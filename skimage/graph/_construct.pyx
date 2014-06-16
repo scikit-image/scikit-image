@@ -3,7 +3,28 @@ cimport numpy as cnp
 import numpy as np
 
 
-def construct_rag_meancolor_3d( img, arr):
+def construct_rag_meancolor_3d(img, arr):
+    """Computes the Region Adjacency Graph of a 3D color image using
+    difference in mean color of regions as edge weights.
+
+    Given an image and its segmentation, this method constructs the
+    corresponsing Region Adjacency Graph (RAG).Each node in the RAG
+    represents a contiguous pixels with in `img` the same label in
+    `arr`
+
+    Parameters
+    ----------
+    img : (width, height, depth, 3) ndarray
+        Input image.
+    arr : (width, height, depth) ndarray
+        The array with labels.
+
+    Returns
+    -------
+    out : RAG
+        The region adjacency graph.
+    """
+
     cdef Py_ssize_t l, b, h, i, j, k
     cdef cnp.int32_t current, next
     l = arr.shape[0]
@@ -19,15 +40,15 @@ def construct_rag_meancolor_3d( img, arr):
             k = 0
             while k < h - 1:
                 current = arr[i, j, k]
-        
-                try :
+
+                try:
                     g.node[current]['pixel_count'] += 1
-                    g.node[current]['total_color'] += img[i,j]
+                    g.node[current]['total_color'] += img[i, j]
                 except KeyError:
                     g.add_node(current)
                     g.node[current]['pixel_count'] = 1
-                    g.node[current]['total_color'] = img[i,j].astype(np.long)
-                    g.node[current]['labels'] = [arr[i,j]]
+                    g.node[current]['total_color'] = img[i, j].astype(np.long)
+                    g.node[current]['labels'] = [arr[i, j]]
 
                 next = arr[i + 1, j, k]
                 if current != next:
@@ -57,18 +78,17 @@ def construct_rag_meancolor_3d( img, arr):
                 if current != next:
                     g.add_edge(current, next)
 
-
                 k += 1
 
             j += 1
 
         i += 1
 
-
     for n in g.nodes():
-        g.node[n]['mean_color'] = g.node[n]['total_color']/g.node[n]['pixel_count']
+        g.node[n]['mean_color'] = g.node[n][
+            'total_color'] / g.node[n]['pixel_count']
 
-    for x,y in g.edges_iter() :
+    for x, y in g.edges_iter():
         diff = g.node[x]['mean_color'] - g.node[y]['mean_color']
         g[x][y]['weight'] = np.sqrt(diff.dot(diff))
 
@@ -76,6 +96,27 @@ def construct_rag_meancolor_3d( img, arr):
 
 
 def construct_rag_meancolor_2d(img, arr):
+    """Computes the Region Adjacency Graph of a 2D color image using
+    difference in mean color of regions as edge weights.
+
+    Given an image and its segmentation, this method constructs the
+    corresponsing Region Adjacency Graph (RAG).Each node in the RAG
+    represents a contiguous pixels with in `img` the same label in
+    `arr`
+
+    Parameters
+    ----------
+    img : (width, height, 3) ndarray
+        Input image.
+    arr : (width, height) ndarray
+        The array with labels.
+
+    Returns
+    -------
+    out : RAG
+        The region adjacency graph.
+    """
+
     cdef Py_ssize_t l, b, h, i, j, k
     cdef cnp.int32_t current, next
     l = arr.shape[0]
@@ -89,14 +130,14 @@ def construct_rag_meancolor_2d(img, arr):
         while j < b - 1:
             current = arr[i, j]
 
-            try :
+            try:
                 g.node[current]['pixel_count'] += 1
-                g.node[current]['total_color'] += img[i,j]
+                g.node[current]['total_color'] += img[i, j]
             except KeyError:
                 g.add_node(current)
                 g.node[current]['pixel_count'] = 1
-                g.node[current]['total_color'] = img[i,j].astype(np.long)
-                g.node[current]['labels'] = [arr[i,j]]
+                g.node[current]['total_color'] = img[i, j].astype(np.long)
+                g.node[current]['labels'] = [arr[i, j]]
 
             next = arr[i + 1, j]
             if current != next:
@@ -114,13 +155,12 @@ def construct_rag_meancolor_2d(img, arr):
 
         i += 1
 
-
     for n in g.nodes():
-        g.node[n]['mean_color'] = g.node[n]['total_color']/g.node[n]['pixel_count']
+        g.node[n]['mean_color'] = g.node[n][
+            'total_color'] / g.node[n]['pixel_count']
 
-    for x,y in g.edges_iter() :
+    for x, y in g.edges_iter():
         diff = g.node[x]['mean_color'] - g.node[y]['mean_color']
         g[x][y]['weight'] = np.sqrt(diff.dot(diff))
-
 
     return g
