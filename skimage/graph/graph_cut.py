@@ -1,11 +1,12 @@
 import networkx as nx
 import numpy as np
 
+
 def threshold_cut(label, rag, thresh):
     """Combines regions seperated by weight less than threshold.
 
     Given an image's labels and its RAG, outputs new labels by
-    combining regions whose nodes are seperated by a weight less 
+    combining regions whose nodes are seperated by a weight less
     than the given threshold.
 
     Parameters
@@ -14,7 +15,7 @@ def threshold_cut(label, rag, thresh):
         The array of labels.
     rag : RAG
         The region adjacency graph.
-    thresh : float 
+    thresh : float
         The threshold, regions with edge weights less than this
         are combined.
 
@@ -23,19 +24,18 @@ def threshold_cut(label, rag, thresh):
     out : (width, height, 3) or (width, height, depth, 3) ndarray
         The new labelled array.
     """
-    to_remove = [(x,y) for x,y,d in rag.edges_iter(data = True) if d['weight'] >= thresh]
+    to_remove = [(x, y)
+                 for x, y, d in rag.edges_iter(data=True) if d['weight'] >= thresh]
 
     rag.remove_edges_from(to_remove)
-
 
     comps = nx.connected_components(rag)
     out = np.copy(label)
 
-    for i, nodes in enumerate(comps) :
-        
-        for node in nodes :
-            for l in rag.node[node]['labels'] :
-                out[label == l] = i
+    for i, nodes in enumerate(comps):
 
+        for node in nodes:
+            for l in rag.node[node]['labels']:
+                out[label == l] = i
 
     return out

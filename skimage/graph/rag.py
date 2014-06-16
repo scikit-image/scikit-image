@@ -2,16 +2,18 @@ import networkx as nx
 import _construct
 from skimage import util
 
+
 class RAG(nx.Graph):
+
     """
     The class for holding the Region Adjacency Graph (RAG).
 
     Each region is a contiguous set of pixels in an image, usuall
-    sharing some common property.Adjacent regions have an edge 
+    sharing some common property.Adjacent regions have an edge
     between their corresponding nodes.
     """
 
-    def merge_nodes(self,i,j):
+    def merge_nodes(self, i, j):
     """Merges nodes `i` and `j`.
 
     The new combined node is adjacent to all the neighbors of `i`
@@ -43,7 +45,7 @@ class RAG(nx.Graph):
 
             self.add_edge(x, j, weight=w)
 
-        self.node[j]['labels'] += self.node[i]['labels'] 
+        self.node[j]['labels'] += self.node[i]['labels']
         self.remove_node(i)
 
 
@@ -70,9 +72,9 @@ def rag_meancolor(img, labels):
     """
 
     img = util.img_as_ubyte(img)
-    if img.ndim == 4 :
-        return _construct.construct_rag_meancolor_3d(img,labels)
-    elif img.ndim == 3 :
-        return _construct.construct_rag_meancolor_2d(img,labels)
-    else :
+    if img.ndim == 4:
+        return _construct.construct_rag_meancolor_3d(img, labels)
+    elif img.ndim == 3:
+        return _construct.construct_rag_meancolor_2d(img, labels)
+    else:
         raise ValueError("Image dimension not supported")
