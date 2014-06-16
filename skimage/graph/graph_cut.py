@@ -31,10 +31,9 @@ def threshold_cut(label, rag, thresh):
     >>> labels = segmentation.slic(img)
     >>> rag = graph.rag_meancolor(img, labels)
     >>> new_labels = graph.threshold_cut(labels, rag, 10)
-
     """
-    to_remove = [(x, y)
-                 for x, y, d in rag.edges_iter(data=True) if d['weight'] >= thresh]
+    to_remove = [(x, y) for x, y, d in rag.edges_iter(data=True)
+                 if d['weight'] >= thresh]
 
     rag.remove_edges_from(to_remove)
 
