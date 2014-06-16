@@ -1,4 +1,4 @@
-import networkx as nx
+import rag
 cimport numpy as cnp
 import numpy as np
 
@@ -10,7 +10,7 @@ def construct_rag_meancolor_3d( img, arr):
     b = arr.shape[1]
     h = arr.shape[2]
 
-    g = nx.Graph()
+    g = rag.RAG()
 
     i = 0
     while i < l - 1:
@@ -81,7 +81,7 @@ def construct_rag_meancolor_2d(img, arr):
     l = arr.shape[0]
     b = arr.shape[1]
 
-    g = nx.Graph()
+    g = rag.RAG()
 
     i = 0
     while i < l - 1:
