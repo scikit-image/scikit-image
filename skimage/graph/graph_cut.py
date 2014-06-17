@@ -11,7 +11,7 @@ def threshold_cut(label, rag, thresh):
 
     Parameters
     ----------
-    label : (width, height, 3) or (width, height, depth, 3) ndarray
+    label : (width, height) or (width, height, 3) ndarray
         The array of labels.
     rag : RAG
         The region adjacency graph.

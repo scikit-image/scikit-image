@@ -3,9 +3,9 @@
 RAG Thresholding
 ================
 
-This examples constructs a Region Adjacency Graph and merges region which are
+This examples constructs a Region Adjacency Graph (RAG) and merges regions which are
 similar in color. We construct a RAG and define edges as the difference in
-mean color. We the join regions with similar mean color.
+mean color. We then join regions with similar mean color.
 
 """
 

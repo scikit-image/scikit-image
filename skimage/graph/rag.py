@@ -1,7 +1,7 @@
 import networkx as nx
 from skimage import util
-from ._construct import construct_rag_meancolor_2d
-from ._construct import construct_rag_meancolor_3d
+from ._build_rag import construct_rag_meancolor_2d
+from ._build_rag import construct_rag_meancolor_3d
 
 
 class RAG(nx.Graph):
