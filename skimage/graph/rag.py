@@ -1,5 +1,4 @@
 import networkx as nx
-from . import rag
 import numpy as np
 from scipy.ndimage import filters
 
@@ -60,7 +59,7 @@ def _add_edge(values, g):
     return 0.0
 
 
-def rag_mean_color(img, arr):
+def rag_meancolor(img, arr):
     """Computes the Region Adjacency Graph of a color image using
     difference in mean color of regions as edge weights.
 
@@ -89,7 +88,7 @@ def rag_mean_color(img, arr):
     >>> rag = graph.rag_meancolor(img, labels)
 
     """
-    g = rag.RAG()
+    g = RAG()
 
     fp = np.zeros((3,) * arr.ndim)
     slc = slice(1, None, None)
