@@ -19,6 +19,16 @@ class skimage_deprecation(Warning):
     pass
 
 
+def deprecation_warning(msg, **kwargs):
+    """Emit deprecation warning for scikit-image.
+
+    Unlike default deprecation warnings, this is not silenced by default.
+    Additional keyword arguments are passed to `warnings.warn_explicit`.
+    """
+    warnings.simplefilter('always', skimage_deprecation)
+    warnings.warn(msg, category=skimage_deprecation, **kwargs)
+
+
 class deprecated(object):
     """Decorator to mark deprecated functions with warning.
 
