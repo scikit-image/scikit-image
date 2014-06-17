@@ -151,9 +151,13 @@ def intensity_range(image, range_values='image', zero_min=False):
         'dtype'
             Return min/max of the image's dtype as the range.
         dtype-name
-            Valid key in `DTYPE_RANGE`.
+            Return intensity range based on desired `dtype`. Must be valid key
+            in `DTYPE_RANGE`. Note: `image` is ignored for this range type.
         2-tuple
-            Explicit values for the min/max intensities.
+            Return `range_values` as min/max intensities. Note that there's no
+            reason to use this function if you just want to specify the
+            intensity range explicitly. This option is included for functions
+            that use `intensity_range` to support all desired range types.
 
     zero_min : bool
         If True, the image dtype's min is truncated to 0. Note that this only
@@ -195,13 +199,14 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
         Min and max intensity values of input and output image.
 
         'image'
-            Return image min/max as the range.
+            Use image min/max as the intensity range.
         'dtype'
-            Return min/max of the image's dtype as the range.
+            Use min/max of the image's dtype as the intensity range.
         dtype-name
-            Valid key in `DTYPE_RANGE`.
+            Use intensity range based on desired `dtype`. Must be valid key
+            in `DTYPE_RANGE`.
         2-tuple
-            Explicit values for the min/max intensities.
+            Use `range_values` as explicit min/max intensities.
 
     Returns
     -------
