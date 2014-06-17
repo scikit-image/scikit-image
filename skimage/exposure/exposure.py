@@ -136,7 +136,7 @@ def equalize_hist(image, nbins=256):
     return out.reshape(image.shape)
 
 
-def _intensity_range(image, range_values, zero_min=None):
+def intensity_range(image, range_values='image', zero_min=False):
     """Return image intensity range (min, max) based on desired value type.
 
     Parameters
@@ -259,8 +259,8 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
         msg = "`out_range` should not be set to None. Use {!r} instead."
         deprecation_warning(msg.format(out_range))
 
-    imin, imax = _intensity_range(image, in_range)
-    omin, omax = _intensity_range(image, out_range, zero_min=(imin >= 0))
+    imin, imax = intensity_range(image, in_range)
+    omin, omax = intensity_range(image, out_range, zero_min=(imin >= 0))
 
     image = np.clip(image, imin, imax)
 
