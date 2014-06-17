@@ -1,7 +1,7 @@
 import networkx as nx
-from skimage import util
-from ._build_rag import construct_rag_meancolor_2d
-from ._build_rag import construct_rag_meancolor_3d
+from . import rag
+import numpy as np
+from scipy.ndimage import filters
 
 
 class RAG(nx.Graph):
@@ -49,7 +49,18 @@ class RAG(nx.Graph):
         self.remove_node(i)
 
 
-def rag_meancolor(img, labels):
+def _add_edge(values, g):
+    values = values.astype(int)
+    current = values[0]
+
+    for value in values[1:]:
+        if value >= 0:
+            g.add_edge(current, value)
+
+    return 0.0
+
+
+def rag_mean_color(img, arr):
     """Computes the Region Adjacency Graph of a color image using
     difference in mean color of regions as edge weights.
 
@@ -78,11 +89,43 @@ def rag_meancolor(img, labels):
     >>> rag = graph.rag_meancolor(img, labels)
 
     """
+    g = rag.RAG()
 
-    img = util.img_as_ubyte(img)
-    if img.ndim == 4:
-        return construct_rag_meancolor_3d(img, labels)
-    elif img.ndim == 3:
-        return construct_rag_meancolor_2d(img, labels)
-    else:
-        raise ValueError("Image dimension not supported")
+    fp = np.zeros((3,) * arr.ndim)
+    slc = slice(1, None, None)
+    fp[(slc,) * arr.ndim] = 1
+
+    filters.generic_filter(
+        arr,
+        function=_add_edge,
+        footprint=fp,
+        mode='constant',
+        cval=-1,
+        extra_arguments=(g,
+                         ))
+    iter = np.nditer(arr, flags=['multi_index'])
+
+    while not iter.finished:
+
+        current = arr[iter.multi_index]
+        try:
+            g.node[current]['pixel count'] += 1
+            g.node[current]['total color'] += img[iter.multi_index]
+        except KeyError:
+            g.add_node(current)
+            g.node[current]['pixel count'] = 1
+            g.node[current]['total color'] = img[
+                iter.multi_index].astype(np.long)
+            g.node[current]['labels'] = [arr[iter.multi_index]]
+
+        iter.iternext()
+
+    for n in g.nodes():
+        g.node[n]['mean color'] = g.node[n][
+            'total color'] / g.node[n]['pixel count']
+
+    for x, y in g.edges_iter():
+        diff = g.node[x]['mean color'] - g.node[y]['mean color']
+        g[x][y]['weight'] = np.linalg.norm(diff)
+
+    return g
