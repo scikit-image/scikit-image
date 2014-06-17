@@ -64,7 +64,7 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
 
 
 def label2rgb(label, image=None, colors=None, alpha=0.3,
-              bg_label=-1, bg_color=None, image_alpha=1):
+              bg_label=-1, bg_color=None, image_alpha=1, kind='overlay'):
     """Return an RGB image where color-coded labels are painted over the image.
 
     Parameters
@@ -86,6 +86,11 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         between [0, 1].
     image_alpha : float [0, 1], optional
         Opacity of the image.
+    kind : string, one of {'overlay', 'avg'}
+        The kind of color image desired. 'overlay' cycles over defined colors
+        and overlays the colored labels over the original image. 'avg' replaces
+        each labeled segment with its average color, for a stained-class or
+        pastel painting appearance.
 
     Returns
     -------
@@ -93,6 +98,15 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         The result of blending a cycling colormap (`colors`) for each distinct
         value in `label` with the image, at a certain alpha value.
     """
+    if kind == 'overlay':
+        return _label2rgb_overlay(label, image, colors, alpha, bg_label,
+                                  bg_color, image_alpha)
+    else:
+        return _label2rgb_avg(label, image, bg_label, bg_color)
+
+
+def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
+                       bg_label=-1, bg_color=None, image_alpha=1):
     if colors is None:
         colors = DEFAULT_COLORS
     colors = [_rgb_vector(c) for c in colors]
@@ -140,3 +154,15 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         result[label == bg_label] = image[label == bg_label]
 
     return result
+
+
+def _label2rgb_avg(label_field, image, bg_label, bg_color):
+    out = np.zeros_like(image)
+    labels = np.unique(label_field)
+    if (labels == bg_label).any():
+        labels = labels[labels != bg_label]
+    for label in labels:
+        mask = (label_field == label).nonzero()
+        color = image[mask].mean(axis=0)
+        out[mask] = color
+    return out
