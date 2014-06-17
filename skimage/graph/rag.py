@@ -1,6 +1,7 @@
 import networkx as nx
-import _construct
 from skimage import util
+from ._construct import construct_rag_meancolor_2d
+from ._construct import construct_rag_meancolor_3d
 
 
 class RAG(nx.Graph):
@@ -80,8 +81,8 @@ def rag_meancolor(img, labels):
 
     img = util.img_as_ubyte(img)
     if img.ndim == 4:
-        return _construct.construct_rag_meancolor_3d(img, labels)
+        return construct_rag_meancolor_3d(img, labels)
     elif img.ndim == 3:
-        return _construct.construct_rag_meancolor_2d(img, labels)
+        return construct_rag_meancolor_2d(img, labels)
     else:
         raise ValueError("Image dimension not supported")

@@ -1,6 +1,6 @@
-import rag
-cimport numpy as cnp
 import numpy as np
+cimport numpy as cnp
+import rag
 
 
 def construct_rag_meancolor_3d(img, arr):
