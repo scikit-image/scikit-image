@@ -157,7 +157,7 @@ def intensity_range(image, range_values='image', zero_min=False):
 
     zero_min : bool
         If True, the image dtype's min is truncated to 0. Note that this only
-        applies the output range if  `range_values` specifies a dtype.
+        applies to the output range if `range_values` specifies a dtype.
     """
     if range_values == 'dtype':
         range_values = image.dtype.type
