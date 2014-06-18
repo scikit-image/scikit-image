@@ -25,7 +25,6 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('heap', sources=['heap.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
-
     return config
 
 if __name__ == '__main__':
