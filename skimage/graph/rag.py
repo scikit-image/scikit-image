@@ -66,7 +66,7 @@ def rag_meancolor(img, arr):
     Given an image and its segmentation, this method constructs the
     corresponsing Region Adjacency Graph (RAG).Each node in the RAG
     represents a contiguous pixels with in `img` the same label in
-    `arr`
+    `arr`.
 
     Parameters
     ----------
@@ -86,6 +86,12 @@ def rag_meancolor(img, arr):
     >>> img = data.lena()
     >>> labels = segmentation.slic(img)
     >>> rag = graph.rag_meancolor(img, labels)
+
+    References
+    ----------
+    .. [1] Alain Tremeau and Philippe Colantoni
+           "Regions Adjacency Graph Applied To Color Image Segmentation"
+           http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.11.5274
 
     """
     g = RAG()

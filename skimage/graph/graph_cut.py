@@ -31,6 +31,13 @@ def threshold_cut(label, rag, thresh):
     >>> labels = segmentation.slic(img)
     >>> rag = graph.rag_meancolor(img, labels)
     >>> new_labels = graph.threshold_cut(labels, rag, 10)
+
+    References
+    ----------
+    .. [1] Alain Tremeau and Philippe Colantoni
+           "Regions Adjacency Graph Applied To Color Image Segmentation"
+           http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.11.5274
+
     """
     to_remove = [(x, y) for x, y, d in rag.edges_iter(data=True)
                  if d['weight'] >= thresh]
