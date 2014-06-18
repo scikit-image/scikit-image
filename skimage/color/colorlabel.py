@@ -157,6 +157,24 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
 
 
 def _label2rgb_avg(label_field, image, bg_label, bg_color):
+    """Visualise each segment in `label_field` with its mean color in `image`.
+
+    Parameters
+    ----------
+    label_field : array of int
+        A segmentation of an image.
+    image : array, shape ``label_field.shape + (3,)``
+        A color image of the same spatial shape as `label_field`.
+    bg_label : int, optional
+        A value in `label_field` to be treated as background.
+    bg_color : 3-tuple of int, optional
+        The color for the background label
+
+    Returns
+    -------
+    out : array, same shape and type as `image`
+        The output visualization.
+    """
     out = np.zeros_like(image)
     labels = np.unique(label_field)
     bg = (labels == bg_label)
