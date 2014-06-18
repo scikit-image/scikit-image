@@ -107,6 +107,34 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
 
 def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
                        bg_label=-1, bg_color=None, image_alpha=1):
+    """Return an RGB image where color-coded labels are painted over the image.
+
+    Parameters
+    ----------
+    label : array, shape (M, N)
+        Integer array of labels with the same shape as `image`.
+    image : array, shape (M, N, 3), optional
+        Image used as underlay for labels. If the input is an RGB image, it's
+        converted to grayscale before coloring.
+    colors : list, optional
+        List of colors. If the number of labels exceeds the number of colors,
+        then the colors are cycled.
+    alpha : float [0, 1], optional
+        Opacity of colorized labels. Ignored if image is `None`.
+    bg_label : int, optional
+        Label that's treated as the background.
+    bg_color : str or array, optional
+        Background color. Must be a name in `color_dict` or RGB float values
+        between [0, 1].
+    image_alpha : float [0, 1], optional
+        Opacity of the image.
+
+    Returns
+    -------
+    result : array of float, shape (M, N, 3)
+        The result of blending a cycling colormap (`colors`) for each distinct
+        value in `label` with the image, at a certain alpha value.
+    """
     if colors is None:
         colors = DEFAULT_COLORS
     colors = [_rgb_vector(c) for c in colors]
