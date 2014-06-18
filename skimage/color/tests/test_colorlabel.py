@@ -89,6 +89,39 @@ def test_leave_labels_alone():
     label2rgb(labels, bg_label=1)
     assert_array_equal(labels, labels_saved)
 
+def test_avg():
+    label_field = np.array([[1, 1, 1, 2],
+                            [1, 2, 2, 2],
+                            [3, 3, 3, 3]], dtype=np.uint8)
+    r = np.array([[1., 1., 0., 0.],
+                  [0., 0., 1., 1.],
+                  [0., 0., 0., 0.]])
+    g = np.array([[0., 0., 0., 1.],
+                  [1., 1., 1., 0.],
+                  [0., 0., 0., 0.]])
+    b = np.array([[0., 0., 0., 1.],
+                  [0., 1., 1., 1.],
+                  [0., 0., 1., 1.]])
+    image = np.dstack((r, g, b))
+    out = label2rgb(label_field, image, kind='avg')
+    rout = np.array([[0.5, 0.5, 0.5, 0.5],
+                     [0.5, 0.5, 0.5, 0.5],
+                     [0. , 0. , 0. , 0. ]])
+    gout = np.array([[0.25, 0.25, 0.25, 0.75],
+                     [0.25, 0.75, 0.75, 0.75],
+                     [0.  , 0.  , 0.  , 0.  ]])
+    bout = np.array([[0. , 0. , 0. , 1. ],
+                     [0. , 1. , 1. , 1. ],
+                     [0.5, 0.5, 0.5, 0.5]])
+    expected_out = np.dstack((rout, gout, bout))
+    assert_array_equal(out, expected_out)
+
+    out_bg = label2rgb(label_field, image, bg_label=2, bg_color=(0, 0, 0),
+                       kind='avg')
+    expected_out_bg = expected_out.copy()
+    expected_out_bg[label_field == 2] = 0
+    assert_array_equal(out_bg, expected_out_bg)
+
 
 if __name__ == '__main__':
     testing.run_module_suite()
