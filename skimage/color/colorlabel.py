@@ -159,8 +159,10 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
 def _label2rgb_avg(label_field, image, bg_label, bg_color):
     out = np.zeros_like(image)
     labels = np.unique(label_field)
-    if (labels == bg_label).any():
+    bg = (labels == bg_label)
+    if bg.any():
         labels = labels[labels != bg_label]
+        out[bg] = bg_color
     for label in labels:
         mask = (label_field == label).nonzero()
         color = image[mask].mean(axis=0)
