@@ -14,7 +14,7 @@ class RAG(nx.Graph):
     """
 
     def merge_nodes(self, i, j):
-        """Merges nodes `i` and `j`.
+        """Merge node `i` into `j`.
 
         The new combined node is adjacent to all the neighbors of `i`
         and `j`. In case of conflicting edges, edge with higher weight
@@ -48,7 +48,23 @@ class RAG(nx.Graph):
         self.remove_node(i)
 
 
-def _add_edge(values, g):
+def _add_edge_filter(values, g):
+    """Adds an edge between first element in `values` and
+    all other elements of ` in the graph `g`.
+
+    Paramteres
+    ----------
+    values : array
+        The array to process.
+    g : RAG
+        The graph to add edges in.
+
+    Returns
+    -------
+    0.0 : float
+        Always returns 0.
+
+    """
     values = values.astype(int)
     current = values[0]
 
@@ -102,32 +118,27 @@ def rag_meancolor(img, arr):
 
     filters.generic_filter(
         arr,
-        function=_add_edge,
+        function=_add_edge_filter,
         footprint=fp,
         mode='constant',
         cval=-1,
         extra_arguments=(g,
                          ))
-    iter = np.nditer(arr, flags=['multi_index'])
 
-    while not iter.finished:
-
-        current = arr[iter.multi_index]
+    for index in np.ndindex(arr.shape):
+        current = arr[index]
         try:
             g.node[current]['pixel count'] += 1
-            g.node[current]['total color'] += img[iter.multi_index]
+            g.node[current]['total color'] += img[index]
         except KeyError:
             g.add_node(current)
             g.node[current]['pixel count'] = 1
-            g.node[current]['total color'] = img[
-                iter.multi_index].astype(np.long)
-            g.node[current]['labels'] = [arr[iter.multi_index]]
+            g.node[current]['total color'] = img[index].astype(np.double)
+            g.node[current]['labels'] = [arr[index]]
 
-        iter.iternext()
-
-    for n in g.nodes():
-        g.node[n]['mean color'] = g.node[n][
-            'total color'] / g.node[n]['pixel count']
+    for n in g:
+        g.node[n]['mean color'] = (g.node[n]['total color'] /
+                                   g.node[n]['pixel count'])
 
     for x, y in g.edges_iter():
         diff = g.node[x]['mean color'] - g.node[y]['mean color']
