@@ -156,7 +156,7 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
     return result
 
 
-def _label2rgb_avg(label_field, image, bg_label, bg_color):
+def _label2rgb_avg(label_field, image, bg_label=0, bg_color=(0, 0, 0)):
     """Visualise each segment in `label_field` with its mean color in `image`.
 
     Parameters
