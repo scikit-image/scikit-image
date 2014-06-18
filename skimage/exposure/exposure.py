@@ -143,8 +143,9 @@ def intensity_range(image, range_values='image', zero_min=False):
     ----------
     image : array
         Input image.
-    range_values : {'image' | 'dtype'} or dtype-name or 2-tuple
+    range_values : str or 2-tuple
         The image intensity range is configured by this parameter.
+        The possible values for this parameter are enumerated below.
 
         'image'
             Return image min/max as the range.
@@ -181,22 +182,17 @@ def intensity_range(image, range_values='image', zero_min=False):
 def rescale_intensity(image, in_range='image', out_range='dtype'):
     """Return image after stretching or shrinking its intensity levels.
 
-    The image intensities are uniformly rescaled such that the minimum and
-    maximum values given by `in_range` match those given by `out_range`. Thus,
-    `in_range` values within the input-image's range will clip intensities,
-    and values outside the input image will tend to push limiting values
-    (e.g. white and black) toward mean values (e.g. gray).
-
-    The minimum and maximum possible values of the output image is determined
-    by `out_range`. The actual min/max of the output could lie within this
-    range if `in_range` lies outside the input-image's intensity range.
+    The desired intensity range of the input and output, `in_range` and
+    `out_range` respectively, are used to stretch or shrink the intensity range
+    of the input image. See examples below.
 
     Parameters
     ----------
     image : array
         Image array.
-    in_range, out_range :  {'image' | 'dtype'} or dtype-name or 2-tuple
+    in_range, out_range : str or 2-tuple
         Min and max intensity values of input and output image.
+        The possible values for this parameter are enumerated below.
 
         'image'
             Use image min/max as the intensity range.
@@ -216,7 +212,9 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
 
     Examples
     --------
-    By default, intensities are stretched to the limits allowed by the dtype:
+    By default, the min/max intensities of the input image are stretched to
+    the limits allowed by the image's dtype, since `in_range` defaults to
+    'image' and `out_range` defaults to 'dtype':
 
     >>> image = np.array([51, 102, 153], dtype=np.uint8)
     >>> rescale_intensity(image)
