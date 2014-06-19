@@ -1,5 +1,22 @@
 import numpy as np
 from skimage import graph
+import random
+
+
+def test_rag_merge():
+    g = graph.rag.RAG()
+    for i in range(10):
+        g.add_edge(i, (i + 1) % 10, {'weight': i * 10})
+        g.node[i]['labels'] = [i]
+
+    for i in range(9):
+        x = random.choice(g.nodes())
+        y = random.choice(g.neighbors(x))
+        g.merge_nodes(x, y)
+
+    idx = g.nodes()[0]
+    sorted(g.node[idx]['labels']) == range(10)
+    assert g.edges() == []
 
 
 def test_threshold_cut():
