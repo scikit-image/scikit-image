@@ -50,9 +50,9 @@ class RAG(nx.Graph):
 
 def _add_edge_filter(values, g):
     """Adds an edge between first element in `values` and
-    all other elements of ` in the graph `g`.
+    all other elements of `values` in the graph `g`.
 
-    Paramteres
+    Parameters
     ----------
     values : array
         The array to process.
@@ -116,22 +116,24 @@ def rag_meancolor(img, arr):
     slc = slice(1, None, None)
     fp[(slc,) * arr.ndim] = 1
 
+    # The footprint is constructed in such a way that the first
+    # element in the array being passed to _add_edge_filter is
+    # the central value.
     filters.generic_filter(
         arr,
         function=_add_edge_filter,
         footprint=fp,
         mode='constant',
         cval=-1,
-        extra_arguments=(g,
-                         ))
+        extra_arguments=(g,))
 
     for index in np.ndindex(arr.shape):
         current = arr[index]
-        try:
+
+        if 'pixel count' in g.node[current]:
             g.node[current]['pixel count'] += 1
             g.node[current]['total color'] += img[index]
-        except KeyError:
-            g.add_node(current)
+        else:
             g.node[current]['pixel count'] = 1
             g.node[current]['total color'] = img[index].astype(np.double)
             g.node[current]['labels'] = [arr[index]]

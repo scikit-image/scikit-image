@@ -39,6 +39,7 @@ def threshold_cut(label, rag, thresh):
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.11.5274
 
     """
+    # Because deleting edges while iterating through them produces an error.
     to_remove = [(x, y) for x, y, d in rag.edges_iter(data=True)
                  if d['weight'] >= thresh]
     rag.remove_edges_from(to_remove)
