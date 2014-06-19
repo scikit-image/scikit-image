@@ -3,7 +3,6 @@ from skimage import graph
 import random
 
 
-
 def test_rag_merge():
     g = graph.rag.RAG()
     for i in range(10):
@@ -15,7 +14,7 @@ def test_rag_merge():
         y = random.choice(g.neighbors(x))
         g.merge_nodes(x, y)
 
-    np.testing.assert_raises(ValueError,g.merge_nodes,7,9)
+    np.testing.assert_raises(ValueError, g.merge_nodes, 7, 9)
 
     idx = g.nodes()[0]
     sorted(g.node[idx]['labels']) == range(10)
