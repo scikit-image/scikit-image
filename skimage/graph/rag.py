@@ -13,12 +13,12 @@ class RAG(nx.Graph):
     between their corresponding nodes.
     """
 
-    def merge_nodes(self, i, j):
+    def merge_nodes(self, i, j, function=max):
         """Merge node `i` into `j`.
 
         The new combined node is adjacent to all the neighbors of `i`
-        and `j`. In case of conflicting edges, edge with higher weight
-        is chosen.
+        and `j`. In case of conflicting edges the given function is
+        called.
 
         Parameters
         ----------
@@ -26,6 +26,9 @@ class RAG(nx.Graph):
             Node to be merged.
         j : int
             Node to be merged.
+        function : callable, optional
+            Function to decide which edge weight to keep when a node is
+            adjacent to both `i` and `j`.
 
         """
         for x in self.neighbors(i):
