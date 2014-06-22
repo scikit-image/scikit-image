@@ -2,6 +2,10 @@ import numpy as np
 from skimage import graph
 import random
 
+def _min_edge((a1,b1),(a2,b2),g):
+    w1 = g.edge[a1][b1]['weight']
+    w2 = g.edge[a2][b2]['weight']
+    return min(w1,w2)
 
 def test_rag_merge():
     g = graph.rag.RAG()
@@ -9,13 +13,20 @@ def test_rag_merge():
         g.add_edge(i, (i + 1) % 10, {'weight': i * 10})
         g.node[i]['labels'] = [i]
 
-    for i in range(9):
+    for i in range(4):
         x = random.choice(g.nodes())
         y = random.choice(g.nodes())
         while x == y :
             y = random.choice(g.nodes())
         g.merge_nodes(x,y)
             
+    for i in range(5):
+        x = random.choice(g.nodes())
+        y = random.choice(g.nodes())
+        while x == y :
+            y = random.choice(g.nodes())
+        g.merge_nodes(x,y,_min_edge)
+
     idx = g.nodes()[0]
     assert sorted(g.node[idx]['labels']) == range(10)
     assert g.edges() == []

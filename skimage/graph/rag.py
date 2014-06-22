@@ -1,6 +1,7 @@
 import networkx as nx
 import numpy as np
 from scipy.ndimage import filters
+from scipy import ndimage as nd
 
 
 class RAG(nx.Graph):
@@ -12,7 +13,7 @@ class RAG(nx.Graph):
     between their corresponding nodes.
     """
 
-    def merge_nodes(self, i, j, function=max):
+    def merge_nodes(self, i, j, function=None, extra_arguments=[], extra_keywords={}):
         """Merge node `i` into `j`.
 
         The new combined node is adjacent to all the neighbors of `i`
@@ -25,7 +26,15 @@ class RAG(nx.Graph):
             Nodes to be merged. The resulting node will have ID `j`.
         function : callable, optional
             Function to decide which edge weight to keep when a node is
-            adjacent to both `i` and `j`.
+            adjacent to both `i` and `j`. The arguments passed to the
+            function are, the tuples represnting both the conflicting edges
+            and the graph.The default behaviour is that the edge with higher
+            weight is kept.
+        extra_arguments : sequence, optional
+            The sequence of extra positional arguments passed to
+            `function`
+        extra_keywords : 
+            The dict of keyword arguments passed to the `function`.
         """
         for x in self.neighbors(i):
             if x == j:
@@ -34,7 +43,13 @@ class RAG(nx.Graph):
             w2 = -1
             if self.has_edge(x, j):
                 w2 = self.get_edge_data(x, j)['weight']
-            w = max(w1, w2)
+            
+            w = w1
+            if w2 > 0 :
+                if not function :
+                    w = max(w1, w2)
+                else:
+                    w = function((i, x), (j,x), self, *extra_arguments, **extra_keywords)
             self.add_edge(x, j, weight=w)
 
         self.node[j]['labels'] += self.node[i]['labels']
@@ -43,7 +58,8 @@ class RAG(nx.Graph):
 
 def _add_edge_filter(values, g):
     """Add an edge between first element in `values` and
-    all other elements of `values` in the graph `g`.
+    all other elements of `values` in the graph `g`.`values[0]`
+    is expected to be the central value of the footprint used.
 
     Parameters
     ----------
@@ -61,13 +77,12 @@ def _add_edge_filter(values, g):
     values = values.astype(int)
     current = values[0]
     for value in values[1:]:
-        if value >= 0:
-            g.add_edge(current, value)
+        g.add_edge(current, value)
 
     return 0.0
 
 
-def rag_meancolor(image, label_image):
+def rag_meancolor(image, label_image, connectivity = 2):
     """Compute the Region Adjacency Graph of a color image using
     difference in mean color of regions as edge weights.
 
@@ -82,6 +97,9 @@ def rag_meancolor(image, label_image):
         Input image.
     label_image : (width, height) or (width, height, depth) ndarray
         The array with labels.
+    connectivity : float, optional
+        Pixels with a squared distance less than `connectivity`from each other
+        are considered adjacent.
 
     Returns
     -------
@@ -104,9 +122,11 @@ def rag_meancolor(image, label_image):
     """
     g = RAG()
 
-    fp = np.zeros((3,) * label_image.ndim)
-    slc = slice(1, None, None)
-    fp[(slc,) * label_image.ndim] = 1
+    fp = nd.generate_binary_structure(label_image.ndim, connectivity)
+    for d in range(fp.ndim):
+        fp = fp.swapaxes(0, d)
+        fp[0, ...] = 0
+        fp = fp.swapaxes(0, d)
 
     # The footprint is constructed in such a way that the first
     # element in the array being passed to _add_edge_filter is
@@ -115,8 +135,7 @@ def rag_meancolor(image, label_image):
         label_image,
         function=_add_edge_filter,
         footprint=fp,
-        mode='constant',
-        cval=-1,
+        mode='nearest',
         extra_arguments=(g,))
 
     for index in np.ndindex(label_image.shape):
