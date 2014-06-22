@@ -2,9 +2,9 @@ import numpy as np
 from skimage import graph
 import random
 
-def _min_edge((a1,b1),(a2,b2),g):
-    w1 = g.edge[a1][b1]['weight']
-    w2 = g.edge[a2][b2]['weight']
+def _min_edge(e1,e2,g):
+    w1 = g.edge[e1[0]][e1[1]]['weight']
+    w2 = g.edge[e2[0]][e2[1]]['weight']
     return min(w1,w2)
 
 def test_rag_merge():
@@ -28,7 +28,7 @@ def test_rag_merge():
         g.merge_nodes(x,y,_min_edge)
 
     idx = g.nodes()[0]
-    assert sorted(g.node[idx]['labels']) == range(10)
+    assert sorted(g.node[idx]['labels']) == list(range(10))
     assert g.edges() == []
 
 

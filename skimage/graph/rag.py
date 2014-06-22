@@ -5,6 +5,7 @@ from scipy import ndimage as nd
 
 
 class RAG(nx.Graph):
+
     """
     The class for holding the Region Adjacency Graph (RAG).
 
@@ -13,7 +14,8 @@ class RAG(nx.Graph):
     between their corresponding nodes.
     """
 
-    def merge_nodes(self, i, j, function=None, extra_arguments=[], extra_keywords={}):
+    def merge_nodes(self, i, j, function=None, extra_arguments=[],
+                    extra_keywords={}):
         """Merge node `i` into `j`.
 
         The new combined node is adjacent to all the neighbors of `i`
@@ -33,7 +35,7 @@ class RAG(nx.Graph):
         extra_arguments : sequence, optional
             The sequence of extra positional arguments passed to
             `function`
-        extra_keywords : 
+        extra_keywords :
             The dict of keyword arguments passed to the `function`.
         """
         for x in self.neighbors(i):
@@ -43,13 +45,14 @@ class RAG(nx.Graph):
             w2 = -1
             if self.has_edge(x, j):
                 w2 = self.get_edge_data(x, j)['weight']
-            
+
             w = w1
-            if w2 > 0 :
-                if not function :
+            if w2 > 0:
+                if not function:
                     w = max(w1, w2)
                 else:
-                    w = function((i, x), (j,x), self, *extra_arguments, **extra_keywords)
+                    w = function((i, x), (j, x), self,
+                                 *extra_arguments, **extra_keywords)
             self.add_edge(x, j, weight=w)
 
         self.node[j]['labels'] += self.node[i]['labels']
@@ -82,7 +85,7 @@ def _add_edge_filter(values, g):
     return 0.0
 
 
-def rag_meancolor(image, label_image, connectivity = 2):
+def rag_meancolor(image, label_image, connectivity=2):
     """Compute the Region Adjacency Graph of a color image using
     difference in mean color of regions as edge weights.
 
@@ -131,6 +134,12 @@ def rag_meancolor(image, label_image, connectivity = 2):
     # The footprint is constructed in such a way that the first
     # element in the array being passed to _add_edge_filter is
     # the central value.
+
+    for i in range(label_image.max() + 1):
+        g.add_node(
+            i, {'labels': [i], 'pixel count': 0, 'total color':
+                np.array([0, 0, 0], dtype=np.double)})
+
     filters.generic_filter(
         label_image,
         function=_add_edge_filter,
@@ -141,13 +150,13 @@ def rag_meancolor(image, label_image, connectivity = 2):
     for index in np.ndindex(label_image.shape):
         current = label_image[index]
 
-        if 'pixel count' in g.node[current]:
-            g.node[current]['pixel count'] += 1
-            g.node[current]['total color'] += image[index]
-        else:
-            g.node[current]['pixel count'] = 1
-            g.node[current]['total color'] = image[index].astype(np.double)
-            g.node[current]['labels'] = [current]
+        # if 'pixel count' in g.node[current]:
+        g.node[current]['pixel count'] += 1
+        g.node[current]['total color'] += image[index]
+        # else:
+        #    g.node[current]['pixel count'] = 1
+        #    g.node[current]['total color'] = image[index].astype(np.double)
+        #    g.node[current]['labels'] = [current]
 
     for n in g:
         g.node[n]['mean color'] = (g.node[n]['total color'] /
