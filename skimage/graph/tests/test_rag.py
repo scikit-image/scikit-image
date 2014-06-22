@@ -11,13 +11,13 @@ def test_rag_merge():
 
     for i in range(9):
         x = random.choice(g.nodes())
-        y = random.choice(g.neighbors(x))
-        g.merge_nodes(x, y)
-
-    np.testing.assert_raises(ValueError, g.merge_nodes, 7, 9)
-
+        y = random.choice(g.nodes())
+        while x == y :
+            y = random.choice(g.nodes())
+        g.merge_nodes(x,y)
+            
     idx = g.nodes()[0]
-    sorted(g.node[idx]['labels']) == range(10)
+    assert sorted(g.node[idx]['labels']) == range(10)
     assert g.edges() == []
 
 

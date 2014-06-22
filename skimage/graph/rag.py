@@ -28,10 +28,6 @@ class RAG(nx.Graph):
             Node to be merged.
 
         """
-
-        if not self.has_edge(i, j):
-            raise ValueError('Cant merge non adjacent nodes')
-
         for x in self.neighbors(i):
             if x == j:
                 continue
@@ -41,7 +37,6 @@ class RAG(nx.Graph):
                 w2 = self.get_edge_data(x, j)['weight']
 
             w = max(w1, w2)
-
             self.add_edge(x, j, weight=w)
 
         self.node[j]['labels'] += self.node[i]['labels']
