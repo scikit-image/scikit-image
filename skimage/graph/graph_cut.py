@@ -46,7 +46,7 @@ def threshold_cut(label_image, rag, thresh):
 
     comps = nx.connected_components(rag)
 
-    map_array = np.arange(label_image.max()+1, dtype = np.int)
+    map_array = np.arange(label_image.max()+1, dtype=np.int)
     for i, nodes in enumerate(comps):
         for node in nodes:
             for label in rag.node[node]['labels']:
