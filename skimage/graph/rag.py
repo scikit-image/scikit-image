@@ -149,14 +149,8 @@ def rag_meancolor(image, label_image, connectivity=2):
 
     for index in np.ndindex(label_image.shape):
         current = label_image[index]
-
-        # if 'pixel count' in g.node[current]:
         g.node[current]['pixel count'] += 1
         g.node[current]['total color'] += image[index]
-        # else:
-        #    g.node[current]['pixel count'] = 1
-        #    g.node[current]['total color'] = image[index].astype(np.double)
-        #    g.node[current]['labels'] = [current]
 
     for n in g:
         g.node[n]['mean color'] = (g.node[n]['total color'] /
