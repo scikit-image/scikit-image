@@ -4,12 +4,11 @@ from scipy.ndimage import filters
 
 
 class RAG(nx.Graph):
-
     """
     The class for holding the Region Adjacency Graph (RAG).
 
-    Each region is a contiguous set of pixels in an image, usuall
-    sharing some common property.Adjacent regions have an edge
+    Each region is a contiguous set of pixels in an image, usually
+    sharing some common property. Adjacent regions have an edge
     between their corresponding nodes.
     """
 
@@ -22,14 +21,11 @@ class RAG(nx.Graph):
 
         Parameters
         ----------
-        i : int
-            Node to be merged.
-        j : int
-            Node to be merged.
+        i, j : int
+            Nodes to be merged. The resulting node will have ID `j`.
         function : callable, optional
             Function to decide which edge weight to keep when a node is
             adjacent to both `i` and `j`.
-
         """
         for x in self.neighbors(i):
             if x == j:
@@ -38,7 +34,6 @@ class RAG(nx.Graph):
             w2 = -1
             if self.has_edge(x, j):
                 w2 = self.get_edge_data(x, j)['weight']
-
             w = max(w1, w2)
             self.add_edge(x, j, weight=w)
 
@@ -47,7 +42,7 @@ class RAG(nx.Graph):
 
 
 def _add_edge_filter(values, g):
-    """Adds an edge between first element in `values` and
+    """Add an edge between first element in `values` and
     all other elements of `values` in the graph `g`.
 
     Parameters
@@ -65,7 +60,6 @@ def _add_edge_filter(values, g):
     """
     values = values.astype(int)
     current = values[0]
-
     for value in values[1:]:
         if value >= 0:
             g.add_edge(current, value)
@@ -73,20 +67,20 @@ def _add_edge_filter(values, g):
     return 0.0
 
 
-def rag_meancolor(img, arr):
-    """Computes the Region Adjacency Graph of a color image using
+def rag_meancolor(image, label_image):
+    """Compute the Region Adjacency Graph of a color image using
     difference in mean color of regions as edge weights.
 
     Given an image and its segmentation, this method constructs the
-    corresponsing Region Adjacency Graph (RAG).Each node in the RAG
+    corresponsing Region Adjacency Graph (RAG). Each node in the RAG
     represents a contiguous pixels with in `img` the same label in
     `arr`.
 
     Parameters
     ----------
-    img : (width, height, 3) or (width, height, depth, 3) ndarray
+    image : (width, height, 3) or (width, height, depth, 3) ndarray
         Input image.
-    arr : (width, height) or (width, height, depth) ndarray
+    label_image : (width, height) or (width, height, depth) ndarray
         The array with labels.
 
     Returns
@@ -110,31 +104,31 @@ def rag_meancolor(img, arr):
     """
     g = RAG()
 
-    fp = np.zeros((3,) * arr.ndim)
+    fp = np.zeros((3,) * label_image.ndim)
     slc = slice(1, None, None)
-    fp[(slc,) * arr.ndim] = 1
+    fp[(slc,) * label_image.ndim] = 1
 
     # The footprint is constructed in such a way that the first
     # element in the array being passed to _add_edge_filter is
     # the central value.
     filters.generic_filter(
-        arr,
+        label_image,
         function=_add_edge_filter,
         footprint=fp,
         mode='constant',
         cval=-1,
         extra_arguments=(g,))
 
-    for index in np.ndindex(arr.shape):
-        current = arr[index]
+    for index in np.ndindex(label_image.shape):
+        current = label_image[index]
 
         if 'pixel count' in g.node[current]:
             g.node[current]['pixel count'] += 1
-            g.node[current]['total color'] += img[index]
+            g.node[current]['total color'] += image[index]
         else:
             g.node[current]['pixel count'] = 1
-            g.node[current]['total color'] = img[index].astype(np.double)
-            g.node[current]['labels'] = [arr[index]]
+            g.node[current]['total color'] = image[index].astype(np.double)
+            g.node[current]['labels'] = [current]
 
     for n in g:
         g.node[n]['mean color'] = (g.node[n]['total color'] /
