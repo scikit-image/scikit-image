@@ -96,10 +96,11 @@ def rag_meancolor(image, label_image, connectivity=2):
 
     Parameters
     ----------
-    image : (width, height, 3) or (width, height, depth, 3) ndarray
+    image : ndarray
         Input image.
-    label_image : (width, height) or (width, height, depth) ndarray
-        The array with labels.
+    label_image : ndarray
+        The array with labels. This should have one dimention lesser than
+        `image`
     connectivity : float, optional
         Pixels with a squared distance less than `connectivity`from each other
         are considered adjacent.
