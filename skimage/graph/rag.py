@@ -85,7 +85,7 @@ def _add_edge_filter(values, g):
     return 0.0
 
 
-def rag_meancolor(image, label_image, connectivity=2):
+def rag_meancolor(image, labels, connectivity=2):
     """Compute the Region Adjacency Graph of a color image using
     difference in mean color of regions as edge weights.
 
@@ -98,7 +98,7 @@ def rag_meancolor(image, label_image, connectivity=2):
     ----------
     image : ndarray
         Input image.
-    label_image : ndarray
+    labels : ndarray
         The array with labels. This should have one dimention lesser than
         `image`
     connectivity : float, optional
@@ -126,7 +126,7 @@ def rag_meancolor(image, label_image, connectivity=2):
     """
     g = RAG()
 
-    fp = nd.generate_binary_structure(label_image.ndim, connectivity)
+    fp = nd.generate_binary_structure(labels.ndim, connectivity)
     for d in range(fp.ndim):
         fp = fp.swapaxes(0, d)
         fp[0, ...] = 0
@@ -136,20 +136,20 @@ def rag_meancolor(image, label_image, connectivity=2):
     # element in the array being passed to _add_edge_filter is
     # the central value.
 
-    for i in range(label_image.max() + 1):
+    for i in range(labels.max() + 1):
         g.add_node(
             i, {'labels': [i], 'pixel count': 0, 'total color':
                 np.array([0, 0, 0], dtype=np.double)})
 
     filters.generic_filter(
-        label_image,
+        labels,
         function=_add_edge_filter,
         footprint=fp,
         mode='nearest',
         extra_arguments=(g,))
 
-    for index in np.ndindex(label_image.shape):
-        current = label_image[index]
+    for index in np.ndindex(labels.shape):
+        current = labels[index]
         g.node[current]['pixel count'] += 1
         g.node[current]['total color'] += image[index]
 
