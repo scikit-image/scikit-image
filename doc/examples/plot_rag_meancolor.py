@@ -11,7 +11,6 @@ difference in mean color. We then join regions with similar mean color.
 
 from skimage import graph, data, io, segmentation, color
 from matplotlib import pyplot as plt
-from skimage import color
 
 
 img = data.coffee()
