@@ -7,56 +7,50 @@ from scipy import ndimage as nd
 class RAG(nx.Graph):
 
     """
-    The class for holding the Region Adjacency Graph (RAG).
-
-    Each region is a contiguous set of pixels in an image, usually
-    sharing some common property. Adjacent regions have an edge
-    between their corresponding nodes.
+    The Region Adjacency Graph (RAG) of an image.
     """
 
-    def merge_nodes(self, i, j, function=None, extra_arguments=[],
+    def merge_nodes(self, src, dst, weight_func=None, extra_arguments=[],
                     extra_keywords={}):
-        """Merge node `i` into `j`.
+        """Merge two nodes.
 
-        The new combined node is adjacent to all the neighbors of `i`
-        and `j`. In case of conflicting edges the given function is
+        The new combined node is adjacent to all the neighbors of `src`
+        and `dst`. In case of conflicting edges the given function is
         called.
 
         Parameters
         ----------
         i, j : int
             Nodes to be merged. The resulting node will have ID `j`.
-        function : callable, optional
-            Function to decide which edge weight to keep when a node is
-            adjacent to both `i` and `j`. The arguments passed to the
-            function are, the tuples represnting both the conflicting edges
-            and the graph.The default behaviour is that the edge with higher
-            weight is kept.
+        weight_func : callable, optional
+            Function to decide edge weight between existing nodes and the new
+            node.The arguments passed to the function are, the graph, `src`,
+            `dst` and the existing node whose edge weight need to be updated.
         extra_arguments : sequence, optional
             The sequence of extra positional arguments passed to
-            `function`
+            `weight_func`
         extra_keywords :
-            The dict of keyword arguments passed to the `function`.
+            The dict of keyword arguments passed to the `weight_func`.
         """
-        for x in self.neighbors(i):
-            if x == j:
+        for neighbor in self.neighbors(src):
+            if neighbor == dst:
                 continue
-            w1 = self.get_edge_data(x, i)['weight']
-            w2 = -1
-            if self.has_edge(x, j):
-                w2 = self.get_edge_data(x, j)['weight']
-
-            w = w1
-            if w2 > 0:
-                if not function:
-                    w = max(w1, w2)
+            w1 = self.get_edge_data(neighbor, src)['weight']
+            w2 = None
+            if self.has_edge(neighbor, dst):
+                w2 = self.get_edge_data(neighbor, dst)['weight']
+            if not weight_func:
+                if w2 is None:
+                    w = w1
                 else:
-                    w = function((i, x), (j, x), self,
-                                 *extra_arguments, **extra_keywords)
-            self.add_edge(x, j, weight=w)
+                    w = min(w1, w2)
+            else:
+                w = weight_func(self, src, dst, neighbor,
+                                *extra_arguments, **extra_keywords)
+            self.add_edge(neighbor, dst, weight=w)
 
-        self.node[j]['labels'] += self.node[i]['labels']
-        self.remove_node(i)
+        self.node[dst]['labels'] += self.node[src]['labels']
+        self.remove_node(src)
 
 
 def _add_edge_filter(values, g):
@@ -86,24 +80,27 @@ def _add_edge_filter(values, g):
 
 
 def rag_meancolor(image, labels, connectivity=2):
-    """Compute the Region Adjacency Graph of a color image using
-    difference in mean color of regions as edge weights.
+    """Compute the Region Adjacency Graph using mean colors.
 
     Given an image and its segmentation, this method constructs the
     corresponsing Region Adjacency Graph (RAG). Each node in the RAG
     represents a contiguous pixels with in `img` the same label in
-    `arr`.
+    `arr`. The weight between two adjacent regions is the difference
+    int their mean color.
 
     Parameters
     ----------
     image : ndarray
         Input image.
     labels : ndarray
-        The array with labels. This should have one dimention lesser than
-        `image`
+        The array with labels. This should have one dimention less than
+        `image`. If `image` has dimensions `(M,N,3)` `labels` should have
+         dimensions `(M, N)`.
     connectivity : float, optional
-        Pixels with a squared distance less than `connectivity`from each other
-        are considered adjacent.
+        Pixels with a squared distance less than `connectivity` from each other
+        are considered adjacent. It can range from 1 to `labels.ndim`. It's
+        behaviour is the same as `connectivity` parameter in
+        `scipy.ndimage.filters.generate_binary_structure`.
 
     Returns
     -------
@@ -126,27 +123,27 @@ def rag_meancolor(image, labels, connectivity=2):
     """
     g = RAG()
 
+    # The footprint is constructed in such a way that the first
+    # element in the array being passed to _add_edge_filter is
+    # the central value.
     fp = nd.generate_binary_structure(labels.ndim, connectivity)
     for d in range(fp.ndim):
         fp = fp.swapaxes(0, d)
         fp[0, ...] = 0
         fp = fp.swapaxes(0, d)
 
-    # The footprint is constructed in such a way that the first
-    # element in the array being passed to _add_edge_filter is
-    # the central value.
-
-    for i in range(labels.max() + 1):
-        g.add_node(
-            i, {'labels': [i], 'pixel count': 0, 'total color':
-                np.array([0, 0, 0], dtype=np.double)})
-
     filters.generic_filter(
         labels,
         function=_add_edge_filter,
         footprint=fp,
         mode='nearest',
+        output=np.zeros(labels.shape, dtype=np.uint8),
         extra_arguments=(g,))
+
+    for n in g:
+        g.node[n].update({'labels': [n],
+                          'pixel count': 0,
+                          'total color': np.array([0, 0, 0], dtype=np.double)})
 
     for index in np.ndindex(labels.shape):
         current = labels[index]

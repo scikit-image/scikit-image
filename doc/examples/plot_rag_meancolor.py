@@ -9,9 +9,7 @@ difference in mean color. We then join regions with similar mean color.
 
 """
 
-from skimage import graph
-from skimage import segmentation
-from skimage import data, io
+from skimage import graph, data, io, segmentation, color
 from matplotlib import pyplot as plt
 from skimage import color
 

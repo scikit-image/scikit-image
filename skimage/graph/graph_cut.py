@@ -5,13 +5,13 @@ import numpy as np
 def threshold_cut(labels, rag, thresh):
     """Combine regions seperated by weight less than threshold.
 
-    Given an image's labels and its RAG, outputs new labels by
+    Given an image's labels and its RAG, output new labels by
     combining regions whose nodes are seperated by a weight less
     than the given threshold.
 
     Parameters
     ----------
-    labels : (width, height) or (width, height, 3) ndarray
+    labels : ndarray
         The array of labels.
     rag : RAG
         The region adjacency graph.
@@ -21,12 +21,12 @@ def threshold_cut(labels, rag, thresh):
 
     Returns
     -------
-    out : (width, height, 3) or (width, height, depth, 3) ndarray
+    out : ndarray
         The new labelled array.
 
     Examples
     --------
-    >>> from skimage import data,graph,segmentation
+    >>> from skimage import data, graph, segmentation
     >>> img = data.lena()
     >>> labels = segmentation.slic(img)
     >>> rag = graph.rag_meancolor(img, labels)
@@ -46,7 +46,7 @@ def threshold_cut(labels, rag, thresh):
 
     comps = nx.connected_components(rag)
 
-    map_array = np.arange(labels.max() + 1, dtype=np.int)
+    map_array = np.arange(labels.max() + 1, dtype=labels.dtype)
     for i, nodes in enumerate(comps):
         for node in nodes:
             for label in rag.node[node]['labels']:
