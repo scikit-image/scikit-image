@@ -1,71 +1,64 @@
 # -*- coding: utf-8 -*-
 
-import scipy
+import numpy as np
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
 
 __author__ = "Egor Panfilov"
 
 
-def biharmonic_inpaint(img_in, mask_in):
-    """ Inpaint points in image, specified with mask, using biharmonic inpainting.
+def biharmonic_inpaint(img, mask):
+    """Inpaint masked points in image, using system of biharmonic
+    equations.
 
     Parameters
     ----------
-    img_in: 2-D ndarray
-        Input image;
-    mask_in: 2-D ndarray
-        Array of pixels to inpaint. Should have the same size as 'img_in'.
+    img: 2-D ndarray
+        Input image.
+    mask: 2-D ndarray
+        Array of pixels to inpaint. Should have the same size as 'img'.
         Unknown pixels should be represented with 1, known - with 0.
 
     Returns
     -------
-    img_out: 2-D ndarray
+    out: 2-D ndarray
         Image with unknown regions inpainted.
 
     Example
     -------
-    image_in = scipy.ones((10, 10))
-    image_in[:, 6:] = 2
-    mask = scipy.zeros_like(image_in)
-    mask[4, 5:] = 1
-    image_out = biharmonic_inpaint(image_in, mask)
-
-    image_in =
-       [[ 1.  1.  1.  1.  1.  1.  2.  2.  2.  2.]
-        [ 1.  1.  1.  1.  1.  1.  2.  2.  2.  2.]
-        [ 1.  1.  1.  1.  1.  1.  2.  2.  2.  2.]
-        [ 1.  1.  1.  1.  1.  1.  2.  2.  2.  2.]
-        [ 1.  1.  1.  1.  1.  1.  2.  2.  2.  2.]
-        [ 1.  1.  1.  1.  1.  1.  2.  2.  2.  2.]
-        [ 1.  1.  1.  1.  1.  1.  2.  2.  2.  2.]
-        [ 1.  1.  1.  1.  1.  1.  2.  2.  2.  2.]
-        [ 1.  1.  1.  1.  1.  1.  2.  2.  2.  2.]
-        [ 1.  1.  1.  1.  1.  1.  2.  2.  2.  2.]]
-
-    mask =
-        [[ 0.  0.  0.  0.  0.  0.  0.  0.  0.  0.]
-         [ 0.  0.  0.  0.  0.  0.  0.  0.  0.  0.]
-         [ 0.  0.  0.  0.  0.  0.  0.  0.  0.  0.]
-         [ 0.  0.  0.  0.  0.  0.  0.  0.  0.  0.]
-         [ 0.  0.  0.  0.  0.  1.  1.  1.  1.  1.]
-         [ 0.  0.  0.  0.  0.  0.  0.  0.  0.  0.]
-         [ 0.  0.  0.  0.  0.  0.  0.  0.  0.  0.]
-         [ 0.  0.  0.  0.  0.  0.  0.  0.  0.  0.]
-         [ 0.  0.  0.  0.  0.  0.  0.  0.  0.  0.]
-         [ 0.  0.  0.  0.  0.  0.  0.  0.  0.  0.]]
-
-    img_out (__before rounding__) =
-        [[ 1.  1.  1.  1.  1.  1.      2.      2.      2.      2.]
-         [ 1.  1.  1.  1.  1.  1.      2.      2.      2.      2.]
-         [ 1.  1.  1.  1.  1.  1.      2.      2.      2.      2.]
-         [ 1.  1.  1.  1.  1.  1.      2.      2.      2.      2.]
-         [ 1.  1.  1.  1.  1.  1.10... 1.89... 2.00... 2.00... 2.]
-         [ 1.  1.  1.  1.  1.  1.      2.      2.      2.      2.]
-         [ 1.  1.  1.  1.  1.  1.      2.      2.      2.      2.]
-         [ 1.  1.  1.  1.  1.  1.      2.      2.      2.      2.]
-         [ 1.  1.  1.  1.  1.  1.      2.      2.      2.      2.]
-         [ 1.  1.  1.  1.  1.  1.      2.      2.      2.      2.]]
+    >>> import numpy as np
+    >>> from inpainting import biharmonic_inpaint
+    >>> image_in = np.ones((5, 5))
+    >>> image_in[:, :2] = 1
+    >>> image_in[:, 2]  = 2
+    >>> image_in[:, 3:] = 3
+    >>> image_in
+    array([[ 1.,  1.,  2.,  3.,  3.],
+           [ 1.,  1.,  2.,  3.,  3.],
+           [ 1.,  1.,  2.,  3.,  3.],
+           [ 1.,  1.,  2.,  3.,  3.],
+           [ 1.,  1.,  2.,  3.,  3.]])
+    >>> mask = np.zeros_like(image_in)
+    >>> mask[1:3, 2:] = 1
+    >>> mask
+    array([[ 0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.],
+           [ 0.,  0.,  1.,  1.,  1.],
+           [ 0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.]])
+    >>> image_in = image_in + mask * 100
+    >>> image_in
+    array([[ 1.,  1.,    2.,    3.,    3.],
+           [ 1.,  1.,  102.,  103.,  103.],
+           [ 1.,  1.,  102.,  103.,  103.],
+           [ 1.,  1.,    2.,    3.,    3.],
+           [ 1.,  1.,    2.,    3.,    3.]])
+    >>> image_out = biharmonic_inpaint(image_in, mask)
+    >>> image_out
+    array([[ 1.,  1.,  2.,  3.,  3.],
+           [ 1.,  1.,  2.,  3.,  3.],
+           [ 1.,  1.,  2.,  3.,  3.],
+           [ 1.,  1.,  2.,  3.,  3.],
 
     References
     ----------
@@ -80,12 +73,11 @@ def biharmonic_inpaint(img_in, mask_in):
            method 3
     """
 
-    img = scipy.copy(img_in)
-    mask = scipy.copy(mask_in)
-    img_height, img_width = img.shape
+    out = np.copy(img)
+    img_height, img_width = out.shape
     img_pixnum = img_height * img_width
 
-    i, j = scipy.where(mask)
+    i, j = np.where(mask)
     defect_points_num = i.size
 
     # Defect points position in flatten array
@@ -105,7 +97,8 @@ def biharmonic_inpaint(img_in, mask_in):
     for defect_pnt in defect_list:
         for eps_pnt in eps:
             # Check if point coordinates are inside the image image
-            # TODO: drop some elements in eps for near-the-edge defect points
+            # TODO: Shouldn't add [0,-2], [2,0], etc points for edge defects
+            #       and so on. It'll increase perfomance a little.
             p_i = eps_pnt[0] + defect_list[defect_pnt][0]
             p_j = eps_pnt[1] + defect_list[defect_pnt][1]
             if 0 <= p_i <= (img_height - 1) and 0 <= p_j <= (img_width - 1):
@@ -171,7 +164,6 @@ def biharmonic_inpaint(img_in, mask_in):
             for k in range(len(kernel)):
                 coef_matrix[idx, seq_num + offset[k]] = kernel[k]
 
-    # =============================== Time to do math =========================
     # Separate known and unknown elements
     knowns_matrix = coef_matrix.copy()
     knowns_matrix[:, defect_list.keys()] = 0
@@ -180,7 +172,7 @@ def biharmonic_inpaint(img_in, mask_in):
     unknowns_matrix = unknowns_matrix[:, defect_list.keys()]
 
     # Put known image values into the matrix (multiply matrix by known values of image)
-    flat_diag_image = sparse.dia_matrix((img.flatten(), scipy.array([0])), shape=(img_pixnum, img_pixnum))
+    flat_diag_image = sparse.dia_matrix((out.flatten(), np.array([0])), shape=(img_pixnum, img_pixnum))
 
     # Get right hand side by sum knowns matrix columns
     rhs = -(knowns_matrix * flat_diag_image).sum(axis=1)
@@ -194,22 +186,7 @@ def biharmonic_inpaint(img_in, mask_in):
 
     # Put calculated points into the image
     for idx, defect_coords in enumerate(defect_list.values()):
-        img[defect_coords] = result[idx]
+        out[defect_coords] = result[idx]
 
-    img_out = img
-    return img_out
+    return out
 
-
-if __name__ == "__main__":
-    image_in = scipy.ones((10, 10))
-    image_in[:, 6:] = 2
-    mask = scipy.zeros_like(image_in)
-    mask[4, 5:] = 1
-    print(image_in)
-    print("\n")
-    print(mask)
-    print("\n")
-
-    image_out = biharmonic_inpaint(image_in, mask)
-    print(image_out)
-    print("\n")
