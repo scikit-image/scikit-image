@@ -14,7 +14,12 @@ def _max_edge(g, src, dst, neighbor):
     except KeyError:
         w2 = None
 
-    return max(w1, w2)
+    if w1 == None:
+        return w2
+    elif w2 == None:
+        return w1
+    else:
+        return max(w1, w2)
 
 
 def test_rag_merge():
