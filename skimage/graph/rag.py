@@ -15,22 +15,23 @@ class RAG(nx.Graph):
         """Merge two nodes.
 
         The new combined node is adjacent to all the neighbors of `src`
-        and `dst`. In case of conflicting edges the given function is
-        called.
+        and `dst`. `weight_func` is called to decide the weight of edges
+        incident on the new node.
 
         Parameters
         ----------
         i, j : int
-            Nodes to be merged. The resulting node will have ID `j`.
+            Nodes to be merged. The resulting node will have ID `dst`.
         weight_func : callable, optional
-            Function to decide edge weight between existing nodes and the new
-            node.The arguments passed to the function are, the graph, `src`,
-            `dst` and the existing node whose edge weight need to be updated.
+            Function to decide edge weight of edges incident on the new node.
+            The arguments passed to the function are, the graph, `src`, `dst`
+            and the node which is adjacent to the new node.
         extra_arguments : sequence, optional
             The sequence of extra positional arguments passed to
-            `weight_func`
+            `weight_func`.
         extra_keywords :
             The dict of keyword arguments passed to the `weight_func`.
+
         """
         for neighbor in self.neighbors(src):
             if neighbor == dst:
@@ -54,8 +55,11 @@ class RAG(nx.Graph):
 
 
 def _add_edge_filter(values, g):
-    """Add an edge between first element in `values` and
-    all other elements of `values` in the graph `g`.`values[0]`
+    """Create and edge between the first and the remaining
+    values in an array.
+
+    Add an edge between first element in `values` and
+    all other elements of `values` in the graph `g`. `values[0]`
     is expected to be the central value of the footprint used.
 
     Parameters
@@ -67,7 +71,7 @@ def _add_edge_filter(values, g):
 
     Returns
     -------
-    0.0 : float
+    0 : int
         Always returns 0.
 
     """
@@ -76,7 +80,7 @@ def _add_edge_filter(values, g):
     for value in values[1:]:
         g.add_edge(current, value)
 
-    return 0.0
+    return 0
 
 
 def rag_meancolor(image, labels, connectivity=2):
@@ -84,9 +88,9 @@ def rag_meancolor(image, labels, connectivity=2):
 
     Given an image and its segmentation, this method constructs the
     corresponsing Region Adjacency Graph (RAG). Each node in the RAG
-    represents a contiguous pixels with in `img` the same label in
-    `arr`. The weight between two adjacent regions is the difference
-    int their mean color.
+    represents a contiguous set pixels within `image` with the same
+    label in `labels`. The weight between two adjacent regions is the 
+    difference int their mean color.
 
     Parameters
     ----------
@@ -94,7 +98,7 @@ def rag_meancolor(image, labels, connectivity=2):
         Input image.
     labels : ndarray
         The array with labels. This should have one dimention less than
-        `image`. If `image` has dimensions `(M,N,3)` `labels` should have
+        `image`. If `image` has dimensions `(M, N, 3)` `labels` should have
          dimensions `(M, N)`.
     connectivity : float, optional
         Pixels with a squared distance less than `connectivity` from each other
@@ -109,7 +113,7 @@ def rag_meancolor(image, labels, connectivity=2):
 
     Examples
     --------
-    >>> from skimage import data,graph,segmentation
+    >>> from skimage import data, graph, segmentation
     >>> img = data.lena()
     >>> labels = segmentation.slic(img)
     >>> rag = graph.rag_meancolor(img, labels)
