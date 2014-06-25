@@ -136,6 +136,13 @@ def rag_meancolor(image, labels, connectivity=2):
         fp[0, ...] = 0
         fp = fp.swapaxes(0, d)
 
+    # For example 
+    # if labels.ndim = 2 and connectivity = 1
+    # fp = [[0,0,0],[0,1,1],[0,1,0]]
+    #
+    # if labels.ndim = 2 and connectivity = 2
+    # fp = [[0,0,0],[0,1,1],[0,1,1]]
+
     filters.generic_filter(
         labels,
         function=_add_edge_filter,
