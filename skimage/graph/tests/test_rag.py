@@ -14,9 +14,9 @@ def _max_edge(g, src, dst, neighbor):
     except KeyError:
         w2 = None
 
-    if w1 == None:
+    if w1 is None:
         return w2
-    elif w2 == None:
+    elif w2 is None:
         return w1
     else:
         return max(w1, w2)
