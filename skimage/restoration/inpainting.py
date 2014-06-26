@@ -4,8 +4,6 @@ import numpy as np
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
 
-__author__ = "Egor Panfilov"
-
 
 def biharmonic_inpaint(img, mask):
     """Inpaint masked points in image, using system of biharmonic
