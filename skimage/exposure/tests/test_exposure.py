@@ -28,7 +28,7 @@ def test_equalize_ubyte():
 
 def test_equalize_float():
     img = skimage.img_as_float(test_img)
-    img_eq = exposure.equalize_hist(img)
+    img_eq = exposure.equalize_hist(img, 0, 1)
 
     cdf, bin_edges = exposure.cumulative_distribution(img_eq)
     check_cdf_slope(cdf)
