@@ -84,12 +84,14 @@ def biharmonic_inpaint(img, mask):
 
     # Create list of neighbor points to be used
     # Possible relative indexes
-    eps = [            [-2, 0],
-             [-1, -1], [-1, 0], [-1, 1],
-    [0, -2], [ 0, -1],          [ 0, 1], [0, 2],
-             [ 1, -1], [ 1, 0], [ 1, 1],
-                       [ 2, 0]
-    ]
+    # eps = [            [-2, 0],
+    #          [-1, -1], [-1, 0], [-1, 1],
+    # [0, -2], [ 0, -1],          [ 0, 1], [0, 2],
+    #          [ 1, -1], [ 1, 0], [ 1, 1],
+    #                    [ 2, 0]                ]
+    #
+    eps = [[-2, 0], [-1, -1], [-1, 0], [-1, 1], [0, -2], [0, -1],
+           [0, 1], [0, 2], [1, -1], [1, 0], [1, 1], [2, 0]]
 
     neighbor_list = {}
     for defect_pnt in defect_list:
@@ -117,9 +119,11 @@ def biharmonic_inpaint(img, mask):
     #
     kernel = [1, 2, -8, 2, 1, -8, 20, -8, 1, 2, -8, 2, 1]
     offset = [-2 * img_width, -img_width - 1, -img_width, -img_width + 1,
-              -2, -1, 0, 1, 2, img_width - 1, img_width, img_width + 1, 2 * img_width]
+              -2, -1, 0, 1, 2, img_width - 1, img_width, img_width + 1,
+              2 * img_width]
 
-    for idx, (seq_num, coord) in enumerate(zip(defect_list.keys(), defect_list.values())):
+    for idx, (seq_num, coord) in enumerate(zip(defect_list.keys(),
+                                               defect_list.values())):
         if 2 <= coord[0] <= img_height - 3 and 2 <= coord[1] <= img_width - 3:
             for k in range(len(kernel)):
                 coef_matrix[idx, seq_num + offset[k]] = kernel[k]
@@ -132,9 +136,12 @@ def biharmonic_inpaint(img, mask):
     kernel = [1, 1, -4, 1, 1]
     offset = [-img_width, -1, 0, 1, img_width]
 
-    for idx, (seq_num, coord) in enumerate(zip(defect_list.keys(), defect_list.values())):
-        if ((coord[0] == 1 or coord[0] == img_height - 2) and 1 <= coord[1] <= img_height - 2) or\
-           ((coord[1] == 1 or coord[1] == img_width - 2) and 1 <= coord[0] <= img_width - 2):
+    for idx, (seq_num, coord) in enumerate(zip(defect_list.keys(),
+                                               defect_list.values())):
+        if ((coord[0] == 1 or coord[0] == img_height - 2) and
+           1 <= coord[1] <= img_height - 2) or \
+           ((coord[1] == 1 or coord[1] == img_width - 2) and
+           1 <= coord[0] <= img_width - 2):
             for k in range(len(kernel)):
                 coef_matrix[idx, seq_num + offset[k]] = kernel[k]
 
@@ -144,8 +151,10 @@ def biharmonic_inpaint(img, mask):
     kernel = [1, -2, 1]
     offset = [-1, 0, 1]
 
-    for idx, (seq_num, coord) in enumerate(zip(defect_list.keys(), defect_list.values())):
-        if (coord[0] == 0 or coord[0] == img_height - 1) and 1 <= coord[1] <= img_width - 1:
+    for idx, (seq_num, coord) in enumerate(zip(defect_list.keys(),
+                                               defect_list.values())):
+        if (coord[0] == 0 or coord[0] == img_height - 1) and \
+           1 <= coord[1] <= img_width - 1:
             for k in range(len(kernel)):
                 coef_matrix[idx, seq_num + offset[k]] = kernel[k]
 
@@ -157,8 +166,10 @@ def biharmonic_inpaint(img, mask):
     kernel = [1, -2, 1]
     offset = [-img_width, 0, img_width]
 
-    for idx, (seq_num, coord) in enumerate(zip(defect_list.keys(), defect_list.values())):
-        if (coord[1] == 0 or coord[1] == img_width - 1) and 1 <= coord[0] <= img_height - 1:
+    for idx, (seq_num, coord) in enumerate(zip(defect_list.keys(),
+                                               defect_list.values())):
+        if (coord[1] == 0 or coord[1] == img_width - 1) and \
+           1 <= coord[0] <= img_height - 1:
             for k in range(len(kernel)):
                 coef_matrix[idx, seq_num + offset[k]] = kernel[k]
 
@@ -169,8 +180,9 @@ def biharmonic_inpaint(img, mask):
     unknowns_matrix = coef_matrix.copy()
     unknowns_matrix = unknowns_matrix[:, defect_list.keys()]
 
-    # Put known image values into the matrix (multiply matrix by known values of image)
-    flat_diag_image = sparse.dia_matrix((out.flatten(), np.array([0])), shape=(img_pixnum, img_pixnum))
+    # Put known image values into the matrix (multiply matrix by known values)
+    flat_diag_image = sparse.dia_matrix((out.flatten(), np.array([0])),
+                                        shape=(img_pixnum, img_pixnum))
 
     # Get right hand side by sum knowns matrix columns
     rhs = -(knowns_matrix * flat_diag_image).sum(axis=1)
@@ -187,4 +199,3 @@ def biharmonic_inpaint(img, mask):
         out[defect_coords] = result[idx]
 
     return out
-
