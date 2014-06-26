@@ -213,7 +213,7 @@ def equalize_adapthist(image, tiles=(16, 16), bin_min=0, bin_max=255,
             cdf = np.round(((x / y) * z) + bin_min)
             cdf = np.nan_to_num(cdf)
             cdf[cdf < 0] = 0
-            bins = np.linspace(bin_min, bin_max, nbins)
+            bins = np.linspace(bin_min, bin_max, bin_level)
             image_tile2 = np.interp(image_tile.flat, bins, cdf, bin_min, bin_max)
             image_tiles[r:r2, c:c2] = image_tile2.reshape((r3, c3))
     
