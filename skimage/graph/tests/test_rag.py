@@ -1,6 +1,5 @@
 import numpy as np
 from skimage import graph
-import random
 
 
 def max_edge(g, src, dst, n):
@@ -36,7 +35,8 @@ def test_rag_merge():
     g.merge_nodes(2, 3)
     g.merge_nodes(3, 4)
     assert sorted(g.node[4]['labels']) == range(5)
-    assert g.edges() == [] 
+    assert g.edges() == []
+
 
 def test_threshold_cut():
 
