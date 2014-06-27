@@ -3,49 +3,40 @@ from skimage import graph
 import random
 
 
-def _max_edge(g, src, dst, neighbor):
-    try:
-        w1 = g.edge[src][neighbor]['weight']
-    except KeyError:
-        w1 = None
-
-    try:
-        w2 = g.edge[dst][neighbor]['weight']
-    except KeyError:
-        w2 = None
-
-    if w1 is None:
-        return w2
-    elif w2 is None:
-        return w1
-    else:
-        return max(w1, w2)
+def max_edge(g, src, dst, n):
+    w1 = g[n].get(src, {'weight': -np.inf})['weight']
+    w2 = g[n].get(dst, {'weight': -np.inf})['weight']
+    return max(w1, w2)
 
 
 def test_rag_merge():
     g = graph.rag.RAG()
-    for i in range(10):
-        g.add_edge(i, (i + 1) % 10, {'weight': i * 10})
-        g.node[i]['labels'] = [i]
-
-    for i in range(4):
-        x = random.choice(g.nodes())
-        y = random.choice(g.nodes())
-        while x == y:
-            y = random.choice(g.nodes())
-        g.merge_nodes(x, y)
 
     for i in range(5):
-        x = random.choice(g.nodes())
-        y = random.choice(g.nodes())
-        while x == y:
-            y = random.choice(g.nodes())
-        g.merge_nodes(x, y, _max_edge)
+        g.add_node(i, {'labels': [i]})
 
-    idx = g.nodes()[0]
-    assert sorted(g.node[idx]['labels']) == list(range(10))
-    assert g.edges() == []
+    g.add_edge(0, 1, {'weight': 10})
+    g.add_edge(1, 2, {'weight': 20})
+    g.add_edge(2, 3, {'weight': 30})
+    g.add_edge(3, 0, {'weight': 40})
+    g.add_edge(0, 2, {'weight': 50})
+    g.add_edge(3, 4, {'weight': 60})
 
+    gc = g.copy()
+
+    g.merge_nodes(0, 2)
+    assert g.edge[1][2]['weight'] == 10
+    assert g.edge[2][3]['weight'] == 30
+
+    gc.merge_nodes(0, 2, weight_func=max_edge)
+    assert gc.edge[1][2]['weight'] == 20
+    assert gc.edge[2][3]['weight'] == 40
+
+    g.merge_nodes(1, 4)
+    g.merge_nodes(2, 3)
+    g.merge_nodes(3, 4)
+    assert sorted(g.node[4]['labels']) == range(5)
+    assert g.edges() == [] 
 
 def test_threshold_cut():
 

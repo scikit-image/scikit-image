@@ -4,13 +4,42 @@ from scipy.ndimage import filters
 from scipy import ndimage as nd
 
 
+def min_weight(g, src, dst, n):
+    """Callback to handle merging nodes by choosing minimum weight.
+
+    Returns either the weight between (`src`, `n`) or (`dst`, `n`)
+    in `g` or the minumum of the two when both exist.
+
+    Parameters
+    ----------
+    g : RAG
+        The graph to consider.
+    src, dst : int
+        Typically the verices in `g` to be merged.
+    n : int
+        A neighbor of `src` or `dst` or both
+
+    Returns
+    -------
+    weight : float
+        The weight between (`src`, `n`) or (`dst`, `n`) in `g` or the
+        minumum of the two when both exist.
+
+    """
+
+    # cover the cases where n only has edge to either `src` or `dst`
+    w1 = g[n].get(src, {'weight': np.inf})['weight']
+    w2 = g[n].get(dst, {'weight': np.inf})['weight']
+    return min(w1, w2)
+
+
 class RAG(nx.Graph):
 
     """
     The Region Adjacency Graph (RAG) of an image.
     """
 
-    def merge_nodes(self, src, dst, weight_func=None, extra_arguments=[],
+    def merge_nodes(self, src, dst, weight_func=min_weight, extra_arguments=[],
                     extra_keywords={}):
         """Merge two nodes.
 
@@ -20,12 +49,13 @@ class RAG(nx.Graph):
 
         Parameters
         ----------
-        i, j : int
+        src, dst : int
             Nodes to be merged. The resulting node will have ID `dst`.
         weight_func : callable, optional
             Function to decide edge weight of edges incident on the new node.
-            The arguments passed to the function are, the graph, `src`, `dst`
-            and the node which is adjacent to the new node.
+            For each neighbor `n` for `src and `dst`, `weight_func` will be
+            called as follows: `weight_func(src, dst, n, *extra_arguments,
+            **extra_keywords)`
         extra_arguments : sequence, optional
             The sequence of extra positional arguments passed to
             `weight_func`.
@@ -33,21 +63,21 @@ class RAG(nx.Graph):
             The dict of keyword arguments passed to the `weight_func`.
 
         """
-        for neighbor in self.neighbors(src):
-            if neighbor == dst:
-                continue
-            w1 = self.get_edge_data(neighbor, src)['weight']
-            w2 = None
-            if self.has_edge(neighbor, dst):
-                w2 = self.get_edge_data(neighbor, dst)['weight']
-            if not weight_func:
-                if w2 is None:
-                    w = w1
-                else:
-                    w = min(w1, w2)
-            else:
-                w = weight_func(self, src, dst, neighbor,
-                                *extra_arguments, **extra_keywords)
+        neighbors = self.adj[src].copy()
+        neighbors.update(self.adj[dst])
+
+        try:
+            del neighbors[src]
+        except KeyError:
+            pass
+        try:
+            del neighbors[dst]
+        except KeyError:
+            pass
+
+        for neighbor in neighbors:
+            w = weight_func(self, src, dst, neighbor, *extra_arguments,
+                            **extra_keywords)
             self.add_edge(neighbor, dst, weight=w)
 
         self.node[dst]['labels'] += self.node[src]['labels']
@@ -55,8 +85,7 @@ class RAG(nx.Graph):
 
 
 def _add_edge_filter(values, g):
-    """Create and edge between the first and the remaining
-    values in an array.
+    """Create edge in `g` between first element of `values` and the rest.
 
     Add an edge between first element in `values` and
     all other elements of `values` in the graph `g`. `values[0]`
@@ -86,24 +115,24 @@ def _add_edge_filter(values, g):
 def rag_meancolor(image, labels, connectivity=2):
     """Compute the Region Adjacency Graph using mean colors.
 
-    Given an image and its segmentation, this method constructs the
+    Given an image and its initial segmentation, this method constructs the
     corresponsing Region Adjacency Graph (RAG). Each node in the RAG
-    represents a contiguous set pixels within `image` with the same
-    label in `labels`. The weight between two adjacent regions is the 
-    difference int their mean color.
+    represents a set pixels within `image` with the same
+    label in `labels`. The weight between two adjacent regions is the
+    difference in their mean color.
 
     Parameters
     ----------
-    image : ndarray
+    image : ndarray, shape(M, N, [..., P,] 3)
         Input image.
-    labels : ndarray
-        The array with labels. This should have one dimention less than
+    labels : ndarray, shape(M, N, [..., P,])
+        The labelled image. This should have one dimension less than
         `image`. If `image` has dimensions `(M, N, 3)` `labels` should have
          dimensions `(M, N)`.
-    connectivity : float, optional
+    connectivity : int, optional
         Pixels with a squared distance less than `connectivity` from each other
-        are considered adjacent. It can range from 1 to `labels.ndim`. It's
-        behaviour is the same as `connectivity` parameter in
+        are considered adjacent. It can range from 1 to `labels.ndim`. Its
+        behavior is the same as `connectivity` parameter in
         `scipy.ndimage.filters.generate_binary_structure`.
 
     Returns
@@ -136,12 +165,16 @@ def rag_meancolor(image, labels, connectivity=2):
         fp[0, ...] = 0
         fp = fp.swapaxes(0, d)
 
-    # For example 
+    # For example
     # if labels.ndim = 2 and connectivity = 1
-    # fp = [[0,0,0],[0,1,1],[0,1,0]]
+    # fp = [[0,0,0],
+    #       [0,1,1],
+    #       [0,1,0]]
     #
     # if labels.ndim = 2 and connectivity = 2
-    # fp = [[0,0,0],[0,1,1],[0,1,1]]
+    # fp = [[0,0,0],
+    #       [0,1,1],
+    #       [0,1,1]]
 
     filters.generic_filter(
         labels,
