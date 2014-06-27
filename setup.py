@@ -34,7 +34,6 @@ import os
 import sys
 import re
 import setuptools
-from numpy.distutils.core import setup
 from distutils.command.build_py import build_py
 
 
@@ -111,6 +110,7 @@ if __name__ == "__main__":
 
     write_version_py()
 
+    from numpy.distutils.core import setup
     setup(
         name=DISTNAME,
         description=DESCRIPTION,
