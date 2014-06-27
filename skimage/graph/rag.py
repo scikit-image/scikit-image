@@ -41,7 +41,7 @@ class RAG(nx.Graph):
 
     def merge_nodes(self, src, dst, weight_func=min_weight, extra_arguments=[],
                     extra_keywords={}):
-        """Merge two nodes.
+        """Merge node `src` into `dst`.
 
         The new combined node is adjacent to all the neighbors of `src`
         and `dst`. `weight_func` is called to decide the weight of edges
