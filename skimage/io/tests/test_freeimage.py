@@ -37,6 +37,13 @@ def test_imread():
     assert img.shape == (370, 371, 3)
     assert all(img[274, 135] == [0, 130, 253])
 
+@skipif(not FI_available)
+def test_imread_truncated_jpg():
+    raised = False
+    raised = True
+    assert_raises(RuntimeError,
+                  sio.imread,
+                  os.path.join(si.data_dir, 'truncated.jpg'))
 
 @skipif(not FI_available)
 def test_imread_uint16():
