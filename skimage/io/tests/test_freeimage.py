@@ -39,8 +39,6 @@ def test_imread():
 
 @skipif(not FI_available)
 def test_imread_truncated_jpg():
-    raised = False
-    raised = True
     assert_raises(RuntimeError,
                   sio.imread,
                   os.path.join(si.data_dir, 'truncated.jpg'))
