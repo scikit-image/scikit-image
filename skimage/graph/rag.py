@@ -13,9 +13,9 @@ def min_weight(g, src, dst, n):
     Parameters
     ----------
     g : RAG
-        The graph to consider.
+        The graph under consideration.
     src, dst : int
-        Typically the verices in `g` to be merged.
+        The verices in `g` to be merged.
     n : int
         A neighbor of `src` or `dst` or both
 
@@ -59,7 +59,7 @@ class RAG(nx.Graph):
         extra_arguments : sequence, optional
             The sequence of extra positional arguments passed to
             `weight_func`.
-        extra_keywords :
+        extra_keywords : dictionary, optional
             The dict of keyword arguments passed to the `weight_func`.
 
         """
@@ -85,9 +85,9 @@ class RAG(nx.Graph):
 
 
 def _add_edge_filter(values, g):
-    """Create edge in `g` between first element of `values` and the rest.
+    """Create edge in `g` between the first element of `values` and the rest.
 
-    Add an edge between first element in `values` and
+    Add an edge between the first element in `values` and
     all other elements of `values` in the graph `g`. `values[0]`
     is expected to be the central value of the footprint used.
 
