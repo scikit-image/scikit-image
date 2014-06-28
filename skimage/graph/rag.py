@@ -17,7 +17,7 @@ def min_weight(g, src, dst, n):
     src, dst : int
         The verices in `g` to be merged.
     n : int
-        A neighbor of `src` or `dst` or both
+        A neighbor of `src` or `dst` or both.
 
     Returns
     -------

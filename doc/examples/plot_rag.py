@@ -9,32 +9,20 @@ weight of all the edges incident on it can be updated by a user defined
 function `weight_func`.
 
 The default behaviour is to use the smaller edge weight incase of a conflict.
-THe example below also shows how to use a custom function to take the larger
+The example below also shows how to use a custom function to take the larger
 weight instead.
 
 """
 from skimage.graph import rag
 import networkx as nx
 from matplotlib import pyplot as plt
+import numpy as np
 
 
-def max_edge(g, src, dst, neighbor):
-    try:
-        w1 = g.edge[src][neighbor]['weight']
-    except KeyError:
-        w1 = None
-
-    try:
-        w2 = g.edge[dst][neighbor]['weight']
-    except KeyError:
-        w2 = None
-
-    if w1 is None:
-        return w2
-    elif w2 is None:
-        return w1
-    else:
-        return max(w1, w2)
+def max_edge(g, src, dst, n):
+    w1 = g[n].get(src, {'weight': -np.inf})['weight']
+    w2 = g[n].get(dst, {'weight': -np.inf})['weight']
+    return max(w1, w2)
 
 
 def display(g, title):
