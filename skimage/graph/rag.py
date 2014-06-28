@@ -63,17 +63,8 @@ class RAG(nx.Graph):
             The dict of keyword arguments passed to the `weight_func`.
 
         """
-        neighbors = self.adj[src].copy()
-        neighbors.update(self.adj[dst])
-
-        try:
-            del neighbors[src]
-        except KeyError:
-            pass
-        try:
-            del neighbors[dst]
-        except KeyError:
-            pass
+        neighbors = (set(self.neighbors(src)) & set(
+            self.neighbors(dst))) - set([src, dst])
 
         for neighbor in neighbors:
             w = weight_func(self, src, dst, neighbor, *extra_arguments,
