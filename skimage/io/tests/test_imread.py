@@ -37,6 +37,11 @@ def test_imread_palette():
     img = imread(os.path.join(data_dir, 'palette_color.png'))
     assert img.ndim == 3
 
+@skipif(not imread_available)
+def test_imread_truncated_jpg():
+    assert_raises((RuntimeError, ValueError),
+                  sio.imread,
+                  os.path.join(si.data_dir, 'truncated.jpg'))
 
 @skipif(not imread_available)
 def test_bilevel():

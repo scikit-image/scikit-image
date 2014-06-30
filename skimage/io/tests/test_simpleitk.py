@@ -52,6 +52,12 @@ def test_bilevel():
 
 
 @skipif(not sitk_available)
+def test_imread_truncated_jpg():
+    assert_raises((RuntimeError, ValueError),
+                  sio.imread,
+                  os.path.join(si.data_dir, 'truncated.jpg'))
+
+@skipif(not sitk_available)
 def test_imread_uint16():
     expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
     img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16.tif'))
