@@ -95,6 +95,10 @@ def test_repr_png():
 
     assert np.all(original_img == round_trip)
 
+@skipif(not PIL_available)
+def test_imread_truncated_jpg():
+    assert_raises((IOError, ValueError), imread,
+                  os.path.join(data_dir, 'truncated.jpg'))
 
 # Big endian images not correctly loaded for PIL < 1.1.7
 # Renable test when PIL 1.1.7 is more common.
