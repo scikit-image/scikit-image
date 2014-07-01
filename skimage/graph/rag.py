@@ -22,7 +22,7 @@ def min_weight(graph, src, dst, n):
     Returns
     -------
     weight : float
-        The weight between (`src`, `n`) or (`dst`, `n`) in `g` or the
+        The weight between (`src`, `n`) or (`dst`, `n`) in `graph` or the
         minumum of the two when both exist.
 
     """
