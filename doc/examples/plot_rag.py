@@ -3,13 +3,14 @@
 Region Adjacency Graphs
 =======================
 
-This example demonstrates the use of `merge_nodes` function of a Region
-Adjacency Graph (RAG). When a new node is formed by merging two nodes, the edge
-weight of all the edges incident on it can be updated by a user defined
-function `weight_func`.
+This example demonstrates the use of the `merge_nodes` function of a Region
+Adjacency Graph (RAG).The `RAG` class represents a undirected weighted graph
+which inherits from `networx.graph` class. When a new node is formed by merging
+two nodes, the edge weight of all the edges incident on the resulting node can
+be updated by a user defined function `weight_func`.
 
-The default behaviour is to use the smaller edge weight incase of a conflict.
-The example below also shows how to use a custom function to take the larger
+The default behaviour is to use the smaller edge weight in case of a conflict.
+The example below also shows how to use a custom function to select the larger
 weight instead.
 
 """
@@ -20,12 +21,37 @@ import numpy as np
 
 
 def max_edge(g, src, dst, n):
+    """Callback to handle merging nodes by choosing maximum weight.
+
+    Returns either the weight between (`src`, `n`) or (`dst`, `n`)
+    in `g` or the maximum of the two when both exist.
+
+    Parameters
+    ----------
+    g : RAG
+        The graph under consideration.
+    src, dst : int
+        The verices in `g` to be merged.
+    n : int
+        A neighbor of `src` or `dst` or both.
+
+    Returns
+    -------
+    weight : float
+        The weight between (`src`, `n`) or (`dst`, `n`) in `g` or the
+        maximum of the two when both exist.
+
+    """
+
     w1 = g[n].get(src, {'weight': -np.inf})['weight']
     w2 = g[n].get(dst, {'weight': -np.inf})['weight']
     return max(w1, w2)
 
 
 def display(g, title):
+    """Displays a graph with the given title.
+
+    """
     pos = nx.circular_layout(g)
     plt.figure()
     plt.title(title)
