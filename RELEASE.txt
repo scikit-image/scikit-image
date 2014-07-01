@@ -34,6 +34,10 @@ How to make a new release of ``skimage``
    python setup.py register
    python setup.py sdist upload
 
+  Go to https://travis-ci.org/scikit-image/scikit-image-wheels,
+  select the "Current" tab, and click (on the right) on the "Restart Build"
+  icon.  After that finished, execute ``tools/osx_wheel_upload.sh``.
+
 - Increase the version number
 
   - In ``setup.py``, set to ``0.Xdev``.
