@@ -56,8 +56,8 @@ def test_threshold_cut():
     labels[50:, :50] = 2
     labels[50:, 50:] = 3
 
-    rag = graph.rag_meancolor(img, labels)
-    new_labels = graph.threshold_cut(labels, rag, 10)
+    rag = graph.rag_mean_color(img, labels)
+    new_labels = graph.cut_threshold(labels, rag, 10)
 
     # Two labels
     assert new_labels.max() == 1

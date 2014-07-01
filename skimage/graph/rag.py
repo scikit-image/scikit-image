@@ -4,18 +4,18 @@ from scipy.ndimage import filters
 from scipy import ndimage as nd
 
 
-def min_weight(g, src, dst, n):
+def min_weight(graph, src, dst, n):
     """Callback to handle merging nodes by choosing minimum weight.
 
     Returns either the weight between (`src`, `n`) or (`dst`, `n`)
-    in `g` or the minumum of the two when both exist.
+    in `graph` or the minumum of the two when both exist.
 
     Parameters
     ----------
-    g : RAG
+    graph : RAG
         The graph under consideration.
     src, dst : int
-        The verices in `g` to be merged.
+        The verices in `graph` to be merged.
     n : int
         A neighbor of `src` or `dst` or both.
 
@@ -28,8 +28,8 @@ def min_weight(g, src, dst, n):
     """
 
     # cover the cases where n only has edge to either `src` or `dst`
-    w1 = g[n].get(src, {'weight': np.inf})['weight']
-    w2 = g[n].get(dst, {'weight': np.inf})['weight']
+    w1 = graph[n].get(src, {'weight': np.inf})['weight']
+    w2 = graph[n].get(dst, {'weight': np.inf})['weight']
     return min(w1, w2)
 
 
@@ -50,7 +50,7 @@ class RAG(nx.Graph):
         Parameters
         ----------
         src, dst : int
-            Nodes to be merged. The resulting node will have ID `dst`.
+            Nodes to be merged.
         weight_func : callable, optional
             Function to decide edge weight of edges incident on the new node.
             For each neighbor `n` for `src and `dst`, `weight_func` will be
@@ -63,8 +63,9 @@ class RAG(nx.Graph):
             The dict of keyword arguments passed to the `weight_func`.
 
         """
-        neighbors = (set(self.neighbors(src)) & set(
-            self.neighbors(dst))) - set([src, dst])
+        src_nbrs = set(self.neighbors(src))
+        dst_nbrs = set(self.neighbors(dst))
+        neighbors = (src_nbrs & dst_nbrs) - set([src, dst])
 
         for neighbor in neighbors:
             w = weight_func(self, src, dst, neighbor, *extra_arguments,
@@ -75,7 +76,7 @@ class RAG(nx.Graph):
         self.remove_node(src)
 
 
-def _add_edge_filter(values, g):
+def _add_edge_filter(values, graph):
     """Create edge in `g` between the first element of `values` and the rest.
 
     Add an edge between the first element in `values` and
@@ -86,31 +87,32 @@ def _add_edge_filter(values, g):
     ----------
     values : array
         The array to process.
-    g : RAG
+    graph : RAG
         The graph to add edges in.
 
     Returns
     -------
     0 : int
-        Always returns 0.
+        Always returns 0. The return value is required so that `generic_fitler`
+        can put it in the output array.
 
     """
     values = values.astype(int)
     current = values[0]
     for value in values[1:]:
-        g.add_edge(current, value)
+        graph.add_edge(current, value)
 
     return 0
 
 
-def rag_meancolor(image, labels, connectivity=2):
+def rag_mean_color(image, labels, connectivity=2):
     """Compute the Region Adjacency Graph using mean colors.
 
     Given an image and its initial segmentation, this method constructs the
     corresponsing Region Adjacency Graph (RAG). Each node in the RAG
-    represents a set pixels within `image` with the same
-    label in `labels`. The weight between two adjacent regions is the
-    difference in their mean color.
+    represents a set of pixels within `image` with the same label in `labels`.
+    The weight between two adjacent regions is the difference in their mean
+    color.
 
     Parameters
     ----------
@@ -145,7 +147,7 @@ def rag_meancolor(image, labels, connectivity=2):
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.11.5274
 
     """
-    g = RAG()
+    graph = RAG()
 
     # The footprint is constructed in such a way that the first
     # element in the array being passed to _add_edge_filter is
@@ -173,24 +175,25 @@ def rag_meancolor(image, labels, connectivity=2):
         footprint=fp,
         mode='nearest',
         output=np.zeros(labels.shape, dtype=np.uint8),
-        extra_arguments=(g,))
+        extra_arguments=(graph,))
 
-    for n in g:
-        g.node[n].update({'labels': [n],
-                          'pixel count': 0,
-                          'total color': np.array([0, 0, 0], dtype=np.double)})
+    for n in graph:
+        graph.node[n].update({'labels': [n],
+                              'pixel count': 0,
+                              'total color': np.array([0, 0, 0],
+                                                      dtype=np.double)})
 
     for index in np.ndindex(labels.shape):
         current = labels[index]
-        g.node[current]['pixel count'] += 1
-        g.node[current]['total color'] += image[index]
+        graph.node[current]['pixel count'] += 1
+        graph.node[current]['total color'] += image[index]
 
-    for n in g:
-        g.node[n]['mean color'] = (g.node[n]['total color'] /
-                                   g.node[n]['pixel count'])
+    for n in graph:
+        graph.node[n]['mean color'] = (graph.node[n]['total color'] /
+                                       graph.node[n]['pixel count'])
 
-    for x, y in g.edges_iter():
-        diff = g.node[x]['mean color'] - g.node[y]['mean color']
-        g[x][y]['weight'] = np.linalg.norm(diff)
+    for x, y in graph.edges_iter():
+        diff = graph.node[x]['mean color'] - graph.node[y]['mean color']
+        graph[x][y]['weight'] = np.linalg.norm(diff)
 
-    return g
+    return graph
