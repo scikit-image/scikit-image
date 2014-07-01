@@ -1,6 +1,6 @@
 #!/bin/bash
 # Script to download / check and upload scikit_image wheels for release
-RACKSPACE_URL=http://a365fff413fe338398b6-1c8a9b3114517dc5fe17b7c3f8c63a43.r19.cf2.rackcdn.com
+RACKSPACE_URL=http://wheels.scikit-image.org
 if [ "`which twine`" == "" ]; then
     echo "twine not on path; need to pip install twine?"
     exit 1
