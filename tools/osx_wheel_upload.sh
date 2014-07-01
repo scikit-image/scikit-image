@@ -5,7 +5,6 @@ if [ "`which twine`" == "" ]; then
     echo "twine not on path; need to pip install twine?"
     exit 1
 fi
-cd scikit-image
 SK_VERSION=`git describe --tags`
 if [ "${SK_VERSION:0:1}" != 'v' ]; then
     echo "scikit image version $SK_VERSION does not start with 'v'"
@@ -20,6 +19,7 @@ for py_tag in cp27-none cp33-cp33m cp34-cp34m
 do
     wheel_name="$WHEEL_HEAD-$py_tag-$WHEEL_TAIL"
     wheel_url="${RACKSPACE_URL}/${wheel_name}"
+    echo "Fetching $wheel_url"
     curl -O $wheel_url
     if [ "$?" != "0" ]; then
         echo "Failed downloading $wheel_url; check travis build?"
