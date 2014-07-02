@@ -29,8 +29,8 @@ def cut_threshold(labels, rag, thresh):
     >>> from skimage import data, graph, segmentation
     >>> img = data.lena()
     >>> labels = segmentation.slic(img)
-    >>> rag = graph.rag_meancolor(img, labels)
-    >>> new_labels = graph.threshold_cut(labels, rag, 10)
+    >>> rag = graph.rag_mean_color(img, labels)
+    >>> new_labels = graph.cut_threshold(labels, rag, 10)
 
     References
     ----------
