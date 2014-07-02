@@ -28,8 +28,9 @@ def min_weight(graph, src, dst, n):
     """
 
     # cover the cases where n only has edge to either `src` or `dst`
-    w1 = graph[n].get(src, {'weight': np.inf})['weight']
-    w2 = graph[n].get(dst, {'weight': np.inf})['weight']
+    default = {'weight': np.inf}
+    w1 = graph[n].get(src, default)['weight']
+    w2 = graph[n].get(dst, default)['weight']
     return min(w1, w2)
 
 
@@ -55,7 +56,9 @@ class RAG(nx.Graph):
             Function to decide edge weight of edges incident on the new node.
             For each neighbor `n` for `src and `dst`, `weight_func` will be
             called as follows: `weight_func(src, dst, n, *extra_arguments,
-            **extra_keywords)`
+            **extra_keywords)`. `src`, `dst` and `n` are IDs of vertices in a
+            .. py:class:: RAG object which is in turn a subclass of
+            `networkx.Graph`.
         extra_arguments : sequence, optional
             The sequence of extra positional arguments passed to
             `weight_func`.
@@ -138,7 +141,7 @@ def rag_mean_color(image, labels, connectivity=2):
     >>> from skimage import data, graph, segmentation
     >>> img = data.lena()
     >>> labels = segmentation.slic(img)
-    >>> rag = graph.rag_meancolor(img, labels)
+    >>> rag = graph.rag_mean_color(img, labels)
 
     References
     ----------

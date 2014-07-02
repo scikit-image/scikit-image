@@ -3,8 +3,9 @@ from skimage import graph
 
 
 def max_edge(g, src, dst, n):
-    w1 = g[n].get(src, {'weight': -np.inf})['weight']
-    w2 = g[n].get(dst, {'weight': -np.inf})['weight']
+    default = {'weight': -np.inf}
+    w1 = g[n].get(src, default)['weight']
+    w2 = g[n].get(dst, default)['weight']
     return max(w1, w2)
 
 
