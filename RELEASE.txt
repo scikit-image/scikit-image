@@ -34,9 +34,11 @@ How to make a new release of ``skimage``
    python setup.py register
    python setup.py sdist upload
 
-  Go to https://travis-ci.org/scikit-image/scikit-image-wheels,
-  select the "Current" tab, and click (on the right) on the "Restart Build"
-  icon.  After that finished, execute ``tools/osx_wheel_upload.sh``.
+  Go to https://travis-ci.org/scikit-image/scikit-image-wheels, select the
+  "Current" tab, and click (on the right) on the "Restart Build" icon.  After
+  the wheels become available at http://wheels.scikit-image.org/ (approx 15
+  mins), execute ``tools/osx_wheel_upload.sh``.  Note that, if you rebuild the
+  same wheels, the Rackspace server may only update in another 15 minutes.
 
 - Increase the version number
 
