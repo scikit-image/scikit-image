@@ -1,0 +1,8 @@
+#editor {
+	position: relative;
+}
+
+/* to force remove outline after button click. issue with bootstrap 2.x */
+.btn:focus {
+  outline: none;
+}

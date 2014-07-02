@@ -85,6 +85,19 @@ from notebook import Notebook
 from docutils.core import publish_parts
 
 
+EDITPLUSREVERTBUTTON = """
+.. raw:: html
+
+    <p>
+        <button type="button" class="btn btn-default btn-lg" id="editcode">
+            <i class="icon-edit"></i> Edit
+        </button>
+        <button type="button" class="btn btn-default btn-lg" id="reload">
+            <i class="icon-refresh"></i>
+        </button>
+    </p>
+"""
+
 LITERALINCLUDE = """
 .. literalinclude:: {src_name}
     :lines: {code_start}-
@@ -355,6 +368,7 @@ def write_example(src_name, src_dir, rst_dir, cfg):
         code_info = dict(src_name=src_name, code_start=end)
         example_rst += LITERALINCLUDE.format(**code_info)
 
+    example_rst += EDITPLUSREVERTBUTTON
     example_rst += CODE_LINK.format(src_name)
     ipnotebook_name = src_name.replace('.py', '.ipynb')
     ipnotebook_name = './notebook/' + ipnotebook_name
