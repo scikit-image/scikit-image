@@ -37,7 +37,8 @@ def min_weight(graph, src, dst, n):
 class RAG(nx.Graph):
 
     """
-    The Region Adjacency Graph (RAG) of an image.
+    The Region Adjacency Graph (RAG) of an image, subclasses
+    `networx.Graph <http://networkx.github.io/documentation/latest/reference/classes.graph.html>`_
     """
 
     def merge_nodes(self, src, dst, weight_func=min_weight, extra_arguments=[],
