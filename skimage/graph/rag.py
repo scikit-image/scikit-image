@@ -97,7 +97,7 @@ def _add_edge_filter(values, graph):
     Returns
     -------
     0 : int
-        Always returns 0. The return value is required so that `generic_fitler`
+        Always returns 0. The return value is required so that `generic_filter`
         can put it in the output array.
 
     """
