@@ -1,7 +1,7 @@
 import numpy as np
 
 from ._ccomp import label as _label
-from ._ccomp import relabel_arrays as _relabel_arrays
+from ._ccomp import relabel_arrays as _relabel_array
 
 __all__ = ['label', 'label_match']
 
@@ -181,8 +181,10 @@ def label_match(label_1, label_2, relabel=True, remove_nonoverlap=False,
     bhash.update(hash2)
     
     if rhash != {} and bhash != {}:
-        # Call the relabel function (that is still working on views to label_1 and label_2)
-        label_1_rav, label_2_rav = _relabel_arrays(rhash, bhash, label_1_rav, label_2_rav)
+        # Call the relabel function
+        # (that is still working on views to label_1 and label_2)
+        label_1_rav = _relabel_array(rhash, label_1_rav)
+        label_2_rav = _relabel_array(bhash, label_2_rav)
 
     #Return the labelled and filtered arrays in their 2D forms
     return label_1, label_2

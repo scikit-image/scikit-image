@@ -239,34 +239,30 @@ def label(input, DTYPE_t neighbors=8, background=None, return_num=False):
     else:
         return data
 
-
-def relabel_arrays(dict hash1, dict hash2, cnp.ndarray[DTYPE_t, ndim=1] array1,
-                   cnp.ndarray[DTYPE_t, ndim=1] array2):
+def relabel_array(dict hash1, cnp.ndarray[DTYPE_t, ndim=1] array1):
     """
-    Take two lablled arrays and two dictionaries and relabel the arrays using
-    the values in the dictionaries.
+    Take a lablled array and a dictionary and relabel the array using
+    the values in the dictionary.
     
     Parameters
     ----------
     
-    hash1, hash2: dict
-        Mappings between old and new labels in array1 and array2.
+    hash1 dict
+        Mappings between old and new labels in array1.
     
-    array1, array2: 1D arrays of same shape
-        Flat arrays to be relabelled.
+    array1: 1D ndarray
+        Flat array to be relabelled.
     
     Returns
     -------
-    array1, array2: 1D array
-        The modified input arrays
+    array1: 1D ndarray
+        The modified input array
     """
 
     cdef int lsize = array1.shape[0]
-    cdef long rp
-    cdef long bp
+    cdef int k
 
     for k in range(lsize):
         array1[k] = hash1.get(array1[k], array1[k])
-        array2[k] = hash2.get(array2[k], array2[k])
     
-    return array1, array2
+    return array1
