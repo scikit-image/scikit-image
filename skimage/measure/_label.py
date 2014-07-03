@@ -1,7 +1,7 @@
 import numpy as np
 
 from ._ccomp import label as _label
-from ._ccomp import relabel_arrays as _relabel_array
+from ._ccomp import relabel_array as _relabel_array
 
 __all__ = ['label', 'label_match']
 
@@ -129,8 +129,11 @@ def label_match(label_1, label_2, relabel=True, remove_nonoverlap=False,
         If true then relabel the input arrays so that if the labels that overlap,
         they share the same label number.
     
-    remove_nonoverlap: bool
-        Remove all labels that do not overlap in both images from both images.
+    remove_nonoverlap: bool or int
+        relabel the non overlapping regions to the background (if True) or
+        relabel sequentially higher than remove_overlap if an integer.
+        This allows you to keep the labels unique, because non overlapping 
+        regions are relabelled to a different number than overlapping ones.
     
     remove_duplicates: bool
         If one label in one image overlaps with more than one  in the other,
@@ -153,38 +156,57 @@ def label_match(label_1, label_2, relabel=True, remove_nonoverlap=False,
     label_1_rav = label_1.ravel()
     label_2_rav = label_2.ravel()
     
-    if remove_nonoverlap:
+    # Map hash
+    hash1 = {}
+    hash2 = {}
+    
+    if isinstance(remove_nonoverlap, bool):
+        if remove_nonoverlap:
+            # Set non overlapping labels in the array to background
+            label_1_rav[np.logical_not(np.in1d(label_1_rav, lab1))] = background
+            label_2_rav[np.logical_not(np.in1d(label_2_rav, lab2))] = background
+
+    elif isinstance(remove_nonoverlap, int):
         # Compute the 1D intersection between the known overlapping labels and the array
-        # Set non overlapping labels in the array to zero
-        label_1_rav[np.logical_not(np.in1d(label_1_rav, lab1))] = background
-        label_2_rav[np.logical_not(np.in1d(label_2_rav, lab2))] = background
+        # and not the background
+        noover_1 = label_1_rav[np.logical_and(np.logical_not(np.in1d(label_1_rav, lab1)),
+                                              np.logical_not(label_1_rav == background))]
+        noover_2 = label_2_rav[np.logical_and(np.logical_not(np.in1d(label_2_rav, lab2)),
+                                              np.logical_not(label_2_rav == background))]
+
+        # Add the non-overlapping relabel to the dict
+        hasha = dict(zip(noover_1, range(remove_nonoverlap+1, len(noover_1)+1)))
+        hashb = dict(zip(noover_2, range(remove_nonoverlap+1, len(noover_2)+1)))
+        
+        hash1.update(hasha)
+        hash2.update(hashb)
+    
+    else:
+        raise TypeError("remove_overlap must be boolean or integer type")
 
     # This routine creates a dictionary of mappings between current label values
     # and desired ones which is then passed to the relabel routine.
     if remove_duplicates:
         # Calculate any duplicates and remove them
-        lab1, lab2, hash1, hash2 = _get_duplicate_hash(lab1, lab2, label_1, label_2, 
+        lab1, lab2, hasha, hashb = _get_duplicate_hash(lab1, lab2, label_1, label_2, 
                                                        pair, background=background)
-    else:
-        hash1 = {}
-        hash2 = {}
+
+        hash1.update(hasha)
+        hash2.update(hashb)
 
     if relabel:
         #Create hashtable mappings of the current labels to the new labels
-        rhash = dict(zip(lab1, range(background+1,len(lab1)+1)))
-        bhash = dict(zip(lab2, range(background+1,len(lab2)+1)))
-    else:
-        rhash = {}
-        bhash = {}
+        hasha = dict(zip(lab1, range(background+1,len(lab1)+1)))
+        hashb = dict(zip(lab2, range(background+1,len(lab2)+1)))
     
-    rhash.update(hash1)
-    bhash.update(hash2)
+        hash1.update(hasha)
+        hash2.update(hashb)
     
-    if rhash != {} and bhash != {}:
+    if hash1 != {} and hash2 != {}:
         # Call the relabel function
         # (that is still working on views to label_1 and label_2)
-        label_1_rav = _relabel_array(rhash, label_1_rav)
-        label_2_rav = _relabel_array(bhash, label_2_rav)
+        label_1_rav = _relabel_array(hash1, label_1_rav)
+        label_2_rav = _relabel_array(hash2, label_2_rav)
 
     #Return the labelled and filtered arrays in their 2D forms
     return label_1, label_2
