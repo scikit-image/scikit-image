@@ -54,6 +54,7 @@ before_install:
     - pip install cython
     - pip install flake8
     - pip install six
+    - pip install networkx
 
     - pip install nose-cov
     - pip install coveralls
