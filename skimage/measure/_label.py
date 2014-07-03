@@ -77,36 +77,30 @@ def _get_duplicate_hash(lab1, lab2, label_1, label_2, pair, background=-1):
     
     return lab1, lab2, hash1, hash2
 
-
-def label_match(label_1, label_2, relabel=False, background=-1,
-                remove_duplicates=True):
+def _find_overlapping_labels(label_1, label_2):
     """
-    Take two labelled arrays and remove non-overlapping labels.
+    Find the overlapping labels in two images and return two 1D numpy arrays
+    mapping the labels in the two images together.
     
     Parameters
     ----------
     label_1, label_2: ndarray
         Two labelled arrays.
     
-    relabel: bool
-        If true then relabel the input arrays so that if the labels that overlap,
-        they share the same label number.
-    
-    background: int
-        The number to use where no label is present.
-    
-    remove_duplicates: bool
-        If one label in one image overlaps with more than one  in the other,
-        remove the labels in the other image that have the smallest overlap.
-
     Returns
     -------
-    label_1, label_2: ndarray
-        Modified versions of the input arrays with the labels changed.
+    lab1, lab2: ndarray
+        Two 1D arrays of the same length mapping the labels in both images.
+    
+    pair: ndarray
+        An image containing both labels in the form xxxyyy. Where x is the 
+        label from image 1 and y is the label from image 2. The amount of 
+        digits required to make the value unique is automatically calculated.
     """
-
-    # Calulate the number to multiply the first array by so that the two sets of labels are seperated by 0s
-    shift = (10**(np.floor(np.log10(np.max([np.max(label_1), np.max(label_2)])))+1)).astype(int)
+    # Calulate the number to multiply the first array by so
+    # that the two sets of labels are seperated by 0s
+    shift = (10**(np.floor(np.log10(np.max([np.max(label_1),
+                                            np.max(label_2)])))+1)).astype(int)
 
     # re-make label_1 and add it to label_2 to create one array with both numbers
     label_1_2 = label_1.copy() * shift
@@ -118,16 +112,55 @@ def label_match(label_1, label_2, relabel=False, background=-1,
     # Get the labels of the overlaps for each input image
     lab1 = doubles // shift
     lab2 = doubles % shift
+    
+    return lab1, lab2, pair
+
+def label_match(label_1, label_2, relabel=True, remove_nonoverlap=False,
+                remove_duplicates=False, background=-1):
+    """
+    Take two labelled arrays and find the labels that overlap in both images.
+    
+    Parameters
+    ----------
+    label_1, label_2: ndarray
+        Two labelled arrays of same shape.
+    
+    relabel: bool
+        If true then relabel the input arrays so that if the labels that overlap,
+        they share the same label number.
+    
+    remove_nonoverlap: bool
+        Remove all labels that do not overlap in both images from both images.
+    
+    remove_duplicates: bool
+        If one label in one image overlaps with more than one  in the other,
+        remove the labels in the other image that have the smallest overlap.
+    
+    background: int
+        The number to use where no label is present.
+
+    Returns
+    -------
+    label_1, label_2: ndarray
+        Modified versions of the input arrays with the labels changed.
+    """
+    if label_1.shape != label_2.shape:
+        raise TypeError("The two labelled arrays must have the same dimensions")
+
+    lab1, lab2, pair = _find_overlapping_labels(label_1, label_2)
 
     # Ravel out the images into a 1D view
     label_1_rav = label_1.ravel()
     label_2_rav = label_2.ravel()
     
-    # Compute the 1D intersection between the known overlapping labels and the array
-    # Set non overlapping labels in the array to zero
-    label_1_rav[np.logical_not(np.in1d(label_1_rav, lab1))] = background
-    label_2_rav[np.logical_not(np.in1d(label_2_rav, lab2))] = background
+    if remove_nonoverlap:
+        # Compute the 1D intersection between the known overlapping labels and the array
+        # Set non overlapping labels in the array to zero
+        label_1_rav[np.logical_not(np.in1d(label_1_rav, lab1))] = background
+        label_2_rav[np.logical_not(np.in1d(label_2_rav, lab2))] = background
 
+    # This routine creates a dictionary of mappings between current label values
+    # and desired ones which is then passed to the relabel routine.
     if remove_duplicates:
         # Calculate any duplicates and remove them
         lab1, lab2, hash1, hash2 = _get_duplicate_hash(lab1, lab2, label_1, label_2, 
