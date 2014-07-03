@@ -49,9 +49,7 @@ def max_edge(g, src, dst, n):
 
 
 def display(g, title):
-    """Displays a graph with the given title.
-
-    """
+    """Displays a graph with the given title."""
     pos = nx.circular_layout(g)
     plt.figure()
     plt.title(title)
