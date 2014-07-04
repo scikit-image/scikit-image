@@ -85,7 +85,7 @@ from notebook import Notebook
 from docutils.core import publish_parts
 
 
-EDITPLUSREVERTBUTTON = """
+EDIT_REVERT_BTN = """
 .. raw:: html
 
     <p>
@@ -368,7 +368,7 @@ def write_example(src_name, src_dir, rst_dir, cfg):
         code_info = dict(src_name=src_name, code_start=end)
         example_rst += LITERALINCLUDE.format(**code_info)
 
-    example_rst += EDITPLUSREVERTBUTTON
+    example_rst += EDIT_REVERT_BTN
     example_rst += CODE_LINK.format(src_name)
     ipnotebook_name = src_name.replace('.py', '.ipynb')
     ipnotebook_name = './notebook/' + ipnotebook_name
