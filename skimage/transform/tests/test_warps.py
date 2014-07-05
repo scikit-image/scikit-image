@@ -117,7 +117,7 @@ def test_fast_homography():
     tform = ProjectiveTransform(H)
     coords = warp_coords(tform.inverse, (img.shape[0], img.shape[1]))
 
-    for order in range(4):
+    for order in range(6):
         for mode in ('constant', 'reflect', 'wrap', 'nearest'):
             p0 = map_coordinates(img, coords, mode=mode, order=order)
             p1 = warp(img, tform, mode=mode, order=order)
@@ -130,8 +130,7 @@ def test_fast_homography():
             # ax3.imshow(np.abs(p0 - p1), cmap=plt.cm.gray)
             # plt.show()
 
-            d = np.mean(np.abs(p0 - p1))
-            assert d < 0.001
+            assert_array_equal(p0, p1)
 
 
 def test_rotate():

@@ -159,7 +159,7 @@ cdef inline double cubic_interpolation(double x, double[4] f):
     x : double
         Position in the interval [0, 1].
     f : double[4]
-        Function values at positions [0, 1/3, 2/3, 1].
+        Function values at positions [-1, 0, 1, 2].
 
     Returns
     -------
@@ -206,8 +206,8 @@ cdef inline double bicubic_interpolation(double* image, Py_ssize_t rows,
     if c < 0:
         c0 -= 1
     # scale position to range [0, 1]
-    cdef double xr = (r - r0) / 3
-    cdef double xc = (c - c0) / 3
+    cdef double xr = r - floor(r)
+    cdef double xc = c - floor(c)
 
     cdef double fc[4]
     cdef double fr[4]
