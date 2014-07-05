@@ -43,6 +43,8 @@ from skimage import data_dir, data
 
 import colorsys
 
+np.random.seed(0)
+
 
 def test_guess_spatial_dimensions():
     im1 = np.zeros((5, 5))

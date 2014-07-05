@@ -15,6 +15,8 @@ try:
 except ImportError:
     TF_available = False
 
+np.random.seed(0)
+
 
 def teardown():
     sio.reset_plugins()

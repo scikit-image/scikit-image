@@ -16,6 +16,8 @@ except ImportError:
 else:
     imread_available = True
 
+np.random.seed(0)
+
 
 def teardown():
     reset_plugins()

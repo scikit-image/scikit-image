@@ -14,6 +14,8 @@ try:
 except RuntimeError:
     FI_available = False
 
+np.random.seed(0)
+
 
 def setup_module(self):
     """The effect of the `plugin.use` call may be overridden by later imports.

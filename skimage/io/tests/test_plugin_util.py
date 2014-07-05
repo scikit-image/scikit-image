@@ -3,6 +3,8 @@ from skimage.io._plugins.util import prepare_for_display, WindowManager
 from numpy.testing import *
 import numpy as np
 
+np.random.seed(0)
+
 
 class TestPrepareForDisplay:
     def test_basic(self):

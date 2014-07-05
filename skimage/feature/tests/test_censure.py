@@ -5,6 +5,7 @@ from skimage.feature import CENSURE
 
 
 img = moon()
+np.random.seed(0)
 
 
 def test_censure_on_rectangular_images():

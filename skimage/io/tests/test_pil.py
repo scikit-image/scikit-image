@@ -21,6 +21,8 @@ except ImportError:
 else:
     PIL_available = True
 
+np.random.seed(0)
+
 
 def teardown():
     reset_plugins()

@@ -12,6 +12,9 @@ from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
 
 
+np.random.seed(0)
+
+
 def test_warp_tform():
     x = np.zeros((5, 5), dtype=np.double)
     x[2, 2] = 1

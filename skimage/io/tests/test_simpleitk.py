@@ -15,6 +15,8 @@ except ImportError:
 else:
     sitk_available = True
 
+np.random.seed(0)
+
 
 def teardown():
     reset_plugins()

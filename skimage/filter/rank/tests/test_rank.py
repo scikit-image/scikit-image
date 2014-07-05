@@ -6,6 +6,8 @@ from skimage import data, util
 from skimage.morphology import cmorph, disk
 from skimage.filter import rank
 
+np.random.seed(0)
+
 
 def test_random_sizes():
     # make sure the size is not a problem

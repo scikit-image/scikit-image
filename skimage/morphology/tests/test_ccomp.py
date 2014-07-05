@@ -5,6 +5,9 @@ from skimage.morphology import label
 from warnings import catch_warnings
 from skimage._shared.utils import skimage_deprecation
 
+np.random.seed(0)
+
+
 class TestConnectedComponents:
     def setup(self):
         self.x = np.array([[0, 0, 3, 2, 1, 9],
