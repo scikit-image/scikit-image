@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-# deconvolution.py --- Image deconvolution
-
-"""Implementations restoration functions"""
-
 from __future__ import division
 
 import numpy as np
