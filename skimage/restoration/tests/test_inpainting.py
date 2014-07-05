@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_equal, assert_raises
 from skimage.restoration import inpaint_fmm
 
 
@@ -28,7 +28,23 @@ def test_basic():
     image = expected.copy()
     image[mask == 1] = 0
 
-    assert_array_equal(inpaint_fmm(image, mask, radius=5), expected)
+    assert_equal(inpaint_fmm(image, mask, radius=5), expected)
+
+
+def test_invalid_input():
+    # Invalid shapes of image and mask
+    assert_raises(ValueError, inpaint_fmm, np.zeros((8, 8), dtype=np.uint8),
+                  np.zeros((8, 9), dtype=np.bool))
+
+    # Invalid image
+    assert_raises(TypeError, inpaint_fmm, np.zeros((8, 8), dtype=np.double),
+                  np.zeros((8, 8), dtype=np.bool))
+
+    # Invalid radius
+    assert_raises(ValueError, inpaint_fmm, np.zeros((8, 8), dtype=np.uint8),
+                  np.zeros((8, 8), dtype=np.bool), 0)
+    assert_raises(ValueError, inpaint_fmm, np.zeros((8, 8), dtype=np.uint8),
+                  np.zeros((8, 8), dtype=np.bool), -1)
 
 
 if __name__ == "__main__":

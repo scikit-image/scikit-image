@@ -18,7 +18,7 @@ def inpaint_fmm(image, mask, radius=5):
     image : (M, N) array
         Grayscale image to be inpainted.
     mask : (M, N) array, bool
-        True values denoting regions to be inpainted.
+        Non-zero values denoting regions to be inpainted.
     radius : int
         Determining the range of the neighborhood for inpainting a pixel.
 
@@ -66,9 +66,6 @@ def inpaint_fmm(image, mask, radius=5):
 
     if not np.issubdtype(image.dtype, np.uint8):
         raise TypeError("`image` must be of dtype `uint8`.")
-
-    if not np.issubdtype(mask.dtype, np.bool):
-        raise TypeError("`mask` must be of dtype `bool`.")
 
     if radius < 1:
         raise ValueError("`radius` must be greater than 0.")
