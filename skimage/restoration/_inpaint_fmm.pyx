@@ -17,13 +17,8 @@ BAND = 1
 UNKNOWN = 2
 
 
-cpdef _fast_marching_method(cnp.float_t[:, ::1] image, mask,
-                            Py_ssize_t radius=5):
-    """Inpaint an image using the Fast Marching Method (FMM).
-
-    Image Inpainting technique based on the Fast Marching Method implementation
-    as described in [1]_. FMM is used for computing the evolution of boundary
-    moving in a direction *normal* to itself.
+cpdef _inpaint_fmm(cnp.double_t[:, ::1] image, mask, Py_ssize_t radius=5):
+    """Inpaint image using the Fast Marching Method (FMM).
 
     Parameters
     ---------
@@ -32,11 +27,11 @@ cpdef _fast_marching_method(cnp.float_t[:, ::1] image, mask,
     mask : array, bool
         Initial mask padded as the image, True values are inpainted.
     radius : int
-        Neighbourhood of the pixel of interest.
+        Neighborhood of the pixel of interest.
 
     Returns
     ------
-    painted : array, float
+    inpainted : array, float
         The inpainted grayscale image.
 
     Notes
@@ -54,14 +49,6 @@ cpdef _fast_marching_method(cnp.float_t[:, ::1] image, mask,
         - Select the ``min`` value and assign it as ``u`` value of the pixel.
         - Insert this new value in the ``heap``.
 
-    For further details, see [1]_.
-
-    References
-    ----------
-    .. [1] Telea, A., "An Image Inpainting Technique based on the Fast Marching
-           Method", Journal of Graphic Tools (2004).
-           http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
-
     """
 
     cdef:
@@ -69,7 +56,7 @@ cpdef _fast_marching_method(cnp.float_t[:, ::1] image, mask,
         cnp.int16_t i_nb, j_nb
         cnp.int16_t[:, ::1] shifted_indices
         cnp.uint8_t[:, ::1] flag
-        cnp.float_t[:, ::1] u
+        cnp.double_t[:, ::1] u
         list heap = list()
 
     flag, u, heap = _init_fmm(mask)
@@ -160,9 +147,9 @@ cdef _init_fmm(mask):
     return flag, u, heap
 
 
-cdef cnp.float_t _eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
+cdef cnp.double_t _eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
                           Py_ssize_t j2, cnp.uint8_t[:, ::1] flag,
-                          cnp.float_t[:, ::1] u):
+                          cnp.double_t[:, ::1] u):
     """Solve a step of the Eikonal equation.
 
     The ``u`` values of known pixels (marked by ``flag``) are considered for
@@ -208,7 +195,7 @@ cdef cnp.float_t _eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
 
     """
 
-    cdef cnp.float_t u_out, u1, u2, perp, s
+    cdef cnp.double_t u_out, u1, u2, perp, s
 
     u_out = LARGE_VALUE
     u1 = u[i1, j1]
@@ -234,8 +221,8 @@ cdef cnp.float_t _eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
     return u_out
 
 
-cdef _inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
-                    cnp.uint8_t[:, ::1] flag, cnp.float_t[:, ::1] u,
+cdef _inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.double_t[:, ::1] image,
+                    cnp.uint8_t[:, ::1] flag, cnp.double_t[:, ::1] u,
                     cnp.int16_t[:, ::1] shifted_indices, Py_ssize_t radius):
     """This function performs the actual inpainting operation. Inpainting
     involves "filling in" regions with unknown intensity values using the
@@ -274,14 +261,14 @@ cdef _inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
         cnp.uint8_t[:, ::1] nb
         cnp.int16_t i_nb, j_nb
         cnp.int8_t rx, ry
-        cnp.float_t geometric_dst, levelset_dst, direction
-        cnp.float_t Ia, Jx, Jy, norm, weight
-        cnp.float_t gradx_u, grady_u, gradx_img, grady_img
+        cnp.double_t geometric_dst, levelset_dst, direction
+        cnp.double_t Ia, Jx, Jy, norm, weight
+        cnp.double_t gradx_u, grady_u, gradx_img, grady_img
         Py_ssize_t k
-    cdef cnp.uint16_t h, w
+        cnp.uint16_t rows, cols
 
-    h = image.shape[0]
-    w = image.shape[1]
+    rows = image.shape[0]
+    cols = image.shape[1]
     Ia, Jx, Jy, norm = 0, 0, 0, 0
 
     gradx_u = _grad_func(u, i, j, flag)
@@ -291,7 +278,7 @@ cdef _inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
         i_nb = shifted_indices[k, 0]
         j_nb = shifted_indices[k, 1]
 
-        if i_nb <= 1 or i_nb >= h - 1 or j_nb <= 1 or j_nb >= w - 1:
+        if i_nb <= 1 or i_nb >= rows - 1 or j_nb <= 1 or j_nb >= cols - 1:
             continue
         if flag[i_nb, j_nb] != KNOWN:
             continue
@@ -323,7 +310,7 @@ cdef _inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
     image[i, j] = Ia / norm + (Jx + Jy) / sqrt(Jx * Jx + Jy * Jy)
 
 
-cdef cnp.float_t _grad_func(cnp.float_t[:, :] array,
+cdef cnp.double_t _grad_func(cnp.double_t[:, :] array,
                             Py_ssize_t i, Py_ssize_t j,
                             cnp.uint8_t[:, :] flag):
     """Return the x-gradient of the input array at a pixel.
@@ -350,8 +337,7 @@ cdef cnp.float_t _grad_func(cnp.float_t[:, :] array,
 
     """
 
-    cdef:
-        cnp.float_t grad
+    cdef cnp.double_t grad
 
     if flag[i, j + 1] != UNKNOWN:
         if flag[i, j - 1] != UNKNOWN:

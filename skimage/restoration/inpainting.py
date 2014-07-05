@@ -1,5 +1,6 @@
 import numpy as np
-from ._inpaint_fmm import _fast_marching_method
+from ._inpaint_fmm import _inpaint_fmm
+from ..util import img_as_float
 
 
 __all__ = ['inpaint_fmm']
@@ -14,7 +15,7 @@ def inpaint_fmm(image, mask, radius=5):
 
     Parameters
     ---------
-    image : (M, N) array, uint8
+    image : (M, N) array
         Grayscale image to be inpainted.
     mask : (M, N) array, bool
         True values denoting regions to be inpainted.
@@ -65,12 +66,18 @@ def inpaint_fmm(image, mask, radius=5):
         raise ValueError("The dimensions of `mask` and `image` do not match. ")
 
     rows, cols = image.shape
-    inpainted = np.zeros((rows + 2, cols + 2), np.double)
-    inpainted_mask = np.zeros((rows + 2, cols + 2), np.uint8)
+    inpainted = np.zeros((rows + 2, cols + 2), dtype=np.double)
+    inpainted_mask = np.zeros((rows + 2, cols + 2), dtype=np.uint8)
     inner = (slice(1, -1), slice(1, -1))
     inpainted[inner] = image
     inpainted_mask[inner] = mask
 
-    _fast_marching_method(inpainted, inpainted_mask, radius=radius)
+    _inpaint_fmm(inpainted, inpainted_mask, radius=radius)
 
-    return inpainted[inner]
+    # Make sure all values are in valid range for uint8
+    np.clip(inpainted, 0, 255, inpainted)
+
+    # Convert back to uint8 and original size
+    inpainted = np.round(inpainted[inner]).astype(np.uint8)
+
+    return inpainted

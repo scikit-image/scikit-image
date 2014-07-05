@@ -20,7 +20,7 @@ def test_basic():
          [188, 191, 191, 189, 170,  98,  29,  12,  13,  10, 10,  9, 10,  9,  9],
          [192, 196, 194, 174, 140,  76,  19,  10,  16,  13, 11, 10, 11,  9,  9],
          [189, 196, 193, 159, 113,  58,  13,   6,  13,  12, 11, 10, 10,  8,  9]],
-        dtype=np.float)
+        dtype=np.uint8)
 
     mask = np.zeros(expected.shape, dtype=np.uint8)
     mask[3:12, 3:12] = 1
@@ -28,7 +28,8 @@ def test_basic():
     image = expected.copy()
     image[mask == 1] = 0
 
-    assert_array_equal(np.round(inpaint_fmm(image, mask, radius=5)), expected)
+    assert_array_equal(inpaint_fmm(image, mask, radius=5), expected)
+
 
 if __name__ == "__main__":
     np.testing.run_module_suite()
