@@ -5,25 +5,25 @@ from ._inpaint_fmm import _fast_marching_method
 __all__ = ['inpaint_fmm']
 
 
-def inpaint_fmm(input_image, inpaint_mask, radius=5):
-    """Returns image with masked regions painted in.
+def inpaint_fmm(image, mask, radius=5):
+    """Inpaint image using Fast Marching Method.
 
-    Image Inpainting technique based on the Fast Marching Method implementation
-    as described in [1]_. FMM is used for computing the evolution of boundary
-    moving in a direction *normal* to itself.
+    Image inpainting technique based on the Fast Marching Method (FMM)
+    implementation as described in [1]_. FMM is used for computing the
+    evolution of boundary moving in a direction perpendicular to itself.
 
     Parameters
     ---------
-    input_image : (M, N) array, unit8
+    image : (M, N) array, uint8
         Grayscale image to be inpainted.
-    inpaint_mask : (M, N) array, bool
-        True values are inpainted.
+    mask : (M, N) array, bool
+        True values denoting regions to be inpainted.
     radius : int
-        Determining the range of the neighbourhood for inpainting a pixel.
+        Determining the range of the neighborhood for inpainting a pixel.
 
     Returns
     ------
-    painted : (M, N) array, float
+    inpainted : (M, N) array, float
         The inpainted grayscale image.
 
     References
@@ -34,10 +34,9 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
 
     Examples
     --------
-    >>> import numpy as np
-    >>> mask = np.zeros((8,8), np.uint8)
+    >>> mask = np.zeros((8, 8), dtype=np.bool)
     >>> mask[2:-2, 2:-2] = 1
-    >>> image = np.arange(64).reshape(8,8)
+    >>> image = np.arange(64).reshape(8, 8)
     >>> image[mask == 1] = 0
     >>> image
     array([[ 0,  1,  2,  3,  4,  5,  6,  7],
@@ -48,9 +47,9 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
            [40, 41,  0,  0,  0,  0, 46, 47],
            [48, 49, 50, 51, 52, 53, 54, 55],
            [56, 57, 58, 59, 60, 61, 62, 63]])
-    >>> from skimage.filter.inpaint import inpaint_fmm
-    >>> painted = inpaint_fmm(image, mask)
-    >>> np.round(painted)
+    >>> from skimage.restoration import inpaint_fmm
+    >>> inpainted = inpaint_fmm(image, mask)
+    >>> np.round(inpainted)
     array([[  0.,   1.,   2.,   3.,   4.,   5.,   6.,   7.],
            [  8.,   9.,  10.,  11.,  12.,  13.,  14.,  15.],
            [ 16.,  17.,  11.,  14.,  15.,  15.,  22.,  23.],
@@ -62,17 +61,16 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
 
     """
 
-    if input_image.shape != inpaint_mask.shape:
-        raise TypeError("The dimensions of 'inpaint_mask' and "
-                        "'input_image' do not match. ")
+    if image.shape != mask.shape:
+        raise ValueError("The dimensions of `mask` and `image` do not match. ")
 
-    h, w = input_image.shape
-    painted = np.zeros((h + 2, w + 2), np.float)
-    mask = np.zeros((h + 2, w + 2), np.uint8)
+    rows, cols = image.shape
+    inpainted = np.zeros((rows + 2, cols + 2), np.double)
+    inpainted_mask = np.zeros((rows + 2, cols + 2), np.uint8)
     inner = (slice(1, -1), slice(1, -1))
-    painted[inner] = input_image
-    mask[inner] = inpaint_mask
+    inpainted[inner] = image
+    inpainted_mask[inner] = mask
 
-    _fast_marching_method(painted, mask, radius=radius)
+    _fast_marching_method(inpainted, inpainted_mask, radius=radius)
 
-    return painted[inner]
+    return inpainted[inner]
