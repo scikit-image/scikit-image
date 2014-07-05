@@ -9,7 +9,8 @@ cdef inline Py_ssize_t round(double r):
     return <Py_ssize_t>((r + 0.5) if (r > 0.0) else (r - 0.5))
 
 
-cdef inline double nearest_neighbour_interpolation(double* image, Py_ssize_t rows,
+cdef inline double nearest_neighbour_interpolation(double* image,
+                                                   Py_ssize_t rows,
                                                    Py_ssize_t cols, double r,
                                                    double c, char mode,
                                                    double cval):
@@ -73,7 +74,8 @@ cdef inline double bilinear_interpolation(double* image, Py_ssize_t rows,
     dc = c - minc
     top = (1 - dc) * get_pixel2d(image, rows, cols, minr, minc, mode, cval) \
           + dc * get_pixel2d(image, rows, cols, minr, maxc, mode, cval)
-    bottom = (1 - dc) * get_pixel2d(image, rows, cols, maxr, minc, mode, cval) \
+    bottom = (1 - dc) * get_pixel2d(image, rows, cols, maxr, minc, mode,
+                                    cval) \
              + dc * get_pixel2d(image, rows, cols, maxr, maxc, mode, cval)
     return (1 - dr) * top + dr * bottom
 
@@ -98,8 +100,8 @@ cdef inline double quadratic_interpolation(double x, double[3] f):
 
 
 cdef inline double biquadratic_interpolation(double* image, Py_ssize_t rows,
-                                             Py_ssize_t cols, double r, double c,
-                                             char mode, double cval):
+                                             Py_ssize_t cols, double r,
+                                             double c, char mode, double cval):
     """Biquadratic interpolation at a given position in the image.
 
     Parameters
@@ -234,7 +236,8 @@ cdef inline double bicubic_interpolation(double* image, Py_ssize_t rows,
 
 
 cdef inline double get_pixel2d(double* image, Py_ssize_t rows, Py_ssize_t cols,
-                               Py_ssize_t r, Py_ssize_t c, char mode, double cval):
+                               Py_ssize_t r, Py_ssize_t c, char mode,
+                               double cval):
     """Get a pixel from the image, taking wrapping mode into consideration.
 
     Parameters
@@ -266,8 +269,8 @@ cdef inline double get_pixel2d(double* image, Py_ssize_t rows, Py_ssize_t cols,
 
 
 cdef inline double get_pixel3d(double* image, Py_ssize_t rows, Py_ssize_t cols,
-                               Py_ssize_t dims, Py_ssize_t r, Py_ssize_t c, Py_ssize_t d,
-                               char mode, double cval):
+                               Py_ssize_t dims, Py_ssize_t r, Py_ssize_t c,
+                               Py_ssize_t d, char mode, double cval):
     """Get a pixel from the image, taking wrapping mode into consideration.
 
     Parameters
@@ -301,8 +304,7 @@ cdef inline double get_pixel3d(double* image, Py_ssize_t rows, Py_ssize_t cols,
 
 
 cdef inline Py_ssize_t coord_map(Py_ssize_t dim, Py_ssize_t coord, char mode):
-    """
-    Wrap a coordinate, according to a given mode.
+    """Wrap a coordinate, according to a given mode.
 
     Parameters
     ----------
