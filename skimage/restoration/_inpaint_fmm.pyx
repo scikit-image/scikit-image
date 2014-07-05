@@ -5,19 +5,19 @@
 
 cimport numpy as cnp
 from libc.math cimport sqrt
+from libc.float cimport DBL_MAX
 
 import numpy as np
 from heapq import heappop, heappush
 from skimage.morphology import disk, dilation
 
 
-LARGE_VALUE = 1.0e6
-KNOWN = 0
-BAND = 1
-UNKNOWN = 2
+cdef cnp.uint8_t KNOWN = 0
+cdef cnp.uint8_t BAND = 1
+cdef cnp.uint8_t UNKNOWN = 2
 
 
-cpdef _inpaint_fmm(cnp.double_t[:, ::1] image, mask, Py_ssize_t radius=5):
+def _inpaint_fmm(cnp.double_t[:, ::1] image, mask, Py_ssize_t radius=5):
     """Inpaint image using the Fast Marching Method (FMM).
 
     Parameters
@@ -136,7 +136,7 @@ cdef _init_fmm(mask):
 
     flag = (2 * outside) - band
 
-    u = np.where(flag == UNKNOWN, LARGE_VALUE, 0)
+    u = np.where(flag == UNKNOWN, DBL_MAX, 0.0)
 
     heap = []
     # Store the ``u`` and indices of pixels marked as BAND points
@@ -197,7 +197,7 @@ cdef cnp.double_t _eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
 
     cdef cnp.double_t u_out, u1, u2, perp, s
 
-    u_out = LARGE_VALUE
+    u_out = DBL_MAX
     u1 = u[i1, j1]
     u2 = u[i2, j2]
 
