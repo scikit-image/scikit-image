@@ -65,6 +65,15 @@ def inpaint_fmm(image, mask, radius=5):
     if image.shape != mask.shape:
         raise ValueError("The dimensions of `mask` and `image` do not match. ")
 
+    if not np.issubdtype(image.dtype, np.uint8):
+        raise TypeError("`image` must be of dtype `uint8`.")
+
+    if not np.issubdtype(mask.dtype, np.bool):
+        raise TypeError("`mask` must be of dtype `bool`.")
+
+    if radius < 1:
+        raise ValueError("`radius` must be greater than 0.")
+
     rows, cols = image.shape
     inpainted = np.zeros((rows + 2, cols + 2), dtype=np.double)
     inpainted_mask = np.zeros((rows + 2, cols + 2), dtype=np.uint8)
