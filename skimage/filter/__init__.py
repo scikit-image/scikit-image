@@ -12,13 +12,13 @@ from . import rank
 
 
 from skimage._shared.utils import deprecated
-from skimage import restoration
+from ..restoration import _denoise
 denoise_bilateral = deprecated('skimage.restoration.denoise_bilateral')\
-                        (restoration.denoise_bilateral)
+                        (_denoise.denoise_bilateral)
 denoise_tv_bregman = deprecated('skimage.restoration.denoise_tv_bregman')\
-                        (restoration.denoise_tv_bregman)
+                        (_denoise.denoise_tv_bregman)
 denoise_tv_chambolle = deprecated('skimage.restoration.denoise_tv_chambolle')\
-                        (restoration.denoise_tv_chambolle)
+                        (_denoise.denoise_tv_chambolle)
 
 
 __all__ = ['inverse',

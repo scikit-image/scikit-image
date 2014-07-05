@@ -154,6 +154,9 @@ Library:
     Extension: skimage.feature._hessian_det_appx
         Sources:
             skimage/exposure/_hessian_det_appx.pyx
+    Extension: skimage.restoration._inpaint_fmm
+        Sources:
+            skimage/restoration/_inpaint_fmm.pyx
 
 Executable: skivi
     Module: skimage.scripts.skivi
