@@ -92,9 +92,13 @@ EDIT_REVERT_BTN = """
         <button type="button" class="btn btn-default btn-lg" id="editcode">
             <i class="icon-edit"></i> Edit
         </button>
+        <button type="button" class="btn btn-default btn-lg" id="runcode">
+            <i class="icon-play"></i> Run
+        </button>
         <button type="button" class="btn btn-default btn-lg" id="reload">
             <i class="icon-refresh"></i>
         </button>
+        <div id="loading"><img src="../_static/ajax-loader.gif"/></div>
     </p>
 """
 
