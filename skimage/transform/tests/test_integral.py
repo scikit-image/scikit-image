@@ -3,9 +3,9 @@ from numpy.testing import assert_equal
 
 from skimage.transform import integral_image, integrate
 
+np.random.seed(0)
 x = (np.random.random((50, 50)) * 255).astype(np.uint8)
 s = integral_image(x)
-np.random.seed(0)
 
 
 def test_validity():
