@@ -182,7 +182,7 @@ cdef inline double bicubic_interpolation(double* image, Py_ssize_t rows,
     """Bicubic interpolation at a given position in the image.
 
     Interpolation using Catmull-Rom splines, based on the bicubic convolution
-    algorithm described in _[1].
+    algorithm described in [1]_.
 
     Parameters
     ----------
