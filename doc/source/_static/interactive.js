@@ -50,8 +50,8 @@ $(document).ready(function () {
         // TODO: it loads the last generated image into the outputimage tag
         // that needs to be changed
 
-        // example images are within a div of class section
-            example_images = $('.section img'),
+        // example images are first children, within a div of class section
+            example_images = $('.section > img'),
         // index for iterating through example images
             i = 0,
             key,
@@ -59,10 +59,18 @@ $(document).ready(function () {
         for (key in output) {
             image = output[key];
             image = imagemeta + image;
-            // console.log(example_images[i]);
-            example_images[i].src = image;
-            // example_images[i].attr('src', image);
-            i = i + 1;
+            // more images generated than in initial example
+            if(i >= example_images.length){
+                $('.section > img:last')
+                    .clone()
+                    .attr('src', image)
+                    .insertAfter('.section > img:last');
+            } else {
+                // console.log(example_images[i]);
+                example_images[i].src = image;
+                // example_images[i].attr('src', image);
+                i = i + 1;
+            }
         }
     }
 
@@ -102,6 +110,7 @@ $(document).ready(function () {
         $('div#editor').replaceWith(backup);
         // hide Run, only visible when code edited
         $('#runcode').hide();
+        $('#loading').hide();
         $('#editcode').show();
     });
 });
