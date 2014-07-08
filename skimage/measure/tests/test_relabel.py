@@ -1,83 +1,96 @@
 # -*- coding: utf-8 -*-
 
+import pytest
+
 import numpy as np
-import matplotlib.pyplot as plt
 
 np.set_printoptions(edgeitems=10)
 
-from skimage.measure import label, label_match
+from skimage.measure import label_match
 
-def test_relabel_single_overlap():
-    filtered_r = np.array(np.logical_not(np.array(plt.imread('test1_no_overlap.png')[...,0],dtype=np.int64)),dtype=np.int64)
-    filtered_b = np.array(np.logical_not(np.array(plt.imread('test1b_no_overlap.png')[...,0],dtype=np.int64)),dtype=np.int64)
-    overlap = np.logical_and(filtered_b, filtered_r)
+@pytest.mark.parametrize("arr1, arr2, dout1, dout2",
+                         [
+                         # Simple relabel
+                         ([1,1,0,0,0,2,2],
+                          [0,3,3,0,4,5,5],
+
+                          [1,1,0,0,0,2,2],
+                          [0,1,1,0,4,2,2]),
+                         # Bit odder
+#                         ([1,1,1,1,1,1,1], [0,3,3,0,4,5,5],
+#                          [1,1,1,1,1,1,1], [0,1,1,0,4,5,5]),
+                         ]
+                        )
+def test_relabel(arr1, arr2, dout1, dout2):
+    out1, out2 = label_match(arr1, arr2, relabel=True, background=0)
     
-    label_1, label_2 = label(filtered_r, background=-1), label(filtered_b, background=-1)
+    np.testing.assert_almost_equal(out1, dout1)
+    np.testing.assert_almost_equal(out2, dout2)
 
-    print(label_1[40:70:2,45:85:2])
-    print("\n")
-    print(label_2[40:70:2,45:85:2])
-    print("-"*80)
 
-    rlabel_1, rlabel_2 = label_match(label_1, label_2, relabel=True, background=0)
+
+@pytest.mark.parametrize("arr1, arr2, dout1, dout2",
+                         [
+                         # Simple relabel
+                         ([1,1,0,0,0,2,2],
+                          [0,3,3,0,4,5,5],
+
+                          [1,1,0,0,0,2,2],
+                          [0,1,1,0,0,2,2]),
+                         # Bit odder
+#                         ([1,1,1,1,1,1,1], [0,3,3,0,4,5,5],
+#                          [1,1,1,1,1,1,1], [0,1,1,0,4,5,5]),
+                         ]
+                        )
+def test_relabel_nonoverlap(arr1, arr2, dout1, dout2):
+    out1, out2 = label_match(arr1, arr2, relabel=True, remove_nonoverlap=True, background=0)
     
-    print(rlabel_1[40:70:2,45:85:2])
-    print("\n")
-    print(rlabel_2[40:70:2,45:85:2])
-    print("-"*80)
+    np.testing.assert_almost_equal(out1, dout1)
+    np.testing.assert_almost_equal(out2, dout2)
+
+@pytest.mark.parametrize("arr1, arr2, dout1, dout2",
+                         [
+                         # Simple relabel
+                         ([0,0,1,1,1,1,0],
+                          [1,1,1,0,2,2,2],
+
+                          [0,0,1,1,1,1,0],
+                          [0,0,0,0,1,1,1]),
+                         # if multiples with same overlap, keep only the first
+                         ([1,1,1,1,1,1,1],
+                          [0,3,3,0,4,5,5],
+
+                          [1,1,1,1,1,1,1],
+                          [0,1,1,0,0,0,0]),
+
+                         # Edge Cases
+                         # Duplicate overlap
+                         ([1,1,0,2,2],
+                          [1,1,1,1,1],
+
+                          [1,1,0,0,0],
+                          [1,1,1,1,1]),
+                         # irregular overlap
+#                         ([1,1,0,2,2,2,0,3,3,3,3],
+#                          [0,1,1,1,0,2,2,2,2,2,2],
+#
+#                          [1,1,0,0,0,0,0,2,2,2,2],
+#                          [0,1,1,1,0,2,2,2,2,2,2]),
+                         # irregular overlap
+                         ([1,1,1,0,2,2,2,0,3,3,3,0,4],
+                          [5,0,4,4,4,0,3,3,3,0,2,2,2],
+
+                          [1,1,1,0,2,2,2,0,0,0,0,0,3],
+                          [1,0,0,0,0,0,2,2,2,0,3,3,3]),
+                          
+                         ]
+                        )
+def test_relabel_duplicates(arr1, arr2, dout1, dout2):
+    out1, out2 = label_match(arr1, arr2, relabel=True, remove_duplicates=True, background=0)
     
-    l1o = label_1[overlap]
-    rl1o = rlabel_2[overlap]
+    np.testing.assert_almost_equal(out1, dout1)
+    np.testing.assert_almost_equal(out2, dout2)
 
-    np.testing.assert_almost_equal(rl1o[l1o == 1], 1)
-    np.testing.assert_almost_equal(rl1o[l1o == 2], 2)
 
-def test_norelabel_single_overlap():
-    filtered_r = np.array(np.logical_not(np.array(plt.imread('test1_no_overlap.png')[...,0],dtype=np.int64)),dtype=np.int64)
-    filtered_b = np.array(np.logical_not(np.array(plt.imread('test1b_no_overlap.png')[...,0],dtype=np.int64)),dtype=np.int64)
-    overlap = np.logical_and(filtered_b, filtered_r)
-    
-    label_1, label_2 = label(filtered_r, background=-1), label(filtered_b, background=-1)
-
-    print(label_1[40:70:2,45:85:2])
-    print("\n")
-    print(label_2[40:70:2,45:85:2])
-    print("-"*80)
-
-    rlabel_1, rlabel_2 = label_match(label_1, label_2, relabel=False, background=0)
-    
-    print(rlabel_1[40:70:2,45:85:2])
-    print("\n")
-    print(rlabel_2[40:70:2,45:85:2])
-    print("-"*80)
-    
-    l1o = label_1[overlap]
-    rl1o = rlabel_2[overlap]
-
-    np.testing.assert_almost_equal(rl1o[l1o == 1], 2)
-    np.testing.assert_almost_equal(rl1o[l1o == 2], 1)
-    
-def test_relabel_double_overlap_remove():
-    filtered_r = np.array(np.logical_not(np.array(plt.imread('test1_no_overlap.png')[...,0],dtype=np.int64)),dtype=np.int64)
-    filtered_b = np.array(np.logical_not(np.array(plt.imread('test2b_overlap.png')[...,0],dtype=np.int64)),dtype=np.int64)
-    
-    label_1, label_2 = label(filtered_r, background=-1), label(filtered_b, background=-1)
-
-    print(label_1[40:70:2,45:85:2])
-    print("\n")
-    print(label_2[40:70:2,45:85:2])
-    print("-"*80)
-
-    rlabel_1, rlabel_2 = label_match(label_1, label_2, relabel=True, background=0)
-    
-    print(rlabel_1[40:70:2,45:85:2])
-    print("\n")
-    print(rlabel_2[40:70:2,45:85:2])
-    print("-"*80)
-
-    # check that the two regions labelled as 1 in the input images are still one
-    np.testing.assert_almost_equal(rlabel_1[np.logical_and(label_1 == 1, label_2==1)], 1)
-    # check that the region labelled 3 in image 2 is remmoved
-    np.testing.assert_almost_equal(rlabel_1[np.logical_and(label_1 == 1, label_2==3)], 0)
-    # check that the single overlap region 2 in both images is still there.
-    np.testing.assert_almost_equal(rlabel_1[np.logical_and(label_1 == 2, label_2==2)], 2)
+if __name__ == "__main__":
+    pytest.main("-x test_relabel.py --tb=short -s")

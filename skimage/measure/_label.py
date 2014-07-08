@@ -147,6 +147,10 @@ def label_match(label_1, label_2, relabel=True, remove_nonoverlap=False,
     label_1, label_2: ndarray
         Modified versions of the input arrays with the labels changed.
     """
+
+    label_1 = np.asanyarray(label_1)
+    label_2 = np.asanyarray(label_2)
+
     if label_1.shape != label_2.shape:
         raise TypeError("The two labelled arrays must have the same dimensions")
 
