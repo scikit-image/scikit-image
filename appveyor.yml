@@ -1,0 +1,20 @@
+# Configuration file for AppVeyor continuous integration on Windows
+# adapted from MDTraj project (http://mdtraj.org/)
+
+os: Windows Server 2012
+
+install:
+  - ps: (new-object net.webclient).DownloadFile('https://raw.github.com/pypa/pip/master/contrib/get-pip.py', 'C:\get-pip.py')
+  - C:\Python27\python.exe c:\get-pip.py
+  - C:\Python27\Scripts\pip.exe install pyyaml
+  - C:\Python27\Scripts\pip.exe install pycosat
+  - C:\Python27\Scripts\pip.exe install conda
+  - C:\Python27\Scripts\conda.exe init
+  - C:\Python27\Scripts\conda.exe create -n build_env --yes --quiet python=3.3 cython matplotlib numpy six networkx nose
+
+build_script:
+  - C:\Python27\envs\build_env\python.exe setup.py install 
+
+test_script:
+  - SET PATH=%PATH%;C:\Python27\envs\build_env\Scripts
+  - C:\Python27\envs\build_env\Scripts\nosetests -v
