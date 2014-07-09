@@ -143,7 +143,7 @@ def test_update_on_save():
     assert pic.modified
     assert pic.path is None
 
-    fd, filename = tempfile.mkstemp(suffix=".jpg")
+    fd, filename = tempfile.mkstemp(suffix=".JPG")
     os.close(fd)
     try:
         pic.save(filename)
