@@ -99,9 +99,9 @@ def test_homography():
     assert_array_almost_equal(x90, np.rot90(x))
 
 
-def test_fast_homography():
-    img = rgb2gray(data.astronaut()).astype(np.uint8)
-    img = img[:, :100]
+def fast_homography():
+    img = img_as_float(rgb2gray(data.lena()))
+    img = img[:100, :100]
 
     theta = np.deg2rad(30)
     scale = 0.5
@@ -115,19 +115,20 @@ def test_fast_homography():
     H[:2, 2] = [tx, ty]
 
     tform = ProjectiveTransform(H)
-    coords = warp_coords(tform.inverse, (img.shape[0], img.shape[1]))
+    coords = warp_coords(tform, (img.shape[0], img.shape[1]))
 
     for order in range(6):
         for mode in ('constant', 'reflect', 'wrap', 'nearest'):
-            p0 = map_coordinates(img, coords, mode=mode, order=order)
-            p1 = warp(img, tform, mode=mode, order=order)
+            p0 = map_coordinates(img, coords, mode=mode, order=order,
+                                 prefilter=False, cval=0)
+            p1 = warp(img, tform, mode=mode, order=order, cval=0)
 
             # import matplotlib.pyplot as plt
             # f, (ax0, ax1, ax2, ax3) = plt.subplots(1, 4)
             # ax0.imshow(img)
             # ax1.imshow(p0, cmap=plt.cm.gray)
             # ax2.imshow(p1, cmap=plt.cm.gray)
-            # ax3.imshow(np.abs(p0 - p1), cmap=plt.cm.gray)
+            # f.colorbar(ax3.imshow(np.abs(p0 - p1), cmap=plt.cm.gray))
             # plt.show()
 
             assert_array_equal(p0, p1)
