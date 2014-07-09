@@ -99,7 +99,7 @@ def test_homography():
     assert_array_almost_equal(x90, np.rot90(x))
 
 
-def fast_homography():
+def test_fast_homography():
     img = img_as_float(rgb2gray(data.lena()))
     img = img[:100, :100]
 

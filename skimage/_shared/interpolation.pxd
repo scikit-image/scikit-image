@@ -260,7 +260,7 @@ cdef inline double get_pixel2d(double* image, Py_ssize_t rows, Py_ssize_t cols,
 
     """
     if mode == 'C':
-        if (r < 0) or (r > rows - 1) or (c < 0) or (c > cols - 1):
+        if (r < 0) or (r >= rows) or (c < 0) or (c >= cols):
             return cval
         else:
             return image[r * cols + c]
@@ -293,14 +293,14 @@ cdef inline double get_pixel3d(double* image, Py_ssize_t rows, Py_ssize_t cols,
 
     """
     if mode == 'C':
-        if (r < 0) or (r > rows - 1) or (c < 0) or (c > cols - 1):
+        if (r < 0) or (r >= rows) or (c < 0) or (c >= cols):
             return cval
         else:
             return image[r * cols * dims + c * dims + d]
     else:
         return image[coord_map(rows, r, mode) * cols * dims
                      + coord_map(cols, c, mode) * dims
-                     + d]
+                     + coord_map(dims, d, mode)]
 
 
 cdef inline Py_ssize_t coord_map(Py_ssize_t dim, Py_ssize_t coord, char mode):
