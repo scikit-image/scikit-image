@@ -10,11 +10,12 @@ install:
   - C:\Python27\Scripts\pip.exe install pycosat
   - C:\Python27\Scripts\pip.exe install conda
   - C:\Python27\Scripts\conda.exe init
-  - C:\Python27\Scripts\conda.exe create -n build_env --yes --quiet python=3.3 cython matplotlib numpy six networkx nose
+  - C:\Python27\Scripts\conda.exe create -n build_env --yes --quiet python=3.3 cython matplotlib numpy scipy six networkx nose setuptools
 
 build_script:
   - C:\Python27\envs\build_env\python.exe setup.py install 
 
 test_script:
   - SET PATH=%PATH%;C:\Python27\envs\build_env\Scripts
-  - C:\Python27\envs\build_env\Scripts\nosetests -v
+  - cd C:\
+  - C:\Python27\envs\build_env\Scripts\nosetests.bat --exe -v skimage
