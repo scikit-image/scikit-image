@@ -17,5 +17,6 @@ build_script:
 
 test_script:
   - SET PATH=%PATH%;C:\Python27\envs\build_env\Scripts
-  - cd C:\
-  - C:\Python27\envs\build_env\Scripts\nosetests.bat --exe -v skimage
+  - cd C:\ 
+  - dir C:\Python27\envs\build_env\Scripts\
+  - C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage
