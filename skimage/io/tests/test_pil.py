@@ -147,7 +147,7 @@ def test_imsave_filelike():
     s = BytesIO()
 
     # save to file-like object
-    with expected_warnings(['precision loss']):
+    with expected_warnings(['precision loss|unclosed file']):
         imsave(s, image)
 
     # read from file-like object

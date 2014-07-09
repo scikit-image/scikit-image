@@ -162,7 +162,7 @@ def test_3d_inactive():
     old_labels = np.copy(labels)
     labels[5:25, 26:29, 26:29] = -1
     after_labels = np.copy(labels)
-    with expected_warnings(['"cg" mode']):
+    with expected_warnings(['"cg" mode|CObject type']):
         labels = random_walker(data, labels, mode='cg')
     assert (labels.reshape(data.shape)[13:17, 13:17, 13:17] == 2).all()
     assert data.shape == labels.shape
