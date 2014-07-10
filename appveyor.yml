@@ -3,6 +3,9 @@
 
 os: Windows Server 2012
 
+environment:
+  python_ver: 2.7
+
 install:
   - ps: (new-object net.webclient).DownloadFile('https://raw.github.com/pypa/pip/master/contrib/get-pip.py', 'C:\get-pip.py')
   - C:\Python27\python.exe c:\get-pip.py
@@ -11,7 +14,7 @@ install:
   - C:\Python27\Scripts\pip.exe install conda
   - C:\Python27\Scripts\conda.exe init
   - C:\Python27\Scripts\conda.exe update conda --yes --quiet
-  - C:\Python27\Scripts\conda.exe create -n build_env --yes --quiet python=2.7 cython matplotlib numpy scipy six networkx nose setuptools
+  - C:\Python27\Scripts\conda.exe create -n build_env --yes --quiet python=$python_ver cython matplotlib numpy scipy six networkx nose setuptools
 
 build_script:
   - C:\Python27\envs\build_env\python.exe setup.py install 
