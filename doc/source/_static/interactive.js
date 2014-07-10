@@ -13,6 +13,9 @@ $(document).ready(function () {
 
     // edit button
     $('#editcode').bind('click', function () {
+        // store scroll position to prevent jumping of scroll bar
+        var temp_scroll = $(window).scrollTop();
+
         // fetch code url
         var code_url = $('a.download.internal:first').attr('href'),
         // fetch height of div which showed the code
@@ -33,6 +36,9 @@ $(document).ready(function () {
 
                 // editor.setTheme("ace/theme/monokai");
                 editor.getSession().setMode("ace/mode/python");
+
+                // restore scroll bar position after adding editor
+                $(window).scrollTop(temp_scroll);
 
                 // edit successful, show Run button
                 $('#editcode').hide();

@@ -1,5 +1,6 @@
 #editor {
 	position: relative;
+	margin-bottom: 10px;
 }
 
 /* to force remove outline after button click. issue with bootstrap 2.x */
