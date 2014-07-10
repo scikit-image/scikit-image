@@ -7,6 +7,9 @@ $(document).ready(function () {
     // hide loading animation, visible, when code running
     $('#runcode').hide();
     $('#loading').hide();
+    $('#error-message').hide();
+    $('#success-message').hide();
+
 
     // edit button
     $('#editcode').bind('click', function () {
@@ -74,13 +77,17 @@ $(document).ready(function () {
         }
     }
 
-    $.support.cors = true;
+    //$.support.cors = true;
     $('#runcode').bind('click', function () {
         // debug
         // console.log('detect click');
 
         // add animation, hide Run to prevent duplicate runs
         $('#loading').show();
+        // hide message from previous Run
+        $('#error-message').hide();
+        $('#success-message').hide();
+
         $(this).hide();
 
         var code = editor.getValue(),
@@ -98,9 +105,21 @@ $(document).ready(function () {
             url: 'http://198.206.133.45:5000/runcode',
             success: function (e) {
                 // remove animation, show Run
+                // TODO: Refactor to something like reset
                 $('#loading').hide();
                 $('#runcode').show();
                 handleoutput(e);
+                $('#success-message').show();
+            },
+            error: function(jqxhr, text_status, error_thrown) {
+                // TODO: Refactor to something like reset
+                $('#loading').hide();
+                $('#runcode').show();
+
+                error_code = jqxhr.status;
+                error_text = jqxhr.statusText;
+                $('#error-message').html(error_text + ' ' + error_code);
+                $('#error-message').show();
             }
         });
     });
@@ -112,5 +131,7 @@ $(document).ready(function () {
         $('#runcode').hide();
         $('#loading').hide();
         $('#editcode').show();
+        $('#error-message').hide();
+        $('#success-message').hide();
     });
 });

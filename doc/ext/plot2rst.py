@@ -99,6 +99,9 @@ EDIT_REVERT_BTN = """
             <i class="icon-refresh"></i>
         </button>
         <div id="loading"><img src="../_static/ajax-loader.gif"/></div>
+        <div class="alert alert-success" id="success-message">Success</div>
+        <div class="alert alert-error" id="error-message"></div>
+
     </p>
 """
 
