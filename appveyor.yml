@@ -29,9 +29,13 @@ install:
 
 build_script:
   - C:\Python27\envs\build_env\python.exe setup.py install 
-
-test_script:
   - SET PATH=%PATH%;C:\Python27\envs\build_env\Scripts
   - cd C:\ 
   - dir C:\Python27\envs\build_env\Scripts\
   - C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage
+
+test_script:
+  #- SET PATH=%PATH%;C:\Python27\envs\build_env\Scripts
+  - cd C:\ 
+  - dir C:\Python27\envs\build_env\Scripts\
+  #- C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage
