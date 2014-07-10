@@ -10,6 +10,13 @@ environment:
     - python_ver: "3.3"
     - python_ver: "3.4"
 
+matrix:
+  allow_failures:
+    - python_ver: "2.6"
+    - python_ver: "2.7"
+    - python_ver: "3.3"
+    - python_ver: "3.4"
+
 install:
   - ps: (new-object net.webclient).DownloadFile('https://raw.github.com/pypa/pip/master/contrib/get-pip.py', 'C:\get-pip.py')
   - C:\Python27\python.exe c:\get-pip.py
