@@ -5,7 +5,7 @@ os: Windows Server 2012
 
 environment:
   matrix: 
-    - python_ver: "2.6"
+   #- python_ver: "2.6"
     - python_ver: "2.7"
     - python_ver: "3.3"
     - python_ver: "3.4"
@@ -18,7 +18,7 @@ install:
   - C:\Python27\Scripts\pip.exe install conda
   - C:\Python27\Scripts\conda.exe init
   - C:\Python27\Scripts\conda.exe update conda --yes --quiet
-  - C:\Python27\Scripts\conda.exe create -n build_env --yes --quiet python=%python_ver% cython matplotlib numpy scipy six networkx nose setuptools pip
+  - C:\Python27\Scripts\conda.exe create -n build_env --yes --quiet python=%python_ver% cython matplotlib numpy scipy six networkx nose setuptools pip PIL
   - dir C:\Python27\envs\build_env\Scripts\
   - C:\Python27\envs\build_env\Scripts\pip.exe install wheel
   - C:\Python27\envs\build_env\python.exe setup.py bdist_wheel bdist_wininst
