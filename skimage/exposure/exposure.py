@@ -3,7 +3,7 @@ import numpy as np
 
 from skimage import img_as_float
 from skimage.util.dtype import dtype_range, dtype_limits
-from skimage._shared.utils import deprecated, deprecation_warning
+from skimage._shared.utils import deprecation_warning
 
 
 __all__ = ['histogram', 'cumulative_distribution', 'equalize',
@@ -136,7 +136,7 @@ def equalize_hist(image, nbins=256):
     return out.reshape(image.shape)
 
 
-def intensity_range(image, range_values='image', zero_min=False):
+def intensity_range(image, range_values='image', clip_negative=False):
     """Return image intensity range (min, max) based on desired value type.
 
     Parameters
@@ -160,9 +160,9 @@ def intensity_range(image, range_values='image', zero_min=False):
             intensity range explicitly. This option is included for functions
             that use `intensity_range` to support all desired range types.
 
-    zero_min : bool
-        If True, the image dtype's min is truncated to 0. Note that this only
-        applies to the output range if `range_values` specifies a dtype.
+    clip_negative : bool
+        If True, clip the negative range (i.e. return 0 for min intensity)
+        even if the image dtype allows negative values.
     """
     if range_values == 'dtype':
         range_values = image.dtype.type
@@ -172,7 +172,7 @@ def intensity_range(image, range_values='image', zero_min=False):
         i_max = np.max(image)
     elif range_values in DTYPE_RANGE:
         i_min, i_max = DTYPE_RANGE[range_values]
-        if zero_min:
+        if clip_negative:
             i_min = 0
     else:
         i_min, i_max = range_values
@@ -263,7 +263,7 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
         deprecation_warning(msg.format(out_range))
 
     imin, imax = intensity_range(image, in_range)
-    omin, omax = intensity_range(image, out_range, zero_min=(imin >= 0))
+    omin, omax = intensity_range(image, out_range, clip_negative=(imin >= 0))
 
     image = np.clip(image, imin, imax)
 
