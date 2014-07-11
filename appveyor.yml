@@ -25,7 +25,7 @@ install:
   - ps: "ls dist"
 
 build_script:
-    - C:\Python27\envs\build_env\Scripts\pip.exe --pre --no-index --find-links dist/ scikit-image
+    - C:\Python27\envs\build_env\Scripts\pip.exe install --pre --no-index --find-links dist/ scikit-image
   #- C:\Python27\envs\build_env\python.exe setup.py install 
 
 test_script:
