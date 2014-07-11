@@ -37,3 +37,6 @@ test_script:
   # The line below is being used to allow tests to run on all Python versions
   # even when the tests fail.
   - C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage || EXIT /B 0
+
+artifacts:
+  - path: dist\*
