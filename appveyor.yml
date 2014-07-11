@@ -5,10 +5,10 @@ os: Windows Server 2012
 
 environment:
   matrix: 
-    #- python_ver: "2.6"
-    - python_ver: "2.7"
-    - python_ver: "3.3"
-    - python_ver: "3.4"
+    - python_ver: "2.6"
+    #- python_ver: "2.7"
+    #- python_ver: "3.3"
+    #- python_ver: "3.4"
 
 install:
   - ps: (new-object net.webclient).DownloadFile('https://raw.github.com/pypa/pip/master/contrib/get-pip.py', 'C:\get-pip.py')
