@@ -10,12 +10,8 @@ environment:
     - python_ver: "2.7"
       deps: "cython matplotlib numpy scipy six networkx nose setuptools pip PIL"
     #- python_ver: "3.3"
-    #- python_ver: "3.4"
-    #  deps: "cython matplotlib numpy scipy six networkx nose setuptools pip"
-
-#matrix:
-#  allow_failures:
-# - python_ver: "3.4"
+    - python_ver: "3.4"
+      deps: "cython matplotlib numpy scipy six networkx nose setuptools pip"
 
 install:
   - ps: (new-object net.webclient).DownloadFile('https://raw.github.com/pypa/pip/master/contrib/get-pip.py', 'C:\get-pip.py')
