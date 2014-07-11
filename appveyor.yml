@@ -4,8 +4,8 @@
 os: Windows Server 2012
 
 environment:
-  matrix:
-    - python_ver: "2.6"
+  matrix: 
+    #- python_ver: "2.6"
     - python_ver: "2.7"
     - python_ver: "3.3"
     - python_ver: "3.4"
@@ -27,4 +27,8 @@ test_script:
   - SET PATH=%PATH%;C:\Python27\envs\build_env\Scripts
   - cd C:\ 
   - dir C:\Python27\envs\build_env\Scripts\
+  #- C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage
+  # The following line above be used once the tests pass on windows,
+  # The line below is being used to allow tests to run on all Python versions
+  # even when the tests fail.
   - C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage || EXIT /B 0
