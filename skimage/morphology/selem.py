@@ -292,7 +292,7 @@ def star(a, dtype=np.uint8):
     selem[selem > 0] = 1
     return selem.astype(dtype)
 
-    
+
 def _default_selem(ndim):
     """
     Generates a cross-shaped structuring element (connectivity=1). This is the

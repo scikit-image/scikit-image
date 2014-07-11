@@ -31,11 +31,11 @@ def binary_erosion(image, selem=None, out=None):
         The result of the morphological erosion with values in ``[0, 1]``.
 
     """
-    
+
     # Default structure element
     if selem is None:
         selem = _default_selem(image.ndim)
-        
+
     selem = (selem != 0)
     selem_sum = np.sum(selem)
 
@@ -80,11 +80,11 @@ def binary_dilation(image, selem=None, out=None):
         The result of the morphological dilation with values in ``[0, 1]``.
 
     """
-    
+
     # Default structure element
     if selem is None:
         selem = _default_selem(image.ndim)
-        
+
     selem = (selem != 0)
 
     if np.sum(selem) <= 255:

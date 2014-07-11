@@ -59,7 +59,7 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
     # Default structure element
     if selem is None:
         selem = _default_selem(image.ndim)
-        
+
     if image is out:
         raise NotImplementedError("In-place erosion not supported!")
     image = img_as_ubyte(image)
@@ -117,7 +117,7 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
     # Default structure element
     if selem is None:
         selem = _default_selem(image.ndim)
-    
+
     if image is out:
         raise NotImplementedError("In-place dilation not supported!")
     image = img_as_ubyte(image)
@@ -168,11 +168,11 @@ def opening(image, selem=None, out=None):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    
+
     # Default structure element
     if selem is None:
         selem = _default_selem(image.ndim)
-        
+
     h, w = selem.shape
     shift_x = True if (w % 2) == 0 else False
     shift_y = True if (h % 2) == 0 else False
@@ -228,7 +228,7 @@ def closing(image, selem=None, out=None):
     # Default structure element
     if selem is None:
         selem = _default_selem(image.ndim)
-    
+
     h, w = selem.shape
     shift_x = True if (w % 2) == 0 else False
     shift_y = True if (h % 2) == 0 else False
@@ -279,11 +279,11 @@ def white_tophat(image, selem=None, out=None):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-   
+
     # Default structure element
     if selem is None:
         selem = _default_selem(image.ndim)
-        
+
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
 
@@ -338,7 +338,7 @@ def black_tophat(image, selem=None, out=None):
     # Default structure element
     if selem is None:
         selem = _default_selem(image.ndim)
-        
+
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
 
