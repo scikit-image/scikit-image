@@ -21,7 +21,7 @@ def binary_erosion(image, selem=None, out=None):
     selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
         If None, use cross-shaped structuring element (connectivity=1).
-    out : ndarray of bool
+    out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
 
