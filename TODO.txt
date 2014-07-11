@@ -1,5 +1,9 @@
 Remember to list any API changes below in `doc/source/api_changes.txt`.
 
+Version 0.13
+------------
+* Remove deprecated `None` defaults for `skimage.exposure.rescale_intensity`
+
 Version 0.12
 ------------
 * Change `label` to mark background as 0, not -1, which is consistent with
@@ -7,7 +11,7 @@ Version 0.12
 * Remove `skimage.morphology.label` from `skimage.morphology.__init__`--it now
   lives in `skimage.measure.label`.
 * Remove deprecated `reverse_map` parameter of `skimage.transform.warp`
-* Change depecrated `enforce_connectivity=False` on skimage.segmentation.slic
+* Change deprecated `enforce_connectivity=False` on skimage.segmentation.slic
   and set it to True as default
 * Remove deprecated `skimage.measure.fit.BaseModel._params` attribute
 * Remove deprecated `skimage.measure.fit.BaseModel._params`,

@@ -3,7 +3,6 @@ import numpy as np
 
 from skimage import img_as_float
 from skimage.util.dtype import dtype_range, dtype_limits
-from skimage._shared.utils import deprecated
 
 
 __all__ = ['histogram', 'cumulative_distribution', 'equalize',
@@ -136,25 +135,73 @@ def equalize_hist(image, nbins=256):
     return out.reshape(image.shape)
 
 
-def rescale_intensity(image, in_range=None, out_range=None):
+def intensity_range(image, range_values='image', clip_negative=False):
+    """Return image intensity range (min, max) based on desired value type.
+
+    Parameters
+    ----------
+    image : array
+        Input image.
+    range_values : str or 2-tuple
+        The image intensity range is configured by this parameter.
+        The possible values for this parameter are enumerated below.
+
+        'image'
+            Return image min/max as the range.
+        'dtype'
+            Return min/max of the image's dtype as the range.
+        dtype-name
+            Return intensity range based on desired `dtype`. Must be valid key
+            in `DTYPE_RANGE`. Note: `image` is ignored for this range type.
+        2-tuple
+            Return `range_values` as min/max intensities. Note that there's no
+            reason to use this function if you just want to specify the
+            intensity range explicitly. This option is included for functions
+            that use `intensity_range` to support all desired range types.
+
+    clip_negative : bool
+        If True, clip the negative range (i.e. return 0 for min intensity)
+        even if the image dtype allows negative values.
+    """
+    if range_values == 'dtype':
+        range_values = image.dtype.type
+
+    if range_values == 'image':
+        i_min = np.min(image)
+        i_max = np.max(image)
+    elif range_values in DTYPE_RANGE:
+        i_min, i_max = DTYPE_RANGE[range_values]
+        if clip_negative:
+            i_min = 0
+    else:
+        i_min, i_max = range_values
+    return i_min, i_max
+
+
+def rescale_intensity(image, in_range='image', out_range='dtype'):
     """Return image after stretching or shrinking its intensity levels.
 
-    The image intensities are uniformly rescaled such that the minimum and
-    maximum values given by `in_range` match those given by `out_range`.
+    The desired intensity range of the input and output, `in_range` and
+    `out_range` respectively, are used to stretch or shrink the intensity range
+    of the input image. See examples below.
 
     Parameters
     ----------
     image : array
         Image array.
-    in_range : 2-tuple (float, float) or str
-        Min and max *allowed* intensity values of input image. If None, the
-        *allowed* min/max values are set to the *actual* min/max values in the
-        input image. Intensity values outside this range are clipped.
-        If string, use data limits of dtype specified by the string.
-    out_range : 2-tuple (float, float) or str
-        Min and max intensity values of output image. If None, use the min/max
-        intensities of the image data type. See `skimage.util.dtype` for
-        details. If string, use data limits of dtype specified by the string.
+    in_range, out_range : str or 2-tuple
+        Min and max intensity values of input and output image.
+        The possible values for this parameter are enumerated below.
+
+        'image'
+            Use image min/max as the intensity range.
+        'dtype'
+            Use min/max of the image's dtype as the intensity range.
+        dtype-name
+            Use intensity range based on desired `dtype`. Must be valid key
+            in `DTYPE_RANGE`.
+        2-tuple
+            Use `range_values` as explicit min/max intensities.
 
     Returns
     -------
@@ -164,7 +211,9 @@ def rescale_intensity(image, in_range=None, out_range=None):
 
     Examples
     --------
-    By default, intensities are stretched to the limits allowed by the dtype:
+    By default, the min/max intensities of the input image are stretched to
+    the limits allowed by the image's dtype, since `in_range` defaults to
+    'image' and `out_range` defaults to 'dtype':
 
     >>> image = np.array([51, 102, 153], dtype=np.uint8)
     >>> rescale_intensity(image)
@@ -203,20 +252,17 @@ def rescale_intensity(image, in_range=None, out_range=None):
     dtype = image.dtype.type
 
     if in_range is None:
-        imin = np.min(image)
-        imax = np.max(image)
-    elif in_range in DTYPE_RANGE:
-        imin, imax = DTYPE_RANGE[in_range]
-    else:
-        imin, imax = in_range
+        in_range = 'image'
+        msg = "`in_range` should not be set to None. Use {!r} instead."
+        warnings.warn(msg.format(in_range))
 
-    if out_range is None or out_range in DTYPE_RANGE:
-        out_range = dtype if out_range is None else out_range
-        omin, omax = DTYPE_RANGE[out_range]
-        if imin >= 0:
-            omin = 0
-    else:
-        omin, omax = out_range
+    if out_range is None:
+        out_range = 'dtype'
+        msg = "`out_range` should not be set to None. Use {!r} instead."
+        warnings.warn(msg.format(out_range))
+
+    imin, imax = intensity_range(image, in_range)
+    omin, omax = intensity_range(image, out_range, clip_negative=(imin >= 0))
 
     image = np.clip(image, imin, imax)
 

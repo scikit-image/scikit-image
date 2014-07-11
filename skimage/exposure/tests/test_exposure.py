@@ -3,9 +3,11 @@ import warnings
 import numpy as np
 from numpy.testing import assert_array_almost_equal as assert_close
 from numpy.testing import assert_array_equal, assert_raises
+
 import skimage
 from skimage import data
 from skimage import exposure
+from skimage.exposure.exposure import intensity_range
 from skimage.color import rgb2gray
 from skimage.util.dtype import dtype_range
 
@@ -39,6 +41,36 @@ def check_cdf_slope(cdf):
     norm_intensity = np.linspace(0, 1, len(cdf))
     slope, intercept = np.polyfit(norm_intensity, cdf, 1)
     assert 0.9 < slope < 1.1
+
+
+# Test intensity range
+# ====================
+
+
+def test_intensity_range_uint8():
+    image = np.array([0, 1], dtype=np.uint8)
+    input_and_expected = [('image', [0, 1]),
+                          ('dtype', [0, 255]),
+                          ((10, 20), [10, 20])]
+    for range_values, expected_values in input_and_expected:
+        out = intensity_range(image, range_values=range_values)
+        yield assert_array_equal, out, expected_values
+
+
+def test_intensity_range_float():
+    image = np.array([0.1, 0.2], dtype=np.float64)
+    input_and_expected = [('image', [0.1, 0.2]),
+                          ('dtype', [-1, 1]),
+                          ((0.3, 0.4), [0.3, 0.4])]
+    for range_values, expected_values in input_and_expected:
+        out = intensity_range(image, range_values=range_values)
+        yield assert_array_equal, out, expected_values
+
+
+def test_intensity_range_clipped_float():
+    image = np.array([0.1, 0.2], dtype=np.float64)
+    out = intensity_range(image, range_values='dtype', clip_negative=True)
+    assert_array_equal(out, (0, 1))
 
 
 # Test rescale intensity
@@ -134,7 +166,7 @@ def test_adapthist_grayscale():
     img = rgb2gray(img)
     img = np.dstack((img, img, img))
     adapted = exposure.equalize_adapthist(img, 10, 9, clip_limit=0.01,
-                        nbins=128)
+                                          nbins=128)
     assert_almost_equal = np.testing.assert_almost_equal
     assert img.shape == adapted.shape
     assert_almost_equal(peak_snr(img, adapted), 97.531, 3)
@@ -374,6 +406,6 @@ def test_adjust_inv_sigmoid_cutoff_half():
     assert_array_equal(result, expected)
 
 
-def test_neggative():
+def test_negative():
     image = np.arange(-10, 245, 4).reshape(8, 8).astype(np.double)
     assert_raises(ValueError, exposure.adjust_gamma, image)
