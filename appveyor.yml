@@ -11,6 +11,11 @@ environment:
       deps: "cython matplotlib numpy scipy six networkx nose setuptools pip PIL"
     #- python_ver: "3.3"
     #- python_ver: "3.4"
+    #  deps: "cython matplotlib numpy scipy six networkx nose setuptools pip"
+
+#matrix:
+#  allow_failures:
+# - python_ver: "3.4"
 
 install:
   - ps: (new-object net.webclient).DownloadFile('https://raw.github.com/pypa/pip/master/contrib/get-pip.py', 'C:\get-pip.py')
@@ -31,10 +36,11 @@ build_script:
 test_script:
   - SET PATH=%PATH%;C:\Python27\envs\build_env\Scripts
   - cd C:\ 
-  - C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage
-  # The line below is being used to allow tests to run on all Python versions
-  # even when the tests fail.
-  #- C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage || EXIT /B 0
+  - IF "%python_ver%"=="2.7" (
+      C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage
+    ) ELSE (
+      C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage || EXIT /B 0
+    )
 
 artifacts:
   - path: dist\*
