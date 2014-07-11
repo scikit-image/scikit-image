@@ -42,8 +42,6 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
         contrast).
     nbins : int, optional
         Number of gray bins for histogram ("dynamic range").
-    mode : {'unchanged', 'zero', 'crop'}, optional
-        How to treat any pixels falling outside of the tiles.  See the notes.
 
     Returns
     -------
@@ -52,18 +50,14 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
 
     Notes
     -----
-    * The algorithm relies on an image whose rows and columns are even
-      multiples of the number of tiles, so the extra rows and columns are not
-      affected by the algorithm.  The handling of those outlier pixels is
-      determined by the `mode` parameter.  If mode is 'unchanged', the values
-      the same as the input values.  If mode is 'zero', they are set to zero.
-      If mode is 'trim', only the portion of the image that was equalized will
-      be returned.
     * For color images, the following steps are performed:
        - The image is converted to HSV color space
        - The CLAHE algorithm is run on the V (Value) channel
        - The image is converted back to RGB space and returned
     * For RGBA images, the original alpha channel is removed.
+    * The CLAHE algorithm relies on image blocks of equal size.  This results
+    in extra border pixels that are not handled.  Extra blocks are created
+    around the border to handle these pixels.
 
     References
     ----------
@@ -81,10 +75,6 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
     image = skimage.img_as_uint(image)
     image = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
     out = _clahe(image, ntiles_x, ntiles_y, clip_limit * nbins, nbins)
-    if mode == 'crop':
-        image = image[:out.shape[0], :out.shape[1]]
-        if ndim == 3:
-            hsv_img = hsv_img[:out.shape[0], :out.shape[1], :]
     image[:out.shape[0], :out.shape[1]] = out
     image = skimage.img_as_float(image)
     if ndim == 3:
@@ -92,14 +82,6 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
         image = color.hsv2rgb(hsv_img)
     else:
         image = rescale_intensity(image)
-    if mode == 'zero':
-        mask = np.zeros(image.shape)
-        if ndim == 3:
-            for i in range(3):
-                mask[:out.shape[0], :out.shape[1], i] = 1
-        else:
-            mask[:out.shape[0], :out.shape[1]] = 1
-        image[mask == 0] = 0
     return image
 
 
