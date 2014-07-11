@@ -6,7 +6,9 @@ os: Windows Server 2012
 environment:
   matrix: 
     - python_ver: "2.6"
+      deps: "cython matplotlib numpy scipy six networkx nose setuptools pip PIL"
     - python_ver: "2.7"
+      deps: "cython matplotlib numpy scipy six networkx nose setuptools pip PIL"
     #- python_ver: "3.3"
     #- python_ver: "3.4"
 
@@ -18,25 +20,21 @@ install:
   - C:\Python27\Scripts\pip.exe install conda
   - C:\Python27\Scripts\conda.exe init
   - C:\Python27\Scripts\conda.exe update conda --yes --quiet
-  - C:\Python27\Scripts\conda.exe create -n build_env --yes --quiet python=%python_ver% cython matplotlib numpy scipy six networkx nose setuptools pip PIL
+  - C:\Python27\Scripts\conda.exe create -n build_env --yes --quiet python=%python_ver% %deps%   
   - dir C:\Python27\envs\build_env\Scripts\
   - C:\Python27\envs\build_env\Scripts\pip.exe install wheel
   - C:\Python27\envs\build_env\python.exe setup.py bdist_wheel bdist_wininst
-  - ps: "ls dist"
 
 build_script:
     - C:\Python27\envs\build_env\Scripts\pip.exe install --pre --no-index --find-links dist/ scikit-image
-  #- C:\Python27\envs\build_env\python.exe setup.py install 
 
 test_script:
   - SET PATH=%PATH%;C:\Python27\envs\build_env\Scripts
   - cd C:\ 
-  - dir C:\Python27\envs\build_env\Scripts\
-  #- C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage
-  # The following line above be used once the tests pass on windows,
+  - C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage
   # The line below is being used to allow tests to run on all Python versions
   # even when the tests fail.
-  - C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage || EXIT /B 0
+  #- C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage || EXIT /B 0
 
 artifacts:
   - path: dist\*
