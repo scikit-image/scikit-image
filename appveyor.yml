@@ -10,13 +10,6 @@ environment:
     - python_ver: "3.3"
     - python_ver: "3.4"
 
-matrix:
-  allow_failures:
-    - python_ver: "2.6"
-    - python_ver: "2.7"
-    - python_ver: "3.3"
-    - python_ver: "3.4"
-
 install:
   - ps: (new-object net.webclient).DownloadFile('https://raw.github.com/pypa/pip/master/contrib/get-pip.py', 'C:\get-pip.py')
   - C:\Python27\python.exe c:\get-pip.py
@@ -29,13 +22,9 @@ install:
 
 build_script:
   - C:\Python27\envs\build_env\python.exe setup.py install 
+
+test_script:
   - SET PATH=%PATH%;C:\Python27\envs\build_env\Scripts
   - cd C:\ 
   - dir C:\Python27\envs\build_env\Scripts\
-  - C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage
-
-test_script:
-  #- SET PATH=%PATH%;C:\Python27\envs\build_env\Scripts
-  - cd C:\ 
-  - dir C:\Python27\envs\build_env\Scripts\
-  #- C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage
+  - C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage || EXIT /B 0
