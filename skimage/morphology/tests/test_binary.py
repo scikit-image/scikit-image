@@ -64,5 +64,30 @@ def test_out_argument():
         testing.assert_(np.any(out != out_saved))
         testing.assert_array_equal(out, func(img, strel))
 
+def test_default_selem():
+
+    functions = [binary.binary_erosion, binary.binary_dilation,
+                 binary.binary_opening, binary.binary_closing]
+                 
+    strel = selem.diamond(radius=1)
+    image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+                      [0, 0, 1, 1, 1, 0, 0, 1, 0, 0],
+                      [0, 0, 1, 1, 1, 0, 0, 1, 0, 0],
+                      [0, 0, 1, 1, 1, 0, 0, 1, 0, 0],
+                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], np.uint8)
+                      
+    for function in functions:
+        im_expected = function(image, strel)
+        im_test = function(image)
+        yield testing.assert_array_equal, im_expected, im_test
+    
 if __name__ == '__main__':
     testing.run_module_suite()

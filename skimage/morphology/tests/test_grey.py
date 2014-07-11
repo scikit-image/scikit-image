@@ -119,7 +119,33 @@ class TestEccentricStructuringElements():
             tophat = grey.black_tophat(self.white_pixel, s)
             assert np.all(tophat == 0)
 
+def test_default_selem():
 
+    functions = [grey.erosion, grey.dilation,
+                 grey.opening, grey.closing,
+                 grey.white_tophat, grey.black_tophat]
+                 
+    strel = selem.diamond(radius=1)
+    image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+                      [0, 0, 1, 1, 1, 0, 0, 1, 0, 0],
+                      [0, 0, 1, 1, 1, 0, 0, 1, 0, 0],
+                      [0, 0, 1, 1, 1, 0, 0, 1, 0, 0],
+                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], np.uint8)
+                      
+    for function in functions:
+        im_expected = function(image, strel)
+        im_test = function(image)
+        yield testing.assert_array_equal, im_expected, im_test
+            
+            
 class TestDTypes():
 
     def setUp(self):

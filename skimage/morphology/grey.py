@@ -1,5 +1,8 @@
 import warnings
 from skimage import img_as_ubyte
+from scipy import ndimage
+from .selem import _default_selem
+
 
 from . import cmorph
 
@@ -8,7 +11,7 @@ __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
            'black_tophat']
 
 
-def erosion(image, selem, out=None, shift_x=False, shift_y=False):
+def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
     """Return greyscale morphological erosion of an image.
 
     Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
@@ -21,7 +24,7 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
         Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarrays
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
     shift_x, shift_y : bool
@@ -52,6 +55,10 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
 
     """
 
+    # Default structure element
+    if selem is None:
+        selem = _default_selem(image.ndim)
+        
     if image is out:
         raise NotImplementedError("In-place erosion not supported!")
     image = img_as_ubyte(image)
@@ -60,7 +67,7 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
                          shift_x=shift_x, shift_y=shift_y)
 
 
-def dilation(image, selem, out=None, shift_x=False, shift_y=False):
+def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
     """Return greyscale morphological dilation of an image.
 
     Morphological dilation sets a pixel at (i,j) to the maximum over all pixels
@@ -105,6 +112,10 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
 
     """
 
+    # Default structure element
+    if selem is None:
+        selem = _default_selem(image.ndim)
+    
     if image is out:
         raise NotImplementedError("In-place dilation not supported!")
     image = img_as_ubyte(image)
@@ -113,7 +124,7 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
                           shift_x=shift_x, shift_y=shift_y)
 
 
-def opening(image, selem, out=None):
+def opening(image, selem=None, out=None):
     """Return greyscale morphological opening of an image.
 
     The morphological opening on an image is defined as an erosion followed by
@@ -154,7 +165,11 @@ def opening(image, selem, out=None):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-
+    
+    # Default structure element
+    if selem is None:
+        selem = _default_selem(image.ndim)
+        
     h, w = selem.shape
     shift_x = True if (w % 2) == 0 else False
     shift_y = True if (h % 2) == 0 else False
@@ -164,7 +179,7 @@ def opening(image, selem, out=None):
     return out
 
 
-def closing(image, selem, out=None):
+def closing(image, selem=None, out=None):
     """Return greyscale morphological closing of an image.
 
     The morphological closing on an image is defined as a dilation followed by
@@ -206,6 +221,10 @@ def closing(image, selem, out=None):
 
     """
 
+    # Default structure element
+    if selem is None:
+        selem = _default_selem(image.ndim)
+    
     h, w = selem.shape
     shift_x = True if (w % 2) == 0 else False
     shift_y = True if (h % 2) == 0 else False
@@ -215,7 +234,7 @@ def closing(image, selem, out=None):
     return out
 
 
-def white_tophat(image, selem, out=None):
+def white_tophat(image, selem=None, out=None):
     """Return white top hat of an image.
 
     The white top hat of an image is defined as the image minus its
@@ -254,7 +273,12 @@ def white_tophat(image, selem, out=None):
            [0, 0, 1, 0, 0],
            [0, 0, 0, 0, 0]], dtype=uint8)
 
-   """
+    """
+   
+    # Default structure element
+    if selem is None:
+        selem = _default_selem(image.ndim)
+        
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
 
@@ -263,7 +287,7 @@ def white_tophat(image, selem, out=None):
     return out
 
 
-def black_tophat(image, selem, out=None):
+def black_tophat(image, selem=None, out=None):
     """Return black top hat of an image.
 
     The black top hat of an image is defined as its morphological closing minus
@@ -305,6 +329,10 @@ def black_tophat(image, selem, out=None):
 
     """
 
+    # Default structure element
+    if selem is None:
+        selem = _default_selem(image.ndim)
+        
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
 
