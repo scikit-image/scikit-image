@@ -3,6 +3,7 @@
 *#
 *egg-info
 *.so
+*.pyd
 *.bak
 *.c
 *.new
