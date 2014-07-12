@@ -55,9 +55,10 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
        - The CLAHE algorithm is run on the V (Value) channel
        - The image is converted back to RGB space and returned
     * For RGBA images, the original alpha channel is removed.
-    * The CLAHE algorithm relies on image blocks of equal size.  This results
-    in extra border pixels that are not handled.  Extra blocks are created
-    around the border to handle these pixels.
+    * The CLAHE algorithm relies on image blocks of equal size.  This may
+      result in extra border pixels that would not be handled.  In that case,
+      we pad the image with a repeat of the border pixels, apply the
+      algorithm, and then trim the image to original size.
 
     References
     ----------
@@ -120,19 +121,36 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
     if clip_limit == 1.0:
         return image  # is OK, immediately returns original image.
 
-    map_array = np.zeros((ntiles_y, ntiles_x, nbins), dtype=int)
-
     y_res = image.shape[0] - image.shape[0] % ntiles_y
     x_res = image.shape[1] - image.shape[1] % ntiles_x
+
     # make the tile size divisible by 2
     while y_res % (2 * ntiles_y):
         y_res -= 1
     while x_res % (2 * ntiles_x):
         x_res -= 1
-    image = image[: y_res, : x_res]
 
-    x_size = image.shape[1] // ntiles_x  # Actual size of contextual regions
-    y_size = image.shape[0] // ntiles_y
+    orig_shape = image.shape
+    x_size = x_res // ntiles_x  # Actual size of contextual regions
+    y_size = y_res // ntiles_y
+
+    if y_res != image.shape[0]:
+        ntiles_y += 1
+    if x_res != image.shape[1]:
+        ntiles_x += 1
+    if y_res != image.shape[1] or x_res != image.shape[0]:
+        hgt = y_size * ntiles_y - image.shape[0]
+        wid = x_size * ntiles_x - image.shape[1]
+        image = np.vstack((image, image[-hgt:, :]))
+        image = np.hstack((image, image[:, -wid:]))
+        y_res, x_res = image.shape
+
+    bin_size = 1 + NR_OF_GREY / nbins
+    aLUT = np.arange(NR_OF_GREY)
+    aLUT //= bin_size
+    img_blocks = view_as_blocks(image, (y_size, x_size))
+
+    map_array = np.zeros((ntiles_y, ntiles_x, nbins), dtype=int)
     n_pixels = x_size * y_size
 
     if clip_limit > 0.0:  # Calculate actual cliplimit
@@ -141,11 +159,6 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
             clip_limit = 1
     else:
         clip_limit = NR_OF_GREY  # Large value, do not clip (AHE)
-
-    bin_size = 1 + NR_OF_GREY / nbins
-    aLUT = np.arange(NR_OF_GREY)
-    aLUT //= bin_size
-    img_blocks = view_as_blocks(image, (y_size, x_size))
 
     # Calculate greylevel mappings for each contextual region
     for y in range(ntiles_y):
@@ -202,6 +215,9 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
             xstart += xstep  # set pointer on next matrix */
 
         ystart += ystep
+
+    if image.shape != orig_shape:
+        image = image[:orig_shape[0], :orig_shape[1]]
 
     return image
 

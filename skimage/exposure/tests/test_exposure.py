@@ -16,6 +16,8 @@ import matplotlib.pyplot as plt
 # Test histogram equalization
 # ===========================
 
+np.random.seed(0)
+
 # squeeze image intensities to lower image contrast
 test_img = skimage.img_as_float(data.camera())
 test_img = exposure.rescale_intensity(test_img / 5. + 100)
@@ -170,8 +172,8 @@ def test_adapthist_grayscale():
                                           nbins=128)
     assert_almost_equal = np.testing.assert_almost_equal
     assert img.shape == adapted.shape
-    assert_almost_equal(peak_snr(img, adapted), 105.669, 3)
-    assert_almost_equal(norm_brightness_err(img, adapted), 0.02470, 3)
+    assert_almost_equal(peak_snr(img, adapted), 104.3168, 3)
+    assert_almost_equal(norm_brightness_err(img, adapted), 0.0265, 3)
     return data, adapted
 
 
@@ -210,59 +212,6 @@ def test_adapthist_alpha():
     assert_almost_equal = np.testing.assert_almost_equal
     assert_almost_equal(peak_snr(full_scale, adapted), 105.50198, 3)
     assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.0544, 3)
-
-
-def test_adapthist_modes_scalar():
-    '''Test adaptist `mode` parameter values for ndim==2 image.
-    '''
-    img = skimage.img_as_float(data.moon())
-    full_scale = skimage.exposure.rescale_intensity(skimage.img_as_uint(img))
-    ignore = exposure.equalize_adapthist(img.copy(), ntiles_x=9, ntiles_y=9)
-    zero = exposure.equalize_adapthist(img.copy(), ntiles_x=9, ntiles_y=9,
-                                       mode='zero')
-    crop = exposure.equalize_adapthist(img.copy(), ntiles_x=9, ntiles_y=9,
-                                       mode='crop')
-    assert ignore.shape == zero.shape
-    assert ignore.shape != crop.shape
-    assert_array_equal(zero[crop.shape[0]:, :], 0)
-    assert_array_equal(zero[:, crop.shape[1]:], 0)
-
-    assert_almost_equal = np.testing.assert_almost_equal
-    full_cropped = full_scale[:crop.shape[0], :crop.shape[1]]
-    zero_cropped = zero[:crop.shape[0], :crop.shape[1]]
-    ignore_cropped = ignore[:crop.shape[0], :crop.shape[1]]
-
-    for crop_img in [ignore_cropped, zero_cropped, crop]:
-        assert_almost_equal(peak_snr(full_cropped, crop_img), 120.456, 3)
-        assert_almost_equal(norm_brightness_err(full_cropped, crop_img),
-                            0.4398, 3)
-
-
-def test_adapthist_modes_rgb():
-    '''Test adaptist `mode` parameter values for rgb image.
-    '''
-    img = skimage.img_as_float(data.lena())
-    full_scale = skimage.exposure.rescale_intensity(skimage.img_as_uint(img))
-    ignore = exposure.equalize_adapthist(img.copy(), ntiles_x=9, ntiles_y=10)
-    zero = exposure.equalize_adapthist(img.copy(), ntiles_x=9, ntiles_y=10,
-                                       mode='zero')
-    crop = exposure.equalize_adapthist(img.copy(), ntiles_x=9, ntiles_y=10,
-                                       mode='crop')
-    assert ignore.shape == zero.shape
-    assert ignore.shape != crop.shape
-
-    assert_array_equal(zero[crop.shape[0]:, :, :], 0)
-    assert_array_equal(zero[:, crop.shape[1]:, :], 0)
-
-    assert_almost_equal = np.testing.assert_almost_equal
-    full_cropped = full_scale[:crop.shape[0], :crop.shape[1], :]
-    zero_cropped = zero[:crop.shape[0], :crop.shape[1], :]
-    ignore_cropped = ignore[:crop.shape[0], :crop.shape[1], :]
-
-    for crop_img in [ignore_cropped, zero_cropped, crop]:
-        assert np.floor(peak_snr(full_cropped, crop_img)) == 106
-        assert_almost_equal(norm_brightness_err(full_cropped, crop_img),
-                            0.0517, 3)
 
 
 def peak_snr(img1, img2):
