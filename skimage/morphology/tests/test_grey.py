@@ -2,6 +2,7 @@ import os.path
 
 import numpy as np
 from numpy import testing
+from scipy import ndimage
 
 import skimage
 from skimage import data_dir
@@ -147,19 +148,19 @@ def test_3d_fallback_default_selem():
     image = np.zeros((7, 7, 7), np.bool)
     image[2:-2, 2:-2, 2:-2] = 1
 
-    opened = morphology.opening(image)
+    opened = grey.opening(image)
 
     # expect a "hyper-cross" centered in the 5x5x5:
     image_expected = np.zeros((7, 7, 7), dtype=bool)
     image_expected[2:5, 2:5, 2:5] = ndimage.generate_binary_structure(3, 1)
     testing.assert_array_equal(opened, image_expected)
 
-def test_3d_fallback_default_selem():
+def test_3d_fallback_cube_selem():
     # 3x3x3 cube inside a 7x7x7 image:
     image = np.zeros((7, 7, 7), np.bool)
     image[2:-2, 2:-2, 2:-2] = 1
 
-    cube = np.ones((3, 3, 3),dtype=np.uint8)
+    cube = np.ones((3, 3, 3), dtype=np.uint8)
 
     for function in [grey.closing, grey.opening]:
         new_image = function(image, cube)
