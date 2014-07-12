@@ -4,6 +4,7 @@
 """
 
 import numpy as np
+from scipy import ndimage
 
 
 def square(width, dtype=np.uint8):
@@ -290,3 +291,30 @@ def star(a, dtype=np.uint8):
     selem = selem_square + selem_rotated
     selem[selem > 0] = 1
     return selem.astype(dtype)
+
+
+def _default_selem(ndim):
+    """
+    Generates a cross-shaped structuring element (connectivity=1). This is the
+    default structuring element (selem) if no selem was specified.
+
+    Parameters
+    ----------
+    ndim : int
+        Number of dimensions of the image.
+
+    Returns
+    -------
+    selem : ndarray
+        The structuring element where elements of the neighborhood
+        are 1 and 0 otherwise.
+
+    """
+    return ndimage.morphology.generate_binary_structure(ndim, 1)
+
+
+
+
+
+
+
