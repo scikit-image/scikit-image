@@ -2,8 +2,10 @@ import warnings
 import numpy as np
 from scipy import ndimage
 from .selem import _default_selem
+from .misc import default_fallback
 
 
+@default_fallback
 def binary_erosion(image, selem=None, out=None):
     """Return fast binary morphological erosion of an image.
 
@@ -32,10 +34,6 @@ def binary_erosion(image, selem=None, out=None):
 
     """
 
-    # Default structure element
-    if selem is None:
-        selem = _default_selem(image.ndim)
-
     selem = (selem != 0)
     selem_sum = np.sum(selem)
 
@@ -52,6 +50,7 @@ def binary_erosion(image, selem=None, out=None):
     return np.equal(conv, selem_sum, out=out)
 
 
+@default_fallback
 def binary_dilation(image, selem=None, out=None):
     """Return fast binary morphological dilation of an image.
 
@@ -81,10 +80,6 @@ def binary_dilation(image, selem=None, out=None):
 
     """
 
-    # Default structure element
-    if selem is None:
-        selem = _default_selem(image.ndim)
-
     selem = (selem != 0)
 
     if np.sum(selem) <= 255:
@@ -100,6 +95,7 @@ def binary_dilation(image, selem=None, out=None):
     return np.not_equal(conv, 0, out=out)
 
 
+@default_fallback
 def binary_opening(image, selem=None, out=None):
     """Return fast binary morphological opening of an image.
 
@@ -133,6 +129,7 @@ def binary_opening(image, selem=None, out=None):
     return out
 
 
+@default_fallback
 def binary_closing(image, selem=None, out=None):
     """Return fast binary morphological closing of an image.
 

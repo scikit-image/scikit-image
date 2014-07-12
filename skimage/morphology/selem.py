@@ -311,10 +311,3 @@ def _default_selem(ndim):
 
     """
     return ndimage.morphology.generate_binary_structure(ndim, 1)
-
-
-
-
-
-
-

@@ -1,5 +1,33 @@
 import numpy as np
 import scipy.ndimage as nd
+from .selem import _default_selem
+
+skimage2ndimage = {x: 'grey_' + x
+                   for x in ('erosion','dilation','opening','closing')}
+skimage2ndimage.update({x: x
+                        for x in ('binary_erosion','binary_dilation',
+                                  'binary_opening','binary_closing',
+                                  'black_tophat','white_tophat')})
+
+
+def default_fallback(func):
+    def func_out(image, selem=None, out=None, **kwargs):
+        # Default structure element
+        if selem is None:
+            selem = _default_selem(image.ndim)
+
+        # If image has more than 2 dimensions, use scipy.ndimage
+        if image.ndim > 2:
+            function = getattr(nd, skimage2ndimage[func.__name__])
+            try:
+                return function(image, footprint=selem, output=out, **kwargs)
+            except TypeError:
+                # nd.binary_* take structure instead of footprint
+                return function(image, structure=selem, output=out, **kwargs)
+        else:
+            return func(image, selem=selem, out=out, **kwargs)
+
+    return func_out
 
 
 def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
