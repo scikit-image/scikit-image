@@ -26,7 +26,7 @@ NR_OF_GREY = 16384  # number of grayscale levels to use in CLAHE algorithm
 
 
 def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
-                       nbins=256, mode='ignore'):
+                       nbins=256):
     """Contrast Limited Adaptive Histogram Equalization.
 
     Parameters
@@ -121,40 +121,39 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
     if clip_limit == 1.0:
         return image  # is OK, immediately returns original image.
 
-    y_res = image.shape[0] - image.shape[0] % ntiles_y
-    x_res = image.shape[1] - image.shape[1] % ntiles_x
+    h_inner = image.shape[0] - image.shape[0] % ntiles_y
+    w_inner = image.shape[1] - image.shape[1] % ntiles_x
 
     # make the tile size divisible by 2
-    while y_res % (2 * ntiles_y):
-        y_res -= 1
-    while x_res % (2 * ntiles_x):
-        x_res -= 1
+    while h_inner % (2 * ntiles_y):
+        h_inner -= 1
+    while w_inner % (2 * ntiles_x):
+        w_inner -= 1
 
     orig_shape = image.shape
-    x_size = x_res // ntiles_x  # Actual size of contextual regions
-    y_size = y_res // ntiles_y
+    width = w_inner // ntiles_x  # Actual size of contextual regions
+    height = h_inner // ntiles_y
 
-    if y_res != image.shape[0]:
+    if h_inner != image.shape[0]:
         ntiles_y += 1
-    if x_res != image.shape[1]:
+    if w_inner != image.shape[1]:
         ntiles_x += 1
-    if y_res != image.shape[1] or x_res != image.shape[0]:
-        hgt = y_size * ntiles_y - image.shape[0]
-        wid = x_size * ntiles_x - image.shape[1]
-        image = np.vstack((image, image[-hgt:, :]))
-        image = np.hstack((image, image[:, -wid:]))
-        y_res, x_res = image.shape
+    if h_inner != image.shape[1] or w_inner != image.shape[0]:
+        h_pad = height * ntiles_y - image.shape[0]
+        w_pad = width * ntiles_x - image.shape[1]
+        image = np.pad(image, ((0, h_pad), (0, w_pad)), 'reflect')
+        h_inner, w_inner = image.shape
 
     bin_size = 1 + NR_OF_GREY / nbins
-    aLUT = np.arange(NR_OF_GREY)
-    aLUT //= bin_size
-    img_blocks = view_as_blocks(image, (y_size, x_size))
+    lut = np.arange(NR_OF_GREY)
+    lut //= bin_size
+    img_blocks = view_as_blocks(image, (height, width))
 
     map_array = np.zeros((ntiles_y, ntiles_x, nbins), dtype=int)
-    n_pixels = x_size * y_size
+    n_pixels = width * height
 
     if clip_limit > 0.0:  # Calculate actual cliplimit
-        clip_limit = int(clip_limit * (x_size * y_size) / nbins)
+        clip_limit = int(clip_limit * (width * height) / nbins)
         if clip_limit < 1:
             clip_limit = 1
     else:
@@ -164,7 +163,7 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
     for y in range(ntiles_y):
         for x in range(ntiles_x):
             sub_img = img_blocks[y, x]
-            hist = aLUT[sub_img.ravel()]
+            hist = lut[sub_img.ravel()]
             hist = np.bincount(hist)
             hist = np.append(hist, np.zeros(nbins - hist.size, dtype=int))
             hist = clip_histogram(hist, clip_limit)
@@ -176,29 +175,29 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
     for y in range(ntiles_y + 1):
         xstart = 0
         if y == 0:  # special case: top row
-            ystep = y_size / 2.0
+            ystep = height / 2.0
             yU = 0
             yB = 0
         elif y == ntiles_y:  # special case: bottom row
-            ystep = y_size / 2.0
+            ystep = height / 2.0
             yU = ntiles_y - 1
             yB = yU
         else:  # default values
-            ystep = y_size
+            ystep = height
             yU = y - 1
             yB = yB + 1
 
         for x in range(ntiles_x + 1):
             if x == 0:  # special case: left column
-                xstep = x_size / 2.0
+                xstep = width / 2.0
                 xL = 0
                 xR = 0
             elif x == ntiles_x:  # special case: right column
-                xstep = x_size / 2.0
+                xstep = width / 2.0
                 xL = ntiles_x - 1
                 xR = xL
             else:  # default values
-                xstep = x_size
+                xstep = width
                 xL = x - 1
                 xR = xL + 1
 
@@ -210,7 +209,7 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
             xslice = np.arange(xstart, xstart + xstep)
             yslice = np.arange(ystart, ystart + ystep)
             interpolate(image, xslice, yslice,
-                        mapLU, mapRU, mapLB, mapRB, aLUT)
+                        mapLU, mapRU, mapLB, mapRB, lut)
 
             xstart += xstep  # set pointer on next matrix */
 
@@ -305,7 +304,7 @@ def map_histogram(hist, min_val, max_val, n_pixels):
 
 
 def interpolate(image, xslice, yslice,
-                mapLU, mapRU, mapLB, mapRB, aLUT):
+                mapLU, mapRU, mapLB, mapRB, lut):
     """Find the new grayscale level for a region using bilinear interpolation.
 
     Parameters
@@ -316,7 +315,7 @@ def interpolate(image, xslice, yslice,
        Indices of the region.
     map* : ndarray
         Mappings of greylevels from histograms.
-    aLUT : ndarray
+    lut : ndarray
         Maps grayscale levels in image to histogram levels.
 
     Returns
@@ -338,7 +337,7 @@ def interpolate(image, xslice, yslice,
 
     view = image[int(yslice[0]):int(yslice[-1] + 1),
                  int(xslice[0]):int(xslice[-1] + 1)]
-    im_slice = aLUT[view]
+    im_slice = lut[view]
     new = ((y_inv_coef * (x_inv_coef * mapLU[im_slice]
                           + x_coef * mapRU[im_slice])
             + y_coef * (x_inv_coef * mapLB[im_slice]
