@@ -5,11 +5,11 @@ from .selem import _default_selem
 # Our function names don't exactly correspond to ndimages.
 # These dictionaries translate from our names to scipy's.
 skimage2ndimage = {x: 'grey_' + x
-                   for x in ('erosion','dilation','opening','closing')}
+    for x in ('erosion','dilation','opening','closing')}
 skimage2ndimage.update({x: x
-                        for x in ('binary_erosion','binary_dilation',
-                                  'binary_opening','binary_closing',
-                                  'black_tophat','white_tophat')})
+    for x in ('binary_erosion','binary_dilation',
+        'binary_opening','binary_closing',
+        'black_tophat','white_tophat')})
 
 def default_fallback(func):
     """Decorator to fall back on ndimage for images with more than 2 dimensions
