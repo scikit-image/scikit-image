@@ -87,15 +87,13 @@ $(document).ready(function () {
         if (stdout==="") {
             $('#stdout').hide();
         } else {
-            $('#stdout').html(stdout);
-            $('#stdout').show();
+            $('#stdout').html(stdout).show();
         }
 
         if (stderr==="") {
             $('#stderr').hide();
         } else {
-            $('#stderr').html(stderr);
-            $('#stderr').show();
+            $('#stderr').html(stderr).show();
         }
         $('.all-output').show();
     }
@@ -133,7 +131,8 @@ $(document).ready(function () {
                 $('#loading').hide();
                 $('#runcode').show();
                 handleoutput(e);
-                $('#success-message').show();
+                num_images = $(e.result).length;
+                $('#success-message').html("Success: Received " + num_images + " image(s)").show();
             },
             error: function(jqxhr, text_status, error_thrown) {
                 // TODO: Refactor to something like reset
