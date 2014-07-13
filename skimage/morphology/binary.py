@@ -1,10 +1,13 @@
 import warnings
 import numpy as np
 from scipy import ndimage
-from .selem import _default_selem
 from .misc import default_fallback
 
 
+# Our functions only work in 2D, so for 3D or higher input we should fall back
+# on `scipy.ndimage`. Additionally, we want to use a cross-shaped structuring
+# element of the appropriate dimension for each of these functions.
+# The `default_callback` provides all these.
 @default_fallback
 def binary_erosion(image, selem=None, out=None):
     """Return fast binary morphological erosion of an image.
@@ -50,6 +53,10 @@ def binary_erosion(image, selem=None, out=None):
     return np.equal(conv, selem_sum, out=out)
 
 
+# Our functions only work in 2D, so for 3D or higher input we should fall back
+# on `scipy.ndimage`. Additionally, we want to use a cross-shaped structuring
+# element of the appropriate dimension for each of these functions.
+# The `default_callback` provides all these.
 @default_fallback
 def binary_dilation(image, selem=None, out=None):
     """Return fast binary morphological dilation of an image.
@@ -95,6 +102,10 @@ def binary_dilation(image, selem=None, out=None):
     return np.not_equal(conv, 0, out=out)
 
 
+# Our functions only work in 2D, so for 3D or higher input we should fall back
+# on `scipy.ndimage`. Additionally, we want to use a cross-shaped structuring
+# element of the appropriate dimension for each of these functions.
+# The `default_callback` provides all these.
 @default_fallback
 def binary_opening(image, selem=None, out=None):
     """Return fast binary morphological opening of an image.
@@ -129,6 +140,10 @@ def binary_opening(image, selem=None, out=None):
     return out
 
 
+# Our functions only work in 2D, so for 3D or higher input we should fall back
+# on `scipy.ndimage`. Additionally, we want to use a cross-shaped structuring
+# element of the appropriate dimension for each of these functions.
+# The `default_callback` provides all these.
 @default_fallback
 def binary_closing(image, selem=None, out=None):
     """Return fast binary morphological closing of an image.

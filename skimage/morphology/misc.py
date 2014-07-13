@@ -2,6 +2,8 @@ import numpy as np
 import scipy.ndimage as nd
 from .selem import _default_selem
 
+# Our function names don't exactly correspond to ndimages.
+# These dictionaries translate from our names to scipy's.
 skimage2ndimage = {x: 'grey_' + x
                    for x in ('erosion','dilation','opening','closing')}
 skimage2ndimage.update({x: x
@@ -9,9 +11,43 @@ skimage2ndimage.update({x: x
                                   'binary_opening','binary_closing',
                                   'black_tophat','white_tophat')})
 
-
 def default_fallback(func):
+    """Decorator to fall back on ndimage for images with more than 2 dimensions
+
+    Parameters
+    ----------
+    func : function
+        A morphology function such as erosion, dilation, opening, closing,
+        white_tophat, or black_tophat.
+
+    Returns
+    -------
+    func_out : function
+        If the image dimentionality is greater than 2D, the ndimage
+        function is returned, otherwise skimage function is used.
+    """
+    
     def func_out(image, selem=None, out=None, **kwargs):
+        """Select a function appropriate for the image dimensionality
+    
+        Parameters
+        ----------
+        image : ndarray
+            Image array.
+        selem : ndarray, optional
+            The neighborhood expressed as a 2-D array of 1's and 0's.
+            If None, use cross-shaped structuring element (connectivity=1).
+        out : ndarray of bool, optional
+            The array to store the result of the morphology. If None is
+            passed, a new array will be allocated.
+    
+        Returns
+        -------
+        func_out : function
+            If the image dimentionality is greater than 2D, the ndimage
+            function is returned, otherwise skimage function is used.
+        """
+        
         # Default structure element
         if selem is None:
             selem = _default_selem(image.ndim)
