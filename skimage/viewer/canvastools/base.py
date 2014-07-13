@@ -11,6 +11,31 @@ def _pass(*args):
     pass
 
 
+class BlitManager(object):
+    """Object that manages blits on an axes"""
+    def __init__(self, ax):
+        self.ax = ax
+        self.canvas = ax.figure.canvas
+        self.canvas.mpl_connect('draw_event', self.on_draw_event)
+        self.ax = ax
+        self.background = None
+        self.artists = []
+
+    def on_draw_event(self, event=None):
+        self.background = self.canvas.copy_from_bbox(self.ax.bbox)
+        self.draw_artists()
+
+    def redraw(self):
+        if self.background is not None:
+            self.canvas.restore_region(self.background)
+            self.draw_artists()
+            self.canvas.blit(self.ax.bbox)
+
+    def draw_artists(self):
+        for artist in self.artists:
+            self.ax.draw_artist(artist)
+
+
 class CanvasToolBase(object):
     """Base canvas tool for matplotlib axes.
 
@@ -28,25 +53,30 @@ class CanvasToolBase(object):
     useblit : bool
         If True, update canvas by blitting, which is much faster than normal
         redrawing (turn off for debugging purposes).
+    nograb_draw : bool
+        If a mouse click is detected, but it does not grab a handle,
+        redraw the line from scratch.  True by default.
     """
+
     def __init__(self, ax, on_move=None, on_enter=None, on_release=None,
                  useblit=True):
         self.ax = ax
         self.canvas = ax.figure.canvas
-        self.img_background = None
         self.cids = []
         self._artists = []
         self.active = True
 
+        self.connect_event('draw_event', self._on_draw_event)
         if useblit:
-            self.connect_event('draw_event', self._blit_on_draw_event)
+            if not hasattr(ax, 'blit_manager'):
+                ax.blit_manager = BlitManager(ax)
+            ax.blit_manager.artists.extend(self._artists)
+
         self.useblit = useblit
 
         self.callback_on_move = _pass if on_move is None else on_move
         self.callback_on_enter = _pass if on_enter is None else on_enter
         self.callback_on_release = _pass if on_release is None else on_release
-
-        self.connect_event('key_press_event', self._on_key_press)
 
     def connect_event(self, event, callback):
         """Connect callback with an event.
@@ -74,9 +104,13 @@ class CanvasToolBase(object):
         for artist in self._artists:
             artist.set_visible(val)
 
-    def _blit_on_draw_event(self, event=None):
-        self.img_background = self.canvas.copy_from_bbox(self.ax.bbox)
-        self._draw_artists()
+    def _on_draw_event(self, event=None):
+        if self.useblit:
+            for artist in self._artists:
+                if not artist in self.ax.blit_manager.artists:
+                    self.ax.blit_manager.artists.append(artist)
+        else:
+            self._draw_artists()
 
     def _draw_artists(self):
         for artist in self._artists:
@@ -97,14 +131,12 @@ class CanvasToolBase(object):
 
         This method should be called by subclasses when artists are updated.
         """
-        if self.useblit and self.img_background is not None:
-            self.canvas.restore_region(self.img_background)
-            self._draw_artists()
-            self.canvas.blit(self.ax.bbox)
+        if not self.useblit:
+            self.canvas.draw()
         else:
-            self.canvas.draw_idle()
+            self.ax.blit_manager.redraw()
 
-    def _on_key_press(self, event):
+    def on_key_press(self, event):
         if event.key == 'enter':
             self.callback_on_enter(self.geometry)
             self.set_visible(False)
