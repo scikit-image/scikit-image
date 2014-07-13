@@ -3,7 +3,6 @@ import numpy as np
 
 from skimage import img_as_float
 from skimage.util.dtype import dtype_range, dtype_limits
-from skimage._shared.utils import deprecation_warning
 
 
 __all__ = ['histogram', 'cumulative_distribution', 'equalize',
