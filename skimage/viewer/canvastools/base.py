@@ -53,9 +53,6 @@ class CanvasToolBase(object):
     useblit : bool
         If True, update canvas by blitting, which is much faster than normal
         redrawing (turn off for debugging purposes).
-    nograb_draw : bool
-        If a mouse click is detected, but it does not grab a handle,
-        redraw the line from scratch.  True by default.
     """
 
     def __init__(self, ax, on_move=None, on_enter=None, on_release=None,
