@@ -10,6 +10,63 @@ from skimage.viewer.canvastools.base import CanvasToolBase, ToolHandles
 __all__ = ['LineTool', 'ThickLineTool']
 
 
+class EventManager(object):
+    """Object that manages events on a canvas"""
+    def __init__(self, ax):
+        self.canvas = ax.figure.canvas
+        self.connect_event('button_press_event', self.on_mouse_press)
+        self.connect_event('key_press_event', self.on_key_press)
+        self.connect_event('button_release_event', self.on_mouse_release)
+        self.connect_event('motion_notify_event', self.on_move)
+
+        self.tools = []
+        self.active_tool = None
+
+    def connect_event(self, name, handler):
+        self.canvas.mpl_connect(name, handler)
+
+    def attach(self, tool):
+        self.tools.append(tool)
+        self.active_tool = tool
+
+    def on_mouse_press(self, event):
+        for tool in self.tools:
+            if not tool.ignore(event) and tool.hit_test(event):
+                self.active_tool = tool
+                tool.on_mouse_press(event)
+                return
+        if self.active_tool and not self.active_tool.ignore(event):
+            self.active_tool.on_mouse_press(event)
+            return
+        for tool in self.tools:
+            if not tool.ignore(event):
+                self.active_tool = tool
+                tool.on_mouse_press(event)
+                return
+
+    def on_key_press(self, event):
+        tool = self.get_tool()
+        if not tool is None and not tool.ignore(event):
+            tool.on_key_press(event)
+
+    def get_tool(self):
+        if not self.tools:
+            return
+        if self.active_tool is None:
+            self.active_tool = self.tools[0]
+        return self.active_tool
+
+    def on_mouse_release(self, event):
+        tool = self.get_tool()
+        if not tool is None and not tool.ignore(event):
+            tool.on_mouse_release(event)
+
+    def on_move(self, event):
+        tool = self.get_tool()
+        if not tool is None and not tool.ignore(event):
+            tool.on_move(event)
+
+
 class LineTool(CanvasToolBase):
     """Widget for line selection in a plot.
 
@@ -35,9 +92,10 @@ class LineTool(CanvasToolBase):
         End points of line ((x1, y1), (x2, y2)).
     """
     def __init__(self, ax, on_move=None, on_release=None, on_enter=None,
-                 maxdist=10, line_props=None):
+                 maxdist=10, line_props=None,
+                 **kwargs):
         super(LineTool, self).__init__(ax, on_move=on_move, on_enter=on_enter,
-                                       on_release=on_release)
+                                       on_release=on_release, **kwargs)
 
         props = dict(color='r', linewidth=1, alpha=0.4, solid_capstyle='butt')
         props.update(line_props if line_props is not None else {})
@@ -56,15 +114,15 @@ class LineTool(CanvasToolBase):
         self._handles.set_visible(False)
         self._artists = [self._line, self._handles.artist]
 
+        if not hasattr(ax, 'event_manager'):
+            ax.event_manager = EventManager(ax)
+        ax.event_manager.attach(self)
+
         if on_enter is None:
             def on_enter(pts):
                 x, y = np.transpose(pts)
                 print("length = %0.2f" % np.sqrt(np.diff(x)**2 + np.diff(y)**2))
         self.callback_on_enter = on_enter
-
-        self.connect_event('button_press_event', self.on_mouse_press)
-        self.connect_event('button_release_event', self.on_mouse_release)
-        self.connect_event('motion_notify_event', self.on_move)
 
     @property
     def end_points(self):
@@ -76,19 +134,24 @@ class LineTool(CanvasToolBase):
 
         self._line.set_data(np.transpose(pts))
         self._handles.set_data(np.transpose(pts))
-        self._line.set_linewidth(self.linewidth)
 
         self.set_visible(True)
         self.redraw()
 
-    def on_mouse_press(self, event):
+    def hit_test(self, event):
         if event.button != 1 or not self.ax.in_axes(event):
-            return
-        self.set_visible(True)
+            return False
         idx, px_dist = self._handles.closest(event.x, event.y)
         if px_dist < self.maxdist:
             self._active_pt = idx
+            return True
         else:
+            self._active_pt = None
+            return False
+
+    def on_mouse_press(self, event):
+        self.set_visible(True)
+        if self._active_pt is None:
             self._active_pt = 0
             x, y = event.xdata, event.ydata
             self._end_pts = np.array([[x, y], [x, y]])
@@ -98,6 +161,7 @@ class LineTool(CanvasToolBase):
             return
         self._active_pt = None
         self.callback_on_release(self.geometry)
+        self.redraw()
 
     def on_move(self, event):
         if event.button != 1 or self._active_pt is None:
