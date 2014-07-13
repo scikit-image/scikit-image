@@ -3,7 +3,7 @@ from skimage import data
 from skimage.viewer import ImageViewer
 from skimage.viewer.widgets import history
 from skimage.viewer.plugins.labelplugin import LabelPainter
-from skimage.filter.inpaint import inpaint_fmm
+from skimage.restoration import inpaint_fmm
 
 
 class OKCancelButtons(history.OKCancelButtons):
