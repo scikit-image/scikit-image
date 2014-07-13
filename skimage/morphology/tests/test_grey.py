@@ -166,6 +166,25 @@ def test_3d_fallback_cube_selem():
         new_image = function(image, cube)
         yield testing.assert_array_equal, new_image, image
 
+def test_3d_fallback_white_tophat():
+    image = np.zeros((7, 7, 7), dtype=bool)
+    image[2, 2:4, 2:4] = 1
+    image[3, 2:5, 2:5] = 1
+    image[4, 3:5, 3:5] = 1
+    new_image = grey.white_tophat(image)
+    footprint = ndimage.generate_binary_structure(3,1)
+    image_expected = ndimage.white_tophat(image,footprint=footprint)
+    testing.assert_array_equal(new_image, image_expected)
+    
+def test_3d_fallback_black_tophat():
+    image = np.ones((7, 7, 7), dtype=bool)
+    image[2, 2:4, 2:4] = 0
+    image[3, 2:5, 2:5] = 0
+    image[4, 3:5, 3:5] = 0
+    new_image = grey.black_tophat(image)
+    footprint = ndimage.generate_binary_structure(3,1)
+    image_expected = ndimage.black_tophat(image,footprint=footprint)
+    testing.assert_array_equal(new_image, image_expected)
 
 class TestDTypes():
 
