@@ -9,6 +9,7 @@ $(document).ready(function () {
     $('#loading').hide();
     $('#error-message').hide();
     $('#success-message').hide();
+    $('.all-output').hide();
 
 
     // edit button
@@ -52,8 +53,10 @@ $(document).ready(function () {
     }
 
     function handleoutput(output) {
-        output = output.result;
-        var imagemeta = 'data:image/png;base64,',
+        var output_images = output.result,
+            stdout = output.stdout,
+            stderr = output.stderr,
+            imagemeta = 'data:image/png;base64,',
         // output is a key, value pair of filename: uuencoded content
         // output = JSON.stringify(output)
         // TODO: it loads the last generated image into the outputimage tag
@@ -65,8 +68,8 @@ $(document).ready(function () {
             i = 0,
             key,
             image;
-        for (key in output) {
-            image = output[key];
+        for (key in output_images) {
+            image = output_images[key];
             image = imagemeta + image;
             // more images generated than in initial example
             if(i >= example_images.length){
@@ -81,6 +84,20 @@ $(document).ready(function () {
                 i = i + 1;
             }
         }
+        if (stdout==="") {
+            $('#stdout').hide();
+        } else {
+            $('#stdout').html(stdout);
+            $('#stdout').show();
+        }
+
+        if (stderr==="") {
+            $('#stderr').hide();
+        } else {
+            $('#stderr').html(stderr);
+            $('#stderr').show();
+        }
+        $('.all-output').show();
     }
 
     //$.support.cors = true;
@@ -93,6 +110,7 @@ $(document).ready(function () {
         // hide message from previous Run
         $('#error-message').hide();
         $('#success-message').hide();
+        $('.all-output').hide();
 
         $(this).hide();
 
@@ -139,5 +157,6 @@ $(document).ready(function () {
         $('#editcode').show();
         $('#error-message').hide();
         $('#success-message').hide();
+        $('.all-output').hide();
     });
 });
