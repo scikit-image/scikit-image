@@ -131,7 +131,12 @@ $(document).ready(function () {
                 $('#loading').hide();
                 $('#runcode').show();
                 handleoutput(e);
-                num_images = $(e.result).length;
+                // suggest number of images received
+                if ($.isEmptyObject(e.result)){
+                    num_images = 0;
+                } else {
+                    num_images = Object.keys(e.result).length;
+                }
                 $('#success-message').html("Success: Received " + num_images + " image(s)").show();
             },
             error: function(jqxhr, text_status, error_thrown) {
