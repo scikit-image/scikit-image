@@ -97,9 +97,10 @@ def _inpaint_fmm(cnp.double_t[:, ::1] image, mask, Py_ssize_t radius=5):
 
 
 cdef _init_fmm(mask):
-    """Initialisation for Image Inpainting technique based on Fast Marching
-    Method as outined in [1]_. Each pixel has 2 new values assigned to it
-    stored in ``flag`` and ``u`` arrays.
+    """Initialization of flags, distance map and heap of BAND points.
+
+    Each pixel has 2 new values assigned to it stored in ``flag`` and ``u``
+    arrays.
 
     Parameters
     ----------
@@ -227,9 +228,10 @@ cdef cnp.double_t _eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
 cdef _inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.double_t[:, ::1] image,
                     cnp.uint8_t[:, ::1] flag, cnp.double_t[:, ::1] u,
                     cnp.int16_t[:, ::1] shifted_indices, Py_ssize_t radius):
-    """This function performs the actual inpainting operation. Inpainting
-    involves "filling in" regions with unknown intensity values using the
-    intensity and gradient information of surrounding known region.
+    """This function performs the actual inpainting operation.
+
+    Inpainting involves "filling in" regions with unknown intensity values
+    using the intensity and gradient information of surrounding known region.
 
     For further implementation details, see Section 2.3 and Figure 5 in [1]_
 
