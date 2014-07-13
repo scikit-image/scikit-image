@@ -12,9 +12,10 @@ from heapq import heappop, heappush
 from skimage.morphology import disk, dilation
 
 
+# Do not change, `_init_fmm` depends on these values
 cdef cnp.uint8_t KNOWN = 0
 cdef cnp.uint8_t BAND = 1
-cdef cnp.uint8_t UNKNOWN = 2
+cdef cnp.uint8_t UNKNOWN = 2  # denoted as INSIDE in the paper
 
 
 def _inpaint_fmm(cnp.double_t[:, ::1] image, mask, Py_ssize_t radius=5):
@@ -134,6 +135,8 @@ cdef _init_fmm(mask):
     outside = dilation(mask, disk(1))
     band = np.logical_xor(mask, outside).astype(np.uint8)
 
+    # 2 * outside == UNKNOWN, where outside = 1
+    # band == BAND, where band = 1
     flag = (2 * outside) - band
 
     u = np.where(flag == UNKNOWN, DBL_MAX, 0.0)
