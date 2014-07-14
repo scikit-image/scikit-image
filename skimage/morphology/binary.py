@@ -49,7 +49,7 @@ def binary_erosion(image, selem=None, out=None):
     ndimage.convolve(binary, selem, mode='constant', cval=1, output=conv)
 
     if out is None:
-        out = conv
+        out = np.empty_like(conv, dtype=np.bool)
     return np.equal(conv, selem_sum, out=out)
 
 
@@ -98,7 +98,7 @@ def binary_dilation(image, selem=None, out=None):
     ndimage.convolve(binary, selem, mode='constant', cval=0, output=conv)
 
     if out is None:
-        out = conv
+        out = np.empty_like(conv, dtype=np.bool)
     return np.not_equal(conv, 0, out=out)
 
 
