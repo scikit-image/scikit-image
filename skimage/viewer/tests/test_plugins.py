@@ -67,5 +67,3 @@ def test_custom_plugin():
     validate_post(viewer.image)
     img = io.pop()
     validate_post(img)
-
-test_custom_plugin()
