@@ -203,6 +203,8 @@ class Slider(BaseWidget):
         if self.value_type == 'float':
             value = (value - self._low) / self._scale
         self.slider.setValue(value)
+        if hasattr(self, 'editbox'):
+            self._on_slider_changed()
 
 
 class ComboBox(BaseWidget):
