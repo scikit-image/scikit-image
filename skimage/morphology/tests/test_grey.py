@@ -175,7 +175,7 @@ def test_3d_fallback_white_tophat():
     footprint = ndimage.generate_binary_structure(3,1)
     image_expected = ndimage.white_tophat(image,footprint=footprint)
     testing.assert_array_equal(new_image, image_expected)
-    
+
 def test_3d_fallback_black_tophat():
     image = np.ones((7, 7, 7), dtype=bool)
     image[2, 2:4, 2:4] = 0
@@ -185,6 +185,22 @@ def test_3d_fallback_black_tophat():
     footprint = ndimage.generate_binary_structure(3,1)
     image_expected = ndimage.black_tophat(image,footprint=footprint)
     testing.assert_array_equal(new_image, image_expected)
+
+def test_2d_ndimage_equivalence():
+    image = np.zeros((9, 9), np.uint16)
+    image[2:-2, 2:-2] = 2**14
+    image[3:-3, 3:-3] = 2**15
+    image[4, 4] = 2**16-1
+
+    opened = grey.opening(image)
+    closed = grey.closing(image)
+
+    selem = ndimage.generate_binary_structure(2, 1)
+    ndimage_opened = ndimage.grey_opening(image, structure=selem)
+    ndimage_closed = ndimage.grey_closing(image, structure=selem)
+
+    testing.assert_array_equal(opened, ndimage_opened)
+    testing.assert_array_equal(closed, ndimage_closed)
 
 class TestDTypes():
 

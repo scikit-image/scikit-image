@@ -8,15 +8,16 @@ funcs = ('erosion', 'dilation', 'opening', 'closing')
 skimage2ndimage = {x: 'grey_' + x for x in funcs}
 
 # These function names are the same in ndimage.
-funcs = ('binary_erosion', 'binary_dilation', 'binary_opening', 
+funcs = ('binary_erosion', 'binary_dilation', 'binary_opening',
          'binary_closing', 'black_tophat', 'white_tophat')
 skimage2ndimage.update({x: x for x in funcs})
 
 def default_fallback(func):
     """Decorator to fall back on ndimage for images with more than 2 dimensions
+
     Decorator also provides a default structuring element, `selem`, with the
     appropriate dimensionality if none is specified.
-    
+
     Parameters
     ----------
     func : function
@@ -29,7 +30,7 @@ def default_fallback(func):
         If the image dimentionality is greater than 2D, the ndimage
         function is returned, otherwise skimage function is used.
     """
-    
+
     def func_out(image, selem=None, out=None, **kwargs):
         # Default structure element
         if selem is None:
