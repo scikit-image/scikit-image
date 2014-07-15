@@ -14,6 +14,7 @@ You can use pip to automatically install the base dependencies as follows::
 Runtime requirements
 --------------------
 * `SciPy >= 0.10 <http://scipy.org>`__
+* `NetworkX >= 1.8 <https://networkx.github.io>`__
 
 Known build errors
 ------------------
