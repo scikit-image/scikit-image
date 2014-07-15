@@ -196,8 +196,8 @@ def test_2d_ndimage_equivalence():
     closed = grey.closing(image)
 
     selem = ndimage.generate_binary_structure(2, 1)
-    ndimage_opened = ndimage.grey_opening(image, structure=selem)
-    ndimage_closed = ndimage.grey_closing(image, structure=selem)
+    ndimage_opened = ndimage.grey_opening(image, footprint=selem)
+    ndimage_closed = ndimage.grey_closing(image, footprint=selem)
 
     testing.assert_array_equal(opened, ndimage_opened)
     testing.assert_array_equal(closed, ndimage_closed)
