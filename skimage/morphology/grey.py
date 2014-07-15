@@ -8,10 +8,6 @@ from . import cmorph
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
            'black_tophat']
 
-# Our functions only work in 2D, so for 3D or higher input we should fall back
-# on `scipy.ndimage`. Additionally, we want to use a cross-shaped structuring
-# element of the appropriate dimension for each of these functions.
-# The `default_callback` provides all these.
 @default_fallback
 def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
     """Return greyscale morphological erosion of an image.
@@ -66,10 +62,6 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
                          shift_x=shift_x, shift_y=shift_y)
 
 
-# Our functions only work in 2D, so for 3D or higher input we should fall back
-# on `scipy.ndimage`. Additionally, we want to use a cross-shaped structuring
-# element of the appropriate dimension for each of these functions.
-# The `default_callback` provides all these.
 @default_fallback
 def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
     """Return greyscale morphological dilation of an image.
@@ -126,10 +118,6 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
                           shift_x=shift_x, shift_y=shift_y)
 
 
-# Our functions only work in 2D, so for 3D or higher input we should fall back
-# on `scipy.ndimage`. Additionally, we want to use a cross-shaped structuring
-# element of the appropriate dimension for each of these functions.
-# The `default_callback` provides all these.
 @default_fallback
 def opening(image, selem=None, out=None):
     """Return greyscale morphological opening of an image.
@@ -183,10 +171,6 @@ def opening(image, selem=None, out=None):
     return out
 
 
-# Our functions only work in 2D, so for 3D or higher input we should fall back
-# on `scipy.ndimage`. Additionally, we want to use a cross-shaped structuring
-# element of the appropriate dimension for each of these functions.
-# The `default_callback` provides all these.
 @default_fallback
 def closing(image, selem=None, out=None):
     """Return greyscale morphological closing of an image.
@@ -240,10 +224,6 @@ def closing(image, selem=None, out=None):
     return out
 
 
-# Our functions only work in 2D, so for 3D or higher input we should fall back
-# on `scipy.ndimage`. Additionally, we want to use a cross-shaped structuring
-# element of the appropriate dimension for each of these functions.
-# The `default_callback` provides all these.
 @default_fallback
 def white_tophat(image, selem=None, out=None):
     """Return white top hat of an image.
@@ -295,10 +275,6 @@ def white_tophat(image, selem=None, out=None):
     return out
 
 
-# Our functions only work in 2D, so for 3D or higher input we should fall back
-# on `scipy.ndimage`. Additionally, we want to use a cross-shaped structuring
-# element of the appropriate dimension for each of these functions.
-# The `default_callback` provides all these.
 @default_fallback
 def black_tophat(image, selem=None, out=None):
     """Return black top hat of an image.
