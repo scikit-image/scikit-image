@@ -91,6 +91,7 @@ class LineProfile(PlotPlugin):
         profile: list of 1d arrays
             Profile of intensity values. Length 1 (grayscale) or 3 (rgb).
         """
+        self._update_data()
         profiles = [data.get_ydata() for data in self.profile]
         return self.line_tool.end_points, profiles
 
@@ -103,8 +104,15 @@ class LineProfile(PlotPlugin):
     def line_changed(self, end_points):
         x, y = np.transpose(end_points)
         self.line_tool.end_points = end_points
-        scan = measure.profile_line(self.image_viewer.original_image,
-                                    *end_points[:, ::-1],
+        self._update_data()
+        self.ax.relim()
+
+        self._autoscale_view()
+        self.redraw()
+
+    def _update_data(self):
+        scan = measure.profile_line(self.image_viewer.image,
+                                    *self.line_tool.end_points[:, ::-1],
                                     linewidth=self.line_tool.linewidth)
         self.scan_data = scan
         if scan.ndim == 1:
@@ -116,11 +124,6 @@ class LineProfile(PlotPlugin):
         for i in range(len(scan[0])):
             self.profile[i].set_xdata(np.arange(scan.shape[0]))
             self.profile[i].set_ydata(scan[:, i])
-
-        self.ax.relim()
-
-        self._autoscale_view()
-        self.redraw()
 
     def reset_axes(self, scan_data):
         # Clear lines out
@@ -147,7 +150,7 @@ class LineProfile(PlotPlugin):
             The line scan values across the image.
         """
         end_points = self.line_tool.end_points
-        line_image = np.zeros(self.image_viewer.original_image.shape[:2],
+        line_image = np.zeros(self.image_viewer.image.shape[:2],
                               np.uint8)
         width = self.line_tool.linewidth
         if width > 1:
