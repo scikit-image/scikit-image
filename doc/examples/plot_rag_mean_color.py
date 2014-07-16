@@ -19,7 +19,7 @@ labels1 = segmentation.slic(img, compactness=30, n_segments=400)
 out1 = color.label2rgb(labels1, img, kind='avg')
 
 g = graph.rag_mean_color(img, labels1)
-labels2 = graph.cut_threshold(labels1, g, 30)
+labels2 = graph.cut_threshold(labels1, g, 29)
 out2 = color.label2rgb(labels2, img, kind='avg')
 
 plt.figure()
