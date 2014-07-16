@@ -11,9 +11,12 @@ from skimage.exposure.exposure import intensity_range
 from skimage.color import rgb2gray
 from skimage.util.dtype import dtype_range
 
+import matplotlib.pyplot as plt
 
 # Test histogram equalization
 # ===========================
+
+np.random.seed(0)
 
 # squeeze image intensities to lower image contrast
 test_img = skimage.img_as_float(data.camera())
@@ -147,13 +150,13 @@ def test_adapthist_scalar():
     '''
     img = skimage.img_as_ubyte(data.moon())
     adapted = exposure.equalize_adapthist(img, clip_limit=0.02)
-    assert adapted.min() == 0
-    assert adapted.max() == (1 << 16) - 1
+    assert adapted.min() == 0.0
+    assert adapted.max() == 1.0
     assert img.shape == adapted.shape
-    full_scale = skimage.exposure.rescale_intensity(skimage.img_as_uint(img))
+    full_scale = skimage.exposure.rescale_intensity(skimage.img_as_float(img))
 
     assert_almost_equal = np.testing.assert_almost_equal
-    assert_almost_equal(peak_snr(full_scale, adapted), 101.231, 3)
+    assert_almost_equal(peak_snr(full_scale, adapted), 101.2295, 3)
     assert_almost_equal(norm_brightness_err(full_scale, adapted),
                         0.041, 3)
     return img, adapted
@@ -169,8 +172,8 @@ def test_adapthist_grayscale():
                                           nbins=128)
     assert_almost_equal = np.testing.assert_almost_equal
     assert img.shape == adapted.shape
-    assert_almost_equal(peak_snr(img, adapted), 97.531, 3)
-    assert_almost_equal(norm_brightness_err(img, adapted), 0.0313, 3)
+    assert_almost_equal(peak_snr(img, adapted), 104.307, 3)
+    assert_almost_equal(norm_brightness_err(img, adapted), 0.0265, 3)
     return data, adapted
 
 
@@ -183,15 +186,32 @@ def test_adapthist_color():
         hist, bin_centers = exposure.histogram(img)
         assert len(w) > 0
     adapted = exposure.equalize_adapthist(img, clip_limit=0.01)
+
     assert_almost_equal = np.testing.assert_almost_equal
     assert adapted.min() == 0
     assert adapted.max() == 1.0
     assert img.shape == adapted.shape
     full_scale = skimage.exposure.rescale_intensity(img)
-    assert_almost_equal(peak_snr(full_scale, adapted), 102.940, 3)
+    assert_almost_equal(peak_snr(full_scale, adapted), 105.50517, 3)
     assert_almost_equal(norm_brightness_err(full_scale, adapted),
-                        0.0110, 3)
+                        0.0544, 3)
     return data, adapted
+
+
+def test_adapthist_alpha():
+    '''Test an RGBA color image
+    '''
+    img = skimage.img_as_float(data.lena())
+    alpha = np.ones((img.shape[0], img.shape[1]), dtype=float)
+    img = np.dstack((img, alpha))
+    adapted = exposure.equalize_adapthist(img)
+    assert adapted.shape != img.shape
+    img = img[:, :, :3]
+    full_scale = skimage.exposure.rescale_intensity(img)
+    assert img.shape == adapted.shape
+    assert_almost_equal = np.testing.assert_almost_equal
+    assert_almost_equal(peak_snr(full_scale, adapted), 105.50198, 3)
+    assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.0544, 3)
 
 
 def peak_snr(img1, img2):
@@ -235,10 +255,6 @@ def norm_brightness_err(img1, img2):
     nbe = ambe / dtype_range[img1.dtype.type][1]
     return nbe
 
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()
 
 
 # Test Gamma Correction
@@ -409,3 +425,8 @@ def test_adjust_inv_sigmoid_cutoff_half():
 def test_negative():
     image = np.arange(-10, 245, 4).reshape(8, 8).astype(np.double)
     assert_raises(ValueError, exposure.adjust_gamma, image)
+
+
+if __name__ == '__main__':
+    from numpy import testing
+    testing.run_module_suite()

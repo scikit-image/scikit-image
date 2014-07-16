@@ -50,37 +50,38 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
 
     Notes
     -----
-    * The algorithm relies on an image whose rows and columns are even
-      multiples of the number of tiles, so the extra rows and columns are left
-      at their original values, thus  preserving the input image shape.
     * For color images, the following steps are performed:
-       - The image is converted to LAB color space
-       - The CLAHE algorithm is run on the L channel
+       - The image is converted to HSV color space
+       - The CLAHE algorithm is run on the V (Value) channel
        - The image is converted back to RGB space and returned
     * For RGBA images, the original alpha channel is removed.
+    * The CLAHE algorithm relies on image blocks of equal size.  This may
+      result in extra border pixels that would not be handled.  In that case,
+      we pad the image with a repeat of the border pixels, apply the
+      algorithm, and then trim the image to original size.
 
     References
     ----------
     .. [1] http://tog.acm.org/resources/GraphicsGems/gems.html#gemsvi
     .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
     """
-    args = [None, ntiles_x, ntiles_y, clip_limit * nbins, nbins]
-    if image.ndim > 2:
-        lab_img = color.rgb2lab(skimage.img_as_float(image))
-        l_chan = lab_img[:, :, 0]
-        l_chan /= np.max(np.abs(l_chan))
-        l_chan = skimage.img_as_uint(l_chan)
-        args[0] = rescale_intensity(l_chan, out_range=(0, NR_OF_GREY - 1))
-        new_l = _clahe(*args).astype(float)
-        new_l = rescale_intensity(new_l, out_range=(0, 100))
-        lab_img[:new_l.shape[0], :new_l.shape[1], 0] = new_l
-        image = color.lab2rgb(lab_img)
-        image = rescale_intensity(image, out_range=(0, 1))
+    ndim = image.ndim
+    if ndim == 3:
+        if image.shape[2] == 4:
+            image = image[:, :, :3]
+        image = skimage.img_as_float(image)
+        image = rescale_intensity(image)
+        hsv_img = color.rgb2hsv(image)
+        image = hsv_img[:, :, 2].copy()
+    image = skimage.img_as_uint(image)
+    image = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
+    out = _clahe(image, ntiles_x, ntiles_y, clip_limit * nbins, nbins)
+    image[:out.shape[0], :out.shape[1]] = out
+    image = skimage.img_as_float(image)
+    if ndim == 3:
+        hsv_img[:, :, 2] = rescale_intensity(image)
+        image = color.hsv2rgb(hsv_img)
     else:
-        image = skimage.img_as_uint(image)
-        args[0] = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
-        out = _clahe(*args)
-        image[:out.shape[0], :out.shape[1]] = out
         image = rescale_intensity(image)
     return image
 
@@ -114,39 +115,55 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
     """
     ntiles_x = min(ntiles_x, MAX_REG_X)
     ntiles_y = min(ntiles_y, MAX_REG_Y)
-    ntiles_y = max(ntiles_x, 2)
-    ntiles_x = max(ntiles_y, 2)
+    ntiles_y = max(ntiles_y, 2)
+    ntiles_x = max(ntiles_x, 2)
 
     if clip_limit == 1.0:
         return image  # is OK, immediately returns original image.
 
+    h_inner = image.shape[0] - image.shape[0] % ntiles_y
+    w_inner = image.shape[1] - image.shape[1] % ntiles_x
+
+    # make the tile size divisible by 2
+    while h_inner % (2 * ntiles_y):
+        h_inner -= 1
+    while w_inner % (2 * ntiles_x):
+        w_inner -= 1
+
+    orig_shape = image.shape
+    width = w_inner // ntiles_x  # Actual size of contextual regions
+    height = h_inner // ntiles_y
+
+    if h_inner != image.shape[0]:
+        ntiles_y += 1
+    if w_inner != image.shape[1]:
+        ntiles_x += 1
+    if h_inner != image.shape[1] or w_inner != image.shape[0]:
+        h_pad = height * ntiles_y - image.shape[0]
+        w_pad = width * ntiles_x - image.shape[1]
+        image = np.pad(image, ((0, h_pad), (0, w_pad)), 'reflect')
+        h_inner, w_inner = image.shape
+
+    bin_size = 1 + NR_OF_GREY / nbins
+    lut = np.arange(NR_OF_GREY)
+    lut //= bin_size
+    img_blocks = view_as_blocks(image, (height, width))
+
     map_array = np.zeros((ntiles_y, ntiles_x, nbins), dtype=int)
-
-    y_res = image.shape[0] - image.shape[0] % ntiles_y
-    x_res = image.shape[1] - image.shape[1] % ntiles_x
-    image = image[: y_res, : x_res]
-
-    x_size = image.shape[1] // ntiles_x  # Actual size of contextual regions
-    y_size = image.shape[0] // ntiles_y
-    n_pixels = x_size * y_size
+    n_pixels = width * height
 
     if clip_limit > 0.0:  # Calculate actual cliplimit
-        clip_limit = int(clip_limit * (x_size * y_size) / nbins)
+        clip_limit = int(clip_limit * (width * height) / nbins)
         if clip_limit < 1:
             clip_limit = 1
     else:
         clip_limit = NR_OF_GREY  # Large value, do not clip (AHE)
 
-    bin_size = 1 + NR_OF_GREY / nbins
-    aLUT = np.arange(NR_OF_GREY)
-    aLUT //= bin_size
-    img_blocks = view_as_blocks(image, (y_size, x_size))
-
     # Calculate greylevel mappings for each contextual region
     for y in range(ntiles_y):
         for x in range(ntiles_x):
             sub_img = img_blocks[y, x]
-            hist = aLUT[sub_img.ravel()]
+            hist = lut[sub_img.ravel()]
             hist = np.bincount(hist)
             hist = np.append(hist, np.zeros(nbins - hist.size, dtype=int))
             hist = clip_histogram(hist, clip_limit)
@@ -158,29 +175,29 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
     for y in range(ntiles_y + 1):
         xstart = 0
         if y == 0:  # special case: top row
-            ystep = y_size / 2.0
+            ystep = height / 2.0
             yU = 0
             yB = 0
         elif y == ntiles_y:  # special case: bottom row
-            ystep = y_size / 2.0
+            ystep = height / 2.0
             yU = ntiles_y - 1
             yB = yU
         else:  # default values
-            ystep = y_size
+            ystep = height
             yU = y - 1
             yB = yB + 1
 
         for x in range(ntiles_x + 1):
             if x == 0:  # special case: left column
-                xstep = x_size / 2.0
+                xstep = width / 2.0
                 xL = 0
                 xR = 0
             elif x == ntiles_x:  # special case: right column
-                xstep = x_size / 2.0
+                xstep = width / 2.0
                 xL = ntiles_x - 1
                 xR = xL
             else:  # default values
-                xstep = x_size
+                xstep = width
                 xL = x - 1
                 xR = xL + 1
 
@@ -192,11 +209,14 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
             xslice = np.arange(xstart, xstart + xstep)
             yslice = np.arange(ystart, ystart + ystep)
             interpolate(image, xslice, yslice,
-                        mapLU, mapRU, mapLB, mapRB, aLUT)
+                        mapLU, mapRU, mapLB, mapRB, lut)
 
             xstart += xstep  # set pointer on next matrix */
 
         ystart += ystep
+
+    if image.shape != orig_shape:
+        image = image[:orig_shape[0], :orig_shape[1]]
 
     return image
 
@@ -284,7 +304,7 @@ def map_histogram(hist, min_val, max_val, n_pixels):
 
 
 def interpolate(image, xslice, yslice,
-                mapLU, mapRU, mapLB, mapRB, aLUT):
+                mapLU, mapRU, mapLB, mapRB, lut):
     """Find the new grayscale level for a region using bilinear interpolation.
 
     Parameters
@@ -295,7 +315,7 @@ def interpolate(image, xslice, yslice,
        Indices of the region.
     map* : ndarray
         Mappings of greylevels from histograms.
-    aLUT : ndarray
+    lut : ndarray
         Maps grayscale levels in image to histogram levels.
 
     Returns
@@ -317,7 +337,7 @@ def interpolate(image, xslice, yslice,
 
     view = image[int(yslice[0]):int(yslice[-1] + 1),
                  int(xslice[0]):int(xslice[-1] + 1)]
-    im_slice = aLUT[view]
+    im_slice = lut[view]
     new = ((y_inv_coef * (x_inv_coef * mapLU[im_slice]
                           + x_coef * mapRU[im_slice])
             + y_coef * (x_inv_coef * mapLB[im_slice]
