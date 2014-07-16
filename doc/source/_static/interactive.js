@@ -1,4 +1,6 @@
 $(document).ready(function () {
+    $.support.cors = true;
+
     // create backup of div containing code
     var backup = $('.highlight-python'),
         editor;
@@ -98,7 +100,6 @@ $(document).ready(function () {
         $('.all-output').show();
     }
 
-    //$.support.cors = true;
     $('#runcode').bind('click', function () {
         // debug
         // console.log('detect click');
