@@ -2,6 +2,7 @@ import os.path
 
 import numpy as np
 from numpy import testing
+from scipy import ndimage
 
 import skimage
 from skimage import data_dir
@@ -141,6 +142,65 @@ def test_default_selem():
         im_expected = function(image, strel)
         im_test = function(image)
         yield testing.assert_array_equal, im_expected, im_test
+
+def test_3d_fallback_default_selem():
+    # 3x3x3 cube inside a 7x7x7 image:
+    image = np.zeros((7, 7, 7), np.bool)
+    image[2:-2, 2:-2, 2:-2] = 1
+
+    opened = grey.opening(image)
+
+    # expect a "hyper-cross" centered in the 5x5x5:
+    image_expected = np.zeros((7, 7, 7), dtype=bool)
+    image_expected[2:5, 2:5, 2:5] = ndimage.generate_binary_structure(3, 1)
+    testing.assert_array_equal(opened, image_expected)
+
+def test_3d_fallback_cube_selem():
+    # 3x3x3 cube inside a 7x7x7 image:
+    image = np.zeros((7, 7, 7), np.bool)
+    image[2:-2, 2:-2, 2:-2] = 1
+
+    cube = np.ones((3, 3, 3), dtype=np.uint8)
+
+    for function in [grey.closing, grey.opening]:
+        new_image = function(image, cube)
+        yield testing.assert_array_equal, new_image, image
+
+def test_3d_fallback_white_tophat():
+    image = np.zeros((7, 7, 7), dtype=bool)
+    image[2, 2:4, 2:4] = 1
+    image[3, 2:5, 2:5] = 1
+    image[4, 3:5, 3:5] = 1
+    new_image = grey.white_tophat(image)
+    footprint = ndimage.generate_binary_structure(3,1)
+    image_expected = ndimage.white_tophat(image,footprint=footprint)
+    testing.assert_array_equal(new_image, image_expected)
+
+def test_3d_fallback_black_tophat():
+    image = np.ones((7, 7, 7), dtype=bool)
+    image[2, 2:4, 2:4] = 0
+    image[3, 2:5, 2:5] = 0
+    image[4, 3:5, 3:5] = 0
+    new_image = grey.black_tophat(image)
+    footprint = ndimage.generate_binary_structure(3,1)
+    image_expected = ndimage.black_tophat(image,footprint=footprint)
+    testing.assert_array_equal(new_image, image_expected)
+
+def test_2d_ndimage_equivalence():
+    image = np.zeros((9, 9), np.uint8)
+    image[2:-2, 2:-2] = 128
+    image[3:-3, 3:-3] = 196
+    image[4, 4] = 255
+
+    opened = grey.opening(image)
+    closed = grey.closing(image)
+
+    selem = ndimage.generate_binary_structure(2, 1)
+    ndimage_opened = ndimage.grey_opening(image, footprint=selem)
+    ndimage_closed = ndimage.grey_closing(image, footprint=selem)
+
+    testing.assert_array_equal(opened, ndimage_opened)
+    testing.assert_array_equal(closed, ndimage_closed)
 
 class TestDTypes():
 
