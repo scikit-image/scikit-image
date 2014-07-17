@@ -1,6 +1,12 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from numpy.testing import assert_equal, assert_raises
+from numpy.testing.decorators import skipif
+try:
+    import matplotlib.pyplot as plt
+    mpl_available = True
+except ImportError:
+    mpl_available = False
+
 
 from skimage.feature.util import (FeatureDetector, DescriptorExtractor,
                                   _prepare_grayscale_input_2D,
@@ -39,6 +45,7 @@ def test_mask_border_keypoints():
                  [0, 0, 0, 0, 1])
 
 
+@skipif(not mpl_available)
 def test_plot_matches():
     fig, ax = plt.subplots(nrows=1, ncols=1)
 
