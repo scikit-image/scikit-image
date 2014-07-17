@@ -4,6 +4,7 @@ from skimage import data, img_as_float, io
 from skimage.viewer import ImageViewer
 from skimage.viewer.widgets import (
     Slider, OKCancelButtons, SaveButtons, ComboBox, Text)
+from skimage.viewer.utils import init_qtapp
 from skimage.viewer.plugins.base import Plugin
 
 from skimage.viewer.qt import qt_api, QtGui, QtCore
@@ -24,10 +25,10 @@ def test_combo_box():
     cb = ComboBox('hello', ('a', 'b', 'c'))
     viewer.plugins[0] += cb
 
-    assert_equal(cb.val, 'a')
+    assert_equal(str(cb.val), 'a')
     assert_equal(cb.index, 0)
     cb.index = 2
-    assert_equal(cb.val, 'c'),
+    assert_equal(str(cb.val), 'c'),
     assert_equal(cb.index, 2)
 
 
@@ -102,4 +103,4 @@ def test_ok_buttons():
 
     ok.update_original_image(),
     ok.close_plugin()
-    
+

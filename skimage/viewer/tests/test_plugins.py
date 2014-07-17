@@ -17,7 +17,7 @@ from skimage.viewer.widgets import Slider
 
 def setup_line_profile(image, limits='image'):
     viewer = ImageViewer(skimage.img_as_float(image))
-    plugin = LineProfile(limits)
+    plugin = LineProfile(limits=limits)
     viewer += plugin
     return plugin
 
@@ -63,16 +63,17 @@ def test_line_profile_dynamic():
 
     line = lp.get_profiles()[-1][0]
     assert line.size == 129
-    assert_almost_equal(np.std(image), 46.478, 3)
+    assert_almost_equal(np.std(viewer.image), 0.208, 3)
     assert_almost_equal(np.std(line), 0.226, 3)
     assert_almost_equal(np.max(line) - np.min(line), 0.725, 1)
 
-    viewer.image = median(image)
+    viewer.image = skimage.img_as_float(median(image,
+                                               selem=disk(radius=3)))
 
     line = lp.get_profiles()[-1][0]
-    assert_almost_equal(np.std(image), 51.364, 3)
-    assert_almost_equal(np.std(line), 56.3555, 3)
-    assert_almost_equal(np.max(line) - np.min(line), 172.0, 1)
+    assert_almost_equal(np.std(viewer.image), 0.198, 3)
+    assert_almost_equal(np.std(line), 0.220, 3)
+    assert_almost_equal(np.max(line) - np.min(line), 0.639, 1)
 
 
 @skipif(qt_api is None)
@@ -110,10 +111,10 @@ def test_label_painter():
 
     assert_equal(lp.radius, 5)
     lp.label = 1
-    assert_equal(lp.label, '1')
+    assert_equal(str(lp.label), '1')
     lp.label = 2
-    assert_equal(lp.label, '2')
-    assert_equal(lp.paint_tool.radius, 2)
+    assert_equal(str(lp.paint_tool.label), '2')
+    assert_equal(lp.paint_tool.radius, 5)
     lp._on_new_image(moon)
     assert_equal(lp.paint_tool.shape, moon.shape)
 
