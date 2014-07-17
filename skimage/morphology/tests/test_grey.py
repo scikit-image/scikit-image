@@ -187,7 +187,7 @@ def test_3d_fallback_black_tophat():
     testing.assert_array_equal(new_image, image_expected)
 
 def test_2d_ndimage_equivalence():
-    image = np.zeros((9, 9), np.uint16)
+    image = np.zeros((9, 9), np.uint8)
     image[2:-2, 2:-2] = 2**14
     image[3:-3, 3:-3] = 2**15
     image[4, 4] = 2**16-1
