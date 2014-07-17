@@ -22,7 +22,7 @@ from skimage.util import view_as_blocks
 
 MAX_REG_X = 16  # max. # contextual regions in x-direction */
 MAX_REG_Y = 16  # max. # contextual regions in y-direction */
-NR_OF_GREY = 16384  # number of grayscale levels to use in CLAHE algorithm
+NR_OF_GREY = 2**14  # number of grayscale levels to use in CLAHE algorithm
 
 
 def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
@@ -34,9 +34,9 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
     image : array-like
         Input image.
     ntiles_x : int, optional
-        Number of tile regions in the X direction.  Ranges between 2 and 16.
+        Number of tile regions in the X direction.  Ranges between 1 and 16.
     ntiles_y : int, optional
-        Number of tile regions in the Y direction.  Ranges between 2 and 16.
+        Number of tile regions in the Y direction.  Ranges between 1 and 16.
     clip_limit : float: optional
         Clipping limit, normalized between 0 and 1 (higher values give more
         contrast).
@@ -115,8 +115,6 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
     """
     ntiles_x = min(ntiles_x, MAX_REG_X)
     ntiles_y = min(ntiles_y, MAX_REG_Y)
-    ntiles_y = max(ntiles_y, 2)
-    ntiles_x = max(ntiles_x, 2)
 
     if clip_limit == 1.0:
         return image  # is OK, immediately returns original image.
@@ -125,10 +123,8 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
     w_inner = image.shape[1] - image.shape[1] % ntiles_x
 
     # make the tile size divisible by 2
-    while h_inner % (2 * ntiles_y):
-        h_inner -= 1
-    while w_inner % (2 * ntiles_x):
-        w_inner -= 1
+    h_inner -= h_inner % (2 * ntiles_y)
+    w_inner -= w_inner % (2 * ntiles_x)
 
     orig_shape = image.shape
     width = w_inner // ntiles_x  # Actual size of contextual regions
