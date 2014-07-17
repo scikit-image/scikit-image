@@ -4,7 +4,6 @@ from skimage import data, img_as_float, io
 from skimage.viewer import ImageViewer
 from skimage.viewer.widgets import (
     Slider, OKCancelButtons, SaveButtons, ComboBox, Text)
-from skimage.viewer.utils import init_qtapp
 from skimage.viewer.plugins.base import Plugin
 
 from skimage.viewer.qt import qt_api, QtGui, QtCore

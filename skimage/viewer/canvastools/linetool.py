@@ -69,7 +69,7 @@ class LineTool(CanvasToolBase):
 
     @property
     def end_points(self):
-        return self._end_pts
+        return self._end_pts.astype(int)
 
     @end_points.setter
     def end_points(self, pts):
