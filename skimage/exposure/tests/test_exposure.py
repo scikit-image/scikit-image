@@ -11,7 +11,6 @@ from skimage.exposure.exposure import intensity_range
 from skimage.color import rgb2gray
 from skimage.util.dtype import dtype_range
 
-import matplotlib.pyplot as plt
 
 # Test histogram equalization
 # ===========================
