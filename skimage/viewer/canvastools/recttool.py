@@ -201,7 +201,7 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
         return self.extents
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     import matplotlib.pyplot as plt
     from skimage import data
 

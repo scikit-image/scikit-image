@@ -191,7 +191,7 @@ class ThickLineTool(LineTool):
             self.callback_on_change(self.geometry)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     import matplotlib.pyplot as plt
     from skimage import data
 
