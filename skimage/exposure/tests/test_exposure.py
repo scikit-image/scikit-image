@@ -145,8 +145,8 @@ def test_rescale_uint14_limits():
 # ====================================
 
 def test_adapthist_scalar():
-    '''Test a scalar uint8 image
-    '''
+    """Test a scalar uint8 image
+    """
     img = skimage.img_as_ubyte(data.moon())
     adapted = exposure.equalize_adapthist(img, clip_limit=0.02)
     assert adapted.min() == 0.0
@@ -162,8 +162,8 @@ def test_adapthist_scalar():
 
 
 def test_adapthist_grayscale():
-    '''Test a grayscale float image
-    '''
+    """Test a grayscale float image
+    """
     img = skimage.img_as_float(data.lena())
     img = rgb2gray(img)
     img = np.dstack((img, img, img))
@@ -171,14 +171,14 @@ def test_adapthist_grayscale():
                                           nbins=128)
     assert_almost_equal = np.testing.assert_almost_equal
     assert img.shape == adapted.shape
-    assert_almost_equal(peak_snr(img, adapted), 104.307, 3)
+    assert_almost_equal(peak_snr(img, adapted), 104.3277, 3)
     assert_almost_equal(norm_brightness_err(img, adapted), 0.0265, 3)
     return data, adapted
 
 
 def test_adapthist_color():
-    '''Test an RGB color uint16 image
-    '''
+    """Test an RGB color uint16 image
+    """
     img = skimage.img_as_uint(data.lena())
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter('always')
@@ -191,15 +191,14 @@ def test_adapthist_color():
     assert adapted.max() == 1.0
     assert img.shape == adapted.shape
     full_scale = skimage.exposure.rescale_intensity(img)
-    assert_almost_equal(peak_snr(full_scale, adapted), 105.50517, 3)
-    assert_almost_equal(norm_brightness_err(full_scale, adapted),
-                        0.0544, 3)
+    assert_almost_equal(peak_snr(full_scale, adapted), 106.9, 1)
+    assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.05, 2)
     return data, adapted
 
 
 def test_adapthist_alpha():
-    '''Test an RGBA color image
-    '''
+    """Test an RGBA color image
+    """
     img = skimage.img_as_float(data.lena())
     alpha = np.ones((img.shape[0], img.shape[1]), dtype=float)
     img = np.dstack((img, alpha))
@@ -209,12 +208,12 @@ def test_adapthist_alpha():
     full_scale = skimage.exposure.rescale_intensity(img)
     assert img.shape == adapted.shape
     assert_almost_equal = np.testing.assert_almost_equal
-    assert_almost_equal(peak_snr(full_scale, adapted), 105.50198, 3)
-    assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.0544, 3)
+    assert_almost_equal(peak_snr(full_scale, adapted), 106.86, 2)
+    assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.0509, 3)
 
 
 def peak_snr(img1, img2):
-    '''Peak signal to noise ratio of two images
+    """Peak signal to noise ratio of two images
 
     Parameters
     ----------
@@ -225,7 +224,7 @@ def peak_snr(img1, img2):
     -------
     peak_snr : float
         Peak signal to noise ratio
-    '''
+    """
     if img1.ndim == 3:
         img1, img2 = rgb2gray(img1.copy()), rgb2gray(img2.copy())
     img1 = skimage.img_as_float(img1)
@@ -236,7 +235,7 @@ def peak_snr(img1, img2):
 
 
 def norm_brightness_err(img1, img2):
-    '''Normalized Absolute Mean Brightness Error between two images
+    """Normalized Absolute Mean Brightness Error between two images
 
     Parameters
     ----------
@@ -247,7 +246,7 @@ def norm_brightness_err(img1, img2):
     -------
     norm_brightness_error : float
         Normalized absolute mean brightness error
-    '''
+    """
     if img1.ndim == 3:
         img1, img2 = rgb2gray(img1), rgb2gray(img2)
     ambe = np.abs(img1.mean() - img2.mean())

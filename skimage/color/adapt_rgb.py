@@ -56,11 +56,8 @@ def hsv_value(image_filter, image, *args, **kwargs):
     image : array
         Input image. Note that RGBA images are treated as RGB.
     """
-    # XXX: Are these 2 lines really necessary?
-    image = img_as_float(image[:, :, :3])
-    image = rescale_intensity(image)
     # Slice the first three channels so that we remove any alpha channels.
-    hsv = color.rgb2hsv(image)
+    hsv = color.rgb2hsv(image[:, :, :3])
     value = hsv[:, :, 2].copy()
     value = image_filter(value, *args, **kwargs)
     hsv[:, :, 2] = convert(value, hsv.dtype)
