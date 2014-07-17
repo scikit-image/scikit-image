@@ -2,9 +2,7 @@ import functools
 
 import numpy as np
 
-from skimage import img_as_float
 from skimage import color
-from skimage.exposure import rescale_intensity
 from skimage.util.dtype import convert
 
 
@@ -34,7 +32,7 @@ def adapt_rgb(apply_to_rgb):
         image. This will only be called if the image is RGB-like.
     """
     def decorator(image_filter):
-        # @functools.wraps
+        @functools.wraps(image_filter)
         def image_filter_adapted(image, *args, **kwargs):
             if is_rgb_like(image):
                 return apply_to_rgb(image_filter, image, *args, **kwargs)
