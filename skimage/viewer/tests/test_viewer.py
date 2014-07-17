@@ -2,7 +2,8 @@
 from skimage import data
 from skimage.viewer import ImageViewer, CollectionViewer
 from skimage.transform import pyramid_gaussian
-from skimage.viewer.plugins import OverlayPlugin, recent_mpl_version
+from skimage.viewer.plugins import OverlayPlugin
+from skimage.viewer.plugins.overlayplugin import recent_mpl_version
 from skimage.filter import sobel
 from skimage.viewer.qt import qt_api, QtGui, QtCore
 from numpy.testing import assert_equal
