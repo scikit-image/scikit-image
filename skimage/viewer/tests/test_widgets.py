@@ -1,14 +1,19 @@
 
 import os
 from skimage import data, img_as_float, io
-from skimage.viewer import ImageViewer
-from skimage.viewer.widgets import (
-    Slider, OKCancelButtons, SaveButtons, ComboBox, Text)
-from skimage.viewer.plugins.base import Plugin
-
-from skimage.viewer.qt import qt_api, QtGui, QtCore
 from numpy.testing import assert_almost_equal, assert_equal
 from numpy.testing.decorators import skipif
+
+try:
+    from skimage.viewer.qt import qt_api, QtGui, QtCore
+    from skimage.viewer import ImageViewer
+    from skimage.viewer.widgets import (
+        Slider, OKCancelButtons, SaveButtons, ComboBox, Text)
+    from skimage.viewer.plugins.base import Plugin
+except ImportError:
+    skip_all = True
+else:
+    skip_all = False
 
 
 def get_image_viewer():
@@ -18,7 +23,7 @@ def get_image_viewer():
     return viewer
 
 
-@skipif(qt_api is None)
+@skipif(skip_all or qt_api is None)
 def test_combo_box():
     viewer = get_image_viewer()
     cb = ComboBox('hello', ('a', 'b', 'c'))
@@ -31,7 +36,7 @@ def test_combo_box():
     assert_equal(cb.index, 2)
 
 
-@skipif(qt_api is None)
+@skipif(skip_all or qt_api is None)
 def test_text_widget():
     viewer = get_image_viewer()
     txt = Text('hello', 'hello, world!')
@@ -42,7 +47,7 @@ def test_text_widget():
     assert_equal(str(txt.text), 'goodbye, world!')
 
 
-@skipif(qt_api is None)
+@skipif(skip_all or qt_api is None)
 def test_slider_int():
     viewer = get_image_viewer()
     sld = Slider('radius', 2, 10, value_type='int')
@@ -56,7 +61,7 @@ def test_slider_int():
     assert_equal(sld.val, 5)
 
 
-@skipif(qt_api is None)
+@skipif(skip_all or qt_api is None)
 def test_slider_float():
     viewer = get_image_viewer()
     sld = Slider('alpha', 2.1, 3.1, value=2.1, value_type='float',
@@ -71,7 +76,7 @@ def test_slider_float():
     assert_almost_equal(sld.val, 2.5, 2)
 
 
-@skipif(qt_api is None)
+@skipif(skip_all or qt_api is None)
 def test_save_buttons():
     viewer = get_image_viewer()
     sv = SaveButtons()
@@ -94,7 +99,7 @@ def test_save_buttons():
     assert_almost_equal(img, viewer.image)
 
 
-@skipif(qt_api is None)
+@skipif(skip_all or qt_api is None)
 def test_ok_buttons():
     viewer = get_image_viewer()
     ok = OKCancelButtons()

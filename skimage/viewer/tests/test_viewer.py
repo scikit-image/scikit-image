@@ -1,16 +1,22 @@
 
 from skimage import data
-from skimage.viewer import ImageViewer, CollectionViewer
 from skimage.transform import pyramid_gaussian
-from skimage.viewer.plugins import OverlayPlugin
-from skimage.viewer.plugins.overlayplugin import recent_mpl_version
 from skimage.filter import sobel
-from skimage.viewer.qt import qt_api, QtGui, QtCore
 from numpy.testing import assert_equal
 from numpy.testing.decorators import skipif
 
+try:
+    from skimage.viewer.qt import qt_api, QtGui, QtCore
+    from skimage.viewer.plugins import OverlayPlugin
+    from skimage.viewer.plugins.overlayplugin import recent_mpl_version
+    from skimage.viewer import ImageViewer, CollectionViewer
+except ImportError:
+    skip_all = True
+else:
+    skip_all = False
 
-@skipif(qt_api is None)
+
+@skipif(skip_all or qt_api is None)
 def test_viewer():
     lena = data.lena()
     coins = data.coins()
@@ -37,7 +43,7 @@ def make_key_event(key):
                            QtCore.Qt.NoModifier)
 
 
-@skipif(qt_api is None)
+@skipif(skip_all or qt_api is None)
 def test_collection_viewer():
 
     img = data.lena()
@@ -53,7 +59,7 @@ def test_collection_viewer():
     view._format_coord(10, 10)
 
 
-@skipif(qt_api is None or not recent_mpl_version())
+@skipif(skip_all or qt_api is None or not recent_mpl_version())
 def test_viewer_with_overlay():
     img = data.coins()
     ov = OverlayPlugin(image_filter=sobel)
