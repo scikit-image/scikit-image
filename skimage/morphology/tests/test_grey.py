@@ -188,9 +188,9 @@ def test_3d_fallback_black_tophat():
 
 def test_2d_ndimage_equivalence():
     image = np.zeros((9, 9), np.uint8)
-    image[2:-2, 2:-2] = 2**14
-    image[3:-3, 3:-3] = 2**15
-    image[4, 4] = 2**16-1
+    image[2:-2, 2:-2] = 128
+    image[3:-3, 3:-3] = 196
+    image[4, 4] = 255
 
     opened = grey.opening(image)
     closed = grey.closing(image)
