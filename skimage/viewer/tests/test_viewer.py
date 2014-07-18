@@ -10,13 +10,12 @@ try:
     from skimage.viewer.plugins import OverlayPlugin
     from skimage.viewer.plugins.overlayplugin import recent_mpl_version
     from skimage.viewer import ImageViewer, CollectionViewer
+    viewer_available = not qt_api is None
 except ImportError:
-    skip_all = True
-else:
-    skip_all = False
+    viewer_available = False
 
 
-@skipif(skip_all or qt_api is None)
+@skipif(not viewer_available)
 def test_viewer():
     lena = data.lena()
     coins = data.coins()
@@ -43,7 +42,7 @@ def make_key_event(key):
                            QtCore.Qt.NoModifier)
 
 
-@skipif(skip_all or qt_api is None)
+@skipif(not viewer_available)
 def test_collection_viewer():
 
     img = data.lena()
@@ -59,7 +58,7 @@ def test_collection_viewer():
     view._format_coord(10, 10)
 
 
-@skipif(skip_all or qt_api is None or not recent_mpl_version())
+@skipif(not viewer_available or not recent_mpl_version())
 def test_viewer_with_overlay():
     img = data.coins()
     ov = OverlayPlugin(image_filter=sobel)

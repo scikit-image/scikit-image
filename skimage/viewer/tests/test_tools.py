@@ -11,10 +11,9 @@ try:
     from skimage.viewer.canvastools import (
         LineTool, ThickLineTool, RectangleTool, PaintTool)
     from skimage.viewer.canvastools.base import CanvasToolBase
+    viewer_available = not qt_api is None
 except ImportError:
-    skip_all = True
-else:
-    skip_all = False
+    viewer_available = False
 
 
 def get_end_points(image):
@@ -76,7 +75,7 @@ def create_mouse_event(ax, button=1, xdata=0, ydata=0, key=None):
     return event
 
 
-@skipif(skip_all or qt_api is None)
+@skipif(not viewer_available)
 def test_line_tool():
     img = data.camera()
     viewer = ImageViewer(img)
@@ -102,7 +101,7 @@ def test_line_tool():
     assert_equal(tool.geometry, np.array([[100, 100], [10, 10]]))
 
 
-@skipif(skip_all or qt_api is None)
+@skipif(not viewer_available)
 def test_thick_line_tool():
     img = data.camera()
     viewer = ImageViewer(img)
@@ -127,7 +126,7 @@ def test_thick_line_tool():
     assert_equal(tool.linewidth, 1)
 
 
-@skipif(skip_all or qt_api is None)
+@skipif(not viewer_available)
 def test_rect_tool():
     img = data.camera()
     viewer = ImageViewer(img)
@@ -159,7 +158,7 @@ def test_rect_tool():
     assert_equal(tool.geometry, [10, 100,  10, 100])
 
 
-@skipif(skip_all or qt_api is None)
+@skipif(not viewer_available)
 def test_paint_tool():
     img = data.moon()
     viewer = ImageViewer(img)
@@ -195,7 +194,7 @@ def test_paint_tool():
     assert_equal(tool.overlay.sum(), 0)
 
 
-@skipif(skip_all or qt_api is None)
+@skipif(not viewer_available)
 def test_base_tool():
     img = data.moon()
     viewer = ImageViewer(img)
