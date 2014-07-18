@@ -9,8 +9,8 @@ environment:
     CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\tools\\appveyor\\run_with_env.cmd"
 
   matrix:
-    - PYTHON: "C:\\Python27_32"
-      PYTHON_VERSION: "2.7.8"
+    - PYTHON: "C:\\Miniconda27_32"
+      PYTHON_VERSION: "2.7"
       PYTHON_ARCH: "32"
 
 #    - PYTHON: "C:\\Python27"
@@ -37,13 +37,13 @@ install:
 
   # Install the build and runtime dependencies of the project.
   - "%CMD_IN_ENV% pip install -r continuous_integration/appveyor/requirements.txt"
-  - "%CMD_IN_ENV% python setup.py bdist_wheel bdist_wininst -b doc/logos/scikit-learn-logo.bmp"
+  - "%CMD_IN_ENV% python setup.py bdist_wheel bdist_wininst"
   - ps: "ls dist"
 
   # Install the genreated wheel package to test it
-  - "pip install --pre --no-index --find-links dist/ scikit-learn"
+  - "pip install --pre --no-index --find-links dist/ scikit-image"
 
-# Not a .NET project, we build scikit-learn in the install step instead
+# Not a .NET project, we build scikit-image in the install step instead
 build: false
 
 test_script:
