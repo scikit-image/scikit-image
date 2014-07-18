@@ -1,12 +1,14 @@
 import numpy as np
 import warnings
 from six import string_types
+from skimage.util.version_requirements import require
 
 from ._unwrap_1d import unwrap_1d
 from ._unwrap_2d import unwrap_2d
 from ._unwrap_3d import unwrap_3d
 
 
+@require('python', '>=2.7')
 def unwrap_phase(image, wrap_around=False):
     '''From ``image``, wrapped to lie in the interval [-pi, pi), recover the
     original, unwrapped image.

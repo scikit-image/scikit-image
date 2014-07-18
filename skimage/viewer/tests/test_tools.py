@@ -1,19 +1,15 @@
 from collections import namedtuple
 
 import numpy as np
-from skimage import data
 from numpy.testing import assert_equal
 from numpy.testing.decorators import skipif
-
-try:
-    from skimage.viewer.qt import qt_api
-    from skimage.viewer import ImageViewer
-    from skimage.viewer.canvastools import (
-        LineTool, ThickLineTool, RectangleTool, PaintTool)
-    from skimage.viewer.canvastools.base import CanvasToolBase
-    viewer_available = not qt_api is None
-except ImportError:
-    viewer_available = False
+from skimage import data
+from skimage.viewer import ImageViewer, viewer_available
+from skimage.viewer.canvastools import (
+    LineTool, ThickLineTool, RectangleTool, PaintTool)
+from skimage.viewer.canvastools.base import CanvasToolBase
+from numpy.testing import assert_equal
+from numpy.testing.decorators import skipif
 
 
 def get_end_points(image):

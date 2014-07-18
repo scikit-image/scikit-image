@@ -7,6 +7,7 @@ from tempfile import NamedTemporaryFile
 
 from skimage import data_dir
 from skimage.io import imread, imsave, use_plugin, reset_plugins
+import skimage.io as sio
 
 try:
     import imread as _imread
@@ -39,11 +40,13 @@ def test_imread_palette():
     img = imread(os.path.join(data_dir, 'palette_color.png'))
     assert img.ndim == 3
 
+
 @skipif(not imread_available)
 def test_imread_truncated_jpg():
     assert_raises((RuntimeError, ValueError),
                   sio.imread,
-                  os.path.join(si.data_dir, 'truncated.jpg'))
+                  os.path.join(data_dir, 'truncated.jpg'))
+
 
 @skipif(not imread_available)
 def test_bilevel():

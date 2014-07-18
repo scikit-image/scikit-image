@@ -21,6 +21,7 @@ def imread(fname, dtype=None):
 
     """
     im = Image.open(fname)
+    fp = im.fp
     if im.mode == 'P':
         if _palette_is_grayscale(im):
             im = im.convert('L')
@@ -35,8 +36,9 @@ def imread(fname, dtype=None):
         im.shape = shape[::-1]
     elif 'A' in im.mode:
         im = im.convert('RGBA')
-
-    return np.array(im, dtype=dtype)
+    im = np.array(im, dtype=dtype)
+    fp.close()
+    return im
 
 
 def _palette_is_grayscale(pil_image):

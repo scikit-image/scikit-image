@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
+from skimage.viewer import viewer_available
+from skimage.viewer.qt import QtCore, QtGui
+from skimage.viewer import utils
+from skimage.viewer.utils import dialogs
 from numpy.testing.decorators import skipif
-
-try:
-    from skimage.viewer.qt import qt_api, QtCore, QtGui
-    from skimage.viewer import utils
-    from skimage.viewer.utils import dialogs
-except ImportError:
-    qt_api = None
+from skimage.viewer import utils
+from skimage.viewer.utils import dialogs
 
 
-@skipif(qt_api is None)
+@skipif(not viewer_available)
 def test_event_loop():
     utils.init_qtapp()
     timer = QtCore.QTimer()
@@ -17,7 +16,7 @@ def test_event_loop():
     utils.start_qtapp()
 
 
-@skipif(qt_api is None)
+@skipif(not viewer_available)
 def test_format_filename():
     fname = dialogs._format_filename(('apple', 2))
     assert fname == 'apple'
@@ -25,7 +24,7 @@ def test_format_filename():
     assert fname is None
 
 
-@skipif(qt_api is None)
+@skipif(not viewer_available)
 def test_open_file_dialog():
     utils.init_qtapp()
     timer = QtCore.QTimer()
@@ -34,7 +33,7 @@ def test_open_file_dialog():
     assert filename is None
 
 
-@skipif(qt_api is None)
+@skipif(not viewer_available)
 def test_save_file_dialog():
     utils.init_qtapp()
     timer = QtCore.QTimer()

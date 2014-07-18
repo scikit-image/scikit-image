@@ -1,4 +1,11 @@
-import networkx as nx
+try:
+    import networkx as nx
+except ImportError:
+    class nx:
+        class Graph:
+            pass
+    import warnings
+    warnings.warn('Region Adjacency Graph (RAG) features require networkx')
 import numpy as np
 from scipy.ndimage import filters
 from scipy import ndimage as nd
