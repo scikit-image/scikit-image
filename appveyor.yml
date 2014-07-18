@@ -28,7 +28,7 @@ environment:
 install:
   # Install Python (from the official .msi of http://python.org) and pip when
   # not already installed.
-  - "powershell ./continuous_integration/appveyor/install.ps1"
+  - "powershell ./tools/appveyor/install.ps1"
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
 
   # Check that we have the expected version and architecture for Python
