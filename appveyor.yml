@@ -1,42 +1,63 @@
-# Configuration file for AppVeyor continuous integration on Windows
-# adapted from MDTraj project (http://mdtraj.org/)
-
-os: Windows Server 2012
+# AppVeyor.com is a Continuous Integration service to build and run tests under
+# Windows
 
 environment:
-  matrix: 
-    - python_ver: "2.6"
-      deps: "cython matplotlib numpy scipy six networkx nose setuptools pip PIL"
-    - python_ver: "2.7"
-      deps: "cython matplotlib numpy scipy six networkx nose setuptools pip PIL"
-    #- python_ver: "3.3"
-    - python_ver: "3.4"
-      deps: "cython matplotlib numpy scipy six networkx nose setuptools pip"
+  global:
+    # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
+    # /E:ON and /V:ON options are not enabled in the batch script intepreter
+    # See: http://stackoverflow.com/a/13751649/163740
+    CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\continuous_integration\\appveyor\\run_with_env.cmd"
+
+  matrix:
+    - PYTHON: "C:\\Python27_32"
+      PYTHON_VERSION: "2.7.8"
+      PYTHON_ARCH: "32"
+
+#    - PYTHON: "C:\\Python27"
+#      PYTHON_VERSION: "2.7.8"
+#      PYTHON_ARCH: "64"
+#
+#    - PYTHON: "C:\\Python34_32"
+#      PYTHON_VERSION: "3.4.1"
+#      PYTHON_ARCH: "32"
+#
+#    - PYTHON: "C:\\Python34"
+#      PYTHON_VERSION: "3.4.1"
+#      PYTHON_ARCH: "64"
 
 install:
-  - ps: (new-object net.webclient).DownloadFile('https://raw.github.com/pypa/pip/master/contrib/get-pip.py', 'C:\get-pip.py')
-  - C:\Python27\python.exe c:\get-pip.py
-  - C:\Python27\Scripts\pip.exe install pyyaml
-  - C:\Python27\Scripts\pip.exe install pycosat
-  - C:\Python27\Scripts\pip.exe install conda
-  - C:\Python27\Scripts\conda.exe init
-  - C:\Python27\Scripts\conda.exe update conda --yes --quiet
-  - C:\Python27\Scripts\conda.exe create -n build_env --yes --quiet python=%python_ver% %deps%   
-  - dir C:\Python27\envs\build_env\Scripts\
-  - C:\Python27\envs\build_env\Scripts\pip.exe install wheel
-  - C:\Python27\envs\build_env\python.exe setup.py bdist_wheel bdist_wininst
+  # Install Python (from the official .msi of http://python.org) and pip when
+  # not already installed.
+  - "powershell ./continuous_integration/appveyor/install.ps1"
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
 
-build_script:
-    - C:\Python27\envs\build_env\Scripts\pip.exe install --pre --no-index --find-links dist/ scikit-image
+  # Check that we have the expected version and architecture for Python
+  - "python --version"
+  - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
+
+  # Install the build and runtime dependencies of the project.
+  - "%CMD_IN_ENV% pip install -r continuous_integration/appveyor/requirements.txt"
+  - "%CMD_IN_ENV% python setup.py bdist_wheel bdist_wininst -b doc/logos/scikit-learn-logo.bmp"
+  - ps: "ls dist"
+
+  # Install the genreated wheel package to test it
+  - "pip install --pre --no-index --find-links dist/ scikit-learn"
+
+# Not a .NET project, we build scikit-learn in the install step instead
+build: false
 
 test_script:
-  - SET PATH=%PATH%;C:\Python27\envs\build_env\Scripts
-  - cd C:\ 
-  - IF "%python_ver%"=="2.7" (
-      C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage
-    ) ELSE (
-      C:\Python27\envs\build_env\Scripts\nosetests --exe -v skimage || EXIT /B 0
-    )
+  # Change to a non-source folder to make sure we run the tests on the
+  # installed library.
+  - "cd C:\\"
+
+  # Skip joblib tests that require multiprocessing as they are prone to random
+  # slow down
+  - "python -c \"import nose; nose.main()\" -v -s sklearn"
 
 artifacts:
+  # Archive the generated wheel package in the ci.appveyor.com build report.
   - path: dist\*
+
+#on_success:
+#  - TODO: upload the content of dist/*.whl to a public wheelhouse
