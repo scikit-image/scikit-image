@@ -244,7 +244,7 @@ class ComboBox(BaseWidget):
 
     @property
     def val(self):
-        return self._combo_box.value()
+        return self._combo_box.currentText()
 
     @property
     def index(self):

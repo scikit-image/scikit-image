@@ -1,48 +1,83 @@
-import skimage
-import skimage.data as data
-from skimage.viewer import ImageViewer
-from skimage.viewer.qt import qt_api
-from numpy.testing import assert_equal, assert_allclose
+
+from skimage import data
+from skimage.transform import pyramid_gaussian
+from skimage.filter import sobel
+from numpy.testing import assert_equal
 from numpy.testing.decorators import skipif
 
-
-def setup_line_profile(image):
-    from skimage.viewer.plugins.lineprofile import LineProfile
-    viewer = ImageViewer(skimage.img_as_float(image))
-    plugin = LineProfile()
-    viewer += plugin
-    return plugin
-
-
-@skipif(qt_api is None)
-def test_line_profile():
-    """ Test a line profile using an ndim=2 image"""
-    plugin = setup_line_profile(data.camera())
-    line_image, scan_data = plugin.output()
-    for inp in [line_image.nonzero()[0].size,
-                line_image.sum() / line_image.max(),
-                scan_data.size]:
-        assert_equal(inp, 172)
-    assert_equal(line_image.shape, (512, 512))
-    assert_allclose(scan_data.max(), 0.9139, rtol=1e-3)
-    assert_allclose(scan_data.mean(), 0.2828, rtol=1e-3)
+try:
+    from skimage.viewer.qt import qt_api, QtGui, QtCore
+    from skimage.viewer.plugins import OverlayPlugin
+    from skimage.viewer.plugins.overlayplugin import recent_mpl_version
+    from skimage.viewer import ImageViewer, CollectionViewer
+    viewer_available = not qt_api is None
+except ImportError:
+    viewer_available = False
 
 
-@skipif(qt_api is None)
-def test_line_profile_rgb():
-    """ Test a line profile using an ndim=3 image"""
-    plugin = setup_line_profile(data.chelsea())
-    for i in range(6):
-        plugin.line_tool._thicken_scan_line()
-    line_image, scan_data = plugin.output()
-    assert_equal(line_image[line_image == 128].size, 755)
-    assert_equal(line_image[line_image == 255].size, 151)
-    assert_equal(line_image.shape, (300, 451))
-    assert_equal(scan_data.shape, (152, 3))
-    assert_allclose(scan_data.max(), 0.772, rtol=1e-3)
-    assert_allclose(scan_data.mean(), 0.4355, rtol=1e-3)
+@skipif(not viewer_available)
+def test_viewer():
+    lena = data.lena()
+    coins = data.coins()
+
+    view = ImageViewer(lena)
+    import tempfile
+    _, filename = tempfile.mkstemp(suffix='.png')
+
+    view.show(False)
+    view.close()
+    view.save_to_file(filename)
+    view.open_file(filename)
+    assert_equal(view.image, lena)
+    view.image = coins
+    assert_equal(view.image, coins),
+    view.save_to_file(filename),
+    view.open_file(filename),
+    view.reset_image(),
+    assert_equal(view.image, coins)
 
 
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()
+def make_key_event(key):
+    return QtGui.QKeyEvent(QtCore.QEvent.KeyPress, key,
+                           QtCore.Qt.NoModifier)
+
+
+@skipif(not viewer_available)
+def test_collection_viewer():
+
+    img = data.lena()
+    img_collection = tuple(pyramid_gaussian(img))
+
+    view = CollectionViewer(img_collection)
+    make_key_event(48)
+
+    view.update_index('', 2),
+    assert_equal(view.image, img_collection[2])
+    view.keyPressEvent(make_key_event(53))
+    assert_equal(view.image, img_collection[5])
+    view._format_coord(10, 10)
+
+
+@skipif(not viewer_available or not recent_mpl_version())
+def test_viewer_with_overlay():
+    img = data.coins()
+    ov = OverlayPlugin(image_filter=sobel)
+    viewer = ImageViewer(img)
+    viewer += ov
+
+    import tempfile
+    _, filename = tempfile.mkstemp(suffix='.png')
+
+    ov.color = 2
+    assert_equal(ov.color, 'yellow')
+    viewer.save_to_file(filename)
+    ov.display_filtered_image(img)
+    assert_equal(ov.overlay, img)
+    ov.overlay = None
+    assert_equal(ov.overlay, None)
+    ov.overlay = img
+    assert_equal(ov.overlay, img)
+    assert_equal(ov.filtered_image, img)
+
+
+

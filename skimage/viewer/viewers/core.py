@@ -174,9 +174,10 @@ class ImageViewer(QtGui.QMainWindow):
         h = viewer_size.height()
         self.resize(w + dx, h + dy)
 
-    def open_file(self):
+    def open_file(self, filename=None):
         """Open image file and display in viewer."""
-        filename = dialogs.open_file_dialog()
+        if filename is None:
+            filename = dialogs.open_file_dialog()
         if filename is None:
             return
         image = io.imread(filename)
@@ -187,7 +188,7 @@ class ImageViewer(QtGui.QMainWindow):
         self.image = image.copy()       # update displayed image
         self.original_image_changed.emit(image)
 
-    def save_to_file(self):
+    def save_to_file(self, filename=None):
         """Save current image to file.
 
         The current behavior is not ideal: It saves the image displayed on
@@ -195,7 +196,8 @@ class ImageViewer(QtGui.QMainWindow):
         not preserved (resizing the viewer window will alter the size of the
         saved image).
         """
-        filename = dialogs.save_file_dialog()
+        if filename is None:
+            filename = dialogs.save_file_dialog()
         if filename is None:
             return
         if len(self.ax.images) == 1:

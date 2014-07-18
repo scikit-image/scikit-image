@@ -198,7 +198,7 @@ class CenteredWindow(object):
         return [slice(ymin, ymax), slice(xmin, xmax)]
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     np.testing.rundocs()
     from skimage import data
 

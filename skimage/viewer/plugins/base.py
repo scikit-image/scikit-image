@@ -239,7 +239,8 @@ class Plugin(QtGui.QDialog):
 
     def clean_up(self):
         self.remove_image_artists()
-        self.image_viewer.plugins.remove(self)
+        if self in self.image_viewer.plugins:
+            self.image_viewer.plugins.remove(self)
         self.image_viewer.reset_image()
         self.image_viewer.redraw()
 

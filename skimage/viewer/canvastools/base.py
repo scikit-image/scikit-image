@@ -115,7 +115,7 @@ class CanvasToolBase(object):
     @property
     def geometry(self):
         """Geometry information that gets passed to callback functions."""
-        raise NotImplementedError
+        return None
 
 
 class ToolHandles(object):

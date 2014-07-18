@@ -69,7 +69,7 @@ class LineTool(CanvasToolBase):
 
     @property
     def end_points(self):
-        return self._end_pts
+        return self._end_pts.astype(int)
 
     @end_points.setter
     def end_points(self, pts):
@@ -191,7 +191,7 @@ class ThickLineTool(LineTool):
             self.callback_on_change(self.geometry)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     import matplotlib.pyplot as plt
     from skimage import data
 
