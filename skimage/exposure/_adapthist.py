@@ -15,7 +15,6 @@ comes with no guarantee.
 """
 import numpy as np
 import skimage
-from skimage import color
 from skimage.color.adapt_rgb import adapt_rgb, hsv_value
 from skimage.exposure import rescale_intensity
 from skimage.util import view_as_blocks
