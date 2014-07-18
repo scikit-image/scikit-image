@@ -15,7 +15,7 @@ comes with no guarantee.
 """
 import numpy as np
 import skimage
-from skimage import color
+from skimage.color.adapt_rgb import adapt_rgb, hsv_value
 from skimage.exposure import rescale_intensity
 from skimage.util import view_as_blocks
 
@@ -25,6 +25,7 @@ MAX_REG_Y = 16  # max. # contextual regions in y-direction */
 NR_OF_GREY = 2**14  # number of grayscale levels to use in CLAHE algorithm
 
 
+@adapt_rgb(hsv_value)
 def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
                        nbins=256):
     """Contrast Limited Adaptive Histogram Equalization.
@@ -65,25 +66,12 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
     .. [1] http://tog.acm.org/resources/GraphicsGems/gems.html#gemsvi
     .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
     """
-    ndim = image.ndim
-    if ndim == 3:
-        if image.shape[2] == 4:
-            image = image[:, :, :3]
-        image = skimage.img_as_float(image)
-        image = rescale_intensity(image)
-        hsv_img = color.rgb2hsv(image)
-        image = hsv_img[:, :, 2].copy()
     image = skimage.img_as_uint(image)
     image = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
     out = _clahe(image, ntiles_x, ntiles_y, clip_limit * nbins, nbins)
     image[:out.shape[0], :out.shape[1]] = out
     image = skimage.img_as_float(image)
-    if ndim == 3:
-        hsv_img[:, :, 2] = rescale_intensity(image)
-        image = color.hsv2rgb(hsv_img)
-    else:
-        image = rescale_intensity(image)
-    return image
+    return rescale_intensity(image)
 
 
 def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
