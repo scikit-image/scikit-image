@@ -17,13 +17,13 @@ environment:
       PYTHON_VERSION: "2.7"
       PYTHON_ARCH: "64"
 
-#    - PYTHON: "C:\\Miniconda34_32"
-#      PYTHON_VERSION: "3.4"
-#      PYTHON_ARCH: "32"
-#
-#    - PYTHON: "C:\\Miniconda34"
-#      PYTHON_VERSION: "3.4"
-#      PYTHON_ARCH: "64"
+    - PYTHON: "C:\\Miniconda34_32"
+      PYTHON_VERSION: "3.4"
+      PYTHON_ARCH: "32"
+
+    - PYTHON: "C:\\Miniconda34"
+      PYTHON_VERSION: "3.4"
+      PYTHON_ARCH: "64"
 
 install:
   # Install Python (from the official .msi of http://python.org) and pip when
@@ -36,7 +36,7 @@ install:
   - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
 
   # Install the build and runtime dependencies of the project.
-  - "%CMD_IN_ENV% pip install -v -r tools/appveyor/requirements.txt"
+  - "%CMD_IN_ENV% pip install -r tools/appveyor/requirements.txt"
   - "%CMD_IN_ENV% python setup.py bdist_wheel bdist_wininst"
   - ps: "ls dist"
 
