@@ -586,7 +586,8 @@ def ransac(data, model_class, min_samples, residual_threshold,
     Robustly estimate geometric transformation:
 
     >>> from skimage.transform import SimilarityTransform
-    >>> src = 100 * np.random.random((50, 2))
+    >>> np.random.seed(0)
+    >>> src = 100 * np.random.rand(50, 2)
     >>> model0 = SimilarityTransform(scale=0.5, rotation=1,
     ...                              translation=(10, 20))
     >>> dst = model0(src)

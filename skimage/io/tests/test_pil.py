@@ -126,7 +126,7 @@ class TestSave:
     def test_imsave_roundtrip(self):
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
             for dtype in (np.uint8, np.uint16, np.float32, np.float64):
-                x = np.ones(shape, dtype=dtype) * np.random.random(shape)
+                x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
                 if np.issubdtype(dtype, float):
                     yield self.roundtrip, dtype, x, 255

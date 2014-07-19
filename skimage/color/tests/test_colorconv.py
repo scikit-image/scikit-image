@@ -225,7 +225,7 @@ class TestColorconv(TestCase):
         assert_equal(g.shape, (1, 1))
 
     def test_rgb2grey_on_grey(self):
-        rgb2grey(np.random.random((5, 5)))
+        rgb2grey(np.random.rand(5, 5))
 
     # test matrices for xyz2lab and lab2xyz generated using http://www.easyrgb.com/index.php?X=CALC
     # Note: easyrgb website displays xyz*100
@@ -351,7 +351,7 @@ def test_gray2rgb():
 
 
 def test_gray2rgb_rgb():
-    x = np.random.random((5, 5, 4))
+    x = np.random.rand(5, 5, 4)
     y = gray2rgb(x)
     assert_equal(x, y)
 
