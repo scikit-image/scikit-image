@@ -18,8 +18,8 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
 
     Parameters
     ----------
-    ax : :class:`matplotlib.axes.Axes`
-        Matplotlib axes where tool is displayed.
+    viewer : :class:`skimage.viewer.Viewer`
+        Skimage viewer object.
     on_move : function
         Function called whenever a control handle is moved.
         This function must accept the rectangle extents as the only argument.
@@ -39,7 +39,7 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
         Rectangle extents: (xmin, xmax, ymin, ymax).
     """
 
-    def __init__(self, ax, on_move=None, on_release=None, on_enter=None,
+    def __init__(self, viewer, on_move=None, on_release=None, on_enter=None,
                  maxdist=10, rect_props=None):
         CanvasToolBase.__init__(self, ax, on_move=on_move,
                                 on_enter=on_enter, on_release=on_release)
@@ -48,9 +48,9 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
         props.update(rect_props if rect_props is not None else {})
         if props['edgecolor'] is None:
             props['edgecolor'] = props['facecolor']
-        RectangleSelector.__init__(self, ax, lambda *args: None,
-                                   rectprops=props,
-                                   useblit=self.useblit)
+        RectangleSelector.__init__(self, self.ax, lambda *args: None,
+                                   rectprops=props)
+        self.disconnect_events()  # events are handled by the viewer
         # Alias rectangle attribute, which is initialized in RectangleSelector.
         self._rect = self.to_draw
         self._rect.set_animated(True)
@@ -74,9 +74,10 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
         self._edge_handles = ToolHandles(ax, xe, ye, marker='s',
                                          marker_props=props)
 
-        self._artists = [self._rect,
-                         self._corner_handles.artist,
-                         self._edge_handles.artist]
+        self.artists = [self._rect,
+                        self._corner_handles.artist,
+                        self._edge_handles.artist]
+        viewer.add_tool(self)
 
     @property
     def _rect_bbox(self):
@@ -129,7 +130,7 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
         self.set_visible(True)
         self.redraw()
 
-    def release(self, event):
+    def on_mouse_release(self, event):
         if event.button != 1:
             return
         if not self.ax.in_axes(event):
@@ -142,7 +143,7 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
         self.redraw()
         self.callback_on_release(self.geometry)
 
-    def press(self, event):
+    def on_mouse_press(self, event):
         if event.button != 1 or not self.ax.in_axes(event):
             return
         self._set_active_handle(event)
@@ -177,7 +178,7 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
             y1, y2 = y2, event.ydata
         self._extents_on_press = x1, x2, y1, y2
 
-    def onmove(self, event):
+    def on_move(self, event):
         if self.eventpress is None or not self.ax.in_axes(event):
             return
 

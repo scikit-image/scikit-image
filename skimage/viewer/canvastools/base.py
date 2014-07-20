@@ -11,38 +11,13 @@ def _pass(*args):
     pass
 
 
-class BlitManager(object):
-    """Object that manages blits on an axes"""
-    def __init__(self, ax):
-        self.ax = ax
-        self.canvas = ax.figure.canvas
-        self.canvas.mpl_connect('draw_event', self.on_draw_event)
-        self.ax = ax
-        self.background = None
-        self.artists = []
-
-    def on_draw_event(self, event=None):
-        self.background = self.canvas.copy_from_bbox(self.ax.bbox)
-        self.draw_artists()
-
-    def redraw(self):
-        if self.background is not None:
-            self.canvas.restore_region(self.background)
-            self.draw_artists()
-            self.canvas.blit(self.ax.bbox)
-
-    def draw_artists(self):
-        for artist in self.artists:
-            self.ax.draw_artist(artist)
-
-
 class CanvasToolBase(object):
     """Base canvas tool for matplotlib axes.
 
     Parameters
     ----------
-    ax : :class:`matplotlib.axes.Axes`
-        Matplotlib axes where tool is displayed.
+    viewer : :class:`skimage.viewer.Viewer`
+        Skimage viewer object.
     on_move : function
         Function called whenever a control handle is moved.
         This function must accept the end points of line as the only argument.
@@ -50,44 +25,18 @@ class CanvasToolBase(object):
         Function called whenever the control handle is released.
     on_enter : function
         Function called whenever the "enter" key is pressed.
-    useblit : bool
-        If True, update canvas by blitting, which is much faster than normal
-        redrawing (turn off for debugging purposes).
     """
 
-    def __init__(self, ax, on_move=None, on_enter=None, on_release=None,
+    def __init__(self, viewer, on_move=None, on_enter=None, on_release=None,
                  useblit=True):
-        self.ax = ax
-        self.canvas = ax.figure.canvas
-        self.cids = []
-        self._artists = []
+        self.viewer = viewer
+        self.ax = viewer.ax
+        self.artists = []
         self.active = True
-
-        self.connect_event('draw_event', self._on_draw_event)
-        if useblit:
-            if not hasattr(ax, 'blit_manager'):
-                ax.blit_manager = BlitManager(ax)
-            ax.blit_manager.artists.extend(self._artists)
-
-        self.useblit = useblit
 
         self.callback_on_move = _pass if on_move is None else on_move
         self.callback_on_enter = _pass if on_enter is None else on_enter
         self.callback_on_release = _pass if on_release is None else on_release
-
-    def connect_event(self, event, callback):
-        """Connect callback with an event.
-
-        This should be used in lieu of `figure.canvas.mpl_connect` since this
-        function stores call back ids for later clean up.
-        """
-        cid = self.canvas.mpl_connect(event, callback)
-        self.cids.append(cid)
-
-    def disconnect_events(self):
-        """Disconnect all events created by this widget."""
-        for c in self.cids:
-            self.canvas.mpl_disconnect(c)
 
     def ignore(self, event):
         """Return True if event should be ignored.
@@ -97,47 +46,30 @@ class CanvasToolBase(object):
         """
         return not self.active
 
+    def redraw(self):
+        self.viewer.redraw()
+
     def set_visible(self, val):
         for artist in self._artists:
             artist.set_visible(val)
-
-    def _on_draw_event(self, event=None):
-        if self.useblit:
-            for artist in self._artists:
-                if not artist in self.ax.blit_manager.artists:
-                    self.ax.blit_manager.artists.append(artist)
-        else:
-            self._draw_artists()
-
-    def _draw_artists(self):
-        for artist in self._artists:
-            self.ax.draw_artist(artist)
-
-    def remove(self):
-        """Remove artists and events from axes.
-
-        Note that the naming here mimics the interface of Matplotlib artists.
-        """
-        #TODO: For some reason, RectangleTool doesn't get properly removed
-        self.disconnect_events()
-        for a in self._artists:
-            a.remove()
-
-    def redraw(self):
-        """Redraw image and canvas artists.
-
-        This method should be called by subclasses when artists are updated.
-        """
-        if not self.useblit:
-            self.canvas.draw()
-        else:
-            self.ax.blit_manager.redraw()
 
     def on_key_press(self, event):
         if event.key == 'enter':
             self.callback_on_enter(self.geometry)
             self.set_visible(False)
-            self.redraw()
+            self.viewer.redraw()
+
+    def on_mouse_press(self, event):
+        pass
+
+    def on_mouse_release(self, event):
+        pass
+
+    def on_move(self, event):
+        pass
+
+    def on_scroll(self, event):
+        pass
 
     @property
     def geometry(self):
@@ -189,9 +121,6 @@ class ToolHandles(object):
 
     def set_animated(self, val):
         self._markers.set_animated(val)
-
-    def draw(self):
-        self.ax.draw_artist(self._markers)
 
     def closest(self, x, y):
         """Return index and pixel distance to closest index."""
