@@ -5,6 +5,7 @@ from numpy.testing import (assert_array_equal,
 
 import skimage.graph.mcp as mcp
 
+np.random.seed(0)
 a = np.ones((8, 8), dtype=np.float32)
 a[1:-1, 1] = 0
 a[1, 1:-1] = 0
@@ -133,15 +134,14 @@ def test_crashing():
 
 def _test_random(shape):
     # Just tests for crashing -- not for correctness.
-    np.random.seed(0)
-    a = np.random.random(shape).astype(np.float32)
+    a = np.random.rand(*shape).astype(np.float32)
     starts = [[0] * len(shape), [-1] * len(shape),
-              (np.random.random(len(shape)) * shape).astype(int)]
-    ends = [(np.random.random(len(shape)) * shape).astype(int)
+              (np.random.rand(len(shape)) * shape).astype(int)]
+    ends = [(np.random.rand(len(shape)) * shape).astype(int)
             for i in range(4)]
     m = mcp.MCP(a, fully_connected=True)
     costs, offsets = m.find_costs(starts)
-    for point in [(np.random.random(len(shape)) * shape).astype(int)
+    for point in [(np.random.rand(len(shape)) * shape).astype(int)
                   for i in range(4)]:
         m.traceback(point)
     m._reset()

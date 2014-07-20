@@ -6,6 +6,8 @@ from skimage import data, util
 from skimage.morphology import cmorph, disk
 from skimage.filter import rank
 
+np.random.seed(0)
+
 
 def test_random_sizes():
     # make sure the size is not a problem
@@ -44,7 +46,7 @@ def test_random_sizes():
 def test_compare_with_cmorph_dilate():
     # compare the result of maximum filter with dilate
 
-    image = (np.random.random((100, 100)) * 256).astype(np.uint8)
+    image = (np.random.rand(100, 100) * 256).astype(np.uint8)
     out = np.empty_like(image)
     mask = np.ones(image.shape, dtype=np.uint8)
 
@@ -58,7 +60,7 @@ def test_compare_with_cmorph_dilate():
 def test_compare_with_cmorph_erode():
     # compare the result of maximum filter with erode
 
-    image = (np.random.random((100, 100)) * 256).astype(np.uint8)
+    image = (np.random.rand(100, 100) * 256).astype(np.uint8)
     out = np.empty_like(image)
     mask = np.ones(image.shape, dtype=np.uint8)
 
@@ -143,7 +145,7 @@ def test_inplace_output():
     # rank filters are not supposed to filter inplace
 
     selem = disk(20)
-    image = (np.random.random((500, 500)) * 256).astype(np.uint8)
+    image = (np.random.rand(500, 500) * 256).astype(np.uint8)
     out = image
     assert_raises(NotImplementedError, rank.mean, image, selem, out=out)
 

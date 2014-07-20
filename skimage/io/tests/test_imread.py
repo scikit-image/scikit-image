@@ -16,6 +16,8 @@ except ImportError:
 else:
     imread_available = True
 
+np.random.seed(0)
+
 
 def teardown():
     reset_plugins()
@@ -66,7 +68,7 @@ class TestSave:
     def test_imsave_roundtrip(self):
         dtype = np.uint8
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
-            x = np.ones(shape, dtype=dtype) * np.random.random(shape)
+            x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
             if np.issubdtype(dtype, float):
                 yield self.roundtrip, x, 255

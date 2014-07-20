@@ -5,12 +5,13 @@ from skimage.feature import CENSURE
 
 
 img = moon()
+np.random.seed(0)
 
 
 def test_censure_on_rectangular_images():
     """Censure feature detector should work on 2D image of any shape."""
-    rect_image = np.random.random((300, 200))
-    square_image = np.random.random((200, 200))
+    rect_image = np.random.rand(300, 200)
+    square_image = np.random.rand(200, 200)
     CENSURE().detect((square_image))
     CENSURE().detect((rect_image))
 

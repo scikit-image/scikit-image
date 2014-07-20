@@ -5,6 +5,9 @@ from skimage.morphology import label
 from warnings import catch_warnings
 from skimage._shared.utils import skimage_deprecation
 
+np.random.seed(0)
+
+
 class TestConnectedComponents:
     def setup(self):
         self.x = np.array([[0, 0, 3, 2, 1, 9],
@@ -24,7 +27,7 @@ class TestConnectedComponents:
         assert self.x[0, 2] == 3
 
     def test_random(self):
-        x = (np.random.random((20, 30)) * 5).astype(np.int)
+        x = (np.random.rand(20, 30) * 5).astype(np.int)
 
         with catch_warnings():
             labels = label(x)

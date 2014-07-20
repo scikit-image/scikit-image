@@ -14,6 +14,8 @@ try:
 except RuntimeError:
     FI_available = False
 
+np.random.seed(0)
+
 
 def setup_module(self):
     """The effect of the `plugin.use` call may be overridden by later imports.
@@ -62,7 +64,7 @@ def test_imread_uint16_big_endian():
 @skipif(not FI_available)
 def test_write_multipage():
     shape = (64, 64, 64)
-    x = np.ones(shape, dtype=np.uint8) * np.random.random(shape) * 255
+    x = np.ones(shape, dtype=np.uint8) * np.random.rand(*shape) * 255
     x = x.astype(np.uint8)
     f = NamedTemporaryFile(suffix='.tif')
     fname = f.name
@@ -91,7 +93,7 @@ class TestSave:
             ]:
             tests = [(d, f) for d in dtype for f in format]
             for d, f in tests:
-                x = np.ones(shape, dtype=d) * np.random.random(shape)
+                x = np.ones(shape, dtype=d) * np.random.rand(*shape)
                 if not np.issubdtype(d, float):
                     x = (x * 255).astype(d)
                 yield self.roundtrip, d, x, f

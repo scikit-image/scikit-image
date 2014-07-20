@@ -15,7 +15,7 @@ def test_denoise_tv_chambolle_2d():
     # lena image
     img = lena_gray
     # add noise to lena
-    img += 0.5 * img.std() * np.random.random(img.shape)
+    img += 0.5 * img.std() * np.random.rand(*img.shape)
     # clip noise so that it does not exceed allowed range for float images.
     img = np.clip(img, 0, 1)
     # denoise
@@ -57,7 +57,7 @@ def test_denoise_tv_chambolle_3d():
     mask = (x - 22)**2 + (y - 20)**2 + (z - 17)**2 < 8**2
     mask = 100 * mask.astype(np.float)
     mask += 60
-    mask += 20 * np.random.random(mask.shape)
+    mask += 20 * np.random.rand(*mask.shape)
     mask[mask < 0] = 0
     mask[mask > 255] = 255
     res = restoration.denoise_tv_chambolle(mask.astype(np.uint8), weight=100)
@@ -66,13 +66,13 @@ def test_denoise_tv_chambolle_3d():
 
     # test wrong number of dimensions
     assert_raises(ValueError, restoration.denoise_tv_chambolle,
-                  np.random.random((8, 8, 8, 8)))
+                  np.random.rand(8, 8, 8, 8))
 
 
 def test_denoise_tv_bregman_2d():
     img = lena_gray
     # add some random noise
-    img += 0.5 * img.std() * np.random.random(img.shape)
+    img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
 
     out1 = restoration.denoise_tv_bregman(img, weight=10)
@@ -98,7 +98,7 @@ def test_denoise_tv_bregman_float_result_range():
 def test_denoise_tv_bregman_3d():
     img = lena
     # add some random noise
-    img += 0.5 * img.std() * np.random.random(img.shape)
+    img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
 
     out1 = restoration.denoise_tv_bregman(img, weight=10)
@@ -112,7 +112,7 @@ def test_denoise_tv_bregman_3d():
 def test_denoise_bilateral_2d():
     img = lena_gray
     # add some random noise
-    img += 0.5 * img.std() * np.random.random(img.shape)
+    img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
 
     out1 = restoration.denoise_bilateral(img, sigma_range=0.1,
@@ -128,7 +128,7 @@ def test_denoise_bilateral_2d():
 def test_denoise_bilateral_3d():
     img = lena
     # add some random noise
-    img += 0.5 * img.std() * np.random.random(img.shape)
+    img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
 
     out1 = restoration.denoise_bilateral(img, sigma_range=0.1,

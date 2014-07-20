@@ -3,13 +3,15 @@ from skimage.io._plugins.util import prepare_for_display, WindowManager
 from numpy.testing import *
 import numpy as np
 
+np.random.seed(0)
+
 
 class TestPrepareForDisplay:
     def test_basic(self):
-        prepare_for_display(np.random.random((10, 10)))
+        prepare_for_display(np.random.rand(10, 10))
 
     def test_dtype(self):
-        x = prepare_for_display(np.random.random((10, 15)))
+        x = prepare_for_display(np.random.rand(10, 15))
         assert x.dtype == np.dtype(np.uint8)
 
     def test_grey(self):
@@ -19,18 +21,18 @@ class TestPrepareForDisplay:
         assert x[3, 2, 0] == 255
 
     def test_colour(self):
-        prepare_for_display(np.random.random((10, 10, 3)))
+        prepare_for_display(np.random.rand(10, 10, 3))
 
     def test_alpha(self):
-        prepare_for_display(np.random.random((10, 10, 4)))
+        prepare_for_display(np.random.rand(10, 10, 4))
 
     @raises(ValueError)
     def test_wrong_dimensionality(self):
-        prepare_for_display(np.random.random((10, 10, 1, 1)))
+        prepare_for_display(np.random.rand(10, 10, 1, 1))
 
     @raises(ValueError)
     def test_wrong_depth(self):
-        prepare_for_display(np.random.random((10, 10, 5)))
+        prepare_for_display(np.random.rand(10, 10, 5))
 
 
 class TestWindowManager:

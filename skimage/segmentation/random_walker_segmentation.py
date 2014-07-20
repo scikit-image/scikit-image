@@ -316,7 +316,8 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
 
     Examples
     --------
-    >>> a = np.zeros((10, 10)) + 0.2 * np.random.random((10, 10))
+    >>> np.random.seed(0)
+    >>> a = np.zeros((10, 10)) + 0.2 * np.random.rand(10, 10)
     >>> a[5:8, 5:8] += 1
     >>> b = np.zeros_like(a)
     >>> b[3, 3] = 1  # Marker for first phase

@@ -12,6 +12,9 @@ from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
 
 
+np.random.seed(0)
+
+
 def test_warp_tform():
     x = np.zeros((5, 5), dtype=np.double)
     x[2, 2] = 1
@@ -249,7 +252,7 @@ def test_inverse():
 
 
 def test_slow_warp_nonint_oshape():
-    image = np.random.random((5, 5))
+    image = np.random.rand(5, 5)
 
     assert_raises(ValueError, warp, image, lambda xy: xy,
                   output_shape=(13.1, 19.5))
