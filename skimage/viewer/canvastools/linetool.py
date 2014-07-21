@@ -37,7 +37,8 @@ class LineTool(CanvasToolBase):
     def __init__(self, viewer, on_move=None, on_release=None, on_enter=None,
                  maxdist=10, line_props=None,
                  **kwargs):
-        super(LineTool, self).__init__(ax, on_move=on_move, on_enter=on_enter,
+        super(LineTool, self).__init__(viewer, on_move=on_move,
+                                       on_enter=on_enter,
                                        on_release=on_release, **kwargs)
 
         props = dict(color='r', linewidth=1, alpha=0.4, solid_capstyle='butt')
@@ -153,7 +154,7 @@ class ThickLineTool(LineTool):
 
     def __init__(self, viewer, on_move=None, on_enter=None, on_release=None,
                  on_change=None, maxdist=10, line_props=None):
-        super(ThickLineTool, self).__init__(ax,
+        super(ThickLineTool, self).__init__(viewer,
                                             on_move=on_move,
                                             on_enter=on_enter,
                                             on_release=on_release,
@@ -192,16 +193,14 @@ class ThickLineTool(LineTool):
 
 
 if __name__ == '__main__':  # pragma: no cover
-    import matplotlib.pyplot as plt
     from skimage import data
+    from skimage.viewer import ImageViewer
 
     image = data.camera()
 
-    f, ax = plt.subplots()
-    ax.imshow(image, interpolation='nearest')
+    viewer = ImageViewer(image)
     h, w = image.shape
 
-    # line_tool = LineTool(ax)
-    line_tool = ThickLineTool(ax)
+    line_tool = ThickLineTool(viewer)
     line_tool.end_points = ([w/3, h/2], [2*w/3, h/2])
-    plt.show()
+    viewer.show()

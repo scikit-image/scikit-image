@@ -371,7 +371,7 @@ class ImageViewer(QtGui.QMainWindow):
             self.status_message('')
 
     def add_tool(self, tool):
-        if self.blit:
+        if self.useblit:
             self._blit_manager.artists.extend(tool.artists)
         self._tools.append(tool)
         self._event_manager.attach(tool)

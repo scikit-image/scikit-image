@@ -46,11 +46,14 @@ class CanvasToolBase(object):
         """
         return not self.active
 
+    def hit_test(self, event):
+        return False
+
     def redraw(self):
         self.viewer.redraw()
 
     def set_visible(self, val):
-        for artist in self._artists:
+        for artist in self.artists:
             artist.set_visible(val)
 
     def on_key_press(self, event):

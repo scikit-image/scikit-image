@@ -44,7 +44,8 @@ class PaintTool(CanvasToolBase):
     def __init__(self, viewer, overlay_shape, radius=5, alpha=0.3,
                  on_move=None, on_release=None, on_enter=None,
                  rect_props=None):
-        super(PaintTool, self).__init__(ax, on_move=on_move, on_enter=on_enter,
+        super(PaintTool, self).__init__(viewer, on_move=on_move,
+                                        on_enter=on_enter,
                                         on_release=on_release)
 
         props = dict(edgecolor='r', facecolor='0.7', alpha=0.5, animated=True)
@@ -65,7 +66,7 @@ class PaintTool(CanvasToolBase):
 
         # Note that the order is important: Redraw cursor *after* overlay
         self.artists = [self._overlay_plot, self._cursor]
-        view.add_tool(self)
+        viewer.add_tool(self)
 
     @property
     def label(self):
@@ -201,10 +202,10 @@ class CenteredWindow(object):
 if __name__ == '__main__':  # pragma: no cover
     np.testing.rundocs()
     from skimage import data
+    from skimage.viewer import ImageViewer
 
     image = data.camera()
 
-    f, ax = plt.subplots()
-    ax.imshow(image, interpolation='nearest')
-    paint_tool = PaintTool(ax, image.shape)
-    plt.show()
+    viewer = ImageViewer(image)
+    paint_tool = PaintTool(viewer, image.shape)
+    viewer.show()

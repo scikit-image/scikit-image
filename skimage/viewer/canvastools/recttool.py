@@ -41,7 +41,7 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
 
     def __init__(self, viewer, on_move=None, on_release=None, on_enter=None,
                  maxdist=10, rect_props=None):
-        CanvasToolBase.__init__(self, ax, on_move=on_move,
+        CanvasToolBase.__init__(self, viewer, on_move=on_move,
                                 on_enter=on_enter, on_release=on_release)
 
         props = dict(edgecolor=None, facecolor='r', alpha=0.15)
@@ -67,11 +67,11 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
         props = dict(mec=props['edgecolor'])
         self._corner_order = ['NW', 'NE', 'SE', 'SW']
         xc, yc = self.corners
-        self._corner_handles = ToolHandles(ax, xc, yc, marker_props=props)
+        self._corner_handles = ToolHandles(self.ax, xc, yc, marker_props=props)
 
         self._edge_order = ['W', 'N', 'E', 'S']
         xe, ye = self.edge_centers
-        self._edge_handles = ToolHandles(ax, xe, ye, marker='s',
+        self._edge_handles = ToolHandles(self.ax, xe, ye, marker='s',
                                          marker_props=props)
 
         self.artists = [self._rect,
@@ -202,13 +202,12 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
 
 
 if __name__ == '__main__':  # pragma: no cover
-    import matplotlib.pyplot as plt
+    from skimage.viewer import ImageViewer
     from skimage import data
 
-    f, ax = plt.subplots()
-    ax.imshow(data.camera(), interpolation='nearest')
+    viewer = ImageViewer(data.camera())
 
-    rect_tool = RectangleTool(ax)
-    plt.show()
+    rect_tool = RectangleTool(viewer)
+    viewer.show()
     print("Final selection:")
     rect_tool.callback_on_enter(rect_tool.extents)
