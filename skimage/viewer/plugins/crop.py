@@ -18,7 +18,7 @@ class Crop(Plugin):
     def attach(self, image_viewer):
         super(Crop, self).attach(image_viewer)
 
-        self.rect_tool = RectangleTool(self.image_viewer.ax,
+        self.rect_tool = RectangleTool(image_viewer,
                                        maxdist=self.maxdist,
                                        on_enter=self.crop)
         self.artists.append(self.rect_tool)

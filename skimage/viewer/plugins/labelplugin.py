@@ -37,7 +37,7 @@ class LabelPainter(Plugin):
         super(LabelPainter, self).attach(image_viewer)
 
         image = image_viewer.original_image
-        self.paint_tool = PaintTool(self.image_viewer.ax, image.shape,
+        self.paint_tool = PaintTool(image_viewer, image.shape,
                                     on_enter=self.on_enter)
         self.paint_tool.radius = self.radius
         self.paint_tool.label = self._label_widget.index = 1
