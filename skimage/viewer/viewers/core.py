@@ -98,8 +98,7 @@ class EventManager(object):
         for tool in self.tools:
             if not tool.ignore(event) and tool.hit_test(event):
                 self.active_tool = tool
-                tool.on_mouse_press(event)
-                return
+                break
         if self.active_tool and not self.active_tool.ignore(event):
             self.active_tool.on_mouse_press(event)
             return
@@ -110,25 +109,23 @@ class EventManager(object):
                 return
 
     def on_key_press(self, event):
-        tool = self.get_tool()
-        if not tool is None and not tool.ignore(event):
+        tool = self._get_tool(event)
+        if not tool is None:
             tool.on_key_press(event)
 
-    def get_tool(self):
-        if not self.tools:
-            return
-        if self.active_tool is None:
-            self.active_tool = self.tools[0]
+    def _get_tool(self, event):
+        if not self.tools or self.active_tool.ignore(event):
+            return None
         return self.active_tool
 
     def on_mouse_release(self, event):
-        tool = self.get_tool()
-        if not tool is None and not tool.ignore(event):
+        tool = self._get_tool(event)
+        if not tool is None:
             tool.on_mouse_release(event)
 
     def on_move(self, event):
-        tool = self.get_tool()
-        if not tool is None and not tool.ignore(event):
+        tool = self._get_tool(event)
+        if not tool is None:
             tool.on_move(event)
 
 
