@@ -119,14 +119,15 @@ def _add_edge_filter(values, graph):
     return 0
 
 
-def rag_mean_color(image, labels, connectivity=2):
+def rag_mean_color(image, labels, connectivity=2, mode='dissimilarity',
+                   sigma=30.0):
     """Compute the Region Adjacency Graph using mean colors.
 
     Given an image and its initial segmentation, this method constructs the
     corresponsing Region Adjacency Graph (RAG). Each node in the RAG
     represents a set of pixels within `image` with the same label in `labels`.
-    The weight between two adjacent regions is the difference in their mean
-    color.
+    The weight between two adjacent regions represents how similar or
+    dissimilar two regions are depending on the `mode` parameter.
 
     Parameters
     ----------
@@ -141,6 +142,23 @@ def rag_mean_color(image, labels, connectivity=2):
         are considered adjacent. It can range from 1 to `labels.ndim`. Its
         behavior is the same as `connectivity` parameter in
         `scipy.ndimage.filters.generate_binary_structure`.
+    mode : str['similarity' | 'dissimilarity']
+        The strategy to assign edge weights.
+
+            'similarity' : The weight between two adjacent regions is the
+            :math:`|c_1 - c_2|`, where :math:`c1` and :math:`c2` are the mean
+            colors of the two regions. It represents how different two regions
+            are.
+
+            'dissimilarity' : The weight between two adjacent is
+            :math:`e^{-d^2/sigma}` where :math:`d=|c_1 - c_2|`, where
+            :math:`c1` and :math:`c2` are the mean colors of the two regions.
+            It represents how similar two regions are.
+    sigma : float, optional
+        Used for computation when `mode='dissimilarity'`. It governs how close
+        to each other, two colors should be, for their corresponding edge
+        weight to be significant. A very large value of `sigma` could make
+        any two colors behave as though they were similar.
 
     Returns
     -------
@@ -206,17 +224,14 @@ def rag_mean_color(image, labels, connectivity=2):
         graph.node[n]['mean color'] = (graph.node[n]['total color'] /
                                        graph.node[n]['pixel count'])
 
-    for x, y in graph.edges_iter():
+    for x, y, d in graph.edges_iter(data=True):
         diff = graph.node[x]['mean color'] - graph.node[y]['mean color']
-        graph[x][y]['weight'] = np.linalg.norm(diff)
-
-    return graph
-
-
-def rag_similarity(image, labels, connectivity=2, sigma=30.0):
-    graph = rag_mean_color(image, labels, connectivity)
-
-    for x, w, d in graph.edges_iter(data=True):
-        d['weight'] = math.e ** (-(d['weight'] ** 2) / sigma)
+        diff = np.linalg.norm(diff)
+        if mode == 'similarity':
+            d['weight'] = math.e ** (-(diff ** 2) / sigma)
+        elif mode == 'dissimilarity':
+            d['weight'] = diff
+        else:
+            raise ValueError("The mode '%s' is not recodnized" % mode)
 
     return graph

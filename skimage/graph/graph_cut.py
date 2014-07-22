@@ -101,7 +101,7 @@ def _ncut_relabel(rag, cut_thresh=0.0001):
         index2 = _ncut_cy.argmin2(vals)
 
         ev = np.real(vectors[:, index2])
-        ev = _ncut.norml(ev)
+        ev = _ncut.normalize(ev)
 
         mcut = np.inf
         thresh = None
