@@ -53,6 +53,7 @@ References
 
 from __future__ import division
 
+from warnings import warn
 import numpy as np
 from scipy import linalg
 from ..util import dtype
@@ -552,6 +553,8 @@ def xyz2rgb(xyz):
     mask = arr > 0.0031308
     arr[mask] = 1.055 * np.power(arr[mask], 1 / 2.4) - 0.055
     arr[~mask] *= 12.92
+    arr[arr < 0] = 0
+    arr[arr > 1] = 1
     return arr
 
 
@@ -808,7 +811,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     return np.concatenate([x[..., np.newaxis] for x in [L, a, b]], axis=-1)
 
 
-def lab2xyz(lab, illuminant="D65", observer="2"):
+def lab2xyz(lab, illuminant="D65", observer="2", error_on_invalid=False):
     """CIE-LAB to XYZcolor space conversion.
 
     Parameters
@@ -819,6 +822,9 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10"}, optional
         The aperture angle of the observer.
+     error_on_invalid: optional, bool
+        If true, raise ValueError when pixels are outside the valid gamut.
+        Otherwise, raise a warning.
 
     Returns
     -------
@@ -853,6 +859,15 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
     y = (L + 16.) / 116.
     x = (a / 500.) + y
     z = y - (b / 200.)
+
+    if np.any(z < 0):
+        invalid = np.nonzero(z < 0)
+        msg = 'Color data out of range: Z < 0 in %s pixels' % invalid[0].size
+        if error_on_invalid:
+            raise ValueError(msg)
+        else:
+            warn(msg)
+            z[invalid] = 0
 
     out = np.dstack([x, y, z])
 
