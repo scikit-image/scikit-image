@@ -157,16 +157,16 @@ def _ncut_relabel(rag, thresh):
         ev = _ncut.normalize(ev)
 
         mcut = np.inf
-        thresh = None
+        threshold = None
         for t in np.arange(0, 1, 0.1):
             mask = ev > t
             cost = _ncut.ncut_cost(mask, d, w)
             if cost < mcut:
                 mcut = cost
-                thresh = t
+                threshold = t
 
         if (mcut < thresh):
-            mask = ev > thresh
+            mask = ev > threshold
 
             nodes1 = [n for i, n in enumerate(rag.nodes()) if mask[i]]
             nodes2 = [n for i, n in enumerate(rag.nodes()) if not mask[i]]
