@@ -7,6 +7,18 @@ import numpy as np
 
 
 def argmin2(cnp.float64_t[:] array):
+    """Return the index of the 2nd smallest value in an array.
+
+    Parameters
+    ----------
+    a : array
+        The array to process.
+
+    Returns
+    -------
+    i : int
+        The index of the second smallest value.
+    """
     cdef cnp.float64_t min1 = np.inf
     cdef cnp.float64_t min2 = np.inf
     cdef Py_ssize_t i1 = 0
