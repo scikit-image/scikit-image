@@ -87,8 +87,8 @@ from docutils.core import publish_parts
 
 EDIT_REVERT_BTN = """
 .. raw:: html
-
-    <p>
+    
+    <p id="controls">
         <button type="button" class="btn btn-default btn-lg" id="editcode">
             <i class="icon-edit"></i> Edit
         </button>
@@ -98,16 +98,27 @@ EDIT_REVERT_BTN = """
         <button type="button" class="btn btn-default btn-lg" id="reload">
             <i class="icon-refresh"></i>
         </button>
-        <div id="loading"><img src="../_static/ajax-loader.gif"/></div>
+        <img id="loading" src="../_static/ajax-loader.gif"/>
+    </p>
+"""
+
+OUTPUT_MESSAGES = """
+.. raw:: html
+
+    <p>
         <div class="alert alert-success" id="success-message"></div>
         <div class="alert alert-error" id="error-message"></div>
         <div class="all-output">
-            <i class="icon-info-sign"></i> <u>STDOUT</u>
+            <p class="stdout-group">
+                <i class="icon-info-sign"></i> <u>STDOUT</u>
+            </p>
             <pre id="stdout"></pre>
-            <hr>
-            <i class="icon-remove-sign"></i> <u>STDERR</u>
+            <hr class="stdout-group">
+            <p class="stderr-group">
+                <i class="icon-remove-sign"></i> <u>STDERR</u>
+            </p>
             <pre id="stderr"></pre>
-            <hr>
+            <hr class="stderr-group">
         </div>
     </p>
 """
@@ -380,9 +391,10 @@ def write_example(src_name, src_dir, rst_dir, cfg):
         example_rst += eval(content)
         example_rst += ''.join(rst_blocks)
         code_info = dict(src_name=src_name, code_start=end)
+        example_rst += EDIT_REVERT_BTN
         example_rst += LITERALINCLUDE.format(**code_info)
 
-    example_rst += EDIT_REVERT_BTN
+    example_rst += OUTPUT_MESSAGES
     example_rst += CODE_LINK.format(src_name)
     ipnotebook_name = src_name.replace('.py', '.ipynb')
     ipnotebook_name = './notebook/' + ipnotebook_name

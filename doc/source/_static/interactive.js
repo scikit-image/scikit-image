@@ -32,7 +32,16 @@ $(document).ready(function () {
 
                 editor = ace.edit("editor");
 
-                $('#editor').height(code_height);
+                editor.on('change', function () {
+                    var doc         = editor.getSession().getDocument(),
+                        // line height varies with zoom level and font size
+                        // correct way to find height is using the renderer
+                        line_height = editor.renderer.lineHeight; 
+                    code_height = line_height * doc.getLength() + 'px';
+                    $('#editor').height(code_height);
+                    editor.resize();
+                });
+
                 // place curson at end to prevent entire code being selected 
                 // after using setValue (which is a feature)
                 editor.setValue(data, 1);
@@ -46,6 +55,16 @@ $(document).ready(function () {
                 // edit successful, show Run button
                 $('#editcode').hide();
                 $('#runcode').show();
+
+                // execute code on pressing 'Shift+Enter'
+                editor.commands.addCommand({
+                    name: 'execute_code',
+                    bindKey: {win: 'Shift-Enter'},
+                    exec: function(editor) {
+                        runcode();
+                    },
+                    readOnly: true // false if this command should not apply in readOnly mode
+                });
             }
         });
     });
@@ -87,20 +106,22 @@ $(document).ready(function () {
             }
         }
         if (stdout==="") {
-            $('#stdout').hide();
+            $('.stdout-group, #stdout').hide();
         } else {
+            $('.stdout-group').show();
             $('#stdout').html(stdout).show();
         }
 
         if (stderr==="") {
-            $('#stderr').hide();
+            $('.stderr-group, #stderr').hide();
         } else {
+            $('.stderr-group').show();
             $('#stderr').html(stderr).show();
         }
         $('.all-output').show();
     }
 
-    $('#runcode').bind('click', function () {
+    function runcode() {
         // debug
         // console.log('detect click');
 
@@ -111,7 +132,7 @@ $(document).ready(function () {
         $('#success-message').hide();
         $('.all-output').hide();
 
-        $(this).hide();
+        $('#runcode').hide();
 
         var code = editor.getValue(),
         // console.log(code);
@@ -151,8 +172,10 @@ $(document).ready(function () {
                 $('#error-message').show();
             }
         });
-    });
+    }
 
+    $('#runcode').bind('click', runcode);
+    
     // revert back to example inside div
     $('#reload').bind('click', function () {
         $('div#editor').replaceWith(backup);
