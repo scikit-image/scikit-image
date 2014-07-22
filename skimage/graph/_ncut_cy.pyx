@@ -5,6 +5,7 @@
 cimport numpy as cnp
 import numpy as np
 
+
 def argmin2(cnp.float64_t[:] array):
     cdef cnp.float64_t min1 = np.inf
     cdef cnp.float64_t min2 = np.inf
@@ -14,14 +15,14 @@ def argmin2(cnp.float64_t[:] array):
 
     while i < array.shape[0]:
         x = array[i]
-        if x < min1 :
+        if x < min1:
             min2 = min1
             i2 = i1
             min1 = x
             i1 = i
-        elif x > min1 and x < min2 :
+        elif x > min1 and x < min2:
             min2 = x
             i2 = i
         i += 1
-        
+
     return i2
