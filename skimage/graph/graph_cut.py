@@ -67,7 +67,7 @@ def cut_threshold(labels, rag, thresh):
     return map_array[labels]
 
 
-def cut_n(labels, rag, thresh=0.0001, num_cuts=10):
+def cut_n(labels, rag, thresh=0.001, num_cuts=10):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Given an image's labels and its similarity RAG, recursively perform
