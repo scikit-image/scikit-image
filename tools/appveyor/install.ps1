@@ -1,10 +1,88 @@
-# Sample script to install Miniconda and pip under Windows
+# Sample script to install Python and pip under Windows
 # Authors: Olivier Grisel, Jonathan Helmus and Kyle Kastner
 # License: CC0 1.0 Universal: http://creativecommons.org/publicdomain/zero/1.0/
 
-$BASE_URL = "http://repo.continuum.io/miniconda/"
+$MINICONDA_URL = "http://repo.continuum.io/miniconda/"
+$BASE_URL = "https://www.python.org/ftp/python/"
 $GET_PIP_URL = "https://bootstrap.pypa.io/get-pip.py"
 $GET_PIP_PATH = "C:\get-pip.py"
+
+
+function DownloadPython ($python_version, $platform_suffix) {
+    $webclient = New-Object System.Net.WebClient
+    $filename = "python-" + $python_version + $platform_suffix + ".msi"
+    $url = $BASE_URL + $python_version + "/" + $filename
+
+    $basedir = $pwd.Path + "\"
+    $filepath = $basedir + $filename
+    if (Test-Path $filename) {
+        Write-Host "Reusing" $filepath
+        return $filepath
+    }
+
+    # Download and retry up to 3 times in case of network transient errors.
+    Write-Host "Downloading" $filename "from" $url
+    $retry_attempts = 2
+    for($i=0; $i -lt $retry_attempts; $i++){
+        try {
+            $webclient.DownloadFile($url, $filepath)
+            break
+        }
+        Catch [Exception]{
+            Start-Sleep 1
+        }
+   }
+   if (Test-Path $filepath) {
+       Write-Host "File saved at" $filepath
+   } else {
+       # Retry once to get the error message if any at the last try
+       $webclient.DownloadFile($url, $filepath)
+   }
+   return $filepath
+}
+
+
+function InstallPython ($python_version, $architecture, $python_home) {
+    Write-Host "Installing Python" $python_version "for" $architecture "bit architecture to" $python_home
+    if (Test-Path $python_home) {
+        Write-Host $python_home "already exists, skipping."
+        return $false
+    }
+    if ($architecture -eq "32") {
+        $platform_suffix = ""
+    } else {
+        $platform_suffix = ".amd64"
+    }
+    $filepath = DownloadPython $python_version $platform_suffix
+    Write-Host "Installing" $filepath "to" $python_home
+    $install_log = $python_home + ".log"
+    $args = "/qn  /log $install_log /i $filepath TARGETDIR=$python_home"
+    Write-Host "msiexec.exe" $args
+    Start-Process -FilePath "msiexec.exe" -ArgumentList $args -Wait -Passthru
+    if (Test-Path $python_home) {
+        Write-Host "Python $python_version ($architecture) installation complete"
+    } else {
+        Write-Host "Failed to install Python in $python_home"
+        Get-Content -Path $install_log
+        Exit 1
+    }
+}
+
+
+function InstallPip ($python_home) {
+    $pip_path = $python_home + "\Scripts\pip.exe"
+    $python_path = $python_home + "\python.exe"
+    if (-not(Test-Path $pip_path)) {
+        Write-Host "Installing pip..."
+        $webclient = New-Object System.Net.WebClient
+        $webclient.DownloadFile($GET_PIP_URL, $GET_PIP_PATH)
+        Write-Host "Executing:" $python_path $GET_PIP_PATH
+        Start-Process -FilePath "$python_path" -ArgumentList "$GET_PIP_PATH" -Wait -Passthru
+    } else {
+        Write-Host "pip already installed."
+    }
+}
+
 
 function DownloadMiniconda ($python_version, $platform_suffix) {
     $webclient = New-Object System.Net.WebClient
@@ -13,7 +91,7 @@ function DownloadMiniconda ($python_version, $platform_suffix) {
     } else {
         $filename = "Miniconda-3.5.5-Windows-" + $platform_suffix + ".exe"
     }
-    $url = $BASE_URL + $filename
+    $url = $MINICONDA_URL + $filename
 
     $basedir = $pwd.Path + "\"
     $filepath = $basedir + $filename
@@ -71,7 +149,7 @@ function InstallMiniconda ($python_version, $architecture, $python_home) {
 }
 
 
-function InstallPip ($python_home) {
+function InstallMinicondaPip ($python_home) {
     $pip_path = $python_home + "\Scripts\pip.exe"
     $conda_path = $python_home + "\Scripts\conda.exe"
     if (-not(Test-Path $pip_path)) {
@@ -86,7 +164,7 @@ function InstallPip ($python_home) {
 
 function main () {
     InstallMiniconda $env:PYTHON_VERSION $env:PYTHON_ARCH $env:PYTHON
-    InstallPip $env:PYTHON
+    InstallMinicondaPip $env:PYTHON
 }
 
 main
