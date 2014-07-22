@@ -11,6 +11,7 @@ except ImportError:
 import numpy as np
 from scipy.ndimage import filters
 from scipy import ndimage as nd
+import math
 
 
 def min_weight(graph, src, dst, n):
@@ -209,4 +210,52 @@ def rag_mean_color(image, labels, connectivity=2):
         diff = graph.node[x]['mean color'] - graph.node[y]['mean color']
         graph[x][y]['weight'] = np.linalg.norm(diff)
 
+    return graph
+ 
+def rag_similarity(image, labels, connectivity=2, sigma = 30.0):
+    graph = RAG()
+
+    # The footprint is constructed in such a way that the first
+    # element in the array being passed to _add_edge_filter is
+    # the central value.
+    fp = nd.generate_binary_structure(labels.ndim, connectivity)
+    for d in range(fp.ndim):
+        fp = fp.swapaxes(0, d)
+        fp[0, ...] = 0
+        fp = fp.swapaxes(0, d)
+
+
+    filters.generic_filter(
+        labels,
+        function=_add_edge_filter,
+        footprint=fp,
+        mode='nearest',
+        output=np.zeros(labels.shape, dtype=np.uint8),
+        extra_arguments=(graph,))
+
+    for n in graph:
+        graph.node[n].update({'labels': [n],
+                              'pixel count': 0,
+                              'total color': np.array([0, 0, 0],
+                                                      dtype=np.double)})
+
+    for index in np.ndindex(labels.shape):
+        current = labels[index]
+        graph.node[current]['pixel count'] += 1
+        graph.node[current]['total color'] += image[index]
+
+    for n in graph:
+        graph.node[n]['mean color'] = (graph.node[n]['total color'] /
+                                       graph.node[n]['pixel count'])
+
+    for x, y in graph.edges_iter():
+        diff = graph.node[x]['mean color'] - graph.node[y]['mean color']
+        diff = np.linalg.norm(diff)
+    
+        #if diff == 0:
+        #    graph[x][y]['weight'] = 99999
+        #else:
+        graph[x][y]['weight'] = math.e**(-(diff**2)/sigma)
+        #print graph[x][y]['weight']
+        #print "diff",diff,"weight",math.e**(-(diff**2)/sigma)
     return graph
