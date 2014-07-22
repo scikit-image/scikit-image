@@ -17,10 +17,9 @@ $(document).ready(function () {
     // edit button
     $('#editcode').bind('click', function () {
         // store scroll position to prevent jumping of scroll bar
-        var temp_scroll = $(window).scrollTop();
-
+        var temp_scroll = $(window).scrollTop(),
         // fetch code url
-        var code_url = $('a.download.internal:first').attr('href'),
+            code_url = $('a.download.internal:first').attr('href'),
         // fetch height of div which showed the code
             code_height = $('.highlight-python').height();
 
@@ -33,10 +32,10 @@ $(document).ready(function () {
                 editor = ace.edit("editor");
 
                 editor.on('change', function () {
-                    var doc         = editor.getSession().getDocument(),
+                    var doc = editor.getSession().getDocument(),
                         // line height varies with zoom level and font size
                         // correct way to find height is using the renderer
-                        line_height = editor.renderer.lineHeight; 
+                        line_height = editor.renderer.lineHeight;
                     code_height = line_height * doc.getLength() + 'px';
                     $('#editor').height(code_height);
                     editor.resize();
@@ -60,7 +59,7 @@ $(document).ready(function () {
                 editor.commands.addCommand({
                     name: 'execute_code',
                     bindKey: {win: 'Shift-Enter'},
-                    exec: function(editor) {
+                    exec: function (editor) {
                         runcode();
                     },
                     readOnly: true // false if this command should not apply in readOnly mode
@@ -93,7 +92,7 @@ $(document).ready(function () {
             image = output_images[key];
             image = imagemeta + image;
             // more images generated than in initial example
-            if(i >= example_images.length){
+            if (i >= example_images.length) {
                 $('.section > img:last')
                     .clone()
                     .attr('src', image)
@@ -105,14 +104,14 @@ $(document).ready(function () {
                 i = i + 1;
             }
         }
-        if (stdout==="") {
+        if (stdout === "") {
             $('.stdout-group, #stdout').hide();
         } else {
             $('.stdout-group').show();
             $('#stdout').html(stdout).show();
         }
 
-        if (stderr==="") {
+        if (stderr === "") {
             $('.stderr-group, #stderr').hide();
         } else {
             $('.stderr-group').show();
@@ -154,14 +153,14 @@ $(document).ready(function () {
                 $('#runcode').show();
                 handleoutput(e);
                 // suggest number of images received
-                if ($.isEmptyObject(e.result)){
+                if ($.isEmptyObject(e.result)) {
                     num_images = 0;
                 } else {
                     num_images = Object.keys(e.result).length;
                 }
                 $('#success-message').html("Success: Received " + num_images + " image(s)").show();
             },
-            error: function(jqxhr, text_status, error_thrown) {
+            error: function (jqxhr, text_status, error_thrown) {
                 // TODO: Refactor to something like reset
                 $('#loading').hide();
                 $('#runcode').show();
@@ -175,7 +174,7 @@ $(document).ready(function () {
     }
 
     $('#runcode').bind('click', runcode);
-    
+
     // revert back to example inside div
     $('#reload').bind('click', function () {
         $('div#editor').replaceWith(backup);
