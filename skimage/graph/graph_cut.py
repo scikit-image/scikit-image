@@ -67,7 +67,7 @@ def cut_threshold(labels, rag, thresh):
     return map_array[labels]
 
 
-def cut_n(labels, rag, thresh=0.0001):
+def cut_n(labels, rag, thresh=0.0001, num_cuts=10):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Given an image's labels and its similarity RAG, recursively perform
@@ -84,6 +84,8 @@ def cut_n(labels, rag, thresh=0.0001):
     thresh : float
         The threshold. A subgraph won't be further subdivided if the
         value of the N-cut exceeds `thresh`.
+    num_cuts : int
+        The number or N-cuts to perform before determining the optimal one.
 
     Returns
     -------
@@ -105,7 +107,7 @@ def cut_n(labels, rag, thresh=0.0001):
            IEEE Transactions on , vol.22, no.8, pp.888,905, Aug 2000
 
     """
-    _ncut_relabel(rag, thresh)
+    _ncut_relabel(rag, thresh, num_cuts)
 
     from_ = range(labels.max() + 1)
     to = [rag.node[x]['ncut label'] for x in from_]
@@ -114,7 +116,7 @@ def cut_n(labels, rag, thresh=0.0001):
     return map_array[labels]
 
 
-def _ncut_relabel(rag, thresh):
+def _ncut_relabel(rag, thresh, num_cuts):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Recursively partition the graph into 2, untill further subdividing
@@ -131,6 +133,8 @@ def _ncut_relabel(rag, thresh):
     thresh : float
         The threshold. A subgraph won't be further subdivided if the
         value of the N-cut exceeds `thresh`.
+    num_cuts : int
+        The number or N-cuts to perform before determining the optimal one.
     """
     d, w = _ncut.DW_matrix(rag)
     error = False
@@ -140,13 +144,17 @@ def _ncut_relabel(rag, thresh):
         vals, vectors = linalg.eigsh(d - w, M=d, which='SM',
                                      k=min(100, m - 2))
     except ArpackNoConvergence as e:
+        # Not all eigenvectors converged, salvage the remaining.
         vals = e.eigenvalues
         vectors = e.eigenvectors
         if len(vals) == 0:
+            # No eigenvector converged.
             error = True
     except ValueError:
+        # k is too less, happens when the graph is of size 1
         error = True
     except ArpackError:
+        # Arpack failing when two eigenvectors are same
         error = True
 
     if not error:
@@ -158,7 +166,8 @@ def _ncut_relabel(rag, thresh):
 
         mcut = np.inf
         threshold = None
-        for t in np.arange(0, 1, 0.1):
+        # Perform evenly spaced n-cuts and determine the optimal one.
+        for t in np.linspace(0, 1, num_cuts, endpoint=False):
             mask = ev > t
             cost = _ncut.ncut_cost(mask, d, w)
             if cost < mcut:
@@ -171,13 +180,18 @@ def _ncut_relabel(rag, thresh):
             nodes1 = [n for i, n in enumerate(rag.nodes()) if mask[i]]
             nodes2 = [n for i, n in enumerate(rag.nodes()) if not mask[i]]
 
+            # Sub divide and perform N-cut again
             sub1 = rag.subgraph(nodes1)
             sub2 = rag.subgraph(nodes2)
 
-            _ncut_relabel(sub1, thresh)
-            _ncut_relabel(sub2, thresh)
+            _ncut_relabel(sub1, thresh, num_cuts)
+            _ncut_relabel(sub2, thresh, num_cuts)
             return
 
+    # Either an errornous condition occurred, or N-cut wasn't small enough.
+    # The remaining graph is a region.
+    # Assign `ncut label` by picking any label from the existing nodes, since
+    # `labels` are unique, 'ncut label' is also unique.
     node = rag.nodes()[0]
     new_label = rag.node[node]['labels'][0]
     for n in rag.nodes():
