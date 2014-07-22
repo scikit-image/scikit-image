@@ -120,7 +120,7 @@ def _add_edge_filter(values, graph):
 
 
 def rag_mean_color(image, labels, connectivity=2, mode='dissimilarity',
-                   sigma=30.0):
+                   sigma=255.0):
     """Compute the Region Adjacency Graph using mean colors.
 
     Given an image and its initial segmentation, this method constructs the
