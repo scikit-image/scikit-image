@@ -65,7 +65,7 @@ def cut_threshold(labels, rag, thresh):
     return map_array[labels]
 
 
-def cut_n(labels, rag, thresh=0.001, num_cuts=10):
+def cut_normalized(labels, rag, thresh=0.001, num_cuts=10):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Given an image's labels and its similarity RAG, recursively perform
@@ -96,7 +96,7 @@ def cut_n(labels, rag, thresh=0.001, num_cuts=10):
     >>> img = data.lena()
     >>> labels = segmentation.slic(img, compactness=30, n_segments=400)
     >>> rag = graph.rag_mean_color(img, labels, mode='similarity')
-    >>> new_labels = graph.cut_n(labels, rag)
+    >>> new_labels = graph.cut_normalized(labels, rag)
 
     References
     ----------
