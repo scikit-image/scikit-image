@@ -7,8 +7,6 @@ import numpy as np
 from . import _ncut
 from . import _ncut_cy
 from scipy.sparse import linalg
-from scipy.sparse.linalg.eigen.arpack.arpack import ArpackNoConvergence
-from scipy.sparse.linalg.eigen.arpack.arpack import ArpackError
 
 
 def cut_threshold(labels, rag, thresh):
@@ -107,22 +105,19 @@ def cut_n(labels, rag, thresh=0.001, num_cuts=10):
            IEEE Transactions on , vol.22, no.8, pp.888,905, Aug 2000
 
     """
-    _ncut_relabel(rag, thresh, num_cuts)
-
-    from_ = range(labels.max() + 1)
-    to = [rag.node[x]['ncut label'] for x in from_]
-    map_array = np.array(to)
+    map_array = np.arange(labels.max() + 1)
+    _ncut_relabel(rag, thresh, num_cuts, map_array)
 
     return map_array[labels]
 
 
-def _ncut_relabel(rag, thresh, num_cuts):
+def _ncut_relabel(rag, thresh, num_cuts, map_array):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Recursively partition the graph into 2, untill further subdividing
     yields a cut greather than `thresh` or such a cut cannot be computed.
-    For such a subgraph, assign a 'ncut label` attribute to all its nodes,
-    which is a their new unique label.
+    For such a subgraph, indices to labels of all its nodes map to a single
+    unique value.
 
     Parameters
     ----------
@@ -135,10 +130,12 @@ def _ncut_relabel(rag, thresh, num_cuts):
         value of the N-cut exceeds `thresh`.
     num_cuts : int
         The number or N-cuts to perform before determining the optimal one.
+    map_array : array
+        The array which maps old labels to new ones. This is modified inside
+        the function.
     """
     d, w = _ncut.DW_matrix(rag)
     error = False
-    
 
     try:
         m = w.shape[0]
@@ -153,7 +150,6 @@ def _ncut_relabel(rag, thresh, num_cuts):
     except ValueError:
         # k is too less, happens when the graph is of size 1
         error = True
-
 
     if not error:
         vals, vectors = np.real(vals), np.real(vectors)
@@ -182,8 +178,8 @@ def _ncut_relabel(rag, thresh, num_cuts):
             sub1 = rag.subgraph(nodes1)
             sub2 = rag.subgraph(nodes2)
 
-            _ncut_relabel(sub1, thresh, num_cuts)
-            _ncut_relabel(sub2, thresh, num_cuts)
+            _ncut_relabel(sub1, thresh, num_cuts, map_array)
+            _ncut_relabel(sub2, thresh, num_cuts, map_array)
             return
 
     # Either an errornous condition occurred, or N-cut wasn't small enough.
@@ -192,5 +188,6 @@ def _ncut_relabel(rag, thresh, num_cuts):
     # `labels` are unique, 'ncut label' is also unique.
     node = rag.nodes()[0]
     new_label = rag.node[node]['labels'][0]
-    for n in rag.nodes():
-        rag.node[n]['ncut label'] = new_label
+    for n, d in rag.nodes_iter(data=True):
+        for l in d['labels']:
+            map_array[l] = new_label

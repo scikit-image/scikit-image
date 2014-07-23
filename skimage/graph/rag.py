@@ -156,7 +156,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='dissimilarity',
             It represents how similar two regions are.
     sigma : float, optional
         Used for computation when `mode='dissimilarity'`. It governs how close
-        to each other, two colors should be, for their corresponding edge
+        to each other two colors should be, for their corresponding edge
         weight to be significant. A very large value of `sigma` could make
         any two colors behave as though they were similar.
 
