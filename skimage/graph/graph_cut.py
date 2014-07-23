@@ -150,19 +150,10 @@ def _ncut_relabel(rag, thresh, num_cuts):
         d2.data = np.sqrt(d2.data)
         vals, vectors = linalg.eigsh(d2*(d - w)*d2, which='SM',
                                      k=min(100, m - 2))
-    except ArpackNoConvergence as e:
-        # Not all eigenvectors converged, salvage the remaining.
-        vals = e.eigenvalues
-        vectors = e.eigenvectors
-        if len(vals) == 0:
-            # No eigenvector converged.
-            error = True
     except ValueError:
         # k is too less, happens when the graph is of size 1
         error = True
-    except ArpackError:
-        # Arpack failing when two eigenvectors are same
-        error = True
+
 
     if not error:
         vals, vectors = np.real(vals), np.real(vectors)
