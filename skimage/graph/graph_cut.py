@@ -145,6 +145,7 @@ def _ncut_relabel(rag, thresh, num_cuts, map_array):
         d2.data = 1.0/d2.data
         # the square root
         d2.data = np.sqrt(d2.data)
+        # Refer to Equation 7
         vals, vectors = linalg.eigsh(d2*(d - w)*d2, which='SM',
                                      k=min(100, m - 2))
     except ValueError:
@@ -152,6 +153,7 @@ def _ncut_relabel(rag, thresh, num_cuts, map_array):
         error = True
 
     if not error:
+        # Refer Section 3.2.3
         vals, vectors = np.real(vals), np.real(vectors)
         index2 = _ncut_cy.argmin2(vals)
 
@@ -160,6 +162,7 @@ def _ncut_relabel(rag, thresh, num_cuts, map_array):
 
         mcut = np.inf
         threshold = None
+        # Refer Section 3.1.3
         # Perform evenly spaced n-cuts and determine the optimal one.
         for t in np.linspace(0, 1, num_cuts, endpoint=False):
             mask = ev > t
@@ -178,6 +181,7 @@ def _ncut_relabel(rag, thresh, num_cuts, map_array):
             sub1 = rag.subgraph(nodes1)
             sub2 = rag.subgraph(nodes2)
 
+            # Refer Section 3.2.5
             _ncut_relabel(sub1, thresh, num_cuts, map_array)
             _ncut_relabel(sub2, thresh, num_cuts, map_array)
             return
