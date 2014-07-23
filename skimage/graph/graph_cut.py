@@ -138,10 +138,17 @@ def _ncut_relabel(rag, thresh, num_cuts):
     """
     d, w = _ncut.DW_matrix(rag)
     error = False
+    
 
     try:
         m = w.shape[0]
-        vals, vectors = linalg.eigsh(d - w, M=d, which='SM',
+        d2 = d.copy()
+        # Since d is diagonal, we can directly operate on it's data
+        # the inverse
+        d2.data = 1.0/d2.data
+        # the square root
+        d2.data = np.sqrt(d2.data)
+        vals, vectors = linalg.eigsh(d2*(d - w)*d2, which='SM',
                                      k=min(100, m - 2))
     except ArpackNoConvergence as e:
         # Not all eigenvectors converged, salvage the remaining.
