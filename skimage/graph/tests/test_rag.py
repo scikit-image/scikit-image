@@ -2,6 +2,8 @@ import numpy as np
 from skimage import graph
 from skimage._shared.version_requirements import is_installed
 from numpy.testing.decorators import skipif
+from skimage import segmentation
+from numpy import testing
 
 
 def max_edge(g, src, dst, n):
@@ -66,3 +68,31 @@ def test_threshold_cut():
 
     # Two labels
     assert new_labels.max() == 1
+
+
+def test_cut_normalized():
+
+    img = np.zeros((100, 100, 3), dtype='uint8')
+    img[:50, :50] = 255, 255, 255
+    img[:50, 50:] = 254, 254, 254
+    img[50:, :50] = 2, 2, 2
+    img[50:, 50:] = 1, 1, 1
+
+    labels = np.zeros((100, 100), dtype='uint8')
+    labels[:50, :50] = 0
+    labels[:50, 50:] = 1
+    labels[50:, :50] = 2
+    labels[50:, 50:] = 3
+
+    rag = graph.rag_mean_color(img, labels, mode='similarity')
+    new_labels = graph.cut_normalized(labels, rag)
+    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
+
+    # Two labels
+    assert new_labels.max() == 1
+
+
+def test_rag_error():
+    img = np.zeros((10, 10, 3), dtype='uint8')
+    labels = np.zeros((10, 10), dtype='uint8')
+    testing.assert_raises(ValueError, graph.rag_mean_color,img, labels, 2, 'non existant mode')
