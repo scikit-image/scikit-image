@@ -71,7 +71,7 @@ def cut_n(labels, rag, thresh=0.001, num_cuts=10):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Given an image's labels and its similarity RAG, recursively perform
-    a 2-wat Normalized cut on it. All nodes belonging to a subgraph
+    a 2-way normalized cut on it. All nodes belonging to a subgraph
     which cannot be cut further, are assigned a unique label in the
     output.
 
