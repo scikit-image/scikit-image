@@ -36,8 +36,9 @@ before_install:
 
     - sudo apt-get install libfreeimage3
 
-    - conda install --yes python=$TRAVIS_PYTHON_VERSION matplotlib setuptools pillow cython flake8 six networkx
+    - conda install --yes python=$TRAVIS_PYTHON_VERSION matplotlib setuptools pillow cython flake8 networkx
 
+    - pip install six
     - pip install nose-cov
     - pip install coveralls
 
