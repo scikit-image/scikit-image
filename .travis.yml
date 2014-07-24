@@ -16,7 +16,7 @@ matrix:
         - python: "2.7"
           env:
             - PYTHON=python PYTHONWARNINGS=all PYTHONX=python PYVER=2.x
-        - python: "3.3"
+        - python: "3.2"
           env:
             - PYTHON=python3 PYTHONWARNINGS=all PYTHONX=python3 PYVER=3.x
     exclude:
