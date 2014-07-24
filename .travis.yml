@@ -44,7 +44,7 @@ before_install:
     - sudo rm -rf /dev/shm
     - sudo ln -s /run/shm /dev/shm
 
-    - conda install --yes python=$PYTHON numpy scipy
+    - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy
 
 
     - sudo apt-get update
