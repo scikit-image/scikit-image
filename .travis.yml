@@ -3,6 +3,8 @@
 # After changing this file, check it on:
 #   http://lint.travis-ci.org/
 
+# The conda installation part was taken from Dan Blancahrd's gist
+# https://gist.github.com/dan-blanchard/7045057
 
 language: python
 
@@ -33,12 +35,22 @@ before_install:
     - export DISPLAY=:99.0
     - sh -e /etc/init.d/xvfb start
 
+    - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+    - chmod +x miniconda.sh
+    - ./miniconda.sh -b
+    - export PATH=/home/travis/miniconda/bin:$PATH
+    - conda update --yes conda
+    # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
+    - sudo rm -rf /dev/shm
+    - sudo ln -s /run/shm /dev/shm
+
+    - conda install --yes python=$PYTHON numpy scipy
+
+
     - sudo apt-get update
 
-    - sudo apt-get install $PYTHON-numpy
     - wget https://raw.githubusercontent.com/numpy/numpy/master/numpy/_import_tools.py -O /home/travis/virtualenv/python3.2_with_system_site_packages/lib/python3.2/site-packages/numpy/_import_tools.py
 
-    - sudo apt-get install $PYTHON-scipy
     - sudo apt-get install libfreeimage3
 
     - if [[ $PYVER == '2.x' ]]; then
