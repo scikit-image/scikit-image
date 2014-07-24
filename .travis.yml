@@ -17,9 +17,6 @@ matrix:
             - PYTHON=python3 PYTHONWARNINGS=all PYTHONX=python3 PYVER=3.x
 
 
-virtualenv:
-    system_site_packages: true
-
 before_install:
     - export DISPLAY=:99.0
     - sh -e /etc/init.d/xvfb start
