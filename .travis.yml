@@ -35,7 +35,7 @@ before_install:
     - conda info -a
 
     # Replace dep1 dep2 ... with your dependencies
-    - conda install --yes python=$TRAVIS_PYTHON_VERSION matplotlib setuptools pillow cython flake8 six networkx
+    - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION matplotlib setuptools pillow cython flake8 six networkx
     - source activate test-environment
 
     - pip install nose-cov
