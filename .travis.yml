@@ -19,7 +19,7 @@ matrix:
             - PYTHONWARNINGS=all
             - PYTHONX=python
             - PYVER=2.x
-        - python: 3.2
+        - python: 3.3
           env:
             - PYTHON=python3
             - PYTHONWARNINGS=all
