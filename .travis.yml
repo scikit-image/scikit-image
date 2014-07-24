@@ -29,19 +29,17 @@ install:
     
     - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
     - chmod +x miniconda.sh
-    - ./miniconda.sh -b -p $HOME/miniconda
+    - bash miniconda.sh -b -p $HOME/miniconda
+    - hash -r
     - export PATH="$HOME/miniconda/bin:$PATH"
     - conda config --set always_yes yes --set changeps1 no
     - conda update -q conda
-    # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
-    - sudo rm -rf /dev/shm
-    - sudo ln -s /run/shm /dev/shm
 
     # Useful for debugging any issues with conda
     - conda info -a
 
     # Replace dep1 dep2 ... with your dependencies
-    - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION matplotlib setuptools pillow cython flake8 six networkx
+    - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION matplotlib setuptools pillow cython flake8 six networkx numpy scipy
     - source activate test-environment
 
     - pip install nose-cov
