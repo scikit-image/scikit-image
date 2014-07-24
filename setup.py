@@ -19,9 +19,11 @@ LICENSE             = 'Modified BSD'
 DOWNLOAD_URL        = 'http://github.com/scikit-image/scikit-image'
 VERSION             = '0.11dev'
 PYTHON_VERSION      = (2, 5)
+
+# These are manually checked.
+# These packages are sometimes installed outside of the setuptools scope
 DEPENDENCIES        = {
                         'numpy': (1, 6),
-                        'six': (1, 3),
                       }
 
 # Only require Cython if we have a developer checkout
@@ -139,7 +141,9 @@ if __name__ == "__main__":
         ],
 
         configuration=configuration,
-
+        install_requires=[
+            "six>=1.3"
+        ],
         packages=setuptools.find_packages(exclude=['doc']),
         include_package_data=True,
         zip_safe=False, # the package can run out of an .egg file
