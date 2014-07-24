@@ -20,7 +20,12 @@ matrix:
 before_install:
     - export DISPLAY=:99.0
     - sh -e /etc/init.d/xvfb start
+    
+    - sudo apt-get update
+    - sudo apt-get install libfreeimage3
 
+
+install:
     - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
     - chmod +x miniconda.sh
     - ./miniconda.sh -b
@@ -43,7 +48,7 @@ before_install:
 
     - python check_bento_build.py
 
-install:
+
     - tools/header.py "Dependency versions"
     - tools/build_versions.py
 
