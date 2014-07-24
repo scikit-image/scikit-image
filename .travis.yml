@@ -32,14 +32,11 @@ before_install:
 
     - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy
 
-
-    - sudo apt-get update
-
     - wget https://raw.githubusercontent.com/numpy/numpy/master/numpy/_import_tools.py -O /home/travis/virtualenv/python3.2_with_system_site_packages/lib/python3.2/site-packages/numpy/_import_tools.py
 
     - sudo apt-get install libfreeimage3
 
-    - conda install matplotlib
+    - conda install --yes python=$TRAVIS_PYTHON_VERSION matplotlib
 
     - pip install pillow
     - pip install cython
