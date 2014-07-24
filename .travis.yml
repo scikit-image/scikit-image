@@ -29,22 +29,16 @@ install:
     
     - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
     - chmod +x miniconda.sh
-    - bash miniconda.sh -b -p $HOME/miniconda
-    - hash -r
-    - export PATH="$HOME/miniconda/bin:$PATH"
-    - conda config --set always_yes yes --set changeps1 no
+    - ./miniconda.sh -b
+    - export PATH=/home/travis/miniconda/bin:$PATH
+    - conda update --yes conda
     - conda update -q conda
 
     # Useful for debugging any issues with conda
     - conda info -a
 
-    # Replace dep1 dep2 ... with your dependencies
-    - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION matplotlib setuptools pillow cython flake8 networkx numpy scipy
-    - source activate test-environment
-
-    - pip install six
-    - pip install nose-cov
-    - pip install coveralls
+    - conda install --yes python=$TRAVIS_PYTHON_VERSION matplotlib setuptools pillow cython flake8 networkx numpy scipy six
+    - conda install --yes -c dan_blanchard python-coveralls nose-cov
 
     - python check_bento_build.py
 
