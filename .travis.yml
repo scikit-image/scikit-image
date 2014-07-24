@@ -36,7 +36,7 @@ before_install:
 
     - sudo apt-get install libfreeimage3
 
-    - conda install --yes python=$TRAVIS_PYTHON_VERSION matplotlib
+    - conda install --yes python=$TRAVIS_PYTHON_VERSION matplotlib setuptools
 
     - pip install pillow
     - pip install cython
