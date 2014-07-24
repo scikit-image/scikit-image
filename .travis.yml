@@ -25,20 +25,19 @@ before_install:
     - chmod +x miniconda.sh
     - ./miniconda.sh -b
     - export PATH=/home/travis/miniconda/bin:$PATH
-    - conda update --yes conda
+    - conda config --set always_yes yes --set changeps1 no
+    - conda update -q conda
     # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
     - sudo rm -rf /dev/shm
     - sudo ln -s /run/shm /dev/shm
 
-    - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy
+    # Useful for debugging any issues with conda
+    - conda info -a
 
-    - wget https://raw.githubusercontent.com/numpy/numpy/master/numpy/_import_tools.py -O /home/travis/virtualenv/python3.2_with_system_site_packages/lib/python3.2/site-packages/numpy/_import_tools.py
+    # Replace dep1 dep2 ... with your dependencies
+    - conda install --yes python=$TRAVIS_PYTHON_VERSION matplotlib setuptools pillow cython flake8 six networkx
+    - source activate test-environment
 
-    - sudo apt-get install libfreeimage3
-
-    - conda install --yes python=$TRAVIS_PYTHON_VERSION matplotlib setuptools pillow cython flake8 networkx
-
-    - pip install six
     - pip install nose-cov
     - pip install coveralls
 
