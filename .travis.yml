@@ -17,6 +17,9 @@ matrix:
             - PYTHON=python3 PYTHONWARNINGS=all PYTHONX=python3 PYVER=3.x
 
 
+virtualenv:
+    system_site_packages: true
+
 before_install:
     - export DISPLAY=:99.0
     - sh -e /etc/init.d/xvfb start
@@ -39,14 +42,7 @@ before_install:
 
     - sudo apt-get install libfreeimage3
 
-    - if [[ $PYVER == '2.x' ]]; then
-    -   sudo apt-get install $PYTHON-qt4;
-    -   sudo apt-get install $PYTHON-matplotlib;
-    - fi
-    - if [[ $PYVER == '3.x' ]]; then
-    -   sudo apt-get install $PYTHON-pyqt4;
-    -   pip install --use-mirrors matplotlib;
-    - fi
+    - conda install matplotlib
 
     - pip install pillow
     - pip install cython
