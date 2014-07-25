@@ -92,16 +92,33 @@ $(document).ready(function () {
             image = output_images[key];
             image = imagemeta + image;
             // more images generated than in initial example
-            if (i >= example_images.length) {
-                $('.section > img:last')
+            // here we replace the original images present
+            // if (i >= example_images.length) {
+            //     $('.section > img:last')
+            //         .clone()
+            //         .attr('src', image)
+            //         .insertAfter('.section > img:last');
+            // } else {
+            //     // console.log(example_images[i]);
+            //     example_images[i].src = image;
+            //     // example_images[i].attr('src', image);
+            //     i = i + 1;
+            // }
+
+            // this stacks images below the editor
+            if (i === 0) {
+                $('.section > img:first')
                     .clone()
                     .attr('src', image)
-                    .insertAfter('.section > img:last');
+                    .addClass('output_image')
+                    .insertAfter('#editor');
+                    i = i + 1;
             } else {
-                // console.log(example_images[i]);
-                example_images[i].src = image;
-                // example_images[i].attr('src', image);
-                i = i + 1;
+                $('.section > img.output_image:last')
+                    .clone()
+                    .attr('src', image)
+                    .addClass('output_image')
+                    .insertAfter('.section > img.output_image:last');
             }
         }
         if (stdout === "") {
