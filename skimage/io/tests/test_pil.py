@@ -167,7 +167,7 @@ def test_imsave_filelike():
 
 @skipif(not PIL_available)
 def test_imexport_imimport():
-    shape = (2, 2)
+   shape = (2, 2) 
     image = np.zeros(shape)
     pil_image = imexport(image)
     out = imimport(pil_image)
