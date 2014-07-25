@@ -13,3 +13,9 @@
 	margin: 10px 0px 5px;
 	text-align:right;
 }
+
+.align-center {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
