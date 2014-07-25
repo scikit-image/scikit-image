@@ -37,7 +37,7 @@ install:
     # Useful for debugging any issues with conda
     - conda info -a
 
-    - conda install --yes python=$TRAVIS_PYTHON_VERSION matplotlib setuptools pillow cython flake8 networkx numpy scipy six
+    - conda install --yes python=$TRAVIS_PYTHON_VERSION matplotlib setuptools pillow cython flake8 networkx numpy scipy six pyqt
     - conda install --yes -c dan_blanchard python-coveralls nose-cov
 
     - python check_bento_build.py
@@ -55,9 +55,10 @@ script:
     - "echo 'backend : Agg' > $HOME/.matplotlib/matplotlibrc"
     - "echo 'backend.qt4 : PyQt4' >> $HOME/.matplotlib/matplotlibrc"
 
+    # .coveragerc assumed by default
     # Run all tests
     - if [[ $PYVER == '3.x' ]]; then
-    -   nosetests --exe -v --with-doctest --with-cov --cov skimage --cov-config=.coveragerc skimage
+    -   nosetests --exe -v --with-doctest --with-cov --cover-package skimage
     - fi
     - if [[ $PYVER == '2.x' ]]; then
     -   nosetests --exe -v --with-doctest skimage
