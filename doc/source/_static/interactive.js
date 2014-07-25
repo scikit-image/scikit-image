@@ -83,11 +83,15 @@ $(document).ready(function () {
         // that needs to be changed
 
         // example images are first children, within a div of class section
-            example_images = $('.section > img'),
+        // example_images = $('.section > img'),
         // index for iterating through example images
             i = 0,
             key,
             image;
+
+        // get rid of output images from previous run
+        $('img.output_image').remove();
+
         for (key in output_images) {
             image = output_images[key];
             image = imagemeta + image;
@@ -153,6 +157,14 @@ $(document).ready(function () {
         var code = editor.getValue(),
         // console.log(code);
             jcode = codetoJSON(code);
+            // get editor-bg
+            editor_color = $('.ace-tm').css('background-color');
+            readonly_editor_color = '#F5F5F5';
+
+        // disable editing when code is run
+        editor.setReadOnly(true);
+        $('.ace-tm').css('background-color', readonly_editor_color);
+
         // console.log(jcode);
         $.ajax({
             type: 'POST',
@@ -162,8 +174,12 @@ $(document).ready(function () {
             data: jcode,
             // This is the type of data you're expecting back from the server.
             dataType: 'json',
-            url: 'http://198.206.133.45:5000/runcode',
+            url: 'http://ci.scipy.org:5000/runcode',
             success: function (e) {
+                // enable editing after response
+                editor.setReadOnly(false);
+                $('.ace-tm').css('background-color', editor_color);
+
                 // remove animation, show Run
                 // TODO: Refactor to something like reset
                 $('#loading').hide();
@@ -178,6 +194,10 @@ $(document).ready(function () {
                 $('#success-message').html("Success: Received " + num_images + " image(s)").show();
             },
             error: function (jqxhr, text_status, error_thrown) {
+                // enable editing after response
+                editor.setReadOnly(false);
+                $('.ace-tm').css('background-color', editor_color);
+
                 // TODO: Refactor to something like reset
                 $('#loading').hide();
                 $('#runcode').show();
