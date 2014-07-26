@@ -42,12 +42,14 @@ install:
 
     - python check_bento_build.py
 
-
+    - conda list
+    - 
     - tools/header.py "Dependency versions"
     - tools/build_versions.py
+    - tools/plugin_debug.py
 
     - python setup.py build_ext --inplace
-    - conda list
+
 
 script:
     # Matplotlib settings
