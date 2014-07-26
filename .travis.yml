@@ -22,7 +22,6 @@ before_install:
     - sh -e /etc/init.d/xvfb start
     
     - sudo apt-get update
-    - sudo apt-get install libc6
     - sudo apt-get install libfreeimage3
     - sudo apt-get install libjpeg62
 
@@ -49,6 +48,10 @@ install:
     - 
     - tools/header.py "Dependency versions"
     - tools/build_versions.py
+
+    - rm /home/travis/miniconda/lib/libm.so.6
+    - rm /home/travis/miniconda/lib/libm-2.5.so
+    - rm /home/travis/miniconda/lib/libm.so
 
     - python setup.py build_ext --inplace
     - python plugin_debug.py
