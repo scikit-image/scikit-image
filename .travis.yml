@@ -51,7 +51,6 @@ install:
     - tools/build_versions.py
 
     - python setup.py build_ext --inplace
-    - python plugin_debug.py
 
 script:
     # Matplotlib settings
