@@ -68,7 +68,7 @@ def test_viewer_with_overlay():
     import tempfile
     _, filename = tempfile.mkstemp(suffix='.png')
 
-    ov.color = 2
+    ov.color = 3
     assert_equal(ov.color, 'yellow')
     viewer.save_to_file(filename)
     ov.display_filtered_image(img)
