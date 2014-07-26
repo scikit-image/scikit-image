@@ -16,7 +16,6 @@ matrix:
           env:
             - PYTHON=python3 PYTHONWARNINGS=all PYTHONX=python3 PYVER=3.x
 
-
 before_install:
     - export DISPLAY=:99.0
     - sh -e /etc/init.d/xvfb start
@@ -25,10 +24,6 @@ before_install:
     - sudo apt-get install libfreeimage3
     - sudo apt-get install libjpeg62
 
-
-
-install:
-    
     - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
     - chmod +x miniconda.sh
     - ./miniconda.sh -b
@@ -38,20 +33,22 @@ install:
 
     # Useful for debugging any issues with conda
     - conda info -a
-
     - conda install --yes python=$TRAVIS_PYTHON_VERSION matplotlib setuptools pillow cython flake8 networkx numpy scipy six pyqt
     - conda install --yes -c dan_blanchard python-coveralls nose-cov
+    - conda list
 
     - python check_bento_build.py
 
-    - conda list
-    - 
-    - tools/header.py "Dependency versions"
-    - tools/build_versions.py
-
+    # TODO : Remove this when anaconda fixes their libraries
+    # The solution was suggested here
+    # https://groups.google.com/a/continuum.io/forum/#!topic/anaconda/-DLG2ZdTkw0
     - rm /home/travis/miniconda/lib/libm.so.6
     - rm /home/travis/miniconda/lib/libm-2.5.so
     - rm /home/travis/miniconda/lib/libm.so
+
+install:
+    - tools/header.py "Dependency versions"
+    - tools/build_versions.py
 
     - python setup.py build_ext --inplace
     - python plugin_debug.py
@@ -63,7 +60,7 @@ script:
     - "echo 'backend : Agg' > $HOME/.matplotlib/matplotlibrc"
     - "echo 'backend.qt4 : PyQt4' >> $HOME/.matplotlib/matplotlibrc"
 
-    # .coveragerc assumed by default
+    # .coveragerc is assumed by default
     # Run all tests
     - if [[ $PYVER == '3.x' ]]; then
     -   nosetests --exe -v --with-doctest --with-cov --cover-package skimage
