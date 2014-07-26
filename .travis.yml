@@ -22,9 +22,10 @@ before_install:
     - sh -e /etc/init.d/xvfb start
     
     - sudo apt-get update
+    - sudo apt-get install libc6
     - sudo apt-get install libfreeimage3
     - sudo apt-get install libjpeg62
-    - sudo apt-get install libopenjpeg2
+
 
 
 install:
