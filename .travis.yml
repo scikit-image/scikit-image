@@ -46,10 +46,9 @@ install:
     - 
     - tools/header.py "Dependency versions"
     - tools/build_versions.py
-    - tools/plugin_debug.py
 
     - python setup.py build_ext --inplace
-
+    - tools/plugin_debug.py
 
 script:
     # Matplotlib settings
