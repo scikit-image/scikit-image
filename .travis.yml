@@ -47,6 +47,7 @@ install:
     - tools/build_versions.py
 
     - python setup.py build_ext --inplace
+    - conda list
 
 script:
     # Matplotlib settings
