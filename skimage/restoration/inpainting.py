@@ -9,6 +9,11 @@ __all__ = ['inpaint_fmm']
 def inpaint_fmm(image, mask, radius=5):
     """Inpaint image using Fast Marching Method.
 
+    Image inpainting fills-in regions with unknown, or undesired, pixel
+    intensities (defined by `mask`) with pixel values from nearby regions or
+    from regions with a similar structure to the masked region. This can be
+    useful for filling-in missing data or correcting blemishes in an image.
+
     Image inpainting technique based on the Fast Marching Method (FMM)
     implementation as described in [1]_. FMM is used for computing the
     evolution of boundary moving in a direction perpendicular to itself.
