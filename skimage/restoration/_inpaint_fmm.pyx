@@ -156,8 +156,8 @@ cdef _init_fmm(mask):
 
 
 cdef cnp.double_t _eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
-                          Py_ssize_t j2, cnp.uint8_t[:, ::1] flag,
-                          cnp.double_t[:, ::1] u):
+                           Py_ssize_t j2, cnp.uint8_t[:, ::1] flag,
+                           cnp.double_t[:, ::1] u):
     """Solve a step of the Eikonal equation.
 
     The ``u`` values of known pixels (marked by ``flag``) are considered for
@@ -320,8 +320,8 @@ cdef _inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.double_t[:, ::1] image,
 
 
 cdef cnp.double_t _grad_func(cnp.double_t[:, :] array,
-                            Py_ssize_t i, Py_ssize_t j,
-                            cnp.uint8_t[:, :] flag):
+                             Py_ssize_t i, Py_ssize_t j,
+                             cnp.uint8_t[:, :] flag):
     """Return the x-gradient of the input array at a pixel.
 
     This gradient is structured to ignore inner, unknown regions as specified
