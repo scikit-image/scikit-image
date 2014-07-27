@@ -37,6 +37,11 @@ def _inpaint_fmm(cnp.double_t[:, ::1] image, mask, Py_ssize_t radius=5):
 
     Notes
     -----
+    Each pixel is labeled as KNOWN, UNKNOWN, or BAND, where pixels with known
+    intensities (outside of the `mask` region) are labeled KNOWN, unknown
+    intensities  (pixels under the `mask`) are labeled UNKNOWN, and known
+    intensities bordering the mask are labeled BAND.
+
     The steps of the algorithm are as follows:
     - Extract the pixel with the smallest distance value (``u``) in the BAND
       pixels.
