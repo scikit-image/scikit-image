@@ -97,8 +97,7 @@ def _inpaint_fmm(cnp.double_t[:, ::1] image, mask, Py_ssize_t radius=5):
                     shifted_indices = (indices_centered +
                                        np.array([i_nb, j_nb], np.int16))
 
-                    _inpaint_point(i_nb, j_nb, image, flag,
-                                   u, shifted_indices, radius)
+                    _inpaint_point(i_nb, j_nb, image, flag, u, shifted_indices)
 
 
 cdef _init_fmm(mask):
@@ -231,7 +230,7 @@ cdef cnp.double_t _eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
 
 cdef _inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.double_t[:, ::1] image,
                     cnp.uint8_t[:, ::1] flag, cnp.double_t[:, ::1] u,
-                    cnp.int16_t[:, ::1] shifted_indices, Py_ssize_t radius):
+                    cnp.int16_t[:, ::1] shifted_indices):
     """This function performs the actual inpainting operation.
 
     Inpainting involves "filling in" regions with unknown intensity values
@@ -250,8 +249,6 @@ cdef _inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.double_t[:, ::1] image,
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = UNKNOWN.
     u : array, float
         The distance/time map from the boundary to each pixel.
-    radius : int
-        Neighbourhood of (i, j) to be considered for inpainting.
 
     Returns
     -------
