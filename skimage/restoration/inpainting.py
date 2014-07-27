@@ -77,6 +77,10 @@ def inpaint_fmm(image, mask, radius=5):
     rows, cols = image.shape
     inpainted = np.zeros((rows + 2, cols + 2), dtype=np.double)
     inpainted_mask = np.zeros((rows + 2, cols + 2), dtype=np.uint8)
+
+    # Implementation needs at least 1-pixel border around unknown region to
+    # work properly, since it needs to find the closest known pixel to an
+    # unknown pixel
     inner = (slice(1, -1), slice(1, -1))
     inpainted[inner] = image
     inpainted_mask[inner] = mask
