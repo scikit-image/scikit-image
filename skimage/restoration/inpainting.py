@@ -1,6 +1,6 @@
 import numpy as np
 from ._inpaint_fmm import _inpaint_fmm
-from ..util import img_as_float
+from ..util import img_as_ubyte
 
 
 __all__ = ['inpaint_fmm']
@@ -69,11 +69,10 @@ def inpaint_fmm(image, mask, radius=5):
     if image.shape != mask.shape:
         raise ValueError("The dimensions of `mask` and `image` do not match. ")
 
-    if not np.issubdtype(image.dtype, np.uint8):
-        raise TypeError("`image` must be of dtype `uint8`.")
-
     if radius < 1:
         raise ValueError("`radius` must be greater than 0.")
+
+    image = img_as_ubyte(image)
 
     rows, cols = image.shape
     inpainted = np.zeros((rows + 2, cols + 2), dtype=np.double)
