@@ -141,8 +141,7 @@ cdef _init_fmm(mask):
     outside = dilation(mask, disk(1))
     band = np.logical_xor(mask, outside).astype(np.uint8)
 
-    # 2 * outside == UNKNOWN, where outside = 1
-    # band == BAND, where band = 1
+    # Flag outside pixels as 2, band pixels as 1, and unknown pixels as 0.
     flag = (2 * outside) - band
 
     u = np.where(flag == UNKNOWN, DBL_MAX, 0.0)
