@@ -67,7 +67,7 @@ class TestSimpleImage():
     def test_isodata_linspace(self):
         assert -63.8 < threshold_isodata(np.linspace(-127, 0, 256)) < -63.6
 
-    def test_isodata_16bit():
+    def test_isodata_16bit(self):
         np.random.seed(0)
         imfloat = np.random.rand(256, 256)
         t = threshold_isodata(imfloat, nbins=1024)
