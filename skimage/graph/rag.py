@@ -13,6 +13,7 @@ import numpy as np
 from scipy.ndimage import filters
 from scipy import ndimage as nd
 import math
+from .. import draw, measure, segmentation
 
 
 def min_weight(graph, src, dst, n):
@@ -236,3 +237,55 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
             raise ValueError("The mode '%s' is not recognised" % mode)
 
     return graph
+
+
+
+def rag_draw(labels, rag, img, border_color = (0,0,0), node_color = (1,1,0), 
+             low_color = (0,1,0), high_color=None, thresh=np.inf ):
+    rag = rag.copy()
+    rag_labels = labels.copy()
+    out = img.copy()
+    
+    low_color = np.array(low_color)
+    
+    if not high_color is None :
+        high_color = np.array(high_color)
+
+    # Handling the case where one node has multiple labels
+    offset = 1
+    for n, d in rag.nodes_iter(data=True):
+        for l in d['labels'] :
+            rag_labels[labels == l] = offset
+        offset += 1
+
+    regions = measure.regionprops(rag_labels)
+    for region in regions:
+        # Because we kept the offset as 1
+        rag.node[region['label'] - 1]['centroid'] = region['centroid']
+
+    if not border_color is None :
+        out = segmentation.mark_boundaries(out, rag_labels, color = border_color)
+
+    if not high_color is None :
+        max_weight = max([d['weight'] for x, y, d in rag.edges_iter(data=True) if d['weight'] < thresh ])
+        min_weight = min([d['weight'] for x, y, d in rag.edges_iter(data=True) if d['weight'] < thresh ])
+    
+    for n1,n2,data in rag.edges_iter(data=True):
+
+        if data['weight'] >=  thresh :
+            continue
+        r1, c1 = map(int, rag.node[n1]['centroid'])
+        r2, c2 = map(int, rag.node[n2]['centroid'])
+
+        line  = draw.line(r1, c1, r2, c2)
+                
+        if not high_color is None:
+            norm_weight = ( rag[n1][n2]['weight'] - min_weight ) / ( max_weight - min_weight )
+            out[line] = norm_weight*high_color + (1 - norm_weight)*low_color
+        else:
+            out[line] = low_color
+            
+        circle = draw.circle(r1,c1,2)
+        out[circle] = node_color
+
+    return out
