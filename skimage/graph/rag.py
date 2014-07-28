@@ -241,6 +241,52 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
 
 def rag_draw(labels, rag, img, border_color=(0, 0, 0), node_color = (1, 1, 0),
              low_color = (0, 1, 0), high_color=None, thresh=np.inf):
+    """Draw a Region Adjacency Graph on an image.
+
+    Given a labelled image and its corresponding RAG, draw the nodes and edges
+    of the RAG on the image with the specified colors. Nodes are markes by
+    the centroids of the corresposning regions.
+
+    Parameters
+    ----------
+    labels : ndarray, shape(M, N, [..., P,])
+        The labelled image. This should have one dimension less than
+        `img`. If `image` has dimensions `(M, N, 3)` `labels` should have
+         dimensions `(M, N)`.
+    rag : RAG
+        The Region Adjacency Graph.
+    img : ndarray, shape(M, N, [..., P,] 3)
+        Input image.
+    border_color : length-3 sequence, optional
+        RGB color of the corder of regions. Specifying `None` won't draw
+        the border.
+    node_color : length-3 sequeunce, optional
+        RGB color of the centroid of nodes. Yellow by default.
+    low_color : length-3 sequeunce, optional
+        RGB color of the edges. If `high_color` is not specified, all edges
+        are draw with `low_color`. Green by default.
+    high_color : length-3 sequeunce, optional
+        RGB color of the edges with high weight. If specified, the edges are
+        color mapped between `low_color` and `high_color` depending on their
+        weight. Edges with low weights are more like `low_color` whereas edges
+        with high weights are more like `high_color`.
+    thresh : float, optiona;
+        Edges with weight below `thresh` are not drawn, or considered for color
+        mapping in case `high_color` is specified.
+
+    Returns
+    -------
+    out : ndarray, shape(M, N, [..., P,] 3)
+        The image with the RAG drawn.
+
+    Examples
+    --------
+    >>> from skimage import data, graph, segmentation
+    >>> img = data.lena()
+    >>> labels = segmentation.slic(img)
+    >>> g =  graph.rag_mean_color(img, labels)
+    >>> out = graph.rag_draw(labels, g, img)
+    """
     rag = rag.copy()
     rag_labels = labels.copy()
     out = img.copy()
@@ -251,6 +297,7 @@ def rag_draw(labels, rag, img, border_color=(0, 0, 0), node_color = (1, 1, 0),
         high_color = np.array(high_color)
 
     # Handling the case where one node has multiple labels
+    # offset is 1 so that regionprops does not ignore 0
     offset = 1
     for n, d in rag.nodes_iter(data=True):
         for l in d['labels']:
@@ -263,10 +310,7 @@ def rag_draw(labels, rag, img, border_color=(0, 0, 0), node_color = (1, 1, 0),
         rag.node[region['label'] - 1]['centroid'] = region['centroid']
 
     if not border_color is None:
-        out = segmentation.mark_boundaries(
-            out,
-            rag_labels,
-            color=border_color)
+        out = segmentation.mark_boundaries(out, rag_labels, color=border_color)
 
     if not high_color is None:
         max_weight = max([d['weight'] for x, y, d in rag.edges_iter(data=True)
@@ -284,10 +328,10 @@ def rag_draw(labels, rag, img, border_color=(0, 0, 0), node_color = (1, 1, 0),
         line = draw.line(r1, c1, r2, c2)
 
         if not high_color is None:
-            norm_weight = (rag[n1][n2]['weight'] - min_weight) / (
-                max_weight - min_weight)
-            out[line] = norm_weight * high_color + \
-                (1 - norm_weight) * low_color
+            norm_weight = ((rag[n1][n2]['weight'] - min_weight) /
+                           (max_weight - min_weight))
+            out[line] = (norm_weight * high_color +
+                         (1 - norm_weight) * low_color)
         else:
             out[line] = low_color
 
