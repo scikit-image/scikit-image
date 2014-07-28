@@ -243,7 +243,7 @@ def threshold_isodata(image, nbins=256):
     cpmfl = np.cumsum(pmf, dtype=np.float32)
     cpmfh = np.cumsum(pmf[::-1], dtype=np.float32)[::-1]
 
-    binnums = np.arange(pmf.size, dtype=np.uint8)
+    binnums = np.arange(pmf.size, dtype=np.min_scalar_type(nbins))
     # l and h contain average value of pixels in sum of bins, calculated
     # from lower to higher and from higher to lower respectively.
     l = np.ma.divide(np.cumsum(pmf * binnums, dtype=np.float32), cpmfl)
