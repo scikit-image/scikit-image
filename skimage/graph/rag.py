@@ -251,15 +251,15 @@ def rag_draw(labels, rag, img, border_color=(0, 0, 0), node_color = (1, 1, 0),
     ----------
     labels : ndarray, shape(M, N, [..., P,])
         The labelled image. This should have one dimension less than
-        `img`. If `image` has dimensions `(M, N, 3)` `labels` should have
+        `img`. If `img` has dimensions `(M, N, 3)` `labels` should have
          dimensions `(M, N)`.
     rag : RAG
         The Region Adjacency Graph.
     img : ndarray, shape(M, N, [..., P,] 3)
         Input image.
     border_color : length-3 sequence, optional
-        RGB color of the corder of regions. Specifying `None` won't draw
-        the border.
+        RGB color of the border of regions. Specifying `None` won't draw
+        the border. Black by default.
     node_color : length-3 sequeunce, optional
         RGB color of the centroid of nodes. Yellow by default.
     low_color : length-3 sequeunce, optional
