@@ -11,7 +11,7 @@
 /* separate control from the image above and make more close to the code */
 #controls {
 	margin: 10px 0px 5px;
-	text-align:right;
+	text-align:left;
 }
 
 .align-center {

@@ -92,13 +92,9 @@ EDIT_REVERT_BTN = """
         <button type="button" class="btn btn-default btn-lg" id="editcode">
             <i class="icon-edit"></i> Edit
         </button>
-        <button type="button" class="btn btn-default btn-lg" id="runcode">
-            <i class="icon-play"></i> Run
-        </button>
         <button type="button" class="btn btn-default btn-lg" id="reload">
             <i class="icon-refresh"></i>
         </button>
-        <img id="loading" src="../_static/ajax-loader.gif"/>
     </p>
 """
 
@@ -120,6 +116,17 @@ OUTPUT_MESSAGES = """
             <pre id="stderr"></pre>
             <hr class="stderr-group">
         </div>
+    </p>
+"""
+
+RUN_BTN = """
+.. raw:: html
+
+    <p id="run_btn">
+        <button type="button" class="btn btn-default btn-lg" id="runcode">
+            <i class="icon-play"></i> Run
+        </button>
+        <img id="loading" src="../_static/ajax-loader.gif"/>
     </p>
 """
 
@@ -394,6 +401,7 @@ def write_example(src_name, src_dir, rst_dir, cfg):
         example_rst += EDIT_REVERT_BTN
         example_rst += LITERALINCLUDE.format(**code_info)
 
+    example_rst += RUN_BTN
     example_rst += OUTPUT_MESSAGES
     example_rst += CODE_LINK.format(src_name)
     ipnotebook_name = src_name.replace('.py', '.ipynb')

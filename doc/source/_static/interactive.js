@@ -14,8 +14,7 @@ $(document).ready(function () {
     $('.all-output').hide();
 
 
-    // edit button
-    $('#editcode').bind('click', function () {
+    function editcode () {
         // store scroll position to prevent jumping of scroll bar
         var temp_scroll = $(window).scrollTop(),
         // fetch code url
@@ -66,7 +65,7 @@ $(document).ready(function () {
                 });
             }
         });
-    });
+    }
 
     function codetoJSON(code) {
         return JSON.stringify({'data': code});
@@ -118,7 +117,7 @@ $(document).ready(function () {
                         .attr('src', image)
                         .attr('title', timestamp)
                         .addClass('output_image')
-                        .insertAfter('#editor');
+                        .insertAfter('#run_btn');
                         i = i + 1;
                 } else {
                     $('.section > img.output_image:last')
@@ -218,11 +217,9 @@ $(document).ready(function () {
         });
     }
 
-    $('#runcode').bind('click', runcode);
-
-    // revert back to example inside div
-    $('#reload').bind('click', function () {
+    function reload () {
         $('div#editor').replaceWith(backup);
+        $('div.highlight-python').bind('click', editcode);
         // hide Run, only visible when code edited
         $('#runcode').hide();
         $('#loading').hide();
@@ -230,5 +227,18 @@ $(document).ready(function () {
         $('#error-message').hide();
         $('#success-message').hide();
         $('.all-output').hide();
-    });
+    }
+
+    // edit button and editor area
+    $('#editcode').bind('click', editcode);
+    $('div.highlight-python').bind('click', editcode);
+    $('#runcode').bind('click', runcode);
+    // revert back to example inside div
+    $('#reload').bind('click', reload);
+
+    $(document).keyup(function(e) {
+        if (e.keyCode == 27) {
+            reload();
+        }   // esc
+    })
 });
