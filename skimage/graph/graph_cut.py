@@ -134,7 +134,7 @@ def _ncut_relabel(rag, thresh, num_cuts, map_array):
         The array which maps old labels to new ones. This is modified inside
         the function.
     """
-    d, w = _ncut.DW_matrix(rag)
+    d, w = _ncut.DW_matrices(rag)
     error = False
 
     try:

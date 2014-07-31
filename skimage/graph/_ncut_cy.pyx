@@ -38,3 +38,30 @@ def argmin2(cnp.float64_t[:] array):
         i += 1
 
     return i2
+
+
+def cut_cost(mask, W):
+    mask = np.array(mask)
+
+    cdef Py_ssize_t num_rows, num_cols
+    cdef cnp.int32_t row, col
+    cdef cnp.int32_t[:] indices = W.indices
+    cdef cnp.int32_t[:] indptr = W.indptr
+    cdef cnp.float64_t[:] data = W.data
+    cdef cnp.int32_t row_index
+    cdef cnp.double_t cost = 0
+
+    num_rows = W.shape[0]
+    num_cols = W.shape[1]
+
+    col = 0
+    while col < num_cols:
+        row_index = indptr[col]
+        while row_index < indptr[col+1]:
+            row = indices[row_index]
+            if mask[row] != mask[col]:
+                cost += <cnp.double_t>data[row_index]
+            row_index += 1
+        col += 1
+
+    return cost*0.5
