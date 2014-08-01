@@ -89,46 +89,52 @@ $(document).ready(function () {
             image,
             timestamp;
 
-        for (key in output_images) {
-            // if it is not the timestamp go ahead and add as an image
-            if (key.indexOf('timestamp') == -1) {
-                image = output_images[key];
-                image = imagemeta + image;
-                timestamp = output_images[key+'timestamp'];
-                console.log(timestamp);
-                // more images generated than in initial example
-                // here we replace the original images present
-                // if (i >= example_images.length) {
-                //     $('.section > img:last')
-                //         .clone()
-                //         .attr('src', image)
-                //         .insertAfter('.section > img:last');
-                // } else {
-                //     // console.log(example_images[i]);
-                //     example_images[i].src = image;
-                //     // example_images[i].attr('src', image);
-                //     i = i + 1;
-                // }
+        console.log(output);
+        console.log(output.stdout);
 
-                // this stacks images below the editor
-                if (i === 0) {
-                    $('.section > img:first')
-                        .clone()
-                        .attr('src', image)
-                        .attr('title', timestamp)
-                        .addClass('output_image')
-                        .insertAfter('#run_btn');
-                        i = i + 1;
-                } else {
-                    $('.section > img.output_image:last')
-                        .clone()
-                        .attr('src', image)
-                        .attr('title', timestamp)
-                        .addClass('output_image')
-                        .insertAfter('.section > img.output_image:last');
+        if (!output.result.hasOwnProperty('busy')) {
+            for (key in output_images) {
+                // if it is not the timestamp go ahead and add as an image
+                if (key.indexOf('timestamp') == -1) {
+                    image = output_images[key];
+                    image = imagemeta + image;
+                    timestamp = output_images[key+'timestamp'];
+                    console.log(timestamp);
+                    // more images generated than in initial example
+                    // here we replace the original images present
+                    // if (i >= example_images.length) {
+                    //     $('.section > img:last')
+                    //         .clone()
+                    //         .attr('src', image)
+                    //         .insertAfter('.section > img:last');
+                    // } else {
+                    //     // console.log(example_images[i]);
+                    //     example_images[i].src = image;
+                    //     // example_images[i].attr('src', image);
+                    //     i = i + 1;
+                    // }
+
+                    // this stacks images below the editor
+                    if (i === 0) {
+                        $('.section > img:first')
+                            .clone()
+                            .attr('src', image)
+                            .attr('title', timestamp)
+                            .addClass('output_image')
+                            .insertAfter('#run_btn');
+                            i = i + 1;
+                    } else {
+                        $('.section > img.output_image:last')
+                            .clone()
+                            .attr('src', image)
+                            .attr('title', timestamp)
+                            .addClass('output_image')
+                            .insertAfter('.section > img.output_image:last');
+                    }
                 }
             }
         }
+
         if (stdout === "") {
             $('.stdout-group, #stdout').hide();
         } else {
@@ -198,7 +204,11 @@ $(document).ready(function () {
                     // half of the keys are timestamps of images in the other half
                     num_images = Object.keys(e.result).length/2;
                 }
-                $('#success-message').html("Success: Received " + num_images + " image(s)").show();
+                if (e.result.hasOwnProperty('busy')) {
+                    $('#success-message').html("Server Busy, try again later!").show();
+                } else {
+                    $('#success-message').html("Success: Received " + num_images + " image(s)").show();
+                }
             },
             error: function (jqxhr, text_status, error_thrown) {
                 // enable editing after response
