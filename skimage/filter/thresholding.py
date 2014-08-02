@@ -220,7 +220,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
 
     Returns
     -------
-    threshold : float, int, array
+    threshold : float or int or array
         Threshold value(s).
 
     References
