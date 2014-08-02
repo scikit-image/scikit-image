@@ -4,7 +4,7 @@
 import numpy as np
 from numpy.testing import assert_raises, assert_equal
 import nose
-from skimage.util import version_requirements as vr
+from skimage._shared import version_requirements as vr
 
 
 def test_get_module_version():
@@ -32,12 +32,6 @@ def test_require():
         return 0
 
     assert_raises(ImportError, lambda: bar())
-
-    @vr.require('numpy', '<1.0')
-    def test_this():
-        assert False
-
-    assert_raises(nose.SkipTest, lambda: test_this()())
 
 
 def test_get_module():

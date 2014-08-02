@@ -1,5 +1,5 @@
 from warnings import warn
-from skimage.util.version_requirements import is_installed
+from skimage._shared.version_requirements import is_installed
 
 from .viewers import ImageViewer, CollectionViewer
 from .qt import qt_api

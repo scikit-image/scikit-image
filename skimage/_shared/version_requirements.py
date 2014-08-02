@@ -3,7 +3,6 @@ import functools
 import re
 import sys
 import types
-from numpy.testing.decorators import skipif
 
 
 def _check_version(actver, version, cmp_op):
@@ -108,12 +107,6 @@ def require(name, version=None):
                 if not version is None:
                     msg += " %s" % version
                 raise ImportError(msg + '"')
-        if (isinstance(obj, types.FunctionType) and
-                obj.__name__.startswith('test_')):
-            if not is_installed(name, version):
-                func_wrapped = lambda: skipif(True)(obj)
-            else:
-                func_wrapped = obj
         return func_wrapped
     return decorator
 

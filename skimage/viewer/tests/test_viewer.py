@@ -7,7 +7,7 @@ from skimage.viewer.plugins import OverlayPlugin
 from skimage.filter import sobel
 from numpy.testing import assert_equal
 from numpy.testing.decorators import skipif
-from skimage.util.version_requirements import require
+from skimage._shared.version_requirements import is_installed
 
 
 @skipif(not viewer_available)
@@ -54,7 +54,7 @@ def test_collection_viewer():
 
 
 @skipif(not viewer_available)
-@require('matplotlib', '>=1.2')
+@skipif(not is_installed('matplotlib', '>=1.2'))
 def test_viewer_with_overlay():
     img = data.coins()
     ov = OverlayPlugin(image_filter=sobel)

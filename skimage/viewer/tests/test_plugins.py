@@ -12,7 +12,7 @@ from skimage.viewer.plugins import (
     PlotPlugin)
 from skimage.viewer.plugins.base import Plugin
 from skimage.viewer.widgets import Slider
-from skimage.util.version_requirements import is_installed
+
 
 def setup_line_profile(image, limits='image'):
     viewer = ImageViewer(skimage.img_as_float(image))

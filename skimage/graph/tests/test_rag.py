@@ -1,6 +1,7 @@
 import numpy as np
 from skimage import graph
-from skimage.util.version_requirements import require
+from skimage._shared.version_requirements import is_installed
+from numpy.testing.decorators import skipif
 
 
 def max_edge(g, src, dst, n):
@@ -10,7 +11,7 @@ def max_edge(g, src, dst, n):
     return max(w1, w2)
 
 
-@require('networkx')
+@skipif(not is_installed('networkx'))
 def test_rag_merge():
     g = graph.rag.RAG()
 
@@ -45,7 +46,7 @@ def test_rag_merge():
     assert g.edges() == []
 
 
-@require('networkx')
+@skipif(not is_installed('networkx'))
 def test_threshold_cut():
 
     img = np.zeros((100, 100, 3), dtype='uint8')
