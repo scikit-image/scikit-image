@@ -245,7 +245,16 @@ def threshold_isodata(image, nbins=256, return_all=False):
     """
 
     hist, bin_centers = histogram(image, nbins)
+
+    # image only contains one unique value
+    if len(bin_centers) == 1:
+        if return_all:
+            return bin_centers
+        else:
+            return bin_centers[0]
+
     hist = hist.astype(np.float32)
+
     # csuml and csumh contain the count of pixels in that bin or lower, and
     # in all bins strictly higher than that bin, respectively
     csuml = np.cumsum(hist)
