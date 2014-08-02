@@ -193,10 +193,19 @@ def threshold_yen(image, nbins=256):
     return bin_centers[crit.argmax()]
 
 
-def threshold_isodata(image, nbins=256):
-    """Return threshold value based on ISODATA method.
+def isodata(image, nbins=256, return_all=False):
+    """Return threshold value(s) based on ISODATA method.
 
-    Histogram-based threshold, known as Ridler-Calvard method or intermeans.
+    Histogram-based threshold, known as Ridler-Calvard method or inter-means.
+    Threshold values returned satisfy the following equality:
+    threshold = (image[image <= threshold].mean() +
+                 image[image > threshold].mean()) / 2.0
+    That is, returned thresholds are intensities that separate the image into
+    two groups of pixels, where the threshold intensity is midway between the
+    mean intensities of these groups.
+
+    For integer images, the above equality holds to within one; for floating-
+    point images, the equality holds to within the histogram bin-width.
 
     Parameters
     ----------
@@ -205,12 +214,14 @@ def threshold_isodata(image, nbins=256):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
+    return_all: bool, optional
+        If False (default), return only the lowest threshold that satisfies
+        the above equality. If True, return all valid thresholds.
 
     Returns
     -------
-    threshold : float or int, corresponding input array dtype.
-        Upper threshold value. All pixels intensities that less or equal of
-        this value assumed as background.
+    threshold : float, int, array
+        Threshold value(s).
 
     References
     ----------
@@ -232,27 +243,49 @@ def threshold_isodata(image, nbins=256):
     >>> thresh = threshold_isodata(image)
     >>> binary = image > thresh
     """
+
     hist, bin_centers = histogram(image, nbins)
-    # On blank images (e.g. filled with 0) with int dtype, `histogram()`
-    # returns `bin_centers` containing only one value. Speed up with it.
-    if bin_centers.size == 1:
-        return bin_centers[0]
-    # It is not necessary to calculate the probability mass function here,
-    # because the l and h fractions already include the normalization.
-    pmf = hist.astype(np.float32)  # / hist.sum()
-    cpmfl = np.cumsum(pmf, dtype=np.float32)
-    cpmfh = np.cumsum(pmf[::-1], dtype=np.float32)[::-1]
+    hist = hist.astype(np.float32)
+    # csuml and csumh contain the count of pixels in that bin or lower, and
+    # in all bins strictly higher than that bin, respectively
+    csuml = np.cumsum(hist)
+    csumh = np.cumsum(hist[::-1])[::-1] - hist
 
-    binnums = np.arange(pmf.size, dtype=np.min_scalar_type(nbins))
-    # l and h contain average value of pixels in sum of bins, calculated
-    # from lower to higher and from higher to lower respectively.
-    l = np.ma.divide(np.cumsum(pmf * binnums, dtype=np.float32), cpmfl)
-    h = np.ma.divide(
-        np.cumsum((pmf[::-1] * binnums[::-1]), dtype=np.float32)[::-1],
-        cpmfh)
+    # intensity_sum contains the total pixel intensity from each bin
+    intensity_sum = hist * bin_centers
 
-    allmean = (l + h) / 2.0
-    threshold = bin_centers[np.nonzero(allmean.round() == binnums)[0][0]]
-    # This implementation returns threshold where
-    # `background <= threshold < foreground`.
-    return threshold
+    # l and h contain average value of all pixels in that bin or lower, and
+    # in all bins strictly higher than that bin, respectively.
+    # Note that since exp.histogram does not include empty bins at the low or
+    # high end of the range, csuml and csumh are strictly > 0, except in the
+    # last bin of csumh, which is zero by construction.
+    # So no worries about division by zero in the following lines, except
+    # for the last bin, but we can ignore that because no valid threshold
+    # can be in the top bin. So we just patch up csumh[-1] to not cause 0/0
+    # errors.
+    csumh[-1] = 1
+    l = np.cumsum(intensity_sum) / csuml
+    h = (np.cumsum(intensity_sum[::-1])[::-1] - intensity_sum) / csumh
+
+    # isodata finds threshold values that meet the criterion t = (l + m)/2
+    # where l is the mean of all pixels <= t and h is the mean of all pixels
+    # > t, as calculated above. So we are looking for places where
+    # (l + m) / 2 equals the intensity value for which those l and m figures
+    # were calculated -- which is, of course, the histogram bin centers.
+    # We only require this equality to be within the precision of the bin
+    # width, of course.
+    all_mean = (l + h) / 2.0
+    bin_width = bin_centers[1] - bin_centers[0]
+
+    # Look only at thresholds that are below the actual all_mean value,
+    # for consistency with the threshold being included in the lower pixel
+    # group. Otherwise can get thresholds that are not actually fixed-points
+    # of the isodata algorithm. For float images, this matters less, since
+    # there really can't be any guarantees anymore anyway.
+    distances = all_mean - bin_centers
+    thresholds = bin_centers[(distances >= 0) & (distances < bin_width)]
+
+    if return_all:
+        return thresholds
+    else:
+        return thresholds[0]
