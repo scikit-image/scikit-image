@@ -157,7 +157,7 @@ def test_yen_coins_image_as_float():
 
 def test_isodata_camera_image():
     camera = skimage.img_as_ubyte(data.camera())
-    assert threshold_isodata(camera) == 88
+    assert threshold_isodata(camera) == 87
 
 
 def test_isodata_coins_image():
@@ -167,19 +167,19 @@ def test_isodata_coins_image():
 
 def test_isodata_moon_image():
     moon = skimage.img_as_ubyte(data.moon())
-    assert threshold_isodata(moon) == 87
+    assert threshold_isodata(moon) == 86
 
 
 def test_isodata_moon_image_negative_int():
     moon = skimage.img_as_ubyte(data.moon()).astype(np.int32)
     moon -= 100
-    assert threshold_isodata(moon) == -13
+    assert threshold_isodata(moon) == -14
 
 
 def test_isodata_moon_image_negative_float():
     moon = skimage.img_as_ubyte(data.moon()).astype(np.float64)
     moon -= 100
-    assert -13 < threshold_isodata(moon) < -12
+    assert -14 < threshold_isodata(moon) < -13
 
 
 if __name__ == '__main__':
