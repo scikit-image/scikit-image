@@ -45,7 +45,9 @@ class OverlayPlugin(Plugin):
         self._overlay_plot = None
         self._overlay = None
         self.cmap = None
-        self.color_names = list(self.colors.keys())
+        # The keys of dictionaries may not come in predefined order.
+        # Sorting them will ensure a consistent order.
+        self.color_names = sorted(list(self.colors.keys()))
 
     def attach(self, image_viewer):
         super(OverlayPlugin, self).attach(image_viewer)
