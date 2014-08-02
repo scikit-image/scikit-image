@@ -1,14 +1,12 @@
 import numpy as np
 import warnings
 from six import string_types
-from skimage.util.version_requirements import require
 
 from ._unwrap_1d import unwrap_1d
 from ._unwrap_2d import unwrap_2d
 from ._unwrap_3d import unwrap_3d
 
 
-@require('python', '>=2.7')
 def unwrap_phase(image, wrap_around=False):
     '''From ``image``, wrapped to lie in the interval [-pi, pi), recover the
     original, unwrapped image.
@@ -86,6 +84,7 @@ def unwrap_phase(image, wrap_around=False):
 
     if np.ma.isMaskedArray(image):
         mask = np.require(image.mask, np.uint8, ['C'])
+        image = image.data
     else:
         mask = np.zeros_like(image, dtype=np.uint8, order='C')
     image_not_masked = np.asarray(image, dtype=np.float64, order='C')

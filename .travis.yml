@@ -90,18 +90,13 @@ script:
 
     # Run all doc examples
     - export PYTHONPATH=$(pwd):$PYTHONPATH
-    - if [[ $ENV != python=2.6* ]]; then
-          for f in doc/examples/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
-      fi
+    - for f in doc/examples/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
     - for f in doc/examples/applications/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
 
     # run tests again with optional dependencies to get more coverage
     # measure coverage on py3.3
-    # doctests fail on python 2.6 for restoration/unwrap
     - if [[ $ENV == python=3.3* ]]; then
          nosetests --exe -v --with-doctest --with-cov --cover-package skimage;
-      elif [[ $ENV == python=2.6* ]]; then
-         nosetests --exe -v skimage;
       else
          nosetests --exe -v --with-doctest skimage;
       fi

@@ -7,7 +7,6 @@ from numpy.testing import (run_module_suite, assert_array_almost_equal,
 import warnings
 
 from skimage.restoration import unwrap_phase
-from skimage.util.version_requirements import require
 
 
 def assert_phase_almost_equal(a, b, *args, **kwargs):
@@ -42,7 +41,6 @@ def check_unwrap(image, mask=None):
     assert_phase_almost_equal(image_unwrapped, image)
 
 
-@require('python', '>=2.7')
 def test_unwrap_1d():
     image = np.linspace(0, 10 * np.pi, 100)
     check_unwrap(image)
@@ -52,7 +50,6 @@ def test_unwrap_1d():
     assert_raises(ValueError, unwrap_phase, image, True)
 
 
-@require('python', '>=2.7')
 def test_unwrap_2d():
     x, y = np.ogrid[:8, :16]
     image = 2 * np.pi * (x * 0.2 + y * 0.1)
@@ -62,7 +59,6 @@ def test_unwrap_2d():
     yield check_unwrap, image, mask
 
 
-@require('python', '>=2.7')
 def test_unwrap_3d():
     x, y, z = np.ogrid[:8, :12, :16]
     image = 2 * np.pi * (x * 0.2 + y * 0.1 + z * 0.05)
@@ -108,14 +104,12 @@ def check_wrap_around(ndim, axis):
                         image_unwrap_wrap_around[index_last])
 
 
-@require('python', '>=2.7')
 def test_wrap_around():
     for ndim in (2, 3):
         for axis in range(ndim):
             yield check_wrap_around, ndim, axis
 
 
-@require('python', '>=2.7')
 def test_mask():
     length = 100
     ramps = [np.linspace(0, 4 * np.pi, length),
@@ -143,7 +137,6 @@ def test_mask():
         assert_array_almost_equal(image_unwrapped_3d[:, :, -1], image[i, -1])
 
 
-@require('python', '>=2.7')
 def test_invalid_input():
     assert_raises(ValueError, unwrap_phase, np.zeros([]))
     assert_raises(ValueError, unwrap_phase, np.zeros((1, 1, 1, 1)))
