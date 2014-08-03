@@ -14,7 +14,7 @@ from six import BytesIO
 
 try:
     from PIL import Image
-    from skimage.io._plugins.pil_plugin import imimport, imexport, _palette_is_grayscale
+    from skimage.io._plugins.pil_plugin import pil_to_ndarray, ndarray_to_pil, _palette_is_grayscale
     use_plugin('pil')
 except ImportError:
     PIL_available = False
@@ -122,8 +122,8 @@ class TestSave:
         return y
 
     def roundtrip_pil_image(self, x):
-        pil_image = imexport(x)
-        y = imimport(pil_image)
+        pil_image = ndarray_to_pil(x)
+        y = pil_to_ndarray(pil_image)
         return y
 
     def verify_roundtrip(self, dtype, x, y, scaling=1):
@@ -169,8 +169,8 @@ def test_imsave_filelike():
 def test_imexport_imimport():
     shape = (2, 2)
     image = np.zeros(shape)
-    pil_image = imexport(image)
-    out = imimport(pil_image)
+    pil_image = ndarray_to_pil(image)
+    out = pil_to_ndarray(pil_image)
     assert out.shape == shape
 
 
