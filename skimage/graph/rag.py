@@ -1,11 +1,13 @@
 try:
     import networkx as nx
 except ImportError:
+    msg = "Graph functions require networkx, which is not installed"
     class nx:
         class Graph:
-            pass
+            def __init__(self, *args, **kwargs):
+                raise ImportError(msg)
     import warnings
-    warnings.warn('Region Adjacency Graph (RAG) features require networkx')
+    warnings.warn(msg)
 import numpy as np
 from scipy.ndimage import filters
 from scipy import ndimage as nd
