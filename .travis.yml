@@ -41,7 +41,7 @@ before_install:
         conda config --set always_yes yes;
         conda update conda;
         conda info -a;
-        conda create -n test $ENV six scipy pip flake8 nose;
+        travis_retry conda create -n test $ENV six scipy pip flake8 nose;
         source activate test;
       fi
     - pip install coveralls pillow
@@ -72,7 +72,7 @@ script:
         pip install --use-mirrors -q matplotlib;
         pip install -q networkx;
       else
-        conda install -q matplotlib pyqt networkx;
+        travis_retry conda install -q matplotlib pyqt networkx;
         sudo cp ~/miniconda/envs/test/include/png* /usr/include;
         rm ~/miniconda/envs/test/lib/libm-2.5.so;
         rm ~/miniconda/envs/test/lib/libm.*;
