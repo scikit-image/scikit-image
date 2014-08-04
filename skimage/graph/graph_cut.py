@@ -3,7 +3,6 @@ try:
 except ImportError:
     import warnings
     warnings.warn('"cut_threshold" requires networkx')
-    nx = None
 import numpy as np
 
 
