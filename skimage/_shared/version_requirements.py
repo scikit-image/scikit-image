@@ -95,6 +95,10 @@ def require(name, version=None):
         If version is not None, checking version
         (must have an attribute named '__version__' or 'VERSION')
         Version may start with =, >=, > or < to specify the exact requirement
+
+    Returns
+    -------
+    A decorator function.
     """
     def decorator(obj):
         @functools.wraps(obj)
@@ -112,6 +116,22 @@ def require(name, version=None):
 
 
 def get_module(module_name, version=None):
+    """Return a module object of name *module_name* if installed.
+
+    Parameters
+    ----------
+    module_name : str
+        Name of module.
+    version : str, optional
+        Version string to test against.
+        If version is not None, checking version
+        (must have an attribute named '__version__' or 'VERSION')
+        Version may start with =, >=, > or < to specify the exact requirement
+
+    Returns
+    -------
+    Module if *module_name* is installed matching the optional version or None.
+    """
     if not is_installed(module_name, version):
         return None
     return __import__(module_name,
