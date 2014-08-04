@@ -24,7 +24,7 @@ before_install:
     - sudo apt-get update
 
     # Python 3.2 is not supported by Miniconda, so we use the package manager for that run.
-    # NumPy has a bug in python 3 that is only fixed in the latest version, hence the download of _import _tools.
+    # NumPy has a bug in python 3 that is only fixed in the latest version, hence the download of _import_tools.
     - if [[ $ENV == python=3.2 ]]; then
         sudo apt-get install python3-numpy;
         wget https://raw.githubusercontent.com/numpy/numpy/master/numpy/_import_tools.py -O /home/travis/virtualenv/python3.2_with_system_site_packages/lib/python3.2/site-packages/numpy/_import_tools.py;
