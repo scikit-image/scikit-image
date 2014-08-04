@@ -2,7 +2,6 @@ from distutils.version import LooseVersion
 import functools
 import re
 import sys
-import types
 
 
 def _check_version(actver, version, cmp_op):
@@ -53,14 +52,15 @@ def is_installed(name, version=None):
         (must have an attribute named '__version__' or 'VERSION')
         Version may start with =, >=, > or < to specify the exact requirement
 
+    Returns
+    -------
+    out : bool
+        True if *name* is installed matching the optional version.
+
     Note
     ----
     Original Copyright (C) 2009-2011 Pierre Raybaut
     Licensed under the terms of the MIT License.
-
-    Returns
-    -------
-    True if *name* is installed matching the optional version.
     """
     if name.lower() == 'python':
         actver = sys.version[:6]
@@ -98,7 +98,9 @@ def require(name, version=None):
 
     Returns
     -------
-    A decorator function.
+    func : function
+        A decorator that raises an ImportError if a function is run
+        in the absence of the input dependency.
     """
     def decorator(obj):
         @functools.wraps(obj)
@@ -130,7 +132,9 @@ def get_module(module_name, version=None):
 
     Returns
     -------
-    Module if *module_name* is installed matching the optional version or None.
+    mod : module or None
+        Module if *module_name* is installed matching the optional version
+        or None otherwise.
     """
     if not is_installed(module_name, version):
         return None

@@ -1,4 +1,4 @@
-"""Tests for the version requirment functions.
+"""Tests for the version requirement functions.
 
 """
 import numpy as np
