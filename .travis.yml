@@ -5,6 +5,8 @@
 
 language: python
 
+
+#  Tthe Travis python is set to 3.2 for all builds, since we use the default python for the 3.2 build and the anaconda python otherwise
 python:
     - 3.2
 
@@ -24,7 +26,7 @@ before_install:
     - sudo apt-get update
 
     # Python 3.2 is not supported by Miniconda, so we use the package manager for that run.
-    # NumPy has a bug in python 3 that is only fixed in the latest version, 
+    # NumPy has a bug in python 3 that is only fixed in the latest version,
     #  hence the below wget of numpy/_import_tools.py from github.
     - if [[ $ENV == python=3.2 ]]; then
         sudo apt-get install python3-numpy;
@@ -59,7 +61,7 @@ script:
     - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
 
     # Install optional dependencies to get full test coverage
-    # Notes: 
+    # Notes:
     # - pyfits and imread do NOT support py3.2
     # - Use the png headers included in anaconda (from matplotlib install)
     # TODO: Remove the libm removal when anaconda fixes their libraries
