@@ -289,7 +289,7 @@ def draw_rag(labels, rag, img, border_color=None, node_color='yellow',
     >>> img = data.coffee()
     >>> labels = segmentation.slic(img)
     >>> g =  graph.rag_mean_color(img, labels)
-    >>> out = graph.rag_draw(labels, g, img)
+    >>> out = graph.draw_rag(labels, g, img)
     """
     rag = rag.copy()
     out = util.img_as_float(img)
