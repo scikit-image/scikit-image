@@ -5,12 +5,15 @@ How to make a new release of ``skimage``
 
 - Update release notes.
 
-  - To show a list of contributors and changes, run
-    ``doc/release/contribs.py <tag of prev release>``.
+  1. Review and cleanup ``doc/release/release_dev.txt``
 
-  - Review and cleanup ``doc/release/release_dev.txt``, rename to
-    ``doc/release/release_X.txt``, and create new
-    ``doc/release/release_dev.txt``.
+     - To show a list of contributors and changes, run
+       ``doc/release/contribs.py <tag of prev release>``.
+
+  2. Rename to ``doc/release/release_X.txt``
+
+  3. Copy ``doc/release/release_template.txt`` to
+     ``doc/release/release_dev.txt`` for the next release.
 
 - Update the version number in ``setup.py`` and ``bento.info`` and commit
 
