@@ -314,7 +314,7 @@ def draw_rag(labels, rag, img, border_color=None, node_color='yellow',
         # Because we kept the offset as 1
         rag.node[region['label'] - 1]['centroid'] = region['centroid']
 
-    if not border_color is None:
+    if border_color is not None:
         border_color = cc.to_rgb(border_color)
         out = segmentation.mark_boundaries(out, rag_labels, color=border_color)
 
