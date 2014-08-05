@@ -232,7 +232,7 @@ def _ncut_relabel(rag, thresh, num_cuts, map_array):
     # The N-cut wasn't small enough, or could not be computed.
     # The remaining graph is a region.
     # Assign `ncut label` by picking any label from the existing nodes, since
-    # `labels` are unique, 'ncut label' is also unique.
+    # `labels` are unique, `new_label` is also unique.
     node = rag.nodes()[0]
     new_label = rag.node[node]['labels'][0]
     for n, d in rag.nodes_iter(data=True):
