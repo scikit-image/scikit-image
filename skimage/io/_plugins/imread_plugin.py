@@ -1,6 +1,6 @@
 __all__ = ['imread', 'imsave']
 
-from skimage.utils.dtype import convert
+from skimage.util.dtype import convert
 
 try:
     import imread as _imread

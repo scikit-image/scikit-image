@@ -131,7 +131,7 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
     if selem is None:
         selem = np.ones([3] * seed.ndim, dtype=bool)
     else:
-        selem = selem.astype(bool, copy=True)
+        selem = selem.astype(bool)
 
     if offset is None:
         if not all([d % 2 == 1 for d in selem.shape]):

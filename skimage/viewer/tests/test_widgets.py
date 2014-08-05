@@ -1,18 +1,13 @@
 
 import os
 from skimage import data, img_as_float, io
+from skimage.viewer import ImageViewer, viewer_available
+from skimage.viewer.widgets import (
+    Slider, OKCancelButtons, SaveButtons, ComboBox, Text)
+from skimage.viewer.plugins.base import Plugin
+from skimage.viewer.qt import QtGui, QtCore
 from numpy.testing import assert_almost_equal, assert_equal
 from numpy.testing.decorators import skipif
-
-try:
-    from skimage.viewer.qt import qt_api, QtGui, QtCore
-    from skimage.viewer import ImageViewer
-    from skimage.viewer.widgets import (
-        Slider, OKCancelButtons, SaveButtons, ComboBox, Text)
-    from skimage.viewer.plugins.base import Plugin
-    viewer_available = not qt_api is None
-except ImportError:
-    viewer_available = False
 
 
 def get_image_viewer():

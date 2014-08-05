@@ -1,6 +1,8 @@
 import numpy as np
-import matplotlib.pyplot as plt
-
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    pass
 from skimage import color
 from skimage import exposure
 from .plotplugin import PlotPlugin

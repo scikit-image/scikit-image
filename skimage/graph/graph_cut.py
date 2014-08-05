@@ -1,4 +1,8 @@
-import networkx as nx
+try:
+    import networkx as nx
+except ImportError:
+    import warnings
+    warnings.warn('"cut_threshold" requires networkx')
 import numpy as np
 
 

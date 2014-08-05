@@ -84,6 +84,7 @@ def unwrap_phase(image, wrap_around=False):
 
     if np.ma.isMaskedArray(image):
         mask = np.require(image.mask, np.uint8, ['C'])
+        image = image.data
     else:
         mask = np.zeros_like(image, dtype=np.uint8, order='C')
     image_not_masked = np.asarray(image, dtype=np.float64, order='C')

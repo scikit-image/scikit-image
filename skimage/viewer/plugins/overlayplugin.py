@@ -5,15 +5,10 @@ from .base import Plugin
 from ..utils import ClearColormap, update_axes_image
 
 import six
+from skimage._shared.version_requirements import is_installed
 
 
 __all__ = ['OverlayPlugin']
-
-
-def recent_mpl_version():
-    import matplotlib
-    version = matplotlib.__version__.split('.')
-    return int(version[0]) == 1 and int(version[1]) >= 2
 
 
 class OverlayPlugin(Plugin):
@@ -38,14 +33,14 @@ class OverlayPlugin(Plugin):
               'cyan': (0, 1, 1)}
 
     def __init__(self, **kwargs):
-        if not recent_mpl_version():
+        if not is_installed('matplotlib', '>=1.2'):
             msg = "Matplotlib >= 1.2 required for OverlayPlugin."
             warn(RuntimeWarning(msg))
         super(OverlayPlugin, self).__init__(**kwargs)
         self._overlay_plot = None
         self._overlay = None
         self.cmap = None
-        self.color_names = list(self.colors.keys())
+        self.color_names = sorted(list(self.colors.keys()))
 
     def attach(self, image_viewer):
         super(OverlayPlugin, self).attach(image_viewer)

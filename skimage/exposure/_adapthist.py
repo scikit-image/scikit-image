@@ -17,7 +17,7 @@ import numpy as np
 import skimage
 from skimage.color.adapt_rgb import adapt_rgb, hsv_value
 from skimage.exposure import rescale_intensity
-from skimage.util import view_as_blocks
+from skimage.util import view_as_blocks, pad
 
 
 MAX_REG_X = 16  # max. # contextual regions in x-direction */
@@ -125,7 +125,7 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
     if h_inner != image.shape[1] or w_inner != image.shape[0]:
         h_pad = height * ntiles_y - image.shape[0]
         w_pad = width * ntiles_x - image.shape[1]
-        image = np.pad(image, ((0, h_pad), (0, w_pad)), 'reflect')
+        image = pad(image, ((0, h_pad), (0, w_pad)), mode='reflect')
         h_inner, w_inner = image.shape
 
     bin_size = 1 + NR_OF_GREY / nbins

@@ -3,8 +3,7 @@ import numpy as np
 try:
     from matplotlib import lines
 except ImportError:
-    print("Could not import matplotlib -- skimage.viewer not available.")
-
+    pass
 from skimage.viewer.canvastools.base import CanvasToolBase, ToolHandles
 
 

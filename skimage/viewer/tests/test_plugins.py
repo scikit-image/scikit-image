@@ -4,20 +4,14 @@ import skimage
 import skimage.data as data
 from skimage.filter.rank import median
 from skimage.morphology import disk
+from skimage.viewer import ImageViewer, viewer_available
 from numpy.testing import assert_equal, assert_allclose, assert_almost_equal
 from numpy.testing.decorators import skipif
-
-try:
-    from skimage.viewer.qt import qt_api
-    from skimage.viewer import ImageViewer
-    from skimage.viewer.plugins import (
-        LineProfile, Measure, CannyPlugin, LabelPainter, Crop, ColorHistogram,
-        PlotPlugin)
-    from skimage.viewer.plugins.base import Plugin
-    from skimage.viewer.widgets import Slider
-    viewer_available = not qt_api is None
-except ImportError:
-    viewer_available = False
+from skimage.viewer.plugins import (
+    LineProfile, Measure, CannyPlugin, LabelPainter, Crop, ColorHistogram,
+    PlotPlugin)
+from skimage.viewer.plugins.base import Plugin
+from skimage.viewer.widgets import Slider
 
 
 def setup_line_profile(image, limits='image'):

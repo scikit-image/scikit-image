@@ -123,7 +123,6 @@ class ImageViewer(QtGui.QMainWindow):
         self.fig, self.ax = utils.figimage(image)
         self.canvas = self.fig.canvas
         self.canvas.setParent(self)
-
         self.ax.autoscale(enable=False)
 
         self._image_plot = self.ax.images[0]
