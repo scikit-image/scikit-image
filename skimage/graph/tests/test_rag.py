@@ -69,7 +69,7 @@ def test_threshold_cut():
     # Two labels
     assert new_labels.max() == 1
 
-
+@skipif(not is_installed('networkx'))
 def test_cut_normalized():
 
     img = np.zeros((100, 100, 3), dtype='uint8')
