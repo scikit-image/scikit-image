@@ -13,17 +13,14 @@ except ImportError:
 import numpy as np
 from scipy.ndimage import filters
 from scipy import ndimage as nd
-<<<<<<< HEAD
 import math
-from .. import draw, measure, segmentation
-=======
-from .. import draw
-from .. import measure
-from .. import segmentation
-from matplotlib import colors
-from matplotlib import cm
-from .. import util
->>>>>>> rebase and change API to support mpl colorspec
+from .. import draw, measure, segmentation, util
+try:
+    from matplotlib import colors
+    from matplotlib import cm
+except ImportError:
+    pass
+
 
 
 def min_weight(graph, src, dst, n):
