@@ -2,7 +2,7 @@ try:
     import networkx as nx
 except ImportError:
     import warnings
-    warnings.warn('"cut_threshold" requires networkx')
+    warnings.warn('RAGs require networkx')
 import numpy as np
 from . import _ncut
 from . import _ncut_cy
