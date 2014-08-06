@@ -91,7 +91,7 @@ def test_cut_normalized():
     # Two labels
     assert new_labels.max() == 1
 
-
+@skipif(not is_installed('networkx'))
 def test_rag_error():
     img = np.zeros((10, 10, 3), dtype='uint8')
     labels = np.zeros((10, 10), dtype='uint8')
