@@ -19,13 +19,25 @@ from six import string_types
 def imread(fname, dtype=None):
     """Load an image from file.
 
+    Parameters
+    ----------
+    fname : file name as string
+    dtype : numpy dtype object or string specifier
+       Specifies data type of array elements.
+
+
     """
     im = Image.open(fname)
     return pil_to_ndarray(im, dtype)
 
 
 def pil_to_ndarray(im, dtype=None):
-    """import an image from a PIL Image object in memory
+    """Import a PIL Image object to an ndarray, in memory.
+
+    Parameters
+    ----------
+    Refer to ``imread``.
+
    
     """
     fp = im.fp if hasattr(im, 'fp') else None 
@@ -74,11 +86,11 @@ def _palette_is_grayscale(pil_image):
 
 
 def ndarray_to_pil(arr, format_str=None):
-    """Export an image as PIL object
+    """Export an ndarray to a PIL object.
 
     Parameters
     ----------
-    See imsave
+    Refer to ``imsave``.
 
     """
     arr = np.asarray(arr).squeeze()
@@ -113,7 +125,6 @@ def ndarray_to_pil(arr, format_str=None):
                                arr.tostring())
 
     return img
-
 
 
 def imsave(fname, arr, format_str=None):
