@@ -19,10 +19,10 @@ def DW_matrices(graph):
     Returns
     -------
     D : csc_matrix
-        The diagonal matrix of the graph. `D[i, i]` is the sum of weights of
+        The diagonal matrix of the graph. ``D[i, i]`` is the sum of weights of
         all edges incident on `i`. All other enteries are `0`.
     W : csc_matrix
-        The weight matrix of the graph. `W[i, j]` is the weight of the edge
+        The weight matrix of the graph. ``W[i, j]`` is the weight of the edge
         joining `i` to `j`.
     """
     # sparse.eighsh is most efficient with CSC-formatted input
@@ -62,7 +62,7 @@ def ncut_cost(cut, D, W):
     # D has elements only along the diagonal, one per node, so we can directly
     # index the data attribute with cut.
     assoc_a = D.data[cut].sum()
-    assoc_b = D.data[np.logical_not(cut)].sum()
+    assoc_b = D.data[~cut].sum()
 
     return (cut_cost / assoc_a) + (cut_cost / assoc_b)
 

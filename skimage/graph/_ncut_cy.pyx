@@ -6,7 +6,7 @@ cimport numpy as cnp
 import numpy as np
 
 
-def argmin2(cnp.float64_t[:] array):
+def argmin2(cnp.double_t[:] array):
     """Return the index of the 2nd smallest value in an array.
 
     Parameters

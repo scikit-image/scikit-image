@@ -95,4 +95,4 @@ def test_cut_normalized():
 def test_rag_error():
     img = np.zeros((10, 10, 3), dtype='uint8')
     labels = np.zeros((10, 10), dtype='uint8')
-    testing.assert_raises(ValueError, graph.rag_mean_color,img, labels, 2, 'non existant mode')
+    testing.assert_raises(ValueError, graph.rag_mean_color, img, labels, 2, 'non existant mode')

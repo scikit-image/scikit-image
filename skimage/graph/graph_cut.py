@@ -89,11 +89,11 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10):
     Returns
     -------
     out : ndarray
-        The new labelled array.
+        The new labeled array.
 
     Examples
     --------
-    >>> from skimage import data, graph, segmentation, color, io
+    >>> from skimage import data, graph, segmentation
     >>> img = data.lena()
     >>> labels = segmentation.slic(img, compactness=30, n_segments=400)
     >>> rag = graph.rag_mean_color(img, labels, mode='similarity')
@@ -103,7 +103,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10):
     ----------
     .. [1] Shi, J.; Malik, J., "Normalized cuts and image segmentation",
            Pattern Analysis and Machine Intelligence,
-           IEEE Transactions on , vol.22, no.8, pp.888,905, Aug 2000
+           IEEE Transactions on , vol.22, no.8, pp.888,905, August 2000
 
     """
     map_array = np.arange(labels.max() + 1)
@@ -138,7 +138,7 @@ def partition_by_cut(cut, rag):
 
 
 def get_min_ncut(ev, d, w, num_cuts):
-    """Threshold an eigen vector evenly, to determine minimum ncut.
+    """Threshold an eigenvector evenly, to determine minimum ncut.
 
     Parameters
     ----------
@@ -174,7 +174,7 @@ def get_min_ncut(ev, d, w, num_cuts):
 def _ncut_relabel(rag, thresh, num_cuts, map_array):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
-    Recursively partition the graph into 2, untill further subdividing
+    Recursively partition the graph into 2, until further subdivision
     yields a cut greather than `thresh` or such a cut cannot be computed.
     For such a subgraph, indices to labels of all its nodes map to a single
     unique value.
@@ -212,7 +212,7 @@ def _ncut_relabel(rag, thresh, num_cuts, map_array):
         stop = True
 
     if not stop:
-        # Pick second smalles eigen vector.
+        # Pick second smalles eigenvector.
         # Refer Shi & Malik 2001, Section 3.2.3, Page 893
         vals, vectors = np.real(vals), np.real(vectors)
         index2 = _ncut_cy.argmin2(vals)
