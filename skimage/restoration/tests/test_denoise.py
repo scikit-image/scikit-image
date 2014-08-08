@@ -7,13 +7,15 @@ from skimage import restoration, data, color, img_as_float
 np.random.seed(1234)
 
 
-lena = img_as_float(data.lena()[:256, :256])
+lena = img_as_float(data.lena()[:128, :128])
 lena_gray = color.rgb2gray(lena)
+checkerboard_gray = img_as_float(data.checkerboard())
+checkerboard = color.gray2rgb(checkerboard_gray)
 
 
 def test_denoise_tv_chambolle_2d():
     # lena image
-    img = lena_gray
+    img = lena_gray.copy()
     # add noise to lena
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     # clip noise so that it does not exceed allowed range for float images.
@@ -70,7 +72,7 @@ def test_denoise_tv_chambolle_3d():
 
 
 def test_denoise_tv_bregman_2d():
-    img = lena_gray
+    img = checkerboard_gray.copy()
     # add some random noise
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
@@ -78,14 +80,14 @@ def test_denoise_tv_bregman_2d():
     out1 = restoration.denoise_tv_bregman(img, weight=10)
     out2 = restoration.denoise_tv_bregman(img, weight=5)
 
-    # make sure noise is reduced
-    assert img.std() > out1.std()
-    assert out1.std() > out2.std()
+    # make sure noise is reduced in the checkerboard cells
+    assert img[30:45, 5:15].std() > out1[30:45, 5:15].std()
+    assert out1[30:45, 5:15].std() > out2[30:45, 5:15].std()
 
 
 def test_denoise_tv_bregman_float_result_range():
     # lena image
-    img = lena_gray
+    img = lena_gray.copy()
     int_lena = np.multiply(img, 255).astype(np.uint8)
     assert np.max(int_lena) > 1
     denoised_int_lena = restoration.denoise_tv_bregman(int_lena, weight=60.0)
@@ -96,7 +98,7 @@ def test_denoise_tv_bregman_float_result_range():
 
 
 def test_denoise_tv_bregman_3d():
-    img = lena
+    img = checkerboard.copy()
     # add some random noise
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
@@ -104,13 +106,13 @@ def test_denoise_tv_bregman_3d():
     out1 = restoration.denoise_tv_bregman(img, weight=10)
     out2 = restoration.denoise_tv_bregman(img, weight=5)
 
-    # make sure noise is reduced
-    assert img.std() > out1.std()
-    assert out1.std() > out2.std()
+    # make sure noise is reduced in the checkerboard cells
+    assert img[30:45, 5:15].std() > out1[30:45, 5:15].std()
+    assert out1[30:45, 5:15].std() > out2[30:45, 5:15].std()
 
 
 def test_denoise_bilateral_2d():
-    img = lena_gray
+    img = checkerboard_gray.copy()
     # add some random noise
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
@@ -120,13 +122,13 @@ def test_denoise_bilateral_2d():
     out2 = restoration.denoise_bilateral(img, sigma_range=0.2,
                                          sigma_spatial=30)
 
-    # make sure noise is reduced
-    assert img.std() > out1.std()
-    assert out1.std() > out2.std()
+    # make sure noise is reduced in the checkerboard cells
+    assert img[30:45, 5:15].std() > out1[30:45, 5:15].std()
+    assert out1[30:45, 5:15].std() > out2[30:45, 5:15].std()
 
 
 def test_denoise_bilateral_3d():
-    img = lena
+    img = checkerboard.copy()
     # add some random noise
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
@@ -136,9 +138,9 @@ def test_denoise_bilateral_3d():
     out2 = restoration.denoise_bilateral(img, sigma_range=0.2,
                                          sigma_spatial=30)
 
-    # make sure noise is reduced
-    assert img.std() > out1.std()
-    assert out1.std() > out2.std()
+    # make sure noise is reduced in the checkerboard cells
+    assert img[30:45, 5:15].std() > out1[30:45, 5:15].std()
+    assert out1[30:45, 5:15].std() > out2[30:45, 5:15].std()
 
 
 if __name__ == "__main__":
