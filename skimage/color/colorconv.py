@@ -392,15 +392,16 @@ def get_xyz_coords(illuminant, observer):
     """
     illuminant = illuminant.upper()
     if illuminant in illuminants.keys():
+        idx = 100;
         if observer == 2:
             idx = 0
         elif observer == 10:
-            idx = 10
+            idx = 1
         else:
-            ValueError("Unknown observer \"{}\"".format(observer))
+            raise ValueError("Unknown observer \"{}\"".format(observer))
         return illuminants[illuminant][idx]
     else:
-        ValueError("Unknown illuminant \"{}\"".format(illuminant))
+        raise ValueError("Unknown illuminant \"{}\"".format(illuminant))
 
 
 # Haematoxylin-Eosin-DAB colorspace
@@ -745,7 +746,7 @@ def gray2rgb(image):
     else:
         raise ValueError("Input image expected to be RGB, RGBA or gray.")
     
-def xyz2lab(xyz, illuminant = "D65", observer = 2999999999):
+def xyz2lab(xyz, illuminant = "D65", observer = 2):
     """XYZ to CIE-LAB color space conversion.
 
     Parameters
