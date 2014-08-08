@@ -103,6 +103,9 @@ class TestSimpleImage():
         out = threshold_adaptive(self.image, 3, method='gaussian')
         assert_equal(ref, out)
 
+        out = threshold_adaptive(self.image, 3, method='gaussian', param=1.0 / 3.0)
+        assert_equal(ref, out)
+
     def test_threshold_adaptive_mean(self):
         ref = np.array(
             [[False, False, False, False,  True],
