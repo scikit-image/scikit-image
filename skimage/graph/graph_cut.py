@@ -9,7 +9,7 @@ from . import _ncut_cy
 from scipy.sparse import linalg
 
 
-def cut_threshold(labels, rag, thresh):
+def cut_threshold(labels, rag, thresh, in_place=True):
     """Combine regions seperated by weight less than threshold.
 
     Given an image's labels and its RAG, output new labels by
@@ -25,6 +25,10 @@ def cut_threshold(labels, rag, thresh):
     thresh : float
         The threshold. Regions connected by edges with smaller weights are
         combined.
+    in_place : bool
+        If set, modifies `rag` in place. The function will remove the edges
+        with weights less that `thresh`. If set to `False` the function
+        makes a copy of `rag` before proceeding.
 
     Returns
     -------
@@ -47,7 +51,9 @@ def cut_threshold(labels, rag, thresh):
 
     """
     # Because deleting edges while iterating through them produces an error.
-    rag = rag.copy()
+    if not in_place:
+        rag = rag.copy()
+
     to_remove = [(x, y) for x, y, d in rag.edges_iter(data=True)
                  if d['weight'] >= thresh]
     rag.remove_edges_from(to_remove)
@@ -66,7 +72,7 @@ def cut_threshold(labels, rag, thresh):
     return map_array[labels]
 
 
-def cut_normalized(labels, rag, thresh=0.001, num_cuts=10):
+def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Given an image's labels and its similarity RAG, recursively perform
@@ -85,6 +91,9 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10):
         value of the N-cut exceeds `thresh`.
     num_cuts : int
         The number or N-cuts to perform before determining the optimal one.
+    in_place : bool
+        If set, modifies `rag` in place. For each node `n` the function will
+        set a new attribute ``rag.node[n]['ncut label]``.
 
     Returns
     -------
@@ -106,8 +115,15 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10):
            IEEE Transactions on , vol.22, no.8, pp.888,905, August 2000
 
     """
-    map_array = np.arange(labels.max() + 1)
-    _ncut_relabel(rag, thresh, num_cuts, map_array)
+    if not in_place:
+        rag = rag.copy()
+
+    _ncut_relabel(rag, thresh, num_cuts)
+
+    map_array = np.zeros(labels.max() + 1)
+    # Mapping from old labels to new
+    for n, d in rag.nodes_iter(data=True):
+        map_array[d['labels']] = d['ncut label']
 
     return map_array[labels]
 
@@ -128,6 +144,16 @@ def partition_by_cut(cut, rag):
     sub1, sub2 : RAG
         The two resulting subgraphs from the bi-partition.
     """
+    # `cut` is derived from `D` and `W` matrices, which also follow the
+    # ordering returned by `rag.nodes()` because we use
+    # nx.to_scipy_sparce_matrix.
+
+    # Example
+    # rag.nodes() = [3, 7, 9, 13]
+    # cut = [True, False, True, False]
+    # nodes1 = [3, 9]
+    # nodes2 = [7, 10]
+
     nodes1 = [n for i, n in enumerate(rag.nodes()) if cut[i]]
     nodes2 = [n for i, n in enumerate(rag.nodes()) if not cut[i]]
 
@@ -153,9 +179,10 @@ def get_min_ncut(ev, d, w, num_cuts):
 
     Returns
     -------
-    threshold, mcut : float
-        The threshold which produced the minimum ncut, and the value of the
-        ncut itself.
+    mask : array
+        The array of booleans which denotes the bi-partition.
+    mcut : float
+        The value of the minimum ncut.
     """
     mcut = np.inf
 
@@ -165,13 +192,21 @@ def get_min_ncut(ev, d, w, num_cuts):
         mask = ev > t
         cost = _ncut.ncut_cost(mask, d, w)
         if cost < mcut:
+            min_mask = mask
             mcut = cost
-            threshold = t
 
-    return threshold, mcut
+    return min_mask, mcut
 
 
-def _ncut_relabel(rag, thresh, num_cuts, map_array):
+def _label_all(rag, attr_name):
+    node = rag.nodes()[0]
+    new_label = rag.node[node]['labels'][0]
+    for n, d in rag.nodes_iter(data=True):
+        for l in d['labels']:
+            d[attr_name] = new_label
+
+
+def _ncut_relabel(rag, thresh, num_cuts):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Recursively partition the graph into 2, until further subdivision
@@ -195,46 +230,37 @@ def _ncut_relabel(rag, thresh, num_cuts, map_array):
         the function.
     """
     d, w = _ncut.DW_matrices(rag)
-    stop = False
     m = w.shape[0]
 
     if m > 2:
         d2 = d.copy()
         # Since d is diagonal, we can directly operate on it's data
-        # the inverse
-        d2.data = 1.0 / d2.data
-        # the square root
-        d2.data = np.sqrt(d2.data)
+        # the inverse of the square root
+        d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
+
         # Refer Shi & Malik 2001, Equation 7, Page 891
         vals, vectors = linalg.eigsh(d2 * (d - w) * d2, which='SM',
                                      k=min(100, m - 2))
-    else:
-        stop = True
 
-    if not stop:
-        # Pick second smalles eigenvector.
+        # Pick second smallest eigenvector.
         # Refer Shi & Malik 2001, Section 3.2.3, Page 893
         vals, vectors = np.real(vals), np.real(vectors)
         index2 = _ncut_cy.argmin2(vals)
         ev = _ncut.normalize(vectors[:, index2])
 
-        threshold, mcut = get_min_ncut(ev, d, w, num_cuts)
+        cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
         if (mcut < thresh):
-            cut_mask = ev > threshold
             # Sub divide and perform N-cut again
             # Refer Shi & Malik 2001, Section 3.2.5, Page 893
             sub1, sub2 = partition_by_cut(cut_mask, rag)
 
-            _ncut_relabel(sub1, thresh, num_cuts, map_array)
-            _ncut_relabel(sub2, thresh, num_cuts, map_array)
+            _ncut_relabel(sub1, thresh, num_cuts)
+            _ncut_relabel(sub2, thresh, num_cuts)
             return
 
     # The N-cut wasn't small enough, or could not be computed.
     # The remaining graph is a region.
     # Assign `ncut label` by picking any label from the existing nodes, since
     # `labels` are unique, `new_label` is also unique.
-    node = rag.nodes()[0]
-    new_label = rag.node[node]['labels'][0]
-    for n, d in rag.nodes_iter(data=True):
-        for l in d['labels']:
-            map_array[l] = new_label
+
+    _label_all(rag, 'ncut label')

@@ -2,6 +2,7 @@ try:
     import networkx as nx
 except ImportError:
     msg = "Graph functions require networkx, which is not installed"
+
     class nx:
         class Graph:
             def __init__(self, *args, **kwargs):
@@ -119,7 +120,7 @@ def _add_edge_filter(values, graph):
     return 0
 
 
-def rag_mean_color(image, labels, connectivity=2, mode='dissimilarity',
+def rag_mean_color(image, labels, connectivity=2, mode='distance',
                    sigma=255.0):
     """Compute the Region Adjacency Graph using mean colors.
 
@@ -142,15 +143,15 @@ def rag_mean_color(image, labels, connectivity=2, mode='dissimilarity',
         are considered adjacent. It can range from 1 to `labels.ndim`. Its
         behavior is the same as `connectivity` parameter in
         `scipy.ndimage.filters.generate_binary_structure`.
-    mode : str['similarity' | 'dissimilarity']
+    mode : {'distance', 'similarity'}, optional
         The strategy to assign edge weights.
 
-            'similarity' : The weight between two adjacent regions is the
+            'distance' : The weight between two adjacent regions is the
             :math:`|c_1 - c_2|`, where :math:`c_1` and :math:`c_2` are the mean
-            colors of the two regions. It represents how different two regions
-            are.
+            colors of the two regions. It represents the Euclidian distance in
+            their average color.
 
-            'dissimilarity' : The weight between two adjacent is
+            'similarity' : The weight between two adjacent is
             :math:`e^{-d^2/sigma}` where :math:`d=|c_1 - c_2|`, where
             :math:`c_1` and :math:`c_2` are the mean colors of the two regions.
             It represents how similar two regions are.
@@ -229,9 +230,9 @@ def rag_mean_color(image, labels, connectivity=2, mode='dissimilarity',
         diff = np.linalg.norm(diff)
         if mode == 'similarity':
             d['weight'] = math.e ** (-(diff ** 2) / sigma)
-        elif mode == 'dissimilarity':
+        elif mode == 'distance':
             d['weight'] = diff
         else:
-            raise ValueError("The mode '%s' is not recodnized" % mode)
+            raise ValueError("The mode '%s' is not recognised" % mode)
 
     return graph

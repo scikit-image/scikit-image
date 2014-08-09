@@ -74,7 +74,5 @@ def cut_cost(cut, W):
             row = indices[row_index]
             if cut_mask[row] != cut_mask[col]:
                 cost += data[row_index]
-            row_index += 1
-        col += 1
 
     return cost * 0.5
