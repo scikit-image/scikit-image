@@ -64,10 +64,14 @@ def test_threshold_cut():
     labels[50:, 50:] = 3
 
     rag = graph.rag_mean_color(img, labels)
-    new_labels = graph.cut_threshold(labels, rag, 10)
-
+    new_labels = graph.cut_threshold(labels, rag, 10, in_place=False)
     # Two labels
     assert new_labels.max() == 1
+
+    new_labels = graph.cut_threshold(labels, rag, 10)
+    # Two labels
+    assert new_labels.max() == 1
+
 
 @skipif(not is_installed('networkx'))
 def test_cut_normalized():
@@ -85,14 +89,20 @@ def test_cut_normalized():
     labels[50:, 50:] = 3
 
     rag = graph.rag_mean_color(img, labels, mode='similarity')
-    new_labels = graph.cut_normalized(labels, rag)
-    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
 
+    new_labels = graph.cut_normalized(labels, rag, in_place=False)
+    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
     # Two labels
     assert new_labels.max() == 1
+
+    new_labels = graph.cut_normalized(labels, rag)
+    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
+    assert new_labels.max() == 1
+
 
 @skipif(not is_installed('networkx'))
 def test_rag_error():
     img = np.zeros((10, 10, 3), dtype='uint8')
     labels = np.zeros((10, 10), dtype='uint8')
-    testing.assert_raises(ValueError, graph.rag_mean_color, img, labels, 2, 'non existant mode')
+    testing.assert_raises(ValueError, graph.rag_mean_color, img, labels,
+                          2, 'non existant mode')
