@@ -41,7 +41,7 @@ def pil_to_ndarray(im, dtype=None):
 
    
     """
-    fp = im.fp if hasattr(im, 'fp') else None 
+    fp = im.fp if hasattr(im, 'fp') else None
     if im.mode == 'P':
         if _palette_is_grayscale(im):
             im = im.convert('L')
