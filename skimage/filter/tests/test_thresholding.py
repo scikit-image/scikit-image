@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_equal, assert_almost_equal
 
 import skimage
 from skimage import data
@@ -59,19 +59,25 @@ class TestSimpleImage():
 
     def test_isodata(self):
         assert threshold_isodata(self.image) == 2
+        assert threshold_isodata(self.image, return_all=True) == [2]
 
     def test_isodata_blank_zero(self):
         image = np.zeros((5, 5), dtype=np.uint8)
         assert threshold_isodata(image) == 0
+        assert threshold_isodata(image, return_all=True) == [0]
 
     def test_isodata_linspace(self):
-        assert -63.8 < threshold_isodata(np.linspace(-127, 0, 256)) < -63.6
+        image = np.linspace(-127, 0, 256)
+        assert -63.8 < threshold_isodata(image) < -63.6
+        assert_almost_equal(threshold_isodata(image, return_all=True),
+                            [-63.74804688, -63.25195312])
 
     def test_isodata_16bit(self):
         np.random.seed(0)
         imfloat = np.random.rand(256, 256)
-        t = threshold_isodata(imfloat, nbins=1024)
-        assert 0.49 < t < 0.51
+        assert 0.49 < threshold_isodata(imfloat, nbins=1024) < 0.51
+        assert all(0.49 < threshold_isodata(imfloat, nbins=1024,
+                                            return_all=True))
 
     def test_threshold_adaptive_generic(self):
         def func(arr):
@@ -84,7 +90,7 @@ class TestSimpleImage():
              [ True,  True, False, False, False]]
         )
         out = threshold_adaptive(self.image, 3, method='generic', param=func)
-        assert_array_equal(ref, out)
+        assert_equal(ref, out)
 
     def test_threshold_adaptive_gaussian(self):
         ref = np.array(
@@ -95,7 +101,10 @@ class TestSimpleImage():
              [ True,  True, False, False, False]]
         )
         out = threshold_adaptive(self.image, 3, method='gaussian')
-        assert_array_equal(ref, out)
+        assert_equal(ref, out)
+
+        out = threshold_adaptive(self.image, 3, method='gaussian', param=1.0 / 3.0)
+        assert_equal(ref, out)
 
     def test_threshold_adaptive_mean(self):
         ref = np.array(
@@ -106,7 +115,7 @@ class TestSimpleImage():
              [ True,  True, False, False, False]]
         )
         out = threshold_adaptive(self.image, 3, method='mean')
-        assert_array_equal(ref, out)
+        assert_equal(ref, out)
 
     def test_threshold_adaptive_median(self):
         ref = np.array(
@@ -117,7 +126,7 @@ class TestSimpleImage():
              [False,  True, False, False, False]]
         )
         out = threshold_adaptive(self.image, 3, method='median')
-        assert_array_equal(ref, out)
+        assert_equal(ref, out)
 
 
 def test_otsu_camera_image():
@@ -157,29 +166,67 @@ def test_yen_coins_image_as_float():
 
 def test_isodata_camera_image():
     camera = skimage.img_as_ubyte(data.camera())
-    assert threshold_isodata(camera) == 88
+
+    threshold = threshold_isodata(camera)
+    assert np.floor((camera[camera <= threshold].mean() +
+                     camera[camera > threshold].mean()) / 2.0) == threshold
+    assert threshold == 87
+
+    assert threshold_isodata(camera, return_all=True) == [87]
 
 
 def test_isodata_coins_image():
     coins = skimage.img_as_ubyte(data.coins())
-    assert threshold_isodata(coins) == 107
+
+    threshold = threshold_isodata(coins)
+    assert np.floor((coins[coins <= threshold].mean() +
+                     coins[coins > threshold].mean()) / 2.0) == threshold
+    assert threshold == 107
+
+    assert threshold_isodata(coins, return_all=True) == [107]
 
 
 def test_isodata_moon_image():
     moon = skimage.img_as_ubyte(data.moon())
-    assert threshold_isodata(moon) == 87
+
+    threshold = threshold_isodata(moon)
+    assert np.floor((moon[moon <= threshold].mean() +
+                     moon[moon > threshold].mean()) / 2.0) == threshold
+    assert threshold == 86
+
+    thresholds = threshold_isodata(moon, return_all=True)
+    for threshold in thresholds:
+        assert np.floor((moon[moon <= threshold].mean() +
+                         moon[moon > threshold].mean()) / 2.0) == threshold
+    assert_equal(thresholds, [86, 87, 88, 122, 123, 124, 139, 140])
 
 
 def test_isodata_moon_image_negative_int():
     moon = skimage.img_as_ubyte(data.moon()).astype(np.int32)
     moon -= 100
-    assert threshold_isodata(moon) == -13
+
+    threshold = threshold_isodata(moon)
+    assert np.floor((moon[moon <= threshold].mean() +
+                     moon[moon > threshold].mean()) / 2.0) == threshold
+    assert threshold == -14
+
+    thresholds = threshold_isodata(moon, return_all=True)
+    for threshold in thresholds:
+        assert np.floor((moon[moon <= threshold].mean() +
+                         moon[moon > threshold].mean()) / 2.0) == threshold
+    assert_equal(thresholds, [-14, -13, -12,  22,  23,  24,  39,  40])
 
 
 def test_isodata_moon_image_negative_float():
     moon = skimage.img_as_ubyte(data.moon()).astype(np.float64)
     moon -= 100
-    assert -13 < threshold_isodata(moon) < -12
+
+    assert -14 < threshold_isodata(moon) < -13
+
+    thresholds = threshold_isodata(moon, return_all=True)
+    assert_almost_equal(thresholds,
+                        [-13.83789062, -12.84179688, -11.84570312, 22.02148438,
+                         23.01757812, 24.01367188, 38.95507812, 39.95117188])
 
 
 if __name__ == '__main__':
