@@ -21,7 +21,8 @@ def imread(fname, dtype=None):
 
     Parameters
     ----------
-    fname : file name as string
+    fname : str
+       File name.
     dtype : numpy dtype object or string specifier
        Specifies data type of array elements.
 
