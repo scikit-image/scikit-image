@@ -39,7 +39,16 @@ def moments(double[:, :] image, Py_ssize_t order=3):
     .. [4] http://en.wikipedia.org/wiki/Image_moment
 
     """
-    return moments_central(image, 0, 0, order)
+    cdef Py_ssize_t p, q, r, c
+    cdef double[:, ::1] mu = np.zeros((order + 1, order + 1), dtype=np.double)
+    cdef double val
+    for r in range(image.shape[0]):
+        for c in range(image.shape[1]):
+            val = image[r, c]
+            for p in range(order + 1):
+                for q in range(order + 1):
+                    mu[p, q] += val * r ** q * c ** p
+    return np.asarray(mu)
 
 
 def moments_central(double[:, :] image, double cr, double cc,
