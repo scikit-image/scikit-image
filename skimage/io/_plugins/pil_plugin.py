@@ -57,8 +57,8 @@ def pil_to_ndarray(im, dtype=None):
     elif 'A' in im.mode:
         im = im.convert('RGBA')
     im = np.array(im, dtype=dtype)
-    if fp:
-       fp.close()
+    if fp is not None:
+        fp.close()
     return im
 
 
