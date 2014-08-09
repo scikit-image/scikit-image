@@ -199,6 +199,17 @@ def get_min_ncut(ev, d, w, num_cuts):
 
 
 def _label_all(rag, attr_name):
+    """Assign a uique integer to the given attribute in the RAG.
+
+    This function assumes that all labels in `rag` are unique. It
+    picks up a random label from them and assigns it to the `attr_name`
+    attribute of all the nodes.
+
+    rag : RAG
+        The Region Adjacency Graph.
+    attr_name : string
+        The attribute to which a unique integer is assigned.
+    """
     node = rag.nodes()[0]
     new_label = rag.node[node]['labels'][0]
     for n, d in rag.nodes_iter(data=True):
@@ -262,5 +273,4 @@ def _ncut_relabel(rag, thresh, num_cuts):
     # The remaining graph is a region.
     # Assign `ncut label` by picking any label from the existing nodes, since
     # `labels` are unique, `new_label` is also unique.
-
     _label_all(rag, 'ncut label')
