@@ -39,7 +39,6 @@ def pil_to_ndarray(im, dtype=None):
     ----------
     Refer to ``imread``.
 
-   
     """
     fp = im.fp if hasattr(im, 'fp') else None
     if im.mode == 'P':
