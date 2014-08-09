@@ -156,7 +156,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
             :math:`c_1` and :math:`c_2` are the mean colors of the two regions.
             It represents how similar two regions are.
     sigma : float, optional
-        Used for computation when `mode` is "dissimilarity". It governs how
+        Used for computation when `mode` is "similarity". It governs how
         close to each other two colors should be, for their corresponding edge
         weight to be significant. A very large value of `sigma` could make
         any two colors behave as though they were similar.
