@@ -189,7 +189,7 @@ $(document).ready(function () {
                 data: jcode,
                 // This is the type of data you're expecting back from the server.
                 dataType: 'json',
-                url: 'http://ci.scipy.org:5000/runcode',
+                url: 'http://ci.scipy.org:8000/runcode',
                 success: function (e) {
                     // enable editing after response
                     editor.setReadOnly(false);
