@@ -148,7 +148,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
 
             'distance' : The weight between two adjacent regions is the
             :math:`|c_1 - c_2|`, where :math:`c_1` and :math:`c_2` are the mean
-            colors of the two regions. It represents the Euclidian distance in
+            colors of the two regions. It represents the Euclidean distance in
             their average color.
 
             'similarity' : The weight between two adjacent is

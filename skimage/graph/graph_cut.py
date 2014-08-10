@@ -50,10 +50,10 @@ def cut_threshold(labels, rag, thresh, in_place=True):
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.11.5274
 
     """
-    # Because deleting edges while iterating through them produces an error.
     if not in_place:
         rag = rag.copy()
 
+    # Because deleting edges while iterating through them produces an error.
     to_remove = [(x, y) for x, y, d in rag.edges_iter(data=True)
                  if d['weight'] >= thresh]
     rag.remove_edges_from(to_remove)
@@ -93,7 +93,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True):
         The number or N-cuts to perform before determining the optimal one.
     in_place : bool
         If set, modifies `rag` in place. For each node `n` the function will
-        set a new attribute ``rag.node[n]['ncut label]``.
+        set a new attribute ``rag.node[n]['ncut label']``.
 
     Returns
     -------
@@ -146,7 +146,7 @@ def partition_by_cut(cut, rag):
     """
     # `cut` is derived from `D` and `W` matrices, which also follow the
     # ordering returned by `rag.nodes()` because we use
-    # nx.to_scipy_sparce_matrix.
+    # nx.to_scipy_sparse_matrix.
 
     # Example
     # rag.nodes() = [3, 7, 9, 13]
@@ -199,7 +199,7 @@ def get_min_ncut(ev, d, w, num_cuts):
 
 
 def _label_all(rag, attr_name):
-    """Assign a uique integer to the given attribute in the RAG.
+    """Assign a unique integer to the given attribute in the RAG.
 
     This function assumes that all labels in `rag` are unique. It
     picks up a random label from them and assigns it to the `attr_name`
@@ -213,8 +213,7 @@ def _label_all(rag, attr_name):
     node = rag.nodes()[0]
     new_label = rag.node[node]['labels'][0]
     for n, d in rag.nodes_iter(data=True):
-        for l in d['labels']:
-            d[attr_name] = new_label
+        d[attr_name] = new_label
 
 
 def _ncut_relabel(rag, thresh, num_cuts):
@@ -245,7 +244,7 @@ def _ncut_relabel(rag, thresh, num_cuts):
 
     if m > 2:
         d2 = d.copy()
-        # Since d is diagonal, we can directly operate on it's data
+        # Since d is diagonal, we can directly operate on its data
         # the inverse of the square root
         d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
 
