@@ -3,6 +3,7 @@ $(document).ready(function () {
 
     // create backup of div containing code
     var backup = $('.highlight-python'),
+        code_running = false,
         editor;
 
     // hide Run, only visible when code edited
@@ -152,79 +153,86 @@ $(document).ready(function () {
     }
 
     function runcode() {
-        // debug
-        // console.log('detect click');
+        if (!code_running) {
+            code_running = true;
+            // debug
+            // console.log('detect click');
 
-        // add animation, hide Run to prevent duplicate runs
-        $('#loading').show();
-        // hide message from previous Run
-        $('#error-message').hide();
-        $('#success-message').hide();
-        $('.all-output').hide();
-        // get rid of output images from previous run
-        $('img.output_image').remove();
+            // add animation, hide Run to prevent duplicate runs
+            $('#loading').show();
+            // hide message from previous Run
+            $('#error-message').hide();
+            $('#success-message').hide();
+            $('.all-output').hide();
+            // get rid of output images from previous run
+            $('img.output_image').remove();
 
-        $('#runcode').hide();
+            $('#runcode').hide();
 
-        var code = editor.getValue(),
-        // console.log(code);
-            jcode = codetoJSON(code);
-            // get editor-bg
-            editor_color = $('.ace-tm').css('background-color');
-            readonly_editor_color = '#F5F5F5';
+            var code = editor.getValue(),
+            // console.log(code);
+                jcode = codetoJSON(code);
+                // get editor-bg
+                editor_color = $('.ace-tm').css('background-color');
+                readonly_editor_color = '#F5F5F5';
 
-        // disable editing when code is run
-        editor.setReadOnly(true);
-        $('.ace-tm').css('background-color', readonly_editor_color);
+            // disable editing when code is run
+            editor.setReadOnly(true);
+            $('.ace-tm').css('background-color', readonly_editor_color);
 
-        // console.log(jcode);
-        $.ajax({
-            type: 'POST',
-            // Provide correct Content-Type, so that Flask will know how to process it.
-            contentType: 'application/json',
-            // Encode your data as JSON.
-            data: jcode,
-            // This is the type of data you're expecting back from the server.
-            dataType: 'json',
-            url: 'http://ci.scipy.org:5000/runcode',
-            success: function (e) {
-                // enable editing after response
-                editor.setReadOnly(false);
-                $('.ace-tm').css('background-color', editor_color);
+            // console.log(jcode);
+            $.ajax({
+                type: 'POST',
+                // Provide correct Content-Type, so that Flask will know how to process it.
+                contentType: 'application/json',
+                // Encode your data as JSON.
+                data: jcode,
+                // This is the type of data you're expecting back from the server.
+                dataType: 'json',
+                url: 'http://ci.scipy.org:5000/runcode',
+                success: function (e) {
+                    // enable editing after response
+                    editor.setReadOnly(false);
+                    $('.ace-tm').css('background-color', editor_color);
 
-                // remove animation, show Run
-                // TODO: Refactor to something like reset
-                $('#loading').hide();
-                $('#runcode').show();
-                handleoutput(e);
-                // suggest number of images received
-                if ($.isEmptyObject(e.result)) {
-                    num_images = 0;
-                } else {
-                    // half of the keys are timestamps of images in the other half
-                    num_images = Object.keys(e.result).length/2;
+                    // remove animation, show Run
+                    // TODO: Refactor to something like reset
+                    $('#loading').hide();
+                    $('#runcode').show();
+                    handleoutput(e);
+                    // suggest number of images received
+                    if ($.isEmptyObject(e.result)) {
+                        num_images = 0;
+                    } else {
+                        // half of the keys are timestamps of images in the other half
+                        num_images = Object.keys(e.result).length/2;
+                    }
+                    if (e.result.hasOwnProperty('busy')) {
+                        $('#success-message').html("Server Busy, try again later!").show();
+                    } else {
+                        $('#success-message').html("Success: Received " + num_images + " image(s)").show();
+                    }
+                    code_running = false;
+                },
+                error: function (jqxhr, text_status, error_thrown) {
+                    // enable editing after response
+                    editor.setReadOnly(false);
+                    $('.ace-tm').css('background-color', editor_color);
+
+                    // TODO: Refactor to something like reset
+                    $('#loading').hide();
+                    $('#runcode').show();
+
+                    error_code = jqxhr.status;
+                    error_text = jqxhr.statusText;
+                    $('#error-message').html(error_text + ' ' + error_code);
+                    $('#error-message').show();
+                    code_running = false;
                 }
-                if (e.result.hasOwnProperty('busy')) {
-                    $('#success-message').html("Server Busy, try again later!").show();
-                } else {
-                    $('#success-message').html("Success: Received " + num_images + " image(s)").show();
-                }
-            },
-            error: function (jqxhr, text_status, error_thrown) {
-                // enable editing after response
-                editor.setReadOnly(false);
-                $('.ace-tm').css('background-color', editor_color);
-
-                // TODO: Refactor to something like reset
-                $('#loading').hide();
-                $('#runcode').show();
-
-                error_code = jqxhr.status;
-                error_text = jqxhr.statusText;
-                $('#error-message').html(error_text + ' ' + error_code);
-                $('#error-message').show();
-            }
-        });
+            });
+        } else {
+            console.log('wait for response..');
+        }
     }
 
     function reload () {
