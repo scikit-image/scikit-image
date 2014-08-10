@@ -112,7 +112,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True):
     ----------
     .. [1] Shi, J.; Malik, J., "Normalized cuts and image segmentation",
            Pattern Analysis and Machine Intelligence,
-           IEEE Transactions on , vol.22, no.8, pp.888,905, August 2000
+           IEEE Transactions on, vol. 22, no. 8, pp. 888-905, August 2000.
 
     """
     if not in_place:
