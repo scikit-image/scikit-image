@@ -14,7 +14,7 @@ from six import BytesIO
 
 try:
     from PIL import Image
-    from skimage.io._plugins.pil_plugin import _palette_is_grayscale
+    from skimage.io._plugins.pil_plugin import pil_to_ndarray, ndarray_to_pil, _palette_is_grayscale
     use_plugin('pil')
 except ImportError:
     PIL_available = False
@@ -113,26 +113,40 @@ def test_imread_uint16_big_endian():
 
 
 class TestSave:
-    def roundtrip(self, dtype, x, scaling=1):
+    def roundtrip_file(self, x):
         f = NamedTemporaryFile(suffix='.png')
         fname = f.name
         f.close()
         imsave(fname, x)
         y = imread(fname)
+        return y
 
+    def roundtrip_pil_image(self, x):
+        pil_image = ndarray_to_pil(x)
+        y = pil_to_ndarray(pil_image)
+        return y
+
+    def verify_roundtrip(self, dtype, x, y, scaling=1):
         assert_array_almost_equal((x * scaling).astype(np.int32), y)
 
-    @skipif(not PIL_available)
-    def test_imsave_roundtrip(self):
+    def verify_imsave_roundtrip(self, roundtrip_function):
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
             for dtype in (np.uint8, np.uint16, np.float32, np.float64):
                 x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
                 if np.issubdtype(dtype, float):
-                    yield self.roundtrip, dtype, x, 255
+                    yield self.verify_roundtrip, dtype, x, roundtrip_function(x), 255
                 else:
                     x = (x * 255).astype(dtype)
-                    yield self.roundtrip, dtype, x
+                    yield self.verify_roundtrip, dtype, x, roundtrip_function(x)
+
+    @skipif(not PIL_available)
+    def test_imsave_roundtrip_file(self):
+         self.verify_imsave_roundtrip(self.roundtrip_file)
+
+    @skipif(not PIL_available)
+    def test_imsave_roundtrip_pil_image(self):
+         self.verify_imsave_roundtrip(self.roundtrip_pil_image)
 
 
 @skipif(not PIL_available)
@@ -149,6 +163,15 @@ def test_imsave_filelike():
     out = imread(s)
     assert out.shape == shape
     assert_allclose(out, image)
+
+
+@skipif(not PIL_available)
+def test_imexport_imimport():
+    shape = (2, 2)
+    image = np.zeros(shape)
+    pil_image = ndarray_to_pil(image)
+    out = pil_to_ndarray(pil_image)
+    assert out.shape == shape
 
 
 if __name__ == "__main__":
