@@ -242,8 +242,6 @@ $(document).ready(function () {
         $('#runcode').hide();
         $('#loading').hide();
         $('#editcode').show();
-        $('#error-message').hide();
-        $('#success-message').hide();
         $('.all-output').hide();
     }
 
