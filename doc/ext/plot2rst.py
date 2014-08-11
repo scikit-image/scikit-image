@@ -85,15 +85,12 @@ from notebook import Notebook
 from docutils.core import publish_parts
 
 
-EDIT_REVERT_BTN = """
+EDIT_BTN = """
 .. raw:: html
     
     <p id="controls">
-        <button type="button" class="btn btn-default btn-lg" id="editcode">
-            <i class="icon-edit"></i> Edit
-        </button>
-        <button type="button" class="btn btn-default btn-lg" id="reload">
-            <i class="icon-refresh"></i>
+        <button type="button" class="btn btn-default btn-small" id="editcode">
+            <i class="icon-edit"></i>
         </button>
     </p>
 """
@@ -119,12 +116,15 @@ OUTPUT_MESSAGES = """
     </p>
 """
 
-RUN_BTN = """
+RUN_REVERT_BTN = """
 .. raw:: html
 
     <p id="run_btn">
         <button type="button" class="btn btn-default btn-lg" id="runcode">
             <i class="icon-play"></i> Run
+        </button>
+        <button type="button" class="btn btn-default btn-lg" id="reload">
+            <i class="icon-refresh"></i>
         </button>
         <img id="loading" src="../_static/ajax-loader.gif"/>
     </p>
@@ -398,10 +398,10 @@ def write_example(src_name, src_dir, rst_dir, cfg):
         example_rst += eval(content)
         example_rst += ''.join(rst_blocks)
         code_info = dict(src_name=src_name, code_start=end)
-        example_rst += EDIT_REVERT_BTN
+        example_rst += EDIT_BTN
         example_rst += LITERALINCLUDE.format(**code_info)
 
-    example_rst += RUN_BTN
+    example_rst += RUN_REVERT_BTN
     example_rst += OUTPUT_MESSAGES
     example_rst += CODE_LINK.format(src_name)
     ipnotebook_name = src_name.replace('.py', '.ipynb')
