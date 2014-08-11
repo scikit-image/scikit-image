@@ -210,7 +210,7 @@ $(document).ready(function () {
                     if (e.result.hasOwnProperty('busy')) {
                         $('#success-message').html("Server Busy, try again later!").show();
                     } else {
-                        $('#success-message').html("Success: Received " + num_images + " image(s)").show();
+                        $('#success-message').html("Success: Received " + num_images + " image(s) at " + e.timestamp + " UTC -5").show();
                     }
                     code_running = false;
                 },
