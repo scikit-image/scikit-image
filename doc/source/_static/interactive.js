@@ -255,6 +255,10 @@ $(document).ready(function () {
         $('div.highlight-python').unbind('click');
         // replacing messes up event handlers so need to bind again
         $('div.highlight-python').bind('click', function (){
+            // if one editor is already active, do nothing
+            if ($('#editor').length > 0) {
+                return;
+            }
             // replace div with editor
             backup = $(this);
 
@@ -288,6 +292,10 @@ $(document).ready(function () {
 
     // clicking on the snippet fetches only the snippet for editing
     $('div.highlight-python').bind('click', function (){
+        // if one editor is already active, do nothing
+        if ($('#editor').length > 0) {
+            return;
+        }
         // replace div with editor
         backup = $(this);
 
