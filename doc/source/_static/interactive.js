@@ -2,9 +2,13 @@ $(document).ready(function () {
     $.support.cors = true;
 
     // create backup of div containing code
-    var backup = $('.highlight-python'),
+    var backup,
+        encodedcode = $(".tobehidden"),
         code_running = false,
         editor;
+
+    // Create Base64 Object
+    var Base64={_keyStr:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",encode:function(e){var t="";var n,r,i,s,o,u,a;var f=0;e=Base64._utf8_encode(e);while(f<e.length){n=e.charCodeAt(f++);r=e.charCodeAt(f++);i=e.charCodeAt(f++);s=n>>2;o=(n&3)<<4|r>>4;u=(r&15)<<2|i>>6;a=i&63;if(isNaN(r)){u=a=64}else if(isNaN(i)){a=64}t=t+this._keyStr.charAt(s)+this._keyStr.charAt(o)+this._keyStr.charAt(u)+this._keyStr.charAt(a)}return t},decode:function(e){var t="";var n,r,i;var s,o,u,a;var f=0;e=e.replace(/[^A-Za-z0-9\+\/\=]/g,"");while(f<e.length){s=this._keyStr.indexOf(e.charAt(f++));o=this._keyStr.indexOf(e.charAt(f++));u=this._keyStr.indexOf(e.charAt(f++));a=this._keyStr.indexOf(e.charAt(f++));n=s<<2|o>>4;r=(o&15)<<4|u>>2;i=(u&3)<<6|a;t=t+String.fromCharCode(n);if(u!=64){t=t+String.fromCharCode(r)}if(a!=64){t=t+String.fromCharCode(i)}}t=Base64._utf8_decode(t);return t},_utf8_encode:function(e){e=e.replace(/\r\n/g,"\n");var t="";for(var n=0;n<e.length;n++){var r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r)}else if(r>127&&r<2048){t+=String.fromCharCode(r>>6|192);t+=String.fromCharCode(r&63|128)}else{t+=String.fromCharCode(r>>12|224);t+=String.fromCharCode(r>>6&63|128);t+=String.fromCharCode(r&63|128)}}return t},_utf8_decode:function(e){var t="";var n=0;var r=c1=c2=0;while(n<e.length){r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r);n++}else if(r>191&&r<224){c2=e.charCodeAt(n+1);t+=String.fromCharCode((r&31)<<6|c2&63);n+=2}else{c2=e.charCodeAt(n+1);c3=e.charCodeAt(n+2);t+=String.fromCharCode((r&15)<<12|(c2&63)<<6|c3&63);n+=3}}return t}}
 
     // hide Run, only visible when code edited
     // hide loading animation, visible, when code running
@@ -13,59 +17,52 @@ $(document).ready(function () {
     $('#error-message').hide();
     $('#success-message').hide();
     $('.all-output').hide();
+    $('.tobehidden').hide();
 
 
-    function editcode () {
-        // store scroll position to prevent jumping of scroll bar
-        var temp_scroll = $(window).scrollTop(),
-        // fetch code url
-            code_url = $('a.download.internal:first').attr('href'),
+    function editcode (snippet) {
+
+        editor = ace.edit("editor");
+
         // fetch height of div which showed the code
-            code_height = $('.highlight-python').height();
+        code_height = $(this).height();
 
-        // fetch code and insert into editor
-        $.get(code_url, function (data, status) {
-            if (status === "success") {
-                // replace div with editor
-                $('.highlight-python').replaceWith('<div id="editor"></div>');
-
-                editor = ace.edit("editor");
-
-                editor.on('change', function () {
-                    var doc = editor.getSession().getDocument(),
-                        // line height varies with zoom level and font size
-                        // correct way to find height is using the renderer
-                        line_height = editor.renderer.lineHeight;
-                    code_height = line_height * doc.getLength() + 'px';
-                    $('#editor').height(code_height);
-                    editor.resize();
-                });
-
-                // place curson at end to prevent entire code being selected 
-                // after using setValue (which is a feature)
-                editor.setValue(data, 1);
-
-                // editor.setTheme("ace/theme/monokai");
-                editor.getSession().setMode("ace/mode/python");
-
-                // restore scroll bar position after adding editor
-                $(window).scrollTop(temp_scroll);
-
-                // edit successful, show Run button
-                $('#editcode').hide();
-                $('#runcode').show();
-
-                // execute code on pressing 'Shift+Enter'
-                editor.commands.addCommand({
-                    name: 'execute_code',
-                    bindKey: {win: 'Shift-Enter'},
-                    exec: function (editor) {
-                        runcode();
-                    },
-                    readOnly: true // false if this command should not apply in readOnly mode
-                });
-            }
+        editor.on('change', function () {
+            var doc = editor.getSession().getDocument(),
+                // line height varies with zoom level and font size
+                // correct way to find height is using the renderer
+                line_height = editor.renderer.lineHeight;
+            code_height = line_height * doc.getLength() + 'px';
+            $('#editor').height(code_height);
+            editor.resize();
         });
+
+        // place cursor at end to prevent entire code being selected
+        // after using setValue (which is a feature)
+        editor.setValue(snippet, 1);
+
+        // editor.setTheme("ace/theme/monokai");
+        editor.getSession().setMode("ace/mode/python");
+
+        // edit successful, show Run button
+        $('#editcode').hide();
+        $('#runcode').show();
+
+        // execute code on pressing 'Shift+Enter'
+        editor.commands.addCommand({
+            name: 'execute_code',
+            bindKey: {win: 'Shift-Enter'},
+            exec: function (editor) {
+                runcode();
+            },
+            readOnly: true // false if this command should not apply in readOnly mode
+        });
+
+        // store scroll position to prevent jumping of scroll bar
+        var temp_scroll = $(window).scrollTop();
+
+        // restore scroll bar position after adding editor
+        $(window).scrollTop(temp_scroll);
     }
 
     function codetoJSON(code) {
@@ -238,7 +235,21 @@ $(document).ready(function () {
 
     function reload () {
         $('div#editor').replaceWith(backup);
-        $('div.highlight-python').bind('click', editcode);
+        $('div.highlight-python').unbind('click');
+        // replacing messes up event handlers so need to bind again
+        $('div.highlight-python').bind('click', function (){
+            // replace div with editor
+            backup = $(this);
+
+            var snippet_index = $(this).closest('div.highlight-python').index('div.highlight-python'),
+                snippet = encodedcode.eq(snippet_index).html();
+
+            $(this).replaceWith('<div id="editor"></div>');
+
+            console.log(snippet_index);
+            snippet = Base64.decode(snippet);
+            editcode(snippet);
+        });
         // hide Run, only visible when code edited
         $('#runcode').hide();
         $('#loading').hide();
@@ -246,9 +257,33 @@ $(document).ready(function () {
         $('.all-output').hide();
     }
 
-    // edit button and editor area
-    $('#editcode').bind('click', editcode);
-    $('div.highlight-python').bind('click', editcode);
+    // edit button fetches code from the URL
+    $('#editcode').bind('click', function () {
+        // fetch code url
+        var code_url = $('a.download.internal:first').attr('href');
+
+        $.get(code_url, function (data, status) {
+            if (status === "success") {
+                editcode(data);
+            }
+        });
+    });
+
+    // clicking on the snippet fetches only the snippet for editing
+    $('div.highlight-python').bind('click', function (){
+        // replace div with editor
+        backup = $(this);
+
+        var snippet_index = $(this).closest('div.highlight-python').index('div.highlight-python'),
+            snippet = encodedcode.eq(snippet_index).html();
+
+        $(this).replaceWith('<div id="editor"></div>');
+        console.log(snippet_index);
+
+        snippet = Base64.decode(snippet);
+        editcode(snippet);
+    });
+
     $('#runcode').bind('click', runcode);
     // revert back to example inside div
     $('#reload').bind('click', reload);

@@ -70,6 +70,7 @@ import shutil
 import token
 import tokenize
 import traceback
+import base64
 
 import numpy as np
 import matplotlib
@@ -128,6 +129,12 @@ RUN_REVERT_BTN = """
         </button>
         <img id="loading" src="../_static/ajax-loader.gif"/>
     </p>
+"""
+
+HIDDEN_CODE = """
+.. raw:: html
+
+    <div class="tobehidden">{0}</div>
 """
 
 LITERALINCLUDE = """
@@ -407,6 +414,11 @@ def write_example(src_name, src_dir, rst_dir, cfg):
     ipnotebook_name = src_name.replace('.py', '.ipynb')
     ipnotebook_name = './notebook/' + ipnotebook_name
     example_rst += NOTEBOOK_LINK.format(ipnotebook_name)
+
+    for (cell_type, _, content) in blocks:
+        if cell_type == 'code':
+            content = content.rstrip('\n')
+            example_rst += HIDDEN_CODE.format(base64.b64encode(content))
 
     f = open(rst_path, 'w')
     f.write(example_rst)
