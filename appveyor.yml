@@ -36,7 +36,7 @@ install:
   - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
 
   # Install the build and runtime dependencies of the project.
-  - "%CMD_IN_ENV% pip install -r tools/appveyor/requirements.txt"
+  - "%CMD_IN_ENV% pip install -v -r tools/appveyor/requirements.txt"
   - "%CMD_IN_ENV% python setup.py bdist_wheel bdist_wininst"
   - ps: "ls dist"
 
