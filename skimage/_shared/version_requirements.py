@@ -55,7 +55,7 @@ def is_installed(name, version=None):
     Returns
     -------
     out : bool
-        True if *name* is installed matching the optional version.
+        True if `name` is installed matching the optional version.
 
     Note
     ----

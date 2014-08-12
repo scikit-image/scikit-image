@@ -32,7 +32,7 @@ before_install:
         sudo apt-get install python3-numpy;
         wget https://raw.githubusercontent.com/numpy/numpy/master/numpy/_import_tools.py -O /home/travis/virtualenv/python3.2_with_system_site_packages/lib/python3.2/site-packages/numpy/_import_tools.py;
         sudo apt-get install python3-scipy;
-        pip install cython flake8 six;
+        travis_retry pip install cython flake8 six;
       else
         wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
         bash miniconda.sh -b -p $HOME/miniconda;
@@ -44,7 +44,7 @@ before_install:
         travis_retry conda create -n test $ENV six scipy pip flake8 nose;
         source activate test;
       fi
-    - pip install coveralls pillow
+    - travis_retry pip install coveralls pillow
     - python check_bento_build.py
 
 install:
@@ -69,16 +69,16 @@ script:
     #   https://groups.google.com/a/continuum.io/forum/#!topic/anaconda/-DLG2ZdTkw0
     - if [[ $ENV == python=3.2 ]]; then
         sudo apt-get install -qq python3-pyqt4;
-        pip install --use-mirrors -q matplotlib;
-        pip install -q networkx;
+        travis_retry pip install -q matplotlib;
+        travis_retry pip install -q networkx;
       else
         travis_retry conda install -q matplotlib pyqt networkx;
         sudo cp ~/miniconda/envs/test/include/png* /usr/include;
         rm ~/miniconda/envs/test/lib/libm-2.5.so;
         rm ~/miniconda/envs/test/lib/libm.*;
         sudo apt-get install -qq libtiff4-dev libwebp-dev xcftools;
-        pip install -q imread;
-        pip install -q pyfits;
+        travis_retry pip install -q imread;
+        travis_retry pip install -q pyfits;
       fi
     - sudo apt-get install -qq libfreeimage3
     # TODO: update when SimpleITK become available on py34 or hopefully pip
