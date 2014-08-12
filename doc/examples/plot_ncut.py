@@ -10,7 +10,7 @@ References
 ----------
 .. [1] Shi, J.; Malik, J., "Normalized cuts and image segmentation",
        Pattern Analysis and Machine Intelligence,
-       IEEE Transactions on , vol.22, no.8, pp.888,905, Aug 2000
+       IEEE Transactions on, vol. 22, no. 8, pp. 888-905, August 2000.
 """
 from skimage import graph, data, io, segmentation, color
 from matplotlib import pyplot as plt
