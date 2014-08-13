@@ -278,6 +278,7 @@ $(document).ready(function () {
         $('.all-output').hide();
     }
 
+    // TODO: make the snippet selection code more modular
     // edit button fetches code from the URL
     $('.editcode').bind('click', function () {
         // if one editor is already active, do nothing
