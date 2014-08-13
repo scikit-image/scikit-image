@@ -90,7 +90,7 @@ EDIT_BTN = """
 .. raw:: html
     
     <p id="controls">
-        <button type="button" class="btn btn-default btn-small" id="editcode">
+        <button type="button" class="btn btn-default btn-small editcode">
             <i class="icon-edit"></i>
         </button>
     </p>
@@ -587,6 +587,8 @@ def process_blocks(blocks, src_path, image_path, cfg):
     for i, (blabel, brange, bcontent) in enumerate(blocks):
         if blabel == 'code':
             exec(bcontent, example_globals)
+            # add edit button associated with each code block
+            rst_blocks.append(EDIT_BTN)
             rst_blocks.append(codestr2rst(bcontent))
         else:
             if i in idx_inline_plot:
