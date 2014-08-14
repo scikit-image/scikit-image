@@ -77,7 +77,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True):
 
     Given an image's labels and its similarity RAG, recursively perform
     a 2-way normalized cut on it. All nodes belonging to a subgraph
-    which cannot be cut further, are assigned a unique label in the
+    that cannot be cut further are assigned a unique label in the
     output.
 
     Parameters
