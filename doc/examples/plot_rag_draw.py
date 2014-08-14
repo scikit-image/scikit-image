@@ -18,7 +18,6 @@ out = graph.draw_rag(labels, g, img)
 plt.figure()
 plt.title("RAG with all edges shown in green.")
 plt.imshow(out)
-io.imsave("/home/vighnesh/Desktop/1.png")
 
 # The color palette used was taken from
 # http://www.colorcombos.com/color-schemes/2/ColorCombo2.html
@@ -29,6 +28,5 @@ plt.figure()
 plt.title("RAG with edge weights less than 30, color "
           "mapped between green and red.")
 
-io.imsave("/home/vighnesh/Desktop/2.png")
 plt.imshow(out)
 plt.show()
