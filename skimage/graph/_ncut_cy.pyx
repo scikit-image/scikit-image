@@ -11,7 +11,7 @@ def argmin2(cnp.double_t[:] array):
 
     Parameters
     ----------
-    a : array
+    array : array
         The array to process.
 
     Returns
