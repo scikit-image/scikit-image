@@ -19,8 +19,11 @@ plt.figure()
 plt.title("RAG with all edges shown in green.")
 plt.imshow(out)
 
-cmap = colors.ListedColormap(['#00ff00', '#ff0000'])
-out = graph.draw_rag(labels, g, img, colormap=cmap, thresh=30, desaturate=True)
+# The color palette used was taken from
+# http://www.colorcombos.com/color-schemes/2/ColorCombo2.html
+cmap = colors.ListedColormap(['#6599FF', '#ff9900'])
+out = graph.draw_rag(labels, g, img, node_color="#ffde00", colormap=cmap,
+                     thresh=30, desaturate=True)
 plt.figure()
 plt.title("RAG with edge weights less than 30, color "
           "mapped between green and red.")
