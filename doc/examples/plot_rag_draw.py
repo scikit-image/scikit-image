@@ -26,7 +26,7 @@ out = graph.draw_rag(labels, g, img, node_color="#ffde00", colormap=cmap,
                      thresh=30, desaturate=True)
 plt.figure()
 plt.title("RAG with edge weights less than 30, color "
-          "mapped between green and red.")
+          "mapped between blue and orange.")
 
 plt.imshow(out)
 plt.show()
