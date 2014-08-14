@@ -5,10 +5,7 @@ $(document).ready(function () {
     var backup,
         encodedcode = $(".tobehidden"),
         code_running = false,
-        editor,
-        snippet,
-        snippet_index,
-        edit_btn_index;
+        editor = [];
 
     // Create Base64 Object
     var Base64={_keyStr:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",encode:function(e){var t="";var n,r,i,s,o,u,a;var f=0;e=Base64._utf8_encode(e);while(f<e.length){n=e.charCodeAt(f++);r=e.charCodeAt(f++);i=e.charCodeAt(f++);s=n>>2;o=(n&3)<<4|r>>4;u=(r&15)<<2|i>>6;a=i&63;if(isNaN(r)){u=a=64}else if(isNaN(i)){a=64}t=t+this._keyStr.charAt(s)+this._keyStr.charAt(o)+this._keyStr.charAt(u)+this._keyStr.charAt(a)}return t},decode:function(e){var t="";var n,r,i;var s,o,u,a;var f=0;e=e.replace(/[^A-Za-z0-9\+\/\=]/g,"");while(f<e.length){s=this._keyStr.indexOf(e.charAt(f++));o=this._keyStr.indexOf(e.charAt(f++));u=this._keyStr.indexOf(e.charAt(f++));a=this._keyStr.indexOf(e.charAt(f++));n=s<<2|o>>4;r=(o&15)<<4|u>>2;i=(u&3)<<6|a;t=t+String.fromCharCode(n);if(u!=64){t=t+String.fromCharCode(r)}if(a!=64){t=t+String.fromCharCode(i)}}t=Base64._utf8_decode(t);return t},_utf8_encode:function(e){e=e.replace(/\r\n/g,"\n");var t="";for(var n=0;n<e.length;n++){var r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r)}else if(r>127&&r<2048){t+=String.fromCharCode(r>>6|192);t+=String.fromCharCode(r&63|128)}else{t+=String.fromCharCode(r>>12|224);t+=String.fromCharCode(r>>6&63|128);t+=String.fromCharCode(r&63|128)}}return t},_utf8_decode:function(e){var t="";var n=0;var r=c1=c2=0;while(n<e.length){r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r);n++}else if(r>191&&r<224){c2=e.charCodeAt(n+1);t+=String.fromCharCode((r&31)<<6|c2&63);n+=2}else{c2=e.charCodeAt(n+1);c3=e.charCodeAt(n+2);t+=String.fromCharCode((r&15)<<12|(c2&63)<<6|c3&63);n+=3}}return t}}
@@ -24,41 +21,64 @@ $(document).ready(function () {
     $('.all-output').hide();
     $('.tobehidden').hide();
 
+    $('div.highlight-python').each(function (index) {
+        $(this).data('index', index);
+    });
 
-    function editcode (snippet) {
+    $('.editcode').each(function (index) {
+        $(this).data('index', index);
+    });
 
-        editor = ace.edit("editor");
+    String.format = function() {
+        // The string containing the format items (e.g. "{0}")
+        // will and always has to be the first argument.
+        var theString = arguments[0];
 
-        // fetch height of div which showed the code
-        code_height = $(this).height();
+        // start with the second argument (i = 1)
+        for (var i = 1; i < arguments.length; i++) {
+            // "gm" = RegEx options for Global search (more than one instance)
+            // and for Multiline search
+            var regEx = new RegExp("\\{" + (i - 1) + "\\}", "gm");
+            theString = theString.replace(regEx, arguments[i]);
+        }
 
-        editor.on('change', function () {
-            var doc = editor.getSession().getDocument(),
+        return theString;
+    }
+
+
+    function editcode (snippet, snippet_index, code_height) {
+
+        var editor_name = String.format("editor{0}", snippet_index);
+        editor[snippet_index] = ace.edit(editor_name);
+
+        editor[snippet_index].on('change', function () {
+            var doc = editor[snippet_index].getSession().getDocument(),
                 // line height varies with zoom level and font size
                 // correct way to find height is using the renderer
-                line_height = editor.renderer.lineHeight;
+                line_height = editor[snippet_index].renderer.lineHeight;
             code_height = line_height * doc.getLength() + 'px';
-            $('#editor').height(code_height);
-            editor.resize();
+            $('#' + editor_name).height(code_height);
+            editor[snippet_index].resize();
         });
 
         // place cursor at end to prevent entire code being selected
         // after using setValue (which is a feature)
-        editor.setValue(snippet, 1);
+        editor[snippet_index].setValue(snippet, 1);
 
         // editor.setTheme("ace/theme/monokai");
-        editor.getSession().setMode("ace/mode/python");
+        editor[snippet_index].getSession().setMode("ace/mode/python");
 
         // edit successful, show Run button
         $('.editcode').eq(snippet_index).hide();
         $('#runcode').show();
 
         // execute code on pressing 'Shift+Enter'
-        editor.commands.addCommand({
+        editor[snippet_index].commands.addCommand({
             name: 'execute_code',
             bindKey: {win: 'Shift-Enter'},
             exec: function (editor) {
-                runcode();
+                console.log('Running code for ' + snippet_index);
+                runcode(snippet_index);
             },
             readOnly: true // false if this command should not apply in readOnly mode
         });
@@ -74,7 +94,8 @@ $(document).ready(function () {
         return JSON.stringify({'data': code});
     }
 
-    function handleoutput(output) {
+    function handleoutput(output, snippet_index) {
+        console.log('Handling output for ' + snippet_index);
         var output_images = output.result,
             stdout = output.stdout,
             stderr = output.stderr,
@@ -125,7 +146,9 @@ $(document).ready(function () {
                             // image creation timstamp
                             // .attr('title', timestamp)
                             .addClass('output_image')
-                            .insertAfter('#run_btn');
+                            //.insertAfter('#run_btn');
+                            // insert just after the snippet which ran the code
+                            .insertAfter($('#editor' + snippet_index));
                             i = i + 1;
                     } else {
                         $('.section > img.output_image:last')
@@ -155,20 +178,24 @@ $(document).ready(function () {
         $('.all-output').show();
     }
 
-    function getcode() {
+    function getcode(snippet_index) {
         var resulting_code = '',
-            enc_snippet;
+            code_snippet;
         for(var i=0; i<snippet_index; i++) {
-            enc_snippet = encodedcode.eq(i).html();
-            enc_snippet = Base64.decode(enc_snippet);
-            resulting_code = resulting_code + enc_snippet;
+            if (editor[i]) {
+                code_snippet = editor[i].getValue();
+            } else {
+                code_snippet = encodedcode.eq(i).html();
+                code_snippet = Base64.decode(code_snippet);
+            }
+            resulting_code = resulting_code + code_snippet;
             resulting_code = resulting_code + clear_images;
         }
-        resulting_code = resulting_code + editor.getValue();
+        resulting_code = resulting_code + editor[snippet_index].getValue();
         return resulting_code;
     }
 
-    function runcode() {
+    function runcode(snippet_index) {
         if (!code_running) {
             code_running = true;
             // debug
@@ -185,16 +212,16 @@ $(document).ready(function () {
 
             $('#runcode').hide();
 
-            var code = getcode(),
+            var code = getcode(snippet_index),
             // console.log(code);
                 jcode = codetoJSON(code);
                 // get editor-bg
-                editor_color = $('.ace-tm').css('background-color');
+                editor_color = $('#editor' + snippet_index).css('background-color');
                 readonly_editor_color = '#F5F5F5';
 
             // disable editing when code is run
-            editor.setReadOnly(true);
-            $('.ace-tm').css('background-color', readonly_editor_color);
+            editor[snippet_index].setReadOnly(true);
+            $('#editor' + snippet_index).css('background-color', readonly_editor_color);
 
             // console.log(jcode);
             $.ajax({
@@ -208,14 +235,14 @@ $(document).ready(function () {
                 url: 'http://ci.scipy.org:8000/runcode',
                 success: function (e) {
                     // enable editing after response
-                    editor.setReadOnly(false);
-                    $('.ace-tm').css('background-color', editor_color);
+                    editor[snippet_index].setReadOnly(false);
+                    $('#editor' + snippet_index).css('background-color', editor_color);
 
                     // remove animation, show Run
                     // TODO: Refactor to something like reset
                     $('#loading').hide();
                     $('#runcode').show();
-                    handleoutput(e);
+                    handleoutput(e, snippet_index);
                     // suggest number of images received
                     if ($.isEmptyObject(e.result)) {
                         num_images = 0;
@@ -232,8 +259,8 @@ $(document).ready(function () {
                 },
                 error: function (jqxhr, text_status, error_thrown) {
                     // enable editing after response
-                    editor.setReadOnly(false);
-                    $('.ace-tm').css('background-color', editor_color);
+                    editor[snippet_index].setReadOnly(false);
+                    $('#editor' + snippet_index).css('background-color', editor_color);
 
                     // TODO: Refactor to something like reset
                     $('#loading').hide();
@@ -263,7 +290,7 @@ $(document).ready(function () {
             // replace div with editor
             backup = $(this);
 
-            snippet_index = $(this).closest('div.highlight-python').index('div.highlight-python'),
+            snippet_index = $(this).data('index'),
             snippet = encodedcode.eq(snippet_index).html();
 
             $(this).replaceWith('<div id="editor"></div>');
@@ -281,50 +308,48 @@ $(document).ready(function () {
     // TODO: make the snippet selection code more modular
     // edit button fetches code from the URL
     $('.editcode').bind('click', function () {
-        // if one editor is already active, do nothing
-        if ($('#editor').length > 0) {
-            return;
-        }
 
-        edit_btn_index = $(this).closest('.editcode').index('.editcode');
+        var edit_btn_index = $(this).data('index'),
+            snippet_index = edit_btn_index,
+            snippet = encodedcode.eq(snippet_index).html();
 
         // replace div with editor
         backup = $('div.highlight-python').eq(edit_btn_index);
 
-        snippet_index = edit_btn_index;
-        snippet = encodedcode.eq(snippet_index).html();
+        $('div.highlight-python').each(function (){
+            if ($(this).data('index') === snippet_index) {
+                $(this).replaceWith(String.format('<div id="editor{0}"></editor>', snippet_index));
+                snippet = Base64.decode(snippet);
+                editcode(snippet, snippet_index);
+            }
+        });
 
-        $('div.highlight-python').eq(snippet_index).replaceWith('<div id="editor"></div>');
-
-        snippet = Base64.decode(snippet);
-        editcode(snippet);
     });
 
     // clicking on the snippet fetches only the snippet for editing
     $('div.highlight-python').bind('click', function (){
-        // if one editor is already active, do nothing
-        if ($('#editor').length > 0) {
-            return;
-        }
+        // fetch height of div which showed the code
+        var code_height = $(this).height(),
+            snippet_index = $(this).data('index'),
+            snippet = encodedcode.eq(snippet_index).html();
+
         // replace div with editor
         backup = $(this);
 
-        snippet_index = $(this).closest('div.highlight-python').index('div.highlight-python'),
-        snippet = encodedcode.eq(snippet_index).html();
-
-        $(this).replaceWith('<div id="editor"></div>');
+        $(this).replaceWith(String.format('<div id="editor{0}"></editor>', snippet_index));
 
         snippet = Base64.decode(snippet);
-        editcode(snippet);
+        editcode(snippet, snippet_index, code_height);
     });
 
     $('#runcode').bind('click', runcode);
+    // WIP: DISABLE RELOAD FOR NOW
     // revert back to example inside div
-    $('#reload').bind('click', reload);
+    //$('#reload').bind('click', reload);
 
     $(document).keyup(function(e) {
         if (e.keyCode == 27) {
-            reload();
+            //reload();
         }   // esc
     })
 });

@@ -1,4 +1,4 @@
-#editor {
+div[id^='editor'] {
 	position: relative;
 	margin-bottom: 10px;
 }
