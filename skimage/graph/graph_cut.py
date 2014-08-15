@@ -120,7 +120,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True):
 
     _ncut_relabel(rag, thresh, num_cuts)
 
-    map_array = np.zeros(labels.max() + 1)
+    map_array = np.zeros(labels.max() + 1, dtype=labels.dtype)
     # Mapping from old labels to new
     for n, d in rag.nodes_iter(data=True):
         map_array[d['labels']] = d['ncut label']
