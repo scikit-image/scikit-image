@@ -518,7 +518,6 @@ def _array_from_bitmap(bitmap):
     # swizzle the color components and flip the scanlines to go from
     # FreeImage's BGR[A] and upside-down internal memory format to something
     # more normal
-
     def n(arr):
         return arr[..., ::-1].T
     if len(shape) == 3 and _FI.FreeImage_IsLittleEndian() and \
@@ -674,16 +673,28 @@ def _array_to_bitmap(array):
     try:
         def n(arr):  # normalise to freeimage's in-memory format
             return arr.T[:, ::-1]
+
         wrapped_array = _wrap_bitmap_bits_in_array(bitmap, w_shape, dtype)
         # swizzle the color components and flip the scanlines to go to
         # FreeImage's BGR[A] and upside-down internal memory format
-        if len(shape) == 3 and _FI.FreeImage_IsLittleEndian() and \
-               dtype.type == numpy.uint8:
-            wrapped_array[0] = n(array[:, :, 2])
-            wrapped_array[1] = n(array[:, :, 1])
-            wrapped_array[2] = n(array[:, :, 0])
-            if shape[2] == 4:
-                wrapped_array[3] = n(array[:, :, 3])
+        if len(shape) == 3:
+            R = array[:, :, 0]
+            G = array[:, :, 1]
+            B = array[:, :, 2]
+
+            if _FI.FreeImage_IsLittleEndian():
+                if dtype.type == numpy.uint8:
+                    wrapped_array[0] = n(B)
+                    wrapped_array[1] = n(G)
+                    wrapped_array[2] = n(R)
+                elif dtype.type == numpy.uint16:
+                    wrapped_array[0] = n(R)
+                    wrapped_array[1] = n(G)
+                    wrapped_array[2] = n(B)
+
+                if shape[2] == 4:
+                    A = array[:, :, 3]
+                    wrapped_array[3] = n(A)
         else:
             wrapped_array[:] = n(array)
         if len(shape) == 2 and dtype.type == numpy.uint8:
