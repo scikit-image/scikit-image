@@ -27,6 +27,13 @@ out = graph.draw_rag(labels, g, img, node_color="#ffde00", colormap=cmap,
 plt.figure()
 plt.title("RAG with edge weights less than 30, color "
           "mapped between blue and orange.")
+plt.imshow(out)
+
+plt.figure()
+plt.title("All edges drawn with cubehelix colormap")
+cmap = plt.get_cmap('cubehelix')
+out = graph.draw_rag(labels, g, img, colormap=cmap,
+                     desaturate=True)
 
 plt.imshow(out)
 plt.show()

@@ -251,8 +251,8 @@ def draw_rag(labels, rag, img, border_color=None, node_color='#ffff00',
     """Draw a Region Adjacency Graph on an image.
 
     Given a labelled image and its corresponding RAG, draw the nodes and edges
-    of the RAG on the image with the specified colors. Nodes are markes by
-    the centroids of the corresposning regions.
+    of the RAG on the image with the specified colors. Nodes are marked by
+    the centroids of the corresponding regions.
 
     Parameters
     ----------
@@ -276,7 +276,7 @@ def draw_rag(labels, rag, img, border_color=None, node_color='#ffff00',
         mapping.
     desaturate : bool, optional
         Convert the image to grayscale before displaying. Particularly helps
-        visualiztion when using the `colormap` option.
+        visualization when using the `colormap` option.
     in_place : bool, optional
         If set, the RAG is modified in place. For each node `n` the function
         will set a new attribute ``rag.node[n]['centroid']``.
