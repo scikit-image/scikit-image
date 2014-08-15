@@ -38,8 +38,9 @@ def merge_hierarchical(labels, rag, thresh):
     rag : RAG
         The Region Adjacency Graph.
     thresh : float
-        The threshold. Nodes are merged until the minimum edge weight in the
-        graph exceeds `thresh`.
+        The threshold. Regions connected by an edges with smaller wegiht than
+        `thresh` are merged. A high value of `thresh` would mean that a lot of
+        regions are merged, and the output will contain fewer regions.
 
     Returns
     -------
@@ -71,11 +72,9 @@ def merge_hierarchical(labels, rag, thresh):
 
             rag.merge_nodes(x, y, _hmerge)
 
-    count = 0
     arr = np.arange(labels.max() + 1)
-    for n, d in rag.nodes_iter(data=True):
-        for l in d['labels']:
-            arr[l] = count
-        count += 1
+    for ix, (n, d) in enumerate(rag.nodes_iter(data=True)):
+        for label in d['labels']:
+            arr[label] = ix
 
     return arr[labels]
