@@ -16,7 +16,7 @@ from skimage import graph, data, io, segmentation, color
 img = data.coffee()
 labels = segmentation.slic(img, compactness=30, n_segments=400)
 g = graph.rag_mean_color(img, labels)
-labels2 = graph.merge_hierarchical(g, labels, 40)
+labels2 = graph.merge_hierarchical(labels, g, 40)
 g2 = graph.rag_mean_color(img, labels2)
 
 out = color.label2rgb(labels2, img, kind='avg')
