@@ -301,7 +301,7 @@ def draw_rag(labels, rag, img, border_color=None, node_color='#ffff00',
         img = color.rgb2gray(img)
         img = color.gray2rgb(img)
 
-    out = util.img_as_float(img)
+    out = util.img_as_float(img, force_copy=True)
     cc = colors.ColorConverter()
 
     edge_color = cc.to_rgb(edge_color)
