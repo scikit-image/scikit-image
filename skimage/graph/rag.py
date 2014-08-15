@@ -22,7 +22,6 @@ except ImportError:
     pass
 
 
-
 def min_weight(graph, src, dst, n):
     """Callback to handle merging nodes by choosing minimum weight.
 
