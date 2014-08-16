@@ -14,8 +14,8 @@ $(document).ready(function () {
 
     // hide Run, only visible when code edited
     // hide loading animation, visible, when code running
-    $('#runcode').hide();
-    $('#loading').hide();
+    $('.runcode').hide();
+    $('.loading').hide();
     $('#error-message').hide();
     $('#success-message').hide();
     $('.all-output').hide();
@@ -27,6 +27,10 @@ $(document).ready(function () {
     });
 
     $('.editcode').each(function (index) {
+        $(this).data('index', index);
+    });
+
+    $('.runcode').each(function (index) {
         $(this).data('index', index);
     });
 
@@ -72,7 +76,7 @@ $(document).ready(function () {
 
         // edit successful, show Run button
         $('.editcode').eq(snippet_index).hide();
-        $('#runcode').show();
+        $('.runcode').eq(snippet_index).show();
 
         // execute code on pressing 'Shift+Enter'
         editor[snippet_index].commands.addCommand({
@@ -150,7 +154,7 @@ $(document).ready(function () {
                             .addClass('output_image')
                             //.insertAfter('#run_btn');
                             // insert just after the snippet which ran the code
-                            .insertAfter($('#editor' + snippet_index));
+                            .insertAfter($('.run_btn').eq(snippet_index));
                             i = i + 1;
                     } else {
                         $('.section > img.output_image:last')
@@ -204,16 +208,16 @@ $(document).ready(function () {
             // console.log('detect click');
 
             // add animation, hide Run to prevent duplicate runs
-            $('#loading').show();
+            $('.loading').show();
             // hide message from previous Run
             $('#error-message').hide();
             $('#success-message').hide();
             $('.all-output').hide();
             // get rid of output images from previous run
             $('img.output_image').remove();
-
-            $('#runcode').hide();
             $('#reload').hide();
+
+            $('.runcode').eq(snippet_index).hide();
 
             var code = getcode(snippet_index),
             // console.log(code);
@@ -243,8 +247,8 @@ $(document).ready(function () {
 
                     // remove animation, show Run
                     // TODO: Refactor to something like reset
-                    $('#loading').hide();
-                    $('#runcode').show();
+                    $('.loading').hide();
+                    $('.runcode').eq(snippet_index).show();
                     $('#reload').show();
                     handleoutput(e, snippet_index);
                     // suggest number of images received
@@ -267,8 +271,8 @@ $(document).ready(function () {
                     $('#editor' + snippet_index).css('background-color', editor_color);
 
                     // TODO: Refactor to something like reset
-                    $('#loading').hide();
-                    $('#runcode').show();
+                    $('.loading').hide();
+                    $('.runcode').eq(snippet_index).show();
                     $('#reload').show();
 
                     error_code = jqxhr.status;
@@ -310,9 +314,9 @@ $(document).ready(function () {
             editcode(snippet, snippet_index, code_height);
         });
         // hide Run, only visible when code edited
-        $('#runcode').hide();
-        $('#loading').hide();
+        $('.runcode').hide();        
         $('.editcode').show();
+        $('.loading').hide();
         $('.all-output').hide();
     }
 
@@ -347,8 +351,11 @@ $(document).ready(function () {
         editcode(snippet, snippet_index, code_height);
     });
 
-    // TODO: Finalize what this button is for
-    //$('#runcode').bind('click', runcode);
+    $('.runcode').bind('click', function () {
+        var run_btn_index = $(this).data('index');
+        console.log(run_btn_index);
+        runcode(run_btn_index);
+    });
 
     // revert back to example inside div
     $('#reload').bind('click', reload);

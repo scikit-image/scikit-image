@@ -117,17 +117,24 @@ OUTPUT_MESSAGES = """
     </p>
 """
 
-RUN_REVERT_BTN = """
+REVERT_BTN = """
 .. raw:: html
 
-    <p id="run_btn">
-        <button type="button" class="btn btn-default btn-lg" id="runcode">
-            <i class="icon-play"></i> Run
-        </button>
+    <p id="revert_btn">
         <button type="button" class="btn btn-default btn-lg" id="reload">
             <i class="icon-refresh"></i>
         </button>
-        <img id="loading" src="../_static/ajax-loader.gif"/>
+    </p>
+"""
+
+RUN_BTN = """
+.. raw:: html
+
+    <p class="run_btn">
+        <button type="button" class="btn btn-default btn-lg runcode">
+            <i class="icon-play"></i> Run
+        </button>
+        <img class="loading" src="../_static/ajax-loader.gif"/>
     </p>
 """
 
@@ -407,8 +414,9 @@ def write_example(src_name, src_dir, rst_dir, cfg):
         code_info = dict(src_name=src_name, code_start=end)
         example_rst += EDIT_BTN
         example_rst += LITERALINCLUDE.format(**code_info)
+        example_rst += RUN_BTN
 
-    example_rst += RUN_REVERT_BTN
+    example_rst += REVERT_BTN
     example_rst += OUTPUT_MESSAGES
     example_rst += CODE_LINK.format(src_name)
     ipnotebook_name = src_name.replace('.py', '.ipynb')
@@ -590,6 +598,7 @@ def process_blocks(blocks, src_path, image_path, cfg):
             # add edit button associated with each code block
             rst_blocks.append(EDIT_BTN)
             rst_blocks.append(codestr2rst(bcontent))
+            rst_blocks.append(RUN_BTN)
         else:
             if i in idx_inline_plot:
                 plt.savefig(image_path.format(fig_num))
