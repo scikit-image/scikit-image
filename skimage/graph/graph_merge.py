@@ -1,4 +1,5 @@
 import numpy as np
+import heapq
 
 
 def _hmerge(rag, x, y, n):
@@ -21,7 +22,13 @@ def _hmerge(rag, x, y, n):
         The absolute difference of the mean color between node `y` and `n`.
     """
     diff = rag.node[y]['mean color'] - rag.node[n]['mean color']
+
     diff = np.linalg.norm(diff)
+    
+    #rag.add_edge(y,n)
+    #rag[y][n]['valid'] = True
+    #heapq.heappush(heap,(diff, y , n, data))
+
     return diff
 
 
@@ -56,21 +63,48 @@ def merge_hierarchical(labels, rag, thresh):
     >>> new_labels = graph.merge_hierarchical(labels, rag, 40)
     """
     min_wt = 0
+    
+    edge_heap = []
+    for x,y,data in rag.edges_iter(data=True):
+        if x != y:
+            data['valid'] = True
+            wt = data['weight']
+            heapq.heappush(edge_heap, (wt, x, y, data))
+    
+        
     while min_wt < thresh:
 
-        valid_edges = ((x, y, d) for x, y, d in rag.edges(data=True) if x != y)
-        x, y, d = min(valid_edges, key=lambda x: x[2]['weight'])
-        min_wt = d['weight']
-
-        if min_wt < thresh:
+        #valid_edges = ((x, y, d) for x, y, d in rag.edges(data=True) if x != y)
+        #x, y, d = min(valid_edges, key=lambda x: x[2]['weight'])
+        #min_wt = d['weight']
+        min_wt,x,y,data = heapq.heappop(edge_heap)
+        print min_wt
+        if min_wt < thresh and data['valid']:
             total_color = (rag.node[y]['total color'] +
                            rag.node[x]['total color'])
             n_pixels = rag.node[x]['pixel count'] + rag.node[y]['pixel count']
             rag.node[y]['total color'] = total_color
             rag.node[y]['pixel count'] = n_pixels
             rag.node[y]['mean color'] = total_color / n_pixels
+            
+            
+            #print x,y
+            for n in rag.neighbors(x):
+                rag[x][n]['valid']  = False
+                
+            for n in rag.neighbors(y):
+                rag[y][n]['valid']  = False
 
             rag.merge_nodes(x, y, _hmerge)
+            
+            
+            for n in rag.neighbors(y):
+                if n!= y:
+                    rag[y][n]['valid']  = True
+                    wt = rag[y][n]['weight']
+                    heapq.heappush(edge_heap, (wt, y, n, rag[y][n]))
+                
+            
 
     arr = np.arange(labels.max() + 1)
     for ix, (n, d) in enumerate(rag.nodes_iter(data=True)):
