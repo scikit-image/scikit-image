@@ -259,14 +259,14 @@ $(document).ready(function () {
                         num_images = Object.keys(e.result).length/2;
                     }
                     if (e.result.hasOwnProperty('busy')) {
-                        $('#success-message').html("Server Busy, try again later!")
-                        .detach().appendTo('.run_btn').eq(snippet_index)
-                        .show();
+                        var success_message = $('#success-message').detach();
+                        $(success-message).html("Server Busy, try again later!");
+                        $(success-message)appendTo('.run_btn').eq(snippet_index).show();
                     }
                     else {
-                        $('#success-message').html("Success: Received " + num_images + " image(s) at " + e.timestamp + " UTC -5")
-                        .detach().appendTo('.run_btn').eq(snippet_index)
-                        .show();
+                        var success_message = $('#success-message').detach();
+                        $(success_message).html("Success: Received " + num_images + " image(s) at " + e.timestamp + " UTC -5");
+                        $(success_message).appendTo('.run_btn').eq(snippet_index).show();
                     }
                     code_running = false;
                 },
