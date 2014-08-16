@@ -29,3 +29,9 @@ div[id^='editor'] {
 .output_image {
 	width: 100%;
 }
+
+#success-message {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	line-height: 10px;
+}

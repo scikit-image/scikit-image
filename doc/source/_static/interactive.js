@@ -259,9 +259,14 @@ $(document).ready(function () {
                         num_images = Object.keys(e.result).length/2;
                     }
                     if (e.result.hasOwnProperty('busy')) {
-                        $('#success-message').html("Server Busy, try again later!").show();
-                    } else {
-                        $('#success-message').html("Success: Received " + num_images + " image(s) at " + e.timestamp + " UTC -5").show();
+                        $('#success-message').html("Server Busy, try again later!")
+                        .detach().appendTo('.run_btn').eq(snippet_index)
+                        .show();
+                    }
+                    else {
+                        $('#success-message').html("Success: Received " + num_images + " image(s) at " + e.timestamp + " UTC -5")
+                        .detach().appendTo('.run_btn').eq(snippet_index)
+                        .show();
                     }
                     code_running = false;
                 },
@@ -277,8 +282,9 @@ $(document).ready(function () {
 
                     error_code = jqxhr.status;
                     error_text = jqxhr.statusText;
-                    $('#error-message').html(error_text + ' ' + error_code);
-                    $('#error-message').show();
+                    $('#error-message').html(error_text + ' ' + error_code)
+                    .detach().appendTo('.run_btn').eq(snippet_index)
+                    .show();
                     code_running = false;
                 }
             });
@@ -353,7 +359,6 @@ $(document).ready(function () {
 
     $('.runcode').bind('click', function () {
         var run_btn_index = $(this).data('index');
-        console.log(run_btn_index);
         runcode(run_btn_index);
     });
 
