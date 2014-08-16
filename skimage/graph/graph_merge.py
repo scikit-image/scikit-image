@@ -72,7 +72,6 @@ def merge_hierarchical(labels, rag, thresh, in_place=True):
             heapq.heappush(edge_heap, (wt, x, y, data))
 
     while min_wt < thresh:
-
         min_wt, x, y, data = heapq.heappop(edge_heap)
 
         # Ensure popped edge is valid, if not, the edge is discarded
