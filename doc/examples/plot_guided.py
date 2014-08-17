@@ -11,11 +11,10 @@ The authors make the following comment: "Try the guided filter in any situation
 when the bilateral filter works well. The guided filter is much faster and
 sometimes (though not always) works even better." [1]_
 
-There are two adjustable parameters: the window_size, which controls the 
-size of the neighbourhood considered in computing the statistics, and eta, 
-which controls the strength of the smoothing. As eta becomes very large 
-compared to the image intensities the result approaches an averaging filter 
-when no guide is specified.
+There are two adjustable parameters: the window_size, which controls the
+size of the neighbourhood considered in computing the statistics, and eta,
+which controls the strength of the smoothing. Larger eta's approximately
+correspond to stronger smoothing.
 
 ==========
 References
@@ -26,7 +25,7 @@ References
 
 """
 
-from skimage.data import immunohistochemistry 
+from skimage.data import immunohistochemistry
 from skimage.restoration import guided_filter
 import numpy as np
 import matplotlib.pyplot as plt
@@ -39,57 +38,83 @@ gray_square[100:300, 100:300] = 0.5
 noisy_square = gray_square + np.random.normal(scale=0.4, size=gray_square.shape)
 noisy_square = np.clip(noisy_square, 0, 1)
 
-# Guided filter the gray rectangle with itself at different values of eta.
-plt.subplot(2,2,1)
-plt.imshow(noisy_square, cmap='gray', vmin=0, vmax=1)
-etas = [0.05, 0.2, 1]
+# Filter the noisy gray square with itself at lower and higher eta, with the
+# same window radius for each.
+guided_low = guided_filter(noisy_square, 0.1, 5)
+guided_high = guided_filter(noisy_square, 0.5, 5)
 
-for i, eta in enumerate(etas):
-    plt.subplot(2, 2, i+2)
-    guided = guided_filter(noisy_square, eta, 5)
-    plt.imshow(guided, cmap='gray', vmin=0, vmax=1)
-    plt.axis('off')
+# Plot the results
+fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(8, 3))
 
-plt.savefig('noisy_square_self_guide.png',dpi=100)
+ax1.imshow(noisy_square, cmap='gray', vmin=0, vmax=1)
+ax1.axis('off')
+ax1.set_title('Original')
+
+ax2.imshow(guided_low, cmap='gray', vmin=0, vmax=1)
+ax2.axis('off')
+ax2.set_title('Eta = 0.1')
+
+ax3.imshow(guided_high, cmap='gray', vmin=0, vmax=1)
+ax3.axis('off')
+ax3.set_title('Eta = 0.5')
+
+fig.subplots_adjust(wspace=0.02, hspace=0.02, top=0.9,
+                    bottom=0.02, left=0.02, right=0.98)
+
 plt.show()
 
+# Filter the noisy gray square with the original image at lower and higher eta,
+# with the same window radius for each.
+guided_low = guided_filter(noisy_square, 0.1, 5, guide=gray_square)
+guided_high = guided_filter(noisy_square, 0.5, 5, guide=gray_square)
 
-plt.subplot(2,2,1)
-plt.imshow(noisy_square, cmap='gray', vmin=0, vmax=1)
-plt.axis('off')
+# Plot the results
+fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(8, 3))
 
-# Guided filter the gray rectangle, but this time with the original sharp edged
-# image as a better estimate of the image structure.
-for i, eta in enumerate(etas):
-    plt.subplot(2, 2, i+2)
-    guided = guided_filter(noisy_square, eta, 5, guide=gray_square)
-    plt.imshow(guided, cmap='gray', vmin=0, vmax=1)
-    plt.axis('off')
-    
-plt.savefig('noisy_square_sharp_guide.png',dpi=100)
+ax1.imshow(noisy_square, cmap='gray', vmin=0, vmax=1)
+ax1.axis('off')
+ax1.set_title('Original')
+
+ax2.imshow(guided_low, cmap='gray', vmin=0, vmax=1)
+ax2.axis('off')
+ax2.set_title('Eta = 0.1')
+
+ax3.imshow(guided_high, cmap='gray', vmin=0, vmax=1)
+ax3.axis('off')
+ax3.set_title('Eta = 0.5')
+
+fig.subplots_adjust(wspace=0.02, hspace=0.02, top=0.9,
+                    bottom=0.02, left=0.02, right=0.98)
+
 plt.show()
+
 
 # Load a colour image and add gaussian noise idependently to each of the
 # channels of a colour image.
-ihc = immunohistochemistry()/255
+ihc = immunohistochemistry()/255.0
 ihc_noisy = ihc + np.random.normal(scale=0.3, size=ihc.shape)
 ihc_noisy = np.clip(ihc_noisy, 0, 1)
 ihc_noisy_gray = ihc_noisy.mean(axis=2)
 
-plt.subplot(2,2,1)
-plt.imshow(ihc_noisy)
-plt.axis('off')
+guided_low = guided_filter(ihc_noisy, 0.02, 5, guide=ihc_noisy_gray)
+guided_high = guided_filter(ihc_noisy, 0.1, 5, guide=ihc_noisy_gray)
 
-# Guided filter the colour image, using the mean of the colour channels as a 
-# guide that is less affected by the applied colour noise.
-etas = [0.05,0.1,0.2]
-for i, eta in enumerate(etas):
-    plt.subplot(2, 2, i+2)
-    guided = guided_filter(ihc_noisy, eta, 5, guide=ihc_noisy_gray)
-    guided = np.clip(guided, 0, 1)    
-    plt.imshow(guided)
-    plt.axis('off')
-    
-plt.show()
-plt.savefig('denoised_immunihistochemistry.png',dpi=100)
+# Plot the results
+fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(8, 3))
+
+ax1.imshow(ihc_noisy)
+ax1.axis('off')
+ax1.set_title('Original with noise')
+
+ax2.imshow(guided_low)
+ax2.axis('off')
+ax2.set_title('Eta = 0.02')
+
+ax3.imshow(guided_high)
+ax3.axis('off')
+ax3.set_title('Eta = 0.1')
+
+fig.subplots_adjust(wspace=0.02, hspace=0.02, top=0.9,
+                    bottom=0.02, left=0.02, right=0.98)
+
 plt.show()

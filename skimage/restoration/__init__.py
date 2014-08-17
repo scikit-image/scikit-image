@@ -11,7 +11,7 @@ References
        http://www.opticsinfobase.org/josaa/abstract.cfm?URI=josaa-27-7-1593
 
 .. [2] Richardson, William Hadley, "Bayesian-Based Iterative Method of
-       Image Restoration". JOSA 62 (1): 5559. doi:10.1364/JOSA.62.000055, 1972
+       Image Restoration". JOSA 62 (1): 55-59. doi:10.1364/JOSA.62.000055, 1972
 
 .. [3] B. R. Hunt "A matrix theory proof of the discrete
        convolution theorem", IEEE Trans. on Audio and

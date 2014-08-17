@@ -4,7 +4,7 @@ from scipy.ndimage.filters import uniform_filter
 
 def _guided_filter(image, guide, eta, radius):
     """ Guided filtering on two distinct single channel float images."""
-    window_size = 2*int(radius)+ 1
+    window_size = 2*radius + 1
     mean_image = uniform_filter(image, window_size)
     mean_guide = uniform_filter(guide, window_size)
     mean_image_guide = uniform_filter(guide*image, window_size)
@@ -23,7 +23,7 @@ def _guided_filter(image, guide, eta, radius):
 
 def _guided_filter_same(image, eta, radius):
     """ Guided filtering with a single channel image as its own guide."""
-    window_size = 2*int(radius) + 1
+    window_size = 2*radius + 1
     mean_image = uniform_filter(image, window_size)
     mean_image_squared = uniform_filter(image**2.0, window_size)
 
@@ -47,18 +47,17 @@ def guided_filter(image, eta, radius, guide=None):
     ----------
 
     image : array-like
-        Input image (grayscale or color) to filter.
+        Input image to filter. Can be a single or multiple channel image.
     eta : float
         Regularisation parameter, larger values correspond to smoother output.
-        The impact of eta depends on the pixel intensities - for intensities in
+        The effect of eta depends on the pixel intensities - for intensities in
         the range [0,1] try 0.1 as a starting point.
-    radius : int 
-        The half edge size of the window used to compute pixel statistics for 
-        smoothing. The actual filter size is 2*radius + 1. Float values are
-        cast to int.
+    radius : int
+        The half edge size of the window used to compute pixel statistics for
+        smoothing. The actual filter window size is 2*radius + 1.
     guide : array-like, optional (default:None)
         Guide image to control the smoothing. If no guide is specified the
-        image will be used as its own guide. Must have the same
+        image will be used as its own guide. The guide image must have the same
         number of rows and columns as the input image. If the input image has
         multiple channels the guide image must either have one channel, or the
         same number of channels as the input. If the guide has only one channel
@@ -87,19 +86,19 @@ def guided_filter(image, eta, radius, guide=None):
     --------
 
     >>> a = np.eye(3)
-    
+
     # If no guide is specified, the image itself is used.
     >>> guided_filter(a, 0.1, 1)
     array([[ 0.82811797,  0.10548081,  0.08231598],
            [ 0.10548081,  0.75720884,  0.10548081],
            [ 0.08231598,  0.10548081,  0.82811797]])
-    
+
     # An explicit guide image can be specified.
     >>> guided_filter(a, 0.1, 1, guide=a*2)
     array([[ 0.94438564,  0.03506486,  0.02870165],
            [ 0.03506486,  0.91356598,  0.03506486],
            [ 0.02870165,  0.03506486,  0.94438564]])
-           
+
     # A multichannel image can be guided with a single channel image.
     >>> a = np.tile(a[..., np.newaxis], (1, 1, 3))
     >>> b = a[:, :, 0]**2
@@ -115,18 +114,18 @@ def guided_filter(image, eta, radius, guide=None):
        [[ 0.08231598,  0.08231598,  0.08231598],
         [ 0.10548081,  0.10548081,  0.10548081],
         [ 0.82811797,  0.82811797,  0.82811797]]])
-    
+
     # Or with a multi-channel image.
     >>> b = a**2
     >>> guided_filter(a, 0.1, 1, guide=b)
     array([[[ 0.82811797,  0.82811797,  0.82811797],
             [ 0.10548081,  0.10548081,  0.10548081],
             [ 0.08231598,  0.08231598,  0.08231598]],
-    
+
            [[ 0.10548081,  0.10548081,  0.10548081],
             [ 0.75720884,  0.75720884,  0.75720884],
             [ 0.10548081,  0.10548081,  0.10548081]],
-    
+
            [[ 0.08231598,  0.08231598,  0.08231598],
             [ 0.10548081,  0.10548081,  0.10548081],
             [ 0.82811797,  0.82811797,  0.82811797]]])
@@ -172,7 +171,3 @@ def guided_filter(image, eta, radius, guide=None):
             return output
         else:
             raise ValueError("Image must have 2 or 3 dimensions")
-
-
-
-    
