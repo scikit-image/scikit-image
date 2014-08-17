@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import sqrt, pi, arctan2, cos, sin
-from scipy.ndimage import uniform_filter
+from scipy.ndimage import uniform_filter, convolve1d
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8),
@@ -80,10 +80,8 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         # to avoid problems with subtracting unsigned numbers in np.diff()
         image = image.astype('float')
 
-    gx = np.zeros(image.shape)
-    gy = np.zeros(image.shape)
-    gx[:, :-1] = np.diff(image, n=1, axis=1)
-    gy[:-1, :] = np.diff(image, n=1, axis=0)
+    gx = convolve1d(image, [-1,0,1], axis=1, mode='nearest')
+    gy = convolve1d(image, [-1,0,1], axis=0, mode='nearest')
 
     """
     The third stage aims to produce an encoding that is sensitive to
@@ -144,9 +142,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
                     dx = radius * cos(float(o) / orientations * np.pi)
                     dy = radius * sin(float(o) / orientations * np.pi)
                     rr, cc = draw.line(int(centre[0] - dx),
-                                       int(centre[1] - dy),
+                                       int(centre[1] + dy),
                                        int(centre[0] + dx),
-                                       int(centre[1] + dy))
+                                       int(centre[1] - dy))
                     hog_image[rr, cc] += orientation_histogram[y, x, o]
 
     """
