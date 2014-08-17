@@ -30,7 +30,6 @@ from ._guided_filter import guided_filter
 nl_means_denoising = copy_func(denoise_nl_means, name='nl_means_denoising')
 nl_means_denoising = deprecated('skimage.restoration.denoise_nl_means')(nl_means_denoising)
 
-
 __all__ = ['wiener',
            'unsupervised_wiener',
            'richardson_lucy',
