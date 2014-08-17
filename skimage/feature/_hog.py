@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import sqrt, pi, arctan2, cos, sin
-from scipy.ndimage import uniform_filter, convolve1d
+from scipy.ndimage import uniform_filter
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8),
@@ -79,9 +79,15 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         # convert uint image to float
         # to avoid problems with subtracting unsigned numbers in np.diff()
         image = image.astype('float')
-
-    gx = convolve1d(image, [-1,0,1], axis=1, mode='nearest')
-    gy = convolve1d(image, [-1,0,1], axis=0, mode='nearest')
+    
+    gx = np.empty_like(image)
+    gx[:, 0] = 0
+    gx[:, -1] = 0
+    gx[:, 1:-1] = image[:, 2:] - image[:, :-2]
+    gy = np.empty_like(image)
+    gy[0, :] = 0
+    gy[-1, :] = 0
+    gy[1:-1, :] = image[2:, :] - image[:-2, :]
 
     """
     The third stage aims to produce an encoding that is sensitive to
