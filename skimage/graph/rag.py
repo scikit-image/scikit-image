@@ -9,10 +9,17 @@ except ImportError:
                 raise ImportError(msg)
     import warnings
     warnings.warn(msg)
+
 import numpy as np
 from scipy.ndimage import filters
 from scipy import ndimage as nd
 import math
+from .. import draw, measure, segmentation, util, color
+try:
+    from matplotlib import colors
+    from matplotlib import cm
+except ImportError:
+    pass
 
 
 def min_weight(graph, src, dst, n):
@@ -237,3 +244,110 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
             raise ValueError("The mode '%s' is not recognised" % mode)
 
     return graph
+
+
+def draw_rag(labels, rag, img, border_color=None, node_color='#ffff00',
+             edge_color='#00ff00', colormap=None, thresh=np.inf,
+             desaturate=False, in_place=True):
+    """Draw a Region Adjacency Graph on an image.
+
+    Given a labelled image and its corresponding RAG, draw the nodes and edges
+    of the RAG on the image with the specified colors. Nodes are marked by
+    the centroids of the corresponding regions.
+
+    Parameters
+    ----------
+    labels : ndarray, shape (M, N)
+        The labelled image.
+    rag : RAG
+        The Region Adjacency Graph.
+    img : ndarray, shape (M, N, 3)
+        Input image.
+    border_color : colorspec, optional
+        Any matplotlib colorspec.
+    node_color : colorspec, optional
+        Any matplotlib colorspec. Yellow by default.
+    edge_color : colorspec, optional
+        Any matplotlib colorspec. Green by default.
+    colormap : colormap, optional
+        Any matplotlib colormap. If specified the edges are colormapped with
+        the specified color map.
+    thresh : float, optional
+        Edges with weight below `thresh` are not drawn, or considered for color
+        mapping.
+    desaturate : bool, optional
+        Convert the image to grayscale before displaying. Particularly helps
+        visualization when using the `colormap` option.
+    in_place : bool, optional
+        If set, the RAG is modified in place. For each node `n` the function
+        will set a new attribute ``rag.node[n]['centroid']``.
+
+    Returns
+    -------
+    out : ndarray, shape (M, N, 3)
+        The image with the RAG drawn.
+
+    Examples
+    --------
+    >>> from skimage import data, graph, segmentation
+    >>> img = data.coffee()
+    >>> labels = segmentation.slic(img)
+    >>> g =  graph.rag_mean_color(img, labels)
+    >>> out = graph.draw_rag(labels, g, img)
+    """
+    if not in_place:
+        rag = rag.copy()
+
+    if desaturate:
+        img = color.rgb2gray(img)
+        img = color.gray2rgb(img)
+
+    out = util.img_as_float(img, force_copy=True)
+    cc = colors.ColorConverter()
+
+    edge_color = cc.to_rgb(edge_color)
+    node_color = cc.to_rgb(node_color)
+
+    # Handling the case where one node has multiple labels
+    # offset is 1 so that regionprops does not ignore 0
+    offset = 1
+    map_array = np.arange(labels.max() + 1)
+    for n, d in rag.nodes_iter(data=True):
+        for label in d['labels']:
+            map_array[label] = offset
+        offset += 1
+
+    rag_labels = map_array[labels]
+    regions = measure.regionprops(rag_labels)
+
+    for (n, data), region in zip(rag.nodes_iter(data=True), regions):
+        data['centroid'] = region['centroid']
+
+    if border_color is not None:
+        border_color = cc.to_rgb(border_color)
+        out = segmentation.mark_boundaries(out, rag_labels, color=border_color)
+
+    if colormap is not None:
+        edge_weight_list = [d['weight'] for x, y, d in
+                            rag.edges_iter(data=True) if d['weight'] < thresh]
+        norm = colors.Normalize()
+        norm.autoscale(edge_weight_list)
+        smap = cm.ScalarMappable(norm, colormap)
+
+    for n1, n2, data in rag.edges_iter(data=True):
+
+        if data['weight'] >= thresh:
+            continue
+        r1, c1 = map(int, rag.node[n1]['centroid'])
+        r2, c2 = map(int, rag.node[n2]['centroid'])
+        line = draw.line(r1, c1, r2, c2)
+
+        if colormap is not None:
+            out[line] = smap.to_rgba([data['weight']])[0][:-1]
+        else:
+            out[line] = edge_color
+
+        circle = draw.circle(r1, c1, 2)
+        out[circle] = node_color
+
+    return out
