@@ -115,7 +115,8 @@ def _add_edge_filter(values, graph):
     values = values.astype(int)
     current = values[0]
     for value in values[1:]:
-        graph.add_edge(current, value)
+        if value != current:
+            graph.add_edge(current, value)
 
     return 0
 

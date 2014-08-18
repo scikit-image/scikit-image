@@ -72,7 +72,8 @@ def cut_threshold(labels, rag, thresh, in_place=True):
     return map_array[labels]
 
 
-def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True):
+def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
+                   max_edge=1.0):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Given an image's labels and its similarity RAG, recursively perform
@@ -94,6 +95,10 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True):
     in_place : bool
         If set, modifies `rag` in place. For each node `n` the function will
         set a new attribute ``rag.node[n]['ncut label']``.
+    max_edge : float, optional
+        The maximum possible value of an edge in the RAG. This corresponds to
+        an edge between identical regions. This is used to put self
+        edges in the RAG.
 
     Returns
     -------
@@ -117,6 +122,9 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True):
     """
     if not in_place:
         rag = rag.copy()
+
+    for node in rag.nodes_iter():
+        rag.add_edge(node, node, weight=max_edge)
 
     _ncut_relabel(rag, thresh, num_cuts)
 
