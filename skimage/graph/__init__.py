@@ -1,11 +1,8 @@
 from .spath import shortest_path
 from .mcp import MCP, MCP_Geometric, MCP_Connect, MCP_Flexible, route_through_array
 from .graph_cut import cut_threshold, cut_normalized
-<<<<<<< HEAD
 from .rag import rag_mean_color, RAG, draw_rag
-=======
 from .graph_merge import merge_hierarchical
->>>>>>> working code
 ncut = cut_normalized
 
 
