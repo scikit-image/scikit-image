@@ -80,11 +80,11 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         # to avoid problems with subtracting unsigned numbers in np.diff()
         image = image.astype('float')
     
-    gx = np.empty(image.shape)
+    gx = np.empty(image.shape, dtype=np.double)
     gx[:, 0] = 0
     gx[:, -1] = 0
     gx[:, 1:-1] = image[:, 2:] - image[:, :-2]
-    gy = np.empty(image.shape)
+    gy = np.empty(image.shape, dtype=np.double)
     gy[0, :] = 0
     gy[-1, :] = 0
     gy[1:-1, :] = image[2:, :] - image[:-2, :]
