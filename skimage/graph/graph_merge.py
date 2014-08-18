@@ -112,13 +112,10 @@ def merge_hierarchical(labels, rag, thresh, in_place=True):
 
         # Ensure popped edge is valid, if not, the edge is discarded
         if valid:
-            total_color = (rag.node[src]['total color'] +
-                           rag.node[dst]['total color'])
-            n_pixels = (rag.node[src]['pixel count'] +
-                        rag.node[dst]['pixel count'])
-            rag.node[dst]['total color'] = total_color
-            rag.node[dst]['pixel count'] = n_pixels
-            rag.node[dst]['mean color'] = total_color / n_pixels
+            rag.node[dst]['total color'] += rag.node[src]['total color']
+            rag.node[dst]['pixel count'] += rag.node[src]['pixel count']
+            rag.node[dst]['mean color'] = (rag.node[dst]['total color'] /
+                                           rag.node[dst]['pixel count'])
 
             # Conider a graph with edges
             # (1, 2) -> 50
