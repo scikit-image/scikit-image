@@ -26,11 +26,49 @@ def _hmerge_mean_color(graph, src, dst, n):
     return diff
 
 
+def _revalidate_node_edges(rag, node, heap_list):
+    """Handles validation and invalidation of edges incident to a node.
+
+    This function invalidates all existing edges incident on `node` and inserts
+    new items in `heap_list` updated with the valid weights.
+
+    rag : RAG
+        The Region Adjacency Graph.
+    node : int
+        The id of the node whose incident edges are to be vaidated/invalidated.
+    heap_list : list
+        The list containing the existing heap of edges.
+    """
+    # networkx updates data dictionary if edge exists
+    # this would mean we have to reposition these edges in
+    # heap if their weight is updated.
+    # instead we invalidate them
+
+    for n in rag.neighbors(node):
+        # The figure these comments refer to is drawn below
+        # You'll know it when you see it
+        data = rag[node][n]
+        try:
+            # invalidates (4, 5) and (4, 6)
+            # their weights in the heap are no longer valid
+            data['heap item'][3] = False
+        except KeyError:
+            # (1, 4) and (2, 4) never existed in the graph before
+            pass
+
+        # Add (1, 4), (2, 4), (4, 5) and (5, 6) with updated weights
+        wt = data['weight']
+        heap_item = [wt, node, n, True]
+        data['heap item'] = heap_item
+        heapq.heappush(heap_list, heap_item)
+
+
 def merge_hierarchical(labels, rag, thresh, in_place=True):
     """Perform hierarchical merging of a RAG.
 
-    Given an image's labels and its RAG, the method merges the similar nodes
-    until the weight between every two nodes is more than `thresh`.
+    Greedily merges the most similar pair of nodes until no edges lower than
+    `thresh` remain.
+
 
     Parameters
     ----------
@@ -39,9 +77,8 @@ def merge_hierarchical(labels, rag, thresh, in_place=True):
     rag : RAG
         The Region Adjacency Graph.
     thresh : float
-        The threshold. Regions connected by an edges with smaller wegiht than
-        `thresh` are merged. A high value of `thresh` would mean that a lot of
-        regions are merged, and the output will contain fewer regions.
+        Regions connected by an edge with weight smaller than `thresh` are
+        merged.
     in_place : bool, optional
         If set, the RAG is modified in place.
 
@@ -58,62 +95,60 @@ def merge_hierarchical(labels, rag, thresh, in_place=True):
     >>> rag = graph.rag_mean_color(img, labels)
     >>> new_labels = graph.merge_hierarchical(labels, rag, 40)
     """
-    min_wt = 0
-
     if not in_place:
         rag = rag.copy()
 
     edge_heap = []
-    for x, y, data in rag.edges_iter(data=True):
-        if x != y:
-            # Validate all edges and push them in heap
-            data['valid'] = True
-            wt = data['weight']
-            heapq.heappush(edge_heap, (wt, x, y, data))
+    for src, dst, data in rag.edges_iter(data=True):
+        # Push a valid edge in the heap
+        wt = data['weight']
+        heap_item = [wt, src, dst, data]
+        heapq.heappush(edge_heap, heap_item)
 
-    while min_wt < thresh:
-        min_wt, x, y, data = heapq.heappop(edge_heap)
+        # Reference to the heap item in the graph
+        data['heap item'] = heap_item
+
+    while edge_heap[0][0] < thresh:
+        _, src, dst, valid = heapq.heappop(edge_heap)
 
         # Ensure popped edge is valid, if not, the edge is discarded
-        if min_wt < thresh and data['valid']:
-            total_color = (rag.node[y]['total color'] +
-                           rag.node[x]['total color'])
-            n_pixels = rag.node[x]['pixel count'] + rag.node[y]['pixel count']
-            rag.node[y]['total color'] = total_color
-            rag.node[y]['pixel count'] = n_pixels
-            rag.node[y]['mean color'] = total_color / n_pixels
+        if valid:
+            total_color = (rag.node[src]['total color'] +
+                           rag.node[dst]['total color'])
+            n_pixels = (rag.node[src]['pixel count'] +
+                        rag.node[dst]['pixel count'])
+            rag.node[dst]['total color'] = total_color
+            rag.node[dst]['pixel count'] = n_pixels
+            rag.node[dst]['mean color'] = total_color / n_pixels
 
-            # This will invalidate all the below edges in the heap
-            for n in rag.neighbors(x):
-                rag[x][n]['valid'] = False
+            # Conider a graph with edges
+            # (1, 2) -> 50
+            # (1, 3) -> 60
+            # (3, 4) -> 70
+            # (4, 5) -> 80
+            # (4, 6) -> 90
+            #
+            # 1       5
+            #  \     /
+            #   3---4
+            #  /     \
+            # 2       6        :-)
 
-            for n in rag.neighbors(y):
-                rag[y][n]['valid'] = False
+            # After merging 3 and 4
+            #
+            #   1   5
+            #    \ /
+            #     4
+            #    / \
+            #   2   6          B-)
 
-            rag.merge_nodes(x, y, _hmerge_mean_color)
-            for n in rag.neighbors(y):
-                if n != y:
-                    # networkx updates data dictionary if edge exists
-                    # this would mean we have to reposition these edges in
-                    # heap if their weight is updated.
-                    # instead we invalidate them
+            # Will take care of (1, 3) and (2, 3)
+            # they are no longer in the graph
+            for n in rag.neighbors(src):
+                rag[src][n]['heap item'][3] = False
 
-                    # invalidates the edge in the heap, if it all it exists
-                    data = rag[y][n]
-                    data['valid'] = False
-
-                    # allocate a new dictionary for the edge
-                    data_copy = data.copy()
-                    rag[y][n] = data_copy
-                    rag[n][y] = data_copy
-
-                    # validate this edge
-                    rag.add_edge(y, n, valid=True)
-
-                    # push the new validated edge in the heap, this will be
-                    # moved to its proper position
-                    wt = rag[y][n]['weight']
-                    heapq.heappush(edge_heap, (wt, y, n, rag[y][n]))
+            rag.merge_nodes(src, dst, _hmerge_mean_color)
+            _revalidate_node_edges(rag, dst, edge_heap)
 
     arr = np.arange(labels.max() + 1)
     for ix, (n, d) in enumerate(rag.nodes_iter(data=True)):
