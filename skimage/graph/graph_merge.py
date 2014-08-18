@@ -12,7 +12,7 @@ def _hmerge_mean_color(graph, src, dst, n):
     graph : RAG
         The graph under consideration.
     src, dst : int
-        The verices in `graph` to be merged.
+        The vertices in `graph` to be merged.
     n : int
         A neighbor of `src` or `dst` or both.
 
@@ -35,7 +35,7 @@ def _revalidate_node_edges(rag, node, heap_list):
     rag : RAG
         The Region Adjacency Graph.
     node : int
-        The id of the node whose incident edges are to be vaidated/invalidated.
+        The id of the node whose incident edges are to be validated/invalidated.
     heap_list : list
         The list containing the existing heap of edges.
     """
@@ -117,7 +117,7 @@ def merge_hierarchical(labels, rag, thresh, in_place=True):
             rag.node[dst]['mean color'] = (rag.node[dst]['total color'] /
                                            rag.node[dst]['pixel count'])
 
-            # Conider a graph with edges
+            # Consider a graph with edges
             # (1, 2) -> 50
             # (1, 3) -> 60
             # (3, 4) -> 70
