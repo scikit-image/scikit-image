@@ -14,12 +14,8 @@ $(document).ready(function () {
 
     // hide Run, only visible when code edited
     // hide loading animation, visible, when code running
-    $('.runcode').hide();
-    $('.loading').hide();
-    $('#error-message').hide();
-    $('#success-message').hide();
-    $('.all-output').hide();
-    $('.tobehidden').hide();
+    $('.runcode, .loading, .all-output, .tobehidden').hide();
+    $('#error-message, #success-message').hide();
 
     $('div.highlight-python').each(function (index) {
         $(this).data('index', index);
@@ -212,9 +208,7 @@ $(document).ready(function () {
             // add animation, hide Run to prevent duplicate runs
             $('.loading').show();
             // hide message from previous Run
-            $('#error-message').hide();
-            $('#success-message').hide();
-            $('.all-output').hide();
+            $('#error-message, #success-message, .all-output').hide();
 
             // get rid of output images from previous run for this snippet
             $('img.output_image').filter(function () {
@@ -292,9 +286,10 @@ $(document).ready(function () {
 
                     error_code = jqxhr.status;
                     error_text = jqxhr.statusText;
-                    $('#error-message').html(error_text + ' ' + error_code)
-                    .detach().appendTo('.run_btn').eq(snippet_index)
-                    .show();
+
+                    var error_message = $('#error-message').detach();
+                    $(error_message).detach().appendTo('.run_btn').eq(snippet_index).show();
+
                     code_running = false;
                 }
             });
@@ -305,7 +300,6 @@ $(document).ready(function () {
 
     function reload () {
         // replace all code snippets (in edit mode or otherwise) with default value
-        console.log(backup.length);
         for(var i=0; i<backup.length; i++){
             if (editor[i]) {
                 $('#editor' + i).replaceWith(backup[i]);
@@ -330,10 +324,8 @@ $(document).ready(function () {
             editcode(snippet, snippet_index, code_height);
         });
         // hide Run, only visible when code edited
-        $('.runcode').hide();        
+        $('.runcode, .loading, .all-output').hide();        
         $('.editcode').show();
-        $('.loading').hide();
-        $('.all-output').hide();
     }
 
     // TODO: make the snippet selection code more modular
@@ -348,7 +340,7 @@ $(document).ready(function () {
             if ($(this).data('index') === snippet_index) {
                 $(this).replaceWith(String.format('<div id="editor{0}"></editor>', snippet_index));
                 snippet = Base64.decode(snippet);
-                editcode(snippet, snippet_index);
+                editcode(snippet, snippet_index, $(this).height());
             }
         });
 
