@@ -69,7 +69,6 @@ def merge_hierarchical(labels, rag, thresh, in_place=True):
     Greedily merges the most similar pair of nodes until no edges lower than
     `thresh` remain.
 
-
     Parameters
     ----------
     labels : ndarray
