@@ -84,7 +84,7 @@ def merge_hierarchical(labels, rag, thresh, in_place=True):
     Returns
     -------
     out : ndarray
-        The new labelled array.
+        The new labeled array.
 
     Examples
     --------
