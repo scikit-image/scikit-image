@@ -79,11 +79,15 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         # convert uint image to float
         # to avoid problems with subtracting unsigned numbers in np.diff()
         image = image.astype('float')
-
-    gx = np.zeros(image.shape)
-    gy = np.zeros(image.shape)
-    gx[:, :-1] = np.diff(image, n=1, axis=1)
-    gy[:-1, :] = np.diff(image, n=1, axis=0)
+    
+    gx = np.empty(image.shape, dtype=np.double)
+    gx[:, 0] = 0
+    gx[:, -1] = 0
+    gx[:, 1:-1] = image[:, 2:] - image[:, :-2]
+    gy = np.empty(image.shape, dtype=np.double)
+    gy[0, :] = 0
+    gy[-1, :] = 0
+    gy[1:-1, :] = image[2:, :] - image[:-2, :]
 
     """
     The third stage aims to produce an encoding that is sensitive to
@@ -144,9 +148,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
                     dx = radius * cos(float(o) / orientations * np.pi)
                     dy = radius * sin(float(o) / orientations * np.pi)
                     rr, cc = draw.line(int(centre[0] - dx),
-                                       int(centre[1] - dy),
+                                       int(centre[1] + dy),
                                        int(centre[0] + dx),
-                                       int(centre[1] + dy))
+                                       int(centre[1] - dy))
                     hog_image[rr, cc] += orientation_histogram[y, x, o]
 
     """
