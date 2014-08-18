@@ -95,9 +95,9 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
     in_place : bool
         If set, modifies `rag` in place. For each node `n` the function will
         set a new attribute ``rag.node[n]['ncut label']``.
-    max_egde : float, optinal
+    max_edge : float, optional
         The maximum possible value of an edge in the RAG. This corresponds to
-        an edge between regions which are identical. This is used to put self
+        an edge between identical regions. This is used to put self
         edges in the RAG.
 
     Returns
