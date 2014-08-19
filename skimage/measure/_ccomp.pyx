@@ -238,3 +238,31 @@ def label(input, DTYPE_t neighbors=8, background=None, return_num=False):
         return data, ctr
     else:
         return data
+
+def relabel_array(dict hash1, cnp.ndarray[DTYPE_t, ndim=1] array1):
+    """
+    Take a lablled array and a dictionary and relabel the array using
+    the values in the dictionary.
+    
+    Parameters
+    ----------
+    
+    hash1 dict
+        Mappings between old and new labels in array1.
+    
+    array1: 1D ndarray
+        Flat array to be relabelled.
+    
+    Returns
+    -------
+    array1: 1D ndarray
+        The modified input array
+    """
+
+    cdef int lsize = array1.shape[0]
+    cdef int k
+
+    for k in range(lsize):
+        array1[k] = hash1.get(array1[k], array1[k])
+    
+    return array1
