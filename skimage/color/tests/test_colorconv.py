@@ -33,7 +33,8 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2grey, gray2rgb,
                            xyz2lab, lab2xyz,
                            lab2rgb, rgb2lab,
-                           is_rgb, is_gray,
+                           xyz2luv, luv2xyz,
+                           luv2rgb, rgb2luv,
                            lab2lch, lch2lab,
                            guess_spatial_dimensions
                            )
@@ -41,6 +42,8 @@ from skimage.color import (rgb2hsv, hsv2rgb,
 from skimage import data_dir, data
 
 import colorsys
+
+np.random.seed(0)
 
 
 def test_guess_spatial_dimensions():
@@ -69,17 +72,24 @@ class TestColorconv(TestCase):
     colbars_point75_array = np.swapaxes(colbars_point75.reshape(3, 4, 2), 0, 2)
 
     xyz_array = np.array([[[0.4124, 0.21260, 0.01930]],  # red
-                    [[0, 0, 0]],  # black
-                    [[.9505, 1., 1.089]],  # white
-                    [[.1805, .0722, .9505]],  # blue
-                    [[.07719, .15438, .02573]],  # green
-                    ])
+                          [[0, 0, 0]],  # black
+                          [[.9505, 1., 1.089]],  # white
+                          [[.1805, .0722, .9505]],  # blue
+                          [[.07719, .15438, .02573]],  # green
+                          ])
     lab_array = np.array([[[53.233, 80.109, 67.220]],  # red
-                    [[0., 0., 0.]],  # black
-                    [[100.0, 0.005, -0.010]],  # white
-                    [[32.303, 79.197, -107.864]],  # blue
-                    [[46.229, -51.7, 49.898]],  # green
-                    ])
+                          [[0., 0., 0.]],  # black
+                          [[100.0, 0.005, -0.010]],  # white
+                          [[32.303, 79.197, -107.864]],  # blue
+                          [[46.229, -51.7, 49.898]],  # green
+                          ])
+
+    luv_array = np.array([[[53.233, 175.053, 37.751]], # red
+                          [[0., 0., 0.]], # black
+                          [[100., 0.001, -0.017]], # white
+                          [[32.303, -9.400, -130.358]], # blue
+                          [[46.228, -43.774, 56.589]], # green
+                          ])
 
     # RGB to HSV
     def test_rgb2hsv_conversion(self):
@@ -215,7 +225,7 @@ class TestColorconv(TestCase):
         assert_equal(g.shape, (1, 1))
 
     def test_rgb2grey_on_grey(self):
-        rgb2grey(np.random.random((5, 5)))
+        rgb2grey(np.random.rand(5, 5))
 
     # test matrices for xyz2lab and lab2xyz generated using http://www.easyrgb.com/index.php?X=CALC
     # Note: easyrgb website displays xyz*100
@@ -249,6 +259,41 @@ class TestColorconv(TestCase):
     def test_lab_rgb_roundtrip(self):
         img_rgb = img_as_float(self.img_rgb)
         assert_array_almost_equal(lab2rgb(rgb2lab(img_rgb)), img_rgb)
+
+    # test matrices for xyz2luv and luv2xyz generated using
+    # http://www.easyrgb.com/index.php?X=CALC
+    # Note: easyrgb website displays xyz*100
+    def test_xyz2luv(self):
+        assert_array_almost_equal(xyz2luv(self.xyz_array),
+                                  self.luv_array, decimal=3)
+
+    def test_luv2xyz(self):
+        assert_array_almost_equal(luv2xyz(self.luv_array),
+                                  self.xyz_array, decimal=3)
+
+    def test_rgb2luv_brucelindbloom(self):
+        """
+        Test the RGB->Lab conversion by comparing to the calculator on the
+        authoritative Bruce Lindbloom
+        [website](http://brucelindbloom.com/index.html?ColorCalculator.html).
+        """
+        # Obtained with D65 white point, sRGB model and gamma
+        gt_for_colbars = np.array([
+            [100, 0, 0],
+            [97.1393, 7.7056, 106.7866],
+            [91.1132, -70.4773, -15.2042],
+            [87.7347, -83.0776, 107.3985],
+            [60.3242, 84.0714, -108.6834],
+            [53.2408, 175.0151, 37.7564],
+            [32.2970, -9.4054, -130.3423],
+            [0, 0, 0]]).T
+        gt_array = np.swapaxes(gt_for_colbars.reshape(3, 4, 2), 0, 2)
+        assert_array_almost_equal(rgb2luv(self.colbars_array),
+                                  gt_array, decimal=2)
+
+    def test_luv_rgb_roundtrip(self):
+        img_rgb = img_as_float(self.img_rgb)
+        assert_array_almost_equal(luv2rgb(rgb2luv(img_rgb)), img_rgb)
 
     def test_lab_lch_roundtrip(self):
         rgb = img_as_float(self.img_rgb)
@@ -306,20 +351,9 @@ def test_gray2rgb():
 
 
 def test_gray2rgb_rgb():
-    x = np.random.random((5, 5, 4))
+    x = np.random.rand(5, 5, 4)
     y = gray2rgb(x)
     assert_equal(x, y)
-
-
-def test_is_rgb():
-    color = data.lena()
-    gray = data.camera()
-
-    assert is_rgb(color)
-    assert not is_gray(color)
-
-    assert is_gray(gray)
-    assert not is_gray(color)
 
 
 if __name__ == "__main__":

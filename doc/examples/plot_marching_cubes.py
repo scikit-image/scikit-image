@@ -17,12 +17,11 @@ a mesh for regions of bone or bone-like density.
 
 This implementation also works correctly on anisotropic datasets, where the
 voxel spacing is not equal for every spatial dimension, through use of the
-`sampling` kwarg.
+`spacing` kwarg.
 
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 from skimage import measure

@@ -69,7 +69,7 @@ def skeletonize(image):
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 1, 1, 1, 0, 0, 0]], dtype=uint8)
     >>> skel = skeletonize(ellipse)
-    >>> skel
+    >>> skel.astype(np.uint8)
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -163,23 +163,19 @@ def medial_axis(image, mask=None, return_distance=False):
 
     Parameters
     ----------
-
-    image : binary ndarray
-
-    mask : binary ndarray, optional
-        If a mask is given, only those elements with a true value in `mask`
-        are used for computing the medial axis.
-
+    image : binary ndarray, shape (M, N)
+        The image of the shape to be skeletonized.
+    mask : binary ndarray, shape (M, N), optional
+        If a mask is given, only those elements in `image` with a true
+        value in `mask` are used for computing the medial axis.
     return_distance : bool, optional
         If true, the distance transform is returned as well as the skeleton.
 
     Returns
     -------
-
     out : ndarray of bools
         Medial axis transform of the image
-
-    dist : ndarray of ints
+    dist : ndarray of ints, optional
         Distance transform of the image (only returned if `return_distance`
         is True)
 
@@ -212,7 +208,6 @@ def medial_axis(image, mask=None, return_distance=False):
 
     Examples
     --------
-    >>> from skimage import morphology
     >>> square = np.zeros((7, 7), dtype=np.uint8)
     >>> square[1:-1, 2:-2] = 1
     >>> square
@@ -223,7 +218,7 @@ def medial_axis(image, mask=None, return_distance=False):
            [0, 0, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
-    >>> morphology.medial_axis(square).astype(np.uint8)
+    >>> medial_axis(square).astype(np.uint8)
     array([[0, 0, 0, 0, 0, 0, 0],
            [0, 0, 1, 0, 1, 0, 0],
            [0, 0, 0, 1, 0, 0, 0],
@@ -282,8 +277,8 @@ def medial_axis(image, mask=None, return_distance=False):
     i, j = np.mgrid[0:image.shape[0], 0:image.shape[1]]
     result = masked_image.copy()
     distance = distance[result]
-    i = np.ascontiguousarray(i[result], np.intp)
-    j = np.ascontiguousarray(j[result], np.intp)
+    i = np.ascontiguousarray(i[result], dtype=np.intp)
+    j = np.ascontiguousarray(j[result], dtype=np.intp)
     result = np.ascontiguousarray(result, np.uint8)
 
     # Determine the order in which pixels are processed.
@@ -296,9 +291,9 @@ def medial_axis(image, mask=None, return_distance=False):
     order = np.lexsort((tiebreaker,
                         corner_score[masked_image],
                         distance))
-    order = np.ascontiguousarray(order, np.int32)
+    order = np.ascontiguousarray(order, dtype=np.int32)
 
-    table = np.ascontiguousarray(table, np.uint8)
+    table = np.ascontiguousarray(table, dtype=np.uint8)
     # Remove pixels not belonging to the medial axis
     _skeletonize_loop(result, i, j, order, table)
 

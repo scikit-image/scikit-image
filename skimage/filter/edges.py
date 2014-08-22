@@ -31,8 +31,8 @@ HPREWITT_WEIGHTS = np.array([[ 1, 1, 1],
                              [-1,-1,-1]]) / 3.0
 VPREWITT_WEIGHTS = HPREWITT_WEIGHTS.T
 
-ROBERTS_PD_WEIGHTS = np.array([[ 1, 0],
-                               [ 0, -1]], dtype=np.double)
+ROBERTS_PD_WEIGHTS = np.array([[1, 0],
+                               [0, -1]], dtype=np.double)
 ROBERTS_ND_WEIGHTS = np.array([[0, 1],
                                [-1, 0]], dtype=np.double)
 
@@ -346,7 +346,7 @@ def roberts(image, mask=None):
     """Find the edge magnitude using Roberts' cross operator.
 
     Parameters
-	----------
+    ----------
     image : 2-D array
         Image to process.
     mask : 2-D array, optional

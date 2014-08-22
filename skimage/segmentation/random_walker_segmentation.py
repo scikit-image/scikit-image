@@ -9,14 +9,29 @@ significantly the performance.
 """
 
 import warnings
-
 import numpy as np
 from scipy import sparse, ndimage
+
+# executive summary for next code block: try to import umfpack from
+# scipy, but make sure not to raise a fuss if it fails since it's only
+# needed to speed up a few cases.
+# See discussions at:
+# https://groups.google.com/d/msg/scikit-image/FrM5IGP6wh4/1hp-FtVZmfcJ
+# http://stackoverflow.com/questions/13977970/ignore-exceptions-printed-to-stderr-in-del/13977992?noredirect=1#comment28386412_13977992
 try:
     from scipy.sparse.linalg.dsolve import umfpack
+    old_del = umfpack.UmfpackContext.__del__
+
+    def new_del(self):
+        try:
+            old_del(self)
+        except AttributeError:
+            pass
+    umfpack.UmfpackContext.__del__ = new_del
     UmfpackContext = umfpack.UmfpackContext()
 except:
     UmfpackContext = None
+
 try:
     from pyamg import ruge_stuben_solver
     amg_loaded = True
@@ -62,14 +77,14 @@ def _make_graph_edges_3d(n_x, n_y, n_z):
     return edges
 
 
-def _compute_weights_3d(data, beta=130, eps=1.e-6, depth=1.,
+def _compute_weights_3d(data, spacing, beta=130, eps=1.e-6,
                         multichannel=False):
     # Weight calculation is main difference in multispectral version
     # Original gradient**2 replaced with sum of gradients ** 2
     gradients = 0
     for channel in range(0, data.shape[-1]):
         gradients += _compute_gradients_3d(data[..., channel],
-                                           depth=depth) ** 2
+                                           spacing) ** 2
     # All channels considered together in this standard deviation
     beta /= 10 * data.std()
     if multichannel:
@@ -82,10 +97,10 @@ def _compute_weights_3d(data, beta=130, eps=1.e-6, depth=1.,
     return weights
 
 
-def _compute_gradients_3d(data, depth=1.):
-    gr_deep = np.abs(data[:, :, :-1] - data[:, :, 1:]).ravel() / depth
-    gr_right = np.abs(data[:, :-1] - data[:, 1:]).ravel()
-    gr_down = np.abs(data[:-1] - data[1:]).ravel()
+def _compute_gradients_3d(data, spacing):
+    gr_deep = np.abs(data[:, :, :-1] - data[:, :, 1:]).ravel() / spacing[2]
+    gr_right = np.abs(data[:, :-1] - data[:, 1:]).ravel() / spacing[1]
+    gr_down = np.abs(data[:-1] - data[1:]).ravel() / spacing[0]
     return np.r_[gr_deep, gr_right, gr_down]
 
 
@@ -101,9 +116,10 @@ def _make_laplacian_sparse(edges, weights):
     lap = sparse.coo_matrix((data, (i_indices, j_indices)),
                             shape=(pixel_nb, pixel_nb))
     connect = - np.ravel(lap.sum(axis=1))
-    lap = sparse.coo_matrix((np.hstack((data, connect)),
-                (np.hstack((i_indices, diag)), np.hstack((j_indices, diag)))),
-                shape=(pixel_nb, pixel_nb))
+    lap = sparse.coo_matrix(
+        (np.hstack((data, connect)), (np.hstack((i_indices, diag)),
+                                      np.hstack((j_indices, diag)))),
+        shape=(pixel_nb, pixel_nb))
     return lap.tocsr()
 
 
@@ -153,14 +169,15 @@ def _mask_edges_weights(edges, weights, mask):
     # Reassign edges labels to 0, 1, ... edges_number - 1
     order = np.searchsorted(np.unique(edges.ravel()),
                             np.arange(max_node_index + 1))
-    edges = order[edges]
+    edges = order[edges.astype(np.int64)]
     return edges, weights
 
 
-def _build_laplacian(data, mask=None, beta=50, depth=1., multichannel=False):
-    l_x, l_y, l_z = data.shape[:3]
+def _build_laplacian(data, spacing, mask=None, beta=50,
+                     multichannel=False):
+    l_x, l_y, l_z = tuple(data.shape[i] for i in range(3))
     edges = _make_graph_edges_3d(l_x, l_y, l_z)
-    weights = _compute_weights_3d(data, beta=beta, eps=1.e-10, depth=depth,
+    weights = _compute_weights_3d(data, spacing, beta=beta, eps=1.e-10,
                                   multichannel=multichannel)
     if mask is not None:
         edges, weights = _mask_edges_weights(edges, weights, mask)
@@ -173,7 +190,7 @@ def _build_laplacian(data, mask=None, beta=50, depth=1., multichannel=False):
 
 
 def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
-                  multichannel=False, return_full_prob=False, depth=1.):
+                  multichannel=False, return_full_prob=False, spacing=None):
     """Random walker algorithm for segmentation from markers.
 
     Random walker algorithm is implemented for gray-level or multichannel
@@ -185,8 +202,8 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         Image to be segmented in phases. Gray-level `data` can be two- or
         three-dimensional; multichannel data can be three- or four-
         dimensional (multichannel=True) with the highest dimension denoting
-        channels. Data spacing is assumed isotropic unless depth keyword
-        argument is used.
+        channels. Data spacing is assumed isotropic unless the `spacing`
+        keyword argument is used.
     labels : array of ints, of same shape as `data` without channels dimension
         Array of seed markers labeled with different positive integers
         for different phases. Zero-labeled pixels are unlabeled pixels.
@@ -199,14 +216,14 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     beta : float
         Penalization coefficient for the random walker motion
         (the greater `beta`, the more difficult the diffusion).
-    mode : {'bf', 'cg_mg', 'cg'} (default: 'bf')
-        Mode for solving the linear system in the random walker
-        algorithm.
+    mode : string, available options {'cg_mg', 'cg', 'bf'}
+        Mode for solving the linear system in the random walker algorithm.
+        If no preference given, automatically attempt to use the fastest
+        option available ('cg_mg' from pyamg >> 'cg' with UMFPACK > 'bf').
 
-        - 'bf' (brute force, default): an LU factorization of the Laplacian is
+        - 'bf' (brute force): an LU factorization of the Laplacian is
           computed. This is fast for small images (<1024x1024), but very slow
-          (due to the memory cost) and memory-consuming for big images (in 3-D
-          for example).
+          and memory-intensive for large images (e.g., 3-D volumes).
         - 'cg' (conjugate gradient): the linear system is solved iteratively
           using the Conjugate Gradient method from scipy.sparse.linalg. This is
           less memory-consuming than the brute force method for large images,
@@ -231,12 +248,9 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     return_full_prob : bool, default False
         If True, the probability that a pixel belongs to each of the labels
         will be returned, instead of only the most likely label.
-    depth : float, default 1.
-        Correction for non-isotropic voxel depths in 3D volumes.
-        Default (1.) implies isotropy.  This factor is derived as follows:
-        depth = (out-of-plane voxel spacing) / (in-plane voxel spacing), where
-        in-plane voxel spacing represents the first two spatial dimensions and
-        out-of-plane voxel spacing represents the third spatial dimension.
+    spacing : iterable of floats
+        Spacing between voxels in each spatial dimension. If `None`, then
+        the spacing between pixels/voxels in each dimension is assumed 1.
 
     Returns
     -------
@@ -259,12 +273,9 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     Multichannel inputs are scaled with all channel data combined. Ensure all
     channels are separately normalized prior to running this algorithm.
 
-    The `depth` argument is specifically for certain types of 3-dimensional
-    volumes which, due to how they were acquired, have different spacing
-    along in-plane and out-of-plane dimensions. This is commonly encountered
-    in medical imaging. The `depth` argument corrects gradients calculated
-    along the third spatial dimension for the otherwise inherent assumption
-    that all points are equally spaced.
+    The `spacing` argument is specifically for anisotropic datasets, where
+    data points are spaced differently in one or more spatial dimensions.
+    Anisotropic data is commonly encountered in medical imaging.
 
     The algorithm was first proposed in *Random walks for image
     segmentation*, Leo Grady, IEEE Trans Pattern Anal Mach Intell.
@@ -305,11 +316,12 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
 
     Examples
     --------
-    >>> a = np.zeros((10, 10)) + 0.2*np.random.random((10, 10))
+    >>> np.random.seed(0)
+    >>> a = np.zeros((10, 10)) + 0.2 * np.random.rand(10, 10)
     >>> a[5:8, 5:8] += 1
     >>> b = np.zeros_like(a)
-    >>> b[3,3] = 1 #Marker for first phase
-    >>> b[6,6] = 2 #Marker for second phase
+    >>> b[3, 3] = 1  # Marker for first phase
+    >>> b[6, 6] = 2  # Marker for second phase
     >>> random_walker(a, b)
     array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -323,38 +335,85 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], dtype=int32)
 
     """
-
-    if UmfpackContext is None:
-        warnings.warn('SciPy was built without UMFPACK. Consider rebuilding '
-                      'SciPy with UMFPACK, this will greatly speed up the '
-                      'random walker functions. You may also install pyamg '
-                      'and run the random walker function in cg_mg mode '
-                      '(see the docstrings)')
-
     # Parse input data
+    if mode is None:
+        if amg_loaded:
+            mode = 'cg_mg'
+        elif UmfpackContext is not None:
+            mode = 'cg'
+        else:
+            mode = 'bf'
+
+    if UmfpackContext is None and mode == 'cg':
+        warnings.warn('"cg" mode will be used, but it may be slower than '
+                      '"bf" because SciPy was built without UMFPACK. Consider'
+                      ' rebuilding SciPy with UMFPACK; this will greatly '
+                      'accelerate the conjugate gradient ("cg") solver. '
+                      'You may also install pyamg and run the random_walker '
+                      'function in "cg_mg" mode (see docstring).')
+
+    if (labels != 0).all():
+        warnings.warn('Random walker only segments unlabeled areas, where '
+                      'labels == 0. No zero valued areas in labels were '
+                      'found. Returning provided labels.')
+
+        if return_full_prob:
+            # Find and iterate over valid labels
+            unique_labels = np.unique(labels)
+            unique_labels = unique_labels[unique_labels > 0]
+
+            out_labels = np.empty(labels.shape + (len(unique_labels),),
+                                  dtype=np.bool)
+            for n, i in enumerate(unique_labels):
+                out_labels[..., n] = (labels == i)
+
+        else:
+            out_labels = labels
+        return out_labels
+
+    # This algorithm expects 4-D arrays of floats, where the first three
+    # dimensions are spatial and the final denotes channels. 2-D images have
+    # a singleton placeholder dimension added for the third spatial dimension,
+    # and single channel images likewise have a singleton added for channels.
+    # The following block ensures valid input and coerces it to the correct
+    # form.
     if not multichannel:
-        # We work with 4-D arrays of floats
-        assert data.ndim > 1 and data.ndim < 4, 'For non-multichannel input, \
-                                                 data must be of dimension 2 \
-                                                 or 3.'
-        dims = data.shape
+        if data.ndim < 2 or data.ndim > 3:
+            raise ValueError('For non-multichannel input, data must be of '
+                             'dimension 2 or 3.')
+        dims = data.shape  # To reshape final labeled result
         data = np.atleast_3d(img_as_float(data))[..., np.newaxis]
     else:
-        dims = data[..., 0].shape
-        assert multichannel and data.ndim > 2, 'For multichannel input, data \
-                                                must have >= 3 dimensions.'
+        if data.ndim < 3:
+            raise ValueError('For multichannel input, data must have 3 or 4 '
+                             'dimensions.')
+        dims = data[..., 0].shape  # To reshape final labeled result
         data = img_as_float(data)
-        if data.ndim == 3:
-            data = data[..., np.newaxis].transpose((0, 1, 3, 2))
+        if data.ndim == 3:  # 2D multispectral, needs singleton in 3rd axis
+            data = data[:, :, np.newaxis, :]
+
+    # Spacing kwarg checks
+    if spacing is None:
+        spacing = np.asarray((1.,) * 3)
+    elif len(spacing) == len(dims):
+        if len(spacing) == 2:  # Need a dummy spacing for singleton 3rd dim
+            spacing = np.r_[spacing, 1.]
+        else:                  # Convert to array
+            spacing = np.asarray(spacing)
+    else:
+        raise ValueError('Input argument `spacing` incorrect, should be an '
+                         'iterable with one number per spatial dimension.')
 
     if copy:
         labels = np.copy(labels)
     label_values = np.unique(labels)
+
     # Reorder label values to have consecutive integers (no gaps)
     if np.any(np.diff(label_values) != 1):
         mask = labels >= 0
         labels[mask] = rank_order(labels[mask])[0].astype(labels.dtype)
     labels = labels.astype(np.int32)
+
     # If the array has pruned zones, be sure that no isolated pixels
     # exist between pruned zones (they could not be determined)
     if np.any(labels < 0):
@@ -363,12 +422,13 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         del filled
     labels = np.atleast_3d(labels)
     if np.any(labels < 0):
-        lap_sparse = _build_laplacian(data, mask=labels >= 0, beta=beta,
-                                      depth=depth, multichannel=multichannel)
+        lap_sparse = _build_laplacian(data, spacing, mask=labels >= 0,
+                                      beta=beta, multichannel=multichannel)
     else:
-        lap_sparse = _build_laplacian(data, beta=beta, depth=depth,
+        lap_sparse = _build_laplacian(data, spacing, beta=beta,
                                       multichannel=multichannel)
     lap_sparse, B = _buildAB(lap_sparse, labels)
+
     # We solve the linear system
     # lap_sparse X = B
     # where X[i, j] is the probability that a marker of label i arrives
@@ -390,6 +450,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     if mode == 'bf':
         X = _solve_bf(lap_sparse, B,
                       return_full_prob=return_full_prob)
+
     # Clean up results
     if return_full_prob:
         labels = labels.astype(np.float)

@@ -1,5 +1,5 @@
 from numpy.testing import assert_array_equal, assert_almost_equal, \
-    assert_array_almost_equal, assert_raises
+    assert_array_almost_equal, assert_raises, assert_equal
 import numpy as np
 import math
 
@@ -23,15 +23,16 @@ INTENSITY_SAMPLE[1, 9:11] = 2
 
 
 def test_all_props():
-    regions = regionprops(SAMPLE, 'all', INTENSITY_SAMPLE)[0]
+    region = regionprops(SAMPLE, INTENSITY_SAMPLE)[0]
     for prop in PROPS:
-        regions[prop]
+        assert_equal(region[prop], getattr(region, PROPS[prop]))
 
 
 def test_dtype():
     regionprops(np.zeros((10, 10), dtype=np.int))
     regionprops(np.zeros((10, 10), dtype=np.uint))
-    assert_raises(TypeError, regionprops, np.zeros((10, 10), dtype=np.double))
+    assert_raises((TypeError, RuntimeError), regionprops,
+                  np.zeros((10, 10), dtype=np.double))
 
 
 def test_ndim():
@@ -269,7 +270,7 @@ def test_solidity():
     assert_almost_equal(solidity, 0.580645161290323)
 
 
-def test_weighted_moments():
+def test_weighted_moments_central():
     wmu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
                       )[0].weighted_moments_central
     ref = np.array(
@@ -333,6 +334,43 @@ def test_weighted_moments_normalized():
          [-0.0162529732, -0.0104598869, -0.0028544152, -0.0011057191]]
     )
     assert_array_almost_equal(wnu, ref)
+
+
+def test_label_sequence():
+    a = np.empty((2, 2), dtype=np.int)
+    a[:, :] = 2
+    ps = regionprops(a)
+    assert len(ps) == 1
+    assert ps[0].label == 2
+
+
+def test_pure_background():
+    a = np.zeros((2, 2), dtype=np.int)
+    ps = regionprops(a)
+    assert len(ps) == 0
+
+
+def test_invalid():
+    ps = regionprops(SAMPLE)
+    def get_intensity_image():
+        ps[0].intensity_image
+    assert_raises(AttributeError, get_intensity_image)
+
+
+def test_equals():
+    arr = np.zeros((100, 100), dtype=np.int)
+    arr[0:25, 0:25] = 1
+    arr[50:99, 50:99] = 2
+
+    regions = regionprops(arr)
+    r1 = regions[0]
+
+    regions = regionprops(arr)
+    r2 = regions[0]
+    r3 = regions[1]
+
+    assert_equal(r1 == r2, True, "Same regionprops are not equal")
+    assert_equal(r1 != r3, True, "Different regionprops are equal")
 
 
 if __name__ == "__main__":

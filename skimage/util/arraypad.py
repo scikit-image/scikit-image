@@ -4,8 +4,8 @@ of an n-dimensional array.
 
 """
 from __future__ import division, absolute_import, print_function
-from skimage._shared.six import integer_types
 
+from six import integer_types
 import numpy as np
 
 try:
@@ -1027,7 +1027,11 @@ def _normalize_shape(narray, shape):
     """
     normshp = None
     shapelen = len(np.shape(narray))
-    if (isinstance(shape, int)) or shape is None:
+
+    if isinstance(shape, np.ndarray):
+        shape = shape.tolist()
+
+    if isinstance(shape, (int, float)) or shape is None:
         normshp = ((shape, shape), ) * shapelen
     elif (isinstance(shape, (tuple, list))
             and isinstance(shape[0], (tuple, list))
@@ -1220,26 +1224,26 @@ def pad(array, pad_width, mode=None, **kwargs):
     Examples
     --------
     >>> a = [1, 2, 3, 4, 5]
-    >>> np.lib.pad(a, (2,3), 'constant', constant_values=(4,6))
+    >>> pad(a, (2,3), 'constant', constant_values=(4,6))
     array([4, 4, 1, 2, 3, 4, 5, 6, 6, 6])
 
-    >>> np.lib.pad(a, (2,3), 'edge')
+    >>> pad(a, (2,3), 'edge')
     array([1, 1, 1, 2, 3, 4, 5, 5, 5, 5])
 
-    >>> np.lib.pad(a, (2,3), 'linear_ramp', end_values=(5,-4))
+    >>> pad(a, (2,3), 'linear_ramp', end_values=(5,-4))
     array([ 5,  3,  1,  2,  3,  4,  5,  2, -1, -4])
 
-    >>> np.lib.pad(a, (2,), 'maximum')
+    >>> pad(a, (2,), 'maximum')
     array([5, 5, 1, 2, 3, 4, 5, 5, 5])
 
-    >>> np.lib.pad(a, (2,), 'mean')
+    >>> pad(a, (2,), 'mean')
     array([3, 3, 1, 2, 3, 4, 5, 3, 3])
 
-    >>> np.lib.pad(a, (2,), 'median')
+    >>> pad(a, (2,), 'median')
     array([3, 3, 1, 2, 3, 4, 5, 3, 3])
 
     >>> a = [[1,2], [3,4]]
-    >>> np.lib.pad(a, ((3, 2), (2, 3)), 'minimum')
+    >>> pad(a, ((3, 2), (2, 3)), 'minimum')
     array([[1, 1, 1, 2, 1, 1, 1],
            [1, 1, 1, 2, 1, 1, 1],
            [1, 1, 1, 2, 1, 1, 1],
@@ -1249,19 +1253,19 @@ def pad(array, pad_width, mode=None, **kwargs):
            [1, 1, 1, 2, 1, 1, 1]])
 
     >>> a = [1, 2, 3, 4, 5]
-    >>> np.lib.pad(a, (2,3), 'reflect')
+    >>> pad(a, (2,3), 'reflect')
     array([3, 2, 1, 2, 3, 4, 5, 4, 3, 2])
 
-    >>> np.lib.pad(a, (2,3), 'reflect', reflect_type='odd')
+    >>> pad(a, (2,3), 'reflect', reflect_type='odd')
     array([-1,  0,  1,  2,  3,  4,  5,  6,  7,  8])
 
-    >>> np.lib.pad(a, (2,3), 'symmetric')
+    >>> pad(a, (2,3), 'symmetric')
     array([2, 1, 1, 2, 3, 4, 5, 5, 4, 3])
 
-    >>> np.lib.pad(a, (2,3), 'symmetric', reflect_type='odd')
+    >>> pad(a, (2,3), 'symmetric', reflect_type='odd')
     array([0, 1, 1, 2, 3, 4, 5, 5, 6, 7])
 
-    >>> np.lib.pad(a, (2,3), 'wrap')
+    >>> pad(a, (2,3), 'wrap')
     array([4, 5, 1, 2, 3, 4, 5, 1, 2, 3])
 
     >>> def padwithtens(vector, pad_width, iaxis, kwargs):
@@ -1272,7 +1276,7 @@ def pad(array, pad_width, mode=None, **kwargs):
     >>> a = np.arange(6)
     >>> a = a.reshape((2,3))
 
-    >>> np.lib.pad(a, 2, padwithtens)
+    >>> pad(a, 2, padwithtens)
     array([[10, 10, 10, 10, 10, 10, 10],
            [10, 10, 10, 10, 10, 10, 10],
            [10, 10,  0,  1,  2, 10, 10],

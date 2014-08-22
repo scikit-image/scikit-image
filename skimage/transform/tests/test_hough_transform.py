@@ -1,7 +1,5 @@
 import numpy as np
-from numpy.testing import (assert_almost_equal,
-                           assert_equal,
-                           )
+from numpy.testing import assert_almost_equal, assert_equal
 
 import skimage.transform as tf
 from skimage.draw import line, circle_perimeter, ellipse_perimeter
@@ -81,8 +79,10 @@ def test_hough_line_peaks_dist():
     img[:, 30] = True
     img[:, 40] = True
     hspace, angles, dists = tf.hough_line(img)
-    assert len(tf.hough_line_peaks(hspace, angles, dists, min_distance=5)[0]) == 2
-    assert len(tf.hough_line_peaks(hspace, angles, dists, min_distance=15)[0]) == 1
+    assert len(tf.hough_line_peaks(hspace, angles, dists,
+                                   min_distance=5)[0]) == 2
+    assert len(tf.hough_line_peaks(hspace, angles, dists,
+                                   min_distance=15)[0]) == 1
 
 
 def test_hough_line_peaks_angle():
@@ -91,18 +91,24 @@ def test_hough_line_peaks_angle():
     img[0, :] = True
 
     hspace, angles, dists = tf.hough_line(img)
-    assert len(tf.hough_line_peaks(hspace, angles, dists, min_angle=45)[0]) == 2
-    assert len(tf.hough_line_peaks(hspace, angles, dists, min_angle=90)[0]) == 1
+    assert len(tf.hough_line_peaks(hspace, angles, dists,
+                                   min_angle=45)[0]) == 2
+    assert len(tf.hough_line_peaks(hspace, angles, dists,
+                                   min_angle=90)[0]) == 1
 
     theta = np.linspace(0, np.pi, 100)
     hspace, angles, dists = tf.hough_line(img, theta)
-    assert len(tf.hough_line_peaks(hspace, angles, dists, min_angle=45)[0]) == 2
-    assert len(tf.hough_line_peaks(hspace, angles, dists, min_angle=90)[0]) == 1
+    assert len(tf.hough_line_peaks(hspace, angles, dists,
+                                   min_angle=45)[0]) == 2
+    assert len(tf.hough_line_peaks(hspace, angles, dists,
+                                   min_angle=90)[0]) == 1
 
     theta = np.linspace(np.pi / 3, 4. / 3 * np.pi, 100)
     hspace, angles, dists = tf.hough_line(img, theta)
-    assert len(tf.hough_line_peaks(hspace, angles, dists, min_angle=45)[0]) == 2
-    assert len(tf.hough_line_peaks(hspace, angles, dists, min_angle=90)[0]) == 1
+    assert len(tf.hough_line_peaks(hspace, angles, dists,
+                                   min_angle=45)[0]) == 2
+    assert len(tf.hough_line_peaks(hspace, angles, dists,
+                                   min_angle=90)[0]) == 1
 
 
 def test_hough_line_peaks_num():
@@ -122,7 +128,7 @@ def test_hough_circle():
     y, x = circle_perimeter(y_0, x_0, radius)
     img[x, y] = 1
 
-    out = tf.hough_circle(img, np.array([radius]))
+    out = tf.hough_circle(img, np.array([radius], dtype=np.intp))
 
     x, y = np.where(out[0] == out[0].max())
     assert_equal(x[0], x_0)
@@ -138,7 +144,8 @@ def test_hough_circle_extended():
     y, x = circle_perimeter(y_0, x_0, radius)
     img[x[np.where(x > 0)], y[np.where(x > 0)]] = 1
 
-    out = tf.hough_circle(img, np.array([radius]), full_output=True)
+    out = tf.hough_circle(img, np.array([radius], dtype=np.intp),
+                          full_output=True)
 
     x, y = np.where(out[0] == out[0].max())
     # Offset for x_0, y_0
@@ -148,36 +155,204 @@ def test_hough_circle_extended():
 
 def test_hough_ellipse_zero_angle():
     img = np.zeros((25, 25), dtype=int)
-    a = 6
-    b = 8
+    rx = 6
+    ry = 8
     x0 = 12
-    y0 = 12
+    y0 = 15
     angle = 0
-    rr, cc = ellipse_perimeter(x0, x0, b, a)
+    rr, cc = ellipse_perimeter(y0, x0, ry, rx)
     img[rr, cc] = 1
     result = tf.hough_ellipse(img, threshold=9)
-    assert_equal(result[0][0], x0)
-    assert_equal(result[0][1], y0)
-    assert_almost_equal(result[0][2], b, decimal=1)
-    assert_almost_equal(result[0][3], a, decimal=1)
-    assert_equal(result[0][4], angle)
+    best = result[-1]
+    assert_equal(best[1], y0)
+    assert_equal(best[2], x0)
+    assert_almost_equal(best[3], ry, decimal=1)
+    assert_almost_equal(best[4], rx, decimal=1)
+    assert_equal(best[5], angle)
+    # Check if I re-draw the ellipse, points are the same!
+    # ie check API compatibility between hough_ellipse and ellipse_perimeter
+    rr2, cc2 = ellipse_perimeter(y0, x0, int(best[3]), int(best[4]),
+                                 orientation=best[5])
+    assert_equal(rr, rr2)
+    assert_equal(cc, cc2)
 
 
-def test_hough_ellipse_non_zero_angle():
-    img = np.zeros((20, 20), dtype=int)
-    a = 6
-    b = 9
+def test_hough_ellipse_non_zero_posangle1():
+    # ry > rx, angle in [0:pi/2]
+    img = np.zeros((30, 24), dtype=int)
+    rx = 6
+    ry = 12
     x0 = 10
-    y0 = 10
+    y0 = 15
     angle = np.pi / 1.35
-    rr, cc = ellipse_perimeter(x0, x0, b, a, orientation=angle)
+    rr, cc = ellipse_perimeter(y0, x0, ry, rx, orientation=angle)
     img[rr, cc] = 1
     result = tf.hough_ellipse(img, threshold=15, accuracy=3)
-    assert_almost_equal(result[0][0] / 100., x0 / 100., decimal=1)
-    assert_almost_equal(result[0][1] / 100., y0 / 100., decimal=1)
-    assert_almost_equal(result[0][2] / 100., b / 100., decimal=1)
-    assert_almost_equal(result[0][3] / 100., a / 100., decimal=1)
-    assert_almost_equal(result[0][4], angle, decimal=1)
+    result.sort(order='accumulator')
+    best = result[-1]
+    assert_almost_equal(best[1] / 100., y0 / 100., decimal=1)
+    assert_almost_equal(best[2] / 100., x0 / 100., decimal=1)
+    assert_almost_equal(best[3] / 10., ry / 10., decimal=1)
+    assert_almost_equal(best[4] / 100., rx / 100., decimal=1)
+    assert_almost_equal(best[5], angle, decimal=1)
+    # Check if I re-draw the ellipse, points are the same!
+    # ie check API compatibility between hough_ellipse and ellipse_perimeter
+    rr2, cc2 = ellipse_perimeter(y0, x0, int(best[3]), int(best[4]),
+                                 orientation=best[5])
+    assert_equal(rr, rr2)
+    assert_equal(cc, cc2)
+
+
+def test_hough_ellipse_non_zero_posangle2():
+    # ry < rx, angle in [0:pi/2]
+    img = np.zeros((30, 24), dtype=int)
+    rx = 12
+    ry = 6
+    x0 = 10
+    y0 = 15
+    angle = np.pi / 1.35
+    rr, cc = ellipse_perimeter(y0, x0, ry, rx, orientation=angle)
+    img[rr, cc] = 1
+    result = tf.hough_ellipse(img, threshold=15, accuracy=3)
+    result.sort(order='accumulator')
+    best = result[-1]
+    assert_almost_equal(best[1] / 100., y0 / 100., decimal=1)
+    assert_almost_equal(best[2] / 100., x0 / 100., decimal=1)
+    assert_almost_equal(best[3] / 10., ry / 10., decimal=1)
+    assert_almost_equal(best[4] / 100., rx / 100., decimal=1)
+    assert_almost_equal(best[5], angle, decimal=1)
+    # Check if I re-draw the ellipse, points are the same!
+    # ie check API compatibility between hough_ellipse and ellipse_perimeter
+    rr2, cc2 = ellipse_perimeter(y0, x0, int(best[3]), int(best[4]),
+                                 orientation=best[5])
+    assert_equal(rr, rr2)
+    assert_equal(cc, cc2)
+
+
+def test_hough_ellipse_non_zero_posangle3():
+    # ry < rx, angle in [pi/2:pi]
+    img = np.zeros((30, 24), dtype=int)
+    rx = 12
+    ry = 6
+    x0 = 10
+    y0 = 15
+    angle = np.pi / 1.35 + np.pi / 2.
+    rr, cc = ellipse_perimeter(y0, x0, ry, rx, orientation=angle)
+    img[rr, cc] = 1
+    result = tf.hough_ellipse(img, threshold=15, accuracy=3)
+    result.sort(order='accumulator')
+    best = result[-1]
+    # Check if I re-draw the ellipse, points are the same!
+    # ie check API compatibility between hough_ellipse and ellipse_perimeter
+    rr2, cc2 = ellipse_perimeter(y0, x0, int(best[3]), int(best[4]),
+                                 orientation=best[5])
+    assert_equal(rr, rr2)
+    assert_equal(cc, cc2)
+
+
+def test_hough_ellipse_non_zero_posangle4():
+    # ry < rx, angle in [pi:3pi/4]
+    img = np.zeros((30, 24), dtype=int)
+    rx = 12
+    ry = 6
+    x0 = 10
+    y0 = 15
+    angle = np.pi / 1.35 + np.pi
+    rr, cc = ellipse_perimeter(y0, x0, ry, rx, orientation=angle)
+    img[rr, cc] = 1
+    result = tf.hough_ellipse(img, threshold=15, accuracy=3)
+    result.sort(order='accumulator')
+    best = result[-1]
+    # Check if I re-draw the ellipse, points are the same!
+    # ie check API compatibility between hough_ellipse and ellipse_perimeter
+    rr2, cc2 = ellipse_perimeter(y0, x0, int(best[3]), int(best[4]),
+                                 orientation=best[5])
+    assert_equal(rr, rr2)
+    assert_equal(cc, cc2)
+
+
+def test_hough_ellipse_non_zero_negangle1():
+    # ry > rx, angle in [0:-pi/2]
+    img = np.zeros((30, 24), dtype=int)
+    rx = 6
+    ry = 12
+    x0 = 10
+    y0 = 15
+    angle = - np.pi / 1.35
+    rr, cc = ellipse_perimeter(y0, x0, ry, rx, orientation=angle)
+    img[rr, cc] = 1
+    result = tf.hough_ellipse(img, threshold=15, accuracy=3)
+    result.sort(order='accumulator')
+    best = result[-1]
+    # Check if I re-draw the ellipse, points are the same!
+    # ie check API compatibility between hough_ellipse and ellipse_perimeter
+    rr2, cc2 = ellipse_perimeter(y0, x0, int(best[3]), int(best[4]),
+                                 orientation=best[5])
+    assert_equal(rr, rr2)
+    assert_equal(cc, cc2)
+
+
+def test_hough_ellipse_non_zero_negangle2():
+    # ry < rx, angle in [0:-pi/2]
+    img = np.zeros((30, 24), dtype=int)
+    rx = 12
+    ry = 6
+    x0 = 10
+    y0 = 15
+    angle = - np.pi / 1.35
+    rr, cc = ellipse_perimeter(y0, x0, ry, rx, orientation=angle)
+    img[rr, cc] = 1
+    result = tf.hough_ellipse(img, threshold=15, accuracy=3)
+    result.sort(order='accumulator')
+    best = result[-1]
+    # Check if I re-draw the ellipse, points are the same!
+    # ie check API compatibility between hough_ellipse and ellipse_perimeter
+    rr2, cc2 = ellipse_perimeter(y0, x0, int(best[3]), int(best[4]),
+                                 orientation=best[5])
+    assert_equal(rr, rr2)
+    assert_equal(cc, cc2)
+
+
+def test_hough_ellipse_non_zero_negangle3():
+    # ry < rx, angle in [-pi/2:-pi]
+    img = np.zeros((30, 24), dtype=int)
+    rx = 12
+    ry = 6
+    x0 = 10
+    y0 = 15
+    angle = - np.pi / 1.35 - np.pi / 2.
+    rr, cc = ellipse_perimeter(y0, x0, ry, rx, orientation=angle)
+    img[rr, cc] = 1
+    result = tf.hough_ellipse(img, threshold=15, accuracy=3)
+    result.sort(order='accumulator')
+    best = result[-1]
+    # Check if I re-draw the ellipse, points are the same!
+    # ie check API compatibility between hough_ellipse and ellipse_perimeter
+    rr2, cc2 = ellipse_perimeter(y0, x0, int(best[3]), int(best[4]),
+                                 orientation=best[5])
+    assert_equal(rr, rr2)
+    assert_equal(cc, cc2)
+
+
+def test_hough_ellipse_non_zero_negangle4():
+    # ry < rx, angle in [-pi:-3pi/4]
+    img = np.zeros((30, 24), dtype=int)
+    rx = 12
+    ry = 6
+    x0 = 10
+    y0 = 15
+    angle = - np.pi / 1.35 - np.pi
+    rr, cc = ellipse_perimeter(y0, x0, ry, rx, orientation=angle)
+    img[rr, cc] = 1
+    result = tf.hough_ellipse(img, threshold=15, accuracy=3)
+    result.sort(order='accumulator')
+    best = result[-1]
+    # Check if I re-draw the ellipse, points are the same!
+    # ie check API compatibility between hough_ellipse and ellipse_perimeter
+    rr2, cc2 = ellipse_perimeter(y0, x0, int(best[3]), int(best[4]),
+                                 orientation=best[5])
+    assert_equal(rr, rr2)
+    assert_equal(cc, cc2)
 
 
 if __name__ == "__main__":

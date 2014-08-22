@@ -2,6 +2,10 @@ import numpy as np
 from numpy.testing import assert_array_equal, run_module_suite
 
 from skimage.morphology import label
+from warnings import catch_warnings
+from skimage._shared.utils import skimage_deprecation
+
+np.random.seed(0)
 
 
 class TestConnectedComponents:
@@ -23,9 +27,11 @@ class TestConnectedComponents:
         assert self.x[0, 2] == 3
 
     def test_random(self):
-        x = (np.random.random((20, 30)) * 5).astype(np.int)
+        x = (np.random.rand(20, 30) * 5).astype(np.int)
 
-        labels = label(x)
+        with catch_warnings():
+            labels = label(x)
+
         n = labels.max()
         for i in range(n):
             values = x[labels == i]
@@ -35,27 +41,29 @@ class TestConnectedComponents:
         x = np.array([[0, 0, 1],
                       [0, 1, 0],
                       [1, 0, 0]])
-        assert_array_equal(label(x),
-                           x)
+        with catch_warnings():
+            assert_array_equal(label(x), x)
 
     def test_4_vs_8(self):
         x = np.array([[0, 1],
                       [1, 0]], dtype=int)
-        assert_array_equal(label(x, 4),
-                           [[0, 1],
-                            [2, 3]])
-        assert_array_equal(label(x, 8),
-                           [[0, 1],
-                            [1, 0]])
+        with catch_warnings():
+            assert_array_equal(label(x, 4),
+                               [[0, 1],
+                                [2, 3]])
+            assert_array_equal(label(x, 8),
+                               [[0, 1],
+                                [1, 0]])
 
     def test_background(self):
         x = np.array([[1, 0, 0],
                       [1, 1, 5],
                       [0, 0, 0]])
 
-        assert_array_equal(label(x), [[0, 1, 1],
-                                      [0, 0, 2],
-                                      [3, 3, 3]])
+        with catch_warnings():
+            assert_array_equal(label(x), [[0, 1, 1],
+                                          [0, 0, 2],
+                                          [3, 3, 3]])
 
         assert_array_equal(label(x, background=0),
                            [[0, -1, -1],
@@ -87,7 +95,9 @@ class TestConnectedComponents:
                       [0, 0, 6],
                       [5, 5, 5]])
 
-        assert_array_equal(label(x, return_num=True)[1], 4)
+        with catch_warnings():
+            assert_array_equal(label(x, return_num=True)[1], 4)
+
         assert_array_equal(label(x, background=0, return_num=True)[1], 3)
 
 

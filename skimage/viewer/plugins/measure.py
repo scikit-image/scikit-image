@@ -47,4 +47,4 @@ class Measure(Plugin):
         dx = np.diff(x)[0]
         dy = np.diff(y)[0]
         self._length.text = '%.1f' % np.hypot(dx, dy)
-        self._angle.text = u'%.1f°' % (180 - np.arctan2(dy, dx) * rad2deg)
+        self._angle.text = '%.1f°' % (180 - np.arctan2(dy, dx) * rad2deg)

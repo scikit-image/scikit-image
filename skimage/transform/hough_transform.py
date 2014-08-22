@@ -1,30 +1,7 @@
 import numpy as np
 from scipy import ndimage
 from skimage import measure, morphology
-
-
-from ._hough_transform import hough_line, probabilistic_hough_line
-from skimage._shared.utils import deprecated
-
-
-@deprecated('hough_line')
-def hough(img, theta=None):
-    return hough_line(img, theta)
-
-
-@deprecated('probabilistic_hough_line')
-def probabilistic_hough(img, threshold=10, line_length=50, line_gap=10,
-                        theta=None):
-    return probabilistic_hough_line(img, threshold=threshold,
-                                    line_length=line_length, line_gap=line_gap,
-                                    theta=theta)
-
-
-@deprecated('hough_line_peaks')
-def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
-                threshold=None, num_peaks=np.inf):
-    return hough_line_peaks(hspace, angles, dists, min_distance, min_angle,
-                            threshold, num_peaks)
+from ._hough_transform import _hough_circle
 
 
 def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
@@ -64,8 +41,7 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
 
     Examples
     --------
-    >>> import numpy as np
-    >>> from skimage.transform import hough_line, hough_peaks
+    >>> from skimage.transform import hough_line, hough_line_peaks
     >>> from skimage.draw import line
     >>> img = np.zeros((15, 15), dtype=np.bool_)
     >>> rr, cc = line(0, 0, 14, 14)
@@ -73,11 +49,9 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     >>> rr, cc = line(0, 14, 14, 0)
     >>> img[cc, rr] = 1
     >>> hspace, angles, dists = hough_line(img)
-    >>> hspace, angles, dists = hough_peaks(hspace, angles, dists)
-    >>> angles
-    array([  0.74590887,  -0.79856126])
-    >>> dists
-    array([  10.74418605,  0.51162791])
+    >>> hspace, angles, dists = hough_line_peaks(hspace, angles, dists)
+    >>> len(angles)
+    2
 
     """
 
@@ -97,9 +71,9 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     hspace *= mask
     hspace_t = hspace > threshold
 
-    label_hspace = morphology.label(hspace_t)
-    props = measure.regionprops(label_hspace, ['Centroid'])
-    coords = np.array([np.round(p['Centroid']) for p in props], dtype=int)
+    label_hspace = measure.label(hspace_t)
+    props = measure.regionprops(label_hspace)
+    coords = np.array([np.round(p.centroid) for p in props], dtype=int)
 
     hspace_peaks = []
     dist_peaks = []
@@ -149,3 +123,31 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
         angle_peaks = angle_peaks[idx_maxsort]
 
     return hspace_peaks, angle_peaks, dist_peaks
+
+
+def hough_circle(image, radius, normalize=True, full_output=False):
+    """Perform a circular Hough transform.
+
+    Parameters
+    ----------
+    image : (M, N) ndarray
+        Input image with nonzero values representing edges.
+    radius : ndarray
+        Radii at which to compute the Hough transform.
+    normalize : boolean, optional (default True)
+        Normalize the accumulator with the number
+        of pixels used to draw the radius.
+    full_output : boolean, optional (default False)
+        Extend the output size by twice the largest
+        radius in order to detect centers outside the
+        input picture.
+
+    Returns
+    -------
+    H : 3D ndarray (radius index, (M + 2R, N + 2R) ndarray)
+        Hough transform accumulator for each radius.
+        R designates the larger radius if full_output is True.
+        Otherwise, R = 0.
+    """
+    return _hough_circle(image, radius.astype(np.intp),
+                         normalize=normalize, full_output=full_output)

@@ -11,18 +11,28 @@ class TestGLCM():
                                [2, 2, 3, 3]], dtype=np.uint8)
 
     def test_output_angles(self):
-        result = greycomatrix(self.image, [1], [0, np.pi / 2], 4)
-        assert result.shape == (4, 4, 1, 2)
+        result = greycomatrix(self.image, [1], [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4], 4)
+        assert result.shape == (4, 4, 1, 4)
         expected1 = np.array([[2, 2, 1, 0],
                              [0, 2, 0, 0],
                              [0, 0, 3, 1],
                              [0, 0, 0, 1]], dtype=np.uint32)
         np.testing.assert_array_equal(result[:, :, 0, 0], expected1)
-        expected2 = np.array([[3, 0, 2, 0],
+        expected2 = np.array([[1, 1, 3, 0],
+                             [0, 1, 1, 0],
+                             [0, 0, 0, 2],
+                             [0, 0, 0, 0]], dtype=np.uint32)
+        np.testing.assert_array_equal(result[:, :, 0, 1], expected2)
+        expected3 = np.array([[3, 0, 2, 0],
                              [0, 2, 2, 0],
                              [0, 0, 1, 2],
                              [0, 0, 0, 0]], dtype=np.uint32)
-        np.testing.assert_array_equal(result[:, :, 0, 1], expected2)
+        np.testing.assert_array_equal(result[:, :, 0, 2], expected3)
+        expected4 = np.array([[2, 0, 0, 0],
+                             [1, 1, 2, 0],
+                             [0, 0, 2, 1],
+                             [0, 0, 0, 0]], dtype=np.uint32)
+        np.testing.assert_array_equal(result[:, :, 0, 3], expected4)
 
     def test_output_symmetric_1(self):
         result = greycomatrix(self.image, [1], [np.pi / 2], 4,
@@ -183,21 +193,27 @@ class TestLBP():
         np.testing.assert_array_equal(lbp, ref)
 
     def test_var(self):
-        lbp = local_binary_pattern(self.image, 8, 1, 'var')
-        ref = np.array([[0.        , 0.00072786, 0.        , 0.00115377,
-                         0.00032355, 0.00224467],
-                        [0.00051758, 0.        , 0.0026383 , 0.00163246,
-                         0.00027414, 0.00041124],
-                        [0.00192834, 0.00130368, 0.00042095, 0.00171894,
-                         0.        , 0.00063726],
-                        [0.00023048, 0.00019464 , 0.00082291, 0.00225386,
-                         0.00076696, 0.        ],
-                        [0.00097253, 0.00013236, 0.0009134 , 0.0014467 ,
-                         0.        , 0.00082472],
-                        [0.00024701, 0.0012277 , 0.        , 0.00109869,
-                         0.00015445, 0.00035881]])
-        np.testing.assert_array_almost_equal(lbp, ref)
+        # Test idea: mean of variance is estimate of overall variance.
 
+        # Fix random seed for test stability.
+        np.random.seed(13141516)
+
+        # Create random image with known variance.
+        image = np.random.rand(500, 500)
+        target_std = 0.3
+        image = image / image.std() * target_std
+
+        # Use P=4 to avoid interpolation effects
+        P, R = 4, 1
+        lbp = local_binary_pattern(image, P, R, 'var')
+
+        # Take central part to avoid border effect.
+        lbp = lbp[5:-5,5:-5]
+
+        # The LBP variance is biased (ddof=0), correct for that.
+        expected = target_std**2 * (P-1)/P
+
+        np.testing.assert_almost_equal(lbp.mean(), expected, 4)
 
     def test_nri_uniform(self):
         lbp = local_binary_pattern(self.image, 8, 1, 'nri_uniform')

@@ -2,7 +2,6 @@ try:
     from matplotlib.widgets import RectangleSelector
 except ImportError:
     RectangleSelector = object
-    print("Could not import matplotlib -- skimage.viewer not available.")
 
 from skimage.viewer.canvastools.base import CanvasToolBase
 from skimage.viewer.canvastools.base import ToolHandles
@@ -201,7 +200,7 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
         return self.extents
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     import matplotlib.pyplot as plt
     from skimage import data
 

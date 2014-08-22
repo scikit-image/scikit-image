@@ -1,77 +1,105 @@
+import warnings
 import numpy as np
 from scipy import ndimage
+from .misc import default_fallback
 
 
-def binary_erosion(image, selem, out=None):
+# Our functions only work in 2D, so for 3D or higher input we should fall back
+# on `scipy.ndimage`. Additionally, we want to use a cross-shaped structuring
+# element of the appropriate dimension for each of these functions.
+# The `default_callback` provides all these.
+@default_fallback
+def binary_erosion(image, selem=None, out=None):
     """Return fast binary morphological erosion of an image.
 
     This function returns the same result as greyscale erosion but performs
     faster for binary images.
 
-    Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
-    in the neighborhood centered at (i,j). Erosion shrinks bright regions and
-    enlarges dark regions.
+    Morphological erosion sets a pixel at ``(i,j)`` to the minimum over all
+    pixels in the neighborhood centered at ``(i,j)``. Erosion shrinks bright
+    regions and enlarges dark regions.
 
     Parameters
     ----------
     image : ndarray
-        Image array.
-    selem : ndarray
+        Binary input image.
+    selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
 
     Returns
     -------
-    eroded : bool array
-        The result of the morphological erosion.
+    eroded : ndarray of bool or uint
+        The result of the morphological erosion with values in ``[0, 1]``.
 
     """
 
-    conv = ndimage.convolve(image > 0, selem, output=out,
-                            mode='constant', cval=1)
-    if conv is not None:
-        out = conv
-    return np.equal(out, np.sum(selem), out=out)
+    selem = (selem != 0)
+    selem_sum = np.sum(selem)
+
+    if selem_sum <= 255:
+        conv = np.empty_like(image, dtype=np.uint8)
+    else:
+        conv = np.empty_like(image, dtype=np.uint)
+
+    binary = (image > 0).view(np.uint8)
+    ndimage.convolve(binary, selem, mode='constant', cval=1, output=conv)
+
+    if out is None:
+        out = np.empty_like(conv, dtype=np.bool)
+    return np.equal(conv, selem_sum, out=out)
 
 
-def binary_dilation(image, selem, out=None):
+@default_fallback
+def binary_dilation(image, selem=None, out=None):
     """Return fast binary morphological dilation of an image.
 
     This function returns the same result as greyscale dilation but performs
     faster for binary images.
 
-    Morphological dilation sets a pixel at (i,j) to the maximum over all pixels
-    in the neighborhood centered at (i,j). Dilation enlarges bright regions
-    and shrinks dark regions.
+    Morphological dilation sets a pixel at ``(i,j)`` to the maximum over all
+    pixels in the neighborhood centered at ``(i,j)``. Dilation enlarges bright
+    regions and shrinks dark regions.
 
     Parameters
     ----------
 
     image : ndarray
-        Image array.
-    selem : ndarray
+        Binary input image.
+    selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarray of bool, optional
         The array to store the result of the morphology. If None, is
         passed, a new array will be allocated.
 
     Returns
     -------
-    dilated : bool array
-        The result of the morphological dilation.
+    dilated : ndarray of bool or uint
+        The result of the morphological dilation with values in ``[0, 1]``.
 
     """
 
-    conv = ndimage.convolve(image > 0, selem, output=out,
-                            mode='constant', cval=0)
-    if conv is not None:
-        out = conv
-    return np.not_equal(out, 0, out=out)
+    selem = (selem != 0)
+
+    if np.sum(selem) <= 255:
+        conv = np.empty_like(image, dtype=np.uint8)
+    else:
+        conv = np.empty_like(image, dtype=np.uint)
+
+    binary = (image > 0).view(np.uint8)
+    ndimage.convolve(binary, selem, mode='constant', cval=0, output=conv)
+
+    if out is None:
+        out = np.empty_like(conv, dtype=np.bool)
+    return np.not_equal(conv, 0, out=out)
 
 
-def binary_opening(image, selem, out=None):
+@default_fallback
+def binary_opening(image, selem=None, out=None):
     """Return fast binary morphological opening of an image.
 
     This function returns the same result as greyscale opening but performs
@@ -85,26 +113,27 @@ def binary_opening(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-        Image array.
-    selem : ndarray
+        Binary input image.
+    selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarray of bool, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
 
     Returns
     -------
-    opening : bool array
+    opening : ndarray of bool
         The result of the morphological opening.
 
     """
-
     eroded = binary_erosion(image, selem)
     out = binary_dilation(eroded, selem, out=out)
     return out
 
 
-def binary_closing(image, selem, out=None):
+@default_fallback
+def binary_closing(image, selem=None, out=None):
     """Return fast binary morphological closing of an image.
 
     This function returns the same result as greyscale closing but performs
@@ -118,16 +147,17 @@ def binary_closing(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-        Image array.
-    selem : ndarray
+        Binary input image.
+    selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarray of bool, optional
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.
 
     Returns
     -------
-    closing : bool array
+    closing : ndarray of bool
         The result of the morphological closing.
 
     """

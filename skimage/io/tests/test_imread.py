@@ -7,6 +7,7 @@ from tempfile import NamedTemporaryFile
 
 from skimage import data_dir
 from skimage.io import imread, imsave, use_plugin, reset_plugins
+import skimage.io as sio
 
 try:
     import imread as _imread
@@ -15,6 +16,8 @@ except ImportError:
     imread_available = False
 else:
     imread_available = True
+
+np.random.seed(0)
 
 
 def teardown():
@@ -36,6 +39,13 @@ def test_imread_flatten():
 def test_imread_palette():
     img = imread(os.path.join(data_dir, 'palette_color.png'))
     assert img.ndim == 3
+
+
+@skipif(not imread_available)
+def test_imread_truncated_jpg():
+    assert_raises((RuntimeError, ValueError),
+                  sio.imread,
+                  os.path.join(data_dir, 'truncated.jpg'))
 
 
 @skipif(not imread_available)
@@ -61,7 +71,7 @@ class TestSave:
     def test_imsave_roundtrip(self):
         dtype = np.uint8
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
-            x = np.ones(shape, dtype=dtype) * np.random.random(shape)
+            x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
             if np.issubdtype(dtype, float):
                 yield self.roundtrip, x, 255

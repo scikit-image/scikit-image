@@ -43,10 +43,9 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20):
            Huttenlocher, D.P.  International Journal of Computer Vision, 2004
     """
 
-    #image = img_as_float(image)
     if image.ndim == 2:
         # assume single channel image
-        return _felzenszwalb_grey(image, scale=scale, sigma=sigma)
+        return _felzenszwalb_grey(image, scale=scale, sigma=sigma, min_size=min_size)
 
     elif image.ndim != 3:
         raise ValueError("Felzenswalb segmentation can only operate on RGB and"

@@ -90,6 +90,29 @@ cdef inline double _kernel_mean(Py_ssize_t* histo, double pop, dtype_t g,
     else:
         return 0
 
+cdef inline double _kernel_sum(Py_ssize_t* histo, double pop, dtype_t g,
+                               Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                               double p0, double p1,
+                               Py_ssize_t s0, Py_ssize_t s1):
+
+    cdef Py_ssize_t i, sum, sum_g, n
+
+    if pop:
+        sum = 0
+        sum_g = 0
+        n = 0
+        for i in range(max_bin):
+            sum += histo[i]
+            if (sum >= p0 * pop) and (sum <= p1 * pop):
+                n += histo[i]
+                sum_g += histo[i] * i
+
+        if n > 0:
+            return sum_g
+        else:
+            return 0
+    else:
+        return 0
 
 cdef inline double _kernel_subtract_mean(Py_ssize_t* histo, double pop,
                                          dtype_t g,
@@ -245,6 +268,15 @@ def _mean(dtype_t[:, ::1] image,
     _core(_kernel_mean[dtype_t], image, selem, mask, out,
           shift_x, shift_y, p0, p1, 0, 0, max_bin)
 
+def _sum(dtype_t[:, ::1] image,
+         char[:, ::1] selem,
+         char[:, ::1] mask,
+         dtype_t_out[:, ::1] out,
+         char shift_x, char shift_y, double p0, double p1,
+         Py_ssize_t max_bin):
+
+    _core(_kernel_sum[dtype_t], image, selem, mask, out,
+          shift_x, shift_y, p0, p1, 0, 0, max_bin)
 
 def _subtract_mean(dtype_t[:, ::1] image,
                    char[:, ::1] selem,

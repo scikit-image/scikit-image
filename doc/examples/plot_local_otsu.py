@@ -15,6 +15,7 @@ The example compares the local threshold with the global threshold.
 .. [1] http://en.wikipedia.org/wiki/Otsu's_method
 
 """
+import matplotlib
 import matplotlib.pyplot as plt
 
 from skimage import data
@@ -23,29 +24,38 @@ from skimage.filter import threshold_otsu, rank
 from skimage.util import img_as_ubyte
 
 
-p8 = img_as_ubyte(data.page())
+matplotlib.rcParams['font.size'] = 9
 
-radius = 10
+
+img = img_as_ubyte(data.page())
+
+radius = 15
 selem = disk(radius)
 
-loc_otsu = rank.otsu(p8, selem)
-t_glob_otsu = threshold_otsu(p8)
-glob_otsu = p8 >= t_glob_otsu
+local_otsu = rank.otsu(img, selem)
+threshold_global_otsu = threshold_otsu(img)
+global_otsu = img >= threshold_global_otsu
 
 
-plt.figure()
-plt.subplot(2, 2, 1)
-plt.imshow(p8, cmap=plt.cm.gray)
-plt.xlabel('original')
-plt.colorbar()
-plt.subplot(2, 2, 2)
-plt.imshow(loc_otsu, cmap=plt.cm.gray)
-plt.xlabel('local Otsu ($radius=%d$)' % radius)
-plt.colorbar()
-plt.subplot(2, 2, 3)
-plt.imshow(p8 >= loc_otsu, cmap=plt.cm.gray)
-plt.xlabel('original >= local Otsu' % t_glob_otsu)
-plt.subplot(2, 2, 4)
-plt.imshow(glob_otsu, cmap=plt.cm.gray)
-plt.xlabel('global Otsu ($t = %d$)' % t_glob_otsu)
+fig, ax = plt.subplots(2, 2, figsize=(8, 5))
+ax1, ax2, ax3, ax4 = ax.ravel()
+
+fig.colorbar(ax1.imshow(img, cmap=plt.cm.gray),
+           ax=ax1, orientation='horizontal')
+ax1.set_title('Original')
+ax1.axis('off')
+
+fig.colorbar(ax2.imshow(local_otsu, cmap=plt.cm.gray),
+           ax=ax2, orientation='horizontal')
+ax2.set_title('Local Otsu (radius=%d)' % radius)
+ax2.axis('off')
+
+ax3.imshow(img >= local_otsu, cmap=plt.cm.gray)
+ax3.set_title('Original >= Local Otsu' % threshold_global_otsu)
+ax3.axis('off')
+
+ax4.imshow(global_otsu, cmap=plt.cm.gray)
+ax4.set_title('Global Otsu (threshold = %d)' % threshold_global_otsu)
+ax4.axis('off')
+
 plt.show()

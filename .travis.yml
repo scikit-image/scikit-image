@@ -1,44 +1,114 @@
 # vim ft=yaml
-# travis-ci.org definition for skimage build
-#
-# We pretend to be erlang because we can't use the python support in
-# travis-ci; it uses virtualenvs, they do not have numpy, scipy, matplotlib,
-# and it is impractical to build them
 
-language: erlang
+# After changing this file, check it on:
+#   http://lint.travis-ci.org/
+
+language: python
+
+
+#  Tthe Travis python is set to 3.2 for all builds, since we use the default python for the 3.2 build and the anaconda python otherwise
+python:
+    - 3.2
+
 env:
-    - PYTHON=python PYSUF='' PYVER=2.7
-    - PYTHON=python3 PYSUF='3' PYVER=3.2
+    - ENV="python=2.6 numpy=1.6 cython=0.19.2"
+    - ENV="python=2.7 numpy cython"
+    - ENV="python=3.2"
+    - ENV="python=3.3 numpy cython"
+    - ENV="python=3.4 numpy cython"
+
+virtualenv:
+    system_site_packages: true
+
+before_install:
+    - export DISPLAY=:99.0
+    - sh -e /etc/init.d/xvfb start
+    - sudo apt-get update
+
+    # Python 3.2 is not supported by Miniconda, so we use the package manager for that run.
+    # NumPy has a bug in python 3 that is only fixed in the latest version,
+    #  hence the below wget of numpy/_import_tools.py from github.
+    - if [[ $ENV == python=3.2 ]]; then
+        sudo apt-get install python3-numpy;
+        wget https://raw.githubusercontent.com/numpy/numpy/master/numpy/_import_tools.py -O /home/travis/virtualenv/python3.2_with_system_site_packages/lib/python3.2/site-packages/numpy/_import_tools.py;
+        sudo apt-get install python3-scipy;
+        travis_retry pip install cython flake8 six;
+      else
+        wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+        bash miniconda.sh -b -p $HOME/miniconda;
+        export PATH="$HOME/miniconda/bin:$PATH";
+        hash -r;
+        conda config --set always_yes yes;
+        conda update conda;
+        conda info -a;
+        travis_retry conda create -n test $ENV six scipy pip flake8 nose;
+        source activate test;
+      fi
+    - travis_retry pip install coveralls pillow
+    - python check_bento_build.py
+
 install:
-    - sudo apt-get update  # needed for python3-numpy
-    - sudo apt-get install $PYTHON-dev
-    - sudo apt-get install $PYTHON-numpy
-    - sudo apt-get install $PYTHON-scipy
-    - sudo apt-get install $PYTHON-setuptools
-    - sudo apt-get install $PYTHON-nose
-    - sudo easy_install$PYSUF pip
-    - sudo pip-$PYVER install cython
-    - if [[ $PYVER == '2.7' ]]; then sudo apt-get install $PYTHON-pywt; fi
-    - if [[ $PYVER == '3.2' ]]; then sudo pip-$PYVER install git+git://github.com/rgommers/pywt.git@refactor-ready-for-pr; fi
-    - sudo apt-get install libfreeimage3
-    - if [[ $PYVER == '2.7' ]]; then sudo apt-get install $PYTHON-matplotlib; fi
-    - if [[ $PYVER == '3.2' ]]; then sudo pip-$PYVER install git+git://github.com/matplotlib/matplotlib.git@v1.2.x; fi
-    - sudo pip-$PYVER install flake8
-    - $PYTHON setup.py build
-    - sudo $PYTHON setup.py install
+    - tools/header.py "Dependency versions"
+    - tools/build_versions.py
+    - export PYTHONWARNINGS=all
+    - python setup.py build_ext --inplace
+
 script:
-    # Check if setup.py's match bento.info
-    - $PYTHON check_bento_build.py
-    # Change into an innocuous directory and find tests from installation
-    - mkdir $HOME/.matplotlib
-    - "echo 'backend : Agg' > $HOME/.matplotlib/matplotlibrc"
-    - "echo 'backend.qt4 : PyQt4' >> $HOME/.matplotlib/matplotlibrc"
-    - mkdir for_test
-    - cd for_test
-    - nosetests-$PYVER --exe -v --cover-package=skimage skimage
-    # Change back to repository root directory and run all doc examples
-    - cd ..
-    - for f in doc/examples/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit 1; fi done
-    - for f in doc/examples/applications/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit 1; fi done
+    # Run all tests with minimum dependencies
+    - nosetests --exe -v skimage
+
     # Run pep8 and flake tests
     - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
+
+    # Install optional dependencies to get full test coverage
+    # Notes:
+    # - pyfits and imread do NOT support py3.2
+    # - Use the png headers included in anaconda (from matplotlib install)
+    # TODO: Remove the libm removal when anaconda fixes their libraries
+    #   The solution was suggested here
+    #   https://groups.google.com/a/continuum.io/forum/#!topic/anaconda/-DLG2ZdTkw0
+    - if [[ $ENV == python=3.2 ]]; then
+        sudo apt-get install -qq python3-pyqt4;
+        travis_retry pip install -q matplotlib;
+        travis_retry pip install -q networkx;
+        travis_retry pip install git+git://github.com/rgommers/pywt.git@refactor-ready-for-pr
+      else
+        travis_retry conda install -q matplotlib pyqt networkx;
+        sudo cp ~/miniconda/envs/test/include/png* /usr/include;
+        rm ~/miniconda/envs/test/lib/libm-2.5.so;
+        rm ~/miniconda/envs/test/lib/libm.*;
+        sudo apt-get install -qq libtiff4-dev libwebp-dev xcftools;
+        travis_retry pip install -q imread;
+        travis_retry pip install -q pyfits;
+        travis_retry pip install PyWavelets
+      fi
+    - sudo apt-get install -qq libfreeimage3
+    # TODO: update when SimpleITK become available on py34 or hopefully pip
+    - if [[ $ENV != python=3.4* ]]; then
+        travis_retry easy_install -q SimpleITK;
+      fi
+
+    # Matplotlib settings
+    - export MPL_DIR=$HOME/.config/matplotlib
+    - mkdir -p $MPL_DIR
+    - touch $MPL_DIR/matplotlibrc
+    - "echo 'backend : Agg' > $MPL_DIR/matplotlibrc"
+    - "echo 'backend.qt4 : PyQt4' >> $MPL_DIR/matplotlibrc"
+
+    # Run all doc examples
+    - export PYTHONPATH=$(pwd):$PYTHONPATH
+    - for f in doc/examples/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
+    - for f in doc/examples/applications/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
+
+    # run tests again with optional dependencies to get more coverage
+    # measure coverage on py3.3
+    - if [[ $ENV == python=3.3* ]]; then
+         nosetests --exe -v --with-doctest --with-cov --cover-package skimage;
+      else
+         nosetests --exe -v --with-doctest skimage;
+      fi
+
+after_success:
+    - if [[ $ENV == python=3.3* ]]; then
+          coveralls;
+      fi

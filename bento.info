@@ -1,5 +1,5 @@
 Name: scikit-image
-Version: 0.9.dev0
+Version: 0.11dev0
 Summary: Image processing routines for SciPy
 Url: http://scikit-image.org
 DownloadUrl: http://github.com/scikit-image/scikit-image
@@ -35,19 +35,17 @@ Library:
         skimage, skimage.color, skimage.data, skimage.draw, skimage.exposure,
         skimage.feature, skimage.filter, skimage.graph, skimage.io,
         skimage.io._plugins, skimage.measure, skimage.morphology,
-        skimage.scripts, skimage.segmentation, skimage.transform, skimage.util
+        skimage.scripts, skimage.restoration, skimage.segmentation,
+        skimage.transform, skimage.util
     Extension: skimage.morphology._pnpoly
         Sources:
             skimage/morphology/_pnpoly.pyx
-    Extension: skimage.feature._template
-        Sources:
-            skimage/feature/_template.pyx
     Extension: skimage.io._plugins._colormixer
         Sources:
             skimage/io/_plugins/_colormixer.pyx
-    Extension: skimage.measure._find_contours
+    Extension: skimage.measure._find_contours_cy
         Sources:
-            skimage/measure/_find_contours.pyx
+            skimage/measure/_find_contours_cy.pyx
     Extension: skimage.measure._moments
         Sources:
             skimage/measure/_moments.pyx
@@ -66,12 +64,9 @@ Library:
     Extension: skimage.filter._ctmf
         Sources:
             skimage/filter/_ctmf.pyx
-    Extension: skimage.filter._denoise_cy
+    Extension: skimage.measure._ccomp
         Sources:
-            skimage/filter/_denoise_cy.pyx
-    Extension: skimage.morphology.ccomp
-        Sources:
-            skimage/morphology/ccomp.pyx
+            skimage/measure/_ccomp.pyx
     Extension: skimage.morphology._watershed
         Sources:
             skimage/morphology/_watershed.pyx
@@ -96,9 +91,12 @@ Library:
     Extension: skimage.feature.censure_cy
         Sources:
             skimage/feature/censure_cy.pyx
-    Extension: skimage.feature._brief_cy
+    Extension: skimage.feature.orb_cy
         Sources:
-            skimage/feature/_brief_cy.pyx
+            skimage/feature/orb_cy.pyx
+    Extension: skimage.feature.brief_cy
+        Sources:
+            skimage/feature/brief_cy.pyx
     Extension: skimage.feature.corner_cy
         Sources:
             skimage/feature/corner_cy.pyx
@@ -123,9 +121,6 @@ Library:
     Extension: skimage.transform._warps_cy
         Sources:
             skimage/transform/_warps_cy.pyx
-    Extension: skimage._shared.interpolation
-        Sources:
-            skimage/_shared/interpolation.pyx
     Extension: skimage.segmentation._felzenszwalb_cy
         Sources:
             skimage/segmentation/_felzenszwalb_cy.pyx
@@ -144,6 +139,24 @@ Library:
     Extension: skimage.filter.rank.bilateral_cy
         Sources:
             skimage/filter/rank/bilateral_cy.pyx
+    Extension: skimage.restoration._unwrap_1d
+        Sources:
+            skimage/restoration/_unwrap_1d.pyx
+    Extension: skimage.restoration._unwrap_2d
+        Sources:
+            skimage/restoration/_unwrap_2d.pyx skimage/exposure/unwrap_2d_ljmu.c
+    Extension: skimage.restoration._unwrap_3d
+        Sources:
+            skimage/restoration/_unwrap_3d.pyx skimage/exposure/unwrap_3d_ljmu.c
+    Extension: skimage.restoration._denoise_cy
+        Sources:
+            skimage/restoration/_denoise_cy.pyx
+    Extension: skimage.feature._hessian_det_appx
+        Sources:
+            skimage/exposure/_hessian_det_appx.pyx
+    Extension: skimage.graph._ncut_cy
+        Sources:
+            skimage/graph/_ncut_cy.pyx
 
 Executable: skivi
     Module: skimage.scripts.skivi

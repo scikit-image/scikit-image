@@ -4,11 +4,11 @@ from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage
 
-from skimage.morphology import convex_hull_image
-from skimage.measure import _moments
+from ._label import label
+from . import _moments
 
 
-__all__ = ['regionprops']
+__all__ = ['regionprops', 'perimeter']
 
 
 STREL_4 = np.array([[0, 1, 0],
@@ -47,12 +47,14 @@ PROPS = {
 #    'PixelList',
     'Solidity': 'solidity',
 #    'SubarrayIdx'
-    'WeightedCentralMoments': 'weighted_central_moments',
+    'WeightedCentralMoments': 'weighted_moments_central',
     'WeightedCentroid': 'weighted_centroid',
     'WeightedHuMoments': 'weighted_moments_hu',
     'WeightedMoments': 'weighted_moments',
     'WeightedNormalizedMoments': 'weighted_moments_normalized'
 }
+
+PROP_VALS = PROPS.values()
 
 
 class _cached_property(object):
@@ -133,6 +135,7 @@ class _RegionProperties(object):
 
     @_cached_property
     def convex_image(self):
+        from ..morphology.convex_hull import convex_hull_image
         return convex_hull_image(self.image)
 
     @_cached_property
@@ -155,8 +158,8 @@ class _RegionProperties(object):
     @_cached_property
     def euler_number(self):
         euler_array = self.filled_image != self.image
-        _, num = ndimage.label(euler_array, STREL_8)
-        return -num
+        _, num = label(euler_array, neighbors=8, return_num=True)
+        return -num + 1
 
     @_cached_property
     def extent(self):
@@ -288,7 +291,7 @@ class _RegionProperties(object):
         return _moments.moments_central(self._intensity_image_double, 0, 0, 3)
 
     @_cached_property
-    def weighted_central_moments(self):
+    def weighted_moments_central(self):
         row, col = self.weighted_local_centroid
         return _moments.moments_central(self._intensity_image_double,
                                         row, col, 3)
@@ -299,34 +302,42 @@ class _RegionProperties(object):
 
     @_cached_property
     def weighted_moments_normalized(self):
-        return _moments.moments_normalized(self.weighted_central_moments, 3)
+        return _moments.moments_normalized(self.weighted_moments_central, 3)
+
+    def __iter__(self):
+        return iter(PROPS.values())
 
     def __getitem__(self, key):
         value = getattr(self, key, None)
         if value is not None:
             return value
         else:  # backwards compatability
-            warnings.warn('Usage of deprecated property name.',
-                          category=DeprecationWarning)
             return getattr(self, PROPS[key])
 
+    def __eq__(self, other):
+        if not isinstance(other, _RegionProperties):
+            return False
 
-def regionprops(label_image, properties=None,
-                intensity_image=None, cache=True):
-    """Measure properties of labelled image regions.
+        for key in PROP_VALS:
+            try:
+                #so that NaNs are equal
+                np.testing.assert_equal(getattr(self, key, None),
+                                        getattr(other, key, None))
+            except AssertionError:
+                return False
+
+        return True
+
+
+def regionprops(label_image, intensity_image=None, cache=True):
+    """Measure properties of labeled image regions.
 
     Parameters
     ----------
     label_image : (N, M) ndarray
-        Labelled input image.
-    properties : {'all', list}
-        **Deprecated parameter**
-
-        This parameter is not needed any more since all properties are
-        determined dynamically.
-
+        Labeled input image.
     intensity_image : (N, M) ndarray, optional
-        Intensity image with same size as labelled image. Default is None.
+        Intensity image with same size as labeled image. Default is None.
     cache : bool, optional
         Determine whether to cache calculated properties. The computation is
         much faster for cached properties, whereas the memory consumption
@@ -334,9 +345,9 @@ def regionprops(label_image, properties=None,
 
     Returns
     -------
-    properties : list
-        List containing a properties for each region. The properties of each
-        region can be accessed as attributes and keys.
+    properties : list of RegionProperties
+        Each item describes one labeled region, and can be accessed using the
+        attributes listed below.
 
     Notes
     -----
@@ -382,7 +393,7 @@ def regionprops(label_image, properties=None,
     **major_axis_length** : float
         The length of the major axis of the ellipse that has the same
         normalized second central moments as the region.
-    **min_intensity** : float
+    **max_intensity** : float
         Value with the greatest intensity in the region.
     **mean_intensity** : float
         Value with the mean intensity in the region.
@@ -430,7 +441,7 @@ def regionprops(label_image, properties=None,
             wm_ji = sum{ array(x, y) * x^j * y^i }
 
         where the sum is over the `x`, `y` coordinates of the region.
-    **weighted_central_moments** : (3, 3) ndarray
+    **weighted_moments_central** : (3, 3) ndarray
         Central moments (translation invariant) of intensity image up to
         3rd order::
 
@@ -462,13 +473,16 @@ def regionprops(label_image, properties=None,
 
     Examples
     --------
-    >>> from skimage.data import coins
+    >>> from skimage import data, util
     >>> from skimage.morphology import label
-    >>> img = coins() > 110
+    >>> img = util.img_as_ubyte(data.coins()) > 110
     >>> label_img = label(img)
     >>> props = regionprops(label_img)
-    >>> props[0].centroid # centroid of first labelled object
-    >>> props[0]['centroid'] # centroid of first labelled object
+    >>> props[0].centroid # centroid of first labeled object
+    (22.729879860483141, 81.912285234465827)
+    >>> props[0]['centroid'] # centroid of first labeled object
+    (22.729879860483141, 81.912285234465827)
+
     """
 
     label_image = np.squeeze(label_image)
@@ -476,20 +490,17 @@ def regionprops(label_image, properties=None,
     if label_image.ndim != 2:
         raise TypeError('Only 2-D images supported.')
 
-    if properties is not None:
-        warnings.warn('The ``properties`` argument is deprecated and is '
-                      'not needed any more as properties are '
-                      'determined dynamically.',
-                      category=DeprecationWarning)
-
     regions = []
 
     objects = ndimage.find_objects(label_image)
     for i, sl in enumerate(objects):
+        if sl is None:
+            continue
+
         label = i + 1
 
-        props = _RegionProperties(sl, label, label_image,
-                                  intensity_image, cache)
+        props = _RegionProperties(sl, label, label_image, intensity_image,
+                                  cache)
         regions.append(props)
 
     return regions

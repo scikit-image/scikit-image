@@ -8,7 +8,7 @@ Copyright (c) 2009-2011 Broad Institute
 All rights reserved.
 Original author: Lee Kamentstky
 """
-import numpy
+import numpy as np
 
 
 def rank_order(image):
@@ -36,25 +36,25 @@ def rank_order(image):
     >>> a = np.array([[1, 4, 5], [4, 4, 1], [5, 1, 1]])
     >>> a
     array([[1, 4, 5],
-        [4, 4, 1],
-        [5, 1, 1]])
+           [4, 4, 1],
+           [5, 1, 1]])
     >>> rank_order(a)
     (array([[0, 1, 2],
-        [1, 1, 0],
-        [2, 0, 0]], dtype=uint32), array([1, 4, 5]))
+           [1, 1, 0],
+           [2, 0, 0]], dtype=uint32), array([1, 4, 5]))
     >>> b = np.array([-1., 2.5, 3.1, 2.5])
     >>> rank_order(b)
     (array([0, 1, 2, 1], dtype=uint32), array([-1. ,  2.5,  3.1]))
     """
     flat_image = image.ravel()
-    sort_order = flat_image.argsort().astype(numpy.uint32)
+    sort_order = flat_image.argsort().astype(np.uint32)
     flat_image = flat_image[sort_order]
-    sort_rank = numpy.zeros_like(sort_order)
+    sort_rank = np.zeros_like(sort_order)
     is_different = flat_image[:-1] != flat_image[1:]
-    numpy.cumsum(is_different, out=sort_rank[1:])
-    original_values = numpy.zeros((sort_rank[-1] + 1,), image.dtype)
+    np.cumsum(is_different, out=sort_rank[1:])
+    original_values = np.zeros((sort_rank[-1] + 1,), image.dtype)
     original_values[0] = flat_image[0]
     original_values[1:] = flat_image[1:][is_different]
-    int_image = numpy.zeros_like(sort_order)
+    int_image = np.zeros_like(sort_order)
     int_image[sort_order] = sort_rank
     return (int_image.reshape(image.shape), original_values)

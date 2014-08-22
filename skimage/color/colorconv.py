@@ -29,9 +29,12 @@ Supported color spaces
 * LAB CIE : Lightness, a, b
         Colorspace derived from XYZ CIE that is intended to be more
         perceptually uniform
+* LUV CIE : Lightness, u, v
+        Colorspace derived from XYZ CIE that is intended to be more
+        perceptually uniform
 * LCH CIE : Lightness, Chroma, Hue
         Defined in terms of LAB CIE.  C and H are the polar representation of
-        a and b.  The polar angle C is defined to be on (0, 2*pi)
+        a and b.  The polar angle C is defined to be on ``(0, 2*pi)``
 
 :author: Nicolas Pinto (rgb2hsv)
 :author: Ralf Gommers (hsv2rgb)
@@ -68,7 +71,7 @@ def guess_spatial_dimensions(image):
     -------
     spatial_dims : int or None
         The number of spatial dimensions of `image`. If ambiguous, the value
-        is `None`.
+        is ``None``.
 
     Raises
     ------
@@ -87,32 +90,6 @@ def guess_spatial_dimensions(image):
         raise ValueError("Expected 2D, 3D, or 4D array, got %iD." % image.ndim)
 
 
-@deprecated()
-def is_rgb(image):
-    """Test whether the image is RGB or RGBA.
-
-    Parameters
-    ----------
-    image : ndarray
-        Input image.
-
-    """
-    return (image.ndim == 3 and image.shape[2] in (3, 4))
-
-
-@deprecated()
-def is_gray(image):
-    """Test whether the image is gray (i.e. has only one color band).
-
-    Parameters
-    ----------
-    image : ndarray
-        Input image.
-
-    """
-    return image.ndim in (2, 3) and not is_rgb(image)
-
-
 def convert_colorspace(arr, fromspace, tospace):
     """Convert an image array to a new color space.
 
@@ -122,12 +99,12 @@ def convert_colorspace(arr, fromspace, tospace):
         The image to convert.
     fromspace : str
         The color space to convert from. Valid color space strings are
-        ['RGB', 'HSV', 'RGB CIE', 'XYZ']. Value may also be specified as lower
-        case.
+        ``['RGB', 'HSV', 'RGB CIE', 'XYZ']``. Value may also be specified as
+        lower case.
     tospace : str
         The color space to convert to. Valid color space strings are
-        ['RGB', 'HSV', 'RGB CIE', 'XYZ']. Value may also be specified as lower
-        case.
+        ``['RGB', 'HSV', 'RGB CIE', 'XYZ']``. Value may also be specified as
+        lower case.
 
     Returns
     -------
@@ -137,7 +114,7 @@ def convert_colorspace(arr, fromspace, tospace):
     Notes
     -----
     Conversion occurs through the "central" RGB color space, i.e. conversion
-    from XYZ to HSV is implemented as XYZ -> RGB -> HSV instead of directly.
+    from XYZ to HSV is implemented as ``XYZ -> RGB -> HSV`` instead of directly.
 
     Examples
     --------
@@ -181,17 +158,17 @@ def rgb2hsv(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3-D array of shape (.., .., 3).
+        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in HSV format, in a 3-D array of shape (.., .., 3).
+        The image in HSV format, in a 3-D array of shape ``(.., .., 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3-D array of shape (.., .., 3).
+        If `rgb` is not a 3-D array of shape ``(.., .., 3)``.
 
     Notes
     -----
@@ -259,21 +236,21 @@ def hsv2rgb(hsv):
     Parameters
     ----------
     hsv : array_like
-        The image in HSV format, in a 3-D array of shape (.., .., 3).
+        The image in HSV format, in a 3-D array of shape ``(.., .., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in RGB format, in a 3-D array of shape (.., .., 3).
+        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
 
     Raises
     ------
     ValueError
-        If `hsv` is not a 3-D array of shape (.., .., 3).
+        If `hsv` is not a 3-D array of shape ``(.., .., 3)``.
 
     Notes
     -----
-    The conversion assumes an input data range of [0, 1] for all
+    The conversion assumes an input data range of ``[0, 1]`` for all
     color components.
 
     Conversion between RGB and HSV color spaces results in some loss of
@@ -468,17 +445,17 @@ def xyz2rgb(xyz):
     Parameters
     ----------
     xyz : array_like
-        The image in XYZ format, in a 3-D array of shape (.., .., 3).
+        The image in XYZ format, in a 3-D array of shape ``(.., .., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in RGB format, in a 3-D array of shape (.., .., 3).
+        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
 
     Raises
     ------
     ValueError
-        If `xyz` is not a 3-D array of shape (.., .., 3).
+        If `xyz` is not a 3-D array of shape ``(.., .., 3)``.
 
     Notes
     -----
@@ -513,18 +490,18 @@ def rgb2xyz(rgb):
     ----------
     rgb : array_like
         The image in RGB format, in a 3- or 4-D array of shape
-        (.., ..,[ ..,] 3).
+        ``(.., ..,[ ..,] 3)``.
 
     Returns
     -------
     out : ndarray
         The image in XYZ format, in a 3- or 4-D array of shape
-        (.., ..,[ ..,] 3).
+        ``(.., ..,[ ..,] 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3- or 4-D array of shape (.., ..,[ ..,] 3).
+        If `rgb` is not a 3- or 4-D array of shape ``(.., ..,[ ..,] 3)``.
 
     Notes
     -----
@@ -556,17 +533,17 @@ def rgb2rgbcie(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3-D array of shape (.., .., 3).
+        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in RGB CIE format, in a 3-D array of shape (.., .., 3).
+        The image in RGB CIE format, in a 3-D array of shape ``(.., .., 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3-D array of shape (.., .., 3).
+        If `rgb` is not a 3-D array of shape ``(.., .., 3)``.
 
     References
     ----------
@@ -588,17 +565,17 @@ def rgbcie2rgb(rgbcie):
     Parameters
     ----------
     rgbcie : array_like
-        The image in RGB CIE format, in a 3-D array of shape (.., .., 3).
+        The image in RGB CIE format, in a 3-D array of shape ``(.., .., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in RGB format, in a 3-D array of shape (.., .., 3).
+        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
 
     Raises
     ------
     ValueError
-        If `rgbcie` is not a 3-D array of shape (.., .., 3).
+        If `rgbcie` is not a 3-D array of shape ``(.., .., 3)``.
 
     References
     ----------
@@ -621,8 +598,8 @@ def rgb2gray(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3-D array of shape (.., .., 3),
-        or in RGBA format with shape (.., .., 4).
+        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``,
+        or in RGBA format with shape ``(.., .., 4)``.
 
     Returns
     -------
@@ -632,8 +609,8 @@ def rgb2gray(rgb):
     Raises
     ------
     ValueError
-        If `rgb2gray` is not a 3-D array of shape (.., .., 3) or
-        (.., .., 4).
+        If `rgb2gray` is not a 3-D array of shape ``(.., .., 3)`` or
+        ``(.., .., 4)``.
 
     References
     ----------
@@ -698,18 +675,18 @@ def xyz2lab(xyz):
     ----------
     xyz : array_like
         The image in XYZ format, in a 3- or 4-D array of shape
-        (.., ..,[ ..,] 3).
+        ``(.., ..,[ ..,] 3)``.
 
     Returns
     -------
     out : ndarray
         The image in CIE-LAB format, in a 3- or 4-D array of shape
-        (.., ..,[ ..,] 3).
+        ``(.., ..,[ ..,] 3)``.
 
     Raises
     ------
     ValueError
-        If `xyz` is not a 3-D array of shape (.., ..,[ ..,] 3).
+        If `xyz` is not a 3-D array of shape ``(.., ..,[ ..,] 3)``.
 
     Notes
     -----
@@ -755,21 +732,21 @@ def lab2xyz(lab):
     Parameters
     ----------
     lab : array_like
-        The image in lab format, in a 3-D array of shape (.., .., 3).
+        The image in lab format, in a 3-D array of shape ``(.., .., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in XYZ format, in a 3-D array of shape (.., .., 3).
+        The image in XYZ format, in a 3-D array of shape ``(.., .., 3)``.
 
     Raises
     ------
     ValueError
-        If `lab` is not a 3-D array of shape (.., .., 3).
+        If `lab` is not a 3-D array of shape ``(.., .., 3)``.
 
     Notes
     -----
-    Observer= 2A, Illuminant= D65
+    Observer = 2A, Illuminant = D65
     CIE XYZ tristimulus values x_ref = 95.047, y_ref = 100., z_ref = 108.883
 
     References
@@ -804,18 +781,18 @@ def rgb2lab(rgb):
     ----------
     rgb : array_like
         The image in RGB format, in a 3- or 4-D array of shape
-        (.., ..,[ ..,] 3).
+        ``(.., ..,[ ..,] 3)``.
 
     Returns
     -------
     out : ndarray
         The image in Lab format, in a 3- or 4-D array of shape
-        (.., ..,[ ..,] 3).
+        ``(.., ..,[ ..,] 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3- or 4-D array of shape (.., ..,[ ..,] 3).
+        If `rgb` is not a 3- or 4-D array of shape ``(.., ..,[ ..,] 3)``.
 
     Notes
     -----
@@ -829,18 +806,18 @@ def lab2rgb(lab):
 
     Parameters
     ----------
-    rgb : array_like
-        The image in Lab format, in a 3-D array of shape (.., .., 3).
+    lab : array_like
+        The image in Lab format, in a 3-D array of shape ``(.., .., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in RGB format, in a 3-D array of shape (.., .., 3).
+        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
 
     Raises
     ------
     ValueError
-        If `lab` is not a 3-D array of shape (.., .., 3).
+        If `lab` is not a 3-D array of shape ``(.., .., 3)``.
 
     Notes
     -----
@@ -849,23 +826,203 @@ def lab2rgb(lab):
     return xyz2rgb(lab2xyz(lab))
 
 
+def xyz2luv(xyz):
+    """XYZ to CIE-Luv color space conversion.
+
+    Parameters
+    ----------
+    xyz : (M, N, [P,] 3) array_like
+        The 3 or 4 dimensional image in XYZ format. Final dimension denotes
+        channels.
+
+    Returns
+    -------
+    out : (M, N, [P,] 3) ndarray
+        The image in CIE-Luv format. Same dimensions as input.
+
+    Raises
+    ------
+    ValueError
+        If `xyz` is not a 3-D or 4-D array of shape ``(M, N, [P,] 3)``.
+
+    Notes
+    -----
+    XYZ conversion weights use Observer = 2A. Reference whitepoint for D65
+    Illuminant, with XYZ tristimulus values of ``(95.047, 100., 108.883)``.
+
+    References
+    ----------
+    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
+    .. [2] http://en.wikipedia.org/wiki/CIELUV
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2xyz, xyz2luv
+    >>> lena = data.lena()
+    >>> lena_xyz = rgb2xyz(lena)
+    >>> lena_luv = xyz2luv(lena_xyz)
+    """
+    arr = _prepare_colorarray(xyz)
+
+    # extract channels
+    x, y, z = arr[..., 0], arr[..., 1], arr[..., 2]
+
+    eps = np.finfo(np.float).eps
+
+    # compute y_r and L
+    L = y / lab_ref_white[1]
+    mask = L > 0.008856
+    L[mask] = 116. * np.power(L[mask], 1. / 3.) - 16.
+    L[~mask] = 903.3 * L[~mask]
+
+    u0 = 4*lab_ref_white[0] / np.dot([1, 15, 3], lab_ref_white)
+    v0 = 9*lab_ref_white[1] / np.dot([1, 15, 3], lab_ref_white)
+
+    # u' and v' helper functions
+    def fu(X, Y, Z):
+        return (4.*X) / (X + 15.*Y + 3.*Z + eps)
+
+    def fv(X, Y, Z):
+        return (9.*Y) / (X + 15.*Y + 3.*Z + eps)
+
+    # compute u and v using helper functions
+    u = 13.*L * (fu(x, y, z) - u0)
+    v = 13.*L * (fv(x, y, z) - v0)
+
+    return np.concatenate([q[..., np.newaxis] for q in [L, u, v]], axis=-1)
+
+
+def luv2xyz(luv):
+    """CIE-Luv to XYZ color space conversion.
+
+    Parameters
+    ----------
+    luv : (M, N, [P,] 3) array_like
+        The 3 or 4 dimensional image in CIE-Luv format. Final dimension denotes
+        channels.
+
+    Returns
+    -------
+    out : (M, N, [P,] 3) ndarray
+        The image in XYZ format. Same dimensions as input.
+
+    Raises
+    ------
+    ValueError
+        If `luv` is not a 3-D or 4-D array of shape ``(M, N, [P,] 3)``.
+
+    Notes
+    -----
+    XYZ conversion weights use Observer = 2A. Reference whitepoint for D65
+    Illuminant, with XYZ tristimulus values of ``(95.047, 100., 108.883)``.
+
+    References
+    ----------
+    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
+    .. [2] http://en.wikipedia.org/wiki/CIELUV
+
+    """
+
+    arr = _prepare_colorarray(luv).copy()
+
+    L, u, v = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+
+    eps = np.finfo(np.float).eps
+
+    # compute y
+    y = L.copy()
+    mask = y > 7.999625
+    y[mask] = np.power((y[mask]+16.) / 116., 3.)
+    y[~mask] = y[~mask] / 903.3
+    y *= lab_ref_white[1]
+
+    # reference white x,z
+    uv_weights = [1, 15, 3]
+    u0 = 4*lab_ref_white[0] / np.dot(uv_weights, lab_ref_white)
+    v0 = 9*lab_ref_white[1] / np.dot(uv_weights, lab_ref_white)
+
+    # compute intermediate values
+    a = u0 + u / (13.*L + eps)
+    b = v0 + v / (13.*L + eps)
+    c = 3*y * (5*b-3)
+
+    # compute x and z
+    z = ((a-4)*c - 15*a*b*y) / (12*b)
+    x = -(c/b + 3.*z)
+
+    return np.concatenate([q[..., np.newaxis] for q in [x, y, z]], axis=-1)
+
+
+def rgb2luv(rgb):
+    """RGB to CIE-Luv color space conversion.
+
+    Parameters
+    ----------
+    rgb : (M, N, [P,] 3) array_like
+        The 3 or 4 dimensional image in RGB format. Final dimension denotes
+        channels.
+
+    Returns
+    -------
+    out : (M, N, [P,] 3) ndarray
+        The image in CIE Luv format. Same dimensions as input.
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not a 3-D or 4-D array of shape ``(M, N, [P,] 3)``.
+
+    Notes
+    -----
+    This function uses rgb2xyz and xyz2luv.
+    """
+    return xyz2luv(rgb2xyz(rgb))
+
+
+def luv2rgb(luv):
+    """Luv to RGB color space conversion.
+
+    Parameters
+    ----------
+    luv : (M, N, [P,] 3) array_like
+        The 3 or 4 dimensional image in CIE Luv format. Final dimension denotes
+        channels.
+
+    Returns
+    -------
+    out : (M, N, [P,] 3) ndarray
+        The image in RGB format. Same dimensions as input.
+
+    Raises
+    ------
+    ValueError
+        If `luv` is not a 3-D or 4-D array of shape ``(M, N, [P,] 3)``.
+
+    Notes
+    -----
+    This function uses luv2xyz and xyz2rgb.
+    """
+    return xyz2rgb(luv2xyz(luv))
+
+
 def rgb2hed(rgb):
     """RGB to Haematoxylin-Eosin-DAB (HED) color space conversion.
 
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3-D array of shape (.., .., 3).
+        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in HED format, in a 3-D array of shape (.., .., 3).
+        The image in HED format, in a 3-D array of shape ``(.., .., 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3-D array of shape (.., .., 3).
+        If `rgb` is not a 3-D array of shape ``(.., .., 3)``.
 
 
     References
@@ -891,17 +1048,17 @@ def hed2rgb(hed):
     Parameters
     ----------
     hed : array_like
-        The image in the HED color space, in a 3-D array of shape (.., .., 3).
+        The image in the HED color space, in a 3-D array of shape ``(.., .., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in RGB, in a 3-D array of shape (.., .., 3).
+        The image in RGB, in a 3-D array of shape ``(.., .., 3)``.
 
     Raises
     ------
     ValueError
-        If `hed` is not a 3-D array of shape (.., .., 3).
+        If `hed` is not a 3-D array of shape ``(.., .., 3)``.
 
     References
     ----------
@@ -927,19 +1084,19 @@ def separate_stains(rgb, conv_matrix):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3-D array of shape (.., .., 3).
+        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
     conv_matrix: ndarray
         The stain separation matrix as described by G. Landini [1]_.
 
     Returns
     -------
     out : ndarray
-        The image in stain color space, in a 3-D array of shape (.., .., 3).
+        The image in stain color space, in a 3-D array of shape ``(.., .., 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3-D array of shape (.., .., 3).
+        If `rgb` is not a 3-D array of shape ``(.., .., 3)``.
 
     Notes
     -----
@@ -981,19 +1138,19 @@ def combine_stains(stains, conv_matrix):
     Parameters
     ----------
     stains : array_like
-        The image in stain color space, in a 3-D array of shape (.., .., 3).
+        The image in stain color space, in a 3-D array of shape ``(.., .., 3)``.
     conv_matrix: ndarray
         The stain separation matrix as described by G. Landini [1]_.
 
     Returns
     -------
     out : ndarray
-        The image in RGB format, in a 3-D array of shape (.., .., 3).
+        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
 
     Raises
     ------
     ValueError
-        If `stains` is not a 3-D array of shape (.., .., 3).
+        If `stains` is not a 3-D array of shape ``(.., .., 3)``.
 
     Notes
     -----
@@ -1043,9 +1200,9 @@ def lab2lch(lab):
     Parameters
     ----------
     lab : array_like
-        The N-D image in CIE-LAB format. The last (`N+1`th) dimension must have
-        at least 3 elements, corresponding to the ``L``, ``a``, and ``b`` color
-        channels.  Subsequent elements are copied.
+        The N-D image in CIE-LAB format. The last (``N+1``-th) dimension must
+        have at least 3 elements, corresponding to the ``L``, ``a``, and ``b``
+        color channels.  Subsequent elements are copied.
 
     Returns
     -------
@@ -1059,7 +1216,7 @@ def lab2lch(lab):
 
     Notes
     -----
-    The Hue is expressed as an angle between (0, 2*pi)
+    The Hue is expressed as an angle between ``(0, 2*pi)``
 
     Examples
     --------
@@ -1079,7 +1236,7 @@ def lab2lch(lab):
 def _cart2polar_2pi(x, y):
     """convert cartesian coordiantes to polar (uses non-standard theta range!)
 
-    NON-STANDARD RANGE! Maps to (0, 2*pi) rather than usual (-pi, +pi)
+    NON-STANDARD RANGE! Maps to ``(0, 2*pi)`` rather than usual ``(-pi, +pi)``
     """
     r, t = np.hypot(x, y), np.arctan2(y, x)
     t += np.where(t < 0., 2 * np.pi, 0)
@@ -1094,9 +1251,9 @@ def lch2lab(lch):
     Parameters
     ----------
     lch : array_like
-        The N-D image in CIE-LCH format. The last (`N+1`th) dimension must have
-        at least 3 elements, corresponding to the ``L``, ``a``, and ``b`` color
-        channels.  Subsequent elements are copied.
+        The N-D image in CIE-LCH format. The last (``N+1``-th) dimension must
+        have at least 3 elements, corresponding to the ``L``, ``a``, and ``b``
+        color channels.  Subsequent elements are copied.
 
     Returns
     -------

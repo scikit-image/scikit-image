@@ -71,7 +71,7 @@ def relabel_sequential(label_field, offset=1):
     -------
     relabeled : numpy array of int, same shape as `label_field`
         The input label field with labels mapped to
-        {1, ..., number_of_labels}.
+        {offset, ..., number_of_labels + offset - 1}.
     forward_map : numpy array of int, shape ``(label_field.max() + 1,)``
         The map from the original label space to the returned label
         space. Can be used to re-apply the same mapping. See examples
@@ -94,7 +94,7 @@ def relabel_sequential(label_field, offset=1):
     Examples
     --------
     >>> from skimage.segmentation import relabel_sequential
-    >>> label_field = array([1, 1, 5, 5, 8, 99, 42])
+    >>> label_field = np.array([1, 1, 5, 5, 8, 99, 42])
     >>> relab, fw, inv = relabel_sequential(label_field)
     >>> relab
     array([1, 1, 2, 2, 3, 5, 4])
@@ -114,17 +114,20 @@ def relabel_sequential(label_field, offset=1):
     >>> relab
     array([5, 5, 6, 6, 7, 9, 8])
     """
+    m = label_field.max()
+    if not np.issubdtype(label_field.dtype, np.int):
+        new_type = np.min_scalar_type(int(m))
+        label_field = label_field.astype(new_type)
+        m = m.astype(new_type)  # Ensures m is an integer
     labels = np.unique(label_field)
     labels0 = labels[labels != 0]
-    m = labels.max()
-    if m == len(labels0): # nothing to do, already 1...n labels
+    if m == len(labels0):  # nothing to do, already 1...n labels
         return label_field, labels, labels
-    forward_map = np.zeros(m+1, int)
-    forward_map[labels0] = np.arange(offset, offset + len(labels0) + 1)
+    forward_map = np.zeros(m + 1, int)
+    forward_map[labels0] = np.arange(offset, offset + len(labels0))
     if not (labels == 0).any():
         labels = np.concatenate(([0], labels))
     inverse_map = np.zeros(offset - 1 + len(labels), dtype=np.intp)
     inverse_map[(offset - 1):] = labels
     relabeled = forward_map[label_field]
     return relabeled, forward_map, inverse_map
-

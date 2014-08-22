@@ -2,16 +2,20 @@ import warnings
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal as assert_close
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_raises
+
 import skimage
 from skimage import data
 from skimage import exposure
+from skimage.exposure.exposure import intensity_range
 from skimage.color import rgb2gray
 from skimage.util.dtype import dtype_range
 
 
 # Test histogram equalization
 # ===========================
+
+np.random.seed(0)
 
 # squeeze image intensities to lower image contrast
 test_img = skimage.img_as_float(data.camera())
@@ -41,8 +45,45 @@ def check_cdf_slope(cdf):
     assert 0.9 < slope < 1.1
 
 
+# Test intensity range
+# ====================
+
+
+def test_intensity_range_uint8():
+    image = np.array([0, 1], dtype=np.uint8)
+    input_and_expected = [('image', [0, 1]),
+                          ('dtype', [0, 255]),
+                          ((10, 20), [10, 20])]
+    for range_values, expected_values in input_and_expected:
+        out = intensity_range(image, range_values=range_values)
+        yield assert_array_equal, out, expected_values
+
+
+def test_intensity_range_float():
+    image = np.array([0.1, 0.2], dtype=np.float64)
+    input_and_expected = [('image', [0.1, 0.2]),
+                          ('dtype', [-1, 1]),
+                          ((0.3, 0.4), [0.3, 0.4])]
+    for range_values, expected_values in input_and_expected:
+        out = intensity_range(image, range_values=range_values)
+        yield assert_array_equal, out, expected_values
+
+
+def test_intensity_range_clipped_float():
+    image = np.array([0.1, 0.2], dtype=np.float64)
+    out = intensity_range(image, range_values='dtype', clip_negative=True)
+    assert_array_equal(out, (0, 1))
+
+
 # Test rescale intensity
 # ======================
+
+
+uint10_max = 2**10 - 1
+uint12_max = 2**12 - 1
+uint14_max = 2**14 - 1
+uint16_max = 2**16 - 1
+
 
 def test_rescale_stretch():
     image = np.array([51, 102, 153], dtype=np.uint8)
@@ -76,63 +117,103 @@ def test_rescale_out_range():
     assert_close(out, [0, 63, 127])
 
 
+def test_rescale_named_in_range():
+    image = np.array([0, uint10_max, uint10_max + 100], dtype=np.uint16)
+    out = exposure.rescale_intensity(image, in_range='uint10')
+    assert_close(out, [0, uint16_max, uint16_max])
+
+
+def test_rescale_named_out_range():
+    image = np.array([0, uint16_max], dtype=np.uint16)
+    out = exposure.rescale_intensity(image, out_range='uint10')
+    assert_close(out, [0, uint10_max])
+
+
+def test_rescale_uint12_limits():
+    image = np.array([0, uint16_max], dtype=np.uint16)
+    out = exposure.rescale_intensity(image, out_range='uint12')
+    assert_close(out, [0, uint12_max])
+
+
+def test_rescale_uint14_limits():
+    image = np.array([0, uint16_max], dtype=np.uint16)
+    out = exposure.rescale_intensity(image, out_range='uint14')
+    assert_close(out, [0, uint14_max])
+
+
 # Test adaptive histogram equalization
 # ====================================
 
 def test_adapthist_scalar():
-    '''Test a scalar uint8 image
-    '''
+    """Test a scalar uint8 image
+    """
     img = skimage.img_as_ubyte(data.moon())
     adapted = exposure.equalize_adapthist(img, clip_limit=0.02)
-    assert adapted.min() == 0
-    assert adapted.max() == (1 << 16) - 1
+    assert adapted.min() == 0.0
+    assert adapted.max() == 1.0
     assert img.shape == adapted.shape
-    full_scale = skimage.exposure.rescale_intensity(skimage.img_as_uint(img))
+    full_scale = skimage.exposure.rescale_intensity(skimage.img_as_float(img))
 
     assert_almost_equal = np.testing.assert_almost_equal
-    assert_almost_equal(peak_snr(full_scale, adapted), 101.231, 3)
+    assert_almost_equal(peak_snr(full_scale, adapted), 101.2295, 3)
     assert_almost_equal(norm_brightness_err(full_scale, adapted),
                         0.041, 3)
     return img, adapted
 
 
 def test_adapthist_grayscale():
-    '''Test a grayscale float image
-    '''
+    """Test a grayscale float image
+    """
     img = skimage.img_as_float(data.lena())
     img = rgb2gray(img)
     img = np.dstack((img, img, img))
     adapted = exposure.equalize_adapthist(img, 10, 9, clip_limit=0.01,
-                        nbins=128)
+                                          nbins=128)
     assert_almost_equal = np.testing.assert_almost_equal
     assert img.shape == adapted.shape
-    assert_almost_equal(peak_snr(img, adapted), 97.531, 3)
-    assert_almost_equal(norm_brightness_err(img, adapted), 0.0313, 3)
+    assert_almost_equal(peak_snr(img, adapted), 104.3277, 3)
+    assert_almost_equal(norm_brightness_err(img, adapted), 0.0265, 3)
     return data, adapted
 
 
 def test_adapthist_color():
-    '''Test an RGB color uint16 image
-    '''
+    """Test an RGB color uint16 image
+    """
     img = skimage.img_as_uint(data.lena())
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter('always')
         hist, bin_centers = exposure.histogram(img)
         assert len(w) > 0
     adapted = exposure.equalize_adapthist(img, clip_limit=0.01)
+
     assert_almost_equal = np.testing.assert_almost_equal
     assert adapted.min() == 0
     assert adapted.max() == 1.0
     assert img.shape == adapted.shape
     full_scale = skimage.exposure.rescale_intensity(img)
-    assert_almost_equal(peak_snr(full_scale, adapted), 102.940, 3)
-    assert_almost_equal(norm_brightness_err(full_scale, adapted),
-                        0.0110, 3)
+    assert_almost_equal(peak_snr(full_scale, adapted), 106.9, 1)
+    assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.05, 2)
     return data, adapted
 
 
+def test_adapthist_alpha():
+    """Test an RGBA color image
+    """
+    img = skimage.img_as_float(data.lena())
+    alpha = np.ones((img.shape[0], img.shape[1]), dtype=float)
+    img = np.dstack((img, alpha))
+    adapted = exposure.equalize_adapthist(img)
+    assert adapted.shape != img.shape
+    img = img[:, :, :3]
+    full_scale = skimage.exposure.rescale_intensity(img)
+    assert img.shape == adapted.shape
+    assert_almost_equal = np.testing.assert_almost_equal
+    assert_almost_equal(peak_snr(full_scale, adapted), 106.86, 2)
+    assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.0509, 3)
+
+
 def peak_snr(img1, img2):
-    '''Peak signal to noise ratio of two images
+    """Peak signal to noise ratio of two images
 
     Parameters
     ----------
@@ -143,7 +224,7 @@ def peak_snr(img1, img2):
     -------
     peak_snr : float
         Peak signal to noise ratio
-    '''
+    """
     if img1.ndim == 3:
         img1, img2 = rgb2gray(img1.copy()), rgb2gray(img2.copy())
     img1 = skimage.img_as_float(img1)
@@ -154,7 +235,7 @@ def peak_snr(img1, img2):
 
 
 def norm_brightness_err(img1, img2):
-    '''Normalized Absolute Mean Brightness Error between two images
+    """Normalized Absolute Mean Brightness Error between two images
 
     Parameters
     ----------
@@ -165,17 +246,13 @@ def norm_brightness_err(img1, img2):
     -------
     norm_brightness_error : float
         Normalized absolute mean brightness error
-    '''
+    """
     if img1.ndim == 3:
         img1, img2 = rgb2gray(img1), rgb2gray(img2)
     ambe = np.abs(img1.mean() - img2.mean())
     nbe = ambe / dtype_range[img1.dtype.type][1]
     return nbe
 
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()
 
 
 # Test Gamma Correction
@@ -228,6 +305,11 @@ def test_adjust_gamma_greater_one():
 
     result = exposure.adjust_gamma(image, 2)
     assert_array_equal(result, expected)
+
+
+def test_adjust_gamma_neggative():
+    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
+    assert_raises(ValueError, exposure.adjust_gamma, image, -1)
 
 
 # Test Logarithmic Correction
@@ -336,3 +418,13 @@ def test_adjust_inv_sigmoid_cutoff_half():
 
     result = exposure.adjust_sigmoid(image, 0.5, 10, True)
     assert_array_equal(result, expected)
+
+
+def test_negative():
+    image = np.arange(-10, 245, 4).reshape(8, 8).astype(np.double)
+    assert_raises(ValueError, exposure.adjust_gamma, image)
+
+
+if __name__ == '__main__':
+    from numpy import testing
+    testing.run_module_suite()

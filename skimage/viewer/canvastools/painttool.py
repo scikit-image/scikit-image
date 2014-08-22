@@ -1,9 +1,11 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-LABELS_CMAP = mcolors.ListedColormap(['white', 'red', 'dodgerblue', 'gold',
+try:
+    import matplotlib.pyplot as plt
+    import matplotlib.colors as mcolors
+    LABELS_CMAP = mcolors.ListedColormap(['white', 'red', 'dodgerblue', 'gold',
                                           'greenyellow', 'blueviolet'])
-
+except ImportError:
+    pass
 from skimage.viewer.canvastools.base import CanvasToolBase
 
 
@@ -50,8 +52,7 @@ class PaintTool(CanvasToolBase):
         self.alpha = alpha
         self.cmap = LABELS_CMAP
         self._overlay_plot = None
-        self._shape = overlay_shape
-        self.overlay = np.zeros(overlay_shape, dtype='uint8')
+        self.shape = overlay_shape
 
         self._cursor = plt.Rectangle((0, 0), 0, 0, **props)
         self._cursor.set_visible(False)
@@ -103,11 +104,24 @@ class PaintTool(CanvasToolBase):
             self._overlay_plot = None
         elif self._overlay_plot is None:
             props = dict(cmap=self.cmap, alpha=self.alpha,
-                         norm=mcolors.no_norm(), animated=True)
+                         norm=mcolors.NoNorm(), animated=True)
             self._overlay_plot = self.ax.imshow(image, **props)
         else:
             self._overlay_plot.set_data(image)
         self.redraw()
+
+    @property
+    def shape(self):
+        return self._shape
+
+    @shape.setter
+    def shape(self, shape):
+        self._shape = shape
+        if not self._overlay_plot is None:
+            self._overlay_plot.set_extent((-0.5, shape[1] + 0.5,
+                                           shape[0] + 0.5, -0.5))
+            self.radius = self._radius
+        self.overlay = np.zeros(shape, dtype='uint8')
 
     def _on_key_press(self, event):
         if event.key == 'enter':
@@ -158,8 +172,8 @@ class PaintTool(CanvasToolBase):
 class CenteredWindow(object):
     """Window that create slices numpy arrays over 2D windows.
 
-    Example
-    -------
+    Examples
+    --------
     >>> a = np.arange(16).reshape(4, 4)
     >>> w = CenteredWindow(1, a.shape)
     >>> a[w.at(1, 1)]
@@ -186,7 +200,7 @@ class CenteredWindow(object):
         return [slice(ymin, ymax), slice(xmin, xmax)]
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     np.testing.rundocs()
     from skimage import data
 

@@ -116,7 +116,10 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     >>> # to the background
     >>> from scipy import ndimage
     >>> distance = ndimage.distance_transform_edt(image)
-    >>> local_maxi = is_local_maximum(distance, image, np.ones((3, 3)))
+    >>> from skimage.feature import peak_local_max
+    >>> local_maxi = peak_local_max(distance, labels=image,
+    ...                             footprint=np.ones((3, 3)),
+    ...                             indices=False)
     >>> markers = ndimage.label(local_maxi)[0]
     >>> labels = watershed(-distance, markers, mask=image)
 
@@ -200,7 +203,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
             stride = np.dot(image_stride, np.array(offs))
             offs.insert(0, stride)
             c.append(offs)
-    c = np.array(c, np.int32)
+    c = np.array(c, dtype=np.int32)
 
     pq, age = __heapify_markers(c_markers, c_image)
     pq = np.ascontiguousarray(pq, dtype=np.int32)
@@ -208,7 +211,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
         # If nothing is labeled, the output is empty and we don't have to
         # do anything
         c_output = c_output.flatten()
-        if c_mask == None:
+        if c_mask is None:
             c_mask = np.ones(c_image.shape, np.int8).flatten()
         else:
             c_mask = c_mask.astype(np.int8).flatten()
@@ -222,79 +225,6 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
         return c_output.astype(markers.dtype)
     except:
         return c_output
-
-
-@deprecated('feature.peak_local_max')
-def is_local_maximum(image, labels=None, footprint=None):
-    """
-    Return a boolean array of points that are local maxima
-
-    Parameters
-    ----------
-    image: ndarray (2-D, 3-D, ...)
-        intensity image
-    labels: ndarray, optional
-        find maxima only within labels. Zero is reserved for background.
-    footprint: ndarray of bools, optional
-        binary mask indicating the neighborhood to be examined
-        `footprint` must be a matrix with odd dimensions, the center is taken
-        to be the point in question.
-
-    Returns
-    -------
-    result: ndarray of bools
-        mask that is True for pixels that are local maxima of `image`
-
-    See also
-    --------
-    skimage.feature.peak_local_max: Unified peak finding backend.
-        The more capable backend for finding local maxima.
-
-    Notes
-    -----
-    This function is now a wrapper for skimage.feature.peak_local_max() and is
-    retained only for convenience and backward compatibility.
-
-    Examples
-    --------
-    >>> image = np.zeros((4, 4))
-    >>> image[1, 2] = 2
-    >>> image[3, 3] = 1
-    >>> image
-    array([[ 0.,  0.,  0.,  0.],
-           [ 0.,  0.,  2.,  0.],
-           [ 0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  1.]])
-    >>> is_local_maximum(image)
-    array([[ True, False, False, False],
-           [ True, False,  True, False],
-           [ True, False, False, False],
-           [ True,  True, False,  True]], dtype=bool)
-    >>> image = np.arange(16).reshape((4, 4))
-    >>> labels = np.array([[1, 2], [3, 4]])
-    >>> labels = np.repeat(np.repeat(labels, 2, axis=0), 2, axis=1)
-    >>> labels
-    array([[1, 1, 2, 2],
-           [1, 1, 2, 2],
-           [3, 3, 4, 4],
-           [3, 3, 4, 4]])
-    >>> image
-    array([[ 0,  1,  2,  3],
-           [ 4,  5,  6,  7],
-           [ 8,  9, 10, 11],
-           [12, 13, 14, 15]])
-    >>> is_local_maximum(image, labels=labels)
-    array([[False, False, False, False],
-           [False,  True, False,  True],
-           [False, False, False, False],
-           [False,  True, False,  True]], dtype=bool)
-
-    """
-    # call import here to prevent circular imports
-    from ..feature import peak_local_max
-    return peak_local_max(image, labels=labels, min_distance=1,
-                          threshold_rel=0, footprint=footprint,
-                          indices=False, exclude_border=False)
 
 
 # ---------------------- deprecated ------------------------------

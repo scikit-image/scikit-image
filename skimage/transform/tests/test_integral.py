@@ -3,14 +3,15 @@ from numpy.testing import assert_equal
 
 from skimage.transform import integral_image, integrate
 
-x = (np.random.random((50, 50)) * 255).astype(np.uint8)
+np.random.seed(0)
+x = (np.random.rand(50, 50) * 255).astype(np.uint8)
 s = integral_image(x)
 
 
 def test_validity():
     y = np.arange(12).reshape((4, 3))
 
-    y = (np.random.random((50, 50)) * 255).astype(np.uint8)
+    y = (np.random.rand(50, 50) * 255).astype(np.uint8)
     assert_equal(integral_image(y)[-1, -1],
                  y.sum())
 

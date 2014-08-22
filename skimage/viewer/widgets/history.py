@@ -81,8 +81,9 @@ class SaveButtons(BaseWidget):
             NOTE: The io stack only works in interactive sessions.''')
         notify(msg)
 
-    def save_to_file(self):
-        filename = dialogs.save_file_dialog()
+    def save_to_file(self, filename=None):
+        if filename is None:
+            filename = dialogs.save_file_dialog()
         if filename is None:
             return
         image = self.plugin.filtered_image

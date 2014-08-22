@@ -1,5 +1,6 @@
 import numpy as np
 from skimage.segmentation import random_walker
+from skimage.transform import resize
 
 
 def make_2d_syntheticdata(lx, ly=None):
@@ -7,16 +8,16 @@ def make_2d_syntheticdata(lx, ly=None):
         ly = lx
     np.random.seed(1234)
     data = np.zeros((lx, ly)) + 0.1 * np.random.randn(lx, ly)
-    small_l = int(lx / 5)
-    data[lx / 2 - small_l:lx / 2 + small_l,
-         ly / 2 - small_l:ly / 2 + small_l] = 1
-    data[lx / 2 - small_l + 1:lx / 2 + small_l - 1,
-         ly / 2 - small_l + 1:ly / 2 + small_l - 1] = \
-                        0.1 * np.random.randn(2 * small_l - 2, 2 * small_l - 2)
-    data[lx / 2 - small_l, ly / 2 - small_l / 8:ly / 2 + small_l / 8] = 0
+    small_l = int(lx // 5)
+    data[lx // 2 - small_l:lx // 2 + small_l,
+         ly // 2 - small_l:ly // 2 + small_l] = 1
+    data[lx // 2 - small_l + 1:lx // 2 + small_l - 1,
+         ly // 2 - small_l + 1:ly // 2 + small_l - 1] = (
+            0.1 * np.random.randn(2 * small_l - 2, 2 * small_l - 2))
+    data[lx // 2 - small_l, ly // 2 - small_l // 8:ly // 2 + small_l // 8] = 0
     seeds = np.zeros_like(data)
-    seeds[lx / 5, ly / 5] = 1
-    seeds[lx / 2 + small_l / 4, ly / 2 - small_l / 4] = 2
+    seeds[lx // 5, ly // 5] = 1
+    seeds[lx // 2 + small_l // 4, ly // 2 - small_l // 4] = 2
     return data, seeds
 
 
@@ -27,21 +28,23 @@ def make_3d_syntheticdata(lx, ly=None, lz=None):
         lz = lx
     np.random.seed(1234)
     data = np.zeros((lx, ly, lz)) + 0.1 * np.random.randn(lx, ly, lz)
-    small_l = int(lx / 5)
-    data[lx / 2 - small_l:lx / 2 + small_l,
-         ly / 2 - small_l:ly / 2 + small_l,
-         lz / 2 - small_l:lz / 2 + small_l] = 1
-    data[lx / 2 - small_l + 1:lx / 2 + small_l - 1,
-         ly / 2 - small_l + 1:ly / 2 + small_l - 1,
-         lz / 2 - small_l + 1:lz / 2 + small_l - 1] = 0
+    small_l = int(lx // 5)
+    data[lx // 2 - small_l:lx // 2 + small_l,
+         ly // 2 - small_l:ly // 2 + small_l,
+         lz // 2 - small_l:lz // 2 + small_l] = 1
+    data[lx // 2 - small_l + 1:lx // 2 + small_l - 1,
+         ly // 2 - small_l + 1:ly // 2 + small_l - 1,
+         lz // 2 - small_l + 1:lz // 2 + small_l - 1] = 0
     # make a hole
-    hole_size = np.max([1, small_l / 8])
-    data[lx / 2 - small_l,
-         ly / 2 - hole_size:ly / 2 + hole_size,
-         lz / 2 - hole_size:lz / 2 + hole_size] = 0
+    hole_size = np.max([1, small_l // 8])
+    data[lx // 2 - small_l,
+         ly // 2 - hole_size:ly // 2 + hole_size,
+         lz // 2 - hole_size:lz // 2 + hole_size] = 0
     seeds = np.zeros_like(data)
-    seeds[lx / 5, ly / 5, lz / 5] = 1
-    seeds[lx / 2 + small_l / 4, ly / 2 - small_l / 4, lz / 2 - small_l / 4] = 2
+    seeds[lx // 5, ly // 5, lz // 5] = 1
+    seeds[lx // 2 + small_l // 4,
+          ly // 2 - small_l // 4,
+          lz // 2 - small_l // 4] = 2
     return data, seeds
 
 
@@ -101,7 +104,7 @@ def test_types():
     lx = 70
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
-    data = 255 * (data - data.min()) / (data.max() - data.min())
+    data = 255 * (data - data.min()) // (data.max() - data.min())
     data = data.astype(np.uint8)
     labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
@@ -181,6 +184,127 @@ def test_multispectral_3d():
     return data, multi_labels, single_labels, labels
 
 
+def test_spacing_0():
+    n = 30
+    lx, ly, lz = n, n, n
+    data, _ = make_3d_syntheticdata(lx, ly, lz)
+
+    # Rescale `data` along Z axis
+    data_aniso = np.zeros((n, n, n // 2))
+    for i, yz in enumerate(data):
+        data_aniso[i, :, :] = resize(yz, (n, n // 2))
+
+    # Generate new labels
+    small_l = int(lx // 5)
+    labels_aniso = np.zeros_like(data_aniso)
+    labels_aniso[lx // 5, ly // 5, lz // 5] = 1
+    labels_aniso[lx // 2 + small_l // 4,
+                 ly // 2 - small_l // 4,
+                 lz // 4 - small_l // 8] = 2
+
+    # Test with `spacing` kwarg
+    labels_aniso = random_walker(data_aniso, labels_aniso, mode='cg',
+                                 spacing=(1., 1., 0.5))
+
+    assert (labels_aniso[13:17, 13:17, 7:9] == 2).all()
+
+
+def test_spacing_1():
+    n = 30
+    lx, ly, lz = n, n, n
+    data, _ = make_3d_syntheticdata(lx, ly, lz)
+
+    # Rescale `data` along Y axis
+    # `resize` is not yet 3D capable, so this must be done by looping in 2D.
+    data_aniso = np.zeros((n, n * 2, n))
+    for i, yz in enumerate(data):
+        data_aniso[i, :, :] = resize(yz, (n * 2, n))
+
+    # Generate new labels
+    small_l = int(lx // 5)
+    labels_aniso = np.zeros_like(data_aniso)
+    labels_aniso[lx // 5, ly // 5, lz // 5] = 1
+    labels_aniso[lx // 2 + small_l // 4,
+                 ly - small_l // 2,
+                 lz // 2 - small_l // 4] = 2
+
+    # Test with `spacing` kwarg
+    # First, anisotropic along Y
+    labels_aniso = random_walker(data_aniso, labels_aniso, mode='cg',
+                                 spacing=(1., 2., 1.))
+    assert (labels_aniso[13:17, 26:34, 13:17] == 2).all()
+
+    # Rescale `data` along X axis
+    # `resize` is not yet 3D capable, so this must be done by looping in 2D.
+    data_aniso = np.zeros((n, n * 2, n))
+    for i in range(data.shape[1]):
+        data_aniso[i, :, :] = resize(data[:, 1, :], (n * 2, n))
+
+    # Generate new labels
+    small_l = int(lx // 5)
+    labels_aniso2 = np.zeros_like(data_aniso)
+    labels_aniso2[lx // 5, ly // 5, lz // 5] = 1
+    labels_aniso2[lx - small_l // 2,
+                  ly // 2 + small_l // 4,
+                  lz // 2 - small_l // 4] = 2
+
+    # Anisotropic along X
+    labels_aniso2 = random_walker(data_aniso,
+                                  labels_aniso2,
+                                  mode='cg', spacing=(2., 1., 1.))
+    assert (labels_aniso2[26:34, 13:17, 13:17] == 2).all()
+
+
+def test_trivial_cases():
+    # When all voxels are labeled
+    img = np.ones((10, 10))
+    labels = np.ones((10, 10))
+    pass_through = random_walker(img, labels)
+    np.testing.assert_array_equal(pass_through, labels)
+
+    # When all voxels are labeled AND return_full_prob is True
+    labels[:, :5] = 3
+    expected = np.concatenate(((labels == 1)[..., np.newaxis],
+                               (labels == 3)[..., np.newaxis]), axis=2)
+    test = random_walker(img, labels, return_full_prob=True)
+    np.testing.assert_array_equal(test, expected)
+
+
+def test_length2_spacing():
+    # If this passes without raising an exception (warnings OK), the new
+    #   spacing code is working properly.
+    np.random.seed(42)
+    img = np.ones((10, 10)) + 0.2 * np.random.normal(size=(10, 10))
+    labels = np.zeros((10, 10), dtype=np.uint8)
+    labels[2, 4] = 1
+    labels[6, 8] = 4
+    random_walker(img, labels, spacing=(1., 2.))
+
+
+def test_bad_inputs():
+    # Too few dimensions
+    img = np.ones(10)
+    labels = np.arange(10)
+    np.testing.assert_raises(ValueError, random_walker, img, labels)
+    np.testing.assert_raises(ValueError,
+                             random_walker, img, labels, multichannel=True)
+
+    # Too many dimensions
+    np.random.seed(42)
+    img = np.random.normal(size=(3, 3, 3, 3, 3))
+    labels = np.arange(3 ** 5).reshape(img.shape)
+    np.testing.assert_raises(ValueError, random_walker, img, labels)
+    np.testing.assert_raises(ValueError,
+                             random_walker, img, labels, multichannel=True)
+
+    # Spacing incorrect length
+    img = np.random.normal(size=(10, 10))
+    labels = np.zeros((10, 10))
+    labels[2, 4] = 2
+    labels[6, 8] = 5
+    np.testing.assert_raises(ValueError,
+                             random_walker, img, labels, spacing=(1,))
+
+
 if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()
+    np.testing.run_module_suite()

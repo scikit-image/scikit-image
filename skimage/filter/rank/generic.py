@@ -77,16 +77,19 @@ def _apply(func, image, selem, out, mask, shift_x, shift_y, out_dtype=None):
 
 
 def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Autolevel image using local histogram.
+    """Auto-level image using local histogram.
+
+    This filter locally stretches the histogram of greyvalues to cover the
+    entire range of values from "white" to "black".
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -97,7 +100,7 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
 
     Examples
@@ -105,10 +108,8 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     >>> from skimage import data
     >>> from skimage.morphology import disk
     >>> from skimage.filter.rank import autolevel
-    >>> # Load test image
-    >>> ima = data.camera()
-    >>> # Stretch image contrast locally
-    >>> auto = autolevel(ima, disk(20))
+    >>> img = data.camera()
+    >>> auto = autolevel(img, disk(5))
 
     """
 
@@ -117,17 +118,20 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 
 def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Returns greyscale local bottomhat of an image.
+    """Local bottom-hat of an image.
+
+    This filter computes the morphological closing of the image and then
+    subtracts the result from the original image.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
-    mask : ndarray
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
+    mask : 2-D array
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -137,8 +141,16 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    bottomhat : ndarray (same dtype as input image)
-        The result of the local bottomhat.
+    out : 2-D array (same dtype as input image)
+        Output image.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.morphology import disk
+    >>> from skimage.filter.rank import bottomhat
+    >>> img = data.camera()
+    >>> out = bottomhat(img, disk(5))
 
     """
 
@@ -151,12 +163,12 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -167,7 +179,7 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
 
     Examples
@@ -175,10 +187,8 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     >>> from skimage import data
     >>> from skimage.morphology import disk
     >>> from skimage.filter.rank import equalize
-    >>> # Load test image
-    >>> ima = data.camera()
-    >>> # Local equalization
-    >>> equ = equalize(ima, disk(20))
+    >>> img = data.camera()
+    >>> equ = equalize(img, disk(5))
 
     """
 
@@ -187,18 +197,16 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 
 def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return greyscale local gradient of an image (i.e. local maximum - local
-    minimum).
-
+    """Return local gradient of an image (i.e. local maximum - local minimum).
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -209,8 +217,16 @@ def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.morphology import disk
+    >>> from skimage.filter.rank import gradient
+    >>> img = data.camera()
+    >>> out = gradient(img, disk(5))
 
     """
 
@@ -219,17 +235,16 @@ def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 
 def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return greyscale local maximum of an image.
-
+    """Return local maximum of an image.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -240,17 +255,25 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
 
     See also
     --------
     skimage.morphology.dilation
 
-    Note
-    ----
-    * the lower algorithm complexity makes the rank.maximum() more efficient
-      for larger images and structuring elements
+    Notes
+    -----
+    The lower algorithm complexity makes the `skimage.filter.rank.maximum`
+    more efficient for larger images and structuring elements.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.morphology import disk
+    >>> from skimage.filter.rank import maximum
+    >>> img = data.camera()
+    >>> out = maximum(img, disk(5))
 
     """
 
@@ -259,16 +282,16 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 
 def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return greyscale local mean of an image.
+    """Return local mean of an image.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -279,7 +302,7 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
 
     Examples
@@ -287,10 +310,8 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     >>> from skimage import data
     >>> from skimage.morphology import disk
     >>> from skimage.filter.rank import mean
-    >>> # Load test image
-    >>> ima = data.camera()
-    >>> # Local mean
-    >>> avg = mean(ima, disk(20))
+    >>> img = data.camera()
+    >>> avg = mean(img, disk(5))
 
     """
 
@@ -304,12 +325,12 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -320,8 +341,16 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.morphology import disk
+    >>> from skimage.filter.rank import subtract_mean
+    >>> img = data.camera()
+    >>> out = subtract_mean(img, disk(5))
 
     """
 
@@ -330,16 +359,16 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
 
 
 def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return greyscale local median of an image.
+    """Return local median of an image.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -350,7 +379,7 @@ def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
 
     Examples
@@ -358,10 +387,8 @@ def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     >>> from skimage import data
     >>> from skimage.morphology import disk
     >>> from skimage.filter.rank import median
-    >>> # Load test image
-    >>> ima = data.camera()
-    >>> # Local mean
-    >>> avg = median(ima, disk(20))
+    >>> img = data.camera()
+    >>> med = median(img, disk(5))
 
     """
 
@@ -370,16 +397,16 @@ def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 
 def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return greyscale local minimum of an image.
+    """Return local minimum of an image.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -390,17 +417,25 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
 
     See also
     --------
     skimage.morphology.erosion
 
-    Note
-    ----
-    * the lower algorithm complexity makes the rank.minimum() more efficient
-      for larger images and structuring elements
+    Notes
+    -----
+    The lower algorithm complexity makes the `skimage.filter.rank.minimum` more
+    efficient for larger images and structuring elements.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.morphology import disk
+    >>> from skimage.filter.rank import minimum
+    >>> img = data.camera()
+    >>> out = minimum(img, disk(5))
 
     """
 
@@ -409,16 +444,18 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 
 def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return greyscale local mode of an image.
+    """Return local mode of an image.
+
+    The mode is the value that appears most often in the local histogram.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -429,8 +466,16 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.morphology import disk
+    >>> from skimage.filter.rank import modal
+    >>> img = data.camera()
+    >>> out = modal(img, disk(5))
 
     """
 
@@ -440,18 +485,20 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
                      shift_y=False):
-    """Enhance an image replacing each pixel by the local maximum if pixel
-    greylevel is closest to maximimum than local minimum OR local minimum
-    otherwise.
+    """Enhance contrast of an image.
+
+    This replaces each pixel by the local maximum if the pixel greyvalue is
+    closer to the local maximum than the local minimum. Otherwise it is
+    replaced by the local minimum.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -462,7 +509,7 @@ def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
         Output image.
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         The result of the local enhance_contrast.
 
     Examples
@@ -470,10 +517,8 @@ def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
     >>> from skimage import data
     >>> from skimage.morphology import disk
     >>> from skimage.filter.rank import enhance_contrast
-    >>> # Load test image
-    >>> ima = data.camera()
-    >>> # Local mean
-    >>> avg = enhance_contrast(ima, disk(20))
+    >>> img = data.camera()
+    >>> out = enhance_contrast(img, disk(5))
 
     """
 
@@ -482,17 +527,19 @@ def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
 
 
 def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return the number (population) of pixels actually inside the
-    neighborhood.
+    """Return the local number (population) of pixels.
+
+    The number of pixels is defined as the number of pixels which are included
+    in the structuring element and the mask.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -503,20 +550,19 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
 
     Examples
     --------
-    >>> # Local mean
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
-    >>> ima = 255 * np.array([[0, 0, 0, 0, 0],
+    >>> img = 255 * np.array([[0, 0, 0, 0, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.pop(ima, square(3))
+    >>> rank.pop(img, square(3))
     array([[4, 6, 6, 6, 4],
            [6, 9, 9, 9, 6],
            [6, 9, 9, 9, 6],
@@ -529,17 +575,20 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                   mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
-def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return greyscale local threshold of an image.
+def sum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+    """Return the local sum of pixels.
+
+    Note that the sum may overflow depending on the data type of the input
+    array.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -550,20 +599,68 @@ def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
 
     Examples
     --------
-    >>> # Local threshold
+    >>> from skimage.morphology import square
+    >>> import skimage.filter.rank as rank
+    >>> img = np.array([[0, 0, 0, 0, 0],
+    ...                 [0, 1, 1, 1, 0],
+    ...                 [0, 1, 1, 1, 0],
+    ...                 [0, 1, 1, 1, 0],
+    ...                 [0, 0, 0, 0, 0]], dtype=np.uint8)
+    >>> rank.sum(img, square(3))
+    array([[1, 2, 3, 2, 1],
+           [2, 4, 6, 4, 2],
+           [3, 6, 9, 6, 3],
+           [2, 4, 6, 4, 2],
+           [1, 2, 3, 2, 1]], dtype=uint8)
+
+    """
+
+    return _apply(generic_cy._sum, image, selem, out=out,
+                  mask=mask, shift_x=shift_x, shift_y=shift_y)
+
+
+def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+    """Local threshold of an image.
+
+    The resulting binary mask is True if the greyvalue of the center pixel is
+    greater than the local mean.
+
+    Parameters
+    ----------
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
+    mask : ndarray
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood. If None, the complete image is used (default).
+    shift_x, shift_y : int
+        Offset added to the structuring element center point. Shift is bounded
+        to the structuring element sizes (center must be inside the given
+        structuring element).
+
+    Returns
+    -------
+    out : 2-D array (same dtype as input image)
+        Output image.
+
+    Examples
+    --------
     >>> from skimage.morphology import square
     >>> from skimage.filter.rank import threshold
-    >>> ima = 255 * np.array([[0, 0, 0, 0, 0],
+    >>> img = 255 * np.array([[0, 0, 0, 0, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> threshold(ima, square(3))
+    >>> threshold(img, square(3))
     array([[0, 0, 0, 0, 0],
            [0, 1, 1, 1, 0],
            [0, 1, 0, 1, 0],
@@ -577,16 +674,19 @@ def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 
 def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return greyscale local tophat of an image.
+    """Local top-hat of an image.
+
+    This filter computes the morphological opening of the image and then
+    subtracts the result from the original image.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -597,8 +697,16 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.morphology import disk
+    >>> from skimage.filter.rank import tophat
+    >>> img = data.camera()
+    >>> out = tophat(img, disk(5))
 
     """
 
@@ -608,16 +716,16 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 def noise_filter(image, selem, out=None, mask=None, shift_x=False,
                  shift_y=False):
-    """Returns the noise feature as described in [Hashimoto12]_
+    """Noise feature as described in [Hashimoto12]_.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -633,8 +741,16 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.morphology import disk
+    >>> from skimage.filter.rank import noise_filter
+    >>> img = data.camera()
+    >>> out = noise_filter(img, disk(5))
 
     """
 
@@ -650,18 +766,19 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
 
 
 def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Returns the entropy [1]_ computed locally. Entropy is computed
-    using base 2 logarithm i.e. the filter returns the minimum number of
-    bits needed to encode local greylevel distribution.
+    """Local entropy [1]_.
+
+    The entropy is computed using base 2 logarithm i.e. the filter returns the
+    minimum number of bits needed to encode the local greylevel distribution.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -677,16 +794,15 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Entropy_(information_theory)>
+    .. [1] http://en.wikipedia.org/wiki/Entropy_(information_theory)
 
     Examples
     --------
-    >>> # Local entropy
     >>> from skimage import data
     >>> from skimage.filter.rank import entropy
     >>> from skimage.morphology import disk
-    >>> a8 = data.camera()
-    >>> ent8 = entropy(a8, disk(5))
+    >>> img = data.camera()
+    >>> ent = entropy(img, disk(5))
 
     """
 
@@ -696,13 +812,13 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 
 def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Returns the Otsu's threshold value for each pixel.
+    """Local Otsu's threshold value for each pixel.
 
     Parameters
     ----------
     image : ndarray
         Image array (uint8 array).
-    selem : ndarray
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
         If None, a new array will be allocated.
@@ -716,7 +832,7 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
 
     References
@@ -725,14 +841,12 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Examples
     --------
-    >>> # Local entropy
     >>> from skimage import data
     >>> from skimage.filter.rank import otsu
     >>> from skimage.morphology import disk
-    >>> # defining a 8-bit test images
-    >>> a8 = data.camera()
-    >>> loc_otsu = otsu(a8, disk(5))
-    >>> thresh_image = a8 >= loc_otsu
+    >>> img = data.camera()
+    >>> local_otsu = otsu(img, disk(5))
+    >>> thresh_image = img >= local_otsu
 
     """
 

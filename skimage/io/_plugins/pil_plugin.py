@@ -6,17 +6,41 @@ try:
     from PIL import Image
 except ImportError:
     raise ImportError("The Python Image Library could not be found. "
-                      "Please refer to http://pypi.python.org/pypi/PIL/ "
+                      "Please refer to "
+                      "https://pypi.python.org/pypi/Pillow/ (or "
+                      "http://pypi.python.org/pypi/PIL/) "
                       "for further instructions.")
 
 from skimage.util import img_as_ubyte
+
+from six import string_types
 
 
 def imread(fname, dtype=None):
     """Load an image from file.
 
+    Parameters
+    ----------
+    fname : str
+       File name.
+    dtype : numpy dtype object or string specifier
+       Specifies data type of array elements.
+
+
     """
     im = Image.open(fname)
+    return pil_to_ndarray(im, dtype)
+
+
+def pil_to_ndarray(im, dtype=None):
+    """Import a PIL Image object to an ndarray, in memory.
+
+    Parameters
+    ----------
+    Refer to ``imread``.
+
+    """
+    fp = im.fp if hasattr(im, 'fp') else None
     if im.mode == 'P':
         if _palette_is_grayscale(im):
             im = im.convert('L')
@@ -31,8 +55,10 @@ def imread(fname, dtype=None):
         im.shape = shape[::-1]
     elif 'A' in im.mode:
         im = im.convert('RGBA')
-
-    return np.array(im, dtype=dtype)
+    im = np.array(im, dtype=dtype)
+    if fp is not None:
+        fp.close()
+    return im
 
 
 def _palette_is_grayscale(pil_image):
@@ -59,24 +85,12 @@ def _palette_is_grayscale(pil_image):
     return np.allclose(np.diff(valid_palette), 0)
 
 
-def imsave(fname, arr, format_str=None):
-    """Save an image to disk.
+def ndarray_to_pil(arr, format_str=None):
+    """Export an ndarray to a PIL object.
 
     Parameters
     ----------
-    fname : str or file-like object
-        Name of destination file.
-    arr : ndarray of uint8 or float
-        Array (image) to save.  Arrays of data-type uint8 should have
-        values in [0, 255], whereas floating-point arrays must be
-        in [0, 1].
-    format_str: str
-        Format to save as, this is defaulted to PNG if using a file-like
-        object; this will be derived from the extension if fname is a string
-
-    Notes
-    -----
-    Currently, only 8-bit precision is supported.
+    Refer to ``imsave``.
 
     """
     arr = np.asarray(arr).squeeze()
@@ -103,11 +117,41 @@ def imsave(fname, arr, format_str=None):
         # Force all integers to bytes
         arr = arr.astype(np.uint8)
 
+    try:
+        img = Image.frombytes(mode, (arr.shape[1], arr.shape[0]),
+                              arr.tostring())
+    except AttributeError:
+        img = Image.fromstring(mode, (arr.shape[1], arr.shape[0]),
+                               arr.tostring())
+
+    return img
+
+
+def imsave(fname, arr, format_str=None):
+    """Save an image to disk.
+
+    Parameters
+    ----------
+    fname : str or file-like object
+        Name of destination file.
+    arr : ndarray of uint8 or float
+        Array (image) to save.  Arrays of data-type uint8 should have
+        values in [0, 255], whereas floating-point arrays must be
+        in [0, 1].
+    format_str: str
+        Format to save as, this is defaulted to PNG if using a file-like
+        object; this will be derived from the extension if fname is a string
+
+    Notes
+    -----
+    Currently, only 8-bit precision is supported.
+
+    """
     # default to PNG if file-like object
-    if not isinstance(fname, basestring) and format_str is None:
+    if not isinstance(fname, string_types) and format_str is None:
         format_str = "PNG"
 
-    img = Image.fromstring(mode, (arr.shape[1], arr.shape[0]), arr.tostring())
+    img = ndarray_to_pil(arr, format_str=None)
     img.save(fname, format=format_str)
 
 

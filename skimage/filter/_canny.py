@@ -112,7 +112,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None):
     >>> # Generate noisy image of a square
     >>> im = np.zeros((256, 256))
     >>> im[64:-64, 64:-64] = 1
-    >>> im += 0.2 * np.random.random(im.shape)
+    >>> im += 0.2 * np.random.rand(*im.shape)
     >>> # First trial with the Canny filter, with the default smoothing
     >>> edges1 = filter.canny(im)
     >>> # Increase the smoothing for better results

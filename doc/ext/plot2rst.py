@@ -80,6 +80,10 @@ from skimage import io
 from skimage import transform
 from skimage.util.dtype import dtype_range
 
+from notebook import Notebook
+
+from docutils.core import publish_parts
+
 
 LITERALINCLUDE = """
 .. literalinclude:: {src_name}
@@ -90,6 +94,13 @@ LITERALINCLUDE = """
 CODE_LINK = """
 
 **Python source code:** :download:`download <{0}>`
+(generated using ``skimage`` |version|)
+
+"""
+
+NOTEBOOK_LINK = """
+
+**IPython Notebook:** :download:`download <{0}>`
 (generated using ``skimage`` |version|)
 
 """
@@ -305,16 +316,20 @@ def write_example(src_name, src_dir, rst_dir, cfg):
 
     image_dir = rst_dir.pjoin('images')
     thumb_dir = image_dir.pjoin('thumb')
+    notebook_dir = rst_dir.pjoin('notebook')
     image_dir.makedirs()
     thumb_dir.makedirs()
+    notebook_dir.makedirs()
 
     base_image_name = os.path.splitext(src_name)[0]
     image_path = image_dir.pjoin(base_image_name + '_{0}.png')
 
     basename, py_ext = os.path.splitext(src_name)
     rst_path = rst_dir.pjoin(basename + cfg.source_suffix)
+    notebook_path = notebook_dir.pjoin(basename + '.ipynb')
 
-    if _plots_are_current(src_path, image_path) and rst_path.exists:
+    if _plots_are_current(src_path, image_path) and rst_path.exists and \
+        notebook_path.exists:
         return
 
     blocks = split_code_and_text_blocks(example_file)
@@ -341,8 +356,11 @@ def write_example(src_name, src_dir, rst_dir, cfg):
         example_rst += LITERALINCLUDE.format(**code_info)
 
     example_rst += CODE_LINK.format(src_name)
+    ipnotebook_name = src_name.replace('.py', '.ipynb')
+    ipnotebook_name = './notebook/' + ipnotebook_name
+    example_rst += NOTEBOOK_LINK.format(ipnotebook_name)
 
-    f = open(rst_path,'w')
+    f = open(rst_path, 'w')
     f.write(example_rst)
     f.flush()
 
@@ -358,6 +376,24 @@ def write_example(src_name, src_dir, rst_dir, cfg):
             print("Specify 'plot2rst_default_thumb' in Sphinx config file.")
         else:
             shutil.copy(cfg.plot2rst_default_thumb, thumb_path)
+
+    # Export example to IPython notebook
+    nb = Notebook()
+
+    for (cell_type, _, content) in blocks:
+        content = content.rstrip('\n')
+
+        if cell_type == 'code':
+            nb.add_cell(content, cell_type='code')
+        else:
+            content = content.replace('"""', '')
+            content = '\n'.join([line for line in content.split('\n') if
+                                 not line.startswith('.. image')])
+            html = publish_parts(content, writer_name='html')['html_body']
+            nb.add_cell(html, cell_type='markdown')
+
+    with open(notebook_path, 'w') as f:
+        f.write(nb.json())
 
 
 def save_thumbnail(image, thumb_path, shape):

@@ -17,11 +17,16 @@ that fall within the 2nd and 98th percentiles [2]_.
 .. [2] http://homepages.inf.ed.ac.uk/rbf/HIPR2/stretch.htm
 
 """
+
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
 from skimage import data, img_as_float
 from skimage import exposure
+
+
+matplotlib.rcParams['font.size'] = 8
 
 
 def plot_img_and_hist(img, axes, bins=256):
@@ -55,8 +60,7 @@ def plot_img_and_hist(img, axes, bins=256):
 img = data.moon()
 
 # Contrast stretching
-p2 = np.percentile(img, 2)
-p98 = np.percentile(img, 98)
+p2, p98 = np.percentile(img, (2, 98))
 img_rescale = exposure.rescale_intensity(img, in_range=(p2, p98))
 
 # Equalization
@@ -66,7 +70,7 @@ img_eq = exposure.equalize_hist(img)
 img_adapteq = exposure.equalize_adapthist(img, clip_limit=0.03)
 
 # Display results
-f, axes = plt.subplots(2, 4, figsize=(8, 4))
+fig, axes = plt.subplots(nrows=2, ncols=4, figsize=(8, 5))
 
 ax_img, ax_hist, ax_cdf = plot_img_and_hist(img, axes[:, 0])
 ax_img.set_title('Low contrast image')
@@ -88,5 +92,5 @@ ax_cdf.set_ylabel('Fraction of total intensity')
 ax_cdf.set_yticks(np.linspace(0, 1, 5))
 
 # prevent overlap of y-axis labels
-plt.subplots_adjust(wspace=0.4)
+fig.subplots_adjust(wspace=0.4)
 plt.show()

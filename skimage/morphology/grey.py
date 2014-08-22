@@ -1,16 +1,15 @@
 import warnings
 from skimage import img_as_ubyte
+from .misc import default_fallback
 
 from . import cmorph
 
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
-           'black_tophat', 'greyscale_erode', 'greyscale_dilate',
-           'greyscale_open', 'greyscale_close', 'greyscale_white_top_hat',
-           'greyscale_black_top_hat']
+           'black_tophat']
 
-
-def erosion(image, selem, out=None, shift_x=False, shift_y=False):
+@default_fallback
+def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
     """Return greyscale morphological erosion of an image.
 
     Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
@@ -21,12 +20,13 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
     ----------
     image : ndarray
         Image array.
-    selem : ndarray
+    selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarrays, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
-    shift_x, shift_y : bool
+    shift_x, shift_y : bool, optional
         shift structuring element about center point. This only affects
         eccentric structuring elements (i.e. selem with even numbered sides).
 
@@ -62,7 +62,8 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
                          shift_x=shift_x, shift_y=shift_y)
 
 
-def dilation(image, selem, out=None, shift_x=False, shift_y=False):
+@default_fallback
+def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
     """Return greyscale morphological dilation of an image.
 
     Morphological dilation sets a pixel at (i,j) to the maximum over all pixels
@@ -74,12 +75,13 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
 
     image : ndarray
         Image array.
-    selem : ndarray
+    selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarray, optional
         The array to store the result of the morphology. If None, is
         passed, a new array will be allocated.
-    shift_x, shift_y : bool
+    shift_x, shift_y : bool, optional
         shift structuring element about center point. This only affects
         eccentric structuring elements (i.e. selem with even numbered sides).
 
@@ -109,13 +111,15 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
 
     if image is out:
         raise NotImplementedError("In-place dilation not supported!")
+
     image = img_as_ubyte(image)
     selem = img_as_ubyte(selem)
     return cmorph._dilate(image, selem, out=out,
                           shift_x=shift_x, shift_y=shift_y)
 
 
-def opening(image, selem, out=None):
+@default_fallback
+def opening(image, selem=None, out=None):
     """Return greyscale morphological opening of an image.
 
     The morphological opening on an image is defined as an erosion followed by
@@ -127,9 +131,10 @@ def opening(image, selem, out=None):
     ----------
     image : ndarray
         Image array.
-    selem : ndarray
+    selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
 
@@ -166,7 +171,8 @@ def opening(image, selem, out=None):
     return out
 
 
-def closing(image, selem, out=None):
+@default_fallback
+def closing(image, selem=None, out=None):
     """Return greyscale morphological closing of an image.
 
     The morphological closing on an image is defined as a dilation followed by
@@ -178,9 +184,10 @@ def closing(image, selem, out=None):
     ----------
     image : ndarray
         Image array.
-    selem : ndarray
+    selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarray, optional
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.
 
@@ -217,7 +224,8 @@ def closing(image, selem, out=None):
     return out
 
 
-def white_tophat(image, selem, out=None):
+@default_fallback
+def white_tophat(image, selem=None, out=None):
     """Return white top hat of an image.
 
     The white top hat of an image is defined as the image minus its
@@ -228,9 +236,10 @@ def white_tophat(image, selem, out=None):
     ----------
     image : ndarray
         Image array.
-    selem : ndarray
+    selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
 
@@ -256,7 +265,8 @@ def white_tophat(image, selem, out=None):
            [0, 0, 1, 0, 0],
            [0, 0, 0, 0, 0]], dtype=uint8)
 
-   """
+    """
+
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
 
@@ -265,7 +275,8 @@ def white_tophat(image, selem, out=None):
     return out
 
 
-def black_tophat(image, selem, out=None):
+@default_fallback
+def black_tophat(image, selem=None, out=None):
     """Return black top hat of an image.
 
     The black top hat of an image is defined as its morphological closing minus
@@ -277,9 +288,10 @@ def black_tophat(image, selem, out=None):
     ----------
     image : ndarray
         Image array.
-    selem : ndarray
+    selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
 
@@ -313,33 +325,3 @@ def black_tophat(image, selem, out=None):
     out = closing(image, selem, out=out)
     out = out - image
     return out
-
-
-def greyscale_erode(*args, **kwargs):
-    warnings.warn("`greyscale_erode` renamed `erosion`.")
-    return erosion(*args, **kwargs)
-
-
-def greyscale_dilate(*args, **kwargs):
-    warnings.warn("`greyscale_dilate` renamed `dilation`.")
-    return dilation(*args, **kwargs)
-
-
-def greyscale_open(*args, **kwargs):
-    warnings.warn("`greyscale_open` renamed `opening`.")
-    return opening(*args, **kwargs)
-
-
-def greyscale_close(*args, **kwargs):
-    warnings.warn("`greyscale_close` renamed `closing`.")
-    return closing(*args, **kwargs)
-
-
-def greyscale_white_top_hat(*args, **kwargs):
-    warnings.warn("`greyscale_white_top_hat` renamed `white_tophat`.")
-    return white_tophat(*args, **kwargs)
-
-
-def greyscale_black_top_hat(*args, **kwargs):
-    warnings.warn("`greyscale_black_top_hat` renamed `black_tophat`.")
-    return black_tophat(*args, **kwargs)

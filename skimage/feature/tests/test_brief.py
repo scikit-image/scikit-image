@@ -3,79 +3,73 @@ from numpy.testing import assert_array_equal, assert_raises
 from skimage import data
 from skimage import transform as tf
 from skimage.color import rgb2gray
-from skimage.feature import (brief, match_keypoints_brief, corner_peaks,
-                             corner_harris)
+from skimage.feature import BRIEF, corner_peaks, corner_harris
 
 
-def test_brief_color_image_unsupported_error():
+def test_color_image_unsupported_error():
     """Brief descriptors can be evaluated on gray-scale images only."""
     img = np.zeros((20, 20, 3))
-    keypoints = [[7, 5], [11, 13]]
-    assert_raises(ValueError, brief, img, keypoints)
+    keypoints = np.asarray([[7, 5], [11, 13]])
+    assert_raises(ValueError, BRIEF().extract, img, keypoints)
 
 
-def test_match_keypoints_brief_lena_translation():
-    """Test matched keypoints between lena image and its translated version."""
-    img = data.lena()
-    img = rgb2gray(img)
-    img.shape
-    tform = tf.SimilarityTransform(scale=1, rotation=0, translation=(15, 20))
-    translated_img = tf.warp(img, tform)
+def test_normal_mode():
+    """Verify the computed BRIEF descriptors with expected for normal mode."""
+    img = rgb2gray(data.lena())
 
-    keypoints1 = corner_peaks(corner_harris(img), min_distance=5)
-    descriptors1, keypoints1 = brief(img, keypoints1, descriptor_size=512)
+    keypoints = corner_peaks(corner_harris(img), min_distance=5)
 
-    keypoints2 = corner_peaks(corner_harris(translated_img), min_distance=5)
-    descriptors2, keypoints2 = brief(translated_img, keypoints2,
-                                     descriptor_size=512)
+    extractor = BRIEF(descriptor_size=8, sigma=2)
 
-    matched_keypoints = match_keypoints_brief(keypoints1, descriptors1,
-                                              keypoints2, descriptors2,
-                                              threshold=0.10)
+    extractor.extract(img, keypoints[:8])
 
-    assert_array_equal(matched_keypoints[:, 0, :], matched_keypoints[:, 1, :] +
-                       [20, 15])
+    expected = np.array([[ True, False,  True, False,  True,  True, False, False],
+                         [False, False, False, False,  True, False, False, False],
+                         [ True,  True,  True,  True,  True,  True,  True,  True],
+                         [ True, False,  True,  True, False,  True, False,  True],
+                         [False,  True,  True,  True,  True,  True,  True,  True],
+                         [ True, False, False, False, False,  True, False,  True],
+                         [False,  True,  True,  True, False, False,  True, False],
+                         [False, False, False, False,  True, False, False, False]], dtype=bool)
+
+    assert_array_equal(extractor.descriptors, expected)
 
 
-def test_match_keypoints_brief_lena_rotation():
-    """Verify matched keypoints result between lena image and its rotated
-    version with the expected keypoint pairs."""
-    img = data.lena()
-    img = rgb2gray(img)
-    img.shape
-    tform = tf.SimilarityTransform(scale=1, rotation=0.10, translation=(0, 0))
-    rotated_img = tf.warp(img, tform)
+def test_uniform_mode():
+    """Verify the computed BRIEF descriptors with expected for uniform mode."""
+    img = rgb2gray(data.lena())
 
-    keypoints1 = corner_peaks(corner_harris(img), min_distance=5)
-    descriptors1, keypoints1 = brief(img, keypoints1, descriptor_size=512)
+    keypoints = corner_peaks(corner_harris(img), min_distance=5)
 
-    keypoints2 = corner_peaks(corner_harris(rotated_img), min_distance=5)
-    descriptors2, keypoints2 = brief(rotated_img, keypoints2,
-                                     descriptor_size=512)
+    extractor = BRIEF(descriptor_size=8, sigma=2, mode='uniform')
 
-    matched_keypoints = match_keypoints_brief(keypoints1, descriptors1,
-                                              keypoints2, descriptors2,
-                                              threshold=0.07)
+    extractor.extract(img, keypoints[:8])
 
-    expected = np.array([[[263, 272],
-                          [234, 298]],
+    expected = np.array([[ True, False,  True, False, False,  True, False, False],
+                         [False,  True, False, False,  True,  True,  True,  True],
+                         [ True, False, False, False, False, False, False, False],
+                         [False,  True,  True, False, False, False,  True, False],
+                         [False, False, False, False, False, False,  True, False],
+                         [False,  True, False, False,  True, False, False, False],
+                         [False, False,  True,  True, False, False,  True,  True],
+                         [ True,  True, False, False, False, False, False, False]], dtype=bool)
 
-                         [[271, 120],
-                          [258, 146]],
+    assert_array_equal(extractor.descriptors, expected)
 
-                         [[323, 164],
-                          [305, 195]],
 
-                         [[414,  70],
-                          [405, 111]],
+def test_unsupported_mode():
+    assert_raises(ValueError, BRIEF, mode='foobar')
 
-                         [[435, 181],
-                          [415, 223]],
 
-                         [[454, 176],
-                          [435, 221]]])
+def test_border():
+    img = np.zeros((100, 100))
+    keypoints = np.array([[1, 1], [20, 20], [50, 50], [80, 80]])
 
-    assert_array_equal(matched_keypoints, expected)
+    extractor = BRIEF(patch_size=41)
+    extractor.extract(img, keypoints)
+
+    assert extractor.descriptors.shape[0] == 3
+    assert_array_equal(extractor.mask, (False, True, True, True))
 
 
 if __name__ == '__main__':

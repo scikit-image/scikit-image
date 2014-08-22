@@ -1,6 +1,7 @@
 import os.path
 import numpy as np
 from numpy.testing.decorators import skipif
+from numpy.testing import assert_raises
 
 from tempfile import NamedTemporaryFile
 
@@ -14,6 +15,8 @@ except ImportError:
     sitk_available = False
 else:
     sitk_available = True
+
+np.random.seed(0)
 
 
 def teardown():
@@ -50,6 +53,15 @@ def test_bilevel():
     img = imread(os.path.join(data_dir, 'checker_bilevel.png'))
     np.testing.assert_array_equal(img, expected)
 
+"""
+#TODO: This test causes a Segmentation fault
+@skipif(not sitk_available)
+def test_imread_truncated_jpg():
+    assert_raises((RuntimeError, ValueError),
+                  imread,
+                  os.path.join(data_dir, 'truncated.jpg'))
+"""
+
 
 @skipif(not sitk_available)
 def test_imread_uint16():
@@ -80,7 +92,7 @@ class TestSave:
     def test_imsave_roundtrip(self):
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
             for dtype in (np.uint8, np.uint16, np.float32, np.float64):
-                x = np.ones(shape, dtype=dtype) * np.random.random(shape)
+                x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
                 if np.issubdtype(dtype, float):
                     yield self.roundtrip, dtype, x

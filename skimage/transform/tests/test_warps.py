@@ -1,4 +1,5 @@
-from numpy.testing import assert_array_almost_equal, run_module_suite, assert_array_equal
+from numpy.testing import (assert_array_almost_equal, run_module_suite,
+                           assert_array_equal, assert_raises)
 import numpy as np
 from scipy.ndimage import map_coordinates
 
@@ -9,6 +10,9 @@ from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
                                downscale_local_mean)
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
+
+
+np.random.seed(0)
 
 
 def test_warp_tform():
@@ -232,6 +236,28 @@ def test_downscale_local_mean():
     expected2 = np.array([[ 14. ,  10.8],
                           [  8.5,   5.7]])
     assert_array_equal(expected2, out2)
+
+
+def test_invalid():
+    assert_raises(ValueError, warp, np.ones((4, )), SimilarityTransform())
+    assert_raises(ValueError, warp, np.ones((4, 3, 3, 3)),
+                  SimilarityTransform())
+
+
+def test_inverse():
+    tform = SimilarityTransform(scale=0.5, rotation=0.1)
+    inverse_tform = SimilarityTransform(matrix=np.linalg.inv(tform.params))
+    image = np.arange(10 * 10).reshape(10, 10).astype(np.double)
+    assert_array_equal(warp(image, inverse_tform), warp(image, tform.inverse))
+
+
+def test_slow_warp_nonint_oshape():
+    image = np.random.rand(5, 5)
+
+    assert_raises(ValueError, warp, image, lambda xy: xy,
+                  output_shape=(13.1, 19.5))
+
+    warp(image, lambda xy: xy, output_shape=(13.0001, 19.9999))
 
 
 if __name__ == "__main__":

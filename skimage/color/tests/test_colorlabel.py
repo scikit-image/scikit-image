@@ -3,7 +3,9 @@ import itertools
 import numpy as np
 from numpy import testing
 from skimage.color.colorlabel import label2rgb
-from numpy.testing import assert_array_almost_equal as assert_close
+from skimage._shared.utils import all_warnings
+from numpy.testing import (assert_array_almost_equal as assert_close,
+                           assert_array_equal, assert_warns)
 
 
 def test_shape_mismatch():
@@ -67,6 +69,66 @@ def test_bg_and_color_cycle():
     assert_close(rgb[0, 0], bg_color)
     for pixel, color in zip(rgb[0, 1:], itertools.cycle(colors)):
         assert_close(pixel, color)
+
+
+def test_label_consistency():
+    """Assert that the same labels map to the same colors."""
+    label_1 = np.arange(5).reshape(1, -1)
+    label_2 = np.array([2, 4])
+    colors = [(1, 0, 0), (0, 1, 0), (0, 0, 1), (1, 1, 0), (1, 0, 1)]
+    # Set alphas just in case the defaults change
+    rgb_1 = label2rgb(label_1, colors=colors)
+    rgb_2 = label2rgb(label_2, colors=colors)
+    for label_id in label_2.flat:
+        assert_close(rgb_1[label_1 == label_id], rgb_2[label_2 == label_id])
+
+def test_leave_labels_alone():
+    labels = np.array([-1, 0, 1])
+    labels_saved = labels.copy()
+
+    label2rgb(labels)
+    label2rgb(labels, bg_label=1)
+    assert_array_equal(labels, labels_saved)
+
+def test_avg():
+    label_field = np.array([[1, 1, 1, 2],
+                            [1, 2, 2, 2],
+                            [3, 3, 3, 3]], dtype=np.uint8)
+    r = np.array([[1., 1., 0., 0.],
+                  [0., 0., 1., 1.],
+                  [0., 0., 0., 0.]])
+    g = np.array([[0., 0., 0., 1.],
+                  [1., 1., 1., 0.],
+                  [0., 0., 0., 0.]])
+    b = np.array([[0., 0., 0., 1.],
+                  [0., 1., 1., 1.],
+                  [0., 0., 1., 1.]])
+    image = np.dstack((r, g, b))
+    out = label2rgb(label_field, image, kind='avg')
+    rout = np.array([[0.5, 0.5, 0.5, 0.5],
+                     [0.5, 0.5, 0.5, 0.5],
+                     [0. , 0. , 0. , 0. ]])
+    gout = np.array([[0.25, 0.25, 0.25, 0.75],
+                     [0.25, 0.75, 0.75, 0.75],
+                     [0.  , 0.  , 0.  , 0.  ]])
+    bout = np.array([[0. , 0. , 0. , 1. ],
+                     [0. , 1. , 1. , 1. ],
+                     [0.5, 0.5, 0.5, 0.5]])
+    expected_out = np.dstack((rout, gout, bout))
+    assert_array_equal(out, expected_out)
+
+    out_bg = label2rgb(label_field, image, bg_label=2, bg_color=(0, 0, 0),
+                       kind='avg')
+    expected_out_bg = expected_out.copy()
+    expected_out_bg[label_field == 2] = 0
+    assert_array_equal(out_bg, expected_out_bg)
+
+
+def test_negative_intensity():
+    with all_warnings():
+        labels = np.arange(100).reshape(10, 10)
+        image = -1 * np.ones((10, 10))
+        assert_warns(UserWarning, label2rgb, labels, image)
 
 
 if __name__ == '__main__':
