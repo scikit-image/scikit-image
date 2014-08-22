@@ -71,6 +71,7 @@ script:
         sudo apt-get install -qq python3-pyqt4;
         travis_retry pip install -q matplotlib;
         travis_retry pip install -q networkx;
+        travis_retry pip install git+git://github.com/rgommers/pywt.git@refactor-ready-for-pr
       else
         travis_retry conda install -q matplotlib pyqt networkx;
         sudo cp ~/miniconda/envs/test/include/png* /usr/include;
@@ -79,6 +80,7 @@ script:
         sudo apt-get install -qq libtiff4-dev libwebp-dev xcftools;
         travis_retry pip install -q imread;
         travis_retry pip install -q pyfits;
+        travis_retry pip install PyWavelets
       fi
     - sudo apt-get install -qq libfreeimage3
     # TODO: update when SimpleITK become available on py34 or hopefully pip
