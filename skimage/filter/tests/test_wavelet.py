@@ -77,22 +77,9 @@ class TestWaveletFilter(unittest.TestCase):
         """
         Tests coefficient array on small test case
         """
-        if imresize:
-            a = np.array([[1, 0], [0, 1]])
-            b = wavelet_coefficient_array(a)
-            assert np.all(np.array([[255., 0], [0, 0]]) == b)
-
-    def test_coefficient_array_odd(self):
-        """
-        Tests coefficient array on larger, odd-dimensioned case
-        """
-        a = np.zeros((5, 3))
-        a[:2, :3] = 1.
+        a = np.eye(10)
         b = wavelet_coefficient_array(a)
-        c = np.zeros((5, 3))
-        c[0, 0:2] = 255.
-        c[1, 0:2] = 76.
-        assert np.all(np.array(c == b))
+        np.testing.assert_array_almost_equal(np.diag(b), np.ones(10))
 
     def test_bayesshrink(self):
         a = np.random.randn(10, 10)
