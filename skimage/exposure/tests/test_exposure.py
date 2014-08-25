@@ -38,6 +38,19 @@ def test_equalize_float():
     check_cdf_slope(cdf)
 
 
+def test_equalize_masked():
+    img = skimage.img_as_float(test_img)
+    mask = np.zeros(test_img.shape)
+    mask[50:150, 50:250] = 1
+    img_mask_eq = exposure.equalize_hist(img, mask=mask)
+    img_eq = exposure.equalize_hist(img)
+
+    cdf, bin_edges = exposure.cumulative_distribution(img_mask_eq)
+    check_cdf_slope(cdf)
+
+    assert not (img_eq == img_mask_eq).all()
+
+
 def check_cdf_slope(cdf):
     """Slope of cdf which should equal 1 for an equalized histogram."""
     norm_intensity = np.linspace(0, 1, len(cdf))

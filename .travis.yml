@@ -73,7 +73,7 @@ script:
     #   The solution was suggested here
     #   https://groups.google.com/a/continuum.io/forum/#!topic/anaconda/-DLG2ZdTkw0
     - if [[ $ENV == python=3.2 ]]; then
-        sudo apt-get install python3-pyqt4;
+        travis_retry sudo apt-get install python3-pyqt4;
         travis_retry pip install matplotlib==1.3.1;
         travis_retry pip install networkx;
       else
