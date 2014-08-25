@@ -11,14 +11,15 @@ on a large batch of images. Let us define an example.
     from skimage.restoration import denoise_tv_chambolle
     from skimage.feature import hog
 
-    def tasks(image):
+    def task(image):
         """
-        Apply some functions.
+        Apply some functions and return an image.
         """
         image = denoise_tv_chambolle(image, weight=0.1, multichannel=True)
         fd, hog_image = hog(color.rgb2gray(image), orientations=8,
                             pixels_per_cell=(16, 16), cells_per_block=(1, 1),
                             visualise=True)
+        return hog_image
 
 
     # Prepare images
@@ -26,7 +27,7 @@ on a large batch of images. Let us define an example.
     width = 10
     pics = [hubble[:,slice:slice+width] for slice in range(0, 1000, width)]
 
-To call the function ``tasks`` on each element of the list ``pics``, it is
+To call the function ``task`` on each element of the list ``pics``, it is
 usual to write a for loop. To measure the execution time of this loop, a function
 is defined and called with ``timeit``.
 
@@ -34,19 +35,25 @@ is defined and called with ``timeit``.
 
     def classic_loop():
         for image in pics:
-            tasks(image)
+            task(image)
 
     import timeit
-    print("classic_loop():", timeit.timeit("classic_loop()", setup="from __main__ import (classic_loop, tasks, pics)", number=1))
+    print("classic_loop():", timeit.timeit("classic_loop()", setup="from __main__ import (classic_loop, task, pics)", number=1))
+
+Alternatively, you can use ipython and measure the execution time with ``%timeit``.
+
+.. code-block:: python
+
+    %timeit classic_loop()
 
 Another equivalent way to code this loop is to use a comprehension list which has the same efficiency.
 
 .. code-block:: python
 
     def comprehension_loop():
-        [tasks(image) for image in pics]
+        [task(image) for image in pics]
 
-    print("comprehension_loop():", timeit.timeit("comprehension_loop()", setup="from __main__ import (comprehension_loop, tasks, pics)", number=1))
+    %timeit comprehension_loop()
 
 ``joblib`` is a library providing an easy way to parallelize for loops once we have a comprehension list.
 The number of jobs can be specified.
@@ -55,6 +62,6 @@ The number of jobs can be specified.
 
     from joblib import Parallel, delayed
     def joblib_loop():
-        Parallel(n_jobs=4)(delayed(tasks)(i) for i in pics)
+        Parallel(n_jobs=4)(delayed(task)(i) for i in pics)
 
-    print("joblib_loop():", timeit.timeit("joblib_loop()", setup="from __main__ import (joblib_loop, tasks, pics)", number=1))
+    %timeit joblib_loop()
