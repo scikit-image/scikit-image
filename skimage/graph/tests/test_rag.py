@@ -124,7 +124,7 @@ def test_merge_hierarchical():
     labels[50:, 50:] = 3
 
     rag = graph.rag_mean_color(img, labels)
-    new_labels = graph.merge_hierarchical(labels, rag, 10)
+    new_labels = graph.merge_hierarchical_mean_color(labels, rag, 10)
 
     # Two labels
     assert new_labels.max() == 1
