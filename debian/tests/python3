@@ -15,5 +15,5 @@ for py in $pys; do
         cd "$ADTTMP"
     fi
 
-    python$py /usr/bin/nosetests3 -s -v skimage 2>&1
+    xvfb-run -apython$py /usr/bin/nosetests3 -s -v skimage 2>&1
 done

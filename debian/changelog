@@ -1,3 +1,15 @@
+skimage (0.10.1-1) unstable; urgency=medium
+
+  * New upstream release
+  * depend on and use libjs-twitter-bootstrap (Closes: #736785)
+  * doc-privacy.patch: use system font for documentation
+  * build depend on python-six (>= 1.3.0) python-numpy (>= 1.6.0) and
+    cython (>= 0.17)
+  * slicing-error.patch: fix error revealed by numpy 1.9
+  * bump standard to 3.9.5
+
+ -- Julian Taylor <jtaylor.debian@googlemail.com>  Sun, 24 Aug 2014 11:38:12 +0200
+
 skimage (0.10.0-1) unstable; urgency=medium
 
   * Fresh upstream release (Closes: #751296)

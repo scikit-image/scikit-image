@@ -83,4 +83,9 @@ endif
 
 override_dh_installdocs:
 	dh_installdocs -A CONTRIBUTORS.txt README.md CONTRIBUTING.txt TASKS.txt
-
+	dh_link -ppython-skimage-doc /usr/share/twitter-bootstrap/files/js/bootstrap.min.js \
+	    usr/share/doc/python-skimage-doc/html/_static/js/bootstrap.min.js
+	dh_link -ppython-skimage-doc /usr/share/twitter-bootstrap/files/css/bootstrap.min.css \
+	    usr/share/doc/python-skimage-doc/html/_static/css/bootstrap.min.css
+	dh_link -ppython-skimage-doc /usr/share/twitter-bootstrap/files/css/bootstrap-responsive.css \
+	    usr/share/doc/python-skimage-doc/html/_static/css/bootstrap-responsive.css
