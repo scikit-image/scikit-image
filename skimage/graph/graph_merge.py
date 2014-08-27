@@ -35,7 +35,8 @@ def _revalidate_node_edges(rag, node, heap_list):
     rag : RAG
         The Region Adjacency Graph.
     node : int
-        The id of the node whose incident edges are to be validated/invalidated.
+        The id of the node whose incident edges are to be validated/invalidated
+        .
     heap_list : list
         The list containing the existing heap of edges.
     """
@@ -45,18 +46,15 @@ def _revalidate_node_edges(rag, node, heap_list):
     # instead we invalidate them
 
     for n in rag.neighbors(node):
-        # The figure these comments refer to is drawn below
-        # You'll know it when you see it
         data = rag[node][n]
         try:
-            # invalidates (4, 5) and (4, 6)
-            # their weights in the heap are no longer valid
+            # invalidate existing neghbors of `dst`, they have new weights
             data['heap item'][3] = False
         except KeyError:
-            # (1, 4) and (2, 4) never existed in the graph before
+            # will hangle the case where the edge did not exist in the existing
+            # graph
             pass
 
-        # Add (1, 4), (2, 4), (4, 5) and (5, 6) with updated weights
         wt = data['weight']
         heap_item = [wt, node, n, True]
         data['heap item'] = heap_item
@@ -117,29 +115,7 @@ def merge_hierarchical(labels, rag, thresh, in_place=True):
             rag.node[dst]['mean color'] = (rag.node[dst]['total color'] /
                                            rag.node[dst]['pixel count'])
 
-            # Consider a graph with edges
-            # (1, 2) -> 50
-            # (1, 3) -> 60
-            # (3, 4) -> 70
-            # (4, 5) -> 80
-            # (4, 6) -> 90
-            #
-            # 1       5
-            #  \     /
-            #   3---4
-            #  /     \
-            # 2       6        :-)
-
-            # After merging 3 and 4
-            #
-            #   1   5
-            #    \ /
-            #     4
-            #    / \
-            #   2   6          B-)
-
-            # Will take care of (1, 3) and (2, 3)
-            # they are no longer in the graph
+            # Invalidate all neigbors of `src` before its deleted
             for n in rag.neighbors(src):
                 rag[src][n]['heap item'][3] = False
 
