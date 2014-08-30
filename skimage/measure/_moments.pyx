@@ -5,7 +5,7 @@
 import numpy as np
 
 
-def moments(double[:, :] image, Py_ssize_t order=3):
+cpdef moments(double[:, :] image, Py_ssize_t order=3):
     """Calculate all raw image moments up to a certain order.
 
     The following properties can be calculated from raw image moments:
@@ -39,20 +39,11 @@ def moments(double[:, :] image, Py_ssize_t order=3):
     .. [4] http://en.wikipedia.org/wiki/Image_moment
 
     """
-    cdef Py_ssize_t p, q, r, c
-    cdef double[:, ::1] mu = np.zeros((order + 1, order + 1), dtype=np.double)
-    cdef double val
-    for r in range(image.shape[0]):
-        for c in range(image.shape[1]):
-            val = image[r, c]
-            for p in range(order + 1):
-                for q in range(order + 1):
-                    mu[p, q] += val * r ** q * c ** p
-    return np.asarray(mu)
+    return moments_central(image, 0, 0, order)
 
 
-def moments_central(double[:, :] image, double cr, double cc,
-                    Py_ssize_t order=3):
+cpdef moments_central(double[:, :] image, double cr, double cc,
+                      Py_ssize_t order=3):
     """Calculate all central image moments up to a certain order.
 
     Note that central moments are translation invariant but not scale and
@@ -88,15 +79,16 @@ def moments_central(double[:, :] image, double cr, double cc,
     """
     cdef Py_ssize_t p, q, r, c
     cdef double[:, ::1] mu = np.zeros((order + 1, order + 1), dtype=np.double)
-    cdef double val, dr, dc
+    cdef double val, dr, dc, dcp
     for r in range(image.shape[0]):
         dr = r - cr
         for c in range(image.shape[1]):
             dc = c - cc
             val = image[r, c]
             for p in range(order + 1):
+                dcp = dc ** p
                 for q in range(order + 1):
-                    mu[p, q] += val * dr ** q * dc ** p
+                    mu[p, q] += val * dr ** q * dcp
     return np.asarray(mu)
 
 
