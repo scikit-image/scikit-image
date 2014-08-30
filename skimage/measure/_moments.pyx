@@ -79,16 +79,19 @@ cpdef moments_central(double[:, :] image, double cr, double cc,
     """
     cdef Py_ssize_t p, q, r, c
     cdef double[:, ::1] mu = np.zeros((order + 1, order + 1), dtype=np.double)
-    cdef double val, dr, dc, dcp
+    cdef double val, dr, dc, dcp, drq
     for r in range(image.shape[0]):
         dr = r - cr
         for c in range(image.shape[1]):
             dc = c - cc
             val = image[r, c]
+            dcp = 1
             for p in range(order + 1):
-                dcp = dc ** p
+                drq = 1
                 for q in range(order + 1):
-                    mu[p, q] += val * dr ** q * dcp
+                    mu[p, q] += val * drq * dcp
+                    drq *= dr
+                dcp *= dc
     return np.asarray(mu)
 
 
