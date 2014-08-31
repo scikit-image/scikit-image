@@ -1,0 +1,10 @@
+============================
+Documentation for developers
+============================
+
+.. toctree::
+   :maxdepth: 2
+
+   plugins
+
+

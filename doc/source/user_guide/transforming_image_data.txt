@@ -1,0 +1,18 @@
+==========================================
+Image adjustement: transforming image data
+==========================================
+
+Color manipulation
+------------------
+
+Contrast and exposure
+---------------------
+
+Image filtering
+---------------
+
+Denoising and restoration
+-------------------------
+
+Mathematical morphology
+-----------------------

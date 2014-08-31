@@ -1,0 +1,15 @@
+==================================================
+Extracting regions of interest: image segmentation
+==================================================
+
+Contrast-based segmentation
+---------------------------
+
+Region-based segmentation
+-------------------------
+
+Segmentation using super-pixels
+-------------------------------
+
+Geometrical methods
+-------------------

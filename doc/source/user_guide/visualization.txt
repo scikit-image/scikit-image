@@ -1,0 +1,9 @@
+==========================
+Geometry and visualization
+==========================
+
+Drawing shapes
+--------------
+
+Enhanced visualizations
+-----------------------

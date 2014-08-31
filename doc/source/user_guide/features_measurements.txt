@@ -1,0 +1,12 @@
+==============================================
+Features extraction and measurements on images
+==============================================
+
+Features extraction
+-------------------
+
+Statistical measures on images
+------------------------------
+
+Measures on labeled images: regions properties
+----------------------------------------------

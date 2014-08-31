@@ -1,0 +1,12 @@
+================================
+Getting started with ``skimage``
+================================
+
+What is an image
+----------------
+
+Using image examples from ``skimage.data``
+------------------------------------------
+
+Basic I/O: reading and writing to image files
+---------------------------------------------
