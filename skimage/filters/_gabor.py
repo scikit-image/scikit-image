@@ -85,7 +85,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None, n_
 
 
 def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
-                 sigma_y=None, offset=0, mode='reflect', cval=0):
+                 sigma_y=None, n_stds=3, offset=0, mode='reflect', cval=0):
     """Return real and imaginary responses to Gabor filter.
 
     The real and imaginary parts of the Gabor filter kernel are applied to the
@@ -97,7 +97,7 @@ def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
 
     Parameters
     ----------
-    image : array
+    image : 2-D array
         Input image.
     frequency : float
         Frequency of the harmonic function.
@@ -111,6 +111,8 @@ def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
         Standard deviation in x- and y-directions. These directions apply to
         the kernel *before* rotation. If `theta = pi/2`, then the kernel is
         rotated 90 degrees so that `sigma_x` controls the *vertical* direction.
+    n_stds : int
+        Number of standard deviations until the array boundaries.
     offset : float, optional
         Phase offset of harmonic function in radians.
 
@@ -125,9 +127,18 @@ def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     .. [1] http://en.wikipedia.org/wiki/Gabor_filter
     .. [2] http://mplab.ucsd.edu/tutorials/gabor.pdf
 
+    Examples
+    --------
+    >>> from skimage.filter import gabor_filter
+    >>> from skimage import data, io
+
+    >>> image = data.checkerboard()
+    >>> filt_real, filt_imag = gabor_filter(image, 0.7)
+    >>> io.imshow(filt_real)
+    >>> io.show()
     """
     assert_nD(image, 2)
-    g = gabor_kernel(frequency, theta, bandwidth, sigma_x, sigma_y, offset)
+    g = gabor_kernel(frequency, theta, bandwidth, sigma_x, sigma_y, n_stds, offset)
 
     filtered_real = ndimage.convolve(image, np.real(g), mode=mode, cval=cval)
     filtered_imag = ndimage.convolve(image, np.imag(g), mode=mode, cval=cval)
