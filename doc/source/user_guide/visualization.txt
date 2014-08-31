@@ -7,3 +7,8 @@ Drawing shapes
 
 Enhanced visualizations
 -----------------------
+
+.. image:: ../../_images/plot_tinting_grayscale_images.png
+    :target: ../auto_examples/plot_tinting_grayscale_images.html
+    :align: center
+
