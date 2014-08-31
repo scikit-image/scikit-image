@@ -145,9 +145,13 @@ def test_otsu_coins_image_as_float():
 
 
 def test_otsu_lena_image():
-    lena = skimage.img_as_ubyte(data.lena())
-    assert 140 < threshold_otsu(lena) < 142
+    img = skimage.img_as_ubyte(data.lena())
+    assert 140 < threshold_otsu(img) < 142
 
+def test_otsu_astro_image():
+    img = skimage.img_as_ubyte(data.astronaut())
+    print threshold_otsu(img)
+    assert 109 < threshold_otsu(img) < 111
 
 def test_yen_camera_image():
     camera = skimage.img_as_ubyte(data.camera())

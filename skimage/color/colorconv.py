@@ -119,8 +119,8 @@ def convert_colorspace(arr, fromspace, tospace):
     Examples
     --------
     >>> from skimage import data
-    >>> lena = data.lena()
-    >>> lena_hsv = convert_colorspace(lena, 'RGB', 'HSV')
+    >>> img = data.astronaut()
+    >>> img_hsv = convert_colorspace(img, 'RGB', 'HSV')
     """
     fromdict = {'RGB': lambda im: im, 'HSV': hsv2rgb, 'RGB CIE': rgbcie2rgb,
                 'XYZ': xyz2rgb}
@@ -186,8 +186,8 @@ def rgb2hsv(rgb):
     --------
     >>> from skimage import color
     >>> from skimage import data
-    >>> lena = data.lena()
-    >>> lena_hsv = color.rgb2hsv(lena)
+    >>> img = data.astronaut()
+    >>> img_hsv = color.rgb2hsv(img)
     """
     arr = _prepare_colorarray(rgb)
     out = np.empty_like(arr)
@@ -263,9 +263,9 @@ def hsv2rgb(hsv):
     Examples
     --------
     >>> from skimage import data
-    >>> lena = data.lena()
-    >>> lena_hsv = rgb2hsv(lena)
-    >>> lena_rgb = hsv2rgb(lena_hsv)
+    >>> img = data.astronaut()
+    >>> img_hsv = rgb2hsv(img)
+    >>> img_rgb = hsv2rgb(img_hsv)
     """
     arr = _prepare_colorarray(hsv)
 
@@ -542,9 +542,9 @@ def xyz2rgb(xyz):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2xyz, xyz2rgb
-    >>> lena = data.lena()
-    >>> lena_xyz = rgb2xyz(lena)
-    >>> lena_rgb = xyz2rgb(lena_xyz)
+    >>> img = data.astronaut()
+    >>> img_xyz = rgb2xyz(img)
+    >>> img_rgb = xyz2rgb(img_xyz)
     """
     # Follow the algorithm from http://www.easyrgb.com/index.php
     # except we don't multiply/divide by 100 in the conversion
@@ -587,8 +587,8 @@ def rgb2xyz(rgb):
     Examples
     --------
     >>> from skimage import data
-    >>> lena = data.lena()
-    >>> lena_xyz = rgb2xyz(lena)
+    >>> img = data.astronaut()
+    >>> img_xyz = rgb2xyz(img)
     """
     # Follow the algorithm from http://www.easyrgb.com/index.php
     # except we don't multiply/divide by 100 in the conversion
@@ -625,8 +625,8 @@ def rgb2rgbcie(rgb):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2rgbcie
-    >>> lena = data.lena()
-    >>> lena_rgbcie = rgb2rgbcie(lena)
+    >>> img = data.astronaut()
+    >>> img_rgbcie = rgb2rgbcie(img)
     """
     return _convert(rgbcie_from_rgb, rgb)
 
@@ -657,9 +657,9 @@ def rgbcie2rgb(rgbcie):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2rgbcie, rgbcie2rgb
-    >>> lena = data.lena()
-    >>> lena_rgbcie = rgb2rgbcie(lena)
-    >>> lena_rgb = rgbcie2rgb(lena_rgbcie)
+    >>> img = data.astronaut()
+    >>> img_rgbcie = rgb2rgbcie(img)
+    >>> img_rgb = rgbcie2rgb(img_rgbcie)
     """
     return _convert(rgb_from_rgbcie, rgbcie)
 
@@ -701,8 +701,8 @@ def rgb2gray(rgb):
     --------
     >>> from skimage.color import rgb2gray
     >>> from skimage import data
-    >>> lena = data.lena()
-    >>> lena_gray = rgb2gray(lena)
+    >>> img = data.astronaut()
+    >>> img_gray = rgb2gray(img)
     """
     if rgb.ndim == 2:
         return rgb
@@ -782,10 +782,9 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2xyz, xyz2lab
-    >>> lena = data.lena()
-    >>> lena_xyz = rgb2xyz(lena)
-    >>> lena_lab = xyz2lab(lena_xyz)
-
+    >>> img = data.astronaut()
+    >>> img_xyz = rgb2xyz(img)
+    >>> img_lab = xyz2lab(img_xyz)
     """
     arr = _prepare_colorarray(xyz)
 
@@ -961,9 +960,9 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2xyz, xyz2luv
-    >>> lena = data.lena()
-    >>> lena_xyz = rgb2xyz(lena)
-    >>> lena_luv = xyz2luv(lena_xyz)
+    >>> img = data.astronaut()
+    >>> img_xyz = rgb2xyz(img)
+    >>> img_luv = xyz2luv(img_xyz)
     """
     arr = _prepare_colorarray(xyz)
 
@@ -1339,9 +1338,9 @@ def lab2lch(lab):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2lab, lab2lch
-    >>> lena = data.lena()
-    >>> lena_lab = rgb2lab(lena)
-    >>> lena_lch = lab2lch(lena_lab)
+    >>> img = data.astronaut()
+    >>> img_lab = rgb2lab(img)
+    >>> img_lch = lab2lch(img_lab)
     """
     lch = _prepare_lab_array(lab)
 
@@ -1386,10 +1385,10 @@ def lch2lab(lch):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2lab, lch2lab
-    >>> lena = data.lena()
-    >>> lena_lab = rgb2lab(lena)
-    >>> lena_lch = lab2lch(lena_lab)
-    >>> lena_lab2 = lch2lab(lena_lch)
+    >>> img = data.astronaut()
+    >>> img_lab = rgb2lab(img)
+    >>> img_lch = lab2lch(img_lab)
+    >>> img_lab2 = lch2lab(img_lch)
     """
     lch = _prepare_lab_array(lch)
 

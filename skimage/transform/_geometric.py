@@ -960,7 +960,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     >>> def shift_up10_left20(xy):
     ...     return xy - np.array([-20, 10])[None, :]
     >>>
-    >>> image = data.lena().astype(np.float32)
+    >>> image = data.astronaut().astype(np.float32)
     >>> coords = warp_coords(shift_up10_left20, image.shape)
     >>> warped_image = map_coordinates(image, coords)
 
