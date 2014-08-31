@@ -6,7 +6,7 @@
 .. _`PROJECTNAME mailing list`: http://projects.scipy.org/mailman/listinfo/nipy-devel
 
 .. numpy
-.. _numpy: hhttp://numpy.scipy.org
+.. _numpy: http://numpy.org
 .. _`numpy github`: http://github.com/numpy/numpy
 .. _`numpy mailing list`: http://mail.scipy.org/mailman/listinfo/numpy-discussion
 
