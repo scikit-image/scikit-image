@@ -1127,7 +1127,8 @@ def separate_stains(rgb, conv_matrix):
     >>> ihc = data.immunohistochemistry()
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     """
-    rgb = dtype.img_as_float(rgb) + 2
+    rgb = dtype.img_as_float(rgb, force_copy=True)
+    rgb += 2
     stains = np.dot(np.reshape(-np.log(rgb), (-1, 3)), conv_matrix)
     return np.reshape(stains, rgb.shape)
 
