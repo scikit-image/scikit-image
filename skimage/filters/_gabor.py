@@ -12,7 +12,7 @@ def _sigma_prefactor(bandwidth):
     return 1.0 / np.pi * np.sqrt(np.log(2)/2.0) * (2.0**b + 1) / (2.0**b - 1)
 
 
-def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
+def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None, n_stds=3, 
                  offset=0):
     """Return complex 2D Gabor filter kernel.
 
@@ -34,6 +34,8 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
         Standard deviation in x- and y-directions. These directions apply to
         the kernel *before* rotation. If `theta = pi/2`, then the kernel is
         rotated 90 degrees so that `sigma_x` controls the *vertical* direction.
+    n_stds : int
+        Number of standard deviations until the array boundaries.
     offset : float, optional
         Phase offset of harmonic function in radians.
 
@@ -47,13 +49,24 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
     .. [1] http://en.wikipedia.org/wiki/Gabor_filter
     .. [2] http://mplab.ucsd.edu/tutorials/gabor.pdf
 
-    """
+    Examples
+    --------
+    >>> from skimage.filter import gabor_kernel
+    >>> from skimage import io
+
+    >>> gk = gabor_kernel(frequency=0.2)
+    >>> io.imshow(gk.real) # plot only the real part of the kernel
+    >>> io.show()
+
+    >>> gk = gabor_kernel(frequency=0.2, bandwidth=0.1) # more ripples 
+    >>> io.imshow(gk.real)
+    >>> io.show()
+    """    
     if sigma_x is None:
         sigma_x = _sigma_prefactor(bandwidth) / frequency
     if sigma_y is None:
         sigma_y = _sigma_prefactor(bandwidth) / frequency
 
-    n_stds = 3
     x0 = np.ceil(max(np.abs(n_stds * sigma_x * np.cos(theta)),
                      np.abs(n_stds * sigma_y * np.sin(theta)), 1))
     y0 = np.ceil(max(np.abs(n_stds * sigma_y * np.cos(theta)),
