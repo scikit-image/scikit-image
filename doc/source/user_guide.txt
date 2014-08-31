@@ -4,13 +4,13 @@ User Guide
 .. toctree::
    :maxdepth: 2
 
-   user_guide/getting_started 
+   .. user_guide/getting_started 
    user_guide/data_types
-   user_guide/transforming_image_data
-   user_guide/warping
-   user_guide/extracting_regions
-   user_guide/features_measurements
-   user_guide/visualization
+   .. user_guide/transforming_image_data
+   .. user_guide/warping
+   .. user_guide/extracting_regions
+   .. user_guide/features_measurements
+   .. user_guide/visualization
    user_guide/tutorials
    user_guide/getting_help
    user_guide/viewer
