@@ -868,8 +868,8 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                   mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
-def windowed_histogram(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Sliding window histogram
+def windowed_histogram(image, selem, out=None, mask=None, shift_x=False, shift_y=False, n_bins=None):
+    """Normalized sliding window histogram
 
     Parameters
     ----------
@@ -886,15 +886,19 @@ def windowed_histogram(image, selem, out=None, mask=None, shift_x=False, shift_y
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
+    n_bins : int or None
+        The number of histogram bins. Will default to image.max() + 1 if None
+        is passed.
 
     Returns
     -------
-    out : 3-D array (same dtype as input image) whose extra dimension
-        Output image.
-
-    References
-    ----------
-    .. [otsu] http://en.wikipedia.org/wiki/Otsu's_method
+    out : 3-D array with float dtype of dimensions (H,W,N), where (H,W) are
+        the dimensions of the input image and N is n_bins or image.max()+1
+        if no value is provided as a parameter. Effectively, each pixel
+        is an N-dimensional feature vector that is the histogram.
+        The sum of the elements in the feature vector will be 1, unless
+        no pixels in the window were covered by both selem and mask, in which
+        case all elements will be 0.
 
     Examples
     --------
@@ -903,9 +907,14 @@ def windowed_histogram(image, selem, out=None, mask=None, shift_x=False, shift_y
     >>> from skimage.morphology import disk
     >>> img = data.camera()
     >>> hist_img = windowed_histogram(img, disk(5))
-    >>> thresh_image = img >= local_otsu
 
     """
 
-    return _apply_vector_per_pixel(generic_cy._windowed_hist, image, selem, out=out,
-                  mask=mask, shift_x=shift_x, shift_y=shift_y, pixel_size=image.max()+1)
+    if n_bins is None:
+        n_bins = image.max() + 1
+
+    return _apply_vector_per_pixel(generic_cy._windowed_hist, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y,
+                                   out_dtype=np.double,
+                                   pixel_size=n_bins)

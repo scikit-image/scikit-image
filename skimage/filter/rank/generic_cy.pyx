@@ -378,8 +378,14 @@ cdef inline void _kernel_win_hist(dtype_t_out[:] out, Py_ssize_t* histo,
                                   Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t i
     cdef Py_ssize_t max_i
-    for i in xrange(out.shape[0]):
-        out[i] = <dtype_t_out>histo[i]
+    cdef double scale
+    if pop:
+        scale = 1.0 / pop
+        for i in xrange(out.shape[0]):
+            out[i] = <dtype_t_out>(histo[i] * scale)
+    else:
+        for i in xrange(out.shape[0]):
+            out[i] = <dtype_t_out>0
 
 
 
