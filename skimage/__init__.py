@@ -69,7 +69,8 @@ try:
     from .version import version as __version__
 except ImportError:
     __version__ = "unbuilt-dev"
-del version
+else:
+    del version
 
 
 try:
