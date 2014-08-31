@@ -1,6 +1,6 @@
 from .lpi_filter import inverse, wiener, LPIFilter2D
 from ._gaussian import gaussian_filter
-# Backward compatibility v<0.10
+# Backward compatibility v<0.11
 from ..feature._canny import canny
 from .edges import (sobel, hsobel, vsobel, scharr, hscharr, vscharr, prewitt,
                     hprewitt, vprewitt, roberts, roberts_positive_diagonal,
