@@ -8,7 +8,7 @@ from skimage.color.adapt_rgb import adapt_rgb, each_channel, hsv_value
 
 
 # Down-sample image for quicker testing.
-COLOR_IMAGE = data.lena()[::5, ::5]
+COLOR_IMAGE = data.astronaut()[::5, ::5]
 GRAY_IMAGE = data.camera()[::5, ::5]
 
 SIGMA = 3

@@ -3,7 +3,9 @@ Code used to trace Scipy logo.
 """
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.nxutils as nx
+#import matplotlib.nxutils as nx
+
+import matplotlib.path as Path
 
 from skimage import io
 from skimage import data
@@ -211,7 +213,10 @@ class ScipyLogo(object):
         y_img, x_img = np.mgrid[:h, :w]
         xy_points = np.column_stack((x_img.flat, y_img.flat))
 
-        mask = nx.points_inside_poly(xy_points, xy_poly)
+        xy_path = Path(xy_poly) 
+        mask = xy_path.contains_points(xy_points)
+
+        #mask = nx.points_inside_poly(xy_points, xy_poly)
         return mask.reshape((h, w))
 
 
@@ -241,18 +246,18 @@ def plot_snake_overlay():
     plt.imshow(img)
 
 
-def plot_lena_overlay():
+def plot_astro_overlay():
     plt.figure()
     logo = ScipyLogo((300, 300), 180)
     logo.plot_snake_curve()
     logo.plot_circle()
-    img = data.lena()
+    img = data.astronaut()
     plt.imshow(img)
 
 
 if __name__ == '__main__':
     plot_scipy_trace()
     plot_snake_overlay()
-    plot_lena_overlay()
+    plot_astro_overlay()
 
     plt.show()
