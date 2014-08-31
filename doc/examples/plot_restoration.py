@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 =====================
-Deconvolution of Lena
+Image Deconvolution
 =====================
 
-In this example, we deconvolve a noisy version of Lena using Wiener
+In this example, we deconvolve a noisy version of an image using Wiener
 and unsupervised Wiener algorithms. This algorithms are based on
 linear models that can't restore sharp edge as much as non-linear
 methods (like TV restoration) but are much faster.
@@ -34,19 +34,19 @@ import matplotlib.pyplot as plt
 
 from skimage import color, data, restoration
 
-lena = color.rgb2gray(data.lena())
+astro = color.rgb2gray(data.astronaut())
 from scipy.signal import convolve2d as conv2
 psf = np.ones((5, 5)) / 25
-lena = conv2(lena, psf, 'same')
-lena += 0.1 * lena.std() * np.random.standard_normal(lena.shape)
+astro = conv2(astro, psf, 'same')
+astro += 0.1 * astro.std() * np.random.standard_normal(astro.shape)
 
-deconvolved, _ = restoration.unsupervised_wiener(lena, psf)
+deconvolved, _ = restoration.unsupervised_wiener(astro, psf)
 
 fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(8, 5))
 
 plt.gray()
 
-ax[0].imshow(lena, vmin=deconvolved.min(), vmax=deconvolved.max())
+ax[0].imshow(astro, vmin=deconvolved.min(), vmax=deconvolved.max())
 ax[0].axis('off')
 ax[0].set_title('Data')
 

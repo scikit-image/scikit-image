@@ -161,12 +161,12 @@ def test_squared_dot():
     assert (results == np.array([[6, 6]])).all()
 
 
-def test_rotated_lena():
+def test_rotated_img():
     """
     The harris filter should yield the same results with an image and it's
     rotation.
     """
-    im = img_as_float(data.lena().mean(axis=2))
+    im = img_as_float(data.astronaut().mean(axis=2))
     im_rotated = im.T
 
     # Moravec
@@ -235,13 +235,13 @@ def test_subpix_border():
 def test_num_peaks():
     """For a bunch of different values of num_peaks, check that
     peak_local_max returns exactly the right amount of peaks. Test
-    is run on Lena in order to produce a sufficient number of corners"""
+    is run on the astronaut image in order to produce a sufficient number of corners"""
 
-    lena_corners = corner_harris(rgb2gray(data.lena()))
+    img_corners = corner_harris(rgb2gray(data.astronaut()))
 
     for i in range(20):
         n = np.random.random_integers(20)
-        results = peak_local_max(lena_corners, num_peaks=n)
+        results = peak_local_max(img_corners, num_peaks=n)
         assert (results.shape[0] == n)
 
 
@@ -281,7 +281,7 @@ def test_corner_fast_image_unsupported_error():
 
 
 def test_corner_fast_lena():
-    img = rgb2gray(data.lena())
+    img = rgb2gray(data.astronaut())
     expected = np.array([[ 67, 157],
                          [204, 261],
                          [247, 146],
@@ -293,6 +293,7 @@ def test_corner_fast_lena():
                          [455, 177],
                          [461, 160]])
     actual = corner_peaks(corner_fast(img, 12, 0.3))
+    print actual
     assert_array_equal(actual, expected)
 
 
