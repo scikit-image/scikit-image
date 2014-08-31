@@ -1,9 +1,9 @@
-==============================================
-Features extraction and measurements on images
-==============================================
+=============================================
+Feature extraction and measurements on images
+=============================================
 
-Features extraction
--------------------
+Feature extraction
+------------------
 
 Statistical measures on images
 ------------------------------
