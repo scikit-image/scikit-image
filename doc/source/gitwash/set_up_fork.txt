@@ -49,7 +49,7 @@ Linking your repository to the upstream repo
    git remote add upstream git://github.com/scikit-image/scikit-image.git
 
 ``upstream`` here is just the arbitrary name we're using to refer to the
-main scikit-image_ repository at `scikit-image github`_.
+main `scikit-image`_ repository at `scikit-image github`_.
 
 Note that we've used ``git://`` for the URL rather than ``git@``.  The
 ``git://`` URL is read only.  This means we that we can't accidentally
