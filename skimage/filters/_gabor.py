@@ -120,7 +120,7 @@ def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     -------
     real, imag : arrays
         Filtered images using the real and imaginary parts of the Gabor filter
-        kernel.
+        kernel. Images are of the same dimensions as the input one.
 
     References
     ----------
