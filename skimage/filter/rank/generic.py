@@ -42,6 +42,9 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
         mask = img_as_ubyte(mask)
         mask = np.ascontiguousarray(mask)
 
+    if image is out:
+        raise NotImplementedError("Cannot perform rank operation in place.")
+
     if out is None:
         if out_dtype is None:
             out_dtype = image.dtype
@@ -49,9 +52,6 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
     else:
         if len(out.shape) == 2:
             out = out.reshape(out.shape+(pixel_size,))
-
-    if image is out:
-        raise NotImplementedError("Cannot perform rank operation in place.")
 
     is_8bit = image.dtype in (np.uint8, np.int8)
 

@@ -542,6 +542,32 @@ def test_sum():
     rank.sum_bilateral(image=image16, selem=elem, out=out16, mask=mask,s0=1000,s1=1000)
     assert_array_equal(r, out16)
 
+def test_windowed_histogram():
+    # check the number of valid pixels in the neighborhood
+
+    image8 = np.array([[0, 0, 0, 0, 0],
+                       [0, 1, 1, 1, 0],
+                       [0, 1, 1, 1, 0],
+                       [0, 1, 1, 1, 0],
+                       [0, 0, 0, 0, 0]], dtype=np.uint8)
+    elem = np.ones((3, 3), dtype=np.uint8)
+    out8 = np.empty(image8.shape+(2,), dtype=np.uint8)
+    mask = np.ones(image8.shape, dtype=np.uint8)
+
+    r0 =  np.array([[3, 4, 3, 4, 3],
+           [4, 5, 3, 5, 4],
+           [3, 3, 0, 3, 3],
+           [4, 5, 3, 5, 4],
+           [3, 4, 3, 4, 3]], dtype=np.uint8)
+    r1 =  np.array([[1, 2, 3, 2, 1],
+           [2, 4, 6, 4, 2],
+           [3, 6, 9, 6, 3],
+           [2, 4, 6, 4, 2],
+           [1, 2, 3, 2, 1]], dtype=np.uint8)
+    rank.windowed_histogram(image=image8, selem=elem, out=out8, mask=mask)
+    assert_array_equal(r0, out8[:,:,0])
+    assert_array_equal(r1, out8[:,:,1])
+
 
 if __name__ == "__main__":
     run_module_suite()
