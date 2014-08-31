@@ -64,12 +64,12 @@ cdef inline double bilinear_interpolation(double* image, Py_ssize_t rows,
 
     """
     cdef double dr, dc
-    cdef Py_ssize_t minr, minc, maxr, maxc
+    cdef long minr, minc, maxr, maxc
 
-    minr = <Py_ssize_t>floor(r)
-    minc = <Py_ssize_t>floor(c)
-    maxr = <Py_ssize_t>ceil(r)
-    maxc = <Py_ssize_t>ceil(c)
+    minr = <long>floor(r)
+    minc = <long>floor(c)
+    maxr = <long>ceil(r)
+    maxc = <long>ceil(c)
     dr = r - minr
     dc = c - minc
     top = (1 - dc) * get_pixel2d(image, rows, cols, minr, minc, mode, cval) \
@@ -86,9 +86,9 @@ cdef inline double quadratic_interpolation(double x, double[3] f):
     Parameters
     ----------
     x : double
-        Position in the interval [-1, 1].
-    f : double[4]
-        Function values at positions [-1, 0, 1].
+        Position in the interval [0, 2].
+    f : double[3]
+        Function values at positions [0, 2].
 
     Returns
     -------
@@ -96,7 +96,9 @@ cdef inline double quadratic_interpolation(double x, double[3] f):
         Interpolated value.
 
     """
-    return f[1] - 0.25 * (f[0] - f[2]) * x
+    return (x * f[2] * (x - 1)) / 2 - \
+                x * f[1] * (x - 2) + \
+                    (f[0] * (x - 1) * (x - 2)) / 2
 
 
 cdef inline double biquadratic_interpolation(double* image, Py_ssize_t rows,
@@ -124,24 +126,17 @@ cdef inline double biquadratic_interpolation(double* image, Py_ssize_t rows,
 
     """
 
-    cdef Py_ssize_t r0 = round(r)
-    cdef Py_ssize_t c0 = round(c)
-    if r < 0:
-        r0 -= 1
-    if c < 0:
-        c0 -= 1
-    # scale position to range [-1, 1]
-    cdef double xr = (r - r0) - 1
-    cdef double xc = (c - c0) - 1
-    if r == r0:
-        xr += 1
-    if c == c0:
-        xc += 1
+    cdef long r0 = <long>round(r) - 1
+    cdef long c0 = <long>round(c) - 1
+
+    # scale position to range [0, 2]
+    cdef double xr = r - r0
+    cdef double xc = c - c0
 
     cdef double fc[3]
     cdef double fr[3]
 
-    cdef Py_ssize_t pr, pc
+    cdef long pr, pc
 
     # row-wise cubic interpolation
     for pr in range(r0, r0 + 3):
@@ -210,20 +205,20 @@ cdef inline double bicubic_interpolation(double* image, Py_ssize_t rows,
 
     """
 
-    cdef Py_ssize_t r0 = <Py_ssize_t>r - 1
-    cdef Py_ssize_t c0 = <Py_ssize_t>c - 1
-    if r < 0:
-        r0 -= 1
-    if c < 0:
-        c0 -= 1
+    cdef long r0 = <long>floor(r)
+    cdef long c0 = <long>floor(c)
+
     # scale position to range [0, 1]
-    cdef double xr = r - floor(r)
-    cdef double xc = c - floor(c)
+    cdef double xr = r - r0
+    cdef double xc = c - c0
+
+    r0 -= 1
+    c0 -= 1
 
     cdef double fc[4]
     cdef double fr[4]
 
-    cdef Py_ssize_t pr, pc
+    cdef long pr, pc
 
     # row-wise cubic interpolation
     for pr in range(r0, r0 + 4):
@@ -236,7 +231,7 @@ cdef inline double bicubic_interpolation(double* image, Py_ssize_t rows,
 
 
 cdef inline double get_pixel2d(double* image, Py_ssize_t rows, Py_ssize_t cols,
-                               Py_ssize_t r, Py_ssize_t c, char mode,
+                               long r, long c, char mode,
                                double cval):
     """Get a pixel from the image, taking wrapping mode into consideration.
 
@@ -269,8 +264,8 @@ cdef inline double get_pixel2d(double* image, Py_ssize_t rows, Py_ssize_t cols,
 
 
 cdef inline double get_pixel3d(double* image, Py_ssize_t rows, Py_ssize_t cols,
-                               Py_ssize_t dims, Py_ssize_t r, Py_ssize_t c,
-                               Py_ssize_t d, char mode, double cval):
+                               Py_ssize_t dims, long r, long c,
+                               long d, char mode, double cval):
     """Get a pixel from the image, taking wrapping mode into consideration.
 
     Parameters
@@ -303,7 +298,7 @@ cdef inline double get_pixel3d(double* image, Py_ssize_t rows, Py_ssize_t cols,
                      + coord_map(dims, d, mode)]
 
 
-cdef inline Py_ssize_t coord_map(Py_ssize_t dim, Py_ssize_t coord, char mode):
+cdef inline Py_ssize_t coord_map(Py_ssize_t dim, long coord, char mode):
     """Wrap a coordinate, according to a given mode.
 
     Parameters
