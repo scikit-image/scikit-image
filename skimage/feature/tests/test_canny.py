@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from scipy.ndimage import binary_dilation, binary_erosion
-import skimage.filter as F
+import skimage.feature as F
 
 
 class TestCanny(unittest.TestCase):

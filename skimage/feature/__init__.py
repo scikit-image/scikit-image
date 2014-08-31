@@ -1,3 +1,4 @@
+from ._canny import canny
 from ._daisy import daisy
 from ._hog import hog
 from .texture import greycomatrix, greycoprops, local_binary_pattern
@@ -17,7 +18,8 @@ from .util import plot_matches
 from .blob import blob_dog, blob_log, blob_doh
 
 
-__all__ = ['daisy',
+__all__ = ['canny'
+           'daisy',
            'hog',
            'greycomatrix',
            'greycoprops',
