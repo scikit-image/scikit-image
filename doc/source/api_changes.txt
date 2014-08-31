@@ -1,7 +1,3 @@
-Version 0.11
-------------
-- Move ``skimage.filter.canny`` to ``skimage.feature.canny``
-
 Version 0.10
 ------------
 - Removed ``skimage.io.video`` functionality due to broken gstreamer bindings

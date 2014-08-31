@@ -3,7 +3,7 @@ Remember to list any API changes below in `doc/source/api_changes.txt`.
 Version 0.13
 ------------
 * Remove deprecated `None` defaults for `skimage.exposure.rescale_intensity`
-* Remove deprecated `skimage.filter.canny` import in __init__.py that is now in `skimage.feature.canny`
+* Remove deprecated `skimage.filter.canny` import in __init__.py that is now in `skimage.feature.canny` (and complete api_changes.txt. `GitHub discuss <https://github.com/scikit-image/scikit-image/pull/1113/files#r16934196>`__ )
 
 Version 0.12
 ------------
