@@ -185,3 +185,6 @@
 
 - Adam Feuer
   PIL Image import and export improvements
+
+- Rebecca Murphy
+  astronaut in examples
