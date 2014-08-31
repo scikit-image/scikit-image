@@ -105,6 +105,9 @@ def marching_cubes(volume, level, spacing=(1., 1., 1.)):
         raise ValueError("Input volume must have 3 dimensions.")
     if level < volume.min() or level > volume.max():
         raise ValueError("Contour level must be within volume data range.")
+    if len(spacing) != 3:
+        raise ValueError("`spacing` must consist of three floats.")
+
     volume = np.array(volume, dtype=np.float64, order="C")
 
     # Extract raw triangles using marching cubes in Cython
@@ -113,14 +116,14 @@ def marching_cubes(volume, level, spacing=(1., 1., 1.)):
     # Note: this algorithm is fast, but returns degenerate "triangles" which
     #   have repeated vertices - and equivalent vertices are redundantly
     #   placed in every triangle they connect with.
-    raw_faces = _marching_cubes_cy.iterate_and_store_3d(volume, float(level),
-                                                        spacing)
+    raw_faces = _marching_cubes_cy.iterate_and_store_3d(volume, float(level))
 
     # Find and collect unique vertices, storing triangle verts as indices.
     # Returns a true mesh with no degenerate faces.
     verts, faces = _marching_cubes_cy.unpack_unique_verts(raw_faces)
 
-    return np.asarray(verts), np.asarray(faces)
+    # Adjust for non-isotropic spacing in `verts` at time of return
+    return np.asarray(verts) * np.r_[spacing], np.asarray(faces)
 
 
 def mesh_surface_area(verts, faces):
