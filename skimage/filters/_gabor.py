@@ -12,30 +12,34 @@ def _sigma_prefactor(bandwidth):
     return 1.0 / np.pi * np.sqrt(np.log(2)/2.0) * (2.0**b + 1) / (2.0**b - 1)
 
 
-def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None, n_stds=3, 
-                 offset=0):
+def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
+                 n_stds=3, offset=0):
     """Return complex 2D Gabor filter kernel.
 
-    Frequency and orientation representations of the Gabor filter are similar
-    to those of the human visual system. It is especially suitable for texture
-    classification using Gabor filter banks.
+    Gabor kernel is a Gaussian kernel modulated by a complex harmonic function.
+    Harmonic function consists of an imaginary sine function and a real
+    cosine function. Spatial frequency is inversely proportional to the
+    wavelength of the harmonic and to the standard deviation of a Gaussian
+    kernel. The bandwidth is also inversely proportional to the standard
+    deviation.
 
     Parameters
     ----------
     frequency : float
-        Frequency of the harmonic function.
-    theta : float
+        Spatial frequency of the harmonic function. Specified in pixels.
+    theta : float, optional
         Orientation in radians. If 0, the harmonic is in the x-direction.
-    bandwidth : float
+    bandwidth : float, optional
         The bandwidth captured by the filter. For fixed bandwidth, `sigma_x`
         and `sigma_y` will decrease with increasing frequency. This value is
         ignored if `sigma_x` and `sigma_y` are set by the user.
-    sigma_x, sigma_y : float
+    sigma_x, sigma_y : float, optional
         Standard deviation in x- and y-directions. These directions apply to
         the kernel *before* rotation. If `theta = pi/2`, then the kernel is
         rotated 90 degrees so that `sigma_x` controls the *vertical* direction.
-    n_stds : int
-        Number of standard deviations until the array boundaries.
+    n_stds : scalar, optional
+        The linear size of the kernel is n_stds (3 by default) standard
+        deviations
     offset : float, optional
         Phase offset of harmonic function in radians.
 
@@ -53,15 +57,20 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None, n_
     --------
     >>> from skimage.filter import gabor_kernel
     >>> from skimage import io
+    >>> from matplotlib import pyplot as plt  # doctest: +SKIP
 
     >>> gk = gabor_kernel(frequency=0.2)
-    >>> io.imshow(gk.real) # plot only the real part of the kernel
-    >>> io.show()
+    >>> plt.figure()        # doctest: +SKIP
+    >>> io.imshow(gk.real)  # doctest: +SKIP
+    >>> io.show()           # doctest: +SKIP
 
-    >>> gk = gabor_kernel(frequency=0.2, bandwidth=0.1) # more ripples 
-    >>> io.imshow(gk.real)
-    >>> io.show()
-    """    
+    >>> # more ripples (equivalent to increasing the size of the
+    >>> # Gaussian spread)
+    >>> gk = gabor_kernel(frequency=0.2, bandwidth=0.1)
+    >>> plt.figure()        # doctest: +SKIP
+    >>> io.imshow(gk.real)  # doctest: +SKIP
+    >>> io.show()           # doctest: +SKIP
+    """
     if sigma_x is None:
         sigma_x = _sigma_prefactor(bandwidth) / frequency
     if sigma_y is None:
@@ -91,30 +100,39 @@ def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     The real and imaginary parts of the Gabor filter kernel are applied to the
     image and the response is returned as a pair of arrays.
 
-    Frequency and orientation representations of the Gabor filter are similar
-    to those of the human visual system. It is especially suitable for texture
-    classification using Gabor filter banks.
+    Gabor filter is a linear filter with a Gaussian kernel which is modulated
+    by a sinusoidal plane wave. Frequency and orientation representations of
+    the Gabor filter are similar to those of the human visual system.
+    Gabor filter banks are commonly used in computer vision and image
+    processing. They are especially suitable for edge detection and texture
+    classification.
 
     Parameters
     ----------
     image : 2-D array
         Input image.
     frequency : float
-        Frequency of the harmonic function.
-    theta : float
+        Spatial frequency of the harmonic function. Specified in pixels.
+    theta : float, optional
         Orientation in radians. If 0, the harmonic is in the x-direction.
-    bandwidth : float
+    bandwidth : float, optional
         The bandwidth captured by the filter. For fixed bandwidth, `sigma_x`
         and `sigma_y` will decrease with increasing frequency. This value is
         ignored if `sigma_x` and `sigma_y` are set by the user.
-    sigma_x, sigma_y : float
+    sigma_x, sigma_y : float, optional
         Standard deviation in x- and y-directions. These directions apply to
         the kernel *before* rotation. If `theta = pi/2`, then the kernel is
         rotated 90 degrees so that `sigma_x` controls the *vertical* direction.
-    n_stds : int
-        Number of standard deviations until the array boundaries.
+    n_stds : scalar, optional
+        The linear size of the kernel is n_stds (3 by default) standard
+        deviations.
     offset : float, optional
         Phase offset of harmonic function in radians.
+    mode : string, optional
+        Mode used to convolve image with a kernel, passed to `ndimage.convolve`
+    cval : scalar, optional
+        Value to fill past edges of input if `mode` of convolution is
+        'constant'. The parameter is passed to `ndimage.convolve`.
 
     Returns
     -------
@@ -131,14 +149,24 @@ def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     --------
     >>> from skimage.filter import gabor_filter
     >>> from skimage import data, io
+    >>> from matplotlib import pyplot as plt  # doctest: +SKIP
 
-    >>> image = data.checkerboard()
-    >>> filt_real, filt_imag = gabor_filter(image, 0.7)
-    >>> io.imshow(filt_real)
-    >>> io.show()
+    >>> image = data.coins()
+    >>> # detecting edges in a coin image
+    >>> filt_real, filt_imag = gabor_filter(image, frequency=0.6)
+    >>> plt.figure()            # doctest: +SKIP
+    >>> io.imshow(filt_real)    # doctest: +SKIP
+    >>> io.show()               # doctest: +SKIP
+
+    >>> # less sensitivity to finer details with the lower frequency kernel
+    >>> filt_real, filt_imag = gabor_filter(image, frequency=0.1)
+    >>> plt.figure()            # doctest: +SKIP
+    >>> io.imshow(filt_real)    # doctest: +SKIP
+    >>> io.show()               # doctest: +SKIP
     """
     assert_nD(image, 2)
-    g = gabor_kernel(frequency, theta, bandwidth, sigma_x, sigma_y, n_stds, offset)
+    g = gabor_kernel(frequency, theta, bandwidth, sigma_x, sigma_y, n_stds,
+                     offset)
 
     filtered_real = ndimage.convolve(image, np.real(g), mode=mode, cval=cval)
     filtered_imag = ndimage.convolve(image, np.imag(g), mode=mode, cval=cval)

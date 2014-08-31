@@ -194,3 +194,6 @@
 
 - Alexey Umnov
   skimage.draw.ellipse bug fix and tests.
+
+- Ivana Kajic
+  Updated description and examples in documentation for gabor filters
