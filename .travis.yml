@@ -22,6 +22,7 @@ virtualenv:
 
 before_install:
     - export DISPLAY=:99.0
+    - export SPACER="\n\n\n\n\n\n\n\n\n\n*************************\n\n"
     - sh -e /etc/init.d/xvfb start
     - sudo apt-get update
 
@@ -57,8 +58,12 @@ script:
     # Run all tests with minimum dependencies
     - nosetests --exe -v skimage
 
+    - echo -e $SPACER
+
     # Run pep8 and flake tests
     - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
+
+    - echo -e $SPACER
 
     # Install optional dependencies to get full test coverage
     # Notes:
@@ -68,22 +73,22 @@ script:
     #   The solution was suggested here
     #   https://groups.google.com/a/continuum.io/forum/#!topic/anaconda/-DLG2ZdTkw0
     - if [[ $ENV == python=3.2 ]]; then
-        sudo apt-get install -qq python3-pyqt4;
-        travis_retry pip install -q matplotlib;
-        travis_retry pip install -q networkx;
+        sudo apt-get install python3-pyqt4;
+        travis_retry pip install matplotlib==1.3.1;
+        travis_retry pip install networkx;
       else
-        travis_retry conda install -q matplotlib pyqt networkx;
+        travis_retry conda install matplotlib pyqt networkx;
         sudo cp ~/miniconda/envs/test/include/png* /usr/include;
         rm ~/miniconda/envs/test/lib/libm-2.5.so;
         rm ~/miniconda/envs/test/lib/libm.*;
-        sudo apt-get install -qq libtiff4-dev libwebp-dev xcftools;
-        travis_retry pip install -q imread;
-        travis_retry pip install -q pyfits;
+        sudo apt-get install libtiff4-dev libwebp-dev xcftools;
+        travis_retry pip install imread;
+        travis_retry pip install pyfits;
       fi
-    - sudo apt-get install -qq libfreeimage3
+    - sudo apt-get install libfreeimage3
     # TODO: update when SimpleITK become available on py34 or hopefully pip
     - if [[ $ENV != python=3.4* ]]; then
-        travis_retry easy_install -q SimpleITK;
+        travis_retry easy_install SimpleITK;
       fi
 
     # Matplotlib settings
@@ -93,10 +98,14 @@ script:
     - "echo 'backend : Agg' > $MPL_DIR/matplotlibrc"
     - "echo 'backend.qt4 : PyQt4' >> $MPL_DIR/matplotlibrc"
 
+    - echo -e $SPACER
+
     # Run all doc examples
     - export PYTHONPATH=$(pwd):$PYTHONPATH
     - for f in doc/examples/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
     - for f in doc/examples/applications/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
+
+    - echo -e $SPACER
 
     # run tests again with optional dependencies to get more coverage
     # measure coverage on py3.3
