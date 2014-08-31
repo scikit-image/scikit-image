@@ -12,10 +12,10 @@ from skimage._shared.version_requirements import is_installed
 
 @skipif(not viewer_available)
 def test_viewer():
-    lena = data.lena()
+    astro = data.astronaut()
     coins = data.coins()
 
-    view = ImageViewer(lena)
+    view = ImageViewer(astro)
     import tempfile
     _, filename = tempfile.mkstemp(suffix='.png')
 
@@ -23,7 +23,7 @@ def test_viewer():
     view.close()
     view.save_to_file(filename)
     view.open_file(filename)
-    assert_equal(view.image, lena)
+    assert_equal(view.image, astro)
     view.image = coins
     assert_equal(view.image, coins),
     view.save_to_file(filename),
@@ -40,7 +40,7 @@ def make_key_event(key):
 @skipif(not viewer_available)
 def test_collection_viewer():
 
-    img = data.lena()
+    img = data.astro()
     img_collection = tuple(pyramid_gaussian(img))
 
     view = CollectionViewer(img_collection)
@@ -74,4 +74,3 @@ def test_viewer_with_overlay():
     ov.overlay = img
     assert_equal(ov.overlay, img)
     assert_equal(ov.filtered_image, img)
-

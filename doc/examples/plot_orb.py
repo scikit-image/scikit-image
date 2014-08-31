@@ -20,7 +20,7 @@ from skimage.color import rgb2gray
 import matplotlib.pyplot as plt
 
 
-img1 = rgb2gray(data.lena())
+img1 = rgb2gray(data.astronaut())
 img2 = tf.rotate(img1, 180)
 tform = tf.AffineTransform(scale=(1.3, 1.1), rotation=0.5,
                            translation=(0, -200))

@@ -1,10 +1,10 @@
 """
-=============================
-Denoising the picture of Lena
-=============================
+====================
+Denoising a picture
+====================
 
-In this example, we denoise a noisy version of the picture of Lena using the
-total variation and bilateral denoising filter.
+In this example, we denoise a noisy version of the picture of the astronaut
+Eileen Collins using the total variation and bilateral denoising filter.
 
 These algorithms typically produce "posterized" images with flat domains
 separated by sharp edges. It is possible to change the degree of posterization
@@ -32,10 +32,10 @@ from skimage import data, img_as_float
 from skimage.restoration import denoise_tv_chambolle, denoise_bilateral
 
 
-lena = img_as_float(data.lena())
-lena = lena[220:300, 220:320]
+astro = img_as_float(data.astronaut())
+astro = astro[220:300, 220:320]
 
-noisy = lena + 0.6 * lena.std() * np.random.random(lena.shape)
+noisy = astro + 0.6 * astro.std() * np.random.random(astro.shape)
 noisy = np.clip(noisy, 0, 1)
 
 fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(8, 5))
@@ -58,7 +58,7 @@ ax[1, 0].set_title('(more) TV')
 ax[1, 1].imshow(denoise_bilateral(noisy, sigma_range=0.1, sigma_spatial=15))
 ax[1, 1].axis('off')
 ax[1, 1].set_title('(more) Bilateral')
-ax[1, 2].imshow(lena)
+ax[1, 2].imshow(astro)
 ax[1, 2].axis('off')
 ax[1, 2].set_title('original')
 

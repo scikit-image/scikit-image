@@ -84,9 +84,9 @@ def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
            [ 0.12075024,  0.16630671,  0.12075024],
            [ 0.08767308,  0.12075024,  0.08767308]])
     >>> # For RGB images, each is filtered separately
-    >>> from skimage.data import lena
-    >>> image = lena()
-    >>> filtered_lena = gaussian_filter(image, sigma=1, multichannel=True)
+    >>> from skimage.data import astronaut
+    >>> image = astronaut()
+    >>> filtered_img = gaussian_filter(image, sigma=1, multichannel=True)
     """
     spatial_dims = guess_spatial_dimensions(image)
     if spatial_dims is None and multichannel is None:
