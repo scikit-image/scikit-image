@@ -37,12 +37,12 @@ Library:
         skimage.io._plugins, skimage.measure, skimage.morphology,
         skimage.scripts, skimage.restoration, skimage.segmentation,
         skimage.transform, skimage.util
-    Extension: skimage.morphology._pnpoly
-        Sources:
-            skimage/morphology/_pnpoly.pyx
     Extension: skimage.io._plugins._colormixer
         Sources:
             skimage/io/_plugins/_colormixer.pyx
+    Extension: skimage.measure._pnpoly
+        Sources:
+            skimage/measure/_pnpoly.pyx
     Extension: skimage.measure._find_contours_cy
         Sources:
             skimage/measure/_find_contours_cy.pyx
