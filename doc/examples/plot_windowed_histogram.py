@@ -37,7 +37,7 @@ def windowed_histogram_similarity(image, selem, reference_hist, n_bins):
     # arithmetic operations with the windowed histograms fro the image
     reference_hist = reference_hist.reshape((1,1) + reference_hist.shape)
 
-    # Compute Chi squared distance metric: sum((X-Y)**2 / (X+Y);
+    # Compute Chi squared distance metric: sum((X-Y)^2 / (X+Y));
     # a measure of distance between histograms
     X = px_histograms
     Y = reference_hist
