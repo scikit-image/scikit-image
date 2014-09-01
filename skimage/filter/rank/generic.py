@@ -887,8 +887,8 @@ def windowed_histogram(image, selem, out=None, mask=None, shift_x=False, shift_y
         to the structuring element sizes (center must be inside the given
         structuring element).
     n_bins : int or None
-        The number of histogram bins. Will default to image.max() + 1 if None
-        is passed.
+        The number of histogram bins. Will default to `image.max() + 1`
+        if None is passed.
 
     Returns
     -------
