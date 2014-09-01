@@ -4,13 +4,13 @@ from __future__ import division
 Sliding window histogram
 ========================
 
-This example extracts a single coin from the coins image and generates a
-histogram of its greyscale values.
+This example extracts a single coin from the `skimage.data.coins` image and
+generates a histogram of its greyscale values.
 
 It then computes a sliding window histogram of the complete image using
-rank.windowed_histogram. The local histogram for the region surrounding
-each pixel in the image is compared to that of the single coin, with
-a similarity measure being computed and displayed.
+`skimage.filter.rank.windowed_histogram`. The local histogram for the region
+surrounding each pixel in the image is compared to that of the single coin,
+with a similarity measure being computed and displayed.
 
 To demonstrate the rotational invariance of the technique, the same
 test is performed on a version of the coins image rotated by 45 degrees.
@@ -20,9 +20,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage.util.dtype import dtype_range
 from skimage.util import img_as_ubyte
-from skimage import exposure
 from skimage.morphology import disk
 from skimage.filter import rank
 from skimage import transform
@@ -57,9 +55,8 @@ def windowed_histogram_similarity(image, selem, reference_hist, n_bins):
     return similarity
 
 
-# Load the coins image
+# Load the `skimage.data.coins` image
 img = img_as_ubyte(data.coins())
-# img = img_as_ubyte(plt.imread('../../skimage/data/coins.png'))
 
 # Quantize to 16 levels of grayscale; this way the output image will have a
 # 16-dimensional feature vector per pixel
