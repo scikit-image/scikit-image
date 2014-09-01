@@ -4,22 +4,38 @@ from __future__ import division
 Sliding window histogram
 ========================
 
-This example extracts a single coin from the `skimage.data.coins` image and
-generates a histogram of its greyscale values.
+Histogram matching can be used for object detection in images [1]_.
+This example extracts a single coin from the `skimage.data.coins` image
+and uses histogram matching to attempt to locate it within the original
+image.
 
-It then computes a sliding window histogram of the complete image using
-`skimage.filter.rank.windowed_histogram`. The local histogram for the region
-surrounding each pixel in the image is compared to that of the single coin,
-with a similarity measure being computed and displayed.
+First, a box-shaped region of the image containing the target coin is
+extracted and a histogram of its greyscale values is computed.
+
+Next, for each pixel in the test image, a histogram of the greyscale values
+in a region of the image surrounding the pixel is computed.
+`skimage.filter.rank.windowed_histogram` is used for this task, as it
+employs an efficient sliding window based algorithm that is able to compute
+these histograms quickly [2]_.
+The local histogram for the region surrounding each pixel in the image is
+compared to that of the single coin, with a similarity measure being
+computed and displayed.
 
 The histogram of the single coin is computed using `numpy.histogram` on a
 box shaped region surrounding the coin, while the sliding window histograms
 are computed using a disc shaped structural element of a slightly different
 size. This is done in aid of demonstrating that the technique still finds
-similarity inspite of these differences.
+similarity in spite of these differences.
 
 To demonstrate the rotational invariance of the technique, the same
 test is performed on a version of the coins image rotated by 45 degrees.
+
+References
+----------
+.. [1] Porikli, F. "Integral Histogram: A Fast Way to Extract Histograms
+       in Cartesian Spaces" CVPR, 2005. Vol. 1. IEEE, 2005
+.. [2] S.Perreault and P.Hebert. Median filtering in constant time.
+       Trans. Image Processing, 16(9):2389-2394, 2007.
 """
 import numpy as np
 import matplotlib

@@ -895,10 +895,10 @@ def windowed_histogram(image, selem, out=None, mask=None, shift_x=False, shift_y
     out : 3-D array with float dtype of dimensions (H,W,N), where (H,W) are
         the dimensions of the input image and N is n_bins or image.max()+1
         if no value is provided as a parameter. Effectively, each pixel
-        is an N-dimensional feature vector that is the histogram.
-        The sum of the elements in the feature vector will be 1, unless
-        no pixels in the window were covered by both selem and mask, in which
-        case all elements will be 0.
+        is a N-D feature vector that is the histogram. The sum of the
+        elements in the feature vector will be 1, unless no pixels in the
+        window were covered by both selem and mask, in which case all
+        elements will be 0.
 
     Examples
     --------
