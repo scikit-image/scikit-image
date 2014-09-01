@@ -28,7 +28,7 @@ def test_format_filename():
 def test_open_file_dialog():
     utils.init_qtapp()
     timer = QtCore.QTimer()
-    timer.singleShot(10, QtGui.QApplication.quit)
+    timer.singleShot(100, lambda: QtGui.QApplication.quit())
     filename = dialogs.open_file_dialog()
     assert filename is None
 
@@ -37,6 +37,6 @@ def test_open_file_dialog():
 def test_save_file_dialog():
     utils.init_qtapp()
     timer = QtCore.QTimer()
-    timer.singleShot(10, QtGui.QApplication.quit)
+    timer.singleShot(100, lambda: QtGui.QApplication.quit())
     filename = dialogs.save_file_dialog()
     assert filename is None

@@ -60,6 +60,14 @@ class BlitManager(object):
         self.background = None
         self.artists = []
 
+    def add_artists(self, artists):
+        self.artists.extend(artists)
+        self.redraw()
+
+    def remove_artists(self, artists):
+        for artist in artists:
+            self.artist.remove(artist)
+
     def on_draw_event(self, event=None):
         self.background = self.canvas.copy_from_bbox(self.ax.bbox)
         self.draw_artists()
@@ -94,6 +102,13 @@ class EventManager(object):
     def attach(self, tool):
         self.tools.append(tool)
         self.active_tool = tool
+
+    def detach(self, tool):
+        self.tools.remove(tool)
+        if self.tools:
+            self.active_tool = self.tools[-1]
+        else:
+            self.active_tool = None
 
     def on_mouse_press(self, event):
         for tool in self.tools:
@@ -375,9 +390,15 @@ class ImageViewer(QtGui.QMainWindow):
 
     def add_tool(self, tool):
         if self.useblit:
-            self._blit_manager.artists.extend(tool.artists)
+            self._blit_manager.add_artists(tool.artists)
         self._tools.append(tool)
         self._event_manager.attach(tool)
+
+    def remove_tool(self, tool):
+        if self.useblit:
+            self._blit_manager.remove_artists(tool.artists)
+        self._tools.remove(tool)
+        self._event_manager.detach(tool)
 
     def _format_coord(self, x, y):
         # callback function to format coordinate display in status bar

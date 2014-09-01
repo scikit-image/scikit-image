@@ -33,6 +33,7 @@ class CanvasToolBase(object):
         self.ax = viewer.ax
         self.artists = []
         self.active = True
+        viewer.add_tool(self)
 
         self.callback_on_move = _pass if on_move is None else on_move
         self.callback_on_enter = _pass if on_enter is None else on_enter
@@ -73,6 +74,9 @@ class CanvasToolBase(object):
 
     def on_scroll(self, event):
         pass
+
+    def remove(self):
+        self.viewer.remove_tool(self)
 
     @property
     def geometry(self):

@@ -77,11 +77,11 @@ def test_save_buttons():
     viewer.plugins[0] += sv
 
     import tempfile
-    _, filename = tempfile.mkstemp(suffix='.png')
-    os.remove(filename)
+    fid, filename = tempfile.mkstemp(suffix='.png')
+    os.close(fid)
 
     timer = QtCore.QTimer()
-    timer.singleShot(100, lambda: QtGui.QApplication.quit())
+    timer.singleShot(100, QtGui.QApplication.quit)
 
     sv.save_to_stack()
     sv.save_to_file(filename)
@@ -91,6 +91,8 @@ def test_save_buttons():
 
     img = io.pop()
     assert_almost_equal(img, viewer.image)
+
+    os.remove(filename)
 
 
 @skipif(not viewer_available)
