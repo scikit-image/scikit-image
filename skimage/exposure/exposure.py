@@ -5,7 +5,7 @@ from skimage import img_as_float
 from skimage.util.dtype import dtype_range, dtype_limits
 
 
-__all__ = ['histogram', 'cumulative_distribution', 'equalize',
+__all__ = ['histogram', 'cumulative_distribution', 'equalize_hist',
            'rescale_intensity', 'adjust_gamma', 'adjust_log', 'adjust_sigmoid']
 
 
@@ -104,7 +104,7 @@ def cumulative_distribution(image, nbins=256):
     return img_cdf, bin_centers
 
 
-def equalize_hist(image, nbins=256):
+def equalize_hist(image, nbins=256, mask=None):
     """Return image after histogram equalization.
 
     Parameters
@@ -113,6 +113,9 @@ def equalize_hist(image, nbins=256):
         Image array.
     nbins : int
         Number of bins for image histogram.
+    mask: ndarray of bools or 0s and 1s, optional
+        Array of same shape as `image`. Only points at which mask == True
+        are used for the equalization, which is applied to the whole image.
 
     Returns
     -------
@@ -130,7 +133,11 @@ def equalize_hist(image, nbins=256):
 
     """
     image = img_as_float(image)
-    cdf, bin_centers = cumulative_distribution(image, nbins)
+    if mask is not None:
+        mask = np.array(mask, dtype=bool)
+        cdf, bin_centers = cumulative_distribution(image[mask], nbins)
+    else:
+        cdf, bin_centers = cumulative_distribution(image, nbins)
     out = np.interp(image.flat, bin_centers, cdf)
     return out.reshape(image.shape)
 
