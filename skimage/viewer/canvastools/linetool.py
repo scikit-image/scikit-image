@@ -75,6 +75,7 @@ class LineTool(CanvasToolBase):
 
         self._line.set_data(np.transpose(pts))
         self._handles.set_data(np.transpose(pts))
+        self._line.set_linewidth(self.linewidth)
 
         self.set_visible(True)
         self.redraw()

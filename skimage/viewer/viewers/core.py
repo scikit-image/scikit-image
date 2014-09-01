@@ -83,6 +83,7 @@ class EventManager(object):
         self.connect_event('key_press_event', self.on_key_press)
         self.connect_event('button_release_event', self.on_mouse_release)
         self.connect_event('motion_notify_event', self.on_move)
+        self.connect_event('scroll_event', self.on_scroll)
 
         self.tools = []
         self.active_tool = None
@@ -127,6 +128,11 @@ class EventManager(object):
         tool = self._get_tool(event)
         if not tool is None:
             tool.on_move(event)
+
+    def on_scroll(self, event):
+        tool = self._get_tool(event)
+        if not tool is None:
+            tool.on_scroll(event)
 
 
 class ImageViewer(QtGui.QMainWindow):
