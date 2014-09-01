@@ -38,8 +38,7 @@ class CanvasToolBase(object):
         self._artists = []
         self.active = True
 
-        if useblit:
-            self.connect_event('draw_event', self._blit_on_draw_event)
+        self.connect_event('draw_event', self._on_draw_event)
         self.useblit = useblit
 
         self.callback_on_move = _pass if on_move is None else on_move
@@ -74,8 +73,9 @@ class CanvasToolBase(object):
         for artist in self._artists:
             artist.set_visible(val)
 
-    def _blit_on_draw_event(self, event=None):
-        self.img_background = self.canvas.copy_from_bbox(self.ax.bbox)
+    def _on_draw_event(self, event=None):
+        if self.useblit:
+            self.img_background = self.canvas.copy_from_bbox(self.ax.bbox)
         self._draw_artists()
 
     def _draw_artists(self):
@@ -102,7 +102,7 @@ class CanvasToolBase(object):
             self._draw_artists()
             self.canvas.blit(self.ax.bbox)
         else:
-            self.canvas.draw_idle()
+            self.canvas.draw()
 
     def _on_key_press(self, event):
         if event.key == 'enter':
