@@ -1,3 +1,4 @@
+from __future__ import division
 """
 ========================
 Sliding window histogram
@@ -50,11 +51,8 @@ def windowed_histogram_similarity(image, selem, reference_hist, n_bins):
 
     # Generate a similarity measure. It needs to be low when distance is high.
     # and high when distance is low; taking the reciprocal will do this.
-    # Chi squared will always be >= 0. Add small value to prevent divide by 0.
-    # Square the denominator to push low values toward 0; this makes the
-    # high similarity regions stand out in the figure created below; this
-    # us just done for aesthetics.
-    similarity = 1 / (chi_sqr + 1.0e-6)**2
+    # Chi squared will always be >= 0, add small value to prevent divide by 0.
+    similarity = 1 / (chi_sqr + 1.0e-4)
 
     return similarity
 
@@ -65,7 +63,7 @@ img = img_as_ubyte(data.coins())
 
 # Quantize to 16 levels of grayscale; this way the output image will have a
 # 16-dimensional feature vector per pixel
-quantized_img = img/16
+quantized_img = img//16
 
 # Select the coin from the 4th column, second row.
 # Co-ordinate ordering: [x1,y1,x2,y2]
@@ -90,7 +88,7 @@ similarity = windowed_histogram_similarity(quantized_img, selem, coin_hist,
 # Now try a rotated image
 rotated_img = img_as_ubyte(transform.rotate(img, 45.0, resize=True))
 # Quantize to 16 levels as before
-quantized_rotated_image = rotated_img/16
+quantized_rotated_image = rotated_img//16
 # Similarity on rotated image
 rotated_similarity = windowed_histogram_similarity(quantized_rotated_image,
                                                    selem, coin_hist,
