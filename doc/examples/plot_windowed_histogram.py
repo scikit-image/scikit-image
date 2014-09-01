@@ -12,6 +12,12 @@ It then computes a sliding window histogram of the complete image using
 surrounding each pixel in the image is compared to that of the single coin,
 with a similarity measure being computed and displayed.
 
+The histogram of the single coin is computed using `numpy.histogram` on a
+box shaped region surrounding the coin, while the sliding window histograms
+are computed using a disc shaped structural element of a slightly different
+size. This is done in aid of demonstrating that the technique still finds
+similarity inspite of these differences.
+
 To demonstrate the rotational invariance of the technique, the same
 test is performed on a version of the coins image rotated by 45 degrees.
 """
@@ -34,7 +40,7 @@ def windowed_histogram_similarity(image, selem, reference_hist, n_bins):
     px_histograms = rank.windowed_histogram(image, selem, n_bins=n_bins)
 
     # Reshape coin histogram to (1,1,N) for broadcast when we want to use it in
-    # arithmetic operations with the windowed histograms fro the image
+    # arithmetic operations with the windowed histograms from the image
     reference_hist = reference_hist.reshape((1,1) + reference_hist.shape)
 
     # Compute Chi squared distance metric: sum((X-Y)^2 / (X+Y));
@@ -47,7 +53,7 @@ def windowed_histogram_similarity(image, selem, reference_hist, n_bins):
     frac[denom==0] = 0
     chi_sqr = np.sum(frac, axis=2) * 0.5
 
-    # Generate a similarity measure. It needs to be low when distance is high.
+    # Generate a similarity measure. It needs to be low when distance is high
     # and high when distance is low; taking the reciprocal will do this.
     # Chi squared will always be >= 0, add small value to prevent divide by 0.
     similarity = 1 / (chi_sqr + 1.0e-4)
