@@ -7,7 +7,8 @@ cimport numpy as cnp
 from .core_cy cimport dtype_t, dtype_t_out, _core, _min, _max
 
 
-cdef inline void _kernel_autolevel(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_autolevel(dtype_t_out* out, Py_ssize_t odepth,
+                                   Py_ssize_t* histo,
                                    double pop, dtype_t g,
                                    Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                    double p0, double p1,
@@ -40,7 +41,8 @@ cdef inline void _kernel_autolevel(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_gradient(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_gradient(dtype_t_out* out, Py_ssize_t odepth,
+                                  Py_ssize_t* histo,
                                   double pop, dtype_t g,
                                   Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                   double p0, double p1,
@@ -68,7 +70,8 @@ cdef inline void _kernel_gradient(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_mean(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_mean(dtype_t_out* out, Py_ssize_t odepth,
+                              Py_ssize_t* histo,
                               double pop, dtype_t g,
                               Py_ssize_t max_bin, Py_ssize_t mid_bin,
                               double p0, double p1,
@@ -93,7 +96,8 @@ cdef inline void _kernel_mean(dtype_t_out[:] out, Py_ssize_t* histo,
     else:
         out[0] = <dtype_t_out>0
 
-cdef inline void _kernel_sum(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_sum(dtype_t_out* out, Py_ssize_t odepth,
+                             Py_ssize_t* histo,
                              double pop, dtype_t g,
                              Py_ssize_t max_bin, Py_ssize_t mid_bin,
                              double p0, double p1,
@@ -118,7 +122,8 @@ cdef inline void _kernel_sum(dtype_t_out[:] out, Py_ssize_t* histo,
     else:
         out[0] = <dtype_t_out>0
 
-cdef inline void _kernel_subtract_mean(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_subtract_mean(dtype_t_out* out, Py_ssize_t odepth,
+                                       Py_ssize_t* histo,
                                        double pop, dtype_t g,
                                        Py_ssize_t max_bin,
                                        Py_ssize_t mid_bin, double p0,
@@ -144,7 +149,8 @@ cdef inline void _kernel_subtract_mean(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_enhance_contrast(dtype_t_out[:] out,
+cdef inline void _kernel_enhance_contrast(dtype_t_out* out,
+                                          Py_ssize_t odepth,
                                           Py_ssize_t* histo, double pop,
                                           dtype_t g,
                                           Py_ssize_t max_bin,
@@ -180,7 +186,8 @@ cdef inline void _kernel_enhance_contrast(dtype_t_out[:] out,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_percentile(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_percentile(dtype_t_out* out, Py_ssize_t odepth,
+                                    Py_ssize_t* histo,
                                     double pop, dtype_t g,
                                     Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                     double p0, double p1,
@@ -204,7 +211,8 @@ cdef inline void _kernel_percentile(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_pop(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_pop(dtype_t_out* out, Py_ssize_t odepth,
+                             Py_ssize_t* histo,
                              double pop, dtype_t g,
                              Py_ssize_t max_bin, Py_ssize_t mid_bin,
                              double p0, double p1,
@@ -224,7 +232,8 @@ cdef inline void _kernel_pop(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_threshold(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_threshold(dtype_t_out* out, Py_ssize_t odepth,
+                                   Py_ssize_t* histo,
                                    double pop, dtype_t g,
                                    Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                    double p0, double p1,

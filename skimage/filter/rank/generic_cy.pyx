@@ -9,7 +9,8 @@ from libc.math cimport log
 from .core_cy cimport dtype_t, dtype_t_out, _core
 
 
-cdef inline void _kernel_autolevel(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_autolevel(dtype_t_out* out, Py_ssize_t odepth,
+                                   Py_ssize_t* histo,
                                    double pop, dtype_t g,
                                    Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                    double p0, double p1,
@@ -35,7 +36,8 @@ cdef inline void _kernel_autolevel(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_bottomhat(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_bottomhat(dtype_t_out* out, Py_ssize_t odepth,
+                                   Py_ssize_t* histo,
                                    double pop, dtype_t g,
                                    Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                    double p0, double p1,
@@ -52,7 +54,8 @@ cdef inline void _kernel_bottomhat(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_equalize(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_equalize(dtype_t_out* out, Py_ssize_t odepth,
+                                  Py_ssize_t* histo,
                                   double pop, dtype_t g,
                                   Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                   double p0, double p1,
@@ -71,7 +74,8 @@ cdef inline void _kernel_equalize(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_gradient(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_gradient(dtype_t_out* out, Py_ssize_t odepth,
+                                  Py_ssize_t* histo,
                                   double pop, dtype_t g,
                                   Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                   double p0, double p1,
@@ -93,7 +97,8 @@ cdef inline void _kernel_gradient(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_maximum(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_maximum(dtype_t_out* out, Py_ssize_t odepth,
+                                 Py_ssize_t* histo,
                                  double pop, dtype_t g,
                                  Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                  double p0, double p1,
@@ -110,7 +115,8 @@ cdef inline void _kernel_maximum(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_mean(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_mean(dtype_t_out* out, Py_ssize_t odepth,
+                              Py_ssize_t* histo,
                               double pop, dtype_t g,
                               Py_ssize_t max_bin, Py_ssize_t mid_bin,
                               double p0, double p1,
@@ -127,7 +133,8 @@ cdef inline void _kernel_mean(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_subtract_mean(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_subtract_mean(dtype_t_out* out, Py_ssize_t odepth,
+                                       Py_ssize_t* histo,
                                        double pop, dtype_t g,
                                        Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                        double p0, double p1,
@@ -144,7 +151,8 @@ cdef inline void _kernel_subtract_mean(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_median(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_median(dtype_t_out* out, Py_ssize_t odepth,
+                                Py_ssize_t* histo,
                                 double pop, dtype_t g,
                                 Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                 double p0, double p1,
@@ -164,7 +172,8 @@ cdef inline void _kernel_median(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_minimum(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_minimum(dtype_t_out* out, Py_ssize_t odepth,
+                                 Py_ssize_t* histo,
                                  double pop, dtype_t g,
                                  Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                  double p0, double p1,
@@ -181,7 +190,8 @@ cdef inline void _kernel_minimum(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_modal(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_modal(dtype_t_out* out, Py_ssize_t odepth,
+                               Py_ssize_t* histo,
                                double pop, dtype_t g,
                                Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                double p0, double p1,
@@ -199,7 +209,8 @@ cdef inline void _kernel_modal(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_enhance_contrast(dtype_t_out[:] out,
+cdef inline void _kernel_enhance_contrast(dtype_t_out* out,
+                                          Py_ssize_t odepth,
                                           Py_ssize_t* histo,
                                           double pop,
                                           dtype_t g,
@@ -227,7 +238,8 @@ cdef inline void _kernel_enhance_contrast(dtype_t_out[:] out,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_pop(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_pop(dtype_t_out* out, Py_ssize_t odepth,
+                             Py_ssize_t* histo,
                              double pop, dtype_t g,
                              Py_ssize_t max_bin, Py_ssize_t mid_bin,
                              double p0, double p1,
@@ -236,7 +248,8 @@ cdef inline void _kernel_pop(dtype_t_out[:] out, Py_ssize_t* histo,
     out[0] = <dtype_t_out>pop
 
 
-cdef inline void _kernel_sum(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_sum(dtype_t_out* out, Py_ssize_t odepth,
+                             Py_ssize_t* histo,
                              double pop, dtype_t g,
                              Py_ssize_t max_bin, Py_ssize_t mid_bin,
                              double p0, double p1,
@@ -253,7 +266,8 @@ cdef inline void _kernel_sum(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_threshold(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_threshold(dtype_t_out* out, Py_ssize_t odepth,
+                                   Py_ssize_t* histo,
                                    double pop, dtype_t g,
                                    Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                    double p0, double p1,
@@ -270,7 +284,8 @@ cdef inline void _kernel_threshold(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_tophat(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_tophat(dtype_t_out* out, Py_ssize_t odepth,
+                                Py_ssize_t* histo,
                                 double pop, dtype_t g,
                                 Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                 double p0, double p1,
@@ -287,7 +302,8 @@ cdef inline void _kernel_tophat(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_noise_filter(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_noise_filter(dtype_t_out* out, Py_ssize_t odepth,
+                                      Py_ssize_t* histo,
                                       double pop, dtype_t g,
                                       Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                       double p0, double p1,
@@ -313,7 +329,8 @@ cdef inline void _kernel_noise_filter(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>min_i
 
 
-cdef inline void _kernel_entropy(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_entropy(dtype_t_out* out, Py_ssize_t odepth,
+                                 Py_ssize_t* histo,
                                  double pop, dtype_t g,
                                  Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                  double p0, double p1,
@@ -332,7 +349,8 @@ cdef inline void _kernel_entropy(dtype_t_out[:] out, Py_ssize_t* histo,
         out[0] = <dtype_t_out>0
 
 
-cdef inline void _kernel_otsu(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_otsu(dtype_t_out* out, Py_ssize_t odepth,
+                              Py_ssize_t* histo,
                               double pop, dtype_t g,
                               Py_ssize_t max_bin, Py_ssize_t mid_bin,
                               double p0, double p1,
@@ -371,7 +389,8 @@ cdef inline void _kernel_otsu(dtype_t_out[:] out, Py_ssize_t* histo,
     out[0] = <dtype_t_out>max_i
 
 
-cdef inline void _kernel_win_hist(dtype_t_out[:] out, Py_ssize_t* histo,
+cdef inline void _kernel_win_hist(dtype_t_out* out, Py_ssize_t odepth,
+                                  Py_ssize_t* histo,
                                   double pop, dtype_t g,
                                   Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                   double p0, double p1,
@@ -381,10 +400,10 @@ cdef inline void _kernel_win_hist(dtype_t_out[:] out, Py_ssize_t* histo,
     cdef double scale
     if pop:
         scale = 1.0 / pop
-        for i in xrange(out.shape[0]):
+        for i in xrange(odepth):
             out[i] = <dtype_t_out>(histo[i] * scale)
     else:
-        for i in xrange(out.shape[0]):
+        for i in xrange(odepth):
             out[i] = <dtype_t_out>0
 
 

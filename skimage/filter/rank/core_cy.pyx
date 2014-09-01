@@ -42,7 +42,7 @@ cdef inline char is_in_mask(Py_ssize_t rows, Py_ssize_t cols,
             return 0
 
 
-cdef void _core(void kernel(dtype_t_out[:] out_feat, Py_ssize_t*, double, dtype_t,
+cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double, dtype_t,
                 	        Py_ssize_t, Py_ssize_t, double,
                             double, Py_ssize_t, Py_ssize_t),
                 dtype_t[:, ::1] image,
@@ -61,6 +61,7 @@ cdef void _core(void kernel(dtype_t_out[:] out_feat, Py_ssize_t*, double, dtype_
     cdef Py_ssize_t cols = image.shape[1]
     cdef Py_ssize_t srows = selem.shape[0]
     cdef Py_ssize_t scols = selem.shape[1]
+    cdef Py_ssize_t odepth = out.shape[2]
 
     cdef Py_ssize_t centre_r = <Py_ssize_t>(selem.shape[0] / 2) + shift_y
     cdef Py_ssize_t centre_c = <Py_ssize_t>(selem.shape[1] / 2) + shift_x
@@ -151,7 +152,7 @@ cdef void _core(void kernel(dtype_t_out[:] out_feat, Py_ssize_t*, double, dtype_
 
     r = 0
     c = 0
-    kernel(out[r, c, :], histo, pop, image[r, c], max_bin, mid_bin,
+    kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], max_bin, mid_bin,
            p0, p1, s0, s1)
 
     # main loop
@@ -172,7 +173,7 @@ cdef void _core(void kernel(dtype_t_out[:] out_feat, Py_ssize_t*, double, dtype_
                 if is_in_mask(rows, cols, rr, cc, mask_data):
                     histogram_decrement(histo, &pop, image[rr, cc])
 
-            kernel(out[r, c, :], histo, pop, image[r, c], max_bin, mid_bin,
+            kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], max_bin, mid_bin,
                    p0, p1, s0, s1)
 
         r += 1  # pass to the next row
@@ -192,7 +193,7 @@ cdef void _core(void kernel(dtype_t_out[:] out_feat, Py_ssize_t*, double, dtype_
             if is_in_mask(rows, cols, rr, cc, mask_data):
                 histogram_decrement(histo, &pop, image[rr, cc])
 
-        kernel(out[r, c, :], histo, pop, image[r, c], max_bin, mid_bin,
+        kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], max_bin, mid_bin,
                p0, p1, s0, s1)
 
         # ---> east to west
@@ -209,7 +210,7 @@ cdef void _core(void kernel(dtype_t_out[:] out_feat, Py_ssize_t*, double, dtype_
                 if is_in_mask(rows, cols, rr, cc, mask_data):
                     histogram_decrement(histo, &pop, image[rr, cc])
 
-            kernel(out[r, c, :], histo, pop, image[r, c], max_bin, mid_bin,
+            kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], max_bin, mid_bin,
                    p0, p1, s0, s1)
 
         r += 1  # pass to the next row
@@ -229,7 +230,7 @@ cdef void _core(void kernel(dtype_t_out[:] out_feat, Py_ssize_t*, double, dtype_
             if is_in_mask(rows, cols, rr, cc, mask_data):
                 histogram_decrement(histo, &pop, image[rr, cc])
 
-        kernel(out[r, c, :], histo, pop, image[r, c],
+        kernel(&out[r, c, 0], odepth, histo, pop, image[r, c],
                max_bin, mid_bin, p0, p1, s0, s1)
 
     # release memory allocated by malloc
