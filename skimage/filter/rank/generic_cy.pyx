@@ -407,7 +407,6 @@ cdef inline void _kernel_win_hist(dtype_t_out* out, Py_ssize_t odepth,
             out[i] = <dtype_t_out>0
 
 
-
 def _autolevel(dtype_t[:, ::1] image,
                char[:, ::1] selem,
                char[:, ::1] mask,
@@ -526,6 +525,7 @@ def _pop(dtype_t[:, ::1] image,
 
     _core(_kernel_pop[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
+
 
 def _sum(dtype_t[:, ::1] image,
          char[:, ::1] selem,

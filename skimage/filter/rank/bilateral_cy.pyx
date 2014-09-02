@@ -51,6 +51,7 @@ cdef inline void _kernel_pop(dtype_t_out* out, Py_ssize_t odepth,
     else:
         out[0] = <dtype_t_out>0
 
+
 cdef inline void _kernel_sum(dtype_t_out* out, Py_ssize_t odepth,
                              Py_ssize_t* histo,
                              double pop, dtype_t g,
@@ -95,6 +96,7 @@ def _pop(dtype_t[:, ::1] image,
 
     _core(_kernel_pop[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, s0, s1, max_bin)
+
 
 def _sum(dtype_t[:, ::1] image,
          char[:, ::1] selem,

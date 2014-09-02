@@ -57,7 +57,7 @@ def windowed_histogram_similarity(image, selem, reference_hist, n_bins):
 
     # Reshape coin histogram to (1,1,N) for broadcast when we want to use it in
     # arithmetic operations with the windowed histograms from the image
-    reference_hist = reference_hist.reshape((1,1) + reference_hist.shape)
+    reference_hist = reference_hist.reshape((1, 1) + reference_hist.shape)
 
     # Compute Chi squared distance metric: sum((X-Y)^2 / (X+Y));
     # a measure of distance between histograms
@@ -66,7 +66,7 @@ def windowed_histogram_similarity(image, selem, reference_hist, n_bins):
     num = (X-Y)*(X-Y)
     denom = X+Y
     frac = num / denom
-    frac[denom==0] = 0
+    frac[denom == 0] = 0
     chi_sqr = np.sum(frac, axis=2) * 0.5
 
     # Generate a similarity measure. It needs to be low when distance is high
@@ -80,17 +80,18 @@ def windowed_histogram_similarity(image, selem, reference_hist, n_bins):
 # Load the `skimage.data.coins` image
 img = img_as_ubyte(data.coins())
 
-# Quantize to 16 levels of grayscale; this way the output image will have a
+# Quantize to 16 levels of greyscale; this way the output image will have a
 # 16-dimensional feature vector per pixel
 quantized_img = img//16
 
 # Select the coin from the 4th column, second row.
 # Co-ordinate ordering: [x1,y1,x2,y2]
-coin_coords = [184,100,228,148]   # 44 x 44 region
-coin = quantized_img[coin_coords[1]:coin_coords[3], coin_coords[0]:coin_coords[2]]
+coin_coords = [184, 100, 228, 148]   # 44 x 44 region
+coin = quantized_img[coin_coords[1]:coin_coords[3],
+                     coin_coords[0]:coin_coords[2]]
 
 # Compute coin histogram and normalize
-coin_hist, _ = np.histogram(coin.flatten(), bins=16, range=(0,16))
+coin_hist, _ = np.histogram(coin.flatten(), bins=16, range=(0, 16))
 coin_hist = coin_hist.astype(float) / np.sum(coin_hist)
 
 
@@ -112,7 +113,6 @@ quantized_rotated_image = rotated_img//16
 rotated_similarity = windowed_histogram_similarity(quantized_rotated_image,
                                                    selem, coin_hist,
                                                    coin_hist.shape[0])
-
 
 
 # Plot it all

@@ -285,6 +285,7 @@ def _mean(dtype_t[:, ::1] image,
     _core(_kernel_mean[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, p0, p1, 0, 0, max_bin)
 
+
 def _sum(dtype_t[:, ::1] image,
          char[:, ::1] selem,
          char[:, ::1] mask,
@@ -294,6 +295,7 @@ def _sum(dtype_t[:, ::1] image,
 
     _core(_kernel_sum[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, p0, p1, 0, 0, max_bin)
+
 
 def _subtract_mean(dtype_t[:, ::1] image,
                    char[:, ::1] selem,
