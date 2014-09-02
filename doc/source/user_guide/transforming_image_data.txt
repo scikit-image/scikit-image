@@ -1,6 +1,6 @@
-==========================================
-Image adjustement: transforming image data
-==========================================
+============================================
+Image adjustment: transforming image content
+============================================
 
 Color manipulation
 ------------------
