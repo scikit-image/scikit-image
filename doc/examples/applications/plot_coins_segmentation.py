@@ -57,7 +57,7 @@ segmentation. To do this, we first get the edges of features using the Canny
 edge-detector.
 """
 
-from skimage.filter import canny
+from skimage.feature import canny
 edges = canny(coins/255.)
 
 fig, ax = plt.subplots(figsize=(4, 3))

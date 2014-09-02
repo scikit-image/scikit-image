@@ -37,16 +37,16 @@ Its size is extended by two times the larger radius.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage import data, filter, color
+from skimage import data, color
 from skimage.transform import hough_circle
-from skimage.feature import peak_local_max
+from skimage.feature import peak_local_max, canny
 from skimage.draw import circle_perimeter
 from skimage.util import img_as_ubyte
 
 
 # Load picture and detect edges
 image = img_as_ubyte(data.coins()[0:95, 70:370])
-edges = filter.canny(image, sigma=3, low_threshold=10, high_threshold=50)
+edges = canny(image, sigma=3, low_threshold=10, high_threshold=50)
 
 fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(5, 2))
 
@@ -106,14 +106,15 @@ References
 
 import matplotlib.pyplot as plt
 
-from skimage import data, filter, color
+from skimage import data, color
+from skimage.feature import canny
 from skimage.transform import hough_ellipse
 from skimage.draw import ellipse_perimeter
 
 # Load picture, convert to grayscale and detect edges
 image_rgb = data.coffee()[0:220, 160:420]
 image_gray = color.rgb2gray(image_rgb)
-edges = filter.canny(image_gray, sigma=2.0,
+edges = canny(image_gray, sigma=2.0,
                      low_threshold=0.55, high_threshold=0.8)
 
 # Perform a Hough Transform

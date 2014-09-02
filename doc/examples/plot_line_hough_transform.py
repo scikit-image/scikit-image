@@ -58,7 +58,7 @@ References
 
 from skimage.transform import (hough_line, hough_line_peaks,
                                probabilistic_hough_line)
-from skimage.filter import canny
+from skimage.feature import canny
 from skimage import data
 
 import numpy as np
