@@ -65,11 +65,11 @@ from skimage._shared.utils import deprecated as _deprecated
 pkg_dir = _osp.abspath(_osp.dirname(__file__))
 data_dir = _osp.join(pkg_dir, 'data')
 
-# try:
-#     from .version import version as __version__
-# except ImportError:
-#     __version__ = "unbuilt-dev"
-# del version
+try:
+    from .version import version as __version__
+except ImportError:
+    __version__ = "unbuilt-dev"
+del version
 
 
 try:
