@@ -28,7 +28,7 @@ __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
            'pop', 'threshold', 'tophat', 'noise_filter', 'entropy', 'otsu']
 
 
-def _handle_input(image, selem, out, mask, out_dtype=None):
+def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
 
     if image.dtype not in (np.uint8, np.uint16):
         image = img_as_ubyte(image)
@@ -42,13 +42,16 @@ def _handle_input(image, selem, out, mask, out_dtype=None):
         mask = img_as_ubyte(mask)
         mask = np.ascontiguousarray(mask)
 
+    if image is out:
+        raise NotImplementedError("Cannot perform rank operation in place.")
+
     if out is None:
         if out_dtype is None:
             out_dtype = image.dtype
-        out = np.empty_like(image, dtype=out_dtype)
-
-    if image is out:
-        raise NotImplementedError("Cannot perform rank operation in place.")
+        out = np.empty(image.shape+(pixel_size,), dtype=out_dtype)
+    else:
+        if len(out.shape) == 2:
+            out = out.reshape(out.shape+(pixel_size,))
 
     is_8bit = image.dtype in (np.uint8, np.int8)
 
@@ -65,10 +68,24 @@ def _handle_input(image, selem, out, mask, out_dtype=None):
     return image, selem, out, mask, max_bin
 
 
-def _apply(func, image, selem, out, mask, shift_x, shift_y, out_dtype=None):
+def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
+                            out_dtype=None):
 
     image, selem, out, mask, max_bin = _handle_input(image, selem, out, mask,
                                                      out_dtype)
+
+    func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
+         out=out, max_bin=max_bin)
+
+    return out.reshape(out.shape[:2])
+
+
+def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
+                            out_dtype=None, pixel_size=1):
+
+    image, selem, out, mask, max_bin = _handle_input(image, selem, out, mask,
+                                                     out_dtype,
+                                                     pixel_size=pixel_size)
 
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, max_bin=max_bin)
@@ -113,8 +130,9 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic_cy._autolevel, image, selem,
-                  out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._autolevel, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)
 
 
 def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -154,8 +172,9 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic_cy._bottomhat, image, selem,
-                  out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._bottomhat, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)
 
 
 def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -192,8 +211,9 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic_cy._equalize, image, selem,
-                  out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._equalize, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)
 
 
 def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -230,8 +250,9 @@ def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic_cy._gradient, image, selem,
-                  out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._gradient, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)
 
 
 def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -277,8 +298,9 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic_cy._maximum, image, selem,
-                  out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._maximum, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)
 
 
 def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -315,8 +337,8 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic_cy._mean, image, selem, out=out,
-                  mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._mean, image, selem, out=out,
+                                   mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
 def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
@@ -354,8 +376,9 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(generic_cy._subtract_mean, image, selem,
-                  out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._subtract_mean, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)
 
 
 def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -392,8 +415,9 @@ def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic_cy._median, image, selem,
-                  out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._median, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)
 
 
 def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -439,8 +463,9 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic_cy._minimum, image, selem,
-                  out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._minimum, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)
 
 
 def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -479,8 +504,9 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic_cy._modal, image, selem,
-                  out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._modal, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)
 
 
 def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
@@ -522,8 +548,9 @@ def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(generic_cy._enhance_contrast, image, selem,
-                  out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._enhance_contrast, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)
 
 
 def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -571,8 +598,9 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic_cy._pop, image, selem, out=out,
-                  mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._pop, image, selem, out=out,
+                                   mask=mask, shift_x=shift_x,
+                                   shift_y=shift_y)
 
 
 def sum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -620,8 +648,9 @@ def sum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic_cy._sum, image, selem, out=out,
-                  mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._sum, image, selem, out=out,
+                                   mask=mask, shift_x=shift_x,
+                                   shift_y=shift_y)
 
 
 def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -669,8 +698,9 @@ def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic_cy._threshold, image, selem,
-                  out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._threshold, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)
 
 
 def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -710,8 +740,9 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic_cy._tophat, image, selem,
-                  out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._tophat, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)
 
 
 def noise_filter(image, selem, out=None, mask=None, shift_x=False,
@@ -761,8 +792,9 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
     selem_cpy = selem.copy()
     selem_cpy[centre_r, centre_c] = 0
 
-    return _apply(generic_cy._noise_filter, image, selem_cpy, out=out,
-                  mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._noise_filter, image, selem_cpy,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)
 
 
 def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -806,9 +838,10 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic_cy._entropy, image, selem,
-                  out=out, mask=mask, shift_x=shift_x, shift_y=shift_y,
-                  out_dtype=np.double)
+    return _apply_scalar_per_pixel(generic_cy._entropy, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y,
+                                   out_dtype=np.double)
 
 
 def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -850,5 +883,59 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic_cy._otsu, image, selem, out=out,
-                  mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._otsu, image, selem, out=out,
+                                   mask=mask, shift_x=shift_x,
+                                   shift_y=shift_y)
+
+
+def windowed_histogram(image, selem, out=None, mask=None,
+                       shift_x=False, shift_y=False, n_bins=None):
+    """Normalized sliding window histogram
+
+    Parameters
+    ----------
+    image : ndarray
+        Image array (uint8 array).
+    selem : 2-D array
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : ndarray
+        If None, a new array will be allocated.
+    mask : ndarray
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood. If None, the complete image is used (default).
+    shift_x, shift_y : int
+        Offset added to the structuring element center point. Shift is bounded
+        to the structuring element sizes (center must be inside the given
+        structuring element).
+    n_bins : int or None
+        The number of histogram bins. Will default to ``image.max() + 1``
+        if None is passed.
+
+    Returns
+    -------
+    out : 3-D array with float dtype of dimensions (H,W,N), where (H,W) are
+        the dimensions of the input image and N is n_bins or
+        ``image.max() + 1`` if no value is provided as a parameter.
+        Effectively, each pixel is a N-D feature vector that is the histogram.
+        The sum of the elements in the feature vector will be 1, unless no
+        pixels in the window were covered by both selem and mask, in which
+        case all elements will be 0.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.filter.rank import windowed_histogram
+    >>> from skimage.morphology import disk
+    >>> img = data.camera()
+    >>> hist_img = windowed_histogram(img, disk(5))
+
+    """
+
+    if n_bins is None:
+        n_bins = image.max() + 1
+
+    return _apply_vector_per_pixel(generic_cy._windowed_hist, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y,
+                                   out_dtype=np.double,
+                                   pixel_size=n_bins)

@@ -42,7 +42,7 @@ def _apply(func, image, selem, out, mask, shift_x, shift_y, s0, s1,
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, max_bin=max_bin, s0=s0, s1=s1)
 
-    return out
+    return out.reshape(out.shape[:2])
 
 
 def mean_bilateral(image, selem, out=None, mask=None, shift_x=False,
@@ -158,8 +158,9 @@ def pop_bilateral(image, selem, out=None, mask=None, shift_x=False,
     return _apply(bilateral_cy._pop, image, selem, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
 
+
 def sum_bilateral(image, selem, out=None, mask=None, shift_x=False,
-                   shift_y=False, s0=10, s1=10):
+                  shift_y=False, s0=10, s1=10):
     """Apply a flat kernel bilateral filter.
 
     This is an edge-preserving and noise reducing denoising filter. It averages
