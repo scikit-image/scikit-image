@@ -338,8 +338,7 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """
 
     return _apply_scalar_per_pixel(generic_cy._mean, image, selem, out=out,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
+                                   mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
 def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
