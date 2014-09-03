@@ -123,12 +123,12 @@ axes[0, 1].set_title('Coin from 2nd row, 4th column')
 axes[0, 1].axis('off')
 
 axes[1, 0].imshow(img, cmap='gray')
-axes[1, 0].imshow(similarity, cmap='jet', alpha=0.5)
+axes[1, 0].imshow(similarity, cmap='hot', alpha=0.5)
 axes[1, 0].set_title('Original image with overlaid similarity')
 axes[1, 0].axis('off')
 
 axes[1, 1].imshow(rotated_img, cmap='gray')
-axes[1, 1].imshow(rotated_similarity, cmap='jet', alpha=0.5)
+axes[1, 1].imshow(rotated_similarity, cmap='hot', alpha=0.5)
 axes[1, 1].set_title('Rotated image with overlaid similarity')
 axes[1, 1].axis('off')
 
