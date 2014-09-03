@@ -4,31 +4,29 @@ from __future__ import division
 Sliding window histogram
 ========================
 
-Histogram matching can be used for object detection in images [1]_.
-This example extracts a single coin from the `skimage.data.coins` image
-and uses histogram matching to attempt to locate it within the original
-image.
+Histogram matching can be used for object detection in images [1]_. This
+example extracts a single coin from the `skimage.data.coins` image and uses
+histogram matching to attempt to locate it within the original image.
 
 First, a box-shaped region of the image containing the target coin is
 extracted and a histogram of its greyscale values is computed.
 
-Next, for each pixel in the test image, a histogram of the greyscale values
-in a region of the image surrounding the pixel is computed.
-`skimage.filter.rank.windowed_histogram` is used for this task, as it
-employs an efficient sliding window based algorithm that is able to compute
-these histograms quickly [2]_.
-The local histogram for the region surrounding each pixel in the image is
-compared to that of the single coin, with a similarity measure being
-computed and displayed.
+Next, for each pixel in the test image, a histogram of the greyscale values in
+a region of the image surrounding the pixel is computed.
+`skimage.filter.rank.windowed_histogram` is used for this task, as it employs
+an efficient sliding window based algorithm that is able to compute these
+histograms quickly [2]_. The local histogram for the region surrounding each
+pixel in the image is compared to that of the single coin, with a similarity
+measure being computed and displayed.
 
-The histogram of the single coin is computed using `numpy.histogram` on a
-box shaped region surrounding the coin, while the sliding window histograms
-are computed using a disc shaped structural element of a slightly different
-size. This is done in aid of demonstrating that the technique still finds
-similarity in spite of these differences.
+The histogram of the single coin is computed using `numpy.histogram` on a box
+shaped region surrounding the coin, while the sliding window histograms are
+computed using a disc shaped structural element of a slightly different size.
+This is done in aid of demonstrating that the technique still finds similarity
+in spite of these differences.
 
-To demonstrate the rotational invariance of the technique, the same
-test is performed on a version of the coins image rotated by 45 degrees.
+To demonstrate the rotational invariance of the technique, the same test is
+performed on a version of the coins image rotated by 45 degrees.
 
 References
 ----------
@@ -41,11 +39,10 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
-from skimage import data
+from skimage import data, transform
 from skimage.util import img_as_ubyte
 from skimage.morphology import disk
 from skimage.filter import rank
-from skimage import transform
 
 
 matplotlib.rcParams['font.size'] = 9
@@ -63,11 +60,11 @@ def windowed_histogram_similarity(image, selem, reference_hist, n_bins):
     # a measure of distance between histograms
     X = px_histograms
     Y = reference_hist
-    num = (X-Y)*(X-Y)
-    denom = X+Y
+    num = (X - Y) ** 2
+    denom = X + Y
     frac = num / denom
     frac[denom == 0] = 0
-    chi_sqr = np.sum(frac, axis=2) * 0.5
+    chi_sqr = 0.5 * np.sum(frac, axis=2)
 
     # Generate a similarity measure. It needs to be low when distance is high
     # and high when distance is low; taking the reciprocal will do this.
@@ -82,7 +79,7 @@ img = img_as_ubyte(data.coins())
 
 # Quantize to 16 levels of greyscale; this way the output image will have a
 # 16-dimensional feature vector per pixel
-quantized_img = img//16
+quantized_img = img // 16
 
 # Select the coin from the 4th column, second row.
 # Co-ordinate ordering: [x1,y1,x2,y2]
@@ -96,8 +93,8 @@ coin_hist = coin_hist.astype(float) / np.sum(coin_hist)
 
 
 # Compute a disk shaped mask that will define the shape of our sliding window
-# Example coin is ~44px across, so make a disk 61px wide (2*rad+1) to be big
-# enough for other coins too.
+# Example coin is ~44px across, so make a disk 61px wide (2 * rad + 1) to be
+# big enough for other coins too.
 selem = disk(30)
 
 
@@ -108,39 +105,31 @@ similarity = windowed_histogram_similarity(quantized_img, selem, coin_hist,
 # Now try a rotated image
 rotated_img = img_as_ubyte(transform.rotate(img, 45.0, resize=True))
 # Quantize to 16 levels as before
-quantized_rotated_image = rotated_img//16
+quantized_rotated_image = rotated_img // 16
 # Similarity on rotated image
 rotated_similarity = windowed_histogram_similarity(quantized_rotated_image,
                                                    selem, coin_hist,
                                                    coin_hist.shape[0])
 
 
-# Plot it all
-fig, axes = plt.subplots(nrows=5, figsize=(6, 18))
-ax0, ax1, ax2, ax3, ax4 = axes
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10))
 
-ax0.imshow(img, cmap='gray')
-ax0.set_title('Original image')
-ax0.axis('off')
+axes[0, 0].imshow(quantized_img, cmap='gray')
+axes[0, 0].set_title('Quantized image')
+axes[0, 0].axis('off')
 
-ax1.imshow(quantized_img, cmap='gray')
-ax1.set_title('Quantized image')
-ax1.axis('off')
+axes[0, 1].imshow(coin, cmap='gray')
+axes[0, 1].set_title('Coin from 2nd row, 4th column')
+axes[0, 1].axis('off')
 
-ax2.imshow(coin, cmap='gray')
-ax2.set_title('Coin from 2nd row, 4th column')
-ax2.axis('off')
+axes[1, 0].imshow(img, cmap='gray')
+axes[1, 0].imshow(similarity, cmap='hot', alpha=0.5)
+axes[1, 0].set_title('Original image with overlaid similarity')
+axes[1, 0].axis('off')
 
-ax3.imshow(img, cmap='gray')
-# While jet is not a great colormap, it makes the high similarity areas
-# stand out
-ax3.imshow(similarity, cmap='jet', alpha=0.5)
-ax3.set_title('Original image with overlayed similarity')
-ax3.axis('off')
-
-ax4.imshow(rotated_img, cmap='gray')
-ax4.imshow(rotated_similarity, cmap='jet', alpha=0.5)
-ax4.set_title('Rotated image with overlayed similarity')
-ax4.axis('off')
+axes[1, 1].imshow(rotated_img, cmap='gray')
+axes[1, 1].imshow(rotated_similarity, cmap='hot', alpha=0.5)
+axes[1, 1].set_title('Rotated image with overlaid similarity')
+axes[1, 1].axis('off')
 
 plt.show()
