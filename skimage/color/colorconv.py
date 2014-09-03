@@ -321,7 +321,7 @@ gray_from_rgb = np.array([[0.2125, 0.7154, 0.0721],
                           [0, 0, 0],
                           [0, 0, 0]])
 
-# CIE LAB constants for Observer= 2A, Illuminant= D65
+# CIE LAB constants for Observer=2A, Illuminant=D65
 ## NOTE: this is actually the XYZ values for the illuminant above.
 lab_ref_white = np.array([0.95047, 1., 1.08883])
 
@@ -348,35 +348,35 @@ lab_ref_white = np.array([0.95047, 1., 1.08883])
 ##    .. [1] http://en.wikipedia.org/wiki/Standard_illuminant
 
 illuminants = \
-    {"A": [[1.098466069456375, 1, 0.3558228003436005], \
-           [1.111420406956693, 1, 0.3519978321919493]], \
-     "D50": [[0.9642119944211994, 1, 0.8251882845188288], \
-             [0.9672062750333777, 1, 0.8142801513128616]], \
-     "D55": [[0.956797052643698, 1, 0.9214805860173273], \
-             [0.9579665682254781, 1, 0.9092525159847462]], \
-     "D65": [lab_ref_white, \
-             [0.94809667673716, 1, 1.0730513595166162]], \
-     "D75": [[0.9497220898840717, 1, 1.226393520724154], \
-             [0.9441713925645873, 1, 1.2064272211720228]], \
-     "E": [[1.0, 1.0, 1.0], \
-           [1.0, 1.0, 1.0]]
+    {"A": [(1.098466069456375, 1, 0.3558228003436005), \
+           (1.111420406956693, 1, 0.3519978321919493)], \
+     "D50": [(0.9642119944211994, 1, 0.8251882845188288), \
+             (0.9672062750333777, 1, 0.8142801513128616)], \
+     "D55": [(0.956797052643698, 1, 0.9214805860173273), \
+             (0.9579665682254781, 1, 0.9092525159847462)], \
+     "D65": [(0.95047, 1., 1.08883), # This was: `lab_ref_white`
+             (0.94809667673716, 1, 1.0730513595166162)], \
+     "D75": [(0.9497220898840717, 1, 1.226393520724154), \
+             (0.9441713925645873, 1, 1.2064272211720228)], \
+     "E": [(1.0, 1.0, 1.0), \
+           (1.0, 1.0, 1.0)]
      }
 
 def get_xyz_coords(illuminant, observer):
-    """Get the XYZ coordinates of the given illuminant and observer [1]. Currently
+    """Get the XYZ coordinates of the given illuminant and observer [1]_. Currently
     supported illuminants are: "A", "D50", "D55", "D65", "D75", "E".
 
     Parameters
     ----------
-    illuminant: string
+    illuminant : {'A', 'D50', 'D55', 'D65', 'D75', 'E'}, optional
         The name of the illuminant (the function is NOT case sensitive).
-    observer: int
+    observer : int, optional
         The aperture angle of the observer.
 
     Returns
     -------
-    xyz_coords: list
-        A list with 3 elements containing the XYZ coordinates of the given
+    (x, y, z) : tuple
+        A tuple with 3 elements containing the XYZ coordinates of the given
         illuminant.
 
     Raises
@@ -391,17 +391,17 @@ def get_xyz_coords(illuminant, observer):
 
     """
     illuminant = illuminant.upper()
-    if illuminant in illuminants.keys():
+    if illuminant in illuminants:
         idx = 100;
         if observer == 2:
             idx = 0
         elif observer == 10:
             idx = 1
         else:
-            raise ValueError("Unknown observer \"{}\"".format(observer))
+            raise ValueError("Unknown observer \"{0}\"".format(observer))
         return illuminants[illuminant][idx]
     else:
-        raise ValueError("Unknown illuminant \"{}\"".format(illuminant))
+        raise ValueError("Unknown illuminant \"{0}\"".format(illuminant))
 
 
 # Haematoxylin-Eosin-DAB colorspace
@@ -746,7 +746,7 @@ def gray2rgb(image):
     else:
         raise ValueError("Input image expected to be RGB, RGBA or gray.")
     
-def xyz2lab(xyz, illuminant = "D65", observer = 2):
+def xyz2lab(xyz, illuminant="D65", observer=2):
     """XYZ to CIE-LAB color space conversion.
 
     Parameters
@@ -754,9 +754,9 @@ def xyz2lab(xyz, illuminant = "D65", observer = 2):
     xyz : array_like
         The image in XYZ format, in a 3- or 4-D array of shape
         ``(.., ..,[ ..,] 3)``.
-    illuminant: string
+    illuminant : {'A', 'D50', 'D55', 'D65', 'D75', 'E'}, optional
         The name of the illuminant (the function is NOT case sensitive).
-    observer: int
+    observer : int, optional
         The aperture angle of the observer.
 
     Returns
@@ -775,8 +775,8 @@ def xyz2lab(xyz, illuminant = "D65", observer = 2):
 
     Notes
     -----
-    By default Observer= 2A, Illuminant= D65. CIE XYZ tristimulus values x_ref
-    = 95.047, y_ref = 100., z_ref = 108.883. See function 'get_xyz_coords' for
+    By default Observer= 2A, Illuminant= D65. CIE XYZ tristimulus values
+    x_ref=95.047, y_ref=100., z_ref=108.883. See function `get_xyz_coords` for
     a list of supported illuminants.
 
     References
@@ -814,16 +814,16 @@ def xyz2lab(xyz, illuminant = "D65", observer = 2):
 
     return np.concatenate([x[..., np.newaxis] for x in [L, a, b]], axis=-1)
 
-def lab2xyz(lab, illuminant = "D65", observer = 2):
+def lab2xyz(lab, illuminant="D65", observer=2):
     """CIE-LAB to XYZcolor space conversion.
 
     Parameters
     ----------
     lab : array_like
         The image in lab format, in a 3-D array of shape ``(.., .., 3)``.
-    illuminant: string
+    illuminant : {'A', 'D50', 'D55', 'D65', 'D75', 'E'}, optional
         The name of the illuminant (the function is NOT case sensitive).
-    observer: int
+    observer : int, optional
         The aperture angle of the observer.
 
     Returns
@@ -923,7 +923,7 @@ def lab2rgb(lab):
     return xyz2rgb(lab2xyz(lab))
 
 
-def xyz2luv(xyz, illuminant = "D65", observer = 2):
+def xyz2luv(xyz, illuminant="D65", observer=2):
     """XYZ to CIE-Luv color space conversion.
 
     Parameters
@@ -931,9 +931,9 @@ def xyz2luv(xyz, illuminant = "D65", observer = 2):
     xyz : (M, N, [P,] 3) array_like
         The 3 or 4 dimensional image in XYZ format. Final dimension denotes
         channels.
-    illuminant: string
+    illuminant : {'A', 'D50', 'D55', 'D65', 'D75', 'E'}, optional
         The name of the illuminant (the function is NOT case sensitive).
-    observer: int
+    observer : int, optional
         The aperture angle of the observer.
 
     Returns
@@ -951,7 +951,7 @@ def xyz2luv(xyz, illuminant = "D65", observer = 2):
 
     Notes
     -----
-    By default XYZ conversion weights use Observer = 2A. Reference whitepoint
+    By default XYZ conversion weights use observer=2A. Reference whitepoint
     for D65 Illuminant, with XYZ tristimulus values of ``(95.047, 100.,
     108.883)``. See function 'get_xyz_coords' for a list of supported
     illuminants.
@@ -1000,7 +1000,7 @@ def xyz2luv(xyz, illuminant = "D65", observer = 2):
     return np.concatenate([q[..., np.newaxis] for q in [L, u, v]], axis=-1)
 
 
-def luv2xyz(luv, illuminant = "D65", observer = 2):
+def luv2xyz(luv, illuminant="D65", observer=2):
     """CIE-Luv to XYZ color space conversion.
 
     Parameters
@@ -1008,9 +1008,9 @@ def luv2xyz(luv, illuminant = "D65", observer = 2):
     luv : (M, N, [P,] 3) array_like
         The 3 or 4 dimensional image in CIE-Luv format. Final dimension denotes
         channels.
-    illuminant: string
+    illuminant : {'A', 'D50', 'D55', 'D65', 'D75', 'E'}, optional
         The name of the illuminant (the function is NOT case sensitive).
-    observer: int
+    observer : int, optional
         The aperture angle of the observer.
 
     Returns
@@ -1028,7 +1028,7 @@ def luv2xyz(luv, illuminant = "D65", observer = 2):
 
     Notes
     -----
-    XYZ conversion weights use Observer = 2A. Reference whitepoint for D65
+    XYZ conversion weights use observer=2A. Reference whitepoint for D65
     Illuminant, with XYZ tristimulus values of ``(95.047, 100., 108.883)``. See
     function 'get_xyz_coords' for a list of supported illuminants.
 
