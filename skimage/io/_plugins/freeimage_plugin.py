@@ -672,7 +672,7 @@ def _array_to_bitmap(array):
         raise RuntimeError('Could not allocate image for storage')
     try:
         def n(arr):  # normalise to freeimage's in-memory format
-            return arr.T[:, ::-1]
+            return arr.T[..., ::-1]
 
         wrapped_array = _wrap_bitmap_bits_in_array(bitmap, w_shape, dtype)
         # swizzle the color components and flip the scanlines to go to
