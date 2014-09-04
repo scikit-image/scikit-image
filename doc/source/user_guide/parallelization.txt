@@ -15,7 +15,7 @@ on a large batch of images. Here is an example:
         """
         Apply some functions and return an image.
         """
-        image = denoise_tv_chambolle(image, weight=0.1, multichannel=True)
+        image = denoise_tv_chambolle(image[0][0], weight=0.1, multichannel=True)
         fd, hog_image = hog(color.rgb2gray(image), orientations=8,
                             pixels_per_cell=(16, 16), cells_per_block=(1, 1),
                             visualise=True)
@@ -35,7 +35,7 @@ use ipython and measure the execution time with ``%timeit``.
 
     def classic_loop():
         for image in pics:
-            task(image[0][0])
+            task(image)
 
 
     %timeit classic_loop()
@@ -45,7 +45,7 @@ Another equivalent way to code this loop is to use a comprehension list which ha
 .. code-block:: python
 
     def comprehension_loop():
-        [task(image[0][0]) for image in pics]
+        [task(image) for image in pics]
 
     %timeit comprehension_loop()
 
@@ -56,6 +56,6 @@ The number of jobs can be specified.
 
     from joblib import Parallel, delayed
     def joblib_loop():
-        Parallel(n_jobs=4)(delayed(task)(i[0][0]) for i in pics)
+        Parallel(n_jobs=4)(delayed(task)(i) for i in pics)
 
     %timeit joblib_loop()
