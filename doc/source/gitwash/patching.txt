@@ -3,7 +3,7 @@
 ================
 
 You've discovered a bug or something else you want to change
-in scikit-image_ .. |emdash| excellent!
+in `scikit-image`_ .. |emdash| excellent!
 
 You've worked out a way to fix it |emdash| even better!
 
@@ -57,7 +57,7 @@ In detail
       git config --global user.name "Your Name Comes Here"
 
 #. If you don't already have one, clone a copy of the
-   scikit-image_ repository::
+   `scikit-image`_ repository::
 
       git clone git://github.com/scikit-image/scikit-image.git
       cd scikit-image
@@ -115,7 +115,7 @@ more feature branches, you will probably want to switch to
 development mode.  You can do this with the repository you
 have.
 
-Fork the scikit-image_ repository on github |emdash| :ref:`forking`.
+Fork the `scikit-image`_ repository on github |emdash| :ref:`forking`.
 Then::
 
    # checkout and refresh master branch from main repo
