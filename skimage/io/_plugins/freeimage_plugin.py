@@ -677,24 +677,23 @@ def _array_to_bitmap(array):
         wrapped_array = _wrap_bitmap_bits_in_array(bitmap, w_shape, dtype)
         # swizzle the color components and flip the scanlines to go to
         # FreeImage's BGR[A] and upside-down internal memory format
-        if len(shape) == 3:
+        if len(shape) == 3 and _FI.FreeImage_IsLittleEndian():
             R = array[:, :, 0]
             G = array[:, :, 1]
             B = array[:, :, 2]
 
-            if _FI.FreeImage_IsLittleEndian():
-                if dtype.type == numpy.uint8:
-                    wrapped_array[0] = n(B)
-                    wrapped_array[1] = n(G)
-                    wrapped_array[2] = n(R)
-                elif dtype.type == numpy.uint16:
-                    wrapped_array[0] = n(R)
-                    wrapped_array[1] = n(G)
-                    wrapped_array[2] = n(B)
+            if dtype.type == numpy.uint8:
+                wrapped_array[0] = n(B)
+                wrapped_array[1] = n(G)
+                wrapped_array[2] = n(R)
+            elif dtype.type == numpy.uint16:
+                wrapped_array[0] = n(R)
+                wrapped_array[1] = n(G)
+                wrapped_array[2] = n(B)
 
-                if shape[2] == 4:
-                    A = array[:, :, 3]
-                    wrapped_array[3] = n(A)
+            if shape[2] == 4:
+                A = array[:, :, 3]
+                wrapped_array[3] = n(A)
         else:
             wrapped_array[:] = n(array)
         if len(shape) == 2 and dtype.type == numpy.uint8:
