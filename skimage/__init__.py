@@ -71,6 +71,7 @@ except ImportError:
     __version__ = "unbuilt-dev"
 del version
 
+
 try:
     _imp.find_module('nose')
 except ImportError:
