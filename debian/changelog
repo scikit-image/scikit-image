@@ -1,3 +1,10 @@
+skimage (0.10.1-2) unstable; urgency=medium
+
+  * build with -fsigned-char to fix test failures on unsigned ports
+  * freeimage-fix.patch: fix freeimage save/load on big endian ports
+
+ -- Julian Taylor <jtaylor.debian@googlemail.com>  Sat, 06 Sep 2014 00:08:12 +0200
+
 skimage (0.10.1-1) unstable; urgency=medium
 
   * New upstream release
