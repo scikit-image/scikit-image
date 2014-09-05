@@ -11,6 +11,9 @@ PYVERS = $(shell pyversions -vr)
 PYVER = $(shell pyversions  -vd)
 PY3VERS = $(shell py3versions -vr)
 
+# upstream relies on signed chars
+export DEB_CFLAGS_MAINT_APPEND := -fsigned-char
+
 export MPLCONFIGDIR=$(CURDIR)/build
 export HOME=$(CURDIR)/build
 
