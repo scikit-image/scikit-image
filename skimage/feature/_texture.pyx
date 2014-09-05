@@ -115,7 +115,7 @@ def _local_binary_pattern(double[:, ::1] image,
 
     # pre-allocate arrays for computation
     cdef double[::1] texture = np.zeros(P, dtype=np.double)
-    cdef char[::1] signed_texture = np.zeros(P, dtype=np.int8)
+    cdef signed char[::1] signed_texture = np.zeros(P, dtype=np.int8)
     cdef int[::1] rotation_chain = np.zeros(P, dtype=np.int32)
 
     output_shape = (image.shape[0], image.shape[1])

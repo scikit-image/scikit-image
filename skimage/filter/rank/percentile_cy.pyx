@@ -257,7 +257,7 @@ def _autolevel(dtype_t[:, ::1] image,
                char[:, ::1] selem,
                char[:, ::1] mask,
                dtype_t_out[:, :, ::1] out,
-               char shift_x, char shift_y, double p0, double p1,
+               signed char shift_x, signed char shift_y, double p0, double p1,
                Py_ssize_t max_bin):
 
     _core(_kernel_autolevel[dtype_t_out, dtype_t], image, selem, mask, out,
@@ -268,7 +268,7 @@ def _gradient(dtype_t[:, ::1] image,
               char[:, ::1] selem,
               char[:, ::1] mask,
               dtype_t_out[:, :, ::1] out,
-              char shift_x, char shift_y, double p0, double p1,
+              signed char shift_x, signed char shift_y, double p0, double p1,
               Py_ssize_t max_bin):
 
     _core(_kernel_gradient[dtype_t_out, dtype_t], image, selem, mask, out,
@@ -279,7 +279,7 @@ def _mean(dtype_t[:, ::1] image,
           char[:, ::1] selem,
           char[:, ::1] mask,
           dtype_t_out[:, :, ::1] out,
-          char shift_x, char shift_y, double p0, double p1,
+          signed char shift_x, signed char shift_y, double p0, double p1,
           Py_ssize_t max_bin):
 
     _core(_kernel_mean[dtype_t_out, dtype_t], image, selem, mask, out,
@@ -290,7 +290,7 @@ def _sum(dtype_t[:, ::1] image,
          char[:, ::1] selem,
          char[:, ::1] mask,
          dtype_t_out[:, :, ::1] out,
-         char shift_x, char shift_y, double p0, double p1,
+         signed char shift_x, signed char shift_y, double p0, double p1,
          Py_ssize_t max_bin):
 
     _core(_kernel_sum[dtype_t_out, dtype_t], image, selem, mask, out,
@@ -301,7 +301,7 @@ def _subtract_mean(dtype_t[:, ::1] image,
                    char[:, ::1] selem,
                    char[:, ::1] mask,
                    dtype_t_out[:, :, ::1] out,
-                   char shift_x, char shift_y, double p0, double p1,
+                   signed char shift_x, signed char shift_y, double p0, double p1,
                    Py_ssize_t max_bin):
 
     _core(_kernel_subtract_mean[dtype_t_out, dtype_t], image, selem, mask,
@@ -312,7 +312,7 @@ def _enhance_contrast(dtype_t[:, ::1] image,
                       char[:, ::1] selem,
                       char[:, ::1] mask,
                       dtype_t_out[:, :, ::1] out,
-                      char shift_x, char shift_y, double p0, double p1,
+                      signed char shift_x, signed char shift_y, double p0, double p1,
                       Py_ssize_t max_bin):
 
     _core(_kernel_enhance_contrast[dtype_t_out, dtype_t], image, selem, mask,
@@ -323,7 +323,7 @@ def _percentile(dtype_t[:, ::1] image,
                 char[:, ::1] selem,
                 char[:, ::1] mask,
                 dtype_t_out[:, :, ::1] out,
-                char shift_x, char shift_y, double p0, double p1,
+                signed char shift_x, signed char shift_y, double p0, double p1,
                 Py_ssize_t max_bin):
 
     _core(_kernel_percentile[dtype_t_out, dtype_t], image, selem, mask, out,
@@ -334,7 +334,7 @@ def _pop(dtype_t[:, ::1] image,
          char[:, ::1] selem,
          char[:, ::1] mask,
          dtype_t_out[:, :, ::1] out,
-         char shift_x, char shift_y, double p0, double p1,
+         signed char shift_x, signed char shift_y, double p0, double p1,
          Py_ssize_t max_bin):
 
     _core(_kernel_pop[dtype_t_out, dtype_t], image, selem, mask, out,
@@ -345,7 +345,7 @@ def _threshold(dtype_t[:, ::1] image,
                char[:, ::1] selem,
                char[:, ::1] mask,
                dtype_t_out[:, :, ::1] out,
-               char shift_x, char shift_y, double p0, double p1,
+               signed char shift_x, signed char shift_y, double p0, double p1,
                Py_ssize_t max_bin):
 
     _core(_kernel_threshold[dtype_t_out, dtype_t], image, selem, mask, out,
