@@ -60,10 +60,11 @@ radii = []
 
 for radius, h in zip(hough_radii, hough_res):
     # For each radius, extract two circles
-    peaks = peak_local_max(h, num_peaks=2)
+    num_peaks = 2
+    peaks = peak_local_max(h, num_peaks=num_peaks)
     centers.extend(peaks)
     accums.extend(h[peaks[:, 0], peaks[:, 1]])
-    radii.extend([radius, radius])
+    radii.extend([radius] * num_peaks)
 
 # Draw the most prominent 5 circles
 image = color.gray2rgb(image)
