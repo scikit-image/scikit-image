@@ -80,7 +80,7 @@ def _mean(dtype_t[:, ::1] image,
           char[:, ::1] selem,
           char[:, ::1] mask,
           dtype_t_out[:, :, ::1] out,
-          char shift_x, char shift_y, Py_ssize_t s0, Py_ssize_t s1,
+          signed char shift_x, signed char shift_y, Py_ssize_t s0, Py_ssize_t s1,
           Py_ssize_t max_bin):
 
     _core(_kernel_mean[dtype_t_out, dtype_t], image, selem, mask, out,
@@ -91,7 +91,7 @@ def _pop(dtype_t[:, ::1] image,
          char[:, ::1] selem,
          char[:, ::1] mask,
          dtype_t_out[:, :, ::1] out,
-         char shift_x, char shift_y, Py_ssize_t s0, Py_ssize_t s1,
+         signed char shift_x, signed char shift_y, Py_ssize_t s0, Py_ssize_t s1,
          Py_ssize_t max_bin):
 
     _core(_kernel_pop[dtype_t_out, dtype_t], image, selem, mask, out,
@@ -102,7 +102,7 @@ def _sum(dtype_t[:, ::1] image,
          char[:, ::1] selem,
          char[:, ::1] mask,
          dtype_t_out[:, :, ::1] out,
-         char shift_x, char shift_y, Py_ssize_t s0, Py_ssize_t s1,
+         signed char shift_x, signed char shift_y, Py_ssize_t s0, Py_ssize_t s1,
          Py_ssize_t max_bin):
 
     _core(_kernel_sum[dtype_t_out, dtype_t], image, selem, mask, out,

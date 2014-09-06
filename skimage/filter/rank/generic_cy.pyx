@@ -411,7 +411,7 @@ def _autolevel(dtype_t[:, ::1] image,
                char[:, ::1] selem,
                char[:, ::1] mask,
                dtype_t_out[:, :, ::1] out,
-               char shift_x, char shift_y, Py_ssize_t max_bin):
+               signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_autolevel[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
@@ -421,7 +421,7 @@ def _bottomhat(dtype_t[:, ::1] image,
                char[:, ::1] selem,
                char[:, ::1] mask,
                dtype_t_out[:, :, ::1] out,
-               char shift_x, char shift_y, Py_ssize_t max_bin):
+               signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_bottomhat[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
@@ -431,7 +431,7 @@ def _equalize(dtype_t[:, ::1] image,
               char[:, ::1] selem,
               char[:, ::1] mask,
               dtype_t_out[:, :, ::1] out,
-              char shift_x, char shift_y, Py_ssize_t max_bin):
+              signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_equalize[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
@@ -441,7 +441,7 @@ def _gradient(dtype_t[:, ::1] image,
               char[:, ::1] selem,
               char[:, ::1] mask,
               dtype_t_out[:, :, ::1] out,
-              char shift_x, char shift_y, Py_ssize_t max_bin):
+              signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_gradient[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
@@ -451,7 +451,7 @@ def _maximum(dtype_t[:, ::1] image,
              char[:, ::1] selem,
              char[:, ::1] mask,
              dtype_t_out[:, :, ::1] out,
-             char shift_x, char shift_y, Py_ssize_t max_bin):
+             signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_maximum[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
@@ -461,7 +461,7 @@ def _mean(dtype_t[:, ::1] image,
           char[:, ::1] selem,
           char[:, ::1] mask,
           dtype_t_out[:, :, ::1] out,
-          char shift_x, char shift_y, Py_ssize_t max_bin):
+          signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_mean[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
@@ -471,7 +471,7 @@ def _subtract_mean(dtype_t[:, ::1] image,
                    char[:, ::1] selem,
                    char[:, ::1] mask,
                    dtype_t_out[:, :, ::1] out,
-                   char shift_x, char shift_y, Py_ssize_t max_bin):
+                   signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_subtract_mean[dtype_t_out, dtype_t], image, selem, mask,
           out, shift_x, shift_y, 0, 0, 0, 0, max_bin)
@@ -481,7 +481,7 @@ def _median(dtype_t[:, ::1] image,
             char[:, ::1] selem,
             char[:, ::1] mask,
             dtype_t_out[:, :, ::1] out,
-            char shift_x, char shift_y, Py_ssize_t max_bin):
+            signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_median[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
@@ -491,7 +491,7 @@ def _minimum(dtype_t[:, ::1] image,
              char[:, ::1] selem,
              char[:, ::1] mask,
              dtype_t_out[:, :, ::1] out,
-             char shift_x, char shift_y, Py_ssize_t max_bin):
+             signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_minimum[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
@@ -501,7 +501,7 @@ def _enhance_contrast(dtype_t[:, ::1] image,
                       char[:, ::1] selem,
                       char[:, ::1] mask,
                       dtype_t_out[:, :, ::1] out,
-                      char shift_x, char shift_y, Py_ssize_t max_bin):
+                      signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_enhance_contrast[dtype_t_out, dtype_t], image, selem, mask,
           out, shift_x, shift_y, 0, 0, 0, 0, max_bin)
@@ -511,7 +511,7 @@ def _modal(dtype_t[:, ::1] image,
            char[:, ::1] selem,
            char[:, ::1] mask,
            dtype_t_out[:, :, ::1] out,
-           char shift_x, char shift_y, Py_ssize_t max_bin):
+           signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_modal[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
@@ -521,7 +521,7 @@ def _pop(dtype_t[:, ::1] image,
          char[:, ::1] selem,
          char[:, ::1] mask,
          dtype_t_out[:, :, ::1] out,
-         char shift_x, char shift_y, Py_ssize_t max_bin):
+         signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_pop[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
@@ -531,7 +531,7 @@ def _sum(dtype_t[:, ::1] image,
          char[:, ::1] selem,
          char[:, ::1] mask,
          dtype_t_out[:, :, ::1] out,
-         char shift_x, char shift_y, Py_ssize_t max_bin):
+         signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_sum[dtype_t_out, dtype_t], image, selem, mask,
           out, shift_x, shift_y, 0, 0, 0, 0, max_bin)
@@ -541,7 +541,7 @@ def _threshold(dtype_t[:, ::1] image,
                char[:, ::1] selem,
                char[:, ::1] mask,
                dtype_t_out[:, :, ::1] out,
-               char shift_x, char shift_y, Py_ssize_t max_bin):
+               signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_threshold[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
@@ -551,7 +551,7 @@ def _tophat(dtype_t[:, ::1] image,
             char[:, ::1] selem,
             char[:, ::1] mask,
             dtype_t_out[:, :, ::1] out,
-            char shift_x, char shift_y, Py_ssize_t max_bin):
+            signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_tophat[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
@@ -561,7 +561,7 @@ def _noise_filter(dtype_t[:, ::1] image,
                   char[:, ::1] selem,
                   char[:, ::1] mask,
                   dtype_t_out[:, :, ::1] out,
-                  char shift_x, char shift_y, Py_ssize_t max_bin):
+                  signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_noise_filter[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
@@ -571,7 +571,7 @@ def _entropy(dtype_t[:, ::1] image,
              char[:, ::1] selem,
              char[:, ::1] mask,
              dtype_t_out[:, :, ::1] out,
-             char shift_x, char shift_y, Py_ssize_t max_bin):
+             signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_entropy[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
@@ -581,7 +581,7 @@ def _otsu(dtype_t[:, ::1] image,
           char[:, ::1] selem,
           char[:, ::1] mask,
           dtype_t_out[:, :, ::1] out,
-          char shift_x, char shift_y, Py_ssize_t max_bin):
+          signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_otsu[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
@@ -591,7 +591,7 @@ def _windowed_hist(dtype_t[:, ::1] image,
                    char[:, ::1] selem,
                    char[:, ::1] mask,
                    dtype_t_out[:, :, ::1] out,
-                   char shift_x, char shift_y, Py_ssize_t max_bin):
+                   signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_win_hist[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)

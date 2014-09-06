@@ -49,7 +49,7 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                 char[:, ::1] selem,
                 char[:, ::1] mask,
                 dtype_t_out[:, :, ::1] out,
-                char shift_x, char shift_y,
+                signed char shift_x, signed char shift_y,
                 double p0, double p1,
                 Py_ssize_t s0, Py_ssize_t s1,
                 Py_ssize_t max_bin) except *:
@@ -112,16 +112,16 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
 
     # build attack and release borders by using difference along axis
     t = np.hstack((selem, np.zeros((selem.shape[0], 1))))
-    cdef char[:, :] t_e = (np.diff(t, axis=1) < 0).view(np.uint8)
+    cdef unsigned char[:, :] t_e = (np.diff(t, axis=1) < 0).view(np.uint8)
 
     t = np.hstack((np.zeros((selem.shape[0], 1)), selem))
-    cdef char[:, :] t_w = (np.diff(t, axis=1) > 0).view(np.uint8)
+    cdef unsigned char[:, :] t_w = (np.diff(t, axis=1) > 0).view(np.uint8)
 
     t = np.vstack((selem, np.zeros((1, selem.shape[1]))))
-    cdef char[:, :] t_s = (np.diff(t, axis=0) < 0).view(np.uint8)
+    cdef unsigned char[:, :] t_s = (np.diff(t, axis=0) < 0).view(np.uint8)
 
     t = np.vstack((np.zeros((1, selem.shape[1])), selem))
-    cdef char[:, :] t_n = (np.diff(t, axis=0) > 0).view(np.uint8)
+    cdef unsigned char[:, :] t_n = (np.diff(t, axis=0) > 0).view(np.uint8)
 
     for r in range(srows):
         for c in range(scols):
