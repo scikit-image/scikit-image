@@ -30,7 +30,7 @@ Build-Depends: cython (>= 0.17),
 Standards-Version: 3.9.5
 Homepage: http://scikit-image.org
 Vcs-Browser: https://github.com/scikit-image/scikit-image
-Vcs-Git: git://github.com/scikit-image/scikit-image.git
+Vcs-Git: git://github.com/scikit-image/scikit-image.git -b debian
 X-Python-Version: >= 2.6
 X-Python3-Version: >= 3.2
 XS-Testsuite: autopkgtest
