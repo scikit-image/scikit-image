@@ -12,7 +12,6 @@ else:
 from skimage import io, img_as_float
 from skimage.util.dtype import dtype_range
 from skimage.exposure import rescale_intensity
-from skimage._shared.testing import doctest_skip_parser
 import numpy as np
 from .. import utils
 from ..widgets import Slider
@@ -49,6 +48,106 @@ def mpl_image_to_rgba(mpl_image):
         # add alpha channel if it's missing
         image = np.dstack((image, np.ones_like(image)))
     return img_as_float(image)
+
+
+class BlitManager(object):
+    """Object that manages blits on an axes"""
+    def __init__(self, ax):
+        self.ax = ax
+        self.canvas = ax.figure.canvas
+        self.canvas.mpl_connect('draw_event', self.on_draw_event)
+        self.ax = ax
+        self.background = None
+        self.artists = []
+
+    def add_artists(self, artists):
+        self.artists.extend(artists)
+        self.redraw()
+
+    def remove_artists(self, artists):
+        for artist in artists:
+            self.artist.remove(artist)
+
+    def on_draw_event(self, event=None):
+        self.background = self.canvas.copy_from_bbox(self.ax.bbox)
+        self.draw_artists()
+
+    def redraw(self):
+        if self.background is not None:
+            self.canvas.restore_region(self.background)
+            self.draw_artists()
+            self.canvas.blit(self.ax.bbox)
+
+    def draw_artists(self):
+        for artist in self.artists:
+            self.ax.draw_artist(artist)
+
+
+class EventManager(object):
+    """Object that manages events on a canvas"""
+    def __init__(self, ax):
+        self.canvas = ax.figure.canvas
+        self.connect_event('button_press_event', self.on_mouse_press)
+        self.connect_event('key_press_event', self.on_key_press)
+        self.connect_event('button_release_event', self.on_mouse_release)
+        self.connect_event('motion_notify_event', self.on_move)
+        self.connect_event('scroll_event', self.on_scroll)
+
+        self.tools = []
+        self.active_tool = None
+
+    def connect_event(self, name, handler):
+        self.canvas.mpl_connect(name, handler)
+
+    def attach(self, tool):
+        self.tools.append(tool)
+        self.active_tool = tool
+
+    def detach(self, tool):
+        self.tools.remove(tool)
+        if self.tools:
+            self.active_tool = self.tools[-1]
+        else:
+            self.active_tool = None
+
+    def on_mouse_press(self, event):
+        for tool in self.tools:
+            if not tool.ignore(event) and tool.hit_test(event):
+                self.active_tool = tool
+                break
+        if self.active_tool and not self.active_tool.ignore(event):
+            self.active_tool.on_mouse_press(event)
+            return
+        for tool in reversed(self.tools):
+            if not tool.ignore(event):
+                self.active_tool = tool
+                tool.on_mouse_press(event)
+                return
+
+    def on_key_press(self, event):
+        tool = self._get_tool(event)
+        if not tool is None:
+            tool.on_key_press(event)
+
+    def _get_tool(self, event):
+        if not self.tools or self.active_tool.ignore(event):
+            return None
+        return self.active_tool
+
+    def on_mouse_release(self, event):
+        tool = self._get_tool(event)
+        if not tool is None:
+            tool.on_mouse_release(event)
+
+    def on_move(self, event):
+        tool = self._get_tool(event)
+        if not tool is None:
+            tool.on_move(event)
+
+    def on_scroll(self, event):
+        tool = self._get_tool(event)
+        if not tool is None:
+            tool.on_scroll(event)
 
 
 class ImageViewer(QtGui.QMainWindow):
@@ -91,7 +190,7 @@ class ImageViewer(QtGui.QMainWindow):
     # Signal that the original image has been changed
     original_image_changed = Signal(np.ndarray)
 
-    def __init__(self, image):
+    def __init__(self, image, useblit=True):
         # Start main loop
         utils.init_qtapp()
         super(ImageViewer, self).__init__()
@@ -124,6 +223,12 @@ class ImageViewer(QtGui.QMainWindow):
         self.canvas = self.fig.canvas
         self.canvas.setParent(self)
         self.ax.autoscale(enable=False)
+
+        self._tools = []
+        self.useblit = useblit
+        if useblit:
+            self._blit_manager = BlitManager(self.ax)
+        self._event_manager = EventManager(self.ax)
 
         self._image_plot = self.ax.images[0]
         self._update_original_image(image)
@@ -238,7 +343,10 @@ class ImageViewer(QtGui.QMainWindow):
         return [p.output() for p in self.plugins]
 
     def redraw(self):
-        self.canvas.draw_idle()
+        if self.useblit:
+            self._blit_manager.redraw()
+        else:
+            self.canvas.draw_idle()
 
     @property
     def image(self):
@@ -279,6 +387,18 @@ class ImageViewer(QtGui.QMainWindow):
             self.status_message(self._format_coord(event.xdata, event.ydata))
         else:
             self.status_message('')
+
+    def add_tool(self, tool):
+        if self.useblit:
+            self._blit_manager.add_artists(tool.artists)
+        self._tools.append(tool)
+        self._event_manager.attach(tool)
+
+    def remove_tool(self, tool):
+        if self.useblit:
+            self._blit_manager.remove_artists(tool.artists)
+        self._tools.remove(tool)
+        self._event_manager.detach(tool)
 
     def _format_coord(self, x, y):
         # callback function to format coordinate display in status bar

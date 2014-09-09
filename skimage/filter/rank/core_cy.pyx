@@ -42,14 +42,14 @@ cdef inline char is_in_mask(Py_ssize_t rows, Py_ssize_t cols,
             return 0
 
 
-cdef void _core(double kernel(Py_ssize_t*, double, dtype_t,
-                              Py_ssize_t, Py_ssize_t, double,
-                              double, Py_ssize_t, Py_ssize_t),
+cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
+                            dtype_t, Py_ssize_t, Py_ssize_t, double,
+                            double, Py_ssize_t, Py_ssize_t),
                 dtype_t[:, ::1] image,
                 char[:, ::1] selem,
                 char[:, ::1] mask,
-                dtype_t_out[:, ::1] out,
-                char shift_x, char shift_y,
+                dtype_t_out[:, :, ::1] out,
+                signed char shift_x, signed char shift_y,
                 double p0, double p1,
                 Py_ssize_t s0, Py_ssize_t s1,
                 Py_ssize_t max_bin) except *:
@@ -61,6 +61,7 @@ cdef void _core(double kernel(Py_ssize_t*, double, dtype_t,
     cdef Py_ssize_t cols = image.shape[1]
     cdef Py_ssize_t srows = selem.shape[0]
     cdef Py_ssize_t scols = selem.shape[1]
+    cdef Py_ssize_t odepth = out.shape[2]
 
     cdef Py_ssize_t centre_r = <Py_ssize_t>(selem.shape[0] / 2) + shift_y
     cdef Py_ssize_t centre_c = <Py_ssize_t>(selem.shape[1] / 2) + shift_x
@@ -111,16 +112,16 @@ cdef void _core(double kernel(Py_ssize_t*, double, dtype_t,
 
     # build attack and release borders by using difference along axis
     t = np.hstack((selem, np.zeros((selem.shape[0], 1))))
-    cdef char[:, :] t_e = (np.diff(t, axis=1) < 0).view(np.uint8)
+    cdef unsigned char[:, :] t_e = (np.diff(t, axis=1) < 0).view(np.uint8)
 
     t = np.hstack((np.zeros((selem.shape[0], 1)), selem))
-    cdef char[:, :] t_w = (np.diff(t, axis=1) > 0).view(np.uint8)
+    cdef unsigned char[:, :] t_w = (np.diff(t, axis=1) > 0).view(np.uint8)
 
     t = np.vstack((selem, np.zeros((1, selem.shape[1]))))
-    cdef char[:, :] t_s = (np.diff(t, axis=0) < 0).view(np.uint8)
+    cdef unsigned char[:, :] t_s = (np.diff(t, axis=0) < 0).view(np.uint8)
 
     t = np.vstack((np.zeros((1, selem.shape[1])), selem))
-    cdef char[:, :] t_n = (np.diff(t, axis=0) > 0).view(np.uint8)
+    cdef unsigned char[:, :] t_n = (np.diff(t, axis=0) > 0).view(np.uint8)
 
     for r in range(srows):
         for c in range(scols):
@@ -151,8 +152,8 @@ cdef void _core(double kernel(Py_ssize_t*, double, dtype_t,
 
     r = 0
     c = 0
-    out[r, c] = <dtype_t_out>kernel(histo, pop, image[r, c], max_bin, mid_bin,
-                                    p0, p1, s0, s1)
+    kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], max_bin, mid_bin,
+           p0, p1, s0, s1)
 
     # main loop
     r = 0
@@ -172,8 +173,8 @@ cdef void _core(double kernel(Py_ssize_t*, double, dtype_t,
                 if is_in_mask(rows, cols, rr, cc, mask_data):
                     histogram_decrement(histo, &pop, image[rr, cc])
 
-            out[r, c] = <dtype_t_out>kernel(histo, pop, image[r, c],
-                                            max_bin, mid_bin, p0, p1, s0, s1)
+            kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], max_bin,
+                   mid_bin, p0, p1, s0, s1)
 
         r += 1  # pass to the next row
         if r >= rows:
@@ -192,8 +193,8 @@ cdef void _core(double kernel(Py_ssize_t*, double, dtype_t,
             if is_in_mask(rows, cols, rr, cc, mask_data):
                 histogram_decrement(histo, &pop, image[rr, cc])
 
-        out[r, c] = <dtype_t_out>kernel(histo, pop, image[r, c],
-                                        max_bin, mid_bin, p0, p1, s0, s1)
+        kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], max_bin,
+               mid_bin, p0, p1, s0, s1)
 
         # ---> east to west
         for c in range(cols - 2, -1, -1):
@@ -209,8 +210,8 @@ cdef void _core(double kernel(Py_ssize_t*, double, dtype_t,
                 if is_in_mask(rows, cols, rr, cc, mask_data):
                     histogram_decrement(histo, &pop, image[rr, cc])
 
-            out[r, c] = <dtype_t_out>kernel(histo, pop, image[r, c],
-                                            max_bin, mid_bin, p0, p1, s0, s1)
+            kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], max_bin,
+                   mid_bin, p0, p1, s0, s1)
 
         r += 1  # pass to the next row
         if r >= rows:
@@ -229,8 +230,8 @@ cdef void _core(double kernel(Py_ssize_t*, double, dtype_t,
             if is_in_mask(rows, cols, rr, cc, mask_data):
                 histogram_decrement(histo, &pop, image[rr, cc])
 
-        out[r, c] = <dtype_t_out>kernel(histo, pop, image[r, c],
-                                        max_bin, mid_bin, p0, p1, s0, s1)
+        kernel(&out[r, c, 0], odepth, histo, pop, image[r, c],
+               max_bin, mid_bin, p0, p1, s0, s1)
 
     # release memory allocated by malloc
     free(se_e_r)

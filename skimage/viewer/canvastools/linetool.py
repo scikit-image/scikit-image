@@ -15,8 +15,8 @@ class LineTool(CanvasToolBase):
 
     Parameters
     ----------
-    ax : :class:`matplotlib.axes.Axes`
-        Matplotlib axes where tool is displayed.
+    viewer : :class:`skimage.viewer.Viewer`
+        Skimage viewer object.
     on_move : function
         Function called whenever a control handle is moved.
         This function must accept the end points of line as the only argument.
@@ -34,10 +34,12 @@ class LineTool(CanvasToolBase):
     end_points : 2D array
         End points of line ((x1, y1), (x2, y2)).
     """
-    def __init__(self, ax, on_move=None, on_release=None, on_enter=None,
-                 maxdist=10, line_props=None):
-        super(LineTool, self).__init__(ax, on_move=on_move, on_enter=on_enter,
-                                       on_release=on_release)
+    def __init__(self, viewer, on_move=None, on_release=None, on_enter=None,
+                 maxdist=10, line_props=None,
+                 **kwargs):
+        super(LineTool, self).__init__(viewer, on_move=on_move,
+                                       on_enter=on_enter,
+                                       on_release=on_release, **kwargs)
 
         props = dict(color='r', linewidth=1, alpha=0.4, solid_capstyle='butt')
         props.update(line_props if line_props is not None else {})
@@ -50,21 +52,18 @@ class LineTool(CanvasToolBase):
         self._end_pts = np.transpose([x, y])
 
         self._line = lines.Line2D(x, y, visible=False, animated=True, **props)
-        ax.add_line(self._line)
+        self.ax.add_line(self._line)
 
-        self._handles = ToolHandles(ax, x, y)
+        self._handles = ToolHandles(self.ax, x, y)
         self._handles.set_visible(False)
-        self._artists = [self._line, self._handles.artist]
+        self.artists = [self._line, self._handles.artist]
 
         if on_enter is None:
             def on_enter(pts):
                 x, y = np.transpose(pts)
                 print("length = %0.2f" % np.sqrt(np.diff(x)**2 + np.diff(y)**2))
         self.callback_on_enter = on_enter
-
-        self.connect_event('button_press_event', self.on_mouse_press)
-        self.connect_event('button_release_event', self.on_mouse_release)
-        self.connect_event('motion_notify_event', self.on_move)
+        viewer.add_tool(self)
 
     @property
     def end_points(self):
@@ -81,14 +80,20 @@ class LineTool(CanvasToolBase):
         self.set_visible(True)
         self.redraw()
 
-    def on_mouse_press(self, event):
+    def hit_test(self, event):
         if event.button != 1 or not self.ax.in_axes(event):
-            return
-        self.set_visible(True)
+            return False
         idx, px_dist = self._handles.closest(event.x, event.y)
         if px_dist < self.maxdist:
             self._active_pt = idx
+            return True
         else:
+            self._active_pt = None
+            return False
+
+    def on_mouse_press(self, event):
+        self.set_visible(True)
+        if self._active_pt is None:
             self._active_pt = 0
             x, y = event.xdata, event.ydata
             self._end_pts = np.array([[x, y], [x, y]])
@@ -98,6 +103,7 @@ class LineTool(CanvasToolBase):
             return
         self._active_pt = None
         self.callback_on_release(self.geometry)
+        self.redraw()
 
     def on_move(self, event):
         if event.button != 1 or self._active_pt is None:
@@ -125,8 +131,8 @@ class ThickLineTool(LineTool):
 
     Parameters
     ----------
-    ax : :class:`matplotlib.axes.Axes`
-        Matplotlib axes where tool is displayed.
+    viewer : :class:`skimage.viewer.Viewer`
+        Skimage viewer object.
     on_move : function
         Function called whenever a control handle is moved.
         This function must accept the end points of line as the only argument.
@@ -147,9 +153,9 @@ class ThickLineTool(LineTool):
         End points of line ((x1, y1), (x2, y2)).
     """
 
-    def __init__(self, ax, on_move=None, on_enter=None, on_release=None,
+    def __init__(self, viewer, on_move=None, on_enter=None, on_release=None,
                  on_change=None, maxdist=10, line_props=None):
-        super(ThickLineTool, self).__init__(ax,
+        super(ThickLineTool, self).__init__(viewer,
                                             on_move=on_move,
                                             on_enter=on_enter,
                                             on_release=on_release,
@@ -160,9 +166,6 @@ class ThickLineTool(LineTool):
             def on_change(*args):
                 pass
         self.callback_on_change = on_change
-
-        self.connect_event('scroll_event', self.on_scroll)
-        self.connect_event('key_press_event', self.on_key_press)
 
     def on_scroll(self, event):
         if not event.inaxes:
@@ -191,16 +194,14 @@ class ThickLineTool(LineTool):
 
 
 if __name__ == '__main__':  # pragma: no cover
-    import matplotlib.pyplot as plt
     from skimage import data
+    from skimage.viewer import ImageViewer
 
     image = data.camera()
 
-    f, ax = plt.subplots()
-    ax.imshow(image, interpolation='nearest')
+    viewer = ImageViewer(image)
     h, w = image.shape
 
-    # line_tool = LineTool(ax)
-    line_tool = ThickLineTool(ax)
+    line_tool = ThickLineTool(viewer)
     line_tool.end_points = ([w/3, h/2], [2*w/3, h/2])
-    plt.show()
+    viewer.show()

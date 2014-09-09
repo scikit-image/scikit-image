@@ -55,33 +55,21 @@ def unpack_unique_verts(list trilist):
     return vert_list, face_list
 
 
-def iterate_and_store_3d(double[:, :, ::1] arr, double level,
-                         tuple spacing=(1., 1., 1.)):
+def iterate_and_store_3d(double[:, :, ::1] arr, double level):
     """Iterate across the given array in a marching-cubes fashion,
     looking for volumes with edges that cross 'level'. If such a volume is
     found, appropriate triangulations are added to a growing list of
     faces to be returned by this function.
 
-    If `spacing` is not provided, vertices are returned in the indexing
-    coordinate system (assuming all 3 spatial dimensions sampled equally).
-    If `spacing` is provided, vertices will be returned in volume coordinates
-    relative to the origin, regularly spaced as specified in each dimension.
-
     """
     if arr.shape[0] < 2 or arr.shape[1] < 2 or arr.shape[2] < 2:
         raise ValueError("Input array must be at least 2x2x2.")
-    if len(spacing) != 3:
-        raise ValueError("`spacing` must be (double, double, double)")
 
     cdef list face_list = []
     cdef list norm_list = []
     cdef Py_ssize_t n
-    cdef bint odd_spacing, plus_z
+    cdef bint plus_z
     plus_z = False
-    if [float(i) for i in spacing] == [1.0, 1.0, 1.0]:
-        odd_spacing = False
-    else:
-        odd_spacing = True
 
     # The plan is to iterate a 2x2x2 cube across the input array. This means
     # the upper-left corner of the cube needs to iterate across a sub-array
@@ -107,12 +95,6 @@ def iterate_and_store_3d(double[:, :, ::1] arr, double level,
     coords[1] = 0
     coords[2] = 0
 
-    # Extract doubles from `spacing` for speed
-    cdef double[3] spacing2
-    spacing2[0] = spacing[0]
-    spacing2[1] = spacing[1]
-    spacing2[2] = spacing[2]
-
     # Calculate the number of iterations we'll need
     cdef Py_ssize_t num_cube_steps = ((arr.shape[0] - 1) *
                                       (arr.shape[1] - 1) *
@@ -120,7 +102,7 @@ def iterate_and_store_3d(double[:, :, ::1] arr, double level,
 
     cdef unsigned char cube_case = 0
     cdef tuple e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12
-    cdef double v1, v2, v3, v4, v5, v6, v7, v8, r0, r1, c0, c1, d0, d1
+    cdef double v1, v2, v3, v4, v5, v6, v7, v8
     cdef Py_ssize_t x0, y0, z0, x1, y1, z1
     e5, e6, e7, e8 = (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)
 
@@ -137,18 +119,6 @@ def iterate_and_store_3d(double[:, :, ::1] arr, double level,
         # Standard Py_ssize_t coordinates for indexing
         x0, y0, z0 = coords[0], coords[1], coords[2]
         x1, y1, z1 = x0 + 1, y0 + 1, z0 + 1
-
-        if odd_spacing:
-            # These doubles are the modified world coordinates; they are only
-            # calculated if non-default `spacing` provided.
-            r0 = coords[0] * spacing2[0]
-            c0 = coords[1] * spacing2[1]
-            d0 = coords[2] * spacing2[2]
-            r1 = r0 + spacing2[0]
-            c1 = c0 + spacing2[1]
-            d1 = d0 + spacing2[2]
-        else:
-            r0, c0, d0, r1, c1, d1 = x0, y0, z0, x1, y1, z1
 
         # We use a right-handed coordinate system, UNlike the paper, but want
         # to index in agreement - the coordinate adjustment takes place here.
@@ -192,40 +162,24 @@ def iterate_and_store_3d(double[:, :, ::1] arr, double level,
                 e3 = e7
                 e4 = e8
             else:
-                # Calculate edges normally
-                if odd_spacing:
-                    e1 = r0 + _get_fraction(v1, v2, level) * spacing2[0], c0, d0
-                    e2 = r1, c0 + _get_fraction(v2, v3, level) * spacing2[1], d0
-                    e3 = r0 + _get_fraction(v4, v3, level) * spacing2[0], c1, d0
-                    e4 = r0, c0 + _get_fraction(v1, v4, level) * spacing2[1], d0
-                else:
-                    e1 = r0 + _get_fraction(v1, v2, level), c0, d0
-                    e2 = r1, c0 + _get_fraction(v2, v3, level), d0
-                    e3 = r0 + _get_fraction(v4, v3, level), c1, d0
-                    e4 = r0, c0 + _get_fraction(v1, v4, level), d0
+                # Calculate these edges normally
+                e1 = x0 + _get_fraction(v1, v2, level), y0, z0
+                e2 = x1, y0 + _get_fraction(v2, v3, level), z0
+                e3 = x0 + _get_fraction(v4, v3, level), y1, z0
+                e4 = x0, y0 + _get_fraction(v1, v4, level), z0
 
             # These must be calculated at each point unless we implemented a
             # large, growing lookup table for all adjacent values; could save
             # ~30% in terms of runtime at the expense of memory usage and
             # much greater complexity.
-            if odd_spacing:
-                e5 = r0 + _get_fraction(v5, v6, level) * spacing2[0], c0, d1
-                e6 = r1, c0 + _get_fraction(v6, v7, level) * spacing2[1], d1
-                e7 = r0 + _get_fraction(v8, v7, level) * spacing2[0], c1, d1
-                e8 = r0, c0 + _get_fraction(v5, v8, level) * spacing2[1], d1
-                e9 = r0, c0, d0 + _get_fraction(v1, v5, level) * spacing2[2]
-                e10 = r1, c0, d0 + _get_fraction(v2, v6, level) * spacing2[2]
-                e11 = r0, c1, d0 + _get_fraction(v4, v8, level) * spacing2[2]
-                e12 = r1, c1, d0 + _get_fraction(v3, v7, level) * spacing2[2]
-            else:
-                e5 = r0 + _get_fraction(v5, v6, level), c0, d1
-                e6 = r1, c0 + _get_fraction(v6, v7, level), d1
-                e7 = r0 + _get_fraction(v8, v7, level), c1, d1
-                e8 = r0, c0 + _get_fraction(v5, v8, level), d1
-                e9 = r0, c0, d0 + _get_fraction(v1, v5, level)
-                e10 = r1, c0, d0 + _get_fraction(v2, v6, level)
-                e11 = r0, c1, d0 + _get_fraction(v4, v8, level)
-                e12 = r1, c1, d0 + _get_fraction(v3, v7, level)
+            e5 = x0 + _get_fraction(v5, v6, level), y0, z1
+            e6 = x1, y0 + _get_fraction(v6, v7, level), z1
+            e7 = x0 + _get_fraction(v8, v7, level), y1, z1
+            e8 = x0, y0 + _get_fraction(v5, v8, level), z1
+            e9 = x0, y0, z0 + _get_fraction(v1, v5, level)
+            e10 = x1, y0, z0 + _get_fraction(v2, v6, level)
+            e11 = x0, y1, z0 + _get_fraction(v4, v8, level)
+            e12 = x1, y1, z0 + _get_fraction(v3, v7, level)
 
 
             # Append appropriate triangles to the growing output `face_list`

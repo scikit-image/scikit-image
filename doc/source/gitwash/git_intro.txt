@@ -2,7 +2,7 @@
  Introduction
 ==============
 
-These pages describe a git_ and github_ workflow for the scikit-image_
+These pages describe a git_ and github_ workflow for the `scikit-image`_
 project.
 
 There are several different workflows here, for different ways of

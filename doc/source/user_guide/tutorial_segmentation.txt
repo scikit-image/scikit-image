@@ -38,11 +38,11 @@ Edge-based segmentation
 
 Let us first try to detect edges that enclose the coins. For edge
 detection, we use the `Canny detector 
-<http://en.wikipedia.org/wiki/Canny_edge_detector>`_ of ``skimage.filter.canny``
+<http://en.wikipedia.org/wiki/Canny_edge_detector>`_ of ``skimage.feature.canny``
 
 ::
 
-    >>> from skimage.filter import canny
+    >>> from skimage.feature import canny
     >>> edges = canny(coins/255.)
 
 As the background is very smooth, almost all edges are found at the

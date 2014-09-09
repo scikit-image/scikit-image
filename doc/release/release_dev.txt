@@ -20,6 +20,7 @@ Region Adjacency Graphs
  - Similarity RAGs (#1080)
  - Normalized Cut on RAGs (#1080)
  - RAG Drawing (#1087)
+Sliding Windowed Histogram (#1127)
 
 Improvements
 ------------

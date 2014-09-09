@@ -59,7 +59,7 @@ class LineProfile(PlotPlugin):
         x = [w / 3, 2 * w / 3]
         y = [h / 2] * 2
 
-        self.line_tool = ThickLineTool(self.image_viewer.ax,
+        self.line_tool = ThickLineTool(self.image_viewer,
                                        maxdist=self.maxdist,
                                        on_move=self.line_changed,
                                        on_change=self.line_changed)
