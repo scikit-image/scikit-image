@@ -40,7 +40,7 @@ def make_key_event(key):
 @skipif(not viewer_available)
 def test_collection_viewer():
 
-    img = data.astro()
+    img = data.astronaut()
     img_collection = tuple(pyramid_gaussian(img))
 
     view = CollectionViewer(img_collection)
