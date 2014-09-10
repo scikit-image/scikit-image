@@ -996,11 +996,26 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     ----------
     image : 2-D or 3-D array
         Input image.
-    inverse_map : transformation object, callable ``xy = f(xy, **kwargs)``, (3, 3) array
-        Inverse coordinate map. A function that transforms a (N, 2) array of
-        ``(row, col)`` coordinates in the *output image* into their corresponding
-        coordinates in the *source image* (e.g. a transformation object or its
-        inverse). See example section for usage.
+    inverse_map : transformation object, callable ``xy = f(xy, **kwargs)``, ndarray
+        Inverse coordinate map, which transforms coordinates in the *output
+        images* into their corresponding coordinates in the *source image*.
+
+        There are a number of different options to define this map:
+
+         - For 2-D images, you can directly pass a transformation object,
+           e.g. `skimage.transform.SimilarityTransform`, or its inverse.
+         - For 2-D images, you can pass a (3, 3) homogeneous transformation
+           matrix, e.g. `skimage.transform.SimilarityTransform.params`
+         - For M-D images, a function that transforms a (N, M) coordinates.
+           In case of 2-D images this means a function that transforms a
+           (N, 2) array of ``(x, y)`` coordinates in the *output image* into
+           their corresponding coordinates in the *source image*. Extra
+           parameters to the function can be specified through `map_args`.
+         - For M-D images, you can directly pass an array of coordinates.
+           See `scipy.ndimage.map_coordinates`. Note, that a (3, 3) matrix
+           is interpreted as a homogeneous transformation matrix.
+
+        See example section for usage.
     map_args : dict, optional
         Keyword arguments passed to `inverse_map`.
     output_shape : tuple (rows, cols), optional
@@ -1009,12 +1024,12 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         and columns need to be specified.
     order : int, optional
         The order of interpolation. The order has to be in the range 0-5:
-        * 0: Nearest-neighbor
-        * 1: Bi-linear (default)
-        * 2: Bi-quadratic
-        * 3: Bi-cubic
-        * 4: Bi-quartic
-        * 5: Bi-quintic
+         - 0: Nearest-neighbor
+         - 1: Bi-linear (default)
+         - 2: Bi-quadratic
+         - 3: Bi-cubic
+         - 4: Bi-quartic
+         - 5: Bi-quintic
     mode : string, optional
         Points outside the boundaries of the input are filled according
         to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
@@ -1120,14 +1135,17 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     if out is None:  # use ndimage.map_coordinates
         rows, cols = output_shape[:2]
 
-        # inverse_map is a transformation matrix as numpy array
+        # inverse_map is a transformation matrix as numpy array, this is only
+        # used for order >= 4.
         if isinstance(inverse_map, np.ndarray) and inverse_map.shape == (3, 3):
             inverse_map = ProjectiveTransform(matrix=inverse_map)
 
-        def coord_map(*args):
-            return inverse_map(*args, **map_args)
-
-        coords = warp_coords(coord_map, (rows, cols, bands))
+        if isinstance(inverse_map, np.ndarray):
+            coords = inverse_map
+        else:
+            def coord_map(*args):
+                return inverse_map(*args, **map_args)
+            coords = warp_coords(coord_map, (rows, cols, bands))
 
         # Pre-filtering not necessary for order 0, 1 interpolation
         prefilter = order > 1
