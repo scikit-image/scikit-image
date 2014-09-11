@@ -912,7 +912,7 @@ def _stackcopy(a, b):
 
 
 def warp_coords(coord_map, shape, dtype=np.float64):
-    """Build the source coordinates for the output pixels of an image warp.
+    """Build the source coordinates for the output of a 2-D image warp.
 
     Parameters
     ----------
@@ -934,8 +934,9 @@ def warp_coords(coord_map, shape, dtype=np.float64):
 
     Notes
     -----
-    This is a lower-level routine that produces the source coordinates used by
-    `warp()`.
+
+    This is a lower-level routine that produces the source coordinates for 2-D
+    images used by `warp()`.
 
     It is provided separately from `warp` to give additional flexibility to
     users who would like, for example, to re-use a particular coordinate
@@ -946,7 +947,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
 
     Examples
     --------
-    Produce a coordinate map that Shifts an image up and to the right:
+    Produce a coordinate map that shifts an image up and to the right:
 
     >>> from skimage import data
     >>> from scipy.ndimage import map_coordinates
