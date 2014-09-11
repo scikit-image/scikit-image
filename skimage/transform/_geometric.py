@@ -994,35 +994,37 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     Parameters
     ----------
-    image : 2-D or 3-D array
+    image : ndarray
         Input image.
     inverse_map : transformation object, callable ``xy = f(xy, **kwargs)``, ndarray
-        Inverse coordinate map, which transforms coordinates in the *output
-        images* into their corresponding coordinates in the *source image*.
+        Inverse coordinate map, which transforms coordinates in the output
+        images into their corresponding coordinates in the input image.
 
-        There are a number of different options to define this map:
+        There are a number of different options to define this map, depending
+        on the dimensionality of the input image. A 2-D image can have 2
+        dimensions for gray-scale images, or 3 dimensions with color
+        information.
 
          - For 2-D images, you can directly pass a transformation object,
            e.g. `skimage.transform.SimilarityTransform`, or its inverse.
          - For 2-D images, you can pass a (3, 3) homogeneous transformation
            matrix, e.g. `skimage.transform.SimilarityTransform.params`
-         - For M-D images, a function that transforms a (N, M) coordinate
-           matrix in the output image to their corresponding coordinates in
-           the source image, where N is the total number of pixels in the
-           output image. In case of 2-D images this means a function that
-           transforms a (N, 2) array of ``(x, y)`` coordinates. Extra
-           parameters to the function can be specified through `map_args`.
-         - For M-D images, you can directly pass an array of coordinates.
-           The first dimension specifies the coordinates in the source image,
+         - For 2-D images, a function that transforms a ``(M, 2)`` array of
+           ``(x, y)`` coordinates in the output image to their corresponding
+           coordinates in the input image. Extra parameters to the function
+           can be specified through `map_args`.
+         - For N-D images, you can directly pass an array of coordinates.
+           The first dimension specifies the coordinates in the input image,
            while the subsequent dimensions determine the position in the
-           output image. In case of 2-D images, you need to pass an array of
-           shape ``(2, rows, cols)``, where `rows` and `cols` determine the
+           output image. E.g. in case of 2-D images, you need to pass an array
+           of shape ``(2, rows, cols)``, where `rows` and `cols` determine the
            shape of the output image, and the first dimension contains the
-           ``(row, col)`` coordinate in the source image. Note, that a
-           ``(3, 3)`` matrix is interpreted as a homogeneous transformation
-           matrix, so you cannot interpolate values from a 3-D input, if the
-           output is of shape ``(3, )``. See `scipy.ndimage.map_coordinates`
-           for further documentation.
+           ``(row, col)`` coordinate in the input image.
+           See `scipy.ndimage.map_coordinates` for further documentation.
+
+       Note, that a ``(3, 3)`` matrix is interpreted as a homogeneous
+       transformation matrix, so you cannot interpolate values from a 3-D
+       input, if the output is of shape ``(3, )``.
 
         See example section for usage.
     map_args : dict, optional
@@ -1086,6 +1088,28 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     >>> warped = warp(image, tform.inverse)
 
+    For N-D images you can pass a coordinate array, that specifies the
+    coordinates in the input image for every element in the output image. E.g.
+    if you want to rescale a 3-D cube, you can do:
+
+    >>> cube_shape = np.array([30, 30, 30])
+    >>> cube = np.random.rand(*cube_shape)
+
+    Setup the coordinate array, that defines the scaling:
+
+    >>> scale = 0.1
+    >>> output_shape = (scale * cube_shape).astype(int)
+    >>> coords0, coords1, coords2 = \
+    ...     np.mgrid[:output_shape[0], :output_shape[1], :output_shape[2]]
+    >>> coords = np.array([coords0, coords1, coords2])
+
+    Assume that the cube contains spatial data, where the first array element
+    center is at coordinate (0.5, 0.5, 0.5) in real space, i.e. we have to
+    account for this extra offset when scaling the image:
+
+    >>> coords = (coords + 0.5) / scale - 0.5
+    >>> warped = warp(cube, coords)
+
     """
     # Backward API compatibility
     if reverse_map is not None:
@@ -1093,19 +1117,13 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
                       'the `inverse_map` parameter.')
         inverse_map = reverse_map
 
-    if image.ndim < 2 or image.ndim > 3:
-        raise ValueError("Input must have 2 or 3 dimensions.")
-
-    orig_ndim = image.ndim
-    image = np.atleast_3d(img_as_float(image))
-    ishape = np.array(image.shape)
-    bands = ishape[2]
+    image = img_as_float(image)
+    input_shape = np.array(image.shape)
 
     if output_shape is None:
-        output_shape = ishape
+        output_shape = input_shape
     else:
         output_shape = safe_as_int(output_shape)
-
 
     out = None
 
@@ -1131,30 +1149,35 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
         if matrix is not None:
             matrix = matrix.astype(np.double)
-            # transform all bands
-            dims = []
-            for dim in range(image.shape[2]):
-                dims.append(_warp_fast(image[..., dim], matrix,
-                                       output_shape=output_shape,
-                                       order=order, mode=mode, cval=cval))
-            out = np.dstack(dims)
-            if orig_ndim == 2:
-                out = out[..., 0]
+            if image.ndim == 2:
+                out = _warp_fast(image, matrix,
+                                 output_shape=output_shape,
+                                 order=order, mode=mode, cval=cval)
+            elif image.ndim == 3:
+                dims = []
+                for dim in range(image.shape[2]):
+                    dims.append(_warp_fast(image[..., dim], matrix,
+                                           output_shape=output_shape,
+                                           order=order, mode=mode, cval=cval))
+                out = np.dstack(dims)
 
     if out is None:  # use ndimage.map_coordinates
-        rows, cols = output_shape[:2]
-
         # inverse_map is a transformation matrix as numpy array, this is only
         # used for order >= 4.
-        if isinstance(inverse_map, np.ndarray) and inverse_map.shape == (3, 3):
+        if (isinstance(inverse_map, np.ndarray)
+                and inverse_map.shape == (3, 3)):
             inverse_map = ProjectiveTransform(matrix=inverse_map)
 
         if isinstance(inverse_map, np.ndarray):
             coords = inverse_map
         else:
+            if image.ndim < 2 or image.ndim > 3:
+                raise ValueError("Input must have 2 or 3 dimensions.")
+
             def coord_map(*args):
                 return inverse_map(*args, **map_args)
-            coords = warp_coords(coord_map, (rows, cols, bands))
+
+            coords = warp_coords(coord_map, output_shape)
 
         # Pre-filtering not necessary for order 0, 1 interpolation
         prefilter = order > 1
@@ -1170,8 +1193,4 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     out = clipped
 
-    if out.ndim == 3 and orig_ndim == 2:
-        # remove singleton dimension introduced by atleast_3d
-        return out[..., 0]
-    else:
-        return out
+    return out
