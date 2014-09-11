@@ -1111,11 +1111,6 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     >>> warped = warp(cube, coords)
 
     """
-    # Backward API compatibility
-    if reverse_map is not None:
-        warnings.warn('`reverse_map` parameter is deprecated and replaced by '
-                      'the `inverse_map` parameter.')
-        inverse_map = reverse_map
 
     image = img_as_float(image)
     input_shape = np.array(image.shape)
