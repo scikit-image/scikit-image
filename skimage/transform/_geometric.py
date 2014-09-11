@@ -1006,14 +1006,23 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
            e.g. `skimage.transform.SimilarityTransform`, or its inverse.
          - For 2-D images, you can pass a (3, 3) homogeneous transformation
            matrix, e.g. `skimage.transform.SimilarityTransform.params`
-         - For M-D images, a function that transforms a (N, M) coordinates.
-           In case of 2-D images this means a function that transforms a
-           (N, 2) array of ``(x, y)`` coordinates in the *output image* into
-           their corresponding coordinates in the *source image*. Extra
+         - For M-D images, a function that transforms a (N, M) coordinate
+           matrix in the output image to their corresponding coordinates in
+           the source image, where N is the total number of pixels in the
+           output image. In case of 2-D images this means a function that
+           transforms a (N, 2) array of ``(x, y)`` coordinates. Extra
            parameters to the function can be specified through `map_args`.
          - For M-D images, you can directly pass an array of coordinates.
-           See `scipy.ndimage.map_coordinates`. Note, that a (3, 3) matrix
-           is interpreted as a homogeneous transformation matrix.
+           The first dimension specifies the coordinates in the source image,
+           while the subsequent dimensions determine the position in the
+           output image. In case of 2-D images, you need to pass an array of
+           shape ``(2, rows, cols)``, where `rows` and `cols` determine the
+           shape of the output image, and the first dimension contains the
+           ``(row, col)`` coordinate in the source image. Note, that a
+           ``(3, 3)`` matrix is interpreted as a homogeneous transformation
+           matrix, so you cannot interpolate values from a 3-D input, if the
+           output is of shape ``(3, )``. See `scipy.ndimage.map_coordinates`
+           for further documentation.
 
         See example section for usage.
     map_args : dict, optional
