@@ -56,7 +56,6 @@ from __future__ import division
 import numpy as np
 from scipy import linalg
 from ..util import dtype
-from skimage._shared.utils import deprecated   # Imported but unused. Remove?
 
 
 def guess_spatial_dimensions(image):
@@ -396,7 +395,7 @@ def get_xyz_coords(illuminant, observer):
         return illuminants[illuminant][observer]
     except KeyError:
         raise ValueError("Unknown illuminant/observer combination\
-        (\"{0}\", \"{1}\")".format(illuminant, observer))
+        (\'{0}\', \'{1}\')".format(illuminant, observer))
 
 # Haematoxylin-Eosin-DAB colorspace
 # From original Ruifrok's paper: A. C. Ruifrok and D. A. Johnston,
@@ -765,7 +764,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     ValueError
         If `xyz` is not a 3-D array of shape ``(.., ..,[ ..,] 3)``.
     ValueError
-        If either the illuminant or the observer angle are not supported or
+        If either the illuminant or the observer angle is unsupported or
         unknown.
 
     Notes

@@ -227,50 +227,57 @@ class TestColorconv(TestCase):
     def test_rgb2grey_on_grey(self):
         rgb2grey(np.random.rand(5, 5))
 
-    # test matrices for xyz2lab and lab2xyz generated using http://www.easyrgb.com/index.php?X=CALC
+    # test matrices for xyz2lab and lab2xyz generated using
+    # http://www.easyrgb.com/index.php?X=CALC
     # Note: easyrgb website displays xyz*100
     def test_xyz2lab(self):
         assert_array_almost_equal(xyz2lab(self.xyz_array),
                                   self.lab_array, decimal=3)
 
-        ## Test the conversion with the rest of the illuminants.
+        # Test the conversion with the rest of the illuminants.
         for I in ["d50", "d55", "d65", "d75"]:
             for obs in ["2", "10"]:
                 fname = "lab_array_{0}_{1}.npy".format(I, obs)
-                lab_array_I_obs = np.load(os.path.join(os.path.dirname(__file__), 'data', fname))
+                lab_array_I_obs = np.load(
+                    os.path.join(os.path.dirname(__file__), 'data', fname))
                 assert_array_almost_equal(lab_array_I_obs,
-                                          xyz2lab(self.xyz_array, I, obs), decimal=2)
+                                          xyz2lab(self.xyz_array, I, obs),
+                                          decimal=2)
         for I in ["a", "e"]:
             fname = "lab_array_{0}_2.npy".format(I)
-            lab_array_I_obs = np.load(os.path.join(os.path.dirname(__file__), 'data', fname))
+            lab_array_I_obs = np.load(
+                os.path.join(os.path.dirname(__file__), 'data', fname))
             assert_array_almost_equal(lab_array_I_obs,
-                                      xyz2lab(self.xyz_array, I, "2"), decimal=2)
+                                      xyz2lab(self.xyz_array, I, "2"),
+                                      decimal=2)
 
     def test_lab2xyz(self):
         assert_array_almost_equal(lab2xyz(self.lab_array),
                                   self.xyz_array, decimal=3)
 
-        ## Test the conversion with the rest of the illuminants.
+        # Test the conversion with the rest of the illuminants.
         for I in ["d50", "d55", "d65", "d75"]:
             for obs in ["2", "10"]:
                 fname = "lab_array_{0}_{1}.npy".format(I, obs)
-                lab_array_I_obs = np.load(os.path.join(os.path.dirname(__file__), 'data', fname))
-                assert_array_almost_equal(lab2xyz(lab_array_I_obs, I, obs), 
+                lab_array_I_obs = np.load(
+                    os.path.join(os.path.dirname(__file__), 'data', fname))
+                assert_array_almost_equal(lab2xyz(lab_array_I_obs, I, obs),
                                           self.xyz_array, decimal=3)
         for I in ["a", "e"]:
             fname = "lab_array_{0}_2.npy".format(I, obs)
-            lab_array_I_obs = np.load(os.path.join(os.path.dirname(__file__), 'data', fname))
+            lab_array_I_obs = np.load(
+                os.path.join(os.path.dirname(__file__), 'data', fname))
             assert_array_almost_equal(lab2xyz(lab_array_I_obs, I, "2"),
-                                          self.xyz_array, decimal=3)
+                                      self.xyz_array, decimal=3)
 
-        ## And we include a call to test the exception handling in the code.
+        # And we include a call to test the exception handling in the code.
         try:
             xs = lab2xyz(lab_array_I_obs, "NaI", "2")   # Not an illuminant
         except ValueError:
             pass
-        
+
         try:
-            xs = lab2xyz(lab_array_I_obs, "d50", "42")   # Not an observer degree
+            xs = lab2xyz(lab_array_I_obs, "d50", "42")   # Not a degree
         except ValueError:
             pass
 
@@ -304,36 +311,41 @@ class TestColorconv(TestCase):
         assert_array_almost_equal(xyz2luv(self.xyz_array),
                                   self.luv_array, decimal=3)
 
-        ## Test the conversion with the rest of the illuminants.
+        # Test the conversion with the rest of the illuminants.
         for I in ["d50", "d55", "d65", "d75"]:
             for obs in ["2", "10"]:
                 fname = "luv_array_{0}_{1}.npy".format(I, obs)
-                luv_array_I_obs = np.load(os.path.join(os.path.dirname(__file__), 'data', fname))
+                luv_array_I_obs = np.load(
+                    os.path.join(os.path.dirname(__file__), 'data', fname))
                 assert_array_almost_equal(luv_array_I_obs,
-                                          xyz2luv(self.xyz_array, I, obs), decimal=2)
+                                          xyz2luv(self.xyz_array, I, obs),
+                                          decimal=2)
         for I in ["a", "e"]:
             fname = "luv_array_{0}_2.npy".format(I)
-            luv_array_I_obs = np.load(os.path.join(os.path.dirname(__file__), 'data', fname))
+            luv_array_I_obs = np.load(
+                os.path.join(os.path.dirname(__file__), 'data', fname))
             assert_array_almost_equal(luv_array_I_obs,
-                                      xyz2luv(self.xyz_array, I, "2"), decimal=2)
-
+                                      xyz2luv(self.xyz_array, I, "2"),
+                                      decimal=2)
 
     def test_luv2xyz(self):
         assert_array_almost_equal(luv2xyz(self.luv_array),
                                   self.xyz_array, decimal=3)
 
-        ## Test the conversion with the rest of the illuminants.
+        # Test the conversion with the rest of the illuminants.
         for I in ["d50", "d55", "d65", "d75"]:
             for obs in ["2", "10"]:
                 fname = "luv_array_{0}_{1}.npy".format(I, obs)
-                luv_array_I_obs = np.load(os.path.join(os.path.dirname(__file__), 'data', fname))
+                luv_array_I_obs = np.load(
+                    os.path.join(os.path.dirname(__file__), 'data', fname))
                 assert_array_almost_equal(luv2xyz(luv_array_I_obs, I, obs),
                                           self.xyz_array, decimal=3)
         for I in ["a", "e"]:
             fname = "luv_array_{0}_2.npy".format(I, obs)
-            luv_array_I_obs = np.load(os.path.join(os.path.dirname(__file__), 'data', fname))
+            luv_array_I_obs = np.load(
+                os.path.join(os.path.dirname(__file__), 'data', fname))
             assert_array_almost_equal(luv2xyz(luv_array_I_obs, I, "2"),
-                                          self.xyz_array, decimal=3)
+                                      self.xyz_array, decimal=3)
 
     def test_rgb2luv_brucelindbloom(self):
         """
