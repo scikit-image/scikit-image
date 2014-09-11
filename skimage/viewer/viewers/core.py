@@ -77,6 +77,8 @@ class BlitManager(object):
             self.canvas.restore_region(self.background)
             self.draw_artists()
             self.canvas.blit(self.ax.bbox)
+        else:
+            self.canvas.draw_idle()
 
     def draw_artists(self):
         for artist in self.artists:
@@ -367,6 +369,9 @@ class ImageViewer(QtGui.QMainWindow):
         if clim[0] < 0 and image.min() >= 0:
             clim = (0, clim[1])
         self._image_plot.set_clim(clim)
+
+        if self.useblit:
+            self._blit_manager.background = None
 
         self.redraw()
 
