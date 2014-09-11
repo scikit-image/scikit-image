@@ -72,6 +72,7 @@ except ImportError:
 del version
 
 
+
 try:
     _imp.find_module('nose')
 except ImportError:

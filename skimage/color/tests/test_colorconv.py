@@ -236,13 +236,11 @@ class TestColorconv(TestCase):
         ## Test the conversion with the rest of the illuminants.
         for I in ["d50", "d55", "d65", "d75"]:
             for obs in ["2", "10"]:
-                print("testing illuminant={0}, observer={1}".format(I, obs))
                 fname = "lab_array_{0}_{1}.npy".format(I, obs)
                 lab_array_I_obs = np.load(os.path.join(os.path.dirname(__file__), 'data', fname))
                 assert_array_almost_equal(lab_array_I_obs,
                                           xyz2lab(self.xyz_array, I, obs), decimal=2)
         for I in ["a", "e"]:
-            print("testing illuminant={0}, observer=2".format(I))
             fname = "lab_array_{0}_2.npy".format(I)
             lab_array_I_obs = np.load(os.path.join(os.path.dirname(__file__), 'data', fname))
             assert_array_almost_equal(lab_array_I_obs,
@@ -267,15 +265,14 @@ class TestColorconv(TestCase):
 
         ## And we include a call to test the exception handling in the code.
         try:
-            xs = lab2xyz(lab_array_I_obs, "NaI", "2") # Not an illuminant
+            xs = lab2xyz(lab_array_I_obs, "NaI", "2")   # Not an illuminant
         except ValueError:
-            print 'Correctly handled the unknown illuminant case.'
-
+            pass
+        
         try:
-            xs = lab2xyz(lab_array_I_obs, "d50", "42") # Not an illuminant
+            xs = lab2xyz(lab_array_I_obs, "d50", "42")   # Not an observer degree
         except ValueError:
-            print 'Correctly handled the unknown observer case.'
-
+            pass
 
     def test_rgb2lab_brucelindbloom(self):
         """
@@ -310,13 +307,11 @@ class TestColorconv(TestCase):
         ## Test the conversion with the rest of the illuminants.
         for I in ["d50", "d55", "d65", "d75"]:
             for obs in ["2", "10"]:
-                print("testing illuminant={0}, observer={1}".format(I, obs))
                 fname = "luv_array_{0}_{1}.npy".format(I, obs)
                 luv_array_I_obs = np.load(os.path.join(os.path.dirname(__file__), 'data', fname))
                 assert_array_almost_equal(luv_array_I_obs,
                                           xyz2luv(self.xyz_array, I, obs), decimal=2)
         for I in ["a", "e"]:
-            print("testing illuminant={0}, observer=2".format(I))
             fname = "luv_array_{0}_2.npy".format(I)
             luv_array_I_obs = np.load(os.path.join(os.path.dirname(__file__), 'data', fname))
             assert_array_almost_equal(luv_array_I_obs,
