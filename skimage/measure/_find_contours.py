@@ -35,7 +35,7 @@ def find_contours(array, level,
     -------
     contours : list of (n,2)-ndarrays
         Each contour is an ndarray of shape ``(n, 2)``,
-        consisting of n ``(x, y)`` coordinates along the contour.
+        consisting of n ``(row, column)`` coordinates along the contour.
 
     Notes
     -----
