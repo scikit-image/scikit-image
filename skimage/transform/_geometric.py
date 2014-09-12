@@ -1168,7 +1168,9 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
             coords = inverse_map
         else:
             if image.ndim < 2 or image.ndim > 3:
-                raise ValueError("Input must have 2 or 3 dimensions.")
+                raise ValueError("Only 2-D images (grayscale or color) are "
+                                 "supported, when providing a callable "
+                                 "`inverse_map`.")
 
             def coord_map(*args):
                 return inverse_map(*args, **map_args)
