@@ -254,6 +254,7 @@ class ComboBox(BaseWidget):
     def index(self, i):
         self._combo_box.setCurrentIndex(i)
 
+
 class CheckBox(BaseWidget):
     """CheckBox widget
 
@@ -265,17 +266,18 @@ class CheckBox(BaseWidget):
         replaced with underscores). In addition, this name is displayed as the
         name of the CheckBox.
     value: {False, True}
-        Initial state of the CheckBox.  
+        Initial state of the CheckBox.
     alignment: {'center','left','right'}
-        Checkbox alignment  
+        Checkbox alignment
     ptype : {'arg' | 'kwarg' | 'plugin'}
-        Parameter type.
+        Parameter type
     callback : function
         Callback function called in response to CheckBox changes. This function
         is typically set when the widget is added to a plugin.
     """
 
-    def __init__(self, name, value=False, alignment='center', ptype='kwarg', callback=None):
+    def __init__(self, name, value=False, alignment='center', ptype='kwarg', 
+                 callback=None):
         super(CheckBox, self).__init__(name, ptype, callback)
 
         self._check_box = QtGui.QCheckBox()
@@ -298,13 +300,10 @@ class CheckBox(BaseWidget):
 
     @property
     def val(self):
-        #return self._check_box.checkState()
         return self._check_box.isChecked()
-
 
     @val.setter
     def val(self, i):
-        #self._check_box.setCheckState(i)  # setCheckState has 3 states: 
-                                           # 0=unchecked, 1=partial, 2=checked
         self._check_box.setChecked(i)   # setChecked has only two states:
                                         # 0 = unchecked,  2 = checked
+                                        
