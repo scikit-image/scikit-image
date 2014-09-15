@@ -919,7 +919,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     coord_map : callable like GeometricTransform.inverse
         Return input coordinates for given output coordinates.
         Coordinates are in the shape (P, 2), where P is the number
-        of coordinates and each element is a ``(x, y)`` pair.
+        of coordinates and each element is a ``(row, col)`` pair.
     shape : tuple
         Shape of output image ``(rows, cols[, bands])``.
     dtype : np.dtype or string
@@ -966,10 +966,10 @@ def warp_coords(coord_map, shape, dtype=np.float64):
         coords_shape.append(shape[2])
     coords = np.empty(coords_shape, dtype=dtype)
 
-    # Reshape grid coordinates into a (P, 2) array of (x, y) pairs
+    # Reshape grid coordinates into a (P, 2) array of (row, col) pairs
     tf_coords = np.indices((cols, rows), dtype=dtype).reshape(2, -1).T
 
-    # Map each (x, y) pair to the source image according to
+    # Map each (row, col) pair to the source image according to
     # the user-provided mapping
     tf_coords = coord_map(tf_coords)
 
@@ -998,7 +998,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         Input image.
     inverse_map : transformation object, callable ``xy = f(xy, **kwargs)``, (3, 3) array
         Inverse coordinate map. A function that transforms a (N, 2) array of
-        ``(x, y)`` coordinates in the *output image* into their corresponding
+        ``(row, col)`` coordinates in the *output image* into their corresponding
         coordinates in the *source image* (e.g. a transformation object or its
         inverse). See example section for usage.
     map_args : dict, optional
