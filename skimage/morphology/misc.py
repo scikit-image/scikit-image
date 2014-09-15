@@ -1,4 +1,5 @@
 import numpy as np
+import functools
 import scipy.ndimage as nd
 from .selem import _default_selem
 
@@ -31,7 +32,7 @@ def default_fallback(func):
         If the image dimentionality is greater than 2D, the ndimage
         function is returned, otherwise skimage function is used.
     """
-
+    @functools.wraps(func)
     def func_out(image, selem=None, out=None, **kwargs):
         # Default structure element
         if selem is None:
