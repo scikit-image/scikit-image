@@ -294,7 +294,7 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
     ----------
     image : ndarray
         Input image.
-    center : (x,y) tuple or (2,) ndarray, optional
+    center : (row, column) tuple or (2,) ndarray, optional
         Center coordinate of transformation.
     strength : float, optional
         The amount of swirling applied.
