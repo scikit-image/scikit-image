@@ -65,6 +65,9 @@ class OverlayPlugin(Plugin):
         else:
             update_axes_image(self._overlay_plot, image)
 
+        if self.image_viewer.useblit:
+            self.image_viewer._blit_manager.background = None
+
         self.image_viewer.redraw()
 
     @property
