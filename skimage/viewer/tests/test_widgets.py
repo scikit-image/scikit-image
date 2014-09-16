@@ -16,6 +16,7 @@ def get_image_viewer():
     viewer += Plugin()
     return viewer
 
+
 @skipif(not viewer_available)
 def test_check_box():
     viewer = get_image_viewer()
@@ -42,6 +43,7 @@ def test_combo_box():
     cb.index = 2
     assert_equal(str(cb.val), 'c'),
     assert_equal(cb.index, 2)
+
 
 @skipif(not viewer_available)
 def test_text_widget():

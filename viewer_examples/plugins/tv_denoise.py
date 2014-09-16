@@ -4,8 +4,8 @@ from skimage.util import img_as_float
 from numpy import random, clip
 
 from skimage.viewer import ImageViewer
-from skimage.viewer.widgets import (Slider, CheckBox, OKCancelButtons, 
-									SaveButtons)
+from skimage.viewer.widgets import (Slider, CheckBox, OKCancelButtons,
+                                    SaveButtons)
 from skimage.viewer.plugins.base import Plugin
 
 

@@ -304,6 +304,7 @@ class CheckBox(BaseWidget):
 
     @val.setter
     def val(self, i):
-        self._check_box.setChecked(i)   # setChecked has only two states:
-                                        # 0 = unchecked,  2 = checked
+        # setChecked has only two states:   0 = unchecked,  2 = checked
+        self._check_box.setChecked(i)   
+                                        
                                         
