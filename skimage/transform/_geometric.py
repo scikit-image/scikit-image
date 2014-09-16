@@ -1158,15 +1158,20 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
                 out = np.dstack(dims)
 
     if out is None:  # use ndimage.map_coordinates
-        # inverse_map is a transformation matrix as numpy array, this is only
-        # used for order >= 4.
+        # inverse_map is a transformation matrix as numpy array,
+        # this is only used for order >= 4.
         if (isinstance(inverse_map, np.ndarray)
                 and inverse_map.shape == (3, 3)):
             inverse_map = ProjectiveTransform(matrix=inverse_map)
 
         if isinstance(inverse_map, np.ndarray):
+            # inverse_map is directly given as coordinates
             coords = inverse_map
         else:
+            # inverse_map is given as function, that transforms (N, 2)
+            # destination coordinates to their corresponding source
+            # coordinates. This is only supported for 2(+1)-D images.
+
             if image.ndim < 2 or image.ndim > 3:
                 raise ValueError("Only 2-D images (grayscale or color) are "
                                  "supported, when providing a callable "
@@ -1179,6 +1184,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
         # Pre-filtering not necessary for order 0, 1 interpolation
         prefilter = order > 1
+
         out = ndimage.map_coordinates(image, coords, prefilter=prefilter,
                                       mode=mode, order=order, cval=cval)
 
