@@ -1180,6 +1180,13 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
             def coord_map(*args):
                 return inverse_map(*args, **map_args)
 
+            # Input image is 2D and has color channel, but output_shape is
+            # given for 2-D images. Automatically add the color channel
+            # dimensionality.
+            if len(input_shape) == 3 and len(output_shape) == 2:
+                output_shape = (output_shape[0], output_shape[1],
+                                input_shape[2])
+
             coords = warp_coords(coord_map, output_shape)
 
         # Pre-filtering not necessary for order 0, 1 interpolation
