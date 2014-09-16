@@ -997,7 +997,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     ----------
     image : ndarray
         Input image.
-    inverse_map : transformation object, callable ``xy = f(xy, **kwargs)``, ndarray
+    inverse_map : transformation object, callable ``cr = f(cr, **kwargs)``, or ndarray
         Inverse coordinate map, which transforms coordinates in the output
         images into their corresponding coordinates in the input image.
 
@@ -1008,12 +1008,13 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
          - For 2-D images, you can directly pass a transformation object,
            e.g. `skimage.transform.SimilarityTransform`, or its inverse.
-         - For 2-D images, you can pass a (3, 3) homogeneous transformation
-           matrix, e.g. `skimage.transform.SimilarityTransform.params`
+         - For 2-D images, you can pass a ``(3, 3)`` homogeneous
+           transformation matrix, e.g.
+           `skimage.transform.SimilarityTransform.params`
          - For 2-D images, a function that transforms a ``(M, 2)`` array of
-           ``(x, y)`` coordinates in the output image to their corresponding
-           coordinates in the input image. Extra parameters to the function
-           can be specified through `map_args`.
+           ``(col, row)`` coordinates in the output image to their
+           corresponding coordinates in the input image. Extra parameters to
+           the function can be specified through `map_args`.
          - For N-D images, you can directly pass an array of coordinates.
            The first dimension specifies the coordinates in the input image,
            while the subsequent dimensions determine the position in the
@@ -1025,7 +1026,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
        Note, that a ``(3, 3)`` matrix is interpreted as a homogeneous
        transformation matrix, so you cannot interpolate values from a 3-D
-       input, if the output is of shape ``(3, )``.
+       input, if the output is of shape ``(3,)``.
 
         See example section for usage.
     map_args : dict, optional
