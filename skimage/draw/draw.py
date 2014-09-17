@@ -7,6 +7,15 @@ def _coords_inside_image(rr, cc, shape):
     return rr[mask], cc[mask]
 
 
+def _ellipse_in_shape(shape, center, radiuses):
+    """Generate coordinates of points within ellipse bounded by shape."""
+    y, x = np.ogrid[0:shape[0], 0:shape[1]]
+    cy, cx = center
+    ry, rx = radiuses
+    distances = ((y - cy) / ry) ** 2 + ((x - cx) / rx) ** 2
+    return np.nonzero(distances < 1)
+
+
 def ellipse(cy, cx, yradius, xradius, shape=None):
     """Generate coordinates of pixels within ellipse.
 
@@ -48,21 +57,26 @@ def ellipse(cy, cx, yradius, xradius, shape=None):
 
     """
 
-    dr = 1 / float(yradius)
-    dc = 1 / float(xradius)
-
-    r, c = np.ogrid[-1:1:dr, -1:1:dc]
-    rr, cc = np.nonzero(r ** 2 + c ** 2 < 1)
-
-    rr.flags.writeable = True
-    cc.flags.writeable = True
-    rr += cy - yradius
-    cc += cx - xradius
-
+    center = np.array([cy, cx])
+    radiuses = np.array([yradius, xradius])
     if shape is not None:
-        return _coords_inside_image(rr, cc, shape)
+        return _ellipse_in_shape(shape, center, radiuses)
+    else:
+        # rounding here is necessary to avoid rounding issues later
+        upper_left = np.floor(center - radiuses)
 
-    return rr, cc
+        shifted_center = center - upper_left
+
+        # Shifted center is in interval [radiuses, radiuses + 1], so
+        # the ellipse must fit in [0, 2*radiuses + 1].
+        bounding_shape = np.ceil(2 * radiuses + 1)
+
+        rr, cc = _ellipse_in_shape(bounding_shape, shifted_center, radiuses)
+        rr.flags.writeable = True
+        cc.flags.writeable = True
+        rr += upper_left[0]
+        cc += upper_left[1]
+        return rr, cc
 
 
 def circle(cy, cx, radius, shape=None):
