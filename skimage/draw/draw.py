@@ -9,7 +9,7 @@ def _coords_inside_image(rr, cc, shape):
 
 def _ellipse_in_shape(shape, center, radiuses):
     """Generate coordinates of points within ellipse bounded by shape."""
-    y, x = np.ogrid[0:shape[0], 0:shape[1]]
+    y, x = np.ogrid[0:float(shape[0]), 0:float(shape[1])]
     cy, cx = center
     ry, rx = radiuses
     distances = ((y - cy) / ry) ** 2 + ((x - cx) / rx) ** 2
