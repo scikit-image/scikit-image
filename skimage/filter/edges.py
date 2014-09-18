@@ -110,6 +110,8 @@ def hsobel(image, mask=None):
      -1  -2  -1
 
     """
+    if image.ndim != 2:
+        raise TypeError("The input 'image' must be a two-dimensional array.")
     image = img_as_float(image)
     result = np.abs(convolve(image, HSOBEL_WEIGHTS))
     return _mask_filter_result(result, mask)
@@ -142,6 +144,8 @@ def vsobel(image, mask=None):
       1   0  -1
 
     """
+    if image.ndim != 2:
+        raise TypeError("The input 'image' must be a two-dimensional array.")
     image = img_as_float(image)
     result = np.abs(convolve(image, VSOBEL_WEIGHTS))
     return _mask_filter_result(result, mask)
@@ -211,6 +215,8 @@ def hscharr(image, mask=None):
            of Kernel Based Image Derivatives.
 
     """
+    if image.ndim != 2:
+        raise TypeError("The input 'image' must be a two-dimensional array.")
     image = img_as_float(image)
     result = np.abs(convolve(image, HSCHARR_WEIGHTS))
     return _mask_filter_result(result, mask)
@@ -248,6 +254,8 @@ def vscharr(image, mask=None):
            of Kernel Based Image Derivatives.
 
     """
+    if image.ndim != 2:
+        raise TypeError("The input 'image' must be a two-dimensional array.")
     image = img_as_float(image)
     result = np.abs(convolve(image, VSCHARR_WEIGHTS))
     return _mask_filter_result(result, mask)
@@ -305,6 +313,8 @@ def hprewitt(image, mask=None):
      -1  -1  -1
 
     """
+    if image.ndim != 2:
+        raise TypeError("The input 'image' must be a two-dimensional array.")
     image = img_as_float(image)
     result = np.abs(convolve(image, HPREWITT_WEIGHTS))
     return _mask_filter_result(result, mask)
@@ -337,6 +347,8 @@ def vprewitt(image, mask=None):
       1   0  -1
 
     """
+    if image.ndim != 2:
+        raise TypeError("The input 'image' must be a two-dimensional array.")
     image = img_as_float(image)
     result = np.abs(convolve(image, VPREWITT_WEIGHTS))
     return _mask_filter_result(result, mask)
@@ -392,6 +404,8 @@ def roberts_positive_diagonal(image, mask=None):
       0  -1
 
     """
+    if image.ndim != 2:
+        raise TypeError("The input 'image' must be a two-dimensional array.")
     image = img_as_float(image)
     result = np.abs(convolve(image, ROBERTS_PD_WEIGHTS))
     return _mask_filter_result(result, mask)
@@ -426,6 +440,8 @@ def roberts_negative_diagonal(image, mask=None):
      -1   0
 
     """
+    if image.ndim != 2:
+        raise TypeError("The input 'image' must be a two-dimensional array.")
     image = img_as_float(image)
     result = np.abs(convolve(image, ROBERTS_ND_WEIGHTS))
     return _mask_filter_result(result, mask)
