@@ -13,7 +13,7 @@ def test_daisy_color_image_unsupported_error():
 
 
 def test_daisy_desc_dims():
-    img = img_as_float(data.lena()[:128, :128].mean(axis=2))
+    img = img_as_float(data.astronaut()[:128, :128].mean(axis=2))
     rings = 2
     histograms = 4
     orientations = 3
@@ -30,7 +30,7 @@ def test_daisy_desc_dims():
 
 
 def test_descs_shape():
-    img = img_as_float(data.lena()[:256, :256].mean(axis=2))
+    img = img_as_float(data.astronaut()[:256, :256].mean(axis=2))
     radius = 20
     step = 8
     descs = daisy(img, radius=radius, step=step)
@@ -46,21 +46,21 @@ def test_descs_shape():
 
 
 def test_daisy_sigmas_and_radii():
-    img = img_as_float(data.lena()[:64, :64].mean(axis=2))
+    img = img_as_float(data.astronaut()[:64, :64].mean(axis=2))
     sigmas = [1, 2, 3]
     radii = [1, 2]
     daisy(img, sigmas=sigmas, ring_radii=radii)
 
 
 def test_daisy_incompatible_sigmas_and_radii():
-    img = img_as_float(data.lena()[:64, :64].mean(axis=2))
+    img = img_as_float(data.astronaut()[:64, :64].mean(axis=2))
     sigmas = [1, 2]
     radii = [1, 2]
     assert_raises(ValueError, daisy, img, sigmas=sigmas, ring_radii=radii)
 
 
 def test_daisy_normalization():
-    img = img_as_float(data.lena()[:64, :64].mean(axis=2))
+    img = img_as_float(data.astronaut()[:64, :64].mean(axis=2))
 
     descs = daisy(img, normalization='l1')
     for i in range(descs.shape[0]):
@@ -93,7 +93,7 @@ def test_daisy_normalization():
 
 
 def test_daisy_visualization():
-    img = img_as_float(data.lena()[:32, :32].mean(axis=2))
+    img = img_as_float(data.astronaut()[:32, :32].mean(axis=2))
     descs, descs_img = daisy(img, visualize=True)
     assert(descs_img.shape == (32, 32, 3))
 

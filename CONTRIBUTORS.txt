@@ -188,3 +188,6 @@
 
 - Geoffrey French
   skimage.filters.rank.windowed_histogram and plot_windowed_histogram example.
+
+- Rebecca Murphy
+  Astronaut in examples
