@@ -22,7 +22,7 @@ from ..qt.QtCore import Qt
 from ..utils import RequiredAttr
 
 
-__all__ = ['BaseWidget', 'Slider', 'ComboBox', 'Text']
+__all__ = ['BaseWidget', 'Slider', 'ComboBox', 'CheckBox', 'Text']
 
 
 class BaseWidget(QtGui.QWidget):
@@ -211,16 +211,16 @@ class ComboBox(BaseWidget):
     Parameters
     ----------
     name : str
-        Name of slider parameter. If this parameter is passed as a keyword
+        Name of ComboBox parameter. If this parameter is passed as a keyword
         argument, it must match the name of that keyword argument (spaces are
         replaced with underscores). In addition, this name is displayed as the
-        name of the slider.
-    items: list
+        name of the ComboBox.
+    items: list of str
         Allowed parameter values.
     ptype : {'arg' | 'kwarg' | 'plugin'}
         Parameter type.
     callback : function
-        Callback function called in response to slider changes. This function
+        Callback function called in response to ComboBox changes. This function
         is typically set when the widget is added to a plugin.
     """
 
@@ -253,3 +253,55 @@ class ComboBox(BaseWidget):
     @index.setter
     def index(self, i):
         self._combo_box.setCurrentIndex(i)
+
+
+class CheckBox(BaseWidget):
+    """CheckBox widget
+
+    Parameters
+    ----------
+    name : str
+        Name of CheckBox parameter. If this parameter is passed as a keyword
+        argument, it must match the name of that keyword argument (spaces are
+        replaced with underscores). In addition, this name is displayed as the
+        name of the CheckBox.
+    value: {False, True}
+        Initial state of the CheckBox.
+    alignment: {'center','left','right'}
+        Checkbox alignment
+    ptype : {'arg' | 'kwarg' | 'plugin'}
+        Parameter type
+    callback : function
+        Callback function called in response to CheckBox changes. This function
+        is typically set when the widget is added to a plugin.
+    """
+
+    def __init__(self, name, value=False, alignment='center', ptype='kwarg', 
+                 callback=None):
+        super(CheckBox, self).__init__(name, ptype, callback)
+
+        self._check_box = QtGui.QCheckBox()
+        self._check_box.setChecked(value)
+        self._check_box.setText(self.name)
+
+        self.layout = QtGui.QHBoxLayout(self)
+        if alignment == 'center':
+            self.layout.setAlignment(QtCore.Qt.AlignCenter)
+        elif alignment == 'left':
+            self.layout.setAlignment(QtCore.Qt.AlignLeft)
+        elif alignment == 'right':
+            self.layout.setAlignment(QtCore.Qt.AlignRight)
+        else:
+            raise ValueError("Unexpected value %s for 'alignment'" % alignment)
+
+        self.layout.addWidget(self._check_box)
+
+        self._check_box.stateChanged.connect(self._value_changed)
+
+    @property
+    def val(self):
+        return self._check_box.isChecked()
+
+    @val.setter
+    def val(self, i):
+        self._check_box.setChecked(i)

@@ -3,7 +3,7 @@ import os
 from skimage import data, img_as_float, io
 from skimage.viewer import ImageViewer, viewer_available
 from skimage.viewer.widgets import (
-    Slider, OKCancelButtons, SaveButtons, ComboBox, Text)
+    Slider, OKCancelButtons, SaveButtons, ComboBox, CheckBox, Text)
 from skimage.viewer.plugins.base import Plugin
 from skimage.viewer.qt import QtGui, QtCore
 from numpy.testing import assert_almost_equal, assert_equal
@@ -16,6 +16,21 @@ def get_image_viewer():
     viewer += Plugin()
     return viewer
 
+
+@skipif(not viewer_available)
+def test_check_box():
+    viewer = get_image_viewer()
+    cb = CheckBox('hello', value=True, alignment='left')
+    viewer.plugins[0] += cb
+
+    assert_equal(cb.val, True)
+    cb.val = False
+    assert_equal(cb.val, False)
+    cb.val = 1
+    assert_equal(cb.val, True) 
+    cb.val = 0
+    assert_equal(cb.val, False)
+    
 
 @skipif(not viewer_available)
 def test_combo_box():
