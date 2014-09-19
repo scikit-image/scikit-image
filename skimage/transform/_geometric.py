@@ -1124,24 +1124,24 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     out = None
 
-    # use fast Cython version for specific interpolation orders and input
     if order in range(4) and not map_args:
+        # use fast Cython version for specific interpolation orders and input
 
         matrix = None
 
-        # inverse_map is a transformation matrix as numpy array
         if isinstance(inverse_map, np.ndarray) and inverse_map.shape == (3, 3):
+            # inverse_map is a transformation matrix as numpy array
             matrix = inverse_map
 
-        # inverse_map is a homography
         elif isinstance(inverse_map, HOMOGRAPHY_TRANSFORMS):
+            # inverse_map is a homography
             matrix = inverse_map.params
 
-        # inverse_map is the inverse of a homography
         elif (hasattr(inverse_map, '__name__')
               and inverse_map.__name__ == 'inverse'
               and get_bound_method_class(inverse_map) \
                   in HOMOGRAPHY_TRANSFORMS):
+            # inverse_map is the inverse of a homography
             matrix = np.linalg.inv(six.get_method_self(inverse_map).params)
 
         if matrix is not None:
@@ -1158,11 +1158,13 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
                                            order=order, mode=mode, cval=cval))
                 out = np.dstack(dims)
 
-    if out is None:  # use ndimage.map_coordinates
-        # inverse_map is a transformation matrix as numpy array,
-        # this is only used for order >= 4.
+    if out is None:
+        # use ndimage.map_coordinates
+
         if (isinstance(inverse_map, np.ndarray)
                 and inverse_map.shape == (3, 3)):
+            # inverse_map is a transformation matrix as numpy array,
+            # this is only used for order >= 4.
             inverse_map = ProjectiveTransform(matrix=inverse_map)
 
         if isinstance(inverse_map, np.ndarray):
@@ -1181,10 +1183,10 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
             def coord_map(*args):
                 return inverse_map(*args, **map_args)
 
-            # Input image is 2D and has color channel, but output_shape is
-            # given for 2-D images. Automatically add the color channel
-            # dimensionality.
             if len(input_shape) == 3 and len(output_shape) == 2:
+                # Input image is 2D and has color channel, but output_shape is
+                # given for 2-D images. Automatically add the color channel
+                # dimensionality.
                 output_shape = (output_shape[0], output_shape[1],
                                 input_shape[2])
 
