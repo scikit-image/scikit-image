@@ -1050,9 +1050,10 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
     clip : bool, optional
-        Whether to clip the output to the float range of ``[0, 1]``,
-        since higher order interpolation may produce values outside the
-        given input range.
+        Whether to clip the output to the float range of ``[0, 1]``, or
+        ``[-1, 1]`` for input images with negative values. This is enabled by
+        default, since  higher order interpolation may produce values outside
+        the given input range.
 
     Notes
     -----
