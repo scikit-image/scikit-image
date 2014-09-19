@@ -990,7 +990,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
 
 
 def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
-         mode='constant', cval=0., reverse_map=None):
+         mode='constant', cval=0.):
     """Warp an image according to a given coordinate transformation.
 
     Parameters
