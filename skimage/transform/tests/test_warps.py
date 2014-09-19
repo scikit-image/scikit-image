@@ -66,8 +66,8 @@ def test_warp_nd():
         refx_c = dim * (1,)
         refx[refx_c] = 1
 
-        coord_grid = dim * (np.arange(5),)
-        coords = np.array(np.meshgrid(*coord_grid)) + 1
+        coord_grid = dim * (slice(0, 5, 1),)
+        coords = np.array(np.mgrid[coord_grid]) + 1
 
         outx = warp(x, coords, order=0, cval=0)
 
