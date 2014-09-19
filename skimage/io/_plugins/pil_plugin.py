@@ -32,8 +32,8 @@ def imread(fname, dtype=None):
     try:
         return pil_to_ndarray(im, dtype)
     except IOError:
-            raise ValueError('Could not load "%s": make sure you have library '
-                'support for "%s" files' % (fname, im.format))
+        raise ValueError('Could not load "%s": make sure you have library '
+            'support for "%s" files' % (fname, im.format))
 
 
 def pil_to_ndarray(im, dtype=None):
