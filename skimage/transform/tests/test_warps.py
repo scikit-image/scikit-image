@@ -55,6 +55,17 @@ def test_warp_matrix():
     outx = warp(x, matrix, order=5)
 
 
+def test_warp_clip():
+    x = 2 * np.ones((5, 5), dtype=np.double)
+    matrix = np.eye(3)
+
+    outx = warp(x, matrix, order=0, clip=False)
+    assert_array_almost_equal(x, outx)
+
+    outx = warp(x, matrix, order=0, clip=True)
+    assert_array_almost_equal(x / 2, outx)
+
+
 def test_homography():
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1

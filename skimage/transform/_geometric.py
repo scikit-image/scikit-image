@@ -990,7 +990,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
 
 
 def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
-         mode='constant', cval=0.):
+         mode='constant', cval=0., clip=True):
     """Warp an image according to a given coordinate transformation.
 
     Parameters
@@ -1049,6 +1049,10 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
+    clip : bool, optional
+        Whether to clip the output to the float range of ``[0, 1]``,
+        since higher order interpolation may produce values outside the
+        given input range.
 
     Notes
     -----
@@ -1198,13 +1202,21 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         out = ndimage.map_coordinates(image, coords, prefilter=prefilter,
                                       mode=mode, order=order, cval=cval)
 
-    # The spline filters sometimes return results outside [0, 1],
-    # so clip to ensure valid data
-    clipped = np.clip(out, 0, 1)
+    if clip:
+        # The spline filters sometimes return results outside [0, 1],
+        # so clip to ensure valid data
 
-    if mode == 'constant' and not (0 <= cval <= 1):
-        clipped[out == cval] = cval
+        if np.min(image) < 0:
+            min_val = -1
+        else:
+            min_val = 0
+        max_val = 1
 
-    out = clipped
+        clipped = np.clip(out, min_val, max_val)
+
+        if mode == 'constant' and not (0 <= cval <= 1):
+            clipped[out == cval] = cval
+
+        out = clipped
 
     return out
