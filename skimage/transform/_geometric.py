@@ -1010,7 +1010,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
            e.g. `skimage.transform.SimilarityTransform`, or its inverse.
          - For 2-D images, you can pass a ``(3, 3)`` homogeneous
            transformation matrix, e.g.
-           `skimage.transform.SimilarityTransform.params`
+           `skimage.transform.SimilarityTransform.params`.
          - For 2-D images, a function that transforms a ``(M, 2)`` array of
            ``(col, row)`` coordinates in the output image to their
            corresponding coordinates in the input image. Extra parameters to
@@ -1024,9 +1024,9 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
            ``(row, col)`` coordinate in the input image.
            See `scipy.ndimage.map_coordinates` for further documentation.
 
-       Note, that a ``(3, 3)`` matrix is interpreted as a homogeneous
-       transformation matrix, so you cannot interpolate values from a 3-D
-       input, if the output is of shape ``(3,)``.
+        Note, that a ``(3, 3)`` matrix is interpreted as a homogeneous
+        transformation matrix, so you cannot interpolate values from a 3-D
+        input, if the output is of shape ``(3,)``.
 
         See example section for usage.
     map_args : dict, optional
