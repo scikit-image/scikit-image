@@ -188,3 +188,6 @@
 
 - Geoffrey French
   skimage.filters.rank.windowed_histogram and plot_windowed_histogram example.
+
+- Alexey Umnov
+  skimage.draw.ellipse bug fix and tests.
