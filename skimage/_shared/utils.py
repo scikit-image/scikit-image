@@ -8,7 +8,7 @@ import six
 from ._warnings import all_warnings
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
-           'safe_as_int']
+           'safe_as_int', 'assert_nD']
 
 
 class skimage_deprecation(Warning):
@@ -141,3 +141,10 @@ def safe_as_int(val, atol=1e-3):
                          "{0}, check inputs.".format(val))
 
     return np.round(val).astype(np.int64)
+
+
+def assert_nD(array, arg_name='image', ndim=2):
+    array = np.asanyarray(array)
+    if array.ndim != ndim:
+        msg = "The parameter `%s` must be a %s-dimensional array"
+        raise ValueError(msg % (arg_name, ndim))
