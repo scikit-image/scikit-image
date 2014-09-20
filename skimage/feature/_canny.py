@@ -17,6 +17,7 @@ import scipy.ndimage as ndi
 from scipy.ndimage import (gaussian_filter,
                            generate_binary_structure, binary_erosion, label)
 from skimage import dtype_limits
+from skimage._shared.utils import assert_nD
 
 
 def smooth_with_function_and_mask(image, function, mask):
@@ -148,9 +149,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None):
     # mask by one and then mask the output. We also mask out the border points
     # because who knows what lies beyond the edge of the image?
     #
-
-    if image.ndim != 2:
-        raise TypeError("The input 'image' must be a two-dimensional array.")
+    assert_nD(image)
 
     if low_threshold is None:
         low_threshold = 0.1 * dtype_limits(image)[1]

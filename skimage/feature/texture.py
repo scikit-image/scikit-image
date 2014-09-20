@@ -3,7 +3,7 @@ Methods to characterize image textures.
 """
 
 import numpy as np
-
+from skimage._shared.utils import assert_nD
 from ._texture import _glcm_loop, _local_binary_pattern
 
 
@@ -279,6 +279,7 @@ def local_binary_pattern(image, P, R, method='default'):
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.214.6851,
            2004.
     """
+    assert_nD(image)
 
     methods = {
         'default': ord('D'),

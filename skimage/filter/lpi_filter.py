@@ -5,6 +5,7 @@
 
 import numpy as np
 from scipy.fftpack import ifftshift
+from skimage._shared.utils import assert_nD
 
 eps = np.finfo(float).eps
 
@@ -118,6 +119,7 @@ class LPIFilter2D(object):
         data : (M,N) ndarray
 
         """
+        assert_nD(data, 'data')
         F, G = self._prepare(data)
         out = np.dual.ifftn(F * G)
         out = np.abs(_centre(out, data.shape))
@@ -155,6 +157,7 @@ def forward(data, impulse_response=None, filter_params={},
     >>> filtered = forward(data.coins(), filt_func)
 
     """
+    assert_nD(data, 'data')
     if predefined_filter is None:
         predefined_filter = LPIFilter2D(impulse_response, **filter_params)
     return predefined_filter(data)
@@ -184,6 +187,7 @@ def inverse(data, impulse_response=None, filter_params={}, max_gain=2,
         images, construct the LPIFilter2D and specify it here.
 
     """
+    assert_nD(data, 'data')
     if predefined_filter is None:
         filt = LPIFilter2D(impulse_response, **filter_params)
     else:
@@ -222,6 +226,8 @@ def wiener(data, impulse_response=None, filter_params={}, K=0.25,
         images, construct the LPIFilter2D and specify it here.
 
     """
+    assert_nD(data, 'data')
+    assert_nD(K, 'K')
     if predefined_filter is None:
         filt = LPIFilter2D(impulse_response, **filter_params)
     else:

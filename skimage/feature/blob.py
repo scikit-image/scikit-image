@@ -9,6 +9,7 @@ from skimage.util import img_as_float
 from .peak import peak_local_max
 from ._hessian_det_appx import _hessian_matrix_det
 from skimage.transform import integral_image
+from skimage._shared.utils import assert_nD
 
 
 # This basic blob detection algorithm is based on:
@@ -169,9 +170,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     -----
     The radius of each blob is approximately :math:`\sqrt{2}sigma`.
     """
-
-    if image.ndim != 2:
-        raise ValueError("'image' must be a grayscale ")
+    assert_nD(image)
 
     image = img_as_float(image)
 
@@ -275,8 +274,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     The radius of each blob is approximately :math:`\sqrt{2}sigma`.
     """
 
-    if image.ndim != 2:
-        raise ValueError("'image' must be a grayscale ")
+    assert_nD(image)
 
     image = img_as_float(image)
 
@@ -385,8 +383,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     due to the box filters used in the approximation of Hessian Determinant.
     """
 
-    if image.ndim != 2:
-        raise ValueError("'image' must be grayscale ")
+    assert_nD(image)
 
     image = img_as_float(image)
     image = integral_image(image)
