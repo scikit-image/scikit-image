@@ -33,8 +33,8 @@ def imread(fname, dtype=None):
         # this will raise an IOError if the file is not readable
         im.getdata()[0]
     except IOError:
-        raise ValueError('Could not load "%s": make sure you have external library '
-            'installed for "%s" files' % (fname, im.format))
+        site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
+        raise ValueError('Could not load "%s"\nPlease see documentation at  %s' % (fname, site))
     else:
         return pil_to_ndarray(im, dtype)
 
