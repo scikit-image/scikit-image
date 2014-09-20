@@ -2,6 +2,7 @@ import numpy as np
 from scipy.signal import fftconvolve
 
 from skimage.util import pad
+from skimage._shared.utils impor assert_nD
 
 
 def _window_sum_2d(image, window_shape):
@@ -102,9 +103,8 @@ def match_template(image, template, pad_input=False, mode='constant',
            [ 0.   ,  0.   ,  0.   ,  0.125, -1.   ,  0.125],
            [ 0.   ,  0.   ,  0.   ,  0.125,  0.125,  0.125]], dtype=float32)
     """
+    assert_nD(ndim=(2, 3))
 
-    if image.ndim not in (2, 3) or template.ndim not in (2, 3):
-        raise ValueError("Only 2- and 3-D images supported.")
     if image.ndim < template.ndim:
         raise ValueError("Dimensionality of template must be less than or "
                          "equal to the dimensionality of image.")
