@@ -11,6 +11,7 @@ Original author: Lee Kamentsky
 """
 import numpy as np
 from skimage import img_as_float
+from skimage._shared.utils import assert_nD
 from scipy.ndimage import convolve, binary_erosion, generate_binary_structure
 
 
@@ -80,6 +81,7 @@ def sobel(image, mask=None):
     Note that ``scipy.ndimage.sobel`` returns a directional Sobel which
     has to be further processed to perform edge detection.
     """
+    assert_nD(image)
     return np.sqrt(hsobel(image, mask)**2 + vsobel(image, mask)**2)
 
 
@@ -110,6 +112,7 @@ def hsobel(image, mask=None):
      -1  -2  -1
 
     """
+    assert_nD(image)
     image = img_as_float(image)
     result = np.abs(convolve(image, HSOBEL_WEIGHTS))
     return _mask_filter_result(result, mask)
@@ -142,6 +145,7 @@ def vsobel(image, mask=None):
       1   0  -1
 
     """
+    assert_nD(image)
     image = img_as_float(image)
     result = np.abs(convolve(image, VSOBEL_WEIGHTS))
     return _mask_filter_result(result, mask)
@@ -211,6 +215,7 @@ def hscharr(image, mask=None):
            of Kernel Based Image Derivatives.
 
     """
+    assert_nD(image)
     image = img_as_float(image)
     result = np.abs(convolve(image, HSCHARR_WEIGHTS))
     return _mask_filter_result(result, mask)
@@ -248,6 +253,7 @@ def vscharr(image, mask=None):
            of Kernel Based Image Derivatives.
 
     """
+    assert_nD(image)
     image = img_as_float(image)
     result = np.abs(convolve(image, VSCHARR_WEIGHTS))
     return _mask_filter_result(result, mask)
@@ -275,6 +281,7 @@ def prewitt(image, mask=None):
     Return the square root of the sum of squares of the horizontal
     and vertical Prewitt transforms.
     """
+    assert_nD(image)
     return np.sqrt(hprewitt(image, mask)**2 + vprewitt(image, mask)**2)
 
 
@@ -305,6 +312,7 @@ def hprewitt(image, mask=None):
      -1  -1  -1
 
     """
+    assert_nD(image)
     image = img_as_float(image)
     result = np.abs(convolve(image, HPREWITT_WEIGHTS))
     return _mask_filter_result(result, mask)
@@ -337,6 +345,7 @@ def vprewitt(image, mask=None):
       1   0  -1
 
     """
+    assert_nD(image)
     image = img_as_float(image)
     result = np.abs(convolve(image, VPREWITT_WEIGHTS))
     return _mask_filter_result(result, mask)
@@ -359,6 +368,7 @@ def roberts(image, mask=None):
     output : 2-D array
         The Roberts' Cross edge map.
     """
+    assert_nD(image)
     return np.sqrt(roberts_positive_diagonal(image, mask)**2 +
                    roberts_negative_diagonal(image, mask)**2)
 
@@ -392,6 +402,7 @@ def roberts_positive_diagonal(image, mask=None):
       0  -1
 
     """
+    assert_nD(image)
     image = img_as_float(image)
     result = np.abs(convolve(image, ROBERTS_PD_WEIGHTS))
     return _mask_filter_result(result, mask)
@@ -426,6 +437,7 @@ def roberts_negative_diagonal(image, mask=None):
      -1   0
 
     """
+    assert_nD(image)
     image = img_as_float(image)
     result = np.abs(convolve(image, ROBERTS_ND_WEIGHTS))
     return _mask_filter_result(result, mask)
