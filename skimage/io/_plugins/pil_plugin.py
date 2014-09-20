@@ -30,10 +30,13 @@ def imread(fname, dtype=None):
     """
     im = Image.open(fname)
     try:
-        return pil_to_ndarray(im, dtype)
+        # this will raise an IOError if the file is not readable
+        im.getdata()[0]
     except IOError:
         raise ValueError('Could not load "%s": make sure you have library '
             'support for "%s" files' % (fname, im.format))
+    else:
+        return pil_to_ndarray(im, dtype)
 
 
 def pil_to_ndarray(im, dtype=None):
@@ -59,8 +62,6 @@ def pil_to_ndarray(im, dtype=None):
         im.shape = shape[::-1]
     elif 'A' in im.mode:
         im = im.convert('RGBA')
-    # this will raise an IOError if the file is not readable
-    im.getdata()[0]
     im = np.array(im, dtype=dtype)
     if fp is not None:
         fp.close()
