@@ -55,6 +55,36 @@ def test_warp_matrix():
     outx = warp(x, matrix, order=5)
 
 
+def test_warp_nd():
+    for dim in range(2, 8):
+        shape = dim * (5,)
+
+        x = np.zeros(shape, dtype=np.double)
+        x_c = dim * (2,)
+        x[x_c] = 1
+        refx = np.zeros(shape, dtype=np.double)
+        refx_c = dim * (1,)
+        refx[refx_c] = 1
+
+        coord_grid = dim * (slice(0, 5, 1),)
+        coords = np.array(np.mgrid[coord_grid]) + 1
+
+        outx = warp(x, coords, order=0, cval=0)
+
+        assert_array_almost_equal(outx, refx)
+
+
+def test_warp_clip():
+    x = 2 * np.ones((5, 5), dtype=np.double)
+    matrix = np.eye(3)
+
+    outx = warp(x, matrix, order=0, clip=False)
+    assert_array_almost_equal(x, outx)
+
+    outx = warp(x, matrix, order=0, clip=True)
+    assert_array_almost_equal(x / 2, outx)
+
+
 def test_homography():
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
