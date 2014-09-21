@@ -125,7 +125,7 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
 
 def _prepare_grayscale_input_2D(image):
     image = np.squeeze(image)
-    assert_nD(image)
+    assert_nD(image, 2)
     return img_as_float(image)
 
 
