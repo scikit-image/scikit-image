@@ -150,4 +150,4 @@ def assert_nD(array, arg_name='image', ndim=2):
         ndim = [ndim]
     if not array.ndim in ndim:
         msg = "The parameter `%s` must be a %s-dimensional array"
-        raise ValueError(msg % (arg_name, '-or-'.join([str(n) for n in ndim]))
+        raise ValueError(msg % (arg_name, '-or-'.join([str(n) for n in ndim])))
