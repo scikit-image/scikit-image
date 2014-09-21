@@ -103,7 +103,7 @@ def match_template(image, template, pad_input=False, mode='constant',
            [ 0.   ,  0.   ,  0.   ,  0.125, -1.   ,  0.125],
            [ 0.   ,  0.   ,  0.   ,  0.125,  0.125,  0.125]], dtype=float32)
     """
-    assert_nD(ndim=(2, 3))
+    assert_nD(image, ndim=(2, 3))
 
     if image.ndim < template.ndim:
         raise ValueError("Dimensionality of template must be less than or "
