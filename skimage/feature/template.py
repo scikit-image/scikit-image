@@ -2,7 +2,7 @@ import numpy as np
 from scipy.signal import fftconvolve
 
 from skimage.util import pad
-from skimage._shared.utils impor assert_nD
+from skimage._shared.utils import assert_nD
 
 
 def _window_sum_2d(image, window_shape):

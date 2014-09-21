@@ -227,7 +227,10 @@ def wiener(data, impulse_response=None, filter_params={}, K=0.25,
 
     """
     assert_nD(data, 'data')
-    assert_nD(K, 'K')
+
+    if not isinstance(K, float):
+        assert_nD(K, 'K')
+
     if predefined_filter is None:
         filt = LPIFilter2D(impulse_response, **filter_params)
     else:
