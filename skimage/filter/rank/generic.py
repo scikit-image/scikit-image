@@ -19,6 +19,7 @@ References
 import warnings
 import numpy as np
 from skimage import img_as_ubyte
+from skimage._shared.utils import assert_nD
 
 from . import generic_cy
 
@@ -30,6 +31,7 @@ __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
 
 def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
 
+    assert_nD(image, 2)
     if image.dtype not in (np.uint8, np.uint16):
         image = img_as_ubyte(image)
 

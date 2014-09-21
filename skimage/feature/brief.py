@@ -138,7 +138,7 @@ class BRIEF(DescriptorExtractor):
             Keypoint coordinates as ``(row, col)``.
 
         """
-        assert_nD(image)
+        assert_nD(image, 2)
 
         np.random.seed(self.sample_seed)
 

@@ -170,7 +170,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     -----
     The radius of each blob is approximately :math:`\sqrt{2}sigma`.
     """
-    assert_nD(image)
+    assert_nD(image, 2)
 
     image = img_as_float(image)
 
@@ -274,7 +274,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     The radius of each blob is approximately :math:`\sqrt{2}sigma`.
     """
 
-    assert_nD(image)
+    assert_nD(image, 2)
 
     image = img_as_float(image)
 
@@ -383,7 +383,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     due to the box filters used in the approximation of Hessian Determinant.
     """
 
-    assert_nD(image)
+    assert_nD(image, 2)
 
     image = img_as_float(image)
     image = integral_image(image)

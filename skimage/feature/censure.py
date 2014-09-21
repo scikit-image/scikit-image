@@ -231,7 +231,7 @@ class CENSURE(FeatureDetector):
         # (4) Finally, we remove the border keypoints and return the keypoints
         # along with its corresponding scale.
 
-        assert_nD(image)
+        assert_nD(image, 2)
 
         num_scales = self.max_scale - self.min_scale
 

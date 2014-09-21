@@ -60,7 +60,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     shadowing and illumination variations.
     """
 
-    assert_nD(image)
+    assert_nD(image, 2)
 
     if normalise:
         image = sqrt(image)

@@ -279,7 +279,7 @@ def local_binary_pattern(image, P, R, method='default'):
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.214.6851,
            2004.
     """
-    assert_nD(image)
+    assert_nD(image, 2)
 
     methods = {
         'default': ord('D'),

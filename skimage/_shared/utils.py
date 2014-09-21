@@ -143,23 +143,23 @@ def safe_as_int(val, atol=1e-3):
     return np.round(val).astype(np.int64)
 
 
-def assert_nD(array, arg_name='image', ndim=2):
+def assert_nD(array, ndim, arg_name='image'):
     """
-    Verify an arry meets the desired ndims.
+    Verify an array meets the desired ndims.
 
     Parameters
     ----------
     array : array-like
         Input array to be validated
-    arg_name : str
-        The name of the array in the original function.
-    ndim : int or array-like
+    ndim : int or iterable of ints
         Allowable ndim or ndims for the array.
+    arg_name : str, optional
+        The name of the array in the original function.
+
     """
     array = np.asanyarray(array)
     msg = "The parameter `%s` must be a %s-dimensional array"
     if isinstance(ndim, int):
         ndim = [ndim]
     if not array.ndim in ndim:
-        msg = "The parameter `%s` must be a %s-dimensional array"
         raise ValueError(msg % (arg_name, '-or-'.join([str(n) for n in ndim])))

@@ -149,7 +149,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None):
     # mask by one and then mask the output. We also mask out the border points
     # because who knows what lies beyond the edge of the image?
     #
-    assert_nD(image)
+    assert_nD(image, 2)
 
     if low_threshold is None:
         low_threshold = 0.1 * dtype_limits(image)[1]

@@ -94,7 +94,7 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
     .. [2] http://cvlab.epfl.ch/alumni/tola/daisy.html
     '''
 
-    assert_nD(img, 'img')
+    assert_nD(img, 2, 'img')
 
     img = img_as_float(img)
 

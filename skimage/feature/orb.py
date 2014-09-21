@@ -167,7 +167,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
             Input image.
 
         """
-        assert_nD(image)
+        assert_nD(image, 2)
 
         pyramid = self._build_pyramid(image)
 
@@ -239,7 +239,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
             Corresponding orientations in radians.
 
         """
-        assert_nD(image)
+        assert_nD(image, 2)
 
         pyramid = self._build_pyramid(image)
 
@@ -285,7 +285,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
             Input image.
 
         """
-        assert_nD(image)
+        assert_nD(image, 2)
 
         pyramid = self._build_pyramid(image)
 
