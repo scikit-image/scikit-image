@@ -144,6 +144,18 @@ def safe_as_int(val, atol=1e-3):
 
 
 def assert_nD(array, arg_name='image', ndim=2):
+    """
+    Verify an arry meets the desired ndims.
+
+    Parameters
+    ----------
+    array : array-like
+        Input array to be validated
+    arg_name : str
+        The name of the array in the original function.
+    ndim : int or array-like
+        Allowable ndim or ndims for the array.
+    """
     array = np.asanyarray(array)
     msg = "The parameter `%s` must be a %s-dimensional array"
     if isinstance(ndim, int):
