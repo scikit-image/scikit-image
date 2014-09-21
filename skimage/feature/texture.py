@@ -89,17 +89,17 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
            [0, 0, 0, 0]], dtype=uint32)
 
     """
+    assert_nD(image, 2)
+    assert_nD(distances, 1, 'distances')
+    assert_nD(angles, 1, 'angles')
 
     assert levels <= 256
     image = np.ascontiguousarray(image)
-    assert image.ndim == 2
     assert image.min() >= 0
     assert image.max() < levels
     image = image.astype(np.uint8)
     distances = np.ascontiguousarray(distances, dtype=np.float64)
     angles = np.ascontiguousarray(angles, dtype=np.float64)
-    assert distances.ndim == 1
-    assert angles.ndim == 1
 
     P = np.zeros((levels, levels, len(distances), len(angles)),
                  dtype=np.uint32, order='C')
@@ -179,8 +179,8 @@ def greycoprops(P, prop='contrast'):
            [ 1.25      ,  2.75      ]])
 
     """
+    assert_nD(P, 4, 'P')
 
-    assert P.ndim == 4
     (num_level, num_level2, num_dist, num_angle) = P.shape
     assert num_level == num_level2
     assert num_dist > 0
