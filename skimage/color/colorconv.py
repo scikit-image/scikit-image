@@ -55,9 +55,7 @@ from __future__ import division
 
 import numpy as np
 from scipy import linalg
-from scipy.interpolate import interp1d, interp2d
 from ..util import dtype
-from skimage._shared.utils import deprecated
 
 
 def guess_spatial_dimensions(image):
