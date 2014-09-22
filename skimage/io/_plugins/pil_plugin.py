@@ -29,7 +29,14 @@ def imread(fname, dtype=None):
 
     """
     im = Image.open(fname)
-    return pil_to_ndarray(im, dtype)
+    try:
+        # this will raise an IOError if the file is not readable
+        im.getdata()[0]
+    except IOError:
+        site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
+        raise ValueError('Could not load "%s"\nPlease see documentation at: %s' % (fname, site))
+    else:
+        return pil_to_ndarray(im, dtype)
 
 
 def pil_to_ndarray(im, dtype=None):
