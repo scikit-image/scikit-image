@@ -1,5 +1,6 @@
 import numpy as np
 from scipy import ndimage
+from skimage._shared.utils import assert_nD
 
 
 __all__ = ['gabor_kernel', 'gabor_filter']
@@ -112,7 +113,7 @@ def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     .. [2] http://mplab.ucsd.edu/tutorials/gabor.pdf
 
     """
-
+    assert_nD(image, 2)
     g = gabor_kernel(frequency, theta, bandwidth, sigma_x, sigma_y, offset)
 
     filtered_real = ndimage.convolve(image, np.real(g), mode=mode, cval=cval)

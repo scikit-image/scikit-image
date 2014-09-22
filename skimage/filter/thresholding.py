@@ -6,6 +6,7 @@ __all__ = ['threshold_adaptive',
 import numpy as np
 import scipy.ndimage
 from skimage.exposure import histogram
+from skimage._shared.utils import assert_nD
 
 
 def threshold_adaptive(image, block_size, method='gaussian', offset=0,
@@ -65,6 +66,7 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
     >>> func = lambda arr: arr.mean()
     >>> binary_image2 = threshold_adaptive(image, 15, 'generic', param=func)
     """
+    assert_nD(image, 2)
     thresh_image = np.zeros(image.shape, 'double')
     if method == 'generic':
         scipy.ndimage.generic_filter(image, param, block_size,

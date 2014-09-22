@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import sqrt, pi, arctan2, cos, sin
 from scipy.ndimage import uniform_filter
+from skimage._shared.utils import assert_nD
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8),
@@ -59,8 +60,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     shadowing and illumination variations.
     """
 
-    if image.ndim > 2:
-        raise ValueError("Currently only supports grey-level images")
+    assert_nD(image, 2)
 
     if normalise:
         image = sqrt(image)
@@ -79,7 +79,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         # convert uint image to float
         # to avoid problems with subtracting unsigned numbers in np.diff()
         image = image.astype('float')
-    
+
     gx = np.empty(image.shape, dtype=np.double)
     gx[:, 0] = 0
     gx[:, -1] = 0

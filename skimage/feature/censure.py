@@ -9,7 +9,7 @@ from skimage.morphology import octagon, star
 from skimage.feature.util import _mask_border_keypoints
 
 from skimage.feature.censure_cy import _censure_dob_loop
-
+from skimage._shared.utils import assert_nD
 
 # The paper(Reference [1]) mentions the sizes of the Octagon shaped filter
 # kernel for the first seven scales only. The sizes of the later scales
@@ -230,6 +230,8 @@ class CENSURE(FeatureDetector):
         # ratio of principal curvatures greater than `line_threshold`.
         # (4) Finally, we remove the border keypoints and return the keypoints
         # along with its corresponding scale.
+
+        assert_nD(image, 2)
 
         num_scales = self.max_scale - self.min_scale
 

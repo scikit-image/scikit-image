@@ -60,7 +60,7 @@ class TestCanny(unittest.TestCase):
         self.assertTrue(point_count < 1600)
 
     def test_image_shape(self):
-        self.assertRaises(TypeError, F.canny, np.zeros((20, 20, 20)), 4, 0, 0)
+        self.assertRaises(ValueError, F.canny, np.zeros((20, 20, 20)), 4, 0, 0)
 
     def test_mask_none(self):
         result1 = F.canny(np.zeros((20, 20)), 4, 0, 0, np.ones((20, 20), bool))
