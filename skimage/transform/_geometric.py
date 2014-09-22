@@ -261,6 +261,10 @@ class ProjectiveTransform(GeometricTransform):
             else:
                 tform = ProjectiveTransform
             return tform(other.params.dot(self.params))
+        elif (hasattr(other, '__name__')
+                and other.__name__ == 'inverse'
+                and hasattr(get_bound_method_class(other), '_inv_matrix')):
+            return ProjectiveTransform(self._inv_matrix.dot(self.params))
         else:
             raise TypeError("Cannot combine transformations of differing "
                             "types.")
@@ -789,6 +793,7 @@ TRANSFORMS = {
     'projective': ProjectiveTransform,
     'polynomial': PolynomialTransform,
 }
+
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,
     AffineTransform,

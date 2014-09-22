@@ -218,6 +218,9 @@ def test_union():
     assert_array_almost_equal(tform._matrix, tform3._matrix)
     assert tform.__class__ == ProjectiveTransform
 
+    tform = AffineTransform(scale=(0.1, 0.1), rotation=0.3)
+    assert_array_almost_equal((tform + tform.inverse).params, np.eye(3))
+
 
 def test_union_differing_types():
     tform1 = SimilarityTransform()
