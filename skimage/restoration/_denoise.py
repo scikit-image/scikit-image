@@ -71,7 +71,7 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     ----------
     image : ndarray
         Input data to be denoised (converted using img_as_float`).
-    weight : float, optional
+    weight : float
         Denoising weight. The smaller the `weight`, the more denoising (at
         the expense of less similarity to the `input`). The regularization
         parameter `lambda` is chosen as `2 * weight`.
