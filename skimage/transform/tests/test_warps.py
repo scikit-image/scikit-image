@@ -152,6 +152,17 @@ def test_rotate_resize():
     assert x45.shape == (14, 14)
 
 
+def test_rotate_center():
+    x = np.zeros((10, 10), dtype=np.double)
+    x[4, 4] = 1
+    refx = np.zeros((10, 10), dtype=np.double)
+    refx[2, 5] = 1
+    x20 = rotate(x, 20, order=0, center=(0, 0))
+    assert_array_almost_equal(x20, refx)
+    x0 = rotate(x20, -20, order=0, center=(0, 0))
+    assert_array_almost_equal(x0, x)
+
+
 def test_rescale():
     # same scale factor
     x = np.zeros((5, 5), dtype=np.double)

@@ -150,7 +150,8 @@ def rescale(image, scale, order=1, mode='constant', cval=0.):
     return resize(image, output_shape, order=order, mode=mode, cval=cval)
 
 
-def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
+def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.,
+           center=None):
     """Rotate image by a certain angle around its center.
 
     Parameters
@@ -180,6 +181,9 @@ def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
+    center : iterable of length 2
+        The rotation center. If ``center=None``, the image is rotated around
+        its center, i.e. ``center=(rows / 2 - 0.5, cols / 2 - 0.5)``.
 
     Examples
     --------
@@ -198,10 +202,13 @@ def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
     rows, cols = image.shape[0], image.shape[1]
 
     # rotation around center
-    translation = np.array((cols, rows)) / 2. - 0.5
-    tform1 = SimilarityTransform(translation=-translation)
+    if center is None:
+        center = np.array((cols, rows)) / 2. - 0.5
+    else:
+        center = np.asarray(center)
+    tform1 = SimilarityTransform(translation=-center)
     tform2 = SimilarityTransform(rotation=np.deg2rad(angle))
-    tform3 = SimilarityTransform(translation=translation)
+    tform3 = SimilarityTransform(translation=center)
     tform = tform1 + tform2 + tform3
 
     output_shape = None
