@@ -153,21 +153,19 @@ def _prepare_colorarray(arr):
     return dtype.img_as_float(arr)
 
 
-_spline_registry = {}
+_lut_registry = {}
 
 
-def _get_spline(exp, low, high):
-    """"Get a spline function for an exponent in the given range
+def _get_lut(exp, low, high):
+    """"Get a lut for an exponent in the given range
     """
-    global _spline_registry
-    if (exp, low, high) in _spline_registry:
-        return _spline_registry[(exp, low, high)]
+    if (exp, low, high) in _lut_registry:
+        return _lut_registry[(exp, low, high)]
 
     x = np.linspace(low, high, 1e6)
-    y = np.power(x, exp)
-    func = interp1d(x, y)
-    _spline_registry[(exp, low, high)] = func
-    return func
+    lut = np.power(x, exp)
+    _lut_registry[(exp, low, high)] = lut
+    return lut
 
 
 def rgb2hsv(rgb):
@@ -496,9 +494,11 @@ def xyz2rgb(xyz):
     # except we don't multiply/divide by 100 in the conversion
     arr = _convert(rgb_from_xyz, xyz)
     mask = arr > 0.0031308
-    spline = _get_spline(2.4, 0, 1.1)
+    lut = _get_lut(1 / 2.4, 0, 1.1)
 
-    arr[mask] = 1.055 * np.power(arr[mask], 1 / 2.4) - 0.055
+    ind = arr[mask] * lut.size / 1.1
+    ind[ind >= lut.size] = lut.size - 1
+    arr[mask] = 1.055 * lut[ind.astype(int)] - 0.055
     arr[~mask] *= 12.92
     return arr
 
@@ -544,9 +544,9 @@ def rgb2xyz(rgb):
 
     mask = arr > 0.04045
 
-    spline = _get_spline(2.4, 0, 1.1)
-
-    arr[mask] = spline((arr[mask] + 0.055) / 1.055)
+    lut = _get_lut(2.4, 0, 1.1)
+    ind = (arr[mask] + 0.055) / 1.055 * lut.size / 1.1
+    arr[mask] = lut[ind.astype(int)]
     arr[~mask] /= 12.92
     return _convert(xyz_from_rgb, arr)
 
@@ -737,8 +737,9 @@ def xyz2lab(xyz):
 
     # Nonlinear distortion and linear transformation
     mask = arr > 0.008856
-    spline = _get_spline(1 / 3., -1.1, 1.1)
-    arr[mask] = spline(arr[mask])
+    lut = _get_lut(1 / 3., 0, 1.1)
+    ind = arr[mask] * lut.size / 1.1
+    arr[mask] = lut[ind.astype(int)]
     arr[~mask] = 7.787 * arr[~mask] + 16. / 116.
 
     x, y, z = arr[..., 0], arr[..., 1], arr[..., 2]
@@ -791,8 +792,9 @@ def lab2xyz(lab):
     out = np.dstack([x, y, z])
 
     mask = out > 0.2068966
-    spline = _get_spline(3., -1.1, 1.1)
-    out[mask] = spline(out[mask])
+    lut = _get_lut(3., 0, 1.1)
+    ind = out[mask] * lut.size / 1.1
+    out[mask] = lut[ind.astype(int)]
     out[~mask] = (out[~mask] - 16.0 / 116.) / 7.787
 
     # rescale Observer= 2 deg, Illuminant= D65
@@ -900,8 +902,9 @@ def xyz2luv(xyz):
     L = y / lab_ref_white[1]
 
     mask = L > 0.008856
-    spline = _get_spline(1 / 3., -1.1, 1.1)
-    L[mask] = 116. * spline(L[mask]) - 16.
+    lut = _get_lut(1 / 3., 0, 1.1)
+    ind = L[mask] * lut.size / 1.1
+    L[mask] = 116. * lut[ind.astype(int)] - 16.
     L[~mask] = 903.3 * L[~mask]
 
     u0 = 4*lab_ref_white[0] / np.dot([1, 15, 3], lab_ref_white)
@@ -962,8 +965,9 @@ def luv2xyz(luv):
     y = L.copy()
     mask = y > 7.999625
 
-    spline = _get_spline(3., -110,  110)
-    y[mask] = spline((y[mask]+16.) / 116.)
+    lut = _get_lut(3., 0,  110)
+    ind = (y[mask]+16.) / 116. * lut.size / 110.
+    y[mask] = lut[ind.astype(int)]
     y[~mask] = y[~mask] / 903.3
     y *= lab_ref_white[1]
 

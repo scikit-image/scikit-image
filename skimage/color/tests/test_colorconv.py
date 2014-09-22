@@ -151,7 +151,7 @@ class TestColorconv(TestCase):
     # RGB<->XYZ roundtrip on another image
     def test_xyz_rgb_roundtrip(self):
         img_rgb = img_as_float(self.img_rgb)
-        assert_array_almost_equal(xyz2rgb(rgb2xyz(img_rgb)), img_rgb)
+        assert_array_almost_equal(xyz2rgb(rgb2xyz(img_rgb)), img_rgb, 4)
 
     # RGB<->HED roundtrip with ubyte image
     def test_hed_rgb_roundtrip(self):
@@ -258,7 +258,8 @@ class TestColorconv(TestCase):
 
     def test_lab_rgb_roundtrip(self):
         img_rgb = img_as_float(self.img_rgb)
-        assert_array_almost_equal(lab2rgb(rgb2lab(img_rgb)), img_rgb)
+        new = lab2rgb(rgb2lab(img_rgb))
+        assert_array_almost_equal(lab2rgb(rgb2lab(img_rgb)), img_rgb, 4)
 
     # test matrices for xyz2luv and luv2xyz generated using
     # http://www.easyrgb.com/index.php?X=CALC
@@ -293,7 +294,7 @@ class TestColorconv(TestCase):
 
     def test_luv_rgb_roundtrip(self):
         img_rgb = img_as_float(self.img_rgb)
-        assert_array_almost_equal(luv2rgb(rgb2luv(img_rgb)), img_rgb)
+        assert_array_almost_equal(luv2rgb(rgb2luv(img_rgb)), img_rgb, 3)
 
     def test_lab_lch_roundtrip(self):
         rgb = img_as_float(self.img_rgb)
@@ -307,7 +308,7 @@ class TestColorconv(TestCase):
         lch = lab2lch(lab)
         lab2 = lch2lab(lch)
         rgb2 = lab2rgb(lab2)
-        assert_array_almost_equal(rgb, rgb2)
+        assert_array_almost_equal(rgb, rgb2, 4)
 
     def test_lab_lch_0d(self):
         lab0 = self._get_lab0()
