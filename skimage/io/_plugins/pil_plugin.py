@@ -11,7 +11,7 @@ except ImportError:
                       "http://pypi.python.org/pypi/PIL/) "
                       "for further instructions.")
 
-from skimage.util import img_as_ubyte
+from skimage.util import img_as_ubyte, img_as_uint, img_as_int, img_as_float
 
 from six import string_types
 
@@ -109,29 +109,37 @@ def ndarray_to_pil(arr, format_str=None):
         if arr.shape[2] not in (3, 4):
             raise ValueError("Invalid number of channels in image array.")
 
-    # Image is floating point, assume in [0, 1]
-    if np.issubdtype(arr.dtype, float):
-        arr = arr * 255
+    if not format_str is None and format_str in ('tiff', 'tif'):
+        # open with pylibtiff
+        pass
 
-    arr = arr.astype(np.uint8)
+    if arr.ndim == 3:
+        arr = img_as_ubyte(arr)
+        mode_base = mode = {3: 'RGB', 4: 'RGBA'}[arr.shape[2]]
 
-    if arr.ndim == 2:
-        mode = 'L'
+    elif arr.dtype.kind == 'f':
+        arr = img_as_uint(arr)
+        mode = 'I;16'
+        mode_base = 'I'
 
-    elif arr.shape[2] in (3, 4):
-        mode = {3: 'RGB', 4: 'RGBA'}[arr.shape[2]]
-
-        # Force all integers to bytes
+    elif arr.max() < 256 and arr.min() >= 0:
         arr = arr.astype(np.uint8)
+        mode = 'L'
+        mode_base = 'L'
 
-    try:
-        img = Image.frombytes(mode, (arr.shape[1], arr.shape[0]),
-                              arr.tostring())
-    except AttributeError:
-        img = Image.fromstring(mode, (arr.shape[1], arr.shape[0]),
-                               arr.tostring())
+    elif arr.max() < 2**16 and arr.min() >= 0:
+        arr = arr.astype(np.uint16)
+        mode = 'I;16'
+        mode_base = 'I'
 
-    return img
+    else:
+        arr = img_as_int(arr)
+        mode = 'I'
+        mode_base = 'I'
+
+    im = Image.new(mode_base, arr.T.shape)
+    im.fromstring(arr.tostring(), 'raw', mode)
+    return im
 
 
 def imsave(fname, arr, format_str=None):
@@ -151,7 +159,10 @@ def imsave(fname, arr, format_str=None):
 
     Notes
     -----
-    Currently, only 8-bit precision is supported.
+    Currently, only 8-bit precision is supported for PNG and JPEG.
+    Images that are not uint8 type will be converted using
+    `skimage.img_as_ubyte`.
+    2D TIFF Files also support unit16 and float32 type images.
 
     """
     # default to PNG if file-like object
