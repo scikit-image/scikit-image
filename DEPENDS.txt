@@ -1,11 +1,8 @@
 Build Requirements
 ------------------
-* `Python >= 2.5 <http://python.org>`__
+* `Python >= 2.6 <http://python.org>`__
 * `Numpy >= 1.6 <http://numpy.scipy.org/>`__
-* `Cython >= 0.17 <http://www.cython.org/>`__
-
-`Matplotlib >= 1.0 <http://matplotlib.sf.net>`__ is needed to generate the
-examples in the documentation.
+* `Cython >= 0.19 <http://www.cython.org/>`__
 
 You can use pip to automatically install the base dependencies as follows::
 
@@ -13,8 +10,10 @@ You can use pip to automatically install the base dependencies as follows::
 
 Runtime requirements
 --------------------
-* `SciPy >= 0.10 <http://scipy.org>`__
+* `SciPy >= 0.9 <http://scipy.org>`__
 * `NetworkX >= 1.8 <https://networkx.github.io>`__
+`Matplotlib >= 1.0 <http://matplotlib.sf.net>`__ is needed to generate the
+examples in the documentation.
 
 Known build errors
 ------------------

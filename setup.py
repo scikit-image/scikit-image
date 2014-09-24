@@ -18,25 +18,33 @@ URL                 = 'http://scikit-image.org'
 LICENSE             = 'Modified BSD'
 DOWNLOAD_URL        = 'http://github.com/scikit-image/scikit-image'
 VERSION             = '0.11dev'
-PYTHON_VERSION      = (2, 5)
+PYTHON_VERSION      = (2, 6)
+
+import re
+import os
+import sys
+
+import setuptools
+from distutils.command.build_py import build_py
+
 
 # These are manually checked.
 # These packages are sometimes installed outside of the setuptools scope
-DEPENDENCIES        = {
-                        'numpy': (1, 6),
-                      }
-
-# Only require Cython if we have a developer checkout
-if VERSION.endswith('dev'):
-    DEPENDENCIES['Cython'] = (0, 17)
-
-
-
-import os
-import sys
-import re
-import setuptools
-from distutils.command.build_py import build_py
+DEPENDENCIES = {}
+with open('requirements.txt') as fid:
+    data = fid.read().decode('utf-8', 'replace')
+for line in data.splitlines():
+    pkg, _, version_info = line.partition('>=')
+    # Only require Cython if we have a developer checkout
+    if pkg.lower() == 'cython' and not VERSION.endswith('dev'):
+        continue
+    version = []
+    for part in re.split('\D+', version_info):
+            try:
+                version.append(int(part))
+            except ValueError:
+                pass
+    DEPENDENCIES[pkg.lower()] = version
 
 
 def configuration(parent_package='', top_path=None):
@@ -142,7 +150,7 @@ if __name__ == "__main__":
 
         configuration=configuration,
         install_requires=[
-            "six>=1.3"
+            "six>=%s" % DEPENDENCIES['six']
         ],
         packages=setuptools.find_packages(exclude=['doc']),
         include_package_data=True,
