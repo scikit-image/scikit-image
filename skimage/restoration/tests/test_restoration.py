@@ -62,3 +62,8 @@ def test_richardson_lucy():
 
     path = pjoin(dirname(abspath(__file__)), 'camera_rl.npy')
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
+
+
+if __name__ == '__main__':
+    from numpy import testing
+    testing.run_module_suite()
