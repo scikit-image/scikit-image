@@ -130,7 +130,8 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     wiener_filter = np.conj(trans_func) / (np.abs(trans_func)**2 +
                                            balance * np.abs(reg)**2)
     if is_real:
-        deconv = uft.uirfft2(wiener_filter * uft.urfft2(image))
+        deconv = uft.uirfft2(wiener_filter * uft.urfft2(image),
+                             shape=image.shape)
     else:
         deconv = uft.uifft2(wiener_filter * uft.ufft2(image))
 
@@ -320,7 +321,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     # Empirical average \approx POSTMEAN Eq. 44
     x_postmean = x_postmean / (iteration - params['burnin'])
     if is_real:
-        x_postmean = uft.uirfft2(x_postmean)
+        x_postmean = uft.uirfft2(x_postmean, shape=image.shape)
     else:
         x_postmean = uft.uifft2(x_postmean)
 
