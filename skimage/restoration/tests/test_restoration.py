@@ -2,6 +2,7 @@ from os.path import abspath, dirname, join as pjoin
 
 import numpy as np
 from scipy.signal import convolve2d
+from scipy import ndimage as nd
 
 import skimage
 from skimage.data import camera
@@ -51,6 +52,29 @@ def test_unsupervised_wiener():
     np.testing.assert_allclose(np.real(deconvolved),
                                np.load(path),
                                rtol=1e-3)
+
+
+def test_image_shape():
+    """Test that shape of output image in deconvolution is same as input.
+
+    This addresses issue #1172.
+    """
+    point = np.zeros((5, 5), np.float)
+    point[2, 2] = 1.
+    psf = nd.gaussian_filter(point, sigma=1.)
+    # image shape: (45, 45), as reported in #1172
+    image = skimage.img_as_float(camera()[110:155, 225:270]) # just the face
+    image_conv = nd.convolve(image, psf)
+    deconv_sup = restoration.wiener(image_conv, psf, 1)
+    deconv_un = restoration.unsupervised_wiener(image_conv, psf)[0]
+    # test the shape
+    np.testing.assert_equal(image.shape, deconv_sup.shape)
+    np.testing.assert_equal(image.shape, deconv_un.shape)
+    # test the reconstruction error
+    sup_relative_error = np.abs(deconv_sup - image) / image
+    un_relative_error = np.abs(deconv_un - image) / image
+    np.testing.assert_array_less(np.median(sup_relative_error), 0.1)
+    np.testing.assert_array_less(np.median(un_relative_error), 0.1)
 
 
 def test_richardson_lucy():
