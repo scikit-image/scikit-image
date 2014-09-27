@@ -99,6 +99,8 @@ def check_requirements():
                          % PYTHON_VERSION)
 
     for package_name, min_version in DEPENDENCIES.items():
+        if package_name == 'cython':
+            package_name = 'Cython'
         dep_error = False
         try:
             package = __import__(package_name)
