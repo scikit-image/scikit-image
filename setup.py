@@ -32,7 +32,7 @@ from distutils.command.build_py import build_py
 # These packages are sometimes installed outside of the setuptools scope
 DEPENDENCIES = {}
 with open('requirements.txt', 'rb') as fid:
-    data = fid.read()
+    data = fid.read().decode('utf-8', 'replace')
 for line in data.splitlines():
     pkg, _, version_info = line.partition('>=')
     # Only require Cython if we have a developer checkout
@@ -44,7 +44,7 @@ for line in data.splitlines():
                 version.append(int(part))
             except ValueError:
                 pass
-    DEPENDENCIES[pkg.lower()] = version
+    DEPENDENCIES[pkg.lower()] = tuple(version)
 
 
 def configuration(parent_package='', top_path=None):
