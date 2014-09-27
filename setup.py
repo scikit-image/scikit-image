@@ -31,7 +31,7 @@ from distutils.command.build_py import build_py
 # These are manually checked.
 # These packages are sometimes installed outside of the setuptools scope
 DEPENDENCIES = {}
-with open('requirements.txt') as fid:
+with open('requirements.txt', 'rb') as fid:
     data = fid.read().decode('utf-8', 'replace')
 for line in data.splitlines():
     pkg, _, version_info = line.partition('>=')
