@@ -659,6 +659,15 @@ def ransac(data, model_class, min_samples, residual_threshold,
     best_inlier_residuals_sum = np.inf
     best_inliers = None
 
+    if min_samples < 0:
+        raise ValueError("`min_samples` must be greater than zero")
+
+    if max_trials < 0:
+        raise ValueError("`max_trials` must be greater than zero")
+
+    if stop_probability < 0 or stop_probability > 1:
+        raise ValueError("`stop_probability` must be in range [0, 1]")
+
     if not isinstance(data, list) and not isinstance(data, tuple):
         data = [data]
 
