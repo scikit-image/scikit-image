@@ -21,14 +21,8 @@ def polygon_clip(rr, cc, r0, c0, r1, c1):
 
     Notes
     -----
-    The algorithm is a translation of the Pascal code found in [1]_ and
-    includes fixes from Anti-Grain Geometry v2.4.
-
-    References
-    ----------
-    .. [1] You-Dong Liang and Brian A. Barsky,
-           An Analysis and Algorithm for Polygon Clipping,
-           Communications of the ACM, Vol 26, No 11, November 1983.
+    This makes use of Sutherland-Hodgman clipping as implemented in
+    AGG 2.4 and exposed in Matplotlib.
 
     """
     from matplotlib import path, transforms
