@@ -56,7 +56,6 @@ from __future__ import division
 import numpy as np
 from scipy import linalg
 from ..util import dtype
-from skimage._shared.utils import deprecated
 
 
 def guess_spatial_dimensions(image):
@@ -150,6 +149,21 @@ def _prepare_colorarray(arr):
         raise ValueError(msg)
 
     return dtype.img_as_float(arr)
+
+
+_lut_registry = {}
+
+
+def _get_lut(exp, low, high):
+    """"Get a lut for an exponent in the given range
+    """
+    if (exp, low, high) in _lut_registry:
+        return _lut_registry[(exp, low, high)]
+
+    x = np.linspace(low, high, 1e6)
+    lut = np.power(x, exp)
+    _lut_registry[(exp, low, high)] = lut
+    return lut
 
 
 def rgb2hsv(rgb):
@@ -478,7 +492,11 @@ def xyz2rgb(xyz):
     # except we don't multiply/divide by 100 in the conversion
     arr = _convert(rgb_from_xyz, xyz)
     mask = arr > 0.0031308
-    arr[mask] = 1.055 * np.power(arr[mask], 1 / 2.4) - 0.055
+    lut = _get_lut(1 / 2.4, 0, 1.1)
+
+    ind = arr[mask] * lut.size / 1.1
+    ind[ind >= lut.size] = lut.size - 1
+    arr[mask] = 1.055 * lut[ind.astype(int)] - 0.055
     arr[~mask] *= 12.92
     return arr
 
@@ -521,8 +539,12 @@ def rgb2xyz(rgb):
     # Follow the algorithm from http://www.easyrgb.com/index.php
     # except we don't multiply/divide by 100 in the conversion
     arr = _prepare_colorarray(rgb).copy()
+
     mask = arr > 0.04045
-    arr[mask] = np.power((arr[mask] + 0.055) / 1.055, 2.4)
+
+    lut = _get_lut(2.4, 0, 1.1)
+    ind = (arr[mask] + 0.055) / 1.055 * lut.size / 1.1
+    arr[mask] = lut[ind.astype(int)]
     arr[~mask] /= 12.92
     return _convert(xyz_from_rgb, arr)
 
@@ -713,7 +735,9 @@ def xyz2lab(xyz):
 
     # Nonlinear distortion and linear transformation
     mask = arr > 0.008856
-    arr[mask] = np.power(arr[mask], 1. / 3.)
+    lut = _get_lut(1 / 3., 0, 1.1)
+    ind = arr[mask] * lut.size / 1.1
+    arr[mask] = lut[ind.astype(int)]
     arr[~mask] = 7.787 * arr[~mask] + 16. / 116.
 
     x, y, z = arr[..., 0], arr[..., 1], arr[..., 2]
@@ -766,7 +790,9 @@ def lab2xyz(lab):
     out = np.dstack([x, y, z])
 
     mask = out > 0.2068966
-    out[mask] = np.power(out[mask], 3.)
+    lut = _get_lut(3., 0, 1.1)
+    ind = out[mask] * lut.size / 1.1
+    out[mask] = lut[ind.astype(int)]
     out[~mask] = (out[~mask] - 16.0 / 116.) / 7.787
 
     # rescale Observer= 2 deg, Illuminant= D65
@@ -872,8 +898,11 @@ def xyz2luv(xyz):
 
     # compute y_r and L
     L = y / lab_ref_white[1]
+
     mask = L > 0.008856
-    L[mask] = 116. * np.power(L[mask], 1. / 3.) - 16.
+    lut = _get_lut(1 / 3., 0, 1.1)
+    ind = L[mask] * lut.size / 1.1
+    L[mask] = 116. * lut[ind.astype(int)] - 16.
     L[~mask] = 903.3 * L[~mask]
 
     u0 = 4*lab_ref_white[0] / np.dot([1, 15, 3], lab_ref_white)
@@ -933,7 +962,10 @@ def luv2xyz(luv):
     # compute y
     y = L.copy()
     mask = y > 7.999625
-    y[mask] = np.power((y[mask]+16.) / 116., 3.)
+
+    lut = _get_lut(3., 0,  110)
+    ind = (y[mask]+16.) / 116. * lut.size / 110.
+    y[mask] = lut[ind.astype(int)]
     y[~mask] = y[~mask] / 903.3
     y *= lab_ref_white[1]
 
