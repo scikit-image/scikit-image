@@ -33,7 +33,8 @@ Optional Requirements
 You can use this scikit with the basic requirements listed above, but some
 functionality is only available with the following installed:
 
-* `NetworkX >= 1.8 <https://networkx.github.io>`__
+* `NetworkX >= 1.8 <https://networkx.github.io>`__ is needed to use region
+adjacency graph (RAG)-based segmentation functions.
 
 * `Matplotlib >= 1.0 <http://matplotlib.sf.net>`__ is needed to generate the
 examples in the documentation.
