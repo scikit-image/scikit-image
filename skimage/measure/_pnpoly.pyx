@@ -8,7 +8,7 @@ cimport numpy as cnp
 from skimage._shared.geometry cimport point_in_polygon, points_in_polygon
 
 
-def grid_points_inside_poly(shape, verts):
+def grid_points_in_poly(shape, verts):
     """Test whether points on a specified grid are inside a polygon.
 
     For each ``(r, c)`` coordinate on a grid, i.e. ``(0, 0)``, ``(0, 1)`` etc.,
@@ -22,6 +22,10 @@ def grid_points_inside_poly(shape, verts):
         Specify the V vertices of the polygon, sorted either clockwise
         or anti-clockwise.  The first point may (but does not need to be)
         duplicated.
+
+    See Also
+    --------
+    points_in_poly
 
     Returns
     -------
@@ -50,7 +54,7 @@ def grid_points_inside_poly(shape, verts):
     return out.view(bool)
 
 
-def points_inside_poly(points, verts):
+def points_in_poly(points, verts):
     """Test whether points lie inside a polygon.
 
     Parameters
@@ -60,6 +64,10 @@ def points_inside_poly(points, verts):
     verts : (M, 2) array
         Vertices of the polygon, sorted either clockwise or anti-clockwise.
         The first point may (but does not need to be) duplicated.
+
+    See Also
+    --------
+    grid_points_in_poly
 
     Returns
     -------
