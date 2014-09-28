@@ -42,6 +42,11 @@ def polygon_area(py, px):
     ----------
     py, px : (N,) array of float
         Polygon coordinates.
+
+    Returns
+    -------
+    a : float
+        Area of the polygon.
     """
     py = np.asarray(py)
     px = np.asarray(px)
