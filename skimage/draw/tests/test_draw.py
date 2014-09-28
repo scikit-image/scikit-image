@@ -2,7 +2,7 @@ from numpy.testing import assert_array_equal, assert_equal, assert_raises
 import numpy as np
 from skimage._shared.testing import test_parallel
 
-from skimage.draw import (set_color, line, line_aa, polygon,
+from skimage.draw import (set_color, line, line_aa, polygon, polygon_perimiter,
                           circle, circle_perimeter, circle_perimeter_aa,
                           ellipse, ellipse_perimeter,
                           _bezier_segment, bezier_curve)
@@ -807,6 +807,37 @@ def test_bezier_curve_shape():
     rr, cc = bezier_curve(x1, y1, x2, y2, x3, y3, 2, shape=None)
     img_[rr, cc] = 1
     assert_array_equal(img, img_[shift:-shift, :])
+
+
+def test_polygon_perimiter():
+    expected = np.array(
+        [[1, 1, 1, 1],
+         [1, 0, 0, 1],
+         [1, 1, 1, 1]]
+         )
+    out = np.zeros_like(expected)
+
+    rr, cc = polygon_perimiter([0, 2, 2, 0],
+                               [0, 0, 3, 3])
+
+    out[rr, cc] = 1
+    assert_array_equal(out, expected)
+
+    out = np.zeros_like(expected)
+    rr, cc = polygon_perimiter([-1, -1, 3,  3],
+                               [-1,  4, 4, -1],
+                               shape=out.shape, clip=True)
+    out[rr, cc] = 1
+    assert_array_equal(out, expected)
+
+    assert_raises(ValueError, polygon_perimiter, [0], [1], clip=True)
+
+
+def test_polygon_perimiter_outside_image():
+    rr, cc = polygon_perimiter([-1, -1, 3,  3],
+                               [-1,  4, 4, -1], shape=(3, 4))
+    assert_equal(len(rr), 0)
+    assert_equal(len(cc), 0)
 
 
 if __name__ == "__main__":
