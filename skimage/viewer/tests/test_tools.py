@@ -79,7 +79,8 @@ def test_line_tool():
     img = data.camera()
     viewer = ImageViewer(img)
 
-    tool = LineTool(viewer, maxdist=10)
+    tool = LineTool(viewer, maxdist=10, line_props=dict(linewidth=3),
+                    handle_props=dict(markersize=5))
     tool.end_points = get_end_points(img)
     assert_equal(tool.end_points, np.array([[170, 256], [341, 256]]))
 
