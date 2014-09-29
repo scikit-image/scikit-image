@@ -3,16 +3,15 @@ __all__ = ['polygon_clip', 'polygon_area']
 import numpy as np
 
 
-def polygon_clip(rr, cc, r0, c0, r1, c1):
+def polygon_clip(yp, xp, r0, c0, r1, c1):
     """Clip a polygon to the given bounding box.
 
     Parameters
     ----------
     yp, xp : (N,) ndarray of double
         Row and column coordinates of the polygon.
-    ytop, xleft, ybottom, xright : double
-        Coordinates of the bounding box.  Note that the following
-        must hold true: ``x_left < x_right`` and ``y_top < y_bottom``.
+    (r0, c0), (r1, c1) : double
+        Top-left and bottom-right coordinates of the bounding box.
 
     Returns
     -------
@@ -27,7 +26,7 @@ def polygon_clip(rr, cc, r0, c0, r1, c1):
     """
     from matplotlib import path, transforms
 
-    poly = path.Path(np.vstack((rr, cc)).T, closed=True)
+    poly = path.Path(np.vstack((yp, xp)).T, closed=True)
     clip_rect = transforms.Bbox([[r0, c0], [r1, c1]])
 
     poly_clipped = poly.clip_to_bbox(clip_rect).to_polygons()[0]

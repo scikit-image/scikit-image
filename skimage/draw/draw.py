@@ -129,14 +129,14 @@ def circle(r, c, radius, shape=None):
     return ellipse(r, c, radius, radius, shape)
 
 
-def polygon_perimiter(cy, cx, shape=None, clip=False):
-    """Generate polygon perimiter coordinates.
+def polygon_perimeter(cy, cx, shape=None, clip=False):
+    """Generate polygon perimeter coordinates.
 
     Parameters
     ----------
-    y : (N,) ndarray
+    cy : (N,) ndarray
         Y-coordinates of vertices of polygon.
-    x : (N,) ndarray
+    cx : (N,) ndarray
         X-coordinates of vertices of polygon.
     shape : tuple, optional
         Image shape which is used to determine maximum extents of output pixel
@@ -156,9 +156,9 @@ def polygon_perimiter(cy, cx, shape=None, clip=False):
 
     Examples
     --------
-    >>> from skimage.draw import polygon_perimiter
+    >>> from skimage.draw import polygon_perimeter
     >>> img = np.zeros((10, 10), dtype=np.uint8)
-    >>> rr, cc = polygon_perimiter([5, -1, 5, 10],
+    >>> rr, cc = polygon_perimeter([5, -1, 5, 10],
     ...                            [-1, 5, 11, 5],
     ...                            shape=img.shape, clip=True)
     >>> img[rr, cc] = 1

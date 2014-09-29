@@ -1,4 +1,4 @@
-from .draw import circle, ellipse, polygon_perimiter, set_color
+from .draw import circle, ellipse, polygon_perimeter, set_color
 from .draw3d import ellipsoid, ellipsoid_stats
 from ._draw import (line, line_aa, polygon, ellipse_perimeter,
                     circle_perimeter, circle_perimeter_aa,
