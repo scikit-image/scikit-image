@@ -7,6 +7,7 @@ from .._shared._geometry import polygon_clip
 from ._draw import line
 
 from skimage._shared.version_requirements import is_installed
+from warnings import warn
 matplotlib_installed = is_installed('matplotlib')
 if not matplotlib_installed:
     warn('Polygon perimeter drawing requires matplotlib')
