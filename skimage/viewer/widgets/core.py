@@ -221,7 +221,7 @@ class ComboBox(BaseWidget):
     ptype : {'arg' | 'kwarg' | 'plugin'}, optional
         Parameter type.
     callback : callable f(widget_name, value), optional
-        Callback function called in response to slider changes.
+        Callback function called in response to combobox changes.
         *Note:* This function is typically set (overridden) when the widget is
         added to a plugin.
     """
@@ -274,7 +274,7 @@ class CheckBox(BaseWidget):
     ptype : {'arg' | 'kwarg' | 'plugin'}, optional
         Parameter type
     callback : callable f(widget_name, value), optional
-        Callback function called in response to slider changes.
+        Callback function called in response to checkbox changes.
         *Note:* This function is typically set (overridden) when the widget is
         added to a plugin.
     """
