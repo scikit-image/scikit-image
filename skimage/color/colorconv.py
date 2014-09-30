@@ -368,9 +368,9 @@ def get_xyz_coords(illuminant, observer):
 
     Parameters
     ----------
-    illuminant : {'A', 'D50', 'D55', 'D65', 'D75', 'E'}, optional
+    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
-    observer : int, optional
+    observer : {"2", "10"}, optional
         The aperture angle of the observer.
 
     Returns
@@ -748,7 +748,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     xyz : array_like
         The image in XYZ format, in a 3- or 4-D array of shape
         ``(.., ..,[ ..,] 3)``.
-    illuminant : {'A', 'D50', 'D55', 'D65', 'D75', 'E'}, optional
+    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10"}, optional
         The aperture angle of the observer.
@@ -816,7 +816,7 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
     ----------
     lab : array_like
         The image in lab format, in a 3-D array of shape ``(.., .., 3)``.
-    illuminant : {'A', 'D50', 'D55', 'D65', 'D75', 'E'}, optional
+    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10"}, optional
         The aperture angle of the observer.
@@ -927,7 +927,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     xyz : (M, N, [P,] 3) array_like
         The 3 or 4 dimensional image in XYZ format. Final dimension denotes
         channels.
-    illuminant : {'A', 'D50', 'D55', 'D65', 'D75', 'E'}, optional
+    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10"}, optional
         The aperture angle of the observer.
@@ -1004,7 +1004,7 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
     luv : (M, N, [P,] 3) array_like
         The 3 or 4 dimensional image in CIE-Luv format. Final dimension denotes
         channels.
-    illuminant : {'A', 'D50', 'D55', 'D65', 'D75', 'E'}, optional
+    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10"}, optional
         The aperture angle of the observer.
