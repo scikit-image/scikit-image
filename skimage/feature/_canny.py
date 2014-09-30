@@ -109,7 +109,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None):
 
     Examples
     --------
-    >>> from skimage import filter
+    >>> from skimage import filters
     >>> # Generate noisy image of a square
     >>> im = np.zeros((256, 256))
     >>> im[64:-64, 64:-64] = 1

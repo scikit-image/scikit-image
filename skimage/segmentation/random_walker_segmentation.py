@@ -39,7 +39,7 @@ except ImportError:
     amg_loaded = False
 from scipy.sparse.linalg import cg
 from ..util import img_as_float
-from ..filter import rank_order
+from ..filters import rank_order
 
 #-----------Laplacian--------------------
 

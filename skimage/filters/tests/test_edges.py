@@ -2,8 +2,8 @@ import numpy as np
 from numpy.testing import (assert_array_almost_equal as assert_close,
                            assert_, assert_allclose)
 
-import skimage.filter as F
-from skimage.filter.edges import _mask_filter_result
+import skimage.filters as F
+from skimage.filters.edges import _mask_filter_result
 
 
 def test_roberts_zeros():

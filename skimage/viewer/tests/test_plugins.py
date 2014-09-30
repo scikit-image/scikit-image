@@ -2,7 +2,7 @@
 import numpy as np
 import skimage
 import skimage.data as data
-from skimage.filter.rank import median
+from skimage.filters.rank import median
 from skimage.morphology import disk
 from skimage.viewer import ImageViewer, viewer_available
 from numpy.testing import assert_equal, assert_allclose, assert_almost_equal

@@ -3,8 +3,9 @@ Remember to list any API changes below in `doc/source/api_changes.txt`.
 Version 0.13
 ------------
 * Remove deprecated `None` defaults for `skimage.exposure.rescale_intensity`
-* Remove deprecated `skimage.filter.canny` import in filter/__init__.py file (canny is now in `skimage.feature.canny`).
+* Remove deprecated `skimage.filters.canny` import in filters/__init__.py file (canny is now in `skimage.feature.canny`).
     * Don't forget to complete api_changes.txt. (`GitHub discuss <https://github.com/scikit-image/scikit-image/pull/1113>`__ )
+* Remove deprecated ``skimage.filter`` module.
 
 Version 0.12
 ------------
@@ -20,4 +21,4 @@ Version 0.12
   `skimage.transform.ProjectiveTransform._matrix`,
   `skimage.transform.PolynomialTransform._params`,
   `skimage.transform.PiecewiseAffineTransform.affines_*` attributes
-* Remove deprecated functions `skimage.filter.denoise_*`
+* Remove deprecated functions `skimage.filters.denoise_*`

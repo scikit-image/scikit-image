@@ -27,7 +27,7 @@ Original author: Lee Kamentsky
 from _heapq import heappush, heappop
 import numpy as np
 import scipy.ndimage
-from ..filter import rank_order
+from ..filters import rank_order
 from .._shared.utils import deprecated
 
 from . import _watershed

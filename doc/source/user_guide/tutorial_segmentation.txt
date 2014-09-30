@@ -117,7 +117,7 @@ The choice of the elevation map is critical for good segmentation.
 Here, the amplitude of the gradient provides a good elevation map. We
 use the Sobel operator for computing the amplitude of the gradient::
 
-    >>> from skimage.filter import sobel
+    >>> from skimage.filters import sobel
     >>> elevation_map = sobel(coins)
 
 From the 3-D surface plot shown below, we see that high barriers effectively

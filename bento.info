@@ -33,7 +33,7 @@ UseBackends: Waf
 Library:
     Packages:
         skimage, skimage.color, skimage.data, skimage.draw, skimage.exposure,
-        skimage.feature, skimage.filter, skimage.graph, skimage.io,
+        skimage.feature, skimage.filters, skimage.graph, skimage.io,
         skimage.io._plugins, skimage.measure, skimage.morphology,
         skimage.scripts, skimage.restoration, skimage.segmentation,
         skimage.transform, skimage.util
@@ -61,9 +61,9 @@ Library:
     Extension: skimage.transform._hough_transform
         Sources:
             skimage/transform/_hough_transform.pyx
-    Extension: skimage.filter._ctmf
+    Extension: skimage.filters._ctmf
         Sources:
-            skimage/filter/_ctmf.pyx
+            skimage/filters/_ctmf.pyx
     Extension: skimage.measure._ccomp
         Sources:
             skimage/measure/_ccomp.pyx
@@ -127,18 +127,18 @@ Library:
     Extension: skimage._shared.geometry
         Sources:
             skimage/_shared/geometry.pyx
-    Extension: skimage.filter.rank.generic_cy
+    Extension: skimage.filters.rank.generic_cy
         Sources:
-            skimage/filter/rank/generic_cy.pyx
-    Extension: skimage.filter.rank.percentile_cy
+            skimage/filters/rank/generic_cy.pyx
+    Extension: skimage.filters.rank.percentile_cy
         Sources:
             skimage/filter/rank/percentile_cy.pyx
-    Extension: skimage.filter.rank.core_cy
+    Extension: skimage.filters.rank.core_cy
         Sources:
             skimage/filter/rank/core_cy.pyx
-    Extension: skimage.filter.rank.bilateral_cy
+    Extension: skimage.filters.rank.bilateral_cy
         Sources:
-            skimage/filter/rank/bilateral_cy.pyx
+            skimage/filters/rank/bilateral_cy.pyx
     Extension: skimage.restoration._unwrap_1d
         Sources:
             skimage/restoration/_unwrap_1d.pyx

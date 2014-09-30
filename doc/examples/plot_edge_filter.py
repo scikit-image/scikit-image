@@ -11,7 +11,7 @@ gradient of the image intensity function.
 import matplotlib.pyplot as plt
 
 from skimage.data import camera
-from skimage.filter import roberts, sobel
+from skimage.filters import roberts, sobel
 
 
 image = camera()

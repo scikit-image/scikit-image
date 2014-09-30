@@ -14,7 +14,7 @@ import numpy as np
 from scipy import ndimage as nd
 import matplotlib.pyplot as plt
 
-from skimage.filter import sobel
+from skimage.filters import sobel
 from skimage.segmentation import slic, join_segmentations
 from skimage.morphology import watershed
 from skimage.color import label2rgb

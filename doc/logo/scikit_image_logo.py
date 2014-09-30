@@ -20,7 +20,7 @@ import skimage.io as sio
 from skimage import img_as_float
 from skimage.color import gray2rgb, rgb2gray
 from skimage.exposure import rescale_intensity
-from skimage.filter import sobel
+from skimage.filters import sobel
 
 import scipy_logo
 

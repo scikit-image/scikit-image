@@ -10,7 +10,7 @@ coded in an image.
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage.filter.rank import entropy
+from skimage.filters.rank import entropy
 from skimage.morphology import disk
 from skimage.util import img_as_ubyte
 

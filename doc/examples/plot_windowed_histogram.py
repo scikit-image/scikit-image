@@ -13,7 +13,7 @@ extracted and a histogram of its greyscale values is computed.
 
 Next, for each pixel in the test image, a histogram of the greyscale values in
 a region of the image surrounding the pixel is computed.
-`skimage.filter.rank.windowed_histogram` is used for this task, as it employs
+`skimage.filters.rank.windowed_histogram` is used for this task, as it employs
 an efficient sliding window based algorithm that is able to compute these
 histograms quickly [2]_. The local histogram for the region surrounding each
 pixel in the image is compared to that of the single coin, with a similarity
@@ -42,7 +42,7 @@ import matplotlib.pyplot as plt
 from skimage import data, transform
 from skimage.util import img_as_ubyte
 from skimage.morphology import disk
-from skimage.filter import rank
+from skimage.filters import rank
 
 
 matplotlib.rcParams['font.size'] = 9

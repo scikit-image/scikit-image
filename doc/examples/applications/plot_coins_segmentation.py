@@ -109,7 +109,7 @@ find an elevation map using the Sobel gradient of the image.
 
 """
 
-from skimage.filter import sobel
+from skimage.filters import sobel
 
 elevation_map = sobel(coins)
 

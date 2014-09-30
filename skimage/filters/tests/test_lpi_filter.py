@@ -5,7 +5,7 @@ from numpy.testing import *
 
 from skimage import data_dir
 from skimage.io import *
-from skimage.filter import *
+from skimage.filters import *
 
 
 class TestLPIFilter2D(object):

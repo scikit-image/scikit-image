@@ -8,7 +8,7 @@ Demo of a CollectionViewer for viewing collections of images with the
 
 """
 from skimage import data
-from skimage.filter import rank
+from skimage.filters import rank
 from skimage.morphology import disk
 
 from skimage.viewer import CollectionViewer

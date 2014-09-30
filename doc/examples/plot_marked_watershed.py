@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 
 from skimage.morphology import watershed, disk
 from skimage import data
-from skimage.filter import rank
+from skimage.filters import rank
 from skimage.util import img_as_ubyte
 
 

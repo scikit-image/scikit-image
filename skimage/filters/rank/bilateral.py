@@ -89,13 +89,13 @@ def mean_bilateral(image, selem, out=None, mask=None, shift_x=False,
 
     See also
     --------
-    skimage.filter.denoise_bilateral for a Gaussian bilateral filter.
+    skimage.filters.denoise_bilateral for a Gaussian bilateral filter.
 
     Examples
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
-    >>> from skimage.filter.rank import mean_bilateral
+    >>> from skimage.filters.rank import mean_bilateral
     >>> img = data.camera().astype(np.uint16)
     >>> bilat_img = mean_bilateral(img, disk(20), s0=10,s1=10)
 
@@ -142,7 +142,7 @@ def pop_bilateral(image, selem, out=None, mask=None, shift_x=False,
     Examples
     --------
     >>> from skimage.morphology import square
-    >>> import skimage.filter.rank as rank
+    >>> import skimage.filters.rank as rank
     >>> img = 255 * np.array([[0, 0, 0, 0, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
@@ -206,13 +206,13 @@ def sum_bilateral(image, selem, out=None, mask=None, shift_x=False,
 
     See also
     --------
-    skimage.filter.denoise_bilateral for a Gaussian bilateral filter.
+    skimage.filters.denoise_bilateral for a Gaussian bilateral filter.
 
     Examples
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
-    >>> from skimage.filter.rank import sum_bilateral
+    >>> from skimage.filters.rank import sum_bilateral
     >>> img = data.camera().astype(np.uint16)
     >>> bilat_img = sum_bilateral(img, disk(10), s0=10, s1=10)
 

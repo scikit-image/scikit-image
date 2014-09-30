@@ -18,7 +18,7 @@ local neighborhood minus an offset value.
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage.filter import threshold_otsu, threshold_adaptive
+from skimage.filters import threshold_otsu, threshold_adaptive
 
 
 image = data.page()

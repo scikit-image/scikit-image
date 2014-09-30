@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.filter._gaussian import gaussian_filter
+from skimage.filters._gaussian import gaussian_filter
 
 
 def test_null_sigma():
