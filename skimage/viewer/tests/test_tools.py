@@ -104,7 +104,8 @@ def test_thick_line_tool():
     img = data.camera()
     viewer = ImageViewer(img)
 
-    tool = ThickLineTool(viewer, maxdist=10)
+    tool = ThickLineTool(viewer, maxdist=10, line_props=dict(color='red'),
+                         handle_props=dict(markersize=5))
     tool.end_points = get_end_points(img)
 
     do_event(viewer, 'scroll', button='up')
