@@ -28,6 +28,9 @@ class LineTool(CanvasToolBase):
         Maximum pixel distance allowed when selecting control handle.
     line_props : dict
         Properties for :class:`matplotlib.lines.Line2D`.
+    handle_props : dict
+        Marker properties for the handles (also see
+        :class:`matplotlib.lines.Line2D`).
 
     Attributes
     ----------
@@ -35,7 +38,7 @@ class LineTool(CanvasToolBase):
         End points of line ((x1, y1), (x2, y2)).
     """
     def __init__(self, viewer, on_move=None, on_release=None, on_enter=None,
-                 maxdist=10, line_props=None,
+                 maxdist=10, line_props=None, handle_props=None,
                  **kwargs):
         super(LineTool, self).__init__(viewer, on_move=on_move,
                                        on_enter=on_enter,
@@ -54,14 +57,16 @@ class LineTool(CanvasToolBase):
         self._line = lines.Line2D(x, y, visible=False, animated=True, **props)
         self.ax.add_line(self._line)
 
-        self._handles = ToolHandles(self.ax, x, y)
+        self._handles = ToolHandles(self.ax, x, y,
+                                    marker_props=handle_props)
         self._handles.set_visible(False)
         self.artists = [self._line, self._handles.artist]
 
         if on_enter is None:
             def on_enter(pts):
                 x, y = np.transpose(pts)
-                print("length = %0.2f" % np.sqrt(np.diff(x)**2 + np.diff(y)**2))
+                print("length = %0.2f" %
+                      np.sqrt(np.diff(x)**2 + np.diff(y)**2))
         self.callback_on_enter = on_enter
         viewer.add_tool(self)
 
@@ -146,6 +151,9 @@ class ThickLineTool(LineTool):
         Maximum pixel distance allowed when selecting control handle.
     line_props : dict
         Properties for :class:`matplotlib.lines.Line2D`.
+    handle_props : dict
+        Marker properties for the handles (also see
+        :class:`matplotlib.lines.Line2D`).
 
     Attributes
     ----------
@@ -154,13 +162,14 @@ class ThickLineTool(LineTool):
     """
 
     def __init__(self, viewer, on_move=None, on_enter=None, on_release=None,
-                 on_change=None, maxdist=10, line_props=None):
+                 on_change=None, maxdist=10, line_props=None, handle_props=None):
         super(ThickLineTool, self).__init__(viewer,
                                             on_move=on_move,
                                             on_enter=on_enter,
                                             on_release=on_release,
                                             maxdist=maxdist,
-                                            line_props=line_props)
+                                            line_props=line_props,
+                                            handle_props=handle_props)
 
         if on_change is None:
             def on_change(*args):
