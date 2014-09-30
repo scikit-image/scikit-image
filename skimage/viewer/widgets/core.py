@@ -81,16 +81,17 @@ class Slider(BaseWidget):
         Range of slider values.
     value : float
         Default slider value. If None, use midpoint between `low` and `high`.
-    value_type : {'float' | 'int'}
+    value_type : {'float' | 'int'}, optional
         Numeric type of slider value.
-    ptype : {'arg' | 'kwarg' | 'plugin'}
+    ptype : {'kwarg' | 'arg' | 'plugin'}, optional
         Parameter type.
-    callback : function
-        Callback function called in response to slider changes. This function
-        is typically set when the widget is added to a plugin.
-    orientation : {'horizontal' | 'vertical'}
+    callback : callable f(widget_name, value), optional
+        Callback function called in response to slider changes.
+        *Note:* This function is typically set (overridden) when the widget is
+        added to a plugin.
+    orientation : {'horizontal' | 'vertical'}, optional
         Slider orientation.
-    update_on : {'release' | 'move'}
+    update_on : {'release' | 'move'}, optional
         Control when callback function is called: on slider move or release.
     """
     def __init__(self, name, low=0.0, high=1.0, value=None, value_type='float',
@@ -217,11 +218,12 @@ class ComboBox(BaseWidget):
         name of the ComboBox.
     items: list of str
         Allowed parameter values.
-    ptype : {'arg' | 'kwarg' | 'plugin'}
+    ptype : {'arg' | 'kwarg' | 'plugin'}, optional
         Parameter type.
-    callback : function
-        Callback function called in response to ComboBox changes. This function
-        is typically set when the widget is added to a plugin.
+    callback : callable f(widget_name, value), optional
+        Callback function called in response to combobox changes.
+        *Note:* This function is typically set (overridden) when the widget is
+        added to a plugin.
     """
 
     def __init__(self, name, items, ptype='kwarg', callback=None):
@@ -265,15 +267,16 @@ class CheckBox(BaseWidget):
         argument, it must match the name of that keyword argument (spaces are
         replaced with underscores). In addition, this name is displayed as the
         name of the CheckBox.
-    value: {False, True}
+    value: {False, True}, optional
         Initial state of the CheckBox.
-    alignment: {'center','left','right'}
+    alignment: {'center','left','right'}, optional
         Checkbox alignment
-    ptype : {'arg' | 'kwarg' | 'plugin'}
+    ptype : {'arg' | 'kwarg' | 'plugin'}, optional
         Parameter type
-    callback : function
-        Callback function called in response to CheckBox changes. This function
-        is typically set when the widget is added to a plugin.
+    callback : callable f(widget_name, value), optional
+        Callback function called in response to checkbox changes.
+        *Note:* This function is typically set (overridden) when the widget is
+        added to a plugin.
     """
 
     def __init__(self, name, value=False, alignment='center', ptype='kwarg', 
