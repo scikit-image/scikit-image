@@ -3,7 +3,8 @@ Pre-built installation
 
 `Windows binaries
 <http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image>`__
-are kindly provided by Christoph Gohlke.
+are kindly provided by Christoph Gohlke (note that, when upgrading,
+you should first uninstall any older versions).
 
 The latest stable release is also included as part of
 `Enthought Canopy <https://www.enthought.com/products/canopy/>`__,
