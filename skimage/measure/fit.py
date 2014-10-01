@@ -476,13 +476,10 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     ----------
     n_inliers : int
         Number of inliers in the data.
-
     n_samples : int
         Total number of samples in the data.
-
     min_samples : int
         Minimum number of samples chosen randomly from original data.
-
     probability : float
         Probability (confidence) that one outlier-free sample is generated.
 
