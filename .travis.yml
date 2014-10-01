@@ -46,7 +46,7 @@ before_install:
         source activate test;
       fi
     - travis_retry pip install wheel;
-    - if [[ $END != python=2.6* ]]; then
+    - if [[ $ENV != python=2.6* ]]; then
             travis_retry pip install --no-index --find-links=http://wheels.scikit-image.org/ matplotlib;
       else 
          pip install matplotlib==1.0;
