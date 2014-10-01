@@ -4,7 +4,6 @@ Build Requirements
 * `Numpy >= 1.6 <http://numpy.scipy.org/>`__
 * `Cython >= 0.19 <http://www.cython.org/>`__
 * `Six >=1.3 <https://pypi.python.org/pypi/six>`__
-* `Matplotlib >= 1.0 <http://matplotlib.sf.net>`__ 
 
 You can use pip to automatically install the base dependencies as follows::
 
@@ -13,6 +12,7 @@ You can use pip to automatically install the base dependencies as follows::
 Runtime requirements
 --------------------
 * `SciPy >= 0.9 <http://scipy.org>`__
+* `Matplotlib >= 1.0 <http://matplotlib.sf.net>`__ 
 
 Known build errors
 ------------------
