@@ -45,7 +45,12 @@ before_install:
         travis_retry conda create -n test $ENV six scipy pip flake8 nose;
         source activate test;
       fi
-    - travis_retry pip install coveralls pillow
+    - travis_retry pip install wheel;
+    - if [[ $END != python=2.6* ]] then
+            travis_retry pip install --no-index --find-links=http://wheels.scikit-image.org/ matplotlib;
+      else 
+         pip install matplotlib==1.0
+      end
     - python check_bento_build.py
 
 install:
@@ -74,16 +79,16 @@ script:
     #   https://groups.google.com/a/continuum.io/forum/#!topic/anaconda/-DLG2ZdTkw0
     - if [[ $ENV == python=3.2 ]]; then
         travis_retry sudo apt-get install python3-pyqt4;
-        travis_retry pip install matplotlib==1.3.1;
         travis_retry pip install networkx;
       else
-        travis_retry conda install matplotlib pyqt networkx;
+        travis_retry conda install networkx;
         sudo cp ~/miniconda/envs/test/include/png* /usr/include;
         rm ~/miniconda/envs/test/lib/libm-2.5.so;
         rm ~/miniconda/envs/test/lib/libm.*;
         sudo apt-get install libtiff4-dev libwebp-dev xcftools;
         travis_retry pip install imread;
         travis_retry pip install pyfits;
+        travis_retry pip install pillow;
       fi
     - sudo apt-get install libfreeimage3
     # TODO: update when SimpleITK become available on py34 or hopefully pip
