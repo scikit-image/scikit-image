@@ -564,7 +564,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
         threshold.
     stop_probability : float in range [0, 1], optional
         RANSAC iteration stops if at least one outlier-free set of the
-        training data is sampled in RANSAC. This requires to generate at least
+        training data is sampled. This requires to generate at least
         N samples (iterations):
 
             N >= log(1 - probability) / log(1 - e**m)
