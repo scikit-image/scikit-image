@@ -25,7 +25,7 @@ before_install:
     - export SPACER="\n\n\n\n\n\n\n\n\n\n*************************\n\n"
     - sh -e /etc/init.d/xvfb start
     - sudo apt-get update
-    - sudo apt-get build-dep python-matplotlib
+    - sudo apt-get build-dep python-matplotlib libjpeg-dev
 
     # Python 3.2 is not supported by Miniconda, so we use the package manager for that run.
     # NumPy has a bug in python 3 that is only fixed in the latest version,
@@ -50,7 +50,7 @@ before_install:
     - if [[ $ENV != python=2.6* ]]; then
             travis_retry pip install --no-index --find-links=http://wheels.scikit-image.org/ matplotlib;
       else 
-         pip install matplotlib==1.0;
+         pip install matplotlib==1.0.1;
       fi
     - python check_bento_build.py
 
