@@ -1,10 +1,9 @@
-from skimage._shared.utils import all_warnings, skimage_deprecation
 from numpy.testing import assert_warns
+from warnings import catch_warnings, simplefilter
 
-def import_filter():
-    from skimage import filter as F
+def test_import_filter():
+    with catch_warnings():
+        simplefilter('ignore')
+        from skimage import filter as F
+
     assert('sobel' in dir(F))
-
-def test_filter_import():
-    with all_warnings():
-        assert_warns(skimage_deprecation, import_filter)
