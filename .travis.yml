@@ -25,8 +25,7 @@ before_install:
     - export SPACER="\n\n\n\n\n\n\n\n\n\n*************************\n\n"
     - sh -e /etc/init.d/xvfb start
     - sudo apt-get update
-    - sudo apt-get build-dep python-matplotlib 
-    - sudo apt-get install libjpeg-dev
+    - sudo apt-get install python-dev libjpeg-dev libfreetype6-dev zlib1g-dev
 
     # Python 3.2 is not supported by Miniconda, so we use the package manager for that run.
     # NumPy has a bug in python 3 that is only fixed in the latest version,
