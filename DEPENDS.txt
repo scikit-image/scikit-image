@@ -24,11 +24,6 @@ example at ``C:\Python26\Lib\distutils\distutils.cfg``) to contain::
     [build]
     compiler=mingw32
 
-
-Usage Requirements
-------------------
-* `Scipy <http://www.scipy.org/>`__
-
 Optional Requirements
 ---------------------
 You can use this scikit with the basic requirements listed above, but some
