@@ -564,14 +564,15 @@ def ransac(data, model_class, min_samples, residual_threshold,
         threshold.
     stop_probability : float in range [0, 1], optional
         RANSAC iteration stops if at least one outlier-free set of the
-        training data is sampled. This requires to generate at least
-        N samples (iterations):
+        training data is sampled with ``probability >= stop_probability``,
+        depending on the current best model's inlier ratio and the number
+        of trials. This requires to generate at least N samples (trials):
 
             N >= log(1 - probability) / log(1 - e**m)
 
-        where the probability (confidence) is typically set to high value such
-        as 0.99 and e is the current fraction of inliers w.r.t. the total
-        number of samples.
+        where the probability (confidence) is typically set to a high value
+        such as 0.99, and e is the current fraction of inliers w.r.t. the
+        total number of samples.
 
     Returns
     -------
