@@ -2,6 +2,7 @@ import numpy as np
 from numpy.testing import assert_equal, assert_raises, assert_almost_equal
 from skimage.measure import LineModel, CircleModel, EllipseModel, ransac
 from skimage.transform import AffineTransform
+from skimage.measure.fit import _dynamic_max_trials
 
 
 def test_line_model_invalid_input():
@@ -202,6 +203,51 @@ def test_ransac_is_model_valid():
                             is_model_valid=is_model_valid)
     assert_equal(model, None)
     assert_equal(inliers, None)
+
+
+def test_ransac_dynamic_max_trials():
+    # Numbers hand-calculated and confirmed on page 119 (Table 4.3) in
+    #   Hartley, R.~I. and Zisserman, A., 2004,
+    #   Multiple View Geometry in Computer Vision, Second Edition,
+    #   Cambridge University Press, ISBN: 0521540518
+
+    # e = 0%, min_samples = X
+    assert_equal(_dynamic_max_trials(100, 100, 2, 0.99), 1)
+
+    # e = 5%, min_samples = 2
+    assert_equal(_dynamic_max_trials(95, 100, 2, 0.99), 2)
+    # e = 10%, min_samples = 2
+    assert_equal(_dynamic_max_trials(90, 100, 2, 0.99), 3)
+    # e = 30%, min_samples = 2
+    assert_equal(_dynamic_max_trials(70, 100, 2, 0.99), 7)
+    # e = 50%, min_samples = 2
+    assert_equal(_dynamic_max_trials(50, 100, 2, 0.99), 17)
+
+    # e = 5%, min_samples = 8
+    assert_equal(_dynamic_max_trials(95, 100, 8, 0.99), 5)
+    # e = 10%, min_samples = 8
+    assert_equal(_dynamic_max_trials(90, 100, 8, 0.99), 9)
+    # e = 30%, min_samples = 8
+    assert_equal(_dynamic_max_trials(70, 100, 8, 0.99), 78)
+    # e = 50%, min_samples = 8
+    assert_equal(_dynamic_max_trials(50, 100, 8, 0.99), 1177)
+
+    # e = 0%, min_samples = 10
+    assert_equal(_dynamic_max_trials(1, 100, 10, 0), 0)
+    assert_equal(_dynamic_max_trials(1, 100, 10, 1), float('inf'))
+
+
+def test_ransac_invalid_input():
+    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=-1,
+                                     residual_threshold=0)
+    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=2,
+                                     residual_threshold=0, max_trials=-1)
+    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=2,
+                                     residual_threshold=0,
+                                     stop_probability=-1)
+    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=2,
+                                     residual_threshold=0,
+                                     stop_probability=1.01)
 
 
 def test_deprecated_params_attribute():
