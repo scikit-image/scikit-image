@@ -82,14 +82,19 @@ version='%s'
 def get_package_version(package):
     version = []
     for version_attr in ('version', 'VERSION', '__version__'):
-        if hasattr(package, version_attr) \
-                and isinstance(getattr(package, version_attr), str):
-            version_info = getattr(package, version_attr, '')
-            for part in re.split('\D+', version_info):
-                try:
-                    version.append(int(part))
-                except ValueError:
-                    pass
+        version_info = getattr(package, version_attr, None)
+        try:
+            parts = re.split('\D+', version_info)
+        except TypeError:
+            continue
+        for part in parts:
+            try:
+                version.append(int(part))
+            except ValueError:
+                pass
+    if not version:
+        print(package)
+
     return tuple(version)
 
 
@@ -112,6 +117,7 @@ def check_requirements():
                 dep_error = True
 
         if dep_error:
+            print('***********', package_version)
             raise ImportError('You need `%s` version %d.%d or later.' \
                               % ((package_name, ) + min_version))
 
