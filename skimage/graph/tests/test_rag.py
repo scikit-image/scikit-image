@@ -41,8 +41,8 @@ def test_rag_merge():
     assert gc.edge[1][2]['weight'] == 20
     assert gc.edge[2][3]['weight'] == 40
 
-    g.merge_nodes(1, 4)
-    g.merge_nodes(2, 3)
+    g.merge_nodes(1, 4, in_place=True)
+    g.merge_nodes(2, 3, in_place=True)
     g.merge_nodes(3, 4)
     assert sorted(g.node[4]['labels']) == list(range(5))
     assert g.edges() == []
