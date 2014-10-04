@@ -15,6 +15,7 @@ from scipy.ndimage import filters
 from scipy import ndimage as nd
 import math
 from .. import draw, measure, segmentation, util, color
+import random
 try:
     from matplotlib import colors
     from matplotlib import cm
@@ -96,7 +97,10 @@ class RAG(nx.Graph):
         dst_nbrs = set(self.neighbors(dst))
         neighbors = (src_nbrs & dst_nbrs) - set([src, dst])
         if not in_place:
-            new = self.number_of_nodes() + 1
+            # Randomly select an id
+            new = random.randint(1, 99999999)
+            while new in self:
+                new = random.randint(1, 99999999)
             self.add_node(new)
 
         for neighbor in neighbors:
