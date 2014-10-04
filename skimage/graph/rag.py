@@ -96,11 +96,12 @@ class RAG(nx.Graph):
         src_nbrs = set(self.neighbors(src))
         dst_nbrs = set(self.neighbors(dst))
         neighbors = (src_nbrs & dst_nbrs) - set([src, dst])
+        n = self.number_of_nodes()
         if not in_place:
             # Randomly select an id
-            new = random.randint(1, 99999999)
+            new = random.randint(1, 2*n)
             while new in self:
-                new = random.randint(1, 99999999)
+                new = random.randint(1, 2*n)
             self.add_node(new)
 
         for neighbor in neighbors:
