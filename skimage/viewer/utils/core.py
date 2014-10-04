@@ -15,6 +15,9 @@ try:
         if 'agg' not in mpl.get_backend().lower():
             print("Recommended matplotlib backend is `Agg` for full "
                   "skimage.viewer functionality.")
+    else:
+        FigureCanvasQTAgg = object
+        LinearSegmentedColormap = object
 except ImportError:
     FigureCanvasQTAgg = object  # hack to prevent nosetest and autodoc errors
     LinearSegmentedColormap = object
