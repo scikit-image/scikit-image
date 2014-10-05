@@ -79,7 +79,7 @@ class RAG(nx.Graph):
             **extra_keywords)`. `src`, `dst` and `n` are IDs of vertices in the
             RAG object which is in turn a subclass of
             `networkx.Graph`.
-        in_place : bool
+        in_place : bool, optional
             If set to `True`, the merged node has the id `dst`, else merged
             node has a new id which is returned.
         extra_arguments : sequence, optional
@@ -95,30 +95,26 @@ class RAG(nx.Graph):
         """
         src_nbrs = set(self.neighbors(src))
         dst_nbrs = set(self.neighbors(dst))
-        neighbors = (src_nbrs & dst_nbrs) - set([src, dst])
-        n = self.number_of_nodes()
-        if not in_place:
-            # Randomly select an id
+        neighbors = (src_nbrs | dst_nbrs) - set([src, dst])
+
+        if in_place:
+            new = dst
+        else:
+            n = self.number_of_nodes()
             new = random.randint(1, 2*n)
             while new in self:
                 new = random.randint(1, 2*n)
             self.add_node(new)
 
         for neighbor in neighbors:
-            w = weight_func(self, src, dst, neighbor, *extra_arguments,
+            w = weight_func(self, src, new, neighbor, *extra_arguments,
                             **extra_keywords)
-            if in_place:
-                self.add_edge(neighbor, dst, weight=w)
-            else:
-                self.add_edge(neighbor, new, weight=w)
+            self.add_edge(neighbor, new, weight=w)
 
-        if in_place:
-            self.node[dst]['labels'] += self.node[src]['labels']
-            self.remove_node(src)
-        else:
-            self.node[new]['labels'] = (self.node[src]['labels'] +
-                                        self.node[dst]['labels'])
-            self.remove_node(src)
+        self.node[new]['labels'] = (self.node[src]['labels'] +
+                                    self.node[dst]['labels'])
+        self.remove_node(src)
+        if not in_place:
             self.remove_node(dst)
             return new
 
