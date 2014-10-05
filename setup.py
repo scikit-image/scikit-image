@@ -39,13 +39,7 @@ for line in data.splitlines():
     # Only require Cython if we have a developer checkout
     if pkg.lower() == 'cython' and not VERSION.endswith('dev'):
         continue
-    version = []
-    for part in re.split('\D+', version_info):
-            try:
-                version.append(int(part))
-            except ValueError:
-                pass
-    DEPENDENCIES[str(pkg.lower())] = tuple(version)
+    DEPENDENCIES[str(pkg.lower())] = str(version_info)
 
 
 def configuration(parent_package='', top_path=None):
@@ -83,18 +77,8 @@ version='%s'
 def get_package_version(package):
     for version_attr in ('version', 'VERSION', '__version__'):
         version_info = getattr(package, version_attr, None)
-        try:
-            parts = re.split('\D+', version_info)
-        except TypeError:
-            continue
-        version = []
-        for part in parts:
-            try:
-                version.append(int(part))
-            except ValueError:
-                pass
-
-        return tuple(version)
+        if version_info:
+            return str(version_info)
 
 def check_requirements():
     if sys.version_info < PYTHON_VERSION:
