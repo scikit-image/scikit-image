@@ -92,8 +92,6 @@ def get_package_version(package):
                 version.append(int(part))
             except ValueError:
                 pass
-    if not version:
-        print(package)
 
     return tuple(version)
 
@@ -117,8 +115,8 @@ def check_requirements():
                 dep_error = True
 
         if dep_error:
-            raise ImportError('You need `%s` version %d.%d or later.' \
-                              % ((package_name, ) + min_version[:2]))
+            raise ImportError('You need `%s` version %s or later.' \
+                              % (package_name, '.'.join(str(i) for i in min_version)))
 
 
 if __name__ == "__main__":
