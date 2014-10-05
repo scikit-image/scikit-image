@@ -11,9 +11,10 @@ except ImportError:
                       "http://pypi.python.org/pypi/PIL/) "
                       "for further instructions.")
 
-from skimage.util import img_as_ubyte, img_as_uint, img_as_int, img_as_float
+from skimage.util import img_as_ubyte, img_as_uint, img_as_int
 
 from six import string_types
+from tifffile import imread as tif_imread, imsave as tif_imsave
 
 
 def imread(fname, dtype=None):
@@ -28,6 +29,9 @@ def imread(fname, dtype=None):
 
 
     """
+    if fname.lower().endswith(('tif', 'tiff')) and dtype is None:
+        return tif_imread(fname)
+
     im = Image.open(fname)
     try:
         # this will raise an IOError if the file is not readable
@@ -109,10 +113,6 @@ def ndarray_to_pil(arr, format_str=None):
         if arr.shape[2] not in (3, 4):
             raise ValueError("Invalid number of channels in image array.")
 
-    if not format_str is None and format_str in ('tiff', 'tif'):
-        # open with pylibtiff
-        pass
-
     if arr.ndim == 3:
         arr = img_as_ubyte(arr)
         mode_base = mode = {3: 'RGB', 4: 'RGBA'}[arr.shape[2]]
@@ -169,8 +169,12 @@ def imsave(fname, arr, format_str=None):
     if not isinstance(fname, string_types) and format_str is None:
         format_str = "PNG"
 
-    img = ndarray_to_pil(arr, format_str=None)
-    img.save(fname, format=format_str)
+    if fname.lower().endswith(('.tiff', '.tif')):
+        tif_imsave(fname)
+
+    else:
+        img = ndarray_to_pil(arr, format_str=None)
+        img.save(fname, format=format_str)
 
 
 def imshow(arr):
