@@ -26,6 +26,7 @@ import sys
 
 import setuptools
 from distutils.command.build_py import build_py
+from distutils.version import LooseVersion
 
 
 # These are manually checked.
@@ -112,7 +113,7 @@ def check_requirements():
             dep_error = True
         else:
             package_version = get_package_version(package)
-            if min_version > package_version:
+            if LooseVersion(min_version) > LooseVersion(package_version):
                 dep_error = True
         if dep_error:
             raise ImportError('You need `%s` version %s or later.' \
