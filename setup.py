@@ -44,7 +44,7 @@ for line in data.splitlines():
                 version.append(int(part))
             except ValueError:
                 pass
-    DEPENDENCIES[pkg.lower()] = tuple(version)
+    DEPENDENCIES[str(pkg.lower())] = tuple(version)
 
 
 def configuration(parent_package='', top_path=None):
@@ -86,20 +86,19 @@ def get_package_version(package):
             parts = re.split('\D+', version_info)
         except TypeError:
             continue
+        version = []
         for part in parts:
             try:
                 version.append(int(part))
             except ValueError:
                 pass
 
-    return tuple(version)
-
+        return tuple(version)
 
 def check_requirements():
     if sys.version_info < PYTHON_VERSION:
         raise SystemExit('You need Python version %d.%d or later.' \
                          % PYTHON_VERSION)
-
     for package_name, min_version in DEPENDENCIES.items():
         if package_name == 'cython':
             package_name = 'Cython'
@@ -115,7 +114,6 @@ def check_requirements():
             package_version = get_package_version(package)
             if min_version > package_version:
                 dep_error = True
-
         if dep_error:
             raise ImportError('You need `%s` version %s or later.' \
                               % (package_name, '.'.join(str(i) for i in min_version)))
