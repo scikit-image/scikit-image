@@ -63,7 +63,7 @@ def ellipse(cy, cx, yradius, xradius, shape=None):
         return _ellipse_in_shape(shape, center, radiuses)
     else:
         # rounding here is necessary to avoid rounding issues later
-        upper_left = np.floor(center - radiuses)
+        upper_left = np.floor(center - radiuses).astype(int)
 
         shifted_center = center - upper_left
 
