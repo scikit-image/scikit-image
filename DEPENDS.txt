@@ -12,7 +12,8 @@ You can use pip to automatically install the base dependencies as follows::
 Runtime requirements
 --------------------
 * `SciPy >= 0.9 <http://scipy.org>`__
-* `Matplotlib >= 1.0 <http://matplotlib.sf.net>`__ 
+* `Matplotlib >= 1.0 <http://matplotlib.sf.net>`__
+* `NetworkX >= 1.8 <https://networkx.github.io>`
 
 Known build errors
 ------------------
@@ -29,9 +30,6 @@ Optional Requirements
 You can use this scikit with the basic requirements listed above, but some
 functionality is only available with the following installed:
 
-* `NetworkX >= 1.8 <https://networkx.github.io>`__ is needed to use region
-adjacency graph (RAG)-based segmentation functions.
-
 * `PyQt4 <http://wiki.python.org/moin/PyQt>`__
    The ``qt`` plugin that provides ``imshow(x, fancy=True)`` and `skivi`.
 
@@ -47,7 +45,15 @@ adjacency graph (RAG)-based segmentation functions.
    (or `PIL <http://www.pythonware.com/products/pil/>`__)
    The ``Pillow`` library (or equivalently ``PIL``) is used for Input/Output.
 
-* `Astropy <http://www.astropy.org>`__ is required to use the FITS io plug-in.
+* `Astropy <http://www.astropy.org>`__ provides FITS io capability.
+
+*`SimpleITK <http://www.simpleitk.org/>`
+ Optional io plugin providing a wide variety of `formats <http://www.itk.org/Wiki/ITK_File_Formats>`__.
+ including specialized formats using in Medical imagery.
+
+*`imread <http://pythonhosted.org//imread/>`
+ Optional io plugin providing most standard `formats <http://pythonhosted.org//imread/formats.html>`__.
+
 
 Testing requirements
 --------------------
