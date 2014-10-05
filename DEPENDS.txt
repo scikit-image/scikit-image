@@ -13,7 +13,9 @@ Runtime requirements
 --------------------
 * `SciPy >= 0.9 <http://scipy.org>`__
 * `Matplotlib >= 1.0 <http://matplotlib.sf.net>`__
-* `NetworkX >= 1.8 <https://networkx.github.io>`
+* `NetworkX >= 1.8 <https://networkx.github.io>`__
+* `Pillow <https://pypi.python.org/pypi/Pillow>`__
+   (or `PIL <http://www.pythonware.com/products/pil/>`__)
 
 Known build errors
 ------------------
@@ -40,10 +42,6 @@ functionality is only available with the following installed:
 * `PyAMG <http://pyamg.org/>`__
    The ``pyamg`` module is used for the fast `cg_mg` mode of random
    walker segmentation.
-
-* `Pillow <https://pypi.python.org/pypi/Pillow>`__
-   (or `PIL <http://www.pythonware.com/products/pil/>`__)
-   The ``Pillow`` library (or equivalently ``PIL``) is used for Input/Output.
 
 * `Astropy <http://www.astropy.org>`__ provides FITS io capability.
 
