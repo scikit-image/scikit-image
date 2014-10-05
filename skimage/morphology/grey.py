@@ -35,6 +35,11 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
     eroded : uint8 array
         The result of the morphological erosion.
 
+    Notes
+    -----
+    The lower algorithm complexity makes the `skimage.filter.rank.minimum`
+    more efficient for larger images and structuring elements.
+
     Examples
     --------
     >>> # Erosion shrinks bright regions
@@ -89,6 +94,11 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
     -------
     dilated : uint8 array
         The result of the morphological dilation.
+
+    Notes
+    -----
+    The lower algorithm complexity makes the `skimage.filter.rank.maximum`
+    more efficient for larger images and structuring elements.
 
     Examples
     --------
