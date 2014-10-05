@@ -39,7 +39,7 @@ for line in data.splitlines():
     # Only require Cython if we have a developer checkout
     if pkg.lower() == 'cython' and not VERSION.endswith('dev'):
         continue
-    DEPENDENCIES[str(pkg.lower())] = str(version_info)
+    DEPENDENCIES[str(pkg).lower()] = str(version_info)
 
 
 def configuration(parent_package='', top_path=None):
@@ -80,11 +80,12 @@ def get_package_version(package):
         if version_info:
             return str(version_info)
 
+
 def check_requirements():
     if sys.version_info < PYTHON_VERSION:
         raise SystemExit('You need Python version %d.%d or later.' \
                          % PYTHON_VERSION)
-    for package_name, min_version in DEPENDENCIES.items():
+    for (package_name, min_version) in DEPENDENCIES.items():
         if package_name == 'cython':
             package_name = 'Cython'
         dep_error = False
