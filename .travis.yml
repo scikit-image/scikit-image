@@ -48,10 +48,11 @@ before_install:
       fi
     - travis_retry pip install wheel;
     - if [[ $ENV != python=2.6* ]]; then
-            travis_retry pip install --no-index --find-links=http://wheels.scikit-image.org/ matplotlib;
+            travis_retry pip install matplotlib --no-index --find-links=http://wheels.scikit-image.org/;
       else
          pip install matplotlib==1.1.0;
       fi
+    - pip install pillow  --no-index --find-links=http://wheels.scikit-image.org/
     - python check_bento_build.py
 
 install:
