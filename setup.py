@@ -107,7 +107,7 @@ def check_requirements():
             package_name = 'PIL.Image'
         try:
             package = __import__(package_name,
-                fromlist=[package_name.split('.')[-1]])
+                fromlist=[package_name.rpartition('.')[0]])
         except ImportError:
             dep_error = True
         else:
