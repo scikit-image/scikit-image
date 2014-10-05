@@ -80,7 +80,6 @@ version='%s'
 
 
 def get_package_version(package):
-    version = []
     for version_attr in ('version', 'VERSION', '__version__'):
         version_info = getattr(package, version_attr, None)
         try:
@@ -105,8 +104,11 @@ def check_requirements():
         if package_name == 'cython':
             package_name = 'Cython'
         dep_error = False
+        if package_name.lower() == 'pillow':
+            package_name = 'PIL.Image'
         try:
-            package = __import__(package_name)
+            package = __import__(package_name,
+                fromlist=[package_name.split('.')[-1]])
         except ImportError:
             dep_error = True
         else:
