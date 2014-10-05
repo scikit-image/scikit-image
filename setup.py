@@ -117,9 +117,8 @@ def check_requirements():
                 dep_error = True
 
         if dep_error:
-            print('***********', package_version)
             raise ImportError('You need `%s` version %d.%d or later.' \
-                              % ((package_name, ) + min_version))
+                              % ((package_name, ) + min_version[:2]))
 
 
 if __name__ == "__main__":
