@@ -29,7 +29,12 @@ def imread(fname, dtype=None):
 
 
     """
-    if fname.lower().endswith(('tif', 'tiff')) and dtype is None:
+    if hasattr(fname, 'name'):
+        name = fname.name.lower()
+    else:
+        name = fname.lower()
+
+    if name.endswith(('.tiff', '.tif')) and dtype is None:
         return tif_imread(fname)
 
     im = Image.open(fname)
@@ -104,18 +109,9 @@ def ndarray_to_pil(arr, format_str=None):
     Refer to ``imsave``.
 
     """
-    arr = np.asarray(arr).squeeze()
-
-    if arr.ndim not in (2, 3):
-        raise ValueError("Invalid shape for image array: %s" % arr.shape)
-
-    if arr.ndim == 3:
-        if arr.shape[2] not in (3, 4):
-            raise ValueError("Invalid number of channels in image array.")
-
     if arr.ndim == 3:
         arr = img_as_ubyte(arr)
-        mode_base = mode = {3: 'RGB', 4: 'RGBA'}[arr.shape[2]]
+        mode = {3: 'RGB', 4: 'RGBA'}[arr.shape[2]]
 
     elif arr.dtype.kind == 'f':
         arr = img_as_uint(arr)
@@ -137,8 +133,16 @@ def ndarray_to_pil(arr, format_str=None):
         mode = 'I'
         mode_base = 'I'
 
-    im = Image.new(mode_base, arr.T.shape)
-    im.fromstring(arr.tostring(), 'raw', mode)
+    if arr.ndim == 2:
+        im = Image.new(mode_base, arr.T.shape)
+        im.fromstring(arr.tostring(), 'raw', mode)
+    else:
+            try:
+                im = Image.frombytes(mode, (arr.shape[1], arr.shape[0]),
+                                      arr.tostring())
+            except AttributeError:
+                im = Image.fromstring(mode, (arr.shape[1], arr.shape[0]),
+                                       arr.tostring())
     return im
 
 
@@ -169,8 +173,25 @@ def imsave(fname, arr, format_str=None):
     if not isinstance(fname, string_types) and format_str is None:
         format_str = "PNG"
 
-    if fname.lower().endswith(('.tiff', '.tif')):
-        tif_imsave(fname)
+    if arr.ndim not in (2, 3):
+        raise ValueError("Invalid shape for image array: %s" % arr.shape)
+
+    if arr.ndim == 3:
+        if arr.shape[2] not in (3, 4):
+            raise ValueError("Invalid number of channels in image array.")
+
+    arr = np.asanyarray(arr).squeeze()
+
+    if arr.dtype.kind == 'b':
+        arr = arr.astype(np.uint8)
+
+    if hasattr(fname, 'name'):
+        name = fname.name.lower()
+    else:
+        name = fname.lower()
+
+    if name.endswith(('.tiff', '.tif')):
+        tif_imsave(fname, arr)
 
     else:
         img = ndarray_to_pil(arr, format_str=None)

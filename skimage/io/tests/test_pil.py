@@ -8,6 +8,7 @@ from tempfile import NamedTemporaryFile
 from skimage import data_dir
 from skimage.io import (imread, imsave, use_plugin, reset_plugins,
                         Image as ioImage)
+from skimage.io.test.utils import ubyte_check, full_range_check
 
 from six import BytesIO
 
@@ -172,6 +173,18 @@ def test_imexport_imimport():
     pil_image = ndarray_to_pil(image)
     out = pil_to_ndarray(pil_image)
     assert out.shape == shape
+
+
+@skip(not PIL_available)
+def test_all_color(self):
+    ubyte_check('pil')
+    ubyte_check('pil', 'bmp')
+
+
+@skip(not PIL_available)
+def test_all_mono(self):
+    full_range_check('pil')
+    full_range_check('pil', 'tiff')
 
 
 if __name__ == "__main__":
