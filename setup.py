@@ -75,9 +75,9 @@ version='%s'
 
 
 def get_package_version(package):
-    for version_attr in ('version', 'VERSION', '__version__'):
+    for version_attr in ('__version__', 'VERSION', 'version'):
         version_info = getattr(package, version_attr, None)
-        if version_info:
+        if version_info and str(version_attr) == version_attr:
             return str(version_info)
 
 
@@ -98,6 +98,9 @@ def check_requirements():
             dep_error = True
         else:
             package_version = get_package_version(package)
+            print(repr(package_version))
+            print(repr(min_version))
+
             if LooseVersion(min_version) > LooseVersion(package_version):
                 dep_error = True
         if dep_error:
