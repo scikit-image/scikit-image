@@ -87,7 +87,7 @@ script:
         rm ~/miniconda/envs/test/lib/libm.*;
         sudo apt-get install libtiff4-dev libwebp-dev xcftools;
         travis_retry pip install imread;
-        travis_retry pip install pillow;
+        conda install pyqt;
       fi
     - sudo apt-get install libfreeimage3
     # TODO: update when SimpleITK become available on py34 or hopefully pip
@@ -98,7 +98,7 @@ script:
     - if [[ $ENV == python=2.* ]]; then
         travis_retry pip install pyamg;
       fi
-    - travis_retry pip install  --no-deps astropy
+    - travis_retry pip install --no-deps astropy
 
     # Matplotlib settings - must be updated after PyQt is installed
     - export MPL_DIR=$HOME/.config/matplotlib
