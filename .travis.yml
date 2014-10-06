@@ -58,12 +58,6 @@ before_install:
 install:
     - tools/header.py "Dependency versions"
     - tools/build_versions.py
-    # Matplotlib settings
-    - export MPL_DIR=$HOME/.config/matplotlib
-    - mkdir -p $MPL_DIR
-    - touch $MPL_DIR/matplotlibrc
-    - "echo 'backend : Agg' > $MPL_DIR/matplotlibrc"
-    - "echo 'backend.qt4 : PyQt4' >> $MPL_DIR/matplotlibrc"
     - export PYTHONWARNINGS=all
     - python setup.py build_ext --inplace
 
@@ -103,12 +97,19 @@ script:
     - travis_retry pip install pyamg
     - travis_retry pip install  --no-deps astropy
 
+    # Matplotlib settings - must be updated after PyQt is installed
+    - export MPL_DIR=$HOME/.config/matplotlib
+    - mkdir -p $MPL_DIR
+    - touch $MPL_DIR/matplotlibrc
+    - "echo 'backend : Agg' > $MPL_DIR/matplotlibrc"
+    - "echo 'backend.qt4 : PyQt4' >> $MPL_DIR/matplotlibrc"
+
     - echo -e $SPACER
 
     # Run all doc examples
     - export PYTHONPATH=$(pwd):$PYTHONPATH
-    # for f in doc/examples/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
-    # for f in doc/examples/applications/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
+    - for f in doc/examples/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
+    - for f in doc/examples/applications/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
 
     - echo -e $SPACER
 
