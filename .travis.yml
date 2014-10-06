@@ -100,14 +100,6 @@ script:
       fi
     - travis_retry pip install --no-deps astropy
 
-    # Reinstall matplotlib with pyqt support
-    - pip uninstall matplotlib
-    - if [[ $ENV != python=2.6* ]]; then
-            travis_retry pip install matplotlib --no-index --find-links=http://wheels.scikit-image.org/;
-      else
-         pip install matplotlib==1.1.0;
-      fi
-
     # Matplotlib settings - must be updated after PyQt is installed
     - export MPL_DIR=$HOME/.config/matplotlib
     - mkdir -p $MPL_DIR
