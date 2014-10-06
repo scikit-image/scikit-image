@@ -98,8 +98,6 @@ def check_requirements():
             dep_error = True
         else:
             package_version = get_package_version(package)
-            print(repr(package_version))
-            print(repr(min_version))
 
             if LooseVersion(min_version) > LooseVersion(package_version):
                 dep_error = True
