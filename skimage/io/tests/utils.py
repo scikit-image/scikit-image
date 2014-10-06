@@ -29,7 +29,7 @@ def ubyte_check(plugin, fmt='png'):
 
     img2 = img > 128
     r2 = roundtrip(img2, plugin, fmt)
-    testing.assert_allclose(img2, img_as_bool(r2))
+    testing.assert_allclose(img2.astype(np.uint8), r2)
 
     img3 = img_as_float(img)
     r3 = roundtrip(img3, plugin, fmt)

@@ -14,7 +14,7 @@ except ImportError:
 from skimage.util import img_as_ubyte, img_as_uint, img_as_int
 
 from six import string_types
-from tifffile import imread as tif_imread, imsave as tif_imsave
+from .tifffile import imread as tif_imread, imsave as tif_imsave
 
 
 def imread(fname, dtype=None):
@@ -29,13 +29,9 @@ def imread(fname, dtype=None):
 
 
     """
-    if hasattr(fname, 'name'):
-        name = fname.name.lower()
-    else:
-        name = fname.lower()
-
-    if name.endswith(('.tiff', '.tif')) and dtype is None:
-        return tif_imread(fname)
+    if hasattr(fname, 'lower') and dtype is None:
+        if fname.lower().endswith(('.tiff', '.tif')):
+            return tif_imread(fname)
 
     im = Image.open(fname)
     try:
@@ -185,12 +181,15 @@ def imsave(fname, arr, format_str=None):
     if arr.dtype.kind == 'b':
         arr = arr.astype(np.uint8)
 
-    if hasattr(fname, 'name'):
-        name = fname.name.lower()
-    else:
-        name = fname.lower()
+    use_tif = False
+    if hasattr(fname, 'lower'):
+        if fname.lower().endswith(('.tiff', '.tif')):
+            use_tif = True
+    if not format_str is None:
+        if format_str.lower() in ['tiff', 'tif']:
+            use_tif = True
 
-    if name.endswith(('.tiff', '.tif')):
+    if use_tif:
         tif_imsave(fname, arr)
 
     else:

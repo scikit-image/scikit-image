@@ -157,6 +157,9 @@ Library:
     Extension: skimage.graph._ncut_cy
         Sources:
             skimage/graph/_ncut_cy.pyx
+    Extension: skimage.io._plugins._tifffile
+        Sources:
+            skimage/io/_plugins/tifffile.c
 
 Executable: skivi
     Module: skimage.scripts.skivi
