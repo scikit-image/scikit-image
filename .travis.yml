@@ -23,8 +23,10 @@ before_install:
     - travis_retry pip install wheel flake8 coveralls nose
 
     # on Python 2.7, use the system versions of numpy, scipy, and matplotlib
+    # and the minimum version of the rest of the requirements
     -  if [[  $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
             travis_retry sudo apt-get install python-scipy python-matplotlib;
+            pip install cython==0.19.2 networkx==1.6.2 six==1.3;
        fi
 
     - travis_retry pip install  -r requirements.txt $WHEELHOUSE;
@@ -48,13 +50,13 @@ script:
     # Install Qt and then update the Matplotlib settings
     - if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
         sudo apt-get install -q python-qt4;
-        export QT_API=PyQt4;
+        export SCI_QT_API=PyQt4;
 
       else
          sudo apt-get install -q libqt4-dev;
          travis_retry pip install PySide $WHEELHOUSE;
          python ~/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/pyside_postinstall.py -install;
-         export QT_API=Pyside;
+         export SCI_QT_API=Pyside;
       fi
 
     # Matplotlib settings - must be after we install Pyside
@@ -62,7 +64,7 @@ script:
     - mkdir -p $MPL_DIR
     - touch $MPL_DIR/matplotlibrc
     - "echo 'backend : Agg' > $MPL_DIR/matplotlibrc"
-    - "echo 'backend.qt4 : $(QT_API)' >> $MPL_DIR/matplotlibrc"
+    - "echo 'backend.qt4 : $(SCI_QT_API)' >> $MPL_DIR/matplotlibrc"
 
     # - imread does NOT support py3.2
     - if [[  $TRAVIS_PYTHON_VERSION != 3.2 ]]; then
@@ -77,7 +79,7 @@ script:
 
       - travis_retry pip install --no-deps astropy
 
-      - if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then
+    - if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then
          travis_retry pip install pyamg;
        fi
 
