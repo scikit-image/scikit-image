@@ -37,8 +37,9 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
 
     Notes
     -----
-    The lower algorithm complexity makes the `skimage.filter.rank.minimum`
-    more efficient for larger images and structuring elements.
+    For `uint8` and `uint16` data, the lower algorithm complexity makes the
+    `skimage.filter.rank.minimum` function more efficient for larger images
+    and structuring elements.
 
     Examples
     --------
@@ -97,8 +98,9 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
 
     Notes
     -----
-    The lower algorithm complexity makes the `skimage.filter.rank.maximum`
-    more efficient for larger images and structuring elements.
+    For `uint8` and `uint16` data, the lower algorithm complexity makes the
+    `skimage.filter.rank.maximum` function more efficient for larger images
+    and structuring elements.
 
     Examples
     --------
