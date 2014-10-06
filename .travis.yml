@@ -94,7 +94,10 @@ script:
     - if [[ $ENV != python=3.4* ]]; then
         travis_retry easy_install SimpleITK;
       fi
-    - travis_retry pip install pyamg
+    # PyAMG is only available on Py2.6 and Py2.7
+    - if [[ $ENV == python=2.* ]]; then
+        travis_retry pip install pyamg;
+      fi
     - travis_retry pip install  --no-deps astropy
 
     # Matplotlib settings - must be updated after PyQt is installed
