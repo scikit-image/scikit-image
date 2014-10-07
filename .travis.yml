@@ -69,7 +69,7 @@ script:
 
     # - imread does NOT support py3.2
     - if [[  $TRAVIS_PYTHON_VERSION != 3.2 ]]; then
-        sudo apt-get install -q libtiff4-dev libwebp-dev xcftools;
+        sudo apt-get install -q libtiff4-dev libwebp-dev libpng12-dev xcftools;
         travis_retry pip install imread;
       fi
 
