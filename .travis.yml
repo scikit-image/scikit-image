@@ -78,7 +78,8 @@ script:
         travis_retry easy_install SimpleITK;
       fi
 
-    - travis_retry pip install --no-deps astropy
+    - travis_retry sudo apt-get install libfreeimage3
+    - travis_retry pip install astropy
 
     - if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then
          travis_retry pip install pyamg;
