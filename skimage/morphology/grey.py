@@ -8,6 +8,7 @@ from . import cmorph
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
            'black_tophat']
 
+
 @default_fallback
 def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
     """Return greyscale morphological erosion of an image.
@@ -37,9 +38,9 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
 
     Notes
     -----
-    For `uint8` and `uint16` data, the lower algorithm complexity makes the
-    `skimage.filter.rank.minimum` function more efficient for larger images
-    and structuring elements.
+    For `uint8` (and `uint16` up to a certain bit-depth) data, the lower
+    algorithm complexity makes the `skimage.filter.rank.minimum` function more
+    efficient for larger images and structuring elements.
 
     Examples
     --------
@@ -98,9 +99,9 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
 
     Notes
     -----
-    For `uint8` and `uint16` data, the lower algorithm complexity makes the
-    `skimage.filter.rank.maximum` function more efficient for larger images
-    and structuring elements.
+    For `uint8` (and `uint16` up to a certain bit-depth) data, the lower
+    algorithm complexity makes the `skimage.filter.rank.minimum` function more
+    efficient for larger images and structuring elements.
 
     Examples
     --------
