@@ -115,7 +115,7 @@ def disk(radius, dtype=np.uint8):
     """
     L = np.arange(-radius, radius + 1)
     X, Y = np.meshgrid(L, L)
-    return np.array((X ** 2 + Y ** 2) <= radius ** 2, dtype=np.uint8)
+    return np.array((X ** 2 + Y ** 2) <= radius ** 2, dtype=dtype)
 
 
 def cube(width, dtype=np.uint8):
