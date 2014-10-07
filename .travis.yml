@@ -64,8 +64,8 @@ script:
     - export MPL_DIR=$HOME/.config/matplotlib
     - mkdir -p $MPL_DIR
     - touch $MPL_DIR/matplotlibrc
-    - "echo 'backend : Agg' > $MPL_DIR/matplotlibrc"
-    - "echo 'backend.qt4 : $SCI_QT_API' >> $MPL_DIR/matplotlibrc"
+    - echo "backend : Agg" > $MPL_DIR/matplotlibrc
+    - echo "backend.qt4 : $SCI_QT_API" >> $MPL_DIR/matplotlibrc
 
     # - imread does NOT support py3.2
     - if [[  $TRAVIS_PYTHON_VERSION != 3.2 ]]; then
