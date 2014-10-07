@@ -1,4 +1,3 @@
-from numpy.testing import assert_warns
 from warnings import catch_warnings, simplefilter
 
 def test_import_filter():

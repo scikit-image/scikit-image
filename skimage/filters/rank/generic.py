@@ -287,7 +287,7 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Notes
     -----
-    The lower algorithm complexity makes the `skimage.filters.rank.maximum`
+    The lower algorithm complexity makes `skimage.filters.rank.maximum`
     more efficient for larger images and structuring elements.
 
     Examples
@@ -452,7 +452,7 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Notes
     -----
-    The lower algorithm complexity makes the `skimage.filters.rank.minimum` more
+    The lower algorithm complexity makes `skimage.filters.rank.minimum` more
     efficient for larger images and structuring elements.
 
     Examples
