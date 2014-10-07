@@ -1,11 +1,12 @@
 """Testing utilities."""
 
 
+import os
 import re
 from tempfile import NamedTemporaryFile
 
 from skimage import (
-    data, io, img_as_uint, img_as_bool, img_as_float, img_as_int, img_as_ubyte)
+    data, io, img_as_uint, img_as_float, img_as_int, img_as_ubyte)
 from numpy import testing
 import numpy as np
 
@@ -91,6 +92,10 @@ def roundtrip(img, plugin, suffix):
     temp_file.close()
     fname = temp_file.name
     io.imsave(fname, img, plugin=plugin)
+    try:
+        os.remove(fname)
+    except Exception:
+        pass
     return io.imread(fname, plugin=plugin)
 
 
