@@ -16,5 +16,10 @@ Travis Notes:
 ```
 
 - "If" blocks cannot contain comments
+- All travis commands are run with `eval` and quotes are taken as literal characters
+  unless you wrap the whole line in quotes:
+`echo "hello : world"` is interpreted as `echo \"hello : world\"`
+`"echo 'hello : world'"` is interpreted as `echo 'hello : world'`
+`"echo 'hello : '$(MYVAR)'world'"` is interpreted as `echo 'hello : $(MYVAR)world'`
 - Use `travis_retry` before a command to have it try several times before failing
   (useful for installing from third party sources)
