@@ -85,10 +85,10 @@ def diamond(radius, dtype=np.uint8):
         The structuring element where elements of the neighborhood
         are 1 and 0 otherwise.
     """
-    half = radius
-    (I, J) = np.meshgrid(range(0, radius * 2 + 1), range(0, radius * 2 + 1))
-    s = np.abs(I - half) + np.abs(J - half)
-    return np.array(s <= radius, dtype=dtype)
+    L = np.arange(0, radius * 2 + 1)
+    I, J = np.meshgrid(L, L)
+    return np.array(np.abs(I - radius) + np.abs(J - radius) <= radius,
+                    dtype=dtype)
 
 
 def disk(radius, dtype=np.uint8):
@@ -113,11 +113,9 @@ def disk(radius, dtype=np.uint8):
         The structuring element where elements of the neighborhood
         are 1 and 0 otherwise.
     """
-    L = np.linspace(-radius, radius, 2 * radius + 1)
-    (X, Y) = np.meshgrid(L, L)
-    s = X**2
-    s += Y**2
-    return np.array(s <= radius * radius, dtype=dtype)
+    L = np.arange(-radius, radius + 1)
+    X, Y = np.meshgrid(L, L)
+    return np.array((X ** 2 + Y ** 2) <= radius ** 2, dtype=dtype)
 
 
 def cube(width, dtype=np.uint8):
