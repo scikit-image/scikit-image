@@ -1,6 +1,6 @@
 
 import os
-from skimage import data, img_as_float, io
+from skimage import data, img_as_float, io, img_as_uint
 from skimage.viewer import ImageViewer, viewer_available
 from skimage.viewer.widgets import (
     Slider, OKCancelButtons, SaveButtons, ComboBox, CheckBox, Text)
@@ -27,10 +27,10 @@ def test_check_box():
     cb.val = False
     assert_equal(cb.val, False)
     cb.val = 1
-    assert_equal(cb.val, True) 
+    assert_equal(cb.val, True)
     cb.val = 0
     assert_equal(cb.val, False)
-    
+
 
 @skipif(not viewer_available)
 def test_combo_box():
@@ -101,8 +101,8 @@ def test_save_buttons():
     sv.save_to_stack()
     sv.save_to_file(filename)
 
-    img = img_as_float(data.imread(filename))
-    assert_almost_equal(img, viewer.image)
+    img = data.imread(filename)
+    assert_almost_equal(img, img_as_uint(viewer.image))
 
     img = io.pop()
     assert_almost_equal(img, viewer.image)

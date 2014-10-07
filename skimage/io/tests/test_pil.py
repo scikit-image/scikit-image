@@ -8,7 +8,7 @@ from tempfile import NamedTemporaryFile
 from skimage import data_dir
 from skimage.io import (imread, imsave, use_plugin, reset_plugins,
                         Image as ioImage)
-from skimage.io.tests.utils import ubyte_check, full_range_check
+from skimage._shared.testing import ubyte_check, full_range_check
 
 from six import BytesIO
 
@@ -94,7 +94,7 @@ def test_imread_truncated_jpg():
 def test_imread_uint16_big_endian():
     expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
     img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16B.tif'))
-    assert img.dtype == np.dtype('>u2')
+    assert img.dtype == np.uint16
     assert_array_almost_equal(img, expected)
 
 
@@ -133,7 +133,6 @@ class TestSave:
          self.verify_imsave_roundtrip(self.roundtrip_pil_image)
 
 
-@skipif(not PIL_available)
 def test_imsave_filelike():
     shape = (2, 2)
     image = np.zeros(shape)
@@ -149,7 +148,6 @@ def test_imsave_filelike():
     assert_allclose(out, image)
 
 
-@skipif(not PIL_available)
 def test_imexport_imimport():
     shape = (2, 2)
     image = np.zeros(shape)
@@ -158,13 +156,11 @@ def test_imexport_imimport():
     assert out.shape == shape
 
 
-@skipif(not PIL_available)
 def test_all_color():
     ubyte_check('pil')
     ubyte_check('pil', 'bmp')
 
 
-@skipif(not PIL_available)
 def test_all_mono():
     full_range_check('pil')
     full_range_check('pil', 'tiff')
@@ -175,8 +171,8 @@ class TestSaveTIF:
         f = NamedTemporaryFile(suffix='.tif')
         fname = f.name
         f.close()
-        sio.imsave(fname, x)
-        y = sio.imread(fname)
+        imsave(fname, x)
+        y = imread(fname)
         assert_array_equal(x, y)
 
     def test_imsave_roundtrip(self):
