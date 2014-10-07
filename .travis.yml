@@ -3,6 +3,8 @@
 # After changing this file, check it on:
 #   http://lint.travis-ci.org/
 
+# See docs/travis_notes.txt for some guidelines
+
 language: python
 
 python:
