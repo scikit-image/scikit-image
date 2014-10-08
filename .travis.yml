@@ -26,11 +26,11 @@ before_install:
 
     # on Python 2.7, use the system versions of numpy, scipy, and matplotlib
     # and the minimum version of cython and networkx
-    -  if [[  $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
+    -   if [[  $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
             travis_retry sudo apt-get install python-scipy python-matplotlib;
             pip install https://github.com/cython/cython/archive/0.19.2.tar.gz;
             pip install https://github.com/networkx/networkx/archive/networkx-1.8.tar.gz;
-       fi
+        fi
 
     - travis_retry pip install  -r requirements.txt $WHEELHOUSE;
     - python check_bento_build.py
@@ -51,16 +51,16 @@ script:
     - tools/header.py "Install optional dependencies"
 
     # Install Qt and then update the Matplotlib settings
-    - if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
-        sudo apt-get install -q python-qt4;
-        export SCI_QT_API=PyQt4;
+    -   if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
+            sudo apt-get install -q python-qt4;
+            export SCI_QT_API=PyQt4;
 
-      else
-         sudo apt-get install -q libqt4-dev;
-         travis_retry pip install PySide $WHEELHOUSE;
-         python ~/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/pyside_postinstall.py -install;
-         export SCI_QT_API=Pyside;
-      fi
+        else
+            sudo apt-get install -q libqt4-dev;
+             travis_retry pip install PySide $WHEELHOUSE;
+             python ~/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/pyside_postinstall.py -install;
+             export SCI_QT_API=Pyside;
+        fi
 
     # Matplotlib settings - must be after we install Pyside
     - export MPL_DIR=$HOME/.config/matplotlib
@@ -70,22 +70,22 @@ script:
     - "echo 'backend.qt4 : '$SCI_QT_API >> $MPL_DIR/matplotlibrc"
 
     # - imread does NOT support py3.2
-    - if [[  $TRAVIS_PYTHON_VERSION != 3.2 ]]; then
-        sudo apt-get install -q libtiff4-dev libwebp-dev libpng12-dev xcftools;
-        travis_retry pip install imread;
-      fi
+    -   if [[  $TRAVIS_PYTHON_VERSION != 3.2 ]]; then
+            sudo apt-get install -q libtiff4-dev libwebp-dev libpng12-dev xcftools;
+            travis_retry pip install imread;
+        fi
 
     # TODO: update when SimpleITK become available on py34 or hopefully pip
-    - if [[  $TRAVIS_PYTHON_VERSION != 3.4 ]]; then
-        travis_retry easy_install SimpleITK;
-      fi
+    -   if [[  $TRAVIS_PYTHON_VERSION != 3.4 ]]; then
+            travis_retry easy_install SimpleITK;
+         fi
 
     - travis_retry sudo apt-get install libfreeimage3
     - travis_retry pip install astropy
 
-    - if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then
-         travis_retry pip install pyamg;
-       fi
+    -   if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then
+            travis_retry pip install pyamg;
+        fi
 
     - tools/header.py "Run doc examples"
     - export PYTHONPATH=$(pwd):$PYTHONPATH
@@ -95,11 +95,11 @@ script:
     - tools/header.py "Run tests with all dependencies"
     # run tests again with optional dependencies to get more coverage
     # measure coverage on py3.3
-    - if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then
-         nosetests --exe -v --with-doctest --with-cov --cover-package skimage;
-      else
-         nosetests --exe -v --with-doctest skimage;
-      fi
+    -   if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then
+            nosetests --exe -v --with-doctest --with-cov --cover-package skimage;
+        else
+            nosetests --exe -v --with-doctest skimage;
+        fi
 
 after_success:
     - coveralls;
