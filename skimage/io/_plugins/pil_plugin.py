@@ -11,7 +11,7 @@ except ImportError:
                       "http://pypi.python.org/pypi/PIL/) "
                       "for further instructions.")
 
-from skimage.util import img_as_ubyte, img_as_uint, img_as_int
+from skimage.util import img_as_ubyte, img_as_uint
 
 from six import string_types
 from .tifffile import imread as tif_imread, imsave as tif_imsave
