@@ -8,7 +8,7 @@ from tempfile import NamedTemporaryFile
 from skimage import data_dir
 from skimage.io import (imread, imsave, use_plugin, reset_plugins,
                         Image as ioImage)
-from skimage._shared.testing import ubyte_check, full_range_check
+from skimage._shared.testing import mono_check, color_check
 
 from six import BytesIO
 
@@ -157,13 +157,13 @@ def test_imexport_imimport():
 
 
 def test_all_color():
-    ubyte_check('pil')
-    ubyte_check('pil', 'bmp')
+    color_check('pil')
+    color_check('pil', 'bmp')
 
 
 def test_all_mono():
-    full_range_check('pil')
-    full_range_check('pil', 'tiff')
+    mono_check('pil')
+    mono_check('pil', 'tiff')
 
 
 class TestSaveTIF:

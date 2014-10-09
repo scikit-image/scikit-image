@@ -100,8 +100,8 @@ def roundtrip(img, plugin, suffix):
     return new
 
 
-def ubyte_check(plugin, fmt='png'):
-    """Check roundtrip behavior for images that can only be saved as uint8
+def color_check(plugin, fmt='png'):
+    """Check roundtrip behavior for color images.
 
     All major input types should be handled as ubytes and read
     back correctly.
@@ -132,11 +132,10 @@ def ubyte_check(plugin, fmt='png'):
     testing.assert_allclose(r5, img)
 
 
-def full_range_check(plugin, fmt='png'):
+def mono_check(plugin, fmt='png'):
     """Check the roundtrip behavior for images that support most types.
 
-    All major input types should be handled, except bool is treated
-    as ubyte and float can treated as uint16 or float.
+    All major input types should be handled.
     """
 
     img = img_as_ubyte(data.moon())
@@ -169,7 +168,7 @@ def full_range_check(plugin, fmt='png'):
 
 
 if __name__ == '__main__':
-    ubyte_check('pil')
-    full_range_check('pil')
-    ubyte_check('pil', 'bmp')
-    full_range_check('pil', 'tiff')
+    color_check('pil')
+    mono_check('pil')
+    mono_check('pil', 'bmp')
+    mono_check('pil', 'tiff')
