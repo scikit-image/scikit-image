@@ -27,7 +27,10 @@ def imread(fname, dtype=None):
     dtype : numpy dtype object or string specifier
        Specifies data type of array elements.
 
-
+    Notes
+    -----
+    Tiff files are handled by Christophe Golhke's tifffile.py, and support many
+    advanced image types including multi-page and floating point.
     """
     if hasattr(fname, 'lower') and dtype is None:
         if fname.lower().endswith(('.tiff', '.tif')):
@@ -109,36 +112,43 @@ def ndarray_to_pil(arr, format_str=None):
         arr = img_as_ubyte(arr)
         mode = {3: 'RGB', 4: 'RGBA'}[arr.shape[2]]
 
-    elif arr.dtype.kind == 'f':
-        arr = img_as_uint(arr)
-        mode = 'I;16'
-        mode_base = 'I'
+    elif format_str.lower() == 'png':
+        if arr.dtype.kind == 'f':
+            arr = img_as_uint(arr)
+            mode = 'I;16'
+            mode_base = 'I'
 
-    elif arr.max() < 256 and arr.min() >= 0:
-        arr = arr.astype(np.uint8)
-        mode = 'L'
-        mode_base = 'L'
+        elif arr.max() < 256 and arr.min() >= 0:
+            arr = arr.astype(np.uint8)
+            mode = 'L'
+            mode_base = 'L'
 
-    elif arr.max() < 2**16 and arr.min() >= 0:
-        arr = arr.astype(np.uint16)
-        mode = 'I;16'
-        mode_base = 'I'
+        elif arr.min() >= 0:
+            arr = img_as_uint(arr)
+            mode = 'I;16'
+            mode_base = 'I'
+
+        else:
+            arr = img_as_int(arr)
+            mode = 'I'
+            mode_base = 'I'
 
     else:
-        arr = img_as_int(arr)
-        mode = 'I'
-        mode_base = 'I'
+        arr = img_as_ubyte(arr)
+        mode = 'L'
+        mode_base = 'L'
 
     if arr.ndim == 2:
         im = Image.new(mode_base, arr.T.shape)
         im.fromstring(arr.tostring(), 'raw', mode)
+
     else:
-            try:
-                im = Image.frombytes(mode, (arr.shape[1], arr.shape[0]),
-                                      arr.tostring())
-            except AttributeError:
-                im = Image.fromstring(mode, (arr.shape[1], arr.shape[0]),
-                                       arr.tostring())
+        try:
+            im = Image.frombytes(mode, (arr.shape[1], arr.shape[0]),
+                                 arr.tostring())
+        except AttributeError:
+            im = Image.fromstring(mode, (arr.shape[1], arr.shape[0]),
+                                  arr.tostring())
     return im
 
 
@@ -159,27 +169,26 @@ def imsave(fname, arr, format_str=None):
 
     Notes
     -----
-    Currently, only 8-bit precision is supported for PNG and JPEG.
-    Images that are not uint8 type will be converted using
-    `skimage.img_as_ubyte`.
-    2D TIFF Files also support unit16 and float32 type images.
+    Tiff files are handled by Christophe Golhke's tifffile.py, and support many
+    advanced image types including multi-page and floating point.
+
+    All other image formats use the Python Imaging Libary.
+    See http://pillow.readthedocs.org/en/latest/handbook/image-file-formats.html
+    for a list of other supported formats. Integer type images are only supported for PNGs.
+    All images besides single channel PNGs are converted using `img_as_uint8`.
+    Single Channel PNGS have the following behavior:
+    - Boolean types -> convert to uint8
+    - Integer values in {0, 256} -> convert to uin8
+    - Integer values > 0 -> convert to uint16
+    - Integer values < 0 -> convert to int16
+    - Floating point images -> convert to uint16
 
     """
     # default to PNG if file-like object
     if not isinstance(fname, string_types) and format_str is None:
         format_str = "PNG"
 
-    if arr.ndim not in (2, 3):
-        raise ValueError("Invalid shape for image array: %s" % arr.shape)
-
-    if arr.ndim == 3:
-        if arr.shape[2] not in (3, 4):
-            raise ValueError("Invalid number of channels in image array.")
-
     arr = np.asanyarray(arr).squeeze()
-
-    if arr.dtype.kind == 'b':
-        arr = arr.astype(np.uint8)
 
     use_tif = False
     if hasattr(fname, 'lower'):
@@ -191,10 +200,20 @@ def imsave(fname, arr, format_str=None):
 
     if use_tif:
         tif_imsave(fname, arr)
+        return
 
-    else:
-        img = ndarray_to_pil(arr, format_str=None)
-        img.save(fname, format=format_str)
+    if arr.ndim not in (2, 3):
+        raise ValueError("Invalid shape for image array: %s" % arr.shape)
+
+    if arr.ndim == 3:
+        if arr.shape[2] not in (3, 4):
+            raise ValueError("Invalid number of channels in image array.")
+
+    if arr.dtype.kind == 'b':
+        arr = arr.astype(np.uint8)
+
+    img = ndarray_to_pil(arr, format_str=None)
+    img.save(fname, format=format_str)
 
 
 def imshow(arr):
