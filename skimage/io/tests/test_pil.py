@@ -1,7 +1,6 @@
 import os.path
 import numpy as np
-from numpy.testing import *
-from numpy.testing.decorators import skipif
+import numpy.testing as npt
 
 from tempfile import NamedTemporaryFile
 
@@ -13,7 +12,8 @@ from skimage._shared.testing import mono_check, color_check
 from six import BytesIO
 
 from PIL import Image
-from skimage.io._plugins.pil_plugin import pil_to_ndarray, ndarray_to_pil, _palette_is_grayscale
+from skimage.io._plugins.pil_plugin import (
+    pil_to_ndarray, ndarray_to_pil, _palette_is_grayscale)
 use_plugin('pil')
 
 np.random.seed(0)
@@ -63,14 +63,14 @@ def test_bilevel():
     expected[::2] = 255
 
     img = imread(os.path.join(data_dir, 'checker_bilevel.png'))
-    assert_array_equal(img, expected)
+    npt.assert_array_equal(img, expected)
 
 
 def test_imread_uint16():
     expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
     img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16.tif'))
     assert np.issubdtype(img.dtype, np.uint16)
-    assert_array_almost_equal(img, expected)
+    npt.assert_array_almost_equal(img, expected)
 
 
 def test_repr_png():
@@ -87,15 +87,15 @@ def test_repr_png():
 
 
 def test_imread_truncated_jpg():
-    assert_raises((IOError, ValueError), imread,
-                  os.path.join(data_dir, 'truncated.jpg'))
+    npt.assert_raises((IOError, ValueError), imread,
+                      os.path.join(data_dir, 'truncated.jpg'))
 
 
 def test_imread_uint16_big_endian():
     expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
     img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16B.tif'))
     assert img.dtype == np.uint16
-    assert_array_almost_equal(img, expected)
+    npt.assert_array_almost_equal(img, expected)
 
 
 class TestSave:
@@ -113,7 +113,7 @@ class TestSave:
         return y
 
     def verify_roundtrip(self, dtype, x, y, scaling=1):
-        assert_array_almost_equal((x * scaling).astype(np.int32), y)
+        npt.assert_array_almost_equal((x * scaling).astype(np.int32), y)
 
     def verify_imsave_roundtrip(self, roundtrip_function):
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
@@ -121,16 +121,18 @@ class TestSave:
                 x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
                 if np.issubdtype(dtype, float):
-                    yield self.verify_roundtrip, dtype, x, roundtrip_function(x), 255
+                    yield (self.verify_roundtrip, dtype, x,
+                           roundtrip_function(x), 255)
                 else:
                     x = (x * 255).astype(dtype)
-                    yield self.verify_roundtrip, dtype, x, roundtrip_function(x)
+                    yield (self.verify_roundtrip, dtype, x,
+                           roundtrip_function(x))
 
     def test_imsave_roundtrip_file(self):
-         self.verify_imsave_roundtrip(self.roundtrip_file)
+        self.verify_imsave_roundtrip(self.roundtrip_file)
 
     def test_imsave_roundtrip_pil_image(self):
-         self.verify_imsave_roundtrip(self.roundtrip_pil_image)
+        self.verify_imsave_roundtrip(self.roundtrip_pil_image)
 
 
 def test_imsave_filelike():
@@ -145,7 +147,7 @@ def test_imsave_filelike():
     s.seek(0)
     out = imread(s)
     assert out.shape == shape
-    assert_allclose(out, image)
+    npt.assert_allclose(out, image)
 
 
 def test_imexport_imimport():
@@ -173,16 +175,19 @@ class TestSaveTIF:
         f.close()
         imsave(fname, x)
         y = imread(fname)
-        assert_array_equal(x, y)
+        npt.assert_array_equal(x, y)
 
     def test_imsave_roundtrip(self):
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
-            for dtype in (np.uint8, np.uint16, np.float32, np.float64):
-                x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
+            for dtype in (np.uint8, np.uint16, np.int16, np.float32,
+                          np.float64, np.bool):
+                x = np.random.rand(*shape)
 
-                if not np.issubdtype(dtype, float):
-                    x = (x * 255).astype(dtype)
+                if not np.issubdtype(dtype, float) and not dtype == np.bool:
+                    x = (x * np.iinfo(dtype).max).astype(dtype)
+                else:
+                    x = x.astype(dtype)
                 yield self.roundtrip, dtype, x
 
 if __name__ == "__main__":
-    run_module_suite()
+    npt.run_module_suite()
