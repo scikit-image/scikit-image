@@ -180,7 +180,7 @@ def imsave(fname, arr, format_str=None):
     All other image formats use the Python Imaging Libary.
     See PIL docs [2] for a list of other supported formats.
     All images besides single channel PNGs are converted using `img_as_uint8`.
-    Single Channel PNGS have the following behavior:
+    Single Channel PNGs have the following behavior:
     - Integer values in [0, 255] and Boolean types -> img_as_uint8
     - Floating point and other integers -> img_as_uint16
 
