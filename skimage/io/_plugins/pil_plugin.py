@@ -75,6 +75,8 @@ def pil_to_ndarray(im, dtype=None):
     elif im.mode.startswith('I;16'):
         shape = im.size
         dtype = '>u2' if im.mode.endswith('B') else '<u2'
+        if 'S' in im.mode:
+            dtype = dtype.replace('u', 'i')
         im = np.fromstring(im.tostring(), dtype)
         im.shape = shape[::-1]
     elif 'A' in im.mode:
@@ -133,10 +135,7 @@ def ndarray_to_pil(arr, format_str=None):
             mode = mode_base = 'L'
 
         else:
-            if arr.dtype.kind == 'u':
-                arr = img_as_uint(arr)
-            else:
-                arr = img_as_int(arr)
+            arr = img_as_uint(arr)
 
     else:
         arr = img_as_ubyte(arr)
@@ -183,8 +182,7 @@ def imsave(fname, arr, format_str=None):
     All images besides single channel PNGs are converted using `img_as_uint8`.
     Single Channel PNGS have the following behavior:
     - Integer values in [0, 255] and Boolean types -> img_as_uint8
-    - Other unsigned integers and floating point -> img_as_uint16
-    - Other signed integers -> img_as_int16
+    - Floating point and other integers -> img_as_uint16
 
     References
     ----------

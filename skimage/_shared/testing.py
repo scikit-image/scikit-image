@@ -119,8 +119,13 @@ def ubyte_check(plugin, fmt='png'):
     testing.assert_allclose(r3, img)
 
     img4 = img_as_int(img)
-    r4 = roundtrip(img4, plugin, fmt)
-    testing.assert_allclose(r4, img)
+    if fmt.lower() in (('tif', 'tiff')):
+        img4 -= 100
+        r4 = roundtrip(img4, plugin, fmt)
+        testing.assert_allclose(r4, img4)
+    else:
+        r4 = roundtrip(img4, plugin, fmt)
+        testing.assert_allclose(r4, img_as_ubyte(img4))
 
     img5 = img_as_uint(img)
     r5 = roundtrip(img5, plugin, fmt)
@@ -150,8 +155,13 @@ def full_range_check(plugin, fmt='png'):
         testing.assert_allclose(r3, img_as_uint(img))
 
     img4 = img_as_int(img)
-    r4 = roundtrip(img4, plugin, fmt)
-    testing.assert_allclose(r4, img4)
+    if fmt.lower() in (('tif', 'tiff')):
+        img4 -= 100
+        r4 = roundtrip(img4, plugin, fmt)
+        testing.assert_allclose(r4, img4)
+    else:
+        r4 = roundtrip(img4, plugin, fmt)
+        testing.assert_allclose(r4, img_as_uint(img4))
 
     img5 = img_as_uint(img)
     r5 = roundtrip(img5, plugin, fmt)
