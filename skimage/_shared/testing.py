@@ -92,11 +92,12 @@ def roundtrip(img, plugin, suffix):
     temp_file.close()
     fname = temp_file.name
     io.imsave(fname, img, plugin=plugin)
+    new = io.imread(fname, plugin=plugin)
     try:
         os.remove(fname)
     except Exception:
         pass
-    return io.imread(fname, plugin=plugin)
+    return new
 
 
 def ubyte_check(plugin, fmt='png'):
