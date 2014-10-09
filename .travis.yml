@@ -1,51 +1,38 @@
 # vim ft=yaml
 
 # After changing this file, check it on:
-#   http://lint.travis-ci.org/
+#   http://yaml-online-parser.appspot.com/
+
+# See doc/travis_notes.txt for some guidelines
 
 language: python
 
-
-#  Tthe Travis python is set to 3.2 for all builds, since we use the default python for the 3.2 build and the anaconda python otherwise
 python:
+    - 2.6
+    - "2.7_with_system_site_packages"
     - 3.2
+    - 3.3
+    - 3.4
 
 env:
-    - ENV="python=2.6 numpy=1.6 cython=0.19.2"
-    - ENV="python=2.7 numpy cython"
-    - ENV="python=3.2"
-    - ENV="python=3.3 numpy cython"
-    - ENV="python=3.4 numpy cython"
-
-virtualenv:
-    system_site_packages: true
+    WHEELHOUSE="--no-index --find-links=http://wheels.scikit-image.org/"
 
 before_install:
     - export DISPLAY=:99.0
-    - export SPACER="\n\n\n\n\n\n\n\n\n\n*************************\n\n"
     - sh -e /etc/init.d/xvfb start
     - sudo apt-get update
 
-    # Python 3.2 is not supported by Miniconda, so we use the package manager for that run.
-    # NumPy has a bug in python 3 that is only fixed in the latest version,
-    #  hence the below wget of numpy/_import_tools.py from github.
-    - if [[ $ENV == python=3.2 ]]; then
-        sudo apt-get install python3-numpy;
-        wget https://raw.githubusercontent.com/numpy/numpy/master/numpy/_import_tools.py -O /home/travis/virtualenv/python3.2_with_system_site_packages/lib/python3.2/site-packages/numpy/_import_tools.py;
-        sudo apt-get install python3-scipy;
-        travis_retry pip install cython flake8 six;
-      else
-        wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
-        bash miniconda.sh -b -p $HOME/miniconda;
-        export PATH="$HOME/miniconda/bin:$PATH";
-        hash -r;
-        conda config --set always_yes yes;
-        conda update conda;
-        conda info -a;
-        travis_retry conda create -n test $ENV six scipy pip flake8 nose;
-        source activate test;
-      fi
-    - travis_retry pip install coveralls pillow
+    - travis_retry pip install wheel flake8 coveralls nose
+
+    # on Python 2.7, use the system versions of numpy, scipy, and matplotlib
+    # and the minimum version of cython and networkx
+    -   if [[  $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
+            travis_retry sudo apt-get install python-scipy python-matplotlib;
+            pip install https://github.com/cython/cython/archive/0.19.2.tar.gz;
+            pip install https://github.com/networkx/networkx/archive/networkx-1.8.tar.gz;
+        fi
+
+    - travis_retry pip install  -r requirements.txt $WHEELHOUSE;
     - python check_bento_build.py
 
 install:
@@ -55,67 +42,64 @@ install:
     - python setup.py build_ext --inplace
 
 script:
-    # Run all tests with minimum dependencies
+    - tools/header.py "Run all tests with minimum dependencies"
     - nosetests --exe -v skimage
 
-    - echo -e $SPACER
-
-    # Run pep8 and flake tests
+    - tools/header.py "Pep8 and Flake tests"
     - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
 
-    - echo -e $SPACER
+    - tools/header.py "Install optional dependencies"
 
-    # Install optional dependencies to get full test coverage
-    # Notes:
-    # - pyfits and imread do NOT support py3.2
-    # - Use the png headers included in anaconda (from matplotlib install)
-    # TODO: Remove the libm removal when anaconda fixes their libraries
-    #   The solution was suggested here
-    #   https://groups.google.com/a/continuum.io/forum/#!topic/anaconda/-DLG2ZdTkw0
-    - if [[ $ENV == python=3.2 ]]; then
-        travis_retry sudo apt-get install python3-pyqt4;
-        travis_retry pip install matplotlib==1.3.1;
-        travis_retry pip install networkx;
-      else
-        travis_retry conda install matplotlib pyqt networkx;
-        sudo cp ~/miniconda/envs/test/include/png* /usr/include;
-        rm ~/miniconda/envs/test/lib/libm-2.5.so;
-        rm ~/miniconda/envs/test/lib/libm.*;
-        sudo apt-get install libtiff4-dev libwebp-dev xcftools;
-        travis_retry pip install imread;
-        travis_retry pip install pyfits;
-      fi
-    - sudo apt-get install libfreeimage3
-    # TODO: update when SimpleITK become available on py34 or hopefully pip
-    - if [[ $ENV != python=3.4* ]]; then
-        travis_retry easy_install SimpleITK;
-      fi
+    # Install Qt and then update the Matplotlib settings
+    -   if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
+            sudo apt-get install -q python-qt4;
+            export SCI_QT_API=PyQt4;
 
-    # Matplotlib settings
+        else
+            sudo apt-get install -q libqt4-dev;
+             travis_retry pip install PySide $WHEELHOUSE;
+             python ~/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/pyside_postinstall.py -install;
+             export SCI_QT_API=Pyside;
+        fi
+
+    # Matplotlib settings - must be after we install Pyside
     - export MPL_DIR=$HOME/.config/matplotlib
     - mkdir -p $MPL_DIR
     - touch $MPL_DIR/matplotlibrc
     - "echo 'backend : Agg' > $MPL_DIR/matplotlibrc"
-    - "echo 'backend.qt4 : PyQt4' >> $MPL_DIR/matplotlibrc"
+    - "echo 'backend.qt4 : '$SCI_QT_API >> $MPL_DIR/matplotlibrc"
 
-    - echo -e $SPACER
+    # - imread does NOT support py3.2
+    -   if [[  $TRAVIS_PYTHON_VERSION != 3.2 ]]; then
+            sudo apt-get install -q libtiff4-dev libwebp-dev libpng12-dev xcftools;
+            travis_retry pip install imread;
+        fi
 
-    # Run all doc examples
+    # TODO: update when SimpleITK become available on py34 or hopefully pip
+    -   if [[  $TRAVIS_PYTHON_VERSION != 3.4 ]]; then
+            travis_retry easy_install SimpleITK;
+         fi
+
+    - travis_retry sudo apt-get install libfreeimage3
+    - travis_retry pip install astropy
+
+    -   if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then
+            travis_retry pip install pyamg;
+        fi
+
+    - tools/header.py "Run doc examples"
     - export PYTHONPATH=$(pwd):$PYTHONPATH
     - for f in doc/examples/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
     - for f in doc/examples/applications/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
 
-    - echo -e $SPACER
-
+    - tools/header.py "Run tests with all dependencies"
     # run tests again with optional dependencies to get more coverage
     # measure coverage on py3.3
-    - if [[ $ENV == python=3.3* ]]; then
-         nosetests --exe -v --with-doctest --with-cov --cover-package skimage;
-      else
-         nosetests --exe -v --with-doctest skimage;
-      fi
+    -   if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then
+            nosetests --exe -v --with-doctest --with-cov --cover-package skimage;
+        else
+            nosetests --exe -v --with-doctest skimage;
+        fi
 
 after_success:
-    - if [[ $ENV == python=3.3* ]]; then
-          coveralls;
-      fi
+    - coveralls;

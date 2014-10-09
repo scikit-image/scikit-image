@@ -1,0 +1,30 @@
+
+- Use http://yaml-online-parser.appspot.com/ to make sure it is valid yaml.
+  http://lint.travis-ci.org/ is recommended elsewhere but does not give helpful
+  error reports.
+- Make sure all of your "-" lines start on the same column
+- Make sure all of your "if" lines are aligned with the "else" and "fi" lines
+- Recommend using tab stops (but not tab chars) everywhere for alignment
+- "If" blocks must be on one travis statement and have semicolons at the
+  end of each line:
+
+```
+    -   if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then
+            echo "2.7";
+        else
+            echo "Not 2.7";
+        end
+```
+
+- "If" blocks cannot contain comments
+- All travis commands are run with `eval` and quotes are taken as literal
+  characters unless you wrap the whole line in quotes:
+`echo "hello : world"` is interpreted as `echo \"hello : world\"`
+`"echo 'hello : world'"` is interpreted as `echo 'hello : world'`
+`"echo 'hello : '$(MYVAR)'world'"` is interpreted as
+  `echo 'hello : $(MYVAR)world'`
+- Use `travis_retry` before a command to have it try several times before
+failing (useful for installing from third party sources)
+- Feel free to cancel a build rather than waiting for it to go to completion
+  if you have made a change to that branch.
+- A VM with 64bit Ubuntu 12.04 is a huge help.
