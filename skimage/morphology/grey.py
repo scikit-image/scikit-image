@@ -100,7 +100,7 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
     Notes
     -----
     For `uint8` (and `uint16` up to a certain bit-depth) data, the lower
-    algorithm complexity makes the `skimage.filter.rank.minimum` function more
+    algorithm complexity makes the `skimage.filter.rank.maximum` function more
     efficient for larger images and structuring elements.
 
     Examples
