@@ -32,9 +32,9 @@ def imread(fname, dtype=None):
     Tiff files are handled by Christophe Golhke's tifffile.py [1], and support many
     advanced image types including multi-page and floating point.
 
-    All other files are read using the Python Imaging Libary.  
+    All other files are read using the Python Imaging Libary.
     See PIL docs [2] for a list of supported formats.
-    
+
     References
     ----------
     .. [1] http://www.lfd.uci.edu/~gohlke/code/tifffile.py.html
@@ -122,25 +122,21 @@ def ndarray_to_pil(arr, format_str=None):
         mode = {3: 'RGB', 4: 'RGBA'}[arr.shape[2]]
 
     elif format_str in ['png', 'PNG']:
+        mode = 'I;16'
+        mode_base = 'I'
+
         if arr.dtype.kind == 'f':
             arr = img_as_uint(arr)
-            mode = 'I;16'
-            mode_base = 'I'
 
         elif arr.max() < 256 and arr.min() >= 0:
             arr = arr.astype(np.uint8)
-            mode = 'L'
-            mode_base = 'L'
-
-        elif arr.min() >= 0:
-            arr = img_as_uint(arr)
-            mode = 'I;16'
-            mode_base = 'I'
+            mode = mode_base = 'L'
 
         else:
-            arr = img_as_int(arr)
-            mode = 'I'
-            mode_base = 'I'
+            if arr.dtype.kind == 'u':
+                arr = img_as_uint(arr)
+            else:
+                arr = img_as_int(arr)
 
     else:
         arr = img_as_ubyte(arr)
@@ -178,20 +174,17 @@ def imsave(fname, arr, format_str=None):
 
     Notes
     -----
-    Tiff files are handled by Christophe Golhke's tifffile.py [1], and support many
-    advanced image types including multi-page and floating point.
+    Tiff files are handled by Christophe Golhke's tifffile.py [1],
+    and support many advanced image types including multi-page and
+    floating point.
 
     All other image formats use the Python Imaging Libary.
-    See PIL docs [1] for a list of other supported formats. 
-    Integer type images are only supported for PNGs.
+    See PIL docs [1] for a list of other supported formats.
     All images besides single channel PNGs are converted using `img_as_uint8`.
     Single Channel PNGS have the following behavior:
-    - Boolean types -> convert to uint8
-    - Integer values in {0, 256} -> convert to uin8
-    - Integer values > 0 -> convert to uint16
-    - Integer values < 0 -> convert to int16
-    - Floating point images -> convert to uint16
-
+    - Integer values in [0, 255] and Boolean types -> img_as_uint8
+    - Other unsigned integers and floating point -> img_as_uint16
+    - Other signed integers -> img_as_int16
 
     References
     ----------
@@ -201,8 +194,15 @@ def imsave(fname, arr, format_str=None):
     # default to PNG if file-like object
     if not isinstance(fname, string_types) and format_str is None:
         format_str = "PNG"
+    # Check for png in filename
+    if (isinstance(fname, string_types)
+            and fname.lower().endswith(".png")):
+        format_str = "PNG"
 
     arr = np.asanyarray(arr).squeeze()
+
+    if arr.dtype.kind == 'b':
+        arr = arr.astype(np.uint8)
 
     use_tif = False
     if hasattr(fname, 'lower'):
@@ -223,10 +223,7 @@ def imsave(fname, arr, format_str=None):
         if arr.shape[2] not in (3, 4):
             raise ValueError("Invalid number of channels in image array.")
 
-    if arr.dtype.kind == 'b':
-        arr = arr.astype(np.uint8)
-
-    img = ndarray_to_pil(arr, format_str=None)
+    img = ndarray_to_pil(arr, format_str=format_str)
     img.save(fname, format=format_str)
 
 
