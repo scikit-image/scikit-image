@@ -708,7 +708,7 @@ def _array_to_bitmap(array):
         raise
 
 
-def imread(filename):
+def imread(filename, flags=0):
     """
     img = imread(filename)
 
@@ -717,15 +717,17 @@ def imread(filename):
     Parameters
     ----------
       filename : file name
+      flags : int
+          FreeImage flags, see IO_FLAGS.
     Returns
     -------
       img : ndarray
     """
-    img = read(filename)
+    img = read(filename, flags=flags)
     return img
 
 
-def imsave(filename, img):
+def imsave(filename, img, flags=0):
     '''
     imsave(filename, img)
 
@@ -736,6 +738,8 @@ def imsave(filename, img):
     Parameters
     ----------
       filename : file name
+      flags : int
+          FreeImage flags, see IO_FLAGS.
       img : image to be saved as nd array
     '''
-    write(img, filename)
+    write(img, filename, flags=flags)
