@@ -29,8 +29,17 @@ def imread(fname, dtype=None):
 
     Notes
     -----
-    Tiff files are handled by Christophe Golhke's tifffile.py, and support many
+    Tiff files are handled by Christophe Golhke's tifffile.py [1], and support many
     advanced image types including multi-page and floating point.
+
+    All other files are read using the Python Imaging Libary.  
+    See PIL docs [2] for a list of supported formats.
+    
+    References
+    ----------
+    .. [1] http://www.lfd.uci.edu/~gohlke/code/tifffile.py.html
+    .. [2] http://pillow.readthedocs.org/en/latest/handbook/image-file-formats.html
+
     """
     if hasattr(fname, 'lower') and dtype is None:
         if fname.lower().endswith(('.tiff', '.tif')):
@@ -112,7 +121,7 @@ def ndarray_to_pil(arr, format_str=None):
         arr = img_as_ubyte(arr)
         mode = {3: 'RGB', 4: 'RGBA'}[arr.shape[2]]
 
-    elif format_str.lower() == 'png':
+    elif format_str in ['png', 'PNG']:
         if arr.dtype.kind == 'f':
             arr = img_as_uint(arr)
             mode = 'I;16'
@@ -169,12 +178,12 @@ def imsave(fname, arr, format_str=None):
 
     Notes
     -----
-    Tiff files are handled by Christophe Golhke's tifffile.py, and support many
+    Tiff files are handled by Christophe Golhke's tifffile.py [1], and support many
     advanced image types including multi-page and floating point.
 
     All other image formats use the Python Imaging Libary.
-    See http://pillow.readthedocs.org/en/latest/handbook/image-file-formats.html
-    for a list of other supported formats. Integer type images are only supported for PNGs.
+    See PIL docs [1] for a list of other supported formats. 
+    Integer type images are only supported for PNGs.
     All images besides single channel PNGs are converted using `img_as_uint8`.
     Single Channel PNGS have the following behavior:
     - Boolean types -> convert to uint8
@@ -183,6 +192,11 @@ def imsave(fname, arr, format_str=None):
     - Integer values < 0 -> convert to int16
     - Floating point images -> convert to uint16
 
+
+    References
+    ----------
+    .. [1] http://www.lfd.uci.edu/~gohlke/code/tifffile.py.html
+    .. [2] http://pillow.readthedocs.org/en/latest/handbook/image-file-formats.html
     """
     # default to PNG if file-like object
     if not isinstance(fname, string_types) and format_str is None:
