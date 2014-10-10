@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -ex
 
+export DISPLAY=:99.0
+export PYTHONWARNINGS="all"
+WHEELHOUSE="--no-index --find-links=http://wheels.scikit-image.org/"
+
 tools/header.py "Run all tests with minimum dependencies"
 nosetests --exe -v skimage
 
