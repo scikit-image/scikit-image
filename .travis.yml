@@ -22,12 +22,9 @@ python:
 before_install:
     - sh -e /etc/init.d/xvfb start
     - sudo apt-get update
-
     - tools/travis_setup.sh
 
 install:
-    - tools/header.py "Dependency versions"
-    - tools/build_versions.py
     - python setup.py build_ext --inplace
 
 script:

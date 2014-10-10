@@ -14,3 +14,6 @@ fi
 
 pip install -r requirements.txt $WHEELHOUSE
 python check_bento_build.py
+
+tools/header.py "Dependency versions"
+tools/build_versions.py
