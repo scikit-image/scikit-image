@@ -23,6 +23,7 @@ before_install:
     - sudo apt-get update
 
     - travis_retry pip install wheel flake8 coveralls nose
+    - travis_retry pip uninstall numpy
 
     # on Python 2.7, use the system versions of numpy, scipy, and matplotlib
     # and the minimum version of cython and networkx
