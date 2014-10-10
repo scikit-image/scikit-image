@@ -22,7 +22,7 @@ before_install:
     - sh -e /etc/init.d/xvfb start
     - sudo apt-get update
 
-    - sh tools/travis_setup.sh
+    - travis_retry sh tools/travis_setup.sh
 
 install:
     - tools/header.py "Dependency versions"
@@ -31,7 +31,28 @@ install:
     - python setup.py build_ext --inplace
 
 script:
-    - sh tools/travis_build.sh
+    - tools/header.py "Run all tests with minimum dependencies"
+    - nosetests --exe -v skimage
+
+    - tools/header.py "Pep8 and Flake tests"
+    - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
+
+    - travis_retry sh tools/travis_get_optional.sh
+
+    - tools/header.py "Run doc examples"
+    - export PYTHONPATH=$(pwd):$PYTHONPATH
+    - for f in doc/examples/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
+    - for f in doc/examples/applications/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
+
+    - tools/header.py "Run tests with all dependencies"
+    # run tests again with optional dependencies to get more coverage
+    # measure coverage on py3.3
+    -   if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then
+            nosetests --exe -v --with-doctest --with-cov --cover-package skimage;
+        else
+            nosetests --exe -v --with-doctest skimage;
+        fi
+
 
 after_success:
     - coveralls
