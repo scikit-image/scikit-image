@@ -22,7 +22,7 @@ before_install:
     - sh -e /etc/init.d/xvfb start
     - sudo apt-get update
 
-    - tools/travis_setup.sh
+    - sh tools/travis_setup.sh
 
 install:
     - tools/header.py "Dependency versions"
@@ -31,7 +31,7 @@ install:
     - python setup.py build_ext --inplace
 
 script:
-    - tools/travis_build.sh
+    - sh tools/travis_build.sh
 
 after_success:
     - coveralls
