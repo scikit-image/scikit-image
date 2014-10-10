@@ -31,13 +31,13 @@ echo 'backend : Agg' > $MPL_DIR/matplotlibrc
 echo 'backend.qt4 : '$MPL_QT_API >> $MPL_DIR/matplotlibrc
 
 # imread does NOT support py3.2
-if [[  $TRAVIS_PYTHON_VERSION != 3.2 ]]; then
+if [[ $TRAVIS_PYTHON_VERSION != 3.2 ]]; then
     sudo apt-get install -q libtiff4-dev libwebp-dev libpng12-dev xcftools
     pip install imread
 fi
 
 # TODO: update when SimpleITK become available on py34 or hopefully pip
-if [[  $TRAVIS_PYTHON_VERSION != 3.4 ]]; then
+if [[ $TRAVIS_PYTHON_VERSION != 3.4 ]]; then
     easy_install SimpleITK
 fi
 
