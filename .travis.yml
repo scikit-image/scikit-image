@@ -7,20 +7,23 @@
 
 language: python
 
-python:
-    - 2.6
-    - "2.7_with_system_site_packages"
-    - 3.2
-    - 3.3
-    - 3.4
+env: TEST_ARGS=""
 
-env:
-    WHEELHOUSE="--no-index --find-links=http://wheels.scikit-image.org/"
+matrix:
+  include:
+    - python: "2.6"
+    - python: "2.7_with_system_site_packages"
+    - python: "3.2"
+    - python: "3.3"
+      env: TEST_ARGS="--with-cov --cover-package"
+    - python: "3.4"
 
 before_install:
     - export DISPLAY=:99.0
     - sh -e /etc/init.d/xvfb start
     - sudo apt-get update
+
+    - export WHEELHOUSE="--no-index --find-links=http://wheels.scikit-image.org/"
 
     - travis_retry sh tools/travis_setup.sh
 
@@ -46,13 +49,7 @@ script:
 
     - tools/header.py "Run tests with all dependencies"
     # run tests again with optional dependencies to get more coverage
-    # measure coverage on py3.3
-    -   if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then
-            nosetests --exe -v --with-doctest --with-cov --cover-package skimage;
-        else
-            nosetests --exe -v --with-doctest skimage;
-        fi
-
+    - nosetests --exe -v --with-doctest $TEST_ARGS
 
 after_success:
     - coveralls
