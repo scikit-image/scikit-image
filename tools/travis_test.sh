@@ -27,13 +27,6 @@ else
     export QT_API=pyside
 fi
 
-# Matplotlib settings - must be after we install Pyside
-MPL_DIR=$HOME/.config/matplotlib
-mkdir -p $MPL_DIR
-touch $MPL_DIR/matplotlibrc
-echo 'backend : Agg' > $MPL_DIR/matplotlibrc
-echo 'backend.qt4 : '$MPL_QT_API >> $MPL_DIR/matplotlibrc
-
 # imread does NOT support py3.2
 if [[ $TRAVIS_PYTHON_VERSION != 3.2 ]]; then
     sudo apt-get install -q libtiff4-dev libwebp-dev libpng12-dev xcftools
@@ -52,6 +45,13 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then
     pip install pyamg
 fi
 
+# Matplotlib settings - do not show figures during doc examples
+MPL_DIR=$HOME/.config/matplotlib
+mkdir -p $MPL_DIR
+touch $MPL_DIR/matplotlibrc
+echo 'backend : Template' > $MPL_DIR/matplotlibrc
+
+
 tools/header.py "Run doc examples"
 for f in doc/examples/*.py; do
     python "$f";
@@ -66,6 +66,11 @@ for f in doc/examples/applications/*.py; do
         exit 1;
     fi
 done
+
+# Now configure Matplotlib to use Qt4
+echo 'backend: Agg' > $MPL_DIR/matplotlibrc
+echo 'backend.qt4 : '$MPL_QT_API >> $MPL_DIR/matplotlibrc
+
 
 tools/header.py "Run tests with all dependencies"
 # run tests again with optional dependencies to get more coverage
