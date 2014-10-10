@@ -1,3 +1,4 @@
+#!/usr/bin/sh
 ./header.py "Run all tests with minimum dependencies"
 nosetests --exe -v skimage
 

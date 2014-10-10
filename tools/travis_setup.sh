@@ -1,3 +1,4 @@
+#!/usr/bin/sh
 travis_retry pip install wheel flake8 coveralls nose
 
 # on Python 2.7, use the system versions of numpy, scipy, and matplotlib
