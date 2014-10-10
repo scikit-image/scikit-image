@@ -49,7 +49,7 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then
 fi
 
 tools/header.py "Run doc examples"
-PYTHONPATH=$(pwd):$PYTHONPATH
+PYTHONPATH="..":$PYTHONPATH
 for f in doc/examples/*.py;
 do python "$f";
     if [ $? -ne 0 ]; then
