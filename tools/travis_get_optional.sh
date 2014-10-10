@@ -4,14 +4,14 @@
 # Install Qt and then update the Matplotlib settings
 if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     sudo apt-get install -q python-qt4
-    SCI_QT_API=PyQt4
+    MPL_QT_API=PyQt4
     export QT_API=pyqt
 
 else
     sudo apt-get install -q libqt4-dev
     pip install PySide $WHEELHOUSE
     python ~/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/pyside_postinstall.py -install
-    SCI_QT_API=PySide
+    MPL_QT_API=PySide
     export QT_API=PySide
 fi
 
@@ -20,7 +20,7 @@ MPL_DIR=$HOME/.config/matplotlib
 mkdir -p $MPL_DIR
 touch $MPL_DIR/matplotlibrc
 echo 'backend : Agg' > $MPL_DIR/matplotlibrc
-echo 'backend.qt4 : '$SCI_QT_API >> $MPL_DIR/matplotlibrc
+echo 'backend.qt4 : '$MPL_QT_API >> $MPL_DIR/matplotlibrc
 
 # imread does NOT support py3.2
 if [[  $TRAVIS_PYTHON_VERSION != 3.2 ]]; then
