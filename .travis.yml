@@ -25,7 +25,6 @@ before_install:
     - tools/travis_setup.sh
 
 install:
-    - python setup.py build_ext --inplace
     - python setup.py install
 
 script:
