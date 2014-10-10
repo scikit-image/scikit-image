@@ -11,3 +11,9 @@ fi
 
 pip install  -r requirements.txt $WHEELHOUSE
 python check_bento_build.py
+
+if [[  $TRAVIS_PYTHON_VERSION == 3.3 ]]; then
+    export TEST_ARGS="--with-cov --cover-package skimage"
+else
+    export TEST_ARGS=""
+fi

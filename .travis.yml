@@ -7,14 +7,12 @@
 
 language: python
 
-matrix:
-  include:
-    - python: "2.6"
-    - python: "2.7_with_system_site_packages"
-    - python: "3.2"
-    - python: "3.3"
-      env: TEST_ARGS="--with-cov --cover-package"
-    - python: "3.4"
+python:
+- 2.6
+- "2.7_with_system_site_packages"
+- 3.2
+- 3.3
+- 3.4
 
 before_install:
     - export DISPLAY=:99.0
@@ -47,6 +45,7 @@ script:
 
     - tools/header.py "Run tests with all dependencies"
     # run tests again with optional dependencies to get more coverage
+    # we get TEST_ARGS from travis_setup.sh
     - nosetests --exe -v --with-doctest $TEST_ARGS
 
 after_success:
