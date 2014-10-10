@@ -21,7 +21,7 @@ before_install:
 
     - export WHEELHOUSE="--no-index --find-links=http://wheels.scikit-image.org/"
 
-    - travis_retry sh tools/travis_setup.sh
+    - ./tools/travis_setup.sh
 
 install:
     - tools/header.py "Dependency versions"
@@ -30,23 +30,7 @@ install:
     - python setup.py build_ext --inplace
 
 script:
-    - tools/header.py "Run all tests with minimum dependencies"
-    - nosetests --exe -v skimage
-
-    - tools/header.py "Pep8 and Flake tests"
-    - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
-
-    - travis_retry sh tools/travis_get_optional.sh
-
-    - tools/header.py "Run doc examples"
-    - export PYTHONPATH=$(pwd):$PYTHONPATH
-    - for f in doc/examples/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
-    - for f in doc/examples/applications/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
-
-    - tools/header.py "Run tests with all dependencies"
-    # run tests again with optional dependencies to get more coverage
-    # we get TEST_ARGS from travis_setup.sh
-    - nosetests --exe -v --with-doctest $TEST_ARGS
+    - ./tools/travis_test.sh
 
 after_success:
     - coveralls

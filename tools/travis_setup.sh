@@ -1,4 +1,6 @@
-#!/usr/bin/sh
+#!/bin/sh
+set -ex
+
 pip install wheel flake8 coveralls nose
 
 # on Python 2.7, use the system versions of numpy, scipy, and matplotlib
@@ -11,9 +13,3 @@ fi
 
 pip install  -r requirements.txt $WHEELHOUSE
 python check_bento_build.py
-
-if [[  $TRAVIS_PYTHON_VERSION == 3.3 ]]; then
-    export TEST_ARGS="--with-cov --cover-package skimage"
-else
-    export TEST_ARGS=""
-fi

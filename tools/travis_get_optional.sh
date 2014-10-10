@@ -1,5 +1,13 @@
-#!/usr/bin/sh
-./header.py "Install optional dependencies"
+#!/bin/sh
+set -ex
+
+tools/header.py "Run all tests with minimum dependencies"
+nosetests --exe -v skimage
+
+tools/header.py "Pep8 and Flake tests"
+flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
+
+tools/header.py "Install optional dependencies"
 
 # Install Qt and then update the Matplotlib settings
 if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
@@ -39,3 +47,29 @@ pip install astropy
 if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then
     pip install pyamg
 fi
+
+tools/header.py "Run doc examples"
+PYTHONPATH=$(pwd):$PYTHONPATH
+for f in doc/examples/*.py;
+do python "$f";
+    if [ $? -ne 0 ]; then
+        exit 1;
+    fi
+done
+
+for f in doc/examples/applications/*.py;
+do python "$f";
+    if [ $? -ne 0 ]; then
+        exit 1;
+    fi
+done
+
+tools/header.py "Run tests with all dependencies"
+# run tests again with optional dependencies to get more coverage
+if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then
+    export TEST_ARGS="--with-cov --cover-package skimage"
+else
+    export TEST_ARGS=""
+fi
+nosetests --exe -v --with-doctest $TEST_ARGS
+
