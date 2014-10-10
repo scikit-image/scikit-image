@@ -2,6 +2,7 @@
 set -ex
 
 pip install wheel flake8 coveralls nose
+pip uninstall -y numpy
 
 # on Python 2.7, use the system versions of numpy, scipy, and matplotlib
 # and the minimum version of cython and networkx
