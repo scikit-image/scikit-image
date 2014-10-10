@@ -5,12 +5,14 @@
 if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     sudo apt-get install -q python-qt4
     SCI_QT_API=PyQt4
+    export QT_API=pyqt
 
 else
     sudo apt-get install -q libqt4-dev
     pip install PySide $WHEELHOUSE
     python ~/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/pyside_postinstall.py -install
     SCI_QT_API=PySide
+    export QT_API=PySide
 fi
 
 # Matplotlib settings - must be after we install Pyside
