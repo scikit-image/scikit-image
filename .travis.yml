@@ -7,6 +7,9 @@
 
 language: python
 
+env:
+    WHEELHOUSE="--no-index --find-links=http://wheels.scikit-image.org/"
+
 python:
 - 2.6
 - "2.7_with_system_site_packages"
@@ -18,8 +21,6 @@ before_install:
     - export DISPLAY=:99.0
     - sh -e /etc/init.d/xvfb start
     - sudo apt-get update
-
-    - export WHEELHOUSE="--no-index --find-links=http://wheels.scikit-image.org/"
 
     - tools/travis_setup.sh
 
