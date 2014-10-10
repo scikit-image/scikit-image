@@ -20,7 +20,7 @@ else
     pip install PySide $WHEELHOUSE
     python ~/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/pyside_postinstall.py -install
     MPL_QT_API=PySide
-    export QT_API=PySide
+    export QT_API=pyside
 fi
 
 # Matplotlib settings - must be after we install Pyside
