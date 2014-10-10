@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/bash
 set -ex
 
 tools/header.py "Run all tests with minimum dependencies"

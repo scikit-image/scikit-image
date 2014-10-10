@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/bash
 set -ex
 
 pip install wheel flake8 coveralls nose
