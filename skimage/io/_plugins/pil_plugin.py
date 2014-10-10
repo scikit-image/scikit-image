@@ -1,4 +1,4 @@
-__all__ = ['imread']
+__all__ = ['imread', 'imsave']
 
 import numpy as np
 
