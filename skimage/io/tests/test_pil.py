@@ -1,6 +1,8 @@
 import os.path
 import numpy as np
-import numpy.testing as npt
+from numpy.testing import (
+    assert_array_equal, assert_array_almost_equal, assert_raises,
+    assert_allclose, run_module_suite)
 
 from tempfile import NamedTemporaryFile
 
@@ -63,14 +65,14 @@ def test_bilevel():
     expected[::2] = 255
 
     img = imread(os.path.join(data_dir, 'checker_bilevel.png'))
-    npt.assert_array_equal(img, expected)
+    assert_array_equal(img, expected)
 
 
 def test_imread_uint16():
     expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
     img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16.tif'))
     assert np.issubdtype(img.dtype, np.uint16)
-    npt.assert_array_almost_equal(img, expected)
+    assert_array_almost_equal(img, expected)
 
 
 def test_repr_png():
@@ -87,15 +89,15 @@ def test_repr_png():
 
 
 def test_imread_truncated_jpg():
-    npt.assert_raises((IOError, ValueError), imread,
-                      os.path.join(data_dir, 'truncated.jpg'))
+    assert_raises((IOError, ValueError), imread,
+                  os.path.join(data_dir, 'truncated.jpg'))
 
 
 def test_imread_uint16_big_endian():
     expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
     img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16B.tif'))
     assert img.dtype == np.uint16
-    npt.assert_array_almost_equal(img, expected)
+    assert_array_almost_equal(img, expected)
 
 
 class TestSave:
@@ -113,7 +115,7 @@ class TestSave:
         return y
 
     def verify_roundtrip(self, dtype, x, y, scaling=1):
-        npt.assert_array_almost_equal((x * scaling).astype(np.int32), y)
+        assert_array_almost_equal((x * scaling).astype(np.int32), y)
 
     def verify_imsave_roundtrip(self, roundtrip_function):
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
@@ -147,7 +149,7 @@ def test_imsave_filelike():
     s.seek(0)
     out = imread(s)
     assert out.shape == shape
-    npt.assert_allclose(out, image)
+    assert_allclose(out, image)
 
 
 def test_imexport_imimport():
@@ -175,7 +177,7 @@ class TestSaveTIF:
         f.close()
         imsave(fname, x)
         y = imread(fname)
-        npt.assert_array_equal(x, y)
+        assert_array_equal(x, y)
 
     def test_imsave_roundtrip(self):
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
@@ -190,4 +192,4 @@ class TestSaveTIF:
                 yield self.roundtrip, dtype, x
 
 if __name__ == "__main__":
-    npt.run_module_suite()
+    run_module_suite()

@@ -3,7 +3,9 @@ import skimage as si
 import skimage.io as sio
 import numpy as np
 
-import numpy.testing as npt
+from numpy.testing import (
+    assert_array_equal, assert_array_almost_equal, run_module_suite)
+
 from tempfile import NamedTemporaryFile
 
 _plugins = sio.plugin_order()
@@ -21,14 +23,14 @@ def test_imread_uint16():
     expected = np.load(os.path.join(si.data_dir, 'chessboard_GRAY_U8.npy'))
     img = sio.imread(os.path.join(si.data_dir, 'chessboard_GRAY_U16.tif'))
     assert img.dtype == np.uint16
-    npt.assert_array_almost_equal(img, expected)
+    assert_array_almost_equal(img, expected)
 
 
 def test_imread_uint16_big_endian():
     expected = np.load(os.path.join(si.data_dir, 'chessboard_GRAY_U8.npy'))
     img = sio.imread(os.path.join(si.data_dir, 'chessboard_GRAY_U16B.tif'))
     assert img.dtype == np.uint16
-    npt.assert_array_almost_equal(img, expected)
+    assert_array_almost_equal(img, expected)
 
 
 class TestSave:
@@ -38,7 +40,7 @@ class TestSave:
         f.close()
         sio.imsave(fname, x)
         y = sio.imread(fname)
-        npt.assert_array_equal(x, y)
+        assert_array_equal(x, y)
 
     def test_imsave_roundtrip(self):
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
@@ -54,4 +56,4 @@ class TestSave:
 
 
 if __name__ == "__main__":
-    npt.run_module_suite()
+    run_module_suite()

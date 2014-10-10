@@ -1,5 +1,5 @@
 try:
-    from tifffile import imread, imsave
+    from .tifffile import imread, imsave
 except ImportError:
     raise ImportError("The tifffile module could not be found.\n"
         "It can be obtained at "
