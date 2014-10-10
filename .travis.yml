@@ -9,6 +9,8 @@ language: python
 
 env:
     WHEELHOUSE="--no-index --find-links=http://wheels.scikit-image.org/"
+    PYTHONWARNINGS="all"
+    DISPLAY=:99.0
 
 python:
 - 2.6
@@ -18,7 +20,6 @@ python:
 - 3.4
 
 before_install:
-    - export DISPLAY=:99.0
     - sh -e /etc/init.d/xvfb start
     - sudo apt-get update
 
@@ -27,7 +28,6 @@ before_install:
 install:
     - tools/header.py "Dependency versions"
     - tools/build_versions.py
-    - export PYTHONWARNINGS=all
     - python setup.py build_ext --inplace
 
 script:
