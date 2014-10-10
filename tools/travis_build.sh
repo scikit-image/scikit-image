@@ -9,17 +9,17 @@ flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
 # Install Qt and then update the Matplotlib settings
 if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     sudo apt-get install -q python-qt4
-    export SCI_QT_API=PyQt4
+    SCI_QT_API=PyQt4
 
 else
     sudo apt-get install -q libqt4-dev
      travis_retry pip install PySide $WHEELHOUSE
      python ~/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/pyside_postinstall.py -install
-     export SCI_QT_API=PySide
+     SCI_QT_API=PySide
 fi
 
 # Matplotlib settings - must be after we install Pyside
-export MPL_DIR=$HOME/.config/matplotlib
+MPL_DIR=$HOME/.config/matplotlib
 mkdir -p $MPL_DIR
 touch $MPL_DIR/matplotlibrc
 echo 'backend : Agg' > $MPL_DIR/matplotlibrc
@@ -44,7 +44,7 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then
 fi
 
 ./header.py "Run doc examples"
-export PYTHONPATH=$(pwd):$PYTHONPATH
+PYTHONPATH=$(pwd):$PYTHONPATH
 for f in doc/examples/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
 for f in doc/examples/applications/*.py; do python "$f"; if [ $? -ne 0 ]; then exit 1; fi done
 
