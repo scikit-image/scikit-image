@@ -23,7 +23,7 @@ before_install:
     - sudo apt-get update
 
     - travis_retry pip install wheel flake8 coveralls nose
-    - travis_retry pip uninstall -y numpy matplotlib scipy
+    - travis_retry pip uninstall -y numpy
 
     # on Python 2.7, use the system versions of numpy, scipy, and matplotlib
     # and the minimum version of cython and networkx
@@ -33,7 +33,7 @@ before_install:
             pip install https://github.com/networkx/networkx/archive/networkx-1.8.tar.gz;
         fi
 
-    - travis_retry pip install  -r requirements.txt $WHEELHOUSE;
+    - travis_retry pip install -r requirements.txt $WHEELHOUSE;
     - python check_bento_build.py
 
 install:
