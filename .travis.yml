@@ -21,7 +21,7 @@ before_install:
 
     - export WHEELHOUSE="--no-index --find-links=http://wheels.scikit-image.org/"
 
-    - ./tools/travis_setup.sh
+    - tools/travis_setup.sh
 
 install:
     - tools/header.py "Dependency versions"
@@ -30,7 +30,7 @@ install:
     - python setup.py build_ext --inplace
 
 script:
-    - ./tools/travis_test.sh
+    - tools/travis_test.sh
 
 after_success:
     - coveralls
