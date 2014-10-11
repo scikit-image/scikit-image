@@ -44,10 +44,7 @@ plugin_meta_data = {}
 # the following preferences.
 preferred_plugins = {
     # Default plugins for all types (overridden by specific types below).
-    'all': ['matplotlib', 'pil', 'qt', 'freeimage', 'null'],
-    # Use PIL as the default imread plugin, since matplotlib (1.2.x)
-    # is buggy (flips PNGs around, returns bytes as floats, etc.)
-    'imread': ['pil'],
+    'all': ['pil', 'matplotlib', 'qt', 'freeimage', 'null']
 }
 
 
