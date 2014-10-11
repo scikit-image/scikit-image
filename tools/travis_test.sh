@@ -17,6 +17,7 @@ tools/header.py "Install optional dependencies"
 if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     sudo apt-get install -q python-qt4
     MPL_QT_API=PyQt4
+    MPL_DIR=$HOME/.matplotlibrc
     export QT_API=pyqt
 
 else
@@ -24,6 +25,7 @@ else
     pip install PySide $WHEELHOUSE
     python ~/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/pyside_postinstall.py -install
     MPL_QT_API=PySide
+    MPL_DIR=$HOME/.config/matplotlibrc
     export QT_API=pyside
 fi
 
@@ -46,7 +48,6 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then
 fi
 
 # Matplotlib settings - do not show figures during doc examples
-MPL_DIR=$HOME/.config/matplotlib
 mkdir -p $MPL_DIR
 touch $MPL_DIR/matplotlibrc
 echo 'backend : Template' > $MPL_DIR/matplotlibrc
