@@ -54,7 +54,7 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
         try:
             self.disconnect_events()
         except AttributeError:
-            # disconnect the events manually (hack for older mpl verions)
+            # disconnect the events manually (hack for older mpl versions)
             [self.canvas.mpl_disconnect(i) for i in range(10)]
 
         # Alias rectangle attribute, which is initialized in RectangleSelector.
