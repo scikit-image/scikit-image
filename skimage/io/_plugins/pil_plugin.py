@@ -29,11 +29,11 @@ def imread(fname, dtype=None):
 
     Notes
     -----
-    Tiff files are handled by Christophe Golhke's tifffile.py [1], and support many
+    Tiff files are handled by Christophe Golhke's tifffile.py [1]_, and support many
     advanced image types including multi-page and floating point.
 
     All other files are read using the Python Imaging Libary.
-    See PIL docs [2] for a list of supported formats.
+    See PIL docs [2]_ for a list of supported formats.
 
     References
     ----------
@@ -173,12 +173,12 @@ def imsave(fname, arr, format_str=None):
 
     Notes
     -----
-    Tiff files are handled by Christophe Golhke's tifffile.py [1],
+    Tiff files are handled by Christophe Golhke's tifffile.py [1]_,
     and support many advanced image types including multi-page and
     floating point.
 
     All other image formats use the Python Imaging Libary.
-    See PIL docs [2] for a list of other supported formats.
+    See PIL docs [2]_ for a list of other supported formats.
     All images besides single channel PNGs are converted using `img_as_uint8`.
     Single Channel PNGs have the following behavior:
     - Integer values in [0, 255] and Boolean types -> img_as_uint8
