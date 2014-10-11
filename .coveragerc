@@ -6,6 +6,7 @@ source = skimage
 include = */skimage/*
 omit =
     */setup.py
+    */skimage/io/_plugins/tifffile.py
 
 [report]
 exclude_lines =

@@ -27,4 +27,4 @@
 failing (useful for installing from third party sources)
 - Feel free to cancel a build rather than waiting for it to go to completion
   if you have made a change to that branch.
-- A VM with 64bit Ubuntu 12.04 is a huge help.
+- A VM with 64bit Ubuntu 12.04 is a huge help for debugging.
