@@ -50,10 +50,10 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
             props['edgecolor'] = props['facecolor']
         RectangleSelector.__init__(self, self.ax, lambda *args: None,
                                    rectprops=props)
-        try:
-            self.disconnect_events()  # events are handled by the viewer
-        except AttributeError:
-            pass  # older versions of MPL do not have this method
+        # Events are handled by the viewer
+        for c in self.cids:
+            self.canvas.mpl_disconnect(c)
+
         # Alias rectangle attribute, which is initialized in RectangleSelector.
         self._rect = self.to_draw
         self._rect.set_animated(True)
