@@ -6,16 +6,16 @@ tools/header.py "Install optional dependencies"
 # Install Qt and then update the Matplotlib settings
 if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     sudo apt-get install -q python-qt4
-    MPL_QT_API=PyQt4
-    MPL_DIR=$HOME/.matplotlib
+    export MPL_QT_API=PyQt4
+    export MPL_DIR=$HOME/.matplotlib
     export QT_API=pyqt
 
 else
     sudo apt-get install -q libqt4-dev
     pip install PySide $WHEELHOUSE
     python ~/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/pyside_postinstall.py -install
-    MPL_QT_API=PySide
-    MPL_DIR=$HOME/.config/matplotlib
+    export MPL_QT_API=PySide
+    export MPL_DIR=$HOME/.config/matplotlib
     export QT_API=pyside
 fi
 
