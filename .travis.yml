@@ -15,6 +15,9 @@ python:
 - 3.4
 
 before_install:
+    - export DISPLAY=:99.0
+    - export PYTHONWARNINGS="all"
+    - export WHEELHOUSE="--no-index --find-links=http://wheels.scikit-image.org/"
     - travis_retry tools/travis_setup.sh
 
 install:
@@ -22,6 +25,13 @@ install:
     - python setup.py install
 
 script:
+    - tools/header.py "Run all tests with minimum dependencies"
+    - nosetests --exe -v skimage
+
+    - tools/header.py "Pep8 and Flake tests"
+    - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
+
+    - travis_retry tools/travis_install_optional.sh
     - tools/travis_test.sh
 
 after_success:
