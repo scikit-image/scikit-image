@@ -10,6 +10,8 @@ from copy import copy
 import numpy as np
 import six
 
+from tifffile import Tifffile
+
 
 __all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
            'imread_collection_wrapper']
@@ -113,8 +115,13 @@ class MultiImage(object):
         self._dtype = dtype
         self._cached = None
 
-        from PIL import Image
-        img = Image.open(self._filename)
+        if filename.lower.endswith(('.tiff', '.tif')):
+            self.tif_img = Tifffile(self._filename)
+
+        else:
+            from PIL import Image
+            img = Image.open(self._filename)
+            self.tif_img = None
         if self._conserve_memory:
             self._numframes = self._find_numframes(img)
         else:
@@ -131,6 +138,8 @@ class MultiImage(object):
 
     def _find_numframes(self, img):
         """Find the number of frames in the multi-img."""
+        if self._tif_img:
+            return len(img.pages)
         i = 0
         while True:
             i += 1
@@ -142,6 +151,8 @@ class MultiImage(object):
 
     def _getframe(self, framenum):
         """Open the image and extract the frame."""
+        if self._tif_img:
+            return self._tif_img[framenum].asarray()
         from PIL import Image
         img = Image.open(self.filename)
         img.seek(framenum)
@@ -149,6 +160,8 @@ class MultiImage(object):
 
     def _getallframes(self, img):
         """Extract all frames from the multi-img."""
+        if self._tif_img:
+            return [self._tif_img[i].asarray() for i in self._tif_img.pages]
         frames = []
         try:
             i = 0
