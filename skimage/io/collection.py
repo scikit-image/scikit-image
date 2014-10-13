@@ -115,6 +115,7 @@ class MultiImage(object):
         self._dtype = dtype
         self._cached = None
 
+        
         if filename.lower().endswith(('.tiff', '.tif')):
             self.tif_img = img = TiffFile(self._filename)
 
@@ -138,7 +139,11 @@ class MultiImage(object):
 
     def _find_numframes(self, img):
         """Find the number of frames in the multi-img."""
+<<<<<<< HEAD
         if self.tif_img:
+=======
+        if self._tif_img:
+>>>>>>> 70b6909... Add tifffile support for MultiImage
             return len(img.pages)
         i = 0
         while True:
@@ -151,8 +156,8 @@ class MultiImage(object):
 
     def _getframe(self, framenum):
         """Open the image and extract the frame."""
-        if self.tif_img:
-            return self.tif_img[framenum].asarray()
+        if self._tif_img:
+            return self._tif_img[framenum].asarray()
         from PIL import Image
         img = Image.open(self.filename)
         img.seek(framenum)
