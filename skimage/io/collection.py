@@ -139,7 +139,6 @@ class MultiImage(object):
 
     def _find_numframes(self, img):
         """Find the number of frames in the multi-img."""
-        
         if self.tif_img:
             return len(img.pages)
         i = 0
@@ -153,8 +152,8 @@ class MultiImage(object):
 
     def _getframe(self, framenum):
         """Open the image and extract the frame."""
-        if self._tif_img:
-            return self._tif_img[framenum].asarray()
+        if self.tif_img:
+            return self.tif_img[framenum].asarray()
         from PIL import Image
         img = Image.open(self.filename)
         img.seek(framenum)
