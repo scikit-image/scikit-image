@@ -16,7 +16,6 @@ Runtime requirements
 * `NetworkX <https://networkx.github.io>`__
 * `Pillow <https://pypi.python.org/pypi/Pillow>`__
    (or `PIL <http://www.pythonware.com/products/pil/>`__)
-* `Tifffile <https://pypi.python.org/pypi/tifffile>`__
 
 Known build errors
 ------------------
