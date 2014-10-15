@@ -17,7 +17,7 @@ python:
 before_install:
     - export DISPLAY=:99.0
     - export PYTHONWARNINGS="all"
-    - export WHEELHOUSE="--no-index --find-links=http://wheels.scikit-image.org/"
+    - export WHEELHOUSE="--no-index --find-links=http://travis-wheels.scikit-image.org/"
     - travis_retry tools/travis_setup.sh
 
 install:

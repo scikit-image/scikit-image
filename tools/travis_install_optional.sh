@@ -30,3 +30,5 @@ pip install astropy
 if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then
     pip install pyamg
 fi
+
+pip install tifffile

@@ -15,8 +15,6 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     pip install https://github.com/networkx/networkx/archive/networkx-1.8.tar.gz
 fi
 
-pip install $WHEELHOUSE numpy
-pip install tifffile
 pip install -r requirements.txt $WHEELHOUSE
 python check_bento_build.py
 
