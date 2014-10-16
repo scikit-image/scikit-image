@@ -1,4 +1,4 @@
 try:
     from tifffile import *
 except ImportError:
-    from ._tifffile import *
+    from .tifffile_local import *
