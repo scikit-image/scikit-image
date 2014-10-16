@@ -116,13 +116,13 @@ References
 
 Examples
 --------
->> data = numpy.random.rand(5, 301, 219)
->> imsave('temp.tif', data)
+>>> data = numpy.random.rand(5, 301, 219)
+>>> imsave('temp.tif', data)
 
->> image = imread('temp.tif')
->> numpy.testing.assert_array_equal(image, data)
+>>> image = imread('temp.tif')
+>>> numpy.testing.assert_array_equal(image, data)
 
->> with TiffFile('temp.tif') as tif:
+>>> with TiffFile('temp.tif') as tif:
 ...     images = tif.asarray()
 ...     for page in tif:
 ...         for tag in page.tags.values():
@@ -153,7 +153,7 @@ import numpy
 
 from . import _tifffile
 
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 __docformat__ = 'restructuredtext en'
 __all__ = ('imsave', 'imread', 'imshow', 'TiffFile', 'TiffWriter',
            'TiffSequence')
@@ -180,9 +180,9 @@ def imsave(filename, data, **kwargs):
 
     Examples
     --------
-    >> data = numpy.random.rand(2, 5, 3, 301, 219)
-    >> description = u'{"shape": %s}' % str(list(data.shape))
-    >> imsave('temp.tif', data, compress=6,
+    >>> data = numpy.random.rand(2, 5, 3, 301, 219)
+    >>> description = u'{"shape": %s}' % str(list(data.shape))
+    >>> imsave('temp.tif', data, compress=6,
     ...        extratags=[(270, 's', 0, description, True)])
 
     """
@@ -209,8 +209,8 @@ class TiffWriter(object):
 
     Examples
     --------
-    >> data = numpy.random.rand(2, 5, 3, 301, 219)
-    >> with TiffWriter('temp.tif', bigtiff=True) as tif:
+    >>> data = numpy.random.rand(2, 5, 3, 301, 219)
+    >>> with TiffWriter('temp.tif', bigtiff=True) as tif:
     ...     for i in range(data.shape[0]):
     ...         tif.save(data[i], compress=6)
 
@@ -663,12 +663,12 @@ def imread(files, **kwargs):
 
     Examples
     --------
-    >> im = imread('test.tif', key=0)
-    >> im.shape
-    (256, 256, 4)
-    >> ims = imread(['test.tif', 'test.tif'])
-    >> ims.shape
-    (2, 256, 256, 4)
+    >>> im = imread('temp.tif', key=0)
+    >>> im.shape
+    (3, 301, 219)
+    >>> ims = imread(['temp.tif', 'temp.tif'])
+    >>> ims.shape
+    (2, 10, 3, 301, 219)
 
     """
     kwargs_file = {}
@@ -733,10 +733,10 @@ class TiffFile(object):
 
     Examples
     --------
-    >> with TiffFile('test.tif') as tif:
+    >>> with TiffFile('temp.tif') as tif:
     ...     data = tif.asarray()
     ...     data.shape
-    (256, 256, 4)
+    (5, 301, 219)
 
     """
     def __init__(self, arg, name=None, offset=None, size=None,
@@ -2215,11 +2215,11 @@ class TiffSequence(object):
 
     Examples
     --------
-    >> tifs = TiffSequence("test.oif.files/*.tif")
-    >> tifs.shape, tifs.axes
+    >>> tifs = TiffSequence("test.oif.files/*.tif")  # doctest: +SKIP
+    >>> tifs.shape, tifs.axes  # doctest: +SKIP
     ((2, 100), 'CT')
-    >> data = tifs.asarray()
-    >> data.shape
+    >>> data = tifs.asarray()  # doctest: +SKIP
+    >>> data.shape  # doctest: +SKIP
     (2, 100, 256, 256)
 
     """
@@ -3316,12 +3316,12 @@ def unpackrgb(data, dtype='<B', bitspersample=(5, 6, 5), rescale=True):
 
     Examples
     --------
-    >> data = struct.pack('BBBB', 0x21, 0x08, 0xff, 0xff)
-    >> print(unpackrgb(data, '<B', (5, 6, 5), False))
+    >>> data = struct.pack('BBBB', 0x21, 0x08, 0xff, 0xff)
+    >>> print(unpackrgb(data, '<B', (5, 6, 5), False))
     [ 1  1  1 31 63 31]
-    >> print(unpackrgb(data, '<B', (5, 6, 5)))
+    >>> print(unpackrgb(data, '<B', (5, 6, 5)))
     [  8   4   8 255 255 255]
-    >> print(unpackrgb(data, '<B', (5, 5, 5)))
+    >>> print(unpackrgb(data, '<B', (5, 5, 5)))
     [ 16   8   8 255 255 255]
 
     """
@@ -3381,7 +3381,7 @@ def squeeze_axes(shape, axes, skip='XY'):
 
     Remove unused dimensions unless their axes are listed in 'skip'.
 
-    >> squeeze_axes((5, 1, 2, 1, 1), 'TZYXC')
+    >>> squeeze_axes((5, 1, 2, 1, 1), 'TZYXC')
     ((5, 2, 1), 'TYX')
 
     """
@@ -3397,7 +3397,7 @@ def transpose_axes(data, axes, asaxes='CTZYX'):
 
     A view is returned if possible.
 
-    >> transpose_axes(numpy.zeros((2, 3, 4, 5)), 'TYXC', asaxes='CTZYX').shape
+    >>> transpose_axes(numpy.zeros((2, 3, 4, 5)), 'TYXC', asaxes='CTZYX').shape
     (5, 2, 1, 3, 4)
 
     """
@@ -3448,7 +3448,7 @@ def stripnull(string):
 
     Clean NULL terminated C strings.
 
-    >> stripnull(b'string\\x00')
+    >>> stripnull(b'string\\x00')
     b'string'
 
     """
@@ -3461,9 +3461,9 @@ def stripascii(string):
 
     Clean NULL separated and terminated TIFF strings.
 
-    >> stripascii(b'string\\x00string\\n\\x01\\x00')
+    >>> stripascii(b'string\\x00string\\n\\x01\\x00')
     b'string\\x00string\\n'
-    >> stripascii(b'\\x00')
+    >>> stripascii(b'\\x00')
     b''
 
     """
@@ -3490,9 +3490,9 @@ def format_size(size):
 def sequence(value):
     """Return tuple containing value if value is not a sequence.
 
-    >> sequence(1)
+    >>> sequence(1)
     (1,)
-    >> sequence([1])
+    >>> sequence([1])
     [1]
 
     """
@@ -3508,9 +3508,9 @@ def product(iterable):
 
     Equivalent of functools.reduce(operator.mul, iterable, 1).
 
-    >> product([2**8, 2**30])
+    >>> product([2**8, 2**30])
     274877906944
-    >> product([])
+    >>> product([])
     1
 
     """
@@ -3525,7 +3525,7 @@ def natural_sorted(iterable):
 
     E.g. for sorting file names.
 
-    >> natural_sorted(['f1', 'f2', 'f10'])
+    >>> natural_sorted(['f1', 'f2', 'f10'])
     ['f1', 'f2', 'f10']
 
     """
@@ -3540,7 +3540,7 @@ def excel_datetime(timestamp, epoch=datetime.datetime.fromordinal(693594)):
 
     Convert LSM time stamps.
 
-    >> excel_datetime(40237.029999999795)
+    >>> excel_datetime(40237.029999999795)
     datetime.datetime(2010, 2, 28, 0, 43, 11, 999982)
 
     """
@@ -3552,7 +3552,7 @@ def julian_datetime(julianday, milisecond=0):
 
     Convert Julian dates according to MetaMorph.
 
-    >> julian_datetime(2451576, 54362783)
+    >>> julian_datetime(2451576, 54362783)
     datetime.datetime(2000, 2, 2, 15, 6, 2, 783)
 
     """
@@ -3586,7 +3586,7 @@ def test_tifffile(directory='testimages', verbose=True):
 
     Print error message on failure.
 
-    >> test_tifffile(verbose=False)
+    >>> test_tifffile(verbose=False)
 
     """
     successful = 0
