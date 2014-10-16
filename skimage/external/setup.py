@@ -11,7 +11,7 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('external', parent_package, top_path)
 
     config.add_extension('tifffile._tifffile',
-                         sources=['tifffile/_tifffile.c'],
+                         sources=['tifffile/tifffile.c'],
                          include_dirs=[get_numpy_include_dirs()])
     return config
 
