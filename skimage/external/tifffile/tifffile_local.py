@@ -153,7 +153,7 @@ import numpy
 
 from . import _tifffile
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 __docformat__ = 'restructuredtext en'
 __all__ = ('imsave', 'imread', 'imshow', 'TiffFile', 'TiffWriter',
            'TiffSequence')
@@ -181,7 +181,7 @@ def imsave(filename, data, **kwargs):
     Examples
     --------
     >>> data = numpy.random.rand(2, 5, 3, 301, 219)
-    >>> description = u'{"shape": %s}' % str(list(data.shape))
+    >>> description = '{"shape": %s}' % str(list(data.shape))
     >>> imsave('temp.tif', data, compress=6,
     ...        extratags=[(270, 's', 0, description, True)])
 
@@ -3448,7 +3448,7 @@ def stripnull(string):
 
     Clean NULL terminated C strings.
 
-    >>> stripnull(b'string\\x00')
+    >>> stripnull(b'string\\x00')  # doctest: +SKIP
     b'string'
 
     """
@@ -3461,9 +3461,9 @@ def stripascii(string):
 
     Clean NULL separated and terminated TIFF strings.
 
-    >>> stripascii(b'string\\x00string\\n\\x01\\x00')
+    >>> stripascii(b'string\\x00string\\n\\x01\\x00')  # doctest: +SKIP
     b'string\\x00string\\n'
-    >>> stripascii(b'\\x00')
+    >>> stripascii(b'\\x00')  # doctest: +SKIP
     b''
 
     """
