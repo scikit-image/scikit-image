@@ -15,7 +15,6 @@ from scipy.ndimage import filters
 from scipy import ndimage as nd
 import math
 from .. import draw, measure, segmentation, util, color
-import random
 try:
     from matplotlib import colors
     from matplotlib import cm
@@ -60,6 +59,13 @@ class RAG(nx.Graph):
     `networx.Graph <http://networkx.github.io/documentation/latest/reference/classes.graph.html>`_
     """
 
+    def __init__(self, data=None, **attr):
+
+        nx.Graph.__init__(self, data, **attr)
+        self.max_id = None
+        for n in self.nodes_iter():
+            self.max_id = max(self.max_id, n)
+
     def merge_nodes(self, src, dst, weight_func=min_weight, in_place=True,
                     extra_arguments=[], extra_keywords={}):
         """Merge node `src` and `dst`.
@@ -100,10 +106,7 @@ class RAG(nx.Graph):
         if in_place:
             new = dst
         else:
-            n = self.number_of_nodes()
-            new = random.randint(1, 2*n)
-            while new in self:
-                new = random.randint(1, 2*n)
+            new = self.max_id + 1
             self.add_node(new)
 
         for neighbor in neighbors:
@@ -117,6 +120,19 @@ class RAG(nx.Graph):
         if not in_place:
             self.remove_node(dst)
             return new
+
+    def add_node(self, n, attr_dict=None, **attr):
+        nx.Graph.add_node(self, n, attr_dict, **attr)
+        self.max_id = max(n, self.max_id)
+
+    def add_edge(self, u, v, attr_dict=None, **attr):
+        nx.Graph.add_edge(self, u, v, attr_dict, **attr)
+        self.max_id = max(u, v, self.max_id)
+
+    def copy(self):
+        g = nx.Graph.copy(self)
+        g.max_id = self.max_id
+        return g
 
 
 def _add_edge_filter(values, graph):
