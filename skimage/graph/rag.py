@@ -62,7 +62,7 @@ class RAG(nx.Graph):
     def __init__(self, data=None, **attr):
 
         nx.Graph.__init__(self, data, **attr)
-        self.max_id = None
+        self.max_id = 0
         for n in self.nodes_iter():
             self.max_id = max(self.max_id, n)
 
