@@ -1,6 +1,9 @@
 Image Processing SciKit
 =======================
 
+[![Build Status](https://travis-ci.org/scikit-image/scikit-image.svg)](https://travis-ci.org/scikit-image/scikit-image)
+[![Coverage Status](https://img.shields.io/coveralls/scikit-image/scikit-image.svg)](https://coveralls.io/r/scikit-image/scikit-image?branch=master)
+
 Source
 ------
 https://github.com/scikit-image/scikit-image
