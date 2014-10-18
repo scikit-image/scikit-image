@@ -61,10 +61,12 @@ class RAG(nx.Graph):
 
     def __init__(self, data=None, **attr):
 
-        nx.Graph.__init__(self, data, **attr)
-        self.max_id = 0
-        for n in self.nodes_iter():
-            self.max_id = max(self.max_id, n)
+        super(RAG, self).__init__(data, **attr)
+        try:
+            self.max_id = max(self.nodes_iter())
+        except ValueError:
+            # Empty sequence
+            self.max_id = 0
 
     def merge_nodes(self, src, dst, weight_func=min_weight, in_place=True,
                     extra_arguments=[], extra_keywords={}):
@@ -106,7 +108,7 @@ class RAG(nx.Graph):
         if in_place:
             new = dst
         else:
-            new = self.max_id + 1
+            new = self.next_id()
             self.add_node(new)
 
         for neighbor in neighbors:
@@ -117,22 +119,36 @@ class RAG(nx.Graph):
         self.node[new]['labels'] = (self.node[src]['labels'] +
                                     self.node[dst]['labels'])
         self.remove_node(src)
+
         if not in_place:
             self.remove_node(dst)
-            return new
+
+        return new
 
     def add_node(self, n, attr_dict=None, **attr):
-        nx.Graph.add_node(self, n, attr_dict, **attr)
+        super(RAG, self).add_node(n, attr_dict, **attr)
         self.max_id = max(n, self.max_id)
 
     def add_edge(self, u, v, attr_dict=None, **attr):
-        nx.Graph.add_edge(self, u, v, attr_dict, **attr)
+        super(RAG, self).add_edge(u, v, attr_dict, **attr)
         self.max_id = max(u, v, self.max_id)
 
     def copy(self):
-        g = nx.Graph.copy(self)
+        g = super(RAG, self).copy()
         g.max_id = self.max_id
         return g
+
+    def next_id(self):
+        """Returns the `id` for the new node to be inserted.
+
+        The current implementation returns one more than the maximum `id`.
+
+        Returns
+        -------
+        id : int
+            The `id` of the new node to be inserted.
+        """
+        return self.max_id + 1
 
 
 def _add_edge_filter(values, graph):
