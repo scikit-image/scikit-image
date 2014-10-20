@@ -20,3 +20,7 @@ python check_bento_build.py
 
 tools/header.py "Dependency versions"
 tools/build_versions.py
+
+# clean up disk space
+sudo apt-get clean
+sudo rm -r /tmp/*
