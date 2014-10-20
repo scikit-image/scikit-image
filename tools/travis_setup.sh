@@ -4,8 +4,6 @@ set -ex
 sh -e /etc/init.d/xvfb start
 sudo apt-get update
 
-WHEELHOUSE="--no-index --find-links=http://wheels.scikit-image.org/"
-
 pip install wheel flake8 coveralls nose
 pip uninstall -y numpy
 

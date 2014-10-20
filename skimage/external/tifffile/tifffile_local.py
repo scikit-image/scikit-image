@@ -151,15 +151,9 @@ from xml.etree import cElementTree as etree
 
 import numpy
 
-try:
-    from . import _tifffile
-except ImportError:
-    warnings.warn(
-        "failed to import the optional _tifffile C extension module.\n"
-        "Loading of some compressed images will be slow.\n"
-        "Tifffile.c can be obtained at http://www.lfd.uci.edu/~gohlke/")
+from . import _tifffile
 
-__version__ = '2014.08.24'
+__version__ = '0.3.3'
 __docformat__ = 'restructuredtext en'
 __all__ = ('imsave', 'imread', 'imshow', 'TiffFile', 'TiffWriter',
            'TiffSequence')
@@ -187,7 +181,7 @@ def imsave(filename, data, **kwargs):
     Examples
     --------
     >>> data = numpy.random.rand(2, 5, 3, 301, 219)
-    >>> description = u'{"shape": %s}' % str(list(data.shape))
+    >>> description = '{"shape": %s}' % str(list(data.shape))
     >>> imsave('temp.tif', data, compress=6,
     ...        extratags=[(270, 's', 0, description, True)])
 
@@ -669,12 +663,12 @@ def imread(files, **kwargs):
 
     Examples
     --------
-    >>> im = imread('test.tif', key=0)
+    >>> im = imread('temp.tif', key=0)
     >>> im.shape
-    (256, 256, 4)
-    >>> ims = imread(['test.tif', 'test.tif'])
+    (3, 301, 219)
+    >>> ims = imread(['temp.tif', 'temp.tif'])
     >>> ims.shape
-    (2, 256, 256, 4)
+    (2, 10, 3, 301, 219)
 
     """
     kwargs_file = {}
@@ -739,10 +733,10 @@ class TiffFile(object):
 
     Examples
     --------
-    >>> with TiffFile('test.tif') as tif:
+    >>> with TiffFile('temp.tif') as tif:
     ...     data = tif.asarray()
     ...     data.shape
-    (256, 256, 4)
+    (5, 301, 219)
 
     """
     def __init__(self, arg, name=None, offset=None, size=None,
@@ -2221,11 +2215,11 @@ class TiffSequence(object):
 
     Examples
     --------
-    >>> tifs = TiffSequence("test.oif.files/*.tif")
-    >>> tifs.shape, tifs.axes
+    >>> tifs = TiffSequence("test.oif.files/*.tif")  # doctest: +SKIP
+    >>> tifs.shape, tifs.axes  # doctest: +SKIP
     ((2, 100), 'CT')
-    >>> data = tifs.asarray()
-    >>> data.shape
+    >>> data = tifs.asarray()  # doctest: +SKIP
+    >>> data.shape  # doctest: +SKIP
     (2, 100, 256, 256)
 
     """
@@ -3454,7 +3448,7 @@ def stripnull(string):
 
     Clean NULL terminated C strings.
 
-    >>> stripnull(b'string\\x00')
+    >>> stripnull(b'string\\x00')  # doctest: +SKIP
     b'string'
 
     """
@@ -3467,9 +3461,9 @@ def stripascii(string):
 
     Clean NULL separated and terminated TIFF strings.
 
-    >>> stripascii(b'string\\x00string\\n\\x01\\x00')
+    >>> stripascii(b'string\\x00string\\n\\x01\\x00')  # doctest: +SKIP
     b'string\\x00string\\n'
-    >>> stripascii(b'\\x00')
+    >>> stripascii(b'\\x00')  # doctest: +SKIP
     b''
 
     """

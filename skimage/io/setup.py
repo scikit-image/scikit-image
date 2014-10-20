@@ -27,10 +27,6 @@ def configuration(parent_package='', top_path=None):
                          sources=['_plugins/_histograms.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
-    config.add_extension('_plugins._tifffile',
-                         sources=['_plugins/tifffile.c'],
-                         include_dirs=[get_numpy_include_dirs()])
-
     return config
 
 if __name__ == '__main__':

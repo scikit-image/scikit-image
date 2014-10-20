@@ -141,12 +141,9 @@ if __name__ == "__main__":
         ],
 
         configuration=configuration,
-        install_requires=[
-            "six>=%s" % '.'.join(str(d) for d in DEPENDENCIES['six'])
-        ],
         packages=setuptools.find_packages(exclude=['doc']),
         include_package_data=True,
-        zip_safe=False, # the package can run out of an .egg file
+        zip_safe=False,  # the package can run out of an .egg file
 
         entry_points={
             'console_scripts': ['skivi = skimage.scripts.skivi:main'],

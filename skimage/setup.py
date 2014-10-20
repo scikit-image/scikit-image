@@ -21,6 +21,7 @@ def configuration(parent_package='', top_path=None):
     config.add_subpackage('transform')
     config.add_subpackage('util')
     config.add_subpackage('segmentation')
+    config.add_subpackage('external')
 
     def add_test_directories(arg, dirname, fnames):
         if dirname.split(os.path.sep)[-1] == 'tests':

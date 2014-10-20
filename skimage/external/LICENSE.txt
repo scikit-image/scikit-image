@@ -1,5 +1,5 @@
 
-_plugins.tifffile.py
+tifffile
 
     Copyright (c) 2008-2014, Christoph Gohlke
     Copyright (c) 2008-2014, The Regents of the University of California
