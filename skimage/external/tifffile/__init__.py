@@ -1,4 +1,4 @@
 try:
-    from tifffile import *
+    from tifffile import imread, imsave, TiffFile
 except ImportError:
-    from .tifffile_local import *
+    from .tifffile_local import imread, imsave, TiffFile
