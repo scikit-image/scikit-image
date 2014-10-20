@@ -9,8 +9,9 @@ from copy import copy
 
 import numpy as np
 import six
+from PIL import Image
 
-from tifffile import TiffFile
+from skimage.external.tifffile import TiffFile
 
 
 __all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
@@ -120,11 +121,12 @@ class MultiImage(object):
             self.tif_img = img = TiffFile(self._filename)
 
         else:
-            from PIL import Image
             img = Image.open(self._filename)
             self.tif_img = None
+
         if self._conserve_memory:
             self._numframes = self._find_numframes(img)
+
         else:
             self._frames = self._getallframes(img)
             self._numframes = len(self._frames)
@@ -141,37 +143,41 @@ class MultiImage(object):
         """Find the number of frames in the multi-img."""
         if self.tif_img:
             return len(img.pages)
-        i = 0
-        while True:
-            i += 1
-            try:
-                img.seek(i)
-            except EOFError:
-                break
-        return i
+
+        else:
+            i = 0
+            while True:
+                i += 1
+                try:
+                    img.seek(i)
+                except EOFError:
+                    break
+            return i
 
     def _getframe(self, framenum):
         """Open the image and extract the frame."""
         if self.tif_img:
             return self.tif_img[framenum].asarray()
-        from PIL import Image
-        img = Image.open(self.filename)
-        img.seek(framenum)
-        return np.asarray(img, dtype=self._dtype)
+
+        else:
+            img = Image.open(self.filename)
+            img.seek(framenum)
+            return np.asarray(img, dtype=self._dtype)
 
     def _getallframes(self, img):
         """Extract all frames from the multi-img."""
         if self.tif_img:
             return [self.tif_img[i].asarray() for i in self.tif_img.pages]
-        frames = []
-        try:
-            i = 0
-            while True:
-                frames.append(np.asarray(img, dtype=self._dtype))
-                i += 1
-                img.seek(i)
-        except EOFError:
-            return frames
+        else:
+            frames = []
+            try:
+                i = 0
+                while True:
+                    frames.append(np.asarray(img, dtype=self._dtype))
+                    i += 1
+                    img.seek(i)
+            except EOFError:
+                return frames
 
     def __getitem__(self, n):
         """Return the n-th frame as an array.
