@@ -131,6 +131,8 @@ class MultiImage(object):
             self._frames = self._getallframes(img)
             self._numframes = len(self._frames)
 
+        img.close()
+
     @property
     def filename(self):
         return self._filename
@@ -161,13 +163,17 @@ class MultiImage(object):
 
         else:
             img = Image.open(self.filename)
-            img.seek(framenum)
-            return np.asarray(img, dtype=self._dtype)
+            for i in range(framenum + 1):
+                img.seek(i)
+            ret = np.asarray(img, dtype=self._dtype)
+            img.close()
+            return ret
 
     def _getallframes(self, img):
         """Extract all frames from the multi-img."""
         if self.tif_img:
-            return [self.tif_img[i].asarray() for i in self.tif_img.pages]
+            return [p.asarray() for p in self.tif_img.pages]
+
         else:
             frames = []
             try:

@@ -14,6 +14,7 @@ class TestMultiImage():
     def setUp(self):
         # This multipage TIF file was created with imagemagick:
         # convert im1.tif im2.tif -adjoin multipage.tif
+<<<<<<< HEAD
         self.img = MultiImage(os.path.join(data_dir, 'multipage.tif'))
 
     def test_len(self):
@@ -30,6 +31,32 @@ class TestMultiImage():
             return self.img[n]
         assert_raises(IndexError, return_img, num)
         assert_raises(IndexError, return_img, -num - 1)
+=======
+        paths = [os.path.join(data_dir, 'multipage.tif'),
+                 os.path.join(data_dir, 'no_time_for_that.gif')]
+        self.imgs = [MultiImage(paths[0]),
+                     MultiImage(paths[0], conserve_memory=False),
+                     MultiImage(paths[1]),
+                     MultiImage(paths[1], conserve_memory=False)]
+
+    def test_len(self):
+        assert len(self.imgs[0]) == len(self.imgs[1]) == 2
+        assert len(self.imgs[2]) == len(self.imgs[3]) == 24
+
+    def test_getitem(self):
+        for img in self.imgs:
+            num = len(img)
+
+            for i in range(-num, num):
+                assert type(img[i]) is np.ndarray
+            assert_allclose(img[0], img[-num])
+
+            # assert_raises expects a callable, hence this thin wrapper function.
+            def return_img(n):
+                return img[n]
+            assert_raises(IndexError, return_img, num)
+            assert_raises(IndexError, return_img, -num - 1)
+>>>>>>> 0769053... Add animated gif, and a test for it, plus tests without conserve_memory
 
     def test_files_property(self):
         assert isinstance(self.img.filename, six.string_types)
