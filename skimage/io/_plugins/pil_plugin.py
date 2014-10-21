@@ -48,7 +48,7 @@ def imread(fname, dtype=None):
         return pil_to_ndarray(im, dtype)
 
 
-def pil_to_ndarray(im, dtype=None):
+def pil_to_ndarray(im, dtype=None, close_fid=True):
     """Import a PIL Image object to an ndarray, in memory.
 
     Parameters
@@ -74,7 +74,7 @@ def pil_to_ndarray(im, dtype=None):
     elif 'A' in im.mode:
         im = im.convert('RGBA')
     im = np.array(im, dtype=dtype)
-    if fp is not None:
+    if fp is not None and close_fid:
         fp.close()
     return im
 
