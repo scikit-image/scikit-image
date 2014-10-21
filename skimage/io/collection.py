@@ -12,6 +12,7 @@ import six
 from PIL import Image
 
 from skimage.external.tifffile import TiffFile
+from skimage.io._plugins.pil_plugin import pil_to_ndarray
 
 
 __all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
@@ -116,7 +117,6 @@ class MultiImage(object):
         self._dtype = dtype
         self._cached = None
 
-
         if filename.lower().endswith(('.tiff', '.tif')):
             self.tif_img = img = TiffFile(self._filename)
 
@@ -166,9 +166,7 @@ class MultiImage(object):
             # GIFs must be read *in order*
             for i in range(framenum + 1):
                 img.seek(i)
-            ret = np.asarray(img, dtype=self._dtype)
-            img.close()
-            return ret
+            return pil_to_ndarray(img, dtype=self._dtype)
 
     def _getallframes(self, img):
         """Extract all frames from the multi-img."""
@@ -180,7 +178,7 @@ class MultiImage(object):
             try:
                 i = 0
                 while True:
-                    frames.append(np.asarray(img, dtype=self._dtype))
+                    frames.append(pil_to_ndarray(img, dtype=self._dtype))
                     i += 1
                     img.seek(i)
             except EOFError:
