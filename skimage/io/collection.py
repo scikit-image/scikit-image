@@ -163,6 +163,7 @@ class MultiImage(object):
 
         else:
             img = Image.open(self.filename)
+            # GIFs must be read *in order*
             for i in range(framenum + 1):
                 img.seek(i)
             ret = np.asarray(img, dtype=self._dtype)
