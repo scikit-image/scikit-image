@@ -131,7 +131,8 @@ class MultiImage(object):
             self._frames = self._getallframes(img)
             self._numframes = len(self._frames)
 
-        img.close()
+        if not self.tif_img:
+            img.fp.close()
 
     @property
     def filename(self):
@@ -178,11 +179,15 @@ class MultiImage(object):
             try:
                 i = 0
                 while True:
-                    frames.append(pil_to_ndarray(img, dtype=self._dtype))
+                    frames.append(pil_to_ndarray(img, dtype=self._dtype,
+                                                 close_fid=False))
                     i += 1
                     img.seek(i)
             except EOFError:
-                return frames
+                pass
+            finally:
+                img.fp.close()
+            return frames
 
     def __getitem__(self, n):
         """Return the n-th frame as an array.
