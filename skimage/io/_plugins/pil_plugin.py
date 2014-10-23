@@ -45,7 +45,23 @@ def imread(fname, dtype=None):
         site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
         raise ValueError('Could not load "%s"\nPlease see documentation at: %s' % (fname, site))
     else:
-        return pil_to_ndarray(im, dtype)
+        return _get_pil_frames(im, dtype)
+
+
+def _get_pil_frames(img, dtype):
+    frames = []
+    try:
+        i = 0
+        while True:
+            frames.append(pil_to_ndarray(img, dtype=dtype,
+                                         close_fid=False))
+            i += 1
+            img.seek(i)
+    except EOFError:
+        pass
+    finally:
+        img.fp.close()
+    return np.dstack(frames)
 
 
 def pil_to_ndarray(im, dtype=None, close_fid=True):

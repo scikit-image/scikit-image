@@ -345,6 +345,8 @@ class ImageCollection(object):
         if load_func is None:
             from ._io import imread
             self.load_func = imread
+            # treat each one as a multi image, then we access
+            # them from there
         else:
             self.load_func = load_func
 
@@ -412,7 +414,7 @@ class ImageCollection(object):
 
     def _check_imgnum(self, n):
         """Check that the given image number is valid."""
-        num = len(self.files)
+        num = len(self.nimages)
         if -num <= n < num:
             n = n % num
         else:
@@ -427,7 +429,7 @@ class ImageCollection(object):
 
     def __len__(self):
         """Number of images in collection."""
-        return len(self.files)
+        return self.nimages
 
     def __str__(self):
         return str(self.files)
