@@ -99,7 +99,12 @@ class RAG(nx.Graph):
         Returns
         -------
         id : int
-            The id of the new node if `in_place` is `True`.
+            The id of the new node.
+
+        Notes
+        -----
+        If `in_place` is `False` the resulting node has a new id, rather than
+        `dst`.
         """
         src_nbrs = set(self.neighbors(src))
         dst_nbrs = set(self.neighbors(dst))
@@ -126,14 +131,23 @@ class RAG(nx.Graph):
         return new
 
     def add_node(self, n, attr_dict=None, **attr):
+        """Add node `n` while updating the maximum node id.
+
+        .. seealso:: :func:`networkx.Graph.add_node`."""
         super(RAG, self).add_node(n, attr_dict, **attr)
         self.max_id = max(n, self.max_id)
 
     def add_edge(self, u, v, attr_dict=None, **attr):
+        """Add an edge between `u` and `v` while updating max node id.
+
+        .. seealso:: :func:`networkx.Graph.add_edge`."""
         super(RAG, self).add_edge(u, v, attr_dict, **attr)
         self.max_id = max(u, v, self.max_id)
 
     def copy(self):
+        """Copy the graph with its max node id.
+
+        .. seealso:: :func:`networkx.Graph.copy`."""
         g = super(RAG, self).copy()
         g.max_id = self.max_id
         return g
