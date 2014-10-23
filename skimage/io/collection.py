@@ -13,7 +13,6 @@ from PIL import Image
 
 from skimage.external.tifffile import TiffFile
 from skimage.io._plugins.pil_plugin import pil_to_ndarray
-from ._io import imread
 
 
 __all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
@@ -164,6 +163,7 @@ class MultiImage(object):
             return self.tif_img[framenum].asarray()
 
         else:
+            from ._io import imread
             return imread(self.filename, self._dtype, framenum)
 
     def _getallframes(self, img):
@@ -172,6 +172,7 @@ class MultiImage(object):
             return [p.asarray() for p in self.tif_img.pages]
 
         else:
+            from ._io import imread
             return imread(img, self._dtype)
 
     def __getitem__(self, n):
@@ -328,6 +329,7 @@ class ImageCollection(object):
         self._cached = None
 
         if load_func is None:
+            from ._io import imread
             self.load_func = imread
         else:
             self.load_func = load_func
