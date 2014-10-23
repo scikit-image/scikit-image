@@ -13,6 +13,7 @@ from PIL import Image
 
 from skimage.external.tifffile import TiffFile
 from skimage.io._plugins.pil_plugin import pil_to_ndarray
+from ._io import imread
 
 
 __all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
@@ -163,11 +164,7 @@ class MultiImage(object):
             return self.tif_img[framenum].asarray()
 
         else:
-            img = Image.open(self.filename)
-            # GIFs must be read *in order*
-            for i in range(framenum + 1):
-                img.seek(i)
-            return pil_to_ndarray(img, dtype=self._dtype)
+            return imread(self.filename, self._dtype, framenum)
 
     def _getallframes(self, img):
         """Extract all frames from the multi-img."""
@@ -175,19 +172,7 @@ class MultiImage(object):
             return [p.asarray() for p in self.tif_img.pages]
 
         else:
-            frames = []
-            try:
-                i = 0
-                while True:
-                    frames.append(pil_to_ndarray(img, dtype=self._dtype,
-                                                 close_fid=False))
-                    i += 1
-                    img.seek(i)
-            except EOFError:
-                pass
-            finally:
-                img.fp.close()
-            return frames
+            return imread(img, self._dtype)
 
     def __getitem__(self, n):
         """Return the n-th frame as an array.
@@ -343,10 +328,7 @@ class ImageCollection(object):
         self._cached = None
 
         if load_func is None:
-            from ._io import imread
             self.load_func = imread
-            # treat each one as a multi image, then we access
-            # them from there
         else:
             self.load_func = load_func
 
