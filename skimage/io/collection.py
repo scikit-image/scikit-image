@@ -128,8 +128,9 @@ class MultiImage(object):
             self._numframes = self._find_numframes(img)
 
         else:
-            self._frames = self._getallframes(img)
-            self._numframes = len(self._frames)
+            self._frames = self._getallframes()
+            # TODO: this is not correct
+            self._numframes = self._frames.shape[0]
 
         if not self.tif_img:
             img.fp.close()
@@ -164,16 +165,15 @@ class MultiImage(object):
 
         else:
             from ._io import imread
-            return imread(self.filename, self._dtype, framenum)
+            return imread(self.filename, self._dtype, img_num=framenum)
 
-    def _getallframes(self, img):
+    def _getallframes(self):
         """Extract all frames from the multi-img."""
         if self.tif_img:
-            return [p.asarray() for p in self.tif_img.pages]
-
+            return self.tif_img.asarray()
         else:
             from ._io import imread
-            return imread(img, self._dtype)
+            return imread(self.filename, self._dtype)
 
     def __getitem__(self, n):
         """Return the n-th frame as an array.
@@ -398,7 +398,7 @@ class ImageCollection(object):
 
     def _check_imgnum(self, n):
         """Check that the given image number is valid."""
-        num = len(self.nimages)
+        num = len(self.files)
         if -num <= n < num:
             n = n % num
         else:
@@ -413,7 +413,7 @@ class ImageCollection(object):
 
     def __len__(self):
         """Number of images in collection."""
-        return self.nimages
+        return len(self.files)
 
     def __str__(self):
         return str(self.files)

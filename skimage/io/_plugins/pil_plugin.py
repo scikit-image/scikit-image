@@ -59,28 +59,33 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
     Refer to ``imread``.
 
     """
-    if im.mode == 'P':
-        if _palette_is_grayscale(im):
-            im = im.convert('L')
-        else:
-            im = im.convert('RGB')
-    elif im.mode == '1':
-        im = im.convert('L')
-    elif 'A' in im.mode:
-        im = im.convert('RGBA')
-
     frames = []
     i = 0
     while 1:
-        frame = im.seek(i)
+        try:
+            im.seek(i)
+        except EOFError:
+            break
 
         # seeking must be done sequentially
         if img_num and not i == img_num:
             i += 1
             continue
 
+        frame = im
+        if im.mode == 'P':
+            if _palette_is_grayscale(im):
+                frame = im.convert('L')
+            else:
+                frame = im.convert('RGB')
+        elif im.mode == '1':
+            frame = im.convert('L')
+
+        elif 'A' in im.mode:
+            frame = im.convert('RGBA')
+
         if im.mode.startswith('I;16'):
-            shape = frame.size
+            shape = im.size
             dtype = '>u2' if im.mode.endswith('B') else '<u2'
             if 'S' in im.mode:
                 dtype = dtype.replace('u', 'i')
@@ -93,8 +98,13 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
         frames.append(frame)
         i += 1
 
-    im.fp.close()
-    return np.dstack(frames)
+    if hasattr(im, 'fp') and im.fp:
+        im.fp.close()
+
+    if len(frames) > 1:
+        return np.array(frames)
+    else:
+        return frames[0]
 
 
 def _palette_is_grayscale(pil_image):
