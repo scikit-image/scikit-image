@@ -43,8 +43,8 @@ def test_rag_merge():
 
     g.merge_nodes(1, 4)
     g.merge_nodes(2, 3)
-    g.merge_nodes(3, 4)
-    assert sorted(g.node[4]['labels']) == list(range(5))
+    n = g.merge_nodes(3, 4, in_place=False)
+    assert sorted(g.node[n]['labels']) == list(range(5))
     assert g.edges() == []
 
 
