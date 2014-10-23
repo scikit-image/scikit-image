@@ -82,6 +82,7 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
     while 1:
         frame = im.seek(i)
 
+        # seeking must be done sequentially
         if img_num and not i == img_num:
             i += 1
             continue
