@@ -9,7 +9,7 @@ from skimage.external.tifffile import (
     imread as tif_imread, imsave as tif_imsave)
 
 
-def imread(fname, dtype=None, img_num=None):
+def imread(fname, dtype=None, img_num=None, **kwargs):
     """Load an image from file.
 
     Parameters
@@ -21,6 +21,9 @@ def imread(fname, dtype=None, img_num=None):
     img_num : int, optional
        Specifies which image to read in a file with multiple images
        (zero-indexed).
+    kwargs : keyword pairs, optional
+        Addition keyword arguments to pass through (only applicable to Tiff
+        files for now.  See `tifffile`'s `imread` function.
 
     Notes
     -----
@@ -37,8 +40,9 @@ def imread(fname, dtype=None, img_num=None):
 
     """
     if hasattr(fname, 'lower') and dtype is None:
+        kwargs.setdefault('key', img_num)
         if fname.lower().endswith(('.tiff', '.tif')):
-            return tif_imread(fname, key=img_num)
+            return tif_imread(fname, **kwargs)
 
     im = Image.open(fname)
     try:
