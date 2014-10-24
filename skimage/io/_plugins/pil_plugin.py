@@ -31,7 +31,7 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
        (zero-indexed).
     kwargs : keyword pairs, optional
         Addition keyword arguments to pass through (only applicable to Tiff
-        files for now.  See `tifffile`'s `imread` function.
+        files for now,  see `tifffile`'s `imread` function).
 
     Notes
     -----
