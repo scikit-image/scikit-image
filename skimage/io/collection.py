@@ -152,7 +152,8 @@ class ImageCollection(object):
 
     """
 
-    def __init__(self, load_pattern, conserve_memory=True, load_func=None):
+    def __init__(self, load_pattern, conserve_memory=True, load_func=None,
+            **load_func_kwargs):
         """Load and manage a collection of images."""
         if isinstance(load_pattern, six.string_types):
             load_pattern = load_pattern.split(os.pathsep)
@@ -179,6 +180,8 @@ class ImageCollection(object):
             self.load_func = imread
         else:
             self.load_func = load_func
+
+        self.load_func_kwargs = load_func_kwargs
 
         self.data = np.empty(memory_slots, dtype=object)
 
@@ -248,10 +251,11 @@ class ImageCollection(object):
                     (self.data[idx] is None)):
                 if self._frame_index:
                     fname, img_num = self._frame_index[idx]
-                    print('loading function')
-                    self.data[idx] = self.load_func(fname, img_num=img_num)
+                    self.data[idx] = self.load_func(fname, img_num=img_num,
+                                                    **self.load_func_kwargs)
                 else:
-                    self.data[idx] = self.load_func(self.files[n])
+                    self.data[idx] = self.load_func(self.files[n],
+                                                    **self.load_func_kwargs)
                 self._cached = n
 
             return self.data[idx]
@@ -399,7 +403,8 @@ class MultiImage(ImageCollection):
 
     """
 
-    def __init__(self, filename, conserve_memory=True, dtype=None):
+    def __init__(self, filename, conserve_memory=True, dtype=None,
+                 **imread_kwargs):
         """Load a multi-img."""
         from ._io import imread
 
@@ -409,7 +414,7 @@ class MultiImage(ImageCollection):
 
         self._filename = filename
         super(MultiImage, self).__init__(filename, conserve_memory,
-                                         load_func=load_func)
+                                         load_func=load_func, **imread_kwargs)
 
     @property
     def filename(self):
