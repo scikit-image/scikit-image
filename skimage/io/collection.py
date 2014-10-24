@@ -12,7 +12,6 @@ import six
 from PIL import Image
 
 from skimage.external.tifffile import TiffFile
-from skimage.io._plugins.pil_plugin import pil_to_ndarray
 
 
 __all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
@@ -76,6 +75,7 @@ def alphanumeric_key(s):
 
 
 class ImageCollection(object):
+
     """Load and manage a collection of image files.
 
     Note that files are always stored in alphabetical order. Also note that
@@ -151,6 +151,7 @@ class ImageCollection(object):
     >>> ic = io.ImageCollection('/tmp/work/*.png:/tmp/other/*.jpg')
 
     """
+
     def __init__(self, load_pattern, conserve_memory=True, load_func=None):
         """Load and manage a collection of images."""
         if isinstance(load_pattern, six.string_types):
@@ -243,8 +244,8 @@ class ImageCollection(object):
             n = self._check_imgnum(n)
             idx = n % len(self.data)
 
-            if (self.conserve_memory and n != self._cached) or \
-                (self.data[idx] is None):
+            if ((self.conserve_memory and n != self._cached) or
+                    (self.data[idx] is None)):
                 if self._frame_index:
                     fname, img_num = self._frame_index[idx]
                     print('loading function')
