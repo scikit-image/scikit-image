@@ -4,7 +4,7 @@ import numpy as np
 from numpy.testing import assert_raises, assert_equal, assert_allclose
 
 from skimage import data_dir
-from skimage.io.collection import MultiImage
+from skimage.io.collection import MultiImage, ImageCollection
 
 import six
 
@@ -19,11 +19,17 @@ class TestMultiImage():
         self.imgs = [MultiImage(paths[0]),
                      MultiImage(paths[0], conserve_memory=False),
                      MultiImage(paths[1]),
-                     MultiImage(paths[1], conserve_memory=False)]
+                     MultiImage(paths[1], conserve_memory=False),
+                     ImageCollection(paths[0]),
+                     ImageCollection(paths[1], conserve_memory=False),
+                     ImageCollection('%s:%s' % (paths[0], paths[1]))]
 
     def test_len(self):
         assert len(self.imgs[0]) == len(self.imgs[1]) == 2
         assert len(self.imgs[2]) == len(self.imgs[3]) == 24
+        assert len(self.imgs[4]) == 2
+        assert len(self.imgs[5]) == 24
+        assert len(self.imgs[6]) == 26
 
     def test_getitem(self):
         for img in self.imgs:
@@ -41,6 +47,9 @@ class TestMultiImage():
 
     def test_files_property(self):
         for img in self.imgs:
+            if isinstance(img, ImageCollection):
+                continue
+
             assert isinstance(img.filename, six.string_types)
 
             def set_filename(f):
