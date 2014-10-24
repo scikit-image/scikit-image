@@ -216,6 +216,9 @@ class ImageCollection(object):
                             im.seek(i)
                         except EOFError:
                             break
+                if hasattr(im, 'fp') and im.fp:
+                    im.fp.close()
+
         self._frame_index = index
         return len(index)
 
