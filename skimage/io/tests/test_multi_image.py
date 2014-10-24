@@ -31,6 +31,17 @@ class TestMultiImage():
         assert len(self.imgs[5]) == 24
         assert len(self.imgs[6]) == 26
 
+    def test_slicing(self):
+        img = self.imgs[-1]
+        assert type(img[:]) is ImageCollection
+        assert len(img[:]) == 26
+        assert len(img[:1]) == 1
+        assert len(img[1:]) == 25
+        assert_allclose(img[0], img[:1][0])
+        assert_allclose(img[1], img[1:][0])
+        assert_allclose(img[-1], img[::-1][0])
+        assert_allclose(img[0], img[::-1][-1])
+
     def test_getitem(self):
         for img in self.imgs:
             num = len(img)
