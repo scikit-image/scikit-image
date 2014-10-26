@@ -341,6 +341,8 @@ def label(input, DTYPE_t neighbors=8, background=None, return_num=False):
         scan1D(data_p, forest_p, & shapeinfo, & bg, neighbors, 0, 0)
     elif shapeinfo.ndim == 2:
         scan2D(data_p, forest_p, & shapeinfo, & bg, neighbors, 0)
+    elif shapeinfo.ndim == 3:
+        scan3D(data_p, forest_p, & shapeinfo, & bg, neighbors)
 
     # Label output
     cdef DTYPE_t ctr = 0
@@ -456,3 +458,151 @@ cdef scan2D(DTYPE_t * data_p, DTYPE_t * forest_p, shpinfo * shapeinfo,
 
             if data_p[rindex] == data_p[rindex + shapeinfo.Ded]:
                 join_trees(forest_p, rindex, rindex + shapeinfo.Ded)
+
+
+cdef scan3D(DTYPE_t * data_p, DTYPE_t * forest_p, shpinfo * shapeinfo,
+            bginfo * bg, DTYPE_t neighbors):
+    """
+    Perform forward scan on a 2D array.
+    """
+    cdef DTYPE_t x, y, z, rindex
+    # Handle first plane
+    scan2D(data_p, forest_p, shapeinfo, bg, neighbors, 0)
+    for z in range(1, shapeinfo.z):
+        # Handle first row in 3D manner
+        rindex = shapeinfo.ravel_index(0, 0, z, shapeinfo)
+        if data_p[rindex] == bg.background_val:
+            link_bg(forest_p, rindex, & bg.background_node)
+
+        # Now we have pixels below
+        if data_p[rindex] == data_p[rindex + shapeinfo.Dej]:
+            join_trees(forest_p, rindex, rindex + shapeinfo.Dej)
+
+        if neighbors == 8:
+            if data_p[rindex] == data_p[rindex + shapeinfo.Dek]:
+                join_trees(forest_p, rindex, rindex + shapeinfo.Dek)
+
+            if data_p[rindex] == data_p[rindex + shapeinfo.Dem]:
+                join_trees(forest_p, rindex, rindex + shapeinfo.Dem)
+
+            if data_p[rindex] == data_p[rindex + shapeinfo.Den]:
+                join_trees(forest_p, rindex, rindex + shapeinfo.Den)
+
+        for x in range(1, shapeinfo.x):
+            rindex += 1
+            # Handle the first row
+            if data_p[rindex] == bg.background_val:
+                link_bg(forest_p, rindex, & bg.background_node)
+
+            if data_p[rindex] == data_p[rindex + shapeinfo.Ded]:
+                join_trees(forest_p, rindex, rindex + shapeinfo.Ded)
+
+            if neighbors == 8:
+                if data_p[rindex] == data_p[rindex + shapeinfo.Dei]:
+                    join_trees(forest_p, rindex, rindex + shapeinfo.Dei)
+
+            if data_p[rindex] == data_p[rindex + shapeinfo.Dej]:
+                join_trees(forest_p, rindex, rindex + shapeinfo.Dej)
+
+            if neighbors == 8:
+                if x + 1 < shapeinfo.x:
+                    if data_p[rindex] == data_p[rindex + shapeinfo.Dek]:
+                        join_trees(forest_p, rindex, rindex + shapeinfo.Dek)
+
+                if data_p[rindex] == data_p[rindex + shapeinfo.Del]:
+                    join_trees(forest_p, rindex, rindex + shapeinfo.Del)
+
+                if data_p[rindex] == data_p[rindex + shapeinfo.Dem]:
+                    join_trees(forest_p, rindex, rindex + shapeinfo.Dem)
+
+                if x + 1 < shapeinfo.x:
+                    if data_p[rindex] == data_p[rindex + shapeinfo.Den]:
+                        join_trees(forest_p, rindex, rindex + shapeinfo.Den)
+
+
+        for y in range(1, shapeinfo.y):
+            rindex = shapeinfo.ravel_index(0, y, z, shapeinfo)
+            # Handle the first column in 3D manner
+            if data_p[rindex] == bg.background_val:
+                link_bg(forest_p, rindex, & bg.background_node)
+
+            if data_p[rindex] == data_p[rindex + shapeinfo.Deb]:
+                join_trees(forest_p, rindex, rindex + shapeinfo.Deb)
+
+            if neighbors == 8:
+                if data_p[rindex] == data_p[rindex + shapeinfo.Dec]:
+                    join_trees(forest_p, rindex, rindex + shapeinfo.Dec)
+
+                if data_p[rindex] == data_p[rindex + shapeinfo.Deg]:
+                    join_trees(forest_p, rindex, rindex + shapeinfo.Deg)
+
+                if data_p[rindex] == data_p[rindex + shapeinfo.Deh]:
+                    join_trees(forest_p, rindex, rindex + shapeinfo.Deh)
+
+            if data_p[rindex] == data_p[rindex + shapeinfo.Dej]:
+                join_trees(forest_p, rindex, rindex + shapeinfo.Dej)
+
+            if neighbors == 8:
+                if data_p[rindex] == data_p[rindex + shapeinfo.Dek]:
+                    join_trees(forest_p, rindex, rindex + shapeinfo.Dek)
+
+                if y + 1 < shapeinfo.y:
+                    if data_p[rindex] == data_p[rindex + shapeinfo.Dem]:
+                        join_trees(forest_p, rindex, rindex + shapeinfo.Dem)
+
+                    if data_p[rindex] == data_p[rindex + shapeinfo.Den]:
+                        join_trees(forest_p, rindex, rindex + shapeinfo.Den)
+
+            # Handle the rest of columns
+            for x in range(1, shapeinfo.x):
+                rindex += 1
+                if data_p[rindex] == bg.background_val:
+                    link_bg(forest_p, rindex, & bg.background_node)
+
+                if neighbors == 8:
+                    if data_p[rindex] == data_p[rindex + shapeinfo.Dea]:
+                        join_trees(forest_p, rindex, rindex + shapeinfo.Dea)
+
+                if data_p[rindex] == data_p[rindex + shapeinfo.Deb]:
+                    join_trees(forest_p, rindex, rindex + shapeinfo.Deb)
+
+                if neighbors == 8:
+                    if x < shapeinfo.x - 1:
+                        if data_p[rindex] == data_p[rindex + shapeinfo.Dec]:
+                            join_trees(forest_p, rindex, rindex + shapeinfo.Dec)
+
+                if data_p[rindex] == data_p[rindex + shapeinfo.Ded]:
+                    join_trees(forest_p, rindex, rindex + shapeinfo.Ded)
+
+                # Now pixels below:
+                if neighbors == 8:
+                    if data_p[rindex] == data_p[rindex + shapeinfo.Def]:
+                        join_trees(forest_p, rindex, rindex + shapeinfo.Def)
+
+                    if data_p[rindex] == data_p[rindex + shapeinfo.Deg]:
+                        join_trees(forest_p, rindex, rindex + shapeinfo.Deg)
+
+                    if x + 1 < shapeinfo.x:
+                        if data_p[rindex] == data_p[rindex + shapeinfo.Deh]:
+                            join_trees(forest_p, rindex, rindex + shapeinfo.Deh)
+
+                    if data_p[rindex] == data_p[rindex + shapeinfo.Dei]:
+                        join_trees(forest_p, rindex, rindex + shapeinfo.Dei)
+
+                if data_p[rindex] == data_p[rindex + shapeinfo.Dej]:
+                    join_trees(forest_p, rindex, rindex + shapeinfo.Dej)
+
+                if neighbors == 8:
+                    if x + 1 < shapeinfo.x:
+                        if data_p[rindex] == data_p[rindex + shapeinfo.Dek]:
+                            join_trees(forest_p, rindex, rindex + shapeinfo.Dek)
+
+                    if data_p[rindex] == data_p[rindex + shapeinfo.Del]:
+                        join_trees(forest_p, rindex, rindex + shapeinfo.Del)
+
+                    if data_p[rindex] == data_p[rindex + shapeinfo.Dem]:
+                        join_trees(forest_p, rindex, rindex + shapeinfo.Dem)
+
+                    if x + 1 < shapeinfo.x:
+                        if data_p[rindex] == data_p[rindex + shapeinfo.Den]:
+                            join_trees(forest_p, rindex, rindex + shapeinfo.Den)
