@@ -63,7 +63,7 @@ cdef struct s_shpinfo:
 
 
 cdef shpinfo get_triple(inarr_shape):
-    cdef shpinfo res = shpinfo()
+    cdef shpinfo res
 
     res.y = 1
     res.z = 1
@@ -389,7 +389,7 @@ cdef DTYPE_t resolve_labels(DTYPE_t * data_p, DTYPE_t * forest_p,
 # The 1D indices are "raveled" or "linear", that's where "rindex" comes from.
 
 
-cdef scan1D(DTYPE_t * data_p, DTYPE_t * forest_p, shpinfo * shapeinfo,
+cdef void scan1D(DTYPE_t * data_p, DTYPE_t * forest_p, shpinfo * shapeinfo,
             bginfo * bg, DTYPE_t neighbors, DTYPE_t y, DTYPE_t z):
     """
     Perform forward scan on a 1D object, usually the first row of an image
@@ -412,7 +412,7 @@ cdef scan1D(DTYPE_t * data_p, DTYPE_t * forest_p, shpinfo * shapeinfo,
         join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
 
 
-cdef scan2D(DTYPE_t * data_p, DTYPE_t * forest_p, shpinfo * shapeinfo,
+cdef void scan2D(DTYPE_t * data_p, DTYPE_t * forest_p, shpinfo * shapeinfo,
             bginfo * bg, DTYPE_t neighbors, DTYPE_t z):
     """
     Perform forward scan on a 2D array.
@@ -452,7 +452,7 @@ cdef scan2D(DTYPE_t * data_p, DTYPE_t * forest_p, shpinfo * shapeinfo,
             join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
 
 
-cdef scan3D(DTYPE_t * data_p, DTYPE_t * forest_p, shpinfo * shapeinfo,
+cdef void scan3D(DTYPE_t * data_p, DTYPE_t * forest_p, shpinfo * shapeinfo,
             bginfo * bg, DTYPE_t neighbors):
     """
     Perform forward scan on a 2D array.
