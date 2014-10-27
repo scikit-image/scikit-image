@@ -323,7 +323,7 @@ def label(input, DTYPE_t neighbors=8, background=None, return_num=False):
 
     # Having data a 2D array slows down access considerably using linear
     # indices even when using the data_p pointer :-(
-    data = np.copy(input.flatten().astype(DTYPE), order="C")
+    data = np.copy(input.flatten().astype(DTYPE))
     forest = np.arange(data.size, dtype=DTYPE)
 
     cdef DTYPE_t *forest_p = <DTYPE_t*>forest.data
