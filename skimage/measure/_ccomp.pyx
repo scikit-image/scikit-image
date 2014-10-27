@@ -31,8 +31,8 @@ ctypedef cnp.int32_t INTS_t
 
 cdef struct s_shpinfo
 
-ctypedef s_shpinfo shpinfo
-ctypedef int (* fun_ravel)(int, int, int, shpinfo *)
+ctypedef s_shpinfo shape_info
+ctypedef int (* fun_ravel)(int, int, int, shape_info *)
 
 
 ctypedef struct bginfo:
@@ -49,21 +49,33 @@ cdef enum:
 
 
 # Structure for centralised access to shape data
+# Contains information related to the shape of the input array
 cdef struct s_shpinfo:
     INTS_t x
     INTS_t y
     INTS_t z
 
+    # Number of elements
     DTYPE_t numels
+    # Number of of the input array
     INTS_t ndim
 
+    # Offsets between elements recalculated to linear index increments
+    # DEX[D_ea] is offset between E and A (i.e. to the point to upper left)
+    # The name DEX is supposed to evoke DE., where . = A, B, C, D, F etc.
     INTS_t DEX[D_COUNT]
 
+    # Function pointer to a function that recalculates multiindex to linear
+    # index. Heavily depends on dimensions of the input array.
     fun_ravel ravel_index
 
 
-cdef shpinfo get_triple(inarr_shape):
-    cdef shpinfo res
+cdef shape_info get_shape_info(inarr_shape):
+    """
+    Precalculates all the needed data from the input array shape
+    and stores them in the shape_info struct.
+    """
+    cdef shape_info res
 
     res.y = 1
     res.z = 1
@@ -131,14 +143,14 @@ cdef inline void join_trees_wrapper(DTYPE_t * data_p, DTYPE_t * forest_p,
         join_trees(forest_p, rindex, rindex + idxdiff)
 
 
-cdef int ravel_index1D(int x, int y, int z, shpinfo * shapeinfo):
+cdef int ravel_index1D(int x, int y, int z, shape_info * shapeinfo):
     """
     Ravel index of a 1D array - trivial. y and z are ignored.
     """
     return x
 
 
-cdef int ravel_index2D(int x, int y, int z, shpinfo * shapeinfo):
+cdef int ravel_index2D(int x, int y, int z, shape_info * shapeinfo):
     """
     Ravel index of a 2D array. z is ignored
     """
@@ -146,7 +158,7 @@ cdef int ravel_index2D(int x, int y, int z, shpinfo * shapeinfo):
     return ret
 
 
-cdef int ravel_index3D(int x, int y, int z, shpinfo * shapeinfo):
+cdef int ravel_index3D(int x, int y, int z, shape_info * shapeinfo):
     """
     Ravel index of a 3D array
     """
@@ -169,7 +181,7 @@ cdef int ravel_index3D(int x, int y, int z, shpinfo * shapeinfo):
 # 1 is the root.
 # Last but not least, one array can hold more than one tree as long as their
 # indices are different. It is the case in this algorithm, so for that reason
-# the array is referred to as the "forrest" = multiple trees next to each
+# the array is referred to as the "forest" = multiple trees next to each
 # other.
 #
 # In this algorithm, there are as many indices as there are elements in the
@@ -259,6 +271,8 @@ def label(input, DTYPE_t neighbors=8, background=None, return_num=False):
         Image to label.
     neighbors : {4, 8}, int, optional
         Whether to use 4- or 8-connectivity.
+        In 3D, 4-connectivity means connected pixels share have to share face,
+        whereas with 8-connectivity, they have to share only edge or vertex.
     background : int, optional
         Consider all pixels with this value as background pixels, and label
         them as -1. (Note: background pixels will be labeled as 0 starting with
@@ -309,16 +323,16 @@ def label(input, DTYPE_t neighbors=8, background=None, return_num=False):
 
     # Having data a 2D array slows down access considerably using linear
     # indices even when using the data_p pointer :-(
-    data = input.flatten().astype(DTYPE, copy=True)
+    data = np.copy(input.flatten().astype(DTYPE), order="C")
     forest = np.arange(data.size, dtype=DTYPE)
 
     cdef DTYPE_t *forest_p = <DTYPE_t*>forest.data
     cdef DTYPE_t *data_p = <DTYPE_t*>data.data
 
-    cdef shpinfo shapeinfo
+    cdef shape_info shapeinfo
     cdef bginfo bg
 
-    shapeinfo = get_triple(input.shape)
+    shapeinfo = get_shape_info(input.shape)
 
     bg.background_val = 0
     bg.background_node = -999
@@ -342,7 +356,7 @@ def label(input, DTYPE_t neighbors=8, background=None, return_num=False):
         scan3D(data_p, forest_p, & shapeinfo, & bg, neighbors)
 
     # Label output
-    cdef DTYPE_t ctr = 0
+    cdef DTYPE_t ctr
     ctr = resolve_labels(data_p, forest_p, & shapeinfo, & bg)
 
     # Work around a bug in ndimage's type checking on 32-bit platforms
@@ -358,17 +372,20 @@ def label(input, DTYPE_t neighbors=8, background=None, return_num=False):
 
 
 cdef DTYPE_t resolve_labels(DTYPE_t * data_p, DTYPE_t * forest_p,
-                            shpinfo * shapeinfo, bginfo * bg):
+                            shape_info * shapeinfo, bginfo * bg):
     """
     We iterate through the provisional labels and assign final labels based on
     our knowledge of prov. labels relationship.
     We also track how many distinct final labels we have.
     """
-    cdef DTYPE_t counter = 0
+    cdef DTYPE_t counter = 0, i
+
     for i in range(shapeinfo.numels):
         if i == bg.background_node:
             data_p[i] = -1
         elif i == forest_p[i]:
+            # We have stumbled across a root which is something new to us (root
+            # is the LOWEST of all prov. labels that are equivalent to it)
             data_p[i] = counter
             counter += 1
         else:
@@ -378,9 +395,9 @@ cdef DTYPE_t resolve_labels(DTYPE_t * data_p, DTYPE_t * forest_p,
 
 # Here, we work with flat arrays regardless whether the data is 1, 2 or 3D.
 # The lookup to the neighbor in a 2D array is achieved by precalculating an
-# offset and ading it to the index.
+# offset and adding it to the index.
 # The forward scan mask looks like this (the center point is actually E):
-# (take a look at shpinfo docs for more exhaustive info)
+# (take a look at shape_info docs for more exhaustive info)
 # A B C
 # D E
 #
@@ -389,8 +406,8 @@ cdef DTYPE_t resolve_labels(DTYPE_t * data_p, DTYPE_t * forest_p,
 # The 1D indices are "raveled" or "linear", that's where "rindex" comes from.
 
 
-cdef void scan1D(DTYPE_t * data_p, DTYPE_t * forest_p, shpinfo * shapeinfo,
-            bginfo * bg, DTYPE_t neighbors, DTYPE_t y, DTYPE_t z):
+cdef void scan1D(DTYPE_t * data_p, DTYPE_t * forest_p, shape_info * shapeinfo,
+                 bginfo * bg, DTYPE_t neighbors, DTYPE_t y, DTYPE_t z):
     """
     Perform forward scan on a 1D object, usually the first row of an image
     """
@@ -412,8 +429,8 @@ cdef void scan1D(DTYPE_t * data_p, DTYPE_t * forest_p, shpinfo * shapeinfo,
         join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
 
 
-cdef void scan2D(DTYPE_t * data_p, DTYPE_t * forest_p, shpinfo * shapeinfo,
-            bginfo * bg, DTYPE_t neighbors, DTYPE_t z):
+cdef void scan2D(DTYPE_t * data_p, DTYPE_t * forest_p, shape_info * shapeinfo,
+                 bginfo * bg, DTYPE_t neighbors, DTYPE_t z):
     """
     Perform forward scan on a 2D array.
     """
@@ -452,8 +469,8 @@ cdef void scan2D(DTYPE_t * data_p, DTYPE_t * forest_p, shpinfo * shapeinfo,
             join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
 
 
-cdef void scan3D(DTYPE_t * data_p, DTYPE_t * forest_p, shpinfo * shapeinfo,
-            bginfo * bg, DTYPE_t neighbors):
+cdef void scan3D(DTYPE_t * data_p, DTYPE_t * forest_p, shape_info * shapeinfo,
+                 bginfo * bg, DTYPE_t neighbors):
     """
     Perform forward scan on a 2D array.
     """
