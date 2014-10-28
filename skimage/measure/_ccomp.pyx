@@ -35,15 +35,22 @@ ctypedef s_shpinfo shape_info
 ctypedef int (* fun_ravel)(int, int, int, shape_info *)
 
 
+# For having stuff concerning background in one place
 ctypedef struct bginfo:
     DTYPE_t background_val
     DTYPE_t background_node
 
 
+# A pixel has neighbors that have already been scanned.
+# In the paper, the pixel is denoted by E and its neighbors
+# by A, B, C and D (in 2D) - see doc for function get_shape_info()
 cdef enum:
     # D_ee, # We don't need D_ee
+    # the 1D neighbor
     D_ed,
+    # 2D neighbors
     D_ea, D_eb, D_ec,
+    # 3D neighbors
     D_ef, D_eg, D_eh, D_ei, D_ej, D_ek, D_el, D_em, D_en,
     D_COUNT
 
@@ -137,20 +144,20 @@ cdef shape_info get_shape_info(inarr_shape):
     return res
 
 
-cdef inline void join_trees_wrapper(DTYPE_t * data_p, DTYPE_t * forest_p,
+cdef inline void join_trees_wrapper(DTYPE_t *data_p, DTYPE_t *forest_p,
                                     DTYPE_t rindex, INTS_t idxdiff):
     if data_p[rindex] == data_p[rindex + idxdiff]:
         join_trees(forest_p, rindex, rindex + idxdiff)
 
 
-cdef int ravel_index1D(int x, int y, int z, shape_info * shapeinfo):
+cdef int ravel_index1D(int x, int y, int z, shape_info *shapeinfo):
     """
     Ravel index of a 1D array - trivial. y and z are ignored.
     """
     return x
 
 
-cdef int ravel_index2D(int x, int y, int z, shape_info * shapeinfo):
+cdef int ravel_index2D(int x, int y, int z, shape_info *shapeinfo):
     """
     Ravel index of a 2D array. z is ignored
     """
@@ -158,7 +165,7 @@ cdef int ravel_index2D(int x, int y, int z, shape_info * shapeinfo):
     return ret
 
 
-cdef int ravel_index3D(int x, int y, int z, shape_info * shapeinfo):
+cdef int ravel_index3D(int x, int y, int z, shape_info *shapeinfo):
     """
     Ravel index of a 3D array
     """
@@ -371,8 +378,8 @@ def label(input, DTYPE_t neighbors=8, background=None, return_num=False):
         return res
 
 
-cdef DTYPE_t resolve_labels(DTYPE_t * data_p, DTYPE_t * forest_p,
-                            shape_info * shapeinfo, bginfo * bg):
+cdef DTYPE_t resolve_labels(DTYPE_t *data_p, DTYPE_t *forest_p,
+                            shape_info *shapeinfo, bginfo *bg):
     """
     We iterate through the provisional labels and assign final labels based on
     our knowledge of prov. labels relationship.
@@ -406,14 +413,14 @@ cdef DTYPE_t resolve_labels(DTYPE_t * data_p, DTYPE_t * forest_p,
 # The 1D indices are "raveled" or "linear", that's where "rindex" comes from.
 
 
-cdef void scan1D(DTYPE_t * data_p, DTYPE_t * forest_p, shape_info * shapeinfo,
-                 bginfo * bg, DTYPE_t neighbors, DTYPE_t y, DTYPE_t z):
+cdef void scan1D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
+                 bginfo *bg, DTYPE_t neighbors, DTYPE_t y, DTYPE_t z):
     """
     Perform forward scan on a 1D object, usually the first row of an image
     """
     # Initialize the first row
     cdef DTYPE_t x, rindex
-    cdef INTS_t * DEX = shapeinfo.DEX
+    cdef INTS_t *DEX = shapeinfo.DEX
     rindex = shapeinfo.ravel_index(0, y, z, shapeinfo)
 
     if data_p[rindex] == bg.background_val:
@@ -429,13 +436,13 @@ cdef void scan1D(DTYPE_t * data_p, DTYPE_t * forest_p, shape_info * shapeinfo,
         join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
 
 
-cdef void scan2D(DTYPE_t * data_p, DTYPE_t * forest_p, shape_info * shapeinfo,
-                 bginfo * bg, DTYPE_t neighbors, DTYPE_t z):
+cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
+                 bginfo *bg, DTYPE_t neighbors, DTYPE_t z):
     """
     Perform forward scan on a 2D array.
     """
     cdef DTYPE_t x, y, rindex
-    cdef INTS_t * DEX = shapeinfo.DEX
+    cdef INTS_t *DEX = shapeinfo.DEX
     scan1D(data_p, forest_p, shapeinfo, bg, neighbors, 0, z)
     for y in range(1, shapeinfo.y):
         rindex = shapeinfo.ravel_index(0, y, 0, shapeinfo)
@@ -469,13 +476,13 @@ cdef void scan2D(DTYPE_t * data_p, DTYPE_t * forest_p, shape_info * shapeinfo,
             join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
 
 
-cdef void scan3D(DTYPE_t * data_p, DTYPE_t * forest_p, shape_info * shapeinfo,
-                 bginfo * bg, DTYPE_t neighbors):
+cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
+                 bginfo *bg, DTYPE_t neighbors):
     """
     Perform forward scan on a 2D array.
     """
     cdef DTYPE_t x, y, z, rindex
-    cdef INTS_t * DEX = shapeinfo.DEX
+    cdef INTS_t *DEX = shapeinfo.DEX
     # Handle first plane
     scan2D(data_p, forest_p, shapeinfo, bg, neighbors, 0)
     for z in range(1, shapeinfo.z):
