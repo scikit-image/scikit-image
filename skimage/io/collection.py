@@ -153,7 +153,7 @@ class ImageCollection(object):
     """
 
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
-            **load_func_kwargs):
+                 **load_func_kwargs):
         """Load and manage a collection of images."""
         if isinstance(load_pattern, six.string_types):
             load_pattern = load_pattern.split(os.pathsep)
