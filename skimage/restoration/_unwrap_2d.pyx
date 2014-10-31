@@ -1,8 +1,9 @@
-cdef extern void unwrap2D(double* wrapped_image,
-                     double* unwrapped_image,
-                     unsigned char* input_mask,
-                     int image_width, int image_height,
-                     int wrap_around_x, int wrap_around_y)
+cdef extern from *:
+    void unwrap2D(double* wrapped_image,
+                  double* unwrapped_image,
+                  unsigned char* input_mask,
+                  int image_width, int image_height,
+                  int wrap_around_x, int wrap_around_y)
 
 def unwrap_2d(double[:, ::1] image,
               unsigned char[:, ::1] mask,
