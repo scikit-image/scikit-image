@@ -1,8 +1,9 @@
-cdef extern void unwrap3D(double* wrapped_volume,
-                     double* unwrapped_volume,
-                     unsigned char* input_mask,
-                     int image_width, int image_height, int volume_depth,
-                     int wrap_around_x, int wrap_around_y, int wrap_around_z)
+cdef extern from *:
+  void unwrap3D(double* wrapped_volume,
+                double* unwrapped_volume,
+                unsigned char* input_mask,
+                int image_width, int image_height, int volume_depth,
+                int wrap_around_x, int wrap_around_y, int wrap_around_z)
 
 def unwrap_3d(double[:, :, ::1] image,
               unsigned char[:, :, ::1] mask,
