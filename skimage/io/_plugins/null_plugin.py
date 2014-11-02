@@ -3,11 +3,11 @@ __all__ = ['imshow', 'imread', 'imsave', '_app_show']
 import warnings
 
 message = '''\
-No plugin has been loaded.  Please refer to
+No plugin has been loaded.  Please refer to the docstring for ``skimage.io``
+for a list of available plugins.  You may specify a plugin explicitly as
+an argument to ``imread``, e.g. ``imread("image.jpg", plugin='pil')``.
 
-skimage.io.plugins()
-
-for a list of available plugins.'''
+'''
 
 
 def imshow(*args, **kwargs):
