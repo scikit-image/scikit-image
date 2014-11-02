@@ -44,7 +44,7 @@ plugin_meta_data = {}
 # the following preferences.
 preferred_plugins = {
     # Default plugins for all types (overridden by specific types below).
-    'all': ['pil', 'matplotlib', 'qt', 'freeimage', 'null']
+    'all': ['pil', 'matplotlib', 'qt', 'freeimage']
 }
 
 
