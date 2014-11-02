@@ -91,7 +91,7 @@ def sobel_gray(image):
     return filter.sobel(image)
 
 fig, ax = plt.subplots()
-ax.imshow(sobel_gray(image))
+ax.imshow(sobel_gray(image), cmap=plt.cm.gray)
 
 plt.show()
 
