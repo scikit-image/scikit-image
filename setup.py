@@ -103,7 +103,7 @@ def check_requirements():
                 dep_error = True
         if dep_error:
             raise ImportError('You need `%s` version %s or later.' \
-                              % (package_name, '.'.join(str(i) for i in min_version)))
+                              % (package_name, min_version))
 
 
 if __name__ == "__main__":
