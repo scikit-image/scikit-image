@@ -1,20 +1,12 @@
 __all__ = ['imread', 'imsave']
 
 import numpy as np
-
-try:
-    from PIL import Image
-except ImportError:
-    raise ImportError("The Python Image Library could not be found. "
-                      "Please refer to "
-                      "https://pypi.python.org/pypi/Pillow/ (or "
-                      "http://pypi.python.org/pypi/PIL/) "
-                      "for further instructions.")
+from six import string_types
+from PIL import Image
 
 from skimage.util import img_as_ubyte, img_as_uint
-
-from six import string_types
-from skimage.external.tifffile import imread as tif_imread, imsave as tif_imsave
+from skimage.external.tifffile import (
+    imread as tif_imread, imsave as tif_imsave)
 
 
 def imread(fname, dtype=None):
