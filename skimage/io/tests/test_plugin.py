@@ -114,7 +114,7 @@ def test_load_preferred_plugins_imread():
         plug, func = manage_plugins.plugin_store['imread'][0]
         assert func == pil_plugin.imread
         plug, func = manage_plugins.plugin_store['imshow'][0]
-        assert func != matplotlib_plugin.imshow
+        assert func == matplotlib_plugin.imshow, func.__module__
 
 
 if __name__ == "__main__":
