@@ -49,8 +49,6 @@ def _dilate(np.uint8_t[:, :] image,
     image = np.ascontiguousarray(image)
     if out is None:
         out = np.zeros((rows, cols), dtype=np.uint8)
-    else:
-        out = np.ascontiguousarray(out)
 
     cdef Py_ssize_t r, c, rr, cc, s, value, local_max
 
@@ -125,8 +123,6 @@ def _erode(np.uint8_t[:, :] image,
     image = np.ascontiguousarray(image)
     if out is None:
         out = np.zeros((rows, cols), dtype=np.uint8)
-    else:
-        out = np.ascontiguousarray(out)
 
     cdef int r, c, rr, cc, s, value, local_min
 

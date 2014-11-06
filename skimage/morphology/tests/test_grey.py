@@ -6,7 +6,6 @@ from scipy import ndimage
 
 import skimage
 from skimage import data_dir
-from skimage.util import img_as_bool
 from skimage.morphology import grey, selem
 
 
@@ -245,6 +244,28 @@ def test_inplace():
     for f in (grey.erosion, grey.dilation,
               grey.white_tophat, grey.black_tophat):
         testing.assert_raises(NotImplementedError, f, image, selem, out=out)
+
+
+def test_discontiguous_out_array():
+    image = np.array([[5, 6, 2],
+                      [7, 2, 2],
+                      [3, 5, 1]], np.uint8)
+    out_array_big = np.zeros((5, 5), np.uint8)
+    out_array = out_array_big[::2, ::2]
+    expected_dilation = np.array([[7, 0, 6, 0, 6],
+                                  [0, 0, 0, 0, 0],
+                                  [7, 0, 7, 0, 2],
+                                  [0, 0, 0, 0, 0],
+                                  [7, 0, 5, 0, 5]], np.uint8)
+    expected_erosion = np.array([[5, 0, 2, 0, 2],
+                                 [0, 0, 0, 0, 0],
+                                 [2, 0, 2, 0, 1],
+                                 [0, 0, 0, 0, 0],
+                                 [3, 0, 1, 0, 1]], np.uint8)
+    grey.dilation(image, out=out_array)
+    testing.assert_array_equal(out_array_big, expected_dilation)
+    grey.erosion(image, out=out_array)
+    testing.assert_array_equal(out_array_big, expected_erosion)
 
 
 if __name__ == '__main__':
