@@ -82,7 +82,9 @@ def sobel(image, mask=None):
     has to be further processed to perform edge detection.
     """
     assert_nD(image, 2)
-    return np.sqrt(hsobel(image, mask)**2 + vsobel(image, mask)**2)
+    out = np.sqrt(hsobel(image, mask)**2 + vsobel(image, mask)**2)
+    out /= np.sqrt(2)
+    return out
 
 
 def hsobel(image, mask=None):
@@ -176,11 +178,13 @@ def scharr(image, mask=None):
 
     References
     ----------
-    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical Optimization
-           of Kernel Based Image Derivatives.
+    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical
+           Optimization of Kernel Based Image Derivatives.
 
     """
-    return np.sqrt(hscharr(image, mask)**2 + vscharr(image, mask)**2)
+    out = np.sqrt(hscharr(image, mask)**2 + vscharr(image, mask)**2)
+    out /= np.sqrt(2)
+    return out
 
 
 def hscharr(image, mask=None):
@@ -211,8 +215,8 @@ def hscharr(image, mask=None):
 
     References
     ----------
-    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical Optimization
-           of Kernel Based Image Derivatives.
+    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical
+           Optimization of Kernel Based Image Derivatives.
 
     """
     assert_nD(image, 2)
@@ -249,8 +253,8 @@ def vscharr(image, mask=None):
 
     References
     ----------
-    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical Optimization
-           of Kernel Based Image Derivatives.
+    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical
+           Optimization of Kernel Based Image Derivatives.
 
     """
     assert_nD(image, 2)
@@ -282,7 +286,9 @@ def prewitt(image, mask=None):
     and vertical Prewitt transforms.
     """
     assert_nD(image, 2)
-    return np.sqrt(hprewitt(image, mask)**2 + vprewitt(image, mask)**2)
+    out = np.sqrt(hprewitt(image, mask)**2 + vprewitt(image, mask)**2)
+    out /= np.sqrt(2)
+    return out
 
 
 def hprewitt(image, mask=None):
@@ -369,8 +375,10 @@ def roberts(image, mask=None):
         The Roberts' Cross edge map.
     """
     assert_nD(image, 2)
-    return np.sqrt(roberts_positive_diagonal(image, mask)**2 +
-                   roberts_negative_diagonal(image, mask)**2)
+    out = np.sqrt(roberts_positive_diagonal(image, mask)**2 +
+                  roberts_negative_diagonal(image, mask)**2)
+    out /= np.sqrt(2)
+    return out
 
 
 def roberts_positive_diagonal(image, mask=None):
