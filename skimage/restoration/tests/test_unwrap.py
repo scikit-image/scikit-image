@@ -1,7 +1,7 @@
 from __future__ import print_function, division
 
 import numpy as np
-from numpy.testing import (run_module_suite, assert_array_almost_equal,
+from numpy.testing import (run_module_suite, assert_array_almost_equal_nulp,
                            assert_almost_equal, assert_array_equal,
                            assert_raises)
 import warnings
@@ -28,7 +28,7 @@ def assert_phase_almost_equal(a, b, *args, **kwargs):
                   np.max(np.abs(au - (bu - shift))))
             print('assert_phase_allclose, no mask, rel',
                   np.max(np.abs((au - (bu - shift)) / au)))
-    assert_array_almost_equal(a + shift, b, *args, **kwargs)
+    assert_array_almost_equal_nulp(a + shift, b, *args, **kwargs)
 
 
 def check_unwrap(image, mask=None):
@@ -128,13 +128,13 @@ def test_mask():
         image_unwrapped -= image_unwrapped[0, 0]    # remove phase shift
         # The end of the unwrapped array should have value equal to the
         # endpoint of the unmasked ramp
-        assert_array_almost_equal(image_unwrapped[:, -1], image[i, -1])
+        assert_array_almost_equal_nulp(image_unwrapped[:, -1], image[i, -1])
 
         # Same tests, but forcing use of the 3D unwrapper by reshaping
         image_wrapped_3d = image_wrapped.reshape((1,) + image_wrapped.shape)
         image_unwrapped_3d = unwrap_phase(image_wrapped_3d)
         image_unwrapped_3d -= image_unwrapped_3d[0, 0, 0]  # remove phase shift
-        assert_array_almost_equal(image_unwrapped_3d[:, :, -1], image[i, -1])
+        assert_array_almost_equal_nulp(image_unwrapped_3d[:, :, -1], image[i, -1])
 
 
 def test_invalid_input():
