@@ -320,7 +320,6 @@ def test_corner_fast_lena():
                         [494, 169],
                         [496, 266]])
     actual = corner_peaks(corner_fast(img, 12, 0.3))
-    print actual
     assert_array_equal(actual, expected)
 
 

@@ -150,7 +150,6 @@ def test_otsu_lena_image():
 
 def test_otsu_astro_image():
     img = skimage.img_as_ubyte(data.astronaut())
-    print threshold_otsu(img)
     assert 109 < threshold_otsu(img) < 111
 
 def test_yen_camera_image():
