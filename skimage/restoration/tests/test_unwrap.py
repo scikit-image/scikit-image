@@ -144,5 +144,12 @@ def test_invalid_input():
     assert_raises(ValueError, unwrap_phase, np.zeros((1, 1)), 'False')
 
 
+def test_unwrap_3d_middle_wrap_around():
+    # Segmentation fault in 3D unwrap phase with middle dimension connected
+    # GitHub issue #1171
+    image = np.zeros((20, 30, 40), dtype=np.float32)
+    unwrap = unwrap_phase(image, wrap_around=[False, True, False])
+    assert np.all(unwrap == 0)
+
 if __name__ == "__main__":
     run_module_suite()

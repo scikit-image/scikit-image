@@ -786,7 +786,7 @@ void  verticalEDGEs(VOXELM *voxel, EDGE *edge, int volume_width, int volume_heig
 		}
 	      voxel_pointer++;
 	    }
-	  voxel_pointer += next_voxel + 1;
+	  voxel_pointer += next_voxel;
 	}
     }
   params->no_of_edges = no_of_edges;
