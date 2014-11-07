@@ -9,7 +9,7 @@ from skimage.external.tifffile import (
     imread as tif_imread, imsave as tif_imsave)
 
 
-def imread(fname, dtype=None):
+def imread(fname, dtype=None, img_num=None, **kwargs):
     """Load an image from file.
 
     Parameters
@@ -18,6 +18,12 @@ def imread(fname, dtype=None):
        File name.
     dtype : numpy dtype object or string specifier
        Specifies data type of array elements.
+    img_num : int, optional
+       Specifies which image to read in a file with multiple images
+       (zero-indexed).
+    kwargs : keyword pairs, optional
+        Addition keyword arguments to pass through (only applicable to Tiff
+        files for now,  see `tifffile`'s `imread` function).
 
     Notes
     -----
@@ -34,8 +40,9 @@ def imread(fname, dtype=None):
 
     """
     if hasattr(fname, 'lower') and dtype is None:
+        kwargs.setdefault('key', img_num)
         if fname.lower().endswith(('.tiff', '.tif')):
-            return tif_imread(fname)
+            return tif_imread(fname, **kwargs)
 
     im = Image.open(fname)
     try:
@@ -45,10 +52,10 @@ def imread(fname, dtype=None):
         site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
         raise ValueError('Could not load "%s"\nPlease see documentation at: %s' % (fname, site))
     else:
-        return pil_to_ndarray(im, dtype)
+        return pil_to_ndarray(im, dtype=dtype)
 
 
-def pil_to_ndarray(im, dtype=None):
+def pil_to_ndarray(im, dtype=None, img_num=None):
     """Import a PIL Image object to an ndarray, in memory.
 
     Parameters
@@ -56,27 +63,52 @@ def pil_to_ndarray(im, dtype=None):
     Refer to ``imread``.
 
     """
-    fp = im.fp if hasattr(im, 'fp') else None
-    if im.mode == 'P':
-        if _palette_is_grayscale(im):
-            im = im.convert('L')
+    frames = []
+    i = 0
+    while 1:
+        try:
+            im.seek(i)
+        except EOFError:
+            break
+
+        # seeking must be done sequentially
+        if img_num and not i == img_num:
+            i += 1
+            continue
+
+        frame = im
+        if im.mode == 'P':
+            if _palette_is_grayscale(im):
+                frame = im.convert('L')
+            else:
+                frame = im.convert('RGB')
+        elif im.mode == '1':
+            frame = im.convert('L')
+
+        elif 'A' in im.mode:
+            frame = im.convert('RGBA')
+
+        if im.mode.startswith('I;16'):
+            shape = im.size
+            dtype = '>u2' if im.mode.endswith('B') else '<u2'
+            if 'S' in im.mode:
+                dtype = dtype.replace('u', 'i')
+            frame = np.fromstring(frame.tostring(), dtype)
+            frame.shape = shape[::-1]
+
         else:
-            im = im.convert('RGB')
-    elif im.mode == '1':
-        im = im.convert('L')
-    elif im.mode.startswith('I;16'):
-        shape = im.size
-        dtype = '>u2' if im.mode.endswith('B') else '<u2'
-        if 'S' in im.mode:
-            dtype = dtype.replace('u', 'i')
-        im = np.fromstring(im.tostring(), dtype)
-        im.shape = shape[::-1]
-    elif 'A' in im.mode:
-        im = im.convert('RGBA')
-    im = np.array(im, dtype=dtype)
-    if fp is not None:
-        fp.close()
-    return im
+            frame = np.array(frame, dtype=dtype)
+
+        frames.append(frame)
+        i += 1
+
+    if hasattr(im, 'fp') and im.fp:
+        im.fp.close()
+
+    if len(frames) > 1:
+        return np.array(frames)
+    else:
+        return frames[0]
 
 
 def _palette_is_grayscale(pil_image):
