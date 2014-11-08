@@ -63,12 +63,12 @@ from __future__ import print_function
 import matplotlib.pyplot as plt
 import numpy as np
 
-from skimage.data import lena
+from skimage.data import astronaut
 from skimage.segmentation import felzenszwalb, slic, quickshift
 from skimage.segmentation import mark_boundaries
 from skimage.util import img_as_float
 
-img = img_as_float(lena()[::2, ::2])
+img = img_as_float(astronaut()[::2, ::2])
 segments_fz = felzenszwalb(img, scale=100, sigma=0.5, min_size=50)
 segments_slic = slic(img, n_segments=250, compactness=10, sigma=1)
 segments_quick = quickshift(img, kernel_size=3, max_dist=6, ratio=0.5)

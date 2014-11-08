@@ -310,12 +310,12 @@ def denoise_tv_chambolle(im, weight=50, eps=2.e-4, n_iter_max=200,
 
     Examples
     --------
-    2D example on Lena image:
+    2D example on astronaut image:
 
     >>> from skimage import color, data
-    >>> lena = color.rgb2gray(data.lena())[:50, :50]
-    >>> lena += 0.5 * lena.std() * np.random.randn(*lena.shape)
-    >>> denoised_lena = denoise_tv_chambolle(lena, weight=60)
+    >>> img = color.rgb2gray(data.astronaut())[:50, :50]
+    >>> img += 0.5 * img.std() * np.random.randn(*astro.shape)
+    >>> denoised_img = denoise_tv_chambolle(img, weight=60)
 
     3D example on synthetic data:
 

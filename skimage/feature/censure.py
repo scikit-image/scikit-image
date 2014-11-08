@@ -160,30 +160,38 @@ class CENSURE(FeatureDetector):
 
     Examples
     --------
-    >>> from skimage.data import lena
+    >>> from skimage.data import astronaut
     >>> from skimage.color import rgb2gray
     >>> from skimage.feature import CENSURE
-    >>> img = rgb2gray(lena()[100:300, 100:300])
+    >>> img = rgb2gray(astronaut()[100:300, 100:300])
     >>> censure = CENSURE()
     >>> censure.detect(img)
     >>> censure.keypoints
-    array([[ 71, 148],
-           [ 77, 186],
-           [ 78, 189],
-           [ 89, 174],
-           [127, 134],
-           [131, 133],
-           [134, 125],
-           [137, 125],
-           [149,  36],
-           [162, 165],
-           [168, 167],
-           [170,   5],
-           [171,  29],
-           [179,  20],
-           [194,  65]])
+    array([[  4, 148],
+           [ 12,  73],
+           [ 21, 176],
+           [ 91,  22],
+           [ 93,  56],
+           [ 94,  22],
+           [ 95,  54],
+           [100,  51],
+           [103,  51],
+           [106,  67],
+           [108,  15],
+           [117,  20],
+           [122,  60],
+           [125,  37],
+           [129,  37],
+           [133,  76],
+           [145,  44],
+           [146,  94],
+           [150, 114],
+           [153,  33],
+           [154, 156],
+           [155, 151],
+           [184,  63]])
     >>> censure.scales
-    array([2, 4, 2, 3, 4, 2, 2, 3, 4, 6, 3, 2, 3, 4, 2])
+    array([2, 6, 6, 2, 4, 3, 2, 3, 2, 6, 3, 2, 2, 3, 2, 2, 2, 3, 2, 2, 4, 2, 2])
 
     """
 

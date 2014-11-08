@@ -244,7 +244,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
     Examples
     --------
     >>> from skimage import data, graph, segmentation
-    >>> img = data.lena()
+    >>> img = data.astronaut()
     >>> labels = segmentation.slic(img)
     >>> rag = graph.rag_mean_color(img, labels)
 

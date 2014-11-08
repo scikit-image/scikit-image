@@ -176,15 +176,18 @@
 
 - François Orieux
   Image deconvolution http://research.orieux.fr
-  
+
 - Vighnesh Birodkar
   Blob Detection
-  
+
 - Axel Donath
   Blob Detection
 
 - Adam Feuer
   PIL Image import and export improvements
+
+- Rebecca Murphy
+  astronaut in examples
 
 - Geoffrey French
   skimage.filters.rank.windowed_histogram and plot_windowed_histogram example.

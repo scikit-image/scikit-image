@@ -100,7 +100,7 @@ def test_homography():
 
 
 def test_fast_homography():
-    img = rgb2gray(data.lena()).astype(np.uint8)
+    img = rgb2gray(data.astronaut()).astype(np.uint8)
     img = img[:, :100]
 
     theta = np.deg2rad(30)
@@ -244,21 +244,21 @@ def test_const_cval_out_of_range():
 
 
 def test_warp_identity():
-    lena = img_as_float(rgb2gray(data.lena()))
-    assert len(lena.shape) == 2
-    assert np.allclose(lena, warp(lena, AffineTransform(rotation=0)))
-    assert not np.allclose(lena, warp(lena, AffineTransform(rotation=0.1)))
-    rgb_lena = np.transpose(np.asarray([lena, np.zeros_like(lena), lena]),
+    img = img_as_float(rgb2gray(data.astronaut()))
+    assert len(img.shape) == 2
+    assert np.allclose(img, warp(img, AffineTransform(rotation=0)))
+    assert not np.allclose(img, warp(img, AffineTransform(rotation=0.1)))
+    rgb_img = np.transpose(np.asarray([img, np.zeros_like(img), img]),
                             (1, 2, 0))
-    warped_rgb_lena = warp(rgb_lena, AffineTransform(rotation=0.1))
-    assert np.allclose(rgb_lena, warp(rgb_lena, AffineTransform(rotation=0)))
-    assert not np.allclose(rgb_lena, warped_rgb_lena)
+    warped_rgb_img = warp(rgb_img, AffineTransform(rotation=0.1))
+    assert np.allclose(rgb_img, warp(rgb_img, AffineTransform(rotation=0)))
+    assert not np.allclose(rgb_img, warped_rgb_img)
     # assert no cross-talk between bands
-    assert np.all(0 == warped_rgb_lena[:, :, 1])
+    assert np.all(0 == warped_rgb_img[:, :, 1])
 
 
 def test_warp_coords_example():
-    image = data.lena().astype(np.float32)
+    image = data.astronaut().astype(np.float32)
     assert 3 == image.shape[2]
     tform = SimilarityTransform(translation=(0, -10))
     coords = warp_coords(tform, (30, 30, 3))

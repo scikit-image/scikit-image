@@ -161,12 +161,12 @@ def test_squared_dot():
     assert (results == np.array([[6, 6]])).all()
 
 
-def test_rotated_lena():
+def test_rotated_img():
     """
     The harris filter should yield the same results with an image and it's
     rotation.
     """
-    im = img_as_float(data.lena().mean(axis=2))
+    im = img_as_float(data.astronaut().mean(axis=2))
     im_rotated = im.T
 
     # Moravec
@@ -235,13 +235,13 @@ def test_subpix_border():
 def test_num_peaks():
     """For a bunch of different values of num_peaks, check that
     peak_local_max returns exactly the right amount of peaks. Test
-    is run on Lena in order to produce a sufficient number of corners"""
+    is run on the astronaut image in order to produce a sufficient number of corners"""
 
-    lena_corners = corner_harris(rgb2gray(data.lena()))
+    img_corners = corner_harris(rgb2gray(data.astronaut()))
 
     for i in range(20):
         n = np.random.random_integers(20)
-        results = peak_local_max(lena_corners, num_peaks=n)
+        results = peak_local_max(img_corners, num_peaks=n)
         assert (results.shape[0] == n)
 
 
@@ -281,17 +281,44 @@ def test_corner_fast_image_unsupported_error():
 
 
 def test_corner_fast_lena():
-    img = rgb2gray(data.lena())
-    expected = np.array([[ 67, 157],
-                         [204, 261],
-                         [247, 146],
-                         [269, 111],
-                         [318, 158],
-                         [386,  73],
-                         [413,  70],
-                         [435, 180],
-                         [455, 177],
-                         [461, 160]])
+    img = rgb2gray(data.astronaut())
+    expected = np.array([[101, 198],
+                        [140, 205],
+                        [141, 242],
+                        [177, 156],
+                        [188, 113],
+                        [197, 148],
+                        [213, 117],
+                        [223, 375],
+                        [232, 266],
+                        [245, 137],
+                        [249, 171],
+                        [300, 244],
+                        [305,  57],
+                        [325, 245],
+                        [339, 242],
+                        [346, 279],
+                        [353, 172],
+                        [358, 307],
+                        [362, 252],
+                        [362, 328],
+                        [363, 192],
+                        [364, 147],
+                        [369, 159],
+                        [374, 171],
+                        [379, 183],
+                        [387, 195],
+                        [390, 149],
+                        [401, 197],
+                        [403, 162],
+                        [413, 181],
+                        [444, 310],
+                        [464, 251],
+                        [476, 250],
+                        [489, 155],
+                        [492, 139],
+                        [494, 169],
+                        [496, 266]])
     actual = corner_peaks(corner_fast(img, 12, 0.3))
     assert_array_equal(actual, expected)
 

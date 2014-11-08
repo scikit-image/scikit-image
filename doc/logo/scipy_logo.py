@@ -241,18 +241,8 @@ def plot_snake_overlay():
     plt.imshow(img)
 
 
-def plot_lena_overlay():
-    plt.figure()
-    logo = ScipyLogo((300, 300), 180)
-    logo.plot_snake_curve()
-    logo.plot_circle()
-    img = data.lena()
-    plt.imshow(img)
-
-
 if __name__ == '__main__':
     plot_scipy_trace()
     plot_snake_overlay()
-    plot_lena_overlay()
 
     plt.show()

@@ -1,7 +1,7 @@
 """
-=======================================================
-Gabors / Primary Visual Cortex "Simple Cells" from Lena
-=======================================================
+============================================================
+Gabors / Primary Visual Cortex "Simple Cells" from an Image
+============================================================
 
 How to build a (bio-plausible) "sparse" dictionary (or 'codebook', or
 'filterbank') for e.g. image classification without any fancy math and
@@ -10,15 +10,16 @@ with just standard python scientific libraries?
 Please find below a short answer ;-)
 
 This simple example shows how to get Gabor-like filters [1]_ using just
-the famous Lena image. Gabor filters are good approximations of the
-"Simple Cells" [2]_ receptive fields [3]_ found in the mammalian primary
-visual cortex (V1) (for details, see e.g. the Nobel-prize winning work
-of Hubel & Wiesel done in the 60s [4]_ [5]_).
+a simple image. In our example, we use a photograph of the astronaut Eileen
+Collins. Gabor filters are good approximations of the "Simple Cells" [2]_ 
+receptive fields [3]_ found in the mammalian primary visual cortex (V1) 
+(for details, see e.g. the Nobel-prize winning work of Hubel & Wiesel done
+in the 60s [4]_ [5]_).
 
 Here we use McQueen's 'kmeans' algorithm [6]_, as a simple biologically
 plausible hebbian-like learning rule and we apply it (a) to patches of
-the original Lena image (retinal projection), and (b) to patches of an
-LGN-like [7]_ Lena image using a simple difference of gaussians (DoG)
+the original image (retinal projection), and (b) to patches of an
+LGN-like [7]_ image using a simple difference of gaussians (DoG)
 approximation.
 
 Enjoy ;-) And keep in mind that getting Gabors on natural image patches
@@ -50,18 +51,18 @@ np.random.seed(42)
 patch_shape = 8, 8
 n_filters = 49
 
-lena = color.rgb2gray(data.lena())
+astro = color.rgb2gray(data.astronaut())
 
-# -- filterbank1 on original Lena
-patches1 = view_as_windows(lena, patch_shape)
+# -- filterbank1 on original image
+patches1 = view_as_windows(astro, patch_shape)
 patches1 = patches1.reshape(-1, patch_shape[0] * patch_shape[1])[::8]
 fb1, _ = kmeans2(patches1, n_filters, minit='points')
 fb1 = fb1.reshape((-1,) + patch_shape)
 fb1_montage = montage2d(fb1, rescale_intensity=True)
 
-# -- filterbank2 LGN-like Lena
-lena_dog = ndi.gaussian_filter(lena, .5) - ndi.gaussian_filter(lena, 1)
-patches2 = view_as_windows(lena_dog, patch_shape)
+# -- filterbank2 LGN-like image
+astro_dog = ndi.gaussian_filter(astro, .5) - ndi.gaussian_filter(astro, 1)
+patches2 = view_as_windows(astro_dog, patch_shape)
 patches2 = patches2.reshape(-1, patch_shape[0] * patch_shape[1])[::8]
 fb2, _ = kmeans2(patches2, n_filters, minit='points')
 fb2 = fb2.reshape((-1,) + patch_shape)
@@ -71,17 +72,17 @@ fb2_montage = montage2d(fb2, rescale_intensity=True)
 fig, axes = plt.subplots(2, 2, figsize=(7, 6))
 ax0, ax1, ax2, ax3 = axes.ravel()
 
-ax0.imshow(lena, cmap=plt.cm.gray)
-ax0.set_title("Lena (original)")
+ax0.imshow(astro, cmap=plt.cm.gray)
+ax0.set_title("Image (original)")
 
 ax1.imshow(fb1_montage, cmap=plt.cm.gray, interpolation='nearest')
-ax1.set_title("K-means filterbank (codebook)\non Lena (original)")
+ax1.set_title("K-means filterbank (codebook)\non original image")
 
-ax2.imshow(lena_dog, cmap=plt.cm.gray)
-ax2.set_title("Lena (LGN-like DoG)")
+ax2.imshow(astro_dog, cmap=plt.cm.gray)
+ax2.set_title("Image (LGN-like DoG)")
 
 ax3.imshow(fb2_montage, cmap=plt.cm.gray, interpolation='nearest')
-ax3.set_title("K-means filterbank (codebook)\non Lena (LGN-like DoG)")
+ax3.set_title("K-means filterbank (codebook)\non LGN-like DoG image")
 
 for ax in axes.ravel():
     ax.axis('off')
