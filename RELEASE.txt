@@ -26,6 +26,7 @@ How to make a new release of ``skimage``
     place.  Double check ``random.js``, otherwise the skimage.org front
     page gets broken!
   - Build using ``make gh-pages``.
+  - Update the symlink to ``stable``.
   - Push upstream: ``git push origin gh-pages`` in ``doc/gh-pages``.
 
 - Add the version number as a tag in git::
@@ -40,6 +41,15 @@ How to make a new release of ``skimage``
 
    python setup.py register
    python setup.py sdist upload
+
+  Go to https://travis-ci.org/scikit-image/scikit-image-wheels, select the
+  "Current" tab, and click (on the right) on the "Restart Build" icon.  After
+  the wheels become available at http://wheels.scikit-image.org/ (approx 15
+  mins), execute ``tools/osx_wheel_upload.sh``.  Note that, if you rebuild the
+  same wheels, it can take up to 15 minutes for the the files in the http
+  directory to update to the versions that Travis-CI uploaded. You may want to
+  check the timestamps in the http directory listing to check that you will get
+  the latest version.
 
 - Increase the version number
 
