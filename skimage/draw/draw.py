@@ -1,10 +1,6 @@
 # coding: utf-8
 import numpy as np
-
-
-def _coords_inside_image(rr, cc, shape):
-    mask = (rr >= 0) & (rr < shape[0]) & (cc >= 0) & (cc < shape[1])
-    return rr[mask], cc[mask]
+from ._draw import _coords_inside_image
 
 
 def _ellipse_in_shape(shape, center, radiuses):
