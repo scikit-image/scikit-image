@@ -1,9 +1,10 @@
 Remember to list any API changes below in `doc/source/api_changes.txt`.
 
 
-
 Version 0.14
 ------------
+* In `skimage._shared._geometry`, remove `clip_to_bbox` and replace with
+  `poly.clip_to_bbox`, if our dependency on Matplotlib is now >= 1.2.
 * Remove deprecated ``ntiles_*` kwargs in ``equalize_adapthist``.
 * Remove deprecated ``skimage.restoration.nl_means_denoising``.
 * Remove deprecated ``skimage.filters.gaussian_filter``.
