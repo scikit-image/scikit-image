@@ -76,7 +76,8 @@ class TestConnectedComponents:
                       [0, 0, 6],
                       [5, 5, 5]])
 
-        assert_array_equal(label(x, background=0),
+        res = label(x, background=0)
+        assert_array_equal(res,
                            [[-1, -1, 0],
                             [-1, -1, 0],
                             [+1,  1, 1]])
@@ -132,16 +133,16 @@ class TestConnectedComponents3d:
                                    [0, 1, 1, 3, 3],
                                    [1, 5, 1, 1, 7]])
 
-        self.labels[2] = np.array([[1, 1, 8, 8, 10],
-                                   [9, 1, 4, 8, 8],
-                                   [9, 1, 7, 8, 7],
-                                   [9, 5, 7, 7, 7]])
+        self.labels[2] = np.array([[1,  1, 8, 8, 9],
+                                   [10, 1, 4, 8, 8],
+                                   [10, 1, 7, 8, 7],
+                                   [10, 5, 7, 7, 7]])
 
     def test_basic(self):
         labels = label(self.x)
         assert_array_equal(labels, self.labels)
 
-        assert self.x[0, 0, 2] == 3, \
+        assert self.x[0, 0, 2] == 2, \
             "Data was modified!"
 
     def test_random(self):
@@ -218,7 +219,8 @@ class TestConnectedComponents3d:
                           [1,   BGL, BGL],
                           [BGL, BGL, BGL]])
 
-        assert_array_equal(label(x, background=0), lb)
+        res = label(x, background=0)
+        assert_array_equal(res, lb)
 
     def test_background_one_region_center(self):
         x = np.zeros((3, 3, 3), int)
@@ -241,14 +243,4 @@ class TestConnectedComponents3d:
 
 
 if __name__ == "__main__":
-    #run_module_suite()
-    lol = TestConnectedComponents3d()
-    lol.setup()
-    lol.test_basic()  # 1 failiure
-    lol.test_random()
-    #lol.test_diag()  # epic failiure
-    #lol.test_4_vs_8()  # label8 epic
-    #lol.test_background()
-    #lol.test_background_two_regions()
-    lol.test_background_one_region_center()
-    lol.test_return_num()
+    run_module_suite()

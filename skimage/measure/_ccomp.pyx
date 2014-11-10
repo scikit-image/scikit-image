@@ -137,7 +137,7 @@ cdef shape_info get_shape_info(inarr_shape):
     res.DEX[D_ei] = res.DEX[D_ef] - res.DEX[D_eb]  # DEX[D_eb] = one row up, remember?
     res.DEX[D_ej] = res.DEX[D_ei] + 1
     res.DEX[D_ek] = res.DEX[D_ei] + 2
-    res.DEX[D_el] = res.DEX[D_ei] - 2 * res.DEX[D_eb]
+    res.DEX[D_el] = res.DEX[D_ei] - res.DEX[D_eb]
     res.DEX[D_em] = res.DEX[D_el] + 1
     res.DEX[D_en] = res.DEX[D_el] + 2
 
@@ -470,7 +470,7 @@ cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
             join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eb])
 
             if neighbors == 8:
-                if x < shapeinfo.x - 1:
+                if x + 1 < shapeinfo.x:
                     join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
 
             join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
@@ -557,7 +557,7 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
                 join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eb])
 
                 if neighbors == 8:
-                    if x < shapeinfo.x - 1:
+                    if x + 1 < shapeinfo.x:
                         join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
 
                 join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
@@ -579,9 +579,11 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
                     if x + 1 < shapeinfo.x:
                         join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ek])
 
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_el])
+                    if y + 1 < shapeinfo.y:
+                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_el])
 
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_em])
+                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_em])
 
-                    if x + 1 < shapeinfo.x:
-                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_en])
+                        if x + 1 < shapeinfo.x:
+                            join_trees_wrapper(data_p, forest_p,
+                                               rindex, DEX[D_en])
