@@ -22,12 +22,14 @@ def _coords_inside_image(rr, cc, shape, val=None):
         Image shape which is used to determine maximum extents of output pixel
         coordinates.
     val : ndarray of float
-        Values of pixels.
+        Values of pixels at coordinates [rr, cc].
 
     Returns
     -------
-    rr, cc, val : (N,) ndarray (int, int, float)
-        Indices of pixels (and values if specified) inside the shape.
+    rr, cc : (N,) array of int
+        Row and column indices of valid pixels (i.e. those inside `shape`).
+    val : (N,) array of float, optional
+        Values at `rr, cc`. Returned only if `val` is given as input.
     """
     mask = (rr >= 0) & (rr < shape[0]) & (cc >= 0) & (cc < shape[1])
     if val is not None:
