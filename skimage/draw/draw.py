@@ -6,12 +6,6 @@ from ._draw import _coords_inside_image
 from .._shared._geometry import polygon_clip
 from ._draw import line
 
-from skimage._shared.version_requirements import is_installed
-from warnings import warn
-matplotlib_installed = is_installed('matplotlib')
-if not matplotlib_installed:
-    warn('Polygon perimeter drawing requires matplotlib')
-
 
 def _ellipse_in_shape(shape, center, radiuses):
     """Generate coordinates of points within ellipse bounded by shape."""
