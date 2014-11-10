@@ -234,6 +234,17 @@ def test_circle_perimeter_bresenham():
     assert_array_equal(img, img_)
 
 
+def test_circle_perimeter_bresenham_shape():
+    img = np.zeros((15, 20), 'uint8')
+    rr, cc = circle_perimeter(7, 10, 9, method='bresenham', shape=(15, 20))
+    img[rr, cc] = 1
+    shift = 5
+    img_ = np.zeros((15 + 2 * shift, 20), 'uint8')
+    rr, cc = circle_perimeter(7 + shift, 10, 9, method='bresenham', shape=None)
+    img_[rr, cc] = 1
+    assert_array_equal(img, img_[shift:-shift, :])
+
+
 def test_circle_perimeter_andres():
     img = np.zeros((15, 15), 'uint8')
     rr, cc = circle_perimeter(7, 7, 0, method='andres')
@@ -297,6 +308,16 @@ def test_circle_perimeter_aa():
         )
     assert_array_equal(img, img_)
 
+
+def test_circle_perimeter_aa_shape():
+    img = np.zeros((15, 20), 'uint8')
+    rr, cc, val = circle_perimeter_aa(7, 10, 9, shape=(15, 20))
+    img[rr, cc] = val * 255
+    shift = 5
+    img_ = np.zeros((15 + 2 * shift, 20), 'uint8')
+    rr, cc, val = circle_perimeter_aa(7 + shift, 10, 9, shape=None)
+    img_[rr, cc] = val * 255
+    assert_array_equal(img, img_[shift:-shift, :])
 
 def test_ellipse_trivial():
     img = np.zeros((2, 2), 'uint8')
@@ -580,6 +601,17 @@ def test_ellipse_perimeter_nzeroangle():
     assert_array_equal(img, img_)
 
 
+def test_ellipse_perimeter_shape():
+    img = np.zeros((15, 20), 'uint8')
+    rr, cc = ellipse_perimeter(7, 10, 9, 9, 0, shape=(15, 20))
+    img[rr, cc] = 1
+    shift = 5
+    img_ = np.zeros((15 + 2 * shift, 20), 'uint8')
+    rr, cc = ellipse_perimeter(7 + shift, 10, 9, 9, 0, shape=None)
+    img_[rr, cc] = 1
+    assert_array_equal(img, img_[shift:-shift, :])
+
+
 def test_bezier_segment_straight():
     image = np.zeros((200, 200), dtype=int)
     x0 = 50
@@ -725,6 +757,24 @@ def test_bezier_curved_weight_neq_1():
              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
             )
     assert_equal(img, img_)
+
+
+def test_bezier_curve_shape():
+    img = np.zeros((15, 20), 'uint8')
+    x1, y1 = (1, 5)
+    x2, y2 = (6, 11)
+    x3, y3 = (1, 14)
+    rr, cc = bezier_curve(x1, y1, x2, y2, x3, y3, 2, shape=(15, 20))
+    img[rr, cc] = 1
+    shift = 5
+    img_ = np.zeros((15 + 2 * shift, 20), 'uint8')
+    x1, y1 = (1 + shift, 5)
+    x2, y2 = (6 + shift, 11)
+    x3, y3 = (1 + shift, 14)
+    rr, cc = bezier_curve(x1, y1, x2, y2, x3, y3, 2, shape=None)
+    img_[rr, cc] = 1
+    assert_array_equal(img, img_[shift:-shift, :])
+
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
