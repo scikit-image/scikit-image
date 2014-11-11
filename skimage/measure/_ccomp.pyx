@@ -42,9 +42,20 @@ ctypedef struct bginfo:
 
 
 # A pixel has neighbors that have already been scanned.
-# In the paper, the pixel is denoted by E and its neighbors
-# by A, B, C and D (in 2D) - see doc for function get_shape_info()
+# In the paper, the pixel is denoted by E and its neighbors:
+#
+#    z=1        z=0       x
+#    ---------------------->
+#   | A B C      F G H
+#   | D E .      I J K
+#   | . . .      L M N
+#   |
+# y V
+#
+# D_ea represents offset of A from E etc. - see the definition of
+# get_shape_info
 cdef enum:
+    # the 0D neighbor
     # D_ee, # We don't need D_ee
     # the 1D neighbor
     D_ed,
@@ -106,15 +117,8 @@ cdef shape_info get_shape_info(inarr_shape):
 
     res.numels = res.x * res.y * res.z
 
-    # Our point of interest is E.
-    #    z=1        z=0       x
-    #    ---------------------->
-    #   | A B C      F G H
-    #   | D E .      I J K
-    #   | . . .      L M N
-    #   |
-    # y V
-    #
+    # When reading this for the first time, look at the diagram by the enum
+    # definition above (keyword D_ee)
     # Difference between E and G is (x=0, y=-1, z=-1), E and A (-1, -1, 0) etc.
     # Here, it is recalculated to linear (raveled) indices of flattened arrays
     # with their last (=contiguous) dimension is x.
@@ -278,7 +282,7 @@ def label(input, DTYPE_t neighbors=8, background=None, return_num=False):
         Image to label.
     neighbors : {4, 8}, int, optional
         Whether to use 4- or 8-connectivity.
-        In 3D, 4-connectivity means connected pixels share have to share face,
+        In 3D, 4-connectivity means connected pixels have to share face,
         whereas with 8-connectivity, they have to share only edge or vertex.
     background : int, optional
         Consider all pixels with this value as background pixels, and label
@@ -389,7 +393,7 @@ cdef DTYPE_t resolve_labels(DTYPE_t *data_p, DTYPE_t *forest_p,
 
     for i in range(shapeinfo.numels):
         if i == bg.background_node:
-            data_p[i] = -1
+            data_p[i] = bg.background_val
         elif i == forest_p[i]:
             # We have stumbled across a root which is something new to us (root
             # is the LOWEST of all prov. labels that are equivalent to it)

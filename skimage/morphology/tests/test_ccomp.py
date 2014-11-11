@@ -6,7 +6,10 @@ from warnings import catch_warnings
 from skimage._shared.utils import skimage_deprecation
 
 np.random.seed(0)
-BGL = -1
+
+# The background label value
+# is supposed to be changed to 0 soon
+BG = -1
 
 
 class TestConnectedComponents:
@@ -191,12 +194,12 @@ class TestConnectedComponents3d:
                            [1, 0, 2],
                            [1, 1, 1]])
         lb = x.copy()
-        lb[0] = np.array([[0,   BGL, BGL],
-                          [0,   BGL, BGL],
-                          [BGL, BGL, BGL]])
-        lb[1] = np.array([[BGL, BGL, BGL],
-                          [BGL, 0,   1],
-                          [BGL, BGL, BGL]])
+        lb[0] = np.array([[0,  BG, BG],
+                          [0,  BG, BG],
+                          [BG, BG, BG]])
+        lb[1] = np.array([[BG, BG, BG],
+                          [BG, 0,   1],
+                          [BG, BG, BG]])
 
         with catch_warnings():
             assert_array_equal(label(x), lnb)
@@ -212,12 +215,12 @@ class TestConnectedComponents3d:
                          [5, 0, 0],
                          [0, 0, 0]])
         lb = x.copy()
-        lb[0] = np.array([[BGL, BGL, 0],
-                          [BGL, BGL, 0],
-                          [1,   1,   1]])
-        lb[1] = np.array([[0,   0,   BGL],
-                          [1,   BGL, BGL],
-                          [BGL, BGL, BGL]])
+        lb[0] = np.array([[BG, BG, 0],
+                          [BG, BG, 0],
+                          [1,   1, 1]])
+        lb[1] = np.array([[0,  0,  BG],
+                          [1,  BG, BG],
+                          [BG, BG, BG]])
 
         res = label(x, background=0)
         assert_array_equal(res, lb)
@@ -226,7 +229,7 @@ class TestConnectedComponents3d:
         x = np.zeros((3, 3, 3), int)
         x[1, 1, 1] = 1
 
-        lb = np.ones_like(x) * BGL
+        lb = np.ones_like(x) * BG
         lb[1, 1, 1] = 0
 
         assert_array_equal(label(x, neighbors=4, background=0), lb)
