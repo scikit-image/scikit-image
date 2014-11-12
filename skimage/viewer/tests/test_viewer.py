@@ -4,7 +4,7 @@ from skimage.viewer.qt import QtGui, QtCore
 from skimage.viewer import ImageViewer, CollectionViewer, viewer_available
 from skimage.transform import pyramid_gaussian
 from skimage.viewer.plugins import OverlayPlugin
-from skimage.filter import sobel
+from skimage.filters import sobel
 from numpy.testing import assert_equal
 from numpy.testing.decorators import skipif
 from skimage._shared.version_requirements import is_installed

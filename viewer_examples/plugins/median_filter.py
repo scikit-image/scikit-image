@@ -1,5 +1,5 @@
 from skimage import data
-from skimage.filter.rank import median
+from skimage.filters.rank import median
 from skimage.morphology import disk
 
 from skimage.viewer import ImageViewer

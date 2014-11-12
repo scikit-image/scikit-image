@@ -116,7 +116,7 @@ thresholding. In practice, you might want to define a region for tinting based
 on segmentation results or blob detection methods.
 """
 
-from skimage.filter import rank
+from skimage.filters import rank
 
 # Square regions defined as slices over the first two dimensions.
 top_left = (slice(100),) * 2

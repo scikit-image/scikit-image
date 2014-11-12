@@ -21,7 +21,7 @@ from scipy import ndimage as nd
 
 from skimage import data
 from skimage.util import img_as_float
-from skimage.filter import gabor_kernel
+from skimage.filters import gabor_kernel
 
 
 def compute_feats(image, kernels):

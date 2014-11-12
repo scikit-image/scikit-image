@@ -28,7 +28,7 @@ from skimage.util.dtype import dtype_range
 from skimage.util import img_as_ubyte
 from skimage import exposure
 from skimage.morphology import disk
-from skimage.filter import rank
+from skimage.filters import rank
 
 
 matplotlib.rcParams['font.size'] = 9

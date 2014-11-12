@@ -1,17 +1,13 @@
-import os.path
-
 import numpy as np
-from numpy.testing import *
+from numpy.testing import (assert_raises, assert_, assert_equal,
+                           run_module_suite)
 
-from skimage import data_dir
-from skimage.io import *
-from skimage.filter import *
+from skimage import data
+from skimage.filters import LPIFilter2D, inverse, wiener
 
 
 class TestLPIFilter2D(object):
-
-    img = imread(os.path.join(data_dir, 'camera.png'),
-                 flatten=True)[:50, :50]
+    img = data.camera()[:50, :50]
 
     def filt_func(self, r, c):
         return np.exp(-np.hypot(r, c) / 1)
@@ -36,14 +32,14 @@ class TestLPIFilter2D(object):
         assert_equal(g.shape, self.img.shape)
 
         g1 = inverse(F[::-1, ::-1], predefined_filter=self.f)
-        assert ((g - g1[::-1, ::-1]).sum() < 55)
+        assert_((g - g1[::-1, ::-1]).sum() < 55)
 
         # test cache
         g1 = inverse(F[::-1, ::-1], predefined_filter=self.f)
-        assert ((g - g1[::-1, ::-1]).sum() < 55)
+        assert_((g - g1[::-1, ::-1]).sum() < 55)
 
         g1 = inverse(F[::-1, ::-1], self.filt_func)
-        assert ((g - g1[::-1, ::-1]).sum() < 55)
+        assert_((g - g1[::-1, ::-1]).sum() < 55)
 
     def test_wiener(self):
         F = self.f(self.img)
@@ -51,10 +47,10 @@ class TestLPIFilter2D(object):
         assert_equal(g.shape, self.img.shape)
 
         g1 = wiener(F[::-1, ::-1], predefined_filter=self.f)
-        assert ((g - g1[::-1, ::-1]).sum() < 1)
+        assert_((g - g1[::-1, ::-1]).sum() < 1)
 
         g1 = wiener(F[::-1, ::-1], self.filt_func)
-        assert ((g - g1[::-1, ::-1]).sum() < 1)
+        assert_((g - g1[::-1, ::-1]).sum() < 1)
 
     def test_non_callable(self):
         assert_raises(ValueError, LPIFilter2D, None)

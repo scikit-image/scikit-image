@@ -19,7 +19,7 @@ exposure
     Image intensity adjustment, e.g., histogram equalization, etc.
 feature
     Feature detection and extraction, e.g., texture analysis corners, etc.
-filter
+filters
     Sharpening, edge finding, rank filters, thresholding, etc.
 graph
     Graph-theoretic operations, e.g., shortest paths.

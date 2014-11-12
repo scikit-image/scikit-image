@@ -126,7 +126,7 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
-    >>> from skimage.filter.rank import autolevel
+    >>> from skimage.filters.rank import autolevel
     >>> img = data.camera()
     >>> auto = autolevel(img, disk(5))
 
@@ -168,7 +168,7 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
-    >>> from skimage.filter.rank import bottomhat
+    >>> from skimage.filters.rank import bottomhat
     >>> img = data.camera()
     >>> out = bottomhat(img, disk(5))
 
@@ -207,7 +207,7 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
-    >>> from skimage.filter.rank import equalize
+    >>> from skimage.filters.rank import equalize
     >>> img = data.camera()
     >>> equ = equalize(img, disk(5))
 
@@ -246,7 +246,7 @@ def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
-    >>> from skimage.filter.rank import gradient
+    >>> from skimage.filters.rank import gradient
     >>> img = data.camera()
     >>> out = gradient(img, disk(5))
 
@@ -287,14 +287,14 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Notes
     -----
-    The lower algorithm complexity makes the `skimage.filter.rank.maximum`
+    The lower algorithm complexity makes `skimage.filters.rank.maximum`
     more efficient for larger images and structuring elements.
 
     Examples
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
-    >>> from skimage.filter.rank import maximum
+    >>> from skimage.filters.rank import maximum
     >>> img = data.camera()
     >>> out = maximum(img, disk(5))
 
@@ -333,7 +333,7 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
-    >>> from skimage.filter.rank import mean
+    >>> from skimage.filters.rank import mean
     >>> img = data.camera()
     >>> avg = mean(img, disk(5))
 
@@ -372,7 +372,7 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
-    >>> from skimage.filter.rank import subtract_mean
+    >>> from skimage.filters.rank import subtract_mean
     >>> img = data.camera()
     >>> out = subtract_mean(img, disk(5))
 
@@ -411,7 +411,7 @@ def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
-    >>> from skimage.filter.rank import median
+    >>> from skimage.filters.rank import median
     >>> img = data.camera()
     >>> med = median(img, disk(5))
 
@@ -452,14 +452,14 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Notes
     -----
-    The lower algorithm complexity makes the `skimage.filter.rank.minimum` more
+    The lower algorithm complexity makes `skimage.filters.rank.minimum` more
     efficient for larger images and structuring elements.
 
     Examples
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
-    >>> from skimage.filter.rank import minimum
+    >>> from skimage.filters.rank import minimum
     >>> img = data.camera()
     >>> out = minimum(img, disk(5))
 
@@ -500,7 +500,7 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
-    >>> from skimage.filter.rank import modal
+    >>> from skimage.filters.rank import modal
     >>> img = data.camera()
     >>> out = modal(img, disk(5))
 
@@ -544,7 +544,7 @@ def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
-    >>> from skimage.filter.rank import enhance_contrast
+    >>> from skimage.filters.rank import enhance_contrast
     >>> img = data.camera()
     >>> out = enhance_contrast(img, disk(5))
 
@@ -585,7 +585,7 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Examples
     --------
     >>> from skimage.morphology import square
-    >>> import skimage.filter.rank as rank
+    >>> import skimage.filters.rank as rank
     >>> img = 255 * np.array([[0, 0, 0, 0, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
@@ -635,7 +635,7 @@ def sum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Examples
     --------
     >>> from skimage.morphology import square
-    >>> import skimage.filter.rank as rank
+    >>> import skimage.filters.rank as rank
     >>> img = np.array([[0, 0, 0, 0, 0],
     ...                 [0, 1, 1, 1, 0],
     ...                 [0, 1, 1, 1, 0],
@@ -685,7 +685,7 @@ def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Examples
     --------
     >>> from skimage.morphology import square
-    >>> from skimage.filter.rank import threshold
+    >>> from skimage.filters.rank import threshold
     >>> img = 255 * np.array([[0, 0, 0, 0, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
@@ -736,7 +736,7 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
-    >>> from skimage.filter.rank import tophat
+    >>> from skimage.filters.rank import tophat
     >>> img = data.camera()
     >>> out = tophat(img, disk(5))
 
@@ -781,7 +781,7 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
-    >>> from skimage.filter.rank import noise_filter
+    >>> from skimage.filters.rank import noise_filter
     >>> img = data.camera()
     >>> out = noise_filter(img, disk(5))
 
@@ -833,7 +833,7 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.filter.rank import entropy
+    >>> from skimage.filters.rank import entropy
     >>> from skimage.morphology import disk
     >>> img = data.camera()
     >>> ent = entropy(img, disk(5))
@@ -877,7 +877,7 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.filter.rank import otsu
+    >>> from skimage.filters.rank import otsu
     >>> from skimage.morphology import disk
     >>> img = data.camera()
     >>> local_otsu = otsu(img, disk(5))
@@ -926,7 +926,7 @@ def windowed_histogram(image, selem, out=None, mask=None,
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.filter.rank import windowed_histogram
+    >>> from skimage.filters.rank import windowed_histogram
     >>> from skimage.morphology import disk
     >>> img = data.camera()
     >>> hist_img = windowed_histogram(img, disk(5))

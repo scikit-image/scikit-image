@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.ndimage as ndi
-from ..filter import rank_order
+from ..filters import rank_order
 
 
 def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,

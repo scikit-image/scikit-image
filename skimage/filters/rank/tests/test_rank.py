@@ -4,7 +4,7 @@ from numpy.testing import run_module_suite, assert_array_equal, assert_raises
 from skimage import img_as_ubyte, img_as_uint, img_as_float
 from skimage import data, util
 from skimage.morphology import cmorph, disk
-from skimage.filter import rank
+from skimage.filters import rank
 
 np.random.seed(0)
 

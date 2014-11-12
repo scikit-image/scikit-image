@@ -3,10 +3,10 @@ from numpy.testing import assert_equal, assert_almost_equal
 
 import skimage
 from skimage import data
-from skimage.filter.thresholding import (threshold_adaptive,
-                                         threshold_otsu,
-                                         threshold_yen,
-                                         threshold_isodata)
+from skimage.filters.thresholding import (threshold_adaptive,
+                                          threshold_otsu,
+                                          threshold_yen,
+                                          threshold_isodata)
 
 
 class TestSimpleImage():
