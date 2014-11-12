@@ -23,15 +23,17 @@ Below, we demonstrate the use of ``adapt_rgb`` on a couple of gray-scale
 filters:
 """
 from skimage.color.adapt_rgb import adapt_rgb, each_channel, hsv_value
-from skimage import filter
+from skimage import filters
+
 
 @adapt_rgb(each_channel)
 def sobel_each(image):
-    return filter.sobel(image)
+    return filters.sobel(image)
+
 
 @adapt_rgb(hsv_value)
 def sobel_hsv(image):
-    return filter.sobel(image)
+    return filters.sobel(image)
 
 """
 We can use these functions as we would normally use them, but now they work
@@ -74,6 +76,7 @@ then return the filtered result:
 """
 from skimage.color import rgb2gray
 
+
 def as_gray(image_filter, image, *args, **kwargs):
     gray_image = rgb2gray(image)
     return image_filter(gray_image, *args, **kwargs)
@@ -86,9 +89,10 @@ have any number of positional and keyword arguments.
 Finally, we can use this handler with ``adapt_rgb`` just as before:
 """
 
+
 @adapt_rgb(as_gray)
 def sobel_gray(image):
-    return filter.sobel(image)
+    return filters.sobel(image)
 
 fig, ax = plt.subplots()
 ax.imshow(sobel_gray(image), cmap=plt.cm.gray)
