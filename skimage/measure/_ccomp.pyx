@@ -272,17 +272,6 @@ cdef inline void join_trees(DTYPE_t *forest, DTYPE_t n, DTYPE_t m):
         set_root(forest, m, root)
 
 
-cdef inline void link_bg(DTYPE_t *forest, DTYPE_t n, DTYPE_t *background_node):
-    """
-    Link a node to the background node.
-
-    """
-    if background_node[0] == -999:
-        background_node[0] = n
-
-    join_trees(forest, n, background_node[0])
-
-
 # Connected components search as described in Fiorio et al.
 def label(input, DTYPE_t neighbors=8, background=None, return_num=False):
     """Label connected regions of an integer array.
@@ -371,6 +360,7 @@ def label(input, DTYPE_t neighbors=8, background=None, return_num=False):
     if neighbors != 4 and neighbors != 8:
         raise ValueError('Neighbors must be either 4 or 8.')
 
+    scanBG(data_p, forest_p, & shapeinfo, & bg)
     if shapeinfo.ndim == 1:
         scan1D(data_p, forest_p, & shapeinfo, & bg, neighbors, 0, 0)
     elif shapeinfo.ndim == 2:
@@ -416,6 +406,30 @@ cdef DTYPE_t resolve_labels(DTYPE_t *data_p, DTYPE_t *forest_p,
     return counter
 
 
+cdef void scanBG(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
+                 bginfo *bg):
+    """
+    Settle all background pixels now and don't bother with them later.
+    Since this only requires one linar sweep through the array, it is fast
+    and it makes sense to do it separately.
+
+    The result of this function is update of forest_p and bg parameter.
+    """
+    cdef DTYPE_t i, bgval = bg.background_val, firstbg
+    # We find the provisional label of the background, which is the index of
+    # the first background pixel
+    for i in range(shapeinfo.numels):
+        if data_p[i] == bgval:
+            firstbg = i
+            bg.background_node = firstbg
+            break
+
+    # And then we apply this provisional label to the whole background
+    for i in range(firstbg, shapeinfo.numels):
+        if data_p[i] == bgval:
+            forest_p[i] = firstbg
+
+
 # Here, we work with flat arrays regardless whether the data is 1, 2 or 3D.
 # The lookup to the neighbor in a 2D array is achieved by precalculating an
 # offset and adding it to the index.
@@ -435,19 +449,17 @@ cdef void scan1D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
     Perform forward scan on a 1D object, usually the first row of an image
     """
     # Initialize the first row
-    cdef DTYPE_t x, rindex
+    cdef DTYPE_t x, rindex, bgval = bg.background_val
     cdef INTS_t *DEX = shapeinfo.DEX
     rindex = shapeinfo.ravel_index(0, y, z, shapeinfo)
-
-    if data_p[rindex] == bg.background_val:
-        link_bg(forest_p, rindex, & bg.background_node)
 
     for x in range(1, shapeinfo.x):
         rindex += 1
         # Handle the first row
         # First row => rindex == j
-        if data_p[rindex] == bg.background_val:
-            link_bg(forest_p, rindex, & bg.background_node)
+        if data_p[rindex] == bgval:
+            # Nothing to do if we are background
+            continue
 
         join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
 
@@ -457,19 +469,19 @@ cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
     """
     Perform forward scan on a 2D array.
     """
-    cdef DTYPE_t x, y, rindex
+    cdef DTYPE_t x, y, rindex, bgval = bg.background_val
     cdef INTS_t *DEX = shapeinfo.DEX
     scan1D(data_p, forest_p, shapeinfo, bg, neighbors, 0, z)
     for y in range(1, shapeinfo.y):
         rindex = shapeinfo.ravel_index(0, y, 0, shapeinfo)
         # Handle the first column
-        if data_p[rindex] == bg.background_val:
-            link_bg(forest_p, rindex, & bg.background_node)
+        if data_p[rindex] != bgval:
+            # Nothing to do if we are background
 
-        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eb])
+            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eb])
 
-        if neighbors == 8:
-            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
+            if neighbors == 8:
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
 
         # Handle the rest of columns
         for x in range(1, shapeinfo.x):
@@ -477,8 +489,9 @@ cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
             # so we increment the raveled index. It will be reset when we get
             # to another row, so we don't have to worry about altering it here.
             rindex += 1
-            if data_p[rindex] == bg.background_val:
-                link_bg(forest_p, rindex, & bg.background_node)
+            if data_p[rindex] == bgval:
+                # Nothing to do if we are background
+                continue
 
             if neighbors == 8:
                 join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ea])
@@ -497,75 +510,76 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
     """
     Perform forward scan on a 2D array.
     """
-    cdef DTYPE_t x, y, z, rindex
+    cdef DTYPE_t x, y, z, rindex, bgval = bg.background_val
     cdef INTS_t *DEX = shapeinfo.DEX
     # Handle first plane
     scan2D(data_p, forest_p, shapeinfo, bg, neighbors, 0)
     for z in range(1, shapeinfo.z):
         # Handle first row in 3D manner
         rindex = shapeinfo.ravel_index(0, 0, z, shapeinfo)
-        if data_p[rindex] == bg.background_val:
-            link_bg(forest_p, rindex, & bg.background_node)
+        if data_p[rindex] != bgval:
+            # Nothing to do if we are background
 
-        # Now we have pixels below
-        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ej])
+            # Now we have pixels below
+            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ej])
 
-        if neighbors == 8:
-            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ek])
-            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_em])
-            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_en])
+            if neighbors == 8:
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ek])
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_em])
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_en])
 
         for x in range(1, shapeinfo.x):
             rindex += 1
             # Handle the first row
-            if data_p[rindex] == bg.background_val:
-                link_bg(forest_p, rindex, & bg.background_node)
+            if data_p[rindex] != bgval:
+                # Nothing to do if we are background
 
-            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
 
-            if neighbors == 8:
-                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ei])
+                if neighbors == 8:
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ei])
 
-            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ej])
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ej])
 
-            if neighbors == 8:
-                if x + 1 < shapeinfo.x:
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ek])
+                if neighbors == 8:
+                    if x + 1 < shapeinfo.x:
+                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ek])
 
-                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_el])
-                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_em])
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_el])
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_em])
 
-                if x + 1 < shapeinfo.x:
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_en])
+                    if x + 1 < shapeinfo.x:
+                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_en])
 
 
         for y in range(1, shapeinfo.y):
             rindex = shapeinfo.ravel_index(0, y, z, shapeinfo)
             # Handle the first column in 3D manner
-            if data_p[rindex] == bg.background_val:
-                link_bg(forest_p, rindex, & bg.background_node)
+            if data_p[rindex] != bgval:
+                # Nothing to do if we are background
 
-            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eb])
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eb])
 
-            if neighbors == 8:
-                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
-                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eg])
-                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eh])
+                if neighbors == 8:
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eg])
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eh])
 
-            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ej])
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ej])
 
-            if neighbors == 8:
-                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ek])
+                if neighbors == 8:
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ek])
 
-                if y + 1 < shapeinfo.y:
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_em])
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_en])
+                    if y + 1 < shapeinfo.y:
+                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_em])
+                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_en])
 
             # Handle the rest of columns
             for x in range(1, shapeinfo.x):
                 rindex += 1
-                if data_p[rindex] == bg.background_val:
-                    link_bg(forest_p, rindex, & bg.background_node)
+                if data_p[rindex] == bgval:
+                    # Nothing to do if we are background
+                    continue
 
                 if neighbors == 8:
                     join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ea])
