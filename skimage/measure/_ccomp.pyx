@@ -37,8 +37,30 @@ ctypedef int (* fun_ravel)(int, int, int, shape_info *)
 
 # For having stuff concerning background in one place
 ctypedef struct bginfo:
+    ## The value in the image (i.e. not the label!) that identifies
+    ## the background.
     DTYPE_t background_val
     DTYPE_t background_node
+    ## Identification of the background in the labelled image
+    DTYPE_t background_label
+
+
+cdef bginfo get_bginfo(background_val):
+    cdef bginfo ret
+
+    if background_val is None:
+        warnings.warn(DeprecationWarning(
+                'The default value for `background` will change to 0 in v0.12'
+            ))
+        ret.background_val = -1
+    else:
+        ret.background_val = background_val
+
+    # The node -999 doesn't exist, it will get subsituted by a meaningful value
+    # upon the first background pixel occurence
+    ret.background_node = -999
+    ret.background_label = -1
+    return ret
 
 
 # A pixel has neighbors that have already been scanned.
@@ -344,17 +366,7 @@ def label(input, DTYPE_t neighbors=8, background=None, return_num=False):
     cdef bginfo bg
 
     shapeinfo = get_shape_info(input.shape)
-
-    bg.background_val = 0
-    bg.background_node = -999
-
-    if background is None:
-        bg.background_val = -1
-        warnings.warn(DeprecationWarning(
-                'The default value for `background` will change to 0 in v0.12'
-            ))
-    else:
-        bg.background_val = background
+    bg = get_bginfo(background)
 
     if neighbors != 4 and neighbors != 8:
         raise ValueError('Neighbors must be either 4 or 8.')
@@ -389,11 +401,11 @@ cdef DTYPE_t resolve_labels(DTYPE_t *data_p, DTYPE_t *forest_p,
     our knowledge of prov. labels relationship.
     We also track how many distinct final labels we have.
     """
-    cdef DTYPE_t counter = 0, i
+    cdef DTYPE_t counter = bg.background_label + 1, i
 
     for i in range(shapeinfo.numels):
         if i == bg.background_node:
-            data_p[i] = bg.background_val
+            data_p[i] = bg.background_label
         elif i == forest_p[i]:
             # We have stumbled across a root which is something new to us (root
             # is the LOWEST of all prov. labels that are equivalent to it)
