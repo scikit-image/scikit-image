@@ -16,10 +16,6 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
 fi
 
 pip install -r requirements.txt $WHEELHOUSE
-python check_bento_build.py
-
-tools/header.py "Dependency versions"
-tools/build_versions.py
 
 # clean up disk space
 sudo apt-get clean
