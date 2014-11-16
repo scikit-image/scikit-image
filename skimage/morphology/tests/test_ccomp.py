@@ -244,6 +244,10 @@ class TestConnectedComponents3d:
 
         assert_array_equal(label(x, background=0, return_num=True)[1], 3)
 
+    def test_nd(self):
+        x = np.ones((1, 2, 3, 4))
+        np.testing.assert_raises(NotImplementedError, label, x)
+
 
 if __name__ == "__main__":
     run_module_suite()
