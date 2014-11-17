@@ -20,6 +20,12 @@ before_install:
     - export WHEELHOUSE="--no-index --find-links=http://travis-wheels.scikit-image.org/"
     - travis_retry tools/travis_setup.sh
 
+    - python check_bento_build.py
+
+    - tools/header.py "Dependency versions"
+    - tools/build_versions.py
+
+
 install:
     - python setup.py build_ext --inplace
     - python setup.py install
