@@ -267,19 +267,49 @@ cdef inline void join_trees(DTYPE_t *forest, DTYPE_t n, DTYPE_t m):
         set_root(forest, m, root)
 
 
+def _norm_connectivity(connectivity, ndim):
+    """
+    Takes the value of the connectivity parameter, validates it and converts
+    it to a value that the subsequent algorithm may use as-is safely.
+
+    Parameters
+    ----------
+    connectivity : int
+        The following should be true: -ndim < connectivity < 0, or
+        0 < connectivity <= ndim.
+
+    Returns
+    -------
+    connectivity : int
+        Connectivity, 0 < connectivity < ndim
+    """
+    if connectivity == 0 or connectivity > ndim:
+        raise ValueError(
+            "Connectivity of 0 or above %d doesn't make sense" % ndim)
+    res = connectivity
+    if res < 0:
+        res = res % ndim
+        # we want -1 to be normed to ndim, -2 to (ndim - 1) etc.
+        res += 1
+    return res
+
+
 # Connected components search as described in Fiorio et al.
-def label(input, DTYPE_t neighbors=8, background=None, return_num=False):
+def label(input, DTYPE_t neighbors=8, background=None, return_num=False,
+          connectivity=None):
     """Label connected regions of an integer array.
 
     Two pixels are connected when they are neighbors and have the same value.
-    They can be neighbors either in a 4- or 8-connected sense::
+    In 2D, they can be neighbors either in a 1- or 2-connected sense.
+    The value refers to the greatest number of orthogonal hops between the
+    starting point and the neighbor.
 
-      4-connectivity      8-connectivity
+      1-connectivity      2-connectivity
 
-           [ ]           [ ]  [ ]  [ ]
-            |               \  |  /
-      [ ]--[ ]--[ ]      [ ]--[ ]--[ ]
-            |               /  |  \\
+           [ ]           [ ]  [ ]  [ ]         [ ]
+            |               \\ |  /             |  <- hop 2
+      [ ]--[x]--[ ]      [ ]--[x]--[ ]    [x]--[ ]
+            |               /  |  \\        hop 1
            [ ]           [ ]  [ ]  [ ]
 
     Parameters
@@ -290,12 +320,21 @@ def label(input, DTYPE_t neighbors=8, background=None, return_num=False):
         Whether to use 4- or 8-connectivity.
         In 3D, 4-connectivity means connected pixels have to share face,
         whereas with 8-connectivity, they have to share only edge or vertex.
+        **Depreceated, use ``connectivity`` instead.**
     background : int, optional
         Consider all pixels with this value as background pixels, and label
         them as -1. (Note: background pixels will be labeled as 0 starting with
         version 0.12).
     return_num : bool, optional
         Whether to return the number of assigned labels.
+    connectivity : int
+        Number of orthogonal hops
+        For the 2D case, 1 considers horizontal and vertical neighbors, whereas
+        2 adds the diagonals (you hop once vertically and once horizontally).
+        1 is the lowest value of connection (4 neighbors in 2D, 6 in 3D).
+        Moreover, the value of -1 specifies the highest connectivity available.
+        So for example in 2D, -1 is equivalent of 2, resulting in considering
+        all 8 neighbors.
 
     Returns
     -------
@@ -352,15 +391,32 @@ def label(input, DTYPE_t neighbors=8, background=None, return_num=False):
     get_shape_info(input.shape, &shapeinfo)
     get_bginfo(background, &bg)
 
-    if neighbors != 4 and neighbors != 8:
-        raise ValueError('Neighbors must be either 4 or 8.')
+    if neighbors is None and connectivity is None:
+        # Pure default
+        connectivity = -1
+    elif neighbors is not None:
+        # Pure fail
+        if neighbors != 4 and neighbors != 8:
+            msg = "Neighbors must be either 4 or 8, got '%d'.\n" % neighbors
+            msg += "Moreover, this arg is depreceated, use 'connectivity' instead"
+            raise ValueError(msg)
+        else:
+            # backwards-compatible neighbors recalc to connectivity,
+            # depreciation warning
+            nei2conn = {4: 1, 8: -1}
+            connectivity = nei2conn[neighbors]
+            msg = "Argument 'neighbors' is depreceated, use 'connectivity' "
+            msg += "instead. Its coresponing value is likely '%d'" % connectivity
+            DeprecationWarning(msg)
 
-    scanBG(data_p, forest_p, & shapeinfo, & bg)
-    scan3D(data_p, forest_p, & shapeinfo, & bg, neighbors)
+    connectivity = _norm_connectivity(connectivity, shapeinfo.ndim)
+
+    scanBG(data_p, forest_p, &shapeinfo, &bg)
+    scan3D(data_p, forest_p, &shapeinfo, &bg, connectivity)
 
     # Label output
     cdef DTYPE_t ctr
-    ctr = resolve_labels(data_p, forest_p, & shapeinfo, & bg)
+    ctr = resolve_labels(data_p, forest_p, &shapeinfo, &bg)
 
     # Work around a bug in ndimage's type checking on 32-bit platforms
     if data.dtype == np.int32:
@@ -429,12 +485,12 @@ cdef void scanBG(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
 # D E
 #
 # So if I am in the point E and want to take a look to A, I take the index of
-# E and add shapeinfo.Dea to it and teg the index of A.
+# E and add shapeinfo.DEX[D_ea] to it and get the index of A.
 # The 1D indices are "raveled" or "linear", that's where "rindex" comes from.
 
 
 cdef void scan1D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
-                 bginfo *bg, DTYPE_t neighbors, DTYPE_t y, DTYPE_t z):
+                 bginfo *bg, DTYPE_t connectivity, DTYPE_t y, DTYPE_t z):
     """
     Perform forward scan on a 1D object, usually the first row of an image
     """
@@ -455,13 +511,13 @@ cdef void scan1D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
 
 
 cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
-                 bginfo *bg, DTYPE_t neighbors, DTYPE_t z):
+                 bginfo *bg, DTYPE_t connectivity, DTYPE_t z):
     """
     Perform forward scan on a 2D array.
     """
     cdef DTYPE_t x, y, rindex, bgval = bg.background_val
     cdef INTS_t *DEX = shapeinfo.DEX
-    scan1D(data_p, forest_p, shapeinfo, bg, neighbors, 0, z)
+    scan1D(data_p, forest_p, shapeinfo, bg, connectivity, 0, z)
     for y in range(1, shapeinfo.y):
         rindex = shapeinfo.ravel_index(0, y, 0, shapeinfo)
         # Handle the first column
@@ -470,7 +526,7 @@ cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
 
             join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eb])
 
-            if neighbors == 8:
+            if connectivity >= 2:
                 join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
 
         # Handle the rest of columns
@@ -483,27 +539,24 @@ cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
                 # Nothing to do if we are background
                 continue
 
-            if neighbors == 8:
-                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ea])
-
             join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eb])
+            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
 
-            if neighbors == 8:
+            if connectivity >= 2:
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ea])
                 if x + 1 < shapeinfo.x:
                     join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
 
-            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
-
 
 cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
-                 bginfo *bg, DTYPE_t neighbors):
+                 bginfo *bg, DTYPE_t connectivity):
     """
     Perform forward scan on a 2D array.
     """
     cdef DTYPE_t x, y, z, rindex, bgval = bg.background_val
     cdef INTS_t *DEX = shapeinfo.DEX
     # Handle first plane
-    scan2D(data_p, forest_p, shapeinfo, bg, neighbors, 0)
+    scan2D(data_p, forest_p, shapeinfo, bg, connectivity, 0)
     for z in range(1, shapeinfo.z):
         # Handle first row in 3D manner
         rindex = shapeinfo.ravel_index(0, 0, z, shapeinfo)
@@ -513,10 +566,11 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
             # Now we have pixels below
             join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ej])
 
-            if neighbors == 8:
+            if connectivity >= 2:
                 join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ek])
                 join_trees_wrapper(data_p, forest_p, rindex, DEX[D_em])
-                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_en])
+                if connectivity >= 3:
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_en])
 
         for x in range(1, shapeinfo.x):
             rindex += 1
@@ -525,22 +579,18 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
                 # Nothing to do if we are background
 
                 join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
-
-                if neighbors == 8:
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ei])
-
                 join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ej])
 
-                if neighbors == 8:
+                if connectivity >= 2:
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ei])
                     if x + 1 < shapeinfo.x:
                         join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ek])
-
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_el])
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_em])
-
-                    if x + 1 < shapeinfo.x:
-                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_en])
-
+                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_em])
+                    if connectivity >= 3:
+                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_el])
+                        if x + 1 < shapeinfo.x:
+                            join_trees_wrapper(data_p, forest_p, rindex,
+                                                DEX[D_en])
 
         for y in range(1, shapeinfo.y):
             rindex = shapeinfo.ravel_index(0, y, z, shapeinfo)
@@ -549,20 +599,20 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
                 # Nothing to do if we are background
 
                 join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eb])
-
-                if neighbors == 8:
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eg])
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eh])
-
                 join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ej])
 
-                if neighbors == 8:
+                if connectivity >= 2:
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eg])
                     join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ek])
-
                     if y + 1 < shapeinfo.y:
                         join_trees_wrapper(data_p, forest_p, rindex, DEX[D_em])
-                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_en])
+                    if connectivity >= 3:
+                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eh])
+                        if y + 1 < shapeinfo.y:
+                            join_trees_wrapper(data_p, forest_p, rindex,
+                                               DEX[D_en])
+
 
             # Handle the rest of columns
             for x in range(1, shapeinfo.x):
@@ -571,39 +621,25 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
                     # Nothing to do if we are background
                     continue
 
-                if neighbors == 8:
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ea])
-
                 join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eb])
-
-                if neighbors == 8:
-                    if x + 1 < shapeinfo.x:
-                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
-
                 join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
-
-                # Now pixels below:
-                if neighbors == 8:
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ef])
-
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eg])
-
-                    if x + 1 < shapeinfo.x:
-                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eh])
-
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ei])
-
                 join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ej])
 
-                if neighbors == 8:
+                if connectivity >= 2:
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ea])
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eg])
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ei])
                     if x + 1 < shapeinfo.x:
+                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
                         join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ek])
-
                     if y + 1 < shapeinfo.y:
-                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_el])
-
                         join_trees_wrapper(data_p, forest_p, rindex, DEX[D_em])
-
+                    if connectivity >= 3:
+                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ef])
                         if x + 1 < shapeinfo.x:
-                            join_trees_wrapper(data_p, forest_p,
-                                               rindex, DEX[D_en])
+                            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eh])
+                        if y + 1 < shapeinfo.y:
+                            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_el])
+                            if x + 1 < shapeinfo.x:
+                                join_trees_wrapper(data_p, forest_p,
+                                                   rindex, DEX[D_en])
