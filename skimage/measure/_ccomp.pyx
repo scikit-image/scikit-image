@@ -618,13 +618,14 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
 
             if connectivity >= 2:
                 join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ei])
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_em])
                 if connectivity >= 3:
                     join_trees_wrapper(data_p, forest_p, rindex, DEX[D_el])
         # END of x = max
         # END of y = 0
 
+        # BEGINNING of y = ...
         for y in range(1, shapeinfo.y - 1):
-            # BEGINNING of y = ...
             # BEGINNING of x = 0
             rindex = shapeinfo.ravel_index(0, y, z, shapeinfo)
             # Handle the first column in 3D manner
@@ -657,9 +658,9 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
 
                 if connectivity >= 2:
                     join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ea])
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
                     join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eg])
                     join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ei])
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
                     join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ek])
                     join_trees_wrapper(data_p, forest_p, rindex, DEX[D_em])
                     if connectivity >= 3:
@@ -686,61 +687,61 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
                         join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ef])
                         join_trees_wrapper(data_p, forest_p, rindex, DEX[D_el])
             # END of x = max
-            # END of y = ...
+        # END of y = ...
 
-            # BEGINNING of y = max
-            # BEGINNING of x = 0
-            rindex = shapeinfo.ravel_index(0, shapeinfo.y, z, shapeinfo)
-            # Handle the first column in 3D manner
-            if data_p[rindex] != bgval:
-                # Nothing to do if we are background
+        # BEGINNING of y = max
+        # BEGINNING of x = 0
+        rindex = shapeinfo.ravel_index(0, shapeinfo.y - 1, z, shapeinfo)
+        # Handle the first column in 3D manner
+        if data_p[rindex] != bgval:
+            # Nothing to do if we are background
 
-                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eb])
-                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ej])
+            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eb])
+            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ej])
 
-                if connectivity >= 2:
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eg])
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ek])
-                    if connectivity >= 3:
-                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eh])
-            # END of x = 0
+            if connectivity >= 2:
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eg])
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ek])
+                if connectivity >= 3:
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eh])
+        # END of x = 0
 
-            # Handle the rest of columns
-            for x in range(1, shapeinfo.x - 1):
-                rindex += 1
-                if data_p[rindex] == bgval:
-                    # Nothing to do if we are background
-                    continue
-
-                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eb])
-                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
-                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ej])
-
-                if connectivity >= 2:
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ea])
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eg])
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ei])
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ek])
-                    if connectivity >= 3:
-                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ef])
-                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eh])
-
-            # BEGINNING of x = max
+        # Handle the rest of columns
+        for x in range(1, shapeinfo.x - 1):
             rindex += 1
-            if data_p[rindex] != bgval:
+            if data_p[rindex] == bgval:
                 # Nothing to do if we are background
+                continue
 
-                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eb])
-                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
-                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ej])
+            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eb])
+            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
+            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ej])
 
-                if connectivity >= 2:
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ea])
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eg])
-                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ei])
-                    if connectivity >= 3:
-                        join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ef])
-            # END of x = max
-            # END of y = max
+            if connectivity >= 2:
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ea])
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eg])
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ei])
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ek])
+                if connectivity >= 3:
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ef])
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eh])
+
+        # BEGINNING of x = max
+        rindex += 1
+        if data_p[rindex] != bgval:
+            # Nothing to do if we are background
+
+            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eb])
+            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ed])
+            join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ej])
+
+            if connectivity >= 2:
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ea])
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_eg])
+                join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ei])
+                if connectivity >= 3:
+                    join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ef])
+        # END of x = max
+        # END of y = max
