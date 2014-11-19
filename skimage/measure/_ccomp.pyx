@@ -295,16 +295,16 @@ def _norm_connectivity(connectivity, ndim):
 
 
 # Connected components search as described in Fiorio et al.
-def label(input, DTYPE_t neighbors=8, background=None, return_num=False,
+def label(input, neighbors=None, background=None, return_num=False,
           connectivity=None):
     """Label connected regions of an integer array.
 
     Two pixels are connected when they are neighbors and have the same value.
     In 2D, they can be neighbors either in a 1- or 2-connected sense.
-    The value refers to the greatest number of orthogonal hops between the
-    starting point and the neighbor.
+    The value refers to the maximum number of orthogonal hops to consider a
+    pixel/voxel a neighbor.
 
-      1-connectivity      2-connectivity
+      1-connectivity      2-connectivity     diagonal connection close-up
 
            [ ]           [ ]  [ ]  [ ]         [ ]
             |               \\ |  /             |  <- hop 2
@@ -320,14 +320,14 @@ def label(input, DTYPE_t neighbors=8, background=None, return_num=False,
         Whether to use 4- or 8-connectivity.
         In 3D, 4-connectivity means connected pixels have to share face,
         whereas with 8-connectivity, they have to share only edge or vertex.
-        **Depreceated, use ``connectivity`` instead.**
+        **Deprecated, use ``connectivity`` instead.**
     background : int, optional
         Consider all pixels with this value as background pixels, and label
         them as -1. (Note: background pixels will be labeled as 0 starting with
         version 0.12).
     return_num : bool, optional
         Whether to return the number of assigned labels.
-    connectivity : int
+    connectivity : int, optional
         Number of orthogonal hops
         For the 2D case, 1 considers horizontal and vertical neighbors, whereas
         2 adds the diagonals (you hop once vertically and once horizontally).
@@ -392,22 +392,23 @@ def label(input, DTYPE_t neighbors=8, background=None, return_num=False,
     get_bginfo(background, &bg)
 
     if neighbors is None and connectivity is None:
-        # Pure default
+        # default
         connectivity = -1
     elif neighbors is not None:
-        # Pure fail
+        depr_msg = ("The argument 'neighbors' is deprecated, use 'connectivity'"
+                    " instead")
+        # fail
         if neighbors != 4 and neighbors != 8:
+            DeprecationWarning(depr_msg)
             msg = "Neighbors must be either 4 or 8, got '%d'.\n" % neighbors
-            msg += "Moreover, this arg is depreceated, use 'connectivity' instead"
             raise ValueError(msg)
         else:
             # backwards-compatible neighbors recalc to connectivity,
-            # depreciation warning
+            # deprecation warning
             nei2conn = {4: 1, 8: -1}
             connectivity = nei2conn[neighbors]
-            msg = "Argument 'neighbors' is depreceated, use 'connectivity' "
-            msg += "instead. Its coresponing value is likely '%d'" % connectivity
-            DeprecationWarning(msg)
+            msg = " Its corresponing value is '%d'" % connectivity
+            DeprecationWarning(depr_msg + msg)
 
     connectivity = _norm_connectivity(connectivity, shapeinfo.ndim)
 
