@@ -1,3 +1,4 @@
+.. _data_types:
 
 ===================================
 Image data types and what they mean

@@ -21,6 +21,10 @@ Retrieving statistical information about gray values: ::
     >>> camera.mean()
     118.31400299072266
 
+Numpy arrays representing images can be of different integer of float
+numerical types. See :ref:`data_types` for more information about data
+types.
+
 Numpy indexing can be used both for looking at pixel values, and to
 modify pixel values: ::
 

@@ -24,12 +24,12 @@ example 2-D arrays for grayscale 2-D images ::
     (512, 512)
 
 The :mod:`skimage.data` submodule provides a set of functions returning
-model images, that can be used to get started quickly on using
+example images, that can be used to get started quickly on using
 scikit-image's functions: ::
 
     >>> coins = data.coins()
-    >>> from skimage import filter
-    >>> threshold_value = filter.threshold_otsu(coins)
+    >>> from skimage import filters
+    >>> threshold_value = filters.threshold_otsu(coins)
     >>> threshold_value
     107
 
