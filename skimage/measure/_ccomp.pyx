@@ -115,6 +115,11 @@ cdef void get_shape_info(inarr_shape, shape_info *res) except *:
     res.y = 1
     res.z = 1
     res.ravel_index = ravel_index2D
+    # A shape (3, 1, 4) would make the algorithm crash, but the corresponding
+    # good_shape (i.e. the array with axis swapped) (1, 3, 4) is OK.
+    # Having an axis length of 1 when an axis on the left is longer than 1
+    # (in this case, it has length of 3) is NOT ALLOWED.
+    good_shape = tuple(sorted(inarr_shape))
 
     res.ndim = len(inarr_shape)
     if res.ndim == 1:
@@ -124,11 +129,20 @@ cdef void get_shape_info(inarr_shape, shape_info *res) except *:
         res.x = inarr_shape[1]
         res.y = inarr_shape[0]
         res.ravel_index = ravel_index2D
+        if res.x == 1 and res.y > 1:
+            raise ValueError(
+                "Swap axis of your %s array so it has a %s shape"
+                % (inarr_shape, good_shape))
     elif res.ndim == 3:
         res.x = inarr_shape[2]
         res.y = inarr_shape[1]
         res.z = inarr_shape[0]
         res.ravel_index = ravel_index3D
+        if ((res.x == 1 and res.y > 1)
+            or res.y == 1 and res.z > 1):
+            raise ValueError(
+                "Swap axes of your %s array so it has a %s shape"
+                % (inarr_shape, good_shape))
     else:
         raise NotImplementedError(
             "Only for images of dimension 1-3 are supported, got a %sD one"
@@ -285,7 +299,7 @@ def _norm_connectivity(connectivity, ndim):
     """
     if connectivity == 0:
         raise ValueError(
-            "Connectivity of 0 or above %d doesn't make sense" % ndim)
+            "Connectivity of 0 doesn't make sense")
     if not -ndim <= connectivity <= ndim:
         raise ValueError(
             "Connectivity below %d or above %d is illegal."
