@@ -28,7 +28,11 @@ NR_OF_GREY = 2**14  # number of grayscale levels to use in CLAHE algorithm
 @adapt_rgb(hsv_value)
 def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
                        nbins=256):
-    """Contrast Limited Adaptive Histogram Equalization.
+    """Contrast Limited Adaptive Histogram Equalization (CLAHE).
+
+    An algorithm for local contrast enhancement, that uses histograms computed
+    over different tile regions of the image. Local details can therefore be
+    enhanced even in regions that are darker or lighter than most of the image.
 
     Parameters
     ----------
@@ -48,6 +52,10 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
     -------
     out : ndarray
         Equalized image.
+
+    See Also
+    --------
+    equalize_hist, rescale_intensity
 
     Notes
     -----
