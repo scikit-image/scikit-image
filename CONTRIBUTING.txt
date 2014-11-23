@@ -123,7 +123,8 @@ Guidelines
 
 * All code should have tests (see `test coverage`_ below for more details).
 * All code should be documented, to the same
-  `standard <http://projects.scipy.org/numpy/wiki/CodingStyleGuidelines>`_
+  `standard
+<://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt#docstring-standard>`_
   as NumPy and SciPy.
 * For new functionality, always add an example to the
   gallery.
