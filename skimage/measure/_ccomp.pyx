@@ -283,21 +283,23 @@ def _norm_connectivity(connectivity, ndim):
     connectivity : int
         Connectivity, 0 < connectivity < ndim
     """
-    if connectivity == 0 or connectivity > ndim:
+    if connectivity == 0:
         raise ValueError(
             "Connectivity of 0 or above %d doesn't make sense" % ndim)
-    res = connectivity
-    if res < 0:
-        res = res % ndim
-        # we want -1 to be normed to ndim, -2 to (ndim - 1) etc.
-        res += 1
-    return res
+    if not -ndim <= connectivity <= ndim:
+        raise ValueError(
+            "Connectivity below %d or above %d is illegal."
+            % (-ndim, ndim))
+    if connectivity < 0:
+        # Just as we say in the docs
+        connectivity += ndim + 1
+    return connectivity
 
 
 # Connected components search as described in Fiorio et al.
 def label(input, neighbors=None, background=None, return_num=False,
           connectivity=None):
-    """Label connected regions of an integer array.
+    r"""Label connected regions of an integer array.
 
     Two pixels are connected when they are neighbors and have the same value.
     In 2D, they can be neighbors either in a 1- or 2-connected sense.
@@ -307,9 +309,9 @@ def label(input, neighbors=None, background=None, return_num=False,
       1-connectivity      2-connectivity     diagonal connection close-up
 
            [ ]           [ ]  [ ]  [ ]         [ ]
-            |               \\ |  /             |  <- hop 2
+            |               \  |  /             |  <- hop 2
       [ ]--[x]--[ ]      [ ]--[x]--[ ]    [x]--[ ]
-            |               /  |  \\        hop 1
+            |               /  |  \         hop 1
            [ ]           [ ]  [ ]  [ ]
 
     Parameters
@@ -328,13 +330,14 @@ def label(input, neighbors=None, background=None, return_num=False,
     return_num : bool, optional
         Whether to return the number of assigned labels.
     connectivity : int, optional
-        Number of orthogonal hops
-        For the 2D case, 1 considers horizontal and vertical neighbors, whereas
-        2 adds the diagonals (you hop once vertically and once horizontally).
-        1 is the lowest value of connection (4 neighbors in 2D, 6 in 3D).
-        Moreover, the value of -1 specifies the highest connectivity available.
-        So for example in 2D, -1 is equivalent of 2, resulting in considering
-        all 8 neighbors.
+        Maximum number of orthogonal hops to consider a pixel/voxel
+        as a neighbor.
+        Accepted values are ranging from  1 to input.ndim. Negative values from
+        -input.ndim to -1 are also accepted. Negative connectivity value
+        :math:`x` is equivalent to the positive connectivity value
+        :math:`x + input.ndim + 1`. For example in 2D, -1 and 2 = -1 + 2 + 1
+        are equivalent, values.
+
 
     Returns
     -------
@@ -353,12 +356,12 @@ def label(input, neighbors=None, background=None, return_num=False,
      [0 1 0]
      [0 0 1]]
 
-    >>> print(m.label(x, neighbors=4))
+    >>> print(m.label(x, connectivity=1))
     [[0 1 1]
      [2 3 1]
      [2 2 4]]
 
-    >>> print(m.label(x, neighbors=8))
+    >>> print(m.label(x, connectivity=2))
     [[0 1 1]
      [1 0 1]
      [1 1 0]]
@@ -395,20 +398,17 @@ def label(input, neighbors=None, background=None, return_num=False,
         # default
         connectivity = -1
     elif neighbors is not None:
-        depr_msg = ("The argument 'neighbors' is deprecated, use 'connectivity'"
-                    " instead")
+        depr_msg = ("The argument 'neighbors' is deprecated, use "
+                    "'connectivity' instead")
+        DeprecationWarning(depr_msg)
         # fail
         if neighbors != 4 and neighbors != 8:
-            DeprecationWarning(depr_msg)
             msg = "Neighbors must be either 4 or 8, got '%d'.\n" % neighbors
             raise ValueError(msg)
         else:
             # backwards-compatible neighbors recalc to connectivity,
-            # deprecation warning
             nei2conn = {4: 1, 8: -1}
             connectivity = nei2conn[neighbors]
-            msg = " Its corresponing value is '%d'" % connectivity
-            DeprecationWarning(depr_msg + msg)
 
     connectivity = _norm_connectivity(connectivity, shapeinfo.ndim)
 
