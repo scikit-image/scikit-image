@@ -10,7 +10,7 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
 else
     sudo apt-get install -q libqt4-dev
     pip install -q PySide $WHEELHOUSE
-    python ~/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/pyside_postinstall.py -install
+    python ~/venv/bin/pyside_postinstall.py -install
 fi
 
 # imread does NOT support py3.2

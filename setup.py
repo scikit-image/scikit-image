@@ -35,7 +35,7 @@ DEPENDENCIES = {}
 with open('requirements.txt', 'rb') as fid:
     data = fid.read().decode('utf-8', 'replace')
 for line in data.splitlines():
-    pkg, _, version_info = line.partition('>=')
+    pkg, _, version_info = line.replace('==', '>=').partition('>=')
     # Only require Cython if we have a developer checkout
     if pkg.lower() == 'cython' and not VERSION.endswith('dev'):
         continue
@@ -88,22 +88,29 @@ def check_requirements():
     for (package_name, min_version) in DEPENDENCIES.items():
         if package_name == 'cython':
             package_name = 'Cython'
-        dep_error = False
+        dep_error = ''
         if package_name.lower() == 'pillow':
             package_name = 'PIL.Image'
+            min_version = '1.1.7'
         try:
             package = __import__(package_name,
                 fromlist=[package_name.rpartition('.')[0]])
         except ImportError:
-            dep_error = True
+            dep_error = ('You need `%s` version %s or later.'
+                         % (package_name, min_version))
         else:
-            package_version = get_package_version(package)
+            if package_name == 'PIL':
+                package_version = package.PILLOW_VERSION
+            else:
+                package_version = get_package_version(package)
 
             if LooseVersion(min_version) > LooseVersion(package_version):
-                dep_error = True
+                dep_error = ('You need `%s` version %s or later,'
+                             'found version %s.'
+                             % (package_name, min_version,
+                                package_version))
         if dep_error:
-            raise ImportError('You need `%s` version %s or later.' \
-                              % (package_name, min_version))
+            raise ImportError(dep_error)
 
 
 if __name__ == "__main__":

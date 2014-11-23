@@ -2,20 +2,26 @@
 set -ex
 
 sh -e /etc/init.d/xvfb start
-sudo apt-get update
 
 pip install wheel flake8 coveralls nose
-pip uninstall -y numpy
+
+# install system tk
+sudo apt-get install python-tk
 
 # on Python 2.7, use the system versions of numpy, scipy, and matplotlib
 # and the minimum version of cython and networkx
 if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     sudo apt-get install python-scipy python-matplotlib
-    pip install https://github.com/cython/cython/archive/0.19.2.tar.gz
-    pip install https://github.com/networkx/networkx/archive/networkx-1.8.tar.gz
+    sed -i 's/cython>=/cython==/g' requirements.txt
+    sed -i 's/networkx>=/networkx==/g' requirements.txt
 fi
 
-pip install -r requirements.txt $WHEELHOUSE
+# on Python 3.2, use matplotlib 1.3.1
+if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
+    sed -i 's/matplotlib>=*.*.*/matplotlib==1.3.1/g' requirements.txt
+fi
+
+pip install $WHEELHOUSE -r requirements.txt
 
 # clean up disk space
 sudo apt-get clean

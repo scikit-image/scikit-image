@@ -9,7 +9,7 @@ language: python
 
 python:
 - 2.6
-- "2.7_with_system_site_packages"
+- 2.7
 - 3.2
 - 3.3
 - 3.4
@@ -18,6 +18,13 @@ before_install:
     - export DISPLAY=:99.0
     - export PYTHONWARNINGS="all"
     - export WHEELHOUSE="--no-index --find-links=http://travis-wheels.scikit-image.org/"
+    - sudo apt-get update
+
+    - virtualenv -p python ~/venv
+    - source ~/venv/bin/activate
+    - which python
+    - python --version
+
     - travis_retry tools/travis_setup.sh
 
     - python check_bento_build.py
