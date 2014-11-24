@@ -409,20 +409,19 @@ def label(input, neighbors=None, background=None, return_num=False,
     get_bginfo(background, &bg)
 
     if neighbors is None and connectivity is None:
-        # default
-        connectivity = -1
+        # use the full connectivity by default
+        connectivity = input.ndim
     elif neighbors is not None:
-        depr_msg = ("The argument 'neighbors' is deprecated, use "
-                    "'connectivity' instead")
-        DeprecationWarning(depr_msg)
-        # fail
-        if neighbors != 4 and neighbors != 8:
-            msg = "Neighbors must be either 4 or 8, got '%d'.\n" % neighbors
-            raise ValueError(msg)
+        DeprecationWarning("The argument 'neighbors' is deprecated, use "
+                           "'connectivity' instead")
+        # backwards-compatible neighbors recalc to connectivity,
+        if neighbors == 4:
+            connectivity = 1
+        elif neighbors == 8:
+            connectivity = input.ndim
         else:
-            # backwards-compatible neighbors recalc to connectivity,
-            nei2conn = {4: 1, 8: -1}
-            connectivity = nei2conn[neighbors]
+            raise ValueError("Neighbors must be either 4 or 8, got '%d'.\n"
+                             % neighbors)
 
     connectivity = _norm_connectivity(connectivity, shapeinfo.ndim)
 
