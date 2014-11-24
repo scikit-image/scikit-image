@@ -62,9 +62,18 @@ def histogram(image, nbins=256):
     # For integer types, histogramming with bincount is more efficient.
     if np.issubdtype(image.dtype, np.integer):
         offset = 0
-        if np.min(image) < 0:
-            offset = np.min(image)
-        hist = np.bincount(image.ravel() - offset)
+        image_min = np.min(image)
+        if image_min < 0:
+            offset = image_min
+            image_range = np.max(image).astype(np.int64) - image_min
+            # get smallest dtype that can hold both minimum and offset maximum
+            offset_dtype = np.promote_types(np.min_scalar_type(image_range),
+                                            np.min_scalar_type(image_min))
+            if image.dtype != offset_dtype:
+                # prevent overflow errors when offsetting
+                image = image.astype(offset_dtype)
+            image = image - offset
+        hist = np.bincount(image.ravel())
         bin_centers = np.arange(len(hist)) + offset
 
         # clip histogram to start with a non-zero bin
