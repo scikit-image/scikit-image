@@ -12,6 +12,27 @@ from skimage.color import rgb2gray
 from skimage.util.dtype import dtype_range
 
 
+# Test integer histograms
+# =======================
+
+def test_negative_overflow():
+    im = np.array([-1, 127], dtype=np.int8)
+    frequencies, bin_centers = exposure.histogram(im)
+    assert_array_equal(bin_centers, np.arange(-1, 128))
+    assert frequencies[0] == 1
+    assert frequencies[-1] == 1
+    assert_array_equal(frequencies[1:-1], 0)
+
+
+def test_all_negative_image():
+    im = np.array([-128, -1], dtype=np.int8)
+    frequencies, bin_centers = exposure.histogram(im)
+    assert_array_equal(bin_centers, np.arange(-128, 0))
+    assert frequencies[0] == 1
+    assert frequencies[-1] == 1
+    assert_array_equal(frequencies[1:-1], 0)
+
+
 # Test histogram equalization
 # ===========================
 
