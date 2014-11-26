@@ -1,3 +1,4 @@
+# coding: utf-8
 import numpy as np
 from . import _moments_cy
 
