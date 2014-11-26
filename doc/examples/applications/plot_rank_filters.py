@@ -586,7 +586,7 @@ def ndi_med(image, n):
 
 Comparison between
 
-* `filter.rank.maximum`
+* `filters.rank.maximum`
 * `morphology.dilate`
 
 on increasing structuring element size:
@@ -610,7 +610,7 @@ ax.set_title('Performance with respect to element size')
 ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Element radius')
 ax.plot(e_range, rec)
-ax.legend(['filter.rank.maximum', 'morphology.dilate'])
+ax.legend(['filters.rank.maximum', 'morphology.dilate'])
 
 """
 
@@ -638,7 +638,7 @@ ax.set_title('Performance with respect to image size')
 ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Image size')
 ax.plot(s_range, rec)
-ax.legend(['filter.rank.maximum', 'morphology.dilate'])
+ax.legend(['filters.rank.maximum', 'morphology.dilate'])
 
 
 """
@@ -647,7 +647,7 @@ ax.legend(['filter.rank.maximum', 'morphology.dilate'])
 
 Comparison between:
 
-* `filter.rank.median`
+* `filters.rank.median`
 * `scipy.ndimage.percentile`
 
 on increasing structuring element size:
@@ -669,7 +669,7 @@ rec = np.asarray(rec)
 fig, ax = plt.subplots()
 ax.set_title('Performance with respect to element size')
 ax.plot(e_range, rec)
-ax.legend(['filter.rank.median', 'scipy.ndimage.percentile'])
+ax.legend(['filters.rank.median', 'scipy.ndimage.percentile'])
 ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Element radius')
 
@@ -682,7 +682,7 @@ Comparison of outcome of the three methods:
 
 fig, ax = plt.subplots()
 ax.imshow(np.hstack((rc, rndi)))
-ax.set_title('filter.rank.median vs. scipy.ndimage.percentile')
+ax.set_title('filters.rank.median vs. scipy.ndimage.percentile')
 ax.axis('off')
 
 """
@@ -708,7 +708,7 @@ rec = np.asarray(rec)
 fig, ax = plt.subplots()
 ax.set_title('Performance with respect to image size')
 ax.plot(s_range, rec)
-ax.legend(['filter.rank.median', 'scipy.ndimage.percentile'])
+ax.legend(['filters.rank.median', 'scipy.ndimage.percentile'])
 ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Image size')
 
