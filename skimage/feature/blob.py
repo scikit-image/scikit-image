@@ -53,8 +53,14 @@ def _blob_overlap(blob1, blob2):
     if d <= abs(r1 - r2):
         return 1
 
-    acos1 = arccos((d ** 2 + r1 ** 2 - r2 ** 2) / (2 * d * r1))
-    acos2 = arccos((d ** 2 + r2 ** 2 - r1 ** 2) / (2 * d * r2))
+    ratio1 = (d ** 2 + r1 ** 2 - r2 ** 2) / (2 * d * r1)
+    ratio1 = np.clip(ratio1, -1, 1)
+    acos1 = arccos(ratio1)
+
+    ratio2 = (d ** 2 + r2 ** 2 - r1 ** 2) / (2 * d * r2)
+    ratio2 = np.clip(ratio2, -1, 1)
+    acos2 = arccos(ratio2)
+
     a = -d + r2 + r1
     b = d - r2 + r1
     c = d + r2 - r1
