@@ -179,10 +179,6 @@ class _RegionProperties(object):
         return self._label_image[self._slice] == self.label
 
     @_cached_property
-    def _image_double(self):
-        return self.image.astype(np.double)
-
-    @_cached_property
     def inertia_tensor(self):
         mu = self.moments_central
         a = mu[2, 0] / mu[0, 0]
@@ -239,12 +235,13 @@ class _RegionProperties(object):
 
     @_cached_property
     def moments(self):
-        return _moments.moments(self._image_double, 3)
+        return _moments.moments(self.image.astype(np.uint8), 3)
 
     @_cached_property
     def moments_central(self):
         row, col = self.local_centroid
-        return _moments.moments_central(self._image_double, row, col, 3)
+        return _moments.moments_central(self.image.astype(np.uint8),
+                                        row, col, 3)
 
     @_cached_property
     def moments_hu(self):
