@@ -46,9 +46,9 @@ Library:
     Extension: skimage.measure._find_contours_cy
         Sources:
             skimage/measure/_find_contours_cy.pyx
-    Extension: skimage.measure._moments
+    Extension: skimage.measure._moments_cy
         Sources:
-            skimage/measure/_moments.pyx
+            skimage/measure/_moments_cy.pyx
     Extension: skimage.measure._marching_cubes_cy
         Sources:
             skimage/measure/_marching_cubes_cy.pyx
