@@ -1,8 +1,11 @@
 from .lpi_filter import inverse, wiener, LPIFilter2D
 from ._gaussian import gaussian_filter
-from .edges import (sobel, hsobel, vsobel, scharr, hscharr, vscharr, prewitt,
-                    hprewitt, vprewitt, roberts, roberts_positive_diagonal,
-                    roberts_negative_diagonal)
+from .edges import (sobel, hsobel, vsobel, sobel_h, sobel_v,
+                    scharr, hscharr, vscharr, scharr_h, scharr_v,
+                    prewitt, hprewitt, vprewitt, prewitt_h, prewitt_v,
+                    roberts, roberts_positive_diagonal,
+                    roberts_negative_diagonal, roberts_pos_diag,
+                    roberts_neg_diag)
 from ._rank_order import rank_order
 from ._gabor import gabor_kernel, gabor_filter
 from .thresholding import (threshold_adaptive, threshold_otsu, threshold_yen,
@@ -34,15 +37,23 @@ __all__ = ['inverse',
            'sobel',
            'hsobel',
            'vsobel',
+           'sobel_h',
+           'sobel_v'
            'scharr',
            'hscharr',
            'vscharr',
+           'scharr_h',
+           'scharr_v',
            'prewitt',
            'hprewitt',
            'vprewitt',
+           'prewitt_h',
+           'prewitt_v',
            'roberts',
            'roberts_positive_diagonal',
            'roberts_negative_diagonal',
+           'roberts_pos_diag',
+           'roberts_neg_diag',
            'denoise_tv_chambolle',
            'denoise_bilateral',
            'denoise_tv_bregman',
