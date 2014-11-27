@@ -69,15 +69,15 @@ def test_sobel_vertical():
 
 def test_hsobel_zeros():
     """Horizontal sobel on an array of all zeros."""
-    result = filters.hsobel(np.zeros((10, 10)), np.ones((10, 10), bool))
+    result = filters.sobel_h(np.zeros((10, 10)), np.ones((10, 10), bool))
     assert (np.all(result == 0))
 
 
 def test_hsobel_mask():
     """Horizontal Sobel on a masked array should be zero."""
     np.random.seed(0)
-    result = filters.hsobel(np.random.uniform(size=(10, 10)),
-                            np.zeros((10, 10), bool))
+    result = filters.sobel_h(np.random.uniform(size=(10, 10)),
+                             np.zeros((10, 10), bool))
     assert (np.all(result == 0))
 
 
@@ -85,7 +85,7 @@ def test_hsobel_horizontal():
     """Horizontal Sobel on an edge should be a horizontal line."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
-    result = filters.hsobel(image)
+    result = filters.sobel_h(image)
     # Fudge the eroded points
     i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == 1))
@@ -96,21 +96,21 @@ def test_hsobel_vertical():
     """Horizontal Sobel on a vertical edge should be zero."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float) * np.sqrt(2)
-    result = filters.hsobel(image)
+    result = filters.sobel_h(image)
     assert_allclose(result, 0, atol=1e-10)
 
 
 def test_vsobel_zeros():
     """Vertical sobel on an array of all zeros."""
-    result = filters.vsobel(np.zeros((10, 10)), np.ones((10, 10), bool))
+    result = filters.sobel_v(np.zeros((10, 10)), np.ones((10, 10), bool))
     assert_allclose(result, 0)
 
 
 def test_vsobel_mask():
     """Vertical Sobel on a masked array should be zero."""
     np.random.seed(0)
-    result = filters.vsobel(np.random.uniform(size=(10, 10)),
-                      np.zeros((10, 10), bool))
+    result = filters.sobel_v(np.random.uniform(size=(10, 10)),
+                             np.zeros((10, 10), bool))
     assert_allclose(result, 0)
 
 
@@ -118,7 +118,7 @@ def test_vsobel_vertical():
     """Vertical Sobel on an edge should be a vertical line."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
-    result = filters.vsobel(image)
+    result = filters.sobel_v(image)
     # Fudge the eroded points
     j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == 1))
@@ -129,7 +129,7 @@ def test_vsobel_horizontal():
     """vertical Sobel on a horizontal edge should be zero."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
-    result = filters.vsobel(image)
+    result = filters.sobel_v(image)
     assert_allclose(result, 0)
 
 
@@ -170,15 +170,15 @@ def test_scharr_vertical():
 
 def test_hscharr_zeros():
     """Horizontal Scharr on an array of all zeros."""
-    result = filters.hscharr(np.zeros((10, 10)), np.ones((10, 10), bool))
+    result = filters.scharr_h(np.zeros((10, 10)), np.ones((10, 10), bool))
     assert_allclose(result, 0)
 
 
 def test_hscharr_mask():
     """Horizontal Scharr on a masked array should be zero."""
     np.random.seed(0)
-    result = filters.hscharr(np.random.uniform(size=(10, 10)),
-                             np.zeros((10, 10), bool))
+    result = filters.scharr_h(np.random.uniform(size=(10, 10)),
+                              np.zeros((10, 10), bool))
     assert_allclose(result, 0)
 
 
@@ -186,7 +186,7 @@ def test_hscharr_horizontal():
     """Horizontal Scharr on an edge should be a horizontal line."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
-    result = filters.hscharr(image)
+    result = filters.scharr_h(image)
     # Fudge the eroded points
     i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == 1))
@@ -197,21 +197,21 @@ def test_hscharr_vertical():
     """Horizontal Scharr on a vertical edge should be zero."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
-    result = filters.hscharr(image)
+    result = filters.scharr_h(image)
     assert_allclose(result, 0)
 
 
 def test_vscharr_zeros():
     """Vertical Scharr on an array of all zeros."""
-    result = filters.vscharr(np.zeros((10, 10)), np.ones((10, 10), bool))
+    result = filters.scharr_v(np.zeros((10, 10)), np.ones((10, 10), bool))
     assert_allclose(result, 0)
 
 
 def test_vscharr_mask():
     """Vertical Scharr on a masked array should be zero."""
     np.random.seed(0)
-    result = filters.vscharr(np.random.uniform(size=(10, 10)),
-                             np.zeros((10, 10), bool))
+    result = filters.scharr_v(np.random.uniform(size=(10, 10)),
+                              np.zeros((10, 10), bool))
     assert_allclose(result, 0)
 
 
@@ -219,7 +219,7 @@ def test_vscharr_vertical():
     """Vertical Scharr on an edge should be a vertical line."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
-    result = filters.vscharr(image)
+    result = filters.scharr_v(image)
     # Fudge the eroded points
     j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == 1))
@@ -230,7 +230,7 @@ def test_vscharr_horizontal():
     """vertical Scharr on a horizontal edge should be zero."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
-    result = filters.vscharr(image)
+    result = filters.scharr_v(image)
     assert_allclose(result, 0)
 
 
@@ -271,15 +271,15 @@ def test_prewitt_vertical():
 
 def test_hprewitt_zeros():
     """Horizontal prewitt on an array of all zeros."""
-    result = filters.hprewitt(np.zeros((10, 10)), np.ones((10, 10), bool))
+    result = filters.prewitt_h(np.zeros((10, 10)), np.ones((10, 10), bool))
     assert_allclose(result, 0)
 
 
 def test_hprewitt_mask():
     """Horizontal prewitt on a masked array should be zero."""
     np.random.seed(0)
-    result = filters.hprewitt(np.random.uniform(size=(10, 10)),
-                        np.zeros((10, 10), bool))
+    result = filters.prewitt_h(np.random.uniform(size=(10, 10)),
+                               np.zeros((10, 10), bool))
     assert_allclose(result, 0)
 
 
@@ -287,7 +287,7 @@ def test_hprewitt_horizontal():
     """Horizontal prewitt on an edge should be a horizontal line."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
-    result = filters.hprewitt(image)
+    result = filters.prewitt_h(image)
     # Fudge the eroded points
     i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == 1))
@@ -298,21 +298,21 @@ def test_hprewitt_vertical():
     """Horizontal prewitt on a vertical edge should be zero."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
-    result = filters.hprewitt(image)
+    result = filters.prewitt_h(image)
     assert_allclose(result, 0, atol=1e-10)
 
 
 def test_vprewitt_zeros():
     """Vertical prewitt on an array of all zeros."""
-    result = filters.vprewitt(np.zeros((10, 10)), np.ones((10, 10), bool))
+    result = filters.prewitt_v(np.zeros((10, 10)), np.ones((10, 10), bool))
     assert_allclose(result, 0)
 
 
 def test_vprewitt_mask():
     """Vertical prewitt on a masked array should be zero."""
     np.random.seed(0)
-    result = filters.vprewitt(np.random.uniform(size=(10, 10)),
-                              np.zeros((10, 10), bool))
+    result = filters.prewitt_v(np.random.uniform(size=(10, 10)),
+                               np.zeros((10, 10), bool))
     assert_allclose(result, 0)
 
 
@@ -320,7 +320,7 @@ def test_vprewitt_vertical():
     """Vertical prewitt on an edge should be a vertical line."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
-    result = filters.vprewitt(image)
+    result = filters.prewitt_v(image)
     # Fudge the eroded points
     j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == 1))
@@ -331,7 +331,7 @@ def test_vprewitt_horizontal():
     """Vertical prewitt on a horizontal edge should be zero."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
-    result = filters.vprewitt(image)
+    result = filters.prewitt_v(image)
     assert_allclose(result, 0)
 
 
@@ -347,7 +347,7 @@ def test_horizontal_mask_line():
     expected[1:-1, 1:-1] = 0.2           # constant gradient for most of image,
     expected[4:7, 1:-1] = 0              # but line and neighbors masked
 
-    for grad_func in (filters.hprewitt, filters.hsobel, filters.hscharr):
+    for grad_func in (filters.prewitt_h, filters.sobel_h, filters.scharr_h):
         result = grad_func(vgrad, mask)
         yield assert_close, result, expected
 
@@ -364,7 +364,7 @@ def test_vertical_mask_line():
     expected[1:-1, 1:-1] = 0.2           # constant gradient for most of image,
     expected[1:-1, 4:7] = 0              # but line and neighbors masked
 
-    for grad_func in (filters.vprewitt, filters.vsobel, filters.vscharr):
+    for grad_func in (filters.prewitt_v, filters.sobel_v, filters.scharr_v):
         result = grad_func(hgrad, mask)
         yield assert_close, result, expected
 
