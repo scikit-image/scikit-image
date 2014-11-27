@@ -38,7 +38,7 @@ __all__ = ['inverse',
            'hsobel',
            'vsobel',
            'sobel_h',
-           'sobel_v'
+           'sobel_v',
            'scharr',
            'hscharr',
            'vscharr',
