@@ -11,7 +11,7 @@ Original author: Lee Kamentsky
 """
 import numpy as np
 from skimage import img_as_float
-from skimage._shared.utils import assert_nD
+from skimage._shared.utils import assert_nD, deprecated
 from scipy.ndimage import convolve, binary_erosion, generate_binary_structure
 
 
@@ -82,12 +82,12 @@ def sobel(image, mask=None):
     has to be further processed to perform edge detection.
     """
     assert_nD(image, 2)
-    out = np.sqrt(hsobel(image, mask)**2 + vsobel(image, mask)**2)
+    out = np.sqrt(sobel_h(image, mask)**2 + sobel_v(image, mask)**2)
     out /= np.sqrt(2)
     return out
 
 
-def hsobel(image, mask=None):
+def sobel_h(image, mask=None):
     """Find the horizontal edges of an image using the Sobel transform.
 
     Parameters
@@ -106,8 +106,7 @@ def hsobel(image, mask=None):
 
     Notes
     -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
+    We use the following kernel::
 
       1   2   1
       0   0   0
@@ -116,10 +115,74 @@ def hsobel(image, mask=None):
     """
     assert_nD(image, 2)
     image = img_as_float(image)
-    result = np.abs(convolve(image, HSOBEL_WEIGHTS))
+    result = convolve(image, HSOBEL_WEIGHTS)
     return _mask_filter_result(result, mask)
 
 
+def sobel_v(image, mask=None):
+    """Find the vertical edges of an image using the Sobel transform.
+
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process.
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : 2-D array
+        The Sobel edge map.
+
+    Notes
+    -----
+    We use the following kernel::
+
+      1   0  -1
+      2   0  -2
+      1   0  -1
+
+    """
+    assert_nD(image, 2)
+    image = img_as_float(image)
+    result = convolve(image, VSOBEL_WEIGHTS)
+    return _mask_filter_result(result, mask)
+
+
+@deprecated("skimage.filters.sobel_h")
+def hsobel(image, mask=None):
+    """Find the horizontal edges of an image using the Sobel transform.
+
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process.
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : 2-D array
+        The absolute Sobel edge map.
+
+    Notes
+    -----
+    We use the following kernel and return the absolute value of the
+    result at each point::
+
+      1   2   1
+      0   0   0
+     -1  -2  -1
+
+    """
+    return np.abs(sobel_h(image, mask))
+
+
+@deprecated("skimage.filters.sobel_v")
 def vsobel(image, mask=None):
     """Find the vertical edges of an image using the Sobel transform.
 
@@ -128,14 +191,14 @@ def vsobel(image, mask=None):
     image : 2-D array
         Image to process
     mask : 2-D array, optional
-        An optional mask to limit the application to a certain area
+        An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
 
     Returns
     -------
     output : 2-D array
-        The Sobel edge map.
+        The absolute Sobel edge map.
 
     Notes
     -----
@@ -147,10 +210,7 @@ def vsobel(image, mask=None):
       1   0  -1
 
     """
-    assert_nD(image, 2)
-    image = img_as_float(image)
-    result = np.abs(convolve(image, VSOBEL_WEIGHTS))
-    return _mask_filter_result(result, mask)
+    return np.abs(sobel_v(image, mask))
 
 
 def scharr(image, mask=None):
@@ -182,12 +242,12 @@ def scharr(image, mask=None):
            Optimization of Kernel Based Image Derivatives.
 
     """
-    out = np.sqrt(hscharr(image, mask)**2 + vscharr(image, mask)**2)
+    out = np.sqrt(scharr_h(image, mask)**2 + scharr_v(image, mask)**2)
     out /= np.sqrt(2)
     return out
 
 
-def hscharr(image, mask=None):
+def scharr_h(image, mask=None):
     """Find the horizontal edges of an image using the Scharr transform.
 
     Parameters
@@ -206,8 +266,7 @@ def hscharr(image, mask=None):
 
     Notes
     -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
+    We use the following kernel::
 
       3   10   3
       0    0   0
@@ -221,10 +280,84 @@ def hscharr(image, mask=None):
     """
     assert_nD(image, 2)
     image = img_as_float(image)
-    result = np.abs(convolve(image, HSCHARR_WEIGHTS))
+    result = convolve(image, HSCHARR_WEIGHTS)
     return _mask_filter_result(result, mask)
 
 
+def scharr_v(image, mask=None):
+    """Find the vertical edges of an image using the Scharr transform.
+
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : 2-D array
+        The Scharr edge map.
+
+    Notes
+    -----
+    We use the following kernel::
+
+       3   0   -3
+      10   0  -10
+       3   0   -3
+
+    References
+    ----------
+    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical
+           Optimization of Kernel Based Image Derivatives.
+
+    """
+    assert_nD(image, 2)
+    image = img_as_float(image)
+    result = convolve(image, VSCHARR_WEIGHTS)
+    return _mask_filter_result(result, mask)
+
+
+@deprecated("skimage.filters.scharr_h")
+def hscharr(image, mask=None):
+    """Find the horizontal edges of an image using the Scharr transform.
+
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process.
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : 2-D array
+        The absolute Scharr edge map.
+
+    Notes
+    -----
+    We use the following kernel and return the absolute value of the
+    result at each point::
+
+      3   10   3
+      0    0   0
+     -3  -10  -3
+
+    References
+    ----------
+    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical
+           Optimization of Kernel Based Image Derivatives.
+
+    """
+    return np.abs(scharr_h(image, mask))
+
+
+@deprecated("skimage.filters.scharr_v")
 def vscharr(image, mask=None):
     """Find the vertical edges of an image using the Scharr transform.
 
@@ -233,14 +366,14 @@ def vscharr(image, mask=None):
     image : 2-D array
         Image to process
     mask : 2-D array, optional
-        An optional mask to limit the application to a certain area
+        An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
 
     Returns
     -------
     output : 2-D array
-        The Scharr edge map.
+        The absolute Scharr edge map.
 
     Notes
     -----
@@ -257,10 +390,7 @@ def vscharr(image, mask=None):
            Optimization of Kernel Based Image Derivatives.
 
     """
-    assert_nD(image, 2)
-    image = img_as_float(image)
-    result = np.abs(convolve(image, VSCHARR_WEIGHTS))
-    return _mask_filter_result(result, mask)
+    return np.abs(scharr_v(image, mask))
 
 
 def prewitt(image, mask=None):
@@ -286,12 +416,12 @@ def prewitt(image, mask=None):
     and vertical Prewitt transforms.
     """
     assert_nD(image, 2)
-    out = np.sqrt(hprewitt(image, mask)**2 + vprewitt(image, mask)**2)
+    out = np.sqrt(prewitt_h(image, mask)**2 + prewitt_v(image, mask)**2)
     out /= np.sqrt(2)
     return out
 
 
-def hprewitt(image, mask=None):
+def prewitt_h(image, mask=None):
     """Find the horizontal edges of an image using the Prewitt transform.
 
     Parameters
@@ -310,8 +440,7 @@ def hprewitt(image, mask=None):
 
     Notes
     -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
+    We use the following kernel::
 
       1   1   1
       0   0   0
@@ -320,11 +449,11 @@ def hprewitt(image, mask=None):
     """
     assert_nD(image, 2)
     image = img_as_float(image)
-    result = np.abs(convolve(image, HPREWITT_WEIGHTS))
+    result = convolve(image, HPREWITT_WEIGHTS)
     return _mask_filter_result(result, mask)
 
 
-def vprewitt(image, mask=None):
+def prewitt_v(image, mask=None):
     """Find the vertical edges of an image using the Prewitt transform.
 
     Parameters
@@ -343,8 +472,7 @@ def vprewitt(image, mask=None):
 
     Notes
     -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
+    We use the following kernel::
 
       1   0  -1
       1   0  -1
@@ -353,8 +481,70 @@ def vprewitt(image, mask=None):
     """
     assert_nD(image, 2)
     image = img_as_float(image)
-    result = np.abs(convolve(image, VPREWITT_WEIGHTS))
+    result = convolve(image, VPREWITT_WEIGHTS)
     return _mask_filter_result(result, mask)
+
+
+@deprecated("skimage.filters.prewitt_h")
+def hprewitt(image, mask=None):
+    """Find the horizontal edges of an image using the Prewitt transform.
+
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process.
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : 2-D array
+        The absolute Prewitt edge map.
+
+    Notes
+    -----
+    We use the following kernel and return the absolute value of the
+    result at each point::
+
+      1   1   1
+      0   0   0
+     -1  -1  -1
+
+    """
+    return np.abs(prewitt_h(image, mask))
+
+
+@deprecated("skimage.filters.prewitt_v")
+def vprewitt(image, mask=None):
+    """Find the vertical edges of an image using the Prewitt transform.
+
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process.
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : 2-D array
+        The absolute Prewitt edge map.
+
+    Notes
+    -----
+    We use the following kernel and return the absolute value of the
+    result at each point::
+
+      1   0  -1
+      1   0  -1
+      1   0  -1
+
+    """
+    return np.abs(prewitt_v(image, mask))
 
 
 def roberts(image, mask=None):
@@ -375,13 +565,13 @@ def roberts(image, mask=None):
         The Roberts' Cross edge map.
     """
     assert_nD(image, 2)
-    out = np.sqrt(roberts_positive_diagonal(image, mask)**2 +
-                  roberts_negative_diagonal(image, mask)**2)
+    out = np.sqrt(roberts_pos_diag(image, mask)**2 +
+                  roberts_neg_diag(image, mask)**2)
     out /= np.sqrt(2)
     return out
 
 
-def roberts_positive_diagonal(image, mask=None):
+def roberts_pos_diag(image, mask=None):
     """Find the cross edges of an image using Roberts' cross operator.
 
     The kernel is applied to the input image to produce separate measurements
@@ -403,8 +593,7 @@ def roberts_positive_diagonal(image, mask=None):
 
     Notes
     -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
+    We use the following kernel::
 
       1   0
       0  -1
@@ -412,11 +601,11 @@ def roberts_positive_diagonal(image, mask=None):
     """
     assert_nD(image, 2)
     image = img_as_float(image)
-    result = np.abs(convolve(image, ROBERTS_PD_WEIGHTS))
+    result = convolve(image, ROBERTS_PD_WEIGHTS)
     return _mask_filter_result(result, mask)
 
 
-def roberts_negative_diagonal(image, mask=None):
+def roberts_neg_diag(image, mask=None):
     """Find the cross edges of an image using the Roberts' Cross operator.
 
     The kernel is applied to the input image to produce separate measurements
@@ -438,8 +627,7 @@ def roberts_negative_diagonal(image, mask=None):
 
     Notes
     -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
+    We use the following kernel::
 
       0   1
      -1   0
@@ -447,5 +635,71 @@ def roberts_negative_diagonal(image, mask=None):
     """
     assert_nD(image, 2)
     image = img_as_float(image)
-    result = np.abs(convolve(image, ROBERTS_ND_WEIGHTS))
+    result = convolve(image, ROBERTS_ND_WEIGHTS)
     return _mask_filter_result(result, mask)
+
+
+@deprecated("skimage.filters.roberts_pos_diag")
+def roberts_positive_diagonal(image, mask=None):
+    """Find the cross edges of an image using Roberts' cross operator.
+
+    The kernel is applied to the input image to produce separate measurements
+    of the gradient component one orientation.
+
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process.
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : 2-D array
+        The absolute Robert's edge map.
+
+    Notes
+    -----
+    We use the following kernel and return the absolute value of the
+    result at each point::
+
+      1   0
+      0  -1
+
+    """
+    return np.abs(roberts_pos_diag(image, mask))
+
+
+@deprecated("skimage.filters.roberts_neg_diag")
+def roberts_negative_diagonal(image, mask=None):
+    """Find the cross edges of an image using the Roberts' Cross operator.
+
+    The kernel is applied to the input image to produce separate measurements
+    of the gradient component one orientation.
+
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process.
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : 2-D array
+        The absolute Robert's edge map.
+
+    Notes
+    -----
+    We use the following kernel and return the absolute value of the
+    result at each point::
+
+      0   1
+     -1   0
+
+    """
+    return np.abs(roberts_neg_diag(image, mask))
