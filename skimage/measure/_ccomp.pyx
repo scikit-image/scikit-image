@@ -130,6 +130,7 @@ cdef void get_shape_info(inarr_shape, shape_info *res) except *:
         res.y = inarr_shape[0]
         res.ravel_index = ravel_index2D
         if res.x == 1 and res.y > 1:
+            # Should not occur, but better be safe than sorry
             raise ValueError(
                 "Swap axis of your %s array so it has a %s shape"
                 % (inarr_shape, good_shape))
@@ -140,6 +141,7 @@ cdef void get_shape_info(inarr_shape, shape_info *res) except *:
         res.ravel_index = ravel_index3D
         if ((res.x == 1 and res.y > 1)
             or res.y == 1 and res.z > 1):
+            # Should not occur, but better be safe than sorry
             raise ValueError(
                 "Swap axes of your %s array so it has a %s shape"
                 % (inarr_shape, good_shape))
@@ -310,6 +312,83 @@ def _norm_connectivity(connectivity, ndim):
     return connectivity
 
 
+def _get_swaps(shp):
+    """
+    What axes to swap if we want to convert an illegal array shape
+    to a legal one.
+
+    Args:
+        shp (tuple-like): The array shape
+
+    Returns:
+        list: List of tuples to be passed to np.swapaxes
+    """
+    shp = np.array(shp)
+    swaps = []
+
+    # Dimensions where the array is "flat"
+    ones = np.where(shp == 1)[0][::-1]
+    # The other dimensions
+    bigs = np.where(shp > 1)[0]
+    # We now go from opposite directions and swap axes if an index of a flat
+    # axis is higher than the one of a thick axis
+    for one, big in zip(ones, bigs):
+        if one < big:
+            # We are ordered already
+            break
+        else:
+            swaps.append((one, big))
+    # TODO: Add more swaps so the array is longer along x and shorter along y
+    return swaps
+
+
+def _apply_swaps(arr, swaps):
+    arr2 = arr
+    for one, two in swaps:
+        arr2 = arr.swapaxes(one, two)
+    return arr2
+
+
+def reshape_array(arr):
+    """
+    "Rotates" the array so it gains a shape that the algorithm can work with.
+    An illegal shape is (3, 1, 4), and correct one is (1, 3, 4) or (1, 4, 3).
+    The point is to have all 1s of the shape at the beginning, not in the
+    middle of the shape tuple.
+
+    Note: The greater-than-one shape component should go from greatest to
+    lowest numbers since it is more friendly to the CPU cache (so (1, 3, 4) is
+    less optimal than (1, 4, 3). Keyword to this is "memory spatial locality"
+
+    Args:
+        arr (np.ndarray): The array we want to fix
+
+    Returns:
+        tuple (result, swaps): The result is the "fixed" array and a record
+        of what has been done with it.
+    """
+    swaps = _get_swaps(arr.shape)
+    reshaped = _apply_swaps(arr, swaps)
+    return reshaped, swaps
+
+
+def undo_reshape_array(arr, swaps):
+    """
+    Does the opposite of what :func:`reshape_array` does
+
+    Args:
+        arr (np.ndarray): The array to "revert"
+        swaps (list): The second result of :func:`reshape_array`
+
+    Returns:
+        np.ndarray: The array of the original shape
+    """
+    # It is safer to undo axes swaps in the opposite order
+    # than the application order
+    reshaped = _apply_swaps(arr, swaps[::-1])
+    return reshaped
+
+
 # Connected components search as described in Fiorio et al.
 def label(input, neighbors=None, background=None, return_num=False,
           connectivity=None):
@@ -390,7 +469,23 @@ def label(input, neighbors=None, background=None, return_num=False,
      [-1 -1 -1]]
 
     """
+    # We have to ensure that the shape of the input can be handled by the
+    # algorithm the input if it is the case
+    input_corrected, swaps = reshape_array(input)
 
+    # Do the labelling
+    res, ctr = _label(input_corrected, neighbors, background, connectivity)
+
+    res_orig = undo_reshape_array(res, swaps)
+
+    if return_num:
+        return res_orig, ctr
+    else:
+        return res_orig
+
+
+# Connected components search as described in Fiorio et al.
+def _label(input, neighbors=None, background=None, connectivity=None):
     cdef cnp.ndarray[DTYPE_t, ndim=1] data
     cdef cnp.ndarray[DTYPE_t, ndim=1] forest
 
@@ -438,10 +533,7 @@ def label(input, neighbors=None, background=None, return_num=False,
 
     res = data.reshape(input.shape)
 
-    if return_num:
-        return res, ctr
-    else:
-        return res
+    return res, ctr
 
 
 cdef DTYPE_t resolve_labels(DTYPE_t *data_p, DTYPE_t *forest_p,

@@ -2,6 +2,7 @@ import numpy as np
 from numpy.testing import assert_array_equal, run_module_suite
 
 from skimage.morphology import label
+import skimage.measure._ccomp as ccomp
 from warnings import catch_warnings
 from skimage._shared.utils import skimage_deprecation
 
@@ -244,9 +245,40 @@ class TestConnectedComponents3d:
 
         assert_array_equal(label(x, background=0, return_num=True)[1], 3)
 
+    def test_1D(self):
+        x = np.array((0, 1, 2, 2, 1, 1, 0, 0))
+        xlen = len(x)
+        y = np.array((0, 1, 2, 2, 3, 3, 4, 4))
+        reshapes = ((xlen,),
+                    (1, xlen), (xlen, 1),
+                    (1, xlen, 1), (xlen, 1, 1), (1, 1, xlen))
+        for reshape in reshapes:
+            x2 = x.reshape(reshape)
+            labelled = label(x2)
+            assert_array_equal(y, labelled.flatten())
+
     def test_nd(self):
         x = np.ones((1, 2, 3, 4))
         np.testing.assert_raises(NotImplementedError, label, x)
+
+
+class TestSupport:
+    def test_reshape(self):
+        shapes_in = ((3, 1, 2), (1, 4, 5), (3, 1, 1), (2, 1), (1,))
+        for shape in shapes_in:
+            shape = np.array(shape)
+            numones = sum(shape == 1)
+            inp = np.random.random(shape)
+
+            fixed, swaps = ccomp.reshape_array(inp)
+            shape2 = fixed.shape
+            # now check that all ones are at the beginning
+            for i in range(numones):
+                assert shape2[i] == 1
+
+            back = ccomp.undo_reshape_array(fixed, swaps)
+            # check that the undo works as expected
+            assert_array_equal(inp, back)
 
 
 if __name__ == "__main__":
