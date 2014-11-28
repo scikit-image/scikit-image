@@ -106,8 +106,7 @@ def sobel_h(image, mask=None):
 
     Notes
     -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
+    We use the following kernel::
 
       1   2   1
       0   0   0
@@ -139,8 +138,7 @@ def sobel_v(image, mask=None):
 
     Notes
     -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
+    We use the following kernel::
 
       1   0  -1
       2   0  -2
@@ -268,8 +266,7 @@ def scharr_h(image, mask=None):
 
     Notes
     -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
+    We use the following kernel::
 
       3   10   3
       0    0   0
@@ -306,8 +303,7 @@ def scharr_v(image, mask=None):
 
     Notes
     -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
+    We use the following kernel::
 
        3   0   -3
       10   0  -10
@@ -444,8 +440,7 @@ def prewitt_h(image, mask=None):
 
     Notes
     -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
+    We use the following kernel::
 
       1   1   1
       0   0   0
@@ -477,8 +472,7 @@ def prewitt_v(image, mask=None):
 
     Notes
     -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
+    We use the following kernel::
 
       1   0  -1
       1   0  -1
@@ -599,8 +593,7 @@ def roberts_pos_diag(image, mask=None):
 
     Notes
     -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
+    We use the following kernel::
 
       1   0
       0  -1
@@ -634,8 +627,7 @@ def roberts_neg_diag(image, mask=None):
 
     Notes
     -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
+    We use the following kernel::
 
       0   1
      -1   0
