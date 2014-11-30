@@ -3,9 +3,9 @@ import scipy.ndimage as ndi
 from ..filters import rank_order
 
 
-def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
-                   exclude_border=True, indices=True, num_peaks=np.inf,
-                   footprint=None, labels=None):
+def peak_local_max(image, min_distance=10, threshold_abs=-np.inf,
+                   threshold_rel=None, exclude_border=True, indices=True,
+                   num_peaks=np.inf, footprint=None, labels=None):
     """
     Find peaks in an image, and return them as coordinates or a boolean array.
 
@@ -28,7 +28,8 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
     threshold_abs : float
         Minimum intensity of peaks.
     threshold_rel : float
-        Minimum intensity of peaks calculated as `max(image) * threshold_rel`.
+        Minimum intensity of peaks calculated as `max(image) * threshold_rel`;
+        not used if set to None (the default).
     exclude_border : bool
         If True, `min_distance` excludes peaks from the border of the image as
         well as from each other.
@@ -42,7 +43,7 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
     footprint : ndarray of bools, optional
         If provided, `footprint == 1` represents the local region within which
         to search for peaks at every point in `image`.  Overrides
-        `min_distance`, except for border exclusion if `exclude_border=True`.
+        `min_distance` (also for `exclude_border`).
     labels : ndarray of ints, optional
         If provided, each unique region `labels == value` represents a unique
         region to search for peaks. Zero is reserved for background.
@@ -138,12 +139,16 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
         # zero out the image borders
         for i in range(image.ndim):
             image = image.swapaxes(0, i)
-            image[:min_distance] = 0
-            image[-min_distance:] = 0
+            remove = (footprint.shape[i] if footprint is not None
+                      else 2 * min_distance)
+            image[:remove // 2] = 0
+            image[-remove // 2:] = 0
             image = image.swapaxes(0, i)
 
     # find top peak candidates above a threshold
-    peak_threshold = max(np.max(image.ravel()) * threshold_rel, threshold_abs)
+    peak_threshold = threshold_abs
+    if threshold_rel is not None:
+        peak_threshold = max(peak_threshold, image.max())
 
     # get coordinates of peaks
     coordinates = np.argwhere(image > peak_threshold)
