@@ -36,11 +36,17 @@ plt.tight_layout()
 
 Different operators compute different finite-difference approximations of the
 gradient. For example, the Scharr filter results in a better rotational
-variance than other filters such as the Sobel filter. The difference between
-the two filters is illustrated below on an image that is the discretization of
-a rotation-invariant continuous function. The discrepancy between the two
-filters is stronger for regions of the image where the direction of the
-gradient is close to diagonals, and for regions with high spatial frequencies.
+variance than other filters such as the Sobel filter [1]_ [2]_. The difference
+between the two filters is illustrated below on an image that is the
+discretization of a rotation-invariant continuous function. The discrepancy
+between the two filters is stronger for regions of the image where the
+direction of the gradient is close to diagonal, and for regions with high
+spatial frequencies.
+
+.. [1] http://en.wikipedia.org/wiki/Sobel_operator#Alternative_operators
+
+.. [2] B. Jaehne, H. Scharr, and S. Koerkel. Principles of filter design. In
+       Handbook of Computer Vision and Applications. Academic Press, 1999.
 """
 
 x, y = np.ogrid[:100, :100]
