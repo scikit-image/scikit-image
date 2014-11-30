@@ -1,6 +1,5 @@
 from warnings import catch_warnings, simplefilter
 
-from skimage.filters import median
 
 def test_filter_import():
     with catch_warnings():
