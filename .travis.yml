@@ -20,13 +20,11 @@ before_install:
     - export WHEELHOUSE="--no-index --find-links=http://travis-wheels.scikit-image.org/"
     - sudo apt-get update
 
-    - virtualenv -p python ~/venv
+    - travis_retry tools/travis_setup.sh
+
     - source ~/venv/bin/activate
     - which python
     - python --version
-
-    - travis_retry tools/travis_setup.sh
-
     - python check_bento_build.py
 
     - tools/header.py "Dependency versions"
