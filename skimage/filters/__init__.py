@@ -11,6 +11,7 @@ from ._gabor import gabor_kernel, gabor_filter
 from .thresholding import (threshold_adaptive, threshold_otsu, threshold_yen,
                            threshold_isodata)
 from . import rank
+from .rank import median
 
 from skimage._shared.utils import deprecated
 from skimage import restoration
@@ -33,6 +34,7 @@ __all__ = ['inverse',
            'wiener',
            'LPIFilter2D',
            'gaussian_filter',
+           'median',
            'canny',
            'sobel',
            'hsobel',
