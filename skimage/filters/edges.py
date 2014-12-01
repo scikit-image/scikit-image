@@ -72,14 +72,32 @@ def sobel(image, mask=None):
     output : 2-D array
         The Sobel edge map.
 
+    See also
+    --------
+    scharr, prewitt, roberts, feature.canny
+
     Notes
     -----
     Take the square root of the sum of the squares of the horizontal and
     vertical Sobels to get a magnitude that's somewhat insensitive to
     direction.
 
+    The 3x3 convolution kernel used in the horizontal and vertical Sobels is
+    an approximation of the gradient of the image (with some slight blurring
+    since 9 pixels are used to compute the gradient at a given pixel). As an
+    approximation of the gradient, the Sobel operator is not completely
+    rotation-invariant. The Scharr operator should be used for a better
+    rotation invariance.
+
     Note that ``scipy.ndimage.sobel`` returns a directional Sobel which
     has to be further processed to perform edge detection.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> camera = data.camera()
+    >>> from skimage import filters
+    >>> edges = filters.sobel(camera)
     """
     assert_nD(image, 2)
     out = np.sqrt(sobel_h(image, mask)**2 + sobel_v(image, mask)**2)
@@ -230,17 +248,30 @@ def scharr(image, mask=None):
     output : 2-D array
         The Scharr edge map.
 
+    See also
+    --------
+    sobel, prewitt, canny
+
     Notes
     -----
     Take the square root of the sum of the squares of the horizontal and
-    vertical Scharrs to get a magnitude that's somewhat insensitive to
-    direction.
+    vertical Scharrs to get a magnitude that is somewhat insensitive to
+    direction. The Scharr operator has a better rotation invariance than
+    other edge filters such as the Sobel or the Prewitt operators.
 
     References
     ----------
     .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical
            Optimization of Kernel Based Image Derivatives.
 
+    .. [2] http://en.wikipedia.org/wiki/Sobel_operator#Alternative_operators
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> camera = data.camera()
+    >>> from skimage import filters
+    >>> edges = filters.scharr(camera)
     """
     out = np.sqrt(scharr_h(image, mask)**2 + scharr_v(image, mask)**2)
     out /= np.sqrt(2)
@@ -410,10 +441,26 @@ def prewitt(image, mask=None):
     output : 2-D array
         The Prewitt edge map.
 
+    See also
+    --------
+    sobel, scharr
+
     Notes
     -----
     Return the square root of the sum of squares of the horizontal
-    and vertical Prewitt transforms.
+    and vertical Prewitt transforms. The edge magnitude depends slightly
+    on edge directions, since the approximation of the gradient operator by
+    the Prewitt operator is not completely rotation invariant. For a better
+    rotation invariance, the Scharr operator should be used. The Sobel operator
+    has a better rotation invariance than the Prewitt operator, but a worse
+    rotation invariance than the Scharr operator.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> camera = data.camera()
+    >>> from skimage import filters
+    >>> edges = filters.prewitt(camera)
     """
     assert_nD(image, 2)
     out = np.sqrt(prewitt_h(image, mask)**2 + prewitt_v(image, mask)**2)
@@ -563,6 +610,18 @@ def roberts(image, mask=None):
     -------
     output : 2-D array
         The Roberts' Cross edge map.
+
+    See also
+    --------
+    sobel, scharr, prewitt, feature.canny
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> camera = data.camera()
+    >>> from skimage import filters
+    >>> edges = filters.roberts(camera)
+
     """
     assert_nD(image, 2)
     out = np.sqrt(roberts_pos_diag(image, mask)**2 +
