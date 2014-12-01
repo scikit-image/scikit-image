@@ -3,7 +3,7 @@ import scipy.ndimage as ndi
 from ..filters import rank_order
 
 
-def peak_local_max(image, min_distance=10, threshold_abs=-np.inf,
+def peak_local_max(image, min_distance=1, threshold_abs=-np.inf,
                    threshold_rel=None, exclude_border=True, indices=True,
                    num_peaks=np.inf, footprint=None, labels=None):
     """
@@ -19,25 +19,25 @@ def peak_local_max(image, min_distance=10, threshold_abs=-np.inf,
     ----------
     image : ndarray of floats
         Input image.
-    min_distance : int
+    min_distance : int, optional
         Minimum number of pixels separating peaks in a region of `2 *
         min_distance + 1` (i.e. peaks are separated by at least
         `min_distance`). If `exclude_border` is True, this value also excludes
         a border `min_distance` from the image boundary.
         To find the maximum number of peaks, use `min_distance=1`.
-    threshold_abs : float
+    threshold_abs : float, optional
         Minimum intensity of peaks.
-    threshold_rel : float
+    threshold_rel : float, optional
         Minimum intensity of peaks calculated as `max(image) * threshold_rel`;
         not used if set to None (the default).
-    exclude_border : bool
+    exclude_border : bool, optional
         If True, `min_distance` excludes peaks from the border of the image as
         well as from each other.
-    indices : bool
-        If True, the output will be an array representing peak coordinates.
-        If False, the output will be a boolean array shaped as `image.shape`
-        with peaks present at True elements.
-    num_peaks : int
+    indices : bool, optional
+        If True (the default), the output will be an array representing peak
+        coordinates.  If False, the output will be a boolean array shaped as
+        `image.shape` with peaks present at True elements.
+    num_peaks : int, optional
         Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
         return `num_peaks` peaks based on highest peak intensity.
     footprint : ndarray of bools, optional
