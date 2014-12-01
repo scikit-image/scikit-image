@@ -4,7 +4,7 @@
 # You can set these variables from the command line.
 PYTHON        ?= python
 SPHINXOPTS    ?=
-SPHINXBUILD   ?= sphinx-build
+SPHINXBUILD   ?= python $(shell which sphinx-build)
 PAPER         ?=
 
 # Internal variables.
