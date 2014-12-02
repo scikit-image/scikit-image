@@ -7,15 +7,11 @@ Source
 ------
 https://github.com/scikit-image/scikit-image
 
-Mailing List
-------------
-http://groups.google.com/group/scikit-image
-
 Installation from source
 ------------------------
 Refer to DEPENDS.txt for a list of dependencies.
 
-The SciKit may be installed globally using
+scikit-image may be installed globally using
 
     $ python setup.py install
 
@@ -27,6 +23,14 @@ If you prefer, you can use it without installing, by simply adding
 this path to your PYTHONPATH variable and compiling the extensions:
 
     $ python setup.py build_ext -i
+
+Website (including the documentation)
+-------------------------------------
+http://scikit-image.org/
+
+Mailing List
+------------
+http://groups.google.com/group/scikit-image
 
 License
 -------
