@@ -283,35 +283,6 @@ cdef inline void join_trees(DTYPE_t *forest, DTYPE_t n, DTYPE_t m):
         set_root(forest, m, root)
 
 
-def _norm_connectivity(connectivity, ndim):
-    """
-    Takes the value of the connectivity parameter, validates it and converts
-    it to a value that the subsequent algorithm may use as-is safely.
-
-    Parameters
-    ----------
-    connectivity : int
-        The following should be true: -ndim < connectivity < 0, or
-        0 < connectivity <= ndim.
-
-    Returns
-    -------
-    connectivity : int
-        Connectivity, 0 < connectivity < ndim
-    """
-    if connectivity == 0:
-        raise ValueError(
-            "Connectivity of 0 doesn't make sense")
-    if not -ndim <= connectivity <= ndim:
-        raise ValueError(
-            "Connectivity below %d or above %d is illegal."
-            % (-ndim, ndim))
-    if connectivity < 0:
-        # Just as we say in the docs
-        connectivity += ndim + 1
-    return connectivity
-
-
 def _get_swaps(shp):
     """
     What axes to swap if we want to convert an illegal array shape
@@ -412,9 +383,9 @@ def label(input, neighbors=None, background=None, return_num=False,
     input : ndarray of dtype int
         Image to label.
     neighbors : {4, 8}, int, optional
-        Whether to use 4- or 8-connectivity.
-        In 3D, 4-connectivity means connected pixels have to share face,
-        whereas with 8-connectivity, they have to share only edge or vertex.
+        Whether to use 4- or 8-"connectivity".
+        In 3D, 4-"connectivity" means connected pixels have to share face,
+        whereas with 8-"connectivity", they have to share only edge or vertex.
         **Deprecated, use ``connectivity`` instead.**
     background : int, optional
         Consider all pixels with this value as background pixels, and label
@@ -425,12 +396,7 @@ def label(input, neighbors=None, background=None, return_num=False,
     connectivity : int, optional
         Maximum number of orthogonal hops to consider a pixel/voxel
         as a neighbor.
-        Accepted values are ranging from  1 to input.ndim. Negative values from
-        -input.ndim to -1 are also accepted. Negative connectivity value
-        :math:`x` is equivalent to the positive connectivity value
-        :math:`x + input.ndim + 1`. For example in 2D, -1 and 2 = -1 + 2 + 1
-        are equivalent, values.
-
+        Accepted values are ranging from  1 to input.ndim.
 
     Returns
     -------
@@ -518,9 +484,14 @@ def _label(input, neighbors=None, background=None, connectivity=None):
             raise ValueError("Neighbors must be either 4 or 8, got '%d'.\n"
                              % neighbors)
 
-    connectivity = _norm_connectivity(connectivity, shapeinfo.ndim)
+    if not 1 <= connectivity <= input.ndim:
+        raise ValueError(
+            "Connectivity below 1 or above %d is illegal."
+            % input.ndim)
 
     scanBG(data_p, forest_p, &shapeinfo, &bg)
+    # the data are treated as degenerated 3D arrays if needed
+    # witout any performance sacrifice
     scan3D(data_p, forest_p, &shapeinfo, &bg, connectivity)
 
     # Label output
