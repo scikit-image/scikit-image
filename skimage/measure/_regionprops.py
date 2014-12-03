@@ -332,7 +332,7 @@ def regionprops(label_image, intensity_image=None, cache=True):
     Parameters
     ----------
     label_image : (N, M) ndarray
-        Labeled input image.
+        Labeled input image. Labels with value 0 are ignored.
     intensity_image : (N, M) ndarray, optional
         Intensity image with same size as labeled image. Default is None.
     cache : bool, optional
