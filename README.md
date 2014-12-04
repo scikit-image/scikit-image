@@ -3,6 +3,14 @@ Image Processing SciKit
 
 [![Coverage Status](https://img.shields.io/coveralls/scikit-image/scikit-image.svg)](https://coveralls.io/r/scikit-image/scikit-image?branch=master)
 
+Website (including documentation)
+---------------------------------
+http://scikit-image.org/
+
+Mailing List
+------------
+http://groups.google.com/group/scikit-image
+
 Source
 ------
 https://github.com/scikit-image/scikit-image
@@ -23,14 +31,6 @@ If you prefer, you can use it without installing, by simply adding
 this path to your PYTHONPATH variable and compiling the extensions:
 
     $ python setup.py build_ext -i
-
-Website (including documentation)
----------------------------------
-http://scikit-image.org/
-
-Mailing List
-------------
-http://groups.google.com/group/scikit-image
 
 License
 -------
