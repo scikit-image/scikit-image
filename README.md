@@ -3,19 +3,23 @@ Image Processing SciKit
 
 [![Coverage Status](https://img.shields.io/coveralls/scikit-image/scikit-image.svg)](https://coveralls.io/r/scikit-image/scikit-image?branch=master)
 
-Source
-------
-https://github.com/scikit-image/scikit-image
+Website (including documentation)
+---------------------------------
+http://scikit-image.org/
 
 Mailing List
 ------------
 http://groups.google.com/group/scikit-image
 
+Source
+------
+https://github.com/scikit-image/scikit-image
+
 Installation from source
 ------------------------
 Refer to DEPENDS.txt for a list of dependencies.
 
-The SciKit may be installed globally using
+scikit-image may be installed globally using
 
     $ python setup.py install
 
