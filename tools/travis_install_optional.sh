@@ -10,8 +10,7 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     # http://stackoverflow.com/a/9716100
     LIBS=( PyQt4 sip.so )
 
-    PYTHON_VERSION=python$(python -c "import sys; print (str(sys.version_info[0])+'.'+str(sys.version_info[1]))")
-    VAR=( $(which -a $PYTHON_VERSION) )
+    VAR=( $(which -a $TRAVIS_PYTHON_VERSION) )
 
     GET_PYTHON_LIB_CMD="from distutils.sysconfig import get_python_lib; print (get_python_lib())"
     LIB_VIRTUALENV_PATH=$(python -c "$GET_PYTHON_LIB_CMD")
