@@ -24,8 +24,8 @@ this path to your PYTHONPATH variable and compiling the extensions:
 
     $ python setup.py build_ext -i
 
-Website (including the documentation)
--------------------------------------
+Website (including documentation)
+---------------------------------
 http://scikit-image.org/
 
 Mailing List
