@@ -197,3 +197,6 @@
 
 - Ivana Kajic
   Updated description and examples in documentation for gabor filters
+
+- Matěj Týč
+  Extended the image labelling implementation so it also works on 3D images.
