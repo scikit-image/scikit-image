@@ -44,10 +44,14 @@ def histogram(image, nbins=256):
     bin_centers : array
         The values at the center of the bins.
 
+    See Also
+    --------
+    cumulative_distribution
+
     Examples
     --------
-    >>> from skimage import data, exposure, util
-    >>> image = util.img_as_float(data.camera())
+    >>> from skimage import data, exposure, img_as_float
+    >>> image = img_as_float(data.camera())
     >>> np.histogram(image, bins=2)
     (array([107432, 154712]), array([ 0. ,  0.5,  1. ]))
     >>> exposure.histogram(image, nbins=2)
@@ -102,10 +106,22 @@ def cumulative_distribution(image, nbins=256):
     bin_centers : array
         Centers of bins.
 
+    See Also
+    --------
+    histogram
+
     References
     ----------
     .. [1] http://en.wikipedia.org/wiki/Cumulative_distribution_function
 
+    Examples
+    --------
+    >>> from skimage import data, exposure, img_as_float
+    >>> image = img_as_float(data.camera())
+    >>> hi = exposure.histogram(image)
+    >>> cdf = exposure.cumulative_distribution(image)
+    >>> np.alltrue(cdf[0] == np.cumsum(hi[0])/float(image.size))
+    True
     """
     hist, bin_centers = histogram(image, nbins)
     img_cdf = hist.cumsum()
@@ -225,6 +241,10 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
         Image array after rescaling its intensity. This image is the same dtype
         as the input image.
 
+    See Also
+    --------
+    intensity_range, equalize_hist
+
     Examples
     --------
     By default, the min/max intensities of the input image are stretched to
@@ -315,6 +335,10 @@ def adjust_gamma(image, gamma=1, gain=1):
     out : ndarray
         Gamma corrected output image.
 
+    See Also
+    --------
+    adjust_log
+
     Notes
     -----
     For gamma greater than 1, the histogram will shift towards left and
@@ -327,6 +351,14 @@ def adjust_gamma(image, gamma=1, gain=1):
     ----------
     .. [1] http://en.wikipedia.org/wiki/Gamma_correction
 
+    Examples
+    --------
+    >>> from skimage import data, exposure, img_as_float
+    >>> image = img_as_float(data.moon())
+    >>> gamma_corrected = exposure.adjust_gamma(image, 2)
+    >>> # Output is darker for gamma > 1
+    >>> image.mean() > gamma_corrected.mean()
+    True
     """
     _assert_non_negative(image)
     dtype = image.dtype.type
@@ -361,6 +393,10 @@ def adjust_log(image, gain=1, inv=False):
     -------
     out : ndarray
         Logarithm corrected output image.
+
+    See Also
+    --------
+    adjust_gamma
 
     References
     ----------
@@ -404,6 +440,10 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
     -------
     out : ndarray
         Sigmoid corrected output image.
+
+    See Also
+    --------
+    adjust_gamma
 
     References
     ----------
