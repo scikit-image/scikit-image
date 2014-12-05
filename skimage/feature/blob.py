@@ -200,8 +200,8 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
                                   footprint=np.ones((3, 3, 3)),
                                   threshold_rel=0.0,
                                   exclude_border=False)
-    # Convert array to float32
-    lm = local_maxima.astype('float32')
+    # Convert array to float64
+    lm = local_maxima.astype('float64')
     # Convert the last index to its corresponding scale value
     lm[:,2] = sigma_list[local_maxima[:,2]]
     local_maxima = lm
@@ -302,8 +302,8 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
                                   threshold_rel=0.0,
                                   exclude_border=False)
 
-    # Convert array to float32
-    lm = local_maxima.astype('float32')
+    # Convert array to float64
+    lm = local_maxima.astype('float64')
     # Convert the last index to its corresponding scale value
     lm[:,2] = sigma_list[local_maxima[:,2]]
     local_maxima = lm
@@ -413,8 +413,8 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
                                   threshold_rel=0.0,
                                   exclude_border=False)
 
-    # Convert array to float32
-    lm = local_maxima.astype('float32')
+    # Convert array to float64
+    lm = local_maxima.astype('float64')
     # Convert the last index to its corresponding scale value
     lm[:,2] = sigma_list[local_maxima[:,2]]
     local_maxima = lm
