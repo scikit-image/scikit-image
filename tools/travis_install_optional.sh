@@ -18,7 +18,7 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
 
     for LIB in ${LIBS[@]}
     do
-        ln -s $LIB_SYSTEM_PATH/$LIB $LIB_VIRTUALENV_PATH/$LIB
+        sudo ln -s $LIB_SYSTEM_PATH/$LIB $LIB_VIRTUALENV_PATH/$LIB
     done
 
 else
