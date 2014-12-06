@@ -15,7 +15,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data, img_as_float
-from skimage.filter import nl_means_denoising
+from skimage.restoration import nl_means_denoising
 
 
 lena = img_as_float(data.lena())
