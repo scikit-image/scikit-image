@@ -1,5 +1,5 @@
 import numpy as np
-from _nl_means_denoising import _nl_means_denoising_2d, \
+from skimage.restoration._nl_means_denoising import _nl_means_denoising_2d, \
                     _nl_means_denoising_2drgb, _nl_means_denoising_3d
 
 def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1):
