@@ -1111,8 +1111,8 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     >>> scale = 0.1
     >>> output_shape = (scale * cube_shape).astype(int)
-    >>> coords0, coords1, coords2 = \
-    ...     np.mgrid[:output_shape[0], :output_shape[1], :output_shape[2]]
+    >>> coords0, coords1, coords2 = np.mgrid[:output_shape[0],
+    ...                    :output_shape[1], :output_shape[2]]
     >>> coords = np.array([coords0, coords1, coords2])
 
     Assume that the cube contains spatial data, where the first array element

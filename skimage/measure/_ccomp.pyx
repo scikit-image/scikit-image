@@ -409,18 +409,19 @@ def label(input, neighbors=None, background=None, return_num=False,
 
     Examples
     --------
+    >>> import numpy as np
     >>> x = np.eye(3).astype(int)
     >>> print(x)
     [[1 0 0]
      [0 1 0]
      [0 0 1]]
-
-    >>> print(m.label(x, connectivity=1))
+    >>> from skimage.measure import label
+    >>> print(label(x, neighbors=4))
     [[0 1 1]
      [2 3 1]
      [2 2 4]]
 
-    >>> print(m.label(x, connectivity=2))
+    >>> print(label(x, neighbors=8))
     [[0 1 1]
      [1 0 1]
      [1 1 0]]
@@ -429,7 +430,7 @@ def label(input, neighbors=None, background=None, return_num=False,
     ...               [1, 1, 5],
     ...               [0, 0, 0]])
 
-    >>> print(m.label(x, background=0))
+    >>> print(label(x, background=0))
     [[ 0 -1 -1]
      [ 0  0  1]
      [-1 -1 -1]]

@@ -109,15 +109,15 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None):
 
     Examples
     --------
-    >>> from skimage import filters
+    >>> from skimage import feature
     >>> # Generate noisy image of a square
     >>> im = np.zeros((256, 256))
     >>> im[64:-64, 64:-64] = 1
     >>> im += 0.2 * np.random.rand(*im.shape)
     >>> # First trial with the Canny filter, with the default smoothing
-    >>> edges1 = filter.canny(im)
+    >>> edges1 = feature.canny(im)
     >>> # Increase the smoothing for better results
-    >>> edges2 = filter.canny(im, sigma=3)
+    >>> edges2 = feature.canny(im, sigma=3)
     """
 
     #
