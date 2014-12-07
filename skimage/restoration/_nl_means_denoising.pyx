@@ -251,8 +251,9 @@ def _nl_means_denoising_3d(image, int s=7,
     n_x, n_y, n_z = image.shape
     cdef int offset = s / 2
     # padd the image so that boundaries are denoised as well
-    cdef DTYPE_t [:, :, ::1] padded = np.ascontiguousarray(util.pad(image,
-                                offset, mode='reflect').astype(np.float32))
+    cdef DTYPE_t [:, :, ::1] padded = np.ascontiguousarray(util.pad(
+                                        image.astype(np.float32),
+                                        offset, mode='reflect'))
     cdef DTYPE_t [:, :, ::1] result = padded.copy()
     h *= (np.max(padded) - np.min(padded))
     cdef float A = ((s - 1.) / 4.)
@@ -305,3 +306,80 @@ def _nl_means_denoising_3d(image, int s=7,
                             new_value += weight * padded[x + i, y + j, z + k]
                 result[x, y, z] = new_value / weight_sum
     return result[offset:-offset, offset:-offset, offset:-offset]
+
+
+@cython.cdivision(True)
+@cython.boundscheck(False)
+def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
+    """
+    Perform fast non-local means denoising on 2-D array, with the outer
+    loop on patch shifts in order to reduce the number of operations.
+
+    Parameters
+    ----------
+    image: ndarray
+        input data to be denoised
+
+    s: int, optional
+        size of patches used for denoising
+
+    d: int, optional
+        maximal distance in pixels where to search patches used for denoising
+
+    h: float, optional
+        cut-off distance (in gray levels). The higher h, the more permissive
+        one is in accepting patches.
+    """
+
+    if s % 2 == 0:
+        s += 1  # odd value for symmetric patch
+    cdef int offset = s / 2
+    cdef int pad_size = offset + d
+    cdef DTYPE_t [:, ::1] padded = np.ascontiguousarray(util.pad(image,
+                                pad_size, mode='reflect').astype(np.float32))
+    cdef DTYPE_t [:, ::1] result = padded.copy()
+    cdef DTYPE_t [:, ::1] weights = np.zeros_like(padded)
+    cdef DTYPE_t [:, ::1] integral = np.zeros_like(padded)
+    h *= (np.max(padded) - np.min(padded))
+    cdef int n_x, n_y, t1, t2, x, y
+    cdef float weight, distance
+    cdef float h2 = h**2
+    cdef float s2 = s**2.
+    n_x, n_y = image.shape
+    n_x += 2 * pad_size
+    n_y += 2 * pad_size
+    for t1 in range(-d, d + 1):
+        for t2 in range(-d, d + 1):
+            integral = np.zeros_like(padded)
+            for x in range(max(1, - t1), min(n_x, n_x - t1)):
+                integral[x, 0] = (padded[x, 0] - padded[x + t1, t2])**2 + \
+                                    integral[x - 1, 0]
+            for y in range(max(1, - t2), min(n_y, n_y - t2)):
+                integral[0, y] = (padded[0, y] - padded[t1, y + t2])**2 + \
+                                    integral[0, y - 1]
+            for x in range(max(1, - t1), min(n_x, n_x - t1)):
+                for y in range(max(1, - t2), min(n_y, n_y - t2)):
+                    integral[x, y] = (padded[x, y] -
+                                      padded[x + t1, y + t2])**2 + \
+                                      integral[x - 1, y] + integral[x, y - 1] \
+                                      - integral[x - 1, y - 1]
+            for x in range(max(offset, offset - t1),
+                           min(n_x - offset, n_x - offset - t1)):
+                for y in range(max(offset, offset - t2),
+                               min(n_y - offset, n_y - offset - t2)):
+                    distance = integral[x + offset, y + offset] + \
+                               integral[x - offset, y - offset] - \
+                               integral[x - offset, y + offset] - \
+                               integral[x + offset, y - offset]
+                    distance /= s2
+                    weight = exp(- distance / h2)
+                    weights[x, y] += weight
+                    result[x, y] += weight * padded[x + t1, y + t2]
+    for x in range(offset, n_x - offset):
+        for y in range(offset, n_x - offset):
+            # I think there is no risk of division by zero
+            # except in padded zone
+            result[x, y] /= weights[x, y]
+    return result[pad_size: - pad_size, pad_size: - pad_size]
+
+

@@ -153,6 +153,15 @@ def test_nl_means_denoising_2d():
     assert img.std() > denoised.std()
 
 
+def test_fast_nl_means_denoising_2d():
+    img = np.zeros((40, 40))
+    img[10:-10, 10:-10] = 1.
+    img += 0.3*np.random.randn(*img.shape)
+    denoised = restoration.fast_nl_means_denoising(img, 7, 5, 0.1)
+    # make sure noise is reduced
+    assert img.std() > denoised.std()
+
+
 def test_nl_means_denoising_2drgb():
     # reduce image size because nl means is very slow
     img = np.copy(astro[:50, :50])
