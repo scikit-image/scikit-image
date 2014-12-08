@@ -52,7 +52,7 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
         site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
         raise ValueError('Could not load "%s"\nPlease see documentation at: %s' % (fname, site))
     else:
-        return pil_to_ndarray(im, dtype=dtype)
+        return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
 
 
 def pil_to_ndarray(im, dtype=None, img_num=None):
@@ -72,7 +72,7 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
             break
 
         # seeking must be done sequentially
-        if img_num and not i == img_num:
+        if not img_num is None and not i == img_num:
             i += 1
             continue
 
