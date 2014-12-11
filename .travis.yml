@@ -24,6 +24,7 @@ python:
 
 before_install:
     - export DISPLAY=:99.0
+    - sh -e /etc/init.d/xvfb start
     - export PYTHONWARNINGS="all"
     - export WHEELHOUSE="--no-index --find-links=http://travis-wheels.scikit-image.org/"
     - sudo apt-get update

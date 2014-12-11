@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -ex
 
-sh -e /etc/init.d/xvfb start
-
 # on Python 2.7, use the system versions of numpy, scipy, and matplotlib
 # and the minimum version of cython and networkx
 if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
