@@ -1,4 +1,6 @@
-import warnings
+"""
+Grayscale morphological operations
+"""
 from skimage import img_as_ubyte
 from .misc import default_fallback
 
