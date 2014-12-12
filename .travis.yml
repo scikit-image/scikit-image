@@ -27,6 +27,7 @@ before_install:
     - sh -e /etc/init.d/xvfb start
     - export PYTHONWARNINGS="all"
     - export WHEELHOUSE="--no-index --find-links=http://travis-wheels.scikit-image.org/"
+    - export TEST_ARGS="--exe -v --all-modules --with-doctest"
     - sudo apt-get update
 
     - travis_retry tools/travis_setup.sh
@@ -46,7 +47,7 @@ install:
 
 script:
     - tools/header.py "Run all tests with minimum dependencies"
-    - nosetests --exe -v skimage
+    - nosetests $TEST_ARGS skimage
 
     - tools/header.py "Pep8 and Flake tests"
     - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
