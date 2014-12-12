@@ -3082,19 +3082,14 @@ def imagej_description(description):
 
 def _replace_by(module_function, package=None, warn=False):
     """Try replace decorated function by module.function."""
-    try:
-        from importlib import import_module
-    except ImportError:
-        warnings.warn('could not import module importlib')
-        return lambda func: func
-
     def decorate(func, module_function=module_function, warn=warn):
         try:
-            module, function = module_function.split('.')
-            if not package:
-                module = import_module(module)
+            modname, function = module_function.split('.')
+            if package is None:
+                full_name = modname
             else:
-                module = import_module('.' + module, package=package)
+                full_name = package + '.' + modname
+            module = __import__(full_name, romlist=[modname])
             func, oldfunc = getattr(module, function), func
             globals()['__old_' + func.__name__] = oldfunc
         except Exception:
