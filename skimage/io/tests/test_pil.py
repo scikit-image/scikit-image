@@ -200,5 +200,4 @@ class TestSaveTIF:
                 yield self.roundtrip, dtype, x
 
 if __name__ == "__main__":
-    #run_module_suite()
-    test_multi_page_gif()
+    run_module_suite()
