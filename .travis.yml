@@ -27,7 +27,7 @@ before_install:
     - sh -e /etc/init.d/xvfb start
     - export PYTHONWARNINGS="all"
     - export WHEELHOUSE="--no-index --find-links=http://travis-wheels.scikit-image.org/"
-    - export TEST_ARGS="--exe -v --all-modules --with-doctest"
+    - export TEST_ARGS="--exe -v --all-modules --with-doctest --ignore-files=^_test --ignore-files=^\. --ignore-files=^setup\.py\$\$ --ignore-files=test"
     - sudo apt-get update
 
     - travis_retry tools/travis_setup.sh
