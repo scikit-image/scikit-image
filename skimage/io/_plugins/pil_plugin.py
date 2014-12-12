@@ -112,10 +112,12 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
     if hasattr(im, 'fp') and im.fp:
         im.fp.close()
 
-    if img_num is None:
+    if img_num is None and len(frames) > 1:
         return np.array(frames)
-    else:
+    elif frames:
         return frames[0]
+    elif img_num:
+        raise IndexError('Could not find image  #%s' % img_num)
 
 
 def _palette_is_grayscale(pil_image):
