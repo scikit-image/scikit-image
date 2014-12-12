@@ -1,11 +1,13 @@
 A crash course on Numpy for images
 ----------------------------------
 
-Images manipulated by ``scikit-image`` are simply NumPy arrays. Hence, a
-large fraction of operations on images will just consist in using NumPy::
+Images manipulated by ``scikit-image`` are simply Numpy arrays. Hence, a
+large fraction of operations on images will just consist in using Numpy::
 
     >>> from skimage import data
     >>> camera = data.camera()
+    >>> type(camera)
+    <type 'numpy.ndarray'>
 
 Retrieving the geometry of the image and the number of pixels: ::
 
@@ -22,25 +24,32 @@ Retrieving statistical information about gray values: ::
     118.31400299072266
 
 Numpy arrays representing images can be of different integer of float
-numerical types. See :ref:`data_types` for more information about data
-types.
+numerical types. See :ref:`data_types` for more information about these
+types and how scikit-image treats them.
+
+
+Numpy indexing
+--------------
 
 Numpy indexing can be used both for looking at pixel values, and to
 modify pixel values: ::
 
-    >>> # Value of pixel on 10th line and 20th column
+    >>> # Get the value of the pixel on the 10th row and 20th column
     >>> camera[10, 20]
     153
-    >>> # Turn to black pixel on 3rd line and 10th column
+    >>> # Set to black the pixel on the 3rd row and 10th column
     >>> camera[3, 10] = 0
 
-Be careful that the first dimension (``camera.shape[0]``) corresponds to
-lines, while the second dimension (``camera.shape[1]``) stands for
-columns.
+Be careful: in Numpy indexing, the first dimension (``camera.shape[0]``)
+corresponds to rows, while the second (``camera.shape[1]``) corresponds
+to columns, with the origin (``camera[0, 0]``) on the top-left corner.
+This matches matrix/linear algebra notation, but is in contrast to
+Cartesian (x, y) coordinates. See `Coordinate conventions`_ below for
+more details.
 
 Beyond individual pixels, it is possible to access / modify values of
 whole sets of pixels, using the different indexing possibilities of
-NumPy.
+Numpy.
 
 Slicing::
 
@@ -55,28 +64,108 @@ Masking (indexing with masks of booleans)::
 
 Fancy indexing (indexing with sets of indices) ::
 
-    >>> inds_x = np.arange(len(camera))
-    >>> inds_y = 4 * inds_x % len(camera)
-    >>> camera[inds_x, inds_y] = 0
+    >>> inds_r = np.arange(len(camera))
+    >>> inds_c = 4 * inds_r % len(camera)
+    >>> camera[inds_r, inds_c] = 0
 
 Using masks, especially, is very useful to select a set of pixels on
 which to perform further manipulations. The mask can be any boolean array
-of same shape as the image (or at least a shape broadcastable to the
-image shape). This can be useful to define a region of interest, as a
+of same shape as the image (or a shape broadcastable to the image shape).
+This can be useful to define a region of interest, such as a
 disk: ::
 
-    >>> l_x, l_y = camera.shape[0], camera.shape[1]
-    >>> X, Y = np.ogrid[:l_x, :l_y]
-    >>> outer_disk_mask = (X - l_x / 2)**2 + (Y - l_y / 2)**2 < (l_x / 2)**2
+    >>> l_r, l_c = camera.shape
+    >>> R, C = np.ogrid[:l_r, :l_c]
+    >>> outer_disk_mask = (R - l_r / 2)**2 + (C - l_c / 2)**2 < (l_r / 2)**2
     >>> camera[outer_disk_mask] = 0
 
 .. image:: ../../_images/plot_camera_numpy_1.png
     :width: 45%
     :target: ../auto_examples/plot_camera_numpy.html
 
-Boolean arithmetics can be used to define more complex masks: ::
+Boolean arithmetic can be used to define more complex masks: ::
 
-    >>> lower_half = X > l_x / 2
+    >>> lower_half = R > l_r / 2
     >>> lower_half_disk = np.logical_and(lower_half, outer_disk_mask)
     >>> camera = data.camera()
     >>> camera[lower_half_disk] = 0 
+
+
+Color images
+------------
+
+All of the above is true of color images, too: a color image is a
+Numpy array, with an additional trailing dimension for the channels:
+
+    >>> cat = data.chelsea()
+    >>> type(cat)
+    <type 'numpy.ndarray'>
+    >>> cat.shape
+    (300, 451, 3)
+
+That's a 300-by-451 pixel image with red, green, and blue channels.
+As before, we can get and set pixel values:
+
+    >>> cat[10, 20]
+    array([151, 129, 115], dtype=uint8)
+    >>> # set the pixel at row 50, column 60 to black
+    >>> cat[50, 60] = 0
+    >>> # set the pixel at row 50, column 61 to green
+    >>> cat[50, 61] = [0, 255, 0] # [red, green, blue]
+
+We can also use masks where they match the 2 spatial dimensions of the
+image:
+
+.. plot::
+    Using a 2D mask on a 2D color image
+    >>> reddish = cat[:, :, 0] > 160
+    >>> cat[reddish] = [0, 255, 0]
+    >>> plt.imshow(cat)
+
+
+Coordinate conventions
+----------------------
+
+Because we represent images with numpy arrays, our coordinates must
+match accordingly. Two-dimensional (2D) grayscale images (such as
+`camera` above) are indexed by row and columns (abbreviated to either
+``row, col`` or ``r, c``), with the lowest element (0, 0) at the top-
+-left corner. In various parts of the library, you will
+also see ``rr`` and ``cc`` refer to lists of row and column
+coordinates. We distinguish this from (x, y), which commonly denote
+Cartesian coordinates, where x is the horizontal coordinate, y the
+vertical, and the origin is on the bottom right. (Matplotlib, for
+example, uses this convention.)
+
+In the case of color (or multichannel) images, the last dimension
+contains the color information and is denoted ``channel`` or ``ch``.
+
+Finally, for 3D images, we refer to the leading dimension as
+``level``, abbreviated as ``lev`` or (rarely) ``l``. In many cases,
+the third imaging dimension has lower resolution than the other two,
+and processing must be done level-wise. When levels are the leading
+dimension, we can use the following syntax:
+
+    >>> for image in image3d: # iterate over first dimension
+    ...     do_something_to(image)
+
+
+Notes on array order
+--------------------
+
+Although the labeling of the axes seems arbitrary, it can have a
+significant effect on speed of operations. This is because modern
+processors never retrieve just one item from memory, but rather a
+whole chunk of adjacent items. Therefore, processing elements that are
+adjacent in memory one after the other is faster than processing them
+in a different order, even if the number of operations is the same:
+
+    >>> def in_order_multiply(arr, scalar):
+    ...     for plane in list(range(arr.shape[0])):
+    ...         arr[plane, :, :] *= scalar
+    ... 
+    >>> def out_of_order_multiply(arr, scalar):
+    ...     for plane in list(range(arr.shape[2])):
+    ...         arr[:, :, plane] *= scalar
+    ... 
+    >>> import time
