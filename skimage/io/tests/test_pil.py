@@ -170,6 +170,14 @@ def test_all_mono():
     mono_check('pil', 'tiff')
 
 
+def test_multi_page_gif():
+    img = imread(os.path.join(data_dir, 'no_time_for_that.gif'))
+    assert img.shape == (24, 280, 500, 3), img.shape
+    img2 = imread(os.path.join(data_dir, 'no_time_for_that.gif'),
+                  img_num=5)
+    assert img2.shape == (280, 500, 3)
+    assert_allclose(img[5], img2)
+
 class TestSaveTIF:
     def roundtrip(self, dtype, x):
         f = NamedTemporaryFile(suffix='.tif')

@@ -52,7 +52,7 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
         site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
         raise ValueError('Could not load "%s"\nPlease see documentation at: %s' % (fname, site))
     else:
-        return pil_to_ndarray(im, dtype=dtype)
+        return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
 
 
 def pil_to_ndarray(im, dtype=None, img_num=None):
@@ -64,6 +64,7 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
 
     """
     frames = []
+    grayscale = None
     i = 0
     while 1:
         try:
@@ -71,22 +72,28 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
         except EOFError:
             break
 
-        # seeking must be done sequentially
-        if img_num and not i == img_num:
+        frame = im
+
+        if not img_num is None and img_num != i:
+            im.getdata()[0]
             i += 1
             continue
 
-        frame = im
         if im.mode == 'P':
-            if _palette_is_grayscale(im):
+            if grayscale is None:
+                grayscale = _palette_is_grayscale(im)
+
+            if grayscale:
                 frame = im.convert('L')
             else:
                 frame = im.convert('RGB')
+
         elif im.mode == '1':
             frame = im.convert('L')
 
         elif 'A' in im.mode:
             frame = im.convert('RGBA')
+
 
         if im.mode.startswith('I;16'):
             shape = im.size
@@ -105,10 +112,12 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
     if hasattr(im, 'fp') and im.fp:
         im.fp.close()
 
-    if len(frames) > 1:
+    if img_num is None and len(frames) > 1:
         return np.array(frames)
-    else:
+    elif frames:
         return frames[0]
+    elif img_num:
+        raise IndexError('Could not find image  #%s' % img_num)
 
 
 def _palette_is_grayscale(pil_image):
