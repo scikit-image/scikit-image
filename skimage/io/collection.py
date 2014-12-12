@@ -210,12 +210,12 @@ class ImageCollection(object):
                 else:
                     i = 0
                     while True:
-                        i += 1
-                        index.append((fname, i))
                         try:
                             im.seek(i)
                         except EOFError:
                             break
+                        index.append((fname, i))
+                        i += 1
                 if hasattr(im, 'fp') and im.fp:
                     im.fp.close()
 
