@@ -21,6 +21,8 @@ def _weight_mean_color(graph, src, dst, n):
     weight : float
         The absolute difference of the mean color between node `dst` and `n`.
     """
+
+    #print 'merging
     diff = graph.node[dst]['mean color'] - graph.node[n]['mean color']
     diff = np.linalg.norm(diff)
     return diff
@@ -79,9 +81,7 @@ def _revalidate_node_edges(rag, node, heap_list):
         heapq.heappush(heap_list, heap_item)
 
 
-def merge_hierarchical_mean_color(labels, rag, thresh, in_place=True):
-    return merge_hierarchical(labels, rag, thresh, in_place,
-                              _pre_merge_mean_color, _weight_mean_color)
+def merge_hierarchical_mean_color(labels, rag, thresh, in_place=True, merge_in_place=False):
     """Perform hierarchical merging of a color distance RAG.
 
     Greedily merges the most similar pair of nodes until no edges lower than
@@ -107,9 +107,11 @@ def merge_hierarchical_mean_color(labels, rag, thresh, in_place=True):
     >>> rag = graph.rag_mean_color(img, labels)
     >>> new_labels = graph.merge_hierarchical_mean_color(labels, rag, 40)
     """
+    return merge_hierarchical(labels, rag, thresh, in_place, merge_in_place,
+                              _pre_merge_mean_color, _weight_mean_color)
 
 
-def merge_hierarchical(labels, rag, thresh, in_place, pre_merge_func,
+def merge_hierarchical(labels, rag, thresh, in_place, merge_in_place,pre_merge_func,
                        weight_func):
     """Perform hierarchical merging of a RAG.
 
@@ -146,27 +148,49 @@ def merge_hierarchical(labels, rag, thresh, in_place, pre_merge_func,
         rag = rag.copy()
 
     edge_heap = []
-    for src, dst, data in rag.edges_iter(data=True):
+    for n1, n2, data in rag.edges_iter(data=True):
         # Push a valid edge in the heap
         wt = data['weight']
-        heap_item = [wt, src, dst, data]
+        heap_item = [wt, n1, n2, data]
         heapq.heappush(edge_heap, heap_item)
 
         # Reference to the heap item in the graph
         data['heap item'] = heap_item
 
     while edge_heap[0][0] < thresh:
-        _, src, dst, valid = heapq.heappop(edge_heap)
+        _, n1, n2, valid = heapq.heappop(edge_heap)
 
         # Ensure popped edge is valid, if not, the edge is discarded
         if valid:
-            _pre_merge_mean_color(rag, src, dst)
+            pre_merge_func(rag, n1, n2)
             # Invalidate all neigbors of `src` before its deleted
-            for n in rag.neighbors(src):
-                rag[src][n]['heap item'][3] = False
+            for n in rag.neighbors(n1):
+                rag[n1][n]['heap item'][3] = False
 
-            rag.merge_nodes(src, dst, _weight_mean_color)
-            _revalidate_node_edges(rag, dst, edge_heap)
+            if not merge_in_place:
+                for n in rag.neighbors(n2):
+                    rag[n2][n]['heap item'][3] = False
+
+            if not merge_in_place:
+            
+                #print 'added',next_id
+                next_id = rag.next_id()
+
+                rag._add_node(next_id)
+                rag.node[next_id] = rag.node[n2]
+
+                for nbr in rag.neighbors(n2):
+                    rag.add_edge(nbr, next_id, {'weight':rag[n][n2]['weight']})
+                
+                rag.remove_node(n2)
+                
+                src, dst = n1, next_id
+            else:
+                src, dst = n1, n2
+            
+            new_id = rag.merge_nodes(src, dst, weight_func)
+            
+            _revalidate_node_edges(rag, new_id, edge_heap)
 
     arr = np.arange(labels.max() + 1)
     for ix, (n, d) in enumerate(rag.nodes_iter(data=True)):

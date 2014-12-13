@@ -164,6 +164,9 @@ class RAG(nx.Graph):
         """
         return self.max_id + 1
 
+    def _add_node(self, u):
+        super(RAG, self).add_node(u)
+
 
 def _add_edge_filter(values, graph):
     """Create edge in `g` between the first element of `values` and the rest.
