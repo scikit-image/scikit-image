@@ -1,12 +1,14 @@
-# Author: Damian Eads
+"""
+Tests for Morphological structuring elements
+(skimage.morphology.selem)
 
+Author: Damian Eads
+"""
 import os.path
 
 import numpy as np
-from numpy.testing import *
+from numpy.testing import assert_equal
 
-from skimage import data_dir
-from skimage.io import *
 from skimage import data_dir
 from skimage.morphology import selem
 
@@ -32,7 +34,7 @@ class TestSElem():
         for arrname in sorted(matlab_masks):
             expected_mask = matlab_masks[arrname]
             actual_mask = func(k)
-            if (expected_mask.shape == (1,)):
+            if expected_mask.shape == (1,):
                 expected_mask = expected_mask[:, np.newaxis]
             assert_equal(expected_mask, actual_mask)
             k = k + 1
@@ -43,15 +45,15 @@ class TestSElem():
         for arrname in sorted(matlab_masks):
             expected_mask = matlab_masks[arrname]
             actual_mask = func(k)
-            if (expected_mask.shape == (1,)):
+            if expected_mask.shape == (1,):
                 expected_mask = expected_mask[:, np.newaxis]
             # Test center slice for each dimension. This gives a good
             # indication of validity without the need for a 3D reference
             # mask.
             c = int(expected_mask.shape[0]/2)
-            assert_equal(expected_mask, actual_mask[c,:,:])
-            assert_equal(expected_mask, actual_mask[:,c,:])
-            assert_equal(expected_mask, actual_mask[:,:,c])
+            assert_equal(expected_mask, actual_mask[c, :, :])
+            assert_equal(expected_mask, actual_mask[:, c, :])
+            assert_equal(expected_mask, actual_mask[:, :, c])
             k = k + 1
 
     def test_selem_disk(self):
