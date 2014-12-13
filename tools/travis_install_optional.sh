@@ -33,8 +33,10 @@ if [[ $TRAVIS_PYTHON_VERSION != 3.2 ]]; then
     pip install -q imread
 fi
 
-# Install SimpleITK from wheelhouse if available
-pip install -q SimpleITK $WHEELHOUSE; true
+# TODO: update when SimpleITK become available on py34 or hopefully pip
+if [[ $TRAVIS_PYTHON_VERSION != 3.4 ]]; then
+    easy_install -q SimpleITK
+fi
 
 sudo apt-get install -q libfreeimage3
 pip install -q astropy $WHEELHOUSE
