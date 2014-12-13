@@ -3081,7 +3081,11 @@ def imagej_description(description):
 
 
 def _replace_by(module_function, package=None, warn=False):
-    """Try replace decorated function by module.function."""
+    """Try replace decorated function by module.function.
+
+    This is used to replace local functions with functions from another
+    (usually compiled) module, if available.
+    """
     def decorate(func, module_function=module_function, warn=warn):
         try:
             modname, function = module_function.split('.')
