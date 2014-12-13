@@ -3085,6 +3085,27 @@ def _replace_by(module_function, package=None, warn=False):
 
     This is used to replace local functions with functions from another
     (usually compiled) module, if available.
+
+    Parameters
+    ----------
+    module_function : str
+        Module and function path string (e.g. numpy.ones)
+    package : str, optional
+        The parent package of the module
+    warn : bool, optional
+        Whether to warn when wrapping fails
+
+    Returns
+    -------
+    func : function
+        Wrapped function, hopefully calling a function in another module.
+
+    Example
+    -------
+    >>> @_replace_by('_tifffile.decodepackbits')
+    ... def decodepackbits(encoded):
+    ...     raise NotImplementedError
+
     """
     def decorate(func, module_function=module_function, warn=warn):
         try:
