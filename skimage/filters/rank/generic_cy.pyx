@@ -29,7 +29,7 @@ cdef inline void _kernel_autolevel(dtype_t_out* out, Py_ssize_t odepth,
                 break
         delta = imax - imin
         if delta > 0:
-            out[0] = <dtype_t_out>(max_bin - 1) * (g - imin) / delta
+            out[0] = <dtype_t_out>((max_bin - 1) * (g - imin) / delta)
         else:
             out[0] = <dtype_t_out>0
     else:
@@ -49,7 +49,7 @@ cdef inline void _kernel_bottomhat(dtype_t_out* out, Py_ssize_t odepth,
         for i in range(max_bin):
             if histo[i]:
                 break
-        out[0] = <dtype_t_out>g - i
+        out[0] = <dtype_t_out>(g - i)
     else:
         out[0] = <dtype_t_out>0
 

@@ -1,12 +1,83 @@
+import os
 import numpy as np
-from numpy.testing import run_module_suite, assert_array_equal, assert_raises
+from numpy.testing import run_module_suite, assert_equal, assert_raises
 
+import skimage
 from skimage import img_as_ubyte, img_as_uint, img_as_float
-from skimage import data, util
+from skimage import data, util, morphology
 from skimage.morphology import cmorph, disk
 from skimage.filters import rank
 
 np.random.seed(0)
+
+
+def test_all():
+    image = np.random.rand(25, 25)
+    selem = morphology.disk(1)
+    refs = np.load(os.path.join(skimage.data_dir, "rank_filter_tests.npz"))
+
+    assert_equal(refs["autolevel"],
+                 rank.autolevel(image, selem))
+    assert_equal(refs["autolevel_percentile"],
+                 rank.autolevel_percentile(image, selem))
+    assert_equal(refs["bottomhat"],
+                 rank.bottomhat(image, selem))
+    assert_equal(refs["equalize"],
+                 rank.equalize(image, selem))
+    assert_equal(refs["gradient"],
+                 rank.gradient(image, selem))
+    assert_equal(refs["gradient_percentile"],
+                 rank.gradient_percentile(image, selem))
+    assert_equal(refs["maximum"],
+                 rank.maximum(image, selem))
+    assert_equal(refs["mean"],
+                 rank.mean(image, selem))
+    assert_equal(refs["mean_percentile"],
+                 rank.mean_percentile(image, selem))
+    assert_equal(refs["mean_bilateral"],
+                 rank.mean_bilateral(image, selem))
+    assert_equal(refs["subtract_mean"],
+                 rank.subtract_mean(image, selem))
+    assert_equal(refs["subtract_mean_percentile"],
+                 rank.subtract_mean_percentile(image, selem))
+    assert_equal(refs["median"],
+                 rank.median(image, selem))
+    assert_equal(refs["minimum"],
+                 rank.minimum(image, selem))
+    assert_equal(refs["modal"],
+                 rank.modal(image, selem))
+    assert_equal(refs["enhance_contrast"],
+                 rank.enhance_contrast(image, selem))
+    assert_equal(refs["enhance_contrast_percentile"],
+                 rank.enhance_contrast_percentile(image, selem))
+    assert_equal(refs["pop"],
+                 rank.pop(image, selem))
+    assert_equal(refs["pop_percentile"],
+                 rank.pop_percentile(image, selem))
+    assert_equal(refs["pop_bilateral"],
+                 rank.pop_bilateral(image, selem))
+    assert_equal(refs["sum"],
+                 rank.sum(image, selem))
+    assert_equal(refs["sum_bilateral"],
+                 rank.sum_bilateral(image, selem))
+    assert_equal(refs["sum_percentile"],
+                 rank.sum_percentile(image, selem))
+    assert_equal(refs["threshold"],
+                 rank.threshold(image, selem))
+    assert_equal(refs["threshold_percentile"],
+                 rank.threshold_percentile(image, selem))
+    assert_equal(refs["tophat"],
+                 rank.tophat(image, selem))
+    assert_equal(refs["noise_filter"],
+                 rank.noise_filter(image, selem))
+    assert_equal(refs["entropy"],
+                 rank.entropy(image, selem))
+    assert_equal(refs["otsu"],
+                 rank.otsu(image, selem))
+    assert_equal(refs["percentile"],
+                 rank.percentile(image, selem))
+    assert_equal(refs["windowed_histogram"],
+                 rank.windowed_histogram(image, selem))
 
 
 def test_random_sizes():
@@ -21,26 +92,26 @@ def test_random_sizes():
         out8 = np.empty_like(image8)
         rank.mean(image=image8, selem=elem, mask=mask, out=out8,
                   shift_x=0, shift_y=0)
-        assert_array_equal(image8.shape, out8.shape)
+        assert_equal(image8.shape, out8.shape)
         rank.mean(image=image8, selem=elem, mask=mask, out=out8,
                   shift_x=+1, shift_y=+1)
-        assert_array_equal(image8.shape, out8.shape)
+        assert_equal(image8.shape, out8.shape)
 
         image16 = np.ones((m, n), dtype=np.uint16)
         out16 = np.empty_like(image8, dtype=np.uint16)
         rank.mean(image=image16, selem=elem, mask=mask, out=out16,
                   shift_x=0, shift_y=0)
-        assert_array_equal(image16.shape, out16.shape)
+        assert_equal(image16.shape, out16.shape)
         rank.mean(image=image16, selem=elem, mask=mask, out=out16,
                   shift_x=+1, shift_y=+1)
-        assert_array_equal(image16.shape, out16.shape)
+        assert_equal(image16.shape, out16.shape)
 
         rank.mean_percentile(image=image16, mask=mask, out=out16,
                              selem=elem, shift_x=0, shift_y=0, p0=.1, p1=.9)
-        assert_array_equal(image16.shape, out16.shape)
+        assert_equal(image16.shape, out16.shape)
         rank.mean_percentile(image=image16, mask=mask, out=out16,
                              selem=elem, shift_x=+1, shift_y=+1, p0=.1, p1=.9)
-        assert_array_equal(image16.shape, out16.shape)
+        assert_equal(image16.shape, out16.shape)
 
 
 def test_compare_with_cmorph_dilate():
@@ -54,7 +125,7 @@ def test_compare_with_cmorph_dilate():
         elem = np.ones((r, r), dtype=np.uint8)
         rank.maximum(image=image, selem=elem, out=out, mask=mask)
         cm = cmorph._dilate(image=image, selem=elem)
-        assert_array_equal(out, cm)
+        assert_equal(out, cm)
 
 
 def test_compare_with_cmorph_erode():
@@ -68,7 +139,7 @@ def test_compare_with_cmorph_erode():
         elem = np.ones((r, r), dtype=np.uint8)
         rank.minimum(image=image, selem=elem, out=out, mask=mask)
         cm = cmorph._erode(image=image, selem=elem)
-        assert_array_equal(out, cm)
+        assert_equal(out, cm)
 
 
 def test_bitdepth():
@@ -98,7 +169,7 @@ def test_population():
                   [6, 9, 9, 9, 6],
                   [6, 9, 9, 9, 6],
                   [4, 6, 6, 6, 4]])
-    assert_array_equal(r, out)
+    assert_equal(r, out)
 
 
 def test_structuring_element8():
@@ -120,7 +191,7 @@ def test_structuring_element8():
 
     rank.maximum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=1, shift_y=1)
-    assert_array_equal(r, out)
+    assert_equal(r, out)
 
     # 16-bit
     image = np.zeros((6, 6), dtype=np.uint16)
@@ -129,7 +200,7 @@ def test_structuring_element8():
 
     rank.maximum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=1, shift_y=1)
-    assert_array_equal(r, out)
+    assert_equal(r, out)
 
 
 def test_pass_on_bitdepth():
@@ -161,7 +232,7 @@ def test_compare_autolevels():
     loc_perc_autolevel = rank.autolevel_percentile(image, selem=selem,
                                                    p0=.0, p1=1.)
 
-    assert_array_equal(loc_autolevel, loc_perc_autolevel)
+    assert_equal(loc_autolevel, loc_perc_autolevel)
 
 
 def test_compare_autolevels_16bit():
@@ -175,7 +246,7 @@ def test_compare_autolevels_16bit():
     loc_perc_autolevel = rank.autolevel_percentile(image, selem=selem,
                                                    p0=.0, p1=1.)
 
-    assert_array_equal(loc_autolevel, loc_perc_autolevel)
+    assert_equal(loc_autolevel, loc_perc_autolevel)
 
 
 def test_compare_ubyte_vs_float():
@@ -191,7 +262,7 @@ def test_compare_ubyte_vs_float():
         func = getattr(rank, method)
         out_u = func(image_uint, disk(3))
         out_f = func(image_float, disk(3))
-        assert_array_equal(out_u, out_f)
+        assert_equal(out_u, out_f)
 
 
 def test_compare_8bit_unsigned_vs_signed():
@@ -204,7 +275,7 @@ def test_compare_8bit_unsigned_vs_signed():
     image_s = image.astype(np.int8)
     image_u = img_as_ubyte(image_s)
 
-    assert_array_equal(image_u, img_as_ubyte(image_s))
+    assert_equal(image_u, img_as_ubyte(image_s))
 
     methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
                'mean', 'subtract_mean', 'median', 'minimum', 'modal',
@@ -214,7 +285,7 @@ def test_compare_8bit_unsigned_vs_signed():
         func = getattr(rank, method)
         out_u = func(image_u, disk(3))
         out_s = func(image_s, disk(3))
-        assert_array_equal(out_u, out_s)
+        assert_equal(out_u, out_s)
 
 
 def test_compare_8bit_vs_16bit():
@@ -223,7 +294,7 @@ def test_compare_8bit_vs_16bit():
 
     image8 = util.img_as_ubyte(data.camera())
     image16 = image8.astype(np.uint16)
-    assert_array_equal(image8, image16)
+    assert_equal(image8, image16)
 
     methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
                'mean', 'subtract_mean', 'median', 'minimum', 'modal',
@@ -233,7 +304,7 @@ def test_compare_8bit_vs_16bit():
         func = getattr(rank, method)
         f8 = func(image8, disk(3))
         f16 = func(image16, disk(3))
-        assert_array_equal(f8, f16)
+        assert_equal(f8, f16)
 
 
 def test_trivial_selem8():
@@ -250,13 +321,13 @@ def test_trivial_selem8():
     elem = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=np.uint8)
     rank.mean(image=image, selem=elem, out=out, mask=mask,
               shift_x=0, shift_y=0)
-    assert_array_equal(image, out)
+    assert_equal(image, out)
     rank.minimum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=0, shift_y=0)
-    assert_array_equal(image, out)
+    assert_equal(image, out)
     rank.maximum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=0, shift_y=0)
-    assert_array_equal(image, out)
+    assert_equal(image, out)
 
 
 def test_trivial_selem16():
@@ -273,13 +344,13 @@ def test_trivial_selem16():
     elem = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=np.uint8)
     rank.mean(image=image, selem=elem, out=out, mask=mask,
               shift_x=0, shift_y=0)
-    assert_array_equal(image, out)
+    assert_equal(image, out)
     rank.minimum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=0, shift_y=0)
-    assert_array_equal(image, out)
+    assert_equal(image, out)
     rank.maximum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=0, shift_y=0)
-    assert_array_equal(image, out)
+    assert_equal(image, out)
 
 
 def test_smallest_selem8():
@@ -296,13 +367,13 @@ def test_smallest_selem8():
     elem = np.array([[1]], dtype=np.uint8)
     rank.mean(image=image, selem=elem, out=out, mask=mask,
               shift_x=0, shift_y=0)
-    assert_array_equal(image, out)
+    assert_equal(image, out)
     rank.minimum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=0, shift_y=0)
-    assert_array_equal(image, out)
+    assert_equal(image, out)
     rank.maximum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=0, shift_y=0)
-    assert_array_equal(image, out)
+    assert_equal(image, out)
 
 
 def test_smallest_selem16():
@@ -319,13 +390,13 @@ def test_smallest_selem16():
     elem = np.array([[1]], dtype=np.uint8)
     rank.mean(image=image, selem=elem, out=out, mask=mask,
               shift_x=0, shift_y=0)
-    assert_array_equal(image, out)
+    assert_equal(image, out)
     rank.minimum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=0, shift_y=0)
-    assert_array_equal(image, out)
+    assert_equal(image, out)
     rank.maximum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=0, shift_y=0)
-    assert_array_equal(image, out)
+    assert_equal(image, out)
 
 
 def test_empty_selem():
@@ -344,13 +415,13 @@ def test_empty_selem():
 
     rank.mean(image=image, selem=elem, out=out, mask=mask,
               shift_x=0, shift_y=0)
-    assert_array_equal(res, out)
+    assert_equal(res, out)
     rank.minimum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=0, shift_y=0)
-    assert_array_equal(res, out)
+    assert_equal(res, out)
     rank.maximum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=0, shift_y=0)
-    assert_array_equal(res, out)
+    assert_equal(res, out)
 
 
 def test_otsu():
@@ -364,7 +435,7 @@ def test_otsu():
     res = np.tile([1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1], (16, 1))
     selem = np.ones((6, 6), dtype=np.uint8)
     th = 1 * (test >= rank.otsu(test, selem))
-    assert_array_equal(th, res)
+    assert_equal(th, res)
 
 
 def test_entropy():
@@ -424,10 +495,10 @@ def test_selem_dtypes():
         elem = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=dtype)
         rank.mean(image=image, selem=elem, out=out, mask=mask,
                   shift_x=0, shift_y=0)
-        assert_array_equal(image, out)
+        assert_equal(image, out)
         rank.mean_percentile(image=image, selem=elem, out=out, mask=mask,
                              shift_x=0, shift_y=0)
-        assert_array_equal(image, out)
+        assert_equal(image, out)
 
 
 def test_16bit():
@@ -464,11 +535,11 @@ def test_percentile_min():
     # check for 8bit
     img_p0 = rank.percentile(img, selem=selem, p0=0)
     img_min = rank.minimum(img, selem=selem)
-    assert_array_equal(img_p0, img_min)
+    assert_equal(img_p0, img_min)
     # check for 16bit
     img_p0 = rank.percentile(img16, selem=selem, p0=0)
     img_min = rank.minimum(img16, selem=selem)
-    assert_array_equal(img_p0, img_min)
+    assert_equal(img_p0, img_min)
 
 
 def test_percentile_max():
@@ -479,11 +550,11 @@ def test_percentile_max():
     # check for 8bit
     img_p0 = rank.percentile(img, selem=selem, p0=1.)
     img_max = rank.maximum(img, selem=selem)
-    assert_array_equal(img_p0, img_max)
+    assert_equal(img_p0, img_max)
     # check for 16bit
     img_p0 = rank.percentile(img16, selem=selem, p0=1.)
     img_max = rank.maximum(img16, selem=selem)
-    assert_array_equal(img_p0, img_max)
+    assert_equal(img_p0, img_max)
 
 
 def test_percentile_median():
@@ -494,11 +565,12 @@ def test_percentile_median():
     # check for 8bit
     img_p0 = rank.percentile(img, selem=selem, p0=.5)
     img_max = rank.median(img, selem=selem)
-    assert_array_equal(img_p0, img_max)
+    assert_equal(img_p0, img_max)
     # check for 16bit
     img_p0 = rank.percentile(img16, selem=selem, p0=.5)
     img_max = rank.median(img16, selem=selem)
-    assert_array_equal(img_p0, img_max)
+    assert_equal(img_p0, img_max)
+
 
 def test_sum():
     # check the number of valid pixels in the neighborhood
@@ -508,39 +580,44 @@ def test_sum():
                        [0, 1, 1, 1, 0],
                        [0, 1, 1, 1, 0],
                        [0, 0, 0, 0, 0]], dtype=np.uint8)
-    image16 = 400*np.array([[0, 0, 0, 0, 0],
-                       [0, 1, 1, 1, 0],
-                       [0, 1, 1, 1, 0],
-                       [0, 1, 1, 1, 0],
-                       [0, 0, 0, 0, 0]], dtype=np.uint16)
+    image16 = 400 * np.array([[0, 0, 0, 0, 0],
+                              [0, 1, 1, 1, 0],
+                              [0, 1, 1, 1, 0],
+                              [0, 1, 1, 1, 0],
+                              [0, 0, 0, 0, 0]], dtype=np.uint16)
     elem = np.ones((3, 3), dtype=np.uint8)
     out8 = np.empty_like(image8)
     out16 = np.empty_like(image16)
     mask = np.ones(image8.shape, dtype=np.uint8)
 
-    r =  np.array([[1, 2, 3, 2, 1],
-           [2, 4, 6, 4, 2],
-           [3, 6, 9, 6, 3],
-           [2, 4, 6, 4, 2],
-           [1, 2, 3, 2, 1]], dtype=np.uint8)
+    r = np.array([[1, 2, 3, 2, 1],
+                  [2, 4, 6, 4, 2],
+                  [3, 6, 9, 6, 3],
+                  [2, 4, 6, 4, 2],
+                  [1, 2, 3, 2, 1]], dtype=np.uint8)
     rank.sum(image=image8, selem=elem, out=out8, mask=mask)
-    assert_array_equal(r, out8)
-    rank.sum_percentile(image=image8, selem=elem, out=out8, mask=mask,p0=.0,p1=1.)
-    assert_array_equal(r, out8)
-    rank.sum_bilateral(image=image8, selem=elem, out=out8, mask=mask,s0=255,s1=255)
-    assert_array_equal(r, out8)
+    assert_equal(r, out8)
+    rank.sum_percentile(
+        image=image8, selem=elem, out=out8, mask=mask, p0=.0, p1=1.)
+    assert_equal(r, out8)
+    rank.sum_bilateral(
+        image=image8, selem=elem, out=out8, mask=mask, s0=255, s1=255)
+    assert_equal(r, out8)
 
-    r = 400* np.array([[1, 2, 3, 2, 1],
-           [2, 4, 6, 4, 2],
-           [3, 6, 9, 6, 3],
-           [2, 4, 6, 4, 2],
-           [1, 2, 3, 2, 1]], dtype=np.uint16)
+    r = 400 * np.array([[1, 2, 3, 2, 1],
+                        [2, 4, 6, 4, 2],
+                        [3, 6, 9, 6, 3],
+                        [2, 4, 6, 4, 2],
+                        [1, 2, 3, 2, 1]], dtype=np.uint16)
     rank.sum(image=image16, selem=elem, out=out16, mask=mask)
-    assert_array_equal(r, out16)
-    rank.sum_percentile(image=image16, selem=elem, out=out16, mask=mask,p0=.0,p1=1.)
-    assert_array_equal(r, out16)
-    rank.sum_bilateral(image=image16, selem=elem, out=out16, mask=mask,s0=1000,s1=1000)
-    assert_array_equal(r, out16)
+    assert_equal(r, out16)
+    rank.sum_percentile(
+        image=image16, selem=elem, out=out16, mask=mask, p0=.0, p1=1.)
+    assert_equal(r, out16)
+    rank.sum_bilateral(
+        image=image16, selem=elem, out=out16, mask=mask, s0=1000, s1=1000)
+    assert_equal(r, out16)
+
 
 def test_windowed_histogram():
     # check the number of valid pixels in the neighborhood
@@ -551,7 +628,7 @@ def test_windowed_histogram():
                        [0, 1, 1, 1, 0],
                        [0, 0, 0, 0, 0]], dtype=np.uint8)
     elem = np.ones((3, 3), dtype=np.uint8)
-    outf = np.empty(image8.shape+(2,), dtype=float)
+    outf = np.empty(image8.shape + (2,), dtype=float)
     mask = np.ones(image8.shape, dtype=np.uint8)
 
     # Population so we can normalize the expected output while maintaining
@@ -562,19 +639,19 @@ def test_windowed_histogram():
                     [6, 9, 9, 9, 6],
                     [4, 6, 6, 6, 4]], dtype=float)
 
-    r0 =  np.array([[3, 4, 3, 4, 3],
-                    [4, 5, 3, 5, 4],
-                    [3, 3, 0, 3, 3],
-                    [4, 5, 3, 5, 4],
-                    [3, 4, 3, 4, 3]], dtype=float) / pop
-    r1 =  np.array([[1, 2, 3, 2, 1],
-                    [2, 4, 6, 4, 2],
-                    [3, 6, 9, 6, 3],
-                    [2, 4, 6, 4, 2],
-                    [1, 2, 3, 2, 1]], dtype=float) / pop
+    r0 = np.array([[3, 4, 3, 4, 3],
+                   [4, 5, 3, 5, 4],
+                   [3, 3, 0, 3, 3],
+                   [4, 5, 3, 5, 4],
+                   [3, 4, 3, 4, 3]], dtype=float) / pop
+    r1 = np.array([[1, 2, 3, 2, 1],
+                   [2, 4, 6, 4, 2],
+                   [3, 6, 9, 6, 3],
+                   [2, 4, 6, 4, 2],
+                   [1, 2, 3, 2, 1]], dtype=float) / pop
     rank.windowed_histogram(image=image8, selem=elem, out=outf, mask=mask)
-    assert_array_equal(r0, outf[:,:,0])
-    assert_array_equal(r1, outf[:,:,1])
+    assert_equal(r0, outf[:, :, 0])
+    assert_equal(r1, outf[:, :, 1])
 
     # Test n_bins parameter
     larger_output = rank.windowed_histogram(image=image8, selem=elem,

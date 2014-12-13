@@ -116,7 +116,7 @@ cdef inline void _kernel_sum(dtype_t_out* out, Py_ssize_t odepth,
                 sum_g += histo[i] * i
 
         if n > 0:
-            out[0] = <dtype_t_out>(sum_g)
+            out[0] = <dtype_t_out>sum_g
         else:
             out[0] = <dtype_t_out>0
     else:

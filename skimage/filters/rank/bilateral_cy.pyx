@@ -26,7 +26,7 @@ cdef inline void _kernel_mean(dtype_t_out* out, Py_ssize_t odepth,
                 bilat_pop += histo[i]
                 mean += histo[i] * i
         if bilat_pop:
-            out[0] = <dtype_t_out>mean / bilat_pop
+            out[0] = <dtype_t_out>(mean / bilat_pop)
         else:
             out[0] = <dtype_t_out>0
     else:
