@@ -35,6 +35,8 @@ fi
 
 # Install SimpleITK from wheelhouse if available (not 3.2 or 3.4)
 if [[ ($TRAVIS_PYTHON_VERSION =~ 3\.[24] ]]; then
+    echo "SimpleITK unavailable on $TRAVIS_PYTHON_VERSION"
+else
     pip install -q SimpleITK $WHEELHOUSE
 fi
 
