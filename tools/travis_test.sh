@@ -40,7 +40,6 @@ echo 'backend.qt4 : '$MPL_QT_API >> $MPL_DIR/matplotlibrc
 
 tools/header.py "Run tests with all dependencies"
 # run tests again with optional dependencies to get more coverage
-TEST_ARGS='--exe -v --with-doctest'
 if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then
     TEST_ARGS="$TEST_ARGS --with-cov --cover-package skimage"
 fi
