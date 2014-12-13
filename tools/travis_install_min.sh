@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -ex
 
+echo -en "travis_fold:start:install.all\r"
+
 # on Python 2.7, use the system versions of numpy, scipy, and matplotlib
 # and the minimum version of cython and networkx
 if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
@@ -29,3 +31,5 @@ pip install $WHEELHOUSE -r requirements.txt
 # clean up disk space
 sudo apt-get clean
 sudo rm -r /tmp/*
+
+echo -en "travis_fold:end:install.all\r"
