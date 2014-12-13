@@ -16,12 +16,14 @@ from skimage.morphology import selem
 class TestSElem():
 
     def test_square_selem(self):
+        """Test square structuring elements"""
         for k in range(0, 5):
             actual_mask = selem.square(k)
             expected_mask = np.ones((k, k), dtype='uint8')
             assert_equal(expected_mask, actual_mask)
 
     def test_rectangle_selem(self):
+        """Test rectangle structuring elements"""
         for i in range(0, 5):
             for j in range(0, 5):
                 actual_mask = selem.rectangle(i, j)
@@ -57,18 +59,23 @@ class TestSElem():
             k = k + 1
 
     def test_selem_disk(self):
+        """Test disk structuring elements"""
         self.strel_worker("disk-matlab-output.npz", selem.disk)
 
     def test_selem_diamond(self):
+        """Test diamond structuring elements"""
         self.strel_worker("diamond-matlab-output.npz", selem.diamond)
 
     def test_selem_ball(self):
+        """Test ball structuring elements"""
         self.strel_worker_3d("disk-matlab-output.npz", selem.ball)
 
     def test_selem_octahedron(self):
+        """Test octahedron structuring elements"""
         self.strel_worker_3d("diamond-matlab-output.npz", selem.octahedron)
 
     def test_selem_octagon(self):
+        """Test octagon structuring elements"""
         expected_mask1 = np.array([[0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
                                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
                                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
@@ -89,6 +96,7 @@ class TestSElem():
         assert_equal(expected_mask2, actual_mask2)
 
     def test_selem_star(self):
+        """Test star structuring elements"""
         expected_mask1 = np.array([[0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
                                    [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
                                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
