@@ -24,7 +24,7 @@ value), where hue can be changed independently of saturation or value, or
 the `CMYK model <http://en.wikipedia.org/wiki/CMYK_color_model>`_ used
 for printing. 
 
-:mod:`skimage.color` provide utility functions to convert images
+:mod:`skimage.color` provides utility functions to convert images
 to and from different color spaces. Note that such conversions may change
 the numerical type of the image array::
 
@@ -71,7 +71,7 @@ duplicates the gray values over the three color channels.
 Painting images with labels
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-:func:`label2rgb` can be used to superimpose colors on a grayscale image,
+:func:`label2rgb` can be used to superimpose colors on a grayscale image
 using an array of labels to encode the regions to be represented with the
 same color. 
 
@@ -104,9 +104,9 @@ concentrated in a subrange of the accessible values.
 of pixels values of an image.  
 
 A first class of methods compute a nonlinear function of the intensity,
-which is always the same no matter the pixel values of a specific image.
+which is always the same, independent of the pixel values of a specific image.
 Such methods are often used for correcting a known non-linearity of
-sensors, or receptors such as the human eye. A known example is the
+sensors, or receptors such as the human eye. A well-known example is the
 `Gamma correction <http://en.wikipedia.org/wiki/Gamma_correction>`_,
 implemented in :func:`adjust_gamma`.
 
@@ -120,11 +120,11 @@ the image. The histogram of pixel values is computed with
 
 that returns the number of pixels for each value bin, and the centers of
 the bins. The behavior of :func:`histogram` is therefore slightly
-different from the one of :func:`np.histogram`, that returns bins'
-boundaries.
+different from the one of :func:`np.histogram`, which returns the
+boundaries of the bins.
 
 The simplest contrast enhancement :func:`rescale_intensity` consists in
-stretching pixels values to the whole allowed range, using a linear
+stretching pixel values to the whole allowed range, using a linear
 transformation.::
     
     >>> from skimage import exposure
