@@ -24,7 +24,7 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     sed -i 's/matplotlib>=*.*.*/matplotlib==1.3.1/g' requirements.txt
 fi
 
-pip install --timeout 60 $WHEELHOUSE -r requirements.txt
+pip install $WHEELHOUSE -r requirements.txt
 
 # clean up disk space
 sudo apt-get clean

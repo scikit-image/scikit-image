@@ -28,6 +28,7 @@ before_install:
     - export PYTHONWARNINGS="all"
     - export WHEELHOUSE="--no-index --find-links=http://travis-wheels.scikit-image.org/"
     - export TEST_ARGS="--exe --ignore-files=^_test -v --with-doctest --ignore-files=^setup.py$"
+    - export PIP_DEFAULT_TIMEOUT=60
     - sudo apt-get update
 
     - travis_retry tools/travis_setup.sh
