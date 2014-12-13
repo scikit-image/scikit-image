@@ -60,9 +60,17 @@ import os.path as _osp
 import imp as _imp
 import functools as _functools
 import warnings as _warnings
+import sys as _sys
 from skimage._shared.utils import deprecated as _deprecated
 
-pkg_dir = _osp.abspath(_osp.dirname(__file__))
+if hasattr(_sys, "frozen"):
+    # In py2exe, data files are typically stored next to the
+    # .exe in the skimage directory
+    exe_dir = _osp.abspath(_osp.dirname(_sys.executable))
+    pkg_dir = _osp.join(exe_dir, 'skimage')
+else:
+    pkg_dir = _osp.abspath(_osp.dirname(__file__))
+
 data_dir = _osp.join(pkg_dir, 'data')
 
 try:
