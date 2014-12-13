@@ -1134,7 +1134,18 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     out = None
 
-    if order in range(4) and not map_args:
+    if order == 2:
+        # When fixing this issue, make sure to fix the branches further
+        # below in this function
+        warnings.warn("Bi-quadratic interpolation behavior has changed due "
+                      "to a bug in the implementation of scikit-image. "
+                      "The new version now serves as a wrapper "
+                      "around SciPy's interpolation functions, which itself "
+                      "is not verified to be a correct implementation. Until "
+                      "skimage's implementation is fixed, we recommend "
+                      "to use bi-linear or bi-cubic interpolation instead.")
+
+    if order in (0, 1, 3) and not map_args:
         # use fast Cython version for specific interpolation orders and input
 
         matrix = None

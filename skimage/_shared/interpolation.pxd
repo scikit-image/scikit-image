@@ -81,7 +81,9 @@ cdef inline double bilinear_interpolation(double* image, Py_ssize_t rows,
 
 
 cdef inline double quadratic_interpolation(double x, double[3] f):
-    """Quadratic interpolation.
+    """WARNING: Do not use, not implemented correctly.
+
+    Quadratic interpolation.
 
     Parameters
     ----------
@@ -104,7 +106,9 @@ cdef inline double quadratic_interpolation(double x, double[3] f):
 cdef inline double biquadratic_interpolation(double* image, Py_ssize_t rows,
                                              Py_ssize_t cols, double r,
                                              double c, char mode, double cval):
-    """Biquadratic interpolation at a given position in the image.
+    """WARNING: Do not use, not implemented correctly.
+
+    Biquadratic interpolation at a given position in the image.
 
     Parameters
     ----------
@@ -129,7 +133,6 @@ cdef inline double biquadratic_interpolation(double* image, Py_ssize_t rows,
     cdef long r0 = <long>round(r) - 1
     cdef long c0 = <long>round(c) - 1
 
-    # scale position to range [0, 2]
     cdef double xr = r - r0
     cdef double xc = c - c0
 
@@ -139,10 +142,11 @@ cdef inline double biquadratic_interpolation(double* image, Py_ssize_t rows,
     cdef long pr, pc
 
     # row-wise cubic interpolation
-    for pr in range(r0, r0 + 3):
-        for pc in range(c0, c0 + 3):
-            fc[pc - c0] = get_pixel2d(image, rows, cols, pr, pc, mode, cval)
-        fr[pr - r0] = quadratic_interpolation(xc, fc)
+    for pr in range(3):
+        for pc in range(3):
+            fc[pc] = get_pixel2d(image, rows, cols,
+                                 r0 + pr, c0 + pc, mode, cval)
+        fr[pr] = quadratic_interpolation(xc, fc)
 
     # cubic interpolation for interpolated values of each row
     return quadratic_interpolation(xr, fr)
@@ -221,10 +225,10 @@ cdef inline double bicubic_interpolation(double* image, Py_ssize_t rows,
     cdef long pr, pc
 
     # row-wise cubic interpolation
-    for pr in range(r0, r0 + 4):
-        for pc in range(c0, c0 + 4):
-            fc[pc - c0] = get_pixel2d(image, rows, cols, pr, pc, mode, cval)
-        fr[pr - r0] = cubic_interpolation(xc, fc)
+    for pr in range(4):
+        for pc in range(4):
+            fc[pc] = get_pixel2d(image, rows, cols, pr + r0, pc + c0, mode, cval)
+        fr[pr] = cubic_interpolation(xc, fc)
 
     # cubic interpolation for interpolated values of each row
     return cubic_interpolation(xr, fr)
