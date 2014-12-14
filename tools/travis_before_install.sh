@@ -2,6 +2,7 @@
 set -ex
 
 export WHEELHOUSE="--no-index --find-links=http://travis-wheels.scikit-image.org/"
+export COVERALLS_REPO_TOKEN=7LdFN9232ZbSY3oaXHbQIzLazrSf6w2pQ
 
 
 retry () {
