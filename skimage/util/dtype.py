@@ -304,7 +304,7 @@ def img_as_uint(image, force_copy=False):
 
     Notes
     -----
-    Negative input values will be clipped. 
+    Negative input values will be clipped.
     Positive values are scaled between 0 and 65535.
 
     """
@@ -353,7 +353,7 @@ def img_as_ubyte(image, force_copy=False):
 
     Notes
     -----
-    Negative input values will be clipped. 
+    Negative input values will be clipped.
     Positive values are scaled between 0 and 255.
 
     """

@@ -171,13 +171,13 @@ class BRIEF(DescriptorExtractor):
         # Removing keypoints that are within (patch_size / 2) distance from the
         # image border
         self.mask = _mask_border_keypoints(image.shape, keypoints,
-                                            patch_size // 2)
+                                           patch_size // 2)
 
         keypoints = np.array(keypoints[self.mask, :], dtype=np.intp,
                              order='C', copy=False)
 
         self.descriptors = np.zeros((keypoints.shape[0], desc_size),
-                                     dtype=bool, order='C')
+                                    dtype=bool, order='C')
 
         _brief_loop(image, self.descriptors.view(np.uint8), keypoints,
                     pos1, pos2)

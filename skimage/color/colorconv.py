@@ -299,8 +299,8 @@ sb_primaries = np.array([1. / 155, 1. / 190, 1. / 225]) * 1e5
 
 # From sRGB specification
 xyz_from_rgb = np.array([[0.412453, 0.357580, 0.180423],
-                        [0.212671, 0.715160, 0.072169],
-                        [0.019334, 0.119193, 0.950227]])
+                         [0.212671, 0.715160, 0.072169],
+                         [0.019334, 0.119193, 0.950227]])
 
 rgb_from_xyz = linalg.inv(xyz_from_rgb)
 
@@ -978,19 +978,19 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     L[mask] = 116. * np.power(L[mask], 1. / 3.) - 16.
     L[~mask] = 903.3 * L[~mask]
 
-    u0 = 4*xyz_ref_white[0] / np.dot([1, 15, 3], xyz_ref_white)
-    v0 = 9*xyz_ref_white[1] / np.dot([1, 15, 3], xyz_ref_white)
+    u0 = 4 * xyz_ref_white[0] / np.dot([1, 15, 3], xyz_ref_white)
+    v0 = 9 * xyz_ref_white[1] / np.dot([1, 15, 3], xyz_ref_white)
 
     # u' and v' helper functions
     def fu(X, Y, Z):
-        return (4.*X) / (X + 15.*Y + 3.*Z + eps)
+        return (4. * X) / (X + 15. * Y + 3. * Z + eps)
 
     def fv(X, Y, Z):
-        return (9.*Y) / (X + 15.*Y + 3.*Z + eps)
+        return (9. * Y) / (X + 15. * Y + 3. * Z + eps)
 
     # compute u and v using helper functions
-    u = 13.*L * (fu(x, y, z) - u0)
-    v = 13.*L * (fv(x, y, z) - v0)
+    u = 13. * L * (fu(x, y, z) - u0)
+    v = 13. * L * (fv(x, y, z) - v0)
 
     return np.concatenate([q[..., np.newaxis] for q in [L, u, v]], axis=-1)
 
@@ -1043,24 +1043,24 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
     # compute y
     y = L.copy()
     mask = y > 7.999625
-    y[mask] = np.power((y[mask]+16.) / 116., 3.)
+    y[mask] = np.power((y[mask] + 16.) / 116., 3.)
     y[~mask] = y[~mask] / 903.3
     xyz_ref_white = get_xyz_coords(illuminant, observer)
     y *= xyz_ref_white[1]
 
     # reference white x,z
     uv_weights = [1, 15, 3]
-    u0 = 4*xyz_ref_white[0] / np.dot(uv_weights, xyz_ref_white)
-    v0 = 9*xyz_ref_white[1] / np.dot(uv_weights, xyz_ref_white)
+    u0 = 4 * xyz_ref_white[0] / np.dot(uv_weights, xyz_ref_white)
+    v0 = 9 * xyz_ref_white[1] / np.dot(uv_weights, xyz_ref_white)
 
     # compute intermediate values
-    a = u0 + u / (13.*L + eps)
-    b = v0 + v / (13.*L + eps)
-    c = 3*y * (5*b-3)
+    a = u0 + u / (13. * L + eps)
+    b = v0 + v / (13. * L + eps)
+    c = 3 * y * (5 * b - 3)
 
     # compute x and z
-    z = ((a-4)*c - 15*a*b*y) / (12*b)
-    x = -(c/b + 3.*z)
+    z = ((a - 4) * c - 15 * a * b * y) / (12 * b)
+    x = -(c / b + 3. * z)
 
     return np.concatenate([q[..., np.newaxis] for q in [x, y, z]], axis=-1)
 

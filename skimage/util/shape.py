@@ -240,7 +240,7 @@ def view_as_windows(arr_in, window_shape, step=1):
     arr_in = np.ascontiguousarray(arr_in)
 
     new_shape = tuple((arr_shape - window_shape) // step + 1) + \
-                tuple(window_shape)
+        tuple(window_shape)
 
     arr_strides = np.array(arr_in.strides)
     new_strides = np.concatenate((arr_strides * step, arr_strides))

@@ -171,9 +171,9 @@ def octahedron(radius, dtype=np.uint8):
     """
     # note that in contrast to diamond(), this method allows non-integer radii
     n = 2 * radius + 1
-    Z, Y, X = np.mgrid[-radius:radius:n*1j,
-                       -radius:radius:n*1j,
-                       -radius:radius:n*1j]
+    Z, Y, X = np.mgrid[-radius:radius:n * 1j,
+                       -radius:radius:n * 1j,
+                       -radius:radius:n * 1j]
     s = np.abs(X) + np.abs(Y) + np.abs(Z)
     return np.array(s <= radius, dtype=dtype)
 
@@ -202,10 +202,10 @@ def ball(radius, dtype=np.uint8):
         are 1 and 0 otherwise.
     """
     n = 2 * radius + 1
-    Z, Y, X = np.mgrid[-radius:radius:n*1j,
-                       -radius:radius:n*1j,
-                       -radius:radius:n*1j]
-    s = X**2 + Y**2 + Z**2
+    Z, Y, X = np.mgrid[-radius:radius:n * 1j,
+                       -radius:radius:n * 1j,
+                       -radius:radius:n * 1j]
+    s = X ** 2 + Y ** 2 + Z ** 2
     return np.array(s <= radius * radius, dtype=dtype)
 
 
@@ -236,7 +236,7 @@ def octagon(m, n, dtype=np.uint8):
 
     """
     from . import convex_hull_image
-    selem = np.zeros((m + 2*n, m + 2*n))
+    selem = np.zeros((m + 2 * n, m + 2 * n))
     selem[0, n] = 1
     selem[n, 0] = 1
     selem[0, m + n - 1] = 1
@@ -274,20 +274,26 @@ def star(a, dtype=np.uint8):
 
     """
     from . import convex_hull_image
+
     if a == 1:
         bfilter = np.zeros((3, 3), dtype)
         bfilter[:] = 1
         return bfilter
+
     m = 2 * a + 1
     n = a // 2
     selem_square = np.zeros((m + 2 * n, m + 2 * n))
     selem_square[n: m + n, n: m + n] = 1
+
     c = (m + 2 * n - 1) // 2
     selem_rotated = np.zeros((m + 2 * n, m + 2 * n))
-    selem_rotated[0, c] = selem_rotated[-1, c] = selem_rotated[c, 0] = selem_rotated[c, -1] = 1
+    selem_rotated[0, c] = selem_rotated[-1, c] = 1
+    selem_rotated[c, 0] = selem_rotated[c, -1] = 1
     selem_rotated = convex_hull_image(selem_rotated).astype(int)
+
     selem = selem_square + selem_rotated
     selem[selem > 0] = 1
+
     return selem.astype(dtype)
 
 

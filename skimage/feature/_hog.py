@@ -104,7 +104,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     cell are used to vote into the orientation histogram.
     """
 
-    magnitude = sqrt(gx**2 + gy**2)
+    magnitude = sqrt(gx ** 2 + gy ** 2)
     orientation = arctan2(gy, gx) * (180 / pi) % 180
 
     sy, sx = image.shape
@@ -119,7 +119,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     subsample = np.index_exp[cy // 2:cy * n_cellsy:cy,
                              cx // 2:cx * n_cellsx:cx]
     for i in range(orientations):
-        #create new integral image for this orientation
+        # create new integral image for this orientation
         # isolate orientations in this range
 
         temp_ori = np.where(orientation < 180.0 / orientations * (i + 1),
@@ -177,7 +177,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         for y in range(n_blocksy):
             block = orientation_histogram[y:y + by, x:x + bx, :]
             eps = 1e-5
-            normalised_blocks[y, x, :] = block / sqrt(block.sum()**2 + eps)
+            normalised_blocks[y, x, :] = block / sqrt(block.sum() ** 2 + eps)
 
     """
     The final step collects the HOG descriptors from all blocks of a dense
