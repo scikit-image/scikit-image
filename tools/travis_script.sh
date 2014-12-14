@@ -1,14 +1,6 @@
 #!/usr/bin/env bash
 set -ex
 
-section "Script.Setup"
-sh -e /etc/init.d/xvfb start
-export DISPLAY=:99.0
-PYTHONWARNINGS="all"
-TEST_ARGS="--exe --ignore-files=^_test -v --with-doctest --ignore-files=^setup.py$"
-section_end "Script.Setup"
-
-
 section "Test.with.min.requirements"
 nosetests $TEST_ARGS skimage
 section_end "Test.with.min.requirements"
