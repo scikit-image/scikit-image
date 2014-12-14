@@ -30,6 +30,13 @@ class TestSElem():
                 expected_mask = np.ones((i, j), dtype='uint8')
                 assert_equal(expected_mask, actual_mask)
 
+    def test_cube_selem(self):
+        """Test cube structuring elements"""
+        for k in range(0, 5):
+            actual_mask = selem.cube(k)
+            expected_mask = np.ones((k, k, k), dtype='uint8')
+            assert_equal(expected_mask, actual_mask)
+
     def strel_worker(self, fn, func):
         matlab_masks = np.load(os.path.join(data_dir, fn))
         k = 0
