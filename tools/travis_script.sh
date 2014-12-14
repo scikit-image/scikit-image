@@ -1,25 +1,25 @@
 #!/usr/bin/env bash
 set -ex
 
-section "Script Setup"
+section "Script.Setup"
 sh -e /etc/init.d/xvfb start
 export DISPLAY=:99.0
 PYTHONWARNINGS="all"
 TEST_ARGS="--exe --ignore-files=^_test -v --with-doctest --ignore-files=^setup.py$"
-section_end "Script Setup"
+section_end "Script.Setup"
 
 
-section "Test with min requirements"
+section "Test.with.min.requirements"
 nosetests $TEST_ARGS skimage
-section_end "Test with min requirements"
+section_end "Test.with.min.requirements"
 
 
-section "Flake8 test"
+section "Flake8.test"
 flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
-section_end "Flake8 test"
+section_end "Flake8.test"
 
 
-section "Install optional dependencies"
+section "Install.optional.dependencies"
 
 # Install Qt and then update the Matplotlib settings
 if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
@@ -67,10 +67,10 @@ fi
 
 retry pip install -q tifffile
 
-section_end "Install optional dependencies"
+section_end "Install.optional.dependencies"
 
 
-section "Run doc examples"
+section "Run.doc.examples"
 
 # Matplotlib settings - do not show figures during doc examples
 if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
@@ -91,10 +91,10 @@ for f in doc/examples/*.py; do
     fi
 done
 
-section_end "Run doc examples"
+section_end "Run.doc.examples"
 
 
-section "Run doc applications"
+section "Run.doc.applications"
 
 for f in doc/examples/applications/*.py; do
     python "$f"
@@ -114,10 +114,10 @@ fi
 echo 'backend: Agg' > $MPL_DIR/matplotlibrc
 echo 'backend.qt4 : '$MPL_QT_API >> $MPL_DIR/matplotlibrc
 
-section_end "Run doc applications"
+section_end "Run.doc.applications"
 
 
-section "Test with optional dependencies"
+section "Test.with.optional.dependencies"
 
 # run tests again with optional dependencies to get more coverage
 if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then
@@ -125,4 +125,4 @@ if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then
 fi
 nosetests $TEST_ARGS
 
-section_end "Test with optional dependencies"
+section_end "Test.with.optional.dependencies"
