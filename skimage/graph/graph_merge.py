@@ -99,7 +99,7 @@ def merge_hierarchical(labels, rag, thresh, rag_copy, in_place_merge,
         # Reference to the heap item in the graph
         data['heap item'] = heap_item
 
-    while edge_heap[0][0] < thresh:
+    while len(edge_heap) > 0 and edge_heap[0][0] < thresh:
         _, n1, n2, valid = heapq.heappop(edge_heap)
 
         # Ensure popped edge is valid, if not, the edge is discarded
