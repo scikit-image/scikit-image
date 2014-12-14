@@ -25,7 +25,7 @@ retry () {
 # on Python 2.7, use the system versions of numpy, scipy, and matplotlib
 # and the minimum version of cython and networkx
 if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
-    virtualenv -p python --system-site-packages ~/venv
+    virtualenv --system-site-packages ~/venv
     sudo apt-get install python-scipy python-matplotlib
     sed -i 's/cython>=/cython==/g' requirements.txt
     sed -i 's/networkx>=/networkx==/g' requirements.txt
