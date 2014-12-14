@@ -132,8 +132,8 @@ GALLERY_IMAGE_TEMPLATE = """
 class Path(str):
     """Path object for manipulating directory and file paths."""
 
-    def __init__(self, path):
-        super(Path, self).__init__(path)
+    def __new__(self, path):
+        return str.__new__(self, path)
 
     @property
     def isdir(self):
@@ -203,7 +203,7 @@ def generate_examples_and_gallery(example_dir, rst_dir, cfg):
     rst_dir.makedirs()
 
     # we create an index.rst with all examples
-    gallery_index = file(rst_dir.pjoin('index'+cfg.source_suffix), 'w')
+    gallery_index = open(rst_dir.pjoin('index'+cfg.source_suffix), 'w')
 
     # Here we don't use an os.walk, but we recurse only twice: flat is
     # better than nested.
@@ -244,7 +244,7 @@ def write_gallery(gallery_index, src_dir, rst_dir, cfg, depth=0):
         print(80*'_')
         return
 
-    gallery_description = file(gallery_template).read()
+    gallery_description = open(gallery_template).read()
     gallery_index.write('\n\n%s\n\n' % gallery_description)
 
     rst_dir.makedirs()
