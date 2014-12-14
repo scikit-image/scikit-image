@@ -37,10 +37,10 @@ def _revalidate_node_edges(rag, node, heap_list):
         heapq.heappush(heap_list, heap_item)
 
 
-def _copy_node(graph, node_id, copy_id):
-    """ Copies `node_id` into `copy_id` along with all its edges. """
+def _rename_node(graph, node_id, copy_id):
+    """ Renames `node_id` in `graph` to `copy_id`. """
 
-    graph._add_node(copy_id)
+    graph._add_node_silent(copy_id)
     graph.node[copy_id] = graph.node[node_id]
 
     for nbr in graph.neighbors(node_id):
@@ -48,6 +48,11 @@ def _copy_node(graph, node_id, copy_id):
         graph.add_edge(nbr, copy_id, {'weight': wt})
 
     graph.remove_node(node_id)
+
+def _invalidate_neighbors(graph, node):
+    """ Invalidates all neighbors of `node` in the heap. """
+    for nbr in graph.neighbors(node):
+        graph[node][nbr]['heap item'][3] = False
 
 
 def merge_hierarchical(labels, rag, thresh, rag_copy, in_place_merge,
@@ -105,16 +110,13 @@ def merge_hierarchical(labels, rag, thresh, rag_copy, in_place_merge,
         # Ensure popped edge is valid, if not, the edge is discarded
         if valid:
             # Invalidate all neigbors of `src` before its deleted
-            for nbr in rag.neighbors(n1):
-                rag[n1][nbr]['heap item'][3] = False
 
-            if not in_place_merge:
-                for nbr in rag.neighbors(n2):
-                    rag[n2][nbr]['heap item'][3] = False
+            _invalidate_neighbors(rag, n1)
+            _invalidate_neighbors(rag, n2)
 
             if not in_place_merge:
                 next_id = rag.next_id()
-                _copy_node(rag, n2, next_id)
+                _rename_node(rag, n2, next_id)
                 src, dst = n1, next_id
             else:
                 src, dst = n1, n2
