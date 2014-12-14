@@ -108,23 +108,3 @@ def test_rag_error():
     labels[5:, :] = 1
     testing.assert_raises(ValueError, graph.rag_mean_color, img, labels,
                           2, 'non existant mode')
-
-@skipif(not is_installed('networkx'))
-def test_merge_hierarchical():
-    img = np.zeros((100, 100, 3), dtype='uint8')
-    img[:50, :50] = 255, 255, 255
-    img[:50, 50:] = 254, 254, 254
-    img[50:, :50] = 2, 2, 2
-    img[50:, 50:] = 1, 1, 1
-
-    labels = np.zeros((100, 100), dtype='uint8')
-    labels[:50, :50] = 0
-    labels[:50, 50:] = 1
-    labels[50:, :50] = 2
-    labels[50:, 50:] = 3
-
-    rag = graph.rag_mean_color(img, labels)
-    new_labels = graph.merge_hierarchical_mean_color(labels, rag, 10)
-
-    # Two labels
-    assert new_labels.max() == 1
