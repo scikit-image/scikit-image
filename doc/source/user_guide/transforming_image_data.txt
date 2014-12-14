@@ -16,17 +16,16 @@ Conversion between color models
 Color images can be represented using different `color spaces
 <http://en.wikipedia.org/wiki/Color_space>`_. One of the most common
 color spaces is the `RGB space
-<http://en.wikipedia.org/wiki/RGB_color_model>`_, where an image has
-red, green and blue channels. However, other color models are widely
-used, such as the `HSV color model
-<http://en.wikipedia.org/wiki/HSL_and_HSV>`_ (for hue, saturation and
-value), where hue can be changed independently of saturation or value, or
-the `CMYK model <http://en.wikipedia.org/wiki/CMYK_color_model>`_ used
-for printing. 
+<http://en.wikipedia.org/wiki/RGB_color_model>`_, where an image has red,
+green and blue channels. However, other color models are widely used,
+such as the `HSV color model
+<http://en.wikipedia.org/wiki/HSL_and_HSV>`_, where hue, saturation and
+value are independent channels, or the `CMYK model
+<http://en.wikipedia.org/wiki/CMYK_color_model>`_ used for printing. 
 
 :mod:`skimage.color` provides utility functions to convert images
-to and from different color spaces. Note that such conversions may change
-the numerical type of the image array::
+to and from different color spaces. Integer-type arrays can be
+transformed to floating-point type by the conversion operation::
 
     >>> # bright saturated red
     >>> red_pixel_rgb = np.array([[[255, 0, 0]]], dtype=np.uint8)
@@ -55,7 +54,10 @@ Converting an RGB image to a grayscale image is realized with
     >>> img_gray = rgb2gray(img)
 
 :func:`rgb2gray` uses a non-uniform weighting of color channels, because of the
-different sensitivity of the human eye to different colors. ::
+different sensitivity of the human eye to different colors. Therefore,
+such a weighting ensures `luminance preservation
+<http://en.wikipedia.org/wiki/Grayscale#Converting_color_to_grayscale>`_
+from RGB to grayscale::
 
     >>> red_pixel = np.array([[[255, 0, 0]]], dtype=np.uint8)
     >>> color.rgb2gray(red_pixel)
@@ -96,19 +98,19 @@ Contrast and exposure
 .. currentmodule:: skimage.exposure
 
 Image pixels can take values determined by the ``dtype`` of the image
-(see :ref:`data_types`), such as 0 to 255 for ``uint8`` images or [-1, 1]
-for floating-point images. However, most images either have a narrower
-range of values (because of poor contrast), or have most pixel values
-concentrated in a subrange of the accessible values.
-:mod:`skimage.exposure` provides functions that modify the distribution
-of pixels values of an image.  
+(see :ref:`data_types`), such as 0 to 255 for ``uint8`` images or ``[0,
+1]`` for floating-point images. However, most images either have a
+narrower range of values (because of poor contrast), or have most pixel
+values concentrated in a subrange of the accessible values.
+:mod:`skimage.exposure` provides functions that spread the intensity
+values over a larger range.
 
 A first class of methods compute a nonlinear function of the intensity,
-which is always the same, independent of the pixel values of a specific image.
-Such methods are often used for correcting a known non-linearity of
-sensors, or receptors such as the human eye. A well-known example is the
-`Gamma correction <http://en.wikipedia.org/wiki/Gamma_correction>`_,
-implemented in :func:`adjust_gamma`.
+that is independent of the pixel values of a specific image. Such methods
+are often used for correcting a known non-linearity of sensors, or
+receptors such as the human eye. A well-known example is the `Gamma
+correction <http://en.wikipedia.org/wiki/Gamma_correction>`_, implemented
+in :func:`adjust_gamma`.
 
 Other methods re-distribute pixel values according to the *histogram* of
 the image. The histogram of pixel values is computed with
