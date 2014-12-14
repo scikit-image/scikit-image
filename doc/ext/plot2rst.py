@@ -70,6 +70,7 @@ import shutil
 import token
 import tokenize
 import traceback
+import base64
 
 import numpy as np
 import matplotlib
@@ -84,6 +85,64 @@ from notebook import Notebook
 
 from docutils.core import publish_parts
 
+
+EDIT_BTN = """
+.. raw:: html
+    
+    <p id="controls">
+        <button type="button" class="btn btn-default btn-small editcode">
+            <i class="icon-edit"></i>
+        </button>
+    </p>
+"""
+
+OUTPUT_MESSAGES = """
+.. raw:: html
+
+    <p>
+        <div class="alert alert-success" id="success-message"></div>
+        <div class="alert alert-error" id="error-message"></div>
+        <div class="all-output">
+            <p class="stdout-group">
+                <i class="icon-info-sign"></i> <u>STDOUT</u>
+            </p>
+            <pre id="stdout"></pre>
+            <hr class="stdout-group">
+            <p class="stderr-group">
+                <i class="icon-remove-sign"></i> <u>STDERR</u>
+            </p>
+            <pre id="stderr"></pre>
+            <hr class="stderr-group">
+        </div>
+    </p>
+"""
+
+REVERT_BTN = """
+.. raw:: html
+
+    <p id="revert_btn">
+        <button type="button" class="btn btn-default btn-lg" id="reload">
+            <i class="icon-refresh"></i>
+        </button>
+    </p>
+"""
+
+RUN_BTN = """
+.. raw:: html
+
+    <p class="run_btn">
+        <button type="button" class="btn btn-default btn-lg runcode">
+            <i class="icon-play"></i> Run
+        </button>
+        <img class="loading" src="../_static/ajax-loader.gif"/>
+    </p>
+"""
+
+HIDDEN_CODE = """
+.. raw:: html
+
+    <div class="tobehidden">{0}</div>
+"""
 
 LITERALINCLUDE = """
 .. literalinclude:: {src_name}
@@ -353,12 +412,21 @@ def write_example(src_name, src_dir, rst_dir, cfg):
         example_rst += eval(content)
         example_rst += ''.join(rst_blocks)
         code_info = dict(src_name=src_name, code_start=end)
+        example_rst += EDIT_BTN
         example_rst += LITERALINCLUDE.format(**code_info)
+        example_rst += RUN_BTN
 
+    example_rst += REVERT_BTN
+    example_rst += OUTPUT_MESSAGES
     example_rst += CODE_LINK.format(src_name)
     ipnotebook_name = src_name.replace('.py', '.ipynb')
     ipnotebook_name = './notebook/' + ipnotebook_name
     example_rst += NOTEBOOK_LINK.format(ipnotebook_name)
+
+    for (cell_type, _, content) in blocks:
+        if cell_type == 'code':
+            content = content.rstrip('\n')
+            example_rst += HIDDEN_CODE.format(base64.b64encode(content))
 
     f = open(rst_path, 'w')
     f.write(example_rst)
@@ -527,7 +595,10 @@ def process_blocks(blocks, src_path, image_path, cfg):
     for i, (blabel, brange, bcontent) in enumerate(blocks):
         if blabel == 'code':
             exec(bcontent, example_globals)
+            # add edit button associated with each code block
+            rst_blocks.append(EDIT_BTN)
             rst_blocks.append(codestr2rst(bcontent))
+            rst_blocks.append(RUN_BTN)
         else:
             if i in idx_inline_plot:
                 plt.savefig(image_path.format(fig_num))
