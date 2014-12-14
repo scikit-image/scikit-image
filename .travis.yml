@@ -23,38 +23,18 @@ python:
 - 3.4
 
 before_install:
-    - export DISPLAY=:99.0
-    - sh -e /etc/init.d/xvfb start
-    - export PYTHONWARNINGS="all"
-    - export WHEELHOUSE="--no-index --find-links=http://travis-wheels.scikit-image.org/"
-    - export TEST_ARGS="--exe --ignore-files=^_test -v --with-doctest --ignore-files=^setup.py$"
-    - export PIP_DEFAULT_TIMEOUT=60
     - sudo apt-get update
+    - source tools/travis_before_install.sh
 
-    - travis_retry tools/travis_setup.sh
-
-    - source ~/venv/bin/activate
-    - which python
-    - python --version
+    - which python; python --version
     - python check_bento_build.py
-
-    - tools/header.py "Dependency versions"
     - tools/build_versions.py
-
 
 install:
     - python setup.py build_ext --inplace
     - python setup.py install
 
-script:
-    - tools/header.py "Run all tests with minimum dependencies"
-    - nosetests $TEST_ARGS skimage
-
-    - tools/header.py "Pep8 and Flake tests"
-    - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
-
-    - travis_retry tools/travis_install_optional.sh
-    - tools/travis_test.sh
+script: tools/travis_script.sh
 
 after_success:
     - coveralls
