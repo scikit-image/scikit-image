@@ -1,10 +1,24 @@
 #!/usr/bin/env bash
+set -ex
 
 export WHEELHOUSE="--no-index --find-links=http://travis-wheels.scikit-image.org/"
 
 
-repip () {
-    travis_retry pip $@
+retry () {
+    # https://gist.github.com/fungusakafungus/1026804
+    local retry_max=3
+    local count=$retry_max
+    while [ $count -gt 0 ]; do
+        "$@" && break
+        count=$(($count - 1))
+        sleep 1
+    done
+
+    [ $count -eq 0 ] && {
+        echo "Retry failed [$retry_max]: $@" >&2
+        return 1
+    }
+    return 0
 }
 
 
@@ -15,37 +29,40 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     sudo apt-get install python-scipy python-matplotlib
     sed -i 's/cython>=/cython==/g' requirements.txt
     sed -i 's/networkx>=/networkx==/g' requirements.txt
+    sed -i '/matplotlib/d' requirements.txt
+    sed -i '/scipy/d' requirements.txt
 else
     virtualenv -p python --system-site-packages ~/venv
 fi
 
 source ~/venv/bin/activate
-repip install wheel flake8 coveralls nose
+retry pip install wheel flake8 coveralls nose
 
 # install system tk for matplotlib
 sudo apt-get install python-tk
 
 
 # on Python 3.2, use matplotlib 1.3.1
-if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
+if [[ $TRAVIS_PYTHON_VERSION == 3.2 ]]; then
     sed -i 's/matplotlib>=*.*.*/matplotlib==1.3.1/g' requirements.txt
 fi
 
-repip install $WHEELHOUSE -r requirements.txt
+retry pip install $WHEELHOUSE -r requirements.txt
 
 # clean up disk space
 sudo apt-get clean
 sudo rm -rf /tmp/*
 
 
-fold_start () {
+section () {
     echo -en "travis_fold:start:$1\r"
+    tools/header.py $1
 }
 
-fold_end () {
+section_end () {
     echo -en "travis_fold:end:$1\r"
 }
 
-export -f fold_start
-export -f fold_end
-export -f repip
+export -f section
+export -f section_end
+export -f retry

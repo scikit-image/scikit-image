@@ -1,31 +1,25 @@
 #!/usr/bin/env bash
 set -ex
 
-fold_start "script.setup"
+section "Script Setup"
 sh -e /etc/init.d/xvfb start
 export DISPLAY=:99.0
 PYTHONWARNINGS="all"
 TEST_ARGS="--exe --ignore-files=^_test -v --with-doctest --ignore-files=^setup.py$"
-fold_end "script.setup"
+section_end "Script Setup"
 
 
-fold_start "test.min"
-tools/header.py "Test with min requirements"
-
+section "Test with min requirements"
 nosetests $TEST_ARGS skimage
-fold_end "test.min"
+section_end "Test with min requirements"
 
 
-fold_start "test.flake8"
-tools/header.py "Flake8 test"
-
+section "Flake8 test"
 flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
-fold_end "test.flake8"
+section_end "Flake8 test"
 
 
-
-fold_start "install.all"
-tools/header.py "Install optional dependencies"
+section "Install optional dependencies"
 
 # Install Qt and then update the Matplotlib settings
 if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
@@ -47,37 +41,42 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
 
 else
     sudo apt-get install -q libqt4-dev
-    repip install -q PySide $WHEELHOUSE
+    retry pip install -q PySide $WHEELHOUSE
     python ~/venv/bin/pyside_postinstall.py -install
 fi
 
 # imread does NOT support py3.2
 if [[ $TRAVIS_PYTHON_VERSION != 3.2 ]]; then
     sudo apt-get install -q libtiff4-dev libwebp-dev libpng12-dev xcftools
-    repip install -q imread
+    retry pip  install -q imread
 fi
 
 # Install SimpleITK from wheelhouse if available (not 3.2 or 3.4)
 if [[ $TRAVIS_PYTHON_VERSION =~ 3\.[24] ]]; then
     echo "SimpleITK unavailable on $TRAVIS_PYTHON_VERSION"
 else
-    repip install -q SimpleITK $WHEELHOUSE
+    retry pip  install -q SimpleITK $WHEELHOUSE
 fi
 
 sudo apt-get install -q libfreeimage3
-repip install -q astropy $WHEELHOUSE
+retry pip install -q astropy $WHEELHOUSE
 
 if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then
-    repip install -q pyamg
+    retry pip install -q pyamg
 fi
 
-repip install -q tifffile
+retry pip install -q tifffile
 
-fold_end "install.all"
+section_end "Install optional dependencies"
 
 
-fold_start "doc.examples"
-tools/header.py "Run doc examples"
+section "Run doc examples"
+
+# Matplotlib settings - do not show figures during doc examples
+MPL_DIR=$HOME/.config/matplotlib
+mkdir -p $MPL_DIR
+touch $MPL_DIR/matplotlibrc
+echo 'backend : Template' > $MPL_DIR/matplotlibrc
 
 for f in doc/examples/*.py; do
     python "$f"
@@ -86,11 +85,10 @@ for f in doc/examples/*.py; do
     fi
 done
 
-fold_end "doc.examples"
+section_end "Run doc examples"
 
 
-fold_start "doc.applications"
-tools/header.py "Run doc applications"
+section "Run doc applications"
 
 for f in doc/examples/applications/*.py; do
     python "$f"
@@ -100,14 +98,20 @@ for f in doc/examples/applications/*.py; do
 done
 
 # Now configure Matplotlib to use Qt4
+if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
+    MPL_QT_API=PyQt4
+    export QT_API=pyqt
+else
+    MPL_QT_API=PySide
+    export QT_API=pyside
+fi
 echo 'backend: Agg' > $MPL_DIR/matplotlibrc
 echo 'backend.qt4 : '$MPL_QT_API >> $MPL_DIR/matplotlibrc
 
-fold_end "doc.applications"
+section_end "Run doc applications"
 
 
-fold_start "test.all"
-tools/header.py "Test with optional dependencies"
+section "Test with optional dependencies"
 
 # run tests again with optional dependencies to get more coverage
 if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then
@@ -115,4 +119,4 @@ if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then
 fi
 nosetests $TEST_ARGS
 
-fold_end "test.all"
+section_end "Test with optional dependencies"
