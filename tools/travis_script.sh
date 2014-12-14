@@ -73,10 +73,16 @@ section_end "Install optional dependencies"
 section "Run doc examples"
 
 # Matplotlib settings - do not show figures during doc examples
-MPL_DIR=$HOME/.config/matplotlib
+if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
+    MPL_DIR=$HOME/.matplotlib
+else
+    MPL_DIR=$HOME/.config/matplotlib
+fi
+
 mkdir -p $MPL_DIR
 touch $MPL_DIR/matplotlibrc
 echo 'backend : Template' > $MPL_DIR/matplotlibrc
+
 
 for f in doc/examples/*.py; do
     python "$f"

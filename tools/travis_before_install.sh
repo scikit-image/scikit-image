@@ -64,3 +64,5 @@ section_end () {
 export -f section
 export -f section_end
 export -f retry
+
+set +ex
