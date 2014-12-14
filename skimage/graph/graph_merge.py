@@ -27,7 +27,7 @@ def _revalidate_node_edges(rag, node, heap_list):
             # invalidate existing neghbors of `dst`, they have new weights
             data['heap item'][3] = False
         except KeyError:
-            # will hangle the case where the edge did not exist in the existing
+            # will handle the case where the edge did not exist in the existing
             # graph
             pass
 
@@ -123,9 +123,9 @@ def merge_hierarchical(labels, rag, thresh, rag_copy, in_place_merge,
             new_id = rag.merge_nodes(src, dst, weight_func)
             _revalidate_node_edges(rag, new_id, edge_heap)
 
-    arr = np.arange(labels.max() + 1)
+    label_map = np.arange(labels.max() + 1)
     for ix, (n, d) in enumerate(rag.nodes_iter(data=True)):
         for label in d['labels']:
-            arr[label] = ix
+            label_map[label] = ix
 
-    return arr[labels]
+    return label_map[labels]
