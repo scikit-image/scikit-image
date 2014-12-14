@@ -11,9 +11,9 @@ __all__ = ['histogram', 'cumulative_distribution', 'equalize_hist',
 
 DTYPE_RANGE = dtype_range.copy()
 DTYPE_RANGE.update((d.__name__, limits) for d, limits in dtype_range.items())
-DTYPE_RANGE.update({'uint10': (0, 2**10 - 1),
-                    'uint12': (0, 2**12 - 1),
-                    'uint14': (0, 2**14 - 1),
+DTYPE_RANGE.update({'uint10': (0, 2 ** 10 - 1),
+                    'uint12': (0, 2 ** 12 - 1),
+                    'uint14': (0, 2 ** 14 - 1),
                     'bool': dtype_range[np.bool_],
                     'float': dtype_range[np.float64]})
 
@@ -457,8 +457,8 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
     scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
 
     if inv:
-        out = (1 - 1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
+        out = (1 - 1 / (1 + np.exp(gain * (cutoff - image / scale)))) * scale
         return dtype(out)
 
-    out = (1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
+    out = (1 / (1 + np.exp(gain * (cutoff - image / scale)))) * scale
     return dtype(out)

@@ -31,7 +31,7 @@ STAR_FILTER_SHAPE = [(1, 0), (3, 1), (4, 2), (5, 3), (7, 4), (8, 5),
 def _filter_image(image, min_scale, max_scale, mode):
 
     response = np.zeros((image.shape[0], image.shape[1],
-                        max_scale - min_scale + 1), dtype=np.double)
+                         max_scale - min_scale + 1), dtype=np.double)
 
     if mode == 'dob':
 
@@ -48,8 +48,8 @@ def _filter_image(image, min_scale, max_scale, mode):
             # Constant multipliers for the outer region and the inner region
             # of the bi-level filters with the constraint of keeping the
             # DC bias 0.
-            inner_weight = (1.0 / (2 * n + 1)**2)
-            outer_weight = (1.0 / (12 * n**2 + 4 * n))
+            inner_weight = (1.0 / (2 * n + 1) ** 2)
+            outer_weight = (1.0 / (12 * n ** 2 + 4 * n))
 
             _censure_dob_loop(n, integral_img, response[:, :, i],
                               inner_weight, outer_weight)
@@ -79,8 +79,8 @@ def _filter_image(image, min_scale, max_scale, mode):
 
 
 def _octagon_kernel(mo, no, mi, ni):
-    outer = (mo + 2 * no)**2 - 2 * no * (no + 1)
-    inner = (mi + 2 * ni)**2 - 2 * ni * (ni + 1)
+    outer = (mo + 2 * no) ** 2 - 2 * no * (no + 1)
+    inner = (mi + 2 * ni) ** 2 - 2 * ni * (ni + 1)
     outer_weight = 1.0 / (outer - inner)
     inner_weight = 1.0 / inner
     c = ((mo + 2 * no) - (mi + 2 * ni)) // 2
@@ -108,7 +108,6 @@ def _suppress_lines(feature_mask, image, sigma, line_threshold):
     Axx, Axy, Ayy = structure_tensor(image, sigma)
     feature_mask[(Axx + Ayy) ** 2
                  > line_threshold * (Axx * Ayy - Axy ** 2)] = False
-
 
 
 class CENSURE(FeatureDetector):

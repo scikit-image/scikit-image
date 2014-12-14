@@ -30,7 +30,7 @@ def default_fallback(func):
     Returns
     -------
     func_out : function
-        If the image dimentionality is greater than 2D, the ndimage
+        If the image dimensionality is greater than 2D, the ndimage
         function is returned, otherwise skimage function is used.
     """
     @functools.wraps(func)

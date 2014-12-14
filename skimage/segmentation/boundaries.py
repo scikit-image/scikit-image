@@ -13,7 +13,8 @@ def find_boundaries(label_img):
     return boundaries
 
 
-def mark_boundaries(image, label_img, color=(1, 1, 0), outline_color=(0, 0, 0)):
+def mark_boundaries(image, label_img, color=(1, 1, 0),
+                    outline_color=(0, 0, 0)):
     """Return image with boundaries between labeled regions highlighted.
 
     Parameters

@@ -6,7 +6,8 @@ from scipy import ndimage
 import warnings
 
 from skimage.util import img_as_float, regular_grid
-from skimage.segmentation._slic import _slic_cython, _enforce_label_connectivity_cython
+from skimage.segmentation._slic import (_slic_cython,
+                                        _enforce_label_connectivity_cython)
 from skimage.color import rgb2lab
 
 

@@ -1,8 +1,8 @@
 # coding: utf-8
 import numpy as np
 from skimage import img_as_float
-from skimage.restoration._denoise_cy import _denoise_bilateral, \
-                                            _denoise_tv_bregman
+from skimage.restoration._denoise_cy import (_denoise_bilateral,
+                                             _denoise_tv_bregman)
 
 
 def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
@@ -151,12 +151,12 @@ def _denoise_tv_chambolle_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
         d[:, :, 1:] += pz[:, :, :-1]
 
         out = im + d
-        E = (d**2).sum()
+        E = (d ** 2).sum()
 
         gx[:-1] = np.diff(out, axis=0)
         gy[:, :-1] = np.diff(out, axis=1)
         gz[:, :, :-1] = np.diff(out, axis=2)
-        norm = np.sqrt(gx**2 + gy**2 + gz**2)
+        norm = np.sqrt(gx ** 2 + gy ** 2 + gz ** 2)
         E += weight * norm.sum()
         norm *= 0.5 / weight
         norm += 1.
@@ -231,10 +231,10 @@ def _denoise_tv_chambolle_2d(im, weight=50, eps=2.e-4, n_iter_max=200):
         d[:, 1:] += py[:, :-1]
 
         out = im + d
-        E = (d**2).sum()
+        E = (d ** 2).sum()
         gx[:-1] = np.diff(out, axis=0)
         gy[:, :-1] = np.diff(out, axis=1)
-        norm = np.sqrt(gx**2 + gy**2)
+        norm = np.sqrt(gx ** 2 + gy ** 2)
         E += weight * norm.sum()
         norm *= 0.5 / weight
         norm += 1

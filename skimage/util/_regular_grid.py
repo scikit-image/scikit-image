@@ -59,9 +59,9 @@ def regular_grid(ar_shape, n_points):
     if (sorted_dims < stepsizes).any():
         for dim in range(ndim):
             stepsizes[dim] = sorted_dims[dim]
-            space_size = float(np.prod(sorted_dims[dim+1:]))
-            stepsizes[dim+1:] = ((space_size / n_points) **
-                                 (1.0 / (ndim - dim - 1)))
+            space_size = float(np.prod(sorted_dims[dim + 1:]))
+            stepsizes[dim + 1:] = ((space_size / n_points) **
+                                   (1.0 / (ndim - dim - 1)))
             if (sorted_dims >= stepsizes).all():
                 break
     starts = (stepsizes // 2).astype(int)

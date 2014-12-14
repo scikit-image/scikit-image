@@ -284,8 +284,8 @@ def _swirl_mapping(xy, center, rotation, strength, radius):
     radius = radius / 5 * np.log(2)
 
     theta = rotation + strength * \
-            np.exp(-rho / radius) + \
-            np.arctan2(y - y0, x - x0)
+        np.exp(-rho / radius) + \
+        np.arctan2(y - y0, x - x0)
 
     xy[..., 0] = x0 + rho * np.cos(theta)
     xy[..., 1] = y0 + rho * np.sin(theta)

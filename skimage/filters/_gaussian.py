@@ -11,12 +11,10 @@ __all__ = ['gaussian_filter']
 
 def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
                     multichannel=None):
-    """
-    Multi-dimensional Gaussian filter
+    """Multi-dimensional Gaussian filter
 
     Parameters
     ----------
-
     image : array-like
         input image (grayscale or color) to filter.
     sigma : scalar or sequence of scalars
@@ -43,13 +41,11 @@ def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
 
     Returns
     -------
-
     filtered_image : ndarray
         the filtered array
 
     Notes
     -----
-
     This function is a wrapper around :func:`scipy.ndimage.gaussian_filter`.
 
     Integer arrays are converted to float.
@@ -87,12 +83,14 @@ def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
     >>> from skimage.data import astronaut
     >>> image = astronaut()
     >>> filtered_img = gaussian_filter(image, sigma=1, multichannel=True)
+
     """
+
     spatial_dims = guess_spatial_dimensions(image)
     if spatial_dims is None and multichannel is None:
-        msg = ("Images with dimensions (M, N, 3) are interpreted as 2D+RGB" +
-                   " by default. Use `multichannel=False` to interpret as " +
-                   " 3D image with last dimension of length 3.")
+        msg = ("Images with dimensions (M, N, 3) are interpreted as 2D+RGB "
+               "by default. Use `multichannel=False` to interpret as "
+               "3D image with last dimension of length 3.")
         warnings.warn(RuntimeWarning(msg))
         multichannel = True
     if multichannel:

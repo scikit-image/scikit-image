@@ -126,8 +126,8 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     else:
         trans_func = psf
 
-    wiener_filter = np.conj(trans_func) / (np.abs(trans_func)**2 +
-                                           balance * np.abs(reg)**2)
+    wiener_filter = np.conj(trans_func) / (np.abs(trans_func) ** 2 +
+                                           balance * np.abs(reg) ** 2)
     if is_real:
         deconv = uft.uirfft2(wiener_filter * uft.urfft2(image),
                              shape=image.shape)
@@ -261,8 +261,8 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
     # The correlation of the object in Fourier space (if size is big,
     # this can reduce computation time in the loop)
-    areg2 = np.abs(reg)**2
-    atf2 = np.abs(trans_fct)**2
+    areg2 = np.abs(reg) ** 2
+    atf2 = np.abs(trans_fct) ** 2
 
     # The Fourier transfrom may change the image.size attribut, so we
     # store it.

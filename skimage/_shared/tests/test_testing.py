@@ -11,6 +11,7 @@ def test_skipper():
         pass
 
     class c():
+
         def __init__(self):
             self.me = "I think, therefore..."
 

@@ -206,7 +206,8 @@ class ImageCollection(object):
                     im.getdata()[0]
                 except IOError:
                     site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
-                    raise ValueError('Could not load "%s"\nPlease see documentation at: %s' % (fname, site))
+                    raise ValueError(
+                        'Could not load "%s"\nPlease see documentation at: %s' % (fname, site))
                 else:
                     i = 0
                     while True:

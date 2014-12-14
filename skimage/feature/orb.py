@@ -16,7 +16,7 @@ OFAST_MASK = np.zeros((31, 31))
 OFAST_UMAX = [15, 15, 15, 15, 14, 14, 14, 13, 13, 12, 11, 10, 9, 8, 6, 3]
 for i in range(-15, 16):
     for j in range(-OFAST_UMAX[abs(i)], OFAST_UMAX[abs(i)] + 1):
-        OFAST_MASK[15 + j, 15 + i]  = 1
+        OFAST_MASK[15 + j, 15 + i] = 1
 
 
 class ORB(FeatureDetector, DescriptorExtractor):
@@ -185,7 +185,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
             keypoints_list.append(keypoints * self.downscale ** octave)
             orientations_list.append(orientations)
-            scales_list.append(self.downscale **  octave
+            scales_list.append(self.downscale ** octave
                                * np.ones(keypoints.shape[0], dtype=np.intp))
             responses_list.append(responses)
 
@@ -314,7 +314,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
             keypoints_list.append(keypoints[mask] * self.downscale ** octave)
             responses_list.append(responses[mask])
             orientations_list.append(orientations[mask])
-            scales_list.append(self.downscale **  octave
+            scales_list.append(self.downscale ** octave
                                * np.ones(keypoints.shape[0], dtype=np.intp))
             descriptors_list.append(descriptors)
 

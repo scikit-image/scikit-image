@@ -28,7 +28,7 @@ def rank_order(image):
         n - 1, where n is the number of distinct unique values in
         `image`.
 
-    original_values: 1-d ndarray
+    original_values: 1-D ndarray
         Unique original values of `image`
 
     Examples

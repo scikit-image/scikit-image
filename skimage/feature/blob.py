@@ -185,7 +185,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
 
     # a geometric progression of standard deviations for gaussian kernels
     sigma_list = np.array([min_sigma * (sigma_ratio ** i)
-                          for i in range(k + 1)])
+                           for i in range(k + 1)])
 
     gaussian_images = [gaussian_filter(image, s) for s in sigma_list]
 

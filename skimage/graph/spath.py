@@ -73,8 +73,8 @@ def shortest_path(arr, reach=1, axis=-1, output_indexlist=False):
 
     if not output_indexlist:
         traceback = np.array(traceback)
-        traceback = np.concatenate([traceback[:, :axis], traceback[:, axis + 1:]],
-                                   axis=1)
+        traceback = np.concatenate([traceback[:, :axis],
+                                    traceback[:, axis + 1:]], axis=1)
         traceback = np.squeeze(traceback)
 
     return traceback, cost

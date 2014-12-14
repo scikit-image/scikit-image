@@ -136,7 +136,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     if offset is None:
         if any([x % 2 == 0 for x in c_connectivity.shape]):
             raise ValueError("Connectivity array must have an unambiguous "
-                    "center")
+                             "center")
         #
         # offset to center of connectivity array
         #
@@ -147,7 +147,8 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     pads = offset
 
     def pad(im):
-        new_im = np.zeros([i + 2 * p for i, p in zip(im.shape, pads)], im.dtype)
+        new_im = np.zeros(
+            [i + 2 * p for i, p in zip(im.shape, pads)], im.dtype)
         new_im[[slice(p, -p, None) for p in pads]] = im
         return new_im
 
@@ -220,7 +221,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
                              c_mask,
                              c_output)
     c_output = c_output.reshape(c_image.shape)[[slice(1, -1, None)] *
-                                                image.ndim]
+                                               image.ndim]
     try:
         return c_output.astype(markers.dtype)
     except:

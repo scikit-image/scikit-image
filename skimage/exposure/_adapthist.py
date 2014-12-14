@@ -22,7 +22,7 @@ from skimage.util import view_as_blocks, pad
 
 MAX_REG_X = 16  # max. # contextual regions in x-direction */
 MAX_REG_Y = 16  # max. # contextual regions in y-direction */
-NR_OF_GREY = 2**14  # number of grayscale levels to use in CLAHE algorithm
+NR_OF_GREY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
 
 
 @adapt_rgb(hsv_value)

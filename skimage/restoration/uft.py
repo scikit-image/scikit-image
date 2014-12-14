@@ -333,10 +333,10 @@ def image_quad_norm(inarray):
     """
     # If there is a Hermitian symmetry
     if inarray.shape[-1] != inarray.shape[-2]:
-        return (2 * np.sum(np.sum(np.abs(inarray)**2, axis=-1), axis=-1) -
-                np.sum(np.abs(inarray[..., 0])**2, axis=-1))
+        return (2 * np.sum(np.sum(np.abs(inarray) ** 2, axis=-1), axis=-1) -
+                np.sum(np.abs(inarray[..., 0]) ** 2, axis=-1))
     else:
-        return np.sum(np.sum(np.abs(inarray)**2, axis=-1), axis=-1)
+        return np.sum(np.sum(np.abs(inarray) ** 2, axis=-1), axis=-1)
 
 
 def ir2tf(imp_resp, shape, dim=None, is_real=True):

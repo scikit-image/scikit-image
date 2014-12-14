@@ -52,9 +52,9 @@ class deprecated(object):
                 func_code = six.get_function_code(func)
                 warnings.simplefilter('always', skimage_deprecation)
                 warnings.warn_explicit(msg,
-                    category=skimage_deprecation,
-                    filename=func_code.co_filename,
-                    lineno=func_code.co_firstlineno + 1)
+                                       category=skimage_deprecation,
+                                       filename=func_code.co_filename,
+                                       lineno=func_code.co_firstlineno + 1)
             elif self.behavior == 'raise':
                 raise skimage_deprecation(msg)
             return func(*args, **kwargs)

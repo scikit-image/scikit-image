@@ -9,11 +9,11 @@ def _window_sum_2d(image, window_shape):
 
     window_sum = np.cumsum(image, axis=0)
     window_sum = (window_sum[window_shape[0]:-1]
-                  - window_sum[:-window_shape[0]-1])
+                  - window_sum[:-window_shape[0] - 1])
 
     window_sum = np.cumsum(window_sum, axis=1)
     window_sum = (window_sum[:, window_shape[1]:-1]
-                  - window_sum[:, :-window_shape[1]-1])
+                  - window_sum[:, :-window_shape[1] - 1])
 
     return window_sum
 
@@ -24,7 +24,7 @@ def _window_sum_3d(image, window_shape):
 
     window_sum = np.cumsum(window_sum, axis=2)
     window_sum = (window_sum[:, :, window_shape[2]:-1]
-                  - window_sum[:, :, :-window_shape[2]-1])
+                  - window_sum[:, :, :-window_shape[2] - 1])
 
     return window_sum
 
@@ -126,13 +126,13 @@ def match_template(image, template, pad_input=False, mode='constant',
     # computation of integral images
     if image.ndim == 2:
         image_window_sum = _window_sum_2d(image, template.shape)
-        image_window_sum2 = _window_sum_2d(image**2, template.shape)
+        image_window_sum2 = _window_sum_2d(image ** 2, template.shape)
     elif image.ndim == 3:
         image_window_sum = _window_sum_3d(image, template.shape)
-        image_window_sum2 = _window_sum_3d(image**2, template.shape)
+        image_window_sum2 = _window_sum_3d(image ** 2, template.shape)
 
     template_volume = np.prod(template.shape)
-    template_ssd = np.sum((template - template.mean())**2)
+    template_ssd = np.sum((template - template.mean()) ** 2)
 
     if image.ndim == 2:
         xcorr = fftconvolve(image, template[::-1, ::-1],

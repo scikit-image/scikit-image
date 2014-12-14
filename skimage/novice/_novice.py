@@ -80,6 +80,7 @@ class Pixel(object):
         Transparency component (0-255), 255 (opaque) by default
 
     """
+
     def __init__(self, pic, array, x, y, rgb, alpha=255):
         self._picture = pic
         self._x = x
@@ -239,6 +240,7 @@ class Picture(object):
     >>> pic[:, pic.height-1] = (255, 0, 0)
 
     """
+
     def __init__(self, path=None, array=None, xy_array=None):
         self._modified = False
         self.scale = 1
