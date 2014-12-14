@@ -21,8 +21,8 @@ def _revalidate_node_edges(rag, node, heap_list):
     # heap if their weight is updated.
     # instead we invalidate them
 
-    for n in rag.neighbors(node):
-        data = rag[node][n]
+    for nbr in rag.neighbors(node):
+        data = rag[node][nbr]
         try:
             # invalidate existing neghbors of `dst`, they have new weights
             data['heap item'][3] = False
@@ -32,7 +32,7 @@ def _revalidate_node_edges(rag, node, heap_list):
             pass
 
         wt = data['weight']
-        heap_item = [wt, node, n, True]
+        heap_item = [wt, node, nbr, True]
         data['heap item'] = heap_item
         heapq.heappush(heap_list, heap_item)
 
@@ -105,12 +105,12 @@ def merge_hierarchical(labels, rag, thresh, rag_copy, in_place_merge,
         # Ensure popped edge is valid, if not, the edge is discarded
         if valid:
             # Invalidate all neigbors of `src` before its deleted
-            for n in rag.neighbors(n1):
-                rag[n1][n]['heap item'][3] = False
+            for nbr in rag.neighbors(n1):
+                rag[n1][nbr]['heap item'][3] = False
 
             if not in_place_merge:
-                for n in rag.neighbors(n2):
-                    rag[n2][n]['heap item'][3] = False
+                for nbr in rag.neighbors(n2):
+                    rag[n2][nbr]['heap item'][3] = False
 
             if not in_place_merge:
                 next_id = rag.next_id()
