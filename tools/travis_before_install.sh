@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
-set -ex
 
-echo -en "travis_fold:start:install.all\r"
+export WHEELHOUSE="--no-index --find-links=http://travis-wheels.scikit-image.org/"
+
+
+repip () {
+    travis_retry pip $@
+}
+
 
 # on Python 2.7, use the system versions of numpy, scipy, and matplotlib
 # and the minimum version of cython and networkx
@@ -15,7 +20,7 @@ else
 fi
 
 source ~/venv/bin/activate
-pip install wheel flake8 coveralls nose
+repip install wheel flake8 coveralls nose
 
 # install system tk for matplotlib
 sudo apt-get install python-tk
@@ -26,10 +31,21 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     sed -i 's/matplotlib>=*.*.*/matplotlib==1.3.1/g' requirements.txt
 fi
 
-pip install $WHEELHOUSE -r requirements.txt
+repip install $WHEELHOUSE -r requirements.txt
 
 # clean up disk space
 sudo apt-get clean
-sudo rm -r /tmp/*
+sudo rm -rf /tmp/*
 
-echo -en "travis_fold:end:install.all\r"
+
+fold_start () {
+    echo -en "travis_fold:start:$1\r"
+}
+
+fold_end () {
+    echo -en "travis_fold:end:$1\r"
+}
+
+export -f fold_start
+export -f fold_end
+export -f repip
