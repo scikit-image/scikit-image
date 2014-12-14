@@ -29,8 +29,6 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     sudo apt-get install python-scipy python-matplotlib
     sed -i 's/cython>=/cython==/g' requirements.txt
     sed -i 's/networkx>=/networkx==/g' requirements.txt
-    sed -i '/matplotlib/d' requirements.txt
-    sed -i '/scipy/d' requirements.txt
 else
     virtualenv -p python --system-site-packages ~/venv
 fi
