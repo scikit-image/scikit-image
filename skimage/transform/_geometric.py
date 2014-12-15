@@ -994,6 +994,24 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     return coords
 
 
+def _clip_warp_output(input_image, output_image, clip, mode, order, cval):
+    """Clip output image to range of values of input image, considering the
+    parameters of a call to warp.
+    """
+    if clip and order != 0:
+        min_val = input_image.min()
+        max_val = input_image.max()
+
+        clipped = np.clip(output_image, min_val, max_val)
+
+        if mode == 'constant' and not (min_val <= cval <= max_val):
+            clipped[output_image == cval] = cval
+
+        return clipped
+
+    return output_image
+
+
 def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
          mode='constant', cval=0., clip=True):
     """Warp an image according to a given coordinate transformation.
@@ -1055,17 +1073,17 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
     clip : bool, optional
-        Whether to clip the output to the float range of ``[0, 1]``, or
-        ``[-1, 1]`` for input images with negative values. This is enabled by
-        default, since  higher order interpolation may produce values outside
-        the given input range.
+        Whether to clip the output to the range of values of the input image.
+        This is enabled by default, since higher order interpolation may
+        produce values outside the given input range.
 
     Notes
     -----
-    In case of a `SimilarityTransform`, `AffineTransform` and
-    `ProjectiveTransform` and `order` in [0, 3] this function uses the
-    underlying transformation matrix to warp the image with a much faster
-    routine.
+    - The input image is converted to a `double` image.
+    - In case of a `SimilarityTransform`, `AffineTransform` and
+      `ProjectiveTransform` and `order` in [0, 3] this function uses the
+      underlying transformation matrix to warp the image with a much faster
+      routine.
 
     Examples
     --------
@@ -1124,7 +1142,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     """
 
-    image = img_as_float(image)
+    image = image.astype(np.double)
     input_shape = np.array(image.shape)
 
     if output_shape is None:
@@ -1219,21 +1237,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         out = ndimage.map_coordinates(image, coords, prefilter=prefilter,
                                       mode=mode, order=order, cval=cval)
 
-    if clip:
-        # The spline filters sometimes return results outside [0, 1],
-        # so clip to ensure valid data
 
-        if np.min(image) < 0:
-            min_val = -1
-        else:
-            min_val = 0
-        max_val = 1
-
-        clipped = np.clip(out, min_val, max_val)
-
-        if mode == 'constant' and not (0 <= cval <= 1):
-            clipped[out == cval] = cval
-
-        out = clipped
+    out = _clip_warp_output(image, out, clip, mode, order, cval)
 
     return out

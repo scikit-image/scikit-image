@@ -3,7 +3,6 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 import numpy as np
-
 cimport numpy as cnp
 from skimage._shared.interpolation cimport (nearest_neighbour_interpolation,
                                             bilinear_interpolation,

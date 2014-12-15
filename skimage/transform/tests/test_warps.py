@@ -75,14 +75,15 @@ def test_warp_nd():
 
 
 def test_warp_clip():
-    x = 2 * np.ones((5, 5), dtype=np.double)
-    matrix = np.eye(3)
+    x = np.zeros((5, 5), dtype=np.double)
+    x[2, 2] = 1
 
-    outx = warp(x, matrix, order=0, clip=False)
-    assert_almost_equal(x, outx)
+    outx = rescale(x, 3, order=3, clip=False)
+    assert outx.min() < 0
 
-    outx = warp(x, matrix, order=0, clip=True)
-    assert_almost_equal(x / 2, outx)
+    outx = rescale(x, 3, order=3, clip=True)
+    assert_almost_equal(outx.min(), 0)
+    assert_almost_equal(outx.max(), 1)
 
 
 def test_homography():
