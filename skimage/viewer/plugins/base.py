@@ -142,7 +142,7 @@ class Plugin(QtGui.QDialog):
             plugin += Widget(...)
 
         Widgets can adjust required or optional arguments of filter function or
-        parameters for the plugin. This is specified by the Widget's `ptype'.
+        parameters for the plugin. This is specified by the Widget's `ptype`.
         """
         if widget.ptype == 'kwarg':
             name = widget.name.replace(' ', '_')

@@ -60,10 +60,12 @@ def windowed_histogram_similarity(image, selem, reference_hist, n_bins):
     # a measure of distance between histograms
     X = px_histograms
     Y = reference_hist
+
     num = (X - Y) ** 2
     denom = X + Y
+    denom[denom == 0] = np.infty
     frac = num / denom
-    frac[denom == 0] = 0
+
     chi_sqr = 0.5 * np.sum(frac, axis=2)
 
     # Generate a similarity measure. It needs to be low when distance is high
