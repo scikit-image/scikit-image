@@ -66,10 +66,12 @@ Suggested CSS definitions
 
 """
 import os
+import re
 import shutil
 import token
 import tokenize
 import traceback
+import itertools
 
 import numpy as np
 import matplotlib
@@ -83,7 +85,7 @@ from skimage.util.dtype import dtype_range
 from notebook import Notebook
 
 from docutils.core import publish_parts
-
+from sphinx.domains.python import PythonDomain
 
 LITERALINCLUDE = """
 .. literalinclude:: {src_name}
@@ -332,6 +334,8 @@ def write_example(src_name, src_dir, rst_dir, cfg):
         notebook_path.exists:
         return
 
+    print('plot2rst: %s' % basename)
+
     blocks = split_code_and_text_blocks(example_file)
     if blocks[0][2].startswith('#!'):
         blocks.pop(0) # don't add shebang line to rst file.
@@ -380,15 +384,57 @@ def write_example(src_name, src_dir, rst_dir, cfg):
     # Export example to IPython notebook
     nb = Notebook()
 
-    for (cell_type, _, content) in blocks:
-        content = content.rstrip('\n')
+    # Add sphinx roles to the examples, otherwise docutils
+    # cannot compile the ReST for the notebook
+    sphinx_roles = PythonDomain.roles.keys()
+    preamble = '\n'.join('.. role:: py:{0}(literal)\n'.format(role)
+                         for role in sphinx_roles)
 
+    # Grab all references to inject them in cells where needed
+    ref_regexp = re.compile('\n(\.\. \[(\d+)\].*(?:\n[ ]{7,8}.*)+)')
+    math_role_regexp = re.compile(':math:`(.*?)`')
+
+    text = '\n'.join((content for (cell_type, _, content) in blocks
+                     if cell_type != 'code'))
+
+    references = re.findall(ref_regexp, text)
+
+    for (cell_type, _, content) in blocks:
         if cell_type == 'code':
             nb.add_cell(content, cell_type='code')
         else:
-            content = content.replace('"""', '')
+            if content.startswith('r'):
+                content = content.replace('r"""', '')
+                escaped = False
+            else:
+                content = content.replace('"""', '')
+                escaped = True
+
+            if not escaped:
+                content = content.replace("\\", "\\\\")
+
+            content = content.replace('.. seealso::', '**See also:**')
+            content = re.sub(math_role_regexp, r'$\1$', content)
+
+            # Remove math directive when rendering notebooks
+            # until we implement a smarter way of capturing and replacing
+            # its content
+            content = content.replace('.. math::', '')
+
+            if not content.strip():
+                continue
+
+            content = (preamble + content).rstrip('\n')
             content = '\n'.join([line for line in content.split('\n') if
                                  not line.startswith('.. image')])
+
+            # Remove reference links until we can figure out a better way to
+            # preserve them
+            for (reference, ref_id) in references:
+                ref_tag = '[{0}]_'.format(ref_id)
+                if ref_tag in content:
+                    content = content.replace(ref_tag, ref_tag[:-1])
+
             html = publish_parts(content, writer_name='html')['html_body']
             nb.add_cell(html, cell_type='markdown')
 
