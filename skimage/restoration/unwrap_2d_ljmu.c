@@ -161,6 +161,9 @@ void initialisePIXELs(double *wrapped_image, unsigned char *input_mask,
   unsigned char *extended_mask_pointer = extended_mask;
   int i, j;
 
+  // Make the initialization deterministic
+  srand(0);
+
   for (i = 0; i < image_height; i++) {
     for (j = 0; j < image_width; j++) {
       pixel_pointer->increment = 0;

@@ -166,6 +166,9 @@ void initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask,
   unsigned char *extended_mask_pointer = extended_mask;
   int n, i, j;
 
+  // Make the initialization deterministic
+  srand(0);
+
   for (n = 0; n < volume_depth; n++) {
     for (i = 0; i < volume_height; i++) {
       for (j = 0; j < volume_width; j++) {
