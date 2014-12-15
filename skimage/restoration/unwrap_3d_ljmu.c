@@ -165,7 +165,7 @@ void  initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask, unsigne
 	      voxel_pointer->increment = 0;
 	      voxel_pointer->number_of_voxels_in_group = 1;
 	      voxel_pointer->value = *wrapped_volume_pointer;
-	      voxel_pointer->reliability = 9999999 + rand();
+	      voxel_pointer->reliability = 9999999 + (rand() % 10000);
 	      voxel_pointer->input_mask = *input_mask_pointer;
 	      voxel_pointer->extended_mask = *extended_mask_pointer;
 	      voxel_pointer->head = voxel_pointer;

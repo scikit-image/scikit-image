@@ -99,6 +99,9 @@ def check_wrap_around(ndim, axis):
     print('endpoints with wrap_around:',
           image_unwrap_wrap_around[index_first],
           image_unwrap_wrap_around[index_last])
+    print('indices:', index_first, index_last)
+    print('shape:', image_unwrap_wrap_around.shape)
+    print('begin and end:', image_unwrap_wrap_around[:3], image_unwrap_wrap_around[-3:])
     # with wrap around, the endpoints of the image should be equal
     assert_almost_equal(image_unwrap_wrap_around[index_first],
                         image_unwrap_wrap_around[index_last])
