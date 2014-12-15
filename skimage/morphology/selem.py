@@ -8,15 +8,15 @@ from scipy import ndimage
 from skimage import draw
 
 def square(width, dtype=np.uint8):
-    """
-    Generates a flat, square-shaped structuring element. Every pixel
-    along the perimeter has a chessboard distance no greater than radius
-    (radius=floor(width/2)) pixels.
+    """Generates a flat, square-shaped structuring element.
+
+    Every pixel along the perimeter has a chessboard distance
+    no greater than radius (radius=floor(width/2)) pixels.
 
     Parameters
     ----------
     width : int
-        The width and height of the square
+        The width and height of the square.
 
     Other Parameters
     ----------------
@@ -34,17 +34,17 @@ def square(width, dtype=np.uint8):
 
 
 def rectangle(width, height, dtype=np.uint8):
-    """
-    Generates a flat, rectangular-shaped structuring element of a
-    given width and height. Every pixel in the rectangle belongs
-    to the neighboorhood.
+    """Generates a flat, rectangular-shaped structuring element.
+
+    Every pixel in the rectangle generated for a given width and given height
+    belongs to the neighboorhood.
 
     Parameters
     ----------
     width : int
-        The width of the rectangle
+        The width of the rectangle.
     height : int
-        The height of the rectangle
+        The height of the rectangle.
 
     Other Parameters
     ----------------
@@ -62,11 +62,11 @@ def rectangle(width, height, dtype=np.uint8):
 
 
 def diamond(radius, dtype=np.uint8):
-    """
-    Generates a flat, diamond-shaped structuring element of a given
-    radius.  A pixel is part of the neighborhood (i.e. labeled 1) if
-    the city block/manhattan distance between it and the center of the
-    neighborhood is no greater than radius.
+    """Generates a flat, diamond-shaped structuring element.
+
+    A pixel is part of the neighborhood (i.e. labeled 1) if
+    the city block/manhattan distance between it and the center of
+    the neighborhood is no greater than radius.
 
     Parameters
     ----------
@@ -92,8 +92,8 @@ def diamond(radius, dtype=np.uint8):
 
 
 def disk(radius, dtype=np.uint8):
-    """
-    Generates a flat, disk-shaped structuring element of a given radius.
+    """Generates a flat, disk-shaped structuring element.
+
     A pixel is within the neighborhood if the euclidean distance between
     it and the origin is no greater than radius.
 
@@ -119,9 +119,9 @@ def disk(radius, dtype=np.uint8):
 
 
 def ellipse(radius, height, dtype=np.uint8):
-    """
-    Generates a flat, ellipse-shaped structuring element of given
-    radius and height. Every pixel along the perimeter satisfies
+    """Generates a flat, ellipse-shaped structuring element.
+
+    Every pixel along the perimeter of ellipse satisfies
     the equation ``(x/radius+1)**2 + (y/height+1)**2 = 1``.
 
     Parameters
@@ -163,15 +163,16 @@ def ellipse(radius, height, dtype=np.uint8):
 
 
 def cube(width, dtype=np.uint8):
-    """
-    Generates a cube-shaped structuring element (the 3D equivalent of
-    a square). Every pixel along the perimeter has a chessboard distance
+    """ Generates a cube-shaped structuring element.
+
+    This is the 3D equivalent of a square.
+    Every pixel along the perimeter has a chessboard distance
     no greater than radius (radius=floor(width/2)) pixels.
 
     Parameters
     ----------
     width : int
-        The width, height and depth of the cube
+        The width, height and depth of the cube.
 
     Other Parameters
     ----------------
@@ -189,12 +190,12 @@ def cube(width, dtype=np.uint8):
 
 
 def octahedron(radius, dtype=np.uint8):
-    """
-    Generates a octahedron-shaped structuring element of a given radius
-    (the 3D equivalent of a diamond).  A pixel is part of the
-    neighborhood (i.e. labeled 1) if the city block/manhattan distance
-    between it and the center of the neighborhood is no greater than
-    radius.
+    """Generates a octahedron-shaped structuring element.
+
+    This is the 3D equivalent of a diamond.
+    A pixel is part of the neighborhood (i.e. labeled 1) if
+    the city block/manhattan distance between it and the center of
+    the neighborhood is no greater than radius.
 
     Parameters
     ----------
@@ -223,11 +224,11 @@ def octahedron(radius, dtype=np.uint8):
 
 
 def ball(radius, dtype=np.uint8):
-    """
-    Generates a ball-shaped structuring element of a given radius (the
-    3D equivalent of a disk). A pixel is within the neighborhood if the
-    euclidean distance between it and the origin is no greater than
-    radius.
+    """Generates a ball-shaped structuring element.
+
+    This is the 3D equivalent of a disk.
+    A pixel is within the neighborhood if the euclidean distance between
+    it and the origin is no greater than radius.
 
     Parameters
     ----------
@@ -254,10 +255,11 @@ def ball(radius, dtype=np.uint8):
 
 
 def octagon(m, n, dtype=np.uint8):
-    """
-    Generates an octagon shaped structuring element with a given size of
-    horizontal and vertical sides and a given height or width of slanted
-    sides. The slanted sides are 45 or 135 degrees to the horizontal axis
+    """Generates an octagon shaped structuring element.
+
+    For a given size of (m) horizontal and vertical sides
+    and a given (n) height or width of slanted sides octagon is generated.
+    The slanted sides are 45 or 135 degrees to the horizontal axis
     and hence the widths and heights are equal.
 
     Parameters
@@ -294,9 +296,10 @@ def octagon(m, n, dtype=np.uint8):
 
 
 def star(a, dtype=np.uint8):
-    """
-    Generates a star shaped structuring element that has 8 vertices and is an
-    overlap of square of size `2*a + 1` with its 45 degree rotated version.
+    """Generates a star shaped structuring element.
+
+    Start has 8 vertices and is an overlap of square of size `2*a + 1`
+    with its 45 degree rotated version.
     The slanted sides are 45 or 135 degrees to the horizontal axis.
 
     Parameters
@@ -342,9 +345,9 @@ def star(a, dtype=np.uint8):
 
 
 def _default_selem(ndim):
-    """
-    Generates a cross-shaped structuring element (connectivity=1). This is the
-    default structuring element (selem) if no selem was specified.
+    """Generates a cross-shaped structuring element (connectivity=1).
+
+    This is the default structuring element (selem) if no selem was specified.
 
     Parameters
     ----------
