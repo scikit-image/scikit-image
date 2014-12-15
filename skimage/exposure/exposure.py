@@ -84,7 +84,7 @@ def histogram(image, nbins=256):
         idx = np.nonzero(hist)[0][0]
         return hist[idx:], bin_centers[idx:]
     else:
-        hist, bin_edges = np.histogram(image.flat, nbins)
+        hist, bin_edges = np.histogram(image.flat, bins=nbins)
         bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2.
         return hist, bin_centers
 
@@ -136,8 +136,10 @@ def equalize_hist(image, nbins=256, mask=None):
     ----------
     image : array
         Image array.
-    nbins : int
-        Number of bins for image histogram.
+    nbins : int, optional
+        Number of bins for image histogram. Note: this argument is
+        ignored for integer images, for which each integer is its own
+        bin.
     mask: ndarray of bools or 0s and 1s, optional
         Array of same shape as `image`. Only points at which mask == True
         are used for the equalization, which is applied to the whole image.
@@ -157,7 +159,6 @@ def equalize_hist(image, nbins=256, mask=None):
     .. [2] http://en.wikipedia.org/wiki/Histogram_equalization
 
     """
-    image = img_as_float(image)
     if mask is not None:
         mask = np.array(mask, dtype=bool)
         cdf, bin_centers = cumulative_distribution(image[mask], nbins)

@@ -2,7 +2,8 @@ import warnings
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal as assert_close
-from numpy.testing import assert_array_equal, assert_raises
+from numpy.testing import (assert_array_equal, assert_raises,
+                           assert_almost_equal)
 
 import skimage
 from skimage import data
@@ -38,9 +39,16 @@ def test_all_negative_image():
 
 np.random.seed(0)
 
+test_img_int = data.camera()
 # squeeze image intensities to lower image contrast
-test_img = skimage.img_as_float(data.camera())
+test_img = skimage.img_as_float(test_img_int)
 test_img = exposure.rescale_intensity(test_img / 5. + 100)
+
+def test_equalize_uint8_approx():
+    """Check integer bins used for uint8 images."""
+    img_eq0 = exposure.equalize_hist(test_img_int)
+    img_eq1 = exposure.equalize_hist(test_img_int, nbins=3)
+    np.testing.assert_allclose(img_eq0, img_eq1)
 
 
 def test_equalize_ubyte():
