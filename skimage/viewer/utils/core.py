@@ -72,16 +72,13 @@ class RequiredAttr(object):
 
     instances = dict()
 
-    def __init__(self, msg='Required attribute not set', init_val=None):
+    def __init__(self, init_val=None):
         self.instances[self, None] = init_val
-        self.msg = msg
 
     def __get__(self, obj, objtype):
         value = self.instances[self, obj]
         if value is None:
-            # Should raise an error but that causes issues with the buildbot.
-            warnings.warn(self.msg)
-            self.__set__(obj, self.init_val)
+            raise AttributeError('Required attribute not set')
         return value
 
     def __set__(self, obj, value):
