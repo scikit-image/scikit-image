@@ -37,7 +37,7 @@ ax2.imshow(yellow_multiplier * image)
 
 In many cases, dealing with RGB values may not be ideal. Because of that, there
 are many other `color spaces`_ in which you can represent a color image. One
-popular color space is called HSV_, which represents hue (~the color),
+popular color space is called HSV, which represents hue (~the color),
 saturation (~colorfulness), and value (~brightness). For example, a color
 (hue) might be green, but its saturation is how intense that green is---where
 olive is on the low end and neon on the high end.
@@ -45,6 +45,9 @@ olive is on the low end and neon on the high end.
 In some implementations, the hue in HSV goes from 0 to 360, since hues wrap
 around in a circle. In scikit-image, however, hues are float values from 0 to
 1, so that hue, saturation, and value all share the same scale.
+
+.. _color spaces:
+    http://en.wikipedia.org/wiki/List_of_color_spaces_and_their_uses
 
 Below, we plot a linear gradient in the hue, with the saturation and value
 turned all the way up:
@@ -68,6 +71,8 @@ ax.set_axis_off()
 Notice how the colors at the far left and far right are the same. That reflects
 the fact that the hues wrap around like the color wheel (see HSV_ for more
 info).
+
+.. _HSV: http://en.wikipedia.org/wiki/HSL_and_HSV
 
 Now, let's create a little utility function to take an RGB image and:
 
@@ -147,7 +152,4 @@ plt.show()
 For coloring multiple regions, you may also be interested in
 `skimage.color.label2rgb <http://scikit-image.org/docs/0.9.x/api/skimage.color.html#label2rgb>`_.
 
-.. _color spaces:
-    http://en.wikipedia.org/wiki/List_of_color_spaces_and_their_uses
-.. _HSV: http://en.wikipedia.org/wiki/HSL_and_HSV
 """
