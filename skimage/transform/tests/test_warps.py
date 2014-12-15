@@ -1,4 +1,4 @@
-from numpy.testing import (assert_array_almost_equal, run_module_suite,
+from numpy.testing import (assert_almost_equal, run_module_suite,
                            assert_array_equal, assert_raises)
 import numpy as np
 from scipy.ndimage import map_coordinates
@@ -22,10 +22,10 @@ def test_warp_tform():
     tform = SimilarityTransform(scale=1, rotation=theta, translation=(0, 4))
 
     x90 = warp(x, tform, order=1)
-    assert_array_almost_equal(x90, np.rot90(x))
+    assert_almost_equal(x90, np.rot90(x))
 
     x90 = warp(x, tform.inverse, order=1)
-    assert_array_almost_equal(x90, np.rot90(x))
+    assert_almost_equal(x90, np.rot90(x))
 
 
 def test_warp_callable():
@@ -37,7 +37,7 @@ def test_warp_callable():
     shift = lambda xy: xy + 1
 
     outx = warp(x, shift, order=1)
-    assert_array_almost_equal(outx, refx)
+    assert_almost_equal(outx, refx)
 
 
 def test_warp_matrix():
@@ -50,7 +50,7 @@ def test_warp_matrix():
 
     # _warp_fast
     outx = warp(x, matrix, order=1)
-    assert_array_almost_equal(outx, refx)
+    assert_almost_equal(outx, refx)
     # check for ndimage.map_coordinates
     outx = warp(x, matrix, order=5)
 
@@ -71,7 +71,7 @@ def test_warp_nd():
 
         outx = warp(x, coords, order=0, cval=0)
 
-        assert_array_almost_equal(outx, refx)
+        assert_almost_equal(outx, refx)
 
 
 def test_warp_clip():
@@ -79,10 +79,10 @@ def test_warp_clip():
     matrix = np.eye(3)
 
     outx = warp(x, matrix, order=0, clip=False)
-    assert_array_almost_equal(x, outx)
+    assert_almost_equal(x, outx)
 
     outx = warp(x, matrix, order=0, clip=True)
-    assert_array_almost_equal(x / 2, outx)
+    assert_almost_equal(x / 2, outx)
 
 
 def test_homography():
@@ -96,49 +96,14 @@ def test_homography():
     x90 = warp(x,
                inverse_map=ProjectiveTransform(M).inverse,
                order=1)
-    assert_array_almost_equal(x90, np.rot90(x))
-
-
-def test_fast_homography():
-    img = rgb2gray(data.astronaut()).astype(np.uint8)
-    img = img[:, :100]
-
-    theta = np.deg2rad(30)
-    scale = 0.5
-    tx, ty = 50, 50
-
-    H = np.eye(3)
-    S = scale * np.sin(theta)
-    C = scale * np.cos(theta)
-
-    H[:2, :2] = [[C, -S], [S, C]]
-    H[:2, 2] = [tx, ty]
-
-    tform = ProjectiveTransform(H)
-    coords = warp_coords(tform.inverse, (img.shape[0], img.shape[1]))
-
-    for order in range(4):
-        for mode in ('constant', 'reflect', 'wrap', 'nearest'):
-            p0 = map_coordinates(img, coords, mode=mode, order=order)
-            p1 = warp(img, tform, mode=mode, order=order)
-
-            # import matplotlib.pyplot as plt
-            # f, (ax0, ax1, ax2, ax3) = plt.subplots(1, 4)
-            # ax0.imshow(img)
-            # ax1.imshow(p0, cmap=plt.cm.gray)
-            # ax2.imshow(p1, cmap=plt.cm.gray)
-            # ax3.imshow(np.abs(p0 - p1), cmap=plt.cm.gray)
-            # plt.show()
-
-            d = np.mean(np.abs(p0 - p1))
-            assert d < 0.001
+    assert_almost_equal(x90, np.rot90(x))
 
 
 def test_rotate():
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
     x90 = rotate(x, 90)
-    assert_array_almost_equal(x90, np.rot90(x))
+    assert_almost_equal(x90, np.rot90(x))
 
 
 def test_rotate_resize():
@@ -158,9 +123,9 @@ def test_rotate_center():
     refx = np.zeros((10, 10), dtype=np.double)
     refx[2, 5] = 1
     x20 = rotate(x, 20, order=0, center=(0, 0))
-    assert_array_almost_equal(x20, refx)
+    assert_almost_equal(x20, refx)
     x0 = rotate(x20, -20, order=0, center=(0, 0))
-    assert_array_almost_equal(x0, x)
+    assert_almost_equal(x0, x)
 
 
 def test_rescale():
@@ -170,7 +135,7 @@ def test_rescale():
     scaled = rescale(x, 2, order=0)
     ref = np.zeros((10, 10))
     ref[2:4, 2:4] = 1
-    assert_array_almost_equal(scaled, ref)
+    assert_almost_equal(scaled, ref)
 
     # different scale factors
     x = np.zeros((5, 5), dtype=np.double)
@@ -178,7 +143,7 @@ def test_rescale():
     scaled = rescale(x, (2, 1), order=0)
     ref = np.zeros((10, 5))
     ref[2:4, 1] = 1
-    assert_array_almost_equal(scaled, ref)
+    assert_almost_equal(scaled, ref)
 
 
 def test_resize2d():
@@ -187,7 +152,7 @@ def test_resize2d():
     resized = resize(x, (10, 10), order=0)
     ref = np.zeros((10, 10))
     ref[2:4, 2:4] = 1
-    assert_array_almost_equal(resized, ref)
+    assert_almost_equal(resized, ref)
 
 
 def test_resize3d_keep():
@@ -197,9 +162,9 @@ def test_resize3d_keep():
     resized = resize(x, (10, 10), order=0)
     ref = np.zeros((10, 10, 3))
     ref[2:4, 2:4, :] = 1
-    assert_array_almost_equal(resized, ref)
+    assert_almost_equal(resized, ref)
     resized = resize(x, (10, 10, 3), order=0)
-    assert_array_almost_equal(resized, ref)
+    assert_almost_equal(resized, ref)
 
 
 def test_resize3d_resize():
@@ -209,7 +174,7 @@ def test_resize3d_resize():
     resized = resize(x, (10, 10, 1), order=0)
     ref = np.zeros((10, 10, 1))
     ref[2:4, 2:4] = 1
-    assert_array_almost_equal(resized, ref)
+    assert_almost_equal(resized, ref)
 
 
 def test_resize3d_bilinear():
@@ -223,7 +188,7 @@ def test_resize3d_bilinear():
     ref[1:5, 2:4, :] = 0.09375
     ref[2:4, 1:5, :] = 0.09375
     ref[2:4, 2:4, :] = 0.28125
-    assert_array_almost_equal(resized, ref)
+    assert_almost_equal(resized, ref)
 
 
 def test_swirl():
