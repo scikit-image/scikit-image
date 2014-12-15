@@ -13,8 +13,8 @@ def block_reduce(image, block_size, func=np.sum, cval=0):
         Array containing down-sampling integer factor along each axis.
     func : callable
         Function object which is used to calculate the return value for each
-        local block. This function must implement an ``axis`` parameter such as
-        ``numpy.sum`` or ``numpy.min``.
+        local block. This function must implement an ``axis`` parameter such
+        as ``numpy.sum`` or ``numpy.min``.
     cval : float
         Constant padding value if image is not perfectly divisible by the
         block size.
@@ -58,6 +58,10 @@ def block_reduce(image, block_size, func=np.sum, cval=0):
 
     pad_width = []
     for i in range(len(block_size)):
+        if block_size[i] < 1:
+            raise ValueError("Down-sampling factors must be >= 1. Use "
+                             "`skimage.transform.resize` to up-sample an "
+                             "image.")
         if image.shape[i] % block_size[i] != 0:
             after_width = block_size[i] - (image.shape[i] % block_size[i])
         else:
