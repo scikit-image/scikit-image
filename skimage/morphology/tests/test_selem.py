@@ -102,6 +102,25 @@ class TestSElem():
         assert_equal(expected_mask1, actual_mask1)
         assert_equal(expected_mask2, actual_mask2)
 
+    def test_selem_ellipse(self):
+        """Test ellipse structuring elements"""
+        expected_mask1 = np.array([[0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0]], dtype=uint8)
+        actual_mask1 = selem.ellipse(5, 3)
+        expected_mask2 = np.array([[1, 1, 1],
+                                   [1, 1, 1],
+                                   [1, 1, 1]], dtype=np.uint8)
+        actual_mask2 = selem.ellipse(1, 1)
+        assert_equal(expected_mask1, actual_mask1)
+        assert_equal(expected_mask2, actual_mask2)
+        assert_equal(expected_mask1, selem.ellipse(3, 5).T)
+        assert_equal(expected_mask2, selem.ellipse(1, 1).T)
+
     def test_selem_star(self):
         """Test star structuring elements"""
         expected_mask1 = np.array([[0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
