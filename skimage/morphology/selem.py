@@ -5,7 +5,7 @@
 
 import numpy as np
 from scipy import ndimage
-
+from skimage import draw
 
 def square(width, dtype=np.uint8):
     """
@@ -116,6 +116,50 @@ def disk(radius, dtype=np.uint8):
     L = np.arange(-radius, radius + 1)
     X, Y = np.meshgrid(L, L)
     return np.array((X ** 2 + Y ** 2) <= radius ** 2, dtype=dtype)
+
+
+def ellipse(radius, height, dtype=np.uint8):
+    """
+    Generates a flat, ellipse-shaped structuring element of given
+    radius and height. Every pixel along the perimeter satisfies
+    the equation ``(x/radius+1)**2 + (y/height+1)**2 = 1``.
+
+    Parameters
+    ----------
+    radius : int
+        The radius of the ellipse-shaped structuring element.
+    height : int
+        The height of the ellipse-shaped structuring element.
+
+    Other Parameters
+    ----------------
+    dtype : data-type
+        The data type of the structuring element.
+
+    Returns
+    -------
+    selem : ndarray
+        The structuring element where elements of the neighborhood
+        are 1 and 0 otherwise.
+
+    Examples
+    --------
+    >>> from skimage.morphology import selem
+    >>> selem.ellipse(5, 3)
+    array([[0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0]], dtype=uint8)
+
+    """
+
+    selem = np.zeros((2 * height + 1, 2 * radius + 1), dtype=dtype)
+    rows, cols = draw.ellipse(height, radius, height + 1, radius + 1)
+    selem[rows, cols] = 1
+    return selem
 
 
 def cube(width, dtype=np.uint8):
