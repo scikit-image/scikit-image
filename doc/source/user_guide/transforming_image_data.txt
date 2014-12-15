@@ -108,7 +108,7 @@ values over a larger range.
 A first class of methods compute a nonlinear function of the intensity,
 that is independent of the pixel values of a specific image. Such methods
 are often used for correcting a known non-linearity of sensors, or
-receptors such as the human eye. A well-known example is the `Gamma
+receptors such as the human eye. A well-known example is `Gamma
 correction <http://en.wikipedia.org/wiki/Gamma_correction>`_, implemented
 in :func:`adjust_gamma`.
 
@@ -120,14 +120,14 @@ the image. The histogram of pixel values is computed with
     >>> exposure.histogram(image)
     (array([3, 0, 1]), array([1, 2, 3]))
 
-that returns the number of pixels for each value bin, and the centers of
-the bins. The behavior of :func:`histogram` is therefore slightly
-different from the one of :func:`np.histogram`, which returns the
-boundaries of the bins.
+:func:`histogram` returns the number of pixels for each value bin, and
+the centers of the bins. The behavior of :func:`histogram` is therefore
+slightly different from the one of :func:`np.histogram`, which returns
+the boundaries of the bins.
 
 The simplest contrast enhancement :func:`rescale_intensity` consists in
 stretching pixel values to the whole allowed range, using a linear
-transformation.::
+transformation::
     
     >>> from skimage import exposure
     >>> text = data.text()
@@ -141,14 +141,14 @@ Even if an image uses the whole value range, sometimes there is very
 little weight at the ends of the value range. In such a case, clipping
 pixel values using percentiles of the image improves the contrast (at the
 expense of some loss of information, because some pixels are saturated by
-this operation).::
+this operation)::
 
     >>> moon = data.moon()
     >>> v_min, v_max = np.percentile(moon, (0.2, 99.8))
     >>> v_min, v_max
     (10.0, 186.0)
-    >>> better_contrast = exposure.rescale_intensity(moon,
-    ...                                     in_range=(v_min, v_max))
+    >>> better_contrast = exposure.rescale_intensity(
+    ...                                     moon, in_range=(v_min, v_max))
 
 The function :func:`equalize_hist` maps the cumulative distribution
 function (cdf) of pixel values onto a linear cdf, ensuring that all parts
