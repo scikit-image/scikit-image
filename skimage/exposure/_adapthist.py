@@ -136,7 +136,7 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
         image = pad(image, ((0, h_pad), (0, w_pad)), mode='reflect')
         h_inner, w_inner = image.shape
 
-    bin_size = 1 + NR_OF_GREY / nbins
+    bin_size = 1 + NR_OF_GREY // nbins
     lut = np.arange(NR_OF_GREY)
     lut //= bin_size
     img_blocks = view_as_blocks(image, (height, width))
