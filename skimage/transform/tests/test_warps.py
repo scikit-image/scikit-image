@@ -246,7 +246,6 @@ def test_downscale_local_mean():
 
 
 def test_invalid():
-    assert_raises(ValueError, warp, np.ones((4, )), SimilarityTransform())
     assert_raises(ValueError, warp, np.ones((4, 3, 3, 3)),
                   SimilarityTransform())
 
