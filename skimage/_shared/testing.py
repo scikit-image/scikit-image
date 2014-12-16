@@ -48,7 +48,7 @@ def doctest_skip_parser(func):
         >>> something + else
         >>> something # skip if HAVE_BMODULE
 
-    This decorator will evaluate the expresssion after ``skip if``.  If this
+    This decorator will evaluate the expression after ``skip if``.  If this
     evaluates to True, then the comment is replaced by ``# doctest: +SKIP``.  If
     False, then the comment is just removed. The expression is evaluated in the
     ``globals`` scope of `func`.

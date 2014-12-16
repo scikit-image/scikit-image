@@ -10,7 +10,7 @@ frequency is equal to
 
 .. math::  \frac{1}{\sqrt{n}} \sum_i x_i
 
-so the Fourier tranform has the same energy as the original image
+so the Fourier transform has the same energy as the original image
 (see ``image_quad_norm`` function). The transform is applied from the
 last axis for performance (assuming a C-order array input).
 
@@ -353,18 +353,18 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
         The impulse responses.
     shape : tuple of int
         A tuple of integer corresponding to the target shape of the
-        tranfer function.
+        transfer function.
     dim : int, optional
         The last axis along which to compute the transform. All
         axes by default.
-    is_real : boolean (optionnal, default True)
+    is_real : boolean (optional, default True)
        If True, imp_resp is supposed real and the Hermitian property
        is used with rfftn Fourier transform.
 
     Returns
     -------
     y : complex ndarray
-       The tranfer function of shape ``shape``.
+       The transfer function of shape ``shape``.
 
     See Also
     --------
@@ -382,7 +382,7 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
     Notes
     -----
     The input array can be composed of multiple-dimensional IR with
-    an arbitrary number of IR. The individual IR must be accesed
+    an arbitrary number of IR. The individual IR must be accessed
     through the first axes. The last ``dim`` axes contain the space
     definition.
     """

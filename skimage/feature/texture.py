@@ -11,7 +11,7 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
                  normed=False):
     """Calculate the grey-level co-occurrence matrix.
 
-    A grey level co-occurence matrix is a histogram of co-occuring
+    A grey level co-occurrence matrix is a histogram of co-occurring
     greyscale values at a given offset over an image.
 
     Parameters
