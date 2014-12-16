@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 
 #ifndef M_PI
 #define M_PI 3.1415926535897932384626433832795
@@ -154,22 +155,24 @@ void quicker_sort(EDGE *left, EDGE *right) {
 // itself
 void initialisePIXELs(double *wrapped_image, unsigned char *input_mask,
                       unsigned char *extended_mask, PIXELM *pixel,
-                      int image_width, int image_height) {
+                      int image_width, int image_height,
+                      char use_seed, unsigned int seed) {
   PIXELM *pixel_pointer = pixel;
   double *wrapped_image_pointer = wrapped_image;
   unsigned char *input_mask_pointer = input_mask;
   unsigned char *extended_mask_pointer = extended_mask;
   int i, j;
 
-  // Make the initialization deterministic
-  srand(0);
+  if (use_seed) {
+    srand(seed);
+  }
 
   for (i = 0; i < image_height; i++) {
     for (j = 0; j < image_width; j++) {
       pixel_pointer->increment = 0;
       pixel_pointer->number_of_pixels_in_group = 1;
       pixel_pointer->value = *wrapped_image_pointer;
-      pixel_pointer->reliability = 9999999. + rand();
+      pixel_pointer->reliability = rand();
       pixel_pointer->input_mask = *input_mask_pointer;
       pixel_pointer->extended_mask = *extended_mask_pointer;
       pixel_pointer->head = pixel_pointer;
@@ -647,7 +650,7 @@ void maskImage(PIXELM *pixel, unsigned char *input_mask, int image_width,
 
   PIXELM *pointer_pixel = pixel;
   unsigned char *IMP = input_mask;  // input mask pointer
-  double min = 99999999;
+  double min = DBL_MAX;
   int i;
   int image_size = image_width * image_height;
 
@@ -694,7 +697,8 @@ void returnImage(PIXELM *pixel, double *unwrapped_image, int image_width,
 // the main function of the unwrapper
 void unwrap2D(double *wrapped_image, double *UnwrappedImage,
               unsigned char *input_mask, int image_width, int image_height,
-              int wrap_around_x, int wrap_around_y) {
+              int wrap_around_x, int wrap_around_y,
+              char use_seed, unsigned int seed) {
   params_t params = {TWOPI, wrap_around_x, wrap_around_y, 0};
   unsigned char *extended_mask;
   PIXELM *pixel;
@@ -708,7 +712,7 @@ void unwrap2D(double *wrapped_image, double *UnwrappedImage,
 
   extend_mask(input_mask, extended_mask, image_width, image_height, &params);
   initialisePIXELs(wrapped_image, input_mask, extended_mask, pixel, image_width,
-                   image_height);
+                   image_height, use_seed, seed);
   calculate_reliability(wrapped_image, pixel, image_width, image_height,
                         &params);
   horizontalEDGEs(pixel, edge, image_width, image_height, &params);
