@@ -1,9 +1,11 @@
 import numpy as np
 from scipy import ndimage
 
-from skimage.transform._geometric import (warp, SimilarityTransform,
-                                          AffineTransform, _clip_warp_output)
-from skimage.measure import block_reduce
+from ..util import img_as_float
+from ..exposure import rescale_intensity
+from ..measure import block_reduce
+from ._geometric import (warp, SimilarityTransform, AffineTransform,
+                         _clip_warp_output)
 
 
 def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
@@ -82,7 +84,10 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
         if keep_range:
             image = image.astype(np.double)
         else:
-            image = img_as_float(image)
+            if image.dtype == np.double:
+                image = rescale_intensity(image)
+            else:
+                image = img_as_float(image)
 
         out = ndimage.map_coordinates(image, coord_map, order=order,
                                       mode=mode, cval=cval)

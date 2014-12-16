@@ -1,5 +1,5 @@
 from numpy.testing import (assert_almost_equal, run_module_suite,
-                           assert_array_equal, assert_raises)
+                           assert_equal, assert_raises)
 import numpy as np
 from scipy.ndimage import map_coordinates
 
@@ -236,13 +236,13 @@ def test_downscale_local_mean():
     out1 = downscale_local_mean(image1, (2, 3))
     expected1 = np.array([[  4.,   7.],
                           [ 16.,  19.]])
-    assert_array_equal(expected1, out1)
+    assert_equal(expected1, out1)
 
     image2 = np.arange(5 * 8).reshape(5, 8)
     out2 = downscale_local_mean(image2, (4, 5))
     expected2 = np.array([[ 14. ,  10.8],
                           [  8.5,   5.7]])
-    assert_array_equal(expected2, out2)
+    assert_equal(expected2, out2)
 
 
 def test_invalid():
@@ -255,7 +255,7 @@ def test_inverse():
     tform = SimilarityTransform(scale=0.5, rotation=0.1)
     inverse_tform = SimilarityTransform(matrix=np.linalg.inv(tform.params))
     image = np.arange(10 * 10).reshape(10, 10).astype(np.double)
-    assert_array_equal(warp(image, inverse_tform), warp(image, tform.inverse))
+    assert_equal(warp(image, inverse_tform), warp(image, tform.inverse))
 
 
 def test_slow_warp_nonint_oshape():
@@ -265,6 +265,19 @@ def test_slow_warp_nonint_oshape():
                   output_shape=(13.1, 19.5))
 
     warp(image, lambda xy: xy, output_shape=(13.0001, 19.9999))
+
+
+def test_keep_range():
+    image = np.linspace(0, 2, 25).reshape(5, 5)
+
+    out = rescale(image, 2, keep_range=False, clip=True, order=0)
+    assert out.min() == 0
+    assert out.max() == 1
+
+    out = rescale(image, 2, keep_range=True, clip=True, order=0)
+    assert out.min() == 0
+    assert out.max() == 2
+
 
 
 if __name__ == "__main__":

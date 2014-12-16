@@ -4,8 +4,9 @@ import warnings
 import numpy as np
 from scipy import ndimage, spatial
 
-from skimage._shared.utils import get_bound_method_class, safe_as_int
-from skimage.util import img_as_float
+from .._shared.utils import get_bound_method_class, safe_as_int
+from ..util import img_as_float
+from ..exposure import rescale_intensity
 from ._warps_cy import _warp_fast
 
 
@@ -1148,7 +1149,10 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     if keep_range:
         image = image.astype(np.double)
     else:
-        image = img_as_float(image)
+        if image.dtype == np.double:
+            image = rescale_intensity(image)
+        else:
+            image = img_as_float(image)
 
     input_shape = np.array(image.shape)
 
