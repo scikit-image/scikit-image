@@ -213,7 +213,7 @@ def wiener(data, impulse_response=None, filter_params={}, K=0.25,
     data : (M,N) ndarray
         Input data.
     K : float or (M,N) ndarray
-        Ratio between power spectrum of noise and undergraded
+        Ratio between power spectrum of noise and undegraded
         image.
     impulse_response : callable `f(r, c, **filter_params)`
         Impulse response of the filter.  See LPIFilter2D.__init__.
