@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 
 #ifndef M_PI
 #define M_PI 3.1415926535897932384626433832795
@@ -159,15 +160,17 @@ void quicker_sort(EDGE *left, EDGE *right) {
 // itself
 void initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask,
                       unsigned char *extended_mask, VOXELM *voxel,
-                      int volume_width, int volume_height, int volume_depth) {
+                      int volume_width, int volume_height, int volume_depth,
+                      char use_seed, unsigned int seed) {
   VOXELM *voxel_pointer = voxel;
   double *wrapped_volume_pointer = WrappedVolume;
   unsigned char *input_mask_pointer = input_mask;
   unsigned char *extended_mask_pointer = extended_mask;
   int n, i, j;
 
-  // Make the initialization deterministic
-  srand(0);
+  if (use_seed) {
+    srand(seed);
+  }
 
   for (n = 0; n < volume_depth; n++) {
     for (i = 0; i < volume_height; i++) {
@@ -175,7 +178,7 @@ void initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask,
         voxel_pointer->increment = 0;
         voxel_pointer->number_of_voxels_in_group = 1;
         voxel_pointer->value = *wrapped_volume_pointer;
-        voxel_pointer->reliability = 9999999 + rand();
+        voxel_pointer->reliability = rand();
         voxel_pointer->input_mask = *input_mask_pointer;
         voxel_pointer->extended_mask = *extended_mask_pointer;
         voxel_pointer->head = voxel_pointer;
@@ -1060,7 +1063,7 @@ void maskVolume(VOXELM *voxel, unsigned char *input_mask, int volume_width,
 
   VOXELM *pointer_voxel = voxel;
   unsigned char *IMP = input_mask;  // input mask pointer
-  double min = 99999999.;
+  double min = DBL_MAX;
   int i, j;
   int volume_size = volume_width * volume_height * volume_depth;
 
@@ -1108,7 +1111,7 @@ void returnVolume(VOXELM *voxel, double *unwrappedVolume, int volume_width,
 void unwrap3D(double *wrapped_volume, double *unwrapped_volume,
               unsigned char *input_mask, int volume_width, int volume_height,
               int volume_depth, int wrap_around_x, int wrap_around_y,
-              int wrap_around_z) {
+              int wrap_around_z, char use_seed, unsigned int seed) {
   params_t params = {TWOPI, wrap_around_x, wrap_around_y, wrap_around_z, 0};
   unsigned char *extended_mask;
   VOXELM *voxel;
@@ -1124,7 +1127,7 @@ void unwrap3D(double *wrapped_volume, double *unwrapped_volume,
   extend_mask(input_mask, extended_mask, volume_width, volume_height,
               volume_depth, &params);
   initialiseVOXELs(wrapped_volume, input_mask, extended_mask, voxel,
-                   volume_width, volume_height, volume_depth);
+                   volume_width, volume_height, volume_depth, use_seed, seed);
   calculate_reliability(wrapped_volume, voxel, volume_width, volume_height,
                         volume_depth, &params);
   horizontalEDGEs(voxel, edge, volume_width, volume_height, volume_depth,

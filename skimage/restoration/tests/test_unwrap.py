@@ -37,7 +37,7 @@ def check_unwrap(image, mask=None):
         print('Testing a masked image')
         image = np.ma.array(image, mask=mask)
         image_wrapped = np.ma.array(image_wrapped, mask=mask)
-    image_unwrapped = unwrap_phase(image_wrapped)
+    image_unwrapped = unwrap_phase(image_wrapped, seed=0)
     assert_phase_almost_equal(image_unwrapped, image)
 
 
@@ -47,7 +47,7 @@ def test_unwrap_1d():
     # Masked arrays are not allowed in 1D
     assert_raises(ValueError, check_unwrap, image, True)
     # wrap_around is not allowed in 1D
-    assert_raises(ValueError, unwrap_phase, image, True)
+    assert_raises(ValueError, unwrap_phase, image, True, seed=0)
 
 
 def test_unwrap_2d():
@@ -83,7 +83,7 @@ def check_wrap_around(ndim, axis):
     with warnings.catch_warnings():
         # We do not want warnings about length 1 dimensions
         warnings.simplefilter("ignore")
-        image_unwrap_no_wrap_around = unwrap_phase(image_wrapped)
+        image_unwrap_no_wrap_around = unwrap_phase(image_wrapped, seed=0)
     print('endpoints without wrap_around:',
           image_unwrap_no_wrap_around[index_first],
           image_unwrap_no_wrap_around[index_last])
@@ -95,7 +95,8 @@ def check_wrap_around(ndim, axis):
     with warnings.catch_warnings():
         # We do not want warnings about length 1 dimensions
         warnings.simplefilter("ignore")
-        image_unwrap_wrap_around = unwrap_phase(image_wrapped, wrap_around)
+        image_unwrap_wrap_around = unwrap_phase(image_wrapped, wrap_around,
+                                                seed=0)
     print('endpoints with wrap_around:',
           image_unwrap_wrap_around[index_first],
           image_unwrap_wrap_around[index_last])

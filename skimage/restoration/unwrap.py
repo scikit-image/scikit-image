@@ -7,29 +7,34 @@ from ._unwrap_2d import unwrap_2d
 from ._unwrap_3d import unwrap_3d
 
 
-def unwrap_phase(image, wrap_around=False):
-    '''From ``image``, wrapped to lie in the interval [-pi, pi), recover the
+def unwrap_phase(image, wrap_around=False, seed=None):
+    '''Recover the original from a wrapped phase image.
+
+    From an image wrapped to lie in the interval [-pi, pi), recover the
     original, unwrapped image.
 
     Parameters
     ----------
     image : 1D, 2D or 3D ndarray of floats, optionally a masked array
-        The values should be in the range ``[-pi, pi)``. If a masked array is
+        The values should be in the range [-pi, pi). If a masked array is
         provided, the masked entries will not be changed, and their values
         will not be used to guide the unwrapping of neighboring, unmasked
         values. Masked 1D arrays are not allowed, and will raise a
-        ``ValueError``.
-    wrap_around : bool or sequence of bool
-        When an element of the sequence is  ``True``, the unwrapping process
+        `ValueError`.
+    wrap_around : bool or sequence of bool, optional
+        When an element of the sequence is  `True`, the unwrapping process
         will regard the edges along the corresponding axis of the image to be
         connected and use this connectivity to guide the phase unwrapping
         process. If only a single boolean is given, it will apply to all axes.
         Wrap around is not supported for 1D arrays.
+    seed : int, optional
+        Unwrapping 2D or 3D images uses random initialization. This sets the
+        seed of the PRNG to achieve deterministic behavior.
 
     Returns
     -------
-    image_unwrapped : array_like, float32
-        Unwrapped image of the same shape as the input. If the input ``image``
+    image_unwrapped : array_like, double
+        Unwrapped image of the same shape as the input. If the input `image`
         was a masked array, the mask will be preserved.
 
     Raises
@@ -60,25 +65,25 @@ def unwrap_phase(image, wrap_around=False):
            International Society for Optics and Photonics.
     '''
     if image.ndim not in (1, 2, 3):
-        raise ValueError('image must be 1, 2 or 3 dimensional')
+        raise ValueError('Image must be 1, 2, or 3 dimensional')
     if isinstance(wrap_around, bool):
         wrap_around = [wrap_around] * image.ndim
     elif (hasattr(wrap_around, '__getitem__')
           and not isinstance(wrap_around, string_types)):
         if len(wrap_around) != image.ndim:
-            raise ValueError('Length of wrap_around must equal the '
+            raise ValueError('Length of `wrap_around` must equal the '
                              'dimensionality of image')
         wrap_around = [bool(wa) for wa in wrap_around]
     else:
-        raise ValueError('wrap_around must be a bool or a sequence with '
+        raise ValueError('`wrap_around` must be a bool or a sequence with '
                          'length equal to the dimensionality of image')
     if image.ndim == 1:
         if np.ma.isMaskedArray(image):
             raise ValueError('1D masked images cannot be unwrapped')
         if wrap_around[0]:
-            raise ValueError('wrap_around is not supported for 1D images')
+            raise ValueError('`wrap_around` is not supported for 1D images')
     if image.ndim in (2, 3) and 1 in image.shape:
-        warnings.warn('image has a length 1 dimension; consider using an '
+        warnings.warn('Image has a length 1 dimension. Consider using an '
                       'array of lower dimensionality to use a more efficient '
                       'algorithm')
 
@@ -87,17 +92,18 @@ def unwrap_phase(image, wrap_around=False):
         image = image.data
     else:
         mask = np.zeros_like(image, dtype=np.uint8, order='C')
-    image_not_masked = np.asarray(image, dtype=np.float64, order='C')
-    image_unwrapped = np.empty_like(image, dtype=np.float64, order='C')
+
+    image_not_masked = np.asarray(image, dtype=np.double, order='C')
+    image_unwrapped = np.empty_like(image, dtype=np.double, order='C')
 
     if image.ndim == 1:
         unwrap_1d(image_not_masked, image_unwrapped)
     elif image.ndim == 2:
         unwrap_2d(image_not_masked, mask, image_unwrapped,
-                  wrap_around)
+                  wrap_around, seed)
     elif image.ndim == 3:
         unwrap_3d(image_not_masked, mask, image_unwrapped,
-                  wrap_around)
+                  wrap_around, seed)
 
     if np.ma.isMaskedArray(image):
         return np.ma.array(image_unwrapped, mask=mask)
