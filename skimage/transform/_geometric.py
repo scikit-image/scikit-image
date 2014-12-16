@@ -995,6 +995,18 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     return coords
 
 
+def _convert_warp_input(image, keep_range):
+    """Convert input image to double image with the appropriate range."""
+    if keep_range:
+        image = image.astype(np.double)
+    else:
+        if image.dtype == np.double:
+            image = rescale_intensity(image)
+        else:
+            image = img_as_float(image)
+    return image
+
+
 def _clip_warp_output(input_image, output_image, clip, mode, order, cval):
     """Clip output image to range of values of input image, considering the
     parameters of a call to warp.
@@ -1146,13 +1158,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     """
 
-    if keep_range:
-        image = image.astype(np.double)
-    else:
-        if image.dtype == np.double:
-            image = rescale_intensity(image)
-        else:
-            image = img_as_float(image)
+    image = _convert_warp_input(image, keep_range)
 
     input_shape = np.array(image.shape)
 
