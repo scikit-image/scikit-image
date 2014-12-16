@@ -1002,6 +1002,7 @@ def _convert_warp_input(image, keep_range):
     else:
         if image.dtype == np.double:
             image = rescale_intensity(image)
+            image = np.atleast_2d(image)
         else:
             image = img_as_float(image)
     return image
