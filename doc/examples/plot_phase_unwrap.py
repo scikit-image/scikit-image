@@ -92,7 +92,7 @@ is clear: Without unwrapping (lower left), the regions above and below the
 masked boundary do not interact at all, resulting in an offset between the
 two regions of an arbitrary integer times two pi. We could just as well have
 unwrapped the regions as two separate images. With wrap around enabled for the
-vertical direction (lower rigth), the situation changes: Unwrapping paths are
+vertical direction (lower right), the situation changes: Unwrapping paths are
 now allowed to pass from the bottom to the top of the image and vice versa, in
 effect providing a way to determine the offset between the two regions.
 

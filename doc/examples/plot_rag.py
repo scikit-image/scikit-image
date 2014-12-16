@@ -31,7 +31,7 @@ def max_edge(g, src, dst, n):
     g : RAG
         The graph under consideration.
     src, dst : int
-        The verices in `g` to be merged.
+        The vertices in `g` to be merged.
     n : int
         A neighbor of `src` or `dst` or both.
 
