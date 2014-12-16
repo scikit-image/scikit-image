@@ -1013,7 +1013,7 @@ def _clip_warp_output(input_image, output_image, clip, mode, order, cval):
 
 
 def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
-         mode='constant', cval=0., clip=True):
+         mode='constant', cval=0., clip=True, keep_range=False):
     """Warp an image according to a given coordinate transformation.
 
     Parameters
@@ -1076,6 +1076,9 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         Whether to clip the output to the range of values of the input image.
         This is enabled by default, since higher order interpolation may
         produce values outside the given input range.
+    keep_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
 
     Notes
     -----
@@ -1142,7 +1145,11 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     """
 
-    image = image.astype(np.double)
+    if keep_range:
+        image = image.astype(np.double)
+    else:
+        image = img_as_float(image)
+
     input_shape = np.array(image.shape)
 
     if output_shape is None:

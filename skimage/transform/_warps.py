@@ -6,7 +6,8 @@ from skimage.transform._geometric import (warp, SimilarityTransform,
 from skimage.measure import block_reduce
 
 
-def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True):
+def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
+           keep_range=False):
     """Resize image to match a certain size.
 
     Performs interpolation to up-size or down-size images. For down-sampling
@@ -44,6 +45,9 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True):
         Whether to clip the output to the range of values of the input image.
         This is enabled by default, since higher order interpolation may
         produce values outside the given input range.
+    keep_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
 
     Examples
     --------
@@ -75,6 +79,11 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True):
 
         coord_map = np.array([map_rows, map_cols, map_dims])
 
+        if keep_range:
+            image = image.astype(np.double)
+        else:
+            image = img_as_float(image)
+
         out = ndimage.map_coordinates(image, coord_map, order=order,
                                       mode=mode, cval=cval)
 
@@ -93,12 +102,13 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True):
         tform.estimate(src_corners, dst_corners)
 
         out = warp(image, tform, output_shape=output_shape, order=order,
-                   mode=mode, cval=cval, clip=clip)
+                   mode=mode, cval=cval, clip=clip, keep_range=keep_range)
 
     return out
 
 
-def rescale(image, scale, order=1, mode='constant', cval=0, clip=True):
+def rescale(image, scale, order=1, mode='constant', cval=0, clip=True,
+            keep_range=False):
     """Scale image by a certain factor.
 
     Performs interpolation to upscale or down-scale images. For down-sampling
@@ -134,6 +144,9 @@ def rescale(image, scale, order=1, mode='constant', cval=0, clip=True):
         Whether to clip the output to the range of values of the input image.
         This is enabled by default, since higher order interpolation may
         produce values outside the given input range.
+    keep_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
 
     Examples
     --------
@@ -158,11 +171,11 @@ def rescale(image, scale, order=1, mode='constant', cval=0, clip=True):
     output_shape = (rows, cols)
 
     return resize(image, output_shape, order=order, mode=mode, cval=cval,
-                  clip=clip)
+                  clip=clip, keep_range=keep_range)
 
 
 def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
-           cval=0, clip=True):
+           cval=0, clip=True, keep_range=False):
     """Rotate image by a certain angle around its center.
 
     Parameters
@@ -199,6 +212,9 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
         Whether to clip the output to the range of values of the input image.
         This is enabled by default, since higher order interpolation may
         produce values outside the given input range.
+    keep_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
 
     Examples
     --------
@@ -245,7 +261,7 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
         tform = tform4 + tform
 
     return warp(image, tform, output_shape=output_shape, order=order,
-                mode=mode, cval=cval, clip=clip)
+                mode=mode, cval=cval, clip=clip, keep_range=keep_range)
 
 
 def downscale_local_mean(image, factors, cval=0, clip=True):
@@ -309,7 +325,8 @@ def _swirl_mapping(xy, center, rotation, strength, radius):
 
 
 def swirl(image, center=None, strength=1, radius=100, rotation=0,
-          output_shape=None, order=1, mode='constant', cval=0, clip=True):
+          output_shape=None, order=1, mode='constant', cval=0, clip=True,
+          keep_range=False):
     """Perform a swirl transformation.
 
     Parameters
@@ -349,6 +366,9 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
         Whether to clip the output to the range of values of the input image.
         This is enabled by default, since higher order interpolation may
         produce values outside the given input range.
+    keep_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
 
     """
 
@@ -361,5 +381,5 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
                  'radius': radius}
 
     return warp(image, _swirl_mapping, map_args=warp_args,
-                output_shape=output_shape,
-                order=order, mode=mode, cval=cval, clip=clip)
+                output_shape=output_shape, order=order, mode=mode, cval=cval,
+                clip=clip, keep_range=keep_range)
