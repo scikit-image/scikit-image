@@ -29,7 +29,7 @@ def structural_similarity(X, Y, win_size=7,
     Returns
     -------
     s : float
-        Strucutural similarity.
+        Structural similarity.
     grad : (N * N,) ndarray
         Gradient of the structural similarity index between X and Y.
         This is only returned if `gradient` is set to True.

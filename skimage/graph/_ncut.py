@@ -20,7 +20,7 @@ def DW_matrices(graph):
     -------
     D : csc_matrix
         The diagonal matrix of the graph. ``D[i, i]`` is the sum of weights of
-        all edges incident on `i`. All other enteries are `0`.
+        all edges incident on `i`. All other entries are `0`.
     W : csc_matrix
         The weight matrix of the graph. ``W[i, j]`` is the weight of the edge
         joining `i` to `j`.
@@ -38,7 +38,7 @@ def ncut_cost(cut, D, W):
     Parameters
     ----------
     cut : ndarray
-        The mask for the nodes in the graph. Nodes corressponding to a `True`
+        The mask for the nodes in the graph. Nodes corresponding to a `True`
         value are in one set.
     D : csc_matrix
         The diagonal matrix of the graph.

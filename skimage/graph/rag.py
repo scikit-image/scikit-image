@@ -26,7 +26,7 @@ def min_weight(graph, src, dst, n):
     """Callback to handle merging nodes by choosing minimum weight.
 
     Returns either the weight between (`src`, `n`) or (`dst`, `n`)
-    in `graph` or the minumum of the two when both exist.
+    in `graph` or the minimum of the two when both exist.
 
     Parameters
     ----------
@@ -41,7 +41,7 @@ def min_weight(graph, src, dst, n):
     -------
     weight : float
         The weight between (`src`, `n`) or (`dst`, `n`) in `graph` or the
-        minumum of the two when both exist.
+        minimum of the two when both exist.
 
     """
 
@@ -200,7 +200,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
     """Compute the Region Adjacency Graph using mean colors.
 
     Given an image and its initial segmentation, this method constructs the
-    corresponsing Region Adjacency Graph (RAG). Each node in the RAG
+    corresponding Region Adjacency Graph (RAG). Each node in the RAG
     represents a set of pixels within `image` with the same label in `labels`.
     The weight between two adjacent regions represents how similar or
     dissimilar two regions are depending on the `mode` parameter.

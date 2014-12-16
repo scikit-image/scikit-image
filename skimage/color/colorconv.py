@@ -1350,7 +1350,7 @@ def lab2lch(lab):
 
 
 def _cart2polar_2pi(x, y):
-    """convert cartesian coordiantes to polar (uses non-standard theta range!)
+    """convert cartesian coordinates to polar (uses non-standard theta range!)
 
     NON-STANDARD RANGE! Maps to ``(0, 2*pi)`` rather than usual ``(-pi, +pi)``
     """
