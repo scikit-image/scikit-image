@@ -118,16 +118,16 @@ def disk(radius, dtype=np.uint8):
     return np.array((X ** 2 + Y ** 2) <= radius ** 2, dtype=dtype)
 
 
-def ellipse(radius, height, dtype=np.uint8):
+def ellipse(width, height, dtype=np.uint8):
     """Generates a flat, ellipse-shaped structuring element.
 
     Every pixel along the perimeter of ellipse satisfies
-    the equation ``(x/radius+1)**2 + (y/height+1)**2 = 1``.
+    the equation ``(x/width+1)**2 + (y/height+1)**2 = 1``.
 
     Parameters
     ----------
-    radius : int
-        The radius of the ellipse-shaped structuring element.
+    width : int
+        The width of the ellipse-shaped structuring element.
     height : int
         The height of the ellipse-shaped structuring element.
 
@@ -155,9 +155,8 @@ def ellipse(radius, height, dtype=np.uint8):
            [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0]], dtype=uint8)
 
     """
-
-    selem = np.zeros((2 * height + 1, 2 * radius + 1), dtype=dtype)
-    rows, cols = draw.ellipse(height, radius, height + 1, radius + 1)
+    selem = np.zeros((2 * height + 1, 2 * width + 1), dtype=dtype)
+    rows, cols = draw.ellipse(height, width, height + 1, width + 1)
     selem[rows, cols] = 1
     return selem
 
