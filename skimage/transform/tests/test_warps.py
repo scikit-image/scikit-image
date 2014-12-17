@@ -269,13 +269,18 @@ def test_slow_warp_nonint_oshape():
 def test_keep_range():
     image = np.linspace(0, 2, 25).reshape(5, 5)
 
-    out = rescale(image, 2, keep_range=False, clip=True, order=0)
-    assert out.min() == 0
-    assert out.max() == 1
-
-    out = rescale(image, 2, keep_range=True, clip=True, order=0)
+    out = rescale(image, 2, preserve_range=False, clip=True, order=0)
     assert out.min() == 0
     assert out.max() == 2
+
+    out = rescale(image, 2, preserve_range=True, clip=True, order=0)
+    assert out.min() == 0
+    assert out.max() == 2
+
+    out = rescale(image.astype(np.uint8), 2, preserve_range=False,
+                  clip=True, order=0)
+    assert out.min() == 0
+    assert out.max() == 2 / 255.0
 
 
 

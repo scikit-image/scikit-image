@@ -995,16 +995,12 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     return coords
 
 
-def _convert_warp_input(image, keep_range):
+def _convert_warp_input(image, preserve_range):
     """Convert input image to double image with the appropriate range."""
-    if keep_range:
+    if preserve_range:
         image = image.astype(np.double)
     else:
-        if image.dtype == np.double:
-            image = rescale_intensity(image)
-            image = np.atleast_2d(image)
-        else:
-            image = img_as_float(image)
+        image = img_as_float(image)
     return image
 
 
@@ -1027,7 +1023,7 @@ def _clip_warp_output(input_image, output_image, clip, mode, order, cval):
 
 
 def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
-         mode='constant', cval=0., clip=True, keep_range=False):
+         mode='constant', cval=0., clip=True, preserve_range=False):
     """Warp an image according to a given coordinate transformation.
 
     Parameters
@@ -1090,7 +1086,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         Whether to clip the output to the range of values of the input image.
         This is enabled by default, since higher order interpolation may
         produce values outside the given input range.
-    keep_range : bool, optional
+    preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
 
@@ -1159,7 +1155,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     """
 
-    image = _convert_warp_input(image, keep_range)
+    image = _convert_warp_input(image, preserve_range)
 
     input_shape = np.array(image.shape)
 
