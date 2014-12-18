@@ -47,6 +47,38 @@ def _shift_selem(selem, shift_x, shift_y):
     return selem
 
 
+def _invert_selem(selem):
+    """Change the order of the values in `selem`.
+
+    This is a patch for the *weird* footprint inversion in
+    `nd.grey_morphology` [1].
+
+    Parameters
+    ----------
+    selem : array
+        The input structuring element.
+
+    Returns
+    -------
+    inverted : array
+        The structuring element, in opposite order.
+
+    Examples
+    --------
+    >>> selem = np.array([[0, 0, 0], [0, 1, 1], [0, 1, 1]], np.uint8)
+    >>> _invert_selem(selem)
+    array([[1, 1, 0],
+           [1, 1, 0],
+           [0, 0, 0]], dtype=uint8)
+
+    References
+    ----------
+    [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285
+    """
+    inverted = selem[(slice(None, None, -1),) * selem.ndim]
+    return inverted
+
+
 @default_selem
 def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
     """Return greyscale morphological erosion of an image.
@@ -160,6 +192,10 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
     """
     selem = np.array(selem)
     selem = _shift_selem(selem, shift_x, shift_y)
+    # invert the structuring element to patch the same thing happening inside
+    # ndimage.grey_dilation
+    # https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285
+    selem = _invert_selem(selem)
     if out is None:
         out = np.empty_like(image)
     nd.grey_dilation(image, footprint=selem, output=out)
