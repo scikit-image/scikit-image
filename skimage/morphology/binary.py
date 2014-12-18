@@ -2,15 +2,13 @@
 Binary morphological operations
 """
 import numpy as np
-from scipy import ndimage
-from .misc import default_fallback
+from scipy import ndimage as nd
+from .misc import default_selem
 
 
-# Our functions only work in 2D, so for 3D or higher input we should fall back
-# on `scipy.ndimage`. Additionally, we want to use a cross-shaped structuring
-# element of the appropriate dimension for each of these functions.
-# The `default_callback` provides all these.
-@default_fallback
+# The default_selem decorator provides a diamond structuring element as default
+# with the appropriate dimension for the input `image`.
+@default_selem
 def binary_erosion(image, selem=None, out=None):
     """Return fast binary morphological erosion of an image.
 
@@ -38,24 +36,13 @@ def binary_erosion(image, selem=None, out=None):
         The result of the morphological erosion with values in ``[0, 1]``.
 
     """
-
-    selem = (selem != 0)
-    selem_sum = np.sum(selem)
-
-    if selem_sum <= 255:
-        conv = np.empty_like(image, dtype=np.uint8)
-    else:
-        conv = np.empty_like(image, dtype=np.uint)
-
-    binary = (image > 0).view(np.uint8)
-    ndimage.convolve(binary, selem, mode='constant', cval=1, output=conv)
-
     if out is None:
-        out = np.empty_like(conv, dtype=np.bool)
-    return np.equal(conv, selem_sum, out=out)
+        out = np.empty(image.shape, dtype=np.bool)
+    nd.binary_erosion(image, structure=selem, output=out)
+    return out
 
 
-@default_fallback
+@default_selem
 def binary_dilation(image, selem=None, out=None):
     """Return fast binary morphological dilation of an image.
 
@@ -84,23 +71,13 @@ def binary_dilation(image, selem=None, out=None):
         The result of the morphological dilation with values in ``[0, 1]``.
 
     """
-
-    selem = (selem != 0)
-
-    if np.sum(selem) <= 255:
-        conv = np.empty_like(image, dtype=np.uint8)
-    else:
-        conv = np.empty_like(image, dtype=np.uint)
-
-    binary = (image > 0).view(np.uint8)
-    ndimage.convolve(binary, selem, mode='constant', cval=0, output=conv)
-
     if out is None:
-        out = np.empty_like(conv, dtype=np.bool)
-    return np.not_equal(conv, 0, out=out)
+        out = np.empty(image.shape, dtype=np.bool)
+    nd.binary_dilation(image, structure=selem, output=out)
+    return out
 
 
-@default_fallback
+@default_selem
 def binary_opening(image, selem=None, out=None):
     """Return fast binary morphological opening of an image.
 
@@ -134,7 +111,7 @@ def binary_opening(image, selem=None, out=None):
     return out
 
 
-@default_fallback
+@default_selem
 def binary_closing(image, selem=None, out=None):
     """Return fast binary morphological closing of an image.
 
@@ -163,7 +140,6 @@ def binary_closing(image, selem=None, out=None):
         The result of the morphological closing.
 
     """
-
     dilated = binary_dilation(image, selem)
     out = binary_erosion(dilated, selem, out=out)
     return out
