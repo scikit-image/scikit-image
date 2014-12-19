@@ -140,7 +140,7 @@ def equalize_hist(image, bin_min=0, bin_max=255, bin_level=256):
     x = cdf - cdf_min
     y = float((row * col) - cdf_min)
     z = bin_max - bin_min
-    cdf = np.round(((x / y) * z) + bin_min)
+    cdf = ((x / y) * z) + bin_min
     cdf = np.nan_to_num(cdf)
     cdf[cdf < 0] = 0
     bin_center = np.linspace(bin_min, bin_max, bin_level)
@@ -210,7 +210,7 @@ def equalize_adapthist(image, tiles=(16, 16), bin_min=0, bin_max=255,
             x = cdf - cdf_min
             y = float((r3 * c3) - cdf_min)
             z = bin_max - bin_min
-            cdf = np.round(((x / y) * z) + bin_min)
+            cdf = ((x / y) * z) + bin_min
             cdf = np.nan_to_num(cdf)
             cdf[cdf < 0] = 0
             bins = np.linspace(bin_min, bin_max, bin_level)
