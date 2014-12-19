@@ -1,8 +1,8 @@
-A crash course on Numpy for images
+A crash course on NumPy for images
 ----------------------------------
 
-Images manipulated by ``scikit-image`` are simply Numpy arrays. Hence, a
-large fraction of operations on images will just consist in using Numpy::
+Images manipulated by ``scikit-image`` are simply NumPy arrays. Hence, a
+large fraction of operations on images will just consist in using NumPy::
 
     >>> from skimage import data
     >>> camera = data.camera()
@@ -23,15 +23,15 @@ Retrieving statistical information about gray values: ::
     >>> camera.mean()
     118.31400299072266
 
-Numpy arrays representing images can be of different integer of float
+NumPy arrays representing images can be of different integer of float
 numerical types. See :ref:`data_types` for more information about these
 types and how scikit-image treats them.
 
 
-Numpy indexing
+NumPy indexing
 --------------
 
-Numpy indexing can be used both for looking at pixel values, and to
+NumPy indexing can be used both for looking at pixel values, and to
 modify pixel values: ::
 
     >>> # Get the value of the pixel on the 10th row and 20th column
@@ -40,7 +40,7 @@ modify pixel values: ::
     >>> # Set to black the pixel on the 3rd row and 10th column
     >>> camera[3, 10] = 0
 
-Be careful: in Numpy indexing, the first dimension (``camera.shape[0]``)
+Be careful: in NumPy indexing, the first dimension (``camera.shape[0]``)
 corresponds to rows, while the second (``camera.shape[1]``) corresponds
 to columns, with the origin (``camera[0, 0]``) on the top-left corner.
 This matches matrix/linear algebra notation, but is in contrast to
@@ -49,7 +49,7 @@ more details.
 
 Beyond individual pixels, it is possible to access / modify values of
 whole sets of pixels, using the different indexing possibilities of
-Numpy.
+NumPy.
 
 Slicing::
 
@@ -95,7 +95,7 @@ Color images
 ------------
 
 All of the above is true of color images, too: a color image is a
-Numpy array, with an additional trailing dimension for the channels:
+NumPy array, with an additional trailing dimension for the channels:
 
     >>> cat = data.chelsea()
     >>> type(cat)
