@@ -156,8 +156,9 @@ Notes on array order
 Although the labeling of the axes seems arbitrary, it can have a
 significant effect on speed of operations. This is because modern
 processors never retrieve just one item from memory, but rather a
-whole chunk of adjacent items. Therefore, processing elements that are
-adjacent in memory one after the other is faster than processing them
+whole chunk of adjacent items. (This is called prefetching.)
+Therefore, processing elements that are
+next to each other in memory is faster than processing them
 in a different order, even if the number of operations is the same:
 
     >>> def in_order_multiply(arr, scalar):
