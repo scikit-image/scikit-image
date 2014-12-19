@@ -141,7 +141,7 @@ In the case of color (or multichannel) images, the last dimension
 contains the color information and is denoted ``channel`` or ``ch``.
 
 Finally, for 3D images, we refer to the leading dimension as
-``level``, abbreviated as ``lev`` or (rarely) ``l``. In many cases,
+``frame``, abbreviated as ``frm`` or ``f``. In many cases,
 the third imaging dimension has lower resolution than the other two,
 and processing must be done level-wise. When levels are the leading
 dimension, we can use the following syntax:
@@ -161,11 +161,11 @@ adjacent in memory one after the other is faster than processing them
 in a different order, even if the number of operations is the same:
 
     >>> def in_order_multiply(arr, scalar):
-    ...     for plane in list(range(arr.shape[0])):
-    ...         arr[plane, :, :] *= scalar
+    ...     for frame in list(range(arr.shape[0])):
+    ...         arr[frame, :, :] *= scalar
     ... 
     >>> def out_of_order_multiply(arr, scalar):
-    ...     for plane in list(range(arr.shape[2])):
-    ...         arr[:, :, plane] *= scalar
+    ...     for frame in list(range(arr.shape[2])):
+    ...         arr[:, :, frame] *= scalar
     ... 
     >>> import time
