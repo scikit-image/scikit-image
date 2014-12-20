@@ -41,33 +41,33 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
 
      Examples
     --------
-    >>>from skimage import data
-    >>>import matplotlib.pyplot as plt
-    >>>from skimage.viewer.canvastools import RectangleTool
-    >>>import numpy as np
-    >>>from skimage.draw import line
-    >>>from skimage.draw import set_color
+    >>> from skimage import data
+    >>> import matplotlib.pyplot as plt
+    >>> from skimage.viewer.canvastools import RectangleTool
+    >>> import numpy as np
+    >>> from skimage.draw import line
+    >>> from skimage.draw import set_color
 
-    >>>im = data.lena()
-    >>>[f, ax] = plt.subplots()
-    >>>ax.imshow(im)
+    >>> im = data.lena()
+    >>> [f, ax] = plt.subplots()
+    >>> ax.imshow(im)
 
-    >>>def stampa(extents):
-    >>>>>>global im,ax
-    >>>>>>coord = np.int64(extents)
-    >>>>>>[rr1, cc1] = line(coord[2],coord[0],coord[2],coord[1])
-    >>>>>>[rr2, cc2] = line(coord[2],coord[1],coord[3],coord[1])
-    >>>>>>[rr3, cc3] = line(coord[3],coord[1],coord[3],coord[0])
-    >>>>>>[rr4, cc4] = line(coord[3],coord[0],coord[2],coord[0])
-    >>>>>>set_color(im, (rr1, cc1), [255, 255, 0])
-    >>>>>>set_color(im, (rr2, cc2), [0, 255, 255])
-    >>>>>>set_color(im, (rr3, cc3), [255, 0, 255])
-    >>>>>>set_color(im, (rr4, cc4), [0, 0, 0])
-    >>>>>>ax.imshow(im)
-    >>>>>>plt.show()
+    >>> def stampa(extents):
+    ...     global im,ax
+    ...     coord = np.int64(extents)
+    ...     [rr1, cc1] = line(coord[2],coord[0],coord[2],coord[1])
+    ...     [rr2, cc2] = line(coord[2],coord[1],coord[3],coord[1])
+    ...     [rr3, cc3] = line(coord[3],coord[1],coord[3],coord[0])
+    ...     [rr4, cc4] = line(coord[3],coord[0],coord[2],coord[0])
+    ...     set_color(im, (rr1, cc1), [255, 255, 0])
+    ...     set_color(im, (rr2, cc2), [0, 255, 255])
+    ...     set_color(im, (rr3, cc3), [255, 0, 255])
+    ...     set_color(im, (rr4, cc4), [0, 0, 0])
+    ...     ax.imshow(im)
+    ...     plt.show()
 
-    >>>rect_tool = RectangleTool(ax, on_enter=stampa)
-    >>>plt.show()
+    >>> rect_tool = RectangleTool(ax, on_enter=stampa)
+    >>> plt.show()
  
     """
     
