@@ -39,6 +39,7 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
     .. [2] http://pillow.readthedocs.org/en/latest/handbook/image-file-formats.html
 
     """
+    print('imread', fname)
     if hasattr(fname, 'lower') and dtype is None:
         kwargs.setdefault('key', img_num)
         if fname.lower().endswith(('.tiff', '.tif')):
@@ -47,7 +48,8 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
     im = Image.open(fname)
     try:
         # this will raise an IOError if the file is not readable
-        im.getdata()[0]
+        #im.getdata()[0]
+        pass
     except IOError:
         site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
         raise ValueError('Could not load "%s"\nPlease see documentation at: %s' % (fname, site))

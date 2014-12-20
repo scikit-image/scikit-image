@@ -11,6 +11,7 @@ from skimage import exposure
 from skimage.exposure.exposure import intensity_range
 from skimage.color import rgb2gray
 from skimage.util.dtype import dtype_range
+from skimage._shared.utils import all_warnings
 
 
 # Test integer histograms
@@ -52,7 +53,8 @@ def test_equalize_uint8_approx():
 
 
 def test_equalize_ubyte():
-    img = skimage.img_as_ubyte(test_img)
+    with all_warnings():  # precision loss
+        img = skimage.img_as_ubyte(test_img)
     img_eq = exposure.equalize_hist(img)
 
     cdf, bin_edges = exposure.cumulative_distribution(img_eq)
@@ -209,8 +211,9 @@ def test_adapthist_grayscale():
     img = skimage.img_as_float(data.astronaut())
     img = rgb2gray(img)
     img = np.dstack((img, img, img))
-    adapted = exposure.equalize_adapthist(img, 10, 9, clip_limit=0.01,
-                                          nbins=128)
+    with all_warnings():  # precision loss
+        adapted = exposure.equalize_adapthist(img, 10, 9, clip_limit=0.01,
+                                              nbins=128)
     assert_almost_equal = np.testing.assert_almost_equal
     assert img.shape == adapted.shape
     assert_almost_equal(peak_snr(img, adapted), 97.6876, 3)
@@ -226,7 +229,8 @@ def test_adapthist_color():
         warnings.simplefilter('always')
         hist, bin_centers = exposure.histogram(img)
         assert len(w) > 0
-    adapted = exposure.equalize_adapthist(img, clip_limit=0.01)
+    with all_warnings():  # precision loss
+        adapted = exposure.equalize_adapthist(img, clip_limit=0.01)
 
     assert_almost_equal = np.testing.assert_almost_equal
     assert adapted.min() == 0
@@ -244,7 +248,8 @@ def test_adapthist_alpha():
     img = skimage.img_as_float(data.astronaut())
     alpha = np.ones((img.shape[0], img.shape[1]), dtype=float)
     img = np.dstack((img, alpha))
-    adapted = exposure.equalize_adapthist(img)
+    with all_warnings():  # precision loss
+        adapted = exposure.equalize_adapthist(img)
     assert adapted.shape != img.shape
     img = img[:, :, :3]
     full_scale = skimage.exposure.rescale_intensity(img)

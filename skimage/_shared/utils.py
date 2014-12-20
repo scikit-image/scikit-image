@@ -163,3 +163,4 @@ def assert_nD(array, ndim, arg_name='image'):
         ndim = [ndim]
     if not array.ndim in ndim:
         raise ValueError(msg % (arg_name, '-or-'.join([str(n) for n in ndim])))
+
