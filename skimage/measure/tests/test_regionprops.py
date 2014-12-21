@@ -4,6 +4,7 @@ import numpy as np
 import math
 
 from skimage.measure._regionprops import regionprops, PROPS, perimeter
+from skimage._shared.utils import all_warnings
 
 
 SAMPLE = np.array(
@@ -25,7 +26,8 @@ INTENSITY_SAMPLE[1, 9:11] = 2
 def test_all_props():
     region = regionprops(SAMPLE, INTENSITY_SAMPLE)[0]
     for prop in PROPS:
-        assert_equal(region[prop], getattr(region, PROPS[prop]))
+        with all_warnings():  # deprecation warning
+            assert_equal(region[prop], getattr(region, PROPS[prop]))
 
 
 def test_dtype():
@@ -125,12 +127,14 @@ def test_equiv_diameter():
 
 
 def test_euler_number():
-    en = regionprops(SAMPLE)[0].euler_number
+    with all_warnings():  # deprecation warning
+        en = regionprops(SAMPLE)[0].euler_number
     assert en == 0
 
     SAMPLE_mod = SAMPLE.copy()
     SAMPLE_mod[7, -3] = 0
-    en = regionprops(SAMPLE_mod)[0].euler_number
+    with all_warnings():  # deprecation warning
+        en = regionprops(SAMPLE_mod)[0].euler_number
     assert en == -1
 
 
@@ -369,8 +373,9 @@ def test_equals():
     r2 = regions[0]
     r3 = regions[1]
 
-    assert_equal(r1 == r2, True, "Same regionprops are not equal")
-    assert_equal(r1 != r3, True, "Different regionprops are equal")
+    with all_warnings():  # deprecation warning
+        assert_equal(r1 == r2, True, "Same regionprops are not equal")
+        assert_equal(r1 != r3, True, "Different regionprops are equal")
 
 
 if __name__ == "__main__":

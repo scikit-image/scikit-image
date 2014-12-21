@@ -7,6 +7,7 @@ from PIL import Image
 from skimage.util import img_as_ubyte, img_as_uint
 from skimage.external.tifffile import (
     imread as tif_imread, imsave as tif_imsave)
+from skimage._shared.utils import all_warnings
 
 
 def imread(fname, dtype=None, img_num=None, **kwargs):
@@ -39,7 +40,6 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
     .. [2] http://pillow.readthedocs.org/en/latest/handbook/image-file-formats.html
 
     """
-    print('imread', fname)
     if hasattr(fname, 'lower') and dtype is None:
         kwargs.setdefault('key', img_num)
         if fname.lower().endswith(('.tiff', '.tif')):
@@ -54,7 +54,8 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
         site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
         raise ValueError('Could not load "%s"\nPlease see documentation at: %s' % (fname, site))
     else:
-        return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
+        with all_warnings():  # PIL resource warnings
+            return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
 
 
 def pil_to_ndarray(im, dtype=None, img_num=None):

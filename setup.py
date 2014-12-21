@@ -149,7 +149,7 @@ if __name__ == "__main__":
 
         configuration=configuration,
         install_requires=[
-            "six>=%s" % DEPENDENCIES['six']
+            "six>=%s" % '.'.join(str(d) for d in DEPENDENCIES['six'])
         ],
         packages=setuptools.find_packages(exclude=['doc']),
         include_package_data=True,
