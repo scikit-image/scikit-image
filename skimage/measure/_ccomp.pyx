@@ -416,12 +416,12 @@ def label(input, neighbors=None, background=None, return_num=False,
      [0 1 0]
      [0 0 1]]
     >>> from skimage.measure import label
-    >>> print(label(x, neighbors=4))
+    >>> print(label(x, neighbors=4))  # doctest: +SKIP
     [[0 1 1]
      [2 3 1]
      [2 2 4]]
 
-    >>> print(label(x, neighbors=8))
+    >>> print(label(x, neighbors=8))  # doctest: +SKIP
     [[0 1 1]
      [1 0 1]
      [1 1 0]]
@@ -430,7 +430,7 @@ def label(input, neighbors=None, background=None, return_num=False,
     ...               [1, 1, 5],
     ...               [0, 0, 0]])
 
-    >>> print(label(x, background=0))
+    >>> print(label(x, background=0))  # doctest: +SKIP
     [[ 0 -1 -1]
      [ 0  0  1]
      [-1 -1 -1]]

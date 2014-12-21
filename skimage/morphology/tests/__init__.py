@@ -1,3 +1,2 @@
-import warnings
-from scipy import ndimage, special, optimize
-warnings.simplefilter('error')
+from skimage._shared.testing import setup_test
+setup_test()

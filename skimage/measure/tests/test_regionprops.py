@@ -33,8 +33,9 @@ def test_all_props():
 def test_dtype():
     regionprops(np.zeros((10, 10), dtype=np.int))
     regionprops(np.zeros((10, 10), dtype=np.uint))
-    assert_raises((TypeError, RuntimeError), regionprops,
-                  np.zeros((10, 10), dtype=np.double))
+    with all_warnings():  # deprecation on dtype
+        assert_raises((TypeError, RuntimeError), regionprops,
+                      np.zeros((10, 10), dtype=np.double))
 
 
 def test_ndim():

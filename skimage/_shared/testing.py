@@ -10,6 +10,7 @@ from skimage import (
 from numpy import testing
 import numpy as np
 from skimage._shared.utils import all_warnings
+import warnings
 
 
 SKIP_RE = re.compile("(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
@@ -175,6 +176,12 @@ def mono_check(plugin, fmt='png'):
     img5 = img_as_uint(img)
     r5 = roundtrip(img5, plugin, fmt)
     testing.assert_allclose(r5, img5)
+
+
+def setup_test():
+   from scipy import signal, ndimage, special, optimize, linalg
+   from skimage import filter, viewer
+   warnings.simplefilter('error')
 
 
 if __name__ == '__main__':

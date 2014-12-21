@@ -145,10 +145,7 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
         if not self.ax.in_axes(event):
             self.eventpress = None
             return
-        if hasattr(RectangleSelector, '_release'):
-            RectangleSelector._release(self, event)
-        else:
-            RectangleSelector.release(self, event)
+        RectangleSelector.release(self, event)
         self._extents_on_press = None
         # Undo hiding of rectangle and redraw.
         self.set_visible(True)
@@ -164,10 +161,7 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
             self.set_visible(False)
             self.redraw()
         self.set_visible(True)
-        if hasattr(RectangleSelector, '_press'):
-            RectangleSelector._press(self, event)
-        else:
-            RectangleSelector.press(self, event)
+        RectangleSelector.press(self, event)
 
     def _set_active_handle(self, event):
         """Set active handle based on the location of the mouse event"""

@@ -121,7 +121,7 @@ def threshold_otsu(image, nbins=256):
     >>> thresh = threshold_otsu(image)
     >>> binary = image <= thresh
     """
-    hist, bin_centers = histogram(image.flatten(), nbins)
+    hist, bin_centers = histogram(image.ravel(), nbins)
     hist = hist.astype(float)
 
     # class probabilities for all possible thresholds
@@ -176,7 +176,7 @@ def threshold_yen(image, nbins=256):
     >>> thresh = threshold_yen(image)
     >>> binary = image <= thresh
     """
-    hist, bin_centers = histogram(image.flatten(), nbins)
+    hist, bin_centers = histogram(image.ravel(), nbins)
     # On blank images (e.g. filled with 0) with int dtype, `histogram()`
     # returns `bin_centers` containing only one value. Speed up with it.
     if bin_centers.size == 1:
@@ -246,7 +246,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
     >>> binary = image > thresh
     """
 
-    hist, bin_centers = histogram(image.flatten(), nbins)
+    hist, bin_centers = histogram(image.ravel(), nbins)
 
     # image only contains one unique value
     if len(bin_centers) == 1:
