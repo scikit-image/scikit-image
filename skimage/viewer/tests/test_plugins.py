@@ -12,6 +12,7 @@ from skimage.viewer.plugins import (
     PlotPlugin)
 from skimage.viewer.plugins.base import Plugin
 from skimage.viewer.widgets import Slider
+from skimage._shared.utils import all_warnings
 
 
 def setup_line_profile(image, limits='image'):
@@ -66,8 +67,9 @@ def test_line_profile_dynamic():
     assert_almost_equal(np.std(line), 0.229, 3)
     assert_almost_equal(np.max(line) - np.min(line), 0.725, 1)
 
-    viewer.image = skimage.img_as_float(median(image,
-                                               selem=disk(radius=3)))
+    with all_warnings():  # precision loss
+        viewer.image = skimage.img_as_float(median(image,
+                                                   selem=disk(radius=3)))
 
     line = lp.get_profiles()[-1][0]
     assert_almost_equal(np.std(viewer.image), 0.198, 3)
@@ -159,7 +161,8 @@ def test_plugin():
     viewer = ImageViewer(img)
 
     def median_filter(img, radius=3):
-        return median(img, selem=disk(radius=radius))
+        with all_warnings():  # precision loss
+            return median(img, selem=disk(radius=radius))
 
     plugin = Plugin(image_filter=median_filter)
     viewer += plugin

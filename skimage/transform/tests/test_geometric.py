@@ -7,6 +7,7 @@ from skimage.transform import (estimate_transform, matrix_transform,
                                SimilarityTransform, AffineTransform,
                                ProjectiveTransform, PolynomialTransform,
                                PiecewiseAffineTransform)
+from skimage._shared.utils import all_warnings
 
 
 SRC = np.array([
@@ -49,7 +50,7 @@ def test_estimate_transform():
 
 def test_matrix_transform():
     tform = AffineTransform(scale=(0.1, 0.5), rotation=2)
-    assert_equal(tform(SRC), matrix_transform(SRC, tform._matrix))
+    assert_equal(tform(SRC), matrix_transform(SRC, tform.params))
 
 
 def test_similarity_estimation():
@@ -209,13 +210,13 @@ def test_union():
     tform2 = SimilarityTransform(scale=0.1, rotation=0.9)
     tform3 = SimilarityTransform(scale=0.1 ** 2, rotation=0.3 + 0.9)
     tform = tform1 + tform2
-    assert_array_almost_equal(tform._matrix, tform3._matrix)
+    assert_array_almost_equal(tform.params, tform3.params)
 
     tform1 = AffineTransform(scale=(0.1, 0.1), rotation=0.3)
     tform2 = SimilarityTransform(scale=0.1, rotation=0.9)
     tform3 = SimilarityTransform(scale=0.1 ** 2, rotation=0.3 + 0.9)
     tform = tform1 + tform2
-    assert_array_almost_equal(tform._matrix, tform3._matrix)
+    assert_array_almost_equal(tform.params, tform3.params)
     assert tform.__class__ == ProjectiveTransform
 
     tform = AffineTransform(scale=(0.1, 0.1), rotation=0.3)
@@ -251,10 +252,12 @@ def test_invalid_input():
 def test_deprecated_params_attributes():
     for t in ('projective', 'affine', 'similarity'):
         tform = estimate_transform(t, SRC, DST)
-        assert_equal(tform._matrix, tform.params)
+        with all_warnings():  # _matrix is deprecated
+            assert_equal(tform._matrix, tform.params)
 
     tform = estimate_transform('polynomial', SRC, DST, order=3)
-    assert_equal(tform._params, tform.params)
+    with all_warnings():  # _params is deprecated
+        assert_equal(tform._params, tform.params)
 
 
 if __name__ == "__main__":

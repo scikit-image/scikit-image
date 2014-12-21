@@ -3,6 +3,7 @@ from numpy.testing import assert_almost_equal, assert_equal
 
 import skimage.transform as tf
 from skimage.draw import line, circle_perimeter, ellipse_perimeter
+from skimage._shared.utils import all_warnings
 
 
 def append_desc(func, description):
@@ -67,7 +68,8 @@ def test_hough_line_peaks():
 
     out, angles, d = tf.hough_line(img)
 
-    out, theta, dist = tf.hough_line_peaks(out, angles, d)
+    with all_warnings():  # _ccomp deprecation
+        out, theta, dist = tf.hough_line_peaks(out, angles, d)
 
     assert_equal(len(dist), 1)
     assert_almost_equal(dist[0], 80.723, 1)
@@ -79,13 +81,19 @@ def test_hough_line_peaks_dist():
     img[:, 30] = True
     img[:, 40] = True
     hspace, angles, dists = tf.hough_line(img)
-    assert len(tf.hough_line_peaks(hspace, angles, dists,
-                                   min_distance=5)[0]) == 2
-    assert len(tf.hough_line_peaks(hspace, angles, dists,
-                                   min_distance=15)[0]) == 1
+    with all_warnings():  # _ccomp deprecation
+        assert len(tf.hough_line_peaks(hspace, angles, dists,
+                                       min_distance=5)[0]) == 2
+        assert len(tf.hough_line_peaks(hspace, angles, dists,
+                                       min_distance=15)[0]) == 1
 
 
 def test_hough_line_peaks_angle():
+    with all_warnings():  # _ccomp deprecation
+        check_hough_line_peaks_angle()
+
+
+def check_hough_line_peaks_angle():
     img = np.zeros((100, 100), dtype=np.bool_)
     img[:, 0] = True
     img[0, :] = True
@@ -116,8 +124,9 @@ def test_hough_line_peaks_num():
     img[:, 30] = True
     img[:, 40] = True
     hspace, angles, dists = tf.hough_line(img)
-    assert len(tf.hough_line_peaks(hspace, angles, dists, min_distance=0,
-                                   min_angle=0, num_peaks=1)[0]) == 1
+    with all_warnings():  # _ccomp deprecation
+        assert len(tf.hough_line_peaks(hspace, angles, dists, min_distance=0,
+                                       min_angle=0, num_peaks=1)[0]) == 1
 
 
 def test_hough_circle():

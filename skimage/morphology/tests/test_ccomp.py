@@ -1,16 +1,20 @@
 import numpy as np
 from numpy.testing import assert_array_equal, run_module_suite
 
-from skimage.morphology import label
+from skimage.morphology import label as _label
 import skimage.measure._ccomp as ccomp
-from warnings import catch_warnings
-from skimage._shared.utils import skimage_deprecation
-
+from skimage._shared.utils import all_warnings
 np.random.seed(0)
 
 # The background label value
 # is supposed to be changed to 0 soon
 BG = -1
+
+
+def label(*args, **kwargs):
+  """Wrap the label function to avoid deprecation warning"""
+  with all_warnings():
+    return _label(*args, **kwargs)
 
 
 class TestConnectedComponents:
@@ -34,7 +38,7 @@ class TestConnectedComponents:
     def test_random(self):
         x = (np.random.rand(20, 30) * 5).astype(np.int)
 
-        with catch_warnings():
+        with all_warnings():
             labels = label(x)
 
         n = labels.max()
@@ -46,13 +50,13 @@ class TestConnectedComponents:
         x = np.array([[0, 0, 1],
                       [0, 1, 0],
                       [1, 0, 0]])
-        with catch_warnings():
+        with all_warnings():
             assert_array_equal(label(x), x)
 
     def test_4_vs_8(self):
         x = np.array([[0, 1],
                       [1, 0]], dtype=int)
-        with catch_warnings():
+        with all_warnings():
             assert_array_equal(label(x, 4),
                                [[0, 1],
                                 [2, 3]])
@@ -65,7 +69,7 @@ class TestConnectedComponents:
                       [1, 1, 5],
                       [0, 0, 0]])
 
-        with catch_warnings():
+        with all_warnings():
             assert_array_equal(label(x), [[0, 1, 1],
                                           [0, 0, 2],
                                           [3, 3, 3]])
@@ -101,7 +105,7 @@ class TestConnectedComponents:
                       [0, 0, 6],
                       [5, 5, 5]])
 
-        with catch_warnings():
+        with all_warnings():
             assert_array_equal(label(x, return_num=True)[1], 4)
 
         assert_array_equal(label(x, background=0, return_num=True)[1], 3)
@@ -152,7 +156,7 @@ class TestConnectedComponents3d:
     def test_random(self):
         x = (np.random.rand(20, 30) * 5).astype(np.int)
 
-        with catch_warnings():
+        with all_warnings():
             labels = label(x)
 
         n = labels.max()
@@ -165,7 +169,7 @@ class TestConnectedComponents3d:
         x[0, 2, 2] = 1
         x[1, 1, 1] = 1
         x[2, 0, 0] = 1
-        with catch_warnings():
+        with all_warnings():
             assert_array_equal(label(x), x)
 
     def test_4_vs_8(self):
@@ -174,7 +178,7 @@ class TestConnectedComponents3d:
         x[1, 0, 0] = 1
         label4 = x.copy()
         label4[1, 0, 0] = 2
-        with catch_warnings():
+        with all_warnings():
             assert_array_equal(label(x, 4), label4)
             assert_array_equal(label(x, 8), x)
 
@@ -202,7 +206,7 @@ class TestConnectedComponents3d:
                           [BG, 0,   1],
                           [BG, BG, BG]])
 
-        with catch_warnings():
+        with all_warnings():
             assert_array_equal(label(x), lnb)
 
         assert_array_equal(label(x, background=0), lb)
@@ -240,7 +244,7 @@ class TestConnectedComponents3d:
                       [0, 0, 6],
                       [5, 5, 5]])
 
-        with catch_warnings():
+        with all_warnings():
             assert_array_equal(label(x, return_num=True)[1], 4)
 
         assert_array_equal(label(x, background=0, return_num=True)[1], 3)
