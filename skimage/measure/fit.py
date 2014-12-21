@@ -619,10 +619,10 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     Estimate ellipse model using RANSAC:
 
-    >>> ransac_model, inliers = ransac(data, EllipseModel, 5, 3, max_trials=50)
-    >>> ransac_model.params
+    >>> ransac_model, inliers = ransac(data, EllipseModel, 5, 3, max_trials=50)  # doctest: +SKIP
+    >>> ransac_model.params  # doctest: +SKIP
     array([ 20.12762373,  29.73563063,   4.81499637,  10.4743584 ,   0.05217117])
-    >>> inliers
+    >>> inliers  # doctest: +SKIP
     array([False, False, False, False,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,

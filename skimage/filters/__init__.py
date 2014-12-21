@@ -1,3 +1,8 @@
+from skimage._shared.utils import all_warnings
+with all_warnings():  # suppress warnings when importing scipy
+  import scipy.ndimage as _ndimage
+  del _ndimage
+
 from .lpi_filter import inverse, wiener, LPIFilter2D
 from ._gaussian import gaussian_filter
 from .edges import (sobel, hsobel, vsobel, sobel_h, sobel_v,

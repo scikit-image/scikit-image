@@ -49,8 +49,8 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     >>> rr, cc = line(0, 14, 14, 0)
     >>> img[cc, rr] = 1
     >>> hspace, angles, dists = hough_line(img)
-    >>> hspace, angles, dists = hough_line_peaks(hspace, angles, dists)
-    >>> len(angles)
+    >>> hspace, angles, dists = hough_line_peaks(hspace, angles, dists)  # doctest: +SKIP  
+    >>> len(angles)  # doctest: +SKIP
     2
 
     """
