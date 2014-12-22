@@ -1,11 +1,11 @@
 import numpy as np
-from numpy.testing import assert_array_equal, assert_almost_equal
+from numpy.testing import assert_equal, assert_almost_equal, run_module_suite
 from skimage.feature import ORB
-from skimage.data import lena
+from skimage import data
 from skimage.color import rgb2gray
 
 
-img = rgb2gray(lena())
+img = rgb2gray(data.lena())
 
 
 def test_keypoints_orb_desired_no_of_keypoints():
@@ -42,7 +42,6 @@ def test_keypoints_orb_desired_no_of_keypoints():
 
 
 def test_keypoints_orb_less_than_desired_no_of_keypoints():
-    img = rgb2gray(lena())
     detector_extractor = ORB(n_keypoints=15, fast_n=12,
                              fast_threshold=0.33, downscale=2, n_scales=2)
     detector_extractor.detect(img)
@@ -102,14 +101,13 @@ def test_descriptor_orb():
     detector_extractor.extract(img, detector_extractor.keypoints,
                                detector_extractor.scales,
                                detector_extractor.orientations)
-    assert_array_equal(exp_descriptors,
-                       detector_extractor.descriptors[100:120, 10:20])
+    assert_equal(exp_descriptors,
+                 detector_extractor.descriptors[100:120, 10:20])
 
     detector_extractor.detect_and_extract(img)
-    assert_array_equal(exp_descriptors,
-                       detector_extractor.descriptors[100:120, 10:20])
+    assert_equal(exp_descriptors,
+                 detector_extractor.descriptors[100:120, 10:20])
 
 
 if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()
+    run_module_suite()
