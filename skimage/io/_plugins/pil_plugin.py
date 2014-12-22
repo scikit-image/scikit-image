@@ -48,8 +48,7 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
     im = Image.open(fname)
     try:
         # this will raise an IOError if the file is not readable
-        #im.getdata()[0]
-        pass
+        im.getdata()[0]
     except IOError:
         site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
         raise ValueError('Could not load "%s"\nPlease see documentation at: %s' % (fname, site))

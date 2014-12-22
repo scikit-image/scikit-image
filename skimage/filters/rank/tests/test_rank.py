@@ -13,12 +13,12 @@ np.random.seed(0)
 
 
 def test_all():
-
-  with all_warnings():  # precision loss
-    check_all()
+    with all_warnings():  # precision loss
+        check_all()
 
 
 def check_all():
+    np.random.seed(0)
     image = np.random.rand(25, 25)
     selem = morphology.disk(1)
     refs = np.load(os.path.join(skimage.data_dir, "rank_filter_tests.npz"))
@@ -159,7 +159,7 @@ def test_bitdepth():
     for i in range(5):
         image = np.ones((100, 100), dtype=np.uint16) * 255 * 2 ** i
         with all_warnings():  # bit depth
-          rank.mean_percentile(image=image, selem=elem, mask=mask,
+            rank.mean_percentile(image=image, selem=elem, mask=mask,
                                out=out, shift_x=0, shift_y=0, p0=.1, p1=.9)
 
 
@@ -270,7 +270,7 @@ def test_compare_ubyte_vs_float():
         func = getattr(rank, method)
         out_u = func(image_uint, disk(3))
         with all_warnings():  # precision loss
-          out_f = func(image_float, disk(3))
+            out_f = func(image_float, disk(3))
         assert_equal(out_u, out_f)
 
 
@@ -283,9 +283,9 @@ def test_compare_8bit_unsigned_vs_signed():
     image[image > 127] = 0
     image_s = image.astype(np.int8)
     with all_warnings():  # precision loss
-      image_u = img_as_ubyte(image_s)
+        image_u = img_as_ubyte(image_s)
 
-      assert_equal(image_u, img_as_ubyte(image_s))
+        assert_equal(image_u, img_as_ubyte(image_s))
 
     methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
                'mean', 'subtract_mean', 'median', 'minimum', 'modal',
@@ -295,8 +295,8 @@ def test_compare_8bit_unsigned_vs_signed():
         func = getattr(rank, method)
 
         with all_warnings():  # sign loss
-          out_u = func(image_u, disk(3))
-          out_s = func(image_s, disk(3))
+            out_u = func(image_u, disk(3))
+            out_s = func(image_s, disk(3))
         assert_equal(out_u, out_s)
 
 
@@ -487,11 +487,11 @@ def test_entropy():
     data = np.tile(
         np.reshape(np.arange(4096), (64, 64)), (2, 2)).astype(np.uint16)
     with all_warnings():  # bitdepth
-      assert(np.max(rank.entropy(data, selem)) == 12)
+        assert(np.max(rank.entropy(data, selem)) == 12)
 
     # make sure output is of dtype double
     with all_warnings():  # bitdepth
-      out = rank.entropy(data, np.ones((16, 16), dtype=np.uint8))
+        out = rank.entropy(data, np.ones((16, 16), dtype=np.uint8))
     assert out.dtype == np.double
 
 
@@ -523,9 +523,9 @@ def test_16bit():
         value = 2 ** bitdepth - 1
         image[10, 10] = value
         with all_warnings():  # bitdepth
-          assert rank.minimum(image, selem)[10, 10] == 0
-          assert rank.maximum(image, selem)[10, 10] == value
-          assert rank.mean(image, selem)[10, 10] == int(value / selem.size)
+            assert rank.minimum(image, selem)[10, 10] == 0
+            assert rank.maximum(image, selem)[10, 10] == value
+            assert rank.mean(image, selem)[10, 10] == int(value / selem.size)
 
 
 def test_bilateral():

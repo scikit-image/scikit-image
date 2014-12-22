@@ -11,13 +11,16 @@ import skimage.io as sio
 
 try:
     import imread as _imread
-    use_plugin('imread')
 except ImportError:
     imread_available = False
 else:
     imread_available = True
 
-np.random.seed(0)
+
+def setup():
+    if imread_available:
+        np.random.seed(0)
+        use_plugin('imread')
 
 
 def teardown():
@@ -54,7 +57,7 @@ def test_bilevel():
     expected[::2] = 1
 
     img = imread(os.path.join(data_dir, 'checker_bilevel.png'))
-    assert_array_equal(img, expected)
+    assert_array_equal(img.astype(bool), expected)
 
 
 class TestSave:

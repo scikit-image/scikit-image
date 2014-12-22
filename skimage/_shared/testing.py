@@ -179,12 +179,14 @@ def mono_check(plugin, fmt='png'):
 
 
 def setup_test():
-   warnings.simplefilter('error')
-   with all_warnings():
+    warnings.simplefilter('error')
+    with all_warnings():
        from scipy import signal, ndimage, special, optimize, linalg
+       from scipy.io import loadmat
        from skimage import filter, viewer, data
        data.moon()
-
+    if os.environ.get('TRAVIS_PYTHON_VERSION', None) == '2.7':
+        warnings.simplefilter('default') 
 
 if __name__ == '__main__':
     color_check('pil')
