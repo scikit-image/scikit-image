@@ -475,9 +475,11 @@ def regionprops(label_image, intensity_image=None, cache=True):
     >>> img = util.img_as_ubyte(data.coins()) > 110
     >>> label_img = label(img)  # doctest: +SKIP
     >>> props = regionprops(label_img)  # doctest: +SKIP
-    >>> props[0].centroid   # doctest: +SKIP centroid of first labeled object
+    >>> # centroid of first labeled object
+    >>> props[0].centroid   # doctest: +SKIP 
     (22.729879860483141, 81.912285234465827)
-    >>> props[0]['centroid']  # doctest: +SKIP centroid of first labeled object
+    >>> # centroid of first labeled object
+    >>> props[0]['centroid']  # doctest: +SKIP 
     (22.729879860483141, 81.912285234465827)
 
     """

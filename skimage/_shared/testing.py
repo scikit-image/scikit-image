@@ -179,9 +179,11 @@ def mono_check(plugin, fmt='png'):
 
 
 def setup_test():
-   from scipy import signal, ndimage, special, optimize, linalg
-   from skimage import filter, viewer
    warnings.simplefilter('error')
+   with all_warnings():
+       from scipy import signal, ndimage, special, optimize, linalg
+       from skimage import filter, viewer, data
+       data.moon()
 
 
 if __name__ == '__main__':

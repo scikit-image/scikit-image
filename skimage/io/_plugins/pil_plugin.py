@@ -180,7 +180,10 @@ def ndarray_to_pil(arr, format_str=None):
 
     if arr.ndim == 2:
         im = Image.new(mode_base, arr.T.shape)
-        im.frombytes(arr.tobytes(), 'raw', mode)
+        try:
+            im.frombytes(arr.tobytes(), 'raw', mode)
+        except AttributeError:
+            im.frombytes(arr.tostring(), 'raw', mode)
 
     else:
         try:
@@ -188,7 +191,7 @@ def ndarray_to_pil(arr, format_str=None):
                                  arr.tobytes())
         except AttributeError:
             im = Image.frombytes(mode, (arr.shape[1], arr.shape[0]),
-                                  arr.tobytes())
+                                  arr.tostring())
     return im
 
 
