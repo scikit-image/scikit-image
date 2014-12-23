@@ -1119,6 +1119,11 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
 
+    Returns
+    -------
+    warped : double ndarray
+        The warped input image.
+
     Notes
     -----
     - The input image is converted to a `double` image.
@@ -1193,7 +1198,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     else:
         output_shape = safe_as_int(output_shape)
 
-    out = None
+    warped = None
 
     if order == 2:
         # When fixing this issue, make sure to fix the branches further
@@ -1229,7 +1234,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         if matrix is not None:
             matrix = matrix.astype(np.double)
             if image.ndim == 2:
-                out = _warp_fast(image, matrix,
+                warped = _warp_fast(image, matrix,
                                  output_shape=output_shape,
                                  order=order, mode=mode, cval=cval)
             elif image.ndim == 3:
@@ -1238,9 +1243,9 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
                     dims.append(_warp_fast(image[..., dim], matrix,
                                            output_shape=output_shape,
                                            order=order, mode=mode, cval=cval))
-                out = np.dstack(dims)
+                warped = np.dstack(dims)
 
-    if out is None:
+    if warped is None:
         # use ndimage.map_coordinates
 
         if (isinstance(inverse_map, np.ndarray)
@@ -1277,10 +1282,10 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         # Pre-filtering not necessary for order 0, 1 interpolation
         prefilter = order > 1
 
-        out = ndimage.map_coordinates(image, coords, prefilter=prefilter,
+        warped = ndimage.map_coordinates(image, coords, prefilter=prefilter,
                                       mode=mode, order=order, cval=cval)
 
 
-    _clip_warp_output(image, out, order, mode, cval, clip)
+    _clip_warp_output(image, warped, order, mode, cval, clip)
 
-    return out
+    return warped
