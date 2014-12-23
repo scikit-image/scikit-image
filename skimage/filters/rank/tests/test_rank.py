@@ -7,18 +7,15 @@ from skimage import img_as_ubyte, img_as_float
 from skimage import data, util, morphology
 from skimage.morphology import cmorph, disk
 from skimage.filters import rank
-from skimage._shared.utils import all_warnings
-
-np.random.seed(0)
+from skimage._shared._warnings import expected_warnings
 
 
 def test_all():
-    with all_warnings():  # precision loss
+    with expected_warnings(['precision loss', 'non-integer']):
         check_all()
 
 
 def check_all():
-    np.random.seed(0)
     image = np.random.rand(25, 25)
     selem = morphology.disk(1)
     refs = np.load(os.path.join(skimage.data_dir, "rank_filter_tests.npz"))
@@ -158,7 +155,11 @@ def test_bitdepth():
 
     for i in range(5):
         image = np.ones((100, 100), dtype=np.uint16) * 255 * 2 ** i
-        with all_warnings():  # bit depth
+        if i > 3:
+          expected = ["Bitdepth of"]
+        else:
+          expected = []
+        with expected_warnings(expected):
             rank.mean_percentile(image=image, selem=elem, mask=mask,
                                out=out, shift_x=0, shift_y=0, p0=.1, p1=.9)
 
@@ -269,7 +270,7 @@ def test_compare_ubyte_vs_float():
     for method in methods:
         func = getattr(rank, method)
         out_u = func(image_uint, disk(3))
-        with all_warnings():  # precision loss
+        with expected_warnings(['precision loss']):
             out_f = func(image_float, disk(3))
         assert_equal(out_u, out_f)
 
@@ -282,9 +283,8 @@ def test_compare_8bit_unsigned_vs_signed():
     image = img_as_ubyte(data.camera())
     image[image > 127] = 0
     image_s = image.astype(np.int8)
-    with all_warnings():  # precision loss
+    with expected_warnings(['sign loss', 'precision loss']):
         image_u = img_as_ubyte(image_s)
-
         assert_equal(image_u, img_as_ubyte(image_s))
 
     methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
@@ -294,7 +294,7 @@ def test_compare_8bit_unsigned_vs_signed():
     for method in methods:
         func = getattr(rank, method)
 
-        with all_warnings():  # sign loss
+        with expected_warnings(['sign loss', 'precision loss']):
             out_u = func(image_u, disk(3))
             out_s = func(image_s, disk(3))
         assert_equal(out_u, out_s)
@@ -486,11 +486,11 @@ def test_entropy():
     selem = np.ones((64, 64), dtype=np.uint8)
     data = np.tile(
         np.reshape(np.arange(4096), (64, 64)), (2, 2)).astype(np.uint16)
-    with all_warnings():  # bitdepth
+    with expected_warnings(['Bitdepth of 11']):
         assert(np.max(rank.entropy(data, selem)) == 12)
 
     # make sure output is of dtype double
-    with all_warnings():  # bitdepth
+    with expected_warnings(['Bitdepth of 11']): 
         out = rank.entropy(data, np.ones((16, 16), dtype=np.uint8))
     assert out.dtype == np.double
 
@@ -522,11 +522,14 @@ def test_16bit():
     for bitdepth in range(17):
         value = 2 ** bitdepth - 1
         image[10, 10] = value
-        with all_warnings():  # bitdepth
+        if bitdepth > 11:
+          expected = ['Bitdepth of %s' % (bitdepth - 1)]
+        else:
+          expected = []
+        with expected_warnings(expected):
             assert rank.minimum(image, selem)[10, 10] == 0
             assert rank.maximum(image, selem)[10, 10] == value
             assert rank.mean(image, selem)[10, 10] == int(value / selem.size)
-
 
 def test_bilateral():
     image = np.zeros((21, 21), dtype=np.uint16)

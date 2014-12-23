@@ -7,7 +7,7 @@ from PIL import Image
 from skimage.util import img_as_ubyte, img_as_uint
 from skimage.external.tifffile import (
     imread as tif_imread, imsave as tif_imsave)
-from skimage._shared.utils import all_warnings
+from skimage._shared._warnings import expected_warnings
 
 
 def imread(fname, dtype=None, img_num=None, **kwargs):
@@ -48,13 +48,13 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
     im = Image.open(fname)
     try:
         # this will raise an IOError if the file is not readable
-        im.getdata()[0]
+        with expected_warnings(['unclosed file']):
+            im.getdata()[0]
     except IOError:
         site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
         raise ValueError('Could not load "%s"\nPlease see documentation at: %s' % (fname, site))
     else:
-        with all_warnings():  # PIL resource warnings
-            return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
+        return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
 
 
 def pil_to_ndarray(im, dtype=None, img_num=None):

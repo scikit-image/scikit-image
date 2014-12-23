@@ -179,14 +179,27 @@ def mono_check(plugin, fmt='png'):
 
 
 def setup_test():
-    warnings.simplefilter('error')
-    with all_warnings():
-       from scipy import signal, ndimage, special, optimize, linalg
-       from scipy.io import loadmat
-       from skimage import filter, viewer, data
-       data.moon()
-    if os.environ.get('TRAVIS_PYTHON_VERSION', None) == '2.7':
-        warnings.simplefilter('default') 
+    """Default package level setup routine for skimage tests.
+
+    Import packages known to raise errors, and then
+    force warnings to raise errors. 
+    """
+    warnings.simplefilter('default')
+    from scipy import signal, ndimage, special, optimize, linalg
+    from scipy.io import loadmat
+    from skimage import filter, viewer, data
+    # trigger PIL warnings
+    data.moon()
+    warnings.simplefilter('error') 
+
+
+def teardown_test():
+    """Default package level teardown routine for skimage tests.
+
+    Restore warnings to default behavior
+    """
+    warnings.simplefilter('default')
+
 
 if __name__ == '__main__':
     color_check('pil')
