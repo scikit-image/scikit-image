@@ -7,7 +7,7 @@ from scipy import ndimage
 import skimage
 from skimage import data_dir
 from skimage.morphology import grey, selem
-from skimage._shared.utils import all_warnings
+from skimage._shared._warnings import expected_warnings
 
 
 lena = np.load(os.path.join(data_dir, 'lena_GRAY_U8.npy'))
@@ -172,10 +172,10 @@ def test_3d_fallback_white_tophat():
     image[3, 2:5, 2:5] = 1
     image[4, 3:5, 3:5] = 1
 
-    with all_warnings():  # scipy upstream warning
+    with expected_warnings(['operator.*deprecated']):
         new_image = grey.white_tophat(image)
     footprint = ndimage.generate_binary_structure(3,1)
-    with all_warnings():  # scipy upstream warning
+    with expected_warnings(['operator.*deprecated']):
         image_expected = ndimage.white_tophat(image,footprint=footprint)
     testing.assert_array_equal(new_image, image_expected)
 
@@ -185,10 +185,10 @@ def test_3d_fallback_black_tophat():
     image[3, 2:5, 2:5] = 0
     image[4, 3:5, 3:5] = 0
 
-    with all_warnings():  # scipy upstream warning
+    with expected_warnings(['operator.*deprecated']):
         new_image = grey.black_tophat(image)
     footprint = ndimage.generate_binary_structure(3,1)
-    with all_warnings():  # scipy upstream warning
+    with expected_warnings(['operator.*deprecated']):
         image_expected = ndimage.black_tophat(image,footprint=footprint)
     testing.assert_array_equal(new_image, image_expected)
 
@@ -223,11 +223,11 @@ class TestDTypes():
         self.expected_closing = np.load(fname_closing)[arrname]
 
     def _test_image(self, image):
-        with all_warnings():  # precision loss
+        with expected_warnings(['precision loss']):
             result_opening = grey.opening(image, self.disk)
         testing.assert_equal(result_opening, self.expected_opening)
 
-        with all_warnings():  # precision loss
+        with expected_warnings(['precision loss']):
             result_closing = grey.closing(image, self.disk)
         testing.assert_equal(result_closing, self.expected_closing)
 

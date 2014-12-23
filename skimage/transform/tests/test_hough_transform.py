@@ -3,7 +3,7 @@ from numpy.testing import assert_almost_equal, assert_equal
 
 import skimage.transform as tf
 from skimage.draw import line, circle_perimeter, ellipse_perimeter
-from skimage._shared.utils import all_warnings
+from skimage._shared._warnings import expected_warnings
 
 
 def append_desc(func, description):
@@ -68,7 +68,7 @@ def test_hough_line_peaks():
 
     out, angles, d = tf.hough_line(img)
 
-    with all_warnings():  # _ccomp deprecation
+    with expected_warnings(['`background`']):
         out, theta, dist = tf.hough_line_peaks(out, angles, d)
 
     assert_equal(len(dist), 1)
@@ -81,7 +81,7 @@ def test_hough_line_peaks_dist():
     img[:, 30] = True
     img[:, 40] = True
     hspace, angles, dists = tf.hough_line(img)
-    with all_warnings():  # _ccomp deprecation
+    with expected_warnings(['`background`']):
         assert len(tf.hough_line_peaks(hspace, angles, dists,
                                        min_distance=5)[0]) == 2
         assert len(tf.hough_line_peaks(hspace, angles, dists,
@@ -89,7 +89,7 @@ def test_hough_line_peaks_dist():
 
 
 def test_hough_line_peaks_angle():
-    with all_warnings():  # _ccomp deprecation
+    with expected_warnings(['`background`']):
         check_hough_line_peaks_angle()
 
 
@@ -124,7 +124,7 @@ def test_hough_line_peaks_num():
     img[:, 30] = True
     img[:, 40] = True
     hspace, angles, dists = tf.hough_line(img)
-    with all_warnings():  # _ccomp deprecation
+    with expected_warnings(['`background`']):
         assert len(tf.hough_line_peaks(hspace, angles, dists, min_distance=0,
                                        min_angle=0, num_peaks=1)[0]) == 1
 

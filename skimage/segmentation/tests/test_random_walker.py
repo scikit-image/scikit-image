@@ -1,7 +1,14 @@
 import numpy as np
 from skimage.segmentation import random_walker
 from skimage.transform import resize
-from skimage._shared.utils import all_warnings
+from skimage._shared._warnings import expected_warnings
+from skimage._shared.version_requirements import is_installed
+
+
+if is_installed('pyamg'):
+    PYAMG_EXPECTED_WARNING = []
+else:
+    PYAMG_EXPECTED_WARNING = ['pyamg']
 
 
 def make_2d_syntheticdata(lx, ly=None):
@@ -75,11 +82,11 @@ def test_2d_cg():
     lx = 70
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
-    with all_warnings():  # cg mode
+    with expected_warnings(['"cg" mode']):
         labels_cg = random_walker(data, labels, beta=90, mode='cg')
     assert (labels_cg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    with all_warnings():  # cg mode
+    with expected_warnings(['"cg" mode']):
         full_prob = random_walker(data, labels, beta=90, mode='cg',
                                   return_full_prob=True)
     assert (full_prob[1, 25:45, 40:60] >=
@@ -92,11 +99,11 @@ def test_2d_cg_mg():
     lx = 70
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
-    with all_warnings():  # pyamg optional
+    with expected_warnings(PYAMG_EXPECTED_WARNING):
         labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    with all_warnings():  # pyamg optional
+    with expected_warnings(PYAMG_EXPECTED_WARNING):
         full_prob = random_walker(data, labels, beta=90, mode='cg_mg',
                               return_full_prob=True)
     assert (full_prob[1, 25:45, 40:60] >=
@@ -111,7 +118,7 @@ def test_types():
     data, labels = make_2d_syntheticdata(lx, ly)
     data = 255 * (data - data.min()) // (data.max() - data.min())
     data = data.astype(np.uint8)
-    with all_warnings():  # pyamg optional
+    with expected_warnings(PYAMG_EXPECTED_WARNING):
         labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
@@ -145,7 +152,7 @@ def test_3d():
     n = 30
     lx, ly, lz = n, n, n
     data, labels = make_3d_syntheticdata(lx, ly, lz)
-    with all_warnings():  # cg mode
+    with expected_warnings(['"cg" mode']):
         labels = random_walker(data, labels, mode='cg')
     assert (labels.reshape(data.shape)[13:17, 13:17, 13:17] == 2).all()
     assert data.shape == labels.shape
@@ -159,7 +166,7 @@ def test_3d_inactive():
     old_labels = np.copy(labels)
     labels[5:25, 26:29, 26:29] = -1
     after_labels = np.copy(labels)
-    with all_warnings():  # cg mode
+    with expected_warnings(['"cg" mode']):
         labels = random_walker(data, labels, mode='cg')
     assert (labels.reshape(data.shape)[13:17, 13:17, 13:17] == 2).all()
     assert data.shape == labels.shape
@@ -170,11 +177,11 @@ def test_multispectral_2d():
     lx, ly = 70, 100
     data, labels = make_2d_syntheticdata(lx, ly)
     data = data[..., np.newaxis].repeat(2, axis=-1)  # Expect identical output
-    with all_warnings():  # cg mode
+    with expected_warnings(['"cg" mode']):
         multi_labels = random_walker(data, labels, mode='cg',
                                      multichannel=True)
     assert data[..., 0].shape == labels.shape
-    with all_warnings():  # cg mode
+    with expected_warnings(['"cg" mode']):
         single_labels = random_walker(data[..., 0], labels, mode='cg')
     assert (multi_labels.reshape(labels.shape)[25:45, 40:60] == 2).all()
     assert data[..., 0].shape == labels.shape
@@ -186,11 +193,11 @@ def test_multispectral_3d():
     lx, ly, lz = n, n, n
     data, labels = make_3d_syntheticdata(lx, ly, lz)
     data = data[..., np.newaxis].repeat(2, axis=-1)  # Expect identical output
-    with all_warnings():  # cg mode
+    with expected_warnings(['"cg" mode']):
         multi_labels = random_walker(data, labels, mode='cg', 
                                      multichannel=True)
     assert data[..., 0].shape == labels.shape
-    with all_warnings():  # cg mode
+    with expected_warnings(['"cg" mode']):
         single_labels = random_walker(data[..., 0], labels, mode='cg')
     assert (multi_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
     assert (single_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
@@ -217,7 +224,7 @@ def test_spacing_0():
                  lz // 4 - small_l // 8] = 2
 
     # Test with `spacing` kwarg
-    with all_warnings():  # cg mode
+    with expected_warnings(['"cg" mode']):
         labels_aniso = random_walker(data_aniso, labels_aniso, mode='cg',
                                  spacing=(1., 1., 0.5))
 
@@ -245,7 +252,7 @@ def test_spacing_1():
 
     # Test with `spacing` kwarg
     # First, anisotropic along Y
-    with all_warnings():  # using cg mode
+    with expected_warnings(['"cg" mode']):
         labels_aniso = random_walker(data_aniso, labels_aniso, mode='cg',
                                      spacing=(1., 2., 1.))
     assert (labels_aniso[13:17, 26:34, 13:17] == 2).all()
@@ -265,7 +272,7 @@ def test_spacing_1():
                   lz // 2 - small_l // 4] = 2
 
     # Anisotropic along X
-    with all_warnings():  # cg mode
+    with expected_warnings(['"cg" mode']):
         labels_aniso2 = random_walker(data_aniso,
                                       labels_aniso2,
                                       mode='cg', spacing=(2., 1., 1.))
@@ -277,7 +284,7 @@ def test_trivial_cases():
     img = np.ones((10, 10))
     labels = np.ones((10, 10))
 
-    with all_warnings():  # using provided labels
+    with expected_warnings(["Returning provided labels"]):
         pass_through = random_walker(img, labels)
     np.testing.assert_array_equal(pass_through, labels)
 
@@ -285,7 +292,7 @@ def test_trivial_cases():
     labels[:, :5] = 3
     expected = np.concatenate(((labels == 1)[..., np.newaxis],
                                (labels == 3)[..., np.newaxis]), axis=2)
-    with all_warnings():  # using provided labels
+    with expected_warnings(["Returning provided labels"]):
         test = random_walker(img, labels, return_full_prob=True)
     np.testing.assert_array_equal(test, expected)
 

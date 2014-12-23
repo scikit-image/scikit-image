@@ -8,7 +8,7 @@ from skimage.viewer.plugins.base import Plugin
 from skimage.viewer.qt import QtGui, QtCore
 from numpy.testing import assert_almost_equal, assert_equal
 from numpy.testing.decorators import skipif
-from skimage._shared.utils import all_warnings
+from skimage._shared._warnings import expected_warnings
 
 
 def get_image_viewer():
@@ -100,12 +100,12 @@ def test_save_buttons():
     timer.singleShot(100, QtGui.QApplication.quit)
 
     sv.save_to_stack()
-    with all_warnings():  # precision loss
+    with expected_warnings(['precision loss']):
         sv.save_to_file(filename)
 
     img = data.imread(filename)
 
-    with all_warnings():  # precision loss
+    with expected_warnings(['precision loss']):
         assert_almost_equal(img, img_as_uint(viewer.image))
 
     img = io.pop()

@@ -3,7 +3,7 @@ from numpy.testing import assert_equal, assert_raises
 from skimage import img_as_int, img_as_float, \
                     img_as_uint, img_as_ubyte
 from skimage.util.dtype import convert
-from skimage._shared.utils import all_warnings
+from skimage._shared._warnings import expected_warnings
 
 
 dtype_range = {np.uint8: (0, 255),
@@ -29,9 +29,13 @@ def test_range():
                         (img_as_float, np.float64),
                         (img_as_uint, np.uint16),
                         (img_as_ubyte, np.ubyte)]:
-
-            with all_warnings():  # precision loss
-              y = f(x)
+            
+            try:
+                with expected_warnings(['precision loss|sign loss']):
+                    y = f(x)
+            except ValueError as e:
+                if not 'No warning raised' in str(e):
+                    raise
 
             omin, omax = dtype_range[dt]
 
@@ -62,8 +66,14 @@ def test_range_extra_dtypes():
     for dtype_in, dt in dtype_pairs:
         imin, imax = dtype_range_extra[dtype_in]
         x = np.linspace(imin, imax, 10).astype(dtype_in)
-        with all_warnings():  # sign loss
-          y = convert(x, dt)
+        
+        try:
+            with expected_warnings(['precision loss|sign loss']):
+                y = convert(x, dt)
+        except ValueError as e:
+          if not 'No warning raised' in str(e):
+            raise
+
         omin, omax = dtype_range_extra[dt]
         yield (_verify_range,
                "From %s to %s" % (np.dtype(dtype_in), np.dtype(dt)),

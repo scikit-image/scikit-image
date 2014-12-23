@@ -3,7 +3,7 @@ import itertools
 import numpy as np
 from numpy import testing
 from skimage.color.colorlabel import label2rgb
-from skimage._shared.utils import all_warnings
+from skimage._shared._warnings import expected_warnings
 from numpy.testing import (assert_array_almost_equal as assert_close,
                            assert_array_equal, assert_warns)
 
@@ -125,10 +125,9 @@ def test_avg():
 
 
 def test_negative_intensity():
-    with all_warnings():
-        labels = np.arange(100).reshape(10, 10)
-        image = -1 * np.ones((10, 10))
-        assert_warns(UserWarning, label2rgb, labels, image)
+    labels = np.arange(100).reshape(10, 10)
+    image = -1 * np.ones((10, 10))
+    assert_warns(UserWarning, label2rgb, labels, image)
 
 
 if __name__ == '__main__':

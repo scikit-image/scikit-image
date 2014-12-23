@@ -3,7 +3,7 @@ from numpy.testing import assert_equal, assert_raises, assert_almost_equal
 from skimage.measure import LineModel, CircleModel, EllipseModel, ransac
 from skimage.transform import AffineTransform
 from skimage.measure.fit import _dynamic_max_trials
-from skimage._shared.utils import all_warnings
+from skimage._shared._warnings import expected_warnings
 
 
 def test_line_model_invalid_input():
@@ -256,7 +256,7 @@ def test_deprecated_params_attribute():
     model.params = (10, 1)
     x = np.arange(-10, 10)
     y = model.predict_y(x)
-    with all_warnings():  # deprecation
+    with expected_warnings(['`_params`']):
         assert_equal(model.params, model._params)
 
 

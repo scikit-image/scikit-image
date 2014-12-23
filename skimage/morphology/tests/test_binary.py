@@ -4,7 +4,7 @@ from numpy import testing
 from skimage import data, color
 from skimage.util import img_as_bool
 from skimage.morphology import binary, grey, selem
-from skimage._shared.utils import all_warnings
+from skimage._shared._warnings import expected_warnings
 from scipy import ndimage
 
 
@@ -15,7 +15,7 @@ bw_img = img > 100
 def test_non_square_image():
     strel = selem.square(3)
     binary_res = binary.binary_erosion(bw_img[:100, :200], strel)
-    with all_warnings():  # precision loss
+    with expected_warnings(['precision loss']):
         grey_res = img_as_bool(grey.erosion(bw_img[:100, :200], strel))
     testing.assert_array_equal(binary_res, grey_res)
 
@@ -23,7 +23,7 @@ def test_non_square_image():
 def test_binary_erosion():
     strel = selem.square(3)
     binary_res = binary.binary_erosion(bw_img, strel)
-    with all_warnings():  # precision loss
+    with expected_warnings(['precision loss']):
         grey_res = img_as_bool(grey.erosion(bw_img, strel))
     testing.assert_array_equal(binary_res, grey_res)
 
@@ -31,7 +31,7 @@ def test_binary_erosion():
 def test_binary_dilation():
     strel = selem.square(3)
     binary_res = binary.binary_dilation(bw_img, strel)
-    with all_warnings():  # precision loss
+    with expected_warnings(['precision loss']):
         grey_res = img_as_bool(grey.dilation(bw_img, strel))
     testing.assert_array_equal(binary_res, grey_res)
 
@@ -39,7 +39,7 @@ def test_binary_dilation():
 def test_binary_closing():
     strel = selem.square(3)
     binary_res = binary.binary_closing(bw_img, strel)
-    with all_warnings():  # precision loss
+    with expected_warnings(['precision loss']):
         grey_res = img_as_bool(grey.closing(bw_img, strel))
     testing.assert_array_equal(binary_res, grey_res)
 
@@ -47,7 +47,7 @@ def test_binary_closing():
 def test_binary_opening():
     strel = selem.square(3)
     binary_res = binary.binary_opening(bw_img, strel)
-    with all_warnings():  # precision loss
+    with expected_warnings(['precision loss']):
         grey_res = img_as_bool(grey.opening(bw_img, strel))
     testing.assert_array_equal(binary_res, grey_res)
 
@@ -57,7 +57,7 @@ def test_selem_overflow():
     img = np.zeros((20, 20))
     img[2:19, 2:19] = 1
     binary_res = binary.binary_erosion(img, strel)
-    with all_warnings():  # precision loss
+    with expected_warnings(['precision loss']):
         grey_res = img_as_bool(grey.erosion(img, strel))
     testing.assert_array_equal(binary_res, grey_res)
 

@@ -11,7 +11,7 @@ from skimage import exposure
 from skimage.exposure.exposure import intensity_range
 from skimage.color import rgb2gray
 from skimage.util.dtype import dtype_range
-from skimage._shared.utils import all_warnings
+from skimage._shared._warnings import expected_warnings
 
 
 # Test integer histograms
@@ -53,7 +53,7 @@ def test_equalize_uint8_approx():
 
 
 def test_equalize_ubyte():
-    with all_warnings():  # precision loss
+    with expected_warnings(['precision loss']):
         img = skimage.img_as_ubyte(test_img)
     img_eq = exposure.equalize_hist(img)
 
@@ -211,7 +211,7 @@ def test_adapthist_grayscale():
     img = skimage.img_as_float(data.astronaut())
     img = rgb2gray(img)
     img = np.dstack((img, img, img))
-    with all_warnings():  # precision loss
+    with expected_warnings(['precision loss']):
         adapted = exposure.equalize_adapthist(img, 10, 9, clip_limit=0.01,
                                               nbins=128)
     assert_almost_equal = np.testing.assert_almost_equal
@@ -229,7 +229,7 @@ def test_adapthist_color():
         warnings.simplefilter('always')
         hist, bin_centers = exposure.histogram(img)
         assert len(w) > 0
-    with all_warnings():  # precision loss
+    with expected_warnings(['precision loss']):
         adapted = exposure.equalize_adapthist(img, clip_limit=0.01)
 
     assert_almost_equal = np.testing.assert_almost_equal
@@ -248,7 +248,7 @@ def test_adapthist_alpha():
     img = skimage.img_as_float(data.astronaut())
     alpha = np.ones((img.shape[0], img.shape[1]), dtype=float)
     img = np.dstack((img, alpha))
-    with all_warnings():  # precision loss
+    with expected_warnings(['precision loss']):
         adapted = exposure.equalize_adapthist(img)
     assert adapted.shape != img.shape
     img = img[:, :, :3]

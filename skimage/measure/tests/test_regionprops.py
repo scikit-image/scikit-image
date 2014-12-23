@@ -4,7 +4,7 @@ import numpy as np
 import math
 
 from skimage.measure._regionprops import regionprops, PROPS, perimeter
-from skimage._shared.utils import all_warnings
+from skimage._shared._warnings import expected_warnings
 
 
 SAMPLE = np.array(
@@ -26,16 +26,14 @@ INTENSITY_SAMPLE[1, 9:11] = 2
 def test_all_props():
     region = regionprops(SAMPLE, INTENSITY_SAMPLE)[0]
     for prop in PROPS:
-        with all_warnings():  # deprecation warning
-            assert_equal(region[prop], getattr(region, PROPS[prop]))
+        assert_equal(region[prop], getattr(region, PROPS[prop]))
 
 
 def test_dtype():
     regionprops(np.zeros((10, 10), dtype=np.int))
     regionprops(np.zeros((10, 10), dtype=np.uint))
-    with all_warnings():  # deprecation on dtype
-        assert_raises((TypeError, RuntimeError), regionprops,
-                      np.zeros((10, 10), dtype=np.double))
+    assert_raises((TypeError, RuntimeError), regionprops,
+                   np.zeros((10, 10), dtype=np.double))
 
 
 def test_ndim():
@@ -128,13 +126,13 @@ def test_equiv_diameter():
 
 
 def test_euler_number():
-    with all_warnings():  # deprecation warning
+    with expected_warnings(['`background`']):
         en = regionprops(SAMPLE)[0].euler_number
     assert en == 0
 
     SAMPLE_mod = SAMPLE.copy()
     SAMPLE_mod[7, -3] = 0
-    with all_warnings():  # deprecation warning
+    with expected_warnings(['`background`']):
         en = regionprops(SAMPLE_mod)[0].euler_number
     assert en == -1
 
@@ -374,7 +372,7 @@ def test_equals():
     r2 = regions[0]
     r3 = regions[1]
 
-    with all_warnings():  # deprecation warning
+    with expected_warnings(['`background`']):
         assert_equal(r1 == r2, True, "Same regionprops are not equal")
         assert_equal(r1 != r3, True, "Different regionprops are equal")
 

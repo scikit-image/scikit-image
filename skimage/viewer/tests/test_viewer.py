@@ -8,7 +8,7 @@ from skimage.filters import sobel
 from numpy.testing import assert_equal
 from numpy.testing.decorators import skipif
 from skimage._shared.version_requirements import is_installed
-from skimage._shared.utils import all_warnings
+from skimage._shared._warnings import expected_warnings
 
 
 @skipif(not viewer_available)
@@ -68,7 +68,7 @@ def test_viewer_with_overlay():
     ov.color = 3
     assert_equal(ov.color, 'yellow')
 
-    with all_warnings():  # precision loss
+    with expected_warnings(['precision loss']):
         viewer.save_to_file(filename)
     ov.display_filtered_image(img)
     assert_equal(ov.overlay, img)

@@ -7,7 +7,7 @@ from skimage.transform import (estimate_transform, matrix_transform,
                                SimilarityTransform, AffineTransform,
                                ProjectiveTransform, PolynomialTransform,
                                PiecewiseAffineTransform)
-from skimage._shared.utils import all_warnings
+from skimage._shared._warnings import expected_warnings
 
 
 SRC = np.array([
@@ -252,11 +252,11 @@ def test_invalid_input():
 def test_deprecated_params_attributes():
     for t in ('projective', 'affine', 'similarity'):
         tform = estimate_transform(t, SRC, DST)
-        with all_warnings():  # _matrix is deprecated
+        with expected_warnings(['`_matrix`.*deprecated']):
             assert_equal(tform._matrix, tform.params)
 
     tform = estimate_transform('polynomial', SRC, DST, order=3)
-    with all_warnings():  # _params is deprecated
+    with expected_warnings(['`_params`.*deprecated']):
         assert_equal(tform._params, tform.params)
 
 

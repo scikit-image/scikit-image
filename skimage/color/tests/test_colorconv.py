@@ -40,11 +40,9 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            )
 
 from skimage import data_dir
-from skimage._shared.utils import all_warnings
+from skimage._shared._warnings import expected_warnings
 
 import colorsys
-
-np.random.seed(0)
 
 
 def test_guess_spatial_dimensions():
@@ -157,7 +155,7 @@ class TestColorconv(TestCase):
     # RGB<->HED roundtrip with ubyte image
     def test_hed_rgb_roundtrip(self):
         img_rgb = img_as_ubyte(self.img_rgb)
-        with all_warnings():  # precision loss
+        with expected_warnings(['precision loss']):
             new = img_as_ubyte(hed2rgb(rgb2hed(img_rgb)))
         assert_equal(new, img_rgb)
 

@@ -1,4 +1,4 @@
-__all__ = ['all_warnings']
+__all__ = ['all_warnings', 'expected_warnings']
 
 from contextlib import contextmanager
 import sys
@@ -90,14 +90,16 @@ def expected_warnings(matching):
     """
     with all_warnings() as w:
         yield w
-        remaining = matching
+        remaining = [m for m in matching]
         for warn in w:
             found = False
             for match in matching:
                 if re.search(match, str(warn.message)) is not None:
                     found = True
-                    remaining.remove(match)
+                    if match in remaining:
+                        remaining.remove(match)
             if not found:
                 raise ValueError('Unexpected warning: %s' % str(warn.message))
         if len(remaining) > 0:
-            raise ValueError('No warning raised matching: "%s"' % remaining[0])
+            msg = 'No warning raised matching:\n%s' % '\n'.join(remaining)
+            raise ValueError(msg)

@@ -1,2 +1,9 @@
-from skimage._shared.testing import setup_test
-setup_test()
+from skimage._shared.testing import setup_test, teardown_test
+
+
+def setup():
+    setup_test()
+
+
+def tearDown():
+    teardown_test()

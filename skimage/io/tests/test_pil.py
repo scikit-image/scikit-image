@@ -10,16 +10,18 @@ from skimage import data_dir
 from skimage.io import (imread, imsave, use_plugin, reset_plugins,
                         Image as ioImage)
 from skimage._shared.testing import mono_check, color_check
-from skimage._shared.utils import all_warnings
+from skimage._shared._warnings import expected_warnings
 
 from six import BytesIO
 
 from PIL import Image
 from skimage.io._plugins.pil_plugin import (
     pil_to_ndarray, ndarray_to_pil, _palette_is_grayscale)
-use_plugin('pil')
 
-np.random.seed(0)
+
+
+def setup():
+    use_plugin('pil')
 
 
 def teardown():
@@ -144,7 +146,7 @@ def test_imsave_filelike():
     s = BytesIO()
 
     # save to file-like object
-    with all_warnings():  # precision loss
+    with expected_warnings(['precision loss']):
         imsave(s, image)
 
     # read from file-like object
@@ -157,7 +159,7 @@ def test_imsave_filelike():
 def test_imexport_imimport():
     shape = (2, 2)
     image = np.zeros(shape)
-    with all_warnings():  # precision loss
+    with expected_warnings(['precision loss']):
         pil_image = ndarray_to_pil(image)
     out = pil_to_ndarray(pil_image)
     assert out.shape == shape
