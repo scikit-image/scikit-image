@@ -1004,10 +1004,37 @@ def _convert_warp_input(image, preserve_range):
     return image
 
 
-def _clip_warp_output(input_image, output_image, clip, mode, order, cval):
-    """Clip output image to range of values of input image, considering the
-    parameters of a call to warp.
+def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
+    """Clip output image to range of values of input image.
+
+    Note that this function modifies the values of `output_image` in-place
+    and it is only modified if ``clip=True``.
+
+    Parameters
+    ----------
+    input_image : ndarray
+        Input image.
+    output_image : ndarray
+        Output image, which is modified in-place.
+
+    Other parameters
+    ----------------
+    order : int, optional
+        The order of the spline interpolation, default is 1. The order has to
+        be in the range 0-5. See `skimage.transform.warp` for detail.
+    mode : string, optional
+        Points outside the boundaries of the input are filled according
+        to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
+    clip : bool, optional
+        Whether to clip the output to the range of values of the input image.
+        This is enabled by default, since higher order interpolation may
+        produce values outside the given input range.
+
     """
+
     if clip and order != 0:
         min_val = input_image.min()
         max_val = input_image.max()
@@ -1254,6 +1281,6 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
                                       mode=mode, order=order, cval=cval)
 
 
-    _clip_warp_output(image, out, clip, mode, order, cval)
+    _clip_warp_output(image, out, order, mode, cval, clip)
 
     return out
