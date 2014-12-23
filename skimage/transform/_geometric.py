@@ -4,8 +4,9 @@ import warnings
 import numpy as np
 from scipy import ndimage, spatial
 
-from skimage._shared.utils import get_bound_method_class, safe_as_int
-from skimage.util import img_as_float
+from .._shared.utils import get_bound_method_class, safe_as_int
+from ..util import img_as_float
+from ..exposure import rescale_intensity
 from ._warps_cy import _warp_fast
 
 
@@ -994,8 +995,64 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     return coords
 
 
+def _convert_warp_input(image, preserve_range):
+    """Convert input image to double image with the appropriate range."""
+    if preserve_range:
+        image = image.astype(np.double)
+    else:
+        image = img_as_float(image)
+    return image
+
+
+def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
+    """Clip output image to range of values of input image.
+
+    Note that this function modifies the values of `output_image` in-place
+    and it is only modified if ``clip=True``.
+
+    Parameters
+    ----------
+    input_image : ndarray
+        Input image.
+    output_image : ndarray
+        Output image, which is modified in-place.
+
+    Other parameters
+    ----------------
+    order : int, optional
+        The order of the spline interpolation, default is 1. The order has to
+        be in the range 0-5. See `skimage.transform.warp` for detail.
+    mode : string, optional
+        Points outside the boundaries of the input are filled according
+        to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
+    clip : bool, optional
+        Whether to clip the output to the range of values of the input image.
+        This is enabled by default, since higher order interpolation may
+        produce values outside the given input range.
+
+    """
+
+    if clip and order != 0:
+        min_val = input_image.min()
+        max_val = input_image.max()
+
+        preserve_cval = mode == 'constant' and not \
+                        (min_val <= cval <= max_val)
+
+        if preserve_cval:
+            cval_mask = output_image == cval
+
+        np.clip(output_image, min_val, max_val, out=output_image)
+
+        if preserve_cval:
+            output_image[cval_mask] = cval
+
+
 def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
-         mode='constant', cval=0., clip=True):
+         mode='constant', cval=0., clip=True, preserve_range=False):
     """Warp an image according to a given coordinate transformation.
 
     Parameters
@@ -1055,17 +1112,25 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
     clip : bool, optional
-        Whether to clip the output to the float range of ``[0, 1]``, or
-        ``[-1, 1]`` for input images with negative values. This is enabled by
-        default, since  higher order interpolation may produce values outside
-        the given input range.
+        Whether to clip the output to the range of values of the input image.
+        This is enabled by default, since higher order interpolation may
+        produce values outside the given input range.
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
+
+    Returns
+    -------
+    warped : double ndarray
+        The warped input image.
 
     Notes
     -----
-    In case of a `SimilarityTransform`, `AffineTransform` and
-    `ProjectiveTransform` and `order` in [0, 3] this function uses the
-    underlying transformation matrix to warp the image with a much faster
-    routine.
+    - The input image is converted to a `double` image.
+    - In case of a `SimilarityTransform`, `AffineTransform` and
+      `ProjectiveTransform` and `order` in [0, 3] this function uses the
+      underlying transformation matrix to warp the image with a much faster
+      routine.
 
     Examples
     --------
@@ -1124,7 +1189,8 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     """
 
-    image = img_as_float(image)
+    image = _convert_warp_input(image, preserve_range)
+
     input_shape = np.array(image.shape)
 
     if output_shape is None:
@@ -1132,7 +1198,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     else:
         output_shape = safe_as_int(output_shape)
 
-    out = None
+    warped = None
 
     if order == 2:
         # When fixing this issue, make sure to fix the branches further
@@ -1168,7 +1234,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         if matrix is not None:
             matrix = matrix.astype(np.double)
             if image.ndim == 2:
-                out = _warp_fast(image, matrix,
+                warped = _warp_fast(image, matrix,
                                  output_shape=output_shape,
                                  order=order, mode=mode, cval=cval)
             elif image.ndim == 3:
@@ -1177,9 +1243,9 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
                     dims.append(_warp_fast(image[..., dim], matrix,
                                            output_shape=output_shape,
                                            order=order, mode=mode, cval=cval))
-                out = np.dstack(dims)
+                warped = np.dstack(dims)
 
-    if out is None:
+    if warped is None:
         # use ndimage.map_coordinates
 
         if (isinstance(inverse_map, np.ndarray)
@@ -1216,24 +1282,10 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         # Pre-filtering not necessary for order 0, 1 interpolation
         prefilter = order > 1
 
-        out = ndimage.map_coordinates(image, coords, prefilter=prefilter,
+        warped = ndimage.map_coordinates(image, coords, prefilter=prefilter,
                                       mode=mode, order=order, cval=cval)
 
-    if clip:
-        # The spline filters sometimes return results outside [0, 1],
-        # so clip to ensure valid data
 
-        if np.min(image) < 0:
-            min_val = -1
-        else:
-            min_val = 0
-        max_val = 1
+    _clip_warp_output(image, warped, order, mode, cval, clip)
 
-        clipped = np.clip(out, min_val, max_val)
-
-        if mode == 'constant' and not (0 <= cval <= 1):
-            clipped[out == cval] = cval
-
-        out = clipped
-
-    return out
+    return warped

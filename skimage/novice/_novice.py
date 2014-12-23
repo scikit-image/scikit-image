@@ -353,8 +353,9 @@ class Picture(object):
         if (value[0] != self.width) or (value[1] != self.height):
             # skimage dimensions are flipped: y, x
             new_size = (int(value[1]), int(value[0]))
-            new_array = resize(self.array, new_size, order=0)
-            self.array = img_as_ubyte(new_array)
+            new_array = resize(self.array, new_size, order=0,
+                               preserve_range=True)
+            self.array = new_array.astype(np.uint8)
 
             self._array_modified()
 
