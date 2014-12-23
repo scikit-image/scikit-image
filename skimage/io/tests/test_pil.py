@@ -10,6 +10,7 @@ from skimage import data_dir
 from skimage.io import (imread, imsave, use_plugin, reset_plugins,
                         Image as ioImage)
 from skimage._shared.testing import mono_check, color_check
+from skimage._shared.utils import all_warnings
 
 from six import BytesIO
 
@@ -143,7 +144,8 @@ def test_imsave_filelike():
     s = BytesIO()
 
     # save to file-like object
-    imsave(s, image)
+    with all_warnings():  # precision loss
+        imsave(s, image)
 
     # read from file-like object
     s.seek(0)
@@ -155,7 +157,8 @@ def test_imsave_filelike():
 def test_imexport_imimport():
     shape = (2, 2)
     image = np.zeros(shape)
-    pil_image = ndarray_to_pil(image)
+    with all_warnings():  # precision loss
+        pil_image = ndarray_to_pil(image)
     out = pil_to_ndarray(pil_image)
     assert out.shape == shape
 

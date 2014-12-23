@@ -102,7 +102,7 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
             dtype = '>u2' if im.mode.endswith('B') else '<u2'
             if 'S' in im.mode:
                 dtype = dtype.replace('u', 'i')
-            frame = np.fromstring(frame.tostring(), dtype)
+            frame = np.fromstring(frame.tobytes(), dtype)
             frame.shape = shape[::-1]
 
         else:
@@ -179,15 +179,15 @@ def ndarray_to_pil(arr, format_str=None):
 
     if arr.ndim == 2:
         im = Image.new(mode_base, arr.T.shape)
-        im.fromstring(arr.tostring(), 'raw', mode)
+        im.frombytes(arr.tobytes(), 'raw', mode)
 
     else:
         try:
             im = Image.frombytes(mode, (arr.shape[1], arr.shape[0]),
-                                 arr.tostring())
+                                 arr.tobytes())
         except AttributeError:
-            im = Image.fromstring(mode, (arr.shape[1], arr.shape[0]),
-                                  arr.tostring())
+            im = Image.frombytes(mode, (arr.shape[1], arr.shape[0]),
+                                  arr.tobytes())
     return im
 
 

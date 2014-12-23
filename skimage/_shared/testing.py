@@ -9,6 +9,7 @@ from skimage import (
     data, io, img_as_uint, img_as_float, img_as_int, img_as_ubyte)
 from numpy import testing
 import numpy as np
+from skimage._shared.utils import all_warnings
 
 
 SKIP_RE = re.compile("(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
@@ -115,20 +116,25 @@ def color_check(plugin, fmt='png'):
     testing.assert_allclose(img2.astype(np.uint8), r2)
 
     img3 = img_as_float(img)
-    r3 = roundtrip(img3, plugin, fmt)
+    with all_warnings():  # precision loss
+        r3 = roundtrip(img3, plugin, fmt)
     testing.assert_allclose(r3, img)
 
-    img4 = img_as_int(img)
+    with all_warnings():  # precision loss
+        img4 = img_as_int(img)
     if fmt.lower() in (('tif', 'tiff')):
         img4 -= 100
-        r4 = roundtrip(img4, plugin, fmt)
+        with all_warnings():  # sign loss
+            r4 = roundtrip(img4, plugin, fmt)
         testing.assert_allclose(r4, img4)
     else:
-        r4 = roundtrip(img4, plugin, fmt)
-        testing.assert_allclose(r4, img_as_ubyte(img4))
+        with all_warnings():  # sign loss
+            r4 = roundtrip(img4, plugin, fmt)
+            testing.assert_allclose(r4, img_as_ubyte(img4))
 
     img5 = img_as_uint(img)
-    r5 = roundtrip(img5, plugin, fmt)
+    with all_warnings():  # precision loss
+        r5 = roundtrip(img5, plugin, fmt)
     testing.assert_allclose(r5, img)
 
 
@@ -147,20 +153,24 @@ def mono_check(plugin, fmt='png'):
     testing.assert_allclose(img2.astype(np.uint8), r2)
 
     img3 = img_as_float(img)
-    r3 = roundtrip(img3, plugin, fmt)
+    with all_warnings():  # precision loss
+        r3 = roundtrip(img3, plugin, fmt)
     if r3.dtype.kind == 'f':
         testing.assert_allclose(img3, r3)
     else:
         testing.assert_allclose(r3, img_as_uint(img))
 
-    img4 = img_as_int(img)
+    with all_warnings():  # precision loss
+        img4 = img_as_int(img)
     if fmt.lower() in (('tif', 'tiff')):
         img4 -= 100
-        r4 = roundtrip(img4, plugin, fmt)
+        with all_warnings():  # sign loss
+            r4 = roundtrip(img4, plugin, fmt)
         testing.assert_allclose(r4, img4)
     else:
-        r4 = roundtrip(img4, plugin, fmt)
-        testing.assert_allclose(r4, img_as_uint(img4))
+        with all_warnings():  # sign loss
+            r4 = roundtrip(img4, plugin, fmt)
+            testing.assert_allclose(r4, img_as_uint(img4))
 
     img5 = img_as_uint(img)
     r5 = roundtrip(img5, plugin, fmt)
