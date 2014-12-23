@@ -30,12 +30,8 @@ def test_range():
                         (img_as_uint, np.uint16),
                         (img_as_ubyte, np.ubyte)]:
             
-            try:
-                with expected_warnings(['precision loss|sign loss']):
-                    y = f(x)
-            except ValueError as e:
-                if not 'No warning raised' in str(e):
-                    raise
+            with expected_warnings(['precision loss|sign loss|\A\Z']):
+                y = f(x)
 
             omin, omax = dtype_range[dt]
 
@@ -67,12 +63,8 @@ def test_range_extra_dtypes():
         imin, imax = dtype_range_extra[dtype_in]
         x = np.linspace(imin, imax, 10).astype(dtype_in)
         
-        try:
-            with expected_warnings(['precision loss|sign loss']):
-                y = convert(x, dt)
-        except ValueError as e:
-          if not 'No warning raised' in str(e):
-            raise
+        with expected_warnings(['precision loss|sign loss|\A\Z']):
+            y = convert(x, dt)
 
         omin, omax = dtype_range_extra[dt]
         yield (_verify_range,

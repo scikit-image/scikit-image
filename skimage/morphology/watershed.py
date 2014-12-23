@@ -119,9 +119,9 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     >>> from skimage.feature import peak_local_max
     >>> local_maxi = peak_local_max(distance, labels=image,
     ...                             footprint=np.ones((3, 3)),
-    ...                             indices=False)  # doctest: +SKIP
-    >>> markers = ndimage.label(local_maxi)[0]  # doctest: +SKIP
-    >>> labels = watershed(-distance, markers, mask=image)  # doctest: +SKIP
+    ...                             indices=False)
+    >>> markers = ndimage.label(local_maxi)[0]
+    >>> labels = watershed(-distance, markers, mask=image)
 
     The algorithm works also for 3-D images, and can be used for example to
     separate overlapping spheres.

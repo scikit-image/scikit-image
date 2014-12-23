@@ -85,12 +85,15 @@ def expected_warnings(matching):
     Uses `all_warnings` to ensure all warnings are raised.
     Upon exiting, it checks the recorded warnings for the desired matching
     string.  Raises a warning if the match was not found or an Unexpected
-    warning is found.
+    warning is found.  You can pass an empty regex as on of the matches
+    to allow for no matches: "\A\Z".
 
     """
     with all_warnings() as w:
+        # enter context
         yield w
-        remaining = [m for m in matching]
+        # exited user context, check the recorded warnings
+        remaining = [m for m in matching if not '\A\Z' in m.split('|')]
         for warn in w:
             found = False
             for match in matching:

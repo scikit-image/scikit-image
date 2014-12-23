@@ -430,7 +430,7 @@ def label(input, neighbors=None, background=None, return_num=False,
     ...               [1, 1, 5],
     ...               [0, 0, 0]])
 
-    >>> print(label(x, background=0))  # doctest: +SKIP
+    >>> print(label(x, background=0))
     [[ 0 -1 -1]
      [ 0  0  1]
      [-1 -1 -1]]
