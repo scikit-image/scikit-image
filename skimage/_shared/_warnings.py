@@ -4,6 +4,7 @@ from contextlib import contextmanager
 import sys
 import warnings
 import inspect
+import re
 
 
 @contextmanager
@@ -61,3 +62,42 @@ def all_warnings():
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         yield w
+
+
+@contextmanager
+def expected_warnings(matching):
+    """Context for use in testing to catch known warnings matching regexes
+    
+    Parameters
+    ----------
+    matching : list of strings or compiled regexes
+        Regexes for the desired warning to catch
+
+
+    Examples
+    --------
+    >>> from skimage import data, img_as_ubyte, img_as_float
+    >>> with expected_warnings(['precision loss']):
+    ...   d = img_as_ubyte(img_as_float(data.coins()))
+
+    Notes
+    -----
+    Uses `all_warnings` to ensure all warnings are raised.
+    Upon exiting, it checks the recorded warnings for the desired matching
+    string.  Raises a warning if the match was not found or an Unexpected
+    warning is found.
+
+    """
+    with all_warnings() as w:
+        yield w
+        remaining = matching
+        for warn in w:
+            found = False
+            for match in matching:
+                if re.search(match, str(warn.message)) is not None:
+                    found = True
+                    remaining.remove(match)
+            if not found:
+                raise ValueError('Unexpected warning: %s' % str(warn.message))
+        if len(remaining) > 0:
+            raise ValueError('No warning raised matching: "%s"' % remaining[0])

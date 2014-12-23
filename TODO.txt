@@ -15,7 +15,7 @@ Version 0.13
 Version 0.12
 ------------
 * Change `label` to mark background as 0, not -1, which is consistent with
-  SciPy's labelling.
+  SciPy's labelling.  Also remove doctest skip in _ccomp.pyx `label`.
 * Remove `skimage.morphology.label` from `skimage.morphology.__init__`--it now
   lives in `skimage.measure.label`.
 * Remove deprecated `reverse_map` parameter of `skimage.transform.warp`

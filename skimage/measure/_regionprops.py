@@ -473,13 +473,13 @@ def regionprops(label_image, intensity_image=None, cache=True):
     >>> from skimage import data, util
     >>> from skimage.morphology import label
     >>> img = util.img_as_ubyte(data.coins()) > 110
-    >>> label_img = label(img)  # doctest: +SKIP
-    >>> props = regionprops(label_img)  # doctest: +SKIP
+    >>> label_img = label(img, connectivity=img.ndim)
+    >>> props = regionprops(label_img)
     >>> # centroid of first labeled object
-    >>> props[0].centroid   # doctest: +SKIP 
+    >>> props[0].centroid
     (22.729879860483141, 81.912285234465827)
     >>> # centroid of first labeled object
-    >>> props[0]['centroid']  # doctest: +SKIP 
+    >>> props[0]['centroid']
     (22.729879860483141, 81.912285234465827)
 
     """

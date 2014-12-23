@@ -42,7 +42,7 @@ True
 451
 
 Changing `size` resizes the picture.
->>> picture.size = (45, 30)  # doctest: +SKIP
+>>> picture.size = (45, 30)
 
 You can iterate over pixels, which have RGB values between 0 and 255,
 and know their location in the picture.

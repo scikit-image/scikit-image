@@ -12,9 +12,9 @@ BG = -1
 
 
 def label(*args, **kwargs):
-  """Wrap the label function to avoid deprecation warning"""
-  with all_warnings():
-    return _label(*args, **kwargs)
+    """Wrap the label function to avoid deprecation warning"""
+    with all_warnings():
+        return _label(*args, **kwargs)
 
 
 class TestConnectedComponents:

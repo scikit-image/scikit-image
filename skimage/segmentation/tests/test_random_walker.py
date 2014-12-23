@@ -81,7 +81,7 @@ def test_2d_cg():
     assert data.shape == labels.shape
     with all_warnings():  # cg mode
         full_prob = random_walker(data, labels, beta=90, mode='cg',
-                              return_full_prob=True)
+                                  return_full_prob=True)
     assert (full_prob[1, 25:45, 40:60] >=
             full_prob[0, 25:45, 40:60]).all()
     assert data.shape == labels.shape
@@ -245,7 +245,7 @@ def test_spacing_1():
 
     # Test with `spacing` kwarg
     # First, anisotropic along Y
-    with all_warnings():  # using cd mode
+    with all_warnings():  # using cg mode
         labels_aniso = random_walker(data_aniso, labels_aniso, mode='cg',
                                      spacing=(1., 2., 1.))
     assert (labels_aniso[13:17, 26:34, 13:17] == 2).all()
