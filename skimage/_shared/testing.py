@@ -182,7 +182,8 @@ def setup_test():
     """Default package level setup routine for skimage tests.
 
     Import packages known to raise errors, and then
-    force warnings to raise errors. 
+    force warnings to raise errors.  
+    Set a random seed
     """
     warnings.simplefilter('default')
     from scipy import signal, ndimage, special, optimize, linalg
@@ -190,6 +191,7 @@ def setup_test():
     from skimage import filter, viewer, data
     # trigger PIL warnings
     data.moon()
+    np.random.seed(0)
     warnings.simplefilter('error') 
 
 
