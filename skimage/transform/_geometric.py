@@ -1012,14 +1012,16 @@ def _clip_warp_output(input_image, output_image, clip, mode, order, cval):
         min_val = input_image.min()
         max_val = input_image.max()
 
-        clipped = np.clip(output_image, min_val, max_val)
+        preserve_cval = mode == 'constant' and not \
+                        (min_val <= cval <= max_val)
 
-        if mode == 'constant' and not (min_val <= cval <= max_val):
-            clipped[output_image == cval] = cval
+        if preserve_cval:
+            cval_mask = output_image == cval
 
-        return clipped
+        np.clip(output_image, min_val, max_val, out=output_image)
 
-    return output_image
+        if preserve_cval:
+            output_image[cval_mask] = cval
 
 
 def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
@@ -1252,6 +1254,6 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
                                       mode=mode, order=order, cval=cval)
 
 
-    out = _clip_warp_output(image, out, clip, mode, order, cval)
+    _clip_warp_output(image, out, clip, mode, order, cval)
 
     return out

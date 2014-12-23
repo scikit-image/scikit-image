@@ -84,7 +84,7 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
         out = ndimage.map_coordinates(image, coord_map, order=order,
                                       mode=mode, cval=cval)
 
-        out = _clip_warp_output(image, out, clip, mode, order, cval)
+        _clip_warp_output(image, out, clip, mode, order, cval)
 
     else:  # 2-dimensional interpolation
 
