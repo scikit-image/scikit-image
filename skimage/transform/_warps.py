@@ -88,18 +88,23 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
 
     else:  # 2-dimensional interpolation
 
-        # 3 control points necessary to estimate exact AffineTransform
-        src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
-        dst_corners = np.zeros(src_corners.shape, dtype=np.double)
-        # take into account that 0th pixel is at position (0.5, 0.5)
-        dst_corners[:, 0] = col_scale * (src_corners[:, 0] + 0.5) - 0.5
-        dst_corners[:, 1] = row_scale * (src_corners[:, 1] + 0.5) - 0.5
+        if rows == 1 and cols == 1:
+            tform = AffineTransform(translation=(orig_cols / 2.0 - 0.5,
+                                                 orig_rows / 2.0 - 0.5))
+        else:
+            # 3 control points necessary to estimate exact AffineTransform
+            src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
+            dst_corners = np.zeros(src_corners.shape, dtype=np.double)
+            # take into account that 0th pixel is at position (0.5, 0.5)
+            dst_corners[:, 0] = col_scale * (src_corners[:, 0] + 0.5) - 0.5
+            dst_corners[:, 1] = row_scale * (src_corners[:, 1] + 0.5) - 0.5
 
-        tform = AffineTransform()
-        tform.estimate(src_corners, dst_corners)
+            tform = AffineTransform()
+            tform.estimate(src_corners, dst_corners)
 
         out = warp(image, tform, output_shape=output_shape, order=order,
-                   mode=mode, cval=cval, clip=clip, preserve_range=preserve_range)
+                   mode=mode, cval=cval, clip=clip,
+                   preserve_range=preserve_range)
 
     return out
 
