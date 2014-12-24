@@ -14,7 +14,7 @@ except ImportError:
             QWidget = object
 
         class QtCore(object):
-            Signal = object
+            def Signal(*args, **kwargs): pass
             Qt = object
 
         QtWidgets = QtGui
