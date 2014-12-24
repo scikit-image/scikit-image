@@ -186,7 +186,7 @@ def setup_test():
     Set a random seed
     """
     warnings.simplefilter('default')
-    from scipy import signal, ndimage, special, optimize, linalg, sparse
+    from scipy import signal, ndimage, special, optimize, linalg
     from scipy.io import loadmat
     from skimage import viewer, filter
     np.random.seed(0)
