@@ -651,6 +651,10 @@ class SimilarityTransform(ProjectiveTransform):
             Destination coordinates.
 
         """
+
+        src_matrix, src = _center_and_normalize_points(src)
+        dst_matrix, dst = _center_and_normalize_points(dst)
+
         xs = src[:, 0]
         ys = src[:, 1]
         xd = dst[:, 0]
@@ -674,9 +678,15 @@ class SimilarityTransform(ProjectiveTransform):
         # singular value
         a0, a1, b0, b1 = - V[-1, :-1] / V[-1, -1]
 
-        self.params = np.array([[a0, -b0, a1],
-                                [b0,  a0, b1],
-                                [ 0,   0,  1]])
+        S = np.array([[a0, -b0, a1],
+                      [b0,  a0, b1],
+                      [ 0,   0,  1]])
+
+        # De-center and de-normalize
+        S = np.dot(np.linalg.inv(dst_matrix), np.dot(S, src_matrix))
+
+        self.params = S
+
 
     @property
     def scale(self):
