@@ -61,12 +61,6 @@ import imp as _imp
 import functools as _functools
 import warnings as _warnings
 
-import matplotlib as _mpl
-if 'Qt5Agg' in _mpl.rcsetup.interactive_bk:
-    _mpl.rcParams['backend'] = 'Qt5Agg'
-else:
-    _mpl.rcParams['backend'] = 'Qt4Agg'
-
 pkg_dir = _osp.abspath(_osp.dirname(__file__))
 data_dir = _osp.join(pkg_dir, 'data')
 
