@@ -94,11 +94,12 @@ def test_2d_cg_mg():
     lx = 70
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
-    with expected_warnings([PYAMG_EXPECTED_WARNING]):
+    expected = 'scipy.sparse.sparsetools|%s' % PYAMG_EXPECTED_WARNING
+    with expected_warnings([expected]):
         labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    with expected_warnings([PYAMG_EXPECTED_WARNING]):
+    with expected_warnings([expected]):
         full_prob = random_walker(data, labels, beta=90, mode='cg_mg',
                               return_full_prob=True)
     assert (full_prob[1, 25:45, 40:60] >=
