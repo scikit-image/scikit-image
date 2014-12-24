@@ -264,6 +264,10 @@ class ProjectiveTransform(GeometricTransform):
             Destination coordinates.
 
         """
+
+        src_matrix, src = _center_and_normalize_points(src)
+        dst_matrix, dst = _center_and_normalize_points(dst)
+
         xs = src[:, 0]
         ys = src[:, 1]
         xd = dst[:, 0]
@@ -295,6 +299,9 @@ class ProjectiveTransform(GeometricTransform):
         # singular value
         H.flat[list(self._coeffs) + [8]] = - V[-1, :-1] / V[-1, -1]
         H[2, 2] = 1
+
+        # De-center and de-normalize
+        H = np.dot(np.linalg.inv(dst_matrix), np.dot(H, src_matrix))
 
         self.params = H
 
