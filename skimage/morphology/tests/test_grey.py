@@ -175,7 +175,7 @@ def test_3d_fallback_white_tophat():
     with expected_warnings(['operator.*deprecated|\A\Z']):
         new_image = grey.white_tophat(image)
     footprint = ndimage.generate_binary_structure(3,1)
-    with expected_warnings(['operator.*deprecated\A\Z']):
+    with expected_warnings(['operator.*deprecated|\A\Z']):
         image_expected = ndimage.white_tophat(image,footprint=footprint)
     testing.assert_array_equal(new_image, image_expected)
 
