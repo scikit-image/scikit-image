@@ -190,8 +190,7 @@ def setup_test():
     from scipy.io import loadmat
     from skimage import viewer, filter
     np.random.seed(0)
-    if os.environ.get('TRAVIS_PYTHON_VERSION', None) != '2.7':
-        warnings.simplefilter('error') 
+    warnings.simplefilter('error') 
 
 
 def teardown_test():

@@ -211,7 +211,7 @@ def test_adapthist_grayscale():
     img = skimage.img_as_float(data.astronaut())
     img = rgb2gray(img)
     img = np.dstack((img, img, img))
-    with expected_warnings(['precision loss']):
+    with expected_warnings(['precision loss|non-contiguous input]):
         adapted = exposure.equalize_adapthist(img, 10, 9, clip_limit=0.01,
                                               nbins=128)
     assert_almost_equal = np.testing.assert_almost_equal

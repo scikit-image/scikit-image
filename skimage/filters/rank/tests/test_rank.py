@@ -11,7 +11,7 @@ from skimage._shared._warnings import expected_warnings
 
 
 def test_all():
-    with expected_warnings(['precision loss', 'non-integer']):
+    with expected_warnings(['precision loss', 'non-integer|\A\Z']):
         check_all()
 
 
