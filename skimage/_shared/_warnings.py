@@ -84,9 +84,16 @@ def expected_warnings(matching):
     -----
     Uses `all_warnings` to ensure all warnings are raised.
     Upon exiting, it checks the recorded warnings for the desired matching
-    string.  Raises a warning if the match was not found or an Unexpected
-    warning is found.  You can pass an empty regex as on of the matches
-    to allow for no matches: "\A\Z".
+    pattern(s).  
+    Raises a ValueError if any match was not found or an unexpected
+    warning was raised.  
+    Allows for three types of behaviors: "and", "or", and "optional" matches. 
+    This is done to accomodate different build enviroments or loop conditions
+    that may produce different warnings.  The behaviors can be combined.
+    If you pass multiple patterns, you get an orderless "and", where all of the
+    warnings must be raised.
+    If you use the "|" operator in a pattern, you can catch one of several warnings.
+    Finally, you can use "|\A\Z" in a pattern to signify it as optional.
 
     """
     with all_warnings() as w:
