@@ -1,17 +1,21 @@
 import warnings
 
 import numpy as np
-from skimage.viewer.qt import QtGui
+from skimage.viewer.qt import QtGui, has_qt
 import matplotlib as mpl
 from matplotlib.figure import Figure
 from matplotlib import _pylab_helpers
 from matplotlib.colors import LinearSegmentedColormap
 
-from matplotlib.backends.backend_qt4 import FigureManagerQT
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
-if 'agg' not in mpl.get_backend().lower():
-    warnings.warn("Recommended matplotlib backend is `Agg` for full "
-          "skimage.viewer functionality.")
+if has_qt:
+    from matplotlib.backends.backend_qt4 import FigureManagerQT
+    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
+    if 'agg' not in mpl.get_backend().lower():
+        warnings.warn("Recommended matplotlib backend is `Agg` for full "
+              "skimage.viewer functionality.")
+else:
+    FigureManagerQT = None
+    FigureCanvasQTAgg = None
 
 
 __all__ = ['init_qtapp', 'start_qtapp', 'RequiredAttr', 'figimage',
