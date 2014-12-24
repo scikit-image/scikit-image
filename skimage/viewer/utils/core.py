@@ -14,8 +14,8 @@ if has_qt:
         warnings.warn("Recommended matplotlib backend is `Agg` for full "
               "skimage.viewer functionality.")
 else:
-    FigureManagerQT = None
-    FigureCanvasQTAgg = None
+    FigureManagerQT = object
+    FigureCanvasQTAgg = object
 
 
 __all__ = ['init_qtapp', 'start_qtapp', 'RequiredAttr', 'figimage',
