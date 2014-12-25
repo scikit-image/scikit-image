@@ -14,13 +14,16 @@ except ImportError:
             QWidget = object
 
         class QtCore_cls(object):
-            Qt = object
+            class Qt(object):
+                 TopDockWidgetArea = None
+                 BottomDockWidgetArea = None
+                 LeftDockWidgetArea = None
+                 RightDockWidgetArea = None
 
             def Signal(self, *args, **kwargs): 
                 pass
 
-        QtCore = QtCore_cls()
-        QtWidgets = QtGui
+        QtCore = QtWidgets = QtCore_cls()
 
         has_qt = False
 
