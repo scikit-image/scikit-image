@@ -23,6 +23,8 @@ except ImportError:
             def Signal(self, *args, **kwargs): 
                 pass
 
+            QWidget = object
+
         QtCore = QtWidgets = QtCore_cls()
 
         has_qt = False
