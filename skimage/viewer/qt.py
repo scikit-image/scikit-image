@@ -13,12 +13,13 @@ except ImportError:
             QDialog = object
             QWidget = object
 
-        class QtCore(object):
+        class QtCore_cls(object):
             Qt = object
 
             def Signal(self, *args, **kwargs): 
                 pass
 
+        QtCore = QtCore_cls()
         QtWidgets = QtGui
 
         has_qt = False
