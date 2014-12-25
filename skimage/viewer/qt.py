@@ -8,7 +8,7 @@ except ImportError:
         QtWidgets = QtGui
     except ImportError:
         # Mock objects
-        class QtGui(object):
+        class QtGui_cls(object):
             QMainWindow = object
             QDialog = object
             QWidget = object
@@ -23,9 +23,8 @@ except ImportError:
             def Signal(self, *args, **kwargs): 
                 pass
 
-            QWidget = object
-
-        QtCore = QtWidgets = QtCore_cls()
+        QtGui = QtWidgets = QtGui_cls()
+        QtCore = QtCore_cls()
 
         has_qt = False
 
