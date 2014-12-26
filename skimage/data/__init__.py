@@ -8,8 +8,13 @@ For more images, see
 
 import os as _os
 
+<<<<<<< HEAD
 from ..io import imread, use_plugin
 from skimage import data_dir
+=======
+from .. import data_dir
+from ..io import imread
+>>>>>>> Use relative imports in skimage files
 
 
 __all__ = ['load',

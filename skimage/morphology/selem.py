@@ -5,7 +5,7 @@
 
 import numpy as np
 from scipy import ndimage
-from skimage import draw
+from .. import draw
 
 def square(width, dtype=np.uint8):
     """Generates a flat, square-shaped structuring element.

@@ -11,7 +11,7 @@ import numpy as np
 import six
 from PIL import Image
 
-from skimage.external.tifffile import TiffFile
+from ..external.tifffile import TiffFile
 
 
 __all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',

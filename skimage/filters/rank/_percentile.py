@@ -23,7 +23,7 @@ References
 """
 
 import numpy as np
-from skimage._shared.utils import assert_nD
+from ..._shared.utils import assert_nD
 
 from . import percentile_cy
 from .generic import _handle_input

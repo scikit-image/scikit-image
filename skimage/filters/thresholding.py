@@ -5,8 +5,8 @@ __all__ = ['threshold_adaptive',
 
 import numpy as np
 import scipy.ndimage
-from skimage.exposure import histogram
-from skimage._shared.utils import assert_nD
+from ..exposure import histogram
+from .._shared.utils import assert_nD
 
 
 def threshold_adaptive(image, block_size, method='gaussian', offset=0,

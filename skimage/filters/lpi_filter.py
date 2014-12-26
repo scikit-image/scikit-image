@@ -5,7 +5,7 @@
 
 import numpy as np
 from scipy.fftpack import ifftshift
-from skimage._shared.utils import assert_nD
+from .._shared.utils import assert_nD
 
 eps = np.finfo(float).eps
 

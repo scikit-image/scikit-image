@@ -18,8 +18,8 @@ References
 
 import warnings
 import numpy as np
-from skimage import img_as_ubyte
-from skimage._shared.utils import assert_nD
+from ... import img_as_ubyte
+from ..._shared.utils import assert_nD
 
 from . import generic_cy
 

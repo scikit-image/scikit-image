@@ -2,14 +2,14 @@
 ImageViewer class for viewing and interacting with images.
 """
 
-from skimage.viewer.qt import QtWidgets, Qt, Signal
-from skimage import io, img_as_float
-from skimage.util.dtype import dtype_range
-from skimage.exposure import rescale_intensity
 import numpy as np
+from ..viewer.qt import QtWidgets, Qt, Signal
+from ... import io, img_as_float
+from ...util.dtype import dtype_range
+from ...exposure import rescale_intensity
 from ..widgets import Slider
-from ..utils import (
-    dialogs, init_qtapp, figimage, start_qtapp, update_axes_image)
+from ..utils import (dialogs, init_qtapp, figimage, start_qtapp,
+                     update_axes_image)
 from ..plugins.base import Plugin
 
 

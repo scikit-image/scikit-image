@@ -4,9 +4,8 @@ import numpy as np
 from six import string_types
 from PIL import Image
 
-from skimage.util import img_as_ubyte, img_as_uint
-from skimage.external.tifffile import (
-    imread as tif_imread, imsave as tif_imsave)
+from ...util import img_as_ubyte, img_as_uint
+from ...external.tifffile import imread as tif_imread, imsave as tif_imsave
 
 
 def imread(fname, dtype=None, img_num=None, **kwargs):

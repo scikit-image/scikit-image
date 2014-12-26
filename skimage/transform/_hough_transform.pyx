@@ -10,12 +10,12 @@ cimport cython
 from libc.math cimport abs, fabs, sqrt, ceil, atan2, M_PI
 from libc.stdlib cimport rand
 
-from skimage.draw import circle_perimeter
+from ..draw import circle_perimeter
 
 cdef double PI_2 = 1.5707963267948966
 cdef double NEG_PI_2 = -PI_2
 
-from skimage._shared.interpolation cimport round
+from .._shared.interpolation cimport round
 
 
 def _hough_circle(cnp.ndarray img,

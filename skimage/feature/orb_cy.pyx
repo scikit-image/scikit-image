@@ -6,12 +6,12 @@
 import os
 import numpy as np
 
-from skimage import data_dir
+from .. import data_dir
 
 cimport numpy as cnp
 from libc.math cimport sin, cos
 
-from skimage._shared.interpolation cimport round
+from .._shared.interpolation cimport round
 
 POS = np.loadtxt(os.path.join(data_dir, "orb_descriptor_positions.txt"),
                  dtype=np.int8)

@@ -3,9 +3,9 @@ import itertools
 
 import numpy as np
 
-from skimage import img_as_float
-from .colorconv import rgb2gray, gray2rgb
+from .. import img_as_float
 from . import rgb_colors
+from .colorconv import rgb2gray, gray2rgb
 
 import six
 from six.moves import zip

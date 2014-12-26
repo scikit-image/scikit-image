@@ -1,7 +1,7 @@
 import numpy as np
 
 import skimage
-from skimage.feature import canny
+from ...feature import canny
 from .overlayplugin import OverlayPlugin
 from ..widgets import Slider, ComboBox
 

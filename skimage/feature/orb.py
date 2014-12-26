@@ -1,13 +1,13 @@
 import numpy as np
 
-from skimage.feature.util import (FeatureDetector, DescriptorExtractor,
-                                  _mask_border_keypoints,
-                                  _prepare_grayscale_input_2D)
+from ..feature.util import (FeatureDetector, DescriptorExtractor,
+                            _mask_border_keypoints,
+                            _prepare_grayscale_input_2D)
 
-from skimage.feature import (corner_fast, corner_orientations, corner_peaks,
+from ..feature import (corner_fast, corner_orientations, corner_peaks,
                              corner_harris)
-from skimage.transform import pyramid_gaussian
-from skimage._shared.utils import assert_nD
+from ..transform import pyramid_gaussian
+from .._shared.utils import assert_nD
 
 from .orb_cy import _orb_loop
 

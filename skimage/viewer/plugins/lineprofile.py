@@ -1,9 +1,8 @@
 from __future__ import division
 
 import numpy as np
-from skimage.util.dtype import dtype_range
-from skimage import draw
-from skimage import measure
+from ...util.dtype import dtype_range
+from ... import draw, measure
 
 from .plotplugin import PlotPlugin
 from ..canvastools import ThickLineTool
@@ -65,7 +64,7 @@ class LineProfile(PlotPlugin):
                                        on_change=self.line_changed)
         self.line_tool.end_points = np.transpose([x, y])
 
-        scan_data = measure.profile_line(image, 
+        scan_data = measure.profile_line(image,
                                          *self.line_tool.end_points[:, ::-1])
         self.scan_data = scan_data
         if scan_data.ndim == 1:

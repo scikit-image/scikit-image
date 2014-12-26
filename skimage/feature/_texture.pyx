@@ -5,7 +5,7 @@
 import numpy as np
 cimport numpy as cnp
 from libc.math cimport sin, cos, abs
-from skimage._shared.interpolation cimport bilinear_interpolation, round
+from .._shared.interpolation cimport bilinear_interpolation, round
 
 
 def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,

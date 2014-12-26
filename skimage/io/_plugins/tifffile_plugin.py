@@ -1,1 +1,1 @@
-from skimage.external.tifffile import imread, imsave
+from ...external.tifffile import imread, imsave

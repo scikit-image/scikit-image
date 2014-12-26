@@ -13,8 +13,8 @@ from .thresholding import (threshold_adaptive, threshold_otsu, threshold_yen,
 from . import rank
 from .rank import median
 
-from skimage._shared.utils import deprecated
-from skimage import restoration
+from .._shared.utils import deprecated
+from .. import restoration
 denoise_bilateral = deprecated('skimage.restoration.denoise_bilateral')\
                         (restoration.denoise_bilateral)
 denoise_tv_bregman = deprecated('skimage.restoration.denoise_tv_bregman')\
@@ -26,7 +26,7 @@ denoise_tv_chambolle = deprecated('skimage.restoration.denoise_tv_chambolle')\
 @deprecated
 def canny(*args, **kwargs):
     # Hack to avoid circular import
-    from skimage.feature._canny import canny as canny_
+    from ..feature._canny import canny as canny_
     return canny_(*args, **kwargs)
 
 
