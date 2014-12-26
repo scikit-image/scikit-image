@@ -43,7 +43,6 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
     >>> from skimage import data
     >>> from skimage.viewer import ImageViewer
     >>> from skimage.viewer.canvastools import RectangleTool
-    >>> import numpy as np
     >>> from skimage.draw import line
     >>> from skimage.draw import set_color
  
@@ -65,10 +64,6 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
     
     >>> rect_tool = RectangleTool(viewer.ax, on_enter=print_the_rect) # doctest: +SKIP
     >>> viewer.show() # doctest: +SKIP
-
-
-    
-    
     """
     
     def __init__(self, viewer, on_move=None, on_release=None, on_enter=None,
