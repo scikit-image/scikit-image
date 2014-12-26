@@ -156,9 +156,9 @@ def test_bitdepth():
     for i in range(5):
         image = np.ones((100, 100), dtype=np.uint16) * 255 * 2 ** i
         if i > 3:
-          expected = ["Bitdepth of"]
+            expected = ["Bitdepth of"]
         else:
-          expected = []
+            expected = []
         with expected_warnings(expected):
             rank.mean_percentile(image=image, selem=elem, mask=mask,
                                out=out, shift_x=0, shift_y=0, p0=.1, p1=.9)
@@ -523,9 +523,9 @@ def test_16bit():
         value = 2 ** bitdepth - 1
         image[10, 10] = value
         if bitdepth > 11:
-          expected = ['Bitdepth of %s' % (bitdepth - 1)]
+            expected = ['Bitdepth of %s' % (bitdepth - 1)]
         else:
-          expected = []
+            expected = []
         with expected_warnings(expected):
             assert rank.minimum(image, selem)[10, 10] == 0
             assert rank.maximum(image, selem)[10, 10] == value

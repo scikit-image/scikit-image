@@ -5,5 +5,5 @@ def setup():
     setup_test()
 
 
-def tearDown():
+def teardown():
     teardown_test()
