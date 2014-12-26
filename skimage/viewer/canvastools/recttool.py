@@ -38,22 +38,20 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
     extents : tuple
         Rectangle extents: (xmin, xmax, ymin, ymax).
     
-
     Examples
-    --------
+    ----------
     >>> from skimage import data
-    >>> import matplotlib.pyplot as plt
+    >>> from skimage.viewer import ImageViewer
     >>> from skimage.viewer.canvastools import RectangleTool
     >>> import numpy as np
     >>> from skimage.draw import line
     >>> from skimage.draw import set_color
-
-    >>> im = data.coffee()
-    >>> [f, ax] = plt.subplots()
-    >>> ax.imshow(im)
+ 
+    >>> viewer = ImageViewer(data.coffee())  # doctest: +SKIP
 
     >>> def print_the_rect(extents):
-    ...     global im, ax
+    ...     global viewer
+    ...     im = viewer.image    
     ...     coord = np.int64(extents)
     ...     [rr1, cc1] = line(coord[2],coord[0],coord[2],coord[1])
     ...     [rr2, cc2] = line(coord[2],coord[1],coord[3],coord[1])
@@ -63,12 +61,14 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
     ...     set_color(im, (rr2, cc2), [0, 255, 255])
     ...     set_color(im, (rr3, cc3), [255, 0, 255])
     ...     set_color(im, (rr4, cc4), [0, 0, 0])
-    ...     ax.imshow(im)
-    ...     plt.show()
+    ...     viewer.image=im
+    
+    >>> rect_tool = RectangleTool(viewer.ax, on_enter=print_the_rect) # doctest: +SKIP
+    >>> viewer.show() # doctest: +SKIP
 
-    >>> rect_tool = RectangleTool(ax, on_enter=print_the_rect)
-    >>> plt.show()
- 
+
+    
+    
     """
     
     def __init__(self, viewer, on_move=None, on_release=None, on_enter=None,
