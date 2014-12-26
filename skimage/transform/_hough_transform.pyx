@@ -359,12 +359,9 @@ def probabilistic_hough_line(cnp.ndarray img, int threshold=10,
     cdef Py_ssize_t width = img.shape[1]
 
     # compute the bins and allocate the accumulator array
-    cdef cnp.ndarray[ndim=2, dtype=cnp.int64_t] accum
-    cdef cnp.ndarray[ndim=1, dtype=cnp.double_t] ctheta, stheta
     cdef cnp.ndarray[ndim=2, dtype=cnp.uint8_t] mask = \
          np.zeros((height, width), dtype=np.uint8)
-    cdef cnp.ndarray[ndim=2, dtype=cnp.int32_t] line_end = \
-         np.zeros((2, 2), dtype=np.int32)
+    cdef cnp.int32_t[:, ::1] line_end = np.zeros((2, 2), dtype=np.int32)
     cdef Py_ssize_t max_distance, offset, num_indexes, index
     cdef double a, b
     cdef Py_ssize_t nidxs, i, j, x, y, px, py, accum_idx
@@ -378,17 +375,18 @@ def probabilistic_hough_line(cnp.ndarray img, int threshold=10,
 
     max_distance = 2 * <int>ceil((sqrt(img.shape[0] * img.shape[0] +
                                        img.shape[1] * img.shape[1])))
-    accum = np.zeros((max_distance, theta.shape[0]), dtype=np.int64)
+    cdef cnp.int64_t[:, ::1] accum = \
+        np.zeros((max_distance, theta.shape[0]), dtype=np.int64)
     offset = max_distance / 2
     nthetas = theta.shape[0]
 
     # compute sine and cosine of angles
-    ctheta = np.cos(theta)
-    stheta = np.sin(theta)
+    cdef cnp.double_t[::1] ctheta = np.cos(theta)
+    cdef cnp.double_t[::1] stheta = np.sin(theta)
 
     # find the nonzero indexes
     y_idxs, x_idxs = np.nonzero(img)
-    points = list(zip(x_idxs, y_idxs))
+    cdef list points = list(zip(x_idxs, y_idxs))
     # mask all non-zero indexes
     mask[y_idxs, x_idxs] = 1
 
