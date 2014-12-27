@@ -12,15 +12,7 @@ from skimage.viewer.plugins import (
     PlotPlugin)
 from numpy.testing import assert_equal, assert_allclose, assert_almost_equal
 from numpy.testing.decorators import skipif
-<<<<<<< HEAD
-from skimage.viewer.plugins import (
-    LineProfile, Measure, CannyPlugin, LabelPainter, Crop, ColorHistogram,
-    PlotPlugin)
-from skimage.viewer.plugins.base import Plugin
-from skimage.viewer.widgets import Slider
 from skimage._shared._warnings import expected_warnings
-=======
->>>>>>> 7e2fdf7... Update viewer for PyQt5 compatibility
 
 
 def setup_line_profile(image, limits='image'):
