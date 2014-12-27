@@ -7,6 +7,7 @@ from scipy import ndimage
 import skimage
 from skimage import data_dir
 from skimage.morphology import grey, selem
+from skimage._shared._warnings import expected_warnings
 
 
 lena = np.load(os.path.join(data_dir, 'lena_GRAY_U8.npy'))
@@ -170,9 +171,12 @@ def test_3d_fallback_white_tophat():
     image[2, 2:4, 2:4] = 1
     image[3, 2:5, 2:5] = 1
     image[4, 3:5, 3:5] = 1
-    new_image = grey.white_tophat(image)
+
+    with expected_warnings(['operator.*deprecated|\A\Z']):
+        new_image = grey.white_tophat(image)
     footprint = ndimage.generate_binary_structure(3,1)
-    image_expected = ndimage.white_tophat(image,footprint=footprint)
+    with expected_warnings(['operator.*deprecated|\A\Z']):
+        image_expected = ndimage.white_tophat(image,footprint=footprint)
     testing.assert_array_equal(new_image, image_expected)
 
 def test_3d_fallback_black_tophat():
@@ -180,9 +184,12 @@ def test_3d_fallback_black_tophat():
     image[2, 2:4, 2:4] = 0
     image[3, 2:5, 2:5] = 0
     image[4, 3:5, 3:5] = 0
-    new_image = grey.black_tophat(image)
+
+    with expected_warnings(['operator.*deprecated|\A\Z']):
+        new_image = grey.black_tophat(image)
     footprint = ndimage.generate_binary_structure(3,1)
-    image_expected = ndimage.black_tophat(image,footprint=footprint)
+    with expected_warnings(['operator.*deprecated|\A\Z']):
+        image_expected = ndimage.black_tophat(image,footprint=footprint)
     testing.assert_array_equal(new_image, image_expected)
 
 def test_2d_ndimage_equivalence():
@@ -216,10 +223,12 @@ class TestDTypes():
         self.expected_closing = np.load(fname_closing)[arrname]
 
     def _test_image(self, image):
-        result_opening = grey.opening(image, self.disk)
+        with expected_warnings(['precision loss']):
+            result_opening = grey.opening(image, self.disk)
         testing.assert_equal(result_opening, self.expected_opening)
 
-        result_closing = grey.closing(image, self.disk)
+        with expected_warnings(['precision loss']):
+            result_closing = grey.closing(image, self.disk)
         testing.assert_equal(result_closing, self.expected_closing)
 
     def test_float(self):

@@ -5,6 +5,7 @@ from numpy.testing import assert_raises, assert_equal, assert_allclose
 
 from skimage import data_dir
 from skimage.io.collection import ImageCollection, alphanumeric_key
+from skimage.io import reset_plugins
 
 
 def test_string_split():
@@ -31,6 +32,7 @@ class TestImageCollection():
                        for pic in ['camera.png', 'moon.png']]
 
     def setUp(self):
+        reset_plugins()
         # Generic image collection with images of different shapes.
         self.images = ImageCollection(self.pattern)
         # Image collection with images having shapes that match.

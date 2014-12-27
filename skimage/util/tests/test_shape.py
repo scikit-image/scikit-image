@@ -3,7 +3,7 @@ from nose.tools import raises
 from numpy.testing import assert_equal, assert_warns
 
 from skimage.util.shape import view_as_blocks, view_as_windows
-from skimage._shared.utils import all_warnings
+from skimage._shared._warnings import expected_warnings
 
 
 @raises(TypeError)
@@ -153,9 +153,8 @@ def test_views_non_contiguous():
     A = np.arange(16).reshape((4, 4))
     A = A[::2, :]
 
-    with all_warnings():
-        assert_warns(RuntimeWarning, view_as_blocks, A, (2, 2))
-        assert_warns(RuntimeWarning, view_as_windows, A, (2, 2))
+    assert_warns(RuntimeWarning, view_as_blocks, A, (2, 2))
+    assert_warns(RuntimeWarning, view_as_windows, A, (2, 2))
 
 
 if __name__ == '__main__':

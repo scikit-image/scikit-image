@@ -7,6 +7,7 @@ from numpy.testing import (run_module_suite, assert_array_almost_equal_nulp,
 import warnings
 
 from skimage.restoration import unwrap_phase
+from skimage._shared._warnings import expected_warnings
 
 
 def assert_phase_almost_equal(a, b, *args, **kwargs):
@@ -132,9 +133,12 @@ def test_mask():
         assert_array_almost_equal_nulp(image_unwrapped[:, -1], image[i, -1])
 
         # Same tests, but forcing use of the 3D unwrapper by reshaping
-        image_wrapped_3d = image_wrapped.reshape((1,) + image_wrapped.shape)
-        image_unwrapped_3d = unwrap_phase(image_wrapped_3d)
-        image_unwrapped_3d -= image_unwrapped_3d[0, 0, 0]  # remove phase shift
+        with expected_warnings(['length 1 dimension']):
+            shape = (1,) + image_wrapped.shape
+            image_wrapped_3d = image_wrapped.reshape(shape)
+            image_unwrapped_3d = unwrap_phase(image_wrapped_3d)
+            # remove phase shift
+            image_unwrapped_3d -= image_unwrapped_3d[0, 0, 0]  
         assert_array_almost_equal_nulp(image_unwrapped_3d[:, :, -1], image[i, -1])
 
 

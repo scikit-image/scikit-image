@@ -8,8 +8,8 @@ from skimage.viewer import ImageViewer, viewer_available
 from skimage.viewer.canvastools import (
     LineTool, ThickLineTool, RectangleTool, PaintTool)
 from skimage.viewer.canvastools.base import CanvasToolBase
-from numpy.testing import assert_equal
-from numpy.testing.decorators import skipif
+from matplotlib.testing.decorators import cleanup
+
 
 
 def get_end_points(image):
@@ -74,6 +74,7 @@ def do_event(viewer, etype, button=1, xdata=0, ydata=0, key=None):
     func(event)
 
 
+@cleanup
 @skipif(not viewer_available)
 def test_line_tool():
     img = data.camera()
@@ -99,6 +100,7 @@ def test_line_tool():
     assert_equal(tool.geometry, np.array([[100, 100], [10, 10]]))
 
 
+@cleanup
 @skipif(not viewer_available)
 def test_thick_line_tool():
     img = data.camera()
@@ -122,6 +124,7 @@ def test_thick_line_tool():
     assert_equal(tool.linewidth, 1)
 
 
+@cleanup
 @skipif(not viewer_available)
 def test_rect_tool():
     img = data.camera()
@@ -150,6 +153,7 @@ def test_rect_tool():
     assert_equal(tool.geometry, [10, 100,  10, 100])
 
 
+@cleanup
 @skipif(not viewer_available)
 def test_paint_tool():
     img = data.moon()
@@ -183,6 +187,7 @@ def test_paint_tool():
     assert_equal(tool.overlay.sum(), 0)
 
 
+@cleanup
 @skipif(not viewer_available)
 def test_base_tool():
     img = data.moon()

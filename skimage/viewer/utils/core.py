@@ -203,6 +203,7 @@ def figimage(image, scale=1, dpi=None, **kwargs):
 
     ax.set_axis_off()
     ax.imshow(image, **kwargs)
+    ax.figure.canvas.draw()
     return fig, ax
 
 

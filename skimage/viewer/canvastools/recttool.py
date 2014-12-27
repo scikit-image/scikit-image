@@ -41,15 +41,16 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
 
     def __init__(self, viewer, on_move=None, on_release=None, on_enter=None,
                  maxdist=10, rect_props=None):
-        CanvasToolBase.__init__(self, viewer, on_move=on_move,
-                                on_enter=on_enter, on_release=on_release)
-
+        self._rect = None
         props = dict(edgecolor=None, facecolor='r', alpha=0.15)
         props.update(rect_props if rect_props is not None else {})
         if props['edgecolor'] is None:
             props['edgecolor'] = props['facecolor']
-        RectangleSelector.__init__(self, self.ax, lambda *args: None,
+        RectangleSelector.__init__(self, viewer.ax, lambda *args: None,
                                    rectprops=props)
+        CanvasToolBase.__init__(self, viewer, on_move=on_move,
+                                on_enter=on_enter, on_release=on_release)
+
         # Events are handled by the viewer
         try:
             self.disconnect_events()
@@ -87,6 +88,8 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
 
     @property
     def _rect_bbox(self):
+        if not self._rect:
+            return 0, 0, 0, 0
         x0 = self._rect.get_x()
         y0 = self._rect.get_y()
         width = self._rect.get_width()

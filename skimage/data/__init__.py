@@ -8,7 +8,7 @@ For more images, see
 
 import os as _os
 
-from ..io import imread
+from ..io import imread, use_plugin
 from skimage import data_dir
 
 
@@ -42,6 +42,7 @@ def load(f):
     img : ndarray
         Image loaded from skimage.data_dir.
     """
+    use_plugin('pil')
     return imread(_os.path.join(data_dir, f))
 
 
