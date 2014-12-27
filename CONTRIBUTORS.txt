@@ -200,3 +200,6 @@
 
 - Matěj Týč
   Extended the image labelling implementation so it also works on 3D images.
+
+- Salvatore Scaramuzzino
+  RectTool example
