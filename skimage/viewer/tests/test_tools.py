@@ -4,22 +4,11 @@ import numpy as np
 from numpy.testing import assert_equal
 from numpy.testing.decorators import skipif
 from skimage import data
-<<<<<<< HEAD
-from skimage.viewer import ImageViewer, viewer_available
+from skimage.viewer import ImageViewer, has_qt
 from skimage.viewer.canvastools import (
     LineTool, ThickLineTool, RectangleTool, PaintTool)
 from skimage.viewer.canvastools.base import CanvasToolBase
 from matplotlib.testing.decorators import cleanup
-
-=======
-try:
-    from skimage.viewer import ImageViewer
-    from skimage.viewer.canvastools import (
-        LineTool, ThickLineTool, RectangleTool, PaintTool)
-    from skimage.viewer.canvastools.base import CanvasToolBase
-except ImportError:
-    ImageViewer = None
->>>>>>> 7e2fdf7... Update viewer for PyQt5 compatibility
 
 
 def get_end_points(image):
@@ -84,12 +73,8 @@ def do_event(viewer, etype, button=1, xdata=0, ydata=0, key=None):
     func(event)
 
 
-<<<<<<< HEAD
 @cleanup
-@skipif(not viewer_available)
-=======
-@skipif(ImageViewer is None)
->>>>>>> 7e2fdf7... Update viewer for PyQt5 compatibility
+@skipif(not has_qt)
 def test_line_tool():
     img = data.camera()
     viewer = ImageViewer(img)
@@ -114,12 +99,8 @@ def test_line_tool():
     assert_equal(tool.geometry, np.array([[100, 100], [10, 10]]))
 
 
-<<<<<<< HEAD
 @cleanup
-@skipif(not viewer_available)
-=======
-@skipif(ImageViewer is None)
->>>>>>> 7e2fdf7... Update viewer for PyQt5 compatibility
+@skipif(not has_qt)
 def test_thick_line_tool():
     img = data.camera()
     viewer = ImageViewer(img)
@@ -142,12 +123,8 @@ def test_thick_line_tool():
     assert_equal(tool.linewidth, 1)
 
 
-<<<<<<< HEAD
 @cleanup
-@skipif(not viewer_available)
-=======
-@skipif(ImageViewer is None)
->>>>>>> 7e2fdf7... Update viewer for PyQt5 compatibility
+@skipif(not has_qt)
 def test_rect_tool():
     img = data.camera()
     viewer = ImageViewer(img)
@@ -175,12 +152,8 @@ def test_rect_tool():
     assert_equal(tool.geometry, [10, 100,  10, 100])
 
 
-<<<<<<< HEAD
 @cleanup
-@skipif(not viewer_available)
-=======
-@skipif(ImageViewer is None)
->>>>>>> 7e2fdf7... Update viewer for PyQt5 compatibility
+@skipif(not has_qt)
 def test_paint_tool():
     img = data.moon()
     viewer = ImageViewer(img)
@@ -213,12 +186,8 @@ def test_paint_tool():
     assert_equal(tool.overlay.sum(), 0)
 
 
-<<<<<<< HEAD
 @cleanup
-@skipif(not viewer_available)
-=======
-@skipif(ImageViewer is None)
->>>>>>> 7e2fdf7... Update viewer for PyQt5 compatibility
+@skipif(not has_qt)
 def test_base_tool():
     img = data.moon()
     viewer = ImageViewer(img)

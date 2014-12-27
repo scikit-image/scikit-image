@@ -4,15 +4,12 @@ import skimage
 import skimage.data as data
 from skimage.filters.rank import median
 from skimage.morphology import disk
-try:
-    from skimage.viewer import ImageViewer
-    from skimage.viewer.plugins.base import Plugin
-    from skimage.viewer.widgets import Slider
-    from skimage.viewer.plugins import (
-        LineProfile, Measure, CannyPlugin, LabelPainter, Crop, ColorHistogram,
-        PlotPlugin)
-except ImportError:
-    ImageViewer is None
+from skimage.viewer import ImageViewer, has_qt
+from skimage.viewer.plugins.base import Plugin
+from skimage.viewer.widgets import Slider
+from skimage.viewer.plugins import (
+    LineProfile, Measure, CannyPlugin, LabelPainter, Crop, ColorHistogram,
+    PlotPlugin)
 from numpy.testing import assert_equal, assert_allclose, assert_almost_equal
 from numpy.testing.decorators import skipif
 <<<<<<< HEAD
@@ -33,7 +30,7 @@ def setup_line_profile(image, limits='image'):
     return plugin
 
 
-@skipif(ImageViewer is None)
+@skipif(not has_qt)
 def test_line_profile():
     """ Test a line profile using an ndim=2 image"""
     plugin = setup_line_profile(data.camera())
@@ -47,7 +44,7 @@ def test_line_profile():
     assert_allclose(scan_data.mean(), 0.2812, rtol=1e-3)
 
 
-@skipif(ImageViewer is None)
+@skipif(not has_qt)
 def test_line_profile_rgb():
     """ Test a line profile using an ndim=3 image"""
     plugin = setup_line_profile(data.chelsea(), limits=None)
@@ -62,7 +59,7 @@ def test_line_profile_rgb():
     assert_allclose(scan_data.mean(), 0.4359, rtol=1e-3)
 
 
-@skipif(ImageViewer is None)
+@skipif(not has_qt)
 def test_line_profile_dynamic():
     """Test a line profile updating after an image transform"""
     image = data.coins()[:-50, :]  # shave some off to make the line lower
@@ -88,7 +85,7 @@ def test_line_profile_dynamic():
     assert_almost_equal(np.max(line) - np.min(line), 0.639, 1)
 
 
-@skipif(ImageViewer is None)
+@skipif(not has_qt)
 def test_measure():
     image = data.camera()
     viewer = ImageViewer(image)
@@ -100,7 +97,7 @@ def test_measure():
     assert_equal(str(m._angle.text[:5]), '135.0')
 
 
-@skipif(ImageViewer is None)
+@skipif(not has_qt)
 def test_canny():
     image = data.camera()
     viewer = ImageViewer(image)
@@ -113,7 +110,7 @@ def test_canny():
     assert edges.sum() == 2852
 
 
-@skipif(ImageViewer is None)
+@skipif(not has_qt)
 def test_label_painter():
     image = data.camera()
     moon = data.moon()
@@ -131,7 +128,7 @@ def test_label_painter():
     assert_equal(lp.paint_tool.shape, moon.shape)
 
 
-@skipif(ImageViewer is None)
+@skipif(not has_qt)
 def test_crop():
     image = data.camera()
     viewer = ImageViewer(image)
@@ -142,7 +139,7 @@ def test_crop():
     assert_equal(viewer.image.shape, (101, 101))
 
 
-@skipif(ImageViewer is None)
+@skipif(not has_qt)
 def test_color_histogram():
     image = skimage.img_as_float(data.load('color.png'))
     viewer = ImageViewer(image)
@@ -154,7 +151,7 @@ def test_color_histogram():
     assert_almost_equal(viewer.image.std(), 0.325, 3)
 
 
-@skipif(ImageViewer is None)
+@skipif(not has_qt)
 def test_plot_plugin():
     viewer = ImageViewer(data.moon())
     plugin = PlotPlugin(image_filter=lambda x: x)
@@ -166,7 +163,7 @@ def test_plot_plugin():
     viewer.close()
 
 
-@skipif(ImageViewer is None)
+@skipif(not has_qt)
 def test_plugin():
     img = skimage.img_as_float(data.moon())
     viewer = ImageViewer(img)
