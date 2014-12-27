@@ -1,8 +1,6 @@
 from textwrap import dedent
 
-from ..qt import QtGui
-from ..qt import QtCore
-
+from ..qt import QtGui, QtCore
 import numpy as np
 
 import skimage

@@ -1,21 +1,15 @@
 """
 ImageViewer class for viewing and interacting with images.
 """
-from ..qt import QtGui, qt_api
-from ..qt.QtCore import Qt, Signal
 
-if qt_api is not None:
-    has_qt = True
-else:
-    has_qt = False
-
+from skimage.viewer.qt import QtWidgets, Qt, Signal
 from skimage import io, img_as_float
 from skimage.util.dtype import dtype_range
 from skimage.exposure import rescale_intensity
 import numpy as np
-from .. import utils
 from ..widgets import Slider
-from ..utils import dialogs
+from ..utils import (
+    dialogs, init_qtapp, figimage, start_qtapp, update_axes_image)
 from ..plugins.base import Plugin
 
 
@@ -152,7 +146,7 @@ class EventManager(object):
             tool.on_scroll(event)
 
 
-class ImageViewer(QtGui.QMainWindow):
+class ImageViewer(QtWidgets.QMainWindow):
     """Viewer for displaying images.
 
     This viewer is a simple container object that holds a Matplotlib axes
@@ -194,7 +188,7 @@ class ImageViewer(QtGui.QMainWindow):
 
     def __init__(self, image, useblit=True):
         # Start main loop
-        utils.init_qtapp()
+        init_qtapp()
         super(ImageViewer, self).__init__()
 
         #TODO: Add ImageViewer to skimage.io window manager
@@ -202,7 +196,7 @@ class ImageViewer(QtGui.QMainWindow):
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.setWindowTitle("Image Viewer")
 
-        self.file_menu = QtGui.QMenu('&File', self)
+        self.file_menu = QtWidgets.QMenu('&File', self)
         self.file_menu.addAction('Open file', self.open_file,
                                  Qt.CTRL + Qt.Key_O)
         self.file_menu.addAction('Save to file', self.save_to_file,
@@ -211,7 +205,7 @@ class ImageViewer(QtGui.QMainWindow):
                                  Qt.CTRL + Qt.Key_Q)
         self.menuBar().addMenu(self.file_menu)
 
-        self.main_widget = QtGui.QWidget()
+        self.main_widget = QtWidgets.QWidget()
         self.setCentralWidget(self.main_widget)
 
         if isinstance(image, Plugin):
@@ -221,7 +215,7 @@ class ImageViewer(QtGui.QMainWindow):
             # When plugin is started, start
             plugin._started.connect(self._show)
 
-        self.fig, self.ax = utils.figimage(image)
+        self.fig, self.ax = figimage(image)
         self.canvas = self.fig.canvas
         self.canvas.setParent(self)
         self.ax.autoscale(enable=False)
@@ -236,7 +230,7 @@ class ImageViewer(QtGui.QMainWindow):
         self._update_original_image(image)
         self.plugins = []
 
-        self.layout = QtGui.QVBoxLayout(self.main_widget)
+        self.layout = QtWidgets.QVBoxLayout(self.main_widget)
         self.layout.addWidget(self.canvas)
 
         status_bar = self.statusBar()
@@ -255,7 +249,7 @@ class ImageViewer(QtGui.QMainWindow):
         if plugin.dock:
             location = self.dock_areas[plugin.dock]
             dock_location = Qt.DockWidgetArea(location)
-            dock = QtGui.QDockWidget()
+            dock = QtWidgets.QDockWidget()
             dock.setWidget(plugin)
             dock.setWindowTitle(plugin.name)
             self.addDockWidget(dock_location, dock)
@@ -341,7 +335,7 @@ class ImageViewer(QtGui.QMainWindow):
         """
         self._show()
         if main_window:
-            utils.start_qtapp()
+            start_qtapp()
         return [p.output() for p in self.plugins]
 
     def redraw(self):
@@ -357,7 +351,7 @@ class ImageViewer(QtGui.QMainWindow):
     @image.setter
     def image(self, image):
         self._img = image
-        utils.update_axes_image(self._image_plot, image)
+        update_axes_image(self._image_plot, image)
 
         # update display (otherwise image doesn't fill the canvas)
         h, w = image.shape[:2]
@@ -487,7 +481,7 @@ class CollectionViewer(ImageViewer):
         self._update_original_image(image)
 
     def keyPressEvent(self, event):
-        if type(event) == QtGui.QKeyEvent:
+        if type(event) == QtWidgets.QKeyEvent:
             key = event.key()
             # Number keys (code: 0 = key 48, 9 = key 57) move to deciles
             if 48 <= key < 58:

@@ -1,8 +1,5 @@
 import numpy as np
-try:
-    from matplotlib import lines
-except ImportError:
-    pass
+from matplotlib import lines
 
 __all__ = ['CanvasToolBase', 'ToolHandles']
 

@@ -1,11 +1,8 @@
 import numpy as np
-try:
-    import matplotlib.pyplot as plt
-    import matplotlib.colors as mcolors
-    LABELS_CMAP = mcolors.ListedColormap(['white', 'red', 'dodgerblue', 'gold',
-                                          'greenyellow', 'blueviolet'])
-except ImportError:
-    pass
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+LABELS_CMAP = mcolors.ListedColormap(['white', 'red', 'dodgerblue', 'gold',
+                                      'greenyellow', 'blueviolet'])
 from skimage.viewer.canvastools.base import CanvasToolBase
 
 

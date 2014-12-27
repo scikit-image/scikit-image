@@ -60,7 +60,13 @@ import os.path as _osp
 import imp as _imp
 import functools as _functools
 import warnings as _warnings
-from skimage._shared.utils import deprecated as _deprecated
+
+import matplotlib as _mpl
+try:
+    _imp.find_module('PyQt5')
+    _mpl.use('Qt5Agg')
+except ImportError:
+    _mpl.use('Qt4Agg')
 
 pkg_dir = _osp.abspath(_osp.dirname(__file__))
 data_dir = _osp.join(pkg_dir, 'data')

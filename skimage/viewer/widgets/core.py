@@ -15,17 +15,15 @@ parameter type specified by its `ptype` attribute, which can be:
         property of the same name that updates the display.
 
 """
-from ..qt import QtGui
-from ..qt import QtCore
-from ..qt.QtCore import Qt
-
+from ..qt import QtWidgets, QtCore, Qt
 from ..utils import RequiredAttr
 
 
 __all__ = ['BaseWidget', 'Slider', 'ComboBox', 'CheckBox', 'Text']
 
 
-class BaseWidget(QtGui.QWidget):
+
+class BaseWidget(QtWidgets.QWidget):
 
     plugin = RequiredAttr("Widget is not attached to a Plugin.")
 
@@ -49,11 +47,11 @@ class Text(BaseWidget):
 
     def __init__(self, name=None, text=''):
         super(Text, self).__init__(name)
-        self._label = QtGui.QLabel()
+        self._label = QtWidgets.QLabel()
         self.text = text
-        self.layout = QtGui.QHBoxLayout(self)
+        self.layout = QtWidgets.QHBoxLayout(self)
         if name is not None:
-            name_label = QtGui.QLabel()
+            name_label = QtWidgets.QLabel()
             name_label.setText(name)
             self.layout.addWidget(name_label)
         self.layout.addWidget(self._label)
@@ -105,17 +103,17 @@ class Slider(BaseWidget):
         # Set widget orientation
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         if orientation == 'vertical':
-            self.slider = QtGui.QSlider(Qt.Vertical)
+            self.slider = QtWidgets.QSlider(Qt.Vertical)
             alignment = QtCore.Qt.AlignHCenter
             align_text = QtCore.Qt.AlignHCenter
             align_value = QtCore.Qt.AlignHCenter
-            self.layout = QtGui.QVBoxLayout(self)
+            self.layout = QtWidgets.QVBoxLayout(self)
         elif orientation == 'horizontal':
-            self.slider = QtGui.QSlider(Qt.Horizontal)
+            self.slider = QtWidgets.QSlider(Qt.Horizontal)
             alignment = QtCore.Qt.AlignVCenter
             align_text = QtCore.Qt.AlignLeft
             align_value = QtCore.Qt.AlignRight
-            self.layout = QtGui.QHBoxLayout(self)
+            self.layout = QtWidgets.QHBoxLayout(self)
         else:
             msg = "Unexpected value %s for 'orientation'"
             raise ValueError(msg % orientation)
@@ -151,11 +149,11 @@ class Slider(BaseWidget):
             raise ValueError("Unexpected value %s for 'update_on'" % update_on)
         self.slider.setFocusPolicy(QtCore.Qt.StrongFocus)
 
-        self.name_label = QtGui.QLabel()
+        self.name_label = QtWidgets.QLabel()
         self.name_label.setText(self.name)
         self.name_label.setAlignment(align_text)
 
-        self.editbox = QtGui.QLineEdit()
+        self.editbox = QtWidgets.QLineEdit()
         self.editbox.setMaximumWidth(max_edit_width)
         self.editbox.setText(self.value_fmt % self.val)
         self.editbox.setAlignment(align_value)
@@ -229,20 +227,18 @@ class ComboBox(BaseWidget):
     def __init__(self, name, items, ptype='kwarg', callback=None):
         super(ComboBox, self).__init__(name, ptype, callback)
 
-        self.name_label = QtGui.QLabel()
+        self.name_label = QtWidgets.QLabel()
         self.name_label.setText(self.name)
         self.name_label.setAlignment(QtCore.Qt.AlignLeft)
 
-        self._combo_box = QtGui.QComboBox()
+        self._combo_box = QtWidgets.QComboBox()
         self._combo_box.addItems(list(items))
 
-        self.layout = QtGui.QHBoxLayout(self)
+        self.layout = QtWidgets.QHBoxLayout(self)
         self.layout.addWidget(self.name_label)
         self.layout.addWidget(self._combo_box)
 
         self._combo_box.currentIndexChanged.connect(self._value_changed)
-        # self.connect(self._combo_box,
-                # SIGNAL("currentIndexChanged(int)"), self.updateUi)
 
     @property
     def val(self):
@@ -283,11 +279,11 @@ class CheckBox(BaseWidget):
                  callback=None):
         super(CheckBox, self).__init__(name, ptype, callback)
 
-        self._check_box = QtGui.QCheckBox()
+        self._check_box = QtWidgets.QCheckBox()
         self._check_box.setChecked(value)
         self._check_box.setText(self.name)
 
-        self.layout = QtGui.QHBoxLayout(self)
+        self.layout = QtWidgets.QHBoxLayout(self)
         if alignment == 'center':
             self.layout.setAlignment(QtCore.Qt.AlignCenter)
         elif alignment == 'left':

@@ -1,6 +1,6 @@
 import numpy as np
-from ..qt import QtGui
 
+from ..qt import QtGui
 from ..utils import new_plot
 from .base import Plugin
 

@@ -1,8 +1,4 @@
-try:
-    from matplotlib.widgets import RectangleSelector
-except ImportError:
-    RectangleSelector = object
-
+from matplotlib.widgets import RectangleSelector
 from skimage.viewer.canvastools.base import CanvasToolBase
 from skimage.viewer.canvastools.base import ToolHandles
 

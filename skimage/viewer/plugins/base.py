@@ -4,19 +4,11 @@ Base class for Plugins that interact with ImageViewer.
 from warnings import warn
 
 import numpy as np
-
-from ..qt import QtGui, qt_api
-from ..qt.QtCore import Qt, Signal
+from ..qt import QtWidgets, QtCore, Signal
 from ..utils import RequiredAttr, init_qtapp
-from skimage._shared.testing import doctest_skip_parser
-
-if qt_api is not None:
-    has_qt = True
-else:
-    has_qt = False
 
 
-class Plugin(QtGui.QDialog):
+class Plugin(QtWidgets.QDialog):
     """Base class for plugins that interact with an ImageViewer.
 
     A plugin connects an image filter (or another function) to an image viewer.
@@ -101,7 +93,7 @@ class Plugin(QtGui.QDialog):
                  "then the `image_filter` argument is ignored.")
 
         self.setWindowTitle(self.name)
-        self.layout = QtGui.QGridLayout(self)
+        self.layout = QtWidgets.QGridLayout(self)
         self.resize(width, height)
         self.row = 0
 
@@ -124,7 +116,7 @@ class Plugin(QtGui.QDialog):
         the image matches the filtered value specified by attached widgets.
         """
         self.setParent(image_viewer)
-        self.setWindowFlags(Qt.Dialog)
+        self.setWindowFlags(QtCore.Qt.Dialog)
 
         self.image_viewer = image_viewer
         self.image_viewer.plugins.append(self)
