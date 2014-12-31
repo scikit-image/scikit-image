@@ -182,3 +182,11 @@ in a different order, even if the number of operations is the same:
     1.18 seconds
     >>> print("Speedup: %.1fx" % ((s1 - s0) / (t1 - t0)))
     Speedup: 8.6x
+
+
+When the dimension you are iterating over is even larger, the
+speedup is even more dramatic. It is worth thinking about this
+*data locality* when writing algorithms. In particular, know that
+scikit-image uses C-contiguous arrays unless otherwise specified, so
+one should iterate along the last/rightmost dimension in the
+innermost loop of the computation.
