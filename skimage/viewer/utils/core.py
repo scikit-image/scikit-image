@@ -1,21 +1,15 @@
 import warnings
 
 import numpy as np
-from skimage.viewer.qt import QtGui, has_qt
+from skimage.viewer.qt import QtWidgets, has_qt, FigureManagerQT, FigureCanvasQTAgg
 import matplotlib as mpl
 from matplotlib.figure import Figure
 from matplotlib import _pylab_helpers
 from matplotlib.colors import LinearSegmentedColormap
 
-if has_qt:
-    from matplotlib.backends.backend_qt4 import FigureManagerQT
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
-    if 'agg' not in mpl.get_backend().lower():
-        warnings.warn("Recommended matplotlib backend is `Agg` for full "
-              "skimage.viewer functionality.")
-else:
-    FigureManagerQT = object
-    FigureCanvasQTAgg = object
+if has_qt and 'agg' not in mpl.get_backend().lower():
+    warnings.warn("Recommended matplotlib backend is `Agg` for full "
+                  "skimage.viewer functionality.")
 
 
 __all__ = ['init_qtapp', 'start_qtapp', 'RequiredAttr', 'figimage',
@@ -32,9 +26,9 @@ def init_qtapp():
     The QApplication needs to be initialized before creating any QWidgets
     """
     global QApp
-    QApp = QtGui.QApplication.instance()
+    QApp = QtWidgets.QApplication.instance()
     if QApp is None:
-        QApp = QtGui.QApplication([])
+        QApp = QtWidgets.QApplication([])
     return QApp
 
 
@@ -121,8 +115,8 @@ class FigureCanvas(FigureCanvasQTAgg):
         self.fig = figure
         FigureCanvasQTAgg.__init__(self, self.fig)
         FigureCanvasQTAgg.setSizePolicy(self,
-                                        QtGui.QSizePolicy.Expanding,
-                                        QtGui.QSizePolicy.Expanding)
+                                        QtWidgets.QSizePolicy.Expanding,
+                                        QtWidgets.QSizePolicy.Expanding)
         FigureCanvasQTAgg.updateGeometry(self)
 
     def resizeEvent(self, event):
