@@ -142,10 +142,11 @@ example, uses this convention.)
 In the case of color (or multichannel) images, the last dimension
 contains the color information and is denoted ``channel`` or ``ch``.
 
-Finally, for 3D images, we refer to the leading dimension as
-``frame``, abbreviated as ``frm`` or ``f``. In many cases,
+Finally, for 3D images, such as videos, magnetic resonance imaging
+(MRI) scans, or confocal microscopy, we refer to the leading dimension
+as ``frame``, abbreviated as ``frm`` or ``f``. In many cases,
 the third imaging dimension has lower resolution than the other two,
-and processing must be done level-wise. When levels are the leading
+and processing must be done frame-wise. When frames are the leading
 dimension, we can use the following syntax:
 
     >>> for image in image3d: # iterate over first dimension
