@@ -119,7 +119,9 @@ We can also use 2D boolean masks for a 2D color image, as we did with
 the grayscale image above:
 
 .. plot::
+
     Using a 2D mask on a 2D color image
+
     >>> reddish = cat[:, :, 0] > 160
     >>> cat[reddish] = [0, 255, 0]
     >>> plt.imshow(cat)
