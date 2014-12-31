@@ -115,8 +115,8 @@ As before, we can get and set pixel values:
     >>> # set the pixel at row 50, column 61 to green
     >>> cat[50, 61] = [0, 255, 0] # [red, green, blue]
 
-We can also use masks where they match the 2 spatial dimensions of the
-image:
+We can also use 2D boolean masks for a 2D color image, as we did with
+the grayscale image above:
 
 .. plot::
     Using a 2D mask on a 2D color image
