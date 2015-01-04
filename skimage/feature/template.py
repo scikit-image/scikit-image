@@ -131,8 +131,9 @@ def match_template(image, template, pad_input=False, mode='constant',
         image_window_sum = _window_sum_3d(image, template.shape)
         image_window_sum2 = _window_sum_3d(image ** 2, template.shape)
 
-    template_volume = np.prod(template.shape)
-    template_ssd = np.sum((template - template.mean()) ** 2)
+    template_volume = float(np.prod(template.shape))
+    template_ssd = float(np.sum((template - template.mean()) ** 2))
+    template_sum = float(template.sum())
 
     if image.ndim == 2:
         xcorr = fftconvolve(image, template[::-1, ::-1],
@@ -141,7 +142,7 @@ def match_template(image, template, pad_input=False, mode='constant',
         xcorr = fftconvolve(image, template[::-1, ::-1, ::-1],
                             mode="valid")[1:-1, 1:-1, 1:-1]
 
-    nom = xcorr - image_window_sum * (template.sum() / template_volume)
+    nom = xcorr - image_window_sum * (template_sum / template_volume)
 
     denom = image_window_sum2
     np.multiply(image_window_sum, image_window_sum, out=image_window_sum)
