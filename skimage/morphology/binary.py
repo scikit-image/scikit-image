@@ -33,7 +33,8 @@ def binary_erosion(image, selem=None, out=None):
     Returns
     -------
     eroded : ndarray of bool or uint
-        The result of the morphological erosion with values in ``[0, 1]``.
+        The result of the morphological erosion taking values in
+        ``[False, True]``.
 
     """
     if out is None:
@@ -68,8 +69,8 @@ def binary_dilation(image, selem=None, out=None):
     Returns
     -------
     dilated : ndarray of bool or uint
-        The result of the morphological dilation with values in ``[0, 1]``.
-
+        The result of the morphological dilation with values in
+        ``[False, True]``.
     """
     if out is None:
         out = np.empty(image.shape, dtype=np.bool)
