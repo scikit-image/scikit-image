@@ -1,3 +1,4 @@
+from __future__ import division
 import numpy as np
 from scipy.signal import fftconvolve
 
@@ -131,9 +132,9 @@ def match_template(image, template, pad_input=False, mode='constant',
         image_window_sum = _window_sum_3d(image, template.shape)
         image_window_sum2 = _window_sum_3d(image ** 2, template.shape)
 
-    template_volume = float(np.prod(template.shape))
-    template_ssd = float(np.sum((template - template.mean()) ** 2))
-    template_sum = float(template.sum())
+    template_volume = np.prod(template.shape)
+    template_ssd = np.sum((template - template.mean()) ** 2)
+    template_sum = template.sum()
 
     if image.ndim == 2:
         xcorr = fftconvolve(image, template[::-1, ::-1],
