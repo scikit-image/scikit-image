@@ -1045,7 +1045,7 @@ class TypeError1(TestCase):
 
 def test_multi_crop():
     arr = np.arange(45).reshape(9, 5)
-    out = crop(arr, (1, 2), (2, 1))
+    out = crop(arr, ((1, 2), (2, 1)))
     assert_array_equal(out[0], [7, 8])
     assert_array_equal(out[-1], [32, 33])
     assert_equal(out.shape, (6, 2))
@@ -1070,7 +1070,7 @@ def test_int_crop():
 def test_copy_crop():
     arr = np.arange(45).reshape(9, 5)
     out0 = crop(arr, 1, copy=True)
-    assert out0.c_contiguous
+    assert out0.flags.c_contiguous
     out0[0, 0] = 100
     assert not np.any(arr == 100)
     assert not np.may_share_memory(arr, out0)
