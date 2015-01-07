@@ -1,9 +1,12 @@
 """
 Grayscale morphological operations
 """
+import functools
+
 import numpy as np
 from scipy import ndimage as nd
 from .misc import default_selem
+from ..util import pad, crop
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
            'black_tophat']
@@ -78,6 +81,51 @@ def _invert_selem(selem):
     inverted = selem[(slice(None, None, -1),) * selem.ndim]
     return inverted
 
+
+def pad_for_eccentric_selems(func):
+    """Pad input images for certain morphological operations.
+
+    Parameters
+    ----------
+    func : callable
+        A morphological function, either opening or closing, that
+        supports eccentric structuring elements. The inputs must
+        include at least `image`, `selem`, and `out`.
+
+    Returns
+    -------
+    func_out : callable
+        A function
+
+    See Also
+    --------
+    ``opening``, ``closing``.
+    """
+    @functools.wraps(func)
+    def func_out(image, selem, out=None, *args, **kwargs):
+        pad_widths = []
+        padding = False
+        if out is None:
+            out = np.empty_like(image)
+        for axis_len in selem.shape:
+            if axis_len % 2 == 0:
+                axis_pad_width = axis_len - 1
+                padding = True
+            else:
+                axis_pad_width = 0
+            pad_widths.append((axis_pad_width,) * 2)
+        if padding:
+            image = pad(image, pad_widths, mode='edge')
+            out_temp = np.empty_like(image)
+        else:
+            out_temp = out
+        out_temp = func(image, selem, out=out_temp, *args, **kwargs)
+        if padding:
+            out[:] = crop(out_temp, pad_widths)
+        else:
+            out = out_temp
+        return out
+    return func_out
 
 @default_selem
 def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
@@ -203,6 +251,7 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
 
 
 @default_selem
+@pad_for_eccentric_selems
 def opening(image, selem=None, out=None):
     """Return greyscale morphological opening of an image.
 
@@ -252,6 +301,7 @@ def opening(image, selem=None, out=None):
 
 
 @default_selem
+@pad_for_eccentric_selems
 def closing(image, selem=None, out=None):
     """Return greyscale morphological closing of an image.
 
