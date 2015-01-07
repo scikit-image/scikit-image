@@ -1528,7 +1528,7 @@ def crop(ar, crop_width, copy=False, order='K'):
         The cropped array. If `copy=False` (default), this is a sliced
         view of the input array.
     """
-    ar = np.array(ar)
+    ar = np.array(ar, copy=False)
     crops = _validate_lengths(ar, crop_width)
     slices = tuple([slice(a, -b) for a, b in crops])
     if copy:
