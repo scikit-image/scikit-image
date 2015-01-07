@@ -1081,5 +1081,11 @@ def test_copy_crop():
     assert np.may_share_memory(arr, out1)
 
 
+def test_zero_crop():
+    arr = np.arange(45).reshape(9, 5)
+    out = crop(arr, 0)
+    assert out.shape == (9, 5)
+
+
 if __name__ == "__main__":
     np.testing.run_module_suite()
