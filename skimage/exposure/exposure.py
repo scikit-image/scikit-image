@@ -188,7 +188,6 @@ def equalize_adapthist(image, tiles=(16, 16), bin_min=0, bin_max=255,
             r3, c3 = image_tile.shape
             hist = sp_hist(image_tile, bin_min, bin_max, bin_level)
             limit = clip * r3 * c3
-            excess_mod = 0
             while True:
                 excess = hist - limit
                 excess[excess < 0] = 0
