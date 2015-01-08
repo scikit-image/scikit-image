@@ -1532,7 +1532,7 @@ def crop(ar, crop_width, copy=False, order='K'):
     crops = _validate_lengths(ar, crop_width)
     slices = [slice(a, ar.shape[i] - b) for i, (a, b) in enumerate(crops)]
     if copy:
-        cropped = np.copy(ar[slices], order=order)
+        cropped = np.array(ar[slices], order=order, copy=True)
     else:
         cropped = ar[slices]
     return cropped
