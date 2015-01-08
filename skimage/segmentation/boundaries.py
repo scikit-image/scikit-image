@@ -108,6 +108,7 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
     """
     ndim = label_img.ndim
     selem = nd.generate_binary_structure(ndim, connectivity)
+    max_label = np.iinfo(label_img.dtype).max
     if mode != 'subpixel':
         boundaries = dilation(label_img, selem) != erosion(label_img, selem)
         if mode == 'inner':
@@ -116,8 +117,12 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
         elif mode == 'outer':
             background_image = (label_img == background)
             selem = nd.generate_binary_structure(ndim, ndim)
-            no_adjacent_background = ~dilation(background_image, selem)
-            boundaries &= (background_image | no_adjacent_background)
+            inverted_background = np.array(label_img, copy=True)
+            inverted_background[background_image] = max_label
+            adjacent_objects = ((dilation(label_img, selem) !=
+                                 erosion(inverted_background, selem)) &
+                                ~background_image)
+            boundaries &= (background_image | adjacent_objects)
         return boundaries
     else:
         label_img_expanded = np.zeros([(2 * s - 1) for s in label_img.shape],
