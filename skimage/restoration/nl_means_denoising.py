@@ -66,8 +66,8 @@ def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1):
     >>> denoised_a = nl_means_denoising(a, 7, 5, 0.1)
     """
     if image.ndim == 2:
-        return np.array(_nl_means_denoising_2d(image, patch_size,
-                                patch_distance, h))
+        return np.array(_nl_means_denoising_2d(image, s=patch_size,
+                                d=patch_distance, h=h))
     if image.ndim == 3 and image.shape[-1] > 4:  # only grayscale
         return np.array(_nl_means_denoising_3d(image, patch_size,
                                 patch_distance, h))
@@ -150,8 +150,8 @@ def fast_nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1):
     >>> denoised_a = fast_nl_means_denoising(a, 7, 5, 0.1)
     """
     if image.ndim == 2:
-        return np.array(_fast_nl_means_denoising_2d(image, patch_size,
-                                patch_distance, h))
+        return np.array(_fast_nl_means_denoising_2d(image, s=patch_size,
+                                d=patch_distance, h=h))
     else:
         raise ValueError("Fast non local means denoising is only possible for \
         2D grayscale images.")

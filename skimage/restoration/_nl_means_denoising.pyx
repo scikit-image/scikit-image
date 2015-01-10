@@ -102,8 +102,6 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     cdef DTYPE_t [:, ::1] padded = np.ascontiguousarray(util.pad(image,
                                 offset, mode='reflect').astype(np.float32))
     cdef DTYPE_t [:, ::1] result = padded.copy()
-    # We normalize by the image contrast, and divide by 3 because of 3 channels
-    h *= (np.max(padded) - np.min(padded)) / 3.
     cdef float A = ((s - 1.) / 4.)
     cdef float new_value
     cdef float weight_sum, weight
@@ -115,7 +113,7 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     cdef int x, y, i, j
     cdef int x_start, x_end, y_start, y_end
     cdef int x_start_i, x_end_i, y_start_j, y_end_j
-    w = 1. / (np.sum(w) * 2 * h ** 2) * w
+    w = 1. / (np.sum(w) * h ** 2.) * w
     # Coordinates of central pixel and patch bounds
     for x in range(offset, n_x + offset):
         x_start = x - offset
@@ -180,7 +178,6 @@ def _nl_means_denoising_2drgb(image, int s=7, int d=13, float h=0.1):
                        ((offset, offset), (offset, offset), (0, 0)),
                         mode='reflect').astype(np.float32))
     cdef DTYPE_t [:, :, ::1] result = padded.copy()
-    h *= (np.max(padded) - np.min(padded))
     cdef float A = ((s - 1.) / 4.)
     cdef float new_value
     cdef float weight_sum, weight
@@ -189,7 +186,7 @@ def _nl_means_denoising_2drgb(image, int s=7, int d=13, float h=0.1):
                                     - (xg ** 2 + yg ** 2) / (2 * A ** 2)).
                                     astype(np.float32))
     cdef float distance
-    w = 1. / (np.sum(w) * 2 * h ** 2) * w
+    w = 1. / (np.sum(w) * h ** 2) * w
     # Coordinates of central pixel and patch bounds
     for x in range(offset, n_x + offset):
         x_start = x - offset
@@ -255,7 +252,6 @@ def _nl_means_denoising_3d(image, int s=7,
                                         image.astype(np.float32),
                                         offset, mode='reflect'))
     cdef DTYPE_t [:, :, ::1] result = padded.copy()
-    h *= (np.max(padded) - np.min(padded))
     cdef float A = ((s - 1.) / 4.)
     cdef float new_value
     cdef float weight_sum, weight
@@ -268,7 +264,7 @@ def _nl_means_denoising_3d(image, int s=7,
     cdef int x, y, z, i, j, k
     cdef int x_start, x_end, y_start, y_end, z_start, z_end
     cdef int x_start_i, x_end_i, y_start_j, y_end_j, z_start_k, z_end_k
-    w = 1. / (np.sum(w) * 2 * h ** 2) * w
+    w = 1. / (np.sum(w) * h ** 2) * w
     # Coordinates of central pixel and patch bounds
     for x in range(offset, n_x + offset):
         x_start = x - offset
@@ -337,17 +333,17 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     cdef int pad_size = offset + d
     cdef DTYPE_t [:, ::1] padded = np.ascontiguousarray(util.pad(image,
                                 pad_size, mode='reflect').astype(np.float32))
-    cdef DTYPE_t [:, ::1] result = padded.copy()
+    cdef DTYPE_t [:, ::1] result = np.zeros_like(padded)
     cdef DTYPE_t [:, ::1] weights = np.zeros_like(padded)
     cdef DTYPE_t [:, ::1] integral = np.zeros_like(padded)
-    h *= (np.max(padded) - np.min(padded))
     cdef int n_x, n_y, t1, t2, x, y
     cdef float weight, distance
-    cdef float h2 = h**2
-    cdef float s2 = s**2.
+    cdef float h2 = h ** 2.
+    cdef float s2 = s ** 2.
     n_x, n_y = image.shape
     n_x += 2 * pad_size
     n_y += 2 * pad_size
+    # Outer loops on patch shifts
     for t1 in range(-d, d + 1):
         for t2 in range(-d, d + 1):
             integral = np.zeros_like(padded)
@@ -371,8 +367,10 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
                                integral[x - offset, y - offset] - \
                                integral[x - offset, y + offset] - \
                                integral[x + offset, y - offset]
-                    distance /= s2
-                    weight = exp(- distance / h2)
+                    distance /= (s2 * h2)
+                    if distance > 4:
+                        continue
+                    weight = exp(- distance)
                     weights[x, y] += weight
                     result[x, y] += weight * padded[x + t1, y + t2]
     for x in range(offset, n_x - offset):
