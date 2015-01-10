@@ -314,7 +314,7 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     Parameters
     ----------
     image: ndarray
-        input data to be denoised
+        2-D input data to be denoised
 
     s: int, optional
         size of patches used for denoising
@@ -326,11 +326,12 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
         cut-off distance (in gray levels). The higher h, the more permissive
         one is in accepting patches.
     """
-
     if s % 2 == 0:
         s += 1  # odd value for symmetric patch
     cdef int offset = s / 2
-    cdef int pad_size = offset + d
+    # Image padding: we need to account for patch size, possible shift,
+    # + 1 for the boundary effects in finite differences
+    cdef int pad_size = offset + d + 1
     cdef DTYPE_t [:, ::1] padded = np.ascontiguousarray(util.pad(image,
                                 pad_size, mode='reflect').astype(np.float32))
     cdef DTYPE_t [:, ::1] result = np.zeros_like(padded)
@@ -338,21 +339,23 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     cdef DTYPE_t [:, ::1] integral = np.zeros_like(padded)
     cdef int n_x, n_y, t1, t2, x, y
     cdef float weight, distance
+    cdef float alpha
     cdef float h2 = h ** 2.
     cdef float s2 = s ** 2.
     n_x, n_y = image.shape
     n_x += 2 * pad_size
     n_y += 2 * pad_size
     # Outer loops on patch shifts
+    # With t2 >= 0, reference patch is always on the left of test patch
     for t1 in range(-d, d + 1):
-        for t2 in range(-d, d + 1):
+        for t2 in range(0, d + 1):
+            # alpha is to account for patches on the same column
+            # distance is computed twice in this case
+            if t2 == 0 and t1 is not 0:
+                alpha = 0.5
+            else:
+                alpha = 1.
             integral = np.zeros_like(padded)
-            for x in range(max(1, - t1), min(n_x, n_x - t1)):
-                integral[x, 0] = (padded[x, 0] - padded[x + t1, t2])**2 + \
-                                    integral[x - 1, 0]
-            for y in range(max(1, - t2), min(n_y, n_y - t2)):
-                integral[0, y] = (padded[0, y] - padded[t1, y + t2])**2 + \
-                                    integral[0, y - 1]
             for x in range(max(1, - t1), min(n_x, n_x - t1)):
                 for y in range(max(1, - t2), min(n_y, n_y - t2)):
                     integral[x, y] = (padded[x, y] -
@@ -370,14 +373,14 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
                     distance /= (s2 * h2)
                     if distance > 4:
                         continue
-                    weight = exp(- distance)
+                    weight = alpha * exp(- distance)
                     weights[x, y] += weight
+                    weights[x + t1, y + t2] += weight
                     result[x, y] += weight * padded[x + t1, y + t2]
+                    result[x + t1, y + t2] += weight * padded[x, y]
     for x in range(offset, n_x - offset):
-        for y in range(offset, n_x - offset):
+        for y in range(offset, n_y - offset):
             # I think there is no risk of division by zero
             # except in padded zone
             result[x, y] /= weights[x, y]
     return result[pad_size: - pad_size, pad_size: - pad_size]
-
-

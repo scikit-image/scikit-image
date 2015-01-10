@@ -154,7 +154,7 @@ def test_nl_means_denoising_2d():
 
 
 def test_fast_nl_means_denoising_2d():
-    img = np.zeros((40, 40))
+    img = np.zeros((40, 50))
     img[10:-10, 10:-10] = 1.
     img += 0.3*np.random.randn(*img.shape)
     denoised = restoration.fast_nl_means_denoising(img, 7, 5, 0.1)
