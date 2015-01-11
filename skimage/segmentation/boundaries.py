@@ -3,7 +3,6 @@ from scipy import ndimage as nd
 from ..morphology import dilation, erosion, square
 from ..util import img_as_float
 from ..color import gray2rgb
-from .._shared.utils import deprecated
 
 
 def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
