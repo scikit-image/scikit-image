@@ -125,34 +125,33 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
            [0, 0, 1, 1, 1, 1, 0, 0, 1, 0],
            [0, 0, 0, 0, 0, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
-    >>> find_boundaries(labels, mode='subpixel').astype(np.uint8)
-    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+    >>> labels_small = labels[::2, ::3]
+    >>> labels_small
+    array([[0, 0, 0, 0],
+           [0, 0, 5, 0],
+           [0, 1, 5, 0],
+           [0, 0, 5, 0],
+           [0, 0, 0, 0]], dtype=uint8)
+    >>> find_boundaries(labels_small, mode='subpixel').astype(np.uint8)
+    array([[0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 0],
+           [0, 0, 0, 1, 0, 1, 0],
+           [0, 1, 1, 1, 0, 1, 0],
+           [0, 1, 0, 1, 0, 1, 0],
+           [0, 1, 1, 1, 0, 1, 0],
+           [0, 0, 0, 1, 0, 1, 0],
+           [0, 0, 0, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
     ndim = label_img.ndim
     selem = nd.generate_binary_structure(ndim, connectivity)
-    max_label = np.iinfo(label_img.dtype).max
     if mode != 'subpixel':
         boundaries = dilation(label_img, selem) != erosion(label_img, selem)
         if mode == 'inner':
             foreground_image = (label_img != background)
             boundaries &= foreground_image
         elif mode == 'outer':
+            max_label = np.iinfo(label_img.dtype).max
             background_image = (label_img == background)
             selem = nd.generate_binary_structure(ndim, ndim)
             inverted_background = np.array(label_img, copy=True)
