@@ -4,7 +4,7 @@ from skimage.segmentation import find_boundaries, mark_boundaries
 
 
 def test_find_boundaries():
-    image = np.zeros((10, 10))
+    image = np.zeros((10, 10), dtype=np.uint8)
     image[2:7, 2:7] = 1
 
     ref = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -24,7 +24,7 @@ def test_find_boundaries():
 
 def test_mark_boundaries():
     image = np.zeros((10, 10))
-    label_image = np.zeros((10, 10))
+    label_image = np.zeros((10, 10), dtype=np.uint8)
     label_image[2:7, 2:7] = 1
 
     ref = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
