@@ -2,7 +2,7 @@
 """Script to auto-generate our API docs.
 """
 # stdlib imports
-import os, sys
+import sys
 
 # local imports
 from apigen import ApiDocWriter

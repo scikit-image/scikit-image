@@ -10,11 +10,11 @@ PAPER         ?=
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
-ALLSPHINXOPTS   = -d build/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
+ALLSPHINXOPTS   = -d build/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) _prebuild
 DEST = build
-.PHONY: all help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest gitwash gh-pages coveragetable random_gallery
+.PHONY: all help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest gitwash gh-pages coveragetable random_gallery prebuild prebuild_docstrip
 
-all: html
+all: clean html
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -31,24 +31,38 @@ help:
 	@echo "  linkcheck to check all external links for integrity"
 	@echo "  doctest   to run all doctests embedded in the documentation (if enabled)"
 	@echo "  gitwash   to update the gitwash documentation"
+
+prebuild:
+	-rm -rf ./_prebuild
+	$(PYTHON) tools/doctest_strip.py --NOSTRIP
+	@echo Copying doc sources to ./_prebuild
+
+prebuild_docstrip:
+	-rm -rf ./_prebuild
+	$(PYTHON) tools/doctest_strip.py
+	@echo Removing doctest annotations from doc sources.
+	@echo Copying doc sources to ./_prebuild
+
 clean:
-	-rm -rf $(DEST)/*
-	-rm -rf source/api
+	-rm -rf ./$(DEST)/*
+	-rm -rf ./_prebuild/*
+	-rm -rf ./source/api
 	-find ./source/auto_examples/* -type f | grep -v blank | xargs rm -f
+
 api:
 	@mkdir -p source/api
 	$(PYTHON) tools/build_modref_templates.py
 	@echo "Build API docs...done."
 
 random_gallery:
-	@cd source && $(PYTHON) random_gallery.py
+	@cd _prebuild && $(PYTHON) random_gallery.py
 
 coveragetable:
-	@cd source && $(PYTHON) coverage_generator.py
+	@cd _prebuild && $(PYTHON) coverage_generator.py
 
-html: api coveragetable random_gallery
+html: api prebuild_docstrip coveragetable random_gallery
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html
-	cp -r source/plots $(DEST)/html
+	cp -r _prebuild/plots $(DEST)/html
 	@echo
 	@echo "Build finished. The HTML pages are in build/html."
 
@@ -91,7 +105,7 @@ devhelp:
 	@echo "# ln -s build/devhelp $$HOME/.local/share/devhelp/scikitimage"
 	@echo "# devhelp"
 
-latex: api
+latex: api prebuild_docstrip
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(DEST)/latex
 	@echo
 	@echo "Build finished; the LaTeX files are in $(DEST)/latex."
@@ -124,7 +138,7 @@ gh-pages:
 	$(PYTHON) gh-pages.py
 
 gitwash:
-	$(PYTHON) tools/gitwash/gitwash_dumper.py source scikit-image \
+	$(PYTHON) tools/gitwash/gitwash_dumper.py _prebuild scikit-image \
 	--project-url=http://scikit-image.org \
 	--project-ml-url=http://groups.google.com/group/scikit-image \
 	--repo-name=scikit-image \

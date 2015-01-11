@@ -11,6 +11,7 @@
 *.old
 doc/source/api
 doc/build
+doc/_prebuild
 source/api
 build
 dist

@@ -12,7 +12,7 @@ References
        Pattern Analysis and Machine Intelligence,
        IEEE Transactions on, vol. 22, no. 8, pp. 888-905, August 2000.
 """
-from skimage import graph, data, io, segmentation, color
+from skimage import graph, data, segmentation, color
 from matplotlib import pyplot as plt
 
 
@@ -25,8 +25,10 @@ g = graph.rag_mean_color(img, labels1, mode='similarity')
 labels2 = graph.cut_normalized(labels1, g)
 out2 = color.label2rgb(labels2, img, kind='avg')
 
-plt.figure()
-io.imshow(out1)
-plt.figure()
-io.imshow(out2)
-io.show()
+fig, ax = plt.subplots()
+ax.imshow(out1)
+
+fig2, ax2 = plt.subplots()
+ax2.imshow(out2)
+
+plt.show()

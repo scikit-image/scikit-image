@@ -51,10 +51,10 @@ def max_edge(g, src, dst, n):
 def display(g, title):
     """Displays a graph with the given title."""
     pos = nx.circular_layout(g)
-    plt.figure()
-    plt.title(title)
-    nx.draw(g, pos)
-    nx.draw_networkx_edge_labels(g, pos, font_size=20)
+    fig, ax = plt.subplots()
+    ax.set_title(title)
+    nx.draw(g, pos, ax=ax)
+    nx.draw_networkx_edge_labels(g, pos, font_size=20, ax=ax)
 
 
 g = rag.RAG()
