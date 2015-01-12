@@ -208,7 +208,7 @@ def mark_boundaries(image, label_img, color=(1, 1, 0),
     boundaries = find_boundaries(label_img, mode=mode,
                                  background=background_label)
     if outline_color is not None:
-        outer_boundaries = dilation(boundaries.astype(np.uint8), square(3))
-        marked[outer_boundaries != 0, :] = np.array(outline_color)
-    marked[boundaries, :] = np.array(color)
+        outlines = dilation(boundaries, square(3))
+        marked[outlines] = outline_color
+    marked[boundaries] = color
     return marked
