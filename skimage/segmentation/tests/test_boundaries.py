@@ -41,7 +41,8 @@ def test_mark_boundaries():
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
 
-    result = mark_boundaries(image, label_image, color=white).mean(axis=2)
+    marked = mark_boundaries(image, label_image, color=white, mode='thick')
+    result = np.mean(marked, axis=-1)
     assert_array_equal(result, ref)
 
     ref = np.array([[0, 2, 2, 2, 2, 2, 2, 2, 0, 0],
@@ -54,8 +55,9 @@ def test_mark_boundaries():
                     [2, 2, 1, 1, 1, 1, 1, 2, 2, 0],
                     [0, 2, 2, 2, 2, 2, 2, 2, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    result = mark_boundaries(image, label_image, color=white,
-                             outline_color=(2, 2, 2)).mean(axis=2)
+    marked = mark_boundaries(image, label_image, color=white,
+                             outline_color=(2, 2, 2), mode='thick')
+    result = np.mean(marked, axis=-1)
     assert_array_equal(result, ref)
 
 
