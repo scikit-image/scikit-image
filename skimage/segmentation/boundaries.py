@@ -169,7 +169,7 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
 
 
 def mark_boundaries(image, label_img, color=(1, 1, 0),
-                    outline_color=(0, 0, 0), mode='outer', background_label=0):
+                    outline_color=None, mode='outer', background_label=0):
     """Return image with boundaries between labeled regions highlighted.
 
     Parameters
