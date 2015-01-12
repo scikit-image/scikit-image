@@ -1,3 +1,5 @@
+from __future__ import division
+
 import numpy as np
 from scipy import ndimage as nd
 from ..morphology import dilation, erosion, square
@@ -95,7 +97,7 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
     ...                    [0, 0, 0, 0, 0, 5, 5, 5, 0, 0],
     ...                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ...                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> find_boundaries(labels).astype(np.uint8) # display 1/0, not True/False
+    >>> find_boundaries(labels, mode='thick').astype(np.uint8)
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
@@ -167,28 +169,42 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
 
 
 def mark_boundaries(image, label_img, color=(1, 1, 0),
-                    outline_color=(0, 0, 0)):
+                    outline_color=(0, 0, 0), mode='outer'):
     """Return image with boundaries between labeled regions highlighted.
 
     Parameters
     ----------
     image : (M, N[, 3]) array
         Grayscale or RGB image.
-    label_img : (M, N) array
+    label_img : (M, N) array of int
         Label array where regions are marked by different integer values.
-    color : length-3 sequence
+    color : length-3 sequence, optional
         RGB color of boundaries in the output image.
-    outline_color : length-3 sequence
+    outline_color : length-3 sequence, optional
         RGB color surrounding boundaries in the output image. If None, no
         outline is drawn.
+    mode : string in {'thick', 'inner', 'outer', 'subpixel'}, optional
+        The mode for finding boundaries.
+
+    Returns
+    -------
+    marked : (M, N, 3) array of float
+        An image in which the boundaries between labels are
+        superimposed on the original image.
+
+    See Also
+    --------
+    ``find_boundaries``.
     """
     if image.ndim == 2:
         image = gray2rgb(image)
-    image = img_as_float(image, force_copy=True)
-
-    boundaries = find_boundaries(label_img)
+    marked = img_as_float(image, force_copy=True)
+    if mode == 'subpixel':
+        marked = nd.zoom(marked, [2 - 1/s for s in marked.shape[:-1]] + [1],
+                         mode='reflect')
+    boundaries = find_boundaries(label_img, mode=mode)
     if outline_color is not None:
         outer_boundaries = dilation(boundaries.astype(np.uint8), square(3))
-        image[outer_boundaries != 0, :] = np.array(outline_color)
-    image[boundaries, :] = np.array(color)
-    return image
+        marked[outer_boundaries != 0, :] = np.array(outline_color)
+    marked[boundaries, :] = np.array(color)
+    return marked
