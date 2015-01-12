@@ -169,7 +169,7 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
 
 
 def mark_boundaries(image, label_img, color=(1, 1, 0),
-                    outline_color=(0, 0, 0), mode='outer'):
+                    outline_color=(0, 0, 0), mode='outer', background_label=0):
     """Return image with boundaries between labeled regions highlighted.
 
     Parameters
@@ -185,6 +185,9 @@ def mark_boundaries(image, label_img, color=(1, 1, 0),
         outline is drawn.
     mode : string in {'thick', 'inner', 'outer', 'subpixel'}, optional
         The mode for finding boundaries.
+    background_label : int, optional
+        Which label to consider background (this is only useful for
+        modes ``inner`` and ``outer``).
 
     Returns
     -------
@@ -202,7 +205,8 @@ def mark_boundaries(image, label_img, color=(1, 1, 0),
     if mode == 'subpixel':
         marked = nd.zoom(marked, [2 - 1/s for s in marked.shape[:-1]] + [1],
                          mode='reflect')
-    boundaries = find_boundaries(label_img, mode=mode)
+    boundaries = find_boundaries(label_img, mode=mode,
+                                 background=background_label)
     if outline_color is not None:
         outer_boundaries = dilation(boundaries.astype(np.uint8), square(3))
         marked[outer_boundaries != 0, :] = np.array(outline_color)
