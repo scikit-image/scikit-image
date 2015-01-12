@@ -69,7 +69,7 @@ def test_mark_boundaries_subpixel():
                        [0, 0, 0, 0]], dtype=np.uint8)
     np.random.seed(0)
     image = np.round(np.random.rand(*labels.shape), 2)
-    marked = np.mark_boundaries(image, labels, color=white, mode='subpixel')
+    marked = mark_boundaries(image, labels, color=white, mode='subpixel')
     marked_proj = np.round(np.mean(marked, axis=-1), 2)
 
     ref_result = np.array(
