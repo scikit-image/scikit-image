@@ -196,9 +196,9 @@ def mark_boundaries(image, label_img, color=(1, 1, 0),
     --------
     ``find_boundaries``.
     """
-    if image.ndim == 2:
-        image = gray2rgb(image)
     marked = img_as_float(image, force_copy=True)
+    if marked.ndim == 2:
+        marked = gray2rgb(marked)
     if mode == 'subpixel':
         marked = nd.zoom(marked, [2 - 1/s for s in marked.shape[:-1]] + [1],
                          mode='reflect')
