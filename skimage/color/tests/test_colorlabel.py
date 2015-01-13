@@ -91,9 +91,12 @@ def test_leave_labels_alone():
     assert_array_equal(labels, labels_saved)
 
 def test_avg():
+    # label image
     label_field = np.array([[1, 1, 1, 2],
                             [1, 2, 2, 2],
                             [3, 3, 3, 3]], dtype=np.uint8)
+
+    # color image
     r = np.array([[1., 1., 0., 0.],
                   [0., 0., 1., 1.],
                   [0., 0., 0., 0.]])
@@ -104,7 +107,8 @@ def test_avg():
                   [0., 1., 1., 1.],
                   [0., 0., 1., 1.]])
     image = np.dstack((r, g, b))
-    out = label2rgb(label_field, image, kind='avg')
+
+    # reference label-colored image
     rout = np.array([[0.5, 0.5, 0.5, 0.5],
                      [0.5, 0.5, 0.5, 0.5],
                      [0. , 0. , 0. , 0. ]])
@@ -115,12 +119,20 @@ def test_avg():
                      [0. , 1. , 1. , 1. ],
                      [0.5, 0.5, 0.5, 0.5]])
     expected_out = np.dstack((rout, gout, bout))
+
+    # test standard averaging
+    out = label2rgb(label_field, image, kind='avg')
     assert_array_equal(out, expected_out)
 
+    # test averaging with custom background value
     out_bg = label2rgb(label_field, image, bg_label=2, bg_color=(0, 0, 0),
                        kind='avg')
     expected_out_bg = expected_out.copy()
     expected_out_bg[label_field == 2] = 0
+    assert_array_equal(out_bg, expected_out_bg)
+
+    # test default background color
+    out_bg = label2rgb(label_field, image, bg_label=2, kind='avg')
     assert_array_equal(out_bg, expected_out_bg)
 
 
