@@ -64,7 +64,7 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
 
 
 def label2rgb(label, image=None, colors=None, alpha=0.3,
-              bg_label=-1, bg_color=None, image_alpha=1, kind='overlay'):
+              bg_label=-1, bg_color=(0, 0, 0), image_alpha=1, kind='overlay'):
     """Return an RGB image where color-coded labels are painted over the image.
 
     Parameters
