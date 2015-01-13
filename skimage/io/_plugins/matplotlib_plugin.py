@@ -60,7 +60,7 @@ def imshow(im, *args, **kwargs):
     kwargs.setdefault('vmax', hi)
     ax = plt.imshow(im, *args, **kwargs)
     if not supported_dtype or out_of_range_float or low_dynamic_range:
-        ax.colorbar()
+        plt.colorbar()
     return ax
 
 imread = plt.imread
