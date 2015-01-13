@@ -14,7 +14,8 @@ def imshow(im, *args, **kwargs):
 
     In contrast, if the image exceeds the standard range, this
     function defaults back to displaying exactly the range of the
-    input image.
+    input image, along with a colorbar to clearly indicate that
+    this range transformation has occurred.
 
     Parameters
     ----------
