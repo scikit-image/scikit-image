@@ -40,6 +40,7 @@ def imshow(im, *args, **kwargs):
             # display range starts at 0 for nonnegative images
             lo = 0
     else:
+        lo, hi = immin, immax
         warnings.warn("Non-standard image type; displaying image with "
                       "stretched contrast.")
     out_of_range_float = (np.issubdtype(im.dtype, np.float) and

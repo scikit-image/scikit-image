@@ -2,6 +2,8 @@ from __future__ import division
 
 import numpy as np
 from skimage import io
+from skimage._shared._warnings import expected_warnings
+
 
 io.use_plugin('matplotlib', 'imshow')
 
@@ -10,6 +12,7 @@ io.use_plugin('matplotlib', 'imshow')
 # but we still expect the display range to equal the full dtype range.
 im8 = np.array([[0, 64], [128, 240]], np.uint8)
 im16 = im8.astype(np.uint16) * 256
+im64 = im8.astype(np.uint64)
 imf = im8 / 255
 im_lo = imf / 1000
 im_hi = imf + 10
@@ -42,6 +45,7 @@ def test_uint8():
     ax_im = io.imshow(im8)
     assert ax_im.cmap.name == 'gray'
     assert ax_im.get_clim() == (0, 255)
+    # check that no colorbar was created
     assert n_subplots(ax_im) == 1
 
 
@@ -57,6 +61,28 @@ def test_float():
     assert ax_im.cmap.name == 'gray'
     assert ax_im.get_clim() == (0, 1)
     assert n_subplots(ax_im) == 1
+
+
+def test_low_dynamic_range():
+    with expected_warnings(["Low image dynamic range"]):
+        ax_im = io.imshow(im_lo)
+    assert ax_im.get_clim() == (im_lo.min(), im_lo.max())
+    # check that a colorbar was created
+    assert n_subplots(ax_im) == 2
+
+
+def test_outside_standard_range():
+    with expected_warnings(["out of standard range"]):
+        ax_im = io.imshow(im_hi)
+    assert ax_im.get_clim() == (im_hi.min(), im_hi.max())
+    assert n_subplots(ax_im) == 2
+
+
+def test_nonstandard_type():
+    with expected_warnings(["Non-standard image type"]):
+        ax_im = io.imshow(im64)
+    assert ax_im.get_clim() == (im64.min(), im64.max())
+    assert n_subplots(ax_im) == 2
 
 
 if __name__ == '__main__':
