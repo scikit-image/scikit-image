@@ -27,8 +27,8 @@ def imshow(im, *args, **kwargs):
 
     Returns
     -------
-    ax : `matplotlib.pyplot.Axes`
-        The axes showing the image.
+    ax : `matplotlib.pyplot.AxesImage`
+        The `AxesImage` object returned by `plt.imshow`.
     """
     if plt.gca().has_data():
         plt.figure()

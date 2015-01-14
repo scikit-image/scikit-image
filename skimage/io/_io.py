@@ -193,7 +193,7 @@ def show():
     >>> import skimage.io as io
 
     >>> for i in range(4):
-    ...     ax = io.imshow(np.random.rand(50, 50))
+    ...     ax_im = io.imshow(np.random.rand(50, 50))
     >>> io.show() # doctest: +SKIP
 
     '''
