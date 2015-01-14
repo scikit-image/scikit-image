@@ -7,7 +7,7 @@ from .misc import default_selem
 
 
 # The default_selem decorator provides a diamond structuring element as default
-# with the appropriate dimension for the input `image`.
+# with the same dimension as the input image and size 3 along each axis.
 @default_selem
 def binary_erosion(image, selem=None, out=None):
     """Return fast binary morphological erosion of an image.

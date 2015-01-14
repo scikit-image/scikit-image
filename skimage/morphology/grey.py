@@ -15,8 +15,8 @@ __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
 def _shift_selem(selem, shift_x, shift_y):
     """Shift the binary image `selem` in the left and/or up.
 
-    This only affects structuring elements with even number of rows or
-    columns.
+    This only affects 2D structuring elements with even number of rows
+    or columns.
 
     Parameters
     ----------
@@ -63,7 +63,7 @@ def _invert_selem(selem):
 
     Returns
     -------
-    inverted : array
+    inverted : array, same shape and type as `selem`
         The structuring element, in opposite order.
 
     Examples
@@ -89,13 +89,14 @@ def pad_for_eccentric_selems(func):
     ----------
     func : callable
         A morphological function, either opening or closing, that
-        supports eccentric structuring elements. The inputs must
+        supports eccentric structuring elements. Its parameters must
         include at least `image`, `selem`, and `out`.
 
     Returns
     -------
     func_out : callable
-        A function
+        The same function, but correctly padding the input image before
+        applying the input function.
 
     See Also
     --------
@@ -156,9 +157,9 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
 
     Notes
     -----
-    For `uint8` (and `uint16` up to a certain bit-depth) data, the lower
-    algorithm complexity makes the `skimage.filter.rank.minimum` function more
-    efficient for larger images and structuring elements.
+    For ``uint8`` (and ``uint16`` up to a certain bit-depth) data, the
+    lower algorithm complexity makes the `skimage.filter.rank.minimum`
+    function more efficient for larger images and structuring elements.
 
     Examples
     --------
@@ -211,7 +212,7 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    dilated : uint8 array
+    dilated : uint8 array, same shape and type as `image`
         The result of the morphological dilation.
 
     Notes
@@ -273,7 +274,7 @@ def opening(image, selem=None, out=None):
 
     Returns
     -------
-    opening : array
+    opening : array, same shape and type as `image`
         The result of the morphological opening.
 
     Examples
@@ -323,7 +324,7 @@ def closing(image, selem=None, out=None):
 
     Returns
     -------
-    closing : array
+    closing : array, same shape and type as `image`
         The result of the morphological closing.
 
     Examples
@@ -371,7 +372,7 @@ def white_tophat(image, selem=None, out=None):
 
     Returns
     -------
-    out : array
+    out : array, same shape and type as `image`
         The result of the morphological white top hat.
 
     Examples
@@ -425,7 +426,7 @@ def black_tophat(image, selem=None, out=None):
 
     Returns
     -------
-    opening : uint8 array
+    opening : array, same shape and type as `image`
        The result of the black top filter.
 
     Examples

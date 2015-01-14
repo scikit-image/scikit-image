@@ -1507,25 +1507,25 @@ def crop(ar, crop_width, copy=False, order='K'):
         Input array.
     crop_width : {sequence, int}
         Number of values to remove from the edges of each axis.
-        ((before_1, after_1), ... (before_N, after_N)) specifies unique
-        crop widths at the start and end of each axis.
-        ((before, after),) specifies the same start and end crops for
-        every axis.
-        (int,) or int is a shortcut for before = after = int for all
-        axes.
+        ``((before_1, after_1),`` ... ``(before_N, after_N))`` specifies
+        unique crop widths at the start and end of each axis.
+        ``((before, after),)`` specifies a fixed start and end crop
+        for every axis.
+        ``(n,)`` or ``n`` for integer ``n`` is a shortcut for
+        before = after = ``n`` for all axes.
     copy : bool, optional
-        Ensure that the returned array is contiguous. Normally, a crop
+        Ensure the returned array is a contiguous copy. Normally, a crop
         operation will return a discontiguous view of the underlying
-        input array. Passing `copy=True` will result in a contiguous
+        input array. Passing ``copy=True`` will result in a contiguous
         copy.
     order : {'C', 'F', 'A', 'K'}, optional
-        If `copy==True`, control the memory layout of the copy. See
-        `np.copy`.
+        If ``copy==True``, control the memory layout of the copy. See
+        ``np.copy``.
 
     Returns
     -------
     cropped : array
-        The cropped array. If `copy=False` (default), this is a sliced
+        The cropped array. If ``copy=False`` (default), this is a sliced
         view of the input array.
     """
     ar = np.array(ar, copy=False)
