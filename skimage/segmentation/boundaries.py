@@ -204,7 +204,7 @@ def mark_boundaries(image, label_img, color=(1, 1, 0),
         marked = gray2rgb(marked)
     if mode == 'subpixel':
         # Here, we want to interpose an extra line of pixels between
-        # each original line — except for the last axis which holds
+        # each original line - except for the last axis which holds
         # the RGB information. ``nd.zoom`` then performs the (cubic)
         # interpolation, filling in the values of the interposed pixels
         marked = nd.zoom(marked, [2 - 1/s for s in marked.shape[:-1]] + [1],
