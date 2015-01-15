@@ -4,6 +4,11 @@ import matplotlib.pyplot as plt
 from skimage.util import dtype as dtypes
 
 
+_default_colormap = 'gray'
+_nonstandard_colormap = 'cubehelix'
+_diverging_colormap = 'RdBu'
+
+
 def imshow(im, *args, **kwargs):
     """Show the input image and return the current axes.
 
@@ -33,14 +38,20 @@ def imshow(im, *args, **kwargs):
     if plt.gca().has_data():
         plt.figure()
     immin, immax = np.min(im), np.max(im)
+    lo, hi = immin, immax
+    cmap = _default_colormap
     supported_dtype = im.dtype in dtypes._supported_types
     if supported_dtype:
         lo, hi = dtypes.dtype_range[im.dtype.type]
-        if immin >= 0:
-            # display range starts at 0 for nonnegative images
+        # for nonnegative float images, ensure lower bound is 0, not -1
+        if immin > 0:
             lo = 0
+        # for signed images, show diverging colormap centered at 0
+        else:
+            cmap = _diverging_colormap
+            magnitude = max(-immin, abs(immax))
+            lo, hi = -magnitude, magnitude
     else:
-        lo, hi = immin, immax
         warnings.warn("Non-standard image type; displaying image with "
                       "stretched contrast.")
     out_of_range_float = (np.issubdtype(im.dtype, np.float) and
@@ -54,9 +65,9 @@ def imshow(im, *args, **kwargs):
         warnings.warn("Low image dynamic range; displaying image with "
                       "stretched contrast.")
     if not supported_dtype or out_of_range_float or low_dynamic_range:
-        lo, hi = immin, immax
+        cmap = _nonstandard_colormap
     kwargs.setdefault('interpolation', 'nearest')
-    kwargs.setdefault('cmap', 'gray')
+    kwargs.setdefault('cmap', cmap)
     kwargs.setdefault('vmin', lo)
     kwargs.setdefault('vmax', hi)
     ax_im = plt.imshow(im, *args, **kwargs)
