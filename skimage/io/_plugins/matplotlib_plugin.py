@@ -27,7 +27,7 @@ def imshow(im, *args, **kwargs):
 
     Returns
     -------
-    ax : `matplotlib.pyplot.AxesImage`
+    ax_im : `matplotlib.pyplot.AxesImage`
         The `AxesImage` object returned by `plt.imshow`.
     """
     if plt.gca().has_data():
@@ -59,10 +59,10 @@ def imshow(im, *args, **kwargs):
     kwargs.setdefault('cmap', 'gray')
     kwargs.setdefault('vmin', lo)
     kwargs.setdefault('vmax', hi)
-    ax = plt.imshow(im, *args, **kwargs)
+    ax_im = plt.imshow(im, *args, **kwargs)
     if not supported_dtype or out_of_range_float or low_dynamic_range:
         plt.colorbar()
-    return ax
+    return ax_im
 
 imread = plt.imread
 show = plt.show
