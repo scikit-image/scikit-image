@@ -47,6 +47,7 @@ def test_uint8():
     assert ax_im.get_clim() == (0, 255)
     # check that no colorbar was created
     assert n_subplots(ax_im) == 1
+    assert ax_im.colorbar is None
 
 
 def test_uint16():
@@ -54,6 +55,7 @@ def test_uint16():
     assert ax_im.cmap.name == 'gray'
     assert ax_im.get_clim() == (0, 65535)
     assert n_subplots(ax_im) == 1
+    assert ax_im.colorbar is None
 
 
 def test_float():
@@ -61,6 +63,7 @@ def test_float():
     assert ax_im.cmap.name == 'gray'
     assert ax_im.get_clim() == (0, 1)
     assert n_subplots(ax_im) == 1
+    assert ax_im.colorbar is None
 
 
 def test_low_dynamic_range():
@@ -69,6 +72,7 @@ def test_low_dynamic_range():
     assert ax_im.get_clim() == (im_lo.min(), im_lo.max())
     # check that a colorbar was created
     assert n_subplots(ax_im) == 2
+    assert ax_im.colorbar is not None
 
 
 def test_outside_standard_range():
@@ -76,6 +80,7 @@ def test_outside_standard_range():
         ax_im = io.imshow(im_hi)
     assert ax_im.get_clim() == (im_hi.min(), im_hi.max())
     assert n_subplots(ax_im) == 2
+    assert ax_im.colorbar is not None
 
 
 def test_nonstandard_type():
@@ -83,6 +88,15 @@ def test_nonstandard_type():
         ax_im = io.imshow(im64)
     assert ax_im.get_clim() == (im64.min(), im64.max())
     assert n_subplots(ax_im) == 2
+    assert ax_im.colorbar is not None
+
+
+def test_signed_image():
+    im_signed = np.array([[-0.5, -0.2], [0.1, 0.4]])
+    ax_im = io.imshow(im_signed)
+    assert ax_im.get_clim() == (-0.5, 0.5)
+    assert n_subplots(ax_im) == 2
+    assert ax_im.colorbar is not None
 
 
 if __name__ == '__main__':
