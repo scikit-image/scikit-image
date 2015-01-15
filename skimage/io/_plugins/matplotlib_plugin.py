@@ -136,8 +136,6 @@ def imshow(im, *args, **kwargs):
     ax_im : `matplotlib.pyplot.AxesImage`
         The `AxesImage` object returned by `plt.imshow`.
     """
-    if plt.gca().has_data():
-        plt.figure()
     lo, hi, cmap = _get_display_range(im)
     kwargs.setdefault('interpolation', 'nearest')
     kwargs.setdefault('cmap', cmap)
