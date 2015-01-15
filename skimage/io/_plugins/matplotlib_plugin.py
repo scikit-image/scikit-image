@@ -52,9 +52,8 @@ def _get_image_properties(image):
                          (float(immax - immin) / (hi - lo)) < (1. / 255))
     unsupported_dtype = image.dtype not in dtypes._supported_types
 
-    ip = ImageProperties(signed, out_of_range_float,
-                         low_dynamic_range, unsupported_dtype)
-    return ip
+    return ImageProperties(signed, out_of_range_float,
+                           low_dynamic_range, unsupported_dtype)
 
 
 def _raise_warnings(image_properties):
