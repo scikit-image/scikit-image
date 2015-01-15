@@ -113,15 +113,19 @@ def _get_display_range(image):
 def imshow(im, *args, **kwargs):
     """Show the input image and return the current axes.
 
+    By default, the image is displayed in greyscale, rather than
+    the matplotlib default colormap, 'jet'.
+
     Images are assumed to have standard range for their type. For
     example, if a floating point image has values in [0, 0.5], the
-    most intense color will be gray50, not white, as would be the
-    default in matplotlib.
+    most intense color will be gray50, not white.
 
-    In contrast, if the image exceeds the standard range, this
-    function defaults back to displaying exactly the range of the
-    input image, along with a colorbar to clearly indicate that
+    If the image exceeds the standard range, or if the range is too
+    small to display, we fall back on displaying exactly the range of
+    the input image, along with a colorbar to clearly indicate that
     this range transformation has occurred.
+
+    For signed images, we use a diverging colormap centered at 0.
 
     Parameters
     ----------
