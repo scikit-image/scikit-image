@@ -3,6 +3,7 @@ from __future__ import division
 import numpy as np
 from skimage import io
 from skimage._shared._warnings import expected_warnings
+import matplotlib.pyplot as plt
 
 
 io.use_plugin('matplotlib', 'imshow')
@@ -76,6 +77,7 @@ def test_low_dynamic_range():
 
 
 def test_outside_standard_range():
+    plt.figure()
     with expected_warnings(["out of standard range"]):
         ax_im = io.imshow(im_hi)
     assert ax_im.get_clim() == (im_hi.min(), im_hi.max())
@@ -84,6 +86,7 @@ def test_outside_standard_range():
 
 
 def test_nonstandard_type():
+    plt.figure()
     with expected_warnings(["Non-standard image type"]):
         ax_im = io.imshow(im64)
     assert ax_im.get_clim() == (im64.min(), im64.max())
@@ -92,6 +95,7 @@ def test_nonstandard_type():
 
 
 def test_signed_image():
+    plt.figure()
     im_signed = np.array([[-0.5, -0.2], [0.1, 0.4]])
     ax_im = io.imshow(im_signed)
     assert ax_im.get_clim() == (-0.5, 0.5)
