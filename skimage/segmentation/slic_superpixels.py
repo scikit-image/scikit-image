@@ -58,7 +58,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         Proportion of the maximum connected segment size. A value of 3 works
         in most of the cases.
     slic_zero: bool, optional
-        Run SLIC-zero, the zero-parameter mode of SLIC
+        Run SLIC-zero, the zero-parameter mode of SLIC. [2]
 
     Returns
     -------
@@ -93,6 +93,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     .. [1] Radhakrishna Achanta, Appu Shaji, Kevin Smith, Aurelien Lucchi,
         Pascal Fua, and Sabine Süsstrunk, SLIC Superpixels Compared to
         State-of-the-art Superpixel Methods, TPAMI, May 2012.
+    .. [2] http://ivrg.epfl.ch/research/superpixels#SLICO
 
     Examples
     --------
