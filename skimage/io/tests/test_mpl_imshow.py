@@ -6,8 +6,8 @@ from skimage._shared._warnings import expected_warnings
 import matplotlib.pyplot as plt
 
 
-io.use_plugin('matplotlib', 'imshow')
-
+def setup():
+    io.reset_plugins()
 
 # test images. Note that they don't have their full range for their dtype,
 # but we still expect the display range to equal the full dtype range.

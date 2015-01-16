@@ -113,7 +113,7 @@ def imshow(im, *args, **kwargs):
     """Show the input image and return the current axes.
 
     By default, the image is displayed in greyscale, rather than
-    the matplotlib default colormap, 'jet'.
+    the matplotlib default colormap.
 
     Images are assumed to have standard range for their type. For
     example, if a floating point image has values in [0, 0.5], the
