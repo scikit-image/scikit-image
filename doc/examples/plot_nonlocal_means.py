@@ -3,7 +3,7 @@
 Non-local means denoising for preserving textures
 =================================================
 
-In this example, we denoise a detail of the Lena image using the non-local
+In this example, we denoise a detail of the astronaut image using the non-local
 means filter. The non-local means algorithm replaces the value of a pixel by an
 average of a selection of other pixels values: small patches centered on the
 other pixels are compared to the patch centered on the pixel of interest, and
@@ -18,13 +18,13 @@ from skimage import data, img_as_float
 from skimage.restoration import nl_means_denoising
 
 
-lena = img_as_float(data.lena())
-lena = lena[200:300, 100:200]
+astro = img_as_float(data.astronaut())
+astro = astro[30:180, 150:300]
 
-noisy = lena + 0.6 * lena.std() * np.random.random(lena.shape)
+noisy = astro + 0.3 * np.random.random(astro.shape)
 noisy = np.clip(noisy, 0, 1)
 
-denoise = nl_means_denoising(noisy, 7, 9, 0.06)
+denoise = nl_means_denoising(noisy, 7, 9, 0.08)
 
 fig, ax = plt.subplots(ncols=2, figsize=(8, 4))
 
