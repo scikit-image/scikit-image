@@ -59,7 +59,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         Proportion of the maximum connected segment size. A value of 3 works
         in most of the cases.
     slic_zero: bool, optional
-        Run SLIC-zero, the zero-parameter mode of SLIC. [2]
+        Run SLIC-zero, the zero-parameter mode of SLIC. [2]_
 
     Returns
     -------
