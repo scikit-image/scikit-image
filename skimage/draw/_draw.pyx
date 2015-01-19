@@ -305,7 +305,7 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     shape : tuple, optional
         Image shape which is used to determine maximum extents of output pixel
         coordinates. This is useful for circles which exceed the image size.
-        By default the full extents of the polygon are used.
+        By default the full extents of the circle are used.
 
     Returns
     -------
@@ -413,7 +413,7 @@ def circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     shape : tuple, optional
         Image shape which is used to determine maximum extents of output pixel
         coordinates. This is useful for circles which exceed the image size.
-        By default the full extents of the polygon are used.
+        By default the full extents of the circle are used.
 
     Returns
     -------
@@ -501,7 +501,7 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
     shape : tuple, optional
         Image shape which is used to determine maximum extents of output pixel
         coordinates. This is useful for ellipses which exceed the image size.
-        By default the full extents of the polygon are used.
+        By default the full extents of the ellipse are used.
 
     Returns
     -------
@@ -776,7 +776,7 @@ def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
     shape : tuple, optional
         Image shape which is used to determine maximum extents of output pixel
         coordinates. This is useful for curves which exceed the image size.
-        By default the full extents of the polygon are used.
+        By default the full extents of the curve are used.
 
     Returns
     -------
