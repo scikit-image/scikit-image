@@ -177,7 +177,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         for y in range(n_blocksy):
             block = orientation_histogram[y:y + by, x:x + bx, :]
             eps = 1e-5
-            normalised_blocks[y, x, :] = block / sqrt(block.sum() ** 2 + eps)
+            normalised_blocks[y, x, :] = block / sqrt((block ** 2).sum() + eps)
 
     """
     The final step collects the HOG descriptors from all blocks of a dense
