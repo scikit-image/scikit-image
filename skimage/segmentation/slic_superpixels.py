@@ -12,7 +12,7 @@ from skimage.color import rgb2lab
 
 
 def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
-         spacing=None, multichannel=True, convert2lab=True,
+         spacing=None, multichannel=True, convert2lab=None,
          enforce_connectivity=False, min_size_factor=0.5, max_size_factor=3,
          slic_zero=False):
     """Segments image using k-means clustering in Color-(x,y,z) space.
@@ -47,8 +47,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         channels or another spatial dimension.
     convert2lab : bool, optional
         Whether the input should be converted to Lab colorspace prior to
-        segmentation. For this purpose, the input is assumed to be RGB. Highly
-        recommended.
+        segmentation. The input image *must* be RGB. Highly recommended.
+        This option defaults to ``True`` when ``multichannel=True`` *and*
+        ``image.shape[-1] == 3``.
     enforce_connectivity: bool, optional (default False)
         Whether the generated segments are connected or not
     min_size_factor: float, optional
@@ -58,7 +59,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         Proportion of the maximum connected segment size. A value of 3 works
         in most of the cases.
     slic_zero: bool, optional
-        Run SLIC-zero, the zero-parameter mode of SLIC
+        Run SLIC-zero, the zero-parameter mode of SLIC. [2]_
 
     Returns
     -------
@@ -68,9 +69,8 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     Raises
     ------
     ValueError
-        If:
-            - the image dimension is not 2 or 3 and `multichannel == False`, OR
-            - the image dimension is not 3 or 4 and `multichannel == True`
+        If ``convert2lab`` is set to ``True`` but the last array
+        dimension is not of length 3.
 
     Notes
     -----
@@ -93,6 +93,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     .. [1] Radhakrishna Achanta, Appu Shaji, Kevin Smith, Aurelien Lucchi,
         Pascal Fua, and Sabine Süsstrunk, SLIC Superpixels Compared to
         State-of-the-art Superpixel Methods, TPAMI, May 2012.
+    .. [2] http://ivrg.epfl.ch/research/superpixels#SLICO
 
     Examples
     --------
@@ -140,10 +141,11 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         sigma = list(sigma) + [0]
         image = ndimage.gaussian_filter(image, sigma)
 
-    if convert2lab and multichannel:
-        if image.shape[3] != 3:
+    if multichannel and (convert2lab or convert2lab is None):
+        if image.shape[-1] != 3 and convert2lab:
             raise ValueError("Lab colorspace conversion requires a RGB image.")
-        image = rgb2lab(image)
+        elif image.shape[-1] == 3:
+            image = rgb2lab(image)
 
     depth, height, width = image.shape[:3]
 
