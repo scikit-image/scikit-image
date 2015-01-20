@@ -120,6 +120,6 @@ def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
             return np.array(_nl_means_denoising_2drgb(image, patch_size,
                                 patch_distance, h))
     else:
-        raise ValueError("Non local means denoising is only possible for \
-        2D grayscale and RGB images or 3-D grayscale images.")
+        raise NotImplementedError("Non-local means denoising is only \
+        implemented for 2D grayscale and RGB images or 3-D grayscale images.")
 

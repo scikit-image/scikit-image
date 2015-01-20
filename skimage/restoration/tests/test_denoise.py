@@ -184,7 +184,7 @@ def test_nl_means_denoising_3d():
 
 def test_nl_means_denoising_wrong_dimension():
     img = np.zeros((5, 5, 5, 5))
-    assert_raises(ValueError, restoration.nl_means_denoising, img)
+    assert_raises(NotImplementedError, restoration.nl_means_denoising, img)
 
 
 if __name__ == "__main__":
