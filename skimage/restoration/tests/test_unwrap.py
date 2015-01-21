@@ -131,6 +131,7 @@ def test_mask():
         # The end of the unwrapped array should have value equal to the
         # endpoint of the unmasked ramp
         assert_array_almost_equal_nulp(image_unwrapped[:, -1], image[i, -1])
+        assert np.ma.isMaskedArray(image_unwrapped)
 
         # Same tests, but forcing use of the 3D unwrapper by reshaping
         with expected_warnings(['length 1 dimension']):
