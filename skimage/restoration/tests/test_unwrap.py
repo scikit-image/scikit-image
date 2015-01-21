@@ -138,7 +138,7 @@ def test_mask():
             image_wrapped_3d = image_wrapped.reshape(shape)
             image_unwrapped_3d = unwrap_phase(image_wrapped_3d)
             # remove phase shift
-            image_unwrapped_3d -= image_unwrapped_3d[0, 0, 0]  
+            image_unwrapped_3d -= image_unwrapped_3d[0, 0, 0]
         assert_array_almost_equal_nulp(image_unwrapped_3d[:, :, -1], image[i, -1])
 
 
