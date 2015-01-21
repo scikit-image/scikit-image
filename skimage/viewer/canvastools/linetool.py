@@ -1,9 +1,6 @@
 import numpy as np
 
-try:
-    from matplotlib import lines
-except ImportError:
-    pass
+from matplotlib import lines
 from skimage.viewer.canvastools.base import CanvasToolBase, ToolHandles
 
 

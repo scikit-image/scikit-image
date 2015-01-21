@@ -1,6 +1,6 @@
 import os
 
-from ..qt import QtGui
+from skimage.viewer.qt import QtGui
 
 
 __all__ = ['open_file_dialog', 'save_file_dialog']
