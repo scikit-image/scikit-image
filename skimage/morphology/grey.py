@@ -241,9 +241,11 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
     """
     selem = np.array(selem)
     selem = _shift_selem(selem, shift_x, shift_y)
-    # invert the structuring element to patch the same thing happening inside
-    # ndimage.grey_dilation
-    # https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285
+    # Inside ndimage.grey_dilation, the structuring element is inverted,
+    # eg. `selem = selem[::-1, ::-1]` for 2D [1]_, for reasons unknown to
+    # this author (@jni). To "patch" this behaviour, we invert our own
+    # selem before passing it to `nd.grey_dilation`.
+    # [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285
     selem = _invert_selem(selem)
     if out is None:
         out = np.empty_like(image)
