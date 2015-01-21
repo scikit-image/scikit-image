@@ -156,5 +156,14 @@ def test_unwrap_3d_middle_wrap_around():
     unwrap = unwrap_phase(image, wrap_around=[False, True, False])
     assert np.all(unwrap == 0)
 
+
+def test_unwrap_2d_compressed_mask():
+    # ValueError when image is masked array with a compressed mask (no masked
+    # elments).  GitHub issue #1346
+    image = np.ma.zeros((10, 10))
+    unwrap = unwrap_phase(image)
+    assert np.all(unwrap == 0)
+
+
 if __name__ == "__main__":
     run_module_suite()
