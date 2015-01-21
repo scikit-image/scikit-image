@@ -166,5 +166,25 @@ def test_unwrap_2d_compressed_mask():
     assert np.all(unwrap == 0)
 
 
+def test_unwrap_2d_all_masked():
+    # Segmentation fault when image is masked array with a all elements masked
+    # GitHub issue #1347
+    # all elements masked
+    image = np.ma.zeros((10, 10))
+    image[:] = np.ma.masked
+    unwrap = unwrap_phase(image)
+    assert np.ma.isMaskedArray(unwrap)
+    assert np.all(unwrap.mask)
+
+    # 1 unmasked element, still zero edges
+    image = np.ma.zeros((10, 10))
+    image[:] = np.ma.masked
+    image[0, 0] = 0
+    unwrap = unwrap_phase(image)
+    assert np.ma.isMaskedArray(unwrap)
+    assert np.sum(unwrap.mask) == 99    # all but one masked
+    assert unwrap[0, 0] == 0
+
+
 if __name__ == "__main__":
     run_module_suite()
