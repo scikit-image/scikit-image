@@ -1136,9 +1136,11 @@ void unwrap3D(double *wrapped_volume, double *unwrapped_volume,
                 &params);
   normalEDGEs(voxel, edge, volume_width, volume_height, volume_depth, &params);
 
-  // sort the EDGEs depending on their reiability. The VOXELs with higher
-  // relibility (small value) first
-  quicker_sort(edge, edge + params.no_of_edges - 1);
+  if (params.no_of_edges != 0) {
+      // sort the EDGEs depending on their reiability. The VOXELs with higher
+      // relibility (small value) first
+      quicker_sort(edge, edge + params.no_of_edges - 1);
+  }
 
   // gather VOXELs into groups
   gatherVOXELs(edge, &params);

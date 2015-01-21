@@ -186,5 +186,22 @@ def test_unwrap_2d_all_masked():
     assert unwrap[0, 0] == 0
 
 
+def test_unwrap_3d_all_masked():
+    # all elements masked
+    image = np.ma.zeros((10, 10, 10))
+    image[:] = np.ma.masked
+    unwrap = unwrap_phase(image)
+    assert np.ma.isMaskedArray(unwrap)
+    assert np.all(unwrap.mask)
+
+    # 1 unmasked element, still zero edges
+    image = np.ma.zeros((10, 10, 10))
+    image[:] = np.ma.masked
+    image[0, 0, 0] = 0
+    unwrap = unwrap_phase(image)
+    assert np.ma.isMaskedArray(unwrap)
+    assert np.sum(unwrap.mask) == 999   # all but one masked
+    assert unwrap[0, 0, 0] == 0
+
 if __name__ == "__main__":
     run_module_suite()
