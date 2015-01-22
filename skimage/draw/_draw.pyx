@@ -19,8 +19,8 @@ def _coords_inside_image(rr, cc, shape, val=None):
     rr, cc : (N,) ndarray of int
         Indices of pixels.
     shape : tuple
-        Image shape which is used to determine the maximum extent of output pixel
-        coordinates.
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates.
     val : ndarray of float, optional
         Values of pixels at coordinates [rr, cc].
 
@@ -223,9 +223,9 @@ def polygon(y, x, shape=None):
     x : (N,) ndarray
         X-coordinates of vertices of polygon.
     shape : tuple, optional
-        Image shape which is used to determine the maximum extent of output pixel
-        coordinates. This is useful for polygons which exceed the image size.
-        By default the full extent of the polygon are used.
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates. This is useful for polygons which exceed the image
+        size. By default the full extent of the polygon are used.
 
     Returns
     -------
@@ -774,9 +774,9 @@ def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
     weight : double
         Middle control point weight, it describes the line tension.
     shape : tuple, optional
-        Image shape which is used to determine the maximum extent of output pixel
-        coordinates. This is useful for curves which exceed the image size.
-        By default the full extent of the curve are used.
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates. This is useful for curves which exceed the image
+        size. By default the full extent of the curve are used.
 
     Returns
     -------
