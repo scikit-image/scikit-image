@@ -5,7 +5,7 @@ from numpy import testing
 from scipy import ndimage
 
 import skimage
-from skimage import data_dir
+from skimage import data_dir, img_as_uint
 from skimage.morphology import grey, selem
 from skimage._shared._warnings import expected_warnings
 
@@ -208,51 +208,51 @@ def test_2d_ndimage_equivalence():
     testing.assert_array_equal(opened, ndimage_opened)
     testing.assert_array_equal(closed, ndimage_closed)
 
-class TestDTypes():
+# float test images
+im = np.array([[ 0.55,  0.72,  0.6 ,  0.54,  0.42],
+               [ 0.65,  0.44,  0.89,  0.96,  0.38],
+               [ 0.79,  0.53,  0.57,  0.93,  0.07],
+               [ 0.09,  0.02,  0.83,  0.78,  0.87],
+               [ 0.98,  0.8 ,  0.46,  0.78,  0.12]])
 
-    def setUp(self):
-        k = 5
-        arrname = '%03i' % k
+eroded = np.array([[ 0.55,  0.44,  0.54,  0.42,  0.38],
+                   [ 0.44,  0.44,  0.44,  0.38,  0.07],
+                   [ 0.09,  0.02,  0.53,  0.07,  0.07],
+                   [ 0.02,  0.02,  0.02,  0.78,  0.07],
+                   [ 0.09,  0.02,  0.46,  0.12,  0.12]])
 
-        self.disk = selem.disk(k)
+dilated = np.array([[ 0.72,  0.72,  0.89,  0.96,  0.54],
+                    [ 0.79,  0.89,  0.96,  0.96,  0.96],
+                    [ 0.79,  0.79,  0.93,  0.96,  0.93],
+                    [ 0.98,  0.83,  0.83,  0.93,  0.87],
+                    [ 0.98,  0.98,  0.83,  0.78,  0.87]])
 
-        fname_opening = os.path.join(data_dir, "disk-open-matlab-output.npz")
-        self.expected_opening = np.load(fname_opening)[arrname]
+opened = np.array([[ 0.55,  0.55,  0.54,  0.54,  0.42],
+                   [ 0.55,  0.44,  0.54,  0.44,  0.38],
+                   [ 0.44,  0.53,  0.53,  0.78,  0.07],
+                   [ 0.09,  0.02,  0.78,  0.78,  0.78],
+                   [ 0.09,  0.46,  0.46,  0.78,  0.12]])
 
-        fname_closing = os.path.join(data_dir, "disk-close-matlab-output.npz")
-        self.expected_closing = np.load(fname_closing)[arrname]
+closed = np.array([[ 0.72,  0.72,  0.72,  0.54,  0.54],
+                   [ 0.72,  0.72,  0.89,  0.96,  0.54],
+                   [ 0.79,  0.79,  0.79,  0.93,  0.87],
+                   [ 0.79,  0.79,  0.83,  0.78,  0.87],
+                   [ 0.98,  0.83,  0.78,  0.78,  0.78]])
 
-    def _test_image(self, image):
-        with expected_warnings(['precision loss']):
-            result_opening = grey.opening(image, self.disk)
-        testing.assert_equal(result_opening, self.expected_opening)
-
-        with expected_warnings(['precision loss']):
-            result_closing = grey.closing(image, self.disk)
-        testing.assert_equal(result_closing, self.expected_closing)
-
-    def test_float(self):
-        image = skimage.img_as_float(lena)
-        self._test_image(image)
-
-    @testing.decorators.skipif(True)
-    def test_int(self):
-        image = skimage.img_as_int(lena)
-        self._test_image(image)
-
-    def test_uint(self):
-        image = skimage.img_as_uint(lena)
-        self._test_image(image)
+def test_float():
+    np.testing.assert_allclose(grey.erosion(im), eroded)
+    np.testing.assert_allclose(grey.dilation(im), dilated)
+    np.testing.assert_allclose(grey.opening(im), opened)
+    np.testing.assert_allclose(grey.closing(im), closed)
 
 
-def test_inplace():
-    selem = np.ones((3, 3))
-    image = np.zeros((5, 5))
-    out = image
-
-    for f in (grey.erosion, grey.dilation,
-              grey.white_tophat, grey.black_tophat):
-        testing.assert_raises(NotImplementedError, f, image, selem, out=out)
+def test_uint16():
+    im16, eroded16, dilated16, opened16, closed16 = (
+                    map(img_as_uint, [im, eroded, dilated, opened, closed]))
+    np.testing.assert_allclose(grey.erosion(im16), eroded16)
+    np.testing.assert_allclose(grey.dilation(im16), dilated16)
+    np.testing.assert_allclose(grey.opening(im16), opened16)
+    np.testing.assert_allclose(grey.closing(im16), closed16)
 
 
 def test_discontiguous_out_array():

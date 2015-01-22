@@ -5,7 +5,7 @@ from numpy.testing import run_module_suite, assert_equal, assert_raises
 import skimage
 from skimage import img_as_ubyte, img_as_float
 from skimage import data, util, morphology
-from skimage.morphology import cmorph, disk
+from skimage.morphology import grey, disk
 from skimage.filters import rank
 from skimage._shared._warnings import expected_warnings
 
@@ -87,7 +87,6 @@ def check_all():
 def test_random_sizes():
     # make sure the size is not a problem
 
-    niter = 10
     elem = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]], dtype=np.uint8)
     for m, n in np.random.random_integers(1, 100, size=(10, 2)):
         mask = np.ones((m, n), dtype=np.uint8)
@@ -118,31 +117,31 @@ def test_random_sizes():
         assert_equal(image16.shape, out16.shape)
 
 
-def test_compare_with_cmorph_dilate():
+def test_compare_with_grey_dilation():
     # compare the result of maximum filter with dilate
 
     image = (np.random.rand(100, 100) * 256).astype(np.uint8)
     out = np.empty_like(image)
     mask = np.ones(image.shape, dtype=np.uint8)
 
-    for r in range(1, 20, 1):
+    for r in range(3, 20, 2):
         elem = np.ones((r, r), dtype=np.uint8)
         rank.maximum(image=image, selem=elem, out=out, mask=mask)
-        cm = cmorph._dilate(image=image, selem=elem)
+        cm = grey.dilation(image=image, selem=elem)
         assert_equal(out, cm)
 
 
-def test_compare_with_cmorph_erode():
+def test_compare_with_grey_erosion():
     # compare the result of maximum filter with erode
 
     image = (np.random.rand(100, 100) * 256).astype(np.uint8)
     out = np.empty_like(image)
     mask = np.ones(image.shape, dtype=np.uint8)
 
-    for r in range(1, 20, 1):
+    for r in range(3, 20, 2):
         elem = np.ones((r, r), dtype=np.uint8)
         rank.minimum(image=image, selem=elem, out=out, mask=mask)
-        cm = cmorph._erode(image=image, selem=elem)
+        cm = grey.erosion(image=image, selem=elem)
         assert_equal(out, cm)
 
 
