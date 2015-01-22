@@ -3,7 +3,7 @@ import scipy.ndimage as ndi
 from ..filters import rank_order
 
 
-def peak_local_max(image, min_distance=1, threshold_abs=-np.inf,
+def peak_local_max(image, min_distance=1, threshold_abs=None,
                    threshold_rel=None, exclude_border=True, indices=True,
                    num_peaks=np.inf, footprint=None, labels=None):
     """
@@ -28,8 +28,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=-np.inf,
     threshold_abs : float, optional
         Minimum intensity of peaks.
     threshold_rel : float, optional
-        Minimum intensity of peaks calculated as `max(image) * threshold_rel`;
-        not used if set to None (the default).
+        Minimum intensity of peaks, calculated as `max(image) * threshold_rel`.
     exclude_border : bool, optional
         If True, `min_distance` excludes peaks from the border of the image as
         well as from each other.
@@ -124,7 +123,6 @@ def peak_local_max(image, min_distance=1, threshold_abs=-np.inf,
         else:
             return out
 
-    image = image.copy()
     # Non maximum filter
     if footprint is not None:
         image_max = ndi.maximum_filter(image, footprint=footprint,
@@ -133,25 +131,27 @@ def peak_local_max(image, min_distance=1, threshold_abs=-np.inf,
         size = 2 * min_distance + 1
         image_max = ndi.maximum_filter(image, size=size, mode='constant')
     mask = (image == image_max)
-    image *= mask
 
     if exclude_border:
         # zero out the image borders
-        for i in range(image.ndim):
-            image = image.swapaxes(0, i)
+        for i in range(mask.ndim):
+            mask = mask.swapaxes(0, i)
             remove = (footprint.shape[i] if footprint is not None
                       else 2 * min_distance)
-            image[:remove // 2] = 0
-            image[-remove // 2:] = 0
-            image = image.swapaxes(0, i)
+            mask[:remove // 2] = mask[-remove // 2:] = False
+            mask = mask.swapaxes(0, i)
 
     # find top peak candidates above a threshold
-    peak_threshold = threshold_abs
+    thresholds = []
+    if threshold_abs is not None:
+        thresholds.append(threshold_abs)
     if threshold_rel is not None:
-        peak_threshold = max(peak_threshold, image.max())
+        thresholds.append(threshold_rel * image.max())
+    if thresholds:
+        mask &= image > max(thresholds)
 
     # get coordinates of peaks
-    coordinates = np.transpose((image > peak_threshold).nonzero())
+    coordinates = np.transpose(mask.nonzero())
 
     if coordinates.shape[0] > num_peaks:
         intensities = image[coordinates[:, 0], coordinates[:, 1]]
