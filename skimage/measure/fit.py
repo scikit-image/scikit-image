@@ -502,7 +502,7 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
 def ransac(data, model_class, min_samples, residual_threshold,
            is_data_valid=None, is_model_valid=None,
            max_trials=100, stop_sample_num=np.inf, stop_residuals_sum=0,
-           stop_probability=1, exceptions=Exception):
+           stop_probability=1):
     """Fit a model to data with the RANSAC (random sample consensus) algorithm.
 
     RANSAC is an iterative algorithm for the robust estimation of parameters
@@ -573,10 +573,6 @@ def ransac(data, model_class, min_samples, residual_threshold,
         where the probability (confidence) is typically set to a high value
         such as 0.99, and e is the current fraction of inliers w.r.t. the
         total number of samples.
-    exceptions : exception class or tuple of exception classes
-        A list of exceptions that are ignored when estimating the model from a
-        random subset. By default all exceptions derived from the built-in
-        exception class `Exception` are ignored.
 
     Returns
     -------
@@ -692,14 +688,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
         # estimate model for current random sample set
         sample_model = model_class()
-
-        if exceptions:
-            try:
-                sample_model.estimate(*samples)
-            except exceptions:
-                continue
-        else:
-            sample_model.estimate(*samples)
+        sample_model.estimate(*samples)
 
         # check if estimated model is valid
         if is_model_valid is not None and not is_model_valid(sample_model,

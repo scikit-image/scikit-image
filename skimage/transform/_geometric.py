@@ -265,8 +265,12 @@ class ProjectiveTransform(GeometricTransform):
 
         """
 
-        src_matrix, src = _center_and_normalize_points(src)
-        dst_matrix, dst = _center_and_normalize_points(dst)
+        try:
+            src_matrix, src = _center_and_normalize_points(src)
+            dst_matrix, dst = _center_and_normalize_points(dst)
+        except ZeroDivisionError:
+            self.params = np.nan * np.empty((3, 3))
+            return
 
         xs = src[:, 0]
         ys = src[:, 1]
@@ -652,8 +656,12 @@ class SimilarityTransform(ProjectiveTransform):
 
         """
 
-        src_matrix, src = _center_and_normalize_points(src)
-        dst_matrix, dst = _center_and_normalize_points(dst)
+        try:
+            src_matrix, src = _center_and_normalize_points(src)
+            dst_matrix, dst = _center_and_normalize_points(dst)
+        except ZeroDivisionError:
+            self.params = np.nan * np.empty((3, 3))
+            return
 
         xs = src[:, 0]
         ys = src[:, 1]
