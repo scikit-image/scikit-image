@@ -87,7 +87,6 @@ def check_all():
 def test_random_sizes():
     # make sure the size is not a problem
 
-    niter = 10
     elem = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]], dtype=np.uint8)
     for m, n in np.random.random_integers(1, 100, size=(10, 2)):
         mask = np.ones((m, n), dtype=np.uint8)
