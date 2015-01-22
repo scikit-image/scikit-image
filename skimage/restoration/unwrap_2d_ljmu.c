@@ -718,10 +718,11 @@ void unwrap2D(double *wrapped_image, double *UnwrappedImage,
   horizontalEDGEs(pixel, edge, image_width, image_height, &params);
   verticalEDGEs(pixel, edge, image_width, image_height, &params);
 
-  // sort the EDGEs depending on their reiability. The PIXELs with higher
-  // relibility (small value) first
-  quicker_sort(edge, edge + params.no_of_edges - 1);
-
+  if (params.no_of_edges != 0) {
+      // sort the EDGEs depending on their reiability. The PIXELs with higher
+      // relibility (small value) first
+      quicker_sort(edge, edge + params.no_of_edges - 1);
+  }
   // gather PIXELs into groups
   gatherPIXELs(edge, &params);
 

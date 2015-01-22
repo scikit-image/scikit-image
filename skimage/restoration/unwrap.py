@@ -88,13 +88,14 @@ def unwrap_phase(image, wrap_around=False, seed=None):
                       'algorithm')
 
     if np.ma.isMaskedArray(image):
-        mask = np.require(image.mask, np.uint8, ['C'])
-        image = image.data
+        mask = np.require(np.ma.getmaskarray(image), np.uint8, ['C'])
     else:
         mask = np.zeros_like(image, dtype=np.uint8, order='C')
 
-    image_not_masked = np.asarray(image, dtype=np.double, order='C')
-    image_unwrapped = np.empty_like(image, dtype=np.double, order='C')
+    image_not_masked = np.asarray(
+        np.ma.getdata(image), dtype=np.double, order='C')
+    image_unwrapped = np.empty_like(image, dtype=np.double, order='C',
+                                    subok=False)
 
     if image.ndim == 1:
         unwrap_1d(image_not_masked, image_unwrapped)
