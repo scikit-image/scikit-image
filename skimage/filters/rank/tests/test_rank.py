@@ -124,7 +124,7 @@ def test_compare_with_grey_dilation():
     out = np.empty_like(image)
     mask = np.ones(image.shape, dtype=np.uint8)
 
-    for r in range(1, 20, 1):
+    for r in range(3, 20, 2):
         elem = np.ones((r, r), dtype=np.uint8)
         rank.maximum(image=image, selem=elem, out=out, mask=mask)
         cm = grey.dilation(image=image, selem=elem)
@@ -138,7 +138,7 @@ def test_compare_with_grey_erosion():
     out = np.empty_like(image)
     mask = np.ones(image.shape, dtype=np.uint8)
 
-    for r in range(1, 20, 1):
+    for r in range(3, 20, 2):
         elem = np.ones((r, r), dtype=np.uint8)
         rank.minimum(image=image, selem=elem, out=out, mask=mask)
         cm = grey.erosion(image=image, selem=elem)
