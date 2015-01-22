@@ -21,7 +21,7 @@ def _center_and_normalize_points(points):
     origin at the centroid of the image points.
 
     Normalize the image points, such that the mean distance from the points
-    to the coordinate system is sqrt(2).
+    to the origin of the coordinate system is sqrt(2).
 
     Parameters
     ----------
