@@ -70,12 +70,14 @@ def test_num_peaks():
     image[1, 5] = 12
     image[3, 5] = 8
     image[5, 3] = 7
-    assert len(peak.peak_local_max(image, min_distance=1)) == 5
-    peaks_limited = peak.peak_local_max(image, min_distance=1, num_peaks=2)
+    assert len(peak.peak_local_max(image, min_distance=1, threshold_abs=0)) == 5
+    peaks_limited = peak.peak_local_max(
+        image, min_distance=1, threshold_abs=0, num_peaks=2)
     assert len(peaks_limited) == 2
     assert (1, 3) in peaks_limited
     assert (1, 5) in peaks_limited
-    peaks_limited = peak.peak_local_max(image, min_distance=1, num_peaks=4)
+    peaks_limited = peak.peak_local_max(
+        image, min_distance=1, threshold_abs=0, num_peaks=4)
     assert len(peaks_limited) == 4
     assert (1, 3) in peaks_limited
     assert (1, 5) in peaks_limited
@@ -272,7 +274,8 @@ def test_disk():
                                  min_distance=1, threshold_rel=0,
                                  indices=False, exclude_border=False)
     assert np.all(result)
-    result = peak.peak_local_max(image, footprint=footprint)
+    result = peak.peak_local_max(image, footprint=footprint, indices=False,
+                                 exclude_border=False)
     assert np.all(result)
 
 
@@ -280,11 +283,14 @@ def test_3D():
     image = np.zeros((30, 30, 30))
     image[15, 15, 15] = 1
     image[5, 5, 5] = 1
-    assert_equal(peak.peak_local_max(image), [[15, 15, 15]])
-    assert_equal(peak.peak_local_max(image, min_distance=6), [[15, 15, 15]])
-    assert_equal(peak.peak_local_max(image, exclude_border=False),
+    assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0),
+                 [[15, 15, 15]])
+    assert_equal(peak.peak_local_max(image, min_distance=6, threshold_rel=0),
+                 [[15, 15, 15]])
+    assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
+                                     exclude_border=False),
                  [[5, 5, 5], [15, 15, 15]])
-    assert_equal(peak.peak_local_max(image, min_distance=5),
+    assert_equal(peak.peak_local_max(image, min_distance=5, threshold_rel=0),
                  [[5, 5, 5], [15, 15, 15]])
 
 
@@ -292,11 +298,14 @@ def test_4D():
     image = np.zeros((30, 30, 30, 30))
     image[15, 15, 15, 15] = 1
     image[5, 5, 5, 5] = 1
-    assert_equal(peak.peak_local_max(image), [[15, 15, 15, 15]])
-    assert_equal(peak.peak_local_max(image, min_distance=6), [[15, 15, 15, 15]])
-    assert_equal(peak.peak_local_max(image, exclude_border=False),
+    assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0),
+                 [[15, 15, 15, 15]])
+    assert_equal(peak.peak_local_max(image, min_distance=6, threshold_rel=0),
+                 [[15, 15, 15, 15]])
+    assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
+                                     exclude_border=False),
                  [[5, 5, 5, 5], [15, 15, 15, 15]])
-    assert_equal(peak.peak_local_max(image, min_distance=5),
+    assert_equal(peak.peak_local_max(image, min_distance=5, threshold_rel=0),
                  [[5, 5, 5, 5], [15, 15, 15, 15]])
 
 
