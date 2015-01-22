@@ -94,7 +94,8 @@ def unwrap_phase(image, wrap_around=False, seed=None):
 
     image_not_masked = np.asarray(
         np.ma.getdata(image), dtype=np.double, order='C')
-    image_unwrapped = np.empty_like(image, dtype=np.double, order='C')
+    image_unwrapped = np.empty_like(image, dtype=np.double, order='C',
+                                    subok=False)
 
     if image.ndim == 1:
         unwrap_1d(image_not_masked, image_unwrapped)
