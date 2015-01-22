@@ -100,7 +100,7 @@ def pad_for_eccentric_selems(func):
 
     See Also
     --------
-    ``opening``, ``closing``.
+    opening, closing.
     """
     @functools.wraps(func)
     def func_out(image, selem, out=None, *args, **kwargs):
