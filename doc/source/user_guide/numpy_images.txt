@@ -162,14 +162,31 @@ Image type                 coordinates
 ========================   ========================================
 
 
-In many cases,
-the third imaging dimension has lower resolution than the other two,
-and processing must be done frame-wise. When frames are the leading
-dimension, we can use the following syntax:
+Many functions in scikit-image operate on 3D images directly:
 
-    >>> for image in image3d:  # doctest: +SKIP
+    >>> im3d = np.random.rand(100, 1000, 1000)
+    >>> from skimage import morphology
+    >>> from scipy import ndimage as nd
+    >>> seeds = nd.label(im3d < 0.1)[0]
+    >>> ws = morphology.watershed(im3d, seeds)
+
+In many cases,
+the third imaging dimension has lower resolution than the other two.
+Some scikit-image functions provide a ``spacing`` keyword argument
+to process these images:
+
+    >>> from skimage import segmentation
+    >>> slics = segmentation.slic(im3d, spacing=[5, 1, 1], multichannel=False)
+
+
+Other times, processing must be done frame-wise. When frames are the
+leading dimension, we can use the following syntax:
+
+    >>> from skimage import filters
+    >>> edges = np.zeros_like(im3d)
+    >>> for frm, image in enumerate(im3d):
     ...     # iterate over the leading dimension (frames)
-    ...     do_something_to(image)
+    ...     edges[frm] = filters.sobel(image)
 
 
 Notes on array order
