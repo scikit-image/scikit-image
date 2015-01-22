@@ -79,9 +79,6 @@ Library:
     Extension: skimage.graph._spath
         Sources:
             skimage/graph/_spath.pyx
-    Extension: skimage.morphology.cmorph
-        Sources:
-            skimage/morphology/cmorph.pyx
     Extension: skimage.graph.heap
         Sources:
             skimage/graph/heap.pyx

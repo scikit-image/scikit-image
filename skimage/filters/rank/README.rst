@@ -16,7 +16,7 @@ followed by the moving window is given hereunder
 /--------------------------/
 \-------------------------- ...
 
-We compare cmorph.dilate to this histogram based method to show how
+We compare grey.dilate to this histogram based method to show how
 computational costs increase with respect to image size or structuring element
 size. This implementation gives better results for large structuring elements.
 
