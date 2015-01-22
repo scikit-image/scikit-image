@@ -138,8 +138,8 @@ match accordingly. Two-dimensional (2D) grayscale images (such as
 -left corner. In various parts of the library, you will
 also see ``rr`` and ``cc`` refer to lists of row and column
 coordinates. We distinguish this from (x, y), which commonly denote
-Cartesian coordinates, where x is the horizontal coordinate, y the
-vertical, and the origin is on the bottom right. (Matplotlib, for
+standard Cartesian coordinates, where x is the horizontal coordinate,
+y the vertical, and the origin is on the bottom right. (Matplotlib, for
 example, uses this convention.)
 
 In the case of color (or multichannel) images, the last dimension
