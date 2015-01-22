@@ -212,3 +212,15 @@ speedup is even more dramatic. It is worth thinking about this
 scikit-image uses C-contiguous arrays unless otherwise specified, so
 one should iterate along the last/rightmost dimension in the
 innermost loop of the computation.
+
+A note on time
+--------------
+
+Although scikit-image does not currently (0.11) provide functions to
+work specifically with time-varying 3D data, our compatibility with
+numpy arrays allows us to work quite naturally with a 5D array of the
+shape (t, frm, row, col, ch):
+
+    >>> for timepoint in image5d:  # doctest: +SKIP
+    ...     # each timepoint is a 3D multichannel image
+    ...     do_something_with(timepoint)
