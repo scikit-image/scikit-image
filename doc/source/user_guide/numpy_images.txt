@@ -146,7 +146,23 @@ contains the color information and is denoted ``channel`` or ``ch``.
 
 Finally, for 3D images, such as videos, magnetic resonance imaging
 (MRI) scans, or confocal microscopy, we refer to the leading dimension
-as ``frame``, abbreviated as ``frm`` or ``f``. In many cases,
+as ``frame``, abbreviated as ``frm`` or ``f``.
+
+These conventions are summarized below:
+
+.. table:: Dimension name and order conventions in scikit-image
+
+========================   ========================================
+Image type                 coordinates
+========================   ========================================
+2D grayscale               (row, col)
+2D multichannel (eg. RGB)  (row, col, ch)
+3D grayscale               (frm, row, col)
+3D multichannel            (frm, row, col, ch)
+========================   ========================================
+
+
+In many cases,
 the third imaging dimension has lower resolution than the other two,
 and processing must be done frame-wise. When frames are the leading
 dimension, we can use the following syntax:
