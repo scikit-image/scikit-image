@@ -105,7 +105,8 @@ NumPy array, with an additional trailing dimension for the channels:
     >>> cat.shape
     (300, 451, 3)
 
-That's a 300-by-451 pixel image with red, green, and blue channels.
+This shows that ``cat`` is a 300-by-451 pixel image with three
+channels (red, green, and blue).
 As before, we can get and set pixel values:
 
     >>> cat[10, 20]
