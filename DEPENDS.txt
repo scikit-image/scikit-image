@@ -2,7 +2,7 @@ Build Requirements
 ------------------
 * `Python >= 2.6 <http://python.org>`__
 * `Numpy >= 1.6 <http://numpy.scipy.org/>`__
-* `Cython >= 0.19.2 <http://www.cython.org/>`__
+* `Cython >= 0.21 <http://www.cython.org/>`__
 * `Six >=1.3 <https://pypi.python.org/pypi/six>`__
 
 You can use pip to automatically install the base dependencies as follows::
