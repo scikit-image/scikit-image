@@ -26,7 +26,7 @@ def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
         sigma of slightly less.
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension.
+        channels or another spatial dimension. Set to ``False`` for 3-D images.
     fast_mode : bool, optional
         if True (default value), a fast version of the non-local means
         algorithm is used. If False, the original version of non-local means is
