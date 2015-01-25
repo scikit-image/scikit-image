@@ -157,13 +157,10 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     ----------
     image: ndarray
         input RGB image to be denoised
-
     s: int, optional
         size of patches used for denoising
-
     d: int, optional
         maximal distance in pixels where to search patches used for denoising
-
     h: float, optional
         cut-off distance (in gray levels). The higher h, the more permissive
         one is in accepting patches.
@@ -244,13 +241,10 @@ def _nl_means_denoising_3d(image, int s=7,
     ----------
     image: ndarray
         input data to be denoised
-
     s: int, optional
         size of patches used for denoising
-
     d: int, optional
         maximal distance in pixels where to search patches used for denoising
-
     h: float, optional
         cut-off distance (in gray levels)
     """
@@ -327,13 +321,10 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     ----------
     image: ndarray
         2-D input data to be denoised, grayscale or RGB
-
     s: int, optional
         size of patches used for denoising
-
     d: int, optional
         maximal distance in pixels where to search patches used for denoising
-
     h: float, optional
         cut-off distance (in gray levels). The higher h, the more permissive
         one is in accepting patches.
@@ -423,13 +414,10 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
     ----------
     image: ndarray
         3-D input data to be denoised
-
     s: int, optional
         size of patches used for denoising
-
     d: int, optional
         maximal distance in pixels where to search patches used for denoising
-
     h: float, optional
         cut-off distance (in gray levels). The higher h, the more permissive
         one is in accepting patches.
