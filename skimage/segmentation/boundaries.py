@@ -65,15 +65,15 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
         How to mark the boundaries:
 
         - thick: any pixel not completely surrounded by pixels of the
-        same label (defined by `connectivity`) is marked as a boundary.
-        This results in boundaries that are 2 pixels thick.
+          same label (defined by `connectivity`) is marked as a boundary.
+          This results in boundaries that are 2 pixels thick.
         - inner: outline the pixels *just inside* of objects, leaving
-        background pixels untouched.
+          background pixels untouched.
         - outer: outline pixels in the background around object
-        boundaries. When two objects touch, their boundary is also
-        marked.
+          boundaries. When two objects touch, their boundary is also
+          marked.
         - subpixel: return a doubled image, with pixels *between* the
-        original pixels marked as boundary where appropriate.
+          original pixels marked as boundary where appropriate.
     background: int, optional
         For modes 'inner' and 'outer', a definition of a background
         label is required. See `mode` for descriptions of these two.
@@ -197,7 +197,7 @@ def mark_boundaries(image, label_img, color=(1, 1, 0),
 
     See Also
     --------
-    ``find_boundaries``.
+    find_boundaries
     """
     marked = img_as_float(image, force_copy=True)
     if marked.ndim == 2:

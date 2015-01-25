@@ -220,7 +220,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
     labels : ndarray, shape(M, N, [..., P,])
         The labelled image. This should have one dimension less than
         `image`. If `image` has dimensions `(M, N, 3)` `labels` should have
-         dimensions `(M, N)`.
+        dimensions `(M, N)`.
     connectivity : int, optional
         Pixels with a squared distance less than `connectivity` from each other
         are considered adjacent. It can range from 1 to `labels.ndim`. Its

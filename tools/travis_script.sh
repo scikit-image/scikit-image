@@ -5,6 +5,9 @@ section "Test.with.min.requirements"
 nosetests $TEST_ARGS skimage
 section_end "Test.with.min.requirements"
 
+section "Build.docs"
+make html
+section_end "Build.docs"
 
 section "Flake8.test"
 flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples

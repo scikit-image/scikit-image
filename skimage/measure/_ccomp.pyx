@@ -368,7 +368,7 @@ def label(input, neighbors=None, background=None, return_num=False,
     Two pixels are connected when they are neighbors and have the same value.
     In 2D, they can be neighbors either in a 1- or 2-connected sense.
     The value refers to the maximum number of orthogonal hops to consider a
-    pixel/voxel a neighbor.
+    pixel/voxel a neighbor::
 
       1-connectivity      2-connectivity     diagonal connection close-up
 

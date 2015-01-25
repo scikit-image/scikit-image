@@ -14,3 +14,7 @@ doctest:
 
 coverage:
 	nosetests skimage --with-coverage --cover-package=skimage
+
+html:
+	pip install sphinx
+	make -C docs html
