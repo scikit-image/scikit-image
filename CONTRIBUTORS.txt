@@ -203,3 +203,6 @@
 
 - Salvatore Scaramuzzino
   RectTool example
+
+- Kevin Keraudren
+  Fix and test for feature.peak_local_max
