@@ -13,6 +13,31 @@ cdef eps = 1.e-8
 cdef inline float patch_distance_2d(DTYPE_t [:, :] p1,
                                     DTYPE_t [:, :] p2,
                                     DTYPE_t [:, ::] w, int s):
+    """
+    Compute a Gaussian distance between two image patches.
+
+    Parameters
+    ----------
+    p1 : 2-D array_like
+        first patch
+    p2 : 2-D array_like
+        first patch
+    w : 2-D array_like
+        array of weigths for the different pixels of the patches
+    s : int
+        linear size of the patches
+
+    Returns
+    -------
+    distance : float
+        Gaussian distance between the two patches
+
+    Notes
+    -----
+    The returned distance is given by
+
+        exp( -w * (p1 - p2)**2)
+    """
     cdef int i, j
     cdef int center = s / 2
     # Check if central pixel is too different in the 2 patches
@@ -36,6 +61,31 @@ cdef inline float patch_distance_2d(DTYPE_t [:, :] p1,
 cdef inline float patch_distance_2drgb(DTYPE_t [:, :, :] p1,
                                        DTYPE_t [:, :, :] p2,
                                        DTYPE_t [:, ::] w, int s):
+    """
+    Compute a Gaussian distance between two image patches.
+
+    Parameters
+    ----------
+    p1 : 3-D array_like
+        first patch, 2D image with last dimension corresponding to channels
+    p2 : 3-D array_like
+        first patch, 2D image with last dimension corresponding to channels
+    w : 2-D array_like
+        array of weigths for the different pixels of the patches
+    s : int
+        linear size of the patches
+
+    Returns
+    -------
+    distance : float
+        Gaussian distance between the two patches
+
+    Notes
+    -----
+    The returned distance is given by
+
+        exp( -w * (p1 - p2)**2)
+    """
     cdef int i, j
     cdef int center = s / 2
     cdef int color
@@ -57,6 +107,31 @@ cdef inline float patch_distance_2drgb(DTYPE_t [:, :, :] p1,
 cdef inline float patch_distance_3d(DTYPE_t [:, :, :] p1,
                                     DTYPE_t [:, :, :] p2,
                                     DTYPE_t [:, :, ::] w, int s):
+    """
+    Compute a Gaussian distance between two image patches.
+
+    Parameters
+    ----------
+    p1 : 3-D array_like
+        first patch
+    p2 : 3-D array_like
+        first patch
+    w : 3-D array_like
+        array of weigths for the different pixels of the patches
+    s : int
+        linear size of the patches
+
+    Returns
+    -------
+    distance : float
+        Gaussian distance between the two patches
+
+    Notes
+    -----
+    The returned distance is given by
+
+        exp( -w * (p1 - p2)**2)
+    """
     cdef int i, j, k
     cdef float distance = 0
     cdef float tmp_diff
@@ -381,8 +456,8 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
                     result[x + t1, y + t2] += weight * padded[x, y]
     for x in range(offset, n_x - offset):
         for y in range(offset, n_y - offset):
-            # I think there is no risk of division by zero
-            # except in padded zone
+            # No risk of division by zero, since the contribution
+            # of a null shift is strictly positive
             result[x, y] /= weights[x, y]
     return result[pad_size: - pad_size, pad_size: - pad_size]
 
@@ -473,8 +548,8 @@ def _fast_nl_means_denoising_2drgb(image, int s=7, int d=13, float h=0.1):
     for x in range(offset, n_x - offset):
         for y in range(offset, n_y - offset):
             for channel in range(3):
-                # no risk of division by zero
-                # except in padded zone
+                # No risk of division by zero, since the contribution
+                # of a null shift is strictly positive
                 result[x, y, channel] /= weights[x, y]
     return result[pad_size: - pad_size, pad_size: - pad_size]
 
