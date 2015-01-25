@@ -5,29 +5,29 @@ from skimage.restoration._nl_means_denoising import _nl_means_denoising_2d, \
                     _fast_nl_means_denoising_2drgb
 
 def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
-                       fast_mode=True):
+                       multichannel=True, fast_mode=True):
     """
     Perform non-local means denoising on 2-D or 3-D grayscale images, and
     2-D RGB images.
 
     Parameters
     ----------
-    image : ndarray
-        input data to be denoised
-
+    image : 2D or 3D ndarray
+        input image to be denoised, which can be 2D or 3D, and grayscale
+        or RGB (for 2D images only, see ``multichannel`` parameter).
     patch_size : int, optional
         size of patches used for denoising
-
     patch_distance : int, optional
         maximal distance in pixels where to search patches used for denoising
-
     h : float, optional
         cut-off distance (in gray levels). The higher h, the more permissive
         one is in accepting patches. A higher h results in a smoother image,
         at the expense of blurring features. For a Gaussian noise of standard
         deviation sigma, a rule of thumb is to choose the value of h to be
         sigma of slightly less.
-
+    multichannel : bool, optional
+        Whether the last axis of the image is to be interpreted as multiple
+        channels or another spatial dimension.
     fast_mode : bool, optional
         if True (default value), a fast version of the non-local means
         algorithm is used. If False, the original version of non-local means is
@@ -105,14 +105,14 @@ def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
         else:
             return np.array(_nl_means_denoising_2d(image, s=patch_size,
                                 d=patch_distance, h=h))
-    if image.ndim == 3 and image.shape[-1] > 4:  # only grayscale
+    elif image.ndim == 3 and not multichannel:  # only grayscale
         if fast_mode:
             return np.array(_fast_nl_means_denoising_3d(image, s=patch_size,
                                               d=patch_distance, h=h))
         else:
             return np.array(_nl_means_denoising_3d(image, patch_size,
                                 patch_distance, h))
-    if image.ndim == 3 and image.shape[-1] == 3:  # 2-D color (RGB) images
+    if image.ndim == 3 and multichannel:  # 2-D color (RGB) images
         if fast_mode:
             return np.array(_fast_nl_means_denoising_2drgb(image, patch_size,
                                 patch_distance, h))
