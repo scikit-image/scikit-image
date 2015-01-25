@@ -11,7 +11,7 @@ Original author: Lee Kamentsky
 """
 import numpy as np
 
-from skimage.filters._rank_order import rank_order
+from ..filters._rank_order import rank_order
 
 
 def reconstruction(seed, mask, method='dilation', selem=None, offset=None):

@@ -1,5 +1,5 @@
 import numpy as np
-from skimage._shared.utils import deprecated
+from .._shared.utils import deprecated
 
 
 def join_segmentations(s1, s2):

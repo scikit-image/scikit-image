@@ -2,7 +2,6 @@
 Grayscale morphological operations
 """
 import functools
-
 import numpy as np
 from scipy import ndimage as nd
 from .misc import default_selem

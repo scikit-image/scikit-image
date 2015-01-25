@@ -2,8 +2,8 @@ import functools
 
 import numpy as np
 
-from skimage import color
-from skimage.util.dtype import convert
+from .. import color
+from ..util.dtype import convert
 
 
 __all__ = ['adapt_rgb', 'hsv_value', 'each_channel']

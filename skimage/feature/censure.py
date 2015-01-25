@@ -1,15 +1,13 @@
 import numpy as np
 from scipy.ndimage.filters import maximum_filter, minimum_filter, convolve
 
-from skimage.feature.util import FeatureDetector, _prepare_grayscale_input_2D
-
-from skimage.transform import integral_image
-from skimage.feature import structure_tensor
-from skimage.morphology import octagon, star
-from skimage.feature.util import _mask_border_keypoints
-
-from skimage.feature.censure_cy import _censure_dob_loop
-from skimage._shared.utils import assert_nD
+from ..transform import integral_image
+from ..feature import structure_tensor
+from ..morphology import octagon, star
+from ..feature.censure_cy import _censure_dob_loop
+from ..feature.util import (FeatureDetector, _prepare_grayscale_input_2D,
+                            _mask_border_keypoints)
+from .._shared.utils import assert_nD
 
 # The paper(Reference [1]) mentions the sizes of the Octagon shaped filter
 # kernel for the first seven scales only. The sizes of the later scales

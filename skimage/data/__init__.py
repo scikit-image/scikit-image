@@ -8,8 +8,8 @@ For more images, see
 
 import os as _os
 
+from .. import data_dir
 from ..io import imread, use_plugin
-from skimage import data_dir
 
 
 __all__ = ['load',

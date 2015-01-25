@@ -21,7 +21,7 @@ from __future__ import division
 
 import numpy as np
 
-from skimage.color.colorconv import lab2lch, _cart2polar_2pi
+from ..color.colorconv import lab2lch, _cart2polar_2pi
 
 
 def deltaE_cie76(lab1, lab2):

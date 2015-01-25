@@ -10,8 +10,8 @@ Original author: Lee Kamentsky
 
 """
 import numpy as np
-from skimage import img_as_float
-from skimage._shared.utils import assert_nD, deprecated
+from .. import img_as_float
+from .._shared.utils import assert_nD, deprecated
 from scipy.ndimage import convolve, binary_erosion, generate_binary_structure
 
 

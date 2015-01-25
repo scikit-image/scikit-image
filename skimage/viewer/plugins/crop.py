@@ -1,6 +1,6 @@
 from .base import Plugin
 from ..canvastools import RectangleTool
-from skimage.viewer.widgets import SaveButtons
+from ...viewer.widgets import SaveButtons
 
 
 __all__ = ['Crop']

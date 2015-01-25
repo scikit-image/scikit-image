@@ -7,7 +7,7 @@ import numpy as np
 
 cimport numpy as cnp
 from libc.math cimport sqrt, sin, cos, floor, ceil
-from skimage._shared.geometry cimport point_in_polygon
+from .._shared.geometry cimport point_in_polygon
 
 
 def _coords_inside_image(rr, cc, shape, val=None):

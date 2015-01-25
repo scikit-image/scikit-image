@@ -1,4 +1,4 @@
-from skimage._shared.utils import skimage_deprecation
+from .._shared.utils import skimage_deprecation
 from warnings import warn
 
 global _import_warned

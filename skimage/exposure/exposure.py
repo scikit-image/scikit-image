@@ -1,8 +1,8 @@
 import warnings
 import numpy as np
 
-from skimage import img_as_float
-from skimage.util.dtype import dtype_range, dtype_limits
+from .. import img_as_float
+from ..util.dtype import dtype_range, dtype_limits
 
 
 __all__ = ['histogram', 'cumulative_distribution', 'equalize_hist',

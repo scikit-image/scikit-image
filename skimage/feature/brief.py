@@ -5,7 +5,7 @@ from .util import (DescriptorExtractor, _mask_border_keypoints,
                    _prepare_grayscale_input_2D)
 
 from .brief_cy import _brief_loop
-from skimage._shared.utils import assert_nD
+from .._shared.utils import assert_nD
 
 
 class BRIEF(DescriptorExtractor):

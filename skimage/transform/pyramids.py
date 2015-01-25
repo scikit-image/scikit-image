@@ -1,8 +1,8 @@
 import math
 import numpy as np
 from scipy import ndimage
-from skimage.transform import resize
-from skimage.util import img_as_float
+from ..transform import resize
+from ..util import img_as_float
 
 
 def _smooth(image, sigma, mode, cval):

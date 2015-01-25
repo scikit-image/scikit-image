@@ -1,8 +1,7 @@
 # coding: utf-8
 import numpy as np
-from skimage import img_as_float
-from skimage.restoration._denoise_cy import (_denoise_bilateral,
-                                             _denoise_tv_bregman)
+from .. import img_as_float
+from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 
 
 def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,

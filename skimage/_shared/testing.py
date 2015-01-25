@@ -5,12 +5,12 @@ import os
 import re
 from tempfile import NamedTemporaryFile
 
-from skimage import (
-    data, io, img_as_uint, img_as_float, img_as_int, img_as_ubyte)
 from numpy import testing
 import numpy as np
 from skimage._shared._warnings import expected_warnings
 import warnings
+
+from .. import data, io, img_as_uint, img_as_float, img_as_int, img_as_ubyte
 
 
 SKIP_RE = re.compile("(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
