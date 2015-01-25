@@ -151,78 +151,6 @@ cdef inline float patch_distance_3d(DTYPE_t [:, :, :] p1,
 @cython.boundscheck(False)
 def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     """
-    Perform non-local means denoising on 2-D array
-
-    Parameters
-    ----------
-    image: ndarray
-        input data to be denoised
-
-    s: int, optional
-        size of patches used for denoising
-
-    d: int, optional
-        maximal distance in pixels where to search patches used for denoising
-
-    h: float, optional
-        cut-off distance (in gray levels). The higher h, the more permissive
-        one is in accepting patches.
-    """
-    if s % 2 == 0:
-        s += 1  # odd value for symmetric patch
-    cdef int n_x, n_y
-    n_x, n_y = image.shape
-    cdef int offset = s / 2
-    # padd the image so that boundaries are denoised as well
-    cdef DTYPE_t [:, ::1] padded = np.ascontiguousarray(util.pad(image,
-                                offset, mode='reflect').astype(np.float32))
-    cdef DTYPE_t [:, ::1] result = padded.copy()
-    cdef float A = ((s - 1.) / 4.)
-    cdef float new_value
-    cdef float weight_sum, weight
-    xg, yg = np.mgrid[-offset:offset + 1, -offset:offset + 1]
-    cdef DTYPE_t [:, ::1] w = np.ascontiguousarray(np.exp(
-                                    - (xg ** 2 + yg ** 2) / (2 * A ** 2)).
-                                    astype(np.float32))
-    cdef float distance
-    cdef int x, y, i, j
-    cdef int x_start, x_end, y_start, y_end
-    cdef int x_start_i, x_end_i, y_start_j, y_end_j
-    w = 1. / (np.sum(w) * h ** 2.) * w
-    # Coordinates of central pixel and patch bounds
-    for x in range(offset, n_x + offset):
-        x_start = x - offset
-        x_end = x + offset + 1
-        for y in range(offset, n_y + offset):
-            new_value = 0
-            weight_sum = 0
-            y_start = y - offset
-            y_end = y + offset + 1
-            # Coordinates of test pixel and patch bounds
-            for i in range(max(- d, offset - x),
-                           min(d + 1, n_x - x - 1)):
-                x_start_i = x_start + i
-                x_end_i = x_end + i
-                for j in range(max(- d, offset - y),
-                               min(d + 1, n_y - y - 1)):
-                    y_start_j = y_start + j
-                    y_end_j = y_end + j
-                    weight = patch_distance_2d(
-                                padded[x_start: x_end,
-                                       y_start: y_end],
-                                padded[x_start_i: x_end_i,
-                                       y_start_j: y_end_j],
-                                w, s)
-                    weight_sum += weight
-                    new_value += weight * padded[x + i, y + j]
-            result[x, y] = new_value / weight_sum
-    return result[offset:-offset, offset:-offset]
-
-
-@cython.cdivision(True)
-@cython.boundscheck(False)
-def _nl_means_denoising_2drgb(image, int s=7, int d=13, float h=0.1):
-    """
     Perform non-local means denoising on 2-D RGB image
 
     Parameters
@@ -242,13 +170,13 @@ def _nl_means_denoising_2drgb(image, int s=7, int d=13, float h=0.1):
     """
     if s % 2 == 0:
         s += 1  # odd value for symmetric patch
-    cdef int n_x, n_y
-    n_x, n_y, _ = image.shape
+    cdef int n_x, n_y, n_ch
+    n_x, n_y, n_ch = image.shape
     cdef int offset = s / 2
     cdef int x, y, i, j, color
     cdef int x_start, x_end, y_start, y_end
     cdef int x_start_i, x_end_i, y_start_j, y_end_j
-    cdef DTYPE_t [::1] new_values = np.zeros(3).astype(np.float32)
+    cdef DTYPE_t [::1] new_values = np.zeros(n_ch).astype(np.float32)
     cdef DTYPE_t [:, :, ::1] padded = np.ascontiguousarray(util.pad(image,
                        ((offset, offset), (offset, offset), (0, 0)),
                         mode='reflect').astype(np.float32))
@@ -261,13 +189,13 @@ def _nl_means_denoising_2drgb(image, int s=7, int d=13, float h=0.1):
                                     - (xg ** 2 + yg ** 2) / (2 * A ** 2)).
                                     astype(np.float32))
     cdef float distance
-    w = 1. / (3 * np.sum(w) * h ** 2) * w
+    w = 1. / (n_ch * np.sum(w) * h ** 2) * w
     # Coordinates of central pixel and patch bounds
     for x in range(offset, n_x + offset):
         x_start = x - offset
         x_end = x + offset + 1
         for y in range(offset, n_y + offset):
-            for color in range(3):
+            for color in range(n_ch):
                 new_values[color] = 0
             weight_sum = 0
             y_start = y - offset
@@ -281,17 +209,26 @@ def _nl_means_denoising_2drgb(image, int s=7, int d=13, float h=0.1):
                                min(d + 1, n_y - y - 1)):
                     y_start_j = y_start + j
                     y_end_j = y_end + j
-                    weight = patch_distance_2drgb(
-                                padded[x_start: x_end,
-                                       y_start: y_end, :],
-                                padded[x_start_i: x_end_i,
-                                       y_start_j: y_end_j, :],
-                                w, s)
+                    if n_ch == 1:
+                        weight = patch_distance_2d(
+                                 padded[x_start: x_end,
+                                        y_start: y_end, 0],
+                                 padded[x_start_i: x_end_i,
+                                        y_start_j: y_end_j, 0],
+                                 w, s)
+
+                    else:
+                        weight = patch_distance_2drgb(
+                                 padded[x_start: x_end,
+                                        y_start: y_end, :],
+                                 padded[x_start_i: x_end_i,
+                                        y_start_j: y_end_j, :],
+                                        w, s)
                     weight_sum += weight
-                    for color in range(3):
+                    for color in range(n_ch):
                         new_values[color] += weight * padded[x + i, y + j,
                                                              color]
-            for color in range(3):
+            for color in range(n_ch):
                 result[x, y, color] = new_values[color] / weight_sum
     return result[offset:-offset, offset:-offset]
 
@@ -389,90 +326,7 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     Parameters
     ----------
     image: ndarray
-        2-D input data to be denoised
-
-    s: int, optional
-        size of patches used for denoising
-
-    d: int, optional
-        maximal distance in pixels where to search patches used for denoising
-
-    h: float, optional
-        cut-off distance (in gray levels). The higher h, the more permissive
-        one is in accepting patches.
-    """
-    if s % 2 == 0:
-        s += 1  # odd value for symmetric patch
-    cdef int offset = s / 2
-    # Image padding: we need to account for patch size, possible shift,
-    # + 1 for the boundary effects in finite differences
-    cdef int pad_size = offset + d + 1
-    cdef DTYPE_t [:, ::1] padded = np.ascontiguousarray(util.pad(image,
-                                pad_size, mode='reflect').astype(np.float32))
-    cdef DTYPE_t [:, ::1] result = np.zeros_like(padded)
-    cdef DTYPE_t [:, ::1] weights = np.zeros_like(padded)
-    cdef DTYPE_t [:, ::1] integral = np.zeros_like(padded)
-    cdef int n_x, n_y, t1, t2, x, y
-    cdef float weight, distance
-    cdef float alpha
-    cdef float h2 = h ** 2.
-    cdef float s2 = s ** 2.
-    n_x, n_y = image.shape
-    n_x += 2 * pad_size
-    n_y += 2 * pad_size
-    # Outer loops on patch shifts
-    # With t2 >= 0, reference patch is always on the left of test patch
-    for t1 in range(-d, d + 1):
-        for t2 in range(0, d + 1):
-            # alpha is to account for patches on the same column
-            # distance is computed twice in this case
-            if t2 == 0 and t1 is not 0:
-                alpha = 0.5
-            else:
-                alpha = 1.
-            integral = np.zeros_like(padded)
-            for x in range(max(1, - t1), min(n_x, n_x - t1)):
-                for y in range(max(1, - t2), min(n_y, n_y - t2)):
-                    integral[x, y] = (padded[x, y] -
-                                      padded[x + t1, y + t2])**2 + \
-                                      integral[x - 1, y] + integral[x, y - 1] \
-                                      - integral[x - 1, y - 1]
-            for x in range(max(offset, offset - t1),
-                           min(n_x - offset, n_x - offset - t1)):
-                for y in range(max(offset, offset - t2),
-                               min(n_y - offset, n_y - offset - t2)):
-                    distance = integral[x + offset, y + offset] + \
-                               integral[x - offset, y - offset] - \
-                               integral[x - offset, y + offset] - \
-                               integral[x + offset, y - offset]
-                    distance /= (s2 * h2)
-                    # exp of large negative numbers is close to zero
-                    if distance > 5:
-                        continue
-                    weight = alpha * exp(- distance)
-                    weights[x, y] += weight
-                    weights[x + t1, y + t2] += weight
-                    result[x, y] += weight * padded[x + t1, y + t2]
-                    result[x + t1, y + t2] += weight * padded[x, y]
-    for x in range(offset, n_x - offset):
-        for y in range(offset, n_y - offset):
-            # No risk of division by zero, since the contribution
-            # of a null shift is strictly positive
-            result[x, y] /= weights[x, y]
-    return result[pad_size: - pad_size, pad_size: - pad_size]
-
-
-@cython.cdivision(True)
-@cython.boundscheck(False)
-def _fast_nl_means_denoising_2drgb(image, int s=7, int d=13, float h=0.1):
-    """
-    Perform fast non-local means denoising on 2-D RGB array, with the outer
-    loop on patch shifts in order to reduce the number of operations.
-
-    Parameters
-    ----------
-    image: ndarray
-        2-D RGB input data to be denoised
+        2-D input data to be denoised, grayscale or RGB
 
     s: int, optional
         size of patches used for denoising
@@ -496,13 +350,13 @@ def _fast_nl_means_denoising_2drgb(image, int s=7, int d=13, float h=0.1):
     cdef DTYPE_t [:, :, ::1] result = np.zeros_like(padded)
     cdef DTYPE_t [:, ::1] weights = np.zeros_like(padded[..., 0], order='C')
     cdef DTYPE_t [:, ::1] integral = np.zeros_like(padded[..., 0], order='C')
-    cdef int n_x, n_y, t1, t2, x, y
+    cdef int n_x, n_y, n_ch, t1, t2, x, y
     cdef float weight, distance
     cdef float alpha
     cdef float h2 = h ** 2.
     cdef float s2 = s ** 2.
-    cdef float h2s2 = 3 * h2 * s2
-    n_x, n_y, _ = image.shape
+    n_x, n_y, n_ch = image.shape
+    cdef float h2s2 = n_ch * h2 * s2
     n_x += 2 * pad_size
     n_y += 2 * pad_size
     # Outer loops on patch shifts
@@ -518,12 +372,16 @@ def _fast_nl_means_denoising_2drgb(image, int s=7, int d=13, float h=0.1):
             integral = np.zeros_like(padded[..., 0], order='C')
             for x in range(max(1, - t1), min(n_x, n_x - t1)):
                 for y in range(max(1, - t2), min(n_y, n_y - t2)):
-                    distance = ((padded[x, y, 0] -
-                                padded[x + t1, y + t2, 0])**2
-                               +(padded[x, y, 1] -
-                                padded[x + t1, y + t2, 1])**2
-                               +(padded[x, y, 2] -
-                                padded[x + t1, y + t2, 2])**2)
+                    if n_ch == 1:
+                        distance = (padded[x, y, 0] -
+                                    padded[x + t1, y + t2, 0])**2
+                    else:
+                        distance = ((padded[x, y, 0] -
+                                    padded[x + t1, y + t2, 0])**2
+                                    +(padded[x, y, 1] -
+                                    padded[x + t1, y + t2, 1])**2
+                                    +(padded[x, y, 2] -
+                                    padded[x + t1, y + t2, 2])**2)
                     integral[x, y] = distance + \
                                      integral[x - 1, y] + integral[x, y - 1] \
                                       - integral[x - 1, y - 1]
@@ -542,12 +400,12 @@ def _fast_nl_means_denoising_2drgb(image, int s=7, int d=13, float h=0.1):
                     weight = alpha * exp(- distance)
                     weights[x, y] += weight
                     weights[x + t1, y + t2] += weight
-                    for ch in range(3):
+                    for ch in range(n_ch):
                         result[x, y, ch] += weight * padded[x + t1, y + t2, ch]
                         result[x + t1, y + t2, ch] += weight * padded[x, y, ch]
     for x in range(offset, n_x - offset):
         for y in range(offset, n_y - offset):
-            for channel in range(3):
+            for channel in range(n_ch):
                 # No risk of division by zero, since the contribution
                 # of a null shift is strictly positive
                 result[x, y, channel] /= weights[x, y]

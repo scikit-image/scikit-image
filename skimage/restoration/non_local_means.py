@@ -1,8 +1,7 @@
 import numpy as np
 from skimage.restoration._nl_means_denoising import _nl_means_denoising_2d, \
-                    _nl_means_denoising_2drgb, _nl_means_denoising_3d, \
-                    _fast_nl_means_denoising_2d, _fast_nl_means_denoising_3d, \
-                    _fast_nl_means_denoising_2drgb
+                    _nl_means_denoising_3d, \
+                    _fast_nl_means_denoising_2d, _fast_nl_means_denoising_3d
 
 def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
                        multichannel=True, fast_mode=True):
@@ -99,12 +98,13 @@ def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
     >>> denoised_a = nl_means_denoising(a, 7, 5, 0.1)
     """
     if image.ndim == 2:
+        image = image[..., np.newaxis]
         if fast_mode:
-            return np.array(_fast_nl_means_denoising_2d(image, s=patch_size,
-                                            d=patch_distance, h=h))
+            return np.squeeze(np.array(_fast_nl_means_denoising_2d(image,
+                                        s=patch_size, d=patch_distance, h=h)))
         else:
-            return np.array(_nl_means_denoising_2d(image, s=patch_size,
-                                d=patch_distance, h=h))
+            return np.squeeze(np.array(_nl_means_denoising_2d(image,
+                                        s=patch_size, d=patch_distance, h=h)))
     elif image.ndim == 3 and not multichannel:  # only grayscale
         if fast_mode:
             return np.array(_fast_nl_means_denoising_3d(image, s=patch_size,
@@ -114,10 +114,10 @@ def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
                                 patch_distance, h))
     if image.ndim == 3 and multichannel:  # 2-D color (RGB) images
         if fast_mode:
-            return np.array(_fast_nl_means_denoising_2drgb(image, patch_size,
+            return np.array(_fast_nl_means_denoising_2d(image, patch_size,
                                 patch_distance, h))
         else:
-            return np.array(_nl_means_denoising_2drgb(image, patch_size,
+            return np.array(_nl_means_denoising_2d(image, patch_size,
                                 patch_distance, h))
     else:
         raise NotImplementedError("Non-local means denoising is only \
