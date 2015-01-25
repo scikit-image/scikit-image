@@ -201,8 +201,8 @@ def threshold_isodata(image, nbins=256, return_all=False):
     Histogram-based threshold, known as Ridler-Calvard method or inter-means.
     Threshold values returned satisfy the following equality:
 
-    ``threshold = (image[image <= threshold].mean() +``
-                 ``image[image > threshold].mean()) / 2.0``
+    `threshold = (image[image <= threshold].mean() +`
+                 `image[image > threshold].mean()) / 2.0`
 
     That is, returned thresholds are intensities that separate the image into
     two groups of pixels, where the threshold intensity is midway between the

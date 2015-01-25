@@ -17,4 +17,4 @@ coverage:
 
 html:
 	pip install sphinx
-	make -C docs html
+	make -C doc html

@@ -6,7 +6,9 @@ nosetests $TEST_ARGS skimage
 section_end "Test.with.min.requirements"
 
 section "Build.docs"
-make html
+if [[ $TRAVIS_PYTHON_VERSION != 3.2 ]]; then
+    make html
+fi
 section_end "Build.docs"
 
 section "Flake8.test"

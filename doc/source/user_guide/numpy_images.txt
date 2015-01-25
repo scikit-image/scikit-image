@@ -81,7 +81,7 @@ disk: ::
     ...                    (nrows / 2)**2)
     >>> camera[outer_disk_mask] = 0
 
-.. image:: ../../_images/plot_camera_numpy_1.png
+.. image:: ../auto_examples/images/plot_camera_numpy_1.png
     :width: 45%
     :target: ../auto_examples/plot_camera_numpy.html
 
@@ -123,6 +123,8 @@ the grayscale image above:
 
     Using a 2D mask on a 2D color image
 
+    >>> from skimage import data
+    >>> cat = data.chelsea()
     >>> reddish = cat[:, :, 0] > 160
     >>> cat[reddish] = [0, 255, 0]
     >>> plt.imshow(cat)
@@ -153,14 +155,14 @@ These conventions are summarized below:
 
 .. table:: Dimension name and order conventions in scikit-image
 
-========================   ========================================
-Image type                 coordinates
-========================   ========================================
-2D grayscale               (row, col)
-2D multichannel (eg. RGB)  (row, col, ch)
-3D grayscale               (pln, row, col)
-3D multichannel            (pln, row, col, ch)
-========================   ========================================
+  =========================   ========================================
+  Image type                  coordinates
+  =========================   ========================================
+  2D grayscale                (row, col)
+  2D multichannel (eg. RGB)   (row, col, ch)
+  3D grayscale                (pln, row, col)
+  3D multichannel             (pln, row, col, ch)
+  =========================   ========================================
 
 
 Many functions in scikit-image operate on 3D images directly:
@@ -248,9 +250,9 @@ We can then supplement the above table as follows:
 
 .. table:: Addendum to dimension names and orders in scikit-image
 
-========================   ========================================
-Image type                 coordinates
-========================   ========================================
-2D color video             (t, row, col, ch)
-3D multichannel video      (t, pln, row, col, ch)
-========================   ========================================
+  ========================   ========================================
+  Image type                 coordinates
+  ========================   ========================================
+  2D color video             (t, row, col, ch)
+  3D multichannel video      (t, pln, row, col, ch)
+  ========================   ========================================

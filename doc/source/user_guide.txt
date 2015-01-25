@@ -12,3 +12,5 @@ User Guide
    user_guide/tutorials
    user_guide/getting_help
    user_guide/viewer
+   user_guide/tutorial_parallelization
+   user_guide/tutorial_segmentation
