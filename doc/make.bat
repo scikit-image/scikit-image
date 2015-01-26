@@ -3,7 +3,7 @@
 REM Command file for Sphinx documentation
 
 set SPHINXBUILD=sphinx-build
-set ALLSPHINXOPTS=-d build/doctrees %SPHINXOPTS% source
+set ALLSPHINXOPTS=-d build/doctrees %SPHINXOPTS% _prebuild
 if NOT "%PAPER%" == "" (
 	set ALLSPHINXOPTS=-D latex_paper_size=%PAPER% %ALLSPHINXOPTS%
 )
@@ -27,22 +27,27 @@ if "%1" == "help" (
 	goto end
 )
 
+rmdir /q /s _prebuild
+mkdir _prebuild
+python tools/doctest_strip.py
+
 for %%x in (html htmlhelp latex qthelp) do (
 	if "%1" == "%%x" (
-		md source\api 2>NUL
+		md _prebuild\api 2>NUL
 		python tools/build_modref_templates.py
 	)
 )
 
-
 if "%1" == "clean" (
 	for /d %%i in (build\*) do rmdir /q /s %%i
 	del /q /s build\*
+	for /d %%i in (_prebuild\*) do rmdir /q /s %%i
+	del /q /s _prebuild\*
 	goto end
 )
 
 if "%1" == "html" (
-	cd source && python random_gallery.py && python coverage_generator.py && cd ..
+	cd _prebuild && python random_gallery.py && python coverage_generator.py && cd ..
 	%SPHINXBUILD% -b html %ALLSPHINXOPTS% build/html
 	echo.
 	echo.Build finished. The HTML pages are in build/html.

@@ -97,7 +97,7 @@ def circle(cy, cx, radius, shape=None):
         ``img[rr, cc] = 1``.
     Notes
     -----
-        This function is a wrapper for skimage.draw.ellipse()
+    This function is a wrapper for skimage.draw.ellipse()
 
     Examples
     --------
