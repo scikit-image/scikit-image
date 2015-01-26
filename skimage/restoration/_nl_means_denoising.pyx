@@ -6,8 +6,6 @@ from libc.math cimport exp
 
 ctypedef np.float32_t DTYPE_t
 
-cdef eps = 1.e-8
-
 
 @cython.boundscheck(False)
 cdef inline float patch_distance_2d(DTYPE_t [:, :] p1,
@@ -44,15 +42,15 @@ cdef inline float patch_distance_2d(DTYPE_t [:, :] p1,
     cdef float tmp_diff = p1[center, center] - p2[center, center]
     cdef float init = w[center, center] * tmp_diff * tmp_diff
     if init > 1:
-        return eps
+        return 0.
     cdef float distance = 0
     for i in range(s):
         # exp of large negative numbers will be 0, so we'd better stop
         if distance > 5:
-            return eps
+            return 0.
         for j in range(s):
             tmp_diff = p1[i, j] - p2[i, j]
-            distance += w[i, j] * tmp_diff * tmp_diff
+            distance += (w[i, j] * tmp_diff * tmp_diff)
     distance = exp(- distance)
     return distance
 
@@ -94,7 +92,7 @@ cdef inline float patch_distance_2drgb(DTYPE_t [:, :, :] p1,
     for i in range(s):
         # exp of large negative numbers will be 0, so we'd better stop
         if distance > 5:
-            return eps
+            return 0.
         for j in range(s):
             for color in range(3):
                 tmp_diff = p1[i, j, color] - p2[i, j, color]
@@ -138,7 +136,7 @@ cdef inline float patch_distance_3d(DTYPE_t [:, :, :] p1,
     for i in range(s):
         # exp of large negative numbers will be 0, so we'd better stop
         if distance > 5:
-            return eps
+            return 0.
         for j in range(s):
             for k in range(s):
                 tmp_diff = p1[i, j, k] - p2[i, j, k]
@@ -199,11 +197,11 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
             x_col_end = x_col + offset + 1
             # Coordinates of test pixel and patch bounds
             for i in range(max(- d, offset - x_row),
-                           min(d + 1, n_row - x_row - 1)):
+                           min(d + 1, n_row + offset - x_row)):
                 x_row_start_i = x_row_start + i
                 x_row_end_i = x_row_end + i
                 for j in range(max(- d, offset - x_col),
-                               min(d + 1, n_col - x_col - 1)):
+                               min(d + 1, n_col + offset - x_col)):
                     x_col_start_j = x_col_start + j
                     x_col_end_j = x_col_end + j
                     if n_ch == 1:
@@ -213,7 +211,6 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
                                  padded[x_row_start_i: x_row_end_i,
                                         x_col_start_j: x_col_end_j, 0],
                                  w, s)
-
                     else:
                         weight = patch_distance_2drgb(
                                  padded[x_row_start: x_row_end,
@@ -288,15 +285,15 @@ def _nl_means_denoising_3d(image, int s=7,
                 weight_sum = 0
                 # Coordinates of test pixel and patch bounds
                 for i in range(max(- d, offset - x_pln),
-                               min(d + 1, n_pln - x_pln - 1)):
+                               min(d + 1, n_pln + offset - x_pln)):
                     x_pln_start_i = x_pln_start + i
                     x_pln_end_i = x_pln_end + i
                     for j in range(max(- d, offset - x_row),
-                                   min(d + 1, n_row - x_row - 1)):
+                                   min(d + 1, n_row + offset - x_row)):
                         x_row_start_j = x_row_start + j
                         x_row_end_j = x_row_end + j
                         for k in range(max(- d, offset - x_col),
-                                   min(d + 1, n_col - x_col - 1)):
+                                   min(d + 1, n_col + offset - x_col)):
                             x_col_start_k = x_col_start + k
                             x_col_end_k = x_col_end + k
                             weight = patch_distance_3d(
