@@ -24,8 +24,9 @@ def _revalidate_node_edges(rag, node, heap_list):
     for nbr in rag.neighbors(node):
         data = rag[node][nbr]
         try:
-            # invalidate existing neghbors of `dst`, they have new weights
+            # invalidate edges incident on `dst`, they have new weights
             data['heap item'][3] = False
+            _invalidate_edge(rag, node, nbr)
         except KeyError:
             # will handle the case where the edge did not exist in the existing
             # graph
@@ -38,7 +39,7 @@ def _revalidate_node_edges(rag, node, heap_list):
 
 
 def _rename_node(graph, node_id, copy_id):
-    """ Renames `node_id` in `graph` to `copy_id`. """
+    """ Rename `node_id` in `graph` to `copy_id`. """
 
     graph._add_node_silent(copy_id)
     graph.node[copy_id] = graph.node[node_id]
@@ -70,9 +71,9 @@ def merge_hierarchical(labels, rag, thresh, rag_copy, in_place_merge,
     thresh : float
         Regions connected by an edge with weight smaller than `thresh` are
         merged.
-    rag_copy : bool, optional
+    rag_copy : bool
         If set, the RAG copied before modifying.
-    in_place_merge : bool, optional
+    in_place_merge : bool
         If set, the nodes are merged in place. Otherwise, a new node is
         created for each merge..
     merge_func : callable
