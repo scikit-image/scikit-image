@@ -50,6 +50,7 @@ def _rename_node(graph, node_id, copy_id):
 
     graph.remove_node(node_id)
 
+
 def _invalidate_edge(graph, n1, n2):
     """ Invalidates the edge (n1, n2) in the heap. """
     graph[n1][n2]['heap item'][3] = False
