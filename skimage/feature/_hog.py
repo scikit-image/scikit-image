@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import sqrt, pi, arctan2, cos, sin
 from scipy.ndimage import uniform_filter
-from skimage._shared.utils import assert_nD
+from .._shared.utils import assert_nD
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8),
@@ -137,7 +137,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     hog_image = None
 
     if visualise:
-        from skimage import draw
+        from .. import draw
 
         radius = min(cx, cy) // 2 - 1
         hog_image = np.zeros((sy, sx), dtype=float)

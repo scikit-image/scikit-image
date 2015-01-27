@@ -82,6 +82,15 @@ def test_num_peaks():
     assert (3, 5) in peaks_limited
 
 
+def test_num_peaks3D():
+    # Issue 1354: the old code only hold for 2D arrays
+    # and this code would die with IndexError
+    image = np.zeros((10, 10, 100))
+    image[5,5,::5] = np.arange(20)
+    peaks_limited = peak.peak_local_max(image, min_distance=1, num_peaks=2)
+    assert len(peaks_limited) == 2
+    
+
 def test_reorder_labels():
     image = np.random.uniform(size=(40, 60))
     i, j = np.mgrid[0:40, 0:60]

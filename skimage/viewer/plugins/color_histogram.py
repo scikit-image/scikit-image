@@ -1,10 +1,6 @@
 import numpy as np
-try:
-    import matplotlib.pyplot as plt
-except ImportError:
-    pass
-from skimage import color
-from skimage import exposure
+import matplotlib.pyplot as plt
+from ... import color, exposure
 from .plotplugin import PlotPlugin
 from ..canvastools import RectangleTool
 
@@ -95,4 +91,3 @@ def pct_total_area(image, percentile=0.80):
     idx = int((image.size - 1) * percentile)
     sorted_pixels = np.sort(image.flat)
     return sorted_pixels[idx]
-

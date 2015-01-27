@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import ndimage
-from skimage._shared.utils import assert_nD
+from .._shared.utils import assert_nD
 
 
 __all__ = ['gabor_kernel', 'gabor_filter']

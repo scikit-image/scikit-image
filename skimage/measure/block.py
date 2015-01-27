@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.util import view_as_blocks, pad
+from ..util import view_as_blocks, pad
 
 
 def block_reduce(image, block_size, func=np.sum, cval=0):

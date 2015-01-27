@@ -3,7 +3,7 @@ Methods to characterize image textures.
 """
 
 import numpy as np
-from skimage._shared.utils import assert_nD
+from .._shared.utils import assert_nD
 from ._texture import _glcm_loop, _local_binary_pattern
 
 

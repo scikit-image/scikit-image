@@ -1,10 +1,6 @@
 import numpy as np
-
-try:
-    from matplotlib import lines
-except ImportError:
-    pass
-from skimage.viewer.canvastools.base import CanvasToolBase, ToolHandles
+from matplotlib import lines
+from ...viewer.canvastools.base import CanvasToolBase, ToolHandles
 
 
 __all__ = ['LineTool', 'ThickLineTool']
@@ -203,8 +199,8 @@ class ThickLineTool(LineTool):
 
 
 if __name__ == '__main__':  # pragma: no cover
-    from skimage import data
-    from skimage.viewer import ImageViewer
+    from ... import data
+    from ...viewer import ImageViewer
 
     image = data.camera()
 

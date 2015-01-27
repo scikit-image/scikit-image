@@ -1,9 +1,9 @@
 import numpy as np
 from scipy import sqrt, pi, arctan2, cos, sin, exp
 from scipy.ndimage import gaussian_filter
-import skimage.color
-from skimage import img_as_float, draw
-from skimage._shared.utils import assert_nD
+from .. import img_as_float, draw
+from ..color import gray2rgb
+from .._shared.utils import assert_nD
 
 
 def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
@@ -177,7 +177,7 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
                 descs[:, :, i:i + orientations] /= norms[:, :, np.newaxis]
 
     if visualize:
-        descs_img = skimage.color.gray2rgb(img)
+        descs_img = gray2rgb(img)
         for i in range(descs.shape[0]):
             for j in range(descs.shape[1]):
                 # Draw center histogram sigma

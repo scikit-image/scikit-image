@@ -5,10 +5,10 @@ import numpy as np
 from scipy import ndimage
 import warnings
 
-from skimage.util import img_as_float, regular_grid
-from skimage.segmentation._slic import (_slic_cython,
-                                        _enforce_label_connectivity_cython)
-from skimage.color import rgb2lab
+from ..util import img_as_float, regular_grid
+from ..segmentation._slic import (_slic_cython,
+                                  _enforce_label_connectivity_cython)
+from ..color import rgb2lab
 
 
 def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,

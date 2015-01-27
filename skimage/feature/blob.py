@@ -5,11 +5,11 @@ import itertools as itt
 import math
 from math import sqrt, hypot, log
 from numpy import arccos
-from skimage.util import img_as_float
+from ..util import img_as_float
 from .peak import peak_local_max
 from ._hessian_det_appx import _hessian_matrix_det
-from skimage.transform import integral_image
-from skimage._shared.utils import assert_nD
+from ..transform import integral_image
+from .._shared.utils import assert_nD
 
 
 # This basic blob detection algorithm is based on:

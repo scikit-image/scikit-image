@@ -1,7 +1,7 @@
 import numpy as np
 
-from skimage.util import img_as_float
-from skimage._shared.utils import assert_nD
+from ..util import img_as_float
+from .._shared.utils import assert_nD
 
 
 class FeatureDetector(object):

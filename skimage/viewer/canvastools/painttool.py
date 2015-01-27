@@ -1,12 +1,9 @@
 import numpy as np
-try:
-    import matplotlib.pyplot as plt
-    import matplotlib.colors as mcolors
-    LABELS_CMAP = mcolors.ListedColormap(['white', 'red', 'dodgerblue', 'gold',
-                                          'greenyellow', 'blueviolet'])
-except ImportError:
-    pass
-from skimage.viewer.canvastools.base import CanvasToolBase
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+LABELS_CMAP = mcolors.ListedColormap(['white', 'red', 'dodgerblue', 'gold',
+                                      'greenyellow', 'blueviolet'])
+from ...viewer.canvastools.base import CanvasToolBase
 
 
 __all__ = ['PaintTool']
@@ -201,8 +198,8 @@ class CenteredWindow(object):
 
 if __name__ == '__main__':  # pragma: no cover
     np.testing.rundocs()
-    from skimage import data
-    from skimage.viewer import ImageViewer
+    from ... import data
+    from ...viewer import ImageViewer
 
     image = data.camera()
 

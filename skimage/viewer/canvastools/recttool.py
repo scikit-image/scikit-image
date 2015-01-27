@@ -1,10 +1,6 @@
-try:
-    from matplotlib.widgets import RectangleSelector
-except ImportError:
-    RectangleSelector = object
-
-from skimage.viewer.canvastools.base import CanvasToolBase
-from skimage.viewer.canvastools.base import ToolHandles
+from matplotlib.widgets import RectangleSelector
+from ...viewer.canvastools.base import CanvasToolBase
+from ...viewer.canvastools.base import ToolHandles
 
 
 __all__ = ['RectangleTool']
@@ -37,7 +33,7 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
     ----------
     extents : tuple
         Rectangle extents: (xmin, xmax, ymin, ymax).
-    
+
     Examples
     ----------
     >>> from skimage import data
@@ -45,12 +41,12 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
     >>> from skimage.viewer.canvastools import RectangleTool
     >>> from skimage.draw import line
     >>> from skimage.draw import set_color
- 
+
     >>> viewer = ImageViewer(data.coffee())  # doctest: +SKIP
 
     >>> def print_the_rect(extents):
     ...     global viewer
-    ...     im = viewer.image    
+    ...     im = viewer.image
     ...     coord = np.int64(extents)
     ...     [rr1, cc1] = line(coord[2],coord[0],coord[2],coord[1])
     ...     [rr2, cc2] = line(coord[2],coord[1],coord[3],coord[1])
@@ -61,11 +57,11 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
     ...     set_color(im, (rr3, cc3), [255, 0, 255])
     ...     set_color(im, (rr4, cc4), [0, 0, 0])
     ...     viewer.image=im
-    
+
     >>> rect_tool = RectangleTool(viewer.ax, on_enter=print_the_rect) # doctest: +SKIP
     >>> viewer.show() # doctest: +SKIP
     """
-    
+
     def __init__(self, viewer, on_move=None, on_release=None, on_enter=None,
                  maxdist=10, rect_props=None):
         self._rect = None
@@ -238,8 +234,8 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
 
 
 if __name__ == '__main__':  # pragma: no cover
-    from skimage.viewer import ImageViewer
-    from skimage import data
+    from ...viewer import ImageViewer
+    from ... import data
 
     viewer = ImageViewer(data.camera())
 

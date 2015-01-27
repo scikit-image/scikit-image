@@ -15,11 +15,8 @@ funcs = ('binary_erosion', 'binary_dilation', 'binary_opening',
 skimage2ndimage.update(dict((x, x) for x in funcs))
 
 
-def default_fallback(func):
-    """Decorator to fall back on ndimage for images with more than 2 dimensions
-
-    Decorator also provides a default structuring element, `selem`, with the
-    appropriate dimensionality if none is specified.
+def default_selem(func):
+    """Decorator to add a default structuring element to morphology functions.
 
     Parameters
     ----------
@@ -30,25 +27,14 @@ def default_fallback(func):
     Returns
     -------
     func_out : function
-        If the image dimensionality is greater than 2D, the ndimage
-        function is returned, otherwise skimage function is used.
+        The function, using a default structuring element of same dimension
+        as the input image with connectivity 1.
     """
     @functools.wraps(func)
-    def func_out(image, selem=None, out=None, **kwargs):
-        # Default structure element
+    def func_out(image, selem=None, *args, **kwargs):
         if selem is None:
             selem = _default_selem(image.ndim)
-
-        # If image has more than 2 dimensions, use scipy.ndimage
-        if image.ndim > 2:
-            function = getattr(nd, skimage2ndimage[func.__name__])
-            try:
-                return function(image, footprint=selem, output=out, **kwargs)
-            except TypeError:
-                # nd.binary_* take structure instead of footprint
-                return function(image, structure=selem, output=out, **kwargs)
-        else:
-            return func(image, selem=selem, out=out, **kwargs)
+        return func(image, selem=selem, *args, **kwargs)
 
     return func_out
 

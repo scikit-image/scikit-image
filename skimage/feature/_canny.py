@@ -16,8 +16,8 @@ import numpy as np
 import scipy.ndimage as ndi
 from scipy.ndimage import (gaussian_filter,
                            generate_binary_structure, binary_erosion, label)
-from skimage import dtype_limits
-from skimage._shared.utils import assert_nD
+from .. import dtype_limits
+from .._shared.utils import assert_nD
 
 
 def smooth_with_function_and_mask(image, function, mask):

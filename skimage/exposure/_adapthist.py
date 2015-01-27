@@ -14,10 +14,10 @@ responsible.  Basically, don't be a jerk, and remember that anything free
 comes with no guarantee.
 """
 import numpy as np
-import skimage
-from skimage.color.adapt_rgb import adapt_rgb, hsv_value
-from skimage.exposure import rescale_intensity
-from skimage.util import view_as_blocks, pad
+from .. import img_as_float, img_as_uint
+from ..color.adapt_rgb import adapt_rgb, hsv_value
+from ..exposure import rescale_intensity
+from ..util import view_as_blocks, pad
 
 
 MAX_REG_X = 16  # max. # contextual regions in x-direction */
@@ -74,11 +74,11 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
     .. [1] http://tog.acm.org/resources/GraphicsGems/gems.html#gemsvi
     .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
     """
-    image = skimage.img_as_uint(image)
+    image = img_as_uint(image)
     image = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
     out = _clahe(image, ntiles_x, ntiles_y, clip_limit * nbins, nbins)
     image[:out.shape[0], :out.shape[1]] = out
-    image = skimage.img_as_float(image)
+    image = img_as_float(image)
     return rescale_intensity(image)
 
 

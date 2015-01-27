@@ -60,7 +60,6 @@ import os.path as _osp
 import imp as _imp
 import functools as _functools
 import warnings as _warnings
-from skimage._shared.utils import deprecated as _deprecated
 
 pkg_dir = _osp.abspath(_osp.dirname(__file__))
 data_dir = _osp.join(pkg_dir, 'data')

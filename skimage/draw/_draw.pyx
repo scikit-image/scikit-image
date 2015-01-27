@@ -7,7 +7,7 @@ import numpy as np
 
 cimport numpy as cnp
 from libc.math cimport sqrt, sin, cos, floor, ceil
-from skimage._shared.geometry cimport point_in_polygon
+from .._shared.geometry cimport point_in_polygon
 
 
 def _coords_inside_image(rr, cc, shape, val=None):
@@ -19,8 +19,8 @@ def _coords_inside_image(rr, cc, shape, val=None):
     rr, cc : (N,) ndarray of int
         Indices of pixels.
     shape : tuple
-        Image shape which is used to determine maximum extents of output pixel
-        coordinates.
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates.
     val : ndarray of float, optional
         Values of pixels at coordinates [rr, cc].
 
@@ -223,9 +223,9 @@ def polygon(y, x, shape=None):
     x : (N,) ndarray
         X-coordinates of vertices of polygon.
     shape : tuple, optional
-        Image shape which is used to determine maximum extents of output pixel
-        coordinates. This is useful for polygons which exceed the image size.
-        By default the full extents of the polygon are used.
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates. This is useful for polygons which exceed the image
+        size. By default the full extent of the polygon are used.
 
     Returns
     -------
@@ -303,9 +303,9 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
         bresenham : Bresenham method (default)
         andres : Andres method
     shape : tuple, optional
-        Image shape which is used to determine maximum extents of output pixel
+        Image shape which is used to determine the maximum extent of output pixel
         coordinates. This is useful for circles which exceed the image size.
-        By default the full extents of the polygon are used.
+        By default the full extent of the circle are used.
 
     Returns
     -------
@@ -411,9 +411,9 @@ def circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     radius: int
         Radius of circle.
     shape : tuple, optional
-        Image shape which is used to determine maximum extents of output pixel
+        Image shape which is used to determine the maximum extent of output pixel
         coordinates. This is useful for circles which exceed the image size.
-        By default the full extents of the polygon are used.
+        By default the full extent of the circle are used.
 
     Returns
     -------
@@ -499,9 +499,9 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
     orientation : double, optional (default 0)
         Major axis orientation in clockwise direction as radians.
     shape : tuple, optional
-        Image shape which is used to determine maximum extents of output pixel
+        Image shape which is used to determine the maximum extent of output pixel
         coordinates. This is useful for ellipses which exceed the image size.
-        By default the full extents of the polygon are used.
+        By default the full extent of the ellipse are used.
 
     Returns
     -------
@@ -774,9 +774,9 @@ def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
     weight : double
         Middle control point weight, it describes the line tension.
     shape : tuple, optional
-        Image shape which is used to determine maximum extents of output pixel
-        coordinates. This is useful for curves which exceed the image size.
-        By default the full extents of the polygon are used.
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates. This is useful for curves which exceed the image
+        size. By default the full extent of the curve are used.
 
     Returns
     -------

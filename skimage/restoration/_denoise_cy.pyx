@@ -8,8 +8,8 @@ import numpy as np
 from libc.math cimport exp, fabs, sqrt
 from libc.stdlib cimport malloc, free
 from libc.float cimport DBL_MAX
-from skimage._shared.interpolation cimport get_pixel3d
-from skimage.util import img_as_float
+from .._shared.interpolation cimport get_pixel3d
+from ..util import img_as_float
 
 
 cdef inline double _gaussian_weight(double sigma, double value):

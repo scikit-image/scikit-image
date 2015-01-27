@@ -2,10 +2,10 @@ import numpy as np
 from scipy import ndimage
 from scipy import stats
 
-from skimage.util import img_as_float, pad
-from skimage.feature import peak_local_max
-from skimage.feature.util import _prepare_grayscale_input_2D
-from skimage.feature.corner_cy import _corner_fast
+from ..util import img_as_float, pad
+from ..feature import peak_local_max
+from ..feature.util import _prepare_grayscale_input_2D
+from ..feature.corner_cy import _corner_fast
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
 from .._shared.utils import safe_as_int
