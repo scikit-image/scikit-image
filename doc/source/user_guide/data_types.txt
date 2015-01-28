@@ -22,10 +22,9 @@ int32      -2\ :sup:`31` to 2\ :sup:`31` - 1
 =========  =================================
 
 Note that float images should be restricted to the range -1 to 1 even though
-the data
-type itself can exceed this range; all integer dtypes, on the other hand, have
-pixel intensities that can span the entire data type range. With a few
-exceptions, *64-bit (u)int images are not supported*.
+the data type itself can exceed this range; all integer dtypes, on the other
+hand, have pixel intensities that can span the entire data type range. With a
+few exceptions, *64-bit (u)int images are not supported*.
 
 Functions in ``skimage`` are designed so that they accept any of these dtypes,
 but, for efficiency, *may return an image of a different dtype* (see `Output
