@@ -156,4 +156,3 @@ def test_rag_hierarchical():
     g = graph.rag_mean_color(img, labels)
     result = merge_hierarchical_mean_color(labels, g, 300)
     assert len(np.unique(result)) == 1
-    io.imsave('/home/vighnesh/Desktop/test.png', img)
