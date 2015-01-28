@@ -10,6 +10,54 @@ from ..exposure import rescale_intensity
 from ._warps_cy import _warp_fast
 
 
+def _center_and_normalize_points(points):
+    """Center and normalize image points.
+
+    The points are transformed in a two-step procedure that is expressed
+    as a transformation matrix. The matrix of the resulting points is usually
+    better conditioned than the matrix of the original points.
+
+    Center the image points, such that the new coordinate system has its
+    origin at the centroid of the image points.
+
+    Normalize the image points, such that the mean distance from the points
+    to the origin of the coordinate system is sqrt(2).
+
+    Parameters
+    ----------
+    points : (N, 2) array
+        The coordinates of the image points.
+
+    Returns
+    -------
+    matrix : (3, 3) array
+        The transformation matrix to obtain the new points.
+    new_points : (N, 2) array
+        The transformed image points.
+
+    """
+
+    centroid = np.mean(points, axis=0)
+
+    rms = math.sqrt(np.sum((points - centroid) ** 2) / points.shape[0])
+
+    norm_factor = math.sqrt(2) / rms
+
+    matrix = np.array([[norm_factor, 0, -norm_factor * centroid[0]],
+                       [0, norm_factor, -norm_factor * centroid[1]],
+                       [0, 0, 1]])
+
+    pointsh = np.row_stack([points.T, np.ones((points.shape[0]),)])
+
+    new_pointsh = np.dot(matrix, pointsh).T
+
+    new_points = new_pointsh[:, :2]
+    new_points[:, 0] /= new_pointsh[:, 2]
+    new_points[:, 1] /= new_pointsh[:, 2]
+
+    return matrix, new_points
+
+
 class GeometricTransform(object):
     """Perform geometric transformations on a set of coordinates.
 
@@ -216,6 +264,14 @@ class ProjectiveTransform(GeometricTransform):
             Destination coordinates.
 
         """
+
+        try:
+            src_matrix, src = _center_and_normalize_points(src)
+            dst_matrix, dst = _center_and_normalize_points(dst)
+        except ZeroDivisionError:
+            self.params = np.nan * np.empty((3, 3))
+            return
+
         xs = src[:, 0]
         ys = src[:, 1]
         xd = dst[:, 0]
@@ -247,6 +303,9 @@ class ProjectiveTransform(GeometricTransform):
         # singular value
         H.flat[list(self._coeffs) + [8]] = - V[-1, :-1] / V[-1, -1]
         H[2, 2] = 1
+
+        # De-center and de-normalize
+        H = np.dot(np.linalg.inv(dst_matrix), np.dot(H, src_matrix))
 
         self.params = H
 
@@ -596,6 +655,14 @@ class SimilarityTransform(ProjectiveTransform):
             Destination coordinates.
 
         """
+
+        try:
+            src_matrix, src = _center_and_normalize_points(src)
+            dst_matrix, dst = _center_and_normalize_points(dst)
+        except ZeroDivisionError:
+            self.params = np.nan * np.empty((3, 3))
+            return
+
         xs = src[:, 0]
         ys = src[:, 1]
         xd = dst[:, 0]
@@ -619,9 +686,15 @@ class SimilarityTransform(ProjectiveTransform):
         # singular value
         a0, a1, b0, b1 = - V[-1, :-1] / V[-1, -1]
 
-        self.params = np.array([[a0, -b0, a1],
-                                [b0,  a0, b1],
-                                [ 0,   0,  1]])
+        S = np.array([[a0, -b0, a1],
+                      [b0,  a0, b1],
+                      [ 0,   0,  1]])
+
+        # De-center and de-normalize
+        S = np.dot(np.linalg.inv(dst_matrix), np.dot(S, src_matrix))
+
+        self.params = S
+
 
     @property
     def scale(self):

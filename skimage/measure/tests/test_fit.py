@@ -239,16 +239,12 @@ def test_ransac_dynamic_max_trials():
 
 
 def test_ransac_invalid_input():
-    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=-1,
-                                     residual_threshold=0)
     assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=2,
-                                     residual_threshold=0, max_trials=-1)
+                  residual_threshold=0, max_trials=-1)
     assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=2,
-                                     residual_threshold=0,
-                                     stop_probability=-1)
+                  residual_threshold=0, stop_probability=-1)
     assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=2,
-                                     residual_threshold=0,
-                                     stop_probability=1.01)
+                  residual_threshold=0, stop_probability=1.01)
 
 
 def test_deprecated_params_attribute():

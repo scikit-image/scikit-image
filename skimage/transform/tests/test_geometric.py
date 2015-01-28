@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import (assert_equal, assert_array_almost_equal,
+from numpy.testing import (assert_equal, assert_almost_equal,
                            assert_raises)
 from skimage.transform._geometric import _stackcopy
 from skimage.transform._geometric import GeometricTransform
@@ -38,7 +38,7 @@ def test_stackcopy():
     y = np.eye(3, 3)
     _stackcopy(x, y)
     for i in range(layers):
-        assert_array_almost_equal(x[..., i], y)
+        assert_almost_equal(x[..., i], y)
 
 
 def test_estimate_transform():
@@ -56,20 +56,20 @@ def test_matrix_transform():
 def test_similarity_estimation():
     # exact solution
     tform = estimate_transform('similarity', SRC[:2, :], DST[:2, :])
-    assert_array_almost_equal(tform(SRC[:2, :]), DST[:2, :])
+    assert_almost_equal(tform(SRC[:2, :]), DST[:2, :])
     assert_equal(tform.params[0, 0], tform.params[1, 1])
     assert_equal(tform.params[0, 1], - tform.params[1, 0])
 
     # over-determined
     tform2 = estimate_transform('similarity', SRC, DST)
-    assert_array_almost_equal(tform2.inverse(tform2(SRC)), SRC)
+    assert_almost_equal(tform2.inverse(tform2(SRC)), SRC)
     assert_equal(tform2.params[0, 0], tform2.params[1, 1])
     assert_equal(tform2.params[0, 1], - tform2.params[1, 0])
 
     # via estimate method
     tform3 = SimilarityTransform()
     tform3.estimate(SRC, DST)
-    assert_array_almost_equal(tform3.params, tform2.params)
+    assert_almost_equal(tform3.params, tform2.params)
 
 
 def test_similarity_init():
@@ -79,15 +79,15 @@ def test_similarity_init():
     translation = (1, 1)
     tform = SimilarityTransform(scale=scale, rotation=rotation,
                                 translation=translation)
-    assert_array_almost_equal(tform.scale, scale)
-    assert_array_almost_equal(tform.rotation, rotation)
-    assert_array_almost_equal(tform.translation, translation)
+    assert_almost_equal(tform.scale, scale)
+    assert_almost_equal(tform.rotation, rotation)
+    assert_almost_equal(tform.translation, translation)
 
     # init with transformation matrix
     tform2 = SimilarityTransform(tform.params)
-    assert_array_almost_equal(tform2.scale, scale)
-    assert_array_almost_equal(tform2.rotation, rotation)
-    assert_array_almost_equal(tform2.translation, translation)
+    assert_almost_equal(tform2.scale, scale)
+    assert_almost_equal(tform2.rotation, rotation)
+    assert_almost_equal(tform2.translation, translation)
 
     # test special case for scale if rotation=0
     scale = 0.1
@@ -95,9 +95,9 @@ def test_similarity_init():
     translation = (1, 1)
     tform = SimilarityTransform(scale=scale, rotation=rotation,
                                 translation=translation)
-    assert_array_almost_equal(tform.scale, scale)
-    assert_array_almost_equal(tform.rotation, rotation)
-    assert_array_almost_equal(tform.translation, translation)
+    assert_almost_equal(tform.scale, scale)
+    assert_almost_equal(tform.rotation, rotation)
+    assert_almost_equal(tform.translation, translation)
 
 
     # test special case for scale if rotation=90deg
@@ -106,24 +106,24 @@ def test_similarity_init():
     translation = (1, 1)
     tform = SimilarityTransform(scale=scale, rotation=rotation,
                                 translation=translation)
-    assert_array_almost_equal(tform.scale, scale)
-    assert_array_almost_equal(tform.rotation, rotation)
-    assert_array_almost_equal(tform.translation, translation)
+    assert_almost_equal(tform.scale, scale)
+    assert_almost_equal(tform.rotation, rotation)
+    assert_almost_equal(tform.translation, translation)
 
 
 def test_affine_estimation():
     # exact solution
     tform = estimate_transform('affine', SRC[:3, :], DST[:3, :])
-    assert_array_almost_equal(tform(SRC[:3, :]), DST[:3, :])
+    assert_almost_equal(tform(SRC[:3, :]), DST[:3, :])
 
     # over-determined
     tform2 = estimate_transform('affine', SRC, DST)
-    assert_array_almost_equal(tform2.inverse(tform2(SRC)), SRC)
+    assert_almost_equal(tform2.inverse(tform2(SRC)), SRC)
 
     # via estimate method
     tform3 = AffineTransform()
     tform3.estimate(SRC, DST)
-    assert_array_almost_equal(tform3.params, tform2.params)
+    assert_almost_equal(tform3.params, tform2.params)
 
 
 def test_affine_init():
@@ -134,71 +134,71 @@ def test_affine_init():
     translation = (1, 1)
     tform = AffineTransform(scale=scale, rotation=rotation, shear=shear,
                             translation=translation)
-    assert_array_almost_equal(tform.scale, scale)
-    assert_array_almost_equal(tform.rotation, rotation)
-    assert_array_almost_equal(tform.shear, shear)
-    assert_array_almost_equal(tform.translation, translation)
+    assert_almost_equal(tform.scale, scale)
+    assert_almost_equal(tform.rotation, rotation)
+    assert_almost_equal(tform.shear, shear)
+    assert_almost_equal(tform.translation, translation)
 
     # init with transformation matrix
     tform2 = AffineTransform(tform.params)
-    assert_array_almost_equal(tform2.scale, scale)
-    assert_array_almost_equal(tform2.rotation, rotation)
-    assert_array_almost_equal(tform2.shear, shear)
-    assert_array_almost_equal(tform2.translation, translation)
+    assert_almost_equal(tform2.scale, scale)
+    assert_almost_equal(tform2.rotation, rotation)
+    assert_almost_equal(tform2.shear, shear)
+    assert_almost_equal(tform2.translation, translation)
 
 
 def test_piecewise_affine():
     tform = PiecewiseAffineTransform()
     tform.estimate(SRC, DST)
     # make sure each single affine transform is exactly estimated
-    assert_array_almost_equal(tform(SRC), DST)
-    assert_array_almost_equal(tform.inverse(DST), SRC)
+    assert_almost_equal(tform(SRC), DST)
+    assert_almost_equal(tform.inverse(DST), SRC)
 
 
 def test_projective_estimation():
     # exact solution
     tform = estimate_transform('projective', SRC[:4, :], DST[:4, :])
-    assert_array_almost_equal(tform(SRC[:4, :]), DST[:4, :])
+    assert_almost_equal(tform(SRC[:4, :]), DST[:4, :])
 
     # over-determined
     tform2 = estimate_transform('projective', SRC, DST)
-    assert_array_almost_equal(tform2.inverse(tform2(SRC)), SRC)
+    assert_almost_equal(tform2.inverse(tform2(SRC)), SRC)
 
     # via estimate method
     tform3 = ProjectiveTransform()
     tform3.estimate(SRC, DST)
-    assert_array_almost_equal(tform3.params, tform2.params)
+    assert_almost_equal(tform3.params, tform2.params)
 
 
 def test_projective_init():
     tform = estimate_transform('projective', SRC, DST)
     # init with transformation matrix
     tform2 = ProjectiveTransform(tform.params)
-    assert_array_almost_equal(tform2.params, tform.params)
+    assert_almost_equal(tform2.params, tform.params)
 
 
 def test_polynomial_estimation():
     # over-determined
     tform = estimate_transform('polynomial', SRC, DST, order=10)
-    assert_array_almost_equal(tform(SRC), DST, 6)
+    assert_almost_equal(tform(SRC), DST, 6)
 
     # via estimate method
     tform2 = PolynomialTransform()
     tform2.estimate(SRC, DST, order=10)
-    assert_array_almost_equal(tform2.params, tform.params)
+    assert_almost_equal(tform2.params, tform.params)
 
 
 def test_polynomial_init():
     tform = estimate_transform('polynomial', SRC, DST, order=10)
     # init with transformation parameters
     tform2 = PolynomialTransform(tform.params)
-    assert_array_almost_equal(tform2.params, tform.params)
+    assert_almost_equal(tform2.params, tform.params)
 
 
 def test_polynomial_default_order():
     tform = estimate_transform('polynomial', SRC, DST)
     tform2 = estimate_transform('polynomial', SRC, DST, order=2)
-    assert_array_almost_equal(tform2.params, tform.params)
+    assert_almost_equal(tform2.params, tform.params)
 
 
 def test_polynomial_inverse():
@@ -210,17 +210,17 @@ def test_union():
     tform2 = SimilarityTransform(scale=0.1, rotation=0.9)
     tform3 = SimilarityTransform(scale=0.1 ** 2, rotation=0.3 + 0.9)
     tform = tform1 + tform2
-    assert_array_almost_equal(tform.params, tform3.params)
+    assert_almost_equal(tform.params, tform3.params)
 
     tform1 = AffineTransform(scale=(0.1, 0.1), rotation=0.3)
     tform2 = SimilarityTransform(scale=0.1, rotation=0.9)
     tform3 = SimilarityTransform(scale=0.1 ** 2, rotation=0.3 + 0.9)
     tform = tform1 + tform2
-    assert_array_almost_equal(tform.params, tform3.params)
+    assert_almost_equal(tform.params, tform3.params)
     assert tform.__class__ == ProjectiveTransform
 
     tform = AffineTransform(scale=(0.1, 0.1), rotation=0.3)
-    assert_array_almost_equal((tform + tform.inverse).params, np.eye(3))
+    assert_almost_equal((tform + tform.inverse).params, np.eye(3))
 
 
 def test_union_differing_types():
@@ -258,6 +258,22 @@ def test_deprecated_params_attributes():
     tform = estimate_transform('polynomial', SRC, DST, order=3)
     with expected_warnings(['`_params`.*deprecated']):
         assert_equal(tform._params, tform.params)
+
+
+def test_degenerate():
+    src = dst = np.zeros((10, 2))
+
+    tform = SimilarityTransform()
+    tform.estimate(src, dst)
+    assert np.all(np.isnan(tform.params))
+
+    tform = AffineTransform()
+    tform.estimate(src, dst)
+    assert np.all(np.isnan(tform.params))
+
+    tform = ProjectiveTransform()
+    tform.estimate(src, dst)
+    assert np.all(np.isnan(tform.params))
 
 
 if __name__ == "__main__":
