@@ -146,17 +146,15 @@ def test_rag_hierarchical():
 
     g = graph.rag_mean_color(img, labels)
     g2 = g.copy()
-    thresh = 20  # more than 11*sqrt(3)
+    thresh = 20  # more than 11*sqrt(3) but less than
 
     result = merge_hierarchical_mean_color(labels, g, thresh)
-    assert(np.all(result[0:4, 0:4] == result[0, 0]))
-    assert(np.all(result[4:, 0:4] == result[4, 0]))
+    assert(np.all(result[:, :4] == result[0, 0]))
     assert(np.all(result[:, 4:] == result[-1, -1]))
 
     result = merge_hierarchical_mean_color(labels, g2, thresh,
                                            in_place_merge=True)
-    assert(np.all(result[0:4, 0:4] == result[0, 0]))
-    assert(np.all(result[4:, 0:4] == result[4, 0]))
+    assert(np.all(result[:, :4] == result[0, 0]))
     assert(np.all(result[:, 4:] == result[-1, -1]))
 
     result = graph.cut_threshold(labels, g, thresh)
