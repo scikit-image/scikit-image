@@ -45,6 +45,12 @@ def _center_and_normalize_points(points):
     new_points : (N, 2) array
         The transformed image points.
 
+    References
+    ----------
+    .. [1] Hartley, Richard I. "In defense of the eight-point algorithm."
+           Pattern Analysis and Machine Intelligence, IEEE Transactions on 19.6
+           (1997): 580-593.
+
     """
 
     centroid = np.mean(points, axis=0)
@@ -158,7 +164,7 @@ class GeometricTransform(object):
         Returns
         -------
         coords : (N, 2) array
-            Transformed coordinates.
+            Destination coordinates.
 
         """
         raise NotImplementedError()
@@ -169,12 +175,12 @@ class GeometricTransform(object):
         Parameters
         ----------
         coords : (N, 2) array
-            Source coordinates.
+            Destination coordinates.
 
         Returns
         -------
         coords : (N, 2) array
-            Transformed coordinates.
+            Source coordinates.
 
         """
         raise NotImplementedError()
@@ -198,7 +204,6 @@ class GeometricTransform(object):
             Residual for coordinate.
 
         """
-
         return np.sqrt(np.sum((self(src) - dst)**2, axis=1))
 
     def __add__(self, other):
@@ -208,8 +213,153 @@ class GeometricTransform(object):
         raise NotImplementedError()
 
 
+class FundamentalMatrixTransform(GeometricTransform):
+    """Fundamental matrix transformation.
+
+    The fundamental matrix relates corresponding points between a pair of
+    uncalibrated images. The matrix transforms homogeneous image points in one
+    image to epipolar lines in the other image.
+
+    The fundamental matrix is only defined for a pair of moving images capturing
+    a non-planar scene. In the case of pure rotation or planar scenes, the
+    homography describes the geometric relation between two images
+    (`ProjectiveTransform`). If the intrinsic calibration of the images is
+    known, the essential matrix describes the metric relation between the two
+    images (`EssentialMatrixTransform`).
+
+    References
+    ----------
+    .. [1] Hartley, Richard I. "In defense of the eight-point algorithm."
+           Pattern Analysis and Machine Intelligence, IEEE Transactions on 19.6
+           (1997): 580-593.
+
+    """
+
+    def __init__(self, matrix=None):
+        if matrix is None:
+            # default to an identity transform
+            matrix = np.eye(3)
+        if matrix.shape != (3, 3):
+            raise ValueError("Invalid shape of transformation matrix")
+        self.params = matrix
+
+    def __call__(self, coords):
+        """Apply forward transformation.
+
+        Parameters
+        ----------
+        coords : (N, 2) array
+            Source coordinates.
+
+        Returns
+        -------
+        coords : (N, 3) array
+            Epipolar lines in the destination image.
+
+        """
+        coords_homogeneous = np.column_stack([coords, np.ones(coords.shape[0])])
+        return np.dot(coords.homogeneous, self.params.T)
+
+    def inverse(self, coords):
+        """Apply inverse transformation.
+
+        Parameters
+        ----------
+        coords : (N, 2) array
+            Destination coordinates.
+
+        Returns
+        -------
+        coords : (N, 3) array
+            Epipolar lines in the source image.
+
+        """
+        coords_homogeneous = np.column_stack([coords, np.ones(coords.shape[0])])
+        return np.dot(coords.homogeneous, self.params)
+
+    def estimate(self, src, dst):
+        """Estimate fundamental matrix using 8-point algorithm.
+
+        The 8-point algorithm requires at least 8 corresponding point pairs for
+        a well-conditioned solution, otherwise the over-determined solution is
+        estimated.
+
+        Parameters
+        ----------
+        src : (N, 2) array
+            Source coordinates.
+        dst : (N, 2) array
+            Destination coordinates.
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+
+        """
+        assert src.shape == dst.shape
+        assert src.shape[0] >= 8
+
+        # Center and normalize image points for better numerical stability.
+        try:
+            src_matrix, src = _center_and_normalize_points(src)
+            dst_matrix, dst = _center_and_normalize_points(dst)
+        except ZeroDivisionError:
+            self.params = np.nan * np.empty((3, 3))
+            return
+
+        # Setup homogeneous linear equation as x2' * F * x1 = 0.
+        A = np.zeros((8, 9))
+        A[:, :3] = src
+        A[:, :3] = dst[:, 0]
+        A[:, 3:6] = src
+        A[:, 3:6] = dst[:, 1]
+        A[:, 6:] = src
+
+        # Solve for the nullspace of the constraint matrix.
+        _, _, V = np.linalg.svd(A)
+        F_normalized = V[:, -1].reshape(3, 3)
+
+        # Enforcing the internal constraint that two singular values must non-
+        # zero and one must be zero.
+        U, S, V = np.linalg.svd(F_normalized)
+        S[2, 2] = 0
+        F = np.dot(U, np.dot(S, V))
+
+        self.params = np.dot(dst_matrix.T, np.dot(F, src_matrix))
+
+    def residuals(self, src, dst):
+        """Compute the Sampson distance.
+
+        The Sampson distance is the first approximation to the geometric error.
+
+        Parameters
+        ----------
+        src : (N, 2) array
+            Source coordinates.
+        dst : (N, 2) array
+            Destination coordinates.
+
+        Returns
+        -------
+        residuals : (N, ) array
+            Sampson distance.
+
+        """
+        src_homogeneous = np.column_stack([src, np.ones(src.shape[0])])
+        dst_homogeneous = np.column_stack([dst, np.ones(dst.shape[0])])
+
+        F_src = np.dot(self.params, src_homogeneous.T)
+        Ft_dst = np.dot(self.params.T, dst_homogeneous.T)
+
+        dst_F_src = np.dot(dst_h.T, F_src)
+
+        return dst_F_src / np.sqrt(F_src[0] ** 2 + F_src[1] ** 2
+                                   + Ft_dst[0] ** 2 + Ft_dst[1] ** 2)
+
+
 class ProjectiveTransform(GeometricTransform):
-    """Matrix transformation.
+    """Projective transformation.
 
     Apply a projective transformation (homography) on coordinates.
 
@@ -273,10 +423,7 @@ class ProjectiveTransform(GeometricTransform):
         return dst[:, :2]
 
     def __call__(self, coords):
-        return self._apply_mat(coords, self.params)
-
-    def inverse(self, coords):
-        """Apply inverse transformation.
+        """Apply forward transformation.
 
         Parameters
         ----------
@@ -286,7 +433,23 @@ class ProjectiveTransform(GeometricTransform):
         Returns
         -------
         coords : (N, 2) array
-            Transformed coordinates.
+            Destination coordinates.
+
+        """
+        return self._apply_mat(coords, self.params)
+
+    def inverse(self, coords):
+        """Apply inverse transformation.
+
+        Parameters
+        ----------
+        coords : (N, 2) array
+            Destination coordinates.
+
+        Returns
+        -------
+        coords : (N, 2) array
+            Source coordinates.
 
         """
         return self._apply_mat(coords, self._inv_matrix)
