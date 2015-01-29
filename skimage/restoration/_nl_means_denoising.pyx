@@ -6,6 +6,7 @@ from libc.math cimport exp
 
 ctypedef np.float32_t DTYPE_t
 
+cdef float DISTANCE_CUTOFF = 5.
 
 @cython.boundscheck(False)
 cdef inline float patch_distance_2d(DTYPE_t [:, :] p1,
@@ -46,7 +47,7 @@ cdef inline float patch_distance_2d(DTYPE_t [:, :] p1,
     cdef float distance = 0
     for i in range(s):
         # exp of large negative numbers will be 0, so we'd better stop
-        if distance > 5:
+        if distance > DISTANCE_CUTOFF:
             return 0.
         for j in range(s):
             tmp_diff = p1[i, j] - p2[i, j]
@@ -91,7 +92,7 @@ cdef inline float patch_distance_2drgb(DTYPE_t [:, :, :] p1,
     cdef float distance = 0
     for i in range(s):
         # exp of large negative numbers will be 0, so we'd better stop
-        if distance > 5:
+        if distance > DISTANCE_CUTOFF:
             return 0.
         for j in range(s):
             for color in range(3):
@@ -135,7 +136,7 @@ cdef inline float patch_distance_3d(DTYPE_t [:, :, :] p1,
     cdef float tmp_diff
     for i in range(s):
         # exp of large negative numbers will be 0, so we'd better stop
-        if distance > 5:
+        if distance > DISTANCE_CUTOFF:
             return 0.
         for j in range(s):
             for k in range(s):
@@ -431,7 +432,7 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
                     distance = _integral_to_distance_2d(integral, x_row, x_col,
                                                      offset, h2s2)
                     # exp of large negative numbers is close to zero
-                    if distance > 5:
+                    if distance > DISTANCE_CUTOFF:
                         continue
                     weight = alpha * exp(- distance)
                     weights[x_row, x_col] += weight
@@ -543,7 +544,7 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
                                         x_pln, x_row, x_col, offset,
                                         s_cube_h_square)
                             # exp of large negative numbers is close to zero
-                            if distance > 5.:
+                            if distance > DISTANCE_CUTOFF:
                                 continue
                             weight = alpha * exp(- distance)
                             weights[x_pln, x_row, x_col] += weight
