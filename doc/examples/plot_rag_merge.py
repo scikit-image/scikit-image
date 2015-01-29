@@ -61,8 +61,10 @@ img = data.coffee()
 labels = segmentation.slic(img, compactness=30, n_segments=400)
 g = graph.rag_mean_color(img, labels)
 
-labels2 = graph.merge_hierarchical(labels, g, 40, False, True,
-                                   merge_mean_color, _weight_mean_color)
+labels2 = graph.merge_hierarchical(labels, g, thresh=40, rag_copy=False,
+                                   in_place_merge=True,
+                                   merge_func=merge_mean_color,
+                                   weight_func=_weight_mean_color)
 
 g2 = graph.rag_mean_color(img, labels2)
 

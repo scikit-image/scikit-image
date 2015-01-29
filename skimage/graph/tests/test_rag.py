@@ -135,7 +135,7 @@ def test_rag_hierarchical():
     img = np.zeros((8, 8, 3), dtype='uint8')
     labels = np.zeros((8, 8), dtype='uint8')
 
-    img[:, :, :] = 30
+    img[:, :, :] = 31
     labels[:, :] = 1
 
     img[0:4, 0:4, :] = 10, 10, 10
@@ -146,14 +146,18 @@ def test_rag_hierarchical():
 
     g = graph.rag_mean_color(img, labels)
     g2 = g.copy()
-    thresh = 17.3206  # just above 10*sqrt(3)
+    thresh = 20  # more than 11*sqrt(3)
 
     result = merge_hierarchical_mean_color(labels, g, thresh)
-    assert len(np.unique(result)) == 2
+    assert(np.all(result[0:4, 0:4] == result[0, 0]))
+    assert(np.all(result[4:, 0:4] == result[4, 0]))
+    assert(np.all(result[:, 4:] == result[-1, -1]))
 
     result = merge_hierarchical_mean_color(labels, g2, thresh,
                                            in_place_merge=True)
-    assert len(np.unique(result)) == 2
+    assert(np.all(result[0:4, 0:4] == result[0, 0]))
+    assert(np.all(result[4:, 0:4] == result[4, 0]))
+    assert(np.all(result[:, 4:] == result[-1, -1]))
 
     result = graph.cut_threshold(labels, g, thresh)
-    assert len(np.unique(result)) == 1
+    assert np.all(result == result[0, 0])
