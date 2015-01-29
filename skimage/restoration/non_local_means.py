@@ -12,14 +12,14 @@ def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
     Parameters
     ----------
     image : 2D or 3D ndarray
-        input image to be denoised, which can be 2D or 3D, and grayscale
+        Input image to be denoised, which can be 2D or 3D, and grayscale
         or RGB (for 2D images only, see ``multichannel`` parameter).
     patch_size : int, optional
-        size of patches used for denoising
+        Size of patches used for denoising.
     patch_distance : int, optional
-        maximal distance in pixels where to search patches used for denoising
+        Maximal distance in pixels where to search patches used for denoising.
     h : float, optional
-        cut-off distance (in gray levels). The higher h, the more permissive
+        Cut-off distance (in gray levels). The higher h, the more permissive
         one is in accepting patches. A higher h results in a smoother image,
         at the expense of blurring features. For a Gaussian noise of standard
         deviation sigma, a rule of thumb is to choose the value of h to be
@@ -28,7 +28,7 @@ def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension. Set to ``False`` for 3-D images.
     fast_mode : bool, optional
-        if True (default value), a fast version of the non-local means
+        If True (default value), a fast version of the non-local means
         algorithm is used. If False, the original version of non-local means is
         used. See the Notes section for more details about the algorithms.
 
@@ -36,7 +36,7 @@ def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
     -------
 
     result : ndarray
-        denoised image, of same shape as `image`.
+        Denoised image, of same shape as `image`.
 
     See Also
     --------

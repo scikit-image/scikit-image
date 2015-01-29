@@ -18,13 +18,13 @@ cdef inline float patch_distance_2d(DTYPE_t [:, :] p1,
     Parameters
     ----------
     p1 : 2-D array_like
-        first patch
+        First patch.
     p2 : 2-D array_like
-        first patch
+        Second patch.
     w : 2-D array_like
-        array of weigths for the different pixels of the patches
+        Array of weigths for the different pixels of the patches.
     s : int
-        linear size of the patches
+        Linear size of the patches.
 
     Returns
     -------
@@ -35,7 +35,7 @@ cdef inline float patch_distance_2d(DTYPE_t [:, :] p1,
     -----
     The returned distance is given by
 
-        exp( -w * (p1 - p2)**2)
+    .. math::  \exp( -w (p1 - p2)^2)
     """
     cdef int i, j
     cdef int center = s / 2
@@ -52,7 +52,7 @@ cdef inline float patch_distance_2d(DTYPE_t [:, :] p1,
         for j in range(s):
             tmp_diff = p1[i, j] - p2[i, j]
             distance += (w[i, j] * tmp_diff * tmp_diff)
-    distance = exp(- distance)
+    distance = exp(-distance)
     return distance
 
 
@@ -66,13 +66,13 @@ cdef inline float patch_distance_2drgb(DTYPE_t [:, :, :] p1,
     Parameters
     ----------
     p1 : 3-D array_like
-        first patch, 2D image with last dimension corresponding to channels
+        First patch, 2D image with last dimension corresponding to channels.
     p2 : 3-D array_like
-        first patch, 2D image with last dimension corresponding to channels
+        Second patch, 2D image with last dimension corresponding to channels.
     w : 2-D array_like
-        array of weigths for the different pixels of the patches
+        Array of weights for the different pixels of the patches.
     s : int
-        linear size of the patches
+        Linear size of the patches.
 
     Returns
     -------
@@ -83,7 +83,7 @@ cdef inline float patch_distance_2drgb(DTYPE_t [:, :, :] p1,
     -----
     The returned distance is given by
 
-        exp( -w * (p1 - p2)**2)
+    .. math::  \exp( -w (p1 - p2)^2)
     """
     cdef int i, j
     cdef int center = s / 2
@@ -98,7 +98,7 @@ cdef inline float patch_distance_2drgb(DTYPE_t [:, :, :] p1,
             for color in range(3):
                 tmp_diff = p1[i, j, color] - p2[i, j, color]
                 distance += w[i, j] * tmp_diff * tmp_diff
-    distance = exp(- distance)
+    distance = exp(-distance)
     return distance
 
 
@@ -112,13 +112,13 @@ cdef inline float patch_distance_3d(DTYPE_t [:, :, :] p1,
     Parameters
     ----------
     p1 : 3-D array_like
-        first patch
+        First patch.
     p2 : 3-D array_like
-        first patch
+        Second patch.
     w : 3-D array_like
-        array of weigths for the different pixels of the patches
+        Array of weights for the different pixels of the patches.
     s : int
-        linear size of the patches
+        Linear size of the patches.
 
     Returns
     -------
@@ -129,7 +129,7 @@ cdef inline float patch_distance_3d(DTYPE_t [:, :, :] p1,
     -----
     The returned distance is given by
 
-        exp( -w * (p1 - p2)**2)
+    .. math::  \exp( -w (p1 - p2)^2)
     """
     cdef int i, j, k
     cdef float distance = 0
@@ -142,7 +142,7 @@ cdef inline float patch_distance_3d(DTYPE_t [:, :, :] p1,
             for k in range(s):
                 tmp_diff = p1[i, j, k] - p2[i, j, k]
                 distance += w[i, j, k] * tmp_diff * tmp_diff
-    distance = exp(- distance)
+    distance = exp(-distance)
     return distance
 
 
@@ -154,15 +154,20 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
 
     Parameters
     ----------
-    image: ndarray
-        input RGB image to be denoised
-    s: int, optional
-        size of patches used for denoising
-    d: int, optional
-        maximal distance in pixels where to search patches used for denoising
-    h: float, optional
-        cut-off distance (in gray levels). The higher h, the more permissive
+    image : ndarray
+        Input RGB image to be denoised
+    s : int, optional
+        Size of patches used for denoising
+    d : int, optional
+        Maximal distance in pixels where to search patches used for denoising
+    h : float, optional
+        Cut-off distance (in gray levels). The higher h, the more permissive
         one is in accepting patches.
+
+    Returns
+    -------
+    result : ndarray
+        Denoised image, of same shape as input image.
     """
     if s % 2 == 0:
         s += 1  # odd value for symmetric patch
@@ -182,8 +187,8 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     cdef float weight_sum, weight
     xg_row, xg_col = np.mgrid[-offset:offset + 1, -offset:offset + 1]
     cdef DTYPE_t [:, ::1] w = np.ascontiguousarray(np.exp(
-                            - (xg_row ** 2 + xg_col ** 2) / (2 * A ** 2)).
-                            astype(np.float32))
+                             -(xg_row ** 2 + xg_col ** 2) / (2 * A ** 2)).
+                             astype(np.float32))
     cdef float distance
     w = 1. / (n_ch * np.sum(w) * h ** 2) * w
     # Coordinates of central pixel and patch bounds
@@ -237,14 +242,19 @@ def _nl_means_denoising_3d(image, int s=7,
 
     Parameters
     ----------
-    image: ndarray
-        input data to be denoised
-    s: int, optional
-        size of patches used for denoising
-    d: int, optional
-        maximal distance in pixels where to search patches used for denoising
-    h: float, optional
-        cut-off distance (in gray levels)
+    image : ndarray
+        Input data to be denoised.
+    s : int, optional
+        Size of patches used for denoising.
+    d : int, optional
+        Maximal distance in pixels where to search patches used for denoising.
+    h : float, optional
+        Cut-off distance (in gray levels).
+
+    Returns
+    -------
+    result : ndarray
+        Denoised image, of same shape as input image.
     """
     if s % 2 == 0:
         s += 1  # odd value for symmetric patch
@@ -263,7 +273,7 @@ def _nl_means_denoising_3d(image, int s=7,
                                       -offset: offset + 1,
                                       -offset: offset + 1]
     cdef DTYPE_t [:, :, ::1] w = np.ascontiguousarray(np.exp(
-                            - (xg_pln ** 2 + xg_row ** 2 + xg_col ** 2) /
+                            -(xg_pln ** 2 + xg_row ** 2 + xg_col ** 2) /
                             (2 * A ** 2)).astype(np.float32))
     cdef float distance
     cdef int x_pln, x_row, x_col, i, j, k
@@ -318,7 +328,8 @@ def _nl_means_denoising_3d(image, int s=7,
 cdef inline float _integral_to_distance_2d(DTYPE_t [:, ::] integral,
                         int x_row, int x_col, int offset, float h2s2):
     """
-    See
+    References
+    ----------
     Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
     Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
 
@@ -338,7 +349,8 @@ cdef inline float _integral_to_distance_3d(DTYPE_t [:, :, ::] integral,
                     int x_pln, int x_row, int x_col, int offset,
                     float s_cube_h_square):
     """
-    See
+    References
+    ----------
     Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
     Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
 
@@ -367,15 +379,20 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
 
     Parameters
     ----------
-    image: ndarray
-        2-D input data to be denoised, grayscale or RGB
-    s: int, optional
-        size of patches used for denoising
-    d: int, optional
-        maximal distance in pixels where to search patches used for denoising
-    h: float, optional
-        cut-off distance (in gray levels). The higher h, the more permissive
+    image : ndarray
+        2-D input data to be denoised, grayscale or RGB.
+    s : int, optional
+        Size of patches used for denoising.
+    d : int, optional
+        Maximal distance in pixels where to search patches used for denoising.
+    h : float, optional
+        Cut-off distance (in gray levels). The higher h, the more permissive
         one is in accepting patches.
+
+    Returns
+    -------
+    result : ndarray
+        Denoised image, of same shape as input image.
     """
     if s % 2 == 0:
         s += 1  # odd value for symmetric patch
@@ -434,7 +451,7 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
                     # exp of large negative numbers is close to zero
                     if distance > DISTANCE_CUTOFF:
                         continue
-                    weight = alpha * exp(- distance)
+                    weight = alpha * exp(-distance)
                     weights[x_row, x_col] += weight
                     weights[x_row + t_row, x_col + t_col] += weight
                     for ch in range(n_ch):
@@ -461,15 +478,20 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
 
     Parameters
     ----------
-    image: ndarray
-        3-D input data to be denoised
-    s: int, optional
-        size of patches used for denoising
-    d: int, optional
-        maximal distance in pixels where to search patches used for denoising
-    h: float, optional
+    image : ndarray
+        3-D input data to be denoised.
+    s : int, optional
+        Size of patches used for denoising.
+    d : int, optional
+        Maximal distance in pixels where to search patches used for denoising.
+    h : float, optional
         cut-off distance (in gray levels). The higher h, the more permissive
         one is in accepting patches.
+
+    Returns
+    -------
+    result : ndarray
+        Denoised image, of same shape as input image.
     """
     if s % 2 == 0:
         s += 1  # odd value for symmetric patch
@@ -546,7 +568,7 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
                             # exp of large negative numbers is close to zero
                             if distance > DISTANCE_CUTOFF:
                                 continue
-                            weight = alpha * exp(- distance)
+                            weight = alpha * exp(-distance)
                             weights[x_pln, x_row, x_col] += weight
                             weights[x_pln + t_pln, x_row + t_row,
                                                    x_col + t_col] += weight
