@@ -164,6 +164,14 @@ class RAG(nx.Graph):
         """
         return self.max_id + 1
 
+    def _add_node_silent(self, n):
+        """Add node `n` without updating the maximum node id.
+
+        This is a convenience method used internally.
+
+        .. seealso:: :func:`networkx.Graph.add_node`."""
+        super(RAG, self).add_node(n)
+
 
 def _add_edge_filter(values, graph):
     """Create edge in `g` between the first element of `values` and the rest.

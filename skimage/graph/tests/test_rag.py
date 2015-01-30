@@ -108,3 +108,54 @@ def test_rag_error():
     labels[5:, :] = 1
     testing.assert_raises(ValueError, graph.rag_mean_color, img, labels,
                           2, 'non existant mode')
+
+
+def _weight_mean_color(graph, src, dst, n):
+    diff = graph.node[dst]['mean color'] - graph.node[n]['mean color']
+    diff = np.linalg.norm(diff)
+    return diff
+
+
+def _pre_merge_mean_color(graph, src, dst):
+    graph.node[dst]['total color'] += graph.node[src]['total color']
+    graph.node[dst]['pixel count'] += graph.node[src]['pixel count']
+    graph.node[dst]['mean color'] = (graph.node[dst]['total color'] /
+                                     graph.node[dst]['pixel count'])
+
+
+def merge_hierarchical_mean_color(labels, rag, thresh, rag_copy=True,
+                                  in_place_merge=False):
+    return graph.merge_hierarchical(labels, rag, thresh, rag_copy,
+                                    in_place_merge, _pre_merge_mean_color,
+                                    _weight_mean_color)
+
+
+@skipif(not is_installed('networkx'))
+def test_rag_hierarchical():
+    img = np.zeros((8, 8, 3), dtype='uint8')
+    labels = np.zeros((8, 8), dtype='uint8')
+
+    img[:, :, :] = 31
+    labels[:, :] = 1
+
+    img[0:4, 0:4, :] = 10, 10, 10
+    labels[0:4, 0:4] = 2
+
+    img[4:, 0:4, :] = 20, 20, 20
+    labels[4:, 0:4] = 3
+
+    g = graph.rag_mean_color(img, labels)
+    g2 = g.copy()
+    thresh = 20  # more than 11*sqrt(3) but less than
+
+    result = merge_hierarchical_mean_color(labels, g, thresh)
+    assert(np.all(result[:, :4] == result[0, 0]))
+    assert(np.all(result[:, 4:] == result[-1, -1]))
+
+    result = merge_hierarchical_mean_color(labels, g2, thresh,
+                                           in_place_merge=True)
+    assert(np.all(result[:, :4] == result[0, 0]))
+    assert(np.all(result[:, 4:] == result[-1, -1]))
+
+    result = graph.cut_threshold(labels, g, thresh)
+    assert np.all(result == result[0, 0])
