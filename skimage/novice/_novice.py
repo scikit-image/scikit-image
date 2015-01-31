@@ -281,6 +281,7 @@ class Picture(object):
         if isinstance(color, six.string_types):
             color = color_dict[color]
         rgb_size = tuple(size) + (len(color),)
+        color = np.array(color, dtype=np.uint8)
         array = np.ones(rgb_size, dtype=np.uint8) * color
 
         # Force RGBA internally (use max alpha)
