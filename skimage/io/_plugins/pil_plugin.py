@@ -73,7 +73,7 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
 
         frame = im
 
-        if not img_num is None and img_num != i:
+        if img_num is not None and img_num != i:
             im.getdata()[0]
             i += 1
             continue
@@ -90,9 +90,8 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
         elif im.mode == '1':
             frame = im.convert('L')
 
-        elif 'A' in im.mode:
+        elif 'A' in im.mode or im.mode == 'CMYK':
             frame = im.convert('RGBA')
-
 
         if im.mode.startswith('I;16'):
             shape = im.size
