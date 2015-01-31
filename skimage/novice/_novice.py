@@ -282,6 +282,7 @@ class Picture(object):
             color = color_dict[color]
         rgb_size = tuple(size) + (len(color),)
         array = np.ones(rgb_size, dtype=np.uint8) * color
+        array = array.astype(np.uint8)
 
         # Force RGBA internally (use max alpha)
         if array.shape[-1] == 3:

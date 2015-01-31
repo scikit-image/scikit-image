@@ -86,6 +86,8 @@ def test_pixel_rgb():
     pixel.rgb = np.arange(4)
     assert_equal(pixel.rgb, np.arange(3))
 
+    assert pic.array.dtype == np.uint8
+
 
 def test_pixel_rgba():
     pic = novice.Picture.from_size((3, 3), color=(10, 10, 10))
