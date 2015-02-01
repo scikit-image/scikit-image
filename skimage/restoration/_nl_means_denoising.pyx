@@ -529,6 +529,7 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
             integral = np.zeros_like(padded[..., 0], order='C')
             _integral_image_2d(padded, integral, t_row, t_col,
                                n_row, n_col, n_ch)
+            # Inner loops on pixel coordinates
             for row in range(max(offset, offset - t_row),
                              min(n_row - offset, n_row - offset - t_row)):
                 for col in range(max(offset, offset - t_col),
@@ -624,6 +625,7 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
                 integral = np.zeros_like(padded)
                 _integral_image_3d(padded, integral, t_pln, t_row, t_col,
                                    n_pln, n_row, n_col)
+                # Inner loops on pixel coordinates
                 for pln in range(pln_dist_min, pln_dist_max):
                     for row in range(row_dist_min, row_dist_max):
                         for col in range(col_dist_min, col_dist_max):
