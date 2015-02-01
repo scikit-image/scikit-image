@@ -174,9 +174,9 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     cdef int n_row, n_col, n_ch
     n_row, n_col, n_ch = image.shape
     cdef int offset = s / 2
-    cdef int x_row, x_col, i, j, color
-    cdef int x_row_start, x_row_end, x_col_start, x_col_end
-    cdef int x_row_start_i, x_row_end_i, x_col_start_j, x_col_end_j
+    cdef int row, col, i, j, color
+    cdef int row_start, row_end, col_start, col_end
+    cdef int row_start_i, row_end_i, col_start_j, col_end_j
     cdef DTYPE_t [::1] new_values = np.zeros(n_ch).astype(np.float32)
     cdef DTYPE_t [:, :, ::1] padded = np.ascontiguousarray(util.pad(image,
                        ((offset, offset), (offset, offset), (0, 0)),
@@ -192,44 +192,44 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     cdef float distance
     w = 1. / (n_ch * np.sum(w) * h ** 2) * w
     # Coordinates of central pixel and patch bounds
-    for x_row in range(offset, n_row + offset):
-        x_row_start = x_row - offset
-        x_row_end = x_row + offset + 1
-        for x_col in range(offset, n_col + offset):
+    for row in range(offset, n_row + offset):
+        row_start = row - offset
+        row_end = row + offset + 1
+        for col in range(offset, n_col + offset):
             for color in range(n_ch):
                 new_values[color] = 0
             weight_sum = 0
-            x_col_start = x_col - offset
-            x_col_end = x_col + offset + 1
+            col_start = col - offset
+            col_end = col + offset + 1
             # Coordinates of test pixel and patch bounds
-            for i in range(max(-d, offset - x_row),
-                           min(d + 1, n_row + offset - x_row)):
-                x_row_start_i = x_row_start + i
-                x_row_end_i = x_row_end + i
-                for j in range(max(-d, offset - x_col),
-                               min(d + 1, n_col + offset - x_col)):
-                    x_col_start_j = x_col_start + j
-                    x_col_end_j = x_col_end + j
+            for i in range(max(-d, offset - row),
+                           min(d + 1, n_row + offset - row)):
+                row_start_i = row_start + i
+                row_end_i = row_end + i
+                for j in range(max(-d, offset - col),
+                               min(d + 1, n_col + offset - col)):
+                    col_start_j = col_start + j
+                    col_end_j = col_end + j
                     if n_ch == 1:
                         weight = patch_distance_2d(
-                                 padded[x_row_start:x_row_end,
-                                        x_col_start:x_col_end, 0],
-                                 padded[x_row_start_i:x_row_end_i,
-                                        x_col_start_j:x_col_end_j, 0],
+                                 padded[row_start:row_end,
+                                        col_start:col_end, 0],
+                                 padded[row_start_i:row_end_i,
+                                        col_start_j:col_end_j, 0],
                                  w, s)
                     else:
                         weight = patch_distance_2drgb(
-                                 padded[x_row_start:x_row_end,
-                                        x_col_start:x_col_end, :],
-                                 padded[x_row_start_i:x_row_end_i,
-                                        x_col_start_j:x_col_end_j, :],
+                                 padded[row_start:row_end,
+                                        col_start:col_end, :],
+                                 padded[row_start_i:row_end_i,
+                                        col_start_j:col_end_j, :],
                                         w, s)
                     weight_sum += weight
                     for color in range(n_ch):
-                        new_values[color] += weight * padded[x_row + i,
-                                                             x_col + j, color]
+                        new_values[color] += weight * padded[row + i,
+                                                             col + j, color]
             for color in range(n_ch):
-                result[x_row, x_col, color] = new_values[color] / weight_sum
+                result[row, col, color] = new_values[color] / weight_sum
     return result[offset:-offset, offset:-offset]
 
 
@@ -276,49 +276,48 @@ def _nl_means_denoising_3d(image, int s=7,
                             -(xg_pln ** 2 + xg_row ** 2 + xg_col ** 2) /
                             (2 * A ** 2)).astype(np.float32))
     cdef float distance
-    cdef int x_pln, x_row, x_col, i, j, k
-    cdef int x_pln_start, x_pln_end, x_row_start, x_row_end, \
-             x_col_start, x_col_end
-    cdef int x_pln_start_i, x_pln_end_i, x_row_start_j, x_row_end_j, \
-             x_col_start_k, x_col_end_k
+    cdef int pln, row, col, i, j, k
+    cdef int pln_start, pln_end, row_start, row_end, col_start, col_end
+    cdef int pln_start_i, pln_end_i, row_start_j, row_end_j, \
+             col_start_k, col_end_k
     w = 1. / (np.sum(w) * h ** 2) * w
     # Coordinates of central pixel and patch bounds
-    for x_pln in range(offset, n_pln + offset):
-        x_pln_start = x_pln - offset
-        x_pln_end = x_pln + offset + 1
-        for x_row in range(offset, n_row + offset):
-            x_row_start = x_row - offset
-            x_row_end = x_row + offset + 1
-            for x_col in range(offset, n_col + offset):
-                x_col_start = x_col - offset
-                x_col_end = x_col + offset + 1
+    for pln in range(offset, n_pln + offset):
+        pln_start = pln - offset
+        pln_end = pln + offset + 1
+        for row in range(offset, n_row + offset):
+            row_start = row - offset
+            row_end = row + offset + 1
+            for col in range(offset, n_col + offset):
+                col_start = col - offset
+                col_end = col + offset + 1
                 new_value = 0
                 weight_sum = 0
                 # Coordinates of test pixel and patch bounds
-                for i in range(max(-d, offset - x_pln),
-                               min(d + 1, n_pln + offset - x_pln)):
-                    x_pln_start_i = x_pln_start + i
-                    x_pln_end_i = x_pln_end + i
-                    for j in range(max(-d, offset - x_row),
-                                   min(d + 1, n_row + offset - x_row)):
-                        x_row_start_j = x_row_start + j
-                        x_row_end_j = x_row_end + j
-                        for k in range(max(-d, offset - x_col),
-                                   min(d + 1, n_col + offset - x_col)):
-                            x_col_start_k = x_col_start + k
-                            x_col_end_k = x_col_end + k
+                for i in range(max(-d, offset - pln),
+                               min(d + 1, n_pln + offset - pln)):
+                    pln_start_i = pln_start + i
+                    pln_end_i = pln_end + i
+                    for j in range(max(-d, offset - row),
+                                   min(d + 1, n_row + offset - row)):
+                        row_start_j = row_start + j
+                        row_end_j = row_end + j
+                        for k in range(max(-d, offset - col),
+                                       min(d + 1, n_col + offset - col)):
+                            col_start_k = col_start + k
+                            col_end_k = col_end + k
                             weight = patch_distance_3d(
-                                    padded[x_pln_start:x_pln_end,
-                                           x_row_start:x_row_end,
-                                           x_col_start:x_col_end],
-                                    padded[x_pln_start_i:x_pln_end_i,
-                                           x_row_start_j:x_row_end_j,
-                                           x_col_start_k:x_col_end_k],
+                                    padded[pln_start:pln_end,
+                                           row_start:row_end,
+                                           col_start:col_end],
+                                    padded[pln_start_i:pln_end_i,
+                                           row_start_j:row_end_j,
+                                           col_start_k:col_end_k],
                                     w, s)
                             weight_sum += weight
-                            new_value += weight * padded[x_pln + i,
-                                                         x_row + j, x_col + k]
-                result[x_pln, x_row, x_col] = new_value / weight_sum
+                            new_value += weight * padded[pln + i,
+                                                         row + j, col + k]
+                result[pln, row, col] = new_value / weight_sum
     return result[offset:-offset, offset:-offset, offset:-offset]
 
 #-------------- Accelerated algorithm of Froment 2015 ------------------
@@ -594,8 +593,8 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
     cdef DTYPE_t [:, :, ::1] integral = np.zeros_like(padded)
     cdef int n_pln, n_row, n_col, t_pln, t_row, t_col, \
              pln, row, col
-    cdef int x_pln_dist_min, x_pln_dist_max, x_row_dist_min, x_row_dist_max, \
-             x_col_dist_min, x_col_dist_max
+    cdef int pln_dist_min, pln_dist_max, row_dist_min, row_dist_max, \
+             col_dist_min, col_dist_max
     cdef float weight, distance
     cdef float alpha
     cdef float h_square = h ** 2.
@@ -608,14 +607,14 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
     # Outer loops on patch shifts
     # With t2 >= 0, reference patch is always on the left of test patch
     for t_pln in range(-d, d + 1):
-        x_pln_dist_min = max(offset, offset - t_pln)
-        x_pln_dist_max = min(n_pln - offset, n_pln - offset - t_pln)
+        pln_dist_min = max(offset, offset - t_pln)
+        pln_dist_max = min(n_pln - offset, n_pln - offset - t_pln)
         for t_row in range(-d, d + 1):
-            x_row_dist_min = max(offset, offset - t_row)
-            x_row_dist_max = min(n_row - offset, n_row - offset - t_row)
+            row_dist_min = max(offset, offset - t_row)
+            row_dist_max = min(n_row - offset, n_row - offset - t_row)
             for t_col in range(0, d + 1):
-                x_col_dist_min = max(offset, offset - t_col)
-                x_col_dist_max = min(n_col - offset, n_col - offset - t_col)
+                col_dist_min = max(offset, offset - t_col)
+                col_dist_max = min(n_col - offset, n_col - offset - t_col)
                 # alpha is to account for patches on the same column
                 # distance is computed twice in this case
                 if t_col == 0 and (t_pln is not 0 or t_row is not 0):
@@ -625,9 +624,9 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
                 integral = np.zeros_like(padded)
                 _integral_image_3d(padded, integral, t_pln, t_row, t_col,
                                    n_pln, n_row, n_col)
-                for pln in range(x_pln_dist_min, x_pln_dist_max):
-                    for row in range(x_row_dist_min, x_row_dist_max):
-                        for col in range(x_col_dist_min, x_col_dist_max):
+                for pln in range(pln_dist_min, pln_dist_max):
+                    for row in range(row_dist_min, row_dist_max):
+                        for col in range(col_dist_min, col_dist_max):
                             distance = _integral_to_distance_3d(integral,
                                         pln, row, col, offset, s_cube_h_square)
                             # exp of large negative numbers is close to zero
