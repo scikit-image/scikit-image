@@ -227,5 +227,4 @@ class TestSaveTIF:
                 yield self.roundtrip, dtype, x
 
 if __name__ == "__main__":
-    #run_module_suite()
-    test_cmyk()
+    run_module_suite()
