@@ -18,6 +18,7 @@ from PIL import Image
 from .._plugins.pil_plugin import (
     pil_to_ndarray, ndarray_to_pil, _palette_is_grayscale)
 from ...measure import structural_similarity as ssim
+from ...color import rgb2lab
 
 
 def setup():
@@ -196,13 +197,16 @@ def test_cmyk():
     img.save(fname)
     img.close()
 
-    new = imread(fname)[:, :, :3]
+    new = imread(fname)
+
+    ref_lab = rgb2lab(ref)
+    new_lab = rgb2lab(new)
 
     for i in range(3):
-        newi = np.ascontiguousarray(new[:, :, i])
-        refi = np.ascontiguousarray(ref[:, :, i])
+        newi = np.ascontiguousarray(new_lab[:, :, i])
+        refi = np.ascontiguousarray(ref_lab[:, :, i])
         sim = ssim(refi, newi, dynamic_range=refi.max() - refi.min())
-        assert sim > 0.85
+        assert sim > 0.99
 
 
 class TestSaveTIF:
