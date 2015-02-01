@@ -4,14 +4,14 @@ cimport numpy as np
 cimport cython
 from libc.math cimport exp
 
-ctypedef np.float32_t DTYPE_t
+ctypedef np.float32_t IMGDTYPE
 
 cdef float DISTANCE_CUTOFF = 5.
 
 @cython.boundscheck(False)
-cdef inline float patch_distance_2d(DTYPE_t [:, :] p1,
-                                    DTYPE_t [:, :] p2,
-                                    DTYPE_t [:, ::] w, int s):
+cdef inline float patch_distance_2d(IMGDTYPE [:, :] p1,
+                                    IMGDTYPE [:, :] p2,
+                                    IMGDTYPE [:, ::] w, int s):
     """
     Compute a Gaussian distance between two image patches.
 
@@ -57,9 +57,9 @@ cdef inline float patch_distance_2d(DTYPE_t [:, :] p1,
 
 
 @cython.boundscheck(False)
-cdef inline float patch_distance_2drgb(DTYPE_t [:, :, :] p1,
-                                       DTYPE_t [:, :, :] p2,
-                                       DTYPE_t [:, ::] w, int s):
+cdef inline float patch_distance_2drgb(IMGDTYPE [:, :, :] p1,
+                                       IMGDTYPE [:, :, :] p2,
+                                       IMGDTYPE [:, ::] w, int s):
     """
     Compute a Gaussian distance between two image patches.
 
@@ -103,9 +103,9 @@ cdef inline float patch_distance_2drgb(DTYPE_t [:, :, :] p1,
 
 
 @cython.boundscheck(False)
-cdef inline float patch_distance_3d(DTYPE_t [:, :, :] p1,
-                                    DTYPE_t [:, :, :] p2,
-                                    DTYPE_t [:, :, ::] w, int s):
+cdef inline float patch_distance_3d(IMGDTYPE [:, :, :] p1,
+                                    IMGDTYPE [:, :, :] p2,
+                                    IMGDTYPE [:, :, ::] w, int s):
     """
     Compute a Gaussian distance between two image patches.
 
@@ -177,16 +177,16 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     cdef int row, col, i, j, color
     cdef int row_start, row_end, col_start, col_end
     cdef int row_start_i, row_end_i, col_start_j, col_end_j
-    cdef DTYPE_t [::1] new_values = np.zeros(n_ch).astype(np.float32)
-    cdef DTYPE_t [:, :, ::1] padded = np.ascontiguousarray(util.pad(image,
+    cdef IMGDTYPE [::1] new_values = np.zeros(n_ch).astype(np.float32)
+    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(util.pad(image,
                        ((offset, offset), (offset, offset), (0, 0)),
                         mode='reflect').astype(np.float32))
-    cdef DTYPE_t [:, :, ::1] result = padded.copy()
+    cdef IMGDTYPE [:, :, ::1] result = padded.copy()
     cdef float A = ((s - 1.) / 4.)
     cdef float new_value
     cdef float weight_sum, weight
     xg_row, xg_col = np.mgrid[-offset:offset + 1, -offset:offset + 1]
-    cdef DTYPE_t [:, ::1] w = np.ascontiguousarray(np.exp(
+    cdef IMGDTYPE [:, ::1] w = np.ascontiguousarray(np.exp(
                              -(xg_row ** 2 + xg_col ** 2) / (2 * A ** 2)).
                              astype(np.float32))
     cdef float distance
@@ -262,19 +262,19 @@ def _nl_means_denoising_3d(image, int s=7,
     n_pln, n_row, n_col = image.shape
     cdef int offset = s / 2
     # padd the image so that boundaries are denoised as well
-    cdef DTYPE_t [:, :, ::1] padded = np.ascontiguousarray(util.pad(
+    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(util.pad(
                                         image.astype(np.float32),
                                         offset, mode='reflect'))
-    cdef DTYPE_t [:, :, ::1] result = padded.copy()
+    cdef IMGDTYPE [:, :, ::1] result = padded.copy()
     cdef float A = ((s - 1.) / 4.)
     cdef float new_value
     cdef float weight_sum, weight
     xg_pln, xg_row, xg_col = np.mgrid[-offset: offset + 1,
                                       -offset: offset + 1,
                                       -offset: offset + 1]
-    cdef DTYPE_t [:, :, ::1] w = np.ascontiguousarray(np.exp(
+    cdef IMGDTYPE [:, :, ::1] w = np.ascontiguousarray(np.exp(
                             -(xg_pln ** 2 + xg_row ** 2 + xg_col ** 2) /
-                            (2 * A ** 2)).astype(np.float32))
+                             (2 * A ** 2)).astype(np.float32))
     cdef float distance
     cdef int pln, row, col, i, j, k
     cdef int pln_start, pln_end, row_start, row_end, col_start, col_end
@@ -325,7 +325,7 @@ def _nl_means_denoising_3d(image, int s=7,
 
 @cython.cdivision(True)
 @cython.boundscheck(False)
-cdef inline float _integral_to_distance_2d(DTYPE_t [:, ::] integral,
+cdef inline float _integral_to_distance_2d(IMGDTYPE [:, ::] integral,
                         int row, int col, int offset, float h2s2):
     """
     References
@@ -346,7 +346,7 @@ cdef inline float _integral_to_distance_2d(DTYPE_t [:, ::] integral,
 
 @cython.cdivision(True)
 @cython.boundscheck(False)
-cdef inline float _integral_to_distance_3d(DTYPE_t [:, :, ::] integral,
+cdef inline float _integral_to_distance_3d(IMGDTYPE [:, :, ::] integral,
                     int pln, int row, int col, int offset,
                     float s_cube_h_square):
     """
@@ -372,8 +372,8 @@ cdef inline float _integral_to_distance_3d(DTYPE_t [:, :, ::] integral,
 
 @cython.cdivision(True)
 @cython.boundscheck(False)
-cdef inline _integral_image_2d(DTYPE_t [:, :, ::] padded,
-                               DTYPE_t [:, ::] integral, int t_row,
+cdef inline _integral_image_2d(IMGDTYPE [:, :, ::] padded,
+                               IMGDTYPE [:, ::] integral, int t_row,
                                int t_col, int n_row, int n_col, int n_ch):
     """
     Computes the integral of the squared difference between an image ``padded``
@@ -422,8 +422,8 @@ cdef inline _integral_image_2d(DTYPE_t [:, :, ::] padded,
 
 @cython.cdivision(True)
 @cython.boundscheck(False)
-cdef inline _integral_image_3d(DTYPE_t [:, :, ::] padded,
-                               DTYPE_t [:, :, ::] integral, int t_pln,
+cdef inline _integral_image_3d(IMGDTYPE [:, :, ::] padded,
+                               IMGDTYPE [:, :, ::] integral, int t_pln,
                                int t_row, int t_col, int n_pln, int n_row,
                                int n_col):
     """
@@ -501,12 +501,12 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     # Image padding: we need to account for patch size, possible shift,
     # + 1 for the boundary effects in finite differences
     cdef int pad_size = offset + d + 1
-    cdef DTYPE_t [:, :, ::1] padded = np.ascontiguousarray(util.pad(image,
+    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(util.pad(image,
                           ((pad_size, pad_size), (pad_size, pad_size), (0, 0)),
                           mode='reflect').astype(np.float32))
-    cdef DTYPE_t [:, :, ::1] result = np.zeros_like(padded)
-    cdef DTYPE_t [:, ::1] weights = np.zeros_like(padded[..., 0], order='C')
-    cdef DTYPE_t [:, ::1] integral = np.zeros_like(padded[..., 0], order='C')
+    cdef IMGDTYPE [:, :, ::1] result = np.zeros_like(padded)
+    cdef IMGDTYPE [:, ::1] weights = np.zeros_like(padded[..., 0], order='C')
+    cdef IMGDTYPE [:, ::1] integral = np.zeros_like(padded[..., 0], order='C')
     cdef int n_row, n_col, n_ch, t_row, t_col, row, col
     cdef float weight, distance
     cdef float alpha
@@ -586,11 +586,11 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
     # Image padding: we need to account for patch size, possible shift,
     # + 1 for the boundary effects in finite differences
     cdef int pad_size = offset + d + 1
-    cdef DTYPE_t [:, :, ::1] padded = np.ascontiguousarray(util.pad(image,
+    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(util.pad(image,
                                 pad_size, mode='reflect').astype(np.float32))
-    cdef DTYPE_t [:, :, ::1] result = np.zeros_like(padded)
-    cdef DTYPE_t [:, :, ::1] weights = np.zeros_like(padded)
-    cdef DTYPE_t [:, :, ::1] integral = np.zeros_like(padded)
+    cdef IMGDTYPE [:, :, ::1] result = np.zeros_like(padded)
+    cdef IMGDTYPE [:, :, ::1] weights = np.zeros_like(padded)
+    cdef IMGDTYPE [:, :, ::1] integral = np.zeros_like(padded)
     cdef int n_pln, n_row, n_col, t_pln, t_row, t_col, \
              pln, row, col
     cdef int pln_dist_min, pln_dist_max, row_dist_min, row_dist_max, \
