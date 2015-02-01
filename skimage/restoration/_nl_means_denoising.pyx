@@ -327,7 +327,7 @@ def _nl_means_denoising_3d(image, int s=7,
 @cython.cdivision(True)
 @cython.boundscheck(False)
 cdef inline float _integral_to_distance_2d(DTYPE_t [:, ::] integral,
-                        int x_row, int x_col, int offset, float h2s2):
+                        int row, int col, int offset, float h2s2):
     """
     References
     ----------
@@ -337,10 +337,10 @@ cdef inline float _integral_to_distance_2d(DTYPE_t [:, ::] integral,
     Used in _fast_nl_means_denoising_2d
     """
     cdef float distance
-    distance =  integral[x_row + offset, x_col + offset] + \
-                integral[x_row - offset, x_col - offset] - \
-                integral[x_row - offset, x_col + offset] - \
-                integral[x_row + offset, x_col - offset]
+    distance =  integral[row + offset, col + offset] + \
+                integral[row - offset, col - offset] - \
+                integral[row - offset, col + offset] - \
+                integral[row + offset, col - offset]
     distance /= h2s2
     return distance
 
@@ -348,7 +348,7 @@ cdef inline float _integral_to_distance_2d(DTYPE_t [:, ::] integral,
 @cython.cdivision(True)
 @cython.boundscheck(False)
 cdef inline float _integral_to_distance_3d(DTYPE_t [:, :, ::] integral,
-                    int x_pln, int x_row, int x_col, int offset,
+                    int pln, int row, int col, int offset,
                     float s_cube_h_square):
     """
     References
@@ -359,16 +359,117 @@ cdef inline float _integral_to_distance_3d(DTYPE_t [:, :, ::] integral,
     Used in _fast_nl_means_denoising_3d
     """
     cdef float distance
-    distance = (integral[x_pln + offset, x_row + offset, x_col + offset] -
-                integral[x_pln - offset, x_row - offset, x_col - offset] +
-                integral[x_pln - offset, x_row - offset, x_col + offset] +
-                integral[x_pln - offset, x_row + offset, x_col - offset] +
-                integral[x_pln + offset, x_row - offset, x_col - offset] -
-                integral[x_pln - offset, x_row + offset, x_col + offset] -
-                integral[x_pln + offset, x_row - offset, x_col + offset] -
-                integral[x_pln + offset, x_row + offset, x_col - offset])
+    distance = (integral[pln + offset, row + offset, col + offset] -
+                integral[pln - offset, row - offset, col - offset] +
+                integral[pln - offset, row - offset, col + offset] +
+                integral[pln - offset, row + offset, col - offset] +
+                integral[pln + offset, row - offset, col - offset] -
+                integral[pln - offset, row + offset, col + offset] -
+                integral[pln + offset, row - offset, col + offset] -
+                integral[pln + offset, row + offset, col - offset])
     distance /= s_cube_h_square
     return distance
+
+
+@cython.cdivision(True)
+@cython.boundscheck(False)
+cdef inline _integral_image_2d(DTYPE_t [:, :, ::] padded,
+                               DTYPE_t [:, ::] integral, int t_row,
+                               int t_col, int n_row, int n_col, int n_ch):
+    """
+    Computes the integral of the squared difference between an image ``padded``
+    and the same image shifted by ``(t_row, t_col)``.
+
+    Parameters
+    ----------
+    padded : ndarray of shape (n_row, n_col, n_ch)
+        Image of interest.
+    integral : ndarray
+        Output of the function. The array is filled with integral values.
+        ``integral`` should have the same shape as ``padded``.
+    t_row : int
+        Shift along the row axis.
+    t_col : int
+        Shift along the column axis.
+    n_row : int
+    n_col : int
+    n_ch : int
+
+    Notes
+    -----
+
+    The integral computation could be performed using
+    ``transform.integral_image``, but this helper function saves memory
+    by avoiding copies of ``padded``.
+    """
+    cdef int row, col
+    cdef float distance
+    for row in range(max(1, -t_row), min(n_row, n_row - t_row)):
+        for col in range(max(1, -t_col), min(n_col, n_col - t_col)):
+            if n_ch == 1:
+                distance = (padded[row, col, 0] -
+                            padded[row + t_row, col + t_col, 0])**2
+            else:
+                distance = ((padded[row, col, 0] -
+                             padded[row + t_row, col + t_col, 0])**2 +
+                            (padded[row, col, 1] -
+                             padded[row + t_row, col + t_col, 1])**2 +
+                            (padded[row, col, 2] -
+                             padded[row + t_row, col + t_col, 2])**2)
+            integral[row, col] = distance + \
+                                 integral[row - 1, col] + \
+                                 integral[row, col - 1] - \
+                                 integral[row - 1, col - 1]
+
+@cython.cdivision(True)
+@cython.boundscheck(False)
+cdef inline _integral_image_3d(DTYPE_t [:, :, ::] padded,
+                               DTYPE_t [:, :, ::] integral, int t_pln,
+                               int t_row, int t_col, int n_pln, int n_row,
+                               int n_col):
+    """
+    Computes the integral of the squared difference between an image ``padded``
+    and the same image shifted by ``(t_pln, t_row, t_col)``.
+
+    Parameters
+    ----------
+    padded : ndarray of shape (n_pln, n_row, n_col)
+        Image of interest.
+    integral : ndarray
+        Output of the function. The array is filled with integral values.
+        ``integral`` should have the same shape as ``padded``.
+    t_pln : int
+        Shift along the plane axis.
+    t_row : int
+        Shift along the row axis.
+    t_col : int
+        Shift along the column axis.
+    n_pln : int
+    n_row : int
+    n_col : int
+
+    Notes
+    -----
+
+    The integral computation could be performed using
+    ``transform.integral_image``, but this helper function saves memory
+    by avoiding copies of ``padded``.
+    """
+    cdef int pln, row, col
+    cdef float distance
+    for pln in range(max(1, -t_pln), min(n_pln, n_pln - t_pln)):
+        for row in range(max(1, -t_row), min(n_row, n_row - t_row)):
+            for col in range(max(1, -t_col), min(n_col, n_col - t_col)):
+                integral[pln, row, col] = \
+                    ((padded[pln, row, col] -
+                      padded[pln + t_pln, row + t_row, col + t_col])**2 +
+                    integral[pln - 1, row, col] +
+                    integral[pln, row - 1, col] +
+                    integral[pln, row, col - 1] +
+                    integral[pln - 1, row - 1, col - 1] -
+                    integral[pln - 1, row - 1, col] -
+                    integral[pln, row - 1, col - 1] -
+                    integral[pln - 1, row, col - 1])
 
 
 @cython.cdivision(True)
@@ -407,7 +508,7 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     cdef DTYPE_t [:, :, ::1] result = np.zeros_like(padded)
     cdef DTYPE_t [:, ::1] weights = np.zeros_like(padded[..., 0], order='C')
     cdef DTYPE_t [:, ::1] integral = np.zeros_like(padded[..., 0], order='C')
-    cdef int n_row, n_col, n_ch, t_row, t_col, x_row, x_col
+    cdef int n_row, n_col, n_ch, t_row, t_col, row, col
     cdef float weight, distance
     cdef float alpha
     cdef float h2 = h ** 2.
@@ -427,46 +528,32 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
             else:
                 alpha = 1.
             integral = np.zeros_like(padded[..., 0], order='C')
-            for x_row in range(max(1, -t_row), min(n_row, n_row - t_row)):
-                for x_col in range(max(1, -t_col), min(n_col, n_col - t_col)):
-                    if n_ch == 1:
-                        distance = (padded[x_row, x_col, 0] -
-                                    padded[x_row + t_row, x_col + t_col, 0])**2
-                    else:
-                        distance = ((padded[x_row, x_col, 0] -
-                                 padded[x_row + t_row, x_col + t_col, 0])**2 +
-                                (padded[x_row, x_col, 1] -
-                                 padded[x_row + t_row, x_col + t_col, 1])**2 +
-                                (padded[x_row, x_col, 2] -
-                                 padded[x_row + t_row, x_col + t_col, 2])**2)
-                    integral[x_row, x_col] = distance + \
-                                     integral[x_row - 1, x_col] + \
-                                     integral[x_row, x_col - 1] - \
-                                     integral[x_row - 1, x_col - 1]
-            for x_row in range(max(offset, offset - t_row),
-                           min(n_row - offset, n_row - offset - t_row)):
-                for x_col in range(max(offset, offset - t_col),
-                               min(n_col - offset, n_col - offset - t_col)):
-                    distance = _integral_to_distance_2d(integral, x_row, x_col,
+            _integral_image_2d(padded, integral, t_row, t_col,
+                               n_row, n_col, n_ch)
+            for row in range(max(offset, offset - t_row),
+                             min(n_row - offset, n_row - offset - t_row)):
+                for col in range(max(offset, offset - t_col),
+                                 min(n_col - offset, n_col - offset - t_col)):
+                    distance = _integral_to_distance_2d(integral, row, col,
                                                      offset, h2s2)
                     # exp of large negative numbers is close to zero
                     if distance > DISTANCE_CUTOFF:
                         continue
                     weight = alpha * exp(-distance)
-                    weights[x_row, x_col] += weight
-                    weights[x_row + t_row, x_col + t_col] += weight
+                    weights[row, col] += weight
+                    weights[row + t_row, col + t_col] += weight
                     for ch in range(n_ch):
-                        result[x_row, x_col, ch] += weight * \
-                                    padded[x_row + t_row, x_col + t_col, ch]
-                        result[x_row + t_row, x_col + t_col, ch] += \
-                                        weight * padded[x_row, x_col, ch]
+                        result[row, col, ch] += weight * \
+                                    padded[row + t_row, col + t_col, ch]
+                        result[row + t_row, col + t_col, ch] += \
+                                        weight * padded[row, col, ch]
     # Normalize pixel values using sum of weights of contributing patches
-    for x_row in range(offset, n_row - offset):
-        for x_col in range(offset, n_col - offset):
+    for row in range(offset, n_row - offset):
+        for col in range(offset, n_col - offset):
             for channel in range(n_ch):
                 # No risk of division by zero, since the contribution
                 # of a null shift is strictly positive
-                result[x_row, x_col, channel] /= weights[x_row, x_col]
+                result[row, col, channel] /= weights[row, col]
     return result[pad_size:-pad_size, pad_size:-pad_size]
 
 
@@ -506,10 +593,7 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
     cdef DTYPE_t [:, :, ::1] weights = np.zeros_like(padded)
     cdef DTYPE_t [:, :, ::1] integral = np.zeros_like(padded)
     cdef int n_pln, n_row, n_col, t_pln, t_row, t_col, \
-             x_pln, x_row, x_col
-    cdef int x_pln_integral_min, x_pln_integral_max, \
-             x_row_integral_min, x_row_integral_max, \
-             x_col_integral_min, x_col_integral_max
+             pln, row, col
     cdef int x_pln_dist_min, x_pln_dist_max, x_row_dist_min, x_row_dist_max, \
              x_col_dist_min, x_col_dist_max
     cdef float weight, distance
@@ -524,18 +608,12 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
     # Outer loops on patch shifts
     # With t2 >= 0, reference patch is always on the left of test patch
     for t_pln in range(-d, d + 1):
-        x_pln_integral_min = max(1, -t_pln)
-        x_pln_integral_max = min(n_pln, n_pln - t_pln)
         x_pln_dist_min = max(offset, offset - t_pln)
         x_pln_dist_max = min(n_pln - offset, n_pln - offset - t_pln)
         for t_row in range(-d, d + 1):
-            x_row_integral_min = max(1, -t_row)
-            x_row_integral_max = min(n_row, n_row - t_row)
             x_row_dist_min = max(offset, offset - t_row)
             x_row_dist_max = min(n_row - offset, n_row - offset - t_row)
             for t_col in range(0, d + 1):
-                x_col_integral_min = max(1, -t_col)
-                x_col_integral_max = min(n_col, n_col - t_col)
                 x_col_dist_min = max(offset, offset - t_col)
                 x_col_dist_max = min(n_col - offset, n_col - offset - t_col)
                 # alpha is to account for patches on the same column
@@ -545,44 +623,30 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
                 else:
                     alpha = 1.
                 integral = np.zeros_like(padded)
-                for x_pln in range(x_pln_integral_min, x_pln_integral_max):
-                    for x_row in range(x_row_integral_min, x_row_integral_max):
-                        for x_col in range(x_col_integral_min,
-                                           x_col_integral_max):
-                            integral[x_pln, x_row, x_col] = \
-                                ((padded[x_pln, x_row, x_col] -
-                                  padded[x_pln + t_pln, x_row + t_row,
-                                       x_col + t_col])**2 +
-                                integral[x_pln - 1, x_row, x_col] +
-                                integral[x_pln, x_row - 1, x_col] +
-                                integral[x_pln, x_row, x_col - 1] +
-                                integral[x_pln - 1, x_row - 1, x_col - 1] -
-                                integral[x_pln - 1, x_row - 1, x_col] -
-                                integral[x_pln, x_row - 1, x_col - 1] -
-                                integral[x_pln - 1, x_row, x_col - 1])
-                for x_pln in range(x_pln_dist_min, x_pln_dist_max):
-                    for x_row in range(x_row_dist_min, x_row_dist_max):
-                        for x_col in range(x_col_dist_min, x_col_dist_max):
+                _integral_image_3d(padded, integral, t_pln, t_row, t_col,
+                                   n_pln, n_row, n_col)
+                for pln in range(x_pln_dist_min, x_pln_dist_max):
+                    for row in range(x_row_dist_min, x_row_dist_max):
+                        for col in range(x_col_dist_min, x_col_dist_max):
                             distance = _integral_to_distance_3d(integral,
-                                        x_pln, x_row, x_col, offset,
-                                        s_cube_h_square)
+                                        pln, row, col, offset, s_cube_h_square)
                             # exp of large negative numbers is close to zero
                             if distance > DISTANCE_CUTOFF:
                                 continue
                             weight = alpha * exp(-distance)
-                            weights[x_pln, x_row, x_col] += weight
-                            weights[x_pln + t_pln, x_row + t_row,
-                                                   x_col + t_col] += weight
-                            result[x_pln, x_row, x_col] += weight * \
-                                    padded[x_pln + t_pln, x_row + t_row,
-                                                          x_col + t_col]
-                            result[x_pln + t_pln, x_row + t_row,
-                                                  x_col + t_col] += weight * \
-                                                  padded[x_pln, x_row, x_col]
-    for x_pln in range(offset, n_pln - offset):
-        for x_row in range(offset, n_row - offset):
-            for x_col in range(offset, n_col - offset):
+                            weights[pln, row, col] += weight
+                            weights[pln + t_pln, row + t_row,
+                                                 col + t_col] += weight
+                            result[pln, row, col] += weight * \
+                                    padded[pln + t_pln, row + t_row,
+                                                        col + t_col]
+                            result[pln + t_pln, row + t_row,
+                                                col + t_col] += weight * \
+                                                  padded[pln, row, col]
+    for pln in range(offset, n_pln - offset):
+        for row in range(offset, n_row - offset):
+            for col in range(offset, n_col - offset):
                 # No risk of division by zero, since the contribution
                 # of a null shift is strictly positive
-                result[x_pln, x_row, x_col] /= weights[x_pln, x_row, x_col]
+                result[pln, row, col] /= weights[pln, row, col]
     return result[pad_size:-pad_size, pad_size:-pad_size, pad_size:-pad_size]
