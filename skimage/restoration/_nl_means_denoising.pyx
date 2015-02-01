@@ -202,27 +202,27 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
             x_col_start = x_col - offset
             x_col_end = x_col + offset + 1
             # Coordinates of test pixel and patch bounds
-            for i in range(max(- d, offset - x_row),
+            for i in range(max(-d, offset - x_row),
                            min(d + 1, n_row + offset - x_row)):
                 x_row_start_i = x_row_start + i
                 x_row_end_i = x_row_end + i
-                for j in range(max(- d, offset - x_col),
+                for j in range(max(-d, offset - x_col),
                                min(d + 1, n_col + offset - x_col)):
                     x_col_start_j = x_col_start + j
                     x_col_end_j = x_col_end + j
                     if n_ch == 1:
                         weight = patch_distance_2d(
-                                 padded[x_row_start: x_row_end,
-                                        x_col_start: x_col_end, 0],
-                                 padded[x_row_start_i: x_row_end_i,
-                                        x_col_start_j: x_col_end_j, 0],
+                                 padded[x_row_start:x_row_end,
+                                        x_col_start:x_col_end, 0],
+                                 padded[x_row_start_i:x_row_end_i,
+                                        x_col_start_j:x_col_end_j, 0],
                                  w, s)
                     else:
                         weight = patch_distance_2drgb(
-                                 padded[x_row_start: x_row_end,
-                                        x_col_start: x_col_end, :],
-                                 padded[x_row_start_i: x_row_end_i,
-                                        x_col_start_j: x_col_end_j, :],
+                                 padded[x_row_start:x_row_end,
+                                        x_col_start:x_col_end, :],
+                                 padded[x_row_start_i:x_row_end_i,
+                                        x_col_start_j:x_col_end_j, :],
                                         w, s)
                     weight_sum += weight
                     for color in range(n_ch):
@@ -295,25 +295,25 @@ def _nl_means_denoising_3d(image, int s=7,
                 new_value = 0
                 weight_sum = 0
                 # Coordinates of test pixel and patch bounds
-                for i in range(max(- d, offset - x_pln),
+                for i in range(max(-d, offset - x_pln),
                                min(d + 1, n_pln + offset - x_pln)):
                     x_pln_start_i = x_pln_start + i
                     x_pln_end_i = x_pln_end + i
-                    for j in range(max(- d, offset - x_row),
+                    for j in range(max(-d, offset - x_row),
                                    min(d + 1, n_row + offset - x_row)):
                         x_row_start_j = x_row_start + j
                         x_row_end_j = x_row_end + j
-                        for k in range(max(- d, offset - x_col),
+                        for k in range(max(-d, offset - x_col),
                                    min(d + 1, n_col + offset - x_col)):
                             x_col_start_k = x_col_start + k
                             x_col_end_k = x_col_end + k
                             weight = patch_distance_3d(
-                                    padded[x_pln_start: x_pln_end,
-                                           x_row_start: x_row_end,
-                                           x_col_start: x_col_end],
-                                    padded[x_pln_start_i: x_pln_end_i,
-                                           x_row_start_j: x_row_end_j,
-                                           x_col_start_k: x_col_end_k],
+                                    padded[x_pln_start:x_pln_end,
+                                           x_row_start:x_row_end,
+                                           x_col_start:x_col_end],
+                                    padded[x_pln_start_i:x_pln_end_i,
+                                           x_row_start_j:x_row_end_j,
+                                           x_col_start_k:x_col_end_k],
                                     w, s)
                             weight_sum += weight
                             new_value += weight * padded[x_pln + i,
@@ -322,6 +322,7 @@ def _nl_means_denoising_3d(image, int s=7,
     return result[offset:-offset, offset:-offset, offset:-offset]
 
 #-------------- Accelerated algorithm of Froment 2015 ------------------
+
 
 @cython.cdivision(True)
 @cython.boundscheck(False)
@@ -343,6 +344,7 @@ cdef inline float _integral_to_distance_2d(DTYPE_t [:, ::] integral,
     distance /= h2s2
     return distance
 
+
 @cython.cdivision(True)
 @cython.boundscheck(False)
 cdef inline float _integral_to_distance_3d(DTYPE_t [:, :, ::] integral,
@@ -356,16 +358,15 @@ cdef inline float _integral_to_distance_3d(DTYPE_t [:, :, ::] integral,
 
     Used in _fast_nl_means_denoising_3d
     """
-
     cdef float distance
-    distance = (integral[x_pln + offset, x_row + offset, x_col + offset]
-              - integral[x_pln - offset, x_row - offset, x_col - offset]
-              + integral[x_pln - offset, x_row - offset, x_col + offset]
-              + integral[x_pln - offset, x_row + offset, x_col - offset]
-              + integral[x_pln + offset, x_row - offset, x_col - offset]
-              - integral[x_pln - offset, x_row + offset, x_col + offset]
-              - integral[x_pln + offset, x_row - offset, x_col + offset]
-              - integral[x_pln + offset, x_row + offset, x_col - offset])
+    distance = (integral[x_pln + offset, x_row + offset, x_col + offset] -
+                integral[x_pln - offset, x_row - offset, x_col - offset] +
+                integral[x_pln - offset, x_row - offset, x_col + offset] +
+                integral[x_pln - offset, x_row + offset, x_col - offset] +
+                integral[x_pln + offset, x_row - offset, x_col - offset] -
+                integral[x_pln - offset, x_row + offset, x_col + offset] -
+                integral[x_pln + offset, x_row - offset, x_col + offset] -
+                integral[x_pln + offset, x_row + offset, x_col - offset])
     distance /= s_cube_h_square
     return distance
 
@@ -426,22 +427,22 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
             else:
                 alpha = 1.
             integral = np.zeros_like(padded[..., 0], order='C')
-            for x_row in range(max(1, - t_row), min(n_row, n_row - t_row)):
-                for x_col in range(max(1, - t_col), min(n_col, n_col - t_col)):
+            for x_row in range(max(1, -t_row), min(n_row, n_row - t_row)):
+                for x_col in range(max(1, -t_col), min(n_col, n_col - t_col)):
                     if n_ch == 1:
                         distance = (padded[x_row, x_col, 0] -
                                     padded[x_row + t_row, x_col + t_col, 0])**2
                     else:
                         distance = ((padded[x_row, x_col, 0] -
-                                    padded[x_row + t_row, x_col + t_col, 0])**2
-                                    +(padded[x_row, x_col, 1] -
-                                    padded[x_row + t_row, x_col + t_col, 1])**2
-                                    +(padded[x_row, x_col, 2] -
-                                    padded[x_row + t_row, x_col + t_col, 2])**2)
+                                 padded[x_row + t_row, x_col + t_col, 0])**2 +
+                                (padded[x_row, x_col, 1] -
+                                 padded[x_row + t_row, x_col + t_col, 1])**2 +
+                                (padded[x_row, x_col, 2] -
+                                 padded[x_row + t_row, x_col + t_col, 2])**2)
                     integral[x_row, x_col] = distance + \
                                      integral[x_row - 1, x_col] + \
-                                     integral[x_row, x_col - 1] \
-                                      - integral[x_row - 1, x_col - 1]
+                                     integral[x_row, x_col - 1] - \
+                                     integral[x_row - 1, x_col - 1]
             for x_row in range(max(offset, offset - t_row),
                            min(n_row - offset, n_row - offset - t_row)):
                 for x_col in range(max(offset, offset - t_col),
@@ -456,7 +457,7 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
                     weights[x_row + t_row, x_col + t_col] += weight
                     for ch in range(n_ch):
                         result[x_row, x_col, ch] += weight * \
-                                        padded[x_row + t_row, x_col + t_col, ch]
+                                    padded[x_row + t_row, x_col + t_col, ch]
                         result[x_row + t_row, x_col + t_col, ch] += \
                                         weight * padded[x_row, x_col, ch]
     # Normalize pixel values using sum of weights of contributing patches
@@ -466,7 +467,7 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
                 # No risk of division by zero, since the contribution
                 # of a null shift is strictly positive
                 result[x_row, x_col, channel] /= weights[x_row, x_col]
-    return result[pad_size: - pad_size, pad_size: - pad_size]
+    return result[pad_size:-pad_size, pad_size:-pad_size]
 
 
 @cython.cdivision(True)
@@ -523,17 +524,17 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
     # Outer loops on patch shifts
     # With t2 >= 0, reference patch is always on the left of test patch
     for t_pln in range(-d, d + 1):
-        x_pln_integral_min = max(1, - t_pln)
+        x_pln_integral_min = max(1, -t_pln)
         x_pln_integral_max = min(n_pln, n_pln - t_pln)
         x_pln_dist_min = max(offset, offset - t_pln)
         x_pln_dist_max = min(n_pln - offset, n_pln - offset - t_pln)
         for t_row in range(-d, d + 1):
-            x_row_integral_min = max(1, - t_row)
+            x_row_integral_min = max(1, -t_row)
             x_row_integral_max = min(n_row, n_row - t_row)
             x_row_dist_min = max(offset, offset - t_row)
             x_row_dist_max = min(n_row - offset, n_row - offset - t_row)
             for t_col in range(0, d + 1):
-                x_col_integral_min = max(1, - t_col)
+                x_col_integral_min = max(1, -t_col)
                 x_col_integral_max = min(n_col, n_col - t_col)
                 x_col_dist_min = max(offset, offset - t_col)
                 x_col_dist_max = min(n_col - offset, n_col - offset - t_col)
@@ -550,15 +551,15 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
                                            x_col_integral_max):
                             integral[x_pln, x_row, x_col] = \
                                 ((padded[x_pln, x_row, x_col] -
-                                padded[x_pln + t_pln, x_row + t_row,
+                                  padded[x_pln + t_pln, x_row + t_row,
                                        x_col + t_col])**2 +
                                 integral[x_pln - 1, x_row, x_col] +
                                 integral[x_pln, x_row - 1, x_col] +
                                 integral[x_pln, x_row, x_col - 1] +
-                                integral[x_pln - 1, x_row - 1, x_col - 1]
-                                - integral[x_pln - 1, x_row - 1, x_col]
-                                - integral[x_pln, x_row - 1, x_col - 1]
-                                - integral[x_pln - 1, x_row, x_col - 1])
+                                integral[x_pln - 1, x_row - 1, x_col - 1] -
+                                integral[x_pln - 1, x_row - 1, x_col] -
+                                integral[x_pln, x_row - 1, x_col - 1] -
+                                integral[x_pln - 1, x_row, x_col - 1])
                 for x_pln in range(x_pln_dist_min, x_pln_dist_max):
                     for x_row in range(x_row_dist_min, x_row_dist_max):
                         for x_col in range(x_col_dist_min, x_col_dist_max):
@@ -581,8 +582,7 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
     for x_pln in range(offset, n_pln - offset):
         for x_row in range(offset, n_row - offset):
             for x_col in range(offset, n_col - offset):
-                # I think there is no risk of division by zero
-                # except in padded zone
+                # No risk of division by zero, since the contribution
+                # of a null shift is strictly positive
                 result[x_pln, x_row, x_col] /= weights[x_pln, x_row, x_col]
-    return result[pad_size: - pad_size, pad_size: - pad_size,
-                                        pad_size: -pad_size]
+    return result[pad_size:-pad_size, pad_size:-pad_size, pad_size:-pad_size]
