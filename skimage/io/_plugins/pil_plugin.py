@@ -90,8 +90,11 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
         elif im.mode == '1':
             frame = im.convert('L')
 
-        elif 'A' in im.mode or im.mode == 'CMYK':
+        elif 'A' in im.mode:
             frame = im.convert('RGBA')
+
+        elif im.mode == 'CMYK':
+            frame = im.convert('RGB')
 
         if im.mode.startswith('I;16'):
             shape = im.size
