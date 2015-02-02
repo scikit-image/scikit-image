@@ -644,6 +644,7 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
                             result[pln + t_pln, row + t_row,
                                                 col + t_col] += weight * \
                                                   padded[pln, row, col]
+    # Normalize pixel values using sum of weights of contributing patches
     for pln in range(offset, n_pln - offset):
         for row in range(offset, n_row - offset):
             for col in range(offset, n_col - offset):
