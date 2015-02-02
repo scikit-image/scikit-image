@@ -6,18 +6,19 @@ from numpy.testing import (
 
 from tempfile import NamedTemporaryFile
 
-from skimage import data_dir
-from skimage.io import (imread, imsave, use_plugin, reset_plugins,
+from ... import data_dir
+from .. import (imread, imsave, use_plugin, reset_plugins,
                         Image as ioImage)
-from skimage._shared.testing import mono_check, color_check
-from skimage._shared._warnings import expected_warnings
+from ..._shared.testing import mono_check, color_check
+from ..._shared._warnings import expected_warnings
 
 from six import BytesIO
 
 from PIL import Image
-from skimage.io._plugins.pil_plugin import (
+from .._plugins.pil_plugin import (
     pil_to_ndarray, ndarray_to_pil, _palette_is_grayscale)
-
+from ...measure import structural_similarity as ssim
+from ...color import rgb2lab
 
 
 def setup():
@@ -182,6 +183,31 @@ def test_multi_page_gif():
                   img_num=5)
     assert img2.shape == (280, 500, 3)
     assert_allclose(img[5], img2)
+
+
+def test_cmyk():
+    ref = imread(os.path.join(data_dir, 'color.png'))
+
+    img = Image.open(os.path.join(data_dir, 'color.png'))
+    img = img.convert('CMYK')
+
+    f = NamedTemporaryFile(suffix='.jpg')
+    fname = f.name
+    f.close()
+    img.save(fname)
+    img.close()
+
+    new = imread(fname)
+
+    ref_lab = rgb2lab(ref)
+    new_lab = rgb2lab(new)
+
+    for i in range(3):
+        newi = np.ascontiguousarray(new_lab[:, :, i])
+        refi = np.ascontiguousarray(ref_lab[:, :, i])
+        sim = ssim(refi, newi, dynamic_range=refi.max() - refi.min())
+        assert sim > 0.99
+
 
 class TestSaveTIF:
     def roundtrip(self, dtype, x):
