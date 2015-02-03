@@ -242,3 +242,15 @@ shape (t, pln, row, col, ch):
     >>> for timepoint in image5d:  # doctest: +SKIP
     ...     # each timepoint is a 3D multichannel image
     ...     do_something_with(timepoint)
+
+
+We can then supplement the above table as follows:
+
+.. table:: Addendum to dimension names and orders in scikit-image
+
+========================   ========================================
+Image type                 coordinates
+========================   ========================================
+2D color video             (t, row, col, ch)
+3D multichannel video      (t, pln, row, col, ch)
+========================   ========================================
