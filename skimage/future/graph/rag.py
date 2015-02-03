@@ -14,7 +14,7 @@ import numpy as np
 from scipy.ndimage import filters
 from scipy import ndimage as nd
 import math
-from .. import draw, measure, segmentation, util, color
+from ... import draw, measure, segmentation, util, color
 try:
     from matplotlib import colors
     from matplotlib import cm
