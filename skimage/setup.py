@@ -14,6 +14,7 @@ def configuration(parent_package='', top_path=None):
     config.add_subpackage('feature')
     config.add_subpackage('restoration')
     config.add_subpackage('filters')
+    config.add_subpackage('future')
     config.add_subpackage('graph')
     config.add_subpackage('io')
     config.add_subpackage('measure')
