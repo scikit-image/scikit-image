@@ -33,7 +33,8 @@ UseBackends: Waf
 Library:
     Packages:
         skimage, skimage.color, skimage.data, skimage.draw, skimage.exposure,
-        skimage.feature, skimage.filters, skimage.graph, skimage.io,
+        skimage.feature, skimage.filters, skimage.future, skimage.future.graph,
+        skimage.graph, skimage.io,
         skimage.io._plugins, skimage.measure, skimage.morphology,
         skimage.scripts, skimage.restoration, skimage.segmentation,
         skimage.transform, skimage.util
@@ -151,9 +152,9 @@ Library:
     Extension: skimage.feature._hessian_det_appx
         Sources:
             skimage/exposure/_hessian_det_appx.pyx
-    Extension: skimage.graph._ncut_cy
+    Extension: skimage.future.graph._ncut_cy
         Sources:
-            skimage/graph/_ncut_cy.pyx
+            skimage/future/graph/_ncut_cy.pyx
     Extension: skimage.external.tifffile._tifffile
         Sources:
             skimage/external/tifffile/_tifffile.c
