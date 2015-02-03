@@ -6,7 +6,8 @@ Drawing Region Adjacency Graphs (RAGs)
 This example constructs a Region Adjacency Graph (RAG) and draws it with
 the `rag_draw` method.
 """
-from skimage import graph, data, segmentation
+from skimage import data, segmentation
+from skimage.future import graph
 from matplotlib import pyplot as plt, colors
 
 
