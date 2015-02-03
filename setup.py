@@ -65,11 +65,17 @@ def write_version_py(filename='skimage/version.py'):
 version='%s'
 """
 
-    vfile = open(os.path.join(os.path.dirname(__file__),
-                              filename), 'w')
-
     try:
+        vfile = open(os.path.join(os.path.dirname(__file__),
+                                  filename), 'w')
         vfile.write(template % VERSION)
+
+    except IOError:
+        raise IOError("Could not open/write to skimage/version.py - did you "
+                      "install using sudo in the past? If so, run\n"
+                      "sudo chown -R your_username ./*\n"
+                      "from package root to fix permissions, and try again.")
+
     finally:
         vfile.close()
 
