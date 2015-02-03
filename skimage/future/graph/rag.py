@@ -365,7 +365,8 @@ def draw_rag(labels, rag, img, border_color=None, node_color='#ffff00',
 
     Examples
     --------
-    >>> from skimage import data, graph, segmentation
+    >>> from skimage import data, segmentation
+    >>> from skimage.future import graph
     >>> img = data.coffee()
     >>> labels = segmentation.slic(img)
     >>> g =  graph.rag_mean_color(img, labels)
