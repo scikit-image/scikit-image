@@ -4,3 +4,7 @@ any version update **and will not follow the skimage two-version deprecation
 path**. Therefore, use the functions herein with care, and do not use them in
 production code that will depend on updated skimage versions.
 """
+
+from . import graph
+
+__all__ = ['graph']
