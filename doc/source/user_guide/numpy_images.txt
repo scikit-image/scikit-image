@@ -147,7 +147,7 @@ contains the color information and is denoted ``channel`` or ``ch``.
 
 Finally, for 3D images, such as videos, magnetic resonance imaging
 (MRI) scans, or confocal microscopy, we refer to the leading dimension
-as ``frame``, abbreviated as ``frm`` or ``f``.
+as ``plane``, abbreviated as ``pln`` or ``p``.
 
 These conventions are summarized below:
 
@@ -158,8 +158,8 @@ Image type                 coordinates
 ========================   ========================================
 2D grayscale               (row, col)
 2D multichannel (eg. RGB)  (row, col, ch)
-3D grayscale               (frm, row, col)
-3D multichannel            (frm, row, col, ch)
+3D grayscale               (pln, row, col)
+3D multichannel            (pln, row, col, ch)
 ========================   ========================================
 
 
@@ -180,14 +180,14 @@ to process these images:
     >>> slics = segmentation.slic(im3d, spacing=[5, 1, 1], multichannel=False)
 
 
-Other times, processing must be done frame-wise. When frames are the
+Other times, processing must be done plane-wise. When planes are the
 leading dimension, we can use the following syntax:
 
     >>> from skimage import filters
     >>> edges = np.zeros_like(im3d)
-    >>> for frm, image in enumerate(im3d):
-    ...     # iterate over the leading dimension (frames)
-    ...     edges[frm] = filters.sobel(image)
+    >>> for pln, image in enumerate(im3d):
+    ...     # iterate over the leading dimension (planes)
+    ...     edges[pln] = filters.sobel(image)
 
 
 Notes on array order
@@ -202,19 +202,19 @@ next to each other in memory is faster than processing them
 in a different order, even if the number of operations is the same:
 
     >>> def in_order_multiply(arr, scalar):
-    ...     for frame in list(range(arr.shape[0])):
-    ...         arr[frame, :, :] *= scalar
+    ...     for plane in list(range(arr.shape[0])):
+    ...         arr[plane, :, :] *= scalar
     ... 
     >>> def out_of_order_multiply(arr, scalar):
-    ...     for frame in list(range(arr.shape[2])):
-    ...         arr[:, :, frame] *= scalar
+    ...     for plane in list(range(arr.shape[2])):
+    ...         arr[:, :, plane] *= scalar
     ... 
     >>> import time
     >>> im3d = np.random.rand(100, 1024, 1024)
     >>> t0 = time.time(); x = in_order_multiply(im3d, 5); t1 = time.time()
     >>> print("%.2f seconds" % (t1 - t0))  # doctest: +SKIP
     0.14 seconds
-    >>> im3d_t = np.transpose(im3d).copy() # place "frames" dimension at end
+    >>> im3d_t = np.transpose(im3d).copy() # place "planes" dimension at end
     >>> im3d_t.shape
     (1024, 1024, 100)
     >>> s0 = time.time(); x = out_of_order_multiply(im3d, 5); s1 = time.time()
@@ -237,7 +237,7 @@ A note on time
 Although scikit-image does not currently (0.11) provide functions to
 work specifically with time-varying 3D data, our compatibility with
 numpy arrays allows us to work quite naturally with a 5D array of the
-shape (t, frm, row, col, ch):
+shape (t, pln, row, col, ch):
 
     >>> for timepoint in image5d:  # doctest: +SKIP
     ...     # each timepoint is a 3D multichannel image
