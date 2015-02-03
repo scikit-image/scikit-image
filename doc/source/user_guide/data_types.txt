@@ -78,7 +78,9 @@ Additionally, some functions take a ``preserve_range`` argument where a range
 conversion is convenient but not necessary. For example, interpolation in
 ``transform.warp`` requires an image of type float, which should have a range
 in [0, 1]. So, by default, input images will be rescaled to this range.
-However, with ``preserve_range=True``, the original range of the data will be
+However, in some cases, the image values represent physical measurements, such
+as temperature or rainfall values, that the user does not want rescaled.
+With ``preserve_range=True``, the original range of the data will be
 preserved, even though the output is a float image. Users must then ensure
 this non-standard image is properly processed by downstream functions, which
 may expect an image in [0, 1].
