@@ -1,5 +1,5 @@
 import numpy as np
-from skimage import graph
+from skimage.future import graph
 from skimage._shared.version_requirements import is_installed
 from numpy.testing.decorators import skipif
 from skimage import segmentation

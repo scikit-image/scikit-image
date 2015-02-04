@@ -14,7 +14,7 @@ The example below also shows how to use a custom function to select the larger
 weight instead.
 
 """
-from skimage.graph import rag
+from skimage.future.graph import rag
 import networkx as nx
 from matplotlib import pyplot as plt
 import numpy as np

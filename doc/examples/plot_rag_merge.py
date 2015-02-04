@@ -10,7 +10,8 @@ until no highly similar region pairs remain.
 
 """
 
-from skimage import graph, data, io, segmentation, color
+from skimage import data, io, segmentation, color
+from skimage.future import graph
 import numpy as np
 
 

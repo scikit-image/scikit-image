@@ -12,7 +12,8 @@ References
        Pattern Analysis and Machine Intelligence,
        IEEE Transactions on, vol. 22, no. 8, pp. 888-905, August 2000.
 """
-from skimage import graph, data, io, segmentation, color
+from skimage import data, io, segmentation, color
+from skimage.future import graph
 from matplotlib import pyplot as plt
 
 
