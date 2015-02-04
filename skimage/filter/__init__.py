@@ -36,7 +36,7 @@ denoise_tv_chambolle = deprecated('skimage.restoration.denoise_tv_chambolle')\
                         (restoration.denoise_tv_chambolle)
 
 # Backward compatibility v<0.11
-@deprecated
+@deprecated()
 def canny(*args, **kwargs):
     # Hack to avoid circular import
     from skimage.feature._canny import canny as canny_
