@@ -8,3 +8,12 @@ def test_filter_import():
 
     assert('sobel' in dir(F))
     assert F._import_warned
+
+
+def test_canny_import():
+    with catch_warnings():
+        simplefilter('ignore')
+        from skimage.filters import canny
+
+    assert('canny' in dir(F))
+    assert F._import_warned
