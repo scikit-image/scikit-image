@@ -15,16 +15,16 @@ Data type  Range
 uint8      0 to 255
 uint16     0 to 65535
 uint32     0 to 2\ :sup:`32`
-float      -1 to 1
+float      -1 to 1 or 0 to 1
 int8       -128 to 127
 int16      -32768 to 32767
 int32      -2\ :sup:`31` to 2\ :sup:`31` - 1
 =========  =================================
 
-Note that float images are restricted to the range -1 to 1 even though the data
-type itself can exceed this range; all integer dtypes, on the other hand, have
-pixel intensities that can span the entire data type range. Currently, *64-bit
-(u)int images are not supported*.
+Note that float images should be restricted to the range -1 to 1 even though
+the data type itself can exceed this range; all integer dtypes, on the other
+hand, have pixel intensities that can span the entire data type range. With a
+few exceptions, *64-bit (u)int images are not supported*.
 
 Functions in ``skimage`` are designed so that they accept any of these dtypes,
 but, for efficiency, *may return an image of a different dtype* (see `Output
@@ -44,9 +44,10 @@ violates these assumptions about the dtype range::
 Input types
 ===========
 
-Functions may choose to support only a subset of these data-types. In such
+Although we aim to preserve the data range and type of input images, functions
+may support only a subset of these data-types. In such
 a case, the input will be converted to the required type (if possible), and
-a warning message is printed to the log if a memory copy is needed. Type
+a warning message printed to the log if a memory copy is needed. Type
 requirements should be noted in the docstrings.
 
 The following utility functions in the main package are available to developers
@@ -71,6 +72,32 @@ issued::
    WARNING:dtype_converter:Possible precision loss when converting from
    float64 to uint8
    array([  0, 128, 255], dtype=uint8)
+
+
+Additionally, some functions take a ``preserve_range`` argument where a range
+conversion is convenient but not necessary. For example, interpolation in
+``transform.warp`` requires an image of type float, which should have a range
+in [0, 1]. So, by default, input images will be rescaled to this range.
+However, in some cases, the image values represent physical measurements, such
+as temperature or rainfall values, that the user does not want rescaled.
+With ``preserve_range=True``, the original range of the data will be
+preserved, even though the output is a float image. Users must then ensure
+this non-standard image is properly processed by downstream functions, which
+may expect an image in [0, 1].
+
+    >>> from skimage import data
+    >>> from skimage.transform import rescale
+    >>> image = data.coins()
+    >>> image.dtype, image.min(), image.max(), image.shape
+    (dtype('uint8'), 1, 252, (303, 384))
+    >>> rescaled = rescale(image, 0.5)
+    >>> (rescaled.dtype, np.round(rescaled.min(), 4),
+    ...  np.round(rescaled.max(), 4), rescaled.shape)
+    (dtype('float64'), 0.0147, 0.9456, (152, 192))
+    >>> rescaled = rescale(image, 0.5, preserve_range=True)
+    >>> (rescaled.dtype, np.round(rescaled.min()),
+    ...  np.round(rescaled.max()), rescaled.shape
+    (dtype('float64'), 4.0, 241.0, (152, 192))
 
 
 Output types
