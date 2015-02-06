@@ -50,6 +50,10 @@ class TestMultiImage():
                 assert type(img[i]) is np.ndarray
             assert_allclose(img[0], img[-num])
 
+            assert_raises(AssertionError,
+                          assert_allclose,
+                          img[0], img[1])
+
             # assert_raises expects a callable, hence this thin wrapper function.
             def return_img(n):
                 return img[n]
@@ -77,6 +81,9 @@ class TestMultiImage():
 
     def test_concatenate(self):
         for img in self.imgs:
+            if img[0].shape != img[-1].shape:
+                assert_raises(ValueError, img.concatenate)
+                continue
             array = img.concatenate()
             assert_equal(array.shape, (len(img),) + img[0].shape)
 
