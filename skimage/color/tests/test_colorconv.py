@@ -388,13 +388,11 @@ class TestColorconv(TestCase):
         a, b = np.meshgrid(np.arange(-100, 100), np.arange(-100, 100))
         L = np.ones(a.shape)
         lab = np.dstack((L, a, b))
-        assert_raises(ValueError, lambda: lab2xyz(lab))
-        multipliers = [0, 10, 50, 100]
-        nan_percents = [12, 9, 0, 0]
-        for (l, perc) in zip(multipliers, nan_percents):
-            lab[:, :, 0] = l
-            out = lab2xyz(lab)
-            assert_equal(int(np.isnan(out).sum() / out.size * 100), perc)
+        assert_raises(ValueError, lambda: lab2xyz(lab, error_on_invalid=True))
+        for value in [0, 10, 20]:
+            lab[:, :, 0] = value
+            with expected_warnings(['Color data out of range']):
+                lab2xyz(lab)
 
     def test_lab_lch_roundtrip(self):
         rgb = img_as_float(self.img_rgb)
