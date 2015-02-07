@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 set -ex
 
+PY=$TRAVIS_PYTHON_VERSION
+
 section "Test.with.min.requirements"
 nosetests $TEST_ARGS skimage
 section_end "Test.with.min.requirements"
 
 section "Build.docs"
-if [[ $TRAVIS_PYTHON_VERSION != 3.2 ]]; then
-    sudo apt-get install -qq texlive
+if [[ ($PY != 2.6) && ($PY != 3.2) ]]; then
+    sudo apt-get install -qq texlive texlive-latex-extra dvipng
     make html
 fi
 section_end "Build.docs"
@@ -20,13 +22,13 @@ section_end "Flake8.test"
 section "Install.optional.dependencies"
 
 # Install Qt and then update the Matplotlib settings
-if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
+if [[ $PY == 2.7* ]]; then
     sudo apt-get install -q python-qt4
 
     # http://stackoverflow.com/a/9716100
     LIBS=( PyQt4 sip.so )
 
-    VAR=( $(which -a python$TRAVIS_PYTHON_VERSION) )
+    VAR=( $(which -a python$PY) )
 
     GET_PYTHON_LIB_CMD="from distutils.sysconfig import get_python_lib; print (get_python_lib())"
     LIB_VIRTUALENV_PATH=$(python -c "$GET_PYTHON_LIB_CMD")
@@ -44,14 +46,14 @@ else
 fi
 
 # imread does NOT support py3.2
-if [[ $TRAVIS_PYTHON_VERSION != 3.2 ]]; then
+if [[ $PY != 3.2 ]]; then
     sudo apt-get install -q libtiff4-dev libwebp-dev libpng12-dev xcftools
     retry pip  install -q imread
 fi
 
 # Install SimpleITK from wheelhouse if available (not 3.2 or 3.4)
-if [[ $TRAVIS_PYTHON_VERSION =~ 3\.[24] ]]; then
-    echo "SimpleITK unavailable on $TRAVIS_PYTHON_VERSION"
+if [[ $PY =~ 3\.[24] ]]; then
+    echo "SimpleITK unavailable on $PY"
 else
     retry pip  install -q SimpleITK $WHEELHOUSE
 fi
@@ -59,7 +61,7 @@ fi
 sudo apt-get install -q libfreeimage3
 retry pip install -q astropy $WHEELHOUSE
 
-if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then
+if [[ $PY == 2.* ]]; then
     retry pip install -q pyamg
 fi
 
@@ -71,7 +73,7 @@ section_end "Install.optional.dependencies"
 section "Run.doc.examples"
 
 # Matplotlib settings - do not show figures during doc examples
-if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
+if [[ $PY == 2.7* ]]; then
     MPL_DIR=$HOME/.matplotlib
 else
     MPL_DIR=$HOME/.config/matplotlib
@@ -102,7 +104,7 @@ for f in doc/examples/applications/*.py; do
 done
 
 # Now configure Matplotlib to use Qt4
-if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
+if [[ $PY == 2.7* ]]; then
     MPL_QT_API=PyQt4
     export QT_API=pyqt
 else
@@ -118,7 +120,7 @@ section_end "Run.doc.applications"
 section "Test.with.optional.dependencies"
 
 # run tests again with optional dependencies to get more coverage
-if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then
+if [[ $PY == 3.3 ]]; then
     TEST_ARGS="$TEST_ARGS --with-cov --cover-package skimage"
 fi
 nosetests $TEST_ARGS
