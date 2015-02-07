@@ -7,6 +7,7 @@ section_end "Test.with.min.requirements"
 
 section "Build.docs"
 if [[ $TRAVIS_PYTHON_VERSION != 3.2 ]]; then
+    sudo apt-get install -qq texlive
     make html
 fi
 section_end "Build.docs"
