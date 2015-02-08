@@ -258,7 +258,8 @@ def write_gallery(gallery_index, src_dir, rst_dir, cfg, depth=0):
     else:
         sub_dir_list = src_dir.psplit()[-depth:]
         sub_dir = Path('/'.join(sub_dir_list) + '/')
-    gallery_index.write(TOCTREE_TEMPLATE % (sub_dir + '\n   '.join(ex_names)))
+    joiner = '\n   %s' % sub_dir
+    gallery_index.write(TOCTREE_TEMPLATE % (sub_dir + joiner.join(ex_names)))
 
     for src_name in examples:
 

@@ -123,9 +123,7 @@ Guidelines
 
 * All code should have tests (see `test coverage`_ below for more details).
 * All code should be documented, to the same
-  `standard
-<://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt#docstring-standard>`_
-  as NumPy and SciPy.
+  `standard <://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt#docstring-standard>`_ as NumPy and SciPy.
 * For new functionality, always add an example to the
   gallery.
 * No changes are ever committed without review.  Ask on the
@@ -195,8 +193,8 @@ successfully passes all tests. To do so,
 
    * Go to `Travis-CI <http://travis-ci.org/>`__ and follow the Sign In link at the top
 
-   * Go to your `profile page <https://travis-ci.org/profile>`__ and switch on your
-   scikit-image fork
+   * Go to your `profile page <https://travis-ci.org/profile>`__ and switch 
+     on your scikit-image fork
 
 It corresponds to steps one and two in
 `Travis-CI documentation <http://about.travis-ci.org/docs/user/getting-started/>`__

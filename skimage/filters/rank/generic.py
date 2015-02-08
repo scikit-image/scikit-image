@@ -1,5 +1,5 @@
 """The local histogram is computed using a sliding window similar to the method
-described in [1]_.
+described in [1].
 
 Input image can be 8-bit or 16-bit, for 16-bit input images, the number of
 histogram bins is determined from the maximum value present in the image.
@@ -749,7 +749,7 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 def noise_filter(image, selem, out=None, mask=None, shift_x=False,
                  shift_y=False):
-    """Noise feature as described in [Hashimoto12]_.
+    """Noise feature as described in [1].
 
     Parameters
     ----------
@@ -769,7 +769,7 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
 
     References
     ----------
-    .. [Hashimoto12] N. Hashimoto et al. Referenceless image quality evaluation
+    .. [1] N. Hashimoto et al. Referenceless image quality evaluation
                      for whole slide imaging. J Pathol Inform 2012;3:9.
 
     Returns
@@ -800,7 +800,7 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
 
 
 def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Local entropy [1]_.
+    """Local entropy [1].
 
     The entropy is computed using base 2 logarithm i.e. the filter returns the
     minimum number of bits needed to encode the local greylevel distribution.
@@ -872,7 +872,7 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     References
     ----------
-    .. [otsu] http://en.wikipedia.org/wiki/Otsu's_method
+    .. [1] http://en.wikipedia.org/wiki/Otsu's_method
 
     Examples
     --------

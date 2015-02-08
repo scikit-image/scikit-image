@@ -67,7 +67,7 @@ from RGB to grayscale::
     array([[ 0.7154]])
 
 
-Converting a grayscale image to RGB with :func:`gray2rgb``simply
+Converting a grayscale image to RGB with :func:`gray2rgb` simply
 duplicates the gray values over the three color channels.
 
 Painting images with labels
@@ -78,7 +78,7 @@ using an array of labels to encode the regions to be represented with the
 same color. 
 
 
-.. image:: ../../_images/plot_join_segmentations_1.png
+.. image: ../auto_examples/images/plot_join_segmentations_1.png
    :target: ../auto_examples/plot_join_segmentations.html
    :align: center
    :width: 80%
@@ -159,7 +159,7 @@ image with :func:`equalize_adapthist`, in order to correct for exposure
 gradients across the image. See the example
 :ref:`example_plot_equalize.py`.
 
-.. image:: ../../_images/plot_equalize_1.png
+.. image:: ../auto_examples/images/plot_equalize_1.png
    :target: ../auto_examples/plot_equalize.html
    :align: center
    :width: 90%

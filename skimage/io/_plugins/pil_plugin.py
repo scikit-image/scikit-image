@@ -260,20 +260,3 @@ def imsave(fname, arr, format_str=None):
 
     img = ndarray_to_pil(arr, format_str=format_str)
     img.save(fname, format=format_str)
-
-
-def imshow(arr):
-    """Display an image, using PIL's default display command.
-
-    Parameters
-    ----------
-    arr : ndarray
-       Image to display.  Images of dtype float are assumed to be in
-       [0, 1].  Images of dtype uint8 are in [0, 255].
-
-    """
-    Image.fromarray(img_as_ubyte(arr)).show()
-
-
-def _app_show():
-    pass

@@ -45,12 +45,12 @@ functionality is only available with the following installed:
 
 * `Astropy <http://www.astropy.org>`__ provides FITS io capability.
 
-*`SimpleITK <http://www.simpleitk.org/>`
- Optional io plugin providing a wide variety of `formats <http://www.itk.org/Wiki/ITK_File_Formats>`__.
- including specialized formats using in medical imaging.
+* `SimpleITK <http://www.simpleitk.org/>`
+  Optional io plugin providing a wide variety of `formats <http://www.itk.org/Wiki/ITK_File_Formats>`__.
+  including specialized formats using in medical imaging.
 
-*`imread <http://pythonhosted.org/imread/>`
- Optional io plugin providing most standard `formats <http://pythonhosted.org//imread/formats.html>`__.
+* `imread <http://pythonhosted.org/imread/>`
+  Optional io plugin providing most standard `formats <http://pythonhosted.org//imread/formats.html>`__.
 
 
 Testing requirements

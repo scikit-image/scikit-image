@@ -95,6 +95,7 @@ def circle(cy, cx, radius, shape=None):
         Pixel coordinates of circle.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
+
     Notes
     -----
         This function is a wrapper for skimage.draw.ellipse()

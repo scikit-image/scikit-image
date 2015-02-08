@@ -363,7 +363,7 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
 
     References
     ----------
-    .. [2] http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
+    .. [1] http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
     """
     image = image.astype(np.float)
     psf = psf.astype(np.float)

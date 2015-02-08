@@ -18,7 +18,7 @@ from .util import plot_matches
 from .blob import blob_dog, blob_log, blob_doh
 
 
-__all__ = ['canny'
+__all__ = ['canny',
            'daisy',
            'hog',
            'greycomatrix',
