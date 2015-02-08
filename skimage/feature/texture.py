@@ -259,7 +259,7 @@ def local_binary_pattern(image, P, R, method='default'):
             finer quantization of the angular space which is gray scale and
             rotation invariant.
         * 'nri_uniform': non rotation-invariant uniform patterns variant
-            which is only gray scale invariant [2].
+            which is only gray scale invariant [2]_.
         * 'var': rotation invariant variance measures of the contrast of local
             image texture which is rotation but not gray scale invariant.
 

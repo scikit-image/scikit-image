@@ -8,7 +8,8 @@ Sphinx is needed to build doc. Install with `pip install sphinx`.
 
 - "citation not found: R###"
   $ cd doc/build; grep -rin R### .
-  There is probably an underscore after the reference (e.g. [1]_)
+  There is probably an underscore after a reference 
+  in the first line of a docstring (e.g. [1]_)
 
 - "Duplicate citation R###, other instance in...""
   There is probably a [2] without a [1] in one of
