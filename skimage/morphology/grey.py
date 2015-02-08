@@ -53,7 +53,7 @@ def _invert_selem(selem):
     """Change the order of the values in `selem`.
 
     This is a patch for the *weird* footprint inversion in
-    `nd.grey_morphology` [1].
+    `nd.grey_morphology` [1]_.
 
     Parameters
     ----------
