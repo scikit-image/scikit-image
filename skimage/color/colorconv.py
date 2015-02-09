@@ -53,6 +53,7 @@ References
 
 from __future__ import division
 
+from warnings import warn
 import numpy as np
 from scipy import linalg
 from ..util import dtype
@@ -552,6 +553,8 @@ def xyz2rgb(xyz):
     mask = arr > 0.0031308
     arr[mask] = 1.055 * np.power(arr[mask], 1 / 2.4) - 0.055
     arr[~mask] *= 12.92
+    arr[arr < 0] = 0
+    arr[arr > 1] = 1
     return arr
 
 
@@ -832,6 +835,8 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
     ValueError
         If either the illuminant or the observer angle are not supported or
         unknown.
+    UserWarning
+        If any of the pixels are invalid (Z < 0).
 
 
     Notes
@@ -853,6 +858,11 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
     y = (L + 16.) / 116.
     x = (a / 500.) + y
     z = y - (b / 200.)
+
+    if np.any(z < 0):
+        invalid = np.nonzero(z < 0)
+        warn('Color data out of range: Z < 0 in %s pixels' % invalid[0].size)
+        z[invalid] = 0
 
     out = np.dstack([x, y, z])
 

@@ -11,6 +11,7 @@ Authors
 :license: modified BSD
 """
 
+from __future__ import division
 import os.path
 
 import numpy as np
@@ -371,6 +372,26 @@ class TestColorconv(TestCase):
     def test_luv_rgb_roundtrip(self):
         img_rgb = img_as_float(self.img_rgb)
         assert_array_almost_equal(luv2rgb(rgb2luv(img_rgb)), img_rgb)
+
+    def test_lab_rgb_outlier(self):
+        lab_array = np.ones((3, 1, 3))
+        lab_array[0] = [50, -12, 85]
+        lab_array[1] = [50, 12, -85]
+        lab_array[2] = [90, -4, -47]
+        rgb_array = np.array([[[0.501, 0.481, 0]],
+                              [[0, 0.482, 1.]],
+                              [[0.578, 0.914, 1.]],
+                              ])
+        assert_almost_equal(lab2rgb(lab_array), rgb_array, decimal=3)
+
+    def test_lab_full_gamut(self):
+        a, b = np.meshgrid(np.arange(-100, 100), np.arange(-100, 100))
+        L = np.ones(a.shape)
+        lab = np.dstack((L, a, b))
+        for value in [0, 10, 20]:
+            lab[:, :, 0] = value
+            with expected_warnings(['Color data out of range']):
+                lab2xyz(lab)
 
     def test_lab_lch_roundtrip(self):
         rgb = img_as_float(self.img_rgb)
