@@ -811,7 +811,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     return np.concatenate([x[..., np.newaxis] for x in [L, a, b]], axis=-1)
 
 
-def lab2xyz(lab, illuminant="D65", observer="2", error_on_invalid=False):
+def lab2xyz(lab, illuminant="D65", observer="2"):
     """CIE-LAB to XYZcolor space conversion.
 
     Parameters
@@ -822,9 +822,6 @@ def lab2xyz(lab, illuminant="D65", observer="2", error_on_invalid=False):
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10"}, optional
         The aperture angle of the observer.
-     error_on_invalid: optional, bool
-        If true, raise ValueError when pixels are outside the valid gamut.
-        Otherwise, raise a warning.
 
     Returns
     -------
@@ -838,6 +835,8 @@ def lab2xyz(lab, illuminant="D65", observer="2", error_on_invalid=False):
     ValueError
         If either the illuminant or the observer angle are not supported or
         unknown.
+    UserWarning
+        If any of the pixels are invalid (Z < 0).
 
 
     Notes
@@ -862,12 +861,8 @@ def lab2xyz(lab, illuminant="D65", observer="2", error_on_invalid=False):
 
     if np.any(z < 0):
         invalid = np.nonzero(z < 0)
-        msg = 'Color data out of range: Z < 0 in %s pixels' % invalid[0].size
-        if error_on_invalid:
-            raise ValueError(msg)
-        else:
-            warn(msg)
-            z[invalid] = 0
+        warn('Color data out of range: Z < 0 in %s pixels' % invalid[0].size)
+        z[invalid] = 0
 
     out = np.dstack([x, y, z])
 

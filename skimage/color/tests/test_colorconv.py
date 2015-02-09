@@ -388,7 +388,6 @@ class TestColorconv(TestCase):
         a, b = np.meshgrid(np.arange(-100, 100), np.arange(-100, 100))
         L = np.ones(a.shape)
         lab = np.dstack((L, a, b))
-        assert_raises(ValueError, lambda: lab2xyz(lab, error_on_invalid=True))
         for value in [0, 10, 20]:
             lab[:, :, 0] = value
             with expected_warnings(['Color data out of range']):
