@@ -191,25 +191,34 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
                              astype(np.float32))
     cdef float distance
     w = 1. / (n_ch * np.sum(w) * h ** 2) * w
-    # Coordinates of central pixel and patch bounds
+
+    # Coordinates of central pixel
+    # Iterate over rows, taking padding into account
     for row in range(offset, n_row + offset):
         row_start = row - offset
         row_end = row + offset + 1
+        # Iterate over columns, taking padding into account
         for col in range(offset, n_col + offset):
+            # Initialize per-channel bins
             for color in range(n_ch):
                 new_values[color] = 0
+            # Reset weights for each local region
             weight_sum = 0
             col_start = col - offset
             col_end = col + offset + 1
-            # Coordinates of test pixel and patch bounds
+
+            # Iterate over local 2d patch for each pixel
+            # First rows
             for i in range(max(-d, offset - row),
                            min(d + 1, n_row + offset - row)):
                 row_start_i = row_start + i
                 row_end_i = row_end + i
+                # Local patch columns
                 for j in range(max(-d, offset - col),
                                min(d + 1, n_col + offset - col)):
                     col_start_j = col_start + j
                     col_end_j = col_end + j
+                    # Shortcut for grayscale, else assume RGB
                     if n_ch == 1:
                         weight = patch_distance_2d(
                                  padded[row_start:row_end,
@@ -224,12 +233,19 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
                                  padded[row_start_i:row_end_i,
                                         col_start_j:col_end_j, :],
                                         w, s)
+
+                    # Collect results in weight sum
                     weight_sum += weight
+                    # Apply to each channel multiplicatively
                     for color in range(n_ch):
                         new_values[color] += weight * padded[row + i,
                                                              col + j, color]
+
+            # Normalize the result
             for color in range(n_ch):
                 result[row, col, color] = new_values[color] / weight_sum
+
+    # Return cropped result, undoing padding
     return result[offset:-offset, offset:-offset]
 
 
@@ -281,27 +297,35 @@ def _nl_means_denoising_3d(image, int s=7,
     cdef int pln_start_i, pln_end_i, row_start_j, row_end_j, \
              col_start_k, col_end_k
     w = 1. / (np.sum(w) * h ** 2) * w
-    # Coordinates of central pixel and patch bounds
+
+    # Coordinates of central pixel
+    # Iterate over planes, taking padding into account
     for pln in range(offset, n_pln + offset):
         pln_start = pln - offset
         pln_end = pln + offset + 1
+        # Iterate over rows, taking padding into account
         for row in range(offset, n_row + offset):
             row_start = row - offset
             row_end = row + offset + 1
+            # Iterate over columns, taking padding into account
             for col in range(offset, n_col + offset):
                 col_start = col - offset
                 col_end = col + offset + 1
                 new_value = 0
                 weight_sum = 0
-                # Coordinates of test pixel and patch bounds
+
+                # Iterate over local 3d patch for each pixel
+                # First planes
                 for i in range(max(-d, offset - pln),
                                min(d + 1, n_pln + offset - pln)):
                     pln_start_i = pln_start + i
                     pln_end_i = pln_end + i
+                    # Rows
                     for j in range(max(-d, offset - row),
                                    min(d + 1, n_row + offset - row)):
                         row_start_j = row_start + j
                         row_end_j = row_end + j
+                        # Columns
                         for k in range(max(-d, offset - col),
                                        min(d + 1, n_col + offset - col)):
                             col_start_k = col_start + k
@@ -314,10 +338,15 @@ def _nl_means_denoising_3d(image, int s=7,
                                            row_start_j:row_end_j,
                                            col_start_k:col_end_k],
                                     w, s)
+                            # Collect results in weight sum
                             weight_sum += weight
                             new_value += weight * padded[pln + i,
                                                          row + j, col + k]
+
+                # Normalize the result
                 result[pln, row, col] = new_value / weight_sum
+
+    # Return cropped result, undoing padding
     return result[offset:-offset, offset:-offset, offset:-offset]
 
 #-------------- Accelerated algorithm of Froment 2015 ------------------
@@ -516,9 +545,12 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     cdef float h2s2 = n_ch * h2 * s2
     n_row += 2 * pad_size
     n_col += 2 * pad_size
+
     # Outer loops on patch shifts
     # With t2 >= 0, reference patch is always on the left of test patch
+    # Iterate over shifts along the row axis
     for t_row in range(-d, d + 1):
+        # Iterate over shifts along the column axis
         for t_col in range(0, d + 1):
             # alpha is to account for patches on the same column
             # distance is computed twice in this case
@@ -526,27 +558,36 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
                 alpha = 0.5
             else:
                 alpha = 1.
+            # Compute integral image of the squared difference between
+            # padded and the same image shifted by (t_row, t_col)
             integral = np.zeros_like(padded[..., 0], order='C')
             _integral_image_2d(padded, integral, t_row, t_col,
                                n_row, n_col, n_ch)
+
             # Inner loops on pixel coordinates
+            # Iterate over rows, taking offset and shift into account
             for row in range(max(offset, offset - t_row),
                              min(n_row - offset, n_row - offset - t_row)):
+                # Iterate over columns, taking offset and shift into account
                 for col in range(max(offset, offset - t_col),
                                  min(n_col - offset, n_col - offset - t_col)):
+                    # Compute squared distance between shifted patches
                     distance = _integral_to_distance_2d(integral, row, col,
                                                      offset, h2s2)
                     # exp of large negative numbers is close to zero
                     if distance > DISTANCE_CUTOFF:
                         continue
                     weight = alpha * exp(-distance)
+                    # Accumulate weights corresponding to different shifts
                     weights[row, col] += weight
                     weights[row + t_row, col + t_col] += weight
+                    # Iterate over channels
                     for ch in range(n_ch):
                         result[row, col, ch] += weight * \
                                     padded[row + t_row, col + t_col, ch]
                         result[row + t_row, col + t_col, ch] += \
                                         weight * padded[row, col, ch]
+
     # Normalize pixel values using sum of weights of contributing patches
     for row in range(offset, n_row - offset):
         for col in range(offset, n_col - offset):
@@ -554,6 +595,8 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
                 # No risk of division by zero, since the contribution
                 # of a null shift is strictly positive
                 result[row, col, channel] /= weights[row, col]
+
+    # Return cropped result, undoing padding
     return result[pad_size:-pad_size, pad_size:-pad_size]
 
 
@@ -605,14 +648,18 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
     n_pln += 2 * pad_size
     n_row += 2 * pad_size
     n_col += 2 * pad_size
+
     # Outer loops on patch shifts
     # With t2 >= 0, reference patch is always on the left of test patch
+    # Iterate over shifts along the plane axis
     for t_pln in range(-d, d + 1):
         pln_dist_min = max(offset, offset - t_pln)
         pln_dist_max = min(n_pln - offset, n_pln - offset - t_pln)
+        # Iterate over shifts along the row axis
         for t_row in range(-d, d + 1):
             row_dist_min = max(offset, offset - t_row)
             row_dist_max = min(n_row - offset, n_row - offset - t_row)
+            # Iterate over shifts along the column axis
             for t_col in range(0, d + 1):
                 col_dist_min = max(offset, offset - t_col)
                 col_dist_max = min(n_col - offset, n_col - offset - t_col)
@@ -622,19 +669,27 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
                     alpha = 0.5
                 else:
                     alpha = 1.
+                # Compute integral image of the squared difference between
+                # padded and the same image shifted by (t_pln, t_row, t_col)
                 integral = np.zeros_like(padded)
                 _integral_image_3d(padded, integral, t_pln, t_row, t_col,
                                    n_pln, n_row, n_col)
+
                 # Inner loops on pixel coordinates
+                # Iterate over planes, taking offset and shift into account
                 for pln in range(pln_dist_min, pln_dist_max):
+                    # Iterate over rows, taking offset and shift into account
                     for row in range(row_dist_min, row_dist_max):
+                        # Iterate over columns
                         for col in range(col_dist_min, col_dist_max):
+                            # Compute squared distance between shifted patches
                             distance = _integral_to_distance_3d(integral,
                                         pln, row, col, offset, s_cube_h_square)
                             # exp of large negative numbers is close to zero
                             if distance > DISTANCE_CUTOFF:
                                 continue
                             weight = alpha * exp(-distance)
+                            # Accumulate weights for the different shifts
                             weights[pln, row, col] += weight
                             weights[pln + t_pln, row + t_row,
                                                  col + t_col] += weight
@@ -644,6 +699,7 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
                             result[pln + t_pln, row + t_row,
                                                 col + t_col] += weight * \
                                                   padded[pln, row, col]
+
     # Normalize pixel values using sum of weights of contributing patches
     for pln in range(offset, n_pln - offset):
         for row in range(offset, n_row - offset):
@@ -651,4 +707,6 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
                 # No risk of division by zero, since the contribution
                 # of a null shift is strictly positive
                 result[pln, row, col] /= weights[pln, row, col]
+
+    # Return cropped result, undoing padding
     return result[pad_size:-pad_size, pad_size:-pad_size, pad_size:-pad_size]
