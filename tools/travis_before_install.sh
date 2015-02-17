@@ -32,9 +32,10 @@ retry () {
 # and the minimum version of cython and networkx
 if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     virtualenv --system-site-packages ~/venv
-    sudo apt-get install python-scipy python-matplotlib
+    sudo apt-get install python-scipy python-matplotlib python-pil
     sed -i 's/cython>=/cython==/g' requirements.txt
     sed -i 's/networkx>=/networkx==/g' requirements.txt
+    sed -i '/pillow/d' requirements.txt
 else
     virtualenv -p python --system-site-packages ~/venv
 fi
