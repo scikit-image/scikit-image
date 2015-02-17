@@ -344,13 +344,9 @@ def threshold_li(image, nbins=256):
     """
 
     tolerance=0.5
-    num_pixels = image.size
-
     # Calculate the mean gray-level 
     mean = image.mean()
-    #for (int ih = 0 + 1; ih < 256; ih++ ) //0 + 1?
-    #    mean += (double)ih * data[ih];
-    #mean /= num_pixels;
+    
     # Initial estimate 
     new_thresh = mean
     old_thresh = new_thresh + 2*tolerance
@@ -362,32 +358,10 @@ def threshold_li(image, nbins=256):
         threshold = int(old_thresh + 0.5)   # range 
         # Calculate the means of background and object pixels 
         # Background 
-        #sum_back = 0
-        #num_back = 0;
-        #for (int ih = 0; ih <= threshold; ih++ ) {
-        #    sum_back += (double)ih * data[ih];
-        #    num_back += data[ih];
-        #}
-        #mean_back = ( num_back == 0 ? 0.0 : ( sum_back / ( double ) num_back ) );
         mean_back = image[ image <= threshold ].mean()
         # Object 
-        #sum_obj = 0;
-        #num_obj = 0;
-        #for (int ih = threshold + 1; ih < 256; ih++ ) {
-        #    sum_obj += (double)ih * data[ih];
-        #    num_obj += data[ih];
-        #}
-        #mean_obj = ( num_obj == 0 ? 0.0 : ( sum_obj / ( double ) num_obj ) );
         mean_obj = image[ image > threshold ].mean()
 
-        # Calculate the new threshold: Equation (7) in Ref. 2 
-        # //new_thresh = simple_round ( ( mean_back - mean_obj ) / ( Math.log ( mean_back ) - Math.log ( mean_obj ) ) );
-        # //simple_round ( double x ) {
-        # // return ( int ) ( IS_NEG ( x ) ? x - .5 : x + .5 );
-        # //}
-        # //
-        # //#define IS_NEG( x ) ( ( x ) < -DBL_EPSILON ) 
-        # //DBL_EPSILON = 2.220446049250313E-16
         temp = (mean_back - mean_obj) / (np.log(mean_back) - np.log(mean_obj))
 
         if temp < 0: # (temp < -2.220446049250313E-16)
@@ -395,5 +369,5 @@ def threshold_li(image, nbins=256):
         else:
             new_thresh = int(temp + 0.5)
     
-    return threshold #;        
+    return threshold         
 
