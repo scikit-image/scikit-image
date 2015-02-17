@@ -195,7 +195,10 @@ def test_cmyk():
     fname = f.name
     f.close()
     img.save(fname)
-    img.close()
+    try:
+        img.close()
+    except AttributeError:  # `close` not available on PIL
+        pass
 
     new = imread(fname)
 
