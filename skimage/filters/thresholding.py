@@ -1,7 +1,8 @@
 __all__ = ['threshold_adaptive',
            'threshold_otsu',
            'threshold_yen',
-           'threshold_isodata']
+           'threshold_isodata', 
+           'threshold_li',]
 
 import numpy as np
 import scipy.ndimage
@@ -302,3 +303,97 @@ def threshold_isodata(image, nbins=256, return_all=False):
         return thresholds
     else:
         return thresholds[0]
+
+
+def threshold_li(image, nbins=256):
+    """Return threshold value based on Li's Minimum Cross Entropy method.
+
+    Parameters
+    ----------
+    image : array
+        Input image.
+    nbins : int, optional
+        Number of bins used to calculate histogram. This value is ignored for
+        integer arrays.
+
+    Returns
+    -------
+    threshold : float
+        Upper threshold value. All pixels intensities that less or equal of
+        this value assumed as foreground.
+
+    References
+    ----------
+    .. [1] Li C.H. and Lee C.K. (1993) "Minimum Cross Entropy Thresholding" 
+           Pattern Recognition, 26(4): 617-625
+    .. [2] Li C.H. and Tam P.K.S. (1998) "An Iterative Algorithm for Minimum 
+           Cross Entropy Thresholding"Pattern Recognition Letters, 18(8): 771-776
+    .. [3] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding 
+           Techniques and Quantitative Performance Evaluation" Journal of 
+           Electronic Imaging, 13(1): 146-165 
+           http://citeseer.ist.psu.edu/sezgin04survey.html
+    
+    Ported to skimage by J. Metz from ImageJ plugin by G.Landini
+
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> image = camera()
+    >>> thresh = threshold_li(image)
+    >>> binary = image <= thresh
+    """
+
+    tolerance=0.5
+    num_pixels = image.size
+
+    # Calculate the mean gray-level 
+    mean = image.mean()
+    #for (int ih = 0 + 1; ih < 256; ih++ ) //0 + 1?
+    #    mean += (double)ih * data[ih];
+    #mean /= num_pixels;
+    # Initial estimate 
+    new_thresh = mean
+    old_thresh = new_thresh + 2*tolerance
+
+    # Stop the iterations when the difference between the
+    # new and old threshold values is less than the tolerance 
+    while abs( new_thresh - old_thresh ) > tolerance: 
+        old_thresh = new_thresh
+        threshold = int(old_thresh + 0.5)   # range 
+        # Calculate the means of background and object pixels 
+        # Background 
+        #sum_back = 0
+        #num_back = 0;
+        #for (int ih = 0; ih <= threshold; ih++ ) {
+        #    sum_back += (double)ih * data[ih];
+        #    num_back += data[ih];
+        #}
+        #mean_back = ( num_back == 0 ? 0.0 : ( sum_back / ( double ) num_back ) );
+        mean_back = image[ image <= threshold ].mean()
+        # Object 
+        #sum_obj = 0;
+        #num_obj = 0;
+        #for (int ih = threshold + 1; ih < 256; ih++ ) {
+        #    sum_obj += (double)ih * data[ih];
+        #    num_obj += data[ih];
+        #}
+        #mean_obj = ( num_obj == 0 ? 0.0 : ( sum_obj / ( double ) num_obj ) );
+        mean_obj = image[ image > threshold ].mean()
+
+        # Calculate the new threshold: Equation (7) in Ref. 2 
+        # //new_thresh = simple_round ( ( mean_back - mean_obj ) / ( Math.log ( mean_back ) - Math.log ( mean_obj ) ) );
+        # //simple_round ( double x ) {
+        # // return ( int ) ( IS_NEG ( x ) ? x - .5 : x + .5 );
+        # //}
+        # //
+        # //#define IS_NEG( x ) ( ( x ) < -DBL_EPSILON ) 
+        # //DBL_EPSILON = 2.220446049250313E-16
+        temp = (mean_back - mean_obj) / (np.log(mean_back) - np.log(mean_obj))
+
+        if temp < 0: # (temp < -2.220446049250313E-16)
+            new_thresh = int(temp - 0.5)
+        else:
+            new_thresh = int(temp + 0.5)
+    
+    return threshold #;        
+
