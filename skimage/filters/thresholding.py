@@ -305,16 +305,13 @@ def threshold_isodata(image, nbins=256, return_all=False):
         return thresholds[0]
 
 
-def threshold_li(image, nbins=256):
+def threshold_li(image):
     """Return threshold value based on Li's Minimum Cross Entropy method.
 
     Parameters
     ----------
     image : array
         Input image.
-    nbins : int, optional
-        Number of bins used to calculate histogram. This value is ignored for
-        integer arrays.
 
     Returns
     -------
