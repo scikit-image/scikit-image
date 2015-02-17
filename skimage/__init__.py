@@ -75,17 +75,12 @@ else:
 try:
     _imp.find_module('nose')
 except ImportError:
-    def _test(verbose=False):
+    def _test(doctest=False, verbose=False):
         """This would run all unit tests, but nose couldn't be
         imported so the test suite can not run.
         """
         raise ImportError("Could not load nose. Unit tests not available.")
 
-    def _doctest(verbose=False):
-        """This would run all doc tests, but nose couldn't be
-        imported so the test suite can not run.
-        """
-        raise ImportError("Could not load nose. Doctests not available.")
 else:
     def _test(doctest=False, verbose=False):
         """Run all unit tests."""
