@@ -60,7 +60,7 @@ class BlitManager(object):
 
     def remove_artists(self, artists):
         for artist in artists:
-            self.artist.remove(artist)
+            self.artists.remove(artist)
 
     def on_draw_event(self, event=None):
         self.background = self.canvas.copy_from_bbox(self.ax.bbox)
