@@ -149,6 +149,9 @@ Library:
     Extension: skimage.restoration._denoise_cy
         Sources:
             skimage/restoration/_denoise_cy.pyx
+    Extension: skimage.restoration._nl_means_denoising
+        Sources:
+            skimage/restoration/_nl_means_denoising.pyx
     Extension: skimage.feature._hessian_det_appx
         Sources:
             skimage/exposure/_hessian_det_appx.pyx
