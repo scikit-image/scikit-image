@@ -183,15 +183,15 @@ def register_translation(src_image, target_image, upsample_factor=1,
     # Whole-pixel shift - Compute cross-correlation by an IFFT
     shape = src_freq.shape
     image_product = src_freq * target_freq.conj()
-    cross_correlation = np.fft.fftshift(np.fft.ifftn(image_product))
+    cross_correlation = np.fft.ifftn(image_product)
 
     # Locate maximum
-    maxima = np.unravel_index(np.argmax(cross_correlation),
+    maxima = np.unravel_index(np.argmax(np.abs(cross_correlation)),
                               cross_correlation.shape)
     midpoints = np.array([np.fix(axis_size / 2) for axis_size in shape])
 
     shifts = np.array(maxima, dtype=np.float64)
-    shifts -= midpoints
+    shifts[shifts>midpoints] -= np.array(shape)[shifts>midpoints]
 
     if upsample_factor == 1:
         src_amp = np.sum(np.abs(src_freq) ** 2) / src_freq.size
@@ -204,28 +204,27 @@ def register_translation(src_image, target_image, upsample_factor=1,
         upsampled_region_size = np.ceil(upsample_factor * 1.5)
         # Center of output array at dftshift + 1
         dftshift = np.fix(upsampled_region_size / 2.0)
-        midpoint_product = np.product(midpoints)
-        normalization = (midpoint_product * upsample_factor ** 2)
+        upsample_factor = np.array(upsample_factor, dtype=np.float64)
+        normalization = (src_freq.size * upsample_factor ** 2)
         # Matrix multiply DFT around the current shift estimate
-        sample_region_offset = shifts*upsample_factor + dftshift
-        cross_correlation = _upsampled_dft(image_product,
+        sample_region_offset = dftshift - shifts*upsample_factor
+        cross_correlation = _upsampled_dft(image_product.conj(),
                                            upsampled_region_size,
                                            upsample_factor,
                                            sample_region_offset).conj()
         cross_correlation /= normalization
         # Locate maximum and map back to original pixel grid
-        maxima = np.array(np.unravel_index(np.argmax(cross_correlation),
+        maxima = np.array(np.unravel_index(np.argmax(np.abs(cross_correlation)),
                                            cross_correlation.shape),
                           dtype=np.float64)
         maxima -= dftshift
-        shifts = shifts - maxima / upsample_factor
+        shifts = shifts + maxima / upsample_factor
         CCmax = cross_correlation.max()
         src_amp = _upsampled_dft(src_freq * src_freq.conj(),
                                  1, upsample_factor)[0, 0]
         src_amp /= normalization
         target_amp = _upsampled_dft(target_freq * target_freq.conj(),
-                                    1,
-                                    upsample_factor)[0, 0]
+                                    1, upsample_factor)[0, 0]
         target_amp /= normalization
 
     # If its only one row or column the shift along that dimension has no
