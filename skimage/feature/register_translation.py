@@ -7,7 +7,7 @@ http://www.mathworks.com/matlabcentral/fileexchange/18401-efficient-subpixel-ima
 import numpy as np
 
 
-def _upsampled_dft(data, upsampled_region_size=None,
+def _upsampled_dft(data, upsampled_region_size,
                    upsample_factor=1, axis_offsets=None):
     """
     Upsampled DFT by matrix multiplication.
@@ -32,8 +32,7 @@ def _upsampled_dft(data, upsampled_region_size=None,
         The input data array (DFT of original data) to upsample.
     upsampled_region_size : integer or tuple of integers, optional
         The size of the region to be sampled.  If one integer is provided, it
-        is duplicated up to the dimensionality of ``data``.  If None, this is
-        equal to ``data.shape``.
+        is duplicated up to the dimensionality of ``data``.
     upsample_factor : integer, optional
         The upsampling factor.  Defaults to 1.
     axis_offsets : tuple of integers, optional
@@ -45,10 +44,8 @@ def _upsampled_dft(data, upsampled_region_size=None,
     output : 2D ndarray
             The upsampled DFT of the specified region.
     """
-    if upsampled_region_size is None:
-        upsampled_region_size = data.shape
     # if people pass in an integer, expand it to a list of equal-sized sections
-    elif not hasattr(upsampled_region_size, "__iter__"):
+    if not hasattr(upsampled_region_size, "__iter__"):
         upsampled_region_size = [upsampled_region_size, ] * data.ndim
     else:
         if len(upsampled_region_size) != data.ndim:
@@ -57,8 +54,6 @@ def _upsampled_dft(data, upsampled_region_size=None,
 
     if axis_offsets is None:
         axis_offsets = [0, ] * data.ndim
-    elif not hasattr(axis_offsets, "__iter__"):
-        axis_offsets = [axis_offsets, ] * data.ndim
     else:
         if len(axis_offsets) != data.ndim:
             raise ValueError("number of axis offsets must be equal to input "
@@ -191,7 +186,7 @@ def register_translation(src_image, target_image, upsample_factor=1,
     midpoints = np.array([np.fix(axis_size / 2) for axis_size in shape])
 
     shifts = np.array(maxima, dtype=np.float64)
-    shifts[shifts>midpoints] -= np.array(shape)[shifts>midpoints]
+    shifts[shifts > midpoints] -= np.array(shape)[shifts > midpoints]
 
     if upsample_factor == 1:
         src_amp = np.sum(np.abs(src_freq) ** 2) / src_freq.size
@@ -214,8 +209,9 @@ def register_translation(src_image, target_image, upsample_factor=1,
                                            sample_region_offset).conj()
         cross_correlation /= normalization
         # Locate maximum and map back to original pixel grid
-        maxima = np.array(np.unravel_index(np.argmax(np.abs(cross_correlation)),
-                                           cross_correlation.shape),
+        maxima = np.array(np.unravel_index(
+                              np.argmax(np.abs(cross_correlation)),
+                              cross_correlation.shape),
                           dtype=np.float64)
         maxima -= dftshift
         shifts = shifts + maxima / upsample_factor
@@ -230,46 +226,8 @@ def register_translation(src_image, target_image, upsample_factor=1,
     # If its only one row or column the shift along that dimension has no
     # effect. We set to zero.
     for dim in range(src_freq.ndim):
-        if midpoints[dim] == 1:
+        if shape[dim] == 1:
             shifts[dim] = 0
 
     return shifts, _compute_error(CCmax, src_amp, target_amp),\
         _compute_phasediff(CCmax)
-
-
-# TODO: this is here for the sake of testing the registration functions.  It is
-#       more accurate than scipy.ndimage.shift, which uses spline interpolation
-#       to achieve the same purpose.  However, in its current state, this
-#       function is far more limited than scipy.ndimage.shift.  Improvements
-#       include choices on how to handle boundary wrap-around, and expansion to
-#       n-dimensions.  With those improvements, this function perhaps belongs
-#       elsewhere in this package.
-def fourier_shift(image, shift):
-    """
-    Shift a real-space 2D image by shift by applying shift to phase in Fourier
-    space.
-
-    Parameters
-    ----------
-    image : ndarray
-        Real-space 2D image to be shifted.
-    shift : length 2 array-like of floats
-        Shift to be applied to image.  Order is row-major (y, x).
-
-    Returns
-    -------
-    out : ndarray
-        Shifted image.  Boundaries wrap around.
-    """
-    if image.ndim > 2:
-        raise NotImplementedError("Error: fourier_shift only supports "
-                                  " 2D images")
-    rows = np.fft.ifftshift(np.arange(-np.floor(image.shape[0] / 2),
-                                      np.ceil(image.shape[0] / 2)))
-    cols = np.fft.ifftshift(np.arange(-np.floor(image.shape[1] / 2),
-                                      np.ceil(image.shape[1] / 2)))
-    cols, rows = np.meshgrid(cols, rows)
-    out = np.fft.ifft2(np.fft.fft2(image) * np.exp(1j * 2 * np.pi *
-                       (shift[0] * rows / image.shape[0] +
-                        shift[1] * cols / image.shape[1])))
-    return out

@@ -20,12 +20,14 @@ import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage.feature import register_translation
-from skimage.feature.register_translation import _upsampled_dft, fourier_shift
+from skimage.feature.register_translation import _upsampled_dft
+from scipy.ndimage.fourier import fourier_shift
 
 image = data.camera()
 shift = (-2.4, 1.32)
 # (-2.4, 1.32) pixel offset relative to reference coin
-offset_image = fourier_shift(image, shift)
+offset_image = fourier_shift(np.fft.fftn(image), shift)
+offset_image = np.fft.ifftn(offset_image)
 print("Known offset (y, x):")
 print(shift)
 
