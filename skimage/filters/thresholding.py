@@ -1,8 +1,8 @@
 __all__ = ['threshold_adaptive',
            'threshold_otsu',
            'threshold_yen',
-           'threshold_isodata', 
-           'threshold_li',]
+           'threshold_isodata',
+           'threshold_li', ]
 
 import numpy as np
 import scipy.ndimage
@@ -306,7 +306,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
 
 
 def threshold_li(image):
-    """Return threshold value based on Li's Minimum Cross Entropy method.
+    """Return threshold value based on adaptation of Li's Minimum Cross Entropy method.
 
     Parameters
     ----------
@@ -321,16 +321,17 @@ def threshold_li(image):
 
     References
     ----------
-    .. [1] Li C.H. and Lee C.K. (1993) "Minimum Cross Entropy Thresholding" 
+    .. [1] Li C.H. and Lee C.K. (1993) "Minimum Cross Entropy Thresholding"
            Pattern Recognition, 26(4): 617-625
-    .. [2] Li C.H. and Tam P.K.S. (1998) "An Iterative Algorithm for Minimum 
+    .. [2] Li C.H. and Tam P.K.S. (1998) "An Iterative Algorithm for Minimum
            Cross Entropy Thresholding"Pattern Recognition Letters, 18(8): 771-776
-    .. [3] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding 
-           Techniques and Quantitative Performance Evaluation" Journal of 
-           Electronic Imaging, 13(1): 146-165 
+    .. [3] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
+           Techniques and Quantitative Performance Evaluation" Journal of
+           Electronic Imaging, 13(1): 146-165
            http://citeseer.ist.psu.edu/sezgin04survey.html
-    
-    Ported to skimage by J. Metz from ImageJ plugin by G.Landini
+    .. [4] ImageJ AutoThresholder code, http://fiji.sc/wiki/index.php/Auto_Threshold
+
+    Adapted for skimage by J. Metz from ImageJ plugin by G.Landini
 
     Examples
     --------
@@ -339,32 +340,37 @@ def threshold_li(image):
     >>> thresh = threshold_li(image)
     >>> binary = image <= thresh
     """
+    # Requires positive image ( log(mean))
+    offset = image.min()
+    # Can't use fixed tolerance for float image
+    imrange = image.max()-offset
+    image -= offset
 
-    tolerance=0.5
-    # Calculate the mean gray-level 
+    tolerance = 0.5 * imrange / 256.0
+    # Calculate the mean gray-level
     mean = image.mean()
-    
-    # Initial estimate 
+
+    # Initial estimate
     new_thresh = mean
-    old_thresh = new_thresh + 2*tolerance
+    old_thresh = new_thresh + 2 * tolerance
 
     # Stop the iterations when the difference between the
-    # new and old threshold values is less than the tolerance 
-    while abs( new_thresh - old_thresh ) > tolerance: 
+    # new and old threshold values is less than the tolerance
+    while abs(new_thresh - old_thresh) > tolerance:
         old_thresh = new_thresh
-        threshold = int(old_thresh + 0.5)   # range 
-        # Calculate the means of background and object pixels 
-        # Background 
-        mean_back = image[ image <= threshold ].mean()
-        # Object 
-        mean_obj = image[ image > threshold ].mean()
+        threshold = old_thresh + tolerance   # range
+        # Calculate the means of background and object pixels
+        # Background
+        mean_back = image[image <= threshold].mean()
+        # Object
+        mean_obj = image[image > threshold].mean()
 
         temp = (mean_back - mean_obj) / (np.log(mean_back) - np.log(mean_obj))
 
-        if temp < 0: # (temp < -2.220446049250313E-16)
-            new_thresh = int(temp - 0.5)
+        if temp < 0:
+            new_thresh = temp - tolerance
         else:
-            new_thresh = int(temp + 0.5)
-    
-    return threshold         
+            new_thresh = temp + tolerance
+
+    return threshold + offset
 
