@@ -324,7 +324,7 @@ def threshold_li(image):
     .. [1] Li C.H. and Lee C.K. (1993) "Minimum Cross Entropy Thresholding"
            Pattern Recognition, 26(4): 617-625
     .. [2] Li C.H. and Tam P.K.S. (1998) "An Iterative Algorithm for Minimum
-           Cross Entropy Thresholding"Pattern Recognition Letters, 18(8): 771-776
+           Cross Entropy Thresholding" Pattern Recognition Letters, 18(8): 771-776
     .. [3] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
            Techniques and Quantitative Performance Evaluation" Journal of
            Electronic Imaging, 13(1): 146-165
@@ -340,10 +340,10 @@ def threshold_li(image):
     >>> thresh = threshold_li(image)
     >>> binary = image <= thresh
     """
-    # Requires positive image ( log(mean))
+    # Requires positive image (because of log(mean))
     offset = image.min()
-    # Can't use fixed tolerance for float image
-    imrange = image.max()-offset
+    # Can not use fixed tolerance for float image
+    imrange = image.max() - offset
     image -= offset
 
     tolerance = 0.5 * imrange / 256.0
@@ -360,9 +360,7 @@ def threshold_li(image):
         old_thresh = new_thresh
         threshold = old_thresh + tolerance   # range
         # Calculate the means of background and object pixels
-        # Background
         mean_back = image[image <= threshold].mean()
-        # Object
         mean_obj = image[image > threshold].mean()
 
         temp = (mean_back - mean_obj) / (np.log(mean_back) - np.log(mean_obj))
@@ -373,4 +371,3 @@ def threshold_li(image):
             new_thresh = temp + tolerance
 
     return threshold + offset
-

@@ -179,10 +179,6 @@ def test_li_coins_image_as_float():
     assert 0.37 < threshold_li(coins) < 0.38
 
 
-def test_li_lena_image():
-    img = skimage.img_as_ubyte(data.lena())
-    assert 127 < threshold_li(img) < 129
-
 def test_li_astro_image():
     img = skimage.img_as_ubyte(data.astronaut())
     assert 66 < threshold_li(img) < 68
