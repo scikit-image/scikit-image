@@ -5,6 +5,7 @@ import skimage
 from skimage import data
 from skimage.filters.thresholding import (threshold_adaptive,
                                           threshold_otsu,
+                                          threshold_li,
                                           threshold_yen,
                                           threshold_isodata)
 
@@ -27,6 +28,17 @@ class TestSimpleImage():
     def test_otsu_float_image(self):
         image = np.float64(self.image)
         assert 2 <= threshold_otsu(image) < 3
+
+    def test_li(self):
+        assert int(threshold_li(self.image)) == 2
+
+    def test_li_negative_int(self):
+        image = self.image - 2
+        assert int(threshold_li(image)) == 0
+
+    def test_li_float_image(self):
+        image = np.float64(self.image)
+        assert 2 <= threshold_li(image) < 3
 
     def test_yen(self):
         assert threshold_yen(self.image) == 2
@@ -151,6 +163,25 @@ def test_otsu_lena_image():
 def test_otsu_astro_image():
     img = skimage.img_as_ubyte(data.astronaut())
     assert 109 < threshold_otsu(img) < 111
+
+def test_li_camera_image():
+    camera = skimage.img_as_ubyte(data.camera())
+    assert 63 < threshold_li(camera) < 65
+
+
+def test_li_coins_image():
+    coins = skimage.img_as_ubyte(data.coins())
+    assert 95 < threshold_li(coins) < 97
+
+
+def test_li_coins_image_as_float():
+    coins = skimage.img_as_float(data.coins())
+    assert 0.37 < threshold_li(coins) < 0.38
+
+
+def test_li_astro_image():
+    img = skimage.img_as_ubyte(data.astronaut())
+    assert 66 < threshold_li(img) < 68
 
 def test_yen_camera_image():
     camera = skimage.img_as_ubyte(data.camera())

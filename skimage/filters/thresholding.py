@@ -1,7 +1,8 @@
 __all__ = ['threshold_adaptive',
            'threshold_otsu',
            'threshold_yen',
-           'threshold_isodata']
+           'threshold_isodata',
+           'threshold_li', ]
 
 import numpy as np
 import scipy.ndimage
@@ -302,3 +303,71 @@ def threshold_isodata(image, nbins=256, return_all=False):
         return thresholds
     else:
         return thresholds[0]
+
+
+def threshold_li(image):
+    """Return threshold value based on adaptation of Li's Minimum Cross Entropy method.
+
+    Parameters
+    ----------
+    image : array
+        Input image.
+
+    Returns
+    -------
+    threshold : float
+        Upper threshold value. All pixels intensities that less or equal of
+        this value assumed as foreground.
+
+    References
+    ----------
+    .. [1] Li C.H. and Lee C.K. (1993) "Minimum Cross Entropy Thresholding"
+           Pattern Recognition, 26(4): 617-625
+    .. [2] Li C.H. and Tam P.K.S. (1998) "An Iterative Algorithm for Minimum
+           Cross Entropy Thresholding" Pattern Recognition Letters, 18(8): 771-776
+    .. [3] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
+           Techniques and Quantitative Performance Evaluation" Journal of
+           Electronic Imaging, 13(1): 146-165
+           http://citeseer.ist.psu.edu/sezgin04survey.html
+    .. [4] ImageJ AutoThresholder code, http://fiji.sc/wiki/index.php/Auto_Threshold
+
+    Adapted for skimage by J. Metz from ImageJ plugin by G.Landini
+
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> image = camera()
+    >>> thresh = threshold_li(image)
+    >>> binary = image <= thresh
+    """
+    # Requires positive image (because of log(mean))
+    offset = image.min()
+    # Can not use fixed tolerance for float image
+    imrange = image.max() - offset
+    image -= offset
+
+    tolerance = 0.5 * imrange / 256.0
+    # Calculate the mean gray-level
+    mean = image.mean()
+
+    # Initial estimate
+    new_thresh = mean
+    old_thresh = new_thresh + 2 * tolerance
+
+    # Stop the iterations when the difference between the
+    # new and old threshold values is less than the tolerance
+    while abs(new_thresh - old_thresh) > tolerance:
+        old_thresh = new_thresh
+        threshold = old_thresh + tolerance   # range
+        # Calculate the means of background and object pixels
+        mean_back = image[image <= threshold].mean()
+        mean_obj = image[image > threshold].mean()
+
+        temp = (mean_back - mean_obj) / (np.log(mean_back) - np.log(mean_obj))
+
+        if temp < 0:
+            new_thresh = temp - tolerance
+        else:
+            new_thresh = temp + tolerance
+
+    return threshold + offset
