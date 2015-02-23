@@ -19,7 +19,6 @@ import re
 import shutil
 import sys
 from os import chdir as cd
-from os.path import join as pjoin
 
 from subprocess import Popen, PIPE, CalledProcessError, check_call
 
@@ -117,8 +116,8 @@ if __name__ == '__main__':
     try:
         cd(pages_dir)
         status = sh2('git status | head -1')
-        branch = re.match('On branch (.*)$', status).group(1)
-        if branch != 'gh-pages':
+        branch = re.match(b'On branch (.*)$', status).group(1)
+        if branch != b'gh-pages':
             e = 'On %r, git branch is %r, MUST be "gh-pages"' % (pages_dir,
                                                                  branch)
             raise RuntimeError(e)
@@ -126,7 +125,12 @@ if __name__ == '__main__':
         sh('git add .nojekyll')
         sh('git add index.html')
         sh('git add --all %s' % tag)
-        sh2('git commit -m"Updated doc release: %s"' % tag)
+
+        status = sh2('git status | tail -1')
+        if not re.match(b'nothing to commit', status):
+            sh2('git commit -m"Updated doc release: %s"' % tag)
+        else:
+            print('\n! Note: no changes to commit\n')
 
         print('Most recent commit:')
         sys.stdout.flush()
