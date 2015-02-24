@@ -206,3 +206,7 @@
 
 - Kevin Keraudren
   Fix and test for feature.peak_local_max
+    
+Jeremy Metz
+  - Adaptation of ImageJ Autothresholder.Li, fixed Qhull error QH6228   
+
