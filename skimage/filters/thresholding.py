@@ -316,8 +316,8 @@ def threshold_li(image):
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels intensities that less or equal of
-        this value assumed as foreground.
+        Upper threshold value. All pixels intensities that more than
+        this value assumed to be foreground.
 
     References
     ----------
@@ -330,8 +330,6 @@ def threshold_li(image):
            Electronic Imaging, 13(1): 146-165
            http://citeseer.ist.psu.edu/sezgin04survey.html
     .. [4] ImageJ AutoThresholder code, http://fiji.sc/wiki/index.php/Auto_Threshold
-
-    Adapted for skimage by J. Metz from ImageJ plugin by G.Landini
 
     Examples
     --------
