@@ -288,7 +288,7 @@ def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
 
     """
 
-    return _image_orthogonal_matrix22_eigvals(Hyy, Hxy, Hyy)
+    return _image_orthogonal_matrix22_eigvals(Hxx, Hxy, Hyy)
 
 
 def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
