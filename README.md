@@ -38,7 +38,7 @@ $ python setup.py develop       # Do this once to add pkg to Python path
 $ python setup.py build_ext -i  # Build binary extensions
 ```
 
-## License
+## License (Modified BSD)
 
 Copyright (C) 2011, the scikit-image team
 All rights reserved.
