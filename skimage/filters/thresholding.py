@@ -316,8 +316,8 @@ def threshold_li(image):
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels intensities that more than
-        this value assumed to be foreground.
+        Upper threshold value. All pixels intensities more than
+        this value are assumed to be foreground.
 
     References
     ----------
@@ -336,7 +336,7 @@ def threshold_li(image):
     >>> from skimage.data import camera
     >>> image = camera()
     >>> thresh = threshold_li(image)
-    >>> binary = image <= thresh
+    >>> binary = image > thresh
     """
     # Requires positive image (because of log(mean))
     offset = image.min()
