@@ -60,7 +60,7 @@ class BlitManager(object):
 
     def remove_artists(self, artists):
         for artist in artists:
-            self.artist.remove(artist)
+            self.artists.remove(artist)
 
     def on_draw_event(self, event=None):
         self.background = self.canvas.copy_from_bbox(self.ax.bbox)
@@ -152,6 +152,9 @@ class ImageViewer(QtWidgets.QMainWindow):
     This viewer is a simple container object that holds a Matplotlib axes
     for showing images. `ImageViewer` doesn't subclass the Matplotlib axes (or
     figure) because of the high probability of name collisions.
+
+    Subclasses and plugins will likely extend the `update_image` method to add
+    custom overlays or filter the displayed image.
 
     Parameters
     ----------
@@ -281,6 +284,14 @@ class ImageViewer(QtWidgets.QMainWindow):
         if filename is None:
             return
         image = io.imread(filename)
+        self._update_original_image(image)
+
+    def update_image(self, image):
+        """Update displayed image.
+
+        This method can be overridden or extended in subclasses and plugins to
+        react to image changes.
+        """
         self._update_original_image(image)
 
     def _update_original_image(self, image):
@@ -423,9 +434,6 @@ class CollectionViewer(ImageViewer):
         home/end keys
             First/last image in collection.
 
-    Subclasses and plugins will likely extend the `update_image` method to add
-    custom overlays or filter the displayed image.
-
     Parameters
     ----------
     image_collection : list of images
@@ -471,14 +479,6 @@ class CollectionViewer(ImageViewer):
         self.index = index
         self.slider.val = index
         self.update_image(self.image_collection[index])
-
-    def update_image(self, image):
-        """Update displayed image.
-
-        This method can be overridden or extended in subclasses and plugins to
-        react to image changes.
-        """
-        self._update_original_image(image)
 
     def keyPressEvent(self, event):
         if type(event) == QtWidgets.QKeyEvent:
