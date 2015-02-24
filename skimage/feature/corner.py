@@ -162,7 +162,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
     kernel_xx /= kernel_xx.sum()
     kernel_xy = 1 / (2 * np.pi * sigma ** 6) * (kx * ky)
     kernel_xy *= gaussian_exp
-    kernel_xy /= kernel_xx.sum()
+    kernel_xy /= kernel_xy.sum()
     kernel_yy = kernel_xx.transpose()
 
     Hxx = ndimage.convolve(image, kernel_xx, mode=mode, cval=cval)
