@@ -79,4 +79,6 @@ __all__ = ['inverse',
            'threshold_otsu',
            'threshold_yen',
            'threshold_isodata',
+           'threshold_niblack',
+           'threshold_sauvola',
            'rank']
