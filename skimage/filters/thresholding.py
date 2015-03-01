@@ -12,6 +12,7 @@ import scipy.ndimage
 from ..exposure import histogram
 from .._shared.utils import assert_nD
 from skimage.exposure import histogram
+from skimage import dtype_limits, img_as_ubyte
 
 
 def threshold_adaptive(image, block_size, method='gaussian', offset=0,
@@ -403,7 +404,7 @@ def _mean_std(image, w):
            Retrieval XV, (San Jose, USA), Jan. 2008.
     """
     from skimage.transform.integral import integral_image  # To avoid
-                                                           # circular import.
+
     if w == 1 or w % 2 == 0:
         raise ValueError(
             "Window size w = %s must be odd and greater than 1." % (w))
@@ -447,7 +448,7 @@ def threshold_niblack(image, w=15, k=0.2, offset=0):
     Parameters
     ----------
     image: (N, M) ndarray
-        Input image.
+        Input image. Only 2D grayscale images allowed.
     w : int, optional
         Odd size of pixel neighborhood window (e.g. 3, 5, 7,
         ..., 21, ...). Default: 15.
@@ -473,7 +474,11 @@ def threshold_niblack(image, w=15, k=0.2, offset=0):
     ... image = page()
     ... binary_image = threshold_niblack(image, w=7, k=0.1)
     """
-
+    if len(image.shape) != 2:
+        raise ValueError("Image is not 2D grayscale.")
+    # Convert img to range [0, 255] if was provided as float with range [0, 1]
+    if (image.dtype == np.float and dtype_limits(image) == (0, 1)):
+        image = img_as_ubyte(image)
     m, s = _mean_std(image, w)
     t = m - k * s
     return image > (t - offset)
@@ -513,7 +518,7 @@ def threshold_sauvola(image, method='sauvola', w=15, k=0.2, r=128., offset=0,
     Parameters
     ----------
     image: (N, M) ndarray
-        Input image.
+        Input image. Only 2D grayscale images allowed.
     method : {'original', 'wolf', 'phansalkar'}, optional.
         method used for computing local thresholds.
 
@@ -567,7 +572,13 @@ def threshold_sauvola(image, method='sauvola', w=15, k=0.2, r=128., offset=0,
     ... binary_phansalkar = threshold_sauvola(image, method='phansalkar',
                                               w=7, k=0.2, r=128)
     """
-
+    image_norm = None
+    if len(image.shape) != 2:
+        raise ValueError("Image is not 2D grayscale.")
+    # Convert img to range [0, 255] if was provided as float with range [0, 1]
+    if (image.dtype == np.float and dtype_limits(image) == (0, 1)):
+        image_norm = image  # Useful for phanlsakar
+        image = img_as_ubyte(image)
     m, s = _mean_std(image, w)
     if method == 'sauvola':
         t = m * (1 + k * ((s / r) - 1))
@@ -576,7 +587,8 @@ def threshold_sauvola(image, method='sauvola', w=15, k=0.2, r=128., offset=0,
         M = image.min()
         t = (1 - k) * m + k * M + k * (s / R) * (m - M)
     elif method == 'phansalkar':
-        image = image.astype(np.float) / 255.  # Normalized image.
+        image = image_norm if image_norm is not None else \
+            image.astype(np.float) / 255.  # Normalized image.
         m, s = m / 255., s / 255.  # Normalized mean, std
         rn = r / 255.
         t = m * (1 + p * np.exp(-q * m) + k * ((s / rn) - 1))
