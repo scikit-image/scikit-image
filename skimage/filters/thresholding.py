@@ -568,7 +568,6 @@ def threshold_sauvola(image, method='sauvola', w=15, k=0.2, r=128., offset=0,
                                               w=7, k=0.2, r=128)
     """
 
-    t = np.zeros_like(image)
     m, s = _mean_std(image, w)
     if method == 'sauvola':
         t = m * (1 + k * ((s / r) - 1))
@@ -578,7 +577,7 @@ def threshold_sauvola(image, method='sauvola', w=15, k=0.2, r=128., offset=0,
         t = (1 - k) * m + k * M + k * (s / R) * (m - M)
     elif method == 'phansalkar':
         image = image.astype(np.float) / 255.  # Normalized image.
-        m, s = _mean_std(image, w)
+        m, s = m / 255., s / 255.  # Normalized mean, std
         rn = r / 255.
         t = m * (1 + p * np.exp(-q * m) + k * ((s / rn) - 1))
     else:

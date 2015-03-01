@@ -32,7 +32,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 from skimage.data import page
-from skimage.filter import (threshold_otsu, threshold_niblack,
+from skimage.filters import (threshold_otsu, threshold_niblack,
                             threshold_sauvola)
 
 
