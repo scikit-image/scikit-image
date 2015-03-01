@@ -22,8 +22,7 @@ from ..filters.edges import (sobel, hsobel, vsobel, sobel_h, sobel_v,
 from ..filters._rank_order import rank_order
 from ..filters._gabor import gabor_kernel, gabor_filter
 from ..filters.thresholding import (threshold_adaptive, threshold_otsu, threshold_yen,
-                           threshold_isodata, threshold_niblack,
-                           threshold_sauvola)
+                           threshold_isodata)
 from ..filters import rank
 from ..filters.rank import median
 
@@ -80,6 +79,4 @@ __all__ = ['inverse',
            'threshold_otsu',
            'threshold_yen',
            'threshold_isodata',
-           'threshold_niblack',
-           'threshold_sauvola',
            'rank']
