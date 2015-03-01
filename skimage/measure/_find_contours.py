@@ -167,7 +167,10 @@ def _assemble_contours(points_iterator):
                     head.extend(tail)
                     # remove all traces of tail:
                     del starts[to_point]
-                    del ends[tail[-1]]
+                    try:
+                        del ends[tail[-1]]
+                    except KeyError:
+                        pass
                     del contours[tail_num]
                     # remove the old end of head and add the new end.
                     del ends[from_point]
