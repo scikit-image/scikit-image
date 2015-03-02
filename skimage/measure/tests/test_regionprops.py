@@ -126,13 +126,13 @@ def test_equiv_diameter():
 
 
 def test_euler_number():
-    with expected_warnings(['`background`']):
+    with expected_warnings(['`background`|CObject type']):
         en = regionprops(SAMPLE)[0].euler_number
     assert en == 0
 
     SAMPLE_mod = SAMPLE.copy()
     SAMPLE_mod[7, -3] = 0
-    with expected_warnings(['`background`']):
+    with expected_warnings(['`background`|CObject type']):
         en = regionprops(SAMPLE_mod)[0].euler_number
     assert en == -1
 
@@ -372,7 +372,7 @@ def test_equals():
     r2 = regions[0]
     r3 = regions[1]
 
-    with expected_warnings(['`background`']):
+    with expected_warnings(['`background`|CObject type']):
         assert_equal(r1 == r2, True, "Same regionprops are not equal")
         assert_equal(r1 != r3, True, "Different regionprops are equal")
 

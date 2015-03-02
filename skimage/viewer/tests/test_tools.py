@@ -8,7 +8,11 @@ from skimage.viewer import ImageViewer, has_qt
 from skimage.viewer.canvastools import (
     LineTool, ThickLineTool, RectangleTool, PaintTool)
 from skimage.viewer.canvastools.base import CanvasToolBase
-from matplotlib.testing.decorators import cleanup
+try:
+    from matplotlib.testing.decorators import cleanup
+except ImportError:
+    def cleanup(func):
+        return func
 
 
 def get_end_points(image):
