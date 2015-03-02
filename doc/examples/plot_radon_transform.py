@@ -65,7 +65,7 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5))
 ax1.set_title("Original")
 ax1.imshow(image, cmap=plt.cm.Greys_r)
 
-theta = np.linspace(0., 180., max(image.shape), endpoint=True)
+theta = np.linspace(0., 180., max(image.shape), endpoint=False)
 sinogram = radon(image, theta=theta, circle=True)
 ax2.set_title("Radon transform\n(Sinogram)")
 ax2.set_xlabel("Projection angle (deg)")
