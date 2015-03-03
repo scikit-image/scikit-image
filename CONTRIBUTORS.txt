@@ -211,5 +211,7 @@
   Adaptation of ImageJ Autothresholder.Li, fixed Qhull error QH6228
 
 - Mike Sarahan
-  Sub-pixel registration
+  Sub-pixel shift registration
 
+- Jim Fienup, Alexander Iacchetta
+  In-depth review of sub-pixel shift registration

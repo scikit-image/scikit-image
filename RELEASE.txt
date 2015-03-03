@@ -7,7 +7,7 @@ How to make a new release of ``skimage``
 
   1. Review and cleanup ``doc/release/release_dev.txt``
 
-     - To show a list of contributors and changes, run
+     - To show a list of merges and contributors, run
        ``doc/release/contribs.py <tag of prev release>``.
 
   2. Rename to ``doc/release/release_X.txt``

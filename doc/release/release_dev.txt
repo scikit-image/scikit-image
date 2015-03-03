@@ -14,13 +14,9 @@ http://scikit-image.org
 
 New Features
 ------------
-Region Adjacency Graphs
- - Color distance RAGs (#1031)
- - Threshold Cut on RAGs (#1031)
- - Similarity RAGs (#1080)
- - Normalized Cut on RAGs (#1080)
- - RAG Drawing (#1087)
-Sliding Windowed Histogram (#1127)
+
+
+
 
 Improvements
 ------------
