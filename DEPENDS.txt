@@ -49,7 +49,7 @@ functionality is only available with the following installed:
   Optional io plugin providing a wide variety of `formats <http://www.itk.org/Wiki/ITK_File_Formats>`__.
   including specialized formats using in medical imaging.
 
-* `imread <http://pythonhosted.org/imread/>`
+* `imread <http://pythonhosted.org/imread/>`__
   Optional io plugin providing most standard `formats <http://pythonhosted.org//imread/formats.html>`__.
 
 
