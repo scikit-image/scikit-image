@@ -80,7 +80,7 @@ surname:
 - Jaime Frio
 - Jostein Bø Fløystad
 - Neeraj Gangwar
-- Christopher Gohlke
+- Christoph Gohlke
 - Michael Hansen
 - Almar Klein
 - Jeremy Metz
@@ -91,13 +91,13 @@ surname:
 - Thomas Robitaille
 - Michal Romaniuk
 - Johannes L. Schönberger
-- Steven Sylvester
+- Steven Silvester
 - Julian Taylor
 - Gregor Thalhammer
 - Matthew Trentacoste
 - Siva Prasad Varma
 - Guillem Palou Visa
 - Stefan van der Walt
-- Josh Warner
+- Joshua Warner
 - Tony S Yu
 - radioxoma
