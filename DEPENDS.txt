@@ -45,7 +45,7 @@ functionality is only available with the following installed:
 
 * `Astropy <http://www.astropy.org>`__ provides FITS io capability.
 
-* `SimpleITK <http://www.simpleitk.org/>`
+* `SimpleITK <http://www.simpleitk.org/>`__
   Optional io plugin providing a wide variety of `formats <http://www.itk.org/Wiki/ITK_File_Formats>`__.
   including specialized formats using in medical imaging.
 
