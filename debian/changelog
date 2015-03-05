@@ -5,6 +5,8 @@ skimage (0.11.0-1) experimental; urgency=medium
   * Updated debian/watch to avoid deprecated redirector
   * debian/{,tests/}control
     - added python{,3}-networkx to {build-,}depends and Recommends
+  * debian/tests/python*
+    - for now exclude testing of test_tools.py due to #779847 in mpl
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 05 Mar 2015 08:32:02 -0500
 
