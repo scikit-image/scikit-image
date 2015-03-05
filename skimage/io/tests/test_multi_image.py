@@ -1,18 +1,10 @@
 import os
 
 import numpy as np
-from numpy.testing.decorators import skipif
 from numpy.testing import assert_raises, assert_equal, assert_allclose
 
 from skimage import data_dir
-from skimage.io.collection import MultiImage
-
-try:
-    from PIL import Image
-except ImportError:
-    PIL_available = False
-else:
-    PIL_available = True
+from skimage.io.collection import MultiImage, ImageCollection
 
 import six
 
@@ -22,46 +14,78 @@ class TestMultiImage():
     def setUp(self):
         # This multipage TIF file was created with imagemagick:
         # convert im1.tif im2.tif -adjoin multipage.tif
-        if PIL_available:
-            self.img = MultiImage(os.path.join(data_dir, 'multipage.tif'))
+        paths = [os.path.join(data_dir, 'multipage.tif'),
+                 os.path.join(data_dir, 'no_time_for_that.gif')]
+        self.imgs = [MultiImage(paths[0]),
+                     MultiImage(paths[0], conserve_memory=False),
+                     MultiImage(paths[1]),
+                     MultiImage(paths[1], conserve_memory=False),
+                     ImageCollection(paths[0]),
+                     ImageCollection(paths[1], conserve_memory=False),
+                     ImageCollection('%s:%s' % (paths[0], paths[1]))]
 
-    @skipif(not PIL_available)
     def test_len(self):
-        assert len(self.img) == 2
+        assert len(self.imgs[0]) == len(self.imgs[1]) == 2
+        assert len(self.imgs[2]) == len(self.imgs[3]) == 24
+        assert len(self.imgs[4]) == 2
+        assert len(self.imgs[5]) == 24
+        assert len(self.imgs[6]) == 26, len(self.imgs[6])
 
-    @skipif(not PIL_available)
+    def test_slicing(self):
+        img = self.imgs[-1]
+        assert type(img[:]) is ImageCollection
+        assert len(img[:]) == 26, len(img[:])
+        assert len(img[:1]) == 1
+        assert len(img[1:]) == 25
+        assert_allclose(img[0], img[:1][0])
+        assert_allclose(img[1], img[1:][0])
+        assert_allclose(img[-1], img[::-1][0])
+        assert_allclose(img[0], img[::-1][-1])
+
     def test_getitem(self):
-        num = len(self.img)
-        for i in range(-num, num):
-            assert type(self.img[i]) is np.ndarray
-        assert_allclose(self.img[0], self.img[-num])
+        for img in self.imgs:
+            num = len(img)
 
-        # assert_raises expects a callable, hence this thin wrapper function.
-        def return_img(n):
-            return self.img[n]
-        assert_raises(IndexError, return_img, num)
-        assert_raises(IndexError, return_img, -num - 1)
+            for i in range(-num, num):
+                assert type(img[i]) is np.ndarray
+            assert_allclose(img[0], img[-num])
 
-    @skipif(not PIL_available)
+            assert_raises(AssertionError,
+                          assert_allclose,
+                          img[0], img[1])
+
+            # assert_raises expects a callable, hence this thin wrapper function.
+            def return_img(n):
+                return img[n]
+            assert_raises(IndexError, return_img, num)
+            assert_raises(IndexError, return_img, -num - 1)
+
     def test_files_property(self):
-        assert isinstance(self.img.filename, six.string_types)
+        for img in self.imgs:
+            if isinstance(img, ImageCollection):
+                continue
 
-        def set_filename(f):
-            self.img.filename = f
-        assert_raises(AttributeError, set_filename, 'newfile')
+            assert isinstance(img.filename, six.string_types)
 
-    @skipif(not PIL_available)
+            def set_filename(f):
+                img.filename = f
+            assert_raises(AttributeError, set_filename, 'newfile')
+
     def test_conserve_memory_property(self):
-        assert isinstance(self.img.conserve_memory, bool)
+        for img in self.imgs:
+            assert isinstance(img.conserve_memory, bool)
 
-        def set_mem(val):
-            self.img.conserve_memory = val
-        assert_raises(AttributeError, set_mem, True)
+            def set_mem(val):
+                img.conserve_memory = val
+            assert_raises(AttributeError, set_mem, True)
 
-    @skipif(not PIL_available)
     def test_concatenate(self):
-        array = self.img.concatenate()
-        assert_equal(array.shape, (len(self.img),) + self.img[0].shape)
+        for img in self.imgs:
+            if img[0].shape != img[-1].shape:
+                assert_raises(ValueError, img.concatenate)
+                continue
+            array = img.concatenate()
+            assert_equal(array.shape, (len(img),) + img[0].shape)
 
 
 if __name__ == "__main__":

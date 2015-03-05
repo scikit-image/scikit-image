@@ -17,9 +17,10 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
 from skimage import data
-from skimage.filter import threshold_otsu
+from skimage.filters import threshold_otsu
 from skimage.segmentation import clear_border
-from skimage.morphology import label, closing, square
+from skimage.measure import label
+from skimage.morphology import closing, square
 from skimage.measure import regionprops
 from skimage.color import label2rgb
 

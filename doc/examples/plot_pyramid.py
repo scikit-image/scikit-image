@@ -16,7 +16,7 @@ from skimage import data
 from skimage.transform import pyramid_gaussian
 
 
-image = data.lena()
+image = data.astronaut()
 rows, cols, dim = image.shape
 pyramid = tuple(pyramid_gaussian(image, downscale=2))
 

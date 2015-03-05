@@ -9,8 +9,8 @@ np.random.seed(1234)
 
 def test_ssim_patch_range():
     N = 51
-    X = (np.random.random((N, N)) * 255).astype(np.uint8)
-    Y = (np.random.random((N, N)) * 255).astype(np.uint8)
+    X = (np.random.rand(N, N) * 255).astype(np.uint8)
+    Y = (np.random.rand(N, N) * 255).astype(np.uint8)
 
     assert(ssim(X, Y, win_size=N) < 0.1)
     assert_equal(ssim(X, X, win_size=N), 1)
@@ -18,8 +18,8 @@ def test_ssim_patch_range():
 
 def test_ssim_image():
     N = 100
-    X = (np.random.random((N, N)) * 255).astype(np.uint8)
-    Y = (np.random.random((N, N)) * 255).astype(np.uint8)
+    X = (np.random.rand(N, N) * 255).astype(np.uint8)
+    Y = (np.random.rand(N, N) * 255).astype(np.uint8)
 
     S0 = ssim(X, X, win_size=3)
     assert_equal(S0, 1)
@@ -31,8 +31,8 @@ def test_ssim_image():
 # NOTE: This test is known to randomly fail on some systems (Mac OS X 10.6)
 def test_ssim_grad():
     N = 30
-    X = np.random.random((N, N)) * 255
-    Y = np.random.random((N, N)) * 255
+    X = np.random.rand(N, N) * 255
+    Y = np.random.rand(N, N) * 255
 
     f = ssim(X, Y, dynamic_range=255)
     g = ssim(X, Y, dynamic_range=255, gradient=True)
@@ -44,8 +44,8 @@ def test_ssim_grad():
 
 def test_ssim_dtype():
     N = 30
-    X = np.random.random((N, N))
-    Y = np.random.random((N, N))
+    X = np.random.rand(N, N)
+    Y = np.random.rand(N, N)
 
     S1 = ssim(X, Y)
 

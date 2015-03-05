@@ -5,6 +5,7 @@ from .util import (DescriptorExtractor, _mask_border_keypoints,
                    _prepare_grayscale_input_2D)
 
 from .brief_cy import _brief_loop
+from .._shared.utils import assert_nD
 
 
 class BRIEF(DescriptorExtractor):
@@ -137,6 +138,7 @@ class BRIEF(DescriptorExtractor):
             Keypoint coordinates as ``(row, col)``.
 
         """
+        assert_nD(image, 2)
 
         np.random.seed(self.sample_seed)
 
@@ -169,13 +171,13 @@ class BRIEF(DescriptorExtractor):
         # Removing keypoints that are within (patch_size / 2) distance from the
         # image border
         self.mask = _mask_border_keypoints(image.shape, keypoints,
-                                            patch_size // 2)
+                                           patch_size // 2)
 
         keypoints = np.array(keypoints[self.mask, :], dtype=np.intp,
                              order='C', copy=False)
 
         self.descriptors = np.zeros((keypoints.shape[0], desc_size),
-                                     dtype=bool, order='C')
+                                    dtype=bool, order='C')
 
         _brief_loop(image, self.descriptors.view(np.uint8), keypoints,
                     pos1, pos2)

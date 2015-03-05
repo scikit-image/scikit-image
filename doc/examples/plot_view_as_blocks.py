@@ -7,10 +7,10 @@ This example illustrates the use of `view_as_blocks` from
 `skimage.util.shape`.  Block views can be incredibly useful when one
 wants to perform local operations on non-overlapping image patches.
 
-We use `lena` from `skimage.data` and virtually 'slice' it into square
+We use `astronaut` from `skimage.data` and virtually 'slice' it into square
 blocks.  Then, on each block, we either pool the mean, the max or the
 median value of that block. The results are displayed altogether, along
-with a spline interpolation of order 3 rescaling of the original `lena`
+with a spline interpolation of order 3 rescaling of the original `astronaut`
 image.
 
 """
@@ -24,20 +24,20 @@ from skimage import color
 from skimage.util.shape import view_as_blocks
 
 
-# -- get `lena` from skimage.data in grayscale
-l = color.rgb2gray(data.lena())
+# -- get `astronaut` from skimage.data in grayscale
+l = color.rgb2gray(data.astronaut())
 
 # -- size of blocks
 block_shape = (4, 4)
 
-# -- see `lena` as a matrix of blocks (of shape
+# -- see `astronaut` as a matrix of blocks (of shape
 #    `block_shape`)
 view = view_as_blocks(l, block_shape)
 
 # -- collapse the last two dimensions in one
 flatten_view = view.reshape(view.shape[0], view.shape[1], -1)
 
-# -- resampling `lena` by taking either the `mean`,
+# -- resampling `astronaut` by taking either the `mean`,
 #    the `max` or the `median` value of each blocks.
 mean_view = np.mean(flatten_view, axis=2)
 max_view = np.max(flatten_view, axis=2)

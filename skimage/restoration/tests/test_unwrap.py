@@ -1,12 +1,13 @@
 from __future__ import print_function, division
 
 import numpy as np
-from numpy.testing import (run_module_suite, assert_array_almost_equal,
+from numpy.testing import (run_module_suite, assert_array_almost_equal_nulp,
                            assert_almost_equal, assert_array_equal,
                            assert_raises)
 import warnings
 
 from skimage.restoration import unwrap_phase
+from skimage._shared._warnings import expected_warnings
 
 
 def assert_phase_almost_equal(a, b, *args, **kwargs):
@@ -28,7 +29,7 @@ def assert_phase_almost_equal(a, b, *args, **kwargs):
                   np.max(np.abs(au - (bu - shift))))
             print('assert_phase_allclose, no mask, rel',
                   np.max(np.abs((au - (bu - shift)) / au)))
-    assert_array_almost_equal(a + shift, b, *args, **kwargs)
+    assert_array_almost_equal_nulp(a + shift, b, *args, **kwargs)
 
 
 def check_unwrap(image, mask=None):
@@ -37,7 +38,7 @@ def check_unwrap(image, mask=None):
         print('Testing a masked image')
         image = np.ma.array(image, mask=mask)
         image_wrapped = np.ma.array(image_wrapped, mask=mask)
-    image_unwrapped = unwrap_phase(image_wrapped)
+    image_unwrapped = unwrap_phase(image_wrapped, seed=0)
     assert_phase_almost_equal(image_unwrapped, image)
 
 
@@ -47,7 +48,7 @@ def test_unwrap_1d():
     # Masked arrays are not allowed in 1D
     assert_raises(ValueError, check_unwrap, image, True)
     # wrap_around is not allowed in 1D
-    assert_raises(ValueError, unwrap_phase, image, True)
+    assert_raises(ValueError, unwrap_phase, image, True, seed=0)
 
 
 def test_unwrap_2d():
@@ -83,7 +84,7 @@ def check_wrap_around(ndim, axis):
     with warnings.catch_warnings():
         # We do not want warnings about length 1 dimensions
         warnings.simplefilter("ignore")
-        image_unwrap_no_wrap_around = unwrap_phase(image_wrapped)
+        image_unwrap_no_wrap_around = unwrap_phase(image_wrapped, seed=0)
     print('endpoints without wrap_around:',
           image_unwrap_no_wrap_around[index_first],
           image_unwrap_no_wrap_around[index_last])
@@ -95,7 +96,8 @@ def check_wrap_around(ndim, axis):
     with warnings.catch_warnings():
         # We do not want warnings about length 1 dimensions
         warnings.simplefilter("ignore")
-        image_unwrap_wrap_around = unwrap_phase(image_wrapped, wrap_around)
+        image_unwrap_wrap_around = unwrap_phase(image_wrapped, wrap_around,
+                                                seed=0)
     print('endpoints with wrap_around:',
           image_unwrap_wrap_around[index_first],
           image_unwrap_wrap_around[index_last])
@@ -128,13 +130,17 @@ def test_mask():
         image_unwrapped -= image_unwrapped[0, 0]    # remove phase shift
         # The end of the unwrapped array should have value equal to the
         # endpoint of the unmasked ramp
-        assert_array_almost_equal(image_unwrapped[:, -1], image[i, -1])
+        assert_array_almost_equal_nulp(image_unwrapped[:, -1], image[i, -1])
+        assert np.ma.isMaskedArray(image_unwrapped)
 
         # Same tests, but forcing use of the 3D unwrapper by reshaping
-        image_wrapped_3d = image_wrapped.reshape((1,) + image_wrapped.shape)
-        image_unwrapped_3d = unwrap_phase(image_wrapped_3d)
-        image_unwrapped_3d -= image_unwrapped_3d[0, 0, 0]  # remove phase shift
-        assert_array_almost_equal(image_unwrapped_3d[:, :, -1], image[i, -1])
+        with expected_warnings(['length 1 dimension']):
+            shape = (1,) + image_wrapped.shape
+            image_wrapped_3d = image_wrapped.reshape(shape)
+            image_unwrapped_3d = unwrap_phase(image_wrapped_3d)
+            # remove phase shift
+            image_unwrapped_3d -= image_unwrapped_3d[0, 0, 0]
+        assert_array_almost_equal_nulp(image_unwrapped_3d[:, :, -1], image[i, -1])
 
 
 def test_invalid_input():
@@ -143,6 +149,59 @@ def test_invalid_input():
     assert_raises(ValueError, unwrap_phase, np.zeros((1, 1)), 3 * [False])
     assert_raises(ValueError, unwrap_phase, np.zeros((1, 1)), 'False')
 
+
+def test_unwrap_3d_middle_wrap_around():
+    # Segmentation fault in 3D unwrap phase with middle dimension connected
+    # GitHub issue #1171
+    image = np.zeros((20, 30, 40), dtype=np.float32)
+    unwrap = unwrap_phase(image, wrap_around=[False, True, False])
+    assert np.all(unwrap == 0)
+
+
+def test_unwrap_2d_compressed_mask():
+    # ValueError when image is masked array with a compressed mask (no masked
+    # elments).  GitHub issue #1346
+    image = np.ma.zeros((10, 10))
+    unwrap = unwrap_phase(image)
+    assert np.all(unwrap == 0)
+
+
+def test_unwrap_2d_all_masked():
+    # Segmentation fault when image is masked array with a all elements masked
+    # GitHub issue #1347
+    # all elements masked
+    image = np.ma.zeros((10, 10))
+    image[:] = np.ma.masked
+    unwrap = unwrap_phase(image)
+    assert np.ma.isMaskedArray(unwrap)
+    assert np.all(unwrap.mask)
+
+    # 1 unmasked element, still zero edges
+    image = np.ma.zeros((10, 10))
+    image[:] = np.ma.masked
+    image[0, 0] = 0
+    unwrap = unwrap_phase(image)
+    assert np.ma.isMaskedArray(unwrap)
+    assert np.sum(unwrap.mask) == 99    # all but one masked
+    assert unwrap[0, 0] == 0
+
+
+def test_unwrap_3d_all_masked():
+    # all elements masked
+    image = np.ma.zeros((10, 10, 10))
+    image[:] = np.ma.masked
+    unwrap = unwrap_phase(image)
+    assert np.ma.isMaskedArray(unwrap)
+    assert np.all(unwrap.mask)
+
+    # 1 unmasked element, still zero edges
+    image = np.ma.zeros((10, 10, 10))
+    image[:] = np.ma.masked
+    image[0, 0, 0] = 0
+    unwrap = unwrap_phase(image)
+    assert np.ma.isMaskedArray(unwrap)
+    assert np.sum(unwrap.mask) == 999   # all but one masked
+    assert unwrap[0, 0, 0] == 0
 
 if __name__ == "__main__":
     run_module_suite()

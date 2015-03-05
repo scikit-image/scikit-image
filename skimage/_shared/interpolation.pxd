@@ -9,7 +9,8 @@ cdef inline Py_ssize_t round(double r):
     return <Py_ssize_t>((r + 0.5) if (r > 0.0) else (r - 0.5))
 
 
-cdef inline double nearest_neighbour_interpolation(double* image, Py_ssize_t rows,
+cdef inline double nearest_neighbour_interpolation(double* image,
+                                                   Py_ssize_t rows,
                                                    Py_ssize_t cols, double r,
                                                    double c, char mode,
                                                    double cval):
@@ -63,30 +64,33 @@ cdef inline double bilinear_interpolation(double* image, Py_ssize_t rows,
 
     """
     cdef double dr, dc
-    cdef Py_ssize_t minr, minc, maxr, maxc
+    cdef long minr, minc, maxr, maxc
 
-    minr = <Py_ssize_t>floor(r)
-    minc = <Py_ssize_t>floor(c)
-    maxr = <Py_ssize_t>ceil(r)
-    maxc = <Py_ssize_t>ceil(c)
+    minr = <long>floor(r)
+    minc = <long>floor(c)
+    maxr = <long>ceil(r)
+    maxc = <long>ceil(c)
     dr = r - minr
     dc = c - minc
     top = (1 - dc) * get_pixel2d(image, rows, cols, minr, minc, mode, cval) \
           + dc * get_pixel2d(image, rows, cols, minr, maxc, mode, cval)
-    bottom = (1 - dc) * get_pixel2d(image, rows, cols, maxr, minc, mode, cval) \
+    bottom = (1 - dc) * get_pixel2d(image, rows, cols, maxr, minc, mode,
+                                    cval) \
              + dc * get_pixel2d(image, rows, cols, maxr, maxc, mode, cval)
     return (1 - dr) * top + dr * bottom
 
 
 cdef inline double quadratic_interpolation(double x, double[3] f):
-    """Quadratic interpolation.
+    """WARNING: Do not use, not implemented correctly.
+
+    Quadratic interpolation.
 
     Parameters
     ----------
     x : double
-        Position in the interval [-1, 1].
-    f : double[4]
-        Function values at positions [-1, 0, 1].
+        Position in the interval [0, 2].
+    f : double[3]
+        Function values at positions [0, 2].
 
     Returns
     -------
@@ -94,13 +98,17 @@ cdef inline double quadratic_interpolation(double x, double[3] f):
         Interpolated value.
 
     """
-    return f[1] - 0.25 * (f[0] - f[2]) * x
+    return (x * f[2] * (x - 1)) / 2 - \
+                x * f[1] * (x - 2) + \
+                    (f[0] * (x - 1) * (x - 2)) / 2
 
 
 cdef inline double biquadratic_interpolation(double* image, Py_ssize_t rows,
-                                             Py_ssize_t cols, double r, double c,
-                                             char mode, double cval):
-    """Biquadratic interpolation at a given position in the image.
+                                             Py_ssize_t cols, double r,
+                                             double c, char mode, double cval):
+    """WARNING: Do not use, not implemented correctly.
+
+    Biquadratic interpolation at a given position in the image.
 
     Parameters
     ----------
@@ -122,30 +130,23 @@ cdef inline double biquadratic_interpolation(double* image, Py_ssize_t rows,
 
     """
 
-    cdef Py_ssize_t r0 = round(r)
-    cdef Py_ssize_t c0 = round(c)
-    if r < 0:
-        r0 -= 1
-    if c < 0:
-        c0 -= 1
-    # scale position to range [-1, 1]
-    cdef double xr = (r - r0) - 1
-    cdef double xc = (c - c0) - 1
-    if r == r0:
-        xr += 1
-    if c == c0:
-        xc += 1
+    cdef long r0 = <long>round(r) - 1
+    cdef long c0 = <long>round(c) - 1
+
+    cdef double xr = r - r0
+    cdef double xc = c - c0
 
     cdef double fc[3]
     cdef double fr[3]
 
-    cdef Py_ssize_t pr, pc
+    cdef long pr, pc
 
     # row-wise cubic interpolation
-    for pr in range(r0, r0 + 3):
-        for pc in range(c0, c0 + 3):
-            fc[pc - c0] = get_pixel2d(image, rows, cols, pr, pc, mode, cval)
-        fr[pr - r0] = quadratic_interpolation(xc, fc)
+    for pr in range(3):
+        for pc in range(3):
+            fc[pc] = get_pixel2d(image, rows, cols,
+                                 r0 + pr, c0 + pc, mode, cval)
+        fr[pr] = quadratic_interpolation(xc, fc)
 
     # cubic interpolation for interpolated values of each row
     return quadratic_interpolation(xr, fr)
@@ -159,7 +160,7 @@ cdef inline double cubic_interpolation(double x, double[4] f):
     x : double
         Position in the interval [0, 1].
     f : double[4]
-        Function values at positions [0, 1/3, 2/3, 1].
+        Function values at positions [-1, 0, 1, 2].
 
     Returns
     -------
@@ -179,6 +180,9 @@ cdef inline double bicubic_interpolation(double* image, Py_ssize_t rows,
                                          char mode, double cval):
     """Bicubic interpolation at a given position in the image.
 
+    Interpolation using Catmull-Rom splines, based on the bicubic convolution
+    algorithm described in [1]_.
+
     Parameters
     ----------
     image : double array
@@ -197,35 +201,42 @@ cdef inline double bicubic_interpolation(double* image, Py_ssize_t rows,
     value : double
         Interpolated value.
 
+    References
+    ----------
+    .. [1] R. Keys, (1981). "Cubic convolution interpolation for digital image
+           processing". IEEE Transactions on Signal Processing, Acoustics,
+           Speech, and Signal Processing 29 (6): 1153–1160.
+
     """
 
-    cdef Py_ssize_t r0 = <Py_ssize_t>r - 1
-    cdef Py_ssize_t c0 = <Py_ssize_t>c - 1
-    if r < 0:
-        r0 -= 1
-    if c < 0:
-        c0 -= 1
+    cdef long r0 = <long>floor(r)
+    cdef long c0 = <long>floor(c)
+
     # scale position to range [0, 1]
-    cdef double xr = (r - r0) / 3
-    cdef double xc = (c - c0) / 3
+    cdef double xr = r - r0
+    cdef double xc = c - c0
+
+    r0 -= 1
+    c0 -= 1
 
     cdef double fc[4]
     cdef double fr[4]
 
-    cdef Py_ssize_t pr, pc
+    cdef long pr, pc
 
     # row-wise cubic interpolation
-    for pr in range(r0, r0 + 4):
-        for pc in range(c0, c0 + 4):
-            fc[pc - c0] = get_pixel2d(image, rows, cols, pr, pc, mode, cval)
-        fr[pr - r0] = cubic_interpolation(xc, fc)
+    for pr in range(4):
+        for pc in range(4):
+            fc[pc] = get_pixel2d(image, rows, cols, pr + r0, pc + c0, mode, cval)
+        fr[pr] = cubic_interpolation(xc, fc)
 
     # cubic interpolation for interpolated values of each row
     return cubic_interpolation(xr, fr)
 
 
 cdef inline double get_pixel2d(double* image, Py_ssize_t rows, Py_ssize_t cols,
-                               Py_ssize_t r, Py_ssize_t c, char mode, double cval):
+                               long r, long c, char mode,
+                               double cval):
     """Get a pixel from the image, taking wrapping mode into consideration.
 
     Parameters
@@ -248,7 +259,7 @@ cdef inline double get_pixel2d(double* image, Py_ssize_t rows, Py_ssize_t cols,
 
     """
     if mode == 'C':
-        if (r < 0) or (r > rows - 1) or (c < 0) or (c > cols - 1):
+        if (r < 0) or (r >= rows) or (c < 0) or (c >= cols):
             return cval
         else:
             return image[r * cols + c]
@@ -257,8 +268,8 @@ cdef inline double get_pixel2d(double* image, Py_ssize_t rows, Py_ssize_t cols,
 
 
 cdef inline double get_pixel3d(double* image, Py_ssize_t rows, Py_ssize_t cols,
-                               Py_ssize_t dims, Py_ssize_t r, Py_ssize_t c, Py_ssize_t d,
-                               char mode, double cval):
+                               Py_ssize_t dims, long r, long c,
+                               long d, char mode, double cval):
     """Get a pixel from the image, taking wrapping mode into consideration.
 
     Parameters
@@ -281,19 +292,18 @@ cdef inline double get_pixel3d(double* image, Py_ssize_t rows, Py_ssize_t cols,
 
     """
     if mode == 'C':
-        if (r < 0) or (r > rows - 1) or (c < 0) or (c > cols - 1):
+        if (r < 0) or (r >= rows) or (c < 0) or (c >= cols):
             return cval
         else:
             return image[r * cols * dims + c * dims + d]
     else:
         return image[coord_map(rows, r, mode) * cols * dims
                      + coord_map(cols, c, mode) * dims
-                     + d]
+                     + coord_map(dims, d, mode)]
 
 
-cdef inline Py_ssize_t coord_map(Py_ssize_t dim, Py_ssize_t coord, char mode):
-    """
-    Wrap a coordinate, according to a given mode.
+cdef inline Py_ssize_t coord_map(Py_ssize_t dim, long coord, char mode):
+    """Wrap a coordinate, according to a given mode.
 
     Parameters
     ----------

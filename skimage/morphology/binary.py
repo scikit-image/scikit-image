@@ -1,9 +1,15 @@
-import warnings
+"""
+Binary morphological operations
+"""
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage as nd
+from .misc import default_selem
 
 
-def binary_erosion(image, selem, out=None):
+# The default_selem decorator provides a diamond structuring element as default
+# with the same dimension as the input image and size 3 along each axis.
+@default_selem
+def binary_erosion(image, selem=None, out=None):
     """Return fast binary morphological erosion of an image.
 
     This function returns the same result as greyscale erosion but performs
@@ -17,35 +23,28 @@ def binary_erosion(image, selem, out=None):
     ----------
     image : ndarray
         Binary input image.
-    selem : ndarray
+    selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray of bool
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
 
     Returns
     -------
     eroded : ndarray of bool or uint
-        The result of the morphological erosion with values in ``[0, 1]``.
+        The result of the morphological erosion taking values in
+        ``[False, True]``.
 
     """
-    selem = (selem != 0)
-    selem_sum = np.sum(selem)
-
-    if selem_sum <= 255:
-        conv = np.empty_like(image, dtype=np.uint8)
-    else:
-        conv = np.empty_like(image, dtype=np.uint)
-
-    binary = (image > 0).view(np.uint8)
-    ndimage.convolve(binary, selem, mode='constant', cval=1, output=conv)
-
     if out is None:
-        out = conv
-    return np.equal(conv, selem_sum, out=out)
+        out = np.empty(image.shape, dtype=np.bool)
+    nd.binary_erosion(image, structure=selem, output=out)
+    return out
 
 
-def binary_dilation(image, selem, out=None):
+@default_selem
+def binary_dilation(image, selem=None, out=None):
     """Return fast binary morphological dilation of an image.
 
     This function returns the same result as greyscale dilation but performs
@@ -60,34 +59,27 @@ def binary_dilation(image, selem, out=None):
 
     image : ndarray
         Binary input image.
-    selem : ndarray
+    selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray of bool
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarray of bool, optional
         The array to store the result of the morphology. If None, is
         passed, a new array will be allocated.
 
     Returns
     -------
     dilated : ndarray of bool or uint
-        The result of the morphological dilation with values in ``[0, 1]``.
-
+        The result of the morphological dilation with values in
+        ``[False, True]``.
     """
-    selem = (selem != 0)
-
-    if np.sum(selem) <= 255:
-        conv = np.empty_like(image, dtype=np.uint8)
-    else:
-        conv = np.empty_like(image, dtype=np.uint)
-
-    binary = (image > 0).view(np.uint8)
-    ndimage.convolve(binary, selem, mode='constant', cval=0, output=conv)
-
     if out is None:
-        out = conv
-    return np.not_equal(conv, 0, out=out)
+        out = np.empty(image.shape, dtype=np.bool)
+    nd.binary_dilation(image, structure=selem, output=out)
+    return out
 
 
-def binary_opening(image, selem, out=None):
+@default_selem
+def binary_opening(image, selem=None, out=None):
     """Return fast binary morphological opening of an image.
 
     This function returns the same result as greyscale opening but performs
@@ -102,9 +94,10 @@ def binary_opening(image, selem, out=None):
     ----------
     image : ndarray
         Binary input image.
-    selem : ndarray
+    selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray of bool
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarray of bool, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
 
@@ -119,7 +112,8 @@ def binary_opening(image, selem, out=None):
     return out
 
 
-def binary_closing(image, selem, out=None):
+@default_selem
+def binary_closing(image, selem=None, out=None):
     """Return fast binary morphological closing of an image.
 
     This function returns the same result as greyscale closing but performs
@@ -134,9 +128,10 @@ def binary_closing(image, selem, out=None):
     ----------
     image : ndarray
         Binary input image.
-    selem : ndarray
+    selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray of bool
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarray of bool, optional
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.
 
@@ -146,7 +141,6 @@ def binary_closing(image, selem, out=None):
         The result of the morphological closing.
 
     """
-
     dilated = binary_dilation(image, selem)
     out = binary_erosion(dilated, selem, out=out)
     return out

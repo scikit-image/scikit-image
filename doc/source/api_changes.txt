@@ -1,3 +1,9 @@
+Version 0.11
+------------
+- The ``skimage.filter`` subpackage has been renamed to ``skimage.filters``.
+- Some edge detectors returned values greater than 1--their results are now
+  appropriately scaled with a factor of ``sqrt(2)``.
+
 Version 0.10
 ------------
 - Removed ``skimage.io.video`` functionality due to broken gstreamer bindings

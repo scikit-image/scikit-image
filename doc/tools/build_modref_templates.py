@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     try:
         __import__(package)
-    except ImportError, e:
+    except ImportError as e:
         abort("Can not import skimage")
 
     module = sys.modules[package]
@@ -51,6 +51,7 @@ if __name__ == '__main__':
     docwriter = ApiDocWriter(package)
     docwriter.package_skip_patterns += [r'\.fixes$',
                                         r'\.externals$',
+                                        r'filter$',
                                         ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'api', relative_to='source/api')

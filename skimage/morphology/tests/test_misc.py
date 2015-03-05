@@ -1,5 +1,6 @@
 import numpy as np
-from numpy.testing import assert_array_equal, assert_equal, assert_raises
+from numpy.testing import (assert_array_equal, assert_equal, assert_raises,
+                           assert_warns)
 from skimage.morphology import remove_small_objects
 
 test_image = np.array([[0, 0, 0, 1, 0],
@@ -53,6 +54,13 @@ def test_uint_image():
                          [0, 0, 3, 3, 3]], dtype=np.uint8)
     observed = remove_small_objects(labeled_image, min_size=3)
     assert_array_equal(observed, expected)
+
+
+def test_single_label_warning():
+    image = np.array([[0, 0, 0, 1, 0],
+                      [1, 1, 1, 0, 0],
+                      [1, 1, 1, 0, 0]], int)
+    assert_warns(UserWarning, remove_small_objects, image, min_size=6)
 
 
 def test_float_input():

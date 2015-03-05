@@ -98,7 +98,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None):
     if fill == 'mean':
         fill = arr_in.mean()
 
-    n_missing = int((alpha_y *  alpha_x) - n_images)
+    n_missing = int((alpha_y * alpha_x) - n_images)
     missing = np.ones((n_missing, height, width), dtype=arr_in.dtype) * fill
     arr_out = np.vstack((arr_in, missing))
 

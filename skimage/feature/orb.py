@@ -1,12 +1,13 @@
 import numpy as np
 
-from skimage.feature.util import (FeatureDetector, DescriptorExtractor,
-                                  _mask_border_keypoints,
-                                  _prepare_grayscale_input_2D)
+from ..feature.util import (FeatureDetector, DescriptorExtractor,
+                            _mask_border_keypoints,
+                            _prepare_grayscale_input_2D)
 
-from skimage.feature import (corner_fast, corner_orientations, corner_peaks,
+from ..feature import (corner_fast, corner_orientations, corner_peaks,
                              corner_harris)
-from skimage.transform import pyramid_gaussian
+from ..transform import pyramid_gaussian
+from .._shared.utils import assert_nD
 
 from .orb_cy import _orb_loop
 
@@ -15,7 +16,7 @@ OFAST_MASK = np.zeros((31, 31))
 OFAST_UMAX = [15, 15, 15, 15, 14, 14, 14, 13, 13, 12, 11, 10, 9, 8, 6, 3]
 for i in range(-15, 16):
     for j in range(-OFAST_UMAX[abs(i)], OFAST_UMAX[abs(i)] + 1):
-        OFAST_MASK[15 + j, 15 + i]  = 1
+        OFAST_MASK[15 + j, 15 + i] = 1
 
 
 class ORB(FeatureDetector, DescriptorExtractor):
@@ -166,6 +167,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
             Input image.
 
         """
+        assert_nD(image, 2)
 
         pyramid = self._build_pyramid(image)
 
@@ -183,7 +185,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
             keypoints_list.append(keypoints * self.downscale ** octave)
             orientations_list.append(orientations)
-            scales_list.append(self.downscale **  octave
+            scales_list.append(self.downscale ** octave
                                * np.ones(keypoints.shape[0], dtype=np.intp))
             responses_list.append(responses)
 
@@ -237,6 +239,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
             Corresponding orientations in radians.
 
         """
+        assert_nD(image, 2)
 
         pyramid = self._build_pyramid(image)
 
@@ -282,6 +285,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
             Input image.
 
         """
+        assert_nD(image, 2)
 
         pyramid = self._build_pyramid(image)
 
@@ -310,7 +314,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
             keypoints_list.append(keypoints[mask] * self.downscale ** octave)
             responses_list.append(responses[mask])
             orientations_list.append(orientations[mask])
-            scales_list.append(self.downscale **  octave
+            scales_list.append(self.downscale ** octave
                                * np.ones(keypoints.shape[0], dtype=np.intp))
             descriptors_list.append(descriptors)
 

@@ -7,7 +7,7 @@ import scipy
 
 cimport cython
 cimport numpy as cnp
-from skimage.measure._ccomp cimport find_root, join_trees
+from ..measure._ccomp cimport find_root, join_trees
 
 from ..util import img_as_float
 

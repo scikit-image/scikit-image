@@ -1,10 +1,5 @@
 import numpy as np
-
-try:
-    from matplotlib import lines
-except ImportError:
-    print("Could not import matplotlib -- skimage.viewer not available.")
-
+from matplotlib import lines
 
 __all__ = ['CanvasToolBase', 'ToolHandles']
 
@@ -18,8 +13,8 @@ class CanvasToolBase(object):
 
     Parameters
     ----------
-    ax : :class:`matplotlib.axes.Axes`
-        Matplotlib axes where tool is displayed.
+    viewer : :class:`skimage.viewer.Viewer`
+        Skimage viewer object.
     on_move : function
         Function called whenever a control handle is moved.
         This function must accept the end points of line as the only argument.
@@ -27,42 +22,19 @@ class CanvasToolBase(object):
         Function called whenever the control handle is released.
     on_enter : function
         Function called whenever the "enter" key is pressed.
-    useblit : bool
-        If True, update canvas by blitting, which is much faster than normal
-        redrawing (turn off for debugging purposes).
     """
-    def __init__(self, ax, on_move=None, on_enter=None, on_release=None,
-                 useblit=True):
-        self.ax = ax
-        self.canvas = ax.figure.canvas
-        self.img_background = None
-        self.cids = []
-        self._artists = []
-        self.active = True
 
-        if useblit:
-            self.connect_event('draw_event', self._blit_on_draw_event)
-        self.useblit = useblit
+    def __init__(self, viewer, on_move=None, on_enter=None, on_release=None,
+                 useblit=True):
+        self.viewer = viewer
+        self.ax = viewer.ax
+        self.artists = []
+        self.active = True
+        viewer.add_tool(self)
 
         self.callback_on_move = _pass if on_move is None else on_move
         self.callback_on_enter = _pass if on_enter is None else on_enter
         self.callback_on_release = _pass if on_release is None else on_release
-
-        self.connect_event('key_press_event', self._on_key_press)
-
-    def connect_event(self, event, callback):
-        """Connect callback with an event.
-
-        This should be used in lieu of `figure.canvas.mpl_connect` since this
-        function stores call back ids for later clean up.
-        """
-        cid = self.canvas.mpl_connect(event, callback)
-        self.cids.append(cid)
-
-    def disconnect_events(self):
-        """Disconnect all events created by this widget."""
-        for c in self.cids:
-            self.canvas.mpl_disconnect(c)
 
     def ignore(self, event):
         """Return True if event should be ignored.
@@ -72,50 +44,41 @@ class CanvasToolBase(object):
         """
         return not self.active
 
-    def set_visible(self, val):
-        for artist in self._artists:
-            artist.set_visible(val)
-
-    def _blit_on_draw_event(self, event=None):
-        self.img_background = self.canvas.copy_from_bbox(self.ax.bbox)
-        self._draw_artists()
-
-    def _draw_artists(self):
-        for artist in self._artists:
-            self.ax.draw_artist(artist)
-
-    def remove(self):
-        """Remove artists and events from axes.
-
-        Note that the naming here mimics the interface of Matplotlib artists.
-        """
-        #TODO: For some reason, RectangleTool doesn't get properly removed
-        self.disconnect_events()
-        for a in self._artists:
-            a.remove()
+    def hit_test(self, event):
+        return False
 
     def redraw(self):
-        """Redraw image and canvas artists.
+        self.viewer.redraw()
 
-        This method should be called by subclasses when artists are updated.
-        """
-        if self.useblit and self.img_background is not None:
-            self.canvas.restore_region(self.img_background)
-            self._draw_artists()
-            self.canvas.blit(self.ax.bbox)
-        else:
-            self.canvas.draw_idle()
+    def set_visible(self, val):
+        for artist in self.artists:
+            artist.set_visible(val)
 
-    def _on_key_press(self, event):
+    def on_key_press(self, event):
         if event.key == 'enter':
             self.callback_on_enter(self.geometry)
             self.set_visible(False)
-            self.redraw()
+            self.viewer.redraw()
+
+    def on_mouse_press(self, event):
+        pass
+
+    def on_mouse_release(self, event):
+        pass
+
+    def on_move(self, event):
+        pass
+
+    def on_scroll(self, event):
+        pass
+
+    def remove(self):
+        self.viewer.remove_tool(self)
 
     @property
     def geometry(self):
         """Geometry information that gets passed to callback functions."""
-        raise NotImplementedError
+        return None
 
 
 class ToolHandles(object):
@@ -162,9 +125,6 @@ class ToolHandles(object):
 
     def set_animated(self, val):
         self._markers.set_animated(val)
-
-    def draw(self):
-        self.ax.draw_artist(self._markers)
 
     def closest(self, x, y):
         """Return index and pixel distance to closest index."""

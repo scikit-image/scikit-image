@@ -1,5 +1,7 @@
 body {
     font-family: "Raleway";
+    letter-spacing: 0.02em;
+    font-size: 102%;
 }
 a {
     color: #CE5C00;
@@ -9,9 +11,6 @@ button,
 select,
 textarea {
     font-family: "Raleway";
-}
-pre {
-    font-size: 11px;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -41,12 +40,6 @@ h6 {
     font-size: 13px;
     line-height: 15px;
 }
-blockquote {
-    border-left: 0;
-}
-dt {
-    font-weight: normal;
-}
 
 .logo {
     float: left;
@@ -57,18 +50,21 @@ dt {
 }
 
 .hero {
-    padding: 10px 25px;
+    padding: 10px 25px 15px 25px;
 }
 
 .gallery-random {
     float: right;
     line-height: 180px;
+    margin-left: 10px;
 }
 .gallery-random img {
     max-height: 180px;
+    max-width: 180px;
 }
 
 .coins-sample {
+    float: left;
     padding: 5px;
 }
 
@@ -77,10 +73,6 @@ dt {
 }
 .sidebar-box-heading {
     padding-left: 15px;
-}
-
-#current {
-    font-weight: bold;
 }
 
 .headerlink {
@@ -111,7 +103,7 @@ h6:hover .headerlink {
     text-decoration: underline;
 }
 
-.ohloh-use, .gplus-use {
+.gplus-use {
     float: left;
     margin: 0 0 10px 15px;
 }
@@ -233,7 +225,14 @@ p.admonition-title {
     text-align: center !important;
 }
 
-/* misc */
-div.math {
-    text-align: center;
+.summary-box {
+    /* Should derive width from span8 */
+    width: 640px;
+}
+
+.citation {
+    color: #3a87ad;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+/*    padding: 1em;*/
 }

@@ -5,17 +5,10 @@ of an n-dimensional array.
 """
 from __future__ import division, absolute_import, print_function
 
-from six import integer_types
 import numpy as np
 
-try:
-    # Available on 2.x at base, Py3 requires this compatibility import.
-    # Later versions of NumPy have this for 2.x as well.
-    from numpy.compat import long
-except:
-    pass
 
-__all__ = ['pad']
+__all__ = ['pad', 'crop']
 
 
 ###############################################################################
@@ -785,7 +778,7 @@ def _pad_ref(arr, pad_amt, method, axis=-1):
     Notes
     -----
     This algorithm does not pad with repetition, i.e. the edges are not
-    repeated in the reflection. For that behavior, use `method='symmetric'`.
+    repeated in the reflection. For that behavior, use `mode='symmetric'`.
 
     The modes 'reflect', 'symmetric', and 'wrap' must be padded with a
     single function, lest the indexing tricks in non-integer multiples of the
@@ -870,7 +863,7 @@ def _pad_sym(arr, pad_amt, method, axis=-1):
     Notes
     -----
     This algorithm DOES pad with repetition, i.e. the edges are repeated.
-    For a method that does not repeat edges, use `method='reflect'`.
+    For padding without repeated edges, use `mode='reflect'`.
 
     The modes 'reflect', 'symmetric', and 'wrap' must be padded with a
     single function, lest the indexing tricks in non-integer multiples of the
@@ -993,7 +986,7 @@ def _pad_wrap(arr, pad_amt, axis=-1):
     return np.concatenate((wrap_chunk1, arr, wrap_chunk2), axis=axis)
 
 
-def _normalize_shape(narray, shape):
+def _normalize_shape(ndarray, shape, cast_to_int=True):
     """
     Private function which does some checks and normalizes the possibly
     much simpler representations of 'pad_width', 'stat_length',
@@ -1003,56 +996,77 @@ def _normalize_shape(narray, shape):
     ----------
     narray : ndarray
         Input ndarray
-    shape : {sequence, int}, optional
-        The width of padding (pad_width) or the number of elements on the
-        edge of the narray used for statistics (stat_length).
+    shape : {sequence, array_like, float, int}, optional
+        The width of padding (pad_width), the number of elements on the
+        edge of the narray used for statistics (stat_length), the constant
+        value(s) to use when filling padded regions (constant_values), or the
+        endpoint target(s) for linear ramps (end_values).
         ((before_1, after_1), ... (before_N, after_N)) unique number of
         elements for each axis where `N` is rank of `narray`.
         ((before, after),) yields same before and after constants for each
         axis.
-        (constant,) or int is a shortcut for before = after = constant for
+        (constant,) or val is a shortcut for before = after = constant for
         all axes.
+    cast_to_int : bool, optional
+        Controls if values in ``shape`` will be rounded and cast to int
+        before being returned.
 
     Returns
     -------
-    _normalize_shape : tuple of tuples
-        int                               => ((int, int), (int, int), ...)
-        [[int1, int2], [int3, int4], ...] => ((int1, int2), (int3, int4), ...)
-        ((int1, int2), (int3, int4), ...) => no change
-        [[int1, int2], ]                  => ((int1, int2), (int1, int2), ...)
-        ((int1, int2), )                  => ((int1, int2), (int1, int2), ...)
-        [[int ,     ], ]                  => ((int, int), (int, int), ...)
-        ((int ,     ), )                  => ((int, int), (int, int), ...)
+    normalized_shape : tuple of tuples
+        val                               => ((val, val), (val, val), ...)
+        [[val1, val2], [val3, val4], ...] => ((val1, val2), (val3, val4), ...)
+        ((val1, val2), (val3, val4), ...) => no change
+        [[val1, val2], ]                  => ((val1, val2), (val1, val2), ...)
+        ((val1, val2), )                  => ((val1, val2), (val1, val2), ...)
+        [[val ,     ], ]                  => ((val, val), (val, val), ...)
+        ((val ,     ), )                  => ((val, val), (val, val), ...)
 
     """
-    normshp = None
-    shapelen = len(np.shape(narray))
+    ndims = ndarray.ndim
 
-    if isinstance(shape, np.ndarray):
-        shape = shape.tolist()
+    # Shortcut shape=None
+    if shape is None:
+        return ((None, None), ) * ndims
 
-    if isinstance(shape, (int, float)) or shape is None:
-        normshp = ((shape, shape), ) * shapelen
-    elif (isinstance(shape, (tuple, list))
-            and isinstance(shape[0], (tuple, list))
-            and len(shape) == shapelen):
-        normshp = shape
-        for i in normshp:
-            if len(i) != 2:
-                fmt = "Unable to create correctly shaped tuple from %s"
-                raise ValueError(fmt % (normshp,))
-    elif (isinstance(shape, (tuple, list))
-            and isinstance(shape[0], integer_types + (float,))
-            and len(shape) == 1):
-        normshp = ((shape[0], shape[0]), ) * shapelen
-    elif (isinstance(shape, (tuple, list))
-            and isinstance(shape[0], integer_types + (float,))
-            and len(shape) == 2):
-        normshp = (shape, ) * shapelen
-    if normshp is None:
+    # Convert any input `info` to a NumPy array
+    arr = np.asarray(shape)
+
+    # Switch based on what input looks like
+    if arr.ndim <= 1:
+        if arr.shape == () or arr.shape == (1,):
+            # Single scalar input
+            #   Create new array of ones, multiply by the scalar
+            arr = np.ones((ndims, 2), dtype=ndarray.dtype) * arr
+        elif arr.shape == (2,):
+            # Apply padding (before, after) each axis
+            #   Create new axis 0, repeat along it for every axis
+            arr = arr[np.newaxis, :].repeat(ndims, axis=0)
+        else:
+            fmt = "Unable to create correctly shaped tuple from %s"
+            raise ValueError(fmt % (shape,))
+
+    elif arr.ndim == 2:
+        if arr.shape[1] == 1 and arr.shape[0] == ndims:
+            # Padded before and after by the same amount
+            arr = arr.repeat(2, axis=1)
+        elif arr.shape[0] == ndims:
+            # Input correctly formatted, pass it on as `arr`
+            arr = shape
+        else:
+            fmt = "Unable to create correctly shaped tuple from %s"
+            raise ValueError(fmt % (shape,))
+
+    else:
         fmt = "Unable to create correctly shaped tuple from %s"
         raise ValueError(fmt % (shape,))
-    return normshp
+
+    # Cast if necessary
+    if cast_to_int is True:
+        arr = np.round(arr).astype(int)
+
+    # Convert list of lists to tuple of tuples
+    return tuple(tuple(axis) for axis in arr.tolist())
 
 
 def _validate_lengths(narray, number_elements):
@@ -1108,38 +1122,49 @@ def pad(array, pad_width, mode=None, **kwargs):
     ----------
     array : array_like of rank N
         Input array
-    pad_width : {sequence, int}
+    pad_width : {sequence, array_like, int}
         Number of values padded to the edges of each axis.
         ((before_1, after_1), ... (before_N, after_N)) unique pad widths
         for each axis.
         ((before, after),) yields same before and after pad for each axis.
         (pad,) or int is a shortcut for before = after = pad width for all
         axes.
-    mode : {str, function}
+    mode : str or function
         One of the following string values or a user supplied function.
 
-        'constant'      Pads with a constant value.
-        'edge'          Pads with the edge values of array.
-        'linear_ramp'   Pads with the linear ramp between end_value and the
-                        array edge value.
-        'maximum'       Pads with the maximum value of all or part of the
-                        vector along each axis.
-        'mean'          Pads with the mean value of all or part of the
-                        vector along each axis.
-        'median'        Pads with the median value of all or part of the
-                        vector along each axis.
-        'minimum'       Pads with the minimum value of all or part of the
-                        vector along each axis.
-        'reflect'       Pads with the reflection of the vector mirrored on
-                        the first and last values of the vector along each
-                        axis.
-        'symmetric'     Pads with the reflection of the vector mirrored
-                        along the edge of the array.
-        'wrap'          Pads with the wrap of the vector along the axis.
-                        The first values are used to pad the end and the
-                        end values are used to pad the beginning.
-        <function>      Padding function, see Notes.
-    stat_length : {sequence, int}, optional
+        'constant'
+            Pads with a constant value.
+        'edge'
+            Pads with the edge values of array.
+        'linear_ramp'
+            Pads with the linear ramp between end_value and the
+            array edge value.
+        'maximum'
+            Pads with the maximum value of all or part of the
+            vector along each axis.
+        'mean'
+            Pads with the mean value of all or part of the
+            vector along each axis.
+        'median'
+            Pads with the median value of all or part of the
+            vector along each axis.
+        'minimum'
+            Pads with the minimum value of all or part of the
+            vector along each axis.
+        'reflect'
+            Pads with the reflection of the vector mirrored on
+            the first and last values of the vector along each
+            axis.
+        'symmetric'
+            Pads with the reflection of the vector mirrored
+            along the edge of the array.
+        'wrap'
+            Pads with the wrap of the vector along the axis.
+            The first values are used to pad the end and the
+            end values are used to pad the beginning.
+        <function>
+            Padding function, see Notes.
+    stat_length : sequence or int, optional
         Used in 'maximum', 'mean', 'median', and 'minimum'.  Number of
         values at edge of each axis used to calculate the statistic value.
 
@@ -1153,7 +1178,7 @@ def pad(array, pad_width, mode=None, **kwargs):
         length for all axes.
 
         Default is ``None``, to use the entire axis.
-    constant_values : {sequence, int}, optional
+    constant_values : sequence or int, optional
         Used in 'constant'.  The values to set the padded values for each
         axis.
 
@@ -1167,7 +1192,7 @@ def pad(array, pad_width, mode=None, **kwargs):
         all axes.
 
         Default is 0.
-    end_values : {sequence, int}, optional
+    end_values : sequence or int, optional
         Used in 'linear_ramp'.  The values used for the ending value of the
         linear_ramp and that will form the edge of the padded array.
 
@@ -1181,7 +1206,7 @@ def pad(array, pad_width, mode=None, **kwargs):
         all axes.
 
         Default is 0.
-    reflect_type : str {'even', 'odd'}, optional
+    reflect_type : {'even', 'odd'}, optional
         Used in 'reflect', and 'symmetric'.  The 'even' style is the
         default with an unaltered reflection around the edge value.  For
         the 'odd' style, the extented part of the array is created by
@@ -1195,6 +1220,8 @@ def pad(array, pad_width, mode=None, **kwargs):
 
     Notes
     -----
+    .. versionadded:: 1.7.0
+
     For an array with rank greater than 1, some of the padding of later
     axes is calculated from padding of previous axes.  This is easiest to
     think about with a rank 2 array where the corners of the padded array
@@ -1202,7 +1229,7 @@ def pad(array, pad_width, mode=None, **kwargs):
 
     The padding function, if used, should return a rank 1 array equal in
     length to the vector argument with padded values replaced. It has the
-    following signature:
+    following signature::
 
         padding_func(vector, iaxis_pad_width, iaxis, **kwargs)
 
@@ -1223,14 +1250,15 @@ def pad(array, pad_width, mode=None, **kwargs):
 
     Examples
     --------
+    >>> from skimage.util import pad
     >>> a = [1, 2, 3, 4, 5]
-    >>> pad(a, (2,3), 'constant', constant_values=(4,6))
+    >>> pad(a, (2,3), 'constant', constant_values=(4, 6))
     array([4, 4, 1, 2, 3, 4, 5, 6, 6, 6])
 
-    >>> pad(a, (2,3), 'edge')
+    >>> pad(a, (2, 3), 'edge')
     array([1, 1, 1, 2, 3, 4, 5, 5, 5, 5])
 
-    >>> pad(a, (2,3), 'linear_ramp', end_values=(5,-4))
+    >>> pad(a, (2, 3), 'linear_ramp', end_values=(5, -4))
     array([ 5,  3,  1,  2,  3,  4,  5,  2, -1, -4])
 
     >>> pad(a, (2,), 'maximum')
@@ -1242,7 +1270,7 @@ def pad(array, pad_width, mode=None, **kwargs):
     >>> pad(a, (2,), 'median')
     array([3, 3, 1, 2, 3, 4, 5, 3, 3])
 
-    >>> a = [[1,2], [3,4]]
+    >>> a = [[1, 2], [3, 4]]
     >>> pad(a, ((3, 2), (2, 3)), 'minimum')
     array([[1, 1, 1, 2, 1, 1, 1],
            [1, 1, 1, 2, 1, 1, 1],
@@ -1253,19 +1281,19 @@ def pad(array, pad_width, mode=None, **kwargs):
            [1, 1, 1, 2, 1, 1, 1]])
 
     >>> a = [1, 2, 3, 4, 5]
-    >>> pad(a, (2,3), 'reflect')
+    >>> pad(a, (2, 3), 'reflect')
     array([3, 2, 1, 2, 3, 4, 5, 4, 3, 2])
 
-    >>> pad(a, (2,3), 'reflect', reflect_type='odd')
+    >>> pad(a, (2, 3), 'reflect', reflect_type='odd')
     array([-1,  0,  1,  2,  3,  4,  5,  6,  7,  8])
 
-    >>> pad(a, (2,3), 'symmetric')
+    >>> pad(a, (2, 3), 'symmetric')
     array([2, 1, 1, 2, 3, 4, 5, 5, 4, 3])
 
-    >>> pad(a, (2,3), 'symmetric', reflect_type='odd')
+    >>> pad(a, (2, 3), 'symmetric', reflect_type='odd')
     array([0, 1, 1, 2, 3, 4, 5, 5, 6, 7])
 
-    >>> pad(a, (2,3), 'wrap')
+    >>> pad(a, (2, 3), 'wrap')
     array([4, 5, 1, 2, 3, 4, 5, 1, 2, 3])
 
     >>> def padwithtens(vector, pad_width, iaxis, kwargs):
@@ -1274,7 +1302,7 @@ def pad(array, pad_width, mode=None, **kwargs):
     ...     return vector
 
     >>> a = np.arange(6)
-    >>> a = a.reshape((2,3))
+    >>> a = a.reshape((2, 3))
 
     >>> pad(a, 2, padwithtens)
     array([[10, 10, 10, 10, 10, 10, 10],
@@ -1283,8 +1311,9 @@ def pad(array, pad_width, mode=None, **kwargs):
            [10, 10,  3,  4,  5, 10, 10],
            [10, 10, 10, 10, 10, 10, 10],
            [10, 10, 10, 10, 10, 10, 10]])
-
     """
+    if not np.asarray(pad_width).dtype.kind == 'i':
+        raise TypeError('`pad_width` must be of integral type.')
 
     narray = np.array(array)
     pad_width = _validate_lengths(narray, pad_width)
@@ -1299,13 +1328,15 @@ def pad(array, pad_width, mode=None, **kwargs):
         'minimum': ['stat_length'],
         'reflect': ['reflect_type'],
         'symmetric': ['reflect_type'],
-        'wrap': []}
+        'wrap': [],
+        }
 
     kwdefaults = {
         'stat_length': None,
         'constant_values': 0,
         'end_values': 0,
-        'reflect_type': 'even'}
+        'reflect_type': 'even',
+        }
 
     if isinstance(mode, str):
         # Make sure have allowed kwargs appropriate for mode
@@ -1323,7 +1354,8 @@ def pad(array, pad_width, mode=None, **kwargs):
             if i == 'stat_length':
                 kwargs[i] = _validate_lengths(narray, kwargs[i])
             if i in ['end_values', 'constant_values']:
-                kwargs[i] = _normalize_shape(narray, kwargs[i])
+                kwargs[i] = _normalize_shape(narray, kwargs[i],
+                                             cast_to_int=False)
     elif mode is None:
         raise ValueError('Keyword "mode" must be a function or one of %s.' %
                          (list(allowedkwargs.keys()),))
@@ -1339,7 +1371,7 @@ def pad(array, pad_width, mode=None, **kwargs):
                                pad_width[i][0] + narray.shape[i])
                          for i in rank]
         new_shape = np.array(narray.shape) + total_dim_increase
-        newmat = np.zeros(new_shape).astype(narray.dtype)
+        newmat = np.zeros(new_shape, narray.dtype)
 
         # Insert the original array into the padded array
         newmat[offset_slices] = narray
@@ -1416,7 +1448,6 @@ def pad(array, pad_width, mode=None, **kwargs):
             method = kwargs['reflect_type']
             safe_pad = newmat.shape[axis] - 1
             while ((pad_before > safe_pad) or (pad_after > safe_pad)):
-                offset = 0
                 pad_iter_b = min(safe_pad,
                                  safe_pad * (pad_before // safe_pad))
                 pad_iter_a = min(safe_pad, safe_pad * (pad_after // safe_pad))
@@ -1424,10 +1455,6 @@ def pad(array, pad_width, mode=None, **kwargs):
                                            pad_iter_a), method, axis)
                 pad_before -= pad_iter_b
                 pad_after -= pad_iter_a
-                if pad_iter_b > 0:
-                    offset += 1
-                if pad_iter_a > 0:
-                    offset += 1
                 safe_pad += pad_iter_b + pad_iter_a
             newmat = _pad_ref(newmat, (pad_before, pad_after), method, axis)
 
@@ -1469,3 +1496,43 @@ def pad(array, pad_width, mode=None, **kwargs):
             newmat = _pad_wrap(newmat, (pad_before, pad_after), axis)
 
     return newmat
+
+
+def crop(ar, crop_width, copy=False, order='K'):
+    """Crop array `ar` by `crop_width` along each dimension.
+
+    Parameters
+    ----------
+    ar : array-like of rank N
+        Input array.
+    crop_width : {sequence, int}
+        Number of values to remove from the edges of each axis.
+        ``((before_1, after_1),`` ... ``(before_N, after_N))`` specifies
+        unique crop widths at the start and end of each axis.
+        ``((before, after),)`` specifies a fixed start and end crop
+        for every axis.
+        ``(n,)`` or ``n`` for integer ``n`` is a shortcut for
+        before = after = ``n`` for all axes.
+    copy : bool, optional
+        Ensure the returned array is a contiguous copy. Normally, a crop
+        operation will return a discontiguous view of the underlying
+        input array. Passing ``copy=True`` will result in a contiguous
+        copy.
+    order : {'C', 'F', 'A', 'K'}, optional
+        If ``copy==True``, control the memory layout of the copy. See
+        ``np.copy``.
+
+    Returns
+    -------
+    cropped : array
+        The cropped array. If ``copy=False`` (default), this is a sliced
+        view of the input array.
+    """
+    ar = np.array(ar, copy=False)
+    crops = _validate_lengths(ar, crop_width)
+    slices = [slice(a, ar.shape[i] - b) for i, (a, b) in enumerate(crops)]
+    if copy:
+        cropped = np.array(ar[slices], order=order, copy=True)
+    else:
+        cropped = ar[slices]
+    return cropped

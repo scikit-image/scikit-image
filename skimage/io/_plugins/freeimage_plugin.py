@@ -34,15 +34,29 @@ def _generate_candidate_libs():
 
     return lib_dirs, lib_paths
 
+if sys.platform == 'win32':
+    LOADER = ctypes.windll
+    FUNCTYPE = ctypes.WINFUNCTYPE
+else:
+    LOADER = ctypes.cdll
+    FUNCTYPE = ctypes.CFUNCTYPE
+
+def handle_errors():
+    global FT_ERROR_STR
+    if FT_ERROR_STR:
+        tmp = FT_ERROR_STR
+        FT_ERROR_STR = None
+        raise RuntimeError(tmp)
+
+FT_ERROR_STR = None
+# This MUST happen in module scope, or the function pointer is garbage
+# collected, leading to a segfault when error_handler is called.
+@FUNCTYPE(None, ctypes.c_int, ctypes.c_char_p)
+def c_error_handler(fif, message):
+    global FT_ERROR_STR
+    FT_ERROR_STR = 'FreeImage error: %s' % message
 
 def load_freeimage():
-    if sys.platform == 'win32':
-        loader = ctypes.windll
-        functype = ctypes.WINFUNCTYPE
-    else:
-        loader = ctypes.cdll
-        functype = ctypes.CFUNCTYPE
-
     freeimage = None
     errors = []
     # First try a few bare library names that ctypes might be able to find
@@ -54,7 +68,7 @@ def load_freeimage():
     lib_paths = bare_libs + lib_paths
     for lib in lib_paths:
         try:
-            freeimage = loader.LoadLibrary(lib)
+            freeimage = LOADER.LoadLibrary(lib)
             break
         except Exception:
             if lib not in bare_libs:
@@ -71,7 +85,7 @@ def load_freeimage():
         if errors:
             # No freeimage library loaded, and load-errors reported for some
             # candidate libs
-            err_txt = ['%s:\n%s' % (l, str(e.message)) for l, e in errors]
+            err_txt = ['%s:\n%s' % (l, str(e)) for l, e in errors]
             raise RuntimeError('One or more FreeImage libraries were found, but '
                                'could not be loaded due to the following errors:\n'
                                '\n\n'.join(err_txt))
@@ -81,11 +95,7 @@ def load_freeimage():
                                '\n'.join(lib_dirs))
 
     # FreeImage found
-    @functype(None, ctypes.c_int, ctypes.c_char_p)
-    def error_handler(fif, message):
-        raise RuntimeError('FreeImage error: %s' % message)
-
-    freeimage.FreeImage_SetOutputMessage(error_handler)
+    freeimage.FreeImage_SetOutputMessage(c_error_handler)
     return freeimage
 
 _FI = load_freeimage()
@@ -189,13 +199,17 @@ class FI_TYPES(object):
     @classmethod
     def get_type_and_shape(cls, bitmap):
         w = _FI.FreeImage_GetWidth(bitmap)
+        handle_errors()
         h = _FI.FreeImage_GetHeight(bitmap)
+        handle_errors()
         fi_type = _FI.FreeImage_GetImageType(bitmap)
+        handle_errors()
         if not fi_type:
             raise ValueError('Unknown image pixel type')
         dtype = cls.dtypes[fi_type]
         if fi_type == cls.FIT_BITMAP:
             bpp = _FI.FreeImage_GetBPP(bitmap)
+            handle_errors()
             if bpp == 8:
                 extra_dims = []
             elif bpp == 24:
@@ -377,9 +391,11 @@ class METADATA_DATATYPE(object):
 def _process_bitmap(filename, flags, process_func):
     filename = asbytes(filename)
     ftype = _FI.FreeImage_GetFileType(filename, 0)
+    handle_errors()
     if ftype == -1:
         raise ValueError('Cannot determine type of file %s' % filename)
     bitmap = _FI.FreeImage_Load(ftype, filename, flags)
+    handle_errors()
     bitmap = ctypes.c_void_p(bitmap)
     if not bitmap:
         raise ValueError('Could not load file %s' % filename)
@@ -387,6 +403,7 @@ def _process_bitmap(filename, flags, process_func):
         return process_func(bitmap)
     finally:
         _FI.FreeImage_Unload(bitmap)
+        handle_errors()
 
 
 def read(filename, flags=0):
@@ -414,6 +431,7 @@ def read_metadata(filename):
 def _process_multipage(filename, flags, process_func):
     filename = asbytes(filename)
     ftype = _FI.FreeImage_GetFileType(filename, 0)
+    handle_errors()
     if ftype == -1:
         raise ValueError('Cannot determine type of file %s' % filename)
     create_new = False
@@ -422,14 +440,17 @@ def _process_multipage(filename, flags, process_func):
     multibitmap = _FI.FreeImage_OpenMultiBitmap(ftype, filename, create_new,
                                                 read_only, keep_cache_in_memory,
                                                 flags)
+    handle_errors()
     multibitmap = ctypes.c_void_p(multibitmap)
     if not multibitmap:
         raise ValueError('Could not open %s as multi-page image.' % filename)
     try:
         pages = _FI.FreeImage_GetPageCount(multibitmap)
+        handle_errors()
         out = []
         for i in range(pages):
             bitmap = _FI.FreeImage_LockPage(multibitmap, i)
+            handle_errors()
             bitmap = ctypes.c_void_p(bitmap)
             if not bitmap:
                 raise ValueError('Could not open %s as a multi-page image.'
@@ -438,9 +459,11 @@ def _process_multipage(filename, flags, process_func):
                 out.append(process_func(bitmap))
             finally:
                 _FI.FreeImage_UnlockPage(multibitmap, bitmap, False)
+                handle_errors()
         return out
     finally:
         _FI.FreeImage_CloseMultiBitmap(multibitmap, 0)
+        handle_errors()
 
 
 def read_multipage(filename, flags=0):
@@ -469,6 +492,7 @@ def _wrap_bitmap_bits_in_array(bitmap, shape, dtype):
 
     """
     pitch = _FI.FreeImage_GetPitch(bitmap)
+    handle_errors()
     height = shape[-1]
     byte_size = height * pitch
     itemsize = dtype.itemsize
@@ -478,6 +502,7 @@ def _wrap_bitmap_bits_in_array(bitmap, shape, dtype):
     else:
         strides = (itemsize, pitch)
     bits = _FI.FreeImage_GetBits(bitmap)
+    handle_errors()
     array = numpy.ndarray(shape, dtype=dtype,
                           buffer=(ctypes.c_char * byte_size).from_address(bits),
                           strides=strides)
@@ -493,7 +518,6 @@ def _array_from_bitmap(bitmap):
     # swizzle the color components and flip the scanlines to go from
     # FreeImage's BGR[A] and upside-down internal memory format to something
     # more normal
-
     def n(arr):
         return arr[..., ::-1].T
     if len(shape) == 3 and _FI.FreeImage_IsLittleEndian() and \
@@ -502,6 +526,7 @@ def _array_from_bitmap(bitmap):
         g = n(array[1])
         r = n(array[2])
         if shape[0] == 3:
+            handle_errors()
             return numpy.dstack((r, g, b))
         elif shape[0] == 4:
             a = n(array[3])
@@ -523,6 +548,7 @@ def _read_metadata(bitmap):
     for model_name, number in models:
         mdhandle = _FI.FreeImage_FindFirstMetadata(number, bitmap,
                                                    ctypes.byref(tag))
+        handle_errors()
         mdhandle = ctypes.c_void_p(mdhandle)
         if mdhandle:
             more = True
@@ -530,8 +556,10 @@ def _read_metadata(bitmap):
                 tag_name = asstr(_FI.FreeImage_GetTagKey(tag))
                 tag_type = _FI.FreeImage_GetTagType(tag)
                 byte_size = _FI.FreeImage_GetTagLength(tag)
+                handle_errors()
                 char_ptr = ctypes.c_char * byte_size
                 tag_str = char_ptr.from_address(_FI.FreeImage_GetTagValue(tag))
+                handle_errors()
                 if tag_type == METADATA_DATATYPE.FIDT_ASCII:
                     tag_val = asstr(tag_str.value)
                 else:
@@ -541,7 +569,9 @@ def _read_metadata(bitmap):
                         tag_val = tag_val[0]
                 metadata[(model_name, tag_name)] = tag_val
                 more = _FI.FreeImage_FindNextMetadata(mdhandle, ctypes.byref(tag))
+                handle_errors()
             _FI.FreeImage_FindCloseMetadata(mdhandle)
+            handle_errors()
     return metadata
 
 
@@ -556,6 +586,7 @@ def write(array, filename, flags=0):
     array = numpy.asarray(array)
     filename = asbytes(filename)
     ftype = _FI.FreeImage_GetFIFFromFilename(filename)
+    handle_errors()
     if ftype == -1:
         raise ValueError('Cannot determine type for %s' % filename)
     bitmap, fi_type = _array_to_bitmap(array)
@@ -563,16 +594,20 @@ def write(array, filename, flags=0):
         if fi_type == FI_TYPES.FIT_BITMAP:
             can_write = _FI.FreeImage_FIFSupportsExportBPP(ftype,
                                       _FI.FreeImage_GetBPP(bitmap))
+            handle_errors()
         else:
             can_write = _FI.FreeImage_FIFSupportsExportType(ftype, fi_type)
+            handle_errors()
         if not can_write:
             raise TypeError('Cannot save image of this format '
                             'to this file type')
         res = _FI.FreeImage_Save(ftype, bitmap, filename, flags)
+        handle_errors()
         if not res:
             raise RuntimeError('Could not save image properly.')
     finally:
         _FI.FreeImage_Unload(bitmap)
+        handle_errors()
 
 
 def write_multipage(arrays, filename, flags=0):
@@ -637,17 +672,28 @@ def _array_to_bitmap(array):
         raise RuntimeError('Could not allocate image for storage')
     try:
         def n(arr):  # normalise to freeimage's in-memory format
-            return arr.T[:, ::-1]
+            return arr.T[..., ::-1]
+
         wrapped_array = _wrap_bitmap_bits_in_array(bitmap, w_shape, dtype)
         # swizzle the color components and flip the scanlines to go to
         # FreeImage's BGR[A] and upside-down internal memory format
-        if len(shape) == 3 and _FI.FreeImage_IsLittleEndian() and \
-               dtype.type == numpy.uint8:
-            wrapped_array[0] = n(array[:, :, 2])
-            wrapped_array[1] = n(array[:, :, 1])
-            wrapped_array[2] = n(array[:, :, 0])
+        if len(shape) == 3 and _FI.FreeImage_IsLittleEndian():
+            R = array[:, :, 0]
+            G = array[:, :, 1]
+            B = array[:, :, 2]
+
+            if dtype.type == numpy.uint8:
+                wrapped_array[0] = n(B)
+                wrapped_array[1] = n(G)
+                wrapped_array[2] = n(R)
+            elif dtype.type == numpy.uint16:
+                wrapped_array[0] = n(R)
+                wrapped_array[1] = n(G)
+                wrapped_array[2] = n(B)
+
             if shape[2] == 4:
-                wrapped_array[3] = n(array[:, :, 3])
+                A = array[:, :, 3]
+                wrapped_array[3] = n(A)
         else:
             wrapped_array[:] = n(array)
         if len(shape) == 2 and dtype.type == numpy.uint8:

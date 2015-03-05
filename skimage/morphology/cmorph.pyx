@@ -11,7 +11,7 @@ from libc.stdlib cimport malloc, free
 def _dilate(np.uint8_t[:, :] image,
             np.uint8_t[:, :] selem,
             np.uint8_t[:, :] out=None,
-            char shift_x=0, char shift_y=0):
+            signed char shift_x=0, signed char shift_y=0):
     """Return greyscale morphological dilation of an image.
 
     Morphological dilation sets a pixel at (i,j) to the maximum over all pixels
@@ -49,8 +49,6 @@ def _dilate(np.uint8_t[:, :] image,
     image = np.ascontiguousarray(image)
     if out is None:
         out = np.zeros((rows, cols), dtype=np.uint8)
-    else:
-        out = np.ascontiguousarray(out)
 
     cdef Py_ssize_t r, c, rr, cc, s, value, local_max
 
@@ -88,7 +86,7 @@ def _dilate(np.uint8_t[:, :] image,
 def _erode(np.uint8_t[:, :] image,
            np.uint8_t[:, :] selem,
            np.uint8_t[:, :] out=None,
-           char shift_x=0, char shift_y=0):
+           signed char shift_x=0, signed char shift_y=0):
     """Return greyscale morphological erosion of an image.
 
     Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
@@ -125,8 +123,6 @@ def _erode(np.uint8_t[:, :] image,
     image = np.ascontiguousarray(image)
     if out is None:
         out = np.zeros((rows, cols), dtype=np.uint8)
-    else:
-        out = np.ascontiguousarray(out)
 
     cdef int r, c, rr, cc, s, value, local_min
 

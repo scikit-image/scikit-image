@@ -1,11 +1,12 @@
-from .generic import (autolevel, bottomhat, equalize, gradient, maximum, mean,
+from ...filters.rank.generic import (autolevel, bottomhat, equalize, gradient, maximum, mean,
                       subtract_mean, median, minimum, modal, enhance_contrast,
-                      pop, threshold, tophat, noise_filter, entropy, otsu, sum)
-from ._percentile import (autolevel_percentile, gradient_percentile,
+                      pop, threshold, tophat, noise_filter, entropy, otsu,
+                      sum, windowed_histogram)
+from ...filters.rank._percentile import (autolevel_percentile, gradient_percentile,
                           mean_percentile, subtract_mean_percentile,
                           enhance_contrast_percentile, percentile,
                           pop_percentile, sum_percentile, threshold_percentile)
-from .bilateral import mean_bilateral, pop_bilateral, sum_bilateral
+from ...filters.rank.bilateral import mean_bilateral, pop_bilateral, sum_bilateral
 
 
 __all__ = ['autolevel',
@@ -37,4 +38,5 @@ __all__ = ['autolevel',
            'noise_filter',
            'entropy',
            'otsu',
-           'percentile']
+           'percentile',
+           'windowed_histogram']

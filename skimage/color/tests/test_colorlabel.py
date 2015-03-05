@@ -3,8 +3,9 @@ import itertools
 import numpy as np
 from numpy import testing
 from skimage.color.colorlabel import label2rgb
+from skimage._shared._warnings import expected_warnings
 from numpy.testing import (assert_array_almost_equal as assert_close,
-                           assert_array_equal)
+                           assert_array_equal, assert_warns)
 
 
 def test_shape_mismatch():
@@ -88,6 +89,57 @@ def test_leave_labels_alone():
     label2rgb(labels)
     label2rgb(labels, bg_label=1)
     assert_array_equal(labels, labels_saved)
+
+def test_avg():
+    # label image
+    label_field = np.array([[1, 1, 1, 2],
+                            [1, 2, 2, 2],
+                            [3, 3, 3, 3]], dtype=np.uint8)
+
+    # color image
+    r = np.array([[1., 1., 0., 0.],
+                  [0., 0., 1., 1.],
+                  [0., 0., 0., 0.]])
+    g = np.array([[0., 0., 0., 1.],
+                  [1., 1., 1., 0.],
+                  [0., 0., 0., 0.]])
+    b = np.array([[0., 0., 0., 1.],
+                  [0., 1., 1., 1.],
+                  [0., 0., 1., 1.]])
+    image = np.dstack((r, g, b))
+
+    # reference label-colored image
+    rout = np.array([[0.5, 0.5, 0.5, 0.5],
+                     [0.5, 0.5, 0.5, 0.5],
+                     [0. , 0. , 0. , 0. ]])
+    gout = np.array([[0.25, 0.25, 0.25, 0.75],
+                     [0.25, 0.75, 0.75, 0.75],
+                     [0.  , 0.  , 0.  , 0.  ]])
+    bout = np.array([[0. , 0. , 0. , 1. ],
+                     [0. , 1. , 1. , 1. ],
+                     [0.5, 0.5, 0.5, 0.5]])
+    expected_out = np.dstack((rout, gout, bout))
+
+    # test standard averaging
+    out = label2rgb(label_field, image, kind='avg')
+    assert_array_equal(out, expected_out)
+
+    # test averaging with custom background value
+    out_bg = label2rgb(label_field, image, bg_label=2, bg_color=(0, 0, 0),
+                       kind='avg')
+    expected_out_bg = expected_out.copy()
+    expected_out_bg[label_field == 2] = 0
+    assert_array_equal(out_bg, expected_out_bg)
+
+    # test default background color
+    out_bg = label2rgb(label_field, image, bg_label=2, kind='avg')
+    assert_array_equal(out_bg, expected_out_bg)
+
+
+def test_negative_intensity():
+    labels = np.arange(100).reshape(10, 10)
+    image = -1 * np.ones((10, 10))
+    assert_warns(UserWarning, label2rgb, labels, image)
 
 
 if __name__ == '__main__':

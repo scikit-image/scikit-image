@@ -4,11 +4,11 @@ Radon transform
 ===============
 
 In computed tomography, the tomography reconstruction problem is to obtain
-a tomographic slice image from a set of projections [1]_. A projection is formed
-by drawing a set of parallel rays through the 2D object of interest, assigning
-the integral of the object's contrast along each ray to a single pixel in the
-projection. A single projection of a 2D object is one dimensional. To
-enable computed tomography reconstruction of the object, several projections
+a tomographic slice image from a set of projections [1]_. A projection is
+formed by drawing a set of parallel rays through the 2D object of interest,
+assigning the integral of the object's contrast along each ray to a single
+pixel in the projection. A single projection of a 2D object is one dimensional.
+To enable computed tomography reconstruction of the object, several projections
 must be acquired, each of them corresponding to a different angle between the
 rays with respect to the object. A collection of projections at several angles
 is called a sinogram, which is a linear transform of the original image.
@@ -29,7 +29,7 @@ and reconstructing the original image are compared: The Filtered Back
 Projection (FBP) and the Simultaneous Algebraic Reconstruction
 Technique (SART).
 
-.. seealso::
+For further information on tomographic reconstruction, see
 
     - AC Kak, M Slaney, "Principles of Computerized Tomographic Imaging",
       http://www.slaney.org/pct/pct-toc.html
@@ -65,7 +65,7 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5))
 ax1.set_title("Original")
 ax1.imshow(image, cmap=plt.cm.Greys_r)
 
-theta = np.linspace(0., 180., max(image.shape), endpoint=True)
+theta = np.linspace(0., 180., max(image.shape), endpoint=False)
 sinogram = radon(image, theta=theta, circle=True)
 ax2.set_title("Radon transform\n(Sinogram)")
 ax2.set_xlabel("Projection angle (deg)")

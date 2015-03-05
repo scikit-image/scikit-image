@@ -32,7 +32,7 @@ class Measure(Plugin):
 
         image = image_viewer.original_image
         h, w = image.shape
-        self.line_tool = LineTool(self.image_viewer.ax,
+        self.line_tool = LineTool(self.image_viewer,
                                   maxdist=self.maxdist,
                                   on_move=self.line_changed)
         self.artists.append(self.line_tool)

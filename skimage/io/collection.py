@@ -9,6 +9,9 @@ from copy import copy
 
 import numpy as np
 import six
+from PIL import Image
+
+from ..external.tifffile import TiffFile
 
 
 __all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
@@ -71,156 +74,8 @@ def alphanumeric_key(s):
     return k
 
 
-class MultiImage(object):
-    """A class containing a single multi-frame image.
-
-    Parameters
-    ----------
-    filename : str
-        The complete path to the image file.
-    conserve_memory : bool, optional
-        Whether to conserve memory by only caching a single frame. Default is
-        True.
-
-    Notes
-    -----
-    If ``conserve_memory=True`` the memory footprint can be reduced, however
-    the performance can be affected because frames have to be read from file
-    more often.
-
-    The last accessed frame is cached, all other frames will have to be read
-    from file.
-
-    The current implementation makes use of PIL.
-
-    Examples
-    --------
-    >>> from skimage import data_dir
-
-    >>> img = MultiImage(data_dir + '/multipage.tif') # doctest: +SKIP
-    >>> len(img) # doctest: +SKIP
-    2
-    >>> for frame in img: # doctest: +SKIP
-    ...     print(frame.shape) # doctest: +SKIP
-    (15, 10)
-    (15, 10)
-
-    """
-    def __init__(self, filename, conserve_memory=True, dtype=None):
-        """Load a multi-img."""
-        self._filename = filename
-        self._conserve_memory = conserve_memory
-        self._dtype = dtype
-        self._cached = None
-
-        from PIL import Image
-        img = Image.open(self._filename)
-        if self._conserve_memory:
-            self._numframes = self._find_numframes(img)
-        else:
-            self._frames = self._getallframes(img)
-            self._numframes = len(self._frames)
-
-    @property
-    def filename(self):
-        return self._filename
-
-    @property
-    def conserve_memory(self):
-        return self._conserve_memory
-
-    def _find_numframes(self, img):
-        """Find the number of frames in the multi-img."""
-        i = 0
-        while True:
-            i += 1
-            try:
-                img.seek(i)
-            except EOFError:
-                break
-        return i
-
-    def _getframe(self, framenum):
-        """Open the image and extract the frame."""
-        from PIL import Image
-        img = Image.open(self.filename)
-        img.seek(framenum)
-        return np.asarray(img, dtype=self._dtype)
-
-    def _getallframes(self, img):
-        """Extract all frames from the multi-img."""
-        frames = []
-        try:
-            i = 0
-            while True:
-                frames.append(np.asarray(img, dtype=self._dtype))
-                i += 1
-                img.seek(i)
-        except EOFError:
-            return frames
-
-    def __getitem__(self, n):
-        """Return the n-th frame as an array.
-
-        Parameters
-        ----------
-        n : int
-            Number of the required frame.
-
-        Returns
-        -------
-        frame : ndarray
-           The n-th frame.
-        """
-        numframes = self._numframes
-        if -numframes <= n < numframes:
-            n = n % numframes
-        else:
-            raise IndexError("There are only %s frames in the image"
-                             % numframes)
-
-        if self.conserve_memory:
-            if not self._cached == n:
-                frame = self._getframe(n)
-                self._cached = n
-                self._cachedframe = frame
-            return self._cachedframe
-        else:
-            return self._frames[n]
-
-    def __iter__(self):
-        """Iterate over the frames."""
-        for i in range(len(self)):
-            yield self[i]
-
-    def __len__(self):
-        """Number of images in collection."""
-        return self._numframes
-
-    def __str__(self):
-        return str(self.filename) + ' [%s frames]' % self._numframes
-
-    def concatenate(self):
-        """Concatenate all images in the multi-image into an array.
-
-        Returns
-        -------
-        ar : np.ndarray
-            An array having one more dimension than the images in `self`.
-
-        See Also
-        --------
-        concatenate_images
-
-        Raises
-        ------
-        ValueError
-            If images in the `MultiImage` don't have identical shapes.
-        """
-        return concatenate_images(self)
-
-
 class ImageCollection(object):
+
     """Load and manage a collection of image files.
 
     Note that files are always stored in alphabetical order. Also note that
@@ -279,6 +134,9 @@ class ImageCollection(object):
 
       ic = ImageCollection('/tmp/*.png', load_func=imread_convert)
 
+    For files with multiple images, the images will be flattened into a list
+    and added to the list of available images.
+
     Examples
     --------
     >>> import skimage.io as io
@@ -293,21 +151,27 @@ class ImageCollection(object):
     >>> ic = io.ImageCollection('/tmp/work/*.png:/tmp/other/*.jpg')
 
     """
-    def __init__(self, load_pattern, conserve_memory=True, load_func=None):
+
+    def __init__(self, load_pattern, conserve_memory=True, load_func=None,
+                 **load_func_kwargs):
         """Load and manage a collection of images."""
         if isinstance(load_pattern, six.string_types):
-            load_pattern = load_pattern.split(os.pathsep)
+            load_pattern = load_pattern.replace(os.pathsep, ':')
+            load_pattern = load_pattern.split(':')
             self._files = []
             for pattern in load_pattern:
                 self._files.extend(glob(pattern))
             self._files = sorted(self._files, key=alphanumeric_key)
+            self._numframes = self._find_images()
         else:
             self._files = load_pattern
+            self._numframes = len(load_pattern)
+            self._frame_index = None
 
         if conserve_memory:
             memory_slots = 1
         else:
-            memory_slots = len(self._files)
+            memory_slots = self._numframes
 
         self._conserve_memory = conserve_memory
         self._cached = None
@@ -318,6 +182,8 @@ class ImageCollection(object):
         else:
             self.load_func = load_func
 
+        self.load_func_kwargs = load_func_kwargs
+
         self.data = np.empty(memory_slots, dtype=object)
 
     @property
@@ -327,6 +193,36 @@ class ImageCollection(object):
     @property
     def conserve_memory(self):
         return self._conserve_memory
+
+    def _find_images(self):
+        index = []
+        for fname in self._files:
+            if fname.lower().endswith(('.tiff', '.tif')):
+                img = TiffFile(fname)
+                index += [(fname, i) for i in range(len(img.pages))]
+            else:
+                im = Image.open(fname)
+                try:
+                    # this will raise an IOError if the file is not readable
+                    im.getdata()[0]
+                except IOError:
+                    site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
+                    raise ValueError(
+                        'Could not load "%s"\nPlease see documentation at: %s' % (fname, site))
+                else:
+                    i = 0
+                    while True:
+                        try:
+                            im.seek(i)
+                        except EOFError:
+                            break
+                        index.append((fname, i))
+                        i += 1
+                if hasattr(im, 'fp') and im.fp:
+                    im.fp.close()
+
+        self._frame_index = index
+        return len(index)
 
     def __getitem__(self, n):
         """Return selected image(s) in the collection.
@@ -356,9 +252,15 @@ class ImageCollection(object):
             n = self._check_imgnum(n)
             idx = n % len(self.data)
 
-            if (self.conserve_memory and n != self._cached) or \
-                (self.data[idx] is None):
-                self.data[idx] = self.load_func(self.files[n])
+            if ((self.conserve_memory and n != self._cached) or
+                    (self.data[idx] is None)):
+                if self._frame_index:
+                    fname, img_num = self._frame_index[n]
+                    self.data[idx] = self.load_func(fname, img_num=img_num,
+                                                    **self.load_func_kwargs)
+                else:
+                    self.data[idx] = self.load_func(self.files[n],
+                                                    **self.load_func_kwargs)
                 self._cached = n
 
             return self.data[idx]
@@ -367,9 +269,17 @@ class ImageCollection(object):
             # object. Any loaded image data in the original ImageCollection
             # will be copied by reference to the new object.  Image data
             # loaded after this creation is not linked.
-            fidx = range(len(self.files))[n]
+            fidx = range(self._numframes)[n]
             new_ic = copy(self)
-            new_ic._files = [self.files[i] for i in fidx]
+
+            if self._frame_index:
+                new_ic._files = [self._frame_index[i][0] for i in fidx]
+                new_ic._frame_index = [self._frame_index[i] for i in fidx]
+            else:
+                new_ic._files = [self._files[i] for i in fidx]
+
+            new_ic._numframes = len(fidx)
+
             if self.conserve_memory:
                 if self._cached in fidx:
                     new_ic._cached = fidx.index(self._cached)
@@ -382,7 +292,7 @@ class ImageCollection(object):
 
     def _check_imgnum(self, n):
         """Check that the given image number is valid."""
-        num = len(self.files)
+        num = self._numframes
         if -num <= n < num:
             n = n % num
         else:
@@ -397,7 +307,7 @@ class ImageCollection(object):
 
     def __len__(self):
         """Number of images in collection."""
-        return len(self.files)
+        return self._numframes
 
     def __str__(self):
         return str(self.files)
@@ -458,3 +368,59 @@ def imread_collection_wrapper(imread):
         return ImageCollection(load_pattern, conserve_memory=conserve_memory,
                                load_func=imread)
     return imread_collection
+
+
+class MultiImage(ImageCollection):
+
+    """A class containing a single multi-frame image.
+
+    Parameters
+    ----------
+    filename : str
+        The complete path to the image file.
+    conserve_memory : bool, optional
+        Whether to conserve memory by only caching a single frame. Default is
+        True.
+
+    Notes
+    -----
+    If ``conserve_memory=True`` the memory footprint can be reduced, however
+    the performance can be affected because frames have to be read from file
+    more often.
+
+    The last accessed frame is cached, all other frames will have to be read
+    from file.
+
+    The current implementation makes use of ``tifffile`` for Tiff files and
+    PIL otherwise.
+
+    Examples
+    --------
+    >>> from skimage import data_dir
+
+    >>> img = MultiImage(data_dir + '/multipage.tif') # doctest: +SKIP
+    >>> len(img) # doctest: +SKIP
+    2
+    >>> for frame in img: # doctest: +SKIP
+    ...     print(frame.shape) # doctest: +SKIP
+    (15, 10)
+    (15, 10)
+
+    """
+
+    def __init__(self, filename, conserve_memory=True, dtype=None,
+                 **imread_kwargs):
+        """Load a multi-img."""
+        from ._io import imread
+
+        def load_func(fname, **kwargs):
+            kwargs.setdefault('dtype', dtype)
+            return imread(fname, **kwargs)
+
+        self._filename = filename
+        super(MultiImage, self).__init__(filename, conserve_memory,
+                                         load_func=load_func, **imread_kwargs)
+
+    @property
+    def filename(self):
+        return self._filename

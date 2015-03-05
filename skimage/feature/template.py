@@ -1,18 +1,19 @@
 import numpy as np
 from scipy.signal import fftconvolve
 
-from skimage.util import pad
+from ..util import pad
+from .._shared.utils import assert_nD
 
 
 def _window_sum_2d(image, window_shape):
 
     window_sum = np.cumsum(image, axis=0)
     window_sum = (window_sum[window_shape[0]:-1]
-                  - window_sum[:-window_shape[0]-1])
+                  - window_sum[:-window_shape[0] - 1])
 
     window_sum = np.cumsum(window_sum, axis=1)
     window_sum = (window_sum[:, window_shape[1]:-1]
-                  - window_sum[:, :-window_shape[1]-1])
+                  - window_sum[:, :-window_shape[1] - 1])
 
     return window_sum
 
@@ -23,7 +24,7 @@ def _window_sum_3d(image, window_shape):
 
     window_sum = np.cumsum(window_sum, axis=2)
     window_sum = (window_sum[:, :, window_shape[2]:-1]
-                  - window_sum[:, :, :-window_shape[2]-1])
+                  - window_sum[:, :, :-window_shape[2] - 1])
 
     return window_sum
 
@@ -102,9 +103,8 @@ def match_template(image, template, pad_input=False, mode='constant',
            [ 0.   ,  0.   ,  0.   ,  0.125, -1.   ,  0.125],
            [ 0.   ,  0.   ,  0.   ,  0.125,  0.125,  0.125]], dtype=float32)
     """
+    assert_nD(image, (2, 3))
 
-    if image.ndim not in (2, 3) or template.ndim not in (2, 3):
-        raise ValueError("Only 2- and 3-D images supported.")
     if image.ndim < template.ndim:
         raise ValueError("Dimensionality of template must be less than or "
                          "equal to the dimensionality of image.")
@@ -126,13 +126,13 @@ def match_template(image, template, pad_input=False, mode='constant',
     # computation of integral images
     if image.ndim == 2:
         image_window_sum = _window_sum_2d(image, template.shape)
-        image_window_sum2 = _window_sum_2d(image**2, template.shape)
+        image_window_sum2 = _window_sum_2d(image ** 2, template.shape)
     elif image.ndim == 3:
         image_window_sum = _window_sum_3d(image, template.shape)
-        image_window_sum2 = _window_sum_3d(image**2, template.shape)
+        image_window_sum2 = _window_sum_3d(image ** 2, template.shape)
 
     template_volume = np.prod(template.shape)
-    template_ssd = np.sum((template - template.mean())**2)
+    template_ssd = np.sum((template - template.mean()) ** 2)
 
     if image.ndim == 2:
         xcorr = fftconvolve(image, template[::-1, ::-1],

@@ -3,9 +3,9 @@ import itertools
 
 import numpy as np
 
-from skimage import img_as_float
-from .colorconv import rgb2gray, gray2rgb
+from .. import img_as_float
 from . import rgb_colors
+from .colorconv import rgb2gray, gray2rgb
 
 import six
 from six.moves import zip
@@ -64,28 +64,76 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
 
 
 def label2rgb(label, image=None, colors=None, alpha=0.3,
-              bg_label=-1, bg_color=None, image_alpha=1):
+              bg_label=-1, bg_color=(0, 0, 0), image_alpha=1, kind='overlay'):
     """Return an RGB image where color-coded labels are painted over the image.
 
     Parameters
     ----------
-    label : array
+    label : array, shape (M, N)
         Integer array of labels with the same shape as `image`.
-    image : array
+    image : array, shape (M, N, 3), optional
         Image used as underlay for labels. If the input is an RGB image, it's
         converted to grayscale before coloring.
-    colors : list
+    colors : list, optional
         List of colors. If the number of labels exceeds the number of colors,
         then the colors are cycled.
-    alpha : float [0, 1]
+    alpha : float [0, 1], optional
         Opacity of colorized labels. Ignored if image is `None`.
-    bg_label : int
+    bg_label : int, optional
         Label that's treated as the background.
-    bg_color : str or array
+    bg_color : str or array, optional
         Background color. Must be a name in `color_dict` or RGB float values
         between [0, 1].
-    image_alpha : float [0, 1]
+    image_alpha : float [0, 1], optional
         Opacity of the image.
+    kind : string, one of {'overlay', 'avg'}
+        The kind of color image desired. 'overlay' cycles over defined colors
+        and overlays the colored labels over the original image. 'avg' replaces
+        each labeled segment with its average color, for a stained-class or
+        pastel painting appearance.
+
+    Returns
+    -------
+    result : array of float, shape (M, N, 3)
+        The result of blending a cycling colormap (`colors`) for each distinct
+        value in `label` with the image, at a certain alpha value.
+    """
+    if kind == 'overlay':
+        return _label2rgb_overlay(label, image, colors, alpha, bg_label,
+                                  bg_color, image_alpha)
+    else:
+        return _label2rgb_avg(label, image, bg_label, bg_color)
+
+
+def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
+                       bg_label=-1, bg_color=None, image_alpha=1):
+    """Return an RGB image where color-coded labels are painted over the image.
+
+    Parameters
+    ----------
+    label : array, shape (M, N)
+        Integer array of labels with the same shape as `image`.
+    image : array, shape (M, N, 3), optional
+        Image used as underlay for labels. If the input is an RGB image, it's
+        converted to grayscale before coloring.
+    colors : list, optional
+        List of colors. If the number of labels exceeds the number of colors,
+        then the colors are cycled.
+    alpha : float [0, 1], optional
+        Opacity of colorized labels. Ignored if image is `None`.
+    bg_label : int, optional
+        Label that's treated as the background.
+    bg_color : str or array, optional
+        Background color. Must be a name in `color_dict` or RGB float values
+        between [0, 1].
+    image_alpha : float [0, 1], optional
+        Opacity of the image.
+
+    Returns
+    -------
+    result : array of float, shape (M, N, 3)
+        The result of blending a cycling colormap (`colors`) for each distinct
+        value in `label` with the image, at a certain alpha value.
     """
     if colors is None:
         colors = DEFAULT_COLORS
@@ -134,3 +182,35 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         result[label == bg_label] = image[label == bg_label]
 
     return result
+
+
+def _label2rgb_avg(label_field, image, bg_label=0, bg_color=(0, 0, 0)):
+    """Visualise each segment in `label_field` with its mean color in `image`.
+
+    Parameters
+    ----------
+    label_field : array of int
+        A segmentation of an image.
+    image : array, shape ``label_field.shape + (3,)``
+        A color image of the same spatial shape as `label_field`.
+    bg_label : int, optional
+        A value in `label_field` to be treated as background.
+    bg_color : 3-tuple of int, optional
+        The color for the background label
+
+    Returns
+    -------
+    out : array, same shape and type as `image`
+        The output visualization.
+    """
+    out = np.zeros_like(image)
+    labels = np.unique(label_field)
+    bg = (labels == bg_label)
+    if bg.any():
+        labels = labels[labels != bg_label]
+        out[bg] = bg_color
+    for label in labels:
+        mask = (label_field == label).nonzero()
+        color = image[mask].mean(axis=0)
+        out[mask] = color
+    return out

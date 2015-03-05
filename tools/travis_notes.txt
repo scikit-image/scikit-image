@@ -1,0 +1,24 @@
+
+- Use http://yaml-online-parser.appspot.com/ to make sure
+the yaml file is valid.
+  http://lint.travis-ci.org/ is recommended elsewhere but does not give helpful
+  error reports.
+- Make sure all of your "-" lines start on the same column
+- Use bash scripts for `before_install` and `script` or any part that
+  has conditional statements
+   - Make sure they are "executable" (chmod +x)
+   - Use the following header:
+
+   ```
+     #!/usr/bin/env bash
+     set -ex
+   ```
+
+- Use the `retry` bash function from `before_install.sh` before a command to have it try 3 times before
+failing (useful for installing from third party sources).
+- Use the `section` function to start a folded section of the script.
+Section names must have underscores or dots instead of spaces and must be
+accompanied by a corresponding `section_end` call.
+- Feel free to cancel a build rather than waiting for it to go to completion
+  if you have made a change to that branch.
+- A VM with 64bit Ubuntu 12.04 is a huge help for debugging.

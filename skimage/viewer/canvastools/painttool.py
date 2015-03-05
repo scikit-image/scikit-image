@@ -2,9 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 LABELS_CMAP = mcolors.ListedColormap(['white', 'red', 'dodgerblue', 'gold',
-                                          'greenyellow', 'blueviolet'])
-
-from skimage.viewer.canvastools.base import CanvasToolBase
+                                      'greenyellow', 'blueviolet'])
+from ...viewer.canvastools.base import CanvasToolBase
 
 
 __all__ = ['PaintTool']
@@ -15,8 +14,8 @@ class PaintTool(CanvasToolBase):
 
     Parameters
     ----------
-    ax : :class:`matplotlib.axes.Axes`
-        Matplotlib axes where tool is displayed.
+    viewer : :class:`skimage.viewer.Viewer`
+        Skimage viewer object.
     overlay_shape : shape tuple
         2D shape tuple used to initialize overlay image.
     alpha : float (between [0, 1])
@@ -39,9 +38,11 @@ class PaintTool(CanvasToolBase):
     label : int
         Current paint color.
     """
-    def __init__(self, ax, overlay_shape, radius=5, alpha=0.3, on_move=None,
-                 on_release=None, on_enter=None, rect_props=None):
-        super(PaintTool, self).__init__(ax, on_move=on_move, on_enter=on_enter,
+    def __init__(self, viewer, overlay_shape, radius=5, alpha=0.3,
+                 on_move=None, on_release=None, on_enter=None,
+                 rect_props=None):
+        super(PaintTool, self).__init__(viewer, on_move=on_move,
+                                        on_enter=on_enter,
                                         on_release=on_release)
 
         props = dict(edgecolor='r', facecolor='0.7', alpha=0.5, animated=True)
@@ -61,11 +62,8 @@ class PaintTool(CanvasToolBase):
         self.radius = radius
 
         # Note that the order is important: Redraw cursor *after* overlay
-        self._artists = [self._overlay_plot, self._cursor]
-
-        self.connect_event('button_press_event', self.on_mouse_press)
-        self.connect_event('button_release_event', self.on_mouse_release)
-        self.connect_event('motion_notify_event', self.on_move)
+        self.artists = [self._overlay_plot, self._cursor]
+        viewer.add_tool(self)
 
     @property
     def label(self):
@@ -102,7 +100,7 @@ class PaintTool(CanvasToolBase):
             self._overlay_plot = None
         elif self._overlay_plot is None:
             props = dict(cmap=self.cmap, alpha=self.alpha,
-                         norm=mcolors.no_norm(), animated=True)
+                         norm=mcolors.NoNorm(), animated=True)
             self._overlay_plot = self.ax.imshow(image, **props)
         else:
             self._overlay_plot.set_data(image)
@@ -121,7 +119,7 @@ class PaintTool(CanvasToolBase):
             self.radius = self._radius
         self.overlay = np.zeros(shape, dtype='uint8')
 
-    def _on_key_press(self, event):
+    def on_key_press(self, event):
         if event.key == 'enter':
             self.callback_on_enter(self.geometry)
             self.redraw()
@@ -138,7 +136,7 @@ class PaintTool(CanvasToolBase):
         self.callback_on_release(self.geometry)
 
     def on_move(self, event):
-        if not self.ax.in_axes(event):
+        if not self.viewer.ax.in_axes(event):
             self._cursor.set_visible(False)
             self.redraw() # make sure cursor is not visible
             return
@@ -198,13 +196,13 @@ class CenteredWindow(object):
         return [slice(ymin, ymax), slice(xmin, xmax)]
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     np.testing.rundocs()
-    from skimage import data
+    from ... import data
+    from ...viewer import ImageViewer
 
     image = data.camera()
 
-    f, ax = plt.subplots()
-    ax.imshow(image, interpolation='nearest')
-    paint_tool = PaintTool(ax, image.shape)
-    plt.show()
+    viewer = ImageViewer(image)
+    paint_tool = PaintTool(viewer, image.shape)
+    viewer.show()

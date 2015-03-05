@@ -12,7 +12,7 @@ from skimage.transform import PiecewiseAffineTransform, warp
 from skimage import data
 
 
-image = data.lena()
+image = data.astronaut()
 rows, cols = image.shape[0], image.shape[1]
 
 src_cols = np.linspace(0, cols, 20)

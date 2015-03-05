@@ -11,6 +11,7 @@ Authors
 :license: modified BSD
 """
 
+from __future__ import division
 import os.path
 
 import numpy as np
@@ -39,7 +40,8 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            guess_spatial_dimensions
                            )
 
-from skimage import data_dir, data
+from skimage import data_dir
+from skimage._shared._warnings import expected_warnings
 
 import colorsys
 
@@ -69,24 +71,24 @@ class TestColorconv(TestCase):
     colbars_point75 = colbars * 0.75
     colbars_point75_array = np.swapaxes(colbars_point75.reshape(3, 4, 2), 0, 2)
 
-    xyz_array = np.array([[[0.4124, 0.21260, 0.01930]],  # red
-                          [[0, 0, 0]],  # black
-                          [[.9505, 1., 1.089]],  # white
-                          [[.1805, .0722, .9505]],  # blue
-                          [[.07719, .15438, .02573]],  # green
+    xyz_array = np.array([[[0.4124, 0.21260, 0.01930]],    # red
+                          [[0, 0, 0]],    # black
+                          [[.9505, 1., 1.089]],    # white
+                          [[.1805, .0722, .9505]],    # blue
+                          [[.07719, .15438, .02573]],    # green
                           ])
-    lab_array = np.array([[[53.233, 80.109, 67.220]],  # red
-                          [[0., 0., 0.]],  # black
-                          [[100.0, 0.005, -0.010]],  # white
-                          [[32.303, 79.197, -107.864]],  # blue
-                          [[46.229, -51.7, 49.898]],  # green
+    lab_array = np.array([[[53.233, 80.109, 67.220]],    # red
+                          [[0., 0., 0.]],    # black
+                          [[100.0, 0.005, -0.010]],    # white
+                          [[32.303, 79.197, -107.864]],    # blue
+                          [[46.229, -51.7, 49.898]],    # green
                           ])
 
-    luv_array = np.array([[[53.233, 175.053, 37.751]], # red
-                          [[0., 0., 0.]], # black
-                          [[100., 0.001, -0.017]], # white
-                          [[32.303, -9.400, -130.358]], # blue
-                          [[46.228, -43.774, 56.589]], # green
+    luv_array = np.array([[[53.233, 175.053, 37.751]],   # red
+                          [[0., 0., 0.]],   # black
+                          [[100., 0.001, -0.017]],   # white
+                          [[32.303, -9.400, -130.358]],   # blue
+                          [[46.228, -43.774, 56.589]],   # green
                           ])
 
     # RGB to HSV
@@ -154,7 +156,9 @@ class TestColorconv(TestCase):
     # RGB<->HED roundtrip with ubyte image
     def test_hed_rgb_roundtrip(self):
         img_rgb = img_as_ubyte(self.img_rgb)
-        assert_equal(img_as_ubyte(hed2rgb(rgb2hed(img_rgb))), img_rgb)
+        with expected_warnings(['precision loss']):
+            new = img_as_ubyte(hed2rgb(rgb2hed(img_rgb)))
+        assert_equal(new, img_rgb)
 
     # RGB<->HED roundtrip with float image
     def test_hed_rgb_float_roundtrip(self):
@@ -223,17 +227,61 @@ class TestColorconv(TestCase):
         assert_equal(g.shape, (1, 1))
 
     def test_rgb2grey_on_grey(self):
-        rgb2grey(np.random.random((5, 5)))
+        rgb2grey(np.random.rand(5, 5))
 
-    # test matrices for xyz2lab and lab2xyz generated using http://www.easyrgb.com/index.php?X=CALC
+    # test matrices for xyz2lab and lab2xyz generated using
+    # http://www.easyrgb.com/index.php?X=CALC
     # Note: easyrgb website displays xyz*100
     def test_xyz2lab(self):
         assert_array_almost_equal(xyz2lab(self.xyz_array),
                                   self.lab_array, decimal=3)
 
+        # Test the conversion with the rest of the illuminants.
+        for I in ["d50", "d55", "d65", "d75"]:
+            for obs in ["2", "10"]:
+                fname = "lab_array_{0}_{1}.npy".format(I, obs)
+                lab_array_I_obs = np.load(
+                    os.path.join(os.path.dirname(__file__), 'data', fname))
+                assert_array_almost_equal(lab_array_I_obs,
+                                          xyz2lab(self.xyz_array, I, obs),
+                                          decimal=2)
+        for I in ["a", "e"]:
+            fname = "lab_array_{0}_2.npy".format(I)
+            lab_array_I_obs = np.load(
+                os.path.join(os.path.dirname(__file__), 'data', fname))
+            assert_array_almost_equal(lab_array_I_obs,
+                                      xyz2lab(self.xyz_array, I, "2"),
+                                      decimal=2)
+
     def test_lab2xyz(self):
         assert_array_almost_equal(lab2xyz(self.lab_array),
                                   self.xyz_array, decimal=3)
+
+        # Test the conversion with the rest of the illuminants.
+        for I in ["d50", "d55", "d65", "d75"]:
+            for obs in ["2", "10"]:
+                fname = "lab_array_{0}_{1}.npy".format(I, obs)
+                lab_array_I_obs = np.load(
+                    os.path.join(os.path.dirname(__file__), 'data', fname))
+                assert_array_almost_equal(lab2xyz(lab_array_I_obs, I, obs),
+                                          self.xyz_array, decimal=3)
+        for I in ["a", "e"]:
+            fname = "lab_array_{0}_2.npy".format(I, obs)
+            lab_array_I_obs = np.load(
+                os.path.join(os.path.dirname(__file__), 'data', fname))
+            assert_array_almost_equal(lab2xyz(lab_array_I_obs, I, "2"),
+                                      self.xyz_array, decimal=3)
+
+        # And we include a call to test the exception handling in the code.
+        try:
+            xs = lab2xyz(lab_array_I_obs, "NaI", "2")   # Not an illuminant
+        except ValueError:
+            pass
+
+        try:
+            xs = lab2xyz(lab_array_I_obs, "d50", "42")   # Not a degree
+        except ValueError:
+            pass
 
     def test_rgb2lab_brucelindbloom(self):
         """
@@ -265,9 +313,41 @@ class TestColorconv(TestCase):
         assert_array_almost_equal(xyz2luv(self.xyz_array),
                                   self.luv_array, decimal=3)
 
+        # Test the conversion with the rest of the illuminants.
+        for I in ["d50", "d55", "d65", "d75"]:
+            for obs in ["2", "10"]:
+                fname = "luv_array_{0}_{1}.npy".format(I, obs)
+                luv_array_I_obs = np.load(
+                    os.path.join(os.path.dirname(__file__), 'data', fname))
+                assert_array_almost_equal(luv_array_I_obs,
+                                          xyz2luv(self.xyz_array, I, obs),
+                                          decimal=2)
+        for I in ["a", "e"]:
+            fname = "luv_array_{0}_2.npy".format(I)
+            luv_array_I_obs = np.load(
+                os.path.join(os.path.dirname(__file__), 'data', fname))
+            assert_array_almost_equal(luv_array_I_obs,
+                                      xyz2luv(self.xyz_array, I, "2"),
+                                      decimal=2)
+
     def test_luv2xyz(self):
         assert_array_almost_equal(luv2xyz(self.luv_array),
                                   self.xyz_array, decimal=3)
+
+        # Test the conversion with the rest of the illuminants.
+        for I in ["d50", "d55", "d65", "d75"]:
+            for obs in ["2", "10"]:
+                fname = "luv_array_{0}_{1}.npy".format(I, obs)
+                luv_array_I_obs = np.load(
+                    os.path.join(os.path.dirname(__file__), 'data', fname))
+                assert_array_almost_equal(luv2xyz(luv_array_I_obs, I, obs),
+                                          self.xyz_array, decimal=3)
+        for I in ["a", "e"]:
+            fname = "luv_array_{0}_2.npy".format(I, obs)
+            luv_array_I_obs = np.load(
+                os.path.join(os.path.dirname(__file__), 'data', fname))
+            assert_array_almost_equal(luv2xyz(luv_array_I_obs, I, "2"),
+                                      self.xyz_array, decimal=3)
 
     def test_rgb2luv_brucelindbloom(self):
         """
@@ -292,6 +372,26 @@ class TestColorconv(TestCase):
     def test_luv_rgb_roundtrip(self):
         img_rgb = img_as_float(self.img_rgb)
         assert_array_almost_equal(luv2rgb(rgb2luv(img_rgb)), img_rgb)
+
+    def test_lab_rgb_outlier(self):
+        lab_array = np.ones((3, 1, 3))
+        lab_array[0] = [50, -12, 85]
+        lab_array[1] = [50, 12, -85]
+        lab_array[2] = [90, -4, -47]
+        rgb_array = np.array([[[0.501, 0.481, 0]],
+                              [[0, 0.482, 1.]],
+                              [[0.578, 0.914, 1.]],
+                              ])
+        assert_almost_equal(lab2rgb(lab_array), rgb_array, decimal=3)
+
+    def test_lab_full_gamut(self):
+        a, b = np.meshgrid(np.arange(-100, 100), np.arange(-100, 100))
+        L = np.ones(a.shape)
+        lab = np.dstack((L, a, b))
+        for value in [0, 10, 20]:
+            lab[:, :, 0] = value
+            with expected_warnings(['Color data out of range']):
+                lab2xyz(lab)
 
     def test_lab_lch_roundtrip(self):
         rgb = img_as_float(self.img_rgb)
@@ -349,7 +449,7 @@ def test_gray2rgb():
 
 
 def test_gray2rgb_rgb():
-    x = np.random.random((5, 5, 4))
+    x = np.random.rand(5, 5, 4)
     y = gray2rgb(x)
     assert_equal(x, y)
 

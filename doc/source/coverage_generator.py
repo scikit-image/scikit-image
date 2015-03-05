@@ -10,7 +10,10 @@ import csv
 try:
     import cStringIO as StringIO
 except ImportError:
-    import StringIO
+    try:
+        import StringIO
+    except:
+        import io as StringIO
 
 # Missing item value
 MISSING_STRING=":missing:`Not Implemented`"
@@ -74,7 +77,7 @@ def read_table_titles(reader):
                     break
             section_titles.append(row[0])
             table_names[row[0]] = names
-    except csv.Error, e:
+    except csv.Error as e:
         sys.exit('line %d: %s' % (reader.line_num, e))
 
     return section_titles,table_names
@@ -106,7 +109,7 @@ def table_row(stream,data,lengths,num_columns=None):
     if num_columns is None:
         num_columns = len(data)
     stream.write("|")
-    for i in xrange(num_columns):
+    for i in range(num_columns):
         if len(data)-1 >= i:
             if len(data[i]) == 0:
                 entry = MISSING_STRING
@@ -145,12 +148,12 @@ def generate_table(reader,stream,table_name=None,
                 break
             data.append([entry.expandtabs() for entry in row])
             num_columns = max(num_columns,len(row))
-    except csv.Error, e:
+    except csv.Error as e:
         sys.exit('line %d: %s' % (reader.line_num, e))
 
     column_lengths = [len(MISSING_STRING)]*num_columns
     for row in data:
-        for i in xrange(len(row)):
+        for i in range(len(row)):
             column_lengths[i] = max(column_lengths[i],len(row[i]))
 
     # Output table header

@@ -4,18 +4,19 @@
 """
 
 import numpy as np
-
+from scipy import ndimage
+from .. import draw
 
 def square(width, dtype=np.uint8):
-    """
-    Generates a flat, square-shaped structuring element. Every pixel
-    along the perimeter has a chessboard distance no greater than radius
-    (radius=floor(width/2)) pixels.
+    """Generates a flat, square-shaped structuring element.
+
+    Every pixel along the perimeter has a chessboard distance
+    no greater than radius (radius=floor(width/2)) pixels.
 
     Parameters
     ----------
     width : int
-        The width and height of the square
+        The width and height of the square.
 
     Other Parameters
     ----------------
@@ -33,17 +34,17 @@ def square(width, dtype=np.uint8):
 
 
 def rectangle(width, height, dtype=np.uint8):
-    """
-    Generates a flat, rectangular-shaped structuring element of a
-    given width and height. Every pixel in the rectangle belongs
-    to the neighboorhood.
+    """Generates a flat, rectangular-shaped structuring element.
+
+    Every pixel in the rectangle generated for a given width and given height
+    belongs to the neighboorhood.
 
     Parameters
     ----------
     width : int
-        The width of the rectangle
+        The width of the rectangle.
     height : int
-        The height of the rectangle
+        The height of the rectangle.
 
     Other Parameters
     ----------------
@@ -61,11 +62,11 @@ def rectangle(width, height, dtype=np.uint8):
 
 
 def diamond(radius, dtype=np.uint8):
-    """
-    Generates a flat, diamond-shaped structuring element of a given
-    radius.  A pixel is part of the neighborhood (i.e. labeled 1) if
-    the city block/manhattan distance between it and the center of the
-    neighborhood is no greater than radius.
+    """Generates a flat, diamond-shaped structuring element.
+
+    A pixel is part of the neighborhood (i.e. labeled 1) if
+    the city block/manhattan distance between it and the center of
+    the neighborhood is no greater than radius.
 
     Parameters
     ----------
@@ -84,15 +85,15 @@ def diamond(radius, dtype=np.uint8):
         The structuring element where elements of the neighborhood
         are 1 and 0 otherwise.
     """
-    half = radius
-    (I, J) = np.meshgrid(range(0, radius * 2 + 1), range(0, radius * 2 + 1))
-    s = np.abs(I - half) + np.abs(J - half)
-    return np.array(s <= radius, dtype=dtype)
+    L = np.arange(0, radius * 2 + 1)
+    I, J = np.meshgrid(L, L)
+    return np.array(np.abs(I - radius) + np.abs(J - radius) <= radius,
+                    dtype=dtype)
 
 
 def disk(radius, dtype=np.uint8):
-    """
-    Generates a flat, disk-shaped structuring element of a given radius.
+    """Generates a flat, disk-shaped structuring element.
+
     A pixel is within the neighborhood if the euclidean distance between
     it and the origin is no greater than radius.
 
@@ -112,23 +113,65 @@ def disk(radius, dtype=np.uint8):
         The structuring element where elements of the neighborhood
         are 1 and 0 otherwise.
     """
-    L = np.linspace(-radius, radius, 2 * radius + 1)
-    (X, Y) = np.meshgrid(L, L)
-    s = X**2
-    s += Y**2
-    return np.array(s <= radius * radius, dtype=dtype)
+    L = np.arange(-radius, radius + 1)
+    X, Y = np.meshgrid(L, L)
+    return np.array((X ** 2 + Y ** 2) <= radius ** 2, dtype=dtype)
+
+
+def ellipse(width, height, dtype=np.uint8):
+    """Generates a flat, ellipse-shaped structuring element.
+
+    Every pixel along the perimeter of ellipse satisfies
+    the equation ``(x/width+1)**2 + (y/height+1)**2 = 1``.
+
+    Parameters
+    ----------
+    width : int
+        The width of the ellipse-shaped structuring element.
+    height : int
+        The height of the ellipse-shaped structuring element.
+
+    Other Parameters
+    ----------------
+    dtype : data-type
+        The data type of the structuring element.
+
+    Returns
+    -------
+    selem : ndarray
+        The structuring element where elements of the neighborhood
+        are 1 and 0 otherwise.
+
+    Examples
+    --------
+    >>> from skimage.morphology import selem
+    >>> selem.ellipse(5, 3)
+    array([[0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0]], dtype=uint8)
+
+    """
+    selem = np.zeros((2 * height + 1, 2 * width + 1), dtype=dtype)
+    rows, cols = draw.ellipse(height, width, height + 1, width + 1)
+    selem[rows, cols] = 1
+    return selem
 
 
 def cube(width, dtype=np.uint8):
-    """
-    Generates a cube-shaped structuring element (the 3D equivalent of
-    a square). Every pixel along the perimeter has a chessboard distance
+    """ Generates a cube-shaped structuring element.
+
+    This is the 3D equivalent of a square.
+    Every pixel along the perimeter has a chessboard distance
     no greater than radius (radius=floor(width/2)) pixels.
 
     Parameters
     ----------
     width : int
-        The width, height and depth of the cube
+        The width, height and depth of the cube.
 
     Other Parameters
     ----------------
@@ -146,12 +189,12 @@ def cube(width, dtype=np.uint8):
 
 
 def octahedron(radius, dtype=np.uint8):
-    """
-    Generates a octahedron-shaped structuring element of a given radius
-    (the 3D equivalent of a diamond).  A pixel is part of the
-    neighborhood (i.e. labeled 1) if the city block/manhattan distance
-    between it and the center of the neighborhood is no greater than
-    radius.
+    """Generates a octahedron-shaped structuring element.
+
+    This is the 3D equivalent of a diamond.
+    A pixel is part of the neighborhood (i.e. labeled 1) if
+    the city block/manhattan distance between it and the center of
+    the neighborhood is no greater than radius.
 
     Parameters
     ----------
@@ -172,19 +215,19 @@ def octahedron(radius, dtype=np.uint8):
     """
     # note that in contrast to diamond(), this method allows non-integer radii
     n = 2 * radius + 1
-    Z, Y, X = np.mgrid[-radius:radius:n*1j,
-                       -radius:radius:n*1j,
-                       -radius:radius:n*1j]
+    Z, Y, X = np.mgrid[-radius:radius:n * 1j,
+                       -radius:radius:n * 1j,
+                       -radius:radius:n * 1j]
     s = np.abs(X) + np.abs(Y) + np.abs(Z)
     return np.array(s <= radius, dtype=dtype)
 
 
 def ball(radius, dtype=np.uint8):
-    """
-    Generates a ball-shaped structuring element of a given radius (the
-    3D equivalent of a disk). A pixel is within the neighborhood if the
-    euclidean distance between it and the origin is no greater than
-    radius.
+    """Generates a ball-shaped structuring element.
+
+    This is the 3D equivalent of a disk.
+    A pixel is within the neighborhood if the euclidean distance between
+    it and the origin is no greater than radius.
 
     Parameters
     ----------
@@ -203,18 +246,19 @@ def ball(radius, dtype=np.uint8):
         are 1 and 0 otherwise.
     """
     n = 2 * radius + 1
-    Z, Y, X = np.mgrid[-radius:radius:n*1j,
-                       -radius:radius:n*1j,
-                       -radius:radius:n*1j]
-    s = X**2 + Y**2 + Z**2
+    Z, Y, X = np.mgrid[-radius:radius:n * 1j,
+                       -radius:radius:n * 1j,
+                       -radius:radius:n * 1j]
+    s = X ** 2 + Y ** 2 + Z ** 2
     return np.array(s <= radius * radius, dtype=dtype)
 
 
 def octagon(m, n, dtype=np.uint8):
-    """
-    Generates an octagon shaped structuring element with a given size of
-    horizontal and vertical sides and a given height or width of slanted
-    sides. The slanted sides are 45 or 135 degrees to the horizontal axis
+    """Generates an octagon shaped structuring element.
+
+    For a given size of (m) horizontal and vertical sides
+    and a given (n) height or width of slanted sides octagon is generated.
+    The slanted sides are 45 or 135 degrees to the horizontal axis
     and hence the widths and heights are equal.
 
     Parameters
@@ -237,7 +281,7 @@ def octagon(m, n, dtype=np.uint8):
 
     """
     from . import convex_hull_image
-    selem = np.zeros((m + 2*n, m + 2*n))
+    selem = np.zeros((m + 2 * n, m + 2 * n))
     selem[0, n] = 1
     selem[n, 0] = 1
     selem[0, m + n - 1] = 1
@@ -251,9 +295,10 @@ def octagon(m, n, dtype=np.uint8):
 
 
 def star(a, dtype=np.uint8):
-    """
-    Generates a star shaped structuring element that has 8 vertices and is an
-    overlap of square of size `2*a + 1` with its 45 degree rotated version.
+    """Generates a star shaped structuring element.
+
+    Start has 8 vertices and is an overlap of square of size `2*a + 1`
+    with its 45 degree rotated version.
     The slanted sides are 45 or 135 degrees to the horizontal axis.
 
     Parameters
@@ -275,18 +320,44 @@ def star(a, dtype=np.uint8):
 
     """
     from . import convex_hull_image
+
     if a == 1:
         bfilter = np.zeros((3, 3), dtype)
         bfilter[:] = 1
         return bfilter
+
     m = 2 * a + 1
     n = a // 2
     selem_square = np.zeros((m + 2 * n, m + 2 * n))
     selem_square[n: m + n, n: m + n] = 1
+
     c = (m + 2 * n - 1) // 2
     selem_rotated = np.zeros((m + 2 * n, m + 2 * n))
-    selem_rotated[0, c] = selem_rotated[-1, c] = selem_rotated[c, 0] = selem_rotated[c, -1] = 1
+    selem_rotated[0, c] = selem_rotated[-1, c] = 1
+    selem_rotated[c, 0] = selem_rotated[c, -1] = 1
     selem_rotated = convex_hull_image(selem_rotated).astype(int)
+
     selem = selem_square + selem_rotated
     selem[selem > 0] = 1
+
     return selem.astype(dtype)
+
+
+def _default_selem(ndim):
+    """Generates a cross-shaped structuring element (connectivity=1).
+
+    This is the default structuring element (selem) if no selem was specified.
+
+    Parameters
+    ----------
+    ndim : int
+        Number of dimensions of the image.
+
+    Returns
+    -------
+    selem : ndarray
+        The structuring element where elements of the neighborhood
+        are 1 and 0 otherwise.
+
+    """
+    return ndimage.morphology.generate_binary_structure(ndim, 1)

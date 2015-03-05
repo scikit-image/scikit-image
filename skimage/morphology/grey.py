@@ -1,14 +1,134 @@
-import warnings
-from skimage import img_as_ubyte
-
-from . import cmorph
-
+"""
+Grayscale morphological operations
+"""
+import functools
+import numpy as np
+from scipy import ndimage as nd
+from .misc import default_selem
+from ..util import pad, crop
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
            'black_tophat']
 
 
-def erosion(image, selem, out=None, shift_x=False, shift_y=False):
+def _shift_selem(selem, shift_x, shift_y):
+    """Shift the binary image `selem` in the left and/or up.
+
+    This only affects 2D structuring elements with even number of rows
+    or columns.
+
+    Parameters
+    ----------
+    selem : 2D array, shape (M, N)
+        The input structuring element.
+    shift_x, shift_y : bool
+        Whether to move `selem` along each axis.
+
+    Returns
+    -------
+    out : 2D array, shape (M + int(shift_x), N + int(shift_y))
+        The shifted structuring element.
+    """
+    if selem.ndim > 2:
+        # do nothing for 3D or higher structuring elements
+        return selem
+    m, n = selem.shape
+    if m % 2 == 0:
+        extra_row = np.zeros((1, n), selem.dtype)
+        if shift_x:
+            selem = np.vstack((selem, extra_row))
+        else:
+            selem = np.vstack((extra_row, selem))
+        m += 1
+    if n % 2 == 0:
+        extra_col = np.zeros((m, 1), selem.dtype)
+        if shift_y:
+            selem = np.hstack((selem, extra_col))
+        else:
+            selem = np.hstack((extra_col, selem))
+    return selem
+
+
+def _invert_selem(selem):
+    """Change the order of the values in `selem`.
+
+    This is a patch for the *weird* footprint inversion in
+    `nd.grey_morphology` [1]_.
+
+    Parameters
+    ----------
+    selem : array
+        The input structuring element.
+
+    Returns
+    -------
+    inverted : array, same shape and type as `selem`
+        The structuring element, in opposite order.
+
+    Examples
+    --------
+    >>> selem = np.array([[0, 0, 0], [0, 1, 1], [0, 1, 1]], np.uint8)
+    >>> _invert_selem(selem)
+    array([[1, 1, 0],
+           [1, 1, 0],
+           [0, 0, 0]], dtype=uint8)
+
+    References
+    ----------
+    [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285
+    """
+    inverted = selem[(slice(None, None, -1),) * selem.ndim]
+    return inverted
+
+
+def pad_for_eccentric_selems(func):
+    """Pad input images for certain morphological operations.
+
+    Parameters
+    ----------
+    func : callable
+        A morphological function, either opening or closing, that
+        supports eccentric structuring elements. Its parameters must
+        include at least `image`, `selem`, and `out`.
+
+    Returns
+    -------
+    func_out : callable
+        The same function, but correctly padding the input image before
+        applying the input function.
+
+    See Also
+    --------
+    opening, closing.
+    """
+    @functools.wraps(func)
+    def func_out(image, selem, out=None, *args, **kwargs):
+        pad_widths = []
+        padding = False
+        if out is None:
+            out = np.empty_like(image)
+        for axis_len in selem.shape:
+            if axis_len % 2 == 0:
+                axis_pad_width = axis_len - 1
+                padding = True
+            else:
+                axis_pad_width = 0
+            pad_widths.append((axis_pad_width,) * 2)
+        if padding:
+            image = pad(image, pad_widths, mode='edge')
+            out_temp = np.empty_like(image)
+        else:
+            out_temp = out
+        out_temp = func(image, selem, out=out_temp, *args, **kwargs)
+        if padding:
+            out[:] = crop(out_temp, pad_widths)
+        else:
+            out = out_temp
+        return out
+    return func_out
+
+@default_selem
+def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
     """Return greyscale morphological erosion of an image.
 
     Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
@@ -19,19 +139,26 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
     ----------
     image : ndarray
         Image array.
-    selem : ndarray
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    selem : ndarray, optional
+        The neighborhood expressed as an array of 1's and 0's.
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarrays, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
-    shift_x, shift_y : bool
+    shift_x, shift_y : bool, optional
         shift structuring element about center point. This only affects
         eccentric structuring elements (i.e. selem with even numbered sides).
 
     Returns
     -------
-    eroded : uint8 array
+    eroded : array, same shape as `image`
         The result of the morphological erosion.
+
+    Notes
+    -----
+    For ``uint8`` (and ``uint16`` up to a certain bit-depth) data, the
+    lower algorithm complexity makes the `skimage.filter.rank.minimum`
+    function more efficient for larger images and structuring elements.
 
     Examples
     --------
@@ -51,16 +178,16 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
+    selem = np.array(selem)
+    selem = _shift_selem(selem, shift_x, shift_y)
+    if out is None:
+        out = np.empty_like(image)
+    nd.grey_erosion(image, footprint=selem, output=out)
+    return out
 
-    if image is out:
-        raise NotImplementedError("In-place erosion not supported!")
-    image = img_as_ubyte(image)
-    selem = img_as_ubyte(selem)
-    return cmorph._erode(image, selem, out=out,
-                         shift_x=shift_x, shift_y=shift_y)
 
-
-def dilation(image, selem, out=None, shift_x=False, shift_y=False):
+@default_selem
+def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
     """Return greyscale morphological dilation of an image.
 
     Morphological dilation sets a pixel at (i,j) to the maximum over all pixels
@@ -72,19 +199,26 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
 
     image : ndarray
         Image array.
-    selem : ndarray
+    selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarray, optional
         The array to store the result of the morphology. If None, is
         passed, a new array will be allocated.
-    shift_x, shift_y : bool
+    shift_x, shift_y : bool, optional
         shift structuring element about center point. This only affects
         eccentric structuring elements (i.e. selem with even numbered sides).
 
     Returns
     -------
-    dilated : uint8 array
+    dilated : uint8 array, same shape and type as `image`
         The result of the morphological dilation.
+
+    Notes
+    -----
+    For `uint8` (and `uint16` up to a certain bit-depth) data, the lower
+    algorithm complexity makes the `skimage.filter.rank.maximum` function more
+    efficient for larger images and structuring elements.
 
     Examples
     --------
@@ -104,16 +238,23 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
+    selem = np.array(selem)
+    selem = _shift_selem(selem, shift_x, shift_y)
+    # Inside ndimage.grey_dilation, the structuring element is inverted,
+    # eg. `selem = selem[::-1, ::-1]` for 2D [1]_, for reasons unknown to
+    # this author (@jni). To "patch" this behaviour, we invert our own
+    # selem before passing it to `nd.grey_dilation`.
+    # [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285
+    selem = _invert_selem(selem)
+    if out is None:
+        out = np.empty_like(image)
+    nd.grey_dilation(image, footprint=selem, output=out)
+    return out
 
-    if image is out:
-        raise NotImplementedError("In-place dilation not supported!")
-    image = img_as_ubyte(image)
-    selem = img_as_ubyte(selem)
-    return cmorph._dilate(image, selem, out=out,
-                          shift_x=shift_x, shift_y=shift_y)
 
-
-def opening(image, selem, out=None):
+@default_selem
+@pad_for_eccentric_selems
+def opening(image, selem=None, out=None):
     """Return greyscale morphological opening of an image.
 
     The morphological opening on an image is defined as an erosion followed by
@@ -125,15 +266,16 @@ def opening(image, selem, out=None):
     ----------
     image : ndarray
         Image array.
-    selem : ndarray
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    selem : ndarray, optional
+        The neighborhood expressed as an array of 1's and 0's.
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
 
     Returns
     -------
-    opening : uint8 array
+    opening : array, same shape and type as `image`
         The result of the morphological opening.
 
     Examples
@@ -154,17 +296,15 @@ def opening(image, selem, out=None):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-
-    h, w = selem.shape
-    shift_x = True if (w % 2) == 0 else False
-    shift_y = True if (h % 2) == 0 else False
-
     eroded = erosion(image, selem)
-    out = dilation(eroded, selem, out=out, shift_x=shift_x, shift_y=shift_y)
+    # note: shift_x, shift_y do nothing if selem side length is odd
+    out = dilation(eroded, selem, out=out, shift_x=True, shift_y=True)
     return out
 
 
-def closing(image, selem, out=None):
+@default_selem
+@pad_for_eccentric_selems
+def closing(image, selem=None, out=None):
     """Return greyscale morphological closing of an image.
 
     The morphological closing on an image is defined as a dilation followed by
@@ -176,15 +316,16 @@ def closing(image, selem, out=None):
     ----------
     image : ndarray
         Image array.
-    selem : ndarray
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    selem : ndarray, optional
+        The neighborhood expressed as an array of 1's and 0's.
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarray, optional
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.
 
     Returns
     -------
-    closing : uint8 array
+    closing : array, same shape and type as `image`
         The result of the morphological closing.
 
     Examples
@@ -205,17 +346,14 @@ def closing(image, selem, out=None):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-
-    h, w = selem.shape
-    shift_x = True if (w % 2) == 0 else False
-    shift_y = True if (h % 2) == 0 else False
-
     dilated = dilation(image, selem)
-    out = erosion(dilated, selem, out=out, shift_x=shift_x, shift_y=shift_y)
+    # note: shift_x, shift_y do nothing if selem side length is odd
+    out = erosion(dilated, selem, out=out, shift_x=True, shift_y=True)
     return out
 
 
-def white_tophat(image, selem, out=None):
+@default_selem
+def white_tophat(image, selem=None, out=None):
     """Return white top hat of an image.
 
     The white top hat of an image is defined as the image minus its
@@ -226,15 +364,16 @@ def white_tophat(image, selem, out=None):
     ----------
     image : ndarray
         Image array.
-    selem : ndarray
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    selem : ndarray, optional
+        The neighborhood expressed as an array of 1's and 0's.
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
 
     Returns
     -------
-    opening : uint8 array
+    out : array, same shape and type as `image`
         The result of the morphological white top hat.
 
     Examples
@@ -254,16 +393,20 @@ def white_tophat(image, selem, out=None):
            [0, 0, 1, 0, 0],
            [0, 0, 0, 0, 0]], dtype=uint8)
 
-   """
-    if image is out:
-        raise NotImplementedError("Cannot perform white top hat in place.")
-
-    out = opening(image, selem, out=out)
-    out = image - out
+    """
+    selem = np.array(selem)
+    if out is image:
+        opened = opening(image, selem)
+        out -= opened
+        return out
+    elif out is None:
+        out = np.empty_like(image)
+    out = nd.white_tophat(image, footprint=selem, output=out)
     return out
 
 
-def black_tophat(image, selem, out=None):
+@default_selem
+def black_tophat(image, selem=None, out=None):
     """Return black top hat of an image.
 
     The black top hat of an image is defined as its morphological closing minus
@@ -275,15 +418,16 @@ def black_tophat(image, selem, out=None):
     ----------
     image : ndarray
         Image array.
-    selem : ndarray
+    selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+        If None, use cross-shaped structuring element (connectivity=1).
+    out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
 
     Returns
     -------
-    opening : uint8 array
+    opening : array, same shape and type as `image`
        The result of the black top filter.
 
     Examples
@@ -304,10 +448,10 @@ def black_tophat(image, selem, out=None):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-
-    if image is out:
-        raise NotImplementedError("Cannot perform white top hat in place.")
-
+    if out is image:
+        original = image.copy()
+    else:
+        original = image
     out = closing(image, selem, out=out)
-    out = out - image
+    out -= original
     return out

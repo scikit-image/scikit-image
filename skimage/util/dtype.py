@@ -304,7 +304,8 @@ def img_as_uint(image, force_copy=False):
 
     Notes
     -----
-    Negative input values will be shifted to the positive domain.
+    Negative input values will be clipped.
+    Positive values are scaled between 0 and 65535.
 
     """
     return convert(image, np.uint16, force_copy)
@@ -327,6 +328,7 @@ def img_as_int(image, force_copy=False):
 
     Notes
     -----
+    The values are scaled between -32768 and 32767.
     If the input data-type is positive-only (e.g., uint8), then
     the output image will still only have positive values.
 
@@ -351,8 +353,8 @@ def img_as_ubyte(image, force_copy=False):
 
     Notes
     -----
-    If the input data-type is positive-only (e.g., uint16), then
-    the output image will still only have positive values.
+    Negative input values will be clipped.
+    Positive values are scaled between 0 and 255.
 
     """
     return convert(image, np.uint8, force_copy)

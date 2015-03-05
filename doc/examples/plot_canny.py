@@ -19,7 +19,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import ndimage
 
-from skimage import filter
+from skimage import feature
 
 
 # Generate noisy image of a square
@@ -31,8 +31,8 @@ im = ndimage.gaussian_filter(im, 4)
 im += 0.2 * np.random.random(im.shape)
 
 # Compute the Canny filter for two values of sigma
-edges1 = filter.canny(im)
-edges2 = filter.canny(im, sigma=3)
+edges1 = feature.canny(im)
+edges2 = feature.canny(im, sigma=3)
 
 # display results
 fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(8, 3))

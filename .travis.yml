@@ -1,94 +1,40 @@
 # vim ft=yaml
 
 # After changing this file, check it on:
-#   http://lint.travis-ci.org/
+#   http://yaml-online-parser.appspot.com/
 
+# See doc/travis_notes.txt for some guidelines
 
 language: python
 
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/1fea29525e8b929dd7c7
+    on_success: change  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: false     # default: false
+
 python:
-    - 2.6
-
-matrix:
-    include:
-        - python: 2.7
-          env:
-            - PYTHON=python
-            - PYTHONWARNINGS=all
-            - PYTHONX=python
-            - PYVER=2.x
-        - python: 3.2
-          env:
-            - PYTHON=python3
-            - PYTHONWARNINGS=all
-            - PYTHONX=python3
-            - PYVER=3.x
-    exclude:
-        - python: 2.6
-
-virtualenv:
-    system_site_packages: true
+- 2.6
+- 2.7
+- 3.2
+- 3.3
+- 3.4
 
 before_install:
-    - export DISPLAY=:99.0
-    - sh -e /etc/init.d/xvfb start
-
     - sudo apt-get update
+    - source tools/travis_before_install.sh
 
-    - sudo apt-get install $PYTHON-numpy
-    - wget https://raw.githubusercontent.com/numpy/numpy/master/numpy/_import_tools.py -O /home/travis/virtualenv/python3.2_with_system_site_packages/lib/python3.2/site-packages/numpy/_import_tools.py
-
-    - sudo apt-get install $PYTHON-scipy
-    - sudo apt-get install libfreeimage3
-
-    - if [[ $PYVER == '2.x' ]]; then
-    -   sudo apt-get install $PYTHON-qt4;
-    -   sudo apt-get install $PYTHON-matplotlib;
-    - fi
-    - if [[ $PYVER == '3.x' ]]; then
-    -   sudo apt-get install $PYTHON-pyqt4;
-    -   pip install --use-mirrors matplotlib;
-    - fi
-
-    - pip install pillow
-    - pip install cython
-    - pip install flake8
-    - pip install six
-
-    - pip install nose-cov
-    - pip install coveralls
-
+    - which python; python --version
     - python check_bento_build.py
-
-install:
-    - tools/header.py "Dependency versions"
     - tools/build_versions.py
 
+install:
     - python setup.py build_ext --inplace
+    - python setup.py install
 
-script:
-    # Matplotlib settings
-    - mkdir -p $HOME/.matplotlib
-    - touch $HOME/.matplotlib/matplotlibrc
-    - "echo 'backend : Agg' > $HOME/.matplotlib/matplotlibrc"
-    - "echo 'backend.qt4 : PyQt4' >> $HOME/.matplotlib/matplotlibrc"
-
-    # Run all tests
-    - if [[ $PYVER == '3.x' ]]; then
-    -   nosetests --exe -v --with-doctest --with-cov --cov skimage --cov-config=.coveragerc skimage
-    - fi
-    - if [[ $PYVER == '2.x' ]]; then
-    -   nosetests --exe -v --with-doctest skimage
-    - fi
-    # Run all doc examples
-    - export PYTHONPATH=$(pwd):$PYTHONPATH
-    - for f in doc/examples/*.py; do $PYTHONX "$f"; if [ $? -ne 0 ]; then exit 1; fi done
-    - for f in doc/examples/applications/*.py; do $PYTHONX "$f"; if [ $? -ne 0 ]; then exit 1; fi done
-
-    # Run pep8 and flake tests
-    - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
+script: tools/travis_script.sh
 
 after_success:
-    - if [[ $PYVER == '3.x' ]]; then
-    -   coveralls
-    - fi
+    - coveralls

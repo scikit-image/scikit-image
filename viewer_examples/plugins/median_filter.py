@@ -1,10 +1,13 @@
 from skimage import data
-from skimage.filter import median_filter
+from skimage.filters.rank import median
+from skimage.morphology import disk
 
 from skimage.viewer import ImageViewer
 from skimage.viewer.widgets import Slider, OKCancelButtons, SaveButtons
 from skimage.viewer.plugins.base import Plugin
 
+def median_filter(image, radius):
+    return median(image, selem=disk(radius))
 
 image = data.coins()
 viewer = ImageViewer(image)

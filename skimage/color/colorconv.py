@@ -53,10 +53,10 @@ References
 
 from __future__ import division
 
+from warnings import warn
 import numpy as np
 from scipy import linalg
 from ..util import dtype
-from skimage._shared.utils import deprecated
 
 
 def guess_spatial_dimensions(image):
@@ -114,13 +114,14 @@ def convert_colorspace(arr, fromspace, tospace):
     Notes
     -----
     Conversion occurs through the "central" RGB color space, i.e. conversion
-    from XYZ to HSV is implemented as ``XYZ -> RGB -> HSV`` instead of directly.
+    from XYZ to HSV is implemented as ``XYZ -> RGB -> HSV`` instead of
+    directly.
 
     Examples
     --------
     >>> from skimage import data
-    >>> lena = data.lena()
-    >>> lena_hsv = convert_colorspace(lena, 'RGB', 'HSV')
+    >>> img = data.astronaut()
+    >>> img_hsv = convert_colorspace(img, 'RGB', 'HSV')
     """
     fromdict = {'RGB': lambda im: im, 'HSV': hsv2rgb, 'RGB CIE': rgbcie2rgb,
                 'XYZ': xyz2rgb}
@@ -129,9 +130,9 @@ def convert_colorspace(arr, fromspace, tospace):
 
     fromspace = fromspace.upper()
     tospace = tospace.upper()
-    if not fromspace in fromdict.keys():
+    if fromspace not in fromdict.keys():
         raise ValueError('fromspace needs to be one of %s' % fromdict.keys())
-    if not tospace in todict.keys():
+    if tospace not in todict.keys():
         raise ValueError('tospace needs to be one of %s' % todict.keys())
 
     return todict[tospace](fromdict[fromspace](arr))
@@ -186,8 +187,8 @@ def rgb2hsv(rgb):
     --------
     >>> from skimage import color
     >>> from skimage import data
-    >>> lena = data.lena()
-    >>> lena_hsv = color.rgb2hsv(lena)
+    >>> img = data.astronaut()
+    >>> img_hsv = color.rgb2hsv(img)
     """
     arr = _prepare_colorarray(rgb)
     out = np.empty_like(arr)
@@ -263,9 +264,9 @@ def hsv2rgb(hsv):
     Examples
     --------
     >>> from skimage import data
-    >>> lena = data.lena()
-    >>> lena_hsv = rgb2hsv(lena)
-    >>> lena_rgb = hsv2rgb(lena_hsv)
+    >>> img = data.astronaut()
+    >>> img_hsv = rgb2hsv(img)
+    >>> img_rgb = hsv2rgb(img_hsv)
     """
     arr = _prepare_colorarray(hsv)
 
@@ -287,20 +288,20 @@ def hsv2rgb(hsv):
     return out
 
 
-#---------------------------------------------------------------
+# ---------------------------------------------------------------
 # Primaries for the coordinate systems
-#---------------------------------------------------------------
+# ---------------------------------------------------------------
 cie_primaries = np.array([700, 546.1, 435.8])
 sb_primaries = np.array([1. / 155, 1. / 190, 1. / 225]) * 1e5
 
-#---------------------------------------------------------------
+# ---------------------------------------------------------------
 # Matrices that define conversion between different color spaces
-#---------------------------------------------------------------
+# ---------------------------------------------------------------
 
 # From sRGB specification
 xyz_from_rgb = np.array([[0.412453, 0.357580, 0.180423],
-                        [0.212671, 0.715160, 0.072169],
-                        [0.019334, 0.119193, 0.950227]])
+                         [0.212671, 0.715160, 0.072169],
+                         [0.019334, 0.119193, 0.950227]])
 
 rgb_from_xyz = linalg.inv(xyz_from_rgb)
 
@@ -321,9 +322,81 @@ gray_from_rgb = np.array([[0.2125, 0.7154, 0.0721],
                           [0, 0, 0],
                           [0, 0, 0]])
 
-# CIE LAB constants for Observer= 2A, Illuminant= D65
+# CIE LAB constants for Observer=2A, Illuminant=D65
+# NOTE: this is actually the XYZ values for the illuminant above.
 lab_ref_white = np.array([0.95047, 1., 1.08883])
 
+# XYZ coordinates of the illuminants, scaled to [0, 1]. For each illuminant I
+# we have:
+#
+#   illuminant[I][0] corresponds to the XYZ coordinates for the 2 degree
+#   field of view.
+#
+#   illuminant[I][1] corresponds to the XYZ coordinates for the 10 degree
+#   field of view.
+#
+# The XYZ coordinates are calculated from [1], using the formula:
+#
+#   X = x * ( Y / y )
+#   Y = Y
+#   Z = ( 1 - x - y ) * ( Y / y )
+#
+# where Y = 1. The only exception is the illuminant "D65" with aperture angle
+# 2, whose coordinates are copied from 'lab_ref_white' for
+# backward-compatibility reasons.
+#
+#     References
+#    ----------
+#    .. [1] http://en.wikipedia.org/wiki/Standard_illuminant
+
+illuminants = \
+    {"A": {'2': (1.098466069456375, 1, 0.3558228003436005),
+           '10': (1.111420406956693, 1, 0.3519978321919493)},
+     "D50": {'2': (0.9642119944211994, 1, 0.8251882845188288),
+             '10': (0.9672062750333777, 1, 0.8142801513128616)},
+     "D55": {'2': (0.956797052643698, 1, 0.9214805860173273),
+             '10': (0.9579665682254781, 1, 0.9092525159847462)},
+     "D65": {'2': (0.95047, 1., 1.08883),   # This was: `lab_ref_white`
+             '10': (0.94809667673716, 1, 1.0730513595166162)},
+     "D75": {'2': (0.9497220898840717, 1, 1.226393520724154),
+             '10': (0.9441713925645873, 1, 1.2064272211720228)},
+     "E": {'2': (1.0, 1.0, 1.0),
+           '10': (1.0, 1.0, 1.0)}}
+
+
+def get_xyz_coords(illuminant, observer):
+    """Get the XYZ coordinates of the given illuminant and observer [1]_.
+
+    Parameters
+    ----------
+    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
+        The name of the illuminant (the function is NOT case sensitive).
+    observer : {"2", "10"}, optional
+        The aperture angle of the observer.
+
+    Returns
+    -------
+    (x, y, z) : tuple
+        A tuple with 3 elements containing the XYZ coordinates of the given
+        illuminant.
+
+    Raises
+    ------
+    ValueError
+        If either the illuminant or the observer angle are not supported or
+        unknown.
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/Standard_illuminant
+
+    """
+    illuminant = illuminant.upper()
+    try:
+        return illuminants[illuminant][observer]
+    except KeyError:
+        raise ValueError("Unknown illuminant/observer combination\
+        (\'{0}\', \'{1}\')".format(illuminant, observer))
 
 # Haematoxylin-Eosin-DAB colorspace
 # From original Ruifrok's paper: A. C. Ruifrok and D. A. Johnston,
@@ -408,9 +481,9 @@ rgb_from_hpx = np.array([[0.644211, 0.716556, 0.266844],
 rgb_from_hpx[2, :] = np.cross(rgb_from_hpx[0, :], rgb_from_hpx[1, :])
 hpx_from_rgb = linalg.inv(rgb_from_hpx)
 
-#-------------------------------------------------------------
+# -------------------------------------------------------------
 # The conversion functions that make use of the matrices above
-#-------------------------------------------------------------
+# -------------------------------------------------------------
 
 
 def _convert(matrix, arr):
@@ -470,9 +543,9 @@ def xyz2rgb(xyz):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2xyz, xyz2rgb
-    >>> lena = data.lena()
-    >>> lena_xyz = rgb2xyz(lena)
-    >>> lena_rgb = xyz2rgb(lena_xyz)
+    >>> img = data.astronaut()
+    >>> img_xyz = rgb2xyz(img)
+    >>> img_rgb = xyz2rgb(img_xyz)
     """
     # Follow the algorithm from http://www.easyrgb.com/index.php
     # except we don't multiply/divide by 100 in the conversion
@@ -480,6 +553,8 @@ def xyz2rgb(xyz):
     mask = arr > 0.0031308
     arr[mask] = 1.055 * np.power(arr[mask], 1 / 2.4) - 0.055
     arr[~mask] *= 12.92
+    arr[arr < 0] = 0
+    arr[arr > 1] = 1
     return arr
 
 
@@ -515,8 +590,8 @@ def rgb2xyz(rgb):
     Examples
     --------
     >>> from skimage import data
-    >>> lena = data.lena()
-    >>> lena_xyz = rgb2xyz(lena)
+    >>> img = data.astronaut()
+    >>> img_xyz = rgb2xyz(img)
     """
     # Follow the algorithm from http://www.easyrgb.com/index.php
     # except we don't multiply/divide by 100 in the conversion
@@ -553,8 +628,8 @@ def rgb2rgbcie(rgb):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2rgbcie
-    >>> lena = data.lena()
-    >>> lena_rgbcie = rgb2rgbcie(lena)
+    >>> img = data.astronaut()
+    >>> img_rgbcie = rgb2rgbcie(img)
     """
     return _convert(rgbcie_from_rgb, rgb)
 
@@ -585,9 +660,9 @@ def rgbcie2rgb(rgbcie):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2rgbcie, rgbcie2rgb
-    >>> lena = data.lena()
-    >>> lena_rgbcie = rgb2rgbcie(lena)
-    >>> lena_rgb = rgbcie2rgb(lena_rgbcie)
+    >>> img = data.astronaut()
+    >>> img_rgbcie = rgb2rgbcie(img)
+    >>> img_rgb = rgbcie2rgb(img_rgbcie)
     """
     return _convert(rgb_from_rgbcie, rgbcie)
 
@@ -629,8 +704,8 @@ def rgb2gray(rgb):
     --------
     >>> from skimage.color import rgb2gray
     >>> from skimage import data
-    >>> lena = data.lena()
-    >>> lena_gray = rgb2gray(lena)
+    >>> img = data.astronaut()
+    >>> img_gray = rgb2gray(img)
     """
     if rgb.ndim == 2:
         return rgb
@@ -668,7 +743,7 @@ def gray2rgb(image):
         raise ValueError("Input image expected to be RGB, RGBA or gray.")
 
 
-def xyz2lab(xyz):
+def xyz2lab(xyz, illuminant="D65", observer="2"):
     """XYZ to CIE-LAB color space conversion.
 
     Parameters
@@ -676,6 +751,10 @@ def xyz2lab(xyz):
     xyz : array_like
         The image in XYZ format, in a 3- or 4-D array of shape
         ``(.., ..,[ ..,] 3)``.
+    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
+        The name of the illuminant (the function is NOT case sensitive).
+    observer : {"2", "10"}, optional
+        The aperture angle of the observer.
 
     Returns
     -------
@@ -687,11 +766,15 @@ def xyz2lab(xyz):
     ------
     ValueError
         If `xyz` is not a 3-D array of shape ``(.., ..,[ ..,] 3)``.
+    ValueError
+        If either the illuminant or the observer angle is unsupported or
+        unknown.
 
     Notes
     -----
-    Observer= 2A, Illuminant= D65
-    CIE XYZ tristimulus values x_ref = 95.047, y_ref = 100., z_ref = 108.883
+    By default Observer= 2A, Illuminant= D65. CIE XYZ tristimulus values
+    x_ref=95.047, y_ref=100., z_ref=108.883. See function `get_xyz_coords` for
+    a list of supported illuminants.
 
     References
     ----------
@@ -702,14 +785,16 @@ def xyz2lab(xyz):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2xyz, xyz2lab
-    >>> lena = data.lena()
-    >>> lena_xyz = rgb2xyz(lena)
-    >>> lena_lab = xyz2lab(lena_xyz)
+    >>> img = data.astronaut()
+    >>> img_xyz = rgb2xyz(img)
+    >>> img_lab = xyz2lab(img_xyz)
     """
     arr = _prepare_colorarray(xyz)
 
+    xyz_ref_white = get_xyz_coords(illuminant, observer)
+
     # scale by CIE XYZ tristimulus values of the reference white point
-    arr = arr / lab_ref_white
+    arr = arr / xyz_ref_white
 
     # Nonlinear distortion and linear transformation
     mask = arr > 0.008856
@@ -726,13 +811,17 @@ def xyz2lab(xyz):
     return np.concatenate([x[..., np.newaxis] for x in [L, a, b]], axis=-1)
 
 
-def lab2xyz(lab):
+def lab2xyz(lab, illuminant="D65", observer="2"):
     """CIE-LAB to XYZcolor space conversion.
 
     Parameters
     ----------
     lab : array_like
         The image in lab format, in a 3-D array of shape ``(.., .., 3)``.
+    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
+        The name of the illuminant (the function is NOT case sensitive).
+    observer : {"2", "10"}, optional
+        The aperture angle of the observer.
 
     Returns
     -------
@@ -743,11 +832,18 @@ def lab2xyz(lab):
     ------
     ValueError
         If `lab` is not a 3-D array of shape ``(.., .., 3)``.
+    ValueError
+        If either the illuminant or the observer angle are not supported or
+        unknown.
+    UserWarning
+        If any of the pixels are invalid (Z < 0).
+
 
     Notes
     -----
-    Observer = 2A, Illuminant = D65
-    CIE XYZ tristimulus values x_ref = 95.047, y_ref = 100., z_ref = 108.883
+    By default Observer= 2A, Illuminant= D65. CIE XYZ tristimulus values x_ref
+    = 95.047, y_ref = 100., z_ref = 108.883. See function 'get_xyz_coords' for
+    a list of supported illuminants.
 
     References
     ----------
@@ -763,14 +859,20 @@ def lab2xyz(lab):
     x = (a / 500.) + y
     z = y - (b / 200.)
 
+    if np.any(z < 0):
+        invalid = np.nonzero(z < 0)
+        warn('Color data out of range: Z < 0 in %s pixels' % invalid[0].size)
+        z[invalid] = 0
+
     out = np.dstack([x, y, z])
 
     mask = out > 0.2068966
     out[mask] = np.power(out[mask], 3.)
     out[~mask] = (out[~mask] - 16.0 / 116.) / 7.787
 
-    # rescale Observer= 2 deg, Illuminant= D65
-    out *= lab_ref_white
+    # rescale to the reference white (illuminant)
+    xyz_ref_white = get_xyz_coords(illuminant, observer)
+    out *= xyz_ref_white
     return out
 
 
@@ -826,7 +928,7 @@ def lab2rgb(lab):
     return xyz2rgb(lab2xyz(lab))
 
 
-def xyz2luv(xyz):
+def xyz2luv(xyz, illuminant="D65", observer="2"):
     """XYZ to CIE-Luv color space conversion.
 
     Parameters
@@ -834,6 +936,10 @@ def xyz2luv(xyz):
     xyz : (M, N, [P,] 3) array_like
         The 3 or 4 dimensional image in XYZ format. Final dimension denotes
         channels.
+    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
+        The name of the illuminant (the function is NOT case sensitive).
+    observer : {"2", "10"}, optional
+        The aperture angle of the observer.
 
     Returns
     -------
@@ -844,11 +950,16 @@ def xyz2luv(xyz):
     ------
     ValueError
         If `xyz` is not a 3-D or 4-D array of shape ``(M, N, [P,] 3)``.
+    ValueError
+        If either the illuminant or the observer angle are not supported or
+        unknown.
 
     Notes
     -----
-    XYZ conversion weights use Observer = 2A. Reference whitepoint for D65
-    Illuminant, with XYZ tristimulus values of ``(95.047, 100., 108.883)``.
+    By default XYZ conversion weights use observer=2A. Reference whitepoint
+    for D65 Illuminant, with XYZ tristimulus values of ``(95.047, 100.,
+    108.883)``. See function 'get_xyz_coords' for a list of supported
+    illuminants.
 
     References
     ----------
@@ -859,9 +970,9 @@ def xyz2luv(xyz):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2xyz, xyz2luv
-    >>> lena = data.lena()
-    >>> lena_xyz = rgb2xyz(lena)
-    >>> lena_luv = xyz2luv(lena_xyz)
+    >>> img = data.astronaut()
+    >>> img_xyz = rgb2xyz(img)
+    >>> img_luv = xyz2luv(img_xyz)
     """
     arr = _prepare_colorarray(xyz)
 
@@ -871,29 +982,30 @@ def xyz2luv(xyz):
     eps = np.finfo(np.float).eps
 
     # compute y_r and L
-    L = y / lab_ref_white[1]
+    xyz_ref_white = get_xyz_coords(illuminant, observer)
+    L = y / xyz_ref_white[1]
     mask = L > 0.008856
     L[mask] = 116. * np.power(L[mask], 1. / 3.) - 16.
     L[~mask] = 903.3 * L[~mask]
 
-    u0 = 4*lab_ref_white[0] / np.dot([1, 15, 3], lab_ref_white)
-    v0 = 9*lab_ref_white[1] / np.dot([1, 15, 3], lab_ref_white)
+    u0 = 4 * xyz_ref_white[0] / np.dot([1, 15, 3], xyz_ref_white)
+    v0 = 9 * xyz_ref_white[1] / np.dot([1, 15, 3], xyz_ref_white)
 
     # u' and v' helper functions
     def fu(X, Y, Z):
-        return (4.*X) / (X + 15.*Y + 3.*Z + eps)
+        return (4. * X) / (X + 15. * Y + 3. * Z + eps)
 
     def fv(X, Y, Z):
-        return (9.*Y) / (X + 15.*Y + 3.*Z + eps)
+        return (9. * Y) / (X + 15. * Y + 3. * Z + eps)
 
     # compute u and v using helper functions
-    u = 13.*L * (fu(x, y, z) - u0)
-    v = 13.*L * (fv(x, y, z) - v0)
+    u = 13. * L * (fu(x, y, z) - u0)
+    v = 13. * L * (fv(x, y, z) - v0)
 
     return np.concatenate([q[..., np.newaxis] for q in [L, u, v]], axis=-1)
 
 
-def luv2xyz(luv):
+def luv2xyz(luv, illuminant="D65", observer="2"):
     """CIE-Luv to XYZ color space conversion.
 
     Parameters
@@ -901,6 +1013,10 @@ def luv2xyz(luv):
     luv : (M, N, [P,] 3) array_like
         The 3 or 4 dimensional image in CIE-Luv format. Final dimension denotes
         channels.
+    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
+        The name of the illuminant (the function is NOT case sensitive).
+    observer : {"2", "10"}, optional
+        The aperture angle of the observer.
 
     Returns
     -------
@@ -911,11 +1027,15 @@ def luv2xyz(luv):
     ------
     ValueError
         If `luv` is not a 3-D or 4-D array of shape ``(M, N, [P,] 3)``.
+    ValueError
+        If either the illuminant or the observer angle are not supported or
+        unknown.
 
     Notes
     -----
-    XYZ conversion weights use Observer = 2A. Reference whitepoint for D65
-    Illuminant, with XYZ tristimulus values of ``(95.047, 100., 108.883)``.
+    XYZ conversion weights use observer=2A. Reference whitepoint for D65
+    Illuminant, with XYZ tristimulus values of ``(95.047, 100., 108.883)``. See
+    function 'get_xyz_coords' for a list of supported illuminants.
 
     References
     ----------
@@ -933,23 +1053,24 @@ def luv2xyz(luv):
     # compute y
     y = L.copy()
     mask = y > 7.999625
-    y[mask] = np.power((y[mask]+16.) / 116., 3.)
+    y[mask] = np.power((y[mask] + 16.) / 116., 3.)
     y[~mask] = y[~mask] / 903.3
-    y *= lab_ref_white[1]
+    xyz_ref_white = get_xyz_coords(illuminant, observer)
+    y *= xyz_ref_white[1]
 
     # reference white x,z
     uv_weights = [1, 15, 3]
-    u0 = 4*lab_ref_white[0] / np.dot(uv_weights, lab_ref_white)
-    v0 = 9*lab_ref_white[1] / np.dot(uv_weights, lab_ref_white)
+    u0 = 4 * xyz_ref_white[0] / np.dot(uv_weights, xyz_ref_white)
+    v0 = 9 * xyz_ref_white[1] / np.dot(uv_weights, xyz_ref_white)
 
     # compute intermediate values
-    a = u0 + u / (13.*L + eps)
-    b = v0 + v / (13.*L + eps)
-    c = 3*y * (5*b-3)
+    a = u0 + u / (13. * L + eps)
+    b = v0 + v / (13. * L + eps)
+    c = 3 * y * (5 * b - 3)
 
     # compute x and z
-    z = ((a-4)*c - 15*a*b*y) / (12*b)
-    x = -(c/b + 3.*z)
+    z = ((a - 4) * c - 15 * a * b * y) / (12 * b)
+    x = -(c / b + 3. * z)
 
     return np.concatenate([q[..., np.newaxis] for q in [x, y, z]], axis=-1)
 
@@ -1048,7 +1169,8 @@ def hed2rgb(hed):
     Parameters
     ----------
     hed : array_like
-        The image in the HED color space, in a 3-D array of shape ``(.., .., 3)``.
+        The image in the HED color space, in a 3-D array of shape
+        ``(.., .., 3)``.
 
     Returns
     -------
@@ -1091,7 +1213,8 @@ def separate_stains(rgb, conv_matrix):
     Returns
     -------
     out : ndarray
-        The image in stain color space, in a 3-D array of shape ``(.., .., 3)``.
+        The image in stain color space, in a 3-D array of shape
+        ``(.., .., 3)``.
 
     Raises
     ------
@@ -1127,7 +1250,8 @@ def separate_stains(rgb, conv_matrix):
     >>> ihc = data.immunohistochemistry()
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     """
-    rgb = dtype.img_as_float(rgb) + 2
+    rgb = dtype.img_as_float(rgb, force_copy=True)
+    rgb += 2
     stains = np.dot(np.reshape(-np.log(rgb), (-1, 3)), conv_matrix)
     return np.reshape(stains, rgb.shape)
 
@@ -1138,7 +1262,8 @@ def combine_stains(stains, conv_matrix):
     Parameters
     ----------
     stains : array_like
-        The image in stain color space, in a 3-D array of shape ``(.., .., 3)``.
+        The image in stain color space, in a 3-D array of shape
+        ``(.., .., 3)``.
     conv_matrix: ndarray
         The stain separation matrix as described by G. Landini [1]_.
 
@@ -1189,7 +1314,8 @@ def combine_stains(stains, conv_matrix):
     stains = dtype.img_as_float(stains)
     logrgb2 = np.dot(-np.reshape(stains, (-1, 3)), conv_matrix)
     rgb2 = np.exp(logrgb2)
-    return rescale_intensity(np.reshape(rgb2 - 2, stains.shape), in_range=(-1, 1))
+    return rescale_intensity(np.reshape(rgb2 - 2, stains.shape),
+                             in_range=(-1, 1))
 
 
 def lab2lch(lab):
@@ -1222,9 +1348,9 @@ def lab2lch(lab):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2lab, lab2lch
-    >>> lena = data.lena()
-    >>> lena_lab = rgb2lab(lena)
-    >>> lena_lch = lab2lch(lena_lab)
+    >>> img = data.astronaut()
+    >>> img_lab = rgb2lab(img)
+    >>> img_lch = lab2lch(img_lab)
     """
     lch = _prepare_lab_array(lab)
 
@@ -1234,7 +1360,7 @@ def lab2lch(lab):
 
 
 def _cart2polar_2pi(x, y):
-    """convert cartesian coordiantes to polar (uses non-standard theta range!)
+    """convert cartesian coordinates to polar (uses non-standard theta range!)
 
     NON-STANDARD RANGE! Maps to ``(0, 2*pi)`` rather than usual ``(-pi, +pi)``
     """
@@ -1269,10 +1395,10 @@ def lch2lab(lch):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2lab, lch2lab
-    >>> lena = data.lena()
-    >>> lena_lab = rgb2lab(lena)
-    >>> lena_lch = lab2lch(lena_lab)
-    >>> lena_lab2 = lch2lab(lena_lch)
+    >>> img = data.astronaut()
+    >>> img_lab = rgb2lab(img)
+    >>> img_lch = lab2lch(img_lab)
+    >>> img_lab2 = lch2lab(img_lch)
     """
     lch = _prepare_lab_array(lch)
 

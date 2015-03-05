@@ -3,7 +3,7 @@ Methods to characterize image textures.
 """
 
 import numpy as np
-
+from .._shared.utils import assert_nD
 from ._texture import _glcm_loop, _local_binary_pattern
 
 
@@ -11,7 +11,7 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
                  normed=False):
     """Calculate the grey-level co-occurrence matrix.
 
-    A grey level co-occurence matrix is a histogram of co-occuring
+    A grey level co-occurrence matrix is a histogram of co-occurring
     greyscale values at a given offset over an image.
 
     Parameters
@@ -89,17 +89,17 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
            [0, 0, 0, 0]], dtype=uint32)
 
     """
+    assert_nD(image, 2)
+    assert_nD(distances, 1, 'distances')
+    assert_nD(angles, 1, 'angles')
 
     assert levels <= 256
     image = np.ascontiguousarray(image)
-    assert image.ndim == 2
     assert image.min() >= 0
     assert image.max() < levels
     image = image.astype(np.uint8)
     distances = np.ascontiguousarray(distances, dtype=np.float64)
     angles = np.ascontiguousarray(angles, dtype=np.float64)
-    assert distances.ndim == 1
-    assert angles.ndim == 1
 
     P = np.zeros((levels, levels, len(distances), len(angles)),
                  dtype=np.uint32, order='C')
@@ -179,8 +179,8 @@ def greycoprops(P, prop='contrast'):
            [ 1.25      ,  2.75      ]])
 
     """
+    assert_nD(P, 4, 'P')
 
-    assert P.ndim == 4
     (num_level, num_level2, num_dist, num_angle) = P.shape
     assert num_level == num_level2
     assert num_dist > 0
@@ -259,7 +259,7 @@ def local_binary_pattern(image, P, R, method='default'):
             finer quantization of the angular space which is gray scale and
             rotation invariant.
         * 'nri_uniform': non rotation-invariant uniform patterns variant
-            which is only gray scale invariant [2].
+            which is only gray scale invariant [2]_.
         * 'var': rotation invariant variance measures of the contrast of local
             image texture which is rotation but not gray scale invariant.
 
@@ -273,13 +273,13 @@ def local_binary_pattern(image, P, R, method='default'):
     .. [1] Multiresolution Gray-Scale and Rotation Invariant Texture
            Classification with Local Binary Patterns.
            Timo Ojala, Matti Pietikainen, Topi Maenpaa.
-           http://www.rafbis.it/biplab15/images/stories/docenti/Danielriccio/\
-           Articoliriferimento/LBP.pdf, 2002.
+           http://www.rafbis.it/biplab15/images/stories/docenti/Danielriccio/Articoliriferimento/LBP.pdf, 2002.
     .. [2] Face recognition with local binary patterns.
            Timo Ahonen, Abdenour Hadid, Matti Pietikainen,
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.214.6851,
            2004.
     """
+    assert_nD(image, 2)
 
     methods = {
         'default': ord('D'),

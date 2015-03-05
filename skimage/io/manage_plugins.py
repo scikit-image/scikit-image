@@ -44,10 +44,8 @@ plugin_meta_data = {}
 # the following preferences.
 preferred_plugins = {
     # Default plugins for all types (overridden by specific types below).
-    'all': ['matplotlib', 'pil', 'qt', 'freeimage', 'null'],
-    # Use PIL as the default imread plugin, since matplotlib (1.2.x)
-    # is buggy (flips PNGs around, returns bytes as floats, etc.)
-    'imread': ['pil'],
+    'all': ['pil', 'matplotlib', 'qt', 'freeimage'],
+    'imshow': ['matplotlib']
 }
 
 
@@ -121,7 +119,7 @@ def _scan_plugins():
 
         for p in provides:
             if not p in plugin_store:
-                print("Plugin `%s` wants to provide non-existent `%s`." \
+                print("Plugin `%s` wants to provide non-existent `%s`."
                       " Ignoring." % (name, p))
 
         # Add plugins that provide 'imread' as provider of 'imread_collection'.
@@ -203,7 +201,7 @@ def call_plugin(kind, *args, **kwargs):
         try:
             func = [f for (p, f) in plugin_funcs if p == plugin][0]
         except IndexError:
-            raise RuntimeError('Could not find the plugin "%s" for %s.' % \
+            raise RuntimeError('Could not find the plugin "%s" for %s.' %
                                (plugin, kind))
 
     return func(*args, **kwargs)
@@ -242,7 +240,7 @@ def use_plugin(name, kind=None):
         kind = plugin_store.keys()
     else:
         if not kind in plugin_provides[name]:
-            raise RuntimeError("Plugin %s does not support `%s`." % \
+            raise RuntimeError("Plugin %s does not support `%s`." %
                                (name, kind))
 
         if kind == 'imshow':
@@ -301,7 +299,7 @@ def _load(plugin):
         if p == 'imread_collection':
             _inject_imread_collection_if_needed(plugin_module)
         elif not hasattr(plugin_module, p):
-            print("Plugin %s does not provide %s as advertised.  Ignoring." % \
+            print("Plugin %s does not provide %s as advertised.  Ignoring." %
                   (plugin, p))
             continue
 

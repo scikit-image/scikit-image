@@ -1,6 +1,6 @@
 from .base import Plugin
 from ..canvastools import RectangleTool
-from skimage.viewer.widgets import SaveButtons
+from ...viewer.widgets import SaveButtons
 
 
 __all__ = ['Crop']
@@ -18,7 +18,7 @@ class Crop(Plugin):
     def attach(self, image_viewer):
         super(Crop, self).attach(image_viewer)
 
-        self.rect_tool = RectangleTool(self.image_viewer.ax,
+        self.rect_tool = RectangleTool(image_viewer,
                                        maxdist=self.maxdist,
                                        on_enter=self.crop)
         self.artists.append(self.rect_tool)

@@ -2,8 +2,9 @@ Pre-built installation
 ----------------------
 
 `Windows binaries
-<http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikits.image>`__
-are kindly provided by Christoph Gohlke.
+<http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image>`__
+are kindly provided by Christoph Gohlke (note that, when upgrading,
+you should first uninstall any older versions).
 
 The latest stable release is also included as part of
 `Enthought Canopy <https://www.enthought.com/products/canopy/>`__,
@@ -18,13 +19,6 @@ add Neurodebian to your system package manager, then look for
 
 On systems that support setuptools, the package can be installed from the
 `Python packaging index <http://pypi.python.org/pypi/scikit-image>`__ using
-
-
-::
-
-  easy_install -U scikit-image
-
-or
 
 ::
 
@@ -45,13 +39,9 @@ If you do not have git installed, you can also download a zipball from
 `https://github.com/scikit-image/scikit-image/zipball/master
 <https://github.com/scikit-image/scikit-image/zipball/master>`_.
 
-The SciKit can be installed globally using::
+The scikit can be installed using::
 
-  python setup.py install
-
-or locally using::
-
-  python setup.py install --prefix=${HOME}
+  pip install .
 
 If you prefer, you can use it without installing, by simply adding
 this path to your ``PYTHONPATH`` variable and compiling extensions
@@ -80,6 +70,7 @@ From the ``scikit-image`` source directory::
     bentomaker build -j     # (add -i for in-place build)
     bentomaker install      # (when not builing in-place)
 
-Depending on file permissions, the install commands may need to be run as sudo.
- 
+Depending on file permissions, the install commands may need to be run as
+sudo.
+
 .. include:: ../../DEPENDS.txt

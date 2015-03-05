@@ -77,6 +77,12 @@ For a more detailed discussion, read these :doc:`detailed documents
       Travis fails, you can find out why by clicking on the "failed" icon (red
       cross) and inspecting the build and test log.
 
+5. Document changes
+
+    Before merging your commits, you must add a description of your changes
+    to the release notes of the upcoming version in
+    ``doc/release/release_dev.txt``.
+
 .. note::
 
    To reviewers: if it is not obvious, add a short explanation of what a branch
@@ -85,7 +91,7 @@ For a more detailed discussion, read these :doc:`detailed documents
 
 
 Divergence between ``upstream master`` and your feature branch
-..............................................................
+--------------------------------------------------------------
 
 Do *not* ever merge the main branch into yours. If GitHub indicates that the
 branch of your Pull Request can no longer be merged automatically, rebase
@@ -117,8 +123,7 @@ Guidelines
 
 * All code should have tests (see `test coverage`_ below for more details).
 * All code should be documented, to the same
-  `standard <http://projects.scipy.org/numpy/wiki/CodingStyleGuidelines>`_
-  as NumPy and SciPy.
+  `standard <://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt#docstring-standard>`_ as NumPy and SciPy.
 * For new functionality, always add an example to the
   gallery.
 * No changes are ever committed without review.  Ask on the
@@ -188,8 +193,8 @@ successfully passes all tests. To do so,
 
    * Go to `Travis-CI <http://travis-ci.org/>`__ and follow the Sign In link at the top
 
-   * Go to your `profile page <https://travis-ci.org/profile>`__ and switch on your
-   scikit-image fork
+   * Go to your `profile page <https://travis-ci.org/profile>`__ and switch 
+     on your scikit-image fork
 
 It corresponds to steps one and two in
 `Travis-CI documentation <http://about.travis-ci.org/docs/user/getting-started/>`__

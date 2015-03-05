@@ -1,8 +1,7 @@
 # coding: utf-8
 import numpy as np
-from skimage import img_as_float
-from skimage.restoration._denoise_cy import _denoise_bilateral, \
-                                            _denoise_tv_bregman
+from .. import img_as_float
+from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 
 
 def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
@@ -71,7 +70,7 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     ----------
     image : ndarray
         Input data to be denoised (converted using img_as_float`).
-    weight : float, optional
+    weight : float
         Denoising weight. The smaller the `weight`, the more denoising (at
         the expense of less similarity to the `input`). The regularization
         parameter `lambda` is chosen as `2 * weight`.
@@ -151,12 +150,12 @@ def _denoise_tv_chambolle_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
         d[:, :, 1:] += pz[:, :, :-1]
 
         out = im + d
-        E = (d**2).sum()
+        E = (d ** 2).sum()
 
         gx[:-1] = np.diff(out, axis=0)
         gy[:, :-1] = np.diff(out, axis=1)
         gz[:, :, :-1] = np.diff(out, axis=2)
-        norm = np.sqrt(gx**2 + gy**2 + gz**2)
+        norm = np.sqrt(gx ** 2 + gy ** 2 + gz ** 2)
         E += weight * norm.sum()
         norm *= 0.5 / weight
         norm += 1.
@@ -231,10 +230,10 @@ def _denoise_tv_chambolle_2d(im, weight=50, eps=2.e-4, n_iter_max=200):
         d[:, 1:] += py[:, :-1]
 
         out = im + d
-        E = (d**2).sum()
+        E = (d ** 2).sum()
         gx[:-1] = np.diff(out, axis=0)
         gy[:, :-1] = np.diff(out, axis=1)
-        norm = np.sqrt(gx**2 + gy**2)
+        norm = np.sqrt(gx ** 2 + gy ** 2)
         E += weight * norm.sum()
         norm *= 0.5 / weight
         norm += 1
@@ -310,12 +309,12 @@ def denoise_tv_chambolle(im, weight=50, eps=2.e-4, n_iter_max=200,
 
     Examples
     --------
-    2D example on Lena image:
+    2D example on astronaut image:
 
     >>> from skimage import color, data
-    >>> lena = color.rgb2gray(data.lena())[:50, :50]
-    >>> lena += 0.5 * lena.std() * np.random.randn(*lena.shape)
-    >>> denoised_lena = denoise_tv_chambolle(lena, weight=60)
+    >>> img = color.rgb2gray(data.astronaut())[:50, :50]
+    >>> img += 0.5 * img.std() * np.random.randn(*img.shape)
+    >>> denoised_img = denoise_tv_chambolle(img, weight=60)
 
     3D example on synthetic data:
 

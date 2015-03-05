@@ -15,7 +15,7 @@ The file
 
 - plot_directive.py
 
-was derived from code in Matplotlib (http://matplotlib.sf.net/), which has the
+was derived from code in Matplotlib (http://matplotlib.org), which has the
 following license:
 
 Copyright (c) 2002-2008 John D. Hunter; All Rights Reserved.

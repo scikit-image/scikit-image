@@ -158,7 +158,7 @@ def imsave(filename, img, format_str=None):
         qbuffer.open(QtCore.QIODevice.ReadWrite)
         saved = qimg.save(qbuffer, format_str.upper())
         qbuffer.seek(0)
-        filename.write(qbuffer.readAll())
+        filename.write(qbuffer.readAll().data())
         qbuffer.close()
     else:
         saved = qimg.save(filename)

@@ -1,3 +1,4 @@
+from ._canny import canny
 from ._daisy import daisy
 from ._hog import hog
 from .texture import greycomatrix, greycoprops, local_binary_pattern
@@ -9,6 +10,7 @@ from .corner import (corner_kitchen_rosenfeld, corner_harris,
                      hessian_matrix_eigvals, hessian_matrix_det)
 from .corner_cy import corner_moravec, corner_orientations
 from .template import match_template
+from .register_translation import register_translation
 from .brief import BRIEF
 from .censure import CENSURE
 from .orb import ORB
@@ -17,7 +19,8 @@ from .util import plot_matches
 from .blob import blob_dog, blob_log, blob_doh
 
 
-__all__ = ['daisy',
+__all__ = ['canny',
+           'daisy',
            'hog',
            'greycomatrix',
            'greycoprops',
@@ -38,6 +41,7 @@ __all__ = ['daisy',
            'corner_fast',
            'corner_orientations',
            'match_template',
+           'register_translation',
            'BRIEF',
            'CENSURE',
            'ORB',

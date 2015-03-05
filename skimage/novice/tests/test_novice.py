@@ -7,14 +7,10 @@ from skimage import novice
 from skimage.novice._novice import (array_to_xy_origin, xy_to_array_origin,
                                     rgb_transpose)
 from skimage import data_dir
-
+from skimage._shared.utils import all_warnings
 
 IMAGE_PATH = os.path.join(data_dir, "chelsea.png")
 SMALL_IMAGE_PATH = os.path.join(data_dir, "block.png")
-
-
-def _array_2d_to_RGBA(array):
-    return np.tile(array[:, :, np.newaxis], (1, 1, 4))
 
 
 def _array_2d_to_RGBA(array):
@@ -62,7 +58,8 @@ def test_modify():
             assert p.blue <= 128
 
     s = pic.size
-    pic.size = (pic.width / 2, pic.height / 2)
+    with all_warnings():  # precision loss
+        pic.size = (pic.width / 2, pic.height / 2)
     assert_equal(pic.size, (int(s[0] / 2), int(s[1] / 2)))
 
     assert pic.modified
@@ -88,6 +85,8 @@ def test_pixel_rgb():
 
     pixel.rgb = np.arange(4)
     assert_equal(pixel.rgb, np.arange(3))
+
+    assert pic.array.dtype == np.uint8
 
 
 def test_pixel_rgba():
@@ -139,7 +138,8 @@ def test_modified_on_set_pixel():
 
 def test_update_on_save():
     pic = novice.Picture(array=np.zeros((3, 3, 3)))
-    pic.size = (6, 6)
+    with all_warnings():  # precision loss
+        pic.size = (6, 6)
     assert pic.modified
     assert pic.path is None
 

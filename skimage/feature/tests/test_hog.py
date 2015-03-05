@@ -10,7 +10,7 @@ from numpy.testing import (assert_raises,
 
 
 def test_histogram_of_oriented_gradients():
-    img = img_as_float(data.lena()[:256, :].mean(axis=2))
+    img = img_as_float(data.astronaut()[:256, :].mean(axis=2))
 
     fd = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
                      cells_per_block=(1, 1))

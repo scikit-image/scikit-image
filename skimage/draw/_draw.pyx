@@ -7,7 +7,34 @@ import numpy as np
 
 cimport numpy as cnp
 from libc.math cimport sqrt, sin, cos, floor, ceil
-from skimage._shared.geometry cimport point_in_polygon
+from .._shared.geometry cimport point_in_polygon
+
+
+def _coords_inside_image(rr, cc, shape, val=None):
+    """
+    Return the coordinates inside an image of a given shape.
+
+    Parameters
+    ----------
+    rr, cc : (N,) ndarray of int
+        Indices of pixels.
+    shape : tuple
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates.
+    val : ndarray of float, optional
+        Values of pixels at coordinates [rr, cc].
+
+    Returns
+    -------
+    rr, cc : (N,) array of int
+        Row and column indices of valid pixels (i.e. those inside `shape`).
+    val : (N,) array of float, optional
+        Values at `rr, cc`. Returned only if `val` is given as input.
+    """
+    mask = (rr >= 0) & (rr < shape[0]) & (cc >= 0) & (cc < shape[1])
+    if val is not None:
+        return rr[mask], cc[mask], val[mask]
+    return rr[mask], cc[mask]
 
 
 def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
@@ -196,9 +223,9 @@ def polygon(y, x, shape=None):
     x : (N,) ndarray
         X-coordinates of vertices of polygon.
     shape : tuple, optional
-        Image shape which is used to determine maximum extents of output pixel
-        coordinates. This is useful for polygons which exceed the image size.
-        By default the full extents of the polygon are used.
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates. This is useful for polygons which exceed the image
+        size. By default the full extent of the polygon are used.
 
     Returns
     -------
@@ -263,7 +290,7 @@ def polygon(y, x, shape=None):
 
 
 def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
-                     method='bresenham'):
+                     method='bresenham', shape=None):
     """Generate circle perimeter coordinates.
 
     Parameters
@@ -275,6 +302,10 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     method : {'bresenham', 'andres'}, optional
         bresenham : Bresenham method (default)
         andres : Andres method
+    shape : tuple, optional
+        Image shape which is used to determine the maximum extent of output pixel
+        coordinates. This is useful for circles which exceed the image size.
+        By default the full extent of the circle are used.
 
     Returns
     -------
@@ -361,11 +392,16 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
                 d = d + 2 * (y - x - 1)
                 y = y - 1
                 x = x + 1
+    if shape is not None:
+        return _coords_inside_image(np.array(rr, dtype=np.intp) + cy,
+                                    np.array(cc, dtype=np.intp) + cx,
+                                    shape)
     return (np.array(rr, dtype=np.intp) + cy,
             np.array(cc, dtype=np.intp) + cx)
 
 
-def circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius):
+def circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
+                        shape=None):
     """Generate anti-aliased circle perimeter coordinates.
 
     Parameters
@@ -374,6 +410,10 @@ def circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius):
         Centre coordinate of circle.
     radius: int
         Radius of circle.
+    shape : tuple, optional
+        Image shape which is used to determine the maximum extent of output pixel
+        coordinates. This is useful for circles which exceed the image size.
+        By default the full extent of the circle are used.
 
     Returns
     -------
@@ -436,13 +476,18 @@ def circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius):
         val.extend([1 - dceil, dceil] * 8)
         dceil_prev = dceil
 
+    if shape is not None:
+        return _coords_inside_image(np.array(rr, dtype=np.intp) + cy,
+                                    np.array(cc, dtype=np.intp) + cx,
+                                    shape,
+                                    val=np.array(val, dtype=np.float))
     return (np.array(rr, dtype=np.intp) + cy,
             np.array(cc, dtype=np.intp) + cx,
             np.array(val, dtype=np.float))
 
 
 def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
-                      Py_ssize_t xradius, double orientation=0):
+                      Py_ssize_t xradius, double orientation=0, shape=None):
     """Generate ellipse perimeter coordinates.
 
     Parameters
@@ -453,6 +498,10 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
         Minor and major semi-axes. ``(x/xradius)**2 + (y/yradius)**2 = 1``.
     orientation : double, optional (default 0)
         Major axis orientation in clockwise direction as radians.
+    shape : tuple, optional
+        Image shape which is used to determine the maximum extent of output pixel
+        coordinates. This is useful for ellipses which exceed the image size.
+        By default the full extent of the ellipse are used.
 
     Returns
     -------
@@ -574,6 +623,9 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
         py.extend(rr)
         px.extend(cc)
 
+    if shape is not None:
+        return _coords_inside_image(np.array(py, dtype=np.intp),
+                                    np.array(px, dtype=np.intp), shape)
     return np.array(py, dtype=np.intp), np.array(px, dtype=np.intp)
 
 
@@ -708,7 +760,7 @@ def _bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
 def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
                  Py_ssize_t y1, Py_ssize_t x1,
                  Py_ssize_t y2, Py_ssize_t x2,
-                 double weight):
+                 double weight, shape=None):
     """Generate Bezier curve coordinates.
 
     Parameters
@@ -721,6 +773,10 @@ def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
         Coordinates of the last control point.
     weight : double
         Middle control point weight, it describes the line tension.
+    shape : tuple, optional
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates. This is useful for curves which exceed the image
+        size. By default the full extent of the curve are used.
 
     Returns
     -------
@@ -833,4 +889,8 @@ def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
     rr, cc = _bezier_segment(y0, x0, y1, x1, y2, x2, weight * weight)
     px.extend(rr)
     py.extend(cc)
+
+    if shape is not None:
+        return _coords_inside_image(np.array(px, dtype=np.intp),
+                                    np.array(py, dtype=np.intp), shape)
     return np.array(px, dtype=np.intp), np.array(py, dtype=np.intp)
