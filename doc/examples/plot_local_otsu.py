@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage.morphology import disk
-from skimage.filter import threshold_otsu, rank
+from skimage.filters import threshold_otsu, rank
 from skimage.util import img_as_ubyte
 
 

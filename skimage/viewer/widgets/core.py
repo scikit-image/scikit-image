@@ -15,17 +15,15 @@ parameter type specified by its `ptype` attribute, which can be:
         property of the same name that updates the display.
 
 """
-from ..qt import QtGui
-from ..qt import QtCore
-from ..qt.QtCore import Qt
-
+from ..qt import QtWidgets, QtCore, Qt
 from ..utils import RequiredAttr
 
 
-__all__ = ['BaseWidget', 'Slider', 'ComboBox', 'Text']
+__all__ = ['BaseWidget', 'Slider', 'ComboBox', 'CheckBox', 'Text']
 
 
-class BaseWidget(QtGui.QWidget):
+
+class BaseWidget(QtWidgets.QWidget):
 
     plugin = RequiredAttr("Widget is not attached to a Plugin.")
 
@@ -49,11 +47,11 @@ class Text(BaseWidget):
 
     def __init__(self, name=None, text=''):
         super(Text, self).__init__(name)
-        self._label = QtGui.QLabel()
+        self._label = QtWidgets.QLabel()
         self.text = text
-        self.layout = QtGui.QHBoxLayout(self)
+        self.layout = QtWidgets.QHBoxLayout(self)
         if name is not None:
-            name_label = QtGui.QLabel()
+            name_label = QtWidgets.QLabel()
             name_label.setText(name)
             self.layout.addWidget(name_label)
         self.layout.addWidget(self._label)
@@ -81,16 +79,17 @@ class Slider(BaseWidget):
         Range of slider values.
     value : float
         Default slider value. If None, use midpoint between `low` and `high`.
-    value_type : {'float' | 'int'}
+    value_type : {'float' | 'int'}, optional
         Numeric type of slider value.
-    ptype : {'arg' | 'kwarg' | 'plugin'}
+    ptype : {'kwarg' | 'arg' | 'plugin'}, optional
         Parameter type.
-    callback : function
-        Callback function called in response to slider changes. This function
-        is typically set when the widget is added to a plugin.
-    orientation : {'horizontal' | 'vertical'}
+    callback : callable f(widget_name, value), optional
+        Callback function called in response to slider changes.
+        *Note:* This function is typically set (overridden) when the widget is
+        added to a plugin.
+    orientation : {'horizontal' | 'vertical'}, optional
         Slider orientation.
-    update_on : {'release' | 'move'}
+    update_on : {'release' | 'move'}, optional
         Control when callback function is called: on slider move or release.
     """
     def __init__(self, name, low=0.0, high=1.0, value=None, value_type='float',
@@ -104,17 +103,17 @@ class Slider(BaseWidget):
         # Set widget orientation
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         if orientation == 'vertical':
-            self.slider = QtGui.QSlider(Qt.Vertical)
+            self.slider = QtWidgets.QSlider(Qt.Vertical)
             alignment = QtCore.Qt.AlignHCenter
             align_text = QtCore.Qt.AlignHCenter
             align_value = QtCore.Qt.AlignHCenter
-            self.layout = QtGui.QVBoxLayout(self)
+            self.layout = QtWidgets.QVBoxLayout(self)
         elif orientation == 'horizontal':
-            self.slider = QtGui.QSlider(Qt.Horizontal)
+            self.slider = QtWidgets.QSlider(Qt.Horizontal)
             alignment = QtCore.Qt.AlignVCenter
             align_text = QtCore.Qt.AlignLeft
             align_value = QtCore.Qt.AlignRight
-            self.layout = QtGui.QHBoxLayout(self)
+            self.layout = QtWidgets.QHBoxLayout(self)
         else:
             msg = "Unexpected value %s for 'orientation'"
             raise ValueError(msg % orientation)
@@ -150,11 +149,11 @@ class Slider(BaseWidget):
             raise ValueError("Unexpected value %s for 'update_on'" % update_on)
         self.slider.setFocusPolicy(QtCore.Qt.StrongFocus)
 
-        self.name_label = QtGui.QLabel()
+        self.name_label = QtWidgets.QLabel()
         self.name_label.setText(self.name)
         self.name_label.setAlignment(align_text)
 
-        self.editbox = QtGui.QLineEdit()
+        self.editbox = QtWidgets.QLineEdit()
         self.editbox.setMaximumWidth(max_edit_width)
         self.editbox.setText(self.value_fmt % self.val)
         self.editbox.setAlignment(align_value)
@@ -211,40 +210,39 @@ class ComboBox(BaseWidget):
     Parameters
     ----------
     name : str
-        Name of slider parameter. If this parameter is passed as a keyword
+        Name of ComboBox parameter. If this parameter is passed as a keyword
         argument, it must match the name of that keyword argument (spaces are
         replaced with underscores). In addition, this name is displayed as the
-        name of the slider.
-    items: list
+        name of the ComboBox.
+    items: list of str
         Allowed parameter values.
-    ptype : {'arg' | 'kwarg' | 'plugin'}
+    ptype : {'arg' | 'kwarg' | 'plugin'}, optional
         Parameter type.
-    callback : function
-        Callback function called in response to slider changes. This function
-        is typically set when the widget is added to a plugin.
+    callback : callable f(widget_name, value), optional
+        Callback function called in response to combobox changes.
+        *Note:* This function is typically set (overridden) when the widget is
+        added to a plugin.
     """
 
     def __init__(self, name, items, ptype='kwarg', callback=None):
         super(ComboBox, self).__init__(name, ptype, callback)
 
-        self.name_label = QtGui.QLabel()
+        self.name_label = QtWidgets.QLabel()
         self.name_label.setText(self.name)
         self.name_label.setAlignment(QtCore.Qt.AlignLeft)
 
-        self._combo_box = QtGui.QComboBox()
+        self._combo_box = QtWidgets.QComboBox()
         self._combo_box.addItems(list(items))
 
-        self.layout = QtGui.QHBoxLayout(self)
+        self.layout = QtWidgets.QHBoxLayout(self)
         self.layout.addWidget(self.name_label)
         self.layout.addWidget(self._combo_box)
 
         self._combo_box.currentIndexChanged.connect(self._value_changed)
-        # self.connect(self._combo_box,
-                # SIGNAL("currentIndexChanged(int)"), self.updateUi)
 
     @property
     def val(self):
-        return self._combo_box.value()
+        return self._combo_box.currentText()
 
     @property
     def index(self):
@@ -253,3 +251,56 @@ class ComboBox(BaseWidget):
     @index.setter
     def index(self, i):
         self._combo_box.setCurrentIndex(i)
+
+
+class CheckBox(BaseWidget):
+    """CheckBox widget
+
+    Parameters
+    ----------
+    name : str
+        Name of CheckBox parameter. If this parameter is passed as a keyword
+        argument, it must match the name of that keyword argument (spaces are
+        replaced with underscores). In addition, this name is displayed as the
+        name of the CheckBox.
+    value: {False, True}, optional
+        Initial state of the CheckBox.
+    alignment: {'center','left','right'}, optional
+        Checkbox alignment
+    ptype : {'arg' | 'kwarg' | 'plugin'}, optional
+        Parameter type
+    callback : callable f(widget_name, value), optional
+        Callback function called in response to checkbox changes.
+        *Note:* This function is typically set (overridden) when the widget is
+        added to a plugin.
+    """
+
+    def __init__(self, name, value=False, alignment='center', ptype='kwarg', 
+                 callback=None):
+        super(CheckBox, self).__init__(name, ptype, callback)
+
+        self._check_box = QtWidgets.QCheckBox()
+        self._check_box.setChecked(value)
+        self._check_box.setText(self.name)
+
+        self.layout = QtWidgets.QHBoxLayout(self)
+        if alignment == 'center':
+            self.layout.setAlignment(QtCore.Qt.AlignCenter)
+        elif alignment == 'left':
+            self.layout.setAlignment(QtCore.Qt.AlignLeft)
+        elif alignment == 'right':
+            self.layout.setAlignment(QtCore.Qt.AlignRight)
+        else:
+            raise ValueError("Unexpected value %s for 'alignment'" % alignment)
+
+        self.layout.addWidget(self._check_box)
+
+        self._check_box.stateChanged.connect(self._value_changed)
+
+    @property
+    def val(self):
+        return self._check_box.isChecked()
+
+    @val.setter
+    def val(self, i):
+        self._check_box.setChecked(i)

@@ -3,6 +3,7 @@
 *#
 *egg-info
 *.so
+*.pyd
 *.bak
 *.c
 *.new
@@ -18,6 +19,7 @@ skimage/version.py
 .coverage
 doc/source/auto_examples/*.py
 doc/source/auto_examples/*.txt
+doc/source/auto_examples/notebook
 doc/source/auto_examples/images/plot_*.png
 doc/source/auto_examples/images/thumb
 doc/source/auto_examples/applications/

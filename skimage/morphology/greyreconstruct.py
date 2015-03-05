@@ -11,7 +11,7 @@ Original author: Lee Kamentsky
 """
 import numpy as np
 
-from skimage.filter._rank_order import rank_order
+from ..filters._rank_order import rank_order
 
 
 def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
@@ -131,7 +131,7 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
     if selem is None:
         selem = np.ones([3] * seed.ndim, dtype=bool)
     else:
-        selem = selem.astype(bool, copy=True)
+        selem = selem.astype(bool)
 
     if offset is None:
         if not all([d % 2 == 1 for d in selem.shape]):
@@ -152,6 +152,9 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
         pad_value = np.min(seed)
     elif method == 'erosion':
         pad_value = np.max(seed)
+    else:
+        raise ValueError("Reconstruction method can be one of 'erosion' "
+                         "or 'dilation'. Got '%s'." % method)
     images = np.ones(dims) * pad_value
     images[[0] + inside_slices] = seed
     images[[1] + inside_slices] = mask

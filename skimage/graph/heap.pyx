@@ -711,7 +711,7 @@ cdef class FastUpdateBinaryHeap(BinaryHeap):
         Returns
         -------
         pushed : bool
-            True if an append/update occured, False if otherwise.
+            True if an append/update occurred, False if otherwise.
 
         Raises
         ------

@@ -251,6 +251,7 @@ latex_use_modindex = False
 # Numpy extensions
 # -----------------------------------------------------------------------------
 numpydoc_show_class_members = False
+numpydoc_class_members_toctree = False
 
 # -----------------------------------------------------------------------------
 # Plots

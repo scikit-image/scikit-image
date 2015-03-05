@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage import filter
+from skimage import filters
 from skimage import morphology
 from skimage.viewer import ImageViewer
 from skimage.viewer.widgets import history

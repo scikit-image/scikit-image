@@ -57,7 +57,7 @@ segmentation. To do this, we first get the edges of features using the Canny
 edge-detector.
 """
 
-from skimage.filter import canny
+from skimage.feature import canny
 edges = canny(coins/255.)
 
 fig, ax = plt.subplots(figsize=(4, 3))
@@ -109,7 +109,7 @@ find an elevation map using the Sobel gradient of the image.
 
 """
 
-from skimage.filter import sobel
+from skimage.filters import sobel
 
 elevation_map = sobel(coins)
 

@@ -4,21 +4,10 @@ from numpy.testing import assert_equal, raises
 
 from skimage import io
 from skimage.io import manage_plugins
-from numpy.testing.decorators import skipif
 
-try:
-    io.use_plugin('pil')
-    PIL_available = True
-    priority_plugin = 'pil'
-except ImportError:
-    PIL_available = False
 
-try:
-    io.use_plugin('freeimage')
-    FI_available = True
-    priority_plugin = 'freeimage'
-except RuntimeError:
-    FI_available = False
+io.use_plugin('pil')
+priority_plugin = 'pil'
 
 
 def setup_module():
@@ -65,7 +54,6 @@ def test_failed_use():
     manage_plugins.use_plugin('asd')
 
 
-@skipif(not PIL_available and not FI_available)
 def test_use_priority():
     manage_plugins.use_plugin(priority_plugin)
     plug, func = manage_plugins.plugin_store['imread'][0]
@@ -76,7 +64,6 @@ def test_use_priority():
     assert_equal(plug, 'test')
 
 
-@skipif(not PIL_available)
 def test_use_priority_with_func():
     manage_plugins.use_plugin('pil')
     plug, func = manage_plugins.plugin_store['imread'][0]
@@ -106,28 +93,31 @@ def test_available():
 
 
 def test_load_preferred_plugins_all():
-    from skimage.io._plugins import null_plugin
+    from skimage.io._plugins import pil_plugin, matplotlib_plugin
 
     with protect_preferred_plugins():
-        manage_plugins.preferred_plugins = {'all': ['null']}
+        manage_plugins.preferred_plugins = {'all': ['pil'],
+                                            'imshow': ['matplotlib']}
         manage_plugins.reset_plugins()
 
-        for plugin_type in ('imread', 'imsave', 'imshow'):
+        for plugin_type in ('imread', 'imsave'):
             plug, func = manage_plugins.plugin_store[plugin_type][0]
-            assert func == getattr(null_plugin, plugin_type)
+            assert func == getattr(pil_plugin, plugin_type)
+        plug, func = manage_plugins.plugin_store['imshow'][0]
+        assert func == getattr(matplotlib_plugin, 'imshow')
 
 
 def test_load_preferred_plugins_imread():
-    from skimage.io._plugins import null_plugin
+    from skimage.io._plugins import pil_plugin, matplotlib_plugin
 
     with protect_preferred_plugins():
-        manage_plugins.preferred_plugins['imread'] = ['null']
+        manage_plugins.preferred_plugins['imread'] = ['pil']
         manage_plugins.reset_plugins()
 
         plug, func = manage_plugins.plugin_store['imread'][0]
-        assert func == null_plugin.imread
+        assert func == pil_plugin.imread
         plug, func = manage_plugins.plugin_store['imshow'][0]
-        assert func != null_plugin.imshow
+        assert func == matplotlib_plugin.imshow, func.__module__
 
 
 if __name__ == "__main__":

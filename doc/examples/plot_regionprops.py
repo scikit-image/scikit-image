@@ -11,8 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from skimage.draw import ellipse
-from skimage.morphology import label
-from skimage.measure import regionprops
+from skimage.measure import label, regionprops
 from skimage.transform import rotate
 
 

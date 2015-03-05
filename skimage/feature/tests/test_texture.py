@@ -199,7 +199,7 @@ class TestLBP():
         np.random.seed(13141516)
 
         # Create random image with known variance.
-        image = np.random.random((500, 500))
+        image = np.random.rand(500, 500)
         target_std = 0.3
         image = image / image.std() * target_std
 

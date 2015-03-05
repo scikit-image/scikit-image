@@ -21,7 +21,7 @@ from __future__ import division
 
 import numpy as np
 
-from skimage.color.colorconv import lab2lch, _cart2polar_2pi
+from ..color.colorconv import lab2lch, _cart2polar_2pi
 
 
 def deltaE_cie76(lab1, lab2):
@@ -336,4 +336,4 @@ def get_dH2(lab1, lab2):
     C2 = np.hypot(a2, b2)
 
     term = (C1 * C2) - (a1 * a2 + b1 * b2)
-    return 2*term
+    return 2 * term

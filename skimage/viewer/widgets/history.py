@@ -1,12 +1,10 @@
 from textwrap import dedent
 
-from ..qt import QtGui
-from ..qt import QtCore
-
+from ..qt import QtGui, QtCore
 import numpy as np
 
 import skimage
-from skimage import io
+from ... import io, img_as_ubyte
 from .core import BaseWidget
 from ..utils import dialogs
 
@@ -81,14 +79,15 @@ class SaveButtons(BaseWidget):
             NOTE: The io stack only works in interactive sessions.''')
         notify(msg)
 
-    def save_to_file(self):
-        filename = dialogs.save_file_dialog()
+    def save_to_file(self, filename=None):
+        if filename is None:
+            filename = dialogs.save_file_dialog()
         if filename is None:
             return
         image = self.plugin.filtered_image
         if image.dtype == np.bool:
             #TODO: This check/conversion should probably be in `imsave`.
-            image = skimage.img_as_ubyte(image)
+            image = img_as_ubyte(image)
         io.imsave(filename, image)
 
 

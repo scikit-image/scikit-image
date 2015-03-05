@@ -62,7 +62,7 @@ randomly set to 0. The **median** filter is applied to remove the noise.
 
 """
 
-from skimage.filter.rank import median
+from skimage.filters.rank import median
 from skimage.morphology import disk
 
 noise = np.random.random(noisy_image.shape)
@@ -107,7 +107,7 @@ image.
 
 """
 
-from skimage.filter.rank import mean
+from skimage.filters.rank import mean
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=[10, 7])
 
@@ -133,11 +133,11 @@ the central one.
 .. note::
 
     A different implementation is available for color images in
-    `skimage.filter.denoise_bilateral`.
+    `skimage.filters.denoise_bilateral`.
 
 """
 
-from skimage.filter.rank import mean_bilateral
+from skimage.filters.rank import mean_bilateral
 
 noisy_image = img_as_ubyte(data.camera())
 
@@ -183,7 +183,7 @@ equalization emphasizes every local gray-level variations.
 """
 
 from skimage import exposure
-from skimage.filter import rank
+from skimage.filters import rank
 
 noisy_image = img_as_ubyte(data.camera())
 
@@ -230,7 +230,7 @@ picture.
 
 """
 
-from skimage.filter.rank import autolevel
+from skimage.filters.rank import autolevel
 
 noisy_image = img_as_ubyte(data.camera())
 
@@ -260,7 +260,7 @@ result.
 
 """
 
-from skimage.filter.rank import autolevel_percentile
+from skimage.filters.rank import autolevel_percentile
 
 image = data.camera()
 
@@ -298,7 +298,7 @@ otherwise by the minimum local.
 
 """
 
-from skimage.filter.rank import enhance_contrast
+from skimage.filters.rank import enhance_contrast
 
 noisy_image = img_as_ubyte(data.camera())
 
@@ -330,7 +330,7 @@ percentile *p0* and *p1* instead of the local minimum and maximum.
 
 """
 
-from skimage.filter.rank import enhance_contrast_percentile
+from skimage.filters.rank import enhance_contrast_percentile
 
 noisy_image = img_as_ubyte(data.camera())
 
@@ -366,19 +366,19 @@ threshold is determined by maximizing the variance between two classes of
 pixels of the local neighborhood defined by a structuring element.
 
 The example compares the local threshold with the global threshold
-`skimage.filter.threshold_otsu`.
+`skimage.filters.threshold_otsu`.
 
 .. note::
 
     Local is much slower than global thresholding. A function for global Otsu
-    thresholding can be found in : `skimage.filter.threshold_otsu`.
+    thresholding can be found in : `skimage.filters.threshold_otsu`.
 
 .. [4] http://en.wikipedia.org/wiki/Otsu's_method
 
 """
 
-from skimage.filter.rank import otsu
-from skimage.filter import threshold_otsu
+from skimage.filters.rank import otsu
+from skimage.filters import threshold_otsu
 
 p8 = data.page()
 
@@ -459,7 +459,7 @@ closing and morphological gradient.
 
 """
 
-from skimage.filter.rank import maximum, minimum, gradient
+from skimage.filters.rank import maximum, minimum, gradient
 
 noisy_image = img_as_ubyte(data.camera())
 
@@ -511,7 +511,7 @@ images.
 """
 
 from skimage import data
-from skimage.filter.rank import entropy
+from skimage.filters.rank import entropy
 from skimage.morphology import disk
 import numpy as np
 import matplotlib.pyplot as plt
@@ -549,7 +549,7 @@ from time import time
 
 from scipy.ndimage.filters import percentile_filter
 from skimage.morphology import dilation
-from skimage.filter.rank import median, maximum
+from skimage.filters.rank import median, maximum
 
 
 def exec_and_timeit(func):
@@ -586,7 +586,7 @@ def ndi_med(image, n):
 
 Comparison between
 
-* `filter.rank.maximum`
+* `filters.rank.maximum`
 * `morphology.dilate`
 
 on increasing structuring element size:
@@ -610,7 +610,7 @@ ax.set_title('Performance with respect to element size')
 ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Element radius')
 ax.plot(e_range, rec)
-ax.legend(['filter.rank.maximum', 'morphology.dilate'])
+ax.legend(['filters.rank.maximum', 'morphology.dilate'])
 
 """
 
@@ -638,7 +638,7 @@ ax.set_title('Performance with respect to image size')
 ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Image size')
 ax.plot(s_range, rec)
-ax.legend(['filter.rank.maximum', 'morphology.dilate'])
+ax.legend(['filters.rank.maximum', 'morphology.dilate'])
 
 
 """
@@ -647,7 +647,7 @@ ax.legend(['filter.rank.maximum', 'morphology.dilate'])
 
 Comparison between:
 
-* `filter.rank.median`
+* `filters.rank.median`
 * `scipy.ndimage.percentile`
 
 on increasing structuring element size:
@@ -669,7 +669,7 @@ rec = np.asarray(rec)
 fig, ax = plt.subplots()
 ax.set_title('Performance with respect to element size')
 ax.plot(e_range, rec)
-ax.legend(['filter.rank.median', 'scipy.ndimage.percentile'])
+ax.legend(['filters.rank.median', 'scipy.ndimage.percentile'])
 ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Element radius')
 
@@ -682,7 +682,7 @@ Comparison of outcome of the three methods:
 
 fig, ax = plt.subplots()
 ax.imshow(np.hstack((rc, rndi)))
-ax.set_title('filter.rank.median vs. scipy.ndimage.percentile')
+ax.set_title('filters.rank.median vs. scipy.ndimage.percentile')
 ax.axis('off')
 
 """
@@ -708,7 +708,7 @@ rec = np.asarray(rec)
 fig, ax = plt.subplots()
 ax.set_title('Performance with respect to image size')
 ax.plot(s_range, rec)
-ax.legend(['filter.rank.median', 'scipy.ndimage.percentile'])
+ax.legend(['filters.rank.median', 'scipy.ndimage.percentile'])
 ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Image size')
 

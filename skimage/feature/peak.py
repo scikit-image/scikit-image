@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.ndimage as ndi
-from ..filter import rank_order
+from ..filters import rank_order
 
 
 def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
@@ -146,10 +146,10 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
     peak_threshold = max(np.max(image.ravel()) * threshold_rel, threshold_abs)
 
     # get coordinates of peaks
-    coordinates = np.transpose((image > peak_threshold).nonzero())
+    coordinates = np.argwhere(image > peak_threshold)
 
     if coordinates.shape[0] > num_peaks:
-        intensities = image[coordinates[:, 0], coordinates[:, 1]]
+        intensities = image.flat[np.ravel_multi_index(coordinates.transpose(),image.shape)]
         idx_maxsort = np.argsort(intensities)[::-1]
         coordinates = coordinates[idx_maxsort][:num_peaks]
 

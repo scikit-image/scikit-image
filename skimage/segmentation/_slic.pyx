@@ -8,7 +8,7 @@ from cpython cimport bool
 import numpy as np
 cimport numpy as cnp
 
-from skimage.util import regular_grid
+from ..util import regular_grid
 
 
 def _slic_cython(double[:, :, :, ::1] image_zyx,
@@ -32,7 +32,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     spacing : 1D array of double, shape (3,)
         The voxel spacing along each image dimension. This parameter
         controls the weights of the distances along z, y, and x during
-        k-means clustering.        
+        k-means clustering.
     slic_zero : bool
         True to run SLIC-zero, False to run original SLIC.
 
@@ -178,7 +178,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                         for c in range(3, n_features):
                             dist_color += (image_zyx[z, y, x, c - 3] -
                                            segments[k, c]) ** 2
-                        
+
                         # The reference implementation seems to only change
                         # the color if it increases from previous iteration
                         if max_dist_color[k] < dist_color:

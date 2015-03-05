@@ -5,8 +5,15 @@ How to make a new release of ``skimage``
 
 - Update release notes.
 
-  - To show a list of contributors and changes, run
-    ``doc/release/contribs.py <tag of prev release>``.
+  1. Review and cleanup ``doc/release/release_dev.txt``
+
+     - To show a list of merges and contributors, run
+       ``doc/release/contribs.py <tag of prev release>``.
+
+  2. Rename to ``doc/release/release_X.txt``
+
+  3. Copy ``doc/release/release_template.txt`` to
+     ``doc/release/release_dev.txt`` for the next release.
 
 - Update the version number in ``setup.py`` and ``bento.info`` and commit
 
@@ -19,6 +26,7 @@ How to make a new release of ``skimage``
     place.  Double check ``random.js``, otherwise the skimage.org front
     page gets broken!
   - Build using ``make gh-pages``.
+  - Update the symlink to ``stable``.
   - Push upstream: ``git push origin gh-pages`` in ``doc/gh-pages``.
 
 - Add the version number as a tag in git::
@@ -34,6 +42,15 @@ How to make a new release of ``skimage``
    python setup.py register
    python setup.py sdist upload
 
+  Go to https://travis-ci.org/scikit-image/scikit-image-wheels, select the
+  "Current" tab, and click (on the right) on the "Restart Build" icon.  After
+  the wheels become available at http://wheels.scikit-image.org/ (approx 15
+  mins), execute ``tools/osx_wheel_upload.sh``.  Note that, if you rebuild the
+  same wheels, it can take up to 15 minutes for the the files in the http
+  directory to update to the versions that Travis-CI uploaded. You may want to
+  check the timestamps in the http directory listing to check that you will get
+  the latest version.
+
 - Increase the version number
 
   - In ``setup.py``, set to ``0.Xdev``.
@@ -45,8 +62,6 @@ How to make a new release of ``skimage``
   - Sync your branch with the remote repo: ``git pull``.
     If you try to ``make gh-pages`` when your branch is out of sync, it
     creates headaches.
-  - Update stable and development version numbers in
-    ``_templates/sidebar_versions.html``.
   - Add release date to ``index.rst`` under "Announcements".
   - Add previous stable version documentation path to disallowed paths
     in `robots.txt`

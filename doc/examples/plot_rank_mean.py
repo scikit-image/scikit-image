@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage.morphology import disk
-from skimage.filter import rank
+from skimage.filters import rank
 
 
 image = (data.coins()).astype(np.uint16) * 16

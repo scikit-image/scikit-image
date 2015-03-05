@@ -97,6 +97,12 @@ def test_invalid_selem():
     reconstruction(seed, mask, selem=np.ones((3, 3)))
 
 
+def test_invalid_method():
+    seed = np.array([0, 8, 8, 8, 8, 8, 8, 8, 8, 0])
+    mask = np.array([0, 3, 6, 2, 1, 1, 1, 4, 2, 0])
+    assert_raises(ValueError, reconstruction, seed, mask, method='foo')
+
+
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()

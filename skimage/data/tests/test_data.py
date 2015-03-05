@@ -7,6 +7,11 @@ def test_lena():
     lena = data.lena()
     assert_equal(lena.shape, (512, 512, 3))
 
+def test_astronaut():
+    """ Test that "astronaut" image can be loaded. """
+    astronaut = data.astronaut()
+    assert_equal(astronaut.shape, (512, 512, 3))
+
 
 def test_camera():
     """ Test that "camera" image can be loaded. """

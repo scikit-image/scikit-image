@@ -1,5 +1,17 @@
 Remember to list any API changes below in `doc/source/api_changes.txt`.
 
+Version 0.13
+------------
+* Remove deprecated `None` defaults for `skimage.exposure.rescale_intensity`
+* Remove deprecated `skimage.filters.canny` import in `filters/__init__.py`
+  file (canny is now in `skimage.feature.canny`).
+    * Don't forget to complete api_changes.txt.
+     (`GitHub discuss <https://github.com/scikit-image/scikit-image/pull/1113>`__ )
+* Remove deprecated ``skimage.filter`` module.
+* Remove deprecated edge filters `hsobel`, `vsobel`, `hscharr`, `vscharr`,
+  `hprewitt`, `vprewitt`, `roberts_positive_diagonal`,
+  `roberts_negative_diagonal` in `skimage/filters/edges.py`
+
 Version 0.12
 ------------
 * Change `label` to mark background as 0, not -1, which is consistent with
@@ -7,11 +19,13 @@ Version 0.12
 * Remove `skimage.morphology.label` from `skimage.morphology.__init__`--it now
   lives in `skimage.measure.label`.
 * Remove deprecated `reverse_map` parameter of `skimage.transform.warp`
-* Change depecrated `enforce_connectivity=False` on skimage.segmentation.slic
+* Change deprecated `enforce_connectivity=False` on skimage.segmentation.slic
   and set it to True as default
 * Remove deprecated `skimage.measure.fit.BaseModel._params` attribute
 * Remove deprecated `skimage.measure.fit.BaseModel._params`,
   `skimage.transform.ProjectiveTransform._matrix`,
   `skimage.transform.PolynomialTransform._params`,
   `skimage.transform.PiecewiseAffineTransform.affines_*` attributes
-* Remove deprecated functions `skimage.filter.denoise_*`
+* Remove deprecated functions `skimage.filters.denoise_*`
+* Add 3D phantom in `skimage.data`
+* Add 3D test case of `skimage.feature.phase_correlate`

@@ -1,5 +1,5 @@
 from skimage import data
-from skimage.filter import canny
+from skimage.feature import canny
 
 from skimage.viewer import ImageViewer
 from skimage.viewer.widgets import Slider

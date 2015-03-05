@@ -27,7 +27,7 @@ Original author: Lee Kamentsky
 from _heapq import heappush, heappop
 import numpy as np
 import scipy.ndimage
-from ..filter import rank_order
+from ..filters import rank_order
 from .._shared.utils import deprecated
 
 from . import _watershed
@@ -136,7 +136,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     if offset is None:
         if any([x % 2 == 0 for x in c_connectivity.shape]):
             raise ValueError("Connectivity array must have an unambiguous "
-                    "center")
+                             "center")
         #
         # offset to center of connectivity array
         #
@@ -147,7 +147,8 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     pads = offset
 
     def pad(im):
-        new_im = np.zeros([i + 2 * p for i, p in zip(im.shape, pads)], im.dtype)
+        new_im = np.zeros(
+            [i + 2 * p for i, p in zip(im.shape, pads)], im.dtype)
         new_im[[slice(p, -p, None) for p in pads]] = im
         return new_im
 
@@ -211,7 +212,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
         # If nothing is labeled, the output is empty and we don't have to
         # do anything
         c_output = c_output.flatten()
-        if c_mask == None:
+        if c_mask is None:
             c_mask = np.ones(c_image.shape, np.int8).flatten()
         else:
             c_mask = c_mask.astype(np.int8).flatten()
@@ -220,7 +221,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
                              c_mask,
                              c_output)
     c_output = c_output.reshape(c_image.shape)[[slice(1, -1, None)] *
-                                                image.ndim]
+                                               image.ndim]
     try:
         return c_output.astype(markers.dtype)
     except:

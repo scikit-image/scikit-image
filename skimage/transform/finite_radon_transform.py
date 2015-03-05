@@ -29,7 +29,7 @@ def frt2(a):
 
     Notes
     -----
-    The FRT has a unique inverse iff n is prime. [FRT]
+    The FRT has a unique inverse if and only if n is prime. [FRT]
     The idea for this algorithm is due to Vlad Negnevitski.
 
     Examples
@@ -88,7 +88,7 @@ def ifrt2(a):
 
     Notes
     -----
-    The FRT has a unique inverse iff n is prime.
+    The FRT has a unique inverse if and only if n is prime.
     See [1]_ for an overview.
     The idea for this algorithm is due to Vlad Negnevitski.
 

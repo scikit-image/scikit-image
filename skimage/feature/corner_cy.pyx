@@ -7,8 +7,8 @@ cimport numpy as cnp
 from libc.float cimport DBL_MAX
 from libc.math cimport atan2
 
-from skimage.util import img_as_float, pad
-from skimage.color import rgb2grey
+from ..util import img_as_float, pad
+from ..color import rgb2grey
 
 from .util import _prepare_grayscale_input_2D
 
@@ -87,7 +87,7 @@ def corner_moravec(image, Py_ssize_t window_size=1):
 
 cdef inline double _corner_fast_response(double curr_pixel,
                                          double* circle_intensities,
-                                         char* bins, char state, char n):
+                                         signed char* bins, signed char state, char n):
     cdef char consecutive_count = 0
     cdef double curr_response
     cdef Py_ssize_t l, m
@@ -104,22 +104,22 @@ cdef inline double _corner_fast_response(double curr_pixel,
     return 0
 
 
-def _corner_fast(double[:, ::1] image, char n, double threshold):
+def _corner_fast(double[:, ::1] image, signed char n, double threshold):
 
     cdef Py_ssize_t rows = image.shape[0]
     cdef Py_ssize_t cols = image.shape[1]
 
     cdef Py_ssize_t i, j, k
 
-    cdef char speed_sum_b, speed_sum_d
+    cdef signed char speed_sum_b, speed_sum_d
     cdef double curr_pixel
     cdef double lower_threshold, upper_threshold
     cdef double[:, ::1] corner_response = np.zeros((rows, cols),
                                                    dtype=np.double)
 
-    cdef char *rp = [0, 1, 2, 3, 3, 3, 2, 1, 0, -1, -2, -3, -3, -3, -2, -1]
-    cdef char *cp = [3, 3, 2, 1, 0, -1, -2, -3, -3, -3, -2, -1, 0, 1, 2, 3]
-    cdef char bins[16]
+    cdef signed char *rp = [0, 1, 2, 3, 3, 3, 2, 1, 0, -1, -2, -3, -3, -3, -2, -1]
+    cdef signed char *cp = [3, 3, 2, 1, 0, -1, -2, -3, -3, -3, -2, -1, 0, 1, 2, 3]
+    cdef signed char bins[16]
     cdef double circle_intensities[16]
 
     cdef double curr_response

@@ -36,11 +36,11 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
        The regularisation parameter value that tunes the balance
        between the data adequacy that improve frequency restoration
        and the prior adequacy that reduce frequency restoration (to
-       avoid noise artifact).
+       avoid noise artifacts).
     reg : ndarray, optional
        The regularisation operator. The Laplacian by default. It can
        be an impulse response or a transfer function, as for the
-       psf. Shape constraint is the same than for the `psf` parameter.
+       psf. Shape constraint is the same as for the `psf` parameter.
     is_real : boolean, optional
        True by default. Specify if ``psf`` and ``reg`` are provided
        with hermitian hypothesis, that is only half of the frequency
@@ -49,24 +49,23 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
        provided as transfer function.  For the hermitian property see
        ``uft`` module or ``np.fft.rfftn``.
     clip : boolean, optional
-       True by default. If true, pixel value of the result above 1 or
-       under -1 are thresholded for skimage pipeline
-       compatibility.
+       True by default. If True, pixel values of the result above 1 or
+       under -1 are thresholded for skimage pipeline compatibility.
 
     Returns
     -------
     im_deconv : (M, N) ndarray
-       The deconvolved image
+       The deconvolved image.
 
     Examples
     --------
     >>> from skimage import color, data, restoration
-    >>> lena = color.rgb2gray(data.lena())
+    >>> img = color.rgb2gray(data.astronaut())
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
-    >>> lena = convolve2d(lena, psf, 'same')
-    >>> lena += 0.1 * lena.std() * np.random.standard_normal(lena.shape)
-    >>> deconvolved_lena = restoration.wiener(lena, psf, 1100)
+    >>> img = convolve2d(img, psf, 'same')
+    >>> img += 0.1 * img.std() * np.random.standard_normal(img.shape)
+    >>> deconvolved_img = restoration.wiener(img, psf, 1100)
 
     Notes
     -----
@@ -96,8 +95,8 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     prior model. By default, the prior model (Laplacian) introduce
     image smoothness or pixel correlation. It can also be interpreted
     as high-frequency penalization to compensate the instability of
-    the solution wrt. data (sometimes called noise amplification or
-    "explosive" solution).
+    the solution with respect to the data (sometimes called noise
+    amplification or "explosive" solution).
 
     Finally, the use of Fourier space implies a circulant property of
     :math:`H`, see [Hunt].
@@ -127,10 +126,11 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     else:
         trans_func = psf
 
-    wiener_filter = np.conj(trans_func) / (np.abs(trans_func)**2 +
-                                           balance * np.abs(reg)**2)
+    wiener_filter = np.conj(trans_func) / (np.abs(trans_func) ** 2 +
+                                           balance * np.abs(reg) ** 2)
     if is_real:
-        deconv = uft.uirfft2(wiener_filter * uft.urfft2(image))
+        deconv = uft.uirfft2(wiener_filter * uft.urfft2(image),
+                             shape=image.shape)
     else:
         deconv = uft.uifft2(wiener_filter * uft.ufft2(image))
 
@@ -143,7 +143,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
 
 def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
                         clip=True):
-    """Unsupervised Wiener-Hunt deconvolution
+    """Unsupervised Wiener-Hunt deconvolution.
 
     Return the deconvolution with a Wiener-Hunt approach, where the
     hyperparameters are automatically estimated. The algorithm is a
@@ -153,21 +153,20 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     Parameters
     ----------
     image : (M, N) ndarray
-       The input degraded image
+       The input degraded image.
     psf : ndarray
        The impulse response (input image's space) or the transfer
        function (Fourier space). Both are accepted. The transfer
-       function is recognize as being complex
+       function is automatically recognized as being complex
        (``np.iscomplexobj(psf)``).
     reg : ndarray, optional
        The regularisation operator. The Laplacian by default. It can
        be an impulse response or a transfer function, as for the psf.
     user_params : dict
-       dictionary of gibbs parameters. See below.
+       Dictionary of parameters for the Gibbs sampler. See below.
     clip : boolean, optional
-       True by default. If true, pixel value of the result above 1 or
-       under -1 are thresholded for skimage pipeline
-       compatibility.
+       True by default. If true, pixel values of the result above 1 or
+       under -1 are thresholded for skimage pipeline compatibility.
 
     Returns
     -------
@@ -203,12 +202,12 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     Examples
     --------
     >>> from skimage import color, data, restoration
-    >>> lena = color.rgb2gray(data.lena())
+    >>> img = color.rgb2gray(data.astronaut())
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
-    >>> lena = convolve2d(lena, psf, 'same')
-    >>> lena += 0.1 * lena.std() * np.random.standard_normal(lena.shape)
-    >>> deconvolved_lena = restoration.unsupervised_wiener(lena, psf)
+    >>> img = convolve2d(img, psf, 'same')
+    >>> img += 0.1 * img.std() * np.random.standard_normal(img.shape)
+    >>> deconvolved_img = restoration.unsupervised_wiener(img, psf)
 
     Notes
     -----
@@ -217,10 +216,10 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     a sum over all the possible images weighted by their respective
     probability. Given the size of the problem, the exact sum is not
     tractable. This algorithm use of MCMC to draw image under the
-    posterior law. The practical idea is to only draw high probable
-    image since they have the biggest contribution to the mean. At the
-    opposite, the lowest probable image are draw less often since
-    their contribution are low. Finally the empirical mean of these
+    posterior law. The practical idea is to only draw highly probable
+    images since they have the biggest contribution to the mean. At the
+    opposite, the less probable images are drawn less often since
+    their contribution is low. Finally the empirical mean of these
     samples give us an estimation of the mean, and an exact
     computation with an infinite sample set.
 
@@ -262,8 +261,8 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
     # The correlation of the object in Fourier space (if size is big,
     # this can reduce computation time in the loop)
-    areg2 = np.abs(reg)**2
-    atf2 = np.abs(trans_fct)**2
+    areg2 = np.abs(reg) ** 2
+    atf2 = np.abs(trans_fct) ** 2
 
     # The Fourier transfrom may change the image.size attribut, so we
     # store it.
@@ -320,7 +319,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     # Empirical average \approx POSTMEAN Eq. 44
     x_postmean = x_postmean / (iteration - params['burnin'])
     if is_real:
-        x_postmean = uft.uirfft2(x_postmean)
+        x_postmean = uft.uirfft2(x_postmean, shape=image.shape)
     else:
         x_postmean = uft.uifft2(x_postmean)
 
@@ -337,21 +336,20 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
     Parameters
     ----------
     image : ndarray
-       Input degraded image
+       Input degraded image.
     psf : ndarray
-       The point spread function
+       The point spread function.
     iterations : int
-       Number of iterations. This parameter play to role of
+       Number of iterations. This parameter plays the role of
        regularisation.
     clip : boolean, optional
        True by default. If true, pixel value of the result above 1 or
-       under -1 are thresholded for skimage pipeline
-       compatibility.
+       under -1 are thresholded for skimage pipeline compatibility.
 
     Returns
     -------
     im_deconv : ndarray
-       The deconvolved image
+       The deconvolved image.
 
     Examples
     --------
@@ -365,7 +363,7 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
 
     References
     ----------
-    .. [2] http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
+    .. [1] http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
     """
     image = image.astype(np.float)
     psf = psf.astype(np.float)

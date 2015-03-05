@@ -8,7 +8,7 @@ import six
 from ._warnings import all_warnings
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
-           'safe_as_int']
+           'safe_as_int', 'assert_nD']
 
 
 class skimage_deprecation(Warning):
@@ -52,9 +52,9 @@ class deprecated(object):
                 func_code = six.get_function_code(func)
                 warnings.simplefilter('always', skimage_deprecation)
                 warnings.warn_explicit(msg,
-                    category=skimage_deprecation,
-                    filename=func_code.co_filename,
-                    lineno=func_code.co_firstlineno + 1)
+                                       category=skimage_deprecation,
+                                       filename=func_code.co_filename,
+                                       lineno=func_code.co_firstlineno + 1)
             elif self.behavior == 'raise':
                 raise skimage_deprecation(msg)
             return func(*args, **kwargs)
@@ -141,3 +141,25 @@ def safe_as_int(val, atol=1e-3):
                          "{0}, check inputs.".format(val))
 
     return np.round(val).astype(np.int64)
+
+
+def assert_nD(array, ndim, arg_name='image'):
+    """
+    Verify an array meets the desired ndims.
+
+    Parameters
+    ----------
+    array : array-like
+        Input array to be validated
+    ndim : int or iterable of ints
+        Allowable ndim or ndims for the array.
+    arg_name : str, optional
+        The name of the array in the original function.
+
+    """
+    array = np.asanyarray(array)
+    msg = "The parameter `%s` must be a %s-dimensional array"
+    if isinstance(ndim, int):
+        ndim = [ndim]
+    if not array.ndim in ndim:
+        raise ValueError(msg % (arg_name, '-or-'.join([str(n) for n in ndim])))

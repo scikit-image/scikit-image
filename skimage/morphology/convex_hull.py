@@ -1,10 +1,10 @@
 __all__ = ['convex_hull_image', 'convex_hull_object']
 
 import numpy as np
-from ._pnpoly import grid_points_inside_poly
+from ..measure import grid_points_in_poly
 from ._convex_hull import possible_hull
 from ..measure._label import label
-from skimage.util import unique_rows
+from ..util import unique_rows
 
 
 def convex_hull_image(image):
@@ -72,7 +72,7 @@ def convex_hull_image(image):
 
     # For each pixel coordinate, check whether that pixel
     # lies inside the convex hull
-    mask = grid_points_inside_poly(image.shape[:2], v)
+    mask = grid_points_in_poly(image.shape[:2], v)
 
     return mask
 

@@ -1,5 +1,42 @@
 import numpy as np
+import functools
+import warnings
 import scipy.ndimage as nd
+from .selem import _default_selem
+
+# Our function names don't exactly correspond to ndimages.
+# This dictionary translates from our names to scipy's.
+funcs = ('erosion', 'dilation', 'opening', 'closing')
+skimage2ndimage = dict((x, 'grey_' + x) for x in funcs)
+
+# These function names are the same in ndimage.
+funcs = ('binary_erosion', 'binary_dilation', 'binary_opening',
+         'binary_closing', 'black_tophat', 'white_tophat')
+skimage2ndimage.update(dict((x, x) for x in funcs))
+
+
+def default_selem(func):
+    """Decorator to add a default structuring element to morphology functions.
+
+    Parameters
+    ----------
+    func : function
+        A morphology function such as erosion, dilation, opening, closing,
+        white_tophat, or black_tophat.
+
+    Returns
+    -------
+    func_out : function
+        The function, using a default structuring element of same dimension
+        as the input image with connectivity 1.
+    """
+    @functools.wraps(func)
+    def func_out(image, selem=None, *args, **kwargs):
+        if selem is None:
+            selem = _default_selem(image.ndim)
+        return func(image, selem=selem, *args, **kwargs)
+
+    return func_out
 
 
 def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
@@ -77,6 +114,10 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
         raise ValueError("Negative value labels are not supported. Try "
                          "relabeling the input with `scipy.ndimage.label` or "
                          "`skimage.morphology.label`.")
+
+    if len(component_sizes) == 2:
+        warnings.warn("Only one label was provided to `remove_small_objects`. "
+                      "Did you mean to use a boolean array?")
 
     too_small = component_sizes < min_size
     too_small_mask = too_small[ccs]

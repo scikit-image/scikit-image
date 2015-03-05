@@ -26,7 +26,7 @@ def _format_plugin_info_table(info_table, column_lengths):
     info_table.insert(0, _separator('=', column_lengths))
     info_table.insert(1, ('Plugin', 'Description'))
     info_table.insert(2, _separator('-', column_lengths))
-    info_table.append(_separator('-', column_lengths))
+    info_table.append(_separator('=', column_lengths))
 
 
 def _update_doc(doc):
@@ -36,11 +36,14 @@ def _update_doc(doc):
     """
     from textwrap import wrap
 
-
     info_table = [(p, plugin_info(p).get('description', 'no description'))
                   for p in available_plugins if not p == 'test']
 
-    name_length = max([len(n) for (n, _) in info_table])
+    if len(info_table) > 0:
+        name_length = max([len(n) for (n, _) in info_table])
+    else:
+        name_length = 0
+
     description_length = WRAP_LEN - 1 - name_length
     column_lengths = [name_length, description_length]
     _format_plugin_info_table(info_table, column_lengths)

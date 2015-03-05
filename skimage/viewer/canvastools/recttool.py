@@ -1,11 +1,6 @@
-try:
-    from matplotlib.widgets import RectangleSelector
-except ImportError:
-    RectangleSelector = object
-    print("Could not import matplotlib -- skimage.viewer not available.")
-
-from skimage.viewer.canvastools.base import CanvasToolBase
-from skimage.viewer.canvastools.base import ToolHandles
+from matplotlib.widgets import RectangleSelector
+from ...viewer.canvastools.base import CanvasToolBase
+from ...viewer.canvastools.base import ToolHandles
 
 
 __all__ = ['RectangleTool']
@@ -19,8 +14,8 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
 
     Parameters
     ----------
-    ax : :class:`matplotlib.axes.Axes`
-        Matplotlib axes where tool is displayed.
+    viewer : :class:`skimage.viewer.Viewer`
+        Skimage viewer object.
     on_move : function
         Function called whenever a control handle is moved.
         This function must accept the rectangle extents as the only argument.
@@ -38,20 +33,54 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
     ----------
     extents : tuple
         Rectangle extents: (xmin, xmax, ymin, ymax).
+
+    Examples
+    ----------
+    >>> from skimage import data
+    >>> from skimage.viewer import ImageViewer
+    >>> from skimage.viewer.canvastools import RectangleTool
+    >>> from skimage.draw import line
+    >>> from skimage.draw import set_color
+
+    >>> viewer = ImageViewer(data.coffee())  # doctest: +SKIP
+
+    >>> def print_the_rect(extents):
+    ...     global viewer
+    ...     im = viewer.image
+    ...     coord = np.int64(extents)
+    ...     [rr1, cc1] = line(coord[2],coord[0],coord[2],coord[1])
+    ...     [rr2, cc2] = line(coord[2],coord[1],coord[3],coord[1])
+    ...     [rr3, cc3] = line(coord[3],coord[1],coord[3],coord[0])
+    ...     [rr4, cc4] = line(coord[3],coord[0],coord[2],coord[0])
+    ...     set_color(im, (rr1, cc1), [255, 255, 0])
+    ...     set_color(im, (rr2, cc2), [0, 255, 255])
+    ...     set_color(im, (rr3, cc3), [255, 0, 255])
+    ...     set_color(im, (rr4, cc4), [0, 0, 0])
+    ...     viewer.image=im
+
+    >>> rect_tool = RectangleTool(viewer.ax, on_enter=print_the_rect) # doctest: +SKIP
+    >>> viewer.show() # doctest: +SKIP
     """
 
-    def __init__(self, ax, on_move=None, on_release=None, on_enter=None,
+    def __init__(self, viewer, on_move=None, on_release=None, on_enter=None,
                  maxdist=10, rect_props=None):
-        CanvasToolBase.__init__(self, ax, on_move=on_move,
-                                on_enter=on_enter, on_release=on_release)
-
+        self._rect = None
         props = dict(edgecolor=None, facecolor='r', alpha=0.15)
         props.update(rect_props if rect_props is not None else {})
         if props['edgecolor'] is None:
             props['edgecolor'] = props['facecolor']
-        RectangleSelector.__init__(self, ax, lambda *args: None,
-                                   rectprops=props,
-                                   useblit=self.useblit)
+        RectangleSelector.__init__(self, viewer.ax, lambda *args: None,
+                                   rectprops=props)
+        CanvasToolBase.__init__(self, viewer, on_move=on_move,
+                                on_enter=on_enter, on_release=on_release)
+
+        # Events are handled by the viewer
+        try:
+            self.disconnect_events()
+        except AttributeError:
+            # disconnect the events manually (hack for older mpl versions)
+            [self.canvas.mpl_disconnect(i) for i in range(10)]
+
         # Alias rectangle attribute, which is initialized in RectangleSelector.
         self._rect = self.to_draw
         self._rect.set_animated(True)
@@ -68,19 +97,22 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
         props = dict(mec=props['edgecolor'])
         self._corner_order = ['NW', 'NE', 'SE', 'SW']
         xc, yc = self.corners
-        self._corner_handles = ToolHandles(ax, xc, yc, marker_props=props)
+        self._corner_handles = ToolHandles(self.ax, xc, yc, marker_props=props)
 
         self._edge_order = ['W', 'N', 'E', 'S']
         xe, ye = self.edge_centers
-        self._edge_handles = ToolHandles(ax, xe, ye, marker='s',
+        self._edge_handles = ToolHandles(self.ax, xe, ye, marker='s',
                                          marker_props=props)
 
-        self._artists = [self._rect,
-                         self._corner_handles.artist,
-                         self._edge_handles.artist]
+        self.artists = [self._rect,
+                        self._corner_handles.artist,
+                        self._edge_handles.artist]
+        viewer.add_tool(self)
 
     @property
     def _rect_bbox(self):
+        if not self._rect:
+            return 0, 0, 0, 0
         x0 = self._rect.get_x()
         y0 = self._rect.get_y()
         width = self._rect.get_width()
@@ -130,7 +162,7 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
         self.set_visible(True)
         self.redraw()
 
-    def release(self, event):
+    def on_mouse_release(self, event):
         if event.button != 1:
             return
         if not self.ax.in_axes(event):
@@ -143,7 +175,7 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
         self.redraw()
         self.callback_on_release(self.geometry)
 
-    def press(self, event):
+    def on_mouse_press(self, event):
         if event.button != 1 or not self.ax.in_axes(event):
             return
         self._set_active_handle(event)
@@ -178,7 +210,7 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
             y1, y2 = y2, event.ydata
         self._extents_on_press = x1, x2, y1, y2
 
-    def onmove(self, event):
+    def on_move(self, event):
         if self.eventpress is None or not self.ax.in_axes(event):
             return
 
@@ -201,14 +233,13 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
         return self.extents
 
 
-if __name__ == '__main__':
-    import matplotlib.pyplot as plt
-    from skimage import data
+if __name__ == '__main__':  # pragma: no cover
+    from ...viewer import ImageViewer
+    from ... import data
 
-    f, ax = plt.subplots()
-    ax.imshow(data.camera(), interpolation='nearest')
+    viewer = ImageViewer(data.camera())
 
-    rect_tool = RectangleTool(ax)
-    plt.show()
+    rect_tool = RectangleTool(viewer)
+    viewer.show()
     print("Final selection:")
     rect_tool.callback_on_enter(rect_tool.extents)

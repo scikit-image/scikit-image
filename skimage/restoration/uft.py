@@ -3,17 +3,16 @@
 
 """Function of unitary fourier transform and utilities
 
-This module implement unitary fourier transform, that is ortho-normal
-transform. They are especially and useful for convolution [1]: they
-respect the Parseval equality, the value of the null frequency is
-equal to
+This module implements the unitary fourier transform, also known as
+the ortho-normal transform. It is especially useful for convolution
+[1], as it respects the Parseval equality. The value of the null
+frequency is equal to
 
 .. math::  \frac{1}{\sqrt{n}} \sum_i x_i
 
-or the Fourier tranform have the same energy than the original image
+so the Fourier transform has the same energy as the original image
 (see ``image_quad_norm`` function). The transform is applied from the
-last axes for performance reason (c order array). You may use directly
-the numpy.fft module for more sophisticated purpose.
+last axis for performance (assuming a C-order array input).
 
 References
 ----------
@@ -31,14 +30,14 @@ __keywords__ = "fft, Fourier Transform, orthonormal, unitary"
 
 
 def ufftn(inarray, dim=None):
-    """N-dim unitary Fourier transform
+    """N-dimensional unitary Fourier transform.
 
     Parameters
     ----------
     inarray : ndarray
         The array to transform.
     dim : int, optional
-        The ``dim`` last axis along wich to compute the transform. All
+        The last axis along which to compute the transform. All
         axes by default.
 
     Returns
@@ -62,14 +61,14 @@ def ufftn(inarray, dim=None):
 
 
 def uifftn(inarray, dim=None):
-    """N-dim unitary inverse Fourier transform
+    """N-dimensional unitary inverse Fourier transform.
 
     Parameters
     ----------
     inarray : ndarray
         The array to transform.
     dim : int, optional
-        The ``dim`` last axis along wich to compute the transform. All
+        The last axis along which to compute the transform. All
         axes by default.
 
     Returns
@@ -93,29 +92,29 @@ def uifftn(inarray, dim=None):
 
 
 def urfftn(inarray, dim=None):
-    """N-dim real unitary Fourier transform
+    """N-dimensional real unitary Fourier transform.
 
-    This transform consider the Hermitian property of the transform on
-    real input
+    This transform considers the Hermitian property of the transform on
+    real-valued input.
 
     Parameters
     ----------
-    inarray : ndarray
+    inarray : ndarray, shape (M, N, ..., P)
         The array to transform.
     dim : int, optional
-        The ``dim`` last axis along wich to compute the transform. All
+        The last axis along which to compute the transform. All
         axes by default.
 
     Returns
     -------
-    outarray : ndarray (the last dim as  N / 2 + 1 lenght)
+    outarray : ndarray, shape (M, N, ..., P / 2 + 1)
         The unitary N-D real Fourier transform of ``inarray``.
 
     Notes
     -----
     The ``urfft`` functions assume an input array of real
-    values. Consequently, the output have an Hermitian property and
-    redondant values are not computed and returned.
+    values. Consequently, the output has a Hermitian property and
+    redundant values are not computed or returned.
 
     Examples
     --------
@@ -133,22 +132,22 @@ def urfftn(inarray, dim=None):
 
 
 def uirfftn(inarray, dim=None, shape=None):
-    """N-dim real unitary Fourier transform
+    """N-dimensional inverse real unitary Fourier transform.
 
-    This transform consider the Hermitian property of the transform
-    from complex to real real input.
+    This transform considers the Hermitian property of the transform
+    from complex to real input.
 
     Parameters
     ----------
     inarray : ndarray
         The array to transform.
     dim : int, optional
-        The ``dim`` last axis along wich to compute the transform. All
+        The last axis along which to compute the transform. All
         axes by default.
-    shape : tuple of int
+    shape : tuple of int, optional
         The shape of the output. The shape of ``rfft`` is ambiguous in
-        case of odd shape. In this case, the parameter must be
-        used. see ``np.fft.irfftn``.
+        case of odd-valued input shape. In this case, this parameter
+        should be provided. See ``np.fft.irfftn``.
 
     Returns
     -------
@@ -157,9 +156,9 @@ def uirfftn(inarray, dim=None, shape=None):
 
     Notes
     -----
-    The ``uirfft`` function assume that output array is of real
-    values. Consequently, the input is assumed of having an Hermitian
-    property and redondant values are implicit.
+    The ``uirfft`` function assumes that the output array is
+    real-valued. Consequently, the input is assumed to have a Hermitian
+    property and redundant values are implicit.
 
     Examples
     --------
@@ -177,7 +176,7 @@ def uirfftn(inarray, dim=None, shape=None):
 
 
 def ufft2(inarray):
-    """2-dim unitary Fourier transform
+    """2-dimensional unitary Fourier transform.
 
     Compute the Fourier transform on the last 2 axes.
 
@@ -188,7 +187,7 @@ def ufft2(inarray):
 
     Returns
     -------
-    outarray : ndarray (same shape than inarray)
+    outarray : ndarray (same shape as inarray)
         The unitary 2-D Fourier transform of ``inarray``.
 
     See Also
@@ -199,7 +198,8 @@ def ufft2(inarray):
     --------
     >>> input = np.ones((10, 128, 128))
     >>> output = ufft2(input)
-    >>> np.allclose(np.sum(input[1, ...]) / np.sqrt(input[1, ...].size), output[1, 0, 0])
+    >>> np.allclose(np.sum(input[1, ...]) / np.sqrt(input[1, ...].size),
+    ...             output[1, 0, 0])
     True
     >>> output.shape
     (10, 128, 128)
@@ -208,7 +208,7 @@ def ufft2(inarray):
 
 
 def uifft2(inarray):
-    """2-dim inverse unitary Fourier transform
+    """2-dimensional inverse unitary Fourier transform.
 
     Compute the inverse Fourier transform on the last 2 axes.
 
@@ -219,7 +219,7 @@ def uifft2(inarray):
 
     Returns
     -------
-    outarray : ndarray (same shape than inarray)
+    outarray : ndarray (same shape as inarray)
         The unitary 2-D inverse Fourier transform of ``inarray``.
 
     See Also
@@ -230,7 +230,8 @@ def uifft2(inarray):
     --------
     >>> input = np.ones((10, 128, 128))
     >>> output = uifft2(input)
-    >>> np.allclose(np.sum(input[1, ...]) / np.sqrt(input[1, ...].size), output[0, 0, 0])
+    >>> np.allclose(np.sum(input[1, ...]) / np.sqrt(input[1, ...].size),
+    ...             output[0, 0, 0])
     True
     >>> output.shape
     (10, 128, 128)
@@ -239,20 +240,20 @@ def uifft2(inarray):
 
 
 def urfft2(inarray):
-    """2-dim real unitary Fourier transform
+    """2-dimensional real unitary Fourier transform
 
     Compute the real Fourier transform on the last 2 axes. This
-    transform consider the Hermitian property of the transform from
-    complex to real real input.
+    transform considers the Hermitian property of the transform from
+    complex to real-valued input.
 
     Parameters
     ----------
-    inarray : ndarray
+    inarray : ndarray, shape (M, N, ..., P)
         The array to transform.
 
     Returns
     -------
-    outarray : ndarray (the last dim as (N - 1) *2 lenght)
+    outarray : ndarray, shape (M, N, ..., 2 * (P - 1))
         The unitary 2-D real Fourier transform of ``inarray``.
 
     See Also
@@ -263,7 +264,8 @@ def urfft2(inarray):
     --------
     >>> input = np.ones((10, 128, 128))
     >>> output = urfft2(input)
-    >>> np.allclose(np.sum(input[1,...]) / np.sqrt(input[1,...].size), output[1, 0, 0])
+    >>> np.allclose(np.sum(input[1,...]) / np.sqrt(input[1,...].size),
+    ...             output[1, 0, 0])
     True
     >>> output.shape
     (10, 128, 65)
@@ -272,20 +274,20 @@ def urfft2(inarray):
 
 
 def uirfft2(inarray, shape=None):
-    """2-dim real unitary Fourier transform
+    """2-dimensional inverse real unitary Fourier transform.
 
     Compute the real inverse Fourier transform on the last 2 axes.
-    This transform consider the Hermitian property of the transform
-    from complex to real real input.
+    This transform considers the Hermitian property of the transform
+    from complex to real-valued input.
 
     Parameters
     ----------
-    inarray : ndarray
+    inarray : ndarray, shape (M, N, ..., P)
         The array to transform.
 
     Returns
     -------
-    outarray : ndarray (the last dim as (N - 1) *2 lenght)
+    outarray : ndarray, shape (M, N, ..., 2 * (P - 1))
         The unitary 2-D inverse real Fourier transform of ``inarray``.
 
     See Also
@@ -305,14 +307,16 @@ def uirfft2(inarray, shape=None):
 
 
 def image_quad_norm(inarray):
-    """Return quadratic norm of images in Fourier space
+    """Return the quadratic norm of images in Fourier space.
 
-    This function detect if the image suppose the hermitian property.
+    This function detects whether the input image satisfies the
+    Hermitian property.
 
     Parameters
     ----------
     inarray : ndarray
-        The images are supposed to be in the last two axes
+        Input image. The image data should reside in the final two
+        axes.
 
     Returns
     -------
@@ -327,40 +331,40 @@ def image_quad_norm(inarray):
     >>> image_quad_norm(ufft2(input)) == image_quad_norm(urfft2(input))
     True
     """
-    # If there is an hermitian symmetry
+    # If there is a Hermitian symmetry
     if inarray.shape[-1] != inarray.shape[-2]:
-        return 2 * np.sum(np.sum(np.abs(inarray)**2, axis=-1), axis=-1) - \
-            np.sum(np.abs(inarray[..., 0])**2, axis=-1)
+        return (2 * np.sum(np.sum(np.abs(inarray) ** 2, axis=-1), axis=-1) -
+                np.sum(np.abs(inarray[..., 0]) ** 2, axis=-1))
     else:
-        return np.sum(np.sum(np.abs(inarray)**2, axis=-1), axis=-1)
+        return np.sum(np.sum(np.abs(inarray) ** 2, axis=-1), axis=-1)
 
 
 def ir2tf(imp_resp, shape, dim=None, is_real=True):
-    """Compute the transfer function of IR
+    """Compute the transfer function of an impulse response (IR).
 
-    This function make the necessary correct zero-padding, zero
-    convention, correct fft2 etc... to compute the transfer function
+    This function makes the necessary correct zero-padding, zero
+    convention, correct fft2, etc... to compute the transfer function
     of IR. To use with unitary Fourier transform for the signal (ufftn
     or equivalent).
 
     Parameters
     ----------
     imp_resp : ndarray
-       The impulsionnal responses.
+        The impulse responses.
     shape : tuple of int
-       A tuple of integer corresponding to the target shape of the
-       tranfert function.
+        A tuple of integer corresponding to the target shape of the
+        transfer function.
     dim : int, optional
-        The ``dim`` last axis along wich to compute the transform. All
+        The last axis along which to compute the transform. All
         axes by default.
-    is_real : boolean (optionnal, default True)
-       If True, imp_resp is supposed real and the hermissian property
+    is_real : boolean (optional, default True)
+       If True, imp_resp is supposed real and the Hermitian property
        is used with rfftn Fourier transform.
 
     Returns
     -------
     y : complex ndarray
-       The tranfert function of shape ``shape``.
+       The transfer function of shape ``shape``.
 
     See Also
     --------
@@ -377,11 +381,10 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
 
     Notes
     -----
-    The input array can be composed of multiple dimentionnal IR with
-    an arbitraru number of IR. The individual IR must be accesed
-    through first axes. The last ``dim`` axes of space definition. The
-    ``dim`` parameter must be specified to compute the transform only
-    along these last axes.
+    The input array can be composed of multiple-dimensional IR with
+    an arbitrary number of IR. The individual IR must be accessed
+    through the first axes. The last ``dim`` axes contain the space
+    definition.
     """
     if not dim:
         dim = imp_resp.ndim
@@ -402,27 +405,27 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
 
 
 def laplacian(ndim, shape, is_real=True):
-    """Return the transfer function of the Laplacian
+    """Return the transfer function of the Laplacian.
 
-    Laplacian is the second order difference, on line and column.
+    Laplacian is the second order difference, on row and column.
 
     Parameters
     ----------
     ndim : int
-        The dimension of the Laplacian
+        The dimension of the Laplacian.
     shape : tuple, shape
         The support on which to compute the transfer function
-    is_real : boolean (optionnal, default True)
-       If True, imp_resp is supposed real and the hermissian property
-       is used with rfftn Fourier transform to return the transfer
-       function.
+    is_real : boolean (optional, default True)
+       If True, imp_resp is assumed to be real-valued and
+       the Hermitian property is used with rfftn Fourier transform
+       to return the transfer function.
 
     Returns
     -------
     tf : array_like, complex
-        The transfer function
+        The transfer function.
     impr : array_like, real
-        The Laplacian
+        The Laplacian.
 
     Examples
     --------

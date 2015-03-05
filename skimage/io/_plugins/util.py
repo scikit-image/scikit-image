@@ -2,7 +2,7 @@ import numpy as np
 from . import _colormixer
 from . import _histograms
 import threading
-from skimage.util import img_as_ubyte
+from ...util import img_as_ubyte
 
 # utilities to make life easier for plugin writers.
 

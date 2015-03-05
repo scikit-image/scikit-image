@@ -1,8 +1,8 @@
 import math
 import numpy as np
 from scipy import ndimage
-from skimage.transform import resize
-from skimage.util import img_as_float
+from ..transform import resize
+from ..util import img_as_float
 
 
 def _smooth(image, sigma, mode, cval):
@@ -10,7 +10,8 @@ def _smooth(image, sigma, mode, cval):
 
     smoothed = np.empty(image.shape, dtype=np.double)
 
-    if image.ndim == 3: # apply Gaussian filter to all dimensions independently
+    # apply Gaussian filter to all dimensions independently
+    if image.ndim == 3:
         for dim in range(image.shape[2]):
             ndimage.gaussian_filter(image[..., dim], sigma,
                                     output=smoothed[..., dim],

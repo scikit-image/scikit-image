@@ -3,7 +3,7 @@ from skimage import data
 from skimage.transform import pyramids
 
 
-image = data.lena()
+image = data.astronaut()
 image_gray = image[..., 0]
 
 

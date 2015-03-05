@@ -1,5 +1,5 @@
 import numpy as np
-from skimage._shared.utils import deprecated
+from .._shared.utils import deprecated
 
 
 def join_segmentations(s1, s2):
@@ -124,7 +124,7 @@ def relabel_sequential(label_field, offset=1):
     if m == len(labels0):  # nothing to do, already 1...n labels
         return label_field, labels, labels
     forward_map = np.zeros(m + 1, int)
-    forward_map[labels0] = np.arange(offset, offset + len(labels0) + 1)
+    forward_map[labels0] = np.arange(offset, offset + len(labels0))
     if not (labels == 0).any():
         labels = np.concatenate(([0], labels))
     inverse_map = np.zeros(offset - 1 + len(labels), dtype=np.intp)

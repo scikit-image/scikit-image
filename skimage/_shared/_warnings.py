@@ -1,9 +1,10 @@
-__all__ = ['all_warnings']
+__all__ = ['all_warnings', 'expected_warnings']
 
 from contextlib import contextmanager
 import sys
 import warnings
 import inspect
+import re
 
 
 @contextmanager
@@ -61,3 +62,54 @@ def all_warnings():
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         yield w
+
+
+@contextmanager
+def expected_warnings(matching):
+    """Context for use in testing to catch known warnings matching regexes
+    
+    Parameters
+    ----------
+    matching : list of strings or compiled regexes
+        Regexes for the desired warning to catch
+
+
+    Examples
+    --------
+    >>> from skimage import data, img_as_ubyte, img_as_float
+    >>> with expected_warnings(['precision loss']):
+    ...     d = img_as_ubyte(img_as_float(data.coins()))
+
+    Notes
+    -----
+    Uses `all_warnings` to ensure all warnings are raised.
+    Upon exiting, it checks the recorded warnings for the desired matching
+    pattern(s).  
+    Raises a ValueError if any match was not found or an unexpected
+    warning was raised.  
+    Allows for three types of behaviors: "and", "or", and "optional" matches. 
+    This is done to accomodate different build enviroments or loop conditions
+    that may produce different warnings.  The behaviors can be combined.
+    If you pass multiple patterns, you get an orderless "and", where all of the
+    warnings must be raised.
+    If you use the "|" operator in a pattern, you can catch one of several warnings.
+    Finally, you can use "|\A\Z" in a pattern to signify it as optional.
+
+    """
+    with all_warnings() as w:
+        # enter context
+        yield w
+        # exited user context, check the recorded warnings
+        remaining = [m for m in matching if not '\A\Z' in m.split('|')]
+        for warn in w:
+            found = False
+            for match in matching:
+                if re.search(match, str(warn.message)) is not None:
+                    found = True
+                    if match in remaining:
+                        remaining.remove(match)
+            if not found:
+                raise ValueError('Unexpected warning: %s' % str(warn.message))
+        if len(remaining) > 0:
+            msg = 'No warning raised matching:\n%s' % '\n'.join(remaining)
+            raise ValueError(msg)

@@ -1,11 +1,9 @@
 Build Requirements
 ------------------
-* `Python >= 2.5 <http://python.org>`__
+* `Python >= 2.6 <http://python.org>`__
 * `Numpy >= 1.6 <http://numpy.scipy.org/>`__
-* `Cython >= 0.17 <http://www.cython.org/>`__
-
-`Matplotlib >= 1.0 <http://matplotlib.sf.net>`__ is needed to generate the
-examples in the documentation.
+* `Cython >= 0.21 <http://www.cython.org/>`__
+* `Six >=1.3 <https://pypi.python.org/pypi/six>`__
 
 You can use pip to automatically install the base dependencies as follows::
 
@@ -13,7 +11,11 @@ You can use pip to automatically install the base dependencies as follows::
 
 Runtime requirements
 --------------------
-* `SciPy >= 0.10 <http://scipy.org>`__
+* `SciPy <http://scipy.org>`__
+* `Matplotlib <http://matplotlib.sf.net>`__
+* `NetworkX <https://networkx.github.io>`__
+* `Pillow <https://pypi.python.org/pypi/Pillow>`__
+   (or `PIL <http://www.pythonware.com/products/pil/>`__)
 
 Known build errors
 ------------------
@@ -24,11 +26,6 @@ example at ``C:\Python26\Lib\distutils\distutils.cfg``) to contain::
 
     [build]
     compiler=mingw32
-
-
-Usage Requirements
-------------------
-* `Scipy <http://www.scipy.org/>`__
 
 Optional Requirements
 ---------------------
@@ -46,11 +43,15 @@ functionality is only available with the following installed:
    The ``pyamg`` module is used for the fast `cg_mg` mode of random
    walker segmentation.
 
-* `Pillow <https://pypi.python.org/pypi/Pillow>`__
-   (or `PIL <http://www.pythonware.com/products/pil/>`__)
-   The ``Pillow`` library (or equivalently ``PIL``) is used for Input/Output.
+* `Astropy <http://www.astropy.org>`__ provides FITS io capability.
 
-* `Astropy <http://www.astropy.org>`__ is required to use the FITS io plug-in.
+* `SimpleITK <http://www.simpleitk.org/>`
+  Optional io plugin providing a wide variety of `formats <http://www.itk.org/Wiki/ITK_File_Formats>`__.
+  including specialized formats using in medical imaging.
+
+* `imread <http://pythonhosted.org/imread/>`
+  Optional io plugin providing most standard `formats <http://pythonhosted.org//imread/formats.html>`__.
+
 
 Testing requirements
 --------------------

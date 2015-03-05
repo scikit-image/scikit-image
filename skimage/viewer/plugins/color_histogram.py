@@ -1,8 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
-from skimage import color
-from skimage import exposure
+from ... import color, exposure
 from .plotplugin import PlotPlugin
 from ..canvastools import RectangleTool
 
@@ -19,7 +17,8 @@ class ColorHistogram(PlotPlugin):
     def attach(self, image_viewer):
         super(ColorHistogram, self).attach(image_viewer)
 
-        self.rect_tool = RectangleTool(self.ax, on_release=self.ab_selected)
+        self.rect_tool = RectangleTool(image_viewer,
+                                       on_release=self.ab_selected)
         self._on_new_image(image_viewer.image)
 
     def _on_new_image(self, image):
@@ -70,14 +69,16 @@ class ColorHistogram(PlotPlugin):
             The selected pixels.
         data : dict
             The data describing the histogram and the selected region.
-            Keys:
-                - 'bins' : array of float, the bin boundaries for both
-                    `a` and `b` channels.
-                - 'hist' : 2D array of float, the normalized histogram.
-                - 'edges' : tuple of array of float, the bin edges
-                    along each dimension
-                - 'extents' : tuple of float, the left and right and
-                    top and bottom of the selected region.
+            The dictionary contains:
+
+              - 'bins' : array of float
+                The bin boundaries for both `a` and `b` channels.
+              - 'hist' : 2D array of float
+                The normalized histogram.
+              - 'edges' : tuple of array of float
+                The bin edges along each dimension
+              - 'extents' : tuple of float
+                The left and right and top and bottom of the selected region.
         """
         return (self.mask, self.data)
 
@@ -90,4 +91,3 @@ def pct_total_area(image, percentile=0.80):
     idx = int((image.size - 1) * percentile)
     sorted_pixels = np.sort(image.flat)
     return sorted_pixels[idx]
-

@@ -115,21 +115,21 @@ class _RegionProperties(object):
         self._intensity_image = intensity_image
         self._cache_active = cache_active
 
-    @_cached_property
+    @property
     def area(self):
         return self.moments[0, 0]
 
-    @_cached_property
+    @property
     def bbox(self):
         return (self._slice[0].start, self._slice[1].start,
                 self._slice[0].stop, self._slice[1].stop)
 
-    @_cached_property
+    @property
     def centroid(self):
         row, col = self.local_centroid
         return row + self._slice[0].start, col + self._slice[1].start
 
-    @_cached_property
+    @property
     def convex_area(self):
         return np.sum(self.convex_image)
 
@@ -138,35 +138,35 @@ class _RegionProperties(object):
         from ..morphology.convex_hull import convex_hull_image
         return convex_hull_image(self.image)
 
-    @_cached_property
+    @property
     def coords(self):
         rr, cc = np.nonzero(self.image)
         return np.vstack((rr + self._slice[0].start,
                           cc + self._slice[1].start)).T
 
-    @_cached_property
+    @property
     def eccentricity(self):
         l1, l2 = self.inertia_tensor_eigvals
         if l1 == 0:
             return 0
         return sqrt(1 - l2 / l1)
 
-    @_cached_property
+    @property
     def equivalent_diameter(self):
         return sqrt(4 * self.moments[0, 0] / PI)
 
-    @_cached_property
+    @property
     def euler_number(self):
         euler_array = self.filled_image != self.image
         _, num = label(euler_array, neighbors=8, return_num=True)
         return -num + 1
 
-    @_cached_property
+    @property
     def extent(self):
         rows, cols = self.image.shape
         return self.moments[0, 0] / (rows * cols)
 
-    @_cached_property
+    @property
     def filled_area(self):
         return np.sum(self.filled_image)
 
@@ -177,10 +177,6 @@ class _RegionProperties(object):
     @_cached_property
     def image(self):
         return self._label_image[self._slice] == self.label
-
-    @_cached_property
-    def _image_double(self):
-        return self.image.astype(np.double)
 
     @_cached_property
     def inertia_tensor(self):
@@ -204,49 +200,50 @@ class _RegionProperties(object):
             raise AttributeError('No intensity image specified.')
         return self._intensity_image[self._slice] * self.image
 
-    @_cached_property
+    @property
     def _intensity_image_double(self):
         return self.intensity_image.astype(np.double)
 
-    @_cached_property
+    @property
     def local_centroid(self):
         m = self.moments
         row = m[0, 1] / m[0, 0]
         col = m[1, 0] / m[0, 0]
         return row, col
 
-    @_cached_property
+    @property
     def max_intensity(self):
         return np.max(self.intensity_image[self.image])
 
-    @_cached_property
+    @property
     def mean_intensity(self):
         return np.mean(self.intensity_image[self.image])
 
-    @_cached_property
+    @property
     def min_intensity(self):
         return np.min(self.intensity_image[self.image])
 
-    @_cached_property
+    @property
     def major_axis_length(self):
         l1, _ = self.inertia_tensor_eigvals
         return 4 * sqrt(l1)
 
-    @_cached_property
+    @property
     def minor_axis_length(self):
         _, l2 = self.inertia_tensor_eigvals
         return 4 * sqrt(l2)
 
     @_cached_property
     def moments(self):
-        return _moments.moments(self._image_double, 3)
+        return _moments.moments(self.image.astype(np.uint8), 3)
 
     @_cached_property
     def moments_central(self):
         row, col = self.local_centroid
-        return _moments.moments_central(self._image_double, row, col, 3)
+        return _moments.moments_central(self.image.astype(np.uint8),
+                                        row, col, 3)
 
-    @_cached_property
+    @property
     def moments_hu(self):
         return _moments.moments_hu(self.moments_normalized)
 
@@ -254,7 +251,7 @@ class _RegionProperties(object):
     def moments_normalized(self):
         return _moments.moments_normalized(self.moments_central, 3)
 
-    @_cached_property
+    @property
     def orientation(self):
         a, b, b, c = self.inertia_tensor.flat
         b = -b
@@ -266,20 +263,20 @@ class _RegionProperties(object):
         else:
             return - 0.5 * atan2(2 * b, (a - c))
 
-    @_cached_property
+    @property
     def perimeter(self):
         return perimeter(self.image, 4)
 
-    @_cached_property
+    @property
     def solidity(self):
         return self.moments[0, 0] / np.sum(self.convex_image)
 
-    @_cached_property
+    @property
     def weighted_centroid(self):
         row, col = self.weighted_local_centroid
         return row + self._slice[0].start, col + self._slice[1].start
 
-    @_cached_property
+    @property
     def weighted_local_centroid(self):
         m = self.weighted_moments
         row = m[0, 1] / m[0, 0]
@@ -296,7 +293,7 @@ class _RegionProperties(object):
         return _moments.moments_central(self._intensity_image_double,
                                         row, col, 3)
 
-    @_cached_property
+    @property
     def weighted_moments_hu(self):
         return _moments.moments_hu(self.weighted_moments_normalized)
 
@@ -335,7 +332,7 @@ def regionprops(label_image, intensity_image=None, cache=True):
     Parameters
     ----------
     label_image : (N, M) ndarray
-        Labeled input image.
+        Labeled input image. Labels with value 0 are ignored.
     intensity_image : (N, M) ndarray, optional
         Intensity image with same size as labeled image. Default is None.
     cache : bool, optional
@@ -476,11 +473,13 @@ def regionprops(label_image, intensity_image=None, cache=True):
     >>> from skimage import data, util
     >>> from skimage.morphology import label
     >>> img = util.img_as_ubyte(data.coins()) > 110
-    >>> label_img = label(img)
+    >>> label_img = label(img, connectivity=img.ndim)
     >>> props = regionprops(label_img)
-    >>> props[0].centroid # centroid of first labeled object
+    >>> # centroid of first labeled object
+    >>> props[0].centroid
     (22.729879860483141, 81.912285234465827)
-    >>> props[0]['centroid'] # centroid of first labeled object
+    >>> # centroid of first labeled object
+    >>> props[0]['centroid']
     (22.729879860483141, 81.912285234465827)
 
     """

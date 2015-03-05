@@ -209,7 +209,7 @@ class SkiviImageWindow(QMainWindow):
         self.rgb_hsv_disp.update_vals((x, y, r, g, b, h, s, v))
 
     def save_to_stack(self):
-        from skimage import io
+        from ... import io
         img = self.arr.copy()
         io.push(img)
         msg = dedent('''
@@ -227,7 +227,7 @@ class SkiviImageWindow(QMainWindow):
         dialog.exec_()
 
     def save_to_file(self):
-        from skimage import io
+        from ... import io
         filename = str(QtGui.QFileDialog.getSaveFileName())
         if len(filename) == 0:
             return

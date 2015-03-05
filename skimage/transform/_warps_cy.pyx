@@ -3,12 +3,11 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 import numpy as np
-
 cimport numpy as cnp
-from skimage._shared.interpolation cimport (nearest_neighbour_interpolation,
-                                            bilinear_interpolation,
-                                            biquadratic_interpolation,
-                                            bicubic_interpolation)
+from .._shared.interpolation cimport (nearest_neighbour_interpolation,
+                                      bilinear_interpolation,
+                                      biquadratic_interpolation,
+                                      bicubic_interpolation)
 
 
 cdef inline void _matrix_transform(double x, double y, double* H, double *x_,

@@ -1,5 +1,4 @@
 import itertools as it
-import warnings
 import numpy as np
 from numpy.testing import assert_equal, assert_raises
 from skimage.segmentation import slic
@@ -14,9 +13,27 @@ def test_color_2d():
     img += 0.01 * rnd.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        seg = slic(img, n_segments=4, sigma=0)
+    seg = slic(img, n_segments=4, sigma=0, enforce_connectivity=False)
+
+    # we expect 4 segments
+    assert_equal(len(np.unique(seg)), 4)
+    assert_equal(seg.shape, img.shape[:-1])
+    assert_equal(seg[:10, :10], 0)
+    assert_equal(seg[10:, :10], 2)
+    assert_equal(seg[:10, 10:], 1)
+    assert_equal(seg[10:, 10:], 3)
+
+
+def test_multichannel_2d():
+    rnd = np.random.RandomState(0)
+    img = np.zeros((20, 20, 8))
+    img[:10, :10, 0:2] = 1
+    img[:10, 10:, 2:4] = 1
+    img[10:, :10, 4:6] = 1
+    img[10:, 10:, 6:8] = 1
+    img += 0.01 * rnd.normal(size=img.shape)
+    img = np.clip(img, 0, 1, out=img)
+    seg = slic(img, n_segments=4, enforce_connectivity=False)
 
     # we expect 4 segments
     assert_equal(len(np.unique(seg)), 4)
@@ -158,9 +175,7 @@ def test_slic_zero():
     img += 0.01 * rnd.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        seg = slic(img, n_segments=4, sigma=0, slic_zero=True)
+    seg = slic(img, n_segments=4, sigma=0, slic_zero=True)
 
     # we expect 4 segments
     assert_equal(len(np.unique(seg)), 4)

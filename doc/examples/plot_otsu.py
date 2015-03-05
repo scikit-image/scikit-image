@@ -18,7 +18,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 from skimage.data import camera
-from skimage.filter import threshold_otsu
+from skimage.filters import threshold_otsu
 
 
 matplotlib.rcParams['font.size'] = 9

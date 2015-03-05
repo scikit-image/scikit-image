@@ -1,20 +1,19 @@
 import warnings
 import numpy as np
 
-from skimage import img_as_float
-from skimage.util.dtype import dtype_range, dtype_limits
-from skimage._shared.utils import deprecated
+from .. import img_as_float
+from ..util.dtype import dtype_range, dtype_limits
 
 
-__all__ = ['histogram', 'cumulative_distribution', 'equalize',
+__all__ = ['histogram', 'cumulative_distribution', 'equalize_hist',
            'rescale_intensity', 'adjust_gamma', 'adjust_log', 'adjust_sigmoid']
 
 
 DTYPE_RANGE = dtype_range.copy()
 DTYPE_RANGE.update((d.__name__, limits) for d, limits in dtype_range.items())
-DTYPE_RANGE.update({'uint10': (0, 2**10 - 1),
-                    'uint12': (0, 2**12 - 1),
-                    'uint14': (0, 2**14 - 1),
+DTYPE_RANGE.update({'uint10': (0, 2 ** 10 - 1),
+                    'uint12': (0, 2 ** 12 - 1),
+                    'uint14': (0, 2 ** 14 - 1),
                     'bool': dtype_range[np.bool_],
                     'float': dtype_range[np.float64]})
 
@@ -45,10 +44,14 @@ def histogram(image, nbins=256):
     bin_centers : array
         The values at the center of the bins.
 
+    See Also
+    --------
+    cumulative_distribution
+
     Examples
     --------
-    >>> from skimage import data, exposure, util
-    >>> image = util.img_as_float(data.camera())
+    >>> from skimage import data, exposure, img_as_float
+    >>> image = img_as_float(data.camera())
     >>> np.histogram(image, bins=2)
     (array([107432, 154712]), array([ 0. ,  0.5,  1. ]))
     >>> exposure.histogram(image, nbins=2)
@@ -63,16 +66,25 @@ def histogram(image, nbins=256):
     # For integer types, histogramming with bincount is more efficient.
     if np.issubdtype(image.dtype, np.integer):
         offset = 0
-        if np.min(image) < 0:
-            offset = np.min(image)
-        hist = np.bincount(image.ravel() - offset)
+        image_min = np.min(image)
+        if image_min < 0:
+            offset = image_min
+            image_range = np.max(image).astype(np.int64) - image_min
+            # get smallest dtype that can hold both minimum and offset maximum
+            offset_dtype = np.promote_types(np.min_scalar_type(image_range),
+                                            np.min_scalar_type(image_min))
+            if image.dtype != offset_dtype:
+                # prevent overflow errors when offsetting
+                image = image.astype(offset_dtype)
+            image = image - offset
+        hist = np.bincount(image.ravel())
         bin_centers = np.arange(len(hist)) + offset
 
         # clip histogram to start with a non-zero bin
         idx = np.nonzero(hist)[0][0]
         return hist[idx:], bin_centers[idx:]
     else:
-        hist, bin_edges = np.histogram(image.flat, nbins)
+        hist, bin_edges = np.histogram(image.flat, bins=nbins)
         bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2.
         return hist, bin_centers
 
@@ -94,10 +106,22 @@ def cumulative_distribution(image, nbins=256):
     bin_centers : array
         Centers of bins.
 
+    See Also
+    --------
+    histogram
+
     References
     ----------
     .. [1] http://en.wikipedia.org/wiki/Cumulative_distribution_function
 
+    Examples
+    --------
+    >>> from skimage import data, exposure, img_as_float
+    >>> image = img_as_float(data.camera())
+    >>> hi = exposure.histogram(image)
+    >>> cdf = exposure.cumulative_distribution(image)
+    >>> np.alltrue(cdf[0] == np.cumsum(hi[0])/float(image.size))
+    True
     """
     hist, bin_centers = histogram(image, nbins)
     img_cdf = hist.cumsum()
@@ -105,15 +129,20 @@ def cumulative_distribution(image, nbins=256):
     return img_cdf, bin_centers
 
 
-def equalize_hist(image, nbins=256):
+def equalize_hist(image, nbins=256, mask=None):
     """Return image after histogram equalization.
 
     Parameters
     ----------
     image : array
         Image array.
-    nbins : int
-        Number of bins for image histogram.
+    nbins : int, optional
+        Number of bins for image histogram. Note: this argument is
+        ignored for integer images, for which each integer is its own
+        bin.
+    mask: ndarray of bools or 0s and 1s, optional
+        Array of same shape as `image`. Only points at which mask == True
+        are used for the equalization, which is applied to the whole image.
 
     Returns
     -------
@@ -130,31 +159,82 @@ def equalize_hist(image, nbins=256):
     .. [2] http://en.wikipedia.org/wiki/Histogram_equalization
 
     """
-    image = img_as_float(image)
-    cdf, bin_centers = cumulative_distribution(image, nbins)
+    if mask is not None:
+        mask = np.array(mask, dtype=bool)
+        cdf, bin_centers = cumulative_distribution(image[mask], nbins)
+    else:
+        cdf, bin_centers = cumulative_distribution(image, nbins)
     out = np.interp(image.flat, bin_centers, cdf)
     return out.reshape(image.shape)
 
 
-def rescale_intensity(image, in_range=None, out_range=None):
+def intensity_range(image, range_values='image', clip_negative=False):
+    """Return image intensity range (min, max) based on desired value type.
+
+    Parameters
+    ----------
+    image : array
+        Input image.
+    range_values : str or 2-tuple
+        The image intensity range is configured by this parameter.
+        The possible values for this parameter are enumerated below.
+
+        'image'
+            Return image min/max as the range.
+        'dtype'
+            Return min/max of the image's dtype as the range.
+        dtype-name
+            Return intensity range based on desired `dtype`. Must be valid key
+            in `DTYPE_RANGE`. Note: `image` is ignored for this range type.
+        2-tuple
+            Return `range_values` as min/max intensities. Note that there's no
+            reason to use this function if you just want to specify the
+            intensity range explicitly. This option is included for functions
+            that use `intensity_range` to support all desired range types.
+
+    clip_negative : bool
+        If True, clip the negative range (i.e. return 0 for min intensity)
+        even if the image dtype allows negative values.
+    """
+    if range_values == 'dtype':
+        range_values = image.dtype.type
+
+    if range_values == 'image':
+        i_min = np.min(image)
+        i_max = np.max(image)
+    elif range_values in DTYPE_RANGE:
+        i_min, i_max = DTYPE_RANGE[range_values]
+        if clip_negative:
+            i_min = 0
+    else:
+        i_min, i_max = range_values
+    return i_min, i_max
+
+
+def rescale_intensity(image, in_range='image', out_range='dtype'):
     """Return image after stretching or shrinking its intensity levels.
 
-    The image intensities are uniformly rescaled such that the minimum and
-    maximum values given by `in_range` match those given by `out_range`.
+    The desired intensity range of the input and output, `in_range` and
+    `out_range` respectively, are used to stretch or shrink the intensity range
+    of the input image. See examples below.
 
     Parameters
     ----------
     image : array
         Image array.
-    in_range : 2-tuple (float, float) or str
-        Min and max *allowed* intensity values of input image. If None, the
-        *allowed* min/max values are set to the *actual* min/max values in the
-        input image. Intensity values outside this range are clipped.
-        If string, use data limits of dtype specified by the string.
-    out_range : 2-tuple (float, float) or str
-        Min and max intensity values of output image. If None, use the min/max
-        intensities of the image data type. See `skimage.util.dtype` for
-        details. If string, use data limits of dtype specified by the string.
+    in_range, out_range : str or 2-tuple
+        Min and max intensity values of input and output image.
+        The possible values for this parameter are enumerated below.
+
+        'image'
+            Use image min/max as the intensity range.
+        'dtype'
+            Use min/max of the image's dtype as the intensity range.
+        dtype-name
+            Use intensity range based on desired `dtype`. Must be valid key
+            in `DTYPE_RANGE`.
+        2-tuple
+            Use `range_values` as explicit min/max intensities.
 
     Returns
     -------
@@ -162,9 +242,15 @@ def rescale_intensity(image, in_range=None, out_range=None):
         Image array after rescaling its intensity. This image is the same dtype
         as the input image.
 
+    See Also
+    --------
+    intensity_range, equalize_hist
+
     Examples
     --------
-    By default, intensities are stretched to the limits allowed by the dtype:
+    By default, the min/max intensities of the input image are stretched to
+    the limits allowed by the image's dtype, since `in_range` defaults to
+    'image' and `out_range` defaults to 'dtype':
 
     >>> image = np.array([51, 102, 153], dtype=np.uint8)
     >>> rescale_intensity(image)
@@ -203,20 +289,17 @@ def rescale_intensity(image, in_range=None, out_range=None):
     dtype = image.dtype.type
 
     if in_range is None:
-        imin = np.min(image)
-        imax = np.max(image)
-    elif in_range in DTYPE_RANGE:
-        imin, imax = DTYPE_RANGE[in_range]
-    else:
-        imin, imax = in_range
+        in_range = 'image'
+        msg = "`in_range` should not be set to None. Use {!r} instead."
+        warnings.warn(msg.format(in_range))
 
-    if out_range is None or out_range in DTYPE_RANGE:
-        out_range = dtype if out_range is None else out_range
-        omin, omax = DTYPE_RANGE[out_range]
-        if imin >= 0:
-            omin = 0
-    else:
-        omin, omax = out_range
+    if out_range is None:
+        out_range = 'dtype'
+        msg = "`out_range` should not be set to None. Use {!r} instead."
+        warnings.warn(msg.format(out_range))
+
+    imin, imax = intensity_range(image, in_range)
+    omin, omax = intensity_range(image, out_range, clip_negative=(imin >= 0))
 
     image = np.clip(image, imin, imax)
 
@@ -253,6 +336,10 @@ def adjust_gamma(image, gamma=1, gain=1):
     out : ndarray
         Gamma corrected output image.
 
+    See Also
+    --------
+    adjust_log
+
     Notes
     -----
     For gamma greater than 1, the histogram will shift towards left and
@@ -265,6 +352,14 @@ def adjust_gamma(image, gamma=1, gain=1):
     ----------
     .. [1] http://en.wikipedia.org/wiki/Gamma_correction
 
+    Examples
+    --------
+    >>> from skimage import data, exposure, img_as_float
+    >>> image = img_as_float(data.moon())
+    >>> gamma_corrected = exposure.adjust_gamma(image, 2)
+    >>> # Output is darker for gamma > 1
+    >>> image.mean() > gamma_corrected.mean()
+    True
     """
     _assert_non_negative(image)
     dtype = image.dtype.type
@@ -299,6 +394,10 @@ def adjust_log(image, gain=1, inv=False):
     -------
     out : ndarray
         Logarithm corrected output image.
+
+    See Also
+    --------
+    adjust_gamma
 
     References
     ----------
@@ -343,6 +442,10 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
     out : ndarray
         Sigmoid corrected output image.
 
+    See Also
+    --------
+    adjust_gamma
+
     References
     ----------
     .. [1] Gustav J. Braun, "Image Lightness Rescaling Using Sigmoidal Contrast
@@ -355,8 +458,8 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
     scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
 
     if inv:
-        out = (1 - 1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
+        out = (1 - 1 / (1 + np.exp(gain * (cutoff - image / scale)))) * scale
         return dtype(out)
 
-    out = (1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
+    out = (1 / (1 + np.exp(gain * (cutoff - image / scale)))) * scale
     return dtype(out)

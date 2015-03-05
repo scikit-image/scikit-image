@@ -2,10 +2,10 @@ import numpy as np
 from scipy import ndimage
 from scipy import stats
 
-from skimage.util import img_as_float, pad
-from skimage.feature import peak_local_max
-from skimage.feature.util import _prepare_grayscale_input_2D
-from skimage.feature.corner_cy import _corner_fast
+from ..util import img_as_float, pad
+from ..feature import peak_local_max
+from ..feature.util import _prepare_grayscale_input_2D
+from ..feature.corner_cy import _corner_fast
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
 from .._shared.utils import safe_as_int
@@ -288,7 +288,7 @@ def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
 
     """
 
-    return _image_orthogonal_matrix22_eigvals(Hyy, Hxy, Hyy)
+    return _image_orthogonal_matrix22_eigvals(Hxx, Hxy, Hyy)
 
 
 def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
@@ -323,8 +323,8 @@ def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
     imxx, imxy = _compute_derivatives(imx, mode=mode, cval=cval)
     imyx, imyy = _compute_derivatives(imy, mode=mode, cval=cval)
 
-    numerator = (imxx * imy**2 + imyy * imx**2 - 2 * imxy * imx * imy)
-    denominator = (imx**2 + imy**2)
+    numerator = (imxx * imy ** 2 + imyy * imx ** 2 - 2 * imxy * imx * imy)
+    denominator = (imx ** 2 + imy ** 2)
 
     response = np.zeros_like(image, dtype=np.double)
 
@@ -403,12 +403,12 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
     Axx, Axy, Ayy = structure_tensor(image, sigma)
 
     # determinant
-    detA = Axx * Ayy - Axy**2
+    detA = Axx * Ayy - Axy ** 2
     # trace
     traceA = Axx + Ayy
 
     if method == 'k':
-        response = detA - k * traceA**2
+        response = detA - k * traceA ** 2
     else:
         response = 2 * detA / (traceA + eps)
 
@@ -473,7 +473,7 @@ def corner_shi_tomasi(image, sigma=1):
     Axx, Axy, Ayy = structure_tensor(image, sigma)
 
     # minimum eigenvalue of A
-    response = ((Axx + Ayy) - np.sqrt((Axx - Ayy)**2 + 4 * Axy**2)) / 2
+    response = ((Axx + Ayy) - np.sqrt((Axx - Ayy) ** 2 + 4 * Axy ** 2)) / 2
 
     return response
 
@@ -543,7 +543,7 @@ def corner_foerstner(image, sigma=1):
     Axx, Axy, Ayy = structure_tensor(image, sigma)
 
     # determinant
-    detA = Axx * Ayy - Axy**2
+    detA = Axx * Ayy - Axy ** 2
     # trace
     traceA = Axx + Ayy
 
@@ -553,7 +553,7 @@ def corner_foerstner(image, sigma=1):
     mask = traceA != 0
 
     w[mask] = detA[mask] / traceA[mask]
-    q[mask] = 4 * detA[mask] / traceA[mask]**2
+    q[mask] = 4 * detA[mask] / traceA[mask] ** 2
 
     return w, q
 
@@ -692,7 +692,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     b_edge = np.zeros((2, ), dtype=np.double)
 
     # critical statistical test values
-    redundancy = window_size**2 - 2
+    redundancy = window_size ** 2 - 2
     t_crit_dot = stats.f.isf(1 - alpha, redundancy, redundancy)
     t_crit_edge = stats.f.isf(alpha, redundancy, redundancy)
 

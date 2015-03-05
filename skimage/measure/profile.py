@@ -9,7 +9,7 @@ def profile_line(img, src, dst, linewidth=1,
     Parameters
     ----------
     img : numeric array, shape (M, N[, C])
-        The image, either grayscale (2D array) or multichannel 
+        The image, either grayscale (2D array) or multichannel
         (3D array, where the final axis contains the channel
         information).
     src : 2-tuple of numeric scalar (float or int)
@@ -109,4 +109,3 @@ def _line_profile_coordinates(src, dst, linewidth=1):
     perp_cols = np.array([np.linspace(col_i - col_width, col_i + col_width,
                                       linewidth) for col_i in line_col])
     return np.array([perp_rows, perp_cols])
-

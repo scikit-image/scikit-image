@@ -6,6 +6,7 @@ source = skimage
 include = */skimage/*
 omit =
     */setup.py
+    */skimage/external/*
 
 [report]
 exclude_lines =

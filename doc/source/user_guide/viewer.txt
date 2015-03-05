@@ -51,7 +51,7 @@ call the total-variation denoising function, ``denoise_tv_bregman``:
 
 .. code-block:: python
 
-   from skimage.filter import denoise_tv_bregman
+   from skimage.filters import denoise_tv_bregman
    from skimage.viewer.plugins.base import Plugin
 
    denoise_plugin = Plugin(image_filter=denoise_tv_bregman)

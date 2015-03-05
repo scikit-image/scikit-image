@@ -32,7 +32,7 @@ def test_binary_descriptors_lena_rotation_crosscheck_false():
     img = data.lena()
     img = rgb2gray(img)
     tform = tf.SimilarityTransform(scale=1, rotation=0.15, translation=(0, 0))
-    rotated_img = tf.warp(img, tform)
+    rotated_img = tf.warp(img, tform, clip=False)
 
     extractor = BRIEF(descriptor_size=512)
 
@@ -65,7 +65,7 @@ def test_binary_descriptors_lena_rotation_crosscheck_true():
     img = data.lena()
     img = rgb2gray(img)
     tform = tf.SimilarityTransform(scale=1, rotation=0.15, translation=(0, 0))
-    rotated_img = tf.warp(img, tform)
+    rotated_img = tf.warp(img, tform, clip=False)
 
     extractor = BRIEF(descriptor_size=512)
 

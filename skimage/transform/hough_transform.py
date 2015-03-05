@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import ndimage
-from skimage import measure, morphology
+from .. import measure, morphology
 from ._hough_transform import _hough_circle
 
 

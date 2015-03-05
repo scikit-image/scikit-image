@@ -3,24 +3,22 @@ import skimage as si
 import skimage.io as sio
 import numpy as np
 
-from numpy.testing import *
-from numpy.testing.decorators import skipif
+from numpy.testing import (
+    assert_array_equal, assert_array_almost_equal, run_module_suite)
+
 from tempfile import NamedTemporaryFile
 
-try:
-    import skimage.io._plugins.tifffile_plugin as tf
-    _plugins = sio.plugin_order()
-    TF_available = True
-    sio.use_plugin('tifffile')
-except ImportError:
-    TF_available = False
+_plugins = sio.plugin_order()
+sio.use_plugin('tifffile')
+
+
+np.random.seed(0)
 
 
 def teardown():
     sio.reset_plugins()
 
 
-@skipif(not TF_available)
 def test_imread_uint16():
     expected = np.load(os.path.join(si.data_dir, 'chessboard_GRAY_U8.npy'))
     img = sio.imread(os.path.join(si.data_dir, 'chessboard_GRAY_U16.tif'))
@@ -28,7 +26,6 @@ def test_imread_uint16():
     assert_array_almost_equal(img, expected)
 
 
-@skipif(not TF_available)
 def test_imread_uint16_big_endian():
     expected = np.load(os.path.join(si.data_dir, 'chessboard_GRAY_U8.npy'))
     img = sio.imread(os.path.join(si.data_dir, 'chessboard_GRAY_U16B.tif'))
@@ -45,14 +42,16 @@ class TestSave:
         y = sio.imread(fname)
         assert_array_equal(x, y)
 
-    @skipif(not TF_available)
     def test_imsave_roundtrip(self):
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
-            for dtype in (np.uint8, np.uint16, np.float32, np.float64):
-                x = np.ones(shape, dtype=dtype) * np.random.random(shape)
+            for dtype in (np.uint8, np.uint16, np.float32, np.int16,
+                          np.float64):
+                x = np.random.rand(*shape)
 
                 if not np.issubdtype(dtype, float):
-                    x = (x * 255).astype(dtype)
+                    x = (x * np.iinfo(dtype).max).astype(dtype)
+                else:
+                    x = x.astype(dtype)
                 yield self.roundtrip, dtype, x
 
 

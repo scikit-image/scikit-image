@@ -13,7 +13,8 @@ def configuration(parent_package='', top_path=None):
     config.add_subpackage('exposure')
     config.add_subpackage('feature')
     config.add_subpackage('restoration')
-    config.add_subpackage('filter')
+    config.add_subpackage('filters')
+    config.add_subpackage('future')
     config.add_subpackage('graph')
     config.add_subpackage('io')
     config.add_subpackage('measure')
@@ -21,6 +22,7 @@ def configuration(parent_package='', top_path=None):
     config.add_subpackage('transform')
     config.add_subpackage('util')
     config.add_subpackage('segmentation')
+    config.add_subpackage('external')
 
     def add_test_directories(arg, dirname, fnames):
         if dirname.split(os.path.sep)[-1] == 'tests':

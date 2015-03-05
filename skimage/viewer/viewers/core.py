@@ -1,22 +1,15 @@
 """
 ImageViewer class for viewing and interacting with images.
 """
-from ..qt import QtGui, qt_api
-from ..qt.QtCore import Qt, Signal
 
-if qt_api is not None:
-    has_qt = True
-else:
-    has_qt = False
-
-from skimage import io, img_as_float
-from skimage.util.dtype import dtype_range
-from skimage.exposure import rescale_intensity
-from skimage._shared.testing import doctest_skip_parser
 import numpy as np
-from .. import utils
+from ... import io, img_as_float
+from ...util.dtype import dtype_range
+from ...exposure import rescale_intensity
+from ..qt import QtWidgets, Qt, Signal
 from ..widgets import Slider
-from ..utils import dialogs
+from ..utils import (dialogs, init_qtapp, figimage, start_qtapp,
+                     update_axes_image)
 from ..plugins.base import Plugin
 
 
@@ -51,12 +44,117 @@ def mpl_image_to_rgba(mpl_image):
     return img_as_float(image)
 
 
-class ImageViewer(QtGui.QMainWindow):
+class BlitManager(object):
+    """Object that manages blits on an axes"""
+    def __init__(self, ax):
+        self.ax = ax
+        self.canvas = ax.figure.canvas
+        self.canvas.mpl_connect('draw_event', self.on_draw_event)
+        self.ax = ax
+        self.background = None
+        self.artists = []
+
+    def add_artists(self, artists):
+        self.artists.extend(artists)
+        self.redraw()
+
+    def remove_artists(self, artists):
+        for artist in artists:
+            self.artists.remove(artist)
+
+    def on_draw_event(self, event=None):
+        self.background = self.canvas.copy_from_bbox(self.ax.bbox)
+        self.draw_artists()
+
+    def redraw(self):
+        if self.background is not None:
+            self.canvas.restore_region(self.background)
+            self.draw_artists()
+            self.canvas.blit(self.ax.bbox)
+        else:
+            self.canvas.draw_idle()
+
+    def draw_artists(self):
+        for artist in self.artists:
+            self.ax.draw_artist(artist)
+
+
+class EventManager(object):
+    """Object that manages events on a canvas"""
+    def __init__(self, ax):
+        self.canvas = ax.figure.canvas
+        self.connect_event('button_press_event', self.on_mouse_press)
+        self.connect_event('key_press_event', self.on_key_press)
+        self.connect_event('button_release_event', self.on_mouse_release)
+        self.connect_event('motion_notify_event', self.on_move)
+        self.connect_event('scroll_event', self.on_scroll)
+
+        self.tools = []
+        self.active_tool = None
+
+    def connect_event(self, name, handler):
+        self.canvas.mpl_connect(name, handler)
+
+    def attach(self, tool):
+        self.tools.append(tool)
+        self.active_tool = tool
+
+    def detach(self, tool):
+        self.tools.remove(tool)
+        if self.tools:
+            self.active_tool = self.tools[-1]
+        else:
+            self.active_tool = None
+
+    def on_mouse_press(self, event):
+        for tool in self.tools:
+            if not tool.ignore(event) and tool.hit_test(event):
+                self.active_tool = tool
+                break
+        if self.active_tool and not self.active_tool.ignore(event):
+            self.active_tool.on_mouse_press(event)
+            return
+        for tool in reversed(self.tools):
+            if not tool.ignore(event):
+                self.active_tool = tool
+                tool.on_mouse_press(event)
+                return
+
+    def on_key_press(self, event):
+        tool = self._get_tool(event)
+        if not tool is None:
+            tool.on_key_press(event)
+
+    def _get_tool(self, event):
+        if not self.tools or self.active_tool.ignore(event):
+            return None
+        return self.active_tool
+
+    def on_mouse_release(self, event):
+        tool = self._get_tool(event)
+        if not tool is None:
+            tool.on_mouse_release(event)
+
+    def on_move(self, event):
+        tool = self._get_tool(event)
+        if not tool is None:
+            tool.on_move(event)
+
+    def on_scroll(self, event):
+        tool = self._get_tool(event)
+        if not tool is None:
+            tool.on_scroll(event)
+
+
+class ImageViewer(QtWidgets.QMainWindow):
     """Viewer for displaying images.
 
     This viewer is a simple container object that holds a Matplotlib axes
     for showing images. `ImageViewer` doesn't subclass the Matplotlib axes (or
     figure) because of the high probability of name collisions.
+
+    Subclasses and plugins will likely extend the `update_image` method to add
+    custom overlays or filter the displayed image.
 
     Parameters
     ----------
@@ -91,9 +189,9 @@ class ImageViewer(QtGui.QMainWindow):
     # Signal that the original image has been changed
     original_image_changed = Signal(np.ndarray)
 
-    def __init__(self, image):
+    def __init__(self, image, useblit=True):
         # Start main loop
-        utils.init_qtapp()
+        init_qtapp()
         super(ImageViewer, self).__init__()
 
         #TODO: Add ImageViewer to skimage.io window manager
@@ -101,7 +199,7 @@ class ImageViewer(QtGui.QMainWindow):
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.setWindowTitle("Image Viewer")
 
-        self.file_menu = QtGui.QMenu('&File', self)
+        self.file_menu = QtWidgets.QMenu('&File', self)
         self.file_menu.addAction('Open file', self.open_file,
                                  Qt.CTRL + Qt.Key_O)
         self.file_menu.addAction('Save to file', self.save_to_file,
@@ -110,7 +208,7 @@ class ImageViewer(QtGui.QMainWindow):
                                  Qt.CTRL + Qt.Key_Q)
         self.menuBar().addMenu(self.file_menu)
 
-        self.main_widget = QtGui.QWidget()
+        self.main_widget = QtWidgets.QWidget()
         self.setCentralWidget(self.main_widget)
 
         if isinstance(image, Plugin):
@@ -120,17 +218,22 @@ class ImageViewer(QtGui.QMainWindow):
             # When plugin is started, start
             plugin._started.connect(self._show)
 
-        self.fig, self.ax = utils.figimage(image)
+        self.fig, self.ax = figimage(image)
         self.canvas = self.fig.canvas
         self.canvas.setParent(self)
-
         self.ax.autoscale(enable=False)
+
+        self._tools = []
+        self.useblit = useblit
+        if useblit:
+            self._blit_manager = BlitManager(self.ax)
+        self._event_manager = EventManager(self.ax)
 
         self._image_plot = self.ax.images[0]
         self._update_original_image(image)
         self.plugins = []
 
-        self.layout = QtGui.QVBoxLayout(self.main_widget)
+        self.layout = QtWidgets.QVBoxLayout(self.main_widget)
         self.layout.addWidget(self.canvas)
 
         status_bar = self.statusBar()
@@ -149,7 +252,7 @@ class ImageViewer(QtGui.QMainWindow):
         if plugin.dock:
             location = self.dock_areas[plugin.dock]
             dock_location = Qt.DockWidgetArea(location)
-            dock = QtGui.QDockWidget()
+            dock = QtWidgets.QDockWidget()
             dock.setWidget(plugin)
             dock.setWindowTitle(plugin.name)
             self.addDockWidget(dock_location, dock)
@@ -174,12 +277,21 @@ class ImageViewer(QtGui.QMainWindow):
         h = viewer_size.height()
         self.resize(w + dx, h + dy)
 
-    def open_file(self):
+    def open_file(self, filename=None):
         """Open image file and display in viewer."""
-        filename = dialogs.open_file_dialog()
+        if filename is None:
+            filename = dialogs.open_file_dialog()
         if filename is None:
             return
         image = io.imread(filename)
+        self._update_original_image(image)
+
+    def update_image(self, image):
+        """Update displayed image.
+
+        This method can be overridden or extended in subclasses and plugins to
+        react to image changes.
+        """
         self._update_original_image(image)
 
     def _update_original_image(self, image):
@@ -187,7 +299,7 @@ class ImageViewer(QtGui.QMainWindow):
         self.image = image.copy()       # update displayed image
         self.original_image_changed.emit(image)
 
-    def save_to_file(self):
+    def save_to_file(self, filename=None):
         """Save current image to file.
 
         The current behavior is not ideal: It saves the image displayed on
@@ -195,7 +307,8 @@ class ImageViewer(QtGui.QMainWindow):
         not preserved (resizing the viewer window will alter the size of the
         saved image).
         """
-        filename = dialogs.save_file_dialog()
+        if filename is None:
+            filename = dialogs.save_file_dialog()
         if filename is None:
             return
         if len(self.ax.images) == 1:
@@ -233,11 +346,14 @@ class ImageViewer(QtGui.QMainWindow):
         """
         self._show()
         if main_window:
-            utils.start_qtapp()
+            start_qtapp()
         return [p.output() for p in self.plugins]
 
     def redraw(self):
-        self.canvas.draw_idle()
+        if self.useblit:
+            self._blit_manager.redraw()
+        else:
+            self.canvas.draw_idle()
 
     @property
     def image(self):
@@ -246,7 +362,7 @@ class ImageViewer(QtGui.QMainWindow):
     @image.setter
     def image(self, image):
         self._img = image
-        utils.update_axes_image(self._image_plot, image)
+        update_axes_image(self._image_plot, image)
 
         # update display (otherwise image doesn't fill the canvas)
         h, w = image.shape[:2]
@@ -258,6 +374,9 @@ class ImageViewer(QtGui.QMainWindow):
         if clim[0] < 0 and image.min() >= 0:
             clim = (0, clim[1])
         self._image_plot.set_clim(clim)
+
+        if self.useblit:
+            self._blit_manager.background = None
 
         self.redraw()
 
@@ -278,6 +397,18 @@ class ImageViewer(QtGui.QMainWindow):
             self.status_message(self._format_coord(event.xdata, event.ydata))
         else:
             self.status_message('')
+
+    def add_tool(self, tool):
+        if self.useblit:
+            self._blit_manager.add_artists(tool.artists)
+        self._tools.append(tool)
+        self._event_manager.attach(tool)
+
+    def remove_tool(self, tool):
+        if self.useblit:
+            self._blit_manager.remove_artists(tool.artists)
+        self._tools.remove(tool)
+        self._event_manager.detach(tool)
 
     def _format_coord(self, x, y):
         # callback function to format coordinate display in status bar
@@ -302,9 +433,6 @@ class CollectionViewer(ImageViewer):
             middle (i.e. 50%) of the collection.
         home/end keys
             First/last image in collection.
-
-    Subclasses and plugins will likely extend the `update_image` method to add
-    custom overlays or filter the displayed image.
 
     Parameters
     ----------
@@ -352,16 +480,8 @@ class CollectionViewer(ImageViewer):
         self.slider.val = index
         self.update_image(self.image_collection[index])
 
-    def update_image(self, image):
-        """Update displayed image.
-
-        This method can be overridden or extended in subclasses and plugins to
-        react to image changes.
-        """
-        self._update_original_image(image)
-
     def keyPressEvent(self, event):
-        if type(event) == QtGui.QKeyEvent:
+        if type(event) == QtWidgets.QKeyEvent:
             key = event.key()
             # Number keys (code: 0 = key 48, 9 = key 57) move to deciles
             if 48 <= key < 58:

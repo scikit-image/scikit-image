@@ -1,6 +1,6 @@
 __all__ = ['imread', 'imsave']
 
-from skimage.utils.dtype import convert
+from ...util.dtype import convert
 
 try:
     import imread as _imread
@@ -33,7 +33,7 @@ def imsave(fname, arr, format_str=None):
     arr : ndarray of uint8 or uint16
         Array (image) to save.
     format_str: str,optional
-        Format to save as. 
+        Format to save as.
 
     Notes
     -----

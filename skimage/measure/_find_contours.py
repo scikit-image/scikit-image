@@ -35,7 +35,7 @@ def find_contours(array, level,
     -------
     contours : list of (n,2)-ndarrays
         Each contour is an ndarray of shape ``(n, 2)``,
-        consisting of n ``(x, y)`` coordinates along the contour.
+        consisting of n ``(row, column)`` coordinates along the contour.
 
     Notes
     -----
@@ -167,7 +167,10 @@ def _assemble_contours(points_iterator):
                     head.extend(tail)
                     # remove all traces of tail:
                     del starts[to_point]
-                    del ends[tail[-1]]
+                    try:
+                        del ends[tail[-1]]
+                    except KeyError:
+                        pass
                     del contours[tail_num]
                     # remove the old end of head and add the new end.
                     del ends[from_point]

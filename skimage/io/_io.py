@@ -3,8 +3,8 @@ from io import BytesIO
 import numpy as np
 import six
 
-from skimage.io.manage_plugins import call_plugin
-from skimage.color import rgb2grey
+from ..io.manage_plugins import call_plugin
+from ..color import rgb2grey
 from .util import file_or_url_context
 
 
@@ -193,7 +193,7 @@ def show():
     >>> import skimage.io as io
 
     >>> for i in range(4):
-    ...     io.imshow(np.random.random((50, 50)))
+    ...     ax_im = io.imshow(np.random.rand(50, 50))
     >>> io.show() # doctest: +SKIP
 
     '''

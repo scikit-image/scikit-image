@@ -7,14 +7,20 @@ from tempfile import NamedTemporaryFile
 
 from skimage import data_dir
 from skimage.io import imread, imsave, use_plugin, reset_plugins
+import skimage.io as sio
 
 try:
     import imread as _imread
-    use_plugin('imread')
 except ImportError:
     imread_available = False
 else:
     imread_available = True
+
+
+def setup():
+    if imread_available:
+        np.random.seed(0)
+        use_plugin('imread')
 
 
 def teardown():
@@ -39,12 +45,19 @@ def test_imread_palette():
 
 
 @skipif(not imread_available)
+def test_imread_truncated_jpg():
+    assert_raises((RuntimeError, ValueError),
+                  sio.imread,
+                  os.path.join(data_dir, 'truncated.jpg'))
+
+
+@skipif(not imread_available)
 def test_bilevel():
     expected = np.zeros((10, 10), bool)
     expected[::2] = 1
 
     img = imread(os.path.join(data_dir, 'checker_bilevel.png'))
-    assert_array_equal(img, expected)
+    assert_array_equal(img.astype(bool), expected)
 
 
 class TestSave:
@@ -61,7 +74,7 @@ class TestSave:
     def test_imsave_roundtrip(self):
         dtype = np.uint8
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
-            x = np.ones(shape, dtype=dtype) * np.random.random(shape)
+            x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
             if np.issubdtype(dtype, float):
                 yield self.roundtrip, x, 255

@@ -1,5 +1,5 @@
 Name: scikit-image
-Version: 0.10.1
+Version: 0.11.0
 Summary: Image processing routines for SciPy
 Url: http://scikit-image.org
 DownloadUrl: http://github.com/scikit-image/scikit-image
@@ -33,22 +33,23 @@ UseBackends: Waf
 Library:
     Packages:
         skimage, skimage.color, skimage.data, skimage.draw, skimage.exposure,
-        skimage.feature, skimage.filter, skimage.graph, skimage.io,
+        skimage.feature, skimage.filters, skimage.future, skimage.future.graph,
+        skimage.graph, skimage.io,
         skimage.io._plugins, skimage.measure, skimage.morphology,
         skimage.scripts, skimage.restoration, skimage.segmentation,
         skimage.transform, skimage.util
-    Extension: skimage.morphology._pnpoly
-        Sources:
-            skimage/morphology/_pnpoly.pyx
     Extension: skimage.io._plugins._colormixer
         Sources:
             skimage/io/_plugins/_colormixer.pyx
+    Extension: skimage.measure._pnpoly
+        Sources:
+            skimage/measure/_pnpoly.pyx
     Extension: skimage.measure._find_contours_cy
         Sources:
             skimage/measure/_find_contours_cy.pyx
-    Extension: skimage.measure._moments
+    Extension: skimage.measure._moments_cy
         Sources:
-            skimage/measure/_moments.pyx
+            skimage/measure/_moments_cy.pyx
     Extension: skimage.measure._marching_cubes_cy
         Sources:
             skimage/measure/_marching_cubes_cy.pyx
@@ -61,9 +62,9 @@ Library:
     Extension: skimage.transform._hough_transform
         Sources:
             skimage/transform/_hough_transform.pyx
-    Extension: skimage.filter._ctmf
+    Extension: skimage.filters._ctmf
         Sources:
-            skimage/filter/_ctmf.pyx
+            skimage/filters/_ctmf.pyx
     Extension: skimage.measure._ccomp
         Sources:
             skimage/measure/_ccomp.pyx
@@ -79,9 +80,6 @@ Library:
     Extension: skimage.graph._spath
         Sources:
             skimage/graph/_spath.pyx
-    Extension: skimage.morphology.cmorph
-        Sources:
-            skimage/morphology/cmorph.pyx
     Extension: skimage.graph.heap
         Sources:
             skimage/graph/heap.pyx
@@ -127,18 +125,18 @@ Library:
     Extension: skimage._shared.geometry
         Sources:
             skimage/_shared/geometry.pyx
-    Extension: skimage.filter.rank.generic_cy
+    Extension: skimage.filters.rank.generic_cy
         Sources:
-            skimage/filter/rank/generic_cy.pyx
-    Extension: skimage.filter.rank.percentile_cy
+            skimage/filters/rank/generic_cy.pyx
+    Extension: skimage.filters.rank.percentile_cy
         Sources:
             skimage/filter/rank/percentile_cy.pyx
-    Extension: skimage.filter.rank.core_cy
+    Extension: skimage.filters.rank.core_cy
         Sources:
             skimage/filter/rank/core_cy.pyx
-    Extension: skimage.filter.rank.bilateral_cy
+    Extension: skimage.filters.rank.bilateral_cy
         Sources:
-            skimage/filter/rank/bilateral_cy.pyx
+            skimage/filters/rank/bilateral_cy.pyx
     Extension: skimage.restoration._unwrap_1d
         Sources:
             skimage/restoration/_unwrap_1d.pyx
@@ -151,9 +149,18 @@ Library:
     Extension: skimage.restoration._denoise_cy
         Sources:
             skimage/restoration/_denoise_cy.pyx
+    Extension: skimage.restoration._nl_means_denoising
+        Sources:
+            skimage/restoration/_nl_means_denoising.pyx
     Extension: skimage.feature._hessian_det_appx
         Sources:
             skimage/exposure/_hessian_det_appx.pyx
+    Extension: skimage.future.graph._ncut_cy
+        Sources:
+            skimage/future/graph/_ncut_cy.pyx
+    Extension: skimage.external.tifffile._tifffile
+        Sources:
+            skimage/external/tifffile/_tifffile.c
 
 Executable: skivi
     Module: skimage.scripts.skivi

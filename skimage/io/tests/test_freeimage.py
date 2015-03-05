@@ -14,6 +14,8 @@ try:
 except RuntimeError:
     FI_available = False
 
+np.random.seed(0)
+
 
 def setup_module(self):
     """The effect of the `plugin.use` call may be overridden by later imports.
@@ -37,6 +39,11 @@ def test_imread():
     assert img.shape == (370, 371, 3)
     assert all(img[274, 135] == [0, 130, 253])
 
+@skipif(not FI_available)
+def test_imread_truncated_jpg():
+    assert_raises((RuntimeError, ValueError),
+                  sio.imread,
+                  os.path.join(si.data_dir, 'truncated.jpg'))
 
 @skipif(not FI_available)
 def test_imread_uint16():
@@ -57,7 +64,7 @@ def test_imread_uint16_big_endian():
 @skipif(not FI_available)
 def test_write_multipage():
     shape = (64, 64, 64)
-    x = np.ones(shape, dtype=np.uint8) * np.random.random(shape) * 255
+    x = np.ones(shape, dtype=np.uint8) * np.random.rand(*shape) * 255
     x = x.astype(np.uint8)
     f = NamedTemporaryFile(suffix='.tif')
     fname = f.name
@@ -74,19 +81,19 @@ class TestSave:
         f.close()
         sio.imsave(fname, x)
         y = sio.imread(fname)
-        assert_array_equal(x, y)
+        assert_array_equal(y, x)
 
     @skipif(not FI_available)
     def test_imsave_roundtrip(self):
         for shape, dtype, format in [
               [(10, 10), (np.uint8, np.uint16), ('tif', 'png')],
               [(10, 10), (np.float32,), ('tif',)],
-              [(10, 10, 3), (np.uint8,), ('png',)],
-              [(10, 10, 4), (np.uint8,), ('png',)]
+              [(10, 10, 3), (np.uint8, np.uint16), ('png',)],
+              [(10, 10, 4), (np.uint8, np.uint16), ('png',)]
             ]:
             tests = [(d, f) for d in dtype for f in format]
             for d, f in tests:
-                x = np.ones(shape, dtype=d) * np.random.random(shape)
+                x = np.ones(shape, dtype=d) * np.random.rand(*shape)
                 if not np.issubdtype(d, float):
                     x = (x * 255).astype(d)
                 yield self.roundtrip, d, x, f
