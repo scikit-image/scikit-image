@@ -1,2 +1,2 @@
 version=3
-http://githubredir.debian.net/github/scikit-image/scikit-image/ v(.+).tar.gz
+https://github.com/scikit-image/scikit-image/tags .*/archive/v(\d[\d\.]+).tar.gz
