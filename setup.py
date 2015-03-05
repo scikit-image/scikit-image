@@ -17,7 +17,7 @@ MAINTAINER_EMAIL    = 'stefan@sun.ac.za'
 URL                 = 'http://scikit-image.org'
 LICENSE             = 'Modified BSD'
 DOWNLOAD_URL        = 'http://github.com/scikit-image/scikit-image'
-VERSION             = '0.11.0'
+VERSION             = '0.11.2'
 PYTHON_VERSION      = (2, 6)
 
 import os
