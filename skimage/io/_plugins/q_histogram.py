@@ -2,7 +2,7 @@ import numpy as np
 
 from PyQt4.QtGui import QWidget, QPainter, QGridLayout, QColor, QFrame
 
-from util import histograms
+from .util import histograms
 
 
 class ColorHistogram(QWidget):
