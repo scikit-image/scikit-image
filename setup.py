@@ -90,6 +90,8 @@ def check_runtime_requirements():
     if sys.version_info < PYTHON_VERSION:
         raise SystemExit('You need Python version %d.%d or later.' \
                          % PYTHON_VERSION)
+
+    dep_errors = []
     for (package_name, min_version) in DEPENDENCIES.items():
         if package_name == 'cython':
             package_name = 'Cython'
@@ -98,7 +100,6 @@ def check_runtime_requirements():
             package_name = 'PIL.Image'
             min_version = '1.1.7'
 
-        dep_errors = []
         try:
             package = __import__(package_name,
                 fromlist=[package_name.rpartition('.')[0]])
@@ -113,20 +114,22 @@ def check_runtime_requirements():
             if not package_version or LooseVersion(min_version) > LooseVersion(package_version):
                 dep_errors.append((package_name, min_version, package_version))
 
-        if dep_errors:
-            print('=========================================================')
-            print('Warning: Unsatisfied dependencies for using scikit-image!')
-            print('=========================================================')
-            for (pkg, version_required, version_installed) in dep_errors:
-                print('You need                ', 'You have'                 )
-                print('---------------------------------------------------------')
-                print(('%s %s' % (pkg, version_required)).ljust(24),
-                      version_installed)
-            print('=========================================================')
-            print('Install runtime dependencies using:')
-            print('')
-            print('  pip install -r requirements.txt')
-            print('=========================================================\n')
+    if dep_errors:
+        print('=========================================================')
+        print('Warning: Unsatisfied dependencies for using scikit-image!')
+        print('=========================================================')
+        for (pkg, version_required, version_installed) in dep_errors:
+            print('You need                ', 'You have'                 )
+            print('---------------------------------------------------------')
+            print(('%s %s' % (pkg, version_required)).ljust(24),
+                  version_installed)
+        print('=========================================================')
+        print('Install runtime dependencies using:')
+        print('')
+        print('  pip install -r requirements.txt')
+        print()
+        print('See DEPENDS.txt for more information.')
+        print('=========================================================\n')
 
 
 if __name__ == "__main__":
