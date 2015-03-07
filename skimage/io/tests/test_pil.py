@@ -147,7 +147,8 @@ def test_imsave_filelike():
     s = BytesIO()
 
     # save to file-like object
-    with expected_warnings(['precision loss|unclosed file']):
+    with expected_warnings(['precision loss|unclosed file',
+                            'is a low contrast image']):
         imsave(s, image)
 
     # read from file-like object

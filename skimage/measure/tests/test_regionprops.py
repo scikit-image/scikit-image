@@ -26,7 +26,7 @@ INTENSITY_SAMPLE[1, 9:11] = 2
 def test_all_props():
     region = regionprops(SAMPLE, INTENSITY_SAMPLE)[0]
     for prop in PROPS:
-        assert_equal(region[prop], getattr(region, PROPS[prop]))
+        assert_almost_equal(region[prop], getattr(region, PROPS[prop]))
 
 
 def test_dtype():
