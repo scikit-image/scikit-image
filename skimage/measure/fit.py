@@ -641,6 +641,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     >>> model = EllipseModel()
     >>> model.estimate(data)
+    True
     >>> model.params # doctest: +SKIP
     array([ -3.30354146e+03,  -2.87791160e+03,   5.59062118e+03,
              7.84365066e+00,   7.19203152e-01])
