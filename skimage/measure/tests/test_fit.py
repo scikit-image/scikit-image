@@ -235,7 +235,7 @@ def test_ransac_dynamic_max_trials():
 
     # e = 0%, min_samples = 5
     assert_equal(_dynamic_max_trials(1, 100, 5, 0), 0)
-    assert_equal(_dynamic_max_trials(1, 100, 5, 1), float('inf'))
+    assert_equal(_dynamic_max_trials(1, 100, 5, 1), np.inf)
 
 
 def test_ransac_invalid_input():

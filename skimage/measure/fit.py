@@ -505,18 +505,18 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
         Number of trials.
     """
     if n_inliers == 0:
-        return float('inf')
+        return np.inf
 
     nom = 1 - probability
     if nom == 0:
-        return float('inf')
+        return np.inf
 
     inlier_ratio = n_inliers / float(n_samples)
     denom = 1 - inlier_ratio ** min_samples
     if denom == 0:
         return 1
     elif denom == 1:
-        return float('inf')
+        return np.inf
 
     nom = np.log(nom)
     denom = np.log(denom)
