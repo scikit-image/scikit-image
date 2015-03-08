@@ -233,9 +233,9 @@ def test_ransac_dynamic_max_trials():
     # e = 50%, min_samples = 8
     assert_equal(_dynamic_max_trials(50, 100, 8, 0.99), 1177)
 
-    # e = 0%, min_samples = 10
-    assert_equal(_dynamic_max_trials(1, 100, 10, 0), 0)
-    assert_equal(_dynamic_max_trials(1, 100, 10, 1), float('inf'))
+    # e = 0%, min_samples = 5
+    assert_equal(_dynamic_max_trials(1, 100, 5, 0), 0)
+    assert_equal(_dynamic_max_trials(1, 100, 5, 1), float('inf'))
 
 
 def test_ransac_invalid_input():
