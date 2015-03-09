@@ -213,6 +213,7 @@ def test_blob_overlap():
 
     assert len(blobs) == 1
 
+
 def test_blob_doh_log():
     img = np.ones((512, 512), dtype=np.uint8)
     img3 = np.ones((5, 5, 5))

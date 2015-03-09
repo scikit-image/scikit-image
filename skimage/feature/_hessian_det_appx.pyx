@@ -153,11 +153,11 @@ def _hessian_matrix_det(cnp.double_t[:, ::1] img, double sigma):
     return out
     
 def _hessian_matrix_det_and_laplacian(cnp.double_t[:, ::1] img, double sigma):
-    """Computes the approximate Hessian Determinant over an image
-    and approximate Laplacian of Gaussian of an image. These two
-    approximation are computed together because of efficiency concerns.
+    """Computes the approximate Hessian Determinant and Laplacian of Gaussian of an image.
+     
+    These two approximations are computed together because of efficiency concerns.
 
-    This method uses box filters over integral images to compute the
+    The method uses box filters over integral images to compute the
     approximate Hessian Determinant as described in [1]_.
     
     As it is also stated in the [1]_, all the filters are already

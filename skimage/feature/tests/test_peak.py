@@ -298,6 +298,7 @@ def test_4D():
     assert_equal(peak.peak_local_max(image, min_distance=5),
                  [[5, 5, 5, 5], [15, 15, 15, 15]])
 
+
 def test_scale_local_maximum():
     one = np.array([[1, 2, 3], [4, 5, 6]])
     two = np.array([[7, 8, 9], [10, 11, 12]])
@@ -308,6 +309,7 @@ def test_scale_local_maximum():
     result = peak.get_scale_local_maximas(check_coords, lapl_dummy)
     
     assert_equal(result, np.array([[1, 0, 1]]))
+
 
 if __name__ == '__main__':
     from numpy import testing
