@@ -2,7 +2,7 @@ from ._canny import canny
 from ._daisy import daisy
 from ._hog import hog
 from .texture import greycomatrix, greycoprops, local_binary_pattern
-from .peak import peak_local_max
+from .peak import peak_local_max, get_scale_local_maximas
 from .corner import (corner_kitchen_rosenfeld, corner_harris,
                      corner_shi_tomasi, corner_foerstner, corner_subpix,
                      corner_peaks, corner_fast, structure_tensor,
@@ -16,7 +16,7 @@ from .censure import CENSURE
 from .orb import ORB
 from .match import match_descriptors
 from .util import plot_matches
-from .blob import blob_dog, blob_log, blob_doh
+from .blob import blob_dog, blob_log, blob_doh, blob_doh_log
 
 
 __all__ = ['canny',
@@ -26,6 +26,7 @@ __all__ = ['canny',
            'greycoprops',
            'local_binary_pattern',
            'peak_local_max',
+           'get_scale_local_maximas',
            'structure_tensor',
            'structure_tensor_eigvals',
            'hessian_matrix',
@@ -49,4 +50,6 @@ __all__ = ['canny',
            'plot_matches',
            'blob_dog',
            'blob_doh',
-           'blob_log']
+           'blob_log',
+           'blob_doh_log'
+           ]
