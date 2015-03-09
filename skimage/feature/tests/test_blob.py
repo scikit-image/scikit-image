@@ -246,7 +246,6 @@ def test_blob_doh_log():
     assert abs(radius(b) - 20) <= thresh
 
     b = s[1]
-    print abs(b[0] - 460)
     assert abs(b[0] - 460) <= thresh
     assert abs(b[1] - 50) <= thresh
     assert abs(radius(b) - 30) <= thresh
