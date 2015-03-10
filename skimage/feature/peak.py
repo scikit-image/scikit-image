@@ -160,6 +160,7 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
         out[nd_indices] = True
         return out
 
+
 def get_scale_local_maximas(cube_coordinates, laplacian_cube):
     """
     Check provided cube coordinate for scale space local maximas.
