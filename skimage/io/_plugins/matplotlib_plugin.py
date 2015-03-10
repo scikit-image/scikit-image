@@ -2,7 +2,9 @@ from collections import namedtuple
 import numpy as np
 import warnings
 import matplotlib.pyplot as plt
-from skimage.util import dtype as dtypes
+from ...util import dtype as dtypes
+from ...exposure import is_low_contrast
+from ..._shared._warnings import all_warnings
 
 
 _default_colormap = 'gray'
@@ -49,7 +51,7 @@ def _get_image_properties(image):
     out_of_range_float = (np.issubdtype(image.dtype, np.float) and
                           (immin < lo or immax > hi))
     low_dynamic_range = (immin != immax and
-                         (float(immax - immin) / (hi - lo)) < (1. / 255))
+                         is_low_contrast(image))
     unsupported_dtype = image.dtype not in dtypes._supported_types
 
     return ImageProperties(signed, out_of_range_float,
@@ -72,8 +74,8 @@ def _raise_warnings(image_properties):
         warnings.warn("Low image dynamic range; displaying image with "
                       "stretched contrast.")
     if ip.out_of_range_float:
-        warnings.warn("Float image out of standard range; displaying image "
-                      "with stretched contrast.")
+        warnings.warn("Float image out of standard range; displaying "
+                      "image with stretched contrast.")
 
 
 def _get_display_range(image):
