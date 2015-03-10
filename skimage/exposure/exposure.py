@@ -491,6 +491,10 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
     out : bool
         True when the image is determined to be low contrast.
 
+    References
+    ----------
+    .. [1] http://scikit-image.org/docs/dev/user_guide/data_types.html
+
     Examples
     --------
     >>> image = np.linspace(0, 0.04, 100)
@@ -501,10 +505,6 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
     True
     >>> is_low_contrast(image, upper_percentile=100)
     False
-
-    See Also
-    --------
-    .. [1] http://scikit-image.org/docs/dev/user_guide/data_types.html
     """
     image = np.asanyarray(image)
     if image.ndim == 3 and image.shape[2] in [3, 4]:
