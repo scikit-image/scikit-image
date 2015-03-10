@@ -475,7 +475,9 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
     image : array-like
         The image under test.
     fraction_threshold : float, optional
-        The low contrast fraction threshold.
+        The low contrast fraction threshold. An image is considered low-
+        contrast when its range of brightness spans less than this
+        fraction of its data type's full range. [1]_
     lower_bound : float, optional
         Disregard values below this percentile when computing image contrast.
     upper_bound : float, optional
@@ -499,6 +501,10 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
     True
     >>> is_low_contrast(image, upper_percentile=100)
     False
+
+    See Also
+    --------
+    .. [1] http://scikit-image.org/docs/dev/user_guide/data_types.html
     """
     image = np.asanyarray(image)
     if image.ndim == 3 and image.shape[2] in [3, 4]:
