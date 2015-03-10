@@ -8,7 +8,7 @@ from ..io.manage_plugins import call_plugin
 from ..color import rgb2grey
 from .util import file_or_url_context
 from ..exposure import is_low_contrast
-from .._shared._warnings import all_warnings
+from .._shared._warnings import always_warn
 
 
 __all__ = ['imread', 'imread_collection', 'imsave', 'imshow', 'show']
@@ -118,7 +118,8 @@ def imsave(fname, arr, plugin=None, **plugin_args):
 
     """
     if is_low_contrast(arr):
-        warnings.warn('%s is a low contrast image' % fname)
+        with always_warn():
+            warnings.warn('%s is a low contrast image' % fname)
     return call_plugin('imsave', fname, arr, plugin=plugin, **plugin_args)
 
 
