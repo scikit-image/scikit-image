@@ -72,7 +72,8 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     hspace_t = hspace > threshold
 
     label_hspace = measure.label(hspace_t)
-    props = measure.regionprops(label_hspace)
+    props = measure.regionprops(label_hspace, hspace_max)
+    props = sorted(props, key= lambda x: x.max_intensity)[::-1]
     coords = np.array([np.round(p.centroid) for p in props], dtype=int)
 
     hspace_peaks = []
