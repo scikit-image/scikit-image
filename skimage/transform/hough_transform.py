@@ -84,7 +84,7 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
                                    -min_angle:min_angle + 1]
 
     for dist_idx, angle_idx in coords:
-        accum = hspace[dist_idx, angle_idx]
+        accum = hspace_max[dist_idx, angle_idx]
         if accum > threshold:
             # absolute coordinate grid for local neighbourhood suppression
             dist_nh = dist_idx + dist_ext
