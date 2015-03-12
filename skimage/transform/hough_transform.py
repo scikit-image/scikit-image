@@ -105,7 +105,7 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
             angle_nh[angle_high] -= cols
 
             # suppress neighbourhood
-            hspace[dist_nh, angle_nh] = 0
+            hspace_max[dist_nh, angle_nh] = 0
 
             # add current line to peaks
             hspace_peaks.append(accum)
