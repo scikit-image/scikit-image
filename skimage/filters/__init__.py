@@ -12,6 +12,7 @@ from .thresholding import (threshold_adaptive, threshold_otsu, threshold_yen,
                            threshold_isodata, threshold_li)
 from . import rank
 from .rank import median
+from .steerable import Steerable, buildSteerable, reconSteerable
 
 from .._shared.utils import deprecated
 from .. import restoration
