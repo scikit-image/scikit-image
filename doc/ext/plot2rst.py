@@ -205,6 +205,9 @@ def generate_examples_and_gallery(example_dir, rst_dir, cfg):
     rst_dir.makedirs()
 
     # we create an index.rst with all examples
+    if isinstance(cfg.source_suffix, list):
+        cfg.source_suffix = cfg.source_suffix[0]
+
     gallery_index = open(rst_dir.pjoin('index'+cfg.source_suffix), 'w')
 
     # Here we don't use an os.walk, but we recurse only twice: flat is
