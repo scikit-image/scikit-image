@@ -20,7 +20,7 @@ import warnings
 import numpy as np
 from ... import img_as_ubyte
 from ..._shared.utils import assert_nD
-
+from scipy.ndimage.filters import _rank_filter
 from . import generic_cy
 
 
@@ -420,6 +420,51 @@ def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     return _apply_scalar_per_pixel(generic_cy._median, image, selem,
                                    out=out, mask=mask,
                                    shift_x=shift_x, shift_y=shift_y)
+
+
+def median_float(input, size=None, footprint=None, output=None,
+                 mode="reflect", cval=0.0, origin=0):
+    """
+    Parameters
+    ----------
+    input :Input array to filter.
+    size  :scalar or tuple, optional
+    footprint:array, optional
+              Either size or footprint must be defined. size gives
+              the shapethat is taken from the input array, at every
+              element position, to define the input to the filter function.
+              footprint is a boolean array that specifies (implicitly)
+              a shape, but also which of the elements within this shape
+              will get passed to the filter function. Thus size=(n,m) is
+              equivalent to footprint=np.ones((n,m)). We adjust size to
+              the number of dimensions of the input array, so that,
+              if the input array is shape (10,10,10), and size is 2,
+              then the actual size used is (2,2,2).
+    output: array, optional
+            The output parameter passes an array in which
+            to store the filter output.
+    mode :  {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+            where cval is the value when mode is equal to 'constant'
+            Default is 'reflect'
+    cval :  scalar, optional
+            Value to fill past edges of input if mode is 'constant'.
+            Default is 0.0
+    origin : scalar, optional
+            The origin parameter controls the placement of the filter.
+             Default 0.0.,
+    Returns:
+    median_filter : ndarray
+                    Return of same shape as input
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.filters.rank import median_float
+    >>> img = data.coins
+    >>> med = median(img, 3)
+
+"""
+    return _rank_filter(input, 0, size, footprint, output, mode, cval, origin,
+                        'median')    
 
 
 def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
