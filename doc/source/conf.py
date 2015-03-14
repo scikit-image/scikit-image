@@ -12,7 +12,6 @@
 # serve to show the default.
 
 import sys, os
-import sphinx
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -51,10 +50,7 @@ else:
 templates_path = ['_templates']
 
 # The suffix of source filenames.
-if sphinx.__version__.startswith('1.3'):
-    source_suffix = ['.txt']
-else:
-    source_suffix = '.txt'
+source_suffix = '.txt'
 
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
