@@ -186,6 +186,11 @@ def setup(app):
 def generate_example_galleries(app):
     cfg = app.builder.config
 
+    if isinstance(cfg.source_suffix, list):
+        cfg.source_suffix_str = cfg.source_suffix[0]
+    else:
+        cfg.source_suffix_str = cfg.source_suffix
+
     doc_src = Path(os.path.abspath(app.builder.srcdir)) # path/to/doc/source
 
     if isinstance(cfg.plot2rst_paths, tuple):
@@ -205,10 +210,7 @@ def generate_examples_and_gallery(example_dir, rst_dir, cfg):
     rst_dir.makedirs()
 
     # we create an index.rst with all examples
-    if isinstance(cfg.source_suffix, list):
-        cfg.source_suffix = cfg.source_suffix[0]
-
-    gallery_index = open(rst_dir.pjoin('index'+cfg.source_suffix), 'w')
+    gallery_index = open(rst_dir.pjoin('index'+cfg.source_suffix_str), 'w')
 
     # Here we don't use an os.walk, but we recurse only twice: flat is
     # better than nested.
@@ -238,7 +240,7 @@ def write_gallery(gallery_index, src_dir, rst_dir, cfg, depth=0):
     cfg : config object
         Sphinx config object created by Sphinx.
     """
-    index_name = cfg.plot2rst_index_name + cfg.source_suffix
+    index_name = cfg.plot2rst_index_name + cfg.source_suffix_str
     gallery_template = src_dir.pjoin(index_name)
     if not os.path.exists(gallery_template):
         print(src_dir)
@@ -331,7 +333,8 @@ def write_example(src_name, src_dir, rst_dir, cfg):
     image_path = image_dir.pjoin(base_image_name + '_{0}.png')
 
     basename, py_ext = os.path.splitext(src_name)
-    rst_path = rst_dir.pjoin(basename + cfg.source_suffix)
+
+    rst_path = rst_dir.pjoin(basename + cfg.source_suffix_str)
     notebook_path = notebook_dir.pjoin(basename + '.ipynb')
 
     if _plots_are_current(src_path, image_path) and rst_path.exists and \
