@@ -10,6 +10,7 @@ section_end "Test.with.min.requirements"
 section "Build.docs"
 if [[ ($PY != 2.6) && ($PY != 3.2) ]]; then
     sudo apt-get install -qq texlive texlive-latex-extra dvipng
+    pip install -U setuptools pip
     make html
 fi
 section_end "Build.docs"
