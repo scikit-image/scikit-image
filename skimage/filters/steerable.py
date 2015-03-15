@@ -12,7 +12,8 @@ def buildSteerable(image, height = 5):
         s = SteerableNoSub(height)
     return s.buildSCFpyr(image)
 
-def reconSteerable(coeff, height = 5):
+def reconSteerable(coeff):
+    height = len(coeff)
     if sampling:
         s = Steerable(height)
     else:
