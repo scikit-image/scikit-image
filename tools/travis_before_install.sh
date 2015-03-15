@@ -41,7 +41,7 @@ else
 fi
 
 source ~/venv/bin/activate
-retry pip install wheel flake8 coveralls nose
+retry pip install wheel flake8 coveralls nose sphinx
 
 # install system tk for matplotlib
 sudo apt-get install python-tk
