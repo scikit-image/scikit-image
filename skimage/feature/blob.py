@@ -517,24 +517,17 @@ def blob_doh_log(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     hessian_images, laplacian_images = zip(*hessian_and_laplacian_images)
     
     laplacian_cube = np.dstack(laplacian_images)
+    hessian_cube = np.dstack(hessian_images)
     
     # Find local maximas for each hessian image
-    # This points will be checked for Laplacian scal local maximum
-    list_of_peaks = []
+    # This points will be checked for Laplacian scal local maximum    
+    fp = np.zeros((3,3,3))
+    fp[:,:,1] = 1
     
-    for scale_number, current_hessian_image in enumerate(hessian_images):
-        
-        current_hessian_image = np.asarray(current_hessian_image)
-        
-        local_maxima = peak_local_max(current_hessian_image, threshold_abs=threshold,
-                                          footprint=np.ones((3, 3)),
+    peaks = peak_local_max(hessian_cube, threshold_abs=threshold,
+                                          footprint=fp,
                                           threshold_rel=0.0,
                                           exclude_border=False)
-
-        layer_labels_column = np.ones((local_maxima.shape[0], 1), dtype=np.int64) * scale_number
-        list_of_peaks.append( np.append(local_maxima, layer_labels_column, axis=1) )
-    
-    peaks = np.concatenate(list_of_peaks, axis=0)
     
     # Get only points that are local maximas in scale space
     accepted_points = get_scale_local_maximas(peaks, laplacian_cube)
