@@ -46,6 +46,8 @@ retry pip install wheel flake8 coveralls nose sphinx
 # install system tk for matplotlib
 sudo apt-get install python-tk
 
+# try to solve #1426
+sudo apt-get install --reinstall python-pkg-resources
 
 # on Python 3.2, use matplotlib 1.3.1
 if [[ $TRAVIS_PYTHON_VERSION == 3.2 ]]; then
