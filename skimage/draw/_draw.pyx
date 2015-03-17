@@ -503,7 +503,7 @@ def _circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
 
 
 def _ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
-                      Py_ssize_t xradius, double orientation=0, shape=None):
+                       Py_ssize_t xradius, double orientation=0, shape=None):
     """Generate ellipse perimeter coordinates.
 
     Parameters
