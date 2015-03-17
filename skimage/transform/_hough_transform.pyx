@@ -98,8 +98,8 @@ def _hough_circle(cnp.ndarray img,
     return acc
 
 
-def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
-                  int min_size=4, max_size=None):
+def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
+                   int min_size=4, max_size=None):
     """Perform an elliptical Hough transform.
 
     Parameters
@@ -228,8 +228,8 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
                                     ('orientation', np.double)])
 
 
-def hough_line(cnp.ndarray img,
-               cnp.ndarray[ndim=1, dtype=cnp.double_t] theta):
+def _hough_line(cnp.ndarray img,
+                cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=None):
     """Perform a straight line Hough transform.
 
     Parameters
@@ -313,9 +313,9 @@ def hough_line(cnp.ndarray img,
     return accum, theta, bins
 
 
-def probabilistic_hough_line(cnp.ndarray img, int threshold=10,
-                             int line_length=50, int line_gap=10,
-                             cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=None):
+def _probabilistic_hough_line(cnp.ndarray img, int threshold=10,
+                              int line_length=50, int line_gap=10,
+                              cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=None):
     """Return lines from a progressive probabilistic line Hough transform.
 
     Parameters

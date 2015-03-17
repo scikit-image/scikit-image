@@ -38,7 +38,7 @@ def _coords_inside_image(rr, cc, shape, val=None):
         return rr[mask], cc[mask], val[mask]
 
 
-def line(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y1, Py_ssize_t x1):
+def _line(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y2, Py_ssize_t x2):
     """Generate line pixel coordinates.
 
     Parameters
@@ -125,7 +125,7 @@ def line(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y1, Py_ssize_t x1):
     return np.asarray(rr), np.asarray(cc)
 
 
-def line_aa(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y1, Py_ssize_t x1):
+def _line_aa(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y1, Py_ssize_t x1):
     """Generate anti-aliased line pixel coordinates.
 
     Parameters
@@ -227,7 +227,7 @@ def line_aa(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y1, Py_ssize_t x1):
             1. - np.array(val, dtype=np.float))
 
 
-def polygon(y, x, shape=None):
+def _polygon(y, x, shape=None):
     """Generate coordinates of pixels within polygon.
 
     Parameters
@@ -305,7 +305,7 @@ def polygon(y, x, shape=None):
     return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
 
 
-def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
+def _circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
                      method='bresenham', shape=None):
     """Generate circle perimeter coordinates.
 
@@ -416,7 +416,7 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
             np.array(cc, dtype=np.intp) + cx)
 
 
-def circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
+def _circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
                         shape=None):
     """Generate anti-aliased circle perimeter coordinates.
 
@@ -502,7 +502,7 @@ def circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
             np.array(val, dtype=np.float))
 
 
-def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
+def _ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
                       Py_ssize_t xradius, double orientation=0, shape=None):
     """Generate ellipse perimeter coordinates.
 
@@ -766,14 +766,14 @@ def _bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
                 err += dy
 
     # Plot line
-    rr, cc = line(x0, y0, x2, y2)
+    rr, cc = _line(x0, y0, x2, y2)
     px.extend(rr)
     py.extend(cc)
 
     return np.array(py, dtype=np.intp), np.array(px, dtype=np.intp)
 
 
-def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
+def _bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
                  Py_ssize_t y1, Py_ssize_t x1,
                  Py_ssize_t y2, Py_ssize_t x2,
                  double weight, shape=None):
