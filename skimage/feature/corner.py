@@ -11,7 +11,7 @@ from ..feature.corner_cy import _corner_fast
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
 from .._shared.utils import safe_as_int
-
+from .corner_cy import _corner_moravec, _corner_orientations
 
 def _compute_derivatives(image, mode='constant', cval=0):
     """Compute derivatives in x and y direction using the Sobel operator.
@@ -841,3 +841,123 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
         return np.transpose(peaks.nonzero())
     else:
         return peaks
+
+def corner_moravec(image, window_size=1):
+    """Compute Moravec corner measure response image.
+
+    This is one of the simplest corner detectors and is comparatively fast but
+    has several limitations (e.g. not rotation invariant).
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    window_size : int, optional (default 1)
+        Window size.
+
+    Returns
+    -------
+    response : ndarray
+        Moravec response image.
+
+    Notes
+    -----
+    This function is a wrapper for Cython code.
+
+    References
+    ----------
+    .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/moravec.htm
+    .. [2] http://en.wikipedia.org/wiki/Corner_detection
+
+    Examples
+    --------
+    >>> from skimage.feature import corner_moravec
+    >>> square = np.zeros([7, 7])
+    >>> square[3, 3] = 1
+    >>> square.astype(int)
+    array([[0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 1, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0]])
+    >>> corner_moravec(square).astype(int)
+    array([[0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 1, 1, 0, 0],
+           [0, 0, 1, 2, 1, 0, 0],
+           [0, 0, 1, 1, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0]])
+    """
+    return _corner_moravec(image, window_size)
+
+def corner_orientations(image, corners, mask):
+    """Compute the orientation of corners.
+
+    The orientation of corners is computed using the first order central moment
+    i.e. the center of mass approach. The corner orientation is the angle of
+    the vector from the corner coordinate to the intensity centroid in the
+    local neighborhood around the corner calculated using first order central
+    moment.
+
+    Parameters
+    ----------
+    image : 2D array
+        Input grayscale image.
+    corners : (N, 2) array
+        Corner coordinates as ``(row, col)``.
+    mask : 2D array
+        Mask defining the local neighborhood of the corner used for the
+        calculation of the central moment.
+
+    Returns
+    -------
+    orientations : (N, 1) array
+        Orientations of corners in the range [-pi, pi].
+
+    Notes
+    -----
+    This function is a wrapper for Cython code.
+
+    References
+    ----------
+    .. [1] Ethan Rublee, Vincent Rabaud, Kurt Konolige and Gary Bradski
+          "ORB : An efficient alternative to SIFT and SURF"
+          http://www.vision.cs.chubu.ac.jp/CV-R/pdf/Rublee_iccv2011.pdf
+    .. [2] Paul L. Rosin, "Measuring Corner Properties"
+          http://users.cs.cf.ac.uk/Paul.Rosin/corner2.pdf
+
+    Examples
+    --------
+    >>> from skimage.morphology import octagon
+    >>> from skimage.feature import (corner_fast, corner_peaks,
+    ...                              corner_orientations)
+    >>> square = np.zeros((12, 12))
+    >>> square[3:9, 3:9] = 1
+    >>> square.astype(int)
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
+    >>> corners = corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> corners
+    array([[3, 3],
+           [3, 8],
+           [8, 3],
+           [8, 8]])
+    >>> orientations = corner_orientations(square, corners, octagon(3, 2))
+    >>> np.rad2deg(orientations)
+    array([  45.,  135.,  -45., -135.])
+
+    """
+    return _corner_orientations(image, corners, mask)

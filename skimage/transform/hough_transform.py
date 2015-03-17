@@ -1,4 +1,5 @@
 import numpy as np
+<<<<<<< bd89d6df442cf69dc780cf19f80fa56fb8110f6b
 from scipy import ndimage as ndi
 from .. import measure
 from ._hough_transform import (_hough_circle,
@@ -64,6 +65,12 @@ def hough_line(img, theta=None):
         theta = np.linspace(-np.pi / 2, np.pi / 2, 180)
 
     return _hough_line(img, theta=theta)
+=======
+from scipy import ndimage
+from .. import measure, morphology
+from ._hough_transform import (_hough_circle, _hough_ellipse,
+                               _hough_line, _probabilistic_hough_line)
+>>>>>>> Made Python wrappers for public Cython functions
 
 
 def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
@@ -277,8 +284,11 @@ def hough_circle(image, radius, normalize=True, full_output=False):
     return _hough_circle(image, radius.astype(np.intp),
                          normalize=normalize, full_output=full_output)
 
+<<<<<<< bd89d6df442cf69dc780cf19f80fa56fb8110f6b
 
 # Wrapper for Cython allows function signature introspection
+=======
+>>>>>>> Made Python wrappers for public Cython functions
 def hough_ellipse(img, threshold=4, accuracy=1, min_size=4, max_size=None):
     """Perform an elliptical Hough transform.
 
@@ -304,16 +314,29 @@ def hough_ellipse(img, threshold=4, accuracy=1, min_size=4, max_size=None):
           axes, respectively. The `orientation` value follows
           `skimage.draw.ellipse_perimeter` convention.
 
+<<<<<<< bd89d6df442cf69dc780cf19f80fa56fb8110f6b
     Examples
     --------
     >>> from skimage.transform import hough_ellipse
     >>> from skimage.draw import ellipse_perimeter
+=======
+    Notes
+    -----
+    This function is a wrapper for Cython code.
+
+    Examples
+    --------
+>>>>>>> Made Python wrappers for public Cython functions
     >>> img = np.zeros((25, 25), dtype=np.uint8)
     >>> rr, cc = ellipse_perimeter(10, 10, 6, 8)
     >>> img[cc, rr] = 1
     >>> result = hough_ellipse(img, threshold=8)
+<<<<<<< bd89d6df442cf69dc780cf19f80fa56fb8110f6b
     >>> result.tolist()
     [(10, 10.0, 10.0, 8.0, 6.0, 0.0)]
+=======
+    [(10, 10.0, 8.0, 6.0, 0.0, 10.0)]
+>>>>>>> Made Python wrappers for public Cython functions
 
     Notes
     -----
@@ -321,11 +344,106 @@ def hough_ellipse(img, threshold=4, accuracy=1, min_size=4, max_size=None):
     distribution. In other words, a flat accumulator distribution with low
     values may be caused by a too low bin size.
 
+<<<<<<< bd89d6df442cf69dc780cf19f80fa56fb8110f6b
+=======
+    This function is a wrapper for Cython code.
+
+>>>>>>> Made Python wrappers for public Cython functions
     References
     ----------
     .. [1] Xie, Yonghong, and Qiang Ji. "A new efficient ellipse detection
            method." Pattern Recognition, 2002. Proceedings. 16th International
            Conference on. Vol. 2. IEEE, 2002
     """
+<<<<<<< bd89d6df442cf69dc780cf19f80fa56fb8110f6b
     return _hough_ellipse(img, threshold=threshold, accuracy=accuracy,
                           min_size=min_size, max_size=max_size)
+=======
+    return _hough_ellipse(img, threshold, accuracy, min_size, max_size)
+
+def hough_line(img, theta=None):
+    """Perform a straight line Hough transform.
+
+    Parameters
+    ----------
+    img : (M, N) ndarray
+        Input image with nonzero values representing edges.
+    theta : 1D ndarray of double
+        Angles at which to compute the transform, in radians.
+        Defaults to -pi/2 .. pi/2
+
+    Returns
+    -------
+    H : 2-D ndarray of uint64
+        Hough transform accumulator.
+    theta : ndarray
+        Angles at which the transform was computed, in radians.
+    distances : ndarray
+        Distance values.
+
+    Notes
+    -----
+    The origin is the top left corner of the original image.
+    X and Y axis are horizontal and vertical edges respectively.
+    The distance is the minimal algebraic distance from the origin
+    to the detected line.
+
+    Examples
+    --------
+    Generate a test image:
+
+    >>> img = np.zeros((100, 150), dtype=bool)
+    >>> img[30, :] = 1
+    >>> img[:, 65] = 1
+    >>> img[35:45, 35:50] = 1
+    >>> for i in range(90):
+    ...     img[i, i] = 1
+    >>> img += np.random.random(img.shape) > 0.95
+
+    Apply the Hough transform:
+
+    >>> out, angles, d = hough_line(img)
+
+    .. plot:: hough_tf.py
+
+    """
+    return _hough_line(img, theta)
+
+def probabilistic_hough_line(img, threshold=10, line_length=50,
+                             line_gap=10, theta=None):
+    """Return lines from a progressive probabilistic line Hough transform.
+
+    Parameters
+    ----------
+    img : (M, N) ndarray
+        Input image with nonzero values representing edges.
+    threshold : int, optional (default 10)
+        Threshold
+    line_length : int, optional (default 50)
+        Minimum accepted length of detected lines.
+        Increase the parameter to extract longer lines.
+    line_gap : int, optional, (default 10)
+        Maximum gap between pixels to still form a line.
+        Increase the parameter to merge broken lines more aggresively.
+    theta : 1D ndarray, dtype=double, optional, default (-pi/2 .. pi/2)
+        Angles at which to compute the transform, in radians.
+
+    Returns
+    -------
+    lines : list
+      List of lines identified, lines in format ((x0, y0), (x1, y0)),
+      indicating line start and end.
+
+    Notes
+    -----
+    This function is a wrapper for Cython code.
+
+    References
+    ----------
+    .. [1] C. Galamhos, J. Matas and J. Kittler, "Progressive probabilistic
+           Hough transform for line detection", in IEEE Computer Society
+           Conference on Computer Vision and Pattern Recognition, 1999.
+    """
+    return _probabilistic_hough_line(img, threshold, line_length,
+                                     line_gap, theta)
+>>>>>>> Made Python wrappers for public Cython functions
