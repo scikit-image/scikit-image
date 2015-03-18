@@ -239,7 +239,7 @@ def hough_line(cnp.ndarray img,
         Input image with nonzero values representing edges.
     theta : 1D ndarray of double
         Angles at which to compute the transform, in radians.
-        Defaults to -pi/2 .. pi/2
+        Defaults to [-pi/2, pi/2) in pi/180 (i.e. 1deg) steps.
 
     Returns
     -------
@@ -284,7 +284,7 @@ def hough_line(cnp.ndarray img,
     cdef cnp.ndarray[ndim=1, dtype=cnp.double_t] stheta
 
     if theta is None:
-        theta = np.linspace(NEG_PI_2, PI_2, 180)
+        theta = np.linspace(NEG_PI_2, PI_2, 180, endpoint=False)
 
     ctheta = np.cos(theta)
     stheta = np.sin(theta)
