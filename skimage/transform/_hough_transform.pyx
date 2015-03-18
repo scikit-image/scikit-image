@@ -297,7 +297,8 @@ def hough_line(cnp.ndarray img,
     max_distance = 2 * <Py_ssize_t>ceil(sqrt(img.shape[0] * img.shape[0] +
                                              img.shape[1] * img.shape[1]))
     accum = np.zeros((max_distance, theta.shape[0]), dtype=np.uint64)
-    bins = np.linspace(-max_distance / 2.0, max_distance / 2.0, max_distance)
+    bins = np.linspace(-max_distance / 2.0, max_distance / 2.0,
+                       max_distance, endpoint=False)
     offset = max_distance / 2
 
     # compute the nonzero indexes
