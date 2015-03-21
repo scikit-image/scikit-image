@@ -459,8 +459,8 @@ def median_float(input, size=None, footprint=None, output=None,
     --------
     >>> from skimage import data
     >>> from skimage.filters.rank import median_float
-    >>> img = data.coins
-    >>> med = median(img, 3)
+    >>> img = data.coins()
+    >>> med = median_float(img,3)
 
 """
     return _rank_filter(input, 0, size, footprint, output, mode, cval, origin,
