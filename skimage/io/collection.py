@@ -163,11 +163,10 @@ class ImageCollection(object):
             for pattern in load_pattern:
                 self._files.extend(glob(pattern))
             self._files = sorted(self._files, key=alphanumeric_key)
-            self._numframes = self._find_images()
         else:
             self._files = load_pattern
-            self._numframes = len(load_pattern)
-            self._frame_index = None
+
+        self._numframes = self._find_images()
 
         if conserve_memory:
             memory_slots = 1
