@@ -13,7 +13,6 @@ try:
     FI_available = True
     sio.use_plugin('freeimage')
 except RuntimeError:
-    raise
     FI_available = False
 
 np.random.seed(0)
