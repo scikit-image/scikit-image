@@ -180,7 +180,7 @@ def get_scale_local_maximas(cube_coordinates, laplacian_cube):
           position of a point in scale space.
     laplacian_cube : ndarray of floats
         Laplacian of Gaussian scale space. 
-        
+
     Returns
     -------
     output : (n, 3) ndarray
@@ -197,35 +197,22 @@ def get_scale_local_maximas(cube_coordinates, laplacian_cube):
     >>> get_scale_local_maximas(check_coords, lapl_dummy)
     array([[1, 0, 1]])
     """
-    
-    amount_of_layers = laplacian_cube.shape[2]
-    amount_of_points = cube_coordinates.shape[0]
+    x, y, z = [ cube_coordinates[:, ind] for ind in range(3) ]
 
-    # Preallocate index. Fill it with False.
-    accepted_points_index = np.ones(amount_of_points, dtype=bool)
+    point_responses = laplacian_cube[x, y, z]
+    lowers = point_responses.copy()
+    uppers = point_responses.copy()
+    not_layer_0 = z > 0
+    lower_responses = laplacian_cube[x[not_layer_0], y[not_layer_0], z[not_layer_0]-1]
+    lowers[not_layer_0] = lower_responses  
 
-    for point_index, interest_point_coords in enumerate(cube_coordinates):
-        # Row coordinate
-        y_coord = interest_point_coords[0]
-        # Column coordinate
-        x_coord = interest_point_coords[1]
-        # Layer number starting from the smallest sigma
-        point_layer = interest_point_coords[2]
-        point_response = laplacian_cube[y_coord, x_coord, point_layer]
+    not_max_layer = z < (laplacian_cube.shape[2] - 1)
+    upper_responses = laplacian_cube[x[not_max_layer], y[not_max_layer], z[not_max_layer]+1]
+    uppers[not_max_layer] = upper_responses
 
-        # Check the point under the current one
-        if point_layer != 0:
-            lower_point_response = laplacian_cube[y_coord, x_coord, point_layer-1]
-            if lower_point_response >= point_response:
-                accepted_points_index[point_index] = False
-                continue
+    lo_check = np.ones(z.shape, dtype=np.bool)
+    lo_check[not_layer_0] = (point_responses > lowers)[not_layer_0]
+    hi_check = np.ones(z.shape, dtype=np.bool)
+    hi_check[not_max_layer] = (point_responses > uppers)[not_max_layer]
 
-        # Check the point above the current one
-        if point_layer != (amount_of_layers-1):
-            upper_point_response = laplacian_cube[y_coord, x_coord, point_layer+1]
-            if upper_point_response >= point_response:
-                accepted_points_index[point_index] = False
-                continue
-    
-    # Return only accepted points
-    return cube_coordinates[accepted_points_index]
+    return cube_coordinates[lo_check & hi_check]

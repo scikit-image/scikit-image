@@ -12,6 +12,7 @@ from ..transform import integral_image
 from .._shared.utils import assert_nD
 
 
+
 # This basic blob detection algorithm is based on:
 # http://www.cs.utah.edu/~jfishbau/advimproc/project1/ (04.04.2013)
 # Theory behind: http://en.wikipedia.org/wiki/Blob_detection (04.04.2013)
@@ -457,7 +458,7 @@ def blob_doh_log(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Blob_detection
+    .. [1] http://en.wikipedia.org/wiki/Blob_detection#The_hybrid_Laplacian_and_determinant_of_the_Hessian_operator_.28Hessian-Laplace.29
 
     .. [2] Herbert Bay, Andreas Ess, Tinne Tuytelaars, Luc Van Gool,
            "SURF: Speeded Up Robust Features"
@@ -521,11 +522,11 @@ def blob_doh_log(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     
     # Find local maximas for each hessian image
     # This points will be checked for Laplacian scal local maximum    
-    fp = np.zeros((3,3,3))
-    fp[:,:,1] = 1
+    footprint = np.zeros((3,3,3))
+    footprint[:,:,1] = 1
     
     peaks = peak_local_max(hessian_cube, threshold_abs=threshold,
-                                          footprint=fp,
+                                          footprint=footprint,
                                           threshold_rel=0.0,
                                           exclude_border=False)
     

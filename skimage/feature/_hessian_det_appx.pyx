@@ -151,7 +151,8 @@ def _hessian_matrix_det(cnp.double_t[:, ::1] img, double sigma):
             out[r, c] = (dxx * dyy - 0.81 * (dxy * dxy))
 
     return out
-    
+
+
 def _hessian_matrix_det_and_laplacian(cnp.double_t[:, ::1] img, double sigma):
     """Computes the approximate Hessian Determinant and Laplacian of Gaussian of an image.
      
