@@ -135,7 +135,8 @@ class ImageCollection(object):
       ic = ImageCollection('/tmp/*.png', load_func=imread_convert)
 
     For files with multiple images, the images will be flattened into a list
-    and added to the list of available images.
+    and added to the list of available images.  In this case, ``load_func`` 
+    should accept the keyword argument ``img_num``.
 
     Examples
     --------
