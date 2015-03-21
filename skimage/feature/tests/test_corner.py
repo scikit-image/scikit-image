@@ -90,6 +90,22 @@ def test_hessian_matrix_eigvals():
                                      [0, 0, 1, 0, 0],
                                      [0, 0, 0, 0, 0],
                                      [0, 0, 0, 0, 0]]))
+    np.random.seed(1) # make sure the test is repeatable
+    N = 100 # number of random images to try
+    for i in range(N):
+        mat = np.random.rand(5, 5)
+        Hxx, Hxy, Hyy = hessian_matrix(mat, sigma=0.1)
+        l1, l2 = hessian_matrix_eigvals(Hxx, Hxy, Hyy)
+        for j in range(5):
+            for k in range(5):
+                hessian = [[Hxx[j][k], Hxy[j][k]], [Hxy[j][k], Hyy[j][k]]]
+                for l in (l1[j][k], l2[j][k]): # test each eigenvalue
+                    # The matrix H - lI should have determinant zero
+                    h = [x[:] for x in hessian] # deep copy
+                    h[0][0] -= l
+                    h[1][1] -= l
+                    det = h[0][0]*h[1][1] - h[0][1]*h[1][0]
+                    assert_almost_equal(det, 0, decimal=3)
 
 
 def test_hessian_matrix_det():
