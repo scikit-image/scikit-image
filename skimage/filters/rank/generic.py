@@ -422,13 +422,13 @@ def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def median_float(input, size=None, footprint=None, output=None,
+def median_float(image, size=None, footprint=None, output=None,
                  mode="reflect", cval=0.0, origin=0):
     """
     Parameters
     ----------
-    input :Input array to filter.
-    size  :scalar or tuple, optional
+    image : Input array to filter.
+    size  : scalar or tuple, optional
     footprint:array, optional
               Either size or footprint must be defined. size gives
               the shapethat is taken from the input array, at every
@@ -463,7 +463,7 @@ def median_float(input, size=None, footprint=None, output=None,
     >>> med = median_float(img,3)
 
 """
-    return _rank_filter(input, 0, size, footprint, output, mode, cval, origin,
+    return _rank_filter(image, 0, size, footprint, output, mode, cval, origin,
                         'median')    
 
 
