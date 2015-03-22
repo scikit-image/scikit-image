@@ -159,6 +159,7 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
     For ``uint8`` (and ``uint16`` up to a certain bit-depth) data, the
     lower algorithm complexity makes the `skimage.filter.rank.minimum`
     function more efficient for larger images and structuring elements.
+    Also note that edge pixels are automatically set to 0.
 
     Examples
     --------
@@ -182,7 +183,7 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
     selem = _shift_selem(selem, shift_x, shift_y)
     if out is None:
         out = np.empty_like(image)
-    nd.grey_erosion(image, footprint=selem, output=out)
+    nd.grey_erosion(image, footprint=selem, mode='constant', output=out)
     return out
 
 
