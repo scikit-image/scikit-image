@@ -12,7 +12,7 @@ from ._geometric import (warp, warp_coords, estimate_transform,
 from ._warps import swirl, resize, rotate, rescale, downscale_local_mean
 from .pyramids import (pyramid_reduce, pyramid_expand,
                        pyramid_gaussian, pyramid_laplacian)
-
+from .haar_feature import haar_feature
 
 __all__ = ['hough_circle',
            'hough_ellipse',
@@ -43,4 +43,5 @@ __all__ = ['hough_circle',
            'pyramid_reduce',
            'pyramid_expand',
            'pyramid_gaussian',
-           'pyramid_laplacian']
+           'pyramid_laplacian'
+           'haar_feature']
