@@ -153,9 +153,7 @@ if __name__ == "__main__":
         ],
 
         configuration=configuration,
-        install_requires=[
-            "six>=%s" % DEPENDENCIES['six']
-        ],
+        install_requires=[dep for dep in DEPENDENCIES],
         packages=setuptools.find_packages(exclude=['doc']),
         include_package_data=True,
         zip_safe=False,  # the package can run out of an .egg file
