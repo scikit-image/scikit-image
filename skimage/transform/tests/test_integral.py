@@ -40,8 +40,10 @@ def test_vectorized_integrate():
                          x[0,0],
                          x[10, 10],
                          x[30:, 31:].sum()])
+    start_pts = [(r0[i], c0[i]) for i in range(len(r0))]
+    end_pts = [(r1[i], c1[i]) for i in range(len(r0))]
     assert_equal(expected, integrate(s, r0, c0, r1, c1))  # test deprecated
-    assert_equal(expected, integrate(s, (r0, c0), (r1, c1)))
+    assert_equal(expected, integrate(s, start_pts, end_pts))
 
 
 if __name__ == '__main__':
