@@ -11,7 +11,7 @@
 
 - **Debian/Ubuntu:** ``sudo apt-get install python-skimage``
 - **OSX:** ``pip install scikit-image``
-- **Anaconda:** ``conda install scikit-image
+- **Anaconda:** ``conda install scikit-image``
 - **Windows:** Download [Windows binaries](http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikits.image)
 
 Also see
