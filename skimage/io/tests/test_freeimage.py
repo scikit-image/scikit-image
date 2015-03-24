@@ -117,11 +117,13 @@ def test_metadata():
 def test_collection():
     pattern = [os.path.join(data_dir, pic)
                for pic in ['camera.png', 'color.png', 'multipage.tif']]
+    images = sio.ImageCollection(pattern[:-1])
+    assert len(images) == 2
+    assert len(images[:]) == 2
+
     images = sio.ImageCollection(pattern)
-    assert len(images) == 4
-    assert len(images[:]) == 4
-    # this will fail as freeimage cannot load multi-image tifs
-    assert_raises(TypeError, images.__getitem__, 3)
+    assert len(images) == 3
+    assert len(images[:]) == 3
 
 if __name__ == "__main__":
     run_module_suite()
