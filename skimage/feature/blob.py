@@ -354,6 +354,9 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     .. [2] Herbert Bay, Andreas Ess, Tinne Tuytelaars, Luc Van Gool,
            "SURF: Speeded Up Robust Features"
            ftp://ftp.vision.ee.ethz.ch/publications/articles/eth_biwi_00517.pdf
+                      
+    .. [3] Tony Lindeberg Scale Selection Properties of Generalized Scale-Space Interest Point Detectors
+           http://link.springer.com/article/10.1007/s10851-012-0378-3/fulltext.html
 
     Examples
     --------
@@ -388,6 +391,11 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     of Gaussians for larger `sigma` takes more time. The downside is that
     this method can't be used for detecting blobs of radius less than `3px`
     due to the box filters used in the approximation of Hessian Determinant.
+    Determinant of Hessian for scale selection has significantly better 
+    repeatability properties under affine or perspective image transformations 
+    than the Laplacian [3]_. This is important if descriptors are later applied 
+    to these points and matching algoritms are used to find similar points on 
+    different images of the same scene.
     """
 
     assert_nD(image, 2)
@@ -422,7 +430,8 @@ def blob_doh_log(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     found, the method returns its coordinates and the standard deviation
     of the Gaussian Kernel used for the Hessian matrix determinant and
     Laplacian that  detected the blob. Determinant of Hessians and
-    Laplacian of Gaussians are approximated using [2]_.
+    Laplacian of Gaussians are approximated using [2]_. This method
+    detects only bright blobs on a darker background.
 
     Parameters
     ----------
@@ -463,6 +472,9 @@ def blob_doh_log(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     .. [2] Herbert Bay, Andreas Ess, Tinne Tuytelaars, Luc Van Gool,
            "SURF: Speeded Up Robust Features"
            ftp://ftp.vision.ee.ethz.ch/publications/articles/eth_biwi_00517.pdf
+           
+    .. [3] Tony Lindeberg Scale Selection Properties of Generalized Scale-Space Interest Point Detectors
+           http://link.springer.com/article/10.1007/s10851-012-0378-3/fulltext.html
 
     Examples
     --------
@@ -496,10 +508,14 @@ def blob_doh_log(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     of Gaussians for larger `sigma` takes more time. The downside is that
     this method can't be used for detecting blobs of radius less than `3px`
     due to the box filters used in the approximation of Hessian Determinant.
-    The Hessian-Laplace method sometimes gives better results than the method
-    based on the determinant of Hessian. For example, on the test coin data
-    Hessian-Laplace shows better results compared to determinant of Hessian.
-    (the last method has one false positive while Hessian-Laplace doesn't)
+    The Hessian-Laplace uses Laplacian of Gaussian for scale selection
+    and not determinant of Hessian as in Determinant of Hessian method. 
+    Determinant of Hessian for scale selection has significantly better 
+    repeatability properties under affine or perspective image transformations 
+    than the Laplacian [3]_. This is important if descriptors are later applied 
+    to these points and matching algoritms are used to find similar points on 
+    different images of the same scene. This blob detection method is, therefore, 
+    is worse than Determinant of Hessian blob detection method.
     """
     
     image = img_as_float(image)
