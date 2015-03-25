@@ -1,6 +1,7 @@
 import os
 import skimage as si
 import skimage.io as sio
+from skimage import data_dir
 import numpy as np
 
 from numpy.testing import *
@@ -111,6 +112,18 @@ def test_metadata():
     assert meta[0][('EXIF_MAIN', 'Orientation')] == 1
     assert meta[1][('EXIF_MAIN', 'Software')].startswith('I')
 
+
+@skipif(not FI_available)
+def test_collection():
+    pattern = [os.path.join(data_dir, pic)
+               for pic in ['camera.png', 'color.png', 'multipage.tif']]
+    images = sio.ImageCollection(pattern[:-1])
+    assert len(images) == 2
+    assert len(images[:]) == 2
+
+    images = sio.ImageCollection(pattern)
+    assert len(images) == 3
+    assert len(images[:]) == 3
 
 if __name__ == "__main__":
     run_module_suite()

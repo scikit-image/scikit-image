@@ -135,7 +135,8 @@ class ImageCollection(object):
       ic = ImageCollection('/tmp/*.png', load_func=imread_convert)
 
     For files with multiple images, the images will be flattened into a list
-    and added to the list of available images.
+    and added to the list of available images.  In this case, ``load_func`` 
+    should accept the keyword argument ``img_num``.
 
     Examples
     --------
@@ -165,7 +166,7 @@ class ImageCollection(object):
             self._numframes = self._find_images()
         else:
             self._files = load_pattern
-            self._numframes = len(load_pattern)
+            self._numframes = len(self._files)
             self._frame_index = None
 
         if conserve_memory:
@@ -254,13 +255,16 @@ class ImageCollection(object):
 
             if ((self.conserve_memory and n != self._cached) or
                     (self.data[idx] is None)):
+                kwargs = self.load_func_kwargs
                 if self._frame_index:
                     fname, img_num = self._frame_index[n]
-                    self.data[idx] = self.load_func(fname, img_num=img_num,
-                                                    **self.load_func_kwargs)
+                    if img_num > 0:
+                        self.data[idx] = self.load_func(fname, img_num=img_num,
+                                                        **kwargs)
+                    else:
+                        self.data[idx] = self.load_func(fname, **kwargs)
                 else:
-                    self.data[idx] = self.load_func(self.files[n],
-                                                    **self.load_func_kwargs)
+                    self.data[idx] = self.load_func(self.files[n], **kwargs)
                 self._cached = n
 
             return self.data[idx]
