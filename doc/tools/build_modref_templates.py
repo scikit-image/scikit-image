@@ -37,10 +37,10 @@ if __name__ == '__main__':
 
     installed_version = V(module.__version__)
 
-    setup_lines = open('../setup.py').readlines()
+    source_lines = open('../skimage/__init__.py').readlines()
     version = 'vUndefined'
-    for l in setup_lines:
-        if l.startswith('VERSION'):
+    for l in source_lines:
+        if l.startswith('__version__'):
             source_version = V(l.split("'")[1])
             break
 
