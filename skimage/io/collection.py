@@ -201,7 +201,7 @@ class ImageCollection(object):
             if fname.lower().endswith(('.tiff', '.tif')):
                 img = TiffFile(fname)
                 index += [(fname, i) for i in range(len(img.pages))]
-            else:
+            elif fname.lower().endswith('gif'):
                 im = Image.open(fname)
                 try:
                     # this will raise an IOError if the file is not readable
@@ -221,6 +221,8 @@ class ImageCollection(object):
                         i += 1
                 if hasattr(im, 'fp') and im.fp:
                     im.fp.close()
+            else:
+                index += (fname, 0)
 
         self._frame_index = index
         return len(index)
