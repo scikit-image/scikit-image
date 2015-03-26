@@ -36,6 +36,7 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     sed -i 's/cython>=/cython==/g' requirements.txt
     sed -i 's/networkx>=/networkx==/g' requirements.txt
     sed -i '/pillow/d' requirements.txt
+    sudo apt-get install --reinstall python-pkg-resources
 else
     virtualenv -p python --system-site-packages ~/venv
 fi
