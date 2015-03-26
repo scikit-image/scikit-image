@@ -537,7 +537,7 @@ def blob_doh_log(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     hessian_cube = np.dstack(hessian_images)
     
     # Find local maximas for each hessian image
-    # This points will be checked for Laplacian scal local maximum    
+    # This points will be checked for Laplacian scale local maximum    
     footprint = np.zeros((3,3,3))
     footprint[:,:,1] = 1
     
