@@ -64,6 +64,7 @@ image = data.hubble_deep_field()[0:500, 0:500]
 image_gray = rgb2gray(image)
 
 blobs_log = blob_log(image_gray, max_sigma=30, num_sigma=10, threshold=.1)
+
 # Compute radii in the 3rd column.
 blobs_log[:, 2] = blobs_log[:, 2] * sqrt(2)
 
