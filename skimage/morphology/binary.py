@@ -12,8 +12,9 @@ from .misc import default_selem
 def binary_erosion(image, selem=None, out=None):
     """Return fast binary morphological erosion of an image.
 
-    This function returns the same result as greyscale erosion but performs
-    faster for binary images.
+    This function returns a similar result to that of greyscale erosion,
+    but uses a constant value of 1 at the edges. It also
+    performs faster for binary images.
 
     Morphological erosion sets a pixel at ``(i,j)`` to the minimum over all
     pixels in the neighborhood centered at ``(i,j)``. Erosion shrinks bright
@@ -39,7 +40,7 @@ def binary_erosion(image, selem=None, out=None):
     """
     if out is None:
         out = np.empty(image.shape, dtype=np.bool)
-    nd.binary_erosion(image, structure=selem, output=out)
+    nd.binary_erosion(image, structure=selem, output=out, border_value=1)
     return out
 
 

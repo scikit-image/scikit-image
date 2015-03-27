@@ -183,7 +183,7 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
     selem = _shift_selem(selem, shift_x, shift_y)
     if out is None:
         out = np.empty_like(image)
-    nd.grey_erosion(image, footprint=selem, mode='constant', output=out)
+    nd.grey_erosion(image, footprint=selem, output=out)
     return out
 
 
