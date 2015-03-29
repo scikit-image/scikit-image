@@ -161,6 +161,9 @@ Library:
     Extension: skimage.external.tifffile._tifffile
         Sources:
             skimage/external/tifffile/_tifffile.c
+    Extension: skimage.transform._seam_carving.pyx
+        Sources:
+            skimage/transform/_seam_carving.pyx
 
 Executable: skivi
     Module: skimage.scripts.skivi
