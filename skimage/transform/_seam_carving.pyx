@@ -84,7 +84,7 @@ cdef find_seam_v(cnp.double_t[:, ::1] energy_img, cnp.int8_t[:, ::1] track_img,
     return seam
 
 
-cdef remove_seam_h_2d(cnp.double_t[:, ::1] img, Py_ssize_t[::1] seam,
+cdef remove_seam_v_2d(cnp.double_t[:, ::1] img, Py_ssize_t[::1] seam,
                       Py_ssize_t cols):
     cdef Py_ssize_t rows, row, col, idx
     rows = img.shape[0]
@@ -105,14 +105,14 @@ cdef remove_seam_h_2d(cnp.double_t[:, ::1] img, Py_ssize_t[::1] seam,
     -----
     `seam` is passed as an argument so that we don't have to reallocate it for
     each iteration in `_seam_carve_v`.
-    """"
+    """
     
     for row in range(rows):
         for idx in range(seam[row], cols - 1):
             img[row, idx] = img[row, idx + 1]
 
 
-cdef remove_seam_h_3d(cnp.double_t[:, :, ::1] img, Py_ssize_t[::1] seam,
+cdef remove_seam_v_3d(cnp.double_t[:, :, ::1] img, Py_ssize_t[::1] seam,
                       Py_ssize_t cols):
     """ Removes one horizontal seam from the image.
 
@@ -131,7 +131,7 @@ cdef remove_seam_h_3d(cnp.double_t[:, :, ::1] img, Py_ssize_t[::1] seam,
     -----
     `seam` is passed as an argument so that we don't have to reallocate it for
     each iteration in `_seam_carve_v`.
-    """"
+    """
     cdef Py_ssize_t rows, row, col, idx
     rows = img.shape[0]
 
@@ -201,9 +201,9 @@ def _seam_carve_v(img, iters, energy_func, extra_args , extra_kwargs, border):
                            cols)
 
         if ndim == 2:
-            remove_seam_h_2d(img, seam, cols)
+            remove_seam_v_2d(img, seam, cols)
         elif ndim == 3:
-            remove_seam_h_3d(img, seam, cols)
+            remove_seam_v_3d(img, seam, cols)
 
         cols -= 1
 

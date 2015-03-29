@@ -1,4 +1,4 @@
-from _seam_carving import _seam_carve_h
+from _seam_carving import _seam_carve_v
 from ..import filters
 from .. import util
 from .._shared import utils
@@ -47,6 +47,12 @@ def seam_carve(img, mode, num, energy_func, extra_args = [],
     -------
     out : ndarray
         The cropped image with the seams removed.
+
+    References
+    ----------
+    .. [1] Shai Avidan and Ariel Shamir
+           "Seam Carving for Content-Aware Image Resizing"
+           http://www.cs.jhu.edu/~misha/ReadingSeminar/Papers/Avidan07.pdf
     """
 
     utils.assert_nD(img, (2,3))
@@ -55,7 +61,7 @@ def seam_carve(img, mode, num, energy_func, extra_args = [],
 
     if mode == 'horizontal':
         img = np.ascontiguousarray(img)
-        return _seam_carve_h(img, num, energy_func, extra_args ,extra_kwargs,
+        return _seam_carve_v(img, num, energy_func, extra_args ,extra_kwargs,
                              border)
     elif mode == 'vertical' :
         if img.ndim == 3:
@@ -64,7 +70,7 @@ def seam_carve(img, mode, num, energy_func, extra_args = [],
             img = img.T
 
         img = np.ascontiguousarray(img)
-        out = _seam_carve_h(img, num, energy_func, extra_args , extra_kwargs,
+        out = _seam_carve_v(img, num, energy_func, extra_args , extra_kwargs,
                             border)
 
         if img.ndim == 3:
