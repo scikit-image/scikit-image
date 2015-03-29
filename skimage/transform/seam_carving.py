@@ -1,12 +1,11 @@
 from _seam_carving import _seam_carve_v
-from ..import filters
 from .. import util
 from .._shared import utils
 import numpy as np
 
 
-def seam_carve(img, mode, num, energy_func, extra_args = [],
-               extra_kwargs = {}, border=1, force_copy = True):
+def seam_carve(img, mode, num, energy_func, extra_args=[],
+               extra_kwargs={}, border=1, force_copy=True):
     """ Carve vertical or horizontal seams off an image.
 
     Carves out vertical/horizontal seams off an image while using the given
@@ -55,25 +54,24 @@ def seam_carve(img, mode, num, energy_func, extra_args = [],
            http://www.cs.jhu.edu/~misha/ReadingSeminar/Papers/Avidan07.pdf
     """
 
-    utils.assert_nD(img, (2,3))
+    utils.assert_nD(img, (2, 3))
     img = util.img_as_float(img)
-    
 
     if mode == 'horizontal':
         img = np.ascontiguousarray(img)
-        return _seam_carve_v(img, num, energy_func, extra_args ,extra_kwargs,
+        return _seam_carve_v(img, num, energy_func, extra_args, extra_kwargs,
                              border)
-    elif mode == 'vertical' :
+    elif mode == 'vertical':
         if img.ndim == 3:
             img = np.transpose(img, (1, 0, 2))
         else:
             img = img.T
 
         img = np.ascontiguousarray(img)
-        out = _seam_carve_v(img, num, energy_func, extra_args , extra_kwargs,
+        out = _seam_carve_v(img, num, energy_func, extra_args, extra_kwargs,
                             border)
 
         if img.ndim == 3:
-            return  np.transpose(out, (1, 0, 2))
+            return np.transpose(out, (1, 0, 2))
         else:
             return out.T
