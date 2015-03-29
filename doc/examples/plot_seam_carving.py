@@ -28,11 +28,11 @@ plt.title('Original Image')
 io.imshow(img, plugin='matplotlib')
 
 plt.figure()
-plt.title('Resized Image Image')
+plt.title('Resized Image')
 io.imshow(resized, plugin='matplotlib')
 
 plt.figure()
-plt.title('Resized Image Image')
+plt.title('Resized using Seam-Carving')
 io.imshow(out, plugin='matplotlib')
 
 io.show()
