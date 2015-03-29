@@ -161,7 +161,7 @@ Library:
     Extension: skimage.external.tifffile._tifffile
         Sources:
             skimage/external/tifffile/_tifffile.c
-    Extension: skimage.transform._seam_carving.pyx
+    Extension: skimage.transform._seam_carving
         Sources:
             skimage/transform/_seam_carving.pyx
 
