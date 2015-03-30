@@ -41,7 +41,7 @@ affine or perspective image transformations than the Laplacian.
 This is important if descriptors are later applied to these points and 
 matching algoritms are used to find similar points on different images 
 of the same scene. This blob detection method is, therefore, 
-is worse than Determinant of Hessian blob detection method.
+worse than Determinant of Hessian blob detection method.
 
 Determinant of Hessian (DoH)
 ----------------------------
