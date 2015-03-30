@@ -196,7 +196,7 @@ def ndarray_to_pil(arr, format_str=None):
     return im
 
 
-def imsave(fname, arr, format_str=None):
+def imsave(fname, arr, format_str=None, **kwargs):
     """Save an image to disk.
 
     Parameters
@@ -210,6 +210,12 @@ def imsave(fname, arr, format_str=None):
     format_str: str
         Format to save as, this is defaulted to PNG if using a file-like
         object; this will be derived from the extension if fname is a string
+    kwargs: dict
+        Keyword arguments to the Pillow save function (or tifffile save
+        function, for Tiff files). These are format dependent. For example,
+        Pillow's JPEG save function supports an integer ``quality`` argument
+        with values in [1, 95], while TIFFFile supports a ``compress``
+        integer argument with values in [0, 9].
 
     Notes
     -----
@@ -251,7 +257,7 @@ def imsave(fname, arr, format_str=None):
             use_tif = True
 
     if use_tif:
-        tif_imsave(fname, arr)
+        tif_imsave(fname, arr, **kwargs)
         return
 
     if arr.ndim not in (2, 3):
@@ -262,4 +268,4 @@ def imsave(fname, arr, format_str=None):
             raise ValueError("Invalid number of channels in image array.")
 
     img = ndarray_to_pil(arr, format_str=format_str)
-    img.save(fname, format=format_str)
+    img.save(fname, format=format_str, **kwargs)

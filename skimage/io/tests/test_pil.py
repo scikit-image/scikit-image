@@ -97,6 +97,17 @@ def test_imread_truncated_jpg():
                   os.path.join(data_dir, 'truncated.jpg'))
 
 
+def test_jpg_quality_arg():
+    chessboard = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
+    with NamedTemporaryFile(suffix='.jpg') as jpg:
+        fname = jpg.name
+        imsave(fname, chessboard, quality=95)
+        im = imread(fname)
+        sim = ssim(chessboard, im,
+                   dynamic_range=chessboard.max() - chessboard.min())
+        assert sim > 0.99
+
+
 def test_imread_uint16_big_endian():
     expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
     img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16B.tif'))
@@ -214,11 +225,19 @@ def test_cmyk():
 
 
 class TestSaveTIF:
-    def roundtrip(self, dtype, x):
+    def roundtrip(self, dtype, x, compress):
         f = NamedTemporaryFile(suffix='.tif')
         fname = f.name
         f.close()
-        imsave(fname, x)
+        if dtype == np.bool:
+            expected = ['low contrast']
+        else:
+            expected = []
+        with expected_warnings(expected):
+            if compress > 0:
+                imsave(fname, x, compress=compress)
+            else:
+                imsave(fname, x)
         y = imread(fname)
         assert_array_equal(x, y)
 
@@ -226,13 +245,15 @@ class TestSaveTIF:
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
             for dtype in (np.uint8, np.uint16, np.int16, np.float32,
                           np.float64, np.bool):
-                x = np.random.rand(*shape)
+                for compress in [0, 2]:
+                    x = np.random.rand(*shape)
 
-                if not np.issubdtype(dtype, float) and not dtype == np.bool:
-                    x = (x * np.iinfo(dtype).max).astype(dtype)
-                else:
-                    x = x.astype(dtype)
-                yield self.roundtrip, dtype, x
+                    if not np.issubdtype(dtype, float) and \
+                                                        not dtype == np.bool:
+                        x = (x * np.iinfo(dtype).max).astype(dtype)
+                    else:
+                        x = x.astype(dtype)
+                    yield self.roundtrip, dtype, x, compress
 
 if __name__ == "__main__":
     run_module_suite()
