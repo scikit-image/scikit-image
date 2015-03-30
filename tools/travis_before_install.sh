@@ -36,19 +36,16 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     sed -i 's/cython>=/cython==/g' requirements.txt
     sed -i 's/networkx>=/networkx==/g' requirements.txt
     sed -i '/pillow/d' requirements.txt
-    sudo apt-get install --reinstall python-pkg-resources
 else
     virtualenv -p python --system-site-packages ~/venv
 fi
 
 source ~/venv/bin/activate
-retry pip install wheel flake8 coveralls nose sphinx
+retry pip install wheel flake8 coveralls nose
 
 # install system tk for matplotlib
 sudo apt-get install python-tk
 
-# try to solve #1426
-sudo apt-get install --reinstall python-pkg-resources
 
 # on Python 3.2, use matplotlib 1.3.1
 if [[ $TRAVIS_PYTHON_VERSION == 3.2 ]]; then

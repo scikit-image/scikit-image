@@ -23,7 +23,7 @@ python:
 - 3.4
 
 before_install:
-    - sudo apt-get update
+    - sudo apt-get update; true
     - source tools/travis_before_install.sh
 
     - which python; python --version

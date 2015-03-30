@@ -64,13 +64,7 @@ import warnings as _warnings
 pkg_dir = _osp.abspath(_osp.dirname(__file__))
 data_dir = _osp.join(pkg_dir, 'data')
 
-try:
-    from .version import version as __version__
-except ImportError:
-    __version__ = "unbuilt-dev"
-else:
-    del version
-
+__version__ = '0.12dev'
 
 try:
     _imp.find_module('nose')
