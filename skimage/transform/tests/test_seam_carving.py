@@ -32,3 +32,7 @@ def test_seam_carving():
 
     out = transform.seam_carve(img3, 'vertical', 1, energy, border=0)
     testing.assert_allclose(out, 0)
+
+
+if __name__ == '__main__':
+    np.testing.run_module_suite()

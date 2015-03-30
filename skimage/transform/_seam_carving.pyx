@@ -78,7 +78,6 @@ cdef find_seam_v(cnp.double_t[:, ::1] energy_img, cnp.int8_t[:, ::1] track_img,
     for row in range(rows-2, -1, -1):
         col = seam[row + 1]
         offset = track_img[row, col]
-        #print offset
         seam[row] = seam[row + 1] + offset
 
     return seam
