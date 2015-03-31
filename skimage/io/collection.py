@@ -135,7 +135,7 @@ class ImageCollection(object):
       ic = ImageCollection('/tmp/*.png', load_func=imread_convert)
 
     For files with multiple images, the images will be flattened into a list
-    and added to the list of available images.  In this case, ``load_func`` 
+    and added to the list of available images.  In this case, ``load_func``
     should accept the keyword argument ``img_num``.
 
     Examples
@@ -222,7 +222,7 @@ class ImageCollection(object):
                 if hasattr(im, 'fp') and im.fp:
                     im.fp.close()
             else:
-                index += (fname, 0)
+                index += [(fname, 0)]
 
         self._frame_index = index
         return len(index)
