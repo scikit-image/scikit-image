@@ -11,6 +11,7 @@ from .. import (imread, imsave, use_plugin, reset_plugins,
                         Image as ioImage)
 from ..._shared.testing import mono_check, color_check
 from ..._shared._warnings import expected_warnings
+from ..._shared._tempfile import temporary_file
 
 from six import BytesIO
 
@@ -99,10 +100,9 @@ def test_imread_truncated_jpg():
 
 def test_jpg_quality_arg():
     chessboard = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
-    with NamedTemporaryFile(suffix='.jpg') as jpg:
-        fname = jpg.name
-        imsave(fname, chessboard, quality=95)
-        im = imread(fname)
+    with temporary_file(suffix='.jpg') as jpg:
+        imsave(jpg, chessboard, quality=95)
+        im = imread(jpg)
         sim = ssim(chessboard, im,
                    dynamic_range=chessboard.max() - chessboard.min())
         assert sim > 0.99
@@ -117,12 +117,10 @@ def test_imread_uint16_big_endian():
 
 class TestSave:
     def roundtrip_file(self, x):
-        f = NamedTemporaryFile(suffix='.png')
-        fname = f.name
-        f.close()
-        imsave(fname, x)
-        y = imread(fname)
-        return y
+        with temporary_file(suffix='.png') as fname:
+            imsave(fname, x)
+            y = imread(fname)
+            return y
 
     def roundtrip_pil_image(self, x):
         pil_image = ndarray_to_pil(x)
@@ -226,20 +224,18 @@ def test_cmyk():
 
 class TestSaveTIF:
     def roundtrip(self, dtype, x, compress):
-        f = NamedTemporaryFile(suffix='.tif')
-        fname = f.name
-        f.close()
-        if dtype == np.bool:
-            expected = ['low contrast']
-        else:
-            expected = []
-        with expected_warnings(expected):
-            if compress > 0:
-                imsave(fname, x, compress=compress)
+        with temporary_file(suffix='.tif') as fname:
+            if dtype == np.bool:
+                expected = ['low contrast']
             else:
-                imsave(fname, x)
-        y = imread(fname)
-        assert_array_equal(x, y)
+                expected = []
+            with expected_warnings(expected):
+                if compress > 0:
+                    imsave(fname, x, compress=compress)
+                else:
+                    imsave(fname, x)
+            y = imread(fname)
+            assert_array_equal(x, y)
 
     def test_imsave_roundtrip(self):
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
