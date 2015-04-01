@@ -135,7 +135,7 @@ class ImageCollection(object):
       ic = ImageCollection('/tmp/*.png', load_func=imread_convert)
 
     For files with multiple images, the images will be flattened into a list
-    and added to the list of available images.  In this case, ``load_func`` 
+    and added to the list of available images.  In this case, ``load_func``
     should accept the keyword argument ``img_num``.
 
     Examples
@@ -202,26 +202,22 @@ class ImageCollection(object):
                 img = TiffFile(fname)
                 index += [(fname, i) for i in range(len(img.pages))]
             else:
-                im = Image.open(fname)
                 try:
-                    # this will raise an IOError if the file is not readable
-                    im.getdata()[0]
-                except IOError:
-                    site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
-                    raise ValueError(
-                        'Could not load "%s"\nPlease see documentation at: %s' % (fname, site))
-                else:
-                    i = 0
-                    while True:
-                        try:
-                            im.seek(i)
-                        except EOFError:
-                            break
-                        index.append((fname, i))
-                        i += 1
+                    im = Image.open(fname)
+                    im.seek(0)
+                except (IOError, OSError):
+                    index.append([fname, i])
+                    continue
+                i = 0
+                while True:
+                    try:
+                        im.seek(i)
+                    except EOFError:
+                        break
+                    index.append((fname, i))
+                    i += 1
                 if hasattr(im, 'fp') and im.fp:
                     im.fp.close()
-
         self._frame_index = index
         return len(index)
 
