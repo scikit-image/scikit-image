@@ -201,29 +201,23 @@ class ImageCollection(object):
             if fname.lower().endswith(('.tiff', '.tif')):
                 img = TiffFile(fname)
                 index += [(fname, i) for i in range(len(img.pages))]
-            elif fname.lower().endswith('gif'):
-                im = Image.open(fname)
+            else:
                 try:
-                    # this will raise an IOError if the file is not readable
-                    im.getdata()[0]
-                except IOError:
-                    site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
-                    raise ValueError(
-                        'Could not load "%s"\nPlease see documentation at: %s' % (fname, site))
-                else:
-                    i = 0
-                    while True:
-                        try:
-                            im.seek(i)
-                        except EOFError:
-                            break
-                        index.append((fname, i))
-                        i += 1
+                    im = Image.open(fname)
+                    im.seek(0)
+                except (IOError, OSError):
+                    index.append([fname, i])
+                    continue
+                i = 0
+                while True:
+                    try:
+                        im.seek(i)
+                    except EOFError:
+                        break
+                    index.append((fname, i))
+                    i += 1
                 if hasattr(im, 'fp') and im.fp:
                     im.fp.close()
-            else:
-                index += [(fname, 0)]
-
         self._frame_index = index
         return len(index)
 
