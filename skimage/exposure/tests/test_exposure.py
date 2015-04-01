@@ -472,6 +472,22 @@ def test_negative():
     assert_raises(ValueError, exposure.adjust_gamma, image)
 
 
+def test_is_low_contrast():
+    image = np.linspace(0, 0.04, 100)
+    assert exposure.is_low_contrast(image)
+    image[-1] = 1
+    assert exposure.is_low_contrast(image)
+    assert not exposure.is_low_contrast(image, upper_percentile=100)
+
+    image = (image * 255).astype(np.uint8)
+    assert exposure.is_low_contrast(image)
+    assert not exposure.is_low_contrast(image, upper_percentile=100)
+
+    image = (image.astype(np.uint16)) * 2**8
+    assert exposure.is_low_contrast(image)
+    assert not exposure.is_low_contrast(image, upper_percentile=100)
+
+
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()

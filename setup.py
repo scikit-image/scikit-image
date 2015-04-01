@@ -17,28 +17,41 @@ MAINTAINER_EMAIL    = 'stefan@sun.ac.za'
 URL                 = 'http://scikit-image.org'
 LICENSE             = 'Modified BSD'
 DOWNLOAD_URL        = 'http://github.com/scikit-image/scikit-image'
-VERSION             = '0.11.2'
-PYTHON_VERSION      = (2, 6)
 
 import os
 import sys
 
 import setuptools
 from distutils.command.build_py import build_py
-from distutils.version import LooseVersion
 
 
-# These are manually checked.
-# These packages are sometimes installed outside of the setuptools scope
-DEPENDENCIES = {}
-with open('requirements.txt', 'rb') as fid:
-    data = fid.read().decode('utf-8', 'replace')
-for line in data.splitlines():
-    pkg, _, version_info = line.replace('==', '>=').partition('>=')
-    # Only require Cython if we have a developer checkout
-    if pkg.lower() == 'cython' and not VERSION.endswith('dev'):
-        continue
-    DEPENDENCIES[str(pkg).lower()] = str(version_info)
+with open('skimage/__init__.py') as fid:
+    for line in fid:
+        if line.startswith('__version__'):
+            VERSION = line.strip().split()[-1][1:-1]
+            break
+
+with open('requirements.txt') as fid:
+    INSTALL_REQUIRES = [l.strip() for l in fid.readlines() if l]
+
+# development versions do not have the cythonized files
+if VERSION.endswith('dev'):
+    SETUP_REQUIRES = [r for r in INSTALL_REQUIRES if r.startswith('cython')]
+else:
+    INSTALL_REQUIRES = [r for r in INSTALL_REQUIRES
+                                         if not r.startswith('cython')]
+    SETUP_REQUIRES = []
+
+
+# list requirements for PyPI
+REQUIRES = [r.replace('>=', ' (>= ') + ')'
+                      for r in INSTALL_REQUIRES + SETUP_REQUIRES]
+REQUIRES = [r.replace('==', ' (== ') for r in REQUIRES]
+
+
+# do not attempt to install numpy and scipy until they have eggs available
+INSTALL_REQUIRES = [r for r in INSTALL_REQUIRES
+                                     if not r.startswith(('scipy', 'numpy'))]
 
 
 def configuration(parent_package='', top_path=None):
@@ -59,72 +72,11 @@ def configuration(parent_package='', top_path=None):
     return config
 
 
-def write_version_py(filename='skimage/version.py'):
-    template = """# THIS FILE IS GENERATED FROM THE SKIMAGE SETUP.PY
-version='%s'
-"""
-
-    try:
-        vfile = open(os.path.join(os.path.dirname(__file__),
-                                  filename), 'w')
-        vfile.write(template % VERSION)
-
-    except IOError:
-        raise IOError("Could not open/write to skimage/version.py - did you "
-                      "install using sudo in the past? If so, run\n"
-                      "sudo chown -R your_username ./*\n"
-                      "from package root to fix permissions, and try again.")
-
-    finally:
-        vfile.close()
-
-
-def get_package_version(package):
-    for version_attr in ('__version__', 'VERSION', 'version'):
-        version_info = getattr(package, version_attr, None)
-        if version_info and str(version_attr) == version_attr:
-            return str(version_info)
-
-
-def check_requirements():
-    if sys.version_info < PYTHON_VERSION:
-        raise SystemExit('You need Python version %d.%d or later.' \
-                         % PYTHON_VERSION)
-    for (package_name, min_version) in DEPENDENCIES.items():
-        if package_name == 'cython':
-            package_name = 'Cython'
-        dep_error = ''
-        if package_name.lower() == 'pillow':
-            package_name = 'PIL.Image'
-            min_version = '1.1.7'
-        try:
-            package = __import__(package_name,
-                fromlist=[package_name.rpartition('.')[0]])
-        except ImportError:
-            dep_error = ('You need `%s` version %s or later.'
-                         % (package_name, min_version))
-        else:
-            if package_name == 'PIL':
-                package_version = package.PILLOW_VERSION
-            else:
-                package_version = get_package_version(package)
-
-            if LooseVersion(min_version) > LooseVersion(package_version):
-                dep_error = ('You need `%s` version %s or later,'
-                             'found version %s.'
-                             % (package_name, min_version,
-                                package_version))
-        if dep_error:
-            raise ImportError(dep_error)
-
-
 if __name__ == "__main__":
-
-    check_requirements()
-
-    write_version_py()
-
+    # purposely fail loudly if numpy or scipy are not available
     from numpy.distutils.core import setup
+    import scipy
+
     setup(
         name=DISTNAME,
         description=DESCRIPTION,
@@ -153,9 +105,9 @@ if __name__ == "__main__":
         ],
 
         configuration=configuration,
-        install_requires=[
-            "six>=%s" % DEPENDENCIES['six']
-        ],
+        setup_requires=SETUP_REQUIRES,
+        install_requires=INSTALL_REQUIRES,
+        requires=REQUIRES,
         packages=setuptools.find_packages(exclude=['doc']),
         include_package_data=True,
         zip_safe=False,  # the package can run out of an .egg file

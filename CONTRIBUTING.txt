@@ -19,8 +19,8 @@ Here's the long and short of it:
 
    * Now, you have remote repositories named:
 
-      - ``upstream``, which refers to the ``scikit-image`` repository
-      - ``origin``, which refers to your personal fork
+     - ``upstream``, which refers to the ``scikit-image`` repository
+     - ``origin``, which refers to your personal fork
 
 2. Develop your contribution:
 
@@ -56,32 +56,32 @@ For a more detailed discussion, read these :doc:`detailed documents
 
 4. Review process:
 
-    * Reviewers (the other developers and interested community members) will
-      write inline and/or general comments on your Pull Request (PR) to help
-      you improve its implementation, documentation and style.  Every single
-      developer working on the project has their code reviewed, and we've come
-      to see it as friendly conversation from which we all learn and the
-      overall code quality benefits.  Therefore, please don't let the review
-      discourage you from contributing: its only aim is to improve the quality
-      of project, not to criticize (we are, after all, very grateful for the
-      time you're donating!).
+   * Reviewers (the other developers and interested community members) will
+     write inline and/or general comments on your Pull Request (PR) to help
+     you improve its implementation, documentation and style.  Every single
+     developer working on the project has their code reviewed, and we've come
+     to see it as friendly conversation from which we all learn and the
+     overall code quality benefits.  Therefore, please don't let the review
+     discourage you from contributing: its only aim is to improve the quality
+     of project, not to criticize (we are, after all, very grateful for the
+     time you're donating!).
 
-    * To update your pull request, make your changes on your local repository
-      and commit. As soon as those changes are pushed up (to the same branch as
-      before) the pull request will update automatically.
+   * To update your pull request, make your changes on your local repository
+     and commit. As soon as those changes are pushed up (to the same branch as
+     before) the pull request will update automatically.
 
-    * `Travis-CI <http://travis-ci.org/>`__, a continuous integration service,
-      is triggered after each Pull Request update to build the code, run unit
-      tests, measure code coverage and check coding style (PEP8) of your
-      branch. The Travis tests must pass before your PR can be merged. If
-      Travis fails, you can find out why by clicking on the "failed" icon (red
-      cross) and inspecting the build and test log.
+   * `Travis-CI <http://travis-ci.org/>`__, a continuous integration service,
+     is triggered after each Pull Request update to build the code, run unit
+     tests, measure code coverage and check coding style (PEP8) of your
+     branch. The Travis tests must pass before your PR can be merged. If
+     Travis fails, you can find out why by clicking on the "failed" icon (red
+     cross) and inspecting the build and test log.
 
 5. Document changes
 
-    Before merging your commits, you must add a description of your changes
-    to the release notes of the upcoming version in
-    ``doc/release/release_dev.txt``.
+   Before merging your commits, you must add a description of your changes
+   to the release notes of the upcoming version in
+   ``doc/release/release_dev.txt``.
 
 .. note::
 
@@ -191,10 +191,11 @@ Travis-CI checks all unittests in the project to prevent breakage.
 Before sending a pull request, you may want to check that Travis-CI
 successfully passes all tests. To do so,
 
-   * Go to `Travis-CI <http://travis-ci.org/>`__ and follow the Sign In link at the top
+* Go to `Travis-CI <http://travis-ci.org/>`__ and follow the Sign In link at
+  the top
 
-   * Go to your `profile page <https://travis-ci.org/profile>`__ and switch 
-     on your scikit-image fork
+* Go to your `profile page <https://travis-ci.org/profile>`__ and switch on
+  your scikit-image fork
 
 It corresponds to steps one and two in
 `Travis-CI documentation <http://about.travis-ci.org/docs/user/getting-started/>`__

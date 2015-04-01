@@ -9,7 +9,7 @@ from ._moments import moments, moments_central, moments_normalized, moments_hu
 from .profile import profile_line
 from .fit import LineModel, CircleModel, EllipseModel, ransac
 from .block import block_reduce
-from ._ccomp import label
+from ._label import label
 
 
 __all__ = ['find_contours',

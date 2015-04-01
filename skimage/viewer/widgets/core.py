@@ -1,20 +1,3 @@
-"""
-Widgets for interacting with ImageViewer.
-
-These widgets should be added to a Plugin subclass using its `add_widget`
-method or calling::
-
-    plugin += Widget(...)
-
-on a Plugin instance. The Plugin will delegate action based on the widget's
-parameter type specified by its `ptype` attribute, which can be:
-
-    'arg' : positional argument passed to Plugin's `filter_image` method.
-    'kwarg' : keyword argument passed to Plugin's `filter_image` method.
-    'plugin' : attribute of Plugin. You'll probably need to add a class
-        property of the same name that updates the display.
-
-"""
 from ..qt import QtWidgets, QtCore, Qt
 from ..utils import RequiredAttr
 
@@ -275,7 +258,7 @@ class CheckBox(BaseWidget):
         added to a plugin.
     """
 
-    def __init__(self, name, value=False, alignment='center', ptype='kwarg', 
+    def __init__(self, name, value=False, alignment='center', ptype='kwarg',
                  callback=None):
         super(CheckBox, self).__init__(name, ptype, callback)
 
