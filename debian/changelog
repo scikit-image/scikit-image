@@ -1,4 +1,4 @@
-skimage (0.11.0-1) experimental; urgency=medium
+skimage (0.11.3-1) experimental; urgency=medium
 
   * Fresh upstream release
     - includes slicing-error.patch freeimage-fix.patch
@@ -8,7 +8,7 @@ skimage (0.11.0-1) experimental; urgency=medium
   * debian/tests/python*
     - for now exclude testing of test_tools.py due to #779847 in mpl
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 05 Mar 2015 08:32:02 -0500
+ -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 02 Apr 2015 20:31:22 -0400
 
 skimage (0.10.1-2) unstable; urgency=medium
 
