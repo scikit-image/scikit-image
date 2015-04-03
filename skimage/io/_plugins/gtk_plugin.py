@@ -1,4 +1,4 @@
-from util import prepare_for_display, window_manager, GuiLockError
+from .util import prepare_for_display, window_manager, GuiLockError
 
 try:
     # we try to aquire the gui lock first
