@@ -161,7 +161,7 @@ def mono_check(plugin, fmt='png'):
     else:
         testing.assert_allclose(r3, img_as_uint(img))
 
-    with expected_warnings(['precision loss']):
+    with expected_warnings(['precision loss|unclosed file']):
         img4 = img_as_int(img)
     if fmt.lower() in (('tif', 'tiff')):
         img4 -= 100
@@ -182,7 +182,7 @@ def setup_test():
     """Default package level setup routine for skimage tests.
 
     Import packages known to raise errors, and then
-    force warnings to raise errors.  
+    force warnings to raise errors.
     Set a random seed
     """
     warnings.simplefilter('default')
@@ -190,7 +190,7 @@ def setup_test():
     from scipy.io import loadmat
     from skimage import viewer, filter
     np.random.seed(0)
-    warnings.simplefilter('error') 
+    warnings.simplefilter('error')
 
 
 def teardown_test():

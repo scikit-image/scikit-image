@@ -4,9 +4,6 @@ import numpy as np
 from scipy import optimize
 
 
-_EPSILON = np.spacing(1)
-
-
 def _check_data_dim(data, dim):
     if data.ndim != 2 or data.shape[1] != dim:
         raise ValueError('Input data must have shape (N, %d).' % dim)
@@ -57,6 +54,11 @@ class LineModel(BaseModel):
         data : (N, 2) array
             N points with ``(x, y)`` coordinates, respectively.
 
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+
         """
 
         _check_data_dim(data, dim=2)
@@ -80,6 +82,8 @@ class LineModel(BaseModel):
         dist = X0[0] * math.cos(theta) + X0[1] * math.sin(theta)
 
         self.params = (dist, theta)
+
+        return True
 
     def residuals(self, data):
         """Determine residuals of data to model.
@@ -182,6 +186,11 @@ class CircleModel(BaseModel):
         data : (N, 2) array
             N points with ``(x, y)`` coordinates, respectively.
 
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+
         """
 
         _check_data_dim(data, dim=2)
@@ -216,6 +225,8 @@ class CircleModel(BaseModel):
         params, _ = optimize.leastsq(fun, params0, Dfun=Dfun, col_deriv=True)
 
         self.params = params
+
+        return True
 
     def residuals(self, data):
         """Determine residuals of data to model.
@@ -313,6 +324,11 @@ class EllipseModel(BaseModel):
         data : (N, 2) array
             N points with ``(x, y)`` coordinates, respectively.
 
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+
         """
 
         _check_data_dim(data, dim=2)
@@ -372,6 +388,8 @@ class EllipseModel(BaseModel):
         params, _ = optimize.leastsq(fun, params0, Dfun=Dfun, col_deriv=True)
 
         self.params = params[:5]
+
+        return True
 
     def residuals(self, data):
         """Determine residuals of data to model.
@@ -471,7 +489,6 @@ class EllipseModel(BaseModel):
 def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     """Determine number trials such that at least one outlier-free subset is
     sampled for the given inlier/outlier ratio.
-
     Parameters
     ----------
     n_inliers : int
@@ -482,21 +499,31 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
         Minimum number of samples chosen randomly from original data.
     probability : float
         Probability (confidence) that one outlier-free sample is generated.
-
     Returns
     -------
     trials : int
         Number of trials.
-
     """
+    if n_inliers == 0:
+        return np.inf
+
+    nom = 1 - probability
+    if nom == 0:
+        return np.inf
+
     inlier_ratio = n_inliers / float(n_samples)
-    nom = max(_EPSILON, 1 - probability)
-    denom = max(_EPSILON, 1 - inlier_ratio ** min_samples)
-    if nom == 1:
+    denom = 1 - inlier_ratio ** min_samples
+    if denom == 0:
+        return 1
+    elif denom == 1:
+        return np.inf
+
+    nom = np.log(nom)
+    denom = np.log(denom)
+    if denom == 0:
         return 0
-    if denom == 1:
-        return float('inf')
-    return abs(float(np.ceil(np.log(nom) / np.log(denom))))
+
+    return int(np.ceil(nom / denom))
 
 
 def ransac(data, model_class, min_samples, residual_threshold,
@@ -542,9 +569,11 @@ def ransac(data, model_class, min_samples, residual_threshold,
     model_class : object
         Object with the following object methods:
 
-         * ``estimate(*data)``
+         * ``success = estimate(*data)``
          * ``residuals(*data)``
 
+        where `success` indicates whether the model estimation succeeded
+        (`True` or `None` for success, `False` for failure).
     min_samples : int
         The minimum number of data points to fit a model to.
     residual_threshold : float
@@ -612,6 +641,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     >>> model = EllipseModel()
     >>> model.estimate(data)
+    True
     >>> model.params # doctest: +SKIP
     array([ -3.30354146e+03,  -2.87791160e+03,   5.59062118e+03,
              7.84365066e+00,   7.19203152e-01])
@@ -688,7 +718,12 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
         # estimate model for current random sample set
         sample_model = model_class()
-        sample_model.estimate(*samples)
+
+        success = sample_model.estimate(*samples)
+
+        if success is not None:  # backwards compatibility
+            if not success:
+                continue
 
         # check if estimated model is valid
         if is_model_valid is not None and not is_model_valid(sample_model,

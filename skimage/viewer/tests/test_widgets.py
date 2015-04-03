@@ -101,6 +101,11 @@ def test_save_buttons():
     timer = QtCore.QTimer()
     timer.singleShot(100, QtGui.QApplication.quit)
 
+    # exercise the button clicks
+    sv.save_stack.click()
+    sv.save_file.click()
+
+    # call the save functions directly
     sv.save_to_stack()
     with expected_warnings(['precision loss']):
         sv.save_to_file(filename)
