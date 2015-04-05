@@ -220,9 +220,9 @@ in a different order, even if the number of operations is the same:
     >>> im3d_t.shape
     (1024, 1024, 100)
     >>> s0 = time.time(); x = out_of_order_multiply(im3d, 5); s1 = time.time()
-    >>> print("%.2f seconds" % (s1 - s0)) doctest: +SKIP
+    >>> print("%.2f seconds" % (s1 - s0))  # doctest: +SKIP
     1.18 seconds
-    >>> print("Speedup: %.1fx" % ((s1 - s0) / (t1 - t0)))  doctest: +SKIP
+    >>> print("Speedup: %.1fx" % ((s1 - s0) / (t1 - t0)))  # doctest: +SKIP
     Speedup: 8.6x
 
 
