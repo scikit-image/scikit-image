@@ -21,45 +21,53 @@ the normal, array-oriented image functions used by scikit-image.
 
 Example
 -------
+We can create a Picture object open opening an image file:
 
-We can create a Picture object open opening an image file
 >>> from skimage import novice
 >>> from skimage import data
 >>> picture = novice.open(data.data_dir + '/chelsea.png')
 
-Pictures know their format
+Pictures know their format:
+
 >>> picture.format
 'png'
 
-... and where they came from
+... and where they came from:
+
 >>> picture.path.endswith('chelsea.png')
 True
 
-... and their size
+... and their size:
+
 >>> picture.size
 (451, 300)
 >>> picture.width
 451
 
 Changing `size` resizes the picture.
+
 >>> picture.size = (45, 30)
 
 You can iterate over pixels, which have RGB values between 0 and 255,
 and know their location in the picture.
+
 >>> for pixel in picture:
 ...     if (pixel.red > 128) and (pixel.x < picture.width):
 ...         pixel.red /= 2
 
 Pictures know if they've been modified from the original file
+
 >>> picture.modified
 True
 >>> print(picture.path)
 None
 
 Pictures can be indexed like arrays
+
 >>> picture[0:20, 0:20] = (0, 0, 0)
 
 Saving the picture updates the path attribute, format, and modified state.
+
 >>> picture.save('save-demo.jpg')
 >>> picture.path.endswith('save-demo.jpg')
 True
