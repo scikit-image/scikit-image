@@ -1,7 +1,6 @@
 import os
 import imghdr
 from collections import namedtuple
-from io import BytesIO
 
 import numpy as np
 from .. import io, img_as_ubyte
@@ -10,7 +9,6 @@ from ..color import color_dict
 from ..io.util import file_or_url_context, is_url
 
 import six
-from six.moves.urllib_parse import urlparse
 from six.moves.urllib import request
 urlopen = request.urlopen
 
@@ -207,35 +205,44 @@ class Picture(object):
 
     Examples
     --------
-    Load an image from a file
+    Load an image from a file:
+
     >>> from skimage import novice
     >>> from skimage import data
     >>> picture = novice.open(data.data_dir + '/chelsea.png')
 
-    Load an image from a URL. URL must start with http(s):// or ftp(s)://
+    Load an image from a URL (the URL must start with ``http(s)://`` or
+    ``ftp(s)://``):
+
     >>> picture = novice.open('http://scikit-image.org/_static/img/logo.png')
 
-    Create a blank 100 pixel wide, 200 pixel tall white image
+    Create a blank 100 pixel wide, 200 pixel tall white image:
+
     >>> pic = Picture.from_size((100, 200), color=(255, 255, 255))
 
-    Use numpy to make an RGB byte array (shape is height x width x 3)
+    Use numpy to make an RGB byte array (shape is height x width x 3):
+
     >>> import numpy as np
     >>> data = np.zeros(shape=(200, 100, 3), dtype=np.uint8)
     >>> data[:, :, 0] = 255  # Set red component to maximum
     >>> pic = Picture(array=data)
 
-    Get the bottom-left pixel
+    Get the bottom-left pixel:
+
     >>> pic[0, 0]
     Pixel(red=255, green=0, blue=0, alpha=255)
 
-    Get the top row of the picture
+    Get the top row of the picture:
+
     >>> pic[:, pic.height-1]
     Picture(100 x 1)
 
-    Set the bottom-left pixel to black
+    Set the bottom-left pixel to black:
+
     >>> pic[0, 0] = (0, 0, 0)
 
-    Set the top row to red
+    Set the top row to red:
+
     >>> pic[:, pic.height-1] = (255, 0, 0)
 
     """
