@@ -1,7 +1,7 @@
 from ._hough_transform import (hough_ellipse, hough_line,
                                probabilistic_hough_line)
 from .hough_transform import hough_circle, hough_line_peaks
-from .radon_transform import radon, iradon, iradon_sart
+from .radon_transform import radon, iradon, iradon_sart, iradon_workspace
 from .finite_radon_transform import frt2, ifrt2
 from .integral import integral_image, integrate
 from ._geometric import (warp, warp_coords, estimate_transform,
