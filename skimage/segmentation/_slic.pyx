@@ -255,7 +255,7 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
 
                 #perform a breadth first search to find
                 # the size of the connected component
-                while bfs_visited != current_segment_size:
+                while bfs_visited < current_segment_size < max_size:
                     for i in range(6):
                         zz = coord_list[bfs_visited, 0] + ddz[i]
                         yy = coord_list[bfs_visited, 1] + ddy[i]
@@ -271,6 +271,8 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
                                 coord_list[current_segment_size, 1] = yy
                                 coord_list[current_segment_size, 2] = xx
                                 current_segment_size += 1
+                                if current_segment_size >= max_size:
+                                    break
                             elif (connected_segments[zz, yy, xx] >= 0 and
                                   connected_segments[zz, yy, xx] != current_new_label):
                                 adjacent = connected_segments[zz, yy, xx]
