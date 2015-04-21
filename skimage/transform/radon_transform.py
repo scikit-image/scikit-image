@@ -128,9 +128,8 @@ def iradon_workspace(theta, output_size, circle=False, full=True):
     """
     Generate workspace needed for iradon().
 
-    This allows expensive work arrays to be calculated once for an output size
-    and set of angles, useful when doing multiple calls to iradon() for the
-    same geometry
+    This allows work arrays to be calculated once for an output size and set
+    of angles, useful for multiple calls to iradon() for the same geometry.
 
     Parameters
     ----------
@@ -145,11 +144,11 @@ def iradon_workspace(theta, output_size, circle=False, full=True):
         ``radon`` called with ``circle=True``.
     full : boolean, optional
         Whether to generate full workspace (default) or only the
-        grid data (for older behavior, smaller memory usage)
+        grid data (for older behavior, smaller memory usage).
     Returns
     -------
-    workspace : a tuple of ndarrays (xpr, ypr, twork)
-
+    xpr, ypr, thw : tuple of ndarrays
+        The workspace
     """
     if not circle:
         output_size = int(np.floor(np.sqrt((output_size)**2 / 2.0)))
@@ -188,9 +187,9 @@ def iradon(radon_image, theta=None, output_size=None, workspace=None,
     output_size : int
         Number of rows and columns in the reconstruction.
     workspace : ``None`` or result of ``iradon_workspace()``
-        workspace is a tuple of arrayy with values needed for iradon
-        transform, as calculated by ``iradon_workspace(output_size, theta)``.
-        If ``None`` (default), the needed work arrays are generated as neeeded.
+        Workspace is a tuple of arrays with values needed for iradon
+        transform, as calculated by ``iradon_workspace(theta, output_size)``.
+        If ``None`` (default), the work arrays are generated as needed.
     filter : str, optional (default ramp)
         Filter used in frequency domain filtering. Ramp filter used by default.
         Filters available: ramp, shepp-logan, cosine, hamming, hann.
@@ -276,12 +275,14 @@ def iradon(radon_image, theta=None, output_size=None, workspace=None,
     # Determine the center of the projections (= center of sinogram)
     mid_index = radon_image.shape[0] // 2
 
+    # notes on workspace:
+    # 1. if thwork[i] is None, the calculation will be done per row.
+    # 2. since output_size may have already been rescaled above, use
+    #    circle=True when calling iradon_workspace() here.
     if workspace is None:
-        workspace = iradon_workspace(theta, output_size, circle=True, full=False)
+        workspace = iradon_workspace(theta, output_size,
+                                     circle=True, full=False)
     xpr, ypr, thwork = workspace
-    # note: if workspace = False, the large thw array will not be
-    # calculated, and thw will be an array of `None` -- this will
-    # cause t to be calculated per row
 
     # Reconstruct image by interpolation
     for i in range(len(theta)):
