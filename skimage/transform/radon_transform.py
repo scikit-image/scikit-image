@@ -147,7 +147,7 @@ def iradon_workspace(theta, output_size, circle=False, full=True):
         grid data (for older behavior, smaller memory usage).
     Returns
     -------
-    xpr, ypr, thw : tuple of ndarrays
+    workspace: 
         The workspace
     """
     if not circle:
