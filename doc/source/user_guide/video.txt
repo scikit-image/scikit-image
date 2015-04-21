@@ -97,3 +97,12 @@ videos that exceed available RAM. It works on all floats if FFmpeg is installed.
     from moviepy.editor import VideoFileClip
     myclip = VideoFileClip("some_video.avi")
 
+Imageio
+^^^^^^^^
+
+`Imageio <http://imageio.github.io/>`_ offers a way to load video using FFmpeg. It's quite similar to moviepy.
+
+ .. code-block:: python
+ import imageio
+ filename = '/tmp/file.mp4'
+ vid = imageio.get_reader(filename,  'ffmpeg')
