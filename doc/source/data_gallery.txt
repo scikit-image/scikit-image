@@ -1,0 +1,7 @@
+Data Gallery
+------------
+
+You can see all images from :mod:`skimage.data` here.
+
+.. raw:: html
+   :file: data_gallery/gallery.html

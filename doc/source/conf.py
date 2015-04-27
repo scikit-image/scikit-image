@@ -145,7 +145,7 @@ html_title = 'skimage v%s docs' % version
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ['_static','data_gallery/images']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -296,3 +296,17 @@ intersphinx_mapping = {
     'http://docs.scipy.org/doc/scipy/reference': None,
     'http://scikit-learn.org/stable': None
 }
+
+# To add links to images in skimage.data.
+# Importing this at the beginning causes matplotlib configuration errors.
+from skimage import data
+template = """
+**Preview**
+
+.. image:: ../data_gallery/images/%s.png
+    :height: 300px
+"""
+for name in data.__all__:
+    if name != 'load':
+        func = getattr(data, name)
+        func.__doc__ += template % name

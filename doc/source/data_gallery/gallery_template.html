@@ -1,0 +1,25 @@
+<script type="text/javascript" src="_static/galleria/galleria-1.3.5.min.js"> </script>
+
+<style>
+    #galleria{ width: 700px; height: 400px;}
+    body .galleria-container{ background:#fff; }
+</style>
+
+
+<div class="galleria" id="galleria">
+</div>
+
+<script>
+    image_array = [
+    {% for image in images %}
+        {image :"_static/{{image['name']}}", title : "{{image['title']}}", description : "{{image['desc']}}",link :"_static/{{image['name']}}"},
+    {% endfor %}    
+    ];
+
+    Galleria.loadTheme("_static/galleria/themes/classic/galleria.classic.min.js");
+    Galleria.run('.galleria', {
+        dataSource: image_array
+    });
+    
+
+</script>

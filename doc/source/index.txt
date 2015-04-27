@@ -57,6 +57,12 @@ Sections
 
      -
 
+   * - `Data Gallery <data_gallery.html>`_
+
+       A gallery of sample images
+
+     -
+
 
 
 Indices and Tables

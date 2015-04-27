@@ -46,7 +46,7 @@ random_gallery:
 coveragetable:
 	@cd source && $(PYTHON) coverage_generator.py
 
-html: api coveragetable random_gallery
+html: api coveragetable random_gallery data_gallery
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html
 	cp -r source/plots $(DEST)/html
 	@echo
@@ -130,3 +130,6 @@ gitwash:
 	--repo-name=scikit-image \
 	--github-user=scikit-image \
 	--source-suffix=.txt
+	
+data_gallery:
+	cd tools && $(PYTHON) data_gallery.py

@@ -23,6 +23,8 @@ doc/source/auto_examples/notebook
 doc/source/auto_examples/images/plot_*.png
 doc/source/auto_examples/images/thumb
 doc/source/auto_examples/applications/
+doc/source/data_gallery/images/*.png
+doc/source/data_gallery/gallery.html
 doc/source/_static/random.js
 .idea/
 *.log
