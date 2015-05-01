@@ -36,6 +36,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import cython
 import numpy as np
 import heap
+import warnings
 
 cimport numpy as cnp
 cimport heap
@@ -299,7 +300,11 @@ cdef class MCP:
         # but this is my code and I like fortran-style! Also, it's
         # faster when working with image arrays, which are often
         # already fortran-strided.)
-        self.flat_costs = costs.astype(FLOAT_D).flatten('F')
+        try:
+            self.flat_costs = costs.astype(FLOAT_D, copy=False).ravel('F')
+        except TypeError:
+            self.flat_costs = costs.astype(FLOAT_D).flatten('F')
+            warnings.warn('Upgrading NumPy should decrease memory usage and increase speed.', Warning)
         size = self.flat_costs.shape[0]
         self.flat_cumulative_costs = np.empty(size, dtype=FLOAT_D)
         self.dim = len(costs.shape)
