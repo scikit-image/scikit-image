@@ -11,53 +11,7 @@ from ..exposure import is_low_contrast
 from .._shared._warnings import all_warnings
 
 
-__all__ = ['Image', 'imread', 'imread_collection', 'imsave', 'imshow', 'show']
-
-
-class Image(np.ndarray):
-    """Class representing Image data.
-
-    These objects have tags for image metadata and IPython display protocol
-    methods for image display.
-
-    Parameters
-    ----------
-    arr : ndarray
-        Image data.
-    kwargs : Image tags as keywords
-        Specified in the form ``tag0=value``, ``tag1=value``.
-
-    Attributes
-    ----------
-    tags : dict
-        Meta-data.
-
-    """
-
-    def __new__(cls, arr, **kwargs):
-        """Set the image data and tags according to given parameters.
-
-        """
-        x = np.asarray(arr).view(cls)
-        x.tags = kwargs
-
-        return x
-
-    def __array_finalize__(self, obj):
-        self.tags = getattr(obj, 'tags', {})
-
-    def _repr_png_(self):
-        return self._repr_image_format('png')
-
-    def _repr_jpeg_(self):
-        return self._repr_image_format('jpeg')
-
-    def _repr_image_format(self, format_str):
-        str_buffer = BytesIO()
-        imsave(str_buffer, self, format_str=format_str)
-        return_str = str_buffer.getvalue()
-        str_buffer.close()
-        return return_str
+__all__ = ['imread', 'imread_collection', 'imsave', 'imshow', 'show']
 
 
 def imread(fname, as_grey=False, plugin=None, flatten=None,
