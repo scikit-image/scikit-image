@@ -54,6 +54,14 @@ def test_coffee():
     data.coffee()
 
 
+def test_binary_blobs():
+    blobs = data.binary_blobs(length=128)
+    assert blobs.mean() == 0.5
+    blobs = data.binary_blobs(length=128, volume_fraction=0.25)
+    assert blobs.mean() == 0.25
+    blobs = data.binary_blobs(length=32, volume_fraction=0.25, n_dim=3)
+    assert blobs.mean() == 0.25
+
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
     run_module_suite()
