@@ -203,7 +203,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     # Convert local_maxima to float64
     lm = local_maxima.astype(np.float64)
     # Convert the last index to its corresponding scale value
-    lm[:,2] = sigma_list[local_maxima[:,2]]
+    lm[:, 2] = sigma_list[local_maxima[:, 2]]
     local_maxima = lm
     return _prune_blobs(local_maxima, overlap)
 
@@ -305,7 +305,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     # Convert local_maxima to float64
     lm = local_maxima.astype(np.float64)
     # Convert the last index to its corresponding scale value
-    lm[:,2] = sigma_list[local_maxima[:,2]]
+    lm[:, 2] = sigma_list[local_maxima[:, 2]]
     local_maxima = lm
     return _prune_blobs(local_maxima, overlap)
 
@@ -415,6 +415,6 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     # Convert local_maxima to float64
     lm = local_maxima.astype(np.float64)
     # Convert the last index to its corresponding scale value
-    lm[:,2] = sigma_list[local_maxima[:,2]]
+    lm[:, 2] = sigma_list[local_maxima[:, 2]]
     local_maxima = lm
     return _prune_blobs(local_maxima, overlap)
