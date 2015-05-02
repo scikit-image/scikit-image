@@ -141,7 +141,7 @@ def test_blob_doh():
 
     radius = lambda x: x[2]
     s = sorted(blobs, key=radius)
-    thresh = 3
+    thresh = 4
 
     b = s[0]
     assert abs(b[0] - 400) <= thresh
