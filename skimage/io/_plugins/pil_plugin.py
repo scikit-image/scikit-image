@@ -47,9 +47,13 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
     try:
         # this will raise an IOError if the file is not readable
         im.getdata()[0]
-    except IOError:
+    except IOError as e:
         site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
-        raise ValueError('Could not load "%s"\nPlease see documentation at: %s' % (fname, site))
+        pillow_error_message = str(e)
+        error_message = ('Could not load "%s" \n'
+            'Reason: "%s"\n'
+            'Please see documentation at: %s') % (fname, pillow_error_message, site)
+        raise ValueError(error_message)
     else:
         return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
 
