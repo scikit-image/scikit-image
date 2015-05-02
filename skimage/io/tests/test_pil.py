@@ -7,8 +7,7 @@ from numpy.testing import (
 from tempfile import NamedTemporaryFile
 
 from ... import data_dir
-from .. import (imread, imsave, use_plugin, reset_plugins,
-                        Image as ioImage)
+from .. import imread, imsave, use_plugin, reset_plugins
 from ..._shared.testing import mono_check, color_check
 from ..._shared._warnings import expected_warnings
 from ..._shared._tempfile import temporary_file
@@ -78,19 +77,6 @@ def test_imread_uint16():
     img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16.tif'))
     assert np.issubdtype(img.dtype, np.uint16)
     assert_array_almost_equal(img, expected)
-
-
-def test_repr_png():
-    img_path = os.path.join(data_dir, 'camera.png')
-    original_img = ioImage(imread(img_path))
-    original_img_str = original_img._repr_png_()
-
-    with NamedTemporaryFile(suffix='.png') as temp_png:
-        temp_png.write(original_img_str)
-        temp_png.seek(0)
-        round_trip = imread(temp_png)
-
-    assert np.all(original_img == round_trip)
 
 
 def test_imread_truncated_jpg():
