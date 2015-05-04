@@ -10,7 +10,7 @@ from scipy import ndimage
 img = color.rgb2gray(data.astronaut())
 bw_img = img > 100./255
 
-def assert_internally_equal(a, b, border=1):
+def _assert_internally_equal(a, b, border=1):
     testing.assert_array_equal(a[border:-border, border:-border],
                                b[border:-border, border:-border])
 
@@ -18,14 +18,14 @@ def test_non_square_image():
     strel = selem.square(3)
     binary_res = binary.binary_erosion(bw_img[:100, :200], strel)
     grey_res = img_as_bool(grey.erosion(bw_img[:100, :200], strel))
-    assert_internally_equal(binary_res, grey_res)
+    _assert_internally_equal(binary_res, grey_res)
 
 
 def test_binary_erosion():
     strel = selem.square(3)
     binary_res = binary.binary_erosion(bw_img, strel)
     grey_res = img_as_bool(grey.erosion(bw_img, strel))
-    assert_internally_equal(binary_res, grey_res)
+    _assert_internally_equal(binary_res, grey_res)
 
 
 def test_binary_dilation():
@@ -39,14 +39,14 @@ def test_binary_closing():
     strel = selem.square(3)
     binary_res = binary.binary_closing(bw_img, strel)
     grey_res = img_as_bool(grey.closing(bw_img, strel))
-    assert_internally_equal(binary_res, grey_res)
+    _assert_internally_equal(binary_res, grey_res)
 
 
 def test_binary_opening():
     strel = selem.square(3)
     binary_res = binary.binary_opening(bw_img, strel)
     grey_res = img_as_bool(grey.opening(bw_img, strel))
-    assert_internally_equal(binary_res, grey_res, border=2)
+    _assert_internally_equal(binary_res, grey_res, border=2)
 
 
 def test_selem_overflow():
