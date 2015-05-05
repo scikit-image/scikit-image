@@ -17,8 +17,6 @@ labels = segmentation.slic(img, compactness=30, n_segments=400)
 edges = filters.sobel(gimg)
 edges_rgb = color.gray2rgb(edges)
 
-mimg = segmentation.mark_boundaries(img, labels, (0,0,0))
-
 g = graph.rag_boundary(labels, edges)
 
 cmap = colors.ListedColormap(['#0000ff', '#ff0000'])
