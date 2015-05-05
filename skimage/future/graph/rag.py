@@ -349,8 +349,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
     nbr_indices = list(np.ndindex(*[2]*labels.ndim))
     del nbr_indices[0]
     nbr_indices_arr = ([idx for idx in nbr_indices if np.linalg.norm(idx)
-                   <= connectivity])
-
+                        <= connectivity])
 
     iter_shape = tuple(np.array(labels.shape) - 1)
 
@@ -358,14 +357,14 @@ def rag_boundary(labels, edge_map, connectivity=2):
 
         index_arr = np.array(index)
         current = labels[index]
-        graph.add_node(current, {'labels':[current]})
+        graph.add_node(current, {'labels': [current]})
 
         for nbr_index in nbr_indices_arr:
 
             adjacent_idx = tuple(index_arr + nbr_index)
             adjacent = labels[adjacent_idx]
 
-            if current==adjacent:
+            if current == adjacent:
                 continue
 
             if graph.has_edge(current, adjacent):

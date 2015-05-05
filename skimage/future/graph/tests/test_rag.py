@@ -202,8 +202,8 @@ def test_rag_boundary():
     labels = np.zeros((16, 16), dtype='uint8')
     edge_map = np.zeros_like(labels, dtype=float)
 
-    edge_map[8,:] = 0.5
-    edge_map[:,8] = 1.0
+    edge_map[8, :] = 0.5
+    edge_map[:, 8] = 1.0
 
     labels[:8, :8] = 1
     labels[:8, 8:] = 2
