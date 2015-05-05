@@ -39,6 +39,7 @@ install:
   # Install the build and runtime dependencies of the project.
   - "%CMD_IN_ENV% pip install -v %WHEELHOUSE% -r tools/appveyor/requirements.txt"
   - "%CMD_IN_ENV% pip install -v -r requirements.txt"
+  - "%CMD_IN_ENV% pip install git+https://github.com/ContinuumIO/dask --upgrade"
   - "%CMD_IN_ENV% python setup.py bdist_wheel bdist_wininst"
   - ps: "ls dist"
 
