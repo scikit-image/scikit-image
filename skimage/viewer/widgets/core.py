@@ -1,8 +1,8 @@
-from ..qt import QtWidgets, QtCore, Qt
+from ..qt import QtWidgets, QtCore, Qt, QtGui
 from ..utils import RequiredAttr
 
 
-__all__ = ['BaseWidget', 'Slider', 'ComboBox', 'CheckBox', 'Text']
+__all__ = ['BaseWidget', 'Slider', 'ComboBox', 'CheckBox', 'Text', 'Button']
 
 
 
@@ -287,3 +287,22 @@ class CheckBox(BaseWidget):
     @val.setter
     def val(self, i):
         self._check_box.setChecked(i)
+
+
+class Button(BaseWidget):
+    """Button which calls callback upon click.
+
+    Parameters
+    ----------
+    name : str
+        Name of button.
+    callback : callable f()
+        Function to call when button is clicked.
+    """
+    def __init__(self, name, callback):
+        super(Button, self).__init__(self)
+        self._button = QtGui.QPushButton(name)
+        self._button.clicked.connect(callback)
+
+        self.layout = QtGui.QHBoxLayout(self)
+        self.layout.addWidget(self._button)
