@@ -8,7 +8,7 @@ This example demonstrates construction of region boundary based RAGs with the
 """
 from skimage.future import graph
 from skimage import data, segmentation, color, filters, io
-from matplotlib import pyplot as colors
+from matplotlib import colors
 
 img = data.coffee()
 gimg = color.rgb2gray(img)
