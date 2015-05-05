@@ -311,6 +311,79 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
     return graph
 
 
+def rag_boundary(labels, edge_map, connectivity=2):
+    """ Comouter RAG based on region boundaries
+
+    Given an image's initial segmentation and its edge map this method
+    constructs the corresponding Region Adjacency Graph (RAG). Each node in the
+    RAG represents a set of pixels within the image with the same label in
+    `labels`. The weight between two adjacent regions is the average value
+    in `edge_map` along their boundary.
+
+    labels : ndarray
+        The labelled image.
+    edge_map : ndarray
+        This should have the same shape as that of `labels`. For all pixels
+        along the boundary between 2 adjacent regions, the average value of the
+        corresponding pixels in `edge_map` is the edge weight between them.
+    connectivity : int, optional
+        Pixels with a squared distance less than `connectivity` from each other
+        are considered adjacent. It can range from 1 to `labels.ndim`. Its
+        behavior is the same as `connectivity` parameter in
+        `scipy.ndimage.filters.generate_binary_structure`.
+
+    Examples
+    --------
+    >>> from skimage import data, segmentation, filters, color
+    >>> from skimage.future import graph
+    >>> img = data.chelsea()
+    >>> labels = segmentation.slic(img)
+    >>> edge_map = filters.sobel(color.rgb2gray(img))
+    >>> rag = graph.rag_mean_color(labels, edge_map)
+
+    """
+
+    graph = RAG()
+
+    #Computing the relative indices of the neighbors
+    nbr_indices = list(np.ndindex(*[2]*labels.ndim))
+    del nbr_indices[0]
+    nbr_indices_arr = ([idx for idx in nbr_indices if np.linalg.norm(idx)
+                   <= connectivity])
+
+
+    iter_shape = tuple(np.array(labels.shape) - 1)
+
+    for index in np.ndindex(iter_shape):
+
+        index_arr = np.array(index)
+        current = labels[index]
+        graph.add_node(current, {'labels':[current]})
+
+        for nbr_index in nbr_indices_arr:
+
+            adjacent_idx = tuple(index_arr + nbr_index)
+            adjacent = labels[adjacent_idx]
+
+            if current==adjacent:
+                continue
+
+            if graph.has_edge(current, adjacent):
+                graph[current][adjacent]['pixel count'] += 2
+                intensity = edge_map[index] + edge_map[adjacent_idx]
+                graph[current][adjacent]['total intensity'] += intensity
+            else:
+                graph.add_edge(current, adjacent)
+                graph[current][adjacent]['pixel count'] = 2
+                intensity = edge_map[index] + edge_map[adjacent_idx]
+                graph[current][adjacent]['total intensity'] = intensity
+
+    for (x, y, data) in graph.edges_iter(data=True):
+        data['weight'] = data['total intensity']/data['pixel count']
+
+    return graph
+
+
 def draw_rag(labels, rag, img, border_color=None, node_color='#ffff00',
              edge_color='#00ff00', colormap=None, thresh=np.inf,
              desaturate=False, in_place=True):

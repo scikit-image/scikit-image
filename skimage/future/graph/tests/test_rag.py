@@ -196,3 +196,20 @@ def test_generic_rag_3d():
     assert h.has_edge(0, 1) and h.has_edge(0, 3) and not h.has_edge(0, 7)
     k = graph.RAG(labels, connectivity=3)
     assert k.has_edge(0, 1) and k.has_edge(1, 2) and k.has_edge(2, 5)
+
+
+def test_rag_boundary():
+    labels = np.zeros((16, 16), dtype='uint8')
+    edge_map = np.zeros_like(labels, dtype=float)
+
+    edge_map[8,:] = 0.5
+    edge_map[:,8] = 1.0
+
+    labels[:8, :8] = 1
+    labels[:8, 8:] = 2
+    labels[8:, :8] = 3
+    labels[8:, 8:] = 4
+
+    g = graph.rag_boundary(labels, edge_map, connectivity=1)
+    assert len(g.nodes()) == 4
+    assert len(g.edges()) == 4
