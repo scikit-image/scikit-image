@@ -31,6 +31,7 @@ before_install:
     - tools/build_versions.py
 
 install:
+    - pip install git+https://github.com/ContinuumIO/dask --upgrade
     - python setup.py build_ext --inplace
     - python setup.py install
 
