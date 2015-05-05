@@ -4,6 +4,7 @@ from numpy.testing import assert_array_almost_equal
 from skimage.filters import threshold_adaptive, gaussian_filter
 from skimage.util import process_chunks
 
+
 def test_process_chunks():
     # data
     a = np.arange(144).reshape(12, 12).astype(float)
@@ -31,6 +32,7 @@ def test_process_chunks():
 
 def test_no_chunks():
     a = np.ones(1 * 4 * 8 * 9).reshape(1, 4, 8, 9)
+
     def add_42(arr):
         return arr + 42
 

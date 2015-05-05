@@ -27,7 +27,8 @@ def _get_chunks(shape, ncpu):
     return tuple(chunks)
 
 
-def process_chunks(function, array, args=(), kwargs={} chunks=None, depth=0, mode=None):
+def process_chunks(function, array, args=(), kwargs={}, chunks=None, depth=0,
+                   mode=None):
     """Map a function in parallel across an array.
 
     Split an array into possibly overlapping chunks of a given depth and
@@ -56,7 +57,7 @@ def process_chunks(function, array, args=(), kwargs={} chunks=None, depth=0, mod
     a chunk.
 
     """
-    if chunks == None:
+    if chunks is None:
         shape = array.shape
         ncpu = cpu_count()
         chunks = _get_chunks(shape, ncpu)
