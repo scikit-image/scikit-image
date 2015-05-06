@@ -1,3 +1,4 @@
+from math import ceil
 from multiprocessing import cpu_count
 
 import dask.array as da
@@ -11,19 +12,35 @@ def _get_chunks(shape, ncpu):
     available processors. The last chunk in each dimension absorbs the
     remainder array elements if the number of cpus does not divide evenly into
     the number of array elements.
+
+    >>> _get_chunks((4, 4), 4)
+    ((2, 2), (2, 2))
+    >>> _get_chunks((4, 4), 2)
+    ((2, 2), (4,))
+    >>> _get_chunks((5, 5), 2)
+    ((2, 3), (5,))
+    >>> _get_chunks((2, 4), 2)
+    ((1, 1), (4,))
     """
     chunks = []
+    nchunks_per_dim = int(ceil(ncpu ** (1./len(shape))))
 
+    used_chunks = 1
     for i in shape:
-        regular_chunk = i // ncpu
-        remainder_chunk = regular_chunk + (i % ncpu)
+        if used_chunks < ncpu:
+            regular_chunk = i // nchunks_per_dim
+            remainder_chunk = regular_chunk + (i % nchunks_per_dim)
 
-        if regular_chunk == 0:
-            chunk_lens = (remainder_chunk,)
+            if regular_chunk == 0:
+                chunk_lens = (remainder_chunk,)
+            else:
+                chunk_lens = ((regular_chunk,) * (nchunks_per_dim - 1) +
+                              (remainder_chunk,))
         else:
-            chunk_lens = (regular_chunk,) * (ncpu - 1) + (remainder_chunk,)
+            chunk_lens = (i,)
 
         chunks.append(chunk_lens)
+        used_chunks *= nchunks_per_dim
     return tuple(chunks)
 
 
