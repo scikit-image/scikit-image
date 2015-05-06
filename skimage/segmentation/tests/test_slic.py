@@ -153,6 +153,12 @@ def test_enforce_connectivity():
                                  enforce_connectivity=False,
                                  convert2lab=False)
 
+    # Make sure nothing fatal occurs (e.g. buffer overflow) at low values of
+    # max_size_factor
+    segments_connected_low_max = slic(img, 2, compactness=0.0001,
+                                      enforce_connectivity=True,
+                                      convert2lab=False, max_size_factor=0.8)
+
     result_connected = np.array([[0, 0, 0, 1, 1, 1],
                                  [0, 0, 0, 1, 1, 1],
                                  [0, 0, 0, 1, 1, 1]], np.float)
@@ -163,6 +169,7 @@ def test_enforce_connectivity():
 
     assert_equal(segments_connected, result_connected)
     assert_equal(segments_disconnected, result_disconnected)
+    assert_equal(segments_connected_low_max, result_connected)
 
 
 def test_slic_zero():
