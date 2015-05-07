@@ -11,7 +11,6 @@ How to contribute to ``skimage``
 
    gitwash/index
    gsoc2011
-   coverage_table
    cell_profiler
 
 
