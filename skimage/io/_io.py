@@ -52,9 +52,15 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
 
     with file_or_url_context(fname) as fname:
         img = call_plugin('imread', fname, plugin=plugin, **plugin_args)
+        
+    if not hasattr(img, 'ndim'):
+        return img
 
-    if as_grey and getattr(img, 'ndim', 0) >= 3:
-        img = rgb2grey(img)
+    if img.ndim > 2:
+        if img.shape[-1] not in (3, 4) and img.shape[-3] in (3, 4):
+            img = np.swapaxes(img, -1, -3)
+        if as_grey:
+            img = rgb2grey(img)
 
     return img
 
