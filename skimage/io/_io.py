@@ -52,7 +52,7 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
 
     with file_or_url_context(fname) as fname:
         img = call_plugin('imread', fname, plugin=plugin, **plugin_args)
-        
+
     if not hasattr(img, 'ndim'):
         return img
 
