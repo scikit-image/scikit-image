@@ -44,8 +44,8 @@ def _get_chunks(shape, ncpu):
     return tuple(chunks)
 
 
-def process_chunks(function, array, args=(), kwargs={}, chunks=None, depth=0,
-                   mode=None):
+def process_chunks(function, array, chunks=None, depth=0,
+                   mode=None, extra_arguments=(), extra_keywords={}):
     """Map a function in parallel across an array.
 
     Split an array into possibly overlapping chunks of a given depth and
@@ -67,6 +67,10 @@ def process_chunks(function, array, args=(), kwargs={}, chunks=None, depth=0,
         integer equal to the depth of the internal external padding
     mode : 'reflect', 'periodic', 'wrap', 'nearest'
         type of external boundary padding
+    extra_arguments : tuple
+        Tuple of arguments to be passed to the function.
+    extra_keywords : dictionary
+        Dictionary of keyword arguments to be passed to the function.
 
     Notes
     -----
@@ -83,7 +87,7 @@ def process_chunks(function, array, args=(), kwargs={}, chunks=None, depth=0,
         mode = 'periodic'
 
     def wrapped_func(arr):
-        return function(arr, *args, **kwargs)
+        return function(arr, *extra_arguments, **extra_keywords)
 
     darr = da.from_array(array, chunks=chunks)
     return darr.map_overlap(wrapped_func, depth, boundary=mode).compute()
