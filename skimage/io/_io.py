@@ -59,7 +59,7 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
     if img.ndim > 2:
         if img.shape[-1] not in (3, 4) and img.shape[-3] in (3, 4):
             img = np.swapaxes(img, -1, -3)
-            img = np.swapaxes(img, -1, -2)
+            img = np.swapaxes(img, -2, -3)
 
         if as_grey:
             img = rgb2grey(img)
