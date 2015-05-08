@@ -65,12 +65,12 @@ def test_bilevel():
 def test_imread_separate_channels():
     # Test that imread returns RGBA values contiguously even when they are
     # stored in separate planes.
-    x = np.zeros((3, 16, 8), np.uint8)
+    x = np.random.rand(3, 16, 8)
     f = NamedTemporaryFile(suffix='.tif')
     fname = f.name
     f.close()
     imsave(fname, x, plugin='tifffile')
-    img = imread(fname)
+    img = imread(fname, plugin='tifffile')
     os.remove(fname)
     assert img.shape == (16, 8, 3), img.shape
 
