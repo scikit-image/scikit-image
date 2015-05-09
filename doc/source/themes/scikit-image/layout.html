@@ -2,8 +2,7 @@
     scikit-image/layout.html
     ~~~~~~~~~~~~~~~~~
 
-    Sphinx layout template for the scikit-image theme, written by
-    Johannes Schönberger.
+    Sphinx layout template for the scikit-image theme
 
 #}
 
@@ -36,8 +35,9 @@
 {%- macro css() %}
     <link rel="stylesheet" href="{{ pathto('_static/pygments.css', 1) }}" type="text/css" />
     <link href="{{ pathto('_static/', 1) }}css/bootstrap.min.css" rel="stylesheet" type="text/css">
-    <link href="{{ pathto('_static/', 1) }}css/custom.css" rel="stylesheet" type="text/css">
-    <link href="http://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css">
+    <link href="{{ pathto('_static/', 1) }}css/custom.css"
+    rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
     {%- for cssfile in css_files %}
         <link rel="stylesheet" href="{{ pathto(cssfile, 1) }}" type="text/css" />
     {%- endfor %}
@@ -86,7 +86,7 @@
             <ul class="nav">
                 {% include 'navbar.html' %}
             </ul>
-            <form class="navbar-form pull-right" action="{{ pathto('search') }}" method="get">
+            <form class="navbar-form pull-right" action="/docs/dev/search.html" method="get">
                 <input type="text" class="search span3" name="q" placeholder="Search documentation ...">
                 <input type="hidden" name="check_keywords" value="yes" >
                 <input type="hidden" name="area" value="default" >
@@ -106,7 +106,7 @@
     <div class="well footer">
         <small>
             &copy; Copyright the scikit-image development team.
-            Created using <a href="http://getbootstrap.com/">Bootstrap</a> and <a href="http://sphinx-doc.org/">Sphinx</a>.
+            Created using <a href="http://twitter.github.com/bootstrap/">Bootstrap</a> and <a href="http://sphinx.pocoo.org/">Sphinx</a>.
         </small>
     </div>
 </body>
