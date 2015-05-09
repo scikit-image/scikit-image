@@ -29,17 +29,18 @@ def binary_blobs(length=512, blob_size_fraction=0.1, n_dim=2,
 
     Examples
     --------
+    >>> from skimage import data
     >>> data.binary_blobs(length=5, blob_size_fraction=0.2, seed=1)
     array([[ True, False,  True,  True,  True],
            [ True,  True,  True, False,  True],
            [False,  True, False,  True,  True],
            [ True, False, False,  True,  True],
            [ True, False, False, False,  True]], dtype=bool)
-    >>> blobs = binary_blobs(length=256, blob_size_fraction=0.1)
+    >>> blobs = data.binary_blobs(length=256, blob_size_fraction=0.1)
     >>> # Finer structures
-    >>> blobs = binary_blobs(length=256, blob_size_fraction=0.05)
+    >>> blobs = data.binary_blobs(length=256, blob_size_fraction=0.05)
     >>> # Blobs cover a smaller volume fraction of the image
-    >>> blobs = binary_blobs(length=256, volume_fraction=0.3)
+    >>> blobs = data.binary_blobs(length=256, volume_fraction=0.3)
     """
     rs = np.random.RandomState(seed)
     shape = tuple([length] * n_dim)
