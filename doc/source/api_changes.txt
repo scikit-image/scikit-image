@@ -1,3 +1,8 @@
+Version 0.12
+------------
+- The functions ``blob_dog``, ``blob_log`` and ``blob_doh`` now return float
+  arrays instead of integer arrays.
+
 Version 0.11
 ------------
 - The ``skimage.filter`` subpackage has been renamed to ``skimage.filters``.
