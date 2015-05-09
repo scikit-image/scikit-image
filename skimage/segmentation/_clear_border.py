@@ -3,7 +3,7 @@ import numpy as np
 from ..measure import label
 
 
-def clear_border(labels, buffer_size=0, bgval=0):
+def clear_border(labels, buffer_size=0, bgval=0, in_place=False):
     """Clear objects connected to the label image border.
 
     The changes will be applied directly to the input.
@@ -17,11 +17,13 @@ def clear_border(labels, buffer_size=0, bgval=0):
         that touch the outside of the image are removed.
     bgval : float or int, optional
         Cleared objects are set to this value.
+    in_place : bool, optional
+        Whether or not to manipulate the labels array in-place.
 
     Returns
     -------
     labels : (N, M) array
-        Cleared binary image.  Note that the input label image is modified.
+        Cleared binary image.
 
     Examples
     --------
@@ -68,6 +70,9 @@ def clear_border(labels, buffer_size=0, bgval=0):
     label_mask = np.in1d(indices, borders_indices)
     # create mask for pixels to clear
     mask = label_mask[labels.ravel()].reshape(labels.shape)
+
+    if not in_place:
+        image = image.copy()
 
     # clear border pixels
     image[mask] = bgval
