@@ -65,7 +65,7 @@ def test_imread_separate_channels():
 
 def test_imread_multipage_rgb_tif():
     img = imread(os.path.join(data_dir, 'multipage_rgb.tif'))
-    assert img.shape == (10, 10, 3), img.shape
+    assert img.shape == (2, 10, 10, 3), img.shape
 
 
 def test_imread_palette():
