@@ -69,10 +69,16 @@ def test_imread_separate_channels():
     f = NamedTemporaryFile(suffix='.tif')
     fname = f.name
     f.close()
-    imsave(fname, x, plugin='tifffile')
-    img = imread(fname, plugin='tifffile')
+    imsave(fname, x)
+    img = imread(fname)
     os.remove(fname)
     assert img.shape == (16, 8, 3), img.shape
+
+
+@skipif(not imread_available)
+def test_imread_multipage_rgb_tif():
+    img = imread(os.path.join(data_dir, 'multipage_rgb.png'))
+    assert img.shape == (10, 10, 3), img.shape
 
 
 class TestSave:
