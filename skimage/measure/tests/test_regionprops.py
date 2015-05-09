@@ -68,8 +68,8 @@ def test_moments_central():
     assert_almost_equal(mu[0, 3], -737.333333333333)
     assert_almost_equal(mu[1, 1], -87.33333333333303)
     assert_almost_equal(mu[1, 2], -127.5555555555593)
-    assert_almost_equal(mu[2, 0],  1259.7777777777774)
-    assert_almost_equal(mu[2, 1],  2000.296296296291)
+    assert_almost_equal(mu[2, 0], 1259.7777777777774)
+    assert_almost_equal(mu[2, 1], 2000.296296296291)
     assert_almost_equal(mu[3, 0], -760.0246913580195)
 
 
@@ -232,11 +232,11 @@ def test_moments():
 def test_moments_normalized():
     nu = regionprops(SAMPLE)[0].moments_normalized
     # determined with OpenCV
-    assert_almost_equal(nu[0, 2],  0.08410493827160502)
+    assert_almost_equal(nu[0, 2], 0.08410493827160502)
     assert_almost_equal(nu[1, 1], -0.016846707818929982)
     assert_almost_equal(nu[1, 2], -0.002899800614433943)
-    assert_almost_equal(nu[2, 0],  0.24301268861454037)
-    assert_almost_equal(nu[2, 1],  0.045473992910668816)
+    assert_almost_equal(nu[2, 0], 0.24301268861454037)
+    assert_almost_equal(nu[2, 1], 0.045473992910668816)
     assert_almost_equal(nu[3, 0], -0.017278118992041805)
 
 
@@ -277,14 +277,14 @@ def test_weighted_moments_central():
     wmu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
                       )[0].weighted_moments_central
     ref = np.array(
-        [[ 7.4000000000e+01, -2.1316282073e-13,
-           4.7837837838e+02, -7.5943608473e+02],
-         [ 3.7303493627e-14, -8.7837837838e+01,
-          -1.4801314828e+02, -1.2714707125e+03],
-         [ 1.2602837838e+03,  2.1571526662e+03,
-           6.6989799420e+03,  1.5304076361e+04],
-         [-7.6561796932e+02, -4.2385971907e+03,
-          -9.9501164076e+03, -3.3156729271e+04]]
+        [[7.4000000000e+01, -2.1316282073e-13,  4.7837837838e+02,
+          -7.5943608473e+02],
+         [3.7303493627e-14, -8.7837837838e+01, -1.4801314828e+02,
+          -1.2714707125e+03],
+         [1.2602837838e+03,  2.1571526662e+03,  6.6989799420e+03,
+          1.5304076361e+04],
+         [-7.6561796932e+02, -4.2385971907e+03, -9.9501164076e+03,
+          -3.3156729271e+04]]
     )
     np.set_printoptions(precision=10)
     assert_array_almost_equal(wmu, ref)
@@ -315,10 +315,14 @@ def test_weighted_moments():
     wm = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
                      )[0].weighted_moments
     ref = np.array(
-        [[7.4000000e+01, 4.1000000e+02, 2.7500000e+03, 1.9778000e+04],
-         [6.9900000e+02, 3.7850000e+03, 2.4855000e+04, 1.7500100e+05],
-         [7.8630000e+03, 4.4063000e+04, 2.9347700e+05, 2.0810510e+06],
-         [9.7317000e+04, 5.7256700e+05, 3.9007170e+06, 2.8078871e+07]]
+        [[7.4000000000e+01, 4.1000000000e+02, 2.7500000000e+03,
+          1.9778000000e+04],
+         [6.9900000000e+02, 3.7850000000e+03, 2.4855000000e+04,
+          1.7500100000e+05],
+         [7.8630000000e+03, 4.4063000000e+04, 2.9347700000e+05,
+          2.0810510000e+06],
+         [9.7317000000e+04, 5.7256700000e+05, 3.9007170000e+06,
+          2.8078871000e+07]]
     )
     assert_array_almost_equal(wm, ref)
 
