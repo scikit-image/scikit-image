@@ -114,6 +114,9 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
         frames.append(frame)
         i += 1
 
+        if img_num is not None:
+            break
+
     if hasattr(im, 'fp') and im.fp:
         im.fp.close()
 
