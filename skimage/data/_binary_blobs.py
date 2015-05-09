@@ -5,21 +5,21 @@ from ..filters import gaussian_filter
 def binary_blobs(length=512, blob_size_fraction=0.1, n_dim=2,
                  volume_fraction=0.5, seed=None):
     """
-    Generate synthetic binary image with several blob-like rounded objects.
+    Generate synthetic binary image with several rounded blob-like objects.
 
     Parameters
     ----------
-    length : int, default 512
+    length : int, optional
         Linear size of output image.
-    blob_size_fraction : float, default 0.1
+    blob_size_fraction : float, optional
         Typical linear size of blob, as a fraction of ``length``, should be
         smaller than 1.
-    n_dim : int, default 2
+    n_dim : int, optional
         Number of dimensions of output image.
     volume_fraction : float, default 0.5
         Fraction of image pixels covered by the blobs (where the output is 1).
         Should be in [0, 1].
-    seed : int, default 0
+    seed : int, optional
         Seed to initialize the random number generator.
 
     Returns
@@ -29,15 +29,18 @@ def binary_blobs(length=512, blob_size_fraction=0.1, n_dim=2,
 
     Examples
     --------
+    >>> data.binary_blobs(length=5, blob_size_fraction=0.2, seed=1)
+    array([[ True, False,  True,  True,  True],
+           [ True,  True,  True, False,  True],
+           [False,  True, False,  True,  True],
+           [ True, False, False,  True,  True],
+           [ True, False, False, False,  True]], dtype=bool)
     >>> blobs = binary_blobs(length=256, blob_size_fraction=0.1)
     >>> # Finer structures
     >>> blobs = binary_blobs(length=256, blob_size_fraction=0.05)
     >>> # Blobs cover a smaller volume fraction of the image
     >>> blobs = binary_blobs(length=256, volume_fraction=0.3)
     """
-    if seed is None:
-        seed = 0
-    # Fix the seed for reproducible results
     rs = np.random.RandomState(seed)
     shape = tuple([length] * n_dim)
     mask = np.zeros(shape)

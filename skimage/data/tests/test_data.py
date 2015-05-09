@@ -1,3 +1,4 @@
+import numpy as np
 import skimage.data as data
 from numpy.testing import assert_equal
 
@@ -6,6 +7,7 @@ def test_lena():
     """ Test that "Lena" image can be loaded. """
     lena = data.lena()
     assert_equal(lena.shape, (512, 512, 3))
+
 
 def test_astronaut():
     """ Test that "astronaut" image can be loaded. """
@@ -61,6 +63,10 @@ def test_binary_blobs():
     assert blobs.mean() == 0.25
     blobs = data.binary_blobs(length=32, volume_fraction=0.25, n_dim=3)
     assert blobs.mean() == 0.25
+    other_realization = data.binary_blobs(length=32, volume_fraction=0.25,
+                                          n_dim=3)
+    assert not np.all(blobs == other_realization)
+
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
