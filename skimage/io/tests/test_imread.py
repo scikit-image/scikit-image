@@ -61,26 +61,6 @@ def test_bilevel():
     assert_array_equal(img.astype(bool), expected)
 
 
-@skipif(not imread_available)
-def test_imread_separate_channels():
-    # Test that imread returns RGBA values contiguously even when they are
-    # stored in separate planes.
-    x = np.random.rand(3, 16, 8)
-    f = NamedTemporaryFile(suffix='.tif')
-    fname = f.name
-    f.close()
-    imsave(fname, x)
-    img = imread(fname)
-    os.remove(fname)
-    assert img.shape == (16, 8, 3), img.shape
-
-
-@skipif(not imread_available)
-def test_imread_multipage_rgb_tif():
-    img = imread(os.path.join(data_dir, 'multipage_rgb.png'))
-    assert img.shape == (10, 10, 3), img.shape
-
-
 class TestSave:
     def roundtrip(self, x, scaling=1):
         f = NamedTemporaryFile(suffix='.png')
