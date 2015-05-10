@@ -44,6 +44,13 @@ cdef double* _compute_range_lut(Py_ssize_t win_size, double sigma):
     return range_lut
 
 
+cdef inline Py_ssize_t Py_ssize_t_min(Py_ssize_t value1, Py_ssize_t value2):
+    if value1 < value2:
+        return value1
+    else:
+        return value2
+
+
 def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
                       double sigma_spatial, Py_ssize_t bins,
                       mode, double cval):
@@ -60,6 +67,7 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
         Py_ssize_t cols = image.shape[1]
         Py_ssize_t dims = image.shape[2]
         Py_ssize_t window_ext = (win_size - 1) / 2
+        Py_ssize_t max_color_lut_bin = bins - 1
 
         double max_value
 
@@ -69,7 +77,7 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
         double* color_lut
         double* range_lut
 
-        Py_ssize_t r, c, d, wr, wc, kr, kc, rr, cc, pixel_addr
+        Py_ssize_t r, c, d, wr, wc, kr, kc, rr, cc, pixel_addr, color_lut_bin
         double value, weight, dist, total_weight, csigma_range, color_weight, \
                range_weight
         double dist_scale
@@ -126,7 +134,10 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
                     dist = sqrt(dist)
 
                     range_weight = range_lut[kr * win_size + kc]
-                    color_weight = color_lut[<int>(dist * dist_scale)]
+
+                    color_lut_bin = Py_ssize_t_min(
+                        <Py_ssize_t>(dist * dist_scale), max_color_lut_bin)
+                    color_weight = color_lut[color_lut_bin]
 
                     weight = range_weight * color_weight
                     for d in range(dims):
