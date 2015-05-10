@@ -17,6 +17,7 @@ STREL_4 = np.array([[0, 1, 0],
                     [1, 1, 1],
                     [0, 1, 0]], dtype=np.uint8)
 STREL_8 = np.ones((3, 3), dtype=np.uint8)
+STREL_26_3D = np.ones((3, 3, 3), dtype=np.uint8)
 PROPS = {
     'Area': 'area',
     'BoundingBox': 'bbox',
@@ -93,39 +94,51 @@ class _RegionProperties(object):
 
         self._cache_active = cache_active
         self._cache = {}
+        self._ndim = label_image.ndim
 
     def area(self):
-        return self.moments[0, 0]
+        return self.image.sum()
 
     def bbox(self):
-        return (self._slice[0].start, self._slice[1].start,
-                self._slice[0].stop, self._slice[1].stop)
+        return tuple([self._slice[i].start for i in range(self._ndim)] +
+                     [self._slice[i].stop for i in range(self._ndim)])
 
     def centroid(self):
-        row, col = self.local_centroid
-        return row + self._slice[0].start, col + self._slice[1].start
+        centroid_coords = self.local_centroid
+        return tuple(centroid_coords +
+                     np.array([self._slice[i].start
+                               for i in range(self._ndim)]))
 
     def convex_area(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images')
         return np.sum(self.convex_image)
 
     @_cached
     def convex_image(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images')
         from ..morphology.convex_hull import convex_hull_image
         return convex_hull_image(self.image)
 
     def coords(self):
-        rr, cc = np.nonzero(self.image)
-        return np.vstack((rr + self._slice[0].start,
-                          cc + self._slice[1].start)).T
+        indices = np.nonzero(self.image)
+        return np.vstack([indices[i] + self._slice[i].start
+                          for i in range(self._ndim)]).T
 
     def eccentricity(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images')
         l1, l2 = self.inertia_tensor_eigvals
         if l1 == 0:
             return 0
         return sqrt(1 - l2 / l1)
 
     def equivalent_diameter(self):
-        return sqrt(4 * self.moments[0, 0] / PI)
+        if self._ndim == 2:
+            return sqrt(4 * self.area / PI)
+        elif self._ndim == 3:
+            return (6 * self.area / PI) ** (1. / 3)
 
     def euler_number(self):
         euler_array = self.filled_image != self.image
@@ -134,15 +147,17 @@ class _RegionProperties(object):
         return -num + 1
 
     def extent(self):
-        rows, cols = self.image.shape
-        return self.moments[0, 0] / (rows * cols)
+        return float(self.area) / self.image.size
 
     def filled_area(self):
         return np.sum(self.filled_image)
 
     @_cached
     def filled_image(self):
-        return ndi.binary_fill_holes(self.image, STREL_8)
+        if self._ndim == 2:
+            return ndi.binary_fill_holes(self.image, STREL_8)
+        else:
+            return ndi.binary_fill_holes(self.image, STREL_26_3D)
 
     @_cached
     def image(self):
@@ -150,6 +165,8 @@ class _RegionProperties(object):
 
     @_cached
     def inertia_tensor(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images')
         mu = self.moments_central
         a = mu[2, 0] / mu[0, 0]
         b = -mu[1, 1] / mu[0, 0]
@@ -158,6 +175,8 @@ class _RegionProperties(object):
 
     @_cached
     def inertia_tensor_eigvals(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images')
         a, b, b, c = self.inertia_tensor.flat
         # eigen values of inertia tensor
         l1 = (a + c) / 2 + sqrt(4 * b ** 2 + (a - c) ** 2) / 2
@@ -174,6 +193,8 @@ class _RegionProperties(object):
         return self.intensity_image.astype(np.double)
 
     def local_centroid(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images')
         m = self.moments
         row = m[0, 1] / m[0, 0]
         col = m[1, 0] / m[0, 0]
@@ -189,31 +210,45 @@ class _RegionProperties(object):
         return np.min(self.intensity_image[self.image])
 
     def major_axis_length(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images')
         l1, _ = self.inertia_tensor_eigvals
         return 4 * sqrt(l1)
 
     def minor_axis_length(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images')
         _, l2 = self.inertia_tensor_eigvals
         return 4 * sqrt(l2)
 
     @_cached
     def moments(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images')
         return _moments.moments(self.image.astype(np.uint8), 3)
 
     @_cached
     def moments_central(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images') 
         row, col = self.local_centroid
         return _moments.moments_central(self.image.astype(np.uint8),
                                         row, col, 3)
 
     def moments_hu(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images')
         return _moments.moments_hu(self.moments_normalized)
 
     @_cached
     def moments_normalized(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images')
         return _moments.moments_normalized(self.moments_central, 3)
 
     def orientation(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images') 
         a, b, b, c = self.inertia_tensor.flat
         b = -b
         if a - c == 0:
@@ -225,16 +260,24 @@ class _RegionProperties(object):
             return - 0.5 * atan2(2 * b, (a - c))
 
     def perimeter(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images')
         return perimeter(self.image, 4)
 
     def solidity(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images')
         return self.moments[0, 0] / np.sum(self.convex_image)
 
     def weighted_centroid(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images')
         row, col = self.weighted_local_centroid
         return row + self._slice[0].start, col + self._slice[1].start
 
     def weighted_local_centroid(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images') 
         m = self.weighted_moments
         row = m[0, 1] / m[0, 0]
         col = m[1, 0] / m[0, 0]
@@ -247,15 +290,21 @@ class _RegionProperties(object):
 
     @_cached
     def weighted_moments_central(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images') 
         row, col = self.weighted_local_centroid
         return _moments.moments_central(self._intensity_image_double(),
                                         row, col, 3)
 
     def weighted_moments_hu(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images')
         return _moments.moments_hu(self.weighted_moments_normalized)
 
     @_cached
     def weighted_moments_normalized(self):
+        if self._ndim > 2:
+            raise NotImplementedError('not implemented for 3D images')
         return _moments.moments_normalized(self.weighted_moments_central, 3)
 
     def __iter__(self):
@@ -476,8 +525,8 @@ def regionprops(label_image, intensity_image=None, cache=True):
 
     label_image = np.squeeze(label_image)
 
-    if label_image.ndim != 2:
-        raise TypeError('Only 2-D images supported.')
+    if label_image.ndim not in (2, 3):
+            raise TypeError('Only 2-D and 3-D images supported.')
 
     if not np.issubdtype(label_image.dtype, np.integer):
         raise TypeError('Label image must be of integral type.')
