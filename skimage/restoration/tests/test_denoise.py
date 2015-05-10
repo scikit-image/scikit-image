@@ -144,6 +144,12 @@ def test_denoise_bilateral_3d():
     assert out1[30:45, 5:15].std() > out2[30:45, 5:15].std()
 
 
+def test_denoise_bilateral_nan():
+    img = np.NaN + np.empty((50, 50))
+    out = restoration.denoise_bilateral(img)
+    assert_equal(img, out)
+
+
 def test_nl_means_denoising_2d():
     img = np.zeros((40, 40))
     img[10:-10, 10:-10] = 1.
