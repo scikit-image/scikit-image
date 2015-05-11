@@ -77,7 +77,8 @@ def _discard_edges(X, pad):
 def structural_similarity(X, Y, win_size=None, gradient=False,
                           dynamic_range=None, multichannel=None,
                           gaussian_weights=False, full=False,
-                          image_content_weighting=False):
+                          image_content_weighting=False,
+                          use_sample_covariance=True):
     """Compute the mean structural similarity index between two images.
 
     Parameters
@@ -106,6 +107,9 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     image_content_weighting : bool
         If True, weight the ssim mean is spatially weighted by image content as
         proposed in Wang and Shang 2006 [3].
+    use_sample_covariance : bool
+        if True, normalize covariances by N-1 rather than, N where N is the
+        number of pixels within the sliding window.
 
     Returns
     -------
@@ -120,7 +124,8 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     Notes
     -----
     To exactly match the implementation of Wang et. al. [1], set
-    `gaussian_weights` to True and `win_size` to 11.
+    `gaussian_weights` to True, `win_size` to 11, and `use_sample_covariance`
+    to False.
 
     References
     ----------
@@ -216,7 +221,12 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     Y = Y.astype(np.float64)
 
     NP = win_size ** ndim
-    cov_norm = NP / (NP - 1)  # filter will normalize by NP, but we want NP - 1
+
+    # filter has already normalized by NP
+    if use_sample_covariance:
+        cov_norm = NP / (NP - 1)  # sample covariance
+    else:
+        cov_norm = 1.0  # population covariance to match Wang et. al. 2004
 
     # compute (weighted) means
     ux = filter_func(X, **filter_args)
