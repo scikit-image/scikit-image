@@ -76,7 +76,8 @@ def _discard_edges(X, pad):
 
 def structural_similarity(X, Y, win_size=None, gradient=False,
                           dynamic_range=None, multichannel=None,
-                          gaussian_weights=False, full=False):
+                          gaussian_weights=False, full=False,
+                          image_content_weighting=False):
     """Compute the mean structural similarity index between two images.
 
     Parameters
@@ -102,6 +103,9 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     full : bool
         If True, return the full structural similarity image instead of the
         mean value
+    image_content_weighting : bool
+        If True, weight the ssim mean is spatially weighted by image content as
+        proposed in Wang and Shang 2006 [3].
 
     Returns
     -------
@@ -128,12 +132,19 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     .. [2] Avanaki, A. N. (2009). Exact global histogram specification
        optimized for structural similarity. Optical Review, 16, 613-621.
 
+    .. [3] Wang, Z. and Shang, X.  Spatial pooling strategies for perceptual
+       image quality assessment. Proc. IEEE Inter. Conf. Image. Proc.
+       2945-2948.
     """
     if not X.dtype == Y.dtype:
         raise ValueError('Input images must have the same dtype.')
 
     if not X.shape == Y.shape:
         raise ValueError('Input images must have the same dimensions.')
+
+    if image_content_weighting and gradient:
+        raise ValueError(
+            "gradient not implemented for image content weighted case")
 
     # default treats 3D arrays with shape[2] == 3 as multichannel
     if multichannel is None:
@@ -234,8 +245,15 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
 
     # to avoid edge effects will ignore filter radius strip around edges
     pad = (win_size - 1) // 2
-    # compute mean of ssim
-    mssim = _discard_edges(S, pad).mean()
+
+    # compute (weighted) mean of ssim
+    if image_content_weighting:
+        # weight with Eq. 7 of Wang and Simoncelli 2006.
+        W = np.log((1 + vx / C2) * (1 + vy / C2))
+        W /= W.sum()
+        mssim = _discard_edges(S * W, pad).sum()
+    else:
+        mssim = _discard_edges(S, pad).mean()
 
     if gradient:
         # The following is Eqs. 7-8 of Avanaki 2009.
@@ -254,4 +272,3 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
             return mssim, S
         else:
             return mssim
-

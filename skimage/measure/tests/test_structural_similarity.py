@@ -143,6 +143,9 @@ def test_invalid_input():
 
     assert_raises(ValueError, ssim, X, X, win_size=8)
 
+    # do not allow both image content weighting and gradient calculation
+    assert_raises(ValueError, ssim, X, X, image_content_weighting=True,
+                  gradient=True)
 
 if __name__ == "__main__":
     np.testing.run_module_suite()
