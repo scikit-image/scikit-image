@@ -2,21 +2,18 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal
 
 from skimage.filters import threshold_adaptive, gaussian_filter
-from skimage.util import process_chunks
+from skimage.util import apply_chunks
 
 
-def test_process_chunks():
+def test_apply_chunks():
     # data
     a = np.arange(144).reshape(12, 12).astype(float)
 
-    # wrapp the function we're applying
-    def wrapped_thresh(arr):
-        return threshold_adaptive(arr, 3, mode='reflect')
-
     # apply the filter
     expected1 = threshold_adaptive(a, 3)
-    result1 = process_chunks(wrapped_thresh, a, chunks=(6, 6),
-                             depth=5)
+    result1 = apply_chunks(threshold_adaptive, a, chunks=(6, 6), depth=5,
+                           extra_arguments=(3,),
+                           extra_keywords={'mode': 'reflect'})
 
     assert_array_almost_equal(result1, expected1)
 
@@ -24,8 +21,7 @@ def test_process_chunks():
         return gaussian_filter(arr, 1, mode='reflect')
 
     expected2 = gaussian_filter(a, 1, mode='reflect')
-    result2 = process_chunks(wrapped_gauss, a, chunks=(6, 6),
-                             depth=5)
+    result2 = apply_chunks(wrapped_gauss, a, chunks=(6, 6), depth=5)
 
     assert_array_almost_equal(result2, expected2)
 
@@ -37,28 +33,27 @@ def test_no_chunks():
         return arr + 42
 
     expected = add_42(a)
-    result = process_chunks(add_42, a)
+    result = apply_chunks(add_42, a)
 
     assert_array_almost_equal(result, expected)
 
 
-def test_process_chunks_wrap():
+def test_apply_chunks_wrap():
     def wrapped(arr):
         return gaussian_filter(arr, 1, mode='wrap')
     a = np.arange(144).reshape(12, 12).astype(float)
     expected = gaussian_filter(a, 1, mode='wrap')
-    result = process_chunks(wrapped, a, chunks=(6, 6),
-                            depth=5, mode='wrap')
+    result = apply_chunks(wrapped, a, chunks=(6, 6), depth=5, mode='wrap')
 
     assert_array_almost_equal(result, expected)
 
 
-def test_process_chunks_nearest():
+def test_apply_chunks_nearest():
     def wrapped(arr):
         return gaussian_filter(arr, 1, mode='nearest')
     a = np.arange(144).reshape(12, 12).astype(float)
     expected = gaussian_filter(a, 1, mode='nearest')
-    result = process_chunks(wrapped, a, chunks=(6, 6),
-                            depth={0: 5, 1: 5}, mode='nearest')
+    result = apply_chunks(wrapped, a, chunks=(6, 6), depth={0: 5, 1: 5},
+                          mode='nearest')
 
     assert_array_almost_equal(result, expected)

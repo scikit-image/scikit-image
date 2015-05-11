@@ -3,7 +3,7 @@ from multiprocessing import cpu_count
 
 import dask.array as da
 
-__all__ = ['process_chunks']
+__all__ = ['apply_chunks']
 
 
 def _get_chunks(shape, ncpu):
@@ -44,8 +44,8 @@ def _get_chunks(shape, ncpu):
     return tuple(chunks)
 
 
-def process_chunks(function, array, chunks=None, depth=0,
-                   mode=None, extra_arguments=(), extra_keywords={}):
+def apply_chunks(function, array, chunks=None, depth=0, mode=None,
+                 extra_arguments=(), extra_keywords={}):
     """Map a function in parallel across an array.
 
     Split an array into possibly overlapping chunks of a given depth and
@@ -57,25 +57,25 @@ def process_chunks(function, array, chunks=None, depth=0,
     function : function
         Function to be mapped which takes an array as an argument.
     array : numpy array
-        array which the function will be applied to.
-    chunks : int, tuple, or tuple of tuples
-        One tuple of length array.ndim or a list of tuples of length ndim.
-        Where each subtuple adds to the size of the array in the corresponding
-        dimension. If None, the array is broken up into chunks based on the
-        number of available cpus.
-    depth : int
-        integer equal to the depth of the internal external padding
-    mode : 'reflect', 'periodic', 'wrap', 'nearest'
+        Array which the function will be applied to.
+    chunks : int, tuple, or tuple of tuples, optional
+        A single integer is interpreted as the length of one side of a square
+        chunk that should be tiled across the array.  One tuple of length
+        ``array.ndim`` represents the shape of a chunk, and it is tiled across
+        the array.  A list of tuples of length ``ndim``, where each sub-tuple
+        is a sequence of chunk sizes along the corresponding dimension. If
+        None, the array is broken up into chunks based on the number of
+        available cpus. More information about chunks is in the documentation
+        `here <https://dask.pydata.org/en/latest/array-design.html>`_.
+    depth : int, optional
+        Integer equal to the depth of the added boundary cells. Defaults to
+        zero.
+    mode : 'reflect', 'periodic', 'wrap', 'nearest', optional
         type of external boundary padding
-    extra_arguments : tuple
+    extra_arguments : tuple, optional
         Tuple of arguments to be passed to the function.
-    extra_keywords : dictionary
+    extra_keywords : dictionary, optional
         Dictionary of keyword arguments to be passed to the function.
-
-    Notes
-    -----
-    Be careful choosing the depth so that it is never larger than the length of
-    a chunk.
 
     """
     if chunks is None:
