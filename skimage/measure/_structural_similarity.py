@@ -27,8 +27,8 @@ def gaussian_filter2(X, sigma=1.5, size=11):
     X : ndarray
         filtered image
 
-    Note
-    ----
+    Notes
+    -----
     scipy.ndimage.gaussian is very similar, but uses a 13 tap FIR filter
     rather than the 11 tap one of Wang. et. al.
     """
@@ -75,7 +75,8 @@ def _discard_edges(X, pad):
 
 
 def structural_similarity(X, Y, win_size=None, gradient=False,
-                          dynamic_range=None, gaussian_weights=False):
+                          dynamic_range=None, multichannel=None,
+                          gaussian_weights=False):
     """Compute the mean structural similarity index between two images.
 
     Parameters
@@ -91,6 +92,10 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
         Dynamic range of the input image (distance between minimum and maximum
         possible values).  By default, this is estimated from the image
         data-type.
+    multichannel : int or None
+        If True, treat the last dimension of the array as channels. Similarity
+        calculations are done independently for each channel then averaged.
+        Defaults to True only if X is 3D and X.shape[2] == 3.
     gaussian_weights : bool
         If True, each patch (of size win_size) has its mean and variance
         spatially weighted by a normalized Gaussian kernel of width sigma=1.5.
@@ -124,6 +129,36 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
 
     if not X.shape == Y.shape:
         raise ValueError('Input images must have the same dimensions.')
+
+    # default treats 3D arrays with shape[2] == 3 as multichannel
+    if multichannel is None:
+        if X.ndim == 3 and X.shape[2] == 3:
+            multichannel = True
+        else:
+            multichannel = False
+
+    if multichannel:
+        # loop over channels
+        args = locals()
+        args.pop('X')
+        args.pop('Y')
+        args['multichannel'] = False
+        nch = X.shape[-1]
+        mssim = np.empty(nch)
+        if gradient:
+            G = np.empty(X.shape)
+        for ch in range(nch):
+            if gradient:
+                mssim[..., ch], G[..., ch] = structural_similarity(
+                    X[..., ch], Y[..., ch], **args)
+            else:
+                mssim[..., ch] = structural_similarity(
+                    X[..., ch], Y[..., ch], **args)
+        mssim = mssim.mean()
+        if gradient:
+            return mssim, G
+        else:
+            return mssim
 
     if win_size is None:
         if gaussian_weights:

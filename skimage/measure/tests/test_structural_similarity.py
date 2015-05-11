@@ -42,6 +42,22 @@ def test_ssim_image():
     assert(S1 < 0.3)
 
 
+def test_ssim_multichannel():
+    N = 100
+    X = (np.random.rand(N, N) * 255).astype(np.uint8)
+    Y = (np.random.rand(N, N) * 255).astype(np.uint8)
+
+    S1 = ssim(X, Y, win_size=3)
+
+    # replicate across three channels.  should get identical value
+    Xc = np.tile(X[..., np.newaxis], (1, 1, 3))
+    Yc = np.tile(Y[..., np.newaxis], (1, 1, 3))
+    S2 = ssim(Xc, Yc, win_size=3)
+    assert_almost_equal(S1, S2)
+
+    # fail if win_size exceeds any non-channel dimension
+    assert_raises(ValueError, ssim, Xc, Yc, win_size=7, multichannel=False)
+
 # NOTE: This test is known to randomly fail on some systems (Mac OS X 10.6)
 def test_ssim_grad():
     N = 30
