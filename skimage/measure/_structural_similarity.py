@@ -77,8 +77,7 @@ def _discard_edges(X, pad):
 def structural_similarity(X, Y, win_size=None, gradient=False,
                           dynamic_range=None, multichannel=None,
                           gaussian_weights=False, full=False,
-                          image_content_weighting=False,
-                          use_sample_covariance=True):
+                          image_content_weighting=False, **kwargs):
     """Compute the mean structural similarity index between two images.
 
     Parameters
@@ -107,9 +106,18 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     image_content_weighting : bool
         If True, weight the ssim mean is spatially weighted by image content as
         proposed in Wang and Shang 2006 [3].
+
+    Other Parameters
+    ----------------
     use_sample_covariance : bool
         if True, normalize covariances by N-1 rather than, N where N is the
         number of pixels within the sliding window.
+    K1 : float
+        algorithm parameter, K1 (small constant, see [1])
+    K2 : float
+        algorithm parameter, K2 (small constant, see [1])
+    sigma : float
+        sigma for the Gaussian when `gaussian_weights` is True.
 
     Returns
     -------
@@ -190,6 +198,11 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
         else:
             return mssim
 
+    K1 = kwargs.pop('K1', 0.01)
+    K2 = kwargs.pop('K2', 0.03)
+    sigma = kwargs.pop('sigma', 1.5)
+    use_sample_covariance = kwargs.pop('use_sample_covariance', True)
+
     if win_size is None:
         if gaussian_weights:
             win_size = 11  # 11 to match Wang et. al. 2004
@@ -211,7 +224,7 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     if gaussian_weights:
         # sigma = 1.5 to match Wang et. al. 2004
         filter_func = gaussian_filter2
-        filter_args = {'sigma': 1.5, 'size': win_size}
+        filter_args = {'sigma': sigma, 'size': win_size}
     else:
         filter_func = uniform_filter
         filter_args = {'size': win_size}
@@ -241,8 +254,6 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     vxy = cov_norm * (uxy - ux * uy)
 
     R = dynamic_range
-    K1 = 0.01
-    K2 = 0.03
     C1 = (K1 * R) ** 2
     C2 = (K2 * R) ** 2
 
