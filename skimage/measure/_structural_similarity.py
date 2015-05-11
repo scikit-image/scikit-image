@@ -76,7 +76,7 @@ def _discard_edges(X, pad):
 
 def structural_similarity(X, Y, win_size=None, gradient=False,
                           dynamic_range=None, multichannel=None,
-                          gaussian_weights=False):
+                          gaussian_weights=False, full=False):
     """Compute the mean structural similarity index between two images.
 
     Parameters
@@ -99,6 +99,9 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     gaussian_weights : bool
         If True, each patch (of size win_size) has its mean and variance
         spatially weighted by a normalized Gaussian kernel of width sigma=1.5.
+    full : bool
+        If True, return the full structural similarity image instead of the
+        mean value
 
     Returns
     -------
@@ -107,6 +110,8 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     grad : ndarray
         Gradient of the structural similarity index between X and Y [2]. This
         is only returned if `gradient` is set to True.
+    S : ndarray
+        Full SSIM image.  This is only returned if `full` is set to True.
 
     Notes
     -----
@@ -147,16 +152,25 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
         mssim = np.empty(nch)
         if gradient:
             G = np.empty(X.shape)
+        if full:
+            S = np.empty(X.shape)
         for ch in range(nch):
-            if gradient:
-                mssim[..., ch], G[..., ch] = structural_similarity(
-                    X[..., ch], Y[..., ch], **args)
+            ch_result = structural_similarity(X[..., ch], Y[..., ch], **args)
+            if gradient and full:
+                mssim[..., ch], G[..., ch], S[..., ch] = ch_result
+            elif gradient:
+                mssim[..., ch], G[..., ch] = ch_result
+            elif full:
+                mssim[..., ch], S[..., ch] = ch_result
             else:
-                mssim[..., ch] = structural_similarity(
-                    X[..., ch], Y[..., ch], **args)
+                mssim[..., ch] = ch_result
         mssim = mssim.mean()
-        if gradient:
+        if gradient and full:
+            return mssim, G, S
+        elif gradient:
             return mssim, G
+        elif full:
+            return mssim, S
         else:
             return mssim
 
@@ -230,6 +244,14 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
         grad += filter_func((ux * (A2 - A1) - uy * (B2 - B1) * S) / D,
                             **filter_args)
         grad *= (2 / X.size)
-        return mssim, grad
+
+        if full:
+            return mssim, grad, S
+        else:
+            return mssim, grad
     else:
-        return mssim
+        if full:
+            return mssim, S
+        else:
+            return mssim
+

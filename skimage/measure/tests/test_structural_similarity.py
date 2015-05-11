@@ -41,6 +41,11 @@ def test_ssim_image():
     S2 = ssim(X, Y, win_size=11, gaussian_weights=True)
     assert(S1 < 0.3)
 
+    mssim0, S3 = ssim(X, Y, full=True)
+    assert_equal(S3.shape, X.shape)
+    mssim = ssim(X, Y)
+    assert_equal(mssim0, mssim)
+
 
 def test_ssim_multichannel():
     N = 100
@@ -55,8 +60,13 @@ def test_ssim_multichannel():
     S2 = ssim(Xc, Yc, win_size=3)
     assert_almost_equal(S1, S2)
 
+    # full case should return an image as well
+    m, S3 = ssim(Xc, Yc, full=True)
+    assert_equal(S3.shape, Xc.shape)
+
     # fail if win_size exceeds any non-channel dimension
     assert_raises(ValueError, ssim, Xc, Yc, win_size=7, multichannel=False)
+
 
 # NOTE: This test is known to randomly fail on some systems (Mac OS X 10.6)
 def test_ssim_grad():
@@ -70,6 +80,9 @@ def test_ssim_grad():
     assert f < 0.05
     assert g[0] < 0.05
     assert np.all(g[1] < 0.05)
+
+    mssim, grad, s = ssim(X, Y, dynamic_range=255, gradient=True, full=True)
+    assert np.all(grad < 0.05)
 
 
 def test_ssim_dtype():
