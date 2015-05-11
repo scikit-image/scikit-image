@@ -4,7 +4,6 @@ import numpy as np
 from numpy.testing import assert_raises, assert_equal, assert_allclose
 
 from skimage import data_dir
-from skimage.io import use_plugin
 from skimage.io.collection import MultiImage, ImageCollection
 
 import six
@@ -15,7 +14,6 @@ class TestMultiImage():
     def setUp(self):
         # This multipage TIF file was created with imagemagick:
         # convert im1.tif im2.tif -adjoin multipage.tif
-        use_plugin('pil')
         paths = [os.path.join(data_dir, 'multipage_rgb.tif'),
                  os.path.join(data_dir, 'no_time_for_that.gif')]
         self.imgs = [MultiImage(paths[0]),
