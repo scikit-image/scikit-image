@@ -1,11 +1,22 @@
+import os
 import numpy as np
-from numpy.testing import assert_equal, assert_raises
+import scipy.io
+from numpy.testing import (assert_equal, assert_raises, assert_almost_equal,
+                           assert_array_almost_equal)
 
 from skimage.measure import structural_similarity as ssim
+import skimage.data
+from skimage.io import imread
+from skimage import data_dir
 
+
+np.random.seed(5)
+cam = skimage.data.camera()
+sigma = 20.0
+cam_noisy = np.clip(cam + sigma * np.random.randn(*cam.shape), 0, 255)
+cam_noisy = cam_noisy.astype(cam.dtype)
 
 np.random.seed(1234)
-
 
 def test_ssim_patch_range():
     N = 51
@@ -25,6 +36,9 @@ def test_ssim_image():
     assert_equal(S0, 1)
 
     S1 = ssim(X, Y, win_size=3)
+    assert(S1 < 0.3)
+
+    S2 = ssim(X, Y, win_size=11, gaussian_weights=True)
     assert(S1 < 0.3)
 
 
@@ -56,6 +70,38 @@ def test_ssim_dtype():
 
     assert S1 < 0.1
     assert S2 < 0.1
+
+
+def test_gaussian_mssim_vs_IPOL():
+    # Tests vs. imdiff result from the following IPOL article and code:
+    # http://www.ipol.im/pub/art/2011/g_lmii/
+    mssim_IPOL = 0.327309966087341
+    mssim = ssim(cam, cam_noisy, gaussian_weights=True)
+    assert_almost_equal(mssim, mssim_IPOL, decimal=2)
+
+
+def test_gaussian_mssim_and_gradient_vs_Matlab():
+    # comparison to Matlab implementation of N. Avanaki:
+    # https://ece.uwaterloo.ca/~nnikvand/Coderep/SHINE%20TOOLBOX/SHINEtoolbox/
+    # Note: final line of ssim_sens.m was modified to discard image borders
+
+    ref = np.load(os.path.join(data_dir, 'mssim_matlab_output.npz'))
+    grad_matlab = ref['grad_matlab']
+    mssim_matlab = float(ref['mssim_matlab'])
+
+    mssim, grad = ssim(cam, cam_noisy, gaussian_weights=True, gradient=True)
+
+    assert_almost_equal(mssim, mssim_matlab, decimal=2)
+
+    # check almost equal aside from object borders
+    assert_array_almost_equal(grad_matlab[5:-5], grad[5:-5])
+
+
+def test_mssim_vs_legacy():
+    # check that ssim with default options matches skimage 0.11 result
+    mssim_skimage_0pt11 = 0.34192589699605191
+    mssim = ssim(cam, cam_noisy)
+    assert_almost_equal(mssim, mssim_skimage_0pt11)
 
 
 def test_invalid_input():

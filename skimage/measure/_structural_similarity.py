@@ -3,36 +3,110 @@ from __future__ import division
 __all__ = ['structural_similarity']
 
 import numpy as np
+from scipy.ndimage.filters import uniform_filter, convolve1d
 
 from ..util.dtype import dtype_range
-from ..util.shape import view_as_windows
 
 
-def structural_similarity(X, Y, win_size=7,
-                          gradient=False, dynamic_range=None):
+def gaussian_filter2(X, sigma=1.5, size=11):
+    """ nD Gaussian filter with specific window extent.
+
+    matches the implementation of Wang. et. al.
+
+    Parameters
+    ----------
+    X : ndarray
+        image
+    sigma : float
+        Gaussian standard deviation (pixels)
+    size : float
+        Gaussian kernel extent (pixels)
+
+    Returns
+    -------
+    X : ndarray
+        filtered image
+
+    Note
+    ----
+    scipy.ndimage.gaussian is very similar, but uses a 13 tap FIR filter
+    rather than the 11 tap one of Wang. et. al.
+    """
+    radius = (size - 1) // 2
+    r = np.arange(2*radius + 1) - radius
+    filt = np.exp(-(r * r)/(2 * sigma * sigma))
+    filt /= filt.sum()
+    for ax in range(X.ndim):
+        X = convolve1d(X, filt, axis=ax)
+    return X
+
+
+def _discard_edges(X, pad):
+    """ Remove border of width pad from ndarray X.
+
+    Parameters
+    ----------
+    X : ndarray
+        image
+    pad : int or sequence of ints
+        border width to remove.  Can be a list of values corresponding to each
+        axis.  If pad is an integer, the same width is removed from all axes.
+
+    Returns
+    -------
+    Y : nadarray
+        image with edges removed
+
+    """
+    X = np.asanyarray(X)
+    if pad == 0:
+        return X
+
+    if isinstance(pad, int):
+        slice_array = [slice(pad, -pad), ] * X.ndim
+    else:
+        if len(pad) != X.ndim:
+            raise ValueError("pad array must match number of X dimensions")
+        slice_array = []
+        for d in range(X.ndim):
+            slice_array.append(slice(pad[d], -pad[d]))
+
+    return X[slice_array]
+
+
+def structural_similarity(X, Y, win_size=None, gradient=False,
+                          dynamic_range=None, gaussian_weights=False):
     """Compute the mean structural similarity index between two images.
 
     Parameters
     ----------
-    X, Y : (N,N) ndarray
+    X, Y : ndarray
         Images.
-    win_size : int
-        The side-length of the sliding window used in comparison.  Must
-        be an odd value.
+    win_size : int or None
+        The side-length of the sliding window used in comparison.  Must be an
+        odd value.  Default is 11 if `gaussian_weights` is True, 7 otherwise.
     gradient : bool
         If True, also return the gradient.
     dynamic_range : int
-        Dynamic range of the input image (distance between minimum and
-        maximum possible values).  By default, this is estimated from
-        the image data-type.
+        Dynamic range of the input image (distance between minimum and maximum
+        possible values).  By default, this is estimated from the image
+        data-type.
+    gaussian_weights : bool
+        If True, each patch (of size win_size) has its mean and variance
+        spatially weighted by a normalized Gaussian kernel of width sigma=1.5.
 
     Returns
     -------
-    s : float
-        Structural similarity.
-    grad : (N * N,) ndarray
-        Gradient of the structural similarity index between X and Y.
-        This is only returned if `gradient` is set to True.
+    mssim : float or ndarray
+        mean structural similarity.
+    grad : ndarray
+        Gradient of the structural similarity index between X and Y [2]. This
+        is only returned if `gradient` is set to True.
+
+    Notes
+    -----
+    To exactly match the implementation of Wang et. al. [1], set
+    `gaussian_weights` to True and `win_size` to 11.
 
     References
     ----------
@@ -41,12 +115,24 @@ def structural_similarity(X, Y, win_size=7,
        structural similarity. IEEE Transactions on Image Processing,
        13, 600-612.
 
+    .. [2] Avanaki, A. N. (2009). Exact global histogram specification
+       optimized for structural similarity. Optical Review, 16, 613-621.
+
     """
     if not X.dtype == Y.dtype:
         raise ValueError('Input images must have the same dtype.')
 
     if not X.shape == Y.shape:
         raise ValueError('Input images must have the same dimensions.')
+
+    if win_size is None:
+        if gaussian_weights:
+            win_size = 11  # 11 to match Wang et. al. 2004
+        else:
+            win_size = 7   # backwards compatibility
+
+    if np.any((np.asarray(X.shape) - win_size) < 0):
+        raise ValueError("win_size exceeds image extent")
 
     if not (win_size % 2 == 1):
         raise ValueError('Window size must be odd.')
@@ -55,22 +141,34 @@ def structural_similarity(X, Y, win_size=7,
         dmin, dmax = dtype_range[X.dtype.type]
         dynamic_range = dmax - dmin
 
-    XW = view_as_windows(X, (win_size, win_size))
-    YW = view_as_windows(Y, (win_size, win_size))
+    ndim = X.ndim
 
-    NS = len(XW)
-    NP = win_size * win_size
+    if gaussian_weights:
+        # sigma = 1.5 to match Wang et. al. 2004
+        filter_func = gaussian_filter2
+        filter_args = {'sigma': 1.5, 'size': win_size}
+    else:
+        filter_func = uniform_filter
+        filter_args = {'size': win_size}
 
-    ux = np.mean(np.mean(XW, axis=2), axis=2)
-    uy = np.mean(np.mean(YW, axis=2), axis=2)
+    # ndimage filters need floating point data
+    X = X.astype(np.float64)
+    Y = Y.astype(np.float64)
 
-    # Compute variances var(X), var(Y) and var(X, Y)
-    cov_norm = 1 / (win_size ** 2 - 1)
-    XWM = XW - ux[..., None, None]
-    YWM = YW - uy[..., None, None]
-    vx = cov_norm * np.sum(np.sum(XWM ** 2, axis=2), axis=2)
-    vy = cov_norm * np.sum(np.sum(YWM ** 2, axis=2), axis=2)
-    vxy = cov_norm * np.sum(np.sum(XWM * YWM, axis=2), axis=2)
+    NP = win_size ** ndim
+    cov_norm = NP / (NP - 1)  # filter will normalize by NP, but we want NP - 1
+
+    # compute (weighted) means
+    ux = filter_func(X, **filter_args)
+    uy = filter_func(Y, **filter_args)
+
+    # compute (weighted) variances and covariances
+    uxx = filter_func(X * X, **filter_args)
+    uyy = filter_func(Y * Y, **filter_args)
+    uxy = filter_func(X * Y, **filter_args)
+    vx = cov_norm * (uxx - ux * ux)
+    vy = cov_norm * (uyy - uy * uy)
+    vxy = cov_norm * (uxy - ux * uy)
 
     R = dynamic_range
     K1 = 0.01
@@ -78,27 +176,25 @@ def structural_similarity(X, Y, win_size=7,
     C1 = (K1 * R) ** 2
     C2 = (K2 * R) ** 2
 
-    A1, A2, B1, B2 = (v[..., None, None] for v in
-                      (2 * ux * uy + C1,
+    A1, A2, B1, B2 = ((2 * ux * uy + C1,
                        2 * vxy + C2,
                        ux ** 2 + uy ** 2 + C1,
                        vx + vy + C2))
+    D = B1 * B2
+    S = (A1 * A2) / D
 
-    S = np.mean((A1 * A2) / (B1 * B2))
+    # to avoid edge effects will ignore filter radius strip around edges
+    pad = (win_size - 1) // 2
+    # compute mean of ssim
+    mssim = _discard_edges(S, pad).mean()
 
     if gradient:
-        local_grad = 2 / (NP * B1 ** 2 * B2 ** 2) * \
-            (A1 * B1 * (B2 * XW - A2 * YW) -
-             B1 * B2 * (A2 - A1) * ux[..., None, None] +
-             A1 * A2 * (B1 - B2) * uy[..., None, None])
-
-        grad = np.zeros_like(X, dtype=float)
-        OW = view_as_windows(grad, (win_size, win_size))
-
-        OW += local_grad
-        grad /= NS
-
-        return S, grad
-
+        # The following is Eqs. 7-8 of Avanaki 2009.
+        grad = filter_func(A1 / D, **filter_args) * X
+        grad += filter_func(-S / B2, **filter_args) * Y
+        grad += filter_func((ux * (A2 - A1) - uy * (B2 - B1) * S) / D,
+                            **filter_args)
+        grad *= (2 / X.size)
+        return mssim, grad
     else:
-        return S
+        return mssim
