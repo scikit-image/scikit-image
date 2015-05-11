@@ -201,6 +201,12 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     K1 = kwargs.pop('K1', 0.01)
     K2 = kwargs.pop('K2', 0.03)
     sigma = kwargs.pop('sigma', 1.5)
+    if K1 < 0:
+        raise ValueError("K1 must be positive")
+    if K2 < 0:
+        raise ValueError("K2 must be positive")
+    if sigma < 0:
+        raise ValueError("sigma must be positive")
     use_sample_covariance = kwargs.pop('use_sample_covariance', True)
 
     if win_size is None:

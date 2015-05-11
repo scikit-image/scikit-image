@@ -5,10 +5,11 @@ from numpy.testing import (assert_equal, assert_raises, assert_almost_equal,
                            assert_array_almost_equal)
 
 from skimage.measure import structural_similarity as ssim
+from skimage.measure._structural_similarity import (gaussian_filter2,
+                                                    _discard_edges)
 import skimage.data
 from skimage.io import imread
 from skimage import data_dir
-
 
 np.random.seed(5)
 cam = skimage.data.camera()
@@ -46,26 +47,8 @@ def test_ssim_image():
     mssim = ssim(X, Y)
     assert_equal(mssim0, mssim)
 
-
-def test_ssim_multichannel():
-    N = 100
-    X = (np.random.rand(N, N) * 255).astype(np.uint8)
-    Y = (np.random.rand(N, N) * 255).astype(np.uint8)
-
-    S1 = ssim(X, Y, win_size=3)
-
-    # replicate across three channels.  should get identical value
-    Xc = np.tile(X[..., np.newaxis], (1, 1, 3))
-    Yc = np.tile(Y[..., np.newaxis], (1, 1, 3))
-    S2 = ssim(Xc, Yc, win_size=3)
-    assert_almost_equal(S1, S2)
-
-    # full case should return an image as well
-    m, S3 = ssim(Xc, Yc, full=True)
-    assert_equal(S3.shape, Xc.shape)
-
-    # fail if win_size exceeds any non-channel dimension
-    assert_raises(ValueError, ssim, Xc, Yc, win_size=7, multichannel=False)
+    # ssim of image with itself should be 1.0
+    assert_equal(ssim(X, X), 1.0)
 
 
 # NOTE: This test is known to randomly fail on some systems (Mac OS X 10.6)
@@ -99,6 +82,64 @@ def test_ssim_dtype():
 
     assert S1 < 0.1
     assert S2 < 0.1
+
+
+def test_ssim_multichannel():
+    N = 100
+    X = (np.random.rand(N, N) * 255).astype(np.uint8)
+    Y = (np.random.rand(N, N) * 255).astype(np.uint8)
+
+    S1 = ssim(X, Y, win_size=3)
+
+    # replicate across three channels.  should get identical value
+    Xc = np.tile(X[..., np.newaxis], (1, 1, 3))
+    Yc = np.tile(Y[..., np.newaxis], (1, 1, 3))
+    S2 = ssim(Xc, Yc, win_size=3)
+    assert_almost_equal(S1, S2)
+
+    # full case should return an image as well
+    m, S3 = ssim(Xc, Yc, full=True)
+    assert_equal(S3.shape, Xc.shape)
+
+    # gradient case
+    m, grad = ssim(Xc, Yc, gradient=True)
+    assert_equal(grad.shape, Xc.shape)
+
+    # full and gradient case
+    m, grad, S3 = ssim(Xc, Yc, full=True, gradient=True)
+    assert_equal(grad.shape, Xc.shape)
+    assert_equal(S3.shape, Xc.shape)
+
+    # fail if win_size exceeds any non-channel dimension
+    assert_raises(ValueError, ssim, Xc, Yc, win_size=7, multichannel=False)
+
+
+def test_ssim_nD():
+    # test 1D through 4D on small random arrays
+    N = 10
+    for ndim in range(1, 5):
+        xsize = [N, ] * 5
+        X = (np.random.rand(*xsize) * 255).astype(np.uint8)
+        Y = (np.random.rand(*xsize) * 255).astype(np.uint8)
+
+        mssim = ssim(X, Y, win_size=3)
+        assert mssim < 0.05
+
+
+def test_ssim_multichannel_chelsea():
+    # color image example
+    Xc = skimage.data.chelsea()
+    sigma = 15.0
+    Yc = np.clip(Xc + sigma * np.random.randn(*Xc.shape), 0, 255)
+    Yc = Yc.astype(Xc.dtype)
+
+    # multichannel result should be mean of the individual channel results
+    mssim = ssim(Xc, Yc)
+    mssim_sep = [ssim(Yc[..., c], Xc[..., c]) for c in range(Xc.shape[-1])]
+    assert_almost_equal(mssim, np.mean(mssim_sep))
+
+    # ssim of image with itself should be 1.0
+    assert_equal(ssim(Xc, Xc), 1.0)
 
 
 def test_gaussian_mssim_vs_IPOL():
@@ -164,6 +205,50 @@ def test_invalid_input():
     # do not allow both image content weighting and gradient calculation
     assert_raises(ValueError, ssim, X, X, image_content_weighting=True,
                   gradient=True)
+    # some kwarg inputs must be non-negative
+    assert_raises(ValueError, ssim, X, X, K1=-0.1)
+    assert_raises(ValueError, ssim, X, X, K2=-0.1)
+    assert_raises(ValueError, ssim, X, X, sigma=-1.0)
+
+
+def test_gaussian_filter2():
+    # expected result for filtering a 2D dirac delta
+    res = np.array(
+        [[0.01441882,  0.02808402,  0.03507270,  0.02808402,  0.01441882],
+         [0.02808402,  0.05470021,  0.06831229,  0.05470021,  0.02808402],
+         [0.03507270,  0.06831229,  0.08531173,  0.06831229,  0.03507270],
+         [0.02808402,  0.05470021,  0.06831229,  0.05470021,  0.02808402],
+         [0.01441882,  0.02808402,  0.03507270,  0.02808402,  0.01441882]])
+
+    x = np.zeros((11, 11))
+    x[5, 5] = 1  # centered direc delta
+    xf = gaussian_filter2(x, sigma=1.5, size=5)
+
+    assert_array_almost_equal(xf[3:8, 3:8], res)
+    # zeros elsewhere
+    assert np.all(xf[-3:, :] == 0)
+    assert np.all(xf[:3, :] == 0)
+    assert np.all(xf[:, -3:] == 0)
+    assert np.all(xf[:, :3] == 0)
+
+
+def test_discard_edges():
+    x = np.zeros((11, 11))
+    x[3:8, 3:8] = 1.0
+    xd = _discard_edges(x, 3)
+    assert xd.shape == (5, 5)
+    assert np.all(xd == 1.0)
+
+    # non-uniform edge case
+    x = np.zeros((11, 11))
+    x[3:8, 1:10] = 1.0
+    xd = _discard_edges(x, [3, 1])
+    assert xd.shape == (5, 9)
+    assert np.all(xd == 1.0)
+
+    assert_raises(ValueError, _discard_edges, x, [3, 3, 3])
+    assert_raises(TypeError, _discard_edges, x, 3.5)
+
 
 if __name__ == "__main__":
     np.testing.run_module_suite()
