@@ -1,11 +1,13 @@
+import numpy as np
 import skimage.data as data
-from numpy.testing import assert_equal
+from numpy.testing import assert_equal, assert_almost_equal
 
 
 def test_lena():
     """ Test that "Lena" image can be loaded. """
     lena = data.lena()
     assert_equal(lena.shape, (512, 512, 3))
+
 
 def test_astronaut():
     """ Test that "astronaut" image can be loaded. """
@@ -52,6 +54,18 @@ def test_chelsea():
 def test_coffee():
     """ Test that "coffee" image can be loaded. """
     data.coffee()
+
+
+def test_binary_blobs():
+    blobs = data.binary_blobs(length=128)
+    assert_almost_equal(blobs.mean(), 0.5, decimal=1)
+    blobs = data.binary_blobs(length=128, volume_fraction=0.25)
+    assert_almost_equal(blobs.mean(), 0.25, decimal=1)
+    blobs = data.binary_blobs(length=32, volume_fraction=0.25, n_dim=3)
+    assert_almost_equal(blobs.mean(), 0.25, decimal=1)
+    other_realization = data.binary_blobs(length=32, volume_fraction=0.25,
+                                          n_dim=3)
+    assert not np.all(blobs == other_realization)
 
 
 if __name__ == "__main__":
