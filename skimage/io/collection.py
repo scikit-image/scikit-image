@@ -254,7 +254,7 @@ class ImageCollection(object):
                 kwargs = self.load_func_kwargs
                 if self._frame_index:
                     fname, img_num = self._frame_index[n]
-                    if img_num > 0:
+                    if img_num is not None:
                         self.data[idx] = self.load_func(fname, img_num=img_num,
                                                         **kwargs)
                     else:
