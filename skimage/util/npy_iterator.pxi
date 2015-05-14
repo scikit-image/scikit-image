@@ -25,13 +25,13 @@ cdef class Iterator:
     """ A cython numpy array iterator.
 
     This class wraps the Numpy array iterator API in a cython interface.
-    You can intialize this with numpy array object and use the corresponding
-    `get_*` function to get each element.
+    You can intialize this with any numpy array object and use the
+    corresponding `get_*` function to get each element.
 
     Examples
     --------
 
-    >>> cdef iter = Iterator(numpy.arange(9).reshape(3,3), dtype=np.int)
+    >>> cdef iter = Iterator(numpy.arange(9).reshape(3,3).astype(np.int))
     >>> while iter.has_next():
     >>>     print(iter.get_int())
     >>>     iter.next()
@@ -61,13 +61,13 @@ cdef class Iterator:
         Returns
         -------
         is_next : boolean
-            `True` if there are more elements to be oterated over. `False`
+            `True` if there are more elements to be iterated over. `False`
             otherwise
         """
         return (self.iter.index < self.iter.size)
 
     cdef next(self):
-        """ Points there iterator to the next element of the array.
+        """ Points the iterator to the next element of the array.
 
         The behaviour of this function when `has_next` is `False`, is undefined
         and may result in a crash.
