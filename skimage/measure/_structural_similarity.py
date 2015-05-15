@@ -3,43 +3,10 @@ from __future__ import division
 __all__ = ['structural_similarity']
 
 import numpy as np
-from scipy.ndimage.filters import uniform_filter, convolve1d
+from scipy.ndimage.filters import uniform_filter, gaussian_filter
 
 from ..util.dtype import dtype_range
 from ..util.arraypad import crop
-
-
-def gaussian_filter2(X, sigma=1.5, size=11):
-    """ nD Gaussian filter with specific window extent.
-
-    matches the implementation of Wang. et. al.
-
-    Parameters
-    ----------
-    X : ndarray
-        image
-    sigma : float
-        Gaussian standard deviation (pixels)
-    size : float
-        Gaussian kernel extent (pixels)
-
-    Returns
-    -------
-    X : ndarray
-        filtered image
-
-    Notes
-    -----
-    scipy.ndimage.gaussian is very similar, but uses a 13 tap FIR filter
-    rather than the 11 tap one of Wang. et. al.
-    """
-    radius = (size - 1) // 2
-    r = np.arange(2*radius + 1) - radius
-    filt = np.exp(-(r * r)/(2 * sigma * sigma))
-    filt /= filt.sum()
-    for ax in range(X.ndim):
-        X = convolve1d(X, filt, axis=ax)
-    return X
 
 
 def structural_similarity(X, Y, win_size=None, gradient=False,
@@ -54,7 +21,8 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
         Image.  Any dimensionality.
     win_size : int or None
         The side-length of the sliding window used in comparison.  Must be an
-        odd value.  Default is 11 if `gaussian_weights` is True, 7 otherwise.
+        odd value.  If `gaussian_weights` is True, this is ignored and the
+        window size will depend on `sigma`.
     gradient : bool
         If True, also return the gradient.
     dynamic_range : int
@@ -65,8 +33,8 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
         If True, treat the last dimension of the array as channels. Similarity
         calculations are done independently for each channel then averaged.
     gaussian_weights : bool
-        If True, each patch (of size `win_size`) has its mean and variance
-        spatially weighted by a normalized Gaussian kernel of width sigma=1.5.
+        If True, each patch has its mean and variance spatially weighted by a
+        normalized Gaussian kernel of width sigma=1.5.
     full : bool
         If True, return the full structural similarity image instead of the
         mean value
@@ -98,9 +66,8 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
 
     Notes
     -----
-    To exactly match the implementation of Wang et. al. [1]_, set
-    `gaussian_weights` to True, `win_size` to 11, and `use_sample_covariance`
-    to False.
+    To match the implementation of Wang et. al. [1]_, set `gaussian_weights`
+    to True, `sigma` to 1.5, and `use_sample_covariance` to False.
 
     References
     ----------
@@ -193,8 +160,8 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
 
     if gaussian_weights:
         # sigma = 1.5 to match Wang et. al. 2004
-        filter_func = gaussian_filter2
-        filter_args = {'sigma': sigma, 'size': win_size}
+        filter_func = gaussian_filter
+        filter_args = {'sigma': sigma}
     else:
         filter_func = uniform_filter
         filter_args = {'size': win_size}
