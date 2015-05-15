@@ -43,7 +43,7 @@ def gaussian_filter2(X, sigma=1.5, size=11):
 
 
 def structural_similarity(X, Y, win_size=None, gradient=False,
-                          dynamic_range=None, multichannel=None,
+                          dynamic_range=None, multichannel=False,
                           gaussian_weights=False, full=False,
                           image_content_weighting=False, **kwargs):
     """Compute the mean structural similarity index between two images.
@@ -64,7 +64,6 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     multichannel : int or None
         If True, treat the last dimension of the array as channels. Similarity
         calculations are done independently for each channel then averaged.
-        Defaults to True only if X is 3D and ``X.shape[2] == 3``.
     gaussian_weights : bool
         If True, each patch (of size `win_size`) has its mean and variance
         spatially weighted by a normalized Gaussian kernel of width sigma=1.5.
@@ -126,13 +125,6 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     if image_content_weighting and gradient:
         raise ValueError(
             "gradient not implemented for image content weighted case")
-
-    # default treats 3D arrays with shape[2] == 3 as multichannel
-    if multichannel is None:
-        if X.ndim == 3 and X.shape[2] == 3:
-            multichannel = True
-        else:
-            multichannel = False
 
     if multichannel:
         # loop over channels

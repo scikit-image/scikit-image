@@ -93,19 +93,19 @@ def test_ssim_multichannel():
     # replicate across three channels.  should get identical value
     Xc = np.tile(X[..., np.newaxis], (1, 1, 3))
     Yc = np.tile(Y[..., np.newaxis], (1, 1, 3))
-    S2 = ssim(Xc, Yc, win_size=3)
+    S2 = ssim(Xc, Yc, multichannel=True, win_size=3)
     assert_almost_equal(S1, S2)
 
     # full case should return an image as well
-    m, S3 = ssim(Xc, Yc, full=True)
+    m, S3 = ssim(Xc, Yc, multichannel=True, full=True)
     assert_equal(S3.shape, Xc.shape)
 
     # gradient case
-    m, grad = ssim(Xc, Yc, gradient=True)
+    m, grad = ssim(Xc, Yc, multichannel=True, gradient=True)
     assert_equal(grad.shape, Xc.shape)
 
     # full and gradient case
-    m, grad, S3 = ssim(Xc, Yc, full=True, gradient=True)
+    m, grad, S3 = ssim(Xc, Yc, multichannel=True, full=True, gradient=True)
     assert_equal(grad.shape, Xc.shape)
     assert_equal(S3.shape, Xc.shape)
 
@@ -133,12 +133,12 @@ def test_ssim_multichannel_chelsea():
     Yc = Yc.astype(Xc.dtype)
 
     # multichannel result should be mean of the individual channel results
-    mssim = ssim(Xc, Yc)
+    mssim = ssim(Xc, Yc, multichannel=True)
     mssim_sep = [ssim(Yc[..., c], Xc[..., c]) for c in range(Xc.shape[-1])]
     assert_almost_equal(mssim, np.mean(mssim_sep))
 
     # ssim of image with itself should be 1.0
-    assert_equal(ssim(Xc, Xc), 1.0)
+    assert_equal(ssim(Xc, Xc, multichannel=True), 1.0)
 
 
 def test_gaussian_mssim_vs_IPOL():
@@ -160,7 +160,7 @@ def test_gaussian_mssim_vs_author_ref():
        img2 = imread('camera_noisy.png')
        mssim = ssim_index(img1, img2)
     """
-    mssim_matlab = 0.218987555561590
+    mssim_matlab = 0.327314295673357
     mssim = ssim(cam, cam_noisy, gaussian_weights=True,
                  use_sample_covariance=False)
     assert_almost_equal(mssim, mssim_matlab, decimal=7)
