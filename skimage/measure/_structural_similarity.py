@@ -51,29 +51,29 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     Parameters
     ----------
     X, Y : ndarray
-        Images.
+        Image.  Any dimensionality.
     win_size : int or None
         The side-length of the sliding window used in comparison.  Must be an
         odd value.  Default is 11 if `gaussian_weights` is True, 7 otherwise.
     gradient : bool
         If True, also return the gradient.
     dynamic_range : int
-        Dynamic range of the input image (distance between minimum and maximum
-        possible values).  By default, this is estimated from the image
+        The dynamic range of the input image (distance between minimum and
+        maximum possible values).  By default, this is estimated from the image
         data-type.
     multichannel : int or None
         If True, treat the last dimension of the array as channels. Similarity
         calculations are done independently for each channel then averaged.
-        Defaults to True only if X is 3D and X.shape[2] == 3.
+        Defaults to True only if X is 3D and ``X.shape[2] == 3``.
     gaussian_weights : bool
-        If True, each patch (of size win_size) has its mean and variance
+        If True, each patch (of size `win_size`) has its mean and variance
         spatially weighted by a normalized Gaussian kernel of width sigma=1.5.
     full : bool
         If True, return the full structural similarity image instead of the
         mean value
     image_content_weighting : bool
         If True, weight the ssim mean is spatially weighted by image content as
-        proposed in Wang and Shang 2006 [3].
+        proposed in Wang and Shang 2006 [3]_.
 
     Other Parameters
     ----------------
@@ -81,25 +81,25 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
         if True, normalize covariances by N-1 rather than, N where N is the
         number of pixels within the sliding window.
     K1 : float
-        algorithm parameter, K1 (small constant, see [1])
+        algorithm parameter, K1 (small constant, see [1]_)
     K2 : float
-        algorithm parameter, K2 (small constant, see [1])
+        algorithm parameter, K2 (small constant, see [1]_)
     sigma : float
         sigma for the Gaussian when `gaussian_weights` is True.
 
     Returns
     -------
     mssim : float or ndarray
-        mean structural similarity.
+        The mean structural similarity over the image.
     grad : ndarray
-        Gradient of the structural similarity index between X and Y [2]. This
-        is only returned if `gradient` is set to True.
+        The gradient of the structural similarity index between X and Y [2]_.
+        This is only returned if `gradient` is set to True.
     S : ndarray
-        Full SSIM image.  This is only returned if `full` is set to True.
+        The full SSIM image.  This is only returned if `full` is set to True.
 
     Notes
     -----
-    To exactly match the implementation of Wang et. al. [1], set
+    To exactly match the implementation of Wang et. al. [1]_, set
     `gaussian_weights` to True, `win_size` to 11, and `use_sample_covariance`
     to False.
 
