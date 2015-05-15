@@ -445,7 +445,8 @@ def regionprops(label_image, intensity_image=None, cache=True):
             wmu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
 
         where the sum is over the `x`, `y` coordinates of the region,
-        and `x_c` and `y_c` are the coordinates of the region's centroid.
+        and `x_c` and `y_c` are the coordinates of the region's weighted
+        centroid.
     **weighted_moments_hu** : tuple
         Hu moments (translation, scale and rotation invariant) of intensity
         image.
