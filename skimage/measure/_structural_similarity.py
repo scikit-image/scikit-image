@@ -6,6 +6,7 @@ import numpy as np
 from scipy.ndimage.filters import uniform_filter, convolve1d
 
 from ..util.dtype import dtype_range
+from ..util.arraypad import crop
 
 
 def gaussian_filter2(X, sigma=1.5, size=11):
@@ -39,39 +40,6 @@ def gaussian_filter2(X, sigma=1.5, size=11):
     for ax in range(X.ndim):
         X = convolve1d(X, filt, axis=ax)
     return X
-
-
-def _discard_edges(X, pad):
-    """ Remove border of width pad from ndarray X.
-
-    Parameters
-    ----------
-    X : ndarray
-        image
-    pad : int or sequence of ints
-        border width to remove.  Can be a list of values corresponding to each
-        axis.  If pad is an integer, the same width is removed from all axes.
-
-    Returns
-    -------
-    Y : nadarray
-        image with edges removed
-
-    """
-    X = np.asanyarray(X)
-    if pad == 0:
-        return X
-
-    if isinstance(pad, int):
-        slice_array = [slice(pad, -pad), ] * X.ndim
-    else:
-        if len(pad) != X.ndim:
-            raise ValueError("pad array must match number of X dimensions")
-        slice_array = []
-        for d in range(X.ndim):
-            slice_array.append(slice(pad[d], -pad[d]))
-
-    return X[slice_array]
 
 
 def structural_similarity(X, Y, win_size=None, gradient=False,
@@ -278,9 +246,9 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
         # weight with Eq. 7 of Wang and Simoncelli 2006.
         W = np.log((1 + vx / C2) * (1 + vy / C2))
         W /= W.sum()
-        mssim = _discard_edges(S * W, pad).sum()
+        mssim = crop(S * W, pad).sum()
     else:
-        mssim = _discard_edges(S, pad).mean()
+        mssim = crop(S, pad).mean()
 
     if gradient:
         # The following is Eqs. 7-8 of Avanaki 2009.

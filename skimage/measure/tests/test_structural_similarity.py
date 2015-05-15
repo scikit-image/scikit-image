@@ -5,8 +5,7 @@ from numpy.testing import (assert_equal, assert_raises, assert_almost_equal,
                            assert_array_almost_equal)
 
 from skimage.measure import structural_similarity as ssim
-from skimage.measure._structural_similarity import (gaussian_filter2,
-                                                    _discard_edges)
+from skimage.measure._structural_similarity import (gaussian_filter2)
 import skimage.data
 from skimage.io import imread
 from skimage import data_dir
@@ -230,24 +229,6 @@ def test_gaussian_filter2():
     assert np.all(xf[:3, :] == 0)
     assert np.all(xf[:, -3:] == 0)
     assert np.all(xf[:, :3] == 0)
-
-
-def test_discard_edges():
-    x = np.zeros((11, 11))
-    x[3:8, 3:8] = 1.0
-    xd = _discard_edges(x, 3)
-    assert xd.shape == (5, 5)
-    assert np.all(xd == 1.0)
-
-    # non-uniform edge case
-    x = np.zeros((11, 11))
-    x[3:8, 1:10] = 1.0
-    xd = _discard_edges(x, [3, 1])
-    assert xd.shape == (5, 9)
-    assert np.all(xd == 1.0)
-
-    assert_raises(ValueError, _discard_edges, x, [3, 3, 3])
-    assert_raises(TypeError, _discard_edges, x, 3.5)
 
 
 if __name__ == "__main__":
