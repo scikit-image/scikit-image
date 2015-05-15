@@ -136,10 +136,14 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
 
     if multichannel:
         # loop over channels
-        args = locals()
-        args.pop('X')
-        args.pop('Y')
-        args['multichannel'] = False
+        args = dict(win_size=win_size,
+                    gradient=gradient,
+                    dynamic_range=dynamic_range,
+                    multichannel=False,
+                    gaussian_weights=gaussian_weights,
+                    full=full,
+                    image_content_weighting=image_content_weighting)
+        args.update(kwargs)
         nch = X.shape[-1]
         mssim = np.empty(nch)
         if gradient:
