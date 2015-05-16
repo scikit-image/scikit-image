@@ -11,8 +11,7 @@ from ..util.arraypad import crop
 
 def structural_similarity(X, Y, win_size=None, gradient=False,
                           dynamic_range=None, multichannel=False,
-                          gaussian_weights=False, full=False,
-                          image_content_weighting=False, **kwargs):
+                          gaussian_weights=False, full=False, **kwargs):
     """Compute the mean structural similarity index between two images.
 
     Parameters
@@ -38,9 +37,6 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     full : bool
         If True, return the full structural similarity image instead of the
         mean value
-    image_content_weighting : bool
-        If True, weight the ssim mean is spatially weighted by image content as
-        proposed in Wang and Shang 2006 [3]_.
 
     Other Parameters
     ----------------
@@ -75,23 +71,18 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
        (2004). Image quality assessment: From error visibility to
        structural similarity. IEEE Transactions on Image Processing,
        13, 600-612.
+       https://ece.uwaterloo.ca/~z70wang/publications/ssim.pdf
 
     .. [2] Avanaki, A. N. (2009). Exact global histogram specification
        optimized for structural similarity. Optical Review, 16, 613-621.
+       http://arxiv.org/abs/0901.0065
 
-    .. [3] Wang, Z. and Shang, X.  Spatial pooling strategies for perceptual
-       image quality assessment. Proc. IEEE Inter. Conf. Image. Proc.
-       2945-2948.
     """
     if not X.dtype == Y.dtype:
         raise ValueError('Input images must have the same dtype.')
 
     if not X.shape == Y.shape:
         raise ValueError('Input images must have the same dimensions.')
-
-    if image_content_weighting and gradient:
-        raise ValueError(
-            "gradient not implemented for image content weighted case")
 
     if multichannel:
         # loop over channels
@@ -100,8 +91,7 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
                     dynamic_range=dynamic_range,
                     multichannel=False,
                     gaussian_weights=gaussian_weights,
-                    full=full,
-                    image_content_weighting=image_content_weighting)
+                    full=full)
         args.update(kwargs)
         nch = X.shape[-1]
         mssim = np.empty(nch)
@@ -132,6 +122,7 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     K1 = kwargs.pop('K1', 0.01)
     K2 = kwargs.pop('K2', 0.03)
     sigma = kwargs.pop('sigma', 1.5)
+    truncate = kwargs.pop('truncate', 3.5)
     if K1 < 0:
         raise ValueError("K1 must be positive")
     if K2 < 0:
@@ -159,9 +150,10 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     ndim = X.ndim
 
     if gaussian_weights:
-        # sigma = 1.5 to match Wang et. al. 2004
+        # sigma = 1.5, truncate=3.5 to match 11-tap filter in Wang et. al. 2004
         filter_func = gaussian_filter
-        filter_args = {'sigma': sigma}
+        filter_args = {'sigma': sigma, 'truncate': truncate}
+
     else:
         filter_func = uniform_filter
         filter_args = {'size': win_size}
@@ -205,13 +197,7 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     pad = (win_size - 1) // 2
 
     # compute (weighted) mean of ssim
-    if image_content_weighting:
-        # weight with Eq. 7 of Wang and Simoncelli 2006.
-        W = np.log((1 + vx / C2) * (1 + vy / C2))
-        W /= W.sum()
-        mssim = crop(S * W, pad).sum()
-    else:
-        mssim = crop(S, pad).mean()
+    mssim = crop(S, pad).mean()
 
     if gradient:
         # The following is Eqs. 7-8 of Avanaki 2009.

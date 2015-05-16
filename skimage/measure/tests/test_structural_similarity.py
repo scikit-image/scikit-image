@@ -146,7 +146,7 @@ def test_gaussian_mssim_vs_IPOL():
     mssim_IPOL = 0.327309966087341
     mssim = ssim(cam, cam_noisy, gaussian_weights=True,
                  use_sample_covariance=False)
-    assert_almost_equal(mssim, mssim_IPOL, decimal=3)
+    assert_almost_equal(mssim, mssim_IPOL, decimal=5)
 
 
 def test_gaussian_mssim_vs_author_ref():
@@ -162,7 +162,7 @@ def test_gaussian_mssim_vs_author_ref():
     mssim_matlab = 0.327314295673357
     mssim = ssim(cam, cam_noisy, gaussian_weights=True,
                  use_sample_covariance=False)
-    assert_almost_equal(mssim, mssim_matlab, decimal=3)
+    assert_almost_equal(mssim, mssim_matlab, decimal=7)
 
 
 def test_gaussian_mssim_and_gradient_vs_Matlab():
@@ -177,7 +177,7 @@ def test_gaussian_mssim_and_gradient_vs_Matlab():
     mssim, grad = ssim(cam, cam_noisy, gaussian_weights=True, gradient=True,
                        use_sample_covariance=False)
 
-    assert_almost_equal(mssim, mssim_matlab, decimal=3)
+    assert_almost_equal(mssim, mssim_matlab, decimal=7)
 
     # check almost equal aside from object borders
     assert_array_almost_equal(grad_matlab[5:-5], grad[5:-5])
