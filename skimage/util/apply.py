@@ -80,7 +80,10 @@ def apply_chunks(function, array, chunks=None, depth=0, mode=None,
     """
     if chunks is None:
         shape = array.shape
-        ncpu = cpu_count()
+        try:
+            ncpu = cpu_count()
+        except NotImplementedError:
+            ncpu = 4
         chunks = _get_chunks(shape, ncpu)
 
     if mode == 'wrap':
