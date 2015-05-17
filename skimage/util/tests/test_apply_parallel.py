@@ -2,16 +2,16 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal
 
 from skimage.filters import threshold_adaptive, gaussian_filter
-from skimage.util import apply_chunks
+from skimage.util import apply_parallel
 
 
-def test_apply_chunks():
+def test_apply_parallel():
     # data
     a = np.arange(144).reshape(12, 12).astype(float)
 
     # apply the filter
     expected1 = threshold_adaptive(a, 3)
-    result1 = apply_chunks(threshold_adaptive, a, chunks=(6, 6), depth=5,
+    result1 = apply_parallel(threshold_adaptive, a, chunks=(6, 6), depth=5,
                            extra_arguments=(3,),
                            extra_keywords={'mode': 'reflect'})
 
@@ -21,7 +21,7 @@ def test_apply_chunks():
         return gaussian_filter(arr, 1, mode='reflect')
 
     expected2 = gaussian_filter(a, 1, mode='reflect')
-    result2 = apply_chunks(wrapped_gauss, a, chunks=(6, 6), depth=5)
+    result2 = apply_parallel(wrapped_gauss, a, chunks=(6, 6), depth=5)
 
     assert_array_almost_equal(result2, expected2)
 
@@ -33,27 +33,27 @@ def test_no_chunks():
         return arr + 42
 
     expected = add_42(a)
-    result = apply_chunks(add_42, a)
+    result = apply_parallel(add_42, a)
 
     assert_array_almost_equal(result, expected)
 
 
-def test_apply_chunks_wrap():
+def test_apply_parallel_wrap():
     def wrapped(arr):
         return gaussian_filter(arr, 1, mode='wrap')
     a = np.arange(144).reshape(12, 12).astype(float)
     expected = gaussian_filter(a, 1, mode='wrap')
-    result = apply_chunks(wrapped, a, chunks=(6, 6), depth=5, mode='wrap')
+    result = apply_parallel(wrapped, a, chunks=(6, 6), depth=5, mode='wrap')
 
     assert_array_almost_equal(result, expected)
 
 
-def test_apply_chunks_nearest():
+def test_apply_parallel_nearest():
     def wrapped(arr):
         return gaussian_filter(arr, 1, mode='nearest')
     a = np.arange(144).reshape(12, 12).astype(float)
     expected = gaussian_filter(a, 1, mode='nearest')
-    result = apply_chunks(wrapped, a, chunks=(6, 6), depth={0: 5, 1: 5},
+    result = apply_parallel(wrapped, a, chunks=(6, 6), depth={0: 5, 1: 5},
                           mode='nearest')
 
     assert_array_almost_equal(result, expected)

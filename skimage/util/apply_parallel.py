@@ -3,7 +3,7 @@ from multiprocessing import cpu_count
 
 import dask.array as da
 
-__all__ = ['apply_chunks']
+__all__ = ['apply_parallel']
 
 
 def _get_chunks(shape, ncpu):
@@ -44,7 +44,7 @@ def _get_chunks(shape, ncpu):
     return tuple(chunks)
 
 
-def apply_chunks(function, array, chunks=None, depth=0, mode=None,
+def apply_parallel(function, array, chunks=None, depth=0, mode=None,
                  extra_arguments=(), extra_keywords={}):
     """Map a function in parallel across an array.
 
