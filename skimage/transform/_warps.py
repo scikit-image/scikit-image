@@ -96,16 +96,14 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
     dim_scales = orig_shape / output_shape
 
     # n-dimensional interpolation
-    if len(output_shape) != 2 and (image.ndim == (len(output_shape) - 1)
-                                   or output_shape[-1] != image.shape[-1]):
-        map_rows, map_cols, map_dims = np.mgrid[:output_shape[0],
-                                                :output_shape[1],
-                                                :output_shape[2]]
-        map_rows = dim_scales[0] * (map_rows + 0.5) - 0.5
-        map_cols = dim_scales[1] * (map_cols + 0.5) - 0.5
-        map_dims = dim_scales[2] * (map_dims + 0.5) - 0.5
+    if len(output_shape) != 2 and (image.ndim == (len(output_shape) - 1) or
+                                   output_shape[-1] != image.shape[-1]):
+        coord_arrays = [dim_scales[i] * (np.arange(d) + 0.5) - 0.5
+                        for i, d in enumerate(output_shape)]
 
-        coord_map = np.array([map_rows, map_cols, map_dims])
+        coord_map = np.array(np.meshgrid(*coord_arrays,
+                                         sparse=False,
+                                         indexing='ij'))
 
         image = convert_to_float(image, preserve_range)
 
@@ -115,8 +113,8 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
         _clip_warp_output(image, out, order, mode, cval, clip)
 
     else:  # 2-dimensional interpolation
-        rows = dim_scales[0]
-        cols = dim_scales[1]
+        rows = output_shape[0]
+        cols = output_shape[1]
         orig_rows = orig_shape[0]
         orig_cols = orig_shape[1]
         if rows == 1 and cols == 1:
@@ -127,8 +125,8 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
             src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
             dst_corners = np.zeros(src_corners.shape, dtype=np.double)
             # take into account that 0th pixel is at position (0.5, 0.5)
-            dst_corners[:, 0] = rows * (src_corners[:, 0] + 0.5) - 0.5
-            dst_corners[:, 1] = cols * (src_corners[:, 1] + 0.5) - 0.5
+            dst_corners[:, 0] = dim_scales[1] * (src_corners[:, 0] + 0.5) - 0.5
+            dst_corners[:, 1] = dim_scales[0] * (src_corners[:, 1] + 0.5) - 0.5
 
             tform = AffineTransform()
             tform.estimate(src_corners, dst_corners)
@@ -193,16 +191,11 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
     (256, 256)
 
     """
-
-    try:
-        row_scale, col_scale = scale
-    except TypeError:
-        row_scale = col_scale = scale
-
-    orig_rows, orig_cols = image.shape[0], image.shape[1]
-    rows = np.round(row_scale * orig_rows)
-    cols = np.round(col_scale * orig_cols)
-    output_shape = (rows, cols)
+    scale = np.atleast_1d(scale)
+    if len(scale) > 1 and len(scale) != image.ndim:
+        raise ValueError("must supply a single scale or one value per axis.")
+    orig_shape = np.asarray(image.shape)
+    output_shape = np.round(scale * orig_shape).astype('i8')
 
     return resize(image, output_shape, order=order, mode=mode, cval=cval,
                   clip=clip, preserve_range=preserve_range)
