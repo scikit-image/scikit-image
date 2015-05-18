@@ -10,7 +10,6 @@ from ..measure import block_reduce
 from ..util import img_as_float
 from .._shared.utils import get_bound_method_class, safe_as_int, warn, convert_to_float
 
-
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,
     AffineTransform,
@@ -18,8 +17,8 @@ HOMOGRAPHY_TRANSFORMS = (
 )
 
 
-def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
-           preserve_range=False):
+def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
+           preserve_range=False, multichannel=True):
     """Resize image to match a certain size.
 
     Performs interpolation to up-size or down-size images. For down-sampling
@@ -61,6 +60,8 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
+    multichannel : bool, optional
+        If True and ``image.ndim > 2``, treat last axis as channels.
 
     Notes
     -----
@@ -84,26 +85,25 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
         warn("The default mode, 'constant', will be changed to 'reflect' in "
              "skimage 0.15.")
 
-    rows, cols = output_shape[0], output_shape[1]
-    orig_rows, orig_cols = image.shape[0], image.shape[1]
+    output_shape = np.asarray(output_shape)
+    orig_shape = image.shape
+    if len(orig_shape) < len(output_shape):
+        orig_shape = orig_shape + (1, ) * (len(output_shape) - len(orig_shape))
+    elif len(output_shape) < len(orig_shape):
+        orig_shape = orig_shape[:-1]
+    orig_shape = np.asarray(orig_shape)
 
-    row_scale = float(orig_rows) / rows
-    col_scale = float(orig_cols) / cols
+    dim_scales = orig_shape / output_shape
 
-    # 3-dimensional interpolation
-    if len(output_shape) == 3 and (image.ndim == 2
-                                   or output_shape[2] != image.shape[2]):
-        ndi_mode = _to_ndimage_mode(mode)
-        dim = output_shape[2]
-        if image.ndim == 2:
-            image = image[:, :, np.newaxis]
-        orig_dim = image.shape[2]
-        dim_scale = float(orig_dim) / dim
-
-        map_rows, map_cols, map_dims = np.mgrid[:rows, :cols, :dim]
-        map_rows = row_scale * (map_rows + 0.5) - 0.5
-        map_cols = col_scale * (map_cols + 0.5) - 0.5
-        map_dims = dim_scale * (map_dims + 0.5) - 0.5
+    # n-dimensional interpolation
+    if len(output_shape) != 2 and (image.ndim == (len(output_shape) - 1)
+                                   or output_shape[-1] != image.shape[-1]):
+        map_rows, map_cols, map_dims = np.mgrid[:output_shape[0],
+                                                :output_shape[1],
+                                                :output_shape[2]]
+        map_rows = dim_scales[0] * (map_rows + 0.5) - 0.5
+        map_cols = dim_scales[1] * (map_cols + 0.5) - 0.5
+        map_dims = dim_scales[2] * (map_dims + 0.5) - 0.5
 
         coord_map = np.array([map_rows, map_cols, map_dims])
 
@@ -115,7 +115,10 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
         _clip_warp_output(image, out, order, mode, cval, clip)
 
     else:  # 2-dimensional interpolation
-
+        rows = dim_scales[0]
+        cols = dim_scales[1]
+        orig_rows = orig_shape[0]
+        orig_cols = orig_shape[1]
         if rows == 1 and cols == 1:
             tform = AffineTransform(translation=(orig_cols / 2.0 - 0.5,
                                                  orig_rows / 2.0 - 0.5))
@@ -124,8 +127,8 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
             src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
             dst_corners = np.zeros(src_corners.shape, dtype=np.double)
             # take into account that 0th pixel is at position (0.5, 0.5)
-            dst_corners[:, 0] = col_scale * (src_corners[:, 0] + 0.5) - 0.5
-            dst_corners[:, 1] = row_scale * (src_corners[:, 1] + 0.5) - 0.5
+            dst_corners[:, 0] = rows * (src_corners[:, 0] + 0.5) - 0.5
+            dst_corners[:, 1] = cols * (src_corners[:, 1] + 0.5) - 0.5
 
             tform = AffineTransform()
             tform.estimate(src_corners, dst_corners)
