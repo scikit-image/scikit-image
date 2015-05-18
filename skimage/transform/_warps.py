@@ -105,8 +105,12 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
                                          sparse=False,
                                          indexing='ij'))
 
+        for i in range(len(output_shape) - image.ndim):
+            image = image[..., np.newaxis]
+
         image = convert_to_float(image, preserve_range)
 
+        ndi_mode = _to_ndimage_mode(mode)
         out = ndi.map_coordinates(image, coord_map, order=order,
                                   mode=ndi_mode, cval=cval)
 
@@ -523,15 +527,6 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     return coords
 
 
-def _convert_warp_input(image, preserve_range):
-    """Convert input image to double image with the appropriate range."""
-    if preserve_range:
-        image = image.astype(np.double)
-    else:
-        image = img_as_float(image)
-    return image
-
-
 def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
     """Clip output image to range of values of input image.
 
@@ -715,7 +710,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
     >>> warped = warp(cube, coords)
 
     """
-    image = _convert_warp_input(image, preserve_range)
+    image = convert_to_float(image, preserve_range)
 
     input_shape = np.array(image.shape)
 

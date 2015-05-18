@@ -225,6 +225,17 @@ def test_resize3d_2din_3dout():
     assert_almost_equal(resized, ref)
 
 
+def test_resize2d_4d():
+    # resize with extra output dimensions
+    x = np.zeros((5, 5), dtype=np.double)
+    x[1, 1] = 1
+    out_shape = (10, 10, 1, 1)
+    resized = resize(x, out_shape, order=0)
+    ref = np.zeros(out_shape)
+    ref[2:4, 2:4, ...] = 1
+    assert_almost_equal(resized, ref)
+
+
 def test_resize3d_bilinear():
     # bilinear 3rd dimension
     x = np.zeros((5, 5, 2), dtype=np.double)
