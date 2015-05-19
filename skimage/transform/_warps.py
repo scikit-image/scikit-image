@@ -95,28 +95,11 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
 
     dim_scales = orig_shape / output_shape
 
-    # n-dimensional interpolation
-    if len(output_shape) != 2 and (image.ndim == (len(output_shape) - 1) or
-                                   output_shape[-1] != image.shape[-1]):
-        coord_arrays = [dim_scales[i] * (np.arange(d) + 0.5) - 0.5
-                        for i, d in enumerate(output_shape)]
-
-        coord_map = np.array(np.meshgrid(*coord_arrays,
-                                         sparse=False,
-                                         indexing='ij'))
-
-        for i in range(len(output_shape) - image.ndim):
-            image = image[..., np.newaxis]
-
-        image = convert_to_float(image, preserve_range)
-
-        ndi_mode = _to_ndimage_mode(mode)
-        out = ndi.map_coordinates(image, coord_map, order=order,
-                                  mode=ndi_mode, cval=cval)
-
-        _clip_warp_output(image, out, order, mode, cval, clip)
-
-    else:  # 2-dimensional interpolation
+    ndim_out = len(output_shape)
+    # 2-dimensional interpolation
+    if ndim_out == 2 or (ndim_out == 3 and
+                         (image.ndim == 2 or
+                          output_shape[2] == image.shape[2])):
         rows = output_shape[0]
         cols = output_shape[1]
         orig_rows = orig_shape[0]
@@ -138,6 +121,25 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
         out = warp(image, tform, output_shape=output_shape, order=order,
                    mode=mode, cval=cval, clip=clip,
                    preserve_range=preserve_range)
+
+    else:  # n-dimensional interpolation
+        for i in range(ndim_out - image.ndim):
+            image = image[..., np.newaxis]
+
+        coord_arrays = [dim_scales[i] * (np.arange(d) + 0.5) - 0.5
+                        for i, d in enumerate(output_shape)]
+
+        coord_map = np.array(np.meshgrid(*coord_arrays,
+                                         sparse=False,
+                                         indexing='ij'))
+
+        image = convert_to_float(image, preserve_range)
+
+        ndi_mode = _to_ndimage_mode(mode)
+        out = ndi.map_coordinates(image, coord_map, order=order,
+                                  mode=ndi_mode, cval=cval)
+
+        _clip_warp_output(image, out, order, mode, cval, clip)
 
     return out
 

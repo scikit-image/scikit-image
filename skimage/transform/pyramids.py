@@ -138,7 +138,7 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
 
 
 def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
-                     mode='reflect', cval=0):
+                     mode='reflect', cval=0, multichannel=True):
     """Yield images of the Gaussian pyramid formed by the input image.
 
     Recursively applies the `pyramid_reduce` function to the image, and yields
@@ -201,7 +201,7 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
         layer += 1
 
         layer_image = pyramid_reduce(prev_layer_image, downscale, sigma, order,
-                                     mode, cval)
+                                     mode, cval, multichannel=multichannel)
 
         prev_shape = np.asarray(current_shape)
         prev_layer_image = layer_image
@@ -292,7 +292,8 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
             out_shape = out_shape[:-1]
 
         resized_image = resize(smoothed_image, out_shape,
-                               order=order, mode=mode, cval=cval)
+                               order=order, mode=mode, cval=cval,
+                               multichannel=multichannel)
         smoothed_image = _smooth(resized_image, sigma, mode, cval,
                                  multichannel)
 
