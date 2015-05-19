@@ -52,6 +52,9 @@ functionality is only available with the following installed:
 * `imread <http://pythonhosted.org/imread/>`__
   Optional io plugin providing most standard `formats <http://pythonhosted.org//imread/formats.html>`__.
 
+* `dask array<dask.pydata.org/en/latest/>`__
+  Package used for ``apply_parallel`` out-of-core and parallel computations.
+
 
 Testing requirements
 --------------------
