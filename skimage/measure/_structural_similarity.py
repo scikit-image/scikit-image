@@ -122,7 +122,6 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     K1 = kwargs.pop('K1', 0.01)
     K2 = kwargs.pop('K2', 0.03)
     sigma = kwargs.pop('sigma', 1.5)
-    truncate = kwargs.pop('truncate', 3.5)
     if K1 < 0:
         raise ValueError("K1 must be positive")
     if K2 < 0:
@@ -150,9 +149,10 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     ndim = X.ndim
 
     if gaussian_weights:
-        # sigma = 1.5, truncate=3.5 to match 11-tap filter in Wang et. al. 2004
+        # sigma = 1.5 to approximately match filter in Wang et. al. 2004
+        # this ends up giving a 13-tap rather than 11-tap Gaussian
         filter_func = gaussian_filter
-        filter_args = {'sigma': sigma, 'truncate': truncate}
+        filter_args = {'sigma': sigma}
 
     else:
         filter_func = uniform_filter
