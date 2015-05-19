@@ -179,6 +179,35 @@ def test_rescale():
     assert_almost_equal(scaled, ref)
 
 
+def test_rescale_multichannel():
+    # 1D + channels
+    x = np.zeros((8, 3), dtype=np.double)
+    scaled = rescale(x, 2, order=0, multichannel=True)
+    assert_equal(scaled.shape, (16, 3))
+    # 2D
+    scaled = rescale(x, 2, order=0, multichannel=False)
+    assert_equal(scaled.shape, (16, 6))
+    # multichannel defaults to False
+    scaled = rescale(x, 2, order=0)
+    assert_equal(scaled.shape, (16, 6))
+
+    # 2D + channels
+    x = np.zeros((8, 8, 3), dtype=np.double)
+    scaled = rescale(x, 2, order=0, multichannel=True)
+    assert_equal(scaled.shape, (16, 16, 3))
+    # 3D
+    scaled = rescale(x, 2, order=0, multichannel=False)
+    assert_equal(scaled.shape, (16, 16, 6))
+
+    # 3D + channels
+    x = np.zeros((8, 8, 8, 3), dtype=np.double)
+    scaled = rescale(x, 2, order=0, multichannel=True)
+    assert_equal(scaled.shape, (16, 16, 16, 3))
+    # 4D
+    scaled = rescale(x, 2, order=0, multichannel=False)
+    assert_equal(scaled.shape, (16, 16, 16, 6))
+
+
 def test_resize2d():
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
@@ -234,6 +263,17 @@ def test_resize2d_4d():
     ref = np.zeros(out_shape)
     ref[2:4, 2:4, ...] = 1
     assert_almost_equal(resized, ref)
+
+
+def test_resize_nd():
+    for dim in range(1, 6):
+        shape = 2 + np.arange(dim) * 2
+        x = np.ones(shape)
+        out_shape = np.asarray(shape) * 1.5
+        resized = resize(x, out_shape, order=0, mode='reflect')
+        expected_shape = 1.5 * shape
+        assert_equal(resized.shape, expected_shape)
+        assert np.all(resized == 1)
 
 
 def test_resize3d_bilinear():

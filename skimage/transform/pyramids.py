@@ -5,9 +5,20 @@ from ..transform import resize
 from ..util import img_as_float
 
 
-def _smooth(image, sigma, mode, cval, multichannel=True):
-    """Return image with each channel smoothed by the Gaussian filter."""
+def _previous_multichannel_default(multichannel, ndim):
+    if multichannel is None:
+        # needed to maintain previous default behavior
+        if ndim == 3:
+            return True
+        else:
+            return False
+    else:
+        return multichannel
 
+
+def _smooth(image, sigma, mode, cval, multichannel=None):
+    """Return image with each channel smoothed by the Gaussian filter."""
+    multichannel = _previous_multichannel_default(multichannel, image.ndim)
     smoothed = np.empty(image.shape, dtype=np.double)
 
     # apply Gaussian filter to all channels independently
@@ -29,7 +40,7 @@ def _check_factor(factor):
 
 
 def pyramid_reduce(image, downscale=2, sigma=None, order=1,
-                   mode='reflect', cval=0, multichannel=True):
+                   mode='reflect', cval=0, multichannel=None):
     """Smooth and then downsample image.
 
     Parameters
@@ -63,13 +74,13 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
     .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
 
     """
-
+    multichannel = _previous_multichannel_default(multichannel, image.ndim)
     _check_factor(downscale)
 
     image = img_as_float(image)
 
     out_shape = tuple([math.ceil(d / float(downscale)) for d in image.shape])
-    if multichannel and image.ndim > 2:
+    if multichannel:
         out_shape = out_shape[:-1]
 
     if sigma is None:
@@ -83,7 +94,7 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
 
 
 def pyramid_expand(image, upscale=2, sigma=None, order=1,
-                   mode='reflect', cval=0, multichannel=True):
+                   mode='reflect', cval=0, multichannel=None):
     """Upsample and then smooth image.
 
     Parameters
@@ -117,13 +128,13 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
     .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
 
     """
-
+    multichannel = _previous_multichannel_default(multichannel, image.ndim)
     _check_factor(upscale)
 
     image = img_as_float(image)
 
     out_shape = tuple([math.ceil(upscale * d) for d in image.shape])
-    if multichannel and image.ndim > 2:
+    if multichannel:
         out_shape = out_shape[:-1]
 
     if sigma is None:
@@ -138,7 +149,7 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
 
 
 def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
-                     mode='reflect', cval=0, multichannel=True):
+                     mode='reflect', cval=0, multichannel=None):
     """Yield images of the Gaussian pyramid formed by the input image.
 
     Recursively applies the `pyramid_reduce` function to the image, and yields
@@ -183,7 +194,6 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
 
     """
-
     _check_factor(downscale)
 
     # cast to float for consistent data type in pyramid
@@ -215,7 +225,7 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 
 
 def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
-                      mode='reflect', cval=0, multichannel=True):
+                      mode='reflect', cval=0, multichannel=None):
     """Yield images of the laplacian pyramid formed by the input image.
 
     Each layer contains the difference between the downsampled and the
@@ -264,7 +274,7 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     .. [2] http://sepwww.stanford.edu/data/media/public/sep/morgan/texturematch/paper_html/node3.html
 
     """
-
+    multichannel = _previous_multichannel_default(multichannel, image.ndim)
     _check_factor(downscale)
 
     # cast to float for consistent data type in pyramid
@@ -288,12 +298,11 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
         out_shape = tuple(
             [math.ceil(d / float(downscale)) for d in current_shape])
 
-        if multichannel and image.ndim > 2:
+        if multichannel:
             out_shape = out_shape[:-1]
 
         resized_image = resize(smoothed_image, out_shape,
-                               order=order, mode=mode, cval=cval,
-                               multichannel=multichannel)
+                               order=order, mode=mode, cval=cval)
         smoothed_image = _smooth(resized_image, sigma, mode, cval,
                                  multichannel)
 

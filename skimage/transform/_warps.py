@@ -18,7 +18,7 @@ HOMOGRAPHY_TRANSFORMS = (
 
 
 def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
-           preserve_range=False, multichannel=True):
+           preserve_range=False):
     """Resize image to match a certain size.
 
     Performs interpolation to up-size or down-size images. For down-sampling
@@ -60,8 +60,6 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
-    multichannel : bool, optional
-        If True and ``image.ndim > 2``, treat last axis as channels.
 
     Notes
     -----
@@ -145,7 +143,7 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
 
 
 def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
-            preserve_range=False):
+            preserve_range=False, multichannel=None):
     """Scale image by a certain factor.
 
     Performs interpolation to upscale or down-scale images. For down-sampling
@@ -185,6 +183,8 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
+    multichannel : bool, optional
+        If True, last axis will not be rescaled.
 
     Examples
     --------
@@ -197,11 +197,15 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
     (256, 256)
 
     """
+    if multichannel is None:
+        multichannel = False  # maintain previous default behavior
     scale = np.atleast_1d(scale)
     if len(scale) > 1 and len(scale) != image.ndim:
         raise ValueError("must supply a single scale or one value per axis.")
     orig_shape = np.asarray(image.shape)
     output_shape = np.round(scale * orig_shape).astype('i8')
+    if multichannel:  # don't scale channel dimension
+        output_shape[-1] = orig_shape[-1]
 
     return resize(image, output_shape, order=order, mode=mode, cval=cval,
                   clip=clip, preserve_range=preserve_range)
