@@ -1,8 +1,6 @@
 from math import ceil
 from multiprocessing import cpu_count
 
-import dask.array as da
-
 __all__ = ['apply_parallel']
 
 
@@ -78,6 +76,8 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         Dictionary of keyword arguments to be passed to the function.
 
     """
+    import dask.array as da
+
     if chunks is None:
         shape = array.shape
         try:
