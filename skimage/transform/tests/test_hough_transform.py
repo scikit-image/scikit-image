@@ -16,6 +16,7 @@ def append_desc(func, description):
     return func
 
 
+@test_parallel()
 def test_hough_line():
     # Generate a test image
     img = np.zeros((100, 150), dtype=int)
