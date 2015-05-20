@@ -14,7 +14,7 @@ cdef inline void _kernel_autolevel(dtype_t_out* out, Py_ssize_t odepth,
                                    double pop, dtype_t g,
                                    Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                    double p0, double p1,
-                                   Py_ssize_t s0, Py_ssize_t s1):
+                                   Py_ssize_t s0, Py_ssize_t s1) nogil:
 
     cdef Py_ssize_t i, imin, imax, delta
 
@@ -41,7 +41,7 @@ cdef inline void _kernel_bottomhat(dtype_t_out* out, Py_ssize_t odepth,
                                    double pop, dtype_t g,
                                    Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                    double p0, double p1,
-                                   Py_ssize_t s0, Py_ssize_t s1):
+                                   Py_ssize_t s0, Py_ssize_t s1) nogil:
 
     cdef Py_ssize_t i
 
@@ -59,7 +59,7 @@ cdef inline void _kernel_equalize(dtype_t_out* out, Py_ssize_t odepth,
                                   double pop, dtype_t g,
                                   Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                   double p0, double p1,
-                                  Py_ssize_t s0, Py_ssize_t s1):
+                                  Py_ssize_t s0, Py_ssize_t s1) nogil:
 
     cdef Py_ssize_t i
     cdef Py_ssize_t sum = 0
@@ -79,7 +79,7 @@ cdef inline void _kernel_gradient(dtype_t_out* out, Py_ssize_t odepth,
                                   double pop, dtype_t g,
                                   Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                   double p0, double p1,
-                                  Py_ssize_t s0, Py_ssize_t s1):
+                                  Py_ssize_t s0, Py_ssize_t s1) nogil:
 
     cdef Py_ssize_t i, imin, imax
 
@@ -102,7 +102,7 @@ cdef inline void _kernel_maximum(dtype_t_out* out, Py_ssize_t odepth,
                                  double pop, dtype_t g,
                                  Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                  double p0, double p1,
-                                 Py_ssize_t s0, Py_ssize_t s1):
+                                 Py_ssize_t s0, Py_ssize_t s1) nogil:
 
     cdef Py_ssize_t i
 
@@ -120,7 +120,7 @@ cdef inline void _kernel_mean(dtype_t_out* out, Py_ssize_t odepth,
                               double pop, dtype_t g,
                               Py_ssize_t max_bin, Py_ssize_t mid_bin,
                               double p0, double p1,
-                              Py_ssize_t s0, Py_ssize_t s1):
+                              Py_ssize_t s0, Py_ssize_t s1) nogil:
 
     cdef Py_ssize_t i
     cdef Py_ssize_t mean = 0
@@ -138,7 +138,7 @@ cdef inline void _kernel_subtract_mean(dtype_t_out* out, Py_ssize_t odepth,
                                        double pop, dtype_t g,
                                        Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                        double p0, double p1,
-                                       Py_ssize_t s0, Py_ssize_t s1):
+                                       Py_ssize_t s0, Py_ssize_t s1) nogil:
 
     cdef Py_ssize_t i
     cdef Py_ssize_t mean = 0
@@ -156,7 +156,7 @@ cdef inline void _kernel_median(dtype_t_out* out, Py_ssize_t odepth,
                                 double pop, dtype_t g,
                                 Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                 double p0, double p1,
-                                Py_ssize_t s0, Py_ssize_t s1):
+                                Py_ssize_t s0, Py_ssize_t s1) nogil:
 
     cdef Py_ssize_t i
     cdef double sum = pop / 2.0
@@ -177,7 +177,7 @@ cdef inline void _kernel_minimum(dtype_t_out* out, Py_ssize_t odepth,
                                  double pop, dtype_t g,
                                  Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                  double p0, double p1,
-                                 Py_ssize_t s0, Py_ssize_t s1):
+                                 Py_ssize_t s0, Py_ssize_t s1) nogil:
 
     cdef Py_ssize_t i
 
@@ -195,7 +195,7 @@ cdef inline void _kernel_modal(dtype_t_out* out, Py_ssize_t odepth,
                                double pop, dtype_t g,
                                Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                double p0, double p1,
-                               Py_ssize_t s0, Py_ssize_t s1):
+                               Py_ssize_t s0, Py_ssize_t s1) nogil:
 
     cdef Py_ssize_t hmax = 0, imax = 0
 
@@ -217,7 +217,7 @@ cdef inline void _kernel_enhance_contrast(dtype_t_out* out,
                                           Py_ssize_t max_bin,
                                           Py_ssize_t mid_bin, double p0,
                                           double p1, Py_ssize_t s0,
-                                          Py_ssize_t s1):
+                                          Py_ssize_t s1) nogil:
 
     cdef Py_ssize_t i, imin, imax
 
@@ -243,7 +243,7 @@ cdef inline void _kernel_pop(dtype_t_out* out, Py_ssize_t odepth,
                              double pop, dtype_t g,
                              Py_ssize_t max_bin, Py_ssize_t mid_bin,
                              double p0, double p1,
-                             Py_ssize_t s0, Py_ssize_t s1):
+                             Py_ssize_t s0, Py_ssize_t s1) nogil:
 
     out[0] = <dtype_t_out>pop
 
@@ -253,7 +253,7 @@ cdef inline void _kernel_sum(dtype_t_out* out, Py_ssize_t odepth,
                              double pop, dtype_t g,
                              Py_ssize_t max_bin, Py_ssize_t mid_bin,
                              double p0, double p1,
-                             Py_ssize_t s0, Py_ssize_t s1):
+                             Py_ssize_t s0, Py_ssize_t s1) nogil:
 
     cdef Py_ssize_t i
     cdef Py_ssize_t sum = 0
@@ -271,7 +271,7 @@ cdef inline void _kernel_threshold(dtype_t_out* out, Py_ssize_t odepth,
                                    double pop, dtype_t g,
                                    Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                    double p0, double p1,
-                                   Py_ssize_t s0, Py_ssize_t s1):
+                                   Py_ssize_t s0, Py_ssize_t s1) nogil:
 
     cdef Py_ssize_t i
     cdef Py_ssize_t mean = 0
@@ -289,7 +289,7 @@ cdef inline void _kernel_tophat(dtype_t_out* out, Py_ssize_t odepth,
                                 double pop, dtype_t g,
                                 Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                 double p0, double p1,
-                                Py_ssize_t s0, Py_ssize_t s1):
+                                Py_ssize_t s0, Py_ssize_t s1) nogil:
 
     cdef Py_ssize_t i
 
@@ -307,7 +307,7 @@ cdef inline void _kernel_noise_filter(dtype_t_out* out, Py_ssize_t odepth,
                                       double pop, dtype_t g,
                                       Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                       double p0, double p1,
-                                      Py_ssize_t s0, Py_ssize_t s1):
+                                      Py_ssize_t s0, Py_ssize_t s1) nogil:
 
     cdef Py_ssize_t i
     cdef Py_ssize_t min_i
@@ -334,7 +334,7 @@ cdef inline void _kernel_entropy(dtype_t_out* out, Py_ssize_t odepth,
                                  double pop, dtype_t g,
                                  Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                  double p0, double p1,
-                                 Py_ssize_t s0, Py_ssize_t s1):
+                                 Py_ssize_t s0, Py_ssize_t s1) nogil:
     cdef Py_ssize_t i
     cdef double e, p
 
@@ -354,7 +354,7 @@ cdef inline void _kernel_otsu(dtype_t_out* out, Py_ssize_t odepth,
                               double pop, dtype_t g,
                               Py_ssize_t max_bin, Py_ssize_t mid_bin,
                               double p0, double p1,
-                              Py_ssize_t s0, Py_ssize_t s1):
+                              Py_ssize_t s0, Py_ssize_t s1) nogil:
     cdef Py_ssize_t i
     cdef Py_ssize_t max_i
     cdef double P, mu1, mu2, q1, new_q1, sigma_b, max_sigma_b
@@ -394,7 +394,7 @@ cdef inline void _kernel_win_hist(dtype_t_out* out, Py_ssize_t odepth,
                                   double pop, dtype_t g,
                                   Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                   double p0, double p1,
-                                  Py_ssize_t s0, Py_ssize_t s1):
+                                  Py_ssize_t s0, Py_ssize_t s1) nogil:
     cdef Py_ssize_t i
     cdef Py_ssize_t max_i
     cdef double scale
