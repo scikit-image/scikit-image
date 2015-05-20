@@ -3,6 +3,8 @@
 
 import os
 import re
+import threading
+import functools
 from tempfile import NamedTemporaryFile
 
 from numpy import testing
@@ -199,6 +201,37 @@ def teardown_test():
     Restore warnings to default behavior
     """
     warnings.simplefilter('default')
+
+
+def test_parallel(num_threads=2):
+    """Decorator to run the same function multiple times in parallel.
+
+    Parameters
+    ----------
+    num_threads : int, optional
+        The number of times the function is run in parallel.
+
+    Notes
+    -----
+    This decorator does not pass the return value of the decorated function.
+
+    """
+
+    assert num_threads > 0
+
+    def wrapper(func):
+        @functools.wraps(func)
+        def inner(*args, **kwargs):
+            threads = []
+            for i in range(num_threads):
+                thread = threading.Thread(target=func, args=args, kwargs=kwargs)
+                threads.append(thread)
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join()
+        return inner
+    return wrapper
 
 
 if __name__ == '__main__':
