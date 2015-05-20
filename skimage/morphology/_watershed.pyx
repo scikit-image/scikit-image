@@ -83,10 +83,11 @@ def watershed(DTYPE_INT32_t[::1] image,
                     not mask[index]:
                 continue
 
-            new_elem.value = image[index]
-            new_elem.age = elem.age + 1
-            new_elem.index = index
             age += 1
+            new_elem.value = image[index]
+            new_elem.age = age
+            new_elem.index = index
+            
             output[index] = output[old_index]
             #
             # Push the neighbor onto the heap to work on it later
