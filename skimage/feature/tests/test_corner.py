@@ -6,6 +6,7 @@ from skimage import data
 from skimage import img_as_float
 from skimage.color import rgb2gray
 from skimage.morphology import octagon
+from skimage._shared.testing import test_parallel
 
 from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_subpix, peak_local_max, corner_peaks,
@@ -99,6 +100,7 @@ def test_hessian_matrix_det():
     assert_almost_equal(det, 0, decimal = 3)
 
 
+@test_parallel()
 def test_square_image():
     im = np.zeros((50, 50)).astype(float)
     im[:25, :25] = 1.
@@ -280,6 +282,7 @@ def test_corner_fast_image_unsupported_error():
     assert_raises(ValueError, corner_fast, img)
 
 
+@test_parallel()
 def test_corner_fast_lena():
     img = rgb2gray(data.astronaut())
     expected = np.array([[101, 198],
@@ -335,6 +338,7 @@ def test_corner_orientations_even_shape_error():
                   np.asarray([[7, 7]]), np.ones((4, 4)))
 
 
+@test_parallel()
 def test_corner_orientations_lena():
     img = rgb2gray(data.lena())
     corners = corner_peaks(corner_fast(img, 11, 0.35))
