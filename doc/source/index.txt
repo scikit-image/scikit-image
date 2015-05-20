@@ -2,8 +2,8 @@
 skimage |version| docs
 ****************************
 
-Scikit-image is an image processing toolbox for SciPy_.  `View the |version|
-release notes here <release_notes_and_installation.txt>`_.
+Scikit-image is an image processing toolbox for SciPy_.  View the latest
+`release notes here <release_notes_and_installation.html>`_.
 
 .. _SciPy: http://www.scipy.org
 
