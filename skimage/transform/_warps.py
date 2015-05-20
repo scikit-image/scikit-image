@@ -91,7 +91,7 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
         orig_shape = orig_shape[:-1]
     orig_shape = np.asarray(orig_shape)
 
-    dim_scales = orig_shape / output_shape
+    dim_scales = orig_shape.astype('f8') / output_shape
 
     ndim_out = len(output_shape)
     # 2-dimensional interpolation
