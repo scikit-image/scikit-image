@@ -5,7 +5,7 @@
 from libc.math cimport ceil, floor
 
 
-cdef inline Py_ssize_t round(double r):
+cdef inline Py_ssize_t round(double r) nogil:
     return <Py_ssize_t>((r + 0.5) if (r > 0.0) else (r - 0.5))
 
 
@@ -13,7 +13,7 @@ cdef inline double nearest_neighbour_interpolation(double* image,
                                                    Py_ssize_t rows,
                                                    Py_ssize_t cols, double r,
                                                    double c, char mode,
-                                                   double cval):
+                                                   double cval) nogil:
     """Nearest neighbour interpolation at a given position in the image.
 
     Parameters
@@ -41,7 +41,7 @@ cdef inline double nearest_neighbour_interpolation(double* image,
 
 cdef inline double bilinear_interpolation(double* image, Py_ssize_t rows,
                                           Py_ssize_t cols, double r, double c,
-                                          char mode, double cval):
+                                          char mode, double cval) nogil:
     """Bilinear interpolation at a given position in the image.
 
     Parameters
@@ -80,7 +80,7 @@ cdef inline double bilinear_interpolation(double* image, Py_ssize_t rows,
     return (1 - dr) * top + dr * bottom
 
 
-cdef inline double quadratic_interpolation(double x, double[3] f):
+cdef inline double quadratic_interpolation(double x, double[3] f) nogil:
     """WARNING: Do not use, not implemented correctly.
 
     Quadratic interpolation.
@@ -105,7 +105,8 @@ cdef inline double quadratic_interpolation(double x, double[3] f):
 
 cdef inline double biquadratic_interpolation(double* image, Py_ssize_t rows,
                                              Py_ssize_t cols, double r,
-                                             double c, char mode, double cval):
+                                             double c, char mode,
+                                             double cval) nogil:
     """WARNING: Do not use, not implemented correctly.
 
     Biquadratic interpolation at a given position in the image.
@@ -152,7 +153,7 @@ cdef inline double biquadratic_interpolation(double* image, Py_ssize_t rows,
     return quadratic_interpolation(xr, fr)
 
 
-cdef inline double cubic_interpolation(double x, double[4] f):
+cdef inline double cubic_interpolation(double x, double[4] f) nogil:
     """Cubic interpolation.
 
     Parameters
@@ -177,7 +178,7 @@ cdef inline double cubic_interpolation(double x, double[4] f):
 
 cdef inline double bicubic_interpolation(double* image, Py_ssize_t rows,
                                          Py_ssize_t cols, double r, double c,
-                                         char mode, double cval):
+                                         char mode, double cval) nogil:
     """Bicubic interpolation at a given position in the image.
 
     Interpolation using Catmull-Rom splines, based on the bicubic convolution
@@ -236,7 +237,7 @@ cdef inline double bicubic_interpolation(double* image, Py_ssize_t rows,
 
 cdef inline double get_pixel2d(double* image, Py_ssize_t rows, Py_ssize_t cols,
                                long r, long c, char mode,
-                               double cval):
+                               double cval) nogil:
     """Get a pixel from the image, taking wrapping mode into consideration.
 
     Parameters
@@ -269,7 +270,7 @@ cdef inline double get_pixel2d(double* image, Py_ssize_t rows, Py_ssize_t cols,
 
 cdef inline double get_pixel3d(double* image, Py_ssize_t rows, Py_ssize_t cols,
                                Py_ssize_t dims, long r, long c,
-                               long d, char mode, double cval):
+                               long d, char mode, double cval) nogil:
     """Get a pixel from the image, taking wrapping mode into consideration.
 
     Parameters
@@ -302,7 +303,7 @@ cdef inline double get_pixel3d(double* image, Py_ssize_t rows, Py_ssize_t cols,
                      + coord_map(dims, d, mode)]
 
 
-cdef inline Py_ssize_t coord_map(Py_ssize_t dim, long coord, char mode):
+cdef inline Py_ssize_t coord_map(Py_ssize_t dim, long coord, char mode) nogil:
     """Wrap a coordinate, according to a given mode.
 
     Parameters
