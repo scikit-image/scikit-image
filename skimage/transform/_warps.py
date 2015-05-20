@@ -17,6 +17,14 @@ HOMOGRAPHY_TRANSFORMS = (
 )
 
 
+def _multichannel_default(multichannel, ndim):
+    # utility for maintaining previous color image default behavior
+    if ndim == 3:
+        return True
+    else:
+        return False
+
+
 def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
            preserve_range=False):
     """Resize image to match a certain size.
@@ -184,7 +192,8 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
     multichannel : bool, optional
-        If True, last axis will not be rescaled.
+        If True, last axis will not be rescaled.  The default is True for 3D
+        (2D+color) inputs, False otherwise.
 
     Examples
     --------
@@ -198,7 +207,7 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
 
     """
     if multichannel is None:
-        multichannel = False  # maintain previous default behavior
+        multichannel = _multichannel_default(multichannel, image.ndim)
     scale = np.atleast_1d(scale)
     if len(scale) > 1 and len(scale) != image.ndim:
         raise ValueError("must supply a single scale or one value per axis.")
