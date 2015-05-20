@@ -2,8 +2,10 @@ import itertools as it
 import numpy as np
 from numpy.testing import assert_equal, assert_raises
 from skimage.segmentation import slic
+from skimage._shared.testing import test_parallel
 
 
+@test_parallel()
 def test_color_2d():
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 21, 3))
