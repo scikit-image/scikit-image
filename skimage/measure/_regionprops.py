@@ -364,8 +364,9 @@ def regionprops(label_image, intensity_image=None, cache=True):
         Coordinate list ``(row, col)`` of the region.
     **eccentricity** : float
         Eccentricity of the ellipse that has the same second-moments as the
-        region. The eccentricity is the ratio of the distance between its
-        minor and major axis length. The value is between 0 and 1.
+        region. The eccentricity is the ratio of the focal distance
+        (distance between focal points) over the major axis length.
+        The value is in the interval [0, 1). When it's 0, the ellipse becomes a circle.
     **equivalent_diameter** : float
         The diameter of a circle with the same area as the region.
     **euler_number** : int
