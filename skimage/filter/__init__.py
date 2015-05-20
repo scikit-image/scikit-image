@@ -26,8 +26,8 @@ from ..filters.thresholding import (threshold_adaptive, threshold_otsu, threshol
 from ..filters import rank
 from ..filters.rank import median
 
-from skimage._shared.utils import deprecated
-from skimage import restoration
+from .._shared.utils import deprecated
+from .. import restoration
 denoise_bilateral = deprecated('skimage.restoration.denoise_bilateral')\
                         (restoration.denoise_bilateral)
 denoise_tv_bregman = deprecated('skimage.restoration.denoise_tv_bregman')\

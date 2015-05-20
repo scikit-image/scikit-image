@@ -41,7 +41,7 @@ def load(f):
     Returns
     -------
     img : ndarray
-        Image loaded from skimage.data_dir.
+        Image loaded from ``skimage.data_dir``.
     """
     use_plugin('pil')
     return imread(_os.path.join(data_dir, f))
