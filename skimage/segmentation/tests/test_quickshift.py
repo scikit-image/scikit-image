@@ -1,10 +1,11 @@
 import numpy as np
 from numpy.testing import assert_equal, assert_array_equal
 from nose.tools import assert_true
-from skimage._shared.testing import assert_greater
+from skimage._shared.testing import assert_greater, test_parallel
 from skimage.segmentation import quickshift
 
 
+@test_parallel()
 def test_grey():
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 21))
