@@ -1,8 +1,10 @@
 import time
 import random
 import skimage.graph.heap as heap
+from skimage._shared.testing import test_parallel
 
 
+@test_parallel()
 def test_heap():
     _test_heap(100000, True)
     _test_heap(100000, False)
