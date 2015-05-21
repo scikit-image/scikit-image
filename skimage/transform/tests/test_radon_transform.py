@@ -12,8 +12,8 @@ from skimage._shared.testing import test_parallel
 from skimage._shared._warnings import expected_warnings
 
 PHANTOM = imread(os.path.join(data_dir, "phantom.png"),
-                   as_grey=True)[::2, ::2]
-PHANTOM = rescale(PHANTOM, 0.5, order=1, mode='reflect')
+                 as_grey=True)[::2, ::2]
+PHANTOM = rescale(PHANTOM, 0.5, order=1, multichannel=False)
 
 
 def _debug_plot(original, result, sinogram=None):

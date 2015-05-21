@@ -4,18 +4,21 @@ import pytest
 import numpy as np
 from skimage import data
 from skimage.transform import pyramids
+from skimage._shared._warnings import expected_warnings
 
 
 image = data.astronaut()
 image_gray = image[..., 0]
 
 
+@expected_warnings(['default multichannel'])
 def test_pyramid_reduce_rgb():
     rows, cols, dim = image.shape
     out = pyramids.pyramid_reduce(image, downscale=2)
     assert_array_equal(out.shape, (rows / 2, cols / 2, dim))
 
 
+@expected_warnings(['default multichannel'])
 def test_pyramid_reduce_gray():
     rows, cols = image_gray.shape
     out = pyramids.pyramid_reduce(image_gray, downscale=2)
@@ -31,12 +34,14 @@ def test_pyramid_reduce_nd():
         assert_array_equal(out.shape, expected_shape)
 
 
+@expected_warnings(['default multichannel'])
 def test_pyramid_expand_rgb():
     rows, cols, dim = image.shape
     out = pyramids.pyramid_expand(image, upscale=2)
     assert_array_equal(out.shape, (rows * 2, cols * 2, dim))
 
 
+@expected_warnings(['default multichannel'])
 def test_pyramid_expand_gray():
     rows, cols = image_gray.shape
     out = pyramids.pyramid_expand(image_gray, upscale=2)
@@ -52,6 +57,7 @@ def test_pyramid_expand_nd():
         assert_array_equal(out.shape, expected_shape)
 
 
+@expected_warnings(['default multichannel'])
 def test_build_gaussian_pyramid_rgb():
     rows, cols, dim = image.shape
     pyramid = pyramids.pyramid_gaussian(image, downscale=2)
@@ -60,6 +66,7 @@ def test_build_gaussian_pyramid_rgb():
         assert_array_equal(out.shape, layer_shape)
 
 
+@expected_warnings(['default multichannel'])
 def test_build_gaussian_pyramid_gray():
     rows, cols = image_gray.shape
     pyramid = pyramids.pyramid_gaussian(image_gray, downscale=2)
@@ -79,6 +86,7 @@ def test_build_gaussian_pyramid_nd():
             assert_array_equal(out.shape, layer_shape)
 
 
+@expected_warnings(['default multichannel'])
 def test_build_laplacian_pyramid_rgb():
     rows, cols, dim = image.shape
     pyramid = pyramids.pyramid_laplacian(image, downscale=2)

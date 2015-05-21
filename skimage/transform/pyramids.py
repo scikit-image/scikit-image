@@ -8,8 +8,7 @@ from ._warps import _multichannel_default
 
 def _smooth(image, sigma, mode, cval, multichannel=None):
     """Return image with each channel smoothed by the Gaussian filter."""
-    if multichannel is None:
-        multichannel = _multichannel_default(multichannel, image.ndim)
+    multichannel = _multichannel_default(multichannel, image.ndim)
     smoothed = np.empty(image.shape, dtype=np.double)
 
     # apply Gaussian filter to all channels independently
@@ -52,6 +51,7 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
         cval is the value when mode is equal to 'constant'.
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
+    multichannel : bool, optional
         If True, last axis will not be rescaled.  The default is True for 3D
         (2D+color) inputs, False otherwise.
 
@@ -65,8 +65,7 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
     .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
 
     """
-    if multichannel is None:
-        multichannel = _multichannel_default(multichannel, image.ndim)
+    multichannel = _multichannel_default(multichannel, image.ndim)
     _check_factor(downscale)
 
     image = img_as_float(image)
@@ -121,8 +120,7 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
     .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
 
     """
-    if multichannel is None:
-        multichannel = _multichannel_default(multichannel, image.ndim)
+    multichannel = _multichannel_default(multichannel, image.ndim)
     _check_factor(upscale)
 
     image = img_as_float(image)
@@ -270,8 +268,7 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     .. [2] http://sepwww.stanford.edu/data/media/public/sep/morgan/texturematch/paper_html/node3.html
 
     """
-    if multichannel is None:
-        multichannel = _multichannel_default(multichannel, image.ndim)
+    multichannel = _multichannel_default(multichannel, image.ndim)
     _check_factor(downscale)
 
     # cast to float for consistent data type in pyramid

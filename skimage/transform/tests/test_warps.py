@@ -88,6 +88,7 @@ def test_warp_nd():
         assert_almost_equal(outx, refx)
 
 
+@expected_warnings(['default multichannel'])
 def test_warp_clip():
     x = np.zeros((5, 5), dtype=np.double)
     x[2, 2] = 1
@@ -159,6 +160,7 @@ def test_rotate_resize_center():
     assert_equal(x45, ref_x45)
 
 
+@expected_warnings(['default multichannel'])
 def test_rescale():
     # same scale factor
     x = np.zeros((5, 5), dtype=np.double)
@@ -187,9 +189,6 @@ def test_rescale_multichannel():
     # 2D
     scaled = rescale(x, 2, order=0, multichannel=False)
     assert_equal(scaled.shape, (16, 6))
-    # multichannel defaults to False
-    scaled = rescale(x, 2, order=0)
-    assert_equal(scaled.shape, (16, 6))
 
     # 2D + channels
     x = np.zeros((8, 8, 3), dtype=np.double)
@@ -206,6 +205,21 @@ def test_rescale_multichannel():
     # 4D
     scaled = rescale(x, 2, order=0, multichannel=False)
     assert_equal(scaled.shape, (16, 16, 16, 6))
+
+
+@expected_warnings(['default multichannel'])
+def test_rescale_multichannel_defaults():
+    # Tests to ensure multichannel=None matches the previous default behaviour
+
+    # 2D: multichannel should default to False
+    x = np.zeros((8, 3), dtype=np.double)
+    scaled = rescale(x, 2, order=0)
+    assert_equal(scaled.shape, (16, 6))
+
+    # 3D: multichannel should default to True
+    x = np.zeros((8, 8, 3), dtype=np.double)
+    scaled = rescale(x, 2, order=0,)
+    assert_equal(scaled.shape, (16, 16, 3))
 
 
 def test_resize2d():
@@ -323,7 +337,7 @@ def test_warp_identity():
     assert np.allclose(img, warp(img, AffineTransform(rotation=0)))
     assert not np.allclose(img, warp(img, AffineTransform(rotation=0.1)))
     rgb_img = np.transpose(np.asarray([img, np.zeros_like(img), img]),
-                            (1, 2, 0))
+                           (1, 2, 0))
     warped_rgb_img = warp(rgb_img, AffineTransform(rotation=0.1))
     assert np.allclose(rgb_img, warp(rgb_img, AffineTransform(rotation=0)))
     assert not np.allclose(rgb_img, warped_rgb_img)
@@ -342,14 +356,14 @@ def test_warp_coords_example():
 def test_downscale_local_mean():
     image1 = np.arange(4 * 6).reshape(4, 6)
     out1 = downscale_local_mean(image1, (2, 3))
-    expected1 = np.array([[  4.,   7.],
-                          [ 16.,  19.]])
+    expected1 = np.array([[ 4.,   7.],
+                          [16.,  19.]])
     assert_equal(expected1, out1)
 
     image2 = np.arange(5 * 8).reshape(5, 8)
     out2 = downscale_local_mean(image2, (4, 5))
-    expected2 = np.array([[ 14. ,  10.8],
-                          [  8.5,   5.7]])
+    expected2 = np.array([[14. ,  10.8],
+                          [ 8.5,   5.7]])
     assert_equal(expected2, out2)
 
 
@@ -376,6 +390,7 @@ def test_slow_warp_nonint_oshape():
     warp(image, lambda xy: xy, output_shape=(13.0001, 19.9999))
 
 
+@expected_warnings(['default multichannel'])
 def test_keep_range():
     image = np.linspace(0, 2, 25).reshape(5, 5)
 
@@ -394,7 +409,6 @@ def test_keep_range():
                       clip=True, order=0)
     assert out.min() == 0
     assert out.max() == 2 / 255.0
-
 
 
 if __name__ == "__main__":

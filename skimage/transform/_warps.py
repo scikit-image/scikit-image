@@ -1,4 +1,5 @@
 import six
+import warnings
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -18,11 +19,16 @@ HOMOGRAPHY_TRANSFORMS = (
 
 
 def _multichannel_default(multichannel, ndim):
-    # utility for maintaining previous color image default behavior
-    if ndim == 3:
-        return True
+    if multichannel is not None:
+        return multichannel
     else:
-        return False
+        warnings.warn('default multichannel argument (None) is deprecated. '
+                      'Specifiy True or False explicitly.')
+        # utility for maintaining previous color image default behavior
+        if ndim == 3:
+            return True
+        else:
+            return False
 
 
 def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
@@ -92,27 +98,31 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
              "skimage 0.15.")
 
     output_shape = np.asarray(output_shape)
-    orig_shape = image.shape
-    if len(orig_shape) < len(output_shape):
-        orig_shape = orig_shape + (1, ) * (len(output_shape) - len(orig_shape))
-    elif len(output_shape) < len(orig_shape):
-        orig_shape = orig_shape[:-1]
-    orig_shape = np.asarray(orig_shape)
-
-    dim_scales = orig_shape.astype('f8') / output_shape
-
     ndim_out = len(output_shape)
+    input_shape = image.shape
+    if ndim_out > image.ndim:
+        # append dimensions to input_shape
+        input_shape = input_shape + (1, ) * (ndim_out - image.ndim)
+    elif ndim_out == image.ndim - 1:
+        # multichannel case: append shape of last axis
+        output_shape = np.concatenate((output_shape, [image.shape[-1], ]))
+        ndim_out += 1
+    elif ndim_out < image.ndim - 1:
+        raise ValueError("len(output_shape) cannot be smaller than the image "
+                         "dimensions")
+
+    input_shape = np.asarray(input_shape, dtype=float)
+    dim_scales = input_shape / output_shape
+
     # 2-dimensional interpolation
-    if ndim_out == 2 or (ndim_out == 3 and
-                         (image.ndim == 2 or
-                          output_shape[2] == image.shape[2])):
+    if ndim_out == 2 or (ndim_out == 3 and output_shape[2] == input_shape[2]):
         rows = output_shape[0]
         cols = output_shape[1]
-        orig_rows = orig_shape[0]
-        orig_cols = orig_shape[1]
+        input_rows = input_shape[0]
+        input_cols = input_shape[1]
         if rows == 1 and cols == 1:
-            tform = AffineTransform(translation=(orig_cols / 2.0 - 0.5,
-                                                 orig_rows / 2.0 - 0.5))
+            tform = AffineTransform(translation=(input_cols / 2.0 - 0.5,
+                                                 input_rows / 2.0 - 0.5))
         else:
             # 3 control points necessary to estimate exact AffineTransform
             src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
@@ -206,13 +216,12 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
     (256, 256)
 
     """
-    if multichannel is None:
-        multichannel = _multichannel_default(multichannel, image.ndim)
+    multichannel = _multichannel_default(multichannel, image.ndim)
     scale = np.atleast_1d(scale)
     if len(scale) > 1 and len(scale) != image.ndim:
         raise ValueError("must supply a single scale or one value per axis.")
     orig_shape = np.asarray(image.shape)
-    output_shape = np.round(scale * orig_shape).astype('i8')
+    output_shape = np.round(scale * orig_shape)
     if multichannel:  # don't scale channel dimension
         output_shape[-1] = orig_shape[-1]
 

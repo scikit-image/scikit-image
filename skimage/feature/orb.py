@@ -132,7 +132,8 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
     def _build_pyramid(self, image):
         image = _prepare_grayscale_input_2D(image)
-        return list(pyramid_gaussian(image, self.n_scales - 1, self.downscale))
+        return list(pyramid_gaussian(image, self.n_scales - 1,
+                                     self.downscale, multichannel=False))
 
     def _detect_octave(self, octave_image):
         # Extract keypoints for current octave
