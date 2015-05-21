@@ -88,16 +88,15 @@ def test_warp_nd():
         assert_almost_equal(outx, refx)
 
 
-@expected_warnings(['default multichannel'])
 def test_warp_clip():
     x = np.zeros((5, 5), dtype=np.double)
     x[2, 2] = 1
 
-    with expected_warnings(['The default mode']):
+    with expected_warnings(['The default mode', 'default multichannel']):
         outx = rescale(x, 3, order=3, clip=False)
     assert outx.min() < 0
 
-    with expected_warnings(['The default mode']):
+    with expected_warnings(['The default mode', 'default multichannel']):
         outx = rescale(x, 3, order=3, clip=True)
     assert_almost_equal(outx.min(), 0)
     assert_almost_equal(outx.max(), 1)
@@ -165,7 +164,7 @@ def test_rescale():
     # same scale factor
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
-    with expected_warnings(['The default mode']):
+    with expected_warnings(['The default mode', 'default multichannel']):
         scaled = rescale(x, 2, order=0)
     ref = np.zeros((10, 10))
     ref[2:4, 2:4] = 1
@@ -174,7 +173,7 @@ def test_rescale():
     # different scale factors
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
-    with expected_warnings(['The default mode']):
+    with expected_warnings(['The default mode', 'default multichannel']):
         scaled = rescale(x, (2, 1), order=0)
     ref = np.zeros((10, 5))
     ref[2:4, 1] = 1
@@ -207,18 +206,19 @@ def test_rescale_multichannel():
     assert_equal(scaled.shape, (16, 16, 16, 6))
 
 
-@expected_warnings(['default multichannel'])
 def test_rescale_multichannel_defaults():
-    # Tests to ensure multichannel=None matches the previous default behaviour
+    # ensure multichannel=None matches the previous default behaviour
 
     # 2D: multichannel should default to False
     x = np.zeros((8, 3), dtype=np.double)
-    scaled = rescale(x, 2, order=0)
+    with expected_warnings(['default multichannel']):
+        scaled = rescale(x, 2, order=0)
     assert_equal(scaled.shape, (16, 6))
 
     # 3D: multichannel should default to True
     x = np.zeros((8, 8, 3), dtype=np.double)
-    scaled = rescale(x, 2, order=0,)
+    with expected_warnings(['default multichannel']):
+        scaled = rescale(x, 2, order=0,)
     assert_equal(scaled.shape, (16, 16, 3))
 
 
@@ -390,21 +390,20 @@ def test_slow_warp_nonint_oshape():
     warp(image, lambda xy: xy, output_shape=(13.0001, 19.9999))
 
 
-@expected_warnings(['default multichannel'])
 def test_keep_range():
     image = np.linspace(0, 2, 25).reshape(5, 5)
 
-    with expected_warnings(['The default mode']):
+    with expected_warnings(['The default mode', 'default multichannel']):
         out = rescale(image, 2, preserve_range=False, clip=True, order=0)
     assert out.min() == 0
     assert out.max() == 2
 
-    with expected_warnings(['The default mode']):
+    with expected_warnings(['The default mode', 'default multichannel']):
         out = rescale(image, 2, preserve_range=True, clip=True, order=0)
     assert out.min() == 0
     assert out.max() == 2
 
-    with expected_warnings(['The default mode']):
+    with expected_warnings(['The default mode', 'default multichannel']):
         out = rescale(image.astype(np.uint8), 2, preserve_range=False,
                       clip=True, order=0)
     assert out.min() == 0
