@@ -1,5 +1,6 @@
 import numpy as np
 from skimage.feature import greycomatrix, greycoprops, local_binary_pattern
+from skimage._shared.testing import test_parallel
 
 
 class TestGLCM():
@@ -10,6 +11,7 @@ class TestGLCM():
                                [0, 2, 2, 2],
                                [2, 2, 3, 3]], dtype=np.uint8)
 
+    @test_parallel()
     def test_output_angles(self):
         result = greycomatrix(self.image, [1], [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4], 4)
         assert result.shape == (4, 4, 1, 4)
@@ -162,6 +164,7 @@ class TestLBP():
                                [  0, 255,  30,  34,  255,  24],
                                [146, 241, 255,   0,  189, 126]], dtype='double')
 
+    @test_parallel()
     def test_default(self):
         lbp = local_binary_pattern(self.image, 8, 1, 'default')
         ref = np.array([[  0, 251,   0, 255,  96, 255],
