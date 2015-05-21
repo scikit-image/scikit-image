@@ -15,6 +15,7 @@ http://scikit-image.org
 New Features
 ------------
 
+- ``skimage.util.apply_parallel`` (#1493)
 
 
 
