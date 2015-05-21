@@ -54,6 +54,8 @@ fi
 
 retry pip install $WHEELHOUSE -r requirements.txt
 
+pip install 'dask[array]>=0.5.0'
+
 # clean up disk space
 sudo apt-get clean
 sudo rm -rf /tmp/*
