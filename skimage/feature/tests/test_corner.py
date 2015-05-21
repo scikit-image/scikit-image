@@ -93,6 +93,7 @@ def test_hessian_matrix_eigvals():
                                      [0, 0, 0, 0, 0]]))
 
 
+@test_parallel()
 def test_hessian_matrix_det():
     image = np.zeros((5, 5))
     image[2, 2] = 1

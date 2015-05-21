@@ -6,7 +6,8 @@ import numpy as np
 cimport numpy as cnp
 
 
-cdef inline Py_ssize_t _clip(Py_ssize_t x, Py_ssize_t low, Py_ssize_t high):
+cdef inline Py_ssize_t _clip(Py_ssize_t x, Py_ssize_t low,
+                             Py_ssize_t high) nogil:
     """Clips coordinate between high and low.
 
     This method was created so that `hessian_det_appx` does not have to make
@@ -36,7 +37,7 @@ cdef inline Py_ssize_t _clip(Py_ssize_t x, Py_ssize_t low, Py_ssize_t high):
 
 cdef inline cnp.double_t _integ(
     cnp.double_t[:, ::1] img, Py_ssize_t r, Py_ssize_t c,
-        Py_ssize_t rl, Py_ssize_t cl):
+        Py_ssize_t rl, Py_ssize_t cl) nogil:
     """Integrate over the integral image in the given window
 
     This method was created so that `hessian_det_appx` does not have to make
@@ -123,31 +124,32 @@ def _hessian_matrix_det(cnp.double_t[:, ::1] img, double sigma):
 
     cdef float dxx, dyy, dxy
 
-    if not size % 2:
-        size += 1
+    with nogil:
+        if size % 2 == 0:
+            size += 1
 
-    for r in range(height):
-        for c in range(width):
-            tl = _integ(img, r - s3, c - s3, s3, s3)  # top left
-            br = _integ(img, r + 1, c + 1, s3, s3)  # bottom right
-            bl = _integ(img, r - s3, c + 1, s3, s3)  # bottom left
-            tr = _integ(img, r + 1, c - s3, s3, s3)  # top right
+        for r in range(height):
+            for c in range(width):
+                tl = _integ(img, r - s3, c - s3, s3, s3)  # top left
+                br = _integ(img, r + 1, c + 1, s3, s3)  # bottom right
+                bl = _integ(img, r - s3, c + 1, s3, s3)  # bottom left
+                tr = _integ(img, r + 1, c - s3, s3, s3)  # top right
 
-            dxy = bl + tr - tl - br
-            dxy = -dxy * w_i
+                dxy = bl + tr - tl - br
+                dxy = -dxy * w_i
 
-            mid = _integ(img, r - s3 + 1, c - s2, 2 * s3 - 1, w)  # middle box
-            side = _integ(img, r - s3 + 1, c - s3 / 2, 2 * s3 - 1, s3)  # sides
+                mid = _integ(img, r - s3 + 1, c - s2, 2 * s3 - 1, w)  # middle box
+                side = _integ(img, r - s3 + 1, c - s3 / 2, 2 * s3 - 1, s3)  # sides
 
-            dxx = mid - 3 * side
-            dxx = -dxx * w_i
+                dxx = mid - 3 * side
+                dxx = -dxx * w_i
 
-            mid = _integ(img, r - s2, c - s3 + 1, w, 2 * s3 - 1)
-            side = _integ(img, r - s3 / 2, c - s3 + 1, s3, 2 * s3 - 1)
+                mid = _integ(img, r - s2, c - s3 + 1, w, 2 * s3 - 1)
+                side = _integ(img, r - s3 / 2, c - s3 + 1, s3, 2 * s3 - 1)
 
-            dyy = mid - 3 * side
-            dyy = -dyy * w_i
+                dyy = mid - 3 * side
+                dyy = -dyy * w_i
 
-            out[r, c] = (dxx * dyy - 0.81 * (dxy * dxy))
+                out[r, c] = (dxx * dyy - 0.81 * (dxy * dxy))
 
     return out
