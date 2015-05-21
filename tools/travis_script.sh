@@ -67,8 +67,6 @@ fi
 
 retry pip install -q tifffile
 
-pip install 'dask[array]>=0.5.0'
-
 section_end "Install.optional.dependencies"
 
 
