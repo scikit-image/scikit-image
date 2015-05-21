@@ -6,7 +6,7 @@ import math
 import numpy as np
 
 cimport numpy as cnp
-from libc.math cimport sqrt, sin, cos, floor, ceil
+from libc.math cimport sqrt, sin, cos, floor, ceil, fabs
 from .._shared.geometry cimport point_in_polygon
 
 
@@ -83,39 +83,41 @@ def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
     cdef Py_ssize_t dy = abs(y2 - y)
     cdef Py_ssize_t sx, sy, d, i
 
-    if (x2 - x) > 0:
-        sx = 1
-    else:
-        sx = -1
-    if (y2 - y) > 0:
-        sy = 1
-    else:
-        sy = -1
-    if dy > dx:
-        steep = 1
-        x, y = y, x
-        dx, dy = dy, dx
-        sx, sy = sy, sx
-    d = (2 * dy) - dx
+    with nogil:
+        if (x2 - x) > 0:
+            sx = 1
+        else:
+            sx = -1
+        if (y2 - y) > 0:
+            sy = 1
+        else:
+            sy = -1
+        if dy > dx:
+            steep = 1
+            x, y = y, x
+            dx, dy = dy, dx
+            sx, sy = sy, sx
+        d = (2 * dy) - dx
 
     cdef Py_ssize_t[::1] rr = np.zeros(int(dx) + 1, dtype=np.intp)
     cdef Py_ssize_t[::1] cc = np.zeros(int(dx) + 1, dtype=np.intp)
 
-    for i in range(dx):
-        if steep:
-            rr[i] = x
-            cc[i] = y
-        else:
-            rr[i] = y
-            cc[i] = x
-        while d >= 0:
-            y = y + sy
-            d = d - (2 * dx)
-        x = x + sx
-        d = d + (2 * dy)
+    with nogil:
+        for i in range(dx):
+            if steep:
+                rr[i] = x
+                cc[i] = y
+            else:
+                rr[i] = y
+                cc[i] = x
+            while d >= 0:
+                y = y + sy
+                d = d - (2 * dx)
+            x = x + sx
+            d = d + (2 * dy)
 
-    rr[dx] = y2
-    cc[dx] = x2
+        rr[dx] = y2
+        cc[dx] = x2
 
     return np.asarray(rr), np.asarray(cc)
 
@@ -187,7 +189,7 @@ def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
     while True:
         cc.append(x)
         rr.append(y)
-        val.append(1. * abs(err - dx + dy) / <float>(ed))
+        val.append(1. * fabs(err - dx + dy) / <float>(ed))
         e = err
         if 2 * e >= -dx:
             if x == x2:
@@ -195,7 +197,7 @@ def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
             if e + dy < ed:
                 cc.append(x)
                 rr.append(y + sign_y)
-                val.append(1. * abs(e + dy) / <float>(ed))
+                val.append(1. * fabs(e + dy) / <float>(ed))
             err -= dy
             x += sign_x
         if 2 * e <= dy:
@@ -204,7 +206,7 @@ def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
             if dx - e < ed:
                 cc.append(x)
                 rr.append(y)
-                val.append(abs(dx - e) / <float>(ed))
+                val.append(fabs(dx - e) / <float>(ed))
             err += dx
             y += sign_y
 
