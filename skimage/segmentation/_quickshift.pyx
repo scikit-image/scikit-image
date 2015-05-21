@@ -8,6 +8,7 @@ from itertools import product
 
 cimport numpy as cnp
 from libc.math cimport exp, sqrt
+from libc.float cimport DBL_MAX
 
 from ..util import img_as_float
 from ..color import rgb2lab
@@ -99,19 +100,20 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10,
             = np.zeros((height, width))
 
     # compute densities
-    for r in range(height):
-        for c in range(width):
-            r_min, r_max = max(r - w, 0), min(r + w + 1, height)
-            c_min, c_max = max(c - w, 0), min(c + w + 1, width)
-            for r_ in range(r_min, r_max):
-                for c_ in range(c_min, c_max):
-                    dist = 0
-                    for channel in range(channels):
-                        dist += (current_pixel_p[channel] -
-                                 image_c[r_, c_, channel])**2
-                    dist += (r - r_)**2 + (c - c_)**2
-                    densities[r, c] += exp(-dist / (2 * kernel_size**2))
-            current_pixel_p += channels
+    with nogil:
+        for r in range(height):
+            for c in range(width):
+                r_min, r_max = max(r - w, 0), min(r + w + 1, height)
+                c_min, c_max = max(c - w, 0), min(c + w + 1, width)
+                for r_ in range(r_min, r_max):
+                    for c_ in range(c_min, c_max):
+                        dist = 0
+                        for channel in range(channels):
+                            dist += (current_pixel_p[channel] -
+                                     image_c[r_, c_, channel])**2
+                        dist += (r - r_)**2 + (c - c_)**2
+                        densities[r, c] += exp(-dist / (2 * kernel_size**2))
+                current_pixel_p += channels
 
     # this will break ties that otherwise would give us headache
     densities += random_state.normal(scale=0.00001, size=(height, width))
@@ -123,29 +125,30 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10,
             = np.zeros((height, width))
 
     # find nearest node with higher density
-    current_pixel_p = image_p
-    for r in range(height):
-        for c in range(width):
-            current_density = densities[r, c]
-            closest = np.inf
-            r_min, r_max = max(r - w, 0), min(r + w + 1, height)
-            c_min, c_max = max(c - w, 0), min(c + w + 1, width)
-            for r_ in range(r_min, r_max):
-                for c_ in range(c_min, c_max):
-                    if densities[r_, c_] > current_density:
-                        dist = 0
-                        # We compute the distances twice since otherwise
-                        # we get crazy memory overhead
-                        # (width * height * windowsize**2)
-                        for channel in range(channels):
-                            dist += (current_pixel_p[channel] -
-                                     image_c[r_, c_, channel])**2
-                        dist += (r - r_)**2 + (c - c_)**2
-                        if dist < closest:
-                            closest = dist
-                            parent[r, c] = r_ * width + c_
-            dist_parent[r, c] = sqrt(closest)
-            current_pixel_p += channels
+    with nogil:
+        current_pixel_p = image_p
+        for r in range(height):
+            for c in range(width):
+                current_density = densities[r, c]
+                closest = DBL_MAX
+                r_min, r_max = max(r - w, 0), min(r + w + 1, height)
+                c_min, c_max = max(c - w, 0), min(c + w + 1, width)
+                for r_ in range(r_min, r_max):
+                    for c_ in range(c_min, c_max):
+                        if densities[r_, c_] > current_density:
+                            dist = 0
+                            # We compute the distances twice since otherwise
+                            # we get crazy memory overhead
+                            # (width * height * windowsize**2)
+                            for channel in range(channels):
+                                dist += (current_pixel_p[channel] -
+                                         image_c[r_, c_, channel])**2
+                            dist += (r - r_)**2 + (c - c_)**2
+                            if dist < closest:
+                                closest = dist
+                                parent[r, c] = r_ * width + c_
+                dist_parent[r, c] = sqrt(closest)
+                current_pixel_p += channels
 
     dist_parent_flat = dist_parent.ravel()
     flat = parent.ravel()

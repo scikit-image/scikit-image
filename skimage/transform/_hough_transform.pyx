@@ -79,22 +79,24 @@ def _hough_circle(cnp.ndarray img,
 
         num_circle_pixels = circle_x.size
 
-        if normalize:
-            incr = 1.0 / num_circle_pixels
-        else:
-            incr = 1
+        with nogil:
 
-        # For each non zero pixel
-        for p in range(num_pixels):
-            # Plug the circle at (px, py),
-            # its coordinates are (tx, ty)
-            for c in range(num_circle_pixels):
-                tx = circle_x[c] + x[p]
-                ty = circle_y[c] + y[p]
-                if offset:
-                    acc[i, tx, ty] += incr
-                elif 0 <= tx < xmax and 0 <= ty < ymax:
-                    acc[i, tx, ty] += incr
+            if normalize:
+                incr = 1.0 / num_circle_pixels
+            else:
+                incr = 1
+
+            # For each non zero pixel
+            for p in range(num_pixels):
+                # Plug the circle at (px, py),
+                # its coordinates are (tx, ty)
+                for c in range(num_circle_pixels):
+                    tx = circle_x[c] + x[p]
+                    ty = circle_y[c] + y[p]
+                    if offset:
+                        acc[i, tx, ty] += incr
+                    elif 0 <= tx < xmax and 0 <= ty < ymax:
+                        acc[i, tx, ty] += incr
 
     return acc
 
@@ -306,14 +308,17 @@ def hough_line(cnp.ndarray img,
 
     # finally, run the transform
     cdef Py_ssize_t nidxs, nthetas, i, j, x, y, accum_idx
-    nidxs = y_idxs.shape[0]  # x and y are the same shape
-    nthetas = theta.shape[0]
-    for i in range(nidxs):
-        x = x_idxs[i]
-        y = y_idxs[i]
-        for j in range(nthetas):
-            accum_idx = <int>round((ctheta[j] * x + stheta[j] * y)) + offset
-            accum[accum_idx, j] += 1
+
+    with nogil:
+        nidxs = y_idxs.shape[0]  # x and y are the same shape
+        nthetas = theta.shape[0]
+        for i in range(nidxs):
+            x = x_idxs[i]
+            y = y_idxs[i]
+            for j in range(nthetas):
+                accum_idx = <int>round((ctheta[j] * x + stheta[j] * y)) + offset
+                accum[accum_idx, j] += 1
+
     return accum, theta, bins
 
 

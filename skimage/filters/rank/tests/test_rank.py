@@ -8,6 +8,7 @@ from skimage import data, util, morphology
 from skimage.morphology import grey, disk
 from skimage.filters import rank
 from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import test_parallel
 
 
 def test_all():
@@ -15,7 +16,9 @@ def test_all():
         check_all()
 
 
+@test_parallel()
 def check_all():
+    np.random.seed(0)
     image = np.random.rand(25, 25)
     selem = morphology.disk(1)
     refs = np.load(os.path.join(skimage.data_dir, "rank_filter_tests.npz"))
@@ -489,7 +492,7 @@ def test_entropy():
         assert(np.max(rank.entropy(data, selem)) == 12)
 
     # make sure output is of dtype double
-    with expected_warnings(['Bitdepth of 11']): 
+    with expected_warnings(['Bitdepth of 11']):
         out = rank.entropy(data, np.ones((16, 16), dtype=np.uint8))
     assert out.dtype == np.double
 

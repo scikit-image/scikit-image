@@ -8,6 +8,7 @@ import os.path
 from skimage.transform import radon, iradon, iradon_sart, rescale
 from skimage.io import imread
 from skimage import data_dir
+from skimage._shared.testing import test_parallel
 
 
 PHANTOM = imread(os.path.join(data_dir, "phantom.png"),
@@ -310,6 +311,7 @@ def test_order_angles_golden_ratio():
             assert len(indices) == len(set(indices))
 
 
+@test_parallel()
 def test_iradon_sart():
     debug = False
 

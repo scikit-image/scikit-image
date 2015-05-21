@@ -11,7 +11,7 @@ from .._shared.interpolation cimport (nearest_neighbour_interpolation,
 
 
 cdef inline void _matrix_transform(double x, double y, double* H, double *x_,
-                                   double *y_):
+                                   double *y_) nogil:
     """Apply a homography to a coordinate.
 
     Parameters
@@ -102,7 +102,7 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
     cdef Py_ssize_t cols = img.shape[1]
 
     cdef double (*interp_func)(double*, Py_ssize_t, Py_ssize_t, double, double,
-                               char, double)
+                               char, double) nogil
     if order == 0:
         interp_func = nearest_neighbour_interpolation
     elif order == 1:
@@ -112,10 +112,11 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
     elif order == 3:
         interp_func = bicubic_interpolation
 
-    for tfr in range(out_r):
-        for tfc in range(out_c):
-            _matrix_transform(tfc, tfr, &M[0, 0], &c, &r)
-            out[tfr, tfc] = interp_func(&img[0, 0], rows, cols, r, c,
-                                        mode_c, cval)
+    with nogil:
+        for tfr in range(out_r):
+            for tfc in range(out_c):
+                _matrix_transform(tfc, tfr, &M[0, 0], &c, &r)
+                out[tfr, tfc] = interp_func(&img[0, 0], rows, cols, r, c,
+                                            mode_c, cval)
 
     return np.asarray(out)

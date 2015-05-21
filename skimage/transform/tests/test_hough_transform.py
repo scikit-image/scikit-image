@@ -4,6 +4,7 @@ from numpy.testing import assert_almost_equal, assert_equal
 import skimage.transform as tf
 from skimage.draw import line, circle_perimeter, ellipse_perimeter
 from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import test_parallel
 
 
 def append_desc(func, description):
@@ -15,6 +16,7 @@ def append_desc(func, description):
     return func
 
 
+@test_parallel()
 def test_hough_line():
     # Generate a test image
     img = np.zeros((100, 150), dtype=int)
@@ -129,6 +131,7 @@ def test_hough_line_peaks_num():
                                        min_angle=0, num_peaks=1)[0]) == 1
 
 
+@test_parallel()
 def test_hough_circle():
     # Prepare picture
     img = np.zeros((120, 100), dtype=int)

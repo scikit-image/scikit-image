@@ -11,6 +11,7 @@ from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
 from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import test_parallel
 
 
 np.random.seed(0)
@@ -41,6 +42,7 @@ def test_warp_callable():
     assert_almost_equal(outx, refx)
 
 
+@test_parallel()
 def test_warp_matrix():
     x = np.zeros((5, 5), dtype=np.double)
     x[2, 2] = 1

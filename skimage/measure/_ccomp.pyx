@@ -234,7 +234,7 @@ cdef int ravel_index3D(int x, int y, int z, shape_info *shapeinfo):
 # discovered and trees begin to surface.
 # When we found out that label 5 and 3 are the same, we assign array[5] = 3.
 
-cdef DTYPE_t find_root(DTYPE_t *forest, DTYPE_t n):
+cdef DTYPE_t find_root(DTYPE_t *forest, DTYPE_t n) nogil:
     """Find the root of node n.
     Given the example above, for any integer from 1 to 9, 1 is always returned
     """
@@ -244,7 +244,7 @@ cdef DTYPE_t find_root(DTYPE_t *forest, DTYPE_t n):
     return root
 
 
-cdef inline void set_root(DTYPE_t *forest, DTYPE_t n, DTYPE_t root):
+cdef inline void set_root(DTYPE_t *forest, DTYPE_t n, DTYPE_t root) nogil:
     """
     Set all nodes on a path to point to new_root.
     Given the example above, given n=9, root=6, it would "reconnect" the tree.
@@ -261,7 +261,7 @@ cdef inline void set_root(DTYPE_t *forest, DTYPE_t n, DTYPE_t root):
     forest[n] = root
 
 
-cdef inline void join_trees(DTYPE_t *forest, DTYPE_t n, DTYPE_t m):
+cdef inline void join_trees(DTYPE_t *forest, DTYPE_t n, DTYPE_t m) nogil:
     """Join two trees containing nodes n and m.
     If we imagine that in the example tree, the root 1 is not known, we
     rather have two disjoint trees with roots 2 and 6.
@@ -416,7 +416,7 @@ def label(input, neighbors=None, background=None, return_num=False,
      [0 1 0]
      [0 0 1]]
     >>> from skimage.measure import label
-    >>> print(label(x, connectivity=1)) 
+    >>> print(label(x, connectivity=1))
     [[0 1 1]
      [2 3 1]
      [2 2 4]]

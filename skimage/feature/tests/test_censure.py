@@ -2,6 +2,7 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_raises
 from skimage.data import moon
 from skimage.feature import CENSURE
+from skimage._shared.testing import test_parallel
 
 
 img = moon()
@@ -53,6 +54,7 @@ def test_keypoints_censure_moon_image_dob():
     assert_array_equal(expected_scales, detector.scales)
 
 
+@test_parallel()
 def test_keypoints_censure_moon_image_octagon():
     """Verify the actual Censure keypoints and their corresponding scale with
     the expected values for Octagon filter."""

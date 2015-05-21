@@ -1,11 +1,11 @@
 import numpy as np
 from numpy.testing import assert_equal, assert_array_equal
 
-from skimage._shared.testing import assert_greater
+from skimage._shared.testing import assert_greater, test_parallel
 from skimage.segmentation import felzenszwalb
 from skimage import data
 
-
+@test_parallel()
 def test_grey():
     # very weak tests. This algorithm is pretty unstable.
     img = np.zeros((20, 21))

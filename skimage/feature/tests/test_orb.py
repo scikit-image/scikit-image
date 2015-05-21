@@ -3,11 +3,13 @@ from numpy.testing import assert_equal, assert_almost_equal, run_module_suite
 from skimage.feature import ORB
 from skimage import data
 from skimage.color import rgb2gray
+from skimage._shared.testing import test_parallel
 
 
 img = rgb2gray(data.lena())
 
 
+@test_parallel()
 def test_keypoints_orb_desired_no_of_keypoints():
     detector_extractor = ORB(n_keypoints=10, fast_n=12, fast_threshold=0.20)
     detector_extractor.detect(img)
