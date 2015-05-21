@@ -4,8 +4,12 @@
 #cython: wraparound=False
 import numpy as np
 cimport numpy as cnp
-from libc.math cimport sin, cos, abs, NAN
+from libc.math cimport sin, cos, abs
 from .._shared.interpolation cimport bilinear_interpolation, round
+
+
+cdef extern from "numpy/npy_math.h":
+    double NAN "NPY_NAN"
 
 
 def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
