@@ -385,6 +385,22 @@ class TestWatershed(unittest.TestCase):
         scipy.ndimage.watershed_ift(image.astype(np.uint16), markers,
                                     self.eight)
 
+    def test_watershed10(self):
+        "watershed 10"
+        data = np.array([[1, 1, 1, 1],
+                         [1, 1, 1, 1],
+                         [1, 1, 1, 1],
+                         [1, 1, 1, 1]], np.uint8)
+        markers = np.array([[1, 0, 0, 2],
+                            [0, 0, 0, 0],
+                            [0, 0, 0, 0],
+                            [3, 0, 0, 4]], np.int8)
+        out = watershed(data, markers, self.eight)
+        error = diff([[1, 1, 2, 2],
+                      [1, 1, 2, 2],
+                      [3, 3, 4, 4],
+                      [3, 3, 4, 4]], out)
+        self.assertTrue(error < eps)
 
 if __name__ == "__main__":
     np.testing.run_module_suite()
