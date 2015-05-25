@@ -8,6 +8,7 @@ sh -e /etc/init.d/xvfb start
 export DISPLAY=:99.0
 export PYTHONWARNINGS="all"
 export TEST_ARGS="--exe --ignore-files=^_test -v --with-doctest --ignore-files=^setup.py$"
+export WHEELBINARIES="matplotlib numpy scipy pillow cython"
 
 
 retry () {
@@ -36,6 +37,7 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     sed -i 's/cython>=/cython==/g' requirements.txt
     sed -i 's/networkx>=/networkx==/g' requirements.txt
     sed -i '/pillow/d' requirements.txt
+    export WHEELBINARIES=${WHEELBINARIES/pillow/}
 else
     virtualenv -p python --system-site-packages ~/venv
 fi
@@ -52,9 +54,8 @@ if [[ $TRAVIS_PYTHON_VERSION == 3.2 ]]; then
     sed -i 's/matplotlib>=*.*.*/matplotlib==1.3.1/g' requirements.txt
 fi
 
-retry pip install $WHEELHOUSE -r requirements.txt
-
-pip install 'dask[array]>=0.5.0'
+retry pip install $WHEELHOUSE $WHEELBINARIES
+retry pip install -r requirements.txt
 
 # clean up disk space
 sudo apt-get clean
