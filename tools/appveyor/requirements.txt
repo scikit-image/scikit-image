@@ -10,9 +10,8 @@
 # wheels are preferred for a given version
 numpy==1.8.1
 scipy==0.14.0
-cython==0.20.2
+cython>=0.21
 matplotlib==1.4.2
 pillow==2.6.1
-dask[array]>=0.5.0
 wheel
 nose
