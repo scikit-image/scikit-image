@@ -186,6 +186,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     # and the second through last are the x,y...whatever offsets
     # (to do bounds checking).
     c = []
+    distances = []
     image_stride = np.array(image.strides) // image.itemsize
     for i in range(np.product(c_connectivity.shape)):
         multiplier = 1
@@ -202,10 +203,14 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
             multiplier *= c_connectivity.shape[j]
         if (not ignore) and c_connectivity.__getitem__(tuple(indexes)):
             stride = np.dot(image_stride, np.array(offs))
+            d = np.sum(np.abs(offs)) - 1
             offs.insert(0, stride)
             c.append(offs)
+            distances.append(d)
+            
     c = np.array(c, dtype=np.int32)
-
+    c = c[np.argsort(distances)]
+    
     pq, age = __heapify_markers(c_markers, c_image)
     pq = np.ascontiguousarray(pq, dtype=np.int32)
     if np.product(pq.shape) > 0:
