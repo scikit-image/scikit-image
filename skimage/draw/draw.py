@@ -64,7 +64,7 @@ def ellipse(cy, cx, yradius, xradius, shape=None):
     if shape is not None:
         # Constrain upper_left and lower_right by shape boundary.
         upper_left = np.maximum(upper_left, np.array([0, 0]))
-        lower_right = np.minimum(lower_right, np.array(shape) - 1)
+        lower_right = np.minimum(lower_right, np.array(shape[:2]) - 1)
 
     shifted_center = center - upper_left
     bounding_shape = lower_right - upper_left + 1
