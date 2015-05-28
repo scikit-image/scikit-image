@@ -1,53 +1,153 @@
-Pre-built installation
+Installing scikit-image
+-----------------------
+If you are on Mac OS X you're lucky, open the terminal and install
+scikit-image with pip::
+
+  pip install scikit-image
+
+
+For Python 3 use pip3 instead::
+
+  pip3 install scikit-image
+
+
+For other systems, please read on.
+
+
+Linux, Mac and Windows
 ----------------------
+An easy light weight method to get scikit-image installed on all of the most
+popular operating systems is by using miniconda_. Go over and grab the
+appropriate miniconda_ version for your operating system and install it. When
+you have miniconda_ installed, open a terminal and install scikit-image
+with conda::
 
-`Windows binaries
-<http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image>`__
-are kindly provided by Christoph Gohlke (note that, when upgrading,
-you should first uninstall any older versions).
+  conda install scikit-image
 
-The latest stable release is also included as part of
-`Enthought Canopy <https://www.enthought.com/products/canopy/>`__,
-`Python(x,y) <http://code.google.com/p/pythonxy/wiki/Welcome>`__ and
-`Anaconda <https://store.continuum.io/cshop/anaconda/>`__.
 
-On Debian and Ubuntu, a Debian package ``python-skimage`` can be found in
-`the Neurodebian repository <http://neuro.debian.net>`__. Follow `the
-instructions <http://neuro.debian.net/#how-to-use-this-repository>`__ to
-add Neurodebian to your system package manager, then look for
-``python-skimage`` in the package manager.
+If you prefer *not* using miniconda, find instructions for your operating
+system below.
 
-On systems that support setuptools, the package can be installed from the
-`Python packaging index <http://pypi.python.org/pypi/scikit-image>`__ using
 
-::
+Windows
+-------
+Scikit-image comes with the Python distributions Anaconda_,
+`Enthought Canopy`_ and `Python(x,y)`_. If you install any of
+them, scikit-image should already be installed.
 
-  pip install -U scikit-image
+.. _Anaconda: https://store.continuum.io/cshop/anaconda/
+.. _Enthought Canopy: https://www.enthought.com/products/canopy/
+.. _Python(x,y): http://code.google.com/p/pythonxy/wiki/Welcome
 
-Installation from source
-------------------------
 
-Obtain the source from the git-repository at
-`http://github.com/scikit-image/scikit-image
-<http://github.com/scikit-image/scikit-image>`_ by running::
+If you prefer the regular Python distribution from python.org_, you can
+install scikit-image manually by downloading packages. You will need numpy_,
+scipy_ and the scikit-image package. You can find the packages in `Cristoph
+Gohlke's`_ web page with compiled Python packages. Here is the direct link to
+the `scipy section`_, `numpy section`_ and `scikit-image section`_. Make sure
+you download the right version for your system. E.g. numpy for Python 3.4 64
+bit would be ``numpy‑1.9.2+mkl‑cp34‑none‑win_amd64.whl``.
 
-  git clone http://github.com/scikit-image/scikit-image.git
+To install Goehlke's packages, use pip::
 
-in a terminal (you will need to have git installed on your machine).
+  pip install wheel
+  pip install --find-links Downloads scikit-image
 
-If you do not have git installed, you can also download a zipball from
-`https://github.com/scikit-image/scikit-image/zipball/master
-<https://github.com/scikit-image/scikit-image/zipball/master>`_.
+Here ``--find-links Downloads`` means that pip will look for packages in the
+folder named `Downloads`. Make sure that is where you saved the packages from
+Goehlke.
 
-The scikit can be installed using::
+As you see, installing scikit-image with pip requires some extra manual labor,
+so using a Python distribution is recommended on Windows.
 
-  pip install .
+If you have a brave soul, you can also install scikit-image on Windows by
+compiling it from source::
 
-If you prefer, you can use it without installing, by simply adding
-this path to your ``PYTHONPATH`` variable and compiling extensions
-in-place::
+  pip install scikit-image
 
-  python setup.py build_ext -i
+
+If you experience the error ``Error:unable to find vcvarsall.bat`` it means that
+distutils is not correctly configured to use the C compiler. Modify (or create,
+if not existing) the configuration file ``distutils.cfg`` (located for
+example at ``C:\Python26\Lib\distutils\distutils.cfg``) to contain::
+
+    [build]
+    compiler=mingw32
+
+For more details on compiling in Windows, there is a lot of knowledge iterated
+into the `setup of appveyor`_ (a continious integration service).
+
+.. _miniconda: http://conda.pydata.org/miniconda.html
+.. _python.org: http://python.org/
+.. _numpy: http://www.numpy.org/
+.. _scipy: http://www.scipy.org/
+.. _Cristoph Gohlke's: http://www.lfd.uci.edu/~gohlke/pythonlibs/
+.. _numpy section: http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy
+.. _scipy section: http://www.lfd.uci.edu/~gohlke/pythonlibs/#scipy
+.. _scikit-image section: http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image
+.. _setup of appveyor: https://github.com/scikit-image/scikit-image/blob/master/appveyor.yml
+
+
+Debian and Ubuntu
+-----------------
+On Debian and Ubuntu install scikit-image with::
+
+  sudo apt-get install python-skimage
+
+
+Or if you use Python 3::
+
+  sudo apt-get install python3-skimage
+
+
+On Ubuntu scikit-image is found in the `universe repo`_, and python-skimage can
+also be found in the `Neurodebian repository`_. For using the repository
+follow the `Neurodebian instructions`_ to add Neurodebian to your system 
+package manager.
+
+Ubuntu 14.04 LTS ships with version 0.9.3 of scikit-image, so if you need an
+up-to-date version you must compile scikit-image yourself. First install the
+dependencies::
+
+  sudo apt-get install python-matplotlib python-numpy python-pil python-scipy
+
+
+or for Python 3::
+
+  sudo apt-get install python3-matplotlib python3-numpy python3-pil python3-scipy
+
+
+Get compilers::
+
+  sudo apt-get install build-essential cython
+
+
+Compile and install the latest stable version of scikit-image::
+
+  pip install scikit-image
+
+
+.. _universe repo: https://help.ubuntu.com/community/Repositories/Ubuntu
+.. _Neurodebian repository: http://neuro.debian.net/
+.. _Neurodebian instructions: http://neuro.debian.net/#how-to-use-this-repository
+
+
+Other Unixes
+------------
+Install binary packages of cython, matplotlib, numpy, pillow and scipy if they
+are available in your operating system's package manager. Make sure you have
+a C and C++ compilers. Then install scikit-image with pip::
+
+  pip install scikit-image
+
+
+Upgrading
+---------
+You can upgrade scikit-image by::
+
+  pip install --upgrade --no-deps scikit-image
+  pip install scikit-image # installs new dependencies, if changed
+
 
 Building with bento
 -------------------
@@ -72,5 +172,27 @@ From the ``scikit-image`` source directory::
 
 Depending on file permissions, the install commands may need to be run as
 sudo.
+
+
+Install bleeding edge development version
+-----------------------------------------
+
+Obtain the source from the git-repository at
+http://github.com/scikit-image/scikit-image by running::
+
+  git clone http://github.com/scikit-image/scikit-image
+
+If you do not have git installed on your machine, you can also download a
+zipball from https://github.com/scikit-image/scikit-image/zipball/master.
+
+The scikit can be installed using::
+
+  pip install .
+
+If you prefer, you can use a link instead by compiling extensions in-place::
+
+  python setup.py build_ext -i
+  pip install -e .
+
 
 .. include:: ../../DEPENDS.txt
