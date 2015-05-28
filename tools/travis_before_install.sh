@@ -10,8 +10,7 @@ export DISPLAY=:99.0
 export PYTHONWARNINGS="all"
 export TEST_ARGS="--exe --ignore-files=^_test -v --with-doctest \
                   --ignore-files=^setup.py$"
-export WHEELBINARIES="matplotlib numpy scipy pillow cython"
-
+WHEELBINARIES="matplotlib numpy scipy pillow cython"
 
 retry () {
     # https://gist.github.com/fungusakafungus/1026804
@@ -30,13 +29,15 @@ retry () {
     return 0
 }
 
+# add build dependencies
+echo "cython>=0.21" >> requirements.txt
 
-# test with minimum requirements on 2.7
+# test minimum requirements on 2.7
 if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     sed -i 's/>=/==/g' requirements.txt
     # PIL instead of Pillow
-    sed -i '/pillow/d' requirements.txt
-    export WHEELBINARIES=${WHEELBINARIES/pillow/pil}
+    sed -i 's/pillow.*/pil==1.1.7/g' requirements.txt
+    WHEELBINARIES=${WHEELBINARIES/pillow/pil}
 fi
 
 # create new empty venv
@@ -54,7 +55,12 @@ if [[ $TRAVIS_PYTHON_VERSION == 3.2 ]]; then
     sed -i 's/matplotlib>=.*/matplotlib==1.3.1/g' requirements.txt
 fi
 
-retry pip install $WHEELHOUSE $WHEELBINARIES
+# install wheels
+for requirement in $WHEELBINARIES; do
+    WHEELS="$WHEELS $(grep $requirement requirements.txt)"
+done
+retry pip install $WHEELHOUSE $WHEELS
+
 retry pip install -r requirements.txt
 
 # clean up disk space

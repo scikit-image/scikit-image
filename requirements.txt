@@ -1,6 +1,6 @@
 matplotlib>=1.1.0
 numpy>=1.6.1
-scipy>=0.9
+scipy>=0.9.0
 six>=1.4
 networkx>=1.8
 pillow>=1.7.8
