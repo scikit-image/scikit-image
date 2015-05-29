@@ -6,10 +6,7 @@ import numpy as np
 from .._shared.utils import assert_nD
 from ._texture import _glcm_loop, _local_binary_pattern
 
-# My imports below
 from ..transform import integrate
-import matplotlib.patches as patches
-import matplotlib.pyplot as plt
 
 
 def greycomatrix(image, distances, angles, levels=256, symmetric=False,
@@ -377,6 +374,9 @@ def multiblock_local_binary_pattern(int_image, x, y, width, height):
     return lbp_code
 
 def visualize_multiblock_lbp(img, x, y, width, height, lbp_code=0):
+
+    import matplotlib.patches as patches
+    import matplotlib.pyplot as plt
 
     plt.imshow(img)
     img_desc = plt.gca()
