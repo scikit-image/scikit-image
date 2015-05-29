@@ -1,7 +1,7 @@
 Installing scikit-image
 -----------------------
-If you are on Mac OS X you're lucky, open the terminal and install
-scikit-image with pip::
+If you are on Mac OS X, simply open the terminal and install scikit-image with
+pip::
 
   pip install scikit-image
 
@@ -16,17 +16,16 @@ For other systems, please read on.
 
 Linux, Mac and Windows
 ----------------------
-An easy light weight method to get scikit-image installed on all of the most
-popular operating systems is by using miniconda_. Go over and grab the
-appropriate miniconda_ version for your operating system and install it. When
-you have miniconda_ installed, open a terminal and install scikit-image
-with conda::
+An easy, lightweight method to install scikit-image on most platforms is by
+using miniconda_. Go over and grab the appropriate miniconda_ version for your
+operating system and install it. Once you have miniconda_ installed, open a
+terminal and install scikit-image with ``conda``::
 
   conda install scikit-image
 
 
-If you prefer *not* using miniconda, find instructions for your operating
-system below.
+If you prefer *not* to use miniconda, read on for installation instructions
+specific to each operating system.
 
 
 Windows
@@ -42,40 +41,38 @@ them, scikit-image should already be installed.
 
 If you prefer the regular Python distribution from python.org_, you can
 install scikit-image manually by downloading packages. You will need numpy_,
-scipy_ and the scikit-image package. You can find the packages in `Cristoph
-Gohlke's`_ web page with compiled Python packages. Here is the direct link to
+scipy_, and the scikit-image package. You can find the packages in `Cristoph
+Gohlke's`_ web page with compiled Python packages. Here are direct links to
 the `scipy section`_, `numpy section`_ and `scikit-image section`_. Make sure
-you download the right version for your system. E.g. numpy for Python 3.4 64
+you download the right version for your system. E.g., numpy for Python 3.4 64
 bit would be ``numpy‑1.9.2+mkl‑cp34‑none‑win_amd64.whl``.
 
 To install Goehlke's packages, use pip::
 
   pip install wheel
-  pip install --find-links Downloads scikit-image
+  pip install --find-links path/to/downloaded/packages scikit-image
 
-Here ``--find-links Downloads`` means that pip will look for packages in the
-folder named `Downloads`. Make sure that is where you saved the packages from
-Goehlke.
+Here ``--find-links path/to/downloaded/packages`` tells pip to look for
+packages not just online, but also in the folder specified. Make sure this
+path is where you saved the packages binaries.
 
-As you see, installing scikit-image with pip requires some extra manual labor,
-so using a Python distribution is recommended on Windows.
-
-If you have a brave soul, you can also install scikit-image on Windows by
-compiling it from source::
+It is possible to compile and install scikit-image on Windows from source.
+This requires a C compiler (mingw32) and Cython in addition to NumPy.::
 
   pip install scikit-image
 
 
 If you experience the error ``Error:unable to find vcvarsall.bat`` it means that
-distutils is not correctly configured to use the C compiler. Modify (or create,
-if not existing) the configuration file ``distutils.cfg`` (located for
-example at ``C:\Python26\Lib\distutils\distutils.cfg``) to contain::
+distutils is not correctly configured to use your C compiler. Modify or create
+the configuration file ``distutils.cfg`` in your python install's
+``lib/distutils`` subdirectory (e.g.,
+``C:\Python26\Lib\distutils\distutils.cfg``) to contain::
 
     [build]
     compiler=mingw32
 
-For more details on compiling in Windows, there is a lot of knowledge iterated
-into the `setup of appveyor`_ (a continious integration service).
+For more details on compiling in Windows, refer to our continuous integration
+`setup script for AppVeyor`_.
 
 .. _miniconda: http://conda.pydata.org/miniconda.html
 .. _python.org: http://python.org/
@@ -85,7 +82,7 @@ into the `setup of appveyor`_ (a continious integration service).
 .. _numpy section: http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy
 .. _scipy section: http://www.lfd.uci.edu/~gohlke/pythonlibs/#scipy
 .. _scikit-image section: http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image
-.. _setup of appveyor: https://github.com/scikit-image/scikit-image/blob/master/appveyor.yml
+.. _setup script for AppVeyor: https://github.com/scikit-image/scikit-image/blob/master/appveyor.yml
 
 
 Debian and Ubuntu
@@ -102,7 +99,7 @@ Or if you use Python 3::
 
 On Ubuntu scikit-image is found in the `universe repo`_, and python-skimage can
 also be found in the `Neurodebian repository`_. For using the repository
-follow the `Neurodebian instructions`_ to add Neurodebian to your system 
+follow the `Neurodebian instructions`_ to add Neurodebian to your system
 package manager.
 
 Ubuntu 14.04 LTS ships with version 0.9.3 of scikit-image, so if you need an
