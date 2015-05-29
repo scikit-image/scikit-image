@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 set -ex
 
-export WHEELHOUSE="--no-index --find-links=http://travis-wheels.scikit-image.org/"
+export WHEELHOUSE="--no-index --trusted-host travis-wheels.scikit-image.org \
+                   --find-links=http://travis-wheels.scikit-image.org/"
 export COVERALLS_REPO_TOKEN=7LdFN9232ZbSY3oaXHbQIzLazrSf6w2pQ
 export PIP_DEFAULT_TIMEOUT=60
 sh -e /etc/init.d/xvfb start
 export DISPLAY=:99.0
 export PYTHONWARNINGS="all"
-export TEST_ARGS="--exe --ignore-files=^_test -v --with-doctest --ignore-files=^setup.py$"
-
+export TEST_ARGS="--exe --ignore-files=^_test -v --with-doctest \
+                  --ignore-files=^setup.py$"
+WHEELBINARIES="matplotlib numpy scipy pillow cython"
 
 retry () {
     # https://gist.github.com/fungusakafungus/1026804
@@ -27,20 +29,21 @@ retry () {
     return 0
 }
 
+# add build dependencies
+echo "cython>=0.21" >> requirements.txt
 
-# on Python 2.7, use the system versions of numpy, scipy, and matplotlib
-# and the minimum version of cython and networkx
+# test minimum requirements on 2.7
 if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
-    virtualenv --system-site-packages ~/venv
-    sudo apt-get install python-scipy python-matplotlib python-imaging
-    sed -i 's/cython>=/cython==/g' requirements.txt
-    sed -i 's/networkx>=/networkx==/g' requirements.txt
-    sed -i '/pillow/d' requirements.txt
-else
-    virtualenv -p python --system-site-packages ~/venv
+    sed -i 's/>=/==/g' requirements.txt
+    # PIL instead of Pillow
+    sed -i 's/pillow.*/pil==1.1.7/g' requirements.txt
+    WHEELBINARIES=${WHEELBINARIES/pillow/pil}
 fi
 
+# create new empty venv
+virtualenv -p python ~/venv
 source ~/venv/bin/activate
+
 retry pip install wheel flake8 coveralls nose
 
 # install system tk for matplotlib
@@ -49,12 +52,16 @@ sudo apt-get install python-tk
 
 # on Python 3.2, use matplotlib 1.3.1
 if [[ $TRAVIS_PYTHON_VERSION == 3.2 ]]; then
-    sed -i 's/matplotlib>=*.*.*/matplotlib==1.3.1/g' requirements.txt
+    sed -i 's/matplotlib>=.*/matplotlib==1.3.1/g' requirements.txt
 fi
 
-retry pip install $WHEELHOUSE -r requirements.txt
+# install wheels
+for requirement in $WHEELBINARIES; do
+    WHEELS="$WHEELS $(grep $requirement requirements.txt)"
+done
+retry pip install $WHEELHOUSE $WHEELS
 
-pip install 'dask[array]>=0.5.0'
+retry pip install -r requirements.txt
 
 # clean up disk space
 sudo apt-get clean
