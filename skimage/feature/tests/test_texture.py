@@ -1,7 +1,14 @@
 import numpy as np
-from skimage.feature import greycomatrix, greycoprops, local_binary_pattern
-from skimage._shared.testing import test_parallel
+from skimage.feature import (
+                            greycomatrix,
+                            greycoprops,
+                            local_binary_pattern,
+                            multiblock_local_binary_pattern
+                            )
 
+
+from skimage._shared.testing import test_parallel
+from skimage.transform import integral_image
 
 class TestGLCM():
 
@@ -227,6 +234,22 @@ class TestLBP():
                         [57,  7, 57, 58,  0, 56],
                         [ 9, 58,  0, 57,  7, 14]])
         np.testing.assert_array_almost_equal(lbp, ref)
+
+    def test_multiblock_lbp(self):
+
+        # Create dummy matrix where first and fifth
+        # rectangles have greater value than the central one
+        # Therefore, the following bits should be 1.
+        test_img = np.zeros((9, 9), dtype='uint8')
+        test_img[3:6, 3:6] = 1
+        test_img[:3, :3] = 255
+        test_img[6:, 6:] = 255
+
+        int_img = integral_image(test_img)
+
+        lbp_code = multiblock_local_binary_pattern(int_img, 0, 0, 3, 3)
+
+        np.testing.assert_equal(lbp_code, 17)
 
 
 if __name__ == '__main__':

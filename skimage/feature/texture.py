@@ -6,6 +6,11 @@ import numpy as np
 from .._shared.utils import assert_nD
 from ._texture import _glcm_loop, _local_binary_pattern
 
+# My imports below
+from ..transform import integrate
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+
 
 def greycomatrix(image, distances, angles, levels=256, symmetric=False,
                  normed=False):
@@ -291,3 +296,127 @@ def local_binary_pattern(image, P, R, method='default'):
     image = np.ascontiguousarray(image, dtype=np.double)
     output = _local_binary_pattern(image, P, R, methods[method.lower()])
     return output
+
+def multiblock_local_binary_pattern(int_image, x, y, width, height):
+    """Multi-block local binary pattern.
+
+    MB-LBP is an extension of LBP that can be computed on many
+    scales in a constant time using integral image. It consists of
+    9 equal-sized rectangles. Sum of pixels' intensity values
+    in each of them are compared to the central rectangle and
+    depending on comparison result, the feature descriptor is
+    computed.
+
+    Parameters
+    ----------
+    int_image : (N, M) array
+        Integral image.
+    x : int
+        X-coordinate of top left corner of a rectangle containing feature.
+    y : int
+        Y-coordinate of top left corner of a rectangle containing feature.
+    width : int
+        Width of one of 9 equal rectangles that will be used to compute
+        a feature.
+    height : int
+        Height of one of 9 equal rectangles that will be used to compute
+        a feature.
+
+    Returns
+    -------
+    output : int
+        8bit MB-LBP feature descriptor.
+
+    References
+    ----------
+    .. [1] Face Detection Based on Multi-Block LBP
+           Representation. Lun Zhang, Rufeng Chu, Shiming Xiang, Shengcai Liao,
+           Stan Z. Li
+           http://www.cbsr.ia.ac.cn/users/scliao/papers/Zhang-ICB07-MBLBP.pdf
+    """
+
+    # Top-left coordinates of central rectangle
+    central_rect_x = x + width
+    central_rect_y = y + height
+
+    # Sum of intensity values of central rectangle
+    central_rect_val = integrate(int_image,
+                                 central_rect_y,
+                                 central_rect_x,
+                                 central_rect_y + height - 1,
+                                 central_rect_x + width - 1)
+
+    # Offsets of neighbour rectangles relative to central one.
+    # It has order starting from top left and going clockwise
+    neighbour_rect_offsets = ((-1, -1), (0, -1), (1, -1),
+                              (1, 0), (1, 1), (0, 1),
+                              (-1, 1), (-1, 0))
+
+    lbp_code = 0
+
+    for element_num, offset in enumerate(neighbour_rect_offsets):
+
+        offset_x, offset_y = offset
+
+        current_rect_x = central_rect_x + offset_x * width
+        current_rect_y = central_rect_y + offset_y * height
+        current_rect_val = integrate(int_image,
+                                     current_rect_y,
+                                     current_rect_x,
+                                     current_rect_y + height - 1,
+                                     current_rect_x + width - 1)
+
+        has_greater_value = current_rect_val >= central_rect_val
+
+        # If current rectangle's intensity value is bigger
+        # make corresponding bit to 1.
+        lbp_code |= has_greater_value << element_num
+
+        print lbp_code
+
+    return lbp_code
+
+def visualize_multiblock_lbp(img, x, y, width, height, lbp_code=0):
+
+    plt.imshow(img)
+    img_desc = plt.gca()
+    plt.set_cmap('gray')
+
+    # Offsets of neighbour rectangles relative to central one.
+    # It has order starting from top left and going clockwise
+    neighbour_rect_offsets = ((-1, -1), (0, -1), (1, -1),
+                              (1, 0), (1, 1), (0, 1),
+                              (-1, 1), (-1, 0))
+
+    # Top-left coordinates of central rectangle
+    central_rect_x = x + width
+    central_rect_y = y + height
+
+    for element_num, offset in enumerate(neighbour_rect_offsets):
+
+        offset_x, offset_y = offset
+
+        current_rect_x = central_rect_x + offset_x * width
+        current_rect_y = central_rect_y + offset_y * height
+
+        has_greater_value = lbp_code & (1 << element_num)
+
+        # Hatch the rectangles that has less
+        # intensity than the central rectangle.
+        hatch = '\\'
+
+        if has_greater_value:
+            hatch = ''
+
+        img_desc.add_patch(
+            patches.Rectangle(
+                (current_rect_x, current_rect_y),
+                width,
+                height,
+                fill=False,
+                hatch=hatch,
+                color='w'
+            )
+        )
+
+    plt.show()
