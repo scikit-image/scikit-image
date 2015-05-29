@@ -1,28 +1,32 @@
 Build Requirements
 ------------------
 * `Python >= 2.6 <http://python.org>`__
-* `Numpy >= 1.6.1 <http://numpy.scipy.org/>`__
+* `Numpy >= 1.6 <http://numpy.scipy.org/>`__
 * `Cython >= 0.21 <http://www.cython.org/>`__
-* `Six >=1.4 <https://pypi.python.org/pypi/six>`__
-* `SciPy >=0.9 <http://scipy.org>`__
+* `Six >=1.3 <https://pypi.python.org/pypi/six>`__
 
-Runtime requirements
---------------------
-* `Python >= 2.6 <http://python.org>`__
-* `Numpy >= 1.6.1 <http://numpy.scipy.org/>`__
-* `SciPy >= 0.9 <http://scipy.org>`__
-* `Matplotlib >= 1.1.0 <http://matplotlib.sf.net>`__
-* `NetworkX >= 1.8 <https://networkx.github.io>`__
-* `Six >=1.4 <https://pypi.python.org/pypi/six>`__
-* `Pillow >= 1.7.8 <https://pypi.python.org/pypi/Pillow>`__
-    (or `PIL <http://www.pythonware.com/products/pil/>`__)
-* `dask[array] >= 0.5.0 <http://dask.pydata.org/en/latest/>`__
-
-
-You can use pip to automatically install the runtime dependencies as follows::
+You can use pip to automatically install the base dependencies as follows::
 
     $ pip install -r requirements.txt
 
+Runtime requirements
+--------------------
+* `SciPy <http://scipy.org>`__
+* `Matplotlib <http://matplotlib.sf.net>`__
+* `NetworkX <https://networkx.github.io>`__
+* `Pillow <https://pypi.python.org/pypi/Pillow>`__
+   (or `PIL <http://www.pythonware.com/products/pil/>`__)
+* `dask array <http://dask.pydata.org/en/latest/>`__
+
+Known build errors
+------------------
+On Windows, the error ``Error:unable to find vcvarsall.bat`` means that
+distutils is not correctly configured to use the C compiler. Modify (or create,
+if not existing) the configuration file ``distutils.cfg`` (located for
+example at ``C:\Python26\Lib\distutils\distutils.cfg``) to contain::
+
+    [build]
+    compiler=mingw32
 
 Optional Requirements
 ---------------------

@@ -230,9 +230,9 @@ class TestSaveTIF:
     def roundtrip(self, dtype, x, compress):
         with temporary_file(suffix='.tif') as fname:
             if dtype == np.bool:
-                expected = ['low contrast|unclosed file']
+                expected = ['low contrast']
             else:
-                expected = ['unclosed file|\A\Z']
+                expected = []
             with expected_warnings(expected):
                 if compress > 0:
                     imsave(fname, x, compress=compress)

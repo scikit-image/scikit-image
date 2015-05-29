@@ -34,10 +34,24 @@ with open('skimage/__init__.py') as fid:
 with open('requirements.txt') as fid:
     INSTALL_REQUIRES = [l.strip() for l in fid.readlines() if l]
 
-# requirements for those browsing PyPI
-REQUIRES = [r.replace('>=', ' (>= ') + ')' for r in INSTALL_REQUIRES]
+# development versions do not have the cythonized files
+if VERSION.endswith('dev'):
+    SETUP_REQUIRES = [r for r in INSTALL_REQUIRES if r.startswith('cython')]
+else:
+    INSTALL_REQUIRES = [r for r in INSTALL_REQUIRES
+                                         if not r.startswith('cython')]
+    SETUP_REQUIRES = []
+
+
+# list requirements for PyPI
+REQUIRES = [r.replace('>=', ' (>= ') + ')'
+                      for r in INSTALL_REQUIRES + SETUP_REQUIRES]
 REQUIRES = [r.replace('==', ' (== ') for r in REQUIRES]
-REQUIRES = [r.replace('[array]', '') for r in REQUIRES]
+
+
+# do not attempt to install numpy and scipy until they have eggs available
+INSTALL_REQUIRES = [r for r in INSTALL_REQUIRES
+                                     if not r.startswith(('scipy', 'numpy'))]
 
 
 def configuration(parent_package='', top_path=None):
@@ -59,17 +73,9 @@ def configuration(parent_package='', top_path=None):
 
 
 if __name__ == "__main__":
-    # purposely fail if numpy is not available
-    # other dependecies will be resolved by pip (install_requires)
-    try:
-        from numpy.distutils.core import setup
-    except ImportError:
-        print('To install scikit-image from source, you will need numpy.\n' +
-              'Install numpy with pip:\n' +
-              'pip install numpy\n'
-              'Or use your operating system package manager. For more\n' +
-              'details, see http://scikit-image.org/docs/stable/install.html')
-        sys.exit(1)
+    # purposely fail loudly if numpy or scipy are not available
+    from numpy.distutils.core import setup
+    import scipy
 
     setup(
         name=DISTNAME,
@@ -99,9 +105,8 @@ if __name__ == "__main__":
         ],
 
         configuration=configuration,
+        setup_requires=SETUP_REQUIRES,
         install_requires=INSTALL_REQUIRES,
-        # install cython when running setup.py (source install)
-        setup_requires=['cython>=0.21'],
         requires=REQUIRES,
         packages=setuptools.find_packages(exclude=['doc']),
         include_package_data=True,
