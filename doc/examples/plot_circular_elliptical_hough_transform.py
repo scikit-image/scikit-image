@@ -128,10 +128,10 @@ result.sort(order='accumulator')
 
 # Estimated parameters for the ellipse
 best = result[-1]
-yc = int(best[1])
-xc = int(best[2])
-a = int(best[3])
-b = int(best[4])
+yc = int(round(best[1]))
+xc = int(round(best[2]))
+a = int(round(best[3]))
+b = int(round(best[4]))
 orientation = best[5]
 
 # Draw the ellipse on the original image
