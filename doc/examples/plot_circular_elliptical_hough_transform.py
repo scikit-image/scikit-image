@@ -127,11 +127,8 @@ result = hough_ellipse(edges, accuracy=20, threshold=250,
 result.sort(order='accumulator')
 
 # Estimated parameters for the ellipse
-best = result[-1]
-yc = int(best[1])
-xc = int(best[2])
-a = int(best[3])
-b = int(best[4])
+best = list(result[-1])
+yc, xc, a, b = [int(round(x)) for x in best[1:5]]
 orientation = best[5]
 
 # Draw the ellipse on the original image
