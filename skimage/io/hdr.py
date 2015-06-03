@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def getRadiance(ims, exp, radianceMap):
+def get_radiance(ims, exp, radiance_map):
     """
     Return the radiance for a series of images based upon a camera response 
     function
@@ -26,15 +26,15 @@ def getRadiance(ims, exp, radianceMap):
 
     den = np.ones(ims[0].shape)
     num = np.zeros(ims[0].shape)
-    wf = np.vectorized(weightFunc)
+    wf = np.vectorized(weight_func)
     for idx, im in enumerate(ims):
         gij = im.copy()
         # For colour
         if im.ndim == 3:
             for ii in range(im.shape[2]):
-                gij[:, :, ii] = radianceMap[im[:, :, ii] + 1, ii]
+                gij[:, :, ii] = radiance_map[im[:, :, ii] + 1, ii]
         else:
-            gij[:, :] = radianceMap[im[:, :, ii] + 1]
+            gij[:, :] = radiance_map[im[:, :, ii] + 1]
         gij = gij - np.log(exp[idx])
 
         wij = wf(zij)
@@ -44,7 +44,7 @@ def getRadiance(ims, exp, radianceMap):
     return num / den
 
 
-def makeHdr(ims, exp, radianceMap, depth=16):
+def make_hdr(ims, exp, radiance_map, depth=16):
     """
     Compute the HDR image from a series of images and a racianceMap
     Based on:
@@ -60,7 +60,7 @@ def makeHdr(ims, exp, radianceMap, depth=16):
     exp : numpy 1D array
           array of exposure times in seconds
 
-    radianceMap : numpy array
+    radiance_map : numpy array
                array (idx) mapping counts to radiance value, if input is RGB 
                this must be Nx3 
 
@@ -87,26 +87,26 @@ def makeHdr(ims, exp, radianceMap, depth=16):
 
     sx, sy, sz = np.shape(ims[0])
 
-    w = np.vectorize(weightFunc)
+    w = np.vectorize(weight_func)
 
     for ii in range(sx):
         for jj in range(sy):
             if gray:
                 zij = ims[:, ii, jj]
-                g = radianceMap[zij]
+                g = radiance_map[zij]
                 W = w(zij, depth)
                 hdr[ii, jj] = np.sum(W * (g - B)) / np.sum(W)
             else:
                 for cc in range(sc):
                     zij = ims[:, ii, jj, cc]
-                    g = radianceMap[zij, cc]
+                    g = radiance_map[zij, cc]
                     W = w(zij, depth)
                     hdr[ii, jj, cc] = np.sum(W * (g - B)) / np.sum(W)
 
     return hdr
 
 
-def getCRF(ims, exp, depth=16, l=200, depth_max=10):
+def get_crf(ims, exp, depth=16, l=200, depth_max=10):
     """
     Compute the camera response function from a set of images and exposures.
     Based on:
@@ -143,7 +143,7 @@ def getCRF(ims, exp, depth=16, l=200, depth_max=10):
 
     Returns
     ----------  
-    radianceMap : numpy array
+    radiance_map : numpy array
                array (idx) mapping counts to radiance value, if input is RGB 
                this is 2**depth x 3
                Order of colours is same as input
@@ -164,26 +164,26 @@ def getCRF(ims, exp, depth=16, l=200, depth_max=10):
     colour = (ims[0].ndim == 3)
 
     # Compute the camera response function
-    randIdx = np.floor(np.random.randn(samples) * 2**depth).astype(np.int)
+    rand_idx = np.floor(np.random.randn(samples) * 2**depth).astype(np.int)
     B = np.log(np.array(exp))
 
     if colour:
-        radianceMap = np.zeros([2**depth, 3])
+        radiance_map = np.zeros([2**depth, 3])
 
-        Z = np.zeros([randIdx.size, len(ims)])
+        Z = np.zeros([rand_idx.size, len(ims)])
 
         for ii in range(3):
 
             for jj in range(len(ims)):
-                Z[:, jj] = ims[jj][:, :, ii].flatten()[randIdx]
-            radianceMap[:, ii], LE = gsolve(Z, B, l, depth, depth_max)
+                Z[:, jj] = ims[jj][:, :, ii].flatten()[rand_idx]
+            radiance_map[:, ii], LE = gsolve(Z, B, l, depth, depth_max)
 
     else:
         for jj in range(len(ims)):
-            Z[:, jj] = ims[jj][:, :, ii].flatten()[randIdx]
-        radianceMap, LE = gsolve(Z, B, l, depth, depth_max)
+            Z[:, jj] = ims[jj][:, :, ii].flatten()[rand_idx]
+        radiance_map, LE = gsolve(Z, B, l, depth, depth_max)
 
-    return radianceMap
+    return radiance_map
 
 
 def gsolve(Z, B, l, depth=16, depth_max=12):
@@ -235,7 +235,7 @@ def gsolve(Z, B, l, depth=16, depth_max=12):
     k = 0
     for ii in range(Z.shape[0]):
         for jj in range(Z.shape[1]):
-            wij = weightFunc(Z[ii, jj] + 1, depth - div)
+            wij = weight_func(Z[ii, jj] + 1, depth - div)
             A[k, Z[ii, jj] + 1] = wij
             A[k, n + ii] = -wij
             b[k] = wij * B[jj]
@@ -246,9 +246,9 @@ def gsolve(Z, B, l, depth=16, depth_max=12):
     k += 1
 
     for ii in range(n - 2):
-        A[k, ii] = l * weightFunc(ii + 1, depth - div)
-        A[k, ii + 1] = -2 * l * weightFunc(ii + 1, depth - div)
-        A[k, ii + 2] = l * weightFunc(ii + 1, depth - div)
+        A[k, ii] = l * weight_func(ii + 1, depth - div)
+        A[k, ii + 1] = -2 * l * weight_func(ii + 1, depth - div)
+        A[k, ii + 2] = l * weight_func(ii + 1, depth - div)
         k += 1
 
     # Solve the equations with SVD
@@ -265,7 +265,7 @@ def gsolve(Z, B, l, depth=16, depth_max=12):
     return g, LE
 
 
-def weightFunc(I, depth=16):
+def weight_func(I, depth=16):
     """
     Weight function for the gsolve, based on:
     Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 3–8.
@@ -273,7 +273,7 @@ def weightFunc(I, depth=16):
 
     Parameters
     ----------
-    I : int
+    I : int 
         intensity
 
     depth : int, optional
