@@ -195,10 +195,17 @@ def get_min_ncut(ev, d, w, num_cuts):
         The value of the minimum ncut.
     """
     mcut = np.inf
+    mn = ev.min()
+    mx = ev.max()
+
+    # If all values in `ev` are equal, the loop does not assign a value to
+    # `min_mask`. This implies that the graph can't be further sub-divided
+    # In this case the bi-partition is the the graph itself and an empty set.
+    min_mask = np.zeros_like(ev, dtype=np.bool)
 
     # Refer Shi & Malik 2001, Section 3.1.3, Page 892
     # Perform evenly spaced n-cuts and determine the optimal one.
-    for t in np.linspace(0, 1, num_cuts, endpoint=False):
+    for t in np.linspace(mn, mx, num_cuts, endpoint=False):
         mask = ev > t
         cost = _ncut.ncut_cost(mask, d, w)
         if cost < mcut:
@@ -266,7 +273,7 @@ def _ncut_relabel(rag, thresh, num_cuts):
         # Refer Shi & Malik 2001, Section 3.2.3, Page 893
         vals, vectors = np.real(vals), np.real(vectors)
         index2 = _ncut_cy.argmin2(vals)
-        ev = _ncut.normalize(vectors[:, index2])
+        ev = vectors[:, index2]
 
         cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
         if (mcut < thresh):

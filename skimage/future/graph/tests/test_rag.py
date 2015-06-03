@@ -159,3 +159,23 @@ def test_rag_hierarchical():
 
     result = graph.cut_threshold(labels, g, thresh)
     assert np.all(result == result[0, 0])
+
+
+@skipif(not is_installed('networkx'))
+def test_ncut_stable_subgraph():
+    """ Test to catch an error thrown when subgraph has all eqal edges. """
+
+    img = np.zeros((100, 100, 3), dtype='uint8')
+
+    labels = np.zeros((100, 100), dtype='uint8')
+    labels[...] = 0
+    labels[:50, :50] = 1
+    labels[:50, 50:] = 2
+
+    rag = graph.rag_mean_color(img, labels, mode='similarity')
+    print(rag.edges(data=True))
+
+    new_labels = graph.cut_normalized(labels, rag, in_place=False)
+    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
+    # Two labels
+    assert new_labels.max() == 0
