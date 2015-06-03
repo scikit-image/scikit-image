@@ -87,20 +87,20 @@ def make_hdr(ims, exp, radiance_map, depth=16):
 
     sx, sy, sz = np.shape(ims[0])
 
-    w = np.vectorize(weight_func)
+    wf = np.vectorize(weight_func)
 
     for ii in range(sx):
         for jj in range(sy):
             if gray:
                 zij = ims[:, ii, jj]
                 g = radiance_map[zij]
-                W = w(zij, depth)
+                W = wf(zij, depth)
                 hdr[ii, jj] = np.sum(W * (g - B)) / np.sum(W)
             else:
                 for cc in range(sc):
                     zij = ims[:, ii, jj, cc]
                     g = radiance_map[zij, cc]
-                    W = w(zij, depth)
+                    W = wf(zij, depth)
                     hdr[ii, jj, cc] = np.sum(W * (g - B)) / np.sum(W)
 
     return hdr
@@ -285,7 +285,8 @@ def weight_func(I, depth=16):
         weight for given intensity
     """
 
-    if I <= (2**depth / 2 + 1):
+    # This assumes Z_min = 0
+    if I <= (2**depth / 2):
         return I
     else:
         return (2**depth - 1) - I
