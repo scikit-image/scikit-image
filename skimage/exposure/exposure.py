@@ -245,7 +245,7 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
 
     See Also
     --------
-    intensity_range, equalize_hist
+    equalize_hist
 
     Examples
     --------
