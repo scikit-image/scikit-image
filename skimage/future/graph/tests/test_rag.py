@@ -173,9 +173,8 @@ def test_ncut_stable_subgraph():
     labels[:50, 50:] = 2
 
     rag = graph.rag_mean_color(img, labels, mode='similarity')
-    print(rag.edges(data=True))
 
     new_labels = graph.cut_normalized(labels, rag, in_place=False)
     new_labels, _, _ = segmentation.relabel_sequential(new_labels)
-    # Two labels
+
     assert new_labels.max() == 0

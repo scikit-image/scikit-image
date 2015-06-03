@@ -29,8 +29,7 @@ def DW_matrices(graph):
     W = nx.to_scipy_sparse_matrix(graph, format='csc')
     entries = W.sum(axis=0)
     D = sparse.dia_matrix((entries, 0), shape=W.shape).tocsc()
-    #print("D = ",D.todense())
-    #print("W = ",W.todense())
+
     return D, W
 
 
