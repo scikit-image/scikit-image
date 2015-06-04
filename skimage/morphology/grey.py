@@ -159,6 +159,7 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
     For ``uint8`` (and ``uint16`` up to a certain bit-depth) data, the
     lower algorithm complexity makes the `skimage.filter.rank.minimum`
     function more efficient for larger images and structuring elements.
+    Also note that edge pixels are automatically set to 0.
 
     Examples
     --------
