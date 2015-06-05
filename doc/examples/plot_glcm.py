@@ -47,7 +47,7 @@ for loc in sky_locations:
 # compute some GLCM properties each patch
 xs = []
 ys = []
-for i, patch in enumerate(grass_patches + sky_patches):
+for patch in (grass_patches + sky_patches):
     glcm = greycomatrix(patch, [5], [0], 256, symmetric=True, normed=True)
     xs.append(greycoprops(glcm, 'dissimilarity')[0, 0])
     ys.append(greycoprops(glcm, 'correlation')[0, 0])
