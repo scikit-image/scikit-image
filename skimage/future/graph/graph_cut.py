@@ -198,10 +198,12 @@ def get_min_ncut(ev, d, w, num_cuts):
     mn = ev.min()
     mx = ev.max()
 
-    # If all values in `ev` are equal, the loop does not assign a value to
-    # `min_mask`. This implies that the graph can't be further sub-divided
-    # In this case the bi-partition is the the graph itself and an empty set.
+    # If all values in `ev` are equal, it implies that the graph can't be
+    # further sub-divided. In this case the bi-partition is the the graph
+    # itself and an empty set.
     min_mask = np.zeros_like(ev, dtype=np.bool)
+    if np.allclose(mn, mx):
+        return min_mask, mcut
 
     # Refer Shi & Malik 2001, Section 3.1.3, Page 892
     # Perform evenly spaced n-cuts and determine the optimal one.
