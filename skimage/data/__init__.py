@@ -26,6 +26,7 @@ __all__ = ['load',
            'clock',
            'coffee',
            'coins',
+           'hdr_images',
            'horse',
            'hubble_deep_field',
            'immunohistochemistry',
@@ -384,3 +385,48 @@ def stereo_motorcycle():
     return (load("motorcycle_left.png"),
             load("motorcycle_right.png"),
             np.load(_os.path.join(data_dir, "motorcycle_disp.npz"))["arr_0"])
+
+
+def hdr_images():
+    """Hubble eXtreme Deep Field.
+
+    The Jefferson National Expansion Memorial, including the Gateway Arch and 
+    Old Courthouse, in St Louis, MO, USA. Taken at night as part of a set of 
+    different exposures.
+
+    Returns
+    ------
+
+    ims : list 
+          list containing the images
+    exp : list
+         list of exposure times in sec 
+
+    Notes
+    -----
+    These images were downloaded from (as the 800x600)
+
+    `Wikipedia Commons:
+    <https://commons.wikimedia.org/wiki/File:StLouisArchMultExpEV%2B4.09.JPG>
+    <https://commons.wikimedia.org/wiki/File:StLouisArchMultExpEV%2B1.51.JPG>
+    <https://commons.wikimedia.org/wiki/File:StLouisArchMultExpEV-1.82.JPG>
+    <https://commons.wikimedia.org/wiki/File:StLouisArchMultExpEV-4.72.JPG>`
+
+    The image was captured by Kevin McCoy and is lisensed under:
+    Creative Commons Attribution-Share Alike 3.0 Unported
+    <https://creativecommons.org/licenses/by-sa/3.0/deed.en>`
+
+    """
+
+    files = ['StLouisArchMultExpEV-4.72.JPG',
+             'StLouisArchMultExpEV-1.82.JPG',
+             'StLouisArchMultExpEV+1.51.JPG',
+             'StLouisArchMultExpEV+4.09.JPG']
+
+    # ev = [-4.72, -1.82, 1.18, 1.51, 4.09]
+    exp = [1 / 30., 0.25, 2.5, 15]
+
+    ims = []
+    for f in files:
+        ims.append(load(f))
+    return ims, exp
