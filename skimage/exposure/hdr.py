@@ -1,5 +1,4 @@
 import numpy as np
-from skimage.feature._combine_hdr import combine_hdr_rgb
 
 
 def get_radiance(ims, exp, radiance_map):
