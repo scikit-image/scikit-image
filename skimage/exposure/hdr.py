@@ -1,4 +1,5 @@
 import numpy as np
+from skimage.feature._combine_hdr import combine_hdr_rgb
 
 
 def get_radiance(ims, exp, radiance_map):
@@ -83,24 +84,32 @@ def make_hdr(ims, exp, radiance_map, depth=16):
         hdr = np.zeros([sx, sy], dtype=np.float)
         gray = True
 
-    ims = np.asarray(ims, dtype=np.int)
+    ims = np.asarray(ims, dtype=np.uint64)
 
     sx, sy, sz = np.shape(ims[0])
-
     w = weight_func_arr(ims, depth)
-    for ii in range(sx):
-        for jj in range(sy):
-            if gray:
-                zij = ims[:, ii, jj]
-                g = radiance_map[zij]
-                hdr[ii, jj] = np.sum(
-                    w[:, ii, jj] * (g - B)) / np.sum(w[:, ii, jj])
-            else:
-                for cc in range(sc):
-                    zij = ims[:, ii, jj, cc]
-                    g = radiance_map[zij, cc]
-                    hdr[ii, jj, cc] = np.sum(
-                        w[:, ii, jj, cc] * (g - B)) / np.sum(w[:, ii, jj, cc])
+
+    if gray:
+        num = np.zeros_like(hdr)
+        den = np.zeros_like(hdr)
+
+        for kk in range(ims.shape[0]):
+            g = np.reshape(
+                radiance_map[ims[kk, :, :].flatten()], [sx, sy])
+            num[:, :] += w[kk, :, :] * (g - B[kk])
+            den[:, :] += w[kk, :, :]
+        hdr = num / den
+    else:
+        num = np.zeros_like(hdr)
+        den = np.zeros_like(hdr)
+        for cc in range(sc):
+            for kk in range(ims.shape[0]):
+                g = np.reshape(
+                    radiance_map[ims[kk, :, :, cc].flatten(), cc], [sx, sy])
+                num[:, :,
+                    cc] += w[kk, :, :, cc] * (g - B[kk])
+                den[:, :, cc] += w[kk, :, :, cc]
+        hdr = num / den
 
     return np.exp(hdr)
 
@@ -313,6 +322,6 @@ def weight_func_arr(I, depth=16):
 
     # This assumes Z_min = 0
 
-    Iout = I
+    Iout = I.copy()
     Iout[I > (2**depth / 2)] = (2**depth - 1) - I[I > (2**depth / 2)]
     return Iout
