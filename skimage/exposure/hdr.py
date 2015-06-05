@@ -87,23 +87,22 @@ def make_hdr(ims, exp, radiance_map, depth=16):
 
     sx, sy, sz = np.shape(ims[0])
 
-    wf = np.vectorize(weight_func)
-
+    w = weight_func_arr(ims, depth)
     for ii in range(sx):
         for jj in range(sy):
             if gray:
                 zij = ims[:, ii, jj]
                 g = radiance_map[zij]
-                W = wf(zij, depth)
-                hdr[ii, jj] = np.sum(W * (g - B)) / np.sum(W)
+                hdr[ii, jj] = np.sum(
+                    w[:, ii, jj] * (g - B)) / np.sum(w[:, ii, jj])
             else:
                 for cc in range(sc):
                     zij = ims[:, ii, jj, cc]
                     g = radiance_map[zij, cc]
-                    W = wf(zij, depth)
-                    hdr[ii, jj, cc] = np.sum(W * (g - B)) / np.sum(W)
+                    hdr[ii, jj, cc] = np.sum(
+                        w[:, ii, jj, cc] * (g - B)) / np.sum(w[:, ii, jj, cc])
 
-    return hdr
+    return np.exp(hdr)
 
 
 def get_crf(ims, exp, depth=16, l=200, depth_max=10):
@@ -150,7 +149,7 @@ def get_crf(ims, exp, depth=16, l=200, depth_max=10):
     """
 
     # Calculate number of samples from image neccesarry for an overdetermined
-    # system (assuming Z_min = 0) using the two times the minimum requirement
+    # system (assuming Z_min = 0) using the four times the minimum requirement
     # in the article
 
     if depth > depth_max:
@@ -158,7 +157,7 @@ def get_crf(ims, exp, depth=16, l=200, depth_max=10):
     else:
         div = 0
 
-    samples = 2 * (2**(depth - div)) // (len(ims) - 1)
+    samples = 4 * (2**(depth - div)) // (len(ims) - 1)
 
     # Find if it is grayscale or colour
     colour = (ims[0].ndim == 3)
@@ -267,7 +266,7 @@ def gsolve(Z, B, l, depth=16, depth_max=12):
 
 def weight_func(I, depth=16):
     """
-    Weight function for the gsolve, based on:
+    Weight function, based on:
     Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 3–8.
     doi:10.1145/258734.258884
 
@@ -290,3 +289,30 @@ def weight_func(I, depth=16):
         return I
     else:
         return (2**depth - 1) - I
+
+
+def weight_func_arr(I, depth=16):
+    """
+    Weight function for arrays, based on:
+    Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 3–8.
+    doi:10.1145/258734.258884
+
+    Parameters
+    ----------
+    I : array 
+        intensities 
+
+    depth : int, optional
+            pixel depth, default=16
+
+    Returns
+    ----------
+    w : int
+        weight for given intensity
+    """
+
+    # This assumes Z_min = 0
+
+    Iout = I
+    Iout[I > (2**depth / 2)] = (2**depth - 1) - I[I > (2**depth / 2)]
+    return Iout
