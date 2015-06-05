@@ -388,11 +388,10 @@ def stereo_motorcycle():
 
 
 def hdr_images():
-    """Hubble eXtreme Deep Field.
+    """Bracket images of the Jefferson National Expansion Memorial.
 
-    The Jefferson National Expansion Memorial, including the Gateway Arch and 
-    Old Courthouse, in St Louis, MO, USA. Taken at night as part of a set of 
-    different exposures.
+    These bracketed images are useful for showing the application of High
+    Dynamic Range (HDR) imaging.
 
     Returns
     ------
@@ -412,7 +411,7 @@ def hdr_images():
     <https://commons.wikimedia.org/wiki/File:StLouisArchMultExpEV-1.82.JPG>
     <https://commons.wikimedia.org/wiki/File:StLouisArchMultExpEV-4.72.JPG>`
 
-    The image was captured by Kevin McCoy and is lisensed under:
+    The image was captured by Kevin McCoy and is licensed under:
     Creative Commons Attribution-Share Alike 3.0 Unported
     <https://creativecommons.org/licenses/by-sa/3.0/deed.en>`
 
