@@ -9,7 +9,7 @@ cimport numpy as cnp
 cdef cnp.double_t DBL_MAX = np.finfo(np.double).max
 
 
-cdef find_seam_v(cnp.double_t[:, ::1] energy_img, cnp.int8_t[:, ::1] track_img,
+cdef _find_seam_v(cnp.double_t[:, ::1] energy_img, cnp.int8_t[:, ::1] track_img,
                  cnp.double_t[::1] current_cost, cnp.double_t[::1] prev_cost,
                  Py_ssize_t cols):
     """Find a single vertical seam in an image that will be removed.
@@ -18,10 +18,11 @@ cdef find_seam_v(cnp.double_t[:, ::1] energy_img, cnp.int8_t[:, ::1] track_img,
     ----------
     energy_img : (M, N) ndarray
         The energy image where a higher value signifies a pixel of more
-        importance.
+        importance. Pixels with a lower value will be cropped first.
     track_img : (M, N) ndarray
         The image used to store the optimal decision made at each point while
-        finding a minimum cost path.
+        finding a minimum cost path. For each pixel it stores the offset that
+        produced that least cost.
     current_cost : (N,) ndarray
         An array to store the current cost of the optimal path for each column
         in row currently being processed.
@@ -83,35 +84,7 @@ cdef find_seam_v(cnp.double_t[:, ::1] energy_img, cnp.int8_t[:, ::1] track_img,
     return seam
 
 
-cdef remove_seam_v_2d(cnp.double_t[:, ::1] img, Py_ssize_t[::1] seam,
-                      Py_ssize_t cols):
-    """ Removes one vertical seam from the image.
-
-    The method modifies `img` so that all pixels to the right of the vertical
-    seam are pushed one place left.
-
-    image : (M, N) ndarray
-      Input image whose vertical seam is to be removed.
-    seam : (M, ) ndarray
-      An array use to store the index of the column in the seam for each row.
-    cols : int
-      Number of columns in the input image to process. Column indices more
-      than `cols` are ingored.
-
-    Notes
-    -----
-    `seam` is passed as an argument so that we don't have to reallocate it for
-    each iteration in `_seam_carve_v`.
-    """
-    cdef Py_ssize_t rows, row, col, idx
-    rows = img.shape[0]
-
-    for row in range(rows):
-        for idx in range(seam[row], cols - 1):
-            img[row, idx] = img[row, idx + 1]
-
-
-cdef remove_seam_v_3d(cnp.double_t[:, :, ::1] img, Py_ssize_t[::1] seam,
+cdef remove_seam_v(cnp.double_t[:, :, ::1] img, Py_ssize_t[::1] seam,
                       Py_ssize_t cols):
     """ Removes one horizontal seam from the image.
 
@@ -189,20 +162,17 @@ def _seam_carve_v(img, iters, energy_func, extra_args , extra_kwargs, border):
 
     for i in range(iters):
 
-        sliced_img = img[:, 0:cols]
+        sliced_img = np.squeeze(img[:, 0:cols])
         energy_img = energy_func(sliced_img, *extra_args, **extra_kwargs)
 
         # So that borders are ignored.
-        energy_img[:, 0:border] = ABSOLUTE_MAX
-        energy_img[:, cols-border:cols] = ABSOLUTE_MAX
+        energy_img[:, 0:border] = DBL_MAX
+        energy_img[:, cols-border:cols] = DBL_MAX
 
-        seam = find_seam_v(energy_img, track_img, current_cost, prev_cost,
+        seam = _find_seam_v(energy_img, track_img, current_cost, prev_cost,
                            cols)
 
-        if ndim == 2:
-            remove_seam_v_2d(img, seam, cols)
-        elif ndim == 3:
-            remove_seam_v_3d(img, seam, cols)
+        remove_seam_v(img, seam, cols)
 
         cols -= 1
 

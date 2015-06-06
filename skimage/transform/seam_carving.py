@@ -55,23 +55,16 @@ def seam_carve(img, mode, num, energy_func, extra_args=[],
     """
 
     utils.assert_nD(img, (2, 3))
-    img = util.img_as_float(img)
+    image = util.img_as_float(img)
 
-    if mode == 'horizontal':
-        img = np.ascontiguousarray(img)
-        return _seam_carve_v(img, num, energy_func, extra_args, extra_kwargs,
-                             border)
-    elif mode == 'vertical':
-        if img.ndim == 3:
-            img = np.transpose(img, (1, 0, 2))
-        else:
-            img = img.T
+    if image.ndim == 2:
+        image = image[..., np.newaxis]
 
-        img = np.ascontiguousarray(img)
-        out = _seam_carve_v(img, num, energy_func, extra_args, extra_kwargs,
-                            border)
+    if mode == 'vertical':
+        image = np.transpose(image, (1, 0, 2))
 
-        if img.ndim == 3:
-            return np.transpose(out, (1, 0, 2))
-        else:
-            return out.T
+    image = np.ascontiguousarray(image)
+    out = _seam_carve_v(image, num, energy_func, extra_args, extra_kwargs, border)
+    if mode == 'vertical':
+        out = np.transpose(out, (1, 0, 2))
+    return np.squeeze(out)
