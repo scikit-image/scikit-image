@@ -163,7 +163,7 @@ def test_rag_hierarchical():
 
 @skipif(not is_installed('networkx'))
 def test_ncut_stable_subgraph():
-    """ Test to catch an error thrown when subgraph has all eqal edges. """
+    """ Test to catch an error thrown when subgraph has all equal edges. """
 
     img = np.zeros((100, 100, 3), dtype='uint8')
 
