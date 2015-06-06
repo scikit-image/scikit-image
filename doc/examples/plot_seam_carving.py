@@ -15,13 +15,13 @@ using the Sobel filter to signify the importance of each pixel.
 """
 from skimage import io, data
 from skimage import transform
-from skimage import color, filters
+from skimage import filters
 from matplotlib import pyplot as plt
 
 
 img = data.coins()
-out  = transform.seam_carve(img, 'vertical', 80, energy_func = filters.sobel)
-out  = transform.seam_carve(out, 'horizontal', 70, energy_func = filters.sobel)
+out = transform.seam_carve(img, 'vertical', 80, energy_func=filters.sobel)
+out = transform.seam_carve(out, 'horizontal', 70, energy_func=filters.sobel)
 resized = transform.resize(img, out.shape)
 
 plt.title('Original Image')

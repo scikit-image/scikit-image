@@ -6,7 +6,7 @@ import numpy as np
 cimport numpy as cnp
 
 
-cdef cnp.double_t ABSOLUTE_MAX = np.finfo(np.double).max
+cdef cnp.double_t DBL_MAX = np.finfo(np.double).max
 
 
 cdef find_seam_v(cnp.double_t[:, ::1] energy_img, cnp.int8_t[:, ::1] track_img,
@@ -22,10 +22,10 @@ cdef find_seam_v(cnp.double_t[:, ::1] energy_img, cnp.int8_t[:, ::1] track_img,
     track_img : (M, N) ndarray
         The image used to store the optimal decision made at each point while
         finding a minimum cost path.
-    current_cost : (N, ) ndarray
+    current_cost : (N,) ndarray
         An array to store the current cost of the optimal path for each column
         in row currently being processed.
-    prev_cost : (N, ) ndarray
+    prev_cost : (N,) ndarray
         An array to store the current cost of the optimal path for each column
         in row prior to the one being processed.
     cols : int
@@ -35,7 +35,7 @@ cdef find_seam_v(cnp.double_t[:, ::1] energy_img, cnp.int8_t[:, ::1] track_img,
 
     Returns
     -------
-    seam : (M, ) ndarray
+    seam : (M, ) ndarray of int
         An array containing the index of the row of the pixel to be removed
         for each column in the image.
 
@@ -58,7 +58,7 @@ cdef find_seam_v(cnp.double_t[:, ::1] energy_img, cnp.int8_t[:, ::1] track_img,
     for row in range(1, rows):
         for col in range(0, cols):
 
-            min_cost = ABSOLUTE_MAX
+            min_cost = DBL_MAX
             for offset in range(-1, 2):
                 idx = col + offset
 
