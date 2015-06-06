@@ -5,7 +5,7 @@ from numpy import testing
 
 def energy(img):
     if(img.ndim == 3):
-        return np.ascontiguousarray(img[:, :, 0])
+        img = np.ascontiguousarray(img[:, :, 0])
     return (1 - img)
 
 
