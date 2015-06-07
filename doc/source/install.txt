@@ -32,30 +32,31 @@ system below.
 Windows
 -------
 Scikit-image comes with the Python distributions Anaconda_,
-`Enthought Canopy`_ and `Python(x,y)`_. If you install any of
-them, scikit-image should already be installed.
+`Enthought Canopy`_, `Python(x,y)`_, and `WinPython`_. 
+If you install any of them, scikit-image should already be installed.
 
 .. _Anaconda: https://store.continuum.io/cshop/anaconda/
 .. _Enthought Canopy: https://www.enthought.com/products/canopy/
 .. _Python(x,y): http://code.google.com/p/pythonxy/wiki/Welcome
+.. _WinPython: https://winpython.github.io/
 
 
 If you prefer the regular Python distribution from python.org_, you can
 install scikit-image manually by downloading packages. You will need numpy_,
-scipy_ and the scikit-image package. You can find the packages in `Cristoph
+scipy_ and the scikit-image package. You can find the packages in `Christoph
 Gohlke's`_ web page with compiled Python packages. Here is the direct link to
 the `scipy section`_, `numpy section`_ and `scikit-image section`_. Make sure
 you download the right version for your system. E.g. numpy for Python 3.4 64
-bit would be ``numpy‑1.9.2+mkl‑cp34‑none‑win_amd64.whl``.
+bit would be ``numpy-1.9.2+mkl-cp34-none-win_amd64.whl``.
 
-To install Goehlke's packages, use pip::
+To install Gohlke's packages, use pip::
 
   pip install wheel
   pip install --find-links Downloads scikit-image
 
 Here ``--find-links Downloads`` means that pip will look for packages in the
 folder named `Downloads`. Make sure that is where you saved the packages from
-Goehlke.
+Gohlke.
 
 As you see, installing scikit-image with pip requires some extra manual labor,
 so using a Python distribution is recommended on Windows.
@@ -81,7 +82,7 @@ into the `setup of appveyor`_ (a continious integration service).
 .. _python.org: http://python.org/
 .. _numpy: http://www.numpy.org/
 .. _scipy: http://www.scipy.org/
-.. _Cristoph Gohlke's: http://www.lfd.uci.edu/~gohlke/pythonlibs/
+.. _Christoph Gohlke's: http://www.lfd.uci.edu/~gohlke/pythonlibs/
 .. _numpy section: http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy
 .. _scipy section: http://www.lfd.uci.edu/~gohlke/pythonlibs/#scipy
 .. _scikit-image section: http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image
