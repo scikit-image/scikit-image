@@ -116,7 +116,7 @@ def view_as_windows(arr_in, window_shape, step=1):
     window_shape : integer or tuple of length arr_in.ndim
         Defines the shape of the elementary n-dimensional orthotope
         (better know as hyperrectangle [1]_) of the rolling window view.
-        If an integer is given, the shape will be a hyperrectangle of
+        If an integer is given, the shape will be a hypercube of
         sidelength given by its value.
     step : integer or tuple of length arr_in.ndim
         Indicates step size at which extraction shall be performed.
@@ -218,16 +218,18 @@ def view_as_windows(arr_in, window_shape, step=1):
     if not isinstance(arr_in, np.ndarray):
         raise TypeError("`arr_in` must be a numpy ndarray")
 
+    ndim = arr_in.ndim
+
     if isinstance(window_shape, numbers.Number):
-        window_shape = tuple([window_shape] * arr_in.ndim)
-    if not (len(window_shape) == arr_in.ndim):
+        window_shape = (window_shape,) * ndim
+    if not (len(window_shape) == ndim):
         raise ValueError("`window_shape` is incompatible with `arr_in.shape`")
 
     if isinstance(step, numbers.Number):
         if step < 1:
             raise ValueError("`step` must be >= 1")
-        step = tuple([step] * arr_in.ndim)
-    if not (len(step) == arr_in.ndim):
+        step = (step,) * ndim
+    if len(step) != ndim:
         raise ValueError("`step` is incompatible with `arr_in.shape`")
 
     arr_shape = np.array(arr_in.shape)
