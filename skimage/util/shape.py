@@ -113,7 +113,7 @@ def view_as_windows(arr_in, window_shape, step=1):
     ----------
     arr_in : ndarray
         N-d input array.
-    window_shape : integer or tuple of length arr_in.ndmi
+    window_shape : integer or tuple of length arr_in.ndim
         Defines the shape of the elementary n-dimensional orthotope
         (better know as hyperrectangle [1]_) of the rolling window view.
         If an integer is given, the shape will be a hyperrectangle of
