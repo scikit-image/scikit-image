@@ -29,6 +29,7 @@ def DW_matrices(graph):
     W = nx.to_scipy_sparse_matrix(graph, format='csc')
     entries = W.sum(axis=0)
     D = sparse.dia_matrix((entries, 0), shape=W.shape).tocsc()
+
     return D, W
 
 
@@ -65,21 +66,3 @@ def ncut_cost(cut, D, W):
     assoc_b = D.data[~cut].sum()
 
     return (cut_cost / assoc_a) + (cut_cost / assoc_b)
-
-
-def normalize(a):
-    """Normalize values in an array between `0` and `1`.
-
-    Parameters
-    ----------
-    a : ndarray
-        The array to be normalized.
-
-    Returns
-    -------
-    out : ndarray
-        The normalized array.
-    """
-    mi = a.min()
-    mx = a.max()
-    return (a - mi) / (mx - mi)
