@@ -264,3 +264,174 @@ def _local_binary_pattern(double[:, ::1] image,
                 output[r, c] = lbp
 
     return np.asarray(output)
+
+
+cdef inline Py_ssize_t _clip(Py_ssize_t x, Py_ssize_t low,
+                             Py_ssize_t high) nogil:
+    """Clips coordinate between high and low.
+
+    Parameters
+    ----------
+    x : int
+        Coordinate to be clipped.
+    low : int
+        The lower bound.
+    high : int
+        The higher bound.
+
+    Returns
+    -------
+    x : int
+        `x` clipped between `high` and `low`.
+    """
+
+    if(x > high):
+        return high
+    if(x < low):
+        return low
+    return x
+
+
+cdef inline cnp.double_t _integ(
+    cnp.double_t[:, ::1] img, Py_ssize_t r0, Py_ssize_t c0,
+        Py_ssize_t r1, Py_ssize_t c1) nogil:
+    """Integrate over the integral image in the given window
+
+    This method was created so that `multiblock_local_binary_pattern`
+    does not have to make a Python call.
+
+    Parameters
+    ----------
+    img : array
+        The integral image over which to integrate.
+    r0 : int
+        The row number of the top left corner.
+    c0 : int
+        The column number of the top left corner.
+    r1 : int
+        The row number of the bottom right corner.
+    c1 : int
+        The column number of the bottom right corner.
+
+    Returns
+    -------
+    ans : double
+        The integral over the given window.
+    """
+
+    r = _clip(r0, 0, img.shape[0] - 1)
+    c = _clip(c0, 0, img.shape[1] - 1)
+
+    r2 = _clip(r1, 0, img.shape[0] - 1)
+    c2 = _clip(c1, 0, img.shape[1] - 1)
+
+    cdef cnp.double_t ans = img[r1, c1]
+
+    if (r0 >= 1) and (c0 >= 1):
+        ans += img[r0 - 1, c0 - 1]
+
+    if (r0 >= 1):
+        ans -= img[r0 - 1, c1]
+
+    if (c0 >= 1):
+        ans -= img[r1, c0 - 1]
+
+    return ans
+
+
+def multiblock_local_binary_pattern(cnp.double_t[:, ::1] int_image,
+                                    Py_ssize_t x,
+                                    Py_ssize_t y,
+                                    Py_ssize_t width,
+                                    Py_ssize_t height):
+    """Multi-block local binary pattern.
+
+    The features are calculated in a way similar to local binary
+    patterns, except that block summed up pixel values
+    rather than pixel values are used.
+
+    MB-LBP is an extension of LBP that can be computed on any
+    scales in a constant time using integral image. It consists of
+    9 equal-sized rectangles. They are used to compute a feature.
+    Sum of pixels' intensity values in each of them are compared
+    to the central rectangle and depending on comparison result,
+    the feature descriptor is computed.
+
+    Parameters
+    ----------
+    int_image : (N, M) double array
+        Integral image.
+    x : int
+        X-coordinate of top left corner of a rectangle containing feature.
+    y : int
+        Y-coordinate of top left corner of a rectangle containing feature.
+    width : int
+        Width of one of 9 equal rectangles that will be used to compute
+        a feature.
+    height : int
+        Height of one of 9 equal rectangles that will be used to compute
+        a feature.
+
+    Returns
+    -------
+    output : int
+        8bit MB-LBP feature descriptor.
+
+    References
+    ----------
+    .. [1] Face Detection Based on Multi-Block LBP
+           Representation. Lun Zhang, Rufeng Chu, Shiming Xiang, Shengcai Liao,
+           Stan Z. Li
+           http://www.cbsr.ia.ac.cn/users/scliao/papers/Zhang-ICB07-MBLBP.pdf
+    """
+
+    # Top-left coordinates of central rectangle
+    cdef:
+        Py_ssize_t central_rect_x = x + width
+        Py_ssize_t central_rect_y = y + height
+
+    # Sum of intensity values of central rectangle
+    cdef double central_rect_val = _integ(int_image,
+                                          central_rect_y,
+                                          central_rect_x,
+                                          central_rect_y + height - 1,
+                                          central_rect_x + width - 1)
+
+    #print central_rect_x, central_rect_y
+
+    # Offsets of neighbour rectangles relative to central one.
+    # It has order starting from top left and going clockwise
+    cdef:
+        Py_ssize_t *x_offsets = [-1, 0, 1, 1, 1, 0, -1, -1]
+        Py_ssize_t *y_offsets = [-1, -1, -1, 0, 1, 1, 1, 0]
+        Py_ssize_t element_num, offset_x, offset_y
+        Py_ssize_t current_rect_x, current_rect_y
+        double current_rect_val
+        int has_greater_value
+        int lbp_code = 0
+
+    for element_num in range(8):
+
+        offset_x = x_offsets[element_num]
+        offset_y = y_offsets[element_num]
+
+
+        current_rect_x = central_rect_x + offset_x * width
+        current_rect_y = central_rect_y + offset_y * height
+
+
+        current_rect_val = _integ(int_image,
+                                  current_rect_y,
+                                  current_rect_x,
+                                  current_rect_y + height - 1,
+                                  current_rect_x + width - 1)
+
+
+        has_greater_value = current_rect_val >= central_rect_val
+
+        # If current rectangle's intensity value is bigger
+        # make corresponding bit to 1.
+        lbp_code |= has_greater_value << (7 - element_num)
+
+    return lbp_code
+

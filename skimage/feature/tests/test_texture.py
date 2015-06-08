@@ -6,9 +6,9 @@ from skimage.feature import (
                             multiblock_local_binary_pattern
                             )
 
-
 from skimage._shared.testing import test_parallel
 from skimage.transform import integral_image
+from skimage.util import img_as_float
 
 class TestGLCM():
 
@@ -235,7 +235,10 @@ class TestLBP():
                         [ 9, 58,  0, 57,  7, 14]])
         np.testing.assert_array_almost_equal(lbp, ref)
 
-    def test_multiblock_lbp(self):
+
+class TestMBLBP():
+
+    def test_single_mblbp(self):
 
         # Create dummy matrix where first and fifth
         # rectangles have greater value than the central one
@@ -245,11 +248,19 @@ class TestLBP():
         test_img[:3, :3] = 255
         test_img[6:, 6:] = 255
 
+        # MB-LBP is filled in reverse order.
+        # So the first and fifth bits from the end should
+        # be filled.
+        correct_answer = 0b10001000
+
+        # The function accepts the float images.
+        # Also it has to be C-contiguous.
+        test_img = img_as_float(test_img)
         int_img = integral_image(test_img)
 
         lbp_code = multiblock_local_binary_pattern(int_img, 0, 0, 3, 3)
 
-        np.testing.assert_equal(lbp_code, 17)
+        np.testing.assert_equal(lbp_code, correct_answer)
 
 
 if __name__ == '__main__':

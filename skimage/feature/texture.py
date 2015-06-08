@@ -4,9 +4,8 @@ Methods to characterize image textures.
 
 import numpy as np
 from .._shared.utils import assert_nD
+from ..util import img_as_float
 from ._texture import _glcm_loop, _local_binary_pattern
-
-from ..transform import integrate
 
 
 def greycomatrix(image, distances, angles, levels=256, symmetric=False,
@@ -294,8 +293,9 @@ def local_binary_pattern(image, P, R, method='default'):
     output = _local_binary_pattern(image, P, R, methods[method.lower()])
     return output
 
-def multiblock_local_binary_pattern(int_image, x, y, width, height):
-    """Multi-block local binary pattern.
+
+def visualize_multiblock_lbp(img, x, y, width, height, lbp_code=0):
+    """Multi-block local binary pattern visualization.
 
     MB-LBP is an extension of LBP that can be computed on many
     scales in a constant time using integral image. It consists of
@@ -304,10 +304,15 @@ def multiblock_local_binary_pattern(int_image, x, y, width, height):
     depending on comparison result, the feature descriptor is
     computed.
 
+    The blocks visualized in the following manner: the center block
+    is left untouched. The blocks that have higher are covered with
+    transparent white rectangles. The blocks that have less intensity
+    are covered with cyan rectangles.
+
     Parameters
     ----------
-    int_image : (N, M) array
-        Integral image.
+    img :
+        Image on which to visualize the pattern.
     x : int
         X-coordinate of top left corner of a rectangle containing feature.
     y : int
@@ -318,11 +323,14 @@ def multiblock_local_binary_pattern(int_image, x, y, width, height):
     height : int
         Height of one of 9 equal rectangles that will be used to compute
         a feature.
+    lbp_code : int
+        The descriptor of feature to visualize. If not provided,
+        the descriptor with 0 value will be used.
 
     Returns
     -------
-    output : int
-        8bit MB-LBP feature descriptor.
+    output :
+        Float image with visualization.
 
     References
     ----------
@@ -332,55 +340,21 @@ def multiblock_local_binary_pattern(int_image, x, y, width, height):
            http://www.cbsr.ia.ac.cn/users/scliao/papers/Zhang-ICB07-MBLBP.pdf
     """
 
-    # Top-left coordinates of central rectangle
-    central_rect_x = x + width
-    central_rect_y = y + height
+    # Default colors for regions.
+    # White is for the blocks that are brighter.
+    # Cyan is for the blocks that has less intensity.
+    color_greater_block = np.asarray([1, 1, 1], dtype='float64')
+    color_less_block = np.asarray([0, 0.69, 0.96], dtype='float64')
 
-    # Sum of intensity values of central rectangle
-    central_rect_val = integrate(int_image,
-                                 central_rect_y,
-                                 central_rect_x,
-                                 central_rect_y + height - 1,
-                                 central_rect_x + width - 1)
+    # Copy array to avoid the changes to the original one
+    output = np.copy(img)
 
-    # Offsets of neighbour rectangles relative to central one.
-    # It has order starting from top left and going clockwise
-    neighbour_rect_offsets = ((-1, -1), (0, -1), (1, -1),
-                              (1, 0), (1, 1), (0, 1),
-                              (-1, 1), (-1, 0))
+    # As the visualization uses RGB color we need 3 bands.
+    if len(img.shape) < 3:
+        output = np.dstack((img,) * 3)
 
-    lbp_code = 0
-
-    for element_num, offset in enumerate(neighbour_rect_offsets):
-
-        offset_x, offset_y = offset
-
-        current_rect_x = central_rect_x + offset_x * width
-        current_rect_y = central_rect_y + offset_y * height
-        current_rect_val = integrate(int_image,
-                                     current_rect_y,
-                                     current_rect_x,
-                                     current_rect_y + height - 1,
-                                     current_rect_x + width - 1)
-
-        has_greater_value = current_rect_val >= central_rect_val
-
-        # If current rectangle's intensity value is bigger
-        # make corresponding bit to 1.
-        lbp_code |= has_greater_value << element_num
-
-        print lbp_code
-
-    return lbp_code
-
-def visualize_multiblock_lbp(img, x, y, width, height, lbp_code=0):
-
-    import matplotlib.patches as patches
-    import matplotlib.pyplot as plt
-
-    plt.imshow(img)
-    img_desc = plt.gca()
-    plt.set_cmap('gray')
+    # Colors are specified in floats
+    output = img_as_float(output)
 
     # Offsets of neighbour rectangles relative to central one.
     # It has order starting from top left and going clockwise
@@ -396,27 +370,19 @@ def visualize_multiblock_lbp(img, x, y, width, height, lbp_code=0):
 
         offset_x, offset_y = offset
 
-        current_rect_x = central_rect_x + offset_x * width
-        current_rect_y = central_rect_y + offset_y * height
+        curr_x = central_rect_x + offset_x * width
+        curr_y = central_rect_y + offset_y * height
 
-        has_greater_value = lbp_code & (1 << element_num)
+        has_greater_value = lbp_code & (1 << (7-element_num))
 
-        # Hatch the rectangles that has less
-        # intensity than the central rectangle.
-        hatch = '\\'
-
+        # Mix-in the visualization colors
         if has_greater_value:
-            hatch = ''
+            output[curr_y:curr_y+height, curr_x:curr_x+width] = \
+                0.5 * output[curr_y:curr_y+height, curr_x:curr_x+width] \
+                + 0.5 * color_greater_block
+        else:
+            output[curr_y:curr_y+height, curr_x:curr_x+width] = \
+                0.5 * output[curr_y:curr_y+height, curr_x:curr_x+width] \
+                + 0.5 * color_less_block
 
-        img_desc.add_patch(
-            patches.Rectangle(
-                (current_rect_x, current_rect_y),
-                width,
-                height,
-                fill=False,
-                hatch=hatch,
-                color='w'
-            )
-        )
-
-    plt.show()
+    return output
