@@ -1,7 +1,3 @@
-# cython: cdivision=True
-# cython: boundscheck=False
-# cython: nonecheck=False
-# cython: wraparound=False
 import numpy as np
 cimport numpy as cnp
 
@@ -112,6 +108,65 @@ cdef remove_seam_v(cnp.double_t[:, :, ::1] img, Py_ssize_t[::1] seam,
             img[row, idx, :] = img[row, idx + 1, :]
 
 
+cdef _preprocess_image(cnp.double_t[:, ::1] energy_img,
+                       cnp.double_t[:, ::1] cumulative_img,
+                       cnp.int8_t[:, ::1] track_img,
+                       Py_ssize_t cols):
+
+    cdef Py_ssize_t r, c, offset, c_idx
+    cdef Py_ssize_t rows = energy_img.shape[0]
+    cdef cnp.double_t min_cost = DBL_MAX
+
+    for c in range(cols):
+        cumulative_img[0, c] = energy_img[0, c]
+
+
+    for r in range(1, rows):
+        for c in range(cols):
+            min_cost = DBL_MAX
+            for offset in range(-1, 2):
+
+                c_idx = c + offset
+                if (c_idx > cols - 1) or (c_idx < 0) :
+                    continue
+
+                if cumulative_img[r-1, c_idx] < min_cost:
+                    min_cost = cumulative_img[r-1, c_idx]
+                    track_img[r, c] = offset
+
+            #print "min_cost = ", min_cost
+            cumulative_img[r,c] = min_cost + energy_img[r, c]
+
+    #print "-------Cumulative Image --------"
+    #print np.array(cumulative_img)
+    #print "-------Energy Image --------"
+    #print np.array(energy_img)
+
+cdef cnp.uint8_t mark_seam(cnp.int8_t[:, ::1] track_img, Py_ssize_t start_index,
+                          cnp.uint8_t[:, ::1] seam_map):
+
+    cdef Py_ssize_t rows = track_img.shape[0]
+    cdef Py_ssize_t[::1] current_seam_indices = np.zeros(rows, dtype=np.int)
+    cdef Py_ssize_t row, col
+    cdef cnp.int8_t offset
+    cdef Py_ssize_t seams
+
+    current_seam_indices[rows - 1] = start_index
+    for row in range(rows - 2, -1, -1):
+        col = current_seam_indices[row+1]
+        offset = track_img[row, col]
+        col = col + offset
+        current_seam_indices[row] = col
+
+        if seam_map[row, col]:
+            return 0
+
+
+    for row in range(rows):
+        col = current_seam_indices[row]
+        seam_map[row, col] = 1
+
+    return 1
 def _seam_carve_v(img, iters, energy_func, extra_args , extra_kwargs, border):
     """ Carve vertical seams off an image.
 
@@ -120,7 +175,7 @@ def _seam_carve_v(img, iters, energy_func, extra_args , extra_kwargs, border):
 
     Parameters
     ----------
-    image : (M, N) or (M, N, 3) ndarray
+    img : (M, N) or (M, N, 3) ndarray
         Input image whose vertical seams are to be removed.
     iters : int
         Number of vertical seams are to be removed.
@@ -151,29 +206,35 @@ def _seam_carve_v(img, iters, energy_func, extra_args , extra_kwargs, border):
            "Seam Carving for Content-Aware Image Resizing"
            http://www.cs.jhu.edu/~misha/ReadingSeminar/Papers/Avidan07.pdf
     """
-    cdef Py_ssize_t[::1] seam
-    cdef Py_ssize_t ndim = img.ndim
+    last_row_obj = np.zeros(img.shape[1], dtype=np.float)
+    seam_map_obj = np.zeros(img.shape[0:2], dtype=np.uint8)
+
+    cdef cnp.double_t[::1] last_row = last_row_obj
+    cdef Py_ssize_t[::1] sorted_indices
+    cdef cnp.uint8_t[:, ::1] seam_map = seam_map_obj
     cdef Py_ssize_t cols = img.shape[1]
 
-    track_img = np.zeros(img.shape[0:2], dtype=np.int8)
+    cdef cnp.double_t[:, :, ::1] image = img
+    cdef cnp.int8_t[:, ::1] track_img = np.zeros(img.shape[0:2], dtype=np.int8)
+    cdef cnp.double_t[:, ::1] cumulative_img = np.zeros(img.shape[0:2], dtype=np.float)
+    cdef cnp.double_t[:, ::1] energy_img
 
-    current_cost = np.zeros_like(track_img[0], dtype = img.dtype)
-    prev_cost = np.zeros_like(track_img[0], dtype = img.dtype)
+    energy_img_obj = energy_func(np.squeeze(img))
+    energy_img = energy_img_obj
 
-    for i in range(iters):
+    energy_img_obj[:, 0:border] = DBL_MAX
+    energy_img_obj[:, cols-border:cols] = DBL_MAX
 
-        sliced_img = np.squeeze(img[:, 0:cols])
-        energy_img = energy_func(sliced_img, *extra_args, **extra_kwargs)
+    _preprocess_image(energy_img, cumulative_img, track_img, cols)
+    last_row[...] = cumulative_img[-1, :]
+    sorted_indices = np.argsort(last_row_obj)
+    #print "Sorted Indices = ", np.array(sorted_indices)
+    #print "First sorted Index = ", sorted_indices[0]
+    #print "Last Row = ", np.array(energy_img[-1, :])
+    #print np.array()
 
-        # So that borders are ignored.
-        energy_img[:, 0:border] = DBL_MAX
-        energy_img[:, cols-border:cols] = DBL_MAX
 
-        seam = _find_seam_v(energy_img, track_img, current_cost, prev_cost,
-                           cols)
-
-        remove_seam_v(img, seam, cols)
-
-        cols -= 1
-
+    from skimage import io
+    io.imshow(seam_map_obj*255)
+    io.show()
     return img[:, 0:cols]

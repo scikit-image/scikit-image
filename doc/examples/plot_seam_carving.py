@@ -18,21 +18,23 @@ from skimage import transform
 from skimage import filters
 from matplotlib import pyplot as plt
 
+def nothing(img):
+    return img
 
-img = data.coins()
+img = data.coins()#io.imread('/home/vighnesh/images/seam_bw.png')
 out = transform.seam_carve(img, 'vertical', 80, energy_func=filters.sobel)
-out = transform.seam_carve(out, 'horizontal', 70, energy_func=filters.sobel)
+#out = transform.seam_carve(out, 'horizontal', 70, energy_func=filters.sobel)
 resized = transform.resize(img, out.shape)
 
 plt.title('Original Image')
-io.imshow(img, plugin='matplotlib')
+#io.imshow(img, plugin='matplotlib')
 
 plt.figure()
 plt.title('Resized Image')
-io.imshow(resized, plugin='matplotlib')
+#io.imshow(resized, plugin='matplotlib')
 
 plt.figure()
 plt.title('Resized using Seam-Carving')
-io.imshow(out, plugin='matplotlib')
+#io.imshow(out, plugin='matplotlib')
 
-io.show()
+#io.show()

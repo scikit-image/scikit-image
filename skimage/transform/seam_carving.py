@@ -60,11 +60,11 @@ def seam_carve(img, mode, num, energy_func, extra_args=[],
     if image.ndim == 2:
         image = image[..., np.newaxis]
 
-    if mode == 'vertical':
+    if mode == 'horizontal':
         image = np.transpose(image, (1, 0, 2))
 
     image = np.ascontiguousarray(image)
     out = _seam_carve_v(image, num, energy_func, extra_args, extra_kwargs, border)
-    if mode == 'vertical':
+    if mode == 'horizontal':
         out = np.transpose(out, (1, 0, 2))
     return np.squeeze(out)
