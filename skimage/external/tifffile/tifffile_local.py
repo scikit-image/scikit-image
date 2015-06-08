@@ -153,7 +153,7 @@ import numpy
 
 from . import _tifffile
 
-__version__ = '0.3.3'
+__version__ = '0.3.4'
 __docformat__ = 'restructuredtext en'
 __all__ = ('imsave', 'imread', 'imshow', 'TiffFile', 'TiffWriter',
            'TiffSequence')
@@ -3114,7 +3114,7 @@ def _replace_by(module_function, package=None, warn=False):
                 full_name = modname
             else:
                 full_name = package + '.' + modname
-            module = __import__(full_name, romlist=[modname])
+            module = __import__(full_name, fromlist=[modname])
             func, oldfunc = getattr(module, function), func
             globals()['__old_' + func.__name__] = oldfunc
         except Exception:
