@@ -1,5 +1,7 @@
 Version 0.12
 ------------
+- ``equalize_adapthist`` now takes a ``kernel_size`` keyword argument, replacing
+  the ``ntiles_*`` arguments.
 - The functions ``blob_dog``, ``blob_log`` and ``blob_doh`` now return float
   arrays instead of integer arrays.
 
