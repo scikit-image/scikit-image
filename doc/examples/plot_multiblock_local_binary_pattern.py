@@ -55,12 +55,12 @@ print(lbp_code == correct_answer)
 """
 Now let's apply the operator to a real image and see how the visualization works.
 """
-from skimage.feature import (multiblock_local_binary_pattern,
-                             draw_multiblock_lbp)
 from skimage.util import img_as_float
 from skimage.transform import integral_image
 from skimage import data
 from matplotlib import pyplot as plt
+from skimage.feature import (multiblock_local_binary_pattern,
+                             draw_multiblock_lbp)
 
 test_img = data.coins()
 
