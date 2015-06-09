@@ -15,26 +15,28 @@ using the Sobel filter to signify the importance of each pixel.
 """
 from skimage import io, data
 from skimage import transform
-from skimage import filters
+from skimage import filters, color
 from matplotlib import pyplot as plt
 
 def nothing(img):
     return img
 
-img = data.coins()#io.imread('/home/vighnesh/images/seam_bw.png')
-out = transform.seam_carve(img, 'vertical', 80, energy_func=filters.sobel)
+#img = io.imread('/home/vighnesh/images/castle.jpg')
+#img = color.rgb2gray(img)
+img = data.camera()
+out = transform.seam_carve(img, 'vertical', 50, energy_func=filters.sobel)
 #out = transform.seam_carve(out, 'horizontal', 70, energy_func=filters.sobel)
 resized = transform.resize(img, out.shape)
 
 plt.title('Original Image')
-#io.imshow(img, plugin='matplotlib')
+io.imshow(img, plugin='matplotlib')
 
-plt.figure()
-plt.title('Resized Image')
+#plt.figure()
+#plt.title('Resized Image')
 #io.imshow(resized, plugin='matplotlib')
 
 plt.figure()
 plt.title('Resized using Seam-Carving')
-#io.imshow(out, plugin='matplotlib')
+io.imshow(out, plugin='matplotlib')
 
-#io.show()
+io.show()
