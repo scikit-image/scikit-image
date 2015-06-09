@@ -3,7 +3,7 @@ from ._daisy import daisy
 from ._hog import hog
 from .texture import (greycomatrix, greycoprops,
                       local_binary_pattern,
-                      visualize_multiblock_lbp)
+                      draw_multiblock_lbp)
 
 from ._texture import multiblock_local_binary_pattern
 from .peak import peak_local_max
@@ -30,7 +30,7 @@ __all__ = ['canny',
            'greycoprops',
            'local_binary_pattern',
            'multiblock_local_binary_pattern',
-           'visualize_multiblock_lbp',
+           'draw_multiblock_lbp',
            'peak_local_max',
            'structure_tensor',
            'structure_tensor_eigvals',

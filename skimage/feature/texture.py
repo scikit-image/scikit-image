@@ -294,7 +294,16 @@ def local_binary_pattern(image, P, R, method='default'):
     return output
 
 
-def visualize_multiblock_lbp(img, x, y, width, height, lbp_code=0):
+def draw_multiblock_lbp(img,
+                        x,
+                        y,
+                        width,
+                        height,
+                        lbp_code=0,
+                        color_greater_block=[1, 1, 1],
+                        color_less_block=[0, 0.69, 0.96],
+                        alpha=0.5
+                        ):
     """Multi-block local binary pattern visualization.
 
     MB-LBP is an extension of LBP that can be computed on many
@@ -326,11 +335,24 @@ def visualize_multiblock_lbp(img, x, y, width, height, lbp_code=0):
     lbp_code : int
         The descriptor of feature to visualize. If not provided,
         the descriptor with 0 value will be used.
+    color_greater_block : list of 3 floats
+        Floats specifying the color for the block that
+        has greater intensity value. They should be
+        in the range [0, 1]. Corresponding values define
+        (R, G, B) values. Default value is white [1, 1, 1].
+    color_greater_block : list of 3 floats
+        Floats specifying the color for the block that
+        has greater intensity value. They should be
+        in the range [0, 1]. Corresponding values define
+        (R, G, B) values. Default value is cyan [0, 0.69, 0.96].
+    alpha : float
+        Value in the range [0, 1] that specifies opacity of
+        visualization. 1 - fully transparent, 0 - opaque.
 
     Returns
     -------
-    output :
-        Float image with visualization.
+    output : ndarray of float
+        Image with visualization.
 
     References
     ----------
@@ -343,26 +365,26 @@ def visualize_multiblock_lbp(img, x, y, width, height, lbp_code=0):
     # Default colors for regions.
     # White is for the blocks that are brighter.
     # Cyan is for the blocks that has less intensity.
-    color_greater_block = np.asarray([1, 1, 1], dtype='float64')
-    color_less_block = np.asarray([0, 0.69, 0.96], dtype='float64')
+    color_greater_block = np.asarray(color_greater_block, dtype='float64')
+    color_less_block = np.asarray(color_less_block, dtype='float64')
 
-    # Copy array to avoid the changes to the original one
+    # Copy array to avoid the changes to the original one.
     output = np.copy(img)
 
     # As the visualization uses RGB color we need 3 bands.
     if len(img.shape) < 3:
         output = np.dstack((img,) * 3)
 
-    # Colors are specified in floats
+    # Colors are specified in floats.
     output = img_as_float(output)
 
     # Offsets of neighbour rectangles relative to central one.
-    # It has order starting from top left and going clockwise
+    # It has order starting from top left and going clockwise.
     neighbour_rect_offsets = ((-1, -1), (0, -1), (1, -1),
                               (1, 0), (1, 1), (0, 1),
                               (-1, 1), (-1, 0))
 
-    # Top-left coordinates of central rectangle
+    # Top-left coordinates of central rectangle.
     central_rect_x = x + width
     central_rect_y = y + height
 
@@ -375,14 +397,14 @@ def visualize_multiblock_lbp(img, x, y, width, height, lbp_code=0):
 
         has_greater_value = lbp_code & (1 << (7-element_num))
 
-        # Mix-in the visualization colors
+        # Mix-in the visualization colors.
         if has_greater_value:
             output[curr_y:curr_y+height, curr_x:curr_x+width] = \
-                0.5 * output[curr_y:curr_y+height, curr_x:curr_x+width] \
-                + 0.5 * color_greater_block
+                (1-alpha) * output[curr_y:curr_y+height, curr_x:curr_x+width] \
+                + alpha * color_greater_block
         else:
             output[curr_y:curr_y+height, curr_x:curr_x+width] = \
-                0.5 * output[curr_y:curr_y+height, curr_x:curr_x+width] \
-                + 0.5 * color_less_block
+                (1-alpha) * output[curr_y:curr_y+height, curr_x:curr_x+width] \
+                + alpha * color_less_block
 
     return output

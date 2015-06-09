@@ -7,18 +7,18 @@ In this example, we will see how to compute the multi-block
 local binary pattern at a specified image and how to visualize it.
 
 The features are calculated in a way similar to local binary
-patterns, except that block summed up pixel values
+patterns, except that summed up pixel values
 rather than pixel values are used.
 
 `MB-LBP` is an extension of LBP that can be computed on any
-scales in a constant time using integral image. It consists of
+scale in a constant time using integral image. It consists of
 `9` equal-sized rectangles. They are used to compute a feature.
 Sum of pixels' intensity values in each of them are compared
 to the central rectangle and depending on comparison result,
 the feature descriptor is computed.
 
-We will start with a simple image that we will generate by our
-own to show how the `MB-LBP` works. We will create a `(9, 9)`
+We will start with a simple image that we will generate
+to show how the `MB-LBP` works. We will create a `(9, 9)`
 rectangle with and divide it into `9` blocks. After this
 we will apply `MB-LBP` on it.
 
@@ -55,10 +55,8 @@ print(lbp_code == correct_answer)
 """
 Now let's apply the operator to a real image and see how the visualization works.
 """
-
-from __future__ import print_function
 from skimage.feature import (multiblock_local_binary_pattern,
-                             visualize_multiblock_lbp)
+                             draw_multiblock_lbp)
 from skimage.util import img_as_float
 from skimage.transform import integral_image
 from skimage import data
@@ -71,8 +69,8 @@ int_img = integral_image(test_img)
 
 lbp_code = multiblock_local_binary_pattern(int_img, 0, 0, 90, 90)
 
-img = visualize_multiblock_lbp(test_img, 0, 0, 90, 90,
-                               lbp_code=lbp_code)
+img = draw_multiblock_lbp(test_img, 0, 0, 90, 90,
+                          lbp_code=lbp_code, alpha=0.5)
 
 
 plt.imshow(img, interpolation='nearest')
