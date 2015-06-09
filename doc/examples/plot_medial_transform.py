@@ -39,7 +39,6 @@ def microstructure(l=256):
     """
     n = 5
     x, y = np.ogrid[0:l, 0:l]
-    mask_outer = (x - l/2)**2 + (y - l/2)**2 < (l/2)**2
     mask = np.zeros((l, l))
     generator = np.random.RandomState(1)
     points = l * generator.rand(2, n**2)
