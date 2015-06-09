@@ -1,5 +1,3 @@
-
-
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # tifffile.py
@@ -153,7 +151,7 @@ import numpy
 
 from . import _tifffile
 
-__version__ = '0.3.4'
+__version__ = '0.4.1'
 __docformat__ = 'restructuredtext en'
 __all__ = ('imsave', 'imread', 'imshow', 'TiffFile', 'TiffWriter',
            'TiffSequence')
@@ -4858,4 +4856,3 @@ if sys.version_info[0] > 2:
 
 if __name__ == "__main__":
     sys.exit(main())
-
