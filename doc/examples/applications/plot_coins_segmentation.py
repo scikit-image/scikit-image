@@ -71,9 +71,9 @@ ax.set_title('Canny detector')
 These contours are then filled using mathematical morphology.
 """
 
-from scipy import ndimage
+from scipy import ndimage as ndi
 
-fill_coins = ndimage.binary_fill_holes(edges)
+fill_coins = ndi.binary_fill_holes(edges)
 
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(fill_coins, cmap=plt.cm.gray, interpolation='nearest')
@@ -158,8 +158,8 @@ individually.
 
 from skimage.color import label2rgb
 
-segmentation = ndimage.binary_fill_holes(segmentation - 1)
-labeled_coins, _ = ndimage.label(segmentation)
+segmentation = ndi.binary_fill_holes(segmentation - 1)
+labeled_coins, _ = ndi.label(segmentation)
 image_label_overlay = label2rgb(labeled_coins, image=coins)
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6, 3))

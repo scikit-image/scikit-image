@@ -10,7 +10,7 @@ significantly the performance.
 
 import warnings
 import numpy as np
-from scipy import sparse, ndimage
+from scipy import sparse, ndimage as ndi
 
 # executive summary for next code block: try to import umfpack from
 # scipy, but make sure not to raise a fuss if it fails since it's only
@@ -417,7 +417,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     # If the array has pruned zones, be sure that no isolated pixels
     # exist between pruned zones (they could not be determined)
     if np.any(labels < 0):
-        filled = ndimage.binary_propagation(labels > 0, mask=labels >= 0)
+        filled = ndi.binary_propagation(labels > 0, mask=labels >= 0)
         labels[np.logical_and(np.logical_not(filled), labels == 0)] = -1
         del filled
     labels = np.atleast_3d(labels)

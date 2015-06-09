@@ -26,9 +26,8 @@ Original author: Lee Kamentsky
 
 from _heapq import heappush, heappop
 import numpy as np
-import scipy.ndimage
+from scipy import ndimage as ndi
 from ..filters import rank_order
-from .._shared.utils import deprecated
 
 from . import _watershed
 
@@ -114,13 +113,13 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     >>> # Now we want to separate the two objects in image
     >>> # Generate the markers as local maxima of the distance
     >>> # to the background
-    >>> from scipy import ndimage
-    >>> distance = ndimage.distance_transform_edt(image)
+    >>> from scipy import ndimage as ndi
+    >>> distance = ndi.distance_transform_edt(image)
     >>> from skimage.feature import peak_local_max
     >>> local_maxi = peak_local_max(distance, labels=image,
     ...                             footprint=np.ones((3, 3)),
     ...                             indices=False)
-    >>> markers = ndimage.label(local_maxi)[0]
+    >>> markers = ndi.label(local_maxi)[0]
     >>> labels = watershed(-distance, markers, mask=image)
 
     The algorithm works also for 3-D images, and can be used for example to
@@ -128,7 +127,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     """
 
     if connectivity is None:
-        c_connectivity = scipy.ndimage.generate_binary_structure(image.ndim, 1)
+        c_connectivity = ndi.generate_binary_structure(image.ndim, 1)
     else:
         c_connectivity = np.array(connectivity, bool)
         if c_connectivity.ndim != image.ndim:

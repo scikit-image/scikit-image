@@ -2,11 +2,10 @@ import six
 import math
 import warnings
 import numpy as np
-from scipy import ndimage, spatial
+from scipy import ndimage as ndi, spatial
 
 from .._shared.utils import get_bound_method_class, safe_as_int
 from ..util import img_as_float
-from ..exposure import rescale_intensity
 from ._warps_cy import _warp_fast
 
 
@@ -1054,7 +1053,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     users who would like, for example, to re-use a particular coordinate
     mapping, to use specific dtypes at various points along the the
     image-warping process, or to implement different post-processing logic
-    than `warp` performs after the call to `ndimage.map_coordinates`.
+    than `warp` performs after the call to `ndi.map_coordinates`.
 
 
     Examples
@@ -1352,7 +1351,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
                 warped = np.dstack(dims)
 
     if warped is None:
-        # use ndimage.map_coordinates
+        # use ndi.map_coordinates
 
         if (isinstance(inverse_map, np.ndarray)
                 and inverse_map.shape == (3, 3)):
@@ -1388,8 +1387,8 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         # Pre-filtering not necessary for order 0, 1 interpolation
         prefilter = order > 1
 
-        warped = ndimage.map_coordinates(image, coords, prefilter=prefilter,
-                                      mode=mode, order=order, cval=cval)
+        warped = ndi.map_coordinates(image, coords, prefilter=prefilter,
+                                     mode=mode, order=order, cval=cval)
 
 
     _clip_warp_output(image, warped, order, mode, cval, clip)

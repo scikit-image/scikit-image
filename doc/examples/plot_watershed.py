@@ -26,7 +26,7 @@ See Wikipedia_ for more details on the algorithm.
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import ndimage
+from scipy import ndimage as ndi
 
 from skimage.morphology import watershed
 from skimage.feature import peak_local_max
@@ -42,10 +42,10 @@ image = np.logical_or(mask_circle1, mask_circle2)
 
 # Now we want to separate the two objects in image
 # Generate the markers as local maxima of the distance to the background
-distance = ndimage.distance_transform_edt(image)
+distance = ndi.distance_transform_edt(image)
 local_maxi = peak_local_max(distance, indices=False, footprint=np.ones((3, 3)),
                             labels=image)
-markers = ndimage.label(local_maxi)[0]
+markers = ndi.label(local_maxi)[0]
 labels = watershed(-distance, markers, mask=image)
 
 fig, axes = plt.subplots(ncols=3, figsize=(8, 2.7))

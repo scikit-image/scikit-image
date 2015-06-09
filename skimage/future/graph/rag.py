@@ -11,8 +11,7 @@ except ImportError:
     warnings.warn(msg)
 
 import numpy as np
-from scipy.ndimage import filters
-from scipy import ndimage as nd
+from scipy import ndimage as ndi
 import math
 from ... import draw, measure, segmentation, util, color
 try:
@@ -269,7 +268,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
     # The footprint is constructed in such a way that the first
     # element in the array being passed to _add_edge_filter is
     # the central value.
-    fp = nd.generate_binary_structure(labels.ndim, connectivity)
+    fp = ndi.generate_binary_structure(labels.ndim, connectivity)
     for d in range(fp.ndim):
         fp = fp.swapaxes(0, d)
         fp[0, ...] = 0
@@ -286,7 +285,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
     #       [0,1,1],
     #       [0,1,1]]
 
-    filters.generic_filter(
+    ndi.generic_filter(
         labels,
         function=_add_edge_filter,
         footprint=fp,

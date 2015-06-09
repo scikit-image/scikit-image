@@ -547,7 +547,7 @@ available in `skimage`.
 
 from time import time
 
-from scipy.ndimage.filters import percentile_filter
+from scipy.ndimage import percentile_filter
 from skimage.morphology import dilation
 from skimage.filters.rank import median, maximum
 

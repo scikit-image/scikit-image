@@ -3,7 +3,7 @@ Algorithms for computing the skeleton of a binary image
 """
 
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage as ndi
 
 from ._skeletonize_cy import _skeletonize_loop, _table_lookup_index
 
@@ -119,7 +119,7 @@ def skeletonize(image):
         pixel_removed = False
 
         # assign each pixel a unique value based on its foreground neighbours
-        neighbours = ndimage.correlate(skeleton, mask, mode='constant')
+        neighbours = ndi.correlate(skeleton, mask, mode='constant')
 
         # ignore background
         neighbours *= skeleton
@@ -138,7 +138,7 @@ def skeletonize(image):
             skeleton[code_mask] = 0
 
         # pass 2 - remove the 2's and 3's
-        neighbours = ndimage.correlate(skeleton, mask, mode='constant')
+        neighbours = ndi.correlate(skeleton, mask, mode='constant')
         neighbours *= skeleton
         codes = np.take(lut, neighbours)
         code_mask = (codes == 2)
@@ -154,7 +154,7 @@ def skeletonize(image):
 
 # --------- Skeletonization by medial axis transform --------
 
-_eight_connect = ndimage.generate_binary_structure(2, 2)
+_eight_connect = ndi.generate_binary_structure(2, 2)
 
 
 def medial_axis(image, mask=None, return_distance=False):
@@ -247,17 +247,17 @@ def medial_axis(image, mask=None, return_distance=False):
     center_is_foreground = (np.arange(512) & 2**4).astype(bool)
     table = (center_is_foreground  # condition 1.
                 &
-            (np.array([ndimage.label(_pattern_of(index), _eight_connect)[1] !=
-                        ndimage.label(_pattern_of(index & ~ 2**4),
+            (np.array([ndi.label(_pattern_of(index), _eight_connect)[1] !=
+                       ndi.label(_pattern_of(index & ~ 2**4),
                                     _eight_connect)[1]
-                        for index in range(512)])  # condition 2
+                       for index in range(512)])  # condition 2
                 |
         np.array([np.sum(_pattern_of(index)) < 3 for index in range(512)]))
         # condition 3
             )
 
     # Build distance transform
-    distance = ndimage.distance_transform_edt(masked_image)
+    distance = ndi.distance_transform_edt(masked_image)
     if return_distance:
         store_distance = distance.copy()
 

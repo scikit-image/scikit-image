@@ -21,7 +21,6 @@ values, and use the random walker for the segmentation.
 
 """
 import numpy as np
-from scipy import ndimage
 import matplotlib.pyplot as plt
 
 from skimage.segmentation import random_walker

@@ -1,5 +1,5 @@
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage as ndi
 from .._shared.utils import assert_nD
 
 
@@ -130,10 +130,10 @@ def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     offset : float, optional
         Phase offset of harmonic function in radians.
     mode : string, optional
-        Mode used to convolve image with a kernel, passed to `ndimage.convolve`
+        Mode used to convolve image with a kernel, passed to `ndi.convolve`
     cval : scalar, optional
         Value to fill past edges of input if `mode` of convolution is
-        'constant'. The parameter is passed to `ndimage.convolve`.
+        'constant'. The parameter is passed to `ndi.convolve`.
 
     Returns
     -------
@@ -169,7 +169,7 @@ def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     g = gabor_kernel(frequency, theta, bandwidth, sigma_x, sigma_y, n_stds,
                      offset)
 
-    filtered_real = ndimage.convolve(image, np.real(g), mode=mode, cval=cval)
-    filtered_imag = ndimage.convolve(image, np.imag(g), mode=mode, cval=cval)
+    filtered_real = ndi.convolve(image, np.real(g), mode=mode, cval=cval)
+    filtered_imag = ndi.convolve(image, np.imag(g), mode=mode, cval=cval)
 
     return filtered_real, filtered_imag

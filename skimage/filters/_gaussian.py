@@ -1,6 +1,6 @@
 import collections as coll
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage as ndi
 import warnings
 
 from ..util import img_as_float
@@ -46,7 +46,7 @@ def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
 
     Notes
     -----
-    This function is a wrapper around :func:`scipy.ndimage.gaussian_filter`.
+    This function is a wrapper around :func:`scipy.ndi.gaussian_filter`.
 
     Integer arrays are converted to float.
 
@@ -100,4 +100,4 @@ def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
         if len(sigma) != image.ndim:
             sigma = np.concatenate((np.asarray(sigma), [0]))
     image = img_as_float(image)
-    return ndimage.gaussian_filter(image, sigma, mode=mode, cval=cval)
+    return ndi.gaussian_filter(image, sigma, mode=mode, cval=cval)

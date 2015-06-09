@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 from skimage import data
 from skimage.feature import register_translation
 from skimage.feature.register_translation import _upsampled_dft
-from scipy.ndimage.fourier import fourier_shift
+from scipy.ndimage import fourier_shift
 
 image = data.camera()
 shift = (-2.4, 1.32)

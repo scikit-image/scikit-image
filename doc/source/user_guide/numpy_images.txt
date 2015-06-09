@@ -169,8 +169,8 @@ Many functions in scikit-image operate on 3D images directly:
 
     >>> im3d = np.random.rand(100, 1000, 1000)
     >>> from skimage import morphology
-    >>> from scipy import ndimage as nd
-    >>> seeds = nd.label(im3d < 0.1)[0]
+    >>> from scipy import ndimage as ndi
+    >>> seeds = ndi.label(im3d < 0.1)[0]
     >>> ws = morphology.watershed(im3d, seeds)
 
 In many cases,

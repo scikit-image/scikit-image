@@ -11,7 +11,7 @@ segmentations.
 
 """
 import numpy as np
-from scipy import ndimage as nd
+from scipy import ndimage as ndi
 import matplotlib.pyplot as plt
 
 from skimage.filters import sobel
@@ -30,7 +30,7 @@ markers[coins < 30.0 / 255] = background
 markers[coins > 150.0 / 255] = foreground
 
 ws = watershed(edges, markers)
-seg1 = nd.label(ws == foreground)[0]
+seg1 = ndi.label(ws == foreground)[0]
 
 # make segmentation using SLIC superpixels
 seg2 = slic(coins, n_segments=117, max_iter=160, sigma=1, compactness=0.75,

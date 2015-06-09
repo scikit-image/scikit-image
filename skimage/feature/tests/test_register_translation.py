@@ -4,7 +4,7 @@ from numpy.testing import assert_allclose, assert_raises
 from skimage.feature.register_translation import (register_translation,
                                                   _upsampled_dft)
 from skimage.data import camera
-from scipy.ndimage.fourier import fourier_shift
+from scipy.ndimage import fourier_shift
 
 
 def test_correlation():

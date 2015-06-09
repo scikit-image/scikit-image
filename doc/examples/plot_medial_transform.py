@@ -21,7 +21,7 @@ a skeleton by iterative morphological thinnings.
 
 """
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage as ndi
 from skimage.morphology import medial_axis
 import matplotlib.pyplot as plt
 
@@ -43,7 +43,7 @@ def microstructure(l=256):
     generator = np.random.RandomState(1)
     points = l * generator.rand(2, n**2)
     mask[(points[0]).astype(np.int), (points[1]).astype(np.int)] = 1
-    mask = ndimage.gaussian_filter(mask, sigma=l/(4.*n))
+    mask = ndi.gaussian_filter(mask, sigma=l/(4.*n))
     return mask > mask.mean()
 
 data = microstructure(l=64)

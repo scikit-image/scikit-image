@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage as ndi
 from ..transform import resize
 from ..util import img_as_float
 
@@ -13,12 +13,12 @@ def _smooth(image, sigma, mode, cval):
     # apply Gaussian filter to all dimensions independently
     if image.ndim == 3:
         for dim in range(image.shape[2]):
-            ndimage.gaussian_filter(image[..., dim], sigma,
-                                    output=smoothed[..., dim],
-                                    mode=mode, cval=cval)
-    else:
-        ndimage.gaussian_filter(image, sigma, output=smoothed,
+            ndi.gaussian_filter(image[..., dim], sigma,
+                                output=smoothed[..., dim],
                                 mode=mode, cval=cval)
+    else:
+        ndi.gaussian_filter(image, sigma, output=smoothed,
+                            mode=mode, cval=cval)
 
     return smoothed
 

@@ -3,7 +3,7 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage as ndi
 from itertools import product
 
 cimport numpy as cnp
@@ -69,7 +69,7 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10,
             ValueError("Only RGB images can be converted to Lab space.")
         image = rgb2lab(image)
 
-    image = ndimage.gaussian_filter(img_as_float(image), [sigma, sigma, 0])
+    image = ndi.gaussian_filter(img_as_float(image), [sigma, sigma, 0])
     cdef cnp.ndarray[dtype=cnp.float_t, ndim=3, mode="c"] image_c \
             = np.ascontiguousarray(image) * ratio
 

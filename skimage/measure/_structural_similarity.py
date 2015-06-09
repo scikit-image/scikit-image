@@ -3,7 +3,7 @@ from __future__ import division
 __all__ = ['structural_similarity']
 
 import numpy as np
-from scipy.ndimage.filters import uniform_filter, gaussian_filter
+from scipy.ndimage import uniform_filter, gaussian_filter
 
 from ..util.dtype import dtype_range
 from ..util.arraypad import crop

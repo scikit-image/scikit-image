@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.ndimage.filters import maximum_filter, minimum_filter, convolve
+from scipy.ndimage import maximum_filter, minimum_filter, convolve
 
 from ..transform import integral_image
 from ..feature import structure_tensor

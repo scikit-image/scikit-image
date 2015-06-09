@@ -5,7 +5,7 @@ __all__ = ['threshold_adaptive',
            'threshold_li', ]
 
 import numpy as np
-import scipy.ndimage
+from scipy import ndimage as ndi
 from ..exposure import histogram
 from .._shared.utils import assert_nD
 
@@ -70,26 +70,23 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
     assert_nD(image, 2)
     thresh_image = np.zeros(image.shape, 'double')
     if method == 'generic':
-        scipy.ndimage.generic_filter(image, param, block_size,
-                                     output=thresh_image, mode=mode)
+        ndi.generic_filter(image, param, block_size,
+                           output=thresh_image, mode=mode)
     elif method == 'gaussian':
         if param is None:
             # automatically determine sigma which covers > 99% of distribution
             sigma = (block_size - 1) / 6.0
         else:
             sigma = param
-        scipy.ndimage.gaussian_filter(image, sigma, output=thresh_image,
-                                      mode=mode)
+        ndi.gaussian_filter(image, sigma, output=thresh_image, mode=mode)
     elif method == 'mean':
         mask = 1. / block_size * np.ones((block_size,))
         # separation of filters to speedup convolution
-        scipy.ndimage.convolve1d(image, mask, axis=0, output=thresh_image,
-                                 mode=mode)
-        scipy.ndimage.convolve1d(thresh_image, mask, axis=1,
-                                 output=thresh_image, mode=mode)
+        ndi.convolve1d(image, mask, axis=0, output=thresh_image, mode=mode)
+        ndi.convolve1d(thresh_image, mask, axis=1,
+                       output=thresh_image, mode=mode)
     elif method == 'median':
-        scipy.ndimage.median_filter(image, block_size, output=thresh_image,
-                                    mode=mode)
+        ndi.median_filter(image, block_size, output=thresh_image, mode=mode)
 
     return image > (thresh_image - offset)
 
