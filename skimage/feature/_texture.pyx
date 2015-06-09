@@ -308,30 +308,20 @@ cdef inline cnp.double_t _integ(cnp.double_t[:, ::1] img,
 
 
 # Constant values that are used by `multiblock_local_binary_pattern` function.
-# These values are taken out for performance improvement.
 # Values represent offsets of neighbour rectangles relative to central one.
 # It has order starting from top left and going clockwise.
 cdef:
     Py_ssize_t[::1] mlbp_x_offsets = np.asarray([-1, 0, 1, 1, 1, 0, -1, -1])
     Py_ssize_t[::1] mlbp_y_offsets = np.asarray([-1, -1, -1, 0, 1, 1, 1, 0])
 
-def _multiblock_local_binary_pattern(cnp.double_t[:, ::1] int_image,
+cdef _multiblock_local_binary_pattern(cnp.double_t[:, ::1] int_image,
                                      Py_ssize_t x,
                                      Py_ssize_t y,
                                      Py_ssize_t width,
                                      Py_ssize_t height):
     """Multi-block local binary pattern.
 
-    The features are calculated in a way similar to local binary
-    patterns, except that summed up pixel values
-    rather than pixel values are used.
-
-    MB-LBP is an extension of LBP that can be computed on any
-    scale in a constant time using integral image. It consists of
-    9 equal-sized rectangles. They are used to compute a feature.
-    Sum of pixels' intensity values in each of them are compared
-    to the central rectangle and depending on comparison result,
-    the feature descriptor is computed.
+    Effcient implementation in Cython.
 
     Parameters
     ----------
@@ -404,4 +394,56 @@ def _multiblock_local_binary_pattern(cnp.double_t[:, ::1] int_image,
         lbp_code |= has_greater_value << (7 - element_num)
 
     return lbp_code
+
+
+def multiblock_local_binary_pattern(int_image,
+                                    x,
+                                    y,
+                                    width,
+                                    height):
+    """Multi-block local binary pattern.
+
+    The features are calculated in a way similar to local binary
+    patterns, except that summed up pixel values
+    rather than pixel values are used.
+
+    MB-LBP is an extension of LBP that can be computed on any
+    scale in a constant time using integral image. It consists of
+    9 equal-sized rectangles. They are used to compute a feature.
+    Sum of pixels' intensity values in each of them are compared
+    to the central rectangle and depending on comparison result,
+    the feature descriptor is computed.
+
+    Parameters
+    ----------
+    int_image : (N, M) array
+        Integral image.
+    x : int
+        X-coordinate of top left corner of a rectangle containing feature.
+    y : int
+        Y-coordinate of top left corner of a rectangle containing feature.
+    width : int
+        Width of one of 9 equal rectangles that will be used to compute
+        a feature.
+    height : int
+        Height of one of 9 equal rectangles that will be used to compute
+        a feature.
+
+    Returns
+    -------
+    output : int
+        8bit MB-LBP feature descriptor.
+
+    References
+    ----------
+    .. [1] Face Detection Based on Multi-Block LBP
+           Representation. Lun Zhang, Rufeng Chu, Shiming Xiang, Shengcai Liao,
+           Stan Z. Li
+           http://www.cbsr.ia.ac.cn/users/scliao/papers/Zhang-ICB07-MBLBP.pdf
+    """
+
+    int_image = np.ascontiguousarray(int_image, dtype=np.double)
+    lbp_code = _multiblock_local_binary_pattern(int_image, x, y, width, height)
+    return lbp_code
+
 

@@ -5,9 +5,7 @@ Methods to characterize image textures.
 import numpy as np
 from .._shared.utils import assert_nD
 from ..util import img_as_float
-from ._texture import (_glcm_loop,
-                       _local_binary_pattern,
-                       _multiblock_local_binary_pattern)
+from ._texture import _glcm_loop, _local_binary_pattern
 
 
 def greycomatrix(image, distances, angles, levels=256, symmetric=False,
@@ -294,57 +292,6 @@ def local_binary_pattern(image, P, R, method='default'):
     image = np.ascontiguousarray(image, dtype=np.double)
     output = _local_binary_pattern(image, P, R, methods[method.lower()])
     return output
-
-
-def multiblock_local_binary_pattern(int_image,
-                                    x,
-                                    y,
-                                    width,
-                                    height):
-    """Multi-block local binary pattern.
-
-    The features are calculated in a way similar to local binary
-    patterns, except that summed up pixel values
-    rather than pixel values are used.
-
-    MB-LBP is an extension of LBP that can be computed on any
-    scale in a constant time using integral image. It consists of
-    9 equal-sized rectangles. They are used to compute a feature.
-    Sum of pixels' intensity values in each of them are compared
-    to the central rectangle and depending on comparison result,
-    the feature descriptor is computed.
-
-    Parameters
-    ----------
-    int_image : (N, M) array
-        Integral image.
-    x : int
-        X-coordinate of top left corner of a rectangle containing feature.
-    y : int
-        Y-coordinate of top left corner of a rectangle containing feature.
-    width : int
-        Width of one of 9 equal rectangles that will be used to compute
-        a feature.
-    height : int
-        Height of one of 9 equal rectangles that will be used to compute
-        a feature.
-
-    Returns
-    -------
-    output : int
-        8bit MB-LBP feature descriptor.
-
-    References
-    ----------
-    .. [1] Face Detection Based on Multi-Block LBP
-           Representation. Lun Zhang, Rufeng Chu, Shiming Xiang, Shengcai Liao,
-           Stan Z. Li
-           http://www.cbsr.ia.ac.cn/users/scliao/papers/Zhang-ICB07-MBLBP.pdf
-    """
-
-    int_image = np.ascontiguousarray(int_image, dtype=np.double)
-    lbp_code = _multiblock_local_binary_pattern(int_image, x, y, width, height)
-    return lbp_code
 
 
 def draw_multiblock_lbp(img,
