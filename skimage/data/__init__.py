@@ -243,6 +243,7 @@ def hubble_deep_field():
     """
     return load("hubble_deep_field.jpg")
 
+
 def rocket():
     """Launch photo of DSCOVR on Falcon 9 by SpaceX.
 
