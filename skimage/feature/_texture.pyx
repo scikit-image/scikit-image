@@ -385,7 +385,7 @@ def multiblock_local_binary_pattern(int_image, x, y, width, height):
     Returns
     -------
     output : int
-        8bit MB-LBP feature descriptor.
+        8-bit MB-LBP feature descriptor.
 
     References
     ----------
