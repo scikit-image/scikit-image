@@ -78,11 +78,11 @@ cdef remove_seam(cnp.double_t[:, :, ::1] img,
             for ch in range(channels):
                 img[r, c, ch] = img[r, c + shift, ch]
 
-def _seam_carve_v(img, iters, energy_func, extra_args , extra_kwargs, border):
+def _seam_carve_v(img, energy_map, iters, border):
     """ Carve vertical seams off an image.
 
     Carves out vertical seams off an image while using the given energy
-    function to decide the importance of each pixel.[1]
+    map to decide the importance of each pixel.[1]
 
     Parameters
     ----------
@@ -90,25 +90,21 @@ def _seam_carve_v(img, iters, energy_func, extra_args , extra_kwargs, border):
         Input image whose vertical seams are to be removed.
     iters : int
         Number of vertical seams are to be removed.
-    energy_func : callable
-        The function used to decide the importance of each pixel. The higher
+    energy_map : (M, N) ndarray
+        The array to decide the importance of each pixel. The higher
         the value corresponding to a pixel, the more the algorithm will try
-        to keep it in the image. For every iteration `energy_func` is called
-        as `energy_func(image, *extra_args, **extra_kwargs)`, where `image`
-        is the cropped image during each iteration and is expected to return a
-        (M, N) ndarray depicting each pixel's importance.
-    extra_args : iterable
-        The extra arguments supplied to `energy_func`.
-    extra_kwargs : dict
-        The extra keyword arguments supplied to `energy_func`.
-    border : int
-        The number of pixels in the right and left end of the image to be
-        excluded from being considered for a seam. This is important as certain
-        filters just ignore image boundaries and set them to `0`.
+        to keep it in the image.
+    num : int
+        Number of seams are to be removed.
+    border : int, optional
+        The number of pixels in the right, left and bottom end of the image
+        to be excluded from being considered for a seam. This is important as
+        certain filters just ignore image boundaries and set them to `0`.
+        By default border is set to `1`.
 
     Returns
     -------
-    image : (M, N - iters) or (M, N - iters, 3) ndarray
+    image : (M, N - iters, 3) ndarray of float
         The cropped image with the vertical seams removed.
 
     References
@@ -118,11 +114,10 @@ def _seam_carve_v(img, iters, energy_func, extra_args , extra_kwargs, border):
            http://www.cs.jhu.edu/~misha/ReadingSeminar/Papers/Avidan07.pdf
     """
     last_row_obj = np.zeros(img.shape[1], dtype=np.float)
-    seam_map_obj = np.zeros(img.shape[0:2], dtype=np.uint8)
 
     cdef cnp.double_t[::1] last_row = last_row_obj
     cdef Py_ssize_t[::1] sorted_indices
-    cdef cnp.uint8_t[:, ::1] seam_map = seam_map_obj
+    cdef cnp.uint8_t[:, ::1] seam_map = np.zeros(img.shape[0:2], dtype=np.uint8)
     cdef Py_ssize_t cols = img.shape[1]
     cdef Py_ssize_t rows = img.shape[0]
     cdef Py_ssize_t seams_left = iters
@@ -134,33 +129,25 @@ def _seam_carve_v(img, iters, energy_func, extra_args , extra_kwargs, border):
     cdef cnp.double_t[:, ::1] cumulative_img = np.zeros(img.shape[0:2], dtype=np.float)
     cdef cnp.double_t[:, :, ::1] energy_img
 
-    energy_img_obj = energy_func(np.squeeze(img))[:, :, np.newaxis]**2
-    energy_img_obj = np.ascontiguousarray(energy_img_obj)
-    energy_img = energy_img_obj
+    energy_map[:, 0:border] = DBL_MAX
+    energy_map[:, cols-border:cols] = DBL_MAX
+    energy_map[rows-border:rows, :] = energy_map[rows-2*border:rows-border, :]
 
-    energy_img_obj[:, 0:border, 0] = DBL_MAX
-    energy_img_obj[:, cols-border:cols, 0] = DBL_MAX
-    energy_img_obj[rows-border:rows,:,0] = energy_img_obj[rows-2*border:rows-border,:,0]
-
+    energy_map = np.ascontiguousarray(energy_map[:, :, np.newaxis])
+    energy_img = energy_map
 
     _preprocess_image(energy_img, cumulative_img, track_img, cols)
     last_row[...] = cumulative_img[-1, :]
     sorted_indices = np.argsort(last_row_obj)
     seam_idx = 0
 
-
     while seams_left > 0:
-        #print "sorted indices", np.array(sorted_indices)[:10]
-        #print "sorted array ", np.sort(last_row_obj)[:10]
-        #print "Seam starting at : ", sorted_indices[seam_idx]
         if mark_seam(track_img, sorted_indices[seam_idx], seam_map):
             seams_left -= 1
             cols -= 1
-            #print "Seam marked ", seam_idx
             seam_idx += 1
             continue
         else:
-            print "Seams removed = ", seam_idx
             seam_idx = 0
             remove_seam(image, seam_map, cols)
             remove_seam(energy_img, seam_map, cols)
@@ -169,7 +156,4 @@ def _seam_carve_v(img, iters, energy_func, extra_args , extra_kwargs, border):
             last_row[:cols] = cumulative_img[-1, :cols]
             sorted_indices = np.argsort(last_row_obj)
 
-    #from skimage import io
-    #io.imshow(seam_map_obj*255)
-    #io.show()
-    return img#[:, 0:cols]
+    return img[:, 0:cols]

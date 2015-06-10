@@ -21,10 +21,11 @@ from matplotlib import pyplot as plt
 def nothing(img):
     return img
 
-#img = io.imread('/home/vighnesh/images/castle.jpg')
+img = io.imread('/home/vighnesh/images/rocket.jpg')
 #img = color.rgb2gray(img)
-img = data.camera()
-out = transform.seam_carve(img, 'vertical', 50, energy_func=filters.sobel)
+eimg = filters.sobel(color.rgb2gray(img))
+#img = data.camera()
+out = transform.seam_carve(img, eimg, 'vertical', 200)
 #out = transform.seam_carve(out, 'horizontal', 70, energy_func=filters.sobel)
 resized = transform.resize(img, out.shape)
 

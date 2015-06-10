@@ -4,43 +4,36 @@ from .._shared import utils
 import numpy as np
 
 
-def seam_carve(img, mode, num, energy_func, extra_args=[],
-               extra_kwargs={}, border=1, force_copy=True):
+def seam_carve(img, energy_map, mode, num, border=1, force_copy=True):
     """ Carve vertical or horizontal seams off an image.
 
     Carves out vertical/horizontal seams off an image while using the given
-    energy function to decide the importance of each pixel.
+    energy map to decide the importance of each pixel.
 
     Parameters
     ----------
     image : (M, N) or (M, N, 3) ndarray
-        Input image whose vertical seams are to be removed.
+        Input image whose seams are to be removed.
+    energy_map : (M, N) ndarray
+        The array to decide the importance of each pixel. The higher
+        the value corresponding to a pixel, the more the algorithm will try
+        to keep it in the image.
     mode : str {'horizontal', 'vertical'}
         Indicates whether seams are to be removed vertically or horizontally.
         Removing seams horizontally will decrease the height whereas removing
         vertically will decrease the width.
     num : int
         Number of seams are to be removed.
-    energy_func : callable
-        The function used to decide the importance of each pixel. The higher
-        the value corresponding to a pixel, the more the algorithm will try
-        to keep it in the image. For every iteration `energy_func` is called
-        as `energy_func(image, *extra_args, **extra_kwargs)`, where `image`
-        is the cropped image during each iteration and is expected to return a
-        (M, N) ndarray depicting each pixel's importance.
-    extra_args : iterable, optional
-        The extra arguments supplied to `energy_func`.
-    extra_kwargs : dict, optional
-        The extra keyword arguments supplied to `energy_func`.
     border : int, optional
-        The number of pixels in the right and left end of the image to be
-        excluded from being considered for a seam. This is important as certain
-        filters just ignore image boundaries and set them to `0`. By default
-        border is set to `1`.
+        The number of pixels in the right, left and bottom end of the image
+        to be excluded from being considered for a seam. This is important as
+        certain filters just ignore image boundaries and set them to `0`.
+        By default border is set to `1`.
     force_copy : bool, optional
-        If set, the image is copied before being used by the method which
-        modifies it in place. Set this to `False` if the original image is no
-        loner needed after this opetration.
+        If set, the `image` and `energy_map` are copied before being used by
+        the method which modifies it in place. Set this to `False` if the
+        original image and the energy map are no longer needed after
+        this opetration.
 
     Returns
     -------
@@ -55,7 +48,8 @@ def seam_carve(img, mode, num, energy_func, extra_args=[],
     """
 
     utils.assert_nD(img, (2, 3))
-    image = util.img_as_float(img)
+    image = util.img_as_float(img, force_copy)
+    energy_map = util.img_as_float(energy_map, force_copy)
 
     if image.ndim == 2:
         image = image[..., np.newaxis]
@@ -64,7 +58,8 @@ def seam_carve(img, mode, num, energy_func, extra_args=[],
         image = np.transpose(image, (1, 0, 2))
 
     image = np.ascontiguousarray(image)
-    out = _seam_carve_v(image, num, energy_func, extra_args, extra_kwargs, border)
+    out = _seam_carve_v(image, energy_map, num, border)
+
     if mode == 'horizontal':
         out = np.transpose(out, (1, 0, 2))
     return np.squeeze(out)
