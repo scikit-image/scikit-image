@@ -202,4 +202,6 @@ def _seam_carve_v(img, energy_map, iters, border):
             last_row[:cols] = cumulative_img[-1, :cols]
             sorted_indices = np.argsort(last_row_obj)
 
+    _remove_seam(image, seam_map, cols)
+
     return img[:, 0:cols]
