@@ -3,36 +3,33 @@
 Multi-Block Local Binary Pattern for texture classification
 ===========================================================
 
-In this example, we will see how to compute the multi-block
-local binary pattern at a specified image and how to visualize it.
+This example shows how to compute multi-block local binary
+pattern (MB-LBP) features as well as how to visualize them.
 
-The features are calculated in a way similar to local binary
-patterns, except that summed up pixel values
-rather than pixel values are used.
+The features are calculated similarly to local binary patterns (LBPs),
+except that summed blocks are used instead of individual pixel values.
 
-`MB-LBP` is an extension of LBP that can be computed on any
-scale in a constant time using integral image. It consists of
-`9` equal-sized rectangles. They are used to compute a feature.
-Sum of pixels' intensity values in each of them are compared
-to the central rectangle and depending on comparison result,
-the feature descriptor is computed.
+MB-LBP is an extension of LBP that can be computed on multiple scales
+in constant time using the integral image.
+9 equally-sized rectangles are used to compute a feature.
+For each rectangle, the sum of the pixel intensities is computed.
+Comparisons of these sums to that of the central rectangle determine
+the feature, similarly to LBP (See `LBP <plot_local_binary_pattern.html>`_).
 
-We will start with a simple image that we will generate
-to show how the `MB-LBP` works. We will create a `(9, 9)`
-rectangle with and divide it into `9` blocks. After this
-we will apply `MB-LBP` on it.
+First, we generate an image to illustrate the functioning of MB-LBP:
+we take a (9, 9) rectangle and divide it into (3, 3) block,
+upon which we then apply MB-LBP.
 
 
 """
 from __future__ import print_function
 from skimage.feature import multiblock_local_binary_pattern
 import numpy as np
-from skimage.util import img_as_float
 from skimage.transform import integral_image
 
-# Create dummy matrix where first and fifth
-# rectangles have greater value than the central one
-# Therefore, the following bits should be 1.
+# Create test matrix where first and fifth
+# rectangles starting from top left clockwise
+# have greater value than the central one.
 test_img = np.zeros((9, 9), dtype='uint8')
 test_img[3:6, 3:6] = 1
 test_img[:3, :3] = 50
@@ -43,14 +40,12 @@ test_img[6:, 6:] = 50
 # be filled.
 correct_answer = 0b10001000
 
-# The function accepts the float images.
-# Also it has to be C-contiguous.
-test_img = img_as_float(test_img)
 int_img = integral_image(test_img)
 
 lbp_code = multiblock_local_binary_pattern(int_img, 0, 0, 3, 3)
 
-print(lbp_code == correct_answer)
+print(correct_answer)
+print(lbp_code)
 
 """
 Now let's apply the operator to a real image and see how the visualization works.
@@ -61,7 +56,6 @@ from skimage.feature import draw_multiblock_lbp
 
 test_img = data.coins()
 
-test_img = img_as_float(test_img)
 int_img = integral_image(test_img)
 
 lbp_code = multiblock_local_binary_pattern(int_img, 0, 0, 90, 90)
@@ -75,8 +69,8 @@ plt.imshow(img, interpolation='nearest')
 """
 .. image:: PLOT2RST.current_figure
 
-On the above plot we see the result of computing a `MB-LBP` and visualization
+On the above plot we see the result of computing a MB-LBP and visualization
 of the computed feature. The rectangles that have less intensity than the central
-rectangle are marked with cyan color. The ones that have bigger intensity values
-are marked with white color. The central rectangle is left untouched.
+rectangle are marked in cyan. The ones that have bigger intensity values
+are marked in white. The central rectangle is left untouched.
 """

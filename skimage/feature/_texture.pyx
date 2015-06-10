@@ -6,6 +6,7 @@ import numpy as np
 cimport numpy as cnp
 from libc.math cimport sin, cos, abs
 from .._shared.interpolation cimport bilinear_interpolation, round
+from .._shared.transform cimport integrate
 
 
 cdef extern from "numpy/npy_math.h":
@@ -266,47 +267,6 @@ def _local_binary_pattern(double[:, ::1] image,
     return np.asarray(output)
 
 
-cdef inline cnp.double_t _integ(cnp.double_t[:, ::1] img,
-                                Py_ssize_t r0, Py_ssize_t c0,
-                                Py_ssize_t r1, Py_ssize_t c1) nogil:
-    """Integrate over the integral image in the given window
-
-    This method was created so that `multiblock_local_binary_pattern`
-    does not have to make a Python call.
-
-    Parameters
-    ----------
-    img : array
-        The integral image over which to integrate.
-    r0 : int
-        The row number of the top left corner.
-    c0 : int
-        The column number of the top left corner.
-    r1 : int
-        The row number of the bottom right corner.
-    c1 : int
-        The column number of the bottom right corner.
-
-    Returns
-    -------
-    ans : double
-        The integral over the given window.
-    """
-
-    cdef cnp.double_t ans = img[r1, c1]
-
-    if (r0 >= 1) and (c0 >= 1):
-        ans += img[r0 - 1, c0 - 1]
-
-    if (r0 >= 1):
-        ans -= img[r0 - 1, c1]
-
-    if (c0 >= 1):
-        ans -= img[r1, c0 - 1]
-
-    return ans
-
-
 # Constant values that are used by `multiblock_local_binary_pattern` function.
 # Values represent offsets of neighbour rectangles relative to central one.
 # It has order starting from top left and going clockwise.
@@ -314,18 +274,16 @@ cdef:
     Py_ssize_t[::1] mlbp_x_offsets = np.asarray([-1, 0, 1, 1, 1, 0, -1, -1])
     Py_ssize_t[::1] mlbp_y_offsets = np.asarray([-1, -1, -1, 0, 1, 1, 1, 0])
 
-cdef _multiblock_local_binary_pattern(cnp.double_t[:, ::1] int_image,
-                                     Py_ssize_t x,
-                                     Py_ssize_t y,
-                                     Py_ssize_t width,
-                                     Py_ssize_t height):
+cdef int _multiblock_local_binary_pattern(float[:, ::1] int_image,
+                                          Py_ssize_t x,
+                                          Py_ssize_t y,
+                                          Py_ssize_t width,
+                                          Py_ssize_t height):
     """Multi-block local binary pattern.
-
-    Effcient implementation in Cython.
 
     Parameters
     ----------
-    int_image : (N, M) double array
+    int_image : (N, M) float array
         Integral image.
     x : int
         X-coordinate of top left corner of a rectangle containing feature.
@@ -341,7 +299,7 @@ cdef _multiblock_local_binary_pattern(cnp.double_t[:, ::1] int_image,
     Returns
     -------
     output : int
-        8bit MB-LBP feature descriptor.
+        8-bit MB-LBP feature descriptor.
 
     References
     ----------
@@ -357,11 +315,11 @@ cdef _multiblock_local_binary_pattern(cnp.double_t[:, ::1] int_image,
         Py_ssize_t central_rect_y = y + height
 
     # Sum of intensity values of central rectangle
-    cdef double central_rect_val = _integ(int_image,
-                                          central_rect_y,
-                                          central_rect_x,
-                                          central_rect_y + height - 1,
-                                          central_rect_x + width - 1)
+    cdef float central_rect_val = integrate(int_image,
+                                            central_rect_y,
+                                            central_rect_x,
+                                            central_rect_y + height - 1,
+                                            central_rect_x + width - 1)
 
     cdef:
         Py_ssize_t element_num, offset_x, offset_y
@@ -380,11 +338,11 @@ cdef _multiblock_local_binary_pattern(cnp.double_t[:, ::1] int_image,
         current_rect_y = central_rect_y + offset_y * height
 
 
-        current_rect_val = _integ(int_image,
-                                  current_rect_y,
-                                  current_rect_x,
-                                  current_rect_y + height - 1,
-                                  current_rect_x + width - 1)
+        current_rect_val = integrate(int_image,
+                                     current_rect_y,
+                                     current_rect_x,
+                                     current_rect_y + height - 1,
+                                     current_rect_x + width - 1)
 
 
         has_greater_value = current_rect_val >= central_rect_val
@@ -396,23 +354,18 @@ cdef _multiblock_local_binary_pattern(cnp.double_t[:, ::1] int_image,
     return lbp_code
 
 
-def multiblock_local_binary_pattern(int_image,
-                                    x,
-                                    y,
-                                    width,
-                                    height):
+def multiblock_local_binary_pattern(int_image, x, y, width, height):
     """Multi-block local binary pattern.
 
-    The features are calculated in a way similar to local binary
-    patterns, except that summed up pixel values
-    rather than pixel values are used.
+    The features are calculated similarly to local binary patterns (LBPs),
+    except that summed blocks are used instead of individual pixel values.
 
-    MB-LBP is an extension of LBP that can be computed on any
-    scale in a constant time using integral image. It consists of
-    9 equal-sized rectangles. They are used to compute a feature.
-    Sum of pixels' intensity values in each of them are compared
-    to the central rectangle and depending on comparison result,
-    the feature descriptor is computed.
+    MB-LBP is an extension of LBP that can be computed on multiple scales
+    in constant time using the integral image.
+    9 equally-sized rectangles are used to compute a feature.
+    For each rectangle, the sum of the pixel intensities is computed.
+    Comparisons of these sums to that of the central rectangle determine
+    the feature, similarly to LBP.
 
     Parameters
     ----------
@@ -442,7 +395,7 @@ def multiblock_local_binary_pattern(int_image,
            http://www.cbsr.ia.ac.cn/users/scliao/papers/Zhang-ICB07-MBLBP.pdf
     """
 
-    int_image = np.ascontiguousarray(int_image, dtype=np.double)
+    int_image = np.ascontiguousarray(int_image, dtype=np.float32)
     lbp_code = _multiblock_local_binary_pattern(int_image, x, y, width, height)
     return lbp_code
 

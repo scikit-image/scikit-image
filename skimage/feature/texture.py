@@ -306,11 +306,11 @@ def draw_multiblock_lbp(img,
                         ):
     """Multi-block local binary pattern visualization.
 
-    The blocks visualized in the following manner: the center block
-    is left untouched. The blocks that have higher are covered with
-    transparent white rectangles. The blocks that have less intensity
-    are covered with cyan rectangles. The colors can also be specified.
-    Opacity of visualization is controlled with `alpha` argument.
+    Blocks with higher sums are colored with transparent white rectangles,
+    whereas blocks with lower sums are colored cyan.
+    The blocks that have less intensity are covered with
+    cyan rectangles. The colors can also be specified.
+    Opacity of visualization is controlled with `alpha` parameter.
 
     Parameters
     ----------
@@ -359,8 +359,8 @@ def draw_multiblock_lbp(img,
     # Default colors for regions.
     # White is for the blocks that are brighter.
     # Cyan is for the blocks that has less intensity.
-    color_greater_block = np.asarray(color_greater_block, dtype='float64')
-    color_less_block = np.asarray(color_less_block, dtype='float64')
+    color_greater_block = np.asarray(color_greater_block, dtype=np.double)
+    color_less_block = np.asarray(color_less_block, dtype=np.double)
 
     # Copy array to avoid the changes to the original one.
     output = np.copy(img)

@@ -8,7 +8,6 @@ from skimage.feature import (
 
 from skimage._shared.testing import test_parallel
 from skimage.transform import integral_image
-from skimage.util import img_as_float
 
 class TestGLCM():
 
@@ -253,9 +252,6 @@ class TestMBLBP():
         # be filled.
         correct_answer = 0b10001000
 
-        # The function accepts the float images.
-        # Also it has to be C-contiguous.
-        test_img = img_as_float(test_img)
         int_img = integral_image(test_img)
 
         lbp_code = multiblock_local_binary_pattern(int_img, 0, 0, 3, 3)
