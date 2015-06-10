@@ -26,6 +26,7 @@ __all__ = ['load',
            'chelsea',
            'coffee',
            'hubble_deep_field',
+           'rocket',
            'astronaut']
 
 
@@ -241,3 +242,21 @@ def hubble_deep_field():
 
     """
     return load("hubble_deep_field.jpg")
+
+def rocket():
+    """Launch photo of DSCOVR on Falcon 9 by SpaceX.
+
+    This is the launch photo of Falcon 9 carrying DSCOVR lifted off from
+    SpaceX's Launch Complex 40 at Cape Canaveral Air Force Station, Fla..
+
+    Notes
+    -----
+    This image was downloaded from
+    `SpaceX Photos
+    <https://www.flickr.com/photos/spacexphotos/16511594820/in/photostream/>`__.
+
+    The image was captured by SpaceX and `released in the public domain
+    <http://arstechnica.com/tech-policy/2015/03/elon-musk-puts-spacex-photos-into-the-public-domain/>`_.
+
+    """
+    return load("rocket.jpg")

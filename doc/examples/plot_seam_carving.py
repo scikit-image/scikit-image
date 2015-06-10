@@ -13,31 +13,81 @@ using the Sobel filter to signify the importance of each pixel.
        http://www.cs.jhu.edu/~misha/ReadingSeminar/Papers/Avidan07.pdf
 
 """
-from skimage import io, data
-from skimage import transform
+from skimage import data, draw
+from skimage import transform, util
+import numpy as np
 from skimage import filters, color
 from matplotlib import pyplot as plt
 
-def nothing(img):
-    return img
 
-img = io.imread('/home/vighnesh/images/rocket.jpg')
-#img = color.rgb2gray(img)
+hl_color = np.array([0, 1, 0])
+
+img = data.rocket()
+img = util.img_as_float(img)
 eimg = filters.sobel(color.rgb2gray(img))
-#img = data.camera()
-out = transform.seam_carve(img, eimg, 'vertical', 200)
-#out = transform.seam_carve(out, 'horizontal', 70, energy_func=filters.sobel)
-resized = transform.resize(img, out.shape)
 
 plt.title('Original Image')
-io.imshow(img, plugin='matplotlib')
+plt.imshow(img)
 
-#plt.figure()
-#plt.title('Resized Image')
-#io.imshow(resized, plugin='matplotlib')
+"""
+.. image:: PLOT2RST.current_figure
+"""
 
+resized = transform.resize(img, (img.shape[0], img.shape[1] - 200))
+plt.figure()
+plt.title('Resized Image')
+plt.imshow(resized)
+
+
+"""
+.. image:: PLOT2RST.current_figure
+"""
+
+out = transform.seam_carve(img, eimg, 'vertical', 200)
 plt.figure()
 plt.title('Resized using Seam-Carving')
-io.imshow(out, plugin='matplotlib')
+plt.imshow(out)
 
-io.show()
+"""
+.. image:: PLOT2RST.current_figure
+
+As you can see, resizing as distorted the rocket and the objects around,
+whereas seam carving has reszied by removing the empty spaces in between.
+
+Object Removal
+--------------
+
+Seam Carving can also be used to remove atrifacts from images. To do that, we
+have to ensure that pixels to be removes get less importance. In the following
+code I approximately mark the rocket with a mask, and then decrease the
+importance of those pixels
+
+"""
+
+masked_img = img.copy()
+
+poly = [(404, 281), (404, 360), (359, 364), (338, 337), (145, 337), (120, 322), (145, 304), (340, 306), (362, 284)]
+pr = np.array([p[0] for p in poly])
+pc = np.array([p[1] for p in poly])
+rr, cc = draw.polygon(pr, pc)
+
+masked_img[rr,cc,:] = masked_img[rr,cc,:]*0.5 + hl_color*.5
+plt.figure()
+plt.title('Object Marked')
+
+plt.imshow(masked_img)
+"""
+.. image:: PLOT2RST.current_figure
+"""
+
+eimg[rr, cc] -= 1000
+
+plt.figure()
+plt.title('Object Removed')
+out = transform.seam_carve(img, eimg, 'vertical', 90)
+resized = transform.resize(img, out.shape)
+plt.imshow(out)
+plt.show()
+"""
+.. image:: PLOT2RST.current_figure
+"""
