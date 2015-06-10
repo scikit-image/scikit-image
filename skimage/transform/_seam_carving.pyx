@@ -41,14 +41,14 @@ cdef _preprocess_image(cnp.double_t[:, :, ::1] energy_img,
             for offset in range(-1, 2):
 
                 c_idx = c + offset
-                if (c_idx > cols - 1) or (c_idx < 0) :
+                if (c_idx > cols - 1) or (c_idx < 0):
                     continue
 
                 if cumulative_img[r-1, c_idx] < min_cost:
                     min_cost = cumulative_img[r-1, c_idx]
                     track_img[r, c] = offset
 
-            cumulative_img[r,c] = min_cost + energy_img[r, c, 0]
+            cumulative_img[r, c] = min_cost + energy_img[r, c, 0]
 
 cdef cnp.uint8_t _mark_seam(cnp.int8_t[:, ::1] track_img,
                             Py_ssize_t start_index,
@@ -98,7 +98,7 @@ cdef cnp.uint8_t _mark_seam(cnp.int8_t[:, ::1] track_img,
     return 1
 
 cdef _remove_seam(cnp.double_t[:, :, ::1] img,
-                cnp.uint8_t[:, ::1] seam_map, Py_ssize_t cols):
+                  cnp.uint8_t[:, ::1] seam_map, Py_ssize_t cols):
     """ Removes marked seams from an image.
 
     Parameters
@@ -120,6 +120,7 @@ cdef _remove_seam(cnp.double_t[:, :, ::1] img,
             shift += seam_map[r, c]
             for ch in range(channels):
                 img[r, c, ch] = img[r, c + shift, ch]
+
 
 def _seam_carve_v(img, energy_map, iters, border):
     """ Carve vertical seams off an image.
@@ -160,7 +161,8 @@ def _seam_carve_v(img, energy_map, iters, border):
 
     cdef cnp.double_t[::1] last_row = last_row_obj
     cdef Py_ssize_t[::1] sorted_indices
-    cdef cnp.uint8_t[:, ::1] seam_map = np.zeros(img.shape[0:2], dtype=np.uint8)
+    cdef cnp.uint8_t[:, ::1] seam_map = np.zeros(img.shape[0:2],
+                                                 dtype=np.uint8)
     cdef Py_ssize_t cols = img.shape[1]
     cdef Py_ssize_t rows = img.shape[0]
     cdef Py_ssize_t seams_left = iters
@@ -169,7 +171,8 @@ def _seam_carve_v(img, energy_map, iters, border):
 
     cdef cnp.double_t[:, :, ::1] image = img
     cdef cnp.int8_t[:, ::1] track_img = np.zeros(img.shape[0:2], dtype=np.int8)
-    cdef cnp.double_t[:, ::1] cumulative_img = np.zeros(img.shape[0:2], dtype=np.float)
+    cdef cnp.double_t[:, ::1] cumulative_img = np.zeros(img.shape[0:2],
+                                                        dtype=np.float)
     cdef cnp.double_t[:, :, ::1] energy_img
 
     energy_map[:, 0:border] = DBL_MAX

@@ -66,12 +66,13 @@ importance of those pixels
 
 masked_img = img.copy()
 
-poly = [(404, 281), (404, 360), (359, 364), (338, 337), (145, 337), (120, 322), (145, 304), (340, 306), (362, 284)]
+poly = [(404, 281), (404, 360), (359, 364), (338, 337), (145, 337), (120, 322),
+        (145, 304), (340, 306), (362, 284)]
 pr = np.array([p[0] for p in poly])
 pc = np.array([p[1] for p in poly])
 rr, cc = draw.polygon(pr, pc)
 
-masked_img[rr,cc,:] = masked_img[rr,cc,:]*0.5 + hl_color*.5
+masked_img[rr, cc, :] = masked_img[rr, cc, :]*0.5 + hl_color*.5
 plt.figure()
 plt.title('Object Marked')
 
