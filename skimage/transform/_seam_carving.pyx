@@ -157,6 +157,7 @@ def _seam_carve_v(img, energy_map, iters, border):
            "Seam Carving for Content-Aware Image Resizing"
            http://www.cs.jhu.edu/~misha/ReadingSeminar/Papers/Avidan07.pdf
     """
+    # This reference has been kept to be used for the `np.argsort` call
     last_row_obj = np.zeros(img.shape[1], dtype=np.float)
 
     cdef cnp.double_t[::1] last_row = last_row_obj
@@ -177,6 +178,12 @@ def _seam_carve_v(img, energy_map, iters, border):
 
     energy_map[:, 0:border] = DBL_MAX
     energy_map[:, cols-border:cols] = DBL_MAX
+
+    # Filters often let the boundary be `0`. If the last row is of all same
+    # values, the least value in then penultimate row will give 3 minimum
+    # enries in the last row. Hence, two successive removals will always
+    # intersect as the 3 least seams will share the same pixels except
+    # they will differ in the last row.
     energy_map[rows-border:rows, :] = energy_map[rows-2*border:rows-border, :]
 
     energy_map = np.ascontiguousarray(energy_map[:, :, np.newaxis])
