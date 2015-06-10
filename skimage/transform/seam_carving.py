@@ -62,4 +62,5 @@ def seam_carve(img, energy_map, mode, num, border=1, force_copy=True):
 
     if mode == 'horizontal':
         out = np.transpose(out, (1, 0, 2))
+
     return np.squeeze(out)

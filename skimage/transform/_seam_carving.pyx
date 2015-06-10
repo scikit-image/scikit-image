@@ -8,6 +8,25 @@ cdef _preprocess_image(cnp.double_t[:, :, ::1] energy_img,
                        cnp.double_t[:, ::1] cumulative_img,
                        cnp.int8_t[:, ::1] track_img,
                        Py_ssize_t cols):
+    """ For each row, compute the lowest seam value for all its columns.
+
+    This function updates `cumulative_img` such that `cumulative_img[r, c]`
+    is the total energy of the lowest energy seam ending at `(r, c)`.
+
+    Parameters
+    ----------
+    energy_img : (M, N, 1) ndarray
+       The array of cost of removal of each pixel. Seam carving tries to avoid
+       pixels with high costs.
+    cumulative_img : (M, N) ndarray
+       The array to be updated with the total cost of lowest energy seams.
+    track_img : (M, N) ndarray
+        For each pixel, `track_img` stores the relative column offset in
+        the previous row which has the lowest value in `cumulative_img`. This
+        helps in in re-tracing the minimum cost seam.
+    cols : int
+        Number of columns to process.
+    """
 
     cdef Py_ssize_t r, c, offset, c_idx
     cdef Py_ssize_t rows = energy_img.shape[0]
@@ -15,7 +34,6 @@ cdef _preprocess_image(cnp.double_t[:, :, ::1] energy_img,
 
     for c in range(cols):
         cumulative_img[0, c] = energy_img[0, c, 0]
-
 
     for r in range(1, rows):
         for c in range(cols):
@@ -30,17 +48,33 @@ cdef _preprocess_image(cnp.double_t[:, :, ::1] energy_img,
                     min_cost = cumulative_img[r-1, c_idx]
                     track_img[r, c] = offset
 
-            #print "min_cost = ", min_cost
             cumulative_img[r,c] = min_cost + energy_img[r, c, 0]
 
-    #print "-------Cumulative Image --------"
-    #print np.array(cumulative_img)
-    #print "-------Energy Image --------"
-    #print np.array(energy_img)
+cdef cnp.uint8_t _mark_seam(cnp.int8_t[:, ::1] track_img,
+                            Py_ssize_t start_index,
+                            cnp.uint8_t[:, ::1] seam_map):
 
-cdef cnp.uint8_t mark_seam(cnp.int8_t[:, ::1] track_img, Py_ssize_t start_index,
-                          cnp.uint8_t[:, ::1] seam_map):
+    """ Re-trace the optimal seam from a given column in the last row.
 
+    This function tries to re-track an optimal seam from `start_index` and
+    tries to mark it in `seam_map`. If this seam intersects with any existing
+    seam in `seam_map` the function returns `0` without marking anything. Else
+    it marks the seam in `seam_map` and returns `1`.
+
+    track_img : (M, N) ndarray
+       The array of relative column indices as updated by `_preprocess_image`.
+    start_index : int
+       The column number of the bottom most row from where to start re-tracing
+       the seam.
+    seam_map : (M, N) ndarray
+        The array used to mark seams. If a pixel is marked as as seam it is set
+        to `1`, else `0`.
+
+    Returns
+    -------
+    out : int
+        `1` if seam was marked, `0` is seam inersects and was not marked.
+    """
     cdef Py_ssize_t rows = track_img.shape[0]
     cdef Py_ssize_t[::1] current_seam_indices = np.zeros(rows, dtype=np.int)
     cdef Py_ssize_t row, col
@@ -55,7 +89,6 @@ cdef cnp.uint8_t mark_seam(cnp.int8_t[:, ::1] track_img, Py_ssize_t start_index,
         current_seam_indices[row] = col
 
         if seam_map[row, col]:
-            #print "---------- Seam conflict at ", row, col
             return 0
 
     for row in range(rows):
@@ -64,9 +97,19 @@ cdef cnp.uint8_t mark_seam(cnp.int8_t[:, ::1] track_img, Py_ssize_t start_index,
 
     return 1
 
-cdef remove_seam(cnp.double_t[:, :, ::1] img,
+cdef _remove_seam(cnp.double_t[:, :, ::1] img,
                 cnp.uint8_t[:, ::1] seam_map, Py_ssize_t cols):
+    """ Removes marked seams from an image.
 
+    Parameters
+    ----------
+    img : (M, N, P) ndarray
+        Input image whose vertical seams are to be removed.
+    seam_map : (M, N) ndarray
+        Array with seams to be removed marked by non-zero entries.
+    cols : int
+        The number of colums to process.
+    """
     cdef Py_ssize_t rows = img.shape[0]
     cdef Py_ssize_t channels = img.shape[2]
     cdef Py_ssize_t r, c, ch, shift
@@ -142,15 +185,15 @@ def _seam_carve_v(img, energy_map, iters, border):
     seam_idx = 0
 
     while seams_left > 0:
-        if mark_seam(track_img, sorted_indices[seam_idx], seam_map):
+        if _mark_seam(track_img, sorted_indices[seam_idx], seam_map):
             seams_left -= 1
             cols -= 1
             seam_idx += 1
             continue
         else:
             seam_idx = 0
-            remove_seam(image, seam_map, cols)
-            remove_seam(energy_img, seam_map, cols)
+            _remove_seam(image, seam_map, cols)
+            _remove_seam(energy_img, seam_map, cols)
             seam_map[...] = 0
             _preprocess_image(energy_img, cumulative_img, track_img, cols)
             last_row[:cols] = cumulative_img[-1, :cols]
