@@ -12,7 +12,6 @@ def test_seam_carving():
     energy = 1 - img
 
     out = transform.seam_carve(img, energy, 'vertical', 1, border=0)
-    print out
     testing.assert_allclose(out, 0)
 
     img = img.T
