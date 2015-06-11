@@ -274,11 +274,11 @@ cdef:
     Py_ssize_t[::1] mlbp_x_offsets = np.asarray([-1, 0, 1, 1, 1, 0, -1, -1])
     Py_ssize_t[::1] mlbp_y_offsets = np.asarray([-1, -1, -1, 0, 1, 1, 1, 0])
 
-cdef int _multiblock_local_binary_pattern(float[:, ::1] int_image,
-                                          Py_ssize_t x,
-                                          Py_ssize_t y,
-                                          Py_ssize_t width,
-                                          Py_ssize_t height):
+def _multiblock_local_binary_pattern(float[:, ::1] int_image,
+                                     Py_ssize_t x,
+                                     Py_ssize_t y,
+                                     Py_ssize_t width,
+                                     Py_ssize_t height):
     """Multi-block local binary pattern.
 
     Parameters
@@ -353,50 +353,5 @@ cdef int _multiblock_local_binary_pattern(float[:, ::1] int_image,
 
     return lbp_code
 
-
-def multiblock_local_binary_pattern(int_image, x, y, width, height):
-    """Multi-block local binary pattern.
-
-    The features are calculated similarly to local binary patterns (LBPs),
-    except that summed blocks are used instead of individual pixel values.
-
-    MB-LBP is an extension of LBP that can be computed on multiple scales
-    in constant time using the integral image.
-    9 equally-sized rectangles are used to compute a feature.
-    For each rectangle, the sum of the pixel intensities is computed.
-    Comparisons of these sums to that of the central rectangle determine
-    the feature, similarly to LBP.
-
-    Parameters
-    ----------
-    int_image : (N, M) array
-        Integral image.
-    x : int
-        X-coordinate of top left corner of a rectangle containing feature.
-    y : int
-        Y-coordinate of top left corner of a rectangle containing feature.
-    width : int
-        Width of one of 9 equal rectangles that will be used to compute
-        a feature.
-    height : int
-        Height of one of 9 equal rectangles that will be used to compute
-        a feature.
-
-    Returns
-    -------
-    output : int
-        8-bit MB-LBP feature descriptor.
-
-    References
-    ----------
-    .. [1] Face Detection Based on Multi-Block LBP
-           Representation. Lun Zhang, Rufeng Chu, Shiming Xiang, Shengcai Liao,
-           Stan Z. Li
-           http://www.cbsr.ia.ac.cn/users/scliao/papers/Zhang-ICB07-MBLBP.pdf
-    """
-
-    int_image = np.ascontiguousarray(int_image, dtype=np.float32)
-    lbp_code = _multiblock_local_binary_pattern(int_image, x, y, width, height)
-    return lbp_code
 
 
