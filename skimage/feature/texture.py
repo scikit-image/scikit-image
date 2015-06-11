@@ -5,6 +5,7 @@ Methods to characterize image textures.
 import numpy as np
 from .._shared.utils import assert_nD
 from ..util import img_as_float
+from ..color import gray2rgb
 from ._texture import (_glcm_loop,
                        _local_binary_pattern,
                        _multiblock_local_binary_pattern)
@@ -414,7 +415,7 @@ def draw_multiblock_lbp(img,
 
     # As the visualization uses RGB color we need 3 bands.
     if len(img.shape) < 3:
-        output = np.dstack((img,) * 3)
+        output = gray2rgb(img)
 
     # Colors are specified in floats.
     output = img_as_float(output)
