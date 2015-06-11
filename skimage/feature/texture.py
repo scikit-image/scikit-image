@@ -356,8 +356,7 @@ def draw_multiblock_lbp(img,
 
     Blocks with higher sums are colored with transparent white rectangles,
     whereas blocks with lower sums are colored cyan.
-    The blocks that have less intensity are covered with
-    cyan rectangles. The colors can also be specified.
+    The colors can also be specified.
     Opacity of visualization is controlled with `alpha` parameter.
 
     Parameters
