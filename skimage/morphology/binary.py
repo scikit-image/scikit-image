@@ -2,7 +2,7 @@
 Binary morphological operations
 """
 import numpy as np
-from scipy import ndimage as nd
+from scipy import ndimage as ndi
 from .misc import default_selem
 
 
@@ -39,7 +39,7 @@ def binary_erosion(image, selem=None, out=None):
     """
     if out is None:
         out = np.empty(image.shape, dtype=np.bool)
-    nd.binary_erosion(image, structure=selem, output=out)
+    ndi.binary_erosion(image, structure=selem, output=out)
     return out
 
 
@@ -74,7 +74,7 @@ def binary_dilation(image, selem=None, out=None):
     """
     if out is None:
         out = np.empty(image.shape, dtype=np.bool)
-    nd.binary_dilation(image, structure=selem, output=out)
+    ndi.binary_dilation(image, structure=selem, output=out)
     return out
 
 

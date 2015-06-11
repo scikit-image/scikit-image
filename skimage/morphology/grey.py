@@ -3,7 +3,7 @@ Grayscale morphological operations
 """
 import functools
 import numpy as np
-from scipy import ndimage as nd
+from scipy import ndimage as ndi
 from .misc import default_selem
 from ..util import pad, crop
 
@@ -53,7 +53,7 @@ def _invert_selem(selem):
     """Change the order of the values in `selem`.
 
     This is a patch for the *weird* footprint inversion in
-    `nd.grey_morphology` [1]_.
+    `ndi.grey_morphology` [1]_.
 
     Parameters
     ----------
@@ -182,7 +182,7 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
     selem = _shift_selem(selem, shift_x, shift_y)
     if out is None:
         out = np.empty_like(image)
-    nd.grey_erosion(image, footprint=selem, output=out)
+    ndi.grey_erosion(image, footprint=selem, output=out)
     return out
 
 
@@ -243,12 +243,12 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
     # Inside ndimage.grey_dilation, the structuring element is inverted,
     # eg. `selem = selem[::-1, ::-1]` for 2D [1]_, for reasons unknown to
     # this author (@jni). To "patch" this behaviour, we invert our own
-    # selem before passing it to `nd.grey_dilation`.
+    # selem before passing it to `ndi.grey_dilation`.
     # [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285
     selem = _invert_selem(selem)
     if out is None:
         out = np.empty_like(image)
-    nd.grey_dilation(image, footprint=selem, output=out)
+    ndi.grey_dilation(image, footprint=selem, output=out)
     return out
 
 
@@ -401,7 +401,7 @@ def white_tophat(image, selem=None, out=None):
         return out
     elif out is None:
         out = np.empty_like(image)
-    out = nd.white_tophat(image, footprint=selem, output=out)
+    out = ndi.white_tophat(image, footprint=selem, output=out)
     return out
 
 

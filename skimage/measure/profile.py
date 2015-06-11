@@ -1,5 +1,5 @@
 import numpy as np
-import scipy.ndimage as nd
+from scipy import ndimage as ndi
 
 
 def profile_line(img, src, dst, linewidth=1,
@@ -52,13 +52,13 @@ def profile_line(img, src, dst, linewidth=1,
     """
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
     if img.ndim == 3:
-        pixels = [nd.map_coordinates(img[..., i], perp_lines,
-                                     order=order, mode=mode, cval=cval)
+        pixels = [ndi.map_coordinates(img[..., i], perp_lines,
+                                      order=order, mode=mode, cval=cval)
                   for i in range(img.shape[2])]
         pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
     else:
-        pixels = nd.map_coordinates(img, perp_lines,
-                                    order=order, mode=mode, cval=cval)
+        pixels = ndi.map_coordinates(img, perp_lines,
+                                     order=order, mode=mode, cval=cval)
     intensities = pixels.mean(axis=1)
 
     return intensities

@@ -24,10 +24,9 @@ def test_denoise_tv_chambolle_2d():
     denoised_astro = restoration.denoise_tv_chambolle(img, weight=60.0)
     # which dtype?
     assert denoised_astro.dtype in [np.float, np.float32, np.float64]
-    from scipy import ndimage
-    grad = ndimage.morphological_gradient(img, size=((3, 3)))
-    grad_denoised = ndimage.morphological_gradient(
-        denoised_astro, size=((3, 3)))
+    from scipy import ndimage as ndi
+    grad = ndi.morphological_gradient(img, size=((3, 3)))
+    grad_denoised = ndi.morphological_gradient(denoised_astro, size=((3, 3)))
     # test if the total variation has decreased
     assert grad_denoised.dtype == np.float
     assert (np.sqrt((grad_denoised**2).sum())

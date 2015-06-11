@@ -1,5 +1,5 @@
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage as ndi
 from skimage import data
 from skimage import feature
 from skimage import img_as_float
@@ -137,7 +137,7 @@ def test_hog_orientations_circle():
     image = np.zeros((height, width))
     rr, cc = draw.circle(int(height / 2), int(width / 2), int(width / 3))
     image[rr, cc] = 100
-    image = ndimage.gaussian_filter(image, 2)
+    image = ndi.gaussian_filter(image, 2)
 
     for orientations in range(2, 15):
         (hog, hog_img) = feature.hog(image, orientations=orientations,

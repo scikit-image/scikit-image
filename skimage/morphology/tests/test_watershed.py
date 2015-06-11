@@ -46,7 +46,7 @@ import math
 import unittest
 
 import numpy as np
-import scipy.ndimage
+from scipy import ndimage as ndi
 
 from skimage.morphology.watershed import watershed, _slow_watershed
 
@@ -380,10 +380,9 @@ class TestWatershed(unittest.TestCase):
             markers[x, y] = idx
             idx += 1
 
-        image = scipy.ndimage.gaussian_filter(image, 4)
+        image = ndi.gaussian_filter(image, 4)
         watershed(image, markers, self.eight)
-        scipy.ndimage.watershed_ift(image.astype(np.uint16), markers,
-                                    self.eight)
+        ndi.watershed_ift(image.astype(np.uint16), markers, self.eight)
 
     def test_watershed10(self):
         "watershed 10"

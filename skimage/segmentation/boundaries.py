@@ -1,7 +1,7 @@
 from __future__ import division
 
 import numpy as np
-from scipy import ndimage as nd
+from scipy import ndimage as ndi
 from ..morphology import dilation, erosion, square
 from ..util import img_as_float, view_as_windows, pad
 from ..color import gray2rgb
@@ -146,7 +146,7 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
     ndim = label_img.ndim
-    selem = nd.generate_binary_structure(ndim, connectivity)
+    selem = ndi.generate_binary_structure(ndim, connectivity)
     if mode != 'subpixel':
         boundaries = dilation(label_img, selem) != erosion(label_img, selem)
         if mode == 'inner':
@@ -155,7 +155,7 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
         elif mode == 'outer':
             max_label = np.iinfo(label_img.dtype).max
             background_image = (label_img == background)
-            selem = nd.generate_binary_structure(ndim, ndim)
+            selem = ndi.generate_binary_structure(ndim, ndim)
             inverted_background = np.array(label_img, copy=True)
             inverted_background[background_image] = max_label
             adjacent_objects = ((dilation(label_img, selem) !=
@@ -205,10 +205,10 @@ def mark_boundaries(image, label_img, color=(1, 1, 0),
     if mode == 'subpixel':
         # Here, we want to interpose an extra line of pixels between
         # each original line - except for the last axis which holds
-        # the RGB information. ``nd.zoom`` then performs the (cubic)
+        # the RGB information. ``ndi.zoom`` then performs the (cubic)
         # interpolation, filling in the values of the interposed pixels
-        marked = nd.zoom(marked, [2 - 1/s for s in marked.shape[:-1]] + [1],
-                         mode='reflect')
+        marked = ndi.zoom(marked, [2 - 1/s for s in marked.shape[:-1]] + [1],
+                          mode='reflect')
     boundaries = find_boundaries(label_img, mode=mode,
                                  background=background_label)
     if outline_color is not None:

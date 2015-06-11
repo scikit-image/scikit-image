@@ -4,7 +4,7 @@
 """
 
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage as ndi
 from .. import draw
 
 def square(width, dtype=np.uint8):
@@ -360,4 +360,4 @@ def _default_selem(ndim):
         are 1 and 0 otherwise.
 
     """
-    return ndimage.morphology.generate_binary_structure(ndim, 1)
+    return ndi.morphology.generate_binary_structure(ndim, 1)

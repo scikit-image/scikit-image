@@ -1,5 +1,5 @@
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage as ndi
 from scipy import stats
 
 from ..util import img_as_float, pad
@@ -33,8 +33,8 @@ def _compute_derivatives(image, mode='constant', cval=0):
 
     """
 
-    imy = ndimage.sobel(image, axis=0, mode=mode, cval=cval)
-    imx = ndimage.sobel(image, axis=1, mode=mode, cval=cval)
+    imy = ndi.sobel(image, axis=0, mode=mode, cval=cval)
+    imx = ndi.sobel(image, axis=1, mode=mode, cval=cval)
 
     return imx, imy
 
@@ -92,9 +92,9 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     imx, imy = _compute_derivatives(image, mode=mode, cval=cval)
 
     # structure tensore
-    Axx = ndimage.gaussian_filter(imx * imx, sigma, mode=mode, cval=cval)
-    Axy = ndimage.gaussian_filter(imx * imy, sigma, mode=mode, cval=cval)
-    Ayy = ndimage.gaussian_filter(imy * imy, sigma, mode=mode, cval=cval)
+    Axx = ndi.gaussian_filter(imx * imx, sigma, mode=mode, cval=cval)
+    Axy = ndi.gaussian_filter(imx * imy, sigma, mode=mode, cval=cval)
+    Ayy = ndi.gaussian_filter(imy * imy, sigma, mode=mode, cval=cval)
 
     return Axx, Axy, Ayy
 
@@ -165,9 +165,9 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
     kernel_xy /= kernel_xx.sum()
     kernel_yy = kernel_xx.transpose()
 
-    Hxx = ndimage.convolve(image, kernel_xx, mode=mode, cval=cval)
-    Hxy = ndimage.convolve(image, kernel_xy, mode=mode, cval=cval)
-    Hyy = ndimage.convolve(image, kernel_yy, mode=mode, cval=cval)
+    Hxx = ndi.convolve(image, kernel_xx, mode=mode, cval=cval)
+    Hxy = ndi.convolve(image, kernel_xy, mode=mode, cval=cval)
+    Hyy = ndi.convolve(image, kernel_yy, mode=mode, cval=cval)
 
     return Hxx, Hxy, Hyy
 

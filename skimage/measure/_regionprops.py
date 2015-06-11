@@ -1,8 +1,7 @@
 # coding: utf-8
-import warnings
 from math import sqrt, atan2, pi as PI
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage as ndi
 
 from ._label import label
 from . import _moments
@@ -172,7 +171,7 @@ class _RegionProperties(object):
 
     @_cached_property
     def filled_image(self):
-        return ndimage.binary_fill_holes(self.image, STREL_8)
+        return ndi.binary_fill_holes(self.image, STREL_8)
 
     @_cached_property
     def image(self):
@@ -494,7 +493,7 @@ def regionprops(label_image, intensity_image=None, cache=True):
 
     regions = []
 
-    objects = ndimage.find_objects(label_image)
+    objects = ndi.find_objects(label_image)
     for i, sl in enumerate(objects):
         if sl is None:
             continue
@@ -534,7 +533,7 @@ def perimeter(image, neighbourhood=4):
     else:
         strel = STREL_8
     image = image.astype(np.uint8)
-    eroded_image = ndimage.binary_erosion(image, strel, border_value=0)
+    eroded_image = ndi.binary_erosion(image, strel, border_value=0)
     border_image = image - eroded_image
 
     perimeter_weights = np.zeros(50, dtype=np.double)
@@ -543,10 +542,10 @@ def perimeter(image, neighbourhood=4):
     perimeter_weights[[13, 23]] = (1 + sqrt(2)) / 2
 
 
-    perimeter_image = ndimage.convolve(border_image, np.array([[10, 2, 10],
-                                                               [ 2, 1,  2],
-                                                               [10, 2, 10]]),
-                                       mode='constant', cval=0)
+    perimeter_image = ndi.convolve(border_image, np.array([[10, 2, 10],
+                                                           [ 2, 1,  2],
+                                                           [10, 2, 10]]),
+                                   mode='constant', cval=0)
 
     # You can also write
     # return perimeter_weights[perimeter_image].sum()

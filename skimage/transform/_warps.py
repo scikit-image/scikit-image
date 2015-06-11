@@ -1,5 +1,5 @@
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage as ndi
 
 from ..measure import block_reduce
 from ._geometric import (warp, SimilarityTransform, AffineTransform,
@@ -81,8 +81,8 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
 
         image = _convert_warp_input(image, preserve_range)
 
-        out = ndimage.map_coordinates(image, coord_map, order=order,
-                                      mode=mode, cval=cval)
+        out = ndi.map_coordinates(image, coord_map, order=order,
+                                  mode=mode, cval=cval)
 
         _clip_warp_output(image, out, order, mode, cval, clip)
 

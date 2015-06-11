@@ -4,7 +4,7 @@ from numpy import testing
 from skimage import data, color
 from skimage.util import img_as_bool
 from skimage.morphology import binary, grey, selem
-from scipy import ndimage
+from scipy import ndimage as ndi
 
 
 img = color.rgb2gray(data.astronaut())
@@ -96,7 +96,7 @@ def test_3d_fallback_default_selem():
 
     # expect a "hyper-cross" centered in the 5x5x5:
     image_expected = np.zeros((7, 7, 7), dtype=bool)
-    image_expected[2:5, 2:5, 2:5] = ndimage.generate_binary_structure(3, 1)
+    image_expected[2:5, 2:5, 2:5] = ndi.generate_binary_structure(3, 1)
     testing.assert_array_equal(opened, image_expected)
 
 def test_3d_fallback_cube_selem():
@@ -119,9 +119,9 @@ def test_2d_ndimage_equivalence():
     bin_opened = binary.binary_opening(image)
     bin_closed = binary.binary_closing(image)
 
-    selem = ndimage.generate_binary_structure(2, 1)
-    ndimage_opened = ndimage.binary_opening(image, structure=selem)
-    ndimage_closed = ndimage.binary_closing(image, structure=selem)
+    selem = ndi.generate_binary_structure(2, 1)
+    ndimage_opened = ndi.binary_opening(image, structure=selem)
+    ndimage_closed = ndi.binary_closing(image, structure=selem)
 
     testing.assert_array_equal(bin_opened, ndimage_opened)
     testing.assert_array_equal(bin_closed, ndimage_closed)

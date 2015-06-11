@@ -1,7 +1,7 @@
 import numpy as np
 import functools
 import warnings
-import scipy.ndimage as nd
+from scipy import ndimage as ndi
 from .selem import _default_selem
 
 # Our function names don't exactly correspond to ndimages.
@@ -102,9 +102,9 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
         return out
 
     if out.dtype == bool:
-        selem = nd.generate_binary_structure(ar.ndim, connectivity)
+        selem = ndi.generate_binary_structure(ar.ndim, connectivity)
         ccs = np.zeros_like(ar, dtype=np.int32)
-        nd.label(ar, selem, output=ccs)
+        ndi.label(ar, selem, output=ccs)
     else:
         ccs = out
 

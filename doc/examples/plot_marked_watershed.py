@@ -14,7 +14,7 @@ See Wikipedia_ for more details on the algorithm.
 
 """
 
-from scipy import ndimage
+from scipy import ndimage as ndi
 import matplotlib.pyplot as plt
 
 from skimage.morphology import watershed, disk
@@ -30,7 +30,7 @@ denoised = rank.median(image, disk(2))
 
 # find continuous region (low gradient) --> markers
 markers = rank.gradient(denoised, disk(5)) < 10
-markers = ndimage.label(markers)[0]
+markers = ndi.label(markers)[0]
 
 #local gradient
 gradient = rank.gradient(denoised, disk(2))

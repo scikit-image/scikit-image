@@ -50,8 +50,8 @@ boundary of the coins, or inside the coins.
 
 ::
 
-    >>> from scipy import ndimage
-    >>> fill_coins = ndimage.binary_fill_holes(edges)
+    >>> from scipy import ndimage as ndi
+    >>> fill_coins = ndi.binary_fill_holes(edges)
 
 .. image:: ../auto_examples/applications/images/plot_coins_segmentation_3.png
    :target: ../auto_examples/applications/plot_coins_segmentation.html
@@ -59,7 +59,7 @@ boundary of the coins, or inside the coins.
 
 Now that we have contours that delineate the outer boundary of the coins,
 we fill the inner part of the coins using the
-``ndimage.binary_fill_holes`` function, which uses mathematical morphology
+``ndi.binary_fill_holes`` function, which uses mathematical morphology
 to fill the holes.
 
 .. image:: ../auto_examples/applications/images/plot_coins_segmentation_4.png
@@ -67,12 +67,12 @@ to fill the holes.
    :align: center
 
 Most coins are well segmented out of the background. Small objects from
-the background can be easily removed using the ``ndimage.label``
+the background can be easily removed using the ``ndi.label``
 function to remove objects smaller than a small threshold.
 
 ::
 
-    >>> label_objects, nb_labels = ndimage.label(fill_coins)
+    >>> label_objects, nb_labels = ndi.label(fill_coins)
     >>> sizes = np.bincount(label_objects.ravel())
     >>> mask_sizes = sizes > 20
     >>> mask_sizes[0] = 0
@@ -159,11 +159,11 @@ background.
 
 We remove a few small holes with mathematical morphology::
 
-    >>> segmentation = ndimage.binary_fill_holes(segmentation - 1)
+    >>> segmentation = ndi.binary_fill_holes(segmentation - 1)
 
-We can now label all the coins one by one using ``ndimage.label``::
+We can now label all the coins one by one using ``ndi.label``::
 
-    >>> labeled_coins, _ = ndimage.label(segmentation)
+    >>> labeled_coins, _ = ndi.label(segmentation)
 
 .. image:: ../auto_examples/applications/images/plot_coins_segmentation_9.png
    :target: ../auto_examples/applications/plot_coins_segmentation.html

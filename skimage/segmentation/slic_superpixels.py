@@ -2,7 +2,7 @@
 
 import collections as coll
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage as ndi
 import warnings
 
 from ..util import img_as_float, regular_grid
@@ -139,7 +139,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     if (sigma > 0).any():
         # add zero smoothing for multichannel dimension
         sigma = list(sigma) + [0]
-        image = ndimage.gaussian_filter(image, sigma)
+        image = ndi.gaussian_filter(image, sigma)
 
     if multichannel and (convert2lab or convert2lab is None):
         if image.shape[-1] != 3 and convert2lab:

@@ -3,7 +3,7 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 import numpy as np
-import scipy
+from scipy import ndimage as ndi
 
 cimport cython
 cimport numpy as cnp
@@ -47,7 +47,7 @@ def _felzenszwalb_grey(image, double scale=1, sigma=0.8,
 
     # rescale scale to behave like in reference implementation
     scale = float(scale) / 255.
-    image = scipy.ndimage.gaussian_filter(image, sigma=sigma)
+    image = ndi.gaussian_filter(image, sigma=sigma)
 
     # compute edge weights in 8 connectivity:
     right_cost = np.abs((image[1:, :] - image[:-1, :]))

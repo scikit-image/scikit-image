@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage import gaussian_filter
 
 from .util import (DescriptorExtractor, _mask_border_keypoints,
                    _prepare_grayscale_input_2D)
