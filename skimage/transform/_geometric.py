@@ -2,7 +2,8 @@ import six
 import math
 import warnings
 import numpy as np
-from scipy import ndimage as ndi, spatial
+from scipy import spatial
+from scipy import ndimage as ndi
 
 from .._shared.utils import get_bound_method_class, safe_as_int
 from ..util import img_as_float
