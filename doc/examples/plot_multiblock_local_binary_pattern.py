@@ -70,7 +70,7 @@ plt.imshow(img, interpolation='nearest')
 .. image:: PLOT2RST.current_figure
 
 On the above plot we see the result of computing a MB-LBP and visualization
-of the computed feature. The rectangles that have less intensity than the central
+of the computed feature. The rectangles that have less intensities' sum than the central
 rectangle are marked in cyan. The ones that have higher intensity values
 are marked in white. The central rectangle is left untouched.
 """
