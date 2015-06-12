@@ -3,7 +3,7 @@ from skimage.feature import (
                             greycomatrix,
                             greycoprops,
                             local_binary_pattern,
-                            multiblock_local_binary_pattern
+                            multiblock_lbp
                             )
 
 from skimage._shared.testing import test_parallel
@@ -254,7 +254,7 @@ class TestMBLBP():
 
         int_img = integral_image(test_img)
 
-        lbp_code = multiblock_local_binary_pattern(int_img, 0, 0, 3, 3)
+        lbp_code = multiblock_lbp(int_img, 0, 0, 3, 3)
 
         np.testing.assert_equal(lbp_code, correct_answer)
 

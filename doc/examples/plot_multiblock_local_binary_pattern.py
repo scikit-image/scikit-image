@@ -23,7 +23,7 @@ upon which we then apply MB-LBP.
 
 """
 from __future__ import print_function
-from skimage.feature import multiblock_local_binary_pattern
+from skimage.feature import multiblock_lbp
 import numpy as np
 from numpy.testing import assert_equal
 from skimage.transform import integral_image
@@ -43,7 +43,7 @@ correct_answer = 0b10001000
 
 int_img = integral_image(test_img)
 
-lbp_code = multiblock_local_binary_pattern(int_img, 0, 0, 3, 3)
+lbp_code = multiblock_lbp(int_img, 0, 0, 3, 3)
 
 assert_equal(correct_answer, lbp_code)
 
@@ -58,7 +58,7 @@ test_img = data.coins()
 
 int_img = integral_image(test_img)
 
-lbp_code = multiblock_local_binary_pattern(int_img, 0, 0, 90, 90)
+lbp_code = multiblock_lbp(int_img, 0, 0, 90, 90)
 
 img = draw_multiblock_lbp(test_img, 0, 0, 90, 90,
                           lbp_code=lbp_code, alpha=0.5)

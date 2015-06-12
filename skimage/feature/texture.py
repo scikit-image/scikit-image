@@ -8,7 +8,7 @@ from ..util import img_as_float
 from ..color import gray2rgb
 from ._texture import (_glcm_loop,
                        _local_binary_pattern,
-                       _multiblock_local_binary_pattern)
+                       _multiblock_lbp)
 
 
 def greycomatrix(image, distances, angles, levels=256, symmetric=False,
@@ -297,7 +297,7 @@ def local_binary_pattern(image, P, R, method='default'):
     return output
 
 
-def multiblock_local_binary_pattern(int_image, x, y, width, height):
+def multiblock_lbp(int_image, x, y, width, height):
     """Multi-block local binary pattern.
 
     The features are calculated similarly to local binary patterns (LBPs),
@@ -339,7 +339,7 @@ def multiblock_local_binary_pattern(int_image, x, y, width, height):
     """
 
     int_image = np.ascontiguousarray(int_image, dtype=np.float32)
-    lbp_code = _multiblock_local_binary_pattern(int_image, x, y, width, height)
+    lbp_code = _multiblock_lbp(int_image, x, y, width, height)
     return lbp_code
 
 

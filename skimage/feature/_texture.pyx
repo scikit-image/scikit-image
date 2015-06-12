@@ -274,11 +274,11 @@ cdef:
     Py_ssize_t[::1] mlbp_x_offsets = np.asarray([-1, 0, 1, 1, 1, 0, -1, -1])
     Py_ssize_t[::1] mlbp_y_offsets = np.asarray([-1, -1, -1, 0, 1, 1, 1, 0])
 
-def _multiblock_local_binary_pattern(float[:, ::1] int_image,
-                                     Py_ssize_t x,
-                                     Py_ssize_t y,
-                                     Py_ssize_t width,
-                                     Py_ssize_t height):
+def _multiblock_lbp(float[:, ::1] int_image,
+                    Py_ssize_t x,
+                    Py_ssize_t y,
+                    Py_ssize_t width,
+                    Py_ssize_t height):
     """Multi-block local binary pattern.
 
     Parameters
