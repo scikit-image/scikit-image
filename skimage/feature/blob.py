@@ -6,10 +6,11 @@ import math
 from math import sqrt, hypot, log
 from numpy import arccos
 from ..util import img_as_float
-from .peak import peak_local_max
-from ._hessian_det_appx import _hessian_matrix_det
+from .peak import peak_local_max, get_scale_local_maximas
+from ._hessian_det_appx import _hessian_matrix_det, _hessian_matrix_det_and_laplacian
 from ..transform import integral_image
 from .._shared.utils import assert_nD
+
 
 
 # This basic blob detection algorithm is based on:
@@ -358,6 +359,9 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     .. [2] Herbert Bay, Andreas Ess, Tinne Tuytelaars, Luc Van Gool,
            "SURF: Speeded Up Robust Features"
            ftp://ftp.vision.ee.ethz.ch/publications/articles/eth_biwi_00517.pdf
+                      
+    .. [3] Tony Lindeberg Scale Selection Properties of Generalized Scale-Space Interest Point Detectors
+           http://link.springer.com/article/10.1007/s10851-012-0378-3/fulltext.html
 
     Examples
     --------
@@ -391,6 +395,11 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     of Gaussians for larger `sigma` takes more time. The downside is that
     this method can't be used for detecting blobs of radius less than `3px`
     due to the box filters used in the approximation of Hessian Determinant.
+    Determinant of Hessian for scale selection has significantly better 
+    repeatability properties under affine or perspective image transformations 
+    than the Laplacian [3]_. This is important if descriptors are later applied 
+    to these points and matching algoritms are used to find similar points on 
+    different images of the same scene.
     """
 
     assert_nD(image, 2)
@@ -418,3 +427,137 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     lm[:, 2] = sigma_list[local_maxima[:, 2]]
     local_maxima = lm
     return _prune_blobs(local_maxima, overlap)
+
+
+def blob_doh_log(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
+             overlap=.5, log_scale=False):
+    """Finds blobs in the given grayscale image.
+
+    Blobs are found using the Hessian-Laplace method [1]_. For each blob
+    found, the method returns its coordinates and the standard deviation
+    of the Gaussian Kernel used for the Hessian matrix determinant and
+    Laplacian that  detected the blob. Determinant of Hessians and
+    Laplacian of Gaussians are approximated using [2]_. This method
+    detects only bright blobs on a darker background.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input grayscale image.Blobs can either be light on dark or vice versa.
+    min_sigma : float, optional
+        The minimum standard deviation for Gaussian Kernel used to compute
+        Hessian matrix. Keep this low to detect smaller blobs.
+    max_sigma : float, optional
+        The maximum standard deviation for Gaussian Kernel used to compute
+        Hessian matrix. Keep this high to detect larger blobs.
+    num_sigma : int, optional
+        The number of intermediate values of standard deviations to consider
+        between `min_sigma` and `max_sigma`.
+    threshold : float, optional.
+        The absolute lower bound for scale space maxima. Local maxima smaller
+        than thresh are ignored. Reduce this to detect less prominent blobs.
+    overlap : float, optional
+        A value between 0 and 1. If the area of two blobs overlaps by a
+        fraction greater than `threshold`, the smaller blob is eliminated.
+    log_scale : bool, optional
+        If set intermediate values of standard deviations are interpolated
+        using a logarithmic scale to the base `10`. If not, linear
+        interpolation is used.
+
+    Returns
+    -------
+    A : (n, 3) ndarray
+        A 2d array with each row representing 3 values, ``(y,x,sigma)``
+        where ``(y,x)`` are coordinates of the blob and ``sigma`` is the
+        standard deviation of the Gaussian kernel of the Hessian Matrix whose
+        determinant detected the blob.
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/Blob_detection#The_hybrid_Laplacian_and_determinant_of_the_Hessian_operator_.28Hessian-Laplace.29
+
+    .. [2] Herbert Bay, Andreas Ess, Tinne Tuytelaars, Luc Van Gool,
+           "SURF: Speeded Up Robust Features"
+           ftp://ftp.vision.ee.ethz.ch/publications/articles/eth_biwi_00517.pdf
+           
+    .. [3] Tony Lindeberg Scale Selection Properties of Generalized Scale-Space Interest Point Detectors
+           http://link.springer.com/article/10.1007/s10851-012-0378-3/fulltext.html
+
+    Examples
+    --------
+    >>> from skimage import data, feature
+    >>> img = data.coins()
+    >>> feature.blob_doh_log(img)
+    array([[121, 271,  30],
+           [123,  44,  23],
+           [123, 205,  20],
+           [124, 336,  20],
+           [126, 101,  20],
+           [126, 153,  20],
+           [185, 348,  30],
+           [192, 212,  23],
+           [193, 275,  23],
+           [195, 100,  23],
+           [197,  44,  20],
+           [197, 153,  20],
+           [260, 173,  30],
+           [262, 243,  23],
+           [265, 113,  23],
+           [270, 363,  30]])
+
+
+    Notes
+    -----
+    The radius of each blob is approximately `sigma`.
+    Computation of Determinant of Hessians is independent of the standard
+    deviation. Therefore detecting larger blobs won't take more time. In
+    methods line :py:meth:`blob_dog` and :py:meth:`blob_log` the computation
+    of Gaussians for larger `sigma` takes more time. The downside is that
+    this method can't be used for detecting blobs of radius less than `3px`
+    due to the box filters used in the approximation of Hessian Determinant.
+    The Hessian-Laplace uses Laplacian of Gaussian for scale selection
+    and not determinant of Hessian as in Determinant of Hessian method. 
+    Determinant of Hessian for scale selection has significantly better 
+    repeatability properties under affine or perspective image transformations 
+    than the Laplacian [3]_. This is important if descriptors are later applied 
+    to these points and matching algoritms are used to find similar points on 
+    different images of the same scene. This blob detection method is, therefore, 
+    is worse than Determinant of Hessian blob detection method.
+    """
+    
+    image = img_as_float(image)
+    image = integral_image(image)
+    
+    if log_scale:
+        start, stop = log(min_sigma, 10), log(max_sigma, 10)
+        sigma_list = np.logspace(start, stop, num_sigma)
+    else:
+        sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
+    
+    # Get approximate determinants of Hessian and Laplacian of Gaussians
+    # Approximations are already scale normalised
+    hessian_and_laplacian_images = [_hessian_matrix_det_and_laplacian(image, s) for s in sigma_list]
+    # Separate hessian and laplacian images
+    hessian_images, laplacian_images = zip(*hessian_and_laplacian_images)
+    
+    laplacian_cube = np.dstack(laplacian_images)
+    hessian_cube = np.dstack(hessian_images)
+    
+    # Find local maximas for each hessian image
+    # This points will be checked for Laplacian scale local maximum    
+    footprint = np.zeros((3,3,3))
+    footprint[:,:,1] = 1
+    
+    peaks = peak_local_max(hessian_cube, threshold_abs=threshold,
+                                          footprint=footprint,
+                                          threshold_rel=0.0,
+                                          exclude_border=False)
+    
+    # Get only points that are local maximas in scale space
+    accepted_points = get_scale_local_maximas(peaks, laplacian_cube)
+    
+    # Replace layer number with corresponding sigma value
+    accepted_points[:, 2] = sigma_list[accepted_points[:, 2]]
+    
+    # Prune overlapping blobs
+    return _prune_blobs(accepted_points, overlap)
