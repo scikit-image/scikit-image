@@ -343,11 +343,7 @@ def multiblock_local_binary_pattern(int_image, x, y, width, height):
     return lbp_code
 
 
-def draw_multiblock_lbp(img,
-                        x,
-                        y,
-                        width,
-                        height,
+def draw_multiblock_lbp(img, x, y, width, height,
                         lbp_code=0,
                         color_greater_block=[1, 1, 1],
                         color_less_block=[0, 0.69, 0.96],
@@ -441,12 +437,12 @@ def draw_multiblock_lbp(img,
 
         # Mix-in the visualization colors.
         if has_greater_value:
-            output[curr_y:curr_y+height, curr_x:curr_x+width] = \
-                (1-alpha) * output[curr_y:curr_y+height, curr_x:curr_x+width] \
-                + alpha * color_greater_block
+            new_value = ((1-alpha) * output[curr_y:curr_y+height, curr_x:curr_x+width]
+                         + alpha * color_greater_block)
+            output[curr_y:curr_y+height, curr_x:curr_x+width] = new_value
         else:
-            output[curr_y:curr_y+height, curr_x:curr_x+width] = \
-                (1-alpha) * output[curr_y:curr_y+height, curr_x:curr_x+width] \
-                + alpha * color_less_block
+            new_value = ((1-alpha) * output[curr_y:curr_y+height, curr_x:curr_x+width]
+                         + alpha * color_less_block)
+            output[curr_y:curr_y+height, curr_x:curr_x+width] = new_value
 
     return output

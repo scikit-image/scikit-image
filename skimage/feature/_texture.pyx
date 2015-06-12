@@ -315,9 +315,7 @@ def _multiblock_local_binary_pattern(float[:, ::1] int_image,
         Py_ssize_t central_rect_y = y + height
 
     # Sum of intensity values of central rectangle
-    cdef float central_rect_val = integrate(int_image,
-                                            central_rect_y,
-                                            central_rect_x,
+    cdef float central_rect_val = integrate(int_image, central_rect_y, central_rect_x,
                                             central_rect_y + height - 1,
                                             central_rect_x + width - 1)
 
@@ -338,9 +336,7 @@ def _multiblock_local_binary_pattern(float[:, ::1] int_image,
         current_rect_y = central_rect_y + offset_y * height
 
 
-        current_rect_val = integrate(int_image,
-                                     current_rect_y,
-                                     current_rect_x,
+        current_rect_val = integrate(int_image, current_rect_y, current_rect_x,
                                      current_rect_y + height - 1,
                                      current_rect_x + width - 1)
 
