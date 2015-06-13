@@ -1,3 +1,7 @@
+# cython: cdivision=True
+# cython: boundscheck=False
+# cython: nonecheck=False
+# cython: wraparound=False
 import numpy as np
 cimport numpy as cnp
 
@@ -190,7 +194,7 @@ def _seam_carve_v(img, energy_map, iters, border):
     energy_img = energy_map
 
     _preprocess_image(energy_img, cumulative_img, track_img, cols)
-    last_row[...] = cumulative_img[-1, :]
+    last_row[...] = cumulative_img[rows - 1, :]
     sorted_indices = np.argsort(last_row_obj)
     seam_idx = 0
 
@@ -199,14 +203,13 @@ def _seam_carve_v(img, energy_map, iters, border):
             seams_left -= 1
             cols -= 1
             seam_idx += 1
-            continue
         else:
             seam_idx = 0
             _remove_seam(image, seam_map, cols)
             _remove_seam(energy_img, seam_map, cols)
             seam_map[...] = 0
             _preprocess_image(energy_img, cumulative_img, track_img, cols)
-            last_row[:cols] = cumulative_img[-1, :cols]
+            last_row[:cols] = cumulative_img[rows - 1, :cols]
             sorted_indices = np.argsort(last_row_obj)
 
     _remove_seam(image, seam_map, cols)
