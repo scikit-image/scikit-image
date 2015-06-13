@@ -319,10 +319,10 @@ def multiblock_lbp(int_image, x, y, width, height):
     y : int
         Y-coordinate of top left corner of a rectangle containing feature.
     width : int
-        Width of one of 9 equal rectangles that will be used to compute
+        Width of one of the 9 equal rectangles that will be used to compute
         a feature.
     height : int
-        Height of one of 9 equal rectangles that will be used to compute
+        Height of one of the 9 equal rectangles that will be used to compute
         a feature.
 
     Returns
