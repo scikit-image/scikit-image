@@ -35,6 +35,11 @@ def test_moon():
     data.moon()
 
 
+def test_retina():
+    """ Test that "retina" image can be loaded. """
+    data.retina()
+
+
 def test_page():
     """ Test that "page" image can be loaded. """
     data.page()

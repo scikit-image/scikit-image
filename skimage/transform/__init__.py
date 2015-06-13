@@ -13,9 +13,10 @@ from ._warps import swirl, resize, rotate, rescale, downscale_local_mean
 from .pyramids import (pyramid_reduce, pyramid_expand,
                        pyramid_gaussian, pyramid_laplacian)
 from .seam_carving import seam_carve
+from ._polar import cart2pol
 
-
-__all__ = ['hough_circle',
+__all__ = ['cart2pol',
+           'hough_circle',
            'hough_ellipse',
            'hough_line',
            'probabilistic_hough_line',
