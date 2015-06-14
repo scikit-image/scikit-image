@@ -20,6 +20,9 @@ def configuration(parent_package='', top_path=None):
     cython(['_slic.pyx'], working_path=base_path)
     config.add_extension('_slic', sources=['_slic.c'],
                          include_dirs=[get_numpy_include_dirs()])
+    cython(['_seeds.pyx'], working_path=base_path)
+    config.add_extension('_seeds', sources=['_seeds.c'],
+                         include_dirs=[get_numpy_include_dirs()])
 
     return config
 
