@@ -15,25 +15,25 @@ cdef float CellHog(np.ndarray[np.float64_t, ndim=2] magnitude,
     Parameters
     ----------
     magnitude : ndarray
-        Coordinate to be clipped.
+        The gradient magnitudes of the pixels.
     orientation : ndarray
-        The lower bound.
+        Lookup table for orientations.
     ori1 : float
-        The higher bound.
+        Orientation range start.
     ori2 : float
-        The higher bound.
+        Orientation range end.
     cx : int
-        The higher bound.
+        Pixels per cell (x).
     cy : int
-        The higher bound.
+        Pixels per cell (y).
     xi : int
-        The higher bound.
+        Block index (x).
     yi : int
-        The higher bound.
+        Block index (y).
     sx : int
-        The higher bound.
+        Image size (x).
     sy : int
-        The higher bound.
+        Image size (y).
 
     Returns
     -------
@@ -58,35 +58,35 @@ cdef float CellHog(np.ndarray[np.float64_t, ndim=2] magnitude,
 
 def HogHistograms(np.ndarray[np.float64_t, ndim=2] gx, 
     np.ndarray[np.float64_t, ndim=2] gy, 
-    int cx, int cy, #Pixels per cell
-    int sx, int sy, #Image size
+    int cx, int cy, 
+    int sx, int sy, 
     int n_cellsx, int n_cellsy, 
     int visualise, int orientations, 
     np.ndarray[np.float64_t, ndim=3] orientation_histogram):
-    """HogHistograms
+    """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Parameters
     ----------
     gx : ndarray
-        Coordinate to be clipped.
+        First order image gradients (x).
     gy : ndarray
-        The lower bound.
+        First order image gradients (y).
     cx : int
-        The higher bound.
+        Pixels per cell (x).
     cy : int
-        The higher bound.
+        Pixels per cell (y).
     sx : int
-        The higher bound.
+        Image size (x).
     sy : int
-        The higher bound.
+        Image size (y).
     n_cellsx : int
-        The higher bound.
+        Number of cells (x).
     n_cellsy : int
-        The higher bound.
+        Number of cells (y).
     visualise : int
-        The higher bound.
+        Also return an image of the HOG.
     orientations : int
-        The higher bound.
+        Number of orientation bins.
     orientation_histogram : ndarray
         The histogram to fill.
     """

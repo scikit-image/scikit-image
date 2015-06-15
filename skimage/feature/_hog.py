@@ -1,5 +1,4 @@
 import numpy as np
-from scipy import sqrt, pi, arctan2, cos, sin
 from scipy.ndimage import uniform_filter
 from .._shared.utils import assert_nD
 from . import _hoghistogram
@@ -63,7 +62,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     assert_nD(image, 2)
 
     if normalise:
-        image = sqrt(image)
+        image = np.sqrt(image)
 
     """
     The second stage computes first order image gradients. These capture
@@ -104,8 +103,8 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     cell are used to vote into the orientation histogram.
     """
 
-    magnitude = sqrt(gx ** 2 + gy ** 2)
-    orientation = arctan2(gy, gx) * (180 / pi) % 180
+    magnitude = np.hypot(gx, gy)
+    orientation = np.arctan2(gy, gx) * (180 / np.pi) % 180
 
     sy, sx = image.shape
     cx, cy = pixels_per_cell
@@ -132,8 +131,8 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
             for y in range(n_cellsy):
                 for o in range(orientations):
                     centre = tuple([y * cy + cy // 2, x * cx + cx // 2])
-                    dx = radius * cos(float(o) / orientations * np.pi)
-                    dy = radius * sin(float(o) / orientations * np.pi)
+                    dx = radius * np.cos(float(o) / orientations * np.pi)
+                    dy = radius * np.sin(float(o) / orientations * np.pi)
                     rr, cc = draw.line(int(centre[0] - dx),
                                        int(centre[1] + dy),
                                        int(centre[0] + dx),
@@ -164,7 +163,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         for y in range(n_blocksy):
             block = orientation_histogram[y:y + by, x:x + bx, :]
             eps = 1e-5
-            normalised_blocks[y, x, :] = block / sqrt(block.sum() ** 2 + eps)
+            normalised_blocks[y, x, :] = block / np.sqrt(block.sum() ** 2 + eps)
 
     """
     The final step collects the HOG descriptors from all blocks of a dense
