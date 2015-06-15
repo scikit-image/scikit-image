@@ -5,11 +5,13 @@
 import numpy as np
 cimport numpy as cnp
 
-cdef float CellHog(cnp.float64_t[:, :] magnitude,
-    cnp.float64_t[:, :] orientation,
-    float ori1, float ori2,
-    int cx, int cy, int xi, int yi, int sx, int sy):
-    """CellHog
+cdef float cell_hog(cnp.float64_t[:, :] magnitude,
+        cnp.float64_t[:, :] orientation,
+        float ori1, float ori2,
+        int cx, int cy, 
+        int xi, int yi, 
+        int sx, int sy):
+    """Calculation of the cell's HOG value
 
     Parameters
     ----------
@@ -26,13 +28,13 @@ cdef float CellHog(cnp.float64_t[:, :] magnitude,
     cy : int
         Pixels per cell (y).
     xi : int
-        Block index (x).
+        Block column index.
     yi : int
-        Block index (y).
+        Block row index.
     sx : int
-        Image size (x).
+        Number of columns.
     sy : int
-        Image size (y).
+        Number of rows.
 
     Returns
     -------
@@ -55,13 +57,13 @@ cdef float CellHog(cnp.float64_t[:, :] magnitude,
 
     return total
 
-def HogHistograms(cnp.float64_t[:, :] gx,
-    cnp.float64_t[:, :] gy,
-    int cx, int cy, 
-    int sx, int sy, 
-    int n_cellsx, int n_cellsy, 
-    int visualise, int orientations, 
-    cnp.float64_t[:, :, :] orientation_histogram):
+def hog_histograms(cnp.float64_t[:, :] gx,
+       cnp.float64_t[:, :] gy,
+       int cx, int cy, 
+       int sx, int sy, 
+       int n_cellsx, int n_cellsy, 
+       int visualise, int orientations, 
+       cnp.float64_t[:, :, :] orientation_histogram):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Parameters
@@ -75,9 +77,9 @@ def HogHistograms(cnp.float64_t[:, :] gx,
     cy : int
         Pixels per cell (y).
     sx : int
-        Image size (x).
+        Number of columns.
     sy : int
-        Image size (y).
+        Number of rows.
     n_cellsx : int
         Number of cells (x).
     n_cellsy : int
