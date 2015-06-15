@@ -20,10 +20,11 @@ cdef _preprocess_image(cnp.double_t[:, :, ::1] energy_img,
     Parameters
     ----------
     energy_img : (M, N, 1) ndarray
-       The array of cost of removal of each pixel. Seam carving tries to avoid
-       pixels with high costs.
+        Cost array representing the expense to remove each pixel. Seam carving
+        tries to avoid pixels with high costs.
     cumulative_img : (M, N) ndarray
-       The array to be updated with the total cost of lowest energy seams.
+        The array to be updated inplace with the total cost of lowest energy
+        seams.
     track_img : (M, N) ndarray
         For each pixel, `track_img` stores the relative column offset in
         the previous row which has the lowest value in `cumulative_img`. This
@@ -35,21 +36,24 @@ cdef _preprocess_image(cnp.double_t[:, :, ::1] energy_img,
     cdef Py_ssize_t r, c, offset, c_idx
     cdef Py_ssize_t rows = energy_img.shape[0]
     cdef cnp.double_t min_cost = DBL_MAX
+    cdef Py_ssize_t colsm1 = cols - 1
+    cdef Py_ssize_t rm1
 
     for c in range(cols):
         cumulative_img[0, c] = energy_img[0, c, 0]
 
     for r in range(1, rows):
+        rm1 = r - 1
         for c in range(cols):
             min_cost = DBL_MAX
             for offset in range(-1, 2):
 
                 c_idx = c + offset
-                if (c_idx > cols - 1) or (c_idx < 0):
+                if (c_idx > colsm1) or (c_idx < 0):
                     continue
 
-                if cumulative_img[r-1, c_idx] < min_cost:
-                    min_cost = cumulative_img[r-1, c_idx]
+                if cumulative_img[rm1, c_idx] < min_cost:
+                    min_cost = cumulative_img[rm1, c_idx]
                     track_img[r, c] = offset
 
             cumulative_img[r, c] = min_cost + energy_img[r, c, 0]
@@ -87,7 +91,7 @@ cdef cnp.uint8_t _mark_seam(cnp.int8_t[:, ::1] track_img,
 
     current_seam_indices[rows - 1] = start_index
     for row in range(rows - 2, -1, -1):
-        col = current_seam_indices[row+1]
+        col = current_seam_indices[row + 1]
         offset = track_img[row, col]
         col = col + offset
         current_seam_indices[row] = col
@@ -103,7 +107,7 @@ cdef cnp.uint8_t _mark_seam(cnp.int8_t[:, ::1] track_img,
 
 cdef _remove_seam(cnp.double_t[:, :, ::1] img,
                   cnp.uint8_t[:, ::1] seam_map, Py_ssize_t cols):
-    """ Removes marked seams from an image.
+    """ Remove marked seams from an image.
 
     Parameters
     ----------
@@ -112,38 +116,37 @@ cdef _remove_seam(cnp.double_t[:, :, ::1] img,
     seam_map : (M, N) ndarray
         Array with seams to be removed marked by non-zero entries.
     cols : int
-        The number of colums to process.
+        The number of columns to process.
     """
     cdef Py_ssize_t rows = img.shape[0]
     cdef Py_ssize_t channels = img.shape[2]
     cdef Py_ssize_t r, c, ch, shift
+    cdef Py_ssize_t c_shift
 
     for r in range(rows):
         shift = 0
         for c in range(cols):
             shift += seam_map[r, c]
+            c_shift = c + shift
             for ch in range(channels):
-                img[r, c, ch] = img[r, c + shift, ch]
+                img[r, c, ch] = img[r, c_shift, ch]
 
 
 def _seam_carve_v(img, energy_map, iters, border):
     """ Carve vertical seams off an image.
 
-    Carves out vertical seams off an image while using the given energy
-    map to decide the importance of each pixel.[1]
+    Carves out vertical seams from an image while using the given energy map to
+    decide the importance of each pixel.[1]_
 
     Parameters
     ----------
     img : (M, N) or (M, N, 3) ndarray
         Input image whose vertical seams are to be removed.
-    iters : int
-        Number of vertical seams are to be removed.
     energy_map : (M, N) ndarray
-        The array to decide the importance of each pixel. The higher
-        the value corresponding to a pixel, the more the algorithm will try
-        to keep it in the image.
-    num : int
-        Number of seams are to be removed.
+        Cost array denoting importance of each pixel. The algorithm will try to
+        retain high valued pixels.
+    iters : int
+        Number of vertical seams to be removed.
     border : int, optional
         The number of pixels in the right, left and bottom end of the image
         to be excluded from being considered for a seam. This is important as

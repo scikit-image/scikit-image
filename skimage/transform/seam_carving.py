@@ -7,7 +7,7 @@ import numpy as np
 def seam_carve(img, energy_map, mode, num, border=1, force_copy=True):
     """ Carve vertical or horizontal seams off an image.
 
-    Carves out vertical/horizontal seams off an image while using the given
+    Carves out vertical/horizontal seams from an image while using the given
     energy map to decide the importance of each pixel.
 
     Parameters

@@ -248,7 +248,7 @@ def rocket():
     """Launch photo of DSCOVR on Falcon 9 by SpaceX.
 
     This is the launch photo of Falcon 9 carrying DSCOVR lifted off from
-    SpaceX's Launch Complex 40 at Cape Canaveral Air Force Station, Fla..
+    SpaceX's Launch Complex 40 at Cape Canaveral Air Force Station, FL.
 
     Notes
     -----
