@@ -3,11 +3,11 @@
 # cython: wraparound=False
 
 import numpy as np
-cimport numpy as np
+cimport numpy as cnp
 
 # cnp.float64_t[:, :] magnitude
-cdef float CellHog(np.ndarray[np.float64_t, ndim=2] magnitude, 
-    np.ndarray[np.float64_t, ndim=2] orientation,
+cdef float CellHog(cnp.ndarray[cnp.float64_t, ndim=2] magnitude,
+    cnp.ndarray[cnp.float64_t, ndim=2] orientation,
     float ori1, float ori2,
     int cx, int cy, int xi, int yi, int sx, int sy):
     """CellHog
@@ -56,13 +56,13 @@ cdef float CellHog(np.ndarray[np.float64_t, ndim=2] magnitude,
 
     return total
 
-def HogHistograms(np.ndarray[np.float64_t, ndim=2] gx, 
-    np.ndarray[np.float64_t, ndim=2] gy, 
+def HogHistograms(cnp.ndarray[cnp.float64_t, ndim=2] gx,
+    cnp.ndarray[cnp.float64_t, ndim=2] gy,
     int cx, int cy, 
     int sx, int sy, 
     int n_cellsx, int n_cellsy, 
     int visualise, int orientations, 
-    np.ndarray[np.float64_t, ndim=3] orientation_histogram):
+    cnp.ndarray[cnp.float64_t, ndim=3] orientation_histogram):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Parameters
@@ -91,8 +91,8 @@ def HogHistograms(np.ndarray[np.float64_t, ndim=2] gx,
         The histogram to fill.
     """
 
-    cdef np.ndarray[np.float64_t, ndim=2] magnitude = np.hypot(gx, gy)
-    cdef np.ndarray[np.float64_t, ndim=2] orientation = (
+    cdef cnp.ndarray[cnp.float64_t, ndim=2] magnitude = np.hypot(gx, gy)
+    cdef cnp.ndarray[cnp.float64_t, ndim=2] orientation = (
         np.arctan2(gy, gx) * (180 / np.pi) % 180)
     cdef int i, x, y, o, yi, xi, cy1, cy2, cx1, cx2
     cdef float ori1, ori2
