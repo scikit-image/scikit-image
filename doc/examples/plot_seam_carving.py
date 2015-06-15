@@ -4,9 +4,10 @@ Seam Carving
 ============
 
 This example demonstrates how images can be resized using seam carving [1]_.
-Resizing often distorts contents in the image. Seam carving tries to resize
-images while trying to keep important content intact. In this example we are
-using the Sobel filter to signify the importance of each pixel.
+Resizing to a new aspect ratio distorts image contents. Seam carving attempts
+to resize *without* distortion, by removing regions of an image which are less
+important. In this example we are using the Sobel filter to signify the
+importance of each pixel.
 
 .. [1] Shai Avidan and Ariel Shamir
        "Seam Carving for Content-Aware Image Resizing"
