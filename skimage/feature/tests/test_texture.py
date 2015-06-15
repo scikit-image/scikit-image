@@ -1,10 +1,8 @@
 import numpy as np
-from skimage.feature import (
-                            greycomatrix,
+from skimage.feature import (greycomatrix,
                             greycoprops,
                             local_binary_pattern,
-                            multiblock_lbp
-                            )
+                            multiblock_lbp)
 
 from skimage._shared.testing import test_parallel
 from skimage.transform import integral_image
@@ -239,17 +237,16 @@ class TestMBLBP():
 
     def test_single_mblbp(self):
 
-        # Create dummy matrix where first and fifth
-        # rectangles have greater value than the central one
-        # Therefore, the following bits should be 1.
+        # Create dummy matrix where first and fifth rectangles have greater
+        # value than the central one. Therefore, the following bits
+        # should be 1.
         test_img = np.zeros((9, 9), dtype='uint8')
         test_img[3:6, 3:6] = 1
         test_img[:3, :3] = 255
         test_img[6:, 6:] = 255
 
-        # MB-LBP is filled in reverse order.
-        # So the first and fifth bits from the end should
-        # be filled.
+        # MB-LBP is filled in reverse order. So the first and fifth bits from
+        # the end should be filled.
         correct_answer = 0b10001000
 
         int_img = integral_image(test_img)

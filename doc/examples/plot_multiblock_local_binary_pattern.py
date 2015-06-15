@@ -28,17 +28,15 @@ import numpy as np
 from numpy.testing import assert_equal
 from skimage.transform import integral_image
 
-# Create test matrix where first and fifth
-# rectangles starting from top left clockwise
-# have greater value than the central one.
+# Create test matrix where first and fifth rectangles starting
+# from top left clockwise have greater value than the central one.
 test_img = np.zeros((9, 9), dtype='uint8')
 test_img[3:6, 3:6] = 1
 test_img[:3, :3] = 50
 test_img[6:, 6:] = 50
 
-# First and fifth bits should be filled.
-# This correct value will be compared to
-# the computed one.
+# First and fifth bits should be filled. This correct value will
+#  be compared to the computed one.
 correct_answer = 0b10001000
 
 int_img = integral_image(test_img)
@@ -48,7 +46,8 @@ lbp_code = multiblock_lbp(int_img, 0, 0, 3, 3)
 assert_equal(correct_answer, lbp_code)
 
 """
-Now let's apply the operator to a real image and see how the visualization works.
+Now let's apply the operator to a real image and see how the
+visualization works.
 """
 from skimage import data
 from matplotlib import pyplot as plt
@@ -69,8 +68,8 @@ plt.imshow(img, interpolation='nearest')
 """
 .. image:: PLOT2RST.current_figure
 
-On the above plot we see the result of computing a MB-LBP and visualization
-of the computed feature. The rectangles that have less intensities' sum than the central
-rectangle are marked in cyan. The ones that have higher intensity values
-are marked in white. The central rectangle is left untouched.
+On the above plot we see the result of computing a MB-LBP and visualization of
+the computed feature. The rectangles that have less intensities' sum than the
+central rectangle are marked in cyan. The ones that have higher intensity
+values are marked in white. The central rectangle is left untouched.
 """

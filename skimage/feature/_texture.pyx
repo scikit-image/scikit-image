@@ -267,28 +267,29 @@ def _local_binary_pattern(double[:, ::1] image,
     return np.asarray(output)
 
 
-# Constant values that are used by `multiblock_local_binary_pattern` function.
+# Constant values that are used by `_multiblock_lbp` function.
 # Values represent offsets of neighbour rectangles relative to central one.
 # It has order starting from top left and going clockwise.
 cdef:
-    Py_ssize_t[::1] mlbp_x_offsets = np.asarray([-1, 0, 1, 1, 1, 0, -1, -1])
-    Py_ssize_t[::1] mlbp_y_offsets = np.asarray([-1, -1, -1, 0, 1, 1, 1, 0])
+    Py_ssize_t[::1] mlbp_r_offsets = np.asarray([-1, -1, -1, 0, 1, 1, 1, 0])
+    Py_ssize_t[::1] mlbp_c_offsets = np.asarray([-1, 0, 1, 1, 1, 0, -1, -1])
+
 
 def _multiblock_lbp(float[:, ::1] int_image,
-                    Py_ssize_t x,
-                    Py_ssize_t y,
+                    Py_ssize_t r,
+                    Py_ssize_t c,
                     Py_ssize_t width,
                     Py_ssize_t height):
-    """Multi-block local binary pattern.
+    """Multi-block local binary pattern (MB-LBP) [1]_.
 
     Parameters
     ----------
     int_image : (N, M) float array
         Integral image.
-    x : int
-        X-coordinate of top left corner of a rectangle containing feature.
-    y : int
-        Y-coordinate of top left corner of a rectangle containing feature.
+    r : int
+        Row-coordinate of top left corner of a rectangle containing feature.
+    c : int
+        Column-coordinate of top left corner of a rectangle containing feature.
     width : int
         Width of one of 9 equal rectangles that will be used to compute
         a feature.
@@ -309,36 +310,43 @@ def _multiblock_lbp(float[:, ::1] int_image,
            http://www.cbsr.ia.ac.cn/users/scliao/papers/Zhang-ICB07-MBLBP.pdf
     """
 
-    # Top-left coordinates of central rectangle
     cdef:
-        Py_ssize_t central_rect_x = x + width
-        Py_ssize_t central_rect_y = y + height
+        # Top-left coordinates of central rectangle.
+        Py_ssize_t central_rect_r = r + height
+        Py_ssize_t central_rect_c = c + width
 
-    # Sum of intensity values of central rectangle
-    cdef float central_rect_val = integrate(int_image, central_rect_y, central_rect_x,
-                                            central_rect_y + height - 1,
-                                            central_rect_x + width - 1)
+        Py_ssize_t r_shift = height - 1
+        Py_ssize_t c_shift = width - 1
 
-    cdef:
-        Py_ssize_t element_num, offset_x, offset_y
-        Py_ssize_t current_rect_x, current_rect_y
+        # Copy offset array to multiply it by width and height later.
+        Py_ssize_t[::1] r_offsets = mlbp_r_offsets.copy()
+        Py_ssize_t[::1] c_offsets = mlbp_c_offsets.copy()
+
+        Py_ssize_t current_rect_r, current_rect_c
+        Py_ssize_t element_num, i
         double current_rect_val
         int has_greater_value
         int lbp_code = 0
 
+    # Pre-multiply offsets with width and height.
+    for i in range(8):
+        r_offsets[i] = r_offsets[i]*height
+        c_offsets[i] = c_offsets[i]*width
+
+    # Sum of intensity values of central rectangle.
+    cdef float central_rect_val = integrate(int_image, central_rect_r, central_rect_c,
+                                            central_rect_r + r_shift,
+                                            central_rect_c + c_shift)
+
     for element_num in range(8):
 
-        offset_x = mlbp_x_offsets[element_num]
-        offset_y = mlbp_y_offsets[element_num]
+        current_rect_r = central_rect_r + r_offsets[element_num]
+        current_rect_c = central_rect_c + c_offsets[element_num]
 
 
-        current_rect_x = central_rect_x + offset_x * width
-        current_rect_y = central_rect_y + offset_y * height
-
-
-        current_rect_val = integrate(int_image, current_rect_y, current_rect_x,
-                                     current_rect_y + height - 1,
-                                     current_rect_x + width - 1)
+        current_rect_val = integrate(int_image, current_rect_r, current_rect_c,
+                                     current_rect_r + r_shift,
+                                     current_rect_c + c_shift)
 
 
         has_greater_value = current_rect_val >= central_rect_val
@@ -348,6 +356,3 @@ def _multiblock_lbp(float[:, ::1] int_image,
         lbp_code |= has_greater_value << (7 - element_num)
 
     return lbp_code
-
-
-

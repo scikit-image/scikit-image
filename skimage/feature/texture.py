@@ -297,27 +297,27 @@ def local_binary_pattern(image, P, R, method='default'):
     return output
 
 
-def multiblock_lbp(int_image, x, y, width, height):
-    """Multi-block local binary pattern.
+def multiblock_lbp(int_image, r, c, width, height):
+    """Multi-block local binary pattern (MB-LBP) [1]_.
 
     The features are calculated similarly to local binary patterns (LBPs),
-    except that summed blocks are used instead of individual pixel values.
+    (See :py:meth:`local_binary_pattern`) except that summed blocks are
+    used instead of individual pixel values.
 
     MB-LBP is an extension of LBP that can be computed on multiple scales
-    in constant time using the integral image.
-    9 equally-sized rectangles are used to compute a feature.
-    For each rectangle, the sum of the pixel intensities is computed.
-    Comparisons of these sums to that of the central rectangle determine
-    the feature, similarly to LBP.
+    in constant time using the integral image. Nine equally-sized rectangles
+    are used to compute a feature. For each rectangle, the sum of the pixel
+    intensities is computed. Comparisons of these sums to that of the central
+    rectangle determine the feature, similarly to LBP.
 
     Parameters
     ----------
     int_image : (N, M) array
         Integral image.
-    x : int
-        X-coordinate of top left corner of a rectangle containing feature.
-    y : int
-        Y-coordinate of top left corner of a rectangle containing feature.
+    r : int
+        Row-coordinate of top left corner of a rectangle containing feature.
+    c : int
+        Column-coordinate of top left corner of a rectangle containing feature.
     width : int
         Width of one of the 9 equal rectangles that will be used to compute
         a feature.
@@ -339,11 +339,11 @@ def multiblock_lbp(int_image, x, y, width, height):
     """
 
     int_image = np.ascontiguousarray(int_image, dtype=np.float32)
-    lbp_code = _multiblock_lbp(int_image, x, y, width, height)
+    lbp_code = _multiblock_lbp(int_image, r, c, width, height)
     return lbp_code
 
 
-def draw_multiblock_lbp(img, x, y, width, height,
+def draw_multiblock_lbp(img, r, c, width, height,
                         lbp_code=0,
                         color_greater_block=[1, 1, 1],
                         color_less_block=[0, 0.69, 0.96],
@@ -351,19 +351,18 @@ def draw_multiblock_lbp(img, x, y, width, height,
                         ):
     """Multi-block local binary pattern visualization.
 
-    Blocks with higher sums are colored with transparent white rectangles,
-    whereas blocks with lower sums are colored cyan.
-    The colors can also be specified.
-    Opacity of visualization is controlled with `alpha` parameter.
+    Blocks with higher sums are colored with alpha-blended white rectangles,
+    whereas blocks with lower sums are colored alpha-blended cyan. Colors
+    and the `alpha` parameter can be changed.
 
     Parameters
     ----------
-    img :
+    img : ndarray of float or uint
         Image on which to visualize the pattern.
-    x : int
-        X-coordinate of top left corner of a rectangle containing feature.
-    y : int
-        Y-coordinate of top left corner of a rectangle containing feature.
+    r : int
+        Row-coordinate of top left corner of a rectangle containing feature.
+    c : int
+        Column-coordinate of top left corner of a rectangle containing feature.
     width : int
         Width of one of 9 equal rectangles that will be used to compute
         a feature.
@@ -371,26 +370,25 @@ def draw_multiblock_lbp(img, x, y, width, height,
         Height of one of 9 equal rectangles that will be used to compute
         a feature.
     lbp_code : int
-        The descriptor of feature to visualize. If not provided,
-        the descriptor with 0 value will be used.
+        The descriptor of feature to visualize. If not provided, the
+        descriptor with 0 value will be used.
     color_greater_block : list of 3 floats
-        Floats specifying the color for the block that
-        has greater intensity value. They should be
-        in the range [0, 1]. Corresponding values define
-        (R, G, B) values. Default value is white [1, 1, 1].
+        Floats specifying the color for the block that has greater
+        intensity value. They should be in the range [0, 1].
+        Corresponding values define (R, G, B) values. Default value
+        is white [1, 1, 1].
     color_greater_block : list of 3 floats
-        Floats specifying the color for the block that
-        has greater intensity value. They should be
-        in the range [0, 1]. Corresponding values define
+        Floats specifying the color for the block that has greater intensity
+        value. They should be in the range [0, 1]. Corresponding values define
         (R, G, B) values. Default value is cyan [0, 0.69, 0.96].
     alpha : float
-        Value in the range [0, 1] that specifies opacity of
-        visualization. 1 - fully transparent, 0 - opaque.
+        Value in the range [0, 1] that specifies opacity of visualization.
+        1 - fully transparent, 0 - opaque.
 
     Returns
     -------
     output : ndarray of float
-        Image with visualization.
+        Image with MB-LBP visualization.
 
     References
     ----------
@@ -403,8 +401,8 @@ def draw_multiblock_lbp(img, x, y, width, height,
     # Default colors for regions.
     # White is for the blocks that are brighter.
     # Cyan is for the blocks that has less intensity.
-    color_greater_block = np.asarray(color_greater_block, dtype=np.double)
-    color_less_block = np.asarray(color_less_block, dtype=np.double)
+    color_greater_block = np.asarray(color_greater_block, dtype=np.float64)
+    color_less_block = np.asarray(color_less_block, dtype=np.float64)
 
     # Copy array to avoid the changes to the original one.
     output = np.copy(img)
@@ -418,31 +416,36 @@ def draw_multiblock_lbp(img, x, y, width, height,
 
     # Offsets of neighbour rectangles relative to central one.
     # It has order starting from top left and going clockwise.
-    neighbour_rect_offsets = ((-1, -1), (0, -1), (1, -1),
-                              (1, 0), (1, 1), (0, 1),
-                              (-1, 1), (-1, 0))
+    neighbour_rect_offsets = ((-1, -1), (-1, 0), (-1, 1),
+                              (0, 1), (1, 1), (1, 0),
+                              (1, -1), (0, -1))
+
+    # Pre-multiply the offsets with width and height.
+    neighbour_rect_offsets = np.array(neighbour_rect_offsets)
+    neighbour_rect_offsets[:, 0] *= height
+    neighbour_rect_offsets[:, 1] *= width
 
     # Top-left coordinates of central rectangle.
-    central_rect_x = x + width
-    central_rect_y = y + height
+    central_rect_r = r + height
+    central_rect_c = c + width
 
     for element_num, offset in enumerate(neighbour_rect_offsets):
 
-        offset_x, offset_y = offset
+        offset_r, offset_c = offset
 
-        curr_x = central_rect_x + offset_x * width
-        curr_y = central_rect_y + offset_y * height
+        curr_r = central_rect_r + offset_r
+        curr_c = central_rect_c + offset_c
 
         has_greater_value = lbp_code & (1 << (7-element_num))
 
         # Mix-in the visualization colors.
         if has_greater_value:
-            new_value = ((1-alpha) * output[curr_y:curr_y+height, curr_x:curr_x+width]
+            new_value = ((1-alpha) * output[curr_r:curr_r+height, curr_c:curr_c+width]
                          + alpha * color_greater_block)
-            output[curr_y:curr_y+height, curr_x:curr_x+width] = new_value
+            output[curr_r:curr_r+height, curr_c:curr_c+width] = new_value
         else:
-            new_value = ((1-alpha) * output[curr_y:curr_y+height, curr_x:curr_x+width]
+            new_value = ((1-alpha) * output[curr_r:curr_r+height, curr_c:curr_c+width]
                          + alpha * color_less_block)
-            output[curr_y:curr_y+height, curr_x:curr_x+width] = new_value
+            output[curr_r:curr_r+height, curr_c:curr_c+width] = new_value
 
     return output
