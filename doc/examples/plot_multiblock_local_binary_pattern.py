@@ -3,23 +3,21 @@
 Multi-Block Local Binary Pattern for texture classification
 ===========================================================
 
-This example shows how to compute multi-block local binary
-pattern (MB-LBP) features as well as how to visualize them.
+This example shows how to compute multi-block local binary pattern (MB-LBP)
+features as well as how to visualize them.
 
-The features are calculated similarly to local binary patterns (LBPs),
-except that summed blocks are used instead of individual pixel values.
+The features are calculated similarly to local binary patterns (LBPs), except
+that summed blocks are used instead of individual pixel values.
 
-MB-LBP is an extension of LBP that can be computed on multiple scales
-in constant time using the integral image. 9 equally-sized rectangles
-are used to compute a feature. For each rectangle, the sum of the pixel
-intensities is computed. Comparisons of these sums to that of the central
-rectangle determine the feature, similarly to LBP
-(See `LBP <plot_local_binary_pattern.html>`_).
+MB-LBP is an extension of LBP that can be computed on multiple scales in
+constant time using the integral image. 9 equally-sized rectangles are used to
+compute a feature. For each rectangle, the sum of the pixel intensities is
+computed. Comparisons of these sums to that of the central rectangle determine
+the feature, similarly to LBP (See `LBP <plot_local_binary_pattern.html>`_).
 
-First, we generate an image to illustrate the functioning of MB-LBP:
-we take a (9, 9) rectangle and divide it into (3, 3) block,
-upon which we then apply MB-LBP.
-
+First, we generate an image to illustrate the functioning of MB-LBP: consider
+a (9, 9) rectangle and divide it into (3, 3) block, upon which we then apply
+MB-LBP.
 
 """
 from __future__ import print_function

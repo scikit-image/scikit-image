@@ -1,8 +1,8 @@
 import numpy as np
 from skimage.feature import (greycomatrix,
-                            greycoprops,
-                            local_binary_pattern,
-                            multiblock_lbp)
+                             greycoprops,
+                             local_binary_pattern,
+                             multiblock_lbp)
 
 from skimage._shared.testing import test_parallel
 from skimage.transform import integral_image
