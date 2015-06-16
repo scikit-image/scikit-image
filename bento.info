@@ -161,6 +161,9 @@ Library:
     Extension: skimage.external.tifffile._tifffile
         Sources:
             skimage/external/tifffile/_tifffile.c
+    Extension: skimage.util._iterator_tests.pyx
+        Sources:
+            skimage/util/_iterator_tests.c
 
 Executable: skivi
     Module: skimage.scripts.skivi
