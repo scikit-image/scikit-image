@@ -21,9 +21,13 @@ from ..color.adapt_rgb import adapt_rgb, hsv_value
 from ..exposure import rescale_intensity
 from ..util import view_as_windows
 <<<<<<< HEAD
+<<<<<<< HEAD
 from .._shared.utils import skimage_deprecation, warnings
 =======
 >>>>>>> 3bcbbc0... Update equalize_adapthist to use new view_as_windows
+=======
+from .._shared.utils import skimage_deprecation
+>>>>>>> 446f383... Add a deprecation warning and add to api_changes.txt
 
 
 NR_OF_GREY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
