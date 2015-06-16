@@ -20,39 +20,14 @@ from .. import img_as_float, img_as_uint
 from ..color.adapt_rgb import adapt_rgb, hsv_value
 from ..exposure import rescale_intensity
 from ..util import view_as_windows
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 from .._shared.utils import skimage_deprecation, warnings
-=======
->>>>>>> 3bcbbc0... Update equalize_adapthist to use new view_as_windows
-=======
-from .._shared.utils import skimage_deprecation
->>>>>>> 446f383... Add a deprecation warning and add to api_changes.txt
-=======
-from .._shared.utils import skimage_deprecation, warnings
->>>>>>> 204208a... Preserve the current API as much as possible and defer to 0.14
-
 
 NR_OF_GREY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
 
 
 @adapt_rgb(hsv_value)
-<<<<<<< HEAD
-<<<<<<< HEAD
 def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
                        nbins=256, kernel_size=None):
-=======
-def equalize_adapthist(image, kernel_size=64, ntiles_x=None, ntiles_y=None,
-<<<<<<< HEAD
-        clip_limit=0.01, nbins=256):
->>>>>>> 3bcbbc0... Update equalize_adapthist to use new view_as_windows
-=======
-=======
-def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, kernel_size=None,
->>>>>>> 204208a... Preserve the current API as much as possible and defer to 0.14
-                       clip_limit=0.01, nbins=256):
->>>>>>> 172fb0d... Style fixes
     """Contrast Limited Adaptive Histogram Equalization (CLAHE).
 
     An algorithm for local contrast enhancement, that uses histograms computed
@@ -109,7 +84,7 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, kernel_size=None,
         ntiles_x = ntiles_x or 8
         ntiles_y = ntiles_y or 8
         kernel_size = (np.round(image.shape[0] / ntiles_y),
-                       np.round(image.shape[1] / ntiles_x))0.14
+                       np.round(image.shape[1] / ntiles_x))
 
     if isinstance(kernel_size, numbers.Number):
         kernel_size = (kernel_size, kernel_size)
