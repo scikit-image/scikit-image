@@ -117,7 +117,7 @@ def hog_histograms(cnp.float64_t[:, :] gx,
             x = cx / 2
 
             while x < cx2:
-                orientation_histogram[yi, xi, i] = CellHog(magnitude, 
+                orientation_histogram[yi, xi, i] = cell_hog(magnitude,
                     orientation, ori1, ori2, cx, cy, x, y, sx, sy)
                 xi += 1
                 x += cx
