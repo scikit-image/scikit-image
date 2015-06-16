@@ -211,17 +211,14 @@ def test_adapthist_grayscale():
     img = skimage.img_as_float(data.astronaut())
     img = rgb2gray(img)
     img = np.dstack((img, img, img))
-    with expected_warnings(['precision loss|non-contiguous input', 'deprecated']):
+    with expected_warnings(['precision loss|non-contiguous input', 
+                            'deprecated']):
         adapted_old = exposure.equalize_adapthist(img, 10, 9, clip_limit=0.01,
-                                              nbins=128)
-        adapted = exposure.equalize_adapthist(img, kernel_size=(57, 51), clip_limit=0.01,
-                                              nbins=128)
-    np.testing.assert_allclose(adapted, adapted_old)
+        adapted = exposure.equalize_adapthist(img, kernel_size=(57, 51), clip_limit=0.01, nbins=128)
     assert_almost_equal = np.testing.assert_almost_equal
     assert img.shape == adapted.shape
     assert_almost_equal(peak_snr(img, adapted), 90.669, 3)
     assert_almost_equal(norm_brightness_err(img, adapted), 0.084, 3)
-
     return data, adapted
 
 
