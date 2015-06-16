@@ -1,3 +1,4 @@
+from __future__ import division
 import numbers
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
@@ -103,7 +104,7 @@ def view_as_blocks(arr_in, block_shape):
     return arr_out
 
 
-def view_as_windows(arr_in, window_shape, step=1):
+def view_as_windows(arr_in, window_shape, step=1, optimal_step=False):
     """Rolling window view of the input n-dimensional array.
 
     Windows are overlapping views of the input array, with adjacent windows
@@ -121,6 +122,9 @@ def view_as_windows(arr_in, window_shape, step=1):
     step : integer or tuple of length arr_in.ndim
         Indicates step size at which extraction shall be performed.
         If integer is given, then the step is uniform in all dimensions.
+    optimal_step: bool, optional
+        When True, selects a ``step`` that will give full coverage of
+        ``arr_in`` with minimal overlap.
 
     Returns
     -------
@@ -224,6 +228,15 @@ def view_as_windows(arr_in, window_shape, step=1):
         window_shape = (window_shape,) * ndim
     if not (len(window_shape) == ndim):
         raise ValueError("`window_shape` is incompatible with `arr_in.shape`")
+
+    if optimal_step:
+        rem = np.array(arr_in.shape) - np.array(window_shape)
+        step = list(window_shape)
+
+        for (ind, size) in enumerate(window_shape):
+            ns = int(np.ceil(arr_in.shape[ind] / size))
+            while step[ind] * (ns - 1) > rem[ind]:
+                step[ind] -= 1
 
     if isinstance(step, numbers.Number):
         if step < 1:
