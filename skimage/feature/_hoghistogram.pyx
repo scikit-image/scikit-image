@@ -62,7 +62,7 @@ def hog_histograms(cnp.float64_t[:, :] gx,
        int cx, int cy, 
        int sx, int sy, 
        int n_cellsx, int n_cellsy, 
-       int visualise, int orientations, 
+       int orientations,
        cnp.float64_t[:, :, :] orientation_histogram):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
@@ -84,8 +84,6 @@ def hog_histograms(cnp.float64_t[:, :] gx,
         Number of cells (x).
     n_cellsy : int
         Number of cells (y).
-    visualise : int
-        Also return an image of the HOG.
     orientations : int
         Number of orientation bins.
     orientation_histogram : ndarray

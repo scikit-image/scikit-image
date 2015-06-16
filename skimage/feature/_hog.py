@@ -103,9 +103,6 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     cell are used to vote into the orientation histogram.
     """
 
-    magnitude = np.hypot(gx, gy)
-    orientation = np.arctan2(gy, gx) * (180 / np.pi) % 180
-
     sy, sx = image.shape
     cx, cy = pixels_per_cell
     bx, by = cells_per_block
@@ -117,7 +114,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     orientation_histogram = np.zeros((n_cellsy, n_cellsx, orientations))
 
     _hoghistogram.hog_histograms(gx, gy, cx, cy, sx, sy, n_cellsx, n_cellsy,
-                                 visualise, orientations, orientation_histogram)
+                                 orientations, orientation_histogram)
 
     # now for each cell, compute the histogram
     hog_image = None
