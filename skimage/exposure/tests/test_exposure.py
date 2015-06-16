@@ -217,8 +217,8 @@ def test_adapthist_grayscale():
                                                   nbins=128)
         adapted = exposure.equalize_adapthist(img, kernel_size=(57, 51), clip_limit=0.01, nbins=128)
     assert img.shape == adapted.shape
-    assert_almost_equal(peak_snr(img, adapted), 90.669, 3)
-    assert_almost_equal(norm_brightness_err(img, adapted), 0.084, 3)
+    assert_almost_equal(peak_snr(img, adapted), 98.961, 3)
+    assert_almost_equal(norm_brightness_err(img, adapted), 0.0577, 3)
     return data, adapted
 
 

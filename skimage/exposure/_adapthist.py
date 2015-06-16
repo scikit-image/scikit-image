@@ -125,34 +125,42 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
     if clip_limit == 1.0:
         return image  # is OK, immediately returns original image.
 
+    nr = int(np.ceil(image.shape[0] / kernel_size[0]))
+    nc = int(np.ceil(image.shape[1] / kernel_size[1]))
+
+    row_step = int(np.floor(image.shape[0] / nr))
+    col_step = int(np.floor(image.shape[1] / nc))
+
+    img_view = view_as_windows(image, kernel_size, (row_step, col_step))
+    print(img_view.shape, nc, nr)
+
     bin_size = 1 + NR_OF_GREY // nbins
     lut = np.arange(NR_OF_GREY)
     lut //= bin_size
 
-    img_view = view_as_windows(image, kernel_size, min_overlap=True)
-    nr, nc = img_view.shape[:2]
-    height = int(image.shape[0] / nr)
-    width = int(image.shape[1] / nc)
-
     map_array = np.zeros((nr, nc, nbins), dtype=int)
-    n_pixels = height * width
-
-    if clip_limit > 0.0:  # Calculate actual cliplimit
-        clip_limit = int(clip_limit * (width * height) / nbins)
-        if clip_limit < 1:
-            clip_limit = 1
-    else:
-        clip_limit = NR_OF_GREY  # Large value, do not clip (AHE)
 
     # Calculate greylevel mappings for each contextual region
     for r in range(nr):
         for c in range(nc):
-            sub_img = img_view[r, c]
+            if r < (nr - 1) and c < (nc - 1):
+                sub_img = img_view[r, c]
+            else:
+                sub_img = image[r * row_step: (r + 1) * row_step,
+                                c * col_step: (c + 1) * col_step]
+
+            if clip_limit > 0.0:  # Calculate actual cliplimit
+                cl = int(clip_limit * sub_img.size / nbins)
+                if cl < 1:
+                    cl = 1
+            else:
+                cl = NR_OF_GREY  # Large value, do not clip (AHE)
+
             hist = lut[sub_img.ravel()]
             hist = np.bincount(hist)
             hist = np.append(hist, np.zeros(nbins - hist.size, dtype=int))
-            hist = clip_histogram(hist, clip_limit)
-            hist = map_histogram(hist, 0, NR_OF_GREY - 1, n_pixels)
+            hist = clip_histogram(hist, cl)
+            hist = map_histogram(hist, 0, NR_OF_GREY - 1, sub_img.size)
             map_array[r, c] = hist
 
     # Interpolate greylevel mappings to get CLAHE image
@@ -160,29 +168,29 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
     for r in range(nr + 1):
         cstart = 0
         if r == 0:  # special case: top row
-            rstep = height / 2.0
+            rstep = row_step / 2.0
             rU = 0
             rB = 0
         elif r == nr:  # special case: bottom row
-            rstep = height / 2.0
+            rstep = row_step / 2.0
             rU = nr - 1
             rB = rU
         else:  # default values
-            rstep = height
+            rstep = row_step
             rU = r - 1
             rB = rB + 1
 
         for c in range(nc + 1):
             if c == 0:  # special case: left column
-                cstep = width / 2.0
+                cstep = col_step / 2.0
                 cL = 0
                 cR = 0
             elif c == nc:  # special case: right column
-                cstep = width / 2.0
+                cstep = col_step / 2.0
                 cL = nc - 1
                 cR = cL
             else:  # default values
-                cstep = width
+                cstep = col_step
                 cL = c - 1
                 cR = cL + 1
 
