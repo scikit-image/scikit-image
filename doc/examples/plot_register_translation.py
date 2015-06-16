@@ -86,8 +86,8 @@ print(shift)
 
 #  Detecting the shift and using fourier_shift from scipy to subpixel shifting
 #    the image such that the two overlap. This is done via a FFT and and iFFT
-# This is useful for overlapping two or more images. Using fftn/ifftn ensures
-#    that this is compatible with RGB images
+# This is useful for overlapping two or more images. Use fftn/ifftn instead of
+#    fft2/ifft2 for RGB images
 
 offset_image = offset_image.real  # A normal image isn't complex
 shift, error, diffphase = register_translation(image, offset_image, 100)
