@@ -58,10 +58,10 @@ cdef void _preprocess_image(cnp.double_t[:, :, ::1] energy_img,
 
             cumulative_img[r, c] = min_cost + energy_img[r, c, 0]
 
-cdef cnp.uint8_t _mark_seam(cnp.int8_t[:, ::1] track_img,
-                            Py_ssize_t start_index,
-                            cnp.uint8_t[:, ::1] seam_map,
-                            Py_ssize_t[::1] seam_buffer) nogil:
+cdef bint _mark_seam(cnp.int8_t[:, ::1] track_img,
+                     Py_ssize_t start_index,
+                     cnp.uint8_t[:, ::1] seam_map,
+                     Py_ssize_t[::1] seam_buffer) nogil:
 
     """ Re-trace the optimal seam from a given column in the last row.
 
@@ -84,8 +84,8 @@ cdef cnp.uint8_t _mark_seam(cnp.int8_t[:, ::1] track_img,
 
     Returns
     -------
-    out : int
-        `1` if seam was marked, `0` is seam inersects and was not marked.
+    success : int
+        `1` if seam was marked, `0` is seam intersects and was not marked.
     """
     cdef Py_ssize_t rows = track_img.shape[0]
     cdef Py_ssize_t[::1] current_seam_indices = seam_buffer
@@ -191,11 +191,11 @@ def _seam_carve_v(img, energy_map, iters, border):
     energy_map[:, 0:border] = DBL_MAX
     energy_map[:, cols-border:cols] = DBL_MAX
 
-    # Filters often let the boundary be `0`. If the last row is of all same
-    # values, the least value in then penultimate row will give 3 minimum
-    # enries in the last row. Hence, two successive removals will always
-    # intersect as the 3 least seams will share the same pixels except
-    # they will differ in the last row.
+    # Filters often let the boundary be `0`. If all the entries in the last
+    # row of `energy_img` are equal, the minimum value in the penultimate row
+    # of `cumulative_img` will result in 3 minimum values in its last row.
+    # Hence, two successive removals will always intersect as the 3 least seams
+    # will share the same pixels except they will differ in the last row.
     energy_map[rows-border:rows, :] = energy_map[rows-2*border:rows-border, :]
 
     energy_map = np.ascontiguousarray(energy_map[:, :, np.newaxis])
