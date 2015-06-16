@@ -149,16 +149,16 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
                                 c * col_step: (c + 1) * col_step]
 
             if clip_limit > 0.0:  # Calculate actual cliplimit
-                cl = int(clip_limit * sub_img.size / nbins)
-                if cl < 1:
-                    cl = 1
+                clim = int(clip_limit * sub_img.size / nbins)
+                if clim < 1:
+                    clim = 1
             else:
-                cl = NR_OF_GREY  # Large value, do not clip (AHE)
+                clim = NR_OF_GREY  # Large value, do not clip (AHE)
 
             hist = lut[sub_img.ravel()]
             hist = np.bincount(hist)
             hist = np.append(hist, np.zeros(nbins - hist.size, dtype=int))
-            hist = clip_histogram(hist, cl)
+            hist = clip_histogram(hist, clim)
             hist = map_histogram(hist, 0, NR_OF_GREY - 1, sub_img.size)
             map_array[r, c] = hist
 
