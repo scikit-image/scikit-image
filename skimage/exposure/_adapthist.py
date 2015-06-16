@@ -35,8 +35,12 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
                        nbins=256, kernel_size=None):
 =======
 def equalize_adapthist(image, kernel_size=64, ntiles_x=None, ntiles_y=None,
+<<<<<<< HEAD
         clip_limit=0.01, nbins=256):
 >>>>>>> 3bcbbc0... Update equalize_adapthist to use new view_as_windows
+=======
+                       clip_limit=0.01, nbins=256):
+>>>>>>> 172fb0d... Style fixes
     """Contrast Limited Adaptive Histogram Equalization (CLAHE).
 
     An algorithm for local contrast enhancement, that uses histograms computed
@@ -51,6 +55,7 @@ def equalize_adapthist(image, kernel_size=64, ntiles_x=None, ntiles_y=None,
         Defines the shape of contextual regions used in the algorithm.
         If an integer is given, the shape will be a square of
 <<<<<<< HEAD
+<<<<<<< HEAD
         sidelength given by this value.
     ntiles_x : int, optional (deprecated in favor of ``kernel_size``)
         Number of tile regions in the X direction (horizontal).
@@ -58,6 +63,9 @@ def equalize_adapthist(image, kernel_size=64, ntiles_x=None, ntiles_y=None,
         Number of tile regions in the Y direction (vertical).
 =======
         sidelength given by its value.
+=======
+        sidelength given by this value.
+>>>>>>> 172fb0d... Style fixes
     ntiles_x : int, optional
         Number of tile regions in the X direction.
     ntiles_y : int, optional
@@ -93,7 +101,7 @@ def equalize_adapthist(image, kernel_size=64, ntiles_x=None, ntiles_y=None,
     """
     image = img_as_uint(image)
     image = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
-<<<<<<< HEAD
+
     if kernel_size is None:
         warnings.warn('`ntiles_*` have been deprecated in favor of '
                       '`kernel_size`.  The `ntiles_*` keyword arguments '
@@ -102,12 +110,6 @@ def equalize_adapthist(image, kernel_size=64, ntiles_x=None, ntiles_y=None,
         ntiles_y = ntiles_y or 8
         kernel_size = (np.round(image.shape[0] / ntiles_y),
                        np.round(image.shape[1] / ntiles_x))
-=======
-    if ntiles_x or ntiles_y:
-        ntiles_x = ntiles_x or 8
-        ntiles_y = ntiles_y or 8
-        kernel_size = (image.shape[0] / ntiles_y, image.shape[1] / ntiles_x)
->>>>>>> 3bcbbc0... Update equalize_adapthist to use new view_as_windows
 
     if isinstance(kernel_size, numbers.Number):
         kernel_size = (kernel_size, kernel_size)
