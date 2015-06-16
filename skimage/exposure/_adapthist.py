@@ -167,29 +167,29 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
     for r in range(nr + 1):
         cstart = 0
         if r == 0:  # special case: top row
-            rstep = row_step / 2.0
+            r_offset = row_step / 2.0
             rU = 0
             rB = 0
         elif r == nr:  # special case: bottom row
-            rstep = row_step / 2.0
+            r_offset = row_step / 2.0
             rU = nr - 1
             rB = rU
         else:  # default values
-            rstep = row_step
+            r_offset = row_step
             rU = r - 1
             rB = rB + 1
 
         for c in range(nc + 1):
             if c == 0:  # special case: left column
-                cstep = col_step / 2.0
+                c_offset = col_step / 2.0
                 cL = 0
                 cR = 0
             elif c == nc:  # special case: right column
-                cstep = col_step / 2.0
+                c_offset = col_step / 2.0
                 cL = nc - 1
                 cR = cL
             else:  # default values
-                cstep = col_step
+                c_offset = col_step
                 cL = c - 1
                 cR = cL + 1
 
@@ -198,15 +198,15 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
             mapLB = map_array[rB, cL]
             mapRB = map_array[rB, cR]
 
-            cslice = np.arange(cstart, cstart + cstep)
-            rslice = np.arange(rstart, rstart + rstep)
+            cslice = np.arange(cstart, cstart + c_offset)
+            rslice = np.arange(rstart, rstart + r_offset)
 
             interpolate(image, cslice, rslice,
                         mapLU, mapRU, mapLB, mapRB, lut)
 
-            cstart += cstep  # set pointer on next matrix */
+            cstart += c_offset  # set pointer on next matrix */
 
-        rstart += rstep
+        rstart += r_offset
 
     return image
 
