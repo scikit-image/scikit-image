@@ -50,8 +50,10 @@ cdef float cell_hog(cnp.float64_t[:, :] magnitude,
                 or row_index + cell_row >= size_rows
                 or column_index + cell_column < 0
                 or column_index + cell_column >= size_columns
-                or orientation[row_index + cell_row, column_index + cell_column] >= orientation_start
-                or orientation[row_index + cell_row, column_index + cell_column] < orientation_end): continue
+                or orientation[row_index + cell_row, column_index + cell_column]
+                    >= orientation_start
+                or orientation[row_index + cell_row, column_index + cell_column]
+                    < orientation_end): continue
 
             total += magnitude[row_index + cell_row, column_index + cell_column]
 
@@ -90,8 +92,10 @@ def hog_histograms(cnp.float64_t[:, :] gradient_columns,
         The histogram to fill.
     """
 
-    cdef cnp.float64_t[:, :] magnitude = np.hypot(gradient_columns, gradient_rows)
-    cdef cnp.float64_t[:, :] orientation = np.arctan2(gradient_rows, gradient_columns) * (180 / np.pi) % 180
+    cdef cnp.float64_t[:, :] magnitude = np.hypot(gradient_columns,
+                                                  gradient_rows)
+    cdef cnp.float64_t[:, :] orientation = \
+        np.arctan2(gradient_rows, gradient_columns) * (180 / np.pi) % 180
     cdef int i, x, y, o, yi, xi, cy1, cy2, cx1, cx2
     cdef float orientation_start, orientation_end
 
@@ -116,7 +120,8 @@ def hog_histograms(cnp.float64_t[:, :] gradient_columns,
 
             while x < cx2:
                 orientation_histogram[yi, xi, i] = cell_hog(magnitude,
-                    orientation, orientation_start, orientation_end, cell_columns, cell_rows, x, y, size_columns, size_rows)
+                    orientation, orientation_start, orientation_end,
+                    cell_columns, cell_rows, x, y, size_columns, size_rows)
                 xi += 1
                 x += cell_columns
 
