@@ -104,7 +104,7 @@ def view_as_blocks(arr_in, block_shape):
     return arr_out
 
 
-def view_as_windows(arr_in, window_shape, step=1, min_overlap=False):
+def view_as_windows(arr_in, window_shape, step=1):
     """Rolling window view of the input n-dimensional array.
 
     Windows are overlapping views of the input array, with adjacent windows
@@ -122,9 +122,6 @@ def view_as_windows(arr_in, window_shape, step=1, min_overlap=False):
     step : integer or tuple of length arr_in.ndim
         Indicates step size at which extraction shall be performed.
         If integer is given, then the step is uniform in all dimensions.
-    min_overlap: bool, optional
-        When True, selects a ``step`` that will give full coverage of
-        ``arr_in`` with minimal overlap.
 
     Returns
     -------
@@ -228,18 +225,6 @@ def view_as_windows(arr_in, window_shape, step=1, min_overlap=False):
         window_shape = (window_shape,) * ndim
     if not (len(window_shape) == ndim):
         raise ValueError("`window_shape` is incompatible with `arr_in.shape`")
-
-    if min_overlap:
-        # start with no overlap
-        step = list(window_shape)
-        # subtract the initial window shape from the overall shape
-        remainder = np.array(arr_in.shape) - np.array(window_shape)
-        # shrink the step size in each direction as needed
-        # to get full coverage
-        for (ind, size) in enumerate(window_shape):
-            num_steps = int(np.ceil(arr_in.shape[ind] / size))
-            while step[ind] * (num_steps - 1) > remainder[ind]:
-                step[ind] -= 1
 
     if isinstance(step, numbers.Number):
         if step < 1:
