@@ -22,18 +22,23 @@ from ..exposure import rescale_intensity
 from ..util import view_as_windows
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 from .._shared.utils import skimage_deprecation, warnings
 =======
 >>>>>>> 3bcbbc0... Update equalize_adapthist to use new view_as_windows
 =======
 from .._shared.utils import skimage_deprecation
 >>>>>>> 446f383... Add a deprecation warning and add to api_changes.txt
+=======
+from .._shared.utils import skimage_deprecation, warnings
+>>>>>>> 204208a... Preserve the current API as much as possible and defer to 0.14
 
 
 NR_OF_GREY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
 
 
 @adapt_rgb(hsv_value)
+<<<<<<< HEAD
 <<<<<<< HEAD
 def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
                        nbins=256, kernel_size=None):
@@ -43,6 +48,9 @@ def equalize_adapthist(image, kernel_size=64, ntiles_x=None, ntiles_y=None,
         clip_limit=0.01, nbins=256):
 >>>>>>> 3bcbbc0... Update equalize_adapthist to use new view_as_windows
 =======
+=======
+def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, kernel_size=None,
+>>>>>>> 204208a... Preserve the current API as much as possible and defer to 0.14
                        clip_limit=0.01, nbins=256):
 >>>>>>> 172fb0d... Style fixes
     """Contrast Limited Adaptive Histogram Equalization (CLAHE).
@@ -58,23 +66,11 @@ def equalize_adapthist(image, kernel_size=64, ntiles_x=None, ntiles_y=None,
     kernel_size: integer or 2-tuple
         Defines the shape of contextual regions used in the algorithm.
         If an integer is given, the shape will be a square of
-<<<<<<< HEAD
-<<<<<<< HEAD
         sidelength given by this value.
     ntiles_x : int, optional (deprecated in favor of ``kernel_size``)
         Number of tile regions in the X direction (horizontal).
     ntiles_y : int, optional (deprecated if favor of ``kernel_size``)
         Number of tile regions in the Y direction (vertical).
-=======
-        sidelength given by its value.
-=======
-        sidelength given by this value.
->>>>>>> 172fb0d... Style fixes
-    ntiles_x : int, optional
-        Number of tile regions in the X direction.
-    ntiles_y : int, optional
-        Number of tile regions in the Y direction.
->>>>>>> 3bcbbc0... Update equalize_adapthist to use new view_as_windows
     clip_limit : float: optional
         Clipping limit, normalized between 0 and 1 (higher values give more
         contrast).
@@ -113,7 +109,7 @@ def equalize_adapthist(image, kernel_size=64, ntiles_x=None, ntiles_y=None,
         ntiles_x = ntiles_x or 8
         ntiles_y = ntiles_y or 8
         kernel_size = (np.round(image.shape[0] / ntiles_y),
-                       np.round(image.shape[1] / ntiles_x))
+                       np.round(image.shape[1] / ntiles_x))0.14
 
     if isinstance(kernel_size, numbers.Number):
         kernel_size = (kernel_size, kernel_size)
