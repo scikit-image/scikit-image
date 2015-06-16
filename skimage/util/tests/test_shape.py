@@ -176,18 +176,18 @@ def test_view_as_windows_step_tuple():
                          [22, 23]]]])
 
 
-def test_view_as_windows_optimal_step():
+def test_view_as_windows_min_overlap():
     A = np.arange(24).reshape((6, 4))
-    B = view_as_windows(A, (3, 2), optimal_step=True)
+    B = view_as_windows(A, (3, 2), min_overlap=True)
     assert B.shape == (2, 2, 3, 2)
     assert B.size == A.size
 
     A = np.arange(512 * 512).reshape((512, 512))
-    B = view_as_windows(A, (10, 10), optimal_step=True)
+    B = view_as_windows(A, (10, 10), min_overlap=True)
     assert B.shape == (56, 56, 10, 10)
     assert B.size >= A.size
 
-    C = view_as_windows(A, (11, 9), optimal_step=True)
+    C = view_as_windows(A, (11, 9), min_overlap=True)
     assert C.shape == (51, 63, 11, 9)
     assert C.size >= A.size
 
