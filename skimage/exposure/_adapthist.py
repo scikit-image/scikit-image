@@ -129,7 +129,7 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
     lut = np.arange(NR_OF_GREY)
     lut //= bin_size
 
-    img_view = view_as_windows(image, kernel_size, optimal_step=True)
+    img_view = view_as_windows(image, kernel_size, min_overlap=True)
     nr, nc = img_view.shape[:2]
     height = int(image.shape[0] / nr)
     width = int(image.shape[1] / nc)
