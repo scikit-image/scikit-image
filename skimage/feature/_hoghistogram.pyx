@@ -6,11 +6,11 @@ import numpy as np
 cimport numpy as cnp
 
 cdef float cell_hog(cnp.float64_t[:, :] magnitude,
-        cnp.float64_t[:, :] orientation,
-        float orientation_start, float orientation_end,
-        int cell_columns, int cell_rows,
-        int column_index, int row_index,
-        int size_columns, int size_rows):
+                    cnp.float64_t[:, :] orientation,
+                    float orientation_start, float orientation_end,
+                    int cell_columns, int cell_rows,
+                    int column_index, int row_index,
+                    int size_columns, int size_rows):
     """Calculation of the cell's HOG value
 
     Parameters
@@ -60,12 +60,12 @@ cdef float cell_hog(cnp.float64_t[:, :] magnitude,
     return total
 
 def hog_histograms(cnp.float64_t[:, :] gradient_columns,
-       cnp.float64_t[:, :] gradient_rows,
-       int cell_columns, int cell_rows,
-       int size_columns, int size_rows,
-       int number_of_cells_columns, int number_of_cells_rows,
-       int number_of_orientations,
-       cnp.float64_t[:, :, :] orientation_histogram):
+                   cnp.float64_t[:, :] gradient_rows,
+                   int cell_columns, int cell_rows,
+                   int size_columns, int size_rows,
+                   int number_of_cells_columns, int number_of_cells_rows,
+                   int number_of_orientations,
+                   cnp.float64_t[:, :, :] orientation_histogram):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Parameters
