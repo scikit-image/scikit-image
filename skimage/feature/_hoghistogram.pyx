@@ -45,17 +45,19 @@ cdef float cell_hog(cnp.float64_t[:, :] magnitude,
 
     cdef float total = 0.
     for cell_row in range(-cell_rows/2, cell_rows/2):
+        cell_row_index = row_index + cell_row
+        if (cell_row_index < 0 or cell_row_index >= size_rows):
+            continue
+
         for cell_column in range(-cell_columns/2, cell_columns/2):
-            if (row_index + cell_row < 0
-                or row_index + cell_row >= size_rows
-                or column_index + cell_column < 0
-                or column_index + cell_column >= size_columns
-                or orientation[row_index + cell_row, column_index + cell_column]
+            cell_column_index = column_index + cell_column
+            if (cell_column_index < 0 or cell_column_index >= size_columns
+                or orientation[cell_row_index, cell_column_index]
                     >= orientation_start
-                or orientation[row_index + cell_row, column_index + cell_column]
+                or orientation[cell_row_index, cell_column_index]
                     < orientation_end): continue
 
-            total += magnitude[row_index + cell_row, column_index + cell_column]
+            total += magnitude[cell_row_index, cell_column_index]
 
     return total
 
