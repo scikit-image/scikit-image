@@ -1,3 +1,4 @@
+from __future__ import division
 import numpy as np
 from .._shared.utils import assert_nD
 from . import _hoghistogram
@@ -123,13 +124,16 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         from .. import draw
 
         radius = min(cx, cy) // 2 - 1
+        orientations_arr = np.array(orientations)
+        dx_arr = radius * np.cos(orientations_arr / orientations_arr * np.pi)
+        dy_arr = radius * np.sin(orientations_arr / orientations_arr * np.pi)
+
         hog_image = np.zeros((sy, sx), dtype=float)
         for x in range(n_cellsx):
             for y in range(n_cellsy):
-                for o in range(orientations):
+                for o, dx, dy in zip(orientations_arr, dx_arr, dy_arr):
                     centre = tuple([y * cy + cy // 2, x * cx + cx // 2])
-                    dx = radius * np.cos(float(o) / orientations * np.pi)
-                    dy = radius * np.sin(float(o) / orientations * np.pi)
+
                     rr, cc = draw.line(int(centre[0] - dx),
                                        int(centre[1] + dy),
                                        int(centre[0] + dx),

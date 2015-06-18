@@ -6,11 +6,11 @@ import numpy as np
 cimport numpy as cnp
 
 cdef float cell_hog(cnp.float64_t[:, :] magnitude,
-        cnp.float64_t[:, :] orientation,
-        float orientation_start, float orientation_end,
-        int cell_columns, int cell_rows,
-        int column_index, int row_index,
-        int size_columns, int size_rows):
+                    cnp.float64_t[:, :] orientation,
+                    float orientation_start, float orientation_end,
+                    int cell_columns, int cell_rows,
+                    int column_index, int row_index,
+                    int size_columns, int size_rows):
     """Calculation of the cell's HOG value
 
     Parameters
@@ -45,27 +45,29 @@ cdef float cell_hog(cnp.float64_t[:, :] magnitude,
 
     cdef float total = 0.
     for cell_row in range(-cell_rows/2, cell_rows/2):
+        cell_row_index = row_index + cell_row
+        if (cell_row_index < 0 or cell_row_index >= size_rows):
+            continue
+
         for cell_column in range(-cell_columns/2, cell_columns/2):
-            if (row_index + cell_row < 0
-                or row_index + cell_row >= size_rows
-                or column_index + cell_column < 0
-                or column_index + cell_column >= size_columns
-                or orientation[row_index + cell_row, column_index + cell_column]
+            cell_column_index = column_index + cell_column
+            if (cell_column_index < 0 or cell_column_index >= size_columns
+                or orientation[cell_row_index, cell_column_index]
                     >= orientation_start
-                or orientation[row_index + cell_row, column_index + cell_column]
+                or orientation[cell_row_index, cell_column_index]
                     < orientation_end): continue
 
-            total += magnitude[row_index + cell_row, column_index + cell_column]
+            total += magnitude[cell_row_index, cell_column_index]
 
     return total
 
 def hog_histograms(cnp.float64_t[:, :] gradient_columns,
-       cnp.float64_t[:, :] gradient_rows,
-       int cell_columns, int cell_rows,
-       int size_columns, int size_rows,
-       int number_of_cells_columns, int number_of_cells_rows,
-       int number_of_orientations,
-       cnp.float64_t[:, :, :] orientation_histogram):
+                   cnp.float64_t[:, :] gradient_rows,
+                   int cell_columns, int cell_rows,
+                   int size_columns, int size_rows,
+                   int number_of_cells_columns, int number_of_cells_rows,
+                   int number_of_orientations,
+                   cnp.float64_t[:, :, :] orientation_histogram):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Parameters
@@ -89,7 +91,7 @@ def hog_histograms(cnp.float64_t[:, :] gradient_columns,
     number_of_orientations : int
         Number of orientation bins.
     orientation_histogram : ndarray
-        The histogram to fill.
+        The histogram array which is modified in place.
     """
 
     cdef cnp.float64_t[:, :] magnitude = np.hypot(gradient_columns,
@@ -99,24 +101,27 @@ def hog_histograms(cnp.float64_t[:, :] gradient_columns,
     cdef int i, x, y, o, yi, xi, cy1, cy2, cx1, cx2
     cdef float orientation_start, orientation_end
 
-    # compute orientations integral images
+    x0 = cell_columns / 2
+    y0 = cell_rows / 2
+    cy2 = cell_rows * number_of_cells_rows
+    cx2 = cell_columns * number_of_cells_columns
 
+    number_of_orientations_per_180 = 180. / number_of_orientations
+
+    # compute orientations integral images
     for i in range(number_of_orientations):
         # isolate orientations in this range
+        orientation_start = number_of_orientations_per_180 * (i + 1)
+        orientation_end = number_of_orientations_per_180 * i
 
-        orientation_start = 180. / number_of_orientations * (i + 1)
-        orientation_end = 180. / number_of_orientations * i
-
-        y = cell_rows / 2
-        cy2 = cell_rows * number_of_cells_rows
-        x = cell_columns / 2
-        cx2 = cell_columns * number_of_cells_columns
+        x = x0
+        y = y0
         yi = 0
         xi = 0
 
         while y < cy2:
             xi = 0
-            x = cell_columns / 2
+            x = x0
 
             while x < cx2:
                 orientation_histogram[yi, xi, i] = cell_hog(magnitude,
