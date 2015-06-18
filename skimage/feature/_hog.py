@@ -124,7 +124,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         from .. import draw
 
         radius = min(cx, cy) // 2 - 1
-        orientations_arr = np.array(orientations)
+        orientations_arr = np.arange(orientations)
         dx_arr = radius * np.cos(orientations_arr / orientations_arr * np.pi)
         dy_arr = radius * np.sin(orientations_arr / orientations_arr * np.pi)
 
