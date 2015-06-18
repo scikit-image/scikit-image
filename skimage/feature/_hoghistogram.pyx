@@ -106,11 +106,13 @@ def hog_histograms(cnp.float64_t[:, :] gradient_columns,
     cy2 = cell_rows * number_of_cells_rows
     cx2 = cell_columns * number_of_cells_columns
 
+    number_of_orientations_per_180 = 180. / number_of_orientations
+
     # compute orientations integral images
     for i in range(number_of_orientations):
         # isolate orientations in this range
-        orientation_start = 180. / number_of_orientations * (i + 1)
-        orientation_end = 180. / number_of_orientations * i
+        orientation_start = number_of_orientations_per_180 * (i + 1)
+        orientation_end = number_of_orientations_per_180 * i
 
         x = x0
         y = y0
