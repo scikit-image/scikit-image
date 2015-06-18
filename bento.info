@@ -107,6 +107,9 @@ Library:
     Extension: skimage.segmentation._slic
         Sources:
             skimage/segmentation/_slic.pyx
+    Extension: skimage.segmentation._seeds
+        Sources:
+            skimage/segmentation/_seeds.pyx
     Extension: skimage.segmentation._quickshift
         Sources:
             skimage/segmentation/_quickshift.pyx
