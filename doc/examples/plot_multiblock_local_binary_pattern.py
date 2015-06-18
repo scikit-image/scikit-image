@@ -63,6 +63,8 @@ img = draw_multiblock_lbp(test_img, 0, 0, 90, 90,
 
 plt.imshow(img, interpolation='nearest')
 
+plt.show()
+
 """
 .. image:: PLOT2RST.current_figure
 
