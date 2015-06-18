@@ -5,8 +5,8 @@
 import numpy as np
 cimport numpy as cnp
 
-cdef float cell_hog(cnp.float64_t[:, :] magnitude,
-                    cnp.float64_t[:, :] orientation,
+cdef float cell_hog(double[:, ::1] magnitude,
+                    double[:, ::1] orientation,
                     float orientation_start, float orientation_end,
                     int cell_columns, int cell_rows,
                     int column_index, int row_index,
@@ -69,8 +69,8 @@ cdef float cell_hog(cnp.float64_t[:, :] magnitude,
 
     return total
 
-def hog_histograms(cnp.float64_t[:, :] gradient_columns,
-                   cnp.float64_t[:, :] gradient_rows,
+def hog_histograms(double[:, ::1] gradient_columns,
+                   double[:, ::1] gradient_rows,
                    int cell_columns, int cell_rows,
                    int size_columns, int size_rows,
                    int number_of_cells_columns, int number_of_cells_rows,
@@ -102,9 +102,9 @@ def hog_histograms(cnp.float64_t[:, :] gradient_columns,
         The histogram array which is modified in place.
     """
 
-    cdef cnp.float64_t[:, :] magnitude = np.hypot(gradient_columns,
+    cdef double[:, ::1] magnitude = np.hypot(gradient_columns,
                                                   gradient_rows)
-    cdef cnp.float64_t[:, :] orientation = \
+    cdef double[:, ::1] orientation = \
         np.arctan2(gradient_rows, gradient_columns) * (180 / np.pi) % 180
     cdef int i, x, y, o, yi, xi, cc, cr, x0, y0
     cdef float orientation_start, orientation_end, \
