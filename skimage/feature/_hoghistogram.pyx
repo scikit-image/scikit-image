@@ -91,7 +91,7 @@ def hog_histograms(cnp.float64_t[:, :] gradient_columns,
     number_of_orientations : int
         Number of orientation bins.
     orientation_histogram : ndarray
-        The histogram to fill.
+        The histogram array which is modified in place.
     """
 
     cdef cnp.float64_t[:, :] magnitude = np.hypot(gradient_columns,
@@ -101,24 +101,25 @@ def hog_histograms(cnp.float64_t[:, :] gradient_columns,
     cdef int i, x, y, o, yi, xi, cy1, cy2, cx1, cx2
     cdef float orientation_start, orientation_end
 
-    # compute orientations integral images
+    x0 = cell_columns / 2
+    y0 = cell_rows / 2
+    cy2 = cell_rows * number_of_cells_rows
+    cx2 = cell_columns * number_of_cells_columns
 
+    # compute orientations integral images
     for i in range(number_of_orientations):
         # isolate orientations in this range
-
         orientation_start = 180. / number_of_orientations * (i + 1)
         orientation_end = 180. / number_of_orientations * i
 
-        y = cell_rows / 2
-        cy2 = cell_rows * number_of_cells_rows
-        x = cell_columns / 2
-        cx2 = cell_columns * number_of_cells_columns
+        x = x0
+        y = y0
         yi = 0
         xi = 0
 
         while y < cy2:
             xi = 0
-            x = cell_columns / 2
+            x = x0
 
             while x < cx2:
                 orientation_histogram[yi, xi, i] = cell_hog(magnitude,
