@@ -192,7 +192,7 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
     for y in xrange(l_metrics.n_blocks_y):
         for x in xrange(l_metrics.n_blocks_x):
             label_areas.append(l_metrics.block_area(y, x))
-    label_areas = np.array(label_areas)
+    label_areas = np.array(label_areas, dtype=np.int32)
     
     block_area = l_metrics.block_area(0, 0)
     block_area_threshold = int(block_area * min_label_area_factor+0.5)
