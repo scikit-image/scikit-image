@@ -10,7 +10,7 @@ cdef float cell_hog(double[:, ::1] magnitude,
                     float orientation_start, float orientation_end,
                     int cell_columns, int cell_rows,
                     int column_index, int row_index,
-                    int size_columns, int size_rows):
+                    int size_columns, int size_rows) nogil:
     """Calculation of the cell's HOG value
 
     Parameters
