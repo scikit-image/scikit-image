@@ -112,7 +112,7 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
     # Get an index image; determine what to do.
     if len(input_2d.shape) == 3 and input_2d.shape[2] == 3:
         # Its RGB; vector quantize
-        if input_2d.dtype == 'uint8' or input_2d.dtype == 'uint16':
+        if input_2d.dtype == np.uint8 or input_2d.dtype == np.uint16:
             # Convert to float
             input_2d = img_as_float(input_2d)
 
@@ -126,7 +126,7 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
                                               hist_size)
         index_2d = index_1d.reshape(input_2d.shape[:2])
     elif len(input_2d.shape) == 2:
-        if input_2d.dtype == float or input_2d.dtype == 'float32':
+        if input_2d.dtype == float or input_2d.dtype == np.float32:
             # Floating point grey-scale; quantize
             input_2d = input_2d[:,:,None]
 
@@ -137,7 +137,7 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
             quantized_colours, index_1d = kmeans2(input_2d.reshape((-1,1)),
                                                   hist_size)
             index_2d = index_1d.reshape(input_2d.shape[:2])
-        elif input_2d.dtype == 'uint8' or input_2d.dtype == 'uint16' or \
+        elif input_2d.dtype == np.uint8 or input_2d.dtype == np.uint16 or \
                 input_2d.dtype == int:
             # Index image; use as is
 
@@ -159,6 +159,8 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
             'don\'t know what to do with array of ' +\
             'shape {0}'.format(input_2d.shape)
 
+    if index_2d.dtype != np.int32:
+        index_2d = index_2d.astype(np.int32)
 
     # Build histograms for each level
     hist_2ds_by_level = []
@@ -180,7 +182,7 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
 
     bottom_labels_shape = l_metrics.n_blocks_y, l_metrics.n_blocks_x
     n_labels = np.prod(bottom_labels_shape)
-    labels = np.arange(1, n_labels+1).astype('int32')
+    labels = np.arange(1, n_labels+1).astype(np.int32)
     labels = labels.reshape(bottom_labels_shape)
     labels_by_level = [None] * n_levels
     labels_by_level[-1] = labels
