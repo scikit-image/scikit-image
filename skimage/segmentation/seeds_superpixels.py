@@ -34,47 +34,48 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
     Parameters
     ----------
     input_2d : the image to segment as either; an RGB image as a 3D array,
-    a greyscale image as a 2D array (must have `dtype` of `float` or
-    `'float64'`), or an index image (must be `dtype` of `'uint8'`,
-    `'uint16'` or `int`)
+    a greyscale image as a 2D array (must have ``dtype`` of ``float`` or
+    ``'float64'``), or an index image (must be ``dtype`` of ``'uint8'``,
+    ``'uint16'`` or ``int``)
     hist_size : the number of bins in the histogram; if the image is RGB or
     greyscale, it will be quantized to have this many colours first. If
     no value is provided, 50 will be used for RGB images and 25 for greyscale.
     num_superpixels : the number of super-pixels to aim for. Given that
     the algorithm works by repeatedly downscaling by a factor of 2,
-    `num_superpixels` is more of a ball-park
-    n_levels : the algorithm tries to divide the image into `num_superpixels`
-    square blocks. These blocks will be recursively divided by 2 `n_levels`
-    times. Note that blocks will not be divided below 2 pixels in size, so
-    increasing `n_levels` further will make no difference in these cases.
+    ``num_superpixels`` is more of a ball-park
+    n_levels : the algorithm tries to divide the image into
+    ``num_superpixels`` square blocks. These blocks will be recursively
+    divided by 2 ``n_levels`` times. Note that blocks will not be divided
+    below 2 pixels in size, so increasing ``n_levels`` further will make no
+    difference in these cases.
     block_refine_iters : after dividing the image into blocks, at each
     level the algorithm re-labels blocks from one label to a neighbouring
     label if doing so will improve the quality of the segmentation.
-    `block_refine_iters` is the number of passes over the image that are
+    ``block_refine_iters`` is the number of passes over the image that are
     performed for each level.
     pixel_refine_iters : after all block-level refinements have been
     performed, the same procedure is repeated at the pixel level.
     score_threshold : blocks or pixels will only be re-labelled if doing so
-    will result in an improvement score greater than `score_threshold`.
+    will result in an improvement score greater than ``score_threshold``.
     min_label_area_factor : at the start, the image is divided into square
     labelled regions. Re-labelling blocks or pixels will only be permitted
     if doing so does not reduce the area covered by a label below
-    `initial_label_area*min_label_area_factor`.
+    ```initial_label_area*min_label_area_factor```.
     return_steps: If True, will return the intermediate results of the
     algorithm; see below.
 
     Returns
     -------
-    If `return_steps` is False, a 2D label image, with labels starting at 1.
-    If `return_steps` is True, a tuple of
-    `(pixel_label_image, block_labels_at_each_level, index_2d,
-    quantized_colours)`, where `pixel_label_image` is the final label image,
-    `block_labels_at_each_level` is a list of label images generated at each
-    step, starting at the coarsest level and finishing at the finest,
-    `index_2d` is the index image after quantization if `input_2d` is RGB
-    or greyscale or just `input_2d` if it was an index image,
-    and `quantized_colours` are the quantized colours or greyscale values
-    as a 2D array of `input_2d` is RGB or greyscale or` None` otherwise.
+    If ``return_steps`` is False, a 2D label image, with labels starting at 1.
+    If ``return_steps`` is True, a tuple of
+    ```(labels, labels_by_level, index_2d, quantized_colours)```, where
+    ``labels`` is the final label image, ``labels_by_level`` is a list of
+    label images generated at each step, starting at the coarsest level and
+    finishing at the finest, ``index_2d`` is the index image after
+    quantization if ``input_2d`` is RGB or greyscale or just ``input_2d`` if
+    it was an index image, and ``quantized_colours`` are the quantized
+    colours or greyscale values as a 2D array if ``input_2d`` is RGB or
+    greyscale or ``None`` otherwise.
 
     References
     ----------

@@ -205,7 +205,7 @@ def build_seed_histogram(int[:,:] index_2d, int hist_size, LevelMetrics metrics)
     `(metrics.n_blocks_y, metrics.n_blocks_x, hist_size)`
     """
     cdef int[:,:,:] hist_2d = np.zeros((metrics.n_blocks_y, metrics.n_blocks_x,
-                                        hist_size), dtype=int)
+                                        hist_size), dtype='int32')
     cdef int x, y, i, j, block_h, block_w, n
     for y in range(metrics.n_blocks_y):
         if y < (metrics.n_blocks_y-1):
