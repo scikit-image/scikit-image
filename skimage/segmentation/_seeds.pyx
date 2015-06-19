@@ -161,7 +161,7 @@ def upscale_labels(int[:,:] labels_2d, LevelMetrics metrics):
     -------
     Upscaled label image of shape `(metrics.h, metrics.w)`
     """
-    cdef int[:,:] up_labels_2d = np.zeros((metrics.h, metrics.w), dtype=int)
+    cdef int[:,:] up_labels_2d = np.zeros((metrics.h, metrics.w), dtype=np.int32)
     cdef int x, y, i, j, block_w, block_h
 
     for y in range(metrics.n_blocks_y):
@@ -205,7 +205,7 @@ def build_seed_histogram(int[:,:] index_2d, int hist_size, LevelMetrics metrics)
     `(metrics.n_blocks_y, metrics.n_blocks_x, hist_size)`
     """
     cdef int[:,:,:] hist_2d = np.zeros((metrics.n_blocks_y, metrics.n_blocks_x,
-                                        hist_size), dtype='int32')
+                                        hist_size), dtype=np.int32)
     cdef int x, y, i, j, block_h, block_w, n
     for y in range(metrics.n_blocks_y):
         if y < (metrics.n_blocks_y-1):
@@ -242,7 +242,7 @@ def downscale_histogram(int[:,:,:] hist_2d):
     """
     cdef int h2 = hist_2d.shape[0]//2, w2 = hist_2d.shape[1]//2
     cdef int hist_size = hist_2d.shape[2]
-    cdef int[:,:,:] ds_hist_2d = np.zeros((h2, w2, hist_size), dtype=int)
+    cdef int[:,:,:] ds_hist_2d = np.zeros((h2, w2, hist_size), dtype=np.int32)
     cdef int x, y, i
     cdef int y_rem = hist_2d.shape[0] & 1
     cdef int x_rem = hist_2d.shape[1] & 1
