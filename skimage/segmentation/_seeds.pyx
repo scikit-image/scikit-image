@@ -122,7 +122,7 @@ def upscale_labels_by_2(int[:,:] labels_2d, int h, int w):
     cdef int h2 = labels_2d.shape[0]*2, w2 = labels_2d.shape[1]*2
     cdef int rem_y = h & 1, rem_x = w & 1
 
-    cdef int[:,:] up_labels_2d = np.zeros((h,w), dtype=int)
+    cdef int[:,:] up_labels_2d = np.zeros((h,w), dtype=np.int32)
     up_labels_2d[:h2:2,:w2:2] = labels_2d
     up_labels_2d[1:h2:2,:w2:2] = labels_2d
     up_labels_2d[:h2:2,1:w2:2] = labels_2d
