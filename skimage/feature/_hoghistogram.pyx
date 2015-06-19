@@ -116,26 +116,27 @@ def hog_histograms(double[:, ::1] gradient_columns,
     cr = cell_columns * number_of_cells_columns
     number_of_orientations_per_180 = 180. / number_of_orientations
 
-    # compute orientations integral images
-    for i in range(number_of_orientations):
-        # isolate orientations in this range
-        orientation_start = number_of_orientations_per_180 * (i + 1)
-        orientation_end = number_of_orientations_per_180 * i
-        x = x0
-        y = y0
-        yi = 0
-        xi = 0
-
-        while y < cc:
-            xi = 0
+    with nogil:
+        # compute orientations integral images
+        for i in range(number_of_orientations):
+            # isolate orientations in this range
+            orientation_start = number_of_orientations_per_180 * (i + 1)
+            orientation_end = number_of_orientations_per_180 * i
             x = x0
+            y = y0
+            yi = 0
+            xi = 0
 
-            while x < cr:
-                orientation_histogram[yi, xi, i] = cell_hog(magnitude,
-                    orientation, orientation_start, orientation_end,
-                    cell_columns, cell_rows, x, y, size_columns, size_rows)
-                xi += 1
-                x += cell_columns
+            while y < cc:
+                xi = 0
+                x = x0
 
-            yi += 1
-            y += cell_rows
+                while x < cr:
+                    orientation_histogram[yi, xi, i] = cell_hog(magnitude,
+                        orientation, orientation_start, orientation_end,
+                        cell_columns, cell_rows, x, y, size_columns, size_rows)
+                    xi += 1
+                    x += cell_columns
+
+                yi += 1
+                y += cell_rows
