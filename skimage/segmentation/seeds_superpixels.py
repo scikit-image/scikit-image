@@ -92,13 +92,13 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
     h, w = input_2d.shape[:2]
 
     # Compute the number of superpixels vertically and horizontally
-    n_superpixels_h = int(math.sqrt(float(num_superpixels) * w / h))
+    n_superpixels_h = int(math.sqrt(float(num_superpixels) * w / h)+0.5)
     n_superpixels_w = n_superpixels_h * w / h
-    
+
     # Compute the width and height of the blocks at the finest level
     block_finest_w_f = float(w) / n_superpixels_w / (2**(n_levels-1))
     block_finest_h_f = float(h) / n_superpixels_h / (2**(n_levels-1))
-    
+
     # Reduce n_levels if necessary so that finest block sizes are > 1.0
     while block_finest_w_f <= 1.0 or block_finest_h_f <= 1.0:
         n_levels -= 1
@@ -106,9 +106,9 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
         block_finest_h_f = float(h) / n_superpixels_h / (2**(n_levels-1))
     
     # Compute seed size
-    seed_w = int(math.ceil(block_finest_w_f))
-    seed_h = int(math.ceil(block_finest_h_f))
-    
+    seed_w = max(int(block_finest_w_f+0.5), 1)
+    seed_h = max(int(block_finest_h_f+0.5), 1)
+
     # Get an index image; determine what to do.
     if len(input_2d.shape) == 3 and input_2d.shape[2] == 3:
         # Its RGB; vector quantize
@@ -123,7 +123,8 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
             hist_size = HIST_SIZE_RGB
 
         quantized_colours, index_1d = kmeans2(input_2d.reshape((-1,3)),
-                                              hist_size)
+                                              hist_size, minit='points',
+                                              iter=50)
         index_2d = index_1d.reshape(input_2d.shape[:2])
     elif len(input_2d.shape) == 2:
         if input_2d.dtype == float or input_2d.dtype == np.float32:
@@ -135,7 +136,8 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
                 hist_size = HIST_SIZE_GREYSCALE
 
             quantized_colours, index_1d = kmeans2(input_2d.reshape((-1,1)),
-                                                  hist_size)
+                                                  hist_size, minit='points',
+                                                  iter=50)
             index_2d = index_1d.reshape(input_2d.shape[:2])
         elif input_2d.dtype == np.uint8 or input_2d.dtype == np.uint16 or \
                 input_2d.dtype == int:
@@ -150,14 +152,14 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
             # Clip away negative values
             index_2d = np.clip(input_2d, 0, hist_size)
         else:
-            raise ValueError, 'SEEDS can only work with 2D image arrays ' +\
+            raise ValueError('SEEDS can only work with 2D image arrays ' +\
                 'are of type float, float64, uint8, uint16 or int, ' +\
-                'not {0}'.format(input_2d.dtype)
+                'not {0}'.format(input_2d.dtype))
     else:
-        raise ValueError, 'SEEDS can only work with either RGB images ' +\
+        raise ValueError('SEEDS can only work with either RGB images ' +\
             'as 3D arrays or greyscale or index images as 2D arrays; ' +\
             'don\'t know what to do with array of ' +\
-            'shape {0}'.format(input_2d.shape)
+            'shape {0}'.format(input_2d.shape))
 
     if index_2d.dtype != np.int32:
         index_2d = index_2d.astype(np.int32)
