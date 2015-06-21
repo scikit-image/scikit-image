@@ -17,7 +17,7 @@ from scipy.cluster.vq import kmeans2
 from .._shared.utils import assert_nD
 from ..util import img_as_float
 
-import _seeds
+from ..segmentation import _seeds
 
 
 HIST_SIZE_RGB = 50
