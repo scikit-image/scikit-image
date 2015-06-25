@@ -245,7 +245,6 @@ def threshold_isodata(image, nbins=256, return_all=False):
     >>> thresh = threshold_isodata(image)
     >>> binary = image > thresh
     """
-
     hist, bin_centers = histogram(image.ravel(), nbins)
 
     # image only contains one unique value
@@ -335,15 +334,16 @@ def threshold_li(image):
     >>> thresh = threshold_li(image)
     >>> binary = image > thresh
     """
+    # Copy to ensure input image is not modified
+    image = image.copy()
     # Requires positive image (because of log(mean))
-    offset = image.min()
-    # Can not use fixed tolerance for float image
-    imrange = image.max() - offset
-    image -= offset
+    immin = np.min(image)
+    image -= immin
+    imrange = np.max(image)
+    tolerance = 0.5 * imrange / 256
 
-    tolerance = 0.5 * imrange / 256.0
     # Calculate the mean gray-level
-    mean = image.mean()
+    mean = np.mean(image)
 
     # Initial estimate
     new_thresh = mean
@@ -365,4 +365,4 @@ def threshold_li(image):
         else:
             new_thresh = temp + tolerance
 
-    return threshold + offset
+    return threshold + immin
