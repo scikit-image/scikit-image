@@ -3,6 +3,7 @@ def configuration(parent_package='skimage', top_path=None):
     from numpy.distutils.misc_util import Configuration
     config = Configuration('future', parent_package, top_path)
     config.add_subpackage('graph')
+    config.add_subpackage('objdetect')
     return config
 
 if __name__ == "__main__":
