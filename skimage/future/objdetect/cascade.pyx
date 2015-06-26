@@ -223,6 +223,3 @@ cdef class Cascade:
         self.stages_amount = stages_amount
         self.features_amount = features_amount
         self.stumps_amount = stumps_amount
-
-
-
