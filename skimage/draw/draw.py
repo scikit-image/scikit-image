@@ -55,24 +55,26 @@ def ellipse(cy, cx, yradius, xradius, shape=None):
 
     center = np.array([cy, cx])
     radiuses = np.array([yradius, xradius])
+
+    # The upper_left and lower_right corners of the
+    # smallest rectangle containing the ellipse.
+    upper_left = np.ceil(center - radiuses).astype(int)
+    lower_right = np.floor(center + radiuses).astype(int)
+
     if shape is not None:
-        return _ellipse_in_shape(shape, center, radiuses)
-    else:
-        # rounding here is necessary to avoid rounding issues later
-        upper_left = np.floor(center - radiuses).astype(int)
+        # Constrain upper_left and lower_right by shape boundary.
+        upper_left = np.maximum(upper_left, np.array([0, 0]))
+        lower_right = np.minimum(lower_right, np.array(shape[:2]) - 1)
 
-        shifted_center = center - upper_left
+    shifted_center = center - upper_left
+    bounding_shape = lower_right - upper_left + 1
 
-        # Shifted center is in interval [radiuses, radiuses + 1], so
-        # the ellipse must fit in [0, 2*radiuses + 1].
-        bounding_shape = np.ceil(2 * radiuses + 1)
-
-        rr, cc = _ellipse_in_shape(bounding_shape, shifted_center, radiuses)
-        rr.flags.writeable = True
-        cc.flags.writeable = True
-        rr += upper_left[0]
-        cc += upper_left[1]
-        return rr, cc
+    rr, cc = _ellipse_in_shape(bounding_shape, shifted_center, radiuses)
+    rr.flags.writeable = True
+    cc.flags.writeable = True
+    rr += upper_left[0]
+    cc += upper_left[1]
+    return rr, cc
 
 
 def circle(cy, cx, radius, shape=None):
