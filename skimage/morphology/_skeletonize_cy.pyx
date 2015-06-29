@@ -3,7 +3,153 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 
-'''
+import numpy as np
+cimport numpy as cnp
+
+def _fast_skeletonize(image):
+    """Return the skeleton of a binary image.
+    Thinning is used to reduce each connected component in a binary image
+    to a single-pixel wide skeleton.
+    Parameters
+    ----------
+    image : numpy.ndarray
+        A binary image containing the objects to be skeletonized. '1'
+        represents foreground, and '0' represents background. It
+        also accepts arrays of boolean values where True is foreground.
+    Returns
+    -------
+    skeleton : ndarray
+        A matrix containing the thinned image.
+    See also
+    --------
+    medial_axis
+    Notes
+    -----
+    The algorithm [1] works by making successive passes of the image,
+    removing pixels on object borders. This continues until no
+    more pixels can be removed.  The image is correlated with a
+    mask that assigns each pixel a number in the range [0...255]
+    corresponding to each possible pattern of its 8 neighbouring
+    pixels. A look up table is then used to assign the pixels a
+    value of 0, 1, 2 or 3, which are selectively removed during
+    the iterations.
+    Note that this algorithm will give different results than a
+    medial axis transform, which is also often referred to as
+    "skeletonization".
+    References
+    ----------
+    .. [1] A fast parallel algorithm for thinning digital patterns,
+       T. Y. ZHANG and C. Y. SUEN, Communications of the ACM,
+       March 1984, Volume 27, Number 3
+    Examples
+    --------
+    >>> X, Y = np.ogrid[0:9, 0:9]
+    >>> ellipse = (1./3 * (X - 4)**2 + (Y - 4)**2 < 3**2).astype(np.uint8)
+    >>> ellipse
+    array([[0, 0, 0, 1, 1, 1, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 0, 1, 1, 1, 0, 0, 0]], dtype=uint8)
+    >>> skel = skeletonize(ellipse)
+    >>> skel.astype(np.uint8)
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+    """
+
+    if image.ndim != 2:
+        raise ValueError("Skeletonize requires a 2D array")
+    if not np.all(np.in1d(image.flat, (0, 1))):
+        raise ValueError("Image contains values other than 0 and 1")
+
+    # look up table - there is one entry for each of the 2^8=256 possible
+    # combinations of 8 binary neighbours. 1's, 2's and 3's are candidates
+    # for removal at each iteration of the algorithm.
+    cdef int *lut = \
+      [0, 0, 0, 1, 0, 0, 1, 3, 0, 0, 3, 1, 1, 0, 1, 3, 0, 0, 0, 0, 0, 0,
+       0, 0, 2, 0, 2, 0, 3, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 2, 2, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0,
+       0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 2, 0, 0, 0, 3, 1,
+       0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 1, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 1, 3, 0, 0,
+       1, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 2, 3, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3,
+       0, 1, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0]
+
+    cdef int pixel_removed, odd_loop, neighbors
+
+    # indices for fast iteration
+    cdef Py_ssize_t x, y
+
+    cdef Py_ssize_t ymax = image.shape[0]+2, xmax = image.shape[1]+2
+
+    # we copy over the image into a larger version with a single pixel border
+    # this removes the need to handle border cases below
+    _skeleton = np.zeros((ymax, xmax), dtype=np.uint8)
+    _skeleton[1:ymax-1, 1:xmax-1] = image > 0
+
+    _cleaned_skeleton = _skeleton.copy()
+
+    # cdef'd numpy-arrays for fast, typed access
+    cdef cnp.ndarray[cnp.uint8_t, ndim=2] skeleton, cleaned_skeleton
+
+    skeleton = _skeleton
+    cleaned_skeleton = _cleaned_skeleton
+
+    pixel_removed = True
+
+    # the algorithm reiterates the thinning till
+    # no further thinning occured (variable pixel_removed set)
+
+    while pixel_removed:
+        pixel_removed = False
+
+        # there are two phases, in the first phase, pixels labeled (see below)
+        # 1 and 3 are removed, in the second 2 and 3
+
+        for odd_loop in range(1, -1, -1):
+            for y in range(1, ymax-1):
+                for x in range(1, xmax-1):
+                    # all set pixels ...
+                    if skeleton[y, x] > 0:
+                        # are correlated with a kernel (coefficients spread around here ...)
+                        # to apply a unique number to every possible neighborhood ...
+
+                        # which is used with the lut to find the "connectivity type"
+
+                        neighbors = lut[  1*skeleton[y - 1, x - 1] +   2*skeleton[y - 1, x] +\
+                                          4*skeleton[y - 1, x + 1] +   8*skeleton[y, x + 1] +\
+                                         16*skeleton[y + 1, x + 1] +  32*skeleton[y + 1, x] +\
+                                         64*skeleton[y + 1, x - 1] + 128*skeleton[y, x - 1]]
+
+                        # if the condition is met, the pixel is removed (unset)
+                        if (odd_loop and neighbors == 1) or ((not odd_loop) and neighbors == 2) or neighbors == 3:
+                            cleaned_skeleton[y, x] = 0
+                            pixel_removed = True
+
+            # once a step has been processed, the original skeleton
+            # is overwritten with the cleaned version
+            _skeleton = _cleaned_skeleton.copy()
+            skeleton = _skeleton
+
+    return _skeleton[1:ymax-1, 1:xmax-1].astype(np.bool)
+
+
+"""
 Originally part of CellProfiler, code licensed under both GPL and BSD licenses.
 Website: http://www.cellprofiler.org
 
@@ -12,11 +158,7 @@ Copyright (c) 2009-2011 Broad Institute
 All rights reserved.
 
 Original author: Lee Kamentsky
-'''
-
-import numpy as np
-cimport numpy as cnp
-
+"""
 
 def _skeletonize_loop(cnp.uint8_t[:, ::1] result,
                       Py_ssize_t[::1] i, Py_ssize_t[::1] j,

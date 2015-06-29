@@ -5,12 +5,12 @@ Algorithms for computing the skeleton of a binary image
 import numpy as np
 from scipy import ndimage as ndi
 
-from ._skeletonize_cy import _skeletonize_loop, _table_lookup_index
+from ._skeletonize_cy import _fast_skeletonize, _skeletonize_loop, _table_lookup_index
 
 # --------- Skeletonization by morphological thinning ---------
 
 
-def skeletonize(image):
+def _slow_skeletonize(image):
     """Return the skeleton of a binary image.
 
     Thinning is used to reduce each connected component in a binary image
@@ -151,6 +151,8 @@ def skeletonize(image):
             skeleton[code_mask] = 0
 
     return skeleton.astype(bool)
+
+skeletonize = _fast_skeletonize
 
 # --------- Skeletonization by medial axis transform --------
 
