@@ -5,10 +5,9 @@ from skimage.util import view_as_windows
 from matplotlib import pyplot as plt
 import matplotlib.patches as patches
 
-import skimage.future.objdetect as objdetect
+import skimage.future.detect_obj as detect_obj
 from skimage.transform import integral_image
 
-from skimage.color import rgb2gray
 import skimage.data
 import os
 
@@ -23,29 +22,18 @@ class TestCascade():
         train_file_path = os.path.join(current_path, os.pardir, train_file_name)
 
         # Initialize the detector cascade.
-        detector = objdetect.Cascade()
+        detector = detect_obj.Cascade()
         detector.load_xml(train_file_path)
 
         # Get the region of an image that contains face
-        current_img = rgb2gray(skimage.data.astronaut()[30:200, 150:290])
+        img = skimage.data.astronaut()
 
-        # Rescale to have the face in the same scale as the detector was trained on.
-        current_img = rescale(current_img, 0.25, order=1)
-
-        detected = []
-
-        # Sliding window.
-        views = view_as_windows(current_img, (24, 24))
-
-        for row in xrange(views.shape[0]):
-            for col in xrange(views.shape[1]):
-
-                # Not efficient. Will be optimized.
-                im = integral_image(views[row, col])
-                im = np.ascontiguousarray(im, dtype=np.float32)
-
-                if detector.evaluate(im):
-                    detected.append([row, col])
+        detected = detector.detect_multi_scale(img=img,
+                                               scale_factor=1.2,
+                                               min_size=(24,24),
+                                               max_size=(123, 123),
+                                               step_ratio=1.5,
+                                               amount_of_threads=4)
 
         # At least one face should be detected.
         assert detected

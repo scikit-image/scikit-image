@@ -6,8 +6,17 @@
 import numpy as np
 cimport numpy as cnp
 from libc.stdlib cimport malloc, free
+from libc.math cimport round
+from skimage._shared.transform cimport integrate
+from cython.parallel import prange
+cimport cython.parallel as parallel
+
+from skimage.color import rgb2gray
+from skimage.transform import integral_image
+
 import xml.etree.ElementTree as ET
 from ...feature._texture cimport _multiblock_lbp
+
 
 cdef struct MBLBP:
 
@@ -51,7 +60,7 @@ cdef class Cascade:
         free(self.features)
         free(self.LUTs)
 
-    def evaluate(self, float[:, ::1] int_img):
+    cdef int evaluate(self, float[:, ::1] int_img, Py_ssize_t row, Py_ssize_t col, float scale) nogil:
 
         cdef:
             float stage_threshold
@@ -65,6 +74,7 @@ cdef class Cascade:
             Py_ssize_t stumps_amount
             Py_ssize_t first_stump_idx
             Py_ssize_t lut_idx
+            Py_ssize_t r, c, widht, height
             cnp.uint32_t[::1] current_lut
             Stage current_stage
             MBLBPStump current_stump
@@ -83,11 +93,17 @@ cdef class Cascade:
 
                 current_feature = self.features[current_stump.feature_id]
 
+                r = <Py_ssize_t>(current_feature.r * scale)
+                c = <Py_ssize_t>(current_feature.c * scale)
+                width = <Py_ssize_t>(current_feature.width * scale)
+                height = <Py_ssize_t>(current_feature.height * scale)
+
+
                 lbp_code = _multiblock_lbp(int_img,
-                                           current_feature.r,
-                                           current_feature.c,
-                                           current_feature.width,
-                                           current_feature.height)
+                                           row + r,
+                                           col + c,
+                                           width,
+                                           height)
 
                 lut_idx = current_stump.lut_idx
 
@@ -96,9 +112,71 @@ cdef class Cascade:
                 stage_points += current_stump.left if bit else current_stump.right
 
             if stage_points < (current_stage.threshold - self.eps):
-                return False
+                return 0
 
-        return True
+        return 1
+
+    def get_valid_scale_factors(self, min_size, max_size, scale):
+
+        min_size = np.array(min_size)
+        max_size = np.array(max_size)
+
+        scale_factors = []
+        current_scale = 1
+        current_size = np.array((self.window_height, self.window_width))
+
+        while (current_size <= max_size).all():
+
+            if (current_size >= min_size).all():
+                scale_factors.append(current_scale)
+
+            current_scale = current_scale * scale
+            current_size = current_size * scale
+
+        return scale_factors
+
+    def detect_single_scale(self, float[:, ::1] int_img, float scale, int step_ratio=1, int amount_of_threads=4):
+
+        cdef:
+            Py_ssize_t height = <Py_ssize_t>(self.window_height * scale)
+            Py_ssize_t width = <Py_ssize_t>(self.window_width * scale)
+            Py_ssize_t max_row = int_img.shape[0] - height
+            Py_ssize_t max_col = int_img.shape[1] - width
+            Py_ssize_t current_row
+            Py_ssize_t current_col
+            Py_ssize_t step
+            int result
+
+        step = <Py_ssize_t>round(scale * step_ratio)
+
+        detections = []
+
+        for current_row in prange(0, max_row, step, num_threads=amount_of_threads, nogil=True):
+            for current_col in prange(0, max_col, step):
+
+                result = self.evaluate(int_img, current_row, current_col, scale)
+
+                if result:
+                    with gil:
+                        detections.append((current_row, current_col, width, height))
+
+        return detections
+
+
+    def detect_multi_scale(self, img, scale_factor, min_size, max_size, step_ratio=1, amount_of_threads=4):
+
+        img = rgb2gray(img)
+        int_img = integral_image(img)
+        int_img = np.ascontiguousarray(int_img, dtype=np.float32)
+
+        detections = []
+        scale_factors = self.get_valid_scale_factors(min_size, max_size, scale_factor)
+
+        for scale in scale_factors:
+            detections.extend(self.detect_single_scale(int_img, scale, step_ratio, amount_of_threads))
+
+        return detections
+
 
     def load_xml(self, filename, eps=1e-5):
 

@@ -5,6 +5,6 @@ path**. Therefore, use the functions herein with care, and do not use them in
 production code that will depend on updated skimage versions.
 """
 
-from . import graph, objdetect
+from . import graph, detect_obj
 
-__all__ = ['graph', 'objdetect']
+__all__ = ['graph', 'detect_obj']
