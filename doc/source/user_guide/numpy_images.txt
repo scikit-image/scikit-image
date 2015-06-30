@@ -131,6 +131,7 @@ the grayscale image above:
 
 
 .. _numpy-images-coordinate-conventions:
+
 Coordinate conventions
 ----------------------
 
