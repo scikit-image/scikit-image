@@ -7,14 +7,14 @@ import numpy as np
 cimport numpy as cnp
 
 def _fast_skeletonize(image):
-    """Optimized parts of the Zhang-Suen skeletonization.
+    """Optimized parts of the Zhang-Suen [1] skeletonization.
     Iteratively, pixels meeting removal criteria are removed,
     till only the skeleton remains (that is, no further removable pixel
     was found).
+
     Performs a hard-coded correlation to assign every neighborhood of 8 a
     unique number, which in turn is used in conjunction with a look up
     table to select the appropriate thinning criteria.
-
 
     Parameters
     ----------
@@ -26,6 +26,12 @@ def _fast_skeletonize(image):
     -------
     skeleton : ndarray
         A matrix containing the thinned image.
+
+    References
+    ----------
+    .. [1] A fast parallel algorithm for thinning digital patterns,
+       T. Y. ZHANG and C. Y. SUEN, Communications of the ACM,
+       March 1984, Volume 27, Number 3
 
     """
 
@@ -91,9 +97,9 @@ def _fast_skeletonize(image):
                                          64*skeleton[row + 1, col - 1] + 128*skeleton[row, col - 1]]
 
                         # if the condition is met, the pixel is removed (unset)
-                        if (first_pass and neighbors == 1) or\
-                           ((not first_pass) and neighbors == 2) or\
-                           neighbors == 3:
+                        if ((neighbors == 1 and first_pass) or
+                                (neighbors == 2 and not first_pass) or
+                                (neighbors == 3)):
                             cleaned_skeleton[row, col] = 0
                             pixel_removed = True
 
