@@ -25,12 +25,11 @@ class TestCascade():
         detector = detect_obj.Cascade()
         detector.load_xml(train_file_path)
 
-        # Get the region of an image that contains face
         img = skimage.data.astronaut()
 
         detected = detector.detect_multi_scale(img=img,
                                                scale_factor=1.2,
-                                               min_size=(24,24),
+                                               min_size=(24, 24),
                                                max_size=(123, 123),
                                                step_ratio=1.5,
                                                amount_of_threads=4)
@@ -38,21 +37,6 @@ class TestCascade():
         # At least one face should be detected.
         assert detected
 
-        # plt.imshow(current_img)
-        # img_desc= plt.gca()
-        # plt.set_cmap('gray')
-        #
-        # for patch in detected:
-        #     img_desc.add_patch(
-        #         patches.Rectangle(
-        #             (patch[1], patch[0]),
-        #             24,
-        #             24,
-        #             fill=False,
-        #             color='c'
-        #         )
-        #     )
-        # plt.show()
 
 if __name__ == '__main__':
     np.testing.run_module_suite()
