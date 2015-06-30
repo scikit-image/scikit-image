@@ -3109,7 +3109,9 @@ def _replace_by(module_function, package=None, warn=False):
         try:
             modname, function = module_function.split('.')
             if package is None:
-                full_name = modname
+                # No package given: 
+                # Assume the module is in the same package as this file.
+                full_name = '.'.join(__name__.split('.')[:-1] + [modname])
             else:
                 full_name = package + '.' + modname
             module = __import__(full_name, fromlist=[modname])
