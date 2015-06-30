@@ -9,8 +9,7 @@ from ._skeletonize_cy import _fast_skeletonize, _skeletonize_loop, _table_lookup
 
 # --------- Skeletonization by morphological thinning ---------
 
-
-def _slow_skeletonize(image):
+def skeletonize(image):
     """Return the skeleton of a binary image.
 
     Thinning is used to reduce each connected component in a binary image
@@ -81,78 +80,20 @@ def _slow_skeletonize(image):
            [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    # look up table - there is one entry for each of the 2^8=256 possible
-    # combinations of 8 binary neighbours. 1's, 2's and 3's are candidates
-    # for removal at each iteration of the algorithm.
-    lut = [0, 0, 0, 1, 0, 0, 1, 3, 0, 0, 3, 1, 1, 0, 1, 3, 0, 0, 0, 0, 0, 0,
-           0, 0, 2, 0, 2, 0, 3, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 2, 2, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0,
-           0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 2, 0, 0, 0, 3, 1,
-           0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 1, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 1, 3, 0, 0,
-           1, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 2, 3, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3,
-           0, 1, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0]
 
     # convert to unsigned int (this should work for boolean values)
-    skeleton = image.astype(np.uint8)
+    image = image.astype(np.uint8)
 
     # check some properties of the input image:
     #  - 2D
     #  - binary image with only 0's and 1's
-    if skeleton.ndim != 2:
+    if image.ndim != 2:
         raise ValueError('Skeletonize requires a 2D array')
-    if not np.all(np.in1d(skeleton.flat, (0, 1))):
+    if not np.all(np.in1d(image.flat, (0, 1))):
         raise ValueError('Image contains values other than 0 and 1')
 
-    # create the mask that will assign a unique value based on the
-    #  arrangement of neighbouring pixels
-    mask = np.array([[  1,  2,  4],
-                     [128,  0,  8],
-                     [ 64, 32, 16]], np.uint8)
+    return _fast_skeletonize(image)
 
-    pixel_removed = True
-    while pixel_removed:
-        pixel_removed = False
-
-        # assign each pixel a unique value based on its foreground neighbours
-        neighbours = ndi.correlate(skeleton, mask, mode='constant')
-
-        # ignore background
-        neighbours *= skeleton
-
-        # use LUT to categorize each foreground pixel as a 0, 1, 2 or 3
-        codes = np.take(lut, neighbours)
-
-        # pass 1 - remove the 1's and 3's
-        code_mask = (codes == 1)
-        if np.any(code_mask):
-            pixel_removed = True
-            skeleton[code_mask] = 0
-        code_mask = (codes == 3)
-        if np.any(code_mask):
-            pixel_removed = True
-            skeleton[code_mask] = 0
-
-        # pass 2 - remove the 2's and 3's
-        neighbours = ndi.correlate(skeleton, mask, mode='constant')
-        neighbours *= skeleton
-        codes = np.take(lut, neighbours)
-        code_mask = (codes == 2)
-        if np.any(code_mask):
-            pixel_removed = True
-            skeleton[code_mask] = 0
-        code_mask = (codes == 3)
-        if np.any(code_mask):
-            pixel_removed = True
-            skeleton[code_mask] = 0
-
-    return skeleton.astype(bool)
-
-skeletonize = _fast_skeletonize
 
 # --------- Skeletonization by medial axis transform --------
 
