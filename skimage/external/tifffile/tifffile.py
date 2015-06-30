@@ -149,9 +149,15 @@ from xml.etree import cElementTree as etree
 
 import numpy
 
-from . import _tifffile
+try:
+    from . import _tifffile
+except ImportError:
+    warnings.warn(
+        "failed to import the optional _tifffile C extension module.\n"
+        "Loading of some compressed images will be slow.\n"
+        "Tifffile.c can be obtained at http://www.lfd.uci.edu/~gohlke/")
 
-__version__ = '0.4.1'
+__version__ = '2014.08.24'
 __docformat__ = 'restructuredtext en'
 __all__ = ('imsave', 'imread', 'imshow', 'TiffFile', 'TiffWriter',
            'TiffSequence')
@@ -179,8 +185,8 @@ def imsave(filename, data, **kwargs):
     Examples
     --------
     >>> data = numpy.random.rand(2, 5, 3, 301, 219)
-    >>> description = '{"shape": %s}' % str(list(data.shape))
-    >>> imsave('temp.tif', data, compress=6,
+    >>> description = u'{"shape": %s}' % str(list(data.shape))  # doctest: +SKIP
+    >>> imsave('temp.tif', data, compress=6,  # doctest: +SKIP
     ...        extratags=[(270, 's', 0, description, True)])
 
     """
@@ -661,12 +667,12 @@ def imread(files, **kwargs):
 
     Examples
     --------
-    >>> im = imread('temp.tif', key=0)
-    >>> im.shape
-    (3, 301, 219)
-    >>> ims = imread(['temp.tif', 'temp.tif'])
-    >>> ims.shape
-    (2, 10, 3, 301, 219)
+    >>> im = imread('test.tif', key=0)  # doctest: +SKIP
+    >>> im.shape  # doctest: +SKIP
+    (256, 256, 4)
+    >>> ims = imread(['test.tif', 'test.tif'])  # doctest: +SKIP
+    >>> ims.shape  # doctest: +SKIP
+    (2, 256, 256, 4)
 
     """
     kwargs_file = {}
@@ -731,10 +737,10 @@ class TiffFile(object):
 
     Examples
     --------
-    >>> with TiffFile('temp.tif') as tif:
+    >>> with TiffFile('test.tif') as tif:  # doctest: +SKIP
     ...     data = tif.asarray()
     ...     data.shape
-    (5, 301, 219)
+    (256, 256, 4)
 
     """
     def __init__(self, arg, name=None, offset=None, size=None,
@@ -3112,8 +3118,11 @@ def _replace_by(module_function, package=None, warn=False):
                 full_name = modname
             else:
                 full_name = package + '.' + modname
-            module = __import__(full_name, fromlist=[modname])
-            func, oldfunc = getattr(module, function), func
+            if modname == '_tifffile':
+                func = getattr(_tifffile, function)
+            else:
+                module = __import__(full_name, fromlist=[modname])
+                func, oldfunc = getattr(module, function), func
             globals()['__old_' + func.__name__] = oldfunc
         except Exception:
             if warn:
