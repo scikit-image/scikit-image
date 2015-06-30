@@ -166,6 +166,10 @@ Stylistic Guidelines
 * Use ``Py_ssize_t`` as data type for all indexing, shape and size variables
   in C/C++ and Cython code.
 
+* Wrap Cython code in a pure Python function, which defines the API. This
+  improves compatibility with code introspection tools, which are often not
+  aware of Cython code.
+
 Test coverage
 -------------
 
