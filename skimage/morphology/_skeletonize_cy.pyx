@@ -7,7 +7,7 @@ import numpy as np
 cimport numpy as cnp
 
 def _fast_skeletonize(image):
-    """Optimized parts of the Zhang-Suen [1] skeletonization.
+    """Optimized parts of the Zhang-Suen [1]_ skeletonization.
     Iteratively, pixels meeting removal criteria are removed,
     till only the skeleton remains (that is, no further removable pixel
     was found).
@@ -30,8 +30,8 @@ def _fast_skeletonize(image):
     References
     ----------
     .. [1] A fast parallel algorithm for thinning digital patterns,
-       T. Y. ZHANG and C. Y. SUEN, Communications of the ACM,
-       March 1984, Volume 27, Number 3
+           T. Y. Zhang and C. Y. Suen, Communications of the ACM,
+           March 1984, Volume 27, Number 3.
 
     """
 
