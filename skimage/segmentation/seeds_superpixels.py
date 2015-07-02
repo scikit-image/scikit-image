@@ -182,7 +182,7 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
         metrics_by_level.append(l_metrics)
         l_metrics_prev = l_metrics
 
-    bottom_labels_shape = l_metrics.n_blocks_y, l_metrics.n_blocks_x
+    bottom_labels_shape = l_metrics.n_blocks_r, l_metrics.n_blocks_c
     n_labels = np.prod(bottom_labels_shape)
     labels = np.arange(1, n_labels+1).astype(np.int32)
     labels = labels.reshape(bottom_labels_shape)
@@ -191,8 +191,8 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
     
     label_hists = np.array(hist_2d).reshape((n_labels, hist_size))
     label_areas = []
-    for y in xrange(l_metrics.n_blocks_y):
-        for x in xrange(l_metrics.n_blocks_x):
+    for y in xrange(l_metrics.n_blocks_r):
+        for x in xrange(l_metrics.n_blocks_c):
             label_areas.append(l_metrics.block_area(y, x))
     label_areas = np.array(label_areas, dtype=np.int32)
     
@@ -204,8 +204,8 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
     labels_prev_level = labels_by_level[-1]
     for level in xrange(n_levels-2, -1, -1):
         labels = _seeds.upscale_labels_by_2(labels_prev_level,
-                                            metrics_by_level[level].n_blocks_y,
-                                            metrics_by_level[level].n_blocks_x)
+                                            metrics_by_level[level].n_blocks_r,
+                                            metrics_by_level[level].n_blocks_c)
         labels_by_level[level] = labels
 
         block_hists = hist_2ds_by_level[level]
@@ -218,7 +218,8 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
         
 
     # Pixel level                
-    pixel_labels = _seeds.upscale_labels(labels_prev_level, metrics_by_level[0])
+    pixel_labels = _seeds.upscale_labels(labels_prev_level,
+                                         metrics_by_level[0])
 
     _seeds.refine_pixels(pixel_refine_iters, pixel_labels, label_hists,
                          label_areas, index_2d, block_area_threshold,
@@ -228,7 +229,9 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
     if return_steps:
         for lvl in xrange(len(labels_by_level)):
             met = metrics_by_level[lvl]
-            labels_by_level[lvl] = np.array(_seeds.upscale_labels(labels_by_level[lvl], met))
-        return np.array(pixel_labels), labels_by_level, index_2d, quantized_colours
+            labels_by_level[lvl] = np.array(
+                _seeds.upscale_labels(labels_by_level[lvl], met))
+        return np.array(pixel_labels), labels_by_level, \
+               index_2d, quantized_colours
     else:
         return np.array(pixel_labels)

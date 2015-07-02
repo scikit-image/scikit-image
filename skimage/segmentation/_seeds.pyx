@@ -29,17 +29,17 @@ cdef class LevelMetrics:
     last_block_h, last_block_w : the height and width of blocks in the last
     row and column respectively; used in cases where the `block_h` and
     `block_w` do not divide exactly into `h` and `w`
-    rem_y, rem_x : the remainder of dividing `h` and `h` by `block_h` and
+    rem_r, rem_c : the remainder of dividing `h` and `h` by `block_h` and
     `block_w` respectively
-    n_blocks_y, n_blocks_x : the number of `(block_h,block_w)` blocks that
+    n_blocks_r, n_blocks_c : the number of `(block_h,block_w)` blocks that
     fit into the `(h,w)` image
 
     """
     cdef readonly int h, w
     cdef readonly int block_h, block_w
     cdef readonly int last_block_h, last_block_w
-    cdef readonly int rem_y, rem_x
-    cdef readonly int n_blocks_y, n_blocks_x
+    cdef readonly int rem_r, rem_c
+    cdef readonly int n_blocks_r, n_blocks_c
 
     cpdef initialise(self, int h, int w, int block_h, int block_w):
         """
@@ -54,12 +54,12 @@ cdef class LevelMetrics:
         self.w = w
         self.block_h = block_h
         self.block_w = block_w
-        self.n_blocks_y = h // block_h
-        self.n_blocks_x = w // block_w
-        self.rem_y = h % block_h
-        self.rem_x = w % block_w
-        self.last_block_h = block_h + self.rem_y
-        self.last_block_w = block_w + self.rem_x
+        self.n_blocks_r = h // block_h
+        self.n_blocks_c = w // block_w
+        self.rem_r = h % block_h
+        self.rem_c = w % block_w
+        self.last_block_h = block_h + self.rem_r
+        self.last_block_w = block_w + self.rem_c
 
     cpdef downscale(self, LevelMetrics metrics):
         """
@@ -69,12 +69,12 @@ cdef class LevelMetrics:
         self.w = metrics.w
         self.block_h = metrics.block_h * 2
         self.block_w = metrics.block_w * 2
-        self.n_blocks_y = metrics.n_blocks_y // 2
-        self.n_blocks_x = metrics.n_blocks_x // 2
-        self.rem_y = metrics.h % self.block_h
-        self.rem_x = metrics.w % self.block_w
-        self.last_block_h = self.block_h + self.rem_y
-        self.last_block_w = self.block_w + self.rem_x
+        self.n_blocks_r = metrics.n_blocks_r // 2
+        self.n_blocks_c = metrics.n_blocks_c // 2
+        self.rem_r = metrics.h % self.block_h
+        self.rem_c = metrics.w % self.block_w
+        self.last_block_h = self.block_h + self.rem_r
+        self.last_block_w = self.block_w + self.rem_c
 
     cpdef int block_area(self, int y, int x):
         """
@@ -90,11 +90,11 @@ cdef class LevelMetrics:
         The area in pixels as an integer
         """
         cdef int bw, bh
-        if y < (self.n_blocks_y-1):
+        if y < (self.n_blocks_r-1):
             bh = self.block_h
         else:
             bh = self.last_block_h
-        if x < (self.n_blocks_x-1):
+        if x < (self.n_blocks_c-1):
             bw = self.block_w
         else:
             bw = self.last_block_w
@@ -120,7 +120,7 @@ def upscale_labels_by_2(int[:,:] labels_2d, int h, int w):
     Upscaled label image of shape `(h,w)`.
     """
     cdef int h2 = labels_2d.shape[0]*2, w2 = labels_2d.shape[1]*2
-    cdef int rem_y = h & 1, rem_x = w & 1
+    cdef int rem_r = h & 1, rem_c = w & 1
 
     cdef int[:,:] up_labels_2d = np.zeros((h,w), dtype=np.int32)
     up_labels_2d[:h2:2,:w2:2] = labels_2d
@@ -128,15 +128,14 @@ def upscale_labels_by_2(int[:,:] labels_2d, int h, int w):
     up_labels_2d[:h2:2,1:w2:2] = labels_2d
     up_labels_2d[1:h2:2,1:w2:2] = labels_2d
 
-    if rem_y != 0:
+    if rem_r != 0:
         up_labels_2d[-1,:w2:2] = labels_2d[-1,:]
         up_labels_2d[-1,1:w2:2] = labels_2d[-1:]
-        if rem_x != 0:
+        if rem_c != 0:
             up_labels_2d[-1,-1] = labels_2d[-1,-1]
-    if rem_x != 0:
+    if rem_c != 0:
         up_labels_2d[:h2:2,-1] = labels_2d[:,-1]
         up_labels_2d[1:h2:2,-1] = labels_2d[:,-1]
-
 
     return up_labels_2d
 
@@ -148,7 +147,7 @@ def upscale_labels(int[:,:] labels_2d, LevelMetrics metrics):
     The resulting image size will be of shape `(metrics.h, metrics.w)`.
     The size of the blocks that are scaled up is
     `(metrics.block_h, metrics.block_w)`.
-    The number of blocks is `(metrics.n_blocks_y, metrics.n_blocks_x)`.
+    The number of blocks is `(metrics.n_blocks_r, metrics.n_blocks_c)`.
     The last row and column are repeated if extra padding is required to make
     up to `(metrics.h, metrics.w)`.
 
@@ -162,22 +161,22 @@ def upscale_labels(int[:,:] labels_2d, LevelMetrics metrics):
     Upscaled label image of shape `(metrics.h, metrics.w)`
     """
     cdef int[:,:] up_labels_2d = np.zeros((metrics.h, metrics.w), dtype=np.int32)
-    cdef int x, y, i, j, block_w, block_h
+    cdef int c, r, i, j, block_w, block_h
 
-    for y in range(metrics.n_blocks_y):
-        if y < (metrics.n_blocks_y-1):
+    for r in range(metrics.n_blocks_r):
+        if r < (metrics.n_blocks_r-1):
             block_h = metrics.block_h
         else:
             block_h = metrics.last_block_h
-        for x in range(metrics.n_blocks_x):
-            if x < (metrics.n_blocks_x-1):
+        for c in range(metrics.n_blocks_c):
+            if c < (metrics.n_blocks_c-1):
                 block_w = metrics.block_w
             else:
                 block_w = metrics.last_block_w
             for j in range(block_h):
                 for i in range(block_w):
-                    up_labels_2d[y*metrics.block_h+j,
-                                 x*metrics.block_w+i] = labels_2d[y,x]
+                    up_labels_2d[r*metrics.block_h+j,
+                                 c*metrics.block_w+i] = labels_2d[r,c]
 
     return up_labels_2d
 
@@ -188,7 +187,7 @@ def build_seed_histogram(int[:,:] index_2d, int hist_size, LevelMetrics metrics)
     Build the base level histogram from the the provided index image.
     Generates a histogram for each block of shape
     `(metrics.block_h, metrics.block_w)`, of which the image is divided into
-    `(metrics.n_blocks_y, metrics.n_blocks_x)` blocks. Last rows and columns
+    `(metrics.n_blocks_r, metrics.n_blocks_c)` blocks. Last rows and columns
     of pixels from the image are included in their nearest respective blocks
     if the image size does not divide exactly.
 
@@ -202,26 +201,27 @@ def build_seed_histogram(int[:,:] index_2d, int hist_size, LevelMetrics metrics)
     Returns
     -------
     The histogram as an array of shape
-    `(metrics.n_blocks_y, metrics.n_blocks_x, hist_size)`
+    `(metrics.n_blocks_r, metrics.n_blocks_c, hist_size)`
     """
-    cdef int[:,:,:] hist_2d = np.zeros((metrics.n_blocks_y, metrics.n_blocks_x,
+    cdef int[:,:,:] hist_2d = np.zeros((metrics.n_blocks_r, metrics.n_blocks_c,
                                         hist_size), dtype=np.int32)
-    cdef int x, y, i, j, block_h, block_w, n
-    for y in range(metrics.n_blocks_y):
-        if y < (metrics.n_blocks_y-1):
+    cdef int c, r, i, j, block_h, block_w, n
+    for r in range(metrics.n_blocks_r):
+        if r < (metrics.n_blocks_r-1):
             block_h = metrics.block_h
         else:
             block_h = metrics.last_block_h
-        for x in range(metrics.n_blocks_x):
-            if x < (metrics.n_blocks_x-1):
+        for c in range(metrics.n_blocks_c):
+            if c < (metrics.n_blocks_c-1):
                 block_w = metrics.block_w
             else:
                 block_w = metrics.last_block_w
             for j in range(block_h):
                 for i in range(block_w):
-                    n = index_2d[y*metrics.block_h+j,x*metrics.block_w+i]
-                    hist_2d[y,x,n] += 1
+                    n = index_2d[r*metrics.block_h+j,c*metrics.block_w+i]
+                    hist_2d[r,c,n] += 1
     return hist_2d
+
 
 @cython.boundscheck(False)
 def downscale_histogram(int[:,:,:] hist_2d):
@@ -243,26 +243,27 @@ def downscale_histogram(int[:,:,:] hist_2d):
     cdef int h2 = hist_2d.shape[0]//2, w2 = hist_2d.shape[1]//2
     cdef int hist_size = hist_2d.shape[2]
     cdef int[:,:,:] ds_hist_2d = np.zeros((h2, w2, hist_size), dtype=np.int32)
-    cdef int x, y, i
-    cdef int y_rem = hist_2d.shape[0] & 1
-    cdef int x_rem = hist_2d.shape[1] & 1
-    for y in range(h2):
-        for x in range(w2):
+    cdef int c, r, i
+    cdef int rem_r = hist_2d.shape[0] & 1
+    cdef int rem_c = hist_2d.shape[1] & 1
+    for r in range(h2):
+        for c in range(w2):
             for i in range(hist_size):
-                ds_hist_2d[y,x,i] += hist_2d[y*2,x*2,i]
-                ds_hist_2d[y,x,i] += hist_2d[y*2,x*2+1,i]
-                ds_hist_2d[y,x,i] += hist_2d[y*2+1,x*2,i]
-                ds_hist_2d[y,x,i] += hist_2d[y*2+1,x*2+1,i]
-                if x == (w2-1) and x_rem != 0:
-                    ds_hist_2d[y,x,i] += hist_2d[y*2,x*2+2,i]
-                    ds_hist_2d[y,x,i] += hist_2d[y*2+1,x*2+2,i]
-                    if y_rem != 0:
-                        ds_hist_2d[y,x,i] += hist_2d[y*2+2,x*2+2,i]
-                if y == (h2-1) and y_rem != 0:
-                    ds_hist_2d[y,x,i] += hist_2d[y*2+2,x*2,i]
-                    ds_hist_2d[y,x,i] += hist_2d[y*2+2,x*2+1,i]
+                ds_hist_2d[r,c,i] += hist_2d[r*2,c*2,i]
+                ds_hist_2d[r,c,i] += hist_2d[r*2,c*2+1,i]
+                ds_hist_2d[r,c,i] += hist_2d[r*2+1,c*2,i]
+                ds_hist_2d[r,c,i] += hist_2d[r*2+1,c*2+1,i]
+                if c == (w2-1) and rem_c != 0:
+                    ds_hist_2d[r,c,i] += hist_2d[r*2,c*2+2,i]
+                    ds_hist_2d[r,c,i] += hist_2d[r*2+1,c*2+2,i]
+                    if rem_r != 0:
+                        ds_hist_2d[r,c,i] += hist_2d[r*2+2,c*2+2,i]
+                if r == (h2-1) and rem_r != 0:
+                    ds_hist_2d[r,c,i] += hist_2d[r*2+2,c*2,i]
+                    ds_hist_2d[r,c,i] += hist_2d[r*2+2,c*2+1,i]
 
     return ds_hist_2d
+
 
 @cython.boundscheck(False)
 @cython.cdivision(True)
@@ -348,7 +349,8 @@ cdef double pixel_relabel_score(int pixel_index_value,
     -------
     A score that measures the improvement, or 0.0 if `label_0 == label_1`.
     """
-    cdef double l0_scale = 1.0, l1_scale = 1.0, l0n = 0.0, l1n = 0.0, l0int=0.0, l1int=0.0;
+    cdef double l0_scale = 1.0, l1_scale = 1.0, l0n = 0.0, l1n = 0.0;
+    cdef double l0int=0.0, l1int=0.0;
 
     if label_0 != label_1:
         l0_scale = 1.0 / (l0_area - 1)
@@ -366,18 +368,25 @@ cdef double pixel_relabel_score(int pixel_index_value,
 
 
 @cython.boundscheck(False)
-cdef bint _relabel_check(int a0, int a1, int b0, int b1, int c0, int c1):
+cdef bint _relabel_will_disconnect(int a0, int a1, int b0, int b1,
+                                   int c0, int c1):
     """
     Check if re-labelling a block or pixel will break a labelled region
     into disjoint sub-regions.
 
-    An explanation; assume that we are relabelling a pixel to match that
+    Assume that we are relabelling a pixel to match that
     of its neighbour above.
     The pixel that is to be relabelled is represented by `b1`.
     The pixel behind/below it is `b0`.
     The pairs `a0`/`a1` and `c0`/`c1` represent pixels either side, e.g.
     `a0` represents the pixel to the left and behind, while `a1` represents
-    the pixel to the right. `c0`/`c1` represent pixels to the right.
+    the pixel to the left. `c0`/`c1` represent pixels to the right.
+
+    +----+----+----+
+    | a1 | b1 | c1 |
+    +----+----+----+
+    | a0 | b0 | c0 |
+    +----+----+----+
 
     Parameters
     ----------
@@ -401,7 +410,8 @@ cdef bint _relabel_check(int a0, int a1, int b0, int b1, int c0, int c1):
 
 
 @cython.boundscheck(False)
-cdef bint relabel_check_above(int[:,:] labels_2d, int y, int x, int h, int w):
+cdef bint relabel_will_disconnect_above(int[:,:] labels_2d, int r, int c,
+                                        int h, int w):
     """
     Check if re-labelling a pixel/block to match the label of its
     neighbour above would break a labelled region into disjoint sub-regions.
@@ -419,16 +429,18 @@ cdef bint relabel_check_above(int[:,:] labels_2d, int y, int x, int h, int w):
     A boolean indicating if the proposed relabelling would cause a break.
     """
     cdef int a0, a1, b0, b1, c0, c1
-    a0 = labels_2d[y+1,x-1]   if y<(h-1) and x>0   else -1
-    a1 = labels_2d[y,x-1]   if x>0   else -1
-    b0 = labels_2d[y+1,x]   if y<(h-1)   else -1
-    b1 = labels_2d[y,x]
-    c0 = labels_2d[y+1,x+1]   if y<(h-1) and x<(w-1)   else -1
-    c1 = labels_2d[y,x+1]   if x>0 and x<(w-1)   else -1
-    return _relabel_check(a0, a1, b0, b1, c0, c1)
+    a0 = labels_2d[r+1,c-1] if r<(h-1) and c>0 else -1
+    a1 = labels_2d[r,c-1] if c>0 else -1
+    b0 = labels_2d[r+1,c] if r<(h-1) else -1
+    b1 = labels_2d[r,c]
+    c0 = labels_2d[r+1,c+1] if r<(h-1) and c<(w-1) else -1
+    c1 = labels_2d[r,c+1] if c>0 and c<(w-1) else -1
+    return _relabel_will_disconnect(a0, a1, b0, b1, c0, c1)
+
 
 @cython.boundscheck(False)
-cdef bint relabel_check_below(int[:,:] labels_2d, int y, int x, int h, int w):
+cdef bint relabel_will_disconnect_below(int[:,:] labels_2d, int r, int c,
+                                        int h, int w):
     """
     Check if re-labelling a pixel/block to match the label of its
     neighbour below would break a labelled region into disjoint sub-regions.
@@ -446,16 +458,17 @@ cdef bint relabel_check_below(int[:,:] labels_2d, int y, int x, int h, int w):
     A boolean indicating if the proposed relabelling would cause a break.
     """
     cdef int a0, a1, b0, b1, c0, c1
-    a0 = labels_2d[y-1,x-1]   if y>0 and x>0   else -1
-    a1 = labels_2d[y,x-1]   if x>0   else -1
-    b0 = labels_2d[y-1,x]   if y>0   else -1
-    b1 = labels_2d[y,x]
-    c0 = labels_2d[y-1,x+1]   if y>0 and x<(w-1)   else -1
-    c1 = labels_2d[y,x+1]   if x>0 and x<(w-1)   else -1
-    return _relabel_check(a0, a1, b0, b1, c0, c1)
+    a0 = labels_2d[r-1,c-1] if r>0 and c>0 else -1
+    a1 = labels_2d[r,c-1] if c>0 else -1
+    b0 = labels_2d[r-1,c] if r>0 else -1
+    b1 = labels_2d[r,c]
+    c0 = labels_2d[r-1,c+1] if r>0 and c<(w-1) else -1
+    c1 = labels_2d[r,c+1] if c>0 and c<(w-1) else -1
+    return _relabel_will_disconnect(a0, a1, b0, b1, c0, c1)
 
 @cython.boundscheck(False)
-cdef bint relabel_check_right(int[:,:] labels_2d, int y, int x, int h, int w):
+cdef bint relabel_will_disconnect_right(int[:,:] labels_2d, int r, int c,
+                                        int h, int w):
     """
     Check if re-labelling a pixel/block to match the label of its
     neighbour to the right would break a labelled region into disjoint
@@ -474,16 +487,17 @@ cdef bint relabel_check_right(int[:,:] labels_2d, int y, int x, int h, int w):
     A boolean indicating if the proposed relabelling would cause a break.
     """
     cdef int a0, a1, b0, b1, c0, c1
-    a0 = labels_2d[y-1,x-1]   if y>0 and x>0   else -1
-    a1 = labels_2d[y-1,x]   if y>0   else -1
-    b0 = labels_2d[y,x-1]   if x>0   else -1
-    b1 = labels_2d[y,x]
-    c0 = labels_2d[y+1,x-1]   if y<(h-1) and x>0   else -1
-    c1 = labels_2d[y+1,x]   if y<(h-1)   else -1
-    return _relabel_check(a0, a1, b0, b1, c0, c1)
+    a0 = labels_2d[r-1,c-1] if r>0 and c>0 else -1
+    a1 = labels_2d[r-1,c] if r>0 else -1
+    b0 = labels_2d[r,c-1] if c>0 else -1
+    b1 = labels_2d[r,c]
+    c0 = labels_2d[r+1,c-1] if r<(h-1) and c>0 else -1
+    c1 = labels_2d[r+1,c] if r<(h-1) else -1
+    return _relabel_will_disconnect(a0, a1, b0, b1, c0, c1)
 
 @cython.boundscheck(False)
-cdef bint relabel_check_left(int[:,:] labels_2d, int y, int x, int h, int w):
+cdef bint relabel_will_disconnect_left(int[:,:] labels_2d, int r, int c,
+                                       int h, int w):
     """
     Check if re-labelling a pixel/block to match the label of its
     neighbour to the left would break a labelled region into disjoint
@@ -502,13 +516,13 @@ cdef bint relabel_check_left(int[:,:] labels_2d, int y, int x, int h, int w):
     A boolean indicating if the proposed relabelling would cause a break.
     """
     cdef int a0, a1, b0, b1, c0, c1
-    a0 = labels_2d[y-1,x+1]   if y>0 and x<(w-1)   else -1
-    a1 = labels_2d[y-1,x]   if y>0   else -1
-    b0 = labels_2d[y,x+1]   if x<(w-1)   else -1
-    b1 = labels_2d[y,x]
-    c0 = labels_2d[y+1,x+1]   if y<(h-1) and x<(w-1)   else -1
-    c1 = labels_2d[y+1,x]   if y<(h-1)   else -1
-    return _relabel_check(a0, a1, b0, b1, c0, c1)
+    a0 = labels_2d[r-1,c+1] if r>0 and c<(w-1) else -1
+    a1 = labels_2d[r-1,c] if r>0 else -1
+    b0 = labels_2d[r,c+1] if c<(w-1) else -1
+    b1 = labels_2d[r,c]
+    c0 = labels_2d[r+1,c+1] if r<(h-1) and c<(w-1) else -1
+    c1 = labels_2d[r+1,c] if r<(h-1) else -1
+    return _relabel_will_disconnect(a0, a1, b0, b1, c0, c1)
 
 
 
@@ -548,21 +562,21 @@ def refine_blocks(int refine_iters, int[:,:] lab_2d, int[:,:] label_hists,
     cdef int h = lab_2d.shape[0], w = lab_2d.shape[1], block_area
     cdef double best_score = 0.0
     cdef int[:] block_hist
-    cdef int r, y, x
+    cdef int refine_it, r, c
 
     # For each refinement iteration
-    for r in range(refine_iters):
-        for y in range(lab_2d.shape[0]):
-            for x in range(lab_2d.shape[1]):
-                l = lab_2d[y,x]-1
+    for refine_it in range(refine_iters):
+        for r in range(lab_2d.shape[0]):
+            for c in range(lab_2d.shape[1]):
+                l = lab_2d[r,c]-1
                 # Compute the area of the block that we are proposing to
                 # re-label
-                block_area = metrics.block_area(y, x)
+                block_area = metrics.block_area(r, c)
                 # Ensure that re-labelling the block will not reduce the area
                 # of the region labelled `l` below the threshold
                 if label_areas[l] > (label_area_threshold+block_area):
                     # Get the block histogram
-                    block_hist = block_hists[y,x,:]
+                    block_hist = block_hists[r,c,:]
                     best_score = 0.0
                     best_label = -1
 
@@ -572,8 +586,9 @@ def refine_blocks(int refine_iters, int[:,:] lab_2d, int[:,:] label_hists,
                     # If not, then compute the score of the proposed
                     # re-labelling
                     # If its better than the best so far, update the best
-                    if y > 0 and relabel_check_above(lab_2d, y, x, h, w):
-                        l_above = lab_2d[y-1,x]-1
+                    if r > 0 and \
+                            relabel_will_disconnect_above(lab_2d, r, c, h, w):
+                        l_above = lab_2d[r-1,c]-1
                         score_above = relabel_score(block_hist, block_area,
                                 l, label_hists[l], label_areas[l],
                                 l_above, label_hists[l_above],
@@ -581,8 +596,9 @@ def refine_blocks(int refine_iters, int[:,:] lab_2d, int[:,:] label_hists,
                         if score_above > best_score:
                             best_score = score_above
                             best_label = l_above
-                    if y < (h-1) and relabel_check_below(lab_2d, y, x, h, w):
-                        l_below = lab_2d[y+1,x]-1
+                    if r < (h-1) and \
+                            relabel_will_disconnect_below(lab_2d, r, c, h, w):
+                        l_below = lab_2d[r+1,c]-1
                         score_below = relabel_score(block_hist, block_area,
                                 l, label_hists[l], label_areas[l],
                                 l_below, label_hists[l_below],
@@ -590,8 +606,9 @@ def refine_blocks(int refine_iters, int[:,:] lab_2d, int[:,:] label_hists,
                         if score_below > best_score:
                             best_score = score_below
                             best_label = l_below
-                    if x > 0 and relabel_check_left(lab_2d, y, x, h, w):
-                        l_left = lab_2d[y,x-1]-1
+                    if c > 0 and \
+                            relabel_will_disconnect_left(lab_2d, r, c, h, w):
+                        l_left = lab_2d[r,c-1]-1
                         score_left = relabel_score(block_hist, block_area,
                                 l, label_hists[l], label_areas[l],
                                 l_left, label_hists[l_left],
@@ -599,8 +616,9 @@ def refine_blocks(int refine_iters, int[:,:] lab_2d, int[:,:] label_hists,
                         if score_left > best_score:
                             best_score = score_left
                             best_label = l_left
-                    if x < (w-1) and relabel_check_right(lab_2d, y, x, h, w):
-                        l_right = lab_2d[y,x+1]-1
+                    if c < (w-1) and \
+                            relabel_will_disconnect_right(lab_2d, r, c, h, w):
+                        l_right = lab_2d[r,c+1]-1
                         score_right = relabel_score(block_hist, block_area,
                                 l, label_hists[l], label_areas[l],
                                 l_right, label_hists[l_right],
@@ -613,7 +631,7 @@ def refine_blocks(int refine_iters, int[:,:] lab_2d, int[:,:] label_hists,
                     # the score threshold
                     if best_label != -1 and best_score > score_threshold:
                         # Re-label the block
-                        lab_2d[y,x] = best_label+1
+                        lab_2d[r,c] = best_label+1
                         # Move the contribution of the block from the source
                         # label histogram and area to that of the target label
                         for i in xrange(block_hist.shape[0]):
@@ -655,17 +673,17 @@ def refine_pixels(int refine_iters, int[:,:] lab_2d, int[:,:] label_hists,
     cdef int l = -1, best_label=-1, h = lab_2d.shape[0], w = lab_2d.shape[1]
     cdef int pixel_index_value = -1
     cdef double best_score = 0.0
-    cdef int r, y, x
+    cdef int refine_it, r, c
 
     # For each refinement iteration
-    for r in range(refine_iters):
-        for y in range(lab_2d.shape[0]):
-            for x in range(lab_2d.shape[1]):
-                l = lab_2d[y,x]-1
+    for refine_it in range(refine_iters):
+        for r in range(lab_2d.shape[0]):
+            for c in range(lab_2d.shape[1]):
+                l = lab_2d[r,c]-1
                 # Ensure that re-labelling the pixel will not reduce the area
                 # of the region labelled `l` below the threshold
                 if label_areas[l] > (label_area_threshold+1):
-                    pixel_index_value = pixel_index_2d[y,x]
+                    pixel_index_value = pixel_index_2d[r,c]
                     best_score = 0.0
                     best_label = -1
 
@@ -675,8 +693,9 @@ def refine_pixels(int refine_iters, int[:,:] lab_2d, int[:,:] label_hists,
                     # If not, then compute the score of the proposed
                     # re-labelling
                     # If its better than the best so far, update the best
-                    if y > 0 and relabel_check_above(lab_2d, y, x, h, w):
-                        l_above = lab_2d[y-1,x]-1
+                    if r > 0 and \
+                            relabel_will_disconnect_above(lab_2d, r, c, h, w):
+                        l_above = lab_2d[r-1,c]-1
                         score_above = pixel_relabel_score(pixel_index_value,
                                 l, label_hists[l], label_areas[l],
                                 l_above, label_hists[l_above],
@@ -684,8 +703,9 @@ def refine_pixels(int refine_iters, int[:,:] lab_2d, int[:,:] label_hists,
                         if score_above > best_score:
                             best_score = score_above
                             best_label = l_above
-                    if y < (h-1) and relabel_check_below(lab_2d, y, x, h, w):
-                        l_below = lab_2d[y+1,x]-1
+                    if r < (h-1) and \
+                            relabel_will_disconnect_below(lab_2d, r, c, h, w):
+                        l_below = lab_2d[r+1,c]-1
                         score_below = pixel_relabel_score(pixel_index_value,
                                 l, label_hists[l], label_areas[l],
                                 l_below, label_hists[l_below],
@@ -693,8 +713,9 @@ def refine_pixels(int refine_iters, int[:,:] lab_2d, int[:,:] label_hists,
                         if score_below > best_score:
                             best_score = score_below
                             best_label = l_below
-                    if x > 0 and relabel_check_left(lab_2d, y, x, h, w):
-                        l_left = lab_2d[y,x-1]-1
+                    if c > 0 and \
+                            relabel_will_disconnect_left(lab_2d, r, c, h, w):
+                        l_left = lab_2d[r,c-1]-1
                         score_left = pixel_relabel_score(pixel_index_value,
                                 l, label_hists[l], label_areas[l],
                                 l_left, label_hists[l_left],
@@ -702,8 +723,9 @@ def refine_pixels(int refine_iters, int[:,:] lab_2d, int[:,:] label_hists,
                         if score_left > best_score:
                             best_score = score_left
                             best_label = l_left
-                    if x < (w-1) and relabel_check_right(lab_2d, y, x, h, w):
-                        l_right = lab_2d[y,x+1]-1
+                    if c < (w-1) and \
+                            relabel_will_disconnect_right(lab_2d, r, c, h, w):
+                        l_right = lab_2d[r,c+1]-1
                         score_right = pixel_relabel_score(pixel_index_value,
                                 l, label_hists[l], label_areas[l],
                                 l_right, label_hists[l_right],
@@ -716,7 +738,7 @@ def refine_pixels(int refine_iters, int[:,:] lab_2d, int[:,:] label_hists,
                     # the score threshold
                     if best_label != -1 and best_score > score_threshold:
                         # Re-label the pixel
-                        lab_2d[y,x] = best_label+1
+                        lab_2d[r,c] = best_label+1
                         # Move the contribution of the block from the source
                         # label histogram and area to that of the target label
                         label_hists[l,pixel_index_value] -= 1
