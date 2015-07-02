@@ -76,25 +76,26 @@ cdef class LevelMetrics:
         self.last_block_h = self.block_h + self.rem_r
         self.last_block_w = self.block_w + self.rem_c
 
-    cpdef int block_area(self, int y, int x):
+    cpdef int block_area(self, int r, int c):
         """
         Compute the area of the block in original image pixels at the given
         co-ordinates
 
         Parameters
         ----------
-        y, x: the block co-ordinates
+        r: the block row co-ordinates
+        c: the block column co-ordinates
 
         Returns
         -------
         The area in pixels as an integer
         """
         cdef int bw, bh
-        if y < (self.n_blocks_r-1):
+        if r < (self.n_blocks_r-1):
             bh = self.block_h
         else:
             bh = self.last_block_h
-        if x < (self.n_blocks_c-1):
+        if c < (self.n_blocks_c-1):
             bw = self.block_w
         else:
             bw = self.last_block_w
@@ -419,8 +420,8 @@ cdef bint relabel_will_disconnect_above(int[:,:] labels_2d, int r, int c,
     Parameters
     ----------
     labels_2d : label image as a 2D array
-    y : the y-coordinate of the pixel/block to be re-labelled
-    x : the x-coordinate of the pixel/block to be re-labelled
+    r : the row co-ordinate of the pixel/block to be re-labelled
+    c : the column co-ordinate of the pixel/block to be re-labelled
     h : the height of the label image
     w : the width of the label image
 
@@ -448,8 +449,8 @@ cdef bint relabel_will_disconnect_below(int[:,:] labels_2d, int r, int c,
     Parameters
     ----------
     labels_2d : label image as a 2D array
-    y : the y-coordinate of the pixel/block to be re-labelled
-    x : the x-coordinate of the pixel/block to be re-labelled
+    r : the row co-ordinate of the pixel/block to be re-labelled
+    c : the column co-ordinate of the pixel/block to be re-labelled
     h : the height of the label image
     w : the width of the label image
 
@@ -477,8 +478,8 @@ cdef bint relabel_will_disconnect_right(int[:,:] labels_2d, int r, int c,
     Parameters
     ----------
     labels_2d : label image as a 2D array
-    y : the y-coordinate of the pixel/block to be re-labelled
-    x : the x-coordinate of the pixel/block to be re-labelled
+    r : the row co-ordinate of the pixel/block to be re-labelled
+    c : the column co-ordinate of the pixel/block to be re-labelled
     h : the height of the label image
     w : the width of the label image
 
@@ -506,8 +507,8 @@ cdef bint relabel_will_disconnect_left(int[:,:] labels_2d, int r, int c,
     Parameters
     ----------
     labels_2d : label image as a 2D array
-    y : the y-coordinate of the pixel/block to be re-labelled
-    x : the x-coordinate of the pixel/block to be re-labelled
+    r : the row co-ordinate of the pixel/block to be re-labelled
+    c : the column co-ordinate of the pixel/block to be re-labelled
     h : the height of the label image
     w : the width of the label image
 
@@ -547,7 +548,7 @@ def refine_blocks(int refine_iters, int[:,:] lab_2d, int[:,:] label_hists,
     label_areas : label areas as an array, indexed by label index; as with
     `label_hists`, subtract ` from `lab_2d` to get a label index
     block_hists : block histograms as a 3D array, indexed by
-    `block_hists[block_y, block_x, histogram_bin]`.
+    `block_hists[block_r, block_c, histogram_bin]`.
     metrics : a `LevelMetrics` instance describing the downscaling operation
     that was performed to reduce the contents of the previous level above
     label_area_threshold : will not allow label areas to drop below this value
