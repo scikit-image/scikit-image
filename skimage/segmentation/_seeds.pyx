@@ -634,7 +634,7 @@ def refine_blocks(int refine_iters, int[:,:] lab_2d, int[:,:] label_hists,
                         lab_2d[r,c] = best_label+1
                         # Move the contribution of the block from the source
                         # label histogram and area to that of the target label
-                        for i in xrange(block_hist.shape[0]):
+                        for i in range(block_hist.shape[0]):
                             label_hists[l,i] -= block_hist[i]
                             label_hists[best_label,i] += block_hist[i]
                         label_areas[l] -= block_area

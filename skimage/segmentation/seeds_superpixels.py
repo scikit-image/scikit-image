@@ -17,7 +17,7 @@ from scipy.cluster.vq import kmeans2
 from .._shared.utils import assert_nD
 from ..util import img_as_float
 
-import _seeds
+from ..segmentation import _seeds
 
 
 HIST_SIZE_RGB = 50
@@ -174,7 +174,7 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
     hist_2ds_by_level.append(hist_2d)
     metrics_by_level.append(seed_metrics)
     l_metrics_prev = seed_metrics
-    for i in xrange(1, n_levels):
+    for i in range(1, n_levels):
         hist_2d = _seeds.downscale_histogram(hist_2d)
         hist_2ds_by_level.append(hist_2d)
         l_metrics = _seeds.LevelMetrics()
@@ -191,8 +191,8 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
     
     label_hists = np.array(hist_2d).reshape((n_labels, hist_size))
     label_areas = []
-    for y in xrange(l_metrics.n_blocks_r):
-        for x in xrange(l_metrics.n_blocks_c):
+    for y in range(l_metrics.n_blocks_r):
+        for x in range(l_metrics.n_blocks_c):
             label_areas.append(l_metrics.block_area(y, x))
     label_areas = np.array(label_areas, dtype=np.int32)
     
@@ -202,7 +202,7 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
 
     # For each level above the pixel level
     labels_prev_level = labels_by_level[-1]
-    for level in xrange(n_levels-2, -1, -1):
+    for level in range(n_levels-2, -1, -1):
         labels = _seeds.upscale_labels_by_2(labels_prev_level,
                                             metrics_by_level[level].n_blocks_r,
                                             metrics_by_level[level].n_blocks_c)
@@ -227,7 +227,7 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
 
 
     if return_steps:
-        for lvl in xrange(len(labels_by_level)):
+        for lvl in range(len(labels_by_level)):
             met = metrics_by_level[lvl]
             labels_by_level[lvl] = np.array(
                 _seeds.upscale_labels(labels_by_level[lvl], met))
