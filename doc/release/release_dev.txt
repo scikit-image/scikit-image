@@ -16,7 +16,7 @@ New Features
 ------------
 
 - ``skimage.util.apply_parallel`` (#1493)
-
+- Plugin for ``imageio`` library (#1575)
 
 
 Improvements
