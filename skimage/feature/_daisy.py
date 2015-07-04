@@ -91,7 +91,7 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
     .. [1] Tola et al. "Daisy: An efficient dense descriptor applied to wide-
            baseline stereo." Pattern Analysis and Machine Intelligence, IEEE
            Transactions on 32.5 (2010): 815-830.
-    .. [2] http://cvlab.epfl.ch/alumni/tola/daisy.html
+    .. [2] http://cvlab.epfl.ch/software/daisy
     '''
 
     assert_nD(img, 2, 'img')
