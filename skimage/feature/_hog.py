@@ -1,7 +1,7 @@
+from __future__ import division
 import numpy as np
-from scipy import sqrt, pi, arctan2, cos, sin
-from scipy.ndimage import uniform_filter
 from .._shared.utils import assert_nD
+from . import _hoghistogram
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8),
@@ -63,7 +63,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     assert_nD(image, 2)
 
     if normalise:
-        image = sqrt(image)
+        image = np.sqrt(image)
 
     """
     The second stage computes first order image gradients. These capture
@@ -104,9 +104,6 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     cell are used to vote into the orientation histogram.
     """
 
-    magnitude = sqrt(gx ** 2 + gy ** 2)
-    orientation = arctan2(gy, gx) * (180 / pi) % 180
-
     sy, sx = image.shape
     cx, cy = pixels_per_cell
     bx, by = cells_per_block
@@ -116,22 +113,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
 
     # compute orientations integral images
     orientation_histogram = np.zeros((n_cellsy, n_cellsx, orientations))
-    subsample = np.index_exp[cy // 2:cy * n_cellsy:cy,
-                             cx // 2:cx * n_cellsx:cx]
-    for i in range(orientations):
-        # create new integral image for this orientation
-        # isolate orientations in this range
 
-        temp_ori = np.where(orientation < 180.0 / orientations * (i + 1),
-                            orientation, -1)
-        temp_ori = np.where(orientation >= 180.0 / orientations * i,
-                            temp_ori, -1)
-        # select magnitudes for those orientations
-        cond2 = temp_ori > -1
-        temp_mag = np.where(cond2, magnitude, 0)
-
-        temp_filt = uniform_filter(temp_mag, size=(cy, cx))
-        orientation_histogram[:, :, i] = temp_filt[subsample]
+    _hoghistogram.hog_histograms(gx, gy, cx, cy, sx, sy, n_cellsx, n_cellsy,
+                                 orientations, orientation_histogram)
 
     # now for each cell, compute the histogram
     hog_image = None
@@ -140,13 +124,16 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         from .. import draw
 
         radius = min(cx, cy) // 2 - 1
+        orientations_arr = np.arange(orientations)
+        dx_arr = radius * np.cos(orientations_arr / orientations * np.pi)
+        dy_arr = radius * np.sin(orientations_arr / orientations * np.pi)
+        cr2 = cy + cy
+        cc2 = cx + cx
         hog_image = np.zeros((sy, sx), dtype=float)
         for x in range(n_cellsx):
             for y in range(n_cellsy):
-                for o in range(orientations):
-                    centre = tuple([y * cy + cy // 2, x * cx + cx // 2])
-                    dx = radius * cos(float(o) / orientations * np.pi)
-                    dy = radius * sin(float(o) / orientations * np.pi)
+                for o, dx, dy in zip(orientations_arr, dx_arr, dy_arr):
+                    centre = tuple([y * cr2 // 2, x * cc2 // 2])
                     rr, cc = draw.line(int(centre[0] - dx),
                                        int(centre[1] + dy),
                                        int(centre[0] + dx),
@@ -177,7 +164,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         for y in range(n_blocksy):
             block = orientation_histogram[y:y + by, x:x + bx, :]
             eps = 1e-5
-            normalised_blocks[y, x, :] = block / sqrt(block.sum() ** 2 + eps)
+            normalised_blocks[y, x, :] = block / np.sqrt(block.sum() ** 2 + eps)
 
     """
     The final step collects the HOG descriptors from all blocks of a dense
