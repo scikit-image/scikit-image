@@ -9,7 +9,7 @@ cimport numpy as cnp
 cimport openmp
 from skimage._shared.transform cimport integrate
 from libc.stdlib cimport malloc, free
-from libc.math cimport round
+from skimage._shared.interpolation cimport round
 from libcpp.vector cimport vector
 
 from cython.parallel import prange
