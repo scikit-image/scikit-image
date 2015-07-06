@@ -20,6 +20,7 @@ from ...feature._texture cimport _multiblock_lbp
 
 
 cdef struct Detection:
+
     int r
     int c
     int width
@@ -45,7 +46,9 @@ cdef struct Stage:
     Py_ssize_t amount
     float threshold
 
+
 cdef class Cascade:
+    """Class for cascade classifiers that are used for object detection."""
 
     cdef:
         public float eps
@@ -68,11 +71,47 @@ cdef class Cascade:
         free(self.LUTs)
 
     def __init__(self, xml_file, eps=1e-5):
+        """Initialize cascade classifier.
+        Parameters
+        ----------
+        xml_file : file's path or file's object
+            A file in a OpenCv format from which all the cascade classifier's
+            parameters are loaded.
+        eps : float
+            Accuracy parameter. Increasing it, makes the classifier detect less
+            false positives but at the same time the false negative score increases.
+        """
 
         self._load_xml(xml_file, eps)
 
 
     cdef int classify(self, float[:, ::1] int_img, Py_ssize_t row, Py_ssize_t col, float scale) nogil:
+        """Classify the provided image patch i.e. check if the classifier
+        detects an object in the given image patch.
+
+        The function takes the original window size that is stored in the
+        trained file, scales it and places in the specified part of the
+        provided image, carries out classification and gives a binary result.
+        Parameters
+        ----------
+        int_img : float[:, ::1]
+            Memory-view to integral image.
+        row : Py_ssize_t
+            Row coordinate of the rectangle in the given image to classify.
+            Top left corner of window.
+        col : Py_ssize_t
+            Column coordinate of the rectangle in the given image to classify.
+            Top left corner of window.
+        scale : float
+            The scale by which the search window is multiplied.
+            After multiplication the result is rounded to the lowest integer.
+
+        Returns
+        -------
+        result : int
+            The binary output that takes only 0 or 1. Gives 1 if the classifier
+            detects the object in specified region and 0 otherwise.
+        """
 
         cdef:
             float stage_threshold
@@ -129,7 +168,30 @@ cdef class Cascade:
 
         return 1
 
-    def _get_valid_scale_factors(self, min_size, max_size, scale):
+    def _get_valid_scale_factors(self, min_size, max_size, scale_step):
+        """Get the valid scale multipliers for the original window size
+        from the trained file.
+
+        The function takes the minimal size of window and maximum size of
+        window as interval and finds all the multipliers that will give the
+        windows which sizes will be not less than the min_size and not bigger
+        than the max_size.
+        Parameters
+        ----------
+        min_size : typle (int, int)
+            Minimum size of window for which to search the scale factor.
+        max_size : typle (int, int)
+            Maximum size of window for which to search the scale factor.
+        scale_step : float
+            The scale by which the search window is multiplied
+            on each iteration.
+
+        Returns
+        -------
+        scale_factors : 1-D floats ndarray
+            The scale factors that give the window sizes that are in the
+            specified interval after multiplying the search window.
+        """
 
         min_size = np.array(min_size)
         max_size = np.array(max_size)
@@ -143,12 +205,30 @@ cdef class Cascade:
             if (current_size >= min_size).all():
                 scale_factors.append(current_scale)
 
-            current_scale = current_scale * scale
-            current_size = current_size * scale
+            current_scale = current_scale * scale_step
+            current_size = current_size * scale_step
 
         return np.array(scale_factors, dtype=np.float32)
 
     def _get_contiguous_integral_image(self, img):
+        """Get a c-contiguous array that represents the integral image.
+
+        The function converts the input image into the integral image in
+        a format that is suitable for work of internal functions of
+        the cascade classifier class. The function converts the image
+        to gray-scale float representation, computes the integral image
+        and makes it c-contiguous.
+        Parameters
+        ----------
+        img : 2-D or 3-D ndarray
+            Ndarray that represents the input image.
+
+
+        Returns
+        -------
+        int_img : 2-D floats ndarray
+            C-contiguous integral image of the input image.
+        """
 
         img = rgb2gray(img)
         int_img = integral_image(img)
@@ -158,6 +238,37 @@ cdef class Cascade:
 
 
     def detect_multi_scale(self, img, float scale_factor, float step_ratio, min_size, max_size):
+        """Search for the object on multiple scales of input image.
+
+        The function takes the input image, the scale factor by which the
+        searching window is multiplied on each step, minimum window size
+        and maximum window size that specify the interval for the search
+        windows that are applied to the input image to detect objects.
+        Parameters
+        ----------
+        img : 2-D or 3-D ndarray
+            Ndarray that represents the input image.
+        scale_factor : float
+            The scale by which searching window is multiplied on each step.
+        step_ratio : float
+            The ratio by which the search step in multiplied on each scale
+            of the image. 1 represents the exaustive search and usually is
+            slow. By setting this parameter to higher values the results will
+            be worse but the computation will be much faster. Usually, values
+            in the interval [1, 1.5] give good results.
+        min_size : typle (int, int)
+            Minimum size of the search window.
+        max_size : typle (int, int)
+            Maximum size of the search window.
+
+        Returns
+        -------
+        output : list of dicts
+            Dict have form {'r': int, 'c': int, 'width': int, 'height': int},
+            where 'r' represents row position of top left corner of detected
+            window, 'c' - col position, 'width' - width of detected window,
+            'height' - height of detected window.
+        """
 
         cdef:
             Py_ssize_t max_row
@@ -235,6 +346,20 @@ cdef class Cascade:
         return list(output)
 
     def _load_xml(self, xml_file, eps=1e-5):
+        """Load the parameters of cascade classifier into the class.
+
+        The function takes the file with the parameters that represent
+        trained cascade classifier and loads them into class for later
+        use.
+        Parameters
+        ----------
+        xml_file : filename or file object
+            File that contains the cascade classifier.
+        eps : float
+            Accuracy parameter. Increasing it, makes the classifier detect less
+            false positives but at the same time the false negative score increases.
+        """
+
 
         cdef:
             Stage* stages_carr
