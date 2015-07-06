@@ -1,41 +1,28 @@
 import numpy as np
 
-from skimage.transform import rescale
-from skimage.util import view_as_windows
-from matplotlib import pyplot as plt
-import matplotlib.patches as patches
-
 import skimage.future.detect_obj as detect_obj
-from skimage.transform import integral_image
-
-import skimage.data
-import os
+import skimage.data as data
 
 
 class TestCascade():
 
-    def test_detector_with_naive_sliding_window(self):
+    def test_detector(self):
 
         # Load the trained file from the module root.
-        train_file_name = 'lbpcascade_frontalface.xml'
-        current_path = os.path.abspath(os.path.dirname(__file__))
-        train_file_path = os.path.join(current_path, os.pardir, train_file_name)
+        trained_file = data.xml_opencv_cascade_file()
 
         # Initialize the detector cascade.
-        detector = detect_obj.Cascade()
-        detector.load_xml(train_file_path)
+        detector = detect_obj.Cascade(trained_file)
 
-        img = skimage.data.astronaut()
+        img = data.astronaut()
 
         detected = detector.detect_multi_scale(img=img,
                                                scale_factor=1.2,
+                                               step_ratio=1.3,
                                                min_size=(24, 24),
-                                               max_size=(123, 123),
-                                               step_ratio=1.5,
-                                               amount_of_threads=4)
+                                               max_size=(123, 123))
 
-        # At least one face should be detected.
-        assert detected
+        assert detected, 'At least one face should be detected.'
 
 
 if __name__ == '__main__':

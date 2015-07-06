@@ -2,41 +2,48 @@
 # cython: boundscheck=False
 # cython: nonecheck=False
 # cython: wraparound=False
+# distutils: language = c++
 
 import numpy as np
 cimport numpy as cnp
+cimport openmp
+from skimage._shared.transform cimport integrate
 from libc.stdlib cimport malloc, free
 from libc.math cimport round
-from skimage._shared.transform cimport integrate
-from cython.parallel import prange
-cimport cython.parallel as parallel
+from libcpp.vector cimport vector
 
+from cython.parallel import prange
 from skimage.color import rgb2gray
 from skimage.transform import integral_image
-
 import xml.etree.ElementTree as ET
 from ...feature._texture cimport _multiblock_lbp
 
 
+cdef struct Detection:
+    int r
+    int c
+    int width
+    int height
+
 cdef struct MBLBP:
 
-        Py_ssize_t r
-        Py_ssize_t c
-        Py_ssize_t width
-        Py_ssize_t height
+    Py_ssize_t r
+    Py_ssize_t c
+    Py_ssize_t width
+    Py_ssize_t height
 
 cdef struct MBLBPStump:
 
-        Py_ssize_t feature_id
-        Py_ssize_t lut_idx
-        float left
-        float right
+    Py_ssize_t feature_id
+    Py_ssize_t lut_idx
+    float left
+    float right
 
 cdef struct Stage:
 
-        Py_ssize_t first_idx
-        Py_ssize_t amount
-        float threshold
+    Py_ssize_t first_idx
+    Py_ssize_t amount
+    float threshold
 
 cdef class Cascade:
 
@@ -47,10 +54,10 @@ cdef class Cascade:
         public Py_ssize_t features_amount
         public Py_ssize_t window_width
         public Py_ssize_t window_height
-        Stage * stages
-        MBLBPStump * stumps
-        MBLBP * features
-        cnp.uint32_t * LUTs
+        Stage* stages
+        MBLBPStump* stumps
+        MBLBP* features
+        cnp.uint32_t* LUTs
 
     def __dealloc__(self):
 
@@ -60,7 +67,12 @@ cdef class Cascade:
         free(self.features)
         free(self.LUTs)
 
-    cdef int evaluate(self, float[:, ::1] int_img, Py_ssize_t row, Py_ssize_t col, float scale) nogil:
+    def __init__(self, xml_file, eps=1e-5):
+
+        self._load_xml(xml_file, eps)
+
+
+    cdef int classify(self, float[:, ::1] int_img, Py_ssize_t row, Py_ssize_t col, float scale) nogil:
 
         cdef:
             float stage_threshold
@@ -112,11 +124,12 @@ cdef class Cascade:
                 stage_points += current_stump.left if bit else current_stump.right
 
             if stage_points < (current_stage.threshold - self.eps):
+
                 return 0
 
         return 1
 
-    def get_valid_scale_factors(self, min_size, max_size, scale):
+    def _get_valid_scale_factors(self, min_size, max_size, scale):
 
         min_size = np.array(min_size)
         max_size = np.array(max_size)
@@ -133,58 +146,101 @@ cdef class Cascade:
             current_scale = current_scale * scale
             current_size = current_size * scale
 
-        return scale_factors
+        return np.array(scale_factors, dtype=np.float32)
 
-    def detect_single_scale(self, float[:, ::1] int_img, float scale, int step_ratio=1, int amount_of_threads=4):
-
-        cdef:
-            Py_ssize_t height = <Py_ssize_t>(self.window_height * scale)
-            Py_ssize_t width = <Py_ssize_t>(self.window_width * scale)
-            Py_ssize_t max_row = int_img.shape[0] - height
-            Py_ssize_t max_col = int_img.shape[1] - width
-            Py_ssize_t current_row
-            Py_ssize_t current_col
-            Py_ssize_t step
-            int result
-
-        step = <Py_ssize_t>round(scale * step_ratio)
-
-        detections = []
-
-        for current_row in prange(0, max_row, step, num_threads=amount_of_threads, nogil=True):
-            for current_col in prange(0, max_col, step):
-
-                result = self.evaluate(int_img, current_row, current_col, scale)
-
-                if result:
-                    with gil:
-                        detections.append((current_row, current_col, width, height))
-
-        return detections
-
-
-    def detect_multi_scale(self, img, scale_factor, min_size, max_size, step_ratio=1, amount_of_threads=4):
+    def _get_contiguous_integral_image(self, img):
 
         img = rgb2gray(img)
         int_img = integral_image(img)
         int_img = np.ascontiguousarray(int_img, dtype=np.float32)
 
-        detections = []
-        scale_factors = self.get_valid_scale_factors(min_size, max_size, scale_factor)
-
-        for scale in scale_factors:
-            detections.extend(self.detect_single_scale(int_img, scale, step_ratio, amount_of_threads))
-
-        return detections
+        return int_img
 
 
-    def load_xml(self, filename, eps=1e-5):
+    def detect_multi_scale(self, img, float scale_factor, float step_ratio, min_size, max_size):
 
         cdef:
-            Stage * stages_carr
-            MBLBPStump * stumps_carr
-            MBLBP * features_carr
-            cnp.uint32_t * LUTs_carr
+            Py_ssize_t max_row
+            Py_ssize_t max_col
+            Py_ssize_t current_height
+            Py_ssize_t current_width
+            Py_ssize_t current_row
+            Py_ssize_t current_col
+            Py_ssize_t current_step
+            Py_ssize_t amount_of_scales
+            Py_ssize_t img_height
+            Py_ssize_t img_width
+            Py_ssize_t scale_number
+            Py_ssize_t window_height = self.window_height
+            Py_ssize_t window_width = self.window_width
+            int result
+            float[::1] scale_factors
+            float[:, ::1] int_img
+            float current_scale_factor
+            vector[detection_container] output
+            Detection new_detection
+
+        int_img = self._get_contiguous_integral_image(img)
+        img_height = int_img.shape[0]
+        img_width = int_img.shape[1]
+
+        scale_factors = self._get_valid_scale_factors(min_size, max_size, scale_factor)
+        amount_of_scales = scale_factors.shape[0]
+
+        # Initialize lock to enable thread-safe writes to the array
+        # in concurrent loop.
+        cdef openmp.omp_lock_t mylock
+        openmp.omp_init_lock(&mylock)
+
+
+        # As the amount of work between the threads is not equal we use `dynamic`
+        # schedule which enables them to use computing power on demand.
+        for scale_number in prange(0, amount_of_scales, schedule='dynamic', nogil=True):
+
+            current_scale_factor = scale_factors[scale_number]
+            current_step = <Py_ssize_t>round(current_scale_factor * step_ratio)
+            current_height = <Py_ssize_t>(window_height * current_scale_factor)
+            current_width = <Py_ssize_t>(window_width * current_scale_factor)
+            max_row = img_height - current_height
+            max_col = img_width - current_width
+
+            # Check if scaled detection window fits in image.
+            if (max_row < 0) or (max_col < 0):
+                continue
+
+            current_row = 0
+            current_col = 0
+
+            while current_row < max_row:
+                while current_col < max_col:
+
+                    result = self.classify(int_img, current_row, current_col, scale_factors[scale_number])
+
+                    if result:
+
+                        new_detection = detection_container()
+                        new_detection.r = current_row
+                        new_detection.c = current_col
+                        new_detection.width = current_width
+                        new_detection.height = current_height
+                        openmp.omp_set_lock(&mylock)
+                        output.push_back(new_detection)
+                        openmp.omp_unset_lock(&mylock)
+
+                    current_col = current_col + current_step
+
+                current_row = current_row + current_step
+                current_col = 0
+
+        return list(output)
+
+    def _load_xml(self, xml_file, eps=1e-5):
+
+        cdef:
+            Stage* stages_carr
+            MBLBPStump* stumps_carr
+            MBLBP* features_carr
+            cnp.uint32_t* LUTs_carr
 
             float stage_threshold
 
@@ -208,7 +264,7 @@ cdef class Cascade:
             MBLBPStump new_stump
             Stage new_stage
 
-        tree = ET.parse(filename)
+        tree = ET.parse(xml_file)
 
         # Load entities.
         features = tree.find('.//features')

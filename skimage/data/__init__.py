@@ -27,7 +27,8 @@ __all__ = ['load',
            'coffee',
            'hubble_deep_field',
            'rocket',
-           'astronaut']
+           'astronaut',
+           'xml_opencv_cascade_file']
 
 
 def load(f):
@@ -45,6 +46,23 @@ def load(f):
     """
     use_plugin('pil')
     return imread(_os.path.join(data_dir, f))
+
+
+def load_file(f):
+    """Load a file located in the data directory.
+
+    Parameters
+    ----------
+    f : string
+        File name.
+
+    Returns
+    -------
+    file : file object
+        File loaded from skimage.data_dir.
+    """
+
+    return open(_os.path.join(data_dir, f))
 
 
 def camera():
@@ -261,3 +279,8 @@ def rocket():
 
     """
     return load("rocket.jpg")
+
+
+def xml_opencv_cascade_file():
+
+    return load_file('lbpcascade_frontalface_opencv.xml')
