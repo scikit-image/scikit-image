@@ -11,6 +11,7 @@ import os as _os
 from .. import data_dir
 from ..io import imread, use_plugin
 from ._binary_blobs import binary_blobs
+import xml
 
 __all__ = ['load',
            'camera',
@@ -28,7 +29,7 @@ __all__ = ['load',
            'hubble_deep_field',
            'rocket',
            'astronaut',
-           'xml_opencv_cascade_file']
+           'xml']
 
 
 def load(f):
@@ -46,23 +47,6 @@ def load(f):
     """
     use_plugin('pil')
     return imread(_os.path.join(data_dir, f))
-
-
-def load_file(f):
-    """Load a file located in the data directory.
-
-    Parameters
-    ----------
-    f : string
-        File name.
-
-    Returns
-    -------
-    file : file object
-        File loaded from skimage.data_dir.
-    """
-
-    return open(_os.path.join(data_dir, f))
 
 
 def camera():
@@ -280,7 +264,3 @@ def rocket():
     """
     return load("rocket.jpg")
 
-
-def xml_opencv_cascade_file():
-
-    return load_file('lbpcascade_frontalface_opencv.xml')

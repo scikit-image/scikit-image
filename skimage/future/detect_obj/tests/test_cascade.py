@@ -9,7 +9,7 @@ class TestCascade():
     def test_detector(self):
 
         # Load the trained file from the module root.
-        trained_file = data.xml_opencv_cascade_file()
+        trained_file = data.xml.face_cascade_detector()
 
         # Initialize the detector cascade.
         detector = detect_obj.Cascade(trained_file)
