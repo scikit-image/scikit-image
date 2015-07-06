@@ -288,7 +288,7 @@ cdef class Cascade:
             float[::1] scale_factors
             float[:, ::1] int_img
             float current_scale_factor
-            vector[detection_container] output
+            vector[Detection] output
             Detection new_detection
 
         int_img = self._get_contiguous_integral_image(img)
