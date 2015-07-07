@@ -317,28 +317,25 @@ cdef inline Py_ssize_t coord_map(Py_ssize_t dim, long coord, char mode) nogil:
         falls outside [0, dim).
 
     """
-    dim = dim - 1
+    cdef Py_ssize_t cmax
+    cmax = dim - 1
     if mode == 'R': # reflect
         if coord < 0:
-            # How many times times does the coordinate wrap?
-            if <Py_ssize_t>(-coord / dim) % 2 != 0:
-                return dim - <Py_ssize_t>(-coord % dim)
-            else:
-                return <Py_ssize_t>(-coord % dim)
-        elif coord > dim:
+            coord = -coord - 1
+        if coord > cmax:
             if <Py_ssize_t>(coord / dim) % 2 != 0:
-                return <Py_ssize_t>(dim - (coord % dim))
+                return <Py_ssize_t>(cmax - (coord % dim))
             else:
                 return <Py_ssize_t>(coord % dim)
     elif mode == 'W': # wrap
         if coord < 0:
-            return <Py_ssize_t>(dim - (-coord % dim))
-        elif coord > dim:
+            return <Py_ssize_t>(cmax - ((-coord - 1) % dim))
+        elif coord > cmax:
             return <Py_ssize_t>(coord % dim)
     elif mode == 'N': # nearest
         if coord < 0:
             return 0
-        elif coord > dim:
-            return dim
+        elif coord > cmax:
+            return cmax
 
     return coord
