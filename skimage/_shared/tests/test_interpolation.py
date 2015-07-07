@@ -1,6 +1,7 @@
 from skimage._shared._interpolation_test import coord_map
 from numpy.testing import assert_array_equal
 
+
 def test_coord_map():
 
     reflect = [coord_map(4, n, 'R') for n in range(-6, 6)]
