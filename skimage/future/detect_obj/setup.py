@@ -13,7 +13,7 @@ def configuration(parent_package='', top_path=None):
     config.add_data_dir('tests')
 
     # This function tries to create C files from the given .pyx files.  If
-    # it fails, try to build with pre-generated .c files.
+    # it fails, try to build with pre-generated .cpp files.
     cython(['cascade.pyx'], working_path=base_path)
     config.add_extension('cascade', sources=['cascade.cpp'],
                          include_dirs=[get_numpy_include_dirs()],

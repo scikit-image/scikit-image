@@ -72,6 +72,7 @@ cdef class Cascade:
 
     def __init__(self, xml_file, eps=1e-5):
         """Initialize cascade classifier.
+
         Parameters
         ----------
         xml_file : file's path or file's object
@@ -92,6 +93,7 @@ cdef class Cascade:
         The function takes the original window size that is stored in the
         trained file, scales it and places in the specified part of the
         provided image, carries out classification and gives a binary result.
+
         Parameters
         ----------
         int_img : float[:, ::1]
@@ -176,6 +178,7 @@ cdef class Cascade:
         window as interval and finds all the multipliers that will give the
         windows which sizes will be not less than the min_size and not bigger
         than the max_size.
+
         Parameters
         ----------
         min_size : typle (int, int)
@@ -218,11 +221,11 @@ cdef class Cascade:
         the cascade classifier class. The function converts the image
         to gray-scale float representation, computes the integral image
         and makes it c-contiguous.
+
         Parameters
         ----------
         img : 2-D or 3-D ndarray
             Ndarray that represents the input image.
-
 
         Returns
         -------
@@ -244,6 +247,7 @@ cdef class Cascade:
         searching window is multiplied on each step, minimum window size
         and maximum window size that specify the interval for the search
         windows that are applied to the input image to detect objects.
+
         Parameters
         ----------
         img : 2-D or 3-D ndarray
@@ -351,6 +355,7 @@ cdef class Cascade:
         The function takes the file with the parameters that represent
         trained cascade classifier and loads them into class for later
         use.
+
         Parameters
         ----------
         xml_file : filename or file object
@@ -359,7 +364,6 @@ cdef class Cascade:
             Accuracy parameter. Increasing it, makes the classifier detect less
             false positives but at the same time the false negative score increases.
         """
-
 
         cdef:
             Stage* stages_carr
