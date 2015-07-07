@@ -12,21 +12,21 @@ import skimage.data
 import matplotlib.pyplot as plt
 import numpy as np
 
-img = np.zeros((9, 9))
+img = np.zeros((16, 16))
 img[:8, :8] += 1
 img[:4, :4] += 1
 img[:2, :2] += 1
 img[:1, :1] += 2
 
 modes = ['constant', 'nearest', 'wrap', 'reflect']
-fig, axes = plt.subplots(1, 4, figsize=(15, 5))
+fig, axes = plt.subplots(1, 4, figsize=(12, 3))
 for n, mode in enumerate(modes):
     img_extended = extend_image(img, pad=img.shape[0], mode=mode)
     axes[n].imshow(img_extended, cmap=plt.cm.gray, interpolation='nearest')
-    axes[n].plot([8.5, 8.5], [8.5, 17.5], 'y--', linewidth=0.5)
-    axes[n].plot([17.5, 17.5], [8.5, 17.5], 'y--', linewidth=0.5)
-    axes[n].plot([8.5, 17.5], [8.5, 8.5], 'y--', linewidth=0.5)
-    axes[n].plot([8.5, 17.5], [17.5, 17.5], 'y--', linewidth=0.5)
+    axes[n].plot([15.5, 15.5], [15.5, 31.5], 'y--', linewidth=0.5)
+    axes[n].plot([31.5, 31.5], [15.5, 31.5], 'y--', linewidth=0.5)
+    axes[n].plot([15.5, 31.5], [15.5, 15.5], 'y--', linewidth=0.5)
+    axes[n].plot([15.5, 31.5], [31.5, 31.5], 'y--', linewidth=0.5)
     axes[n].set_axis_off()
     axes[n].set_aspect('equal')
     axes[n].set_title(mode)
