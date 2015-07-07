@@ -71,7 +71,7 @@ cdef class Cascade:
         free(self.LUTs)
 
     def __init__(self, xml_file, eps=1e-5):
-        """Initialize cascade classifier.
+        """initialize cascade classifier.
 
         Parameters
         ----------
