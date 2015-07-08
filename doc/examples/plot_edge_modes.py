@@ -17,9 +17,10 @@ img[:8, :8] += 1
 img[:4, :4] += 1
 img[:2, :2] += 1
 img[:1, :1] += 2
+img[8, 8] = 4
 
-modes = ['constant', 'nearest', 'wrap', 'reflect']
-fig, axes = plt.subplots(1, 4, figsize=(12, 3))
+modes = ['constant', 'nearest', 'wrap', 'reflect', 'mirror']
+fig, axes = plt.subplots(1, 5, figsize=(15, 5))
 for n, mode in enumerate(modes):
     img_extended = extend_image(img, pad=img.shape[0], mode=mode)
     axes[n].imshow(img_extended, cmap=plt.cm.gray, interpolation='nearest')
