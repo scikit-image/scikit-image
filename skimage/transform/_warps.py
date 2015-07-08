@@ -69,7 +69,9 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
     if len(output_shape) == 3 and (image.ndim == 2
                                    or output_shape[2] != image.shape[2]):
         dim = output_shape[2]
-        orig_dim = 1 if image.ndim == 2 else image.shape[2]
+        if image.ndim == 2:
+            image = image[:, :, np.newaxis]
+        orig_dim = image.shape[2]
         dim_scale = float(orig_dim) / dim
 
         map_rows, map_cols, map_dims = np.mgrid[:rows, :cols, :dim]
