@@ -24,8 +24,8 @@ cdef inline double nearest_neighbour_interpolation(double* image,
         Shape of image.
     r, c : double
         Position at which to interpolate.
-    mode : {'C', 'W', 'R', 'N'}
-        Wrapping mode. Constant, Wrap, Reflect or Nearest.
+    mode : {'C', 'W', 'R', 'N', 'M'}
+        Wrapping mode. Constant, Wrap, Reflect, Nearest or Mirror.
     cval : double
         Constant value to use for constant mode.
 
@@ -52,8 +52,8 @@ cdef inline double bilinear_interpolation(double* image, Py_ssize_t rows,
         Shape of image.
     r, c : double
         Position at which to interpolate.
-    mode : {'C', 'W', 'R', 'N'}
-        Wrapping mode. Constant, Wrap, Reflect or Nearest.
+    mode : {'C', 'W', 'R', 'N', 'M'}
+        Wrapping mode. Constant, Wrap, Reflect, Nearest or Mirror.
     cval : double
         Constant value to use for constant mode.
 
@@ -119,8 +119,8 @@ cdef inline double biquadratic_interpolation(double* image, Py_ssize_t rows,
         Shape of image.
     r, c : double
         Position at which to interpolate.
-    mode : {'C', 'W', 'R', 'N'}
-        Wrapping mode. Constant, Wrap, Reflect or Nearest.
+    mode : {'C', 'W', 'R', 'N', 'M'}
+        Wrapping mode. Constant, Wrap, Reflect, Nearest or Mirror.
     cval : double
         Constant value to use for constant mode.
 
@@ -192,8 +192,8 @@ cdef inline double bicubic_interpolation(double* image, Py_ssize_t rows,
         Shape of image.
     r, c : double
         Position at which to interpolate.
-    mode : {'C', 'W', 'R', 'N'}
-        Wrapping mode. Constant, Wrap, Reflect or Nearest.
+    mode : {'C', 'W', 'R', 'N', 'M'}
+        Wrapping mode. Constant, Wrap, Reflect, Nearest or Mirror.
     cval : double
         Constant value to use for constant mode.
 
@@ -248,8 +248,8 @@ cdef inline double get_pixel2d(double* image, Py_ssize_t rows, Py_ssize_t cols,
         Shape of image.
     r, c : int
         Position at which to get the pixel.
-    mode : {'C', 'W', 'R', 'N'}
-        Wrapping mode. Constant, Wrap, Reflect or Nearest.
+    mode : {'C', 'W', 'R', 'N', 'M'}
+        Wrapping mode. Constant, Wrap, Reflect, Nearest or Mirror.
     cval : double
         Constant value to use for constant mode.
 
@@ -281,8 +281,8 @@ cdef inline double get_pixel3d(double* image, Py_ssize_t rows, Py_ssize_t cols,
         Shape of image.
     r, c, d : int
         Position at which to get the pixel.
-    mode : {'C', 'W', 'R', 'N'}
-        Wrapping mode. Constant, Wrap, Reflect or Nearest.
+    mode : {'C', 'W', 'R', 'N', 'M'}
+        Wrapping mode. Constant, Wrap, Reflect, Nearest or Mirror.
     cval : double
         Constant value to use for constant mode.
 
@@ -312,8 +312,8 @@ cdef inline Py_ssize_t coord_map(Py_ssize_t dim, long coord, char mode) nogil:
         Maximum coordinate.
     coord : int
         Coord provided by user.  May be < 0 or > dim.
-    mode : {'W', 'R', 'N'}
-        Whether to wrap or reflect the coordinate if it
+    mode : {'W', 'R', 'N', 'M'}
+        Whether to wrap, reflect, mirror or use the nearest coordinate if it
         falls outside [0, dim).
 
     """
@@ -337,5 +337,16 @@ cdef inline Py_ssize_t coord_map(Py_ssize_t dim, long coord, char mode) nogil:
             return 0
         elif coord > cmax:
             return cmax
-
+    elif mode == 'M': # mirror
+        if coord < 0:
+            # How many times times does the coordinate wrap?
+            if <Py_ssize_t>(-coord / cmax) % 2 != 0:
+                return cmax - <Py_ssize_t>(-coord % cmax)
+            else:
+                return <Py_ssize_t>(-coord % cmax)
+        elif coord > cmax:
+            if <Py_ssize_t>(coord / cmax) % 2 != 0:
+                return <Py_ssize_t>(cmax - (coord % cmax))
+            else:
+                return <Py_ssize_t>(coord % cmax)
     return coord

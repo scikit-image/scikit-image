@@ -16,5 +16,9 @@ def test_coord_map():
     expected_neareset = [0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3, 3]
     assert_array_equal(nearest, expected_neareset)
 
+    mirror = [coord_map(4, n, 'M') for n in range(-6, 6)]
+    expected_mirror = [0, 1, 2, 3, 2, 1, 0, 1, 2, 3, 2, 1]
+    assert_array_equal(mirror, expected_mirror)
+
     other = [coord_map(4, n, 'undefined') for n in range(-6, 6)]
     assert_array_equal(other, list(range(-6, 6)))

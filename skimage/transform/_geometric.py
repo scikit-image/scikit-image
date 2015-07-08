@@ -1128,9 +1128,9 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
     order : int, optional
         The order of the spline interpolation, default is 1. The order has to
         be in the range 0-5. See `skimage.transform.warp` for detail.
-    mode : string, optional
+    mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
+        to the given mode.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -1211,9 +1211,9 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
          - 3: Bi-cubic
          - 4: Bi-quartic
          - 5: Bi-quintic
-    mode : string, optional
+    mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
+        to the given mode.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.

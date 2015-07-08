@@ -21,7 +21,7 @@ def profile_line(img, src, dst, linewidth=1,
     order : int in {0, 1, 2, 3, 4, 5}, optional
         The order of the spline interpolation to compute image values at
         non-integer coordinates. 0 means nearest-neighbor interpolation.
-    mode : string, one of {'constant', 'nearest', 'reflect', 'wrap'}, optional
+    mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
         How to compute any values falling outside of the image.
     cval : float, optional
         If `mode` is 'constant', what constant value to use outside the image.

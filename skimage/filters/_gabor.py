@@ -129,7 +129,7 @@ def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
         deviations.
     offset : float, optional
         Phase offset of harmonic function in radians.
-    mode : string, optional
+    mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
         Mode used to convolve image with a kernel, passed to `ndi.convolve`
     cval : scalar, optional
         Value to fill past edges of input if `mode` of convolution is

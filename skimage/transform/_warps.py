@@ -35,9 +35,9 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
     order : int, optional
         The order of the spline interpolation, default is 1. The order has to
         be in the range 0-5. See `skimage.transform.warp` for detail.
-    mode : string, optional
+    mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
+        to the given mode.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -48,6 +48,14 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
+
+    Notes
+    -----
+    Modes 'mirror' and 'reflect' are similar, but differ in whether the edge
+    voxels are duplicated during the reflection.  As an example, if an array
+    has values [0, 1, 2] and was padded to the right by four values using
+    reflect, the result would be [0, 1, 2, 2, 1, 0, 0], while for mirror it
+    would be [0, 1, 2, 1, 0, 1, 2].
 
     Examples
     --------
@@ -138,9 +146,9 @@ def rescale(image, scale, order=1, mode='constant', cval=0, clip=True,
     order : int, optional
         The order of the spline interpolation, default is 1. The order has to
         be in the range 0-5. See `skimage.transform.warp` for detail.
-    mode : string, optional
+    mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
+        to the given mode.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -206,9 +214,9 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
     order : int, optional
         The order of the spline interpolation, default is 1. The order has to
         be in the range 0-5. See `skimage.transform.warp` for detail.
-    mode : string, optional
+    mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'},  optional
         Points outside the boundaries of the input are filled according
-        to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
+        to the given mode.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -360,9 +368,9 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
     order : int, optional
         The order of the spline interpolation, default is 1. The order has to
         be in the range 0-5. See `skimage.transform.warp` for detail.
-    mode : string, optional
+    mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
+        to the given mode.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.

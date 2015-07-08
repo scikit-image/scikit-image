@@ -70,20 +70,28 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
         * 1: Bi-linear (default)
         * 2: Bi-quadratic
         * 3: Bi-cubic
-    mode : {'constant', 'reflect', 'wrap', 'nearest'}, optional
+    mode : {'constant', 'reflect', 'mirror', 'wrap', 'nearest'}, optional
         How to handle values outside the image borders (default is constant).
     cval : string, optional (default 0)
         Used in conjunction with mode 'C' (constant), the value
         outside the image boundaries.
+
+    Notes
+    -----
+    Modes 'mirror' and 'reflect' are similar, but differ in whether the edge
+    voxels are duplicated during the reflection.  As an example, if an array
+    has values [0, 1, 2] and was padded to the right by four values using
+    reflect, the result would be [0, 1, 2, 2, 1, 0, 0], while for mirror it
+    would be [0, 1, 2, 1, 0, 1, 2].
 
     """
 
     cdef double[:, ::1] img = np.ascontiguousarray(image, dtype=np.double)
     cdef double[:, ::1] M = np.ascontiguousarray(H)
 
-    if mode not in ('constant', 'wrap', 'reflect', 'nearest'):
-        raise ValueError("Invalid mode specified.  Please use "
-                         "`constant`, `nearest`, `wrap` or `reflect`.")
+    if mode not in ('constant', 'wrap', 'reflect', 'mirror', 'nearest'):
+        raise ValueError("Invalid mode specified.  Please use `constant`, "
+                         "`nearest`, `wrap`, `mirror` or `reflect`.")
     cdef char mode_c = ord(mode[0].upper())
 
     cdef Py_ssize_t out_r, out_c
