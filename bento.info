@@ -107,9 +107,9 @@ Library:
     Extension: skimage._shared.transform
         Sources:
             skimage/_shared/transform.pyx
-    Extension: skimage._shared._interpolation_test
+    Extension: skimage._shared.interpolation
         Sources:
-            skimage/_shared/_interpolation_test.pyx
+            skimage/_shared/interpolation.pyx
     Extension: skimage.segmentation._slic
         Sources:
             skimage/segmentation/_slic.pyx
