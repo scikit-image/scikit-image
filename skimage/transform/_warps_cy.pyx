@@ -76,8 +76,8 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
         Used in conjunction with mode 'C' (constant), the value
         outside the image boundaries.
 
-    Notes
-    -----
+    Note
+    ----
     Modes 'mirror' and 'reflect' are similar, but differ in whether the edge
     voxels are duplicated during the reflection.  As an example, if an array
     has values [0, 1, 2] and was padded to the right by four values using

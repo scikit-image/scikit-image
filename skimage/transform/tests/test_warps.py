@@ -181,7 +181,6 @@ def test_resize3d_resize():
     assert_almost_equal(resized, ref)
 
 
-
 def test_resize3d_2din_3dout():
     # 3D output with 2D input
     x = np.zeros((5, 5), dtype=np.double)
@@ -190,7 +189,6 @@ def test_resize3d_2din_3dout():
     ref = np.zeros((10, 10, 1))
     ref[2:4, 2:4] = 1
     assert_almost_equal(resized, ref)
-
 
 
 def test_resize3d_bilinear():
