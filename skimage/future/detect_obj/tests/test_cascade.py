@@ -22,7 +22,7 @@ class TestCascade():
                                                min_size=(24, 24),
                                                max_size=(123, 123))
 
-        assert detected, 'At least one face should be detected.'
+        assert len(detected) == 2, 'Two faces on the image.'
 
 
 if __name__ == '__main__':

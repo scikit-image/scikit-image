@@ -10,6 +10,7 @@ cimport openmp
 from skimage._shared.transform cimport integrate
 from libc.stdlib cimport malloc, free
 from skimage._shared.interpolation cimport round
+from libc.math cimport fmax, fmin
 from libcpp.vector cimport vector
 
 from cython.parallel import prange
@@ -46,6 +47,128 @@ cdef struct Stage:
     Py_ssize_t amount
     float threshold
 
+cdef vector[Detection] _post_process_detections(vector[Detection] detections,
+                                                          int min_neighbour_amount=4):
+
+    cdef:
+        Detection mean_cluster
+        vector[Detection] clusters
+        vector[int] clusters_scores
+        Py_ssize_t clusters_amount
+        Py_ssize_t current_detection
+        Py_ssize_t current_cluster
+        Py_ssize_t detections_amount = detections.size()
+        Py_ssize_t best_cluster_number
+        int new_cluster
+        float best_score
+        float intersection_score
+
+    if detections_amount:
+        clusters.push_back(detections[0])
+        clusters_scores.push_back(1)
+
+    for current_detection in range(1, detections_amount):
+
+        best_score = 0.5
+        best_cluster_number = 0
+        new_cluster = 1
+
+        clusters_amount = clusters.size()
+
+        for current_cluster in range(clusters_amount):
+
+            mean_cluster = compute_mean_detection(clusters[current_cluster], clusters_scores[current_cluster])
+            intersection_score = rect_intersection_score(detections[current_detection], mean_cluster)
+
+            if intersection_score > best_score:
+
+                new_cluster = 0
+                best_cluster_number = current_cluster
+                best_score = intersection_score
+
+        if new_cluster:
+            clusters.push_back(detections[current_detection])
+            clusters_scores.push_back(1)
+        else:
+            clusters[best_cluster_number].r += detections[current_detection].r
+            clusters[best_cluster_number].c += detections[current_detection].c
+            clusters[best_cluster_number].width += detections[current_detection].width
+            clusters[best_cluster_number].height += detections[current_detection].height
+            clusters_scores[best_cluster_number] += 1
+
+    clusters = get_mean_clusters(clusters, clusters_scores)
+    return threshold_clusters(clusters, clusters_scores, min_neighbour_amount)
+
+cdef vector[Detection] threshold_clusters(vector[Detection] clusters, vector[int] counts, int threshold):
+
+    cdef:
+        Py_ssize_t clusters_amount
+        Py_ssize_t current_cluster
+        vector[Detection] output
+
+    clusters_amount = clusters.size()
+
+    for current_cluster in range(clusters_amount):
+
+        if counts[current_cluster] >= threshold:
+            output.push_back(clusters[current_cluster])
+
+    return output
+
+cdef vector[Detection] get_mean_clusters(vector[Detection] clusters, vector[int] counts):
+
+    cdef:
+        Py_ssize_t current_cluster
+        Py_ssize_t clusters_amount = clusters.size()
+
+    for current_cluster in range(clusters_amount):
+         clusters[current_cluster] = compute_mean_detection(clusters[current_cluster], counts[current_cluster])
+
+    return clusters
+
+cdef Detection compute_mean_detection(Detection sum, int count):
+
+    cdef Detection mean = sum
+
+    mean.r = mean.r / count
+    mean.c = mean.c / count
+    mean.width = mean.width / count
+    mean.height = mean.height / count
+
+    return mean
+
+cdef float rect_intersection_area(Detection rect_a, Detection rect_b):
+
+    cdef:
+        Py_ssize_t r_a_1 = rect_a.r
+        Py_ssize_t r_a_2 = rect_a.r + rect_a.height
+        Py_ssize_t c_a_1 = rect_a.c
+        Py_ssize_t c_a_2 = rect_a.c + rect_a.width
+
+        Py_ssize_t r_b_1 = rect_b.r
+        Py_ssize_t r_b_2 = rect_b.r + rect_b.height
+        Py_ssize_t c_b_1 = rect_b.c
+        Py_ssize_t c_b_2 = rect_b.c + rect_b.width
+
+    return fmax(0, fmin(c_a_2, c_b_2) - fmax(c_a_1, c_b_1)) * fmax(0, fmin(r_a_2, r_b_2) - fmax(r_a_1, r_b_1))
+
+cdef float rect_intersection_score(Detection rect_a, Detection rect_b):
+
+    cdef:
+        float intersection_area
+        float union_area
+        float smaller_area
+        float area_a = rect_a.height * rect_a.width
+        float area_b = rect_b.height * rect_b.width
+
+    intersection_area = rect_intersection_area(rect_a, rect_b)
+
+    union_area = area_a + area_b - intersection_area
+
+    smaller_area = area_a if area_b > area_a else area_b
+
+    return intersection_area / smaller_area
+
 
 cdef class Cascade:
     """Class for cascade classifiers that are used for object detection."""
@@ -71,7 +194,7 @@ cdef class Cascade:
         free(self.LUTs)
 
     def __init__(self, xml_file, eps=1e-5):
-        """initialize cascade classifier.
+        """Initialize cascade classifier.
 
         Parameters
         ----------
@@ -240,7 +363,8 @@ cdef class Cascade:
         return int_img
 
 
-    def detect_multi_scale(self, img, float scale_factor, float step_ratio, min_size, max_size):
+    def detect_multi_scale(self, img, float scale_factor, float step_ratio,
+                           min_size, max_size, min_neighbour_amount=4):
         """Search for the object on multiple scales of input image.
 
         The function takes the input image, the scale factor by which the
@@ -347,7 +471,7 @@ cdef class Cascade:
                 current_row = current_row + current_step
                 current_col = 0
 
-        return list(output)
+        return list(_post_process_detections(output, min_neighbour_amount))
 
     def _load_xml(self, xml_file, eps=1e-5):
         """Load the parameters of cascade classifier into the class.
