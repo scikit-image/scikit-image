@@ -130,6 +130,8 @@ the grayscale image above:
     >>> plt.imshow(cat)
 
 
+.. _numpy-images-coordinate-conventions:
+
 Coordinate conventions
 ----------------------
 
