@@ -14,6 +14,7 @@ References:
     Imaging", IEEE Press 1988.
 """
 from __future__ import division
+from collections import namedtuple
 import numpy as np
 from scipy.fftpack import fft, ifft, fftfreq
 from scipy.interpolate import interp1d
@@ -163,7 +164,9 @@ def iradon_workspace(theta, output_size, circle=False, full=True):
                        dtype=np.float64)
         for i in range(len(th)):
             thw[i] = ypr * np.cos(th[i]) - xpr * np.sin(th[i])
-    return (xpr, ypr, thw)
+
+    Workspace = namedtuple("Workspace", ["xpr","ypr","thw"])
+    return Workspace(xpr=xpr, ypr=ypr, thw=thw)
 
 def iradon(radon_image, theta=None, output_size=None, workspace=None,
            filter="ramp", interpolation="linear", circle=False):
