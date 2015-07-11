@@ -44,19 +44,19 @@ def test_blob_dog():
 
 def test_blob_log():
     r2 = math.sqrt(2)
-    img = np.ones((512, 512))
+    img = np.ones((256, 256))
     img3 = np.ones((5, 5, 5))
 
-    xs, ys = circle(400, 130, 5)
+    xs, ys = circle(200, 65, 5)
     img[xs, ys] = 255
 
-    xs, ys = circle(160, 50, 15)
+    xs, ys = circle(80, 25, 15)
     img[xs, ys] = 255
 
-    xs, ys = circle(100, 300, 25)
+    xs, ys = circle(50, 150, 25)
     img[xs, ys] = 255
 
-    xs, ys = circle(200, 350, 30)
+    xs, ys = circle(100, 175, 30)
     img[xs, ys] = 255
 
     blobs = blob_log(img, min_sigma=5, max_sigma=20, threshold=1)
@@ -66,23 +66,23 @@ def test_blob_log():
     thresh = 3
 
     b = s[0]
-    assert abs(b[0] - 400) <= thresh
-    assert abs(b[1] - 130) <= thresh
+    assert abs(b[0] - 200) <= thresh
+    assert abs(b[1] - 65) <= thresh
     assert abs(radius(b) - 5) <= thresh
 
     b = s[1]
-    assert abs(b[0] - 160) <= thresh
-    assert abs(b[1] - 50) <= thresh
+    assert abs(b[0] - 80) <= thresh
+    assert abs(b[1] - 25) <= thresh
     assert abs(radius(b) - 15) <= thresh
 
     b = s[2]
-    assert abs(b[0] - 100) <= thresh
-    assert abs(b[1] - 300) <= thresh
+    assert abs(b[0] - 50) <= thresh
+    assert abs(b[1] - 150) <= thresh
     assert abs(radius(b) - 25) <= thresh
 
     b = s[3]
-    assert abs(b[0] - 200) <= thresh
-    assert abs(b[1] - 350) <= thresh
+    assert abs(b[0] - 100) <= thresh
+    assert abs(b[1] - 175) <= thresh
     assert abs(radius(b) - 30) <= thresh
 
     # Testing log scale
@@ -94,23 +94,23 @@ def test_blob_log():
         log_scale=True)
 
     b = s[0]
-    assert abs(b[0] - 400) <= thresh
-    assert abs(b[1] - 130) <= thresh
+    assert abs(b[0] - 200) <= thresh
+    assert abs(b[1] - 65) <= thresh
     assert abs(radius(b) - 5) <= thresh
 
     b = s[1]
-    assert abs(b[0] - 160) <= thresh
-    assert abs(b[1] - 50) <= thresh
+    assert abs(b[0] - 80) <= thresh
+    assert abs(b[1] - 25) <= thresh
     assert abs(radius(b) - 15) <= thresh
 
     b = s[2]
-    assert abs(b[0] - 100) <= thresh
-    assert abs(b[1] - 300) <= thresh
+    assert abs(b[0] - 50) <= thresh
+    assert abs(b[1] - 150) <= thresh
     assert abs(radius(b) - 25) <= thresh
 
     b = s[3]
-    assert abs(b[0] - 200) <= thresh
-    assert abs(b[1] - 350) <= thresh
+    assert abs(b[0] - 100) <= thresh
+    assert abs(b[1] - 175) <= thresh
     assert abs(radius(b) - 30) <= thresh
 
     assert_raises(ValueError, blob_log, img3)
