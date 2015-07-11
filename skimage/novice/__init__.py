@@ -27,6 +27,10 @@ We can create a Picture object open opening an image file:
 >>> from skimage import data
 >>> picture = novice.open(data.data_dir + '/chelsea.png')
 
+We can display pictures (after running this command, close the window to access the prompt again):
+
+>>> picture.show()
+
 Pictures know their format:
 
 >>> picture.format
@@ -44,9 +48,17 @@ True
 >>> picture.width
 451
 
+As a reminder, we can preview the picture with our earlier command:
+
+>>> picture.show()
+
 Changing `size` resizes the picture.
 
 >>> picture.size = (45, 30)
+
+We can preview the changes we made to the picture with our earlier command:
+
+>>> picture.show()
 
 You can iterate over pixels, which have RGB values between 0 and 255,
 and know their location in the picture.
