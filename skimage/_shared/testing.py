@@ -186,7 +186,7 @@ def setup_test():
     Import packages known to raise warnings, and then
     force warnings to raise errors.
 
-    Also set a random seed.
+    Also set the random seed to zero.
     """
     warnings.simplefilter('default')
 
