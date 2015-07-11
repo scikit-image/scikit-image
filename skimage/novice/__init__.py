@@ -65,7 +65,7 @@ and know their location in the picture.
 
 >>> for pixel in picture:
 ...     if (pixel.red > 128) and (pixel.x < picture.width):
-...         pixel.red /= 2
+...         pixel.red = pixel.red / 2
 
 Pictures know if they've been modified from the original file
 
