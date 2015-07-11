@@ -486,8 +486,8 @@ def test_entropy():
 
     # 12 bit per pixel
     selem = np.ones((64, 64), dtype=np.uint8)
-    data = np.tile(
-        np.reshape(np.arange(4096), (64, 64)), (2, 2)).astype(np.uint16)
+    data = np.zeros((65, 65), dtype=np.uint16)
+    data[:64, :64] = np.reshape(np.arange(4096), (64, 64))
     with expected_warnings(['Bitdepth of 11']):
         assert(np.max(rank.entropy(data, selem)) == 12)
 
