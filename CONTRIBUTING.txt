@@ -79,15 +79,17 @@ For a more detailed discussion, read these :doc:`detailed documents
 
 5. Document changes
 
-   Before merging your commits, you must add a description of your changes
-   to the release notes of the upcoming version in
-   ``doc/release/release_dev.txt``.
+   If your change introduces any API modifications, please update
+   ``doc/source/api_changes.txt``.
+
+   If your change introduces a deprecation, add a reminder to ``TODO.txt``
+   for the team to remove the deprecated functionality in the future.
 
 .. note::
 
-   To reviewers: if it is not obvious, add a short explanation of what a branch
-   did to the merge message and, if closing a bug, also add "Closes #123"
-   where 123 is the issue number.
+   To reviewers: if it is not obvious from the PR description, add a short
+   explanation of what a branch did to the merge message and, if closing a
+   bug, also add "Closes #123" where 123 is the issue number.
 
 
 Divergence between ``upstream master`` and your feature branch
@@ -124,8 +126,7 @@ Guidelines
 * All code should have tests (see `test coverage`_ below for more details).
 * All code should be documented, to the same
   `standard <://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt#docstring-standard>`_ as NumPy and SciPy.
-* For new functionality, always add an example to the
-  gallery.
+* For new functionality, always add an example to the gallery.
 * No changes are ever committed without review.  Ask on the
   `mailing list <http://groups.google.com/group/scikit-image>`_ if
   you get no response to your pull request.
@@ -147,7 +148,7 @@ Stylistic Guidelines
    import matplotlib.pyplot as plt
    from scipy import ndimage as ndi
 
-   cimport numpy as cnp # in Cython code
+   cimport numpy as cnp  # in Cython code
 
 * When documenting array parameters, use ``image : (M, N) ndarray``
   and then refer to ``M`` and ``N`` in the docstring, if necessary.
@@ -166,9 +167,16 @@ Stylistic Guidelines
 * Use ``Py_ssize_t`` as data type for all indexing, shape and size variables
   in C/C++ and Cython code.
 
+* Use relative module imports, i.e. ``from .._shared import xyz`` rather than
+  ``from skimage._shared import xyz``.
+
 * Wrap Cython code in a pure Python function, which defines the API. This
   improves compatibility with code introspection tools, which are often not
   aware of Cython code.
+
+* For Cython functions, release the GIL whenever possible, using
+  ``with nogil:``.
+
 
 Test coverage
 -------------

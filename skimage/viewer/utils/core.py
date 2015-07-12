@@ -1,7 +1,7 @@
 import warnings
 
 import numpy as np
-from skimage.viewer.qt import QtWidgets, has_qt, FigureManagerQT, FigureCanvasQTAgg
+from ..qt import QtWidgets, has_qt, FigureManagerQT, FigureCanvasQTAgg
 import matplotlib as mpl
 from matplotlib.figure import Figure
 from matplotlib import _pylab_helpers

@@ -9,7 +9,7 @@ from tempfile import NamedTemporaryFile
 
 from numpy import testing
 import numpy as np
-from skimage._shared._warnings import expected_warnings
+from ._warnings import expected_warnings
 import warnings
 
 from .. import data, io, img_as_uint, img_as_float, img_as_int, img_as_ubyte
@@ -183,15 +183,19 @@ def mono_check(plugin, fmt='png'):
 def setup_test():
     """Default package level setup routine for skimage tests.
 
-    Import packages known to raise errors, and then
+    Import packages known to raise warnings, and then
     force warnings to raise errors.
-    Set a random seed
+
+    Also set the random seed to zero.
     """
     warnings.simplefilter('default')
+
     from scipy import signal, ndimage, special, optimize, linalg
     from scipy.io import loadmat
     from skimage import viewer, filter
+
     np.random.seed(0)
+
     warnings.simplefilter('error')
 
 
