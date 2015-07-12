@@ -5,19 +5,19 @@ from ._draw import _coords_inside_image
 
 def _ellipse_in_shape(shape, center, radiuses):
     """Generate coordinates of points within ellipse bounded by shape."""
-    y, x = np.ogrid[0:float(shape[0]), 0:float(shape[1])]
-    cy, cx = center
+    r_lim, c_lim = np.ogrid[0:float(shape[0]), 0:float(shape[1])]
+    r, c = center
     ry, rx = radiuses
-    distances = ((y - cy) / ry) ** 2 + ((x - cx) / rx) ** 2
+    distances = ((r_lim - r) / ry) ** 2 + ((c_lim - c) / rx) ** 2
     return np.nonzero(distances < 1)
 
 
-def ellipse(cy, cx, yradius, xradius, shape=None):
+def ellipse(r, c, yradius, xradius, shape=None):
     """Generate coordinates of pixels within ellipse.
 
     Parameters
     ----------
-    cy, cx : double
+    r, c : double
         Centre coordinate of ellipse.
     yradius, xradius : double
         Minor and major semi-axes. ``(x/xradius)**2 + (y/yradius)**2 = 1``.
@@ -53,7 +53,7 @@ def ellipse(cy, cx, yradius, xradius, shape=None):
 
     """
 
-    center = np.array([cy, cx])
+    center = np.array([r, c])
     radiuses = np.array([yradius, xradius])
 
     # The upper_left and lower_right corners of the
@@ -77,12 +77,12 @@ def ellipse(cy, cx, yradius, xradius, shape=None):
     return rr, cc
 
 
-def circle(cy, cx, radius, shape=None):
+def circle(r, c, radius, shape=None):
     """Generate coordinates of pixels within circle.
 
     Parameters
     ----------
-    cy, cx : double
+    r, c : double
         Centre coordinate of circle.
     radius: double
         Radius of circle.
@@ -122,7 +122,7 @@ def circle(cy, cx, radius, shape=None):
 
     """
 
-    return ellipse(cy, cx, radius, radius, shape)
+    return ellipse(r, c, radius, radius, shape)
 
 
 def set_color(img, coords, color):
