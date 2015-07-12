@@ -37,12 +37,12 @@ def _coords_inside_image(rr, cc, shape, val=None):
     return rr[mask], cc[mask]
 
 
-def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y1, Py_ssize_t x1):
+def line(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y1, Py_ssize_t x1):
     """Generate line pixel coordinates.
 
     Parameters
     ----------
-    y, x : int
+    y0, x0 : int
         Starting position (row, column).
     y1, x1 : int
         End position (row, column).
@@ -54,9 +54,9 @@ def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y1, Py_ssize_t x1):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
 
-    Notes
-    -----
-    Anti-aliased line generator is available with `line_aa`.
+    See Also
+    --------
+    line_aa : Anti-aliased line generator
 
     Examples
     --------
@@ -79,8 +79,10 @@ def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y1, Py_ssize_t x1):
     """
 
     cdef char steep = 0
-    cdef Py_ssize_t dx = abs(x1 - x)
-    cdef Py_ssize_t dy = abs(y1 - y)
+    cdef Py_ssize_t x = x0
+    cdef Py_ssize_t y = y0
+    cdef Py_ssize_t dx = abs(x1 - x0)
+    cdef Py_ssize_t dy = abs(y1 - y0)
     cdef Py_ssize_t sx, sy, d, i
 
     with nogil:
