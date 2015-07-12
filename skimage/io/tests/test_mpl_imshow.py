@@ -42,6 +42,7 @@ def n_subplots(ax_im):
 
 
 def test_uint8():
+    plt.figure()
     ax_im = io.imshow(im8)
     assert ax_im.cmap.name == 'viridis'
     assert ax_im.get_clim() == (0, 255)
@@ -50,16 +51,20 @@ def test_uint8():
 
 
 def test_uint16():
+    plt.figure()
     ax_im = io.imshow(im16)
     assert ax_im.cmap.name == 'viridis'
     assert ax_im.get_clim() == (0, 65535)
+    assert n_subplots(ax_im) == 2
     assert ax_im.colorbar is not None
 
 
 def test_float():
+    plt.figure()
     ax_im = io.imshow(imf)
     assert ax_im.cmap.name == 'viridis'
     assert ax_im.get_clim() == (0, 1)
+    assert n_subplots(ax_im) == 2
     assert ax_im.colorbar is not None
 
 
