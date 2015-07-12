@@ -4,7 +4,8 @@ all:
 	python setup.py build_ext --inplace
 
 clean:
-	find . -name "*.so" -o -name "*.pyc" -o -name "*.pyx.md5" | xargs rm -f
+	find . -name "*.so" -o -name "*.pyc" -o -name "*.pyx.md5" -o -name "*.pyd" | xargs rm -f
+	find . -name "*.pyx" -exec ./tools/rm_pyx_c_file.sh {} \;
 
 test:
 	python -c "import skimage, sys, io; sys.exit(skimage.test_verbose())"
