@@ -11,8 +11,8 @@ class LineTool(CanvasToolBase):
 
     Parameters
     ----------
-    viewer : :class:`skimage.viewer.Viewer`
-        Skimage viewer object.
+    manager : Viewer or PlotPlugin.
+        Skimage viewer or plot plugin object.
     on_move : function
         Function called whenever a control handle is moved.
         This function must accept the end points of line as the only argument.
@@ -33,10 +33,10 @@ class LineTool(CanvasToolBase):
     end_points : 2D array
         End points of line ((x1, y1), (x2, y2)).
     """
-    def __init__(self, viewer, on_move=None, on_release=None, on_enter=None,
+    def __init__(self, manager, on_move=None, on_release=None, on_enter=None,
                  maxdist=10, line_props=None, handle_props=None,
                  **kwargs):
-        super(LineTool, self).__init__(viewer, on_move=on_move,
+        super(LineTool, self).__init__(manager, on_move=on_move,
                                        on_enter=on_enter,
                                        on_release=on_release, **kwargs)
 
@@ -64,7 +64,7 @@ class LineTool(CanvasToolBase):
                 print("length = %0.2f" %
                       np.sqrt(np.diff(x)**2 + np.diff(y)**2))
         self.callback_on_enter = on_enter
-        viewer.add_tool(self)
+        self.manager.add_tool(self)
 
     @property
     def end_points(self):
@@ -132,8 +132,8 @@ class ThickLineTool(LineTool):
 
     Parameters
     ----------
-    viewer : :class:`skimage.viewer.Viewer`
-        Skimage viewer object.
+    manager : Viewer or PlotPlugin.
+        Skimage viewer or plot plugin object.
     on_move : function
         Function called whenever a control handle is moved.
         This function must accept the end points of line as the only argument.
@@ -157,9 +157,9 @@ class ThickLineTool(LineTool):
         End points of line ((x1, y1), (x2, y2)).
     """
 
-    def __init__(self, viewer, on_move=None, on_enter=None, on_release=None,
+    def __init__(self, manager, on_move=None, on_enter=None, on_release=None,
                  on_change=None, maxdist=10, line_props=None, handle_props=None):
-        super(ThickLineTool, self).__init__(viewer,
+        super(ThickLineTool, self).__init__(manager,
                                             on_move=on_move,
                                             on_enter=on_enter,
                                             on_release=on_release,
