@@ -3,6 +3,7 @@ from numpy.testing import assert_array_equal, assert_raises
 from skimage.data import moon
 from skimage.feature import CENSURE
 from skimage._shared.testing import test_parallel
+from skimage.transform import rescale
 
 
 img = moon()
@@ -60,14 +61,14 @@ def test_keypoints_censure_moon_image_octagon():
     the expected values for Octagon filter."""
 
     detector = CENSURE(mode='octagon')
-    detector.detect(img)
-    expected_keypoints = np.array([[ 21, 496],
-                                   [ 35,  46],
-                                   [287, 250],
-                                   [356, 239],
-                                   [463, 116]])
+    detector.detect(rescale(img, 0.25))     # quarter scale image for speed
+    expected_keypoints = np.array([[ 23,  27],
+                                   [ 29,  89],
+                                   [ 31,  87],
+                                   [106,  59],
+                                   [111,  67]])
 
-    expected_scales = np.array([3, 4, 2, 2, 2])
+    expected_scales = np.array([3, 2, 5, 2, 4])
 
     assert_array_equal(expected_keypoints, detector.keypoints)
     assert_array_equal(expected_scales, detector.scales)
@@ -77,19 +78,16 @@ def test_keypoints_censure_moon_image_star():
     """Verify the actual Censure keypoints and their corresponding scale with
     the expected values for STAR filter."""
     detector = CENSURE(mode='star')
-    detector.detect(img)
-    expected_keypoints = np.array([[ 21, 497],
-                                  [ 36,  46],
-                                  [117, 356],
-                                  [185, 177],
-                                  [260, 227],
-                                  [287, 250],
-                                  [357, 239],
-                                  [451, 281],
-                                  [463, 116],
-                                  [467, 260]])
+    detector.detect(rescale(img, 0.25))     # quarter scale image for speed
+    expected_keypoints = np.array([[ 23,  27],
+                                   [ 29,  89],
+                                   [ 30,  86],
+                                   [107,  59],
+                                   [109,  64],
+                                   [111,  67],
+                                   [113,  70]])
 
-    expected_scales = np.array([3, 3, 6, 2, 3, 2, 3, 5, 2, 2])
+    expected_scales = np.array([3, 2, 4, 2, 5, 3, 2])
 
     assert_array_equal(expected_keypoints, detector.keypoints)
     assert_array_equal(expected_scales, detector.scales)

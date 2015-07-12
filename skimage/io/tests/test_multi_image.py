@@ -17,7 +17,7 @@ class TestMultiImage():
         # convert im1.tif im2.tif -adjoin multipage.tif
         use_plugin('pil')
         paths = [os.path.join(data_dir, 'multipage_rgb.tif'),
-                 os.path.join(data_dir, 'no_time_for_that.gif')]
+                 os.path.join(data_dir, 'no_time_for_that_tiny.gif')]
         self.imgs = [MultiImage(paths[0]),
                      MultiImage(paths[0], conserve_memory=False),
                      MultiImage(paths[1]),
