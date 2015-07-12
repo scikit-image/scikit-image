@@ -104,6 +104,21 @@ def test_line_aa_diagonal():
     for x, y in zip(r, c):
         assert_equal(img[r, c], 1)
 
+def test_line_equal_aliasing_horizontally_vertically():
+    img0 = np.zeros((25, 25))
+    img1 = np.zeros((25, 25))
+
+    # Near-horizontal line
+    rr, cc, val = line_aa(10, 2, 12, 20)
+    img0[rr, cc] = val
+
+    # Near-vertical (transpose of prior)
+    rr, cc, val = line_aa(2, 10, 20, 12)
+    img1[rr, cc] = val
+
+    # Difference - should be zero
+    assert_array_equal(img0, img1.T)
+
 
 def test_polygon_rectangle():
     img = np.zeros((10, 10), 'uint8')
