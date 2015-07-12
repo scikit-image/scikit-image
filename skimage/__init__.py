@@ -110,3 +110,5 @@ doctest_verbose = functools.partial(test, doctest=True, verbose=True)
 doctest_verbose.__doc__ = doctest.__doc__
 
 del warnings, functools, osp, imp
+
+from . import __check_build
