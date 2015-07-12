@@ -7,8 +7,8 @@ from ...exposure import is_low_contrast
 from ..._shared._warnings import all_warnings
 
 
-_default_colormap = 'gray'
-_nonstandard_colormap = 'cubehelix'
+_default_colormap = 'viridis'
+_nonstandard_colormap = 'viridis'
 _diverging_colormap = 'RdBu'
 
 
