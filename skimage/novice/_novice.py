@@ -249,7 +249,6 @@ class Picture(object):
 
     def __init__(self, path=None, array=None, xy_array=None):
         self._modified = False
-        self.scale = 1
         self._path = None
         self._format = None
 
@@ -325,7 +324,7 @@ class Picture(object):
         path : str
             Path (with file extension) where the picture is saved.
         """
-        io.imsave(path, self._rescale(self.array))
+        io.imsave(path, self.array)
         self._modified = False
         self._path = os.path.abspath(path)
         self._format = imghdr.what(path)
@@ -386,20 +385,13 @@ class Picture(object):
 
     def show(self):
         """Display the image."""
-        io.imshow(self._rescale(self.array))
+        io.imshow(self.array)
         io.show()
 
     def _makepixel(self, x, y):
         """Create a Pixel object for a given x, y location."""
         rgb = self.xy_array[x, y]
         return Pixel(self, self.array, x, y, rgb)
-
-    def _rescale(self, array):
-        """Rescale image according to scale factor."""
-        if self.scale == 1:
-            return array
-        new_size = (self.height * self.scale, self.width * self.scale)
-        return img_as_ubyte(resize(array, new_size, order=0))
 
     def _get_channel(self, channel):
         """Return a specific dimension out of the raw image data slice."""
