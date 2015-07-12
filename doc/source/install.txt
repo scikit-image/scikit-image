@@ -98,7 +98,7 @@ To update::
 Building with bento
 ```````````````````
 
-``scikit-image`` can also be built using `bento
+Alternatively, ``scikit-image`` can also be built using `bento
 <http://cournape.github.io/Bento/>`__.  Bento depends on `WAF
 <https://code.google.com/p/waf/>`__ for compilation.
 
