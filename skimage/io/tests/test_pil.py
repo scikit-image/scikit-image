@@ -160,7 +160,7 @@ def test_imsave_filelike():
     s = BytesIO()
 
     # save to file-like object
-    with expected_warnings(['precision loss|unclosed file',
+    with expected_warnings(['precision loss',
                             'is a low contrast image']):
         imsave(s, image)
 
@@ -230,9 +230,9 @@ class TestSaveTIF:
     def roundtrip(self, dtype, x, compress):
         with temporary_file(suffix='.tif') as fname:
             if dtype == np.bool:
-                expected = ['low contrast|unclosed file']
+                expected = ['low contrast']
             else:
-                expected = ['unclosed file|\A\Z']
+                expected = ['\A\Z']
             with expected_warnings(expected):
                 if compress > 0:
                     imsave(fname, x, compress=compress)

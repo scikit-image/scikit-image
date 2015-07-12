@@ -119,7 +119,7 @@ def color_check(plugin, fmt='png'):
     testing.assert_allclose(img2.astype(np.uint8), r2)
 
     img3 = img_as_float(img)
-    with expected_warnings(['precision loss|unclosed file']):
+    with expected_warnings(['precision loss']):
         r3 = roundtrip(img3, plugin, fmt)
     testing.assert_allclose(r3, img)
 
@@ -131,12 +131,12 @@ def color_check(plugin, fmt='png'):
             r4 = roundtrip(img4, plugin, fmt)
         testing.assert_allclose(r4, img4)
     else:
-        with expected_warnings(['sign loss|precision loss|unclosed file']):
+        with expected_warnings(['sign loss|precision loss']):
             r4 = roundtrip(img4, plugin, fmt)
             testing.assert_allclose(r4, img_as_ubyte(img4))
 
     img5 = img_as_uint(img)
-    with expected_warnings(['precision loss|unclosed file']):
+    with expected_warnings(['precision loss']):
         r5 = roundtrip(img5, plugin, fmt)
     testing.assert_allclose(r5, img)
 
@@ -156,14 +156,14 @@ def mono_check(plugin, fmt='png'):
     testing.assert_allclose(img2.astype(np.uint8), r2)
 
     img3 = img_as_float(img)
-    with expected_warnings(['precision|unclosed file|\A\Z']):
+    with expected_warnings(['precision|\A\Z']):
         r3 = roundtrip(img3, plugin, fmt)
     if r3.dtype.kind == 'f':
         testing.assert_allclose(img3, r3)
     else:
         testing.assert_allclose(r3, img_as_uint(img))
 
-    with expected_warnings(['precision loss|unclosed file']):
+    with expected_warnings(['precision loss']):
         img4 = img_as_int(img)
     if fmt.lower() in (('tif', 'tiff')):
         img4 -= 100
@@ -171,7 +171,7 @@ def mono_check(plugin, fmt='png'):
             r4 = roundtrip(img4, plugin, fmt)
         testing.assert_allclose(r4, img4)
     else:
-        with expected_warnings(['precision loss|sign loss|unclosed file']):
+        with expected_warnings(['precision loss|sign loss']):
             r4 = roundtrip(img4, plugin, fmt)
             testing.assert_allclose(r4, img_as_uint(img4))
 
