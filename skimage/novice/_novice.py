@@ -384,9 +384,6 @@ class Picture(object):
     def height(self, value):
         self.size = (self.width, value)
 
-    def _repr_png_(self):
-        return io.Image(self._rescale(self.array))._repr_png_()
-
     def show(self):
         """Display the image."""
         io.imshow(self._rescale(self.array))
@@ -497,6 +494,19 @@ class Picture(object):
 
     def __repr__(self):
         return "Picture({0} x {1})".format(*self.size)
+
+    def _repr_png_(self):
+        return self._repr_image_format('png')
+
+    def _repr_jpeg_(self):
+        return self._repr_image_format('jpeg')
+
+    def _repr_image_format(self, format_str):
+        str_buffer = six.BytesIO()
+        io.imsave(str_buffer, self.array, format_str=format_str)
+        return_str = str_buffer.getvalue()
+        str_buffer.close()
+        return return_str
 
 
 if __name__ == '__main__':
