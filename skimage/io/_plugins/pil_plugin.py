@@ -13,8 +13,8 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
 
     Parameters
     ----------
-    fname : str
-       File name.
+    fname : str or file
+       File name or file-like-object.
     dtype : numpy dtype object or string specifier
        Specifies data type of array elements.
     img_num : int, optional
@@ -43,20 +43,13 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
         if fname.lower().endswith(('.tiff', '.tif')):
             return tif_imread(fname, **kwargs)
 
-    with open(fname, 'rb') as f:
-        im = Image.open(f)
-        try:
-            # this will raise an IOError if the file is not readable
-            im.getdata()[0]
-        except IOError as e:
-            site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
-            pillow_error_message = str(e)
-            error_message = ('Could not load "%s" \n'
-                'Reason: "%s"\n'
-                'Please see documentation at: %s') % (fname, pillow_error_message, site)
-            raise ValueError(error_message)
-        else:
+    if isinstance(fname, string_types):
+        with open(fname, 'rb') as f:
+            im = Image.open(f)
             return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
+    else:
+        im = Image.open(f)
+        return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
 
 
 def pil_to_ndarray(im, dtype=None, img_num=None):
@@ -67,6 +60,17 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
     Refer to ``imread``.
 
     """
+    try:
+        # this will raise an IOError if the file is not readable
+        im.getdata()[0]
+    except IOError as e:
+        site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
+        pillow_error_message = str(e)
+        error_message = ('Could not load "%s" \n'
+            'Reason: "%s"\n'
+            'Please see documentation at: %s'
+             % (im.filename, pillow_error_message, site))
+        raise ValueError(error_message)
     frames = []
     grayscale = None
     i = 0
