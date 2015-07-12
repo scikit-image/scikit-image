@@ -147,8 +147,7 @@ def imshow(im, *args, **kwargs):
     kwargs.setdefault('vmin', lo)
     kwargs.setdefault('vmax', hi)
     ax_im = plt.imshow(im, *args, **kwargs)
-    if cmap != _default_colormap:
-        plt.colorbar()
+    plt.colorbar()
     return ax_im
 
 imread = plt.imread

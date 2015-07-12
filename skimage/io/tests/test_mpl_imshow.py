@@ -19,7 +19,6 @@ im_lo = imf / 1000
 im_hi = imf + 10
 
 
-
 def n_subplots(ax_im):
     """Return the number of subplots in the figure containing an ``AxesImage``.
 
@@ -44,27 +43,24 @@ def n_subplots(ax_im):
 
 def test_uint8():
     ax_im = io.imshow(im8)
-    assert ax_im.cmap.name == 'gray'
+    assert ax_im.cmap.name == 'viridis'
     assert ax_im.get_clim() == (0, 255)
-    # check that no colorbar was created
-    assert n_subplots(ax_im) == 1
-    assert ax_im.colorbar is None
+    assert n_subplots(ax_im) == 2
+    assert ax_im.colorbar is not None
 
 
 def test_uint16():
     ax_im = io.imshow(im16)
-    assert ax_im.cmap.name == 'gray'
+    assert ax_im.cmap.name == 'viridis'
     assert ax_im.get_clim() == (0, 65535)
-    assert n_subplots(ax_im) == 1
-    assert ax_im.colorbar is None
+    assert ax_im.colorbar is not None
 
 
 def test_float():
     ax_im = io.imshow(imf)
-    assert ax_im.cmap.name == 'gray'
+    assert ax_im.cmap.name == 'viridis'
     assert ax_im.get_clim() == (0, 1)
-    assert n_subplots(ax_im) == 1
-    assert ax_im.colorbar is None
+    assert ax_im.colorbar is not None
 
 
 def test_low_dynamic_range():
@@ -72,7 +68,6 @@ def test_low_dynamic_range():
         ax_im = io.imshow(im_lo)
     assert ax_im.get_clim() == (im_lo.min(), im_lo.max())
     # check that a colorbar was created
-    assert n_subplots(ax_im) == 2
     assert ax_im.colorbar is not None
 
 
