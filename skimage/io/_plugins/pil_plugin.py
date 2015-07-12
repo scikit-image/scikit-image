@@ -43,19 +43,20 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
         if fname.lower().endswith(('.tiff', '.tif')):
             return tif_imread(fname, **kwargs)
 
-    im = Image.open(fname)
-    try:
-        # this will raise an IOError if the file is not readable
-        im.getdata()[0]
-    except IOError as e:
-        site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
-        pillow_error_message = str(e)
-        error_message = ('Could not load "%s" \n'
-            'Reason: "%s"\n'
-            'Please see documentation at: %s') % (fname, pillow_error_message, site)
-        raise ValueError(error_message)
-    else:
-        return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
+    with open(fname, 'rb') as f:
+        im = Image.open(f)
+        try:
+            # this will raise an IOError if the file is not readable
+            im.getdata()[0]
+        except IOError as e:
+            site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
+            pillow_error_message = str(e)
+            error_message = ('Could not load "%s" \n'
+                'Reason: "%s"\n'
+                'Please see documentation at: %s') % (fname, pillow_error_message, site)
+            raise ValueError(error_message)
+        else:
+            return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
 
 
 def pil_to_ndarray(im, dtype=None, img_num=None):
