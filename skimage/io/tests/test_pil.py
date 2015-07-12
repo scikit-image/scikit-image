@@ -166,6 +166,8 @@ def test_imsave_filelike():
 
     # read from file-like object
     s.seek(0)
+    im = Image.open(s)
+    out = pil_to_ndarray(im)
     out = imread(s)
     assert out.shape == shape
     assert_allclose(out, image)
