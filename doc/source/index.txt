@@ -60,14 +60,16 @@ Sections
 
 
 
-Indices and Tables
-==================
+Indices
+=======
 
-`Table of Contents <contents.html>`_
-   Lists all sections and subsections.
+.. list-table::
+   :class: contentstable
 
-:ref:`search`
-   Search this documentation.
+   * - :ref:`search`
 
-:ref:`genindex`
-   All functions, classes, terms.
+       Search this documentation.
+
+     - :ref:`genindex`
+
+       All functions, classes, terms.
