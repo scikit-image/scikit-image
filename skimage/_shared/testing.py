@@ -93,8 +93,8 @@ def roundtrip(img, plugin, suffix):
     if not '.' in suffix:
         suffix = '.' + suffix
     temp_file = NamedTemporaryFile(suffix=suffix, delete=False)
-    temp_file.close()
     fname = temp_file.name
+    temp_file.close()
     io.imsave(fname, img, plugin=plugin)
     new = io.imread(fname, plugin=plugin)
     try:
