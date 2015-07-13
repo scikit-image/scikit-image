@@ -73,8 +73,8 @@ if __name__ == "__main__":
             # For these actions, NumPy is not required.
             #
             # They are required to succeed without Numpy for example when
-            # pip is used to install Scipy when Numpy is not yet present in
-            # the system.
+            # pip is used to install scikit-image when Numpy is not yet
+            # present in the system.
             pass
         else:
             print('To install scikit-image from source, you will need numpy.\n' +
