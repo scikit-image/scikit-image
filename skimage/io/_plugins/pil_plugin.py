@@ -41,7 +41,8 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
     if hasattr(fname, 'lower') and dtype is None:
         kwargs.setdefault('key', img_num)
         if fname.lower().endswith(('.tiff', '.tif')):
-            return tif_imread(fname, **kwargs)
+            with open(fname, 'rb') as f:
+                return tif_imread(f, **kwargs)
 
     if isinstance(fname, string_types):
         with open(fname, 'rb') as f:
