@@ -48,7 +48,7 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
             im = Image.open(f)
             return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
     else:
-        im = Image.open(f)
+        im = Image.open(fname)
         return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
 
 
