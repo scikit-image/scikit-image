@@ -19,7 +19,6 @@ import numpy as np
 from .. import img_as_float, img_as_uint
 from ..color.adapt_rgb import adapt_rgb, hsv_value
 from ..exposure import rescale_intensity
-from ..util import view_as_windows
 from .._shared.utils import skimage_deprecation, warnings
 
 NR_OF_GREY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
@@ -44,7 +43,7 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
         sidelength given by this value.
     ntiles_x : int, optional (deprecated in favor of ``kernel_size``)
         Number of tile regions in the X direction (horizontal).
-    ntiles_y : int, optional (deprecated if favor of ``kernel_size``)
+    ntiles_y : int, optional (deprecated in favor of ``kernel_size``)
         Number of tile regions in the Y direction (vertical).
     clip_limit : float: optional
         Clipping limit, normalized between 0 and 1 (higher values give more
@@ -131,8 +130,6 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
     row_step = int(np.floor(image.shape[0] / nr))
     col_step = int(np.floor(image.shape[1] / nc))
 
-    img_view = view_as_windows(image, kernel_size, (row_step, col_step))
-
     bin_size = 1 + NR_OF_GREY // nbins
     lut = np.arange(NR_OF_GREY)
     lut //= bin_size
@@ -142,11 +139,8 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
     # Calculate greylevel mappings for each contextual region
     for r in range(nr):
         for c in range(nc):
-            if r < (nr - 1) and c < (nc - 1):
-                sub_img = img_view[r, c]
-            else:
-                sub_img = image[r * row_step: (r + 1) * row_step,
-                                c * col_step: (c + 1) * col_step]
+            sub_img = image[r * row_step: (r + 1) * row_step,
+                            c * col_step: (c + 1) * col_step]
 
             if clip_limit > 0.0:  # Calculate actual cliplimit
                 clim = int(clip_limit * sub_img.size / nbins)
