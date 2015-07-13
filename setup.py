@@ -9,14 +9,14 @@ Please refer to the online documentation at
 http://scikit-image.org/
 """
 
-DISTNAME            = 'scikit-image'
-DESCRIPTION         = 'Image processing routines for SciPy'
-LONG_DESCRIPTION    = descr
-MAINTAINER          = 'Stefan van der Walt'
-MAINTAINER_EMAIL    = 'stefan@sun.ac.za'
-URL                 = 'http://scikit-image.org'
-LICENSE             = 'Modified BSD'
-DOWNLOAD_URL        = 'http://github.com/scikit-image/scikit-image'
+DISTNAME = 'scikit-image'
+DESCRIPTION = 'Image processing routines for SciPy'
+LONG_DESCRIPTION = descr
+MAINTAINER = 'Stefan van der Walt'
+MAINTAINER_EMAIL = 'stefan@sun.ac.za'
+URL = 'http://scikit-image.org'
+LICENSE = 'Modified BSD'
+DOWNLOAD_URL = 'http://github.com/scikit-image/scikit-image'
 
 import os
 import sys
@@ -41,16 +41,17 @@ REQUIRES = [r.replace('[array]', '') for r in REQUIRES]
 
 
 def configuration(parent_package='', top_path=None):
-    if os.path.exists('MANIFEST'): os.remove('MANIFEST')
+    if os.path.exists('MANIFEST'):
+        os.remove('MANIFEST')
 
     from numpy.distutils.misc_util import Configuration
     config = Configuration(None, parent_package, top_path)
 
     config.set_options(
-            ignore_setup_xxx_py=True,
-            assume_default_configuration=True,
-            delegate_options_to_subpackages=True,
-            quiet=True)
+        ignore_setup_xxx_py=True,
+        assume_default_configuration=True,
+        delegate_options_to_subpackages=True,
+        quiet=True)
 
     config.add_subpackage('skimage')
     config.add_data_dir('skimage/data')
@@ -59,17 +60,29 @@ def configuration(parent_package='', top_path=None):
 
 
 if __name__ == "__main__":
-    # purposely fail if numpy is not available
-    # other dependecies will be resolved by pip (install_requires)
     try:
         from numpy.distutils.core import setup
+        extra = {'configuration': configuration}
+        # do not risk update numpy
+        INSTALL_REQUIRES = [r for r in INSTALL_REQUIRES if 'numpy' not in r]
     except ImportError:
-        print('To install scikit-image from source, you will need numpy.\n' +
-              'Install numpy with pip:\n' +
-              'pip install numpy\n'
-              'Or use your operating system package manager. For more\n' +
-              'details, see http://scikit-image.org/docs/stable/install.html')
-        sys.exit(1)
+        if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or
+                                   sys.argv[1] in ('--help-commands',
+                                                   'egg_info', '--version',
+                                                   'clean')):
+            # For these actions, NumPy is not required.
+            #
+            # They are required to succeed without Numpy for example when
+            # pip is used to install Scipy when Numpy is not yet present in
+            # the system.
+            pass
+        else:
+            print('To install scikit-image from source, you will need numpy.\n' +
+                  'Install numpy with pip:\n' +
+                  'pip install numpy\n'
+                  'Or use your operating system package manager. For more\n' +
+                  'details, see http://scikit-image.org/docs/stable/install.html')
+            sys.exit(1)
 
     setup(
         name=DISTNAME,
@@ -97,8 +110,6 @@ if __name__ == "__main__":
             'Operating System :: Unix',
             'Operating System :: MacOS',
         ],
-
-        configuration=configuration,
         install_requires=INSTALL_REQUIRES,
         # install cython when running setup.py (source install)
         setup_requires=['cython>=0.21'],
@@ -112,4 +123,5 @@ if __name__ == "__main__":
         },
 
         cmdclass={'build_py': build_py},
+        **extra
     )
