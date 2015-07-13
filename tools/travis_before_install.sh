@@ -46,10 +46,6 @@ source ~/venv/bin/activate
 
 retry pip install wheel flake8 coveralls nose
 
-# install system tk for matplotlib
-sudo apt-get install python-tk
-
-
 # on Python 3.2, use matplotlib 1.3.1
 if [[ $TRAVIS_PYTHON_VERSION == 3.2 ]]; then
     sed -i 's/matplotlib>=.*/matplotlib==1.3.1/g' requirements.txt
@@ -62,10 +58,6 @@ done
 retry pip install $WHEELHOUSE $WHEELS
 
 retry pip install -r requirements.txt
-
-# clean up disk space
-sudo apt-get clean
-sudo rm -rf /tmp/*
 
 
 section () {
