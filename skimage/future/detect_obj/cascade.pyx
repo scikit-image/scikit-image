@@ -567,8 +567,9 @@ cdef class Cascade:
         int_img : 2-D floats ndarray
             C-contiguous integral image of the input image.
         """
-
-        img = rgb2gray(img)
+        # Convert to gray image if the color image passed in.
+        if len(img.shape) > 2:
+            img = rgb2gray(img)
         int_img = integral_image(img)
         int_img = np.ascontiguousarray(int_img, dtype=np.float32)
 
