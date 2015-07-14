@@ -6,6 +6,15 @@
 # See doc/travis_notes.txt for some guidelines
 
 language: python
+sudo: false
+cache: pip
+addons:
+  apt:
+    packages:
+    - libfreeimage3
+    - texlive 
+    - texlive-latex-extra 
+    - dvipng
 
 notifications:
   webhooks:

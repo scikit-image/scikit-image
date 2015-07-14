@@ -29,7 +29,7 @@ We can create a Picture object open opening an image file:
 
 We can display pictures (after running this command, close the window to access the prompt again):
 
->>> picture.show()
+>>> picture.show()  # doctest: +SKIP
 
 Pictures know their format:
 
@@ -50,7 +50,7 @@ True
 
 As a reminder, we can preview the picture with our earlier command:
 
->>> picture.show()
+>>> picture.show()  # doctest: +SKIP
 
 Changing `size` resizes the picture.
 
@@ -58,7 +58,7 @@ Changing `size` resizes the picture.
 
 We can preview the changes we made to the picture with our earlier command:
 
->>> picture.show()
+>>> picture.show()  # doctest: +SKIP
 
 You can iterate over pixels, which have RGB values between 0 and 255,
 and know their location in the picture.
