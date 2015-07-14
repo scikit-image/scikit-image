@@ -1,5 +1,10 @@
 Remember to list any API changes below in `doc/source/api_changes.txt`.
 
+Version 0.14
+------------
+* Remove deprecated ``ntiles_*` kwargs in ``equalize_adapthist``.
+
+
 Version 0.13
 ------------
 * Remove deprecated `None` defaults for `skimage.exposure.rescale_intensity`
@@ -11,6 +16,8 @@ Version 0.13
 * Remove deprecated edge filters `hsobel`, `vsobel`, `hscharr`, `vscharr`,
   `hprewitt`, `vprewitt`, `roberts_positive_diagonal`,
   `roberts_negative_diagonal` in `skimage/filters/edges.py`
+
+
 
 Version 0.12
 ------------
