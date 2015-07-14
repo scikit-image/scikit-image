@@ -19,6 +19,11 @@ import xml.etree.ElementTree as ET
 from ...feature._texture cimport _multiblock_lbp
 
 
+# Struct for storing clusters of rectangles. As the rectangles are dynamically
+# added, the sum of row, col positions and width and heights are stored
+# with the count of rectangles that belong to this cluster. This way,
+# we don't have to store all the rectangles information as array
+# and the average can be easily computed in a constant time.
 cdef struct DetectionsCluster:
 
     int r_sum
@@ -27,6 +32,7 @@ cdef struct DetectionsCluster:
     int height_sum
     int count
 
+# Struct for storing a single detection.
 cdef struct Detection:
 
     int r
@@ -34,6 +40,7 @@ cdef struct Detection:
     int width
     int height
 
+# Struct for storing multi-block binary pattern position.
 cdef struct MBLBP:
 
     Py_ssize_t r
@@ -41,6 +48,11 @@ cdef struct MBLBP:
     Py_ssize_t width
     Py_ssize_t height
 
+# Struct for storing a stump of classifying cascade. It has the index to the
+# look-up table which is stored in Cascade class. Depending on the value of
+# the feature after its evaluation `left` or `right` value is returned which
+# is used by Cascade classifier to predict whether or not the
+# object is detected.
 cdef struct MBLBPStump:
 
     Py_ssize_t feature_id
@@ -48,6 +60,13 @@ cdef struct MBLBPStump:
     float left
     float right
 
+# Struct for storing a stage of classifier which itself consists from stumps.
+# It has the index that maps to the starting stump and amount of stumps.
+# In each stage all the stumps are evaluated and their output values( `left`
+# or `right` depending on the input) are summed up and compared to the
+# threshold. If the value is higher than threshold, the stage is passed
+# and Cascade classifier goes to the next one. If all the stages are passed,
+# the object is predicted to be present in the input image patch.
 cdef struct Stage:
 
     Py_ssize_t first_idx
