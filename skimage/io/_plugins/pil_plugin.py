@@ -5,7 +5,7 @@ from six import string_types
 from PIL import Image
 
 from ...util import img_as_ubyte, img_as_uint
-from ...external.tifffile import TiffFile, imsave as tif_imsave
+from .tifffile import imread as tif_imread, imsave as tif_imsave
 
 
 def imread(fname, dtype=None, img_num=None, **kwargs):
@@ -41,9 +41,7 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
     if hasattr(fname, 'lower') and dtype is None:
         kwargs.setdefault('key', img_num)
         if fname.lower().endswith(('.tiff', '.tif')):
-            with open(fname, 'rb') as f:
-                tif = TiffFile(f)
-                return tif.asarray(**kwargs)
+            return tif_imread(fname, **kwargs)
 
     if isinstance(fname, string_types):
         with open(fname, 'rb') as f:
