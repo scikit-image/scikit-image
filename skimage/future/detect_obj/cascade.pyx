@@ -21,6 +21,7 @@ from skimage.color import rgb2gray
 from skimage.transform import integral_image
 import xml.etree.ElementTree as ET
 from ...feature._texture cimport _multiblock_lbp
+import math
 
 
 # Struct for storing clusters of rectangles. As the rectangles are dynamically
@@ -528,22 +529,24 @@ cdef class Cascade:
             specified interval after multiplying the search window.
         """
 
-        min_size = np.array(min_size)
-        max_size = np.array(max_size)
-
-        scale_factors = []
-        current_scale = 1
         current_size = np.array((self.window_height, self.window_width))
+        min_size = np.array(min_size, dtype=np.float32)
+        max_size = np.array(max_size, dtype=np.float32)
 
-        while (current_size <= max_size).all():
+        row_power_max = math.log(max_size[0]/current_size[0], scale_step)
+        col_power_max = math.log(max_size[1]/current_size[1], scale_step)
 
-            if (current_size >= min_size).all():
-                scale_factors.append(current_scale)
+        row_power_min = math.log(min_size[0]/current_size[0], scale_step)
+        col_power_min = math.log(min_size[1]/current_size[1], scale_step)
 
-            current_scale = current_scale * scale_step
-            current_size = current_size * scale_step
+        mn = max(row_power_min, col_power_min, 0)
+        mx = min(row_power_max, col_power_max)
 
-        return np.array(scale_factors, dtype=np.float32)
+        powers = np.arange(mn, mx)
+
+        scale_factors = np.power(scale_step, powers, dtype=np.float32)
+
+        return scale_factors
 
     def _get_contiguous_integral_image(self, img):
         """Get a c-contiguous array that represents the integral image.
