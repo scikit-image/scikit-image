@@ -7,10 +7,14 @@
 import numpy as np
 cimport numpy as cnp
 cimport openmp
-from skimage._shared.transform cimport integrate
 from libc.stdlib cimport malloc, free
-from skimage._shared.interpolation cimport round, fmax, fmin
 from libcpp.vector cimport vector
+from skimage._shared.transform cimport integrate
+
+# Use our own implementation of the function instead of libc.math.
+# Otherwise, the compilation breaks on some compilers due to Cython
+# bug.
+from skimage._shared.interpolation cimport round, fmax, fmin
 
 from cython.parallel import prange
 from skimage.color import rgb2gray
@@ -32,6 +36,7 @@ cdef struct DetectionsCluster:
     int height_sum
     int count
 
+
 # Struct for storing a single detection.
 cdef struct Detection:
 
@@ -40,6 +45,7 @@ cdef struct Detection:
     int width
     int height
 
+
 # Struct for storing multi-block binary pattern position.
 cdef struct MBLBP:
 
@@ -47,6 +53,7 @@ cdef struct MBLBP:
     Py_ssize_t c
     Py_ssize_t width
     Py_ssize_t height
+
 
 # Struct for storing a stump of classifying cascade. It has the index to the
 # look-up table which is stored in Cascade class. Depending on the value of
@@ -60,11 +67,12 @@ cdef struct MBLBPStump:
     float left
     float right
 
-# Struct for storing a stage of classifier which itself consists from stumps.
+
+# Struct for storing a stage of classifier which itself consists of stumps.
 # It has the index that maps to the starting stump and amount of stumps.
 # In each stage all the stumps are evaluated and their output values( `left`
 # or `right` depending on the input) are summed up and compared to the
-# threshold. If the value is higher than threshold, the stage is passed
+# threshold. If the value is higher than the threshold, the stage is passed
 # and Cascade classifier goes to the next one. If all the stages are passed,
 # the object is predicted to be present in the input image patch.
 cdef struct Stage:
@@ -73,7 +81,31 @@ cdef struct Stage:
     Py_ssize_t amount
     float threshold
 
-cdef vector[Detection] _post_process_detections(vector[Detection] detections, int min_neighbour_amount=4):
+
+cdef vector[Detection] _group_detections(vector[Detection] detections,
+                                         int min_neighbour_amount=4):
+    """Groups similar detection into single detection and eliminates weak
+    detections that have small amount of intersecting detection.
+
+    The function assumes that true detections are supposed to have a certain
+    amount of intersecting detections and the false detections are supposed to
+    have small amount. Based on this approach, the final detections are
+    computed. The detections that are approved and gathered into one cluster
+    are averaged and this value is returned.
+
+    Parameters
+    ----------
+    detections : vector[Detection]
+        A cluster of detections.
+    min_neighbour_amount : int
+        Minimum amount of intersecting detections in order for detection
+        to be approved by the function.
+
+    Returns
+    -------
+    output : vector[Detection]
+        The grouped detections.
+    """
 
     cdef:
         Detection mean_detection
@@ -123,7 +155,26 @@ cdef vector[Detection] _post_process_detections(vector[Detection] detections, in
     clusters = threshold_clusters(clusters, min_neighbour_amount)
     return get_mean_detections(clusters)
 
-cdef DetectionsCluster update_cluster(DetectionsCluster cluster, Detection detection):
+
+cdef DetectionsCluster update_cluster(DetectionsCluster cluster,
+                                      Detection detection):
+    """Updated the cluster by adding new detection.
+
+    Updates the cluster by adding new detection to it. The added
+    detection contributes to the mean values of the cluster.
+
+    Parameters
+    ----------
+    cluster : DetectionsCluster
+        A cluster of detections.
+    detection : Detection
+        The detection to be added to cluster.
+
+    Returns
+    -------
+    updated_cluster : DetectionsCluster
+        The updated cluster.
+    """
 
     cdef DetectionsCluster updated_cluster = cluster
 
@@ -137,6 +188,21 @@ cdef DetectionsCluster update_cluster(DetectionsCluster cluster, Detection detec
 
 
 cdef Detection mean_detection_from_cluster(DetectionsCluster cluster):
+    """Compute the mean detection from the cluster.
+
+    Returns the mean detection computed from the all rectangles that
+    belong to current cluster.
+
+    Parameters
+    ----------
+    cluster : DetectionsCluster
+        A cluster of detections.
+
+    Returns
+    -------
+    mean : Detection
+        The mean detection.
+    """
 
     cdef Detection mean
 
@@ -147,7 +213,22 @@ cdef Detection mean_detection_from_cluster(DetectionsCluster cluster):
 
     return mean
 
+
 cdef DetectionsCluster cluster_from_detection(Detection detection):
+    """Create a cluster from a single detection.
+
+    Creates a cluster with count one and values that are taken from detection.
+
+    Parameters
+    ----------
+    detection : Detection
+        A single detection.
+
+    Returns
+    -------
+    new_cluster : DetectionsCluster
+        The cluster struct that was created from detection.
+    """
 
     cdef DetectionsCluster new_cluster
 
@@ -159,7 +240,26 @@ cdef DetectionsCluster cluster_from_detection(Detection detection):
 
     return new_cluster
 
-cdef vector[DetectionsCluster] threshold_clusters(vector[DetectionsCluster] clusters, int count_threshold):
+
+cdef vector[DetectionsCluster] threshold_clusters(vector[DetectionsCluster] clusters,
+                                                  int count_threshold):
+    """Threshold clusters depending on the amount of rectangles in them.
+
+    Only the clusters with the amount of rectangles greater than the threshold
+    are left.
+
+    Parameters
+    ----------
+    clusters : vector[DetectionsCluster]
+        Array of rectnagles clusters.
+    count_threshold : int
+        The threshold amount of rectangles that is used.
+
+    Returns
+    -------
+    output : vector[DetectionsCluster]
+        The array of clusters that satisfy the threshold criteria.
+    """
 
     cdef:
         Py_ssize_t clusters_amount
@@ -175,7 +275,25 @@ cdef vector[DetectionsCluster] threshold_clusters(vector[DetectionsCluster] clus
 
     return output
 
+
 cdef vector[Detection] get_mean_detections(vector[DetectionsCluster] clusters):
+    """Computes the mean of each cluster of detections in the array.
+
+    Each cluster is replaced with a single detection that represents
+    the mean of the cluster, computed from the rectangles that belong
+    to the cluster.
+
+    Parameters
+    ----------
+    clusters : vector[DetectionsCluster]
+        Array of rectnagles clusters.
+
+    Returns
+    -------
+    detections : vector[Detection]
+        The array of mean detections. Each detection represent mean
+        for one cluster.
+    """
 
     cdef:
         Py_ssize_t current_cluster
@@ -191,6 +309,22 @@ cdef vector[Detection] get_mean_detections(vector[DetectionsCluster] clusters):
 
 
 cdef float rect_intersection_area(Detection rect_a, Detection rect_b):
+    """Computes the intersection area of two rectangles.
+
+    The area where rectangles intersect.
+
+    Parameters
+    ----------
+    rect_a : Detection
+        Struct of the first rectnagle.
+    rect_a : Detection
+        Struct of the second rectnagle.
+
+    Returns
+    -------
+    result : float
+        The intersection score area.
+    """
 
     cdef:
         Py_ssize_t r_a_1 = rect_a.r
@@ -203,9 +337,29 @@ cdef float rect_intersection_area(Detection rect_a, Detection rect_b):
         Py_ssize_t c_b_1 = rect_b.c
         Py_ssize_t c_b_2 = rect_b.c + rect_b.width
 
-    return fmax(0, fmin(c_a_2, c_b_2) - fmax(c_a_1, c_b_1)) * fmax(0, fmin(r_a_2, r_b_2) - fmax(r_a_1, r_b_1))
+    return (fmax(0, fmin(c_a_2, c_b_2) - fmax(c_a_1, c_b_1)) *
+            fmax(0, fmin(r_a_2, r_b_2) - fmax(r_a_1, r_b_1)))
+
 
 cdef float rect_intersection_score(Detection rect_a, Detection rect_b):
+    """Computes the intersection score of two rectangles.
+
+    The score is computed by dividing the intersection area of rectangles
+    by the area of the rectangle with the smallest area.
+
+    Parameters
+    ----------
+    rect_a : Detection
+        Struct of the first rectnagle.
+    rect_a : Detection
+        Struct of the second rectnagle.
+
+    Returns
+    -------
+    result : float
+        The intersection score. The number in the interval [0, 1].
+        1 means rectangles fully intersect, 0 means they don't.
+    """
 
     cdef:
         float intersection_area
@@ -215,8 +369,6 @@ cdef float rect_intersection_score(Detection rect_a, Detection rect_b):
         float area_b = rect_b.height * rect_b.width
 
     intersection_area = rect_intersection_area(rect_a, rect_b)
-
-    union_area = area_a + area_b - intersection_area
 
     smaller_area = area_a if area_b > area_a else area_b
 
@@ -260,7 +412,6 @@ cdef class Cascade:
         """
 
         self._load_xml(xml_file, eps)
-
 
     cdef bint classify(self, float[:, ::1] int_img, Py_ssize_t row, Py_ssize_t col, float scale) nogil:
         """Classify the provided image patch i.e. check if the classifier
@@ -524,7 +675,7 @@ cdef class Cascade:
                 current_row = current_row + current_step
                 current_col = 0
 
-        return list(_post_process_detections(output, min_neighbour_amount))
+        return list(_group_detections(output, min_neighbour_amount))
 
     def _load_xml(self, xml_file, eps=1e-5):
         """Load the parameters of cascade classifier into the class.
