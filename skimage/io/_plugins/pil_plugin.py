@@ -5,7 +5,7 @@ from six import string_types
 from PIL import Image
 
 from ...util import img_as_ubyte, img_as_uint
-from .tifffile import imread as tif_imread, imsave as tif_imsave
+from .tifffile_plugin import imread as tif_imread, imsave as tif_imsave
 
 
 def imread(fname, dtype=None, img_num=None, **kwargs):
