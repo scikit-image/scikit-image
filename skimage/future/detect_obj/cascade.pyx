@@ -83,6 +83,7 @@ cdef struct Stage:
 
 
 cdef vector[Detection] _group_detections(vector[Detection] detections,
+                                         float intersection_score_threshold=0.5,
                                          int min_neighbour_amount=4):
     """Groups similar detection into single detection and eliminates weak
     detections that have small amount of intersecting detection.
@@ -100,6 +101,10 @@ cdef vector[Detection] _group_detections(vector[Detection] detections,
     min_neighbour_amount : int
         Minimum amount of intersecting detections in order for detection
         to be approved by the function.
+    intersection_score_threshold : float
+        The minimum value of value of ratio
+        (intersection area) / (small rectangle ratio) in order to merge
+        two rectangles into one cluster.
 
     Returns
     -------
@@ -127,7 +132,7 @@ cdef vector[Detection] _group_detections(vector[Detection] detections,
 
     for current_detection in range(1, detections_amount):
 
-        best_score = 0.5
+        best_score = intersection_score_threshold
         best_cluster_number = 0
         new_cluster = True
 
@@ -568,7 +573,8 @@ cdef class Cascade:
 
 
     def detect_multi_scale(self, img, float scale_factor, float step_ratio,
-                           min_size, max_size, min_neighbour_amount=4):
+                           min_size, max_size, min_neighbour_amount=4,
+                           intersection_score_threshold=0.5):
         """Search for the object on multiple scales of input image.
 
         The function takes the input image, the scale factor by which the
@@ -592,6 +598,13 @@ cdef class Cascade:
             Minimum size of the search window.
         max_size : typle (int, int)
             Maximum size of the search window.
+        min_neighbour_amount : int
+            Minimum amount of intersecting detections in order for detection
+            to be approved by the function.
+        intersection_score_threshold : float
+            The minimum value of value of ratio
+            (intersection area) / (small rectangle ratio) in order to merge
+            two detections into one.
 
         Returns
         -------
@@ -675,7 +688,8 @@ cdef class Cascade:
                 current_row = current_row + current_step
                 current_col = 0
 
-        return list(_group_detections(output, min_neighbour_amount))
+        return list(_group_detections(output, intersection_score_threshold,
+                                      min_neighbour_amount))
 
     def _load_xml(self, xml_file, eps=1e-5):
         """Load the parameters of cascade classifier into the class.
