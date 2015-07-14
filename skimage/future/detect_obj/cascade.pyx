@@ -567,7 +567,6 @@ cdef class Cascade:
         int_img : 2-D floats ndarray
             C-contiguous integral image of the input image.
         """
-        # Convert to gray image if the color image passed in.
         if len(img.shape) > 2:
             img = rgb2gray(img)
         int_img = integral_image(img)
@@ -767,7 +766,7 @@ cdef class Cascade:
 
         # Check if memory was allocated.
         if not (features_carr and stumps_carr and stages_carr and LUTs_carr):
-            raise MemoryError()
+            raise MemoryError("Can't allocate memory.")
 
         # Parse and load features in memory.
         for feature_number in range(features_amount):
