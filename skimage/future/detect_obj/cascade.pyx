@@ -20,6 +20,14 @@ import xml.etree.ElementTree as ET
 from ...feature._texture cimport _multiblock_lbp
 
 
+cdef struct DetectionsCluster:
+
+    int r_sum
+    int c_sum
+    int width_sum
+    int height_sum
+    int count
+
 cdef struct Detection:
 
     int r
@@ -47,95 +55,122 @@ cdef struct Stage:
     Py_ssize_t amount
     float threshold
 
-cdef vector[Detection] _post_process_detections(vector[Detection] detections,
-                                                          int min_neighbour_amount=4):
+cdef vector[Detection] _post_process_detections(vector[Detection] detections, int min_neighbour_amount=4):
 
     cdef:
-        Detection mean_cluster
-        vector[Detection] clusters
+        Detection mean_detection
+        vector[DetectionsCluster] clusters
         vector[int] clusters_scores
         Py_ssize_t clusters_amount
         Py_ssize_t current_detection
         Py_ssize_t current_cluster
         Py_ssize_t detections_amount = detections.size()
         Py_ssize_t best_cluster_number
-        int new_cluster
+        bint new_cluster
         float best_score
         float intersection_score
 
+    # Check if detections array is not empty.
+    # Push first detection as first cluster.
     if detections_amount:
-        clusters.push_back(detections[0])
-        clusters_scores.push_back(1)
+        clusters.push_back(cluster_from_detection(detections[0]))
 
     for current_detection in range(1, detections_amount):
 
         best_score = 0.5
         best_cluster_number = 0
-        new_cluster = 1
+        new_cluster = True
 
         clusters_amount = clusters.size()
 
         for current_cluster in range(clusters_amount):
 
-            mean_cluster = compute_mean_detection(clusters[current_cluster], clusters_scores[current_cluster])
-            intersection_score = rect_intersection_score(detections[current_detection], mean_cluster)
+            mean_detection = mean_detection_from_cluster(clusters[current_cluster])
+            intersection_score = rect_intersection_score(detections[current_detection], mean_detection)
 
             if intersection_score > best_score:
 
-                new_cluster = 0
+                new_cluster = False
                 best_cluster_number = current_cluster
                 best_score = intersection_score
 
         if new_cluster:
-            clusters.push_back(detections[current_detection])
-            clusters_scores.push_back(1)
+
+            clusters.push_back(cluster_from_detection(detections[current_detection]))
         else:
-            clusters[best_cluster_number].r += detections[current_detection].r
-            clusters[best_cluster_number].c += detections[current_detection].c
-            clusters[best_cluster_number].width += detections[current_detection].width
-            clusters[best_cluster_number].height += detections[current_detection].height
-            clusters_scores[best_cluster_number] += 1
 
-    clusters = get_mean_clusters(clusters, clusters_scores)
-    return threshold_clusters(clusters, clusters_scores, min_neighbour_amount)
+            clusters[best_cluster_number] = update_cluster(clusters[best_cluster_number],
+                                                           detections[current_detection])
 
-cdef vector[Detection] threshold_clusters(vector[Detection] clusters, vector[int] counts, int threshold):
+    clusters = threshold_clusters(clusters, min_neighbour_amount)
+    return get_mean_detections(clusters)
+
+cdef DetectionsCluster update_cluster(DetectionsCluster cluster, Detection detection):
+
+    cdef DetectionsCluster updated_cluster = cluster
+
+    updated_cluster.r_sum += detection.r
+    updated_cluster.c_sum += detection.c
+    updated_cluster.width_sum += detection.width
+    updated_cluster.height_sum += detection.height
+    updated_cluster.count += 1
+
+    return updated_cluster
+
+
+cdef Detection mean_detection_from_cluster(DetectionsCluster cluster):
+
+    cdef Detection mean
+
+    mean.r = cluster.r_sum / cluster.count
+    mean.c = cluster.c_sum / cluster.count
+    mean.width = cluster.width_sum / cluster.count
+    mean.height = cluster.height_sum / cluster.count
+
+    return mean
+
+cdef DetectionsCluster cluster_from_detection(Detection detection):
+
+    cdef DetectionsCluster new_cluster
+
+    new_cluster.r_sum = detection.r
+    new_cluster.c_sum = detection.c
+    new_cluster.width_sum = detection.width
+    new_cluster.height_sum = detection.height
+    new_cluster.count = 1
+
+    return new_cluster
+
+cdef vector[DetectionsCluster] threshold_clusters(vector[DetectionsCluster] clusters, int count_threshold):
 
     cdef:
         Py_ssize_t clusters_amount
         Py_ssize_t current_cluster
-        vector[Detection] output
+        vector[DetectionsCluster] output
 
     clusters_amount = clusters.size()
 
     for current_cluster in range(clusters_amount):
 
-        if counts[current_cluster] >= threshold:
+        if clusters[current_cluster].count >= count_threshold:
             output.push_back(clusters[current_cluster])
 
     return output
 
-cdef vector[Detection] get_mean_clusters(vector[Detection] clusters, vector[int] counts):
+cdef vector[Detection] get_mean_detections(vector[DetectionsCluster] clusters):
 
     cdef:
         Py_ssize_t current_cluster
         Py_ssize_t clusters_amount = clusters.size()
+        vector[Detection] detections
+
+    detections.resize(clusters_amount)
 
     for current_cluster in range(clusters_amount):
-         clusters[current_cluster] = compute_mean_detection(clusters[current_cluster], counts[current_cluster])
+         detections[current_cluster] = mean_detection_from_cluster(clusters[current_cluster])
 
-    return clusters
+    return detections
 
-cdef Detection compute_mean_detection(Detection sum, int count):
-
-    cdef Detection mean = sum
-
-    mean.r = mean.r / count
-    mean.c = mean.c / count
-    mean.width = mean.width / count
-    mean.height = mean.height / count
-
-    return mean
 
 cdef float rect_intersection_area(Detection rect_a, Detection rect_b):
 
@@ -209,7 +244,7 @@ cdef class Cascade:
         self._load_xml(xml_file, eps)
 
 
-    cdef int classify(self, float[:, ::1] int_img, Py_ssize_t row, Py_ssize_t col, float scale) nogil:
+    cdef bint classify(self, float[:, ::1] int_img, Py_ssize_t row, Py_ssize_t col, float scale) nogil:
         """Classify the provided image patch i.e. check if the classifier
         detects an object in the given image patch.
 
@@ -289,9 +324,9 @@ cdef class Cascade:
 
             if stage_points < (current_stage.threshold - self.eps):
 
-                return 0
+                return False
 
-        return 1
+        return True
 
     def _get_valid_scale_factors(self, min_size, max_size, scale_step):
         """Get the valid scale multipliers for the original window size
