@@ -199,8 +199,9 @@ class ImageCollection(object):
         index = []
         for fname in self._files:
             if fname.lower().endswith(('.tiff', '.tif')):
-                img = TiffFile(fname)
-                index += [(fname, i) for i in range(len(img.pages))]
+                with open(fname, 'rb') as f:
+                    img = TiffFile(f)
+                    index += [(fname, i) for i in range(len(img.pages))]
             else:
                 try:
                     im = Image.open(fname)
