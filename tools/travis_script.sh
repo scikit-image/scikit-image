@@ -33,7 +33,7 @@ fi
 if [[ $PY =~ 3\.[24] ]]; then
     echo "SimpleITK unavailable on $PY"
 else
-    retry pip  install -q SimpleITK $WHEELHOUSE
+    retry pip install -q SimpleITK $WHEELHOUSE
 fi
 
 retry pip install -q astropy $WHEELHOUSE
