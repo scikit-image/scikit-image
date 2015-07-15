@@ -15,6 +15,7 @@ addons:
     - texlive 
     - texlive-latex-extra 
     - dvipng
+    - python-qt4
 
 notifications:
   webhooks:

@@ -21,8 +21,25 @@ section_end "Flake8.test"
 section "Install.optional.dependencies"
 
 # Install Qt and then update the Matplotlib settings
-retry pip install -q PySide $WHEELHOUSE
-python ~/venv/bin/pyside_postinstall.py -install
+if [[ $PY == 2.7* ]]; then
+    # http://stackoverflow.com/a/9716100
+    LIBS=( PyQt4 sip.so )
+
+    VAR=( $(which -a python$PY) )
+
+    GET_PYTHON_LIB_CMD="from distutils.sysconfig import get_python_lib; print (get_python_lib())"
+    LIB_VIRTUALENV_PATH=$(python -c "$GET_PYTHON_LIB_CMD")
+    LIB_SYSTEM_PATH=$(${VAR[-1]} -c "$GET_PYTHON_LIB_CMD")
+
+    for LIB in ${LIBS[@]}
+    do
+        ln -sf $LIB_SYSTEM_PATH/$LIB $LIB_VIRTUALENV_PATH/$LIB
+    done
+
+else
+    retry pip install -q PySide $WHEELHOUSE
+    python ~/venv/bin/pyside_postinstall.py -install
+fi 
 
 # Install imread from wheelhouse if available (not 3.2)
 if [[ $PY != 3.2 ]]; then
