@@ -7,7 +7,9 @@
 
 language: python
 sudo: false
-cache: pip
+cache:
+  directories:
+    - $HOME/.cache/pip
 addons:
   apt:
     packages:
@@ -15,6 +17,7 @@ addons:
     - texlive 
     - texlive-latex-extra 
     - dvipng
+    - python-qt4
 
 notifications:
   webhooks:
