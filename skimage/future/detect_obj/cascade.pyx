@@ -771,7 +771,7 @@ cdef class Cascade:
         # Parse and load features in memory.
         for feature_number in range(features_amount):
             params = features[feature_number][0].text.split()
-            params = map(lambda x: int(x), params)
+            params = list(map(lambda x: int(x), params))
             new_feature = MBLBP(params[1], params[0], params[2], params[3])
             features_carr[feature_number] = new_feature
 
