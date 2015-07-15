@@ -7,7 +7,9 @@
 
 language: python
 sudo: false
-cache: pip
+cache:
+  directories:
+    - $HOME/.cache/pip
 addons:
   apt:
     packages:
