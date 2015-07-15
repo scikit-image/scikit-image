@@ -771,6 +771,7 @@ cdef class Cascade:
         # Parse and load features in memory.
         for feature_number in range(features_amount):
             params = features[feature_number][0].text.split()
+            # list() is for Python3 fix here
             params = list(map(lambda x: int(x), params))
             new_feature = MBLBP(params[1], params[0], params[2], params[3])
             features_carr[feature_number] = new_feature
@@ -798,7 +799,8 @@ cdef class Cascade:
                 # Stump's leaf values. First negative if image is probably not
                 # a face. Second positive if image is probably a face.
                 leaf_values = current_weak_classifier.find('leafValues').text
-                leaf_values = map(lambda x: float(x), leaf_values.split())
+                # list() is for Python3 fix here
+                leaf_values = list(map(lambda x: float(x), leaf_values.split()))
 
                 # Extract the elements only starting from second.
                 # First two are useless
@@ -808,7 +810,8 @@ cdef class Cascade:
                 # Extract the feature number and respective parameters.
                 # The MBLBP position and size.
                 feature_number = int(internal_nodes[0])
-                lut_array = map(lambda x: int(x), internal_nodes[1:])
+                # list() is for Python3 fix here
+                lut_array = list(map(lambda x: int(x), internal_nodes[1:]))
                 lut = np.asarray(lut_array, dtype='uint32')
 
                 # Copy array to the main LUT array
