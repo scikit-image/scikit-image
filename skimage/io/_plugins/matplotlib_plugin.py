@@ -140,6 +140,8 @@ def imshow(im, *args, **kwargs):
     ax_im : `matplotlib.pyplot.AxesImage`
         The `AxesImage` object returned by `plt.imshow`.
     """
+    if kwargs.get('cmap', None) == 'viridis':
+        kwargs['cmap'] = viridis
     lo, hi, cmap = _get_display_range(im)
     kwargs.setdefault('interpolation', 'nearest')
     kwargs.setdefault('cmap', cmap)
