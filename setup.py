@@ -63,8 +63,14 @@ if __name__ == "__main__":
     try:
         from numpy.distutils.core import setup
         extra = {'configuration': configuration}
-        # do not risk updating numpy
+        # do not risk updating numpy or scipy
         INSTALL_REQUIRES = [r for r in INSTALL_REQUIRES if 'numpy' not in r]
+        try:
+            import scipy
+            INSTALL_REQUIRES = [r for r in INSTALL_REQUIRES if 'scipy'
+                                not in r]
+        except ImportError:
+            pass
     except ImportError:
         if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or
                                    sys.argv[1] in ('--help-commands',
