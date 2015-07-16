@@ -61,8 +61,6 @@ import imp
 import functools
 import warnings
 from .util.dtype import *
-from .util.colormap import viridis
-from matplotlib.cm import register_cmap
 
 pkg_dir = osp.abspath(osp.dirname(__file__))
 data_dir = osp.join(pkg_dir, 'data')
@@ -99,11 +97,6 @@ else:
             return 0
         else:
             return 1
-
-
-# register the viridis colormap
-register_cmap('viridis', viridis)
-del register_cmap, viridis
 
 
 # do not use `test` as function name as this leads to a recursion problem with
