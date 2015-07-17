@@ -15,10 +15,11 @@ can be multiple states for a given plugin:
         loaded explicitly by the user.
 
 """
+import sys
 
-try:
+if sys.version.startswith('3'):
     from configparser import ConfigParser  # Python 3
-except ImportError:
+else:
     from ConfigParser import ConfigParser  # Python 2
 
 import os.path
