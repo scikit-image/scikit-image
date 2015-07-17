@@ -504,8 +504,7 @@ cdef class Cascade:
         return True
 
     def _get_valid_scale_factors(self, min_size, max_size, scale_step):
-        """Get the valid scale multipliers for the original window size
-        from the trained file.
+        """Get the valid scale multipliers for the original window size.
 
         The function takes the minimal size of window and maximum size of
         window as interval and finds all the multipliers that will give the
