@@ -485,11 +485,8 @@ cdef class Cascade:
                 height = <Py_ssize_t>(current_feature.height * scale)
 
 
-                lbp_code = _multiblock_lbp(int_img,
-                                           row + r,
-                                           col + c,
-                                           width,
-                                           height)
+                lbp_code = _multiblock_lbp(int_img, row + r, col + c,
+                                           width, height)
 
                 lut_idx = current_stump.lut_idx
 
