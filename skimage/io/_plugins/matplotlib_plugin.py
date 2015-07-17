@@ -4,7 +4,7 @@ import warnings
 import matplotlib.pyplot as plt
 from ...util import dtype as dtypes
 from ...exposure import is_low_contrast
-from ..util.colormap import viridis
+from ...util.colormap import viridis
 
 _default_colormap = 'gray'
 _nonstandard_colormap = viridis
