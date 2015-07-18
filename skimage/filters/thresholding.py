@@ -2,10 +2,12 @@ __all__ = ['threshold_adaptive',
            'threshold_otsu',
            'threshold_yen',
            'threshold_isodata',
-           'threshold_li', ]
+           'threshold_li',
+           'threshold_minimum', ]
 
 import numpy as np
 from scipy import ndimage as ndi
+from scipy.ndimage import filters as ndif
 from ..exposure import histogram
 from .._shared.utils import assert_nD, warn
 
@@ -389,3 +391,91 @@ def threshold_li(image):
             new_thresh = temp + tolerance
 
     return threshold + immin
+
+
+def threshold_minimum(image, nbins=256, bias='min'):
+    """Return threshold value based on minimum method.
+
+    A histogram is computed and smoothed until there are only two maximums.
+    Then the minimum between these is found.
+
+    Parameters
+    ----------
+    image : array
+        Input image.
+    nbins : int, optional
+        Number of bins used to calculate histogram. This value is ignored for
+        integer arrays.
+    bias : {'min, 'mid', 'max'}, optional
+        'min', 'mid', 'max' return lowest, middle, or highest pixel value
+        with minimum histogram value.
+
+    Returns
+    -------
+    threshold : float
+        Computed threshold value.
+        May return 0 if the algorithm fails.
+
+    References
+    ----------
+    .. [1] Prewitt, JMS & Mendelsohn, ML (1966), "The analysis of cell images",
+           Annals of the New York Academy of Sciences 128: 1035-1053
+
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> image = camera()
+    >>> thresh = threshold_minimum(image)
+    >>> binary = image > thresh
+    """
+
+    def find_local_maxima(hist):
+        maximums = list()
+        direction = +1
+        for i in range(hist.shape[0] - 1):
+            if direction > 0:
+                if hist[i + 1] < hist[i]:
+                    direction = -1
+                    maximums.append(i)
+            else:
+                if hist[i + 1] > hist[i]:
+                    direction = +1
+        return maximums
+
+    hist, bin_centers = histogram(image.ravel(), nbins)
+    # On blank images (e.g. filled with 0) with int dtype, `histogram()`
+    # returns `bin_centers` containing only one value. Speed up with it.
+    if bin_centers.size == 1:
+        return bin_centers[0]
+
+    threshold = 0
+    smooth_hist = np.copy(hist)
+    smooth_hist = ndif.uniform_filter1d(smooth_hist, 3)
+    maximums = find_local_maxima(smooth_hist)
+    while len(maximums) > 2:
+        smooth_hist = ndif.uniform_filter1d(smooth_hist, 3)
+        maximums = find_local_maxima(smooth_hist)
+
+    # If we don't have 2 maxima the algorithm failed
+    if len(maximums) != 2:
+        raise RuntimeError('Failure: Unable to find two maxima in histogram')
+
+    # Find lowest point between the maxima, biased to the low end (min)
+    minimum = smooth_hist[maximums[0]]
+    threshold = maximums[0]
+    for i in range(maximums[0], maximums[1]):
+        if smooth_hist[i] < minimum:
+            minimum = smooth_hist[i]
+            threshold = i
+
+    if bias == 'min':
+        return bin_centers[threshold]
+    else:
+        i = threshold
+        while smooth_hist[i] == smooth_hist[threshold]:
+            i += 1
+        i -= 1
+        if bias == 'max':
+            return bin_centers[i]
+        else:
+            return bin_centers[(threshold + i) // 2]
