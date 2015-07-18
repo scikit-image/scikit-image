@@ -397,7 +397,8 @@ def threshold_minimum(image, nbins=256, bias='min') :
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
     bias : string, optional
-        'min', 'mid', 'max' return lowest, middle, or highest pixel value with minimum histogram value
+        'min', 'mid', 'max' return lowest, middle, or highest pixel value
+        with minimum histogram value
 
     Returns
     -------
@@ -408,7 +409,8 @@ def threshold_minimum(image, nbins=256, bias='min') :
 
     References
     ----------
-    Prewitt, JMS & Mendelsohn, ML (1966), "The analysis of cell images", Annals of the New York Academy of Sciences 128: 1035-1053
+    Prewitt, JMS & Mendelsohn, ML (1966), "The analysis of cell images",
+    Annals of the New York Academy of Sciences 128: 1035-1053
 
     Examples
     --------
