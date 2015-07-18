@@ -10,7 +10,8 @@ from skimage.filters.thresholding import (threshold_adaptive,
                                           threshold_otsu,
                                           threshold_li,
                                           threshold_yen,
-                                          threshold_isodata)
+                                          threshold_isodata,
+                                          threshold_minimum)
 
 
 class TestSimpleImage():
@@ -271,6 +272,19 @@ def test_isodata_moon_image_negative_float():
     assert_almost_equal(thresholds,
                         [-13.83789062, -12.84179688, -11.84570312, 22.02148438,
                          23.01757812, 24.01367188, 38.95507812, 39.95117188])
+
+def test_threshold_minimum():
+    camera = skimage.img_as_ubyte(data.camera())
+
+    threshold = threshold_minimum(camera)
+    assert threshold == 78
+
+    threshold = threshold_minimum(camera, bias='max')
+    assert threshold == 79
+
+    astronaut = skimage.img_as_ubyte(data.astronaut())
+    threshold = threshold_minimum(astronaut)
+    assert threshold == 131
 
 
 if __name__ == '__main__':
