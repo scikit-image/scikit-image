@@ -67,7 +67,7 @@ def all_warnings():
 @contextmanager
 def expected_warnings(matching):
     """Context for use in testing to catch known warnings matching regexes
-    
+
     Parameters
     ----------
     matching : list of strings or compiled regexes
@@ -84,10 +84,10 @@ def expected_warnings(matching):
     -----
     Uses `all_warnings` to ensure all warnings are raised.
     Upon exiting, it checks the recorded warnings for the desired matching
-    pattern(s).  
+    pattern(s).
     Raises a ValueError if any match was not found or an unexpected
-    warning was raised.  
-    Allows for three types of behaviors: "and", "or", and "optional" matches. 
+    warning was raised.
+    Allows for three types of behaviors: "and", "or", and "optional" matches.
     This is done to accomodate different build enviroments or loop conditions
     that may produce different warnings.  The behaviors can be combined.
     If you pass multiple patterns, you get an orderless "and", where all of the
@@ -113,3 +113,32 @@ def expected_warnings(matching):
         if len(remaining) > 0:
             msg = 'No warning raised matching:\n%s' % '\n'.join(remaining)
             raise ValueError(msg)
+
+
+@contextmanager
+def always_warn():
+    """
+    Context to ensure that warnings are always raised.
+
+    Examples
+    --------
+    >>> import warnings
+    >>> def foo():
+    ...     with always_warn():
+    ...         warnings.warn(RuntimeWarning("bar"))
+
+    We raise the warning once, while the warning filter is set to "once".
+    Hereafter, the warning would be invisible, even with custom filters:
+
+    >>> warnings.simplefilter('once')
+    >>> from numpy.testing import assert_warns
+    >>> assert_warns(RuntimeWarning, foo)
+
+    We can now raise the warning again, with the help of ``always_warn``:
+
+    >>> assert_warns(RuntimeWarning, foo)
+    """
+
+    warnings.simplefilter("always")
+    yield
+    warnings.simplefilter("default")

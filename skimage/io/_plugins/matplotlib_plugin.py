@@ -4,7 +4,7 @@ import warnings
 import matplotlib.pyplot as plt
 from ...util import dtype as dtypes
 from ...exposure import is_low_contrast
-from ..._shared._warnings import all_warnings
+from ..._shared._warnings import always_warn
 
 
 _default_colormap = 'gray'
@@ -67,15 +67,16 @@ def _raise_warnings(image_properties):
         The properties of the considered image.
     """
     ip = image_properties
-    if ip.unsupported_dtype:
-        warnings.warn("Non-standard image type; displaying image with "
-                      "stretched contrast.")
-    if ip.low_dynamic_range:
-        warnings.warn("Low image dynamic range; displaying image with "
-                      "stretched contrast.")
-    if ip.out_of_range_float:
-        warnings.warn("Float image out of standard range; displaying "
-                      "image with stretched contrast.")
+    with always_warn():
+        if ip.unsupported_dtype:
+            warnings.warn("Non-standard image type; displaying image with "
+                          "stretched contrast.")
+        if ip.low_dynamic_range:
+            warnings.warn("Low image dynamic range; displaying image with "
+                          "stretched contrast.")
+        if ip.out_of_range_float:
+            warnings.warn("Float image out of standard range; displaying "
+                          "image with stretched contrast.")
 
 
 def _get_display_range(image):
