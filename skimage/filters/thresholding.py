@@ -7,6 +7,7 @@ __all__ = ['threshold_adaptive',
 
 import numpy as np
 from scipy import ndimage as ndi
+from scipy.ndimage import filters as ndif
 from ..exposure import histogram
 from .._shared.utils import assert_nD, warn
 
@@ -386,8 +387,10 @@ def threshold_li(image):
 
     return threshold + immin
 
-def threshold_minimum(image, nbins=256, bias='min') :
-    """ Return threshold value based on minimum method
+def threshold_minimum(image, nbins=256, bias='min'):
+    """Return threshold value based on minimum method.  A histogram is computed
+    and smoothed until there are only two maximums.  Then the minimum between
+    these is found.
 
     Parameters
     ----------
@@ -396,21 +399,20 @@ def threshold_minimum(image, nbins=256, bias='min') :
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
-    bias : string, optional
+    bias : {'min, 'mid', 'max}, optional
         'min', 'mid', 'max' return lowest, middle, or highest pixel value
         with minimum histogram value
 
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels intensities that less or equal of
-        this value assumed as foreground.
-        May return 0 if the algorithm fails
+        Computed threshold value.
+        May return 0 if the algorithm fails.
 
     References
     ----------
-    Prewitt, JMS & Mendelsohn, ML (1966), "The analysis of cell images",
-    Annals of the New York Academy of Sciences 128: 1035-1053
+    .. [1] Prewitt, JMS & Mendelsohn, ML (1966), "The analysis of cell images",
+           Annals of the New York Academy of Sciences 128: 1035-1053
 
     Examples
     --------
@@ -420,25 +422,16 @@ def threshold_minimum(image, nbins=256, bias='min') :
     >>> binary = image > thresh
     """
 
-    # Smooth histogram with a 3-element kernel: [1, 1, 1] / 3
-    def smooth_histogram(hist):
-        result = np.zeros_like(hist)
-        for i in range(1, result.shape[0] - 1) :
-            result[i] = (hist[i-1] + hist[i] + hist[i + 1]) / 3.
-        result[0] = (2. * hist[0] + hist[1]) / 3.
-        result[-1] = (hist[-2] + 2. * hist[-1]) / 3.
-        return result
-
     def find_local_maxima(hist):
         maximums = list()
         direction = +1
-        for i in range(hist.shape[0] - 1) :
+        for i in range(hist.shape[0] - 1):
             if direction > 0:
-                if hist[i + 1] < hist[i] :
+                if hist[i + 1] < hist[i]:
                     direction = -1
                     maximums.append(i)
-            else :
-                if hist[i + 1] > hist[i] :
+            else:
+                if hist[i + 1] > hist[i]:
                     direction = +1
         return maximums
 
@@ -450,10 +443,10 @@ def threshold_minimum(image, nbins=256, bias='min') :
 
     threshold = 0
     smooth_hist = np.copy(hist)
-    smooth_hist = smooth_histogram(smooth_hist)
+    smooth_hist = ndif.uniform_filter1d(smooth_hist, 3)
     maximums = find_local_maxima(smooth_hist)
     while len(maximums) > 2:
-        smooth_hist = smooth_histogram(smooth_hist)
+        smooth_hist = ndif.uniform_filter1d(smooth_hist, 3)
         maximums = find_local_maxima(smooth_hist)
 
     # If we don't have 2 maxima the algorithm failed
@@ -463,7 +456,7 @@ def threshold_minimum(image, nbins=256, bias='min') :
     # Find lowest point between the maxima, biased to the low end (min)
     minimum = smooth_hist[maximums[0]]
     threshold = maximums[0]
-    for i in range(maximums[0], maximums[1]) :
+    for i in range(maximums[0], maximums[1]):
         if smooth_hist[i] < minimum:
             minimum = smooth_hist[i]
             threshold = i

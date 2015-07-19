@@ -277,15 +277,14 @@ def test_threshold_minimum():
     camera = skimage.img_as_ubyte(data.camera())
 
     threshold = threshold_minimum(camera)
-    assert threshold == 78
+    assert threshold == 76
 
     threshold = threshold_minimum(camera, bias='max')
-    assert threshold == 79
+    assert threshold == 77
 
     astronaut = skimage.img_as_ubyte(data.astronaut())
     threshold = threshold_minimum(astronaut)
-    assert threshold == 131
-
+    assert threshold == 117
 
 if __name__ == '__main__':
     np.testing.run_module_suite()
