@@ -56,6 +56,7 @@ img_as_ubyte
 
 """
 
+import sys
 import os.path as osp
 import imp
 import functools
@@ -111,4 +112,19 @@ doctest_verbose.__doc__ = doctest.__doc__
 
 del warnings, functools, osp, imp
 
-from . import __check_build
+try:
+    # This variable is injected in the __builtins__ by the build
+    # process. It used to enable importing subpackages of skimage when
+    # the binaries are not built
+    __SKIMAGE_SETUP__
+except NameError:
+    __SKIMAGE_SETUP__ = False
+
+if __SKIMAGE_SETUP__:
+    sys.stderr.write('Partial import of skimage during the build process.\n')
+    # We are not importing the rest of the scikit during the build
+    # process, as it may not be compiled yet
+else:
+    from . import __check_build
+    from .util.dtype import *
+    __check_build   # avoid flakes unused varaible error
