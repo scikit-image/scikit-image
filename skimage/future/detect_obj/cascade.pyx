@@ -270,7 +270,7 @@ cdef vector[DetectionsCluster] threshold_clusters(vector[DetectionsCluster] clus
     clusters : vector[DetectionsCluster]
         Array of rectangles clusters.
     count_threshold : int
-        The threshold amount of rectangles that is used.
+        The threshold number of rectangles that is used.
 
     Returns
     -------
@@ -328,7 +328,6 @@ cdef vector[Detection] get_mean_detections(vector[DetectionsCluster] clusters):
 cdef float rect_intersection_area(Detection rect_a, Detection rect_b):
     """Computes the intersection area of two rectangles.
 
-    The area where rectangles intersect.
 
     Parameters
     ----------
