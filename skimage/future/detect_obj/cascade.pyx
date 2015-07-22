@@ -392,7 +392,23 @@ cdef float rect_intersection_score(Detection rect_a, Detection rect_b):
 
 
 cdef class Cascade:
-    """Class for cascade classifiers that are used for object detection."""
+    """Class for cascade of classifiers that is used for object detection.
+
+    The main idea behind cascade of classifiers is to create classifiers
+    of medium accuracy and ensemble them into one strong classifier
+    instead of just creating a strong one. The second advantage of cascade
+    classifier is that easy examples can be classified only by evaluating
+    some of the classifiers in the cascade, making the process much faster
+    than the process of evaluating a one strong classifier.
+
+    Attributes
+    ----------
+    eps : float
+            Accuracy parameter. Increasing it, makes the classifier detect less
+            false positives but at the same time the false negative score increases.
+    stages_amount : int
+        Color of overlay.
+    """
 
     cdef:
         public float eps
