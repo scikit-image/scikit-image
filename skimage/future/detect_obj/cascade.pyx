@@ -332,9 +332,9 @@ cdef float rect_intersection_area(Detection rect_a, Detection rect_b):
     Parameters
     ----------
     rect_a : Detection
-        Struct of the first rectnagle.
+        Struct of the first rectangle.
     rect_a : Detection
-        Struct of the second rectnagle.
+        Struct of the second rectangle.
 
     Returns
     -------
@@ -373,7 +373,7 @@ cdef float rect_intersection_score(Detection rect_a, Detection rect_b):
     Returns
     -------
     result : float
-        The intersection score. The number in the interval [0, 1].
+        The intersection score. The number in the interval ``[0, 1]``.
         1 means rectangles fully intersect, 0 means they don't.
     """
 
