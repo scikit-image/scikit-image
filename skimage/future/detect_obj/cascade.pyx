@@ -89,7 +89,7 @@ cdef struct Stage:
 
 cdef vector[Detection] _group_detections(vector[Detection] detections,
                                          float intersection_score_threshold=0.5,
-                                         int min_neighbour_amount=4):
+                                         int min_neighbour_number=4):
     """Group similar detections into a single detection and eliminate weak
     (non-overlapping) detections.
 
@@ -104,7 +104,7 @@ cdef vector[Detection] _group_detections(vector[Detection] detections,
     ----------
     detections : vector[Detection]
         A cluster of detections.
-    min_neighbour_amount : int
+    min_neighbour_number : int
         Minimum amount of intersecting detections in order for detection
         to be approved by the function.
     intersection_score_threshold : float
@@ -169,7 +169,7 @@ cdef vector[Detection] _group_detections(vector[Detection] detections,
                                             clusters[best_cluster_nr],
                                             detections[current_detection_nr])
 
-    clusters = threshold_clusters(clusters, min_neighbour_amount)
+    clusters = threshold_clusters(clusters, min_neighbour_number)
     return get_mean_detections(clusters)
 
 
@@ -618,7 +618,7 @@ cdef class Cascade:
 
 
     def detect_multi_scale(self, img, float scale_factor, float step_ratio,
-                           min_size, max_size, min_neighbour_amount=4,
+                           min_size, max_size, min_neighbour_number=4,
                            intersection_score_threshold=0.5):
         """Search for the object on multiple scales of input image.
 
@@ -643,7 +643,7 @@ cdef class Cascade:
             Minimum size of the search window.
         max_size : typle (int, int)
             Maximum size of the search window.
-        min_neighbour_amount : int
+        min_neighbour_number : int
             Minimum amount of intersecting detections in order for detection
             to be approved by the function.
         intersection_score_threshold : float
@@ -668,7 +668,7 @@ cdef class Cascade:
             Py_ssize_t current_row
             Py_ssize_t current_col
             Py_ssize_t current_step
-            Py_ssize_t amount_of_scales
+            Py_ssize_t number_of_scales
             Py_ssize_t img_height
             Py_ssize_t img_width
             Py_ssize_t scale_number
@@ -686,7 +686,7 @@ cdef class Cascade:
         img_width = int_img.shape[1]
 
         scale_factors = self._get_valid_scale_factors(min_size, max_size, scale_factor)
-        amount_of_scales = scale_factors.shape[0]
+        number_of_scales = scale_factors.shape[0]
 
         # Initialize lock to enable thread-safe writes to the array
         # in concurrent loop.
@@ -696,7 +696,7 @@ cdef class Cascade:
 
         # As the amount of work between the threads is not equal we use `dynamic`
         # schedule which enables them to use computing power on demand.
-        for scale_number in prange(0, amount_of_scales, schedule='dynamic', nogil=True):
+        for scale_number in prange(0, number_of_scales, schedule='dynamic', nogil=True):
 
             current_scale_factor = scale_factors[scale_number]
             current_step = <Py_ssize_t>round(current_scale_factor * step_ratio)
@@ -734,7 +734,7 @@ cdef class Cascade:
                 current_col = 0
 
         return list(_group_detections(output, intersection_score_threshold,
-                                      min_neighbour_amount))
+                                      min_neighbour_number))
 
     def _load_xml(self, xml_file, eps=1e-5):
         """Load the parameters of cascade classifier into the class.
