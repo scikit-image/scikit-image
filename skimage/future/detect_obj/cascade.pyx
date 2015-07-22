@@ -406,15 +406,15 @@ cdef class Cascade:
     eps : float
             Accuracy parameter. Increasing it, makes the classifier detect less
             false positives but at the same time the false negative score increases.
-    stages_amount : int
+    stages_number : int
         Color of overlay.
     """
 
     cdef:
         public float eps
-        public Py_ssize_t stages_amount
-        public Py_ssize_t stumps_amount
-        public Py_ssize_t features_amount
+        public Py_ssize_t stages_number
+        public Py_ssize_t stumps_number
+        public Py_ssize_t features_number
         public Py_ssize_t window_width
         public Py_ssize_t window_height
         Stage* stages
@@ -482,8 +482,8 @@ cdef class Cascade:
             Py_ssize_t stage_number
             Py_ssize_t weak_classifier_number
             Py_ssize_t feature_number
-            Py_ssize_t features_amount
-            Py_ssize_t stumps_amount
+            Py_ssize_t features_number
+            Py_ssize_t stumps_number
             Py_ssize_t first_stump_idx
             Py_ssize_t lut_idx
             Py_ssize_t r, c, widht, height
@@ -493,7 +493,7 @@ cdef class Cascade:
             MBLBP current_feature
 
 
-        for stage_number in range(self.stages_amount):
+        for stage_number in range(self.stages_number):
 
             current_stage = self.stages[stage_number]
             first_stump_idx = current_stage.first_idx
@@ -741,7 +741,7 @@ cdef class Cascade:
             float stage_threshold
 
             Py_ssize_t stage_number
-            Py_ssize_t stages_amount
+            Py_ssize_t stages_number
             Py_ssize_t window_height
             Py_ssize_t window_width
 
@@ -749,7 +749,7 @@ cdef class Cascade:
             Py_ssize_t weak_classifier_number
 
             Py_ssize_t feature_number
-            Py_ssize_t features_amount
+            Py_ssize_t features_number
             Py_ssize_t stump_lut_idx
             Py_ssize_t stump_idx
             Py_ssize_t i
@@ -767,31 +767,31 @@ cdef class Cascade:
         stages = tree.find('.//stages')
 
         # Get the respective amounts.
-        stages_amount = int(tree.find('.//stageNum').text)
+        stages_number = int(tree.find('.//stageNum').text)
         window_height = int(tree.find('.//height').text)
         window_width = int(tree.find('.//width').text)
-        features_amount = len(features)
+        features_number = len(features)
 
         # Count the stumps.
-        stumps_amount = 0
-        for stage_number in range(stages_amount):
+        stumps_number = 0
+        for stage_number in range(stages_number):
             current_stage = stages[stage_number]
             weak_classifiers_amount = int(current_stage.find('maxWeakCount').text)
-            stumps_amount += weak_classifiers_amount
+            stumps_number += weak_classifiers_amount
 
         # Allocate memory for data.
-        features_carr = <MBLBP*>malloc(features_amount*sizeof(MBLBP))
-        stumps_carr = <MBLBPStump*>malloc(stumps_amount*sizeof(MBLBPStump))
-        stages_carr = <Stage*>malloc(stages_amount*sizeof(Stage))
+        features_carr = <MBLBP*>malloc(features_number*sizeof(MBLBP))
+        stumps_carr = <MBLBPStump*>malloc(stumps_number*sizeof(MBLBPStump))
+        stages_carr = <Stage*>malloc(stages_number*sizeof(Stage))
         # Each look-up table consists of 8 u-int numbers.
-        LUTs_carr = <cnp.uint32_t*>malloc(8*stumps_amount*sizeof(cnp.uint32_t))
+        LUTs_carr = <cnp.uint32_t*>malloc(8*stumps_number*sizeof(cnp.uint32_t))
 
         # Check if memory was allocated.
         if not (features_carr and stumps_carr and stages_carr and LUTs_carr):
             raise MemoryError("Failed to allocate memory while parsing XML.")
 
         # Parse and load features in memory.
-        for feature_number in range(features_amount):
+        for feature_number in range(features_number):
             params = features[feature_number][0].text.split()
             # list() is for Python3 fix here
             params = list(map(lambda x: int(x), params))
@@ -802,7 +802,7 @@ cdef class Cascade:
         stump_idx = 0
 
         # Parse and load stumps, stages.
-        for stage_number in range(stages_amount):
+        for stage_number in range(stages_number):
 
             current_stage = stages[stage_number]
 
@@ -853,6 +853,6 @@ cdef class Cascade:
         self.stumps = stumps_carr
         self.stages = stages_carr
         self.LUTs = LUTs_carr
-        self.stages_amount = stages_amount
-        self.features_amount = features_amount
-        self.stumps_amount = stumps_amount
+        self.stages_number = stages_number
+        self.features_number = features_number
+        self.stumps_number = stumps_number
