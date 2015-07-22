@@ -800,11 +800,11 @@ cdef class Cascade:
             stumps_number += weak_classifiers_amount
 
         # Allocate memory for data.
-        features_carr = <MBLBP*>malloc(features_number*sizeof(MBLBP))
-        stumps_carr = <MBLBPStump*>malloc(stumps_number*sizeof(MBLBPStump))
+        features_carr = <MBLBP*>malloc(features_number * sizeof(MBLBP))
+        stumps_carr = <MBLBPStump*>malloc(stumps_number * sizeof(MBLBPStump))
         stages_carr = <Stage*>malloc(stages_number*sizeof(Stage))
         # Each look-up table consists of 8 u-int numbers.
-        LUTs_carr = <cnp.uint32_t*>malloc(8*stumps_number*sizeof(cnp.uint32_t))
+        LUTs_carr = <cnp.uint32_t*>malloc(8*stumps_number * sizeof(cnp.uint32_t))
 
         # Check if memory was allocated.
         if not (features_carr and stumps_carr and stages_carr and LUTs_carr):
