@@ -268,7 +268,7 @@ cdef vector[DetectionsCluster] threshold_clusters(vector[DetectionsCluster] clus
     Parameters
     ----------
     clusters : vector[DetectionsCluster]
-        Array of rectnagles clusters.
+        Array of rectangles clusters.
     count_threshold : int
         The threshold amount of rectangles that is used.
 
@@ -303,7 +303,7 @@ cdef vector[Detection] get_mean_detections(vector[DetectionsCluster] clusters):
     Parameters
     ----------
     clusters : vector[DetectionsCluster]
-        Array of rectnagles clusters.
+        Array of rectangles clusters.
 
     Returns
     -------
