@@ -11,9 +11,6 @@ from libc.stdlib cimport malloc, free
 from libcpp.vector cimport vector
 from skimage._shared.transform cimport integrate
 
-# Use our own implementation of the function instead of libc.math.
-# Otherwise, the compilation breaks on some compilers due to Cython
-# bug.
 from skimage._shared.interpolation cimport round, fmax, fmin
 
 from cython.parallel import prange
@@ -22,20 +19,6 @@ from skimage.transform import integral_image
 import xml.etree.ElementTree as ET
 from ...feature._texture cimport _multiblock_lbp
 import math
-
-
-# Struct for storing clusters of rectangles. As the rectangles are dynamically
-# added, the sum of row, col positions and width and heights are stored
-# with the count of rectangles that belong to this cluster. This way,
-# we don't have to store all the rectangles information as array
-# and the average can be easily computed in a constant time.
-cdef struct DetectionsCluster:
-
-    int r_sum
-    int c_sum
-    int width_sum
-    int height_sum
-    int count
 
 
 # Struct for storing a single detection.
@@ -47,7 +30,24 @@ cdef struct Detection:
     int height
 
 
+# Struct for storing cluster of rectangles that represent detections.
+# As the rectangles are dynamically added, the sum of row, col positions,
+# width and heights are stored with the count of rectangles that belong
+# to this cluster. This way,  we don't have to store all the rectangles
+# information as array and the average of all detections in a cluster
+# can be easily computed in a constant time.
+cdef struct DetectionsCluster:
+
+    int r_sum
+    int c_sum
+    int width_sum
+    int height_sum
+    int count
+
+
 # Struct for storing multi-block binary pattern position.
+# Defines the parameters of multi-block binary pattern feature.
+# Read more in skimage.feature.texture.multiblock_lbp.
 cdef struct MBLBP:
 
     Py_ssize_t r
@@ -56,11 +56,14 @@ cdef struct MBLBP:
     Py_ssize_t height
 
 
-# Struct for storing a stump of classifying cascade. It has the index to the
-# look-up table which is stored in Cascade class. Depending on the value of
-# the feature after its evaluation `left` or `right` value is returned which
-# is used by Cascade classifier to predict whether or not the
-# object is detected.
+# Struct for storing information about trained MBLBP feature.
+# Feature_id contains an index to array where the parameters of MBLBP features
+# are stored using MBLBP struct. Index is used because some stages in cascade
+# can have repeating features. The lut_idx contains an index to a look-up table
+# which gives, depending on the computed value of a feature, an answer whether
+# an object is present in the current detection window. Based on the value of
+# look-up table (0 or 1) positive(right) or negative(left) weight is added to
+# the overall score of a stage.
 cdef struct MBLBPStump:
 
     Py_ssize_t feature_id
@@ -69,13 +72,14 @@ cdef struct MBLBPStump:
     float right
 
 
-# Struct for storing a stage of classifier which itself consists of stumps.
-# It has the index that maps to the starting stump and amount of stumps.
-# In each stage all the stumps are evaluated and their output values( `left`
-# or `right` depending on the input) are summed up and compared to the
-# threshold. If the value is higher than the threshold, the stage is passed
-# and Cascade classifier goes to the next one. If all the stages are passed,
-# the object is predicted to be present in the input image patch.
+# Struct for storing a stage of classifier which itself consists of
+# MBLBPStumps. It has the index that maps to the starting stump and amount of
+# stumps that belong to a stage after this index. In each stage all the stumps
+# are evaluated and their output values( `left` or `right` depending on the
+# input) are summed up and compared to the threshold. If the value is higher
+# than the threshold, the stage is passed and Cascade classifier goes to the
+# next stage. If all the stages are passed, the object is predicted to be
+# present in the input image patch.
 cdef struct Stage:
 
     Py_ssize_t first_idx
@@ -86,14 +90,15 @@ cdef struct Stage:
 cdef vector[Detection] _group_detections(vector[Detection] detections,
                                          float intersection_score_threshold=0.5,
                                          int min_neighbour_amount=4):
-    """Groups similar detection into single detection and eliminates weak
-    detections that have small amount of intersecting detection.
+    """Group similar detections into a single detection and eliminate weak
+    (non-overlapping) detections.
 
-    The function assumes that true detections are supposed to have a certain
-    amount of intersecting detections and the false detections are supposed to
-    have small amount. Based on this approach, the final detections are
-    computed. The detections that are approved and gathered into one cluster
-    are averaged and this value is returned.
+    We assume that a true detection is characterized by a high number of
+    overlapping detections. Such detections are isolated and gathered into
+    one cluster. The average of each cluster is returned. Averaging means
+    that the row and column positions of top left corners and the width
+    and height parameters of each rectangle in a cluster are used to compute
+    values of average rectangle that will represent cluster.
 
     Parameters
     ----------
@@ -117,46 +122,52 @@ cdef vector[Detection] _group_detections(vector[Detection] detections,
         Detection mean_detection
         vector[DetectionsCluster] clusters
         vector[int] clusters_scores
-        Py_ssize_t clusters_amount
-        Py_ssize_t current_detection
-        Py_ssize_t current_cluster
-        Py_ssize_t detections_amount = detections.size()
-        Py_ssize_t best_cluster_number
+        Py_ssize_t nr_of_clusters
+        Py_ssize_t current_detection_nr
+        Py_ssize_t current_cluster_nr
+        Py_ssize_t nr_of_detections = detections.size()
+        Py_ssize_t best_cluster_nr
         bint new_cluster
         float best_score
         float intersection_score
 
     # Check if detections array is not empty.
     # Push first detection as first cluster.
-    if detections_amount:
+    if nr_of_detections:
         clusters.push_back(cluster_from_detection(detections[0]))
 
-    for current_detection in range(1, detections_amount):
+    for current_detection_nr in range(1, nr_of_detections):
 
         best_score = intersection_score_threshold
-        best_cluster_number = 0
+        best_cluster_nr = 0
         new_cluster = True
 
-        clusters_amount = clusters.size()
+        nr_of_clusters = clusters.size()
 
-        for current_cluster in range(clusters_amount):
+        for current_cluster_nr in range(nr_of_clusters):
 
-            mean_detection = mean_detection_from_cluster(clusters[current_cluster])
-            intersection_score = rect_intersection_score(detections[current_detection], mean_detection)
+            mean_detection = mean_detection_from_cluster(
+                                    clusters[current_cluster_nr])
+
+            intersection_score = rect_intersection_score(
+                                        detections[current_detection_nr],
+                                        mean_detection)
 
             if intersection_score > best_score:
 
                 new_cluster = False
-                best_cluster_number = current_cluster
+                best_cluster_nr = current_cluster_nr
                 best_score = intersection_score
 
         if new_cluster:
 
-            clusters.push_back(cluster_from_detection(detections[current_detection]))
+            clusters.push_back(cluster_from_detection(
+                                    detections[current_detection_nr]))
         else:
 
-            clusters[best_cluster_number] = update_cluster(clusters[best_cluster_number],
-                                                           detections[current_detection])
+            clusters[best_cluster_nr] = update_cluster(
+                                            clusters[best_cluster_nr],
+                                            detections[current_detection_nr])
 
     clusters = threshold_clusters(clusters, min_neighbour_amount)
     return get_mean_detections(clusters)
@@ -167,7 +178,7 @@ cdef DetectionsCluster update_cluster(DetectionsCluster cluster,
     """Updated the cluster by adding new detection.
 
     Updates the cluster by adding new detection to it. The added
-    detection contributes to the mean values of the cluster.
+    detection contributes to the mean value of the cluster.
 
     Parameters
     ----------
