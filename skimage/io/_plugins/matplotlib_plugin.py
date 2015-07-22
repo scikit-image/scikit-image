@@ -4,11 +4,10 @@ import warnings
 import matplotlib.pyplot as plt
 from ...util import dtype as dtypes
 from ...exposure import is_low_contrast
-from ..._shared._warnings import all_warnings
-
+from ...util.colormap import viridis
 
 _default_colormap = 'gray'
-_nonstandard_colormap = 'cubehelix'
+_nonstandard_colormap = viridis
 _diverging_colormap = 'RdBu'
 
 
@@ -141,6 +140,8 @@ def imshow(im, *args, **kwargs):
     ax_im : `matplotlib.pyplot.AxesImage`
         The `AxesImage` object returned by `plt.imshow`.
     """
+    if kwargs.get('cmap', None) == 'viridis':
+        kwargs['cmap'] = viridis
     lo, hi, cmap = _get_display_range(im)
     kwargs.setdefault('interpolation', 'nearest')
     kwargs.setdefault('cmap', cmap)

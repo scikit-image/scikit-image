@@ -56,18 +56,19 @@ img_as_ubyte
 
 """
 
-import os.path as _osp
-import imp as _imp
-import functools as _functools
-import warnings as _warnings
+import os.path as osp
+import imp
+import functools
+import warnings
+from .util.dtype import *
 
-pkg_dir = _osp.abspath(_osp.dirname(__file__))
-data_dir = _osp.join(pkg_dir, 'data')
+pkg_dir = osp.abspath(osp.dirname(__file__))
+data_dir = osp.join(pkg_dir, 'data')
 
 __version__ = '0.12dev'
 
 try:
-    _imp.find_module('nose')
+    imp.find_module('nose')
 except ImportError:
     def _test(doctest=False, verbose=False):
         """This would run all unit tests, but nose couldn't be
@@ -86,8 +87,8 @@ else:
             args.extend(['--with-doctest', '--ignore-files=^\.',
                          '--ignore-files=^setup\.py$$', '--ignore-files=test'])
             # Make sure warnings do not break the doc tests
-            with _warnings.catch_warnings():
-                _warnings.simplefilter("ignore")
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
                 success = nose.run('skimage', argv=args)
         else:
             success = nose.run('skimage', argv=args)
@@ -101,11 +102,11 @@ else:
 # do not use `test` as function name as this leads to a recursion problem with
 # the nose test suite
 test = _test
-test_verbose = _functools.partial(test, verbose=True)
+test_verbose = functools.partial(test, verbose=True)
 test_verbose.__doc__ = test.__doc__
-doctest = _functools.partial(test, doctest=True)
+doctest = functools.partial(test, doctest=True)
 doctest.__doc__ = doctest.__doc__
-doctest_verbose = _functools.partial(test, doctest=True, verbose=True)
+doctest_verbose = functools.partial(test, doctest=True, verbose=True)
 doctest_verbose.__doc__ = doctest.__doc__
 
-from .util.dtype import *
+del warnings, functools, osp, imp
