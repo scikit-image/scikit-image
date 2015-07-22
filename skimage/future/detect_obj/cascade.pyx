@@ -404,10 +404,30 @@ cdef class Cascade:
     Attributes
     ----------
     eps : float
-            Accuracy parameter. Increasing it, makes the classifier detect less
-            false positives but at the same time the false negative score increases.
-    stages_number : int
-        Color of overlay.
+        Accuracy parameter. Increasing it, makes the classifier detect less
+        false positives but at the same time the false negative score increases.
+    stages_number : Py_ssize_t
+        Amount of stages in a cascade. Each cascade consists of stumps i.e.
+        trained features.
+    stumps_number : Py_ssize_t
+        The overall amount of stumps in all the stages of cascade.
+    features_number : Py_ssize_t
+        The overall amount of different features used by cascade.
+        Two stumps can use the same features but has different trained
+        values.
+    window_width : Py_ssize_t
+        The width of a detection window that is used. Objects smaller than
+        this window can't be detected.
+    window_height : Py_ssize_t
+        The height of a detection window.
+    stages : Stage*
+        A link to the c array that stores stages information using
+        Stage struct.
+    features : MBLBP*
+        Link to the c array that stores MBLBP features using MBLBP struct.
+    LUTs : cnp.uint32_t*
+        The ling to the array with look-up tables that are used by trained
+        MBLBP features (MBLBPStumps) to evaluate a particular region.
     """
 
     cdef:
