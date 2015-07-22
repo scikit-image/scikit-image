@@ -366,9 +366,9 @@ cdef float rect_intersection_score(Detection rect_a, Detection rect_b):
     Parameters
     ----------
     rect_a : Detection
-        Struct of the first rectnagle.
+        Struct of the first rectangle.
     rect_a : Detection
-        Struct of the second rectnagle.
+        Struct of the second rectangle.
 
     Returns
     -------
