@@ -18,12 +18,14 @@ High dynamic imageing is nicely covered at 'Wikipedia
 import matplotlib.pyplot as plt
 
 import numpy as np
-from skimage.exposure import adjust_gamma, adjust_log, hdr
+from skimage.exposure import adjust_gamma hdr
 from skimage import data
 from skimage.morphology import disk
 from matplotlib.colors import LogNorm
 from skimage.filters import rank
 from skimage.color import rgb2gray
+from skimage.io import imsave
+import skimage
 
 # Get example images
 ims, exp = data.hdr_images()
@@ -47,6 +49,10 @@ for ii in range(3):
     hdr_norm[:, :, ii] = hdr_im[:, :, ii] / norm
 
 
+
+
+
+
 fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 20))
 # Show hdr image. This is going to be dark due to the range in the image
 axes[0].imshow(hdr_norm)
@@ -56,6 +62,13 @@ axes[1].imshow(adjust_gamma(hdr_norm, gamma=0.25))
 # print(np.max(np.nan_to_num(hdr_hist)))
 # axes[2].imshow(hdr_im / (hdr_im + 1))
 plt.show()
+
+
+# Optional saving the image as a hdr image for importing it into other software
+# the only working format is tiff, as the freeimage plugin doesn't export .hdr
+# and .exr files correctly 
+# imsave(fname, hdr_norm.astype(np.float32), plugin='tifffile')
+
 
 
 # Show histogram equalized  hdr image.
