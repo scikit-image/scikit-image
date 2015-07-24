@@ -18,37 +18,50 @@ High dynamic imageing is nicely covered at 'Wikipedia
 import matplotlib.pyplot as plt
 
 import numpy as np
-from skimage.exposure import hdr
+from skimage.exposure import adjust_gamma, adjust_log, hdr
 from skimage import data
 from skimage.morphology import disk
 from matplotlib.colors import LogNorm
 from skimage.filters import rank
 from skimage.color import rgb2gray
 
+# Get example images
 ims, exp = data.hdr_images()
 exp = np.array(exp)
 
+# Get radiance map (how the radiance maps to the counts for each channel
+radiance_map = hdr.get_crf(ims, exp, depth=8, l=100)
 
-radiance_map = hdr.get_crf(ims, exp, depth=8)
+# Show radiance map
 plt.plot(radiance_map)
 plt.show()
+
+# Make the HDR image
 hdr_im = hdr.make_hdr(ims, exp, radiance_map, depth=8)
 
+
+# Normalise the hdr image
 hdr_norm = np.zeros_like(hdr_im)
+norm = np.max(np.nan_to_num(hdr_im.flatten()))
 for ii in range(3):
-    norm = np.max(np.nan_to_num(hdr_im[:, :, ii].flatten()))
     hdr_norm[:, :, ii] = hdr_im[:, :, ii] / norm
 
-plt.imshow(hdr_norm)
+
+fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 20))
+# Show hdr image. This is going to be dark due to the range in the image
+axes[0].imshow(hdr_norm)
+# Show gamma adjusted hdr image.
+axes[1].imshow(adjust_gamma(hdr_norm, gamma=0.25))
+#
+# print(np.max(np.nan_to_num(hdr_hist)))
+# axes[2].imshow(hdr_im / (hdr_im + 1))
 plt.show()
 
-I = 0.2125 * hdr_im[:, :, 0] + 0.7154 * \
-    hdr_im[:, :, 1] + 0.0721 * hdr_im[:, :, 2]
-# I = np.asanyarray(rgb2gray(hdr_im), dtype=np.float)
 
-
-plt.imshow(I, 'gray', norm=LogNorm())
-plt.show()
+# Show histogram equalized  hdr image.
+# hdr_hist = np.zeros_like(hdr_norm)
+# for ii in range(3):
+#     hdr_hist[:, :, ii] = hdr_norm / (hdr_norm + 1)
 
 
 # tone_mapped = np.zeros_like(hdr_im)

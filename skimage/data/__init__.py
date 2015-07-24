@@ -388,7 +388,8 @@ def stereo_motorcycle():
 
 
 def hdr_images():
-    """Bracket images of the Jefferson National Expansion Memorial.
+    """Bracket images taken from the UNIS building on Svalbard, overlooking the
+    Hjorthfjellet mountain
 
     These bracketed images are useful for showing the application of High
     Dynamic Range (HDR) imaging.
@@ -403,27 +404,15 @@ def hdr_images():
 
     Notes
     -----
-    These images were downloaded from (as the 800x600)
-
-    `Wikipedia Commons:
-    <https://commons.wikimedia.org/wiki/File:StLouisArchMultExpEV%2B4.09.JPG>
-    <https://commons.wikimedia.org/wiki/File:StLouisArchMultExpEV%2B1.51.JPG>
-    <https://commons.wikimedia.org/wiki/File:StLouisArchMultExpEV-1.82.JPG>
-    <https://commons.wikimedia.org/wiki/File:StLouisArchMultExpEV-4.72.JPG>`
-
-    The image was captured by Kevin McCoy and is licensed under:
-    Creative Commons Attribution-Share Alike 3.0 Unported
-    <https://creativecommons.org/licenses/by-sa/3.0/deed.en>`
-
+    These images were taken by Pål Ellingsen and are released into the public
+    domain (CC-0)
     """
 
-    files = ['StLouisArchMultExpEV-4.72.JPG',
-             'StLouisArchMultExpEV-1.82.JPG',
-             'StLouisArchMultExpEV+1.51.JPG',
-             'StLouisArchMultExpEV+4.09.JPG']
+    files = ['UNIS_EV-2.jpg',
+             'UNIS_EV0.jpg',
+             'UNIS_EV2.jpg']
 
-    # ev = [-4.72, -1.82, 1.18, 1.51, 4.09]
-    exp = [1 / 30., 0.25, 2.5, 15]
+    exp = [1 / 1250., 1 / 320, 1 / 40]
 
     ims = []
     for f in files:
