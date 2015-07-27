@@ -286,5 +286,22 @@ def test_threshold_minimum():
     threshold = threshold_minimum(astronaut)
     assert threshold == 117
 
+def test_threshold_minimum_synthetic():
+    img = np.zeros((25*25), dtype=np.uint8)
+    for i in range(25*25) :
+        img[i] = i % 256
+    img = np.reshape(img, (25,25))
+    img[0:9,:] = 50
+    img[14:25,:] = 250
+
+    threshold = threshold_minimum(img, bias='min')
+    assert threshold == 93
+
+    threshold = threshold_minimum(img, bias='mid')
+    assert threshold == 159
+
+    threshold = threshold_minimum(img, bias='max')
+    assert threshold == 225
+
 if __name__ == '__main__':
     np.testing.run_module_suite()
