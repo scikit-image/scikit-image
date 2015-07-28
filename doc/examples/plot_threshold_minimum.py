@@ -3,16 +3,11 @@
 Minimum Algorithm For Thresholding
 ==================================
 
-Thresholding is the simplest way to segment objects from a background. If that
-background is relatively uniform, then you can use a global threshold value to
-binarize the image by pixel-intensity. If there's large variation in the
-background intensity, however, adaptive thresholding (a.k.a. local or dynamic
-thresholding) may produce better results.
-
-Here, we binarize an image using the `threshold_adaptive` function, which
-calculates thresholds in regions of size `block_size` surrounding each pixel
-(i.e. local neighborhoods). Each threshold value is the weighted mean of the
-local neighborhood minus an offset value.
+The minimum algorithm takes a histogram of the image and smooths it
+repeatedly unitl there are only two peaks in the histogram.  Then it
+finds the minimum value between the two peaks.  With the smoothing
+there can be multiple pixel values with the minimum histogram count,
+so you can pick 'min', 'mid', or 'max' of these values.
 
 """
 import matplotlib.pyplot as plt
@@ -22,7 +17,7 @@ from skimage.filters.thresholding import threshold_minimum
 
 image = data.camera()
 
-threshold = threshold_minimum(image)
+threshold = threshold_minimum(image, bias='min')
 
 binarized = image > threshold
 
