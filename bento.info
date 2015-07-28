@@ -38,9 +38,6 @@ Library:
         skimage.io._plugins, skimage.measure, skimage.morphology,
         skimage.scripts, skimage.restoration, skimage.segmentation,
         skimage.transform, skimage.util
-    Extension: skimage.__check_build._check_build
-        Sources:
-            skimage/__check_build/_check_build.pyx    
     Extension: skimage.io._plugins._colormixer
         Sources:
             skimage/io/_plugins/_colormixer.pyx
