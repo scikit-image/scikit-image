@@ -60,6 +60,7 @@ import os.path as osp
 import imp
 import functools
 import warnings
+import sys
 
 pkg_dir = osp.abspath(osp.dirname(__file__))
 data_dir = osp.join(pkg_dir, 'data')
@@ -123,9 +124,8 @@ Python version, your operating system and your platform."""
 
 
 def _raise_build_error(e):
-    import os
     # Raise a comprehensible error
-    local_dir = os.path.split(__file__)[0]
+    local_dir = osp.split(__file__)[0]
     msg = _STANDARD_MSG
     if local_dir == "skimage":
         # Picking up the local install: this will work only if the
@@ -139,8 +139,6 @@ to build the package before using it: run `python setup.py install` or
 `make` in the source directory.
 %s""" % (e, msg))
 
-del warnings, functools, osp, imp
-
 try:
     # This variable is injected in the __builtins__ by the build
     # process. It used to enable importing subpackages of skimage when
@@ -150,7 +148,6 @@ except NameError:
     __SKIMAGE_SETUP__ = False
 
 if __SKIMAGE_SETUP__:
-    import sys
     sys.stderr.write('Partial import of skimage during the build process.\n')
     # We are not importing the rest of the scikit during the build
     # process, as it may not be compiled yet
@@ -161,3 +158,5 @@ else:
     except ImportError as e:
         _raise_build_error(e)
     from .util.dtype import *
+
+del warnings, functools, osp, imp, sys
