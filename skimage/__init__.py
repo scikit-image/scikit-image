@@ -60,7 +60,6 @@ import os.path as osp
 import imp
 import functools
 import warnings
-from .util.dtype import *
 
 pkg_dir = osp.abspath(osp.dirname(__file__))
 data_dir = osp.join(pkg_dir, 'data')
