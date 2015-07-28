@@ -56,7 +56,6 @@ img_as_ubyte
 
 """
 
-import sys
 import os.path as osp
 import imp
 import functools
@@ -110,6 +109,37 @@ doctest.__doc__ = doctest.__doc__
 doctest_verbose = functools.partial(test, doctest=True, verbose=True)
 doctest_verbose.__doc__ = doctest.__doc__
 
+
+# Logic for checking for improper install and importing while in the source
+# tree when package has not been installed inplace.
+# Code adapted from scikit-learn's __check_build module.
+_INPLACE_MSG = """
+It appears that you are importing a local scikit-image source tree. For
+this, you need to have an inplace install. Maybe you are in the source
+directory and you need to try from another location."""
+
+_STANDARD_MSG = """
+If you have used an installer, please check that it is suited for your
+Python version, your operating system and your platform."""
+
+
+def _raise_build_error(e):
+    import os
+    # Raise a comprehensible error
+    local_dir = os.path.split(__file__)[0]
+    msg = _STANDARD_MSG
+    if local_dir == "skimage":
+        # Picking up the local install: this will work only if the
+        # install is an 'inplace build'
+        msg = _INPLACE_MSG
+    raise ImportError("""%s
+It seems that scikit-image has not been built correctly.
+
+If you have installed scikit-image from source, please do not forget
+to build the package before using it: run `python setup.py install` or
+`make` in the source directory.
+%s""" % (e, msg))
+
 del warnings, functools, osp, imp
 
 try:
@@ -121,10 +151,14 @@ except NameError:
     __SKIMAGE_SETUP__ = False
 
 if __SKIMAGE_SETUP__:
+    import sys
     sys.stderr.write('Partial import of skimage during the build process.\n')
     # We are not importing the rest of the scikit during the build
     # process, as it may not be compiled yet
 else:
-    from . import __check_build
+    try:
+        from ._shared import geometry
+        del geometry
+    except ImportError as e:
+        _raise_build_error(e)
     from .util.dtype import *
-    __check_build   # avoid flakes unused varaible error
