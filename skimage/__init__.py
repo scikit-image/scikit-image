@@ -119,8 +119,9 @@ this, you need to have an inplace install. Maybe you are in the source
 directory and you need to try from another location."""
 
 _STANDARD_MSG = """
-If you have used an installer, please check that it is suited for your
-Python version, your operating system and your platform."""
+Your install of scikit-image appears to be broken.
+Try re-installing the package following the instructions at:
+http://scikit-image.org/docs/stable/install.html """
 
 
 def _raise_build_error(e):
@@ -133,10 +134,6 @@ def _raise_build_error(e):
         msg = _INPLACE_MSG
     raise ImportError("""%s
 It seems that scikit-image has not been built correctly.
-
-If you have installed scikit-image from source, please do not forget
-to build the package before using it: run `python setup.py install` or
-`make` in the source directory.
 %s""" % (e, msg))
 
 try:
