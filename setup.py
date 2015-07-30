@@ -24,6 +24,19 @@ import sys
 import setuptools
 from distutils.command.build_py import build_py
 
+if sys.version_info[0] < 3:
+    import __builtin__ as builtins
+else:
+    import builtins
+
+# This is a bit (!) hackish: we are setting a global variable so that the main
+# skimage __init__ can detect if it is being loaded by the setup routine, to
+# avoid attempting to load components that aren't built yet:
+# the numpy distutils extensions that are used by scikit-image to recursively
+# build the compiled extensions in sub-packages is based on the Python import
+# machinery.
+builtins.__SKIMAGE_SETUP__ = True
+
 
 with open('skimage/__init__.py') as fid:
     for line in fid:
