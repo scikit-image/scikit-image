@@ -163,7 +163,7 @@ def test_bitdepth():
             expected = []
         with expected_warnings(expected):
             rank.mean_percentile(image=image, selem=elem, mask=mask,
-                               out=out, shift_x=0, shift_y=0, p0=.1, p1=.9)
+                                 out=out, shift_x=0, shift_y=0, p0=.1, p1=.9)
 
 
 def test_population():
@@ -221,6 +221,8 @@ def test_pass_on_bitdepth():
     elem = np.ones((3, 3), dtype=np.uint8)
     out = np.empty_like(image)
     mask = np.ones(image.shape, dtype=np.uint8)
+    with expected_warnings(["Bitdepth of"]):
+        rank.maximum(image=image, selem=elem, out=out, mask=mask)
 
 
 def test_inplace_output():
@@ -532,6 +534,7 @@ def test_16bit():
             assert rank.minimum(image, selem)[10, 10] == 0
             assert rank.maximum(image, selem)[10, 10] == value
             assert rank.mean(image, selem)[10, 10] == int(value / selem.size)
+
 
 def test_bilateral():
     image = np.zeros((21, 21), dtype=np.uint16)
