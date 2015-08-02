@@ -11,7 +11,9 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import sys
+import os
+import skimage
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -25,9 +27,14 @@ sys.path.append(os.path.join(curpath, '..', 'ext'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.pngmath', 'numpydoc',
-              'sphinx.ext.autosummary', 'plot2rst',
-              'sphinx.ext.intersphinx']
+extensions = ['sphinx.ext.autodoc',
+              'sphinx.ext.pngmath',
+              'numpydoc',
+              'sphinx.ext.autosummary',
+              'plot2rst',
+              'sphinx.ext.intersphinx',
+              'sphinx.ext.linkcode',
+              ]
 
 # Determine if the matplotlib has a recent enough version of the
 # plot_directive, otherwise use the local fork.
@@ -292,7 +299,66 @@ plot2rst_rcparams = {'image.cmap' : 'gray',
 _python_doc_base = 'http://docs.python.org/2.7'
 intersphinx_mapping = {
     _python_doc_base: None,
-    'http://docs.scipy.org/doc/numpy': None,
-    'http://docs.scipy.org/doc/scipy/reference': None,
-    'http://scikit-learn.org/stable': None
+    'http://docs.scipy.org/doc/numpy':
+        (None, './_intersphinx/numpy-objects.inv'),
+    'http://docs.scipy.org/doc/scipy/reference':
+        (None, './_intersphinx/scipy-objects.inv'),
+    'http://scikit-learn.org/stable':
+        (None, './_intersphinx/sklearn-objects.inv'),
 }
+
+# ----------------------------------------------------------------------------
+# Source code links
+# ----------------------------------------------------------------------------
+
+import inspect
+from os.path import relpath, dirname
+
+
+# Function courtesy of NumPy to return URLs containing line #'s'
+def linkcode_resolve(domain, info):
+    """
+    Determine the URL corresponding to Python object
+    """
+    if domain != 'py':
+        return None
+
+    modname = info['module']
+    fullname = info['fullname']
+
+    submod = sys.modules.get(modname)
+    if submod is None:
+        return None
+
+    obj = submod
+    for part in fullname.split('.'):
+        try:
+            obj = getattr(obj, part)
+        except:
+            return None
+
+    try:
+        fn = inspect.getsourcefile(obj)
+    except:
+        fn = None
+    if not fn:
+        return None
+
+    try:
+        source, lineno = inspect.findsource(obj)
+    except:
+        lineno = None
+
+    if lineno:
+        linespec = "#L%d" % (lineno + 1)
+    else:
+        linespec = ""
+
+    fn = relpath(fn, start=dirname(skimage.__file__))
+
+    if 'dev' in skimage.__version__:
+        return ("http://github.com/scikit-image/skimage/blob/"
+                "master/skimage/%s%s" % (fn, linespec))
+    else:
+        return ("http://github.com/scikit-image/skimage/blob/"
+                "v%s/skimage/%s%s" % (skimage.__version__, fn, linespec))
