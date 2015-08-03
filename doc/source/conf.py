@@ -298,13 +298,13 @@ plot2rst_rcparams = {'image.cmap' : 'gray',
 # -----------------------------------------------------------------------------
 _python_doc_base = 'http://docs.python.org/2.7'
 intersphinx_mapping = {
-    _python_doc_base: None,
-    'http://docs.scipy.org/doc/numpy':
-        (None, './_intersphinx/numpy-objects.inv'),
-    'http://docs.scipy.org/doc/scipy/reference':
-        (None, './_intersphinx/scipy-objects.inv'),
-    'http://scikit-learn.org/stable':
-        (None, './_intersphinx/sklearn-objects.inv'),
+    'python': (_python_doc_base, None),
+    'numpy': ('http://docs.scipy.org/doc/numpy',
+              (None, './_intersphinx/numpy-objects.inv')),
+    'scipy': ('http://docs.scipy.org/doc/scipy/reference',
+              (None, './_intersphinx/scipy-objects.inv')),
+    'sklearn': ('http://scikit-learn.org/stable',
+                (None, './_intersphinx/sklearn-objects.inv')),
 }
 
 # ----------------------------------------------------------------------------
@@ -315,7 +315,7 @@ import inspect
 from os.path import relpath, dirname
 
 
-# Function courtesy of NumPy to return URLs containing line #'s'
+# Function courtesy of NumPy to return URLs containing line numbers
 def linkcode_resolve(domain, info):
     """
     Determine the URL corresponding to Python object
@@ -357,8 +357,8 @@ def linkcode_resolve(domain, info):
     fn = relpath(fn, start=dirname(skimage.__file__))
 
     if 'dev' in skimage.__version__:
-        return ("http://github.com/scikit-image/skimage/blob/"
+        return ("http://github.com/scikit-image/scikit-image/blob/"
                 "master/skimage/%s%s" % (fn, linespec))
     else:
-        return ("http://github.com/scikit-image/skimage/blob/"
+        return ("http://github.com/scikit-image/scikit-image/blob/"
                 "v%s/skimage/%s%s" % (skimage.__version__, fn, linespec))
