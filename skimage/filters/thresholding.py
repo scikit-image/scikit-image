@@ -388,9 +388,10 @@ def threshold_li(image):
     return threshold + immin
 
 def threshold_minimum(image, nbins=256, bias='min'):
-    """Return threshold value based on minimum method.  A histogram is computed
-    and smoothed until there are only two maximums.  Then the minimum between
-    these is found.
+    """Return threshold value based on minimum method.
+
+    A histogram is computed and smoothed until there are only two maximums.
+    Then the minimum between these is found.
 
     Parameters
     ----------
@@ -399,9 +400,9 @@ def threshold_minimum(image, nbins=256, bias='min'):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
-    bias : {'min, 'mid', 'max}, optional
+    bias : {'min, 'mid', 'max'}, optional
         'min', 'mid', 'max' return lowest, middle, or highest pixel value
-        with minimum histogram value
+        with minimum histogram value.
 
     Returns
     -------
