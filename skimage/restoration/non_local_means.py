@@ -6,8 +6,8 @@ from ._nl_means_denoising import (
     _fast_nl_means_denoising_3d)
 
 
-def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
-                       multichannel=True, fast_mode=True):
+def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
+                     multichannel=True, fast_mode=True):
     """
     Perform non-local means denoising on 2-D or 3-D grayscale images, and
     2-D RGB images.
@@ -41,10 +41,6 @@ def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
     result : ndarray
         Denoised image, of same shape as `image`.
 
-    See Also
-    --------
-    fast_nl_means_denoising
-
     Notes
     -----
 
@@ -68,19 +64,19 @@ def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
 
     image.size * patch_distance ** image.ndim
 
-    The computing time depends only weakly on the patch size, thanks to the
-    computation of the integral of patches distances for a given shift, that
-    reduces the number of operations [1]_. Therefore, this algorithm executes
-    faster than `nl_means_denoising`, at the expense of using twice as much
-    memory.
+    The computing time depends only weakly on the patch size, thanks to
+    the computation of the integral of patches distances for a given
+    shift, that reduces the number of operations [1]_. Therefore, this
+    algorithm executes faster than the classic algorith
+    (``fast_mode=False``), at the expense of using twice as much memory.
 
-    Compared to the classic non-local means algorithm implemented in
-    `nl_means_denoising`, all pixels of a patch contribute to the distance to
-    another patch with the same weight, no matter their distance to the center
-    of the patch. This coarser computation of the distance can result in a
-    slightly poorer denoising performance. Moreover, for small images (images
-    with a linear size that is only a few times the patch size), the classic
-    algorithm can be faster due to boundary effects.
+    Compared to the classic algorithm, all pixels of a patch contribute
+    to the distance to another patch with the same weight, no matter
+    their distance to the center of the patch. This coarser computation
+    of the distance can result in a slightly poorer denoising
+    performance. Moreover, for small images (images with a linear size
+    that is only a few times the patch size), the classic algorithm can
+    be faster due to boundary effects.
 
     The image is padded using the `reflect` mode of `skimage.util.pad`
     before denoising.
@@ -97,8 +93,8 @@ def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
     --------
     >>> a = np.zeros((40, 40))
     >>> a[10:-10, 10:-10] = 1.
-    >>> a += 0.3*np.random.randn(*a.shape)
-    >>> denoised_a = nl_means_denoising(a, 7, 5, 0.1)
+    >>> a += 0.3 * np.random.randn(*a.shape)
+    >>> denoised_a = denoise_nl_means(a, 7, 5, 0.1)
     """
     if image.ndim == 2:
         image = image[..., np.newaxis]
