@@ -28,8 +28,8 @@ def _generate_candidate_libs():
         for lib_name in lib_names:
             files = os.listdir(lib_dir)
             lib_paths += [os.path.join(lib_dir, lib) for lib in files
-                           if lib.lower().startswith(lib_name) and not
-                           os.path.splitext(lib)[1] in ('.py', '.pyc', '.ini')]
+                          if lib.lower().startswith(lib_name) and not
+                          os.path.splitext(lib)[1] in ('.py', '.pyc', '.ini')]
     lib_paths = [lp for lp in lib_paths if os.path.exists(lp)]
 
     return lib_dirs, lib_paths
@@ -41,6 +41,7 @@ else:
     LOADER = ctypes.cdll
     FUNCTYPE = ctypes.CFUNCTYPE
 
+
 def handle_errors():
     global FT_ERROR_STR
     if FT_ERROR_STR:
@@ -48,13 +49,17 @@ def handle_errors():
         FT_ERROR_STR = None
         raise RuntimeError(tmp)
 
+
 FT_ERROR_STR = None
+
+
 # This MUST happen in module scope, or the function pointer is garbage
 # collected, leading to a segfault when error_handler is called.
 @FUNCTYPE(None, ctypes.c_int, ctypes.c_char_p)
 def c_error_handler(fif, message):
     global FT_ERROR_STR
     FT_ERROR_STR = 'FreeImage error: %s' % message
+
 
 def load_freeimage():
     freeimage = None
@@ -63,7 +68,7 @@ def load_freeimage():
     # in the default locations for each platform. Win DLL names don't need the
     # extension, but other platforms do.
     bare_libs = ['FreeImage', 'libfreeimage.dylib', 'libfreeimage.so',
-                'libfreeimage.so.3']
+                 'libfreeimage.so.3']
     lib_dirs, lib_paths = _generate_candidate_libs()
     lib_paths = bare_libs + lib_paths
     for lib in lib_paths:
@@ -86,13 +91,13 @@ def load_freeimage():
             # No freeimage library loaded, and load-errors reported for some
             # candidate libs
             err_txt = ['%s:\n%s' % (l, str(e)) for l, e in errors]
-            raise RuntimeError('One or more FreeImage libraries were found, but '
-                               'could not be loaded due to the following errors:\n'
-                               '\n\n'.join(err_txt))
+            raise RuntimeError('One or more FreeImage libraries were found, '
+                               'but could not be loaded due to the following '
+                               'errors:\n\n\n'.join(err_txt))
         else:
             # No errors, because no potential libraries found at all!
-            raise RuntimeError('Could not find a FreeImage library in any of:\n' +
-                               '\n'.join(lib_dirs))
+            raise RuntimeError('Could not find a FreeImage library in any of:'
+                               '\n\n'.join(lib_dirs))
 
     # FreeImage found
     freeimage.FreeImage_SetOutputMessage(c_error_handler)
@@ -121,7 +126,7 @@ API = {
     'FreeImage_Load': (ctypes.c_void_p, None),
     'FreeImage_LockPage': (ctypes.c_void_p, None),
     'FreeImage_OpenMultiBitmap': (ctypes.c_void_p, None)
-    }
+}
 
 # Albert's ctypes pattern
 
@@ -135,7 +140,7 @@ def register_api(lib, api):
 register_api(_FI, API)
 
 
-class FI_TYPES(object):
+class FiTypes(object):
     FIT_UNKNOWN = 0
     FIT_BITMAP = 1
     FIT_UINT16 = 2
@@ -150,51 +155,48 @@ class FI_TYPES(object):
     FIT_RGBF = 11
     FIT_RGBAF = 12
 
-    dtypes = {
-        FIT_BITMAP: numpy.uint8,
-        FIT_UINT16: numpy.uint16,
-        FIT_INT16: numpy.int16,
-        FIT_UINT32: numpy.uint32,
-        FIT_INT32: numpy.int32,
-        FIT_FLOAT: numpy.float32,
-        FIT_DOUBLE: numpy.float64,
-        FIT_COMPLEX: numpy.complex128,
-        FIT_RGB16: numpy.uint16,
-        FIT_RGBA16: numpy.uint16,
-        FIT_RGBF: numpy.float32,
-        FIT_RGBAF: numpy.float32
-        }
+    dtypes = {FIT_BITMAP: numpy.uint8,
+              FIT_UINT16: numpy.uint16,
+              FIT_INT16: numpy.int16,
+              FIT_UINT32: numpy.uint32,
+              FIT_INT32: numpy.int32,
+              FIT_FLOAT: numpy.float32,
+              FIT_DOUBLE: numpy.float64,
+              FIT_COMPLEX: numpy.complex128,
+              FIT_RGB16: numpy.uint16,
+              FIT_RGBA16: numpy.uint16,
+              FIT_RGBF: numpy.float32,
+              FIT_RGBAF: numpy.float32,
+              }
 
-    fi_types = {
-        (numpy.dtype('uint8'), 1): FIT_BITMAP,
-        (numpy.dtype('uint8'), 3): FIT_BITMAP,
-        (numpy.dtype('uint8'), 4): FIT_BITMAP,
-        (numpy.dtype('uint16'), 1): FIT_UINT16,
-        (numpy.dtype('int16'), 1): FIT_INT16,
-        (numpy.dtype('uint32'), 1): FIT_UINT32,
-        (numpy.dtype('int32'), 1): FIT_INT32,
-        (numpy.dtype('float32'), 1): FIT_FLOAT,
-        (numpy.dtype('float64'), 1): FIT_DOUBLE,
-        (numpy.dtype('complex128'), 1): FIT_COMPLEX,
-        (numpy.dtype('uint16'), 3): FIT_RGB16,
-        (numpy.dtype('uint16'), 4): FIT_RGBA16,
-        (numpy.dtype('float32'), 3): FIT_RGBF,
-        (numpy.dtype('float32'), 4): FIT_RGBAF
-        }
+    fi_types = {(numpy.dtype('uint8'), 1): FIT_BITMAP,
+                (numpy.dtype('uint8'), 3): FIT_BITMAP,
+                (numpy.dtype('uint8'), 4): FIT_BITMAP,
+                (numpy.dtype('uint16'), 1): FIT_UINT16,
+                (numpy.dtype('int16'), 1): FIT_INT16,
+                (numpy.dtype('uint32'), 1): FIT_UINT32,
+                (numpy.dtype('int32'), 1): FIT_INT32,
+                (numpy.dtype('float32'), 1): FIT_FLOAT,
+                (numpy.dtype('float64'), 1): FIT_DOUBLE,
+                (numpy.dtype('complex128'), 1): FIT_COMPLEX,
+                (numpy.dtype('uint16'), 3): FIT_RGB16,
+                (numpy.dtype('uint16'), 4): FIT_RGBA16,
+                (numpy.dtype('float32'), 3): FIT_RGBF,
+                (numpy.dtype('float32'), 4): FIT_RGBAF,
+                }
 
-    extra_dims = {
-        FIT_UINT16: [],
-        FIT_INT16: [],
-        FIT_UINT32: [],
-        FIT_INT32: [],
-        FIT_FLOAT: [],
-        FIT_DOUBLE: [],
-        FIT_COMPLEX: [],
-        FIT_RGB16: [3],
-        FIT_RGBA16: [4],
-        FIT_RGBF: [3],
-        FIT_RGBAF: [4]
-        }
+    extra_dims = {FIT_UINT16: [],
+                  FIT_INT16: [],
+                  FIT_UINT32: [],
+                  FIT_INT32: [],
+                  FIT_FLOAT: [],
+                  FIT_DOUBLE: [],
+                  FIT_COMPLEX: [],
+                  FIT_RGB16: [3],
+                  FIT_RGBA16: [4],
+                  FIT_RGBF: [3],
+                  FIT_RGBAF: [4],
+                  }
 
     @classmethod
     def get_type_and_shape(cls, bitmap):
@@ -223,62 +225,79 @@ class FI_TYPES(object):
         return numpy.dtype(dtype), extra_dims + [w, h]
 
 
-class IO_FLAGS(object):
-    FIF_LOAD_NOPIXELS = 0x8000  # loading: load the image header only
-                                # (not supported by all plugins)
+class IoFlags(object):
+    # loading: load the image header only (not supported by all plugins)
+    FIF_LOAD_NOPIXELS = 0x8000
 
     BMP_DEFAULT = 0
     BMP_SAVE_RLE = 1
     CUT_DEFAULT = 0
     DDS_DEFAULT = 0
     EXR_DEFAULT = 0  # save data as half with piz-based wavelet compression
-    EXR_FLOAT = 0x0001  # save data as float instead of as half (not recommended)
+    EXR_FLOAT = 0x0001  # save data as float instead of half (not recommended)
     EXR_NONE = 0x0002  # save with no compression
     EXR_ZIP = 0x0004  # save with zlib compression, in blocks of 16 scan lines
     EXR_PIZ = 0x0008  # save with piz-based wavelet compression
     EXR_PXR24 = 0x0010  # save with lossy 24-bit float compression
-    EXR_B44 = 0x0020  # save with lossy 44% float compression
-                     # - goes to 22% when combined with EXR_LC
-    EXR_LC = 0x0040  # save images with one luminance and two chroma channels,
-                    # rather than as RGB (lossy compression)
+
+    # save with lossy 44% float compression (22% when combined with EXR_LC)
+    EXR_B44 = 0x0020
+
+    # one luminance and two chroma channels rather than as RGB (lossy)
+    EXR_LC = 0x0040
     FAXG3_DEFAULT = 0
     GIF_DEFAULT = 0
-    GIF_LOAD256 = 1  # Load the image as a 256 color image with ununsed
-                     # palette entries, if it's 16 or 2 color
-    GIF_PLAYBACK = 2  # 'Play' the GIF to generate each frame (as 32bpp)
-                      # instead of returning raw frame data when loading
+
+    # Load as 256 color image with ununsed palette entries if 16 or 2 color
+    GIF_LOAD256 = 1
+
+    # 'Play' the GIF generating each frame (as 32bpp) instead of raw frame data
+    GIF_PLAYBACK = 2
     HDR_DEFAULT = 0
     ICO_DEFAULT = 0
-    ICO_MAKEALPHA = 1  # convert to 32bpp and create an alpha channel from the
-                       # AND-mask when loading
+
+    # convert to 32bpp then add an alpha channel from the AND-mask when loading
+    ICO_MAKEALPHA = 1
     IFF_DEFAULT = 0
     J2K_DEFAULT = 0  # save with a 16:1 rate
     JP2_DEFAULT = 0  # save with a 16:1 rate
-    JPEG_DEFAULT = 0  # loading (see JPEG_FAST);
-                      # saving (see JPEG_QUALITYGOOD|JPEG_SUBSAMPLING_420)
-    JPEG_FAST = 0x0001  # load the file as fast as possible,
-                        # sacrificing some quality
-    JPEG_ACCURATE = 0x0002  # load the file with the best quality,
-                            # sacrificing some speed
-    JPEG_CMYK = 0x0004  # load separated CMYK "as is"
-                        # (use | to combine with other load flags)
-    JPEG_EXIFROTATE = 0x0008  # load and rotate according to
-                              # Exif 'Orientation' tag if available
+
+    # loading (see JPEG_FAST)
+    # saving (see JPEG_QUALITYGOOD|JPEG_SUBSAMPLING_420)
+    JPEG_DEFAULT = 0
+
+    # load the file as fast as possible, sacrificing some quality
+    JPEG_FAST = 0x0001
+
+    # load the file with the best quality, sacrificing some speed
+    JPEG_ACCURATE = 0x0002
+
+    # load separated CMYK "as is" (use | to combine with other load flags)
+    JPEG_CMYK = 0x0004
+
+    # load and rotate according to Exif 'Orientation' tag if available
+    JPEG_EXIFROTATE = 0x0008
     JPEG_QUALITYSUPERB = 0x80  # save with superb quality (100:1)
     JPEG_QUALITYGOOD = 0x0100  # save with good quality (75:1)
     JPEG_QUALITYNORMAL = 0x0200  # save with normal quality (50:1)
     JPEG_QUALITYAVERAGE = 0x0400  # save with average quality (25:1)
     JPEG_QUALITYBAD = 0x0800  # save with bad quality (10:1)
-    JPEG_PROGRESSIVE = 0x2000  # save as a progressive-JPEG
-                               # (use | to combine with other save flags)
-    JPEG_SUBSAMPLING_411 = 0x1000  # save with high 4x1 chroma
-                                   # subsampling (4:1:1)
-    JPEG_SUBSAMPLING_420 = 0x4000  # save with medium 2x2 medium chroma
-                                   # subsampling (4:2:0) - default value
-    JPEG_SUBSAMPLING_422 = 0x8000  # save with low 2x1 chroma subsampling (4:2:2)
+
+    # save as a progressive-JPEG (use | to combine with other save flags)
+    JPEG_PROGRESSIVE = 0x2000
+
+    # save with high 4x1 chroma subsampling (4:1:1)
+    JPEG_SUBSAMPLING_411 = 0x1000
+
+    # save with medium 2x2 medium chroma subsampling (4:2:0) - default value
+    JPEG_SUBSAMPLING_420 = 0x4000
+
+    # save with low 2x1 chroma subsampling (4:2:2)
+    JPEG_SUBSAMPLING_422 = 0x8000
     JPEG_SUBSAMPLING_444 = 0x10000  # save with no chroma subsampling (4:4:4)
-    JPEG_OPTIMIZE = 0x20000  # on saving, compute optimal Huffman coding tables
-                             # (can reduce a few percent of file size)
+
+    # compute optimal Huffman coding tables (can reduce file size a few %)
+    JPEG_OPTIMIZE = 0x20000  # on saving,
     JPEG_BASELINE = 0x40000  # save basic JPEG, without metadata or any markers
     KOALA_DEFAULT = 0
     LBM_DEFAULT = 0
@@ -292,33 +311,40 @@ class IO_FLAGS(object):
     PICT_DEFAULT = 0
     PNG_DEFAULT = 0
     PNG_IGNOREGAMMA = 1  # loading: avoid gamma correction
-    PNG_Z_BEST_SPEED = 0x0001  # save using ZLib level 1 compression flag
-                               # (default value is 6)
-    PNG_Z_DEFAULT_COMPRESSION = 0x0006  # save using ZLib level 6 compression
-                                        # flag (default recommended value)
-    PNG_Z_BEST_COMPRESSION = 0x0009  # save using ZLib level 9 compression flag
-                                     # (default value is 6)
+
+    # save using ZLib level 1 compression flag (default value is 6)
+    PNG_Z_BEST_SPEED = 0x0001
+
+    # save using ZLib level 6 compression flag (default recommended value)
+    PNG_Z_DEFAULT_COMPRESSION = 0x0006
+
+    # save using ZLib level 9 compression flag (default value is 6)
+    PNG_Z_BEST_COMPRESSION = 0x0009
     PNG_Z_NO_COMPRESSION = 0x0100  # save without ZLib compression
-    PNG_INTERLACED = 0x0200  # save using Adam7 interlacing (use | to combine
-                             # with other save flags)
+
+    # save using Adam7 interlacing (use | to combine with other save flags)
+    PNG_INTERLACED = 0x0200
     PNM_DEFAULT = 0
     PNM_SAVE_RAW = 0  # Writer saves in RAW format (i.e. P4, P5 or P6)
     PNM_SAVE_ASCII = 1  # Writer saves in ASCII format (i.e. P1, P2 or P3)
     PSD_DEFAULT = 0
-    PSD_CMYK = 1  # reads tags for separated CMYK (default is conversion to RGB)
+    PSD_CMYK = 1  # reads tags for separated CMYK (default converts to RGB)
     PSD_LAB = 2  # reads tags for CIELab (default is conversion to RGB)
     RAS_DEFAULT = 0
     RAW_DEFAULT = 0  # load the file as linear RGB 48-bit
-    RAW_PREVIEW = 1  # try to load the embedded JPEG preview with included
-                     # Exif Data or default to RGB 24-bit
+
+    # try to load embedded JPEG preview from Exif Data or default to RGB 24-bit
+    RAW_PREVIEW = 1
     RAW_DISPLAY = 2  # load the file as RGB 24-bit
     SGI_DEFAULT = 0
     TARGA_DEFAULT = 0
     TARGA_LOAD_RGB888 = 1  # Convert RGB555 and ARGB8888 -> RGB888.
     TARGA_SAVE_RLE = 2  # Save with RLE compression
     TIFF_DEFAULT = 0
-    TIFF_CMYK = 0x0001  # reads/stores tags for separated CMYK
-                        # (use | to combine with compression flags)
+
+    # reads/stores tags for separated CMYK
+    # (use | to combine with compression flags)
+    TIFF_CMYK = 0x0001
     TIFF_PACKBITS = 0x0100  # save using PACKBITS compression
     TIFF_DEFLATE = 0x0200  # save using DEFLATE (a.k.a. ZLIB) compression
     TIFF_ADOBE_DEFLATE = 0x0400  # save using ADOBE DEFLATE compression
@@ -333,7 +359,7 @@ class IO_FLAGS(object):
     XPM_DEFAULT = 0
 
 
-class METADATA_MODELS(object):
+class MetadataModels(object):
     FIMD_COMMENTS = 0
     FIMD_EXIF_MAIN = 1
     FIMD_EXIF_EXIF = 2
@@ -346,7 +372,7 @@ class METADATA_MODELS(object):
     FIMD_ANIMATION = 9
 
 
-class METADATA_DATATYPE(object):
+class MetadataDatatype(object):
     FIDT_BYTE = 1  # 8-bit unsigned integer
     FIDT_ASCII = 2  # 8-bit bytes w/ last byte null
     FIDT_SHORT = 3  # 16-bit unsigned integer
@@ -365,27 +391,26 @@ class METADATA_DATATYPE(object):
     FIDT_SLONG8 = 17  # 64-bit signed integer
     FIDT_IFD8 = 18  # 64-bit unsigned integer (offset)
 
-    dtypes = {
-        FIDT_BYTE: numpy.uint8,
-        FIDT_SHORT: numpy.uint16,
-        FIDT_LONG: numpy.uint32,
-        FIDT_RATIONAL: [('numerator', numpy.uint32),
-                        ('denominator', numpy.uint32)],
-        FIDT_SBYTE: numpy.int8,
-        FIDT_UNDEFINED: numpy.uint8,
-        FIDT_SSHORT: numpy.int16,
-        FIDT_SLONG: numpy.int32,
-        FIDT_SRATIONAL: [('numerator', numpy.int32),
-                         ('denominator', numpy.int32)],
-        FIDT_FLOAT: numpy.float32,
-        FIDT_DOUBLE: numpy.float64,
-        FIDT_IFD: numpy.uint32,
-        FIDT_PALETTE: [('R', numpy.uint8), ('G', numpy.uint8),
-                       ('B', numpy.uint8), ('A', numpy.uint8)],
-        FIDT_LONG8: numpy.uint64,
-        FIDT_SLONG8: numpy.int64,
-        FIDT_IFD8: numpy.uint64
-        }
+    dtypes = {FIDT_BYTE: numpy.uint8,
+              FIDT_SHORT: numpy.uint16,
+              FIDT_LONG: numpy.uint32,
+              FIDT_RATIONAL: [('numerator', numpy.uint32),
+                              ('denominator', numpy.uint32)],
+              FIDT_SBYTE: numpy.int8,
+              FIDT_UNDEFINED: numpy.uint8,
+              FIDT_SSHORT: numpy.int16,
+              FIDT_SLONG: numpy.int32,
+              FIDT_SRATIONAL: [('numerator', numpy.int32),
+                               ('denominator', numpy.int32)],
+              FIDT_FLOAT: numpy.float32,
+              FIDT_DOUBLE: numpy.float64,
+              FIDT_IFD: numpy.uint32,
+              FIDT_PALETTE: [('R', numpy.uint8), ('G', numpy.uint8),
+                             ('B', numpy.uint8), ('A', numpy.uint8)],
+              FIDT_LONG8: numpy.uint64,
+              FIDT_SLONG8: numpy.int64,
+              FIDT_IFD8: numpy.uint64,
+              }
 
 
 def _process_bitmap(filename, flags, process_func):
@@ -410,7 +435,7 @@ def read(filename, flags=0):
     """Read an image to a numpy array of shape (height, width) for
     greyscale images, or shape (height, width, nchannels) for RGB or
     RGBA images.
-    The `flags` parameter should be one or more values from the IO_FLAGS
+    The `flags` parameter should be one or more values from the IoFlags
     class defined in this module, or-ed together with | as appropriate.
     (See the source-code comments for more details.)
     """
@@ -422,9 +447,9 @@ def read_metadata(filename):
 
     Returned dict maps (metadata_model, tag_name) keys to tag values, where
     metadata_model is a string name based on the FreeImage "metadata models"
-    defined in the class METADATA_MODELS.
+    defined in the class MetadataModels.
     """
-    flags = IO_FLAGS.FIF_LOAD_NOPIXELS
+    flags = IoFlags.FIF_LOAD_NOPIXELS
     return _process_bitmap(filename, flags, _read_metadata)
 
 
@@ -437,9 +462,8 @@ def _process_multipage(filename, flags, process_func):
     create_new = False
     read_only = True
     keep_cache_in_memory = True
-    multibitmap = _FI.FreeImage_OpenMultiBitmap(ftype, filename, create_new,
-                                                read_only, keep_cache_in_memory,
-                                                flags)
+    multibitmap = _FI.FreeImage_OpenMultiBitmap(
+        ftype, filename, create_new, read_only, keep_cache_in_memory, flags)
     handle_errors()
     multibitmap = ctypes.c_void_p(multibitmap)
     if not multibitmap:
@@ -454,7 +478,7 @@ def _process_multipage(filename, flags, process_func):
             bitmap = ctypes.c_void_p(bitmap)
             if not bitmap:
                 raise ValueError('Could not open %s as a multi-page image.'
-                                  % filename)
+                                 % filename)
             try:
                 out.append(process_func(bitmap))
             finally:
@@ -470,7 +494,7 @@ def read_multipage(filename, flags=0):
     """Read a multipage image to a list of numpy arrays, where each
     array is of shape (height, width) for greyscale images, or shape
     (height, width, nchannels) for RGB or RGBA images.
-    The `flags` parameter should be one or more values from the IO_FLAGS
+    The `flags` parameter should be one or more values from the IoFlags
     class defined in this module, or-ed together with | as appropriate.
     (See the source-code comments for more details.)
     """
@@ -481,7 +505,7 @@ def read_multipage_metadata(filename):
     """Read a multipage image to a list of metadata dicts, one dict for each
     page. The dict format is as in read_metadata().
     """
-    flags = IO_FLAGS.FIF_LOAD_NOPIXELS
+    flags = IoFlags.FIF_LOAD_NOPIXELS
     return _process_multipage(filename, flags, _read_metadata)
 
 
@@ -503,9 +527,9 @@ def _wrap_bitmap_bits_in_array(bitmap, shape, dtype):
         strides = (itemsize, pitch)
     bits = _FI.FreeImage_GetBits(bitmap)
     handle_errors()
-    array = numpy.ndarray(shape, dtype=dtype,
-                          buffer=(ctypes.c_char * byte_size).from_address(bits),
-                          strides=strides)
+    array = numpy.ndarray(
+        shape, dtype=dtype,
+        buffer=(ctypes.c_char * byte_size).from_address(bits), strides=strides)
     return array
 
 
@@ -513,8 +537,9 @@ def _array_from_bitmap(bitmap):
     """Convert a FreeImage bitmap pointer to a numpy array.
 
     """
-    dtype, shape = FI_TYPES.get_type_and_shape(bitmap)
+    dtype, shape = FiTypes.get_type_and_shape(bitmap)
     array = _wrap_bitmap_bits_in_array(bitmap, shape, dtype)
+
     # swizzle the color components and flip the scanlines to go from
     # FreeImage's BGR[A] and upside-down internal memory format to something
     # more normal
@@ -542,7 +567,7 @@ def _array_from_bitmap(bitmap):
 def _read_metadata(bitmap):
     metadata = {}
     models = [(name[5:], number) for name, number in
-        METADATA_MODELS.__dict__.items() if name.startswith('FIMD_')]
+              MetadataModels.__dict__.items() if name.startswith('FIMD_')]
 
     tag = ctypes.c_void_p()
     for model_name, number in models:
@@ -560,15 +585,16 @@ def _read_metadata(bitmap):
                 char_ptr = ctypes.c_char * byte_size
                 tag_str = char_ptr.from_address(_FI.FreeImage_GetTagValue(tag))
                 handle_errors()
-                if tag_type == METADATA_DATATYPE.FIDT_ASCII:
+                if tag_type == MetadataDatatype.FIDT_ASCII:
                     tag_val = asstr(tag_str.value)
                 else:
-                    tag_val = numpy.fromstring(tag_str,
-                            dtype=METADATA_DATATYPE.dtypes[tag_type])
+                    tag_val = numpy.fromstring(
+                        tag_str, dtype=MetadataDatatype.dtypes[tag_type])
                     if len(tag_val) == 1:
                         tag_val = tag_val[0]
                 metadata[(model_name, tag_name)] = tag_val
-                more = _FI.FreeImage_FindNextMetadata(mdhandle, ctypes.byref(tag))
+                more = _FI.FreeImage_FindNextMetadata(mdhandle,
+                                                      ctypes.byref(tag))
                 handle_errors()
             _FI.FreeImage_FindCloseMetadata(mdhandle)
             handle_errors()
@@ -579,7 +605,7 @@ def write(array, filename, flags=0):
     """Write a (height, width) or (height, width, nchannels) array to
     a greyscale, RGB, or RGBA image, with file type deduced from the
     filename.
-    The `flags` parameter should be one or more values from the IO_FLAGS
+    The `flags` parameter should be one or more values from the IoFlags
     class defined in this module, or-ed together with | as appropriate.
     (See the source-code comments for more details.)
     """
@@ -591,9 +617,9 @@ def write(array, filename, flags=0):
         raise ValueError('Cannot determine type for %s' % filename)
     bitmap, fi_type = _array_to_bitmap(array)
     try:
-        if fi_type == FI_TYPES.FIT_BITMAP:
-            can_write = _FI.FreeImage_FIFSupportsExportBPP(ftype,
-                                      _FI.FreeImage_GetBPP(bitmap))
+        if fi_type == FiTypes.FIT_BITMAP:
+            can_write = _FI.FreeImage_FIFSupportsExportBPP(
+                ftype, _FI.FreeImage_GetBPP(bitmap))
             handle_errors()
         else:
             can_write = _FI.FreeImage_FIFSupportsExportType(ftype, fi_type)
@@ -614,7 +640,7 @@ def write_multipage(arrays, filename, flags=0):
     """Write a list of (height, width) or (height, width, nchannels)
     arrays to a multipage greyscale, RGB, or RGBA image, with file type
     deduced from the filename.
-    The `flags` parameter should be one or more values from the IO_FLAGS
+    The `flags` parameter should be one or more values from the IoFlags
     class defined in this module, or-ed together with | as appropriate.
     (See the source-code comments for more details.)
     """
@@ -660,7 +686,7 @@ def _array_to_bitmap(array):
     else:
         n_channels = shape[0]
     try:
-        fi_type = FI_TYPES.fi_types[(dtype, n_channels)]
+        fi_type = FiTypes.fi_types[(dtype, n_channels)]
     except KeyError:
         raise ValueError('Cannot write arrays of given type and shape.')
 
@@ -678,22 +704,22 @@ def _array_to_bitmap(array):
         # swizzle the color components and flip the scanlines to go to
         # FreeImage's BGR[A] and upside-down internal memory format
         if len(shape) == 3 and _FI.FreeImage_IsLittleEndian():
-            R = array[:, :, 0]
-            G = array[:, :, 1]
-            B = array[:, :, 2]
+            r = array[:, :, 0]
+            g = array[:, :, 1]
+            b = array[:, :, 2]
 
             if dtype.type == numpy.uint8:
-                wrapped_array[0] = n(B)
-                wrapped_array[1] = n(G)
-                wrapped_array[2] = n(R)
+                wrapped_array[0] = n(b)
+                wrapped_array[1] = n(g)
+                wrapped_array[2] = n(r)
             elif dtype.type == numpy.uint16:
-                wrapped_array[0] = n(R)
-                wrapped_array[1] = n(G)
-                wrapped_array[2] = n(B)
+                wrapped_array[0] = n(r)
+                wrapped_array[1] = n(g)
+                wrapped_array[2] = n(b)
 
             if shape[2] == 4:
-                A = array[:, :, 3]
-                wrapped_array[3] = n(A)
+                a = array[:, :, 3]
+                wrapped_array[3] = n(a)
         else:
             wrapped_array[:] = n(array)
         if len(shape) == 2 and dtype.type == numpy.uint8:
