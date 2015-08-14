@@ -105,9 +105,9 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
     centres = <double*>malloc(dims * sizeof(double))
     total_values = <double*>malloc(dims * sizeof(double))
 
-    if mode not in ('constant', 'wrap', 'reflect', 'nearest'):
-        raise ValueError("Invalid mode specified.  Please use "
-                         "`constant`, `nearest`, `wrap` or `reflect`.")
+    if mode not in ('constant', 'wrap', 'symmetric', 'reflect', 'edge'):
+        raise ValueError("Invalid mode specified.  Please use `constant`, "
+                         "`edge`, `wrap`, `symmetric` or `reflect`.")
     cdef char cmode = ord(mode[0].upper())
 
     for r in range(rows):

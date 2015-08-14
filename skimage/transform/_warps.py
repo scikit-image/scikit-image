@@ -4,6 +4,18 @@ from scipy import ndimage as ndi
 from ..measure import block_reduce
 from ._geometric import (warp, SimilarityTransform, AffineTransform,
                          _convert_warp_input, _clip_warp_output)
+from .._shared.utils import _mode_deprecations
+
+
+def _to_ndimage_mode(mode):
+    """ Convert from a numpy.pad mode name to the corresponding ndimage
+    mode. """
+    mode = _mode_deprecations(mode.lower())
+    mode_translation_dict = dict(edge='nearest', symmetric='reflect',
+                                 reflect='mirror')
+    if mode in mode_translation_dict:
+        mode = mode_translation_dict[mode]
+    return mode
 
 
 def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
@@ -35,9 +47,9 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
     order : int, optional
         The order of the spline interpolation, default is 1. The order has to
         be in the range 0-5. See `skimage.transform.warp` for detail.
-    mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
+    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode.
+        to the given mode.  Modes match the behaviour of `numpy.pad`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -51,10 +63,10 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
 
     Note
     ----
-    Modes 'mirror' and 'reflect' are similar, but differ in whether the edge
+    Modes 'reflect' and 'symmetric' are similar, but differ in whether the edge
     voxels are duplicated during the reflection.  As an example, if an array
     has values [0, 1, 2] and was padded to the right by four values using
-    reflect, the result would be [0, 1, 2, 2, 1, 0, 0], while for mirror it
+    symmetric, the result would be [0, 1, 2, 2, 1, 0, 0], while for reflect it
     would be [0, 1, 2, 1, 0, 1, 2].
 
     Examples
@@ -76,6 +88,7 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
     # 3-dimensional interpolation
     if len(output_shape) == 3 and (image.ndim == 2
                                    or output_shape[2] != image.shape[2]):
+        mode = _to_ndimage_mode(mode)
         dim = output_shape[2]
         if image.ndim == 2:
             image = image[:, :, np.newaxis]
@@ -146,9 +159,9 @@ def rescale(image, scale, order=1, mode='constant', cval=0, clip=True,
     order : int, optional
         The order of the spline interpolation, default is 1. The order has to
         be in the range 0-5. See `skimage.transform.warp` for detail.
-    mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
+    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode.
+        to the given mode.  Modes match the behaviour of `numpy.pad`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -214,9 +227,9 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
     order : int, optional
         The order of the spline interpolation, default is 1. The order has to
         be in the range 0-5. See `skimage.transform.warp` for detail.
-    mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'},  optional
+    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode.
+        to the given mode.  Modes match the behaviour of `numpy.pad`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -368,9 +381,9 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
     order : int, optional
         The order of the spline interpolation, default is 1. The order has to
         be in the range 0-5. See `skimage.transform.warp` for detail.
-    mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
+    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode.
+        to the given mode.  Modes match the behaviour of `numpy.pad`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.

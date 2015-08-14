@@ -5,8 +5,10 @@ import numpy as np
 from scipy import spatial
 from scipy import ndimage as ndi
 
-from .._shared.utils import get_bound_method_class, safe_as_int
+from .._shared.utils import (get_bound_method_class, safe_as_int,
+                             _mode_deprecations)
 from ..util import img_as_float
+
 from ._warps_cy import _warp_fast
 
 
@@ -1128,9 +1130,9 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
     order : int, optional
         The order of the spline interpolation, default is 1. The order has to
         be in the range 0-5. See `skimage.transform.warp` for detail.
-    mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
+    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode.
+        to the given mode.  Modes match the behaviour of `numpy.pad`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -1140,7 +1142,7 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
         produce values outside the given input range.
 
     """
-
+    mode = _mode_deprecations(mode)
     if clip and order != 0:
         min_val = input_image.min()
         max_val = input_image.max()
@@ -1211,9 +1213,9 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
          - 3: Bi-cubic
          - 4: Bi-quartic
          - 5: Bi-quintic
-    mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
+    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode.
+        to the given mode.  Modes match the behaviour of `numpy.pad`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -1294,7 +1296,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     >>> warped = warp(cube, coords)
 
     """
-
+    mode = _mode_deprecations(mode)
     image = _convert_warp_input(image, preserve_range)
 
     input_shape = np.array(image.shape)

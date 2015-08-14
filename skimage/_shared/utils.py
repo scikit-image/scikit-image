@@ -163,3 +163,14 @@ def assert_nD(array, ndim, arg_name='image'):
         ndim = [ndim]
     if not array.ndim in ndim:
         raise ValueError(msg % (arg_name, '-or-'.join([str(n) for n in ndim])))
+
+
+def _mode_deprecations(mode):
+    """ to be used by functions to update deprecated mode names in
+    `skimage._shared.interpolation.pyx`."""
+    if mode.lower() == 'nearest':
+        warnings.warn(skimage_deprecation(
+            "Mode 'nearest' has been renamed 'edge'. Mode 'nearest' will be "
+            "removed in a future release."))
+        mode = 'edge'
+    return mode
