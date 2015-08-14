@@ -68,13 +68,18 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
     depth : int, optional
         Integer equal to the depth of the added boundary cells. Defaults to
         zero.
-    mode : 'reflect', 'periodic', 'wrap', 'nearest', optional
-        type of external boundary padding
+    mode : {'reflect', 'symmetric', 'periodic', 'wrap', 'nearest', 'edge'}, optional
+        type of external boundary padding.
     extra_arguments : tuple, optional
         Tuple of arguments to be passed to the function.
     extra_keywords : dictionary, optional
         Dictionary of keyword arguments to be passed to the function.
 
+    Notes
+    -----
+    Numpy edge modes `symmetric`, `wrap` and `edge` are converted to the
+    equivalent `dask` boundary modes `reflect`, `periodic` and `nearest`,
+    respectively.
     """
     import dask.array as da
 
@@ -88,6 +93,10 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
 
     if mode == 'wrap':
         mode = 'periodic'
+    elif mode == 'symmetric':
+        mode = 'reflect'
+    elif mode == 'edge':
+        mode = 'nearest'
 
     def wrapped_func(arr):
         return function(arr, *extra_arguments, **extra_keywords)
