@@ -5,13 +5,13 @@ from .utils import _mode_deprecations
 
 
 def coord_map_py(Py_ssize_t dim, long coord, mode):
-    """ interpolation.coord_map python wrapper """
+    """interpolation.coord_map python wrapper"""
     cdef char mode_c = ord(mode[0].upper())
     return coord_map(dim, coord, mode_c)
 
 
 def extend_image(image, pad=10, mode='constant', cval=0):
-    """ Pad a 2D image by ``pad`` pixels on each side.
+    """Pad a 2D image by ``pad`` pixels on each side.
 
     Parameters
     ----------

@@ -80,7 +80,7 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
     Note
     ----
     Modes 'reflect' and 'symmetric' are similar, but differ in whether the edge
-    voxels are duplicated during the reflection.  As an example, if an array
+    pixels are duplicated during the reflection.  As an example, if an array
     has values [0, 1, 2] and was padded to the right by four values using
     symmetric, the result would be [0, 1, 2, 2, 1, 0, 0], while for reflect it
     would be [0, 1, 2, 1, 0, 1, 2].
