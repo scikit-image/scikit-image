@@ -12,6 +12,17 @@ from ..util import img_as_float
 from ._warps_cy import _warp_fast
 
 
+def _to_ndimage_mode(mode):
+    """ Convert from a numpy.pad mode name to the corresponding ndimage
+    mode. """
+    mode = _mode_deprecations(mode.lower())
+    mode_translation_dict = dict(edge='nearest', symmetric='reflect',
+                                 reflect='mirror')
+    if mode in mode_translation_dict:
+        mode = mode_translation_dict[mode]
+    return mode
+
+
 def _center_and_normalize_points(points):
     """Center and normalize image points.
 
@@ -1142,7 +1153,6 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
         produce values outside the given input range.
 
     """
-    mode = _mode_deprecations(mode)
     if clip and order != 0:
         min_val = input_image.min()
         max_val = input_image.max()
@@ -1390,8 +1400,9 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         # Pre-filtering not necessary for order 0, 1 interpolation
         prefilter = order > 1
 
+        ndi_mode = _to_ndimage_mode(mode)
         warped = ndi.map_coordinates(image, coords, prefilter=prefilter,
-                                     mode=mode, order=order, cval=cval)
+                                     mode=ndi_mode, order=order, cval=cval)
 
 
     _clip_warp_output(image, warped, order, mode, cval, clip)

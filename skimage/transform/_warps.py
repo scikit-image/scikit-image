@@ -3,19 +3,9 @@ from scipy import ndimage as ndi
 
 from ..measure import block_reduce
 from ._geometric import (warp, SimilarityTransform, AffineTransform,
-                         _convert_warp_input, _clip_warp_output)
+                         _convert_warp_input, _clip_warp_output,
+                         _to_ndimage_mode)
 from .._shared.utils import _mode_deprecations
-
-
-def _to_ndimage_mode(mode):
-    """ Convert from a numpy.pad mode name to the corresponding ndimage
-    mode. """
-    mode = _mode_deprecations(mode.lower())
-    mode_translation_dict = dict(edge='nearest', symmetric='reflect',
-                                 reflect='mirror')
-    if mode in mode_translation_dict:
-        mode = mode_translation_dict[mode]
-    return mode
 
 
 def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
@@ -88,7 +78,7 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
     # 3-dimensional interpolation
     if len(output_shape) == 3 and (image.ndim == 2
                                    or output_shape[2] != image.shape[2]):
-        mode = _to_ndimage_mode(mode)
+        ndi_mode = _to_ndimage_mode(mode)
         dim = output_shape[2]
         if image.ndim == 2:
             image = image[:, :, np.newaxis]
@@ -105,7 +95,7 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
         image = _convert_warp_input(image, preserve_range)
 
         out = ndi.map_coordinates(image, coord_map, order=order,
-                                  mode=mode, cval=cval)
+                                  mode=ndi_mode, cval=cval)
 
         _clip_warp_output(image, out, order, mode, cval, clip)
 
