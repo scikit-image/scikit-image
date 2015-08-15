@@ -26,8 +26,8 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
 
     Notes
     -----
-    Tiff files are handled by Christophe Golhke's tifffile.py [1]_, and support many
-    advanced image types including multi-page and floating point.
+    Tiff files are handled by Christophe Golhke's tifffile.py [1]_, and support
+    many advanced image types including multi-page and floating point.
 
     All other files are read using the Python Imaging Libary.
     See PIL docs [2]_ for a list of supported formats.
@@ -67,9 +67,9 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
         site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
         pillow_error_message = str(e)
         error_message = ('Could not load "%s" \n'
-            'Reason: "%s"\n'
-            'Please see documentation at: %s'
-             % (im.filename, pillow_error_message, site))
+                         'Reason: "%s"\n'
+                         'Please see documentation at: %s'
+                         % (im.filename, pillow_error_message, site))
         raise ValueError(error_message)
     frames = []
     grayscale = None
@@ -255,7 +255,7 @@ def imsave(fname, arr, format_str=None, **kwargs):
             and fname.lower().endswith(".png")):
         format_str = "PNG"
 
-    arr = np.asanyarray(arr).squeeze()
+    arr = np.asanyarray(arr)
 
     if arr.dtype.kind == 'b':
         arr = arr.astype(np.uint8)
@@ -264,7 +264,7 @@ def imsave(fname, arr, format_str=None, **kwargs):
     if hasattr(fname, 'lower'):
         if fname.lower().endswith(('.tiff', '.tif')):
             use_tif = True
-    if not format_str is None:
+    if format_str is not None:
         if format_str.lower() in ['tiff', 'tif']:
             use_tif = True
 

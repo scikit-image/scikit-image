@@ -94,23 +94,23 @@ def imread_qt(filename):
     arrayptr = qtimg.bits()
     # QT may pad the image, so we need to use bytesPerLine, not width for
     # the conversion to a numpy array
-    bytesPerPixel = qtimg.depth() // 8
-    pixelsPerLine = qtimg.bytesPerLine() // bytesPerPixel
-    img_size = pixelsPerLine * qtimg.height() * bytesPerPixel
+    bytes_per_pixel = qtimg.depth() // 8
+    pixels_per_line = qtimg.bytesPerLine() // bytes_per_pixel
+    img_size = pixels_per_line * qtimg.height() * bytes_per_pixel
     arrayptr.setsize(img_size)
     img = np.array(arrayptr)
     # Reshape and trim down to correct dimensions
-    if bytesPerPixel > 1:
-        img = img.reshape((qtimg.height(), pixelsPerLine, bytesPerPixel))
+    if bytes_per_pixel > 1:
+        img = img.reshape((qtimg.height(), pixels_per_line, bytes_per_pixel))
         img = img[:, :qtimg.width(), :]
     else:
-        img = img.reshape((qtimg.height(), pixelsPerLine))
+        img = img.reshape((qtimg.height(), pixels_per_line))
         img = img[:, :qtimg.width()]
     # Strip qt's false alpha channel if needed
     # and reorder color axes as required
-    if bytesPerPixel == 4 and not qtimg.hasAlphaChannel():
+    if bytes_per_pixel == 4 and not qtimg.hasAlphaChannel():
         img = img[:, :, 2::-1]
-    elif bytesPerPixel == 4:
+    elif bytes_per_pixel == 4:
         img[:, :, 0:3] = img[:, :, 2::-1]
     return img
 
@@ -151,7 +151,7 @@ def imsave(filename, img, format_str=None):
     # we can add support for other than 3D uint8 here...
     img = prepare_for_display(img)
     qimg = QImage(img.data, img.shape[1], img.shape[0],
-                          img.strides[0], QImage.Format_RGB888)
+                  img.strides[0], QImage.Format_RGB888)
     if _is_filelike(filename):
         byte_array = QtCore.QByteArray()
         qbuffer = QtCore.QBuffer(byte_array)

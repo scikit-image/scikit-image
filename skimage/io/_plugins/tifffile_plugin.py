@@ -11,7 +11,8 @@ def imread(fname, dtype=None, **kwargs):
     dtype : numpy dtype object or string specifier
        Specifies data type of array elements (Not currently used).
     kwargs : keyword pairs, optional
-        Addition keyword arguments to pass through (see `tifffile`'s `imread` function).
+        Additional keyword arguments to pass through (see ``tifffile``'s
+        ``imread`` function).
 
     Notes
     -----
