@@ -6,7 +6,8 @@
 
 import numpy as np
 cimport numpy as cnp
-cimport openmp
+cimport safe_openmp as openmp
+from safe_openmp cimport have_openmp
 from libc.stdlib cimport malloc, free
 from libcpp.vector cimport vector
 from skimage._shared.transform cimport integrate
@@ -691,7 +692,9 @@ cdef class Cascade:
         # Initialize lock to enable thread-safe writes to the array
         # in concurrent loop.
         cdef openmp.omp_lock_t mylock
-        openmp.omp_init_lock(&mylock)
+
+        if have_openmp:
+            openmp.omp_init_lock(&mylock)
 
 
         # As the amount of work between the threads is not equal we use `dynamic`
@@ -724,14 +727,22 @@ cdef class Cascade:
                         new_detection.c = current_col
                         new_detection.width = current_width
                         new_detection.height = current_height
-                        openmp.omp_set_lock(&mylock)
+
+                        if have_openmp:
+                            openmp.omp_set_lock(&mylock)
+
                         output.push_back(new_detection)
-                        openmp.omp_unset_lock(&mylock)
+
+                        if have_openmp:
+                            openmp.omp_unset_lock(&mylock)
 
                     current_col = current_col + current_step
 
                 current_row = current_row + current_step
                 current_col = 0
+
+        if have_openmp:
+            openmp.omp_destroy_lock(&mylock)
 
         return list(_group_detections(output, intersection_score_threshold,
                                       min_neighbour_number))

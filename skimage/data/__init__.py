@@ -11,7 +11,7 @@ import os as _os
 from .. import data_dir
 from ..io import imread, use_plugin
 from ._binary_blobs import binary_blobs
-import xml
+import detect
 
 __all__ = ['load',
            'camera',
@@ -29,7 +29,7 @@ __all__ = ['load',
            'hubble_deep_field',
            'rocket',
            'astronaut',
-           'xml']
+           'detect']
 
 
 def load(f):

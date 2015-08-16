@@ -1,6 +1,6 @@
 import numpy as np
 
-import skimage.future.detect_obj as detect_obj
+import skimage.future.detect as detect
 import skimage.data as data
 
 
@@ -9,10 +9,10 @@ class TestCascade():
     def test_detector_astrout(self):
 
         # Load the trained file from the module root.
-        trained_file = data.xml.face_cascade_detector()
+        trained_file = data.detect.frontal_face_cascade_xml()
 
         # Initialize the detector cascade.
-        detector = detect_obj.Cascade(trained_file)
+        detector = detect.Cascade(trained_file)
 
         img = data.astronaut()
 
@@ -27,10 +27,10 @@ class TestCascade():
     def test_detector_lena(self):
 
         # Load the trained file from the module root.
-        trained_file = data.xml.face_cascade_detector()
+        trained_file = data.detect.frontal_face_cascade_xml()
 
         # Initialize the detector cascade.
-        detector = detect_obj.Cascade(trained_file)
+        detector = detect.Cascade(trained_file)
 
         img = data.lena()
 

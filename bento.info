@@ -167,9 +167,9 @@ Library:
     Extension: skimage.transform._seam_carving
         Sources:
             skimage/transform/_seam_carving.pyx
-    Extension: skimage.future.detect_obj.cascade
+    Extension: skimage.future.detect.cascade
         Sources:
-            skimage/future/detect_obj/cascade.pyx
+            skimage/future/detect/cascade.pyx
 
 Executable: skivi
     Module: skimage.scripts.skivi

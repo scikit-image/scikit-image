@@ -2,9 +2,9 @@ import os as _os
 from .. import data_dir
 
 
-def face_cascade_detector():
+def frontal_face_cascade_xml():
     """
-    Returns the filepath to the trained xml file.
+    Returns the file's path to the trained xml file.
     """
 
     return _os.path.join(data_dir, 'lbpcascade_frontalface_opencv.xml')

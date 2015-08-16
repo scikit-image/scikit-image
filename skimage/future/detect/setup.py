@@ -9,10 +9,10 @@ base_path = os.path.abspath(os.path.dirname(__file__))
 def configuration(parent_package='', top_path=None):
     from numpy.distutils.misc_util import Configuration, get_numpy_include_dirs
 
-    config = Configuration('detect_obj', parent_package, top_path)
+    config = Configuration('detect', parent_package, top_path)
     config.add_data_dir('tests')
 
-    # This function tries to create C files from the given .pyx files.  If
+    # This function tries to create cpp files from the given .pyx files.  If
     # it fails, try to build with pre-generated .cpp files.
     cython(['cascade.pyx'], working_path=base_path)
     config.add_extension('cascade', sources=['cascade.cpp'],
