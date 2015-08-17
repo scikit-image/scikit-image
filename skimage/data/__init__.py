@@ -11,7 +11,7 @@ import os as _os
 from .. import data_dir
 from ..io import imread, use_plugin
 from ._binary_blobs import binary_blobs
-import detect
+from . import detect
 
 __all__ = ['load',
            'camera',
