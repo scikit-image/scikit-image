@@ -24,6 +24,42 @@ HIST_SIZE_RGB = 50
 HIST_SIZE_GREYSCALE = 25
 
 
+def _upscale_labels_by_2(labels_2d, h, w):
+    """
+    Upscale a label image by a factor of 2.
+
+    Parameters
+    ----------
+    labels_2d : the label image to upscale
+    h : target height; if `h > labels_2d.shape[0]*2`, then the last row will
+    be repeated as necessary
+    w : target width; if `w > labels_2d.shape[1]*2`, then the last column will
+    be repeated as necessary
+
+    Returns
+    -------
+    Upscaled label image of shape `(h,w)`.
+    """
+    h2 = labels_2d.shape[0] * 2
+    w2 = labels_2d.shape[1] * 2
+    rem_r = h & 1
+    rem_c = w & 1
+
+    rep = np.repeat(np.repeat(labels_2d, 2, 1), 2, 0)
+    if rem_r == 0 and rem_c == 0:
+        return rep
+    else:
+        up_labels_2d = np.zeros((h,w), dtype=np.int32)
+        up_labels_2d[:h2, :w2] = rep
+
+        if rem_r != 0:
+            up_labels_2d[-1, :] = up_labels_2d[-2, :]
+        if rem_c != 0:
+            up_labels_2d[:, -1] = up_labels_2d[:, -2]
+
+    return up_labels_2d
+
+
 def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
           block_refine_iters=10, pixel_refine_iters=10,
           score_threshold=0.0, min_label_area_factor=0.0,
@@ -203,9 +239,9 @@ def seeds(input_2d, hist_size=None, num_superpixels=200, n_levels=5,
     # For each level above the pixel level
     labels_prev_level = labels_by_level[-1]
     for level in range(n_levels-2, -1, -1):
-        labels = _seeds.upscale_labels_by_2(labels_prev_level,
-                                            metrics_by_level[level].n_blocks_r,
-                                            metrics_by_level[level].n_blocks_c)
+        labels = _upscale_labels_by_2(labels_prev_level,
+                                      metrics_by_level[level].n_blocks_r,
+                                      metrics_by_level[level].n_blocks_c)
         labels_by_level[level] = labels
 
         block_hists = hist_2ds_by_level[level]

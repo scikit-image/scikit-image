@@ -102,45 +102,6 @@ cdef class LevelMetrics:
         return bw * bh
 
 
-
-@cython.boundscheck(False)
-def upscale_labels_by_2(int[:,:] labels_2d, int h, int w):
-    """
-    Upscale a label image by a factor of 2.
-
-    Parameters
-    ----------
-    labels_2d : the label image to upscale
-    h : target height; if `h > labels_2d.shape[0]*2`, then the last row will
-    be repeated as necessary
-    w : target width; if `w > labels_2d.shape[1]*2`, then the last column will
-    be repeated as necessary
-
-    Returns
-    -------
-    Upscaled label image of shape `(h,w)`.
-    """
-    cdef int h2 = labels_2d.shape[0]*2, w2 = labels_2d.shape[1]*2
-    cdef int rem_r = h & 1, rem_c = w & 1
-
-    cdef int[:,:] up_labels_2d = np.zeros((h,w), dtype=np.int32)
-    up_labels_2d[:h2:2,:w2:2] = labels_2d
-    up_labels_2d[1:h2:2,:w2:2] = labels_2d
-    up_labels_2d[:h2:2,1:w2:2] = labels_2d
-    up_labels_2d[1:h2:2,1:w2:2] = labels_2d
-
-    if rem_r != 0:
-        up_labels_2d[-1,:w2:2] = labels_2d[-1,:]
-        up_labels_2d[-1,1:w2:2] = labels_2d[-1:]
-        if rem_c != 0:
-            up_labels_2d[-1,-1] = labels_2d[-1,-1]
-    if rem_c != 0:
-        up_labels_2d[:h2:2,-1] = labels_2d[:,-1]
-        up_labels_2d[1:h2:2,-1] = labels_2d[:,-1]
-
-    return up_labels_2d
-
-
 @cython.boundscheck(False)
 def upscale_labels(int[:,:] labels_2d, LevelMetrics metrics):
     """
