@@ -5,7 +5,6 @@ from ..measure import block_reduce
 from ._geometric import (warp, SimilarityTransform, AffineTransform,
                          _convert_warp_input, _clip_warp_output,
                          _to_ndimage_mode)
-from .._shared.utils import _mode_deprecations
 
 
 def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
