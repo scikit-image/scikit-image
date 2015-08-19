@@ -1,4 +1,4 @@
-from numpy.testing import assert_equal, assert_almost_equal
+from numpy.testing import assert_equal, assert_almost_equal, assert_raises
 import numpy as np
 
 from skimage.measure import (moments, moments_central, moments_normalized,
@@ -48,6 +48,13 @@ def test_moments_normalized():
     nu2 = moments_normalized(mu2)
     # central moments must be translation and scale invariant
     assert_almost_equal(nu, nu2, decimal=1)
+
+
+def test_moments_normalized_invalid():
+    assert_raises(TypeError, moments_normalized, np.zeros((3, 3, 3)))
+    assert_raises(TypeError, moments_normalized, np.zeros((3,)))
+    assert_raises(TypeError, moments_normalized, np.zeros((3, 3)), 3)
+    assert_raises(TypeError, moments_normalized, np.zeros((3, 3)), 4)
 
 
 def test_moments_hu():
