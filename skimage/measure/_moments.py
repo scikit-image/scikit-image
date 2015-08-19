@@ -7,8 +7,8 @@ def moments(image, order=3):
     """Calculate all raw image moments up to a certain order.
 
     The following properties can be calculated from raw image moments:
-     * Area as ``m[0, 0]``.
-     * Centroid as {``m[0, 1] / m[0, 0]``, ``m[1, 0] / m[0, 0]``}.
+     * Area as: ``m[0, 0]``.
+     * Centroid as: {``m[0, 1] / m[0, 0]``, ``m[1, 0] / m[0, 0]``}.
 
     Note that raw moments are neither translation, scale nor rotation
     invariant.
@@ -36,12 +36,25 @@ def moments(image, order=3):
            Berlin, 1993.
     .. [4] http://en.wikipedia.org/wiki/Image_moment
 
+    Examples
+    --------
+    >>> image = np.zeros((20, 20), dtype=np.double)
+    >>> image[13:17, 13:17] = 1
+    >>> m = moments(image)
+    >>> cr = m[0, 1] / m[0, 0]
+    >>> cc = m[1, 0] / m[0, 0]
+    >>> cr, cc
+    (14.5, 14.5)
+
     """
     return _moments_cy.moments_central(image, 0, 0, order)
 
 
 def moments_central(image, cr, cc, order=3):
     """Calculate all central image moments up to a certain order.
+
+    The center coordinates (cr, cc) can be calculated from the raw moments as:
+    {``m[0, 1] / m[0, 0]``, ``m[1, 0] / m[0, 0]``}.
 
     Note that central moments are translation invariant but not scale and
     rotation invariant.
@@ -73,6 +86,18 @@ def moments_central(image, cr, cc, order=3):
            Berlin, 1993.
     .. [4] http://en.wikipedia.org/wiki/Image_moment
 
+    Examples
+    --------
+    >>> image = np.zeros((20, 20), dtype=np.double)
+    >>> image[13:17, 13:17] = 1
+    >>> m = moments(image)
+    >>> cr = m[0, 1] / m[0, 0]
+    >>> cc = m[1, 0] / m[0, 0]
+    >>> moments_central(image, cr, cc)
+    array([[ 16.,   0.,  20.,   0.],
+           [  0.,   0.,   0.,   0.],
+           [ 20.,   0.,  25.,   0.],
+           [  0.,   0.,   0.,   0.]])
     """
 
     return _moments_cy.moments_central(image, cr, cc, order)
@@ -107,7 +132,25 @@ def moments_normalized(mu, order=3):
            Berlin, 1993.
     .. [4] http://en.wikipedia.org/wiki/Image_moment
 
+    Examples
+    --------
+    >>> image = np.zeros((20, 20), dtype=np.double)
+    >>> image[13:17, 13:17] = 1
+    >>> m = moments(image)
+    >>> cr = m[0, 1] / m[0, 0]
+    >>> cc = m[1, 0] / m[0, 0]
+    >>> mu = moments_central(image, cr, cc)
+    >>> moments_normalized(mu)
+    array([[        nan,         nan,  0.078125  ,  0.        ],
+           [        nan,  0.        ,  0.        ,  0.        ],
+           [ 0.078125  ,  0.        ,  0.00610352,  0.        ],
+           [ 0.        ,  0.        ,  0.        ,  0.        ]])
+
     """
+    if mu.ndim != 2:
+        raise TypeError("Image moments must be 2-dimension")
+    if mu.shape[0] <= order or mu.shape[1] <= order:
+        raise TypeError("Shape of image moments must be >= `order`")
     return _moments_cy.moments_normalized(mu.astype(np.double), order)
 
 
