@@ -87,8 +87,8 @@ def test_stereo_motorcycle():
 def test_hdr_images():
     """Test that the "hdr" images can be loaded. """
     ims, exp = data.hdr_images()
-    assert_equal(len(ims), 4)
-    assert_equal(len(exp), 4)
+    assert_equal(len(ims), 3)
+    assert_equal(len(exp), 3)
 
 
 def test_binary_blobs():
