@@ -117,7 +117,7 @@ def get_crf(ims, exp, depth=16, l=200, depth_max=10):
     """
     Compute the camera response function from a set of images and exposures.
     Based on:
-    Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 3–8.
+    Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 3-8.
     doi:10.1145/258734.258884
 
 
@@ -196,7 +196,7 @@ def get_crf(ims, exp, depth=16, l=200, depth_max=10):
 def gsolve(Z, B, l, depth=16, depth_max=12):
     """
     Solves for the camera response function, based upon the code in:
-    Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 3–8.
+    Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 3-8.
     doi:10.1145/258734.258884
 
 
@@ -275,7 +275,7 @@ def gsolve(Z, B, l, depth=16, depth_max=12):
 def weight_func(I, depth=16):
     """
     Weight function, based on:
-    Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 3–8.
+    Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 3-8.
     doi:10.1145/258734.258884
 
     Parameters
@@ -302,7 +302,7 @@ def weight_func(I, depth=16):
 def weight_func_arr(I, depth=16):
     """
     Weight function for arrays, based on:
-    Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 3–8.
+    Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 3-8.
     doi:10.1145/258734.258884
 
     Parameters
