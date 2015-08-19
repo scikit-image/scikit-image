@@ -48,7 +48,7 @@ def make_hdr(ims, exp, radiance_map, depth=16):
     """
     Compute the HDR image from a series of images and a racianceMap
     Based on:
-    Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 3–8.
+    Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 3-8.
     doi:10.1145/258734.258884
 
     Parameters
