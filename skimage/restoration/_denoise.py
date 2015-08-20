@@ -2,6 +2,7 @@
 import numpy as np
 from .. import img_as_float
 from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
+from .._shared.utils import _mode_deprecations
 
 
 def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
@@ -37,9 +38,9 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
     bins : int
         Number of discrete values for gaussian weights of color filtering.
         A larger value results in improved accuracy.
-    mode : string
+    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}
         How to handle values outside the image borders. See
-        `scipy.ndimage.map_coordinates` for detail.
+        `numpy.pad` for detail.
     cval : string
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -54,6 +55,7 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
     .. [1] http://users.soe.ucsc.edu/~manduchi/Papers/ICCV98.pdf
 
     """
+    mode = _mode_deprecations(mode)
     return _denoise_bilateral(image, win_size, sigma_range, sigma_spatial,
                               bins, mode, cval)
 

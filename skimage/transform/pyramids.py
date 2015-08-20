@@ -45,7 +45,7 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
     order : int, optional
         Order of splines used in interpolation of downsampling. See
         `skimage.transform.warp` for detail.
-    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+    mode : {'reflect', 'constant', 'edge', 'symmetric', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         cval is the value when mode is equal to 'constant'.
     cval : float, optional
@@ -99,7 +99,7 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
     order : int, optional
         Order of splines used in interpolation of upsampling. See
         `skimage.transform.warp` for detail.
-    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+    mode : {'reflect', 'constant', 'edge', 'symmetric', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         cval is the value when mode is equal to 'constant'.
     cval : float, optional
@@ -164,7 +164,7 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     order : int, optional
         Order of splines used in interpolation of downsampling. See
         `skimage.transform.warp` for detail.
-    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+    mode : {'reflect', 'constant', 'edge', 'symmetric', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         cval is the value when mode is equal to 'constant'.
     cval : float, optional
@@ -245,7 +245,7 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     order : int, optional
         Order of splines used in interpolation of downsampling. See
         `skimage.transform.warp` for detail.
-    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+    mode : {'reflect', 'constant', 'edge', 'symmetric', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         cval is the value when mode is equal to 'constant'.
     cval : float, optional
