@@ -5,13 +5,13 @@ from .utils import _mode_deprecations
 
 
 def coord_map_py(Py_ssize_t dim, long coord, mode):
-    """interpolation.coord_map python wrapper"""
+    """Python wrapper for `interpolation.coord_map`."""
     cdef char mode_c = ord(mode[0].upper())
     return coord_map(dim, coord, mode_c)
 
 
 def extend_image(image, pad=10, mode='constant', cval=0):
-    """Pad a 2D image by ``pad`` pixels on each side.
+    """Pad a 2D image by `pad` pixels on each side.
 
     Parameters
     ----------
@@ -31,11 +31,11 @@ def extend_image(image, pad=10, mode='constant', cval=0):
     extended : ndarray
         The extended version of the input image.
 
-    Note
-    ----
-    For image padding, ``skimage.util.pad`` should be used instead.  This
-    function is intended only for testing get_pixel2d and demonstrating the
-    coordinate mapping modes implemented in ``coord_map``.
+    Notes
+    -----
+    For image padding, `skimage.util.pad` should be used instead.  This
+    function is intended only for testing `get_pixel2d` and demonstrating the
+    coordinate mapping modes implemented in `coord_map`.
     """
     mode = _mode_deprecations(mode)
     cdef:

@@ -13,8 +13,7 @@ from ._warps_cy import _warp_fast
 
 
 def _to_ndimage_mode(mode):
-    """ Convert from a numpy.pad mode name to the corresponding ndimage
-    mode. """
+    """Convert from `numpy.pad` mode name to the corresponding ndimage mode."""
     mode = _mode_deprecations(mode.lower())
     mode_translation_dict = dict(edge='nearest', symmetric='reflect',
                                  reflect='mirror')
