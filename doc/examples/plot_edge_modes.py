@@ -4,8 +4,8 @@ Interpolation: Edge Modes
 =========================
 
 This example illustrates the different edge modes available during
-interpolation in routines such as ``skimage.transform.rescale`` and
-``skimage.transform.resize``.
+interpolation in routines such as `skimage.transform.rescale` and
+`skimage.transform.resize`.
 """
 from skimage._shared.interpolation import extend_image
 import skimage.data

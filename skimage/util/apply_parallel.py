@@ -5,12 +5,13 @@ __all__ = ['apply_parallel']
 
 
 def _get_chunks(shape, ncpu):
-    """
-    Split the array into equal sized chunks based on the number of
+    """Split the array into equal sized chunks based on the number of
     available processors. The last chunk in each dimension absorbs the
-    remainder array elements if the number of cpus does not divide evenly into
+    remainder array elements if the number of CPUs does not divide evenly into
     the number of array elements.
 
+    Examples
+    --------
     >>> _get_chunks((4, 4), 4)
     ((2, 2), (2, 2))
     >>> _get_chunks((4, 4), 2)
@@ -77,8 +78,8 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
 
     Notes
     -----
-    Numpy edge modes `symmetric`, `wrap` and `edge` are converted to the
-    equivalent `dask` boundary modes `reflect`, `periodic` and `nearest`,
+    Numpy edge modes 'symmetric', 'wrap', and 'edge' are converted to the
+    equivalent `dask` boundary modes 'reflect', 'periodic' and 'nearest',
     respectively.
     """
     import dask.array as da

@@ -166,11 +166,11 @@ def assert_nD(array, ndim, arg_name='image'):
 
 
 def _mode_deprecations(mode):
-    """ to be used by functions to update deprecated mode names in
+    """Used to update deprecated mode names in
     `skimage._shared.interpolation.pyx`."""
     if mode.lower() == 'nearest':
         warnings.warn(skimage_deprecation(
-            "Mode 'nearest' has been renamed 'edge'. Mode 'nearest' will be "
+            "Mode 'nearest' has been renamed to 'edge'. Mode 'nearest' will be "
             "removed in a future release."))
         mode = 'edge'
     return mode
