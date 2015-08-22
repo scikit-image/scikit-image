@@ -454,6 +454,23 @@ def test_gray2rgb_rgb():
     assert_equal(x, y)
 
 
+def test_gray2rgb_alpha():
+    x = np.random.random((5, 5, 4))
+    assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 4))
+    assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
+    assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
+
+    x = np.random.random((5, 5, 3))
+    assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 3))
+    assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
+    assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
+
+    assert_equal(gray2rgb(np.array([[1, 2], [3, 4.]]),
+                          alpha=True)[0, 0, 3], 1)
+    assert_equal(gray2rgb(np.array([[1, 2], [3, 4]], dtype=np.uint8),
+                          alpha=True)[0, 0, 3], 255)
+
+
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
     run_module_suite()
