@@ -395,7 +395,7 @@ def hdr_images():
     Dynamic Range (HDR) imaging.
 
     Returns
-    ------
+    -------
 
     ims : list 
           list containing the images
