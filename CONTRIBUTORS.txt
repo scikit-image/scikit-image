@@ -217,4 +217,4 @@
   In-depth review of sub-pixel shift registration
 
 - Egor Panfilov
-  Inpainting with biharmonic equations, exemplar-based inpainting
+  Inpainting with biharmonic equations
