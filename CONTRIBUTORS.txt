@@ -215,3 +215,6 @@
 
 - Jim Fienup, Alexander Iacchetta
   In-depth review of sub-pixel shift registration
+
+- Egor Panfilov
+  Inpainting with biharmonic equations, exemplar-based inpainting
