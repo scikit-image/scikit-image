@@ -49,7 +49,6 @@ def inpaint_biharmonic(img, mask):
 
     img = skimage.img_as_float(img)
     mask = mask.astype(np.bool)
-    mask = mask.astype(np.bool)
 
     out = np.copy(img)
     out_h, out_w = out.shape
