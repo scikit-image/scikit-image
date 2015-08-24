@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+from __future__ import print_function, division
 
 import numpy as np
 import skimage
@@ -6,59 +6,31 @@ from scipy import sparse
 from scipy.sparse.linalg import spsolve
 
 
-def biharmonic_inpaint(img, mask):
-    # XXX: check and/or rework examples
-    """Inpaint masked points in image, using system of biharmonic
-    equations.
+def inpaint_biharmonic(img, mask):
+    """Inpaint masked points in image with biharmonic equations.
 
     Parameters
     ----------
-    img: 2-D ndarray
+    img : 2-D np.array
         Input image.
-    mask: 2-D ndarray
-        Array of pixels to be inpainted. Has to have the same size as 'img'.
+    mask : 2-D np.array
+        Array of pixels to be inpainted. Have to be the same size as 'img'.
         Unknown pixels has to be represented with 1, known - with 0.
 
     Returns
     -------
-    out: 2-D ndarray
+    out : 2-D np.array
         Input image with masked pixels inpainted.
 
     Example
     -------
-    # >>> import numpy as np
-    # >>> from skimage.restoration.inpainting import biharmonic_inpaint
-    # >>> image_in = np.ones((5, 5))
-    # >>> image_in[:, :2] = 1
-    # >>> image_in[:, 2]  = 2
-    # >>> image_in[:, 3:] = 3
-    # >>> image_in
-    # array([[ 1.,  1.,  2.,  3.,  3.],
-    #        [ 1.,  1.,  2.,  3.,  3.],
-    #        [ 1.,  1.,  2.,  3.,  3.],
-    #        [ 1.,  1.,  2.,  3.,  3.],
-    #        [ 1.,  1.,  2.,  3.,  3.]])
-    # >>> mask = np.zeros_like(image_in)
-    # >>> mask[1:3, 2:] = 1
-    # >>> mask
-    # array([[ 0.,  0.,  0.,  0.,  0.],
-    #        [ 0.,  0.,  1.,  1.,  1.],
-    #        [ 0.,  0.,  1.,  1.,  1.],
-    #        [ 0.,  0.,  0.,  0.,  0.],
-    #        [ 0.,  0.,  0.,  0.,  0.]])
-    # >>> image_in = image_in + mask * 100
-    # >>> image_in
-    # array([[ 1.,  1.,    2.,    3.,    3.],
-    #        [ 1.,  1.,  102.,  103.,  103.],
-    #        [ 1.,  1.,  102.,  103.,  103.],
-    #        [ 1.,  1.,    2.,    3.,    3.],
-    #        [ 1.,  1.,    2.,    3.,    3.]])
-    # >>> image_out = biharmonic_inpaint(image_in, mask)
-    # >>> image_out
-    # array([[ 1.,  1.,  2.,  3.,  3.],
-    #        [ 1.,  1.,  2.,  3.,  3.],
-    #        [ 1.,  1.,  2.,  3.,  3.],
-    #        [ 1.,  1.,  2.,  3.,  3.],
+    >>> row = np.square(np.linspace(0, 1, 5))
+    >>> img = np.repeat(np.reshape(row, (1, 5)), 5, axis=0)
+    >>> mask = np.zeros_like(img)
+    >>> mask[2, 2:] = 1
+    >>> mask[1, 3:] = 1
+    >>> mask[0, 4:] = 1
+    >>> out = inpaint_biharmonic(img, mask)
 
     References
     ----------
@@ -73,20 +45,31 @@ def biharmonic_inpaint(img, mask):
             method 3
     """
 
-    # TODO: add sufficient conditions (e.g. unknown area has to be <= 1/16)
+    # TODO: add sufficient conditions (if any)
 
     img = skimage.img_as_float(img)
-    mask = skimage.img_as_bool(mask)
+    mask = mask.astype(np.bool)
+    mask = mask.astype(np.bool)
 
     out = np.copy(img)
     out_h, out_w = out.shape
+    out_l = out.size
+
+    def _in_bounds(idx):
+        if len(idx) == 1:
+            if 0 <= idx <= out_l - 1:
+                return True
+        else:
+            if (0 <= idx[0] <= out_h - 1) and (0 <= idx[1] <= out_w - 1):
+                return True
+        return False
 
     # Find indexes of masked points in flatten array
     mask_mn = np.array(np.where(mask)).T
     mask_i = np.ravel_multi_index(np.where(mask), mask.shape)
 
     # Initialize sparse matrix
-    # TODO: Only points required for computation could be considered
+    # TODO: only points required for computation might be considered
     matrix_unknown = sparse.lil_matrix((np.sum(mask), out.size), dtype=np.int32)
     matrix_known = sparse.lil_matrix((np.sum(mask), out.size), dtype=np.int32)
 
@@ -94,12 +77,6 @@ def biharmonic_inpaint(img, mask):
     #       and np.array([0, 1, 0], [1, -4, 1], [0, 1, 0])
 
     # 1 stage. Find points 2 or more pixels far from bounds
-    # kernel = [        1
-    #               2  -8   2
-    #           1  -8  20  -8   1
-    #               2  -8   2
-    #                   1       ]
-    #
     kernel = [1, 2, -8, 2, 1, -8, 20, -8, 1, 2, -8, 2, 1]
     offset = [-2 * out_w, -out_w - 1, -out_w, -out_w + 1,
               -2, -1, 0, 1, 2, out_w - 1, out_w, out_w + 1, 2 * out_w]
@@ -113,10 +90,6 @@ def biharmonic_inpaint(img, mask):
                     matrix_known[idx, i + o] = k
 
     # 2 stage. Find points 1 pixel far from bounds
-    # kernel = [     1
-    #            1  -4  1
-    #                1     ]
-    #
     kernel = [1, 1, -4, 1, 1]
     offset = [-out_w, -1, 0, 1, out_w]
 
@@ -130,13 +103,11 @@ def biharmonic_inpaint(img, mask):
                     matrix_known[idx, i + o] = k
 
     # 3 stage. Find points on the horizontal bounds
-    # kernel = [ 1, -2, 1 ]
-    #
     kernel = [1, -2, 1]
     offset = [-1, 0, 1]
 
     for idx, (i, (m, n)) in enumerate(zip(mask_i, mask_mn)):
-        if m in [0, out_h - 1] and 1 <= n <= out_w - 1:
+        if m in [0, out_h - 1] and 1 <= n <= out_w - 2:
             for k, o in zip(kernel, offset):
                 if i + o in mask_i:
                     matrix_unknown[idx, i + o] = k
@@ -144,20 +115,31 @@ def biharmonic_inpaint(img, mask):
                     matrix_known[idx, i + o] = k
 
     # 4 stage. Find points on the vertical bounds
-    # kernel = [  1,
-    #            -2,
-    #             1  ]
-    #
     kernel = [1, -2, 1]
     offset = [-out_w, 0, out_w]
 
     for idx, (i, (m, n)) in enumerate(zip(mask_i, mask_mn)):
-        if n in [0, out_w - 1] and 1 <= m <= out_h - 1:
+        if n in [0, out_w - 1] and 1 <= m <= out_h - 2:
             for k, o in zip(kernel, offset):
                 if i + o in mask_i:
                     matrix_unknown[idx, i + o] = k
                 else:
                     matrix_known[idx, i + o] = k
+
+    # 5 stage. Find corner points if any
+    kernel = [1, 1, -2, 1, 1]
+    offset = [-out_w, -1, 0, 1, out_w]
+    offset_mn = [(-1, 0), (0, -1), (0, 0), (0, 1), (1, 0)]
+
+    for idx, (i, (m, n)) in enumerate(zip(mask_i, mask_mn)):
+        if m in [0, out_h - 1] and n in [0, out_w - 1]:
+            for k, o_mn in zip(kernel, offset_mn):
+                if _in_bounds((m + o_mn[0], n + o_mn[1])):
+                    o = offset[offset_mn.index(o_mn)]
+                    if i + o in mask_i:
+                        matrix_unknown[idx, i + o] = k
+                    else:
+                        matrix_known[idx, i + o] = k
 
     # Prepare diagonal matrix
     flat_diag_image = sparse.dia_matrix((out.flatten(), np.array([0])),
@@ -173,11 +155,11 @@ def biharmonic_inpaint(img, mask):
     result = spsolve(matrix_unknown, rhs)
 
     # Handle enormous values
-    out[np.where(out < -1)] = -1
-    out[np.where(out > 1)] = 1
+    result[np.where(result < -1)] = -1
+    result[np.where(result > 1)] = 1
 
     # Put calculated points into the image
     for idx, (m, n) in enumerate(mask_mn):
         out[m, n] = result[idx]
 
-    return skimage.img_as_uint(out)
+    return out
