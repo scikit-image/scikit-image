@@ -218,3 +218,6 @@
 
 - Damian Eads
   Structuring elements in morphology module.
+
+- Egor Panfilov
+  Inpainting with biharmonic equations, exemplar-based inpainting
