@@ -45,6 +45,13 @@ def inpaint_biharmonic(img, mask):
             method 3
     """
 
+    if img.ndim != 2 or mask.ndim != 2:
+        raise ValueError('Only 2-dimensional arrays are supported')
+    if img.shape != mask.shape:
+        raise ValueError('Input arrays have to be the same shape')
+    if np.ma.isMaskedArray(img):
+        raise TypeError('Masked arrays are not supported')
+
     # TODO: add sufficient conditions (if any)
 
     img = skimage.img_as_float(img)
@@ -56,12 +63,9 @@ def inpaint_biharmonic(img, mask):
 
     def _in_bounds(idx):
         if len(idx) == 1:
-            if 0 <= idx <= out_l - 1:
-                return True
+            return 0 <= idx <= out_l - 1
         else:
-            if (0 <= idx[0] <= out_h - 1) and (0 <= idx[1] <= out_w - 1):
-                return True
-        return False
+            return (0 <= idx[0] <= out_h - 1) and (0 <= idx[1] <= out_w - 1)
 
     # Find indexes of masked points in flatten array
     mask_mn = np.array(np.where(mask)).T
