@@ -1,7 +1,7 @@
 from __future__ import print_function, division
 
 import numpy as np
-from numpy.testing import (run_module_suite, assert_array_equal,
+from numpy.testing import (run_module_suite, assert_allclose,
                            assert_raises)
 from skimage.restoration import inpaint
 
@@ -19,13 +19,21 @@ def test_inpaint_biharmonic():
            [0., 0.0625, 0.2578125, 0.5625, 0.890625],
            [0., 0.0625, 0.25, 0.5625, 1.],
            [0., 0.0625, 0.25, 0.5625, 1.]]
-    assert_array_equal(ref, out)
+    assert_allclose(ref, out)
 
 
 def test_invalid_input():
-    assert_raises(ValueError, inpaint.inpaint_biharmonic, np.zeros([]))
-    assert_raises(ValueError, inpaint.inpaint_biharmonic,
-                  [np.zeros([]), np.zeros([])])
+    assert_raises(TypeError, inpaint.inpaint_biharmonic, np.zeros([]))
+
+    img, mask = np.zeros([]), np.zeros([])
+    assert_raises(ValueError, inpaint.inpaint_biharmonic, [img, mask])
+
+    img, mask = np.zeros((2, 2)), np.zeros((4, 1))
+    assert_raises(ValueError, inpaint.inpaint_biharmonic, [img, mask])
+
+    img = np.ma.array(np.zeros(2, 2), mask=[[0, 0], [0, 0]])
+    mask = np.zeros((2, 2))
+    assert_raises(ValueError, inpaint.inpaint_biharmonic, [img, mask])
 
 
 if __name__ == '__main__':
