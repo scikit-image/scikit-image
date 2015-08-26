@@ -7,8 +7,8 @@ from skimage.restoration import inpaint
 
 
 def test_inpaint_biharmonic():
-    row = np.square(np.linspace(0, 1, 5))
-    img = np.repeat(np.reshape(row, (1, 5)), 5, axis=0)
+    img = np.tile(np.square(np.linspace(0, 1, 5)), (5, 1))
+    print(img)
     mask = np.zeros_like(img)
     mask[2, 2:] = 1
     mask[1, 3:] = 1
@@ -31,7 +31,7 @@ def test_invalid_input():
 
     img = np.ma.array(np.zeros((2, 2)), mask=[[0, 0], [0, 0]])
     mask = np.zeros((2, 2))
-    assert_raises(ValueError, inpaint.inpaint_biharmonic, img, mask)
+    assert_raises(TypeError, inpaint.inpaint_biharmonic, img, mask)
 
 
 if __name__ == '__main__':
