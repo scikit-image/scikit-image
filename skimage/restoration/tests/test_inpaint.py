@@ -29,7 +29,7 @@ def test_invalid_input():
     img, mask = np.zeros((2, 2)), np.zeros((4, 1))
     assert_raises(ValueError, inpaint.inpaint_biharmonic, img, mask)
 
-    img = np.ma.array(np.zeros(2, 2), mask=[[0, 0], [0, 0]])
+    img = np.ma.array(np.zeros((2, 2)), mask=[[0, 0], [0, 0]])
     mask = np.zeros((2, 2))
     assert_raises(ValueError, inpaint.inpaint_biharmonic, img, mask)
 
