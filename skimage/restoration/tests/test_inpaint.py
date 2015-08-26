@@ -23,8 +23,6 @@ def test_inpaint_biharmonic():
 
 
 def test_invalid_input():
-    assert_raises(TypeError, inpaint.inpaint_biharmonic, np.zeros([]))
-
     img, mask = np.zeros([]), np.zeros([])
     assert_raises(ValueError, inpaint.inpaint_biharmonic, [img, mask])
 
