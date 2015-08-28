@@ -31,8 +31,8 @@ plt.title("RAG with edge weights less than 30, color "
 plt.imshow(out)
 
 plt.figure()
-plt.title("All edges drawn with cubehelix colormap")
-cmap = plt.get_cmap('cubehelix')
+plt.title("All edges drawn with viridis colormap")
+cmap = plt.get_cmap('viridis')
 out = graph.draw_rag(labels, g, img, colormap=cmap,
                      desaturate=True)
 
