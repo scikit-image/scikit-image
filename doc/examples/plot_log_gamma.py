@@ -3,8 +3,8 @@
 Gamma and log contrast adjustment
 ======================================
 
-This examples adjust image contrast by performing a Gamma and a Logarithmic
-correction on the input image.
+This example adjusts image contrast by performing a Gamma and a Logarithmic
+corrections on the input image.
 
 """
 import matplotlib
