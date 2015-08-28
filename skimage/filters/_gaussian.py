@@ -94,8 +94,7 @@ def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
         warnings.warn(RuntimeWarning(msg))
         multichannel = True
     if np.any(np.asarray(sigma) < 0.0):
-        msg = "Sigma values less than zero are not valid"
-        raise ValueError(msg)
+        raise ValueError("Sigma values less than zero are not valid")
     if multichannel:
         # do not filter across channels
         if not isinstance(sigma, coll.Iterable):
