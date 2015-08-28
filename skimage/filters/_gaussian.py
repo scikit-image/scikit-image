@@ -74,6 +74,10 @@ def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
     array([[ 0.05855018,  0.09653293,  0.05855018],
            [ 0.09653293,  0.15915589,  0.09653293],
            [ 0.05855018,  0.09653293,  0.05855018]])
+    >>> gaussian_filter(a, sigma=-1)
+    Traceback (most recent call last):
+    ...
+    ValueError: Sigma values less than zero are not valid
     >>> # Several modes are possible for handling boundaries
     >>> gaussian_filter(a, sigma=1, mode='reflect')
     array([[ 0.08767308,  0.12075024,  0.08767308],
@@ -93,6 +97,9 @@ def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
                "3D image with last dimension of length 3.")
         warnings.warn(RuntimeWarning(msg))
         multichannel = True
+    if np.any(np.asarray(sigma) < 0.0):
+        msg = "Sigma values less than zero are not valid"
+        raise ValueError(msg)
     if multichannel:
         # do not filter across channels
         if not isinstance(sigma, coll.Iterable):
