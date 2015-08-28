@@ -33,7 +33,7 @@ image = img_as_ubyte(data.camera())
 denoised = rank.median(image, disk(2))
 
 # find continuous region (low gradient - where less than 10 for this image) --> markers
-# disk(5) is used here to get a more smooth image
+# disk(5) is used here to get a smoother image
 markers = rank.gradient(denoised, disk(5)) < 10
 markers = ndi.label(markers)[0]
 
