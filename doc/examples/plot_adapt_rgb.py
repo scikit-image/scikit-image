@@ -3,9 +3,9 @@
 Adapting gray-scale filters to RGB images
 =========================================
 
-There are many filters that are designed work with gray-scale images but not
-color images. To simplify the process of creating functions that can adapt to
-RGB images, scikit-image provides the ``adapt_rgb`` decorator.
+There are many filters that are designed to work with gray-scale images but not
+with color images. To simplify the process of creating functions that can adapt
+to RGB images, scikit-image provides the ``adapt_rgb`` decorator.
 
 To actually use the ``adapt_rgb`` decorator, you have to decide how you want to
 adapt the RGB image for use with the gray-scale filter. There are two
@@ -46,9 +46,19 @@ import matplotlib.pyplot as plt
 
 image = data.lena()
 
-fig, (ax_each, ax_hsv) = plt.subplots(ncols=2)
-ax_each.imshow(sobel_each(image))
-ax_hsv.imshow(sobel_hsv(image))
+fig = plt.figure( figsize=(14,7) )
+ax_each = fig.add_subplot(121)
+ax_hsv  = fig.add_subplot(122)
+
+# We use 1 - sobel_each(image) but this will not work if image is not normalized
+ax_each.imshow(1-sobel_each(image))
+ax_each.set_xticks([]), ax_each.set_yticks([])
+ax_each.set_title("Sobel filter computed\n on individual RGB channels")
+
+# We use 1 - sobel_hsv(image) but this will not work if image is not normalized
+ax_hsv.imshow(1-sobel_hsv(image))
+ax_hsv.set_xticks([]), ax_hsv.set_yticks([])
+ax_hsv.set_title("Sobel filter computed\n on (V)alue converted image (HSV)")
 
 """
 .. image:: PLOT2RST.current_figure
@@ -94,8 +104,13 @@ Finally, we can use this handler with ``adapt_rgb`` just as before:
 def sobel_gray(image):
     return filters.sobel(image)
 
-fig, ax = plt.subplots()
-ax.imshow(sobel_gray(image), cmap=plt.cm.gray)
+fig = plt.figure( figsize=(7,7) )
+ax = fig.add_subplot(111)
+
+# We use 1 - sobel_gray(image) but this will not work if image is not normalized 
+ax.imshow(1-sobel_gray(image), cmap=plt.cm.gray)
+ax.set_xticks([]), ax.set_yticks([])
+ax.set_title("Sobel filter computed\n on the converted grayscale image")
 
 plt.show()
 
