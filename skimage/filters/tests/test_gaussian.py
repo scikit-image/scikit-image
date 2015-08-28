@@ -1,6 +1,21 @@
+from nose.tools import raises
 import numpy as np
 from skimage.filters._gaussian import gaussian_filter
 from skimage._shared._warnings import expected_warnings
+
+
+@raises(ValueError)
+def test_negative_sigma():
+    a = np.zeros((3, 3))
+    a[1, 1] = 1.
+    gaussian_filter(a, -1.0)
+
+
+@raises(ValueError)
+def test_multiple_negative_sigma():
+    a = np.zeros((3, 3))
+    a[1, 1] = 1.
+    gaussian_filter(a, [-1.0, 1.0])
 
 
 def test_null_sigma():
