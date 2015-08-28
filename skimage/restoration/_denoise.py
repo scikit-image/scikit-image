@@ -54,8 +54,8 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
     ----------
     .. [1] http://users.soe.ucsc.edu/~manduchi/Papers/ICCV98.pdf
 
-    Examples
-    --------
+    Example
+    -------
     >>> from skimage import data, img_as_float
     >>> from skimage.restoration import denoise_bilateral
     >>> import numpy as np
