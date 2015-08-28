@@ -41,8 +41,13 @@ image[chull] += 1
 
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 6))
+
 ax1.set_title('Original picture')
 ax1.imshow(original_image, cmap=plt.cm.gray, interpolation='nearest')
+ax1.set_xticks([]), ax1.set_yticks([])
+
 ax2.set_title('Transformed picture')
 ax2.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
+ax2.set_xticks([]), ax2.set_yticks([])
+
 plt.show()
