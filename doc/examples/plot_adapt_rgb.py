@@ -42,6 +42,7 @@ image:
 """
 
 from skimage import data
+from skimage.exposure import rescale_intensity
 import matplotlib.pyplot as plt
 
 image = data.astronaut()
@@ -51,12 +52,12 @@ ax_each = fig.add_subplot(121)
 ax_hsv  = fig.add_subplot(122)
 
 # We use 1 - sobel_each(image) but this will not work if image is not normalized
-ax_each.imshow(1-sobel_each(image))
+ax_each.imshow( rescale_intensity(1-sobel_each(image)))
 ax_each.set_xticks([]), ax_each.set_yticks([])
 ax_each.set_title("Sobel filter computed\n on individual RGB channels")
 
 # We use 1 - sobel_hsv(image) but this will not work if image is not normalized
-ax_hsv.imshow(1-sobel_hsv(image))
+ax_hsv.imshow( rescale_intensity((1-sobel_hsv(image))))
 ax_hsv.set_xticks([]), ax_hsv.set_yticks([])
 ax_hsv.set_title("Sobel filter computed\n on (V)alue converted image (HSV)")
 
@@ -108,7 +109,7 @@ fig = plt.figure( figsize=(7,7) )
 ax = fig.add_subplot(111)
 
 # We use 1 - sobel_gray(image) but this will not work if image is not normalized 
-ax.imshow(1-sobel_gray(image), cmap=plt.cm.gray)
+ax.imshow( rescale_intensity(1-sobel_gray(image)), cmap=plt.cm.gray)
 ax.set_xticks([]), ax.set_yticks([])
 ax.set_title("Sobel filter computed\n on the converted grayscale image")
 
