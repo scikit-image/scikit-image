@@ -148,6 +148,27 @@ def hough_circle(image, radius, normalize=True, full_output=False):
         Hough transform accumulator for each radius.
         R designates the larger radius if full_output is True.
         Otherwise, R = 0.
+
+    Examples
+    --------
+    >>> from skimage.transform import hough_circle
+    >>> img = np.zeros((100,100),dtype=np.bool_)
+    >>> X,Y = np.meshgrid(np.arange(100),np.arange(100))
+    >>> x0,y0,radius = 20,35,23
+    >>> circle = np.abs((X-x0)**2+(Y-y0)**2-radius**2)<5**2
+    >>> img[circle] = 1
+    >>> # Find position of circle from known radius:
+    >>> res = hough_circle(img,np.array([radius]))[0,:,:]
+    >>> y,x = np.unravel_index(np.argmax(res),res.shape)
+    >>> x,y
+    (20, 35)
+    >>> # Find position and radius by trying a range of radii:
+    >>> radii_range = np.arange(5,50)
+    >>> res = hough_circle(img,radii_range)
+    >>> ridx,y,x = np.unravel_index(np.argmax(res),res.shape)
+    >>> x,y,radii_range[ridx]
+    (20, 35, 23)
+
     """
     return _hough_circle(image, radius.astype(np.intp),
                          normalize=normalize, full_output=full_output)
