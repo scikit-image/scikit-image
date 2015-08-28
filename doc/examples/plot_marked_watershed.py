@@ -6,7 +6,11 @@ Markers for watershed transform
 The watershed is a classical algorithm used for **segmentation**, that
 is, for separating different objects in an image.
 
-Here a marker image is build from the region of low gradient inside the image.
+Here a marker image is built from the region of low gradient inside the image.
+In a gradient image, the areas of high values provide barriers which help to
+segment the image. 
+Using markers on the lower values will ensure that the segmented objects are
+found.
 
 See Wikipedia_ for more details on the algorithm.
 
@@ -28,11 +32,12 @@ image = img_as_ubyte(data.camera())
 # denoise image
 denoised = rank.median(image, disk(2))
 
-# find continuous region (low gradient) --> markers
+# find continuous region (low gradient - where less than 10 for this image) --> markers
+# disk(5) is used here to get a more smooth image
 markers = rank.gradient(denoised, disk(5)) < 10
 markers = ndi.label(markers)[0]
 
-#local gradient
+# local gradient (disk(2) is used to keep edges thin)
 gradient = rank.gradient(denoised, disk(2))
 
 # process the watershed
@@ -43,13 +48,17 @@ fig, axes = plt.subplots(ncols=4, figsize=(8, 2.7))
 ax0, ax1, ax2, ax3 = axes
 
 ax0.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
+ax0.set_title("Original")
 ax1.imshow(gradient, cmap=plt.cm.spectral, interpolation='nearest')
+ax1.set_title("Local Gradient")
 ax2.imshow(markers, cmap=plt.cm.spectral, interpolation='nearest')
+ax2.set_title("Markers")
 ax3.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
 ax3.imshow(labels, cmap=plt.cm.spectral, interpolation='nearest', alpha=.7)
+ax3.set_title("Segmented")
 
 for ax in axes:
     ax.axis('off')
 
-fig.subplots_adjust(hspace=0.01, wspace=0.01, top=1, bottom=0, left=0, right=1)
+fig.subplots_adjust(hspace=0.01, wspace=0.01, top=0.9, bottom=0, left=0, right=1)
 plt.show()
