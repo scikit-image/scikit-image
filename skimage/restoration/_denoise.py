@@ -31,7 +31,8 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
         similarity). A larger value results in averaging of pixels with larger
         radiometric differences. Note, that the image will be converted using
         the `img_as_float` function and thus the standard deviation is in
-        respect to the range `[0, 1]`.
+        respect to the range `[0, 1]`. If the value is `None` the standard 
+        deviation of the `image` will be used.
     sigma_spatial : float
         Standard deviation for range distance. A larger value results in
         averaging of pixels with larger spatial differences.
