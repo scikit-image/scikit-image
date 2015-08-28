@@ -7,7 +7,7 @@ The watershed is a classical algorithm used for **segmentation**, that
 is, for separating different objects in an image.
 
 Here a marker image is built from the region of low gradient inside the image.
-In a gradient image, the areas of high values provide barriers which help to
+In a gradient image, the areas of high values provide barriers that help to
 segment the image. 
 Using markers on the lower values will ensure that the segmented objects are
 found.
