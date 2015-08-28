@@ -4,7 +4,7 @@ To build docs, run `make` in this directory. `make help` lists all targets.
 ## Requirements ##
 Sphinx and Latex is needed to build doc.
 
-**Spinx:**
+**Sphinx:**
 ```sh
 pip install sphinx
 ```
