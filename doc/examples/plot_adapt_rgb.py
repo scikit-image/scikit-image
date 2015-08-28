@@ -44,7 +44,7 @@ image:
 from skimage import data
 import matplotlib.pyplot as plt
 
-image = data.lena()
+image = data.astronaut()
 
 fig = plt.figure( figsize=(14,7) )
 ax_each = fig.add_subplot(121)
