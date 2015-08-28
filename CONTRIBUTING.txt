@@ -125,7 +125,7 @@ Guidelines
 
 * All code should have tests (see `test coverage`_ below for more details).
 * All code should be documented, to the same
-  `standard <://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt#docstring-standard>`_ as NumPy and SciPy.
+  `standard <https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt#docstring-standard>`_ as NumPy and SciPy.
 * For new functionality, always add an example to the gallery.
 * No changes are ever committed without review.  Ask on the
   `mailing list <http://groups.google.com/group/scikit-image>`_ if
