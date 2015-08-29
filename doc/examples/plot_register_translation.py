@@ -16,6 +16,7 @@ arbitrary subpixel precision. [1]_
 
 """
 import numpy as np
+
 import matplotlib.pyplot as plt
 
 from skimage import data
@@ -108,9 +109,10 @@ ax2.imshow(shifted_image)
 ax2.set_axis_off()
 ax2.set_title('Shifted back image')
 
-
-diff = image - shifted_image
-cax = ax3.imshow(diff)
+# Taking the difference in the images (using float to avoid problem with
+# overflow)
+diff = image - shifted_image.astype(np.float)
+cax = ax3.imshow(diff, cmap='gray')
 ax3.set_axis_off()
 ax3.set_title('Original - Shifted')
 plt.colorbar(cax)
