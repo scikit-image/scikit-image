@@ -23,7 +23,7 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
     Parameters
     ----------
     image : ndarray
-        Input image.
+        Input image (image minimum must be >0).
     win_size : int
         Window size for filtering.
     sigma_range : float
