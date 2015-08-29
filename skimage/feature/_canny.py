@@ -70,7 +70,8 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
         Mask to limit the application of Canny to a certain area.
     quantile_threshold : bool, optional
         If True then treat low_threshold and high_threshold as quantiles of the
-        edge magnitude image, rather than absolute edge magnitude values.
+        edge magnitude image, rather than absolute edge magnitude values. If True
+        then the thresholds must be in the range [0, 1].
 
     Returns
     -------
@@ -255,6 +256,11 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     #---- If quantile_threshold is set then calculate the thresholds to use
     #
     if quantile_threshold:
+        if high_threshold > 1.0 or low_threshold > 1.0:
+            raise ValueError("Quantile thresholds must not be > 1.0")
+        if high_threshold < 0.0 or low_threshold < 0.0:
+            raise ValueError("Quantile thresholds must not be < 0.0")
+
         high_threshold = np.percentile(magnitude, 100.0 * high_threshold)
         low_threshold = np.percentile(magnitude, 100.0 * low_threshold)
 
