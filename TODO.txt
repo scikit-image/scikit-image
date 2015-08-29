@@ -1,8 +1,11 @@
 Remember to list any API changes below in `doc/source/api_changes.txt`.
 
+
+
 Version 0.14
 ------------
 * Remove deprecated ``ntiles_*` kwargs in ``equalize_adapthist``.
+* Remove deprecated ``skimage.restoration.nl_means_denoising``.
 
 
 Version 0.13
