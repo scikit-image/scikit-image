@@ -70,7 +70,7 @@ class TestCanny(unittest.TestCase):
         result2 = F.canny(np.zeros((20, 20)), 4, 0, 0)
         self.assertTrue(np.all(result1 == result2))
 
-    def test_quantile_threshold(self):
+    def test_use_quantiles(self):
         image = img_as_float(data.camera()[::50,::50])
 
         # Correct output produced manually with quantiles
@@ -87,26 +87,26 @@ class TestCanny(unittest.TestCase):
            [0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
 
-        result = F.canny(image, low_threshold=0.6, high_threshold=0.8, quantile_threshold=True)
+        result = F.canny(image, low_threshold=0.6, high_threshold=0.8, use_quantiles=True)
 
         assert_equal(result, correct_output)
 
-    def test_invalid_quantile_threshold(self):
+    def test_invalid_use_quantiles(self):
         image = img_as_float(data.camera()[::50,::50])
 
         with self.assertRaises(ValueError):
-            result = F.canny(image, quantile_threshold=True,
+            result = F.canny(image, use_quantiles=True,
                                 low_threshold=0.5, high_threshold=3.6)
 
         with self.assertRaises(ValueError):
-            result = F.canny(image, quantile_threshold=True,
+            result = F.canny(image, use_quantiles=True,
                                 low_threshold=99, high_threshold=0.9)
 
         with self.assertRaises(ValueError):
-            result = F.canny(image, quantile_threshold=True,
+            result = F.canny(image, use_quantiles=True,
                                 low_threshold=-5, high_threshold=0.5)
 
         with self.assertRaises(ValueError):
-            result = F.canny(image, quantile_threshold=True,
+            result = F.canny(image, use_quantiles=True,
                                 low_threshold=0.5, high_threshold=-100)
 
