@@ -8,6 +8,7 @@ the `rag_draw` method.
 """
 from skimage import data, segmentation
 from skimage.future import graph
+from skimage.util.colormap import viridis
 from matplotlib import pyplot as plt, colors
 
 
@@ -32,8 +33,7 @@ plt.imshow(out)
 
 plt.figure()
 plt.title("All edges drawn with viridis colormap")
-cmap = plt.get_cmap('viridis')
-out = graph.draw_rag(labels, g, img, colormap=cmap,
+out = graph.draw_rag(labels, g, img, colormap=viridis,
                      desaturate=True)
 
 plt.imshow(out)
