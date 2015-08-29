@@ -61,6 +61,6 @@ ax2.set_title('Separated objects')
 for ax in axes:
     ax.axis('off')
 
-fig.subplots_adjust(hspace=0.01, wspace=0.01, top=1, bottom=0, left=0,
+fig.subplots_adjust(hspace=0.01, wspace=0.01, top=0.9, bottom=0, left=0,
                     right=1)
 plt.show()
