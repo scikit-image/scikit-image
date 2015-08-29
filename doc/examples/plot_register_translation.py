@@ -16,7 +16,6 @@ arbitrary subpixel precision. [1]_
 
 """
 import numpy as np
-
 import matplotlib.pyplot as plt
 
 from skimage import data
