@@ -434,7 +434,7 @@ def threshold_minimum(image, nbins=256, bias='min'):
 
     # If we don't have 2 maxima the algorithm failed
     if len(maximums) != 2:
-        return 0
+        raise RuntimeError('Failure: Unable to find two maxima in histogram')
 
     # Find lowest point between the maxima, biased to the low end (min)
     minimum = smooth_hist[maximums[0]]

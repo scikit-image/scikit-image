@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_almost_equal
+from numpy.testing import assert_equal, assert_almost_equal, assert_raises
 
 import skimage
 from skimage import data
@@ -292,6 +292,13 @@ def test_threshold_minimum_synthetic():
 
     threshold = threshold_minimum(img, bias='max')
     assert threshold == 225
+
+def test_threshold_minimum_failure():
+    img = np.zeros((16*16), dtype=np.uint8)
+    for i in range(16*16) :
+        img[i] = i % 256
+    img = np.reshape(img, (16,16))
+    assert_raises(RuntimeError, threshold_minimum, img)
 
 if __name__ == '__main__':
     np.testing.run_module_suite()
