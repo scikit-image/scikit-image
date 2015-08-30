@@ -192,7 +192,6 @@ def remove_small_holes(ar, min_size=64, connectivity=1, in_place=False):
     
     #Creates warning if image is an integer image
     if out.dtype != bool:
-        print("I'm about to warn")
         warnings.warn("Any labeled images will be returned as a boolean array. "
                       "Did you mean to use a boolean array?", UserWarning)
     
