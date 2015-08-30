@@ -39,8 +39,9 @@ from skimage.measure import ransac
 checkerboard = img_as_float(data.checkerboard())
 img_orig = np.zeros(list(checkerboard.shape) + [3])
 img_orig[..., 0] = checkerboard
-gradient_r, gradient_c = np.mgrid[0:img_orig.shape[0],
-                                  0:img_orig.shape[1]] / float(img_orig.shape[0])
+gradient_r, gradient_c = (np.mgrid[0:img_orig.shape[0],
+                                   0:img_orig.shape[1]]
+                          / float(img_orig.shape[0]))
 img_orig[..., 1] = gradient_r
 img_orig[..., 2] = gradient_c
 img_orig = rescale_intensity(img_orig)
@@ -72,7 +73,7 @@ def gaussian_weights(window_ext, sigma=1):
 
 
 def match_corner(coord, window_ext=5):
-    r, c =  np.round(coord).astype(np.intp)
+    r, c = np.round(coord).astype(np.intp)
     window_orig = img_orig[r-window_ext:r+window_ext+1,
                            c-window_ext:c+window_ext+1, :]
 

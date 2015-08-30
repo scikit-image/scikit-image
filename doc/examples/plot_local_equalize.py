@@ -4,8 +4,8 @@ Local Histogram Equalization
 ============================
 
 This examples enhances an image with low contrast, using a method called *local
-histogram equalization*, which spreads out the most frequent intensity values in
-an image.
+histogram equalization*, which spreads out the most frequent intensity values
+in an image.
 
 The equalized image [1]_ has a roughly linear cumulative distribution function
 for each pixel neighborhood.

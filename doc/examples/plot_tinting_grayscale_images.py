@@ -82,6 +82,7 @@ Now, let's create a little utility function to take an RGB image and:
 
 """
 
+
 def colorize(image, hue, saturation=1):
     """ Add color of the given hue to an RGB image.
 
@@ -91,6 +92,7 @@ def colorize(image, hue, saturation=1):
     hsv[:, :, 1] = saturation
     hsv[:, :, 0] = hue
     return color.hsv2rgb(hsv)
+
 
 """
 Notice that we need to bump up the saturation; images with zero saturation are
@@ -150,6 +152,7 @@ plt.show()
 .. image:: PLOT2RST.current_figure
 
 For coloring multiple regions, you may also be interested in
-`skimage.color.label2rgb <http://scikit-image.org/docs/0.9.x/api/skimage.color.html#label2rgb>`_.
+`skimage.color.label2rgb
+<http://scikit-image.org/docs/0.9.x/api/skimage.color.html#label2rgb>`_.
 
 """

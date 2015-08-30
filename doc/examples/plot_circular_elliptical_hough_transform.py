@@ -116,7 +116,7 @@ from skimage.draw import ellipse_perimeter
 image_rgb = data.coffee()[0:220, 160:420]
 image_gray = color.rgb2gray(image_rgb)
 edges = canny(image_gray, sigma=2.0,
-                     low_threshold=0.55, high_threshold=0.8)
+              low_threshold=0.55, high_threshold=0.8)
 
 # Perform a Hough Transform
 # The accuracy corresponds to the bin size of a major axis.

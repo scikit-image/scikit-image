@@ -49,10 +49,11 @@ image = data.astronaut()
 
 fig = plt.figure(figsize=(14, 7))
 ax_each = fig.add_subplot(121)
-ax_hsv  = fig.add_subplot(122)
+ax_hsv = fig.add_subplot(122)
 
-# We use 1 - sobel_each(image) but this will not work if image is not normalized
-ax_each.imshow( rescale_intensity(1-sobel_each(image)))
+# We use 1 - sobel_each(image)
+# but this will not work if image is not normalized
+ax_each.imshow(rescale_intensity(1 - sobel_each(image)))
 ax_each.set_xticks([]), ax_each.set_yticks([])
 ax_each.set_title("Sobel filter computed\n on individual RGB channels")
 
@@ -108,8 +109,9 @@ def sobel_gray(image):
 fig = plt.figure(figsize=(7, 7))
 ax = fig.add_subplot(111)
 
-# We use 1 - sobel_gray(image) but this will not work if image is not normalized 
-ax.imshow( rescale_intensity(1 - sobel_gray(image)), cmap=plt.cm.gray)
+# We use 1 - sobel_gray(image)
+# but this will not work if image is not normalized
+ax.imshow(rescale_intensity(1 - sobel_gray(image)), cmap=plt.cm.gray)
 ax.set_xticks([]), ax.set_yticks([])
 ax.set_title("Sobel filter computed\n on the converted grayscale image")
 

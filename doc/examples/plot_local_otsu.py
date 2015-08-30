@@ -5,8 +5,8 @@ Local Otsu Threshold
 
 This example shows how Otsu's threshold [1]_ method can be applied locally. For
 each pixel, an "optimal" threshold is determined by maximizing the variance
-between two classes of pixels of the local neighborhood defined by a structuring
-element.
+between two classes of pixels of the local neighborhood defined by a
+structuring element.
 
 The example compares the local threshold with the global threshold.
 
@@ -41,12 +41,12 @@ fig, ax = plt.subplots(2, 2, figsize=(8, 5))
 ax1, ax2, ax3, ax4 = ax.ravel()
 
 fig.colorbar(ax1.imshow(img, cmap=plt.cm.gray),
-           ax=ax1, orientation='horizontal')
+             ax=ax1, orientation='horizontal')
 ax1.set_title('Original')
 ax1.axis('off')
 
 fig.colorbar(ax2.imshow(local_otsu, cmap=plt.cm.gray),
-           ax=ax2, orientation='horizontal')
+             ax=ax2, orientation='horizontal')
 ax2.set_title('Local Otsu (radius=%d)' % radius)
 ax2.axis('off')
 

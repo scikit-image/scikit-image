@@ -11,8 +11,8 @@ Please find below a short answer ;-)
 
 This simple example shows how to get Gabor-like filters [1]_ using just
 a simple image. In our example, we use a photograph of the astronaut Eileen
-Collins. Gabor filters are good approximations of the "Simple Cells" [2]_ 
-receptive fields [3]_ found in the mammalian primary visual cortex (V1) 
+Collins. Gabor filters are good approximations of the "Simple Cells" [2]_
+receptive fields [3]_ found in the mammalian primary visual cortex (V1)
 (for details, see e.g. the Nobel-prize winning work of Hubel & Wiesel done
 in the 60s [4]_ [5]_).
 

@@ -18,7 +18,7 @@ from skimage.transform import rotate
 image = np.zeros((600, 600))
 
 rr, cc = ellipse(300, 350, 100, 220)
-image[rr,cc] = 1
+image[rr, cc] = 1
 
 image = rotate(image, angle=15, order=0)
 
