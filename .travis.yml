@@ -8,8 +8,7 @@
 language: python
 sudo: false
 cache:
-  directories:
-    - $HOME/.cache/pip
+  - pip
 addons:
   apt:
     packages:
@@ -28,14 +27,14 @@ notifications:
     on_start: false     # default: false
 
 python:
-- 2.6
-- 2.7
-- 3.2
-- 3.3
-- 3.4
+  - 2.6
+  - 2.7
+  - 3.2
+  - 3.3
+  - 3.4
 
 before_install:
-    - sudo apt-get update; true
+    - pip install --upgrade pip
     - source tools/travis_before_install.sh
 
     - which python; python --version
@@ -43,8 +42,7 @@ before_install:
     - tools/build_versions.py
 
 install:
-    - python setup.py build_ext --inplace
-    - python setup.py install
+    - python setup.py develop
 
 script: tools/travis_script.sh
 

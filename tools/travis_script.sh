@@ -20,6 +20,9 @@ section_end "Flake8.test"
 
 section "Install.optional.dependencies"
 
+# Install most of the optional packages
+pip install --retries 3 -q -r ./optional_requirements.txt $WHEELHOUSE
+
 # Install Qt and then update the Matplotlib settings
 if [[ $PY == 2.7* ]]; then
     # http://stackoverflow.com/a/9716100
@@ -37,29 +40,12 @@ if [[ $PY == 2.7* ]]; then
     done
 
 else
-    retry pip install -q PySide $WHEELHOUSE
     python ~/venv/bin/pyside_postinstall.py -install
-fi 
-
-# Install imread from wheelhouse if available (not 3.2)
-if [[ $PY != 3.2 ]]; then
-    retry pip install -q $WHEELHOUSE
 fi
-
-# Install SimpleITK from wheelhouse if available (not 3.2 or 3.4)
-if [[ $PY =~ 3\.[24] ]]; then
-    echo "SimpleITK unavailable on $PY"
-else
-    retry pip install -q SimpleITK $WHEELHOUSE
-fi
-
-retry pip install -q astropy $WHEELHOUSE
 
 if [[ $PY == 2.* ]]; then
     retry pip install -q pyamg
 fi
-
-retry pip install -q tifffile
 
 section_end "Install.optional.dependencies"
 
