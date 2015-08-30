@@ -94,19 +94,14 @@ class TestCanny(unittest.TestCase):
     def test_invalid_use_quantiles(self):
         image = img_as_float(data.camera()[::50,::50])
 
-        with self.assertRaises(ValueError):
-            result = F.canny(image, use_quantiles=True,
-                                low_threshold=0.5, high_threshold=3.6)
+        self.assertRaises(ValueError, F.canny, image, use_quantiles=True,
+                          low_threshold=0.5, high_threshold=3.6)
 
-        with self.assertRaises(ValueError):
-            result = F.canny(image, use_quantiles=True,
-                                low_threshold=99, high_threshold=0.9)
+        self.assertRaises(ValueError, F.canny, image, use_quantiles=True,
+                          low_threshold=-5, high_threshold=0.5)
 
-        with self.assertRaises(ValueError):
-            result = F.canny(image, use_quantiles=True,
-                                low_threshold=-5, high_threshold=0.5)
+        self.assertRaises(ValueError, F.canny, image, use_quantiles=True,
+                          low_threshold=99, high_threshold=0.9)
 
-        with self.assertRaises(ValueError):
-            result = F.canny(image, use_quantiles=True,
-                                low_threshold=0.5, high_threshold=-100)
-
+        self.assertRaises(ValueError, F.canny, image, use_quantiles=True,
+                          low_threshold=0.5, high_threshold=-100)
