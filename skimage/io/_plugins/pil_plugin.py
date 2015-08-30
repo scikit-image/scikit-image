@@ -87,6 +87,9 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
             i += 1
             continue
 
+        if im.format == 'PNG' and im.mode == 'I' and dtype is None:
+            dtype = 'uint16'
+
         if im.mode == 'P':
             if grayscale is None:
                 grayscale = _palette_is_grayscale(im)
