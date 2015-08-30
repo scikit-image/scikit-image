@@ -148,6 +148,20 @@ def hough_circle(image, radius, normalize=True, full_output=False):
         Hough transform accumulator for each radius.
         R designates the larger radius if full_output is True.
         Otherwise, R = 0.
+
+    Examples
+    --------
+    >>> from skimage.transform import hough_circle
+    >>> from skimage.draw import circle_perimeter
+    >>> img = np.zeros((100, 100), dtype=np.bool_)
+    >>> rr, cc = circle_perimeter(25, 35, 23)
+    >>> img[rr, cc] = 1
+    >>> try_radii = np.arange(5, 50)
+    >>> res = hough_circle(img, try_radii)
+    >>> ridx, r, c = np.unravel_index(np.argmax(res), res.shape)
+    >>> r, c, try_radii[ridx]
+    (25, 35, 23)
+
     """
     return _hough_circle(image, radius.astype(np.intp),
                          normalize=normalize, full_output=full_output)
