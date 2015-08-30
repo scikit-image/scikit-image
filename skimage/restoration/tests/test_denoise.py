@@ -110,6 +110,19 @@ def test_denoise_tv_bregman_3d():
     assert img[30:45, 5:15].std() > out1[30:45, 5:15].std()
     assert out1[30:45, 5:15].std() > out2[30:45, 5:15].std()
 
+def test_denoise_bilateral_null():
+    img = np.zeros((50, 50))
+    out = restoration.denoise_bilateral(img)
+
+    # image full of zeros should return identity
+    assert_equal(out, img)
+
+def test_denoise_bilateral_negative():
+    img = -np.ones((50, 50))
+    out = restoration.denoise_bilateral(img)
+
+    # image with negative value should be filtered as well using an offset
+    assert_equal(out, img)
 
 def test_denoise_bilateral_2d():
     img = checkerboard_gray.copy()
@@ -147,6 +160,7 @@ def test_denoise_bilateral_nan():
     img = np.NaN + np.empty((50, 50))
     out = restoration.denoise_bilateral(img)
     assert_equal(img, out)
+
 
 
 def test_nl_means_denoising_2d():
