@@ -121,8 +121,18 @@ def test_denoise_bilateral_negative():
     img = -np.ones((50, 50))
     out = restoration.denoise_bilateral(img)
 
-    # image with negative value should be filtered as well using an offset
+    # image with only negative values should be ok
     assert_equal(out, img)
+
+def test_denoise_bilateral_negative2():
+    img = np.ones((50, 50))
+    img[2,2] = 2
+
+    out1 = restoration.denoise_bilateral(img)
+    out2 = restoration.denoise_bilateral(img-10) #contains negative values
+
+    # 2 images with a given offset should give the same result (with the same offset)
+    assert_equal(out1, out2+10)
 
 def test_denoise_bilateral_2d():
     img = checkerboard_gray.copy()

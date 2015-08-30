@@ -56,8 +56,16 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
 
     """
     mode = _mode_deprecations(mode)
-    return _denoise_bilateral(image, win_size, sigma_range, sigma_spatial,
-                              bins, mode, cval)
+
+    offset = np.min(image)
+    offset_img = image - offset
+    if not offset_img.any():
+        # if all value identical, returns the same image
+        return image
+    else:
+        return _denoise_bilateral(offset_img+1, win_size, sigma_range, sigma_spatial,
+                              bins, mode, cval) + offset -1
+
 
 
 def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
