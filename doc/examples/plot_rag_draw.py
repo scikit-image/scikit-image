@@ -8,6 +8,7 @@ the `rag_draw` method.
 """
 from skimage import data, segmentation
 from skimage.future import graph
+from skimage.util.colormap import viridis
 from matplotlib import pyplot as plt, colors
 
 
@@ -31,9 +32,8 @@ plt.title("RAG with edge weights less than 30, color "
 plt.imshow(out)
 
 plt.figure()
-plt.title("All edges drawn with cubehelix colormap")
-cmap = plt.get_cmap('cubehelix')
-out = graph.draw_rag(labels, g, img, colormap=cmap,
+plt.title("All edges drawn with viridis colormap")
+out = graph.draw_rag(labels, g, img, colormap=viridis,
                      desaturate=True)
 
 plt.imshow(out)
