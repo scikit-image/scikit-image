@@ -132,8 +132,9 @@ def hough_circle(image, radius, normalize=True, full_output=False):
     ----------
     image : (M, N) ndarray
         Input image with nonzero values representing edges.
-    radius : ndarray
+    radius : scalar or sequence of scalars
         Radii at which to compute the Hough transform.
+        Floats are converted to integers.
     normalize : boolean, optional (default True)
         Normalize the accumulator with the number
         of pixels used to draw the radius.
