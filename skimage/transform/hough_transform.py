@@ -163,5 +163,7 @@ def hough_circle(image, radius, normalize=True, full_output=False):
     (25, 35, 23)
 
     """
+
+    radius = np.atleast_1d(np.asarray(radius))
     return _hough_circle(image, radius.astype(np.intp),
                          normalize=normalize, full_output=full_output)
