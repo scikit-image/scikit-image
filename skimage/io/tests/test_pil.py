@@ -42,9 +42,11 @@ def setup_module(self):
 def test_png_round_trip():
     f = NamedTemporaryFile(suffix='.png')
     fname = f.name
+    f.close()
     I = np.eye(3)
     imsave(fname, I)
     Ip = img_as_float(imread(fname))
+    os.remove(fname)
     assert np.sum(np.abs(Ip-I)) < 1e-3
 
 def test_imread_flatten():
