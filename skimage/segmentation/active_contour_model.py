@@ -2,7 +2,7 @@ import numpy as np
 from skimage import img_as_float
 import scipy.linalg
 from scipy.interpolate import RectBivariateSpline
-from skimage.filters import gaussian_filter, sobel
+from skimage.filters import sobel
 
 def active_contour_model(image, snake, alpha=0.01, beta=0.1,
                          w_line=0, w_edge=1, gamma=0.01,
@@ -58,6 +58,7 @@ def active_contour_model(image, snake, alpha=0.01, beta=0.1,
     --------
     >>> #from skimage.segmentation import active_contour_model
     >>> from skimage.draw import circle_perimeter
+    >>> from skimage.filters import gaussian_filter
     >>> img = np.zeros((100, 100))
     >>> rr, cc = circle_perimeter(35, 45, 25)
     >>> img[rr, cc] = 1
@@ -71,7 +72,7 @@ def active_contour_model(image, snake, alpha=0.01, beta=0.1,
     """
 
     max_iterations = int(max_iterations)
-    if max_iterations<=0:
+    if max_iterations <= 0:
         raise ValueError("max_iterations should be >0.")
     convergence_order = 10
     valid_bcs = ['periodic', 'free', 'fixed', 'free-fixed',
@@ -80,25 +81,26 @@ def active_contour_model(image, snake, alpha=0.01, beta=0.1,
         raise ValueError("Invalid boundary condition.\n"+
                          "Should be one of: "+", ".join(valid_bcs)+'.')
     img = img_as_float(image)
-    RGB = len(img.shape)==3
+    RGB = len(img.shape) == 3
 
     # Find edges using sobel:
-    if w_edge!=0:
+    if w_edge != 0:
         if RGB:
-            edge = [sobel(img[:,:,0]),sobel(img[:,:,1]),sobel(img[:,:,2])]
+            edge = [sobel(img[:, :, 0]), sobel(img[:, :, 1]),
+                    sobel(img[:, :, 2])]
         else:
             edge = [sobel(img)]
         for i in xrange(3 if RGB else 1):
-            edge[i][0,:] = edge[i][1,:]
-            edge[i][-1,:] = edge[i][-2,:]
-            edge[i][:,0] = edge[i][:,1]
-            edge[i][:,-1] = edge[i][:,-2]
+            edge[i][0, :] = edge[i][1, :]
+            edge[i][-1, :] = edge[i][-2, :]
+            edge[i][:, 0] = edge[i][:, 1]
+            edge[i][:, -1] = edge[i][:, -2]
     else:
         edge = [0]
 
     # Superimpose intensity and edge images:
     if RGB:
-        img = w_line*np.sum(img,axis=2) \
+        img = w_line*np.sum(img, axis=2) \
             + w_edge*sum(edge)
     else:
         img = w_line*img + w_edge*edge[0]
@@ -108,8 +110,8 @@ def active_contour_model(image, snake, alpha=0.01, beta=0.1,
             np.arange(img.shape[0]), img.T, kx=2, ky=2, s=0)
 
     x, y = snake[:, 0].copy(), snake[:, 1].copy()
-    xsave = np.empty((convergence_order,len(x)))
-    ysave = np.empty((convergence_order,len(x)))
+    xsave = np.empty((convergence_order, len(x)))
+    ysave = np.empty((convergence_order, len(x)))
 
     # Build snake shape matrix
     n = len(x)
@@ -187,9 +189,9 @@ def active_contour_model(image, snake, alpha=0.01, beta=0.1,
 
         # Convergence criteria:
         j = i%(convergence_order+1)
-        if j<convergence_order:
-            xsave[j,:] = x
-            ysave[j,:] = y
+        if j < convergence_order:
+            xsave[j, :] = x
+            ysave[j, :] = y
         else:
             dist = np.min(np.max(np.abs(xsave-x[None, :])
                 + np.abs(ysave-y[None, :]), 1))
