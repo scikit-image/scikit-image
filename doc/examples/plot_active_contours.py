@@ -17,7 +17,7 @@ smooth images a bit before analyzing, as done in the following examples.
 .. [1] *Snakes: Active contour models*. Kass, M.; Witkin, A.; Terzopoulos, D.
        International Journal of Computer Vision 1 (4): 321 (1988).
 
-We initialize a circle around the astronaut's face and use the defualt boundary
+We initialize a circle around the astronaut's face and use the default boundary
 condition `bc='periodic'` to fit a closed curve. The default parameters
 `w_line=0, w_edge=1` will make the curve search towards edges, such as the
 boundaries of the face.

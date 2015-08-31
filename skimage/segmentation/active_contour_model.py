@@ -16,38 +16,38 @@ def active_contour_model(image, snake, alpha=0.01, beta=0.1,
 
     Parameters
     ----------
-    image: (N, M) or (N, M, 3) ndarray
+    image : (N, M) or (N, M, 3) ndarray
         Input image
-    snake: (N, 2) ndarray
+    snake : (N, 2) ndarray
         Initialisation of snake.
-    alpha: float, optional
+    alpha : float, optional
         Snake length shape parameter
-    beta: float, optional
+    beta : float, optional
         Snake smoothness shape parameter
-    w_line: float, optional
+    w_line : float, optional
         Controls attraction to brightness. Use negative values to attract to
         dark regions
-    w_edge: float, optional
+    w_edge : float, optional
         Controls attraction to edges. Use negative values to repel snake from
         edges.
-    gamma: flota, optional
+    gamma : float, optional
         Excpliti time stepping parameter.
-    bc: {'periodic', 'free', 'fixed'}, optional
+    bc : {'periodic', 'free', 'fixed'}, optional
         Boundary conditions for worm. 'periodic' attaches the two ends of the
          snake, 'fixed' holds the end-points in place, and'free' allows free
          movement of the ends. 'fixed' and 'free' can be combined by parsing
          'fixed-free', 'free-fixed'. Parsing 'fixed-fixed' or 'free-free'
          yields same behaviour as 'fixed' and 'free', respectively.
-    max_px_move: float, optional
+    max_px_move : float, optional
         Maximum pixel distance to move per iteration.
-    max_iterations: int, optional
+    max_iterations : int, optional
         Maximum iterations to optimize snake shape.
     convergence: float, optional
         Convergence criteria.
 
     Returns
     -------
-    snake: (N, 2) ndarray
+    snake : (N, 2) ndarray
         Optimised snake, same shape as input parameter.
 
     References
@@ -84,7 +84,7 @@ def active_contour_model(image, snake, alpha=0.01, beta=0.1,
         raise ValueError("Invalid boundary condition.\n"+
                          "Should be one of: "+", ".join(valid_bcs)+'.')
     img = img_as_float(image)
-    RGB = len(img.shape) == 3
+    RGB = img.ndim == 3
 
     # Find edges using sobel:
     if w_edge != 0:
