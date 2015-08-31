@@ -44,7 +44,7 @@ else
 fi
 
 if [[ $PY == 2.* ]]; then
-    retry pip install -q pyamg
+    pip install --retries 3 -q pyamg
 fi
 
 section_end "Install.optional.dependencies"

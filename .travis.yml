@@ -8,7 +8,9 @@
 language: python
 sudo: false
 cache:
-  - pip
+  # See http://docs.travis-ci.com/user/caching/#pip-cache
+  directories:
+    - $HOME/.cache/pip
 addons:
   apt:
     packages:
@@ -34,7 +36,7 @@ python:
   - 3.4
 
 before_install:
-    - pip install --upgrade pip
+    - pip install -U pip
     - source tools/travis_before_install.sh
 
     - which python; python --version
