@@ -73,7 +73,7 @@ def test_RGB():
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refy)
 
 
-def test_end_points_tests():
+def test_end_points():
     img = data.astronaut()
     img = rgb2gray(img)
     s = np.linspace(0, 2*np.pi, 400)
@@ -94,7 +94,7 @@ def test_end_points_tests():
     assert_allclose(snake[0, :], [x[0], y[0]], atol=1e-5)
 
 
-def test_bad_input_tests():
+def test_bad_input():
     img = np.zeros((10, 10))
     x = np.linspace(5, 424, 100)
     y = np.linspace(136, 50, 100)
