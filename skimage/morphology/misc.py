@@ -37,7 +37,12 @@ def default_selem(func):
         return func(image, selem=selem, *args, **kwargs)
 
     return func_out
-
+ 
+def _supported_types(ar): 
+    # Should use `issubdtype` for bool below, but there's a bug in numpy 1.7
+    if not (ar.dtype == bool or np.issubdtype(ar.dtype, np.integer)):
+        raise TypeError("Only bool or integer image types are supported. "
+                        "Got %s." % ar.dtype)
 
 def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     """Remove connected components smaller than the specified size.
@@ -88,10 +93,8 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     >>> d is a
     True
     """
-    # Should use `issubdtype` for bool below, but there's a bug in numpy 1.7
-    if not (ar.dtype == bool or np.issubdtype(ar.dtype, np.integer)):
-        raise TypeError("Only bool or integer image types are supported. "
-                        "Got %s." % ar.dtype)
+    # Raising type error if not int or bool
+    _supported_types(ar)
 
     if in_place:
         out = ar
@@ -180,10 +183,7 @@ def remove_small_holes(ar, min_size=64, connectivity=1, in_place=False):
     >>> d is a
     True
     """
-    # Should use `issubdtype` for bool below, but there's a bug in numpy 1.7
-    if not (ar.dtype == bool or np.issubdtype(ar.dtype, np.integer)):
-        raise TypeError("Only bool or integer image types are supported. "
-                        "Got %s." % ar.dtype)
+    _supported_types(ar)
     
     if in_place:
         out = ar
@@ -191,7 +191,7 @@ def remove_small_holes(ar, min_size=64, connectivity=1, in_place=False):
         out = ar.copy()
     
     #Creates warning if image is an integer image
-    if out.dtype != bool:
+    if ar.dtype != bool:
         warnings.warn("Any labeled images will be returned as a boolean array. "
                       "Did you mean to use a boolean array?", UserWarning)
     
@@ -204,3 +204,4 @@ def remove_small_holes(ar, min_size=64, connectivity=1, in_place=False):
     out = np.logical_not(out)
     
     return out
+    
