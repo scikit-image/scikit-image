@@ -5,7 +5,7 @@ from skimage.filters import gaussian_filter
 from skimage.segmentation import active_contour_model
 from numpy.testing import assert_equal, assert_allclose, assert_raises
 
-def periodic_reference_test():
+def test_periodic_reference():
     img = data.astronaut()
     img = rgb2gray(img)
     s = np.linspace(0, 2*np.pi, 400)
@@ -20,7 +20,7 @@ def periodic_reference_test():
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refy)
 
 
-def fixed_reference_test():
+def test_fixed_reference():
     img = data.text()
     x = np.linspace(5, 424, 100)
     y = np.linspace(136, 50, 100)
@@ -33,7 +33,7 @@ def fixed_reference_test():
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refy)
 
 
-def free_reference_test():
+def test_free_reference():
     img = data.text()
     x = np.linspace(5, 424, 100)
     y = np.linspace(70, 40, 100)
@@ -46,7 +46,7 @@ def free_reference_test():
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refy)
 
 
-def RGB_test():
+def test_RGB():
     img = gaussian_filter(data.text(), 1)
     imgR = np.zeros((img.shape[0], img.shape[1], 3))
     imgG = np.zeros((img.shape[0], img.shape[1], 3))
@@ -73,7 +73,7 @@ def RGB_test():
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refy)
 
 
-def end_points_tests():
+def test_end_points_tests():
     img = data.astronaut()
     img = rgb2gray(img)
     s = np.linspace(0, 2*np.pi, 400)
@@ -94,7 +94,7 @@ def end_points_tests():
     assert_allclose(snake[0, :], [x[0], y[0]], atol=1e-5)
 
 
-def bad_input_tests():
+def test_bad_input_tests():
     img = np.zeros((10, 10))
     x = np.linspace(5, 424, 100)
     y = np.linspace(136, 50, 100)

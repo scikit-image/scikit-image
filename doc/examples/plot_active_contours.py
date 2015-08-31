@@ -11,7 +11,8 @@ image energy.
 In the following two examples the active contour model is used (1) to segment
 the face of a person from the rest of an image by fitting a closed curve
 to the edges of the face and (2) to find the darkest curve between two fixed
-points while obeying smoothness considerations.
+points while obeying smoothness considerations. Typically it is a good idea to
+smooth images a bit before analyzing, as done in the following examples.
 
 .. [1] *Snakes: Active contour models*. Kass, M.; Witkin, A.; Terzopoulos, D.
        International Journal of Computer Vision 1 (4): 321 (1988).

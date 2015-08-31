@@ -8,7 +8,7 @@ def active_contour_model(image, snake, alpha=0.01, beta=0.1,
                          w_line=0, w_edge=1, gamma=0.01,
                          bc='periodic', max_px_move=1.0,
                          max_iterations=2500, convergence=0.1):
-    """Active contour model
+    """Active contour model.
 
     Active contours by fitting snakes to features of images. Supports single
     and multichannel 2D images. Snakes can be periodic (for segmentation) or
@@ -52,21 +52,24 @@ def active_contour_model(image, snake, alpha=0.01, beta=0.1,
 
     References
     ----------
-    .. [1]  Kass, M.; Witkin, A.; Terzopoulos, D. "Snakes: Active contour models". International Journal of Computer Vision 1 (4): 321 (1988).
+    .. [1]  Kass, M.; Witkin, A.; Terzopoulos, D. "Snakes: Active contour
+    models". International Journal of Computer Vision 1 (4): 321 (1988).
 
     Examples
     --------
-    >>> #from skimage.segmentation import active_contour_model
     >>> from skimage.draw import circle_perimeter
     >>> from skimage.filters import gaussian_filter
+    Create and smooth image:
     >>> img = np.zeros((100, 100))
     >>> rr, cc = circle_perimeter(35, 45, 25)
     >>> img[rr, cc] = 1
-    >>> img = gaussian_filter(img,2)
-    >>> s = np.linspace(0,2*np.pi,100)
-    >>> init = 50*np.array([np.cos(s),np.sin(s)]).T+50
+    >>> img = gaussian_filter(img, 2)
+    Initiliaze spline:
+    >>> s = np.linspace(0, 2*np.pi,100)
+    >>> init = 50*np.array([np.cos(s), np.sin(s)]).T+50
+    Fit spline to image:
     >>> snake = active_contour_model(img, init, w_edge=0, w_line=1)
-    >>> int(np.mean(np.sqrt((45-snake[:,0])**2 + (35-snake[:,1])**2)))
+    >>> int(np.mean(np.sqrt((45-snake[:, 0])**2 + (35-snake[:, 1])**2)))
     25
 
     """
