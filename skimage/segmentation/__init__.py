@@ -1,4 +1,5 @@
 from .random_walker_segmentation import random_walker
+from .active_contour_model import active_contour_model
 from ._felzenszwalb import felzenszwalb
 from .slic_superpixels import slic
 from ._quickshift import quickshift
@@ -8,6 +9,7 @@ from ._join import join_segmentations, relabel_from_one, relabel_sequential
 
 
 __all__ = ['random_walker',
+            'active_contour_model',
            'felzenszwalb',
            'slic',
            'quickshift',
