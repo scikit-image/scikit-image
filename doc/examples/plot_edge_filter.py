@@ -35,15 +35,16 @@ plt.tight_layout()
 .. image:: PLOT2RST.current_figure
 
 Different operators compute different finite-difference approximations of the
-gradient. For example, the Scharr filter results in a better rotational
-variance than the Sobel filter that is in turn better than the Prewitt filter
-[1]_ [2]_ [3]_. The difference between the Prewitt and Sobel filters and the
-Scharr filter is illustrated below on an image that is the discretization of a
-rotation-invariant continuous function. The discrepancy between the Prewitt and
-Sobel filters, and the Scharr filter is stronger for regions of the image where
-the direction of the gradient is close to diagonal, and for regions with high
-spatial frequencies. The Sobel filter is less rotationally invariant than the
-Sobel filter.
+gradient. For example, the Scharr filter results in a less rotational variance
+than the Sobel filter that is in turn better than the Prewitt filter [1]_ [2]_
+[3]_. The difference between the Prewitt and Sobel filters and the Scharr filter
+is illustrated below with an image that is the discretization of a rotation-
+invariant continuous function. The discrepancy between the Prewitt and Sobel
+filters, and the Scharr filter is stronger for regions of the image where the
+direction of the gradient is close to diagonal, and for regions with high
+spatial frequencies. For the example image the differences between the filter
+results are very small and the filter results are visually almost
+indistinguishable.
 
 .. [1] https://en.wikipedia.org/wiki/Sobel_operator#Alternative_operators
 
@@ -61,38 +62,29 @@ edge_sobel = sobel(img)
 edge_scharr = scharr(img)
 edge_prewitt = prewitt(img)
 
-fig, ((ax0, ax1, ax2), (ax3, ax4, ax5)) = plt.subplots(nrows=2, ncols=3)
-
-ax0.imshow(edge_prewitt, cmap=plt.cm.gray)
-ax0.set_title('Prewitt Edge Detection')
-ax0.axis('off')
-
-ax1.imshow(edge_sobel, cmap=plt.cm.gray)
-ax1.set_title('Sobel Edge Detection')
-ax1.axis('off')
-
-ax2.imshow(edge_scharr, cmap=plt.cm.gray)
-ax2.set_title('Scharr Edge Detection')
-ax2.axis('off')
-
-ax3.imshow(img, cmap=plt.cm.gray)
-ax3.set_title('Original image')
-ax3.axis('off')
-
 diff_scharr_prewitt = edge_scharr - edge_prewitt
 diff_scharr_sobel = edge_scharr - edge_sobel
 max_diff = np.max(np.maximum(diff_scharr_prewitt, diff_scharr_sobel))
 
-ax4.imshow(diff_scharr_prewitt, cmap=plt.cm.jet, vmax=max_diff)
-ax4.set_title('difference (Scharr - Prewitt)')
-ax4.axis('off')
+fig, ((ax0, ax1), (ax2, ax3)) = plt.subplots(nrows=2, ncols=2)
 
-ax5.imshow(diff_scharr_sobel, cmap=plt.cm.jet, vmax=max_diff)
-ax5.set_title('difference (Scharr - Sobel)')
-ax5.axis('off')
+ax0.imshow(img, cmap=plt.cm.gray)
+ax0.set_title('Original image')
+ax0.axis('off')
+
+ax1.imshow(edge_scharr, cmap=plt.cm.gray)
+ax1.set_title('Scharr Edge Detection')
+ax1.axis('off')
+
+ax2.imshow(diff_scharr_prewitt, cmap=plt.cm.jet, vmax=max_diff)
+ax2.set_title('Scharr - Prewitt')
+ax2.axis('off')
+
+ax3.imshow(diff_scharr_sobel, cmap=plt.cm.jet, vmax=max_diff)
+ax3.set_title('Scharr - Sobel')
+ax3.axis('off')
 
 plt.tight_layout()
-
 plt.show()
 
 """
