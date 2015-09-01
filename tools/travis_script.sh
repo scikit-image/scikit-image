@@ -47,6 +47,9 @@ if [[ $PY == 2.* ]]; then
     pip install --retries 3 -q pyamg
 fi
 
+# Show what's installed
+pip list
+
 section_end "Install.optional.dependencies"
 
 

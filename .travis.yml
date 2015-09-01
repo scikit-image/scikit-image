@@ -36,7 +36,6 @@ python:
   - 3.4
 
 before_install:
-    - pip install -U pip
     - source tools/travis_before_install.sh
 
     - which python; python --version
