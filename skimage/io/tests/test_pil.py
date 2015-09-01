@@ -6,7 +6,7 @@ from numpy.testing import (
 
 from tempfile import NamedTemporaryFile
 
-from ... import data_dir
+from ... import data_dir, img_as_float
 from .. import imread, imsave, use_plugin, reset_plugins
 from ..._shared.testing import mono_check, color_check
 from ..._shared._warnings import expected_warnings
@@ -39,6 +39,15 @@ def setup_module(self):
     except ImportError:
         pass
 
+def test_png_round_trip():
+    f = NamedTemporaryFile(suffix='.png')
+    fname = f.name
+    f.close()
+    I = np.eye(3)
+    imsave(fname, I)
+    Ip = img_as_float(imread(fname))
+    os.remove(fname)
+    assert np.sum(np.abs(Ip-I)) < 1e-3
 
 def test_imread_flatten():
     # a color image is flattened
