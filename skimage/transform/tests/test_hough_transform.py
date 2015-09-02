@@ -140,8 +140,11 @@ def test_hough_circle():
     y, x = circle_perimeter(y_0, x_0, radius)
     img[x, y] = 1
 
+    out1 = tf.hough_circle(img, radius)
+    out2 = tf.hough_circle(img, [radius])
+    assert_equal(out1, out2)
     out = tf.hough_circle(img, np.array([radius], dtype=np.intp))
-
+    assert_equal(out, out1)
     x, y = np.where(out[0] == out[0].max())
     assert_equal(x[0], x_0)
     assert_equal(y[0], y_0)
