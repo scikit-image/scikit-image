@@ -106,8 +106,9 @@ class _RegionProperties(object):
         self._cache = {}
         self._ndim = label_image.ndim
 
+    @_cached_property
     def area(self):
-        return self.image.sum()
+        return np.sum(self.image)
 
     def bbox(self):
         return tuple([self._slice[i].start for i in range(self._ndim)] +
