@@ -491,6 +491,9 @@ def regionprops(label_image, intensity_image=None, cache=True):
     if label_image.ndim != 2:
         raise TypeError('Only 2-D images supported.')
 
+    if not np.issubdtype(label_image.dtype, np.integer):
+        raise TypeError('Label image must be of integral type.')
+
     regions = []
 
     objects = ndi.find_objects(label_image)
