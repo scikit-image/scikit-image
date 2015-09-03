@@ -8,7 +8,6 @@ from tempfile import NamedTemporaryFile
 
 from skimage import data_dir
 from skimage.io import imread, imsave, use_plugin, reset_plugins
-import skimage.io as sio
 
 try:
     import imageio as _imageio
@@ -48,11 +47,12 @@ def test_imageio_palette():
 @skipif(not imageio_available)
 def test_imageio_truncated_jpg():
     assert_raises((RuntimeError, ValueError),
-                  sio.imread,
+                  imread,
                   os.path.join(data_dir, 'truncated.jpg'))
 
 
 class TestSave:
+
     def roundtrip(self, x, scaling=1):
         f = NamedTemporaryFile(suffix='.png')
         fname = f.name
