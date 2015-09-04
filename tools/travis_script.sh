@@ -21,7 +21,9 @@ section_end "Flake8.test"
 section "Install.optional.dependencies"
 
 # Install most of the optional packages
-pip install --retries 3 -q -r ./optional_requirements.txt $WHEELHOUSE
+if [[ $PY != 3.2* ]]; then
+    pip install --retries 3 -q -r ./optional_requirements.txt $WHEELHOUSE
+fi
 
 # Install Qt and then update the Matplotlib settings
 if [[ $PY == 2.7* ]]; then
@@ -39,7 +41,7 @@ if [[ $PY == 2.7* ]]; then
         ln -sf $LIB_SYSTEM_PATH/$LIB $LIB_VIRTUALENV_PATH/$LIB
     done
 
-else
+elif [[ $PY != 3.2* ]]; then
     python ~/venv/bin/pyside_postinstall.py -install
 fi
 
