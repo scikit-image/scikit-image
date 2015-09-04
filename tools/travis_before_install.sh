@@ -49,7 +49,8 @@ fi
 virtualenv -p python ~/venv
 source ~/venv/bin/activate
 
-retry pip install -q wheel flake8 coveralls nose
+pip install --upgrade pip
+pip install --retries 3 -q wheel flake8 coveralls nose
 
 # on Python 3.2, use matplotlib 1.3.1
 if [[ $TRAVIS_PYTHON_VERSION == 3.2 ]]; then
@@ -60,10 +61,12 @@ fi
 for requirement in $WHEELBINARIES; do
     WHEELS="$WHEELS $(grep $requirement requirements.txt)"
 done
-retry pip install -q $WHEELHOUSE $WHEELS
+pip install --retries 3 -q $WHEELHOUSE $WHEELS
 
-retry pip install -q -r requirements.txt
+pip install --retries 3 -q -r requirements.txt
 
+# Show what's installed
+pip list
 
 section () {
     echo -en "travis_fold:start:$1\r"
