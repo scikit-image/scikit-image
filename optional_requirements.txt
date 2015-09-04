@@ -3,4 +3,4 @@ imread; python_version != '2.7'
 SimpleITK; python_version != '3.4'
 astropy
 tifffile
-imageio
+imageio; python_version != '2.6'

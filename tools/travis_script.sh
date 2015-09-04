@@ -41,7 +41,7 @@ if [[ $PY == 2.7* ]]; then
         ln -sf $LIB_SYSTEM_PATH/$LIB $LIB_VIRTUALENV_PATH/$LIB
     done
 
-else
+else if [[ $PY != 3.2* ]]; then
     python ~/venv/bin/pyside_postinstall.py -install
 fi
 
