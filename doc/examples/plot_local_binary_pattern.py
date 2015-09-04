@@ -108,10 +108,12 @@ def highlight_bars(bars, indexes):
 image = data.load('brick.png')
 lbp = local_binary_pattern(image, n_points, radius, METHOD)
 
+
 def hist(ax, lbp):
     n_bins = lbp.max() + 1
     return ax.hist(lbp.ravel(), normed=True, bins=n_bins, range=(0, n_bins),
                    facecolor='0.5')
+
 
 # plot histograms of LBP of textures
 fig, (ax_img, ax_hist) = plt.subplots(nrows=2, ncols=3, figsize=(9, 6))

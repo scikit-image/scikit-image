@@ -21,12 +21,14 @@ image = data.moon()
 # Rescale image intensity so that we can see dim features.
 image = rescale_intensity(image, in_range=(50, 200))
 
+
 # convenience function for plotting images
 def imshow(image, title, **kwargs):
     fig, ax = plt.subplots(figsize=(5, 4))
     ax.imshow(image, **kwargs)
     ax.axis('off')
     ax.set_title(title)
+
 
 imshow(image, 'Original image')
 
@@ -50,7 +52,7 @@ mask = image
 
 filled = reconstruction(seed, mask, method='erosion')
 
-imshow(filled, 'after filling holes',vmin=image.min(), vmax=image.max())
+imshow(filled, 'after filling holes', vmin=image.min(), vmax=image.max())
 
 """
 .. image:: PLOT2RST.current_figure

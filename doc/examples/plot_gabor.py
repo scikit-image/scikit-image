@@ -4,8 +4,8 @@ Gabor filter banks for texture classification
 =============================================
 
 In this example, we will see how to classify textures based on Gabor filter
-banks. Frequency and orientation representations of the Gabor filter are similar
-to those of the human visual system.
+banks. Frequency and orientation representations of the Gabor filter are
+similar to those of the human visual system.
 
 The images are filtered using the real parts of various different Gabor filter
 kernels. The mean and variance of the filtered images are then used as features

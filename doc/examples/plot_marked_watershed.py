@@ -8,7 +8,7 @@ is, for separating different objects in an image.
 
 Here a marker image is built from the region of low gradient inside the image.
 In a gradient image, the areas of high values provide barriers that help to
-segment the image. 
+segment the image.
 Using markers on the lower values will ensure that the segmented objects are
 found.
 
@@ -32,7 +32,7 @@ image = img_as_ubyte(data.camera())
 # denoise image
 denoised = rank.median(image, disk(2))
 
-# find continuous region (low gradient - 
+# find continuous region (low gradient -
 # where less than 10 for this image) --> markers
 # disk(5) is used here to get a more smooth image
 markers = rank.gradient(denoised, disk(5)) < 10
@@ -61,5 +61,6 @@ ax3.set_title("Segmented")
 for ax in axes:
     ax.axis('off')
 
-fig.subplots_adjust(hspace=0.01, wspace=0.01, top=0.9, bottom=0, left=0, right=1)
+fig.subplots_adjust(hspace=0.01, wspace=0.01, top=0.9, bottom=0,
+                    left=0, right=1)
 plt.show()
