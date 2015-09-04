@@ -10,17 +10,17 @@ For an image, local entropy is related to the complexity contained in a given
 neighborhood, typically defined by a structuring element. A large number of
 various gray levels has a higher entropy than an homogeneous neighborhood.
 
-Entropy filter can detect subtle variations of local gray level distribution,
-in the example, the image is composed of two surfaces with two slightly
+The entropy filter can detect subtle variations of local gray level distribution.
+In the example, the image is composed of two surfaces with two slightly
 different distributions.
 
-Image center has a random distribution in the range [-14,+14] centered on 128,
-while the borders has a random distribution in the range [-15,+15] centered
-on 128.
+Image has a uniform random distribution in the range [-14, +14] in the middle of the
+image and a uniform random distribution in the range [-15, 15] at
+the image borders, both centered at a gray value of 128.
 
 We apply the local entropy measure using a circular structuring element of
-radius 10. As a result, one can detect the central square. Radius should be big
-enough to efficiently sample the local gray level distribution.
+radius 10. As a result, one can detect the central square. The radius is
+big enough to efficiently sample the local gray level distribution.
 
 In the second example, the local entropy is used to detect image texture.
 
@@ -43,19 +43,15 @@ img = noise + 128
 radius = 10
 e = entropy(img, disk(radius))
 
-plt.figure(figsize=[15, 5])
-plt.subplot(1, 3, 1)
-plt.imshow(noise_mask, cmap=plt.cm.gray)
-plt.xlabel('noise mask')
-plt.colorbar()
-plt.subplot(1, 3, 2)
-plt.imshow(img, cmap=plt.cm.gray)
-plt.xlabel('noised image')
-plt.colorbar()
-plt.subplot(1, 3, 3)
-plt.imshow(e)
-plt.xlabel('image local entropy ($r=%d$)' % radius)
-plt.colorbar()
+fig, ax = plt.subplots(1, 3, figsize=(8, 5))
+ax1, ax2, ax3 = ax.ravel()
+
+ax1.imshow(noise_mask, cmap=plt.cm.gray)
+ax1.set_xlabel('Noise mask')
+ax2.imshow(img, cmap=plt.cm.gray)
+ax2.set_xlabel('Noised image')
+ax3.imshow(e)
+ax3.set_xlabel('Local entropy ($r=%d$)' % radius)
 
 # second example: texture detection
 
