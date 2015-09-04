@@ -110,12 +110,14 @@ def test_denoise_tv_bregman_3d():
     assert img[30:45, 5:15].std() > out1[30:45, 5:15].std()
     assert out1[30:45, 5:15].std() > out2[30:45, 5:15].std()
 
+
 def test_denoise_bilateral_null():
     img = np.zeros((50, 50))
     out = restoration.denoise_bilateral(img)
 
     # image full of zeros should return identity
     assert_equal(out, img)
+
 
 def test_denoise_bilateral_negative():
     img = -np.ones((50, 50))
@@ -124,15 +126,18 @@ def test_denoise_bilateral_negative():
     # image with only negative values should be ok
     assert_equal(out, img)
 
+
 def test_denoise_bilateral_negative2():
     img = np.ones((50, 50))
-    img[2,2] = 2
+    img[2, 2] = 2
 
     out1 = restoration.denoise_bilateral(img)
-    out2 = restoration.denoise_bilateral(img-10) #contains negative values
+    out2 = restoration.denoise_bilateral(img - 10)  # contains negative values
 
-    # 2 images with a given offset should give the same result (with the same offset)
-    assert_equal(out1, out2+10)
+    # 2 images with a given offset should give the same result (with the same
+    # offset)
+    assert_equal(out1, out2 + 10)
+
 
 def test_denoise_bilateral_2d():
     img = checkerboard_gray.copy()
@@ -172,11 +177,10 @@ def test_denoise_bilateral_nan():
     assert_equal(img, out)
 
 
-
 def test_nl_means_denoising_2d():
     img = np.zeros((40, 40))
     img[10:-10, 10:-10] = 1.
-    img += 0.3*np.random.randn(*img.shape)
+    img += 0.3 * np.random.randn(*img.shape)
     denoised = restoration.nl_means_denoising(img, 7, 5, 0.2, fast_mode=True)
     # make sure noise is reduced
     assert img.std() > denoised.std()
@@ -202,7 +206,7 @@ def test_nl_means_denoising_2drgb():
 def test_nl_means_denoising_3d():
     img = np.zeros((20, 20, 10))
     img[5:-5, 5:-5, 3:-3] = 1.
-    img += 0.3*np.random.randn(*img.shape)
+    img += 0.3 * np.random.randn(*img.shape)
     denoised = restoration.nl_means_denoising(img, 5, 4, 0.2, fast_mode=True,
                                               multichannel=False)
     # make sure noise is reduced
@@ -216,15 +220,15 @@ def test_nl_means_denoising_3d():
 def test_nl_means_denoising_multichannel():
     img = np.zeros((21, 20, 10))
     img[10, 9:11, 2:-2] = 1.
-    img += 0.3*np.random.randn(*img.shape)
+    img += 0.3 * np.random.randn(*img.shape)
     denoised_wrong_multichannel = restoration.nl_means_denoising(img,
-                    5, 4, 0.1, fast_mode=True, multichannel=True)
+                                                                 5, 4, 0.1, fast_mode=True, multichannel=True)
     denoised_ok_multichannel = restoration.nl_means_denoising(img,
-                    5, 4, 0.1, fast_mode=True, multichannel=False)
+                                                              5, 4, 0.1, fast_mode=True, multichannel=False)
     snr_wrong = 10 * np.log10(1. /
-                            ((denoised_wrong_multichannel - img)**2).mean())
+                              ((denoised_wrong_multichannel - img)**2).mean())
     snr_ok = 10 * np.log10(1. /
-                            ((denoised_ok_multichannel - img)**2).mean())
+                           ((denoised_ok_multichannel - img)**2).mean())
     assert snr_ok > snr_wrong
 
 
@@ -236,7 +240,7 @@ def test_nl_means_denoising_wrong_dimension():
 def test_no_denoising_for_small_h():
     img = np.zeros((40, 40))
     img[10:-10, 10:-10] = 1.
-    img += 0.3*np.random.randn(*img.shape)
+    img += 0.3 * np.random.randn(*img.shape)
     # very small h should result in no averaging with other patches
     denoised = restoration.nl_means_denoising(img, 7, 5, 0.01, fast_mode=True)
     assert np.allclose(denoised, img)

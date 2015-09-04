@@ -59,7 +59,7 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
     # if image.max() is 0, then dist_scale can have an unverified value
     # and color_lut[<int>(dist * dist_scale)] may cause a segmentation fault
     # so we verify we have a positive image and that the max is not 0.0.
-    if image.min() <= 0.0:
+    if image.min() < 0.0:
         raise ValueError("Image must contain only positive values")
 
     cdef:
