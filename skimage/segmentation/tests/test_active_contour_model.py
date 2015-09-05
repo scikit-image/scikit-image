@@ -2,7 +2,7 @@ import numpy as np
 from skimage import data
 from skimage.color import rgb2gray
 from skimage.filters import gaussian_filter
-from skimage.segmentation import active_contour_model
+from skimage.segmentation import active_contour
 from numpy.testing import assert_equal, assert_allclose, assert_raises
 
 def test_periodic_reference():
@@ -12,7 +12,7 @@ def test_periodic_reference():
     x = 220 + 100*np.cos(s)
     y = 100 + 100*np.sin(s)
     init = np.array([x, y]).T
-    snake = active_contour_model(gaussian_filter(img, 3), init,
+    snake = active_contour(gaussian_filter(img, 3), init,
         alpha=0.015, beta=10, w_line=0, w_edge=1, gamma=0.001)
     refx = [299, 298, 298, 298, 298, 297, 297, 296, 296, 295]
     refy = [98, 99, 100, 101, 102, 103, 104, 105, 106, 108]
@@ -25,7 +25,7 @@ def test_fixed_reference():
     x = np.linspace(5, 424, 100)
     y = np.linspace(136, 50, 100)
     init = np.array([x, y]).T
-    snake = active_contour_model(gaussian_filter(img, 1), init, bc='fixed',
+    snake = active_contour(gaussian_filter(img, 1), init, bc='fixed',
             alpha=0.1, beta=1.0, w_line=-5, w_edge=0, gamma=0.1)
     refx = [5, 9, 13, 17, 21, 25, 30, 34, 38, 42]
     refy = [136, 135, 134, 133, 132, 131, 129, 128, 127, 125]
@@ -38,7 +38,7 @@ def test_free_reference():
     x = np.linspace(5, 424, 100)
     y = np.linspace(70, 40, 100)
     init = np.array([x, y]).T
-    snake = active_contour_model(gaussian_filter(img, 3), init, bc='free',
+    snake = active_contour(gaussian_filter(img, 3), init, bc='free',
             alpha=0.1, beta=1.0, w_line=-5, w_edge=0, gamma=0.1)
     refx = [10, 13, 16, 19, 23, 26, 29, 32, 36, 39]
     refy = [76, 76, 75, 74, 73, 72, 71, 70, 69, 69]
@@ -57,17 +57,17 @@ def test_RGB():
     x = np.linspace(5, 424, 100)
     y = np.linspace(136, 50, 100)
     init = np.array([x, y]).T
-    snake = active_contour_model(imgR, init, bc='fixed',
+    snake = active_contour(imgR, init, bc='fixed',
             alpha=0.1, beta=1.0, w_line=-5, w_edge=0, gamma=0.1)
     refx = [5, 9, 13, 17, 21, 25, 30, 34, 38, 42]
     refy = [136, 135, 134, 133, 132, 131, 129, 128, 127, 125]
     assert_equal(np.array(snake[:10, 0], dtype=np.int32), refx)
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refy)
-    snake = active_contour_model(imgG, init, bc='fixed',
+    snake = active_contour(imgG, init, bc='fixed',
             alpha=0.1, beta=1.0, w_line=-5, w_edge=0, gamma=0.1)
     assert_equal(np.array(snake[:10, 0], dtype=np.int32), refx)
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refy)
-    snake = active_contour_model(imgRGB, init, bc='fixed',
+    snake = active_contour(imgRGB, init, bc='fixed',
             alpha=0.1, beta=1.0, w_line=-5/3., w_edge=0, gamma=0.1)
     assert_equal(np.array(snake[:10, 0], dtype=np.int32), refx)
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refy)
@@ -80,15 +80,15 @@ def test_end_points():
     x = 220 + 100*np.cos(s)
     y = 100 + 100*np.sin(s)
     init = np.array([x, y]).T
-    snake = active_contour_model(gaussian_filter(img, 3), init,
+    snake = active_contour(gaussian_filter(img, 3), init,
         bc='periodic', alpha=0.015, beta=10, w_line=0, w_edge=1, gamma=0.001,
         max_iterations=100)
     assert np.sum(np.abs(snake[0, :]-snake[-1, :])) < 2
-    snake = active_contour_model(gaussian_filter(img, 3), init,
+    snake = active_contour(gaussian_filter(img, 3), init,
         bc='free', alpha=0.015, beta=10, w_line=0, w_edge=1, gamma=0.001,
         max_iterations=100)
     assert np.sum(np.abs(snake[0, :]-snake[-1, :])) > 2
-    snake = active_contour_model(gaussian_filter(img, 3), init,
+    snake = active_contour(gaussian_filter(img, 3), init,
         bc='fixed', alpha=0.015, beta=10, w_line=0, w_edge=1, gamma=0.001,
         max_iterations=100)
     assert_allclose(snake[0, :], [x[0], y[0]], atol=1e-5)
@@ -99,9 +99,9 @@ def test_bad_input():
     x = np.linspace(5, 424, 100)
     y = np.linspace(136, 50, 100)
     init = np.array([x, y]).T
-    assert_raises(ValueError, active_contour_model, img, init,
+    assert_raises(ValueError, active_contour, img, init,
                             bc='wrong')
-    assert_raises(ValueError, active_contour_model, img, init,
+    assert_raises(ValueError, active_contour, img, init,
                             max_iterations=-15)
 
 

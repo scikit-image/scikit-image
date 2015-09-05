@@ -1,13 +1,14 @@
+import warnings
 import numpy as np
 from skimage import img_as_float
 import scipy.linalg
-from scipy.interpolate import RectBivariateSpline
+from scipy.interpolate import RectBivariateSpline, interp2d
 from skimage.filters import sobel
 
-def active_contour_model(image, snake, alpha=0.01, beta=0.1,
-                         w_line=0, w_edge=1, gamma=0.01,
-                         bc='periodic', max_px_move=1.0,
-                         max_iterations=2500, convergence=0.1):
+def active_contour(image, snake, alpha=0.01, beta=0.1,
+                   w_line=0, w_edge=1, gamma=0.01,
+                   bc='periodic', max_px_move=1.0,
+                   max_iterations=2500, convergence=0.1):
     """Active contour model.
 
     Active contours by fitting snakes to features of images. Supports single
@@ -59,20 +60,28 @@ def active_contour_model(image, snake, alpha=0.01, beta=0.1,
     --------
     >>> from skimage.draw import circle_perimeter
     >>> from skimage.filters import gaussian_filter
-    Create and smooth image:
+    >>> # Create and smooth image:
     >>> img = np.zeros((100, 100))
     >>> rr, cc = circle_perimeter(35, 45, 25)
     >>> img[rr, cc] = 1
     >>> img = gaussian_filter(img, 2)
-    Initiliaze spline:
+    >>>> # Initiliaze spline:
     >>> s = np.linspace(0, 2*np.pi,100)
     >>> init = 50*np.array([np.cos(s), np.sin(s)]).T+50
-    Fit spline to image:
+    >>> # Fit spline to image:
     >>> snake = active_contour_model(img, init, w_edge=0, w_line=1)
     >>> int(np.mean(np.sqrt((45-snake[:, 0])**2 + (35-snake[:, 1])**2)))
     25
 
     """
+    scipy_version = map(int, scipy.__version__.split('.'))
+    new_scipy = scipy_version[0]>0 or \
+                (scipy_version[0]==0 and scipy_version[1]>=14)
+    if not new_scipy:
+        warnings.warn('You are using an old version of scipy. '
+                      'Upgrading to a version newer than 0.14.0 '
+                      'will signifcantly improve the performance '
+                      'of this algorithm.')
 
     max_iterations = int(max_iterations)
     if max_iterations <= 0:
@@ -109,8 +118,13 @@ def active_contour_model(image, snake, alpha=0.01, beta=0.1,
         img = w_line*img + w_edge*edge[0]
 
     # Interpolate for smoothness:
-    intp = RectBivariateSpline(np.arange(img.shape[1]),
-            np.arange(img.shape[0]), img.T, kx=2, ky=2, s=0)
+    if new_scipy:
+        intp = RectBivariateSpline(np.arange(img.shape[1]),
+                np.arange(img.shape[0]), img.T, kx=2, ky=2, s=0)
+    else:
+        intp = np.vectorize(interp2d(np.arange(img.shape[1]),
+            np.arange(img.shape[0]), img, kind='cubic', copy=False,
+            bounds_error=False, fill_value=0))
 
     x, y = snake[:, 0].copy(), snake[:, 1].copy()
     xsave = np.empty((convergence_order, len(x)))
@@ -156,13 +170,17 @@ def active_contour_model(image, snake, alpha=0.01, beta=0.1,
         A[-2, -4:] = [-1, 3, -3, 1]
         efree = True
 
-    # Only one inversion is needed:
+    # Only one inversion is needed for implicit spline energy minimization:
     inv = scipy.linalg.inv(A+gamma*np.eye(n))
 
-    # Explcit time stepping for image energy minimization:
+    # Explicit time stepping for image energy minimization:
     for i in xrange(max_iterations):
-        fx = intp(x, y, dx=1, grid=False)
-        fy = intp(x, y, dy=1, grid=False)
+        if new_scipy:
+            fx = intp(x, y, dx=1, grid=False)
+            fy = intp(x, y, dy=1, grid=False)
+        else:
+            fx = intp(x, y, dx=1)
+            fy = intp(x, y, dy=1)
         if sfixed:
             fx[0] = 0
             fy[0] = 0
@@ -190,7 +208,8 @@ def active_contour_model(image, snake, alpha=0.01, beta=0.1,
         x[:] += dx
         y[:] += dy
 
-        # Convergence criteria:
+        # Convergence criteria needs to compare to a number of previous
+        # configurations since oscillations can occur.
         j = i%(convergence_order+1)
         if j < convergence_order:
             xsave[j, :] = x
