@@ -11,6 +11,7 @@ cache:
   # See http://docs.travis-ci.com/user/caching/#pip-cache
   directories:
     - $HOME/.cache/pip
+    - $HOME/.cache/sphinx
     - $HOME/.ccache
 addons:
   apt:
