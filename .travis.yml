@@ -11,9 +11,11 @@ cache:
   # See http://docs.travis-ci.com/user/caching/#pip-cache
   directories:
     - $HOME/.cache/pip
+    - $HOME/.ccache
 addons:
   apt:
     packages:
+    - ccache
     - libfreeimage3
     - texlive 
     - texlive-latex-extra 
@@ -36,8 +38,9 @@ python:
   - 3.4
 
 before_install:
+    - ccache -s
+    - export PATH=/usr/lib/ccache:${PATH}
     - source tools/travis_before_install.sh
-
     - which python; python --version
     - python check_bento_build.py
     - tools/build_versions.py
