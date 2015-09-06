@@ -122,9 +122,8 @@ def test_line_equal_aliasing_horizontally_vertically():
 
 def test_polygon_rectangle():
     img = np.zeros((10, 10), 'uint8')
-    poly = np.array(((1, 1), (4, 1), (4, 4), (1, 4), (1, 1)))
 
-    rr, cc = polygon(poly[:, 0], poly[:, 1])
+    rr, cc = polygon((1, 4, 4, 1, 1), (1, 1, 4, 4, 1))
     img[rr, cc] = 1
 
     img_ = np.zeros((10, 10))
