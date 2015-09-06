@@ -82,7 +82,7 @@ from skimage import io
 from skimage import transform
 from skimage.util.dtype import dtype_range
 
-from notebook import Notebook
+from notebook_doc import Notebook
 
 from docutils.core import publish_parts
 from sphinx.domains.python import PythonDomain
