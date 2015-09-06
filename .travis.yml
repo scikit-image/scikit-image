@@ -19,6 +19,10 @@ addons:
     - texlive-latex-extra 
     - dvipng
     - python-qt4
+env:
+  global:
+    - GH_REF: github.com/scikit-image/docs.git
+    - secure: "M/t6G0+xYC9c7vjCOdbGj/2m5YKIWCrSpuk1a93ql/bQrF+l5Cdwt3VSTx9mkNFpx1WZgz1We+9OBG0OMR+N/WDLESAlx6L0QRoNBL8+KyKcw3/+MdGjVsFzSq4mJsLW3eEZ35U9PI81/JEyWg6GybjheikzaoW8uPyKTu2Qzmc="
 
 notifications:
   webhooks:
@@ -49,3 +53,4 @@ script: tools/travis_script.sh
 
 after_success:
     - coveralls
+    - bash tools/deploy_docs.sh
