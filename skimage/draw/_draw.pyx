@@ -268,6 +268,8 @@ def polygon(y, x, shape=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
+    x = np.asanyarray(x)
+    y = np.asanyarray(y)
 
     cdef Py_ssize_t nr_verts = x.shape[0]
     cdef Py_ssize_t minr = int(max(0, y.min()))
