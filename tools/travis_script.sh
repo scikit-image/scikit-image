@@ -9,8 +9,9 @@ section_end "Test.with.min.requirements"
 
 section "Build.docs"
 if [[ ($PY != 2.6) && ($PY != 3.2) ]]; then
+    SPHINXBUILD="python $(which sphinx-build)"
     pushd doc
-    python `which sphinx-build` -d $HOME/.cache/sphinx -W source build/html
+    $SPHINXBUILD -d $HOME/.cache/sphinx -W source build/html
     popd
 fi
 section_end "Build.docs"
