@@ -7,15 +7,6 @@ section "Test.with.min.requirements"
 nosetests $TEST_ARGS skimage
 section_end "Test.with.min.requirements"
 
-section "Build.docs"
-if [[ ($PY != 2.6) && ($PY != 3.2) ]]; then
-    SPHINXBUILD="python $(which sphinx-build)"
-    pushd doc
-    $SPHINXBUILD -d $HOME/.cache/sphinx -W source build/html
-    popd
-fi
-section_end "Build.docs"
-
 section "Flake8.test"
 flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
 section_end "Flake8.test"
@@ -56,6 +47,16 @@ fi
 pip list
 
 section_end "Install.optional.dependencies"
+
+
+section "Build.docs"
+if [[ ($PY != 2.6) && ($PY != 3.2) ]]; then
+    SPHINXBUILD="python $(which sphinx-build)"
+    pushd doc
+    $SPHINXBUILD -d $HOME/.cache/sphinx -W source build/html
+    popd
+fi
+section_end "Build.docs"
 
 
 section "Run.doc.examples"

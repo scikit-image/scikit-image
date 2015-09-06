@@ -4,3 +4,4 @@ SimpleITK; python_version != '3.4'
 astropy
 tifffile
 imageio; python_version != '2.6'
+sphinx; python_version != '2.6' and python_version != '3.2'
