@@ -51,10 +51,8 @@ section_end "Install.optional.dependencies"
 
 section "Build.docs"
 if [[ ($PY != 2.6) && ($PY != 3.2) ]]; then
-    SPHINXBUILD="python $(which sphinx-build)"
-    pushd doc
-    $SPHINXBUILD -d $HOME/.cache/sphinx -W source build/html
-    popd
+    export SPHINXCACHE=$HOME/.cache/sphinx
+    make html
 fi
 section_end "Build.docs"
 
