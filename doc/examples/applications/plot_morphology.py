@@ -42,7 +42,7 @@ Let's also define a convenience function for plotting comparisons:
 
 def plot_comparison(original, filtered, filter_name):
 
-    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4))
+    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4), sharex=True, sharey=True)
     ax1.imshow(original, cmap=plt.cm.gray)
     ax1.set_title('original')
     ax1.axis('off')

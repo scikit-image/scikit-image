@@ -28,7 +28,10 @@ image = color.gray2rgb(grayscale_image)
 red_multiplier = [1, 0, 0]
 yellow_multiplier = [1, 1, 0]
 
-fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4))
+# sharing the axes makes the grid show beneath the image
+# this could be solved by calling set_axis_off() where this
+# behaviour is not wanted
+fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4), sharex=True, sharey=True)
 ax1.imshow(red_multiplier * image)
 ax2.imshow(yellow_multiplier * image)
 
@@ -104,7 +107,7 @@ and a non-zero saturation:
 
 hue_rotations = np.linspace(0, 1, 6)
 
-fig, axes = plt.subplots(nrows=2, ncols=3)
+fig, axes = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
 
 for ax, hue in zip(axes.flat, hue_rotations):
     # Turn down the saturation to give it that vintage look.
@@ -142,7 +145,7 @@ textured_regions = noisy > 4
 masked_image = image.copy()
 masked_image[textured_regions, :] *= red_multiplier
 
-fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4))
+fig, (ax1, ax2) = plt.subplots(ncols=2, nrows=1, figsize=(8, 4), sharex=True, sharey=True)
 ax1.imshow(sliced_image)
 ax2.imshow(masked_image)
 

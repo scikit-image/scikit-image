@@ -77,11 +77,13 @@ image[idx, idx] = 255
 
 h, theta, d = hough_line(image)
 
-fig, ax = plt.subplots(1, 3, figsize=(8, 4))
+fig, ax = plt.subplots(1, 3, figsize=(8, 4), sharex=True, sharey=True)
+fig.delaxes(ax[1])
+ax[1] = fig.add_subplot(1, 3, 2)
 
 ax[0].imshow(image, cmap=plt.cm.gray)
 ax[0].set_title('Input image')
-ax[0].axis('image')
+ax[0].set_axis_off()
 
 ax[1].imshow(np.log(1 + h),
              extent=[np.rad2deg(theta[-1]), np.rad2deg(theta[0]),
@@ -100,7 +102,7 @@ for _, angle, dist in zip(*hough_line_peaks(h, theta, d)):
     ax[2].plot((0, cols), (y0, y1), '-r')
 ax[2].axis((0, cols, rows, 0))
 ax[2].set_title('Detected lines')
-ax[2].axis('image')
+ax[2].set_axis_off()
 
 # Line finding, using the Probabilistic Hough Transform
 
@@ -109,15 +111,15 @@ edges = canny(image, 2, 1, 25)
 lines = probabilistic_hough_line(edges, threshold=10, line_length=5,
                                  line_gap=3)
 
-fig2, ax = plt.subplots(1, 3, figsize=(8, 3))
+fig2, ax = plt.subplots(1, 3, figsize=(8, 3), sharex=True, sharey=True)
 
 ax[0].imshow(image, cmap=plt.cm.gray)
 ax[0].set_title('Input image')
-ax[0].axis('image')
+ax[0].set_axis_off()
 
 ax[1].imshow(edges, cmap=plt.cm.gray)
 ax[1].set_title('Canny edges')
-ax[1].axis('image')
+ax[1].set_axis_off()
 
 ax[2].imshow(edges * 0)
 
@@ -126,5 +128,5 @@ for line in lines:
     ax[2].plot((p0[0], p1[0]), (p0[1], p1[1]))
 
 ax[2].set_title('Probabilistic Hough')
-ax[2].axis('image')
+ax[2].set_axis_off()
 plt.show()
