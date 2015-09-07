@@ -7,16 +7,16 @@ In information theory, information entropy is the log-base-2 of the number of
 possible outcomes for a message.
 
 For an image, local entropy is related to the complexity contained in a given
-neighborhood, typically defined by a structuring element. A large number of
-various gray levels has a higher entropy than an homogeneous neighborhood.
+neighborhood, typically defined by a structuring element.
 
-The entropy filter can detect subtle variations of local gray level distribution.
+The entropy filter can detect subtle variations in the local gray level
+distribution.
 In the example, the image is composed of two surfaces with two slightly
 different distributions.
 
-Image has a uniform random distribution in the range [-14, +14] in the middle of the
-image and a uniform random distribution in the range [-15, 15] at
-the image borders, both centered at a gray value of 128.
+The image has a uniform random distribution in the range [-14, +14] in the
+middle of the image and a uniform random distribution in the range [-15, 15]
+at the image borders, both centered at a gray value of 128.
 
 We apply the local entropy measure using a circular structuring element of
 radius 10. As a result, one can detect the central square. The radius is
