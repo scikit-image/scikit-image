@@ -38,13 +38,16 @@ markers[data > 1.3] = 2
 labels = random_walker(data, markers, beta=10, mode='bf')
 
 # Plot results
-fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(8, 3.2), sharex=True, sharey=True)
+fig = plt.figure(figsize=(8, 3.2))
+ax1 = plt.subplot(1, 3, 1, adjustable='box-forced')
 ax1.imshow(data, cmap='gray', interpolation='nearest')
 ax1.axis('off')
 ax1.set_title('Noisy data')
+ax2 = plt.subplot(1, 3, 2, sharex=ax1, sharey=ax1, adjustable='box-forced')
 ax2.imshow(markers, cmap='hot', interpolation='nearest')
 ax2.axis('off')
 ax2.set_title('Markers')
+ax3 = plt.subplot(1, 3, 3, sharex=ax1, sharey=ax1, adjustable='box-forced')
 ax3.imshow(labels, cmap='gray', interpolation='nearest')
 ax3.axis('off')
 ax3.set_title('Segmentation')

@@ -70,7 +70,7 @@ noisy_image = img_as_ubyte(data.camera())
 noisy_image[noise > 0.99] = 255
 noisy_image[noise < 0.01] = 0
 
-fig, ax = plt.subplots(2, 2, figsize=(10, 7), sharex=True, sharey=True)
+fig, ax = plt.subplots(2, 2, figsize=(10, 7), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
 ax1, ax2, ax3, ax4 = ax.ravel()
 
 ax1.imshow(noisy_image, vmin=0, vmax=255, cmap=plt.cm.gray)
@@ -109,7 +109,7 @@ image.
 
 from skimage.filters.rank import mean
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=[10, 7], sharex=True, sharey=True)
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=[10, 7], sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
 
 loc_mean = mean(noisy_image, disk(10))
 
@@ -143,7 +143,7 @@ noisy_image = img_as_ubyte(data.camera())
 
 bilat = mean_bilateral(noisy_image.astype(np.uint16), disk(20), s0=10, s1=10)
 
-fig, ax = plt.subplots(2, 2, figsize=(10, 7), sharex='row', sharey='row')
+fig, ax = plt.subplots(2, 2, figsize=(10, 7), sharex='row', sharey='row', subplot_kw={'adjustable':'box-forced'})
 ax1, ax2, ax3, ax4 = ax.ravel()
 
 ax1.imshow(noisy_image, cmap=plt.cm.gray)
@@ -196,9 +196,13 @@ hist = np.histogram(noisy_image, bins=np.arange(0, 256))
 glob_hist = np.histogram(glob, bins=np.arange(0, 256))
 loc_hist = np.histogram(loc, bins=np.arange(0, 256))
 
-# this way histograms also share the axes
-fig, ax = plt.subplots(3, 2, figsize=(10, 10), sharex='col', sharey='col')
-ax1, ax2, ax3, ax4, ax5, ax6 = ax.ravel()
+fig = plt.figure()
+ax1 = plt.subplot(3, 2, 1, adjustable='box-forced')
+ax2 = plt.subplot(3, 2, 2)
+ax3 = plt.subplot(3, 2, 3, adjustable='box-forced', sharex=ax1, sharey=ax1)
+ax4 = plt.subplot(3, 2, 4)
+ax5 = plt.subplot(3, 2, 5, adjustable='box-forced', sharex=ax1, sharey=ax1)
+ax6 = plt.subplot(3, 2, 6)
 
 ax1.imshow(noisy_image, interpolation='nearest', cmap=plt.cm.gray)
 ax1.axis('off')
@@ -237,7 +241,7 @@ noisy_image = img_as_ubyte(data.camera())
 
 auto = autolevel(noisy_image.astype(np.uint16), disk(20))
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=[10, 7], sharex=True, sharey=True)
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=[10, 7], sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
 
 ax1.imshow(noisy_image, cmap=plt.cm.gray)
 ax1.set_title('Original')
@@ -272,12 +276,9 @@ loc_perc_autolevel1 = autolevel_percentile(image, selem=selem, p0=.01, p1=.99)
 loc_perc_autolevel2 = autolevel_percentile(image, selem=selem, p0=.05, p1=.95)
 loc_perc_autolevel3 = autolevel_percentile(image, selem=selem, p0=.1, p1=.9)
 
-fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(7, 8), sharex=True, sharey=True)
+fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(7, 8), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
 ax0, ax1, ax2 = axes
 plt.gray()
-
-#ax0.imshow(np.hstack((image, loc_autolevel)), cmap=plt.cm.gray)
-#ax0.set_title('Original / auto-level')
 
 title_list = ['Original',
                 'auto_level',
@@ -298,18 +299,6 @@ for i in range(0,len(image_list)):
     axes_list[i].set_title(title_list[i])
     axes_list[i].axis('off')
 
-'''
-ax1.imshow(
-    np.hstack((loc_perc_autolevel0, loc_perc_autolevel1)), vmin=0, vmax=255)
-ax1.set_title('Percentile auto-level 0%,1%')
-ax2.imshow(
-    np.hstack((loc_perc_autolevel2, loc_perc_autolevel3)), vmin=0, vmax=255)
-ax2.set_title('Percentile auto-level 5% and 10%')
-
-for ax in axes:
-    ax.axis('off')
-'''
-
 """
 
 .. image:: PLOT2RST.current_figure
@@ -326,7 +315,7 @@ noisy_image = img_as_ubyte(data.camera())
 
 enh = enhance_contrast(noisy_image, disk(5))
 
-fig, ax = plt.subplots(2, 2, figsize=[10, 7], sharex='row', sharey='row')
+fig, ax = plt.subplots(2, 2, figsize=[10, 7], sharex='row', sharey='row', subplot_kw={'adjustable':'box-forced'})
 ax1, ax2, ax3, ax4 = ax.ravel()
 
 ax1.imshow(noisy_image, cmap=plt.cm.gray)
@@ -358,7 +347,7 @@ noisy_image = img_as_ubyte(data.camera())
 
 penh = enhance_contrast_percentile(noisy_image, disk(5), p0=.1, p1=.9)
 
-fig, ax = plt.subplots(2, 2, figsize=[10, 7], sharex='row', sharey='row')
+fig, ax = plt.subplots(2, 2, figsize=[10, 7], sharex='row', sharey='row', subplot_kw={'adjustable':'box-forced'})
 ax1, ax2, ax3, ax4 = ax.ravel()
 
 ax1.imshow(noisy_image, cmap=plt.cm.gray)
@@ -415,7 +404,7 @@ loc_otsu = p8 >= t_loc_otsu
 t_glob_otsu = threshold_otsu(p8)
 glob_otsu = p8 >= t_glob_otsu
 
-fig, ax = plt.subplots(2, 2, sharex=True, sharey=True)
+fig, ax = plt.subplots(2, 2, sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
 ax1, ax2, ax3, ax4 = ax.ravel()
 
 fig.colorbar(ax1.imshow(p8, cmap=plt.cm.gray), ax=ax1)
@@ -451,7 +440,7 @@ m = (np.tile(x, (n, 1)) * np.linspace(0.1, 1, n) * 128 + 128).astype(np.uint8)
 radius = 10
 t = rank.otsu(m, disk(radius))
 
-fig, (ax1, ax2) = plt.subplots(1, 2, sharex=True, sharey=True)
+fig, (ax1, ax2) = plt.subplots(1, 2, sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
 
 ax1.imshow(m)
 ax1.set_title('Original')
@@ -490,7 +479,7 @@ opening = minimum(maximum(noisy_image, disk(5)), disk(5))
 grad = gradient(noisy_image, disk(5))
 
 # display results
-fig, ax = plt.subplots(2, 2, figsize=[10, 7], sharex=True, sharey=True)
+fig, ax = plt.subplots(2, 2, figsize=[10, 7], sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
 ax1, ax2, ax3, ax4 = ax.ravel()
 
 ax1.imshow(noisy_image, cmap=plt.cm.gray)
@@ -540,7 +529,7 @@ import matplotlib.pyplot as plt
 
 image = data.camera()
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4), sharex=True, sharey=True)
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
 
 fig.colorbar(ax1.imshow(image, cmap=plt.cm.gray), ax=ax1)
 ax1.set_title('Image')
@@ -702,13 +691,7 @@ Comparison of outcome of the three methods:
 
 """
 
-'''
-fig, ax = plt.subplots()
-ax.imshow(np.hstack((rc, rndi)))
-ax.set_title('filters.rank.median vs. scipy.ndimage.percentile')
-ax.axis('off')
-'''
-fig, (ax0, ax1) = plt.subplots(ncols=2, sharex=True, sharey=True)
+fig, (ax0, ax1) = plt.subplots(ncols=2, sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
 ax0.set_title('filters.rank.median')
 ax0.imshow(rc)
 ax0.axis('off')

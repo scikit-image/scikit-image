@@ -77,32 +77,33 @@ image[idx, idx] = 255
 
 h, theta, d = hough_line(image)
 
-fig, ax = plt.subplots(1, 3, figsize=(8, 4), sharex=True, sharey=True)
-fig.delaxes(ax[1])
-ax[1] = fig.add_subplot(1, 3, 2)
+fig = plt.figure(figsize=(8, 4))
+ax1 = plt.subplot(1, 3, 1, adjustable='box-forced')
+ax2 = plt.subplot(1, 3, 2)
+ax3 = plt.subplot(1, 3, 3, sharex=ax1, sharey=ax1, adjustable='box-forced')
 
-ax[0].imshow(image, cmap=plt.cm.gray)
-ax[0].set_title('Input image')
-ax[0].set_axis_off()
+ax1.imshow(image, cmap=plt.cm.gray)
+ax1.set_title('Input image')
+ax1.set_axis_off()
 
-ax[1].imshow(np.log(1 + h),
+ax2.imshow(np.log(1 + h),
              extent=[np.rad2deg(theta[-1]), np.rad2deg(theta[0]),
                      d[-1], d[0]],
              cmap=plt.cm.gray, aspect=1/1.5)
-ax[1].set_title('Hough transform')
-ax[1].set_xlabel('Angles (degrees)')
-ax[1].set_ylabel('Distance (pixels)')
-ax[1].axis('image')
+ax2.set_title('Hough transform')
+ax2.set_xlabel('Angles (degrees)')
+ax2.set_ylabel('Distance (pixels)')
+ax2.axis('image')
 
-ax[2].imshow(image, cmap=plt.cm.gray)
+ax3.imshow(image, cmap=plt.cm.gray)
 rows, cols = image.shape
 for _, angle, dist in zip(*hough_line_peaks(h, theta, d)):
     y0 = (dist - 0 * np.cos(angle)) / np.sin(angle)
     y1 = (dist - cols * np.cos(angle)) / np.sin(angle)
-    ax[2].plot((0, cols), (y0, y1), '-r')
-ax[2].axis((0, cols, rows, 0))
-ax[2].set_title('Detected lines')
-ax[2].set_axis_off()
+    ax3.plot((0, cols), (y0, y1), '-r')
+ax3.axis((0, cols, rows, 0))
+ax3.set_title('Detected lines')
+ax3.set_axis_off()
 
 # Line finding, using the Probabilistic Hough Transform
 
@@ -111,22 +112,25 @@ edges = canny(image, 2, 1, 25)
 lines = probabilistic_hough_line(edges, threshold=10, line_length=5,
                                  line_gap=3)
 
-fig2, ax = plt.subplots(1, 3, figsize=(8, 3), sharex=True, sharey=True)
+fig2 = plt.figure(figsize=(8, 3))
+ax1 = plt.subplot(1, 3, 1, adjustable='box-forced')
+ax2 = plt.subplot(1, 3, 2, sharex=ax1, sharey=ax1, adjustable='box-forced')
+ax3 = plt.subplot(1, 3, 3, sharex=ax1, sharey=ax1, adjustable='box-forced')
 
-ax[0].imshow(image, cmap=plt.cm.gray)
-ax[0].set_title('Input image')
-ax[0].set_axis_off()
+ax1.imshow(image, cmap=plt.cm.gray)
+ax1.set_title('Input image')
+ax1.set_axis_off()
 
-ax[1].imshow(edges, cmap=plt.cm.gray)
-ax[1].set_title('Canny edges')
-ax[1].set_axis_off()
+ax2.imshow(edges, cmap=plt.cm.gray)
+ax2.set_title('Canny edges')
+ax2.set_axis_off()
 
-ax[2].imshow(edges * 0)
+ax3.imshow(edges * 0)
 
 for line in lines:
     p0, p1 = line
-    ax[2].plot((p0[0], p1[0]), (p0[1], p1[1]))
+    ax3.plot((p0[0], p1[0]), (p0[1], p1[1]))
 
-ax[2].set_title('Probabilistic Hough')
-ax[2].set_axis_off()
+ax3.set_title('Probabilistic Hough')
+ax3.set_axis_off()
 plt.show()

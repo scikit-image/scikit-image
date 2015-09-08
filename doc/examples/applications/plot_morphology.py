@@ -46,9 +46,11 @@ def plot_comparison(original, filtered, filter_name):
     ax1.imshow(original, cmap=plt.cm.gray)
     ax1.set_title('original')
     ax1.axis('off')
+    ax1.set_adjustable('box-forced')
     ax2.imshow(filtered, cmap=plt.cm.gray)
     ax2.set_title(filter_name)
     ax2.axis('off')
+    ax2.set_adjustable('box-forced')
 
 """
 Erosion

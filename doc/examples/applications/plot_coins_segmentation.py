@@ -35,7 +35,9 @@ background with the coins:
 
 """
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6, 3), sharex=True, sharey=True)
+fig = plt.figure(figsize=(6,3))
+ax1 = fig.add_subplot(1, 2, 1, adjustable='box-forced')
+ax2 = fig.add_subplot(1, 2, 2, sharex = ax1, sharey = ax1, adjustable='box-forced')
 ax1.imshow(coins > 100, cmap=plt.cm.gray, interpolation='nearest')
 ax1.set_title('coins > 100')
 ax1.axis('off')
@@ -162,8 +164,9 @@ segmentation = ndi.binary_fill_holes(segmentation - 1)
 labeled_coins, _ = ndi.label(segmentation)
 image_label_overlay = label2rgb(labeled_coins, image=coins)
 
-# TODO: this example would benefit from sharing axes over multiple figures
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6, 3), sharex=True, sharey=True)
+fig = plt.figure(figsize=(6,3))
+ax1 = fig.add_subplot(1, 2, 1, adjustable='box-forced')
+ax2 = fig.add_subplot(1, 2, 2, sharex = ax1, sharey = ax1, adjustable='box-forced')
 ax1.imshow(coins, cmap=plt.cm.gray, interpolation='nearest')
 ax1.contour(segmentation, [0.5], linewidths=1.2, colors='y')
 ax1.axis('off')
