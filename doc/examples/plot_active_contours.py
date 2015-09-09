@@ -1,7 +1,8 @@
 """
-====================================================
+====================
 Active Contour Model
-====================================================
+====================
+
 The active contour model is a method to fit open or closed splines to lines or
 edges in an image. It works by minimising an energy that is in part defined by
 the image and part by the spline's shape: length and smoothness. The
@@ -18,8 +19,8 @@ smooth images a bit before analyzing, as done in the following examples.
        International Journal of Computer Vision 1 (4): 321 (1988).
 
 We initialize a circle around the astronaut's face and use the default boundary
-condition `bc='periodic'` to fit a closed curve. The default parameters
-`w_line=0, w_edge=1` will make the curve search towards edges, such as the
+condition ``bc='periodic'`` to fit a closed curve. The default parameters
+``w_line=0, w_edge=1`` will make the curve search towards edges, such as the
 boundaries of the face.
 """
 
@@ -39,7 +40,7 @@ y = 100 + 100*np.sin(s)
 init = np.array([x, y]).T
 
 snake = active_contour(gaussian_filter(img, 3),
-    init, alpha=0.015, beta=10, gamma=0.001)
+            init, alpha=0.015, beta=10, gamma=0.001)
 
 fig = plt.figure(figsize=(7, 7))
 ax = fig.add_subplot(111)

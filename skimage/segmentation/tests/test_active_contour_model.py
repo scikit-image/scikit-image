@@ -5,6 +5,7 @@ from skimage.filters import gaussian_filter
 from skimage.segmentation import active_contour
 from numpy.testing import assert_equal, assert_allclose, assert_raises
 
+
 def test_periodic_reference():
     img = data.astronaut()
     img = rgb2gray(img)
@@ -13,7 +14,7 @@ def test_periodic_reference():
     y = 100 + 100*np.sin(s)
     init = np.array([x, y]).T
     snake = active_contour(gaussian_filter(img, 3), init,
-        alpha=0.015, beta=10, w_line=0, w_edge=1, gamma=0.001)
+            alpha=0.015, beta=10, w_line=0, w_edge=1, gamma=0.001)
     refx = [299, 298, 298, 298, 298, 297, 297, 296, 296, 295]
     refy = [98, 99, 100, 101, 102, 103, 104, 105, 106, 108]
     assert_equal(np.array(snake[:10, 0], dtype=np.int32), refx)
@@ -81,16 +82,16 @@ def test_end_points():
     y = 100 + 100*np.sin(s)
     init = np.array([x, y]).T
     snake = active_contour(gaussian_filter(img, 3), init,
-        bc='periodic', alpha=0.015, beta=10, w_line=0, w_edge=1, gamma=0.001,
-        max_iterations=100)
+             bc='periodic', alpha=0.015, beta=10, w_line=0, w_edge=1,
+             gamma=0.001, max_iterations=100)
     assert np.sum(np.abs(snake[0, :]-snake[-1, :])) < 2
     snake = active_contour(gaussian_filter(img, 3), init,
-        bc='free', alpha=0.015, beta=10, w_line=0, w_edge=1, gamma=0.001,
-        max_iterations=100)
+            bc='free', alpha=0.015, beta=10, w_line=0, w_edge=1,
+            gamma=0.001, max_iterations=100)
     assert np.sum(np.abs(snake[0, :]-snake[-1, :])) > 2
     snake = active_contour(gaussian_filter(img, 3), init,
-        bc='fixed', alpha=0.015, beta=10, w_line=0, w_edge=1, gamma=0.001,
-        max_iterations=100)
+            bc='fixed', alpha=0.015, beta=10, w_line=0, w_edge=1,
+            gamma=0.001, max_iterations=100)
     assert_allclose(snake[0, :], [x[0], y[0]], atol=1e-5)
 
 

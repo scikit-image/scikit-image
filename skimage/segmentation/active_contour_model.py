@@ -5,6 +5,7 @@ import scipy.linalg
 from scipy.interpolate import RectBivariateSpline, interp2d
 from skimage.filters import sobel
 
+
 def active_contour(image, snake, alpha=0.01, beta=0.1,
                    w_line=0, w_edge=1, gamma=0.01,
                    bc='periodic', max_px_move=1.0,
@@ -18,27 +19,29 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     Parameters
     ----------
     image : (N, M) or (N, M, 3) ndarray
-        Input image
+        Input image.
     snake : (N, 2) ndarray
-        Initialisation of snake.
+        Initialisation coordinates of snake. For periodic snakes, it should
+        not include duplicate endpoints.
     alpha : float, optional
-        Snake length shape parameter
+        Snake length shape parameter. Higher values makes snake contract
+        faster.
     beta : float, optional
-        Snake smoothness shape parameter
+        Snake smoothness shape parameter. Higher values makes snake smoother.
     w_line : float, optional
         Controls attraction to brightness. Use negative values to attract to
-        dark regions
+        dark regions.
     w_edge : float, optional
         Controls attraction to edges. Use negative values to repel snake from
         edges.
     gamma : float, optional
-        Excpliti time stepping parameter.
+        Explicit time stepping parameter.
     bc : {'periodic', 'free', 'fixed'}, optional
         Boundary conditions for worm. 'periodic' attaches the two ends of the
-         snake, 'fixed' holds the end-points in place, and'free' allows free
-         movement of the ends. 'fixed' and 'free' can be combined by parsing
-         'fixed-free', 'free-fixed'. Parsing 'fixed-fixed' or 'free-free'
-         yields same behaviour as 'fixed' and 'free', respectively.
+        snake, 'fixed' holds the end-points in place, and'free' allows free
+        movement of the ends. 'fixed' and 'free' can be combined by parsing
+        'fixed-free', 'free-fixed'. Parsing 'fixed-fixed' or 'free-free'
+        yields same behaviour as 'fixed' and 'free', respectively.
     max_px_move : float, optional
         Maximum pixel distance to move per iteration.
     max_iterations : int, optional
@@ -54,29 +57,36 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     References
     ----------
     .. [1]  Kass, M.; Witkin, A.; Terzopoulos, D. "Snakes: Active contour
-    models". International Journal of Computer Vision 1 (4): 321 (1988).
+            models". International Journal of Computer Vision 1 (4): 321
+            (1988).
 
     Examples
     --------
     >>> from skimage.draw import circle_perimeter
     >>> from skimage.filters import gaussian_filter
-    >>> # Create and smooth image:
+
+    Create and smooth image:
+
     >>> img = np.zeros((100, 100))
     >>> rr, cc = circle_perimeter(35, 45, 25)
     >>> img[rr, cc] = 1
     >>> img = gaussian_filter(img, 2)
-    >>>> # Initiliaze spline:
+
+    Initiliaze spline:
+
     >>> s = np.linspace(0, 2*np.pi,100)
     >>> init = 50*np.array([np.cos(s), np.sin(s)]).T+50
-    >>> # Fit spline to image:
+
+    Fit spline to image:
+
     >>> snake = active_contour_model(img, init, w_edge=0, w_line=1)
     >>> int(np.mean(np.sqrt((45-snake[:, 0])**2 + (35-snake[:, 1])**2)))
     25
 
     """
-    scipy_version = map(int, scipy.__version__.split('.'))
-    new_scipy = scipy_version[0]>0 or \
-                (scipy_version[0]==0 and scipy_version[1]>=14)
+    scipy_version = list(map(int, scipy.__version__.split('.')))
+    new_scipy = scipy_version[0] > 0 or \
+                (scipy_version[0] == 0 and scipy_version[1] >= 14)
     if not new_scipy:
         warnings.warn('You are using an old version of scipy. '
                       'Upgrading to a version newer than 0.14.0 '
@@ -130,16 +140,16 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     xsave = np.empty((convergence_order, len(x)))
     ysave = np.empty((convergence_order, len(x)))
 
-    # Build snake shape matrix
+    # Build snake shape matrix for Euler equation
     n = len(x)
     a = np.roll(np.eye(n), -1, axis=0) \
       + np.roll(np.eye(n), -1, axis=1) \
-      - 2*np.eye(n)
+      - 2*np.eye(n) # second order derivative, central difference
     b = np.roll(np.eye(n), -2, axis=0) \
       + np.roll(np.eye(n), -2, axis=1) \
       - 4*np.roll(np.eye(n), -1, axis=0) \
       - 4*np.roll(np.eye(n), -1, axis=1) \
-      + 6*np.eye(n)
+      + 6*np.eye(n) # fourth order derivative, central difference
     A = -alpha*a + beta*b
 
     # Impose boundary conditions different from periodic:
@@ -216,7 +226,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
             ysave[j, :] = y
         else:
             dist = np.min(np.max(np.abs(xsave-x[None, :])
-                + np.abs(ysave-y[None, :]), 1))
+                 + np.abs(ysave-y[None, :]), 1))
             if dist < convergence:
                 break
 

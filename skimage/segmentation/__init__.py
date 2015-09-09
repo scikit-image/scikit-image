@@ -9,7 +9,7 @@ from ._join import join_segmentations, relabel_from_one, relabel_sequential
 
 
 __all__ = ['random_walker',
-            'active_contour',
+           'active_contour',
            'felzenszwalb',
            'slic',
            'quickshift',
