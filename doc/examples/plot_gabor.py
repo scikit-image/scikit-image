@@ -100,7 +100,19 @@ for theta in (0, 1):
         # Save kernel and the power image for each image
         results.append((kernel, [power(img, kernel) for img in images]))
 
-fig, axes = plt.subplots(nrows=5, ncols=4, figsize=(5, 6))
+# Prepare exes for ploting
+fig = plt.figure(figsize=(5, 6))
+axes = np.zeros((5, 4), dtype=np.object)
+# first column
+for n in range(0, 5):
+    axes[n,0] = plt.subplot(5, 4, 1+n*4)
+# the other columns, each column axes are shared
+for m in range(1, 4):
+    axes[0,m] = plt.subplot(5, 4, 1+m, adjustable='box-forced')
+    for n in range(1, 5):
+        axes[n,m] = plt.subplot(5, 4, 1+n*4+m, sharex=axes[0,m], sharey=axes[0,m])
+        axes[n,m].set_adjustable('box-forced')
+
 plt.gray()
 
 fig.suptitle('Image responses for Gabor filter kernels', fontsize=12)

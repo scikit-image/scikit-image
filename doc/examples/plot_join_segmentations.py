@@ -40,7 +40,7 @@ seg2 = slic(coins, n_segments=117, max_iter=160, sigma=1, compactness=0.75,
 segj = join_segmentations(seg1, seg2)
 
 # show the segmentations
-fig, axes = plt.subplots(ncols=4, figsize=(9, 2.5))
+fig, axes = plt.subplots(ncols=4, figsize=(9, 2.5), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
 axes[0].imshow(coins, cmap=plt.cm.gray, interpolation='nearest')
 axes[0].set_title('Image')
 

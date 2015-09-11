@@ -61,8 +61,12 @@ titles = ['Laplacian of Gaussian', 'Difference of Gaussian',
           'Determinant of Hessian']
 sequence = zip(blobs_list, colors, titles)
 
+
+fig,axes = plt.subplots(1, 3, sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+axes = axes.ravel()
 for blobs, color, title in sequence:
-    fig, ax = plt.subplots(1, 1)
+    ax = axes[0]
+    axes = axes[1:]
     ax.set_title(title)
     ax.imshow(image, interpolation='nearest')
     for blob in blobs:

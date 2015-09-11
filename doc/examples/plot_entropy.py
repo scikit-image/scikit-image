@@ -17,7 +17,7 @@ from skimage.util import img_as_ubyte
 
 image = img_as_ubyte(data.camera())
 
-fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(10, 4))
+fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(10, 4), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
 
 img0 = ax0.imshow(image, cmap=plt.cm.gray)
 ax0.set_title('Image')

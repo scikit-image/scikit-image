@@ -74,7 +74,7 @@ from skimage.transform import swirl
 image = data.checkerboard()
 swirled = swirl(image, rotation=0, strength=10, radius=120, order=2)
 
-fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(8, 3))
+fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(8, 3), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
 
 ax0.imshow(image, cmap=plt.cm.gray, interpolation='none')
 ax0.axis('off')

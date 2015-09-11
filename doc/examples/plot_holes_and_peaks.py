@@ -21,16 +21,13 @@ image = data.moon()
 # Rescale image intensity so that we can see dim features.
 image = rescale_intensity(image, in_range=(50, 200))
 
-
-# convenience function for plotting images
-def imshow(image, title, **kwargs):
-    fig, ax = plt.subplots(figsize=(5, 4))
-    ax.imshow(image, **kwargs)
-    ax.axis('off')
-    ax.set_title(title)
+fig,ax = plt.subplots(2, 2, figsize=(5, 4), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+ax = ax.ravel()
 
 
-imshow(image, 'Original image')
+ax[0].imshow(image)
+ax[0].set_title('Original image')
+ax[0].axis('off')
 
 """
 .. image:: PLOT2RST.current_figure
@@ -52,8 +49,9 @@ mask = image
 
 filled = reconstruction(seed, mask, method='erosion')
 
-imshow(filled, 'after filling holes', vmin=image.min(), vmax=image.max())
-
+ax[1].imshow(filled)
+ax[1].set_title('after filling holes')
+ax[1].axis('off')
 """
 .. image:: PLOT2RST.current_figure
 
@@ -63,8 +61,9 @@ isolate the dark regions by subtracting the reconstructed image from the
 original image.
 """
 
-imshow(image - filled, 'holes')
-# plt.title('holes')
+ax[2].imshow(image-filled)
+ax[2].set_title('holes')
+ax[2].axis('off')
 
 """
 .. image:: PLOT2RST.current_figure
@@ -79,7 +78,10 @@ intensity instead of the maximum. The remainder of the process is the same.
 seed = np.copy(image)
 seed[1:-1, 1:-1] = image.min()
 rec = reconstruction(seed, mask, method='dilation')
-imshow(image - rec, 'peaks')
+
+ax[3].imshow(image-rec)
+ax[3].set_title('peaks')
+ax[3].axis('off')
 plt.show()
 
 """

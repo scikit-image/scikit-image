@@ -28,7 +28,12 @@ image = camera()
 thresh = threshold_otsu(image)
 binary = image > thresh
 
-fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(8, 2.5))
+#fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(8, 2.5))
+fig = plt.figure(figsize=(8, 2.5))
+ax1 = plt.subplot(1, 3, 1, adjustable='box-forced')
+ax2 = plt.subplot(1, 3, 2)
+ax3 = plt.subplot(1, 3, 3, sharex=ax1, sharey=ax1, adjustable='box-forced')
+
 ax1.imshow(image, cmap=plt.cm.gray)
 ax1.set_title('Original')
 ax1.axis('off')

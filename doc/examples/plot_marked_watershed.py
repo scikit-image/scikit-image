@@ -45,7 +45,8 @@ gradient = rank.gradient(denoised, disk(2))
 labels = watershed(gradient, markers)
 
 # display results
-fig, axes = plt.subplots(ncols=4, figsize=(8, 2.7))
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(8, 8), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+axes = axes.ravel()
 ax0, ax1, ax2, ax3 = axes
 
 ax0.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
@@ -61,6 +62,5 @@ ax3.set_title("Segmented")
 for ax in axes:
     ax.axis('off')
 
-fig.subplots_adjust(hspace=0.01, wspace=0.01, top=0.9, bottom=0,
-                    left=0, right=1)
+fig.tight_layout()
 plt.show()
