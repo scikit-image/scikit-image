@@ -296,7 +296,8 @@ plot2rst_rcparams = {'image.cmap' : 'gray',
 # -----------------------------------------------------------------------------
 # intersphinx
 # -----------------------------------------------------------------------------
-_python_doc_base = 'http://docs.python.org/2.7'
+_python_version_str = '{0.major}.{0.minor}'.format(sys.version_info)
+_python_doc_base = 'http://docs.python.org/' + _python_version_str
 intersphinx_mapping = {
     'python': (_python_doc_base, None),
     'numpy': ('http://docs.scipy.org/doc/numpy',
