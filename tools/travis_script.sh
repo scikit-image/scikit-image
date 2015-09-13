@@ -51,8 +51,7 @@ section_end "Install.optional.dependencies"
 
 section "Build.docs"
 if [[ ($PY != 2.6) && ($PY != 3.2) ]]; then
-    export SPHINXCACHE=$HOME/.cache/sphinx
-    make html
+    export SPHINXCACHE=$HOME/.cache/sphinx; make html
 fi
 section_end "Build.docs"
 
