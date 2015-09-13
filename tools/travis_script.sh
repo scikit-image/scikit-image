@@ -9,7 +9,7 @@ section_end "Test.with.min.requirements"
 
 section "Build.docs"
 if [[ ($PY != 2.6) && ($PY != 3.2) ]]; then
-    make html
+    export SPHINXCACHE=$HOME/.cache/sphinx; make html
 fi
 section_end "Build.docs"
 
