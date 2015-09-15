@@ -52,7 +52,7 @@ build: false
 test_script:
   # Build the docs
   - pip install sphinx
-  - cd doc && make
+  - cd doc && make html
 
   # Change to a non-source folder to make sure we run the tests on the
   # installed library.
