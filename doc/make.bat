@@ -47,6 +47,7 @@ if "%1" == "html" (
 	mkdir source/api
 	%PYTHON% tools/build_modref_templates.py 
 	cd source && %PYTHON% random_gallery.py
+	cd ..
 	%SPHINXBUILD% -b html %ALLSPHINXOPTS% %BUILDDIR%/html
 	echo.
 	echo.Build finished. The HTML pages are in %BUILDDIR%/html.
