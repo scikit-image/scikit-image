@@ -61,6 +61,10 @@ test_script:
   # Run unit tests with nose
   - "python -c \"import nose; nose.main()\" -v -s skimage"
 
+  # Build the docs
+  - pip install sphinx
+  - cd doc && make
+
 artifacts:
   # Archive the generated wheel package in the ci.appveyor.com build report.
   - path: dist\*

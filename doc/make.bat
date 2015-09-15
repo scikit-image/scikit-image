@@ -5,6 +5,9 @@ REM Command file for Sphinx documentation
 if "%SPHINXBUILD%" == "" (
 	set SPHINXBUILD=sphinx-build
 )
+if "%PYTHON%" == "" (
+	set PYTHON=python
+)
 set BUILDDIR=_build
 set ALLSPHINXOPTS=-d %BUILDDIR%/doctrees %SPHINXOPTS% source
 if NOT "%PAPER%" == "" (
@@ -41,6 +44,9 @@ if "%1" == "clean" (
 )
 
 if "%1" == "html" (
+	mkdir source/api
+	%PYTHON% tools/build_modref_templates.py 
+	cd source && %PYTHON% random_gallery.py
 	%SPHINXBUILD% -b html %ALLSPHINXOPTS% %BUILDDIR%/html
 	echo.
 	echo.Build finished. The HTML pages are in %BUILDDIR%/html.
