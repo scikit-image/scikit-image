@@ -46,11 +46,14 @@ install:
   - "pip install --pre --no-index --find-links dist/ scikit-image"
 
 
-
 # Not a .NET project, we build scikit-image in the install step instead
 build: false
 
 test_script:
+  # Build the docs
+  - pip install sphinx
+  - cd doc && make
+
   # Change to a non-source folder to make sure we run the tests on the
   # installed library.
   - "cd C:\\"
@@ -60,10 +63,6 @@ test_script:
 
   # Run unit tests with nose
   - "python -c \"import nose; nose.main()\" -v -s skimage"
-
-  # Build the docs
-  - pip install sphinx
-  - cd doc && make
 
 artifacts:
   # Archive the generated wheel package in the ci.appveyor.com build report.

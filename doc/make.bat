@@ -115,6 +115,8 @@ if "%1" == "epub" (
 )
 
 if "%1" == "latex" (
+	mkdir source/api
+	%PYTHON% tools/build_modref_templates.py 
 	%SPHINXBUILD% -b latex %ALLSPHINXOPTS% %BUILDDIR%/latex
 	echo.
 	echo.Build finished; the LaTeX files are in %BUILDDIR%/latex.
