@@ -14,17 +14,17 @@ environment:
       PYTHON_ARCH: "32"
 
    # disable other builds until they can be run in parallel
-   #- PYTHON: "C:\\Python27_64"
-   #  PYTHON_VERSION: "2.7"
-   #  PYTHON_ARCH: "64"
+   - PYTHON: "C:\\Python27_64"
+     PYTHON_VERSION: "2.7"
+     PYTHON_ARCH: "64"
 
     #- PYTHON: "C:\\Python34_32"
     #  PYTHON_VERSION: "3.4.2"
     #  PYTHON_ARCH: "32"
 
-    - PYTHON: "C:\\Python34_64"
-      PYTHON_VERSION: "3.4.2"
-      PYTHON_ARCH: "64"
+    #- PYTHON: "C:\\Python34_64"
+    #  PYTHON_VERSION: "3.4.2"
+    #  PYTHON_ARCH: "64"
 
 install:
   # Install Python (from the official .msi of http://python.org) and pip when
@@ -37,7 +37,6 @@ install:
   - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
 
   # Install the build and runtime dependencies of the project.
-  - "%CMD_IN_ENV% pip install -U pip"
   - "%CMD_IN_ENV% pip install -v --trusted-host 28daf2247a33ed269873-7b1aad3fab3cc330e1fd9d109892382a.r6.cf2.rackcdn.com %WHEELHOUSE% -r tools/appveyor/requirements.txt"
   - "%CMD_IN_ENV% pip install -v -r requirements.txt"
   - "%CMD_IN_ENV% python setup.py bdist_wheel bdist_wininst"
