@@ -14,15 +14,15 @@ environment:
       PYTHON_ARCH: "32"
 
    # disable other builds until they can be run in parallel
-   #- PYTHON: "C:\\Python27_64"
-   #  PYTHON_VERSION: "2.7"
-   #  PYTHON_ARCH: "64"
+    #- PYTHON: "C:\\Python27_64"
+    #  PYTHON_VERSION: "2.7"
+    #  PYTHON_ARCH: "64"
 
     #- PYTHON: "C:\\Python34_32"
     #  PYTHON_VERSION: "3.4.2"
     #  PYTHON_ARCH: "32"
 
-    #- PYTHON: "C:\\Python24_64"
+    #- PYTHON: "C:\\Python34_64"
     #  PYTHON_VERSION: "3.4.2"
     #  PYTHON_ARCH: "64"
 
@@ -46,11 +46,14 @@ install:
   - "pip install --pre --no-index --find-links dist/ scikit-image"
 
 
-
 # Not a .NET project, we build scikit-image in the install step instead
 build: false
 
 test_script:
+  # Build the docs
+  - pip install sphinx
+  - SET PYTHON=%PYTHON%\\python.exe && cd doc && make html
+
   # Change to a non-source folder to make sure we run the tests on the
   # installed library.
   - "cd C:\\"
