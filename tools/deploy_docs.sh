@@ -1,5 +1,5 @@
 #!/bin/bash
-if [[ $TRAVIS_PULL_REQUEST == false && $TRAVIS_BRANCH == "master" && $PY == 3.4 ]]
+if [[ $TRAVIS_BRANCH == "master" && $PY == 3.4 ]]
 then
     # See https://help.github.com/articles/creating-an-access-token-for-command-line-use/ for how to generate a token
     # See http://docs.travis-ci.com/user/encryption-keys/ for how to generate 
