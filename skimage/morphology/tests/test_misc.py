@@ -162,7 +162,7 @@ def test_label_warning_holes():
                                     [0,0,0,0,0,0,0,2,2,2],
                                     [0,0,0,0,0,0,0,2,0,2],
                                     [0,0,0,0,0,0,0,2,2,2]], dtype=int)
-    assert_warns(UserWarning, remove_small_holes, labeled_holes_image, min_size=3)
+    assert_warns(UserWarning, remove_small_holes, labeled_holes_image)
 
 def test_float_input_holes():
     float_test = np.random.rand(5, 5)

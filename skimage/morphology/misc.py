@@ -38,7 +38,7 @@ def default_selem(func):
 
     return func_out
  
-def _supported_types(ar): 
+def _check_dtype_supported(ar): 
     # Should use `issubdtype` for bool below, but there's a bug in numpy 1.7
     if not (ar.dtype == bool or np.issubdtype(ar.dtype, np.integer)):
         raise TypeError("Only bool or integer image types are supported. "
@@ -94,7 +94,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     True
     """
     # Raising type error if not int or bool
-    _supported_types(ar)
+    _check_dtype_supported(ar)
 
     if in_place:
         out = ar
@@ -129,8 +129,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     return out
 
 def remove_small_holes(ar, min_size=64, connectivity=1, in_place=False):
-    """Remove connected components smaller than the specified size within a 
-       larger connected object.
+    """Remove continguous holes smaller than the specified size.
 
     Parameters
     ----------
@@ -183,25 +182,31 @@ def remove_small_holes(ar, min_size=64, connectivity=1, in_place=False):
     >>> d is a
     True
     """
-    _supported_types(ar)
-    
-    if in_place:
-        out = ar
-    else:
-        out = ar.copy()
+    _check_dtype_supported(ar)
     
     #Creates warning if image is an integer image
     if ar.dtype != bool:
         warnings.warn("Any labeled images will be returned as a boolean array. "
                       "Did you mean to use a boolean array?", UserWarning)
     
+    if in_place:
+        out = ar
+    else:
+        out = ar.copy()
+        
     #Creating the inverse of ar
-    out = np.logical_not(out)
+    if in_place:
+        out = np.logical_not(out,out)
+    else:
+        out = np.logical_not(out)
     
     #removing small objects from the inverse of ar
     out = remove_small_objects(out, min_size, connectivity, in_place)
     
-    out = np.logical_not(out)
+    if in_place:
+        out = np.logical_not(out,out)
+    else:
+        out = np.logical_not(out)
     
     return out
     
