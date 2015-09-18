@@ -35,12 +35,13 @@ notifications:
     on_failure: always  # options: [always|never|change] default: always
     on_start: false     # default: false
 
-python:
-  - 2.6
-  - 2.7
-  - 3.2
-  - 3.3
-  - 3.4
+matrix:
+  include:
+    - python: 2.6
+    - python: 2.7
+    - python: 3.2
+    - python: 3.3
+    - python: 3.4
 
 before_install:
     - ccache -s
