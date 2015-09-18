@@ -51,6 +51,68 @@ def min_weight(graph, src, dst, n):
     return min(w1, w2)
 
 
+def mean_color(graph, extra_arguments=[], extra_keywords={}):
+    """Callback to compute edge weights.
+
+    The method expects that each node has already been described.
+
+    Parameters
+    ----------
+    graph : RAG
+        The graph under consideration.
+    extra_arguments : sequence, optional
+        Allows extra positional arguments passed.
+    extra_keywords : dictionary, optional
+        Allows extra keyword arguments passed.
+        sigma = 255
+        mode = 'distance'
+    """
+    print "Extra Keywords: ", extra_keywords
+    sigma = extra_keywords['sigma']
+    mode = extra_keywords['mode']
+    for x, y, d in graph.edges_iter(data=True):
+        diff = graph.node[x]['mean color'] - graph.node[y]['mean color']
+        diff = np.linalg.norm(diff)
+        if mode == 'similarity':
+            d['weight'] = math.e ** (-(diff ** 2) / sigma)
+        elif mode == 'distance':
+            d['weight'] = diff
+        else:
+            raise ValueError("The mode '%s' is not recognised" % mode)
+
+
+def describe_node(graph,labels,image, *args, **kwargs):
+    """Callback to handle describing nodes.
+
+    Nodes can have arbitrary Python objects assigned as attributes. This method
+    expects a valid graph and computes the mean color of the node.
+
+    Parameters
+    ----------
+    graph : RAG
+        The graph under consideration.
+    extra_arguments : sequence, optional
+        Allows extra positional arguments passed.
+    extra_keywords : dictionary, optional
+        Allows extra keyword arguments passed.
+
+    """
+    for n in graph:
+        graph.node[n].update({'labels': [n],
+                              'pixel count': 0,
+                              'total color': np.array([0, 0, 0],
+                                                      dtype=np.double)})
+
+    for index in np.ndindex(labels.shape):
+        current = labels[index]
+        graph.node[current]['pixel count'] += 1
+        graph.node[current]['total color'] += image[index]
+
+    for n in graph:
+        graph.node[n]['mean color'] = (graph.node[n]['total color'] /
+                                       graph.node[n]['pixel count'])
+
+
 class RAG(nx.Graph):
 
     """
@@ -317,6 +379,101 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
             d['weight'] = diff
         else:
             raise ValueError("The mode '%s' is not recognised" % mode)
+
+    return graph
+
+
+
+def rag_generic(image, labels, connectivity=2, describe_func=describe_node,
+                weight_func=mean_color, extra_arguments=[],
+                extra_keywords={'sigma':255.0, 'mode':'distance'}):
+    """Compute the Region Adjacency Graph using callbacks.
+
+    Given an image and its initial segmentation, this method constructs the
+    corresponding Region Adjacency Graph (RAG). Each node in the RAG represents
+    a set of pixels within `image` with the same label in `labels`.  Each node
+    in the RAG will be described by the `describe_func` and the weight between
+    two adjacent regions will be comuted by `weight_func`. The default behaviour
+    mimics `rag_mean_color()`.
+
+    Parameters
+    ----------
+    image : ndarray, shape(M, N, [..., P,] 3)
+        Input image.
+    labels : ndarray, shape(M, N, [..., P,])
+        The labelled image. This should have one dimension less than
+        `image`. If `image` has dimensions `(M, N, 3)` `labels` should have
+        dimensions `(M, N)`.
+    connectivity : int, optional
+        Pixels with a squared distance less than `connectivity` from each other
+        are considered adjacent. It can range from 1 to `labels.ndim`. Its
+        behavior is the same as `connectivity` parameter in
+        `scipy.ndimage.filters.generate_binary_structure`.
+    describe_func : callable, optional
+        Nodes can have arbitrary Python objects assigned as attributes by using
+        keyword/value pairs adding a node `describe_func` will be called as
+        follows `describe_func(graph, labels, image, *extra_arguments,
+        **extra_keywords)`.  graph is RAG object which is in turn a subclass of
+        `networkx.Graph`.
+    weight_func : callable, optional
+        Function to decide edge weight of edges incident on the node.
+        `weight_func` will be called as follows: `weight_func(graph,
+        *extra_arguments, **extra_keywords)`.  graph is RAG object which is in
+        turn a subclass of `networkx.Graph`.
+    extra_arguments : sequence, optional
+        Allows extra positional arguments which will be passed to
+        `describe_func` and `weight_func`.
+    extra_keywords : dictionary, optional
+        Allows extra keyword arguments which will be passed to
+        `describe_func` and `weight_func`.
+
+    Returns
+    -------
+    out : RAG
+        The region adjacency graph.
+
+    Examples
+    --------
+    >>> from skimage import data, segmentation
+    >>> from skimage.future import graph
+    >>> img = data.astronaut()
+    >>> labels = segmentation.slic(img)
+    >>> rag = graph.rag_generic(img, labels)
+
+    """
+    graph = RAG()
+
+    # The footprint is constructed in such a way that the first
+    # element in the array being passed to _add_edge_filter is
+    # the central value.
+    fp = ndi.generate_binary_structure(labels.ndim, connectivity)
+    for d in range(fp.ndim):
+        fp = fp.swapaxes(0, d)
+        fp[0, ...] = 0
+        fp = fp.swapaxes(0, d)
+
+    # For example
+    # if labels.ndim = 2 and connectivity = 1
+    # fp = [[0,0,0],
+    #       [0,1,1],
+    #       [0,1,0]]
+    #
+    # if labels.ndim = 2 and connectivity = 2
+    # fp = [[0,0,0],
+    #       [0,1,1],
+    #       [0,1,1]]
+
+    ndi.generic_filter(
+        labels,
+        function=_add_edge_filter,
+        footprint=fp,
+        mode='nearest',
+        output=np.zeros(labels.shape, dtype=np.uint8),
+        extra_arguments=(graph,))
+
+    describe_func(graph, labels, image)
+    weight_func(graph, extra_arguments=extra_arguments,
+                extra_keywords=extra_keywords)
 
     return graph
 
