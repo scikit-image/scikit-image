@@ -18,8 +18,8 @@ addons:
     packages:
     - ccache
     - libfreeimage3
-    - texlive 
-    - texlive-latex-extra 
+    - texlive
+    - texlive-latex-extra
     - dvipng
     - python-qt4
 env:
@@ -53,7 +53,9 @@ before_install:
 install:
     - python setup.py develop
 
-script: tools/travis_script.sh
+script:
+    - tools/travis_script.sh
+    - tools/deploy_docs.sh
 
 after_success:
     - coveralls
