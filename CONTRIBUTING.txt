@@ -137,7 +137,7 @@ Stylistic Guidelines
 --------------------
 
 * Set up your editor to remove trailing whitespace.  Follow `PEP08
-  <www.python.org/dev/peps/pep-0008/>`__.  Check code with pyflakes / flake8.
+  <http://www.python.org/dev/peps/pep-0008/>`__.  Check code with pyflakes / flake8.
 
 * Use numpy data types instead of strings (``np.uint8`` instead of
   ``"uint8"``).
