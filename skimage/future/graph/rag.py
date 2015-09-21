@@ -67,7 +67,6 @@ def mean_color(graph, extra_arguments=[], extra_keywords={}):
         sigma = 255
         mode = 'distance'
     """
-    print "Extra Keywords: ", extra_keywords
     sigma = extra_keywords['sigma']
     mode = extra_keywords['mode']
     for x, y, d in graph.edges_iter(data=True):
@@ -381,7 +380,6 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
             raise ValueError("The mode '%s' is not recognised" % mode)
 
     return graph
-
 
 
 def rag_generic(image, labels, connectivity=2, describe_func=describe_node,
