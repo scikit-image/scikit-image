@@ -371,9 +371,8 @@ def write_example(src_name, src_dir, rst_dir, cfg):
     ipnotebook_name = './notebook/' + ipnotebook_name
     example_rst += NOTEBOOK_LINK.format(ipnotebook_name)
 
-    f = open(rst_path, 'w')
-    f.write(example_rst)
-    f.flush()
+    with open(rst_path, 'w') as f:
+        f.write(example_rst)
 
     thumb_path = thumb_dir.pjoin(src_name[:-3] + '.png')
     first_image_file = image_dir.pjoin(figure_list[0].lstrip('/'))
