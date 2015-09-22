@@ -210,18 +210,17 @@ def generate_examples_and_gallery(example_dir, rst_dir, cfg):
     rst_dir.makedirs()
 
     # we create an index.rst with all examples
-    gallery_index = open(rst_dir.pjoin('index'+cfg.source_suffix_str), 'w')
-
-    # Here we don't use an os.walk, but we recurse only twice: flat is
-    # better than nested.
-    write_gallery(gallery_index, example_dir, rst_dir, cfg)
-    for d in sorted(example_dir.listdir()):
-        example_sub = example_dir.pjoin(d)
-        if example_sub.isdir:
-            rst_sub = rst_dir.pjoin(d)
-            rst_sub.makedirs()
-            write_gallery(gallery_index, example_sub, rst_sub, cfg, depth=1)
-    gallery_index.flush()
+    with open(rst_dir.pjoin('index'+cfg.source_suffix_str), 'w') as gallery_index:
+        # Here we don't use an os.walk, but we recurse only twice: flat is
+        # better than nested.
+        write_gallery(gallery_index, example_dir, rst_dir, cfg)
+        for d in sorted(example_dir.listdir()):
+            example_sub = example_dir.pjoin(d)
+            if example_sub.isdir:
+                rst_sub = rst_dir.pjoin(d)
+                rst_sub.makedirs()
+                write_gallery(gallery_index, example_sub, rst_sub, cfg, depth=1)
+        gallery_index.flush()
 
 
 def write_gallery(gallery_index, src_dir, rst_dir, cfg, depth=0):
@@ -251,7 +250,8 @@ def write_gallery(gallery_index, src_dir, rst_dir, cfg, depth=0):
         print(80*'_')
         return
 
-    gallery_description = open(gallery_template).read()
+    with open(gallery_template) as f:
+        gallery_description = f.read()
     gallery_index.write('\n\n%s\n\n' % gallery_description)
 
     rst_dir.makedirs()

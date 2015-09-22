@@ -75,7 +75,8 @@ copyright = '2013, the scikit-image team'
 #
 # The short X.Y version.
 
-setup_lines = open('../../skimage/__init__.py').readlines()
+with open('../../skimage/__init__.py') as f:
+    setup_lines = f.readlines()
 version = 'vUndefined'
 for l in setup_lines:
     if l.startswith('__version__'):
