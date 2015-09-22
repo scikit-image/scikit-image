@@ -134,13 +134,9 @@ def remove_small_holes(ar, min_size=64, connectivity=1, in_place=False):
     Parameters
     ----------
     ar : ndarray (arbitrary shape, int or bool type)
-        The array containing the connected components of interest. If the array
-        type is int, it is assumed that it contains already-labeled objects. The
-        labels are not kept in the output image (this function always outputs
-        a bool image. It is suggested that labeling is completed after using 
-        this function.
+        The array containing the connected components of interest.
     min_size : int, optional (default: 64)
-        The smallest allowable connected component size.
+        The hole component size.
     connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
         The connectivity defining the neighborhood of a pixel.
     in_place : bool, optional (default: False)
@@ -181,6 +177,14 @@ def remove_small_holes(ar, min_size=64, connectivity=1, in_place=False):
     >>> d = morphology.remove_small_holes(a, 2, in_place=True)
     >>> d is a
     True
+
+    Notes
+    -----
+
+    If the array type is int, it is assumed that it contains already-labeled 
+    objects. The labels are not kept in the output image (this function always 
+    outputs a bool image). It is suggested that labeling is completed after 
+    using this function.
     """
     _check_dtype_supported(ar)
     
