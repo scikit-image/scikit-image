@@ -2,6 +2,7 @@ import numpy as np
 from numpy.testing import (assert_array_equal, assert_equal, assert_raises,
                            assert_warns)
 from skimage.morphology import remove_small_objects, remove_small_holes
+from ..._shared._warnings import expected_warnings
 
 test_image = np.array([[0, 0, 0, 1, 0],
                        [1, 1, 1, 0, 0],
@@ -60,7 +61,8 @@ def test_single_label_warning():
     image = np.array([[0, 0, 0, 1, 0],
                       [1, 1, 1, 0, 0],
                       [1, 1, 1, 0, 0]], int)
-    assert_warns(UserWarning, remove_small_objects, image, min_size=6)
+    with expected_warnings(['use a boolean array?']):
+        remove_small_objects(image, min_size=6)
 
 
 def test_float_input():
@@ -162,7 +164,8 @@ def test_label_warning_holes():
                                     [0,0,0,0,0,0,0,2,2,2],
                                     [0,0,0,0,0,0,0,2,0,2],
                                     [0,0,0,0,0,0,0,2,2,2]], dtype=int)
-    assert_warns(UserWarning, remove_small_holes, labeled_holes_image)
+    with expected_warnings(['use a boolean array?']):
+        remove_small_holes(labeled_holes_image, min_size=3)
 
 def test_float_input_holes():
     float_test = np.random.rand(5, 5)
