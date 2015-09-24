@@ -170,10 +170,10 @@ def remove_small_holes(ar, min_size=64, connectivity=1, in_place=False):
            [ True,  True,  True, True, True, False]], dtype=bool)
     >>> c = morphology.remove_small_holes(a, 2, connectivity=2)
     >>> c
-    array([[ True,  True,  True,  True, True, False],
-           [ True,  True,  True, False, True, False],
-           [ True, False, False,  True, True, False],
-           [ True,  True,  True,  True, True, False]], dtype=bool)
+    array([[ True,  True,  True,  True,  True, False],
+           [ True,  True,  True, False,  True, False],
+           [ True, False, False,  True,  True, False],
+           [ True,  True,  True,  True,  True, False]], dtype=bool)
     >>> d = morphology.remove_small_holes(a, 2, in_place=True)
     >>> d is a
     True
