@@ -7,7 +7,7 @@ from .edges import (sobel, hsobel, vsobel, sobel_h, sobel_v,
                     roberts_negative_diagonal, roberts_pos_diag,
                     roberts_neg_diag)
 from ._rank_order import rank_order
-from ._gabor import gabor_kernel, gabor_filter
+from ._gabor import gabor_kernel, gabor
 from .thresholding import (threshold_adaptive, threshold_otsu, threshold_yen,
                            threshold_isodata, threshold_li)
 from . import rank
@@ -61,7 +61,7 @@ __all__ = ['inverse',
            'denoise_tv_bregman',
            'rank_order',
            'gabor_kernel',
-           'gabor_filter',
+           'gabor',
            'threshold_adaptive',
            'threshold_otsu',
            'threshold_yen',
