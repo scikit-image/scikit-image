@@ -1,5 +1,5 @@
 from .lpi_filter import inverse, wiener, LPIFilter2D
-from ._gaussian import gaussian_filter
+from ._gaussian import gaussian
 from .edges import (sobel, hsobel, vsobel, sobel_h, sobel_v,
                     scharr, hscharr, vscharr, scharr_h, scharr_v,
                     prewitt, hprewitt, vprewitt, prewitt_h, prewitt_v,
@@ -33,7 +33,7 @@ def canny(*args, **kwargs):
 __all__ = ['inverse',
            'wiener',
            'LPIFilter2D',
-           'gaussian_filter',
+           'gaussian',
            'median',
            'canny',
            'sobel',
