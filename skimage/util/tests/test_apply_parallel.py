@@ -4,7 +4,7 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal
 
 from skimage.filters import threshold_adaptive, gaussian
-from skimage.util.apply_parallel import apply_parallel
+from skimage.util import apply_parallel
 
 
 def test_apply_parallel():
