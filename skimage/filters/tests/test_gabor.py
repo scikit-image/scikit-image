@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import (assert_equal, assert_almost_equal,
                            assert_array_almost_equal)
 
-from skimage.filters._gabor import gabor_kernel, gabor_filter, _sigma_prefactor
+from skimage.filters._gabor import gabor_kernel, gabor, _sigma_prefactor
 
 
 def test_gabor_kernel_size():
@@ -59,13 +59,13 @@ def test_gabor_kernel_theta():
                                               np.abs(kernel180))
 
 
-def test_gabor_filter():
+def test_gabor():
     Y, X = np.mgrid[:40, :40]
     frequencies = (0.1, 0.3)
     wave_images = [np.sin(2 * np.pi * X * f) for f in frequencies]
 
     def match_score(image, frequency):
-        gabor_responses = gabor_filter(image, frequency)
+        gabor_responses = gabor(image, frequency)
         return np.mean(np.hypot(*gabor_responses))
 
     # Gabor scores: diagonals are frequency-matched, off-diagonals are not.
