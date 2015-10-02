@@ -1,6 +1,6 @@
+from __future__ import division
 import numpy as np
 import heapq
-
 
 def _revalidate_node_edges(rag, node, heap_list):
     """Handles validation and invalidation of edges incident to a node.
@@ -57,7 +57,7 @@ def _invalidate_edge(graph, n1, n2):
 
 
 def merge_hierarchical(labels, rag, thresh, rag_copy, in_place_merge,
-                       merge_func, weight_func):
+                       merge_func, weight_func, merge_trace = False):
     """Perform hierarchical merging of a RAG.
 
     Greedily merges the most similar pair of nodes until no edges lower than
@@ -77,6 +77,8 @@ def merge_hierarchical(labels, rag, thresh, rag_copy, in_place_merge,
     in_place_merge : bool
         If set, the nodes are merged in place. Otherwise, a new node is
         created for each merge..
+    merge_trace : bool
+        If set, the intermediate merge steps are returned.
     merge_func : callable
         This function is called before merging two nodes. For the RAG `graph`
         while merging `src` and `dst`, it is called as follows
@@ -90,8 +92,12 @@ def merge_hierarchical(labels, rag, thresh, rag_copy, in_place_merge,
     -------
     out : ndarray
         The new labeled array.
-
+    trace: list of label maps
+        If `merge_trace` set, then intermediate merge steps are returned as a
+        list of label maps, one for each merge. Otherwise an empty list is
+        returned.
     """
+    trace = [] #store intermediate merges
     if rag_copy:
         rag = rag.copy()
 
@@ -129,9 +135,12 @@ def merge_hierarchical(labels, rag, thresh, rag_copy, in_place_merge,
             new_id = rag.merge_nodes(src, dst, weight_func)
             _revalidate_node_edges(rag, new_id, edge_heap)
 
+            if merge_trace:
+                trace.append(rag.node[new_id]['labels'])
+
     label_map = np.arange(labels.max() + 1)
     for ix, (n, d) in enumerate(rag.nodes_iter(data=True)):
         for label in d['labels']:
             label_map[label] = ix
 
-    return label_map[labels]
+    return label_map[labels], trace

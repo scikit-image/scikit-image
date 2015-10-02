@@ -1,3 +1,5 @@
+from __future__ import division
+
 try:
     import networkx as nx
 except ImportError:
@@ -49,6 +51,7 @@ def min_weight(graph, src, dst, n):
     w1 = graph[n].get(src, default)['weight']
     w2 = graph[n].get(dst, default)['weight']
     return min(w1, w2)
+
 
 
 class RAG(nx.Graph):
@@ -214,12 +217,12 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
 
     Parameters
     ----------
-    image : ndarray, shape(M, N, [..., P,] 3)
-        Input image.
     labels : ndarray, shape(M, N, [..., P,])
         The labelled image. This should have one dimension less than
         `image`. If `image` has dimensions `(M, N, 3)` `labels` should have
         dimensions `(M, N)`.
+    image : ndarray, shape(M, N, [..., P,] 3)
+        Input image.
     connectivity : int, optional
         Pixels with a squared distance less than `connectivity` from each other
         are considered adjacent. It can range from 1 to `labels.ndim`. Its
@@ -263,6 +266,125 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.11.5274
 
     """
+
+
+    def define_graph(graph,labels,image, extra_arguments=[],
+                     extra_keywords={'sigma':255.0, 'mode':'distance'}):
+        """Callback to handle describing nodes.
+
+        Nodes can have arbitrary Python objects assigned as attributes. This
+        method expects a valid graph and computes the mean color of the node.
+
+        Parameters
+        ----------
+        graph : RAG
+            The graph under consideration.
+        labels : ndarray, shape(M, N, [..., P,])
+            The labelled image. This should have one dimension less than
+            `image`. If `image` has dimensions `(M, N, 3)` `labels` should have
+            dimensions `(M, N)`.
+        image : ndarray, shape(M, N, [..., P,] 3)
+            Input image.
+        extra_arguments : sequence, optional
+            Allows extra positional arguments passed.
+        extra_keywords : dictionary, optional
+            Allows extra keyword arguments passed.
+
+        """
+
+        # Describe the nodes
+        for n in graph:
+            graph.node[n].update({'labels': [n],
+                                'pixel count': 0,
+                                'total color': np.array([0, 0, 0],
+                                                        dtype=np.double)})
+
+        for index in np.ndindex(labels.shape):
+            current = labels[index]
+            graph.node[current]['pixel count'] += 1
+            graph.node[current]['total color'] += image[index]
+
+        for n in graph:
+            graph.node[n]['mean color'] = (graph.node[n]['total color'] /
+                                        graph.node[n]['pixel count'])
+
+        # Calcuate the edge weights
+        sigma = extra_keywords['sigma']
+        mode = extra_keywords['mode']
+
+        for x, y, d in graph.edges_iter(data=True):
+            diff = graph.node[x]['mean color'] - graph.node[y]['mean color']
+            diff = np.linalg.norm(diff)
+            if mode == 'similarity':
+                d['weight'] = math.e ** (-(diff ** 2) / sigma)
+            elif mode == 'distance':
+                d['weight'] = diff
+            else:
+                raise ValueError("The mode '%s' is not recognised" % mode)
+
+
+    extra_keywords={'sigma':sigma, 'mode':mode}
+    graph = region_adjacency_graph(labels, image=image,
+                                   connectivity=connectivity,
+                                   describe_func=define_graph,
+                                   extra_arguments=[],
+                                   extra_keywords=extra_keywords)
+
+    return graph
+
+
+def region_adjacency_graph(labels, image=None, connectivity=1,
+                           describe_func=None, extra_arguments=[],
+                           extra_keywords={}):
+    """Compute the Region Adjacency Graph using callbacks.
+
+    Given an image and its initial segmentation, this method constructs the
+    corresponding Region Adjacency Graph (RAG). Each node in the RAG represents
+    a set of pixels within `image` with the same label in `labels`.  Each node
+    edge, can be described by the `define_grpah`. This callback will also
+    calculate the weight between two adjacent regions.  The default
+    behaviour is to create a RAG where adjacent labels have an edge.
+
+    Parameters
+    ----------
+    labels : ndarray, shape(M, N, [..., P,])
+        The labelled image. This should have one dimension less than
+        `image`. If `image` has dimensions `(M, N, 3)` `labels` should have
+        dimensions `(M, N)`.
+    image : ndarray, shape(M, N, [..., P,] 3)
+        Input image.
+    connectivity : int, optional
+        Pixels with a squared distance less than `connectivity` from each other
+        are considered adjacent. It can range from 1 to `labels.ndim`. Its
+        behavior is the same as `connectivity` parameter in
+        `scipy.ndimage.filters.generate_binary_structure`.
+    describe_func: callable, optional
+        Nodes and edges can have arbitrary Python objects assigned as attributes
+        by using keyword/value pairs. Adding a node `describe_func` will be
+        called as follows `describe_func(graph, labels, image, *extra_arguments,
+        **extra_keywords)`.  graph is RAG object which is in turn a subclass of
+        `networkx.Graph`.
+    extra_arguments : sequence, optional
+        Allows extra positional arguments which will be passed to
+        `describe_func`.
+    extra_keywords : dictionary, optional
+        Allows extra keyword arguments which will be passed to
+        `describe_func`.
+
+    Returns
+    -------
+    out : RAG
+        The region adjacency graph.
+
+    Examples
+    --------
+    >>> from skimage import data, segmentation
+    >>> from skimage.future import graph
+    >>> img = data.astronaut()
+    >>> labels = segmentation.slic(img)
+    >>> rag = graph.region_adjacency_graph(img, labels)
+
+    """
     graph = RAG()
 
     # The footprint is constructed in such a way that the first
@@ -293,30 +415,10 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
         output=np.zeros(labels.shape, dtype=np.uint8),
         extra_arguments=(graph,))
 
-    for n in graph:
-        graph.node[n].update({'labels': [n],
-                              'pixel count': 0,
-                              'total color': np.array([0, 0, 0],
-                                                      dtype=np.double)})
-
-    for index in np.ndindex(labels.shape):
-        current = labels[index]
-        graph.node[current]['pixel count'] += 1
-        graph.node[current]['total color'] += image[index]
-
-    for n in graph:
-        graph.node[n]['mean color'] = (graph.node[n]['total color'] /
-                                       graph.node[n]['pixel count'])
-
-    for x, y, d in graph.edges_iter(data=True):
-        diff = graph.node[x]['mean color'] - graph.node[y]['mean color']
-        diff = np.linalg.norm(diff)
-        if mode == 'similarity':
-            d['weight'] = math.e ** (-(diff ** 2) / sigma)
-        elif mode == 'distance':
-            d['weight'] = diff
-        else:
-            raise ValueError("The mode '%s' is not recognised" % mode)
+    if describe_func:
+        describe_func(graph, labels, image,
+                      extra_arguments=extra_arguments,
+                      extra_keywords=extra_keywords)
 
     return graph
 
