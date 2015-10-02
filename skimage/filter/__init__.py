@@ -12,7 +12,7 @@ del warn
 del skimage_deprecation
 
 from ..filters.lpi_filter import inverse, wiener, LPIFilter2D
-from ..filters._gaussian import gaussian_filter
+from ..filters._gaussian import gaussian
 from ..filters.edges import (sobel, hsobel, vsobel, sobel_h, sobel_v,
                     scharr, hscharr, vscharr, scharr_h, scharr_v,
                     prewitt, hprewitt, vprewitt, prewitt_h, prewitt_v,
@@ -20,7 +20,7 @@ from ..filters.edges import (sobel, hsobel, vsobel, sobel_h, sobel_v,
                     roberts_negative_diagonal, roberts_pos_diag,
                     roberts_neg_diag)
 from ..filters._rank_order import rank_order
-from ..filters._gabor import gabor_kernel, gabor_filter
+from ..filters._gabor import gabor_kernel, gabor
 from ..filters.thresholding import (threshold_adaptive, threshold_otsu, threshold_yen,
                            threshold_isodata)
 from ..filters import rank
@@ -46,7 +46,7 @@ def canny(*args, **kwargs):
 __all__ = ['inverse',
            'wiener',
            'LPIFilter2D',
-           'gaussian_filter',
+           'gaussian',
            'median',
            'canny',
            'sobel',
@@ -74,7 +74,7 @@ __all__ = ['inverse',
            'denoise_tv_bregman',
            'rank_order',
            'gabor_kernel',
-           'gabor_filter',
+           'gabor',
            'threshold_adaptive',
            'threshold_otsu',
            'threshold_yen',
