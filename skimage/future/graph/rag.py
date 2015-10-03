@@ -205,6 +205,60 @@ def _add_edge_filter(values, graph):
     return 0
 
 
+def _define_mean_color_rag(graph, labels, image, extra_arguments=[],
+                           extra_keywords={'sigma':255.0, 'mode':'distance'}):
+        """Callback to handle describing nodes.
+
+        Nodes can have arbitrary Python objects assigned as attributes. This
+        method expects a valid graph and computes the mean color of the node.
+
+        Parameters
+        ----------
+        graph : RAG
+            The graph under consideration.
+        labels : ndarray, shape(M, N, [..., P,])
+            The labelled image. This should have one dimension less than
+            `image`. If `image` has dimensions `(M, N, 3)` `labels` should have
+            dimensions `(M, N)`.
+        image : ndarray, shape(M, N, [..., P,] 3)
+            Input image.
+        extra_arguments : sequence, optional
+            Allows extra positional arguments passed.
+        extra_keywords : dictionary, optional
+            Allows extra keyword arguments passed.
+
+        """
+        # Describe the nodes
+        for n in graph:
+            graph.node[n].update({'labels': [n],
+                                'pixel count': 0,
+                                'total color': np.array([0, 0, 0],
+                                                        dtype=np.double)})
+
+        for index in np.ndindex(labels.shape):
+            current = labels[index]
+            graph.node[current]['pixel count'] += 1
+            graph.node[current]['total color'] += image[index]
+
+        for n in graph:
+            graph.node[n]['mean color'] = (graph.node[n]['total color'] /
+                                        graph.node[n]['pixel count'])
+
+        # Calcuate the edge weights
+        sigma = extra_keywords['sigma']
+        mode = extra_keywords['mode']
+
+        for x, y, d in graph.edges_iter(data=True):
+            diff = graph.node[x]['mean color'] - graph.node[y]['mean color']
+            diff = np.linalg.norm(diff)
+            if mode == 'similarity':
+                d['weight'] = math.e ** (-(diff ** 2) / sigma)
+            elif mode == 'distance':
+                d['weight'] = diff
+            else:
+                raise ValueError("The mode '%s' is not recognised" % mode)
+
+
 def rag_mean_color(image, labels, connectivity=2, mode='distance',
                    sigma=255.0):
     """Compute the Region Adjacency Graph using mean colors.
@@ -266,67 +320,10 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.11.5274
 
     """
-
-
-    def define_graph(graph,labels,image, extra_arguments=[],
-                     extra_keywords={'sigma':255.0, 'mode':'distance'}):
-        """Callback to handle describing nodes.
-
-        Nodes can have arbitrary Python objects assigned as attributes. This
-        method expects a valid graph and computes the mean color of the node.
-
-        Parameters
-        ----------
-        graph : RAG
-            The graph under consideration.
-        labels : ndarray, shape(M, N, [..., P,])
-            The labelled image. This should have one dimension less than
-            `image`. If `image` has dimensions `(M, N, 3)` `labels` should have
-            dimensions `(M, N)`.
-        image : ndarray, shape(M, N, [..., P,] 3)
-            Input image.
-        extra_arguments : sequence, optional
-            Allows extra positional arguments passed.
-        extra_keywords : dictionary, optional
-            Allows extra keyword arguments passed.
-
-        """
-
-        # Describe the nodes
-        for n in graph:
-            graph.node[n].update({'labels': [n],
-                                'pixel count': 0,
-                                'total color': np.array([0, 0, 0],
-                                                        dtype=np.double)})
-
-        for index in np.ndindex(labels.shape):
-            current = labels[index]
-            graph.node[current]['pixel count'] += 1
-            graph.node[current]['total color'] += image[index]
-
-        for n in graph:
-            graph.node[n]['mean color'] = (graph.node[n]['total color'] /
-                                        graph.node[n]['pixel count'])
-
-        # Calcuate the edge weights
-        sigma = extra_keywords['sigma']
-        mode = extra_keywords['mode']
-
-        for x, y, d in graph.edges_iter(data=True):
-            diff = graph.node[x]['mean color'] - graph.node[y]['mean color']
-            diff = np.linalg.norm(diff)
-            if mode == 'similarity':
-                d['weight'] = math.e ** (-(diff ** 2) / sigma)
-            elif mode == 'distance':
-                d['weight'] = diff
-            else:
-                raise ValueError("The mode '%s' is not recognised" % mode)
-
-
     extra_keywords={'sigma':sigma, 'mode':mode}
     graph = region_adjacency_graph(labels, image=image,
                                    connectivity=connectivity,
-                                   describe_func=define_graph,
+                                   describe_func=_define_color_mean_rag,
                                    extra_arguments=[],
                                    extra_keywords=extra_keywords)
 

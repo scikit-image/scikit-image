@@ -4,20 +4,20 @@ Selective Search
 ================
 
 Selective search uses an heirachical groupings of an initial oversegmented image
-to propose regions in an image that may contian objects.  The process uses image
-structure to guide the sampling process.  By grouping adjacent regions on a
-region-level similarity can generate many approximate locations essientally
-capturing objects at all scales.
+to propose regions in an image that may contian objects.  By grouping adjacent
+regions using a region-level similarity measure you can generate many
+approximate locations essientally capturing objects at all scales.
 
 This example implements a simplified version of Selective Search [1] by first
 constructing a Region Adjacency Graph (RAG).  The RAG is progressively merges
-regions that are similar in color. Merging two adjacent regions produces
-a new region with all the pixels from the merged regions. Regions are merged
-until no highly similar region pairs remain.
+regions that are similar in color. Merging two adjacent regions produces a new
+region with all the pixels from the merged regions. Regions are merged until no
+highly similar region pairs remain.  Unlike [1], this example does not further
+processing, that is, we do not classify the regions.
 
 This examaple is based RAG Merging [2] and uses the same callbacks. For more
-powerful merging strategy see Selective Search [1] for equations that uses
-size, texture and colour to influence the merging of adjacent regions
+powerful merging strategy see Selective Search [1] for equations that uses size,
+texture and colour to influence the merging of adjacent regions.
 
 References
 ----------
@@ -28,9 +28,7 @@ References
 .. [2] RAG Merging, scikit-image Gallery.
 
 """
-
 from __future__ import division
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
@@ -94,8 +92,7 @@ def add_bbox(labels, boxes):
     -------
     If a new boundng box is found it is appended to `bbox`
     """
-    regions = measure.regionprops(labels)
-    for props in regions:
+    for props in measure.regionprops(labels):
         if props.bbox not in boxes:
             boxes.append(props.bbox)
 
@@ -113,9 +110,9 @@ for image in source:
     merged, steps = graph.merge_hierarchical(labels, g, thresh=400,
                                              rag_copy=True,
                                              in_place_merge=False,
-                                             merge_trace=True,
+                                             weight_func=_weight_mean_color,
                                              merge_func=merge_mean_color,
-                                             weight_func=_weight_mean_color)
+                                             merge_trace=True)
 
     # Add regions from initial segmentation (smallest scale)
     add_bbox(labels, detections)
@@ -126,13 +123,14 @@ for image in source:
         label_map[:] = 2
         for label in step:
             label_map[label] = 1
-        add_bbox(label_map[labels], detections)
 
+        add_bbox(label_map[labels], detections)
 
 # Selective Search has a different goal from segmentation, the result is
 # list of proposed regions that may contain an object, not a final segmentaiton.
 # Here we plot the last 10 bounding boxes.  Each bounding box encloses a
 # region found during the merge process.
+
 fig, ax = plt.subplots()
 plt.imshow(img)
 for (minr, minc, maxr, maxc) in detections[-10:]:
