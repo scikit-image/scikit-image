@@ -11,6 +11,7 @@ np.random.seed(21)
 def test_trivial_case():
     trivial = np.zeros((25, 25))
     peak_indices = peak.peak_local_max(trivial, min_distance=1, indices=True)
+    assert type(peak_indices) is np.ndarray
     assert not peak_indices     # inherent boolean-ness of empty list
     peaks = peak.peak_local_max(trivial, min_distance=1, indices=False)
     assert (peaks.astype(np.bool) == trivial).all()
@@ -89,7 +90,7 @@ def test_num_peaks3D():
     image[5,5,::5] = np.arange(20)
     peaks_limited = peak.peak_local_max(image, min_distance=1, num_peaks=2)
     assert len(peaks_limited) == 2
-    
+
 
 def test_reorder_labels():
     image = np.random.uniform(size=(40, 60))
