@@ -3,21 +3,22 @@
 Selective Search
 ================
 
-Selective search uses an heirachical groupings of an initial oversegmented image
-to propose regions in an image that may contian objects.  By grouping adjacent
-regions using a region-level similarity measure you can generate many
-approximate locations essientally capturing objects at all scales.
+This example illustrates a hierarchical grouping strategy to propose regions in
+an image that may contain objects.  Using an initial over segmented image then
+grouping adjacent regions using a region-level similarity measure you can
+generate many approximate locations essentially capturing objects at all scales.
 
 This example implements a simplified version of Selective Search [1] by first
 constructing a Region Adjacency Graph (RAG).  The RAG is progressively merges
-regions that are similar in color. Merging two adjacent regions produces a new
-region with all the pixels from the merged regions. Regions are merged until no
-highly similar region pairs remain.  Unlike [1], this example does not further
-processing, that is, we do not classify the regions.
+regions that are similar, in this example based on color. Merging two adjacent
+regions produces a new region with all the pixels from the merged regions. This
+process is continued until the whole image becomes a single region.  The final
+step (not included in this example) would be to train a classifier to label the
+bounding boxes.
 
-This examaple is based RAG Merging [2] and uses the same callbacks. For more
-powerful merging strategy see Selective Search [1] for equations that uses size,
-texture and colour to influence the merging of adjacent regions.
+This example uses the same callbacks as RAG Merging [2].  See [1] for
+alternative similarity measure that uses size, texture and colour to influence
+the merging of adjacent regions.
 
 References
 ----------
@@ -36,7 +37,7 @@ from skimage.future import graph
 from skimage import measure, data, segmentation, color
 
 
-def _weight_mean_color(graph, src, dst, n):
+def weight_mean_color(graph, src, dst, n):
     """Callback to handle merging nodes by recomputing mean color.
 
     The method expects that the mean color of `dst` is already computed.
@@ -90,7 +91,7 @@ def add_bbox(labels, boxes):
 
     Returns
     -------
-    If a new boundng box is found it is appended to `bbox`
+    If a new bounding box is found it is appended to `bbox`
     """
     for props in measure.regionprops(labels):
         if props.bbox not in boxes:
@@ -98,19 +99,30 @@ def add_bbox(labels, boxes):
 
 
 # Original paper uses multiple colour spaces with complementary invariance
-# properties.  Fro this example we just use two, RGB and Intensity.
+# properties as part of its diversification strategy.  In this example
+# we use two image sources, RGB and Intensity.
 img = data.astronaut()
 gray = color.rgb2gray(data.astronaut())
 source = [img,gray]
 
 detections = []
 for image in source:
+    # Over segment the image.  This identifies objects at the 'smallest' scale.
     labels = segmentation.slic(image, compactness=20, n_segments=200)
+
+    # The similarity measures used are based on the description of the nodes
+    # in the RAG.  In this example we use mean colour.  For different similarity
+    # measure, and hence different description, you will need to use
+    # graph.region_adjacency_graph().
     g = graph.rag_mean_color(image, labels)
-    merged, steps = graph.merge_hierarchical(labels, g, thresh=400,
+
+    # By setting the threshold sufficiently high will cause the process to
+    # continue until the whole image becomes a single region. The return value
+    # 'steps' will contain a list of each merged regions.
+    merged, steps = graph.merge_hierarchical(labels, g, thresh=256,
                                              rag_copy=True,
                                              in_place_merge=False,
-                                             weight_func=_weight_mean_color,
+                                             weight_func=weight_mean_color,
                                              merge_func=merge_mean_color,
                                              merge_trace=True)
 
@@ -126,11 +138,10 @@ for image in source:
 
         add_bbox(label_map[labels], detections)
 
-# Selective Search has a different goal from segmentation, the result is
-# list of proposed regions that may contain an object, not a final segmentaiton.
-# Here we plot the last 10 bounding boxes.  Each bounding box encloses a
-# region found during the merge process.
-
+# Selective Search has a different goal from segmentation, the result is list of
+# proposed regions that may contain an object, not a final segmentation.  In a
+# typical classification problem, the final step would be to train a classifier
+# to label the bounding boxes. Here we plot the last 10 bounding boxes.
 fig, ax = plt.subplots()
 plt.imshow(img)
 for (minr, minc, maxr, maxc) in detections[-10:]:
