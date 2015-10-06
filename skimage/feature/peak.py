@@ -119,7 +119,7 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
 
     if np.all(image == image.flat[0]):
         if indices is True:
-            return []
+            return np.empty((0, 2), np.int)
         else:
             return out
 
