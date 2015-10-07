@@ -213,5 +213,3 @@ def remove_small_holes(ar, min_size=64, connectivity=1, in_place=False):
         out = np.logical_not(out)
     
     return out
-    
-    
