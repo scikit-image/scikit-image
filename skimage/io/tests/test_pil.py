@@ -196,7 +196,6 @@ def test_all_color():
 
 def test_all_mono():
     mono_check('pil')
-    mono_check('pil', 'tiff')
 
 
 def test_multi_page_gif():
@@ -233,36 +232,6 @@ def test_cmyk():
         refi = np.ascontiguousarray(ref_lab[:, :, i])
         sim = ssim(refi, newi, dynamic_range=refi.max() - refi.min())
         assert sim > 0.99
-
-
-class TestSaveTIF:
-    def roundtrip(self, dtype, x, compress):
-        with temporary_file(suffix='.tif') as fname:
-            if dtype == np.bool:
-                expected = ['low contrast']
-            else:
-                expected = ['\A\Z']
-            with expected_warnings(expected):
-                if compress > 0:
-                    imsave(fname, x, compress=compress)
-                else:
-                    imsave(fname, x)
-            y = imread(fname)
-            assert_array_equal(x, y)
-
-    def test_imsave_roundtrip(self):
-        for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
-            for dtype in (np.uint8, np.uint16, np.int16, np.float32,
-                          np.float64, np.bool):
-                for compress in [0, 2]:
-                    x = np.random.rand(*shape)
-
-                    if not np.issubdtype(dtype, float) and \
-                                                        not dtype == np.bool:
-                        x = (x * np.iinfo(dtype).max).astype(dtype)
-                    else:
-                        x = x.astype(dtype)
-                    yield self.roundtrip, dtype, x, compress
 
 if __name__ == "__main__":
     run_module_suite()

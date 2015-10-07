@@ -5,7 +5,6 @@ from six import string_types
 from PIL import Image
 
 from ...util import img_as_ubyte, img_as_uint
-from .tifffile_plugin import imread as tif_imread, imsave as tif_imsave
 
 
 def imread(fname, dtype=None, img_num=None, **kwargs):
@@ -21,28 +20,17 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
        Specifies which image to read in a file with multiple images
        (zero-indexed).
     kwargs : keyword pairs, optional
-        Addition keyword arguments to pass through (only applicable to Tiff
-        files for now,  see `tifffile`'s `imread` function).
+        Addition keyword arguments to pass through.
 
     Notes
     -----
-    Tiff files are handled by Christophe Golhke's tifffile.py [1]_, and support
-    many advanced image types including multi-page and floating point.
-
-    All other files are read using the Python Imaging Libary.
-    See PIL docs [2]_ for a list of supported formats.
+    Files are read using the Python Imaging Libary.
+    See PIL docs [1]_ for a list of supported formats.
 
     References
     ----------
-    .. [1] http://www.lfd.uci.edu/~gohlke/code/tifffile.py.html
-    .. [2] http://pillow.readthedocs.org/en/latest/handbook/image-file-formats.html
-
+    .. [1] http://pillow.readthedocs.org/en/latest/handbook/image-file-formats.html
     """
-    if hasattr(fname, 'lower') and dtype is None:
-        kwargs.setdefault('key', img_num)
-        if fname.lower().endswith(('.tiff', '.tif')):
-            return tif_imread(fname, **kwargs)
-
     if isinstance(fname, string_types):
         with open(fname, 'rb') as f:
             im = Image.open(f)
@@ -234,12 +222,8 @@ def imsave(fname, arr, format_str=None, **kwargs):
 
     Notes
     -----
-    Tiff files are handled by Christophe Golhke's tifffile.py [1]_,
-    and support many advanced image types including multi-page and
-    floating point.
-
-    All other image formats use the Python Imaging Libary.
-    See PIL docs [2]_ for a list of other supported formats.
+    Use the Python Imaging Libary.
+    See PIL docs [1]_ for a list of other supported formats.
     All images besides single channel PNGs are converted using `img_as_uint8`.
     Single Channel PNGs have the following behavior:
     - Integer values in [0, 255] and Boolean types -> img_as_uint8
@@ -247,8 +231,7 @@ def imsave(fname, arr, format_str=None, **kwargs):
 
     References
     ----------
-    .. [1] http://www.lfd.uci.edu/~gohlke/code/tifffile.py.html
-    .. [2] http://pillow.readthedocs.org/en/latest/handbook/image-file-formats.html
+    .. [1] http://pillow.readthedocs.org/en/latest/handbook/image-file-formats.html
     """
     # default to PNG if file-like object
     if not isinstance(fname, string_types) and format_str is None:
@@ -262,18 +245,6 @@ def imsave(fname, arr, format_str=None, **kwargs):
 
     if arr.dtype.kind == 'b':
         arr = arr.astype(np.uint8)
-
-    use_tif = False
-    if hasattr(fname, 'lower'):
-        if fname.lower().endswith(('.tiff', '.tif')):
-            use_tif = True
-    if format_str is not None:
-        if format_str.lower() in ['tiff', 'tif']:
-            use_tif = True
-
-    if use_tif:
-        tif_imsave(fname, arr, **kwargs)
-        return
 
     if arr.ndim not in (2, 3):
         raise ValueError("Invalid shape for image array: %s" % arr.shape)
