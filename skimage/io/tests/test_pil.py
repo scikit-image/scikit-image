@@ -196,7 +196,6 @@ def test_all_color():
 
 def test_all_mono():
     mono_check('pil')
-    mono_check('pil', 'tiff')
 
 
 def test_multi_page_gif():
