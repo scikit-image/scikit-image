@@ -15,7 +15,7 @@ def test_gabor_kernel_size():
     kernel = gabor_kernel(0, theta=0, sigma_x=sigma_x, sigma_y=sigma_y)
     assert_equal(kernel.shape, (size_y, size_x))
 
-    kernel = gabor_kernel(0, theta=np.pi/2, sigma_x=sigma_x, sigma_y=sigma_y)
+    kernel = gabor_kernel(0, theta=np.pi / 2, sigma_x=sigma_x, sigma_y=sigma_y)
     assert_equal(kernel.shape, (size_x, size_y))
 
 
@@ -39,7 +39,7 @@ def test_gabor_kernel_sum():
     for sigma_x in range(1, 10, 2):
         for sigma_y in range(1, 10, 2):
             for frequency in range(0, 10, 2):
-                kernel = gabor_kernel(frequency+0.1, theta=0,
+                kernel = gabor_kernel(frequency + 0.1, theta=0,
                                       sigma_x=sigma_x, sigma_y=sigma_y)
                 # make sure gaussian distribution is covered nearly 100%
                 assert_almost_equal(np.abs(kernel).sum(), 1, 2)
@@ -50,9 +50,9 @@ def test_gabor_kernel_theta():
         for sigma_y in range(1, 10, 2):
             for frequency in range(0, 10, 2):
                 for theta in range(0, 10, 2):
-                    kernel0 = gabor_kernel(frequency+0.1, theta=theta,
+                    kernel0 = gabor_kernel(frequency + 0.1, theta=theta,
                                            sigma_x=sigma_x, sigma_y=sigma_y)
-                    kernel180 = gabor_kernel(frequency, theta=theta+np.pi,
+                    kernel180 = gabor_kernel(frequency, theta=theta + np.pi,
                                              sigma_x=sigma_x, sigma_y=sigma_y)
 
                     assert_array_almost_equal(np.abs(kernel0),

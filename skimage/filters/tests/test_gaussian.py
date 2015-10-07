@@ -30,23 +30,23 @@ def test_multichannel():
     a = np.zeros((5, 5, 3))
     a[1, 1] = np.arange(1, 4)
     gaussian_rgb_a = gaussian(a, sigma=1, mode='reflect',
-                                     multichannel=True)
+                              multichannel=True)
     # Check that the mean value is conserved in each channel
     # (color channels are not mixed together)
     assert np.allclose([a[..., i].mean() for i in range(3)],
-                        [gaussian_rgb_a[..., i].mean() for i in range(3)])
+                       [gaussian_rgb_a[..., i].mean() for i in range(3)])
     # Test multichannel = None
     with expected_warnings(['multichannel']):
         gaussian_rgb_a = gaussian(a, sigma=1, mode='reflect')
     # Check that the mean value is conserved in each channel
     # (color channels are not mixed together)
     assert np.allclose([a[..., i].mean() for i in range(3)],
-                        [gaussian_rgb_a[..., i].mean() for i in range(3)])
+                       [gaussian_rgb_a[..., i].mean() for i in range(3)])
     # Iterable sigma
     gaussian_rgb_a = gaussian(a, sigma=[1, 2], mode='reflect',
-                                     multichannel=True)
+                              multichannel=True)
     assert np.allclose([a[..., i].mean() for i in range(3)],
-                        [gaussian_rgb_a[..., i].mean() for i in range(3)])
+                       [gaussian_rgb_a[..., i].mean() for i in range(3)])
 
 
 if __name__ == "__main__":

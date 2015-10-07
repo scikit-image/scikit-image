@@ -95,7 +95,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
 
 
 def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
-                 sigma_y=None, n_stds=3, offset=0, mode='reflect', cval=0):
+          sigma_y=None, n_stds=3, offset=0, mode='reflect', cval=0):
     """Return real and imaginary responses to Gabor filter.
 
     The real and imaginary parts of the Gabor filter kernel are applied to the

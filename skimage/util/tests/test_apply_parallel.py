@@ -14,8 +14,8 @@ def test_apply_parallel():
     # apply the filter
     expected1 = threshold_adaptive(a, 3)
     result1 = apply_parallel(threshold_adaptive, a, chunks=(6, 6), depth=5,
-                           extra_arguments=(3,),
-                           extra_keywords={'mode': 'reflect'})
+                             extra_arguments=(3,),
+                             extra_keywords={'mode': 'reflect'})
 
     assert_array_almost_equal(result1, expected1)
 
@@ -56,6 +56,6 @@ def test_apply_parallel_nearest():
     a = np.arange(144).reshape(12, 12).astype(float)
     expected = gaussian(a, 1, mode='nearest')
     result = apply_parallel(wrapped, a, chunks=(6, 6), depth={0: 5, 1: 5},
-                          mode='nearest')
+                            mode='nearest')
 
     assert_array_almost_equal(result, expected)

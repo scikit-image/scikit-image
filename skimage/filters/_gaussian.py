@@ -10,7 +10,7 @@ __all__ = ['gaussian']
 
 
 def gaussian(image, sigma, output=None, mode='nearest', cval=0,
-                    multichannel=None):
+             multichannel=None):
     """Multi-dimensional Gaussian filter
 
     Parameters

@@ -16,17 +16,19 @@ from .rank import median
 from .._shared.utils import deprecated, copy_func
 from .. import restoration
 denoise_bilateral = deprecated('skimage.restoration.denoise_bilateral')\
-                        (restoration.denoise_bilateral)
+    (restoration.denoise_bilateral)
 denoise_tv_bregman = deprecated('skimage.restoration.denoise_tv_bregman')\
-                        (restoration.denoise_tv_bregman)
+    (restoration.denoise_tv_bregman)
 denoise_tv_chambolle = deprecated('skimage.restoration.denoise_tv_chambolle')\
-                        (restoration.denoise_tv_chambolle)
+    (restoration.denoise_tv_chambolle)
 gaussian_filter = copy_func(gaussian, name='gaussian_filter')
 gaussian_filter = deprecated('skimage.filters.gaussian')(gaussian_filter)
 gabor_filter = copy_func(gabor, name='gabor_filter')
 gabor_filter = deprecated('skimage.filters.gabor')(gabor_filter)
 
 # Backward compatibility v<0.11
+
+
 @deprecated('skimage.feature.canny')
 def canny(*args, **kwargs):
     # Hack to avoid circular import
@@ -70,5 +72,5 @@ __all__ = ['inverse',
            'threshold_otsu',
            'threshold_yen',
            'threshold_isodata',
-           'threshold_li', 
+           'threshold_li',
            'rank']
