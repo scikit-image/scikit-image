@@ -26,7 +26,10 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
         If True, convert color images to grey-scale (32-bit floats).
         Images that are already in grey-scale format are not converted.
     plugin : str
-        Name of plugin to use (Python Imaging Library by default).
+        Name of plugin to use.  By default, the different plugins are
+        tried (starting with the Python Imaging Library) until a suitable
+        candidate is found.  If not given and fname is a tiff file, the
+        tifffile plugin will be used.
 
     Other Parameters
     ----------------
@@ -49,6 +52,10 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
     # Backward compatibility
     if flatten is not None:
         as_grey = flatten
+
+    if plugin is None and hasattr(fname, 'lower'):
+        if fname.lower().endswith(('.tiff', '.tif')):
+            plugin = 'tifffile'
 
     with file_or_url_context(fname) as fname:
         img = call_plugin('imread', fname, plugin=plugin, **plugin_args)
@@ -109,7 +116,8 @@ def imsave(fname, arr, plugin=None, **plugin_args):
     plugin : str
         Name of plugin to use.  By default, the different plugins are
         tried (starting with the Python Imaging Library) until a suitable
-        candidate is found.
+        candidate is found.  If not given and fname is a tiff file, the
+        tifffile plugin will be used.
 
     Other parameters
     ----------------
@@ -117,6 +125,9 @@ def imsave(fname, arr, plugin=None, **plugin_args):
         Passed to the given plugin.
 
     """
+    if plugin is None and hasattr(fname, 'lower'):
+        if fname.lower().endswith(('.tiff', '.tif')):
+            plugin = 'tifffile'
     if is_low_contrast(arr):
         warnings.warn('%s is a low contrast image' % fname)
     return call_plugin('imsave', fname, arr, plugin=plugin, **plugin_args)
