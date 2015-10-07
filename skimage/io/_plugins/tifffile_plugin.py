@@ -25,7 +25,7 @@ def imread(fname, dtype=None, **kwargs):
 
     """
     if 'img_num' in kwargs:
-        kwargs['key'] = kwargs['img_num']
+        kwargs['key'] = kwargs.pop('img_num')
     with open(fname, 'rb') as f:
         tif = TiffFile(f)
         return tif.asarray(**kwargs)
