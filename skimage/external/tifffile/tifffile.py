@@ -185,8 +185,8 @@ def imsave(filename, data, **kwargs):
     Examples
     --------
     >>> data = numpy.random.rand(2, 5, 3, 301, 219)
-    >>> description = u'{"shape": %s}' % str(list(data.shape))  # doctest: +SKIP
-    >>> imsave('temp.tif', data, compress=6,  # doctest: +SKIP
+    >>> description = u'{"shape": %s}' % str(list(data.shape))
+    >>> imsave('temp.tif', data, compress=6,
     ...        extratags=[(270, 's', 0, description, True)])
 
     """
@@ -667,11 +667,11 @@ def imread(files, **kwargs):
 
     Examples
     --------
-    >>> im = imread('test.tif', key=0)  # doctest: +SKIP
-    >>> im.shape  # doctest: +SKIP
+    >>> im = imread('test.tif', key=0)
+    >>> im.shape
     (256, 256, 4)
-    >>> ims = imread(['test.tif', 'test.tif'])  # doctest: +SKIP
-    >>> ims.shape  # doctest: +SKIP
+    >>> ims = imread(['test.tif', 'test.tif'])
+    >>> ims.shape
     (2, 256, 256, 4)
 
     """
@@ -737,7 +737,7 @@ class TiffFile(object):
 
     Examples
     --------
-    >>> with TiffFile('test.tif') as tif:  # doctest: +SKIP
+    >>> with TiffFile('test.tif') as tif:
     ...     data = tif.asarray()
     ...     data.shape
     (256, 256, 4)
@@ -2219,11 +2219,11 @@ class TiffSequence(object):
 
     Examples
     --------
-    >>> tifs = TiffSequence("test.oif.files/*.tif")  # doctest: +SKIP
-    >>> tifs.shape, tifs.axes  # doctest: +SKIP
+    >>> tifs = TiffSequence("test.oif.files/*.tif")
+    >>> tifs.shape, tifs.axes
     ((2, 100), 'CT')
-    >>> data = tifs.asarray()  # doctest: +SKIP
-    >>> data.shape  # doctest: +SKIP
+    >>> data = tifs.asarray()
+    >>> data.shape
     (2, 100, 256, 256)
 
     """
@@ -3475,7 +3475,7 @@ def stripnull(string):
 
     Clean NULL terminated C strings.
 
-    >>> stripnull(b'string\\x00')  # doctest: +SKIP
+    >>> stripnull(b'string\\x00')
     b'string'
 
     """
@@ -3488,9 +3488,9 @@ def stripascii(string):
 
     Clean NULL separated and terminated TIFF strings.
 
-    >>> stripascii(b'string\\x00string\\n\\x01\\x00')  # doctest: +SKIP
+    >>> stripascii(b'string\\x00string\\n\\x01\\x00')
     b'string\\x00string\\n'
-    >>> stripascii(b'\\x00')  # doctest: +SKIP
+    >>> stripascii(b'\\x00')
     b''
 
     """
