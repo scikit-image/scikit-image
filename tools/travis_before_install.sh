@@ -52,12 +52,6 @@ source ~/venv/bin/activate
 pip install --upgrade pip
 pip install --retries 3 -q wheel flake8 coveralls nose
 
-# on Python 3.2, use older versions of matplotlib and dask
-if [[ $TRAVIS_PYTHON_VERSION == 3.2 ]]; then
-    sed -i 's/matplotlib>=.*/matplotlib==1.3.1/g' requirements.txt
-    sed -i 's/dask.*>=.*/dask[array]==0.7.1/g' requirements.txt
-fi
-
 # install wheels
 for requirement in $WHEELBINARIES; do
     WHEELS="$WHEELS $(grep $requirement requirements.txt)"
