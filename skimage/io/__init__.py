@@ -10,6 +10,7 @@ from .collection import *
 
 from ._io import *
 from ._image_stack import *
+import sys
 
 
 reset_plugins()
@@ -58,5 +59,5 @@ def _update_doc(doc):
 
     return doc
 
-
-__doc__ = _update_doc(__doc__)
+if sys.flags.optimize < 2:
+    __doc__ = _update_doc(__doc__)
