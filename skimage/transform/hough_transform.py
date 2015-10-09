@@ -72,7 +72,8 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     hspace_t = hspace > threshold
 
     label_hspace = measure.label(hspace_t)
-    props = measure.regionprops(label_hspace)
+    props = measure.regionprops(label_hspace, hspace_max)
+    props = sorted(props, key= lambda x: x.max_intensity)[::-1]
     coords = np.array([np.round(p.centroid) for p in props], dtype=int)
 
     hspace_peaks = []
@@ -84,7 +85,7 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
                                    -min_angle:min_angle + 1]
 
     for dist_idx, angle_idx in coords:
-        accum = hspace[dist_idx, angle_idx]
+        accum = hspace_max[dist_idx, angle_idx]
         if accum > threshold:
             # absolute coordinate grid for local neighbourhood suppression
             dist_nh = dist_idx + dist_ext
@@ -105,7 +106,7 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
             angle_nh[angle_high] -= cols
 
             # suppress neighbourhood
-            hspace[dist_nh, angle_nh] = 0
+            hspace_max[dist_nh, angle_nh] = 0
 
             # add current line to peaks
             hspace_peaks.append(accum)
