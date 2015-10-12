@@ -69,12 +69,8 @@ fb2 = fb2.reshape((-1,) + patch_shape)
 fb2_montage = montage2d(fb2, rescale_intensity=True)
 
 # --
-fig = plt.figure(figsize=(7, 6))
-ax0 = plt.subplot(2, 2, 1, adjustable='box-forced')
-ax1 = plt.subplot(2, 2, 2)
-ax2 = plt.subplot(2, 2, 3, sharex=ax0, sharey=ax0, adjustable='box-forced')
-ax3 = plt.subplot(2, 2, 4)
-
+fig, axes = plt.subplots(2, 2, figsize=(7, 6))
+ax0, ax1, ax2, ax3 = axes.ravel()
 
 ax0.imshow(astro, cmap=plt.cm.gray)
 ax0.set_title("Image (original)")
@@ -88,7 +84,7 @@ ax2.set_title("Image (LGN-like DoG)")
 ax3.imshow(fb2_montage, cmap=plt.cm.gray, interpolation='nearest')
 ax3.set_title("K-means filterbank (codebook)\non LGN-like DoG image")
 
-for ax in [ax0, ax1, ax2, ax3]: 
+for ax in axes.ravel():
     ax.axis('off')
 
 fig.subplots_adjust(hspace=0.3)
