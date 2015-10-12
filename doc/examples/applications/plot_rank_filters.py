@@ -70,24 +70,31 @@ noisy_image = img_as_ubyte(data.camera())
 noisy_image[noise > 0.99] = 255
 noisy_image[noise < 0.01] = 0
 
-fig, ax = plt.subplots(2, 2, figsize=(10, 7), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, ax = plt.subplots(2, 2, figsize=(10, 7), sharex=True, sharey=True)
 ax1, ax2, ax3, ax4 = ax.ravel()
 
 ax1.imshow(noisy_image, vmin=0, vmax=255, cmap=plt.cm.gray)
 ax1.set_title('Noisy image')
 ax1.axis('off')
+ax1.set_adjustable('box-forced')
 
 ax2.imshow(median(noisy_image, disk(1)), vmin=0, vmax=255, cmap=plt.cm.gray)
 ax2.set_title('Median $r=1$')
 ax2.axis('off')
+ax2.set_adjustable('box-forced')
+
 
 ax3.imshow(median(noisy_image, disk(5)), vmin=0, vmax=255, cmap=plt.cm.gray)
 ax3.set_title('Median $r=5$')
 ax3.axis('off')
+ax3.set_adjustable('box-forced')
+
 
 ax4.imshow(median(noisy_image, disk(20)), vmin=0, vmax=255, cmap=plt.cm.gray)
 ax4.set_title('Median $r=20$')
 ax4.axis('off')
+ax4.set_adjustable('box-forced')
+
 
 """
 
@@ -109,17 +116,19 @@ image.
 
 from skimage.filters.rank import mean
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=[10, 7], sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=[10, 7], sharex=True, sharey=True)
 
 loc_mean = mean(noisy_image, disk(10))
 
 ax1.imshow(noisy_image, vmin=0, vmax=255, cmap=plt.cm.gray)
 ax1.set_title('Original')
 ax1.axis('off')
+ax1.set_adjustable('box-forced')
 
 ax2.imshow(loc_mean, vmin=0, vmax=255, cmap=plt.cm.gray)
 ax2.set_title('Local mean $r=10$')
 ax2.axis('off')
+ax2.set_adjustable('box-forced')
 
 """
 
@@ -143,22 +152,26 @@ noisy_image = img_as_ubyte(data.camera())
 
 bilat = mean_bilateral(noisy_image.astype(np.uint16), disk(20), s0=10, s1=10)
 
-fig, ax = plt.subplots(2, 2, figsize=(10, 7), sharex='row', sharey='row', subplot_kw={'adjustable':'box-forced'})
+fig, ax = plt.subplots(2, 2, figsize=(10, 7), sharex='row', sharey='row')
 ax1, ax2, ax3, ax4 = ax.ravel()
 
 ax1.imshow(noisy_image, cmap=plt.cm.gray)
 ax1.set_title('Original')
 ax1.axis('off')
+ax1.set_adjustable('box-forced')
 
 ax2.imshow(bilat, cmap=plt.cm.gray)
 ax2.set_title('Bilateral mean')
 ax2.axis('off')
+ax2.set_adjustable('box-forced')
 
 ax3.imshow(noisy_image[200:350, 350:450], cmap=plt.cm.gray)
 ax3.axis('off')
+ax3.set_adjustable('box-forced')
 
 ax4.imshow(bilat[200:350, 350:450], cmap=plt.cm.gray)
 ax4.axis('off')
+ax4.set_adjustable('box-forced')
 
 """
 
@@ -196,13 +209,8 @@ hist = np.histogram(noisy_image, bins=np.arange(0, 256))
 glob_hist = np.histogram(glob, bins=np.arange(0, 256))
 loc_hist = np.histogram(loc, bins=np.arange(0, 256))
 
-fig = plt.figure()
-ax1 = plt.subplot(3, 2, 1, adjustable='box-forced')
-ax2 = plt.subplot(3, 2, 2)
-ax3 = plt.subplot(3, 2, 3, adjustable='box-forced', sharex=ax1, sharey=ax1)
-ax4 = plt.subplot(3, 2, 4)
-ax5 = plt.subplot(3, 2, 5, adjustable='box-forced', sharex=ax1, sharey=ax1)
-ax6 = plt.subplot(3, 2, 6)
+fig, ax = plt.subplots(3, 2, figsize=(10, 10))
+ax1, ax2, ax3, ax4, ax5, ax6 = ax.ravel()
 
 ax1.imshow(noisy_image, interpolation='nearest', cmap=plt.cm.gray)
 ax1.axis('off')
@@ -241,15 +249,17 @@ noisy_image = img_as_ubyte(data.camera())
 
 auto = autolevel(noisy_image.astype(np.uint16), disk(20))
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=[10, 7], sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=[10, 7], sharex=True, sharey=True)
 
 ax1.imshow(noisy_image, cmap=plt.cm.gray)
 ax1.set_title('Original')
 ax1.axis('off')
+ax1.set_adjustable('box-forced')
 
 ax2.imshow(auto, cmap=plt.cm.gray)
 ax2.set_title('Local autolevel')
 ax2.axis('off')
+ax2.set_adjustable('box-forced')
 
 """
 
@@ -276,7 +286,7 @@ loc_perc_autolevel1 = autolevel_percentile(image, selem=selem, p0=.01, p1=.99)
 loc_perc_autolevel2 = autolevel_percentile(image, selem=selem, p0=.05, p1=.95)
 loc_perc_autolevel3 = autolevel_percentile(image, selem=selem, p0=.1, p1=.9)
 
-fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(7, 8), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(7, 8), sharex=True, sharey=True)
 ax0, ax1, ax2 = axes
 plt.gray()
 
@@ -298,6 +308,7 @@ for i in range(0,len(image_list)):
     axes_list[i].imshow(image_list[i], cmap=plt.cm.gray, vmin=0, vmax=255)
     axes_list[i].set_title(title_list[i])
     axes_list[i].axis('off')
+    axes_list[i].set_adjustable('box-forced')
 
 """
 
@@ -315,22 +326,26 @@ noisy_image = img_as_ubyte(data.camera())
 
 enh = enhance_contrast(noisy_image, disk(5))
 
-fig, ax = plt.subplots(2, 2, figsize=[10, 7], sharex='row', sharey='row', subplot_kw={'adjustable':'box-forced'})
+fig, ax = plt.subplots(2, 2, figsize=[10, 7], sharex='row', sharey='row')
 ax1, ax2, ax3, ax4 = ax.ravel()
 
 ax1.imshow(noisy_image, cmap=plt.cm.gray)
 ax1.set_title('Original')
 ax1.axis('off')
+ax1.set_adjustable('box-forced')
 
 ax2.imshow(enh, cmap=plt.cm.gray)
 ax2.set_title('Local morphological contrast enhancement')
 ax2.axis('off')
+ax2.set_adjustable('box-forced')
 
 ax3.imshow(noisy_image[200:350, 350:450], cmap=plt.cm.gray)
 ax3.axis('off')
+ax3.set_adjustable('box-forced')
 
 ax4.imshow(enh[200:350, 350:450], cmap=plt.cm.gray)
 ax4.axis('off')
+ax4.set_adjustable('box-forced')
 
 """
 
@@ -347,22 +362,22 @@ noisy_image = img_as_ubyte(data.camera())
 
 penh = enhance_contrast_percentile(noisy_image, disk(5), p0=.1, p1=.9)
 
-fig, ax = plt.subplots(2, 2, figsize=[10, 7], sharex='row', sharey='row', subplot_kw={'adjustable':'box-forced'})
+fig, ax = plt.subplots(2, 2, figsize=[10, 7], sharex='row', sharey='row')
 ax1, ax2, ax3, ax4 = ax.ravel()
 
 ax1.imshow(noisy_image, cmap=plt.cm.gray)
 ax1.set_title('Original')
-ax1.axis('off')
 
 ax2.imshow(penh, cmap=plt.cm.gray)
 ax2.set_title('Local percentile morphological\n contrast enhancement')
-ax2.axis('off')
 
 ax3.imshow(noisy_image[200:350, 350:450], cmap=plt.cm.gray)
-ax3.axis('off')
 
 ax4.imshow(penh[200:350, 350:450], cmap=plt.cm.gray)
-ax4.axis('off')
+
+for ax in ax.ravel():
+    ax.axis('off')
+    ax.set_adjustable('box-forced')
 
 """
 
@@ -404,24 +419,24 @@ loc_otsu = p8 >= t_loc_otsu
 t_glob_otsu = threshold_otsu(p8)
 glob_otsu = p8 >= t_glob_otsu
 
-fig, ax = plt.subplots(2, 2, sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, ax = plt.subplots(2, 2, sharex=True, sharey=True)
 ax1, ax2, ax3, ax4 = ax.ravel()
 
 fig.colorbar(ax1.imshow(p8, cmap=plt.cm.gray), ax=ax1)
 ax1.set_title('Original')
-ax1.axis('off')
 
 fig.colorbar(ax2.imshow(t_loc_otsu, cmap=plt.cm.gray), ax=ax2)
 ax2.set_title('Local Otsu ($r=%d$)' % radius)
-ax2.axis('off')
 
 ax3.imshow(p8 >= t_loc_otsu, cmap=plt.cm.gray)
 ax3.set_title('Original >= local Otsu' % t_glob_otsu)
-ax3.axis('off')
 
 ax4.imshow(glob_otsu, cmap=plt.cm.gray)
 ax4.set_title('Global Otsu ($t=%d$)' % t_glob_otsu)
-ax4.axis('off')
+
+for ax in ax.ravel():
+    ax.axis('off')
+    ax.set_adjustable('box-forced')
 
 """
 
@@ -440,15 +455,17 @@ m = (np.tile(x, (n, 1)) * np.linspace(0.1, 1, n) * 128 + 128).astype(np.uint8)
 radius = 10
 t = rank.otsu(m, disk(radius))
 
-fig, (ax1, ax2) = plt.subplots(1, 2, sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, (ax1, ax2) = plt.subplots(1, 2, sharex=True, sharey=True)
 
 ax1.imshow(m)
 ax1.set_title('Original')
 ax1.axis('off')
+ax1.set_adjustable('box-forced')
 
 ax2.imshow(m >= t, interpolation='nearest')
 ax2.set_title('Local Otsu ($r=%d$)' % radius)
 ax2.axis('off')
+ax2.set_adjustable('box-forced')
 
 """
 
@@ -479,25 +496,24 @@ opening = minimum(maximum(noisy_image, disk(5)), disk(5))
 grad = gradient(noisy_image, disk(5))
 
 # display results
-fig, ax = plt.subplots(2, 2, figsize=[10, 7], sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, ax = plt.subplots(2, 2, figsize=[10, 7], sharex=True, sharey=True)
 ax1, ax2, ax3, ax4 = ax.ravel()
 
 ax1.imshow(noisy_image, cmap=plt.cm.gray)
 ax1.set_title('Original')
-ax1.axis('off')
 
 ax2.imshow(closing, cmap=plt.cm.gray)
 ax2.set_title('Gray-level closing')
-ax2.axis('off')
 
 ax3.imshow(opening, cmap=plt.cm.gray)
 ax3.set_title('Gray-level opening')
-ax3.axis('off')
 
 ax4.imshow(grad, cmap=plt.cm.gray)
 ax4.set_title('Morphological gradient')
-ax4.axis('off')
 
+for ax in ax.ravel():
+    ax.axis('off')
+    ax.set_adjustable('box-forced')
 """
 
 .. image:: PLOT2RST.current_figure
@@ -529,15 +545,17 @@ import matplotlib.pyplot as plt
 
 image = data.camera()
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4), sharex=True, sharey=True)
 
 fig.colorbar(ax1.imshow(image, cmap=plt.cm.gray), ax=ax1)
 ax1.set_title('Image')
 ax1.axis('off')
+ax1.set_adjustable('box-forced')
 
 fig.colorbar(ax2.imshow(entropy(image, disk(5)), cmap=plt.cm.jet), ax=ax2)
 ax2.set_title('Entropy')
 ax2.axis('off')
+ax2.set_adjustable('box-forced')
 
 """
 
@@ -691,13 +709,15 @@ Comparison of outcome of the three methods:
 
 """
 
-fig, (ax0, ax1) = plt.subplots(ncols=2, sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, (ax0, ax1) = plt.subplots(ncols=2, sharex=True, sharey=True)
 ax0.set_title('filters.rank.median')
 ax0.imshow(rc)
 ax0.axis('off')
+ax0.set_adjustable('box-forced')
 ax1.set_title('scipy.ndimage.percentile')
 ax1.imshow(rndi)
 ax1.axis('off')
+ax1.set_adjustable('box-forced')
 
 """
 .. image:: PLOT2RST.current_figure
