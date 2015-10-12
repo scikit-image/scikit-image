@@ -77,10 +77,7 @@ image[idx, idx] = 255
 
 h, theta, d = hough_line(image)
 
-fig = plt.figure(figsize=(8, 4))
-ax1 = plt.subplot(1, 3, 1, adjustable='box-forced')
-ax2 = plt.subplot(1, 3, 2)
-ax3 = plt.subplot(1, 3, 3, sharex=ax1, sharey=ax1, adjustable='box-forced')
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(8,4))
 
 ax1.imshow(image, cmap=plt.cm.gray)
 ax1.set_title('Input image')
@@ -112,18 +109,17 @@ edges = canny(image, 2, 1, 25)
 lines = probabilistic_hough_line(edges, threshold=10, line_length=5,
                                  line_gap=3)
 
-fig2 = plt.figure(figsize=(8, 3))
-ax1 = plt.subplot(1, 3, 1, adjustable='box-forced')
-ax2 = plt.subplot(1, 3, 2, sharex=ax1, sharey=ax1, adjustable='box-forced')
-ax3 = plt.subplot(1, 3, 3, sharex=ax1, sharey=ax1, adjustable='box-forced')
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(8,4), sharex=True, sharey=True)
 
 ax1.imshow(image, cmap=plt.cm.gray)
 ax1.set_title('Input image')
 ax1.set_axis_off()
+ax1.set_adjustable('box-forced')
 
 ax2.imshow(edges, cmap=plt.cm.gray)
 ax2.set_title('Canny edges')
 ax2.set_axis_off()
+ax2.set_adjustable('box-forced')
 
 ax3.imshow(edges * 0)
 
@@ -133,4 +129,5 @@ for line in lines:
 
 ax3.set_title('Probabilistic Hough')
 ax3.set_axis_off()
+ax3.set_adjustable('box-forced')
 plt.show()
