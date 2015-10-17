@@ -25,10 +25,13 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     n_segments : int, optional
         The (approximate) number of labels in the segmented output image.
     compactness : float, optional
-        Balances color-space proximity and image-space proximity. Higher
-        values give more weight to image-space. As `compactness` tends to
-        infinity, superpixel shapes become square/cubic. In SLICO mode, this
-        is the initial compactness.
+        Balances color proximity and space proximity. Higher values give
+        more weight to space proximity, making superpixel shapes more
+        square/cubic. In SLICO mode, this is the initial compactness.
+        This parameter depends strongly on image contrast and on the
+        shapes of objects in the image; we recommend exploring possible
+        values on a log scale, e.g., 0.01, 0.1, 1, 10, 100, before
+        refining around a chosen value.
     max_iter : int, optional
         Maximum number of iterations of k-means.
     sigma : float or (3,) array-like of floats, optional
