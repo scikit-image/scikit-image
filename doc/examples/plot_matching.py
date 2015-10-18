@@ -33,24 +33,44 @@ from skimage.transform import warp, AffineTransform
 from skimage.exposure import rescale_intensity
 from skimage.color import rgb2gray
 from skimage.measure import ransac
+from skimage  import io
 
-
-# generate synthetic checkerboard image and add gradient for the later matching
-checkerboard = img_as_float(data.checkerboard())
-img_orig = np.zeros(list(checkerboard.shape) + [3])
-img_orig[..., 0] = checkerboard
-gradient_r, gradient_c = (np.mgrid[0:img_orig.shape[0],
-                                   0:img_orig.shape[1]]
-                          / float(img_orig.shape[0]))
-img_orig[..., 1] = gradient_r
-img_orig[..., 2] = gradient_c
-img_orig = rescale_intensity(img_orig)
-img_orig_gray = rgb2gray(img_orig)
+original=True
 
 # warp synthetic image
 tform = AffineTransform(scale=(0.9, 0.9), rotation=0.2, translation=(20, -10))
-img_warped = warp(img_orig, tform.inverse, output_shape=(200, 200))
-img_warped_gray = rgb2gray(img_warped)
+
+if original:
+    # generate synthetic checkerboard image and add gradient for the later matching
+    checkerboard = img_as_float(data.checkerboard())
+    img_orig = np.zeros(list(checkerboard.shape) + [3])
+    img_orig[..., 0] = checkerboard
+    gradient_r, gradient_c = (np.mgrid[0:img_orig.shape[0],
+                                       0:img_orig.shape[1]]
+                              / float(img_orig.shape[0]))
+    img_orig[..., 1] = gradient_r
+    img_orig[..., 2] = gradient_c
+    img_orig = rescale_intensity(img_orig)
+    img_orig_gray = rgb2gray(img_orig)
+
+    img_warped = warp(img_orig, tform.inverse, output_shape=(200, 200))
+    img_warped_gray = rgb2gray(img_warped)
+else:
+    imageName='test1.png'
+    imageName2='test2.png'
+
+    #print "imageName:",imageName
+    #print "imageName2:",imageName2
+
+
+    img1  = io.imread(imageName)
+    img2  = io.imread(imageName2)
+
+    img_orig        = img1
+    img_warped      = img2
+    img_orig_gray   = rgb2gray(img_orig)
+    img_warped_gray = rgb2gray(img_warped)
+
 
 # extract corners using Harris' corner measure
 coords_orig = corner_peaks(corner_harris(img_orig_gray), threshold_rel=0.001,
@@ -64,44 +84,50 @@ coords_warped_subpix = corner_subpix(img_warped_gray, coords_warped,
                                      window_size=9)
 
 
-def gaussian_weights(window_ext, sigma=1):
-    y, x = np.mgrid[-window_ext:window_ext+1, -window_ext:window_ext+1]
+def gaussian_weights(patch_radius, sigma=1):
+    y, x = np.mgrid[-patch_radius:patch_radius+1, -patch_radius:patch_radius+1]
     g = np.zeros(y.shape, dtype=np.double)
     g[:] = np.exp(-0.5 * (x**2 / sigma**2 + y**2 / sigma**2))
     g /= 2 * np.pi * sigma * sigma
     return g
 
 
-def match_corner(coord, window_ext=5):
-    r, c = np.round(coord).astype(np.intp)
-    window_orig = img_orig[r-window_ext:r+window_ext+1,
-                           c-window_ext:c+window_ext+1, :]
 
-    # weight pixels depending on distance to center pixel
-    weights = gaussian_weights(window_ext, 3)
-    weights = np.dstack((weights, weights, weights))
+def match_corner(coord_list1,coord_list2,img1,img2, patch_radius=5):#     # find correspondences using simple weighted sum of squared differences
 
-    # compute sum of squared differences to all corners in warped image
-    SSDs = []
-    for cr, cc in coords_warped:
-        window_warped = img_warped[cr-window_ext:cr+window_ext+1,
-                                   cc-window_ext:cc+window_ext+1, :]
-        SSD = np.sum(weights * (window_orig - window_warped)**2)
-        SSDs.append(SSD)
+    c1len = len(coord_list1)
+    c2len = len(coord_list2)
+    cl1index = np.arange(c1len)
+    cl2index = np.arange(c2len)
+    src = []
+    dst = []
+    for [[r,c],idx] in zip(coord_list1,cl1index):
+        src.append(idx)
+        window_orig = img1[r-patch_radius:r+patch_radius+1,
+                          c-patch_radius:c+patch_radius+1]
 
-    # use corner with minimum SSD as correspondence
-    min_idx = np.argmin(SSDs)
-    return coords_warped_subpix[min_idx]
+        # weight pixels depending on distance to center pixel
+        weights = gaussian_weights(patch_radius, 3)
+
+        # compute sum of squared differences to all corners in warped image
+        SSDs = []
+        for cr, cc in coord_list2:
+            window_warped = img2[cr-patch_radius:cr+patch_radius+1,
+                                 cc-patch_radius:cc+patch_radius+1]
+            SSD = np.sum(weights * (window_orig - window_warped)**2)
+            SSDs.append(SSD)
+
+        # use corner with minimum SSD as correspondence
+        min_idx = np.argmin(SSDs)
+        dst.append(min_idx)
+
+
+    return [np.array(coord_list1[src]),np.array(coord_list2[dst])]
 
 
 # find correspondences using simple weighted sum of squared differences
-src = []
-dst = []
-for coord in coords_orig_subpix:
-    src.append(coord)
-    dst.append(match_corner(coord))
-src = np.array(src)
-dst = np.array(dst)
+[src,dst] = match_corner(coords_orig,coords_warped,img_orig_gray,img_warped_gray, patch_radius=5)
+
 
 
 # estimate affine transform model using all coordinates
@@ -109,8 +135,8 @@ model = AffineTransform()
 model.estimate(src, dst)
 
 # robustly estimate affine transform model with RANSAC
-model_robust, inliers = ransac((src, dst), AffineTransform, min_samples=3,
-                               residual_threshold=2, max_trials=100)
+model_robust, inliers = ransac((src, dst), AffineTransform, min_samples=8,
+                               residual_threshold=2, max_trials=10000)
 outliers = inliers == False
 
 
@@ -120,7 +146,20 @@ print(model.scale, model.translation, model.rotation)
 print(model_robust.scale, model_robust.translation, model_robust.rotation)
 
 # visualize correspondence
-fig, ax = plt.subplots(nrows=2, ncols=1)
+fig, ax = plt.subplots(nrows=4, ncols=1)
+
+def warp_and_combine(img1,img2,xform):
+    img1_warped = warp(img1,xform)
+    img1f = img1_warped.astype(float)*0.5
+    img2f = img_warped_gray.astype(float)*0.5
+    if img1f.shape == img2f.shape:
+        combined = img1f+img2f
+    else:
+        combined = img1f
+
+    return combined
+
+
 
 plt.gray()
 
@@ -135,5 +174,14 @@ plot_matches(ax[1], img_orig_gray, img_warped_gray, src, dst,
              np.column_stack((outlier_idxs, outlier_idxs)), matches_color='r')
 ax[1].axis('off')
 ax[1].set_title('Faulty correspondences')
+
+ax[2].axis('off')
+ax[2].set_title('inverse transform overlay')
+ax[2].imshow(warp_and_combine(img_orig_gray,img_warped_gray,model_robust.inverse))
+
+
+ax[3].axis('off')
+ax[3].set_title('transform overlay')
+ax[3].imshow(warp_and_combine(img_orig_gray,img_warped_gray,model_robust))
 
 plt.show()
