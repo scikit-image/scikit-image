@@ -247,12 +247,14 @@ def clip_histogram(hist, clip_limit):
     while n_excess > 0:  # Redistribute remaining excess
         index = 0
         while n_excess > 0 and index < hist.size:
+            under_mask = hist < 0
             step_size = int(hist[hist < clip_limit].size / n_excess)
             step_size = max(step_size, 1)
             indices = np.arange(index, hist.size, step_size)
-            under = hist[indices] < clip_limit
-            hist[under] += 1
-            n_excess -= hist[under].size
+            under_mask[indices] = True
+            under_mask = (under_mask) & (hist < clip_limit)
+            hist[under_mask] += 1
+            n_excess -= under_mask.sum()
             index += 1
 
     return hist
