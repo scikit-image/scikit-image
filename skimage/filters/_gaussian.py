@@ -6,11 +6,11 @@ import warnings
 from ..util import img_as_float
 from ..color import guess_spatial_dimensions
 
-__all__ = ['gaussian_filter']
+__all__ = ['gaussian']
 
 
-def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
-                    multichannel=None):
+def gaussian(image, sigma, output=None, mode='nearest', cval=0,
+             multichannel=None):
     """Multi-dimensional Gaussian filter
 
     Parameters
@@ -66,23 +66,23 @@ def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
     array([[ 0.,  0.,  0.],
            [ 0.,  1.,  0.],
            [ 0.,  0.,  0.]])
-    >>> gaussian_filter(a, sigma=0.4)  # mild smoothing
+    >>> gaussian(a, sigma=0.4)  # mild smoothing
     array([[ 0.00163116,  0.03712502,  0.00163116],
            [ 0.03712502,  0.84496158,  0.03712502],
            [ 0.00163116,  0.03712502,  0.00163116]])
-    >>> gaussian_filter(a, sigma=1)  # more smooting
+    >>> gaussian(a, sigma=1)  # more smooting
     array([[ 0.05855018,  0.09653293,  0.05855018],
            [ 0.09653293,  0.15915589,  0.09653293],
            [ 0.05855018,  0.09653293,  0.05855018]])
     >>> # Several modes are possible for handling boundaries
-    >>> gaussian_filter(a, sigma=1, mode='reflect')
+    >>> gaussian(a, sigma=1, mode='reflect')
     array([[ 0.08767308,  0.12075024,  0.08767308],
            [ 0.12075024,  0.16630671,  0.12075024],
            [ 0.08767308,  0.12075024,  0.08767308]])
     >>> # For RGB images, each is filtered separately
     >>> from skimage.data import astronaut
     >>> image = astronaut()
-    >>> filtered_img = gaussian_filter(image, sigma=1, multichannel=True)
+    >>> filtered_img = gaussian(image, sigma=1, multichannel=True)
 
     """
 

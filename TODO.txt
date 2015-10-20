@@ -6,6 +6,8 @@ Version 0.14
 ------------
 * Remove deprecated ``ntiles_*` kwargs in ``equalize_adapthist``.
 * Remove deprecated ``skimage.restoration.nl_means_denoising``.
+* Remove deprecated ``skimage.filters.gaussian_filter``.
+* Remove deprecated ``skimage.filters.gabor_filter``.
 
 
 Version 0.13
