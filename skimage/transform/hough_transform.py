@@ -1,7 +1,67 @@
 import numpy as np
 from scipy import ndimage as ndi
-from .. import measure, morphology
-from ._hough_transform import _hough_circle
+from .. import measure
+from ._hough_transform import (_hough_circle,
+                               hough_ellipse as _hough_ellipse,
+                               hough_line as _hough_line,
+                               probabilistic_hough_line as _prob_hough_line)
+
+
+# Wrapper for Cython allows function signature introspection
+def hough_line(img, theta=None):
+    """Perform a straight line Hough transform.
+
+    Parameters
+    ----------
+    img : (M, N) ndarray
+        Input image with nonzero values representing edges.
+    theta : 1D ndarray of double
+        Angles at which to compute the transform, in radians.
+        Defaults to -pi/2 .. pi/2
+
+    Returns
+    -------
+    H : 2-D ndarray of uint64
+        Hough transform accumulator.
+    theta : ndarray
+        Angles at which the transform was computed, in radians.
+    distances : ndarray
+        Distance values.
+
+    Notes
+    -----
+    The origin is the top left corner of the original image.
+    X and Y axis are horizontal and vertical edges respectively.
+    The distance is the minimal algebraic distance from the origin
+    to the detected line.
+
+    Examples
+    --------
+    Generate a test image:
+
+    >>> img = np.zeros((100, 150), dtype=bool)
+    >>> img[30, :] = 1
+    >>> img[:, 65] = 1
+    >>> img[35:45, 35:50] = 1
+    >>> for i in range(90):
+    ...     img[i, i] = 1
+    >>> img += np.random.random(img.shape) > 0.95
+
+    Apply the Hough transform:
+
+    >>> out, angles, d = hough_line(img)
+
+    .. plot:: hough_tf.py
+
+    """
+    if img.ndim != 2:
+        raise ValueError('The input image `img` must be 2D.')
+
+    if theta is None:
+        # These values are approximations of pi/2
+        theta = np.linspace(-1.5707963267948966, 1.5707963267948966, 180)
+
+    return _hough_line(img, theta=theta)
 
 
 def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
@@ -73,7 +133,10 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
 
     label_hspace = measure.label(hspace_t)
     props = measure.regionprops(label_hspace, hspace_max)
-    props = sorted(props, key= lambda x: x.max_intensity)[::-1]
+
+    # Sort the list of peaks by intensity, not left-right, so larger peaks
+    # in Hough space cannot be arbitrarily suppressed by smaller neighbors
+    props = sorted(props, key=lambda x: x.max_intensity)[::-1]
     coords = np.array([np.round(p.centroid) for p in props], dtype=int)
 
     hspace_peaks = []
@@ -126,6 +189,48 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     return hspace_peaks, angle_peaks, dist_peaks
 
 
+# Wrapper for Cython allows function signature introspection
+def probabilistic_hough_line(img, threshold=10, line_length=50, line_gap=10,
+                             theta=None):
+    """Return lines from a progressive probabilistic line Hough transform.
+
+    Parameters
+    ----------
+    img : (M, N) ndarray
+        Input image with nonzero values representing edges.
+    threshold : int, optional (default 10)
+        Threshold
+    line_length : int, optional (default 50)
+        Minimum accepted length of detected lines.
+        Increase the parameter to extract longer lines.
+    line_gap : int, optional, (default 10)
+        Maximum gap between pixels to still form a line.
+        Increase the parameter to merge broken lines more aggresively.
+    theta : 1D ndarray, dtype=double, optional, default (-pi/2 .. pi/2)
+        Angles at which to compute the transform, in radians.
+
+    Returns
+    -------
+    lines : list
+      List of lines identified, lines in format ((x0, y0), (x1, y0)),
+      indicating line start and end.
+
+    References
+    ----------
+    .. [1] C. Galamhos, J. Matas and J. Kittler, "Progressive probabilistic
+           Hough transform for line detection", in IEEE Computer Society
+           Conference on Computer Vision and Pattern Recognition, 1999.
+    """
+    if img.ndim != 2:
+        raise ValueError('The input image `img` must be 2D.')
+
+    if theta is None:
+        theta = 1.5707963267948966 - np.arange(180) / 180.0 * np.pi
+
+    return _prob_hough_line(img, threshold=threshold, line_length=line_length,
+                            line_gap=line_gap, theta=theta)
+
+
 def hough_circle(image, radius, normalize=True, full_output=False):
     """Perform a circular Hough transform.
 
@@ -169,3 +274,53 @@ def hough_circle(image, radius, normalize=True, full_output=False):
     radius = np.atleast_1d(np.asarray(radius))
     return _hough_circle(image, radius.astype(np.intp),
                          normalize=normalize, full_output=full_output)
+
+
+# Wrapper for Cython allows function signature introspection
+def hough_ellipse(img, threshold=4, accuracy=1, min_size=4, max_size=None):
+    """Perform an elliptical Hough transform.
+
+    Parameters
+    ----------
+    img : (M, N) ndarray
+        Input image with nonzero values representing edges.
+    threshold: int, optional (default 4)
+        Accumulator threshold value.
+    accuracy : double, optional (default 1)
+        Bin size on the minor axis used in the accumulator.
+    min_size : int, optional (default 4)
+        Minimal major axis length.
+    max_size : int, optional
+        Maximal minor axis length. (default None)
+        If None, the value is set to the half of the smaller
+        image dimension.
+
+    Returns
+    -------
+    result : ndarray with fields [(accumulator, y0, x0, a, b, orientation)]
+          Where ``(yc, xc)`` is the center, ``(a, b)`` the major and minor
+          axes, respectively. The `orientation` value follows
+          `skimage.draw.ellipse_perimeter` convention.
+
+    Examples
+    --------
+    >>> img = np.zeros((25, 25), dtype=np.uint8)
+    >>> rr, cc = ellipse_perimeter(10, 10, 6, 8)
+    >>> img[cc, rr] = 1
+    >>> result = hough_ellipse(img, threshold=8)
+    [(10, 10.0, 8.0, 6.0, 0.0, 10.0)]
+
+    Notes
+    -----
+    The accuracy must be chosen to produce a peak in the accumulator
+    distribution. In other words, a flat accumulator distribution with low
+    values may be caused by a too low bin size.
+
+    References
+    ----------
+    .. [1] Xie, Yonghong, and Qiang Ji. "A new efficient ellipse detection
+           method." Pattern Recognition, 2002. Proceedings. 16th International
+           Conference on. Vol. 2. IEEE, 2002
+    """
+    return _hough_ellipse(img, threshold=threshold, accuracy=accuracy,
+                          min_size=min_size, max_size=max_size)

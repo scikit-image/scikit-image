@@ -78,6 +78,22 @@ def test_hough_line_peaks():
     assert_almost_equal(theta[0], 1.41, 1)
 
 
+def test_hough_line_peaks_ordered():
+    # Regression test per PR #1421
+    testim = np.zeros((256, 64), dtype=np.bool)
+
+    testim[50:100, 20] = True
+    testim[85:200, 25] = True
+    testim[15:35, 50] = True
+    testim[1:-1, 58] = True
+
+    hough_space, angles, dists = tf.hough_line(testim)
+
+    with expected_warnings(['`background`']):
+        hspace, _, _ = tf.hough_line_peaks(hough_space, angles, dists)
+        assert hspace[0] > hspace[1]
+
+
 def test_hough_line_peaks_dist():
     img = np.zeros((100, 100), dtype=np.bool_)
     img[:, 30] = True
