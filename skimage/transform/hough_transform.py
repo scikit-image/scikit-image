@@ -59,7 +59,7 @@ def hough_line(img, theta=None):
 
     if theta is None:
         # These values are approximations of pi/2
-        theta = np.linspace(-1.5707963267948966, 1.5707963267948966, 180)
+        theta = np.linspace(-np.pi / 2, np.pi / 2, 180)
 
     return _hough_line(img, theta=theta)
 
@@ -225,7 +225,7 @@ def probabilistic_hough_line(img, threshold=10, line_length=50, line_gap=10,
         raise ValueError('The input image `img` must be 2D.')
 
     if theta is None:
-        theta = 1.5707963267948966 - np.arange(180) / 180.0 * np.pi
+        theta = np.pi / 2 - np.arange(180) / 180.0 * np.pi
 
     return _prob_hough_line(img, threshold=threshold, line_length=line_length,
                             line_gap=line_gap, theta=theta)
@@ -304,11 +304,14 @@ def hough_ellipse(img, threshold=4, accuracy=1, min_size=4, max_size=None):
 
     Examples
     --------
+    >>> from skimage.transform import hough_ellipse
+    >>> from skimage.draw import ellipse_perimeter
     >>> img = np.zeros((25, 25), dtype=np.uint8)
     >>> rr, cc = ellipse_perimeter(10, 10, 6, 8)
     >>> img[cc, rr] = 1
     >>> result = hough_ellipse(img, threshold=8)
-    [(10, 10.0, 8.0, 6.0, 0.0, 10.0)]
+    >>> result.tolist()
+    [(10, 10.0, 10.0, 8.0, 6.0, 0.0)]
 
     Notes
     -----

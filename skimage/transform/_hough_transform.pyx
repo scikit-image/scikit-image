@@ -12,9 +12,6 @@ from libc.stdlib cimport rand
 
 from ..draw import circle_perimeter
 
-cdef double PI_2 = 1.5707963267948966
-cdef double NEG_PI_2 = -PI_2
-
 from .._shared.interpolation cimport round
 
 
