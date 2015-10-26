@@ -14,6 +14,7 @@ References:
     Imaging", IEEE Press 1988.
 """
 from __future__ import division
+from collections import namedtuple
 import numpy as np
 from scipy.fftpack import fft, ifft, fftfreq
 from scipy.interpolate import interp1d
@@ -22,7 +23,7 @@ from ._radon_transform import sart_projection_update
 from .. import util
 
 
-__all__ = ["radon", "iradon", "iradon_sart"]
+__all__ = ["radon", "iradon", "iradon_sart", "iradon_workspace"]
 
 
 def radon(image, theta=None, circle=False):
@@ -124,8 +125,50 @@ def _sinogram_circle_to_square(sinogram):
     pad_width = ((pad_before, pad - pad_before), (0, 0))
     return util.pad(sinogram, pad_width, mode='constant', constant_values=0)
 
+def iradon_workspace(theta, output_size, circle=False, full=True):
+    """
+    Generate workspace needed for iradon().
 
-def iradon(radon_image, theta=None, output_size=None,
+    This allows work arrays to be calculated once for an output size and set
+    of angles, useful for multiple calls to iradon() for the same geometry.
+
+    Parameters
+    ----------
+    theta : array_like, dtype=float, optional
+        Reconstruction angles (in degrees). Default: m angles evenly spaced
+        between 0 and 180 (if the shape of `radon_image` is (N, M)).
+    output_size : int
+        Number of rows and columns in the reconstruction.
+    circle : boolean, optional
+        Assume the reconstructed image is zero outside the inscribed circle.
+        Also changes the default output_size to match the behaviour of
+        ``radon`` called with ``circle=True``.
+    full : boolean, optional
+        Whether to generate full workspace (default) or only the
+        grid data (for older behavior, smaller memory usage).
+    Returns
+    -------
+    workspace: 
+        The workspace
+    """
+    if not circle:
+        output_size = int(np.floor(np.sqrt((output_size)**2 / 2.0)))
+
+    [_x, _y] = np.mgrid[0:output_size, 0:output_size]
+    xpr = _x - int(output_size) // 2
+    ypr = _y - int(output_size) // 2
+    thw = [None]*len(theta)
+    if full:
+        th  = np.deg2rad(theta)
+        thw = np.zeros((len(th), output_size, output_size),
+                       dtype=np.float64)
+        for i in range(len(th)):
+            thw[i] = ypr * np.cos(th[i]) - xpr * np.sin(th[i])
+
+    Workspace = namedtuple("Workspace", ["xpr","ypr","thw"])
+    return Workspace(xpr=xpr, ypr=ypr, thw=thw)
+
+def iradon(radon_image, theta=None, output_size=None, workspace=None,
            filter="ramp", interpolation="linear", circle=False):
     """
     Inverse radon transform.
@@ -146,6 +189,10 @@ def iradon(radon_image, theta=None, output_size=None,
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
     output_size : int
         Number of rows and columns in the reconstruction.
+    workspace : ``None`` or result of ``iradon_workspace()``
+        Workspace is a tuple of arrays with values needed for iradon
+        transform, as calculated by ``iradon_workspace(theta, output_size)``.
+        If ``None`` (default), the work arrays are generated as needed.
     filter : str, optional (default ramp)
         Filter used in frequency domain filtering. Ramp filter used by default.
         Filters available: ramp, shepp-logan, cosine, hamming, hann.
@@ -194,8 +241,7 @@ def iradon(radon_image, theta=None, output_size=None,
                                                / 2.0)))
     if circle:
         radon_image = _sinogram_circle_to_square(radon_image)
-
-    th = (np.pi / 180.0) * theta
+    th = np.deg2rad(theta)
     # resize image to next power of two (but no less than 64) for
     # Fourier analysis; speeds up Fourier and lessens artifacts
     projection_size_padded = \
@@ -232,13 +278,21 @@ def iradon(radon_image, theta=None, output_size=None,
     # Determine the center of the projections (= center of sinogram)
     mid_index = radon_image.shape[0] // 2
 
-    [X, Y] = np.mgrid[0:output_size, 0:output_size]
-    xpr = X - int(output_size) // 2
-    ypr = Y - int(output_size) // 2
+    # notes on workspace:
+    # 1. if thwork[i] is None, the calculation will be done per row.
+    # 2. since output_size may have already been rescaled above, use
+    #    circle=True when calling iradon_workspace() here.
+    if workspace is None:
+        workspace = iradon_workspace(theta, output_size,
+                                     circle=True, full=False)
+    xpr, ypr, thwork = workspace
 
     # Reconstruct image by interpolation
     for i in range(len(theta)):
-        t = ypr * np.cos(th[i]) - xpr * np.sin(th[i])
+        t = thwork[i]
+        if t is None:
+            t = ypr * np.cos(th[i]) - xpr * np.sin(th[i])
+
         x = np.arange(radon_filtered.shape[0]) - mid_index
         if interpolation == 'linear':
             backprojected = np.interp(t, x, radon_filtered[:, i],
