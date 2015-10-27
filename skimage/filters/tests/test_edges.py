@@ -335,6 +335,20 @@ def test_vprewitt_horizontal():
     assert_allclose(result, 0)
 
 
+def test_laplace_zeros():
+    """Laplace on an array of all zeros."""
+    result = filters.laplace(np.zeros((10, 10)), np.ones((10, 10), bool))
+    assert (np.all(result == 0))
+
+
+def test_laplace_mask():
+    """Laplace on a masked array should be zero."""
+    np.random.seed(0)
+    result = filters.laplace(np.random.uniform(size=(10, 10)),
+                             np.zeros((10, 10), bool))
+    assert (np.all(result == 0))
+
+
 def test_horizontal_mask_line():
     """Horizontal edge filters mask pixels surrounding input mask."""
     vgrad, _ = np.mgrid[:1:11j, :1:11j]  # vertical gradient with spacing 0.1
@@ -350,7 +364,6 @@ def test_horizontal_mask_line():
     for grad_func in (filters.prewitt_h, filters.sobel_h, filters.scharr_h):
         result = grad_func(vgrad, mask)
         yield assert_close, result, expected
-
 
 def test_vertical_mask_line():
     """Vertical edge filters mask pixels surrounding input mask."""

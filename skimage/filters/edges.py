@@ -37,6 +37,9 @@ ROBERTS_PD_WEIGHTS = np.array([[1, 0],
 ROBERTS_ND_WEIGHTS = np.array([[0, 1],
                                [-1, 0]], dtype=np.double)
 
+LAPLACE_WEIGHTS = np.array([[1,  1,  1],
+                            [1, -8,  1],
+                            [1,  1,  1]]) / 16.0
 
 def _mask_filter_result(result, mask):
     """Return result after masking.
@@ -762,3 +765,34 @@ def roberts_negative_diagonal(image, mask=None):
 
     """
     return np.abs(roberts_neg_diag(image, mask))
+
+def laplace(image, mask=None):
+    """Find the edges of an image using the Laplace operator.
+
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process.
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : 2-D array
+        The Laplace edge map.
+
+    Notes
+    -----
+    We use the following kernel::
+
+      1   1   1
+      1  -8   1
+      1   1   1
+
+    """
+    assert_nD(image, 2)
+    image = img_as_float(image)
+    result = convolve(image, LAPLACE_WEIGHTS)
+    return _mask_filter_result(result, mask)
