@@ -337,15 +337,29 @@ def test_vprewitt_horizontal():
 
 def test_laplace_zeros():
     """Laplace on an array of all zeros."""
-    result = filters.laplace(np.zeros((10, 10)), np.ones((10, 10), bool))
-    assert (np.all(result == 0))
+    # Create a synthetic 2D image
+    image = np.zeros((9,9))
+    image[3:-3] = 1
+    result = filters.laplace(image)
+    res_chk = array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+                     [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+                     [ 0.,  0.,  0., -1., -1., -1.,  0.,  0.,  0.],
+                     [ 0.,  0., -1.,  2.,  1.,  2., -1.,  0.,  0.],
+                     [ 0.,  0., -1.,  1.,  0.,  1., -1.,  0.,  0.],
+                     [ 0.,  0., -1.,  2.,  1.,  2., -1.,  0.,  0.],
+                     [ 0.,  0.,  0., -1., -1., -1.,  0.,  0.,  0.],
+                     [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+                     [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
+    assert_allclose(result, res_chk)
 
 
 def test_laplace_mask():
     """Laplace on a masked array should be zero."""
-    np.random.seed(0)
-    result = filters.laplace(np.random.uniform(size=(10, 10)),
-                             np.zeros((10, 10), bool))
+    # Create a synthetic 2D image
+    image = np.zeros((9, 9))
+    image[3:-3] = 1
+    # Define the mask
+    result = filters.laplace(image, np.zeros((10, 10), bool))
     assert (np.all(result == 0))
 
 
