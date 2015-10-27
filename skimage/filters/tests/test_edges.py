@@ -336,20 +336,20 @@ def test_vprewitt_horizontal():
 
 
 def test_laplace_zeros():
-    """Laplace on an array of all zeros."""
+    """Laplace on a square image."""
     # Create a synthetic 2D image
-    image = np.zeros((9,9))
-    image[3:-3] = 1
+    image = np.zeros((9, 9))
+    image[3:-3, 3:-3] = 1
     result = filters.laplace(image)
-    res_chk = array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-                     [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-                     [ 0.,  0.,  0., -1., -1., -1.,  0.,  0.,  0.],
-                     [ 0.,  0., -1.,  2.,  1.,  2., -1.,  0.,  0.],
-                     [ 0.,  0., -1.,  1.,  0.,  1., -1.,  0.,  0.],
-                     [ 0.,  0., -1.,  2.,  1.,  2., -1.,  0.,  0.],
-                     [ 0.,  0.,  0., -1., -1., -1.,  0.,  0.,  0.],
-                     [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-                     [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
+    res_chk = np.array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+                        [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+                        [ 0.,  0.,  0., -1., -1., -1.,  0.,  0.,  0.],
+                        [ 0.,  0., -1.,  2.,  1.,  2., -1.,  0.,  0.],
+                        [ 0.,  0., -1.,  1.,  0.,  1., -1.,  0.,  0.],
+                        [ 0.,  0., -1.,  2.,  1.,  2., -1.,  0.,  0.],
+                        [ 0.,  0.,  0., -1., -1., -1.,  0.,  0.,  0.],
+                        [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+                        [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
     assert_allclose(result, res_chk)
 
 
@@ -357,9 +357,9 @@ def test_laplace_mask():
     """Laplace on a masked array should be zero."""
     # Create a synthetic 2D image
     image = np.zeros((9, 9))
-    image[3:-3] = 1
+    image[3:-3, 3:-3] = 1
     # Define the mask
-    result = filters.laplace(image, np.zeros((10, 10), bool))
+    result = filters.laplace(image, ksize=3, mask=np.zeros((9, 9), bool))
     assert (np.all(result == 0))
 
 
