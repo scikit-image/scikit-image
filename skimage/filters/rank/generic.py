@@ -373,7 +373,7 @@ def geometric_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
     >>> from skimage.morphology import disk
     >>> from skimage.filters.rank import mean
     >>> img = data.camera()
-    >>> avg = geomtric_mean(img, disk(5))
+    >>> avg = geometric_mean(img, disk(5))
 
     """
 
