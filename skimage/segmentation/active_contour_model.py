@@ -79,7 +79,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
 
     Fit spline to image:
 
-    >>> snake = active_contour_model(img, init, w_edge=0, w_line=1)
+    >>> snake = active_contour(img, init, w_edge=0, w_line=1)
     >>> int(np.mean(np.sqrt((45-snake[:, 0])**2 + (35-snake[:, 1])**2)))
     25
 
@@ -88,10 +88,9 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     new_scipy = scipy_version[0] > 0 or \
                 (scipy_version[0] == 0 and scipy_version[1] >= 14)
     if not new_scipy:
-        warnings.warn('You are using an old version of scipy. '
-                      'Upgrading to a version newer than 0.14.0 '
-                      'will signifcantly improve the performance '
-                      'of this algorithm.')
+        raise NotImplementedError('You are using an old version of scipy. '
+                      'Active contours is implemented for scipy versions '
+                      '0.14.0 and above.')
 
     max_iterations = int(max_iterations)
     if max_iterations <= 0:
@@ -112,7 +111,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
                     sobel(img[:, :, 2])]
         else:
             edge = [sobel(img)]
-        for i in xrange(3 if RGB else 1):
+        for i in range(3 if RGB else 1):
             edge[i][0, :] = edge[i][1, :]
             edge[i][-1, :] = edge[i][-2, :]
             edge[i][:, 0] = edge[i][:, 1]
@@ -184,7 +183,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     inv = scipy.linalg.inv(A+gamma*np.eye(n))
 
     # Explicit time stepping for image energy minimization:
-    for i in xrange(max_iterations):
+    for i in range(max_iterations):
         if new_scipy:
             fx = intp(x, y, dx=1, grid=False)
             fy = intp(x, y, dy=1, grid=False)
