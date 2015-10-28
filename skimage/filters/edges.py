@@ -14,6 +14,7 @@ from .. import img_as_float
 from .._shared.utils import assert_nD, deprecated
 from scipy.ndimage import convolve, binary_erosion, generate_binary_structure
 
+from ..restoration.uft import laplacian
 
 EROSION_SELEM = generate_binary_structure(2, 2)
 
@@ -175,6 +176,7 @@ def hsobel(image, mask=None):
 
     Parameters
     ----------
+
     image : 2-D array
         Image to process.
     mask : 2-D array, optional
@@ -762,3 +764,35 @@ def roberts_negative_diagonal(image, mask=None):
 
     """
     return np.abs(roberts_neg_diag(image, mask))
+
+def laplace(image, ksize=3, mask=None):
+    """Find the edges of an image using the Laplace operator.
+
+    Parameters
+    ----------
+    image : ndarray
+        Image to process.
+    ksize : int, optional
+        Define the size of the discrete Laplacian operator such that it
+        will have a size of (ksize,) * image.ndim.
+    mask : ndarray, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : ndarray
+        The Laplace edge map.
+
+    Notes
+    -----
+    The Laplacian operator is generated using the function 
+    skimage.restoration.uft.laplacian().
+
+    """
+    image = img_as_float(image)
+    # Create the discrete Laplacian operator - We keep only the real part of the filter
+    _, laplace_op = laplacian(image.ndim, (ksize, ) * image.ndim)
+    result = convolve(image, laplace_op)
+    return _mask_filter_result(result, mask)
