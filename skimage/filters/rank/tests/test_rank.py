@@ -39,6 +39,8 @@ def check_all():
                  rank.maximum(image, selem))
     assert_equal(refs["mean"],
                  rank.mean(image, selem))
+    assert_equal(refs["geometric_mean"],
+                 rank.geometric_mean(image, selem)),
     assert_equal(refs["mean_percentile"],
                  rank.mean_percentile(image, selem))
     assert_equal(refs["mean_bilateral"],
@@ -102,6 +104,13 @@ def test_random_sizes():
         rank.mean(image=image8, selem=elem, mask=mask, out=out8,
                   shift_x=+1, shift_y=+1)
         assert_equal(image8.shape, out8.shape)
+        
+        rank.geometric_mean(image=image8, selem=elem, mask=mask, out=out8,
+                            shift_x=0, shift_y=0)
+        assert_equal(image8.shape, out8.shape)
+        rank.geometric_mean(image=image8, selem=elem, mask=mask, out=out8,
+                            shift_x=+1, shift_y=+1)
+        assert_equal(image8.shape, out8.shape)
 
         image16 = np.ones((m, n), dtype=np.uint16)
         out16 = np.empty_like(image8, dtype=np.uint16)
@@ -110,6 +119,13 @@ def test_random_sizes():
         assert_equal(image16.shape, out16.shape)
         rank.mean(image=image16, selem=elem, mask=mask, out=out16,
                   shift_x=+1, shift_y=+1)
+        assert_equal(image16.shape, out16.shape)
+
+        rank.geometric_mean(image=image16, selem=elem, mask=mask, out=out16,
+                            shift_x=0, shift_y=0)
+        assert_equal(image16.shape, out16.shape)
+        rank.geometric_mean(image=image16, selem=elem, mask=mask, out=out16,
+                            shift_x=+1, shift_y=+1)
         assert_equal(image16.shape, out16.shape)
 
         rank.mean_percentile(image=image16, mask=mask, out=out16,
@@ -292,8 +308,8 @@ def test_compare_8bit_unsigned_vs_signed():
         assert_equal(image_u, img_as_ubyte(image_s))
 
     methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
-               'mean', 'subtract_mean', 'median', 'minimum', 'modal',
-               'enhance_contrast', 'pop', 'threshold', 'tophat']
+               'mean', 'geometric_mean', 'subtract_mean', 'median', 'minimum', 
+               'modal', 'enhance_contrast', 'pop', 'threshold', 'tophat']
 
     for method in methods:
         func = getattr(rank, method)
@@ -338,6 +354,9 @@ def test_trivial_selem8():
     rank.mean(image=image, selem=elem, out=out, mask=mask,
               shift_x=0, shift_y=0)
     assert_equal(image, out)
+    rank.geometric_mean(image=image, selem=elem, out=out, mask=mask,
+                        shift_x=0, shift_y=0)
+    assert_equal(image, out)
     rank.minimum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=0, shift_y=0)
     assert_equal(image, out)
@@ -360,6 +379,9 @@ def test_trivial_selem16():
     elem = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=np.uint8)
     rank.mean(image=image, selem=elem, out=out, mask=mask,
               shift_x=0, shift_y=0)
+    assert_equal(image, out)
+    rank.geometric_mean(image=image, selem=elem, out=out, mask=mask,
+                        shift_x=0, shift_y=0)
     assert_equal(image, out)
     rank.minimum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=0, shift_y=0)
@@ -407,6 +429,9 @@ def test_smallest_selem16():
     rank.mean(image=image, selem=elem, out=out, mask=mask,
               shift_x=0, shift_y=0)
     assert_equal(image, out)
+    rank.geometric_mean(image=image, selem=elem, out=out, mask=mask,
+                        shift_x=0, shift_y=0)
+    assert_equal(image, out)
     rank.minimum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=0, shift_y=0)
     assert_equal(image, out)
@@ -431,6 +456,9 @@ def test_empty_selem():
 
     rank.mean(image=image, selem=elem, out=out, mask=mask,
               shift_x=0, shift_y=0)
+    assert_equal(res, out)
+    rank.geometric_mean(image=image, selem=elem, out=out, mask=mask,
+                        shift_x=0, shift_y=0)
     assert_equal(res, out)
     rank.minimum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=0, shift_y=0)
@@ -513,6 +541,9 @@ def test_selem_dtypes():
         elem = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=dtype)
         rank.mean(image=image, selem=elem, out=out, mask=mask,
                   shift_x=0, shift_y=0)
+        assert_equal(image, out)
+        rank.geometric_mean(image=image, selem=elem, out=out, mask=mask,
+                            shift_x=0, shift_y=0)
         assert_equal(image, out)
         rank.mean_percentile(image=image, selem=elem, out=out, mask=mask,
                              shift_x=0, shift_y=0)
