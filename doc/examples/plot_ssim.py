@@ -45,7 +45,7 @@ def mse(x, y):
 img_noise = img + noise
 img_const = img + abs(noise)
 
-fig, (ax0, ax1, ax2) = plt.subplots(nrows=1, ncols=3, figsize=(8, 4))
+fig, (ax0, ax1, ax2) = plt.subplots(nrows=1, ncols=3, figsize=(8, 4), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
 
 mse_none = mse(img, img)
 ssim_none = ssim(img, img, dynamic_range=img.max() - img.min())

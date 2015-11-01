@@ -33,7 +33,10 @@ result = match_template(image, coin)
 ij = np.unravel_index(np.argmax(result), result.shape)
 x, y = ij[::-1]
 
-fig, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(8, 3))
+fig = plt.figure(figsize=(8, 3))
+ax1 = plt.subplot(1, 3, 1)
+ax2 = plt.subplot(1, 3, 2, adjustable='box-forced')
+ax3 = plt.subplot(1, 3, 3, sharex=ax2, sharey=ax2, adjustable='box-forced')
 
 ax1.imshow(coin)
 ax1.set_axis_off()

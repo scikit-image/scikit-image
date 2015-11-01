@@ -26,7 +26,7 @@ from skimage.color import rgb2hed
 ihc_rgb = data.immunohistochemistry()
 ihc_hed = rgb2hed(ihc_rgb)
 
-fig, axes = plt.subplots(2, 2, figsize=(7, 6))
+fig, axes = plt.subplots(2, 2, figsize=(7, 6), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
 ax0, ax1, ax2, ax3 = axes.ravel()
 
 ax0.imshow(ihc_rgb)
@@ -61,7 +61,9 @@ h = rescale_intensity(ihc_hed[:, :, 0], out_range=(0, 1))
 d = rescale_intensity(ihc_hed[:, :, 2], out_range=(0, 1))
 zdh = np.dstack((np.zeros_like(h), d, h))
 
-fig, ax = plt.subplots()
+#fig, ax = plt.subplots()
+fig = plt.figure()
+ax = plt.subplot(1, 1, 1, sharex=ax0, sharey=ax0, adjustable='box-forced')
 ax.imshow(zdh)
 ax.set_title("Stain separated image (rescaled)")
 ax.axis('off')

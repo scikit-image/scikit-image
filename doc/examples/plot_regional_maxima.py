@@ -36,19 +36,22 @@ Subtracting the dilated image leaves an image with just the coins and a flat,
 black background, as shown below.
 """
 
-fig, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(8, 2.5))
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(8, 2.5), sharex=True, sharey=True)
 
 ax1.imshow(image)
 ax1.set_title('original image')
 ax1.axis('off')
+ax1.set_adjustable('box-forced')
 
 ax2.imshow(dilated, vmin=image.min(), vmax=image.max())
 ax2.set_title('dilated')
 ax2.axis('off')
+ax2.set_adjustable('box-forced')
 
 ax3.imshow(image - dilated)
 ax3.set_title('image - dilated')
 ax3.axis('off')
+ax3.set_adjustable('box-forced')
 
 fig.tight_layout()
 
@@ -76,7 +79,7 @@ mask, seed, and dilated images along a slice of the image (indicated by red
 line).
 """
 
-fig, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(8, 2.5))
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(8, 2.5))
 
 yslice = 197
 
