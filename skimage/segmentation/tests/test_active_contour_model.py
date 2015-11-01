@@ -5,6 +5,7 @@ from skimage.filters import gaussian_filter
 from skimage.segmentation import active_contour
 from numpy.testing import assert_equal, assert_allclose, assert_raises
 from numpy.testing.decorators import skipif
+import scipy
 
 scipy_version = list(map(int, scipy.__version__.split('.')))
 new_scipy = scipy_version[0] > 0 or \

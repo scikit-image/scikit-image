@@ -1,10 +1,10 @@
 import warnings
 import numpy as np
 from skimage import img_as_float
+import scipy
 import scipy.linalg
 from scipy.interpolate import RectBivariateSpline, interp2d
 from skimage.filters import sobel
-
 
 def active_contour(image, snake, alpha=0.01, beta=0.1,
                    w_line=0, w_edge=1, gamma=0.01,
