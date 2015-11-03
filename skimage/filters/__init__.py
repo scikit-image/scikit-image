@@ -8,6 +8,7 @@ from .edges import (sobel, hsobel, vsobel, sobel_h, sobel_v,
                     roberts_neg_diag, laplace)
 from ._rank_order import rank_order
 from ._gabor import gabor_kernel, gabor
+from ._frangi import frangi, hessian
 from .thresholding import (threshold_adaptive, threshold_otsu, threshold_yen,
                            threshold_isodata, threshold_li, threshold_minimum)
 from . import rank
@@ -53,6 +54,8 @@ __all__ = ['inverse',
            'rank_order',
            'gabor_kernel',
            'gabor',
+           'frangi',
+           'hessian',
            'threshold_adaptive',
            'threshold_otsu',
            'threshold_yen',
