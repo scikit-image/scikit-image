@@ -379,6 +379,16 @@ def test_equals():
         assert_equal(r1 != r3, True, "Different regionprops are equal")
 
 
+def test_iterate_all_props():
+    region = regionprops(SAMPLE)[0]
+    p0 = {p: region[p] for p in region}
+
+    region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0]
+    p1 = {p: region[p] for p in region}
+
+    assert len(p0) < len(p1)
+
+
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
     run_module_suite()
