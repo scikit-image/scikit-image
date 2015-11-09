@@ -381,10 +381,10 @@ def test_equals():
 
 def test_iterate_all_props():
     region = regionprops(SAMPLE)[0]
-    p0 = {p: region[p] for p in region}
+    p0 = dict((p, region[p]) for p in region)
 
     region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0]
-    p1 = {p: region[p] for p in region}
+    p1 = dict((p, region[p]) for p in region)
 
     assert len(p0) < len(p1)
 
