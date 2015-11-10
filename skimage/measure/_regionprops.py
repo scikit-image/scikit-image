@@ -180,7 +180,7 @@ class _RegionProperties(object):
         max_feret = 0.0
         identity_convex_hull = convex_hull_image(label_image == label)
         coordinates = np.vstack(find_contours(identity_convex_hull, 0.5, fully_connected = 'high'))
-    
+        
         n = len(coordinates)
         for a in range(0, n):
             for b in range(0, n):
