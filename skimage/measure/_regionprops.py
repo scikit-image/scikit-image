@@ -420,6 +420,12 @@ def regionprops(label_image, intensity_image=None, cache=True):
     **extent** : float
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as ``area / (rows * cols)``
+    **feret_diameter** : list
+        Maximum Feret's diameter computed as the longest distance between
+        points around a region's convex hull contour as determined by
+        ``find_contours``. Return list contains the maximum Feret 
+        diameter and the coordinates of the line of maximum diameter as
+        [float, [float, float], [float, float]].
     **filled_area** : int
         Number of pixels of filled region.
     **filled_image** : (H, J) ndarray
