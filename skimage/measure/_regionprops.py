@@ -192,7 +192,7 @@ class _RegionProperties(object):
                     i1 = a
                     i2 = b
         
-        return (max_feret, tuple(coordinates[i1]), tuple(coordinates[i2]))
+        return max_feret
 
     @property
     def filled_area(self):
@@ -420,12 +420,10 @@ def regionprops(label_image, intensity_image=None, cache=True):
     **extent** : float
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as ``area / (rows * cols)``
-    **feret_diameter** : tuple
+    **feret_diameter** : float
         Maximum Feret's diameter computed as the longest distance between
         points around a region's convex hull contour as determined by
-        ``find_contours``. Return list contains the maximum Feret 
-        diameter and the coordinates of the line of maximum diameter as
-        (float, (float, float), (float, float)).
+        ``find_contours``.
     **filled_area** : int
         Number of pixels of filled region.
     **filled_image** : (H, J) ndarray
