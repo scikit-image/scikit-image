@@ -167,6 +167,14 @@ def test_label():
     assert_array_equal(label, 1)
 
 
+def test_feret_diameter():
+    # comparator result is based on SAMPLE from manually-inspected computations
+    comparator_result = (17.029386365926403, (6.5, 17.0), (7.5, 0.0))
+    test_result = regionprops(SAMPLE)[0].feret_diameter
+    assert_almost_equal(comparator_result[0], test_result[0])
+    assert_array_almost_equal(comparator_result[0], test_result[0])
+    assert_array_almost_equal(comparator_result[1], test_result[1])
+
 def test_filled_area():
     area = regionprops(SAMPLE)[0].filled_area
     assert area == np.sum(SAMPLE)
