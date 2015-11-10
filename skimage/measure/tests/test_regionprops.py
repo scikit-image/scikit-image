@@ -45,6 +45,13 @@ def test_ndim():
     assert_raises(TypeError, regionprops, np.zeros((10, 10, 2), dtype=np.int))
 
 
+def test_feret_diameter():
+    # comparator result is based on SAMPLE from manually-inspected computations
+    comparator_result = 17.029386365926403
+    test_result = regionprops(SAMPLE)[0].feret_diameter
+    assert_almost_equal(comparator_result, test_result)
+
+
 def test_area():
     area = regionprops(SAMPLE)[0].area
     assert area == np.sum(SAMPLE)
@@ -140,13 +147,6 @@ def test_euler_number():
 def test_extent():
     extent = regionprops(SAMPLE)[0].extent
     assert_almost_equal(extent, 0.4)
-
-
-def test_feret_diameter():
-    # comparator result is based on SAMPLE from manually-inspected computations
-    comparator_result = 17.029386365926403
-    test_result = regionprops(SAMPLE)[0].feret_diameter
-    assert_almost_equal(comparator_result, test_result)
 
 
 def test_moments_hu():

@@ -173,26 +173,18 @@ class _RegionProperties(object):
     def feret_diameter(self):
         from ..morphology.convex_hull import convex_hull_image
         from ._find_contours import find_contours
+        from scipy.spatial.distance import pdist
         
         label_image = self._label_image
         label = self.label
         
         max_feret = 0.0
         identity_convex_hull = convex_hull_image(label_image == label)
-        coordinates = np.vstack(find_contours(identity_convex_hull, 0.5, fully_connected = 'high'))
-        
-        n = len(coordinates)
-        for a in range(0, n):
-            for b in range(0, n):
-                dx = coordinates[a][0] - coordinates[b][0]
-                dy = coordinates[a][1] - coordinates[b][1]
-                d = sqrt(dx ** 2 + dy ** 2)
-                if d > max_feret:
-                    max_feret = d
-                    i1 = a
-                    i2 = b
-        
-        return max_feret
+        coordinates = np.vstack(find_contours(identity_convex_hull, 0.5, 
+                                              fully_connected = 'high'))
+        distances = pdist(coordinates, 'euclidean')
+
+        return np.max(distances)
 
     @property
     def filled_area(self):
