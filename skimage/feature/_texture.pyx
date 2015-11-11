@@ -271,8 +271,8 @@ def _local_binary_pattern(double[:, ::1] image,
 # Values represent offsets of neighbour rectangles relative to central one.
 # It has order starting from top left and going clockwise.
 cdef:
-    Py_ssize_t[::1] mlbp_r_offsets = np.asarray([-1, -1, -1, 0, 1, 1, 1, 0])
-    Py_ssize_t[::1] mlbp_c_offsets = np.asarray([-1, 0, 1, 1, 1, 0, -1, -1])
+    Py_ssize_t[::1] mlbp_r_offsets = np.asarray([-1, -1, -1, 0, 1, 1, 1, 0], dtype=np.intp)
+    Py_ssize_t[::1] mlbp_c_offsets = np.asarray([-1, 0, 1, 1, 1, 0, -1, -1], dtype=np.intp)
 
 
 def _multiblock_lbp(float[:, ::1] int_image,
