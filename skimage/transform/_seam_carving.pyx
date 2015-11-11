@@ -180,7 +180,7 @@ def _seam_carve_v(img, energy_map, iters, border):
     cdef Py_ssize_t seams_left = iters
     cdef Py_ssize_t seams_removed
     cdef Py_ssize_t seam_idx
-    cdef Py_ssize_t[::1] seam_buffer = np.zeros(rows, dtype=np.int)
+    cdef Py_ssize_t[::1] seam_buffer = np.zeros(rows, dtype=np.intp)
 
     cdef cnp.double_t[:, :, ::1] image = img
     cdef cnp.int8_t[:, ::1] track_img = np.zeros(img.shape[0:2], dtype=np.int8)
