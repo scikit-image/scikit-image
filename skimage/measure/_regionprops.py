@@ -2,9 +2,13 @@
 from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage as ndi
+from scipy.spatial.distance import pdist
 
 from ._label import label
 from . import _moments
+from ._find_contours import find_contours
+
+
 
 
 __all__ = ['regionprops', 'perimeter']
@@ -172,19 +176,13 @@ class _RegionProperties(object):
     @property
     def feret_diameter(self):
         from ..morphology.convex_hull import convex_hull_image
-        from ._find_contours import find_contours
-        from scipy.spatial.distance import pdist
-        
         label_image = self._label_image
         label = self.label
-        
-        max_feret = 0.0
         identity_convex_hull = convex_hull_image(label_image == label)
         coordinates = np.vstack(find_contours(identity_convex_hull, 0.5, 
                                               fully_connected = 'high'))
-        distances = pdist(coordinates, 'euclidean')
-
-        return np.max(distances)
+        distances = pdist(coordinates, 'sqeuclidean')
+        return sqrt(np.max(distances))
 
     @property
     def filled_area(self):
@@ -415,7 +413,7 @@ def regionprops(label_image, intensity_image=None, cache=True):
     **feret_diameter** : float
         Maximum Feret's diameter computed as the longest distance between
         points around a region's convex hull contour as determined by
-        ``find_contours``.
+        ``find_contours``. [5]_
     **filled_area** : int
         Number of pixels of filled region.
     **filled_image** : (H, J) ndarray
@@ -515,6 +513,9 @@ def regionprops(label_image, intensity_image=None, cache=True):
            Features, from Lecture notes in computer science, p. 676. Springer,
            Berlin, 1993.
     .. [4] http://en.wikipedia.org/wiki/Image_moment
+    .. [5] W. Pabst, E. Gregorová. Characterization of particles and particle
+           systems, pp. 27-28. ICT Prague, 2007.
+           http://old.vscht.cz/sil/keramika/Characterization_of_particles/CPPS%20_English%20version_.pdf
 
     Examples
     --------
