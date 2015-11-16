@@ -768,8 +768,6 @@ def gray2rgb(image, alpha=None):
         else:
             return np.concatenate(3 * (image,), axis=-1)
 
-        return image
-
     else:
         raise ValueError("Input image expected to be RGB, RGBA or gray.")
 
