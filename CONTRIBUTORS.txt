@@ -215,3 +215,6 @@
 
 - Jim Fienup, Alexander Iacchetta
   In-depth review of sub-pixel shift registration
+
+- Damian Eads
+  Structuring elements in morphology module.
