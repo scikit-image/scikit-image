@@ -6,6 +6,11 @@ from ._convex_hull import possible_hull
 from ..measure._label import label
 from ..util import unique_rows
 
+try:
+    from scipy.spatial import Delaunay
+except ImportError:
+    Delaunay = None
+
 
 def convex_hull_image(image):
     """Compute the convex hull image of a binary image.
@@ -29,6 +34,10 @@ def convex_hull_image(image):
 
     """
 
+    if Delaunay is None:
+        raise ImportError("Could not import scipy.spatial.Delaunay, "
+                          "only available in scipy >= 0.9.")
+
     image = image.astype(bool)
 
     # Here we do an optimisation by choosing only pixels that are
@@ -47,12 +56,6 @@ def convex_hull_image(image):
     # repeated coordinates can *sometimes* cause problems in
     # scipy.spatial.Delaunay, so we remove them.
     coords = unique_rows(coords_corners)
-
-    try:
-        from scipy.spatial import Delaunay
-    except ImportError:
-        raise ImportError('Could not import scipy.spatial, only available in '
-                          'scipy >= 0.9.')
 
     # Subtract offset
     offset = coords.mean(axis=0)
