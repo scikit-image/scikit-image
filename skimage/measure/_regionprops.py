@@ -5,6 +5,7 @@ from scipy import ndimage as ndi
 
 from ._label import label
 from . import _moments
+from ..morphology.convex_hull import convex_hull_image
 
 
 __all__ = ['regionprops', 'perimeter']
@@ -134,7 +135,6 @@ class _RegionProperties(object):
 
     @_cached_property
     def convex_image(self):
-        from ..morphology.convex_hull import convex_hull_image
         return convex_hull_image(self.image)
 
     @property
