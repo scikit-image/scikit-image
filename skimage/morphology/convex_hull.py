@@ -20,12 +20,12 @@ def convex_hull_image(image):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) array
         Binary input image. This array is cast to bool before processing.
 
     Returns
     -------
-    hull : ndarray of bool
+    hull : (M, N) array of bool
         Binary image with pixels in convex hull set to True.
 
     References
@@ -38,12 +38,9 @@ def convex_hull_image(image):
         raise ImportError("Could not import scipy.spatial.Delaunay, "
                           "only available in scipy >= 0.9.")
 
-    image = image.astype(bool)
-
     # Here we do an optimisation by choosing only pixels that are
     # the starting or ending pixel of a row or column.  This vastly
-    # limits the number of coordinates to examine for the virtual
-    # hull.
+    # limits the number of coordinates to examine for the virtual hull.
     coords = possible_hull(image.astype(np.uint8))
     N = len(coords)
 
