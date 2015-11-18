@@ -8,7 +8,7 @@ from .watershed import watershed
 from ._skeletonize import skeletonize, medial_axis
 from .convex_hull import convex_hull_image, convex_hull_object
 from .greyreconstruct import reconstruction
-from .misc import remove_small_objects
+from .misc import remove_small_objects, remove_small_holes
 
 from ..measure._label import label
 from .._shared.utils import deprecated as _deprecated
@@ -40,4 +40,5 @@ __all__ = ['binary_erosion',
            'convex_hull_image',
            'convex_hull_object',
            'reconstruction',
-           'remove_small_objects']
+           'remove_small_objects',
+           'remove_small_holes']
