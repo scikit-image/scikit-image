@@ -127,13 +127,11 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         orientations_arr = np.arange(orientations)
         dx_arr = radius * np.cos(orientations_arr / orientations * np.pi)
         dy_arr = radius * np.sin(orientations_arr / orientations * np.pi)
-        cr2 = cy + cy
-        cc2 = cx + cx
         hog_image = np.zeros((sy, sx), dtype=float)
         for x in range(n_cellsx):
             for y in range(n_cellsy):
                 for o, dx, dy in zip(orientations_arr, dx_arr, dy_arr):
-                    centre = tuple([y * cr2 // 2, x * cc2 // 2])
+                    centre = tuple([y * cy + cy // 2, x * cx + cx // 2])
                     rr, cc = draw.line(int(centre[0] - dx),
                                        int(centre[1] + dy),
                                        int(centre[0] + dx),
