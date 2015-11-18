@@ -84,6 +84,28 @@ def test_imread_palette():
     assert img.ndim == 3
 
 
+def test_imread_index_png_with_alpha():
+    # The file `foo3x5x4indexed.png` was created with this array
+    # (3x5 is (height)x(width)):
+    data = np.array([[[127, 0, 255, 255],
+                      [127, 0, 255, 255],
+                      [127, 0, 255, 255],
+                      [127, 0, 255, 255],
+                      [127, 0, 255, 255]],
+                     [[192, 192, 255, 0],
+                      [192, 192, 255, 0],
+                      [0, 0, 255, 0],
+                      [0, 0, 255, 0],
+                      [0, 0, 255, 0]],
+                     [[0, 31, 255, 255],
+                      [0, 31, 255, 255],
+                      [0, 31, 255, 255],
+                      [0, 31, 255, 255],
+                      [0, 31, 255, 255]]], dtype=np.uint8)
+    img = imread(os.path.join(data_dir, 'foo3x5x4indexed.png'))
+    assert_array_equal(img, data)
+
+
 def test_palette_is_gray():
     gray = Image.open(os.path.join(data_dir, 'palette_gray.png'))
     assert _palette_is_grayscale(gray)
