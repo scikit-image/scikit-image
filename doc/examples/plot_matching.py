@@ -39,7 +39,7 @@ original=True
 
 # warp synthetic image
 tform = AffineTransform(scale=(0.9, 0.9), rotation=0.2, translation=(20, -10))
-
+    
 if original:
     # generate synthetic checkerboard image and add gradient for the later matching
     checkerboard = img_as_float(data.checkerboard())
@@ -52,25 +52,21 @@ if original:
     img_orig[..., 2] = gradient_c
     img_orig = rescale_intensity(img_orig)
     img_orig_gray = rgb2gray(img_orig)
-
+    
     img_warped = warp(img_orig, tform.inverse, output_shape=(200, 200))
     img_warped_gray = rgb2gray(img_warped)
 else:
     imageName='test1.png'
-    imageName2='test2.png'
-
-    #print "imageName:",imageName
-    #print "imageName2:",imageName2
-
-
+    imageName2='test2.png'    
+    
     img1  = io.imread(imageName)
     img2  = io.imread(imageName2)
-
+    
     img_orig        = img1
     img_warped      = img2
     img_orig_gray   = rgb2gray(img_orig)
     img_warped_gray = rgb2gray(img_warped)
-
+    
 
 # extract corners using Harris' corner measure
 coords_orig = corner_peaks(corner_harris(img_orig_gray), threshold_rel=0.001,
@@ -92,9 +88,8 @@ def gaussian_weights(patch_radius, sigma=1):
     return g
 
 
-
-def match_corner(coord_list1,coord_list2,img1,img2, patch_radius=5):#     # find correspondences using simple weighted sum of squared differences
-
+# find correspondences using simple weighted sum of squared differences
+def match_corner(coord_list1,coord_list2,img1,img2, patch_radius=5):
     c1len = len(coord_list1)
     c2len = len(coord_list2)
     cl1index = np.arange(c1len)
@@ -105,10 +100,10 @@ def match_corner(coord_list1,coord_list2,img1,img2, patch_radius=5):#     # find
         src.append(idx)
         window_orig = img1[r-patch_radius:r+patch_radius+1,
                           c-patch_radius:c+patch_radius+1]
-
+    
         # weight pixels depending on distance to center pixel
         weights = gaussian_weights(patch_radius, 3)
-
+    
         # compute sum of squared differences to all corners in warped image
         SSDs = []
         for cr, cc in coord_list2:
@@ -116,12 +111,12 @@ def match_corner(coord_list1,coord_list2,img1,img2, patch_radius=5):#     # find
                                  cc-patch_radius:cc+patch_radius+1]
             SSD = np.sum(weights * (window_orig - window_warped)**2)
             SSDs.append(SSD)
-
+    
         # use corner with minimum SSD as correspondence
         min_idx = np.argmin(SSDs)
         dst.append(min_idx)
-
-
+    
+   
     return [np.array(coord_list1[src]),np.array(coord_list2[dst])]
 
 
@@ -145,8 +140,12 @@ print(tform.scale, tform.translation, tform.rotation)
 print(model.scale, model.translation, model.rotation)
 print(model_robust.scale, model_robust.translation, model_robust.rotation)
 
+# bug workaround swapping X,Y
+# issue: https://github.com/scikit-image/scikit-image/issues/1789
+model_robust.params[[0, 1], :] = model_robust.params[[1, 0], :]
+
 # visualize correspondence
-fig, ax = plt.subplots(nrows=4, ncols=1)
+fig, ax = plt.subplots(nrows=2, ncols=2)
 
 def warp_and_combine(img1,img2,xform):
     img1_warped = warp(img1,xform)
@@ -156,32 +155,30 @@ def warp_and_combine(img1,img2,xform):
         combined = img1f+img2f
     else:
         combined = img1f
-
+    
     return combined
-
-
-
+        
 plt.gray()
 
 inlier_idxs = np.nonzero(inliers)[0]
-plot_matches(ax[0], img_orig_gray, img_warped_gray, src, dst,
+plot_matches(ax[0,0], img_orig_gray, img_warped_gray, src, dst,
              np.column_stack((inlier_idxs, inlier_idxs)), matches_color='b')
-ax[0].axis('off')
-ax[0].set_title('Correct correspondences')
+ax[0,0].axis('off')
+ax[0,0].set_title('Correct Correspondences')
 
 outlier_idxs = np.nonzero(outliers)[0]
-plot_matches(ax[1], img_orig_gray, img_warped_gray, src, dst,
+plot_matches(ax[0,1], img_orig_gray, img_warped_gray, src, dst,
              np.column_stack((outlier_idxs, outlier_idxs)), matches_color='r')
-ax[1].axis('off')
-ax[1].set_title('Faulty correspondences')
+ax[0,1].axis('off')
+ax[0,1].set_title('Faulty Correspondences')
 
-ax[2].axis('off')
-ax[2].set_title('inverse transform overlay')
-ax[2].imshow(warp_and_combine(img_orig_gray,img_warped_gray,model_robust.inverse))
+ax[1,0].axis('off')
+ax[1,0].set_title('Combine Originals')
+ax[1,0].imshow(warp_and_combine(img_orig_gray,img_warped_gray,AffineTransform()))
 
 
-ax[3].axis('off')
-ax[3].set_title('transform overlay')
-ax[3].imshow(warp_and_combine(img_orig_gray,img_warped_gray,model_robust))
+ax[1,1].axis('off')
+ax[1,1].set_title('Warp then Combine')
+ax[1,1].imshow(warp_and_combine(img_orig_gray,img_warped_gray,model_robust.inverse))
 
 plt.show()
