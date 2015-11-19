@@ -5,7 +5,8 @@ from . import _hoghistogram
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8),
-        cells_per_block=(3, 3), visualise=False, normalise=False):
+        cells_per_block=(3, 3), visualise=False, normalise=False,
+        feature_vector=True):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Compute a Histogram of Oriented Gradients (HOG) by
@@ -31,6 +32,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     normalise : bool, optional
         Apply power law compression to normalise the image before
         processing.
+    feature_vector : bool, optional
+        Return the data as a feature vector by calling .ravel() on the result
+        just before returning.
 
     Returns
     -------
@@ -169,8 +173,11 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     overlapping grid of blocks covering the detection window into a combined
     feature vector for use in the window classifier.
     """
+    
+    if feature_vector:
+        normalised_blocks = normalised_blocks.ravel()
 
     if visualise:
-        return normalised_blocks.ravel(), hog_image
+        return normalised_blocks, hog_image
     else:
-        return normalised_blocks.ravel()
+        return normalised_blocks
