@@ -139,5 +139,6 @@ def test_object():
 
     assert_raises(ValueError, convex_hull_object, image, 7)
 
+
 if __name__ == "__main__":
     np.testing.run_module_suite()

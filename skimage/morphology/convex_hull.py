@@ -1,10 +1,15 @@
 __all__ = ['convex_hull_image', 'convex_hull_object']
 
 import numpy as np
-from ..measure import grid_points_in_poly
+from ..measure._pnpoly import grid_points_in_poly
 from ._convex_hull import possible_hull
 from ..measure._label import label
 from ..util import unique_rows
+
+try:
+    from scipy.spatial import Delaunay
+except ImportError:
+    Delaunay = None
 
 
 def convex_hull_image(image):
@@ -15,12 +20,12 @@ def convex_hull_image(image):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) array
         Binary input image. This array is cast to bool before processing.
 
     Returns
     -------
-    hull : ndarray of bool
+    hull : (M, N) array of bool
         Binary image with pixels in convex hull set to True.
 
     References
@@ -29,12 +34,13 @@ def convex_hull_image(image):
 
     """
 
-    image = image.astype(bool)
+    if Delaunay is None:
+        raise ImportError("Could not import scipy.spatial.Delaunay, "
+                          "only available in scipy >= 0.9.")
 
     # Here we do an optimisation by choosing only pixels that are
     # the starting or ending pixel of a row or column.  This vastly
-    # limits the number of coordinates to examine for the virtual
-    # hull.
+    # limits the number of coordinates to examine for the virtual hull.
     coords = possible_hull(image.astype(np.uint8))
     N = len(coords)
 
@@ -47,12 +53,6 @@ def convex_hull_image(image):
     # repeated coordinates can *sometimes* cause problems in
     # scipy.spatial.Delaunay, so we remove them.
     coords = unique_rows(coords_corners)
-
-    try:
-        from scipy.spatial import Delaunay
-    except ImportError:
-        raise ImportError('Could not import scipy.spatial, only available in '
-                          'scipy >= 0.9.')
 
     # Subtract offset
     offset = coords.mean(axis=0)
