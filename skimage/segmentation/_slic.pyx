@@ -76,7 +76,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     # approximate grid size for desired n_segments
     cdef Py_ssize_t step_z, step_y, step_x
     slices = regular_grid((depth, height, width), n_segments)
-    step_z, step_y, step_x = [int(s.step) for s in slices]
+    step_z, step_y, step_x = [int(s.step if s.step is not None else 1)
+                              for s in slices]
 
     cdef Py_ssize_t[:, :, ::1] nearest_segments \
         = np.empty((depth, height, width), dtype=np.intp)
