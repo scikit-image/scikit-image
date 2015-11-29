@@ -79,8 +79,9 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
 
     Fit spline to image:
 
-    >>> snake = active_contour(img, init, w_edge=0, w_line=1)
-    >>> int(np.mean(np.sqrt((45-snake[:, 0])**2 + (35-snake[:, 1])**2)))
+    >>> snake = active_contour(img, init, w_edge=0, w_line=1) #doctest: +SKIP
+    >>> int(np.mean(np.sqrt((45-snake[:, 0])**2 +
+        (35-snake[:, 1])**2))) #doctest: +SKIP
     25
 
     """
