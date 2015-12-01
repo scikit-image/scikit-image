@@ -188,7 +188,8 @@ class LineModel3D(BaseModel):
         elif data.shape[0] > 2:  # over-determined
             data = data - X0
             # first principal component
-            # Note: without full_matrices=False Python dies with joblib parallel_for.
+            # Note: without full_matrices=False Python dies with joblib
+            # parallel_for.
             _, _, u = np.linalg.svd(data, full_matrices=False)
             u = u[0]
         else:  # under-determined
@@ -200,8 +201,8 @@ class LineModel3D(BaseModel):
 
     def residuals(self, data):
         """Determine residuals of data to model.
-        For each point the shortest distance to the line is returned. It is obtained by projecting the data onto the
-        line.
+        For each point the shortest distance to the line is returned.
+        It is obtained by projecting the data onto the line.
 
         Parameters
         ----------
@@ -214,7 +215,8 @@ class LineModel3D(BaseModel):
             Residual for each data point.
         """
         X0, u = self.params
-        return np.linalg.norm((data - X0) - np.dot(data - X0, u)[..., np.newaxis] * u, axis=1)
+        return np.linalg.norm((data - X0) -
+                              np.dot(data - X0, u)[..., np.newaxis] * u, axis=1)
 
 
 class CircleModel(BaseModel):

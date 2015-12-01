@@ -32,7 +32,9 @@ outliers = inliers == False
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-ax.scatter(xyz[inliers][:, 0], xyz[inliers][:, 1], xyz[inliers][:, 2], c='b', marker='o', label='Inlier data')
-ax.scatter(xyz[outliers][:, 0], xyz[outliers][:, 1], xyz[outliers][:, 2], c='r', marker='o', label='Outlier data')
+ax.scatter(xyz[inliers][:, 0], xyz[inliers][:, 1], xyz[inliers][:, 2], c='b',
+           marker='o', label='Inlier data')
+ax.scatter(xyz[outliers][:, 0], xyz[outliers][:, 1], xyz[outliers][:, 2], c='r',
+           marker='o', label='Outlier data')
 ax.legend(loc='lower left')
 plt.show()

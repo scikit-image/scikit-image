@@ -56,10 +56,12 @@ def test_line_model_under_determined():
 def test_line_model3D_estimate():
     # generate original data without noise
     model0 = LineModel3D()
-    model0.params = (np.array([0,0,0], dtype='float'), np.array([1,1,1], dtype='float')/np.sqrt(3))
-    # we scale the unit vector with a factor 10 when generating points on the line
-    # in order to compensate for the scale of the random noise
-    data0 = model0.params[0] + 10 * np.arange(-100,100)[...,np.newaxis] * model0.params[1]
+    model0.params = (np.array([0,0,0], dtype='float'),
+                     np.array([1,1,1], dtype='float')/np.sqrt(3))
+    # we scale the unit vector with a factor 10 when generating points on the
+    # line in order to compensate for the scale of the random noise
+    data0 = (model0.params[0] +
+             10 * np.arange(-100,100)[...,np.newaxis] * model0.params[1])
 
     # add gaussian noise to data
     np.random.seed(1234)
@@ -70,9 +72,11 @@ def test_line_model3D_estimate():
     model_est.estimate(data)
 
     # test whether estimated parameters are correct
-    # we use the following geometric property: two aligned vectors have a cross-product equal to zero
+    # we use the following geometric property: two aligned vectors have
+    # a cross-product equal to zero
     # test if direction vectors are aligned
-    assert_almost_equal(np.linalg.norm(np.cross(model0.params[1], model_est.params[1])), 0, 1)
+    assert_almost_equal(np.linalg.norm(np.cross(model0.params[1],
+                                                model_est.params[1])), 0, 1)
     # test if origins are aligned with the direction
     a = model_est.params[0] - model0.params[0]
     if np.linalg.norm(a) > 0:
