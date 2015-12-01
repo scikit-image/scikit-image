@@ -156,6 +156,67 @@ class LineModel(BaseModel):
         return (dist - x * math.cos(theta)) / math.sin(theta)
 
 
+class LineModel3D(BaseModel):
+    """Total least squares estimator for 3D lines.
+
+    Lines are defined by point and a unit vector (direction).
+
+    Attributes
+    ----------
+    params : tuple
+        Line model parameters in the following order `point`, `direction`.
+    """
+
+    def estimate(self, data):
+        """Estimate line model from data.
+
+        Parameters
+        ----------
+        data : (N, 3) array
+            N points with ``(x, y, z)`` coordinates, respectively.
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+        """
+        X0 = data.mean(axis=0)
+
+        if data.shape[0] == 2:  # well determined
+            u = data[1] - data[0]
+            u /= np.linalg.norm(u)
+        elif data.shape[0] > 2:  # over-determined
+            data = data - X0
+            # first principal component
+            # Note: without full_matrices=False Python dies with joblib parallel_for.
+            _, _, u = np.linalg.svd(data, full_matrices=False)
+            u = u[0]
+        else:  # under-determined
+            raise ValueError('At least 2 input points needed.')
+
+        self.params = (X0, u)
+
+        return True
+
+    def residuals(self, data):
+        """Determine residuals of data to model.
+        For each point the shortest distance to the line is returned. It is obtained by projecting the data onto the
+        line.
+
+        Parameters
+        ----------
+        data : (N, 3) array
+            N points with ``(x, y, z)`` coordinates, respectively.
+
+        Returns
+        -------
+        residuals : (N, ) array
+            Residual for each data point.
+        """
+        X0, u = self.params
+        return np.linalg.norm((data - X0) - np.dot(data - X0, u)[..., np.newaxis] * u, axis=1)
+
+
 class CircleModel(BaseModel):
 
     """Total least squares estimator for 2D circles.
