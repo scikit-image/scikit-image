@@ -41,7 +41,7 @@ def _find_boundaries_subpixel(label_img):
     for index in np.ndindex(label_img_expanded.shape):
         if edges[index]:
             values = np.unique(windows[index].ravel())
-            if len(values) > 2: # single value and max_label
+            if len(values) > 2:  # single value and max_label
                 boundaries[index] = True
     return boundaries
 
@@ -51,9 +51,9 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
 
     Parameters
     ----------
-    label_img : array of int
-        An array in which different regions are labeled with different
-        integers.
+    label_img : array of int or bool
+        An array in which different regions are labeled with either different
+        integers or boolean values.
     connectivity: int in {1, ..., `label_img.ndim`}, optional
         A pixel is considered a boundary pixel if any of its neighbors
         has a different label. `connectivity` controls which pixels are
@@ -144,7 +144,20 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
            [0, 0, 0, 1, 0, 1, 0],
            [0, 0, 0, 1, 1, 1, 0],
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+    >>> bool_image = np.array([[False, False, False, False, False],
+    ...                        [False, False, False, False, False],
+    ...                        [False, False,  True,  True,  True],
+    ...                        [False, False,  True,  True,  True],
+    ...                        [False, False,  True,  True,  True]], dtype=np.bool)
+    >>> find_boundaries(bool_image)
+    array([[False, False, False, False, False],
+           [False, False,  True,  True,  True],
+           [False,  True,  True,  True,  True],
+           [False,  True,  True, False, False],
+           [False,  True,  True, False, False]], dtype=bool)
     """
+    if label_img.dtype == 'bool':
+        label_img = label_img.astype(np.uint8)
     ndim = label_img.ndim
     selem = ndi.generate_binary_structure(ndim, connectivity)
     if mode != 'subpixel':
