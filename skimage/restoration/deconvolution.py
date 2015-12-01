@@ -7,7 +7,7 @@ from __future__ import division
 
 import numpy as np
 import numpy.random as npr
-from scipy.signal import convolve2d
+from scipy.signal import fftconvolve
 
 from . import uft
 
@@ -370,8 +370,8 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
     im_deconv = 0.5 * np.ones(image.shape)
     psf_mirror = psf[::-1, ::-1]
     for _ in range(iterations):
-        relative_blur = image / convolve2d(im_deconv, psf, 'same')
-        im_deconv *= convolve2d(relative_blur, psf_mirror, 'same')
+        relative_blur = image / fftconvolve(im_deconv, psf, 'same')
+        im_deconv *= fftconvolve(relative_blur, psf_mirror, 'same')
 
     if clip:
         im_deconv[im_deconv > 1] = 1
