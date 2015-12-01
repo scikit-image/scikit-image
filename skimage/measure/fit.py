@@ -159,7 +159,7 @@ class LineModel(BaseModel):
 class LineModel3D(BaseModel):
     """Total least squares estimator for 3D lines.
 
-    Lines are defined by point and a unit vector (direction).
+    Lines are defined by a point and a unit vector (direction).
 
     Attributes
     ----------
@@ -201,6 +201,7 @@ class LineModel3D(BaseModel):
 
     def residuals(self, data):
         """Determine residuals of data to model.
+
         For each point the shortest distance to the line is returned.
         It is obtained by projecting the data onto the line.
 
