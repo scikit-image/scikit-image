@@ -9,10 +9,16 @@ def _check_data_dim(data, dim):
         raise ValueError('Input data must have shape (N, %d).' % dim)
 
 
+def _check_data_atleast_2D(data):
+    if data.ndim < 2 or data.shape[1] < 2:
+        raise ValueError('Input data must be at least 2D.')
+
+
 class BaseModel(object):
 
     def __init__(self):
         self.params = None
+        self.new_params = None
 
     @property
     def _params(self):
@@ -22,60 +28,61 @@ class BaseModel(object):
 
 
 class LineModel(BaseModel):
+    """Total least squares estimator for ND lines.
 
-    """Total least squares estimator for 2D lines.
-
-    Lines are parameterized using polar coordinates as functional model::
-
-        dist = x * cos(theta) + y * sin(theta)
-
-    This parameterization is able to model vertical lines in contrast to the
-    standard line model ``y = a*x + b``.
-
-    This estimator minimizes the squared distances from all points to the
-    line::
-
-        min{ sum((dist - x_i * cos(theta) + y_i * sin(theta))**2) }
-
-    A minimum number of 2 points is required to solve for the parameters.
+    Lines are defined by a point and a unit vector (direction).
 
     Attributes
     ----------
     params : tuple
-        Line model parameters in the following order `dist`, `theta`.
-
+        2D line model parameters in the following order `dist`, `theta`.
+        If dim > 2, these parameters correspond to the projection of the line
+        into the space spanned by the first two axes.
+        These parameters correspond to the functional model:
+            dist = x * cos(theta) + y * sin(theta)
+    new_params : tuple
+        ND line model parameters in the following order `X0`, `direction`.
+        These parameters correspond to the vector equation
+            X = X0 + lambda * direction
     """
 
     def estimate(self, data):
-        """Estimate line model from data using total least squares.
+        """Estimate line model from data.
 
         Parameters
         ----------
-        data : (N, 2) array
-            N points with ``(x, y)`` coordinates, respectively.
+        data : (N, dim) array
+            N points in a space of dimensionality dim >= 2.
 
         Returns
         -------
         success : bool
             True, if model estimation succeeds.
-
         """
 
-        _check_data_dim(data, dim=2)
+        _check_data_atleast_2D(data)
 
         X0 = data.mean(axis=0)
 
         if data.shape[0] == 2:  # well determined
-            theta = np.arctan2(data[1, 1] - data[0, 1],
-                               data[1, 0] - data[0, 0])
+            u = data[1] - data[0]
+            norm = np.linalg.norm(u)
+            if norm > 0:
+                u /= norm
         elif data.shape[0] > 2:  # over-determined
             data = data - X0
             # first principal component
-            _, _, v = np.linalg.svd(data)
-            theta = np.arctan2(v[0, 1], v[0, 0])
+            # Note: without full_matrices=False Python dies with joblib
+            # parallel_for.
+            _, _, u = np.linalg.svd(data, full_matrices=False)
+            u = u[0]
         else:  # under-determined
             raise ValueError('At least 2 input points needed.')
 
+        self.new_params = (X0, u)
+
+        # legacy LineModel (2D case)
+        theta = np.arctan2(u[1], u[0])
         # angle perpendicular to line angle
         theta = (theta + np.pi / 2) % np.pi
         # line always passes through mean
@@ -89,37 +96,84 @@ class LineModel(BaseModel):
         """Determine residuals of data to model.
 
         For each point the shortest distance to the line is returned.
+        It is obtained by projecting the data onto the line.
 
         Parameters
         ----------
-        data : (N, 2) array
-            N points with ``(x, y)`` coordinates, respectively.
+        data : (N, dim) array
+            N points in a space of dimension dim.
 
         Returns
         -------
         residuals : (N, ) array
             Residual for each data point.
-
         """
+        if self.new_params is None:
+            self.new_params = self._params_from_polar(self.params)
 
-        _check_data_dim(data, dim=2)
+        X0, u = self.new_params
+        return np.linalg.norm((data - X0) -
+                              np.dot(data - X0, u)[..., np.newaxis] * u, axis=1)
 
-        dist, theta = self.params
+    def _params_from_polar(self, params):
+        (dist, theta) = params
+        u = np.array([math.cos(theta - np.pi / 2), math.sin(theta - np.pi / 2)])
+        if math.cos(theta) == 0:
+            X0 = np.array([0, dist / math.sin(theta)])
+        else:
+            X0 = np.array([dist / math.cos(theta), 0])
+        return X0, u
 
-        x = data[:, 0]
-        y = data[:, 1]
+    def predict(self, x, axis=0, params=None, new_params=None):
+        """Predict intersection of the estimated line model with a hyperplane
+        orthogonal to a given axis.
 
-        return dist - (x * math.cos(theta) + y * math.sin(theta))
+        Parameters
+        ----------
+        x : array
+            coordinates along an axis.
+        axis : int
+            axis orthogonal to the hyperplane intersecting the line.
+        params : (2, ) array, optional
+            Optional custom parameter set in the form (`dist`, `theta`).
+        new_params : (2, ) array, optional
+            Optional custom parameter set in the form (`X0`, `direction`).
 
-    def predict_x(self, y, params=None):
+        Returns
+        -------
+        y : array
+            Predicted coordinates.
+
+        If the line is parallel to the given axis, a ValueError is raised.
+        """
+        if new_params is None:
+            if params is None and self.new_params is not None:
+                new_params = self.new_params
+            else:
+                new_params = self._params_from_polar(params or self.params)
+
+        X0, u = new_params
+
+        if u[axis] == 0:
+            # line parallel to axis
+            raise ValueError('Line parallel to axis %s' % axis)
+
+        l = (x - X0[axis]) / u[axis]
+        return X0 + l[..., np.newaxis] * u
+
+    def predict_x(self, y, params=None, new_params=None):
         """Predict x-coordinates using the estimated model.
+
+        Alias for predict(y, axis=1)[:, 0].
 
         Parameters
         ----------
         y : array
             y-coordinates.
         params : (2, ) array, optional
-            Optional custom parameter set.
+            Optional custom parameter set in the form (`dist`, `theta`).
+        new_params : (2, ) array, optional
+            Optional custom parameter set in the form (`X0`, `direction`).
 
         Returns
         -------
@@ -127,21 +181,22 @@ class LineModel(BaseModel):
             Predicted x-coordinates.
 
         """
+        return self.predict(y, axis=1, params=params,
+                            new_params=new_params)[:, 0]
 
-        if params is None:
-            params = self.params
-        dist, theta = params
-        return (dist - y * math.sin(theta)) / math.cos(theta)
-
-    def predict_y(self, x, params=None):
+    def predict_y(self, x, params=None, new_params=None):
         """Predict y-coordinates using the estimated model.
+
+        Alias for predict(x, axis=1)[:, 1].
 
         Parameters
         ----------
         x : array
             x-coordinates.
         params : (2, ) array, optional
-            Optional custom parameter set.
+            Optional custom parameter set in the form (`dist`, `theta`).
+        new_params : (2, ) array, optional
+            Optional custom parameter set in the form (`X0`, `direction`).
 
         Returns
         -------
@@ -149,75 +204,8 @@ class LineModel(BaseModel):
             Predicted y-coordinates.
 
         """
-
-        if params is None:
-            params = self.params
-        dist, theta = params
-        return (dist - x * math.cos(theta)) / math.sin(theta)
-
-
-class LineModel3D(BaseModel):
-    """Total least squares estimator for 3D lines.
-
-    Lines are defined by a point and a unit vector (direction).
-
-    Attributes
-    ----------
-    params : tuple
-        Line model parameters in the following order `point`, `direction`.
-    """
-
-    def estimate(self, data):
-        """Estimate line model from data.
-
-        Parameters
-        ----------
-        data : (N, 3) array
-            N points with ``(x, y, z)`` coordinates, respectively.
-
-        Returns
-        -------
-        success : bool
-            True, if model estimation succeeds.
-        """
-        X0 = data.mean(axis=0)
-
-        if data.shape[0] == 2:  # well determined
-            u = data[1] - data[0]
-            u /= np.linalg.norm(u)
-        elif data.shape[0] > 2:  # over-determined
-            data = data - X0
-            # first principal component
-            # Note: without full_matrices=False Python dies with joblib
-            # parallel_for.
-            _, _, u = np.linalg.svd(data, full_matrices=False)
-            u = u[0]
-        else:  # under-determined
-            raise ValueError('At least 2 input points needed.')
-
-        self.params = (X0, u)
-
-        return True
-
-    def residuals(self, data):
-        """Determine residuals of data to model.
-
-        For each point the shortest distance to the line is returned.
-        It is obtained by projecting the data onto the line.
-
-        Parameters
-        ----------
-        data : (N, 3) array
-            N points with ``(x, y, z)`` coordinates, respectively.
-
-        Returns
-        -------
-        residuals : (N, ) array
-            Residual for each data point.
-        """
-        X0, u = self.params
-        return np.linalg.norm((data - X0) -
-                              np.dot(data - X0, u)[..., np.newaxis] * u, axis=1)
+        return self.predict(x, axis=0, params=params,
+                            new_params=new_params)[:, 1]
 
 
 class CircleModel(BaseModel):
