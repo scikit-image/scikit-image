@@ -7,7 +7,7 @@ from ._polygon import approximate_polygon, subdivide_polygon
 from ._pnpoly import points_in_poly, grid_points_in_poly
 from ._moments import moments, moments_central, moments_normalized, moments_hu
 from .profile import profile_line
-from .fit import LineModel, CircleModel, EllipseModel, ransac
+from .fit import LineModel, LineModelND, CircleModel, EllipseModel, ransac
 from .block import block_reduce
 from ._label import label
 
@@ -19,6 +19,7 @@ __all__ = ['find_contours',
            'approximate_polygon',
            'subdivide_polygon',
            'LineModel',
+           'LineModelND',
            'CircleModel',
            'EllipseModel',
            'ransac',
