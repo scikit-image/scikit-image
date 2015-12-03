@@ -44,6 +44,8 @@ class LineModel(BaseModel):
 
     A minimum number of 2 points is required to solve for the parameters.
 
+    **Deprecated, use ``LineModelND`` instead.**
+
     Attributes
     ----------
     params : tuple
@@ -243,9 +245,7 @@ class LineModelND(BaseModel):
         axis : int
             axis orthogonal to the hyperplane intersecting the line.
         params : (2, ) array, optional
-            Optional custom parameter set in the form (`dist`, `theta`).
-        new_params : (2, ) array, optional
-            Optional custom parameter set in the form (`X0`, `direction`).
+            Optional custom parameter set in the form (`origin`, `direction`).
 
         Returns
         -------

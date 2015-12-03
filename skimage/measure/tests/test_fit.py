@@ -52,8 +52,6 @@ def test_line_model_residuals():
 def test_line_model_under_determined():
     data = np.empty((1, 2))
     assert_raises(ValueError, LineModel().estimate, data)
-    data = np.empty((1, 3))
-    assert_raises(ValueError, LineModel().estimate, data)
 
 
 def test_line_modelND_invalid_input():
