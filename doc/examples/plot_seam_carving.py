@@ -52,8 +52,8 @@ plt.imshow(out)
 """
 .. image:: PLOT2RST.current_figure
 
-As you can see, resizing has distorted the rocket and the objects around,
-whereas seam carving has resized by removing the empty spaces in between.
+Resizing distorts the rocket and surrounding objects, whereas seam carving
+removes empty spaces and preserves object proportions.
 
 Object Removal
 --------------
