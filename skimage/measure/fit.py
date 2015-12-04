@@ -2,6 +2,7 @@ import math
 import warnings
 import numpy as np
 from scipy import optimize
+from .._shared.utils import skimage_deprecation
 
 
 def _check_data_dim(data, dim):
@@ -52,6 +53,11 @@ class LineModel(BaseModel):
         Line model parameters in the following order `dist`, `theta`.
 
     """
+
+    def __init__(self):
+        self.params = None
+        warnings.warn(skimage_deprecation('`LineModel` is deprecated, '
+                      'use `LineModelND` instead.'))
 
     def estimate(self, data):
         """Estimate line model from data using total least squares.
