@@ -39,8 +39,7 @@ img = noise + 128
 
 entr_img = entropy(img, disk(10))
 
-fig, ax = plt.subplots(1, 3, figsize=(8, 3))
-ax0, ax1, ax2 = ax.ravel()
+fig, (ax0, ax1, ax2) = plt.subplots(1, 3, figsize=(8, 3))
 
 ax0.imshow(noise_mask, cmap=plt.cm.gray)
 ax0.set_xlabel("Noise mask")
