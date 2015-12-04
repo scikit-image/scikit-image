@@ -45,7 +45,7 @@ class LineModel(BaseModel):
 
     A minimum number of 2 points is required to solve for the parameters.
 
-    **Deprecated, use ``LineModelND`` instead.**
+    **Deprecated class**. Use ``LineModelND`` instead.
 
     Attributes
     ----------
@@ -172,14 +172,16 @@ class LineModel(BaseModel):
 class LineModelND(BaseModel):
     """Total least squares estimator for N-dimensional lines.
 
-    Lines are defined by a point (origin) and a unit vector (direction).
+    Lines are defined by a point (origin) and a unit vector (direction)
+    according to the following vector equation::
+
+        X = origin + lambda * direction
 
     Attributes
     ----------
     params : tuple
         Line model parameters in the following order `origin`, `direction`.
-        These parameters correspond to the vector equation
-            X = origin + lambda * direction
+
     """
 
     def estimate(self, data):
@@ -276,7 +278,9 @@ class LineModelND(BaseModel):
     def predict_x(self, y, params=None, new_params=None):
         """Predict x-coordinates for 2D lines using the estimated model.
 
-        Alias for predict(y, axis=1)[:, 0].
+        Alias for::
+
+            predict(y, axis=1)[:, 0]
 
         Parameters
         ----------
@@ -296,7 +300,9 @@ class LineModelND(BaseModel):
     def predict_y(self, x, params=None):
         """Predict y-coordinates  for 2D lines using the estimated model.
 
-        Alias for predict(x, axis=1)[:, 1].
+        Alias for::
+
+            predict(x, axis=0)[:, 1]
 
         Parameters
         ----------

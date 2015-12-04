@@ -1,7 +1,7 @@
 """
-=========================================
-Robust line model estimation using RANSAC
-=========================================
+============================================
+Robust 3D line model estimation using RANSAC
+============================================
 
 In this example we see how to robustly fit a 3D line model to faulty data using
 the RANSAC algorithm.
