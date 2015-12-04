@@ -46,22 +46,22 @@ plt.imshow(resized)
 
 out = transform.seam_carve(img, eimg, 'vertical', 200)
 plt.figure()
-plt.title('Resized using Seam-Carving')
+plt.title('Resized using Seam Carving')
 plt.imshow(out)
 
 """
 .. image:: PLOT2RST.current_figure
 
-As you can see, resizing as distorted the rocket and the objects around,
-whereas seam carving has reszied by removing the empty spaces in between.
+As you can see, resizing has distorted the rocket and the objects around,
+whereas seam carving has resized by removing the empty spaces in between.
 
 Object Removal
 --------------
 
-Seam Carving can also be used to remove atrifacts from images. To do that, we
-have to ensure that pixels to be removes get less importance. In the following
+Seam carving can also be used to remove artifacts from images. To do that, we
+have to ensure that pixels to be removed get less importance. In the following
 code I approximately mark the rocket with a mask, and then decrease the
-importance of those pixels
+importance of those pixels.
 
 """
 
