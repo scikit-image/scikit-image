@@ -375,6 +375,11 @@ def geometric_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
     >>> img = data.camera()
     >>> avg = geometric_mean(img, disk(5))
 
+    References
+    ----------
+    .. [1] Gonzalez, R. C. and Wood, R. E. "Digital Image Processing (3rd Edition)." 
+           Prentice-Hall Inc, 2006.
+
     """
 
     return _apply_scalar_per_pixel(generic_cy._geometric_mean, image, selem, out=out,
