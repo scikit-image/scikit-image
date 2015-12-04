@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.testing import assert_equal, assert_raises, assert_almost_equal
-from skimage.measure import LineModel, CircleModel, EllipseModel, ransac
+from skimage.measure import LineModel, LineModelND, CircleModel, EllipseModel, ransac
 from skimage.transform import AffineTransform
 from skimage.measure.fit import _dynamic_max_trials
 from skimage._shared._warnings import expected_warnings
@@ -52,6 +52,62 @@ def test_line_model_residuals():
 def test_line_model_under_determined():
     data = np.empty((1, 2))
     assert_raises(ValueError, LineModel().estimate, data)
+
+
+def test_line_modelND_invalid_input():
+    assert_raises(ValueError, LineModelND().estimate, np.empty((5, 1)))
+
+
+def test_line_modelND_predict():
+    model = LineModelND()
+    model.params = (np.array([0,0]), np.array([0.2,0.98]))
+    x = np.arange(-10, 10)
+    y = model.predict_y(x)
+    assert_almost_equal(x, model.predict_x(y))
+
+
+def test_line_modelND_estimate():
+    # generate original data without noise
+    model0 = LineModelND()
+    model0.params = (np.array([0,0,0], dtype='float'),
+                         np.array([1,1,1], dtype='float')/np.sqrt(3))
+    # we scale the unit vector with a factor 10 when generating points on the
+    # line in order to compensate for the scale of the random noise
+    data0 = (model0.params[0] +
+             10 * np.arange(-100,100)[...,np.newaxis] * model0.params[1])
+
+    # add gaussian noise to data
+    np.random.seed(1234)
+    data = data0 + np.random.normal(size=data0.shape)
+
+    # estimate parameters of noisy data
+    model_est = LineModelND()
+    model_est.estimate(data)
+
+    # test whether estimated parameters are correct
+    # we use the following geometric property: two aligned vectors have
+    # a cross-product equal to zero
+    # test if direction vectors are aligned
+    assert_almost_equal(np.linalg.norm(np.cross(model0.params[1],
+                                                model_est.params[1])), 0, 1)
+    # test if origins are aligned with the direction
+    a = model_est.params[0] - model0.params[0]
+    if np.linalg.norm(a) > 0:
+        a /= np.linalg.norm(a)
+    assert_almost_equal(np.linalg.norm(np.cross(model0.params[1], a)), 0, 1)
+
+
+def test_line_modelND_residuals():
+    model = LineModelND()
+    model.params = (np.array([0,0,0]), np.array([0,0,1]))
+    assert_equal(abs(model.residuals(np.array([[0, 0,0]]))), 0)
+    assert_equal(abs(model.residuals(np.array([[0,0,1]]))), 0)
+    assert_equal(abs(model.residuals(np.array([[10, 0,0]]))), 10)
+
+
+def test_line_modelND_under_determined():
+    data = np.empty((1, 3))
+    assert_raises(ValueError, LineModelND().estimate, data)
 
 
 def test_circle_model_invalid_input():
