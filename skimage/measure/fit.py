@@ -275,7 +275,7 @@ class LineModelND(BaseModel):
         l = (x - X0[axis]) / u[axis]
         return X0 + l[..., np.newaxis] * u
 
-    def predict_x(self, y, params=None, new_params=None):
+    def predict_x(self, y, params=None):
         """Predict x-coordinates for 2D lines using the estimated model.
 
         Alias for::
