@@ -39,7 +39,6 @@ plt.figure()
 plt.title('Resized Image')
 plt.imshow(resized)
 
-
 """
 .. image:: PLOT2RST.current_figure
 """
@@ -59,9 +58,9 @@ Object Removal
 --------------
 
 Seam carving can also be used to remove artifacts from images.
-This requires to downweigh the pixels to be removed. In the following
-code, the rocket is thus approximately masked to decrease the
-importance of those pixels.
+This requires weighting the artifact with low values. Recall lower weights are
+preferentially removed in seam carving. The following code masks the rocket's
+region with low weights, indicating it should be removed.
 
 """
 
@@ -78,6 +77,7 @@ plt.figure()
 plt.title('Object Marked')
 
 plt.imshow(masked_img)
+
 """
 .. image:: PLOT2RST.current_figure
 """
@@ -90,6 +90,7 @@ out = transform.seam_carve(img, eimg, 'vertical', 90)
 resized = transform.resize(img, out.shape)
 plt.imshow(out)
 plt.show()
+
 """
 .. image:: PLOT2RST.current_figure
 """
