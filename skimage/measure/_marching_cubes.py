@@ -228,10 +228,14 @@ def correct_mesh_orientation(volume, verts, faces, spacing=(1., 1., 1.),
     import scipy.ndimage as ndi
 
     # Calculate gradient of `volume`, then interpolate to vertices in `verts`
-    grad_x, grad_y, grad_z = np.gradient(volume, *spacing)
+    grad_x, grad_y, grad_z = np.gradient(volume)
 
     # Fancy indexing to define two vector arrays from triangle vertices
     actual_verts = verts[faces]
+    actual_verts[:, 0] /= spacing[0]
+    actual_verts[:, 1] /= spacing[1]
+    actual_verts[:, 2] /= spacing[2]
+    
     a = actual_verts[:, 0, :] - actual_verts[:, 1, :]
     b = actual_verts[:, 0, :] - actual_verts[:, 2, :]
 
