@@ -58,9 +58,9 @@ removes empty spaces and preserves object proportions.
 Object Removal
 --------------
 
-Seam carving can also be used to remove artifacts from images. To do that, we
-have to ensure that pixels to be removed get less importance. In the following
-code I approximately mark the rocket with a mask, and then decrease the
+Seam carving can also be used to remove artifacts from images.
+This requires to downweigh the pixels to be removed. In the following
+code, the rocket is thus approximately masked to decrease the
 importance of those pixels.
 
 """
