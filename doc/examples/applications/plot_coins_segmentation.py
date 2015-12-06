@@ -35,13 +35,15 @@ background with the coins:
 
 """
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6, 3))
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6, 3), sharex=True, sharey=True)
 ax1.imshow(coins > 100, cmap=plt.cm.gray, interpolation='nearest')
 ax1.set_title('coins > 100')
 ax1.axis('off')
+ax1.set_adjustable('box-forced')
 ax2.imshow(coins > 150, cmap=plt.cm.gray, interpolation='nearest')
 ax2.set_title('coins > 150')
 ax2.axis('off')
+ax2.set_adjustable('box-forced')
 margins = dict(hspace=0.01, wspace=0.01, top=1, bottom=0, left=0, right=1)
 fig.subplots_adjust(**margins)
 
@@ -162,12 +164,14 @@ segmentation = ndi.binary_fill_holes(segmentation - 1)
 labeled_coins, _ = ndi.label(segmentation)
 image_label_overlay = label2rgb(labeled_coins, image=coins)
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6, 3))
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6, 3), sharex=True, sharey=True)
 ax1.imshow(coins, cmap=plt.cm.gray, interpolation='nearest')
 ax1.contour(segmentation, [0.5], linewidths=1.2, colors='y')
 ax1.axis('off')
+ax1.set_adjustable('box-forced')
 ax2.imshow(image_label_overlay, interpolation='nearest')
 ax2.axis('off')
+ax2.set_adjustable('box-forced')
 
 fig.subplots_adjust(**margins)
 

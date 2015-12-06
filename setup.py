@@ -87,14 +87,15 @@ if __name__ == "__main__":
     except ImportError:
         if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or
                                    sys.argv[1] in ('--help-commands',
-                                                   'egg_info', '--version',
+                                                   '--version',
                                                    'clean')):
             # For these actions, NumPy is not required.
             #
             # They are required to succeed without Numpy for example when
             # pip is used to install scikit-image when Numpy is not yet
             # present in the system.
-            pass
+            from setuptools import setup
+            extra = {}
         else:
             print('To install scikit-image from source, you will need numpy.\n' +
                   'Install numpy with pip:\n' +

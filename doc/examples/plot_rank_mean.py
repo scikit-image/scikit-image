@@ -34,19 +34,16 @@ bilateral_result = rank.mean_bilateral(image, selem=selem, s0=500, s1=500)
 normal_result = rank.mean(image, selem=selem)
 
 
-fig, axes = plt.subplots(nrows=3, figsize=(8, 10))
-ax0, ax1, ax2 = axes
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(8, 10), sharex=True, sharey=True)
+ax = axes.ravel()
 
-ax0.imshow(np.hstack((image, percentile_result)))
-ax0.set_title('Percentile mean')
-ax0.axis('off')
+titles = ['Original', 'Percentile mean', 'Bilateral mean', 'Local mean']
+imgs = [image, percentile_result, bilateral_result, normal_result]
+for n in range(0, len(imgs)):
+    ax[n].imshow(imgs[n])
+    ax[n].set_title(titles[n])
+    ax[n].set_adjustable('box-forced')
+    ax[n].axis('off')
 
-ax1.imshow(np.hstack((image, bilateral_result)))
-ax1.set_title('Bilateral mean')
-ax1.axis('off')
-
-ax2.imshow(np.hstack((image, normal_result)))
-ax2.set_title('Local mean')
-ax2.axis('off')
 
 plt.show()

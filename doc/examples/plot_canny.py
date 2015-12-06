@@ -35,7 +35,7 @@ edges1 = feature.canny(im)
 edges2 = feature.canny(im, sigma=3)
 
 # display results
-fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(8, 3))
+fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(8, 3), sharex=True, sharey=True)
 
 ax1.imshow(im, cmap=plt.cm.jet)
 ax1.axis('off')

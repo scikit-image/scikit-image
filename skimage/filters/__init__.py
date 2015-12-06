@@ -5,7 +5,7 @@ from .edges import (sobel, hsobel, vsobel, sobel_h, sobel_v,
                     prewitt, hprewitt, vprewitt, prewitt_h, prewitt_v,
                     roberts, roberts_positive_diagonal,
                     roberts_negative_diagonal, roberts_pos_diag,
-                    roberts_neg_diag)
+                    roberts_neg_diag, laplace)
 from ._rank_order import rank_order
 from ._gabor import gabor_kernel, gabor
 from .thresholding import (threshold_adaptive, threshold_otsu, threshold_yen,
@@ -62,6 +62,7 @@ __all__ = ['inverse',
            'roberts_negative_diagonal',
            'roberts_pos_diag',
            'roberts_neg_diag',
+           'laplace',
            'denoise_tv_chambolle',
            'denoise_bilateral',
            'denoise_tv_bregman',

@@ -157,7 +157,7 @@ class _RegionProperties(object):
     @property
     def euler_number(self):
         euler_array = self.filled_image != self.image
-        _, num = label(euler_array, neighbors=8, return_num=True)
+        _, num = label(euler_array, neighbors=8, return_num=True, background=-1)
         return -num + 1
 
     @property
@@ -473,7 +473,7 @@ def regionprops(label_image, intensity_image=None, cache=True):
     Examples
     --------
     >>> from skimage import data, util
-    >>> from skimage.morphology import label
+    >>> from skimage.measure import label
     >>> img = util.img_as_ubyte(data.coins()) > 110
     >>> label_img = label(img, connectivity=img.ndim)
     >>> props = regionprops(label_img)

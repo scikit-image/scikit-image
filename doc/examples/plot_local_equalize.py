@@ -72,7 +72,14 @@ img_eq = rank.equalize(img, selem=selem)
 
 
 # Display results
-fig, axes = plt.subplots(2, 3, figsize=(8, 5))
+fig = plt.figure(figsize=(8, 5))
+axes = np.zeros((2, 3), dtype=np.object)
+axes[0,0] = plt.subplot(2, 3, 1, adjustable='box-forced')
+axes[0,1] = plt.subplot(2, 3, 2, sharex=axes[0,0], sharey=axes[0,0], adjustable='box-forced')
+axes[0,2] = plt.subplot(2, 3, 3, sharex=axes[0,0], sharey=axes[0,0], adjustable='box-forced')
+axes[1,0] = plt.subplot(2, 3, 4)
+axes[1,1] = plt.subplot(2, 3, 5)
+axes[1,2] = plt.subplot(2, 3, 6)
 
 ax_img, ax_hist, ax_cdf = plot_img_and_hist(img, axes[:, 0])
 ax_img.set_title('Low contrast image')

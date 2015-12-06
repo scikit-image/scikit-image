@@ -56,7 +56,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
 
     Examples
     --------
-    >>> from skimage.filter import gabor_kernel
+    >>> from skimage.filters import gabor_kernel
     >>> from skimage import io
     >>> from matplotlib import pyplot as plt  # doctest: +SKIP
 
@@ -148,7 +148,7 @@ def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
 
     Examples
     --------
-    >>> from skimage.filter import gabor
+    >>> from skimage.filters import gabor
     >>> from skimage import data, io
     >>> from matplotlib import pyplot as plt  # doctest: +SKIP
 

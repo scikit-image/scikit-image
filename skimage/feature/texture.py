@@ -298,7 +298,7 @@ def local_binary_pattern(image, P, R, method='default'):
 
 
 def multiblock_lbp(int_image, r, c, width, height):
-    """Multi-block local binary pattern (MB-LBP) [1]_.
+    """Multi-block local binary pattern (MB-LBP).
 
     The features are calculated similarly to local binary patterns (LBPs),
     (See :py:meth:`local_binary_pattern`) except that summed blocks are

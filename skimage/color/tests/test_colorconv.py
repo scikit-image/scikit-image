@@ -439,6 +439,8 @@ def test_gray2rgb():
 
     assert_equal(y.shape, (3, 1, 3))
     assert_equal(y.dtype, x.dtype)
+    assert_equal(y[..., 0], x)
+    assert_equal(y[0, 0, :], [0, 0, 0])
 
     x = np.array([[0, 128, 255]], dtype=np.uint8)
     z = gray2rgb(x)

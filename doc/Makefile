@@ -13,7 +13,7 @@ PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d $(SPHINXCACHE) $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 DEST = build
-.PHONY: all help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest gitwash gh-pages release_notes random_gallery
+.PHONY: all help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest gitwash gh-pages release_notes
 
 all: html
 
@@ -41,18 +41,16 @@ api:
 	$(PYTHON) tools/build_modref_templates.py
 	@echo "Build API docs...done."
 
-random_gallery:
-	@cd source && $(PYTHON) random_gallery.py
-
 release_notes:
 	@echo "Copying release notes"
 	@tail -n +4 `ls release/*.txt | sort -k 2 -t . -n | tail -n 1` > release/_release_notes_for_docs.txt
 
-html: api release_notes random_gallery
+html: api release_notes
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html
 	cp -r source/plots $(DEST)/html
 	@echo
 	@echo "Build finished. The HTML pages are in build/html."
+	$(PYTHON) source/random_gallery.py
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(DEST)/dirhtml

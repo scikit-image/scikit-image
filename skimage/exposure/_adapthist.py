@@ -244,6 +244,8 @@ def clip_histogram(hist, clip_limit):
     n_excess -= mid.size * clip_limit - mid.sum()
     hist[mid_mask] = clip_limit
 
+    prev_n_excess = n_excess
+
     while n_excess > 0:  # Redistribute remaining excess
         index = 0
         while n_excess > 0 and index < hist.size:
@@ -256,6 +258,10 @@ def clip_histogram(hist, clip_limit):
             hist[under_mask] += 1
             n_excess -= under_mask.sum()
             index += 1
+        # bail if we have not distributed any excess
+        if prev_n_excess == n_excess:
+            break
+        prev_n_excess = n_excess
 
     return hist
 

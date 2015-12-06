@@ -37,7 +37,7 @@ threshold_global_otsu = threshold_otsu(img)
 global_otsu = img >= threshold_global_otsu
 
 
-fig, ax = plt.subplots(2, 2, figsize=(8, 5))
+fig, ax = plt.subplots(2, 2, figsize=(8, 5), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
 ax1, ax2, ax3, ax4 = ax.ravel()
 
 fig.colorbar(ax1.imshow(img, cmap=plt.cm.gray),

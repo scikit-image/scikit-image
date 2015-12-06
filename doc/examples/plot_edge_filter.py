@@ -19,7 +19,7 @@ image = camera()
 edge_roberts = roberts(image)
 edge_sobel = sobel(image)
 
-fig, (ax0, ax1) = plt.subplots(ncols=2)
+fig, (ax0, ax1) = plt.subplots(ncols=2, sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
 
 ax0.imshow(edge_roberts, cmap=plt.cm.gray)
 ax0.set_title('Roberts Edge Detection')
@@ -66,7 +66,7 @@ diff_scharr_prewitt = edge_scharr - edge_prewitt
 diff_scharr_sobel = edge_scharr - edge_sobel
 max_diff = np.max(np.maximum(diff_scharr_prewitt, diff_scharr_sobel))
 
-fig, ((ax0, ax1), (ax2, ax3)) = plt.subplots(nrows=2, ncols=2)
+fig, ((ax0, ax1), (ax2, ax3)) = plt.subplots(nrows=2, ncols=2, sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
 
 ax0.imshow(img, cmap=plt.cm.gray)
 ax0.set_title('Original image')

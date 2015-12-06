@@ -12,9 +12,6 @@ from libc.stdlib cimport rand
 
 from ..draw import circle_perimeter
 
-cdef double PI_2 = 1.5707963267948966
-cdef double NEG_PI_2 = -PI_2
-
 from .._shared.interpolation cimport round
 
 
@@ -278,15 +275,9 @@ def hough_line(cnp.ndarray img,
     .. plot:: hough_tf.py
 
     """
-    if img.ndim != 2:
-        raise ValueError('The input image must be 2D.')
-
     # Compute the array of angles and their sine and cosine
     cdef cnp.ndarray[ndim=1, dtype=cnp.double_t] ctheta
     cdef cnp.ndarray[ndim=1, dtype=cnp.double_t] stheta
-
-    if theta is None:
-        theta = np.linspace(NEG_PI_2, PI_2, 180)
 
     ctheta = np.cos(theta)
     stheta = np.sin(theta)
@@ -354,12 +345,6 @@ def probabilistic_hough_line(cnp.ndarray img, int threshold=10,
            Hough transform for line detection", in IEEE Computer Society
            Conference on Computer Vision and Pattern Recognition, 1999.
     """
-    if img.ndim != 2:
-        raise ValueError('The input image must be 2D.')
-
-    if theta is None:
-        theta = PI_2 - np.arange(180) / 180.0 * 2 * PI_2
-
     cdef Py_ssize_t height = img.shape[0]
     cdef Py_ssize_t width = img.shape[1]
 
