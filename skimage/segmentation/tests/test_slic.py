@@ -208,6 +208,7 @@ def test_more_segments_than_pixels():
                multichannel=False, convert2lab=False)
     assert np.all(seg.ravel() == np.arange(seg.size))
 
+
 if __name__ == '__main__':
     from numpy import testing
 
