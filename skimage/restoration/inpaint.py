@@ -51,8 +51,6 @@ def inpaint_biharmonic(img, mask):
     if np.ma.isMaskedArray(img):
         raise TypeError('Masked arrays are not supported')
 
-    # TODO: add sufficient conditions (if any)
-
     img = skimage.img_as_float(img)
     mask = mask.astype(np.bool)
 
@@ -78,7 +76,7 @@ def inpaint_biharmonic(img, mask):
     # INFO: kernels can be reworked using scipy.signal.convolve2d
     #       and np.array([0, 1, 0], [1, -4, 1], [0, 1, 0])
 
-    # 1 stage. Find points 2 or more pixels far from bounds
+    # 1 stage. Find points 2 or more pixels far from edges
     kernel = [1, 2, -8, 2, 1, -8, 20, -8, 1, 2, -8, 2, 1]
     offset = [-2 * out_w, -out_w - 1, -out_w, -out_w + 1,
               -2, -1, 0, 1, 2, out_w - 1, out_w, out_w + 1, 2 * out_w]
@@ -91,7 +89,7 @@ def inpaint_biharmonic(img, mask):
                 else:
                     matrix_known[idx, i + o] = k
 
-    # 2 stage. Find points 1 pixel far from bounds
+    # 2 stage. Find points 1 pixel far from edges
     kernel = [1, 1, -4, 1, 1]
     offset = [-out_w, -1, 0, 1, out_w]
 
@@ -104,31 +102,23 @@ def inpaint_biharmonic(img, mask):
                 else:
                     matrix_known[idx, i + o] = k
 
-    # 3 stage. Find points on the horizontal bounds
-    kernel = [1, -2, 1]
-    offset = [-1, 0, 1]
+    # 3 stage. Find points on the edges
+    kernel = [1, 1, -3, 1, 1]
+    offset = [-out_w, -1, 0, 1, out_w]
+    offset_mn = [(-1, 0), (0, -1), (0, 0), (0, 1), (1, 0)]
 
     for idx, (i, (m, n)) in enumerate(zip(mask_i, mask_mn)):
-        if m in [0, out_h - 1] and 1 <= n <= out_w - 2:
-            for k, o in zip(kernel, offset):
-                if i + o in mask_i:
-                    matrix_unknown[idx, i + o] = k
-                else:
-                    matrix_known[idx, i + o] = k
+        if (m in [0, out_h - 1] and 1 <= n <= out_w - 2) or \
+           (n in [0, out_w - 1] and 1 <= m <= out_h - 2):
+            for k, o_mn in zip(kernel, offset_mn):
+                if _in_bounds((m + o_mn[0], n + o_mn[1])):
+                    o = offset[offset_mn.index(o_mn)]
+                    if i + o in mask_i:
+                        matrix_unknown[idx, i + o] = k
+                    else:
+                        matrix_known[idx, i + o] = k
 
-    # 4 stage. Find points on the vertical bounds
-    kernel = [1, -2, 1]
-    offset = [-out_w, 0, out_w]
-
-    for idx, (i, (m, n)) in enumerate(zip(mask_i, mask_mn)):
-        if n in [0, out_w - 1] and 1 <= m <= out_h - 2:
-            for k, o in zip(kernel, offset):
-                if i + o in mask_i:
-                    matrix_unknown[idx, i + o] = k
-                else:
-                    matrix_known[idx, i + o] = k
-
-    # 5 stage. Find corner points if any
+    # 4 stage. Find corner points
     kernel = [1, 1, -2, 1, 1]
     offset = [-out_w, -1, 0, 1, out_w]
     offset_mn = [(-1, 0), (0, -1), (0, 0), (0, 1), (1, 0)]
