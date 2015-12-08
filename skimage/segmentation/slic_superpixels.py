@@ -155,7 +155,8 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     # initialize cluster centroids for desired number of segments
     grid_z, grid_y, grid_x = np.mgrid[:depth, :height, :width]
     slices = regular_grid(image.shape[:3], n_segments)
-    step_z, step_y, step_x = [int(s.step) for s in slices]
+    step_z, step_y, step_x = [int(s.step if s.step is not None else 1)
+                              for s in slices]
     segments_z = grid_z[slices]
     segments_y = grid_y[slices]
     segments_x = grid_x[slices]

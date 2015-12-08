@@ -195,6 +195,20 @@ def test_slic_zero():
     assert_equal(seg[10:, 10:], 3)
 
 
+def test_more_segments_than_pixels():
+    rnd = np.random.RandomState(0)
+    img = np.zeros((20, 21))
+    img[:10, :10] = 0.33
+    img[10:, :10] = 0.67
+    img[10:, 10:] = 1.00
+    img += 0.0033 * rnd.normal(size=img.shape)
+    img[img > 1] = 1
+    img[img < 0] = 0
+    seg = slic(img, sigma=0, n_segments=500, compactness=1,
+               multichannel=False, convert2lab=False)
+    assert np.all(seg.ravel() == np.arange(seg.size))
+
+
 if __name__ == '__main__':
     from numpy import testing
 
