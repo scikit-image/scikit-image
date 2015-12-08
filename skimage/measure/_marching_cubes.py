@@ -19,7 +19,7 @@ def marching_cubes(volume, level, spacing=(1., 1., 1.),
         indexing dimensions (M, N, P) as in `volume`.
     gradient_direction : string
         Controls if the mesh was generated from an isosurface with gradient
-        ascent toward objects of interest (the default), or the opposite.
+        descent toward objects of interest (the default), or the opposite.
         The two options are:
         * descent : Object was greater than exterior
         * ascent : Exterior was greater than object
@@ -201,7 +201,7 @@ def correct_mesh_orientation(volume, verts, faces, spacing=(1., 1., 1.),
         indexing dimensions (M, N, P) as in `volume`.
     gradient_direction : string
         Controls if the mesh was generated from an isosurface with gradient
-        ascent toward objects of interest (the default), or the opposite.
+        descent toward objects of interest (the default), or the opposite.
         The two options are:
         * descent : Object was greater than exterior
         * ascent : Exterior was greater than object
@@ -277,7 +277,7 @@ def _correct_mesh_orientation(volume, actual_verts, faces,
         indexing dimensions (M, N, P) as in `volume`.
     gradient_direction : string
         Controls if the mesh was generated from an isosurface with gradient
-        ascent toward objects of interest (the default), or the opposite.
+        descent toward objects of interest (the default), or the opposite.
         The two options are:
         * descent : Object was greater than exterior
         * ascent : Exterior was greater than object
