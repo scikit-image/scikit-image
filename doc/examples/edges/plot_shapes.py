@@ -5,16 +5,16 @@ Shapes
 
 This example shows how to draw several different shapes:
 
- - line
- - Bezier curve
- - polygon
- - circle
- - ellipse
+- line
+- Bezier curve
+- polygon
+- circle
+- ellipse
 
 Anti-aliased drawing for:
 
- - line
- - circle
+- line
+- circle
 
 """
 import math

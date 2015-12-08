@@ -79,9 +79,10 @@ print("Felzenszwalb's number of segments: %d" % len(np.unique(segments_fz)))
 print("Slic number of segments: %d" % len(np.unique(segments_slic)))
 print("Quickshift number of segments: %d" % len(np.unique(segments_quick)))
 
-fig, ax = plt.subplots(1, 3, sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, ax = plt.subplots(1, 3, sharex=True, sharey=True,
+                       subplot_kw={'adjustable': 'box-forced'})
 fig.set_size_inches(8, 3, forward=True)
-fig.subplots_adjust(0.05, 0.05, 0.95, 0.95, 0.05, 0.05)
+fig.tight_layout()
 
 ax[0].imshow(mark_boundaries(img, segments_fz))
 ax[0].set_title("Felzenszwalbs's method")

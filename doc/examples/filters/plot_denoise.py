@@ -38,7 +38,8 @@ astro = astro[220:300, 220:320]
 noisy = astro + 0.6 * astro.std() * np.random.random(astro.shape)
 noisy = np.clip(noisy, 0, 1)
 
-fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(8, 5), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(8, 5), sharex=True,
+                       sharey=True, subplot_kw={'adjustable': 'box-forced'})
 
 plt.gray()
 
@@ -62,7 +63,6 @@ ax[1, 2].imshow(astro)
 ax[1, 2].axis('off')
 ax[1, 2].set_title('original')
 
-fig.subplots_adjust(wspace=0.02, hspace=0.2,
-                    top=0.9, bottom=0.05, left=0, right=1)
+fig.tight_layout()
 
 plt.show()

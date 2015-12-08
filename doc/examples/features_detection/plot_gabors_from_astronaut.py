@@ -87,5 +87,5 @@ ax3.set_title("K-means filterbank (codebook)\non LGN-like DoG image")
 for ax in axes.ravel():
     ax.axis('off')
 
-fig.subplots_adjust(hspace=0.3)
+fig.tight_layout()
 plt.show()

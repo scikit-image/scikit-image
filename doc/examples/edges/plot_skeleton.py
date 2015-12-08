@@ -47,7 +47,9 @@ image[circle2] = 0
 skeleton = skeletonize(image)
 
 # display results
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=(8, 4.5),
+                               sharex=True, sharey=True,
+                               subplot_kw={'adjustable': 'box-forced'})
 
 ax1.imshow(image, cmap=plt.cm.gray)
 ax1.axis('off')
@@ -57,7 +59,6 @@ ax2.imshow(skeleton, cmap=plt.cm.gray)
 ax2.axis('off')
 ax2.set_title('skeleton', fontsize=20)
 
-fig.subplots_adjust(wspace=0.02, hspace=0.02, top=0.98,
-                    bottom=0.02, left=0.02, right=0.98)
+fig.tight_layout()
 
 plt.show()

@@ -48,7 +48,8 @@ local_maxi = peak_local_max(distance, indices=False, footprint=np.ones((3, 3)),
 markers = ndi.label(local_maxi)[0]
 labels = watershed(-distance, markers, mask=image)
 
-fig, axes = plt.subplots(ncols=3, figsize=(8, 2.7), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, axes = plt.subplots(ncols=3, figsize=(8, 2.7), sharex=True, sharey=True,
+                         subplot_kw={'adjustable': 'box-forced'})
 ax0, ax1, ax2 = axes
 
 ax0.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
@@ -61,6 +62,5 @@ ax2.set_title('Separated objects')
 for ax in axes:
     ax.axis('off')
 
-fig.subplots_adjust(hspace=0.01, wspace=0.01, top=0.9, bottom=0, left=0,
-                    right=1)
+fig.tight_layout()
 plt.show()
