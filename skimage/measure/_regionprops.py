@@ -53,7 +53,7 @@ PROPS = {
     'WeightedNormalizedMoments': 'weighted_moments_normalized'
 }
 
-PROP_VALS = PROPS.values()
+PROP_VALS = set(PROPS.values())
 
 
 class _cached_property(object):
@@ -105,6 +105,9 @@ class _cached_property(object):
 
 
 class _RegionProperties(object):
+    """Please refer to `skimage.measure.regionprops` for more information
+    on the available region properties.
+    """
 
     def __init__(self, slice, label, label_image, intensity_image,
                  cache_active):
@@ -301,7 +304,23 @@ class _RegionProperties(object):
         return _moments.moments_normalized(self.weighted_moments_central, 3)
 
     def __iter__(self):
-        return iter(PROPS.values())
+        props = PROP_VALS
+
+        if self._intensity_image is None:
+            unavailable_props = ('intensity_image',
+                                 'max_intensity',
+                                 'mean_intensity',
+                                 'min_intensity',
+                                 'weighted_moments',
+                                 'weighted_moments_central',
+                                 'weighted_centroid',
+                                 'weighted_local_centroid',
+                                 'weighted_moments_hu',
+                                 'weighted_moments_normalized')
+
+            props = props.difference(unavailable_props)
+
+        return iter(sorted(props))
 
     def __getitem__(self, key):
         value = getattr(self, key, None)
@@ -457,7 +476,12 @@ def regionprops(label_image, intensity_image=None, cache=True):
 
             wnu_ji = wmu_ji / wm_00^[(i+j)/2 + 1]
 
-        where `wm_00` is the zeroth spatial moment (intensity-weighted area).
+        where ``wm_00`` is the zeroth spatial moment (intensity-weighted area).
+
+    Each region also supports iteration, so that you can do::
+
+      for prop in region:
+          print(prop, region[prop])
 
     References
     ----------
