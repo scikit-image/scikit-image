@@ -2,7 +2,7 @@
 To build docs, run `make` in this directory. `make help` lists all targets.
 
 ## Requirements ##
-Sphinx and Latex is needed to build doc.
+Sphinx (>= 1.3) and Latex is needed to build doc.
 
 **Sphinx:**
 ```sh
