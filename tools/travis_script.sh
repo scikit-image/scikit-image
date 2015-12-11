@@ -96,7 +96,7 @@ else
     MPL_QT_API=PySide
     export QT_API=pyside
 fi
-echo 'backend: Agg' > $MPL_DIR/matplotlibrc
+echo 'backend: Qt4Agg' > $MPL_DIR/matplotlibrc
 echo 'backend.qt4 : '$MPL_QT_API >> $MPL_DIR/matplotlibrc
 
 section_end "Run.doc.applications"
