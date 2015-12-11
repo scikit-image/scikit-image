@@ -104,9 +104,6 @@ section_end "Run.doc.applications"
 
 section "Test.with.optional.dependencies"
 
-echo '****************'
-cat $MPL_DIR/matplotlibrc
-
 # run tests again with optional dependencies to get more coverage
 if [[ $PY == 3.3 ]]; then
     TEST_ARGS="$TEST_ARGS --with-cov --cover-package skimage"
