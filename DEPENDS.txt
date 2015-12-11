@@ -56,3 +56,10 @@ Testing requirements
       A Python Unit Testing Framework
 * `Coverage.py <http://nedbatchelder.com/code/coverage/>`__
       A tool that generates a unit test code coverage report
+
+
+Documentation requirements
+--------------------------
+
+`sphinx >= 1.3 <http://sphinx-doc.org/>`_ is required to build the
+documentation.

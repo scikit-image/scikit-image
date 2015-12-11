@@ -122,7 +122,7 @@ the image. The histogram of pixel values is computed with
 
 :func:`histogram` returns the number of pixels for each value bin, and
 the centers of the bins. The behavior of :func:`histogram` is therefore
-slightly different from the one of :func:`np.histogram`, which returns
+slightly different from the one of :func:`numpy.histogram`, which returns
 the boundaries of the bins.
 
 The simplest contrast enhancement :func:`rescale_intensity` consists in
