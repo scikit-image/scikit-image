@@ -1,10 +1,10 @@
-import warnings
 import numpy as np
 from skimage import img_as_float
 import scipy
 import scipy.linalg
 from scipy.interpolate import RectBivariateSpline, interp2d
 from skimage.filters import sobel
+
 
 def active_contour(image, snake, alpha=0.01, beta=0.1,
                    w_line=0, w_edge=1, gamma=0.01,
@@ -100,7 +100,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     valid_bcs = ['periodic', 'free', 'fixed', 'free-fixed',
                  'fixed-free', 'fixed-fixed', 'free-free']
     if bc not in valid_bcs:
-        raise ValueError("Invalid boundary condition.\n"+
+        raise ValueError("Invalid boundary condition.\n" +
                          "Should be one of: "+", ".join(valid_bcs)+'.')
     img = img_as_float(image)
     RGB = img.ndim == 3
@@ -130,11 +130,12 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     # Interpolate for smoothness:
     if new_scipy:
         intp = RectBivariateSpline(np.arange(img.shape[1]),
-                np.arange(img.shape[0]), img.T, kx=2, ky=2, s=0)
+                                   np.arange(img.shape[0]),
+                                   img.T, kx=2, ky=2, s=0)
     else:
         intp = np.vectorize(interp2d(np.arange(img.shape[1]),
-            np.arange(img.shape[0]), img, kind='cubic', copy=False,
-            bounds_error=False, fill_value=0))
+                        np.arange(img.shape[0]), img, kind='cubic',
+                        copy=False, bounds_error=False, fill_value=0))
 
     x, y = snake[:, 0].copy(), snake[:, 1].copy()
     xsave = np.empty((convergence_order, len(x)))
@@ -142,14 +143,14 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
 
     # Build snake shape matrix for Euler equation
     n = len(x)
-    a = np.roll(np.eye(n), -1, axis=0) \
-      + np.roll(np.eye(n), -1, axis=1) \
-      - 2*np.eye(n) # second order derivative, central difference
-    b = np.roll(np.eye(n), -2, axis=0) \
-      + np.roll(np.eye(n), -2, axis=1) \
-      - 4*np.roll(np.eye(n), -1, axis=0) \
-      - 4*np.roll(np.eye(n), -1, axis=1) \
-      + 6*np.eye(n) # fourth order derivative, central difference
+    a = np.roll(np.eye(n), -1, axis=0) + \
+        np.roll(np.eye(n), -1, axis=1) - \
+        2*np.eye(n)  # second order derivative, central difference
+    b = np.roll(np.eye(n), -2, axis=0) + \
+        np.roll(np.eye(n), -2, axis=1) - \
+        4*np.roll(np.eye(n), -1, axis=0) - \
+        4*np.roll(np.eye(n), -1, axis=1) + \
+        6*np.eye(n)  # fourth order derivative, central difference
     A = -alpha*a + beta*b
 
     # Impose boundary conditions different from periodic:
@@ -220,13 +221,13 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
 
         # Convergence criteria needs to compare to a number of previous
         # configurations since oscillations can occur.
-        j = i%(convergence_order+1)
+        j = i % (convergence_order+1)
         if j < convergence_order:
             xsave[j, :] = x
             ysave[j, :] = y
         else:
-            dist = np.min(np.max(np.abs(xsave-x[None, :])
-                 + np.abs(ysave-y[None, :]), 1))
+            dist = np.min(np.max(np.abs(xsave-x[None, :]) +
+                   np.abs(ysave-y[None, :]), 1))
             if dist < convergence:
                 break
 
