@@ -365,13 +365,22 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
     ----------
     .. [1] http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
     """
+    direct_time = lambda n, m, k, l: k*l * n*m
+    def fft_time(m, n, k, l):
+        return m*np.log(m) + n*np.log(n) + k*np.log(k) + l*np.log(l)
+
+    time_ratio = 71.468 * fft_time(*image.shape, *psf.shape)
+    time_ratio /= direct_time(*image.shape, *psf.shape)
+    convolve_method = fftconvolve if time_ratio <= 1 else convolve2d
+
     image = image.astype(np.float)
     psf = psf.astype(np.float)
     im_deconv = 0.5 * np.ones(image.shape)
     psf_mirror = psf[::-1, ::-1]
+
     for _ in range(iterations):
-        relative_blur = image / fftconvolve(im_deconv, psf, 'same')
-        im_deconv *= fftconvolve(relative_blur, psf_mirror, 'same')
+        relative_blur = image / convolve_method(im_deconv, psf, 'same')
+        im_deconv *= convolve_method(relative_blur, psf_mirror, 'same')
 
     if clip:
         im_deconv[im_deconv > 1] = 1
