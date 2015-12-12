@@ -3,7 +3,8 @@ from numpy.testing import assert_array_equal, assert_almost_equal, \
 import numpy as np
 import math
 
-from skimage.measure._regionprops import regionprops, PROPS, perimeter
+from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
+                                          _parse_docs, _RegionProperties)
 from skimage._shared._warnings import expected_warnings
 
 
@@ -357,6 +358,7 @@ def test_invalid():
     ps = regionprops(SAMPLE)
     def get_intensity_image():
         ps[0].intensity_image
+
     assert_raises(AttributeError, get_intensity_image)
 
 
@@ -384,6 +386,37 @@ def test_iterate_all_props():
     p1 = dict((p, region[p]) for p in region)
 
     assert len(p0) < len(p1)
+
+
+def test_cache():
+    region = regionprops(SAMPLE)[0]
+    f0 = region.filled_image
+    region._label_image[:10] = 1
+    f1 = region.filled_image
+
+    # Changed underlying image, but cache keeps result the same
+    assert_array_equal(f0, f1)
+
+    # Now invalidate cache
+    region._cache_active = False
+    f1 = region.filled_image
+
+    assert np.any(f0 != f1)
+
+
+def test_docstrings_and_props():
+    region = regionprops(SAMPLE)[0]
+
+    docs = _parse_docs()
+    props = [m for m in dir(region) if not m.startswith('_')]
+
+    nr_docs_parsed = len(docs)
+    nr_props = len(props)
+    assert_equal(nr_docs_parsed, nr_props)
+
+    ds = docs['weighted_moments_normalized']
+    assert 'iteration' not in ds
+    assert len(ds.split('\n')) > 3
 
 
 if __name__ == "__main__":

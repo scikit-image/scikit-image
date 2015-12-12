@@ -7,6 +7,10 @@ from ._label import label
 from . import _moments
 
 
+import sys
+from functools import wraps
+from collections import defaultdict
+
 __all__ = ['regionprops', 'perimeter']
 
 
@@ -56,52 +60,18 @@ PROPS = {
 PROP_VALS = set(PROPS.values())
 
 
-class _cached_property(object):
-    """Decorator to use a function as a cached property.
+def _cached(f):
+    @wraps(f)
+    def wrapper(obj):
+        cache = obj._cache
+        prop = f.__name__
 
-    The function is only called the first time and each successive call returns
-    the cached result of the first call.
+        if (cache[prop] is None) or (not obj._cache_active):
+            cache[prop] = f(obj)
 
-        class Foo(object):
+        return cache[prop]
 
-            @_cached_property
-            def foo(self):
-                return "Cached"
-
-        class Foo(object):
-
-            def __init__(self):
-                self._cache_active = False
-
-            @_cached_property
-            def foo(self):
-                return "Not cached"
-
-    Adapted from <http://wiki.python.org/moin/PythonDecoratorLibrary>.
-
-    """
-
-    def __init__(self, func, name=None, doc=None):
-        self.__name__ = name or func.__name__
-        self.__module__ = func.__module__
-        self.__doc__ = doc or func.__doc__
-        self.func = func
-
-    def __get__(self, obj, type=None):
-        if obj is None:
-            return self
-
-        # call every time, if cache is not active
-        if not obj.__dict__.get('_cache_active', True):
-            return self.func(obj)
-
-        # try to retrieve from cache or call and store result in cache
-        try:
-            value = obj.__dict__[self.__name__]
-        except KeyError:
-            value = self.func(obj)
-            obj.__dict__[self.__name__] = value
-        return value
+    return wrapper
 
 
 class _RegionProperties(object):
@@ -112,75 +82,68 @@ class _RegionProperties(object):
     def __init__(self, slice, label, label_image, intensity_image,
                  cache_active):
         self.label = label
+
         self._slice = slice
         self._label_image = label_image
         self._intensity_image = intensity_image
-        self._cache_active = cache_active
 
-    @property
+        self._cache_active = cache_active
+        self._cache = defaultdict(lambda: None)
+
     def area(self):
         return self.moments[0, 0]
 
-    @property
     def bbox(self):
         return (self._slice[0].start, self._slice[1].start,
                 self._slice[0].stop, self._slice[1].stop)
 
-    @property
     def centroid(self):
         row, col = self.local_centroid
         return row + self._slice[0].start, col + self._slice[1].start
 
-    @property
     def convex_area(self):
         return np.sum(self.convex_image)
 
-    @_cached_property
+    @_cached
     def convex_image(self):
         from ..morphology.convex_hull import convex_hull_image
         return convex_hull_image(self.image)
 
-    @property
     def coords(self):
         rr, cc = np.nonzero(self.image)
         return np.vstack((rr + self._slice[0].start,
                           cc + self._slice[1].start)).T
 
-    @property
     def eccentricity(self):
         l1, l2 = self.inertia_tensor_eigvals
         if l1 == 0:
             return 0
         return sqrt(1 - l2 / l1)
 
-    @property
     def equivalent_diameter(self):
         return sqrt(4 * self.moments[0, 0] / PI)
 
-    @property
     def euler_number(self):
         euler_array = self.filled_image != self.image
         _, num = label(euler_array, neighbors=8, return_num=True, background=-1)
         return -num + 1
 
-    @property
     def extent(self):
         rows, cols = self.image.shape
         return self.moments[0, 0] / (rows * cols)
 
-    @property
     def filled_area(self):
         return np.sum(self.filled_image)
 
-    @_cached_property
+    @_cached
     def filled_image(self):
         return ndi.binary_fill_holes(self.image, STREL_8)
 
-    @_cached_property
+    @_cached
     def image(self):
         return self._label_image[self._slice] == self.label
 
-    @_cached_property
+    @_cached
     def inertia_tensor(self):
         mu = self.moments_central
         a = mu[2, 0] / mu[0, 0]
@@ -188,7 +151,7 @@ class _RegionProperties(object):
         c = mu[0, 2] / mu[0, 0]
         return np.array([[a, b], [b, c]])
 
-    @_cached_property
+    @_cached
     def inertia_tensor_eigvals(self):
         a, b, b, c = self.inertia_tensor.flat
         # eigen values of inertia tensor
@@ -196,64 +159,55 @@ class _RegionProperties(object):
         l2 = (a + c) / 2 - sqrt(4 * b ** 2 + (a - c) ** 2) / 2
         return l1, l2
 
-    @_cached_property
+    @_cached
     def intensity_image(self):
         if self._intensity_image is None:
             raise AttributeError('No intensity image specified.')
         return self._intensity_image[self._slice] * self.image
 
-    @property
     def _intensity_image_double(self):
         return self.intensity_image.astype(np.double)
 
-    @property
     def local_centroid(self):
         m = self.moments
         row = m[0, 1] / m[0, 0]
         col = m[1, 0] / m[0, 0]
         return row, col
 
-    @property
     def max_intensity(self):
         return np.max(self.intensity_image[self.image])
 
-    @property
     def mean_intensity(self):
         return np.mean(self.intensity_image[self.image])
 
-    @property
     def min_intensity(self):
         return np.min(self.intensity_image[self.image])
 
-    @property
     def major_axis_length(self):
         l1, _ = self.inertia_tensor_eigvals
         return 4 * sqrt(l1)
 
-    @property
     def minor_axis_length(self):
         _, l2 = self.inertia_tensor_eigvals
         return 4 * sqrt(l2)
 
-    @_cached_property
+    @_cached
     def moments(self):
         return _moments.moments(self.image.astype(np.uint8), 3)
 
-    @_cached_property
+    @_cached
     def moments_central(self):
         row, col = self.local_centroid
         return _moments.moments_central(self.image.astype(np.uint8),
                                         row, col, 3)
 
-    @property
     def moments_hu(self):
         return _moments.moments_hu(self.moments_normalized)
 
-    @_cached_property
+    @_cached
     def moments_normalized(self):
         return _moments.moments_normalized(self.moments_central, 3)
 
-    @property
     def orientation(self):
         a, b, b, c = self.inertia_tensor.flat
         b = -b
@@ -265,41 +219,36 @@ class _RegionProperties(object):
         else:
             return - 0.5 * atan2(2 * b, (a - c))
 
-    @property
     def perimeter(self):
         return perimeter(self.image, 4)
 
-    @property
     def solidity(self):
         return self.moments[0, 0] / np.sum(self.convex_image)
 
-    @property
     def weighted_centroid(self):
         row, col = self.weighted_local_centroid
         return row + self._slice[0].start, col + self._slice[1].start
 
-    @property
     def weighted_local_centroid(self):
         m = self.weighted_moments
         row = m[0, 1] / m[0, 0]
         col = m[1, 0] / m[0, 0]
         return row, col
 
-    @_cached_property
+    @_cached
     def weighted_moments(self):
-        return _moments.moments_central(self._intensity_image_double, 0, 0, 3)
+        return _moments.moments_central(self._intensity_image_double(), 0, 0, 3)
 
-    @_cached_property
+    @_cached
     def weighted_moments_central(self):
         row, col = self.weighted_local_centroid
-        return _moments.moments_central(self._intensity_image_double,
+        return _moments.moments_central(self._intensity_image_double(),
                                         row, col, 3)
 
-    @property
     def weighted_moments_hu(self):
         return _moments.moments_hu(self.weighted_moments_normalized)
 
-    @_cached_property
+    @_cached
     def weighted_moments_normalized(self):
         return _moments.moments_normalized(self.weighted_moments_central, 3)
 
@@ -352,7 +301,8 @@ def regionprops(label_image, intensity_image=None, cache=True):
     label_image : (N, M) ndarray
         Labeled input image. Labels with value 0 are ignored.
     intensity_image : (N, M) ndarray, optional
-        Intensity image with same size as labeled image. Default is None.
+        Intensity (i.e., input) image with same size as labeled image.
+        Default is None.
     cache : bool, optional
         Determine whether to cache calculated properties. The computation is
         much faster for cached properties, whereas the memory consumption
@@ -371,7 +321,7 @@ def regionprops(label_image, intensity_image=None, cache=True):
     **area** : int
         Number of pixels of region.
     **bbox** : tuple
-       Bounding box ``(min_row, min_col, max_row, max_col)``
+        Bounding box ``(min_row, min_col, max_row, max_col)``
     **centroid** : array
         Centroid coordinate tuple ``(row, col)``.
     **convex_area** : int
@@ -405,8 +355,13 @@ def regionprops(label_image, intensity_image=None, cache=True):
         Inertia tensor of the region for the rotation around its mass.
     **inertia_tensor_eigvals** : tuple
         The two eigen values of the inertia tensor in decreasing order.
+    **intensity_image** : ndarray
+        Image inside region bounding box.
     **label** : int
         The label in the labeled input image.
+    **local_centroid** : array
+        Centroid coordinate tuple ``(row, col)``, relative to region bounding
+        box.
     **major_axis_length** : float
         The length of the major axis of the ellipse that has the same
         normalized second central moments as the region.
@@ -452,6 +407,9 @@ def regionprops(label_image, intensity_image=None, cache=True):
     **weighted_centroid** : array
         Centroid coordinate tuple ``(row, col)`` weighted with intensity
         image.
+    **weighted_local_centroid** : array
+        Centroid coordinate tuple ``(row, col)``, relative to region bounding
+        box, weighted with intensity image.
     **weighted_moments** : (3, 3) ndarray
         Spatial moments of intensity image up to 3rd order::
 
@@ -581,3 +539,27 @@ def perimeter(image, neighbourhood=4):
     perimeter_histogram = np.bincount(perimeter_image.ravel(), minlength=50)
     total_perimeter = np.dot(perimeter_histogram, perimeter_weights)
     return total_perimeter
+
+
+
+def _parse_docs():
+    import re
+    import textwrap
+
+    doc = regionprops.__doc__
+    matches = re.finditer('\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)', doc, flags=re.DOTALL)
+    prop_doc = dict((m.group(1), textwrap.dedent(m.group(2))) for m in matches)
+
+    return prop_doc
+
+
+def _install_properties_docs():
+    prop_doc = _parse_docs()
+
+    for p in [member for member in dir(_RegionProperties)
+              if not member.startswith('_')]:
+        getattr(_RegionProperties, p).__doc__ = prop_doc[p]
+        setattr(_RegionProperties, p, property(getattr(_RegionProperties, p)))
+
+
+_install_properties_docs()
