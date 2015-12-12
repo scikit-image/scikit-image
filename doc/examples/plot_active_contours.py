@@ -40,7 +40,7 @@ y = 100 + 100*np.sin(s)
 init = np.array([x, y]).T
 
 snake = active_contour(gaussian_filter(img, 3),
-            init, alpha=0.015, beta=10, gamma=0.001)
+                       init, alpha=0.015, beta=10, gamma=0.001)
 
 fig = plt.figure(figsize=(7, 7))
 ax = fig.add_subplot(111)
@@ -67,7 +67,7 @@ y = np.linspace(136, 50, 100)
 init = np.array([x, y]).T
 
 snake = active_contour(gaussian_filter(img, 1), init, bc='fixed',
-        alpha=0.1, beta=1.0, w_line=-5, w_edge=0, gamma=0.1)
+                       alpha=0.1, beta=1.0, w_line=-5, w_edge=0, gamma=0.1)
 
 fig = plt.figure(figsize=(9, 5))
 ax = fig.add_subplot(111)
