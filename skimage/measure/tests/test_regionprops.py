@@ -4,8 +4,7 @@ import numpy as np
 import math
 
 from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
-                                          _parse_docs, _RegionProperties)
-from skimage._shared._warnings import expected_warnings
+                                          _parse_docs)
 
 
 SAMPLE = np.array(
@@ -64,14 +63,14 @@ def test_bbox():
 def test_moments_central():
     mu = regionprops(SAMPLE)[0].moments_central
     # determined with OpenCV
-    assert_almost_equal(mu[0,2], 436.00000000000045)
+    assert_almost_equal(mu[0, 2], 436.00000000000045)
     # different from OpenCV results, bug in OpenCV
-    assert_almost_equal(mu[0,3], -737.333333333333)
-    assert_almost_equal(mu[1,1], -87.33333333333303)
-    assert_almost_equal(mu[1,2], -127.5555555555593)
-    assert_almost_equal(mu[2,0], 1259.7777777777774)
-    assert_almost_equal(mu[2,1], 2000.296296296291)
-    assert_almost_equal(mu[3,0], -760.0246913580195)
+    assert_almost_equal(mu[0, 3], -737.333333333333)
+    assert_almost_equal(mu[1, 1], -87.33333333333303)
+    assert_almost_equal(mu[1, 2], -127.5555555555593)
+    assert_almost_equal(mu[2, 0],  1259.7777777777774)
+    assert_almost_equal(mu[2, 1],  2000.296296296291)
+    assert_almost_equal(mu[3, 0], -760.0246913580195)
 
 
 def test_centroid():
@@ -146,13 +145,13 @@ def test_extent():
 def test_moments_hu():
     hu = regionprops(SAMPLE)[0].moments_hu
     ref = np.array([
-        3.27117627e-01,
-        2.63869194e-02,
-        2.35390060e-02,
-        1.23151193e-03,
-        1.38882330e-06,
+         3.27117627e-01,
+         2.63869194e-02,
+         2.35390060e-02,
+         1.23151193e-03,
+         1.38882330e-06,
         -2.72586158e-05,
-        6.48350653e-06
+         6.48350653e-06
     ])
     # bug in OpenCV caused in Central Moments calculation?
     assert_array_almost_equal(hu, ref)
@@ -218,27 +217,27 @@ def test_minor_axis_length():
 def test_moments():
     m = regionprops(SAMPLE)[0].moments
     # determined with OpenCV
-    assert_almost_equal(m[0,0], 72.0)
-    assert_almost_equal(m[0,1], 408.0)
-    assert_almost_equal(m[0,2], 2748.0)
-    assert_almost_equal(m[0,3], 19776.0)
-    assert_almost_equal(m[1,0], 680.0)
-    assert_almost_equal(m[1,1], 3766.0)
-    assert_almost_equal(m[1,2], 24836.0)
-    assert_almost_equal(m[2,0], 7682.0)
-    assert_almost_equal(m[2,1], 43882.0)
-    assert_almost_equal(m[3,0], 95588.0)
+    assert_almost_equal(m[0, 0], 72.0)
+    assert_almost_equal(m[0, 1], 408.0)
+    assert_almost_equal(m[0, 2], 2748.0)
+    assert_almost_equal(m[0, 3], 19776.0)
+    assert_almost_equal(m[1, 0], 680.0)
+    assert_almost_equal(m[1, 1], 3766.0)
+    assert_almost_equal(m[1, 2], 24836.0)
+    assert_almost_equal(m[2, 0], 7682.0)
+    assert_almost_equal(m[2, 1], 43882.0)
+    assert_almost_equal(m[3, 0], 95588.0)
 
 
 def test_moments_normalized():
     nu = regionprops(SAMPLE)[0].moments_normalized
     # determined with OpenCV
-    assert_almost_equal(nu[0,2], 0.08410493827160502)
-    assert_almost_equal(nu[1,1], -0.016846707818929982)
-    assert_almost_equal(nu[1,2], -0.002899800614433943)
-    assert_almost_equal(nu[2,0], 0.24301268861454037)
-    assert_almost_equal(nu[2,1], 0.045473992910668816)
-    assert_almost_equal(nu[3,0], -0.017278118992041805)
+    assert_almost_equal(nu[0, 2],  0.08410493827160502)
+    assert_almost_equal(nu[1, 1], -0.016846707818929982)
+    assert_almost_equal(nu[1, 2], -0.002899800614433943)
+    assert_almost_equal(nu[2, 0],  0.24301268861454037)
+    assert_almost_equal(nu[2, 1],  0.045473992910668816)
+    assert_almost_equal(nu[3, 0], -0.017278118992041805)
 
 
 def test_orientation():
@@ -278,14 +277,14 @@ def test_weighted_moments_central():
     wmu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
                       )[0].weighted_moments_central
     ref = np.array(
-        [[  7.4000000000e+01, -2.1316282073e-13,  4.7837837838e+02,
-            -7.5943608473e+02],
-         [  3.7303493627e-14, -8.7837837838e+01, -1.4801314828e+02,
-            -1.2714707125e+03],
-         [  1.2602837838e+03,  2.1571526662e+03,  6.6989799420e+03,
-             1.5304076361e+04],
-         [ -7.6561796932e+02, -4.2385971907e+03, -9.9501164076e+03,
-            -3.3156729271e+04]]
+        [[ 7.4000000000e+01, -2.1316282073e-13,
+           4.7837837838e+02, -7.5943608473e+02],
+         [ 3.7303493627e-14, -8.7837837838e+01,
+          -1.4801314828e+02, -1.2714707125e+03],
+         [ 1.2602837838e+03,  2.1571526662e+03,
+           6.6989799420e+03,  1.5304076361e+04],
+         [-7.6561796932e+02, -4.2385971907e+03,
+          -9.9501164076e+03, -3.3156729271e+04]]
     )
     np.set_printoptions(precision=10)
     assert_array_almost_equal(wmu, ref)
@@ -316,14 +315,10 @@ def test_weighted_moments():
     wm = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
                      )[0].weighted_moments
     ref = np.array(
-        [[  7.4000000000e+01, 4.1000000000e+02, 2.7500000000e+03,
-            1.9778000000e+04],
-         [  6.9900000000e+02, 3.7850000000e+03, 2.4855000000e+04,
-            1.7500100000e+05],
-         [  7.8630000000e+03, 4.4063000000e+04, 2.9347700000e+05,
-            2.0810510000e+06],
-         [  9.7317000000e+04, 5.7256700000e+05, 3.9007170000e+06,
-            2.8078871000e+07]]
+        [[7.4000000e+01, 4.1000000e+02, 2.7500000e+03, 1.9778000e+04],
+         [6.9900000e+02, 3.7850000e+03, 2.4855000e+04, 1.7500100e+05],
+         [7.8630000e+03, 4.4063000e+04, 2.9347700e+05, 2.0810510e+06],
+         [9.7317000e+04, 5.7256700e+05, 3.9007170e+06, 2.8078871e+07]]
     )
     assert_array_almost_equal(wm, ref)
 
@@ -356,6 +351,7 @@ def test_pure_background():
 
 def test_invalid():
     ps = regionprops(SAMPLE)
+
     def get_intensity_image():
         ps[0].intensity_image
 

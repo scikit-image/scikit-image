@@ -7,7 +7,6 @@ from ._label import label
 from . import _moments
 
 
-import sys
 from functools import wraps
 from collections import defaultdict
 
@@ -24,14 +23,14 @@ PROPS = {
     'CentralMoments': 'moments_central',
     'Centroid': 'centroid',
     'ConvexArea': 'convex_area',
-#    'ConvexHull',
+    # 'ConvexHull',
     'ConvexImage': 'convex_image',
     'Coordinates': 'coords',
     'Eccentricity': 'eccentricity',
     'EquivDiameter': 'equivalent_diameter',
     'EulerNumber': 'euler_number',
     'Extent': 'extent',
-#    'Extrema',
+    # 'Extrema',
     'FilledArea': 'filled_area',
     'FilledImage': 'filled_image',
     'HuMoments': 'moments_hu',
@@ -46,10 +45,10 @@ PROPS = {
     'NormalizedMoments': 'moments_normalized',
     'Orientation': 'orientation',
     'Perimeter': 'perimeter',
-#    'PixelIdxList',
-#    'PixelList',
+    # 'PixelIdxList',
+    # 'PixelList',
     'Solidity': 'solidity',
-#    'SubarrayIdx'
+    # 'SubarrayIdx'
     'WeightedCentralMoments': 'weighted_moments_central',
     'WeightedCentroid': 'weighted_centroid',
     'WeightedHuMoments': 'weighted_moments_hu',
@@ -125,7 +124,8 @@ class _RegionProperties(object):
 
     def euler_number(self):
         euler_array = self.filled_image != self.image
-        _, num = label(euler_array, neighbors=8, return_num=True, background=-1)
+        _, num = label(euler_array, neighbors=8, return_num=True,
+                       background=-1)
         return -num + 1
 
     def extent(self):
@@ -237,7 +237,8 @@ class _RegionProperties(object):
 
     @_cached
     def weighted_moments(self):
-        return _moments.moments_central(self._intensity_image_double(), 0, 0, 3)
+        return _moments.moments_central(self._intensity_image_double(),
+                                        0, 0, 3)
 
     @_cached
     def weighted_moments_central(self):
@@ -284,7 +285,7 @@ class _RegionProperties(object):
 
         for key in PROP_VALS:
             try:
-                #so that NaNs are equal
+                # so that NaNs are equal
                 np.testing.assert_equal(getattr(self, key, None),
                                         getattr(other, key, None))
             except AssertionError:
@@ -526,7 +527,6 @@ def perimeter(image, neighbourhood=4):
     perimeter_weights[[21, 33]] = sqrt(2)
     perimeter_weights[[13, 23]] = (1 + sqrt(2)) / 2
 
-
     perimeter_image = ndi.convolve(border_image, np.array([[10, 2, 10],
                                                            [ 2, 1,  2],
                                                            [10, 2, 10]]),
@@ -541,13 +541,13 @@ def perimeter(image, neighbourhood=4):
     return total_perimeter
 
 
-
 def _parse_docs():
     import re
     import textwrap
 
     doc = regionprops.__doc__
-    matches = re.finditer('\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)', doc, flags=re.DOTALL)
+    matches = re.finditer('\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)',
+                          doc, flags=re.DOTALL)
     prop_doc = dict((m.group(1), textwrap.dedent(m.group(2))) for m in matches)
 
     return prop_doc
