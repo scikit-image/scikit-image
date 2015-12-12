@@ -126,7 +126,15 @@ def convert(image, dtype, force_copy=False, uniform=False):
         # Output array is of same kind as input.
         kind = a.dtype.kind
         if n > m and a.max() < 2 ** m:
-            warn("Downcasting directly without scaling")
+            mnew = int(np.ceil(m / 2) * 2)
+            if mnew > m:
+                dtype = "int%s" % mnew
+            else:
+                dtype = "uint%s" % mnew
+            n = int(np.ceil(n / 2) * 2)
+            msg = ("Downcasting %s to %s without scaling because max "
+                   "value %s fits in %s" % (a.dtype, dtype, a.max(), dtype))
+            warn(msg)
             return a.astype(_dtype2(kind, m))
         elif n == m:
             return a.copy() if copy else a
