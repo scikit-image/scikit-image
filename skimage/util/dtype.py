@@ -21,8 +21,8 @@ dtype_range = {np.bool_: (False, True),
 integer_types = (np.uint8, np.uint16, np.int8, np.int16)
 
 _supported_types = (np.bool_, np.bool8,
-                    np.uint8, np.uint16, np.uint32,
-                    np.int8, np.int16, np.int32,
+                    np.uint8, np.uint16, np.uint32, np.uint64,
+                    np.int8, np.int16, np.int32, np.int64,
                     np.float32, np.float64)
 
 if np.__version__ >= "1.6.0":
@@ -125,7 +125,10 @@ def convert(image, dtype, force_copy=False, uniform=False):
         # Numbers can be represented exactly only if m is a multiple of n
         # Output array is of same kind as input.
         kind = a.dtype.kind
-        if n == m:
+        if n > m and a.max() < 2 ** m:
+            warn("Downcasting directly without scaling")
+            return a.astype(_dtype2(kind, m))
+        elif n == m:
             return a.copy() if copy else a
         elif n > m:
             # downscale with precision loss
