@@ -29,7 +29,7 @@ def test_range():
                         (img_as_float, np.float64),
                         (img_as_uint, np.uint16),
                         (img_as_ubyte, np.ubyte)]:
-            
+
             with expected_warnings(['precision loss|sign loss|\A\Z']):
                 y = f(x)
 
@@ -62,7 +62,7 @@ def test_range_extra_dtypes():
     for dtype_in, dt in dtype_pairs:
         imin, imax = dtype_range_extra[dtype_in]
         x = np.linspace(imin, imax, 10).astype(dtype_in)
-        
+
         with expected_warnings(['precision loss|sign loss|\A\Z']):
             y = convert(x, dt)
 
@@ -72,9 +72,12 @@ def test_range_extra_dtypes():
                y, omin, omax, np.dtype(dt))
 
 
-def test_unsupported_dtype():
+def test_downcast():
     x = np.arange(10).astype(np.uint64)
-    assert_raises(ValueError, img_as_int, x)
+    with expected_warnings('Downcasting'):
+        y = img_as_int(x)
+    assert np.allclose(y, x.astype(np.int16))
+    assert y.dtype == np.uint16
 
 
 def test_float_out_of_range():
