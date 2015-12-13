@@ -150,6 +150,8 @@ def inpaint_biharmonic(img, mask):
     result[np.where(result < -1)] = -1
     result[np.where(result > 1)] = 1
 
+    result = result.ravel()
+    
     # Put calculated points into the image
     for idx, (m, n) in enumerate(mask_mn):
         out[m, n] = result[idx]
