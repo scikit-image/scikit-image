@@ -7,7 +7,7 @@ from __future__ import division
 
 import numpy as np
 import numpy.random as npr
-from scipy.signal import fftconvolve, convolve2d
+from scipy.signal import fftconvolve, convolve
 
 from . import uft
 
@@ -336,7 +336,7 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
     Parameters
     ----------
     image : ndarray
-       Input degraded image.
+       Input degraded image (can be N dimensional).
     psf : ndarray
        The point spread function.
     iterations : int
@@ -365,15 +365,23 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
     ----------
     .. [1] http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
     """
-    direct_time = lambda n, m, k, l: k*l * n*m
-    def fft_time(m, n, k, l):
-        return m*np.log(m) + n*np.log(n) + k*np.log(k) + l*np.log(l)
+    # compute the times for direct convolution and the fft method. The fft is of
+    # complexity O(N log(N)) for each dimension and the direct method does
+    # straight arithmetic (and is O(n*k) to add n elements k times)
+    def direct_time(img_shape, kernel_shape):
+        return np.prod(img_shape + kernel_shape)
+    def fft_time(img_shape, kernel_shape):
+        return np.sum([n*np.log(n) for n in img_shape+kernel_shape])
 
     # see whether the fourier transform convolution method or the direct
     # convolution method is faster (discussed in scikit-image PR #1792)
-    time_ratio = 71.468 * fft_time(*(image.shape + psf.shape))
-    time_ratio /= direct_time(*(image.shape + psf.shape))
-    convolve_method = fftconvolve if time_ratio <= 1 else convolve2d
+    time_ratio = 40.032 * fft_time(image.shape, psf.shape))
+    time_ratio /= direct_time(image.shape, psf.shape)
+
+    if time_ratio <= 1 or len(image.shape) > 2:
+        convolve_method = fftconvolve
+    else:
+        convolve_method = convolve
 
     image = image.astype(np.float)
     psf = psf.astype(np.float)
