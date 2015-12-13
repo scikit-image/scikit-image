@@ -16,6 +16,7 @@ Version 0.14
 
 Version 0.13
 ------------
+* Require Python 2.7+, remove warning in `__init__.py`.
 * Remove deprecated `None` defaults for `skimage.exposure.rescale_intensity`
 * Remove deprecated `skimage.filters.canny` import in `filters/__init__.py`
   file (canny is now in `skimage.feature.canny`).
