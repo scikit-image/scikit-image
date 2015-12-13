@@ -369,6 +369,8 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
     def fft_time(m, n, k, l):
         return m*np.log(m) + n*np.log(n) + k*np.log(k) + l*np.log(l)
 
+    # see whether the fourier transform convolution method or the direct
+    # convolution method is faster (discussed in scikit-image PR #1792)
     time_ratio = 71.468 * fft_time(*(image.shape + psf.shape))
     time_ratio /= direct_time(*(image.shape + psf.shape))
     convolve_method = fftconvolve if time_ratio <= 1 else convolve2d
