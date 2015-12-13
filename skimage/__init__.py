@@ -156,4 +156,9 @@ else:
         _raise_build_error(e)
     from .util.dtype import *
 
+
+if sys.version.startswith('2.6'):
+    warnings.warn("Python 2.6 is deprecated and will not be supported in scikit-image 0.13+")
+
+
 del warnings, functools, osp, imp, sys
