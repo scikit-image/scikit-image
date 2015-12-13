@@ -10,6 +10,14 @@ exploiting the information presented in non-damaged regions.
 
 In this example, we show how the masked pixels get inpainted by
 inpainting algorithm based on 'biharmonic equation'-assumption [2]_ [3]_.
+
+.. [1]  Wikipedia. Inpainting
+        https://en.wikipedia.org/wiki/Inpainting
+.. [2]  Wikipedia. Biharmonic equation
+        https://en.wikipedia.org/wiki/Biharmonic_equation
+.. [3]  N.S.Hoang, S.B.Damelin, "On surface completion and image 
+        inpainting by biharmonic functions: numerical aspects",
+        http://www.ima.umn.edu/~damelin/biharmonic
 """
 
 import numpy as np
@@ -46,13 +54,3 @@ ax3.imshow(image_result, cmap=plt.cm.gray, interpolation='nearest')
 ax3.set_xticks([]), ax3.set_yticks([])
 
 plt.show()
-
-"""
-.. [1]  Wikipedia. Inpainting
-        https://en.wikipedia.org/wiki/Inpainting
-.. [2]  Wikipedia. Biharmonic equation
-        https://en.wikipedia.org/wiki/Biharmonic_equation
-.. [3]  N.S.Hoang, S.B.Damelin, "On surface completion and image 
-        inpainting by biharmonic functions: numerical aspects",
-        http://www.ima.umn.edu/~damelin/biharmonic
-"""
