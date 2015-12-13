@@ -65,7 +65,7 @@ def _cached(f):
         cache = obj._cache
         prop = f.__name__
 
-        if (cache[prop] is None) or (not obj._cache_active):
+        if not ((prop in cache) and obj._cache_active):
             cache[prop] = f(obj)
 
         return cache[prop]
@@ -87,7 +87,7 @@ class _RegionProperties(object):
         self._intensity_image = intensity_image
 
         self._cache_active = cache_active
-        self._cache = defaultdict(lambda: None)
+        self._cache = {}
 
     def area(self):
         return self.moments[0, 0]
