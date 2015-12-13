@@ -76,18 +76,15 @@ def integrate(ii, start, end, *args):
     rows = 1
     # handle input from new input format
     if len(args) == 0:
-        if isinstance(start, collections.Iterable):
-            rows = len(start)
-        start = np.array(start)
-        end = np.array(end)
+        start = np.atleast_2d(np.array(start))
+        end = np.atleast_2d(np.array(end))
+        rows = start.shape[0]
     # handle deprecated input format
     else:
         warnings.warn("The syntax 'integrate(ii, r0, c0, r1, c1)' is "
                       "deprecated, and will be phased out in release 0.14. "
                       "The new syntax is "
-                      "'integrate(ii, [(r0, c0)], [(r1, c1)])'.")
-        if isinstance(start, collections.Iterable):
-            rows = len(start)
+                      "'integrate(ii, (r0, c0), (r1, c1))'.")
         args = (start, end) + args
         start = np.array(args[:int(len(args)/2)]).T
         end = np.array(args[int(len(args)/2):]).T
