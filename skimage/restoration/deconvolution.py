@@ -375,7 +375,7 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
 
     # see whether the fourier transform convolution method or the direct
     # convolution method is faster (discussed in scikit-image PR #1792)
-    time_ratio = 40.032 * fft_time(image.shape, psf.shape))
+    time_ratio = 40.032 * fft_time(image.shape, psf.shape)
     time_ratio /= direct_time(image.shape, psf.shape)
 
     if time_ratio <= 1 or len(image.shape) > 2:
