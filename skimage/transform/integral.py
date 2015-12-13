@@ -50,7 +50,7 @@ def integrate(ii, start, end, *args):
         Each tuple in the list containing the end row, col, ... index i.e
         `[(row_win1, col_win1, ...), (row_win2, col_win2, ...), ...]`.
     args: optional
-        For backward compatibility with versions prior to 0.11.
+        For backward compatibility with versions prior to 0.12.
         The earlier function signature was `integrate(ii, r0, c0, r1, c1)`,
         where `r0`, `c0` are int(lists) specifying start coordinates
         of window(s) to be integrated and `r1`, `c1` the end coordinates.
