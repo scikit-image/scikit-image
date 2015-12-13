@@ -85,6 +85,8 @@ def integrate(ii, start, end, *args):
                       "deprecated, and will be phased out in release 0.14. "
                       "The new syntax is "
                       "'integrate(ii, (r0, c0), (r1, c1))'.")
+        if isinstance(start, collections.Iterable):
+            rows = len(start)
         args = (start, end) + args
         start = np.array(args[:int(len(args)/2)]).T
         end = np.array(args[int(len(args)/2):]).T
