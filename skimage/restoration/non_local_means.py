@@ -91,7 +91,7 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     .. [2] J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
            nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
            International Symposium on Biomedical Imaging: From Nano to Macro,
-           2008, pp. 1331–1334.
+           2008, pp. 1331-1334.
 
     .. [3] Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
            Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.

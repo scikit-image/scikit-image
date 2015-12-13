@@ -362,7 +362,7 @@ cdef inline float _integral_to_distance_2d(IMGDTYPE [:, ::] integral,
     J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
     nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
     International Symposium on Biomedical Imaging: From Nano to Macro,
-    2008, pp. 1331–1334.
+    2008, pp. 1331-1334.
 
     Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
     Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
@@ -389,7 +389,7 @@ cdef inline float _integral_to_distance_3d(IMGDTYPE [:, :, ::] integral,
     J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
     nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
     International Symposium on Biomedical Imaging: From Nano to Macro,
-    2008, pp. 1331–1334.
+    2008, pp. 1331-1334.
 
     Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
     Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
@@ -539,7 +539,7 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
     nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
     International Symposium on Biomedical Imaging: From Nano to Macro,
-    2008, pp. 1331–1334.
+    2008, pp. 1331-1334.
 
     Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
     Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
@@ -649,7 +649,7 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
     J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
     nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
     International Symposium on Biomedical Imaging: From Nano to Macro,
-    2008, pp. 1331–1334.
+    2008, pp. 1331-1334.
 
     Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
     Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
