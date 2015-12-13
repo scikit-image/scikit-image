@@ -7,7 +7,7 @@ from __future__ import division
 
 import numpy as np
 import numpy.random as npr
-from scipy.signal import fftconvolve
+from scipy.signal import fftconvolve, convolve2d
 
 from . import uft
 
@@ -369,8 +369,8 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
     def fft_time(m, n, k, l):
         return m*np.log(m) + n*np.log(n) + k*np.log(k) + l*np.log(l)
 
-    time_ratio = 71.468 * fft_time(*image.shape, *psf.shape)
-    time_ratio /= direct_time(*image.shape, *psf.shape)
+    time_ratio = 71.468 * fft_time(*(image.shape + psf.shape))
+    time_ratio /= direct_time(*(image.shape + psf.shape))
     convolve_method = fftconvolve if time_ratio <= 1 else convolve2d
 
     image = image.astype(np.float)
