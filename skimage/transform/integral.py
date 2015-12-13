@@ -65,11 +65,12 @@ def integrate(ii, start, end, *args):
     --------
     >>> arr = np.ones((5, 6), dtype=np.float)
     >>> ii = integral_image(arr)
-    >>> integrate(ii, [(1, 0)], [(1, 2)])  # sum from (1,0) -> (1,2)
+    >>> integrate(ii, [(1, 0)], [(1, 2)])  # sum from (1, 0) to (1, 2)
     array([ 3.])
-    >>> integrate(ii, [(3, 3)], [(4, 5)])  # sum form (3,3) -> (4,5)
+    >>> integrate(ii, [(3, 3)], [(4, 5)])  # sum from (3, 3) to (4, 5)
     array([ 6.])
-    >>> integrate(ii, [(1, 0), (3, 3)], [(1, 2), (4, 5)])  # sum from (1,0) -> (1,2) and (3,3) -> (4,5)
+    >>> # sum from (1, 0) to (1, 2) and from (3, 3) to (4, 5)
+    >>> integrate(ii, [(1, 0), (3, 3)], [(1, 2), (4, 5)])
     array([ 3.,  6.])
     """
     rows = 1
