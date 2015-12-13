@@ -558,7 +558,12 @@ def _install_properties_docs():
 
     for p in [member for member in dir(_RegionProperties)
               if not member.startswith('_')]:
-        getattr(_RegionProperties, p).__doc__ = prop_doc[p]
+        try:
+            getattr(_RegionProperties, p).__doc__ = prop_doc[p]
+        except AttributeError:
+            # For Python 2.x
+            getattr(_RegionProperties, p).im_func.__doc__ = prop_doc[p]
+
         setattr(_RegionProperties, p, property(getattr(_RegionProperties, p)))
 
 
