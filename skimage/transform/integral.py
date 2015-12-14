@@ -1,6 +1,6 @@
 import numpy as np
 import collections
-
+import warnings
 
 def integral_image(img):
     """Integral image / summed area table.
@@ -50,7 +50,7 @@ def integrate(ii, start, end, *args):
         Each tuple in the list containing the end row, col, ... index i.e
         `[(row_win1, col_win1, ...), (row_win2, col_win2, ...), ...]`.
     args: optional
-        For backward compatibility with versions prior to 0.11.
+        For backward compatibility with versions prior to 0.12.
         The earlier function signature was `integrate(ii, r0, c0, r1, c1)`,
         where `r0`, `c0` are int(lists) specifying start coordinates
         of window(s) to be integrated and `r1`, `c1` the end coordinates.
@@ -65,22 +65,26 @@ def integrate(ii, start, end, *args):
     --------
     >>> arr = np.ones((5, 6), dtype=np.float)
     >>> ii = integral_image(arr)
-    >>> integrate(ii, [(1, 0)], [(1, 2)])  # sum from (1,0) -> (1,2)
+    >>> integrate(ii, (1, 0), (1, 2))  # sum from (1, 0) to (1, 2)
     array([ 3.])
-    >>> integrate(ii, [(3, 3)], [(4, 5)])  # sum form (3,3) -> (4,5)
+    >>> integrate(ii, [(3, 3)], [(4, 5)])  # sum from (3, 3) to (4, 5)
     array([ 6.])
-    >>> integrate(ii, [(1, 0), (3, 3)], [(1, 2), (4, 5)])  # sum from (1,0) -> (1,2) and (3,3) -> (4,5)
+    >>> # sum from (1, 0) to (1, 2) and from (3, 3) to (4, 5)
+    >>> integrate(ii, [(1, 0), (3, 3)], [(1, 2), (4, 5)])
     array([ 3.,  6.])
     """
     rows = 1
     # handle input from new input format
     if len(args) == 0:
-        if isinstance(start, collections.Iterable):
-            rows = len(start)
-        start = np.array(start)
-        end = np.array(end)
+        start = np.atleast_2d(np.array(start))
+        end = np.atleast_2d(np.array(end))
+        rows = start.shape[0]
     # handle deprecated input format
     else:
+        warnings.warn("The syntax 'integrate(ii, r0, c0, r1, c1)' is "
+                      "deprecated, and will be phased out in release 0.14. "
+                      "The new syntax is "
+                      "'integrate(ii, (r0, c0), (r1, c1))'.")
         if isinstance(start, collections.Iterable):
             rows = len(start)
         args = (start, end) + args

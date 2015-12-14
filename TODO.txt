@@ -12,6 +12,7 @@ Version 0.14
   add an alias LineModel = LineModelND. While the deprecated LineModel has for
   parameters `(dist, theta)`, LineModelND has the more general parameters
   `(origin, direction)`.
+* Remove deprecated old syntax support for ``skimage.transform.integrate``.
 
 
 Version 0.13
