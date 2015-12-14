@@ -40,16 +40,93 @@ def min_weight(graph, src, dst, n):
     return min(w1, w2)
 
 
+def _add_edge_filter(values, graph):
+    """Create edge in `g` between the first element of `values` and the rest.
+
+    Add an edge between the first element in `values` and
+    all other elements of `values` in the graph `g`. `values[0]`
+    is expected to be the central value of the footprint used.
+
+    Parameters
+    ----------
+    values : array
+        The array to process.
+    graph : RAG
+        The graph to add edges in.
+
+    Returns
+    -------
+    0 : float
+        Always returns 0. The return value is required so that `generic_filter`
+        can put it in the output array, but it is ignored by this filter.
+    """
+    values = values.astype(int)
+    current = values[0]
+    for value in values[1:]:
+        if value != current:
+            graph.add_edge(current, value)
+    return 0.
+
+
 class RAG(nx.Graph):
 
     """
     The Region Adjacency Graph (RAG) of an image, subclasses
     `networx.Graph <http://networkx.github.io/documentation/latest/reference/classes.graph.html>`_
+
+    Parameters
+    ----------
+    label_image : array of int
+        An initial segmentation, with each region labeled as a different
+        integer. Every unique value in ``label_image`` will correspond to
+        a node in the graph.
+    connectivity : int in {1, ..., ``label_image.ndim``}, optional
+        The connectivity between pixels in ``label_image``. For a 2D image,
+        a connectivity of 1 corresponds to immediate neighbors up, down,
+        left, and right, while a connectivity of 2 also includes diagonal
+        neighbors. See `scipy.ndimage.generate_binary_structure`.
+    data : networkx Graph specification, optional
+        Initial or additional edges to pass to the NetworkX Graph
+        constructor. See `networkx.Graph`. Valid edge specifications
+        include edge list (list of tuples), NumPy arrays, and SciPy
+        sparse matrices.
+    **attr : keyword arguments, optional
+        Additional attributes to add to the graph.
     """
 
-    def __init__(self, data=None, **attr):
+    def __init__(self, label_image=None, connectivity=1, data=None, **attr):
 
         super(RAG, self).__init__(data, **attr)
+
+        if label_image is not None:
+            # The footprint is constructed such that the first
+            # element in the array being passed to _add_edge_filter is
+            # the central value.
+            #
+            # For example
+            # if labels.ndim = 2 and connectivity = 1, then
+            # fp = [[0,0,0],
+            #       [0,1,1],
+            #       [0,1,0]]
+            #
+            # if labels.ndim = 2 and connectivity = 2, then
+            # fp = [[0,0,0],
+            #       [0,1,1],
+            #       [0,1,1]]
+            fp = ndi.generate_binary_structure(label_image.ndim, connectivity)
+            for d in range(fp.ndim):
+                fp = fp.swapaxes(0, d)
+                fp[0, ...] = 0
+                fp = fp.swapaxes(0, d)
+
+            ndi.generic_filter(
+                label_image,
+                function=_add_edge_filter,
+                footprint=fp,
+                mode='nearest',
+                output=np.empty(labels_image.shape, dtype=np.uint8),
+                extra_arguments=(self,))
+
         try:
             self.max_id = max(self.nodes_iter())
         except ValueError:
@@ -161,36 +238,6 @@ class RAG(nx.Graph):
         super(RAG, self).add_node(n)
 
 
-def _add_edge_filter(values, graph):
-    """Create edge in `g` between the first element of `values` and the rest.
-
-    Add an edge between the first element in `values` and
-    all other elements of `values` in the graph `g`. `values[0]`
-    is expected to be the central value of the footprint used.
-
-    Parameters
-    ----------
-    values : array
-        The array to process.
-    graph : RAG
-        The graph to add edges in.
-
-    Returns
-    -------
-    0 : int
-        Always returns 0. The return value is required so that `generic_filter`
-        can put it in the output array.
-
-    """
-    values = values.astype(int)
-    current = values[0]
-    for value in values[1:]:
-        if value != current:
-            graph.add_edge(current, value)
-
-    return 0
-
-
 def rag_mean_color(image, labels, connectivity=2, mode='distance',
                    sigma=255.0):
     """Compute the Region Adjacency Graph using mean colors.
@@ -252,35 +299,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.11.5274
 
     """
-    graph = RAG()
-
-    # The footprint is constructed in such a way that the first
-    # element in the array being passed to _add_edge_filter is
-    # the central value.
-    fp = ndi.generate_binary_structure(labels.ndim, connectivity)
-    for d in range(fp.ndim):
-        fp = fp.swapaxes(0, d)
-        fp[0, ...] = 0
-        fp = fp.swapaxes(0, d)
-
-    # For example
-    # if labels.ndim = 2 and connectivity = 1
-    # fp = [[0,0,0],
-    #       [0,1,1],
-    #       [0,1,0]]
-    #
-    # if labels.ndim = 2 and connectivity = 2
-    # fp = [[0,0,0],
-    #       [0,1,1],
-    #       [0,1,1]]
-
-    ndi.generic_filter(
-        labels,
-        function=_add_edge_filter,
-        footprint=fp,
-        mode='nearest',
-        output=np.zeros(labels.shape, dtype=np.uint8),
-        extra_arguments=(graph,))
+    graph = RAG(labels, connectivity=connectivity)
 
     for n in graph:
         graph.node[n].update({'labels': [n],
