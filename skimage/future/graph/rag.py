@@ -1,15 +1,4 @@
-try:
-    import networkx as nx
-except ImportError:
-    msg = "Graph functions require networkx, which is not installed"
-
-    class nx:
-        class Graph:
-            def __init__(self, *args, **kwargs):
-                raise ImportError(msg)
-    import warnings
-    warnings.warn(msg)
-
+import networkx as nx
 import numpy as np
 from scipy import ndimage as ndi
 import math
