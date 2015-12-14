@@ -273,6 +273,7 @@ def test_isodata_moon_image_negative_float():
                         [-13.83789062, -12.84179688, -11.84570312, 22.02148438,
                          23.01757812, 24.01367188, 38.95507812, 39.95117188])
 
+
 def test_threshold_minimum():
     camera = skimage.img_as_ubyte(data.camera())
 
@@ -285,6 +286,7 @@ def test_threshold_minimum():
     astronaut = skimage.img_as_ubyte(data.astronaut())
     threshold = threshold_minimum(astronaut)
     assert threshold == 117
+
 
 def test_threshold_minimum_synthetic():
     img = np.zeros((25*25), dtype=np.uint8)
@@ -303,12 +305,14 @@ def test_threshold_minimum_synthetic():
     threshold = threshold_minimum(img, bias='max')
     assert threshold == 225
 
+
 def test_threshold_minimum_failure():
     img = np.zeros((16*16), dtype=np.uint8)
     for i in range(16*16) :
         img[i] = i % 256
     img = np.reshape(img, (16,16))
     assert_raises(RuntimeError, threshold_minimum, img)
+
 
 if __name__ == '__main__':
     np.testing.run_module_suite()
