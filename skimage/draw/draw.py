@@ -1,4 +1,7 @@
 # coding: utf-8
+
+from __future__ import division
+
 import numpy as np
 from ._draw import _coords_inside_image
 
@@ -10,6 +13,72 @@ def _ellipse_in_shape(shape, center, radiuses):
     ry, rx = radiuses
     distances = ((y - cy) / ry) ** 2 + ((x - cx) / rx) ** 2
     return np.nonzero(distances < 1)
+
+
+def _pairs(iterable):
+    "s -> (s0,s1), (s2,s3), (s4, s5), ..."
+    a = iter(iterable)
+    return zip(a, a)
+
+
+def polygon_scanline(image, yp, xp):
+    """Draw polygon onto image using a scanline algorithm.
+
+    Attributes
+    ----------
+    yp, xp : double array
+        Coordinates of polygon.
+
+    References
+    ----------
+    .. [1] "Intersection point of two lines in 2 dimensions",
+        http://paulbourke.net/geometry/pointlineplane/
+    .. [2] UC Davis ECS175 (Introduction to Computer Graphics) notes,
+       http://www.cs.ucdavis.edu/~ma/ECS175_S00/Notes/0411_b.pdf
+    """
+    yp = list(yp)
+    xp = list(xp)
+
+    y_start, y_end = np.min(yp), np.max(yp)
+    if not ((yp[0] == yp[-1]) and (xp[0] == xp[-1])):
+        yp.append(yp[0])
+        xp.append(xp[0])
+
+    ys = zip(yp[:-1], yp[1:])
+    xs = zip(xp[:-1], xp[1:])
+
+    h, w = image.shape[:2]
+
+    segments = zip(xs, ys)
+
+    for y in range(max(0, y_start), min(h, y_end)):
+        intersections = []
+
+        for ((x0, x1), (y0, y1)) in segments:
+            if y0 == y1:
+                continue
+
+            xmin = min(x0, x1)
+            xmax = max(x0, x1)
+            ymin = min(y0, y1)
+            ymax = max(y0, y1)
+
+            if not (ymin <= y <= ymax):
+                    continue
+
+            xi = ((x1 - x0) * (y - y0) - (y1 - y0) * (-x0)) / (y1 - y0)
+
+            if (xmin <= xi <= xmax):
+                if (y == y0 or y == y1) and (y != ymin):
+                    continue
+                intersections.append(xi)
+
+        intersections = np.sort(intersections)
+
+        for x0, x1 in _pairs(intersections):
+            image[y, max(0, np.ceil(x0)):min(np.ceil(x1), w)] = 1
+
+    return image
 
 
 def ellipse(cy, cx, yradius, xradius, shape=None):
@@ -167,3 +236,24 @@ def set_color(img, coords, color):
     rr, cc = coords
     rr, cc = _coords_inside_image(rr, cc, img.shape)
     img[rr, cc] = color
+
+
+if __name__ == "__main__":
+    image = np.zeros((100, 100))
+
+    p = np.array([[20, 5],
+                  [0, 20],
+                  [10, 16],
+                  [20, 20],
+                  [40, 40],
+                  [19, 15],
+                  [20, 5]])
+
+    import matplotlib.pyplot as plt
+
+    polygon_scanline(image, p[:, 1], p[:, 0])
+
+    plt.imshow(image, cmap='gray', interpolation='nearest')
+    plt.plot(p[:, 0], p[:, 1], 'r-o')
+    plt.axis('image')
+    plt.show()

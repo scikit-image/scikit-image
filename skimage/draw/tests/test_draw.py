@@ -4,7 +4,7 @@ from skimage._shared.testing import test_parallel
 
 from skimage.draw import (set_color, line, line_aa, polygon,
                           circle, circle_perimeter, circle_perimeter_aa,
-                          ellipse, ellipse_perimeter,
+                          ellipse, ellipse_perimeter, polygon_scanline,
                           _bezier_segment, bezier_curve)
 
 
@@ -131,6 +131,9 @@ def test_polygon_rectangle():
 
     assert_array_equal(img, img_)
 
+    img2 = polygon_scanline(np.zeros((10, 10)), poly[:, 0], poly[:, 1])
+    assert_array_equal(img2, img_)
+
 
 def test_polygon_rectangle_angular():
     img = np.zeros((10, 10), 'uint8')
@@ -153,6 +156,9 @@ def test_polygon_rectangle_angular():
     )
 
     assert_array_equal(img, img_)
+
+    img2 = polygon_scanline(np.zeros((10, 10)), poly[:, 0], poly[:, 1])
+    assert_array_equal(img2, img_)
 
 
 def test_polygon_parallelogram():
@@ -177,6 +183,9 @@ def test_polygon_parallelogram():
 
     assert_array_equal(img, img_)
 
+    img2 = polygon_scanline(np.zeros((10, 10)), poly[:, 0], poly[:, 1])
+    assert_array_equal(img2, img_)
+
 
 def test_polygon_exceed():
     img = np.zeros((10, 10), 'uint8')
@@ -189,6 +198,9 @@ def test_polygon_exceed():
     img_[1:, :] = 1
 
     assert_array_equal(img, img_)
+
+    img2 = polygon_scanline(np.zeros((10, 10)), poly[:, 0], poly[:, 1])
+    assert_array_equal(img2, img_)
 
 
 def test_circle():
