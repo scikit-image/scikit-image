@@ -1,5 +1,6 @@
 import networkx as nx
 import numpy as np
+from numpy.lib.stride_tricks import as_strided
 from scipy import ndimage as ndi
 import math
 from ... import draw, measure, segmentation, util, color
@@ -124,7 +125,9 @@ class RAG(nx.Graph):
                 function=_add_edge_filter,
                 footprint=fp,
                 mode='nearest',
-                output=np.empty(label_image.shape, dtype=np.uint8),
+                output=as_strided(np.empty((1,), dtype=np.float_),
+                                  shape=label_image.shape,
+                                  strides=((0,) * label_image.ndim)),
                 extra_arguments=(self,))
 
         try:
