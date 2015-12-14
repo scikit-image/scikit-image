@@ -62,10 +62,10 @@ def _add_edge_filter(values, graph):
         can put it in the output array, but it is ignored by this filter.
     """
     values = values.astype(int)
-    current = values[0]
-    for value in values[1:]:
-        if value != current:
-            graph.add_edge(current, value)
+    center = values[len(values) // 2]
+    for value in values:
+        if value != center and not graph.has_edge(center, value):
+            graph.add_edge(center, value)
     return 0.
 
 
@@ -104,26 +104,7 @@ class RAG(nx.Graph):
             self.max_id = max(self.nodes_iter())
 
         if label_image is not None:
-            # The footprint is constructed such that the first
-            # element in the array being passed to _add_edge_filter is
-            # the central value.
-            #
-            # For example
-            # if labels.ndim = 2 and connectivity = 1, then
-            # fp = [[0,0,0],
-            #       [0,1,1],
-            #       [0,1,0]]
-            #
-            # if labels.ndim = 2 and connectivity = 2, then
-            # fp = [[0,0,0],
-            #       [0,1,1],
-            #       [0,1,1]]
             fp = ndi.generate_binary_structure(label_image.ndim, connectivity)
-            for d in range(fp.ndim):
-                fp = fp.swapaxes(0, d)
-                fp[0, ...] = 0
-                fp = fp.swapaxes(0, d)
-
             ndi.generic_filter(
                 label_image,
                 function=_add_edge_filter,
