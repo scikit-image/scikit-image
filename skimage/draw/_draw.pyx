@@ -21,20 +21,24 @@ def _coords_inside_image(rr, cc, shape, val=None):
     shape : tuple
         Image shape which is used to determine the maximum extent of output
         pixel coordinates.
-    val : ndarray of float, optional
-        Values of pixels at coordinates [rr, cc].
+    val : (N, D) ndarray of float, optional
+        Values of pixels at coordinates ``[rr, cc]``.
 
     Returns
     -------
-    rr, cc : (N,) array of int
+    rr, cc : (M,) array of int
         Row and column indices of valid pixels (i.e. those inside `shape`).
-    val : (N,) array of float, optional
+    val : (M, D) array of float, optional
         Values at `rr, cc`. Returned only if `val` is given as input.
     """
     mask = (rr >= 0) & (rr < shape[0]) & (cc >= 0) & (cc < shape[1])
-    if val is not None:
-        return rr[mask], cc[mask], val[mask]
-    return rr[mask], cc[mask]
+    if val is None:
+        return rr[mask], cc[mask]
+    else:
+        if np.isscalar(val):
+           return rr[mask], cc[mask], val
+        else:
+           return rr[mask], cc[mask], val[mask]
 
 
 def line(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y1, Py_ssize_t x1):

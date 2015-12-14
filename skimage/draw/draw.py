@@ -125,7 +125,7 @@ def circle(r, c, radius, shape=None):
     return ellipse(r, c, radius, radius, shape)
 
 
-def set_color(img, coords, color):
+def set_color(img, coords, color, alpha=None):
     """Set pixel color in the image at the given coordinates.
 
     Coordinates that exceed the shape of the image will be ignored.
@@ -134,10 +134,13 @@ def set_color(img, coords, color):
     ----------
     img : (M, N, D) ndarray
         Image
-    coords : ((P,) ndarray, (P,) ndarray)
-        Coordinates of pixels to be colored.
+    coords : tuple of ((P,) ndarray, (P,) ndarray)
+        Row and column coordinates of pixels to be colored.
     color : (D,) ndarray
         Color to be assigned to coordinates in the image.
+    alpha : scalar or (N,) ndarray
+        Alpha values used to blend color with image.  0 is transparent,
+        1 is opaque.
 
     Returns
     -------
@@ -163,7 +166,38 @@ def set_color(img, coords, color):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]], dtype=uint8)
 
     """
-
     rr, cc = coords
-    rr, cc = _coords_inside_image(rr, cc, img.shape)
-    img[rr, cc] = color
+
+    if alpha is None:
+        rr, cc = _coords_inside_image(rr, cc, img.shape)
+    else:
+        rr, cc, alpha = _coords_inside_image(rr, cc, img.shape, val=alpha)
+
+    if not np.isscalar(color):
+        color = np.array(color)
+        if color.shape[0] != img.shape[-1]:
+            raise ValueError('Color shape ({}) must match last '
+                             'image dimension ({}).'.format(color.shape[0],
+                                                            img.shape[-1]))
+
+    if alpha is None:
+        img[rr, cc] = color
+    else:
+        if np.isscalar(alpha) or np.isscalar(color):
+            color = color * alpha
+        else:
+            color = color * alpha[:, None]
+
+
+        # Strategy: try operation directly.  If scalar / correctly shaped
+        # vector, this will work.  If not (e.g. vector alpha but color image),
+        # try broadcasting.
+        try:
+            vals = img[rr, cc] * (1 - alpha)
+        except ValueError:
+            vals = img[rr, cc] * (1 - alpha[:, None])
+
+        try:
+            img[rr, cc] = vals + color
+        except ValueError:
+            img[rr, cc] = vals + color[:, None]
