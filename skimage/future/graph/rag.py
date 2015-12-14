@@ -98,6 +98,10 @@ class RAG(nx.Graph):
     def __init__(self, label_image=None, connectivity=1, data=None, **attr):
 
         super(RAG, self).__init__(data, **attr)
+        if self.number_of_nodes() == 0:
+            self.max_id = 0
+        else:
+            self.max_id = max(self.nodes_iter())
 
         if label_image is not None:
             # The footprint is constructed such that the first
@@ -129,12 +133,6 @@ class RAG(nx.Graph):
                                   shape=label_image.shape,
                                   strides=((0,) * label_image.ndim)),
                 extra_arguments=(self,))
-
-        try:
-            self.max_id = max(self.nodes_iter())
-        except ValueError:
-            # Empty sequence
-            self.max_id = 0
 
     def merge_nodes(self, src, dst, weight_func=min_weight, in_place=True,
                     extra_arguments=[], extra_keywords={}):
