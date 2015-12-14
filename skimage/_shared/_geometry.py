@@ -35,8 +35,10 @@ def polygon_clip(rp, cp, r0, c0, r1, c1):
 
     poly = path.Path(np.vstack((rp, cp)).T, closed=True)
     clip_rect = transforms.Bbox([[r0, c0], [r1, c1]])
-
     poly_clipped = clip_to_bbox(poly, clip_rect).to_polygons()[0]
+
+    if np.all(poly_clipped[-1] == poly_clipped[-2]):
+        poly_clipped = poly_clipped[:-1]
 
     return poly_clipped[:, 0], poly_clipped[:, 1]
 
