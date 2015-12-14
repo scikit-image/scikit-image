@@ -124,7 +124,7 @@ class RAG(nx.Graph):
                 function=_add_edge_filter,
                 footprint=fp,
                 mode='nearest',
-                output=np.empty(labels_image.shape, dtype=np.uint8),
+                output=np.empty(label_image.shape, dtype=np.uint8),
                 extra_arguments=(self,))
 
         try:
