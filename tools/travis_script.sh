@@ -45,13 +45,9 @@ elif [[ $PY != 3.2* ]]; then
     python ~/venv/bin/pyside_postinstall.py -install
 fi
 
-## Disable pyamg until
-## https://github.com/scikit-image/scikit-image/issues/1788
-## is closed
-
-#if [[ $PY == 2.* ]]; then
-#    pip install --retries 3 -q pyamg
-#fi
+if [[ $PY == 2.* ]]; then
+    pip install --retries 3 -q pyamg
+fi
 
 # Show what's installed
 pip list
