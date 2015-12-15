@@ -5,9 +5,10 @@
 #cython: wraparound=False
 
 import numpy as np
+import cython
 
 
-cpdef fsum_vector(double[:] v, int calc_cumsum=0):
+def fsum_vector(cython.floating[:] v, int calc_cumsum=0):
     """Apply Kahan summation to a vector.
 
     Parameters
@@ -26,7 +27,7 @@ cpdef fsum_vector(double[:] v, int calc_cumsum=0):
         double y, t
         double c = 0
         Py_ssize_t i
-        double[:] cumsum
+        cython.floating[:] cumsum
 
     if calc_cumsum:
         cumsum = np.zeros_like(v)
