@@ -42,10 +42,10 @@ def min_weight(graph, src, dst, n):
 
 
 def _add_edge_filter(values, graph):
-    """Create edge in `g` between the first element of `values` and the rest.
+    """Create edge in `graph` between central element of `values` and the rest.
 
-    Add an edge between the first element in `values` and
-    all other elements of `values` in the graph `g`. `values[0]`
+    Add an edge between the middle element in `values` and
+    all other elements of `values` into `graph`.  ``values[len(values) // 2]``
     is expected to be the central value of the footprint used.
 
     Parameters
