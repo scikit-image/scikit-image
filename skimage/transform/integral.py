@@ -1,6 +1,8 @@
 import numpy as np
 import collections
 import warnings
+from .._shared.kahan import kahan_cumsum
+
 
 def integral_image(img):
     """Integral image / summed area table.
@@ -29,8 +31,13 @@ def integral_image(img):
 
     """
     S = img
+    if np.issubdtype(img.dtype, np.integer):
+        cumsum = np.cumsum
+    else:
+        cumsum = kahan_cumsum
+
     for i in range(img.ndim):
-        S = S.cumsum(axis=i)
+        S = cumsum(S, axis=i)
     return S
 
 
