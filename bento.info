@@ -110,6 +110,9 @@ Library:
     Extension: skimage._shared.interpolation
         Sources:
             skimage/_shared/interpolation.pyx
+    Extension: skimage._shared.kahan
+        Sources:
+            skimage/_shared/kahan.pyx
     Extension: skimage.segmentation._slic
         Sources:
             skimage/segmentation/_slic.pyx
