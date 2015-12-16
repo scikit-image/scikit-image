@@ -368,15 +368,12 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
     # compute the times for direct convolution and the fft method. The fft is of
     # complexity O(N log(N)) for each dimension and the direct method does
     # straight arithmetic (and is O(n*k) to add n elements k times)
-    def direct_time(img_shape, kernel_shape):
-        return np.prod(img_shape + kernel_shape)
-    def fft_time(img_shape, kernel_shape):
-        return np.sum([n*np.log(n) for n in img_shape+kernel_shape])
+    direct_time = np.prod(image.shape + psf.shape)
+    fft_time =  np.sum([n*np.log(n) for n in image.shape + psf.shape])
 
     # see whether the fourier transform convolution method or the direct
     # convolution method is faster (discussed in scikit-image PR #1792)
-    time_ratio = 40.032 * fft_time(image.shape, psf.shape)
-    time_ratio /= direct_time(image.shape, psf.shape)
+    time_ratio = 40.032 * fft_time / direct_time
 
     if time_ratio <= 1 or len(image.shape) > 2:
         convolve_method = fftconvolve
