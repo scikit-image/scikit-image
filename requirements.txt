@@ -3,5 +3,5 @@ numpy>=1.6.1
 scipy>=0.9.0
 six>=1.4
 networkx>=1.8
-pillow>=1.7.8
+pillow>=2.1.0
 dask[array]>=0.5.0

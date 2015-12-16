@@ -40,9 +40,6 @@ fi
 # test minimum requirements on 2.7
 if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     sed -i 's/>=/==/g' requirements.txt
-    # PIL instead of Pillow
-    sed -i 's/pillow.*/pil==1.1.7/g' requirements.txt
-    WHEELBINARIES=${WHEELBINARIES/pillow/pil}
 fi
 
 # create new empty venv
