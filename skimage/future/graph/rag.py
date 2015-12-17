@@ -2,8 +2,9 @@ import networkx as nx
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 from scipy import ndimage as ndi
+from scipy import sparse
 import math
-from ... import draw, measure, segmentation, util, color
+from ... import draw, measure, segmentation, util, color, morphology
 try:
     from matplotlib import colors
     from matplotlib import cm
@@ -344,41 +345,32 @@ def rag_boundary(labels, edge_map, connectivity=2):
     """
 
     graph = RAG()
+    eroded = morphology.erosion(labels)
+    dilated = morphology.dilation(labels)
+    boundaries = eroded != dilated
 
-    #Computing the relative indices of the neighbors
-    nbr_indices = list(np.ndindex(*[2]*labels.ndim))
-    del nbr_indices[0]
-    nbr_indices_arr = ([idx for idx in nbr_indices if np.linalg.norm(idx)
-                        <= connectivity])
+    small_labels = eroded[boundaries]
+    large_labels = dilated[boundaries]
+    data = edge_map[boundaries]
 
-    iter_shape = tuple(np.array(labels.shape) - 1)
+    # coo logic sums values of duplicate indices
+    edge_data = sparse.coo_matrix((data, (small_labels, large_labels))).tocsr()
 
-    for index in np.ndindex(iter_shape):
+    # create a repeating array of [1., 1., ...] using stride tricks to save memory
+    counts = np.ones((1,), dtype=float)
+    counts = as_strided(counts, shape=small_labels.shape, strides=(0,))
+    # use COO matrix to count the ones at each location
+    edge_count = sparse.coo_matrix((counts, (small_labels, large_labels))).tocsr()
 
-        index_arr = np.array(index)
-        current = labels[index]
-        graph.add_node(current, {'labels': [current]})
+    edge_data.data /= edge_count.data
 
-        for nbr_index in nbr_indices_arr:
+    rows, cols = edge_data.nonzero()
+    graph_data = zip(rows, cols, edge_data.data)
 
-            adjacent_idx = tuple(index_arr + nbr_index)
-            adjacent = labels[adjacent_idx]
+    graph.add_weighted_edges_from(graph_data)
 
-            if current == adjacent:
-                continue
-
-            if graph.has_edge(current, adjacent):
-                graph[current][adjacent]['pixel count'] += 2
-                intensity = edge_map[index] + edge_map[adjacent_idx]
-                graph[current][adjacent]['total intensity'] += intensity
-            else:
-                graph.add_edge(current, adjacent)
-                graph[current][adjacent]['pixel count'] = 2
-                intensity = edge_map[index] + edge_map[adjacent_idx]
-                graph[current][adjacent]['total intensity'] = intensity
-
-    for (x, y, data) in graph.edges_iter(data=True):
-        data['weight'] = data['total intensity']/data['pixel count']
+    for n in graph.nodes():
+        graph.node[n].update({'labels': [n]})
 
     return graph
 
