@@ -345,8 +345,10 @@ def rag_boundary(labels, edge_map, connectivity=2):
     """
 
     graph = RAG()
-    eroded = morphology.erosion(labels)
-    dilated = morphology.dilation(labels)
+    fp = ndi.generate_binary_structure(labels.ndim, connectivity)
+    print(fp)
+    eroded = morphology.erosion(labels, selem=fp)
+    dilated = morphology.dilation(labels, selem=fp)
     boundaries = eroded != dilated
 
     small_labels = eroded[boundaries]
