@@ -69,7 +69,7 @@ touch $MPL_DIR/matplotlibrc
 echo 'backend : Template' > $MPL_DIR/matplotlibrc
 
 
-for f in doc/examples/*.py; do
+for f in doc/examples/*/*.py; do
     python "$f"
     if [ $? -ne 0 ]; then
         exit 1
@@ -81,7 +81,7 @@ section_end "Run.doc.examples"
 
 section "Run.doc.applications"
 
-for f in doc/examples/applications/*.py; do
+for f in doc/examples/xx_applications/*.py; do
     python "$f"
     if [ $? -ne 0 ]; then
         exit 1
