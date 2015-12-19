@@ -334,7 +334,7 @@ def denoise_tv_chambolle(im, weight=0.1, eps=2.e-4, n_iter_max=200,
     return out
 
 
-def denoise_wavelet(im, threshold=0.2, wavelet='db1'):
+def denoise_wavelet(im, threshold=0.2, wavelet='db1', clip=False):
     """Performs wavelet denoising on an image.
 
     Parameters
