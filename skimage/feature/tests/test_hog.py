@@ -1,5 +1,7 @@
+import os
 import numpy as np
 from scipy import ndimage as ndi
+import skimage as si
 from skimage import data
 from skimage import feature
 from skimage import img_as_float
@@ -9,13 +11,24 @@ from numpy.testing import (assert_raises,
                            )
 
 
-def test_histogram_of_oriented_gradients():
+def test_histogram_of_oriented_gradients_output_size():
     img = img_as_float(data.astronaut()[:256, :].mean(axis=2))
 
     fd = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
                      cells_per_block=(1, 1))
 
     assert len(fd) == 9 * (256 // 8) * (512 // 8)
+
+
+def test_histogram_of_oriented_gradients_output_correctness():
+    img = np.load(os.path.join(si.data_dir, 'lena_GRAY_U8.npy'))
+    correct_output = np.load(os.path.join(si.data_dir, 'lena_GRAY_U8_hog.npy'))
+    
+    output = feature.hog(img, orientations=9, pixels_per_cell=(8, 8), 
+                         cells_per_block=(3, 3), feature_vector=True,
+                         normalise=False, visualise=False)
+    
+    assert_almost_equal(output, correct_output)
 
 
 def test_hog_image_size_cell_size_mismatch():
