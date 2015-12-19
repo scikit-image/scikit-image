@@ -332,3 +332,92 @@ def denoise_tv_chambolle(im, weight=0.1, eps=2.e-4, n_iter_max=200,
     else:
         out = _denoise_tv_chambolle_nd(im, weight, eps, n_iter_max)
     return out
+
+
+def denoise_wavelet(im, threshold=0.2, wavelet='db1'):
+    """Performs wavelet denoising on an image.
+
+    Parameters
+    ----------
+    im : ndarray (2d or 3d) of ints, uints or floats
+        Input data to be denoised. `im` can be of any numeric type,
+        but it is cast into an ndarray of floats for the computation
+        of the denoised image.
+    threshold : float, optional
+        The thresholding value. All wavelet coefficients less than this value
+        are set to 0.
+    wavelet : string, optional
+        The type of wavelet to perform. Can be any of the options
+        [pywt.wavelets]_ outputs. For example, this may be any of ``{db1, db2,
+        db3, db4}``.
+
+    Returns
+    -------
+    out : ndarray
+        Denoised image.
+
+    Notes
+    -----
+    As with the Fourier transform, there is an analogue to frequency in the
+    wavelet domain. Correspondingly, many pixel values of an image are 0 after
+    taking the wavelet transform.
+
+    By wavelet denoising, we are enforcing that many of the wavelet coefficients
+    are 0 while keeping the error small, or our estimate
+
+    .. math:: \widehat{x} = \arg \min_x ||z - x||_2^2 + \lambda ||x||_1
+
+    where :math:`z` is the input image wavelet coefficients and :math:`\lambda`
+    is the threshold.
+
+    References
+    ----------
+    .. [wiki] https://en.wikipedia.org/wiki/Wavelet#Wavelet_denoising.
+    .. [pywt.wavedec2] http://pywavelets.readthedocs.org/en/latest/ref/2d-dwt-and-idwt.html#pywt.wavedec2
+    .. [pywt.waverec2] http://pywavelets.readthedocs.org/en/latest/ref/2d-dwt-and-idwt.html#pywt.waverec2
+    .. [pywt.families] http://pywavelets.readthedocs.org/en/latest/ref/wavelets.html#wavelet-families
+    .. [pywt] http://pywavelets.readthedocs.org/
+
+    Examples
+    --------
+    >>> from skimage import color, data
+    >>> img = data.astronaut() * 1.0 / 255
+    >>> img = color.rgb2gray(img)
+    >>> img += 0.5 * img.std() * np.random.randn(*img.shape)
+    >>> img = np.clip(img, 0, 1)
+    >>> denoised_img = denoise_wavelet(img, wavelet='db1', threshold=0.2)
+    """
+    def _denoise_wavelet(img, wavelet, threshold):
+        import pywt
+        coeffs = pywt.wavedec2(img, wavelet)
+        denoised_coeffs = [pywt.threshold(c, value=threshold) for c in coeffs]
+        return pywt.waverec2(denoised_coeffs, wavelet)
+
+    size_error = ValueError("The image is not of the correct shape. Try "
+                            "passing in a different sized image (i.e the "
+                            "'db2' wavelets only accept even image sizes")
+
+    im_type = im.dtype
+    if not im_type.kind == 'f':
+        im = img_as_float(im)
+
+    if im.ndim == 2:
+        out = _denoise_wavelet(img, wavelet=wavelet, threshold=threshold)
+
+    elif im.ndim == 3:
+        out = np.zeros_like(im)
+        for c in range(im.shape[2]):
+            try:
+                out[..., c] = _denoise_wavelet(im[..., c], wavelet=wavelet,
+                                                           threshold=threshold)
+            except ValueError:
+                raise size_error
+
+    else:
+        raise ValueError('only 2-d and 3-d images may be denoised with this '
+                         'function')
+
+    if out.shape != im.shape:
+        raise size_error
+
+    return out
