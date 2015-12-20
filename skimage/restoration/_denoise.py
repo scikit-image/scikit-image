@@ -397,25 +397,12 @@ def denoise_wavelet(im, threshold=0.2, wavelet='db1', clip=False):
                             "passing in a different sized image (i.e the "
                             "'db2' wavelets only accept even image sizes")
 
-    im_type = im.dtype
-    if not im_type.kind == 'f':
         im = img_as_float(im)
 
     if im.ndim == 2:
         out = _denoise_wavelet(img, wavelet=wavelet, threshold=threshold)
 
-    elif im.ndim == 3:
-        out = np.zeros_like(im)
-        for c in range(im.shape[2]):
-            try:
-                out[..., c] = _denoise_wavelet(im[..., c], wavelet=wavelet,
-                                                           threshold=threshold)
-            except ValueError:
-                raise size_error
-
     else:
-        raise ValueError('only 2-d and 3-d images may be denoised with this '
-                         'function')
 
     if out.shape != im.shape:
         raise size_error
