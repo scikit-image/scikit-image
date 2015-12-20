@@ -59,8 +59,8 @@ if new_scipy:
     ax = fig.add_subplot(111)
     plt.gray()
     ax.imshow(img)
-    ax.plot(init[:, 0], init[:, 1], '--r')
-    ax.plot(snake[:, 0], snake[:, 1], '-b')
+    ax.plot(init[:, 0], init[:, 1], '--r', lw=3)
+    ax.plot(snake[:, 0], snake[:, 1], '-b', lw=3)
     ax.set_xticks([]), ax.set_yticks([])
     ax.axis([0, img.shape[1], img.shape[0], 0])
 
@@ -87,8 +87,8 @@ if new_scipy:
     ax = fig.add_subplot(111)
     plt.gray()
     ax.imshow(img)
-    ax.plot(init[:, 0], init[:, 1], '--r')
-    ax.plot(snake[:, 0], snake[:, 1], '-b')
+    ax.plot(init[:, 0], init[:, 1], '--r', lw=3)
+    ax.plot(snake[:, 0], snake[:, 1], '-b', lw=3)
     ax.set_xticks([]), ax.set_yticks([])
     ax.axis([0, img.shape[1], img.shape[0], 0])
 
