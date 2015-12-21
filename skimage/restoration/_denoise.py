@@ -515,8 +515,7 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
     return sigma
 
 
-def estimate_sigma(im, multichannel, average_sigmas=True,
-                   distribution='Gaussian'):
+def estimate_sigma(im, multichannel, average_sigmas=True):
     """
     Robust wavelet-based estimator of the noise standard deviation [1]_.
 
@@ -524,7 +523,7 @@ def estimate_sigma(im, multichannel, average_sigmas=True,
     ----------
     im : ndarray
         Image for which to estimate the noise standard deviation.
-    multichannel : bool, optional
+    multichannel : bool
        Estimate sigma separately for each channel.
     average_sigmas : bool, optional
         If true, average the channel estimates of `sigma`.  Otherwise return
@@ -557,7 +556,7 @@ def estimate_sigma(im, multichannel, average_sigmas=True,
     im = np.asarray(im)
 
     if multichannel:
-        kwargs = dict(multichannel=False, distribution=distribution)
+        kwargs = dict(multichannel=False, distribution='Gaussian')
         nchannels = im.shape[-1]
         sigmas = [estimate_sigma(
             im[..., c], **kwargs) for c in range(nchannels)]
@@ -567,4 +566,4 @@ def estimate_sigma(im, multichannel, average_sigmas=True,
 
     coeffs = pywt.dwtn(im, wavelet='db2')
     detail_coeffs = coeffs['d' * im.ndim]
-    return _sigma_est_dwt(detail_coeffs, distribution=distribution)
+    return _sigma_est_dwt(detail_coeffs, distribution='Gaussian')
