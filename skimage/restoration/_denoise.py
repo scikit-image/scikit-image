@@ -7,6 +7,12 @@ from .._shared.utils import skimage_deprecation, warn
 import warnings
 import pywt
 
+try:
+    import pywt
+    pywt_available = True
+except ImportError:
+    pywt_available = False
+
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                       bins=10000, mode='constant', cval=0, multichannel=True,
@@ -472,3 +478,93 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
 
     clip_range = (-1, 1) if img.min() < 0 else (0, 1)
     return np.clip(out, *clip_range)
+
+
+def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
+    """
+    Calculation of the robust median estimator of the noise standard
+    deviation [1]_.
+
+    Parameters
+    ----------
+    detail_coeffs : ndarray
+        The detail coefficients corresponding to the discrete wavelet
+        transform of an image.
+    distribution : str
+        The underlying noise distribution.
+
+    Returns
+    -------
+    sigma : float
+        estimated noise standard deviation.  See [1]_
+
+    References
+    ----------
+    .. [1] Donoho, David L., and Jain M. Johnstone. "Ideal spatial adaptation
+       by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
+    """
+    detail_coeffs = np.asarray(detail_coeffs)
+    if distribution.lower() == 'gaussian':
+        # 75th quantile of the underlying, symmetric noise distribution:
+        # denom = scipy.stats.norm.ppf(0.75)
+        denom = 0.67448975019608171
+        sigma = np.median(np.abs(detail_coeffs)) / denom
+    else:
+        raise ValueError("Only Gaussian noise estimation is currently "
+                         "supported")
+    return sigma
+
+
+def estimate_sigma(im, multichannel, average_sigmas=True,
+                   distribution='Gaussian'):
+    """
+    Robust wavelet-based estimator of the noise standard deviation [1]_.
+
+    Parameters
+    ----------
+    im : ndarray
+        Image for which to estimate the noise standard deviation.
+    multichannel : bool, optional
+       Estimate sigma separately for each channel.
+    average_sigmas : bool, optional
+        If true, average the channel estimates of `sigma`.  Otherwise return
+        a list of sigmas corresponding to each channel.
+
+    Returns
+    -------
+    sigma : float or list
+        Estimated noise standard deviation(s).  If `multichannel` is True and
+        `average_sigmas` is False, a separate noise estimate for each channel
+        is returned.  Otherwise, the average of the individual channel
+        estimates is returned.
+
+    References
+    ----------
+    .. [1] Donoho, David L., and Jain M. Johnstone. "Ideal spatial adaptation
+       by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
+
+    Examples
+    --------
+    >>> import skimage.data
+    >>> img = skimage.data.camera()
+    >>> sigma = 20
+    >>> img = img + sigma * np.random.standard_normal(img.shape)
+    >>> sigma_hat = sigma_est(img)
+    """
+    if not pywt_available:
+        raise ValueError("Estimate_sigma requires PyWavelets to be installed.")
+
+    im = np.asarray(im)
+
+    if multichannel:
+        kwargs = dict(multichannel=False, distribution=distribution)
+        nchannels = im.shape[-1]
+        sigmas = [estimate_sigma(
+            im[..., c], **kwargs) for c in range(nchannels)]
+        if average_sigmas:
+            sigmas = np.mean(sigmas)
+        return sigmas
+
+    coeffs = pywt.dwtn(im, wavelet='db2')
+    detail_coeffs = coeffs['d' * im.ndim]
+    return _sigma_est_dwt(detail_coeffs, distribution=distribution)
