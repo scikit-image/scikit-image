@@ -1,5 +1,6 @@
 import numpy as np
-from numpy.testing import run_module_suite, assert_raises, assert_equal
+from numpy.testing import (run_module_suite, assert_raises, assert_equal,
+                           assert_almost_equal, dec)
 
 from skimage import restoration, data, color, img_as_float, measure
 from skimage._shared._warnings import expected_warnings
@@ -352,6 +353,38 @@ def test_wavelet_denoising_nd():
         psnr_noisy = compare_psnr(img, noisy)
         psnr_denoised = compare_psnr(img, denoised)
         assert psnr_denoised > psnr_noisy
+
+
+@dec.skipif(not restoration._denoise.pywt_available)
+def test_estimate_sigma_gray():
+    rstate = np.random.RandomState(1234)
+    # astronaut image
+    img = astro_gray.copy()
+    sigma = 0.1
+    # add noise to astronaut
+    img += sigma * rstate.standard_normal(img.shape)
+
+    sigma_est = restoration.estimate_sigma(img, multichannel=False)
+    assert_almost_equal(sigma, sigma_est, decimal=2)
+
+
+@dec.skipif(not restoration._denoise.pywt_available)
+def test_estimate_sigma_color():
+    rstate = np.random.RandomState(1234)
+    # astronaut image
+    img = astro.copy()
+    sigma = 0.1
+    # add noise to astronaut
+    img += sigma * rstate.standard_normal(img.shape)
+
+    sigma_est = restoration.estimate_sigma(img, multichannel=True,
+                                           average_sigmas=True)
+    assert_almost_equal(sigma, sigma_est, decimal=2)
+
+    sigma_list = restoration.estimate_sigma(img, multichannel=True,
+                                            average_sigmas=False)
+    assert_equal(len(sigma_list), img.shape[-1])
+    assert_almost_equal(sigma_list[0], sigma_est, decimal=2)
 
 
 if __name__ == "__main__":
