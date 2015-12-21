@@ -334,7 +334,7 @@ def denoise_tv_chambolle(im, weight=0.1, eps=2.e-4, n_iter_max=200,
     return out
 
 
-def denoise_wavelet(im, threshold=0.2, wavelet='db1', clip=False):
+def denoise_wavelet(im, threshold=None, wavelet='db1', noise_stdev=0.13):
     """Performs wavelet denoising on an image.
 
     Parameters
@@ -345,11 +345,15 @@ def denoise_wavelet(im, threshold=0.2, wavelet='db1', clip=False):
         of the denoised image.
     threshold : float, optional
         The thresholding value. All wavelet coefficients less than this value
-        are set to 0.
+        are set to 0. By default, the threshold is computed adaptively as
+        described in [1]_.
     wavelet : string, optional
         The type of wavelet to perform. Can be any of the options
         [pywt.wavelets]_ outputs. For example, this may be any of ``{db1, db2,
         db3, db4}``.
+    noise_stdev : float, optional
+        The noise standard deviation used when computing the threshold
+        adaptively as described in [1]_.
 
     Returns
     -------
@@ -362,13 +366,16 @@ def denoise_wavelet(im, threshold=0.2, wavelet='db1', clip=False):
     wavelet domain. Correspondingly, many pixel values of an image are 0 after
     taking the wavelet transform.
 
-    By wavelet denoising, we are enforcing that many of the wavelet coefficients
-    are 0 while keeping the error small, or our estimate
+    By wavelet denoising, we are enforcing that
+    many of the wavelet coefficients are 0 while keeping the error small. When
+    we use soft thresholding, our estimate is
 
     .. math:: \widehat{x} = \arg \min_x ||z - x||_2^2 + \lambda ||x||_1
 
     where :math:`z` is the input image wavelet coefficients and :math:`\lambda`
     is the threshold.
+
+    This function performs wavelet denoising on each color plane separately.
 
     References
     ----------
@@ -377,6 +384,9 @@ def denoise_wavelet(im, threshold=0.2, wavelet='db1', clip=False):
     .. [pywt.waverec2] http://pywavelets.readthedocs.org/en/latest/ref/2d-dwt-and-idwt.html#pywt.waverec2
     .. [pywt.families] http://pywavelets.readthedocs.org/en/latest/ref/wavelets.html#wavelet-families
     .. [pywt] http://pywavelets.readthedocs.org/
+    .. [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
+           thresholding for image denoising and compression." Image Processing,
+           IEEE Transactions on 9.9 (2000): 1532-1546.
 
     Examples
     --------
@@ -385,26 +395,30 @@ def denoise_wavelet(im, threshold=0.2, wavelet='db1', clip=False):
     >>> img = color.rgb2gray(img)
     >>> img += 0.5 * img.std() * np.random.randn(*img.shape)
     >>> img = np.clip(img, 0, 1)
-    >>> denoised_img = denoise_wavelet(img, wavelet='db1', threshold=0.2)
+    >>> denoised_img = denoise_wavelet(img)
     """
     def _denoise_wavelet(img, wavelet, threshold):
         import pywt
         coeffs = pywt.wavedec2(img, wavelet)
-        denoised_coeffs = [pywt.threshold(c, value=threshold) for c in coeffs]
+        denoised_coeffs = [pywt.threshold(c, value=threshold, mode='soft')
+                                for c in coeffs]
         return pywt.waverec2(denoised_coeffs, wavelet)
 
-    size_error = ValueError("The image is not of the correct shape. Try "
-                            "passing in a different sized image (i.e the "
-                            "'db2' wavelets only accept even image sizes")
-
+    if not im.dtype.kind == 'f':
         im = img_as_float(im)
+
+    if threshold is None:
+        # The BayesShrink threshold from [1]_ in docstring.
+        threshold = noise_stdev**2 / np.sqrt(max(im.var() - noise_stdev**2, 0))
 
     if im.ndim == 2:
         out = _denoise_wavelet(img, wavelet=wavelet, threshold=threshold)
 
     else:
+        out = np.dstack([_denoise_wavelet(im[..., c], wavelet=wavelet,
+                         threshold=threshold) for c in range(3)])
 
-    if out.shape != im.shape:
-        raise size_error
+    # ensure valid image in 0, 1 is returned
+    out = np.clip(out, 0, 1)
 
     return out
