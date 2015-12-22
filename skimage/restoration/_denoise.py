@@ -503,7 +503,6 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
     .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
        by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
     """
-    detail_coeffs = np.asarray(detail_coeffs)
     if distribution.lower() == 'gaussian':
         # 75th quantile of the underlying, symmetric noise distribution:
         # denom = scipy.stats.norm.ppf(0.75)
@@ -558,8 +557,6 @@ def estimate_sigma(im, multichannel, average_sigmas=True):
     """
     if not pywt_available:
         raise ValueError("estimate_sigma requires PyWavelets to be installed.")
-
-    im = np.asarray(im)
 
     if multichannel:
         kwargs = dict(multichannel=False, distribution='Gaussian')
