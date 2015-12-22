@@ -549,7 +549,7 @@ def estimate_sigma(im, multichannel, average_sigmas=True):
     >>> img = img_as_float(skimage.data.camera())
     >>> sigma = 0.1
     >>> img = img + sigma * np.random.standard_normal(img.shape)
-    >>> sigma_hat = estimate_sigma(img, multichannel=False)
+    >>> sigma_hat = estimate_sigma(img, multichannel=False)  # doctest: +SKIP
     """
     if not pywt_available:
         raise ValueError("estimate_sigma requires PyWavelets to be installed.")
