@@ -483,7 +483,7 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
 def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
     """
     Calculation of the robust median estimator of the noise standard
-    deviation [1]_.
+    deviation.
 
     Parameters
     ----------
@@ -517,7 +517,7 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
 
 def estimate_sigma(im, multichannel, average_sigmas=True):
     """
-    Robust wavelet-based estimator of the noise standard deviation [1]_.
+    Robust wavelet-based estimator of the noise standard deviation.
 
     Parameters
     ----------
@@ -536,6 +536,11 @@ def estimate_sigma(im, multichannel, average_sigmas=True):
         `average_sigmas` is False, a separate noise estimate for each channel
         is returned.  Otherwise, the average of the individual channel
         estimates is returned.
+
+    Notes
+    -----
+    The estimation algorithm is based on the mean absolute deviation of the
+    wavelet detail coefficients as described in [1]_.
 
     References
     ----------
