@@ -496,11 +496,11 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
     Returns
     -------
     sigma : float
-        estimated noise standard deviation.  See [1]_
+        The estimated noise standard deviation (see section 4.2 of [1]_).
 
     References
     ----------
-    .. [1] Donoho, David L., and Jain M. Johnstone. "Ideal spatial adaptation
+    .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
        by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
     """
     detail_coeffs = np.asarray(detail_coeffs)
@@ -524,7 +524,7 @@ def estimate_sigma(im, multichannel, average_sigmas=True):
     im : ndarray
         Image for which to estimate the noise standard deviation.
     multichannel : bool
-       Estimate sigma separately for each channel.
+        Estimate sigma separately for each channel.
     average_sigmas : bool, optional
         If true, average the channel estimates of `sigma`.  Otherwise return
         a list of sigmas corresponding to each channel.
@@ -539,12 +539,12 @@ def estimate_sigma(im, multichannel, average_sigmas=True):
 
     Notes
     -----
-    The estimation algorithm is based on the mean absolute deviation of the
-    wavelet detail coefficients as described in [1]_.
+    The estimation algorithm is based on the median absolute deviation of the
+    wavelet detail coefficients as described in section 4.2 of [1]_.
 
     References
     ----------
-    .. [1] Donoho, David L., and Jain M. Johnstone. "Ideal spatial adaptation
+    .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
        by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
 
     Examples
