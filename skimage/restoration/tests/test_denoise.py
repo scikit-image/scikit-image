@@ -66,9 +66,23 @@ def test_denoise_tv_chambolle_3d():
     assert res.dtype == np.float
     assert res.std() * 255 < mask.std()
 
-    # test wrong number of dimensions
-    assert_raises(ValueError, restoration.denoise_tv_chambolle,
-                  np.random.rand(8, 8, 8, 8))
+
+def test_denoise_tv_chambolle_1d():
+    """Apply the TV denoising algorithm on a 1D sinusoid."""
+    x = 125 + 100*np.sin(np.linspace(0, 8*np.pi, 1000))
+    x += 20 * np.random.rand(x.size)
+    x = np.clip(x, 0, 255)
+    res = restoration.denoise_tv_chambolle(x.astype(np.uint8), weight=0.5)
+    assert res.dtype == np.float
+    assert res.std() * 255 < x.std()
+
+
+def test_denoise_tv_chambolle_4d():
+    """ TV denoising for a 4D input."""
+    im = 255 * np.random.rand(8, 8, 8, 8)
+    res = restoration.denoise_tv_chambolle(im.astype(np.uint8), weight=0.5)
+    assert res.dtype == np.float
+    assert res.std() * 255 < im.std()
 
 
 def test_denoise_tv_bregman_2d():
