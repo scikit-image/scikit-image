@@ -33,7 +33,7 @@ def test_basic():
 
     # Test that an error is raised on passing a 3D image:
     image3d = np.empty((5, 5, 5))
-    assert_raises(ValueError, convex_hull_object, image3d)
+    assert_raises(ValueError, convex_hull_image, image3d)
 
 
 @skipif(not scipy_spatial)
