@@ -19,18 +19,13 @@ but with very different mean structural similarity indices.
        assessment: From error visibility to structural similarity," IEEE
        Transactions on Image Processing, vol. 13, no. 4, pp. 600-612,
        Apr. 2004.
-
 """
+
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
 
 from skimage import data, img_as_float
 from skimage.measure import structural_similarity as ssim
-
-
-matplotlib.rcParams['font.size'] = 9
-
 
 img = img_as_float(data.camera())
 rows, cols = img.shape
@@ -45,7 +40,10 @@ def mse(x, y):
 img_noise = img + noise
 img_const = img + abs(noise)
 
-fig, (ax0, ax1, ax2) = plt.subplots(nrows=1, ncols=3, figsize=(8, 4), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, (ax0, ax1, ax2) = plt.subplots(nrows=1, ncols=3, figsize=(16, 6),
+                                    sharex=True, sharey=True,
+                                    subplot_kw={'adjustable': 'box-forced'})
+plt.tight_layout()
 
 mse_none = mse(img, img)
 ssim_none = ssim(img, img, dynamic_range=img.max() - img.min())
@@ -63,13 +61,16 @@ label = 'MSE: %2.f, SSIM: %.2f'
 ax0.imshow(img, cmap=plt.cm.gray, vmin=0, vmax=1)
 ax0.set_xlabel(label % (mse_none, ssim_none))
 ax0.set_title('Original image')
+ax0.axes.get_yaxis().set_visible(False)
 
 ax1.imshow(img_noise, cmap=plt.cm.gray, vmin=0, vmax=1)
 ax1.set_xlabel(label % (mse_noise, ssim_noise))
 ax1.set_title('Image with noise')
+ax1.axes.get_yaxis().set_visible(False)
 
 ax2.imshow(img_const, cmap=plt.cm.gray, vmin=0, vmax=1)
 ax2.set_xlabel(label % (mse_const, ssim_const))
 ax2.set_title('Image plus constant')
+ax2.axes.get_yaxis().set_visible(False)
 
 plt.show()
