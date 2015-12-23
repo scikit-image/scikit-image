@@ -11,8 +11,6 @@ from .greyreconstruct import reconstruction
 from .misc import remove_small_objects, remove_small_holes
 
 from ..measure._label import label
-from .._shared.utils import deprecated as _deprecated
-label = _deprecated('skimage.measure.label')(label)
 
 
 __all__ = ['binary_erosion',

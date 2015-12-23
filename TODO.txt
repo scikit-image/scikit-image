@@ -38,8 +38,6 @@ Version 0.12
 ------------
 * Change `label` to mark background as 0, not -1, which is consistent with
   SciPy's labelling.
-* Remove `skimage.morphology.label` from `skimage.morphology.__init__`--it now
-  lives in `skimage.measure.label`.
 * Remove deprecated `reverse_map` parameter of `skimage.transform.warp`
 * Change deprecated `enforce_connectivity=False` on skimage.segmentation.slic
   and set it to True as default
