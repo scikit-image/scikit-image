@@ -85,7 +85,7 @@ def convex_hull_object(image, neighbors=8):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) array
         Binary input image.
     neighbors : {4, 8}, int
         Whether to use 4- or 8-connectivity.
