@@ -80,6 +80,11 @@ class _RegionProperties(object):
 
     def __init__(self, slice, label, label_image, intensity_image,
                  cache_active):
+                 
+        if intensity_image is not None:
+            if not intensity_image.shape == label_image.shape:
+                raise ValueError('Label and intensity image must have the same shape.')
+        
         self.label = label
 
         self._slice = slice
