@@ -2,6 +2,7 @@ from __future__ import print_function, division
 
 import numpy as np
 import skimage
+from .._shared.utils import assert_nD
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
 
@@ -14,14 +15,15 @@ def inpaint_biharmonic(img, mask, multichannel=False):
     img : 2D{+color} np.array
         Input image.
     mask : 2D np.array
-        Array of pixels to be inpainted. Have to be the same size as 'img'.
-        Unknown pixels has to be represented with 1, known pixels - with 0.
+        Array of pixels to be inpainted. Have to be the same size as one
+        of the 'img' channels. Unknown pixels has to be represented with 1, 
+        known pixels - with 0.
     multichannel : boolean, optional
-        Defines if the last array dimension is a color dimension,
+        Defines if the last `img` dimension is a color dimension.
 
     Returns
     -------
-    out : 2-D np.array
+    out : 2D{+color} np.array
         Input image with masked pixels inpainted.
 
     Example
@@ -152,8 +154,8 @@ def inpaint_biharmonic(img, mask, multichannel=False):
 
         return out
 
-    if img.ndim != (2 + multichannel) or mask.ndim != 2:
-        raise ValueError('Only 2D{+color} arrays are supported')
+    assert_nD(img, 2 + multichannel)
+    assert_nD(mask, 2)
 
     img_baseshape = img.shape[:-1] if multichannel else img.shape
     if img_baseshape != mask.shape:
