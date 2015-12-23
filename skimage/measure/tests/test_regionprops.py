@@ -129,12 +129,12 @@ def test_equiv_diameter():
 
 def test_euler_number():
     en = regionprops(SAMPLE)[0].euler_number
-    assert en == 0
+    assert en == 1
 
     SAMPLE_mod = SAMPLE.copy()
     SAMPLE_mod[7, -3] = 0
     en = regionprops(SAMPLE_mod)[0].euler_number
-    assert en == -1
+    assert en == 0
 
 
 def test_extent():

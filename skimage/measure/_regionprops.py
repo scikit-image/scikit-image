@@ -125,7 +125,7 @@ class _RegionProperties(object):
     def euler_number(self):
         euler_array = self.filled_image != self.image
         _, num = label(euler_array, neighbors=8, return_num=True,
-                       background=-1)
+                       background=0)
         return -num + 1
 
     def extent(self):
