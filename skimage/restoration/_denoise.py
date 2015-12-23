@@ -175,12 +175,7 @@ def _denoise_tv_chambolle_nd(im, weight=0.2, eps=2.e-4, n_iter_max=200):
             g[slices_g] = np.diff(out, axis=ax)
             slices_g[ax] = slice(None)
 
-        try:
-            norm = np.sqrt((g*g).sum(-1, keepdims=True))
-        except:
-            # no keepdims argument available prior to numpy 1.7
-            norm = np.sqrt((g*g).sum(-1))[..., np.newaxis]
-
+        norm = np.sqrt((g*g).sum(-1))[..., np.newaxis]
         E += weight * norm.sum()
         norm *= 0.5 / weight
         norm += 1.
