@@ -125,7 +125,7 @@ class _RegionProperties(object):
     def euler_number(self):
         euler_array = self.filled_image != self.image
         _, num = label(euler_array, neighbors=8, return_num=True,
-                       background=-1)
+                       background=0)
         return -num + 1
 
     def extent(self):
@@ -340,7 +340,7 @@ def regionprops(label_image, intensity_image=None, cache=True):
     **equivalent_diameter** : float
         The diameter of a circle with the same area as the region.
     **euler_number** : int
-        Euler number of region. Computed as number of objects (= 1)
+        Euler characteristic of region. Computed as number of objects (= 1)
         subtracted by number of holes (8-connectivity).
     **extent** : float
         Ratio of pixels in the region to pixels in the total bounding box.
