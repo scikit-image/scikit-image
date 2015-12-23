@@ -147,7 +147,7 @@ def _denoise_tv_chambolle_nd(im, weight=0.2, eps=2.e-4, n_iter_max=200):
     """
 
     ndim = im.ndim
-    p = np.zeros(im.shape + (im.ndim, ), dtype=im.dtype)
+    p = np.zeros(im.shape + (im.ndim, ), dtype=im.dtype, order='F')
     g = np.zeros_like(p)
     d = np.zeros_like(im)
     i = 0
