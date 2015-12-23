@@ -21,7 +21,7 @@ def test_denoise_tv_chambolle_2d():
     # clip noise so that it does not exceed allowed range for float images.
     img = np.clip(img, 0, 1)
     # denoise
-    denoised_astro = restoration.denoise_tv_chambolle(img, weight=60.0)
+    denoised_astro = restoration.denoise_tv_chambolle(img, weight=0.25)
     # which dtype?
     assert denoised_astro.dtype in [np.float, np.float32, np.float64]
     from scipy import ndimage as ndi
@@ -30,12 +30,12 @@ def test_denoise_tv_chambolle_2d():
     # test if the total variation has decreased
     assert grad_denoised.dtype == np.float
     assert (np.sqrt((grad_denoised**2).sum())
-            < np.sqrt((grad**2).sum()) / 2)
+            < np.sqrt((grad**2).sum()))
 
 
 def test_denoise_tv_chambolle_multichannel():
-    denoised0 = restoration.denoise_tv_chambolle(astro[..., 0], weight=60.0)
-    denoised = restoration.denoise_tv_chambolle(astro, weight=60.0,
+    denoised0 = restoration.denoise_tv_chambolle(astro[..., 0], weight=0.25)
+    denoised = restoration.denoise_tv_chambolle(astro, weight=0.25,
                                                 multichannel=True)
     assert_equal(denoised[..., 0], denoised0)
 
@@ -46,7 +46,7 @@ def test_denoise_tv_chambolle_float_result_range():
     int_astro = np.multiply(img, 255).astype(np.uint8)
     assert np.max(int_astro) > 1
     denoised_int_astro = restoration.denoise_tv_chambolle(int_astro,
-                                                          weight=60.0)
+                                                          weight=0.25)
     # test if the value range of output float data is within [0.0:1.0]
     assert denoised_int_astro.dtype == np.float
     assert np.max(denoised_int_astro) <= 1.0
@@ -62,7 +62,7 @@ def test_denoise_tv_chambolle_3d():
     mask += 20 * np.random.rand(*mask.shape)
     mask[mask < 0] = 0
     mask[mask > 255] = 255
-    res = restoration.denoise_tv_chambolle(mask.astype(np.uint8), weight=100)
+    res = restoration.denoise_tv_chambolle(mask.astype(np.uint8), weight=0.4)
     assert res.dtype == np.float
     assert res.std() * 255 < mask.std()
 
