@@ -1,10 +1,11 @@
-__all__ = ['convex_hull_image', 'convex_hull_object']
-
+"""Convex Hull."""
 import numpy as np
 from ..measure._pnpoly import grid_points_in_poly
 from ._convex_hull import possible_hull
 from ..measure._label import label
 from ..util import unique_rows
+
+__all__ = ['convex_hull_image', 'convex_hull_object']
 
 try:
     from scipy.spatial import Delaunay
@@ -33,6 +34,8 @@ def convex_hull_image(image):
     .. [1] http://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/
 
     """
+    if image.ndim > 2:
+        raise ValueError("Input must be a 2D image")
 
     if Delaunay is None:
         raise ImportError("Could not import scipy.spatial.Delaunay, "
@@ -85,7 +88,7 @@ def convex_hull_object(image, neighbors=8):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) array
         Binary input image.
     neighbors : {4, 8}, int
         Whether to use 4- or 8-connectivity.
@@ -104,6 +107,8 @@ def convex_hull_object(image, neighbors=8):
     convex_hull_image separately on each object.
 
     """
+    if image.ndim > 2:
+        raise ValueError("Input must be a 2D image")
 
     if neighbors != 4 and neighbors != 8:
         raise ValueError('Neighbors must be either 4 or 8.')
