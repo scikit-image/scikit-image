@@ -117,12 +117,12 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
 
 
 def _denoise_tv_chambolle_nd(im, weight=0.2, eps=2.e-4, n_iter_max=200):
-    """Perform total-variation denoising on 3D images.
+    """Perform total-variation denoising on n-dimensional images.
 
     Parameters
     ----------
     im : ndarray
-        3-D input data to be denoised.
+        n-D input data to be denoised.
     weight : float, optional
         Denoising weight. The greater `weight`, the more denoising (at
         the expense of fidelity to `input`).
@@ -147,22 +147,22 @@ def _denoise_tv_chambolle_nd(im, weight=0.2, eps=2.e-4, n_iter_max=200):
     """
 
     ndim = im.ndim
-    p = np.zeros(im.shape + (im.ndim, ), dtype=im.dtype, order='F')
+    p = np.zeros((im.ndim, ) + im.shape, dtype=im.dtype)
     g = np.zeros_like(p)
     d = np.zeros_like(im)
     i = 0
     while i < n_iter_max:
         if i > 0:
-            d = -p.sum(-1)
+            d = -p.sum(0)
             slices_d = [slice(None), ] * ndim
             slices_p = [slice(None), ] * (ndim + 1)
             for ax in range(ndim):
                 slices_d[ax] = slice(1, None)
-                slices_p[ax] = slice(0, -1)
-                slices_p[-1] = ax
+                slices_p[ax+1] = slice(0, -1)
+                slices_p[0] = ax
                 d[slices_d] += p[slices_p]
                 slices_d[ax] = slice(None)
-                slices_p[ax] = slice(None)
+                slices_p[ax+1] = slice(None)
             out = im + d
         else:
             out = im
@@ -170,12 +170,12 @@ def _denoise_tv_chambolle_nd(im, weight=0.2, eps=2.e-4, n_iter_max=200):
 
         slices_g = [slice(None), ] * (ndim + 1)
         for ax in range(ndim):
-            slices_g[ax] = slice(0, -1)
-            slices_g[-1] = ax
+            slices_g[ax+1] = slice(0, -1)
+            slices_g[0] = ax
             g[slices_g] = np.diff(out, axis=ax)
-            slices_g[ax] = slice(None)
+            slices_g[ax+1] = slice(None)
 
-        norm = np.sqrt((g*g).sum(-1))[..., np.newaxis]
+        norm = np.sqrt((g ** 2).sum(0))[np.newaxis, ...]
         E += weight * norm.sum()
         norm *= 0.5 / weight
         norm += 1.
@@ -196,7 +196,7 @@ def _denoise_tv_chambolle_nd(im, weight=0.2, eps=2.e-4, n_iter_max=200):
 
 def denoise_tv_chambolle(im, weight=0.2, eps=2.e-4, n_iter_max=200,
                          multichannel=False):
-    """Perform total-variation denoising on 2D and 3D images.
+    """Perform total-variation denoising on n-dimensional images.
 
     Parameters
     ----------
