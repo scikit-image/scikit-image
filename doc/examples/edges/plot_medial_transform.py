@@ -54,12 +54,13 @@ skel, distance = medial_axis(data, return_distance=True)
 # Distance to the background for pixels of the skeleton
 dist_on_skel = distance * skel
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4), sharex=True, sharey=True,
+                               subplot_kw={'adjustable': 'box-forced'})
 ax1.imshow(data, cmap=plt.cm.gray, interpolation='nearest')
 ax1.axis('off')
 ax2.imshow(dist_on_skel, cmap=plt.cm.spectral, interpolation='nearest')
 ax2.contour(data, [0.5], colors='w')
 ax2.axis('off')
 
-fig.subplots_adjust(hspace=0.01, wspace=0.01, top=1, bottom=0, left=0, right=1)
+fig.tight_layout()
 plt.show()

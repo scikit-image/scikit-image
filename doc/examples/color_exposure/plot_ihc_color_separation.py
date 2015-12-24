@@ -26,7 +26,8 @@ from skimage.color import rgb2hed
 ihc_rgb = data.immunohistochemistry()
 ihc_hed = rgb2hed(ihc_rgb)
 
-fig, axes = plt.subplots(2, 2, figsize=(7, 6), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, axes = plt.subplots(2, 2, figsize=(7, 6), sharex=True, sharey=True,
+                         subplot_kw={'adjustable': 'box-forced'})
 ax0, ax1, ax2, ax3 = axes.ravel()
 
 ax0.imshow(ihc_rgb)
@@ -44,7 +45,7 @@ ax3.set_title("DAB")
 for ax in axes.ravel():
     ax.axis('off')
 
-fig.subplots_adjust(hspace=0.3)
+fig.tight_layout()
 
 
 """

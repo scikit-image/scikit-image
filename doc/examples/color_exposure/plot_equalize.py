@@ -99,5 +99,5 @@ ax_cdf.set_ylabel('Fraction of total intensity')
 ax_cdf.set_yticks(np.linspace(0, 1, 5))
 
 # prevent overlap of y-axis labels
-fig.subplots_adjust(wspace=0.4)
+fig.tight_layout()
 plt.show()

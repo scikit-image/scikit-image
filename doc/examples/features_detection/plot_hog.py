@@ -15,11 +15,11 @@ Algorithm overview
 
 Compute a Histogram of Oriented Gradients (HOG) by
 
-    1. (optional) global image normalisation
-    2. computing the gradient image in x and y
-    3. computing gradient histograms
-    4. normalising across blocks
-    5. flattening into a feature vector
+1. (optional) global image normalisation
+2. computing the gradient image in x and y
+3. computing gradient histograms
+4. normalising across blocks
+5. flattening into a feature vector
 
 The first stage applies an optional global image normalisation
 equalisation that is designed to reduce the influence of illumination

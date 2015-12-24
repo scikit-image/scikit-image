@@ -55,10 +55,12 @@ logarithmic_corrected = exposure.adjust_log(img, 1)
 
 # Display results
 fig = plt.figure(figsize=(8, 5))
-axes = np.zeros((2,3), dtype=np.object)
+axes = np.zeros((2, 3), dtype=np.object)
 axes[0, 0] = plt.subplot(2, 3, 1, adjustable='box-forced')
-axes[0, 1] = plt.subplot(2, 3, 2, sharex=axes[0, 0], sharey=axes[0, 0], adjustable='box-forced')
-axes[0, 2] = plt.subplot(2, 3, 3, sharex=axes[0, 0], sharey=axes[0, 0], adjustable='box-forced')
+axes[0, 1] = plt.subplot(2, 3, 2, sharex=axes[0, 0], sharey=axes[0, 0],
+                         adjustable='box-forced')
+axes[0, 2] = plt.subplot(2, 3, 3, sharex=axes[0, 0], sharey=axes[0, 0],
+                         adjustable='box-forced')
 axes[1, 0] = plt.subplot(2, 3, 4)
 axes[1, 1] = plt.subplot(2, 3, 5)
 axes[1, 2] = plt.subplot(2, 3, 6)
@@ -80,5 +82,5 @@ ax_cdf.set_ylabel('Fraction of total intensity')
 ax_cdf.set_yticks(np.linspace(0, 1, 5))
 
 # prevent overlap of y-axis labels
-fig.subplots_adjust(wspace=0.4)
+fig.tight_layout()
 plt.show()

@@ -40,7 +40,8 @@ seg2 = slic(coins, n_segments=117, max_iter=160, sigma=1, compactness=0.75,
 segj = join_segmentations(seg1, seg2)
 
 # show the segmentations
-fig, axes = plt.subplots(ncols=4, figsize=(9, 2.5), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, axes = plt.subplots(ncols=4, figsize=(9, 2.5), sharex=True, sharey=True,
+                         subplot_kw={'adjustable': 'box-forced'})
 axes[0].imshow(coins, cmap=plt.cm.gray, interpolation='nearest')
 axes[0].set_title('Image')
 
@@ -58,5 +59,5 @@ axes[3].set_title('Join')
 
 for ax in axes:
     ax.axis('off')
-fig.subplots_adjust(hspace=0.01, wspace=0.01, top=1, bottom=0, left=0, right=1)
+fig.tight_layout()
 plt.show()
