@@ -153,6 +153,7 @@ def _denoise_tv_chambolle_nd(im, weight=0.2, eps=2.e-4, n_iter_max=200):
     i = 0
     while i < n_iter_max:
         if i > 0:
+            # d will be the (negative) divergence of p
             d = -p.sum(0)
             slices_d = [slice(None), ] * ndim
             slices_p = [slice(None), ] * (ndim + 1)
@@ -168,6 +169,8 @@ def _denoise_tv_chambolle_nd(im, weight=0.2, eps=2.e-4, n_iter_max=200):
             out = im
         E = (d ** 2).sum()
 
+        # g stores the gradients of out along each axis
+        # e.g. g[0] is the first order finite difference along axis 0
         slices_g = [slice(None), ] * (ndim + 1)
         for ax in range(ndim):
             slices_g[ax+1] = slice(0, -1)
@@ -177,9 +180,10 @@ def _denoise_tv_chambolle_nd(im, weight=0.2, eps=2.e-4, n_iter_max=200):
 
         norm = np.sqrt((g ** 2).sum(0))[np.newaxis, ...]
         E += weight * norm.sum()
-        norm *= 0.5 / weight
+        tau = 1. / (2.*ndim)
+        norm *= tau / weight
         norm += 1.
-        p -= 1. / (2.*ndim) * g
+        p -= tau * g
         p /= norm
         E /= float(im.size)
         if i == 0:
