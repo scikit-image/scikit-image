@@ -116,7 +116,7 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     return _denoise_tv_bregman(image, weight, max_iter, eps, isotropic)
 
 
-def _denoise_tv_chambolle_nd(im, weight=0.2, eps=2.e-4, n_iter_max=200):
+def _denoise_tv_chambolle_nd(im, weight=0.1, eps=2.e-4, n_iter_max=200):
     """Perform total-variation denoising on n-dimensional images.
 
     Parameters
@@ -198,7 +198,7 @@ def _denoise_tv_chambolle_nd(im, weight=0.2, eps=2.e-4, n_iter_max=200):
     return out
 
 
-def denoise_tv_chambolle(im, weight=0.2, eps=2.e-4, n_iter_max=200,
+def denoise_tv_chambolle(im, weight=0.1, eps=2.e-4, n_iter_max=200,
                          multichannel=False):
     """Perform total-variation denoising on n-dimensional images.
 
