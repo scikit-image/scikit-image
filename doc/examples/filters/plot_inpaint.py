@@ -39,18 +39,18 @@ image_defect[np.where(mask)] = 0
 
 image_result = inpaint.inpaint_biharmonic(image_defect, mask)
 
-fig, (ax1, ax2, ax3) = plt.subplots(ncols=3, nrows=1, figsize=(10, 6))
+fig, axes = plt.subplots(ncols=3, nrows=1)
 
-ax1.set_title('Defected image')
-ax1.imshow(image_orig, cmap=plt.cm.gray, interpolation='nearest')
-ax1.set_xticks([]), ax1.set_yticks([])
+axes[0].set_title('Defected image')
+axes[0].imshow(image_orig, cmap=plt.cm.gray, interpolation='nearest')
+axes[0].set_xticks([]), axes[0].set_yticks([])
 
-ax2.set_title('Defect mask')
-ax2.imshow(mask, cmap=plt.cm.gray, interpolation='nearest')
-ax2.set_xticks([]), ax2.set_yticks([])
+axes[1].set_title('Defect mask')
+axes[1].imshow(mask, cmap=plt.cm.gray, interpolation='nearest')
+axes[1].set_xticks([]), axes[1].set_yticks([])
 
-ax3.set_title('Inpainted image')
-ax3.imshow(image_result, cmap=plt.cm.gray, interpolation='nearest')
-ax3.set_xticks([]), ax3.set_yticks([])
+axes[2].set_title('Inpainted image')
+axes[2].imshow(image_result, cmap=plt.cm.gray, interpolation='nearest')
+axes[2].set_xticks([]), axes[2].set_yticks([])
 
 plt.show()
