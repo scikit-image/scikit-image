@@ -111,3 +111,7 @@ fi
 nosetests $TEST_ARGS
 
 section_end "Test.with.optional.dependencies"
+
+section "Prepare.release"
+doc/release/contribs.py HEAD~10
+section_end "Prepare.release"
