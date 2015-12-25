@@ -42,7 +42,8 @@ authors = [a.strip() for a in authors if a.strip()]
 
 def key(author):
     author = [v for v in author.split() if v[0] in string.ascii_letters]
-    return author[-1]
+    if len(author) > 0:
+        return author[-1]
 
 authors = sorted(set(authors), key=key)
 
