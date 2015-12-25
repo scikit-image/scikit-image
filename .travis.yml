@@ -53,9 +53,7 @@ before_install:
 install:
     - python setup.py develop
 
-script:
-   - tools/travis_script.sh
-   - grep -irn "R385" doc/build
+script: tools/travis_script.sh
 
 after_success:
     - coveralls
