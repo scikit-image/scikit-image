@@ -159,9 +159,6 @@ def test_euler_number():
     en = regionprops(SAMPLE_mod)[0].euler_number
     assert en == 0
 
-    en = regionprops(SAMPLE_3D)[0].euler_number
-    assert en == 1
-
 
 def test_extent():
     extent = regionprops(SAMPLE)[0].extent
