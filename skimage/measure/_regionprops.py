@@ -120,7 +120,6 @@ class _RegionProperties(object):
                      np.array([self._slice[i].start
                                for i in range(self._ndim)]))
 
-    #@property
     @only2d
     def convex_area(self):
         return np.sum(self.convex_image)
@@ -136,7 +135,6 @@ class _RegionProperties(object):
         return np.vstack([indices[i] + self._slice[i].start
                           for i in range(self._ndim)]).T
 
-    #@property
     @only2d
     def eccentricity(self):
         l1, l2 = self.inertia_tensor_eigvals
@@ -201,7 +199,6 @@ class _RegionProperties(object):
     def _intensity_image_double(self):
         return self.intensity_image.astype(np.double)
 
-    #@property
     @only2d
     def local_centroid(self):
         m = self.moments
@@ -218,13 +215,11 @@ class _RegionProperties(object):
     def min_intensity(self):
         return np.min(self.intensity_image[self.image])
 
-    #@property
     @only2d
     def major_axis_length(self):
         l1, _ = self.inertia_tensor_eigvals
         return 4 * sqrt(l1)
 
-    #@property
     @only2d
     def minor_axis_length(self):
         _, l2 = self.inertia_tensor_eigvals
@@ -242,7 +237,6 @@ class _RegionProperties(object):
         return _moments.moments_central(self.image.astype(np.uint8),
                                         row, col, 3)
 
-    #@property
     @only2d
     def moments_hu(self):
         return _moments.moments_hu(self.moments_normalized)
@@ -252,7 +246,6 @@ class _RegionProperties(object):
     def moments_normalized(self):
         return _moments.moments_normalized(self.moments_central, 3)
 
-    #@property
     @only2d
     def orientation(self):
         a, b, b, c = self.inertia_tensor.flat
@@ -265,23 +258,19 @@ class _RegionProperties(object):
         else:
             return - 0.5 * atan2(2 * b, (a - c))
 
-    #@property
     @only2d
     def perimeter(self):
         return perimeter(self.image, 4)
 
-    #@property
     @only2d
     def solidity(self):
         return self.moments[0, 0] / np.sum(self.convex_image)
 
-    #@property
     @only2d
     def weighted_centroid(self):
         row, col = self.weighted_local_centroid
         return row + self._slice[0].start, col + self._slice[1].start
 
-    #@property
     @only2d
     def weighted_local_centroid(self):
         m = self.weighted_moments
@@ -301,7 +290,6 @@ class _RegionProperties(object):
         return _moments.moments_central(self._intensity_image_double(),
                                         row, col, 3)
 
-    #@property
     @only2d
     def weighted_moments_hu(self):
         return _moments.moments_hu(self.weighted_moments_normalized)
