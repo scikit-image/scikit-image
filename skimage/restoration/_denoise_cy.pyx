@@ -95,6 +95,11 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
     if max_value == 0.0:
         raise ValueError("The maximum value found in the image was 0.")
 
+    if mode not in ('constant', 'wrap', 'symmetric', 'reflect', 'edge'):
+        raise ValueError("Invalid mode specified.  Please use `constant`, "
+                         "`edge`, `wrap`, `symmetric` or `reflect`.")
+    cdef char cmode = ord(mode[0].upper())
+
     cimage = np.ascontiguousarray(image)
 
     out = np.zeros((rows, cols, dims), dtype=np.double)
@@ -104,11 +109,6 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
     values = <double*>malloc(dims * sizeof(double))
     centres = <double*>malloc(dims * sizeof(double))
     total_values = <double*>malloc(dims * sizeof(double))
-
-    if mode not in ('constant', 'wrap', 'symmetric', 'reflect', 'edge'):
-        raise ValueError("Invalid mode specified.  Please use `constant`, "
-                         "`edge`, `wrap`, `symmetric` or `reflect`.")
-    cdef char cmode = ord(mode[0].upper())
 
     for r in range(rows):
         for c in range(cols):
