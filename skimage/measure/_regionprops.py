@@ -1,4 +1,5 @@
 # coding: utf-8
+from __future__ import division
 from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage as ndi
@@ -75,12 +76,12 @@ def _cached(f):
 
 
 def only2d(method):
+    @wraps(method)
     def func2d(self, *args, **kwargs):
         if self._ndim > 2:
             raise NotImplementedError('Property %s is not implemented for '
                                       '3D images' % method.__name__)
         return method(self, *args, **kwargs)
-    func2d.__name__ = method.__name__
     return func2d
 
 
@@ -91,11 +92,11 @@ class _RegionProperties(object):
 
     def __init__(self, slice, label, label_image, intensity_image,
                  cache_active):
-                 
+
         if intensity_image is not None:
             if not intensity_image.shape == label_image.shape:
                 raise ValueError('Label and intensity image must have the same shape.')
-        
+
         self.label = label
 
         self._slice = slice
@@ -156,17 +157,15 @@ class _RegionProperties(object):
         return -num + 1
 
     def extent(self):
-        return float(self.area) / self.image.size
+        return self.area / self.image.size
 
     def filled_area(self):
         return np.sum(self.filled_image)
 
     @_cached
     def filled_image(self):
-        if self._ndim == 2:
-            return ndi.binary_fill_holes(self.image, STREL_8)
-        else:
-            return ndi.binary_fill_holes(self.image, STREL_26_3D)
+        structure = STREL_8 if self._ndim == 2 else STREL_26_3D
+        return ndi.binary_fill_holes(self.image, structure)
 
     @_cached
     def image(self):
@@ -518,7 +517,7 @@ def regionprops(label_image, intensity_image=None, cache=True):
     label_image = np.squeeze(label_image)
 
     if label_image.ndim not in (2, 3):
-            raise TypeError('Only 2-D and 3-D images supported.')
+        raise TypeError('Only 2-D and 3-D images supported.')
 
     if not np.issubdtype(label_image.dtype, np.integer):
         raise TypeError('Label image must be of integral type.')
