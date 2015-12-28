@@ -6,7 +6,6 @@
 cimport numpy as cnp
 import numpy as np
 from libc.math cimport exp, fabs, sqrt
-from libc.stdlib cimport malloc, free
 from libc.float cimport DBL_MAX
 from .._shared.interpolation cimport get_pixel3d
 from ..util import img_as_float
@@ -16,10 +15,10 @@ cdef inline double _gaussian_weight(double sigma, double value):
     return exp(-0.5 * (value / sigma)**2)
 
 
-cdef double* _compute_color_lut(Py_ssize_t bins, double sigma, double max_value):
+cdef double[:] _compute_color_lut(Py_ssize_t bins, double sigma, double max_value):
 
     cdef:
-        double* color_lut = <double*>malloc(bins * sizeof(double))
+        double[:] color_lut = np.empty(bins, dtype=np.double)
         Py_ssize_t b
 
     for b in range(bins):
@@ -28,10 +27,10 @@ cdef double* _compute_color_lut(Py_ssize_t bins, double sigma, double max_value)
     return color_lut
 
 
-cdef double* _compute_range_lut(Py_ssize_t win_size, double sigma):
+cdef double[:] _compute_range_lut(Py_ssize_t win_size, double sigma):
 
     cdef:
-        double* range_lut = <double*>malloc(win_size**2 * sizeof(double))
+        double[:] range_lut = np.empty(win_size**2, dtype=np.double)
         Py_ssize_t kr, kc
         Py_ssize_t window_ext = (win_size - 1) / 2
         double dist
@@ -74,16 +73,16 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
         double[:, :, ::1] cimage
         double[:, :, ::1] out
 
-        double* color_lut
-        double* range_lut
+        double[:] color_lut
+        double[:] range_lut
 
         Py_ssize_t r, c, d, wr, wc, kr, kc, rr, cc, pixel_addr, color_lut_bin
         double value, weight, dist, total_weight, csigma_range, color_weight, \
                range_weight
         double dist_scale
-        double* values
-        double* centres
-        double* total_values
+        double[:] values
+        double[:] centres
+        double[:] total_values
 
     if sigma_range is None:
         csigma_range = image.std()
@@ -106,9 +105,9 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
     color_lut = _compute_color_lut(bins, csigma_range, max_value)
     range_lut = _compute_range_lut(win_size, sigma_spatial)
     dist_scale = bins / dims / max_value
-    values = <double*>malloc(dims * sizeof(double))
-    centres = <double*>malloc(dims * sizeof(double))
-    total_values = <double*>malloc(dims * sizeof(double))
+    values = np.empty(dims, dtype=np.double)
+    centres = np.empty(dims, dtype=np.double)
+    total_values = np.empty(dims, dtype=np.double)
 
     for r in range(rows):
         for c in range(cols):
@@ -145,12 +144,6 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
                     total_weight += weight
             for d in range(dims):
                 out[r, c, d] = total_values[d] / total_weight
-
-    free(color_lut)
-    free(range_lut)
-    free(values)
-    free(centres)
-    free(total_values)
 
     return np.squeeze(np.asarray(out))
 
