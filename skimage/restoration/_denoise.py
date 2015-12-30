@@ -559,10 +559,9 @@ def estimate_sigma(im, multichannel, average_sigmas=True):
         raise ValueError("estimate_sigma requires PyWavelets to be installed.")
 
     if multichannel:
-        kwargs = dict(multichannel=False, distribution='Gaussian')
         nchannels = im.shape[-1]
         sigmas = [estimate_sigma(
-            im[..., c], **kwargs) for c in range(nchannels)]
+            im[..., c], multichannel=False) for c in range(nchannels)]
         if average_sigmas:
             sigmas = np.mean(sigmas)
         return sigmas
