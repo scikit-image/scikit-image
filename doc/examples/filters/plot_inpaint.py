@@ -26,18 +26,20 @@ import matplotlib.pyplot as plt
 from skimage import data, color
 from skimage.restoration import inpaint
 
-image_orig = color.rgb2gray(data.astronaut())
+image_orig = data.astronaut()
 
 # Create mask with three defect regions: left, middle, right respectively
-mask = np.zeros_like(image_orig)
+mask = np.zeros(image_orig.shape[:-1])
 mask[20:60, 0:20] = 1
 mask[200:300, 150:170] = 1
 mask[50:100, 400:430] = 1
 
+# Defect image over the same region in each color channel
 image_defect = image_orig.copy()
-image_defect[np.where(mask)] = 0
+for layer in range(image_defect.shape[-1]):
+    image_defect[np.where(mask)] = 0
 
-image_result = inpaint.inpaint_biharmonic(image_defect, mask)
+image_result = inpaint.inpaint_biharmonic(image_defect, mask, multichannel=True)
 
 fig, axes = plt.subplots(ncols=3, nrows=1)
 
