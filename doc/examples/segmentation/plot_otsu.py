@@ -3,6 +3,8 @@
 Thresholding
 ============
 
+.. _otsu:
+
 Thresholding is used to create a binary image. This example uses Otsu's method
 to calculate the threshold value.
 
@@ -13,6 +15,7 @@ the intra-class variance.
 
 .. [1] http://en.wikipedia.org/wiki/Otsu's_method
 
+See also: :ref:`Adaptive thresholding <threshold_adaptive>`
 """
 import matplotlib
 import matplotlib.pyplot as plt
