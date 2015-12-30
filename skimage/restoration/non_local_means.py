@@ -69,6 +69,8 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     shift, that reduces the number of operations [1]_. Therefore, this
     algorithm executes faster than the classic algorith
     (``fast_mode=False``), at the expense of using twice as much memory.
+    This implementation has been proven to be more efficient compared to
+    other alternatives, see e.g. [3]_.
 
     Compared to the classic algorithm, all pixels of a patch contribute
     to the distance to another patch with the same weight, no matter
@@ -84,9 +86,14 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     References
     ----------
     .. [1] Buades, A., Coll, B., & Morel, J. M. (2005, June). A non-local
-        algorithm for image denoising. In CVPR 2005, Vol. 2, pp. 60-65, IEEE.
+           algorithm for image denoising. In CVPR 2005, Vol. 2, pp. 60-65, IEEE.
 
-    .. [2] Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
+    .. [2] J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
+           nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
+           International Symposium on Biomedical Imaging: From Nano to Macro,
+           2008, pp. 1331-1334.
+
+    .. [3] Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
            Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
 
     Examples
