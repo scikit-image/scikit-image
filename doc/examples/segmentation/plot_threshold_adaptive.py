@@ -1,6 +1,4 @@
 """
-.. _threshold_adaptive:
-
 =====================
 Adaptive Thresholding
 =====================
