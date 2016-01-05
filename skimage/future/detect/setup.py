@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 from skimage._build import cython
-
 import os
 import tempfile
 import shutil
-#from numpy.distutils.command.build_ext import build_ext
+from numpy.distutils.command.build_ext import build_ext
 from distutils.errors import CompileError, LinkError
-from Cython.Distutils import build_ext
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -50,7 +49,7 @@ class Checker(build_ext):
     def build_extensions(self):
         """ Hook into extension building to check compiler flags """
 
-        print '-----------------------'
+        print('-----------------------')
 
         if self.can_compile_link():
 
