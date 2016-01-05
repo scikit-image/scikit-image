@@ -23,7 +23,7 @@ import sys
 
 import setuptools
 from distutils.command.build_py import build_py
-from distutils.command.build_ext import build_ext
+from numpy.distutils.command.build_ext import build_ext
 from distutils.errors import CompileError, LinkError
 import tempfile
 import shutil
