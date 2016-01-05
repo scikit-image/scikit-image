@@ -5,8 +5,9 @@ from skimage._build import cython
 import os
 import tempfile
 import shutil
-from numpy.distutils.command.build_ext import build_ext
+#from numpy.distutils.command.build_ext import build_ext
 from distutils.errors import CompileError, LinkError
+from Cython.Distutils import build_ext
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -49,6 +50,8 @@ class Checker(build_ext):
     def build_extensions(self):
         """ Hook into extension building to check compiler flags """
 
+        print '-----------------------'
+
         if self.can_compile_link():
 
             for ext in self.extensions:
@@ -67,13 +70,10 @@ def configuration(parent_package='', top_path=None):
     # This function tries to create cpp files from the given .pyx files.  If
     # it fails, try to build with pre-generated .cpp files.
 
-
     cython(['cascade.pyx'], working_path=base_path)
     config.add_extension('cascade', sources=['cascade.cpp'],
                          include_dirs=[get_numpy_include_dirs()],
-                         language="c++",
-                         extra_compile_args=compile_flags,
-                         extra_link_args=link_flags)
+                         language="c++")
     return config
 
 cmdclass = dict(build_ext=Checker)
@@ -83,11 +83,12 @@ if __name__ == '__main__':
 
     conf = configuration(top_path='').todict()
 
+    conf['cmdclass'] = cmdclass
+
     setup(maintainer='scikit-image Developers',
           maintainer_email='scikit-image@googlegroups.com',
           description='Object detection framework',
           url='https://github.com/scikit-image/scikit-image',
           license='Modified BSD',
-          cmdclass=cmdclass,
           **(conf)
           )
