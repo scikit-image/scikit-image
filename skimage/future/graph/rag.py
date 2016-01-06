@@ -354,8 +354,8 @@ def rag_boundary(labels, edge_map, connectivity=2):
     n = np.max(labels_large) + 1
 
     # use a dummy broadcast array as data for RAG
-    ones = np.broadcast_to(np.ones((1,), dtype=np.int_),
-                           labels_small.shape)
+    ones = as_strided(np.ones((1,), dtype=np.float), shape=labels_small.shape,
+                      strides=(0,))
     count_matrix = sparse.coo_matrix((ones, (labels_small, labels_large)),
                                      dtype=np.int_, shape=(n, n)).tocsr()
     data = np.concatenate((edge_map[boundaries0], edge_map[boundaries1]))
