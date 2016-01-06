@@ -9,6 +9,7 @@ This example demonstrates construction of region boundary based RAGs with the
 from skimage.future import graph
 from skimage import data, segmentation, color, filters, io
 from matplotlib import colors
+import numpy as np
 
 img = data.coffee()
 gimg = color.rgb2gray(img)
@@ -19,8 +20,8 @@ edges_rgb = color.gray2rgb(edges)
 
 g = graph.rag_boundary(labels, edges)
 
-cmap = colors.ListedColormap(['#0000ff', '#ff0000'])
-out = graph.draw_rag(labels, g, edges_rgb, node_color="#ffff00", colormap=cmap)
+out = graph.draw_rag(labels, g, edges_rgb, node_color="#ffff00",
+                     colormap='plasma')
 
 io.imshow(out)
 io.show()

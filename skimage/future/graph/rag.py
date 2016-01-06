@@ -344,37 +344,35 @@ def rag_boundary(labels, edge_map, connectivity=2):
 
     """
 
-    graph = RAG()
-    fp = ndi.generate_binary_structure(labels.ndim, connectivity)
-    print(fp)
-    eroded = morphology.erosion(labels, selem=fp)
-    dilated = morphology.dilation(labels, selem=fp)
-    boundaries = eroded != dilated
+    conn = ndi.generate_binary_structure(labels.ndim, connectivity)
+    eroded = ndi.grey_erosion(labels, footprint=conn)
+    dilated = ndi.grey_dilation(labels, footprint=conn)
+    boundaries0 = (eroded != labels)
+    boundaries1 = (dilated != labels)
+    labels_small = np.concatenate((eroded[boundaries0], labels[boundaries1]))
+    labels_large = np.concatenate((labels[boundaries0], dilated[boundaries1]))
+    n = np.max(labels_large) + 1
 
-    small_labels = eroded[boundaries]
-    large_labels = dilated[boundaries]
-    data = edge_map[boundaries]
+    # use a dummy broadcast array as data for RAG
+    ones = np.broadcast_to(np.ones((1,), dtype=np.int_),
+                           labels_small.shape)
+    count_matrix = sparse.coo_matrix((ones, (labels_small, labels_large)),
+                                     dtype=np.int_, shape=(n, n)).tocsr()
+    data = np.concatenate((edge_map[boundaries0], edge_map[boundaries1]))
 
-    # coo logic sums values of duplicate indices
-    edge_data = sparse.coo_matrix((data, (small_labels, large_labels))).tocsr()
+    data_coo = sparse.coo_matrix((data, (labels_small, labels_large)))
+    graph_matrix = data_coo.tocsr()
+    graph_matrix.data /= count_matrix.data
 
-    # create a repeating array of [1., 1., ...] using stride tricks to save memory
-    counts = np.ones((1,), dtype=float)
-    counts = as_strided(counts, shape=small_labels.shape, strides=(0,))
-    # use COO matrix to count the ones at each location
-    edge_count = sparse.coo_matrix((counts, (small_labels, large_labels))).tocsr()
+    rag = nx.Graph()
+    rows, cols = graph_matrix.nonzero()
+    graph_data = zip(rows, cols, graph_matrix.data)
+    rag.add_weighted_edges_from(graph_data)
 
-    edge_data.data /= edge_count.data
+    for n in rag.nodes():
+        rag.node[n].update({'labels': [n]})
 
-    rows, cols = edge_data.nonzero()
-    graph_data = zip(rows, cols, edge_data.data)
-
-    graph.add_weighted_edges_from(graph_data)
-
-    for n in graph.nodes():
-        graph.node[n].update({'labels': [n]})
-
-    return graph
+    return rag
 
 
 def draw_rag(labels, rag, img, border_color=None, node_color='#ffff00',
