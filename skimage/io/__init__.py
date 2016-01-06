@@ -58,5 +58,5 @@ def _update_doc(doc):
 
     return doc
 
-
-__doc__ = _update_doc(__doc__)
+if __doc__ is not None:
+    __doc__ = _update_doc(__doc__)

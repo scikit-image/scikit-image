@@ -33,16 +33,15 @@ retry () {
 echo "cython>=0.21" >> requirements.txt
 
 # require networkx 1.9.1 on 2.6, as 2.6 support was dropped in 1.10
+# require matplotlib 1.4.3 on 2.6, as 2.6 support was dropped in 1.5
 if [[ $TRAVIS_PYTHON_VERSION == 2.6* ]]; then
     sed -i 's/networkx.*/networkx==1.9.1/g' requirements.txt
+    sed -i 's/matplotlib.*/matplotlib==1.4.3/g' requirements.txt
 fi
 
 # test minimum requirements on 2.7
 if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
     sed -i 's/>=/==/g' requirements.txt
-    # PIL instead of Pillow
-    sed -i 's/pillow.*/pil==1.1.7/g' requirements.txt
-    WHEELBINARIES=${WHEELBINARIES/pillow/pil}
 fi
 
 # create new empty venv

@@ -87,8 +87,7 @@ def test_outside_standard_range():
 
 def test_nonstandard_type():
     plt.figure()
-    with expected_warnings(["Non-standard image type",
-                            "Low image dynamic range"]):
+    with expected_warnings(["Low image dynamic range"]):
         ax_im = io.imshow(im64)
     assert ax_im.get_clim() == (im64.min(), im64.max())
     assert n_subplots(ax_im) == 2

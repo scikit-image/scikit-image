@@ -3,8 +3,8 @@ from numpy.testing import assert_array_equal, assert_almost_equal, \
 import numpy as np
 import math
 
-from skimage.measure._regionprops import regionprops, PROPS, perimeter
-from skimage._shared._warnings import expected_warnings
+from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
+                                          _parse_docs)
 
 
 SAMPLE = np.array(
@@ -22,12 +22,24 @@ SAMPLE = np.array(
 INTENSITY_SAMPLE = SAMPLE.copy()
 INTENSITY_SAMPLE[1, 9:11] = 2
 
+SAMPLE_3D = np.zeros((6, 6, 6), dtype=np.uint8)
+SAMPLE_3D[1:3, 1:3, 1:3] = 1
+SAMPLE_3D[3, 2, 2] = 1 
+INTENSITY_SAMPLE_3D = SAMPLE_3D.copy()
 
 def test_all_props():
     region = regionprops(SAMPLE, INTENSITY_SAMPLE)[0]
     for prop in PROPS:
         assert_almost_equal(region[prop], getattr(region, PROPS[prop]))
 
+
+def test_all_props_3d():
+    region = regionprops(SAMPLE_3D, INTENSITY_SAMPLE_3D)[0]
+    for prop in PROPS:
+        try:
+            assert_almost_equal(region[prop], getattr(region, PROPS[prop]))
+        except NotImplementedError:
+            pass
 
 def test_dtype():
     regionprops(np.zeros((10, 10), dtype=np.int))
@@ -42,12 +54,15 @@ def test_ndim():
     regionprops(np.zeros((10, 10), dtype=np.int))
     regionprops(np.zeros((10, 10, 1), dtype=np.int))
     regionprops(np.zeros((10, 10, 1, 1), dtype=np.int))
-    assert_raises(TypeError, regionprops, np.zeros((10, 10, 2), dtype=np.int))
+    regionprops(np.zeros((10, 10, 10), dtype=np.int))
+    assert_raises(TypeError, regionprops, np.zeros((10, 10, 10, 2), dtype=np.int))
 
 
 def test_area():
     area = regionprops(SAMPLE)[0].area
     assert area == np.sum(SAMPLE)
+    area = regionprops(SAMPLE_3D)[0].area
+    assert area == np.sum(SAMPLE_3D)
 
 
 def test_bbox():
@@ -58,6 +73,9 @@ def test_bbox():
     SAMPLE_mod[:, -1] = 0
     bbox = regionprops(SAMPLE_mod)[0].bbox
     assert_array_almost_equal(bbox, (0, 0, SAMPLE.shape[0], SAMPLE.shape[1]-1))
+
+    bbox = regionprops(SAMPLE_3D)[0].bbox
+    assert_array_almost_equal(bbox, (1, 1, 1, 4, 3, 3))
 
 
 def test_moments_central():
@@ -110,6 +128,11 @@ def test_coordinates():
     prop_coords = regionprops(sample)[0].coords
     assert_array_equal(prop_coords, coords)
 
+    sample = np.zeros((6, 6, 6), dtype=np.int8)
+    coords = np.array([[1, 1, 1], [1, 2, 1], [1, 3, 1]])
+    sample[coords[:, 0], coords[:, 1], coords[:, 2]] = 1
+    prop_coords = regionprops(sample)[0].coords
+    assert_array_equal(prop_coords, coords)
 
 def test_eccentricity():
     eps = regionprops(SAMPLE)[0].eccentricity
@@ -129,12 +152,12 @@ def test_equiv_diameter():
 
 def test_euler_number():
     en = regionprops(SAMPLE)[0].euler_number
-    assert en == 0
+    assert en == 1
 
     SAMPLE_mod = SAMPLE.copy()
     SAMPLE_mod[7, -3] = 0
     en = regionprops(SAMPLE_mod)[0].euler_number
-    assert en == -1
+    assert en == 0
 
 
 def test_extent():
@@ -145,13 +168,13 @@ def test_extent():
 def test_moments_hu():
     hu = regionprops(SAMPLE)[0].moments_hu
     ref = np.array([
-        3.27117627e-01,
-        2.63869194e-02,
-        2.35390060e-02,
-        1.23151193e-03,
-        1.38882330e-06,
+         3.27117627e-01,
+         2.63869194e-02,
+         2.35390060e-02,
+         1.23151193e-03,
+         1.38882330e-06,
         -2.72586158e-05,
-        6.48350653e-06
+         6.48350653e-06
     ])
     # bug in OpenCV caused in Central Moments calculation?
     assert_array_almost_equal(hu, ref)
@@ -161,9 +184,15 @@ def test_image():
     img = regionprops(SAMPLE)[0].image
     assert_array_equal(img, SAMPLE)
 
+    img = regionprops(SAMPLE_3D)[0].image
+    assert_array_equal(img, SAMPLE_3D[1:4, 1:3, 1:3])
+
 
 def test_label():
     label = regionprops(SAMPLE)[0].label
+    assert_array_equal(label, 1)
+
+    label = regionprops(SAMPLE_3D)[0].label
     assert_array_equal(label, 1)
 
 
@@ -355,9 +384,16 @@ def test_pure_background():
 
 def test_invalid():
     ps = regionprops(SAMPLE)
+
     def get_intensity_image():
         ps[0].intensity_image
+
     assert_raises(AttributeError, get_intensity_image)
+
+
+def test_invalid_size():
+    wrong_intensity_sample = np.array([[1], [1]])
+    assert_raises(ValueError, regionprops, SAMPLE, wrong_intensity_sample)
 
 
 def test_equals():
@@ -374,6 +410,47 @@ def test_equals():
 
     assert_equal(r1 == r2, True, "Same regionprops are not equal")
     assert_equal(r1 != r3, True, "Different regionprops are equal")
+
+
+def test_iterate_all_props():
+    region = regionprops(SAMPLE)[0]
+    p0 = dict((p, region[p]) for p in region)
+
+    region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0]
+    p1 = dict((p, region[p]) for p in region)
+
+    assert len(p0) < len(p1)
+
+
+def test_cache():
+    region = regionprops(SAMPLE)[0]
+    f0 = region.filled_image
+    region._label_image[:10] = 1
+    f1 = region.filled_image
+
+    # Changed underlying image, but cache keeps result the same
+    assert_array_equal(f0, f1)
+
+    # Now invalidate cache
+    region._cache_active = False
+    f1 = region.filled_image
+
+    assert np.any(f0 != f1)
+
+
+def test_docstrings_and_props():
+    region = regionprops(SAMPLE)[0]
+
+    docs = _parse_docs()
+    props = [m for m in dir(region) if not m.startswith('_')]
+
+    nr_docs_parsed = len(docs)
+    nr_props = len(props)
+    assert_equal(nr_docs_parsed, nr_props)
+
+    ds = docs['weighted_moments_normalized']
+    assert 'iteration' not in ds
+    assert len(ds.split('\n')) > 3
 
 
 if __name__ == "__main__":

@@ -5,7 +5,8 @@ from . import _hoghistogram
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8),
-        cells_per_block=(3, 3), visualise=False, normalise=False):
+        cells_per_block=(3, 3), visualise=False, normalise=False,
+        feature_vector=True):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Compute a Histogram of Oriented Gradients (HOG) by
@@ -31,6 +32,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     normalise : bool, optional
         Apply power law compression to normalise the image before
         processing.
+    feature_vector : bool, optional
+        Return the data as a feature vector by calling .ravel() on the result
+        just before returning.
 
     Returns
     -------
@@ -127,13 +131,11 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         orientations_arr = np.arange(orientations)
         dx_arr = radius * np.cos(orientations_arr / orientations * np.pi)
         dy_arr = radius * np.sin(orientations_arr / orientations * np.pi)
-        cr2 = cy + cy
-        cc2 = cx + cx
         hog_image = np.zeros((sy, sx), dtype=float)
         for x in range(n_cellsx):
             for y in range(n_cellsy):
                 for o, dx, dy in zip(orientations_arr, dx_arr, dy_arr):
-                    centre = tuple([y * cr2 // 2, x * cc2 // 2])
+                    centre = tuple([y * cy + cy // 2, x * cx + cx // 2])
                     rr, cc = draw.line(int(centre[0] - dx),
                                        int(centre[1] + dy),
                                        int(centre[0] + dx),
@@ -171,8 +173,11 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     overlapping grid of blocks covering the detection window into a combined
     feature vector for use in the window classifier.
     """
+    
+    if feature_vector:
+        normalised_blocks = normalised_blocks.ravel()
 
     if visualise:
-        return normalised_blocks.ravel(), hog_image
+        return normalised_blocks, hog_image
     else:
-        return normalised_blocks.ravel()
+        return normalised_blocks

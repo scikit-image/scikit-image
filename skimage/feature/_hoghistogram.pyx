@@ -10,7 +10,9 @@ cdef float cell_hog(double[:, ::1] magnitude,
                     float orientation_start, float orientation_end,
                     int cell_columns, int cell_rows,
                     int column_index, int row_index,
-                    int size_columns, int size_rows) nogil:
+                    int size_columns, int size_rows,
+                    int range_rows_start, int range_rows_stop,
+                    int range_columns_start, int range_columns_stop) nogil:
     """Calculation of the cell's HOG value
 
     Parameters
@@ -35,22 +37,23 @@ cdef float cell_hog(double[:, ::1] magnitude,
         Number of columns.
     size_rows : int
         Number of rows.
+    range_rows_start : int
+        Start row of cell.
+    range_rows_stop : int
+        Stop row of cell.
+    range_columns_start : int
+        Start column of cell.
+    range_columns_stop : int
+        Stop column of cell
 
     Returns
     -------
     total : float
         The total HOG value.
     """
-    cdef int cell_column, cell_row, cell_row_index, cell_column_index, \
-        range_columns_start, range_columns_stop, range_rows_start, \
-        range_rows_stop
-
-    range_rows_stop = cell_rows/2
-    range_rows_start = -range_rows_stop
-    range_columns_stop = cell_columns/2
-    range_columns_start = -range_columns_stop
-
+    cdef int cell_column, cell_row, cell_row_index, cell_column_index
     cdef float total = 0.
+
     for cell_row in range(range_rows_start, range_rows_stop):
         cell_row_index = row_index + cell_row
         if (cell_row_index < 0 or cell_row_index >= size_rows):
@@ -67,7 +70,7 @@ cdef float cell_hog(double[:, ::1] magnitude,
 
             total += magnitude[cell_row_index, cell_column_index]
 
-    return total
+    return total / (cell_rows * cell_columns)
 
 def hog_histograms(double[:, ::1] gradient_columns,
                    double[:, ::1] gradient_rows,
@@ -106,7 +109,9 @@ def hog_histograms(double[:, ::1] gradient_columns,
                                                   gradient_rows)
     cdef double[:, ::1] orientation = \
         np.arctan2(gradient_rows, gradient_columns) * (180 / np.pi) % 180
-    cdef int i, x, y, o, yi, xi, cc, cr, x0, y0
+    cdef int i, x, y, o, yi, xi, cc, cr, x0, y0, \
+        range_rows_start, range_rows_stop, \
+        range_columns_start, range_columns_stop
     cdef float orientation_start, orientation_end, \
         number_of_orientations_per_180
 
@@ -115,6 +120,10 @@ def hog_histograms(double[:, ::1] gradient_columns,
     cc = cell_rows * number_of_cells_rows
     cr = cell_columns * number_of_cells_columns
     number_of_orientations_per_180 = 180. / number_of_orientations
+    range_rows_stop = cell_rows/2
+    range_rows_start = -range_rows_stop
+    range_columns_stop = cell_columns/2
+    range_columns_start = -range_columns_stop
 
     with nogil:
         # compute orientations integral images
@@ -134,7 +143,8 @@ def hog_histograms(double[:, ::1] gradient_columns,
                 while x < cr:
                     orientation_histogram[yi, xi, i] = cell_hog(magnitude,
                         orientation, orientation_start, orientation_end,
-                        cell_columns, cell_rows, x, y, size_columns, size_rows)
+                        cell_columns, cell_rows, x, y, size_columns, size_rows,
+                        range_rows_start, range_rows_stop, range_columns_start, range_columns_stop)
                     xi += 1
                     x += cell_columns
 

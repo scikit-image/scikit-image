@@ -69,7 +69,7 @@ touch $MPL_DIR/matplotlibrc
 echo 'backend : Template' > $MPL_DIR/matplotlibrc
 
 
-for f in doc/examples/*.py; do
+for f in doc/examples/*/*.py; do
     python "$f"
     if [ $? -ne 0 ]; then
         exit 1
@@ -81,7 +81,7 @@ section_end "Run.doc.examples"
 
 section "Run.doc.applications"
 
-for f in doc/examples/applications/*.py; do
+for f in doc/examples/xx_applications/*.py; do
     python "$f"
     if [ $? -ne 0 ]; then
         exit 1
@@ -96,7 +96,7 @@ else
     MPL_QT_API=PySide
     export QT_API=pyside
 fi
-echo 'backend: Agg' > $MPL_DIR/matplotlibrc
+echo 'backend: Qt4Agg' > $MPL_DIR/matplotlibrc
 echo 'backend.qt4 : '$MPL_QT_API >> $MPL_DIR/matplotlibrc
 
 section_end "Run.doc.applications"
@@ -111,3 +111,7 @@ fi
 nosetests $TEST_ARGS
 
 section_end "Test.with.optional.dependencies"
+
+section "Prepare.release"
+doc/release/contribs.py HEAD~10
+section_end "Prepare.release"

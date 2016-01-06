@@ -20,6 +20,7 @@ from scipy.interpolate import interp1d
 from ._warps_cy import _warp_fast
 from ._radon_transform import sart_projection_update
 from .. import util
+from warnings import warn
 
 
 __all__ = ["radon", "iradon", "iradon_sart"]
@@ -49,11 +50,6 @@ def radon(image, theta=None, circle=False):
         at the pixel index ``radon_image.shape[0] // 2`` along the 0th
         dimension of ``radon_image``.
 
-    Raises
-    ------
-    ValueError
-        If called with ``circle=True`` and ``image != 0`` outside the inscribed
-        circle
     """
     if image.ndim != 2:
         raise ValueError('The input image must be 2-D')
@@ -67,8 +63,8 @@ def radon(image, theta=None, circle=False):
                                  + (c1 - image.shape[1] // 2) ** 2)
         reconstruction_circle = reconstruction_circle <= radius ** 2
         if not np.all(reconstruction_circle | (image == 0)):
-            raise ValueError('Image must be zero outside the reconstruction'
-                             ' circle')
+            warn('Radon transform: image must be zero outside the '
+                 'reconstruction circle')
         # Crop image to make it square
         slices = []
         for d in (0, 1):

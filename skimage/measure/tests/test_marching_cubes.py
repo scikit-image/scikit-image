@@ -39,7 +39,24 @@ def test_invalid_input():
 
 def test_correct_mesh_orientation():
     sphere_small = ellipsoid(1, 1, 1, levelset=True)
-    verts, faces = marching_cubes(sphere_small, 0.)
+
+    # Mesh with incorrectly oriented faces which was previously returned from
+    # `marching_cubes`, before it guaranteed correct mesh orientation
+    verts = np.array([[1., 2., 2.],
+                      [2., 2., 1.],
+                      [2., 1., 2.],
+                      [2., 2., 3.],
+                      [2., 3., 2.],
+                      [3., 2., 2.]])
+
+    faces = np.array([[0, 1, 2],
+                      [2, 0, 3],
+                      [1, 0, 4],
+                      [4, 0, 3],
+                      [1, 2, 5],
+                      [2, 3, 5],
+                      [1, 4, 5],
+                      [5, 4, 3]])
 
     # Correct mesh orientation - descent
     corrected_faces1 = correct_mesh_orientation(sphere_small, verts, faces,

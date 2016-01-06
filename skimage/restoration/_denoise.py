@@ -22,8 +22,8 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
 
     Parameters
     ----------
-    image : ndarray
-        Input image.
+    image : ndarray, shape (M, N[, 3])
+        Input image, 2D grayscale or RGB.
     win_size : int
         Window size for filtering.
     sigma_range : float
@@ -31,7 +31,7 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
         similarity). A larger value results in averaging of pixels with larger
         radiometric differences. Note, that the image will be converted using
         the `img_as_float` function and thus the standard deviation is in
-        respect to the range ``[0, 1]``. If the value is ``None`` the standard 
+        respect to the range ``[0, 1]``. If the value is ``None`` the standard
         deviation of the ``image`` will be used.
     sigma_spatial : float
         Standard deviation for range distance. A larger value results in
@@ -116,7 +116,7 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     return _denoise_tv_bregman(image, weight, max_iter, eps, isotropic)
 
 
-def _denoise_tv_chambolle_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
+def _denoise_tv_chambolle_3d(im, weight=0.2, eps=2.e-4, n_iter_max=200):
     """Perform total-variation denoising on 3D images.
 
     Parameters
@@ -189,7 +189,7 @@ def _denoise_tv_chambolle_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
     return out
 
 
-def _denoise_tv_chambolle_2d(im, weight=50, eps=2.e-4, n_iter_max=200):
+def _denoise_tv_chambolle_2d(im, weight=0.2, eps=2.e-4, n_iter_max=200):
     """Perform total-variation denoising on 2D images.
 
     Parameters
@@ -265,7 +265,7 @@ def _denoise_tv_chambolle_2d(im, weight=50, eps=2.e-4, n_iter_max=200):
     return out
 
 
-def denoise_tv_chambolle(im, weight=50, eps=2.e-4, n_iter_max=200,
+def denoise_tv_chambolle(im, weight=0.2, eps=2.e-4, n_iter_max=200,
                          multichannel=False):
     """Perform total-variation denoising on 2D and 3D images.
 

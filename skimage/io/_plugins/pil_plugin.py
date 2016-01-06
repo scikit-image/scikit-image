@@ -85,7 +85,10 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
             if grayscale:
                 frame = im.convert('L')
             else:
-                frame = im.convert('RGB')
+                if im.format == 'PNG' and 'transparency' in im.info:
+                    frame = im.convert('RGBA')
+                else:
+                    frame = im.convert('RGB')
 
         elif im.mode == '1':
             frame = im.convert('L')
