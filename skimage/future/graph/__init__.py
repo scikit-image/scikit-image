@@ -9,5 +9,5 @@ __all__ = ['rag_mean_color',
            'ncut',
            'draw_rag',
            'merge_hierarchical',
-           'rag_boundary'
+           'rag_boundary',
            'RAG']

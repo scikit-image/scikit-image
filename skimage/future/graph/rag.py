@@ -4,7 +4,7 @@ from numpy.lib.stride_tricks import as_strided
 from scipy import ndimage as ndi
 from scipy import sparse
 import math
-from ... import draw, measure, segmentation, util, color, morphology
+from ... import draw, measure, segmentation, util, color
 try:
     from matplotlib import colors
     from matplotlib import cm
@@ -364,10 +364,10 @@ def rag_boundary(labels, edge_map, connectivity=2):
     graph_matrix = data_coo.tocsr()
     graph_matrix.data /= count_matrix.data
 
-    rag = nx.Graph()
+    rag = RAG()
     rows, cols = graph_matrix.nonzero()
     graph_data = zip(rows, cols, graph_matrix.data)
-    rag.add_weighted_edges_from(graph_data)
+    rag.add_weighted_edges_from(graph_data, attr='weight')
 
     for n in rag.nodes():
         rag.node[n].update({'labels': [n]})
