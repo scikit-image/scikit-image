@@ -340,7 +340,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
     >>> img = data.chelsea()
     >>> labels = segmentation.slic(img)
     >>> edge_map = filters.sobel(color.rgb2gray(img))
-    >>> rag = graph.rag_mean_color(labels, edge_map)
+    >>> rag = graph.rag_boundary(labels, edge_map)
 
     """
 
