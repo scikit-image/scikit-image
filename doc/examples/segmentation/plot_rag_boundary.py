@@ -19,7 +19,7 @@ edges_rgb = color.gray2rgb(edges)
 g = graph.rag_boundary(labels, edges)
 
 out = graph.draw_rag(labels, g, edges_rgb, node_color="#ffff00",
-                     colormap='plasma')
+                     colormap='jet')
 
 io.imshow(out)
 io.show()
