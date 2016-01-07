@@ -5,7 +5,7 @@ from .grey import (erosion, dilation, opening, closing, white_tophat,
 from .selem import (square, rectangle, diamond, disk, cube, octahedron, ball,
                     octagon, star)
 from .watershed import watershed
-from ._skeletonize import skeletonize, medial_axis
+from ._skeletonize import skeletonize, medial_axis, thin
 from ._skeletonize_3d import skeletonize_3d
 from .convex_hull import convex_hull_image, convex_hull_object
 from .greyreconstruct import reconstruction
@@ -36,6 +36,7 @@ __all__ = ['binary_erosion',
            'watershed',
            'skeletonize',
            'skeletonize_3d',
+           'thin',
            'medial_axis',
            'convex_hull_image',
            'convex_hull_object',
