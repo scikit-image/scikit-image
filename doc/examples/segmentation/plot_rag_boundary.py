@@ -8,6 +8,8 @@ This example demonstrates construction of region boundary based RAGs with the
 """
 from skimage.future import graph
 from skimage import data, segmentation, color, filters, io
+from skimage.util.colormap import viridis
+
 
 img = data.coffee()
 gimg = color.rgb2gray(img)
@@ -18,8 +20,8 @@ edges_rgb = color.gray2rgb(edges)
 
 g = graph.rag_boundary(labels, edges)
 
-out = graph.draw_rag(labels, g, edges_rgb, node_color="#ffff00",
-                     colormap='jet')
+out = graph.draw_rag(labels, g, edges_rgb, node_color="#999999",
+                     colormap=viridis)
 
 io.imshow(out)
 io.show()
