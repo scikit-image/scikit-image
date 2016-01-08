@@ -406,6 +406,8 @@ def rag_boundary(labels, edge_map, connectivity=2):
     rag = RAG()
     rag.add_weighted_edges_from(_edge_generator_from_csr(graph_matrix),
                                 weight='weight')
+    rag.add_weighted_edges_from(_edge_generator_from_csr(count_matrix),
+                                weight='count')
 
     for n in rag.nodes():
         rag.node[n].update({'labels': [n]})
