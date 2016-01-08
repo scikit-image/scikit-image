@@ -48,7 +48,7 @@ def _edge_generator_from_csr(csr_matrix):
     col_indices = csr_matrix.indices
     for i in range(nrows):
         for j in range(indptr[i], indptr[i + 1]):
-            yield i, col_indices[j], data[j]
+            yield i, col_indices[j], values[j]
 
 
 def min_weight(graph, src, dst, n):
