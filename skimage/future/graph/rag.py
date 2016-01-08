@@ -12,6 +12,45 @@ except ImportError:
     pass
 
 
+def _edge_generator_from_csr(csr_matrix):
+    """Yield weighted edge triples for use by NetworkX from a CSR matrix.
+
+    This function is a straight rewrite of
+    `networkx.convert_matrix._csr_gen_triples`. Since that is a private
+    function, it is safer to include our own here.
+
+    Parameters
+    ----------
+    csr_matrix : scipy.sparse.csr_matrix
+        The input matrix. An edge (i, j, w) will be yielded if there is a
+        data value for coordinates (i, j) in the matrix, even if that value
+        is 0.
+
+    Yields
+    ------
+    i, j, w : (int, int, float) tuples
+        Each value `w` in the matrix along with its coordinates (i, j).
+
+    Examples
+    --------
+
+    >>> dense = np.eye(2, dtype=np.float)
+    >>> csr = sparse.csr_matrix(dense)
+    >>> edges = _edge_generator_from_csr(csr)
+    >>> type(edges)
+    generator
+    >>> list(edges)
+    [(0, 0, 1.0), (1, 1, 1.0)]
+    """
+    nrows = csr_matrix.shape[0]
+    values = csr_matrix.data
+    indptr = csr_matrix.indptr
+    col_indices = csr_matrix.indices
+    for i in range(nrows):
+        for j in range(indptr[i], indptr[i + 1]):
+            yield i, col_indices[j], data[j]
+
+
 def min_weight(graph, src, dst, n):
     """Callback to handle merging nodes by choosing minimum weight.
 
@@ -365,9 +404,10 @@ def rag_boundary(labels, edge_map, connectivity=2):
     graph_matrix.data /= count_matrix.data
 
     rag = RAG()
-    rows, cols = graph_matrix.nonzero()
-    graph_data = zip(rows, cols, graph_matrix.data)
-    rag.add_weighted_edges_from(graph_data, attr='weight')
+    rag.add_weighted_edges_from(_edge_generator_from_csr(graph_matrix),
+                                weight='weight')
+    rag.add_weighted_edges_from(_edge_generator_from_csr(count_matrix),
+                                weight='count')
 
     for n in rag.nodes():
         rag.node[n].update({'labels': [n]})
