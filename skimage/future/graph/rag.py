@@ -37,8 +37,6 @@ def _edge_generator_from_csr(csr_matrix):
     >>> dense = np.eye(2, dtype=np.float)
     >>> csr = sparse.csr_matrix(dense)
     >>> edges = _edge_generator_from_csr(csr)
-    >>> type(edges)
-    generator
     >>> list(edges)
     [(0, 0, 1.0), (1, 1, 1.0)]
     """
