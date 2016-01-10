@@ -11,6 +11,7 @@ from .._shared.transform cimport integrate
 
 cdef extern from "numpy/npy_math.h":
     double NAN "NPY_NAN"
+    double PI "NPY_PI"
 
 
 def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
@@ -57,8 +58,8 @@ def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
                         row = r + <int>round(sin(angle) * distance)
                         col = c + <int>round(cos(angle) * distance)
                         
-                        if (np.isclose(abs(tan(angle)), 1)): #if pi/4 or 3*pi/4, invert cosines
-                            col = c + <int>round(cos(angle+np.pi) * distance)
+                        if (abs(abs(tan(angle))-1) < 1e-8): #if pi/4 or 3*pi/4, invert cosines
+                            col = c + <int>round(cos(angle+PI) * distance)
 
                         # make sure the offset is within bounds
                         if row >= 0 and row < rows and \
