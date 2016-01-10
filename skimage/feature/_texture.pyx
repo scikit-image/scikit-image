@@ -4,7 +4,7 @@
 #cython: wraparound=False
 import numpy as np
 cimport numpy as cnp
-from libc.math cimport sin, cos, abs
+from libc.math cimport sin, cos, tan, abs
 from .._shared.interpolation cimport bilinear_interpolation, round
 from .._shared.transform cimport integrate
 
@@ -54,8 +54,11 @@ def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
                         i = image[r, c]
 
                         # compute the location of the offset pixel
-                        row = r + <int>round(sin(-angle) * distance)
+                        row = r + <int>round(sin(angle) * distance)
                         col = c + <int>round(cos(angle) * distance)
+                        
+                        if (np.isclose(abs(tan(angle)), 1)): #if pi/4 or 3*pi/4, invert cosines
+                            col = c + <int>round(cos(angle+np.pi) * distance)
 
                         # make sure the offset is within bounds
                         if row >= 0 and row < rows and \
