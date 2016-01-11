@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import ndimage as ndi
-
+from ..util import img_as_float
 
 def profile_line(img, src, dst, linewidth=1,
                  order=1, mode='constant', cval=0.0):
@@ -50,6 +50,7 @@ def profile_line(img, src, dst, linewidth=1,
     The destination point is included in the profile, in contrast to
     standard numpy indexing.
     """
+    img = img_as_float(img)
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
     if img.ndim == 3:
         pixels = [ndi.map_coordinates(img[..., i], perp_lines,
@@ -109,3 +110,4 @@ def _line_profile_coordinates(src, dst, linewidth=1):
     perp_cols = np.array([np.linspace(col_i - col_width, col_i + col_width,
                                       linewidth) for col_i in line_col])
     return np.array([perp_rows, perp_cols])
+
