@@ -2,6 +2,7 @@ import networkx as nx
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 from scipy import ndimage as ndi
+from scipy import sparse
 import math
 from ... import draw, measure, segmentation, util, color
 try:
@@ -9,6 +10,43 @@ try:
     from matplotlib import cm
 except ImportError:
     pass
+
+
+def _edge_generator_from_csr(csr_matrix):
+    """Yield weighted edge triples for use by NetworkX from a CSR matrix.
+
+    This function is a straight rewrite of
+    `networkx.convert_matrix._csr_gen_triples`. Since that is a private
+    function, it is safer to include our own here.
+
+    Parameters
+    ----------
+    csr_matrix : scipy.sparse.csr_matrix
+        The input matrix. An edge (i, j, w) will be yielded if there is a
+        data value for coordinates (i, j) in the matrix, even if that value
+        is 0.
+
+    Yields
+    ------
+    i, j, w : (int, int, float) tuples
+        Each value `w` in the matrix along with its coordinates (i, j).
+
+    Examples
+    --------
+
+    >>> dense = np.eye(2, dtype=np.float)
+    >>> csr = sparse.csr_matrix(dense)
+    >>> edges = _edge_generator_from_csr(csr)
+    >>> list(edges)
+    [(0, 0, 1.0), (1, 1, 1.0)]
+    """
+    nrows = csr_matrix.shape[0]
+    values = csr_matrix.data
+    indptr = csr_matrix.indptr
+    col_indices = csr_matrix.indices
+    for i in range(nrows):
+        for j in range(indptr[i], indptr[i + 1]):
+            yield i, col_indices[j], values[j]
 
 
 def min_weight(graph, src, dst, n):
@@ -309,6 +347,70 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
             raise ValueError("The mode '%s' is not recognised" % mode)
 
     return graph
+
+
+def rag_boundary(labels, edge_map, connectivity=2):
+    """ Comouter RAG based on region boundaries
+
+    Given an image's initial segmentation and its edge map this method
+    constructs the corresponding Region Adjacency Graph (RAG). Each node in the
+    RAG represents a set of pixels within the image with the same label in
+    `labels`. The weight between two adjacent regions is the average value
+    in `edge_map` along their boundary.
+
+    labels : ndarray
+        The labelled image.
+    edge_map : ndarray
+        This should have the same shape as that of `labels`. For all pixels
+        along the boundary between 2 adjacent regions, the average value of the
+        corresponding pixels in `edge_map` is the edge weight between them.
+    connectivity : int, optional
+        Pixels with a squared distance less than `connectivity` from each other
+        are considered adjacent. It can range from 1 to `labels.ndim`. Its
+        behavior is the same as `connectivity` parameter in
+        `scipy.ndimage.filters.generate_binary_structure`.
+
+    Examples
+    --------
+    >>> from skimage import data, segmentation, filters, color
+    >>> from skimage.future import graph
+    >>> img = data.chelsea()
+    >>> labels = segmentation.slic(img)
+    >>> edge_map = filters.sobel(color.rgb2gray(img))
+    >>> rag = graph.rag_boundary(labels, edge_map)
+
+    """
+
+    conn = ndi.generate_binary_structure(labels.ndim, connectivity)
+    eroded = ndi.grey_erosion(labels, footprint=conn)
+    dilated = ndi.grey_dilation(labels, footprint=conn)
+    boundaries0 = (eroded != labels)
+    boundaries1 = (dilated != labels)
+    labels_small = np.concatenate((eroded[boundaries0], labels[boundaries1]))
+    labels_large = np.concatenate((labels[boundaries0], dilated[boundaries1]))
+    n = np.max(labels_large) + 1
+
+    # use a dummy broadcast array as data for RAG
+    ones = as_strided(np.ones((1,), dtype=np.float), shape=labels_small.shape,
+                      strides=(0,))
+    count_matrix = sparse.coo_matrix((ones, (labels_small, labels_large)),
+                                     dtype=np.int_, shape=(n, n)).tocsr()
+    data = np.concatenate((edge_map[boundaries0], edge_map[boundaries1]))
+
+    data_coo = sparse.coo_matrix((data, (labels_small, labels_large)))
+    graph_matrix = data_coo.tocsr()
+    graph_matrix.data /= count_matrix.data
+
+    rag = RAG()
+    rag.add_weighted_edges_from(_edge_generator_from_csr(graph_matrix),
+                                weight='weight')
+    rag.add_weighted_edges_from(_edge_generator_from_csr(count_matrix),
+                                weight='count')
+
+    for n in rag.nodes():
+        rag.node[n].update({'labels': [n]})
+
+    return rag
 
 
 def draw_rag(labels, rag, img, border_color=None, node_color='#ffff00',
