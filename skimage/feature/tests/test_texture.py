@@ -156,6 +156,56 @@ class TestGLCM():
         for prop in ['contrast', 'dissimilarity', 'homogeneity',
                      'energy', 'correlation', 'ASM']:
             greycoprops(result, prop)
+            
+    def test_variance(self):
+
+        glcm = greycomatrix(self.image, [1], [0], 4, normed=True, symmetric=True)
+    
+        feature = greycoprops(glcm, "variance")
+    
+        np.testing.assert_almost_equal(feature[0,0], 1.03993055)
+        
+    def test_mean(self):
+
+        glcm = greycomatrix(self.image, [1], [0], 4, normed=True, symmetric=True)    
+        feature = greycoprops(glcm, "mean")    
+        np.testing.assert_almost_equal(feature[0,0], 1.29166666)
+        
+    def test_maximum_probability(self):
+
+        glcm = greycomatrix(self.image, [1], [0], 4, normed=True, symmetric=True)    
+        feature = greycoprops(glcm, "maxprob")    
+        np.testing.assert_almost_equal(feature[0,0], 0.25)
+        
+    def test_inverse_difference(self):
+
+        glcm = greycomatrix(self.image, [1], [0], 4, normed=True, symmetric=True)    
+        feature = greycoprops(glcm, "invdiff")    
+        np.testing.assert_almost_equal(feature[0,0], 0.81944444)
+
+    def test_autocorrelation(self):
+
+        glcm = greycomatrix(self.image, [1], [0], 4, normed=True, symmetric=True)    
+        feature = greycoprops(glcm, "autocorr")    
+        np.testing.assert_almost_equal(feature[0,0], 2.41666666)
+        
+    def test_entropy(self):
+
+        glcm = greycomatrix(self.image, [1], [0], 4, normed=True, symmetric=True)    
+        feature = greycoprops(glcm, "entropy")    
+        np.testing.assert_almost_equal(feature[0,0], 13649637258.817244)
+
+    def test_cluster_shade(self):
+
+        glcm = greycomatrix(self.image, [1], [0], 4, normed=True, symmetric=True)    
+        feature = greycoprops(glcm, "cshade")    
+        np.testing.assert_almost_equal(feature[0,0], 1.62615740)
+        
+    def test_cluster_prominence(self):
+
+        glcm = greycomatrix(self.image, [1], [0], 4, normed=True, symmetric=True)    
+        feature = greycoprops(glcm, "cprominence")    
+        np.testing.assert_almost_equal(feature[0,0], 23.70471643)
 
 
 class TestLBP():
