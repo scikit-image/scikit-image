@@ -134,11 +134,12 @@ def greycoprops(P, prop='contrast'):
     follows:
 
     - 'ASM': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}^2`
-    - 'autocorr' :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(ij)`
+    - 'autocorr': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(ij)`
     - 'contrast': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i-j)^2`
     - 'correlation':
         .. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i) \\
                   (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
+                  
     - 'cprominence': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i+j-\\mu_i-\\mu_j)^4`
     - 'cshade': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i+j-\\mu_i-\\mu_j)^3`
     - 'dissimilarity': :math:`\\sum_{i,j=0}^{levels-1}P_{i,j}|i-j|`
@@ -149,6 +150,7 @@ def greycoprops(P, prop='contrast'):
     - 'maxprob': :math:`\\sum_{i,j=0}^{levels-1} \\max{P_{i,j}}`
     - 'mean': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i)`
     - 'variance': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i-\\mu_i)^2`
+
 
     Parameters
     ----------
