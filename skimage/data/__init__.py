@@ -57,7 +57,7 @@ def camera():
     return load("camera.png")
 
 
-@deprecated()
+@deprecated('skimage.data.astronaut')
 def lena():
     """Colour "Lena" image.
 
