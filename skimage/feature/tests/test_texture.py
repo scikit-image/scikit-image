@@ -193,7 +193,7 @@ class TestGLCM():
 
         glcm = greycomatrix(self.image, [1], [0], 4, normed=True, symmetric=True)    
         feature = greycoprops(glcm, "entropy")    
-        np.testing.assert_almost_equal(feature[0,0], 13649637258.817244)
+        np.testing.assert_almost_equal(feature[0,0], 2.09472904)
 
     def test_cluster_shade(self):
 
