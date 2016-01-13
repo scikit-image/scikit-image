@@ -138,19 +138,17 @@ def greycoprops(P, prop='contrast'):
     - 'contrast': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i-j)^2`
     - 'correlation':
         .. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i) \\
-                  (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
-                  
+                  (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]        
     - 'cprominence': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i+j-\\mu_i-\\mu_j)^4`
     - 'cshade': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i+j-\\mu_i-\\mu_j)^3`
-    - 'dissimilarity': :math:`\\sum_{i,j=0}^{levels-1}P_{i,j}|i-j|`
+    - 'dissimilarity': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}|i-j|`
     - 'energy': :math:`\\sqrt{ASM}`
-    - 'entropy': :math:`\\sum_{i,j=0}^{levels-1}-P_{i,j}*\\log{P_{i,j}}`
+    - 'entropy': :math:`\\sum_{i,j=0}^{levels-1} -P_{i,j}*\\log{P_{i,j}}`
     - 'homogeneity': :math:`\\sum_{i,j=0}^{levels-1}\\frac{P_{i,j}}{1+(i-j)^2}`
-    - 'invdiff': :math:`\\sum_{i,j=0}^{levels-1}\\frac{P_{i,j}}{1+|i-j|}`
+    - 'invdiff': :math:`\\sum_{i,j=0}^{levels-1} \\frac{P_{i,j}}{1+|i-j|}`
     - 'maxprob': :math:`\\sum_{i,j=0}^{levels-1} \\max{P_{i,j}}`
     - 'mean': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i)`
     - 'variance': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i-\\mu_i)^2`
-
 
     Parameters
     ----------
@@ -176,20 +174,19 @@ def greycoprops(P, prop='contrast'):
            http://www.fp.ucalgary.ca/mhallbey/tutorial.htm
            
     .. [2] R. M. Haralick, K. Shanmugan, and I. H. Dinstein,
-    "Textural features for image classification,"
-    IEEE Trans. Syst., Man, Cybern., vol. SMC-3, pp. 610–621, May 1973.
+        "Textural features for image classification,"
+        IEEE Trans. Syst., Man, Cybern., vol. SMC-3, pp. 610–621, May 1973.
 
     .. [3] R. W. Conners, M. M. Trivedi, and C. A. Harlow,
-    "Segmentation of a high-resolution urban scene using texture operators,"
-    Comput. Vision, Graph., Image Processing, vol. 25, pp. 273–310, 1984.
+        "Segmentation of a high-resolution urban scene using texture operators,"
+        Comput. Vision, Graph., Image Processing, vol. 25, pp. 273–310, 1984.
 
     .. [4] R. M. Haralick, "Statistical and structural approaches to texture,"
-    Proc. IEEE, vol. 67, pp. 786–804, May 1979.
+        Proc. IEEE, vol. 67, pp. 786–804, May 1979.
 
     .. [5] Soh, L.-K.; Tsatsoulis, C.,
-    "Texture analysis of SAR sea ice imagery using gray level co-occurrence matrices,"
-    in Geoscience and Remote Sensing, IEEE Transactions on , vol.37, no.2, pp.780-795, Mar 1999
-    doi: 10.1109/36.752194
+        "Texture analysis of SAR sea ice imagery using gray level co-occurrence matrices,"
+        in Geoscience and Remote Sensing, IEEE Transactions on , vol.37, no.2, pp.780-795, Mar 1999
 
     Examples
     --------
