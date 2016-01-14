@@ -66,7 +66,7 @@ def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
                         row = r + <int>round(sin(angle) * distance)
                         col = c + <int>round(cos(angle) * distance)
                         
-                        if _clockwise == 1:
+                        if _clockwise == 0:
                             row = r + <int>round(sin(-angle) * distance)
 
                         # make sure the offset is within bounds
