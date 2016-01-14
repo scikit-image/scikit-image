@@ -4,19 +4,19 @@
 #cython: wraparound=False
 import numpy as np
 cimport numpy as cnp
-from libc.math cimport sin, cos, tan, fabs
+from cpython cimport bool
+from libc.math cimport sin, cos
 from .._shared.interpolation cimport bilinear_interpolation, round
 from .._shared.transform cimport integrate
 
 
 cdef extern from "numpy/npy_math.h":
     double NAN "NPY_NAN"
-    double PI "NPY_PI"
 
 
 def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
                double[:] angles, Py_ssize_t levels,
-               cnp.uint32_t[:, :, :, ::1] out):
+               cnp.uint32_t[:, :, :, ::1] out, bool clockwise):
     """Perform co-occurrence matrix accumulation.
 
     Parameters
@@ -34,6 +34,8 @@ def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
     out : ndarray
         On input a 4D array of zeros, and on output it contains
         the results of the GLCM computation.
+    clockwise : bool
+        Defines if the angles will be considered clockwise or anti-clockwise.
 
     """
 
@@ -58,8 +60,8 @@ def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
                         row = r + <int>round(sin(angle) * distance)
                         col = c + <int>round(cos(angle) * distance)
                         
-                        if (fabs(fabs(tan(angle))-1) < 1e-8): #if pi/4 or 3*pi/4, invert cosines
-                            col = c + <int>round(cos(angle+PI) * distance)
+                        if (not clockwise):
+                            row = r + <int>round(sin(-angle) * distance)
 
                         # make sure the offset is within bounds
                         if row >= 0 and row < rows and \

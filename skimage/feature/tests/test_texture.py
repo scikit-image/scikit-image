@@ -24,9 +24,9 @@ class TestGLCM():
                              [0, 0, 3, 1],
                              [0, 0, 0, 1]], dtype=np.uint32)
         np.testing.assert_array_equal(result[:, :, 0, 0], expected1)
-        expected2 = np.array([[2, 0, 0, 0],
-                             [1, 1, 2, 0],
-                             [0, 0, 2, 1],
+        expected2 = np.array([[1, 1, 3, 0],
+                             [0, 1, 1, 0],
+                             [0, 0, 0, 2],
                              [0, 0, 0, 0]], dtype=np.uint32)
         np.testing.assert_array_equal(result[:, :, 0, 1], expected2)
         expected3 = np.array([[3, 0, 2, 0],
@@ -34,10 +34,35 @@ class TestGLCM():
                              [0, 0, 1, 2],
                              [0, 0, 0, 0]], dtype=np.uint32)
         np.testing.assert_array_equal(result[:, :, 0, 2], expected3)        
-        expected4 = np.array([[1, 1, 3, 0],
-                             [0, 1, 1, 0],
-                             [0, 0, 0, 2],
-                             [0, 0, 0, 0]], dtype=np.uint32)
+        expected4 = np.array([[2, 0, 0, 0],
+                             [2, 2, 0, 0],
+                             [1, 0, 3, 0],
+                             [0, 0, 1, 1]], dtype=np.uint32)
+        np.testing.assert_array_equal(result[:, :, 0, 3], expected4)
+
+    @test_parallel()
+    def test_output_angles_anti_clockwise(self):
+        result = greycomatrix(self.image, [1], [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4], 4, clockwise=False)
+        assert result.shape == (4, 4, 1, 4)
+        expected1 = np.array([[2, 2, 1, 0],
+                             [0, 2, 0, 0],
+                             [0, 0, 3, 1],
+                             [0, 0, 0, 1]], dtype=np.uint32)
+        np.testing.assert_array_equal(result[:, :, 0, 0], expected1)
+        expected2 = np.array([[2, 1, 0, 0],
+                             [0, 1, 0, 0],
+                             [0, 2, 2, 0],
+                             [0, 0, 1, 0]], dtype=np.uint32)
+        np.testing.assert_array_equal(result[:, :, 0, 1], expected2)
+        expected3 = np.array([[3, 0, 0, 0],
+                             [0, 2, 0, 0],
+                             [2, 2, 1, 0],
+                             [0, 0, 2, 0]], dtype=np.uint32)
+        np.testing.assert_array_equal(result[:, :, 0, 2], expected3)        
+        expected4 = np.array([[1, 0, 0, 0],
+                             [1, 1, 0, 0],
+                             [3, 1, 0, 0],
+                             [0, 0, 2, 0]], dtype=np.uint32)
         np.testing.assert_array_equal(result[:, :, 0, 3], expected4)
 
     def test_output_symmetric_1(self):

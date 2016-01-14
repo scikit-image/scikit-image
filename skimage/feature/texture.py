@@ -12,7 +12,7 @@ from ._texture import (_glcm_loop,
 
 
 def greycomatrix(image, distances, angles, levels=256, symmetric=False,
-                 normed=False):
+                 normed=False, clockwise=True):
     """Calculate the grey-level co-occurrence matrix.
 
     A grey level co-occurrence matrix is a histogram of co-occurring
@@ -42,6 +42,8 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
         by the total number of accumulated co-occurrences for the given
         offset. The elements of the resulting matrix sum to 1. The
         default is False.
+    clockwise : bool, optional
+        Defines if the angles will be considered clockwise or anti-clockwise. Default: True
 
     Returns
     -------
@@ -77,9 +79,9 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
            [0, 0, 3, 1],
            [0, 0, 0, 1]], dtype=uint32)
     >>> result[:, :, 0, 1]
-    array([[2, 0, 0, 0],
-           [1, 1, 2, 0],
-           [0, 0, 2, 1],
+    array([[1, 1, 3, 0],
+           [0, 1, 1, 0],
+           [0, 0, 0, 2],
            [0, 0, 0, 0]], dtype=uint32)
     >>> result[:, :, 0, 2]
     array([[3, 0, 2, 0],
@@ -87,10 +89,10 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
            [0, 0, 1, 2],
            [0, 0, 0, 0]], dtype=uint32)
     >>> result[:, :, 0, 3]
-    array([[1, 1, 3, 0],
-           [0, 1, 1, 0],
-           [0, 0, 0, 2],
-           [0, 0, 0, 0]], dtype=uint32)
+    array([[2, 0, 0, 0],
+           [2, 2, 0, 0],
+           [1, 0, 3, 0],
+           [0, 0, 1, 1]], dtype=uint32)
 
     """
     assert_nD(image, 2)
@@ -109,7 +111,7 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
                  dtype=np.uint32, order='C')
 
     # count co-occurences
-    _glcm_loop(image, distances, angles, levels, P)
+    _glcm_loop(image, distances, angles, levels, P, clockwise)
 
     # make each GLMC symmetric
     if symmetric:
