@@ -4,7 +4,7 @@
 #cython: wraparound=False
 import numpy as np
 cimport numpy as cnp
-from libcpp cimport bool
+from cpython cimport bool
 from libc.math cimport sin, cos
 from .._shared.interpolation cimport bilinear_interpolation, round
 from .._shared.transform cimport integrate
@@ -43,6 +43,12 @@ def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
         Py_ssize_t a_idx, d_idx, r, c, rows, cols, row, col
         cnp.uint8_t i, j
         cnp.float64_t angle, distance
+        cnp.uint8_t _clockwise
+        
+    if clockwise:
+        _clockwise = 1
+    else:
+        _clockwise = 0
 
     with nogil:
         rows = image.shape[0]
@@ -60,7 +66,7 @@ def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
                         row = r + <int>round(sin(angle) * distance)
                         col = c + <int>round(cos(angle) * distance)
                         
-                        if (not clockwise):
+                        if _clockwise == 1:
                             row = r + <int>round(sin(-angle) * distance)
 
                         # make sure the offset is within bounds
