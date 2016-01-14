@@ -97,7 +97,7 @@ def threshold_otsu(image, nbins=256):
     Parameters
     ----------
     image : array
-        Input image.
+        Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
@@ -118,6 +118,10 @@ def threshold_otsu(image, nbins=256):
     >>> image = camera()
     >>> thresh = threshold_otsu(image)
     >>> binary = image <= thresh
+
+    Notes
+    -----
+    The input image must be Grayscale.
     """
     hist, bin_centers = histogram(image.ravel(), nbins)
     hist = hist.astype(float)
