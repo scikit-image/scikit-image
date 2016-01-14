@@ -270,11 +270,11 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
         output_shape = np.ceil((out_rows, out_cols))
 
         # fit output image in new shape
-        translation = ((cols - out_cols) / 2., (rows - out_rows) / 2.)
+        translation = -np.asarray((minc, minr))
         tform4 = SimilarityTransform(translation=translation)
         tform = tform4 + tform
 
-    return warp(image, tform, output_shape=output_shape, order=order,
+    return warp(image, tform.inverse, output_shape=output_shape, order=order,
                 mode=mode, cval=cval, clip=clip, preserve_range=preserve_range)
 
 
