@@ -90,9 +90,9 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
            [0, 0, 0, 0]], dtype=uint32)
     >>> result[:, :, 0, 3]
     array([[2, 0, 0, 0],
-           [2, 2, 0, 0],
-           [1, 0, 3, 0],
-           [0, 0, 1, 1]], dtype=uint32)
+           [1, 1, 2, 0],
+           [0, 0, 2, 1],
+           [0, 0, 0, 0]], dtype=uint32)
 
     """
     assert_nD(image, 2)

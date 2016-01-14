@@ -35,9 +35,9 @@ class TestGLCM():
                              [0, 0, 0, 0]], dtype=np.uint32)
         np.testing.assert_array_equal(result[:, :, 0, 2], expected3)        
         expected4 = np.array([[2, 0, 0, 0],
-                             [2, 2, 0, 0],
-                             [1, 0, 3, 0],
-                             [0, 0, 1, 1]], dtype=np.uint32)
+                             [1, 1, 2, 0],
+                             [0, 0, 2, 1],
+                             [0, 0, 0, 0]], dtype=np.uint32)
         np.testing.assert_array_equal(result[:, :, 0, 3], expected4)
 
     @test_parallel()
