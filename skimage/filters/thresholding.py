@@ -8,6 +8,7 @@ import numpy as np
 from scipy import ndimage as ndi
 from ..exposure import histogram
 from .._shared.utils import assert_nD
+import warnings
 
 
 def threshold_adaptive(image, block_size, method='gaussian', offset=0,
@@ -123,6 +124,11 @@ def threshold_otsu(image, nbins=256):
     -----
     The input image must be Grayscale.
     """
+    if image.shape[-1] in (3, 4):
+        msg = "threshold_otsu is expected to work correctly only for " \
+              "grayscale images; image shape {} looks like an RGB image"
+        warnings.warn(msg.format(image.shape))
+
     hist, bin_centers = histogram(image.ravel(), nbins)
     hist = hist.astype(float)
 
