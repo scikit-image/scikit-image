@@ -4,7 +4,7 @@
 #cython: wraparound=False
 import numpy as np
 cimport numpy as cnp
-from cpython cimport bool
+from libcpp cimport bool
 from libc.math cimport sin, cos
 from .._shared.interpolation cimport bilinear_interpolation, round
 from .._shared.transform cimport integrate
