@@ -122,11 +122,11 @@ def threshold_otsu(image, nbins=256):
 
     Notes
     -----
-    The input image must be Grayscale.
+    The input image must be grayscale.
     """
     if image.shape[-1] in (3, 4):
         msg = "threshold_otsu is expected to work correctly only for " \
-              "grayscale images; image shape {} looks like an RGB image"
+              "grayscale images; image shape {0} looks like an RGB image"
         warnings.warn(msg.format(image.shape))
 
     hist, bin_centers = histogram(image.ravel(), nbins)
