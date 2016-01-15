@@ -77,9 +77,9 @@ def inpaint_biharmonic(img, mask, multichannel=False):
 
     Parameters
     ----------
-    img : (M, N[, ..., P][, C]) ndarray
+    img : (M[, N[, ..., P]][, C]) ndarray
         Input image.
-    mask : (M, N[, ..., P]) ndarray
+    mask : (M[, N[, ..., P]]) ndarray
         Array of pixels to be inpainted. Have to be the same shape as one
         of the 'img' channels. Unknown pixels have to be represented with 1,
         known pixels - with 0.
@@ -89,7 +89,7 @@ def inpaint_biharmonic(img, mask, multichannel=False):
 
     Returns
     -------
-    out : (M, N[, ..., P][, C] ndarray
+    out : (M[, N[, ..., P]][, C]) ndarray
         Input image with masked pixels inpainted.
 
     Example
@@ -108,6 +108,9 @@ def inpaint_biharmonic(img, mask, multichannel=False):
             by biharmonic functions: numerical aspects",
             http://www.ima.umn.edu/~damelin/biharmonic
     """
+
+    if img.ndim < 1:
+        raise ValueError('Input array has to be at least 1D')
     
     img_baseshape = img.shape[:-1] if multichannel else img.shape
     if img_baseshape != mask.shape:
