@@ -6,12 +6,13 @@ from numpy.testing import (run_module_suite, assert_allclose,
 from skimage.restoration import inpaint
 
 
-def test_inpaint_biharmonic():
+def test_inpaint_biharmonic_2d():
     img = np.tile(np.square(np.linspace(0, 1, 5)), (5, 1))
     mask = np.zeros_like(img)
     mask[2, 2:] = 1
     mask[1, 3:] = 1
     mask[0, 4:] = 1
+    img[np.where(mask)] = 0
     out = inpaint.inpaint_biharmonic(img, mask)
     ref = np.array(
         [[0., 0.0625, 0.25000000, 0.5625000, 0.73925058],
@@ -20,6 +21,32 @@ def test_inpaint_biharmonic():
          [0., 0.0625, 0.25000000, 0.5625000, 1.00000000],
          [0., 0.0625, 0.25000000, 0.5625000, 1.00000000]]
     )
+    assert_allclose(ref, out)
+
+
+def test_inpaint_biharmonic_3d():
+    img = np.tile(np.square(np.linspace(0, 1, 5)), (5, 1))
+    img = np.dstack((img, img.T))
+    mask = np.zeros_like(img)
+    mask[2, 2:, :] = 1
+    mask[1, 3:, :] = 1
+    mask[0, 4:, :] = 1
+    img[np.where(mask)] = 0
+    out = inpaint.inpaint_biharmonic(img, mask)
+    ref = np.dstack((
+        np.array(
+            [[0.0000, 0.0625, 0.25000000, 0.56250000, 0.53752796],
+             [0.0000, 0.0625, 0.25000000, 0.44443780, 0.53762210],
+             [0.0000, 0.0625, 0.23693666, 0.46621112, 0.68615592],
+             [0.0000, 0.0625, 0.25000000, 0.56250000, 1.00000000],
+             [0.0000, 0.0625, 0.25000000, 0.56250000, 1.00000000]]),
+        np.array(
+            [[0.0000, 0.0000, 0.00000000, 0.00000000, 0.19621902],
+             [0.0625, 0.0625, 0.06250000, 0.17470756, 0.30140091],
+             [0.2500, 0.2500, 0.27241289, 0.35155440, 0.43068654],
+             [0.5625, 0.5625, 0.56250000, 0.56250000, 0.56250000],
+             [1.0000, 1.0000, 1.00000000, 1.00000000, 1.00000000]])
+    ))
     assert_allclose(ref, out)
 
 
