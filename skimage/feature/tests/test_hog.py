@@ -2,6 +2,7 @@ import os
 import numpy as np
 from scipy import ndimage as ndi
 import skimage as si
+from skimage import color
 from skimage import data
 from skimage import feature
 from skimage import img_as_float
@@ -21,8 +22,8 @@ def test_histogram_of_oriented_gradients_output_size():
 
 
 def test_histogram_of_oriented_gradients_output_correctness():
-    img = np.load(os.path.join(si.data_dir, 'lena_GRAY_U8.npy'))
-    correct_output = np.load(os.path.join(si.data_dir, 'lena_GRAY_U8_hog.npy'))
+    img = color.rgb2gray(data.astronaut())
+    correct_output = np.load(os.path.join(si.data_dir, 'astronaut_GRAY_hog.npy'))
     
     output = feature.hog(img, orientations=9, pixels_per_cell=(8, 8), 
                          cells_per_block=(3, 3), feature_vector=True,
