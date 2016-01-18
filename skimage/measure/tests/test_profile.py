@@ -104,6 +104,36 @@ def test_pythagorean_triangle_transpose_left_down_linewidth():
     assert_almost_equal(prof, expected_prof)
 
 
+a = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
+b = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
+c = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
+image3d = np.dstack((a, b, c)).astype(np.float)
+
+
+def test_3d_vertical_downward():
+    prof = profile_line(image3d, (0, 0, 0), (0, 1, 0), order=0, multichannel=False)
+    expected_prof = np.array([1, 1])
+    assert_equal(prof, expected_prof)
+
+
+def test_3d_diagonal():
+    prof = profile_line(image3d, (0, 0, 0), (2, 2, 2), order=0, multichannel=False)
+    expected_prof = np.array([1, 0, 0, 1, 1])
+    assert_equal(prof, expected_prof)
+
+
+def test_3d_diagonal_interpolated():
+    prof = profile_line(image3d, (0, 0, 0), (2, 2, 2), order=1, multichannel=False)
+    expected_prof = np.array([1, 0.75, 0, 0.75, 1])
+    assert_equal(prof, expected_prof)
+
+
+def test_3d_through_center_linewidth():
+    prof = profile_line(image3d, (1, 1, 0), (1, 1, 2), order=1, linewidth=3, multichannel=False)
+    expected_prof = np.repeat(0.850761583277, 3)
+    assert_almost_equal(prof, expected_prof)
+
+
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
     run_module_suite()
