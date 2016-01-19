@@ -85,7 +85,8 @@ pyth_image[above] = 0.6
 
 
 def test_pythagorean_triangle_right_downward_linewidth():
-    prof = profile_line(pyth_image, (1, 1), (4, 5), linewidth=3, order=0)
+    prof = profile_line(pyth_image, (1, 1), (4, 5),
+                        linewidth=3, order=0)
     expected_prof = np.ones(6)
     assert_almost_equal(prof, expected_prof)
 
@@ -104,10 +105,10 @@ def test_pythagorean_triangle_transpose_left_down_linewidth():
     assert_almost_equal(prof, expected_prof)
 
 
-a = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
-b = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
-c = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
-image3d = np.dstack((a, b, c)).astype(np.float)
+slice1 = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
+slice2 = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
+slice3 = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
+image3d = np.dstack((slice1, slice2, slice3)).astype(np.float)
 
 
 def test_3d_vertical_downward():
