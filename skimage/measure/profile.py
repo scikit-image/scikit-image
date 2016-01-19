@@ -54,27 +54,34 @@ def profile_line(img, src, dst, linewidth=1,
     standard numpy indexing.
     """
 
-    if multichannel:
-        perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
-        # Convert image to float, otherwise if the image is int, the order value in ndi.map_coordinates
-        # will not be evaluated properly
-        img = img_as_float(img)
-        if img.ndim == 3:
-            pixels = [ndi.map_coordinates(img[..., i], perp_lines, order=order,
-                                          mode=mode, cval=cval) for i in range(img.shape[2])]
-            pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
-        else:
-            pixels = ndi.map_coordinates(img, perp_lines, order=order, mode=mode, cval=cval)
-
-        intensities = pixels.mean(axis=1)
-    else:
+    if img.ndim == 4 and multichannel:
+        # 3D RGB to be implemented
+        raise NotImplementedError('3D RGB to be implemented')
+    elif img.ndim == 3 and not multichannel:
+        # 3D intensity
         perp_lines = _line_profile_coordinates3d(src, dst, linewidth=linewidth)
         # Convert 3d array to float, otherwise the order value in ndi.map_coordinates
         # will not be evaluated properly for int arrays
         img = img.astype(np.float)
         pixels = ndi.map_coordinates(img, perp_lines, order=order, mode=mode, cval=cval)
-        intensities = pixels.mean(axis=1)
+    elif img.ndim == 3 and multichannel:
+        # 2D RGB
+        perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
+        # Convert image to float, otherwise if the image is int, the order value in ndi.map_coordinates
+        # will not be evaluated properly
+        img = img_as_float(img)
+        pixels = [ndi.map_coordinates(img[..., i], perp_lines, order=order,
+                                      mode=mode, cval=cval) for i in range(img.shape[2])]
+        pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
+    elif img.ndim == 2:
+        # 2D intensity
+        perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
+        img = img_as_float(img)
+        pixels = ndi.map_coordinates(img, perp_lines, order=order, mode=mode, cval=cval)
+    else:
+        raise ValueError('Invalid arguments')
 
+    intensities = pixels.mean(axis=1)
     return intensities
 
 
@@ -194,7 +201,7 @@ def _line_profile_coordinates3d(src, dst, linewidth=1):
     perp_cols = np.array([np.linspace(col_i - col_width, col_i + col_width,
                                       linewidth) for col_i in line_col])
     perp_plane = np.array([np.linspace(slice_i - slice_width, slice_i + slice_width,
-                                        linewidth) for slice_i in line_slice])
+                                       linewidth) for slice_i in line_slice])
 
     perp_array = np.array([perp_rows, perp_cols, perp_plane])
 
@@ -251,7 +258,7 @@ def rotate_sample_points(linewidth, perp_array, src, dst):
     # loop through all the angles to get the rotated sampling points
     sampling_array = []
     for j in range(transposed_perp_array.shape[0]):  # the number of sample points per unit (i.e. linewidth)
-        for angle in rotation_angles: # the number of angles to use as rotation angles for the samping points
+        for angle in rotation_angles:  # the number of angles to use as rotation angles for the samping points
             points_array = []
             for i in range(transposed_perp_array.shape[1]):  # the number of unit points on displacement vector
                 point = transposed_perp_array[j][i]
