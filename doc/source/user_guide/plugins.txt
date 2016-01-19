@@ -49,17 +49,18 @@ Any plugin in the ``_plugins`` directory is automatically examined by
 system::
 
   >>> import skimage.io as io
-  >>> io.plugins()
+  >>> io.find_available_plugins()
   {'gtk': ['imshow'],
-   'matplotlib': ['imshow', 'imsave'],
-   'pil': ['imread'],
-   'qt': ['imshow'],
-   'test': ['imsave', 'imshow', 'imread']}
+   'matplotlib': ['imshow', 'imread', 'imread_collection'],
+   'pil': ['imread', 'imsave', 'imread_collection'],
+   'qt': ['imshow', 'imsave', 'imread', 'imread_collection'],
+   'test': ['imsave', 'imshow', 'imread', 'imread_collection'],}
 
 or only those already loaded::
 
-  >>> io.plugins(loaded=True)
-  {'pil': ['imread']}
+  >>> io.find_available_plugins(loaded=True)
+  {'matplotlib': ['imshow', 'imread', 'imread_collection'],
+   'pil': ['imread', 'imsave', 'imread_collection']}
 
 A plugin is loaded using the ``use_plugin`` command::
 
@@ -78,7 +79,7 @@ last plugin loaded is used.
 To query a plugin's capabilities, use ``plugin_info``::
 
   >>> io.plugin_info('pil')
-  >>> 
+  >>>
   {'description': 'Image reading via the Python Imaging Library',
-   'provides': 'imread'}
+   'provides': 'imread, imsave'}
 
