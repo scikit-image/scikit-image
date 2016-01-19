@@ -252,16 +252,12 @@ def rotate_sample_points(linewidth, perp_array, src, dst):
     # Remove last element, the 180 degree rotation, from the list
     rotation_angles = np.delete(rotation_angles, len(rotation_angles) - 1)
 
-    # The perp_array is transposed to get sampling points in the form of transposed_perp_array[j][i]
-    transposed_perp_array = perp_array.T
-
     # loop through all the angles to get the rotated sampling points
     sampling_array = []
-    for j in range(transposed_perp_array.shape[0]):  # the number of sample points per unit (i.e. linewidth)
+    for perp_points in perp_array.T: # the number of sample points per unit (i.e. linewidth)
         for angle in rotation_angles:  # the number of angles to use as rotation angles for the samping points
             points_array = []
-            for i in range(transposed_perp_array.shape[1]):  # the number of unit points on displacement vector
-                point = transposed_perp_array[j][i]
+            for point in perp_points: # the number of unit points on displacement vector
                 if angle == 0:
                     points_array.append(point)
                 else:
