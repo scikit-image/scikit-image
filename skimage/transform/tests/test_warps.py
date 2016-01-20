@@ -132,6 +132,20 @@ def test_rotate_center():
     assert_almost_equal(x0, x)
 
 
+def test_rotate_resize_center():
+    x = np.zeros((10, 10), dtype=np.double)
+    x[0, 0] = 1
+
+    ref_x45 = np.zeros((14, 14), dtype=np.double)
+    ref_x45[6, 0] = 1
+    ref_x45[7, 0] = 1
+
+    x45 = rotate(x, 45, resize=True, center=(3, 3), order=0)
+    # new dimension should be d = sqrt(2 * (10/2)^2)
+    assert x45.shape == (14, 14)
+    assert_equal(x45, ref_x45)
+
+
 def test_rescale():
     # same scale factor
     x = np.zeros((5, 5), dtype=np.double)
