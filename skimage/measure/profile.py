@@ -53,6 +53,9 @@ def profile_line(img, src, dst, linewidth=1,
     The destination point is included in the profile, in contrast to
     standard numpy indexing.
     """
+    # Convert array to float, otherwise the order value in ndi.map_coordinates
+    # will not be evaluated properly for int arrays
+    img = img_as_float(img)
 
     if img.ndim == 4 and multichannel:
         # 3D RGB to be implemented
@@ -60,23 +63,16 @@ def profile_line(img, src, dst, linewidth=1,
     elif img.ndim == 3 and not multichannel:
         # 3D intensity
         perp_lines = _line_profile_coordinates3d(src, dst, linewidth=linewidth)
-        # Convert 3d array to float, otherwise the order value in ndi.map_coordinates
-        # will not be evaluated properly for int arrays
-        img = img.astype(np.float)
         pixels = ndi.map_coordinates(img, perp_lines, order=order, mode=mode, cval=cval)
     elif img.ndim == 3 and multichannel:
         # 2D RGB
         perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
-        # Convert image to float, otherwise if the image is int, the order value in ndi.map_coordinates
-        # will not be evaluated properly
-        img = img_as_float(img)
         pixels = [ndi.map_coordinates(img[..., i], perp_lines, order=order,
                                       mode=mode, cval=cval) for i in range(img.shape[2])]
         pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
     elif img.ndim == 2:
         # 2D intensity
         perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
-        img = img_as_float(img)
         pixels = ndi.map_coordinates(img, perp_lines, order=order, mode=mode, cval=cval)
     else:
         raise ValueError('Invalid arguments')

@@ -3,7 +3,7 @@ import numpy as np
 
 from skimage.measure import profile_line
 
-image = np.arange(100).reshape((10, 10)).astype(np.float)
+image = np.arange(100, dtype=np.float).reshape((10, 10))
 
 def test_horizontal_rightward():
     prof = profile_line(image, (0, 2), (0, 8), order=0)
@@ -105,10 +105,10 @@ def test_pythagorean_triangle_transpose_left_down_linewidth():
     assert_almost_equal(prof, expected_prof)
 
 
-slice1 = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
-slice2 = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
-slice3 = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
-image3d = np.dstack((slice1, slice2, slice3)).astype(np.float)
+slice1 = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype=np.float)
+slice2 = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype=np.float)
+slice3 = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype=np.float)
+image3d = np.dstack((slice1, slice2, slice3))
 
 
 def test_3d_vertical_downward():
