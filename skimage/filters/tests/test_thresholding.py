@@ -3,6 +3,7 @@ from numpy.testing import assert_equal, assert_almost_equal
 
 import skimage
 from skimage import data
+from skimage._shared._warnings import expected_warnings
 from skimage.filters.thresholding import (threshold_adaptive,
                                           threshold_otsu,
                                           threshold_li,
@@ -158,11 +159,13 @@ def test_otsu_coins_image_as_float():
 
 def test_otsu_lena_image():
     img = skimage.img_as_ubyte(data.lena())
-    assert 140 < threshold_otsu(img) < 142
+    with expected_warnings(['grayscale']):
+        assert 140 < threshold_otsu(img) < 142
 
 def test_otsu_astro_image():
     img = skimage.img_as_ubyte(data.astronaut())
-    assert 109 < threshold_otsu(img) < 111
+    with expected_warnings(['grayscale']):
+        assert 109 < threshold_otsu(img) < 111
 
 def test_li_camera_image():
     camera = skimage.img_as_ubyte(data.camera())

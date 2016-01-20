@@ -10,6 +10,7 @@ import os as _os
 
 from .. import data_dir
 from ..io import imread, use_plugin
+from .._shared.utils import deprecated
 from ._binary_blobs import binary_blobs
 
 __all__ = ['load',
@@ -56,6 +57,7 @@ def camera():
     return load("camera.png")
 
 
+@deprecated('skimage.data.astronaut')
 def lena():
     """Colour "Lena" image.
 
