@@ -53,10 +53,6 @@ def profile_line(img, src, dst, linewidth=1,
     The destination point is included in the profile, in contrast to
     standard numpy indexing.
     """
-    # Convert array to float, otherwise the order value in ndi.map_coordinates
-    # will not be evaluated properly for int arrays
-    img = img_as_float(img)
-
     if img.ndim == 4 and multichannel:
         # 3D RGB to be implemented
         raise NotImplementedError('3D RGB to be implemented')
