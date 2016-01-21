@@ -340,11 +340,22 @@ def test_corner_orientations_even_shape_error():
 
 
 @test_parallel()
-def test_corner_orientations_lena():
-    img = rgb2gray(data.lena())
+def test_corner_orientations_astronaut():
+    img = rgb2gray(data.astronaut())
     corners = corner_peaks(corner_fast(img, 11, 0.35))
-    expected = np.array([-1.9195897 , -3.03159624, -1.05991162, -2.89573739,
-                         -2.61607644, 2.98660159])
+    expected = np.array([-1.75220190e+00,  2.01197383e+00, -2.01162417e+00,
+                         -1.88247204e-01,  1.19134149e+00, -6.61151410e-01,
+                         -2.99143370e+00,  2.17103132e+00, -7.52950306e-04,
+                          1.25854853e+00,  2.43573659e+00, -1.69230287e+00,
+                         -9.88548213e-01,  1.47154532e+00, -1.65449964e+00,
+                          1.09650167e+00,  1.07812134e+00, -1.68885773e+00,
+                         -1.64397304e+00,  3.09780364e+00, -3.49561988e-01,
+                         -1.46554357e+00, -2.81524886e+00,  8.12701702e-01,
+                          2.47305654e+00, -1.63869275e+00,  5.46905279e-02,
+                         -4.40598471e-01,  3.14918803e-01, -1.76069982e+00,
+                          3.05330950e+00,  2.39291733e+00, -1.22091334e-01,
+                         -3.09279990e-01,  1.45931342e+00])
+
     actual = corner_orientations(img, corners, octagon(3, 2))
     assert_almost_equal(actual, expected)
 
