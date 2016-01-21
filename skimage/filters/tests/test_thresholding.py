@@ -157,11 +157,6 @@ def test_otsu_coins_image_as_float():
     assert 0.41 < threshold_otsu(coins) < 0.42
 
 
-def test_otsu_lena_image():
-    img = skimage.img_as_ubyte(data.lena())
-    with expected_warnings(['grayscale']):
-        assert 140 < threshold_otsu(img) < 142
-
 def test_otsu_astro_image():
     img = skimage.img_as_ubyte(data.astronaut())
     with expected_warnings(['grayscale']):
