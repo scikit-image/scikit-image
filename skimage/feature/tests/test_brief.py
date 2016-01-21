@@ -16,7 +16,7 @@ def test_color_image_unsupported_error():
 
 def test_normal_mode():
     """Verify the computed BRIEF descriptors with expected for normal mode."""
-    img = rgb2gray(data.lena())
+    img = data.coins()
 
     keypoints = corner_peaks(corner_harris(img), min_distance=5)
 
@@ -24,21 +24,21 @@ def test_normal_mode():
 
     extractor.extract(img, keypoints[:8])
 
-    expected = np.array([[ True, False,  True, False,  True,  True, False, False],
+    expected = np.array([[False,  True, False, False,  True, False,  True, False],
+                         [ True, False,  True,  True, False,  True, False, False],
+                         [ True, False, False,  True, False,  True, False,  True],
+                         [ True,  True,  True,  True, False,  True, False,  True],
+                         [ True,  True,  True, False, False,  True,  True,  True],
                          [False, False, False, False,  True, False, False, False],
-                         [ True,  True,  True,  True,  True,  True,  True,  True],
-                         [ True, False,  True,  True, False,  True, False,  True],
-                         [False,  True,  True,  True,  True,  True,  True,  True],
-                         [ True, False, False, False, False,  True, False,  True],
-                         [False,  True,  True,  True, False, False,  True, False],
-                         [False, False, False, False,  True, False, False, False]], dtype=bool)
+                         [False,  True, False, False,  True, False,  True, False],
+                         [False, False, False, False, False, False, False, False]], dtype=bool)
 
     assert_array_equal(extractor.descriptors, expected)
 
 
 def test_uniform_mode():
     """Verify the computed BRIEF descriptors with expected for uniform mode."""
-    img = rgb2gray(data.lena())
+    img = data.coins()
 
     keypoints = corner_peaks(corner_harris(img), min_distance=5)
 
@@ -46,14 +46,14 @@ def test_uniform_mode():
 
     extractor.extract(img, keypoints[:8])
 
-    expected = np.array([[ True, False,  True, False, False,  True, False, False],
-                         [False,  True, False, False,  True,  True,  True,  True],
-                         [ True, False, False, False, False, False, False, False],
-                         [False,  True,  True, False, False, False,  True, False],
-                         [False, False, False, False, False, False,  True, False],
-                         [False,  True, False, False,  True, False, False, False],
-                         [False, False,  True,  True, False, False,  True,  True],
-                         [ True,  True, False, False, False, False, False, False]], dtype=bool)
+    expected = np.array([[False, False, False,  True,  True,  True, False, False],
+                         [ True,  True,  True, False,  True, False, False,  True],
+                         [ True,  True,  True, False,  True,  True, False,  True],
+                         [ True,  True,  True,  True, False,  True, False,  True],
+                         [ True,  True,  True,  True,  True,  True, False, False],
+                         [ True,  True,  True,  True,  True,  True,  True,  True],
+                         [False, False, False,  True,  True,  True,  True,  True],
+                         [False,  True, False,  True, False,  True,  True,  True]], dtype=bool)
 
     assert_array_equal(extractor.descriptors, expected)
 
