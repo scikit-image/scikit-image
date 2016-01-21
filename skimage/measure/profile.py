@@ -186,14 +186,14 @@ def _line_profile_coordinates3d(src, dst, linewidth=1):
 
     line_col = np.linspace(src_col, dst_col, length)
     line_row = np.linspace(src_row, dst_row, length)
-    line_slice = np.linspace(src_dim3, dst_dim3, length)
+    line_plane = np.linspace(src_dim3, dst_dim3, length)
 
     perp_rows = np.array([np.linspace(row_i - row_width, row_i + row_width,
                                       linewidth) for row_i in line_row])
     perp_cols = np.array([np.linspace(col_i - col_width, col_i + col_width,
                                       linewidth) for col_i in line_col])
     perp_plane = np.array([np.linspace(slice_i - slice_width, slice_i + slice_width,
-                                       linewidth) for slice_i in line_slice])
+                                       linewidth) for slice_i in line_plane])
 
     perp_array = np.array([perp_rows, perp_cols, perp_plane])
 
