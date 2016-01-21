@@ -246,10 +246,10 @@ def rotate_sample_points(linewidth, perp_array, src, dst):
 
     # loop through all the angles to get the rotated sampling points
     sampling_array = []
-    for perp_points in perp_array.T: # the number of sample points per unit (i.e. linewidth)
+    for perp_points in perp_array.T:  # the number of sample points per unit (i.e. linewidth)
         for angle in rotation_angles:  # the number of angles to use as rotation angles for the samping points
             points_array = []
-            for point in perp_points: # the number of unit points on displacement vector
+            for point in perp_points:  # the number of unit points on displacement vector
                 if angle == 0:
                     points_array.append(point)
                 else:
@@ -257,7 +257,7 @@ def rotate_sample_points(linewidth, perp_array, src, dst):
                     # and ignore, since it has already been added for rotation = 0
                     if _distance_point_line_3d(point, src, dst) == 0:
                         continue
-                    rotated_point = np.array(_rotate_point_around_line(point, src, unit_direction_vector, angle))
+                    rotated_point = _rotate_point_around_line(point, src, unit_direction_vector, angle)
                     points_array.append(rotated_point)
             # Prevent empty arrays from being added, when a center point is detected for example
             if len(points_array) > 0:
@@ -306,7 +306,7 @@ def _rotate_point_around_line(point_to_rotate, point_on_line, unit_direction_vec
         A point where the line is passing through
     unit_direction_vector : 3-tuple of numeric scalar (float or int)
         The unit direction vector of the line
-    unit_direction_vector : float or int
+    angle_in_radians : float or int
         The angle of rotation in radians
 
     Returns
@@ -316,28 +316,20 @@ def _rotate_point_around_line(point_to_rotate, point_on_line, unit_direction_vec
 
     """
 
-    a = point_on_line[0]
-    b = point_on_line[1]
-    c = point_on_line[2]
+    a, b, c = point_on_line
+    x, y, z = point_to_rotate
+    u, v, w = unit_direction_vector
 
-    x = point_to_rotate[0]
-    y = point_to_rotate[1]
-    z = point_to_rotate[2]
-
-    u = unit_direction_vector[0]
-    v = unit_direction_vector[1]
-    w = unit_direction_vector[2]
-
-    p1 = (a * (v ** 2 + w ** 2) - u * (b * v + c * w - u * x - v * y - w * z)) * (
-        1 - np.cos(angle_in_radians)) + x * np.cos(
-            angle_in_radians) + (-c * v + b * w - w * y + v * z) * np.sin(angle_in_radians)
+    p1 = (a * (v ** 2 + w ** 2) - u * (b * v + c * w - u * x - v * y - w * z)) * \
+        (1 - np.cos(angle_in_radians)) + x * np.cos(angle_in_radians) \
+        + (-c * v + b * w - w * y + v * z) * np.sin(angle_in_radians)
 
     p2 = (b * (u ** 2 + w ** 2) - v * (a * u + c * w - u * x - v * y - w * z)) * (
-        1 - np.cos(angle_in_radians)) + y * np.cos(
-            angle_in_radians) + (-c * u - a * w + w * x - u * z) * np.sin(angle_in_radians)
+        1 - np.cos(angle_in_radians)) + y * np.cos(angle_in_radians) \
+        + (-c * u - a * w + w * x - u * z) * np.sin(angle_in_radians)
 
     p3 = (c * (u ** 2 + v ** 2) - w * (a * u + b * v - u * x - v * y - w * z)) * (
-        1 - np.cos(angle_in_radians)) + z * np.cos(
-            angle_in_radians) + (-b * u + a * v - v * x + u * y) * np.sin(angle_in_radians)
+        1 - np.cos(angle_in_radians)) + z * np.cos(angle_in_radians) \
+        + (-b * u + a * v - v * x + u * y) * np.sin(angle_in_radians)
 
-    return [p1, p2, p3]
+    return np.array([p1, p2, p3])
