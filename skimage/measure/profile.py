@@ -10,8 +10,8 @@ def profile_line(img, src, dst, linewidth=1,
     Parameters
     ----------
     img : numeric array, shape (M, N[, C])
-        The image, either grayscale (2D array) or multichannel
-        (3D array, where the final axis contains the channel
+        The image, either grayscale (2D array or 3d array) or multichannel
+        (3D array, for a RBG 2d image where the final axis contains the channel
         information).
     src : 2-tuple of numeric scalar (float or int)
         The start point of the scan line.
@@ -140,9 +140,10 @@ def _line_profile_coordinates3d(src, dst, linewidth=1):
 
     Returns
     -------
-    coords : array, shape (3, N, C), float
+    perp_array : array, shape (3, M, N), float
         The coordinates of the profile along the scan line. The length of the
-        profile is the ceil of the computed length of the scan line.
+        profile, M, is the ceil of the computed length of the scan line.
+        The line width, N, is the number of sample points taken at each unit of the scan line.
 
     Notes
     -----
@@ -213,7 +214,7 @@ def rotate_sample_points(linewidth, perp_array, src, dst):
         Width of the scan, perpendicular to the line,
         since the line is 3d, this value is the diameter
         of a 3d cylinder following the scan line.
-    perp_array, shape (3, N, C), float
+    perp_array, shape (3, M, N), float
         The coordinates of the profile along the scan line. The length of the
         profile is the ceil of the computed length of the scan line.
         The coordinates are 180 degrees apart.
@@ -224,7 +225,7 @@ def rotate_sample_points(linewidth, perp_array, src, dst):
 
     Returns
     -------
-    sampling_array : array, shape (3, N, C), float
+    sampling_array : array, shape (3, M, N), float
         The coordinates of the 3d sample points along the scan line. The length of the
         profile is the ceil of the computed length of the scan line.
 
@@ -311,7 +312,7 @@ def _rotate_point_around_line(point_to_rotate, point_on_line, unit_direction_vec
 
     Returns
     -------
-    point : array, shape (3), float
+    return_value : array, shape (3), float
         The coordinates of the rotated point around the line
 
     """
