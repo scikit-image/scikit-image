@@ -71,7 +71,7 @@ def profile_line(img, src, dst, linewidth=1,
         perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
         pixels = ndi.map_coordinates(img, perp_lines, order=order, mode=mode, cval=cval)
     else:
-        raise ValueError('Invalid arguments')
+        raise ValueError('profile_line is not implemented for images of dimension {0}'.format(img.shape))
 
     intensities = pixels.mean(axis=1)
     return intensities
