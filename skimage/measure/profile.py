@@ -189,12 +189,17 @@ def _line_profile_coordinates3d(src, dst, linewidth=1):
     line_row = np.linspace(src_row, dst_row, length)
     line_plane = np.linspace(src_dim3, dst_dim3, length)
 
+    # find divisor to get only first half of array and center point if odd
+    first_half_index = np.int(np.ceil(np.float(linewidth)/2))
+    if first_half_index < 1:
+        first_half_index = 1
+
     perp_rows = np.array([np.linspace(row_i - row_width, row_i + row_width,
-                                      linewidth) for row_i in line_row])
+                                      linewidth)[:first_half_index] for row_i in line_row])
     perp_cols = np.array([np.linspace(col_i - col_width, col_i + col_width,
-                                      linewidth) for col_i in line_col])
+                                      linewidth)[:first_half_index] for col_i in line_col])
     perp_plane = np.array([np.linspace(slice_i - slice_width, slice_i + slice_width,
-                                       linewidth) for slice_i in line_plane])
+                                       linewidth)[:first_half_index] for slice_i in line_plane])
 
     perp_array = np.array([perp_rows, perp_cols, perp_plane])
 
@@ -230,39 +235,30 @@ def rotate_sample_points(linewidth, perp_array, src, dst):
         profile is the ceil of the computed length of the scan line.
 
     """
-
     d_row, d_col, d_plane = dst - src
     length = np.ceil(np.linalg.norm([d_row, d_col, d_plane]) + 1)
     unit_direction_vector = [d_row / (length - 1), d_col / (length - 1), d_plane / (length - 1)]
 
-    # Rotate the points around the axis a number of times depending on the linewidth
-    # to simulate sampling of points around the axis
-    # Example, for a linewidth of 2 only one rotation of 90 degrees for is necessary to get the sampling points
-    # For a linewidth of 3 only one rotation of 45 - 90 and 135 degrees are necessary to get the sampling points
-    # The center point is not be rotated as it is unnecessary
-
-    rotation_angles = np.linspace(0, constants.pi, (linewidth * 2) - 1)  #
-    # Remove last element, the 180 degree rotation, from the list
-    rotation_angles = np.delete(rotation_angles, len(rotation_angles) - 1)
-
-    # loop through all the angles to get the rotated sampling points
+    # Rotate the points around the axis a number of times depending on the distance of the point
+    # from the direction axis to simulate sampling of points around the axis
     sampling_array = []
-    for perp_points in perp_array.T:  # the number of sample points per unit (i.e. linewidth)
+    for perp_points in perp_array.T:
+        distance_point_line = _distance_point_line_3d(perp_points[0], src, dst)
+        if distance_point_line == 0:
+            rotation_angles = np.array([0])
+        else:
+            rotation_angles = np.linspace(0, 2 * constants.pi, 2 * distance_point_line + 3)
+            rotation_angles = np.delete(rotation_angles, len(rotation_angles) - 1)
         for angle in rotation_angles:  # the number of angles to use as rotation angles for the samping points
             points_array = []
             for point in perp_points:  # the number of unit points on displacement vector
                 if angle == 0:
                     points_array.append(point)
                 else:
-                    # Check to see if point is on axis (i.e. when linewidth is odd)
-                    # and ignore, since it has already been added for rotation = 0
-                    if _distance_point_line_3d(point, src, dst) == 0:
-                        continue
                     rotated_point = _rotate_point_around_line(point, src, unit_direction_vector, angle)
                     points_array.append(rotated_point)
-            # Prevent empty arrays from being added, when a center point is detected for example
-            if len(points_array) > 0:
-                sampling_array.append(points_array)
+
+            sampling_array.append(points_array)
 
     # Return transposed array for ndi.map_coordinates
     return np.array(sampling_array, dtype=float).T

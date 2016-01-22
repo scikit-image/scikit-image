@@ -131,16 +131,10 @@ def test_3d_diagonal_interpolated():
     assert_equal(prof, expected_prof)
 
 
-def test_3d_through_center_linewidth_2():
-    prof = profile_line(image3d, (3, 3, 0), (3, 3, 2), order=1, linewidth=2, multichannel=False)
-    expected_prof = np.repeat(0.850761583277, 3)
-    assert_almost_equal(prof, expected_prof)
-
-
 def test_3d_through_center_linewidth_3():
     prof = profile_line(image3d, (3, 3, 0), (3, 3, 2), order=1, linewidth=3, multichannel=False)
-    expected_prof = np.repeat(0.850761583277, 3)
-    assert_almost_equal(prof, expected_prof)
+    expected_prof = np.repeat(0, 3)
+    assert_equal(prof, expected_prof)
 
 
 def test_3d_through_center_linewidth_5():
