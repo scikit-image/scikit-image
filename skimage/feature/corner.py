@@ -136,7 +136,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
     --------
     >>> from skimage.feature import hessian_matrix
     >>> square = np.zeros((5, 5))
-    >>> square[2, 2] = 1
+    >>> square[2, 2] = -1.0 / 1591.54943092
     >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
     >>> Hxx
     array([[ 0.,  0.,  0.,  0.,  0.],
@@ -280,7 +280,7 @@ def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
     --------
     >>> from skimage.feature import hessian_matrix, hessian_matrix_eigvals
     >>> square = np.zeros((5, 5))
-    >>> square[2, 2] = 1
+    >>> square[2, 2] = -1 / 1591.54943092
     >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
     >>> hessian_matrix_eigvals(Hxx, Hxy, Hyy)[0]
     array([[ 0.,  0.,  0.,  0.,  0.],
