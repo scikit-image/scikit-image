@@ -105,10 +105,12 @@ def test_pythagorean_triangle_transpose_left_down_linewidth():
     assert_almost_equal(prof, expected_prof)
 
 
-slice1 = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype=np.float)
-slice2 = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype=np.float)
-slice3 = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype=np.float)
-image3d = np.dstack((slice1, slice2, slice3))
+plane1 = np.array([[1, 1, 1, 1, 1], [1, 1, 0, 1, 1], [1, 1, 1, 1, 1]], dtype=np.float)
+plane2 = np.array([[1, 1, 1, 1, 1], [1, 1, 0, 1, 1], [1, 1, 1, 1, 1]], dtype=np.float)
+plane3 = np.array([[1, 1, 1, 1, 1], [1, 1, 0, 1, 1], [1, 1, 1, 1, 1]], dtype=np.float)
+plane4 = np.array([[1, 1, 1, 1, 1], [1, 1, 0, 1, 1], [1, 1, 1, 1, 1]], dtype=np.float)
+plane5 = np.array([[1, 1, 1, 1, 1], [1, 1, 0, 1, 1], [1, 1, 1, 1, 1]], dtype=np.float)
+image3d = np.dstack((plane1, plane2, plane3, plane4, plane5))
 
 
 def test_3d_vertical_downward():
@@ -129,9 +131,21 @@ def test_3d_diagonal_interpolated():
     assert_equal(prof, expected_prof)
 
 
-def test_3d_through_center_linewidth():
-    prof = profile_line(image3d, (1, 1, 0), (1, 1, 2), order=1, linewidth=3, multichannel=False)
+def test_3d_through_center_linewidth_2():
+    prof = profile_line(image3d, (3, 3, 0), (3, 3, 2), order=1, linewidth=2, multichannel=False)
     expected_prof = np.repeat(0.850761583277, 3)
+    assert_almost_equal(prof, expected_prof)
+
+
+def test_3d_through_center_linewidth_3():
+    prof = profile_line(image3d, (3, 3, 0), (3, 3, 2), order=1, linewidth=3, multichannel=False)
+    expected_prof = np.repeat(0.850761583277, 3)
+    assert_almost_equal(prof, expected_prof)
+
+
+def test_3d_through_center_linewidth_5():
+    prof = profile_line(image3d, (3, 3, 0), (3, 3, 2), order=1, linewidth=5, multichannel=False)
+    expected_prof = np.repeat(0.159759937535, 3)
     assert_almost_equal(prof, expected_prof)
 
 
