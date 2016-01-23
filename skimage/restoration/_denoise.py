@@ -178,7 +178,7 @@ def _denoise_tv_chambolle_nd(im, weight=0.1, eps=2.e-4, n_iter_max=200):
             g[slices_g] = np.diff(out, axis=ax)
             slices_g[ax+1] = slice(None)
 
-        norm = np.sqrt((g ** 2).sum(0))[np.newaxis, ...]
+        norm = np.sqrt((g ** 2).sum(axis=0))[np.newaxis, ...]
         E += weight * norm.sum()
         tau = 1. / (2.*ndim)
         norm *= tau / weight
