@@ -15,7 +15,7 @@ bw_lena = lena > 100
 
 class TestMorphology():
 
-    def morph_worker(self, img, fn, morph_func, strel_func):
+    def morph_worker(self, fn, morph_func, strel_func):
         matlab_results = np.load(os.path.join(data_dir, fn))
         k = 0
         for arrname in sorted(matlab_results):
@@ -26,43 +26,43 @@ class TestMorphology():
             k = k + 1
 
     def test_erode_diamond(self):
-        self.morph_worker(lena, "diamond-erode-matlab-output.npz",
+        self.morph_worker("diamond-erode-matlab-output.npz",
                           grey.erosion, selem.diamond)
 
     def test_dilate_diamond(self):
-        self.morph_worker(lena, "diamond-dilate-matlab-output.npz",
+        self.morph_worker("diamond-dilate-matlab-output.npz",
                           grey.dilation, selem.diamond)
 
     def test_open_diamond(self):
-        self.morph_worker(lena, "diamond-open-matlab-output.npz",
+        self.morph_worker("diamond-open-matlab-output.npz",
                           grey.opening, selem.diamond)
 
     def test_close_diamond(self):
-        self.morph_worker(lena, "diamond-close-matlab-output.npz",
+        self.morph_worker("diamond-close-matlab-output.npz",
                           grey.closing, selem.diamond)
 
     def test_tophat_diamond(self):
-        self.morph_worker(lena, "diamond-tophat-matlab-output.npz",
+        self.morph_worker("diamond-tophat-matlab-output.npz",
                           grey.white_tophat, selem.diamond)
 
     def test_bothat_diamond(self):
-        self.morph_worker(lena, "diamond-bothat-matlab-output.npz",
+        self.morph_worker("diamond-bothat-matlab-output.npz",
                           grey.black_tophat, selem.diamond)
 
     def test_erode_disk(self):
-        self.morph_worker(lena, "disk-erode-matlab-output.npz",
+        self.morph_worker("disk-erode-matlab-output.npz",
                           grey.erosion, selem.disk)
 
     def test_dilate_disk(self):
-        self.morph_worker(lena, "disk-dilate-matlab-output.npz",
+        self.morph_worker("disk-dilate-matlab-output.npz",
                           grey.dilation, selem.disk)
 
     def test_open_disk(self):
-        self.morph_worker(lena, "disk-open-matlab-output.npz",
+        self.morph_worker("disk-open-matlab-output.npz",
                           grey.opening, selem.disk)
 
     def test_close_disk(self):
-        self.morph_worker(lena, "disk-close-matlab-output.npz",
+        self.morph_worker("disk-close-matlab-output.npz",
                           grey.closing, selem.disk)
 
 
