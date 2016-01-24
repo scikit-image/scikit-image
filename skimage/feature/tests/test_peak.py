@@ -310,6 +310,19 @@ def test_4D():
                  [[5, 5, 5, 5], [15, 15, 15, 15]])
 
 
+def test_threshold_rel_default():
+    image = np.ones((5, 5))
+
+    image[2, 2] = 1
+    assert len(peak.peak_local_max(image)) == 0
+
+    image[2, 2] = 2
+    assert_equal(peak.peak_local_max(image), [[2, 2]])
+
+    image[2, 2] = 0
+    assert len(peak.peak_local_max(image, min_distance=0)) == image.size - 1
+
+
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()
