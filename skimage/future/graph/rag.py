@@ -143,6 +143,13 @@ class RAG(nx.Graph):
 
         if label_image is not None:
             fp = ndi.generate_binary_structure(label_image.ndim, connectivity)
+            # In the next ``ndi.generic_filter`` function, the kwarg
+            # ``output`` is used to provide a strided array with a single
+            # 64-bit floating point number, to which the function repeatedly
+            # writes. This is done because even if we don't care about the
+            # output, without this, a float array of the same shape as the
+            # input image will be created and that could be expensive in
+            # memory consumption.
             ndi.generic_filter(
                 label_image,
                 function=_add_edge_filter,
