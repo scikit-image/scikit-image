@@ -365,7 +365,8 @@ def test_corner_orientations_even_shape_error():
 @test_parallel()
 def test_corner_orientations_astronaut():
     img = rgb2gray(data.astronaut())
-    corners = corner_peaks(corner_fast(img, 11, 0.35))
+    corners = corner_peaks(corner_fast(img, 11, 0.35),
+                           min_distance=10, threshold_abs=0, threshold_rel=0.1)
     expected = np.array([-1.75220190e+00,  2.01197383e+00, -2.01162417e+00,
                          -1.88247204e-01,  1.19134149e+00, -6.61151410e-01,
                          -2.99143370e+00,  2.17103132e+00, -7.52950306e-04,
