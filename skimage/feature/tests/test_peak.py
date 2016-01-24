@@ -272,10 +272,11 @@ def test_disk():
     result = peak.peak_local_max(image, labels=np.ones((10, 20)),
                                  footprint=footprint,
                                  min_distance=1, threshold_rel=0,
-                                 indices=False, exclude_border=False)
-    assert np.all(result)
-    result = peak.peak_local_max(image, footprint=footprint, indices=False,
+                                 threshold_abs=-1, indices=False,
                                  exclude_border=False)
+    assert np.all(result)
+    result = peak.peak_local_max(image, footprint=footprint, threshold_abs=-1,
+                                 indices=False, exclude_border=False)
     assert np.all(result)
 
 
@@ -307,13 +308,6 @@ def test_4D():
                  [[5, 5, 5, 5], [15, 15, 15, 15]])
     assert_equal(peak.peak_local_max(image, min_distance=5, threshold_rel=0),
                  [[5, 5, 5, 5], [15, 15, 15, 15]])
-
-
-def test_invalid_min_distance():
-    assert_raises(ValueError, peak.peak_local_max, np.zeros((10, 10)),
-                  min_distance=0)
-    assert_raises(ValueError, peak.peak_local_max, np.zeros((10, 10)),
-                  min_distance=-1)
 
 
 if __name__ == '__main__':

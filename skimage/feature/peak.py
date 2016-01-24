@@ -3,7 +3,7 @@ import scipy.ndimage as ndi
 from ..filters import rank_order
 
 
-def peak_local_max(image, min_distance=1, threshold_abs=0,
+def peak_local_max(image, min_distance=1, threshold_abs=None,
                    threshold_rel=None, exclude_border=True, indices=True,
                    num_peaks=np.inf, footprint=None, labels=None):
     """Find peaks in an image as coordinate list or boolean mask.
@@ -28,7 +28,8 @@ def peak_local_max(image, min_distance=1, threshold_abs=0,
         a border `min_distance` from the image boundary.
         To find the maximum number of peaks, use `min_distance=1`.
     threshold_abs : float, optional
-        Minimum intensity of peaks.
+        Minimum intensity of peaks. By default, the absolute threshold is
+        the minimum intensity of the image.
     threshold_rel : float, optional
         Minimum intensity of peaks, calculated as `max(image) * threshold_rel`.
     exclude_border : bool, optional
@@ -93,9 +94,6 @@ def peak_local_max(image, min_distance=1, threshold_abs=0,
 
     """
 
-    if min_distance < 1:
-        raise ValueError("`min_disance` must greater than 0")
-
     out = np.zeros_like(image, dtype=np.bool)
 
     # In the case of labels, recursively build and return an output
@@ -150,8 +148,9 @@ def peak_local_max(image, min_distance=1, threshold_abs=0,
 
     # find top peak candidates above a threshold
     thresholds = []
-    if threshold_abs is not None:
-        thresholds.append(threshold_abs)
+    if threshold_abs is None:
+        threshold_abs = image.min()
+    thresholds.append(threshold_abs)
     if threshold_rel is not None:
         thresholds.append(threshold_rel * image.max())
     if thresholds:
