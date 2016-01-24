@@ -34,8 +34,8 @@ def test_NRMSE():
     x = np.ones(4)
     y = np.asarray([0., 2., 2., 2.])
     assert_equal(nrmse(y, x, 'mean'), 1/np.mean(y))
-    assert_equal(nrmse(y, x, 'Euclidean'), 0.5)
-    assert_equal(nrmse(y, x, 'min-max'), 0.5)
+    assert_equal(nrmse(y, x, 'Euclidean'), 1/np.sqrt(3))
+    assert_equal(nrmse(y, x, 'min-max'), 1/(y.max()-y.min()))
 
     assert_equal(nrmse(x, x), 0)
 
