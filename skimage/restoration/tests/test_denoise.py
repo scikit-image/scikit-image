@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import run_module_suite, assert_raises, assert_equal
 
-from skimage import restoration, data, color, img_as_float
+from skimage import restoration, data, color, img_as_float, measure
 
 
 np.random.seed(1234)
@@ -92,6 +92,24 @@ def test_denoise_tv_chambolle_4d():
     res = restoration.denoise_tv_chambolle(im.astype(np.uint8), weight=0.1)
     assert res.dtype == np.float
     assert res.std() * 255 < im.std()
+
+
+def test_denoise_tv_chambolle_weighting():
+    # make sure a specified weight gives consistent results regardless of
+    # the number of input image dimensions
+    rstate = np.random.RandomState(1234)
+    img2d = astro_gray.copy()
+    img2d += 0.15 * rstate.standard_normal(img2d.shape)
+    img2d = np.clip(img2d, 0, 1)
+
+    # generate 4D image by tiling
+    img4d = np.tile(img2d[..., None, None], (1, 1, 2, 2))
+
+    w = 0.2
+    denoised_2d = restoration.denoise_tv_chambolle(img2d, weight=w)
+    denoised_4d = restoration.denoise_tv_chambolle(img4d, weight=w)
+    assert measure.structural_similarity(denoised_2d,
+                                         denoised_4d[:, :, 0, 0]) > 0.99
 
 
 def test_denoise_tv_bregman_2d():
