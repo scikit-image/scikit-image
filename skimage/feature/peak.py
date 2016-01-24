@@ -3,7 +3,7 @@ import scipy.ndimage as ndi
 from ..filters import rank_order
 
 
-def peak_local_max(image, min_distance=1, threshold_abs=None,
+def peak_local_max(image, min_distance=1, threshold_abs=0,
                    threshold_rel=None, exclude_border=True, indices=True,
                    num_peaks=np.inf, footprint=None, labels=None):
     """Find peaks in an image as coordinate list or boolean mask.
