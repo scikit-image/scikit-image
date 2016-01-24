@@ -175,14 +175,18 @@ def test_denoise_bilateral_3d():
     img = np.clip(img, 0, 1)
 
     out1 = restoration.denoise_bilateral(img, sigma_range=0.1,
-                                         sigma_spatial=20)
+                                         sigma_spatial=20, multichannel=True)
     out2 = restoration.denoise_bilateral(img, sigma_range=0.2,
-                                         sigma_spatial=30)
+                                         sigma_spatial=30, multichannel=True)
 
     # make sure noise is reduced in the checkerboard cells
     assert img[30:45, 5:15].std() > out1[30:45, 5:15].std()
     assert out1[30:45, 5:15].std() > out2[30:45, 5:15].std()
 
+
+def test_denoise_bilateral_3d_grayscale():
+    img =  np.ones((500, 500, 3))
+    assert_raises(TypeError, restoration.denoise_bilateral, img)
 
 def test_denoise_bilateral_nan():
     img = np.NaN + np.empty((50, 50))

@@ -46,7 +46,7 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
     cval : string
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
-    multichannel : bool, default False
+    multichannel : bool
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension.
 
@@ -66,17 +66,27 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
     >>> astro = astro[220:300, 220:320]
     >>> noisy = astro + 0.6 * astro.std() * np.random.random(astro.shape)
     >>> noisy = np.clip(noisy, 0, 1)
-    >>> denoised = denoise_bilateral(noisy, sigma_range=0.05, sigma_spatial=15)
+    >>> denoised = denoise_bilateral(noisy, sigma_range=0.05,
+    ...                              sigma_spatial=15, multichannel=True)
     """
     if multichannel:
-        if image.shape[2] not in (3, 4):
-            msg = "Input image must be grayscale, RGB, or RGBA; but has " \
-                  "a shape {0}."
-            warnings.warn(msg.format(image.shape))
+        if image.ndim != 3:
+            raise ValueError("Use ``multichannel=False`` for 2D grayscale images. "
+                             "The last axis of the input image must be multiple "
+                             "color channels not another spatial dimension.")
+        elif image.shape[2] not in (3, 4):
+            if image.shape[2] > 4:
+                warnings.warn("The last axis of the input image is interpreted "
+                              "as channels. Input image with shape {0} has {1} "
+                              "channels in last axis. ``denoise_bilateral`` is "
+                              "implemented for 2D grayscale and color images "
+                              "only.".format(image.shape, image.shape[2]))
+            else:
+                msg = "Input image must be grayscale, RGB, or RGBA; but has shape {0}."
+                warnings.warn(msg.format(image.shape))
     else:
         if image.ndim > 2:
-            msg = "Input image must be grayscale, RGB, or RGBA; but has " \
-                  "a shape {0}."
+            msg = "Input image must be grayscale, RGB, or RGBA; but has shape {0}."
             raise TypeError(msg.format(image.shape))
 
 
