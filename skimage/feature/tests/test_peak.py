@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.testing import (assert_array_almost_equal as assert_close,
-                           assert_equal)
+                           assert_equal, assert_raises)
 from scipy import ndimage as ndi
 from skimage.feature import peak
 
@@ -307,6 +307,13 @@ def test_4D():
                  [[5, 5, 5, 5], [15, 15, 15, 15]])
     assert_equal(peak.peak_local_max(image, min_distance=5, threshold_rel=0),
                  [[5, 5, 5, 5], [15, 15, 15, 15]])
+
+
+def test_invalid_min_distance():
+    assert_raises(ValueError, peak.peak_local_max, np.zeros((10, 10)),
+                  min_distance=0)
+    assert_raises(ValueError, peak.peak_local_max, np.zeros((10, 10)),
+                  min_distance=-1)
 
 
 if __name__ == '__main__':

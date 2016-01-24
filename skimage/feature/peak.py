@@ -19,7 +19,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
 
     Parameters
     ----------
-    image : ndarray of floats
+    image : ndarray
         Input image.
     min_distance : int, optional
         Minimum number of pixels separating peaks in a region of `2 *
@@ -92,6 +92,9 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     array([[10, 10, 10]])
 
     """
+
+    if min_distance < 1:
+        raise ValueError("`min_disance` must greater than 0")
 
     out = np.zeros_like(image, dtype=np.bool)
 
