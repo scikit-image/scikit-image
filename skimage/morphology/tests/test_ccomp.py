@@ -24,17 +24,14 @@ class TestConnectedComponents:
                                 [6, 5, 5, 7, 8, 9]])
 
     def test_basic(self):
-        with expected_warnings(['`background`']):
-            assert_array_equal(label(self.x), self.labels)
+        assert_array_equal(label(self.x), self.labels)
 
         # Make sure data wasn't modified
         assert self.x[0, 2] == 3
 
     def test_random(self):
         x = (np.random.rand(20, 30) * 5).astype(np.int)
-
-        with expected_warnings(['`background`']):
-            labels = label(x)
+        labels = label(x)
 
         n = labels.max()
         for i in range(n):
@@ -45,29 +42,26 @@ class TestConnectedComponents:
         x = np.array([[0, 0, 1],
                       [0, 1, 0],
                       [1, 0, 0]])
-        with expected_warnings(['`background`']):
-            assert_array_equal(label(x), x)
+        assert_array_equal(label(x), x)
 
     def test_4_vs_8(self):
         x = np.array([[0, 1],
                       [1, 0]], dtype=int)
-        with expected_warnings(['`background`']):
-            assert_array_equal(label(x, 4),
-                               [[0, 1],
-                                [2, 3]])
-            assert_array_equal(label(x, 8),
-                               [[0, 1],
-                                [1, 0]])
+        assert_array_equal(label(x, 4),
+                           [[0, 1],
+                            [2, 3]])
+        assert_array_equal(label(x, 8),
+                           [[0, 1],
+                            [1, 0]])
 
     def test_background(self):
         x = np.array([[1, 0, 0],
                       [1, 1, 5],
                       [0, 0, 0]])
 
-        with expected_warnings(['`background`']):
-            assert_array_equal(label(x), [[0, 1, 1],
-                                          [0, 0, 2],
-                                          [3, 3, 3]])
+        assert_array_equal(label(x), [[0, 1, 1],
+                                      [0, 0, 2],
+                                      [3, 3, 3]])
 
         assert_array_equal(label(x, background=0),
                            [[0, -1, -1],
@@ -100,8 +94,7 @@ class TestConnectedComponents:
                       [0, 0, 6],
                       [5, 5, 5]])
 
-        with expected_warnings(['`background`']):
-            assert_array_equal(label(x, return_num=True)[1], 4)
+        assert_array_equal(label(x, return_num=True)[1], 4)
 
         assert_array_equal(label(x, background=0, return_num=True)[1], 3)
 
@@ -142,8 +135,7 @@ class TestConnectedComponents3d:
                                    [10, 5, 7, 7, 7]])
 
     def test_basic(self):
-        with expected_warnings(['`background`']):
-            labels = label(self.x)
+        labels = label(self.x)
         assert_array_equal(labels, self.labels)
 
         assert self.x[0, 0, 2] == 2, \
@@ -151,9 +143,7 @@ class TestConnectedComponents3d:
 
     def test_random(self):
         x = (np.random.rand(20, 30) * 5).astype(np.int)
-
-        with expected_warnings(['`background`']):
-            labels = label(x)
+        labels = label(x)
 
         n = labels.max()
         for i in range(n):
@@ -165,8 +155,7 @@ class TestConnectedComponents3d:
         x[0, 2, 2] = 1
         x[1, 1, 1] = 1
         x[2, 0, 0] = 1
-        with expected_warnings(['`background`']):
-            assert_array_equal(label(x), x)
+        assert_array_equal(label(x), x)
 
     def test_4_vs_8(self):
         x = np.zeros((2, 2, 2), int)
@@ -174,9 +163,8 @@ class TestConnectedComponents3d:
         x[1, 0, 0] = 1
         label4 = x.copy()
         label4[1, 0, 0] = 2
-        with expected_warnings(['`background`']):
-            assert_array_equal(label(x, 4), label4)
-            assert_array_equal(label(x, 8), x)
+        assert_array_equal(label(x, 4), label4)
+        assert_array_equal(label(x, 8), x)
 
     def test_background(self):
         x = np.zeros((2, 3, 3), int)
@@ -202,9 +190,7 @@ class TestConnectedComponents3d:
                           [BG, 0,   1],
                           [BG, BG, BG]])
 
-        with expected_warnings(['`background`']):
-            assert_array_equal(label(x), lnb)
-
+        assert_array_equal(label(x), lnb)
         assert_array_equal(label(x, background=0), lb)
 
     def test_background_two_regions(self):
@@ -240,9 +226,7 @@ class TestConnectedComponents3d:
                       [0, 0, 6],
                       [5, 5, 5]])
 
-        with expected_warnings(['`background`']):
-            assert_array_equal(label(x, return_num=True)[1], 4)
-
+        assert_array_equal(label(x, return_num=True)[1], 4)
         assert_array_equal(label(x, background=0, return_num=True)[1], 3)
 
     def test_1D(self):
@@ -254,8 +238,7 @@ class TestConnectedComponents3d:
                     (1, xlen, 1), (xlen, 1, 1), (1, 1, xlen))
         for reshape in reshapes:
             x2 = x.reshape(reshape)
-            with expected_warnings(['`background`']):
-                labelled = label(x2)
+            labelled = label(x2)
             assert_array_equal(y, labelled.flatten())
 
     def test_nd(self):
