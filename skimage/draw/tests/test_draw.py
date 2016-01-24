@@ -32,9 +32,6 @@ def test_set_color_with_alpha():
     img = np.zeros((10, 10, 3))
 
     rr, cc, alpha = line_aa(0, 0, 0, 30)
-    set_color(img, (rr, cc), 1, alpha=alpha)
-
-    rr, cc, alpha = line_aa(0, 0, 0, 30)
     set_color(img, (rr, cc), (1, 0, 0), alpha=alpha)
 
 

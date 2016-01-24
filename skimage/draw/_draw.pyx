@@ -35,10 +35,7 @@ def _coords_inside_image(rr, cc, shape, val=None):
     if val is None:
         return rr[mask], cc[mask]
     else:
-        if np.isscalar(val):
-           return rr[mask], cc[mask], val
-        else:
-           return rr[mask], cc[mask], val[mask]
+        return rr[mask], cc[mask], val[mask]
 
 
 def line(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y1, Py_ssize_t x1):
