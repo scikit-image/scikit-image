@@ -276,7 +276,7 @@ def denoise_tv_chambolle(im, weight=0.1, eps=2.e-4, n_iter_max=200,
 
     if multichannel:
         out = np.zeros_like(im)
-        for c in range(im.shape[2]):
+        for c in range(im.shape[-1]):
             out[..., c] = _denoise_tv_chambolle_nd(im[..., c], weight, eps,
                                                    n_iter_max)
     else:

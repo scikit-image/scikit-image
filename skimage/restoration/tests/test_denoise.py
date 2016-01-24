@@ -39,6 +39,15 @@ def test_denoise_tv_chambolle_multichannel():
                                                 multichannel=True)
     assert_equal(denoised[..., 0], denoised0)
 
+    # tile astronaut subset to generate 3D+channels data
+    astro3 = np.tile(astro[:64, :64, np.newaxis, :], [1, 1, 2, 1])
+    # modify along tiled dimension to give non-zero gradient on 3rd axis
+    astro3[:, :, 0, :] = 2*astro3[:, :, 0, :]
+    denoised0 = restoration.denoise_tv_chambolle(astro3[..., 0], weight=0.1)
+    denoised = restoration.denoise_tv_chambolle(astro3, weight=0.1,
+                                                multichannel=True)
+    assert_equal(denoised[..., 0], denoised0)
+
 
 def test_denoise_tv_chambolle_float_result_range():
     # astronaut image
