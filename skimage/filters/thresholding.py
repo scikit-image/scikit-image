@@ -129,6 +129,12 @@ def threshold_otsu(image, nbins=256):
               "grayscale images; image shape {0} looks like an RGB image"
         warnings.warn(msg.format(image.shape))
 
+    # Check if the image is multi-colored or not
+    if image.min() == image.max():
+        raise TypeError("threshold_otsu is expected to work with images " \
+                        "having more than one color. The input image seems " \
+                        "to have just one color {0}.".format(image.min()))
+
     hist, bin_centers = histogram(image.ravel(), nbins)
     hist = hist.astype(float)
 
