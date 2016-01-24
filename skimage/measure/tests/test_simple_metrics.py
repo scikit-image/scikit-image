@@ -1,5 +1,6 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_raises, assert_almost_equal
+from numpy.testing import (run_module_suite, assert_equal, assert_raises,
+                           assert_almost_equal)
 
 from skimage.measure import psnr, nrmse
 import skimage.data
@@ -41,3 +42,7 @@ def test_NRMSE():
 
     assert_raises(ValueError, nrmse, x.astype(np.uint8), y)
     assert_raises(ValueError, nrmse, x[:-1], y)
+
+
+if __name__ == "__main__":
+    run_module_suite()
