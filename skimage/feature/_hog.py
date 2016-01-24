@@ -2,10 +2,11 @@ from __future__ import division
 import numpy as np
 from .._shared.utils import assert_nD
 from . import _hoghistogram
+import warnings
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8),
-        cells_per_block=(3, 3), visualise=False, normalise=False,
+        cells_per_block=(3, 3), visualise=False, transform_sqrt=False,
         feature_vector=True):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
@@ -29,9 +30,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         Number of cells in each block.
     visualise : bool, optional
         Also return an image of the HOG.
-    normalise : bool, optional
+    transform_sqrt : bool, optional
         Apply power law compression to normalise the image before
-        processing.
+        processing. DO NOT use this if the image contains negative values.
     feature_vector : bool, optional
         Return the data as a feature vector by calling .ravel() on the result
         just before returning.
@@ -66,7 +67,10 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
 
     assert_nD(image, 2)
 
-    if normalise:
+    if transform_sqrt:
+        if image.min() < 0:
+            warnings.warn("The input image contains negative values.  \
+                           This will produce NaNs in the result!")
         image = np.sqrt(image)
 
     """
