@@ -151,10 +151,11 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         mask &= image > max(thresholds)
 
     # get coordinates of peaks
-    coordinates = np.argwhere(image > peak_threshold)
+    coordinates = np.transpose(mask.nonzero())
 
     if coordinates.shape[0] > num_peaks:
-        intensities = image.flat[np.ravel_multi_index(coordinates.transpose(),image.shape)]
+        intensities = image.flat[np.ravel_multi_index(coordinates.transpose(),
+                                                      image.shape)]
         idx_maxsort = np.argsort(intensities)[::-1]
         coordinates = coordinates[idx_maxsort][:num_peaks]
 
