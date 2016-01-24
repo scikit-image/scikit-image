@@ -6,14 +6,16 @@ from ..filters import rank_order
 def peak_local_max(image, min_distance=1, threshold_abs=None,
                    threshold_rel=None, exclude_border=True, indices=True,
                    num_peaks=np.inf, footprint=None, labels=None):
-    """
-    Find peaks in an image, and return them as coordinates or a boolean array.
+    """Find peaks in an image as coordinate list or boolean mask.
 
     Peaks are the local maxima in a region of `2 * min_distance + 1`
     (i.e. peaks are separated by at least `min_distance`).
 
-    NOTE: If peaks are flat (i.e. multiple adjacent pixels have identical
+    If peaks are flat (i.e. multiple adjacent pixels have identical
     intensities), the coordinates of all such pixels are returned.
+
+    If both `threshold_abs` and `threshold_rel` are provided, the maximum
+    of the two is chosen as the minimum intensity threshold of peaks.
 
     Parameters
     ----------
@@ -33,7 +35,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         If True, `min_distance` excludes peaks from the border of the image as
         well as from each other.
     indices : bool, optional
-        If True (the default), the output will be an array representing peak
+        If True, the output will be an array representing peak
         coordinates.  If False, the output will be a boolean array shaped as
         `image.shape` with peaks present at True elements.
     num_peaks : int, optional
@@ -58,10 +60,10 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     Notes
     -----
     The peak local maximum function returns the coordinates of local peaks
-    (maxima) in a image. A maximum filter is used for finding local maxima.
-    This operation dilates the original image. After comparison between
-    dilated and original image, peak_local_max function returns the
-    coordinates of peaks where dilated image = original.
+    (maxima) in an image. A maximum filter is used for finding local maxima.
+    This operation dilates the original image. After comparison of the dilated
+    and original image, this function returns the coordinates or a mask of the
+    peaks where the dilated image equals the original image.
 
     Examples
     --------
@@ -90,7 +92,9 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     array([[10, 10, 10]])
 
     """
+
     out = np.zeros_like(image, dtype=np.bool)
+
     # In the case of labels, recursively build and return an output
     # operating on each label separately
     if labels is not None:
@@ -130,7 +134,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     else:
         size = 2 * min_distance + 1
         image_max = ndi.maximum_filter(image, size=size, mode='constant')
-    mask = (image == image_max)
+    mask = image == image_max
 
     if exclude_border:
         # zero out the image borders
