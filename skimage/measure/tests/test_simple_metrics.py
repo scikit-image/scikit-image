@@ -1,0 +1,43 @@
+import numpy as np
+from numpy.testing import assert_equal, assert_raises, assert_almost_equal
+
+from skimage.measure import psnr, nrmse
+import skimage.data
+
+np.random.seed(5)
+cam = skimage.data.camera()
+sigma = 20.0
+cam_noisy = np.clip(cam + sigma * np.random.randn(*cam.shape), 0, 255)
+cam_noisy = cam_noisy.astype(cam.dtype)
+
+
+def test_PSNR_vs_IPOL():
+    # Tests vs. imdiff result from the following IPOL article and code:
+    # http://www.ipol.im/pub/art/2011/g_lmii/
+    p_IPOL = 22.4497
+    p = psnr(cam, cam_noisy)
+    assert_almost_equal(p, p_IPOL, decimal=4)
+
+
+def test_PSNR_float():
+    p_uint8 = psnr(cam, cam_noisy)
+    p_float64 = psnr(cam/255., cam_noisy/255., dynamic_range=1)
+    assert_almost_equal(p_uint8, p_float64)
+
+
+def test_PSNR_errors():
+    assert_raises(ValueError, psnr, cam, cam.astype(np.float32))
+    assert_raises(ValueError, psnr, cam, cam[:-1, :])
+
+
+def test_NRMSE():
+    x = np.ones(4)
+    y = np.asarray([0., 2., 2., 2.])
+    assert_equal(nrmse(y, x, 'mean'), 1/np.mean(y))
+    assert_equal(nrmse(y, x, 'Euclidean'), 0.5)
+    assert_equal(nrmse(y, x, 'min-max'), 0.5)
+
+    assert_equal(nrmse(x, x), 0)
+
+    assert_raises(ValueError, nrmse, x.astype(np.uint8), y)
+    assert_raises(ValueError, nrmse, x[:-1], y)

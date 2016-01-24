@@ -113,5 +113,4 @@ def psnr(im_true, im, dynamic_range=None):
     im = im.astype(np.float64)
 
     err = mse(im_true, im)
-    psnr = 10 * np.log10((dynamic_range ** 2) / err)
-    return psnr
+    return 10 * np.log10((dynamic_range ** 2) / err)
