@@ -1,8 +1,9 @@
 """Test for correctness of color distance functions"""
+import sys
 from os.path import abspath, dirname, join as pjoin
 
 import numpy as np
-from numpy.testing import assert_allclose, assert_equal
+from numpy.testing import assert_allclose, assert_equal, assert_almost_equal
 
 from skimage.color import (deltaE_cie76,
                            deltaE_ciede94,
@@ -140,6 +141,9 @@ def test_cmc():
     # Test that equal colors have a distance of 0:
     lab1 = lab2 = np.array([0., 1.59607713, 0.87755709])
     assert_equal(deltaE_cmc(lab1, lab2), 0)
+    # If they're *almost* equal, than that's still fine:
+    lab2 = np.array([0. + np.finfo(float).eps, 1.59607713, 0.87755709])
+    assert_almost_equal(deltaE_cmc(lab1, lab2), 0)
 
 
 def test_single_color_cie76():
