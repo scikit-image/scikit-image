@@ -120,7 +120,7 @@ def test_rgb_vertical_downward():
 
 plane = np.array([[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 0, 1, 1],
                   [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]], dtype=np.float)
-image3d = np.dstack((plane, plane, plane, plane, plane))
+image3d = np.stack((plane, plane, plane, plane, plane))
 
 
 def test_3d_vertical_downward():
@@ -140,15 +140,20 @@ def test_3d_diagonal_interpolated():
     expected_prof = np.array([1, 0.75, 0, 0.75, 1])
     assert_equal(prof, expected_prof)
 
+def test_3d_through_center_linewidth_1():
+    prof = profile_line(image3d, (0, 2, 2), (4, 2, 2), order=1, linewidth=1, multichannel=False)
+    expected_prof = np.repeat(0, 5)
+    assert_equal(prof, expected_prof)
+
 
 def test_3d_through_center_linewidth_3():
-    prof = profile_line(image3d, (2, 2, 0), (2, 2, 4), order=1, linewidth=3, multichannel=False)
+    prof = profile_line(image3d, (0, 2, 2), (4, 2, 2), order=1, linewidth=3, multichannel=False)
     expected_prof = np.repeat(0.731370849898, 5)
     assert_almost_equal(prof, expected_prof)
 
 
 def test_3d_through_center_linewidth_5():
-    prof = profile_line(image3d, (2, 2, 0), (2, 2, 4), order=1, linewidth=5, multichannel=False)
+    prof = profile_line(image3d, (0, 2, 2), (4, 2, 2), order=1, linewidth=5, multichannel=False)
     expected_prof = np.repeat(0.877895840863, 5)
     assert_almost_equal(prof, expected_prof)
 

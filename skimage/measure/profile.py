@@ -153,9 +153,9 @@ def _line_profile_coordinates3d(src, dst, linewidth=1):
     The destination point is included in the profile, in contrast to
     standard numpy indexing.
     """
-    src_row, src_col, src_dim3 = src = np.asarray(src, dtype=float)
-    dst_row, dst_col, dst_dim3 = dst = np.asarray(dst, dtype=float)
-    d_row, d_col, d_plane = dst - src
+    src_pln, src_row, src_col = src = np.asarray(src, dtype=float)
+    dst_pln, dst_row, dst_col = dst = np.asarray(dst, dtype=float)
+    d_pln, d_row, d_col = dst - src
 
     # Get one unit vector perpendicular to direction vector to find a point
     # that is one unit distance away from the destination vector
@@ -164,32 +164,32 @@ def _line_profile_coordinates3d(src, dst, linewidth=1):
     # We subtract 1 from linewidth to change from pixel-counting
     # (make this line 3 pixels wide) to point distances (the
     # distance between pixel centers)
-    if d_plane != 0:
+    if d_pln != 0:
         # try finding the solution to ix + jy + kz = 0 for x = 1 and y = 1
-        dim_z = - (d_row + d_col) / d_plane
+        dim_z = - (d_row + d_col) / d_pln
         length_vector = np.sqrt(2 + dim_z ** 2)
         col_width = row_width = (linewidth - 1) / (2 * length_vector)
         slice_width = (linewidth - 1) * (dim_z / 2 * length_vector)
     elif d_row != 0:
         # try finding the solution to ix + jy + kz = 0 for y = 1 and z = 1
-        dim_x = - (d_plane + d_col) / d_row
+        dim_x = - (d_pln + d_col) / d_row
         length_vector = np.sqrt(2 + dim_x ** 2)
         col_width = slice_width = (linewidth - 1) / (2 * length_vector)
         row_width = (linewidth - 1) * (dim_x / length_vector) / 2
     else:
         # try finding the solution to ix + jy + kz = 0 for x = 1 and z = 1
-        dim_y = - (d_row + d_plane) / d_col
+        dim_y = - (d_row + d_pln) / d_col
         length_vector = np.sqrt(2 + dim_y ** 2)
         row_width = slice_width = (linewidth - 1) / (2 * length_vector)
         col_width = (linewidth - 1) * (dim_y / length_vector) / 2
 
     # we add one above because we include the last point in the profile
     # (in contrast to standard numpy indexing)
-    length = np.ceil(np.linalg.norm([d_row, d_col, d_plane]) + 1)
+    length = np.ceil(np.linalg.norm([d_pln, d_row, d_col]) + 1)
 
     line_col = np.linspace(src_col, dst_col, length)
     line_row = np.linspace(src_row, dst_row, length)
-    line_plane = np.linspace(src_dim3, dst_dim3, length)
+    line_pln = np.linspace(src_pln, dst_pln, length)
 
     # find divisor to get only first half of array and center point if odd
     first_half_index = np.int(np.ceil(np.float(linewidth)/2))
@@ -200,10 +200,10 @@ def _line_profile_coordinates3d(src, dst, linewidth=1):
                                       linewidth)[:first_half_index] for row_i in line_row])
     perp_cols = np.array([np.linspace(col_i - col_width, col_i + col_width,
                                       linewidth)[:first_half_index] for col_i in line_col])
-    perp_plane = np.array([np.linspace(slice_i - slice_width, slice_i + slice_width,
-                                       linewidth)[:first_half_index] for slice_i in line_plane])
+    perp_pln = np.array([np.linspace(slice_i - slice_width, slice_i + slice_width,
+                                       linewidth)[:first_half_index] for slice_i in line_pln])
 
-    perp_array = np.array([perp_rows, perp_cols, perp_plane])
+    perp_array = np.array([perp_pln, perp_rows, perp_cols])
 
     # rotate all sample points around the direction axis if linewidth is > 1
     if linewidth > 1:
@@ -237,9 +237,9 @@ def rotate_sample_points(linewidth, perp_array, src, dst):
         profile is the ceil of the computed length of the scan line.
 
     """
-    d_row, d_col, d_plane = dst - src
-    length = np.ceil(np.linalg.norm([d_row, d_col, d_plane]) + 1)
-    unit_direction_vector = [d_row / (length - 1), d_col / (length - 1), d_plane / (length - 1)]
+    line_vector = np.subtract(dst, src)
+    length_vector = np.linalg.norm(line_vector)
+    unit_direction_vector = np.divide(line_vector, length_vector)
 
     # Rotate the points around the axis a number of times depending on the distance of the point
     # from the direction axis to simulate sampling of points around the axis
@@ -284,12 +284,11 @@ def _distance_point_line_3d(point, src, dst):
         The distance between the point and the line in units
 
     """
-
     line_vector = np.subtract(dst, src)
-    length_line = np.linalg.norm(line_vector)
+    length_vector = np.linalg.norm(line_vector)
     vector1 = np.subtract(point, dst)
     vector2 = np.subtract(point, src)
-    distance = np.linalg.norm(np.cross(vector1, vector2) / length_line)
+    distance = np.linalg.norm(np.cross(vector1, vector2) / length_vector)
     return np.abs(distance)
 
 
@@ -314,10 +313,9 @@ def _rotate_point_around_line(point_to_rotate, point_on_line, unit_direction_vec
         The coordinates of the rotated point around the line
 
     """
-
-    a, b, c = point_on_line
-    x, y, z = point_to_rotate
-    u, v, w = unit_direction_vector
+    c, b, a = point_on_line
+    z, y, x = point_to_rotate
+    w, v, u = unit_direction_vector
 
     p1 = (a * (v ** 2 + w ** 2) - u * (b * v + c * w - u * x - v * y - w * z)) * \
         (1 - np.cos(angle_in_radians)) + x * np.cos(angle_in_radians) \
@@ -331,4 +329,4 @@ def _rotate_point_around_line(point_to_rotate, point_on_line, unit_direction_vec
         1 - np.cos(angle_in_radians)) + z * np.cos(angle_in_radians) \
         + (-b * u + a * v - v * x + u * y) * np.sin(angle_in_radians)
 
-    return np.array([p1, p2, p3])
+    return np.array([p3, p2, p1])
