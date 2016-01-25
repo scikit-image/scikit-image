@@ -10,7 +10,8 @@ from ..exposure import is_low_contrast
 from .._shared.utils import all_warnings, warn
 
 
-__all__ = ['imread', 'imread_collection', 'imsave', 'imshow', 'show']
+__all__ = ['imread', 'imsave', 'imshow', 'show',
+           'imread_collection', 'imshow_collection']
 
 
 def imread(fname, as_grey=False, plugin=None, flatten=None,
@@ -153,6 +154,26 @@ def imshow(arr, plugin=None, **plugin_args):
     if isinstance(arr, six.string_types):
         arr = call_plugin('imread', arr, plugin=plugin)
     return call_plugin('imshow', arr, plugin=plugin, **plugin_args)
+
+
+def imshow_collection(ic, plugin=None, **plugin_args):
+    """Display an image.
+
+    Parameters
+    ----------
+    ic : ImageCollection
+        Collection to display.
+    plugin : str
+        Name of plugin to use.  By default, the different plugins are
+        tried until a suitable candidate is found.
+
+    Other parameters
+    ----------------
+    plugin_args : keywords
+        Passed to the given plugin.
+
+    """
+    return call_plugin('imshow_collection', ic, plugin=plugin, **plugin_args)
 
 
 def show():
