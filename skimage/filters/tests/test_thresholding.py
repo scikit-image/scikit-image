@@ -1,5 +1,7 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_almost_equal
+from numpy.testing import (assert_equal,
+                           assert_almost_equal,
+                           assert_raises)
 
 import skimage
 from skimage import data
@@ -161,6 +163,11 @@ def test_otsu_astro_image():
     img = skimage.img_as_ubyte(data.astronaut())
     with expected_warnings(['grayscale']):
         assert 109 < threshold_otsu(img) < 111
+
+
+def test_otsu_one_color_image():
+    img = np.ones((10, 10), dtype=np.uint8)
+    assert_raises(TypeError, threshold_otsu, img)
 
 def test_li_camera_image():
     camera = skimage.img_as_ubyte(data.camera())
