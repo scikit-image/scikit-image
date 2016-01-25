@@ -171,7 +171,7 @@ def imshow_collection(ic, *args, **kwargs):
     """
     fig, axes = plt.subplots(1, len(ic))
     for n, image in enumerate(ic):
-        kwargs['axis'] = axes[n]
+        kwargs['ax'] = axes[n]
         imshow(image, *args, **kwargs)
 
 

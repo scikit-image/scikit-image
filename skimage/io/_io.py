@@ -157,7 +157,7 @@ def imshow(arr, plugin=None, **plugin_args):
 
 
 def imshow_collection(ic, plugin=None, **plugin_args):
-    """Display an image.
+    """Display a collection of images.
 
     Parameters
     ----------
