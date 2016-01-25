@@ -203,6 +203,11 @@ def test_yen_coins_image_as_float():
     assert 0.43 < threshold_yen(coins) < 0.44
 
 
+def test_adaptive_even_block_size_error():
+    img = data.camera()
+    assert_raises(ValueError, threshold_adaptive, img, block_size=4)
+
+
 def test_isodata_camera_image():
     camera = skimage.img_as_ubyte(data.camera())
 
