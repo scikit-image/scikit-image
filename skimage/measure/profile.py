@@ -1,6 +1,5 @@
 import numpy as np
 from scipy import ndimage as ndi, constants
-from ..util import img_as_float
 
 
 def profile_line(img, src, dst, linewidth=1,
@@ -54,8 +53,11 @@ def profile_line(img, src, dst, linewidth=1,
     standard numpy indexing.
     """
     if img.ndim == 4 and multichannel:
-        # 3D RGB to be implemented
-        raise NotImplementedError('3D RGB to be implemented')
+        # 3D RGB
+        perp_lines = _line_profile_coordinates3d(src, dst, linewidth=linewidth)
+        pixels = [ndi.map_coordinates(img[..., i], perp_lines, order=order,
+                                      mode=mode, cval=cval) for i in range(img.shape[3])]
+        pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
     elif img.ndim == 3 and not multichannel:
         # 3D intensity
         perp_lines = _line_profile_coordinates3d(src, dst, linewidth=linewidth)

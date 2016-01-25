@@ -2,7 +2,6 @@ from numpy.testing import assert_equal, assert_almost_equal
 import numpy as np
 
 from skimage.measure import profile_line
-from skimage import data, img_as_float
 
 image = np.arange(100, dtype=np.float).reshape((10, 10))
 
@@ -108,6 +107,17 @@ def test_pythagorean_triangle_transpose_left_down_linewidth():
     assert_almost_equal(prof, expected_prof)
 
 
+first_color = np.array([0, 0, 255])
+second_color = np.array([255, 255, 0])
+rgb_image = np.array(([first_color, first_color], [second_color, second_color]), dtype=np.float)
+
+
+def test_rgb_vertical_downward():
+    prof = profile_line(rgb_image, (0, 0), (1, 0), order=0)
+    expected_prof = np.array((first_color, second_color))
+    assert_equal(prof, expected_prof)
+
+
 plane = np.array([[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 0, 1, 1],
                   [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]], dtype=np.float)
 image3d = np.dstack((plane, plane, plane, plane, plane))
@@ -142,6 +152,20 @@ def test_3d_through_center_linewidth_5():
     expected_prof = np.repeat(0.877895840863, 5)
     assert_almost_equal(prof, expected_prof)
 
+
+first_plane_color = np.array([0, 0, 255])
+second_plane_color = np.array([255, 255, 0])
+rgb_first_plane = np.array([[[first_plane_color], [first_plane_color]],
+                            [[first_plane_color], [first_plane_color]]], dtype=np.float)
+rgb_second_plane = np.array([[[second_plane_color], [second_plane_color]],
+                             [[second_plane_color], [second_plane_color]]], dtype=np.float)
+rgb_image3d = np.dstack((rgb_first_plane, rgb_second_plane))
+
+
+def test_rgb_3d_diagonal():
+    prof = profile_line(rgb_image3d, (0, 0, 0), (1, 1, 1), order=0, multichannel=True)
+    expected_prof = np.array((first_plane_color, second_plane_color, second_plane_color))
+    assert_equal(prof, expected_prof)
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
