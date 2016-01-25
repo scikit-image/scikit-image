@@ -1,5 +1,7 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_almost_equal
+from numpy.testing import (assert_equal,
+                           assert_almost_equal,
+                           assert_raises)
 
 import skimage
 from skimage import data
@@ -194,6 +196,11 @@ def test_yen_coins_image():
 def test_yen_coins_image_as_float():
     coins = skimage.img_as_float(data.coins())
     assert 0.43 < threshold_yen(coins) < 0.44
+
+
+def test_adaptive_even_block_size_error():
+    img = data.camera()
+    assert_raises(ValueError, threshold_adaptive, img, block_size=4)
 
 
 def test_isodata_camera_image():
