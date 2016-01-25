@@ -116,13 +116,13 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     return _denoise_tv_bregman(image, weight, max_iter, eps, isotropic)
 
 
-def _denoise_tv_chambolle_3d(im, weight=0.2, eps=2.e-4, n_iter_max=200):
-    """Perform total-variation denoising on 3D images.
+def _denoise_tv_chambolle_nd(im, weight=0.1, eps=2.e-4, n_iter_max=200):
+    """Perform total-variation denoising on n-dimensional images.
 
     Parameters
     ----------
     im : ndarray
-        3-D input data to be denoised.
+        n-D input data to be denoised.
     weight : float, optional
         Denoising weight. The greater `weight`, the more denoising (at
         the expense of fidelity to `input`).
@@ -146,36 +146,45 @@ def _denoise_tv_chambolle_3d(im, weight=0.2, eps=2.e-4, n_iter_max=200):
 
     """
 
-    px = np.zeros_like(im)
-    py = np.zeros_like(im)
-    pz = np.zeros_like(im)
-    gx = np.zeros_like(im)
-    gy = np.zeros_like(im)
-    gz = np.zeros_like(im)
+    ndim = im.ndim
+    p = np.zeros((im.ndim, ) + im.shape, dtype=im.dtype)
+    g = np.zeros_like(p)
     d = np.zeros_like(im)
     i = 0
     while i < n_iter_max:
-        d = - px - py - pz
-        d[1:] += px[:-1]
-        d[:, 1:] += py[:, :-1]
-        d[:, :, 1:] += pz[:, :, :-1]
-
-        out = im + d
+        if i > 0:
+            # d will be the (negative) divergence of p
+            d = -p.sum(0)
+            slices_d = [slice(None), ] * ndim
+            slices_p = [slice(None), ] * (ndim + 1)
+            for ax in range(ndim):
+                slices_d[ax] = slice(1, None)
+                slices_p[ax+1] = slice(0, -1)
+                slices_p[0] = ax
+                d[slices_d] += p[slices_p]
+                slices_d[ax] = slice(None)
+                slices_p[ax+1] = slice(None)
+            out = im + d
+        else:
+            out = im
         E = (d ** 2).sum()
 
-        gx[:-1] = np.diff(out, axis=0)
-        gy[:, :-1] = np.diff(out, axis=1)
-        gz[:, :, :-1] = np.diff(out, axis=2)
-        norm = np.sqrt(gx ** 2 + gy ** 2 + gz ** 2)
+        # g stores the gradients of out along each axis
+        # e.g. g[0] is the first order finite difference along axis 0
+        slices_g = [slice(None), ] * (ndim + 1)
+        for ax in range(ndim):
+            slices_g[ax+1] = slice(0, -1)
+            slices_g[0] = ax
+            g[slices_g] = np.diff(out, axis=ax)
+            slices_g[ax+1] = slice(None)
+
+        norm = np.sqrt((g ** 2).sum(axis=0))[np.newaxis, ...]
         E += weight * norm.sum()
-        norm *= 0.5 / weight
+        tau = 1. / (2.*ndim)
+        norm *= tau / weight
         norm += 1.
-        px -= 1. / 6. * gx
-        px /= norm
-        py -= 1. / 6. * gy
-        py /= norm
-        pz -= 1 / 6. * gz
-        pz /= norm
+        p -= tau * g
+        p /= norm
         E /= float(im.size)
         if i == 0:
             E_init = E
@@ -189,89 +198,13 @@ def _denoise_tv_chambolle_3d(im, weight=0.2, eps=2.e-4, n_iter_max=200):
     return out
 
 
-def _denoise_tv_chambolle_2d(im, weight=0.2, eps=2.e-4, n_iter_max=200):
-    """Perform total-variation denoising on 2D images.
-
-    Parameters
-    ----------
-    im : ndarray
-        Input data to be denoised.
-    weight : float, optional
-        Denoising weight. The greater `weight`, the more denoising (at
-        the expense of fidelity to `input`)
-    eps : float, optional
-        Relative difference of the value of the cost function that determines
-        the stop criterion. The algorithm stops when:
-
-            (E_(n-1) - E_n) < eps * E_0
-
-    n_iter_max : int, optional
-        Maximal number of iterations used for the optimization.
-
-    Returns
-    -------
-    out : ndarray
-        Denoised array of floats.
-
-    Notes
-    -----
-    The principle of total variation denoising is explained in
-    http://en.wikipedia.org/wiki/Total_variation_denoising.
-
-    This code is an implementation of the algorithm of Rudin, Fatemi and Osher
-    that was proposed by Chambolle in [1]_.
-
-    References
-    ----------
-    .. [1] A. Chambolle, An algorithm for total variation minimization and
-           applications, Journal of Mathematical Imaging and Vision,
-           Springer, 2004, 20, 89-97.
-
-    """
-
-    px = np.zeros_like(im)
-    py = np.zeros_like(im)
-    gx = np.zeros_like(im)
-    gy = np.zeros_like(im)
-    d = np.zeros_like(im)
-    i = 0
-    while i < n_iter_max:
-        d = -px - py
-        d[1:] += px[:-1]
-        d[:, 1:] += py[:, :-1]
-
-        out = im + d
-        E = (d ** 2).sum()
-        gx[:-1] = np.diff(out, axis=0)
-        gy[:, :-1] = np.diff(out, axis=1)
-        norm = np.sqrt(gx ** 2 + gy ** 2)
-        E += weight * norm.sum()
-        norm *= 0.5 / weight
-        norm += 1
-        px -= 0.25 * gx
-        px /= norm
-        py -= 0.25 * gy
-        py /= norm
-        E /= float(im.size)
-        if i == 0:
-            E_init = E
-            E_previous = E
-        else:
-            if np.abs(E_previous - E) < eps * E_init:
-                break
-            else:
-                E_previous = E
-        i += 1
-    return out
-
-
-def denoise_tv_chambolle(im, weight=0.2, eps=2.e-4, n_iter_max=200,
+def denoise_tv_chambolle(im, weight=0.1, eps=2.e-4, n_iter_max=200,
                          multichannel=False):
-    """Perform total-variation denoising on 2D and 3D images.
+    """Perform total-variation denoising on n-dimensional images.
 
     Parameters
     ----------
-    im : ndarray (2d or 3d) of ints, uints or floats
+    im : ndarray of ints, uints or floats
         Input data to be denoised. `im` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
@@ -289,7 +222,7 @@ def denoise_tv_chambolle(im, weight=0.2, eps=2.e-4, n_iter_max=200,
     multichannel : bool, optional
         Apply total-variation denoising separately for each channel. This
         option should be true for color images, otherwise the denoising is
-        also applied in the 3rd dimension.
+        also applied in the channels dimension.
 
     Returns
     -------
@@ -341,17 +274,11 @@ def denoise_tv_chambolle(im, weight=0.2, eps=2.e-4, n_iter_max=200,
     if not im_type.kind == 'f':
         im = img_as_float(im)
 
-    if im.ndim == 2:
-        out = _denoise_tv_chambolle_2d(im, weight, eps, n_iter_max)
-    elif im.ndim == 3:
-        if multichannel:
-            out = np.zeros_like(im)
-            for c in range(im.shape[2]):
-                out[..., c] = _denoise_tv_chambolle_2d(im[..., c], weight, eps,
-                                                       n_iter_max)
-        else:
-            out = _denoise_tv_chambolle_3d(im, weight, eps, n_iter_max)
+    if multichannel:
+        out = np.zeros_like(im)
+        for c in range(im.shape[-1]):
+            out[..., c] = _denoise_tv_chambolle_nd(im[..., c], weight, eps,
+                                                   n_iter_max)
     else:
-        raise ValueError('only 2-d and 3-d images may be denoised with this '
-                         'function')
+        out = _denoise_tv_chambolle_nd(im, weight, eps, n_iter_max)
     return out
