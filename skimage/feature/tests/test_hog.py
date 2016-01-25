@@ -188,5 +188,9 @@ def test_hog_orientations_circle():
         assert_almost_equal(actual, desired, decimal=1)
 
 
+def test_hog_normalise_none_error_raised():
+    img = np.array([1, 2, 3])
+    assert_raises(ValueError, feature.hog, img, normalise=True)
+
 if __name__ == '__main__':
     np.testing.run_module_suite()

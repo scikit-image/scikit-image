@@ -7,7 +7,7 @@ import warnings
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8),
         cells_per_block=(3, 3), visualise=False, transform_sqrt=False,
-        feature_vector=True):
+        feature_vector=True, normalise=None):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Compute a Histogram of Oriented Gradients (HOG) by
@@ -32,10 +32,14 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         Also return an image of the HOG.
     transform_sqrt : bool, optional
         Apply power law compression to normalise the image before
-        processing. DO NOT use this if the image contains negative values.
+        processing. DO NOT use this if the image contains negative
+        values. Also see `notes` section below.
     feature_vector : bool, optional
         Return the data as a feature vector by calling .ravel() on the result
         just before returning.
+    normalise : bool, deprecated
+        The parameter is deprecated. Use `transform_sqrt` for power law
+        compression. `normalise` has been deprecated.
 
     Returns
     -------
@@ -52,6 +56,13 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
       Human Detection, IEEE Computer Society Conference on Computer
       Vision and Pattern Recognition 2005 San Diego, CA, USA
 
+    Notes
+    -----
+    Power law compression, also known as Gamma correction, is used to reduce
+    the effects of shadowing and illumination variations. The compression makes
+    the dark regions lighter. When the kwarg `transform_sqrt` is set to
+    ``True``, the function computes the square root of each color channel
+    and then applies the hog algorithm to the image.
     """
     image = np.atleast_2d(image)
 
@@ -67,10 +78,13 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
 
     assert_nD(image, 2)
 
+    if normalise is not None:
+        raise ValueError("The normalise parameter was removed due to incorrect "
+                         "behavior; it only applied a square root instead of a "
+                         "true normalization. If you wish to duplicate the old "
+                         "behavior, set ``transform_sqrt=True``.")
+
     if transform_sqrt:
-        if image.min() < 0:
-            warnings.warn("The input image contains negative values.  \
-                           This will produce NaNs in the result!")
         image = np.sqrt(image)
 
     """
@@ -177,7 +191,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     overlapping grid of blocks covering the detection window into a combined
     feature vector for use in the window classifier.
     """
-    
+
     if feature_vector:
         normalised_blocks = normalised_blocks.ravel()
 
