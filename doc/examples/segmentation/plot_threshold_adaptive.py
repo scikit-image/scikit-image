@@ -26,7 +26,7 @@ image = data.page()
 global_thresh = threshold_otsu(image)
 binary_global = image > global_thresh
 
-block_size = 40
+block_size = 35
 binary_adaptive = threshold_adaptive(image, block_size, offset=10)
 
 fig, axes = plt.subplots(nrows=3, figsize=(7, 8))
