@@ -6,6 +6,16 @@ from ..util.dtype import dtype_range
 __all__ = ['mse', 'nrmse', 'psnr']
 
 
+def _as_floats(X, Y):
+    """Promote X, Y to nearest appropriate floating point precision."""
+    float_type = np.result_type(X.dtype, Y.dtype, np.float32)
+    if X.dtype != float_type:
+        X = X.astype(float_type)
+    if Y.dtype != float_type:
+        Y = Y.astype(float_type)
+    return X, Y
+
+
 def mse(X, Y):
     """Compute the mean-squared error between two images.
 
@@ -20,6 +30,8 @@ def mse(X, Y):
         The MSE metric.
 
     """
+    X, Y = _as_floats(X, Y)
+
     if not X.shape == Y.shape:
         raise ValueError('Input images must have the same dimensions.')
     if not X.dtype == Y.dtype:
@@ -60,6 +72,8 @@ def nrmse(im_true, im_test, norm_type='Euclidean'):
 
     if not im_true.shape == im_test.shape:
         raise ValueError('Input images must have the same dimensions.')
+
+    im_true, im_test = _as_floats(im_true, im_test)
 
     norm_type = norm_type.lower()
     if norm_type == 'euclidean':
@@ -107,8 +121,7 @@ def psnr(im_true, im_test, dynamic_range=None):
         dmin, dmax = dtype_range[im_true.dtype.type]
         dynamic_range = dmax - dmin
 
-    im_true = im_true.astype(np.float64)
-    im_test = im_test.astype(np.float64)
+    im_true, im_test = _as_floats(im_true, im_test)
 
     err = mse(im_true, im_test)
     return 10 * np.log10((dynamic_range ** 2) / err)
