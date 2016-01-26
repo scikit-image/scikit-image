@@ -1,9 +1,11 @@
 from __future__ import division, print_function, absolute_import
 
 import numpy as np
+from numpy cimport npy_intp, npy_uint8
 
+ctypedef npy_uint8[:, :, ::1] img_type
 
-def get_neighborhood(img, p, r, c):
+def get_neighborhood(img_type img, npy_intp p, npy_intp r, npy_intp c):
     """Get the neighborhood of a pixel.
 
        Assume zero boundary conditions. Image is already padded, so no
@@ -228,7 +230,7 @@ def is_surfacepoint(neighbors, points_LUT):
     return True
 
 
-def is_Euler_invariant(neighbors):
+cdef bint is_Euler_invariant(neighbors):
     """Check if a point is Euler invariant.
 
     Calculate Euler characteristc for each octant and sum up.
@@ -243,14 +245,15 @@ def is_Euler_invariant(neighbors):
     bool
 
     """
-    euler_char = 0
-    for octant in OCTANTS:
+    cdef int octant, n
+    cdef int euler_char = 0
+    for octant in xrange(8):
         n = index_octants(octant, neighbors)
         euler_char += LUT[n]
     return euler_char == 0
 
 
-def is_simple_point(neighbors):
+cdef bint is_simple_point(neighbors):
     """Check is a point is a Simple Point.
 
     This method is named 'N(v)_labeling' in [Lee94].
@@ -272,8 +275,10 @@ def is_simple_point(neighbors):
     # ignore center pixel (i=13) when counting (see [Lee94])
     cube = np.r_[neighbors[:13], neighbors[14:]]
 
+    cdef int i
+
     # set initial label
-    label = 2
+    cdef int label = 2
 
     # for all point in the neighborhood
     for i in range(26):
@@ -304,7 +309,7 @@ def is_simple_point(neighbors):
     return True
 
 
-def octree_labeling(octant, label, cube):
+cdef void octree_labeling(int octant, int label, cube):
     """This is a recursive method that calculates the number of connected
     components in the 3D neighborhood after the center pixel would
     have been removed.
@@ -547,19 +552,23 @@ def octree_labeling(octant, label, cube):
               cube[25] = label
 
 
-def _loop_through(img, curr_border):
+cdef list _loop_through(img_type img,
+                        int curr_border):
     """Inner loop of compute_thin_image.
 
     return simple_border_points as a list to be rechecked sequentially.
     """
+    cdef:
+        list simple_border_points = []
+        npy_intp p, r, c
+        bint is_border_pt
+
     # loop through the image
     # NB: each loop is from 1 to size-1: img is padded from all sides 
-    simple_border_points = []
 
-    ### XXX: 2D images
     ### if the original is 2D, img.shape[0] == 3, the algorithm removes too much
     ### because all points are considered 'boundary' in the 3rd direction.
-    ### Hence just bail out
+    ### Hence just bail out.
     if img.shape[0] == 3 and curr_border in (5, 6):
         print("skipping curr_border = ", curr_border)
         return []
@@ -607,14 +616,18 @@ def _loop_through(img, curr_border):
 
 
 def _compute_thin_image(img):
-    ### compute
-    unchanged_borders = 0
+
+    cdef:
+        int unchanged_borders = 0, curr_border
+        npy_intp p, r, c
+        bint no_change
+        list simple_border_points
 
     # loop through the image several times until there is no change for all
     # the six border types
     while unchanged_borders < 6:
         unchanged_borders = 0
-        for curr_border in (4, 3, 2, 1, 5, 6):
+        for curr_border in [4, 3, 2, 1, 5, 6]:
 
             simple_border_points = _loop_through(img, curr_border)
             print(curr_border, " : ", simple_border_points, '\n')

@@ -12,7 +12,6 @@ def _prepare_image(img_in):
         raise ValueError('expect 2D, got ndim = %s' % img_in.ndim)
 
     img = img_in.copy()
-
     if img.ndim == 2:
         img = img.reshape((1,) + img.shape)
 
@@ -23,7 +22,6 @@ def _prepare_image(img_in):
     img_o = np.zeros(tuple(s + 2 for s in img.shape),
                      dtype=np.uint8)
     img_o[1:-1, 1:-1, 1:-1] = img.astype(np.uint8)
-
     return img_o
 
 
