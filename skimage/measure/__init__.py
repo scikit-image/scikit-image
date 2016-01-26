@@ -2,7 +2,7 @@ from ._find_contours import find_contours
 from ._marching_cubes import (marching_cubes, mesh_surface_area,
                               correct_mesh_orientation)
 from ._regionprops import regionprops, perimeter
-from ._simple_metrics import mse, nrmse, psnr
+from .simple_metrics import mse, nrmse, psnr
 from ._structural_similarity import structural_similarity
 from ._polygon import approximate_polygon, subdivide_polygon
 from ._pnpoly import points_in_poly, grid_points_in_poly
