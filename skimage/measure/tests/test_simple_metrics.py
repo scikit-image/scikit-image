@@ -40,8 +40,13 @@ def test_NRMSE():
 
     assert_equal(nrmse(x, x), 0)
 
-    assert_raises(ValueError, nrmse, x.astype(np.uint8), y)
-    assert_raises(ValueError, nrmse, x[:-1], y)
+
+def test_NRMSE_errors():
+    x = np.ones(4)
+    assert_raises(ValueError, nrmse, x.astype(np.uint8), x.astype(np.float32))
+    assert_raises(ValueError, nrmse, x[:-1], x)
+    # invalid normalization name
+    assert_raises(ValueError, nrmse, x, x, 'foo')
 
 
 if __name__ == "__main__":
