@@ -119,7 +119,15 @@ def psnr(im_true, im_test, dynamic_range=None):
 
     if dynamic_range is None:
         dmin, dmax = dtype_range[im_true.dtype.type]
-        dynamic_range = dmax - dmin
+        dynamic_range = dmax  # assume non-negative inputs
+        if im_true.min() < 0:
+            raise ValueError(
+                "im_true contains negative values.  Please manually specify "
+                "the dynamic range.")
+        if im_true.max() > dmax:
+            raise ValueError(
+                "im_true has a larger maximum intensity than expected for its "
+                "data type.  Please manually specify the dynamic_range")
 
     im_true, im_test = _as_floats(im_true, im_test)
 
