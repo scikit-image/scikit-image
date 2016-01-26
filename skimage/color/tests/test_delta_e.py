@@ -139,11 +139,18 @@ def test_cmc():
     assert_allclose(dE2, oracle, rtol=1.e-8)
 
     # Test that equal colors have a distance of 0:
+    lab1 = lab2
+    assert_equal(deltaE_cmc(lab1, lab2), np.zeros(oracle.shape))
+    # If they're *almost* equal, than that's still fine:
+    lab2[0, 0] = lab2[0, 0] + np.finfo(float).eps
+    assert_almost_equal(deltaE_cmc(lab1, lab2), np.zeros(oracle.shape))
+
+    # Generalize to the single item case:
     lab1 = lab2 = np.array([0., 1.59607713, 0.87755709])
     assert_equal(deltaE_cmc(lab1, lab2), 0)
-    # If they're *almost* equal, than that's still fine:
-    lab2 = np.array([0. + np.finfo(float).eps, 1.59607713, 0.87755709])
-    assert_almost_equal(deltaE_cmc(lab1, lab2), 0)
+
+    #lab2 = np.array([0.+ np.finfo(float).eps, 1.59607713, 0.87755709])
+    #assert_equal(deltaE_cmc(lab1, lab2), 0)
 
 
 def test_single_color_cie76():

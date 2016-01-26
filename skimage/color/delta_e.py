@@ -18,7 +18,6 @@ http://en.wikipedia.org/wiki/Color_difference
 
 """
 from __future__ import division
-import sys
 
 import numpy as np
 
@@ -327,11 +326,16 @@ def get_dH2(lab1, lab2):
     and then simplified to:
         2*|ab1|*|ab2| - 2*dot(ab1, ab2)
     """
-    if np.allclose(lab1, lab2):
-        return 0
 
     lab1 = np.asarray(lab1)
     lab2 = np.asarray(lab2)
+
+    if np.allclose(lab1, lab2):
+        if len(lab1.shape) > 1:
+            return np.zeros(lab1.shape[0])
+        else:
+            return 0
+
     a1, b1 = np.rollaxis(lab1, -1)[1:3]
     a2, b2 = np.rollaxis(lab2, -1)[1:3]
 
