@@ -598,14 +598,6 @@ cdef list _loop_through(pixel_type[:, :, ::1] img,
 
     # loop through the image
     # NB: each loop is from 1 to size-1: img is padded from all sides 
-
-    ### if the original is 2D, img.shape[0] == 3, the algorithm removes too much
-    ### because all points are considered 'boundary' in the 3rd direction.
-    ### Hence just bail out.
-    if img.shape[0] == 3 and curr_border in (5, 6):
-        print("skipping curr_border = ", curr_border)
-        return []
-
     for p in range(1, img.shape[0] - 1):
         for r in range(1, img.shape[1] - 1):
             for c in range(1, img.shape[2] - 1):
@@ -651,17 +643,27 @@ cdef list _loop_through(pixel_type[:, :, ::1] img,
 def _compute_thin_image(pixel_type[:, :, ::1] img not None):
 
     cdef:
-        int unchanged_borders = 0, curr_border
+        int unchanged_borders = 0, curr_border, num_borders
+        int borders[6]
         npy_intp p, r, c
         bint no_change
         list simple_border_points
         pixel_type[::1] neighb = np.zeros(27, dtype=np.uint8)
 
+    borders[:] = [4, 3, 2, 1, 5, 6]
+
+    # no need to worry about the z direction if the original image is 2D.
+    if img.shape[0] == 3:
+        num_borders = 4
+    else:
+        num_borders = 6
+
     # loop through the image several times until there is no change for all
     # the six border types
-    while unchanged_borders < 6:
+    while unchanged_borders < num_borders:
         unchanged_borders = 0
-        for curr_border in [4, 3, 2, 1, 5, 6]:
+        for j in range(num_borders):
+            curr_border = borders[j]
 
             simple_border_points = _loop_through(img, curr_border)
             print(curr_border, " : ", simple_border_points, '\n')
@@ -676,7 +678,7 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
                     img[p, r, c] = 0
                     no_change = False
                 else:
-                    print(" *** ", pt, is_simple_point(neighb))
+                    print(" *** ", pt, " is not simple.")
 
             if no_change:
                 unchanged_borders += 1
