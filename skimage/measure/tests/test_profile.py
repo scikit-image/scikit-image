@@ -122,6 +122,7 @@ plane = np.array([[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 0, 1, 1],
                   [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]], dtype=np.float)
 image3d = np.dstack((plane, plane, plane, plane, plane)).T
 
+
 def test_3d_vertical_downward():
     prof = profile_line(image3d, (0, 0, 0), (0, 1, 0), order=0, multichannel=False)
     expected_prof = np.array([1, 1])
