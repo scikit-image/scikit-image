@@ -16,12 +16,11 @@ def _assert_compatible(X, Y):
 
 
 def _as_floats(X, Y):
-    """Promote X, Y to nearest appropriate floating point precision."""
-    float_type = np.result_type(X.dtype, Y.dtype, np.float32)
-    if X.dtype != float_type:
-        X = X.astype(float_type)
-    if Y.dtype != float_type:
-        Y = Y.astype(float_type)
+    """Promote X, Y to floating point precision."""
+    if X.dtype != np.float64:
+        X = X.astype(np.float64)
+    if Y.dtype != np.float64:
+        Y = Y.astype(np.float64)
     return X, Y
 
 
