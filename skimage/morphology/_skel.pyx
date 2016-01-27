@@ -64,7 +64,7 @@ NUMPOINTS_LUT = fill_numpoints_LUT()
 
 
 def fill_Euler_LUT():
-    LUT = np.zeros(256, dtype=int)
+    LUT = np.zeros(256, dtype=np.intc)
 
     LUT[1]  =  1
     LUT[3]  = -1
@@ -200,14 +200,14 @@ def fill_Euler_LUT():
     LUT[255] = -1
     return LUT
 
-LUT = fill_Euler_LUT()
+cdef int[::] LUT = fill_Euler_LUT()
 
 
 ### Octants (indexOctantXXX functions)
 OCTANTS = tuple(range(8))
 NEB, NWB, SEB, SWB, NEU, NWU, SEU, SWU = OCTANTS
 
-_neib_idx = np.empty((8, 7), dtype=np.int32)
+_neib_idx = np.empty((8, 7), dtype=np.intc)
 _neib_idx[NEB, ...] = [2, 1, 11, 10, 5, 4, 14]
 _neib_idx[NWB, ...] = [0, 9, 3, 12, 1, 10, 4]
 _neib_idx[SEB, ...] = [8, 7, 17, 16, 5, 4, 14]
@@ -241,6 +241,8 @@ def is_surfacepoint(neighbors, points_LUT):
     return True
 
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef bint is_Euler_invariant(neighb_type neighbors):
     """Check if a point is Euler invariant.
 
