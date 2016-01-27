@@ -207,21 +207,29 @@ LUT = fill_Euler_LUT()
 OCTANTS = tuple(range(8))
 NEB, NWB, SEB, SWB, NEU, NWU, SEU, SWU = OCTANTS
 
-neib_idx = np.empty((8, 7), dtype=int)
-neib_idx[NEB, ...] = [2, 1, 11, 10, 5, 4, 14]
-neib_idx[NWB, ...] = [0, 9, 3, 12, 1, 10, 4]
-neib_idx[SEB, ...] = [8, 7, 17, 16, 5, 4, 14]
-neib_idx[SWB, ...] = [6, 15, 7, 16, 3, 12, 4]
-neib_idx[NEU, ...] = [20, 23, 19, 22, 11, 14, 10]
-neib_idx[NWU, ...] = [18, 21, 9, 12, 19, 22, 10]
-neib_idx[SEU, ...] = [26, 23, 17, 14, 25, 22, 16]
-neib_idx[SWU, ...] = [24, 25, 15, 16, 21, 22, 12]
+_neib_idx = np.empty((8, 7), dtype=np.int32)
+_neib_idx[NEB, ...] = [2, 1, 11, 10, 5, 4, 14]
+_neib_idx[NWB, ...] = [0, 9, 3, 12, 1, 10, 4]
+_neib_idx[SEB, ...] = [8, 7, 17, 16, 5, 4, 14]
+_neib_idx[SWB, ...] = [6, 15, 7, 16, 3, 12, 4]
+_neib_idx[NEU, ...] = [20, 23, 19, 22, 11, 14, 10]
+_neib_idx[NWU, ...] = [18, 21, 9, 12, 19, 22, 10]
+_neib_idx[SEU, ...] = [26, 23, 17, 14, 25, 22, 16]
+_neib_idx[SWU, ...] = [24, 25, 15, 16, 21, 22, 12]
+cdef int[:, ::1] neib_idx = _neib_idx
 
-def index_octants(octant, neighb_type neighbors):
-    n = 1
-    for j, idx in enumerate(neib_idx[octant]):
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cdef int index_octants(int octant,
+                       neighb_type neighbors,
+                       int[:, ::1] neib_idx=neib_idx):
+    # XXX: early binding or just a normal argument for neib_idx?
+    cdef int n = 1, j, idx
+    for j in range(7):
+        idx = neib_idx[octant, j]
         if neighbors[idx] == 1:
-            n |= 2**(7 - j)
+            n |= 2 ** (7 - j)    # XXX hardcode powers?
     return n
 
 
