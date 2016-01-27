@@ -4,15 +4,14 @@ import numpy as np
 from numpy cimport npy_intp, npy_uint8
 cimport cython
 
-ctypedef npy_uint8[:, :, ::1] img_type
-ctypedef npy_uint8[::1] neighb_type
+ctypedef npy_uint8 pixel_type
 
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef void get_neighborhood(img_type img,
+cdef void get_neighborhood(pixel_type[:, :, ::1] img,
                            npy_intp p, npy_intp r, npy_intp c,
-                           neighb_type neighborhood):
+                           pixel_type[::1] neighborhood):
     """Get the neighborhood of a pixel.
 
        Assume zero boundary conditions. Image is already padded, so no
@@ -222,7 +221,7 @@ cdef int[:, ::1] neib_idx = _neib_idx
 @cython.wraparound(False)
 @cython.cdivision(True)
 cdef int index_octants(int octant,
-                       neighb_type neighbors,
+                       pixel_type[::1] neighbors,
                        int[:, ::1] neib_idx=neib_idx):
     # XXX: early binding or just a normal argument for neib_idx?
     cdef int n = 1, j, idx
@@ -243,7 +242,7 @@ def is_surfacepoint(neighbors, points_LUT):
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef inline bint is_endpoint(neighb_type neighbors):
+cdef inline bint is_endpoint(pixel_type[::1] neighbors):
     """An endpoint has exactly one neighbor in the 26-neighborhood.
     """
     # The center pixel is counted, thus r.h.s. is 2
@@ -255,7 +254,7 @@ cdef inline bint is_endpoint(neighb_type neighbors):
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef bint is_Euler_invariant(neighb_type neighbors):
+cdef bint is_Euler_invariant(pixel_type[::1] neighbors):
     """Check if a point is Euler invariant.
 
     Calculate Euler characteristc for each octant and sum up.
@@ -280,7 +279,7 @@ cdef bint is_Euler_invariant(neighb_type neighbors):
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef bint is_simple_point(neighb_type neighbors):
+cdef bint is_simple_point(pixel_type[::1] neighbors):
     """Check is a point is a Simple Point.
 
     This method is named 'N(v)_labeling' in [Lee94].
@@ -300,11 +299,14 @@ cdef bint is_simple_point(neighb_type neighbors):
     """
     # copy neighbors for labeling
     # ignore center pixel (i=13) when counting (see [Lee94])
-    cdef neighb_type cube = np.r_[neighbors[:13], neighbors[14:]]
-    cdef int i
+    cdef:
+        pixel_type a_cube[26]
+        pixel_type[::1] cube = a_cube
+    cube[:13] = neighbors[:13]
+    cube[13:] = neighbors[14:]
 
     # set initial label
-    cdef int label = 2
+    cdef int label = 2, i
 
     # for all point in the neighborhood
     for i in range(26):
@@ -337,7 +339,7 @@ cdef bint is_simple_point(neighb_type neighbors):
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef void octree_labeling(int octant, int label, neighb_type cube):
+cdef void octree_labeling(int octant, int label, pixel_type[::1] cube):
     """This is a recursive method that calculates the number of connected
     components in the 3D neighborhood after the center pixel would
     have been removed.
@@ -582,7 +584,7 @@ cdef void octree_labeling(int octant, int label, neighb_type cube):
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef list _loop_through(img_type img,
+cdef list _loop_through(pixel_type[:, :, ::1] img,
                         int curr_border):
     """Inner loop of compute_thin_image.
 
@@ -590,7 +592,7 @@ cdef list _loop_through(img_type img,
     """
     cdef:
         list simple_border_points = []
-        neighb_type neighborhood = np.zeros(27, dtype=np.uint8)
+        pixel_type[::1] neighborhood = np.zeros(27, dtype=np.uint8)
         npy_intp p, r, c
         bint is_border_pt
 
@@ -651,7 +653,7 @@ def _compute_thin_image(img):
         npy_intp p, r, c
         bint no_change
         list simple_border_points
-        neighb_type neighb = np.zeros(27, dtype=np.uint8)
+        pixel_type[::1] neighb = np.zeros(27, dtype=np.uint8)
 
     # loop through the image several times until there is no change for all
     # the six border types
