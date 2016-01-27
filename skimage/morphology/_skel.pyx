@@ -646,7 +646,9 @@ cdef list _loop_through(pixel_type[:, :, ::1] img,
     return simple_border_points
 
 
-def _compute_thin_image(img):
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def _compute_thin_image(pixel_type[:, :, ::1] img not None):
 
     cdef:
         int unchanged_borders = 0, curr_border
@@ -680,4 +682,4 @@ def _compute_thin_image(img):
                 unchanged_borders += 1
             simple_border_points = []
 
-    return img
+    return np.asarray(img)
