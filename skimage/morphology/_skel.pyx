@@ -243,6 +243,18 @@ def is_surfacepoint(neighbors, points_LUT):
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
+cdef inline bint is_endpoint(neighb_type neighbors):
+    """An endpoint has exactly one neighbor in the 26-neighborhood.
+    """
+    # The center pixel is counted, thus r.h.s. is 2
+    cdef int s = 0, j
+    for j in range(27):
+        s += neighbors[j]
+    return s == 2
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef bint is_Euler_invariant(neighb_type neighbors):
     """Check if a point is Euler invariant.
 
@@ -612,14 +624,12 @@ cdef list _loop_through(img_type img,
 
                 get_neighborhood(img, p, r, c, neighborhood)
 
-                # check if (p, r, c) is an endpoint. An endpoint has exactly
-                # one neighbor in the 26-neighborhood.
-                # The center pixel is counted, thus r.h.s. is 2
-                if np.sum(neighborhood) == 2:
+                # check if (p, r, c) is an endpoint: endpoints are not deletable.
+                if is_endpoint(neighborhood):
                     continue
 
-                # check if point is Euler invariant (condition 1 in [Lee94])
-                # if it is not, it's not deletable
+                # check if point is Euler invariant (condition 1 in [Lee94]):
+                # if it is not, it's not deletable.
                 if not is_Euler_invariant(neighborhood):
                     continue
 
