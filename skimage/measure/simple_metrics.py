@@ -6,6 +6,15 @@ from ..util.dtype import dtype_range
 __all__ = ['mse', 'nrmse', 'psnr']
 
 
+def _assert_compatible(X, Y):
+    """Raise an error if the shape and dtype do not match."""
+    if not X.dtype == Y.dtype:
+        raise ValueError('Input images must have the same dtype.')
+    if not X.shape == Y.shape:
+        raise ValueError('Input images must have the same dimensions.')
+    return
+
+
 def _as_floats(X, Y):
     """Promote X, Y to nearest appropriate floating point precision."""
     float_type = np.result_type(X.dtype, Y.dtype, np.float32)
@@ -30,12 +39,8 @@ def mse(X, Y):
         The MSE metric.
 
     """
+    _assert_compatible(X, Y)
     X, Y = _as_floats(X, Y)
-
-    if not X.shape == Y.shape:
-        raise ValueError('Input images must have the same dimensions.')
-    if not X.dtype == Y.dtype:
-        raise ValueError('Input images must have the same dtype.')
     return np.square(X - Y).mean()
 
 
@@ -67,12 +72,7 @@ def nrmse(im_true, im_test, norm_type='Euclidean'):
     .. [1] https://en.wikipedia.org/wiki/Root-mean-square_deviation
 
     """
-    if not im_true.dtype == im_test.dtype:
-        raise ValueError('Input images must have the same dtype.')
-
-    if not im_true.shape == im_test.shape:
-        raise ValueError('Input images must have the same dimensions.')
-
+    _assert_compatible(im_true, im_test)
     im_true, im_test = _as_floats(im_true, im_test)
 
     norm_type = norm_type.lower()
@@ -111,23 +111,19 @@ def psnr(im_true, im_test, dynamic_range=None):
     .. [1] https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio
 
     """
-    if not im_true.dtype == im_test.dtype:
-        raise ValueError('Input images must have the same dtype.')
-
-    if not im_true.shape == im_test.shape:
-        raise ValueError('Input images must have the same dimensions.')
-
+    _assert_compatible(im_true, im_test)
     if dynamic_range is None:
         dmin, dmax = dtype_range[im_true.dtype.type]
-        dynamic_range = dmax  # assume non-negative inputs
-        if im_true.min() < 0:
+        true_min, true_max = im_true.min(), im_true.max()
+        if true_max > dmax or true_min < dmin:
             raise ValueError(
-                "im_true contains negative values.  Please manually specify "
-                "the dynamic range.")
-        if im_true.max() > dmax:
-            raise ValueError(
-                "im_true has a larger maximum intensity than expected for its "
-                "data type.  Please manually specify the dynamic_range")
+                "im_true has intensity values outside the range expected for "
+                "its data type.  Please manually specify the dynamic_range")
+        if true_min >= 0:
+            # most common case (255 for uint8, 1 for float)
+            dynamic_range = dmax
+        else:
+            dynamic_range = dmax - dmin
 
     im_true, im_test = _as_floats(im_true, im_test)
 
