@@ -223,13 +223,6 @@ cdef void get_neighborhood(pixel_type[:, :, ::1] img,
 
 
 ###### look-up tables
-def fill_numpoints_LUT(n=256):
-    p = int(np.log2(n) + 1)
-    return np.sum(np.arange(n)[:, None] & (1 << np.arange(p)) != 0, axis=1)
-
-NUMPOINTS_LUT = fill_numpoints_LUT()
-
-
 def fill_Euler_LUT():
     """ Look-up table for preserving Euler characteristic.
 
@@ -403,14 +396,6 @@ cdef int index_octants(int octant,
         if neighbors[idx] == 1:
             n |= 2 ** (7 - j)    # XXX hardcode powers?
     return n
-
-
-def is_surfacepoint(neighbors, points_LUT):
-    for octant in OCTANTS:
-        n = index_octants(octant, neighbors)
-        if n not in (240, 165, 170) and points_LUT[n] > 2:
-            return False
-    return True
 
 
 cdef inline bint is_endpoint(pixel_type neighbors[]):
