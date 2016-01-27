@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import (run_module_suite, assert_equal, assert_raises,
                            assert_almost_equal)
 
-from skimage.measure import psnr, nrmse
+from skimage.measure import psnr, nrmse, mse
 import skimage.data
 
 np.random.seed(5)
@@ -23,7 +23,7 @@ def test_PSNR_vs_IPOL():
 def test_PSNR_float():
     p_uint8 = psnr(cam, cam_noisy)
     p_float64 = psnr(cam/255., cam_noisy/255., dynamic_range=1)
-    assert_almost_equal(p_uint8, p_float64)
+    assert_almost_equal(p_uint8, p_float64, decimal=5)
 
 
 def test_PSNR_errors():
@@ -38,7 +38,14 @@ def test_NRMSE():
     assert_equal(nrmse(y, x, 'Euclidean'), 1/np.sqrt(3))
     assert_equal(nrmse(y, x, 'min-max'), 1/(y.max()-y.min()))
 
-    assert_equal(nrmse(x, x), 0)
+
+def test_NRMSE_no_int_overflow():
+    camf = cam.astype(np.float32)
+    cam_noisyf = cam_noisy.astype(np.float32)
+    assert_almost_equal(mse(cam, cam_noisy),
+                        mse(camf, cam_noisyf))
+    assert_almost_equal(nrmse(cam, cam_noisy),
+                        nrmse(camf, cam_noisyf))
 
 
 def test_NRMSE_errors():
