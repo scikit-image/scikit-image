@@ -235,7 +235,6 @@ def rotate_sample_points(linewidth, perp_array, src, dst):
     sampling_array : array, shape (3, M, N), float
         The coordinates of the 3d sample points along the scan line. The length of the
         profile is the ceil of the computed length of the scan line.
-
     """
     line_vector = np.subtract(dst, src)
     length_vector = np.linalg.norm(line_vector)
@@ -245,12 +244,7 @@ def rotate_sample_points(linewidth, perp_array, src, dst):
     # from the direction axis to simulate sampling of points around the axis
     sampling_array = []
     for perp_points in perp_array.T:
-        distance_point_line = _distance_point_line_3d(perp_points[0], src, dst)
-        if distance_point_line == 0:
-            rotation_angles = np.array([0])
-        else:
-            rotation_angles = np.linspace(0, 2 * constants.pi, 2 * distance_point_line + 3)
-            rotation_angles = np.delete(rotation_angles, len(rotation_angles) - 1)
+        rotation_angles = _rotation_angles_by_distance(dst, src, perp_points[0])
         for angle in rotation_angles:  # the number of angles to use as rotation angles for the samping points
             points_array = []
             for point in perp_points:  # the number of unit points on displacement vector
@@ -264,6 +258,34 @@ def rotate_sample_points(linewidth, perp_array, src, dst):
 
     # Return transposed array for ndi.map_coordinates
     return np.array(sampling_array, dtype=float).T
+
+
+def _rotation_angles_by_distance(dst, src, point):
+    """Return an array of angles that will be used to rotate a point 360 degrees around a line.
+    The number of angles is dependent on the distance between the point and the line.
+    The farther the point from the line, the smaller the angle incrementation.
+
+    Parameters
+    ----------
+    src : 3-tuple of numeric scalar (float or int)
+        A first point where the line is passing through
+    dst : 3-tuple of numeric scalar (float or int)
+        A second point where the line is passing through
+    point : 3-tuple of numeric scalar (float or int)
+        The point to find the distance.
+
+    Returns
+    -------
+    angles : tuple, float
+        The angles that will be used to rotate the sample point to create more sample points around the line.
+    """
+    distance_point_line = _distance_point_line_3d(point, src, dst)
+    if distance_point_line == 0:
+        rotation_angles = np.array([0])
+    else:
+        rotation_angles = np.linspace(0, 2 * constants.pi, 2 * distance_point_line + 3)
+        rotation_angles = np.delete(rotation_angles, len(rotation_angles) - 1)
+    return rotation_angles
 
 
 def _distance_point_line_3d(point, src, dst):
@@ -282,7 +304,6 @@ def _distance_point_line_3d(point, src, dst):
     -------
     point : float
         The distance between the point and the line in units
-
     """
     line_vector = np.subtract(dst, src)
     length_vector = np.linalg.norm(line_vector)
@@ -311,7 +332,6 @@ def _rotate_point_around_line(point_to_rotate, point_on_line, unit_direction_vec
     -------
     return_value : array, shape (3), float
         The coordinates of the rotated point around the line
-
     """
     c, b, a = point_on_line
     z, y, x = point_to_rotate
