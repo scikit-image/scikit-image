@@ -42,6 +42,137 @@ ctypedef npy_uint8 pixel_type
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
+def _compute_thin_image(pixel_type[:, :, ::1] img not None):
+    """Compute a thin image.
+
+    Loop through the image multiple times, removing "simple" points, i.e.
+    those point which can be removed without changing local connectivity in the
+    3x3x3 neighborhood of a point.
+
+    This routine implements the two-pass algorthim of [Lee94]. Namely,
+    for each of the six border types (positive and negative x-, y- and z-),
+    the algorithm first collects all possibly deletable points, and then
+    performs a sequential rechecking.
+
+    The input, `img`, is assumed to be a 3D binary image in the
+    (p, r, c) format [i.e., C ordered array], filled by zeros (background) and
+    ones. Furthermore, `img` is assumed to be padded by zeros from all
+    directions --- this way the zero boundary conditions are authomatic
+    and there is need to guard against out-of-bounds access.
+
+    """
+    cdef:
+        int unchanged_borders = 0, curr_border, num_borders
+        int borders[6]
+        npy_intp p, r, c
+        bint no_change
+        list simple_border_points
+        pixel_type neighb[27]
+    borders[:] = [4, 3, 2, 1, 5, 6]
+
+    # no need to worry about the z direction if the original image is 2D.
+    if img.shape[0] == 3:
+        num_borders = 4
+    else:
+        num_borders = 6
+
+    # loop through the image several times until there is no change for all
+    # the six border types
+    while unchanged_borders < num_borders:
+        unchanged_borders = 0
+        for j in range(num_borders):
+            curr_border = borders[j]
+
+            simple_border_points = _loop_through(img, curr_border)
+           ## print(curr_border, " : ", simple_border_points, '\n')
+
+            # sequential re-checking to preserve connectivity when deleting
+            # in a parallel way
+            no_change = True
+            for pt in simple_border_points:
+                p, r, c = pt
+                get_neighborhood(img, p, r, c, neighb)
+                if is_simple_point(neighb):
+                    img[p, r, c] = 0
+                    no_change = False
+                else:
+                    pass
+            ##        print(" *** ", pt, " is not simple.")
+
+            if no_change:
+                unchanged_borders += 1
+            simple_border_points = []
+
+    return np.asarray(img)
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef list _loop_through(pixel_type[:, :, ::1] img,
+                        int curr_border):
+    """Inner loop of compute_thin_image.
+
+    The algorithm of [Lee94] proceeds in two steps: (1) six directions are
+    checked for simple border points to remove, and (2) these candidates are
+    sequentially rechecked, see Sec 3 of [Lee94] for rationale and discussion.
+
+    This routine implements the first step above: it loops over the image
+    for a given direction and assembles candidates for removal.
+
+    """
+    # This routine looks like it could be nogil, but actually it cannot be,
+    # because of `simple_border_points` being a python list which is being
+    # mutated.
+    cdef:
+        list simple_border_points = []
+        pixel_type neighborhood[27]
+        npy_intp p, r, c
+        bint is_border_pt
+
+    # loop through the image
+    # NB: each loop is from 1 to size-1: img is padded from all sides 
+    for p in range(1, img.shape[0] - 1):
+        for r in range(1, img.shape[1] - 1):
+            for c in range(1, img.shape[2] - 1):
+
+                # check if pixel is foreground
+                if img[p, r, c] != 1:
+                    continue
+
+                is_border_pt = (curr_border == 1 and img[p, r, c-1] <= 0 or  #N
+                                curr_border == 2 and img[p, r, c+1] <= 0 or  #S
+                                curr_border == 3 and img[p, r+1, c] <= 0 or  #E
+                                curr_border == 4 and img[p, r-1, c] <= 0 or  #W
+                                curr_border == 5 and img[p+1, r, c] <= 0 or  #U
+                                curr_border == 6 and img[p-1, r, c] <= 0)    #B
+                if not is_border_pt:
+                    # current point is not deletable
+                    continue
+
+                get_neighborhood(img, p, r, c, neighborhood)
+
+                # check if (p, r, c) is an endpoint (then it's not deletable.)
+                if is_endpoint(neighborhood):
+                    continue
+
+                # check if point is Euler invariant (condition 1 in [Lee94]):
+                # if it is not, it's not deletable.
+                if not is_Euler_invariant(neighborhood):
+                    continue
+
+                # check if point is simple (i.e., deletion does not
+                # change connectivity in the 3x3x3 neighborhood)
+                # this are conditions 2 and 3 in [Lee94]
+                if not is_simple_point(neighborhood):
+                    continue
+
+                # ok, add (p, r, c) to the list of simple border points
+                simple_border_points.append((p, r, c))
+    return simple_border_points
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef void get_neighborhood(pixel_type[:, :, ::1] img,
                            npy_intp p, npy_intp r, npy_intp c,
                            pixel_type neighborhood[]):
@@ -622,134 +753,3 @@ cdef void octree_labeling(int octant, int label, pixel_type cube[]):
               octree_labeling(7, label, cube)
         if cube[25] == 1:
               cube[25] = label
-
-
-@cython.boundscheck(False)
-@cython.wraparound(False)
-cdef list _loop_through(pixel_type[:, :, ::1] img,
-                        int curr_border):
-    """Inner loop of compute_thin_image.
-
-    The algorithm of [Lee94] proceeds in two steps: (1) six directions are
-    checked for simple border points to remove, and (2) these candidates are
-    sequentially rechecked, see Sec 3 of [Lee94] for rationale and discussion.
-
-    This routine implements the first step above: it loops over the image
-    for a given direction and assembles candidates for removal.
-
-    """
-    # This routine looks like it could be nogil, but actually it cannot be,
-    # because of `simple_border_points` being a python list which is being
-    # mutated.
-    cdef:
-        list simple_border_points = []
-        pixel_type neighborhood[27]
-        npy_intp p, r, c
-        bint is_border_pt
-
-    # loop through the image
-    # NB: each loop is from 1 to size-1: img is padded from all sides 
-    for p in range(1, img.shape[0] - 1):
-        for r in range(1, img.shape[1] - 1):
-            for c in range(1, img.shape[2] - 1):
-
-                # check if pixel is foreground
-                if img[p, r, c] != 1:
-                    continue
-
-                is_border_pt = (curr_border == 1 and img[p, r, c-1] <= 0 or  #N
-                                curr_border == 2 and img[p, r, c+1] <= 0 or  #S
-                                curr_border == 3 and img[p, r+1, c] <= 0 or  #E
-                                curr_border == 4 and img[p, r-1, c] <= 0 or  #W
-                                curr_border == 5 and img[p+1, r, c] <= 0 or  #U
-                                curr_border == 6 and img[p-1, r, c] <= 0)    #B
-                if not is_border_pt:
-                    # current point is not deletable
-                    continue
-
-                get_neighborhood(img, p, r, c, neighborhood)
-
-                # check if (p, r, c) is an endpoint (then it's not deletable.)
-                if is_endpoint(neighborhood):
-                    continue
-
-                # check if point is Euler invariant (condition 1 in [Lee94]):
-                # if it is not, it's not deletable.
-                if not is_Euler_invariant(neighborhood):
-                    continue
-
-                # check if point is simple (i.e., deletion does not
-                # change connectivity in the 3x3x3 neighborhood)
-                # this are conditions 2 and 3 in [Lee94]
-                if not is_simple_point(neighborhood):
-                    continue
-
-                # ok, add (p, r, c) to the list of simple border points
-                simple_border_points.append((p, r, c))
-    return simple_border_points
-
-
-@cython.boundscheck(False)
-@cython.wraparound(False)
-def _compute_thin_image(pixel_type[:, :, ::1] img not None):
-    """Compute a thin image.
-
-    Loop through the image multiple times, removing "simple" points, i.e.
-    those point which can be removed without changing local connectivity in the
-    3x3x3 neighborhood of a point.
-
-    This routine implements the two-pass algorthim of [Lee94]. Namely,
-    for each of the six border types (positive and negative x-, y- and z-),
-    the algorithm first collects all possibly deletable points, and then
-    performs a sequential rechecking.
-
-    The input, `img`, is assumed to be a 3D binary image in the
-    (p, r, c) format [i.e., C ordered array], filled by zeros (background) and
-    ones. Furthermore, `img` is assumed to be padded by zeros from all
-    directions --- this way the zero boundary conditions are authomatic
-    and there is need to guard against out-of-bounds access.
-
-    """
-    cdef:
-        int unchanged_borders = 0, curr_border, num_borders
-        int borders[6]
-        npy_intp p, r, c
-        bint no_change
-        list simple_border_points
-        pixel_type neighb[27]
-    borders[:] = [4, 3, 2, 1, 5, 6]
-
-    # no need to worry about the z direction if the original image is 2D.
-    if img.shape[0] == 3:
-        num_borders = 4
-    else:
-        num_borders = 6
-
-    # loop through the image several times until there is no change for all
-    # the six border types
-    while unchanged_borders < num_borders:
-        unchanged_borders = 0
-        for j in range(num_borders):
-            curr_border = borders[j]
-
-            simple_border_points = _loop_through(img, curr_border)
-           ## print(curr_border, " : ", simple_border_points, '\n')
-
-            # sequential re-checking to preserve connectivity when deleting
-            # in a parallel way
-            no_change = True
-            for pt in simple_border_points:
-                p, r, c = pt
-                get_neighborhood(img, p, r, c, neighb)
-                if is_simple_point(neighb):
-                    img[p, r, c] = 0
-                    no_change = False
-                else:
-                    pass
-            ##        print(" *** ", pt, " is not simple.")
-
-            if no_change:
-                unchanged_borders += 1
-            simple_border_points = []
-
-    return np.asarray(img)
