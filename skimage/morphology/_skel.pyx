@@ -129,6 +129,11 @@ cdef list _loop_through(pixel_type[:, :, ::1] img,
         npy_intp p, r, c
         bint is_border_pt
 
+        # rebind global names to avoid lookup. Both tables are filled in
+        # at import time.
+        int[::1] Euler_LUT = LUT
+        cdef int[:, ::1] neighb_idx = NEIGHB_IDX
+
     # loop through the image
     # NB: each loop is from 1 to size-1: img is padded from all sides 
     for p in range(1, img.shape[0] - 1):
@@ -157,7 +162,7 @@ cdef list _loop_through(pixel_type[:, :, ::1] img,
 
                 # check if point is Euler invariant (condition 1 in [Lee94]):
                 # if it is not, it's not deletable.
-                if not is_Euler_invariant(neighborhood):
+                if not is_Euler_invariant(neighborhood, Euler_LUT, neighb_idx):
                     continue
 
                 # check if point is simple (i.e., deletion does not
@@ -363,24 +368,28 @@ def fill_Euler_LUT():
     LUT[253] =  1
     LUT[255] = -1
     return LUT
-
-cdef int[::] LUT = fill_Euler_LUT()
+cdef int[::1] LUT = fill_Euler_LUT()
 
 
 ### Octants (indexOctantXXX functions)
-OCTANTS = tuple(range(8))
-NEB, NWB, SEB, SWB, NEU, NWU, SEU, SWU = OCTANTS
+def fill_neighbor_idx():
+    """Fill the look-up table for indexing octants for computing the Euler
+    characteristics.
 
-_neib_idx = np.empty((8, 7), dtype=np.intc)
-_neib_idx[NEB, ...] = [2, 1, 11, 10, 5, 4, 14]
-_neib_idx[NWB, ...] = [0, 9, 3, 12, 1, 10, 4]
-_neib_idx[SEB, ...] = [8, 7, 17, 16, 5, 4, 14]
-_neib_idx[SWB, ...] = [6, 15, 7, 16, 3, 12, 4]
-_neib_idx[NEU, ...] = [20, 23, 19, 22, 11, 14, 10]
-_neib_idx[NWU, ...] = [18, 21, 9, 12, 19, 22, 10]
-_neib_idx[SEU, ...] = [26, 23, 17, 14, 25, 22, 16]
-_neib_idx[SWU, ...] = [24, 25, 15, 16, 21, 22, 12]
-cdef int[:, ::1] neib_idx = _neib_idx
+    See index_octants and is_Euler_invariant routines below.
+    """
+    NEB, NWB, SEB, SWB, NEU, NWU, SEU, SWU = tuple(range(8))
+    _neighb_idx = np.empty((8, 7), dtype=np.intc)
+    _neighb_idx[NEB, ...] = [2, 1, 11, 10, 5, 4, 14]
+    _neighb_idx[NWB, ...] = [0, 9, 3, 12, 1, 10, 4]
+    _neighb_idx[SEB, ...] = [8, 7, 17, 16, 5, 4, 14]
+    _neighb_idx[SWB, ...] = [6, 15, 7, 16, 3, 12, 4]
+    _neighb_idx[NEU, ...] = [20, 23, 19, 22, 11, 14, 10]
+    _neighb_idx[NWU, ...] = [18, 21, 9, 12, 19, 22, 10]
+    _neighb_idx[SEU, ...] = [26, 23, 17, 14, 25, 22, 16]
+    _neighb_idx[SWU, ...] = [24, 25, 15, 16, 21, 22, 12]
+    return _neighb_idx
+cdef int[:, ::1] NEIGHB_IDX = fill_neighbor_idx()
 
 
 @cython.boundscheck(False)
@@ -388,8 +397,7 @@ cdef int[:, ::1] neib_idx = _neib_idx
 @cython.cdivision(True)
 cdef int index_octants(int octant,
                        pixel_type neighbors[],
-                       int[:, ::1] neib_idx=neib_idx):
-    # XXX: early binding or just a normal argument for neib_idx?
+                       int[:, ::1] neib_idx):
     cdef int n = 1, j, idx
     for j in range(7):
         idx = neib_idx[octant, j]
@@ -410,15 +418,21 @@ cdef inline bint is_endpoint(pixel_type neighbors[]):
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef bint is_Euler_invariant(pixel_type neighbors[]):
+cdef bint is_Euler_invariant(pixel_type neighbors[],
+                             int[::1] lut,
+                             int[:, ::1] neighb_idx):
     """Check if a point is Euler invariant.
 
     Calculate Euler characteristc for each octant and sum up.
 
     Parameters
     ----------
-    neighbors : uint8 C array, shape (27,)
+    neighbors
         neighbors of a point
+    lut
+        The look-up table for preserving the Euler characteristic.
+    neighb_idx
+        The look-up table for indexing octants.
 
     Returns
     -------
@@ -427,8 +441,8 @@ cdef bint is_Euler_invariant(pixel_type neighbors[]):
     """
     cdef int octant, n, euler_char = 0
     for octant in range(8):
-        n = index_octants(octant, neighbors)
-        euler_char += LUT[n]
+        n = index_octants(octant, neighbors, neighb_idx)
+        euler_char += lut[n]
     return euler_char == 0
 
 
