@@ -733,7 +733,7 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
             curr_border = borders[j]
 
             simple_border_points = _loop_through(img, curr_border)
-            print(curr_border, " : ", simple_border_points, '\n')
+           ## print(curr_border, " : ", simple_border_points, '\n')
 
             # sequential re-checking to preserve connectivity when deleting
             # in a parallel way
@@ -745,7 +745,8 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
                     img[p, r, c] = 0
                     no_change = False
                 else:
-                    print(" *** ", pt, " is not simple.")
+                    pass
+            ##        print(" *** ", pt, " is not simple.")
 
             if no_change:
                 unchanged_borders += 1
