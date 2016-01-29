@@ -16,11 +16,12 @@ def _assert_compatible(im1, im2):
 
 
 def _as_floats(im1, im2):
-    """Promote im1, im2 to floating point precision."""
-    if im1.dtype != np.float64:
-        im1 = im1.astype(np.float64)
-    if im2.dtype != np.float64:
-        im2 = im2.astype(np.float64)
+    """Promote im1, im2 to nearest appropriate floating point precision."""
+    float_type = np.result_type(im1.dtype, im2.dtype, np.float32)
+    if im1.dtype != float_type:
+        im1 = im1.astype(float_type)
+    if im2.dtype != float_type:
+        im2 = im2.astype(float_type)
     return im1, im2
 
 
@@ -40,7 +41,7 @@ def mean_squared_error(im1, im2):
     """
     _assert_compatible(im1, im2)
     im1, im2 = _as_floats(im1, im2)
-    return np.mean(np.square(im1 - im2))
+    return np.mean(np.square(im1 - im2), dtype=np.float64)
 
 
 def normalized_root_mse(im_true, im_test, norm_type='Euclidean'):
@@ -77,7 +78,7 @@ def normalized_root_mse(im_true, im_test, norm_type='Euclidean'):
 
     norm_type = norm_type.lower()
     if norm_type == 'euclidean':
-        denom = np.sqrt(np.mean((im_true*im_true)))
+        denom = np.sqrt(np.mean((im_true*im_true), dtype=np.float64))
     elif norm_type == 'min-max':
         denom = im_true.max() - im_true.min()
     elif norm_type == 'mean':
