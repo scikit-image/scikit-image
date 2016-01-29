@@ -2,6 +2,7 @@ import numpy as np
 from numpy.testing import run_module_suite, assert_raises, assert_equal
 
 from skimage import restoration, data, color, img_as_float, measure
+from skimage._shared._warnings import expected_warnings
 
 
 np.random.seed(1234)
@@ -159,16 +160,16 @@ def test_denoise_bilateral_2d():
     img = np.clip(img, 0, 1)
 
     out1 = restoration.denoise_bilateral(img, sigma_range=0.1,
-                                         sigma_spatial=20)
+                                         sigma_spatial=20, multichannel=False)
     out2 = restoration.denoise_bilateral(img, sigma_range=0.2,
-                                         sigma_spatial=30)
+                                         sigma_spatial=30, multichannel=False)
 
     # make sure noise is reduced in the checkerboard cells
     assert img[30:45, 5:15].std() > out1[30:45, 5:15].std()
     assert out1[30:45, 5:15].std() > out2[30:45, 5:15].std()
 
 
-def test_denoise_bilateral_3d():
+def test_denoise_bilateral_color():
     img = checkerboard.copy()
     # add some random noise
     img += 0.5 * img.std() * np.random.rand(*img.shape)
@@ -185,12 +186,31 @@ def test_denoise_bilateral_3d():
 
 
 def test_denoise_bilateral_3d_grayscale():
-    img =  np.ones((500, 500, 3))
-    assert_raises(TypeError, restoration.denoise_bilateral, img)
+    img =  np.ones((50, 50, 3))
+    assert_raises(TypeError, restoration.denoise_bilateral, img, \
+                  multichannel=False)
+
+
+def test_denoise_bilateral_3d_multichannel():
+    img = np.ones((50, 50, 50))
+    with expected_warnings(["grayscale"]):
+        result = restoration.denoise_bilateral(img, multichannel=True)
+
+    expected = np.empty_like(img)
+    expected.fill(np.nan)
+
+    assert_equal(result, expected)
+
+
+def test_denoise_bilateral_multidimensional():
+    img = np.ones((10, 10, 10, 10))
+    assert_raises(ValueError, restoration.denoise_bilateral, img,
+                  multichannel=True)
+
 
 def test_denoise_bilateral_nan():
     img = np.NaN + np.empty((50, 50))
-    out = restoration.denoise_bilateral(img)
+    out = restoration.denoise_bilateral(img, multichannel=False)
     assert_equal(img, out)
 
 

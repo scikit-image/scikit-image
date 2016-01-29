@@ -7,7 +7,7 @@ import warnings
 
 
 def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
-                      bins=10000, mode='constant', cval=0, multichannel=False):
+                      bins=10000, mode='constant', cval=0, multichannel=True):
     """Denoise image using bilateral filter.
 
     This is an edge-preserving and noise reducing denoising filter. It averages
@@ -86,8 +86,11 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
                 warnings.warn(msg.format(image.shape))
     else:
         if image.ndim > 2:
-            msg = "Input image must be grayscale, RGB, or RGBA; but has shape {0}."
-            raise TypeError(msg.format(image.shape))
+            raise TypeError("Bilateral filter is not implemented for "
+                            "grayscale images of 3 or more dimensions, "
+                            "but input image has {0} dimension. Use "
+                            "``multichannel=True`` for 2-D RGB "
+                            "images.".format(image.shape))
 
 
     mode = _mode_deprecations(mode)
