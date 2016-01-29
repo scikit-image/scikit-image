@@ -3,48 +3,49 @@ from __future__ import division
 import numpy as np
 from ..util.dtype import dtype_range
 
-__all__ = ['mse', 'nrmse', 'psnr']
+__all__ = ['mean_squared_error', 'normalized_root_mse', 'psnr']
 
 
-def _assert_compatible(X, Y):
+def _assert_compatible(im1, im2):
     """Raise an error if the shape and dtype do not match."""
-    if not X.dtype == Y.dtype:
+    if not im1.dtype == im2.dtype:
         raise ValueError('Input images must have the same dtype.')
-    if not X.shape == Y.shape:
+    if not im1.shape == im2.shape:
         raise ValueError('Input images must have the same dimensions.')
     return
 
 
-def _as_floats(X, Y):
-    """Promote X, Y to floating point precision."""
-    if X.dtype != np.float64:
-        X = X.astype(np.float64)
-    if Y.dtype != np.float64:
-        Y = Y.astype(np.float64)
-    return X, Y
+def _as_floats(im1, im2):
+    """Promote im1, im2 to floating point precision."""
+    if im1.dtype != np.float64:
+        im1 = im1.astype(np.float64)
+    if im2.dtype != np.float64:
+        im2 = im2.astype(np.float64)
+    return im1, im2
 
 
-def mse(X, Y):
+def mean_squared_error(im1, im2):
     """Compute the mean-squared error between two images.
 
     Parameters
     ----------
-    X, Y : ndarray
+    im1, im2 : ndarray
         Image.  Any dimensionality.
 
     Returns
     -------
     mse : float
-        The MSE metric.
+        The mean-squared error (MSE) metric.
 
     """
-    _assert_compatible(X, Y)
-    X, Y = _as_floats(X, Y)
-    return np.square(X - Y).mean()
+    _assert_compatible(im1, im2)
+    im1, im2 = _as_floats(im1, im2)
+    return np.mean(np.square(im1 - im2))
 
 
-def nrmse(im_true, im_test, norm_type='Euclidean'):
-    """Compute the normalized root mean-squared error between two images.
+def normalized_root_mse(im_true, im_test, norm_type='Euclidean'):
+    """Compute the normalized root mean-squared error (NRMSE) between two
+    images.
 
     Parameters
     ----------
@@ -76,14 +77,14 @@ def nrmse(im_true, im_test, norm_type='Euclidean'):
 
     norm_type = norm_type.lower()
     if norm_type == 'euclidean':
-        denom = np.sqrt((im_true*im_true).mean())
+        denom = np.sqrt(np.mean((im_true*im_true)))
     elif norm_type == 'min-max':
         denom = im_true.max() - im_true.min()
     elif norm_type == 'mean':
         denom = im_true.mean()
     else:
         raise ValueError("Unsupported norm_type")
-    return np.sqrt(mse(im_true, im_test)) / denom
+    return np.sqrt(mean_squared_error(im_true, im_test)) / denom
 
 
 def psnr(im_true, im_test, dynamic_range=None):
@@ -113,7 +114,7 @@ def psnr(im_true, im_test, dynamic_range=None):
     _assert_compatible(im_true, im_test)
     if dynamic_range is None:
         dmin, dmax = dtype_range[im_true.dtype.type]
-        true_min, true_max = im_true.min(), im_true.max()
+        true_min, true_max = np.min(im_true), np.max(im_true)
         if true_max > dmax or true_min < dmin:
             raise ValueError(
                 "im_true has intensity values outside the range expected for "
@@ -126,5 +127,5 @@ def psnr(im_true, im_test, dynamic_range=None):
 
     im_true, im_test = _as_floats(im_true, im_test)
 
-    err = mse(im_true, im_test)
+    err = mean_squared_error(im_true, im_test)
     return 10 * np.log10((dynamic_range ** 2) / err)

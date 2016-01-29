@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import (run_module_suite, assert_equal, assert_raises,
                            assert_almost_equal)
 
-from skimage.measure import psnr, nrmse, mse
+from skimage.measure import psnr, normalized_root_mse, mean_squared_error
 import skimage.data
 
 np.random.seed(5)
@@ -34,26 +34,27 @@ def test_PSNR_errors():
 def test_NRMSE():
     x = np.ones(4)
     y = np.asarray([0., 2., 2., 2.])
-    assert_equal(nrmse(y, x, 'mean'), 1/np.mean(y))
-    assert_equal(nrmse(y, x, 'Euclidean'), 1/np.sqrt(3))
-    assert_equal(nrmse(y, x, 'min-max'), 1/(y.max()-y.min()))
+    assert_equal(normalized_root_mse(y, x, 'mean'), 1/np.mean(y))
+    assert_equal(normalized_root_mse(y, x, 'Euclidean'), 1/np.sqrt(3))
+    assert_equal(normalized_root_mse(y, x, 'min-max'), 1/(y.max()-y.min()))
 
 
 def test_NRMSE_no_int_overflow():
     camf = cam.astype(np.float32)
     cam_noisyf = cam_noisy.astype(np.float32)
-    assert_almost_equal(mse(cam, cam_noisy),
-                        mse(camf, cam_noisyf))
-    assert_almost_equal(nrmse(cam, cam_noisy),
-                        nrmse(camf, cam_noisyf))
+    assert_almost_equal(mean_squared_error(cam, cam_noisy),
+                        mean_squared_error(camf, cam_noisyf))
+    assert_almost_equal(normalized_root_mse(cam, cam_noisy),
+                        normalized_root_mse(camf, cam_noisyf))
 
 
 def test_NRMSE_errors():
     x = np.ones(4)
-    assert_raises(ValueError, nrmse, x.astype(np.uint8), x.astype(np.float32))
-    assert_raises(ValueError, nrmse, x[:-1], x)
+    assert_raises(ValueError, normalized_root_mse,
+                  x.astype(np.uint8), x.astype(np.float32))
+    assert_raises(ValueError, normalized_root_mse, x[:-1], x)
     # invalid normalization name
-    assert_raises(ValueError, nrmse, x, x, 'foo')
+    assert_raises(ValueError, normalized_root_mse, x, x, 'foo')
 
 
 if __name__ == "__main__":
