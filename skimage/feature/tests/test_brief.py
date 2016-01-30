@@ -18,7 +18,8 @@ def test_normal_mode():
     """Verify the computed BRIEF descriptors with expected for normal mode."""
     img = data.coins()
 
-    keypoints = corner_peaks(corner_harris(img), min_distance=5)
+    keypoints = corner_peaks(corner_harris(img), min_distance=5,
+                             threshold_abs=0, threshold_rel=0.1)
 
     extractor = BRIEF(descriptor_size=8, sigma=2)
 
@@ -40,7 +41,8 @@ def test_uniform_mode():
     """Verify the computed BRIEF descriptors with expected for uniform mode."""
     img = data.coins()
 
-    keypoints = corner_peaks(corner_harris(img), min_distance=5)
+    keypoints = corner_peaks(corner_harris(img), min_distance=5,
+                             threshold_abs=0, threshold_rel=0.1)
 
     extractor = BRIEF(descriptor_size=8, sigma=2, mode='uniform')
 

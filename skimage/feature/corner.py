@@ -610,7 +610,7 @@ def corner_fast(image, n=12, threshold=0.15):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> corner_peaks(corner_fast(square, 9), min_distance=1, threshold_rel=0.1)
     array([[3, 3],
            [3, 8],
            [8, 3],
@@ -799,7 +799,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     return corners_subpix
 
 
-def corner_peaks(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
+def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
                  exclude_border=True, indices=True, num_peaks=np.inf,
                  footprint=None, labels=None):
     """Find corners in corner measure response image.
@@ -823,18 +823,13 @@ def corner_peaks(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
            [ 0.,  0.,  1.,  1.,  0.],
            [ 0.,  0.,  1.,  1.,  0.],
            [ 0.,  0.,  0.,  0.,  0.]])
-    >>> peak_local_max(response, exclude_border=False)
+    >>> peak_local_max(response)
     array([[2, 2],
            [2, 3],
            [3, 2],
            [3, 3]])
-    >>> corner_peaks(response, exclude_border=False)
+    >>> corner_peaks(response)
     array([[2, 2]])
-    >>> corner_peaks(response, exclude_border=False, min_distance=0)
-    array([[2, 2],
-           [2, 3],
-           [3, 2],
-           [3, 3]])
 
     """
 
