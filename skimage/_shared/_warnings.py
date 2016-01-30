@@ -7,11 +7,10 @@ import inspect
 import re
 
 
-def warn(*args, **kwargs):
-    """A version of `warnings.warn` with a default stacklevel of 2
+def warn(message, category=None, stacklevel=2):
+    """A version of `warnings.warn` with a default stacklevel of 2.
     """
-    kwargs.setdefault('stacklevel', 2)
-    warnings.warn(*args, **kwargs)
+    warnings.warn(message, category=category, stacklevel=stacklevel)
 
 
 @contextmanager
