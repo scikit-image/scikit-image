@@ -304,7 +304,7 @@ cdef class MCP:
             self.flat_costs = costs.astype(FLOAT_D, copy=False).ravel('F')
         except TypeError:
             self.flat_costs = costs.astype(FLOAT_D).flatten('F')
-            warnings.warn('Upgrading NumPy should decrease memory usage and increase speed.', Warning)
+            warnings.warn('Upgrading NumPy should decrease memory usage and increase speed.', Warning, stacklevel=2)
         size = self.flat_costs.shape[0]
         self.flat_cumulative_costs = np.empty(size, dtype=FLOAT_D)
         self.dim = len(costs.shape)
