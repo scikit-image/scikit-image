@@ -8,7 +8,7 @@ from matplotlib.colors import LinearSegmentedColormap
 
 if has_qt and 'agg' not in mpl.get_backend().lower():
     warn("Recommended matplotlib backend is `Agg` for full "
-                  "skimage.viewer functionality.")
+         "skimage.viewer functionality.")
 
 
 __all__ = ['init_qtapp', 'start_qtapp', 'RequiredAttr', 'figimage',

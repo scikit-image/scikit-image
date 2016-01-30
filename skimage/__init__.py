@@ -158,7 +158,9 @@ else:
 
 
 if sys.version.startswith('2.6'):
-    warnings.warn("Python 2.6 is deprecated and will not be supported in scikit-image 0.13+", stacklevel=2)
+    msg = ("Python 2.6 is deprecated and will not be supported in"
+           "scikit-image 0.13+")
+    warnings.warn(msg, stacklevel=2)
 
 
 del warnings, functools, osp, imp, sys

@@ -7,11 +7,13 @@ import re
 __all__ = ['all_warnings', 'expected_warnings', 'warn']
 
 
-def warn(message, **kwargs):
+def warn(message, category=None, stacklevel=2):
     """A version of `warnings.warn` with a default stacklevel of 2.
     """
-    kwargs.setdefault('stacklevel', 2)
-    warnings.warn(message, **kwargs)
+    if category is not None:
+        warnings.warn(message, category=category, stacklevel=stacklevel)
+    else:
+        warnings.warn(message, stacklevel=stacklevel)
 
 
 @contextmanager
