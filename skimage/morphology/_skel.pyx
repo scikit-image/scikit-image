@@ -1,8 +1,8 @@
 """
 This is an implementation of the 2D/3D thinning algorithm
-of [Lee94] of binary images, based on [IAC15]. 
+of [Lee94]_ of binary images, based on [IAC15]_. 
 
-The original Java code [IAC15] carries the following message:
+The original Java code [IAC15]_ carries the following message:
 
  * This work is an implementation by Ignacio Arganda-Carreras of the
  * 3D thinning algorithm from Lee et al. "Building skeleton models via 3-D 
@@ -49,7 +49,7 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
     those point which can be removed without changing local connectivity in the
     3x3x3 neighborhood of a point.
 
-    This routine implements the two-pass algorthim of [Lee94]. Namely,
+    This routine implements the two-pass algorthim of [Lee94]_. Namely,
     for each of the six border types (positive and negative x-, y- and z-),
     the algorithm first collects all possibly deletable points, and then
     performs a sequential rechecking.
@@ -112,9 +112,9 @@ cdef list _loop_through(pixel_type[:, :, ::1] img,
                         int curr_border):
     """Inner loop of compute_thin_image.
 
-    The algorithm of [Lee94] proceeds in two steps: (1) six directions are
+    The algorithm of [Lee94]_ proceeds in two steps: (1) six directions are
     checked for simple border points to remove, and (2) these candidates are
-    sequentially rechecked, see Sec 3 of [Lee94] for rationale and discussion.
+    sequentially rechecked, see Sec 3 of [Lee94]_ for rationale and discussion.
 
     This routine implements the first step above: it loops over the image
     for a given direction and assembles candidates for removal.
@@ -160,14 +160,14 @@ cdef list _loop_through(pixel_type[:, :, ::1] img,
                 if is_endpoint(neighborhood):
                     continue
 
-                # check if point is Euler invariant (condition 1 in [Lee94]):
+                # check if point is Euler invariant (condition 1 in [Lee94]_):
                 # if it is not, it's not deletable.
                 if not is_Euler_invariant(neighborhood, Euler_LUT, neighb_idx):
                     continue
 
                 # check if point is simple (i.e., deletion does not
                 # change connectivity in the 3x3x3 neighborhood)
-                # this are conditions 2 and 3 in [Lee94]
+                # this are conditions 2 and 3 in [Lee94]_
                 if not is_simple_point(neighborhood):
                     continue
 
@@ -186,9 +186,9 @@ cdef void get_neighborhood(pixel_type[:, :, ::1] img,
     Assume zero boundary conditions. 
     Image is already padded, so no out-of-bounds checking.
 
-    For the numbering of points see Fig. 1a. of [Lee94], where the numbers
+    For the numbering of points see Fig. 1a. of [Lee94]_, where the numbers
     do *not* include the center point itself. OTOH, this numbering below
-    includes it as number 13. The latter is consistent with [IAC15].
+    includes it as number 13. The latter is consistent with [IAC15]_.
     """
     neighborhood[0] = img[p-1, r-1, c-1]
     neighborhood[1] = img[p-1, r,   c-1]
@@ -231,7 +231,7 @@ cdef void get_neighborhood(pixel_type[:, :, ::1] img,
 def fill_Euler_LUT():
     """ Look-up table for preserving Euler characteristic.
 
-    This is column $\delta G_{26}$ of Table 2 of [Lee94].
+    This is column $\delta G_{26}$ of Table 2 of [Lee94]_.
     """
     LUT = np.zeros(256, dtype=np.intc)
 
@@ -371,25 +371,17 @@ def fill_Euler_LUT():
 cdef int[::1] LUT = fill_Euler_LUT()
 
 
-### Octants (indexOctantXXX functions)
-def fill_neighbor_idx():
-    """Fill the look-up table for indexing octants for computing the Euler
-    characteristics.
-
-    See index_octants and is_Euler_invariant routines below.
-    """
-    NEB, NWB, SEB, SWB, NEU, NWU, SEU, SWU = tuple(range(8))
-    _neighb_idx = np.empty((8, 7), dtype=np.intc)
-    _neighb_idx[NEB, ...] = [2, 1, 11, 10, 5, 4, 14]
-    _neighb_idx[NWB, ...] = [0, 9, 3, 12, 1, 10, 4]
-    _neighb_idx[SEB, ...] = [8, 7, 17, 16, 5, 4, 14]
-    _neighb_idx[SWB, ...] = [6, 15, 7, 16, 3, 12, 4]
-    _neighb_idx[NEU, ...] = [20, 23, 19, 22, 11, 14, 10]
-    _neighb_idx[NWU, ...] = [18, 21, 9, 12, 19, 22, 10]
-    _neighb_idx[SEU, ...] = [26, 23, 17, 14, 25, 22, 16]
-    _neighb_idx[SWU, ...] = [24, 25, 15, 16, 21, 22, 12]
-    return _neighb_idx
-cdef int[:, ::1] NEIGHB_IDX = fill_neighbor_idx()
+# Fill the look-up table for indexing octants for computing the Euler
+# characteristic. See index_octants and is_Euler_invariant routines below.
+cdef int[:, ::1] NEIGHB_IDX = np.array([[2, 1, 11, 10, 5, 4, 14],      # NEB
+                                        [0, 9, 3, 12, 1, 10, 4],       # NWB
+                                        [8, 7, 17, 16, 5, 4, 14],      # SEB
+                                        [6, 15, 7, 16, 3, 12, 4],      # SWB
+                                        [20, 23, 19, 22, 11, 14, 10],  # NEU
+                                        [18, 21, 9, 12, 19, 22, 10],   # NWU
+                                        [26, 23, 17, 14, 25, 22, 16],  # SEU
+                                        [24, 25, 15, 16, 21, 22, 12],  # SWU
+                              ], dtype=np.intc)
 
 
 @cython.boundscheck(False)
@@ -402,7 +394,7 @@ cdef int index_octants(int octant,
     for j in range(7):
         idx = neib_idx[octant, j]
         if neighbors[idx] == 1:
-            n |= 2 ** (7 - j)    # XXX hardcode powers?
+            n |= 1 << (7 - j)    # XXX hardcode powers?
     return n
 
 
@@ -449,7 +441,7 @@ cdef bint is_Euler_invariant(pixel_type neighbors[],
 cdef bint is_simple_point(pixel_type neighbors[]):
     """Check is a point is a Simple Point.
 
-    This method is named "N(v)_labeling" in [Lee94].
+    This method is named "N(v)_labeling" in [Lee94]_.
     Outputs the number of connected objects in a neighborhood of a point
     after this point would have been removed.
 
@@ -465,7 +457,7 @@ cdef bint is_simple_point(pixel_type neighbors[]):
 
     """
     # copy neighbors for labeling
-    # ignore center pixel (i=13) when counting (see [Lee94])
+    # ignore center pixel (i=13) when counting (see [Lee94]_)
     cdef pixel_type cube[26]
     memcpy(cube, neighbors, 13*sizeof(pixel_type))
     memcpy(cube+13, neighbors+14, 13*sizeof(pixel_type))
@@ -509,7 +501,7 @@ cdef void octree_labeling(int octant, int label, pixel_type cube[]):
     components in the 3D neighborhood after the center pixel would
     have been removed.
 
-    See Figs. 6 and 7 of [Lee94] for the values of indices.
+    See Figs. 6 and 7 of [Lee94]_ for the values of indices.
 
     Parameters
     ----------

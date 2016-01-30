@@ -15,6 +15,8 @@ def _prepare_image(img_in):
     if img.ndim == 2:
         img = img.reshape((1,) + img.shape)
 
+    intensity = img.max()
+
     # normalize to binary
     img[img != 0] = 1
 
@@ -22,25 +24,25 @@ def _prepare_image(img_in):
     img_o = np.zeros(tuple(s + 2 for s in img.shape),
                      dtype=np.uint8)
     img_o[1:-1, 1:-1, 1:-1] = img.astype(np.uint8)
-    return img_o
+    return img_o, intensity
 
 
-def _postprocess_image(img_o):
+def _postprocess_image(img_o, intensity):
     """Clip the image (padding is an implementation detail), convert to b/w.
        If the original was 2D, convert back to 2D.
     """
     img_oo = img_o[1:-1, 1:-1, 1:-1]
     img_oo = img_oo.squeeze()
-    img_oo *= 255
+    img_oo *= intensity
     return img_oo
 
 
 def compute_thin_image(img_in):
     """Compute the thin image.
     """
-    img = _prepare_image(img_in)
+    img, intensity = _prepare_image(img_in)
     img = np.asarray(_compute_thin_image(img))
-    img = _postprocess_image(img)
+    img = _postprocess_image(img, intensity)
     return img
 
 
