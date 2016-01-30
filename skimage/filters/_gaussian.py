@@ -1,10 +1,10 @@
 import collections as coll
 import numpy as np
 from scipy import ndimage as ndi
-import warnings
 
 from ..util import img_as_float
 from ..color import guess_spatial_dimensions
+from .._shared.utils import warn
 
 __all__ = ['gaussian']
 
@@ -91,7 +91,7 @@ def gaussian(image, sigma, output=None, mode='nearest', cval=0,
         msg = ("Images with dimensions (M, N, 3) are interpreted as 2D+RGB "
                "by default. Use `multichannel=False` to interpret as "
                "3D image with last dimension of length 3.")
-        warnings.warn(RuntimeWarning(msg))
+        warn(RuntimeWarning(msg))
         multichannel = True
     if np.any(np.asarray(sigma) < 0.0):
         raise ValueError("Sigma values less than zero are not valid")

@@ -1,6 +1,8 @@
 import numpy as np
 import collections
-import warnings
+
+from .._shared.utils import warn
+
 
 def integral_image(img):
     """Integral image / summed area table.
@@ -81,10 +83,10 @@ def integrate(ii, start, end, *args):
         rows = start.shape[0]
     # handle deprecated input format
     else:
-        warnings.warn("The syntax 'integrate(ii, r0, c0, r1, c1)' is "
-                      "deprecated, and will be phased out in release 0.14. "
-                      "The new syntax is "
-                      "'integrate(ii, (r0, c0), (r1, c1))'.")
+        warn("The syntax 'integrate(ii, r0, c0, r1, c1)' is "
+             "deprecated, and will be phased out in release 0.14. "
+             "The new syntax is "
+             "'integrate(ii, (r0, c0), (r1, c1))'.")
         if isinstance(start, collections.Iterable):
             rows = len(start)
         args = (start, end) + args

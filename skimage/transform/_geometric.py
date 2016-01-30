@@ -1,12 +1,11 @@
 import six
 import math
-import warnings
 import numpy as np
 from scipy import spatial
 from scipy import ndimage as ndi
 
 from .._shared.utils import (get_bound_method_class, safe_as_int,
-                             _mode_deprecations)
+                             _mode_deprecations, warn)
 from ..util import img_as_float
 
 from ._warps_cy import _warp_fast
@@ -184,8 +183,7 @@ class ProjectiveTransform(GeometricTransform):
 
     @property
     def _matrix(self):
-        warnings.warn('`_matrix` attribute is deprecated, '
-                      'use `params` instead.')
+        warn('`_matrix` attribute is deprecated, use `params` instead.')
         return self.params
 
     @property
@@ -782,8 +780,7 @@ class PolynomialTransform(GeometricTransform):
 
     @property
     def _params(self):
-        warnings.warn('`_params` attribute is deprecated, '
-                      'use `params` instead.')
+        warn('`_params` attribute is deprecated, use `params` instead.')
         return self.params
 
     def estimate(self, src, dst, order=2):
@@ -1320,13 +1317,13 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     if order == 2:
         # When fixing this issue, make sure to fix the branches further
         # below in this function
-        warnings.warn("Bi-quadratic interpolation behavior has changed due "
-                      "to a bug in the implementation of scikit-image. "
-                      "The new version now serves as a wrapper "
-                      "around SciPy's interpolation functions, which itself "
-                      "is not verified to be a correct implementation. Until "
-                      "skimage's implementation is fixed, we recommend "
-                      "to use bi-linear or bi-cubic interpolation instead.")
+        warn("Bi-quadratic interpolation behavior has changed due "
+             "to a bug in the implementation of scikit-image. "
+             "The new version now serves as a wrapper "
+             "around SciPy's interpolation functions, which itself "
+             "is not verified to be a correct implementation. Until "
+             "skimage's implementation is fixed, we recommend "
+             "to use bi-linear or bi-cubic interpolation instead.")
 
     if order in (0, 1, 3) and not map_args:
         # use fast Cython version for specific interpolation orders and input

@@ -7,8 +7,7 @@ __all__ = ['threshold_adaptive',
 import numpy as np
 from scipy import ndimage as ndi
 from ..exposure import histogram
-from .._shared.utils import assert_nD
-import warnings
+from .._shared.utils import assert_nD, warn
 
 
 def threshold_adaptive(image, block_size, method='gaussian', offset=0,
@@ -130,7 +129,7 @@ def threshold_otsu(image, nbins=256):
     if image.shape[-1] in (3, 4):
         msg = "threshold_otsu is expected to work correctly only for " \
               "grayscale images; image shape {0} looks like an RGB image"
-        warnings.warn(msg.format(image.shape))
+        warn(msg.format(image.shape))
 
     # Check if the image is multi-colored or not
     if image.min() == image.max():
