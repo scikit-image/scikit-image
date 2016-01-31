@@ -81,6 +81,7 @@ def test_outside_standard_range():
     # Warning raised by matplotlib on Windows:
     # "The CObject type is marked Pending Deprecation in Python 2.7.
     #  Please use capsule objects instead."
+    # Ref: https://docs.python.org/2/c-api/cobject.html
     with expected_warnings(["out of standard range|CObject type is marked"]):
         ax_im = io.imshow(im_hi)
     assert ax_im.get_clim() == (im_hi.min(), im_hi.max())
@@ -93,6 +94,7 @@ def test_nonstandard_type():
     # Warning raised by matplotlib on Windows:
     # "The CObject type is marked Pending Deprecation in Python 2.7.
     #  Please use capsule objects instead."
+    # Ref: https://docs.python.org/2/c-api/cobject.html
     with expected_warnings(["Low image dynamic range|CObject type is marked"]):
         ax_im = io.imshow(im64)
     assert ax_im.get_clim() == (im64.min(), im64.max())
