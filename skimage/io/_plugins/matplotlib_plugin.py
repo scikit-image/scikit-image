@@ -1,6 +1,7 @@
 from collections import namedtuple
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from ...util import dtype as dtypes
 from ...exposure import is_low_contrast
 from ...util.colormap import viridis
@@ -110,7 +111,7 @@ def _get_display_range(image):
     return lo, hi, cmap
 
 
-def imshow(im, *args, **kwargs):
+def imshow(im, ax=None, show_cbar=None, **kwargs):
     """Show the input image and return the current axes.
 
     By default, the image is displayed in greyscale, rather than
@@ -131,8 +132,11 @@ def imshow(im, *args, **kwargs):
     ----------
     im : array, shape (M, N[, 3])
         The image to display.
-
-    *args, **kwargs : positional and keyword arguments
+    ax: `matplotlib.axes.Axes`, optional
+        The axis to use for the image, defaults to plt.gca().
+    show_cbar: boolean, optional.
+        Whether to show the colorbar (used to override default behavior).
+    **kwargs : Keyword arguments
         These are passed directly to `matplotlib.pyplot.imshow`.
 
     Returns
@@ -147,9 +151,15 @@ def imshow(im, *args, **kwargs):
     kwargs.setdefault('cmap', cmap)
     kwargs.setdefault('vmin', lo)
     kwargs.setdefault('vmax', hi)
-    ax_im = plt.imshow(im, *args, **kwargs)
-    if cmap != _default_colormap:
-        plt.colorbar()
+
+    ax = ax or plt.gca()
+    ax_im = ax.imshow(im, **kwargs)
+    if (cmap != _default_colormap and show_cbar is not False) or show_cbar:
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        plt.colorbar(ax_im, cax=cax)
+    ax.set_adjustable('box-forced')
+    ax.get_figure().tight_layout()
     return ax_im
 
 imread = plt.imread

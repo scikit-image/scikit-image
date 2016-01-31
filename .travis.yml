@@ -18,8 +18,8 @@ addons:
     packages:
     - ccache
     - libfreeimage3
-    - texlive 
-    - texlive-latex-extra 
+    - texlive
+    - texlive-latex-extra
     - dvipng
     - python-qt4
 env:
