@@ -25,14 +25,16 @@ To get started, let's load an image using ``io.imread``. Note that morphology
 functions only work on gray-scale or binary images, so we set ``as_grey=True``.
 """
 
+import os
 import matplotlib.pyplot as plt
 from skimage.data import data_dir
 from skimage.util import img_as_ubyte
 from skimage import io
 
-phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
+orig_phantom = img_as_ubyte(io.imread(os.path.join(data_dir, "phantom.png"),
+                                      as_grey=True))
 fig, ax = plt.subplots()
-ax.imshow(phantom, cmap=plt.cm.gray)
+ax.imshow(orig_phantom, cmap=plt.cm.gray)
 
 """
 .. image:: PLOT2RST.current_figure
@@ -42,7 +44,8 @@ Let's also define a convenience function for plotting comparisons:
 
 def plot_comparison(original, filtered, filter_name):
 
-    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4), sharex=True, sharey=True)
+    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4), sharex=True,
+                                   sharey=True)
     ax1.imshow(original, cmap=plt.cm.gray)
     ax1.set_title('original')
     ax1.axis('off')
@@ -68,8 +71,8 @@ from skimage.morphology import black_tophat, skeletonize, convex_hull_image
 from skimage.morphology import disk
 
 selem = disk(6)
-eroded = erosion(phantom, selem)
-plot_comparison(phantom, eroded, 'erosion')
+eroded = erosion(orig_phantom, selem)
+plot_comparison(orig_phantom, eroded, 'erosion')
 
 """
 .. image:: PLOT2RST.current_figure
@@ -88,8 +91,8 @@ pixels in the neighborhood centered at (i, j)*. Dilation enlarges bright
 regions and shrinks dark regions.
 """
 
-dilated = dilation(phantom, selem)
-plot_comparison(phantom, dilated, 'dilation')
+dilated = dilation(orig_phantom, selem)
+plot_comparison(orig_phantom, dilated, 'dilation')
 
 """
 .. image:: PLOT2RST.current_figure
@@ -108,8 +111,8 @@ dilation*. Opening can remove small bright spots (i.e. "salt") and connect
 small dark cracks.
 """
 
-opened = opening(phantom, selem)
-plot_comparison(phantom, opened, 'opening')
+opened = opening(orig_phantom, selem)
+plot_comparison(orig_phantom, opened, 'opening')
 
 """
 .. image:: PLOT2RST.current_figure
@@ -134,7 +137,7 @@ small bright cracks.
 To illustrate this more clearly, let's add a small crack to the white border:
 """
 
-phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
+phantom = orig_phantom.copy()
 phantom[10:30, 200:210] = 0
 
 closed = closing(phantom, selem)
@@ -161,7 +164,7 @@ that are smaller than the structuring element.
 To make things interesting, we'll add bright and dark spots to the image:
 """
 
-phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
+phantom = orig_phantom.copy()
 phantom[340:350, 200:210] = 255
 phantom[100:110, 200:210] = 0
 
@@ -215,10 +218,9 @@ on binary images only.
 
 """
 
-from skimage import img_as_bool
-horse = ~img_as_bool(io.imread(data_dir+'/horse.png', as_grey=True))
+horse = io.imread(os.path.join(data_dir, "horse.png"), as_grey=True)
 
-sk = skeletonize(horse)
+sk = skeletonize(horse == 0)
 plot_comparison(horse, sk, 'skeletonize')
 
 """
@@ -237,7 +239,7 @@ that this is also performed on binary images.
 
 """
 
-hull1 = convex_hull_image(horse)
+hull1 = convex_hull_image(horse == 0)
 plot_comparison(horse, hull1, 'convex hull')
 
 """
@@ -252,11 +254,11 @@ enclose that grain:
 
 import numpy as np
 
-horse2 = np.copy(horse)
-horse2[45:50, 75:80] = 1
+horse_mask = horse == 0
+horse_mask[45:50, 75:80] = 1
 
-hull2 = convex_hull_image(horse2)
-plot_comparison(horse2, hull2, 'convex hull')
+hull2 = convex_hull_image(horse_mask)
+plot_comparison(horse_mask, hull2, 'convex hull')
 
 """
 .. image:: PLOT2RST.current_figure
