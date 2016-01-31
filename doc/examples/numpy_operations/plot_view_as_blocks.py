@@ -25,7 +25,7 @@ from skimage.util.shape import view_as_blocks
 
 
 # -- get `astronaut` from skimage.data in grayscale
-l = color.rgb2gray(data.astronaut())
+l = np.ascontiguousarray(color.rgb2gray(data.astronaut()))
 
 # -- size of blocks
 block_shape = (4, 4)
