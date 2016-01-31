@@ -50,8 +50,8 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
 
-    Note
-    ----
+    Notes
+    -----
     Modes 'reflect' and 'symmetric' are similar, but differ in whether the edge
     pixels are duplicated during the reflection.  As an example, if an array
     has values [0, 1, 2] and was padded to the right by four values using
