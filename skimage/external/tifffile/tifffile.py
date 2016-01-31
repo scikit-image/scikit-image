@@ -2208,7 +2208,7 @@ class TiffSequence(object):
 
     The data shape and dtype of all files must match.
 
-    Properties
+    Attributes
     ----------
     files : list
         List of file names.
