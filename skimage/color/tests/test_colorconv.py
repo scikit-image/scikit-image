@@ -231,6 +231,10 @@ class TestColorconv(TestCase):
         assert rgb2grey(x).flags["C_CONTIGUOUS"]
         assert rgb2grey(x[:5, :5]).flags["C_CONTIGUOUS"]
 
+    def test_rgb2grey_alpha(self):
+        x = np.random.rand(10, 10, 4)
+        assert rgb2grey(x).ndim == 2
+
     def test_rgb2grey_on_grey(self):
         rgb2grey(np.random.rand(5, 5))
 

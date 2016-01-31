@@ -711,7 +711,7 @@ def rgb2gray(rgb):
     if rgb.ndim == 2:
         return np.ascontiguousarray(rgb)
 
-    rgb = _prepare_colorarray(rgb)
+    rgb = _prepare_colorarray(rgb[..., :3])
 
     gray = 0.2125 * rgb[..., 0]
     gray[:] += 0.7154 * rgb[..., 1]
