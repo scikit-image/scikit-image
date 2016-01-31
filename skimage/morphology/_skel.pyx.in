@@ -370,6 +370,37 @@ cdef bint is_simple_point(pixel_type neighbors[]):
     return True
 
 
+# Octree structure for labeling in `octree_labeling` routine below.
+# NB: this is only available at build time, and is used by Tempita templating.
+{{py:
+_octree = [
+    # octant 1
+    ([0, 1, 3, 4, 9, 10, 12],
+     [[], [2], [3], [2, 3, 4], [5], [2, 5, 6], [3, 5, 7]]),
+    # octant 2
+    ([1, 4, 10, 2, 5, 11, 13],
+     [[1], [1, 3, 4], [1, 5, 6], [], [4], [6], [4, 6, 8]]),
+    # octant 3
+    ([3, 4, 12, 6, 7, 14, 15],
+     [[1], [1, 2, 4], [1, 5, 7], [], [4], [7], [4, 7, 8]]),
+    # octant 4
+    ([4, 5, 13, 7, 15, 8, 16],
+     [[1, 2, 3], [2], [2, 6, 8], [3], [3, 7, 8], [], [8]]),
+    # octant 5
+    ([9, 10, 12, 17, 18, 20, 21],
+     [[1], [1, 2, 6], [1, 3, 7], [], [6], [7], [6, 7, 8]]),
+    # octant 6
+    ([10, 11, 13, 18, 21, 19, 22],
+     [[1, 2, 5], [2], [2, 4, 8], [5], [5, 7, 8], [], [8]]),
+    # octant 7
+    ([12, 14, 15, 20, 21, 23, 24],
+     [[1, 3, 5], [3], [3, 4, 8], [5], [5, 6, 8], [], [8]]),
+    # octant 8
+    ([13, 15, 16, 21, 22, 24, 25],
+     [[2, 4, 6], [3, 4, 7], [4], [5, 6, 7], [6], [7], []])
+]
+}}
+
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef void octree_labeling(int octant, int label, pixel_type cube[]):
@@ -389,229 +420,20 @@ cdef void octree_labeling(int octant, int label, pixel_type cube[]):
         local neighborhood of the point
 
     """
-    # check if there are points in the octant with value 1
-    if octant == 1:
-        # set points in this octant to current label
-        # and recursive labeling of adjacent octants
-        if cube[0] == 1:
-            cube[0] = label
-        if cube[1] == 1:
-            cube[1] = label
-            octree_labeling(2, label, cube)
-        if cube[3] == 1:
-            cube[3] = label
-            octree_labeling(3, label, cube)
-        if cube[4] == 1:
-            cube[4] = label
-            octree_labeling(2, label, cube)
-            octree_labeling(3, label, cube)
-            octree_labeling(4, label, cube)
-        if cube[9] == 1:
-            cube[9] = label
-            octree_labeling(5, label, cube)
-        if cube[10] == 1:
-            cube[10] = label
-            octree_labeling(2, label, cube)
-            octree_labeling(5, label, cube)
-            octree_labeling(6, label, cube)
-        if cube[12] == 1:
-            cube[12] = label
-            octree_labeling(3, label, cube)
-            octree_labeling(5, label, cube)
-            octree_labeling(7, label, cube)
+    # This routine checks if there are points in the octant with value 1
+    # Then sets points in this octant to current label
+    # and recursive labeling of adjacent octants.
+    #
+    # Below, leading underscore means build-time variables.
+    {{for _oct in range(1, 9)}}
 
-    if octant == 2:
-        if cube[1] == 1:
-            cube[1] = label
-            octree_labeling(1, label, cube)
-        if cube[4] == 1:
-              cube[4] = label
-              octree_labeling(1, label, cube)
-              octree_labeling(3, label, cube)
-              octree_labeling(4, label, cube)
-        if cube[10] == 1:
-              cube[10] = label
-              octree_labeling(1, label, cube)
-              octree_labeling(5, label, cube)
-              octree_labeling(6, label, cube)
-        if cube[2] == 1:
-              cube[2] = label
-        if cube[5] == 1:
-              cube[5] = label
-              octree_labeling(4, label, cube)
-        if cube[11] == 1:
-              cube[11] = label
-              octree_labeling(6, label, cube)
-        if cube[13] == 1:
-              cube[13] = label
-              octree_labeling(4, label, cube)
-              octree_labeling(6, label, cube)
-              octree_labeling(8, label, cube)
-
-    if octant ==3:
-        if cube[3] == 1:
-              cube[3] = label
-              octree_labeling(1, label, cube)
-        if cube[4] == 1:
-              cube[4] = label
-              octree_labeling(1, label, cube)
-              octree_labeling(2, label, cube)
-              octree_labeling(4, label, cube)
-        if cube[12] == 1:
-              cube[12] = label
-              octree_labeling(1, label, cube)
-              octree_labeling(5, label, cube)
-              octree_labeling(7, label, cube)
-        if cube[6] == 1:
-              cube[6] = label
-        if cube[7] == 1:
-              cube[7] = label
-              octree_labeling(4, label, cube)
-        if cube[14] == 1:
-              cube[14] = label
-              octree_labeling(7, label, cube)
-        if cube[15] == 1:
-              cube[15] = label
-              octree_labeling(4, label, cube)
-              octree_labeling(7, label, cube)
-              octree_labeling(8, label, cube)
-
-    if octant == 4:
-        if cube[4] == 1:
-              cube[4] = label
-              octree_labeling(1, label, cube)
-              octree_labeling(2, label, cube)
-              octree_labeling(3, label, cube)
-        if cube[5] == 1:
-              cube[5] = label
-              octree_labeling(2, label, cube)
-        if cube[13] == 1:
-              cube[13] = label
-              octree_labeling(2, label, cube)
-              octree_labeling(6, label, cube)
-              octree_labeling(8, label, cube)
-        if cube[7] == 1:
-              cube[7] = label
-              octree_labeling(3, label, cube)
-        if cube[15] == 1:
-              cube[15] = label
-              octree_labeling(3, label, cube)
-              octree_labeling(7, label, cube)
-              octree_labeling(8, label, cube)
-        if cube[8] == 1:
-              cube[8] = label
-        if cube[16] == 1:
-              cube[16] = label
-              octree_labeling(8, label, cube)
-
-    if octant == 5:
-        if cube[9] == 1:
-              cube[9] = label
-              octree_labeling(1, label, cube)
-        if cube[10] == 1:
-              cube[10] = label
-              octree_labeling(1, label, cube)
-              octree_labeling(2, label, cube)
-              octree_labeling(6, label, cube)
-        if cube[12] == 1:
-              cube[12] = label
-              octree_labeling(1, label, cube)
-              octree_labeling(3, label, cube)
-              octree_labeling(7, label, cube)
-        if cube[17] == 1:
-              cube[17] = label
-        if cube[18] == 1:
-              cube[18] = label
-              octree_labeling(6, label, cube)
-        if cube[20] == 1:
-              cube[20] = label
-              octree_labeling(7, label, cube)
-        if cube[21] == 1:
-              cube[21] = label
-              octree_labeling(6, label, cube)
-              octree_labeling(7, label, cube)
-              octree_labeling(8, label, cube)
-
-    if octant == 6:
-        if cube[10] == 1:
-              cube[10] = label
-              octree_labeling(1, label, cube)
-              octree_labeling(2, label, cube)
-              octree_labeling(5, label, cube)
-        if cube[11] == 1:
-              cube[11] = label
-              octree_labeling(2, label, cube)
-        if cube[13] == 1:
-              cube[13] = label
-              octree_labeling(2, label, cube)
-              octree_labeling(4, label, cube)
-              octree_labeling(8, label, cube)
-        if cube[18] == 1:
-              cube[18] = label
-              octree_labeling(5, label, cube)
-        if cube[21] == 1:
-              cube[21] = label
-              octree_labeling(5, label, cube)
-              octree_labeling(7, label, cube)
-              octree_labeling(8, label, cube)
-        if cube[19] == 1:
-              cube[19] = label
-        if cube[22] == 1:
-              cube[22] = label
-              octree_labeling(8, label, cube)
-
-    if octant == 7:
-        if cube[12] == 1:
-              cube[12] = label
-              octree_labeling(1, label, cube)
-              octree_labeling(3, label, cube)
-              octree_labeling(5, label, cube)
-        if cube[14] == 1:
-              cube[14] = label
-              octree_labeling(3, label, cube)
-        if cube[15] == 1:
-              cube[15] = label
-              octree_labeling(3, label, cube)
-              octree_labeling(4, label, cube)
-              octree_labeling(8, label, cube)
-        if cube[20] == 1:
-              cube[20] = label
-              octree_labeling(5, label, cube)
-        if cube[21] == 1:
-              cube[21] = label
-              octree_labeling(5, label, cube)
-              octree_labeling(6, label, cube)
-              octree_labeling(8, label, cube)
-        if cube[23] == 1:
-              cube[23] = label
-        if cube[24] == 1:
-              cube[24] = label
-              octree_labeling(8, label, cube)
-
-    if octant == 8:
-        if cube[13] == 1:
-              cube[13] = label
-              octree_labeling(2, label, cube)
-              octree_labeling(4, label, cube)
-              octree_labeling(6, label, cube)
-        if cube[15] == 1:
-              cube[15] = label
-              octree_labeling(3, label, cube)
-              octree_labeling(4, label, cube)
-              octree_labeling(7, label, cube)
-        if cube[16] == 1:
-              cube[16] = label
-              octree_labeling(4, label, cube)
-        if cube[21] == 1:
-              cube[21] = label
-              octree_labeling(5, label, cube)
-              octree_labeling(6, label, cube)
-              octree_labeling(7, label, cube)
-        if cube[22] == 1:
-              cube[22] = label
-              octree_labeling(6, label, cube)
-        if cube[24] == 1:
-              cube[24] = label
-              octree_labeling(7, label, cube)
-        if cube[25] == 1:
-              cube[25] = label
+    if octant == {{_oct}}:
+        {{py: _indices, _list_octants = _octree[_oct-1]}}
+        {{for _idx, _new_octants in zip(_indices, _list_octants)}}
+        if cube[{{_idx}}] == 1:
+            cube[{{_idx}}] = label
+            {{for _new_octant in _new_octants}}
+            octree_labeling({{_new_octant}}, label, cube)
+            {{endfor}}
+        {{endfor}}
+    {{endfor}}
