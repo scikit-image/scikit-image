@@ -76,11 +76,11 @@ ax1.imshow(edge_scharr, cmap=plt.cm.gray)
 ax1.set_title('Scharr Edge Detection')
 ax1.axis('off')
 
-ax2.imshow(diff_scharr_prewitt, cmap=plt.cm.jet, vmax=max_diff)
+ax2.imshow(diff_scharr_prewitt, cmap=plt.cm.gray, vmax=max_diff)
 ax2.set_title('Scharr - Prewitt')
 ax2.axis('off')
 
-ax3.imshow(diff_scharr_sobel, cmap=plt.cm.jet, vmax=max_diff)
+ax3.imshow(diff_scharr_sobel, cmap=plt.cm.gray, vmax=max_diff)
 ax3.set_title('Scharr - Sobel')
 ax3.axis('off')
 

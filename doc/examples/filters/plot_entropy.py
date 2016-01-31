@@ -63,7 +63,7 @@ ax0.set_title("Image")
 ax0.axis("off")
 fig.colorbar(img0, ax=ax0)
 
-img1 = ax1.imshow(entropy(image, disk(5)), cmap=plt.cm.jet)
+img1 = ax1.imshow(entropy(image, disk(5)), cmap=plt.cm.gray)
 ax1.set_title("Entropy")
 ax1.axis("off")
 fig.colorbar(img1, ax=ax1)

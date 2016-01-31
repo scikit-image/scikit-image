@@ -116,7 +116,7 @@ from skimage.filters import sobel
 elevation_map = sobel(coins)
 
 fig, ax = plt.subplots(figsize=(4, 3))
-ax.imshow(elevation_map, cmap=plt.cm.jet, interpolation='nearest')
+ax.imshow(elevation_map, cmap=plt.cm.gray, interpolation='nearest')
 ax.axis('off')
 ax.set_title('elevation_map')
 
