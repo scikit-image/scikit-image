@@ -4,7 +4,7 @@
 #cython: wraparound=False
 
 import numpy as np
-import warnings
+from .._shared.utils import warn
 
 cimport numpy as cnp
 
@@ -47,7 +47,7 @@ ctypedef struct bginfo:
 
 cdef void get_bginfo(background_val, bginfo *ret) except *:
     if background_val is None:
-        warnings.warn(DeprecationWarning(
+        warn(DeprecationWarning(
                 'The default value for `background` will change to 0 in v0.12'
             ))
         ret.background_val = -1

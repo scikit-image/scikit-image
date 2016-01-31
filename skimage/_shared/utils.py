@@ -6,10 +6,10 @@ import types
 
 import six
 
-from ._warnings import all_warnings
+from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
-           'safe_as_int', 'assert_nD']
+           'safe_as_int', 'assert_nD', 'warn']
 
 
 class skimage_deprecation(Warning):
@@ -170,7 +170,7 @@ def _mode_deprecations(mode):
     """Used to update deprecated mode names in
     `skimage._shared.interpolation.pyx`."""
     if mode.lower() == 'nearest':
-        warnings.warn(skimage_deprecation(
+        warn(skimage_deprecation(
             "Mode 'nearest' has been renamed to 'edge'. Mode 'nearest' will be "
             "removed in a future release."))
         mode = 'edge'

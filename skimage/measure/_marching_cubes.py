@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.ndimage as ndi
+from .._shared.utils import warn
 from . import _marching_cubes_cy
 
 
@@ -239,11 +240,9 @@ def correct_mesh_orientation(volume, verts, faces, spacing=(1., 1., 1.),
     skimage.measure.mesh_surface_area
 
     """
-    import warnings
-    warnings.warn(
-        DeprecationWarning("`correct_mesh_orientation` is deprecated for "
-                           "removal as `marching_cubes` now guarantess "
-                           "correct mesh orientation."))
+    warn(DeprecationWarning("`correct_mesh_orientation` is deprecated for "
+                            "removal as `marching_cubes` now guarantess "
+                            "correct mesh orientation."))
 
     verts = verts.copy()
     verts[:, 0] /= spacing[0]

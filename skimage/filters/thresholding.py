@@ -7,7 +7,7 @@ __all__ = ['threshold_adaptive',
 import numpy as np
 from scipy import ndimage as ndi
 from ..exposure import histogram
-from .._shared.utils import assert_nD
+from .._shared.utils import assert_nD, warn
 
 
 def threshold_adaptive(image, block_size, method='gaussian', offset=0,
@@ -24,7 +24,7 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
     image : (N, M) ndarray
         Input image.
     block_size : int
-        Uneven size of pixel neighborhood which is used to calculate the
+        Odd size of pixel neighborhood which is used to calculate the
         threshold value (e.g. 3, 5, 7, ..., 21, ...).
     method : {'generic', 'gaussian', 'mean', 'median'}, optional
         Method used to determine adaptive threshold for local neighbourhood in
@@ -67,6 +67,9 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
     >>> func = lambda arr: arr.mean()
     >>> binary_image2 = threshold_adaptive(image, 15, 'generic', param=func)
     """
+    if block_size % 2 == 0:
+        raise ValueError("The kwarg ``block_size`` must be odd! Given "
+                         "``block_size`` {0} is even.".format(block_size))
     assert_nD(image, 2)
     thresh_image = np.zeros(image.shape, 'double')
     if method == 'generic':
@@ -97,7 +100,7 @@ def threshold_otsu(image, nbins=256):
     Parameters
     ----------
     image : array
-        Input image.
+        Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
@@ -118,7 +121,22 @@ def threshold_otsu(image, nbins=256):
     >>> image = camera()
     >>> thresh = threshold_otsu(image)
     >>> binary = image <= thresh
+
+    Notes
+    -----
+    The input image must be grayscale.
     """
+    if image.shape[-1] in (3, 4):
+        msg = "threshold_otsu is expected to work correctly only for " \
+              "grayscale images; image shape {0} looks like an RGB image"
+        warn(msg.format(image.shape))
+
+    # Check if the image is multi-colored or not
+    if image.min() == image.max():
+        raise TypeError("threshold_otsu is expected to work with images " \
+                        "having more than one color. The input image seems " \
+                        "to have just one color {0}.".format(image.min()))
+
     hist, bin_centers = histogram(image.ravel(), nbins)
     hist = hist.astype(float)
 

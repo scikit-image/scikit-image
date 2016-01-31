@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import run_module_suite, assert_raises, assert_equal
 
-from skimage import restoration, data, color, img_as_float
+from skimage import restoration, data, color, img_as_float, measure
 
 
 np.random.seed(1234)
@@ -21,7 +21,7 @@ def test_denoise_tv_chambolle_2d():
     # clip noise so that it does not exceed allowed range for float images.
     img = np.clip(img, 0, 1)
     # denoise
-    denoised_astro = restoration.denoise_tv_chambolle(img, weight=0.25)
+    denoised_astro = restoration.denoise_tv_chambolle(img, weight=0.1)
     # which dtype?
     assert denoised_astro.dtype in [np.float, np.float32, np.float64]
     from scipy import ndimage as ndi
@@ -34,8 +34,17 @@ def test_denoise_tv_chambolle_2d():
 
 
 def test_denoise_tv_chambolle_multichannel():
-    denoised0 = restoration.denoise_tv_chambolle(astro[..., 0], weight=0.25)
-    denoised = restoration.denoise_tv_chambolle(astro, weight=0.25,
+    denoised0 = restoration.denoise_tv_chambolle(astro[..., 0], weight=0.1)
+    denoised = restoration.denoise_tv_chambolle(astro, weight=0.1,
+                                                multichannel=True)
+    assert_equal(denoised[..., 0], denoised0)
+
+    # tile astronaut subset to generate 3D+channels data
+    astro3 = np.tile(astro[:64, :64, np.newaxis, :], [1, 1, 2, 1])
+    # modify along tiled dimension to give non-zero gradient on 3rd axis
+    astro3[:, :, 0, :] = 2*astro3[:, :, 0, :]
+    denoised0 = restoration.denoise_tv_chambolle(astro3[..., 0], weight=0.1)
+    denoised = restoration.denoise_tv_chambolle(astro3, weight=0.1,
                                                 multichannel=True)
     assert_equal(denoised[..., 0], denoised0)
 
@@ -46,7 +55,7 @@ def test_denoise_tv_chambolle_float_result_range():
     int_astro = np.multiply(img, 255).astype(np.uint8)
     assert np.max(int_astro) > 1
     denoised_int_astro = restoration.denoise_tv_chambolle(int_astro,
-                                                          weight=0.25)
+                                                          weight=0.1)
     # test if the value range of output float data is within [0.0:1.0]
     assert denoised_int_astro.dtype == np.float
     assert np.max(denoised_int_astro) <= 1.0
@@ -62,13 +71,45 @@ def test_denoise_tv_chambolle_3d():
     mask += 20 * np.random.rand(*mask.shape)
     mask[mask < 0] = 0
     mask[mask > 255] = 255
-    res = restoration.denoise_tv_chambolle(mask.astype(np.uint8), weight=0.4)
+    res = restoration.denoise_tv_chambolle(mask.astype(np.uint8), weight=0.1)
     assert res.dtype == np.float
     assert res.std() * 255 < mask.std()
 
-    # test wrong number of dimensions
-    assert_raises(ValueError, restoration.denoise_tv_chambolle,
-                  np.random.rand(8, 8, 8, 8))
+
+def test_denoise_tv_chambolle_1d():
+    """Apply the TV denoising algorithm on a 1D sinusoid."""
+    x = 125 + 100*np.sin(np.linspace(0, 8*np.pi, 1000))
+    x += 20 * np.random.rand(x.size)
+    x = np.clip(x, 0, 255)
+    res = restoration.denoise_tv_chambolle(x.astype(np.uint8), weight=0.1)
+    assert res.dtype == np.float
+    assert res.std() * 255 < x.std()
+
+
+def test_denoise_tv_chambolle_4d():
+    """ TV denoising for a 4D input."""
+    im = 255 * np.random.rand(8, 8, 8, 8)
+    res = restoration.denoise_tv_chambolle(im.astype(np.uint8), weight=0.1)
+    assert res.dtype == np.float
+    assert res.std() * 255 < im.std()
+
+
+def test_denoise_tv_chambolle_weighting():
+    # make sure a specified weight gives consistent results regardless of
+    # the number of input image dimensions
+    rstate = np.random.RandomState(1234)
+    img2d = astro_gray.copy()
+    img2d += 0.15 * rstate.standard_normal(img2d.shape)
+    img2d = np.clip(img2d, 0, 1)
+
+    # generate 4D image by tiling
+    img4d = np.tile(img2d[..., None, None], (1, 1, 2, 2))
+
+    w = 0.2
+    denoised_2d = restoration.denoise_tv_chambolle(img2d, weight=w)
+    denoised_4d = restoration.denoise_tv_chambolle(img4d, weight=w)
+    assert measure.structural_similarity(denoised_2d,
+                                         denoised_4d[:, :, 0, 0]) > 0.99
 
 
 def test_denoise_tv_bregman_2d():

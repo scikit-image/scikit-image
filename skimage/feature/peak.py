@@ -3,46 +3,49 @@ import scipy.ndimage as ndi
 from ..filters import rank_order
 
 
-def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
-                   exclude_border=True, indices=True, num_peaks=np.inf,
-                   footprint=None, labels=None):
-    """
-    Find peaks in an image, and return them as coordinates or a boolean array.
+def peak_local_max(image, min_distance=1, threshold_abs=None,
+                   threshold_rel=None, exclude_border=True, indices=True,
+                   num_peaks=np.inf, footprint=None, labels=None):
+    """Find peaks in an image as coordinate list or boolean mask.
 
     Peaks are the local maxima in a region of `2 * min_distance + 1`
     (i.e. peaks are separated by at least `min_distance`).
 
-    NOTE: If peaks are flat (i.e. multiple adjacent pixels have identical
+    If peaks are flat (i.e. multiple adjacent pixels have identical
     intensities), the coordinates of all such pixels are returned.
+
+    If both `threshold_abs` and `threshold_rel` are provided, the maximum
+    of the two is chosen as the minimum intensity threshold of peaks.
 
     Parameters
     ----------
-    image : ndarray of floats
+    image : ndarray
         Input image.
-    min_distance : int
+    min_distance : int, optional
         Minimum number of pixels separating peaks in a region of `2 *
         min_distance + 1` (i.e. peaks are separated by at least
         `min_distance`). If `exclude_border` is True, this value also excludes
         a border `min_distance` from the image boundary.
         To find the maximum number of peaks, use `min_distance=1`.
-    threshold_abs : float
-        Minimum intensity of peaks.
-    threshold_rel : float
-        Minimum intensity of peaks calculated as `max(image) * threshold_rel`.
-    exclude_border : bool
+    threshold_abs : float, optional
+        Minimum intensity of peaks. By default, the absolute threshold is
+        the minimum intensity of the image.
+    threshold_rel : float, optional
+        Minimum intensity of peaks, calculated as `max(image) * threshold_rel`.
+    exclude_border : bool, optional
         If True, `min_distance` excludes peaks from the border of the image as
         well as from each other.
-    indices : bool
-        If True, the output will be an array representing peak coordinates.
-        If False, the output will be a boolean array shaped as `image.shape`
-        with peaks present at True elements.
-    num_peaks : int
+    indices : bool, optional
+        If True, the output will be an array representing peak
+        coordinates.  If False, the output will be a boolean array shaped as
+        `image.shape` with peaks present at True elements.
+    num_peaks : int, optional
         Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
         return `num_peaks` peaks based on highest peak intensity.
     footprint : ndarray of bools, optional
         If provided, `footprint == 1` represents the local region within which
         to search for peaks at every point in `image`.  Overrides
-        `min_distance`, except for border exclusion if `exclude_border=True`.
+        `min_distance` (also for `exclude_border`).
     labels : ndarray of ints, optional
         If provided, each unique region `labels == value` represents a unique
         region to search for peaks. Zero is reserved for background.
@@ -58,10 +61,10 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
     Notes
     -----
     The peak local maximum function returns the coordinates of local peaks
-    (maxima) in a image. A maximum filter is used for finding local maxima.
-    This operation dilates the original image. After comparison between
-    dilated and original image, peak_local_max function returns the
-    coordinates of peaks where dilated image = original.
+    (maxima) in an image. A maximum filter is used for finding local maxima.
+    This operation dilates the original image. After comparison of the dilated
+    and original image, this function returns the coordinates or a mask of the
+    peaks where the dilated image equals the original image.
 
     Examples
     --------
@@ -90,7 +93,9 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
     array([[10, 10, 10]])
 
     """
+
     out = np.zeros_like(image, dtype=np.bool)
+
     # In the case of labels, recursively build and return an output
     # operating on each label separately
     if labels is not None:
@@ -123,7 +128,6 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
         else:
             return out
 
-    image = image.copy()
     # Non maximum filter
     if footprint is not None:
         image_max = ndi.maximum_filter(image, footprint=footprint,
@@ -131,25 +135,33 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
     else:
         size = 2 * min_distance + 1
         image_max = ndi.maximum_filter(image, size=size, mode='constant')
-    mask = (image == image_max)
-    image *= mask
+    mask = image == image_max
 
-    if exclude_border:
+    if exclude_border and (footprint is not None or min_distance > 0):
         # zero out the image borders
-        for i in range(image.ndim):
-            image = image.swapaxes(0, i)
-            image[:min_distance] = 0
-            image[-min_distance:] = 0
-            image = image.swapaxes(0, i)
+        for i in range(mask.ndim):
+            mask = mask.swapaxes(0, i)
+            remove = (footprint.shape[i] if footprint is not None
+                      else 2 * min_distance)
+            mask[:remove // 2] = mask[-remove // 2:] = False
+            mask = mask.swapaxes(0, i)
 
     # find top peak candidates above a threshold
-    peak_threshold = max(np.max(image.ravel()) * threshold_rel, threshold_abs)
+    thresholds = []
+    if threshold_abs is None:
+        threshold_abs = image.min()
+    thresholds.append(threshold_abs)
+    if threshold_rel is not None:
+        thresholds.append(threshold_rel * image.max())
+    if thresholds:
+        mask &= image > max(thresholds)
 
     # get coordinates of peaks
-    coordinates = np.argwhere(image > peak_threshold)
+    coordinates = np.transpose(mask.nonzero())
 
     if coordinates.shape[0] > num_peaks:
-        intensities = image.flat[np.ravel_multi_index(coordinates.transpose(),image.shape)]
+        intensities = image.flat[np.ravel_multi_index(coordinates.transpose(),
+                                                      image.shape)]
         idx_maxsort = np.argsort(intensities)[::-1]
         coordinates = coordinates[idx_maxsort][:num_peaks]
 

@@ -1,3 +1,4 @@
+from ..._shared import warn
 from .util import prepare_for_display, window_manager
 import numpy as np
 
@@ -10,7 +11,6 @@ try:
                              QLabel, QMainWindow, QPixmap, QWidget)
     from PyQt4 import QtCore, QtGui
     import sip
-    import warnings
 
 except ImportError:
     window_manager._release('qt')
@@ -119,8 +119,7 @@ if sip.SIP_VERSION >= 0x040c00:
     # doesn't work with earlier versions
     imread = imread_qt
 else:
-    warnings.warn(RuntimeWarning(
-        "sip version too old. QT imread disabled"))
+    warn(RuntimeWarning("sip version too old. QT imread disabled"))
 
 
 def imshow(arr, fancy=False):
