@@ -2,11 +2,12 @@ from __future__ import division
 import numpy as np
 from .._shared.utils import assert_nD
 from . import _hoghistogram
+import warnings
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8),
-        cells_per_block=(3, 3), visualise=False, normalise=False,
-        feature_vector=True):
+        cells_per_block=(3, 3), visualise=False, transform_sqrt=False,
+        feature_vector=True, normalise=None):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Compute a Histogram of Oriented Gradients (HOG) by
@@ -29,12 +30,16 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         Number of cells in each block.
     visualise : bool, optional
         Also return an image of the HOG.
-    normalise : bool, optional
+    transform_sqrt : bool, optional
         Apply power law compression to normalise the image before
-        processing.
+        processing. DO NOT use this if the image contains negative
+        values. Also see `notes` section below.
     feature_vector : bool, optional
         Return the data as a feature vector by calling .ravel() on the result
         just before returning.
+    normalise : bool, deprecated
+        The parameter is deprecated. Use `transform_sqrt` for power law
+        compression. `normalise` has been deprecated.
 
     Returns
     -------
@@ -51,6 +56,13 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
       Human Detection, IEEE Computer Society Conference on Computer
       Vision and Pattern Recognition 2005 San Diego, CA, USA
 
+    Notes
+    -----
+    Power law compression, also known as Gamma correction, is used to reduce
+    the effects of shadowing and illumination variations. The compression makes
+    the dark regions lighter. When the kwarg `transform_sqrt` is set to
+    ``True``, the function computes the square root of each color channel
+    and then applies the hog algorithm to the image.
     """
     image = np.atleast_2d(image)
 
@@ -66,7 +78,13 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
 
     assert_nD(image, 2)
 
-    if normalise:
+    if normalise is not None:
+        raise ValueError("The normalise parameter was removed due to incorrect "
+                         "behavior; it only applied a square root instead of a "
+                         "true normalization. If you wish to duplicate the old "
+                         "behavior, set ``transform_sqrt=True``.")
+
+    if transform_sqrt:
         image = np.sqrt(image)
 
     """
@@ -173,7 +191,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     overlapping grid of blocks covering the detection window into a combined
     feature vector for use in the window classifier.
     """
-    
+
     if feature_vector:
         normalised_blocks = normalised_blocks.ravel()
 
