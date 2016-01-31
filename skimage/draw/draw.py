@@ -179,8 +179,10 @@ def set_color(img, coords, color, alpha=1):
                                                         img.shape[-1]))
 
     if np.isscalar(alpha):
-        alpha = np.full_like(rr, alpha, dtype=float)
-    
+        # Can be replaced by ``full_like`` when numpy 1.8 becomes
+        # minimum dependency
+        alpha = np.ones_like(rr) * alpha
+
     rr, cc, alpha = _coords_inside_image(rr, cc, img.shape, val=alpha)
 
     alpha = alpha[..., np.newaxis]
