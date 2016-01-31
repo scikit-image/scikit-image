@@ -26,7 +26,7 @@ from skimage.morphology import disk
 from skimage.filters import rank
 
 
-image = (data.coins()).astype(np.uint16) * 16
+image = data.coins()
 selem = disk(20)
 
 percentile_result = rank.mean_percentile(image, selem=selem, p0=.1, p1=.9)
@@ -45,6 +45,5 @@ for n in range(0, len(imgs)):
     ax[n].set_title(titles[n])
     ax[n].set_adjustable('box-forced')
     ax[n].axis('off')
-
 
 plt.show()
