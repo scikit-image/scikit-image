@@ -92,8 +92,8 @@ def inpaint_biharmonic(img, mask, multichannel=False):
     out : (M[, N[, ..., P]][, C]) ndarray
         Input image with masked pixels inpainted.
 
-    Example
-    -------
+    Examples
+    --------
     >>> img = np.tile(np.square(np.linspace(0, 1, 5)), (5, 1))
     >>> mask = np.zeros_like(img)
     >>> mask[2, 2:] = 1
@@ -111,11 +111,11 @@ def inpaint_biharmonic(img, mask, multichannel=False):
 
     if img.ndim < 1:
         raise ValueError('Input array has to be at least 1D')
-    
+
     img_baseshape = img.shape[:-1] if multichannel else img.shape
     if img_baseshape != mask.shape:
         raise ValueError('Input arrays have to be the same shape')
-    
+
     if np.ma.isMaskedArray(img):
         raise TypeError('Masked arrays are not supported')
 

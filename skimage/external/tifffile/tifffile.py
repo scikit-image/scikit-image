@@ -3104,8 +3104,8 @@ def _replace_by(module_function, package=None, warn=False):
     func : function
         Wrapped function, hopefully calling a function in another module.
 
-    Example
-    -------
+    Examples
+    --------
     >>> @_replace_by('_tifffile.decodepackbits')
     ... def decodepackbits(encoded):
     ...     raise NotImplementedError

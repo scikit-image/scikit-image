@@ -55,8 +55,8 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
     ----------
     .. [1] http://users.soe.ucsc.edu/~manduchi/Papers/ICCV98.pdf
 
-    Example
-    -------
+    Examples
+    --------
     >>> from skimage import data, img_as_float
     >>> astro = img_as_float(data.astronaut())
     >>> astro = astro[220:300, 220:320]
