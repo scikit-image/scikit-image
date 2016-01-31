@@ -28,7 +28,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage.color import rgb2gray
 from skimage import data
-from skimage.filters import gaussian_filter
+from skimage.filters import gaussian
 from skimage.segmentation import active_contour
 
 # Test scipy version, since active contour is only possible
@@ -52,7 +52,7 @@ if not new_scipy:
           '0.14.0 and above.')
 
 if new_scipy:
-    snake = active_contour(gaussian_filter(img, 3),
+    snake = active_contour(gaussian(img, 3),
                            init, alpha=0.015, beta=10, gamma=0.001)
 
     fig = plt.figure(figsize=(7, 7))
@@ -80,7 +80,7 @@ y = np.linspace(136, 50, 100)
 init = np.array([x, y]).T
 
 if new_scipy:
-    snake = active_contour(gaussian_filter(img, 1), init, bc='fixed',
+    snake = active_contour(gaussian(img, 1), init, bc='fixed',
                            alpha=0.1, beta=1.0, w_line=-5, w_edge=0, gamma=0.1)
 
     fig = plt.figure(figsize=(9, 5))
