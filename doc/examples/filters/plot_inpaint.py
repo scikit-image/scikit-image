@@ -3,7 +3,7 @@
 Inpainting
 ===========
 Inpainting [1]_ is the process of reconstructing lost or deteriorated
-parts of images and videos. 
+parts of images and videos.
 
 The reconstruction is supposed to be performed in fully automatic way by
 exploiting the information presented in non-damaged regions.
@@ -15,7 +15,7 @@ inpainting algorithm based on 'biharmonic equation'-assumption [2]_ [3]_.
         https://en.wikipedia.org/wiki/Inpainting
 .. [2]  Wikipedia. Biharmonic equation
         https://en.wikipedia.org/wiki/Biharmonic_equation
-.. [3]  N.S.Hoang, S.B.Damelin, "On surface completion and image 
+.. [3]  N.S.Hoang, S.B.Damelin, "On surface completion and image
         inpainting by biharmonic functions: numerical aspects",
         http://www.ima.umn.edu/~damelin/biharmonic
 """
@@ -41,18 +41,24 @@ for layer in range(image_defect.shape[-1]):
 
 image_result = inpaint.inpaint_biharmonic(image_defect, mask, multichannel=True)
 
-fig, axes = plt.subplots(ncols=3, nrows=1)
+fig, axes = plt.subplots(ncols=2, nrows=2)
+ax0, ax1, ax2, ax3 = axes.ravel()
 
-axes[0].set_title('Defected image')
-axes[0].imshow(image_orig)
-axes[0].set_xticks([]), axes[0].set_yticks([])
+ax0.set_title('Original image')
+ax0.imshow(image_orig)
+ax0.set_xticks([]), ax0.set_yticks([])
 
-axes[1].set_title('Defect mask')
-axes[1].imshow(mask, cmap=plt.cm.gray)
-axes[1].set_xticks([]), axes[1].set_yticks([])
+ax1.set_title('Mask')
+ax1.imshow(mask, cmap=plt.cm.gray)
+ax1.set_xticks([]), ax1.set_yticks([])
 
-axes[2].set_title('Inpainted image')
-axes[2].imshow(image_result)
-axes[2].set_xticks([]), axes[2].set_yticks([])
+ax2.set_title('Defected image')
+ax2.imshow(image_defect)
+ax2.set_xticks([]), ax2.set_yticks([])
 
+ax3.set_title('Inpainted image')
+ax3.imshow(image_result)
+ax3.set_xticks([]), ax3.set_yticks([])
+
+plt.tight_layout()
 plt.show()
