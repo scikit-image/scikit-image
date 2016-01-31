@@ -1,10 +1,10 @@
 from collections import namedtuple
 import numpy as np
-import warnings
 import matplotlib.pyplot as plt
 from ...util import dtype as dtypes
 from ...exposure import is_low_contrast
 from ...util.colormap import viridis
+from ..._shared.utils import warn
 
 _default_colormap = 'gray'
 _nonstandard_colormap = viridis
@@ -67,14 +67,14 @@ def _raise_warnings(image_properties):
     """
     ip = image_properties
     if ip.unsupported_dtype:
-        warnings.warn("Non-standard image type; displaying image with "
-                      "stretched contrast.")
+        warn("Non-standard image type; displaying image with "
+             "stretched contrast.")
     if ip.low_dynamic_range:
-        warnings.warn("Low image dynamic range; displaying image with "
-                      "stretched contrast.")
+        warn("Low image dynamic range; displaying image with "
+             "stretched contrast.")
     if ip.out_of_range_float:
-        warnings.warn("Float image out of standard range; displaying "
-                      "image with stretched contrast.")
+        warn("Float image out of standard range; displaying "
+             "image with stretched contrast.")
 
 
 def _get_display_range(image):

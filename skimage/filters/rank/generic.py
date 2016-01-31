@@ -16,17 +16,16 @@ References
 
 """
 
-import warnings
 import numpy as np
 from ... import img_as_ubyte
-from ..._shared.utils import assert_nD
+from ..._shared.utils import assert_nD, warn
 
 from . import generic_cy
 
 
 __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
-           'geometric_mean', 'subtract_mean', 'median', 'minimum', 'modal', 
-           'enhance_contrast', 'pop', 'threshold', 'tophat', 'noise_filter', 
+           'geometric_mean', 'subtract_mean', 'median', 'minimum', 'modal',
+           'enhance_contrast', 'pop', 'threshold', 'tophat', 'noise_filter',
            'entropy', 'otsu']
 
 
@@ -65,8 +64,8 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
 
     bitdepth = int(np.log2(max_bin))
     if bitdepth > 10:
-        warnings.warn("Bitdepth of %d may result in bad rank filter "
-                      "performance due to large number of bins." % bitdepth)
+        warn("Bitdepth of %d may result in bad rank filter "
+             "performance due to large number of bins." % bitdepth)
 
     return image, selem, out, mask, max_bin
 
@@ -377,7 +376,7 @@ def geometric_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
 
     References
     ----------
-    .. [1] Gonzalez, R. C. and Wood, R. E. "Digital Image Processing (3rd Edition)." 
+    .. [1] Gonzalez, R. C. and Wood, R. E. "Digital Image Processing (3rd Edition)."
            Prentice-Hall Inc, 2006.
 
     """

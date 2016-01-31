@@ -1,7 +1,7 @@
 import numpy as np
 import functools
-import warnings
 from scipy import ndimage as ndi
+from .._shared.utils import warn
 from .selem import _default_selem
 
 # Our function names don't exactly correspond to ndimages.
@@ -37,8 +37,8 @@ def default_selem(func):
         return func(image, selem=selem, *args, **kwargs)
 
     return func_out
- 
-def _check_dtype_supported(ar): 
+
+def _check_dtype_supported(ar):
     # Should use `issubdtype` for bool below, but there's a bug in numpy 1.7
     if not (ar.dtype == bool or np.issubdtype(ar.dtype, np.integer)):
         raise TypeError("Only bool or integer image types are supported. "
@@ -119,8 +119,8 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
                          "`skimage.morphology.label`.")
 
     if len(component_sizes) == 2:
-        warnings.warn("Only one label was provided to `remove_small_objects`. "
-                      "Did you mean to use a boolean array?")
+        warn("Only one label was provided to `remove_small_objects`. "
+             "Did you mean to use a boolean array?")
 
     too_small = component_sizes < min_size
     too_small_mask = too_small[ccs]
@@ -181,35 +181,35 @@ def remove_small_holes(ar, min_size=64, connectivity=1, in_place=False):
     Notes
     -----
 
-    If the array type is int, it is assumed that it contains already-labeled 
-    objects. The labels are not kept in the output image (this function always 
-    outputs a bool image). It is suggested that labeling is completed after 
+    If the array type is int, it is assumed that it contains already-labeled
+    objects. The labels are not kept in the output image (this function always
+    outputs a bool image). It is suggested that labeling is completed after
     using this function.
     """
     _check_dtype_supported(ar)
-    
+
     #Creates warning if image is an integer image
     if ar.dtype != bool:
-        warnings.warn("Any labeled images will be returned as a boolean array. "
-                      "Did you mean to use a boolean array?", UserWarning)
-    
+        warn("Any labeled images will be returned as a boolean array. "
+             "Did you mean to use a boolean array?", UserWarning)
+
     if in_place:
         out = ar
     else:
         out = ar.copy()
-        
+
     #Creating the inverse of ar
     if in_place:
         out = np.logical_not(out,out)
     else:
         out = np.logical_not(out)
-    
+
     #removing small objects from the inverse of ar
     out = remove_small_objects(out, min_size, connectivity, in_place)
-    
+
     if in_place:
         out = np.logical_not(out,out)
     else:
         out = np.logical_not(out)
-    
+
     return out

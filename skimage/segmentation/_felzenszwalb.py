@@ -1,6 +1,6 @@
-import warnings
 import numpy as np
 
+from .._shared.utils import warn
 from ._felzenszwalb_cy import _felzenszwalb_grey
 
 
@@ -56,8 +56,8 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20):
     # assume we got 2d image with multiple channels
     n_channels = image.shape[2]
     if n_channels != 3:
-        warnings.warn("Got image with %d channels. Is that really what you"
-                      " wanted?" % image.shape[2])
+        warn("Got image with %d channels. Is that really what you"
+             " wanted?" % image.shape[2])
     segmentations = []
     # compute quickshift for each channel
     for c in range(n_channels):

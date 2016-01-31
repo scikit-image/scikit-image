@@ -1,8 +1,7 @@
 import math
-import warnings
 import numpy as np
 from scipy import optimize
-from .._shared.utils import skimage_deprecation
+from .._shared.utils import skimage_deprecation, warn
 
 
 def _check_data_dim(data, dim):
@@ -27,8 +26,7 @@ class BaseModel(object):
 
     @property
     def _params(self):
-        warnings.warn('`_params` attribute is deprecated, '
-                      'use `params` instead.')
+        warn('`_params` attribute is deprecated, use `params` instead.')
         return self.params
 
 
@@ -61,8 +59,8 @@ class LineModel(BaseModel):
 
     def __init__(self):
         self.params = None
-        warnings.warn(skimage_deprecation('`LineModel` is deprecated, '
-                      'use `LineModelND` instead.'))
+        warn(skimage_deprecation('`LineModel` is deprecated, '
+             'use `LineModelND` instead.'))
 
     def estimate(self, data):
         """Estimate line model from data using total least squares.

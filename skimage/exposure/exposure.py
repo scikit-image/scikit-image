@@ -1,9 +1,9 @@
 from __future__ import division
-import warnings
 import numpy as np
 
 from ..color import rgb2gray
 from ..util.dtype import dtype_range, dtype_limits
+from .._shared.utils import warn
 
 
 __all__ = ['histogram', 'cumulative_distribution', 'equalize_hist',
@@ -60,9 +60,9 @@ def histogram(image, nbins=256):
     """
     sh = image.shape
     if len(sh) == 3 and sh[-1] < 4:
-        warnings.warn("This might be a color image. The histogram will be "
-                      "computed on the flattened image. You can instead "
-                      "apply this function to each color channel.")
+        warn("This might be a color image. The histogram will be "
+             "computed on the flattened image. You can instead "
+             "apply this function to each color channel.")
 
     # For integer types, histogramming with bincount is more efficient.
     if np.issubdtype(image.dtype, np.integer):
@@ -292,12 +292,12 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     if in_range is None:
         in_range = 'image'
         msg = "`in_range` should not be set to None. Use {!r} instead."
-        warnings.warn(msg.format(in_range))
+        warn(msg.format(in_range))
 
     if out_range is None:
         out_range = 'dtype'
         msg = "`out_range` should not be set to None. Use {!r} instead."
-        warnings.warn(msg.format(out_range))
+        warn(msg.format(out_range))
 
     imin, imax = intensity_range(image, in_range)
     omin, omax = intensity_range(image, out_range, clip_negative=(imin >= 0))
