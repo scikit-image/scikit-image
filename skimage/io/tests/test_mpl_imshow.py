@@ -78,7 +78,7 @@ def test_low_dynamic_range():
 
 def test_outside_standard_range():
     plt.figure()
-    with expected_warnings(["out of standard range|CObject type is marked"]):
+    with expected_warnings(["out of standard range"]):
         ax_im = io.imshow(im_hi)
     assert ax_im.get_clim() == (im_hi.min(), im_hi.max())
     assert n_subplots(ax_im) == 2
@@ -88,7 +88,7 @@ def test_outside_standard_range():
 def test_nonstandard_type():
     plt.figure()
 
-    with expected_warnings(["Low image dynamic range|CObject type is marked"]):
+    with expected_warnings(["Low image dynamic range"]):
         ax_im = io.imshow(im64)
     assert ax_im.get_clim() == (im64.min(), im64.max())
     assert n_subplots(ax_im) == 2
