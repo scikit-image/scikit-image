@@ -707,10 +707,17 @@ def rgb2gray(rgb):
     >>> img = data.astronaut()
     >>> img_gray = rgb2gray(img)
     """
+
     if rgb.ndim == 2:
         return rgb
 
-    return _convert(gray_from_rgb, rgb[:, :, :3])[..., 0]
+    rgb = _prepare_colorarray(rgb)
+
+    gray = 0.2125 * rgb[..., 0]
+    gray[:] += 0.7154 * rgb[..., 1]
+    gray[:] += 0.0721 * rgb[..., 2]
+
+    return gray
 
 rgb2grey = rgb2gray
 
