@@ -1,17 +1,19 @@
 from __future__ import division
 
-__all__ = ['structural_similarity']
+__all__ = ['compare_ssim',
+           'structural_similarity']
 
 import numpy as np
 from scipy.ndimage import uniform_filter, gaussian_filter
 
 from ..util.dtype import dtype_range
 from ..util.arraypad import crop
+from .._shared.utils import deprecated
 
 
-def structural_similarity(X, Y, win_size=None, gradient=False,
-                          dynamic_range=None, multichannel=False,
-                          gaussian_weights=False, full=False, **kwargs):
+def compare_ssim(X, Y, win_size=None, gradient=False,
+                 dynamic_range=None, multichannel=False,
+                 gaussian_weights=False, full=False, **kwargs):
     """Compute the mean structural similarity index between two images.
 
     Parameters
@@ -216,3 +218,13 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
             return mssim, S
         else:
             return mssim
+
+
+@deprecated('compare_ssim')
+def structural_similarity(X, Y, win_size=None, gradient=False,
+                          dynamic_range=None, multichannel=False,
+                          gaussian_weights=False, full=False, **kwargs):
+    """""" + compare_ssim.__doc__
+    return compare_ssim(X, Y, win_size=None, gradient=False,
+                        dynamic_range=None, multichannel=False,
+                        gaussian_weights=False, full=False, **kwargs)

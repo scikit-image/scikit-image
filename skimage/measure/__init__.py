@@ -2,8 +2,8 @@ from ._find_contours import find_contours
 from ._marching_cubes import (marching_cubes, mesh_surface_area,
                               correct_mesh_orientation)
 from ._regionprops import regionprops, perimeter
-from .simple_metrics import mean_squared_error, normalized_root_mse, psnr
-from ._structural_similarity import structural_similarity
+from .simple_metrics import compare_mse, compare_nrmse, compare_psnr
+from ._structural_similarity import compare_ssim, structural_similarity
 from ._polygon import approximate_polygon, subdivide_polygon
 from ._pnpoly import points_in_poly, grid_points_in_poly
 from ._moments import moments, moments_central, moments_normalized, moments_hu
@@ -36,6 +36,9 @@ __all__ = ['find_contours',
            'label',
            'points_in_poly',
            'grid_points_in_poly',
-           'mean_squared_error',
-           'normalized_root_mse',
-           'psnr']
+           'structural_similarity',
+           'compare_ssim',
+           'compare_mse',
+           'compare_nrmse',
+           'compare_psnr',
+           ]
