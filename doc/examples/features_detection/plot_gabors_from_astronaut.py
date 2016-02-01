@@ -51,7 +51,7 @@ np.random.seed(42)
 patch_shape = 8, 8
 n_filters = 49
 
-astro = np.ascontiguousarray(color.rgb2gray(data.astronaut()))
+astro = color.rgb2gray(data.astronaut())
 
 # -- filterbank1 on original image
 patches1 = view_as_windows(astro, patch_shape)
