@@ -66,7 +66,11 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
         int borders[6]
         npy_intp p, r, c
         bint no_change
+
         list simple_border_points
+        Py_ssize_t num_simple_points, i, j
+        (npy_intp, npy_intp, npy_intp) point
+
         pixel_type neighb[27]
     borders[:] = [4, 3, 2, 1, 5, 6]
 
@@ -84,24 +88,21 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
             curr_border = borders[j]
 
             simple_border_points = _loop_through(img, curr_border)
-           ## print(curr_border, " : ", simple_border_points, '\n')
 
             # sequential re-checking to preserve connectivity when deleting
             # in a parallel way
             no_change = True
-            for pt in simple_border_points:
-                p, r, c = pt
+            num_border_points = len(simple_border_points)
+            for i in range(num_border_points):
+                point = simple_border_points[i]
+                p, r, c = point
                 get_neighborhood(img, p, r, c, neighb)
                 if is_simple_point(neighb):
                     img[p, r, c] = 0
                     no_change = False
-                else:
-                    pass
-            ##        print(" *** ", pt, " is not simple.")
 
             if no_change:
                 unchanged_borders += 1
-            simple_border_points = []
 
     return np.asarray(img)
 
@@ -128,6 +129,7 @@ cdef list _loop_through(pixel_type[:, :, ::1] img,
         pixel_type neighborhood[27]
         npy_intp p, r, c
         bint is_border_pt
+        (npy_intp, npy_intp, npy_intp) point
 
         # rebind global names to avoid lookup. Both tables are filled in
         # at import time.
@@ -172,7 +174,8 @@ cdef list _loop_through(pixel_type[:, :, ::1] img,
                     continue
 
                 # ok, add (p, r, c) to the list of simple border points
-                simple_border_points.append((p, r, c))
+                point = p, r, c
+                simple_border_points.append(point)
     return simple_border_points
 
 
@@ -362,8 +365,6 @@ cdef bint is_simple_point(pixel_type neighbors[]):
                 octree_labeling(7, label, cube)
             elif i == 25:
                 octree_labeling(8, label, cube)
-            else:
-                raise ValueError("Never be here. i = %s" % i)
             label += 1
             if label - 2 >= 2:
                 return False
