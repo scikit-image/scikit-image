@@ -21,7 +21,7 @@ Unsupervised Wiener
 This algorithm has a self-tuned regularisation parameters based on
 data learning. This is not common and based on the following
 publication. The algorithm is based on a iterative Gibbs sampler that
-draw alternatively samples of posterior conditionnal law of the image,
+draw alternatively samples of posterior conditional law of the image,
 the noise power and the image frequency power.
 
 .. [1] François Orieux, Jean-François Giovannelli, and Thomas
