@@ -131,10 +131,9 @@ cdef list _loop_through(pixel_type[:, :, ::1] img,
         bint is_border_pt
         (npy_intp, npy_intp, npy_intp) point
 
-        # rebind global names to avoid lookup. Both tables are filled in
+        # rebind a global name to avoid lookup. The table is filled in
         # at import time.
         int[::1] Euler_LUT = LUT
-        cdef int[:, ::1] neighb_idx = NEIGHB_IDX
 
     # loop through the image
     # NB: each loop is from 1 to size-1: img is padded from all sides 
@@ -164,7 +163,7 @@ cdef list _loop_through(pixel_type[:, :, ::1] img,
 
                 # check if point is Euler invariant (condition 1 in [Lee94]_):
                 # if it is not, it's not deletable.
-                if not is_Euler_invariant(neighborhood, Euler_LUT, neighb_idx):
+                if not is_Euler_invariant(neighborhood, Euler_LUT):
                     continue
 
                 # check if point is simple (i.e., deletion does not
@@ -251,47 +250,24 @@ cdef int[::1] LUT = fill_Euler_LUT()
 
 
 # Fill the look-up table for indexing octants for computing the Euler
-# characteristic. See index_octants and is_Euler_invariant routines below.
-cdef int[:, ::1] NEIGHB_IDX = np.array([[2, 1, 11, 10, 5, 4, 14],      # NEB
-                                        [0, 9, 3, 12, 1, 10, 4],       # NWB
-                                        [8, 7, 17, 16, 5, 4, 14],      # SEB
-                                        [6, 15, 7, 16, 3, 12, 4],      # SWB
-                                        [20, 23, 19, 22, 11, 14, 10],  # NEU
-                                        [18, 21, 9, 12, 19, 22, 10],   # NWU
-                                        [26, 23, 17, 14, 25, 22, 16],  # SEU
-                                        [24, 25, 15, 16, 21, 22, 12],  # SWU
-                              ], dtype=np.intc)
-
-
-@cython.boundscheck(False)
-@cython.wraparound(False)
-@cython.cdivision(True)
-cdef int index_octants(int octant,
-                       pixel_type neighbors[],
-                       int[:, ::1] neib_idx):
-    cdef int n = 1, j, idx
-    for j in range(7):
-        idx = neib_idx[octant, j]
-        if neighbors[idx] == 1:
-            n |= 1 << (7 - j)    # XXX hardcode powers?
-    return n
-
-
-cdef inline bint is_endpoint(pixel_type neighbors[]):
-    """An endpoint has exactly one neighbor in the 26-neighborhood.
-    """
-    # The center pixel is counted, thus r.h.s. is 2
-    cdef int s = 0, j
-    for j in range(27):
-        s += neighbors[j]
-    return s == 2
+# characteristic. See is_Euler_invariant routine below.
+{{py:
+_neighb_idx = [[2, 1, 11, 10, 5, 4, 14],      # NEB
+               [0, 9, 3, 12, 1, 10, 4],       # NWB
+               [8, 7, 17, 16, 5, 4, 14],      # SEB
+               [6, 15, 7, 16, 3, 12, 4],      # SWB
+               [20, 23, 19, 22, 11, 14, 10],  # NEU
+               [18, 21, 9, 12, 19, 22, 10],   # NWU
+               [26, 23, 17, 14, 25, 22, 16],  # SEU
+               [24, 25, 15, 16, 21, 22, 12],  # SWU
+              ]
+}}
 
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef bint is_Euler_invariant(pixel_type neighbors[],
-                             int[::1] lut,
-                             int[:, ::1] neighb_idx):
+                             int[::1] lut):
     """Check if a point is Euler invariant.
 
     Calculate Euler characteristc for each octant and sum up.
@@ -302,19 +278,36 @@ cdef bint is_Euler_invariant(pixel_type neighbors[],
         neighbors of a point
     lut
         The look-up table for preserving the Euler characteristic.
-    neighb_idx
-        The look-up table for indexing octants.
 
     Returns
     -------
     bool (C bool, that is)
 
     """
-    cdef int octant, n, euler_char = 0
-    for octant in range(8):
-        n = index_octants(octant, neighbors, neighb_idx)
-        euler_char += lut[n]
+    cdef int n, euler_char = 0
+    {{for _octant in range(8)}}
+
+    # octant {{_octant}}:
+    n = 1
+    {{for _j in range(7):}}
+    {{py: _idx = _neighb_idx[_octant][_j]}}
+    if neighbors[{{_idx}}] == 1:
+        n |= {{1 << (7 - _j)}}
+
+    {{endfor}}
+    euler_char += lut[n]
+    {{endfor}}
     return euler_char == 0
+
+
+cdef inline bint is_endpoint(pixel_type neighbors[]):
+    """An endpoint has exactly one neighbor in the 26-neighborhood.
+    """
+    # The center pixel is counted, thus r.h.s. is 2
+    cdef int s = 0, j
+    for j in range(27):
+        s += neighbors[j]
+    return s == 2
 
 
 cdef bint is_simple_point(pixel_type neighbors[]):
