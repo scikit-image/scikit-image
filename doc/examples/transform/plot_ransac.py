@@ -10,7 +10,7 @@ the RANSAC algorithm.
 import numpy as np
 from matplotlib import pyplot as plt
 
-from skimage.measure import LineModel, ransac
+from skimage.measure import LineModelND, ransac
 
 
 np.random.seed(seed=1)
@@ -32,11 +32,11 @@ data[::2] += 5 * noise[::2]
 data[::4] += 20 * noise[::4]
 
 # fit line using all data
-model = LineModel()
+model = LineModelND()
 model.estimate(data)
 
 # robustly fit line only using inlier data with RANSAC algorithm
-model_robust, inliers = ransac(data, LineModel, min_samples=2,
+model_robust, inliers = ransac(data, LineModelND, min_samples=2,
                                residual_threshold=1, max_trials=1000)
 outliers = inliers == False
 

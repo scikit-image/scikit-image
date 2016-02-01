@@ -25,7 +25,7 @@ NR_OF_GREY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
 
 
 @adapt_rgb(hsv_value)
-def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
+def equalize_adapthist(image, ntiles_x=None, ntiles_y=None, clip_limit=0.01,
                        nbins=256, kernel_size=None):
     """Contrast Limited Adaptive Histogram Equalization (CLAHE).
 
@@ -76,10 +76,12 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
     image = img_as_uint(image)
     image = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
 
-    if kernel_size is None:
+    if ntiles_x is not None or ntiles_y is not None:
         warn('`ntiles_*` have been deprecated in favor of '
              '`kernel_size`.  The `ntiles_*` keyword arguments '
              'will be removed in v0.14', skimage_deprecation)
+
+    if kernel_size is None:
         ntiles_x = ntiles_x or 8
         ntiles_y = ntiles_y or 8
         kernel_size = (np.round(image.shape[0] / ntiles_y),

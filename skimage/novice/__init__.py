@@ -19,8 +19,8 @@ the normal, array-oriented image functions used by scikit-image.
     instead of row, column.
 
 
-Example
--------
+Examples
+--------
 We can create a Picture object open opening an image file:
 
 >>> from skimage import novice
