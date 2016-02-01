@@ -1,4 +1,4 @@
-from numpy.testing import assert_array_equal, assert_equal
+from numpy.testing import assert_array_equal, assert_equal, assert_raises
 import numpy as np
 from skimage._shared.testing import test_parallel
 
@@ -18,6 +18,21 @@ def test_set_color():
     img_[0, :] = 1
 
     assert_array_equal(img, img_)
+
+
+def test_set_color_with_alpha():
+    img = np.zeros((10, 10))
+
+    rr, cc, alpha = line_aa(0, 0, 0, 30)
+    set_color(img, (rr, cc), 1, alpha=alpha)
+
+    # Wrong dimensionality color
+    assert_raises(ValueError, set_color, img, (rr, cc), (255, 0, 0), alpha=alpha)
+
+    img = np.zeros((10, 10, 3))
+
+    rr, cc, alpha = line_aa(0, 0, 0, 30)
+    set_color(img, (rr, cc), (1, 0, 0), alpha=alpha)
 
 
 @test_parallel()
@@ -72,7 +87,7 @@ def test_line_aa_horizontal():
     img = np.zeros((10, 10))
 
     rr, cc, val = line_aa(0, 0, 0, 9)
-    img[rr, cc] = val
+    set_color(img, (rr, cc), 1, alpha=val)
 
     img_ = np.zeros((10, 10))
     img_[0, :] = 1
@@ -329,11 +344,13 @@ def test_circle_perimeter_aa_shape():
     img = np.zeros((15, 20), 'uint8')
     rr, cc, val = circle_perimeter_aa(7, 10, 9, shape=(15, 20))
     img[rr, cc] = val * 255
+
     shift = 5
     img_ = np.zeros((15 + 2 * shift, 20), 'uint8')
     rr, cc, val = circle_perimeter_aa(7 + shift, 10, 9, shape=None)
     img_[rr, cc] = val * 255
     assert_array_equal(img, img_[shift:-shift, :])
+
 
 def test_ellipse_trivial():
     img = np.zeros((2, 2), 'uint8')

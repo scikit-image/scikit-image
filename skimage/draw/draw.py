@@ -125,7 +125,7 @@ def circle(r, c, radius, shape=None):
     return ellipse(r, c, radius, radius, shape)
 
 
-def set_color(img, coords, color):
+def set_color(img, coords, color, alpha=1):
     """Set pixel color in the image at the given coordinates.
 
     Coordinates that exceed the shape of the image will be ignored.
@@ -134,10 +134,13 @@ def set_color(img, coords, color):
     ----------
     img : (M, N, D) ndarray
         Image
-    coords : ((P,) ndarray, (P,) ndarray)
-        Coordinates of pixels to be colored.
+    coords : tuple of ((P,) ndarray, (P,) ndarray)
+        Row and column coordinates of pixels to be colored.
     color : (D,) ndarray
         Color to be assigned to coordinates in the image.
+    alpha : scalar or (N,) ndarray
+        Alpha values used to blend color with image.  0 is transparent,
+        1 is opaque.
 
     Returns
     -------
@@ -163,7 +166,28 @@ def set_color(img, coords, color):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]], dtype=uint8)
 
     """
-
     rr, cc = coords
-    rr, cc = _coords_inside_image(rr, cc, img.shape)
-    img[rr, cc] = color
+
+    if img.ndim == 2:
+        img = img[..., np.newaxis]
+
+    color = np.array(color, ndmin=1, copy=False)
+
+    if img.shape[-1] != color.shape[-1]:
+        raise ValueError('Color shape ({}) must match last '
+                         'image dimension ({}).'.format(color.shape[0],
+                                                        img.shape[-1]))
+
+    if np.isscalar(alpha):
+        # Can be replaced by ``full_like`` when numpy 1.8 becomes
+        # minimum dependency
+        alpha = np.ones_like(rr) * alpha
+
+    rr, cc, alpha = _coords_inside_image(rr, cc, img.shape, val=alpha)
+
+    alpha = alpha[..., np.newaxis]
+
+    color = color * alpha
+    vals = img[rr, cc] * (1 - alpha)
+
+    img[rr, cc] = vals + color

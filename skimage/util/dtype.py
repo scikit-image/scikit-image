@@ -25,9 +25,8 @@ _supported_types = (np.bool_, np.bool8,
                     np.int8, np.int16, np.int32, np.int64,
                     np.float32, np.float64)
 
-if np.__version__ >= "1.6.0":
-    dtype_range[np.float16] = (-1, 1)
-    _supported_types += (np.float16, )
+dtype_range[np.float16] = (-1, 1)
+_supported_types += (np.float16, )
 
 
 def dtype_limits(image, clip_negative=True):
