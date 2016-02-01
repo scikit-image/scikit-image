@@ -46,19 +46,19 @@ ax0, ax1, ax2, ax3 = axes.ravel()
 
 ax0.set_title('Original image')
 ax0.imshow(image_orig)
-ax0.set_xticks([]), ax0.set_yticks([])
+ax0.axis('off')
 
 ax1.set_title('Mask')
 ax1.imshow(mask, cmap=plt.cm.gray)
-ax1.set_xticks([]), ax1.set_yticks([])
+ax1.axis('off')
 
 ax2.set_title('Defected image')
 ax2.imshow(image_defect)
-ax2.set_xticks([]), ax2.set_yticks([])
+ax2.axis('off')
 
 ax3.set_title('Inpainted image')
 ax3.imshow(image_result)
-ax3.set_xticks([]), ax3.set_yticks([])
+ax3.axis('off')
 
 plt.tight_layout()
 plt.show()
