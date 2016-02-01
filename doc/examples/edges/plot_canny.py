@@ -38,7 +38,7 @@ edges2 = feature.canny(im, sigma=3)
 fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(8, 3),
                                     sharex=True, sharey=True)
 
-ax1.imshow(im, cmap=plt.cm.jet)
+ax1.imshow(im, cmap=plt.cm.gray)
 ax1.axis('off')
 ax1.set_title('noisy image', fontsize=20)
 

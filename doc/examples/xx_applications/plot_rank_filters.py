@@ -552,7 +552,7 @@ ax1.set_title('Image')
 ax1.axis('off')
 ax1.set_adjustable('box-forced')
 
-fig.colorbar(ax2.imshow(entropy(image, disk(5)), cmap=plt.cm.jet), ax=ax2)
+fig.colorbar(ax2.imshow(entropy(image, disk(5)), cmap=plt.cm.gray), ax=ax2)
 ax2.set_title('Entropy')
 ax2.axis('off')
 ax2.set_adjustable('box-forced')

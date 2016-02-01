@@ -68,18 +68,18 @@ image_unwrapped_wrap_around = unwrap_phase(image_wrapped,
 fig, ax = plt.subplots(2, 2)
 ax1, ax2, ax3, ax4 = ax.ravel()
 
-fig.colorbar(ax1.imshow(np.ma.array(image, mask=mask), cmap='jet'), ax=ax1)
+fig.colorbar(ax1.imshow(np.ma.array(image, mask=mask), cmap='rainbow'), ax=ax1)
 ax1.set_title('Original')
 
-fig.colorbar(ax2.imshow(image_wrapped, cmap='jet', vmin=-np.pi, vmax=np.pi),
+fig.colorbar(ax2.imshow(image_wrapped, cmap='rainbow', vmin=-np.pi, vmax=np.pi),
              ax=ax2)
 ax2.set_title('Wrapped phase')
 
-fig.colorbar(ax3.imshow(image_unwrapped_no_wrap_around, cmap='jet'),
+fig.colorbar(ax3.imshow(image_unwrapped_no_wrap_around, cmap='rainbow'),
              ax=ax3)
 ax3.set_title('Unwrapped without wrap_around')
 
-fig.colorbar(ax4.imshow(image_unwrapped_wrap_around, cmap='jet'), ax=ax4)
+fig.colorbar(ax4.imshow(image_unwrapped_wrap_around, cmap='rainbow'), ax=ax4)
 ax4.set_title('Unwrapped with wrap_around')
 
 plt.show()
