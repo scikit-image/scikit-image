@@ -26,7 +26,7 @@ def test_old_name_deprecated():
     with expected_warnings('Call to deprecated function '
                            '``structural_similarity``. Use '
                            '``compare_ssim`` instead.'):
-        ssim_result = structural_similarity(cam, cam_noisy, win_size=32)
+        ssim_result = structural_similarity(cam, cam_noisy, win_size=31)
 
 
 def test_ssim_patch_range():

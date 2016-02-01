@@ -16,7 +16,6 @@ from ._label import label
 __all__ = ['find_contours',
            'regionprops',
            'perimeter',
-           'structural_similarity',
            'approximate_polygon',
            'subdivide_polygon',
            'LineModel',

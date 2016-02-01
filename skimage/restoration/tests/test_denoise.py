@@ -108,8 +108,8 @@ def test_denoise_tv_chambolle_weighting():
     w = 0.2
     denoised_2d = restoration.denoise_tv_chambolle(img2d, weight=w)
     denoised_4d = restoration.denoise_tv_chambolle(img4d, weight=w)
-    assert measure.structural_similarity(denoised_2d,
-                                         denoised_4d[:, :, 0, 0]) > 0.99
+    assert measure.compare_ssim(denoised_2d,
+                                denoised_4d[:, :, 0, 0]) > 0.99
 
 
 def test_denoise_tv_bregman_2d():
