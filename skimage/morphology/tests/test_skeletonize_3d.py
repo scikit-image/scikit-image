@@ -25,6 +25,11 @@ def test_simple_3d():
     for fname in ['3/stack', '4/stack']:
         yield check_skel_3d, fname
 
+# 'slow' test: Bat Cochlea from FIJI collections.
+def test_large():
+    for fname in ['bat/bat-cochlea-volume',]:
+        yield check_skel_3d, fname
+
 
 def get_data_path():
     # XXX this is a bad temp hack

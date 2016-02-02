@@ -36,7 +36,7 @@ def _postprocess_image(img_o):
 
 def compute_thin_image(img_in):
     img = _prepare_image(img_in)
-    img = _compute_thin_image(img)
+    img = np.asarray(_compute_thin_image(img))
     img = _postprocess_image(img)
     return img
 
