@@ -305,15 +305,15 @@ def polygon(y, x, shape=None):
     return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
 
 
-def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
+def circle_perimeter(float cy, float cx, float radius,
                      method='bresenham', shape=None):
     """Generate circle perimeter coordinates.
-
+    
     Parameters
     ----------
-    cy, cx : int
+    cy, cx : float
         Centre coordinate of circle.
-    radius: int
+    radius: float
         Radius of circle.
     method : {'bresenham', 'andres'}, optional
         bresenham : Bresenham method (default)
@@ -322,7 +322,6 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
         Image shape which is used to determine the maximum extent of output pixel
         coordinates. This is useful for circles which exceed the image size.
         By default the full extent of the circle are used.
-
     Returns
     -------
     rr, cc : (N,) ndarray of int
@@ -330,7 +329,6 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
         Indices of pixels that belong to the circle perimeter.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
-
     Notes
     -----
     Andres method presents the advantage that concentric
@@ -338,14 +336,12 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     is also less distortions when Andres circles are rotated.
     Bresenham method is also known as midpoint circle algorithm.
     Anti-aliased circle generator is available with `circle_perimeter_aa`.
-
     References
     ----------
     .. [1] J.E. Bresenham, "Algorithm for computer control of a digital
            plotter", IBM Systems journal, 4 (1965) 25-30.
     .. [2] E. Andres, "Discrete circles, rings and spheres", Computers &
            Graphics, 18 (1994) 695-706.
-
     Examples
     --------
     >>> from skimage.draw import circle_perimeter
@@ -363,18 +359,14 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
            [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
-
     """
 
     cdef list rr = list()
     cdef list cc = list()
 
-    cdef Py_ssize_t x = 0
-    cdef Py_ssize_t y = radius
-    cdef Py_ssize_t d = 0
-
-    cdef double dceil = 0
-    cdef double dceil_prev = 0
+    cdef float x = 0
+    cdef float y = radius
+    cdef float d = 0
 
     cdef char cmethod
     if method == 'bresenham':
@@ -408,12 +400,16 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
                 d = d + 2 * (y - x - 1)
                 y = y - 1
                 x = x + 1
+
+    ry = (np.array(rr, dtype=np.float) + cy)
+    rx = (np.array(cc, dtype=np.float) + cx)
+    ry = np.round(ry)
+    rx = np.round(rx)
+
     if shape is not None:
-        return _coords_inside_image(np.array(rr, dtype=np.intp) + cy,
-                                    np.array(cc, dtype=np.intp) + cx,
-                                    shape)
-    return (np.array(rr, dtype=np.intp) + cy,
-            np.array(cc, dtype=np.intp) + cx)
+        return _coords_inside_image(ry.astype(np.int), rx.astype(np.int), shape)
+
+    return (ry.astype(np.int), rx.astype(np.int))
 
 
 def circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
