@@ -1,6 +1,7 @@
 __all__ = ['polygon_clip', 'polygon_area']
 
 import numpy as np
+from matplotlib import _path, path, transforms
 
 
 def polygon_clip(rp, cp, r0, c0, r1, c1):
@@ -24,19 +25,11 @@ def polygon_clip(rp, cp, r0, c0, r1, c1):
     AGG 2.4 and exposed in Matplotlib.
 
     """
-    from matplotlib import _path, path, transforms
-
-    # `clip_to_bbox` is included directly from Matplotlib
-    # since it was only included after v1.1
-    def clip_to_bbox(poly_path, bbox, inside=True):
-        verts = _path.clip_path_to_rect(poly_path, bbox, inside)
-        paths = [path.Path(poly) for poly in verts]
-        return poly_path.make_compound_path(*paths)
-
     poly = path.Path(np.vstack((rp, cp)).T, closed=True)
     clip_rect = transforms.Bbox([[r0, c0], [r1, c1]])
-    poly_clipped = clip_to_bbox(poly, clip_rect).to_polygons()[0]
+    poly_clipped = poly.clip_to_bbox(clip_rect).to_polygons()[0]
 
+    # This should be fixed in matplotlib >1.5
     if np.all(poly_clipped[-1] == poly_clipped[-2]):
         poly_clipped = poly_clipped[:-1]
 
