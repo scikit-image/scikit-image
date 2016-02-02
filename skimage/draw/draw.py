@@ -129,15 +129,15 @@ def circle(r, c, radius, shape=None):
     return ellipse(r, c, radius, radius, shape)
 
 
-def polygon_perimeter(cy, cx, shape=None, clip=False):
+def polygon_perimeter(cr, cc, shape=None, clip=False):
     """Generate polygon perimeter coordinates.
 
     Parameters
     ----------
-    cy : (N,) ndarray
-        Y-coordinates of vertices of polygon.
-    cx : (N,) ndarray
-        X-coordinates of vertices of polygon.
+    cr : (N,) ndarray
+        Row (Y) coordinates of vertices of polygon.
+    cc : (N,) ndarray
+        Column (X) coordinates of vertices of polygon.
     shape : tuple, optional
         Image shape which is used to determine maximum extents of output pixel
         coordinates. This is useful for polygons which exceed the image size.
@@ -149,10 +149,10 @@ def polygon_perimeter(cy, cx, shape=None, clip=False):
 
     Returns
     -------
-    rr, cc : ndarray of int
+    pr, pc : ndarray of int
         Pixel coordinates of polygon.
         May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
+        ``img[pr, pc] = 1``.
 
     Examples
     --------
@@ -180,30 +180,30 @@ def polygon_perimeter(cy, cx, shape=None, clip=False):
             raise ValueError("Must specify clipping shape")
         clip_box = np.array([0, 0, shape[0] - 1, shape[1] - 1])
     else:
-        clip_box = np.array([np.min(cy), np.min(cx),
-                             np.max(cy), np.max(cx)])
+        clip_box = np.array([np.min(cr), np.min(cc),
+                             np.max(cr), np.max(cc)])
 
     # Do the clipping irrespective of whether clip is set.  This
     # ensures that the returned polygon is closed and is an array.
-    cy, cx = polygon_clip(cy, cx, *clip_box)
+    cr, cc = polygon_clip(cr, cc, *clip_box)
 
-    cy = np.round(cy).astype(int)
-    cx = np.round(cx).astype(int)
+    cr = np.round(cr).astype(int)
+    cc = np.round(cc).astype(int)
 
     # Construct line segments
-    rr, cc = [], []
-    for i in range(len(cy) - 1):
-        line_r, line_c = line(cy[i], cx[i], cy[i + 1], cx[i + 1])
-        rr.extend(line_r)
-        cc.extend(line_c)
+    pr, pc = [], []
+    for i in range(len(cr) - 1):
+        line_r, line_c = line(cr[i], cc[i], cr[i + 1], cc[i + 1])
+        pr.extend(line_r)
+        pc.extend(line_c)
 
-    rr = np.asarray(rr)
-    cc = np.asarray(cc)
+    pr = np.asarray(pr)
+    pc = np.asarray(pc)
 
     if shape is None:
-        return rr, cc
+        return pr, pc
     else:
-        return _coords_inside_image(rr, cc, shape)
+        return _coords_inside_image(pr, pc, shape)
 
 
 def set_color(img, coords, color, alpha=1):
