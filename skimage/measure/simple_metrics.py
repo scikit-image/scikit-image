@@ -3,7 +3,10 @@ from __future__ import division
 import numpy as np
 from ..util.dtype import dtype_range
 
-__all__ = ['mean_squared_error', 'normalized_root_mse', 'psnr']
+__all__ = ['compare_mse', 
+           'compare_nrmse', 
+           'compare_psnr',
+           ]
 
 
 def _assert_compatible(im1, im2):
@@ -25,7 +28,7 @@ def _as_floats(im1, im2):
     return im1, im2
 
 
-def mean_squared_error(im1, im2):
+def compare_mse(im1, im2):
     """Compute the mean-squared error between two images.
 
     Parameters
@@ -44,7 +47,7 @@ def mean_squared_error(im1, im2):
     return np.mean(np.square(im1 - im2), dtype=np.float64)
 
 
-def normalized_root_mse(im_true, im_test, norm_type='Euclidean'):
+def compare_nrmse(im_true, im_test, norm_type='Euclidean'):
     """Compute the normalized root mean-squared error (NRMSE) between two
     images.
 
@@ -85,10 +88,10 @@ def normalized_root_mse(im_true, im_test, norm_type='Euclidean'):
         denom = im_true.mean()
     else:
         raise ValueError("Unsupported norm_type")
-    return np.sqrt(mean_squared_error(im_true, im_test)) / denom
+    return np.sqrt(compare_mse(im_true, im_test)) / denom
 
 
-def psnr(im_true, im_test, dynamic_range=None):
+def compare_psnr(im_true, im_test, dynamic_range=None):
     """ Compute the peak signal to noise ratio (PSNR) for an image.
 
     Parameters
@@ -128,5 +131,5 @@ def psnr(im_true, im_test, dynamic_range=None):
 
     im_true, im_test = _as_floats(im_true, im_test)
 
-    err = mean_squared_error(im_true, im_test)
+    err = compare_mse(im_true, im_test)
     return 10 * np.log10((dynamic_range ** 2) / err)

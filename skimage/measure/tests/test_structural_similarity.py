@@ -4,10 +4,11 @@ import scipy.io
 from numpy.testing import (assert_equal, assert_raises, assert_almost_equal,
                            assert_array_almost_equal)
 
-from skimage.measure import structural_similarity as ssim
+from skimage.measure import compare_ssim as ssim
 import skimage.data
 from skimage.io import imread
 from skimage import data_dir
+from skimage._shared._warnings import expected_warnings
 
 np.random.seed(5)
 cam = skimage.data.camera()
@@ -16,6 +17,16 @@ cam_noisy = np.clip(cam + sigma * np.random.randn(*cam.shape), 0, 255)
 cam_noisy = cam_noisy.astype(cam.dtype)
 
 np.random.seed(1234)
+
+
+# This test to be removed in 0.14, along with the structural_similarity alias
+# for compare_ssim
+def test_old_name_deprecated():
+    from skimage.measure import structural_similarity
+    with expected_warnings('Call to deprecated function '
+                           '``structural_similarity``. Use '
+                           '``compare_ssim`` instead.'):
+        ssim_result = structural_similarity(cam, cam_noisy, win_size=31)
 
 
 def test_ssim_patch_range():

@@ -17,7 +17,7 @@ from six import BytesIO
 from PIL import Image
 from .._plugins.pil_plugin import (
     pil_to_ndarray, ndarray_to_pil, _palette_is_grayscale)
-from ...measure import structural_similarity as ssim
+from ...measure import compare_ssim as ssim
 from ...color import rgb2lab
 
 
