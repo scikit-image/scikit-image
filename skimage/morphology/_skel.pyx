@@ -1,3 +1,34 @@
+"""
+This is an implementation of the 2D/3D thinning algorithm
+of [Lee94] of binary images, based on [IAC15]. 
+
+The original Java code [IAC15] carries the following message:
+
+ * This work is an implementation by Ignacio Arganda-Carreras of the
+ * 3D thinning algorithm from Lee et al. "Building skeleton models via 3-D 
+ * medial surface/axis thinning algorithms. Computer Vision, Graphics, and 
+ * Image Processing, 56(6):462–478, 1994." Based on the ITK version from
+ * Hanno Homann <a href="http://hdl.handle.net/1926/1292"> http://hdl.handle.net/1926/1292</a>
+ * <p>
+ *  More information at Skeletonize3D homepage:
+ *  http://fiji.sc/Skeletonize3D
+ *
+ * @version 1.0 11/13/2015 (unique BSD licensed version for scikit-image)
+ * @author Ignacio Arganda-Carreras (iargandacarreras at gmail.com)
+
+Porting to Cython was done by Evgeni Burovski (evgeny.burovskiy@gmail.com).
+
+References
+----------
+
+.. [Lee94] Lee et al, Building skeleton models via 3-D medial surface/axis
+           thinning algorithms. Computer Vision, Graphics, and Image Processing,
+           56(6):462–478, 1994
+
+.. [IAC15] Ignacio Arganda-Carreras, 2015. Skeletonize3D plugin for ImageJ(C).
+           http://fiji.sc/Skeletonize3D
+
+"""
 from __future__ import division, print_function, absolute_import
 
 import numpy as np
@@ -14,8 +45,12 @@ cdef void get_neighborhood(pixel_type[:, :, ::1] img,
                            pixel_type[::1] neighborhood):
     """Get the neighborhood of a pixel.
 
-       Assume zero boundary conditions. Image is already padded, so no
-       out-of-bounds checking. 
+    Assume zero boundary conditions. 
+    Image is already padded, so no out-of-bounds checking.
+
+    For the numbering of points see Fig. 1a. of [Lee94], where the numbers
+    do *not* include the center point itself. OTOH, this numbering below
+    includes it as number 13. The latter is consistent with [IAC15].
     """
     neighborhood[0] = img[p-1, r-1, c-1]
     neighborhood[1] = img[p-1, r,   c-1]
@@ -63,6 +98,10 @@ NUMPOINTS_LUT = fill_numpoints_LUT()
 
 
 def fill_Euler_LUT():
+    """ Look-up table for preserving Euler characteristic.
+
+    This is column $\delta G_{26}$ of Table 2 of [Lee94].
+    """
     LUT = np.zeros(256, dtype=np.intc)
 
     LUT[1]  =  1
@@ -217,6 +256,7 @@ _neib_idx[SEU, ...] = [26, 23, 17, 14, 25, 22, 16]
 _neib_idx[SWU, ...] = [24, 25, 15, 16, 21, 22, 12]
 cdef int[:, ::1] neib_idx = _neib_idx
 
+
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
@@ -266,7 +306,7 @@ cdef bint is_Euler_invariant(pixel_type[::1] neighbors):
 
     Returns
     -------
-    bool
+    bool (C bool, that is)
 
     """
     cdef int octant, n
@@ -282,7 +322,7 @@ cdef bint is_Euler_invariant(pixel_type[::1] neighbors):
 cdef bint is_simple_point(pixel_type[::1] neighbors):
     """Check is a point is a Simple Point.
 
-    This method is named 'N(v)_labeling' in [Lee94].
+    This method is named "N(v)_labeling" in [Lee94].
     Outputs the number of connected objects in a neighborhood of a point
     after this point would have been removed.
 
@@ -343,6 +383,8 @@ cdef void octree_labeling(int octant, int label, pixel_type[::1] cube):
     """This is a recursive method that calculates the number of connected
     components in the 3D neighborhood after the center pixel would
     have been removed.
+
+    See Figs. 6 and 7 of [Lee94] for the values of indices.
 
     Parameters
     ----------
@@ -588,8 +630,17 @@ cdef list _loop_through(pixel_type[:, :, ::1] img,
                         int curr_border):
     """Inner loop of compute_thin_image.
 
-    return simple_border_points as a list to be rechecked sequentially.
+    The algorithm of [Lee94] proceeds in two steps: (1) six directions are
+    checked for simple border points to remove, and (2) these candidates are
+    sequentially rechecked, see Sec 3 of [Lee94] for rationale and discussion.
+
+    This routine implements the first step above: it loops over the image
+    for a given direction and assembles candidates for removal.
+
     """
+    # This routine looks like it could be nogil, but actually it cannot be,
+    # because of `simple_border_points` being a python list which is being
+    # mutated.
     cdef:
         list simple_border_points = []
         pixel_type[::1] neighborhood = np.zeros(27, dtype=np.uint8)
@@ -618,7 +669,7 @@ cdef list _loop_through(pixel_type[:, :, ::1] img,
 
                 get_neighborhood(img, p, r, c, neighborhood)
 
-                # check if (p, r, c) is an endpoint: endpoints are not deletable.
+                # check if (p, r, c) is an endpoint (then it's not deletable.)
                 if is_endpoint(neighborhood):
                     continue
 
@@ -641,7 +692,24 @@ cdef list _loop_through(pixel_type[:, :, ::1] img,
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def _compute_thin_image(pixel_type[:, :, ::1] img not None):
+    """Compute a thin image.
 
+    Loop through the image multiple times, removing "simple" points, i.e.
+    those point which can be removed without changing local connectivity in the
+    3x3x3 neighborhood of a point.
+
+    This routine implements the two-pass algorthim of [Lee94]. Namely,
+    for each of the six border types (positive and negative x-, y- and z-),
+    the algorithm first collects all possibly deletable points, and then
+    performs a sequential rechecking.
+
+    The input, `img`, is assumed to be a 3D binary image in the
+    (p, r, c) format [i.e., C ordered array], filled by zeros (background) and
+    ones. Furthermore, `img` is assumed to be padded by zeros from all
+    directions --- this way the zero boundary conditions are authomatic
+    and there is need to guard against out-of-bounds access.
+
+    """
     cdef:
         int unchanged_borders = 0, curr_border, num_borders
         int borders[6]
@@ -649,7 +717,6 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
         bint no_change
         list simple_border_points
         pixel_type[::1] neighb = np.zeros(27, dtype=np.uint8)
-
     borders[:] = [4, 3, 2, 1, 5, 6]
 
     # no need to worry about the z direction if the original image is 2D.
