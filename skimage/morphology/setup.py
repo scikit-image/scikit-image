@@ -16,7 +16,7 @@ def configuration(parent_package='', top_path=None):
     cython(['_skeletonize_cy.pyx'], working_path=base_path)
     cython(['_convex_hull.pyx'], working_path=base_path)
     cython(['_greyreconstruct.pyx'], working_path=base_path)
-    cython(['_skel.pyx'], working_path=base_path)
+    cython(['_skel.pyx.in'], working_path=base_path)
 
     config.add_extension('_watershed', sources=['_watershed.c'],
                          include_dirs=[get_numpy_include_dirs()])
