@@ -1,11 +1,14 @@
 from __future__ import division, print_function, absolute_import
 
+import os
+
 import numpy as np
 from numpy.testing import assert_equal
 
+import skimage
 from skimage import io
 
-from skel import compute_thin_image
+from skimage.morphology import compute_thin_image
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -23,9 +26,18 @@ def test_simple_3d():
         yield check_skel_3d, fname
 
 
+def get_data_path():
+    # XXX this is a bad temp hack
+    return os.path.join(os.path.split(skimage.__file__)[0],
+                        'morphology',
+                        'tests',
+                        'data')
+
+
 def check_skel(fname, viz=False):
     # compute the thin image and compare the result to that of ImageJ
-    img = np.loadtxt('data/' + fname + '.txt', dtype=np.uint8)
+
+    img = np.loadtxt(os.path.join(get_data_path(), fname+'.txt'), dtype=np.uint8)
 
     if viz:
         ax = _viz(img, **dict(marker='s', color='b', s=99, alpha=0.2))
@@ -38,7 +50,7 @@ def check_skel(fname, viz=False):
                                       s=80, alpha=0.7, label='us'))
 
     # compare to FIJI
-    img_f = np.loadtxt('data/' + fname + '_fiji.txt', dtype=np.uint8)
+    img_f = np.loadtxt(os.path.join(get_data_path(), fname+'_fiji.txt'), dtype=np.uint8)
 
     if not viz:
         # actually compare images
@@ -70,8 +82,8 @@ def _viz(img, ax=None, **kwds):
 
 
 def check_skel_3d(fname):
-    img = io.imread('data/' + fname + '.tif')
-    img_f = io.imread('data/' + fname + '_fiji.tif')
+    img = io.imread(os.path.join(get_data_path(), fname+'.tif'))
+    img_f = io.imread(os.path.join(get_data_path(), fname+'_fiji.tif'))
 
     img_s = compute_thin_image(img)
     assert_equal(img_s, img_f)
