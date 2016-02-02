@@ -2,7 +2,7 @@ from __future__ import division, print_function, absolute_import
 
 import numpy as np
 
-from ._skel import _compute_thin_image
+from ._skeletonize_3d_cy import _compute_thin_image
 
 
 def _prepare_image(img_in):
@@ -37,7 +37,7 @@ def _postprocess_image(img_o, intensity):
     return img_oo
 
 
-def compute_thin_image(img_in):
+def skeletonize_3d(img_in):
     """Compute the thin image.
     """
     img, intensity = _prepare_image(img_in)

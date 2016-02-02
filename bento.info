@@ -119,6 +119,9 @@ Library:
     Extension: skimage.morphology._skeletonize_cy
         Sources:
             skimage/morphology/_skeletonize_cy.pyx
+    Extension: skimage.morphology._skeletonize_3d_cy
+        Sources:
+            skimage/morphology/_skeletonize_3d_cy.pyx
     Extension: skimage.transform._radon_transform
         Sources:
             skimage/transform/_radon_transform.pyx
