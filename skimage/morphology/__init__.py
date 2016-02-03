@@ -6,7 +6,7 @@ from .selem import (square, rectangle, diamond, disk, cube, octahedron, ball,
                     octagon, star)
 from .watershed import watershed
 from ._skeletonize import skeletonize, medial_axis
-from ._skeletonize_3d import skeletonize_3d as compute_thin_image
+from ._skeletonize_3d import skeletonize_3d
 from .convex_hull import convex_hull_image, convex_hull_object
 from .greyreconstruct import reconstruction
 from .misc import remove_small_objects, remove_small_holes

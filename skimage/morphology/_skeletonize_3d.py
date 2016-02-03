@@ -1,10 +1,11 @@
 from __future__ import division, print_function, absolute_import
 
 import numpy as np
+from ..util import img_as_ubyte
 from ._skeletonize_3d_cy import _compute_thin_image
 
 
-def skeletonize_3d(img_in):
+def skeletonize_3d(img):
     """Compute the skeleton of a binary image.
 
     Thinning is used to reduce each connected component in a binary image
@@ -12,7 +13,7 @@ def skeletonize_3d(img_in):
 
     Parameters
     ----------
-    image : ndarray, 2D or 3D
+    img : ndarray, 2D or 3D
         A binary image containing the objects to be skeletonized. Zeros
         represent background, nonzero values are foreground.
 
@@ -33,17 +34,19 @@ def skeletonize_3d(img_in):
 
     """
     # make sure the image is 3D or 2D (if it is, temporarily upcast to 3D)
-    if img_in.ndim < 2 or img_in.ndim > 3:
-        raise ValueError('expect 2D, got ndim = %s' % img_in.ndim)
+    if img.ndim < 2 or img.ndim > 3:
+        raise ValueError('expect 2D, got ndim = %s' % img.ndim)
 
-    img = img_in.copy()
+    img = img_as_ubyte(img)
+    img = np.ascontiguousarray(img)
+
+    img = img.copy()
     if img.ndim == 2:
         img = img[None, ...]
 
     # normalize to binary
     maxval = img.max()
     img[img != 0] = 1
-    img = img.astype(np.uint8)
 
     # pad w/ zeros to simplify dealing w/ boundaries
     img_o = np.pad(img, pad_width=1, mode='constant')
