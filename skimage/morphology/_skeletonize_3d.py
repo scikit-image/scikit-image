@@ -29,7 +29,7 @@ def skeletonize_3d(img_in):
     ----------
     .. [Lee94] Lee et al, Building skeleton models via 3-D medial surface/axis
            thinning algorithms. Computer Vision, Graphics, and Image Processing,
-           56(6):462–478, 1994.
+           56(6):462-478, 1994.
 
     """
     # make sure the image is 3D or 2D (if it is, temporarily upcast to 3D)
