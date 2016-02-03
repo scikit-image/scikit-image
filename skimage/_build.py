@@ -86,7 +86,7 @@ def process_tempita_pyx(fromfile):
         raise Exception('Building requires Tempita: '
                         'pip install --user Tempita')
     from_filename = tempita.Template.from_filename
-    template = from_filename(fromfile) #, encoding=sys.getdefaultencoding())
+    template = from_filename(fromfile, encoding=sys.getdefaultencoding())
     pyxcontent = template.substitute()
     assert fromfile.endswith('.pyx.in')
     pyxfile = fromfile[:-len('.pyx.in')] + '.pyx'
