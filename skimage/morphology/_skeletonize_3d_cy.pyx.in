@@ -21,9 +21,10 @@ Porting to Cython was done by Evgeni Burovski (evgeny.burovskiy@gmail.com).
 References
 ----------
 
-.. [Lee94] Lee et al, Building skeleton models via 3-D medial surface/axis
-           thinning algorithms. Computer Vision, Graphics, and Image Processing,
-           56(6):462-478, 1994
+.. [Lee94] T.-C. Lee, R.L. Kashyap and C.-N. Chu, Building skeleton models
+       via 3-D medial surface/axis thinning algorithms.
+       Computer Vision, Graphics, and Image Processing, 56(6):462-478, 1994.
+
 
 .. [IAC15] Ignacio Arganda-Carreras, 2015. Skeletonize3D plugin for ImageJ(C).
            http://fiji.sc/Skeletonize3D
