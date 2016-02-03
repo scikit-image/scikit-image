@@ -1,6 +1,10 @@
 # coding: utf-8
 import numpy as np
+
 from ._draw import _coords_inside_image
+
+from .._shared._geometry import polygon_clip
+from ._draw import line
 
 
 def _ellipse_in_shape(shape, center, radiuses):
@@ -123,6 +127,83 @@ def circle(r, c, radius, shape=None):
     """
 
     return ellipse(r, c, radius, radius, shape)
+
+
+def polygon_perimeter(cr, cc, shape=None, clip=False):
+    """Generate polygon perimeter coordinates.
+
+    Parameters
+    ----------
+    cr : (N,) ndarray
+        Row (Y) coordinates of vertices of polygon.
+    cc : (N,) ndarray
+        Column (X) coordinates of vertices of polygon.
+    shape : tuple, optional
+        Image shape which is used to determine maximum extents of output pixel
+        coordinates. This is useful for polygons which exceed the image size.
+        By default the full extents of the polygon are used.
+    clip : bool, optional
+        Whether to clip the polygon to the provided shape.  If this is set
+        to True, the drawn figure will always be a closed polygon with all
+        edges visible.
+
+    Returns
+    -------
+    pr, pc : ndarray of int
+        Pixel coordinates of polygon.
+        May be used to directly index into an array, e.g.
+        ``img[pr, pc] = 1``.
+
+    Examples
+    --------
+    >>> from skimage.draw import polygon_perimeter
+    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> rr, cc = polygon_perimeter([5, -1, 5, 10],
+    ...                            [-1, 5, 11, 5],
+    ...                            shape=img.shape, clip=True)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 0, 0, 0, 1, 0, 0],
+           [0, 0, 1, 0, 0, 0, 0, 0, 1, 0],
+           [0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+           [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+           [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+           [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+           [0, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+           [0, 0, 0, 1, 0, 0, 0, 1, 1, 0],
+           [0, 0, 0, 0, 1, 1, 1, 0, 0, 0]], dtype=uint8)
+
+    """
+    if clip:
+        if shape is None:
+            raise ValueError("Must specify clipping shape")
+        clip_box = np.array([0, 0, shape[0] - 1, shape[1] - 1])
+    else:
+        clip_box = np.array([np.min(cr), np.min(cc),
+                             np.max(cr), np.max(cc)])
+
+    # Do the clipping irrespective of whether clip is set.  This
+    # ensures that the returned polygon is closed and is an array.
+    cr, cc = polygon_clip(cr, cc, *clip_box)
+
+    cr = np.round(cr).astype(int)
+    cc = np.round(cc).astype(int)
+
+    # Construct line segments
+    pr, pc = [], []
+    for i in range(len(cr) - 1):
+        line_r, line_c = line(cr[i], cc[i], cr[i + 1], cc[i + 1])
+        pr.extend(line_r)
+        pc.extend(line_c)
+
+    pr = np.asarray(pr)
+    pc = np.asarray(pc)
+
+    if shape is None:
+        return pr, pc
+    else:
+        return _coords_inside_image(pr, pc, shape)
 
 
 def set_color(img, coords, color, alpha=1):
