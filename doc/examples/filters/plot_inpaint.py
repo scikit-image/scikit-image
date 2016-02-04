@@ -26,13 +26,13 @@ import matplotlib.pyplot as plt
 from skimage import data, color
 from skimage.restoration import inpaint
 
-image_orig = data.astronaut()
+image_orig = data.astronaut()[0:200, 0:200]
 
 # Create mask with three defect regions: left, middle, right respectively
 mask = np.zeros(image_orig.shape[:-1])
 mask[20:60, 0:20] = 1
-mask[200:300, 150:170] = 1
-mask[50:100, 400:430] = 1
+mask[160:180, 70:155] = 1
+mask[30:60, 170:195] = 1
 
 # Defect image over the same region in each color channel
 image_defect = image_orig.copy()
@@ -60,5 +60,5 @@ ax3.set_title('Inpainted image')
 ax3.imshow(image_result)
 ax3.axis('off')
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()
