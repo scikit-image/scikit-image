@@ -45,6 +45,12 @@ include:
   ``measure.regionprops``.
 - Replace jet by viridis as default colormap
 - Alpha layer support for ``color.gray2rgb``
+- The measure of structural similarity (``measure.compare_ssim``) is now
+  n-dimensional and supports color channels as well.
+- We fixed an issue related to incorrect propagation in plateaus in
+  ``segmentation.watershed``
+
+
 
 Documentation:
 
@@ -73,10 +79,6 @@ Deprecations
   ``measure.compare_ssim``
 - ``data.lena`` has been deprecated, and gallery examples use instead the
   ``data.astronaut()`` picture.
-- The measure of structural similarity (``measure.compare_ssim``) is now
-  n-dimensional and supports color channels as well.
-- We fixed an issue related to incorrect propagation in plateaus in
-  ``segmentation.watershed``
 
 Contributors to this release
 ----------------------------
