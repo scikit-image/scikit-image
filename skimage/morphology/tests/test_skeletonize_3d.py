@@ -162,13 +162,6 @@ def test_two_hole_image():
     assert_equal(res, img_f)
 
 
-# nose test generators:
-# 2D images
-def test_simple_2d_images():
-    for fname in ("strip", "loop", "cross", "two-hole"):
-        yield check_skel, fname
-
-
 # trivial 3D images
 def test_simple_3d():
     for fname in ['3/stack', '4/stack']:
@@ -187,22 +180,6 @@ def get_data_path():
                         'morphology',
                         'tests',
                         'data')
-
-
-def check_skel(fname):
-    # compute the thin image and compare the result to that of ImageJ
-    img = np.loadtxt(os.path.join(get_data_path(), fname + '.txt'),
-                     dtype=np.uint8)
-
-    # compute
-    img1_2d = skeletonize_3d(img)
-
-    # and compare to FIJI
-    img_f = np.loadtxt(os.path.join(get_data_path(), fname + '_fiji.txt'),
-                       dtype=np.uint8)
-
-    assert_equal(img1_2d, img_f)
-
 
 def check_skel_3d(fname):
     img = io.imread(os.path.join(get_data_path(), fname + '.tif'))
