@@ -38,7 +38,7 @@ clean:
 	-find ./source/auto_examples/* -type f | grep -v blank | xargs rm -f
 api:
 	@mkdir -p source/api
-	$(PYTHON) tools/build_modref_templates.py
+	#$(PYTHON) tools/build_modref_templates.py
 	@echo "Build API docs...done."
 
 release_notes:
