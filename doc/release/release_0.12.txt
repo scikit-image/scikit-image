@@ -82,7 +82,6 @@ Contributors to this release
 ----------------------------
 (Listed alphabetically by last name)
 
-- Ömer Özak
 - K.-Michael Aye
 - Connelly Barnes
 - Sumit Binnani
@@ -117,6 +116,7 @@ Contributors to this release
 - Benny Lichtner
 - Himanshu Mishra
 - Juan Nunez-Iglesias
+- Ömer Özak
 - Leena P.
 - Michael Pacer
 - Daniil Pakhomov
