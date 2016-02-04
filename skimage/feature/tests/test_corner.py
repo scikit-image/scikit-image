@@ -305,7 +305,7 @@ def test_corner_fast_image_unsupported_error():
 
 
 @test_parallel()
-def test_corner_fast_lena():
+def test_corner_fast_astronaut():
     img = rgb2gray(data.astronaut())
     expected = np.array([[101, 198],
                         [140, 205],
