@@ -50,19 +50,19 @@ def skeletonize_3d(img):
     if img.ndim < 2 or img.ndim > 3:
         raise ValueError('expect 2D, got ndim = %s' % img.ndim)
 
-    img = img_as_ubyte(img)
     img = np.ascontiguousarray(img)
+    img = img_as_ubyte(img, force_copy=False)
 
-    img = img.copy()
+    # make an in image 3D pad w/ zeros to simplify dealing w/ boundaries
+    # NB: careful to not clobber the original *and* minimize copying
     if img.ndim == 2:
-        img = img[None, ...]
+        img_o = np.pad(img[None, ...], pad_width=1, mode='constant')
+    else:
+        img_o = np.pad(img, pad_width=1, mode='constant')
 
     # normalize to binary
-    maxval = img.max()
-    img[img != 0] = 1
-
-    # pad w/ zeros to simplify dealing w/ boundaries
-    img_o = np.pad(img, pad_width=1, mode='constant')
+    maxval = img_o.max()
+    img_o[img_o != 0] = 1
 
     # do the computation
     img_o = np.asarray(_compute_thin_image(img_o))

@@ -76,6 +76,25 @@ def test_dtype_conv():
                  img_as_ubyte(img).max())    # the intensity range is preserved
 
 
+def test_input():
+    # check that the input is not clobbered
+    # for 2D and 3D images of varying dtypes
+
+    imgs = [np.ones((8, 8), dtype=float), np.ones((4, 8, 8), dtype=float),
+            np.ones((8, 8), dtype=np.uint8), np.ones((4, 8, 8), dtype=np.uint8)]
+    for img in imgs:
+        yield check_input, img
+
+
+def check_input(img):
+    orig = img.copy()
+    with warnings.catch_warnings():
+        # UserWarning for possible precision loss, expected
+        warnings.simplefilter('ignore', UserWarning)
+        res = skeletonize_3d(img)
+    assert_equal(img, orig)
+
+
 def test_skeletonize_num_neighbours():
     # an empty image
     image = np.zeros((300, 300))
