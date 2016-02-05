@@ -3,10 +3,11 @@ import numpy as np
 from .. import img_as_float
 from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 from .._shared.utils import _mode_deprecations
+import warnings
 
 
 def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
-                      bins=10000, mode='constant', cval=0):
+                      bins=10000, mode='constant', cval=0, multichannel=True):
     """Denoise image using bilateral filter.
 
     This is an edge-preserving and noise reducing denoising filter. It averages
@@ -45,6 +46,9 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
     cval : string
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
+    multichannel : bool
+        Whether the last axis of the image is to be interpreted as multiple
+        channels or another spatial dimension.
 
     Returns
     -------
@@ -64,6 +68,38 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
     >>> noisy = np.clip(noisy, 0, 1)
     >>> denoised = denoise_bilateral(noisy, sigma_range=0.05, sigma_spatial=15)
     """
+    if multichannel:
+        if image.ndim != 3:
+            if image.ndim == 2:
+                raise ValueError("Use ``multichannel=False`` for 2D grayscale "
+                                 "images. The last axis of the input image "
+                                 "must be multiple color channels not another "
+                                 "spatial dimension.")
+            else:
+                raise ValueError("Bilateral filter is only implemented for "
+                                 "2D grayscale images (image.ndim == 2) and "
+                                 "2D multichannel (image.ndim == 3) images, "
+                                 "but the input image has {0} dimensions. "
+                                 "".format(image.ndim))
+        elif image.shape[2] not in (3, 4):
+            if image.shape[2] > 4:
+                warnings.warn("The last axis of the input image is interpreted "
+                              "as channels. Input image with shape {0} has {1} "
+                              "channels in last axis. ``denoise_bilateral`` is "
+                              "implemented for 2D grayscale and color images "
+                              "only.".format(image.shape, image.shape[2]))
+            else:
+                msg = "Input image must be grayscale, RGB, or RGBA; but has shape {0}."
+                warnings.warn(msg.format(image.shape))
+    else:
+        if image.ndim > 2:
+            raise ValueError("Bilateral filter is not implemented for "
+                             "grayscale images of 3 or more dimensions, "
+                             "but input image has {0} dimension. Use "
+                             "``multichannel=True`` for 2-D RGB "
+                             "images.".format(image.shape))
+
+
     mode = _mode_deprecations(mode)
     return _denoise_bilateral(image, win_size, sigma_range, sigma_spatial,
                               bins, mode, cval)
