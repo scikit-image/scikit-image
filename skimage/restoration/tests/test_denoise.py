@@ -175,10 +175,8 @@ def test_denoise_bilateral_color():
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
 
-    out1 = restoration.denoise_bilateral(img, sigma_range=0.1,
-                                         sigma_spatial=20, multichannel=True)
-    out2 = restoration.denoise_bilateral(img, sigma_range=0.2,
-                                         sigma_spatial=30, multichannel=True)
+    out1 = restoration.denoise_bilateral(img, sigma_range=0.1, sigma_spatial=20)
+    out2 = restoration.denoise_bilateral(img, sigma_range=0.2, sigma_spatial=30)
 
     # make sure noise is reduced in the checkerboard cells
     assert img[30:45, 5:15].std() > out1[30:45, 5:15].std()
@@ -187,14 +185,14 @@ def test_denoise_bilateral_color():
 
 def test_denoise_bilateral_3d_grayscale():
     img =  np.ones((50, 50, 3))
-    assert_raises(TypeError, restoration.denoise_bilateral, img, \
+    assert_raises(ValueError, restoration.denoise_bilateral, img,
                   multichannel=False)
 
 
 def test_denoise_bilateral_3d_multichannel():
     img = np.ones((50, 50, 50))
     with expected_warnings(["grayscale"]):
-        result = restoration.denoise_bilateral(img, multichannel=True)
+        result = restoration.denoise_bilateral(img)
 
     expected = np.empty_like(img)
     expected.fill(np.nan)
@@ -204,6 +202,7 @@ def test_denoise_bilateral_3d_multichannel():
 
 def test_denoise_bilateral_multidimensional():
     img = np.ones((10, 10, 10, 10))
+    assert_raises(ValueError, restoration.denoise_bilateral, img)
     assert_raises(ValueError, restoration.denoise_bilateral, img,
                   multichannel=True)
 
