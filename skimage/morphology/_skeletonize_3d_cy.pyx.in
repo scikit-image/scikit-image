@@ -16,15 +16,11 @@ The original Java code [IAC15]_ carries the following message:
  * @version 1.0 11/13/2015 (unique BSD licensed version for scikit-image)
  * @author Ignacio Arganda-Carreras (iargandacarreras at gmail.com)
 
-Porting to Cython was done by Evgeni Burovski (evgeny.burovskiy@gmail.com).
-
 References
 ----------
-
 .. [Lee94] T.-C. Lee, R.L. Kashyap and C.-N. Chu, Building skeleton models
        via 3-D medial surface/axis thinning algorithms.
        Computer Vision, Graphics, and Image Processing, 56(6):462-478, 1994.
-
 
 .. [IAC15] Ignacio Arganda-Carreras, 2015. Skeletonize3D plugin for ImageJ(C).
            http://fiji.sc/Skeletonize3D
@@ -50,7 +46,7 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
     those point which can be removed without changing local connectivity in the
     3x3x3 neighborhood of a point.
 
-    This routine implements the two-pass algorthim of [Lee94]_. Namely,
+    This routine implements the two-pass algorithm of [Lee94]_. Namely,
     for each of the six border types (positive and negative x-, y- and z-),
     the algorithm first collects all possibly deletable points, and then
     performs a sequential rechecking.
@@ -58,7 +54,7 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
     The input, `img`, is assumed to be a 3D binary image in the
     (p, r, c) format [i.e., C ordered array], filled by zeros (background) and
     ones. Furthermore, `img` is assumed to be padded by zeros from all
-    directions --- this way the zero boundary conditions are authomatic
+    directions --- this way the zero boundary conditions are automatic
     and there is need to guard against out-of-bounds access.
 
     """
@@ -69,7 +65,7 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
         bint no_change
 
         list simple_border_points
-        Py_ssize_t num_simple_points, i, j
+        Py_ssize_t num_border_points, i, j
         (npy_intp, npy_intp, npy_intp) point
 
         pixel_type neighb[27]
@@ -146,12 +142,12 @@ cdef list _loop_through(pixel_type[:, :, ::1] img,
                 if img[p, r, c] != 1:
                     continue
 
-                is_border_pt = (curr_border == 1 and img[p, r, c-1] <= 0 or  #N
-                                curr_border == 2 and img[p, r, c+1] <= 0 or  #S
-                                curr_border == 3 and img[p, r+1, c] <= 0 or  #E
-                                curr_border == 4 and img[p, r-1, c] <= 0 or  #W
-                                curr_border == 5 and img[p+1, r, c] <= 0 or  #U
-                                curr_border == 6 and img[p-1, r, c] <= 0)    #B
+                is_border_pt = (curr_border == 1 and img[p, r, c-1] == 0 or  #N
+                                curr_border == 2 and img[p, r, c+1] == 0 or  #S
+                                curr_border == 3 and img[p, r+1, c] == 0 or  #E
+                                curr_border == 4 and img[p, r-1, c] == 0 or  #W
+                                curr_border == 5 and img[p+1, r, c] == 0 or  #U
+                                curr_border == 6 and img[p-1, r, c] == 0)    #B
                 if not is_border_pt:
                     # current point is not deletable
                     continue
@@ -271,7 +267,7 @@ cdef bint is_Euler_invariant(pixel_type neighbors[],
                              int[::1] lut):
     """Check if a point is Euler invariant.
 
-    Calculate Euler characteristc for each octant and sum up.
+    Calculate Euler characteristic for each octant and sum up.
 
     Parameters
     ----------

@@ -56,6 +56,11 @@ def skeletonize_3d(img):
     # make an in image 3D pad w/ zeros to simplify dealing w/ boundaries
     # NB: careful to not clobber the original *and* minimize copying
     if img.ndim == 2:
+
+        if img.shape[0] == 1 or img.shape[1] == 1:
+            # nothing to do, image is already thin. Bail out.
+            return img.copy()
+
         img_o = np.pad(img[None, ...], pad_width=1, mode='constant')
     else:
         img_o = np.pad(img, pad_width=1, mode='constant')
