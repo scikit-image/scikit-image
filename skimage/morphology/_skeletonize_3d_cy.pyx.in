@@ -69,6 +69,7 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
         (npy_intp, npy_intp, npy_intp) point
 
         pixel_type neighb[27]
+    # loop over the six directions in this order (for consistency with ImageJ)
     borders[:] = [4, 3, 2, 1, 5, 6]
 
     # no need to worry about the z direction if the original image is 2D.
@@ -84,7 +85,7 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
         for j in range(num_borders):
             curr_border = borders[j]
 
-            simple_border_points = _loop_through(img, curr_border)
+            simple_border_points = find_simple_point_candidates(img, curr_border)
 
             # sequential re-checking to preserve connectivity when deleting
             # in a parallel way
@@ -106,7 +107,7 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef list _loop_through(pixel_type[:, :, ::1] img,
+cdef list find_simple_point_candidates(pixel_type[:, :, ::1] img,
                         int curr_border):
     """Inner loop of compute_thin_image.
 
@@ -154,19 +155,15 @@ cdef list _loop_through(pixel_type[:, :, ::1] img,
 
                 get_neighborhood(img, p, r, c, neighborhood)
 
-                # check if (p, r, c) is an endpoint (then it's not deletable.)
-                if is_endpoint(neighborhood):
-                    continue
-
-                # check if point is Euler invariant (condition 1 in [Lee94]_):
-                # if it is not, it's not deletable.
-                if not is_Euler_invariant(neighborhood, Euler_LUT):
-                    continue
-
-                # check if point is simple (i.e., deletion does not
-                # change connectivity in the 3x3x3 neighborhood)
-                # this are conditions 2 and 3 in [Lee94]_
-                if not is_simple_point(neighborhood):
+                # check if (p, r, c) can be deleted: 
+                # * it must not be an endpoint;
+                # * it must be Euler invariant (condition 1 in [Lee94]_); and
+                # * it must be simple (i.e., its deletion does not change
+                #   connectivity in the 3x3x3 neighborhood)
+                #   this is conditions 2 and 3 in [Lee94]_
+                if (is_endpoint(neighborhood) or
+                    not is_Euler_invariant(neighborhood, Euler_LUT) or
+                    not is_simple_point(neighborhood)):
                     continue
 
                 # ok, add (p, r, c) to the list of simple border points
@@ -310,9 +307,10 @@ cdef inline bint is_endpoint(pixel_type neighbors[]):
 cdef bint is_simple_point(pixel_type neighbors[]):
     """Check is a point is a Simple Point.
 
+    A point is simple iff its deletion does not change connectivity in
+    the 3x3x3 neighborhood. (cf conditions 2 and 3 in [Lee94]_).
+
     This method is named "N(v)_labeling" in [Lee94]_.
-    Outputs the number of connected objects in a neighborhood of a point
-    after this point would have been removed.
 
     Parameters
     ----------
