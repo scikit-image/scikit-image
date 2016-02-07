@@ -1,129 +1,65 @@
 import os
-import skimage as si
-import skimage.io as sio
-from skimage import data_dir
+import os.path
 import numpy as np
-
 from numpy.testing import *
 from numpy.testing.decorators import skipif
+
 from tempfile import NamedTemporaryFile
 
+from skimage import data_dir
+from skimage.io import imread, imsave, use_plugin, reset_plugins
+
 try:
-    import skimage.io._plugins.freeimage_plugin as fi
-    FI_available = True
-    sio.use_plugin('freeimage')
-except RuntimeError:
-    FI_available = False
-
-np.random.seed(0)
+    import imageio as _imageio
+except ImportError:
+    imageio_available = False
+else:
+    imageio_available = True
 
 
-def setup_module(self):
-    """The effect of the `plugin.use` call may be overridden by later imports.
-    Call `use_plugin` directly before the tests to ensure that freeimage is
-    used.
-
-    """
-    try:
-        sio.use_plugin('freeimage')
-    except RuntimeError:
-        pass
+def setup():
+    if imageio_available:
+        np.random.seed(0)
+        use_plugin('freeimage')
 
 
 def teardown():
-    sio.reset_plugins()
+    reset_plugins()
 
 
-@skipif(not FI_available)
-def test_imread():
-    img = sio.imread(os.path.join(si.data_dir, 'color.png'))
-    assert img.shape == (370, 371, 3)
-    assert all(img[274, 135] == [0, 130, 253])
-
-@skipif(not FI_available)
-def test_imread_truncated_jpg():
-    assert_raises((RuntimeError, ValueError),
-                  sio.imread,
-                  os.path.join(si.data_dir, 'truncated.jpg'))
-
-@skipif(not FI_available)
-def test_imread_uint16():
-    expected = np.load(os.path.join(si.data_dir, 'chessboard_GRAY_U8.npy'))
-    img = sio.imread(os.path.join(si.data_dir, 'chessboard_GRAY_U16.tif'))
-    assert img.dtype == np.uint16
-    assert_array_almost_equal(img, expected)
-
-
-@skipif(not FI_available)
-def test_imread_uint16_big_endian():
-    expected = np.load(os.path.join(si.data_dir, 'chessboard_GRAY_U8.npy'))
-    img = sio.imread(os.path.join(si.data_dir, 'chessboard_GRAY_U16B.tif'))
-    assert img.dtype == np.uint16
-    assert_array_almost_equal(img, expected)
-
-
-@skipif(not FI_available)
-def test_write_multipage():
-    shape = (64, 64, 64)
-    x = np.ones(shape, dtype=np.uint8) * np.random.rand(*shape) * 255
-    x = x.astype(np.uint8)
-    f = NamedTemporaryFile(suffix='.tif')
-    fname = f.name
-    f.close()
-    fi.write_multipage(x, fname)
-    y = fi.read_multipage(fname)
-    assert_array_equal(x, y)
+@skipif(not imageio_available)
+def test_freeimage_flatten():
+    # a color image is flattened
+    img = imread(os.path.join(data_dir, 'color.png'), flatten=True)
+    assert img.ndim == 2
+    assert img.dtype == np.float64
+    img = imread(os.path.join(data_dir, 'camera.png'), flatten=True)
+    # check that flattening does not occur for an image that is grey already.
+    assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 
 class TestSave:
-    def roundtrip(self, dtype, x, suffix):
-        f = NamedTemporaryFile(suffix='.' + suffix)
+
+    def roundtrip(self, x, scaling=1):
+        f = NamedTemporaryFile(suffix='.png')
         fname = f.name
         f.close()
-        sio.imsave(fname, x)
-        y = sio.imread(fname)
-        assert_array_equal(y, x)
+        imsave(fname, x)
+        y = imread(fname)
 
-    @skipif(not FI_available)
+        assert_array_almost_equal((x * scaling).astype(np.int32), y)
+
+    @skipif(not imageio_available)
     def test_imsave_roundtrip(self):
-        for shape, dtype, format in [
-              [(10, 10), (np.uint8, np.uint16), ('tif', 'png')],
-              [(10, 10), (np.float32,), ('tif',)],
-              [(10, 10, 3), (np.uint8, np.uint16), ('png',)],
-              [(10, 10, 4), (np.uint8, np.uint16), ('png',)]
-            ]:
-            tests = [(d, f) for d in dtype for f in format]
-            for d, f in tests:
-                x = np.ones(shape, dtype=d) * np.random.rand(*shape)
-                if not np.issubdtype(d, float):
-                    x = (x * 255).astype(d)
-                yield self.roundtrip, d, x, f
+        dtype = np.uint8
+        for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
+            x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
-
-@skipif(not FI_available)
-def test_metadata():
-    meta = fi.read_metadata(os.path.join(si.data_dir, 'multipage.tif'))
-    assert meta[('EXIF_MAIN', 'Orientation')] == 1
-    assert meta[('EXIF_MAIN', 'Software')].startswith('I')
-
-    meta = fi.read_multipage_metadata(os.path.join(si.data_dir,
-                                                   'multipage.tif'))
-    assert len(meta) == 2
-    assert meta[0][('EXIF_MAIN', 'Orientation')] == 1
-    assert meta[1][('EXIF_MAIN', 'Software')].startswith('I')
-
-
-@skipif(not FI_available)
-def test_collection():
-    pattern = [os.path.join(data_dir, pic)
-               for pic in ['camera.png', 'color.png', 'multipage.tif']]
-    images = sio.ImageCollection(pattern[:-1])
-    assert len(images) == 2
-    assert len(images[:]) == 2
-
-    images = sio.ImageCollection(pattern)
-    assert len(images) == 3
-    assert len(images[:]) == 3
+            if np.issubdtype(dtype, float):
+                yield self.roundtrip, x, 255
+            else:
+                x = (x * 255).astype(dtype)
+                yield self.roundtrip, x
 
 if __name__ == "__main__":
     run_module_suite()
