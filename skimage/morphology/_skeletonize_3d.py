@@ -1,7 +1,7 @@
 from __future__ import division, print_function, absolute_import
 
 import numpy as np
-from ..util import img_as_ubyte
+from ..util import img_as_ubyte, crop
 from ._skeletonize_3d_cy import _compute_thin_image
 
 
@@ -46,24 +46,19 @@ def skeletonize_3d(img):
            Computer Vision, Graphics, and Image Processing, 56(6):462-478, 1994.
 
     """
-    # make sure the image is 3D or 2D (if it is, temporarily upcast to 3D)
+    # make sure the image is 3D or 2D
     if img.ndim < 2 or img.ndim > 3:
         raise ValueError('expect 2D, got ndim = %s' % img.ndim)
 
     img = np.ascontiguousarray(img)
     img = img_as_ubyte(img, force_copy=False)
 
-    # make an in image 3D pad w/ zeros to simplify dealing w/ boundaries
-    # NB: careful to not clobber the original *and* minimize copying
+    # make an in image 3D and pad it w/ zeros to simplify dealing w/ boundaries
+    # NB: careful here to not clobber the original *and* minimize copying
+    img_o = img
     if img.ndim == 2:
-
-        if img.shape[0] == 1 or img.shape[1] == 1:
-            # nothing to do, image is already thin. Bail out.
-            return img.copy()
-
-        img_o = np.pad(img[None, ...], pad_width=1, mode='constant')
-    else:
-        img_o = np.pad(img, pad_width=1, mode='constant')
+        img_o = img[np.newaxis, ...]
+    img_o = np.pad(img_o, pad_width=1, mode='constant')
 
     # normalize to binary
     maxval = img_o.max()
@@ -72,9 +67,10 @@ def skeletonize_3d(img):
     # do the computation
     img_o = np.asarray(_compute_thin_image(img_o))
 
-    # clip it back and restore the original intensity range
-    img_o = img_o[1:-1, 1:-1, 1:-1]
-    img_o = img_o.squeeze()
+    # crop it back and restore the original intensity range
+    img_o = crop(img_o, crop_width=1)
+    if img.ndim == 2:
+        img_o = img_o[0]
     img_o *= maxval
 
     return img_o

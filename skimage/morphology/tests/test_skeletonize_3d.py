@@ -27,6 +27,13 @@ def test_skeletonize_wrong_dim():
     assert_raises(ValueError, skeletonize_3d, im)
 
 
+def test_skeletonize_1D():
+    # a corner case of an image of a shape(1, N)
+    im = np.ones((5, 1), dtype=np.uint8)
+    res = skeletonize_3d(im)
+    assert_equal(res, im)
+
+
 def test_skeletonize_no_foreground():
     im = np.zeros((5, 5), dtype=np.uint8)
     result = skeletonize_3d(im)
@@ -80,7 +87,8 @@ def test_input():
     # check that the input is not clobbered
     # for 2D and 3D images of varying dtypes
     imgs = [np.ones((8, 8), dtype=float), np.ones((4, 8, 8), dtype=float),
-            np.ones((8, 8), dtype=np.uint8), np.ones((4, 8, 8), dtype=np.uint8)]
+            np.ones((8, 8), dtype=np.uint8), np.ones((4, 8, 8), dtype=np.uint8),
+            np.ones((8, 8), dtype=bool), np.ones((4, 8, 8), dtype=bool)]
     for img in imgs:
         yield check_input, img
 
