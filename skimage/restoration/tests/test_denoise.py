@@ -308,5 +308,25 @@ def test_no_denoising_for_small_h():
     assert np.allclose(denoised, img)
 
 
+def test_wavelet_denoising():
+    img = astro_gray.copy()
+    noise_std = 0.09
+    img += noise_std * np.random.randn(*img.shape)
+    img = np.clip(img, 0, 1)
+
+    denoised_img = restoration.denoise_wavelet(img, wavelet='db1', noise_stdev=1.5*noise_std)
+
+    # less energy in signal
+    assert np.sum(denoised_img) <= np.sum(img)
+    # test changing noise_std (higher threshold, so less energy in signal)
+    assert denoise_wavelet(img, noise_stdev=2*noise_std).sum() <= \
+                                                            denoised_img.sum()
+    # again, changing threshold and seeing less energy
+    assert np.sum(denoise_wavelet(img, threshold=2)) < np.sum(
+                                              denoise_wavelet(img, threshold=1))
+    # This works for this particular image (probably more wavelet theory here)
+    assert np.sum(denoise_wavelet(img, wavelet='db2')) < np.sum(denoise_wavelet(img, wavelet='db1'))
+    
+
 if __name__ == "__main__":
     run_module_suite()
