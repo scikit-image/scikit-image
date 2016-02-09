@@ -31,7 +31,7 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
         similarity). A larger value results in averaging of pixels with larger
         radiometric differences. Note, that the image will be converted using
         the `img_as_float` function and thus the standard deviation is in
-        respect to the range ``[0, 1]``. If the value is ``None`` the standard 
+        respect to the range ``[0, 1]``. If the value is ``None`` the standard
         deviation of the ``image`` will be used.
     sigma_spatial : float
         Standard deviation for range distance. A larger value results in
@@ -387,7 +387,7 @@ def _denoise_wavelet(img, wavelet, threshold):
     return pywt.waverec2(denoised_coeffs, wavelet)
 
 
-def denoise_wavelet(im, threshold=None, wavelet='db1', noise_stdev=0.13):
+def denoise_wavelet(im, noise_stdev=0.13, wavelet='db1', threshold=None):
     """Performs wavelet denoising on an image.
 
     Parameters
@@ -396,17 +396,18 @@ def denoise_wavelet(im, threshold=None, wavelet='db1', noise_stdev=0.13):
         Input data to be denoised. `im` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
-    threshold : float, optional
-        The thresholding value. All wavelet coefficients less than this value
-        are set to 0. By default, the threshold is computed adaptively as
-        described in [1]_.
+    noise_stdev : float, optional
+        The noise standard deviation used when computing the threshold
+        adaptively as described in [1]_.
     wavelet : string, optional
         The type of wavelet to perform and can be any of the options
         [pywt.wavelist]_ outputs. For example, this may be any of ``{db1, db2,
         db3, db4}``.
-    noise_stdev : float, optional
-        The noise standard deviation used when computing the threshold
-        adaptively as described in [1]_.
+    threshold : float, optional
+        The thresholding value. All wavelet coefficients less than this value
+        are set to 0. By default, the threshold is computed adaptively as
+        described in [1]_. If this threshold is specified, the parameter
+        noise_stdev is ignored.
 
     Returns
     -------
