@@ -249,17 +249,6 @@ def test_invalid_input():
     assert_raises(ValueError, PolynomialTransform, np.zeros((3, 3)))
 
 
-def test_deprecated_params_attributes():
-    for t in ('projective', 'affine', 'similarity'):
-        tform = estimate_transform(t, SRC, DST)
-        with expected_warnings(['`_matrix`.*deprecated']):
-            assert_equal(tform._matrix, tform.params)
-
-    tform = estimate_transform('polynomial', SRC, DST, order=3)
-    with expected_warnings(['`_params`.*deprecated']):
-        assert_equal(tform._params, tform.params)
-
-
 def test_degenerate():
     src = dst = np.zeros((10, 2))
 

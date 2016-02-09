@@ -41,14 +41,5 @@ Version 0.12
 ------------
 * Change `label` to mark background as 0, not -1, which is consistent with
   SciPy's labelling.
-* Remove deprecated `reverse_map` parameter of `skimage.transform.warp`
-* Change deprecated `enforce_connectivity=False` on skimage.segmentation.slic
-  and set it to True as default
-* Remove deprecated `skimage.measure.fit.BaseModel._params` attribute
-* Remove deprecated `skimage.measure.fit.BaseModel._params`,
-  `skimage.transform.ProjectiveTransform._matrix`,
-  `skimage.transform.PolynomialTransform._params`,
-  `skimage.transform.PiecewiseAffineTransform.affines_*` attributes
-* Remove deprecated functions `skimage.filters.denoise_*`
 * Add 3D phantom in `skimage.data`
 * Add 3D test case of `skimage.feature.phase_correlate`

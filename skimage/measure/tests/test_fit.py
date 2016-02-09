@@ -301,14 +301,5 @@ def test_ransac_invalid_input():
                   residual_threshold=0, stop_probability=1.01)
 
 
-def test_deprecated_params_attribute():
-    model = LineModelND()
-    model.params = ((0, 0), (1, 1))
-    x = np.arange(-10, 10)
-    y = model.predict_y(x)
-    with expected_warnings(['`_params`']):
-        assert_equal(model.params, model._params)
-
-
 if __name__ == "__main__":
     np.testing.run_module_suite()

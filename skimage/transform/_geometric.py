@@ -182,11 +182,6 @@ class ProjectiveTransform(GeometricTransform):
         self.params = matrix
 
     @property
-    def _matrix(self):
-        warn('`_matrix` attribute is deprecated, use `params` instead.')
-        return self.params
-
-    @property
     def _inv_matrix(self):
         return np.linalg.inv(self.params)
 
@@ -777,11 +772,6 @@ class PolynomialTransform(GeometricTransform):
         if params.shape[0] != 2:
             raise ValueError("invalid shape of transformation parameters")
         self.params = params
-
-    @property
-    def _params(self):
-        warn('`_params` attribute is deprecated, use `params` instead.')
-        return self.params
 
     def estimate(self, src, dst, order=2):
         """Set the transformation matrix with the explicit transformation
