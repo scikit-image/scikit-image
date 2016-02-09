@@ -215,10 +215,6 @@ def test_parallel(num_threads=2):
     num_threads : int, optional
         The number of times the function is run in parallel.
 
-    Notes
-    -----
-    This decorator does not pass the return value of the decorated function.
-
     """
 
     assert num_threads > 0
@@ -227,14 +223,21 @@ def test_parallel(num_threads=2):
         @functools.wraps(func)
         def inner(*args, **kwargs):
             threads = []
-            for i in range(num_threads):
+            for i in range(num_threads - 1):
                 thread = threading.Thread(target=func, args=args, kwargs=kwargs)
                 threads.append(thread)
             for thread in threads:
                 thread.start()
+
+            result = func(*args, **kwargs)
+
             for thread in threads:
                 thread.join()
+
+            return result
+
         return inner
+
     return wrapper
 
 
