@@ -24,11 +24,6 @@ class BaseModel(object):
     def __init__(self):
         self.params = None
 
-    @property
-    def _params(self):
-        warn('`_params` attribute is deprecated, use `params` instead.')
-        return self.params
-
 
 class LineModel(BaseModel):
 

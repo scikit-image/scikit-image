@@ -13,7 +13,7 @@ from ..color import rgb2lab
 
 def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
          spacing=None, multichannel=True, convert2lab=None,
-         enforce_connectivity=False, min_size_factor=0.5, max_size_factor=3,
+         enforce_connectivity=True, min_size_factor=0.5, max_size_factor=3,
          slic_zero=False):
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
@@ -53,7 +53,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         segmentation. The input image *must* be RGB. Highly recommended.
         This option defaults to ``True`` when ``multichannel=True`` *and*
         ``image.shape[-1] == 3``.
-    enforce_connectivity: bool, optional (default False)
+    enforce_connectivity: bool, optional
         Whether the generated segments are connected or not
     min_size_factor: float, optional
         Proportion of the minimum segment size to be removed with respect
@@ -110,10 +110,6 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     >>> segments = slic(img, n_segments=100, compactness=20)
 
     """
-    if enforce_connectivity is None:
-        warn('Deprecation: enforce_connectivity will default to'
-             ' True in future versions.')
-        enforce_connectivity = False
 
     image = img_as_float(image)
     is_2d = False
