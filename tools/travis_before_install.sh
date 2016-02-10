@@ -55,9 +55,9 @@ pip install --retries 3 -q wheel flake8 coveralls nose
 for requirement in $WHEELBINARIES; do
     WHEELS="$WHEELS $(grep $requirement requirements.txt)"
 done
-pip install --retries 3 -q $WHEELHOUSE $WHEELS
+pip install --retries 3 -q $PIP_FLAGS $WHEELHOUSE $WHEELS
 
-pip install --retries 3 -q -r requirements.txt
+pip install --retries 3 -q $PIP_FLAGS -r requirements.txt
 
 # Show what's installed
 pip list

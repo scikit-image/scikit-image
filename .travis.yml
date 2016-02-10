@@ -35,12 +35,16 @@ notifications:
     on_failure: always  # options: [always|never|change] default: always
     on_start: false     # default: false
 
-python:
-  - 2.6
-  - 2.7
-  - 3.3
-  - 3.4
-  - 3.5
+matrix:
+  include:
+    - python: 2.6
+    - python: 2.7
+      env: PIP_FLAGS="--pre"
+    - python: 2.7
+      env: MINIMUM_REQUIREMENTS=1
+    - python: 3.4
+    - python: 3.5
+      env: PIP_FLAGS="--pre"
 
 before_install:
     - ccache -s
