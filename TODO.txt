@@ -41,5 +41,3 @@ Version 0.12
 ------------
 * Change `label` to mark background as 0, not -1, which is consistent with
   SciPy's labelling.
-* Add 3D phantom in `skimage.data`
-* Add 3D test case of `skimage.feature.phase_correlate`

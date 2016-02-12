@@ -3,9 +3,9 @@ from numpy.testing import assert_allclose, assert_raises
 
 from skimage.feature.register_translation import (register_translation,
                                                   _upsampled_dft)
-from skimage.data import camera
+from skimage.data import camera, binary_blobs
 from scipy.ndimage import fourier_shift
-
+from skimage import img_as_float
 
 def test_correlation():
     reference_image = np.fft.fftn(camera())
@@ -57,13 +57,25 @@ def test_size_one_dimension_input():
 
 
 def test_3d_input():
-    # TODO: this test case is waiting on a Phantom data set to be added to the
-    #    data module.
-    # pixel precision
-    # result, error, diffphase = register_translation(ref_image, shifted_image)
+    phantom = img_as_float(binary_blobs(length=32, n_dim=3))
+    reference_image = np.fft.fftn(phantom)
+    shift = (-2., 1., 5.)
+    shifted_image = fourier_shift(reference_image, shift)
 
-    # assert_allclose(np.array(result[:2]), np.array(shift))
-    pass
+    result, error, diffphase = register_translation(reference_image,
+                                                    shifted_image,
+                                                    space="fourier")
+    assert_allclose(result, -np.array(shift), atol=0.05)
+    # subpixel precision not available for 3-D data
+    subpixel_shift = (-2.3, 1., 5.)
+    shifted_image = fourier_shift(reference_image, subpixel_shift)
+    result, error, diffphase = register_translation(reference_image,
+                                                    shifted_image,
+                                                    space="fourier")
+    assert_allclose(result, -np.array(shift), atol=0.5)
+    assert_raises(NotImplementedError, register_translation, reference_image,
+                                       shifted_image, upsample_factor=100,
+                                       space="fourier")
 
 
 def test_unknown_space_input():
