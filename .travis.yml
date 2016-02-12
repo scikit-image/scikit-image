@@ -38,11 +38,13 @@ notifications:
 matrix:
   include:
     - python: 2.6
+      env: WITH_PYAMG=1 NO_SPHINX=1
     - python: 2.7
       env: PIP_FLAGS="--pre"
     - python: 2.7
-      env: MINIMUM_REQUIREMENTS=1
+      env: WITH_PYAMG=1 MINIMUM_REQUIREMENTS=1 WITH_QT=1
     - python: 3.4
+      env: OPTIONAL_DEPS=1 WITH_PYSIDE=1
     - python: 3.5
       env: PIP_FLAGS="--pre"
 

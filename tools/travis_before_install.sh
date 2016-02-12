@@ -39,8 +39,7 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.6* ]]; then
     sed -i 's/matplotlib.*/matplotlib==1.4.3/g' requirements.txt
 fi
 
-# test minimum requirements on 2.7
-if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
+if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     sed -i 's/>=/==/g' requirements.txt
 fi
 
