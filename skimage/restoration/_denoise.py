@@ -197,7 +197,7 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
 
     Returns
     -------
-    u : ndarray
+    out : ndarray
         Denoised image.
 
     References
@@ -225,8 +225,8 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     _denoise_tv_bregman(image, image.dtype.type(weight), max_iter, eps,
                         isotropic, out)
 
-    minvalue = -1 if np.any(image < 0) else 0
-    maxvalue = 1
+    minvalue = -1. if np.any(image < 0) else 0.
+    maxvalue = 1.
     np.clip(out, minvalue, maxvalue, out=out)
 
     return np.squeeze(out[1:-1, 1:-1])
