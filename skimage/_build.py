@@ -85,10 +85,12 @@ def process_tempita_pyx(fromfile):
     except ImportError:
         raise Exception('Building requires Tempita: '
                         'pip install --user Tempita')
-    from_filename = tempita.Template.from_filename
-    template = from_filename(fromfile, encoding=sys.getdefaultencoding())
+    template = tempita.Template.from_filename(fromfile,
+                                              encoding=sys.getdefaultencoding())
     pyxcontent = template.substitute()
-    assert fromfile.endswith('.pyx.in')
-    pyxfile = fromfile[:-len('.pyx.in')] + '.pyx'
+    if not fromfile.endswith('.pyx.in'):
+        raise ValueError("Unexpected extension of %s." % fromfile)
+
+    pyxfile = os.path.splitext(fromfile)[0] + '.pyx'
     with open(pyxfile, "w") as f:
         f.write(pyxcontent)
