@@ -7,6 +7,7 @@ from .boundaries import find_boundaries, mark_boundaries
 from ._clear_border import clear_border
 from ._join import join_segmentations, relabel_from_one, relabel_sequential
 from ..morphology import watershed
+from .chan_vese import chan_vese
 
 
 __all__ = ['random_walker',
@@ -20,4 +21,6 @@ __all__ = ['random_walker',
            'join_segmentations',
            'relabel_from_one',
            'relabel_sequential',
-           'watershed']
+           'watershed',
+           'chan_vese'
+           ]
