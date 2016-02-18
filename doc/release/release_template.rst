@@ -15,7 +15,7 @@ http://scikit-image.org
 New Features
 ------------
 
-
+Chan-Vese Segmentation
 
 
 Improvements

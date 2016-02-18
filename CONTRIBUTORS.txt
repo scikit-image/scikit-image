@@ -1,4 +1,4 @@
-- Stefan van der Walt
+﻿- Stefan van der Walt
   Project coordination
 
 - Nicolas Pinto
@@ -247,3 +247,6 @@
 
 - Scott Sievert
   Wavelet denoising
+
+-Gleb Goussarov
+  Chan-Vese Segmentation
