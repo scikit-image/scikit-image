@@ -33,7 +33,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         Minimum intensity of peaks, calculated as `max(image) * threshold_rel`.
     exclude_border : int, optional
         If nonzero, `exclude_border` excludes peaks from
-        within `exclude_border` of the border of the image.
+        within `exclude_border`-pixels of the border of the image.
     indices : bool, optional
         If True, the output will be an array representing peak
         coordinates.  If False, the output will be a boolean array shaped as
