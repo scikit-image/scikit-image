@@ -4,7 +4,7 @@ from ..filters import rank_order
 
 
 def peak_local_max(image, min_distance=1, threshold_abs=None,
-                   threshold_rel=None, exclude_border=True, indices=True,
+                   threshold_rel=None, exclude_border=1, indices=True,
                    num_peaks=np.inf, footprint=None, labels=None):
     """Find peaks in an image as coordinate list or boolean mask.
 
@@ -24,17 +24,16 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     min_distance : int, optional
         Minimum number of pixels separating peaks in a region of `2 *
         min_distance + 1` (i.e. peaks are separated by at least
-        `min_distance`). If `exclude_border` is True, this value also excludes
-        a border `min_distance` from the image boundary.
+        `min_distance`).
         To find the maximum number of peaks, use `min_distance=1`.
     threshold_abs : float, optional
         Minimum intensity of peaks. By default, the absolute threshold is
         the minimum intensity of the image.
     threshold_rel : float, optional
         Minimum intensity of peaks, calculated as `max(image) * threshold_rel`.
-    exclude_border : bool, optional
-        If True, `min_distance` excludes peaks from the border of the image as
-        well as from each other.
+    exclude_border : int, optional
+        If nonzero, `exclude_border` excludes peaks from
+        within `exclude_border` of the border of the image.
     indices : bool, optional
         If True, the output will be an array representing peak
         coordinates.  If False, the output will be a boolean array shaped as
@@ -89,7 +88,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
 
     >>> img2 = np.zeros((20, 20, 20))
     >>> img2[10, 10, 10] = 1
-    >>> peak_local_max(img2, exclude_border=False)
+    >>> peak_local_max(img2, exclude_border=0)
     array([[10, 10, 10]])
 
     """
@@ -137,12 +136,12 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         image_max = ndi.maximum_filter(image, size=size, mode='constant')
     mask = image == image_max
 
-    if exclude_border and (footprint is not None or min_distance > 0):
+    if exclude_border and (footprint is not None):
         # zero out the image borders
         for i in range(mask.ndim):
             mask = mask.swapaxes(0, i)
             remove = (footprint.shape[i] if footprint is not None
-                      else 2 * min_distance)
+                      else exclude_border)
             mask[:remove // 2] = mask[-remove // 2:] = False
             mask = mask.swapaxes(0, i)
 
