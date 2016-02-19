@@ -141,7 +141,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         for i in range(mask.ndim):
             mask = mask.swapaxes(0, i)
             remove = (footprint.shape[i] if footprint is not None
-                      else exclude_border)
+                      else exclude_border*2)
             mask[:remove // 2] = mask[-remove // 2:] = False
             mask = mask.swapaxes(0, i)
 
