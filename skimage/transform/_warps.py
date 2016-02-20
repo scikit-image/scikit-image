@@ -325,7 +325,6 @@ def downscale_local_mean(image, factors, cval=0, clip=True):
 
 
 def _swirl_mapping(xy, center, rotation, strength, radius):
-    oldxy = np.copy(xy).T
     x, y = xy.T
     x0, y0 = center
     rho = np.sqrt((x - x0) ** 2 + (y - y0) ** 2)
