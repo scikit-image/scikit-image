@@ -333,7 +333,7 @@ def _swirl_mapping(xy, center, rotation, strength, radius):
     # within the specified radius.
     radius = radius / 5 * np.log(2)
     if radius == 0:
-        radius = np.power(10.0, -500)
+        radius = np.finfo(float).eps
 
     theta = rotation + strength * \
         np.exp(-rho / radius) + \
@@ -342,7 +342,6 @@ def _swirl_mapping(xy, center, rotation, strength, radius):
     xy[..., 0] = x0 + rho * np.cos(theta)
     xy[..., 1] = y0 + rho * np.sin(theta)
 
-    xy = np.nan_to_num(xy)
     xy[xy <= 0] = 0
 
     return xy
