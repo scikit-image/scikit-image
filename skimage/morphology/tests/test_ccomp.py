@@ -5,10 +5,8 @@ from skimage.measure import label
 import skimage.measure._ccomp as ccomp
 from skimage._shared._warnings import expected_warnings
 
-
-# The background label value
-# is supposed to be changed to 0 soon
-BG = -1
+# Background value
+BG = 0
 
 
 class TestConnectedComponents:
@@ -21,7 +19,7 @@ class TestConnectedComponents:
         self.labels = np.array([[0, 0, 1, 2, 3, 4],
                                 [0, 5, 5, 4, 2, 4],
                                 [0, 0, 5, 4, 4, 4],
-                                [6, 5, 5, 7, 8, 9]])
+                                [6, 5, 5, 7, 8, 0]])
 
     def test_basic(self):
         assert_array_equal(label(self.x), self.labels)
@@ -49,7 +47,7 @@ class TestConnectedComponents:
                       [1, 0]], dtype=int)
         assert_array_equal(label(x, 4),
                            [[0, 1],
-                            [2, 3]])
+                            [2, 0]])
         assert_array_equal(label(x, 8),
                            [[0, 1],
                             [1, 0]])
@@ -59,14 +57,14 @@ class TestConnectedComponents:
                       [1, 1, 5],
                       [0, 0, 0]])
 
-        assert_array_equal(label(x), [[0, 1, 1],
-                                      [0, 0, 2],
-                                      [3, 3, 3]])
+        assert_array_equal(label(x), [[1, 0, 0],
+                                      [1, 1, 2],
+                                      [0, 0, 0]])
 
         assert_array_equal(label(x, background=0),
-                           [[0, -1, -1],
-                            [0,  0,  1],
-                            [-1, -1, -1]])
+                           [[1, 0, 0],
+                            [1, 1, 2],
+                            [0, 0, 0]])
 
     def test_background_two_regions(self):
         x = np.array([[0, 0, 6],
@@ -75,9 +73,9 @@ class TestConnectedComponents:
 
         res = label(x, background=0)
         assert_array_equal(res,
-                           [[-1, -1, 0],
-                            [-1, -1, 0],
-                            [+1,  1, 1]])
+                           [[0, 0, 1],
+                            [0, 0, 1],
+                            [2, 2, 2]])
 
     def test_background_one_region_center(self):
         x = np.array([[0, 0, 0],
@@ -85,18 +83,18 @@ class TestConnectedComponents:
                       [0, 0, 0]])
 
         assert_array_equal(label(x, neighbors=4, background=0),
-                           [[-1, -1, -1],
-                            [-1,  0, -1],
-                            [-1, -1, -1]])
+                           [[0, 0, 0],
+                            [0, 1, 0],
+                            [0, 0, 0]])
 
     def test_return_num(self):
         x = np.array([[1, 0, 6],
                       [0, 0, 6],
                       [5, 5, 5]])
 
-        assert_array_equal(label(x, return_num=True)[1], 4)
+        assert_array_equal(label(x, return_num=True)[1], 3)
 
-        assert_array_equal(label(x, background=0, return_num=True)[1], 3)
+        assert_array_equal(label(x, background=-1, return_num=True)[1], 4)
 
 
 class TestConnectedComponents3d:
@@ -122,17 +120,17 @@ class TestConnectedComponents3d:
         self.labels[0] = np.array([[0, 1, 2, 3, 4],
                                    [0, 5, 4, 2, 4],
                                    [0, 5, 4, 4, 4],
-                                   [1, 5, 6, 1, 7]])
+                                   [1, 5, 6, 1, 0]])
 
         self.labels[1] = np.array([[1, 1, 2, 3, 4],
                                    [0, 1, 4, 2, 3],
                                    [0, 1, 1, 3, 3],
-                                   [1, 5, 1, 1, 7]])
+                                   [1, 5, 1, 1, 0]])
 
-        self.labels[2] = np.array([[1,  1, 8, 8, 9],
-                                   [10, 1, 4, 8, 8],
-                                   [10, 1, 7, 8, 7],
-                                   [10, 5, 7, 7, 7]])
+        self.labels[2] = np.array([[1, 1, 7, 7, 0],
+                                   [8, 1, 4, 7, 7],
+                                   [8, 1, 0, 7, 0],
+                                   [8, 5, 0, 0, 0]])
 
     def test_basic(self):
         labels = label(self.x)
@@ -176,22 +174,22 @@ class TestConnectedComponents3d:
                          [0, 0, 0]])
 
         lnb = x.copy()
-        lnb[0] = np.array([[0, 1, 1],
-                           [0, 1, 1],
-                           [1, 1, 1]])
-        lnb[1] = np.array([[1, 1, 1],
-                           [1, 0, 2],
-                           [1, 1, 1]])
+        lnb[0] = np.array([[1, 2, 2],
+                           [1, 2, 2],
+                           [2, 2, 2]])
+        lnb[1] = np.array([[2, 2, 2],
+                           [2, 1, 3],
+                           [2, 2, 2]])
         lb = x.copy()
-        lb[0] = np.array([[0,  BG, BG],
-                          [0,  BG, BG],
+        lb[0] = np.array([[1,  BG, BG],
+                          [1,  BG, BG],
                           [BG, BG, BG]])
         lb[1] = np.array([[BG, BG, BG],
-                          [BG, 0,   1],
+                          [BG, 1,   2],
                           [BG, BG, BG]])
 
-        assert_array_equal(label(x), lnb)
-        assert_array_equal(label(x, background=0), lb)
+        assert_array_equal(label(x), lb)
+        assert_array_equal(label(x, background=-1), lnb)
 
     def test_background_two_regions(self):
         x = np.zeros((2, 3, 3), int)
@@ -202,11 +200,11 @@ class TestConnectedComponents3d:
                          [5, 0, 0],
                          [0, 0, 0]])
         lb = x.copy()
-        lb[0] = np.array([[BG, BG, 0],
-                          [BG, BG, 0],
-                          [1,   1, 1]])
-        lb[1] = np.array([[0,  0,  BG],
-                          [1,  BG, BG],
+        lb[0] = np.array([[BG, BG, 1],
+                          [BG, BG, 1],
+                          [2,   2, 2]])
+        lb[1] = np.array([[1,  1,  BG],
+                          [2,  BG, BG],
                           [BG, BG, BG]])
 
         res = label(x, background=0)
@@ -217,7 +215,7 @@ class TestConnectedComponents3d:
         x[1, 1, 1] = 1
 
         lb = np.ones_like(x) * BG
-        lb[1, 1, 1] = 0
+        lb[1, 1, 1] = 1
 
         assert_array_equal(label(x, neighbors=4, background=0), lb)
 
@@ -226,13 +224,13 @@ class TestConnectedComponents3d:
                       [0, 0, 6],
                       [5, 5, 5]])
 
-        assert_array_equal(label(x, return_num=True)[1], 4)
-        assert_array_equal(label(x, background=0, return_num=True)[1], 3)
+        assert_array_equal(label(x, return_num=True)[1], 3)
+        assert_array_equal(label(x, background=-1, return_num=True)[1], 4)
 
     def test_1D(self):
         x = np.array((0, 1, 2, 2, 1, 1, 0, 0))
         xlen = len(x)
-        y = np.array((0, 1, 2, 2, 3, 3, 4, 4))
+        y = np.array((0, 1, 2, 2, 3, 3, 0, 0))
         reshapes = ((xlen,),
                     (1, xlen), (xlen, 1),
                     (1, xlen, 1), (xlen, 1, 1), (1, 1, xlen))

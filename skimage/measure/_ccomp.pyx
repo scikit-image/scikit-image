@@ -358,7 +358,7 @@ def undo_reshape_array(arr, swaps):
 
 
 # Connected components search as described in Fiorio et al.
-def label(input, neighbors=None, background=None, return_num=False,
+def label(input, neighbors=None, background=0, return_num=False,
           connectivity=None):
     r"""Label connected regions of an integer array.
 
@@ -386,13 +386,15 @@ def label(input, neighbors=None, background=None, return_num=False,
         **Deprecated, use ``connectivity`` instead.**
     background : int, optional
         Consider all pixels with this value as background pixels, and label
-        them as 0.
+        them as 0. By default, 0-valued pixels are considered as background
+        pixels.
     return_num : bool, optional
         Whether to return the number of assigned labels.
     connectivity : int, optional
         Maximum number of orthogonal hops to consider a pixel/voxel
         as a neighbor.
-        Accepted values are ranging from  1 to input.ndim.
+        Accepted values are ranging from  1 to input.ndim. If ``None``, a full
+        connectivity of ``input.ndim`` is used.
 
     Returns
     -------
@@ -413,24 +415,28 @@ def label(input, neighbors=None, background=None, return_num=False,
      [0 0 1]]
     >>> from skimage.measure import label
     >>> print(label(x, connectivity=1))
-    [[0 1 1]
-     [2 3 1]
-     [2 2 4]]
+    [[1 0 0]
+     [0 2 0]
+     [0 0 3]]
 
     >>> print(label(x, connectivity=2))
-    [[0 1 1]
-     [1 0 1]
-     [1 1 0]]
+    [[1 0 0]
+     [0 1 0]
+     [0 0 1]]
+
+    >>> print(label(x, background=-1))
+    [[1 2 2]
+     [2 1 2]
+     [2 2 1]]
 
     >>> x = np.array([[1, 0, 0],
     ...               [1, 1, 5],
     ...               [0, 0, 0]])
 
-    >>> print(label(x, background=1))
-    [[ 0  1  1]
-     [ 0  0  2]
-     [ 3  3  3]]
-
+    >>> print(label(x))
+    [[1 0 0]
+     [1 1 2]
+     [0 0 0]]
     """
     # We have to ensure that the shape of the input can be handled by the
     # algorithm the input if it is the case
@@ -511,7 +517,7 @@ cdef DTYPE_t resolve_labels(DTYPE_t *data_p, DTYPE_t *forest_p,
     our knowledge of prov. labels relationship.
     We also track how many distinct final labels we have.
     """
-    cdef DTYPE_t counter = 0, i
+    cdef DTYPE_t counter = 1, i
 
     for i in range(shapeinfo.numels):
         if i == bg.background_node:
@@ -523,7 +529,7 @@ cdef DTYPE_t resolve_labels(DTYPE_t *data_p, DTYPE_t *forest_p,
             counter += 1
         else:
             data_p[i] = data_p[forest_p[i]]
-    return counter
+    return counter - 1
 
 
 cdef void scanBG(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
