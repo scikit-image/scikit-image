@@ -189,7 +189,7 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True,
         Relative difference of the value of the cost function that determines
         the stop criterion. The algorithm stops when::
 
-            SUM((u(n) - u(n-1))**2) < eps
+            SUM((out(n) - out(n-1))**2) < eps
 
     max_iter : int, optional
         Maximal number of iterations used for the optimization.
