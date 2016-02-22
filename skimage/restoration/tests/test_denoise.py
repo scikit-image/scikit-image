@@ -175,10 +175,10 @@ def test_denoise_tv_bregman_3d():
 
 
 def test_denoise_tv_bregman_approx_errors():
-    '''Ensure output is valid image when valid input image is given.
+    """Ensure output is valid image when valid input image is given.
 
     The test image was shown to give invalid output (>1) in #1939.
-    '''
+    """
     image = np.array([[[254, 255, 254, 255, 255, 255, 255],
                        [254, 255, 255, 255, 255, 255, 255]],
 
@@ -190,6 +190,24 @@ def test_denoise_tv_bregman_approx_errors():
     image = img_as_float(image).astype(np.float32)
     out = restoration.denoise_tv_bregman(image, weight=50)
     assert np.max(out) <= 1
+
+
+def test_denoise_tv_bregman_noclip():
+    """Ensure output is not clipped when the `clip=False` kwarg is used.
+
+    The test image was shown to give output >1 in #1939.
+    """
+    image = np.array([[[254, 255, 254, 255, 255, 255, 255],
+                       [254, 255, 255, 255, 255, 255, 255]],
+
+                      [[248, 255, 255, 255, 255, 255, 255],
+                       [255, 255, 255, 255, 255, 255, 255]],
+
+                      [[250, 255, 255, 255, 255, 255, 255],
+                       [255, 255, 255, 255, 255, 255, 255]]], dtype=np.uint8).T
+    image = img_as_float(image).astype(np.float32)
+    out = restoration.denoise_tv_bregman(image, weight=50, clip=False)
+    assert np.max(out) > 1
 
 
 def test_denoise_bilateral_2d():
