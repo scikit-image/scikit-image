@@ -91,6 +91,6 @@ def process_tempita_pyx(fromfile):
     if not fromfile.endswith('.pyx.in'):
         raise ValueError("Unexpected extension of %s." % fromfile)
 
-    pyxfile = os.path.splitext(fromfile)[0] + '.pyx'
+    pyxfile = os.path.splitext(fromfile)[0]    # split off the .in ending
     with open(pyxfile, "w") as f:
         f.write(pyxcontent)
