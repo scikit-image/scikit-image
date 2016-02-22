@@ -29,6 +29,9 @@ include:
 - Synthetic 2-D and 3-D binary data with rounded blobs (#1485)
 - Plugin for ``imageio`` library (#1575)
 - Inpainting algorithm (#1804)
+- New handling of background pixels for ``measure.label``: 0-valued
+  pixels are considered as background by default, and the label of
+  background pixels is 0.
 - Partial support of 3-D images for ``skimage.measure.regionprops``
   (#1505)
 - Multi-block local binary patterns (MB-LBP) for texture classification (#1536)

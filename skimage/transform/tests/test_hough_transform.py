@@ -82,8 +82,7 @@ def test_hough_line_peaks():
 
     out, angles, d = tf.hough_line(img)
 
-    with expected_warnings(['`background`']):
-        out, theta, dist = tf.hough_line_peaks(out, angles, d)
+    out, theta, dist = tf.hough_line_peaks(out, angles, d)
 
     assert_equal(len(dist), 1)
     assert_almost_equal(dist[0], 80.723, 1)
@@ -101,9 +100,8 @@ def test_hough_line_peaks_ordered():
 
     hough_space, angles, dists = tf.hough_line(testim)
 
-    with expected_warnings(['`background`']):
-        hspace, _, _ = tf.hough_line_peaks(hough_space, angles, dists)
-        assert hspace[0] > hspace[1]
+    hspace, _, _ = tf.hough_line_peaks(hough_space, angles, dists)
+    assert hspace[0] > hspace[1]
 
 
 def test_hough_line_peaks_dist():
@@ -111,16 +109,14 @@ def test_hough_line_peaks_dist():
     img[:, 30] = True
     img[:, 40] = True
     hspace, angles, dists = tf.hough_line(img)
-    with expected_warnings(['`background`']):
-        assert len(tf.hough_line_peaks(hspace, angles, dists,
-                                       min_distance=5)[0]) == 2
-        assert len(tf.hough_line_peaks(hspace, angles, dists,
+    assert len(tf.hough_line_peaks(hspace, angles, dists,
+                                   min_distance=5)[0]) == 2
+    assert len(tf.hough_line_peaks(hspace, angles, dists,
                                        min_distance=15)[0]) == 1
 
 
 def test_hough_line_peaks_angle():
-    with expected_warnings(['`background`']):
-        check_hough_line_peaks_angle()
+    check_hough_line_peaks_angle()
 
 
 def check_hough_line_peaks_angle():
@@ -154,9 +150,8 @@ def test_hough_line_peaks_num():
     img[:, 30] = True
     img[:, 40] = True
     hspace, angles, dists = tf.hough_line(img)
-    with expected_warnings(['`background`']):
-        assert len(tf.hough_line_peaks(hspace, angles, dists, min_distance=0,
-                                       min_angle=0, num_peaks=1)[0]) == 1
+    assert len(tf.hough_line_peaks(hspace, angles, dists, min_distance=0,
+                                   min_angle=0, num_peaks=1)[0]) == 1
 
 
 @test_parallel()

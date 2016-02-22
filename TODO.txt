@@ -37,7 +37,3 @@ Version 0.13
   _shared/interpolation.pyx, transform/_geometric.py, and transform/_warps.py
 
 
-Version 0.12
-------------
-* Change `label` to mark background as 0, not -1, which is consistent with
-  SciPy's labelling.

@@ -1,5 +1,4 @@
 import numpy as np
-#from scipy.ndimage import label
 from ..measure import label
 
 
@@ -60,7 +59,7 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False):
 
     # Re-label, in case we are dealing with a binary image
     # and to get consistent labeling
-    labels = label(image, background=0) + 1
+    labels = label(image, background=0)
     number = np.max(labels) + 1
 
     # determine all objects that are connected to borders

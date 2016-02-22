@@ -37,8 +37,6 @@ clear_border(cleared)
 
 # label image regions
 label_image = label(cleared)
-borders = np.logical_xor(bw, cleared)
-label_image[borders] = -1
 image_label_overlay = label2rgb(label_image, image=image)
 
 fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(6, 6))

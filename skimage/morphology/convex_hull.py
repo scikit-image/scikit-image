@@ -117,7 +117,7 @@ def convex_hull_object(image, neighbors=8):
     convex_obj = np.zeros(image.shape, dtype=bool)
     convex_img = np.zeros(image.shape, dtype=bool)
 
-    for i in range(0, labeled_im.max() + 1):
+    for i in range(1, labeled_im.max() + 1):
         convex_obj = convex_hull_image(labeled_im == i)
         convex_img = np.logical_or(convex_img, convex_obj)
 
