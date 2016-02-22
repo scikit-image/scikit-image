@@ -221,3 +221,6 @@
 
 - Egor Panfilov
   Inpainting with biharmonic equation
+
+- Evgeni Burovski
+  Adaptation of ImageJ 3D skeletonization algorithm.

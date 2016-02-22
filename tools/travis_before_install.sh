@@ -30,7 +30,7 @@ retry () {
 }
 
 # add build dependencies
-echo "cython>=0.21" >> requirements.txt
+echo "cython>=0.23.4" >> requirements.txt
 
 # require networkx 1.9.1 on 2.6, as 2.6 support was dropped in 1.10
 # require matplotlib 1.4.3 on 2.6, as 2.6 support was dropped in 1.5
