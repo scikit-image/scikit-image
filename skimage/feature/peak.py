@@ -92,6 +92,9 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     array([[10, 10, 10]])
 
     """
+    
+    if type(exclude_border) == bool:
+      exclude_border = min_distance if exclude_border else 0
 
     out = np.zeros_like(image, dtype=np.bool)
 
