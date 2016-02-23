@@ -109,7 +109,7 @@ def test_reorder_labels():
     expected = (expected == image)
     result = peak.peak_local_max(image, labels=labels, min_distance=1,
                                  threshold_rel=0, footprint=footprint,
-                                 indices=False, exclude_border=False)
+                                 indices=False, exclude_border=0)
     assert (result == expected).all()
 
 
@@ -127,7 +127,7 @@ def test_indices_with_labels():
     expected = (expected == image)
     result = peak.peak_local_max(image, labels=labels, min_distance=1,
                                  threshold_rel=0, footprint=footprint,
-                                 indices=True, exclude_border=False)
+                                 indices=True, exclude_border=0)
     assert (result == np.transpose(expected.nonzero())).all()
 
 
@@ -145,7 +145,7 @@ def test_ndarray_exclude_border():
     nd_image[2,2,2] = 1
     expected = np.zeros_like(nd_image, dtype=np.bool)
     expected[2,2,2] = True
-    result = peak.peak_local_max(nd_image, min_distance=2, indices=False)
+    result = peak.peak_local_max(nd_image, exclude_border=2, indices=False)
     assert (result == expected).all()
 
 
@@ -155,7 +155,7 @@ def test_empty():
     result = peak.peak_local_max(image, labels=labels,
                                  footprint=np.ones((3, 3), bool),
                                  min_distance=1, threshold_rel=0,
-                                 indices=False, exclude_border=False)
+                                 indices=False, exclude_border=0)
     assert np.all(~ result)
 
 
@@ -167,7 +167,7 @@ def test_one_point():
     result = peak.peak_local_max(image, labels=labels,
                                  footprint=np.ones((3, 3), bool),
                                  min_distance=1, threshold_rel=0,
-                                 indices=False, exclude_border=False)
+                                 indices=False, exclude_border=0)
     assert np.all(result == (labels == 1))
 
 
@@ -179,7 +179,7 @@ def test_adjacent_and_same():
     result = peak.peak_local_max(image, labels=labels,
                                  footprint=np.ones((3, 3), bool),
                                  min_distance=1, threshold_rel=0,
-                                 indices=False, exclude_border=False)
+                                 indices=False, exclude_border=0)
     assert np.all(result == (labels == 1))
 
 
@@ -193,11 +193,11 @@ def test_adjacent_and_different():
     result = peak.peak_local_max(image, labels=labels,
                                  footprint=np.ones((3, 3), bool),
                                  min_distance=1, threshold_rel=0,
-                                 indices=False, exclude_border=False)
+                                 indices=False, exclude_border=0)
     assert np.all(result == expected)
     result = peak.peak_local_max(image, labels=labels,
                                  min_distance=1, threshold_rel=0,
-                                 indices=False, exclude_border=False)
+                                 indices=False, exclude_border=0)
     assert np.all(result == expected)
 
 
@@ -211,7 +211,7 @@ def test_not_adjacent_and_different():
     result = peak.peak_local_max(image, labels=labels,
                                  footprint=np.ones((3, 3), bool),
                                  min_distance=1, threshold_rel=0,
-                                 indices=False, exclude_border=False)
+                                 indices=False, exclude_border=0)
     assert np.all(result == expected)
 
 
@@ -226,7 +226,7 @@ def test_two_objects():
     result = peak.peak_local_max(image, labels=labels,
                                  footprint=np.ones((3, 3), bool),
                                  min_distance=1, threshold_rel=0,
-                                 indices=False, exclude_border=False)
+                                 indices=False, exclude_border=0)
     assert np.all(result == expected)
 
 
@@ -241,7 +241,7 @@ def test_adjacent_different_objects():
     result = peak.peak_local_max(image, labels=labels,
                                  footprint=np.ones((3, 3), bool),
                                  min_distance=1, threshold_rel=0,
-                                 indices=False, exclude_border=False)
+                                 indices=False, exclude_border=0)
     assert np.all(result == expected)
 
 
@@ -259,7 +259,7 @@ def test_four_quadrants():
     expected = (expected == image)
     result = peak.peak_local_max(image, labels=labels, footprint=footprint,
                                  min_distance=1, threshold_rel=0,
-                                 indices=False, exclude_border=False)
+                                 indices=False, exclude_border=0)
     assert np.all(result == expected)
 
 
@@ -273,10 +273,10 @@ def test_disk():
                                  footprint=footprint,
                                  min_distance=1, threshold_rel=0,
                                  threshold_abs=-1, indices=False,
-                                 exclude_border=False)
+                                 exclude_border=0)
     assert np.all(result)
     result = peak.peak_local_max(image, footprint=footprint, threshold_abs=-1,
-                                 indices=False, exclude_border=False)
+                                 indices=False, exclude_border=0)
     assert np.all(result)
 
 
@@ -289,7 +289,7 @@ def test_3D():
     assert_equal(peak.peak_local_max(image, min_distance=6, threshold_rel=0),
                  [[15, 15, 15]])
     assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
-                                     exclude_border=False),
+                                     exclude_border=0),
                  [[5, 5, 5], [15, 15, 15]])
     assert_equal(peak.peak_local_max(image, min_distance=5, threshold_rel=0),
                  [[5, 5, 5], [15, 15, 15]])
@@ -304,7 +304,7 @@ def test_4D():
     assert_equal(peak.peak_local_max(image, min_distance=6, threshold_rel=0),
                  [[15, 15, 15, 15]])
     assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
-                                     exclude_border=False),
+                                     exclude_border=0),
                  [[5, 5, 5, 5], [15, 15, 15, 15]])
     assert_equal(peak.peak_local_max(image, min_distance=5, threshold_rel=0),
                  [[5, 5, 5, 5], [15, 15, 15, 15]])
