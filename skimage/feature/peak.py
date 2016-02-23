@@ -4,7 +4,7 @@ from ..filters import rank_order
 
 
 def peak_local_max(image, min_distance=1, threshold_abs=None,
-                   threshold_rel=None, exclude_border=1, indices=True,
+                   threshold_rel=None, exclude_border=True, indices=True,
                    num_peaks=np.inf, footprint=None, labels=None):
     """Find peaks in an image as coordinate list or boolean mask.
 
@@ -92,7 +92,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     array([[10, 10, 10]])
 
     """
-    
+
     if type(exclude_border) == bool:
       exclude_border = min_distance if exclude_border else 0
 
