@@ -11,8 +11,8 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     Peaks are the local maxima in a region of `2 * min_distance + 1`
     (i.e. peaks are separated by at least `min_distance`).
 
-    If peaks are flat (i.e. multiple adjacent pixels have identical
-    intensities), the coordinates of all such pixels are returned.
+    If multiple peaks in the specified region have identical intensities,
+    the coordinates of all such pixels are returned.
 
     If both `threshold_abs` and `threshold_rel` are provided, the maximum
     of the two is chosen as the minimum intensity threshold of peaks.
@@ -138,7 +138,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     mask = image == image_max
 
     if exclude_border and (footprint is not None or min_distance > 0):
-        # zero out the image borders
+        # Zero out the image borders
         for i in range(mask.ndim):
             mask = mask.swapaxes(0, i)
             remove = (footprint.shape[i] if footprint is not None
@@ -146,7 +146,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
             mask[:remove // 2] = mask[-remove // 2:] = False
             mask = mask.swapaxes(0, i)
 
-    # find top peak candidates above a threshold
+    # Find top peak candidates above a threshold
     thresholds = []
     if threshold_abs is None:
         threshold_abs = image.min()
@@ -156,7 +156,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     if thresholds:
         mask &= image > max(thresholds)
 
-    # get coordinates of peaks
+    # Get coordinates of peaks
     coordinates = np.transpose(mask.nonzero())
 
     if coordinates.shape[0] > num_peaks:
