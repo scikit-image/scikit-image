@@ -139,7 +139,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         image_max = ndi.maximum_filter(image, size=size, mode='constant')
     mask = image == image_max
 
-    if exclude_border and (footprint is not None):
+    if exclude_border:
         # zero out the image borders
         for i in range(mask.ndim):
             mask = mask.swapaxes(0, i)
