@@ -145,9 +145,34 @@ def test_ndarray_exclude_border():
     nd_image[2,2,2] = 1
     expected = np.zeros_like(nd_image, dtype=np.bool)
     expected[2,2,2] = True
+    expectedNoBorder = nd_image > 0
     result = peak.peak_local_max(nd_image, min_distance=2,
         exclude_border=2, indices=False)
-    assert (result == expected).all()
+    assert_equal(result, expected)
+    # Check that bools work as expected
+    assert_equal(
+        peak.peak_local_max(nd_image, min_distance=2,
+            exclude_border=2, indices=False)
+        peak.peak_local_max(nd_image, min_distance=2,
+            exclude_border=True, indices=False)
+        )
+    assert_equal(
+        peak.peak_local_max(nd_image, min_distance=2,
+            exclude_border=0, indices=False)
+        peak.peak_local_max(nd_image, min_distance=2,
+            exclude_border=False, indices=False)
+        )
+    # Check both versions with  no border
+    assert_equal(
+        peak.peak_local_max(nd_image, min_distance=2,
+            exclude_border=0, indices=False)
+        expectedNoBorder,
+        )
+    assert_equal(
+        peak.peak_local_max(nd_image,
+            exclude_border=False, indices=False)
+        expectedNoBorder,
+        )
 
 
 def test_empty():
