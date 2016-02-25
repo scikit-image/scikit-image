@@ -16,6 +16,8 @@ def profile_line(img, src, dst, linewidth=1,
         The start point of the scan line.
     dst : 2-tuple of numeric scalar (float or int)
         The end point of the scan line.
+        Note: The final destination point is INCLUDED in the profile, 
+            in constrast to standard numpy indexing.
     linewidth : int, optional
         Width of the scan, perpendicular to the line
     order : int in {0, 1, 2, 3, 4, 5}, optional
@@ -44,11 +46,18 @@ def profile_line(img, src, dst, linewidth=1,
            [0, 0, 0, 0, 0, 0]])
     >>> profile_line(img, (2, 1), (2, 4))
     array([ 1.,  1.,  2.,  2.])
+    >>> profile_line(img, (1, 0), (1, 6), cval=4)
+    array([ 1.,  1.,  1.,  2.,  2.,  2.,  4.])
 
     Notes
     -----
     The destination point is included in the profile, in contrast to
     standard numpy indexing.
+
+    For example: 
+        >>> img = np.array([1,1,2,2])
+        >>> profile_line(img, (0, 0), (0, 4)) # The final point is out of bounds
+        >>> profile_line(img, (0, 0), (0, 3)) # This accesses the full first row
     """
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
     if img.ndim == 3:
