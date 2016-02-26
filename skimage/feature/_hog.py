@@ -22,6 +22,34 @@ def _hog_normalize_block(block, method, eps=1e-5):
     return out
 
 
+def compute_image_gradients(image):
+    """ Computes the gradient image in x and y
+
+    Parameters
+    ----------
+    image : (M, N) 2darray
+        Input image.
+
+    Returns
+    -------
+    gx: gradient of the image in x
+    gy: gradient ofthe image in y
+
+    """
+    assert_nD(image, 2)
+
+    gx = np.empty(image.shape, dtype=np.double)
+    gx[:, 0] = 0
+    gx[:, -1] = 0
+    gx[:, 1:-1] = image[:, 2:] - image[:, :-2]
+    gy = np.empty(image.shape, dtype=np.double)
+    gy[0, :] = 0
+    gy[-1, :] = 0
+    gy[1:-1, :] = image[2:, :] - image[:-2, :]
+
+    return gx, gy
+
+
 def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         block_norm=None, visualize=False, visualise=None, transform_sqrt=False,
         feature_vector=True):
@@ -124,6 +152,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
 
     image = np.atleast_2d(image)
 
+
     """
     The first stage applies an optional global image normalization
     equalisation that is designed to reduce the influence of illumination
@@ -133,8 +162,6 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     illumination so this compression helps to reduce the effects of local
     shadowing and illumination variations.
     """
-
-    assert_nD(image, 2)
 
     if transform_sqrt:
         image = np.sqrt(image)
@@ -154,14 +181,26 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         # to avoid problems with subtracting unsigned numbers
         image = image.astype('float')
 
-    gx = np.empty(image.shape, dtype=np.double)
-    gx[:, 0] = 0
-    gx[:, -1] = 0
-    gx[:, 1:-1] = image[:, 2:] - image[:, :-2]
-    gy = np.empty(image.shape, dtype=np.double)
-    gy[0, :] = 0
-    gy[-1, :] = 0
-    gy[1:-1, :] = image[2:, :] - image[:-2, :]
+    if len(image.shape) == 3:
+        channel_gradients = []
+        gradient = np.zeros(image.shape)
+
+        for dimension in range(image.shape[2]):
+            gx, gy = compute_image_gradients(image[:, :, dimension])
+            gradient[:, :, dimension] = np.hypot(gx, gy)
+            channel_gradients.append((gx, gy))
+
+        gx = np.empty(image.shape[0:2], dtype=np.double)
+        gy = np.empty(image.shape[0:2], dtype=np.double)
+
+        max_index_array = gradient.argmax(axis = 2)
+
+        for row_index, row in enumerate(max_index_array):
+            for col_index, value in enumerate(row):
+                gx[row_index][col_index] = channel_gradients[value][0][row_index][col_index]
+                gy[row_index][col_index] = channel_gradients[value][1][row_index][col_index]
+    else:
+        gx, gy = compute_image_gradients(image)
 
     """
     The third stage aims to produce an encoding that is sensitive to
@@ -178,7 +217,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     cell are used to vote into the orientation histogram.
     """
 
-    sy, sx = image.shape
+    sy, sx = image.shape[0:2]
     cx, cy = pixels_per_cell
     bx, by = cells_per_block
 
