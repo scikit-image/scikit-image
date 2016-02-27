@@ -37,7 +37,8 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            xyz2luv, luv2xyz,
                            luv2rgb, rgb2luv,
                            lab2lch, lch2lab,
-                           guess_spatial_dimensions
+                           guess_spatial_dimensions,
+                           img_to_cmap
                            )
 
 from skimage import data_dir
@@ -481,6 +482,12 @@ def test_gray2rgb_alpha():
     assert_equal(gray2rgb(np.array([[1, 2], [3, 4]], dtype=np.uint8),
                           alpha=True)[0, 0, 3], 255)
 
+
+def test_img_to_cmap():
+    img= np.array([[255, 192], [128, 64]], dtype=np.uint8)
+    rgb = np.empty((2,2,3))
+    rgb[:, :, 0] = rgb[:, :, 1] = rgb[:, :, 2] = img.astype(np.float)/255.0
+    assert_almost_equal(rgb, img_to_cmap(img, 'gray'))
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite

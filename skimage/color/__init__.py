@@ -44,7 +44,8 @@ from .colorconv import (convert_colorspace,
                         rgb_from_ahx,
                         ahx_from_rgb,
                         rgb_from_hpx,
-                        hpx_from_rgb)
+                        hpx_from_rgb,
+                        img_to_cmap)
 
 from .colorlabel import color_dict, label2rgb
 
@@ -104,4 +105,5 @@ __all__ = ['convert_colorspace',
            'deltaE_ciede94',
            'deltaE_ciede2000',
            'deltaE_cmc',
+           'img_to_cmap'
            ]
