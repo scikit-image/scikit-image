@@ -1473,6 +1473,11 @@ def img_to_cmap(img, cmap):
     -------
     out: (M, N, 3) array
         The image drawn with the specified colormap in RGB format.
+
+    Examples
+    --------
+    from skimage import data, color
+    out = color.img_to_cmap(data.camera(), 'viridis')
     """
 
     cmap = plt.get_cmap(cmap)
