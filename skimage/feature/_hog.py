@@ -131,24 +131,20 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         image = image.astype('float')
 
     if len(image.shape) == 3:
-
-        channel_gradients = []
-        gradient = np.zeros(image.shape)
+        #If image is a color image
+        x_gradient = np.zeros(image.shape)
+        y_gradient = np.zeros(image.shape)
+        gradient_magnitude = np.zeros(image.shape)
 
         for dimension in range(image.shape[2]):
-            gx, gy = compute_image_gradients(image[:, :, dimension])
-            gradient[:, :, dimension] = np.hypot(gx, gy)
-            channel_gradients.append((gx, gy))
+            x_gradient[:, :, dimension], y_gradient[:, :, dimension] = compute_image_gradients(image[:, :, dimension])
+            gradient_magnitude[:, :, dimension] = np.hypot(x_gradient[:, :, dimension], y_gradient[:, :, dimension])
 
-        gx = np.empty(image.shape[0:2], dtype=np.double)
-        gy = np.empty(image.shape[0:2], dtype=np.double)
+        max_index_array = gradient_magnitude.argmax(axis=2)
+        rr, cc = np.meshgrid(np.arange(image.shape[0]), np.arange(image.shape[1]))
 
-        max_index_array = gradient.argmax(axis = 2)
-
-        for row_index, row in enumerate(max_index_array):
-            for col_index, value in enumerate(row):
-                gx[row_index][col_index] = channel_gradients[value][0][row_index][col_index]
-                gy[row_index][col_index] = channel_gradients[value][1][row_index][col_index]
+        gx = x_gradient[rr, cc, max_index_array]
+        gy = y_gradient[rr, cc, max_index_array]
 
     else:
         gx, gy = compute_image_gradients(image)
