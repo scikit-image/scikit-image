@@ -1476,8 +1476,8 @@ def img_to_cmap(img, cmap):
 
     Examples
     --------
-    from skimage import data, color
-    out = color.img_to_cmap(data.camera(), 'viridis')
+    >>> from skimage import data, color
+    >>> out = color.img_to_cmap(data.camera(), 'viridis')
     """
 
     cmap = plt.get_cmap(cmap)
