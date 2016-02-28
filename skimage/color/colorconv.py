@@ -56,7 +56,12 @@ from __future__ import division
 from warnings import warn
 import numpy as np
 from scipy import linalg
-from ..util import dtype, dtype_limits
+from ..util import dtype, dtype_limits, img_as_ubyte
+try:
+    from matplotlib import pyplot as plt
+except ImportError:
+    warn("matplotlib not found, the function `img_to_cmap` " +
+         "cannot be supported")
 
 
 def guess_spatial_dimensions(image):
@@ -1455,3 +1460,38 @@ def _prepare_lab_array(arr):
     if shape[-1] < 3:
         raise ValueError('Input array has less than 3 color channels')
     return dtype.img_as_float(arr, force_copy=True)
+
+
+def colormap_image(img, cmap):
+    """Draw a grayscale image by using the given colormap.
+
+    Parameters
+    ----------
+    img : (M, N) array
+        The input image.
+    cmap : string or :class:`matplotlib.colors.Colormap` instance.
+        The colormap to use
+
+    Returns
+    -------
+    out: (M, N, 3) array
+        The image drawn with the specified colormap in RGB format.
+
+    Examples
+    --------
+    >>> from skimage import data, color
+    >>> from skimage.util.colormap import viridis
+    >>> out = color.colormap_image(data.camera(), viridis)
+    """
+
+    cmap = plt.get_cmap(cmap)
+    img = img_as_ubyte(img)
+    gray_colors = np.arange(0, 256, dtype=np.int)
+    mapping = cmap(gray_colors)
+
+    out = np.empty((img.shape[0], img.shape[1], 3), dtype=np.float)
+    out[:, :, 0] = mapping[:, 0][img]
+    out[:, :, 1] = mapping[:, 1][img]
+    out[:, :, 2] = mapping[:, 2][img]
+
+    return out
