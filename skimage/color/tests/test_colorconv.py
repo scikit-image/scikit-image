@@ -21,6 +21,8 @@ from numpy.testing import (assert_equal,
                            assert_raises,
                            TestCase,
                            )
+from numpy.testing.decorators import skipif
+from skimage._shared.version_requirements import is_installed
 
 from skimage import img_as_float, img_as_ubyte
 from skimage.io import imread
@@ -38,13 +40,18 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            luv2rgb, rgb2luv,
                            lab2lch, lch2lab,
                            guess_spatial_dimensions,
-                           img_to_cmap
+                           colormap_image
                            )
 
 from skimage import data_dir
 from skimage._shared._warnings import expected_warnings
 
 import colorsys
+
+try:
+    from matplotlib.colors import LinearSegmentedColormap
+except ImportError:
+    pass
 
 
 def test_guess_spatial_dimensions():
@@ -483,11 +490,16 @@ def test_gray2rgb_alpha():
                           alpha=True)[0, 0, 3], 255)
 
 
+@skipif(not is_installed('matplotlib'))
 def test_img_to_cmap():
-    img= np.array([[255, 192], [128, 64]], dtype=np.uint8)
-    rgb = np.empty((2,2,3))
+    img = np.array([[255, 192], [128, 64]], dtype=np.uint8)
+    rgb = np.empty((2, 2, 3))
     rgb[:, :, 0] = rgb[:, :, 1] = rgb[:, :, 2] = img.astype(np.float)/255.0
-    assert_almost_equal(rgb, img_to_cmap(img, 'gray'))
+    assert_almost_equal(rgb, colormap_image(img, 'gray'))
+
+    gmap = LinearSegmentedColormap.from_list('gmap', ['black', 'white'])
+    assert_almost_equal(rgb, colormap_image(img, gmap))
+
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite

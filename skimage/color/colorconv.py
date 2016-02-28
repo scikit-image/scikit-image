@@ -57,8 +57,11 @@ from warnings import warn
 import numpy as np
 from scipy import linalg
 from ..util import dtype, dtype_limits, img_as_ubyte
-from matplotlib import pyplot as plt
-
+try:
+    from matplotlib import pyplot as plt
+except ImportError:
+    warn("matplotlib not found, the function `img_to_cmap` " +
+         "cannot be supported")
 
 
 def guess_spatial_dimensions(image):
@@ -1459,7 +1462,7 @@ def _prepare_lab_array(arr):
     return dtype.img_as_float(arr, force_copy=True)
 
 
-def img_to_cmap(img, cmap):
+def colormap_image(img, cmap):
     """Draw a grayscale image by using the given colormap.
 
     Parameters
@@ -1477,7 +1480,8 @@ def img_to_cmap(img, cmap):
     Examples
     --------
     >>> from skimage import data, color
-    >>> out = color.img_to_cmap(data.camera(), 'afmhot')
+    >>> from skimage.util.colormap import viridis
+    >>> out = color.colormap_image(data.camera(), viridis)
     """
 
     cmap = plt.get_cmap(cmap)
