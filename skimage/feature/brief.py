@@ -182,3 +182,5 @@ class BRIEF(DescriptorExtractor):
 
         _brief_loop(image, self.descriptors.view(np.uint8), keypoints,
                     pos1, pos2)
+                    
+        return self
