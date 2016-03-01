@@ -206,6 +206,8 @@ class ORB(FeatureDetector, DescriptorExtractor):
             self.scales = scales[best_indices]
             self.orientations = orientations[best_indices]
             self.responses = responses[best_indices]
+            
+        return self
 
     def _extract_octave(self, octave_image, keypoints, orientations):
         mask = _mask_border_keypoints(octave_image.shape, keypoints,
@@ -272,6 +274,8 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
         self.descriptors = np.vstack(descriptors_list).view(np.bool)
         self.mask_ = np.hstack(mask_list)
+        
+        return self
 
     def detect_and_extract(self, image):
         """Detect oriented FAST keypoints and extract rBRIEF descriptors.
@@ -338,3 +342,5 @@ class ORB(FeatureDetector, DescriptorExtractor):
             self.orientations = orientations[best_indices]
             self.responses = responses[best_indices]
             self.descriptors = descriptors[best_indices]
+            
+        return self
