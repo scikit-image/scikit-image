@@ -406,12 +406,24 @@ class AffineTransform(ProjectiveTransform):
                 translation = (0, 0)
 
             sx, sy = scale
-            self.params = np.array([
-                [sx * math.cos(rotation), -sy * math.sin(rotation + shear), 0],
-                [sx * math.sin(rotation),  sy * math.cos(rotation + shear), 0],
-                [                      0,                                0, 1]
-            ])
+            if hasattr(shear, '__len__'):
+                if len(shear) != 2:
+                    raise ValueError("Shear value must be an integer or an iterable"
+                                     " of length 2")
+                shx, shy = shear
+                self.params = np.array([
+                    [sx * math.cos(rotation), -sy * math.sin(rotation) + shx, 0],
+                    [sx * math.sin(rotation) + shy,  sy * math.cos(rotation), 0],
+                    [                      0,                        0, 1]
+                ])
+            else:
+                self.params = np.array([
+                        [sx * math.cos(rotation), -sy * math.sin(rotation + shear), 0],
+                        [sx * math.sin(rotation),  sy * math.cos(rotation + shear), 0],
+                        [                      0,                                0, 1]
+                ])
             self.params[0:2, 2] = translation
+
         else:
             # default to an identity transform
             self.params = np.eye(3)
