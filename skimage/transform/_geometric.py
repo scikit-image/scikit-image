@@ -414,7 +414,7 @@ class AffineTransform(ProjectiveTransform):
                 self.params = np.array([
                     [sx * math.cos(rotation), -sy * math.sin(rotation) + shx, 0],
                     [sx * math.sin(rotation) + shy,  sy * math.cos(rotation), 0],
-                    [                      0,                        0, 1]
+                    [                      0,                              0, 1]
                 ])
             else:
                 self.params = np.array([
