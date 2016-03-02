@@ -423,7 +423,6 @@ class AffineTransform(ProjectiveTransform):
                         [                      0,                                0, 1]
                 ])
             self.params[0:2, 2] = translation
-
         else:
             # default to an identity transform
             self.params = np.eye(3)
