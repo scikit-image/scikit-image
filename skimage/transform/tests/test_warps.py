@@ -241,6 +241,17 @@ def test_swirl_small_radius():
 
     assert np.mean(np.abs(image - unswirled)) < 0.01
 
+def test_swirl_zero_radius():
+    image = img_as_float(data.checkerboard())
+
+    swirl_params = {'radius': 0, 'rotation': 0, 'order': 2, 'mode': 'reflect'}
+
+    with expected_warnings(['Bi-quadratic.*bug']):
+        swirled = tf.swirl(image, strength=10, **swirl_params)
+        unswirled = tf.swirl(swirled, strength=-10, **swirl_params)
+
+    assert np.mean(np.abs(image - unswirled)) < 0.01
+
 
 def test_const_cval_out_of_range():
     img = np.random.randn(100, 100)
