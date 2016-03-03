@@ -2,6 +2,7 @@ import os
 import tempfile
 
 import numpy as np
+from nose.tools import assert_true
 from numpy.testing import assert_equal, raises, assert_allclose
 from skimage import novice
 from skimage.novice._novice import (array_to_xy_origin, xy_to_array_origin,
@@ -140,7 +141,7 @@ def test_reset():
     v = pic[0, 0]
     pic[0, 0] = (1, 1, 1)
     pic.reset()
-    assert_equal(pic[0, 0], v)
+    assert_true(pic[0, 0] == v)
 
 
 def test_update_on_save():
