@@ -28,6 +28,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
         Input image, 2D grayscale or RGB.
     win_size : int
         Window size for filtering.
+        If win_size is not specified, it is calculated as max(5, 2*ceil(3*sigma_spatial)+1)
     sigma_range : float
         Standard deviation for grayvalue/color distance (radiometric
         similarity). A larger value results in averaging of pixels with larger
