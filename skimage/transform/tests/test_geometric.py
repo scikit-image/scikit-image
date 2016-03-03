@@ -49,9 +49,8 @@ def test_estimate_transform():
 
 
 def test_matrix_transform():
-    tform = AffineTransform(scale=(0.1, 0.5), rotation=2)
+    tform = AffineTransform(scale=(0.1, 0.5), rotation=2, shear=(0.5, 2))
     assert_equal(tform(SRC), matrix_transform(SRC, tform.params))
-
 
 def test_similarity_estimation():
     # exact solution
@@ -245,6 +244,9 @@ def test_invalid_input():
                   matrix=np.zeros((2, 3)), scale=1)
     assert_raises(ValueError, SimilarityTransform,
                   matrix=np.zeros((2, 3)), scale=1)
+
+    assert_raises(ValueError, AffineTransform,
+                  shear=(1, 2, 3))
 
     assert_raises(ValueError, PolynomialTransform, np.zeros((3, 3)))
 
