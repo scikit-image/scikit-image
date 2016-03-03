@@ -304,8 +304,8 @@ class Picture(object):
 
     @array.setter
     def array(self, array):
-        self._array = array
-        self._xy_array = array_to_xy_origin(array)
+        self._array = array.astype(np.uint8)
+        self._xy_array = array_to_xy_origin(self._array)
         self._array_backup = self._array.copy()
 
     @property
