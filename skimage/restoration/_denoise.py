@@ -1,12 +1,13 @@
 # coding: utf-8
 import numpy as np
+from math import ceil
 from .. import img_as_float
 from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 from .._shared.utils import _mode_deprecations
 import warnings
 
 
-def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
+def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                       bins=10000, mode='constant', cval=0, multichannel=True):
     """Denoise image using bilateral filter.
 
@@ -19,7 +20,7 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
 
     Radiometric similarity is measured by the gaussian function of the euclidian
     distance between two color values and a certain standard deviation
-    (`sigma_range`).
+    (`sigma_color`).
 
     Parameters
     ----------
@@ -66,7 +67,7 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
     >>> astro = astro[220:300, 220:320]
     >>> noisy = astro + 0.6 * astro.std() * np.random.random(astro.shape)
     >>> noisy = np.clip(noisy, 0, 1)
-    >>> denoised = denoise_bilateral(noisy, sigma_range=0.05, sigma_spatial=15)
+    >>> denoised = denoise_bilateral(noisy, sigma_color=0.05, sigma_spatial=15)
     """
     if multichannel:
         if image.ndim != 3:
@@ -99,9 +100,11 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
                              "``multichannel=True`` for 2-D RGB "
                              "images.".format(image.shape))
 
+    if win_size is None:
+        win_size = max(5, 2*ceil(3*sigma_spatial)+1)
 
     mode = _mode_deprecations(mode)
-    return _denoise_bilateral(image, win_size, sigma_range, sigma_spatial,
+    return _denoise_bilateral(image, win_size, sigma_color, sigma_spatial,
                               bins, mode, cval)
 
 

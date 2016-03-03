@@ -159,9 +159,9 @@ def test_denoise_bilateral_2d():
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
 
-    out1 = restoration.denoise_bilateral(img, sigma_range=0.1,
+    out1 = restoration.denoise_bilateral(img, sigma_color=0.1,
                                          sigma_spatial=20, multichannel=False)
-    out2 = restoration.denoise_bilateral(img, sigma_range=0.2,
+    out2 = restoration.denoise_bilateral(img, sigma_color=0.2,
                                          sigma_spatial=30, multichannel=False)
 
     # make sure noise is reduced in the checkerboard cells
@@ -175,8 +175,8 @@ def test_denoise_bilateral_color():
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
 
-    out1 = restoration.denoise_bilateral(img, sigma_range=0.1, sigma_spatial=20)
-    out2 = restoration.denoise_bilateral(img, sigma_range=0.2, sigma_spatial=30)
+    out1 = restoration.denoise_bilateral(img, sigma_color=0.1, sigma_spatial=20)
+    out2 = restoration.denoise_bilateral(img, sigma_color=0.2, sigma_spatial=30)
 
     # make sure noise is reduced in the checkerboard cells
     assert img[30:45, 5:15].std() > out1[30:45, 5:15].std()
