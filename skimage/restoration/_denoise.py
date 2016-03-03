@@ -102,7 +102,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                              "images.".format(image.shape))
 
     if win_size is None:
-        win_size = max(5, 2*ceil(3*sigma_spatial)+1)
+        win_size = max(5, 2*int(ceil(3*sigma_spatial))+1)
 
     mode = _mode_deprecations(mode)
     return _denoise_bilateral(image, win_size, sigma_color, sigma_spatial,
