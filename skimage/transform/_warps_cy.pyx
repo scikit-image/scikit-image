@@ -9,8 +9,13 @@ from .._shared.interpolation cimport (nearest_neighbour_interpolation,
                                       biquadratic_interpolation,
                                       bicubic_interpolation)
 
+ctypedef fused numeric:
+    cnp.float64_t
+    cnp.uint64_t
+    cython.float
+    cython.double
 
-cdef inline void _matrix_transform(double x, double y, double* H, double *x_,
+cdef inline void _matrix_transform(numeric x, numeric y, double* H, double *x_,
                                    double *y_) nogil:
     """Apply a homography to a coordinate.
 
