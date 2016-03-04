@@ -89,8 +89,10 @@ class ORB(FeatureDetector, DescriptorExtractor):
     >>> img2[53:73, 53:73] = square
     >>> detector_extractor1 = ORB(n_keypoints=5)
     >>> detector_extractor2 = ORB(n_keypoints=5)
-    >>> detector_extractor1.detect_and_extract(img1)
-    >>> detector_extractor2.detect_and_extract(img2)
+    >>> detector_extractor1.detect_and_extract(img1) #doctest: +ELLIPSIS
+    <skimage.feature.orb.ORB object at 0x...>
+    >>> detector_extractor2.detect_and_extract(img2) #doctest: +ELLIPSIS
+    <skimage.feature.orb.ORB object at 0x...>
     >>> matches = match_descriptors(detector_extractor1.descriptors,
     ...                             detector_extractor2.descriptors)
     >>> matches
