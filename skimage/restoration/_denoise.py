@@ -1,13 +1,14 @@
 # coding: utf-8
 import numpy as np
+from math import ceil
 from .. import img_as_float
 from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
-from .._shared.utils import _mode_deprecations
+from .._shared.utils import _mode_deprecations, skimage_deprecation, warn
 import warnings
 
 
-def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
-                      bins=10000, mode='constant', cval=0, multichannel=True):
+def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
+                      bins=10000, mode='constant', cval=0, multichannel=True, sigma_range=None):
     """Denoise image using bilateral filter.
 
     This is an edge-preserving and noise reducing denoising filter. It averages
@@ -19,7 +20,7 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
 
     Radiometric similarity is measured by the gaussian function of the euclidian
     distance between two color values and a certain standard deviation
-    (`sigma_range`).
+    (`sigma_color`).
 
     Parameters
     ----------
@@ -27,7 +28,8 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
         Input image, 2D grayscale or RGB.
     win_size : int
         Window size for filtering.
-    sigma_range : float
+        If win_size is not specified, it is calculated as max(5, 2*ceil(3*sigma_spatial)+1)
+    sigma_color : float
         Standard deviation for grayvalue/color distance (radiometric
         similarity). A larger value results in averaging of pixels with larger
         radiometric differences. Note, that the image will be converted using
@@ -66,7 +68,7 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
     >>> astro = astro[220:300, 220:320]
     >>> noisy = astro + 0.6 * astro.std() * np.random.random(astro.shape)
     >>> noisy = np.clip(noisy, 0, 1)
-    >>> denoised = denoise_bilateral(noisy, sigma_range=0.05, sigma_spatial=15)
+    >>> denoised = denoise_bilateral(noisy, sigma_color=0.05, sigma_spatial=15)
     """
     if multichannel:
         if image.ndim != 3:
@@ -99,9 +101,19 @@ def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
                              "``multichannel=True`` for 2-D RGB "
                              "images.".format(image.shape))
 
+    if sigma_range is not None:
+        warn('`sigma_range` has been deprecated in favor of '
+             '`sigma_color`. The `sigma_range` keyword argument '
+             'will be removed in v0.14', skimage_deprecation)
+
+        #If sigma_range is provided, assign it to sigma_color
+        sigma_color = sigma_range
+
+    if win_size is None:
+        win_size = max(5, 2*int(ceil(3*sigma_spatial))+1)
 
     mode = _mode_deprecations(mode)
-    return _denoise_bilateral(image, win_size, sigma_range, sigma_spatial,
+    return _denoise_bilateral(image, win_size, sigma_color, sigma_spatial,
                               bins, mode, cval)
 
 
