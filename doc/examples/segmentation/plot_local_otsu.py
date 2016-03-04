@@ -10,7 +10,7 @@ structuring element.
 
 The example compares the local threshold with the global threshold.
 
-.. Note: local is much slower than global thresholding
+.. note: local is much slower than global thresholding
 
 .. [1] http://en.wikipedia.org/wiki/Otsu's_method
 
@@ -37,6 +37,7 @@ global_otsu = img >= threshold_global_otsu
 fig, ax = plt.subplots(2, 2, figsize=(8, 5), sharex=True, sharey=True,
                        subplot_kw={'adjustable': 'box-forced'})
 ax0, ax1, ax2, ax3 = ax.ravel()
+plt.tight_layout()
 
 fig.colorbar(ax0.imshow(img, cmap=plt.cm.gray),
              ax=ax0, orientation='horizontal')

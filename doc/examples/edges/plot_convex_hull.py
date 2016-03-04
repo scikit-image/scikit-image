@@ -13,11 +13,11 @@ A good overview of the algorithm is given on `Steve Eddin's blog
 <http://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/>`__.
 
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage.morphology import convex_hull_image
-
 
 image = np.array(
     [[0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -31,6 +31,7 @@ original_image = np.copy(image)
 
 chull = convex_hull_image(image)
 image[chull] += 1
+
 # image is now:
 # [[ 0.  0.  0.  0.  0.  0.  0.  0.  0.]
 #  [ 0.  0.  0.  0.  2.  0.  0.  0.  0.]
@@ -39,15 +40,15 @@ image[chull] += 1
 #  [ 0.  2.  1.  1.  1.  1.  1.  2.  0.]
 #  [ 0.  0.  0.  0.  0.  0.  0.  0.  0.]]
 
+fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(12, 4))
+plt.tight_layout()
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 6))
+ax0.set_title('Original picture')
+ax0.imshow(original_image, cmap=plt.cm.gray, interpolation='nearest')
+ax0.set_xticks([]), ax0.set_yticks([])
 
-ax1.set_title('Original picture')
-ax1.imshow(original_image, cmap=plt.cm.gray, interpolation='nearest')
+ax1.set_title('Transformed picture')
+ax1.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
 ax1.set_xticks([]), ax1.set_yticks([])
-
-ax2.set_title('Transformed picture')
-ax2.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
-ax2.set_xticks([]), ax2.set_yticks([])
 
 plt.show()
