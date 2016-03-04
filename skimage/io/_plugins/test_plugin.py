@@ -1,6 +1,8 @@
 # This mock-up is called by ../tests/test_plugin.py
 # to verify the behaviour of the plugin infrastructure
 
+from skimage.io import ImageCollection
+
 
 def imread(fname, dtype=None):
     assert fname == 'test.png'
@@ -20,3 +22,8 @@ def imshow(arr, plugin_arg=None):
 def imread_collection(x, conserve_memory=True):
     assert conserve_memory == False
     assert x == '*.png'
+    return ImageCollection([0, 1], load_func=lambda x: x)
+
+
+def imshow_collection(x):
+    assert len(x) == 2

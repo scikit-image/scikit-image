@@ -56,9 +56,9 @@ Changing `size` resizes the picture.
 
 >>> picture.size = (45, 30)
 
-We can preview the changes we made to the picture with our earlier command:
+We can preview the changes we made to the picture with the ``compare`` command:
 
->>> picture.show()  # doctest: +SKIP
+>>> picture.compare()  # doctest: +SKIP
 
 You can iterate over pixels, which have RGB values between 0 and 255,
 and know their location in the picture.
@@ -87,6 +87,13 @@ True
 'jpeg'
 >>> picture.modified
 False
+
+An image can also be restored to its original state after modification:
+
+>>> picture[0:20, 0:20] = (0, 0, 0)
+>>> picture.compare()  # doctest: +SKIP
+>>> picture.reset()
+>>> picture.compare()  # doctest: +SKIP
 
 """
 from ._novice import Picture, open, colors, color_dict

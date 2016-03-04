@@ -7,6 +7,7 @@ from .. import io, img_as_ubyte
 from ..transform import resize
 from ..color import color_dict
 from ..io.util import file_or_url_context, is_url
+from ..io.collection import ImageCollection
 
 import six
 from six.moves.urllib import request
@@ -303,8 +304,9 @@ class Picture(object):
 
     @array.setter
     def array(self, array):
-        self._array = array
-        self._xy_array = array_to_xy_origin(array)
+        self._array = array.astype(np.uint8)
+        self._xy_array = array_to_xy_origin(self._array)
+        self._array_backup = self._array.copy()
 
     @property
     def xy_array(self):
@@ -328,6 +330,12 @@ class Picture(object):
         self._modified = False
         self._path = os.path.abspath(path)
         self._format = imghdr.what(path)
+
+    def reset(self):
+        """Reset image to its original state, removing modifications.
+
+        """
+        self.array = self._array_backup
 
     @property
     def path(self):
@@ -386,6 +394,13 @@ class Picture(object):
     def show(self):
         """Display the image."""
         io.imshow(self.array)
+        io.show()
+
+    def compare(self):
+        """Compare the image to its unmodified version."""
+        images = [self._array_backup, self.array]
+        ic = ImageCollection([0, 1], load_func=lambda x: images[x])
+        io.imshow_collection(images)
         io.show()
 
     def _makepixel(self, x, y):

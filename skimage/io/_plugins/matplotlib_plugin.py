@@ -147,6 +147,7 @@ def imshow(im, ax=None, show_cbar=None, **kwargs):
     if kwargs.get('cmap', None) == 'viridis':
         kwargs['cmap'] = viridis
     lo, hi, cmap = _get_display_range(im)
+
     kwargs.setdefault('interpolation', 'nearest')
     kwargs.setdefault('cmap', cmap)
     kwargs.setdefault('vmin', lo)
@@ -160,7 +161,19 @@ def imshow(im, ax=None, show_cbar=None, **kwargs):
         plt.colorbar(ax_im, cax=cax)
     ax.set_adjustable('box-forced')
     ax.get_figure().tight_layout()
+
     return ax_im
+
+
+def imshow_collection(ic, *args, **kwargs):
+    """Display all images in the collection.
+
+    """
+    fig, axes = plt.subplots(1, len(ic))
+    for n, image in enumerate(ic):
+        kwargs['ax'] = axes[n]
+        imshow(image, *args, **kwargs)
+
 
 imread = plt.imread
 show = plt.show
