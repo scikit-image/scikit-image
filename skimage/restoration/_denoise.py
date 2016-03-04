@@ -102,7 +102,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                              "images.".format(image.shape))
 
     if sigma_range is not None:
-        warn('`sigma_range` have been deprecated in favor of '
+        warn('`sigma_range` has been deprecated in favor of '
              '`sigma_color`. The `sigma_range` keyword argument '
              'will be removed in v0.14', skimage_deprecation)
 
