@@ -3,12 +3,12 @@ import numpy as np
 from math import ceil
 from .. import img_as_float
 from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
-from .._shared.utils import _mode_deprecations
+from .._shared.utils import _mode_deprecations, skimage_deprecation, warn
 import warnings
 
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
-                      bins=10000, mode='constant', cval=0, multichannel=True):
+                      bins=10000, mode='constant', cval=0, multichannel=True, sigma_range=None):
     """Denoise image using bilateral filter.
 
     This is an edge-preserving and noise reducing denoising filter. It averages
@@ -29,7 +29,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     win_size : int
         Window size for filtering.
         If win_size is not specified, it is calculated as max(5, 2*ceil(3*sigma_spatial)+1)
-    sigma_range : float
+    sigma_color : float
         Standard deviation for grayvalue/color distance (radiometric
         similarity). A larger value results in averaging of pixels with larger
         radiometric differences. Note, that the image will be converted using
@@ -100,6 +100,14 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                              "but input image has {0} dimension. Use "
                              "``multichannel=True`` for 2-D RGB "
                              "images.".format(image.shape))
+
+    if sigma_range is not None:
+        warn('`sigma_range` have been deprecated in favor of '
+             '`sigma_color`. The `sigma_range` keyword argument '
+             'will be removed in v0.14', skimage_deprecation)
+
+        #If sigma_range is provided, assign it to sigma_color
+        sigma_color = sigma_range
 
     if win_size is None:
         win_size = max(5, 2*int(ceil(3*sigma_spatial))+1)

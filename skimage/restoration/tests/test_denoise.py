@@ -4,7 +4,6 @@ from numpy.testing import run_module_suite, assert_raises, assert_equal
 from skimage import restoration, data, color, img_as_float, measure
 from skimage._shared._warnings import expected_warnings
 
-
 np.random.seed(1234)
 
 
@@ -212,6 +211,31 @@ def test_denoise_bilateral_nan():
     out = restoration.denoise_bilateral(img, multichannel=False)
     assert_equal(img, out)
 
+def test_denoise_sigma_range():
+    img = checkerboard_gray.copy()
+    # add some random noise
+    img += 0.5 * img.std() * np.random.rand(*img.shape)
+    img = np.clip(img, 0, 1)
+    out1 = restoration.denoise_bilateral(img, sigma_color=0.1,
+                                         sigma_spatial=20, multichannel=False)
+    with expected_warnings('`sigma_range` have been deprecated in favor of `sigma_color`. '
+                           'The `sigma_range` keyword argument will be removed in v0.14'):
+        out2 = restoration.denoise_bilateral(img, sigma_range=0.1,
+                                             sigma_spatial=20, multichannel=False)
+    assert_equal(out1, out2)
+
+def test_denoise_sigma_range_and_sigma_color():
+    img = checkerboard_gray.copy()
+    # add some random noise
+    img += 0.5 * img.std() * np.random.rand(*img.shape)
+    img = np.clip(img, 0, 1)
+    out1 = restoration.denoise_bilateral(img, sigma_color=0.1,
+                                         sigma_spatial=20, multichannel=False)
+    with expected_warnings('`sigma_range` have been deprecated in favor of `sigma_color`. '
+                           'The `sigma_range` keyword argument will be removed in v0.14'):
+        out2 = restoration.denoise_bilateral(img, sigma_color=0.2, sigma_range=0.1,
+                                             sigma_spatial=20, multichannel=False)
+    assert_equal(out1, out2)
 
 def test_nl_means_denoising_2d():
     img = np.zeros((40, 40))
