@@ -88,9 +88,11 @@ class BRIEF(DescriptorExtractor):
     >>> keypoints1 = corner_peaks(corner_harris(square1), min_distance=1)
     >>> keypoints2 = corner_peaks(corner_harris(square2), min_distance=1)
     >>> extractor = BRIEF(patch_size=5)
-    >>> extractor.extract(square1, keypoints1)
+    >>> extractor.extract(square1, keypoints1) #doctest: +ELLIPSIS
+    <skimage.feature.brief.BRIEF object at 0x...>
     >>> descriptors1 = extractor.descriptors
-    >>> extractor.extract(square2, keypoints2)
+    >>> extractor.extract(square2, keypoints2) #doctest: +ELLIPSIS
+    <skimage.feature.brief.BRIEF object at 0x...>
     >>> descriptors2 = extractor.descriptors
     >>> matches = match_descriptors(descriptors1, descriptors2)
     >>> matches
