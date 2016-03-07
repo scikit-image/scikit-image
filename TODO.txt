@@ -13,7 +13,6 @@ Version 0.14
   parameters `(dist, theta)`, LineModelND has the more general parameters
   `(origin, direction)`.
 * Remove deprecated old syntax support for ``skimage.transform.integrate``.
-* Remove deprecated ``skimage.data.lena`` and corresponding data files.
 * Remove deprecated ``skimage.measure.structural_similarity`` alias and
   deprecation warning test for this alias.
 * Remove deprecated ``sigma_range`` kwargs in ``skimage.restoration.denoise_bilateral``
