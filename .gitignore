@@ -30,3 +30,4 @@ doc/source/_static/random.js
 doc/release/_release_notes_for_docs.txt
 doc/gh-pages
 wheels
+skimage/morphology/_skeletonize_3d_cy.pyx
