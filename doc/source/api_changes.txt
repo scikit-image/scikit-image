@@ -4,6 +4,8 @@ Version 0.12
   the ``ntiles_*`` arguments.
 - The functions ``blob_dog``, ``blob_log`` and ``blob_doh`` now return float
   arrays instead of integer arrays.
+- ``transform.integrate`` now takes lists of tuples instead of integers
+  to define the window over which to integrate.
 - `reverse_map` parameter in `skimage.transform.warp` has been removed.
 - `enforce_connectivity` in `skimage.segmentation.slic` defaults to ``True``.
 - `skimage.measure.fit.BaseModel._params`,
