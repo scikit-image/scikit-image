@@ -67,6 +67,14 @@ API Changes
   float  arrays instead of integer arrays.
 - ``transform.integrate`` now takes lists of tuples instead of integers
   to define the window over which to integrate.
+- `reverse_map` parameter in `skimage.transform.warp` has been removed.
+- `enforce_connectivity` in `skimage.segmentation.slic` defaults to ``True``.
+- `skimage.measure.fit.BaseModel._params`,
+  `skimage.transform.ProjectiveTransform._matrix`,
+  `skimage.transform.PolynomialTransform._params`,
+  `skimage.transform.PiecewiseAffineTransform.affines_*` attributes
+  have been removed.
+- `skimage.filters.denoise_*` have moved to `skimage.restoration.denoise_*`.
 
 Deprecations
 ------------
