@@ -1,7 +1,7 @@
-Announcement: scikit-image 0.12.0
-=================================
+Announcement: scikit-image 0.12
+===============================
 
-We're happy to announce the release of scikit-image v0.12.0!
+We're happy to announce the release of scikit-image v0.12!
 
 scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
@@ -22,8 +22,8 @@ For this release, we merged over 200 pull requests with bug fixes,
 cleanups, improved documentation and new features.  Highlights
 include:
 
-
-- Parallelization framework using ``dask``:``skimage.util.apply_parallel`` 
+- 3D skeletonization (#1923)
+- Parallelization framework using ``dask``:``skimage.util.apply_parallel``
   (#1493)
 - Laplacian operator ``filters.laplace`` (#1763)
 - Synthetic 2-D and 3-D binary data with rounded blobs (#1485)
@@ -53,12 +53,10 @@ include:
 - We fixed an issue related to incorrect propagation in plateaus in
   ``segmentation.watershed``
 
-
-
 Documentation:
 
 - New organization of gallery of examples in sections
-- More frequent update of online documentation
+- More frequent (automated) updates of online documentation
 
 API Changes
 -----------
@@ -68,7 +66,7 @@ API Changes
 - The functions ``blob_dog``, ``blob_log`` and ``blob_doh`` now return
   float  arrays instead of integer arrays.
 - ``transform.integrate`` now takes lists of tuples instead of integers
-  to define the window over which to integrate. 
+  to define the window over which to integrate.
 
 Deprecations
 ------------
@@ -152,5 +150,4 @@ Contributors to this release
 - John Wiggins
 - Robin Wilson
 - Olivia Wilson
-
 
