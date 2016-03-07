@@ -143,11 +143,11 @@ class ImageCollection(object):
     >>> import skimage.io as io
     >>> from skimage import data_dir
 
-    >>> coll = io.ImageCollection(data_dir + '/lena*.png')
+    >>> coll = io.ImageCollection(data_dir + '/chess*.png')
     >>> len(coll)
     2
     >>> coll[0].shape
-    (512, 512, 3)
+    (200, 200)
 
     >>> ic = io.ImageCollection('/tmp/work/*.png:/tmp/other/*.jpg')
 

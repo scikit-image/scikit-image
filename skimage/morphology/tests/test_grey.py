@@ -4,66 +4,46 @@ import numpy as np
 from numpy import testing
 from scipy import ndimage as ndi
 
-from skimage import data_dir, img_as_uint
+from skimage import color, data, transform
+from skimage import img_as_uint, img_as_ubyte, data_dir
 from skimage.morphology import grey, selem
 from skimage._shared._warnings import expected_warnings
 
 
-lena = np.load(os.path.join(data_dir, 'lena_GRAY_U8.npy'))
-bw_lena = lena > 100
-
-
 class TestMorphology():
 
-    def morph_worker(self, img, fn, morph_func, strel_func):
-        matlab_results = np.load(os.path.join(data_dir, fn))
-        k = 0
-        for arrname in sorted(matlab_results):
-            expected_result = matlab_results[arrname]
-            mask = strel_func(k)
-            actual_result = morph_func(lena, mask)
-            testing.assert_equal(expected_result, actual_result)
-            k = k + 1
+    # These expected outputs were generated with skimage v0.12.1
+    # using:
+    #
+    #   from skimage.morphology.tests.test_grey import TestMorphology
+    #   import numpy as np
+    #   output = TestMorphology()._build_expected_output()
+    #   np.savez_compressed('gray_morph_output.npz', **output)
 
-    def test_erode_diamond(self):
-        self.morph_worker(lena, "diamond-erode-matlab-output.npz",
-                          grey.erosion, selem.diamond)
 
-    def test_dilate_diamond(self):
-        self.morph_worker(lena, "diamond-dilate-matlab-output.npz",
-                          grey.dilation, selem.diamond)
+    def _build_expected_output(self):
+        funcs = (grey.erosion, grey.dilation, grey.opening, grey.closing,
+                 grey.white_tophat, grey.black_tophat)
+        selems_2D = (selem.square, selem.diamond,
+                     selem.disk, selem.star)
 
-    def test_open_diamond(self):
-        self.morph_worker(lena, "diamond-open-matlab-output.npz",
-                          grey.opening, selem.diamond)
+        with expected_warnings(['Possible precision loss']):
+            image = img_as_ubyte(transform.downscale_local_mean(
+                color.rgb2gray(data.coffee()), (20, 20)))
 
-    def test_close_diamond(self):
-        self.morph_worker(lena, "diamond-close-matlab-output.npz",
-                          grey.closing, selem.diamond)
+        output = {}
+        for n in range(1, 4):
+            for strel in selems_2D:
+                for func in funcs:
+                    key = '{0}_{1}_{2}'.format(strel.__name__, n, func.__name__)
+                    output[key] = func(image, strel(n))
 
-    def test_tophat_diamond(self):
-        self.morph_worker(lena, "diamond-tophat-matlab-output.npz",
-                          grey.white_tophat, selem.diamond)
+        return output
 
-    def test_bothat_diamond(self):
-        self.morph_worker(lena, "diamond-bothat-matlab-output.npz",
-                          grey.black_tophat, selem.diamond)
-
-    def test_erode_disk(self):
-        self.morph_worker(lena, "disk-erode-matlab-output.npz",
-                          grey.erosion, selem.disk)
-
-    def test_dilate_disk(self):
-        self.morph_worker(lena, "disk-dilate-matlab-output.npz",
-                          grey.dilation, selem.disk)
-
-    def test_open_disk(self):
-        self.morph_worker(lena, "disk-open-matlab-output.npz",
-                          grey.opening, selem.disk)
-
-    def test_close_disk(self):
-        self.morph_worker(lena, "disk-close-matlab-output.npz",
-                          grey.closing, selem.disk)
+    def test_gray_morphology(self):
+        expected = dict(np.load(os.path.join(data_dir, 'gray_morph_output.npz')))
+        calculated = self._build_expected_output()
+        testing.assert_equal(expected, calculated)
 
 
 class TestEccentricStructuringElements():
@@ -119,6 +99,7 @@ class TestEccentricStructuringElements():
             tophat = grey.black_tophat(self.white_pixel, s)
             assert np.all(tophat == 0)
 
+
 def test_default_selem():
     functions = [grey.erosion, grey.dilation,
                  grey.opening, grey.closing,
@@ -142,6 +123,7 @@ def test_default_selem():
         im_test = function(image)
         yield testing.assert_array_equal, im_expected, im_test
 
+
 def test_3d_fallback_default_selem():
     # 3x3x3 cube inside a 7x7x7 image:
     image = np.zeros((7, 7, 7), np.bool)
@@ -154,6 +136,7 @@ def test_3d_fallback_default_selem():
     image_expected[2:5, 2:5, 2:5] = ndi.generate_binary_structure(3, 1)
     testing.assert_array_equal(opened, image_expected)
 
+
 def test_3d_fallback_cube_selem():
     # 3x3x3 cube inside a 7x7x7 image:
     image = np.zeros((7, 7, 7), np.bool)
@@ -164,6 +147,7 @@ def test_3d_fallback_cube_selem():
     for function in [grey.closing, grey.opening]:
         new_image = function(image, cube)
         yield testing.assert_array_equal, new_image, image
+
 
 def test_3d_fallback_white_tophat():
     image = np.zeros((7, 7, 7), dtype=bool)
@@ -178,6 +162,7 @@ def test_3d_fallback_white_tophat():
         image_expected = ndi.white_tophat(image,footprint=footprint)
     testing.assert_array_equal(new_image, image_expected)
 
+
 def test_3d_fallback_black_tophat():
     image = np.ones((7, 7, 7), dtype=bool)
     image[2, 2:4, 2:4] = 0
@@ -190,6 +175,7 @@ def test_3d_fallback_black_tophat():
     with expected_warnings(['operator.*deprecated|\A\Z']):
         image_expected = ndi.black_tophat(image,footprint=footprint)
     testing.assert_array_equal(new_image, image_expected)
+
 
 def test_2d_ndimage_equivalence():
     image = np.zeros((9, 9), np.uint8)
@@ -206,6 +192,7 @@ def test_2d_ndimage_equivalence():
 
     testing.assert_array_equal(opened, ndimage_opened)
     testing.assert_array_equal(closed, ndimage_closed)
+
 
 # float test images
 im = np.array([[ 0.55,  0.72,  0.6 ,  0.54,  0.42],
@@ -246,8 +233,9 @@ def test_float():
 
 
 def test_uint16():
-    im16, eroded16, dilated16, opened16, closed16 = (
-                    map(img_as_uint, [im, eroded, dilated, opened, closed]))
+    with expected_warnings(['Possible precision loss']):
+        im16, eroded16, dilated16, opened16, closed16 = (
+            map(img_as_uint, [im, eroded, dilated, opened, closed]))
     np.testing.assert_allclose(grey.erosion(im16), eroded16)
     np.testing.assert_allclose(grey.dilation(im16), dilated16)
     np.testing.assert_allclose(grey.opening(im16), opened16)

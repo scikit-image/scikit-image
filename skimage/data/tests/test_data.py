@@ -1,12 +1,11 @@
 import numpy as np
 import skimage.data as data
-from numpy.testing import assert_equal, assert_almost_equal
+from numpy.testing import assert_equal, assert_almost_equal, assert_raises
 
 
-def test_lena():
-    """ Test that "Lena" image can be loaded. """
-    lena = data.lena()
-    assert_equal(lena.shape, (512, 512, 3))
+def test_lena_removed():
+    """ Test that "Lena" has been removed """
+    assert_raises(RuntimeError, data.lena)
 
 
 def test_astronaut():
