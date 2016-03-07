@@ -35,8 +35,8 @@ class TestMorphology():
         for n in range(1, 4):
             for strel in selems_2D:
                 for func in funcs:
-                    output['{}_{}_{}'.format(strel.__name__, n, func.__name__)]\
-                      = func(image, strel(n))
+                    key = '{0}_{1}_{2}'.format(strel.__name__, n, func.__name__)
+                    output[key] = func(image, strel(n))
 
         return output
 
