@@ -1,0 +1,68 @@
+--- a/skimage/util/apply_parallel.py
++++ b/skimage/util/apply_parallel.py
+@@ -4,6 +4,13 @@
+ __all__ = ['apply_parallel']
+ 
+ 
++try:
++    import dask.array as da
++    dask_available = True
++except ImportError:
++    dask_available = False
++
++
+ def _get_chunks(shape, ncpu):
+     """Split the array into equal sized chunks based on the number of
+     available processors. The last chunk in each dimension absorbs the
+@@ -82,7 +89,9 @@
+     equivalent `dask` boundary modes 'reflect', 'periodic' and 'nearest',
+     respectively.
+     """
+-    import dask.array as da
++    if not dask_available:
++        raise RuntimeError("Could not import 'dask'.  Please install "
++                           "using 'pip install dask'")
+ 
+     if chunks is None:
+         shape = array.shape
+--- a/skimage/util/tests/test_apply_parallel.py
++++ b/skimage/util/tests/test_apply_parallel.py
+@@ -2,11 +2,13 @@
+ 
+ import numpy as np
+ from numpy.testing import assert_array_almost_equal
++from numpy.testing.decorators import skipif
+ 
+ from skimage.filters import threshold_adaptive, gaussian
+-from skimage.util.apply_parallel import apply_parallel
++from skimage.util.apply_parallel import apply_parallel, dask_available
+ 
+ 
++@skipif(not dask_available)
+ def test_apply_parallel():
+     # data
+     a = np.arange(144).reshape(12, 12).astype(float)
+@@ -28,6 +30,7 @@
+     assert_array_almost_equal(result2, expected2)
+ 
+ 
++@skipif(not dask_available)
+ def test_no_chunks():
+     a = np.ones(1 * 4 * 8 * 9).reshape(1, 4, 8, 9)
+ 
+@@ -40,6 +43,7 @@
+     assert_array_almost_equal(result, expected)
+ 
+ 
++@skipif(not dask_available)
+ def test_apply_parallel_wrap():
+     def wrapped(arr):
+         return gaussian(arr, 1, mode='wrap')
+@@ -50,6 +54,7 @@
+     assert_array_almost_equal(result, expected)
+ 
+ 
++@skipif(not dask_available)
+ def test_apply_parallel_nearest():
+     def wrapped(arr):
+         return gaussian(arr, 1, mode='nearest')
