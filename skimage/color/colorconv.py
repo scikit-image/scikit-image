@@ -779,6 +779,7 @@ def gray2rgb(image, alpha=None):
     else:
         raise ValueError("Input image expected to be RGB, RGBA or gray.")
 
+grey2rgb = gray2rgb
 
 def xyz2lab(xyz, illuminant="D65", observer="2"):
     """XYZ to CIE-LAB color space conversion.
