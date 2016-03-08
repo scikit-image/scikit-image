@@ -92,6 +92,12 @@ def inpaint_biharmonic(img, mask, multichannel=False):
     out : (M[, N[, ..., P]][, C]) ndarray
         Input image with masked pixels inpainted.
 
+    References
+    ----------
+    .. [1]  N.S.Hoang, S.B.Damelin, "On surface completion and image inpainting
+            by biharmonic functions: numerical aspects",
+            http://www.ima.umn.edu/~damelin/biharmonic
+
     Examples
     --------
     >>> img = np.tile(np.square(np.linspace(0, 1, 5)), (5, 1))
@@ -100,13 +106,6 @@ def inpaint_biharmonic(img, mask, multichannel=False):
     >>> mask[1, 3:] = 1
     >>> mask[0, 4:] = 1
     >>> out = inpaint_biharmonic(img, mask)
-
-    References
-    ----------
-    Algorithm is based on:
-    .. [1]  N.S.Hoang, S.B.Damelin, "On surface completion and image inpainting
-            by biharmonic functions: numerical aspects",
-            http://www.ima.umn.edu/~damelin/biharmonic
     """
 
     if img.ndim < 1:
