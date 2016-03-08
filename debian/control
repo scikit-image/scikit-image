@@ -3,26 +3,25 @@ Section: python
 Priority: optional
 Maintainer: Stefan van der Walt <stefan@sun.ac.za>
 Uploaders: Yaroslav Halchenko <debian@onerussian.com>
-Build-Depends: cython (>= 0.17),
-               cython3 (>= 0.17),
+Build-Depends: cython (>= 0.23),
+               cython3 (>= 0.23),
                debhelper (>= 9~),
-               libfreeimage3,
                libjs-twitter-bootstrap,
                python-all-dev (>= 2.6.6-3~),
-               python-matplotlib (>= 1.0),
+               python-matplotlib (>= 1.3.1),
                python-nose,
-               python-numpy (>= 1.6.0),
-               python-pil | python-imaging,
+               python-numpy (>= 1.7.2),
+               python-pil (>= 1.7.8) | python-imaging,
                python-scipy (>= 0.10),
                python-networkx (>= 1.8),
                python-setuptools,
-               python-six (>= 1.3.0),
-               python-sphinx (>= 1.0.7+dfsg-1~),
+               python-six (>= 1.4),
+               python-sphinx (>= 1.3.0),
                python3-all-dev,
-               python3-matplotlib | python-matplotlib (<< 1.2.0~),
+               python3-matplotlib (>= 1.3.1),
                python3-nose,
-               python3-numpy,
-               python3-pil | python3-imaging,
+               python3-numpy (>= 1.7.2),
+               python3-pil (>= 1.7.8) | python3-imaging,
                python3-scipy,
                python3-networkx (>= 1.8),
                python3-setuptools,
@@ -39,18 +38,16 @@ XS-Testsuite: autopkgtest
 
 Package: python-skimage
 Architecture: all
-Depends: libfreeimage3,
-         python-numpy,
+Depends: python-numpy,
          python-scipy (>= 0.10),
-         python-six (>= 1.3.0),
+         python-six (>= 1.4),
+         python-matplotlib (>= 1.3.1),
+         python-pil (>= 1.7.8) | python-imaging,
+         python-networkx (>= 1.8),
          python-skimage-lib (>= ${source:Version}),
          ${misc:Depends},
          ${python:Depends}
-Recommends: python-imaging,
-            python-matplotlib (>= 1.0),
-            python-networkx (>= 1.8),
-            python-nose,
-            python-pil,
+Recommends: python-nose,
             python-qt4
 Suggests: python-opencv, python-skimage-doc
 Description: Python modules for image processing
@@ -62,18 +59,16 @@ Description: Python modules for image processing
 
 Package: python3-skimage
 Architecture: all
-Depends: libfreeimage3,
-         python3-numpy,
+Depends: python3-numpy (>= 1.7.2),
          python3-scipy (>= 0.10),
-         python3-six (>= 1.3.0),
+         python3-six (>= 1.4),
+         python3-matplotlib (>= 1.3.1),
+         python3-pil (>= 1.7.8) | python3-imaging,
+         python3-networkx (>= 1.8),
          python3-skimage-lib (>= ${source:Version}),
          ${misc:Depends},
          ${python3:Depends}
-Recommends: python3-imaging,
-            python3-matplotlib (>= 1.0),
-            python3-networkx (>= 1.8),
-            python3-nose,
-            python3-pil
+Recommends: python3-nose
 Suggests: python-skimage-doc
 Description: Python 3 modules for image processing
  scikit-image is a collection of image processing algorithms for

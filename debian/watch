@@ -1,2 +1,3 @@
 version=3
-https://github.com/scikit-image/scikit-image/tags .*/archive/v(\d[\d\.]+).tar.gz
+opts="filenamemangle=s/(?:.*)?v?(\d[\d\.]*)\.tar\.gz/scikit-image-$1.tar.gz/" \
+  https://github.com/scikit-image/scikit-image/tags (?:.*/)?v?(\d[\d\.]*)\.tar\.gz
