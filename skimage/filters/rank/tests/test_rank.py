@@ -8,6 +8,7 @@ from skimage import data, util, morphology
 from skimage.morphology import grey, disk
 from skimage.filters import rank
 from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import test_parallel
 
 
 def test_all():
@@ -15,7 +16,9 @@ def test_all():
         check_all()
 
 
+@test_parallel()
 def check_all():
+    np.random.seed(0)
     image = np.random.rand(25, 25)
     selem = morphology.disk(1)
     refs = np.load(os.path.join(skimage.data_dir, "rank_filter_tests.npz"))
@@ -36,6 +39,8 @@ def check_all():
                  rank.maximum(image, selem))
     assert_equal(refs["mean"],
                  rank.mean(image, selem))
+    assert_equal(refs["geometric_mean"],
+                 rank.geometric_mean(image, selem)),
     assert_equal(refs["mean_percentile"],
                  rank.mean_percentile(image, selem))
     assert_equal(refs["mean_bilateral"],
@@ -99,6 +104,13 @@ def test_random_sizes():
         rank.mean(image=image8, selem=elem, mask=mask, out=out8,
                   shift_x=+1, shift_y=+1)
         assert_equal(image8.shape, out8.shape)
+        
+        rank.geometric_mean(image=image8, selem=elem, mask=mask, out=out8,
+                            shift_x=0, shift_y=0)
+        assert_equal(image8.shape, out8.shape)
+        rank.geometric_mean(image=image8, selem=elem, mask=mask, out=out8,
+                            shift_x=+1, shift_y=+1)
+        assert_equal(image8.shape, out8.shape)
 
         image16 = np.ones((m, n), dtype=np.uint16)
         out16 = np.empty_like(image8, dtype=np.uint16)
@@ -107,6 +119,13 @@ def test_random_sizes():
         assert_equal(image16.shape, out16.shape)
         rank.mean(image=image16, selem=elem, mask=mask, out=out16,
                   shift_x=+1, shift_y=+1)
+        assert_equal(image16.shape, out16.shape)
+
+        rank.geometric_mean(image=image16, selem=elem, mask=mask, out=out16,
+                            shift_x=0, shift_y=0)
+        assert_equal(image16.shape, out16.shape)
+        rank.geometric_mean(image=image16, selem=elem, mask=mask, out=out16,
+                            shift_x=+1, shift_y=+1)
         assert_equal(image16.shape, out16.shape)
 
         rank.mean_percentile(image=image16, mask=mask, out=out16,
@@ -160,7 +179,7 @@ def test_bitdepth():
             expected = []
         with expected_warnings(expected):
             rank.mean_percentile(image=image, selem=elem, mask=mask,
-                               out=out, shift_x=0, shift_y=0, p0=.1, p1=.9)
+                                 out=out, shift_x=0, shift_y=0, p0=.1, p1=.9)
 
 
 def test_population():
@@ -218,6 +237,8 @@ def test_pass_on_bitdepth():
     elem = np.ones((3, 3), dtype=np.uint8)
     out = np.empty_like(image)
     mask = np.ones(image.shape, dtype=np.uint8)
+    with expected_warnings(["Bitdepth of"]):
+        rank.maximum(image=image, selem=elem, out=out, mask=mask)
 
 
 def test_inplace_output():
@@ -279,7 +300,7 @@ def test_compare_8bit_unsigned_vs_signed():
     # of dynamic) should be identical
 
     # Create signed int8 image that and convert it to uint8
-    image = img_as_ubyte(data.camera())
+    image = img_as_ubyte(data.camera())[::2, ::2]
     image[image > 127] = 0
     image_s = image.astype(np.int8)
     with expected_warnings(['sign loss', 'precision loss']):
@@ -287,8 +308,8 @@ def test_compare_8bit_unsigned_vs_signed():
         assert_equal(image_u, img_as_ubyte(image_s))
 
     methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
-               'mean', 'subtract_mean', 'median', 'minimum', 'modal',
-               'enhance_contrast', 'pop', 'threshold', 'tophat']
+               'mean', 'geometric_mean', 'subtract_mean', 'median', 'minimum', 
+               'modal', 'enhance_contrast', 'pop', 'threshold', 'tophat']
 
     for method in methods:
         func = getattr(rank, method)
@@ -303,7 +324,7 @@ def test_compare_8bit_vs_16bit():
     # filters applied on 8-bit image ore 16-bit image (having only real 8-bit
     # of dynamic) should be identical
 
-    image8 = util.img_as_ubyte(data.camera())
+    image8 = util.img_as_ubyte(data.camera())[::2, ::2]
     image16 = image8.astype(np.uint16)
     assert_equal(image8, image16)
 
@@ -333,6 +354,9 @@ def test_trivial_selem8():
     rank.mean(image=image, selem=elem, out=out, mask=mask,
               shift_x=0, shift_y=0)
     assert_equal(image, out)
+    rank.geometric_mean(image=image, selem=elem, out=out, mask=mask,
+                        shift_x=0, shift_y=0)
+    assert_equal(image, out)
     rank.minimum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=0, shift_y=0)
     assert_equal(image, out)
@@ -355,6 +379,9 @@ def test_trivial_selem16():
     elem = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=np.uint8)
     rank.mean(image=image, selem=elem, out=out, mask=mask,
               shift_x=0, shift_y=0)
+    assert_equal(image, out)
+    rank.geometric_mean(image=image, selem=elem, out=out, mask=mask,
+                        shift_x=0, shift_y=0)
     assert_equal(image, out)
     rank.minimum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=0, shift_y=0)
@@ -402,6 +429,9 @@ def test_smallest_selem16():
     rank.mean(image=image, selem=elem, out=out, mask=mask,
               shift_x=0, shift_y=0)
     assert_equal(image, out)
+    rank.geometric_mean(image=image, selem=elem, out=out, mask=mask,
+                        shift_x=0, shift_y=0)
+    assert_equal(image, out)
     rank.minimum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=0, shift_y=0)
     assert_equal(image, out)
@@ -426,6 +456,9 @@ def test_empty_selem():
 
     rank.mean(image=image, selem=elem, out=out, mask=mask,
               shift_x=0, shift_y=0)
+    assert_equal(res, out)
+    rank.geometric_mean(image=image, selem=elem, out=out, mask=mask,
+                        shift_x=0, shift_y=0)
     assert_equal(res, out)
     rank.minimum(image=image, selem=elem, out=out, mask=mask,
                  shift_x=0, shift_y=0)
@@ -483,13 +516,13 @@ def test_entropy():
 
     # 12 bit per pixel
     selem = np.ones((64, 64), dtype=np.uint8)
-    data = np.tile(
-        np.reshape(np.arange(4096), (64, 64)), (2, 2)).astype(np.uint16)
+    data = np.zeros((65, 65), dtype=np.uint16)
+    data[:64, :64] = np.reshape(np.arange(4096), (64, 64))
     with expected_warnings(['Bitdepth of 11']):
         assert(np.max(rank.entropy(data, selem)) == 12)
 
     # make sure output is of dtype double
-    with expected_warnings(['Bitdepth of 11']): 
+    with expected_warnings(['Bitdepth of 11']):
         out = rank.entropy(data, np.ones((16, 16), dtype=np.uint8))
     assert out.dtype == np.double
 
@@ -508,6 +541,9 @@ def test_selem_dtypes():
         elem = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=dtype)
         rank.mean(image=image, selem=elem, out=out, mask=mask,
                   shift_x=0, shift_y=0)
+        assert_equal(image, out)
+        rank.geometric_mean(image=image, selem=elem, out=out, mask=mask,
+                            shift_x=0, shift_y=0)
         assert_equal(image, out)
         rank.mean_percentile(image=image, selem=elem, out=out, mask=mask,
                              shift_x=0, shift_y=0)
@@ -529,6 +565,7 @@ def test_16bit():
             assert rank.minimum(image, selem)[10, 10] == 0
             assert rank.maximum(image, selem)[10, 10] == value
             assert rank.mean(image, selem)[10, 10] == int(value / selem.size)
+
 
 def test_bilateral():
     image = np.zeros((21, 21), dtype=np.uint16)

@@ -22,9 +22,6 @@ How to make a new release of ``skimage``
   - Edit ``doc/source/_static/docversions.js`` and commit
   - Build a clean version of the docs.  Run ``python setup.py install`` in the
     root dir, then ``rm -rf build; make html`` in the docs.
-  - Run ``make html`` again to copy the newly generated ``random.js`` into
-    place.  Double check ``random.js``, otherwise the skimage.org front
-    page gets broken!
   - Build using ``make gh-pages``.
   - Update the symlink to ``stable``.
   - Push upstream: ``git push origin gh-pages`` in ``doc/gh-pages``.

@@ -335,6 +335,34 @@ def test_vprewitt_horizontal():
     assert_allclose(result, 0)
 
 
+def test_laplace_zeros():
+    """Laplace on a square image."""
+    # Create a synthetic 2D image
+    image = np.zeros((9, 9))
+    image[3:-3, 3:-3] = 1
+    result = filters.laplace(image)
+    res_chk = np.array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+                        [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+                        [ 0.,  0.,  0., -1., -1., -1.,  0.,  0.,  0.],
+                        [ 0.,  0., -1.,  2.,  1.,  2., -1.,  0.,  0.],
+                        [ 0.,  0., -1.,  1.,  0.,  1., -1.,  0.,  0.],
+                        [ 0.,  0., -1.,  2.,  1.,  2., -1.,  0.,  0.],
+                        [ 0.,  0.,  0., -1., -1., -1.,  0.,  0.,  0.],
+                        [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+                        [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
+    assert_allclose(result, res_chk)
+
+
+def test_laplace_mask():
+    """Laplace on a masked array should be zero."""
+    # Create a synthetic 2D image
+    image = np.zeros((9, 9))
+    image[3:-3, 3:-3] = 1
+    # Define the mask
+    result = filters.laplace(image, ksize=3, mask=np.zeros((9, 9), bool))
+    assert (np.all(result == 0))
+
+
 def test_horizontal_mask_line():
     """Horizontal edge filters mask pixels surrounding input mask."""
     vgrad, _ = np.mgrid[:1:11j, :1:11j]  # vertical gradient with spacing 0.1
@@ -350,7 +378,6 @@ def test_horizontal_mask_line():
     for grad_func in (filters.prewitt_h, filters.sobel_h, filters.scharr_h):
         result = grad_func(vgrad, mask)
         yield assert_close, result, expected
-
 
 def test_vertical_mask_line():
     """Vertical edge filters mask pixels surrounding input mask."""

@@ -6,18 +6,18 @@ from numpy.testing import (
 
 from tempfile import NamedTemporaryFile
 
-from ... import data_dir
-from .. import (imread, imsave, use_plugin, reset_plugins,
-                        Image as ioImage)
+from ... import data_dir, img_as_float
+from .. import imread, imsave, use_plugin, reset_plugins
 from ..._shared.testing import mono_check, color_check
 from ..._shared._warnings import expected_warnings
+from ..._shared._tempfile import temporary_file
 
 from six import BytesIO
 
 from PIL import Image
 from .._plugins.pil_plugin import (
     pil_to_ndarray, ndarray_to_pil, _palette_is_grayscale)
-from ...measure import structural_similarity as ssim
+from ...measure import compare_ssim as ssim
 from ...color import rgb2lab
 
 
@@ -39,6 +39,15 @@ def setup_module(self):
     except ImportError:
         pass
 
+def test_png_round_trip():
+    f = NamedTemporaryFile(suffix='.png')
+    fname = f.name
+    f.close()
+    I = np.eye(3)
+    imsave(fname, I)
+    Ip = img_as_float(imread(fname))
+    os.remove(fname)
+    assert np.sum(np.abs(Ip-I)) < 1e-3
 
 def test_imread_flatten():
     # a color image is flattened
@@ -50,11 +59,51 @@ def test_imread_flatten():
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 
+def test_imread_separate_channels():
+    # Test that imread returns RGBA values contiguously even when they are
+    # stored in separate planes.
+    x = np.random.rand(3, 16, 8)
+    f = NamedTemporaryFile(suffix='.tif')
+    fname = f.name
+    f.close()
+    imsave(fname, x)
+    img = imread(fname)
+    os.remove(fname)
+    assert img.shape == (16, 8, 3), img.shape
+
+
+def test_imread_multipage_rgb_tif():
+    img = imread(os.path.join(data_dir, 'multipage_rgb.tif'))
+    assert img.shape == (2, 10, 10, 3), img.shape
+
+
 def test_imread_palette():
     img = imread(os.path.join(data_dir, 'palette_gray.png'))
     assert img.ndim == 2
     img = imread(os.path.join(data_dir, 'palette_color.png'))
     assert img.ndim == 3
+
+
+def test_imread_index_png_with_alpha():
+    # The file `foo3x5x4indexed.png` was created with this array
+    # (3x5 is (height)x(width)):
+    data = np.array([[[127, 0, 255, 255],
+                      [127, 0, 255, 255],
+                      [127, 0, 255, 255],
+                      [127, 0, 255, 255],
+                      [127, 0, 255, 255]],
+                     [[192, 192, 255, 0],
+                      [192, 192, 255, 0],
+                      [0, 0, 255, 0],
+                      [0, 0, 255, 0],
+                      [0, 0, 255, 0]],
+                     [[0, 31, 255, 255],
+                      [0, 31, 255, 255],
+                      [0, 31, 255, 255],
+                      [0, 31, 255, 255],
+                      [0, 31, 255, 255]]], dtype=np.uint8)
+    img = imread(os.path.join(data_dir, 'foo3x5x4indexed.png'))
+    assert_array_equal(img, data)
 
 
 def test_palette_is_gray():
@@ -79,22 +128,19 @@ def test_imread_uint16():
     assert_array_almost_equal(img, expected)
 
 
-def test_repr_png():
-    img_path = os.path.join(data_dir, 'camera.png')
-    original_img = ioImage(imread(img_path))
-    original_img_str = original_img._repr_png_()
-
-    with NamedTemporaryFile(suffix='.png') as temp_png:
-        temp_png.write(original_img_str)
-        temp_png.seek(0)
-        round_trip = imread(temp_png)
-
-    assert np.all(original_img == round_trip)
-
-
 def test_imread_truncated_jpg():
     assert_raises((IOError, ValueError), imread,
                   os.path.join(data_dir, 'truncated.jpg'))
+
+
+def test_jpg_quality_arg():
+    chessboard = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
+    with temporary_file(suffix='.jpg') as jpg:
+        imsave(jpg, chessboard, quality=95)
+        im = imread(jpg)
+        sim = ssim(chessboard, im,
+                   dynamic_range=chessboard.max() - chessboard.min())
+        assert sim > 0.99
 
 
 def test_imread_uint16_big_endian():
@@ -106,12 +152,10 @@ def test_imread_uint16_big_endian():
 
 class TestSave:
     def roundtrip_file(self, x):
-        f = NamedTemporaryFile(suffix='.png')
-        fname = f.name
-        f.close()
-        imsave(fname, x)
-        y = imread(fname)
-        return y
+        with temporary_file(suffix='.png') as fname:
+            imsave(fname, x)
+            y = imread(fname)
+            return y
 
     def roundtrip_pil_image(self, x):
         pil_image = ndarray_to_pil(x)
@@ -147,7 +191,7 @@ def test_imsave_filelike():
     s = BytesIO()
 
     # save to file-like object
-    with expected_warnings(['precision loss|unclosed file',
+    with expected_warnings(['precision loss',
                             'is a low contrast image']):
         imsave(s, image)
 
@@ -174,15 +218,14 @@ def test_all_color():
 
 def test_all_mono():
     mono_check('pil')
-    mono_check('pil', 'tiff')
 
 
 def test_multi_page_gif():
-    img = imread(os.path.join(data_dir, 'no_time_for_that.gif'))
-    assert img.shape == (24, 280, 500, 3), img.shape
-    img2 = imread(os.path.join(data_dir, 'no_time_for_that.gif'),
+    img = imread(os.path.join(data_dir, 'no_time_for_that_tiny.gif'))
+    assert img.shape == (24, 25, 14, 3), img.shape
+    img2 = imread(os.path.join(data_dir, 'no_time_for_that_tiny.gif'),
                   img_num=5)
-    assert img2.shape == (280, 500, 3)
+    assert img2.shape == (25, 14, 3)
     assert_allclose(img[5], img2)
 
 
@@ -211,28 +254,6 @@ def test_cmyk():
         refi = np.ascontiguousarray(ref_lab[:, :, i])
         sim = ssim(refi, newi, dynamic_range=refi.max() - refi.min())
         assert sim > 0.99
-
-
-class TestSaveTIF:
-    def roundtrip(self, dtype, x):
-        f = NamedTemporaryFile(suffix='.tif')
-        fname = f.name
-        f.close()
-        imsave(fname, x)
-        y = imread(fname)
-        assert_array_equal(x, y)
-
-    def test_imsave_roundtrip(self):
-        for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
-            for dtype in (np.uint8, np.uint16, np.int16, np.float32,
-                          np.float64, np.bool):
-                x = np.random.rand(*shape)
-
-                if not np.issubdtype(dtype, float) and not dtype == np.bool:
-                    x = (x * np.iinfo(dtype).max).astype(dtype)
-                else:
-                    x = x.astype(dtype)
-                yield self.roundtrip, dtype, x
 
 if __name__ == "__main__":
     run_module_suite()

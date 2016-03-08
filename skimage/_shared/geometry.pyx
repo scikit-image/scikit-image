@@ -5,7 +5,8 @@
 
 
 cdef inline unsigned char point_in_polygon(Py_ssize_t nr_verts, double *xp,
-                                           double *yp, double x, double y):
+                                           double *yp, double x,
+                                           double y) nogil:
     """Test whether point lies inside a polygon.
 
     Parameters
@@ -33,7 +34,7 @@ cdef inline unsigned char point_in_polygon(Py_ssize_t nr_verts, double *xp,
 
 cdef void points_in_polygon(Py_ssize_t nr_verts, double *xp, double *yp,
                             Py_ssize_t nr_points, double *x, double *y,
-                            unsigned char *result):
+                            unsigned char *result) nogil:
     """Test whether points lie inside a polygon.
 
     Parameters

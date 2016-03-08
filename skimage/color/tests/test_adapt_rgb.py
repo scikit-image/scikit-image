@@ -12,7 +12,7 @@ COLOR_IMAGE = data.astronaut()[::5, ::5]
 GRAY_IMAGE = data.camera()[::5, ::5]
 
 SIGMA = 3
-smooth = partial(filters.gaussian_filter, sigma=SIGMA)
+smooth = partial(filters.gaussian, sigma=SIGMA)
 assert_allclose = partial(np.testing.assert_allclose, atol=1e-8)
 
 
@@ -23,7 +23,7 @@ def edges_each(image):
 
 @adapt_rgb(each_channel)
 def smooth_each(image, sigma):
-    return filters.gaussian_filter(image, sigma)
+    return filters.gaussian(image, sigma)
 
 
 @adapt_rgb(hsv_value)
@@ -33,7 +33,7 @@ def edges_hsv(image):
 
 @adapt_rgb(hsv_value)
 def smooth_hsv(image, sigma):
-    return filters.gaussian_filter(image, sigma)
+    return filters.gaussian(image, sigma)
 
 
 @adapt_rgb(hsv_value)

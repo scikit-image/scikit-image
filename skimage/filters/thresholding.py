@@ -5,9 +5,9 @@ __all__ = ['threshold_adaptive',
            'threshold_li', ]
 
 import numpy as np
-import scipy.ndimage
+from scipy import ndimage as ndi
 from ..exposure import histogram
-from .._shared.utils import assert_nD
+from .._shared.utils import assert_nD, warn
 
 
 def threshold_adaptive(image, block_size, method='gaussian', offset=0,
@@ -24,7 +24,7 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
     image : (N, M) ndarray
         Input image.
     block_size : int
-        Uneven size of pixel neighborhood which is used to calculate the
+        Odd size of pixel neighborhood which is used to calculate the
         threshold value (e.g. 3, 5, 7, ..., 21, ...).
     method : {'generic', 'gaussian', 'mean', 'median'}, optional
         Method used to determine adaptive threshold for local neighbourhood in
@@ -67,29 +67,29 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
     >>> func = lambda arr: arr.mean()
     >>> binary_image2 = threshold_adaptive(image, 15, 'generic', param=func)
     """
+    if block_size % 2 == 0:
+        raise ValueError("The kwarg ``block_size`` must be odd! Given "
+                         "``block_size`` {0} is even.".format(block_size))
     assert_nD(image, 2)
     thresh_image = np.zeros(image.shape, 'double')
     if method == 'generic':
-        scipy.ndimage.generic_filter(image, param, block_size,
-                                     output=thresh_image, mode=mode)
+        ndi.generic_filter(image, param, block_size,
+                           output=thresh_image, mode=mode)
     elif method == 'gaussian':
         if param is None:
             # automatically determine sigma which covers > 99% of distribution
             sigma = (block_size - 1) / 6.0
         else:
             sigma = param
-        scipy.ndimage.gaussian_filter(image, sigma, output=thresh_image,
-                                      mode=mode)
+        ndi.gaussian_filter(image, sigma, output=thresh_image, mode=mode)
     elif method == 'mean':
         mask = 1. / block_size * np.ones((block_size,))
         # separation of filters to speedup convolution
-        scipy.ndimage.convolve1d(image, mask, axis=0, output=thresh_image,
-                                 mode=mode)
-        scipy.ndimage.convolve1d(thresh_image, mask, axis=1,
-                                 output=thresh_image, mode=mode)
+        ndi.convolve1d(image, mask, axis=0, output=thresh_image, mode=mode)
+        ndi.convolve1d(thresh_image, mask, axis=1,
+                       output=thresh_image, mode=mode)
     elif method == 'median':
-        scipy.ndimage.median_filter(image, block_size, output=thresh_image,
-                                    mode=mode)
+        ndi.median_filter(image, block_size, output=thresh_image, mode=mode)
 
     return image > (thresh_image - offset)
 
@@ -100,7 +100,7 @@ def threshold_otsu(image, nbins=256):
     Parameters
     ----------
     image : array
-        Input image.
+        Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
@@ -121,7 +121,22 @@ def threshold_otsu(image, nbins=256):
     >>> image = camera()
     >>> thresh = threshold_otsu(image)
     >>> binary = image <= thresh
+
+    Notes
+    -----
+    The input image must be grayscale.
     """
+    if image.shape[-1] in (3, 4):
+        msg = "threshold_otsu is expected to work correctly only for " \
+              "grayscale images; image shape {0} looks like an RGB image"
+        warn(msg.format(image.shape))
+
+    # Check if the image is multi-colored or not
+    if image.min() == image.max():
+        raise TypeError("threshold_otsu is expected to work with images " \
+                        "having more than one color. The input image seems " \
+                        "to have just one color {0}.".format(image.min()))
+
     hist, bin_centers = histogram(image.ravel(), nbins)
     hist = hist.astype(float)
 
@@ -248,7 +263,6 @@ def threshold_isodata(image, nbins=256, return_all=False):
     >>> thresh = threshold_isodata(image)
     >>> binary = image > thresh
     """
-
     hist, bin_centers = histogram(image.ravel(), nbins)
 
     # image only contains one unique value
@@ -338,15 +352,16 @@ def threshold_li(image):
     >>> thresh = threshold_li(image)
     >>> binary = image > thresh
     """
+    # Copy to ensure input image is not modified
+    image = image.copy()
     # Requires positive image (because of log(mean))
-    offset = image.min()
-    # Can not use fixed tolerance for float image
-    imrange = image.max() - offset
-    image -= offset
+    immin = np.min(image)
+    image -= immin
+    imrange = np.max(image)
+    tolerance = 0.5 * imrange / 256
 
-    tolerance = 0.5 * imrange / 256.0
     # Calculate the mean gray-level
-    mean = image.mean()
+    mean = np.mean(image)
 
     # Initial estimate
     new_thresh = mean
@@ -368,4 +383,4 @@ def threshold_li(image):
         else:
             new_thresh = temp + tolerance
 
-    return threshold + offset
+    return threshold + immin

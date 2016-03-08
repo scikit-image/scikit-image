@@ -6,6 +6,26 @@
 # See doc/travis_notes.txt for some guidelines
 
 language: python
+sudo: false
+cache:
+  # See http://docs.travis-ci.com/user/caching/#pip-cache
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/.cache/sphinx
+    - $HOME/.ccache
+addons:
+  apt:
+    packages:
+    - ccache
+    - libfreeimage3
+    - texlive
+    - texlive-latex-extra
+    - dvipng
+    - python-qt4
+env:
+  global:
+    - GH_REF: github.com/scikit-image/docs.git
+    - secure: "h25sS+tTrt1Ab8LzCFmw4nGDY7uKh4vkQ57m7KwVTua0jnI2D/mUrSiwuERF07F0w5xEoICLDUP/9P74g0JuUwSJcnyIK61lNfGXW0WLj/fMWp0iB2cOnFTTJYpUKlEmHooGVY4qqYVVAG3gaiB8s0ElPsSn5v+zoVmzq1BGark="
 
 notifications:
   webhooks:
@@ -16,25 +36,25 @@ notifications:
     on_start: false     # default: false
 
 python:
-- 2.6
-- 2.7
-- 3.2
-- 3.3
-- 3.4
+  - 2.6
+  - 2.7
+  - 3.3
+  - 3.4
+  - 3.5
 
 before_install:
-    - sudo apt-get update; true
+    - ccache -s
+    - export PATH=/usr/lib/ccache:${PATH}
     - source tools/travis_before_install.sh
-
     - which python; python --version
     - python check_bento_build.py
     - tools/build_versions.py
 
 install:
-    - python setup.py build_ext --inplace
-    - python setup.py install
+    - python setup.py develop
 
 script: tools/travis_script.sh
 
 after_success:
     - coveralls
+    - bash tools/deploy_docs.sh

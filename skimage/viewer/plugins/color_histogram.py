@@ -17,7 +17,7 @@ class ColorHistogram(PlotPlugin):
     def attach(self, image_viewer):
         super(ColorHistogram, self).attach(image_viewer)
 
-        self.rect_tool = RectangleTool(image_viewer,
+        self.rect_tool = RectangleTool(self,
                                        on_release=self.ab_selected)
         self._on_new_image(image_viewer.image)
 

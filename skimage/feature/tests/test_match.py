@@ -25,22 +25,24 @@ def test_binary_descriptors():
     assert_equal(matches, [[0, 0], [1, 1]])
 
 
-def test_binary_descriptors_lena_rotation_crosscheck_false():
+def test_binary_descriptors_rotation_crosscheck_false():
     """Verify matched keypoints and their corresponding masks results between
-    lena image and its rotated version with the expected keypoint pairs with
+    image and its rotated version with the expected keypoint pairs with
     cross_check disabled."""
-    img = data.lena()
+    img = data.astronaut()
     img = rgb2gray(img)
     tform = tf.SimilarityTransform(scale=1, rotation=0.15, translation=(0, 0))
     rotated_img = tf.warp(img, tform, clip=False)
 
     extractor = BRIEF(descriptor_size=512)
 
-    keypoints1 = corner_peaks(corner_harris(img), min_distance=5)
+    keypoints1 = corner_peaks(corner_harris(img), min_distance=5,
+                              threshold_abs=0, threshold_rel=0.1)
     extractor.extract(img, keypoints1)
     descriptors1 = extractor.descriptors
 
-    keypoints2 = corner_peaks(corner_harris(rotated_img), min_distance=5)
+    keypoints2 = corner_peaks(corner_harris(rotated_img), min_distance=5,
+                              threshold_abs=0, threshold_rel=0.1)
     extractor.extract(rotated_img, keypoints2)
     descriptors2 = extractor.descriptors
 
@@ -50,41 +52,43 @@ def test_binary_descriptors_lena_rotation_crosscheck_false():
                              12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
                              24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
                              36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46])
-    exp_matches2 = np.array([33,  0, 35,  7,  1, 35,  3,  2,  3,  6,  4,  9,
-                             11, 10, 28,  7,  8,  5, 31, 14, 13, 15, 21, 16,
-                             16, 13, 17, 18, 19, 21, 22, 23,  0, 24,  1, 24,
-                             23,  0, 26, 27, 25, 34, 28, 14, 29, 30, 21])
+    exp_matches2 = np.array([ 0, 31,  2,  3,  1,  4,  6,  4, 38,  5, 27,  7,
+                             13, 10,  9, 27,  7, 11, 15,  8, 23, 14, 12, 16,
+                             10, 25, 18, 19, 21, 20, 41, 24, 25, 26, 28, 27,
+                             22, 23, 29, 30, 31, 32, 35, 33, 34, 30, 36])
     assert_equal(matches[:, 0], exp_matches1)
     assert_equal(matches[:, 1], exp_matches2)
 
 
-def test_binary_descriptors_lena_rotation_crosscheck_true():
+def test_binary_descriptors_rotation_crosscheck_true():
     """Verify matched keypoints and their corresponding masks results between
-    lena image and its rotated version with the expected keypoint pairs with
+    image and its rotated version with the expected keypoint pairs with
     cross_check enabled."""
-    img = data.lena()
+    img = data.astronaut()
     img = rgb2gray(img)
     tform = tf.SimilarityTransform(scale=1, rotation=0.15, translation=(0, 0))
     rotated_img = tf.warp(img, tform, clip=False)
 
     extractor = BRIEF(descriptor_size=512)
 
-    keypoints1 = corner_peaks(corner_harris(img), min_distance=5)
+    keypoints1 = corner_peaks(corner_harris(img), min_distance=5,
+                              threshold_abs=0, threshold_rel=0.1)
     extractor.extract(img, keypoints1)
     descriptors1 = extractor.descriptors
 
-    keypoints2 = corner_peaks(corner_harris(rotated_img), min_distance=5)
+    keypoints2 = corner_peaks(corner_harris(rotated_img), min_distance=5,
+                              threshold_abs=0, threshold_rel=0.1)
     extractor.extract(rotated_img, keypoints2)
     descriptors2 = extractor.descriptors
 
     matches = match_descriptors(descriptors1, descriptors2, cross_check=True)
 
-    exp_matches1 = np.array([ 0,  1,  2,  4,  6,  7,  9, 10, 11, 12, 13, 15,
-                               16, 17, 19, 20, 21, 24, 26, 27, 28, 29, 30, 35,
-                               36, 38, 39, 40, 42, 44, 45])
-    exp_matches2 = np.array([33,  0, 35,  1,  3,  2,  6,  4,  9, 11, 10,  7,
-                                8,  5, 14, 13, 15, 16, 17, 18, 19, 21, 22, 24,
-                                23, 26, 27, 25, 28, 29, 30])
+    exp_matches1 = np.array([ 0,  2,  3,  4,  5,  6,  9, 11, 12, 13, 14, 17,
+                             18, 19, 21, 22, 23, 26, 27, 28, 29, 31, 32, 33,
+                             34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 46])
+    exp_matches2 = np.array([ 0,  2,  3,  1,  4,  6,  5,  7, 13, 10,  9, 11,
+                             15,  8, 14, 12, 16, 18, 19, 21, 20, 24, 25, 26,
+                             28, 27, 22, 23, 29, 30, 31, 32, 35, 33, 34, 36])
     assert_equal(matches[:, 0], exp_matches1)
     assert_equal(matches[:, 1], exp_matches2)
 

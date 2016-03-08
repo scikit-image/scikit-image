@@ -41,7 +41,8 @@ def test_show():
 
 
 def test_collection():
-    io.imread_collection('*.png', conserve_memory=False, plugin='test')
+    ic = io.imread_collection('*.png', conserve_memory=False, plugin='test')
+    io.imshow_collection(ic)
 
 
 def test_use():

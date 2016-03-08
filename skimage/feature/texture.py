@@ -4,7 +4,11 @@ Methods to characterize image textures.
 
 import numpy as np
 from .._shared.utils import assert_nD
-from ._texture import _glcm_loop, _local_binary_pattern
+from ..util import img_as_float
+from ..color import gray2rgb
+from ._texture import (_glcm_loop,
+                       _local_binary_pattern,
+                       _multiblock_lbp)
 
 
 def greycomatrix(image, distances, angles, levels=256, symmetric=False,
@@ -290,4 +294,158 @@ def local_binary_pattern(image, P, R, method='default'):
     }
     image = np.ascontiguousarray(image, dtype=np.double)
     output = _local_binary_pattern(image, P, R, methods[method.lower()])
+    return output
+
+
+def multiblock_lbp(int_image, r, c, width, height):
+    """Multi-block local binary pattern (MB-LBP).
+
+    The features are calculated similarly to local binary patterns (LBPs),
+    (See :py:meth:`local_binary_pattern`) except that summed blocks are
+    used instead of individual pixel values.
+
+    MB-LBP is an extension of LBP that can be computed on multiple scales
+    in constant time using the integral image. Nine equally-sized rectangles
+    are used to compute a feature. For each rectangle, the sum of the pixel
+    intensities is computed. Comparisons of these sums to that of the central
+    rectangle determine the feature, similarly to LBP.
+
+    Parameters
+    ----------
+    int_image : (N, M) array
+        Integral image.
+    r : int
+        Row-coordinate of top left corner of a rectangle containing feature.
+    c : int
+        Column-coordinate of top left corner of a rectangle containing feature.
+    width : int
+        Width of one of the 9 equal rectangles that will be used to compute
+        a feature.
+    height : int
+        Height of one of the 9 equal rectangles that will be used to compute
+        a feature.
+
+    Returns
+    -------
+    output : int
+        8-bit MB-LBP feature descriptor.
+
+    References
+    ----------
+    .. [1] Face Detection Based on Multi-Block LBP
+           Representation. Lun Zhang, Rufeng Chu, Shiming Xiang, Shengcai Liao,
+           Stan Z. Li
+           http://www.cbsr.ia.ac.cn/users/scliao/papers/Zhang-ICB07-MBLBP.pdf
+    """
+
+    int_image = np.ascontiguousarray(int_image, dtype=np.float32)
+    lbp_code = _multiblock_lbp(int_image, r, c, width, height)
+    return lbp_code
+
+
+def draw_multiblock_lbp(img, r, c, width, height,
+                        lbp_code=0,
+                        color_greater_block=[1, 1, 1],
+                        color_less_block=[0, 0.69, 0.96],
+                        alpha=0.5
+                        ):
+    """Multi-block local binary pattern visualization.
+
+    Blocks with higher sums are colored with alpha-blended white rectangles,
+    whereas blocks with lower sums are colored alpha-blended cyan. Colors
+    and the `alpha` parameter can be changed.
+
+    Parameters
+    ----------
+    img : ndarray of float or uint
+        Image on which to visualize the pattern.
+    r : int
+        Row-coordinate of top left corner of a rectangle containing feature.
+    c : int
+        Column-coordinate of top left corner of a rectangle containing feature.
+    width : int
+        Width of one of 9 equal rectangles that will be used to compute
+        a feature.
+    height : int
+        Height of one of 9 equal rectangles that will be used to compute
+        a feature.
+    lbp_code : int
+        The descriptor of feature to visualize. If not provided, the
+        descriptor with 0 value will be used.
+    color_greater_block : list of 3 floats
+        Floats specifying the color for the block that has greater
+        intensity value. They should be in the range [0, 1].
+        Corresponding values define (R, G, B) values. Default value
+        is white [1, 1, 1].
+    color_greater_block : list of 3 floats
+        Floats specifying the color for the block that has greater intensity
+        value. They should be in the range [0, 1]. Corresponding values define
+        (R, G, B) values. Default value is cyan [0, 0.69, 0.96].
+    alpha : float
+        Value in the range [0, 1] that specifies opacity of visualization.
+        1 - fully transparent, 0 - opaque.
+
+    Returns
+    -------
+    output : ndarray of float
+        Image with MB-LBP visualization.
+
+    References
+    ----------
+    .. [1] Face Detection Based on Multi-Block LBP
+           Representation. Lun Zhang, Rufeng Chu, Shiming Xiang, Shengcai Liao,
+           Stan Z. Li
+           http://www.cbsr.ia.ac.cn/users/scliao/papers/Zhang-ICB07-MBLBP.pdf
+    """
+
+    # Default colors for regions.
+    # White is for the blocks that are brighter.
+    # Cyan is for the blocks that has less intensity.
+    color_greater_block = np.asarray(color_greater_block, dtype=np.float64)
+    color_less_block = np.asarray(color_less_block, dtype=np.float64)
+
+    # Copy array to avoid the changes to the original one.
+    output = np.copy(img)
+
+    # As the visualization uses RGB color we need 3 bands.
+    if len(img.shape) < 3:
+        output = gray2rgb(img)
+
+    # Colors are specified in floats.
+    output = img_as_float(output)
+
+    # Offsets of neighbour rectangles relative to central one.
+    # It has order starting from top left and going clockwise.
+    neighbour_rect_offsets = ((-1, -1), (-1, 0), (-1, 1),
+                              (0, 1), (1, 1), (1, 0),
+                              (1, -1), (0, -1))
+
+    # Pre-multiply the offsets with width and height.
+    neighbour_rect_offsets = np.array(neighbour_rect_offsets)
+    neighbour_rect_offsets[:, 0] *= height
+    neighbour_rect_offsets[:, 1] *= width
+
+    # Top-left coordinates of central rectangle.
+    central_rect_r = r + height
+    central_rect_c = c + width
+
+    for element_num, offset in enumerate(neighbour_rect_offsets):
+
+        offset_r, offset_c = offset
+
+        curr_r = central_rect_r + offset_r
+        curr_c = central_rect_c + offset_c
+
+        has_greater_value = lbp_code & (1 << (7-element_num))
+
+        # Mix-in the visualization colors.
+        if has_greater_value:
+            new_value = ((1-alpha) * output[curr_r:curr_r+height, curr_c:curr_c+width]
+                         + alpha * color_greater_block)
+            output[curr_r:curr_r+height, curr_c:curr_c+width] = new_value
+        else:
+            new_value = ((1-alpha) * output[curr_r:curr_r+height, curr_c:curr_c+width]
+                         + alpha * color_less_block)
+            output[curr_r:curr_r+height, curr_c:curr_c+width] = new_value
+
     return output

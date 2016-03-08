@@ -77,17 +77,21 @@ For a more detailed discussion, read these :doc:`detailed documents
      Travis fails, you can find out why by clicking on the "failed" icon (red
      cross) and inspecting the build and test log.
 
+   * A pull request must be approved by two core team members before merging.
+
 5. Document changes
 
-   Before merging your commits, you must add a description of your changes
-   to the release notes of the upcoming version in
-   ``doc/release/release_dev.txt``.
+   If your change introduces any API modifications, please update
+   ``doc/source/api_changes.txt``.
+
+   If your change introduces a deprecation, add a reminder to ``TODO.txt``
+   for the team to remove the deprecated functionality in the future.
 
 .. note::
 
-   To reviewers: if it is not obvious, add a short explanation of what a branch
-   did to the merge message and, if closing a bug, also add "Closes #123"
-   where 123 is the issue number.
+   To reviewers: if it is not obvious from the PR description, add a short
+   explanation of what a branch did to the merge message and, if closing a
+   bug, also add "Closes #123" where 123 is the issue number.
 
 
 Divergence between ``upstream master`` and your feature branch
@@ -123,10 +127,10 @@ Guidelines
 
 * All code should have tests (see `test coverage`_ below for more details).
 * All code should be documented, to the same
-  `standard <://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt#docstring-standard>`_ as NumPy and SciPy.
-* For new functionality, always add an example to the
-  gallery.
-* No changes are ever committed without review.  Ask on the
+  `standard <https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt#docstring-standard>`_ as NumPy and SciPy.
+* For new functionality, always add an example to the gallery.
+* No changes are ever committed without review and approval by two core
+  team members.  Ask on the
   `mailing list <http://groups.google.com/group/scikit-image>`_ if
   you get no response to your pull request.
   **Never merge your own pull request.**
@@ -136,7 +140,7 @@ Stylistic Guidelines
 --------------------
 
 * Set up your editor to remove trailing whitespace.  Follow `PEP08
-  <www.python.org/dev/peps/pep-0008/>`__.  Check code with pyflakes / flake8.
+  <http://www.python.org/dev/peps/pep-0008/>`__.  Check code with pyflakes / flake8.
 
 * Use numpy data types instead of strings (``np.uint8`` instead of
   ``"uint8"``).
@@ -145,11 +149,16 @@ Stylistic Guidelines
 
    import numpy as np
    import matplotlib.pyplot as plt
+   from scipy import ndimage as ndi
 
-   cimport numpy as cnp # in Cython code
+   cimport numpy as cnp  # in Cython code
 
 * When documenting array parameters, use ``image : (M, N) ndarray``
   and then refer to ``M`` and ``N`` in the docstring, if necessary.
+
+* Refer to array dimensions as (plane), row, column, not as x, y, z. See
+  :ref:`Coordinate conventions <numpy-images-coordinate-conventions>`
+  in the user guide for more information.
 
 * Functions should support all input image dtypes.  Use utility functions such
   as ``img_as_float`` to help convert to an appropriate type.  The output
@@ -160,6 +169,17 @@ Stylistic Guidelines
 
 * Use ``Py_ssize_t`` as data type for all indexing, shape and size variables
   in C/C++ and Cython code.
+
+* Use relative module imports, i.e. ``from .._shared import xyz`` rather than
+  ``from skimage._shared import xyz``.
+
+* Wrap Cython code in a pure Python function, which defines the API. This
+  improves compatibility with code introspection tools, which are often not
+  aware of Cython code.
+
+* For Cython functions, release the GIL whenever possible, using
+  ``with nogil:``.
+
 
 Test coverage
 -------------
@@ -206,6 +226,73 @@ and you will receive an email notification when the process is done.
 
 Every time Travis is triggered, it also calls on `Coveralls
 <http://coveralls.io>`_ to inspect the current test overage.
+
+
+Building docs
+-------------
+
+To build docs, run ``make`` from the ``docs`` directory. ``make help`` lists
+all targets.
+
+Requirements
+~~~~~~~~~~~~
+
+Sphinx (>= 1.3) and Latex is needed to build doc.
+
+**Sphinx:**
+
+.. code:: sh
+
+    pip install sphinx
+
+**Latex Ubuntu:**
+
+.. code:: sh
+
+    sudo apt-get install -qq texlive texlive-latex-extra dvipng
+
+**Latex Mac:**
+
+Install the full `MacTex <http://www.tug.org/mactex/>`__ installation or
+install the smaller
+`BasicTex <http://www.tug.org/mactex/morepackages.html>`__ and add *ucs*
+and *dvipng* packages:
+
+.. code:: sh
+
+    sudo tlmgr install ucs dvipng
+
+Fixing Warnings
+~~~~~~~~~~~~~~~
+
+-  "citation not found: R###" There is probably an underscore after a
+   reference in the first line of a docstring (e.g. [1]\_). Use this
+   method to find the source file: $ cd doc/build; grep -rin R####
+
+-  "Duplicate citation R###, other instance in..."" There is probably a
+   [2] without a [1] in one of the docstrings
+
+-  Make sure to use pre-sphinxification paths to images (not the
+   \_images directory)
+
+Auto-generating dev docs
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+This set of instructions was used to create
+scikit-image/tools/deploy-docs.sh
+
+-  Go to Github account settings -> personal access tokens
+-  Create a new token with access rights ``public_repo`` and
+   ``user:email only``
+-  Install the travis command line tool: ``gem install travis``. On OSX,
+   you can get gem via ``brew install ruby``.
+-  Take then token generated by Github and run
+   ``travis encrypt GH_TOKEN=<token>`` from inside a scikit-image repo
+-  Paste the output into the secure: field of ``.travis.yml``.
+-  The decrypted GH\_TOKEN env var will be available for travis scripts
+
+https://help.github.com/articles/creating-an-access-token-for-command-line-use/
+http://docs.travis-ci.com/user/encryption-keys/
 
 
 Bugs

@@ -9,8 +9,7 @@ section_end "Test.with.min.requirements"
 
 section "Build.docs"
 if [[ ($PY != 2.6) && ($PY != 3.2) ]]; then
-    sudo apt-get install -qq texlive texlive-latex-extra dvipng
-    make html
+    export SPHINXCACHE=$HOME/.cache/sphinx; make html
 fi
 section_end "Build.docs"
 
@@ -21,10 +20,13 @@ section_end "Flake8.test"
 
 section "Install.optional.dependencies"
 
+# Install most of the optional packages
+if [[ $PY != 3.2* ]]; then
+    pip install --retries 3 -q -r ./optional_requirements.txt $WHEELHOUSE
+fi
+
 # Install Qt and then update the Matplotlib settings
 if [[ $PY == 2.7* ]]; then
-    sudo apt-get install -q python-qt4
-
     # http://stackoverflow.com/a/9716100
     LIBS=( PyQt4 sip.so )
 
@@ -36,36 +38,19 @@ if [[ $PY == 2.7* ]]; then
 
     for LIB in ${LIBS[@]}
     do
-        sudo ln -sf $LIB_SYSTEM_PATH/$LIB $LIB_VIRTUALENV_PATH/$LIB
+        ln -sf $LIB_SYSTEM_PATH/$LIB $LIB_VIRTUALENV_PATH/$LIB
     done
 
-else
-    sudo apt-get install -q libqt4-dev
-    retry pip install -q PySide $WHEELHOUSE
+elif [[ $PY != 3.2* ]]; then
     python ~/venv/bin/pyside_postinstall.py -install
 fi
 
-# imread does NOT support py3.2
-if [[ $PY != 3.2 ]]; then
-    sudo apt-get install -q libtiff4-dev libwebp-dev libpng12-dev xcftools
-    retry pip  install -q imread
-fi
-
-# Install SimpleITK from wheelhouse if available (not 3.2 or 3.4)
-if [[ $PY =~ 3\.[24] ]]; then
-    echo "SimpleITK unavailable on $PY"
-else
-    retry pip  install -q SimpleITK $WHEELHOUSE
-fi
-
-sudo apt-get install -q libfreeimage3
-retry pip install -q astropy $WHEELHOUSE
-
 if [[ $PY == 2.* ]]; then
-    retry pip install -q pyamg
+    pip install --retries 3 -q pyamg
 fi
 
-retry pip install -q tifffile
+# Show what's installed
+pip list
 
 section_end "Install.optional.dependencies"
 
@@ -84,7 +69,7 @@ touch $MPL_DIR/matplotlibrc
 echo 'backend : Template' > $MPL_DIR/matplotlibrc
 
 
-for f in doc/examples/*.py; do
+for f in doc/examples/*/*.py; do
     python "$f"
     if [ $? -ne 0 ]; then
         exit 1
@@ -96,7 +81,7 @@ section_end "Run.doc.examples"
 
 section "Run.doc.applications"
 
-for f in doc/examples/applications/*.py; do
+for f in doc/examples/xx_applications/*.py; do
     python "$f"
     if [ $? -ne 0 ]; then
         exit 1
@@ -111,7 +96,7 @@ else
     MPL_QT_API=PySide
     export QT_API=pyside
 fi
-echo 'backend: Agg' > $MPL_DIR/matplotlibrc
+echo 'backend: Qt4Agg' > $MPL_DIR/matplotlibrc
 echo 'backend.qt4 : '$MPL_QT_API >> $MPL_DIR/matplotlibrc
 
 section_end "Run.doc.applications"
@@ -126,3 +111,7 @@ fi
 nosetests $TEST_ARGS
 
 section_end "Test.with.optional.dependencies"
+
+section "Prepare.release"
+doc/release/contribs.py HEAD~10
+section_end "Prepare.release"

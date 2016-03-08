@@ -3,6 +3,7 @@ import os
 import numpy as np
 from numpy.testing import assert_raises, assert_equal, assert_allclose
 
+from skimage.io import use_plugin
 from skimage import data_dir
 from skimage.io.collection import MultiImage, ImageCollection
 
@@ -14,8 +15,9 @@ class TestMultiImage():
     def setUp(self):
         # This multipage TIF file was created with imagemagick:
         # convert im1.tif im2.tif -adjoin multipage.tif
-        paths = [os.path.join(data_dir, 'multipage.tif'),
-                 os.path.join(data_dir, 'no_time_for_that.gif')]
+        use_plugin('pil')
+        paths = [os.path.join(data_dir, 'multipage_rgb.tif'),
+                 os.path.join(data_dir, 'no_time_for_that_tiny.gif')]
         self.imgs = [MultiImage(paths[0]),
                      MultiImage(paths[0], conserve_memory=False),
                      MultiImage(paths[1]),
@@ -23,6 +25,12 @@ class TestMultiImage():
                      ImageCollection(paths[0]),
                      ImageCollection(paths[1], conserve_memory=False),
                      ImageCollection('%s:%s' % (paths[0], paths[1]))]
+
+    def test_shapes(self):
+        img = self.imgs[-1]
+        imgs = img[:]
+        assert imgs[0].shape == imgs[1].shape
+        assert imgs[0].shape == (10, 10, 3)
 
     def test_len(self):
         assert len(self.imgs[0]) == len(self.imgs[1]) == 2

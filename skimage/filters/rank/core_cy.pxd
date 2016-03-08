@@ -11,13 +11,13 @@ ctypedef fused dtype_t_out:
     double_t
 
 
-cdef dtype_t _max(dtype_t a, dtype_t b)
-cdef dtype_t _min(dtype_t a, dtype_t b)
+cdef dtype_t _max(dtype_t a, dtype_t b) nogil
+cdef dtype_t _min(dtype_t a, dtype_t b) nogil
 
 
 cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                             dtype_t, Py_ssize_t, Py_ssize_t, double,
-                            double, Py_ssize_t, Py_ssize_t),
+                            double, Py_ssize_t, Py_ssize_t) nogil,
                 dtype_t[:, ::1] image,
                 char[:, ::1] selem,
                 char[:, ::1] mask,

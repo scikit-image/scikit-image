@@ -43,7 +43,8 @@ cdef extern from "pyport.h":
 cdef VALUE_T inf = Py_HUGE_VAL
 
 # this is handy
-cdef inline INDEX_T index_min(INDEX_T a, INDEX_T b): return a if a <= b else b
+cdef inline INDEX_T index_min(INDEX_T a, INDEX_T b) nogil:
+    return a if a <= b else b
 
 
 cdef class BinaryHeap:
@@ -185,7 +186,7 @@ cdef class BinaryHeap:
 
     ## C Maintanance methods
 
-    cdef void _add_or_remove_level(self, LEVELS_T add_or_remove):
+    cdef void _add_or_remove_level(self, LEVELS_T add_or_remove) nogil:
         # init indexing ints
         cdef INDEX_T i, i1, i2, n
 
@@ -228,7 +229,7 @@ cdef class BinaryHeap:
         self._update()
 
 
-    cdef void _update(self):
+    cdef void _update(self) nogil:
         """Update the full tree from the bottom up.
         This should be done after resizing. """
 
@@ -251,7 +252,7 @@ cdef class BinaryHeap:
                     values[ii] = values[i+1]
 
 
-    cdef void _update_one(self, INDEX_T i):
+    cdef void _update_one(self, INDEX_T i) nogil:
         """Update the tree for one value."""
 
         # shorter name for values
@@ -279,7 +280,7 @@ cdef class BinaryHeap:
                 i = ii-1
 
 
-    cdef void _remove(self, INDEX_T i1):
+    cdef void _remove(self, INDEX_T i1) nogil:
         """Remove a value from the heap. By index."""
 
         cdef LEVELS_T levels = self.levels
@@ -314,7 +315,7 @@ cdef class BinaryHeap:
 
     ## C Public methods
 
-    cdef INDEX_T push_fast(self, VALUE_T value, REFERENCE_T reference):
+    cdef INDEX_T push_fast(self, VALUE_T value, REFERENCE_T reference) nogil:
         """The c-method for fast pushing.
 
         Returns the index relative to the start of the last level in the heap."""
@@ -338,7 +339,7 @@ cdef class BinaryHeap:
         return count
 
 
-    cdef VALUE_T pop_fast(self):
+    cdef VALUE_T pop_fast(self) nogil:
         """The c-method for fast popping.
 
         Returns the minimum value. The reference is put in self._popped_ref"""
@@ -543,7 +544,7 @@ cdef class FastUpdateBinaryHeap(BinaryHeap):
             self._crossref[i] = -1
 
 
-    cdef void _remove(self, INDEX_T i1):
+    cdef void _remove(self, INDEX_T i1) nogil:
         """ Remove a value from the heap. By index. """
         cdef LEVELS_T levels = self.levels
         cdef INDEX_T count = self.count
@@ -581,7 +582,7 @@ cdef class FastUpdateBinaryHeap(BinaryHeap):
             self._update_one(i2)
 
 
-    cdef INDEX_T push_fast(self, VALUE_T value, REFERENCE_T reference):
+    cdef INDEX_T push_fast(self, VALUE_T value, REFERENCE_T reference) nogil:
         """The c method for fast pushing.
 
         If the reference is already present, will update its value, otherwise
@@ -611,7 +612,8 @@ cdef class FastUpdateBinaryHeap(BinaryHeap):
         self._crossref[reference] = ir
         return ir
 
-    cdef INDEX_T push_if_lower_fast(self, VALUE_T value, REFERENCE_T reference):
+    cdef INDEX_T push_if_lower_fast(self, VALUE_T value,
+                                    REFERENCE_T reference) nogil:
         """If the reference is already present, will update its value ONLY if
         the new value is lower than the old one. If the reference is not
         present, this append it. If a value was appended, self._pushed is

@@ -16,17 +16,17 @@ References
 
 """
 
-import warnings
 import numpy as np
 from ... import img_as_ubyte
-from ..._shared.utils import assert_nD
+from ..._shared.utils import assert_nD, warn
 
 from . import generic_cy
 
 
 __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
-           'subtract_mean', 'median', 'minimum', 'modal', 'enhance_contrast',
-           'pop', 'threshold', 'tophat', 'noise_filter', 'entropy', 'otsu']
+           'geometric_mean', 'subtract_mean', 'median', 'minimum', 'modal',
+           'enhance_contrast', 'pop', 'threshold', 'tophat', 'noise_filter',
+           'entropy', 'otsu']
 
 
 def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
@@ -64,8 +64,8 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
 
     bitdepth = int(np.log2(max_bin))
     if bitdepth > 10:
-        warnings.warn("Bitdepth of %d may result in bad rank filter "
-                      "performance due to large number of bins." % bitdepth)
+        warn("Bitdepth of %d may result in bad rank filter "
+             "performance due to large number of bins." % bitdepth)
 
     return image, selem, out, mask, max_bin
 
@@ -340,6 +340,48 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """
 
     return _apply_scalar_per_pixel(generic_cy._mean, image, selem, out=out,
+                                   mask=mask, shift_x=shift_x, shift_y=shift_y)
+
+def geometric_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+    """Return local geometric mean of an image.
+
+    Parameters
+    ----------
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
+    mask : ndarray
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood. If None, the complete image is used (default).
+    shift_x, shift_y : int
+        Offset added to the structuring element center point. Shift is bounded
+        to the structuring element sizes (center must be inside the given
+        structuring element).
+
+    Returns
+    -------
+    out : 2-D array (same dtype as input image)
+        Output image.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.morphology import disk
+    >>> from skimage.filters.rank import mean
+    >>> img = data.camera()
+    >>> avg = geometric_mean(img, disk(5))
+
+    References
+    ----------
+    .. [1] Gonzalez, R. C. and Wood, R. E. "Digital Image Processing (3rd Edition)."
+           Prentice-Hall Inc, 2006.
+
+    """
+
+    return _apply_scalar_per_pixel(generic_cy._geometric_mean, image, selem, out=out,
                                    mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 

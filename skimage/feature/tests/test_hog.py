@@ -1,5 +1,8 @@
+import os
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage as ndi
+import skimage as si
+from skimage import color
 from skimage import data
 from skimage import feature
 from skimage import img_as_float
@@ -9,13 +12,24 @@ from numpy.testing import (assert_raises,
                            )
 
 
-def test_histogram_of_oriented_gradients():
+def test_histogram_of_oriented_gradients_output_size():
     img = img_as_float(data.astronaut()[:256, :].mean(axis=2))
 
     fd = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
                      cells_per_block=(1, 1))
 
     assert len(fd) == 9 * (256 // 8) * (512 // 8)
+
+
+def test_histogram_of_oriented_gradients_output_correctness():
+    img = color.rgb2gray(data.astronaut())
+    correct_output = np.load(os.path.join(si.data_dir, 'astronaut_GRAY_hog.npy'))
+
+    output = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
+                         cells_per_block=(3, 3), feature_vector=True,
+                         transform_sqrt=False, visualise=False)
+
+    assert_almost_equal(output, correct_output)
 
 
 def test_hog_image_size_cell_size_mismatch():
@@ -35,7 +49,7 @@ def test_hog_basic_orientations_and_data_types():
     #  1) create image (with float values) where upper half is filled by
     #     zeros, bottom half by 100
     #  2) create unsigned integer version of this image
-    #  3) calculate feature.hog() for both images, both with 'normalise'
+    #  3) calculate feature.hog() for both images, both with 'transform_sqrt'
     #     option enabled and disabled
     #  4) verify that all results are equal where expected
     #  5) verify that computed feature vector is as expected
@@ -56,16 +70,16 @@ def test_hog_basic_orientations_and_data_types():
 
         (hog_float, hog_img_float) = feature.hog(
             image_float, orientations=4, pixels_per_cell=(8, 8),
-            cells_per_block=(1, 1), visualise=True, normalise=False)
+            cells_per_block=(1, 1), visualise=True, transform_sqrt=False)
         (hog_uint8, hog_img_uint8) = feature.hog(
             image_uint8, orientations=4, pixels_per_cell=(8, 8),
-            cells_per_block=(1, 1), visualise=True, normalise=False)
+            cells_per_block=(1, 1), visualise=True, transform_sqrt=False)
         (hog_float_norm, hog_img_float_norm) = feature.hog(
             image_float, orientations=4, pixels_per_cell=(8, 8),
-            cells_per_block=(1, 1), visualise=True, normalise=True)
+            cells_per_block=(1, 1), visualise=True, transform_sqrt=True)
         (hog_uint8_norm, hog_img_uint8_norm) = feature.hog(
             image_uint8, orientations=4, pixels_per_cell=(8, 8),
-            cells_per_block=(1, 1), visualise=True, normalise=True)
+            cells_per_block=(1, 1), visualise=True, transform_sqrt=True)
 
         # set to True to enable manual debugging with graphical output,
         # must be False for automatic testing
@@ -87,11 +101,11 @@ def test_hog_basic_orientations_and_data_types():
             plt.subplot(2, 3, 3)
             plt.imshow(hog_img_float_norm)
             plt.colorbar()
-            plt.title('HOG result (normalise) visualisation (float img)')
+            plt.title('HOG result (transform_sqrt) visualisation (float img)')
             plt.subplot(2, 3, 6)
             plt.imshow(hog_img_uint8_norm)
             plt.colorbar()
-            plt.title('HOG result (normalise) visualisation (uint8 img)')
+            plt.title('HOG result (transform_sqrt) visualisation (uint8 img)')
             plt.show()
 
         # results (features and visualisation) for float and uint8 images must
@@ -99,7 +113,7 @@ def test_hog_basic_orientations_and_data_types():
         assert_almost_equal(hog_float, hog_uint8)
         assert_almost_equal(hog_img_float, hog_img_uint8)
 
-        # resulting features should be almost equal when 'normalise' is enabled
+        # resulting features should be almost equal when 'transform_sqrt' is enabled
         #  or disabled (for current simple testing image)
         assert_almost_equal(hog_float, hog_float_norm, decimal=4)
         assert_almost_equal(hog_float, hog_uint8_norm, decimal=4)
@@ -137,13 +151,13 @@ def test_hog_orientations_circle():
     image = np.zeros((height, width))
     rr, cc = draw.circle(int(height / 2), int(width / 2), int(width / 3))
     image[rr, cc] = 100
-    image = ndimage.gaussian_filter(image, 2)
+    image = ndi.gaussian_filter(image, 2)
 
     for orientations in range(2, 15):
         (hog, hog_img) = feature.hog(image, orientations=orientations,
                                      pixels_per_cell=(8, 8),
                                      cells_per_block=(1, 1), visualise=True,
-                                     normalise=False)
+                                     transform_sqrt=False)
 
         # set to True to enable manual debugging with graphical output,
         # must be False for automatic testing
@@ -173,6 +187,10 @@ def test_hog_orientations_circle():
         desired = np.mean(hog_matrix)
         assert_almost_equal(actual, desired, decimal=1)
 
+
+def test_hog_normalise_none_error_raised():
+    img = np.array([1, 2, 3])
+    assert_raises(ValueError, feature.hog, img, normalise=True)
 
 if __name__ == '__main__':
     np.testing.run_module_suite()

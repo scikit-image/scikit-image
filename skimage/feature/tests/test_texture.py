@@ -1,6 +1,11 @@
 import numpy as np
-from skimage.feature import greycomatrix, greycoprops, local_binary_pattern
+from skimage.feature import (greycomatrix,
+                             greycoprops,
+                             local_binary_pattern,
+                             multiblock_lbp)
 
+from skimage._shared.testing import test_parallel
+from skimage.transform import integral_image
 
 class TestGLCM():
 
@@ -10,6 +15,7 @@ class TestGLCM():
                                [0, 2, 2, 2],
                                [2, 2, 3, 3]], dtype=np.uint8)
 
+    @test_parallel()
     def test_output_angles(self):
         result = greycomatrix(self.image, [1], [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4], 4)
         assert result.shape == (4, 4, 1, 4)
@@ -162,6 +168,7 @@ class TestLBP():
                                [  0, 255,  30,  34,  255,  24],
                                [146, 241, 255,   0,  189, 126]], dtype='double')
 
+    @test_parallel()
     def test_default(self):
         lbp = local_binary_pattern(self.image, 8, 1, 'default')
         ref = np.array([[  0, 251,   0, 255,  96, 255],
@@ -224,6 +231,29 @@ class TestLBP():
                         [57,  7, 57, 58,  0, 56],
                         [ 9, 58,  0, 57,  7, 14]])
         np.testing.assert_array_almost_equal(lbp, ref)
+
+
+class TestMBLBP():
+
+    def test_single_mblbp(self):
+
+        # Create dummy matrix where first and fifth rectangles have greater
+        # value than the central one. Therefore, the following bits
+        # should be 1.
+        test_img = np.zeros((9, 9), dtype='uint8')
+        test_img[3:6, 3:6] = 1
+        test_img[:3, :3] = 255
+        test_img[6:, 6:] = 255
+
+        # MB-LBP is filled in reverse order. So the first and fifth bits from
+        # the end should be filled.
+        correct_answer = 0b10001000
+
+        int_img = integral_image(test_img)
+
+        lbp_code = multiblock_lbp(int_img, 0, 0, 3, 3)
+
+        np.testing.assert_equal(lbp_code, correct_answer)
 
 
 if __name__ == '__main__':

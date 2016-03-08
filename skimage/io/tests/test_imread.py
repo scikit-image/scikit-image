@@ -1,3 +1,4 @@
+import os
 import os.path
 import numpy as np
 from numpy.testing import *

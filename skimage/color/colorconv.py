@@ -56,7 +56,7 @@ from __future__ import division
 from warnings import warn
 import numpy as np
 from scipy import linalg
-from ..util import dtype
+from ..util import dtype, dtype_limits
 
 
 def guess_spatial_dimensions(image):
@@ -707,21 +707,32 @@ def rgb2gray(rgb):
     >>> img = data.astronaut()
     >>> img_gray = rgb2gray(img)
     """
-    if rgb.ndim == 2:
-        return rgb
 
-    return _convert(gray_from_rgb, rgb[:, :, :3])[..., 0]
+    if rgb.ndim == 2:
+        return np.ascontiguousarray(rgb)
+
+    rgb = _prepare_colorarray(rgb[..., :3])
+
+    gray = 0.2125 * rgb[..., 0]
+    gray[:] += 0.7154 * rgb[..., 1]
+    gray[:] += 0.0721 * rgb[..., 2]
+
+    return gray
+
 
 rgb2grey = rgb2gray
 
 
-def gray2rgb(image):
+def gray2rgb(image, alpha=None):
     """Create an RGB representation of a gray-level image.
 
     Parameters
     ----------
     image : array_like
         Input image of shape ``(M, N [, P])``.
+    alpha : bool, optional
+        Ensure that the output image has an alpha layer.  If None,
+        alpha layers are passed through but not created.
 
     Returns
     -------
@@ -734,11 +745,37 @@ def gray2rgb(image):
         If the input is not a 2- or 3-dimensional image.
 
     """
-    if np.squeeze(image).ndim == 3 and image.shape[2] in (3, 4):
+    is_rgb = False
+    is_alpha = False
+    dims = np.squeeze(image).ndim
+
+    if dims == 3:
+        if image.shape[2] == 3:
+            is_rgb = True
+        elif image.shape[2] == 4:
+            is_alpha = True
+            is_rgb = True
+
+    if is_rgb:
+        if alpha == False:
+            image = image[..., :3]
+
+        elif alpha == True and not is_alpha:
+            alpha_layer = (np.ones_like(image[..., 0, np.newaxis]) *
+                           dtype_limits(image)[1])
+            image = np.concatenate((image, alpha_layer), axis=2)
+
         return image
-    elif image.ndim != 1 and np.squeeze(image).ndim in (1, 2, 3):
+
+    elif image.ndim != 1 and dims in (1, 2, 3):
         image = image[..., np.newaxis]
-        return np.concatenate(3 * (image,), axis=-1)
+
+        if alpha:
+            alpha_layer = (np.ones_like(image) * dtype_limits(image)[1])
+            return np.concatenate(3 * (image,) + (alpha_layer,), axis=-1)
+        else:
+            return np.concatenate(3 * (image,), axis=-1)
+
     else:
         raise ValueError("Input image expected to be RGB, RGBA or gray.")
 

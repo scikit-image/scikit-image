@@ -1,5 +1,5 @@
 import numpy as np
-import scipy.ndimage as nd
+from scipy import ndimage as ndi
 
 
 def profile_line(img, src, dst, linewidth=1,
@@ -15,13 +15,14 @@ def profile_line(img, src, dst, linewidth=1,
     src : 2-tuple of numeric scalar (float or int)
         The start point of the scan line.
     dst : 2-tuple of numeric scalar (float or int)
-        The end point of the scan line.
+        The end point of the scan line. The destination point is *included* 
+        in the profile, in constrast to standard numpy indexing.
     linewidth : int, optional
         Width of the scan, perpendicular to the line
     order : int in {0, 1, 2, 3, 4, 5}, optional
         The order of the spline interpolation to compute image values at
         non-integer coordinates. 0 means nearest-neighbor interpolation.
-    mode : string, one of {'constant', 'nearest', 'reflect', 'wrap'}, optional
+    mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
         How to compute any values falling outside of the image.
     cval : float, optional
         If `mode` is 'constant', what constant value to use outside the image.
@@ -44,21 +45,26 @@ def profile_line(img, src, dst, linewidth=1,
            [0, 0, 0, 0, 0, 0]])
     >>> profile_line(img, (2, 1), (2, 4))
     array([ 1.,  1.,  2.,  2.])
+    >>> profile_line(img, (1, 0), (1, 6), cval=4)
+    array([ 1.,  1.,  1.,  2.,  2.,  2.,  4.])
 
-    Notes
-    -----
     The destination point is included in the profile, in contrast to
     standard numpy indexing.
+    For example: 
+    >>> profile_line(img, (1, 0), (1, 6))  # The final point is out of bounds
+    array([ 1.,  1.,  1.,  2.,  2.,  2.,  0.])
+    >>> profile_line(img, (1, 0), (1, 5))  # This accesses the full first row
+    array([ 1.,  1.,  1.,  2.,  2.,  2.])
     """
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
     if img.ndim == 3:
-        pixels = [nd.map_coordinates(img[..., i], perp_lines,
-                                     order=order, mode=mode, cval=cval)
+        pixels = [ndi.map_coordinates(img[..., i], perp_lines,
+                                      order=order, mode=mode, cval=cval)
                   for i in range(img.shape[2])]
         pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
     else:
-        pixels = nd.map_coordinates(img, perp_lines,
-                                    order=order, mode=mode, cval=cval)
+        pixels = ndi.map_coordinates(img, perp_lines,
+                                     order=order, mode=mode, cval=cval)
     intensities = pixels.mean(axis=1)
 
     return intensities

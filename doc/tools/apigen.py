@@ -212,7 +212,7 @@ class ApiDocWriter(object):
             obj = mod.__dict__[obj_str]
 
             # figure out if obj is a function or class
-            if isinstance(obj, FunctionType):
+            if isinstance(obj, (FunctionType, BuiltinFunctionType)):
                 functions.append(obj_str)
             else:
                 try:

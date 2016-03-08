@@ -91,7 +91,7 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
     .. [1] Tola et al. "Daisy: An efficient dense descriptor applied to wide-
            baseline stereo." Pattern Analysis and Machine Intelligence, IEEE
            Transactions on 32.5 (2010): 815-830.
-    .. [2] http://cvlab.epfl.ch/alumni/tola/daisy.html
+    .. [2] http://cvlab.epfl.ch/software/daisy
     '''
 
     assert_nD(img, 2, 'img')
@@ -181,20 +181,20 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
         for i in range(descs.shape[0]):
             for j in range(descs.shape[1]):
                 # Draw center histogram sigma
-                color = (1, 0, 0)
+                color = [1, 0, 0]
                 desc_y = i * step + radius
                 desc_x = j * step + radius
-                coords = draw.circle_perimeter(desc_y, desc_x, int(sigmas[0]))
-                draw.set_color(descs_img, coords, color)
+                rows, cols, val = draw.circle_perimeter_aa(desc_y, desc_x, int(sigmas[0]))
+                draw.set_color(descs_img, (rows, cols), color, alpha=val)
                 max_bin = np.max(descs[i, j, :])
                 for o_num, o in enumerate(orientation_angles):
                     # Draw center histogram bins
                     bin_size = descs[i, j, o_num] / max_bin
                     dy = sigmas[0] * bin_size * sin(o)
                     dx = sigmas[0] * bin_size * cos(o)
-                    coords = draw.line(desc_y, desc_x, int(desc_y + dy),
-                                       int(desc_x + dx))
-                    draw.set_color(descs_img, coords, color)
+                    rows, cols, val = draw.line_aa(desc_y, desc_x, int(desc_y + dy),
+                                                   int(desc_x + dx))
+                    draw.set_color(descs_img, (rows, cols), color, alpha=val)
                 for r_num, r in enumerate(ring_radii):
                     color_offset = float(1 + r_num) / rings
                     color = (1 - color_offset, 1, color_offset)
@@ -202,9 +202,9 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
                         # Draw ring histogram sigmas
                         hist_y = desc_y + int(round(r * sin(t)))
                         hist_x = desc_x + int(round(r * cos(t)))
-                        coords = draw.circle_perimeter(hist_y, hist_x,
-                                                       int(sigmas[r_num + 1]))
-                        draw.set_color(descs_img, coords, color)
+                        rows, cols, val = draw.circle_perimeter_aa(hist_y, hist_x,
+                                                                   int(sigmas[r_num + 1]))
+                        draw.set_color(descs_img, (rows, cols), color, alpha=val)
                         for o_num, o in enumerate(orientation_angles):
                             # Draw histogram bins
                             bin_size = descs[i, j, orientations + r_num *
@@ -213,10 +213,10 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
                             bin_size /= max_bin
                             dy = sigmas[r_num + 1] * bin_size * sin(o)
                             dx = sigmas[r_num + 1] * bin_size * cos(o)
-                            coords = draw.line(hist_y, hist_x,
-                                               int(hist_y + dy),
-                                               int(hist_x + dx))
-                            draw.set_color(descs_img, coords, color)
+                            rows, cols, val = draw.line_aa(hist_y, hist_x,
+                                                           int(hist_y + dy),
+                                                           int(hist_x + dx))
+                            draw.set_color(descs_img, (rows, cols), color, alpha=val)
         return descs, descs_img
     else:
         return descs

@@ -6,7 +6,7 @@ import math
 import numpy as np
 
 cimport numpy as cnp
-from libc.math cimport sqrt, sin, cos, floor, ceil
+from libc.math cimport sqrt, sin, cos, floor, ceil, fabs
 from .._shared.geometry cimport point_in_polygon
 
 
@@ -21,30 +21,31 @@ def _coords_inside_image(rr, cc, shape, val=None):
     shape : tuple
         Image shape which is used to determine the maximum extent of output
         pixel coordinates.
-    val : ndarray of float, optional
-        Values of pixels at coordinates [rr, cc].
+    val : (N, D) ndarray of float, optional
+        Values of pixels at coordinates ``[rr, cc]``.
 
     Returns
     -------
-    rr, cc : (N,) array of int
+    rr, cc : (M,) array of int
         Row and column indices of valid pixels (i.e. those inside `shape`).
-    val : (N,) array of float, optional
+    val : (M, D) array of float, optional
         Values at `rr, cc`. Returned only if `val` is given as input.
     """
     mask = (rr >= 0) & (rr < shape[0]) & (cc >= 0) & (cc < shape[1])
-    if val is not None:
+    if val is None:
+        return rr[mask], cc[mask]
+    else:
         return rr[mask], cc[mask], val[mask]
-    return rr[mask], cc[mask]
 
 
-def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
+def line(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y1, Py_ssize_t x1):
     """Generate line pixel coordinates.
 
     Parameters
     ----------
-    y, x : int
+    y0, x0 : int
         Starting position (row, column).
-    y2, x2 : int
+    y1, x1 : int
         End position (row, column).
 
     Returns
@@ -54,9 +55,9 @@ def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
 
-    Notes
-    -----
-    Anti-aliased line generator is available with `line_aa`.
+    See Also
+    --------
+    line_aa : Anti-aliased line generator
 
     Examples
     --------
@@ -79,55 +80,59 @@ def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
     """
 
     cdef char steep = 0
-    cdef Py_ssize_t dx = abs(x2 - x)
-    cdef Py_ssize_t dy = abs(y2 - y)
+    cdef Py_ssize_t x = x0
+    cdef Py_ssize_t y = y0
+    cdef Py_ssize_t dx = abs(x1 - x0)
+    cdef Py_ssize_t dy = abs(y1 - y0)
     cdef Py_ssize_t sx, sy, d, i
 
-    if (x2 - x) > 0:
-        sx = 1
-    else:
-        sx = -1
-    if (y2 - y) > 0:
-        sy = 1
-    else:
-        sy = -1
-    if dy > dx:
-        steep = 1
-        x, y = y, x
-        dx, dy = dy, dx
-        sx, sy = sy, sx
-    d = (2 * dy) - dx
+    with nogil:
+        if (x1 - x) > 0:
+            sx = 1
+        else:
+            sx = -1
+        if (y1 - y) > 0:
+            sy = 1
+        else:
+            sy = -1
+        if dy > dx:
+            steep = 1
+            x, y = y, x
+            dx, dy = dy, dx
+            sx, sy = sy, sx
+        d = (2 * dy) - dx
 
     cdef Py_ssize_t[::1] rr = np.zeros(int(dx) + 1, dtype=np.intp)
     cdef Py_ssize_t[::1] cc = np.zeros(int(dx) + 1, dtype=np.intp)
 
-    for i in range(dx):
-        if steep:
-            rr[i] = x
-            cc[i] = y
-        else:
-            rr[i] = y
-            cc[i] = x
-        while d >= 0:
-            y = y + sy
-            d = d - (2 * dx)
-        x = x + sx
-        d = d + (2 * dy)
+    with nogil:
+        for i in range(dx):
+            if steep:
+                rr[i] = x
+                cc[i] = y
+            else:
+                rr[i] = y
+                cc[i] = x
+            while d >= 0:
+                y = y + sy
+                d = d - (2 * dx)
+            x = x + sx
+            d = d + (2 * dy)
 
-    rr[dx] = y2
-    cc[dx] = x2
+        rr[dx] = y1
+        cc[dx] = x1
 
     return np.asarray(rr), np.asarray(cc)
 
 
-def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
+def line_aa(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y1, Py_ssize_t x1):
     """Generate anti-aliased line pixel coordinates.
 
     Parameters
     ----------
-    y1, x1 : int
+    y0, x0 : int
         Starting position (row, column).
-    y2, x2 : int
+    y1, x1 : int
         End position (row, column).
 
     Returns
@@ -163,17 +168,22 @@ def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
     cdef list cc = list()
     cdef list val = list()
 
-    cdef int dx = abs(x1 - x2)
-    cdef int dy = abs(y1 - y2)
-    cdef int err = dx - dy
-    cdef int x, y, e, ed, sign_x, sign_y
+    cdef int dx = abs(x0 - x1)
+    cdef int dx_prime
 
-    if x1 < x2:
+    cdef int dy = abs(y0 - y1)
+    cdef float err = dx - dy
+    cdef float err_prime
+
+    cdef int x, y, sign_x, sign_y
+    cdef float ed
+
+    if x0 < x1:
         sign_x = 1
     else:
         sign_x = -1
 
-    if y1 < y2:
+    if y0 < y1:
         sign_y = 1
     else:
         sign_y = -1
@@ -181,30 +191,34 @@ def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
     if dx + dy == 0:
         ed = 1
     else:
-        ed = <int>(sqrt(dx*dx + dy*dy))
+        ed = sqrt(dx*dx + dy*dy)
 
-    x, y = x1, y1
+    x, y = x0, y0
     while True:
         cc.append(x)
         rr.append(y)
-        val.append(1. * abs(err - dx + dy) / <float>(ed))
-        e = err
-        if 2 * e >= -dx:
-            if x == x2:
+        val.append(fabs(err - dx + dy) / ed)
+
+        err_prime = err
+        x_prime = x
+
+        if (2 * err_prime) >= -dx:
+            if x == x1:
                 break
-            if e + dy < ed:
+            if (err_prime + dy) < ed:
                 cc.append(x)
                 rr.append(y + sign_y)
-                val.append(1. * abs(e + dy) / <float>(ed))
+                val.append(fabs(err_prime + dy) / ed)
             err -= dy
             x += sign_x
-        if 2 * e <= dy:
-            if y == y2:
+
+        if 2 * err_prime <= dy:
+            if y == y1:
                 break
-            if dx - e < ed:
-                cc.append(x)
+            if (dx - err_prime) < ed:
+                cc.append(x_prime + sign_x)
                 rr.append(y)
-                val.append(abs(dx - e) / <float>(ed))
+                val.append(fabs(dx - err_prime) / ed)
             err += dx
             y += sign_y
 
@@ -255,6 +269,8 @@ def polygon(y, x, shape=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
+    x = np.asanyarray(x)
+    y = np.asanyarray(y)
 
     cdef Py_ssize_t nr_verts = x.shape[0]
     cdef Py_ssize_t minr = int(max(0, y.min()))

@@ -1,10 +1,13 @@
 import numpy as np
-from skimage.restoration._nl_means_denoising import _nl_means_denoising_2d, \
-                    _nl_means_denoising_3d, \
-                    _fast_nl_means_denoising_2d, _fast_nl_means_denoising_3d
+from ._nl_means_denoising import (
+    _nl_means_denoising_2d,
+    _nl_means_denoising_3d,
+    _fast_nl_means_denoising_2d,
+    _fast_nl_means_denoising_3d)
 
-def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
-                       multichannel=True, fast_mode=True):
+
+def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
+                     multichannel=True, fast_mode=True):
     """
     Perform non-local means denoising on 2-D or 3-D grayscale images, and
     2-D RGB images.
@@ -38,10 +41,6 @@ def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
     result : ndarray
         Denoised image, of same shape as `image`.
 
-    See Also
-    --------
-    fast_nl_means_denoising
-
     Notes
     -----
 
@@ -65,19 +64,21 @@ def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
 
     image.size * patch_distance ** image.ndim
 
-    The computing time depends only weakly on the patch size, thanks to the
-    computation of the integral of patches distances for a given shift, that
-    reduces the number of operations [1]_. Therefore, this algorithm executes
-    faster than `nl_means_denoising`, at the expense of using twice as much
-    memory.
+    The computing time depends only weakly on the patch size, thanks to
+    the computation of the integral of patches distances for a given
+    shift, that reduces the number of operations [1]_. Therefore, this
+    algorithm executes faster than the classic algorith
+    (``fast_mode=False``), at the expense of using twice as much memory.
+    This implementation has been proven to be more efficient compared to
+    other alternatives, see e.g. [3]_.
 
-    Compared to the classic non-local means algorithm implemented in
-    `nl_means_denoising`, all pixels of a patch contribute to the distance to
-    another patch with the same weight, no matter their distance to the center
-    of the patch. This coarser computation of the distance can result in a
-    slightly poorer denoising performance. Moreover, for small images (images
-    with a linear size that is only a few times the patch size), the classic
-    algorithm can be faster due to boundary effects.
+    Compared to the classic algorithm, all pixels of a patch contribute
+    to the distance to another patch with the same weight, no matter
+    their distance to the center of the patch. This coarser computation
+    of the distance can result in a slightly poorer denoising
+    performance. Moreover, for small images (images with a linear size
+    that is only a few times the patch size), the classic algorithm can
+    be faster due to boundary effects.
 
     The image is padded using the `reflect` mode of `skimage.util.pad`
     before denoising.
@@ -85,17 +86,22 @@ def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
     References
     ----------
     .. [1] Buades, A., Coll, B., & Morel, J. M. (2005, June). A non-local
-        algorithm for image denoising. In CVPR 2005, Vol. 2, pp. 60-65, IEEE.
+           algorithm for image denoising. In CVPR 2005, Vol. 2, pp. 60-65, IEEE.
 
-    .. [2] Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
+    .. [2] J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
+           nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
+           International Symposium on Biomedical Imaging: From Nano to Macro,
+           2008, pp. 1331-1334.
+
+    .. [3] Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
            Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
 
     Examples
     --------
     >>> a = np.zeros((40, 40))
     >>> a[10:-10, 10:-10] = 1.
-    >>> a += 0.3*np.random.randn(*a.shape)
-    >>> denoised_a = nl_means_denoising(a, 7, 5, 0.1)
+    >>> a += 0.3 * np.random.randn(*a.shape)
+    >>> denoised_a = denoise_nl_means(a, 7, 5, 0.1)
     """
     if image.ndim == 2:
         image = image[..., np.newaxis]
@@ -113,8 +119,7 @@ def nl_means_denoising(image, patch_size=7, patch_distance=11, h=0.1,
     else:  # 3-D grayscale
         if fast_mode:
             return np.array(_fast_nl_means_denoising_3d(image, s=patch_size,
-                                              d=patch_distance, h=h))
+                                                        d=patch_distance, h=h))
         else:
             return np.array(_nl_means_denoising_3d(image, patch_size,
-                                patch_distance, h))
-
+                            patch_distance, h))

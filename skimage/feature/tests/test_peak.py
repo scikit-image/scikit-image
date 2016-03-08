@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import (assert_array_almost_equal as assert_close,
-                           assert_equal)
-import scipy.ndimage
+                           assert_equal, assert_raises)
+from scipy import ndimage as ndi
 from skimage.feature import peak
 
 
@@ -11,6 +11,7 @@ np.random.seed(21)
 def test_trivial_case():
     trivial = np.zeros((25, 25))
     peak_indices = peak.peak_local_max(trivial, min_distance=1, indices=True)
+    assert type(peak_indices) is np.ndarray
     assert not peak_indices     # inherent boolean-ness of empty list
     peaks = peak.peak_local_max(trivial, min_distance=1, indices=False)
     assert (peaks.astype(np.bool) == trivial).all()
@@ -69,12 +70,14 @@ def test_num_peaks():
     image[1, 5] = 12
     image[3, 5] = 8
     image[5, 3] = 7
-    assert len(peak.peak_local_max(image, min_distance=1)) == 5
-    peaks_limited = peak.peak_local_max(image, min_distance=1, num_peaks=2)
+    assert len(peak.peak_local_max(image, min_distance=1, threshold_abs=0)) == 5
+    peaks_limited = peak.peak_local_max(
+        image, min_distance=1, threshold_abs=0, num_peaks=2)
     assert len(peaks_limited) == 2
     assert (1, 3) in peaks_limited
     assert (1, 5) in peaks_limited
-    peaks_limited = peak.peak_local_max(image, min_distance=1, num_peaks=4)
+    peaks_limited = peak.peak_local_max(
+        image, min_distance=1, threshold_abs=0, num_peaks=4)
     assert len(peaks_limited) == 4
     assert (1, 3) in peaks_limited
     assert (1, 5) in peaks_limited
@@ -89,7 +92,7 @@ def test_num_peaks3D():
     image[5,5,::5] = np.arange(20)
     peaks_limited = peak.peak_local_max(image, min_distance=1, num_peaks=2)
     assert len(peaks_limited) == 2
-    
+
 
 def test_reorder_labels():
     image = np.random.uniform(size=(40, 60))
@@ -101,8 +104,8 @@ def test_reorder_labels():
     expected = np.zeros(image.shape, float)
     for imin, imax in ((0, 20), (20, 40)):
         for jmin, jmax in ((0, 30), (30, 60)):
-            expected[imin:imax, jmin:jmax] = scipy.ndimage.maximum_filter(
-                image[imin:imax, jmin:jmax], footprint=footprint)
+            expected[imin:imax, jmin:jmax] = ndi.maximum_filter(
+                            image[imin:imax, jmin:jmax], footprint=footprint)
     expected = (expected == image)
     result = peak.peak_local_max(image, labels=labels, min_distance=1,
                                  threshold_rel=0, footprint=footprint,
@@ -119,7 +122,7 @@ def test_indices_with_labels():
     expected = np.zeros(image.shape, float)
     for imin, imax in ((0, 20), (20, 40)):
         for jmin, jmax in ((0, 30), (30, 60)):
-            expected[imin:imax, jmin:jmax] = scipy.ndimage.maximum_filter(
+            expected[imin:imax, jmin:jmax] = ndi.maximum_filter(
                 image[imin:imax, jmin:jmax], footprint=footprint)
     expected = (expected == image)
     result = peak.peak_local_max(image, labels=labels, min_distance=1,
@@ -142,8 +145,34 @@ def test_ndarray_exclude_border():
     nd_image[2,2,2] = 1
     expected = np.zeros_like(nd_image, dtype=np.bool)
     expected[2,2,2] = True
-    result = peak.peak_local_max(nd_image, min_distance=2, indices=False)
-    assert (result == expected).all()
+    expectedNoBorder = nd_image > 0
+    result = peak.peak_local_max(nd_image, min_distance=2,
+        exclude_border=2, indices=False)
+    assert_equal(result, expected)
+    # Check that bools work as expected
+    assert_equal(
+        peak.peak_local_max(nd_image, min_distance=2,
+            exclude_border=2, indices=False),
+        peak.peak_local_max(nd_image, min_distance=2,
+            exclude_border=True, indices=False)
+        )
+    assert_equal(
+        peak.peak_local_max(nd_image, min_distance=2,
+            exclude_border=0, indices=False),
+        peak.peak_local_max(nd_image, min_distance=2,
+            exclude_border=False, indices=False)
+        )
+    # Check both versions with  no border
+    assert_equal(
+        peak.peak_local_max(nd_image, min_distance=2,
+            exclude_border=0, indices=False),
+        expectedNoBorder,
+        )
+    assert_equal(
+        peak.peak_local_max(nd_image,
+            exclude_border=False, indices=False),
+        expectedNoBorder,
+        )
 
 
 def test_empty():
@@ -251,7 +280,7 @@ def test_four_quadrants():
     expected = np.zeros(image.shape, float)
     for imin, imax in ((0, 20), (20, 40)):
         for jmin, jmax in ((0, 30), (30, 60)):
-            expected[imin:imax, jmin:jmax] = scipy.ndimage.maximum_filter(
+            expected[imin:imax, jmin:jmax] = ndi.maximum_filter(
                 image[imin:imax, jmin:jmax], footprint=footprint)
     expected = (expected == image)
     result = peak.peak_local_max(image, labels=labels, footprint=footprint,
@@ -269,9 +298,11 @@ def test_disk():
     result = peak.peak_local_max(image, labels=np.ones((10, 20)),
                                  footprint=footprint,
                                  min_distance=1, threshold_rel=0,
-                                 indices=False, exclude_border=False)
+                                 threshold_abs=-1, indices=False,
+                                 exclude_border=False)
     assert np.all(result)
-    result = peak.peak_local_max(image, footprint=footprint)
+    result = peak.peak_local_max(image, footprint=footprint, threshold_abs=-1,
+                                 indices=False, exclude_border=False)
     assert np.all(result)
 
 
@@ -279,11 +310,14 @@ def test_3D():
     image = np.zeros((30, 30, 30))
     image[15, 15, 15] = 1
     image[5, 5, 5] = 1
-    assert_equal(peak.peak_local_max(image), [[15, 15, 15]])
-    assert_equal(peak.peak_local_max(image, min_distance=6), [[15, 15, 15]])
-    assert_equal(peak.peak_local_max(image, exclude_border=False),
+    assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0),
+                 [[15, 15, 15]])
+    assert_equal(peak.peak_local_max(image, min_distance=6, threshold_rel=0),
+                 [[15, 15, 15]])
+    assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
+                                     exclude_border=False),
                  [[5, 5, 5], [15, 15, 15]])
-    assert_equal(peak.peak_local_max(image, min_distance=5),
+    assert_equal(peak.peak_local_max(image, min_distance=5, threshold_rel=0),
                  [[5, 5, 5], [15, 15, 15]])
 
 
@@ -291,12 +325,28 @@ def test_4D():
     image = np.zeros((30, 30, 30, 30))
     image[15, 15, 15, 15] = 1
     image[5, 5, 5, 5] = 1
-    assert_equal(peak.peak_local_max(image), [[15, 15, 15, 15]])
-    assert_equal(peak.peak_local_max(image, min_distance=6), [[15, 15, 15, 15]])
-    assert_equal(peak.peak_local_max(image, exclude_border=False),
+    assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0),
+                 [[15, 15, 15, 15]])
+    assert_equal(peak.peak_local_max(image, min_distance=6, threshold_rel=0),
+                 [[15, 15, 15, 15]])
+    assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
+                                     exclude_border=False),
                  [[5, 5, 5, 5], [15, 15, 15, 15]])
-    assert_equal(peak.peak_local_max(image, min_distance=5),
+    assert_equal(peak.peak_local_max(image, min_distance=5, threshold_rel=0),
                  [[5, 5, 5, 5], [15, 15, 15, 15]])
+
+
+def test_threshold_rel_default():
+    image = np.ones((5, 5))
+
+    image[2, 2] = 1
+    assert len(peak.peak_local_max(image)) == 0
+
+    image[2, 2] = 2
+    assert_equal(peak.peak_local_max(image), [[2, 2]])
+
+    image[2, 2] = 0
+    assert len(peak.peak_local_max(image, min_distance=0)) == image.size - 1
 
 
 if __name__ == '__main__':
