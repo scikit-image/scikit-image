@@ -19,6 +19,7 @@ LICENSE = 'Modified BSD'
 DOWNLOAD_URL = 'http://github.com/scikit-image/scikit-image'
 
 import os
+import sys
 
 import setuptools
 from distutils.command.build_py import build_py
