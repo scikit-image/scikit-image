@@ -1,6 +1,7 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: scikit-image
 Upstream-Contact: Stéfan van der Walt <stefan@sun.ac.za>
+Files-Excluded: doc/source/themes/scikit-image/static/js/*.min.js
 Source: http://github.com/scikit-image/scikit-image
 
 Files: *
