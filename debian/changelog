@@ -6,6 +6,7 @@ skimage (0.12.3-1) experimental; urgency=medium
     - Fixes Sphinx 1.3 incompatibility (Closes: #788965)
   * debian/watch now uses scikit-image-*.*.tar.gz as filename
   * Patch: turn dask into an optional dependency
+  * Update license for tifffile
 
  -- Stefan van der Walt <stefanv@berkeley.edu>  Mon, 07 Mar 2016 13:17:24 -0800
 

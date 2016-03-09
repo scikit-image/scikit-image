@@ -4,7 +4,12 @@ Upstream-Contact: Stéfan van der Walt <stefan@sun.ac.za>
 Source: http://github.com/scikit-image/scikit-image
 
 Files: *
-Copyright: 2009-2013, the scikit-image team
+Copyright: 2009-2016, the scikit-image team
+License: BSD-3
+
+Files: skimage/external/tifffile.py
+Copyright: 2008-2014, Christoph Gohlke
+Copyright: 2008-2014, The Regents of the University of California
 License: BSD-3
 
 Files: doc/sphinxext/docscrape.py doc/sphinxext/docscrape_sphinx.py
