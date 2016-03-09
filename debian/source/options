@@ -1,3 +1,3 @@
 # Do not generate diff for version.py which gets updated by setup.py
-extend-diff-ignore = "(^|/)skimage/version.py$"
+extend-diff-ignore = "((^|/)skimage/version.py|.*\.min\.js)$"
 
