@@ -357,7 +357,7 @@ def denoise_tv_chambolle(im, weight=50, eps=2.e-4, n_iter_max=200,
     return out
 
 
-def _denoise_wavelet(img, wavelet, threshold):
+def _denoise_wavelet(img, wavelet, threshold, mode='soft'):
     """Performs wavelet denoising.
 
     Parameters
@@ -374,6 +374,10 @@ def _denoise_wavelet(img, wavelet, threshold):
         The thresholding value. All wavelet coefficients less than this value
         are set to 0. By default, the threshold is computed adaptively as
         described in [1]_.
+    mode : {'soft', 'hard'}, optional
+        An optional argument to choose the type of denoising performed. It
+        noted that choosing soft thresholding given additive noise finds the
+        best approximation of the original image.
 
     Returns
     -------
@@ -382,12 +386,13 @@ def _denoise_wavelet(img, wavelet, threshold):
     """
     import pywt
     coeffs = pywt.wavedec2(img, wavelet)
-    denoised_coeffs = [pywt.threshold(c, value=threshold, mode='soft')
-                            for c in coeffs]
+    denoised_coeffs = [pywt.threshold(c, value=threshold, mode=mode)
+                       for c in coeffs]
     return pywt.waverec2(denoised_coeffs, wavelet)
 
 
-def denoise_wavelet(im, noise_stdev=0.13, wavelet='db1', threshold=None):
+def denoise_wavelet(im, noise_stdev=0.13, wavelet='db1', threshold=None,
+                    mode='soft'):
     """Performs wavelet denoising on an image.
 
     Parameters
@@ -408,6 +413,10 @@ def denoise_wavelet(im, noise_stdev=0.13, wavelet='db1', threshold=None):
         are set to 0. By default, the threshold is computed adaptively as
         described in [1]_. If this threshold is specified, the parameter
         noise_stdev is ignored.
+    mode : {'soft', 'hard'}, optional
+        An optional argument to choose the type of denoising performed. It
+        noted that choosing soft thresholding given additive noise finds the
+        best approximation of the original image.
 
     Returns
     -------
@@ -459,11 +468,13 @@ def denoise_wavelet(im, noise_stdev=0.13, wavelet='db1', threshold=None):
         threshold = noise_stdev**2 / np.sqrt(max(im.var() - noise_stdev**2, 0))
 
     if im.ndim == 2:
-        out = _denoise_wavelet(im, wavelet=wavelet, threshold=threshold)
+        out = _denoise_wavelet(im, wavelet=wavelet, threshold=threshold,
+                               mode=mode)
 
     else:
         out = np.dstack([_denoise_wavelet(im[..., c], wavelet=wavelet,
-                         threshold=threshold) for c in range(im.ndim)])
+                         threshold=threshold, mode=mode)
+                         for c in range(im.ndim)])
 
     # ensure valid image in 0, 1 is returned
     out = np.clip(out, 0, 1)
