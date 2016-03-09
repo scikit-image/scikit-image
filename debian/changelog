@@ -7,6 +7,8 @@ skimage (0.12.3-1) experimental; urgency=medium
   * debian/watch now uses scikit-image-*.*.tar.gz as filename
   * Patch: turn dask into an optional dependency
   * Update license for tifffile
+  * debian/control
+    - boosted policy to 3.9.7
 
  -- Stefan van der Walt <stefanv@berkeley.edu>  Mon, 07 Mar 2016 13:17:24 -0800
 
