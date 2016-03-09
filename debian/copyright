@@ -10,7 +10,7 @@ License: BSD-3
 
 Files: skimage/external/tifffile.py
 Copyright: 2008-2014, Christoph Gohlke
-Copyright: 2008-2014, The Regents of the University of California
+           2008-2014, The Regents of the University of California
 License: BSD-3
 
 Files: doc/sphinxext/docscrape.py doc/sphinxext/docscrape_sphinx.py
