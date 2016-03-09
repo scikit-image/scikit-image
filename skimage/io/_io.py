@@ -11,7 +11,7 @@ from .._shared.utils import all_warnings, warn
 
 
 __all__ = ['imread', 'imsave', 'imshow', 'show',
-           'imread_collection', 'imshow_collection']
+           'imread_collection', 'imshow_collection', 'imread_with_metadata']
 
 
 def imread(fname, as_grey=False, plugin=None, flatten=None,
@@ -72,6 +72,68 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
             img = rgb2grey(img)
 
     return img
+
+
+def imread_with_metadata(fname, as_grey=False, plugin=None, flatten=None,
+           **plugin_args):
+    """Load an image from file along with its metadata.
+
+    Parameters
+    ----------
+    fname : string
+        Image file name, e.g. ``test.jpg`` or URL.
+    as_grey : bool
+        If True, convert color images to grey-scale (32-bit floats).
+        Images that are already in grey-scale format are not converted.
+    plugin : str
+        Name of plugin to use.  By default, the different plugins are
+        tried (starting with the Python Imaging Library) until a suitable
+        candidate is found.  If not given and fname is a tiff file, the
+        tifffile plugin will be used.
+
+    Other Parameters
+    ----------------
+    flatten : bool
+        Backward compatible keyword, superseded by `as_grey`.
+
+    Returns
+    -------
+    img_array : ndarray
+        The different colour bands/channels are stored in the
+        third dimension, such that a grey-image is MxN, an
+        RGB-image MxNx3 and an RGBA-image MxNx4.
+    metadata : list
+        A list containing TIFF pages' metadata dictionaries.
+
+    Other parameters
+    ----------------
+    plugin_args : keywords
+        Passed to the given plugin.
+
+    """
+    # Backward compatibility
+    if flatten is not None:
+        as_grey = flatten
+
+    if plugin is None and hasattr(fname, 'lower'):
+        if fname.lower().endswith(('.tiff', '.tif')):
+            plugin = 'tifffile'
+
+    with file_or_url_context(fname) as fname:
+        (img, metadata) = call_plugin('imread_with_metadata', fname, plugin=plugin, **plugin_args)
+
+    if not hasattr(img, 'ndim'):
+        return (img, metadata)
+
+    if img.ndim > 2:
+        if img.shape[-1] not in (3, 4) and img.shape[-3] in (3, 4):
+            img = np.swapaxes(img, -1, -3)
+            img = np.swapaxes(img, -2, -3)
+
+        if as_grey:
+            img = rgb2grey(img)
+
+    return (img, metadata)
 
 
 def imread_collection(load_pattern, conserve_memory=True,
