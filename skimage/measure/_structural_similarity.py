@@ -102,7 +102,7 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
         if full:
             S = np.empty(X.shape)
         for ch in range(nch):
-            ch_result = structural_similarity(X[..., ch], Y[..., ch], **args)
+            ch_result = compare_ssim(X[..., ch], Y[..., ch], **args)
             if gradient and full:
                 mssim[..., ch], G[..., ch], S[..., ch] = ch_result
             elif gradient:
@@ -226,6 +226,6 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
                           gaussian_weights=False, full=False, **kwargs):
     """""" + compare_ssim.__doc__
     return compare_ssim(X, Y, win_size=win_size, gradient=gradient,
-                        dynamic_range=dynamic_range, 
-                        multichannel=multichannel, 
+                        dynamic_range=dynamic_range,
+                        multichannel=multichannel,
                         gaussian_weights=gaussian_weights, full=full, **kwargs)
