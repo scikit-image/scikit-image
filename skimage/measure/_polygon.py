@@ -35,12 +35,23 @@ def approximate_polygon(coords, tolerance):
     if coords.shape[0] <= 2:
         return coords
 
+    # calculate the furthest two points
+    max_dist = 0
+    furthest_points = None
+    for i in range(coords.shape[0]):
+        for j in range(i + 1, coords.shape[0]):
+            dist = np.sum((coords[j, :] - coords[i, :]) ** 2)
+            if dist > max_dist:
+                max_dist = dist
+                furthest_points = (i, j)
+
     chain = np.zeros(coords.shape[0], 'bool')
     # pre-allocate distance array for all points
     dists = np.zeros(coords.shape[0])
-    chain[0] = True
-    chain[-1] = True
-    pos_stack = [(0, chain.shape[0] - 1)]
+    i, j = furthest_points
+    chain[i] = True
+    chain[j] = True
+    pos_stack = [(0, i), (i, j), (j, coords.shape[0] - 1)]
     end_of_chain = False
 
     while not end_of_chain:
