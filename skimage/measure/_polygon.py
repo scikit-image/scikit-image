@@ -1,5 +1,6 @@
 import numpy as np
 from scipy import signal
+import pdb
 
 
 def approximate_polygon(coords, tolerance):
@@ -31,66 +32,59 @@ def approximate_polygon(coords, tolerance):
     if tolerance <= 0:
         return coords
 
+    if coords.shape[0] <= 2:
+        return coords
+
     chain = np.zeros(coords.shape[0], 'bool')
-    # pre-allocate distance array for all points
-    dists = np.zeros(coords.shape[0])
     chain[0] = True
-    chain[-1] = True
-    pos_stack = [(0, chain.shape[0] - 1)]
-    end_of_chain = False
-
-    while not end_of_chain:
+    chain[coords.shape[0] - 1] = True
+    pos_stack = [(0, coords.shape[0] - 1)]
+    while len(pos_stack) != 0:
         start, end = pos_stack.pop()
-        # determine properties of current line segment
-        r0, c0 = coords[start, :]
-        r1, c1 = coords[end, :]
-        dr = r1 - r0
-        dc = c1 - c0
-        segment_angle = - np.arctan2(dr, dc)
-        segment_dist = c0 * np.sin(segment_angle) + r0 * np.cos(segment_angle)
-
-        # select points in-between line segment
-        segment_coords = coords[start + 1:end, :]
-        segment_dists = dists[start + 1:end]
-
-        # check whether to take perpendicular or euclidean distance with
-        # inner product of vectors
-
-        # vectors from points -> start and end
-        dr0 = segment_coords[:, 0] - r0
-        dc0 = segment_coords[:, 1] - c0
-        dr1 = segment_coords[:, 0] - r1
-        dc1 = segment_coords[:, 1] - c1
-        # vectors points -> start and end projected on start -> end vector
-        projected_lengths0 = dr0 * dr + dc0 * dc
-        projected_lengths1 = - dr1 * dr - dc1 * dc
-        perp = np.logical_and(projected_lengths0 > 0,
-                              projected_lengths1 > 0)
-        eucl = np.logical_not(perp)
-        segment_dists[perp] = np.abs(
-            segment_coords[perp, 0] * np.cos(segment_angle)
-            + segment_coords[perp, 1] * np.sin(segment_angle)
-            - segment_dist
-        )
-        segment_dists[eucl] = np.minimum(
-            # distance to start point
-            np.sqrt(dc0[eucl] ** 2 + dr0[eucl] ** 2),
-            # distance to end point
-            np.sqrt(dc1[eucl] ** 2 + dr1[eucl] ** 2)
-        )
-
-        if np.any(segment_dists > tolerance):
-            # select point with maximum distance to line
-            new_end = start + np.argmax(segment_dists) + 1
-            pos_stack.append((new_end, end))
-            pos_stack.append((start, new_end))
-            chain[new_end] = True
-
-        if len(pos_stack) == 0:
-            end_of_chain = True
+        index, dmax = _max_perp_dist(coords, start, end)
+        if dmax > tolerance:
+            pos_stack.append((start, index))
+            pos_stack.append((index, end))
+            chain[index] = True
 
     return coords[chain, :]
 
+def _max_perp_dist(coords, start, end):
+    """Helper function for approximate_polygon.
+
+    For each point in COORDS, it calculates the perpendicular distance from the
+    line connecting START and END.
+
+    It returns the index and the distance of the point that has the maximum
+    distance.
+
+    Parameters
+    ----------
+    coords : (N, 2) array
+        Coordinate array.
+
+    Returns
+    -------
+    index : integer
+        Index of the point with maximum distance.
+    dmax : float
+        The maximum perpendicular distance.
+    """
+    dmax = 0
+    index = 0
+    p1_x, p1_y = coords[start, :]
+    p2_x, p2_y = coords[end, :]
+
+    for i in range(start + 1, end):
+        x, y = coords[i, :]
+        perp_dist = abs(float((p2_y - p1_y) * x - (p2_x - p1_x) * y + \
+                        (p2_x * p1_y) - (p2_y * p1_x))) / \
+                        (((p2_y - p1_y) ** 2 + (p2_x - p1_x) ** 2) ** 0.5)
+        if perp_dist > dmax:
+            index = i
+            dmax = perp_dist
+
+    return index, dmax
 
 # B-Spline subdivision
 _SUBDIVISION_MASKS = {
