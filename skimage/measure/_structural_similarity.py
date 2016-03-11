@@ -139,7 +139,9 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
             win_size = 7   # backwards compatibility
 
     if np.any((np.asarray(X.shape) - win_size) < 0):
-        raise ValueError("win_size exceeds image extent")
+        raise ValueError(
+            "win_size exceeds image extent.  If the input is a multichannel "
+            "(color) image, set multichannel=True.")
 
     if not (win_size % 2 == 1):
         raise ValueError('Window size must be odd.')
