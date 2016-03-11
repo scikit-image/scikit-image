@@ -29,28 +29,10 @@ def approximate_polygon(coords, tolerance):
     ----------
     .. [1] http://en.wikipedia.org/wiki/Ramer-Douglas-Peucker_algorithm
     """
-    """
     if tolerance <= 0:
         return coords
 
     if coords.shape[0] <= 2:
-        return coords
-
-    chain = np.zeros(coords.shape[0], 'bool')
-    chain[0] = True
-    chain[coords.shape[0] - 1] = True
-    pos_stack = [(0, coords.shape[0] - 1)]
-    while len(pos_stack) != 0:
-        start, end = pos_stack.pop()
-        index, dmax = _max_perp_dist(coords, start, end)
-        if dmax > tolerance:
-            pos_stack.append((start, index))
-            pos_stack.append((index, end))
-            chain[index] = True
-
-    return coords[chain, :]
-    """
-    if tolerance <= 0:
         return coords
 
     chain = np.zeros(coords.shape[0], 'bool')
@@ -68,8 +50,6 @@ def approximate_polygon(coords, tolerance):
         r1, c1 = coords[end, :]
         dr = r1 - r0
         dc = c1 - c0
-        segment_angle = - np.arctan2(dr, dc)
-        segment_dist = c0 * np.sin(segment_angle) + r0 * np.cos(segment_angle)
 
         # select points in-between line segment
         segment_coords = coords[start + 1:end, :]
@@ -112,44 +92,6 @@ def approximate_polygon(coords, tolerance):
             end_of_chain = True
 
     return coords[chain, :]
-
-
-def _max_perp_dist(coords, start, end):
-    """Helper function for approximate_polygon.
-
-    For each point in COORDS, it calculates the perpendicular distance from the
-    line connecting START and END.
-
-    It returns the index and the distance of the point that has the maximum
-    distance.
-
-    Parameters
-    ----------
-    coords : (N, 2) array
-        Coordinate array.
-
-    Returns
-    -------
-    index : integer
-        Index of the point with maximum distance.
-    dmax : float
-        The maximum perpendicular distance.
-    """
-    dmax = 0
-    index = 0
-    p1_x, p1_y = coords[start, :]
-    p2_x, p2_y = coords[end, :]
-
-    for i in range(start + 1, end):
-        x, y = coords[i, :]
-        perp_dist = abs(float((p2_y - p1_y) * x - (p2_x - p1_x) * y + \
-                        (p2_x * p1_y) - (p2_y * p1_x))) / \
-                        (((p2_y - p1_y) ** 2 + (p2_x - p1_x) ** 2) ** 0.5)
-        if perp_dist > dmax:
-            index = i
-            dmax = perp_dist
-
-    return index, dmax
 
 # B-Spline subdivision
 _SUBDIVISION_MASKS = {
