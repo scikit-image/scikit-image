@@ -20,8 +20,11 @@ def approximate_polygon(coords, tolerance, closed=True):
         polygonal chain. If tolerance is 0, the original coordinate array
         is returned.
     closed : boolean
-        If true, the approximated curve is closed (the first and last
-        vertices are connected). Default is True.
+        If true, the algorithm assumes the given polygon is closed
+        (the first and last vertices are connected) and approximates using the
+        furthest points. If false, the algorithm assumes the given polygon isn't
+        closed and approximates using the first and last points of the input.
+        Default is True.
 
     Returns
     -------
@@ -38,23 +41,29 @@ def approximate_polygon(coords, tolerance, closed=True):
     if coords.shape[0] <= 2:
         return coords
 
-    # calculate the furthest two points
-    max_dist = 0
-    furthest_points = None
-    for i in range(coords.shape[0]):
-        for j in range(i + 1, coords.shape[0]):
-            dist = np.sum((coords[j, :] - coords[i, :]) ** 2)
-            if dist > max_dist:
-                max_dist = dist
-                furthest_points = (i, j)
-
     chain = np.zeros(coords.shape[0], 'bool')
+    # if closed, calculate the furthest two points
+    if closed:
+        max_dist = 0
+        furthest_points = None
+        for i in range(coords.shape[0]):
+            for j in range(i + 1, coords.shape[0]):
+                dist = np.sum((coords[j, :] - coords[i, :]) ** 2)
+                if dist > max_dist:
+                    max_dist = dist
+                    furthest_points = (i, j)
+
+        i, j = furthest_points
+        chain[i] = True
+        chain[j] = True
+        pos_stack = [(j, coords.shape[0] - 1), (i, j), (0, i)]
+    else:
+        chain[0] = True
+        chain[coords.shape[0] - 1] = True
+        pos_stack = [(0, coords.shape[0] - 1)]
+
     # pre-allocate distance array for all points
     dists = np.zeros(coords.shape[0])
-    i, j = furthest_points
-    chain[i] = True
-    chain[j] = True
-    pos_stack = [(j, coords.shape[0] - 1), (i, j), (0, i)]
     end_of_chain = False
 
     while not end_of_chain:

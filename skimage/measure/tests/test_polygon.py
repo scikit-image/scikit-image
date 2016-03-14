@@ -14,19 +14,19 @@ def test_approximate_polygon():
     out = approximate_polygon(square, 0.1, closed=True)
     np.testing.assert_array_equal(out, square[(0, 3, 6, 9, 12), :])
     out = approximate_polygon(square, 0.1, closed=False)
-    np.testing.assert_array_equal(out, square[(0, 3, 6, 9), :])
+    np.testing.assert_array_equal(out, square[(0, 3, 6, 9, 12), :])
 
     out = approximate_polygon(square, 2.2, closed=True)
     np.testing.assert_array_equal(out, square[(0, 6, 12), :])
     out = approximate_polygon(square, 2.2, closed=False)
-    np.testing.assert_array_equal(out, square[(0, 6), :])
+    np.testing.assert_array_equal(out, square[(0, 6, 12), :])
 
     out = approximate_polygon(square[(0, 1, 3, 4, 5, 6, 7, 9, 11, 12), :],
                               0.1, closed=True)
     np.testing.assert_array_equal(out, square[(0, 3, 6, 9, 12), :])
     out = approximate_polygon(square[(0, 1, 3, 4, 5, 6, 7, 9, 11, 12), :],
                               0.1, closed=False)
-    np.testing.assert_array_equal(out, square[(0, 3, 6, 9), :])
+    np.testing.assert_array_equal(out, square[(0, 3, 6, 9, 12), :])
 
     out = approximate_polygon(square, -1, closed=True)
     np.testing.assert_array_equal(out, square)
