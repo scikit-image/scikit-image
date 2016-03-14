@@ -3,7 +3,7 @@ from scipy import signal
 import pdb
 
 
-def approximate_polygon(coords, tolerance):
+def approximate_polygon(coords, tolerance, closed=True):
     """Approximate a polygonal chain with the specified tolerance.
 
     It is based on the Douglas-Peucker algorithm.
@@ -19,6 +19,9 @@ def approximate_polygon(coords, tolerance):
         Maximum distance from original points of polygon to approximated
         polygonal chain. If tolerance is 0, the original coordinate array
         is returned.
+    closed : boolean
+        If true, the approximated curve is closed (the first and last
+        vertices are connected). Default is True.
 
     Returns
     -------
@@ -51,7 +54,7 @@ def approximate_polygon(coords, tolerance):
     i, j = furthest_points
     chain[i] = True
     chain[j] = True
-    pos_stack = [(0, i), (i, j), (j, coords.shape[0] - 1)]
+    pos_stack = [(j, coords.shape[0] - 1), (i, j), (0, i)]
     end_of_chain = False
 
     while not end_of_chain:
@@ -101,6 +104,11 @@ def approximate_polygon(coords, tolerance):
 
         if len(pos_stack) == 0:
             end_of_chain = True
+
+    if closed:
+        for i, p in enumerate(coords):
+            if chain[i]:
+                return np.vstack([coords[chain, :], p])
 
     return coords[chain, :]
 
