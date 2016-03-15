@@ -1,5 +1,7 @@
 import numpy as np
 from scipy import signal
+from scipy.spatial import distance_matrix
+from numpy import unravel_index
 import pdb
 
 
@@ -20,10 +22,11 @@ def approximate_polygon(coords, tolerance, closed=True):
         polygonal chain. If tolerance is 0, the original coordinate array
         is returned.
     closed : boolean
-        If true, the algorithm assumes the given polygon is closed
+        If True, the algorithm assumes the given polygon is closed
         (the first and last vertices are connected) and approximates using the
-        furthest points. If false, the algorithm assumes the given polygon isn't
-        closed and approximates using the first and last points of the input.
+        furthest points. If False, the algorithm assumes the given polygon isn't
+        closed and automatically marks the first and last points of the input
+        to be kept in the approximated curve.
         Default is True.
 
     Returns
@@ -34,6 +37,7 @@ def approximate_polygon(coords, tolerance, closed=True):
     References
     ----------
     .. [1] http://en.wikipedia.org/wiki/Ramer-Douglas-Peucker_algorithm
+    .. [2] http://paulbourke.net/geometry/pointlineplane/
     """
     if tolerance <= 0:
         return coords
@@ -44,15 +48,8 @@ def approximate_polygon(coords, tolerance, closed=True):
     chain = np.zeros(coords.shape[0], 'bool')
     # if closed, calculate the furthest two points
     if closed:
-        max_dist = 0
-        furthest_points = None
-        for i in range(coords.shape[0]):
-            for j in range(i + 1, coords.shape[0]):
-                dist = np.sum((coords[j, :] - coords[i, :]) ** 2)
-                if dist > max_dist:
-                    max_dist = dist
-                    furthest_points = (i, j)
-
+        dist_mat = distance_matrix(coords, coords)
+        furthest_points = unravel_index(dist_mat.argmax(), dist_mat.shape)
         i, j = furthest_points
         chain[i] = True
         chain[j] = True
@@ -92,6 +89,7 @@ def approximate_polygon(coords, tolerance, closed=True):
         perp = np.logical_and(projected_lengths0 > 0,
                               projected_lengths1 > 0)
         eucl = np.logical_not(perp)
+        # Reference [2]
         segment_dists[perp] = np.abs(
             (segment_coords[perp, 0] * dc - segment_coords[perp, 1] * dr \
             + (r1 * c0) - (c1 * r0)) \
@@ -114,6 +112,7 @@ def approximate_polygon(coords, tolerance, closed=True):
         if len(pos_stack) == 0:
             end_of_chain = True
 
+    # connect the first and last point of the approximated curve
     if closed:
         for i, p in enumerate(coords):
             if chain[i]:
