@@ -231,7 +231,7 @@ Every time Travis is triggered, it also calls on `Coveralls
 Building docs
 -------------
 
-To build docs, run ``make`` from the ``docs`` directory. ``make help`` lists
+To build docs, run ``make`` from the ``doc`` directory. ``make help`` lists
 all targets.
 
 Requirements
