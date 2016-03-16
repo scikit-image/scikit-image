@@ -1,4 +1,5 @@
 from matplotlib.colors import LinearSegmentedColormap
+from matplotlib import cm
 
 viridis_data = [[ 0.26700401,  0.00487433,  0.32941519],
        [ 0.26851048,  0.00960483,  0.33542652],
@@ -517,4 +518,7 @@ magma_data = [[0.001462, 0.000466, 0.013866],
 
 
 viridis = LinearSegmentedColormap.from_list('viridis', viridis_data)
+cm.register_cmap('viridis', viridis)
+
 magma = LinearSegmentedColormap.from_list('magma', magma_data)
+cm.register_cmap('magma', magma)
