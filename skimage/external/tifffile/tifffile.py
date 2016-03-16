@@ -978,8 +978,11 @@ class TiffFile(object):
 
         return series
 
-    def asarray(self, key=None, series=None, memmap=False):
-        """Return image data from multiple TIFF pages as numpy array.
+    def asarray_with_metadata(self, key=None, series=None, memmap=False):
+        """Return a tuple (imagedata, metadata).
+        Image data is taken from multiple TIFF pages as numpy array.
+        Metadata is a list of dictionaries, each dictionary corresponding
+        to each TIFF page's metadata.
 
         By default the first image series is returned.
 
@@ -994,6 +997,7 @@ class TiffFile(object):
             if possible.
 
         """
+        metadata = []
         if key is None and series is None:
             series = 0
         if series is not None:
@@ -1024,7 +1028,9 @@ class TiffFile(object):
                 result = stack_pages(pages, memmap=memmap,
                                      colormapped=False, squeeze=False)
         elif len(pages) == 1:
-            return pages[0].asarray(memmap=memmap)
+            currPage_metadata = {t: k.value for (t, k) in pages[0].tags.items()}
+            metadata.append(currPage_metadata)
+            return (pages[0].asarray(memmap=memmap), metadata)
         elif self.is_ome:
             assert not self.is_palette, "color mapping disabled for ome-tiff"
             if any(p is None for p in pages):
@@ -1065,6 +1071,8 @@ class TiffFile(object):
                 if page:
                     a = page.asarray(memmap=False, colormapped=False,
                                      reopen=False)
+                    currPage_metadata = {t: k.value for (t, k) in page.tags.items()}
+                    metadata.append(currPage_metadata)
                 else:
                     a = nopage
                 try:
@@ -1091,7 +1099,26 @@ class TiffFile(object):
                     result.shape = (-1,) + pages[0].shape
         else:
             result.shape = (-1,) + pages[0].shape
-        return result
+
+        return (result, metadata)
+
+    def asarray(self, key=None, series=None, memmap=False):
+        """Return image data from multiple TIFF pages as numpy array.
+
+        By default the first image series is returned.
+
+        Parameters
+        ----------
+        key : int, slice, or sequence of page indices
+            Defines which pages to return as array.
+        series : int
+            Defines which series of pages to return as array.
+        memmap : bool
+            If True, return an array stored in a binary file on disk
+            if possible.
+
+        """
+        return self.asarray_with_metadata(key, series, memmap)[0]
 
     def _omeseries(self):
         """Return image series in OME-TIFF file(s)."""

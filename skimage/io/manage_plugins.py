@@ -57,6 +57,7 @@ def _clear_plugins():
     """
     global plugin_store
     plugin_store = {'imread': [],
+                    'imread_with_metadata': [],
                     'imsave': [],
                     'imshow': [],
                     'imread_collection': [],
@@ -68,7 +69,8 @@ _clear_plugins()
 def _load_preferred_plugins():
     # Load preferred plugin for each io function.
     io_types = ['imsave', 'imshow', 'imread_collection', 'imshow_collection',
-                'imread']
+                'imread', 'imread_with_metadata']
+
     for p_type in io_types:
         _set_plugin(p_type, preferred_plugins['all'])
 
