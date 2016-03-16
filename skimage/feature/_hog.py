@@ -66,10 +66,6 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     and then applies the hog algorithm to the image.
     """
 
-    # TODO: allow function to operate on 3d
-    # Distinguish between both cases
-
-    # TODO: will this work on 3d..?
     image = np.atleast_2d(image)
 
     """
@@ -81,10 +77,6 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     illumination so this compression helps to reduce the effects of local
     shadowing and illumination variations.
     """
-
-    # TODO: allow 3d images
-    #assert_nD(image, 2)
-    #assert_nD(image, 2) or assert_nD(image, 3)
 
     if normalise is not None:
         raise ValueError("The normalise parameter was removed due to incorrect "
@@ -117,7 +109,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         msg = ("Images with dimensions (M, N, 3) are interpreted as 2D+RGB "
                "by default. Use `multichannel=False` to interpret as "
                "3D image with last dimension of length 3.")
-        #warn(RuntimeWarning(msg))
+        warn(RuntimeWarning(msg))
         multichannel = True
     if multichannel:
         n_channels = np.shape(image)[-1]
@@ -134,7 +126,6 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
                 max_norm = channel_norm
         gx = gradients[:,:,0,max_channel].copy(order='C')
         gy = gradients[:,:,1,max_channel].copy(order='C')
-        
 
     """
     The third stage aims to produce an encoding that is sensitive to
