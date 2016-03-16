@@ -1,13 +1,14 @@
 from __future__ import division
 import numpy as np
-from .._shared.utils import assert_nD
+from .._shared.utils import assert_nD, warn
 from . import _hoghistogram
 import warnings
+from ..color import guess_spatial_dimensions
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8),
         cells_per_block=(3, 3), visualise=False, transform_sqrt=False,
-        feature_vector=True, normalise=None):
+        feature_vector=True, normalise=None, multichannel=None):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Compute a Histogram of Oriented Gradients (HOG) by
@@ -64,6 +65,11 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     ``True``, the function computes the square root of each color channel
     and then applies the hog algorithm to the image.
     """
+
+    # TODO: allow function to operate on 3d
+    # Distinguish between both cases
+
+    # TODO: will this work on 3d..?
     image = np.atleast_2d(image)
 
     """
@@ -76,7 +82,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     shadowing and illumination variations.
     """
 
-    assert_nD(image, 2)
+    # TODO: allow 3d images
+    #assert_nD(image, 2)
+    #assert_nD(image, 2) or assert_nD(image, 3)
 
     if normalise is not None:
         raise ValueError("The normalise parameter was removed due to incorrect "
@@ -102,14 +110,31 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         # to avoid problems with subtracting unsigned numbers in np.diff()
         image = image.astype('float')
 
-    gx = np.empty(image.shape, dtype=np.double)
-    gx[:, 0] = 0
-    gx[:, -1] = 0
-    gx[:, 1:-1] = image[:, 2:] - image[:, :-2]
-    gy = np.empty(image.shape, dtype=np.double)
-    gy[0, :] = 0
-    gy[-1, :] = 0
-    gy[1:-1, :] = image[2:, :] - image[:-2, :]
+    spatial_dims = guess_spatial_dimensions(image)
+    if spatial_dims == 2:
+        gx, gy = _compute_image_gradient(image)
+    elif spatial_dims is None and multichannel is None:
+        msg = ("Images with dimensions (M, N, 3) are interpreted as 2D+RGB "
+               "by default. Use `multichannel=False` to interpret as "
+               "3D image with last dimension of length 3.")
+        #warn(RuntimeWarning(msg))
+        multichannel = True
+    if multichannel:
+        n_channels = np.shape(image)[-1]
+        gradients = np.empty((image.shape[0], image.shape[1], 2, n_channels))
+        max_norm = np.float('-inf')
+        max_channel = None
+        for i in range(n_channels):
+            gx, gy = _compute_image_gradient(image[:,:,i])
+            gradients[:, :, 0, i] = gx
+            gradients[:, :, 1, i] = gy
+            channel_norm = np.linalg.norm(gx) + np.linalg.norm(gy)
+            if channel_norm > max_norm:
+                max_channel = i
+                max_norm = channel_norm
+        gx = gradients[:,:,0,max_channel].copy(order='C')
+        gy = gradients[:,:,1,max_channel].copy(order='C')
+        
 
     """
     The third stage aims to produce an encoding that is sensitive to
@@ -125,8 +150,8 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     predetermined bins. The gradient magnitudes of the pixels in the
     cell are used to vote into the orientation histogram.
     """
-
-    sy, sx = image.shape
+    # No longer need third channel
+    sy, sx = image.shape[0:2]
     cx, cy = pixels_per_cell
     bx, by = cells_per_block
 
@@ -191,7 +216,6 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     overlapping grid of blocks covering the detection window into a combined
     feature vector for use in the window classifier.
     """
-
     if feature_vector:
         normalised_blocks = normalised_blocks.ravel()
 
@@ -199,3 +223,34 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         return normalised_blocks, hog_image
     else:
         return normalised_blocks
+
+
+
+def _compute_image_gradient(image):
+    """ Computes the x and y image gradient. Image must be 2D.
+
+    Parameters
+    ----------
+    image : (M, N) ndarray
+        Input image (2D, either greyscale or one colour channel)
+
+    Returns
+    -------
+    gx : (M, N) ndarray
+        Gradient for the image in x
+    gy : (M, N) ndarray
+        Gradient for the image in y
+    """
+    assert_nD(image, 2)
+
+    gx = np.empty(image.shape, dtype=np.double)
+    gx[:, 0] = 0
+    gx[:, -1] = 0
+    gx[:, 1:-1] = image[:, 2:] - image[:, :-2]
+    gy = np.empty(image.shape, dtype=np.double)
+    gy[0, :] = 0
+    gy[-1, :] = 0
+    gy[1:-1, :] = image[2:, :] - image[:-2, :]
+
+    return gx, gy
+
