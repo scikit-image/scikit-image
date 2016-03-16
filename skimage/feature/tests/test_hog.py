@@ -31,45 +31,32 @@ def test_histogram_of_oriented_gradients_output_correctness():
                          transform_sqrt=False, visualise=False)
     assert_almost_equal(output, correct_output)
 
+
 def test_histogram_of_oriented_gradients_matlab_correctness():
     img = color.rgb2gray(data.astronaut())
     output = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
                          cells_per_block=(1, 1), feature_vector=True,
                          transform_sqrt=False, visualise=False)
-    matlab_hog = io.loadmat('/Users/shaunsingh/Documents/hog_astronaut_2.mat')['hog2']
-
+    matlab_hog = io.loadmat(
+        os.path.join(si.data_dir, 'hog_astronaut_2.mat'))['hog2']
     assert_almost_equal(output, matlab_hog)
-    '''
-    output = np.atleast_2d(output) / np.linalg.norm(output)
-    matlab_hog = matlab_hog / np.linalg.norm(matlab_hog)
-    assert_almost_equal(np.atleast_2d(output), matlab_hog)
-    '''
+
+
+def test_hog_color_image():
+    image = data.astronaut()
+    output, viz = feature.hog(image, orientations=9, pixels_per_cell=(8, 8),
+                         cells_per_block=(1, 1), feature_vector=True,
+                         transform_sqrt=False, visualise=False)
+    matlab_hog = io.loadmat(
+        os.path.join(si.data_dir, 'hog_astronaut.mat'))['hog1']
+    assert_almost_equal(output, matlab_hog)
+
 
 def test_hog_image_size_cell_size_mismatch():
     image = data.camera()[:150, :200]
     fd = feature.hog(image, orientations=9, pixels_per_cell=(8, 8),
                      cells_per_block=(1, 1))
     assert len(fd) == 9 * (150 // 8) * (200 // 8)
-
-
-#def test_hog_color_image_unsupported_error():
-#    image = np.zeros((20, 20, 3))
-#    assert_raises(ValueError, feature.hog, image)
-
-def test_hog_color_image():
-    image = data.astronaut()
-    output, viz = feature.hog(image, orientations=9, pixels_per_cell=(8, 8),
-                         cells_per_block=(1, 1), feature_vector=True,
-                         transform_sqrt=False, visualise=True)
-    img = color.rgb2gray(data.astronaut())
-    output2 = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
-                         cells_per_block=(1, 1), feature_vector=True,
-                         transform_sqrt=False, visualise=False)
-    #output = np.atleast_2d(output) / np.linalg.norm(output)
-    matlab_hog = io.loadmat('/Users/shaunsingh/Documents/hog_astronaut.mat')['hog1']
-    matlab_hog = matlab_hog / np.linalg.norm(matlab_hog)
-    #assert_almost_equal(output, matlab_hog)
-    assert_almost_equal(output, output2)
 
 
 def test_hog_basic_orientations_and_data_types():
