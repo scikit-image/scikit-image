@@ -16,18 +16,18 @@ Runtime requirements
 * `Six >=1.4 <https://pypi.python.org/pypi/six>`__
 * `Pillow >= 1.7.8 <https://pypi.python.org/pypi/Pillow>`__
     (or `PIL <http://www.pythonware.com/products/pil/>`__)
-* `dask[array] >= 0.5.0 <http://dask.pydata.org/en/latest/>`__
-
 
 You can use pip to automatically install the runtime dependencies as follows::
 
     $ pip install -r requirements.txt
 
-
 Optional Requirements
 ---------------------
 You can use this scikit with the basic requirements listed above, but some
 functionality is only available with the following installed:
+
+* `dask[array] >= 0.5.0 <http://dask.pydata.org/en/latest/>`__.
+   For parallel computation using `skimage.util.apply_parallel`.
 
 * `PyQt4 <http://wiki.python.org/moin/PyQt>`__
    The ``qt`` plugin that provides ``imshow(x, fancy=True)`` and `skivi`.
