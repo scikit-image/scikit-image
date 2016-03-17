@@ -39,6 +39,13 @@ def test_histogram_of_oriented_gradients_matlab_correctness():
                          transform_sqrt=False, visualise=False)
     matlab_hog = io.loadmat(
         os.path.join(si.data_dir, 'hog_astronaut_2.mat'))['hog2']
+    s1 = np.sum(output)
+    s2 = np.sum(matlab_hog)
+    print "SUM scikit: %s" % s1
+    print "SUM Matlab: %s" % s2
+    output = np.atleast_2d(output)
+    #output = np.atleast_2d(output / s1)
+    #matlab_hog = matlab_hog / s2
     assert_almost_equal(output, matlab_hog)
 
 
