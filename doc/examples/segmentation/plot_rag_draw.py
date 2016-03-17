@@ -18,10 +18,12 @@ g = graph.rag_mean_color(img, labels)
 
 fig, ax = plt.subplots()
 ax.set_title('RAG drawn will all edges')
-graph.show_rag(labels, g, img, ax=ax)
+smap = graph.show_rag(labels, g, img, ax=ax)
+plt.colorbar(smap, fraction=0.03)
 
 fig, ax = plt.subplots()
 ax.set_title('RAG drawn with edges having weight less than 30')
-graph.show_rag(labels, g, img, thresh=30, ax=ax)
+smap = graph.show_rag(labels, g, img, thresh=30, ax=ax)
+plt.colorbar(smap, fraction=0.03)
 
 plt.show()

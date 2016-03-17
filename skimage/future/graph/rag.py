@@ -445,6 +445,11 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     ax : matplotlib axes, optional
         The axes to draw on.
 
+    Reutrns
+    -------
+    smap : matplotlib ScalarMappable
+         A ScalarMappable for the edges that can be used to show colorbars.
+
     Examples
     --------
     >>> from skimage import data, segmentation
@@ -452,7 +457,8 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     >>> img = data.coffee()
     >>> labels = segmentation.slic(img)
     >>> g =  graph.rag_mean_color(img, labels)
-    >>> graph.show_rag(labels, g, img)
+    >>> smap = graph.show_rag(labels, g, img)
+    >>> cbar = plt.colorbar(smap)
     """
 
     if not in_place:
@@ -515,3 +521,5 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
             col = smap.to_rgba([data['weight']])[0][:-1]
             ax.add_artist(plt.Line2D([c1, c2], [r1, r2],  color=col,
                                      lw=edge_width))
+    smap.set_array(edge_weight_list)
+    return smap
