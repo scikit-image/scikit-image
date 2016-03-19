@@ -1,5 +1,6 @@
 # coding: utf-8
 import numpy as np
+import pywt
 from .. import img_as_float
 from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 from .._shared.utils import _mode_deprecations
@@ -357,7 +358,7 @@ def denoise_tv_chambolle(im, weight=50, eps=2.e-4, n_iter_max=200,
     return out
 
 
-def _denoise_wavelet(img, wavelet, threshold, mode='soft'):
+def _wavelet_threshold(im, wavelet, threshold=None, noise_std=None, mode='soft'):
     """Performs wavelet denoising.
 
     Parameters
@@ -369,11 +370,14 @@ def _denoise_wavelet(img, wavelet, threshold, mode='soft'):
     wavelet : string
         The type of wavelet to perform. Can be any of the options
         [pywt.wavelist]_ outputs. For example, this may be any of ``{db1, db2,
-        db3, db4}``.
-    threshold : float
+        db3, db4, haar}``.
+    noise_std : float, optional
+        The noise is estimated when noise_std is None (the default). It does
+        this as mentioned in pull request #1837.
+    threshold : float, optional
         The thresholding value. All wavelet coefficients less than this value
-        are set to 0. By default, the threshold is computed adaptively as
-        described in [1]_.
+        are set to 0. The default value (None) uses the SureShrink method found in
+        [1]_ to remove noise.
     mode : {'soft', 'hard'}, optional
         An optional argument to choose the type of denoising performed. It
         noted that choosing soft thresholding given additive noise finds the
@@ -383,36 +387,46 @@ def _denoise_wavelet(img, wavelet, threshold, mode='soft'):
     -------
     out : ndarray
         Denoised image.
+
+    References
+    ----------
+    .. [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
+           thresholding for image denoising and compression." Image Processing,
+           IEEE Transactions on 9.9 (2000): 1532-1546.
     """
-    import pywt
-    coeffs = pywt.wavedec2(img, wavelet)
-    denoised_coeffs = [pywt.threshold(c, value=threshold, mode=mode)
-                       for c in coeffs]
-    return pywt.waverec2(denoised_coeffs, wavelet)
+    coeffs = pywt.wavedecn(im, wavelet=wavelet)
+    detail_coeffs = coeffs[-1]['d' * im.ndim]
+
+    if noise_std is None:
+        # Estimate the noise std.dev as discussed in PR #1837
+        noise_std = np.median(np.abs(detail_coeffs)) / 0.67448975019608171
+
+    if threshold is None:
+        # The BayesShrink threshold from [1]_ in docstring
+        threshold = noise_std**2 / np.sqrt(max(im.var() - noise_std**2, 0))
+
+    denoised_detail = [{key: pywt.threshold(level[key], value=threshold,
+                       mode=mode) for key in level} for level in coeffs[1:]]
+    denoised_root = pywt.threshold(coeffs[0], value=threshold, mode=mode)
+    return pywt.waverecn([denoised_root, *denoised_detail], wavelet)
 
 
-def denoise_wavelet(im, noise_stdev=0.13, wavelet='db1', threshold=None,
-                    mode='soft'):
+def denoise_wavelet(im, noise_std=None, wavelet='db1', mode='soft'):
     """Performs wavelet denoising on an image.
 
     Parameters
     ----------
-    im : ndarray (2d or 3d) of ints, uints or floats
+    im : ndarray (greater than 2d) of ints, uints or floats
         Input data to be denoised. `im` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
-    noise_stdev : float, optional
+    noise_std : float, optional
         The noise standard deviation used when computing the threshold
         adaptively as described in [1]_.
     wavelet : string, optional
         The type of wavelet to perform and can be any of the options
-        [pywt.wavelist]_ outputs. For example, this may be any of ``{db1, db2,
-        db3, db4}``.
-    threshold : float, optional
-        The thresholding value. All wavelet coefficients less than this value
-        are set to 0. By default, the threshold is computed adaptively as
-        described in [1]_. If this threshold is specified, the parameter
-        noise_stdev is ignored.
+        [pywt.wavelist]_ outputs. The default is `'db1'`. For example,
+        ``wavelet`` can be any of ``{'db2', 'haar', 'sym9'}`` and many more.
     mode : {'soft', 'hard'}, optional
         An optional argument to choose the type of denoising performed. It
         noted that choosing soft thresholding given additive noise finds the
@@ -448,6 +462,10 @@ def denoise_wavelet(im, noise_stdev=0.13, wavelet='db1', threshold=None,
            IEEE Transactions on 9.9 (2000): 1532-1546.
     .. [pywt.wavelist] http://pywavelets.readthedocs.org/en/latest/ref/wavelets.html#wavelet-wavelist
 
+    See also
+    --------
+    _wavelet_threshold : The function used to compute the wavelet denoising.
+
     Examples
     --------
     >>> from skimage import color, data
@@ -463,20 +481,14 @@ def denoise_wavelet(im, noise_stdev=0.13, wavelet='db1', threshold=None,
     if not im.dtype.kind == 'f':
         im = img_as_float(im)
 
-    if threshold is None:
-        # The BayesShrink threshold from [1]_ in docstring.
-        threshold = noise_stdev**2 / np.sqrt(max(im.var() - noise_stdev**2, 0))
-
     if im.ndim == 2:
-        out = _denoise_wavelet(im, wavelet=wavelet, threshold=threshold,
-                               mode=mode)
+        out = _wavelet_threshold(im, wavelet=wavelet, mode=mode,
+                                 noise_std=noise_std)
 
     else:
-        out = np.dstack([_denoise_wavelet(im[..., c], wavelet=wavelet,
-                         threshold=threshold, mode=mode)
+        out = np.dstack([_wavelet_threshold(im[..., c], wavelet=wavelet,
+                                            mode=mode, noise_std=noise_std)
                          for c in range(im.ndim)])
 
     # ensure valid image in 0, 1 is returned
-    out = np.clip(out, 0, 1)
-
-    return out
+    return np.clip(out, 0, 1)
