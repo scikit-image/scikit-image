@@ -14,7 +14,7 @@ from ..util import img_as_float
 from ..color import rgb2lab
 
 
-def quickshift(image, ratio=1., float kernel_size=5, max_dist=10,
+def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
                return_tree=False, sigma=0, convert2lab=True, random_seed=None):
     """Segments image using quickshift clustering in Color-(x,y) space.
 
@@ -84,7 +84,8 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10,
     # window size for neighboring pixels to consider
     if kernel_size < 1:
         raise ValueError("Sigma should be >= 1")
-    cdef int w = int(3 * kernel_size)
+    cdef float kernel_size_sq = kernel_size**2
+    cdef int w = np.ceil(3 * kernel_size)
 
     cdef Py_ssize_t height = image_c.shape[0]
     cdef Py_ssize_t width = image_c.shape[1]
@@ -112,13 +113,13 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10,
                             dist += (current_pixel_p[channel] -
                                      image_c[r_, c_, channel])**2
                         dist += (r - r_)**2 + (c - c_)**2
-                        densities[r, c] += exp(-dist / (2 * kernel_size**2))
+                        densities[r, c] += exp(-dist / (2 * kernel_size_sq))
                 current_pixel_p += channels
 
     # this will break ties that otherwise would give us headache
     densities += random_state.normal(scale=0.00001, size=(height, width))
 
-    # default parent to self:
+    # default parent to self
     cdef cnp.ndarray[dtype=cnp.int_t, ndim=2] parent \
             = np.arange(width * height).reshape(height, width)
     cdef cnp.ndarray[dtype=cnp.float_t, ndim=2] dist_parent \
