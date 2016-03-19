@@ -1,5 +1,3 @@
-
-
 /* tifffile.c
 
 A Python C extension module for decoding PackBits and LZW encoded TIFF data.
@@ -12,7 +10,13 @@ Refer to the tifffile.py module for documentation and tests.
 :Organization:
   Laboratory for Fluorescence Dynamics, University of California, Irvine
 
-:Version: 2013.11.05
+:Version: 2015.08.17
+
+Requirements
+------------
+* `CPython 2.7 or 3.4 <http://www.python.org>`_
+* `Numpy 1.9.2 <http://www.numpy.org>`_
+* A Python distutils compatible C compiler  (build)
 
 Install
 -------
@@ -28,8 +32,8 @@ Use this Python distutils setup script to build the extension module::
 
 License
 -------
-Copyright (c) 2008-2014, Christoph Gohlke
-Copyright (c) 2008-2014, The Regents of the University of California
+Copyright (c) 2008-2015, Christoph Gohlke
+Copyright (c) 2008-2015, The Regents of the University of California
 Produced at the Laboratory for Fluorescence Dynamics
 All rights reserved.
 
@@ -58,7 +62,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-#define _VERSION_ "2013.11.05"
+#define _VERSION_ "2015.08.17"
 
 #define WIN32_LEAN_AND_MEAN
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
@@ -83,7 +87,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define NO_ERROR 0
 #define VALUE_ERROR -1
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && _MSC_VER < 1600
 typedef unsigned __int8  uint8_t;
 typedef unsigned __int16  uint16_t;
 typedef unsigned __int32  uint32_t;
@@ -92,17 +96,23 @@ typedef unsigned __int64  uint64_t;
 typedef __int64  ssize_t;
 typedef signed __int64  intptr_t;
 typedef unsigned __int64  uintptr_t;
-#define SSIZE_MAX (9223372036854775808)
 #else
 typedef int ssize_t;
 typedef _W64 signed int  intptr_t;
 typedef _W64 unsigned int  uintptr_t;
-#define SSIZE_MAX (2147483648)
 #endif
 #else
 /* non MS compilers */
 #include <stdint.h>
 #include <limits.h>
+#endif
+
+#ifndef SSIZE_MAX
+#ifdef _WIN64
+#define SSIZE_MAX (9223372036854775808L)
+#else
+#define SSIZE_MAX (2147483648)
+#endif
 #endif
 
 #define SWAP2BYTES(x) \
@@ -641,7 +651,7 @@ py_decodelzw(PyObject *obj, PyObject *args)
     table_len = 258;
     bitw = 9;
     shr = 23;
-    mask = 4286578688;
+    mask = 4286578688u;
     bitcount = 0;
     result_len = 0;
     code = 0;
@@ -673,16 +683,19 @@ py_decodelzw(PyObject *obj, PyObject *args)
             }
             bitw = 9;
             shr = 23;
-            mask = 4286578688;
+            mask = 4286578688u;
 
-            /* read next code */
-            code = *((unsigned int *)((void *)(encoded + (bitcount / 8))));
-            if (little_endian)
-                code = SWAP4BYTES(code);
-            code <<= bitcount % 8;
-            code &= mask;
-            code >>= shr;
-            bitcount += bitw;
+            /* read next code, skip clearcodes */
+            /* TODO: bounds checking */
+            do {
+                code = *((unsigned int *)((void *)(encoded + (bitcount / 8))));
+                if (little_endian)
+                    code = SWAP4BYTES(code);
+                code <<= bitcount % 8;
+                code &= mask;
+                code >>= shr;
+                bitcount += bitw;
+            } while (code == 256);
 
             if (code == 257) /* end of information */
                 break;
@@ -760,17 +773,17 @@ py_decodelzw(PyObject *obj, PyObject *args)
             case 511:
                 bitw = 10;
                 shr = 22;
-                mask = 4290772992;
+                mask = 4290772992u;
                 break;
             case 1023:
                 bitw = 11;
                 shr = 21;
-                mask = 4292870144;
+                mask = 4292870144u;
                 break;
             case 2047:
                 bitw = 12;
                 shr = 20;
-                mask = 4293918720;
+                mask = 4293918720u;
         }
     }
 
@@ -868,12 +881,12 @@ char module_doc[] =
 
 static PyMethodDef module_methods[] = {
 #if MSB
-    {"unpackints", (PyCFunction)py_unpackints, METH_VARARGS|METH_KEYWORDS,
+    {"unpack_ints", (PyCFunction)py_unpackints, METH_VARARGS|METH_KEYWORDS,
         py_unpackints_doc},
 #endif
-    {"decodelzw", (PyCFunction)py_decodelzw, METH_VARARGS,
+    {"decode_lzw", (PyCFunction)py_decodelzw, METH_VARARGS,
         py_decodelzw_doc},
-    {"decodepackbits", (PyCFunction)py_decodepackbits, METH_VARARGS,
+    {"decode_packbits", (PyCFunction)py_decodepackbits, METH_VARARGS,
         py_decodepackbits_doc},
     {NULL, NULL, 0, NULL} /* Sentinel */
 };
@@ -925,7 +938,8 @@ init_tifffile(void)
     PyObject *module;
 
     char *doc = (char *)PyMem_Malloc(sizeof(module_doc) + sizeof(_VERSION_));
-    PyOS_snprintf(doc, sizeof(doc), module_doc, _VERSION_);
+    PyOS_snprintf(doc, sizeof(module_doc) + sizeof(_VERSION_),
+                  module_doc, _VERSION_);
 
 #if PY_MAJOR_VERSION >= 3
     moduledef.m_doc = doc;
@@ -959,4 +973,3 @@ init_tifffile(void)
     return module;
 #endif
 }
-
