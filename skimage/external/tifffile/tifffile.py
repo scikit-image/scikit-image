@@ -254,16 +254,12 @@ except ImportError:
         lzma = None
 
 try:
-    if __package__:
-        from . import _tifffile
-    else:
-        import _tifffile
+    from . import _tifffile
 except ImportError:
     warnings.warn(
         "failed to import the optional _tifffile C extension module.\n"
-        "Loading of some compressed images will be very slow.\n"
+        "Loading of some compressed images will be slow.\n"
         "Tifffile.c can be obtained at http://www.lfd.uci.edu/~gohlke/")
-
 
 __version__ = '2016.02.22'
 __docformat__ = 'restructuredtext en'
@@ -3010,11 +3006,11 @@ class TiffSequence(object):
 
     Examples
     --------
-    >>> tifs = TiffSequence("test.oif.files/*.tif")
-    >>> tifs.shape, tifs.axes
+    >>> tifs = TiffSequence("test.oif.files/*.tif")  # doctest: +SKIP
+    >>> tifs.shape, tifs.axes  # doctest: +SKIP
     ((2, 100), 'CT')
-    >>> data = tifs.asarray()
-    >>> data.shape
+    >>> data = tifs.asarray()  # doctest: +SKIP
+    >>> data.shape  # doctest: +SKIP
     (2, 100, 256, 256)
 
     """
@@ -3999,24 +3995,21 @@ def image_description(shape, colormaped=False, **metadata):
 
 def _replace_by(module_function, package=__package__, warn=False):
     """Try replace decorated function by module.function."""
-    try:
-        from importlib import import_module
-    except ImportError:
-        warnings.warn('could not import module importlib')
-        return lambda func: func
-
     def decorate(func, module_function=module_function, warn=warn):
         try:
-            module, function = module_function.split('.')
-            if package:
-                module = import_module('.' + module, package=package)
+            modname, function = module_function.split('.')
+            if package is None:
+                full_name = modname
             else:
-                module = import_module(module)
-            func, oldfunc = getattr(module, function), func
+                full_name = package + '.' + modname
+            if modname == '_tifffile':
+                func, oldfunc = getattr(_tifffile, function), func
+            else:
+                module = __import__(full_name, fromlist=[modname])
+                func, oldfunc = getattr(module, function), func
             globals()['__old_' + func.__name__] = oldfunc
         except Exception:
-            if warn:
-                warnings.warn("failed to import %s" % module_function)
+            warnings.warn("failed to import %s" % module_function)
         return func
 
     return decorate
