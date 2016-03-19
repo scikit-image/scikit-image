@@ -62,5 +62,5 @@ install:
 script: tools/travis_script.sh
 
 after_success:
-    - coveralls
+    - codecov
     - bash tools/deploy_docs.sh

@@ -48,7 +48,7 @@ virtualenv -p python ~/venv
 source ~/venv/bin/activate
 
 pip install --upgrade pip
-pip install --retries 3 -q wheel flake8 coveralls nose
+pip install --retries 3 -q wheel flake8 codecov nose
 
 # install wheels
 for requirement in $WHEELBINARIES; do
