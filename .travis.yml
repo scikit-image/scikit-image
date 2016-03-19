@@ -47,7 +47,6 @@ before_install:
     - export PATH=/usr/lib/ccache:${PATH}
     - source tools/travis_before_install.sh
     - which python; python --version
-    - pip install codecov
     - python check_bento_build.py
     - tools/build_versions.py
 
