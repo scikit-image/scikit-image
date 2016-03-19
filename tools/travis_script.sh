@@ -8,7 +8,7 @@ nosetests $TEST_ARGS skimage
 section_end "Test.with.min.requirements"
 
 section "Build.docs"
-if [[ ($PY != 2.6) && ($PY != 3.2) ]]; then
+if [[ $NO_SPHINX != 1 ]]; then
     export SPHINXCACHE=$HOME/.cache/sphinx; make html
 fi
 section_end "Build.docs"
@@ -21,12 +21,12 @@ section_end "Flake8.test"
 section "Install.optional.dependencies"
 
 # Install most of the optional packages
-if [[ $PY != 3.2* ]]; then
+if [[ $OPTIONAL_DEPS == 1 ]]; then
     pip install --retries 3 -q -r ./optional_requirements.txt $WHEELHOUSE
 fi
 
 # Install Qt and then update the Matplotlib settings
-if [[ $PY == 2.7* ]]; then
+if [[ $WITH_QT == 1 ]]; then
     # http://stackoverflow.com/a/9716100
     LIBS=( PyQt4 sip.so )
 
@@ -41,11 +41,11 @@ if [[ $PY == 2.7* ]]; then
         ln -sf $LIB_SYSTEM_PATH/$LIB $LIB_VIRTUALENV_PATH/$LIB
     done
 
-elif [[ $PY != 3.2* ]]; then
+elif [[ $WITH_PYSIDE == 1 ]]; then
     python ~/venv/bin/pyside_postinstall.py -install
 fi
 
-if [[ $PY == 2.* ]]; then
+if [[ $WITH_PYAMG == 1 ]]; then
     pip install --retries 3 -q pyamg
 fi
 
@@ -58,7 +58,7 @@ section_end "Install.optional.dependencies"
 section "Run.doc.examples"
 
 # Matplotlib settings - do not show figures during doc examples
-if [[ $PY == 2.7* ]]; then
+if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     MPL_DIR=$HOME/.matplotlib
 else
     MPL_DIR=$HOME/.config/matplotlib
@@ -89,15 +89,17 @@ for f in doc/examples/xx_applications/*.py; do
 done
 
 # Now configure Matplotlib to use Qt4
-if [[ $PY == 2.7* ]]; then
+if [[ $WITH_QT == 1 ]]; then
     MPL_QT_API=PyQt4
     export QT_API=pyqt
-else
+elif [[ $WITH_PYSIDE == 1 ]]; then
     MPL_QT_API=PySide
     export QT_API=pyside
 fi
-echo 'backend: Qt4Agg' > $MPL_DIR/matplotlibrc
-echo 'backend.qt4 : '$MPL_QT_API >> $MPL_DIR/matplotlibrc
+if [ "$WITH_QT" = "1" -o "$WITH_PYSIDE" = "1" ]; then
+    echo 'backend: Qt4Agg' > $MPL_DIR/matplotlibrc
+    echo 'backend.qt4 : '$MPL_QT_API >> $MPL_DIR/matplotlibrc
+fi
 
 section_end "Run.doc.applications"
 
@@ -105,7 +107,7 @@ section_end "Run.doc.applications"
 section "Test.with.optional.dependencies"
 
 # run tests again with optional dependencies to get more coverage
-if [[ $PY == 3.3 ]]; then
+if [ $OPTIONAL_DEPS == 1 ]; then
     TEST_ARGS="$TEST_ARGS --with-cov --cover-package skimage"
 fi
 nosetests $TEST_ARGS

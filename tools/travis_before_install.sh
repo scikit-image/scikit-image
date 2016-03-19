@@ -39,8 +39,7 @@ if [[ $TRAVIS_PYTHON_VERSION == 2.6* ]]; then
     sed -i 's/matplotlib.*/matplotlib==1.4.3/g' requirements.txt
 fi
 
-# test minimum requirements on 2.7
-if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
+if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     sed -i 's/>=/==/g' requirements.txt
 fi
 
@@ -55,9 +54,9 @@ pip install --retries 3 -q wheel flake8 coveralls nose
 for requirement in $WHEELBINARIES; do
     WHEELS="$WHEELS $(grep $requirement requirements.txt)"
 done
-pip install --retries 3 -q $WHEELHOUSE $WHEELS
+pip install --retries 3 -q $PIP_FLAGS $WHEELHOUSE $WHEELS
 
-pip install --retries 3 -q -r requirements.txt
+pip install --retries 3 -q $PIP_FLAGS -r requirements.txt
 
 # Show what's installed
 pip list
