@@ -4529,7 +4529,7 @@ def stripnull(string):
 
     Clean NULL terminated C strings.
 
-    >>> stripnull(b'string\\x00')
+    >>> stripnull(b'string\\x00')  # doctest: +SKIP
     b'string'
 
     """
@@ -4542,9 +4542,9 @@ def stripascii(string):
 
     Clean NULL separated and terminated TIFF strings.
 
-    >>> stripascii(b'string\\x00string\\n\\x01\\x00')
+    >>> stripascii(b'string\\x00string\\n\\x01\\x00')  # doctest: +SKIP
     b'string\\x00string\\n'
-    >>> stripascii(b'\\x00')
+    >>> stripascii(b'\\x00')  # doctest: +SKIP
     b''
 
     """
