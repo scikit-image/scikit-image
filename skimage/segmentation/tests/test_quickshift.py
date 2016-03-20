@@ -41,7 +41,7 @@ def test_color():
     assert_array_equal(seg[10:, 10:], 3)
 
     seg2 = quickshift(img, kernel_size=1, max_dist=2, random_seed=0,
-            convert2lab=False, sigma=0)
+                      convert2lab=False, sigma=0)
     # very oversegmented:
     assert_equal(len(np.unique(seg2)), 7)
     # still don't cross lines
