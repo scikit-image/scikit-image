@@ -16,7 +16,6 @@ Runtime requirements
 * `Six >=1.4 <https://pypi.python.org/pypi/six>`__
 * `Pillow >= 1.7.8 <https://pypi.python.org/pypi/Pillow>`__
     (or `PIL <http://www.pythonware.com/products/pil/>`__)
-* `PyWavelets >= 0.4.0 <http://pywavelets.readthedocs.org/en/latest/>`
 
 You can use pip to automatically install the runtime dependencies as follows::
 
@@ -49,6 +48,11 @@ functionality is only available with the following installed:
 
 * `imread <http://pythonhosted.org/imread/>`__
   Optional io plugin providing most standard `formats <http://pythonhosted.org//imread/formats.html>`__.
+
+* `PyWavelets >= 0.4.0 <http://pywavelets.readthedocs.org/en/latest/>`
+  Provides wavelet capabilities, useful in wavelet denoising and noise variance
+  estimation.
+  
 
 
 Testing requirements
