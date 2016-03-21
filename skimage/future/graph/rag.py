@@ -7,6 +7,7 @@ import math
 from ... import measure, segmentation, util, color
 from matplotlib import colors, cm
 from matplotlib import pyplot as plt
+from matplotlib.collections import LineCollection
 
 
 def _edge_generator_from_csr(csr_matrix):
@@ -411,8 +412,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
 
 
 def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
-             edge_cmap='magma', img_cmap='bone', thresh=np.inf, in_place=True,
-             ax=None):
+             edge_cmap='magma', img_cmap='bone', in_place=True, ax=None):
     """Draw a Region Adjacency Graph on an image.
 
     Given a labelled image and its corresponding RAG, draw the nodes and edges
@@ -426,9 +426,10 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     rag : RAG
         The Region Adjacency Graph.
     img : ndarray, shape (M, N, 3)
-        Input image.
+        Input image. If `colormap` is `None`, the image should be in RGB
+        format.
     border_color : colorspec, optional
-        Color with which the borders of regions are drawn.
+        Color with which the borders between regions are drawn.
     edge_width : float, optional
         The thickness with which the RAG edges are drawn.
     edge_cmap : colormap, optional
@@ -445,10 +446,11 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     ax : matplotlib axes, optional
         The axes to draw on.
 
-    Reutrns
+    Returns
     -------
-    smap : matplotlib ScalarMappable
-         A ScalarMappable for the edges that can be used to show colorbars.
+    lc : :py:class:`matplotlib.collections.LineCollection`
+         A colection of lines that represent the edges of the graph. It can be
+         passed to the :meth:`matplotlib.figure.Figure.colorbar` function.
 
     Examples
     --------
@@ -457,8 +459,8 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     >>> img = data.coffee()
     >>> labels = segmentation.slic(img)
     >>> g =  graph.rag_mean_color(img, labels)
-    >>> smap = graph.show_rag(labels, g, img)
-    >>> cbar = plt.colorbar(smap)
+    >>> lc = graph.show_rag(labels, g, img)
+    >>> cbar = plt.colorbar(lc)
     """
 
     if not in_place:
@@ -470,17 +472,15 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
 
     if img_cmap is None:
         if img.ndim < 3:
-            raise ValueError('The image needs to be RGB')
-        if img.ndim < 4:
-            r, c, _ = img.shape
-            new_img = np.empty((r, c, 4), dtype=np.float)
-            new_img[:, :, 0:3] = img
-            new_img[:, :, 3] = 1
-            out = new_img
+            msg = 'If colormap is `None`, an RGB image should be given'
+            raise ValueError(msg)
+        # Ignore the alpha channel
+        out = img[:, :, :3]
     else:
         img_cmap = cm.get_cmap(img_cmap)
         out = color.rgb2gray(img)
-        out = img_cmap(out)
+        # Ignore the alpha channel
+        out = img_cmap(out)[:, :, :3]
 
     edge_cmap = cm.get_cmap(edge_cmap)
 
@@ -497,29 +497,24 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     regions = measure.regionprops(rag_labels)
 
     for (n, data), region in zip(rag.nodes_iter(data=True), regions):
-        data['centroid'] = region['centroid']
+        data['centroid'] = map(int, region['centroid'])
 
     cc = colors.ColorConverter()
     if border_color is not None:
-        border_color = cc.to_rgba(border_color)
+        border_color = cc.to_rgb(border_color)
         out = segmentation.mark_boundaries(out, rag_labels, color=border_color)
 
     ax.imshow(out)
 
-    edge_weight_list = [d['weight'] for x, y, d in
-                        rag.edges_iter(data=True) if d['weight'] < thresh]
+    # Defining the end points of the edges
+    # The tuple[::-1] syntax reverses a tuple as matplotlib uses (x,y)
+    # convention while skimage uses (row, column)
+    lines = [[rag.node[n1]['centroid'][::-1], rag.node[n2]['centroid'][::-1]]
+             for (n1, n2) in rag.edges_iter()]
 
-    norm = colors.Normalize()
-    norm.autoscale(edge_weight_list)
-    smap = cm.ScalarMappable(norm, edge_cmap)
+    lc = LineCollection(lines, linewidths=edge_width, cmap=edge_cmap)
+    edge_weights = [d['weight'] for x, y, d in rag.edges_iter(data=True)]
+    lc.set_array(np.array(edge_weights))
+    ax.add_collection(lc)
 
-    for n1, n2, data in rag.edges_iter(data=True):
-
-        if data['weight'] < thresh:
-            r1, c1 = map(int, rag.node[n1]['centroid'])
-            r2, c2 = map(int, rag.node[n2]['centroid'])
-            col = smap.to_rgba([data['weight']])[0][:-1]
-            ax.add_artist(plt.Line2D([c1, c2], [r1, r2],  color=col,
-                                     lw=edge_width))
-    smap.set_array(edge_weight_list)
-    return smap
+    return lc
