@@ -437,9 +437,6 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     img_cmap : colormap, optional
         Any matplotlib colormap with which the image is draw. If set to `None`
         the image is drawn as it is.
-    thresh : float, optional
-        Edges with weight above `thresh` are not drawn, or considered for color
-        mapping.
     in_place : bool, optional
         If set, the RAG is modified in place. For each node `n` the function
         will set a new attribute ``rag.node[n]['centroid']``.
@@ -467,7 +464,7 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
         rag = rag.copy()
 
     if ax is None:
-        fix, ax = plt.subplots()
+        fig, ax = plt.subplots()
     out = util.img_as_float(img, force_copy=True)
 
     if img_cmap is None:
