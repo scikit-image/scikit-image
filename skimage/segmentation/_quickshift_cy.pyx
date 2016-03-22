@@ -6,15 +6,12 @@
 import numpy as np
 cimport numpy as cnp
 
-from libc.math cimport exp, sqrt
+from libc.math cimport exp, sqrt, ceil
 from libc.float cimport DBL_MAX
 
 
-def _quickshift_cython(cnp.ndarray[double, ndim=3, mode="c"] image,
-                       float kernel_size,
-                       float max_dist,
-                       bint return_tree,
-                       int random_seed):
+def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
+                       double max_dist, bint return_tree, int random_seed):
     """Segments image using quickshift clustering in Color-(x,y) space.
 
     Produces an oversegmentation of the image using the quickshift mode-seeking
@@ -50,57 +47,57 @@ def _quickshift_cython(cnp.ndarray[double, ndim=3, mode="c"] image,
     # an effect for very high max_dist.
 
     # window size for neighboring pixels to consider
-    cdef float kernel_size_sq = kernel_size**2
-    cdef int w = np.ceil(3 * kernel_size)
+    cdef double inv_kernel_size_sqr = -0.5 / kernel_size**2
+    cdef int kernel_width = <int>ceil(3 * kernel_size)
 
     cdef Py_ssize_t height = image.shape[0]
     cdef Py_ssize_t width = image.shape[1]
     cdef Py_ssize_t channels = image.shape[2]
+
+    cdef double[:, ::1] densities = np.zeros((height, width), dtype=np.double)
+
     cdef double current_density, closest, dist
-
-    cdef Py_ssize_t r, c, r_, c_, channel, r_min, c_min
-
-    cdef cnp.float_t* image_p = <cnp.float_t*> image.data
-    cdef cnp.float_t* current_pixel_p
-
-    cdef cnp.ndarray[dtype=cnp.float_t, ndim=2] densities \
-            = np.zeros((height, width))
+    cdef Py_ssize_t r, c, r_, c_, channel, r_min, r_max, c_min, c_max
+    cdef double* current_pixel_ptr
 
     # compute densities
     with nogil:
-        current_pixel_p = image_p
+        current_pixel_ptr = &image[0, 0, 0]
         for r in range(height):
+            r_min = max(r - kernel_width, 0)
+            r_max = min(r + kernel_width + 1, height)
             for c in range(width):
-                r_min, r_max = max(r - w, 0), min(r + w + 1, height)
-                c_min, c_max = max(c - w, 0), min(c + w + 1, width)
+                c_min = max(c - kernel_width, 0)
+                c_max = min(c + kernel_width + 1, width)
                 for r_ in range(r_min, r_max):
                     for c_ in range(c_min, c_max):
                         dist = 0
                         for channel in range(channels):
-                            dist += (current_pixel_p[channel] -
+                            dist += (current_pixel_ptr[channel] -
                                      image[r_, c_, channel])**2
                         dist += (r - r_)**2 + (c - c_)**2
-                        densities[r, c] += exp(-dist / (2 * kernel_size_sq))
-                current_pixel_p += channels
+                        densities[r, c] += exp(dist * inv_kernel_size_sqr)
+                current_pixel_ptr += channels
 
     # this will break ties that otherwise would give us headache
     densities += random_state.normal(scale=0.00001, size=(height, width))
 
     # default parent to self
-    cdef cnp.ndarray[dtype=cnp.int_t, ndim=2] parent \
-            = np.arange(width * height).reshape(height, width)
-    cdef cnp.ndarray[dtype=cnp.float_t, ndim=2] dist_parent \
-            = np.zeros((height, width))
+    cdef Py_ssize_t[:, ::1] parent = \
+        np.arange(width * height, dtype=np.intp).reshape(height, width)
+    cdef double[:, ::1] dist_parent = np.zeros((height, width), dtype=np.double)
 
     # find nearest node with higher density
     with nogil:
-        current_pixel_p = image_p
+        current_pixel_ptr = &image[0, 0, 0]
         for r in range(height):
+            r_min = max(r - kernel_width, 0)
+            r_max = min(r + kernel_width + 1, height)
             for c in range(width):
                 current_density = densities[r, c]
                 closest = DBL_MAX
-                r_min, r_max = max(r - w, 0), min(r + w + 1, height)
-                c_min, c_max = max(c - w, 0), min(c + w + 1, width)
+                c_min = max(c - kernel_width, 0)
+                c_max = min(c + kernel_width + 1, width)
                 for r_ in range(r_min, r_max):
                     for c_ in range(c_min, c_max):
                         if densities[r_, c_] > current_density:
@@ -109,27 +106,31 @@ def _quickshift_cython(cnp.ndarray[double, ndim=3, mode="c"] image,
                             # we get crazy memory overhead
                             # (width * height * windowsize**2)
                             for channel in range(channels):
-                                dist += (current_pixel_p[channel] -
+                                dist += (current_pixel_ptr[channel] -
                                          image[r_, c_, channel])**2
                             dist += (r - r_)**2 + (c - c_)**2
                             if dist < closest:
                                 closest = dist
                                 parent[r, c] = r_ * width + c_
                 dist_parent[r, c] = sqrt(closest)
-                current_pixel_p += channels
+                current_pixel_ptr += channels
 
-    dist_parent_flat = dist_parent.ravel()
-    flat = parent.ravel()
+    dist_parent_flat = np.array(dist_parent).ravel()
+    parent_flat = np.array(parent).ravel()
+
     # remove parents with distance > max_dist
     too_far = dist_parent_flat > max_dist
-    flat[too_far] = np.arange(width * height)[too_far]
-    old = np.zeros_like(flat)
+    parent_flat[too_far] = np.arange(width * height)[too_far]
+    old = np.zeros_like(parent_flat)
+
     # flatten forest (mark each pixel with root of corresponding tree)
-    while (old != flat).any():
-        old = flat
-        flat = flat[flat]
-    flat = np.unique(flat, return_inverse=True)[1]
-    flat = flat.reshape(height, width)
+    while (old != parent_flat).any():
+        old = parent_flat
+        parent_flat = parent_flat[parent_flat]
+
+    parent_flat = np.unique(parent_flat, return_inverse=True)[1]
+    parent_flat = parent_flat.reshape(height, width)
+
     if return_tree:
-        return flat, parent, dist_parent
-    return flat
+        return parent_flat, parent, dist_parent
+    return parent_flat
