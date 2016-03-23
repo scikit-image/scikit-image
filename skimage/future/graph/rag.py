@@ -494,7 +494,7 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     regions = measure.regionprops(rag_labels)
 
     for (n, data), region in zip(rag.nodes_iter(data=True), regions):
-        data['centroid'] = map(int, region['centroid'])
+        data['centroid'] = tuple(map(int, region['centroid']))
 
     cc = colors.ColorConverter()
     if border_color is not None:
@@ -506,6 +506,7 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     # Defining the end points of the edges
     # The tuple[::-1] syntax reverses a tuple as matplotlib uses (x,y)
     # convention while skimage uses (row, column)
+    ll_ = [(rag.node[n1]['centroid'], rag.node[n2]['centroid']) for (n1, n2) in rag.edges_iter()]
     lines = [[rag.node[n1]['centroid'][::-1], rag.node[n2]['centroid'][::-1]]
              for (n1, n2) in rag.edges_iter()]
 
