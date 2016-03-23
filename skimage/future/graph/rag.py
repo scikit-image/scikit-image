@@ -468,8 +468,8 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     out = util.img_as_float(img, force_copy=True)
 
     if img_cmap is None:
-        if img.ndim < 3:
-            msg = 'If colormap is `None`, an RGB image should be given'
+        if img.ndim < 3 or img.shape[2] not in [3, 4]:
+            msg = 'If colormap is `None`, an RGB or RGBA image should be given'
             raise ValueError(msg)
         # Ignore the alpha channel
         out = img[:, :, :3]
