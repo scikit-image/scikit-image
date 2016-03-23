@@ -14,8 +14,8 @@ def configuration(parent_package='', top_path=None):
     cython(['_felzenszwalb_cy.pyx'], working_path=base_path)
     config.add_extension('_felzenszwalb_cy', sources=['_felzenszwalb_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
-    cython(['_quickshift.pyx'], working_path=base_path)
-    config.add_extension('_quickshift', sources=['_quickshift.c'],
+    cython(['_quickshift_cy.pyx'], working_path=base_path)
+    config.add_extension('_quickshift_cy', sources=['_quickshift_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     cython(['_slic.pyx'], working_path=base_path)
     config.add_extension('_slic', sources=['_slic.c'],
