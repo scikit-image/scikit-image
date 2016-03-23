@@ -94,9 +94,9 @@ def _prune_blobs(blobs_array, overlap):
     for blob1, blob2 in itt.combinations(blobs_array, 2):
 
         # Ignore if we have removed either blob during an earlier iteration.
-        if blob1[3] == -1:
+        if blob1[2] == -1:
           continue
-        if blob2[3] == -1:
+        if blob2[2] == -1:
           continue
 
         if _blob_overlap(blob1, blob2) > overlap:
