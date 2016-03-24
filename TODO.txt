@@ -24,10 +24,6 @@ Version 0.13
 * Require Python 2.7+, remove warning in `__init__.py` and 2.6 hack in
   `doc/release/contribs.py`.
 * Remove deprecated `None` defaults for `skimage.exposure.rescale_intensity`
-* Remove deprecated `skimage.filters.canny` import in `filters/__init__.py`
-  file (canny is now in `skimage.feature.canny`).
-    * Don't forget to complete api_changes.txt.
-     (`GitHub discuss <https://github.com/scikit-image/scikit-image/pull/1113>`__ )
 * Remove deprecated edge filters `hsobel`, `vsobel`, `hscharr`, `vscharr`,
   `hprewitt`, `vprewitt`, `roberts_positive_diagonal`,
   `roberts_negative_diagonal` in `skimage/filters/edges.py`
