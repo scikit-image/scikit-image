@@ -1,6 +1,6 @@
 Version 0.13
 ------------
-- `skimage.filter` has been removed.
+- `skimage.filter` has been removed. Use `skimage.filters` instead.
 
 Version 0.12
 ------------
