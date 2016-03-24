@@ -192,7 +192,7 @@ def setup_test():
 
     from scipy import signal, ndimage, special, optimize, linalg
     from scipy.io import loadmat
-    from skimage import viewer, filter
+    from skimage import viewer
 
     np.random.seed(0)
 
