@@ -43,7 +43,7 @@ api:
 
 release_notes:
 	@echo "Copying release notes"
-	@tail -n +4 `ls release/*.txt | sort -k 2 -t . -n | tail -n 1` > release/_release_notes_for_docs.txt
+	@tail -n +4 `ls release/*.rst | sort -k 2 -t . -n | tail -n 1` > release/_release_notes_for_docs.rst
 
 html: api release_notes
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html
@@ -129,4 +129,4 @@ gitwash:
 	--project-ml-url=http://groups.google.com/group/scikit-image \
 	--repo-name=scikit-image \
 	--github-user=scikit-image \
-	--source-suffix=.txt
+	--source-suffix=.rst
