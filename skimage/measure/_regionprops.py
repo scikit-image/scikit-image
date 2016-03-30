@@ -112,6 +112,12 @@ class _RegionProperties(object):
         return np.sum(self.image)
 
     def bbox(self):
+        """
+        Returns
+        -------
+        A tuple of the bounding box's start coordinates for each dimension, 
+        followed by the end coordinates for each dimension
+        """
         return tuple([self._slice[i].start for i in range(self._ndim)] +
                      [self._slice[i].stop for i in range(self._ndim)])
 
