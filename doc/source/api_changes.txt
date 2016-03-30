@@ -1,6 +1,8 @@
 Version 0.13
 ------------
 - `skimage.filter` has been removed. Use `skimage.filters` instead.
+- `skimage.filters.canny` has been removed.
+  `canny` is available only from `skimage.feature` now.
 
 Version 0.12
 ------------
