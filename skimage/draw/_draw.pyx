@@ -513,7 +513,8 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
     yradius, xradius : int
         Minor and major semi-axes. ``(x/xradius)**2 + (y/yradius)**2 = 1``.
     orientation : double, optional (default 0)
-        Major axis orientation in clockwise direction as radians.
+        Counter-clockwise angle of rotation from the x-axis to the major axis
+of the ellipse in radians.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output pixel
         coordinates. This is useful for ellipses which exceed the image size.
