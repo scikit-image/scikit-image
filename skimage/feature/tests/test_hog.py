@@ -51,9 +51,9 @@ def test_histogram_of_oriented_gradients_matlab_correctness():
 
 def test_hog_color_image():
     image = data.astronaut()
-    output, viz = feature.hog(image, orientations=9, pixels_per_cell=(8, 8),
+    output = feature.hog(image, orientations=9, pixels_per_cell=(8, 8),
                          cells_per_block=(1, 1), feature_vector=True,
-                         transform_sqrt=False, visualise=False)
+                         transform_sqrt=False, visualise=False, multichannel=True)
     matlab_hog = io.loadmat(
         os.path.join(si.data_dir, 'hog_astronaut.mat'))['hog1']
     assert_almost_equal(output, matlab_hog)
