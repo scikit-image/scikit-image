@@ -421,11 +421,11 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
 
     Parameters
     ----------
-    labels : ndarray, shape (M, N[, 3])
+    labels : ndarray, shape (M, N)
         The labelled image.
     rag : RAG
         The Region Adjacency Graph.
-    img : ndarray, shape (M, N, 3)
+    img : ndarray, shape (M, N[, 3])
         Input image. If `colormap` is `None`, the image should be in RGB
         format.
     border_color : colorspec, optional
