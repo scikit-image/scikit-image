@@ -517,8 +517,14 @@ magma_data = [[0.001462, 0.000466, 0.013866],
               [0.987053, 0.991438, 0.749504]]
 
 
-viridis = LinearSegmentedColormap.from_list('viridis', viridis_data)
-cm.register_cmap('viridis', viridis)
+def register_cmap_safe(name, data):
+    "Register a colormap if not already registered."
+    try:
+        cm.get_cmap(name)
+    except ValueError:
+        cmap = LinearSegmentedColormap.from_list(name, data)
+        cm.register_cmap(name, cmap)
 
-magma = LinearSegmentedColormap.from_list('magma', magma_data)
-cm.register_cmap('magma', magma)
+
+register_cmap_safe('viridis', viridis_data)
+register_cmap_safe('magma', magma_data)

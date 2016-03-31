@@ -421,7 +421,7 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
 
     Parameters
     ----------
-    labels : ndarray, shape (M, N)
+    labels : ndarray, shape (M, N[, 3])
         The labelled image.
     rag : RAG
         The Region Adjacency Graph.
@@ -441,7 +441,8 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
         If set, the RAG is modified in place. For each node `n` the function
         will set a new attribute ``rag.node[n]['centroid']``.
     ax : matplotlib axes, optional
-        The axes to draw on.
+        The axes to draw on. If not specified, new axes are created and drawn
+        on.
 
     Returns
     -------
