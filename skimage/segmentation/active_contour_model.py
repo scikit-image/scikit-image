@@ -137,7 +137,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
                         np.arange(img.shape[0]), img, kind='cubic',
                         copy=False, bounds_error=False, fill_value=0))
 
-    x, y = snake[:, 0].copy(), snake[:, 1].copy()
+    x, y = snake[:, 0].astype(np.float), snake[:, 1].astype(np.float)
     xsave = np.empty((convergence_order, len(x)))
     ysave = np.empty((convergence_order, len(x)))
 
@@ -216,8 +216,8 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         if efixed:
             dx[-1] = 0
             dy[-1] = 0
-        x[:] += dx
-        y[:] += dy
+        x += dx
+        y += dy
 
         # Convergence criteria needs to compare to a number of previous
         # configurations since oscillations can occur.
