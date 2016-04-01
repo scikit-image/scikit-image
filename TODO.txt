@@ -21,8 +21,6 @@ Version 0.14
 
 Version 0.13
 ------------
-* Require Python 2.7+, remove warning in `__init__.py` and 2.6 hack in
-  `doc/release/contribs.py`.
 * Remove deprecated `None` defaults for `skimage.exposure.rescale_intensity`
 * Remove deprecated edge filters `hsobel`, `vsobel`, `hscharr`, `vscharr`,
   `hprewitt`, `vprewitt`, `roberts_positive_diagonal`,

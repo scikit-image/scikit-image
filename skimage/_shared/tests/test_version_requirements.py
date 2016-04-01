@@ -15,14 +15,13 @@ def test_get_module_version():
 
 
 def test_is_installed():
-    assert version_req.is_installed('python', '>=2.6')
+    assert version_req.is_installed('python', '>=2.7')
     assert not version_req.is_installed('numpy', '<1.0')
 
 
 def test_require():
-
-    # A function that only runs on Python >2.6 and numpy > 1.5 (should pass)
-    @version_req.require('python', '>2.6')
+    # A function that only runs on Python >2.7 and numpy > 1.5 (should pass)
+    @version_req.require('python', '>2.7')
     @version_req.require('numpy', '>1.5')
     def foo():
         return 1
