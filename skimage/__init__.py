@@ -80,6 +80,7 @@ else:
     def _test(doctest=False, verbose=False):
         """Run all unit tests."""
         import nose
+        import warnings
         args = ['', pkg_dir, '--exe', '--ignore-files=^_test']
         if verbose:
             args.extend(['-v', '-s'])
