@@ -37,8 +37,6 @@ notifications:
 
 matrix:
   include:
-    - python: 2.6
-      env: WITH_PYAMG=1 NO_SPHINX=1
     - python: 2.7
       env: PIP_FLAGS="--pre"
     - python: 2.7
