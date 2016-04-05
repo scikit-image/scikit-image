@@ -49,6 +49,11 @@ functionality is only available with the following installed:
 * `imread <http://pythonhosted.org/imread/>`__
   Optional io plugin providing most standard `formats <http://pythonhosted.org//imread/formats.html>`__.
 
+* `PyWavelets >= 0.4.0 <http://pywavelets.readthedocs.org/en/latest/>`
+  Provides wavelet capabilities, useful in wavelet denoising and noise variance
+  estimation.
+  
+
 
 Testing requirements
 --------------------
