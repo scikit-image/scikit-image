@@ -1,9 +1,10 @@
 # coding: utf-8
 import numpy as np
-import pywt
+from math import ceil
 from .. import img_as_float
 from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
-from .._shared.utils import _mode_deprecations
+from .._shared.utils import _mode_deprecations, skimage_deprecation, warn
+import warnings
 
 
 def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
