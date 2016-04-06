@@ -131,8 +131,6 @@ if __name__ == "__main__":
             'Operating System :: MacOS',
         ],
         install_requires=INSTALL_REQUIRES,
-        # install cython when running setup.py (source install)
-        setup_requires=['cython>=0.21'],
         requires=REQUIRES,
         packages=setuptools.find_packages(exclude=['doc']),
         include_package_data=True,
