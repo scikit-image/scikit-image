@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 set -ex
 
-export WHEELHOUSE="--no-index --trusted-host travis-wheels.scikit-image.org \
-                   --find-links=http://travis-wheels.scikit-image.org/"
+
 export COVERALLS_REPO_TOKEN=7LdFN9232ZbSY3oaXHbQIzLazrSf6w2pQ
 export PIP_DEFAULT_TIMEOUT=60
-sh -e /etc/init.d/xvfb start
+
+if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
+    sh -e /etc/init.d/xvfb start
+    export WHEELHOUSE="--no-index --trusted-host travis-wheels.scikit-image.org \
+                       --find-links=http://travis-wheels.scikit-image.org/"
+fi
+
 export DISPLAY=:99.0
 export PYTHONWARNINGS="d,all:::skimage"
 export TEST_ARGS="--exe --ignore-files=^_test -v --with-doctest \
