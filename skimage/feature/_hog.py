@@ -1,36 +1,69 @@
 from __future__ import division
 import numpy as np
 from .._shared.utils import assert_nD
+from .._shared.utils import skimage_deprecation, warn
 from . import _hoghistogram
 
 
-def hog(image, orientations=9, pixels_per_cell=(8, 8),
-        cells_per_block=(3, 3), visualise=False, transform_sqrt=False,
+def _hog_normalize_block(block, method, eps=1e-5):
+    if method == 'L1':
+        out = block / (np.sum(np.abs(block)) + eps)
+    elif method == 'L1-sqrt':
+        out = np.sqrt(block / (np.sum(np.abs(block)) + eps))
+    elif method == 'L2':
+        out = block / np.sqrt(np.sqrt(np.sum(block ** 2)) ** 2 + eps ** 2)
+    elif method == 'L2-Hys':
+        out = block / np.sqrt(np.sqrt(np.sum(block ** 2)) ** 2 + eps ** 2)
+        out = np.minimum(out, 0.2)
+        out = out / np.sqrt(np.sqrt(np.sum(block ** 2)) ** 2 + eps ** 2)
+    else:
+        raise ValueError('Selected block normalization method is invalid.')
+
+    return out
+
+
+def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
+        block_norm='L1', visualise=False, transform_sqrt=False,
         feature_vector=True, normalise=None):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Compute a Histogram of Oriented Gradients (HOG) by
 
-        1. (optional) global image normalisation
+        1. (optional) global image normalization
         2. computing the gradient image in x and y
         3. computing gradient histograms
-        4. normalising across blocks
+        4. normalizing across blocks
         5. flattening into a feature vector
 
     Parameters
     ----------
     image : (M, N) ndarray
         Input image (greyscale).
-    orientations : int
+    orientations : int, optional
         Number of orientation bins.
-    pixels_per_cell : 2 tuple (int, int)
+    pixels_per_cell : 2-tuple (int, int), optional
         Size (in pixels) of a cell.
-    cells_per_block  : 2 tuple (int,int)
+    cells_per_block : 2-tuple (int, int), optional
         Number of cells in each block.
+    block_norm : str {'L1', 'L1-sqrt', 'L2', 'L2-Hys'}, optional
+        Block normalization method:
+
+        ``L1``
+           Normalization using L1-norm. (default)
+        ``L1-sqrt``
+           Normalization using L1-norm, followed by square root.
+        ``L2``
+           Normalization using L2-norm.
+        ``L2-Hys``
+           Normalization using L2-norm, followed by limiting the
+           maximum values to 0.2 (`Hys` stands for `hysteresis`) and
+           renormalization using L2-norm.           
+           For details, see [3]_, [4]_.
+
     visualise : bool, optional
         Also return an image of the HOG.
     transform_sqrt : bool, optional
-        Apply power law compression to normalise the image before
+        Apply power law compression to normalize the image before
         processing. DO NOT use this if the image contains negative
         values. Also see `notes` section below.
     feature_vector : bool, optional
@@ -49,24 +82,46 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
 
     References
     ----------
-    * http://en.wikipedia.org/wiki/Histogram_of_oriented_gradients
+    .. [1] http://en.wikipedia.org/wiki/Histogram_of_oriented_gradients
 
-    * Dalal, N and Triggs, B, Histograms of Oriented Gradients for
-      Human Detection, IEEE Computer Society Conference on Computer
-      Vision and Pattern Recognition 2005 San Diego, CA, USA
+    .. [2] Dalal, N and Triggs, B, Histograms of Oriented Gradients for
+           Human Detection, IEEE Computer Society Conference on Computer
+           Vision and Pattern Recognition 2005 San Diego, CA, USA,
+           https://lear.inrialpes.fr/people/triggs/pubs/Dalal-cvpr05.pdf,
+           DOI:10.1109/CVPR.2005.177
+
+    .. [3] Lowe, D.G., Distinctive image features from scale-invatiant
+           keypoints, International Journal of Computer Vision (2004) 60: 91,
+           http://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf,
+           DOI:10.1023/B:VISI.0000029664.99615.94
+
+    .. [4] Dalal, N, Finding People in Images and Videos,
+           Human-Computer Interaction [cs.HC], Institut National Polytechnique
+           de Grenoble - INPG, 2006,
+           https://tel.archives-ouvertes.fr/tel-00390303/file/NavneetDalalThesis.pdf
 
     Notes
     -----
+    The presented code implements the HOG extraction method from [2]_ with
+    the following changes: (I) blocks of (3, 3) cells are used ((2, 2) in the
+    paper; (II) no smoothing within cells (Gaussian spatial window with sigma=8pix
+    in the paper); (III) L1 block normalization is used (L2-Hys in the paper).
+
     Power law compression, also known as Gamma correction, is used to reduce
     the effects of shadowing and illumination variations. The compression makes
     the dark regions lighter. When the kwarg `transform_sqrt` is set to
     ``True``, the function computes the square root of each color channel
     and then applies the hog algorithm to the image.
     """
+
+    if block_norm == 'L1':
+        warn('Default value of `block_norm`==`L1` is deprecated and will '
+             'be changed to `L2-Hys` in v0.15', skimage_deprecation)
+
     image = np.atleast_2d(image)
 
     """
-    The first stage applies an optional global image normalisation
+    The first stage applies an optional global image normalization
     equalisation that is designed to reduce the influence of illumination
     effects. In practice we use gamma (power law) compression, either
     computing the square root or the log of each colour channel.
@@ -78,10 +133,12 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     assert_nD(image, 2)
 
     if normalise is not None:
-        raise ValueError("The normalise parameter was removed due to incorrect "
-                         "behavior; it only applied a square root instead of a "
-                         "true normalization. If you wish to duplicate the old "
-                         "behavior, set ``transform_sqrt=True``.")
+        raise ValueError("The ``normalise`` parameter was removed due to "
+                         "incorrect behavior: it only applied a square root "
+                         "instead of a true normalization. "
+                         "If you wish to duplicate the old behavior, set "
+                         "``transform_sqrt=True``. ``normalise`` will be "
+                         "completely removed in v0.14.")
 
     if transform_sqrt:
         image = np.sqrt(image)
@@ -98,17 +155,11 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
 
     if image.dtype.kind == 'u':
         # convert uint image to float
-        # to avoid problems with subtracting unsigned numbers in np.diff()
+        # to avoid problems with subtracting unsigned numbers
         image = image.astype('float')
 
-    gx = np.empty(image.shape, dtype=np.double)
-    gx[:, 0] = 0
-    gx[:, -1] = 0
-    gx[:, 1:-1] = image[:, 2:] - image[:, :-2]
-    gy = np.empty(image.shape, dtype=np.double)
-    gy[0, :] = 0
-    gy[-1, :] = 0
-    gy[1:-1, :] = image[2:, :] - image[:-2, :]
+    gy, gx = [np.ascontiguousarray(g, dtype=np.double)
+              for g in np.gradient(image)]
 
     """
     The third stage aims to produce an encoding that is sensitive to
@@ -129,8 +180,8 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     cx, cy = pixels_per_cell
     bx, by = cells_per_block
 
-    n_cellsx = int(np.floor(sx // cx))  # number of cells in x
-    n_cellsy = int(np.floor(sy // cy))  # number of cells in y
+    n_cellsx = int(sx // cx)  # number of cells in x
+    n_cellsy = int(sy // cy)  # number of cells in y
 
     # compute orientations integral images
     orientation_histogram = np.zeros((n_cellsy, n_cellsx, orientations))
@@ -138,7 +189,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     _hoghistogram.hog_histograms(gx, gy, cx, cy, sx, sy, n_cellsx, n_cellsy,
                                  orientations, orientation_histogram)
 
-    # now for each cell, compute the histogram
+    # now compute the histogram for each cell
     hog_image = None
 
     if visualise:
@@ -160,30 +211,31 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
                     hog_image[rr, cc] += orientation_histogram[y, x, o]
 
     """
-    The fourth stage computes normalisation, which takes local groups of
-    cells and contrast normalises their overall responses before passing
-    to next stage. Normalisation introduces better invariance to illumination,
+    The fourth stage computes normalization, which takes local groups of
+    cells and contrast normalizes their overall responses before passing
+    to next stage. Normalization introduces better invariance to illumination,
     shadowing, and edge contrast. It is performed by accumulating a measure
     of local histogram "energy" over local groups of cells that we call
-    "blocks". The result is used to normalise each cell in the block.
+    "blocks". The result is used to normalize each cell in the block.
     Typically each individual cell is shared between several blocks, but
-    its normalisations are block dependent and thus different. The cell
+    its normalizations are block dependent and thus different. The cell
     thus appears several times in the final output vector with different
-    normalisations. This may seem redundant but it improves the performance.
-    We refer to the normalised block descriptors as Histogram of Oriented
+    normalizations. This may seem redundant but it improves the performance.
+    We refer to the normalized block descriptors as Histogram of Oriented
     Gradient (HOG) descriptors.
     """
 
     n_blocksx = (n_cellsx - bx) + 1
     n_blocksy = (n_cellsy - by) + 1
-    normalised_blocks = np.zeros((n_blocksy, n_blocksx,
+    normalized_blocks = np.zeros((n_blocksy, n_blocksx,
                                   by, bx, orientations))
 
+    eps = 1e-8
     for x in range(n_blocksx):
         for y in range(n_blocksy):
             block = orientation_histogram[y:y + by, x:x + bx, :]
-            eps = 1e-5
-            normalised_blocks[y, x, :] = block / np.sqrt(block.sum() ** 2 + eps)
+            normalized_blocks[y, x, :] = \
+                _hog_normalize_block(block, method=block_norm)
 
     """
     The final step collects the HOG descriptors from all blocks of a dense
@@ -192,9 +244,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     """
 
     if feature_vector:
-        normalised_blocks = normalised_blocks.ravel()
+        normalized_blocks = normalized_blocks.ravel()
 
     if visualise:
-        return normalised_blocks, hog_image
+        return normalized_blocks, hog_image
     else:
-        return normalised_blocks
+        return normalized_blocks
