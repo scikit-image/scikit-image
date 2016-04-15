@@ -640,7 +640,102 @@ class PiecewiseAffineTransform(GeometricTransform):
         return out
 
 
-class SimilarityTransform(ProjectiveTransform):
+class EuclideanTransform(ProjectiveTransform):
+    """2D Euclidean transformation of the form:
+
+    ..:math:
+
+        X = a0 * x - b0 * y + a1 =
+          = x * cos(rotation) - y * sin(rotation) + a1
+
+        Y = b0 * x + a0 * y + b1 =
+          = x * sin(rotation) + y * cos(rotation) + b1
+
+    where the homogeneous transformation matrix is::
+
+        [[a0  b0  a1]
+         [b0  a0  b1]
+         [0   0    1]]
+
+    Parameters
+    ----------
+    matrix : (3, 3) array, optional
+        Homogeneous transformation matrix.
+    rotation : float, optional
+        Rotation angle in counter-clockwise direction as radians.
+    translation : (tx, ty) as array, list or tuple, optional
+        x, y translation parameters.
+
+    Attributes
+    ----------
+    params : (3, 3) array
+        Homogeneous transformation matrix.
+
+    """
+
+    def __init__(self, matrix=None, rotation=None, translation=None):
+        params = any(param is not None
+                     for param in (rotation, translation))
+
+        if params and matrix is not None:
+            raise ValueError("You cannot specify the transformation matrix and"
+                             " the implicit parameters at the same time.")
+        elif matrix is not None:
+            if matrix.shape != (3, 3):
+                raise ValueError("Invalid shape of transformation matrix.")
+            self.params = matrix
+        elif params:
+            if rotation is None:
+                rotation = 0
+            if translation is None:
+                translation = (0, 0)
+
+            self.params = np.array([
+                [math.cos(rotation), - math.sin(rotation), 0],
+                [math.sin(rotation),   math.cos(rotation), 0],
+                [                 0,                    0, 1]
+            ])
+            self.params[0:2, 2] = translation
+        else:
+            # default to an identity transform
+            self.params = np.eye(3)
+
+    def estimate(self, src, dst):
+        """Estimate the transformation from a set of corresponding points.
+
+        You can determine the over-, well- and under-determined parameters
+        with the total least-squares method.
+
+        Number of source and destination coordinates must match.
+
+        Parameters
+        ----------
+        src : (N, 2) array
+            Source coordinates.
+        dst : (N, 2) array
+            Destination coordinates.
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+
+        """
+
+        self.params = _umeyama(src, dst, False)
+
+        return True
+
+    @property
+    def rotation(self):
+        return math.atan2(self.params[1, 0], self.params[1, 1])
+
+    @property
+    def translation(self):
+        return self.params[0:2, 2]
+
+
+class SimilarityTransform(EuclideanTransform):
     """2D similarity transformation of the form:
 
         X = a0 * x - b0 * y + a1 =
@@ -739,17 +834,9 @@ class SimilarityTransform(ProjectiveTransform):
             scale = self.params[0, 0] / math.cos(self.rotation)
         return scale
 
-    @property
-    def rotation(self):
-        return math.atan2(self.params[1, 0], self.params[1, 1])
-
-    @property
-    def translation(self):
-        return self.params[0:2, 2]
-
 
 class PolynomialTransform(GeometricTransform):
-    """2D transformation of the form:
+    """2D polynomial transformation of the form:
 
         X = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
         Y = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
@@ -895,6 +982,7 @@ class PolynomialTransform(GeometricTransform):
 
 
 TRANSFORMS = {
+    'euclidean': EuclideanTransform,
     'similarity': SimilarityTransform,
     'affine': AffineTransform,
     'piecewise-affine': PiecewiseAffineTransform,
@@ -919,13 +1007,14 @@ def estimate_transform(ttype, src, dst, **kwargs):
 
     Parameters
     ----------
-    ttype : {'similarity', 'affine', 'piecewise-affine', 'projective', \
-             'polynomial'}
+    ttype : {'euclidean', similarity', 'affine', 'piecewise-affine',
+             'projective', 'polynomial'}
         Type of transform.
     kwargs : array or int
         Function parameters (src, dst, n, angle)::
 
             NAME / TTYPE        FUNCTION PARAMETERS
+            'euclidean'         `src, `dst`
             'similarity'        `src, `dst`
             'affine'            `src, `dst`
             'piecewise-affine'  `src, `dst`
