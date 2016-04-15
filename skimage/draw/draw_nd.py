@@ -33,6 +33,8 @@ def line_nd(start, stop, endpoint=False, round=True):
     >>> lin
     [array([1, 2, 3, 4]), array([1, 1, 2, 2])]
     >>> im = np.zeros((6, 5), dtype=int)
+    >>> im[lin] = 1
+    >>> im
     array([[0, 0, 0, 0, 0],
            [0, 1, 0, 0, 0],
            [0, 1, 0, 0, 0],
