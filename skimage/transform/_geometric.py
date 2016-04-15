@@ -657,6 +657,10 @@ class EuclideanTransform(ProjectiveTransform):
          [b0  a0  b1]
          [0   0    1]]
 
+    The Euclidean transformation is a rigid transformation with rotation and
+    translation parameters. The similarity transformation extends the Euclidean
+    transformation with a single scaling factor.
+
     Parameters
     ----------
     matrix : (3, 3) array, optional
@@ -739,16 +743,20 @@ class SimilarityTransform(EuclideanTransform):
     """2D similarity transformation of the form:
 
         X = a0 * x - b0 * y + a1 =
-          = m * x * cos(rotation) - m * y * sin(rotation) + a1
+          = s * x * cos(rotation) - s * y * sin(rotation) + a1
 
         Y = b0 * x + a0 * y + b1 =
-          = m * x * sin(rotation) + m * y * cos(rotation) + b1
+          = s * x * sin(rotation) + s * y * cos(rotation) + b1
 
-    where ``m`` is a scale factor and the homogeneous transformation matrix is::
+    where ``s`` is a scale factor and the homogeneous transformation matrix is::
 
         [[a0  b0  a1]
          [b0  a0  b1]
          [0   0    1]]
+
+    The similarity transformation extends the Euclidean transformation with a
+    single scaling factor in addition to the rotation and translation
+    parameters.
 
     Parameters
     ----------
