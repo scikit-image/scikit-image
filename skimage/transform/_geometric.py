@@ -67,6 +67,82 @@ def _center_and_normalize_points(points):
     return matrix, new_points
 
 
+def _umeyama(src, dst, estimate_scale):
+    """Estimate N-D similarity transformation with or without scaling.
+
+    Parameters
+    ----------
+    src : (M, N) array
+        Source coordinates.
+    dst : (M, N) array
+        Destination coordinates.
+    estimate_scale : bool
+        Whether to estimate scaling factor.
+
+    Returns
+    -------
+    T : (N + 1, N + 1)
+        The homogeneous similarity transformation matrix. The matrix contains
+        NaN values only if the problem is not well-conditioned.
+
+    References
+    ----------
+    .. [1] "Least-squares estimation of transformation parameters between two
+            point patterns", Shinji Umeyama, PAMI 1991, DOI: 10.1109/34.88573
+
+    """
+
+    num = src.shape[0]
+    dim = src.shape[1]
+
+    # Compute mean of src and dst.
+    src_mean = src.mean(axis=0)
+    dst_mean = dst.mean(axis=0)
+
+    # Subtract mean from src and dst.
+    src_demean = src - src_mean
+    dst_demean = dst - dst_mean
+
+    # Eq. (38).
+    A = np.dot(dst_demean.T, src_demean) / float(num)
+
+    # Eq. (39).
+    D = np.ones((dim,), dtype=np.double)
+    if np.linalg.det(A) < 0:
+        D[dim - 1] = -1
+
+    T = np.eye(dim + 1, dtype=np.double)
+
+    U, S, V = np.linalg.svd(A)
+
+    # Eq. (40) and (43).
+    rank = np.linalg.matrix_rank(A)
+    if rank == 0:
+        return np.nan * np.empty((3, 3))
+    elif rank == dim - 1:
+        if np.linalg.det(U) * np.linalg.det(V) > 0:
+            T[:dim, :dim] = np.dot(U, V)
+        else:
+            s = D[dim - 1]
+            D[dim - 1] = -1
+            T[:dim, :dim] = np.dot(U, np.dot(np.diag(D), V))
+            D[dim - 1] = s
+    else:
+        T[:dim, :dim] = np.dot(U, np.dot(np.diag(D), V.T))
+
+    if estimate_scale:
+        # Eq. (41) and (42).
+        scale = 1.0 / src_demean.var(axis=0).sum() * np.dot(S, D)
+    else:
+        scale = 1.0
+
+    T[:dim, dim] = dst_mean
+    T[:dim, dim] -= scale * np.dot(T[:dim, :dim], src_mean.T)
+    T[:dim, :dim] *= scale
+
+    return T
+
+
 class GeometricTransform(object):
     """Perform geometric transformations on a set of coordinates.
 
@@ -644,26 +720,6 @@ class SimilarityTransform(ProjectiveTransform):
             X = a0 * x - b0 * y + a1
             Y = b0 * x + a0 * y + b1
 
-        These equations can be transformed to the following form::
-
-            0 = a0 * x - b0 * y + a1 - X
-            0 = b0 * x + a0 * y + b1 - Y
-
-        which exist for each set of corresponding points, so we have a set of
-        N * 2 equations. The coefficients appear linearly so we can write
-        A x = 0, where::
-
-            A   = [[x 1 -y 0 -X]
-                   [y 0  x 1 -Y]
-                    ...
-                    ...
-                  ]
-            x.T = [a0 a1 b0 b1 c3]
-
-        In case of total least-squares the solution of this homogeneous system
-        of equations is the right singular vector of A which corresponds to the
-        smallest singular value normed by the coefficient c3.
-
         Parameters
         ----------
         src : (N, 2) array
@@ -678,44 +734,7 @@ class SimilarityTransform(ProjectiveTransform):
 
         """
 
-        try:
-            src_matrix, src = _center_and_normalize_points(src)
-            dst_matrix, dst = _center_and_normalize_points(dst)
-        except ZeroDivisionError:
-            self.params = np.nan * np.empty((3, 3))
-            return False
-
-        xs = src[:, 0]
-        ys = src[:, 1]
-        xd = dst[:, 0]
-        yd = dst[:, 1]
-        rows = src.shape[0]
-
-        # params: a0, a1, b0, b1
-        A = np.zeros((rows * 2, 5))
-        A[:rows, 0] = xs
-        A[:rows, 2] = - ys
-        A[:rows, 1] = 1
-        A[rows:, 2] = xs
-        A[rows:, 0] = ys
-        A[rows:, 3] = 1
-        A[:rows, 4] = xd
-        A[rows:, 4] = yd
-
-        _, _, V = np.linalg.svd(A)
-
-        # solution is right singular vector that corresponds to smallest
-        # singular value
-        a0, a1, b0, b1 = - V[-1, :-1] / V[-1, -1]
-
-        S = np.array([[a0, -b0, a1],
-                      [b0,  a0, b1],
-                      [ 0,   0,  1]])
-
-        # De-center and de-normalize
-        S = np.dot(np.linalg.inv(dst_matrix), np.dot(S, src_matrix))
-
-        self.params = S
+        self.params = _umeyama(src, dst, True)
 
         return True
 
