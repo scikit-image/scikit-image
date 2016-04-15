@@ -144,7 +144,7 @@ def _umeyama(src, dst, estimate_scale):
 
 
 class GeometricTransform(object):
-    """Perform geometric transformations on a set of coordinates.
+    """Base class for geometric transformations.
 
     """
     def __call__(self, coords):
@@ -292,8 +292,7 @@ class ProjectiveTransform(GeometricTransform):
         return self._apply_mat(coords, self._inv_matrix)
 
     def estimate(self, src, dst):
-        """Set the transformation matrix with the explicit transformation
-        parameters.
+        """Estimate the transformation from a set of corresponding points.
 
         You can determine the over-, well- and under-determined parameters
         with the total least-squares method.
@@ -417,7 +416,6 @@ class ProjectiveTransform(GeometricTransform):
 
 
 class AffineTransform(ProjectiveTransform):
-
     """2D affine transformation of the form:
 
         X = a0*x + a1*y + a2 =
@@ -426,7 +424,7 @@ class AffineTransform(ProjectiveTransform):
         Y = b0*x + b1*y + b2 =
           = sx*x*sin(rotation) + sy*y*cos(rotation + shear) + b2
 
-    where ``sx`` and ``sy`` are zoom factors in the x and y directions,
+    where ``sx`` and ``sy`` are scale factors in the x and y directions,
     and the homogeneous transformation matrix is::
 
         [[a0  a1  a2]
@@ -509,7 +507,6 @@ class AffineTransform(ProjectiveTransform):
 
 
 class PiecewiseAffineTransform(GeometricTransform):
-
     """2D piecewise affine transformation.
 
     Control points are used to define the mapping. The transform is based on
@@ -532,7 +529,7 @@ class PiecewiseAffineTransform(GeometricTransform):
         self.inverse_affines = None
 
     def estimate(self, src, dst):
-        """Set the control points with which to perform the piecewise mapping.
+        """Estimate the transformation from a set of corresponding points.
 
         Number of source and destination coordinates must match.
 
@@ -652,7 +649,7 @@ class SimilarityTransform(ProjectiveTransform):
         Y = b0 * x + a0 * y + b1 =
           = m * x * sin(rotation) + m * y * cos(rotation) + b1
 
-    where ``m`` is a zoom factor and the homogeneous transformation matrix is::
+    where ``m`` is a scale factor and the homogeneous transformation matrix is::
 
         [[a0  b0  a1]
          [b0  a0  b1]
@@ -708,17 +705,12 @@ class SimilarityTransform(ProjectiveTransform):
             self.params = np.eye(3)
 
     def estimate(self, src, dst):
-        """Set the transformation matrix with the explicit parameters.
+        """Estimate the transformation from a set of corresponding points.
 
         You can determine the over-, well- and under-determined parameters
         with the total least-squares method.
 
         Number of source and destination coordinates must match.
-
-        The transformation is defined as::
-
-            X = a0 * x - b0 * y + a1
-            Y = b0 * x + a0 * y + b1
 
         Parameters
         ----------
@@ -785,8 +777,7 @@ class PolynomialTransform(GeometricTransform):
         self.params = params
 
     def estimate(self, src, dst, order=2):
-        """Set the transformation matrix with the explicit transformation
-        parameters.
+        """Estimate the transformation from a set of corresponding points.
 
         You can determine the over-, well- and under-determined parameters
         with the total least-squares method.
