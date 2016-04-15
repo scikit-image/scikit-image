@@ -229,9 +229,8 @@ class FundamentalMatrixTransform(GeometricTransform):
 
     References
     ----------
-    .. [1] Hartley, Richard I. "In defense of the eight-point algorithm."
-           Pattern Analysis and Machine Intelligence, IEEE Transactions on 19.6
-           (1997): 580-593.
+    .. [1] Hartley, Richard, and Andrew Zisserman. Multiple view geometry in
+           computer vision. Cambridge university press, 2003.
 
     """
 
@@ -277,26 +276,7 @@ class FundamentalMatrixTransform(GeometricTransform):
         coords_homogeneous = np.column_stack([coords, np.ones(coords.shape[0])])
         return np.dot(coords.homogeneous, self.params)
 
-    def estimate(self, src, dst):
-        """Estimate fundamental matrix using 8-point algorithm.
-
-        The 8-point algorithm requires at least 8 corresponding point pairs for
-        a well-conditioned solution, otherwise the over-determined solution is
-        estimated.
-
-        Parameters
-        ----------
-        src : (N, 2) array
-            Source coordinates.
-        dst : (N, 2) array
-            Destination coordinates.
-
-        Returns
-        -------
-        success : bool
-            True, if model estimation succeeds.
-
-        """
+    def _setup_constraint_matrix(self, src, dst):
         assert src.shape == dst.shape
         assert src.shape[0] >= 8
 
@@ -320,6 +300,32 @@ class FundamentalMatrixTransform(GeometricTransform):
         _, _, V = np.linalg.svd(A)
         F_normalized = V[:, -1].reshape(3, 3)
 
+        return F_normalized, src_matrix, dst_matrix
+
+    def estimate(self, src, dst):
+        """Estimate fundamental matrix using 8-point algorithm.
+
+        The 8-point algorithm requires at least 8 corresponding point pairs for
+        a well-conditioned solution, otherwise the over-determined solution is
+        estimated.
+
+        Parameters
+        ----------
+        src : (N, 2) array
+            Source coordinates.
+        dst : (N, 2) array
+            Destination coordinates.
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+
+        """
+
+        F_normalized, src_matrix, dst_matrix = \
+            _setup_constraint_matrix(src, dst)
+
         # Enforcing the internal constraint that two singular values must non-
         # zero and one must be zero.
         U, S, V = np.linalg.svd(F_normalized)
@@ -327,6 +333,8 @@ class FundamentalMatrixTransform(GeometricTransform):
         F = np.dot(U, np.dot(S, V))
 
         self.params = np.dot(dst_matrix.T, np.dot(F, src_matrix))
+
+        return True
 
     def residuals(self, src, dst):
         """Compute the Sampson distance.
@@ -356,6 +364,64 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         return dst_F_src / np.sqrt(F_src[0] ** 2 + F_src[1] ** 2
                                    + Ft_dst[0] ** 2 + Ft_dst[1] ** 2)
+
+
+class EssentialMatrixTransform(FundamentalMatrixTransform):
+    """Essential matrix transformation.
+
+    The essential matrix relates corresponding points between a pair of
+    calibrated images. The matrix transforms normalized, homogeneous image
+    points in one image to epipolar lines in the other image.
+
+    The essential matrix is only defined for a pair of moving images capturing a
+    non-planar scene. In the case of pure rotation or planar scenes, the
+    homography describes the geometric relation between two images
+    (`ProjectiveTransform`). If the intrinsic calibration of the images is
+    unknown, the fundamental matrix describes the metric relation between the
+    two images (`FundamentalMatrixTransform`).
+
+    References
+    ----------
+    .. [1] Hartley, Richard, and Andrew Zisserman. Multiple view geometry in
+           computer vision. Cambridge university press, 2003.
+
+    """
+
+    def estimate(self, src, dst):
+        """Estimate essential matrix using 8-point algorithm.
+
+        The 8-point algorithm requires at least 8 corresponding point pairs for
+        a well-conditioned solution, otherwise the over-determined solution is
+        estimated.
+
+        Parameters
+        ----------
+        src : (N, 2) array
+            Source coordinates.
+        dst : (N, 2) array
+            Destination coordinates.
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+
+        """
+
+        E_normalized, src_matrix, dst_matrix = \
+            _setup_constraint_matrix(src, dst)
+
+        # Enforcing the internal constraint that two singular values must be
+        # equal and one must be zero.
+        U, S, V = np.linalg.svd(E_normalized)
+        S[0, 0] = (S[0, 0] + S[1, 1]) / 2.0
+        S[1, 1] = S[0, 0]
+        S[2, 2] = 0
+        E = np.dot(U, np.dot(S, V))
+
+        self.params = np.dot(dst_matrix.T, np.dot(E, src_matrix))
+
+        return True
 
 
 class ProjectiveTransform(GeometricTransform):
