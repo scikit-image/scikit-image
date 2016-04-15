@@ -1015,7 +1015,7 @@ def estimate_transform(ttype, src, dst, **kwargs):
 
     Parameters
     ----------
-    ttype : {'euclidean', similarity', 'affine', 'piecewise-affine',
+    ttype : {'euclidean', similarity', 'affine', 'piecewise-affine', \
              'projective', 'polynomial'}
         Type of transform.
     kwargs : array or int
