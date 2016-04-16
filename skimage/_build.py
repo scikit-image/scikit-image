@@ -36,7 +36,7 @@ def cython(pyx_files, working_path=''):
         c_files = [f.replace('.pyx.in', '.c').replace('.pyx', '.c') for f in pyx_files]
         for cfile in [os.path.join(working_path, f) for f in c_files]:
             if not os.path.isfile(cfile):
-                raise RuntimeError('Cython >= 0.23 is required to build scikit-image from SCM checkout')
+                raise RuntimeError('Cython >= 0.23 is required to build scikit-image from git checkout')
 
         print("Cython >= 0.23 not found; falling back to pre-built %s" \
               % " ".join(c_files))
