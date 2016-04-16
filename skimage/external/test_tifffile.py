@@ -42,11 +42,29 @@ def test_extension():
 class TestSave:
 
     def roundtrip(self, dtype, x):
+
+        # input: file name
         f = NamedTemporaryFile(suffix='.tif')
         fname = f.name
         f.close()
         imsave(fname, x)
         y = imread(fname)
+        assert_array_equal(x, y)
+
+        # input: open file object
+        f = NamedTemporaryFile(suffix='.tif')
+        imsave(f, x)
+        f.seek(0)
+        y = imread(f)
+        assert_array_equal(x, y)
+        f.close()
+
+        #input: byte stream
+        from io import BytesIO
+        b = BytesIO()
+        imsave(b, x)
+        b.seek(0)
+        y = imread(b)
         assert_array_equal(x, y)
 
     def test_imsave_roundtrip(self):

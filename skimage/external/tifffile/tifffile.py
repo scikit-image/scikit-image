@@ -1264,6 +1264,7 @@ class TiffFile(object):
 
     def close(self):
         """Close open file handle(s)."""
+
         for tif in self._files.values():
             tif._fh.close()
         self._files = {}
