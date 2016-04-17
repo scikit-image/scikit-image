@@ -3,6 +3,20 @@ set -ex
 
 PY=$TRAVIS_PYTHON_VERSION
 
+# Matplotlib settings - do not show figures during doc examples
+if [[ $MINIMUM_REQUIREMENTS == 1 || $TRAVIS_OS_NAME == "osx" ]]; then
+    MPL_DIR=$HOME/.matplotlib
+else
+    MPL_DIR=$HOME/.config/matplotlib
+fi
+
+mkdir -p $MPL_DIR
+touch $MPL_DIR/matplotlibrc
+
+if [[ $TRAVIS_OS_NAME == "osx" ]]; then
+    echo 'backend : Template' > $MPL_DIR/matplotlibrc
+fi
+
 section "Test.with.min.requirements"
 nosetests $TEST_ARGS skimage
 section_end "Test.with.min.requirements"
@@ -56,16 +70,6 @@ section_end "Install.optional.dependencies"
 
 
 section "Run.doc.examples"
-
-# Matplotlib settings - do not show figures during doc examples
-if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
-    MPL_DIR=$HOME/.matplotlib
-else
-    MPL_DIR=$HOME/.config/matplotlib
-fi
-
-mkdir -p $MPL_DIR
-touch $MPL_DIR/matplotlibrc
 echo 'backend : Template' > $MPL_DIR/matplotlibrc
 
 
@@ -96,7 +100,7 @@ elif [[ $WITH_PYSIDE == 1 ]]; then
     MPL_QT_API=PySide
     export QT_API=pyside
 fi
-if [ "$WITH_QT" = "1" -o "$WITH_PYSIDE" = "1" ]; then
+if [[ $WITH_QT == 1 || $WITH_PYSIDE == 1 ]]; then
     echo 'backend: Qt4Agg' > $MPL_DIR/matplotlibrc
     echo 'backend.qt4 : '$MPL_QT_API >> $MPL_DIR/matplotlibrc
 fi
@@ -107,7 +111,7 @@ section_end "Run.doc.applications"
 section "Test.with.optional.dependencies"
 
 # run tests again with optional dependencies to get more coverage
-if [ $OPTIONAL_DEPS == 1 ]; then
+if [[ $OPTIONAL_DEPS == 1 ]]; then
     TEST_ARGS="$TEST_ARGS --with-cov --cover-package skimage"
 fi
 nosetests $TEST_ARGS

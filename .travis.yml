@@ -37,16 +37,25 @@ notifications:
 
 matrix:
   include:
-    - python: 2.7
+    - os: linux
+      python: 2.7
       env: PIP_FLAGS="--pre"
-    - python: 2.7
+    - os: linux
+      python: 2.7
       env: WITH_PYAMG=1 MINIMUM_REQUIREMENTS=1 WITH_QT=1
-    - python: 3.4
+    - os: linux
+      python: 3.4
       env: OPTIONAL_DEPS=1 WITH_PYSIDE=1
-    - python: 3.5
+    - os: linux
+      python: 3.5
       env: PIP_FLAGS="--pre"
+    - os: osx
+      osx_image: xcode7.3
+      language: objective-c
+      env: TRAVIS_PYTHON_VERSION=3.5
 
 before_install:
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source tools/travis_osx_install.sh ; fi
     - ccache -s
     - export PATH=/usr/lib/ccache:${PATH}
     - source tools/travis_before_install.sh
@@ -55,7 +64,9 @@ before_install:
     - tools/build_versions.py
 
 install:
+    - section build
     - python setup.py develop
+    - section_end build
 
 script: tools/travis_script.sh
 
