@@ -14,7 +14,7 @@ def _sigma_prefactor(bandwidth):
 
 
 def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
-                 n_stds=3, offset=0):
+                 n_stds=3, offset=0, aspectratio = 1):
     """Return complex 2D Gabor filter kernel.
 
     Gabor kernel is a Gaussian kernel modulated by a complex harmonic function.
@@ -87,7 +87,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
     roty = -x * np.sin(theta) + y * np.cos(theta)
 
     g = np.zeros(y.shape, dtype=np.complex)
-    g[:] = np.exp(-0.5 * (rotx ** 2 / sigma_x ** 2 + roty ** 2 / sigma_y ** 2))
+    g[:] = np.exp(-0.5 * (rotx ** 2 / sigma_x ** 2 + (aspectratio ** 2) * (roty ** 2) / sigma_y ** 2))
     g /= 2 * np.pi * sigma_x * sigma_y
     g *= np.exp(1j * (2 * np.pi * frequency * rotx + offset))
 
