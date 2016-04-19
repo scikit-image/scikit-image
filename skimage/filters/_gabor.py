@@ -45,7 +45,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
         Phase offset of harmonic function in radians.
 
     aspectratio : float, optional
-        the spatial aspect ratio, and specifies the ellipticity of the support of the Gabor function.
+        The spatial aspect ratio, and specifies the ellipticity of the support of the Gabor function.
 
     Returns
     -------
