@@ -1,6 +1,7 @@
 from ._find_contours import find_contours
 from ._marching_cubes import (marching_cubes, mesh_surface_area,
                               correct_mesh_orientation)
+from ._marching_cubes_lewiner import marching_cubes_lewiner
 from ._regionprops import regionprops, perimeter
 from .simple_metrics import compare_mse, compare_nrmse, compare_psnr
 from ._structural_similarity import compare_ssim, structural_similarity
@@ -29,6 +30,7 @@ __all__ = ['find_contours',
            'moments_normalized',
            'moments_hu',
            'marching_cubes',
+           'marching_cubes_lewiner',
            'mesh_surface_area',
            'correct_mesh_orientation',
            'profile_line',
