@@ -130,9 +130,6 @@ def marching_cubes(volume, level, spacing=(1., 1., 1.),
     verts = np.asarray(verts)
     faces = np.asarray(faces)
 
-    # Calculate gradient of `volume`, then interpolate to vertices in `verts`
-    grad_x, grad_y, grad_z = np.gradient(volume)
-
     # Fancy indexing to define two vector arrays from triangle vertices
     faces = _correct_mesh_orientation(volume, verts[faces], faces, spacing,
                                       gradient_direction)
