@@ -2,7 +2,6 @@ import numpy as np
 from scipy import signal
 from scipy.spatial import distance_matrix
 from numpy import unravel_index
-import pdb
 
 
 def approximate_polygon(coords, tolerance, closed=True):
