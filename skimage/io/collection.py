@@ -161,8 +161,10 @@ class ImageCollection(object):
             load_pattern = load_pattern.split(':')
             self._files = []
             for pattern in load_pattern:
+                print(pattern, glob(pattern))
                 self._files.extend(glob(pattern))
             self._files = sorted(self._files, key=alphanumeric_key)
+            print(self._files, load_pattern)
             self._numframes = self._find_images()
         else:
             self._files = load_pattern
@@ -207,7 +209,6 @@ class ImageCollection(object):
                     im = Image.open(fname)
                     im.seek(0)
                 except (IOError, OSError):
-                    index.append([fname, i])
                     continue
                 i = 0
                 while True:
@@ -256,10 +257,15 @@ class ImageCollection(object):
                 if self._frame_index:
                     fname, img_num = self._frame_index[n]
                     if img_num is not None:
-                        self.data[idx] = self.load_func(fname, img_num=img_num,
-                                                        **kwargs)
-                    else:
+                        kwargs['img_num'] = img_num
+                    try:
                         self.data[idx] = self.load_func(fname, **kwargs)
+                    except TypeError as e:
+                        if "unexpected keyword argument 'img_num'" in str(e):
+                            del kwargs['img_num']
+                            self.data[idx] = self.load_func(fname, **kwargs)
+                        else:
+                            raise
                 else:
                     self.data[idx] = self.load_func(self.files[n], **kwargs)
                 self._cached = n
