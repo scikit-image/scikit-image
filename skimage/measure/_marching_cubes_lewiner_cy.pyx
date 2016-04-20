@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2012, Almar Klein
 # Copyright (C) 2002, Thomas Lewiner
+#
+#cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
 
 """  
 This is an implementation of the marching cubes algorithm proposed in:
@@ -43,10 +48,54 @@ cdef double FLT_EPSILON = np.spacing(1.0) #0.0000001
 
 # Define abs function for doubles
 cdef inline double dabs(double a): return a if a>=0 else -a
-
+cdef inline int imin(int a, int b): return a if a<b else b
 
 # todo: allow dynamic isovalue?
 # todo: can we disable Cython from checking for zero division? Sometimes we know that it never happens!
+
+def remove_degenerate_faces(vertices, faces, *arrays):
+    
+    vertices_map0 = np.arange(len(vertices), dtype=np.int32)
+    vertices_map1 = vertices_map0.copy()
+    faces_ok = np.ones(len(faces), dtype=np.int32)
+    
+    cdef np.ndarray[FLOAT32_T, ndim=2] vertices_ = vertices
+    cdef np.ndarray[FLOAT32_T, ndim=1] v1, v2, v3
+    cdef np.ndarray[INT32_T, ndim=2] faces_ = faces
+    cdef np.ndarray[INT32_T, ndim=1] face_
+    
+    
+    cdef np.ndarray[INT32_T, ndim=1] vertices_map1_ = vertices_map1
+    cdef np.ndarray[INT32_T, ndim=1] faces_ok_ = faces_ok
+    
+    cdef int j, i1, i2, i3
+    
+    # Iterate over all faces. When we encounter a degenerate triangle,
+    # we update the vertex map, i.e. we merge the corresponding vertices.
+    for j in range(faces_.shape[0]):
+        face_ = faces_[j]
+        i1, i2, i3 = face_[0], face_[1], face_[2]
+        v1, v2, v3 = vertices_[face_[0]], vertices_[face_[1]], vertices_[face_[2]]
+        if v1[0] == v2[0] and v1[1] == v2[1] and v1[2] == v2[2]:
+            vertices_map1_[i1] = vertices_map1_[i1] = imin(vertices_map1_[i1], vertices_map1_[i2])
+            faces_ok_[j] = 0
+        if v1[0] == v3[0] and v1[1] == v3[1] and v1[2] == v3[2]:
+            vertices_map1_[i1] = vertices_map1_[i3] = imin(vertices_map1_[i1], vertices_map1_[i3])
+            faces_ok_[j] = 0
+        if v2[0] == v3[0] and v2[1] == v3[1] and v2[2] == v3[2]:
+            vertices_map1_[i2] = vertices_map1_[i3] = imin(vertices_map1_[i2], vertices_map1_[i3])
+            faces_ok_[j] = 0
+    
+    # Create mask and mapping to new vertex indices
+    vertices_ok = vertices_map1 == vertices_map0
+    vertices_map2 = np.cumsum(vertices_ok) - 1
+    
+    # Apply selection and mapping
+    faces2 = vertices_map2[vertices_map1[faces[faces_ok>0]]]
+    vertices2 = vertices[vertices_ok]
+    arrays2 = [arr[vertices_ok] for arr in arrays]
+    
+    return (vertices2, faces2) + tuple(arrays2)
 
 
 cdef class Cell:
@@ -449,7 +498,6 @@ cdef class Cell:
                 vi = lut.get3(lutIndex, lutIndex2, i*3+j)
                 self._add_face_from_edge_index(vi)
     
-    
     ## Used internally
      
     cdef void _add_face_from_edge_index(self, int vi):
@@ -505,6 +553,8 @@ cdef class Cell:
             tmpf1 = 1.0 / (FLT_EPSILON + dabs(self.vv[index1]))
             tmpf2 = 1.0 / (FLT_EPSILON + dabs(self.vv[index2]))
             
+            # print('indexInVertexArray', self.x, self.y, self.z, '-', vi, indexInVertexArray, indexInFaceLayer)
+            
             if indexInVertexArray >= 0:
                 # Vertex already calculated, only need to add face and gradient
                 self.add_face(indexInVertexArray)
@@ -516,6 +566,7 @@ cdef class Cell:
                 fx, fy, fz, ff = 0.0, 0.0, 0.0, 0.0
                 fx += <double>dx1 * tmpf1;  fy += <double>dy1 * tmpf1;  fz += <double>dz1 * tmpf1;  ff += tmpf1
                 fx += <double>dx2 * tmpf2;  fy += <double>dy2 * tmpf2;  fz += <double>dz2 * tmpf2;  ff += tmpf2
+                
                 # Add vertex
                 indexInVertexArray = self.add_vertex( 
                                 <double>self.x + stp*fx/ff, 
@@ -550,7 +601,7 @@ cdef class Cell:
         This method returns -1 if no vertex has been defined yet.
         
         
-              vertices              edes                edge-indices per cell
+              vertices              edges                edge-indices per cell
         *         7 ________ 6           _____6__             ________
         *         /|       /|         7/|       /|          /|       /|
         *       /  |     /  |        /  |     /5 |        /  |     /  |
@@ -560,7 +611,7 @@ cdef class Cell:
         *    |    /   |    /      8   3/   9    /      2    /   |    /
         *    |  /     |  /        |  /     |  /1       |  1     |  /
         *    |/_______|/          |/___0___|/          |/___0___|/
-        *   0          1        0          1
+        *   0          1                 
         */
         """ 
         
@@ -590,8 +641,8 @@ cdef class Cell:
             elif vi == 3:  # no step
                 j = 1  
         
-        elif vi<12:
-            # four vertical edges
+        elif vi < 12:
+            # 4 vertical edges
             faceLayer = self.faceLayer1
             j = 2
             
@@ -889,9 +940,6 @@ cdef class LutProvider:
         self.SUBCONFIG13 = Lut(SUBCONFIG13)
 
 
-
-@cython.boundscheck(False)
-@cython.wraparound(False)
 def marching_cubes(im, double isovalue, LutProvider luts, int st=1, int classic=0):
     """ marching_cubes(im, double isovalue, LutProvider luts, int st=1, int classic=0)
     This is the main entry to apply marching cubes.

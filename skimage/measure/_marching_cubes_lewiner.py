@@ -14,7 +14,7 @@ from . import _marching_cubes_lewiner_cy
 
 
 def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
-                           step_size=1, use_classic=False):
+                           step_size=1, allow_degenerate=True, use_classic=False):
     """
     Lewiner marching cubes algorithm to find surfaces in 3d volumetric data
     
@@ -35,6 +35,10 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
         Step size in voxels. Default 1. Larger steps yield faster but
         coarser results. The result will always be topologically correct
         though.
+    allow_degenerate : bool
+        Whether to allow degenerate triangles in the end-result. Default True.
+        If False, degenerate triangles are removed, making the algorithm 
+        about twice as slow.
     use_classic : bool
         If given and True, the classic marching cubes by Lorensen (1987)
         is used. This option is included for reference purposes. Note
@@ -80,7 +84,7 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
         raise ValueError('Input volume should be a 3D numpy array.')
     if volume.shape[0] < 2 or volume.shape[1] < 2 or volume.shape[2] < 2:
         raise ValueError("Input array must be at least 2x2x2.")
-    volume = np.array(volume, dtype=np.float32, order="C", copy=False)
+    volume = np.ascontiguousarray(volume, np.float32)  # no copy if not necessary
     
     # Check/convert other inputs:
     # level
@@ -119,7 +123,11 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     if spacing != (1, 1, 1):
         vertices = vertices * np.r_[spacing]
     
-    return vertices, faces, normals, values
+    if allow_degenerate:
+        return vertices, faces, normals, values
+    else:
+        fun = _marching_cubes_lewiner_cy.remove_degenerate_faces
+        return fun(vertices, faces, normals, values)
 
 
 def _toArray(args):
