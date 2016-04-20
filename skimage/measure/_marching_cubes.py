@@ -4,17 +4,18 @@ from .._shared.utils import warn
 from . import _marching_cubes_cy
 
 
-def marching_cubes(volume, level, spacing=(1., 1., 1.),
+def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
                    gradient_direction='descent'):
     """
-    Marching cubes algorithm to find iso-valued surfaces in 3d volumetric data
+    Classic marching cubes algorithm to find surfaces in 3d volumetric data
 
     Parameters
     ----------
     volume : (M, N, P) array of doubles
         Input data volume to find isosurfaces. Will be cast to `np.float64`.
     level : float
-        Contour value to search for isosurfaces in `volume`.
+        Contour value to search for isosurfaces in `volume`. If not
+        given or None, the average of the min and max of vol is used.
     spacing : length-3 tuple of floats
         Voxel spacing in spatial dimensions corresponding to numpy array
         indexing dimensions (M, N, P) as in `volume`.
@@ -108,8 +109,12 @@ def marching_cubes(volume, level, spacing=(1., 1., 1.),
     # Check inputs and ensure `volume` is C-contiguous for memoryviews
     if volume.ndim != 3:
         raise ValueError("Input volume must have 3 dimensions.")
-    if level < volume.min() or level > volume.max():
-        raise ValueError("Contour level must be within volume data range.")
+    if level is None:
+        level = 0.5 * (volume.min() + volume.max())
+    else:
+        level = float(level)
+        if level < volume.min() or level > volume.max():
+            raise ValueError("Surface level must be within volume data range.")
     if len(spacing) != 3:
         raise ValueError("`spacing` must consist of three floats.")
 
