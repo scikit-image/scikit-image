@@ -428,19 +428,19 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     img : ndarray, shape (M, N[, 3])
         Input image. If `colormap` is `None`, the image should be in RGB
         format.
-    border_color : colorspec, optional
+    border_color : color spec, optional
         Color with which the borders between regions are drawn.
     edge_width : float, optional
         The thickness with which the RAG edges are drawn.
-    edge_cmap : colormap, optional
+    edge_cmap : :py:class:`matplotlib.colors.Colormap`, optional
         Any matplotlib colormap with which the edges are drawn.
-    img_cmap : colormap, optional
+    img_cmap : :py:class:`matplotlib.colors.Colormap`, optional
         Any matplotlib colormap with which the image is draw. If set to `None`
         the image is drawn as it is.
     in_place : bool, optional
         If set, the RAG is modified in place. For each node `n` the function
         will set a new attribute ``rag.node[n]['centroid']``.
-    ax : matplotlib axes, optional
+    ax : :py:class:`matplotlib.axes.Axes`, optional
         The axes to draw on. If not specified, new axes are created and drawn
         on.
 

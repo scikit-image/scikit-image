@@ -520,11 +520,11 @@ magma_data = [[0.001462, 0.000466, 0.013866],
 def register_cmap_safe(name, data):
     "Register a colormap if not already registered."
     try:
-        cm.get_cmap(name)
+        return cm.get_cmap(name)
     except ValueError:
         cmap = LinearSegmentedColormap.from_list(name, data)
         cm.register_cmap(name, cmap)
+        return cmap
 
-
-register_cmap_safe('viridis', viridis_data)
-register_cmap_safe('magma', magma_data)
+viridis = register_cmap_safe('viridis', viridis_data)
+magma = register_cmap_safe('magma', magma_data)
