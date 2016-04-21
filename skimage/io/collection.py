@@ -161,10 +161,8 @@ class ImageCollection(object):
             load_pattern = load_pattern.split(':')
             self._files = []
             for pattern in load_pattern:
-                print(pattern, glob(pattern))
                 self._files.extend(glob(pattern))
             self._files = sorted(self._files, key=alphanumeric_key)
-            print(self._files, load_pattern)
             self._numframes = self._find_images()
         else:
             self._files = load_pattern
