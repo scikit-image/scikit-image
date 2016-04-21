@@ -1,6 +1,6 @@
 import os
 from ... import data_dir
-from .. import imread, imsave, use_plugin, reset_plugins
+from .. import imread, imsave, use_plugin, reset_plugins, imread_with_metadata
 import numpy as np
 
 from numpy.testing import (
@@ -31,6 +31,13 @@ def test_imread_uint16_big_endian():
     assert img.dtype == np.uint16
     assert_array_almost_equal(img, expected)
 
+def test_imread_with_metadata():
+    expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
+    (img, metadata) = imread_with_metadata(os.path.join(data_dir, 'chessboard_GRAY_U16.tif'))
+    assert img.dtype == np.uint16
+    assert isinstance(metadata,list)
+    assert 'photometric' in metadata[0]
+    assert_array_almost_equal(img, expected)
 
 def test_imread_multipage_rgb_tif():
     img = imread(os.path.join(data_dir, 'multipage_rgb.tif'))

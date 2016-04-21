@@ -56,6 +56,8 @@ def _clear_plugins():
     """
     global plugin_store
     plugin_store = {'imread': [],
+                    'imread_with_metadata': [],
+                    'imread_metadata': [],
                     'imsave': [],
                     'imshow': [],
                     'imread_collection': [],
@@ -65,7 +67,9 @@ _clear_plugins()
 
 def _load_preferred_plugins():
     # Load preferred plugin for each io function.
-    io_types = ['imsave', 'imshow', 'imread_collection', 'imread']
+    io_types = ['imsave', 'imshow', 'imread_collection',
+                'imread', 'imread_with_metadata']
+
     for p_type in io_types:
         _set_plugin(p_type, preferred_plugins['all'])
 
@@ -190,8 +194,8 @@ def call_plugin(kind, *args, **kwargs):
     if len(plugin_funcs) == 0:
         msg = ("No suitable plugin registered for %s.\n\n"
                "You may load I/O plugins with the `skimage.io.use_plugin` "
-               "command.  A list of all available plugins can be found using "
-               "`skimage.io.plugins()`.")
+               "command.  A list of all available plugins are shown in the "
+               "`skimage.io` docstring.")
         raise RuntimeError(msg % kind)
 
     plugin = kwargs.pop('plugin', None)
