@@ -1,7 +1,7 @@
 # scikit-image: Image processing in Python
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/scikit-image/scikit-image?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-[![Coverage Status](https://img.shields.io/coveralls/scikit-image/scikit-image.svg)](https://coveralls.io/r/scikit-image/scikit-image?branch=master)
+[![codecov.io](https://codecov.io/github/scikit-image/scikit-image/coverage.svg?branch=master)](https://codecov.io/github/scikit-image/scikit-image?branch=master)
 
 - **Website (including documentation):** [http://scikit-image.org/](http://scikit-image.org)
 - **Mailing list:** [http://groups.google.com/group/scikit-image](http://groups.google.com/group/scikit-image)
