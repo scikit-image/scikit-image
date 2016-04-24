@@ -8,7 +8,7 @@ This example demonstrates construction of region boundary based RAGs with the
 """
 from skimage.future import graph
 from skimage import data, segmentation, color, filters, io
-from skimage.util.colormap import viridis
+from matplotlib import pyplot as plt
 
 
 img = data.coffee()
@@ -19,9 +19,8 @@ edges = filters.sobel(gimg)
 edges_rgb = color.gray2rgb(edges)
 
 g = graph.rag_boundary(labels, edges)
+lc = graph.show_rag(labels, g, edges_rgb, img_cmap=None, edge_cmap='viridis',
+                    edge_width=1.2)
 
-out = graph.draw_rag(labels, g, edges_rgb, node_color="#999999",
-                     colormap=viridis)
-
-io.imshow(out)
+plt.colorbar(lc, fraction=0.03)
 io.show()
