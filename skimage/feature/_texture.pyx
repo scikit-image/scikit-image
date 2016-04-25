@@ -44,7 +44,7 @@ def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
         cnp.uint8_t i, j
         cnp.float64_t angle, distance
         cnp.uint8_t _clockwise
-        
+
     if clockwise:
         _clockwise = 1
     else:
@@ -65,7 +65,7 @@ def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
                         # compute the location of the offset pixel
                         row = r + <int>round(sin(angle) * distance)
                         col = c + <int>round(cos(angle) * distance)
-                        
+
                         if _clockwise == 0:
                             row = r + <int>round(sin(-angle) * distance)
 
@@ -187,8 +187,7 @@ def _local_binary_pattern(double[:, ::1] image,
                     # determine number of 0 - 1 changes
                     changes = 0
                     for i in range(P - 1):
-                        changes += (signed_texture[i]
-                                    - signed_texture[i + 1]) != 0
+                        changes += (signed_texture[i]- signed_texture[i + 1]) != 0
                     if method == 'N':
                         # Uniform local binary patterns are defined as patterns
                         # with at most 2 value changes (from 0 to 1 or from 1 to
