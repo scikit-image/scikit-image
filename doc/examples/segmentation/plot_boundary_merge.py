@@ -52,6 +52,10 @@ def weight_boundary(graph, src, dst, n):
 
 
 def merge_boundary(graph, src, dst):
+    """Call back called before merging 2 nodes.
+
+    In this case we don't need to do any computation here.
+    """
     pass
 
 img = data.coffee()
