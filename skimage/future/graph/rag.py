@@ -50,8 +50,9 @@ def _edge_generator_from_csr(csr_matrix):
 def min_weight(graph, src, dst, n):
     """Callback to handle merging nodes by choosing minimum weight.
 
-    Returns either the weight between (`src`, `n`) or (`dst`, `n`)
-    in `graph` or the minimum of the two when both exist.
+    Returns a dictionary with `"weight"` set as either the weight between
+    (`src`, `n`) or (`dst`, `n`) in `graph` or the minimum of the two when
+    both exist.
 
     Parameters
     ----------
@@ -64,9 +65,10 @@ def min_weight(graph, src, dst, n):
 
     Returns
     -------
-    weight : float
-        The weight between (`src`, `n`) or (`dst`, `n`) in `graph` or the
-        minimum of the two when both exist.
+    data : dict
+        A dict with the `"weight"` attribute set the weight between
+        (`src`, `n`) or (`dst`, `n`) in `graph` or the minimum of the two when
+        both exist.
 
     """
 
