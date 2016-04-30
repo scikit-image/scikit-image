@@ -1481,6 +1481,7 @@ def _prepare_lab_array(arr):
         raise ValueError('Input array has less than 3 color channels')
     return dtype.img_as_float(arr, force_copy=True)
 
+
 def rgb2yuv(rgb):
     """RGB to YUV color space conversion.
 
@@ -1488,24 +1489,25 @@ def rgb2yuv(rgb):
     ----------
     rgb : array_like
         The image in RGB format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        ``(M, N, [P,] 3)``.
 
     Returns
     -------
     out : ndarray
         The image in YUV format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        ``(M, N, [P,] 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3- or 4-D array of shape ``(.., ..,[ ..,] 3)``.
+        If `rgb` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
 
     Notes
     -----
     Y is between 0 and 1.  Use YCbCr instead of YUV for the color space which is commonly used by video codecs (where Y ranges from 16 to 235)
     """
     return _convert(yuv_from_rgb, rgb)
+
 
 def rgb2yiq(rgb):
     """RGB to YIQ color space conversion.
@@ -1514,20 +1516,21 @@ def rgb2yiq(rgb):
     ----------
     rgb : array_like
         The image in RGB format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        ``(M, N, [P,] 3)``.
 
     Returns
     -------
     out : ndarray
         The image in YIQ format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        ``(M, N, [P,] 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3- or 4-D array of shape ``(.., ..,[ ..,] 3)``.
+        If `rgb` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
     """
     return _convert(yiq_from_rgb, rgb)
+
 
 def rgb2ypbpr(rgb):
     """RGB to YIQ color space conversion.
@@ -1536,20 +1539,21 @@ def rgb2ypbpr(rgb):
     ----------
     rgb : array_like
         The image in RGB format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        ``(M, N, [P,] 3)``.
 
     Returns
     -------
     out : ndarray
         The image in YIQ format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        ``(M, N, [P,] 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3- or 4-D array of shape ``(.., ..,[ ..,] 3)``.
+        If `rgb` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
     """
     return _convert(ypbpr_from_rgb, rgb)
+
 
 def rgb2ycbcr(rgb):
     """RGB to YCbCr color space conversion.
@@ -1558,18 +1562,18 @@ def rgb2ycbcr(rgb):
     ----------
     rgb : array_like
         The image in RGB format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        ``(M, N, [P,] 3)``.
 
     Returns
     -------
     out : ndarray
         The image in YCbCr format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        ``(M, N, [P,] 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3- or 4-D array of shape ``(.., ..,[ ..,] 3)``.
+        If `rgb` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
 
     Notes
     -----
@@ -1581,6 +1585,7 @@ def rgb2ycbcr(rgb):
     arr[..., 2] += 128
     return arr
 
+
 def yuv2rgb(yuv):
     """RGB to YIQ color space conversion.
 
@@ -1588,20 +1593,21 @@ def yuv2rgb(yuv):
     ----------
     rgb : array_like
         The image in RGB format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        ``(M, N, [P,] 3)``.
 
     Returns
     -------
     out : ndarray
         The image in YIQ format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        ``(M, N, [P,] 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3- or 4-D array of shape ``(.., ..,[ ..,] 3)``.
+        If `rgb` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
     """
     return _convert(rgb_from_yuv, yuv)
+
 
 def yiq2rgb(yiq):
     """YIQ to RGB color space conversion.
@@ -1610,20 +1616,21 @@ def yiq2rgb(yiq):
     ----------
     yiq : array_like
         The image in YIQ format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        ``(M, N, [P,] 3)``.
 
     Returns
     -------
     out : ndarray
         The image in RGB format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        ``(M, N, [P,] 3)``.
 
     Raises
     ------
     ValueError
-        If `yiq` is not a 3- or 4-D array of shape ``(.., ..,[ ..,] 3)``.
+        If `yiq` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
     """
     return _convert(rgb_from_yiq, yiq)
+
 
 def ypbpr2rgb(ypbpr):
     """YPbPr to RGB color space conversion.
@@ -1632,20 +1639,21 @@ def ypbpr2rgb(ypbpr):
     ----------
     ypbpr : array_like
         The image in YPbPr format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        ``(M, N, [P,] 3)``.
 
     Returns
     -------
     out : ndarray
         The image in RGB format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        ``(M, N, [P,] 3)``.
 
     Raises
     ------
     ValueError
-        If `ypbpr` is not a 3- or 4-D array of shape ``(.., ..,[ ..,] 3)``.
+        If `ypbpr` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
     """
     return _convert(rgb_from_ypbpr, ypbpr)
+
 
 def ycbcr2rgb(ycbcr):
     """YCbCr to RGB color space conversion.
@@ -1654,18 +1662,18 @@ def ycbcr2rgb(ycbcr):
     ----------
     ycbcr : array_like
         The image in YCbCr format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        ``(M, N, [P,] 3)``.
 
     Returns
     -------
     out : ndarray
         The image in RGB format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        ``(M, N, [P,] 3)``.
 
     Raises
     ------
     ValueError
-        If `ycbcr` is not a 3- or 4-D array of shape ``(.., ..,[ ..,] 3)``.
+        If `ycbcr` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
 
     Notes
     -----
