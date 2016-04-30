@@ -1577,7 +1577,7 @@ def rgb2ycbcr(rgb):
 
     Notes
     -----
-    The destination color space is sometimes also called "YUV"
+    Y is between 16 and 235.  This is the color space which is commonly used by video codecs, it is sometimes incorrectly called "YUV"
     """
     arr = _convert(ycbcr_from_rgb, rgb)
     arr[..., 0] += 16
@@ -1677,7 +1677,7 @@ def ycbcr2rgb(ycbcr):
 
     Notes
     -----
-    The source color space is sometimes also called "YUV"
+    Y is between 16 and 235.  This is the color space which is commonly used by video codecs, it is sometimes incorrectly called "YUV"
     """
     arr = ycbcr.copy()
     arr[..., 0] -= 16
