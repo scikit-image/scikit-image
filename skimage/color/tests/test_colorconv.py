@@ -444,17 +444,25 @@ class TestColorconv(TestCase):
 
     def test_yuv(self):
         rgb = np.array([[[1.0, 1.0, 1.0]]])
-        assert_array_almost_equal(rgb2yuv(rgb), np.array([[[0.9998, -0.0193, -0.0122]]]), decimal=4)
-        assert_array_almost_equal(rgb2yiq(rgb), np.array([[[0.9998, 0.0003, -0.0228]]]), decimal=4)
-        assert_array_almost_equal(rgb2ypbpr(rgb), np.array([[[0.9998, -0.0221, -0.0099]]]), decimal=4)
-        assert_array_almost_equal(rgb2ycbcr(rgb), np.array([[[234.9561, 123.0547, 125.7861]]]), decimal=4)
+        assert_array_almost_equal(rgb2yuv(rgb), np.array([[[1, 0, 0]]]))
+        assert_array_almost_equal(rgb2yiq(rgb), np.array([[[1, 0, 0]]]))
+        assert_array_almost_equal(rgb2ypbpr(rgb), np.array([[[1, 0, 0]]]))
+        assert_array_almost_equal(rgb2ycbcr(rgb), np.array([[[235, 128, 128]]]))
 
     def test_yuv_roundtrip(self):
-        img_rgb = img_as_float(self.img_rgb)
+        img_rgb = img_as_float(self.img_rgb)[::16, ::16]
         assert_array_almost_equal(yuv2rgb(rgb2yuv(img_rgb)), img_rgb)
         assert_array_almost_equal(yiq2rgb(rgb2yiq(img_rgb)), img_rgb)
         assert_array_almost_equal(ypbpr2rgb(rgb2ypbpr(img_rgb)), img_rgb)
         assert_array_almost_equal(ycbcr2rgb(rgb2ycbcr(img_rgb)), img_rgb)
+
+    def test_rgb2yiq_conversion(self):
+        rgb = img_as_float(self.img_rgb)[::16, ::16]
+        yiq = rgb2yiq(rgb).reshape(-1, 3)
+        gt = np.array([colorsys.rgb_to_yiq(pt[0], pt[1], pt[2])
+                       for pt in rgb.reshape(-1, 3)]
+                      )
+        assert_almost_equal(yiq, gt, decimal=2)
 
 
 def test_gray2rgb():
