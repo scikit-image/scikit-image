@@ -37,6 +37,10 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            xyz2luv, luv2xyz,
                            luv2rgb, rgb2luv,
                            lab2lch, lch2lab,
+                           rgb2yuv, yuv2rgb,
+                           rgb2yiq, yiq2rgb,
+                           rgb2ypbpr, ypbpr2rgb,
+                           rgb2ycbcr, ycbcr2rgb,
                            guess_spatial_dimensions
                            )
 
@@ -437,6 +441,20 @@ class TestColorconv(TestCase):
     def _get_lab0(self):
         rgb = img_as_float(self.img_rgb[:1, :1, :])
         return rgb2lab(rgb)[0, 0, :]
+
+    def test_yuv(self):
+        rgb = np.array([[[1.0, 1.0, 1.0]]])
+        assert_array_almost_equal(rgb2yuv(rgb), np.array([[[0.9998, -0.0193, -0.0122]]]), decimal=4)
+        assert_array_almost_equal(rgb2yiq(rgb), np.array([[[0.9998, 0.0003, -0.0228]]]), decimal=4)
+        assert_array_almost_equal(rgb2ypbpr(rgb), np.array([[[0.9998, -0.0221, -0.0099]]]), decimal=4)
+        assert_array_almost_equal(rgb2ycbcr(rgb), np.array([[[234.9561, 123.0547, 125.7861]]]), decimal=4)
+
+    def test_yuv_roundtrip(self):
+        img_rgb = img_as_float(self.img_rgb)
+        assert_array_almost_equal(yuv2rgb(rgb2yuv(img_rgb)), img_rgb)
+        assert_array_almost_equal(yiq2rgb(rgb2yiq(img_rgb)), img_rgb)
+        assert_array_almost_equal(ypbpr2rgb(rgb2ypbpr(img_rgb)), img_rgb)
+        assert_array_almost_equal(ycbcr2rgb(rgb2ycbcr(img_rgb)), img_rgb)
 
 
 def test_gray2rgb():
