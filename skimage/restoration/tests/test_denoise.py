@@ -153,15 +153,15 @@ def test_denoise_tv_bregman_3d():
 
 
 def test_denoise_bilateral_2d():
-    img = checkerboard_gray.copy()
+    img = checkerboard_gray.copy()[:50,:50]
     # add some random noise
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
 
     out1 = restoration.denoise_bilateral(img, sigma_color=0.1,
-                                         sigma_spatial=20, multichannel=False)
+                                         sigma_spatial=10, multichannel=False)
     out2 = restoration.denoise_bilateral(img, sigma_color=0.2,
-                                         sigma_spatial=30, multichannel=False)
+                                         sigma_spatial=20, multichannel=False)
 
     # make sure noise is reduced in the checkerboard cells
     assert img[30:45, 5:15].std() > out1[30:45, 5:15].std()
@@ -169,13 +169,13 @@ def test_denoise_bilateral_2d():
 
 
 def test_denoise_bilateral_color():
-    img = checkerboard.copy()
+    img = checkerboard.copy()[:50,:50]
     # add some random noise
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
 
-    out1 = restoration.denoise_bilateral(img, sigma_color=0.1, sigma_spatial=20)
-    out2 = restoration.denoise_bilateral(img, sigma_color=0.2, sigma_spatial=30)
+    out1 = restoration.denoise_bilateral(img, sigma_color=0.1, sigma_spatial=10)
+    out2 = restoration.denoise_bilateral(img, sigma_color=0.2, sigma_spatial=20)
 
     # make sure noise is reduced in the checkerboard cells
     assert img[30:45, 5:15].std() > out1[30:45, 5:15].std()
@@ -212,29 +212,29 @@ def test_denoise_bilateral_nan():
     assert_equal(img, out)
 
 def test_denoise_sigma_range():
-    img = checkerboard_gray.copy()
+    img = checkerboard_gray.copy()[:50,:50]
     # add some random noise
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
     out1 = restoration.denoise_bilateral(img, sigma_color=0.1,
-                                         sigma_spatial=20, multichannel=False)
+                                         sigma_spatial=10, multichannel=False)
     with expected_warnings('`sigma_range` has been deprecated in favor of `sigma_color`. '
                            'The `sigma_range` keyword argument will be removed in v0.14'):
         out2 = restoration.denoise_bilateral(img, sigma_range=0.1,
-                                             sigma_spatial=20, multichannel=False)
+                                             sigma_spatial=10, multichannel=False)
     assert_equal(out1, out2)
 
 def test_denoise_sigma_range_and_sigma_color():
-    img = checkerboard_gray.copy()
+    img = checkerboard_gray.copy()[:50,:50]
     # add some random noise
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
     out1 = restoration.denoise_bilateral(img, sigma_color=0.1,
-                                         sigma_spatial=20, multichannel=False)
+                                         sigma_spatial=10, multichannel=False)
     with expected_warnings('`sigma_range` has been deprecated in favor of `sigma_color`. '
                            'The `sigma_range` keyword argument will be removed in v0.14'):
         out2 = restoration.denoise_bilateral(img, sigma_color=0.2, sigma_range=0.1,
-                                             sigma_spatial=20, multichannel=False)
+                                             sigma_spatial=10, multichannel=False)
     assert_equal(out1, out2)
 
 def test_nl_means_denoising_2d():
