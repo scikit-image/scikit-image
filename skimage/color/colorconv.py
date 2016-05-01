@@ -331,7 +331,7 @@ rgb_from_yuv = linalg.inv(yuv_from_rgb)
 
 yiq_from_rgb = np.array([[0.299     ,  0.587     ,  0.114     ],
                          [0.59590059, -0.27455667, -0.32134392],
-                         [0.21153661, -0.52273617,  0.31119955]]).T
+                         [0.21153661, -0.52273617,  0.31119955]])
 
 rgb_from_yiq = linalg.inv(yiq_from_rgb)
 
