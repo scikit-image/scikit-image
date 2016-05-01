@@ -40,6 +40,7 @@ Supported color spaces
 :author: Ralf Gommers (hsv2rgb)
 :author: Travis Oliphant (XYZ and RGB CIE functions)
 :author: Matt Terry (lab2lch)
+:author: Alex Izvorski (yuv2rgb, rgb2yuv and related)
 
 :license: modified BSD
 
@@ -330,7 +331,7 @@ rgb_from_yuv = linalg.inv(yuv_from_rgb)
 
 yiq_from_rgb = np.array([[0.299     ,  0.587     ,  0.114     ],
                          [0.59590059, -0.27455667, -0.32134392],
-                         [0.21153661, -0.52273617,  0.31119955]])
+                         [0.21153661, -0.52273617,  0.31119955]]).T
 
 rgb_from_yiq = linalg.inv(yiq_from_rgb)
 
