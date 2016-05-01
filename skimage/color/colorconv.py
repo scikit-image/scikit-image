@@ -125,9 +125,11 @@ def convert_colorspace(arr, fromspace, tospace):
     >>> img_hsv = convert_colorspace(img, 'RGB', 'HSV')
     """
     fromdict = {'RGB': lambda im: im, 'HSV': hsv2rgb, 'RGB CIE': rgbcie2rgb,
-                'XYZ': xyz2rgb, 'YUV': yuv2rgb, 'YIQ': yiq2rgb, 'YPbPr': ypbpr2rgb, 'YCbCr': ycbcr2rgb }
+                'XYZ': xyz2rgb, 'YUV': yuv2rgb, 'YIQ': yiq2rgb,
+                'YPbPr': ypbpr2rgb, 'YCbCr': ycbcr2rgb }
     todict = {'RGB': lambda im: im, 'HSV': rgb2hsv, 'RGB CIE': rgb2rgbcie,
-              'XYZ': rgb2xyz, 'YUV': rgb2yuv, 'YIQ': rgb2yiq, 'YPbPr': rgb2ypbpr, 'YCbCr': rgb2ycbcr }
+              'XYZ': rgb2xyz, 'YUV': rgb2yuv, 'YIQ': rgb2yiq,
+              'YPbPr': rgb2ypbpr, 'YCbCr': rgb2ycbcr }
 
     fromspace = fromspace.upper()
     tospace = tospace.upper()
@@ -1505,7 +1507,8 @@ def rgb2yuv(rgb):
 
     Notes
     -----
-    Y is between 0 and 1.  Use YCbCr instead of YUV for the color space which is commonly used by video codecs (where Y ranges from 16 to 235)
+    Y is between 0 and 1.  Use YCbCr instead of YUV for the color space which
+    is commonly used by video codecs (where Y ranges from 16 to 235)
     """
     return _convert(yuv_from_rgb, rgb)
 
@@ -1578,7 +1581,8 @@ def rgb2ycbcr(rgb):
 
     Notes
     -----
-    Y is between 16 and 235.  This is the color space which is commonly used by video codecs, it is sometimes incorrectly called "YUV"
+    Y is between 16 and 235.  This is the color space which is commonly used
+    by video codecs, it is sometimes incorrectly called "YUV"
     """
     arr = _convert(ycbcr_from_rgb, rgb)
     arr[..., 0] += 16
@@ -1678,7 +1682,8 @@ def ycbcr2rgb(ycbcr):
 
     Notes
     -----
-    Y is between 16 and 235.  This is the color space which is commonly used by video codecs, it is sometimes incorrectly called "YUV"
+    Y is between 16 and 235.  This is the color space which is commonly used
+    by video codecs, it is sometimes incorrectly called "YUV"
     """
     arr = ycbcr.copy()
     arr[..., 0] -= 16
