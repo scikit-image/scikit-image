@@ -502,14 +502,8 @@ def _convert(matrix, arr):
         The converted array.
     """
     arr = _prepare_colorarray(arr)
-    arr = np.swapaxes(arr, 0, -1)
-    oldshape = arr.shape
-    arr = np.reshape(arr, (3, -1))
-    out = np.dot(matrix, arr)
-    out.shape = oldshape
-    out = np.swapaxes(out, -1, 0)
 
-    return np.ascontiguousarray(out)
+    return np.dot(arr, matrix.T.copy())
 
 
 def xyz2rgb(xyz):
