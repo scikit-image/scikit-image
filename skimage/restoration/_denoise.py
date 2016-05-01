@@ -8,17 +8,18 @@ import warnings
 
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
-                      bins=10000, mode='constant', cval=0, multichannel=True, sigma_range=None):
+                      bins=10000, mode='constant', cval=0, multichannel=True,
+                      sigma_range=None):
     """Denoise image using bilateral filter.
 
-    This is an edge-preserving and noise reducing denoising filter. It averages
-    pixels based on their spatial closeness and radiometric similarity.
+    This is an edge-preserving, denoising filter. It averages pixels based on
+    their spatial closeness and radiometric similarity.
 
-    Spatial closeness is measured by the gaussian function of the euclidian
+    Spatial closeness is measured by the Gaussian function of the Euclidean
     distance between two pixels and a certain standard deviation
     (`sigma_spatial`).
 
-    Radiometric similarity is measured by the gaussian function of the euclidian
+    Radiometric similarity is measured by the Gaussian function of the Euclidean
     distance between two color values and a certain standard deviation
     (`sigma_color`).
 
@@ -28,7 +29,8 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
         Input image, 2D grayscale or RGB.
     win_size : int
         Window size for filtering.
-        If win_size is not specified, it is calculated as max(5, 2*ceil(3*sigma_spatial)+1)
+        If win_size is not specified, it is calculated as
+        ``max(5, 2 * ceil(3 * sigma_spatial) + 1)``.
     sigma_color : float
         Standard deviation for grayvalue/color distance (radiometric
         similarity). A larger value results in averaging of pixels with larger
@@ -40,7 +42,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
         Standard deviation for range distance. A larger value results in
         averaging of pixels with larger spatial differences.
     bins : int
-        Number of discrete values for gaussian weights of color filtering.
+        Number of discrete values for Gaussian weights of color filtering.
         A larger value results in improved accuracy.
     mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}
         How to handle values outside the image borders. See
@@ -91,7 +93,8 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                               "implemented for 2D grayscale and color images "
                               "only.".format(image.shape, image.shape[2]))
             else:
-                msg = "Input image must be grayscale, RGB, or RGBA; but has shape {0}."
+                msg = "Input image must be grayscale, RGB, or RGBA; " \
+                      "but has shape {0}."
                 warnings.warn(msg.format(image.shape))
     else:
         if image.ndim > 2:
@@ -110,7 +113,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
         sigma_color = sigma_range
 
     if win_size is None:
-        win_size = max(5, 2*int(ceil(3*sigma_spatial))+1)
+        win_size = max(5, 2 * int(ceil(3 * sigma_spatial)) + 1)
 
     mode = _mode_deprecations(mode)
     return _denoise_bilateral(image, win_size, sigma_color, sigma_spatial,
