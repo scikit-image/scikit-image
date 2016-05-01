@@ -12,7 +12,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                       sigma_range=None):
     """Denoise image using bilateral filter.
 
-    This is an edge-preserving denoising filter. It averages pixels based on
+    This is an edge-preserving, denoising filter. It averages pixels based on
     their spatial closeness and radiometric similarity.
 
     Spatial closeness is measured by the Gaussian function of the Euclidean
