@@ -226,4 +226,4 @@
   Adaptation of ImageJ 3D skeletonization algorithm.
 
 - Alex Izvorski
-  Color spaces
+  Color spaces for YUV and related spaces
