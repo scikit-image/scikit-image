@@ -751,7 +751,7 @@ def imread(filename):
     return img
 
 
-def imsave(filename, img):
+def imsave(filename, img, **kwargs):
     '''
     imsave(filename, img)
 
@@ -763,5 +763,26 @@ def imsave(filename, img):
     ----------
       filename : file name
       img : image to be saved as nd array
+
+    Other parameters
+    ----------------
+    kwargs : keywords
+        When saving as JPEG, supports the ``quality`` keyword argument which is
+        an integer with values in [1, 100]
     '''
-    write(img, filename)
+
+    flags = 0
+    if 'quality' in kwargs:
+        quality = kwargs['quality']
+        if quality > 75:
+            flags |= IoFlags.JPEG_QUALITYSUPERB
+        elif quality > 50:
+            flags |= IoFlags.JPEG_QUALITYGOOD
+        elif quality > 25:
+            flags |= IoFlags.JPEG_QUALITYNORMAL
+        elif quality > 10:
+            flags |= IoFlags.JPEG_QUALITYAVERAGE
+        elif quality >= 0:
+            flags |= IoFlags.JPEG_QUALITYBAD
+
+    write(img, filename, flags=flags)
