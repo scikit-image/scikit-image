@@ -448,6 +448,11 @@ class TestColorconv(TestCase):
         assert_array_almost_equal(rgb2yiq(rgb), np.array([[[1, 0, 0]]]))
         assert_array_almost_equal(rgb2ypbpr(rgb), np.array([[[1, 0, 0]]]))
         assert_array_almost_equal(rgb2ycbcr(rgb), np.array([[[235, 128, 128]]]))
+        rgb = np.array([[[0.0, 1.0, 0.0]]])
+        assert_array_almost_equal(rgb2yuv(rgb), np.array([[[0.587, -0.28886916, -0.51496512]]]))
+        assert_array_almost_equal(rgb2yiq(rgb), np.array([[[0.587, -0.27455667, -0.52273617]]]))
+        assert_array_almost_equal(rgb2ypbpr(rgb), np.array([[[0.587, -0.331264, -0.418688]]]))
+        assert_array_almost_equal(rgb2ycbcr(rgb), np.array([[[144.553,   53.797,   34.214]]]))
 
     def test_yuv_roundtrip(self):
         img_rgb = img_as_float(self.img_rgb)[::16, ::16]
