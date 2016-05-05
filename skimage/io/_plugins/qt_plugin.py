@@ -1,6 +1,7 @@
-from ..._shared import warn
-from .util import prepare_for_display, window_manager
 import numpy as np
+from .util import prepare_for_display, window_manager
+from ..._shared.utils import warn
+
 
 # We try to aquire the gui lock first or else the gui import might
 # trample another GUI's PyOS_InputHook.
