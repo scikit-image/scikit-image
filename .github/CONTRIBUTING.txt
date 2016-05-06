@@ -18,7 +18,7 @@ Here's the long and short of it:
      - If you have set up your `github SSH keys
        <https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/>`_::
 
-        git clone git@github.com:your-username/scikit-image.git
+        git remote add upstream git@github.com:scikit-image/scikit-image.git
 
      - Otherwise::
 
