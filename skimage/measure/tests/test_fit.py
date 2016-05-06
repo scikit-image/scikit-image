@@ -193,8 +193,6 @@ def test_ellipse_model_residuals():
 
 
 def test_ransac_shape():
-    np.random.seed(1)
-
     # generate original data without noise
     model0 = CircleModel()
     model0.params = (10, 12, 3)
@@ -208,7 +206,7 @@ def test_ransac_shape():
     data0[outliers[2], :] = (-100, -10)
 
     # estimate parameters of corrupted data
-    model_est, inliers = ransac(data0, CircleModel, 3, 5)
+    model_est, inliers = ransac(data0, CircleModel, 3, 5, random_state=np.random.RandomState(1))
 
     # test whether estimated parameters equal original parameters
     assert_equal(model0.params, model_est.params)
@@ -217,10 +215,10 @@ def test_ransac_shape():
 
 
 def test_ransac_geometric():
-    np.random.seed(1)
+    random_state = np.random.RandomState(1)
 
     # generate original data without noise
-    src = 100 * np.random.random((50, 2))
+    src = 100 * random_state.random_sample((50, 2))
     model0 = AffineTransform(scale=(0.5, 0.3), rotation=1,
                              translation=(10, 20))
     dst = model0(src)
@@ -232,7 +230,7 @@ def test_ransac_geometric():
     dst[outliers[2]] = (50, 50)
 
     # estimate parameters of corrupted data
-    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20)
+    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20, random_state=random_state)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.params, model_est.params)

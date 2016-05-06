@@ -1,4 +1,5 @@
 import math
+import numbers
 import numpy as np
 from scipy import optimize
 from .._shared.utils import skimage_deprecation, warn
@@ -687,12 +688,29 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
         return 0
 
     return int(np.ceil(nom / denom))
+    
+    
+def check_random_state(seed):
+    """Turn seed into a np.random.RandomState instance
+    If seed is None, return the RandomState singleton used by np.random.
+    If seed is an int, return a new RandomState instance seeded with seed.
+    If seed is already a RandomState instance, return it.
+    Otherwise raise ValueError.
+    """
+    if seed is None or seed is np.random:
+        return np.random.mtrand._rand
+    if isinstance(seed, (numbers.Integral, np.integer)):
+        return np.random.RandomState(seed)
+    if isinstance(seed, np.random.RandomState):
+        return seed
+    raise ValueError('%r cannot be used to seed a numpy.random.RandomState'
+                     ' instance' % seed)
 
 
 def ransac(data, model_class, min_samples, residual_threshold,
            is_data_valid=None, is_model_valid=None,
            max_trials=100, stop_sample_num=np.inf, stop_residuals_sum=0,
-           stop_probability=1):
+           stop_probability=1, random_state=None):
     """Fit a model to data with the RANSAC (random sample consensus) algorithm.
 
     RANSAC is an iterative algorithm for the robust estimation of parameters
@@ -765,6 +783,12 @@ def ransac(data, model_class, min_samples, residual_threshold,
         where the probability (confidence) is typically set to a high value
         such as 0.99, and e is the current fraction of inliers w.r.t. the
         total number of samples.
+    random_state : int, RandomState instance or None, optional (default=None)
+        If int, random_state is the seed used by the random number generator;
+        If RandomState instance, random_state is the random number generator;
+        If None, the random number generator is the RandomState instance used
+        by `np.random`.
+    
 
     Returns
     -------
@@ -849,6 +873,8 @@ def ransac(data, model_class, min_samples, residual_threshold,
     best_inlier_num = 0
     best_inlier_residuals_sum = np.inf
     best_inliers = None
+    
+    random_state = check_random_state(random_state)
 
     if min_samples < 0:
         raise ValueError("`min_samples` must be greater than zero")
@@ -871,7 +897,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
         # choose random sample set
         samples = []
-        random_idxs = np.random.randint(0, num_samples, min_samples)
+        random_idxs = random_state.randint(0, num_samples, min_samples)
         for d in data:
             samples.append(d[random_idxs])
 
