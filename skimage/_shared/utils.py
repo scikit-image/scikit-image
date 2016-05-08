@@ -3,6 +3,7 @@ import functools
 import sys
 import numpy as np
 import types
+import numbers
 
 import six
 
@@ -191,3 +192,20 @@ def copy_func(f, name=None):
     return types.FunctionType(six.get_function_code(f),
                               six.get_function_globals(f), name or f.__name__,
                               six.get_function_defaults(f), six.get_function_closure(f))
+
+
+def check_random_state(seed):
+    """Turn seed into a np.random.RandomState instance
+    If seed is None, return the RandomState singleton used by np.random.
+    If seed is an int, return a new RandomState instance seeded with seed.
+    If seed is already a RandomState instance, return it.
+    Otherwise raise ValueError.
+    """
+    if seed is None or seed is np.random:
+        return np.random.mtrand._rand
+    if isinstance(seed, (numbers.Integral, np.integer)):
+        return np.random.RandomState(seed)
+    if isinstance(seed, np.random.RandomState):
+        return seed
+    raise ValueError('%r cannot be used to seed a numpy.random.RandomState'
+                     ' instance' % seed)

@@ -1,8 +1,7 @@
 import math
-import numbers
 import numpy as np
 from scipy import optimize
-from .._shared.utils import skimage_deprecation, warn
+from .._shared.utils import check_random_state, skimage_deprecation, warn
 
 
 def _check_data_dim(data, dim):
@@ -688,23 +687,6 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
         return 0
 
     return int(np.ceil(nom / denom))
-    
-    
-def check_random_state(seed):
-    """Turn seed into a np.random.RandomState instance
-    If seed is None, return the RandomState singleton used by np.random.
-    If seed is an int, return a new RandomState instance seeded with seed.
-    If seed is already a RandomState instance, return it.
-    Otherwise raise ValueError.
-    """
-    if seed is None or seed is np.random:
-        return np.random.mtrand._rand
-    if isinstance(seed, (numbers.Integral, np.integer)):
-        return np.random.RandomState(seed)
-    if isinstance(seed, np.random.RandomState):
-        return seed
-    raise ValueError('%r cannot be used to seed a numpy.random.RandomState'
-                     ' instance' % seed)
 
 
 def ransac(data, model_class, min_samples, residual_threshold,
