@@ -201,6 +201,7 @@ def check_random_state(seed):
     If seed is already a RandomState instance, return it.
     Otherwise raise ValueError.
     """
+    # Function originally from scikit-learn's module sklearn.utils.validation
     if seed is None or seed is np.random:
         return np.random.mtrand._rand
     if isinstance(seed, (numbers.Integral, np.integer)):
