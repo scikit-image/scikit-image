@@ -384,3 +384,133 @@ def threshold_li(image):
             new_thresh = temp + tolerance
 
     return threshold + immin
+
+
+def threshold_multiotsu(image, nclass=3, nbins=256):
+    """Generates multiple thresholds for an input image. Based on the
+    Multi-Otsu implementation by Liao and Chung.
+
+    Parameters
+    ----------
+    image : array
+        Grayscale input image.
+    nclass : int, optional
+        Number of classes to be thresholded, i.e. the number of
+        resulting regions. Accepts an integer from 2 to 5.
+    nbins : int, optional
+        Number of bins used to calculate histogram. This value is
+        ignored for integer arrays.
+
+    Returns
+    -------
+    idx_thresh : array
+        Array containing the threshold values for the desired classes.
+
+    References
+    ----------
+    .. [1] Liao, P-S. and Chung, P-C., "A fast algorithm for multilevel
+    thresholding", Journal of Information Science and Engineering 17
+    (5): 713-727, 2001.
+
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> image = camera()
+    >>> thresh = threshold_multiotsu(image)
+    >>> region1 = image <= thresh[0]
+    >>> region2 = (image > thresh[0]) & (image <= thresh[1])
+    >>> region3 = image > thresh[1]
+    """
+    # check if the image is RGB.
+    if image.shape[-1] in (3, 4):
+        raise TypeError("Your image seems to be RGB (shape: {0}. Please "
+                        "use a grayscale image.".format(image.shape))
+
+    # check if the image has more than one color.
+    if image.min() == image.max():
+        raise TypeError("The input image seems to have just one color: {0}."
+                        "Please use a grayscale image.".format(image.min()))
+
+    # calculating the histogram and the probability of each gray level.
+    hist, _ = histogram(image.ravel(), nbins)
+    prob = hist/np.size(image)
+
+    gray_lvl = 256
+    max_sigma = 0
+    idx_thresh = np.zeros(nclass-1)
+    momP, momS, var_btwcls = [np.zeros([gray_lvl, gray_lvl]) for n in range(3)]
+
+    # building the lookup tables: calculating the first row.
+    for u in range(1, gray_lvl):
+        momP[1, u] = momP[1, u-1] + prob[u]
+        momS[1, u] = momS[1, u-1] + (u)*prob[u]
+
+    # building the lookup tables: calculating the other rows recursively.
+    for u in range(2, gray_lvl):
+        for v in range(u, gray_lvl):
+            momP[u, v] = momP[1, v] - momP[1, u-1]
+            momS[u, v] = momS[1, v] - momS[1, u-1]
+
+    # building the lookup tables: calculating the between class variance.
+    for u in range(1, gray_lvl):
+        for v in range(u+1, gray_lvl):
+            if (momP[u, v] != 0):
+                var_btwcls[u, v] = (momS[u, v]**2)/momP[u, v]
+            else:
+                var_btwcls[u, v] = 0
+
+    # finding max threshold candidates, depending on nclass.
+    # number of thresholds is equal to number of classes - 1.
+    if nclass == 2:
+        for idx in range(gray_lvl - nclass):
+            part_sigma = var_btwcls[1, idx] + var_btwcls[idx+1, gray_lvl-1]
+            if max_sigma < part_sigma:
+                idx_thresh[0] = idx
+                max_sigma = part_sigma
+
+    elif nclass == 3:
+        for idx1 in range(gray_lvl - nclass):
+            for idx2 in range(idx1+1, gray_lvl - nclass+1):
+                part_sigma = var_btwcls[1, idx1] + \
+                            var_btwcls[idx1+1, idx2] + \
+                            var_btwcls[idx2+1, gray_lvl-1]
+
+                if max_sigma < part_sigma:
+                    idx_thresh[0] = idx1
+                    idx_thresh[1] = idx2
+                    max_sigma = part_sigma
+
+    elif nclass == 4:
+        for idx1 in range(gray_lvl - nclass):
+            for idx2 in range(idx1+1, gray_lvl - nclass+1):
+                for idx3 in range(idx2+1, gray_lvl - nclass+2):
+                    part_sigma = var_btwcls[1, idx1] + \
+                                var_btwcls[idx1+1, idx2] + \
+                                var_btwcls[idx2+1, idx3] + \
+                                var_btwcls[idx3+1, gray_lvl-1]
+
+                    if max_sigma < part_sigma:
+                        idx_thresh[0] = idx1
+                        idx_thresh[1] = idx2
+                        idx_thresh[2] = idx3
+                        max_sigma = part_sigma
+
+    elif nclass == 5:
+        for idx1 in range(gray_lvl - nclass):
+            for idx2 in range(idx1+1, gray_lvl - nclass+1):
+                for idx3 in range(idx2+1, gray_lvl - nclass+2):
+                    for idx4 in range(idx3+1, gray_lvl - nclass+3):
+                        part_sigma = var_btwcls[1, idx1] + \
+                            var_btwcls[idx1+1, idx2] + \
+                            var_btwcls[idx2+1, idx3] + \
+                            var_btwcls[idx3+1, idx4] + \
+                            var_btwcls[idx4+1, gray_lvl-1]
+
+                        if max_sigma < part_sigma:
+                            idx_thresh[0] = idx1
+                            idx_thresh[1] = idx2
+                            idx_thresh[2] = idx3
+                            idx_thresh[3] = idx4
+                            max_sigma = part_sigma
+
+    return idx_thresh
