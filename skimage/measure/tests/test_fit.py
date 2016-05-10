@@ -32,7 +32,8 @@ def test_line_model_estimate():
     model_est.estimate(data)
 
     # test whether estimated parameters almost equal original parameters
-    x = np.random.rand(100, 2)
+    random_state = np.random.RandomState(1234)
+    x = random_state.rand(100, 2)
     assert_almost_equal(model0.predict(x), model_est.predict(x), 1)
 
 
@@ -75,8 +76,8 @@ def test_line_modelND_estimate():
              10 * np.arange(-100,100)[...,np.newaxis] * model0.params[1])
 
     # add gaussian noise to data
-    np.random.seed(1234)
-    data = data0 + np.random.normal(size=data0.shape)
+    random_state = np.random.RandomState(1234)
+    data = data0 + random_state.normal(size=data0.shape)
 
     # estimate parameters of noisy data
     model_est = LineModelND()
@@ -130,8 +131,8 @@ def test_circle_model_estimate():
     data0 = model0.predict_xy(t)
 
     # add gaussian noise to data
-    np.random.seed(1234)
-    data = data0 + np.random.normal(size=data0.shape)
+    random_state = np.random.RandomState(1234)
+    data = data0 + random_state.normal(size=data0.shape)
 
     # estimate parameters of noisy data
     model_est = CircleModel()
@@ -172,8 +173,8 @@ def test_ellipse_model_estimate():
     data0 = model0.predict_xy(t)
 
     # add gaussian noise to data
-    np.random.seed(1234)
-    data = data0 + np.random.normal(size=data0.shape)
+    random_state = np.random.RandomState(1234)
+    data = data0 + random_state.normal(size=data0.shape)
 
     # estimate parameters of noisy data
     model_est = EllipseModel()
@@ -193,8 +194,6 @@ def test_ellipse_model_residuals():
 
 
 def test_ransac_shape():
-    np.random.seed(1)
-
     # generate original data without noise
     model0 = CircleModel()
     model0.params = (10, 12, 3)
@@ -208,7 +207,8 @@ def test_ransac_shape():
     data0[outliers[2], :] = (-100, -10)
 
     # estimate parameters of corrupted data
-    model_est, inliers = ransac(data0, CircleModel, 3, 5)
+    model_est, inliers = ransac(data0, CircleModel, 3, 5,
+                                random_state=1)
 
     # test whether estimated parameters equal original parameters
     assert_equal(model0.params, model_est.params)
@@ -217,10 +217,10 @@ def test_ransac_shape():
 
 
 def test_ransac_geometric():
-    np.random.seed(1)
+    random_state = np.random.RandomState(1)
 
     # generate original data without noise
-    src = 100 * np.random.random((50, 2))
+    src = 100 * random_state.random_sample((50, 2))
     model0 = AffineTransform(scale=(0.5, 0.3), rotation=1,
                              translation=(10, 20))
     dst = model0(src)
@@ -232,7 +232,8 @@ def test_ransac_geometric():
     dst[outliers[2]] = (50, 50)
 
     # estimate parameters of corrupted data
-    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20)
+    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20,
+                                random_state=random_state)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.params, model_est.params)
@@ -240,22 +241,20 @@ def test_ransac_geometric():
 
 
 def test_ransac_is_data_valid():
-    np.random.seed(1)
 
     is_data_valid = lambda data: data.shape[0] > 2
     model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
-                            is_data_valid=is_data_valid)
+                            is_data_valid=is_data_valid, random_state=1)
     assert_equal(model, None)
     assert_equal(inliers, None)
 
 
 def test_ransac_is_model_valid():
-    np.random.seed(1)
 
     def is_model_valid(model, data):
         return False
     model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
-                            is_model_valid=is_model_valid)
+                            is_model_valid=is_model_valid, random_state=1)
     assert_equal(model, None)
     assert_equal(inliers, None)
 
