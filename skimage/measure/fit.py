@@ -765,7 +765,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
         where the probability (confidence) is typically set to a high value
         such as 0.99, and e is the current fraction of inliers w.r.t. the
         total number of samples.
-    random_state : int, RandomState instance or None, optional (default=None)
+    random_state : int, RandomState instance or None, optional
         If int, random_state is the seed used by the random number generator;
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance used
