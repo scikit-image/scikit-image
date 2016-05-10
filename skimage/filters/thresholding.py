@@ -395,11 +395,11 @@ def threshold_multiotsu(image, nclass=3, nbins=256):
     image : array
         Grayscale input image.
     nclass : int, optional
-        Number of classes to be thresholded, i.e. the number of
-        resulting regions. Accepts an integer from 2 to 5.
+        Number of classes to be thresholded, i.e. the number of resulting
+        regions. Accepts an integer from 2 to 5.
     nbins : int, optional
-        Number of bins used to calculate histogram. This value is
-        ignored for integer arrays.
+        Number of bins used to calculate histogram. This value is ignored for
+        integer arrays.
 
     Returns
     -------
@@ -421,15 +421,19 @@ def threshold_multiotsu(image, nclass=3, nbins=256):
     >>> region2 = (image > thresh[0]) & (image <= thresh[1])
     >>> region3 = image > thresh[1]
     """
+
     # check if the image is RGB.
     if image.shape[-1] in (3, 4):
-        raise TypeError("Your image seems to be RGB (shape: {0}. Please "
-                        "use a grayscale image.".format(image.shape))
+        raise TypeError("Your image seems to be RGB (shape: {0}. Please use a"
+                        "grayscale image.".format(image.shape))
 
     # check if the image has more than one color.
     if image.min() == image.max():
         raise TypeError("The input image seems to have just one color: {0}."
                         "Please use a grayscale image.".format(image.min()))
+
+    # image needs to be treated as float.
+    image = img_as_float(image)
 
     # calculating the histogram and the probability of each gray level.
     hist, _ = histogram(image.ravel(), nbins)
