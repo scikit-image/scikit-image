@@ -48,11 +48,9 @@ for ax in axes.ravel():
 fig.tight_layout()
 
 
-"""
-.. image:: PLOT2RST.current_figure
+######################################################################
+# Now we can easily manipulate the hematoxylin and DAB "channels":
 
-Now we can easily manipulate the hematoxylin and DAB "channels":
-"""
 import numpy as np
 
 from skimage.exposure import rescale_intensity
@@ -70,6 +68,3 @@ ax.set_title("Stain separated image (rescaled)")
 ax.axis('off')
 plt.show()
 
-"""
-.. image:: PLOT2RST.current_figure
-"""

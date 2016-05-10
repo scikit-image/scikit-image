@@ -6,9 +6,9 @@
 Release notes
 =============
 
-.. include:: ../release/_release_notes_for_docs.txt
+.. include:: ../release/_release_notes_for_docs.rst
 
 Installation
 ============
 
-.. include:: install.txt
+.. include:: install.rst

@@ -14,7 +14,7 @@
 import sys
 import os
 import skimage
-
+import sphinx_gallery
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -37,11 +37,14 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx_gallery.gen_gallery'
               ]
 
+autosummary_generate = True
+
 #------------------------------------------------------------------------
 # Sphinx-gallery configuration
 #------------------------------------------------------------------------
 
 sphinx_gallery_conf = {
+   'doc_module'        : 'skimage',
     # path to your examples scripts
     'examples_dirs' : '../examples',
     # path where to save gallery generated examples

@@ -31,28 +31,26 @@ ax1.axis('off')
 
 plt.tight_layout()
 
-"""
-.. image:: PLOT2RST.current_figure
-
-Different operators compute different finite-difference approximations of the
-gradient. For example, the Scharr filter results in a less rotational variance
-than the Sobel filter that is in turn better than the Prewitt filter [1]_ [2]_
-[3]_. The difference between the Prewitt and Sobel filters and the Scharr filter
-is illustrated below with an image that is the discretization of a rotation-
-invariant continuous function. The discrepancy between the Prewitt and Sobel
-filters, and the Scharr filter is stronger for regions of the image where the
-direction of the gradient is close to diagonal, and for regions with high
-spatial frequencies. For the example image the differences between the filter
-results are very small and the filter results are visually almost
-indistinguishable.
-
-.. [1] https://en.wikipedia.org/wiki/Sobel_operator#Alternative_operators
-
-.. [2] B. Jaehne, H. Scharr, and S. Koerkel. Principles of filter design. In
-       Handbook of Computer Vision and Applications. Academic Press, 1999.
-
-.. [3] https://en.wikipedia.org/wiki/Prewitt_operator
-"""
+######################################################################
+# Different operators compute different finite-difference approximations of
+# the gradient. For example, the Scharr filter results in a less rotational
+# variance than the Sobel filter that is in turn better than the Prewitt
+# filter [1]_ [2]_ [3]_. The difference between the Prewitt and Sobel filters
+# and the Scharr filter is illustrated below with an image that is the
+# discretization of a rotation- invariant continuous function. The
+# discrepancy between the Prewitt and Sobel filters, and the Scharr filter is
+# stronger for regions of the image where the direction of the gradient is
+# close to diagonal, and for regions with high spatial frequencies. For the
+# example image the differences between the filter results are very small and
+# the filter results are visually almost indistinguishable.
+#
+# .. [1] https://en.wikipedia.org/wiki/Sobel_operator#Alternative_operators
+#
+# .. [2] B. Jaehne, H. Scharr, and S. Koerkel. Principles of filter design.
+#        In Handbook of Computer Vision and Applications. Academic Press,
+#        1999.
+#
+# .. [3] https://en.wikipedia.org/wiki/Prewitt_operator
 
 x, y = np.ogrid[:100, :100]
 # Rotation-invariant image with different spatial frequencies
@@ -86,7 +84,3 @@ ax3.axis('off')
 
 plt.tight_layout()
 plt.show()
-
-"""
-.. image:: PLOT2RST.current_figure
-"""
