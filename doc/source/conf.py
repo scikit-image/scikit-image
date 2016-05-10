@@ -31,7 +31,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.imgmath',
               'numpydoc',
               'sphinx.ext.autosummary',
-              #'plot2rst',
+              'plot2rst',
               'sphinx.ext.intersphinx',
               'sphinx.ext.linkcode',
               'sphinx_gallery.gen_gallery'
@@ -44,7 +44,7 @@ autosummary_generate = True
 #------------------------------------------------------------------------
 
 sphinx_gallery_conf = {
-   'doc_module'        : 'skimage',
+    # 'doc_module'        : 'skimage',
     # path to your examples scripts
     'examples_dirs' : '../examples',
     # path where to save gallery generated examples
