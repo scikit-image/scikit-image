@@ -195,11 +195,20 @@ def copy_func(f, name=None):
 
 
 def check_random_state(seed):
-    """Turn seed into a np.random.RandomState instance
-    If seed is None, return the RandomState singleton used by np.random.
-    If seed is an int, return a new RandomState instance seeded with seed.
-    If seed is already a RandomState instance, return it.
-    Otherwise raise ValueError.
+    """Turn seed into a `np.random.RandomState` instance.
+
+    Parameters
+    ----------
+    seed : None, int or np.random.RandomState
+           If `seed` is None, return the RandomState singleton used by `np.random`.
+           If `seed` is an int, return a new RandomState instance seeded with `seed`.
+           If `seed` is already a RandomState instance, return it.
+
+    Raises
+    ------
+    ValueError
+        If `seed` is of the wrong type.
+
     """
     # Function originally from scikit-learn's module sklearn.utils.validation
     if seed is None or seed is np.random:
