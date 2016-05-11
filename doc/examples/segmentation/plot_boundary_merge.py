@@ -13,7 +13,7 @@ from matplotlib import pyplot as plt
 
 def weight_boundary(graph, src, dst, n):
     """
-    Callback to handle merging of nodes of a region boundary RAG.
+    Handle merging of nodes of a region boundary region adjacency graph.
 
     This function computes the `"weight"` and the count `"count"`
     attributes of the edge between `n` and the node formed after
@@ -32,7 +32,7 @@ def weight_boundary(graph, src, dst, n):
     Returns
     -------
     data : dict
-        A dictionary with the `"weight"` and `"count"` attributes to be
+        A dictionary with the "weight" and "count" attributes to be
         assigned for the merged node.
 
     """
@@ -47,7 +47,7 @@ def weight_boundary(graph, src, dst, n):
     count = count_src + count_dst
     return {
         'count': count,
-        'weight': (count_src*weight_src + count_dst*weight_dst)/count
+        'weight': (count_src * weight_src + count_dst * weight_dst)/count
     }
 
 

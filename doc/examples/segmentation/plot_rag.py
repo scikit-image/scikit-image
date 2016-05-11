@@ -24,23 +24,23 @@ def max_edge(g, src, dst, n):
     """Callback to handle merging nodes by choosing maximum weight.
 
     Returns a dictionary with `"weight"` set as either the weight between
-    (`src`, `n`) or (`dst`, `n`) in `graph` or the maximum of the two when
+    (`src`, `n`) or (`dst`, `n`) in `g` or the maximum of the two when
     both exist.
 
     Parameters
     ----------
-    graph : RAG
+    g : RAG
         The graph under consideration.
     src, dst : int
-        The verices in `graph` to be merged.
+        The vertices in `g` to be merged.
     n : int
         A neighbor of `src` or `dst` or both.
 
     Returns
     -------
     data : dict
-        A dict with the `"weight"` attribute set the weight between
-        (`src`, `n`) or (`dst`, `n`) in `graph` or the maximum of the two when
+        A dict with the "weight" attribute set the weight between
+        (`src`, `n`) or (`dst`, `n`) in `g` or the maximum of the two when
         both exist.
     """
 
