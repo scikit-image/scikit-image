@@ -58,18 +58,26 @@ For command line usage run `python tifffile.py --help`
 :Organization:
   Laboratory for Fluorescence Dynamics, University of California, Irvine
 
-:Version: 2016.02.22
+:Version: 2016.04.18
 
 Requirements
 ------------
 * `CPython 2.7 or 3.5 <http://www.python.org>`_ (64 bit recommended)
 * `Numpy 1.10 <http://www.numpy.org>`_
 * `Matplotlib 1.5 <http://www.matplotlib.org>`_ (optional for plotting)
-* `Tifffile.c 2015.08.17 <http://www.lfd.uci.edu/~gohlke/>`_
+* `Tifffile.c 2016.04.13 <http://www.lfd.uci.edu/~gohlke/>`_
   (recommended for faster decoding of PackBits and LZW encoded strings)
 
 Revisions
 ---------
+2016.04.18
+    Pass 1932 tests.
+    TiffWriter, imread, and imsave accept open binary file streams.
+2016.04.13
+    Correctly handle reversed fill order in 2 and 4 bps images (bug fix).
+    Implement reverse_bitorder in C.
+2016.03.18
+    Fixed saving additional ImageJ metadata.
 2016.02.22
     Pass 1920 tests.
     Write 8 bytes double tag values using offset if necessary (bug fix).
@@ -171,11 +179,11 @@ Tested on little-endian platforms only.
 
 Other Python packages and modules for reading bio-scientific TIFF files:
 
-*  `Imread <http://luispedro.org/software/imread>`_
-*  `PyLibTiff <http://code.google.com/p/pylibtiff>`_
+*  `Imread <https://github.com/luispedro/imread>`_
+*  `PyLibTiff <https://github.com/pearu/pylibtiff>`_
 *  `SimpleITK <http://www.simpleitk.org>`_
 *  `PyLSM <https://launchpad.net/pylsm>`_
-*  `PyMca.TiffIO.py <http://pymca.sourceforge.net/>`_ (same as fabio.TiffIO)
+*  `PyMca.TiffIO.py <https://github.com/vasole/pymca>`_ (same as fabio.TiffIO)
 *  `BioImageXD.Readers <http://www.bioimagexd.net/>`_
 *  `Cellcognition.io <http://cellcognition.org/>`_
 *  `CellProfiler.bioformats
@@ -254,14 +262,18 @@ except ImportError:
         lzma = None
 
 try:
-    from . import _tifffile
+    if __package__:
+        from . import _tifffile
+    else:
+        import _tifffile
 except ImportError:
     warnings.warn(
         "failed to import the optional _tifffile C extension module.\n"
-        "Loading of some compressed images will be slow.\n"
+        "Loading of some compressed images will be very slow.\n"
         "Tifffile.c can be obtained at http://www.lfd.uci.edu/~gohlke/")
 
-__version__ = '2016.02.22'
+
+__version__ = '2016.04.18'
 __docformat__ = 'restructuredtext en'
 __all__ = (
     'imsave', 'imread', 'imshow', 'TiffFile', 'TiffWriter', 'TiffSequence',
@@ -269,15 +281,15 @@ __all__ = (
     'FileHandle', 'lazyattr', 'natural_sorted', 'decode_lzw', 'stripnull')
 
 
-def imsave(filename, data, **kwargs):
+def imsave(file, data, **kwargs):
     """Write image data to TIFF file.
 
     Refer to the TiffWriter class and member functions for documentation.
 
     Parameters
     ----------
-    filename : str
-        Name of file to write.
+    file : str or binary stream
+        File name or writable binary stream, such as a open file or BytesIO.
     data : array_like
         Input image. The last dimensions are assumed to be image depth,
         height, width, and samples.
@@ -291,7 +303,6 @@ def imsave(filename, data, **kwargs):
     Examples
     --------
     >>> data = numpy.random.rand(2, 5, 3, 301, 219)
-    >>> metadata = {'axes': 'TZCYX'}
     >>> imsave('temp.tif', data, compress=6, metadata={'axes': 'TZCYX'})
 
     """
@@ -305,7 +316,7 @@ def imsave(filename, data, **kwargs):
             data.size*data.dtype.itemsize > 2000*2**20):
         tifargs['bigtiff'] = True
 
-    with TiffWriter(filename, **tifargs) as tif:
+    with TiffWriter(file, **tifargs) as tif:
         tif.save(data, **kwargs)
 
 
@@ -339,16 +350,17 @@ class TiffWriter(object):
         'smin_sample_value': 340, 'smax_sample_value': 341,
         'image_depth': 32997, 'tile_depth': 32998}
 
-    def __init__(self, filename, bigtiff=False, byteorder=None,
+    def __init__(self, file, bigtiff=False, byteorder=None,
                  software='tifffile.py', imagej=False):
-        """Create a new TIFF file for writing.
+        """Open a TIFF file for writing.
 
         Use bigtiff=True when creating files larger than 2 GB.
 
         Parameters
         ----------
-        filename : str
-            Name of file to write.
+        file : str, binary stream, or FileHandle
+            File name or writable binary stream, such as a open file
+            or BytesIO.
         bigtiff : bool
             If True, the BigTIFF format is used.
         byteorder : {'<', '>'}
@@ -393,7 +405,7 @@ class TiffWriter(object):
         self._data_byte_counts = None  # byte counts per plane
         self._tag_offsets = None  # strip or tile offset tag code
 
-        self._fh = open(filename, 'wb')
+        self._fh = FileHandle(file, mode='wb', size=0)
         self._fh.write({'<': b'II', '>': b'MM'}[byteorder])
 
         if bigtiff:
@@ -528,7 +540,7 @@ class TiffWriter(object):
                 self._data_shape = (self._data_shape[0] + 1,) + data.shape
                 if not compress:
                     # write contiguous data, write ifds/tags later
-                    data.tofile(fh)
+                    fh.write_array(data)
                     return
 
         if photometric not in (None, 'minisblack', 'miniswhite',
@@ -916,7 +928,7 @@ class TiffWriter(object):
                                     strip_byte_counts.append(len(t))
                                     fh.write(t)
                                 else:
-                                    chunk.tofile(fh)
+                                    fh.write_array(chunk)
                                     fh.flush()
             elif compress:
                 for plane in data[pageindex]:
@@ -924,7 +936,7 @@ class TiffWriter(object):
                     strip_byte_counts.append(len(plane))
                     fh.write(plane)
             else:
-                data.tofile(fh)  # if this fails try update Python and numpy
+                fh.write_array(data)
 
             # update strip/tile offsets and byte_counts if necessary
             pos = fh.tell()
@@ -1099,8 +1111,9 @@ def imread(files, **kwargs):
 
     Parameters
     ----------
-    files : str or list
-        File name, glob pattern, or list of file names.
+    files : str, binary stream, or sequence
+        File name, seekable binary stream, glob pattern, or sequence of
+        file names.
     key : int, slice, or sequence of page indices
         Defines which pages to return as array.
     series : int
@@ -1140,10 +1153,10 @@ def imread(files, **kwargs):
         files = glob.glob(files)
     if not files:
         raise ValueError('no files found')
-    if len(files) == 1:
+    if not hasattr(files, 'seek') and len(files) == 1:
         files = files[0]
 
-    if isinstance(files, basestring):
+    if isinstance(files, basestring) or hasattr(files, 'seek'):
         with TiffFile(files, **kwargs_file) as tif:
             return tif.asarray(**kwargs)
     else:
@@ -1226,7 +1239,8 @@ class TiffFile(object):
             thousands of pages.
 
         """
-        self._fh = FileHandle(arg, name=name, offset=offset, size=size)
+        self._fh = FileHandle(arg, mode='rb',
+                              name=name, offset=offset, size=size)
         self.offset_size = None
         self.pages = []
         self._multifile = bool(multifile)
@@ -1250,6 +1264,7 @@ class TiffFile(object):
 
     def close(self):
         """Close open file handle(s)."""
+
         for tif in self._files.values():
             tif._fh.close()
         self._files = {}
@@ -2317,6 +2332,7 @@ class TiffPage(object):
         image_depth = self.image_depth
         typecode = self.parent.byteorder + dtype
         bits_per_sample = self.bits_per_sample
+        lsb2msb = self.fill_order == 'lsb2msb'
 
         byte_counts, offsets = self._byte_counts_offsets
 
@@ -2340,6 +2356,8 @@ class TiffPage(object):
             fh.seek(offsets[0])
             result = fh.read_array(typecode, product(shape))
             result = result.astype('=' + dtype)
+            if lsb2msb:
+                reverse_bitorder(result)
         else:
             if self.is_contig:
                 runlen *= self.samples_per_pixel
@@ -2380,7 +2398,11 @@ class TiffPage(object):
                 tw, tl, td, pl = 0, 0, 0, 0
                 for offset, bytecount in zip(offsets, byte_counts):
                     fh.seek(offset)
-                    tile = unpack(decompress(fh.read(bytecount)))
+                    tile = fh.read(bytecount)
+                    if lsb2msb:
+                        tile = reverse_bitorder(tile)
+                    tile = decompress(tile)
+                    tile = unpack(tile)
                     try:
                         tile.shape = tile_shape
                     except ValueError:
@@ -2414,6 +2436,8 @@ class TiffPage(object):
                 for offset, bytecount in zip(offsets, byte_counts):
                     fh.seek(offset)
                     strip = fh.read(bytecount)
+                    if lsb2msb:
+                        strip = reverse_bitorder(strip)
                     strip = decompress(strip)
                     strip = unpack(strip)
                     size = min(result.size, strip.size, strip_size,
@@ -2431,8 +2455,6 @@ class TiffPage(object):
                 numpy.cumsum(result, axis=-2, dtype=dtype, out=result)
             elif self.predictor == 'float':
                 result = decode_floats(result)
-        if self.fill_order == 'lsb2msb':
-            reverse_bitorder(result)
         if colormapped and self.is_indexed:
             if self.color_map.shape[1] >= 2**bits_per_sample:
                 # FluoView and LSM might fail here
@@ -3037,6 +3059,7 @@ class TiffSequence(object):
         ----------
         files : str, or sequence of str
             Glob pattern or sequence of file names.
+            Binary streams are not supported.
         imread : function or class
             Image read function or class with asarray function returning numpy
             array from single file.
@@ -3051,6 +3074,8 @@ class TiffSequence(object):
         files = list(files)
         if not files:
             raise ValueError("no files found")
+        if not isinstance(files[0], basestring):
+            raise ValueError("not a file name")
         #if not os.path.isfile(files[0]):
         #    raise ValueError("file not found")
         self.files = files
@@ -3226,11 +3251,15 @@ class TiffTags(Record):
 class FileHandle(object):
     """Binary file handle.
 
-    * Handle embedded files (for CZI within CZI files).
-    * Allow to re-open closed files (for multi file formats such as OME-TIFF).
-    * Read numpy arrays and records from file like objects.
+    A limited, special purpose file handler that:
 
-    Only binary read, seek, tell, and close are supported on embedded files.
+    * handles embedded files (for CZI within CZI files)
+    * allows to re-open closed files (for multi file formats, such as OME-TIFF)
+    * reads and writes numpy arrays and records from file like objects
+
+    Only 'rb' and 'wb' modes are supported. Concurrently reading and writing
+    of the same stream is untested.
+
     When initialized from another file handle, do not use it unless this
     FileHandle is closed.
 
@@ -3248,20 +3277,21 @@ class FileHandle(object):
     All attributes are read-only.
 
     """
-    __slots__ = ('_fh', '_arg', '_mode', '_name', '_dir',
+    __slots__ = ('_fh', '_file', '_mode', '_name', '_dir',
                  '_offset', '_size', '_close', 'is_file')
 
-    def __init__(self, arg, mode='rb', name=None, offset=None, size=None):
+    def __init__(self, file, mode='rb', name=None, offset=None, size=None):
         """Initialize file handle from file name or another file handle.
 
         Parameters
         ----------
-        arg : str, File, or FileHandle
-            File name or open file handle.
+        file : str, binary stream, or FileHandle
+            File name or seekable binary stream, such as a open file
+            or BytesIO.
         mode : str
-            File open mode in case 'arg' is a file name.
+            File open mode in case 'file' is a file name. Must be 'rb' or 'wb'.
         name : str
-            Optional name of file in case 'arg' is a file handle.
+            Optional name of file in case 'file' is a binary stream.
         offset : int
             Optional start position of embedded file. By default this is
             the current file position.
@@ -3271,7 +3301,7 @@ class FileHandle(object):
 
         """
         self._fh = None
-        self._arg = arg
+        self._file = file
         self._mode = mode
         self._name = name
         self._dir = ''
@@ -3286,39 +3316,56 @@ class FileHandle(object):
         if self._fh:
             return  # file is open
 
-        if isinstance(self._arg, basestring):
+        if isinstance(self._file, basestring):
             # file name
-            self._arg = os.path.abspath(self._arg)
-            self._dir, self._name = os.path.split(self._arg)
-            self._fh = open(self._arg, self._mode)
+            self._file = os.path.abspath(self._file)
+            self._dir, self._name = os.path.split(self._file)
+            self._fh = open(self._file, self._mode)
             self._close = True
             if self._offset is None:
                 self._offset = 0
-        elif isinstance(self._arg, FileHandle):
+        elif isinstance(self._file, FileHandle):
             # FileHandle
-            self._fh = self._arg._fh
+            self._fh = self._file._fh
             if self._offset is None:
                 self._offset = 0
-            self._offset += self._arg._offset
+            self._offset += self._file._offset
             self._close = False
             if not self._name:
                 if self._offset:
-                    name, ext = os.path.splitext(self._arg._name)
+                    name, ext = os.path.splitext(self._file._name)
                     self._name = "%s@%i%s" % (name, self._offset, ext)
                 else:
-                    self._name = self._arg._name
-            self._dir = self._arg._dir
-        else:
-            # open file object
-            self._fh = self._arg
+                    self._name = self._file._name
+            if self._mode and self._mode != self._file._mode:
+                raise ValueError('FileHandle has wrong mode')
+            self._mode = self._file._mode
+            self._dir = self._file._dir
+        elif hasattr(self._file, 'seek'):
+            # binary stream: open file, BytesIO
+            try:
+                self._file.tell()
+            except Exception:
+                raise ValueError("binary stream is not seekable")
+            self._fh = self._file
             if self._offset is None:
-                self._offset = self._arg.tell()
+                self._offset = self._file.tell()
             self._close = False
             if not self._name:
                 try:
                     self._dir, self._name = os.path.split(self._fh.name)
                 except AttributeError:
-                    self._name = "Unnamed stream"
+                    self._name = "Unnamed binary stream"
+            try:
+                self._mode = self._fh.mode
+            except AttributeError:
+                pass
+        else:
+            raise ValueError("The first parameter must be a file name, "
+                             "seekable binary stream, or FileHandle")
+
+        # if self._mode not in (None, 'rb', 'wb', 'r+b', 'rb+', 'w+b', 'wb+'):
+        #    raise ValueError('file mode not supported: %s' % self._mode)
 
         if self._offset:
             self._fh.seek(self._offset)
@@ -3340,6 +3387,14 @@ class FileHandle(object):
         if size < 0 and self._offset:
             size = self._size
         return self._fh.read(size)
+
+    def write(self, bytestring):
+        """Write bytestring to file."""
+        return self._fh.write(bytestring)
+
+    def flush(self):
+        """Flush write buffers if applicable."""
+        return self._fh.flush()
 
     def memmap_array(self, dtype, shape, offset=0, mode='r', order='C'):
         """Return numpy.memmap of data stored in file."""
@@ -3381,6 +3436,14 @@ class FileHandle(object):
                                         byteorder=byteorder)
         return rec[0] if shape == 1 else rec
 
+    def write_array(self, data):
+        """Write numpy array to binary file."""
+        try:
+            data.tofile(self._fh)
+        except Exception:
+            # BytesIO
+            self._fh.write(data.tostring())
+
     def tell(self):
         """Return file's current position."""
         return self._fh.tell() - self._offset
@@ -3391,7 +3454,7 @@ class FileHandle(object):
             if whence == 0:
                 self._fh.seek(self._offset + offset, whence)
                 return
-            elif whence == 2:
+            elif whence == 2 and self._size > 0:
                 self._fh.seek(self._offset + self._size + offset, 0)
                 return
         self._fh.seek(offset, whence)
@@ -3881,7 +3944,7 @@ def imagej_description_dict(description):
 
 
 def imagej_description(shape, rgb=None, colormaped=False, version='1.11a',
-                       hyperstack=None, mode=None, loop=None, kwargs={}):
+                       hyperstack=None, mode=None, loop=None, **kwargs):
     """Return ImageJ image decription from data shape as byte string.
 
     ImageJ can handle up to 6 dimensions in order TZCYXS.
@@ -3995,21 +4058,24 @@ def image_description(shape, colormaped=False, **metadata):
 
 def _replace_by(module_function, package=__package__, warn=False):
     """Try replace decorated function by module.function."""
+    try:
+        from importlib import import_module
+    except ImportError:
+        warnings.warn('could not import module importlib')
+        return lambda func: func
+
     def decorate(func, module_function=module_function, warn=warn):
         try:
-            modname, function = module_function.split('.')
-            if package is None:
-                full_name = modname
+            module, function = module_function.split('.')
+            if package:
+                module = import_module('.' + module, package=package)
             else:
-                full_name = package + '.' + modname
-            if modname == '_tifffile':
-                func, oldfunc = getattr(_tifffile, function), func
-            else:
-                module = __import__(full_name, fromlist=[modname])
-                func, oldfunc = getattr(module, function), func
+                module = import_module(module)
+            func, oldfunc = getattr(module, function), func
             globals()['__old_' + func.__name__] = oldfunc
         except Exception:
-            warnings.warn("failed to import %s" % module_function)
+            if warn:
+                warnings.warn("failed to import %s" % module_function)
         return func
 
     return decorate
@@ -4295,59 +4361,73 @@ def unpack_rgb(data, dtype='<B', bitspersample=(5, 6, 5), rescale=True):
     return result.reshape(-1)
 
 
+@_replace_by('_tifffile.reverse_bitorder')
 def reverse_bitorder(data):
-    """In-place reverse bits in each byte.
+    """Reverse bits in each byte of byte string or numpy array.
+
+    Decode data where pixels with lower column values are stored in the
+    lower-order bits of the bytes (fill_order == 'lsb2msb').
 
     Parameters
     ----------
-    data : ndarray
-        The data to be bit reversed in-place.
-        Pixels with lower column values stored in the lower-order bits
-        of the bytes (fill_order == 'lsb2msb').
+    data : byte string or ndarray
+        The data to be bit reversed. If byte string, a new bit-reversed byte
+        string is returned. Numpy arrays are bit-reversed in-place.
 
     Examples
     --------
+    >>> reverse_bitorder(b'\x01\x64')  # doctest: +SKIP
+    b'\x80&'
+
     >>> data = numpy.array([1, 666], dtype='uint16')
     >>> reverse_bitorder(data)
     >>> data
     array([  128, 16473], dtype=uint16)
 
     """
-    reverse = numpy.array([
-        0x00, 0x80, 0x40, 0xC0, 0x20, 0xA0, 0x60, 0xE0,
-        0x10, 0x90, 0x50, 0xD0, 0x30, 0xB0, 0x70, 0xF0,
-        0x08, 0x88, 0x48, 0xC8, 0x28, 0xA8, 0x68, 0xE8,
-        0x18, 0x98, 0x58, 0xD8, 0x38, 0xB8, 0x78, 0xF8,
-        0x04, 0x84, 0x44, 0xC4, 0x24, 0xA4, 0x64, 0xE4,
-        0x14, 0x94, 0x54, 0xD4, 0x34, 0xB4, 0x74, 0xF4,
-        0x0C, 0x8C, 0x4C, 0xCC, 0x2C, 0xAC, 0x6C, 0xEC,
-        0x1C, 0x9C, 0x5C, 0xDC, 0x3C, 0xBC, 0x7C, 0xFC,
-        0x02, 0x82, 0x42, 0xC2, 0x22, 0xA2, 0x62, 0xE2,
-        0x12, 0x92, 0x52, 0xD2, 0x32, 0xB2, 0x72, 0xF2,
-        0x0A, 0x8A, 0x4A, 0xCA, 0x2A, 0xAA, 0x6A, 0xEA,
-        0x1A, 0x9A, 0x5A, 0xDA, 0x3A, 0xBA, 0x7A, 0xFA,
-        0x06, 0x86, 0x46, 0xC6, 0x26, 0xA6, 0x66, 0xE6,
-        0x16, 0x96, 0x56, 0xD6, 0x36, 0xB6, 0x76, 0xF6,
-        0x0E, 0x8E, 0x4E, 0xCE, 0x2E, 0xAE, 0x6E, 0xEE,
-        0x1E, 0x9E, 0x5E, 0xDE, 0x3E, 0xBE, 0x7E, 0xFE,
-        0x01, 0x81, 0x41, 0xC1, 0x21, 0xA1, 0x61, 0xE1,
-        0x11, 0x91, 0x51, 0xD1, 0x31, 0xB1, 0x71, 0xF1,
-        0x09, 0x89, 0x49, 0xC9, 0x29, 0xA9, 0x69, 0xE9,
-        0x19, 0x99, 0x59, 0xD9, 0x39, 0xB9, 0x79, 0xF9,
-        0x05, 0x85, 0x45, 0xC5, 0x25, 0xA5, 0x65, 0xE5,
-        0x15, 0x95, 0x55, 0xD5, 0x35, 0xB5, 0x75, 0xF5,
-        0x0D, 0x8D, 0x4D, 0xCD, 0x2D, 0xAD, 0x6D, 0xED,
-        0x1D, 0x9D, 0x5D, 0xDD, 0x3D, 0xBD, 0x7D, 0xFD,
-        0x03, 0x83, 0x43, 0xC3, 0x23, 0xA3, 0x63, 0xE3,
-        0x13, 0x93, 0x53, 0xD3, 0x33, 0xB3, 0x73, 0xF3,
-        0x0B, 0x8B, 0x4B, 0xCB, 0x2B, 0xAB, 0x6B, 0xEB,
-        0x1B, 0x9B, 0x5B, 0xDB, 0x3B, 0xBB, 0x7B, 0xFB,
-        0x07, 0x87, 0x47, 0xC7, 0x27, 0xA7, 0x67, 0xE7,
-        0x17, 0x97, 0x57, 0xD7, 0x37, 0xB7, 0x77, 0xF7,
-        0x0F, 0x8F, 0x4F, 0xCF, 0x2F, 0xAF, 0x6F, 0xEF,
-        0x1F, 0x9F, 0x5F, 0xDF, 0x3F, 0xBF, 0x7F, 0xFF], dtype='uint8')
-    view = data.view('uint8')
-    numpy.take(reverse, view, out=view)
+    try:
+        # numpy array
+        view = data.view('uint8')
+        table = numpy.array([
+            0x00, 0x80, 0x40, 0xC0, 0x20, 0xA0, 0x60, 0xE0,
+            0x10, 0x90, 0x50, 0xD0, 0x30, 0xB0, 0x70, 0xF0,
+            0x08, 0x88, 0x48, 0xC8, 0x28, 0xA8, 0x68, 0xE8,
+            0x18, 0x98, 0x58, 0xD8, 0x38, 0xB8, 0x78, 0xF8,
+            0x04, 0x84, 0x44, 0xC4, 0x24, 0xA4, 0x64, 0xE4,
+            0x14, 0x94, 0x54, 0xD4, 0x34, 0xB4, 0x74, 0xF4,
+            0x0C, 0x8C, 0x4C, 0xCC, 0x2C, 0xAC, 0x6C, 0xEC,
+            0x1C, 0x9C, 0x5C, 0xDC, 0x3C, 0xBC, 0x7C, 0xFC,
+            0x02, 0x82, 0x42, 0xC2, 0x22, 0xA2, 0x62, 0xE2,
+            0x12, 0x92, 0x52, 0xD2, 0x32, 0xB2, 0x72, 0xF2,
+            0x0A, 0x8A, 0x4A, 0xCA, 0x2A, 0xAA, 0x6A, 0xEA,
+            0x1A, 0x9A, 0x5A, 0xDA, 0x3A, 0xBA, 0x7A, 0xFA,
+            0x06, 0x86, 0x46, 0xC6, 0x26, 0xA6, 0x66, 0xE6,
+            0x16, 0x96, 0x56, 0xD6, 0x36, 0xB6, 0x76, 0xF6,
+            0x0E, 0x8E, 0x4E, 0xCE, 0x2E, 0xAE, 0x6E, 0xEE,
+            0x1E, 0x9E, 0x5E, 0xDE, 0x3E, 0xBE, 0x7E, 0xFE,
+            0x01, 0x81, 0x41, 0xC1, 0x21, 0xA1, 0x61, 0xE1,
+            0x11, 0x91, 0x51, 0xD1, 0x31, 0xB1, 0x71, 0xF1,
+            0x09, 0x89, 0x49, 0xC9, 0x29, 0xA9, 0x69, 0xE9,
+            0x19, 0x99, 0x59, 0xD9, 0x39, 0xB9, 0x79, 0xF9,
+            0x05, 0x85, 0x45, 0xC5, 0x25, 0xA5, 0x65, 0xE5,
+            0x15, 0x95, 0x55, 0xD5, 0x35, 0xB5, 0x75, 0xF5,
+            0x0D, 0x8D, 0x4D, 0xCD, 0x2D, 0xAD, 0x6D, 0xED,
+            0x1D, 0x9D, 0x5D, 0xDD, 0x3D, 0xBD, 0x7D, 0xFD,
+            0x03, 0x83, 0x43, 0xC3, 0x23, 0xA3, 0x63, 0xE3,
+            0x13, 0x93, 0x53, 0xD3, 0x33, 0xB3, 0x73, 0xF3,
+            0x0B, 0x8B, 0x4B, 0xCB, 0x2B, 0xAB, 0x6B, 0xEB,
+            0x1B, 0x9B, 0x5B, 0xDB, 0x3B, 0xBB, 0x7B, 0xFB,
+            0x07, 0x87, 0x47, 0xC7, 0x27, 0xA7, 0x67, 0xE7,
+            0x17, 0x97, 0x57, 0xD7, 0x37, 0xB7, 0x77, 0xF7,
+            0x0F, 0x8F, 0x4F, 0xCF, 0x2F, 0xAF, 0x6F, 0xEF,
+            0x1F, 0x9F, 0x5F, 0xDF, 0x3F, 0xBF, 0x7F, 0xFF], dtype='uint8')
+        numpy.take(table, view, out=view)
+    except AttributeError:
+        # byte string
+        # TODO: use string translate
+        data = numpy.fromstring(data, dtype='uint8')
+        reverse_bitorder(data)
+        return data.tostring()
 
 
 def apply_colormap(image, colormap, contig=True):
@@ -5760,6 +5840,21 @@ def _app_show():
     pyplot.show()
 
 
+def askopenfilename(**kwargs):
+    """Return file name(s) from Tkinter's file open dialog."""
+    try:
+        from Tkinter import Tk
+        import tkFileDialog as filedialog
+    except ImportError:
+        from tkinter import Tk, filedialog
+    root = Tk()
+    root.withdraw()
+    root.update()
+    filenames = filedialog.askopenfilename(**kwargs)
+    root.destroy()
+    return filenames
+
+
 def main(argv=None):
     """Command line usage main function."""
     if float(sys.version[0:3]) < 2.6:
@@ -5809,14 +5904,12 @@ def main(argv=None):
         doctest.testmod()
         return 0
     if not path:
-        try:
-            import tkFileDialog as filedialog
-        except ImportError:
-            from tkinter import filedialog
-        path = filedialog.askopenfilename(filetypes=[
-            ("TIF files", "*.tif"), ("LSM files", "*.lsm"),
-            ("STK files", "*.stk"), ("allfiles", "*")])
-        #parser.error("No file specified")
+        path = askopenfilename(
+            title="Select a TIFF file",
+            filetypes=[("TIF files", "*.tif"), ("LSM files", "*.lsm"),
+                       ("STK files", "*.stk"), ("allfiles", "*")])
+        if not path:
+            parser.error("No file specified")
     if settings.test:
         test_tifffile(path, settings.verbose)
         return 0
