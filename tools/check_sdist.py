@@ -19,8 +19,9 @@ data = [l.replace('hard linking ', '') for l in data]
 data = ['./' + l.split(' ->')[0] for l in data]
 
 ignore_exts = ['.pyc', '.so', '.o', '#', '~', '.gitignore']
-ignore_dirs = ['./dist', './tools', './doc', './viewer_examples']
-ignore_files = ['./TODO.md', './README.md', 
+ignore_dirs = ['./dist', './tools', './doc', './viewer_examples',
+               './downloads']
+ignore_files = ['./TODO.md', './README.md',
                 './.gitignore', './.travis.yml', './.gitmodules',
                 './.mailmap', './.coveragerc', './appveyor.yml',
                 './tools/check_bento_build.py',
