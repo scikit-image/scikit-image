@@ -70,6 +70,7 @@ before_install:
     - which python; python --version
     - tools/check_bento_build.py
     - tools/build_versions.py
+    - tools/check_sdist.py
 
 install:
     - section build
