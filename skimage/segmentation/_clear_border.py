@@ -45,17 +45,21 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False):
     """
     image = labels
 
-    rows, cols = image.shape
-    if buffer_size >= rows or buffer_size >= cols:
+    if any( ( buffer_size >= s for s in image.shape)):
         raise ValueError("buffer size may not be greater than image size")
 
     # create borders with buffer_size
     borders = np.zeros_like(image, dtype=np.bool_)
     ext = buffer_size + 1
-    borders[:ext] = True
-    borders[- ext:] = True
-    borders[:, :ext] = True
-    borders[:, - ext:] = True
+    slstart = slice(ext)
+    slend   = slice(-ext, None)
+    slices  = [slice(s) for s in image.shape]
+    for d in range(image.ndim):
+        slicedim = slices.copy()
+        slicedim[d] = slstart
+        borders[slicedim] = True
+        slicedim[d] = slend
+        borders[slicedim] = True
 
     # Re-label, in case we are dealing with a binary image
     # and to get consistent labeling
