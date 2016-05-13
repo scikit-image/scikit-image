@@ -4,7 +4,8 @@
 #cython: wraparound=False
 import numpy as np
 cimport numpy as cnp
-from libc.math cimport sin, cos, abs
+from cpython cimport bool
+from libc.math cimport sin, cos
 from .._shared.interpolation cimport bilinear_interpolation, round
 from .._shared.transform cimport integrate
 
@@ -15,7 +16,7 @@ cdef extern from "numpy/npy_math.h":
 
 def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
                double[:] angles, Py_ssize_t levels,
-               cnp.uint32_t[:, :, :, ::1] out):
+               cnp.uint32_t[:, :, :, ::1] out, bool clockwise):
     """Perform co-occurrence matrix accumulation.
 
     Parameters
@@ -33,6 +34,8 @@ def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
     out : ndarray
         On input a 4D array of zeros, and on output it contains
         the results of the GLCM computation.
+    clockwise : bool
+        Defines if the angles will be considered clockwise or anti-clockwise.
 
     """
 
@@ -40,6 +43,12 @@ def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
         Py_ssize_t a_idx, d_idx, r, c, rows, cols, row, col
         cnp.uint8_t i, j
         cnp.float64_t angle, distance
+        cnp.uint8_t _clockwise
+        
+    if clockwise:
+        _clockwise = 1
+    else:
+        _clockwise = 0
 
     with nogil:
         rows = image.shape[0]
@@ -56,6 +65,9 @@ def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
                         # compute the location of the offset pixel
                         row = r + <int>round(sin(angle) * distance)
                         col = c + <int>round(cos(angle) * distance)
+                        
+                        if _clockwise == 0:
+                            row = r + <int>round(sin(-angle) * distance)
 
                         # make sure the offset is within bounds
                         if row >= 0 and row < rows and \
