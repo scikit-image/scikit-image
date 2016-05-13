@@ -46,6 +46,7 @@ Here's the long and short of it:
    * Enter your GitHub username and password (repeat contributors or advanced
      users can remove this step by connecting to GitHub with SSH. See detailed
      instructions below if desired).
+
    * Go to GitHub. The new branch will show up with a green Pull Request
      button - click it.
 
