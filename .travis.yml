@@ -68,7 +68,7 @@ before_install:
     - pip install -U virtualenv
     - source tools/travis_before_install.sh
     - which python; python --version
-    - python check_bento_build.py
+    - tools/check_bento_build.py
     - tools/build_versions.py
 
 install:
