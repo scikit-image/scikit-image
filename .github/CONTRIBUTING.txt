@@ -11,16 +11,9 @@ Here's the long and short of it:
 
    * Clone the project to your local computer::
 
-      git clone git@github.com:your-username/scikit-image.git
+      git clone https://github.com/your-username/scikit-image.git
 
    * Add the upstream repository:
-
-     - If you have set up your `github SSH keys
-       <https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/>`_::
-
-        git remote add upstream git@github.com:scikit-image/scikit-image.git
-
-     - Otherwise::
 
         git remote add upstream https://github.com/scikit-image/scikit-image.git
 
@@ -50,6 +43,9 @@ Here's the long and short of it:
 
       git push origin transform-speedups
 
+   * Enter your GitHub username and password (repeat contributors or advanced
+     users can remove this step by connecting to GitHub with SSH. See detailed
+     instructions below if desired).
    * Go to GitHub. The new branch will show up with a green Pull Request
      button - click it.
 
