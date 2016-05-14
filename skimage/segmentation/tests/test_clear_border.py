@@ -74,6 +74,42 @@ def test_clear_border_non_binary():
     assert_(not np.all(image == result))
 
 
+def test_clear_border_non_binary_3d():
+    image3d = np.array(
+        [[[1, 2, 3, 1, 2],
+        [3, 3, 3, 4, 2],
+        [3, 4, 3, 4, 2],
+        [3, 3, 2, 1, 2]],
+        [[1, 2, 3, 1, 2],
+        [3, 3, 5, 4, 2],
+        [3, 4, 5, 4, 2],
+        [3, 3, 2, 1, 2]],
+        [[1, 2, 3, 1, 2],
+        [3, 3, 3, 4, 2],
+        [3, 4, 3, 4, 2],
+        [3, 3, 2, 1, 2]],
+        )
+
+    result = clear_border(image3d)
+    expected = np.array(
+        [[[0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0]],
+        [[0, 0, 0, 0, 0],
+        [0, 0, 5, 0, 0],
+        [0, 0, 5, 0, 0],
+        [0, 0, 0, 0, 0]],
+        [[0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0]],
+        )
+
+    assert_array_equal(result, expected)
+    assert_(not np.all(image3d == result))
+
+
 def test_clear_border_non_binary_inplace():
     image = np.array([[1, 2, 3, 1, 2],
                       [3, 3, 5, 4, 2],
@@ -88,6 +124,42 @@ def test_clear_border_non_binary_inplace():
 
     assert_array_equal(result, expected)
     assert_array_equal(image, result)
+
+
+def test_clear_border_non_binary_inplace_3d():
+    image3d = np.array(
+        [[[1, 2, 3, 1, 2],
+        [3, 3, 3, 4, 2],
+        [3, 4, 3, 4, 2],
+        [3, 3, 2, 1, 2]],
+        [[1, 2, 3, 1, 2],
+        [3, 3, 5, 4, 2],
+        [3, 4, 5, 4, 2],
+        [3, 3, 2, 1, 2]],
+        [[1, 2, 3, 1, 2],
+        [3, 3, 3, 4, 2],
+        [3, 4, 3, 4, 2],
+        [3, 3, 2, 1, 2]],
+        )
+
+    result = clear_border(image3d, in_place=True)
+    expected = np.array(
+        [[[0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0]],
+        [[0, 0, 0, 0, 0],
+        [0, 0, 5, 0, 0],
+        [0, 0, 5, 0, 0],
+        [0, 0, 0, 0, 0]],
+        [[0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0]],
+        )
+
+    assert_array_equal(result, expected)
+    assert_array_equal(image3d, result)
 
 if __name__ == "__main__":
     np.testing.run_module_suite()
