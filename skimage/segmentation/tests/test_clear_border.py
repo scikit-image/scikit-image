@@ -88,7 +88,7 @@ def test_clear_border_non_binary_3d():
         [3, 3, 3, 4, 2],
         [3, 4, 3, 4, 2],
         [3, 3, 2, 1, 2]],
-        )
+        ])
 
     result = clear_border(image3d)
     expected = np.array(
@@ -104,7 +104,7 @@ def test_clear_border_non_binary_3d():
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0]],
-        )
+        ])
 
     assert_array_equal(result, expected)
     assert_(not np.all(image3d == result))
@@ -140,7 +140,7 @@ def test_clear_border_non_binary_inplace_3d():
         [3, 3, 3, 4, 2],
         [3, 4, 3, 4, 2],
         [3, 3, 2, 1, 2]],
-        )
+        ])
 
     result = clear_border(image3d, in_place=True)
     expected = np.array(
@@ -156,7 +156,7 @@ def test_clear_border_non_binary_inplace_3d():
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0]],
-        )
+        ])
 
     assert_array_equal(result, expected)
     assert_array_equal(image3d, result)
