@@ -1,7 +1,7 @@
 import numpy as np
 
 from .._shared.utils import warn
-from ._felzenszwalb_cy import _felzenszwalb_grey
+from ._felzenszwalb_cy import _felzenszwalb_grey, _felzenszwalb_rgb
 
 
 def felzenszwalb(image, scale=1, sigma=0.8, min_size=20):
@@ -59,26 +59,5 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20):
         raise ValueError("Felzenswalb segmentation can only operate on RGB and"
                          " grey images, but input array of ndim %d given."
                          % image.ndim)
-
-    # assume we got 2d image with multiple channels
-    n_channels = image.shape[2]
-    if n_channels != 3:
-        warn("Got image with %d channels. Is that really what you"
-             " wanted?" % image.shape[2])
-    segmentations = []
-    # compute quickshift for each channel
-    for c in range(n_channels):
-        channel = np.ascontiguousarray(image[:, :, c])
-        s = _felzenszwalb_grey(channel, scale=scale, sigma=sigma,
-                               min_size=min_size)
-        segmentations.append(s)
-
-    # put pixels in same segment only if in the same segment in all images
-    # we do this by combining the channels to one number
-    n0 = segmentations[0].max() + 1
-    n1 = segmentations[1].max() + 1
-    segmentation = (segmentations[0] + segmentations[1] * n0
-                    + segmentations[2] * n0 * n1)
-    # make segment labels consecutive numbers starting at 0
-    labels = np.unique(segmentation, return_inverse=True)[1]
-    return labels.reshape(image.shape[:2])
+    return _felzenszwalb_rgb(image, scale=scale, sigma=sigma,
+                             min_size=min_size)
