@@ -53,7 +53,7 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False):
     slend   = slice(-ext, None)
     slices  = [slice(s) for s in image.shape]
     for d in range(image.ndim):
-        slicedim = slices.copy()
+        slicedim = list(slices)
         slicedim[d] = slstart
         borders[slicedim] = True
         slicedim[d] = slend
