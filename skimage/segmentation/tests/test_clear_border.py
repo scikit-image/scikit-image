@@ -28,6 +28,36 @@ def test_clear_border():
     assert_array_equal(result, 2 * np.ones_like(image))
 
 
+def test_clear_border_3d():
+    image = np.array([
+        [[0, 0, 0, 0],
+         [0, 0, 0, 0],
+         [0, 0, 0, 0],
+         [1, 0, 0, 0]],
+        [[0, 0, 0, 0],
+         [0, 1, 1, 0],
+         [0, 0, 1, 0],
+         [0, 0, 0, 0]],
+        [[0, 0, 0, 0],
+         [0, 0, 0, 0],
+         [0, 0, 0, 0],
+         [0, 0, 0, 0]],
+        ])
+    # test default case
+    result = clear_border(image.copy())
+    ref = image.copy()
+    ref[0, 3, 0] = 0
+    assert_array_equal(result, ref)
+
+    # test buffer
+    result = clear_border(image.copy(), 1)
+    assert_array_equal(result, np.zeros(result.shape))
+
+    # test background value
+    result = clear_border(image.copy(), buffer_size=1, bgval=2)
+    assert_array_equal(result, 2 * np.ones_like(image))
+
+
 def test_clear_border_non_binary():
     image = np.array([[1, 2, 3, 1, 2],
                       [3, 3, 5, 4, 2],
