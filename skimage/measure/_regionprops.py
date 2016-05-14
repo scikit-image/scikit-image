@@ -115,17 +115,14 @@ class _RegionProperties(object):
         """
         Returns
         -------
-        A tuple of the bounding box's start coordinates for each dimension, 
+        A tuple of the bounding box's start coordinates for each dimension,
         followed by the end coordinates for each dimension
         """
         return tuple([self._slice[i].start for i in range(self._ndim)] +
                      [self._slice[i].stop for i in range(self._ndim)])
 
     def centroid(self):
-        centroid_coords = self.local_centroid
-        return tuple(centroid_coords +
-                     np.array([self._slice[i].start
-                               for i in range(self._ndim)]))
+        return tuple(self.coords.mean(axis=0))
 
     @only2d
     def convex_area(self):
