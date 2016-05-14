@@ -17,9 +17,8 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20):
     controlled indirectly through ``scale``. Segment size within an image can
     vary greatly depending on local contrast.
 
-    For RGB images, the algorithm computes a separate segmentation for each
-    channel and then combines these. The combined segmentation is the
-    intersection of the separate segmentations on the color channels.
+    For RGB images, the algorithm uses the euclidean distance between pixels in
+    channel space.
 
     Parameters
     ----------
