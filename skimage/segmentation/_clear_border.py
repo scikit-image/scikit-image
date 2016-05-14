@@ -5,12 +5,10 @@ from ..measure import label
 def clear_border(labels, buffer_size=0, bgval=0, in_place=False):
     """Clear objects connected to the label image border.
 
-    The changes will be applied directly to the input.
-
     Parameters
     ----------
-    labels : (N, M) array of int
-        Label or binary image.
+    labels : (M[, N[, ..., P]]) array of int
+        Label or binary image
     buffer_size : int, optional
         The width of the border examined.  By default, only objects
         that touch the outside of the image are removed.
@@ -21,7 +19,7 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False):
 
     Returns
     -------
-    labels : (N, M) array
+    labels : (M[, N[, ..., P]]) array
         Cleared binary image.
 
     Examples
