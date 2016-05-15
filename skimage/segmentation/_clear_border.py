@@ -7,8 +7,8 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False):
 
     Parameters
     ----------
-    labels : (M[, N[, ..., P]]) array of int
-        Label or binary image
+    labels : (M[, N[, ..., P]]) array of int or bool
+        Imaging data labels.
     buffer_size : int, optional
         The width of the border examined.  By default, only objects
         that touch the outside of the image are removed.
@@ -19,8 +19,8 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False):
 
     Returns
     -------
-    labels : (M[, N[, ..., P]]) array
-        Cleared binary image.
+    out : (M[, N[, ..., P]]) array
+        Imaging data labels with cleared borders
 
     Examples
     --------
