@@ -12,7 +12,7 @@ from ._texture import (_glcm_loop,
 
 
 def greycomatrix(image, distances, angles, levels=256, symmetric=False,
-                 normed=False):
+                 normed=False, clockwise=True):
     """Calculate the grey-level co-occurrence matrix.
 
     A grey level co-occurrence matrix is a histogram of co-occurring
@@ -42,6 +42,8 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
         by the total number of accumulated co-occurrences for the given
         offset. The elements of the resulting matrix sum to 1. The
         default is False.
+    clockwise : bool, optional
+        Defines if the angles will be considered clockwise or anti-clockwise. Default: True
 
     Returns
     -------
@@ -109,7 +111,7 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
                  dtype=np.uint32, order='C')
 
     # count co-occurences
-    _glcm_loop(image, distances, angles, levels, P)
+    _glcm_loop(image, distances, angles, levels, P, clockwise)
 
     # make each GLMC symmetric
     if symmetric:
@@ -133,15 +135,22 @@ def greycoprops(P, prop='contrast'):
     a compact summary of the matrix. The properties are computed as
     follows:
 
-    - 'contrast': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i-j)^2`
-    - 'dissimilarity': :math:`\\sum_{i,j=0}^{levels-1}P_{i,j}|i-j|`
-    - 'homogeneity': :math:`\\sum_{i,j=0}^{levels-1}\\frac{P_{i,j}}{1+(i-j)^2}`
     - 'ASM': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}^2`
-    - 'energy': :math:`\\sqrt{ASM}`
+    - 'autocorr': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(ij)`
+    - 'contrast': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i-j)^2`
     - 'correlation':
         .. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i) \\
-                  (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
-
+                  (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]        
+    - 'cprominence': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i+j-\\mu_i-\\mu_j)^4`
+    - 'cshade': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i+j-\\mu_i-\\mu_j)^3`
+    - 'dissimilarity': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}|i-j|`
+    - 'energy': :math:`\\sqrt{ASM}`
+    - 'entropy': :math:`\\sum_{i,j=0}^{levels-1} -P_{i,j}*\\log{P_{i,j}}`
+    - 'homogeneity': :math:`\\sum_{i,j=0}^{levels-1}\\frac{P_{i,j}}{1+(i-j)^2}`
+    - 'invdiff': :math:`\\sum_{i,j=0}^{levels-1} \\frac{P_{i,j}}{1+|i-j|}`
+    - 'maxprob': :math:`\\sum_{i,j=0}^{levels-1} \\max{P_{i,j}}`
+    - 'mean': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i)`
+    - 'variance': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i-\\mu_i)^2`
 
     Parameters
     ----------
@@ -151,8 +160,8 @@ def greycoprops(P, prop='contrast'):
         `P[i,j,d,theta]` is the number of times that grey-level j
         occurs at a distance d and at an angle theta from
         grey-level i.
-    prop : {'contrast', 'dissimilarity', 'homogeneity', 'energy', \
-            'correlation', 'ASM'}, optional
+    prop : {'ASM', 'autocorr', 'contrast', 'correlation', 'cprominence', 'cshade', 'dissimilarity', 'energy', 'entropy', 'homogeneity', \
+            'invdiff', 'maxprob', 'mean', 'variance'}, optional
         The property of the GLCM to compute. The default is 'contrast'.
 
     Returns
@@ -165,6 +174,21 @@ def greycoprops(P, prop='contrast'):
     ----------
     .. [1] The GLCM Tutorial Home Page,
            http://www.fp.ucalgary.ca/mhallbey/tutorial.htm
+           
+    .. [2] R. M. Haralick, K. Shanmugan, and I. H. Dinstein,
+        "Textural features for image classification,"
+        IEEE Trans. Syst., Man, Cybern., vol. SMC-3, pp. 610-621, May 1973.
+
+    .. [3] R. W. Conners, M. M. Trivedi, and C. A. Harlow,
+        "Segmentation of a high-resolution urban scene using texture operators,"
+        Comput. Vision, Graph., Image Processing, vol. 25, pp. 273-310, 1984.
+
+    .. [4] R. M. Haralick, "Statistical and structural approaches to texture,"
+        Proc. IEEE, vol. 67, pp. 786-804, May 1979.
+
+    .. [5] Soh, L.-K.; Tsatsoulis, C.,
+        "Texture analysis of SAR sea ice imagery using gray level co-occurrence matrices,"
+        in Geoscience and Remote Sensing, IEEE Transactions on , vol.37, no.2, pp.780-795, Mar 1999
 
     Examples
     --------
@@ -198,7 +222,11 @@ def greycoprops(P, prop='contrast'):
         weights = np.abs(I - J)
     elif prop == 'homogeneity':
         weights = 1. / (1. + (I - J) ** 2)
-    elif prop in ['ASM', 'energy', 'correlation']:
+    elif prop == 'invdiff':
+        weights = 1. / (1. + np.abs(I - J))
+    elif prop == 'autocorr':
+        weights = I * J
+    elif prop in ['ASM', 'energy', 'correlation', 'cshade', 'cprominence', 'mean', 'entropy', 'variance', 'maxprob']:
         pass
     else:
         raise ValueError('%s is an invalid property' % (prop))
@@ -209,6 +237,18 @@ def greycoprops(P, prop='contrast'):
         results = np.sqrt(asm)
     elif prop == 'ASM':
         results = np.apply_over_axes(np.sum, (P ** 2), axes=(0, 1))[0, 0]
+    elif prop == 'entropy':
+        results = np.apply_over_axes(np.sum, -P * np.log(P + np.finfo(np.float).eps), axes=(0, 1))[0, 0]
+    elif prop == 'mean':
+        I = np.array(range(num_level)).reshape((num_level, 1, 1, 1))
+        results = np.apply_over_axes(np.sum, (I * P), axes=(0, 1))[0, 0]
+    elif prop == 'variance':
+        I = np.array(range(num_level)).reshape((num_level, 1, 1, 1))
+        mean_i = np.apply_over_axes(np.sum, (I * P), axes=(0, 1))[0, 0]
+        weights = np.power(I - mean_i, 2)
+        results = np.apply_over_axes(np.sum, (P * weights), axes=(0, 1))[0, 0]
+    elif prop == 'maxprob':
+        results = np.apply_over_axes(np.max, P, axes=(0, 1))[0, 0]
     elif prop == 'correlation':
         results = np.zeros((num_dist, num_angle), dtype=np.float64)
         I = np.array(range(num_level)).reshape((num_level, 1, 1, 1))
@@ -231,7 +271,27 @@ def greycoprops(P, prop='contrast'):
         # handle the standard case
         mask_1 = mask_0 == False
         results[mask_1] = cov[mask_1] / (std_i[mask_1] * std_j[mask_1])
-    elif prop in ['contrast', 'dissimilarity', 'homogeneity']:
+    elif prop == 'cshade':
+        I = np.array(range(num_level)).reshape((num_level, 1, 1, 1))
+        J = np.array(range(num_level)).reshape((1, num_level, 1, 1))
+
+        mean_i = np.apply_over_axes(np.sum, (I * P), axes=(0, 1))[0, 0]
+        mean_j = np.apply_over_axes(np.sum, (J * P), axes=(0, 1))[0, 0]
+
+        weights = np.power(I + J - mean_i - mean_j, 3)
+
+        results = np.apply_over_axes(np.sum, (P * weights), axes=(0, 1))[0, 0]
+    elif prop == 'cprominence':
+        I = np.array(range(num_level)).reshape((num_level, 1, 1, 1))
+        J = np.array(range(num_level)).reshape((1, num_level, 1, 1))
+
+        mean_i = np.apply_over_axes(np.sum, (I * P), axes=(0, 1))[0, 0]
+        mean_j = np.apply_over_axes(np.sum, (J * P), axes=(0, 1))[0, 0]
+
+        weights = np.power(I + J - mean_i - mean_j, 4)
+
+        results = np.apply_over_axes(np.sum, (P * weights), axes=(0, 1))[0, 0]
+    elif prop in ['contrast', 'dissimilarity', 'homogeneity', 'invdiff', 'autocorr']:
         weights = weights.reshape((num_level, num_level, 1, 1))
         results = np.apply_over_axes(np.sum, (P * weights), axes=(0, 1))[0, 0]
 
