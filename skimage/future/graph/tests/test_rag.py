@@ -10,7 +10,7 @@ def max_edge(g, src, dst, n):
     default = {'weight': -np.inf}
     w1 = g[n].get(src, default)['weight']
     w2 = g[n].get(dst, default)['weight']
-    return max(w1, w2)
+    return {'weight': max(w1, w2)}
 
 
 @skipif(not is_installed('networkx'))
@@ -113,7 +113,7 @@ def test_rag_error():
 def _weight_mean_color(graph, src, dst, n):
     diff = graph.node[dst]['mean color'] - graph.node[n]['mean color']
     diff = np.linalg.norm(diff)
-    return diff
+    return {'weight': diff}
 
 
 def _pre_merge_mean_color(graph, src, dst):
