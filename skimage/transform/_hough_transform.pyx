@@ -229,7 +229,7 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
 
 
 def hough_line(cnp.ndarray img,
-               cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=None):
+               cnp.ndarray[ndim=1, dtype=cnp.double_t] theta):
     """Perform a straight line Hough transform.
 
     Parameters
