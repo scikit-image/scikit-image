@@ -58,7 +58,11 @@ def get_data(url, gallery_dir):
     if sys.version_info[0] == 2 and isinstance(url, unicode):
         url = url.encode('utf-8')
 
-    cached_file = os.path.join(gallery_dir, 'searchindex')
+    cwd = os.getcwd()
+    if 'source' in cwd:
+        cached_file = os.path.join(gallery_dir, 'searchindex')
+    else:
+        cached_file = os.path.join('source', gallery_dir, 'searchindex')
     search_index = shelve.open(cached_file)
     if url in search_index:
         data = search_index[url]
@@ -318,7 +322,6 @@ class SphinxDocLinkResolver(object):
 def _embed_code_links(app, gallery_conf, gallery_dir):
     # Add resolvers for the packages for which we want to show links
     doc_resolvers = {}
-
     for this_module, url in gallery_conf['reference_url'].items():
         try:
             if url is None:
@@ -341,9 +344,10 @@ def _embed_code_links(app, gallery_conf, gallery_dir):
                   "Error:\n".format(this_module))
             print(e.args)
 
+    working_dir = os.getcwd()
+    os.chdir(app.builder.srcdir)
     html_gallery_dir = os.path.abspath(os.path.join(app.builder.outdir,
                                                     gallery_dir))
-
     # patterns for replacement
     link_pattern = '<a href="%s">%s</a>'
     orig_pattern = '<span class="n">%s</span>'
@@ -356,7 +360,6 @@ def _embed_code_links(app, gallery_conf, gallery_dir):
             subpath = dirpath[len(html_gallery_dir) + 1:]
             pickle_fname = os.path.join(gallery_dir, subpath,
                                         fname[:-5] + '_codeobj.pickle')
-
             if os.path.exists(pickle_fname):
                 # we have a pickle file with the objects to embed links for
                 with open(pickle_fname, 'rb') as fid:
@@ -366,7 +369,6 @@ def _embed_code_links(app, gallery_conf, gallery_dir):
                 # generate replacement strings with the links
                 for name, cobj in example_code_obj.items():
                     this_module = cobj['module'].split('.')[0]
-
                     if this_module not in doc_resolvers:
                         continue
 
@@ -403,6 +405,7 @@ def _embed_code_links(app, gallery_conf, gallery_dir):
                             line = expr.sub(substitute_link, line)
                             fid.write(line.encode('utf-8'))
     print('[done]')
+    os.chdir(working_dir)
 
 
 def embed_code_links(app, exception):

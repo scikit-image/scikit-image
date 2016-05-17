@@ -73,15 +73,16 @@ def generate_gallery_rst(app):
     if not isinstance(gallery_dirs, list):
         gallery_dirs = [gallery_dirs]
 
+    # cd to the appropriate directory regardless of sphinx configuration
+    working_dir = os.getcwd()
+    os.chdir(app.builder.srcdir)
+
     mod_examples_dir = os.path.relpath(gallery_conf['mod_example_dir'],
                                        app.builder.srcdir)
     seen_backrefs = set()
 
     computation_times = []
 
-    # cd to the appropriate directory regardless of sphinx configuration
-    working_dir = os.getcwd()
-    os.chdir(app.builder.srcdir)
     for examples_dir, gallery_dir in zip(examples_dirs, gallery_dirs):
         examples_dir = os.path.relpath(examples_dir,
                                        app.builder.srcdir)
@@ -100,7 +101,6 @@ def generate_gallery_rst(app):
                              seen_backrefs)
 
         computation_times += this_computation_times
-
         fhindex.write(this_fhindex)
         for directory in sorted(os.listdir(examples_dir)):
             if os.path.isdir(os.path.join(examples_dir, directory)):
@@ -113,7 +113,6 @@ def generate_gallery_rst(app):
                 computation_times += this_computation_times
 
         fhindex.flush()
-
     # Back to initial directory
     os.chdir(working_dir)
 
