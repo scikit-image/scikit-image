@@ -1,8 +1,8 @@
 /*
-Sphinx-Gallery is has compatible CSS to fix default sphinx themes
+Sphinx-Gallery has compatible CSS to fix default sphinx themes
 Tested for Sphinx 1.3.1 for all themes: default, alabaster, sphinxdoc,
 scrolls, agogo, traditional, nature, haiku, pyramid
-Tested for Read the docs theme 0.1.7 */
+Tested for Read the Docs theme 0.1.7 */
 .sphx-glr-thumbcontainer {
   background: #fff;
   border: solid #fff 1px;
@@ -12,7 +12,7 @@ Tested for Read the docs theme 0.1.7 */
   box-shadow: none;
   float: left;
   margin: 5px;
-  min-height: 230px;
+  min-height: 240px;
   padding-top: 5px;
   position: relative;
 }
@@ -40,12 +40,12 @@ thumbnail with its default link Background color */
 }
 .sphx-glr-thumbcontainer .figure {
   margin: 10px;
-  width: 160px;
+  width: 200px;
 }
 .sphx-glr-thumbcontainer img {
   display: inline;
-  max-height: 160px;
-  width: 160px;
+  max-height: 200px;
+  width: 200px;
 }
 .sphx-glr-thumbcontainer[tooltip]:hover:after {
   background: rgba(0, 0, 0, 0.8);
@@ -58,7 +58,7 @@ thumbnail with its default link Background color */
   padding: 5px 15px;
   position: absolute;
   z-index: 98;
-  width: 220px;
+  width: 240px;
   bottom: 52%;
 }
 .sphx-glr-thumbcontainer[tooltip]:hover:before {
@@ -124,4 +124,14 @@ ul.sphx-glr-horizontal li {
 }
 ul.sphx-glr-horizontal img {
   height: auto !important;
+}
+
+p.sphx-glr-signature a.reference.external {
+  background-color: #EBECED;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  padding: 3px;
+  position: absolute;
+  right: 15px;
 }

@@ -4,7 +4,7 @@ r"""
 Parser for Jupyter notebooks
 ============================
 
-Class that holds the Ipython notebook information
+Class that holds the Jupyter notebook information
 
 """
 # Author: Óscar Nájera
@@ -48,7 +48,7 @@ def ipy_notebook_skeleton():
 
 def rst2md(text):
     """Converts the RST text from the examples docstrigs and comments
-    into markdown text for the IPython notebooks"""
+    into markdown text for the Jupyter notebooks"""
 
     top_heading = re.compile(r'^=+$\s^([\w\s-]+)^=+$', flags=re.M)
     text = re.sub(top_heading, r'# \1', text)
@@ -64,7 +64,7 @@ def rst2md(text):
 
 
 class Notebook(object):
-    """Ipython notebook object
+    """Jupyter notebook object
 
     Constructs the file cell-by-cell and writes it at the end"""
 

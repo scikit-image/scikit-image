@@ -12,19 +12,12 @@ neighborhood around a pixel.
 In this document we outline the following basic morphological operations:
 
 1. Erosion
-
 2. Dilation
-
 3. Opening
-
 4. Closing
-
 5. White Tophat
-
 6. Black Tophat
-
 7. Skeletonize
-
 8. Convex Hull
 
 
@@ -45,6 +38,7 @@ ax.imshow(orig_phantom, cmap=plt.cm.gray)
 
 ######################################################################
 # Let's also define a convenience function for plotting comparisons:
+
 
 def plot_comparison(original, filtered, filter_name):
 
@@ -188,9 +182,9 @@ plot_comparison(phantom, b_tophat, 'black tophat')
 #
 # 1. Erosion <-> Dilation
 #
-# 2. Opening <-> Closing
+# 2. Opening <-> Closing
 #
-# 3. White tophat <-> Black tophat
+# 3. White tophat <-> Black tophat
 #
 #Skeletonize
 #===========

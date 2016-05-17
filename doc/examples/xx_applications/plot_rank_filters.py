@@ -467,7 +467,7 @@ for ax in ax.ravel():
 ######################################################################
 #
 # Feature extraction
-# ===================
+# ===================
 #
 # Local histograms can be exploited to compute local entropy, which is
 # related to the local image complexity. Entropy is computed using base 2

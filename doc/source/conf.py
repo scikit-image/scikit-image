@@ -31,7 +31,6 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.imgmath',
               'numpydoc',
               'sphinx.ext.autosummary',
-              #'plot2rst',
               'sphinx.ext.intersphinx',
               'sphinx.ext.linkcode',
               'sphinx_gallery.gen_gallery'

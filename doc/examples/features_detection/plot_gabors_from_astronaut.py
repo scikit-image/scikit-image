@@ -3,7 +3,7 @@
 Gabors / Primary Visual Cortex "Simple Cells" from an Image
 ============================================================
 
-How to build a (bio-plausible) "sparse" dictionary (or 'codebook', or
+How to build a (bio-plausible) *sparse* dictionary (or 'codebook', or
 'filterbank') for e.g. image classification without any fancy math and
 with just standard python scientific libraries?
 

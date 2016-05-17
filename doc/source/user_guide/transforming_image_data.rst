@@ -78,7 +78,7 @@ using an array of labels to encode the regions to be represented with the
 same color. 
 
 
-.. image:: ../../_images/sphx_glr_plot_join_segmentations_001.png
+.. image:: ../auto_examples/segmentation/images/sphx_glr_plot_join_segmentations_001.png
    :target: ../auto_examples/segmentation/plot_join_segmentations.html
    :align: center
    :width: 80%
@@ -159,7 +159,7 @@ image with :func:`equalize_adapthist`, in order to correct for exposure
 gradients across the image. See the example
 :ref:`sphx_glr_auto_examples_color_exposure_plot_equalize.py`.
 
-.. image:: ../../_images/sphx_glr_plot_equalize_001.png
+.. image:: ../auto_examples/color_exposure/images/sphx_glr_plot_equalize_001.png
    :target: ../auto_examples/color_exposure/plot_equalize.html
    :align: center
    :width: 90%

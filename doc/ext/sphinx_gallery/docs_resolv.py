@@ -58,11 +58,7 @@ def get_data(url, gallery_dir):
     if sys.version_info[0] == 2 and isinstance(url, unicode):
         url = url.encode('utf-8')
 
-    cwd = os.getcwd()
-    if 'source' in cwd:
-        cached_file = os.path.join(gallery_dir, 'searchindex')
-    else:
-        cached_file = os.path.join('source', gallery_dir, 'searchindex')
+    cached_file = os.path.join(gallery_dir, 'searchindex')
     search_index = shelve.open(cached_file)
     if url in search_index:
         data = search_index[url]
@@ -321,6 +317,8 @@ class SphinxDocLinkResolver(object):
 
 def _embed_code_links(app, gallery_conf, gallery_dir):
     # Add resolvers for the packages for which we want to show links
+    working_dir = os.getcwd()
+    os.chdir(app.builder.srcdir)
     doc_resolvers = {}
     for this_module, url in gallery_conf['reference_url'].items():
         try:
@@ -344,8 +342,6 @@ def _embed_code_links(app, gallery_conf, gallery_dir):
                   "Error:\n".format(this_module))
             print(e.args)
 
-    working_dir = os.getcwd()
-    os.chdir(app.builder.srcdir)
     html_gallery_dir = os.path.abspath(os.path.join(app.builder.outdir,
                                                     gallery_dir))
     # patterns for replacement
