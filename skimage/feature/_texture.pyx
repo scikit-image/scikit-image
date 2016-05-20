@@ -13,7 +13,7 @@ cdef extern from "numpy/npy_math.h":
     double NAN "NPY_NAN"
 
 
-def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
+def _glcm_loop(cnp.uint16_t[:, ::1] image, double[:] distances,
                double[:] angles, Py_ssize_t levels,
                cnp.uint32_t[:, :, :, ::1] out):
     """Perform co-occurrence matrix accumulation.
@@ -29,7 +29,10 @@ def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
     levels : int
         The input image should contain integers in [0, levels-1],
         where levels indicate the number of grey-levels counted
-        (typically 256 for an 8-bit image)
+        (typically 256 for an 8-bit image). Be aware that the co-occurrence
+        matrix for every angle and every distance is of size levels x levels. 
+        Choosing a too large level might result in exceedingly large matrix.
+        If you have 16 bit or 32 bit images, consider binning. 
     out : ndarray
         On input a 4D array of zeros, and on output it contains
         the results of the GLCM computation.
@@ -38,7 +41,7 @@ def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
 
     cdef:
         Py_ssize_t a_idx, d_idx, r, c, rows, cols, row, col
-        cnp.uint8_t i, j
+        cnp.uint16_t i, j
         cnp.float64_t angle, distance
 
     with nogil:

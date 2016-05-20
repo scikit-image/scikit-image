@@ -11,7 +11,7 @@ from ._texture import (_glcm_loop,
                        _multiblock_lbp)
 
 
-def greycomatrix(image, distances, angles, levels=256, symmetric=False,
+def greycomatrix(image, distances, angles, levels=None, symmetric=False,
                  normed=False):
     """Calculate the grey-level co-occurrence matrix.
 
@@ -30,8 +30,10 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
     levels : int, optional
         The input image should contain integers in [0, levels-1],
         where levels indicate the number of grey-levels counted
-        (typically 256 for an 8-bit image). The maximum value is
-        256.
+        (typically 256 for an 8-bit image). Be aware that the co-occurrence
+        matrix for every angle and every distance is of size levels x levels. 
+        Choosing a too large level might result in exceedingly large matrix.
+        If you have 16 bit or 32 bit images, consider binning. 
     symmetric : bool, optional
         If True, the output matrix `P[:, :, d, theta]` is symmetric. This
         is accomplished by ignoring the order of value pairs, so both
@@ -97,11 +99,21 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
     assert_nD(distances, 1, 'distances')
     assert_nD(angles, 1, 'angles')
 
-    assert levels <= 256
     image = np.ascontiguousarray(image)
     assert image.min() >= 0
-    assert image.max() < levels
-    image = image.astype(np.uint8)
+
+    image_max = image.max()
+    if levels is None:
+        # if levels is not given, we assume that there are [0, image_max -1] levels to 
+        # be considered. There would be only zeros for all other rows and columns. 
+        levels = image_max + 1
+        
+    assert image_max < levels
+
+    # we cast to uint16 (because of fixed typing in cython) 
+    # this has no impact on the size of the co-occurrence matrix. 
+    image = image.astype(np.uint16)
+
     distances = np.ascontiguousarray(distances, dtype=np.float64)
     angles = np.ascontiguousarray(angles, dtype=np.float64)
 
