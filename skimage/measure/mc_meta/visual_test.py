@@ -9,10 +9,12 @@ import numpy as np
 import visvis as vv
 
 from skimage.measure import marching_cubes, marching_cubes_lewiner
+from skimage.draw import ellipsoid
 
 
 # Create test volume
-SELECT = 1
+SELECT = 4
+gradient_dir = 'descent'  # ascent or descent
 
 if SELECT == 1:
     # Medical data
@@ -45,20 +47,26 @@ elif SELECT == 3:
     # Uncommenting the line below will yield different results for classic MC
     #vol = -vol
 
+elif SELECT == 4:
+    vol = ellipsoid(4, 3, 2, levelset=True)
+    isovalue = 0
+
 # Get surface meshes
 t0 = time.time()
-vertices1, faces1, *_ = marching_cubes_lewiner(vol, isovalue, use_classic=False)
+vertices1, faces1, *_ = marching_cubes_lewiner(vol, isovalue, gradient_direction=gradient_dir, use_classic=False)
 print('finding surface lewiner took %1.0f ms' % (1000*(time.time()-t0)) )
 
 t0 = time.time()
-vertices2, faces2, *_ = marching_cubes(vol, isovalue)
+vertices2, faces2, *_ = marching_cubes(vol, isovalue, gradient_direction=gradient_dir)
 print('finding surface classic took %1.0f ms' % (1000*(time.time()-t0)) )
 
 # Show
 vv.figure(1); vv.clf()
-a1 = vv.subplot(121); vv.mesh(np.fliplr(vertices1), faces1)
-a2 = vv.subplot(122); vv.mesh(np.fliplr(vertices2), faces2)
+a1 = vv.subplot(121); m1 = vv.mesh(np.fliplr(vertices1), faces1)
+a2 = vv.subplot(122); m2 = vv.mesh(np.fliplr(vertices2), faces2)
 a1.camera = a2.camera
 
+# visvis uses right-hand rule, gradient_direction param uses left-hand rule
+m1.cullFaces = m2.cullFaces = 'front'  # None, front or back
 
 vv.use().Run()

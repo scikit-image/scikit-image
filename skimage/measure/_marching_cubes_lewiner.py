@@ -14,7 +14,8 @@ from . import _marching_cubes_lewiner_cy
 
 
 def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
-                           step_size=1, allow_degenerate=True, use_classic=False):
+                           gradient_direction='descent', step_size=1,
+                           allow_degenerate=True, use_classic=False):
     """
     Lewiner marching cubes algorithm to find surfaces in 3d volumetric data
     
@@ -31,14 +32,21 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     spacing : length-3 tuple of floats
         Voxel spacing in spatial dimensions corresponding to numpy array
         indexing dimensions (M, N, P) as in `volume`.
+    gradient_direction : string
+        Controls if the mesh was generated from an isosurface with gradient
+        descent toward objects of interest (the default), or the opposite,
+        considering the *left-hand* rule.
+        The two options are:
+        * descent : Object was greater than exterior
+        * ascent : Exterior was greater than object
     step_size : int
         Step size in voxels. Default 1. Larger steps yield faster but
         coarser results. The result will always be topologically correct
         though.
     allow_degenerate : bool
-        Whether to allow degenerate triangles in the end-result. Default True.
-        If False, degenerate triangles are removed, making the algorithm 
-        about twice as slow.
+        Whether to allow degenerate (i.e. zero-area) triangles in the
+        end-result. Default True. If False, degenerate triangles are
+        removed, at the cost of making the algorithm slower.
     use_classic : bool
         If given and True, the classic marching cubes by Lorensen (1987)
         is used. This option is included for reference purposes. Note
@@ -120,6 +128,12 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     
     # Finishing touches to output
     faces.shape = -1, 3
+    if gradient_direction == 'descent':
+        # MC implementation is right-handed, but gradient_direction is left-handed
+        faces = np.fliplr(faces)
+    elif not gradient_direction == 'ascent':
+        raise ValueError("Incorrect input %s in `gradient_direction`, see "
+                         "docstring." % (gradient_direction))
     if spacing != (1, 1, 1):
         vertices = vertices * np.r_[spacing]
     
