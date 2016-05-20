@@ -53,6 +53,9 @@ Library:
     Extension: skimage.measure._marching_cubes_cy
         Sources:
             skimage/measure/_marching_cubes_cy.pyx
+    Extension: skimage.measure._marching_cubes_lewiner_cy
+        Sources:
+            skimage/measure/_marching_cubes_lewiner_cy.pyx
     Extension: skimage.graph._mcp
         Sources:
             skimage/graph/_mcp.pyx
