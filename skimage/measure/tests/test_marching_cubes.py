@@ -111,15 +111,21 @@ def test_both_algs_same_result_ellipse():
     assert _same_mesh(vertices1, faces1, vertices3, faces3)
 
 
-def _same_mesh(vertices1, faces1, vertices2, faces2):
-    rounder = lambda x: int(x*1000)/1000  # to take into account small variations
+def _same_mesh(vertices1, faces1, vertices2, faces2, tol=1e-10):
+    """ Compare two meshes, using a certain tolerance and invariant to
+    the order of the faces.
+    """
+    # Unwind vertices
     triangles1 = vertices1[np.array(faces1)]
     triangles2 = vertices2[np.array(faces2)]
+    # Sort vertices within each triangle
     triang1 = [np.concatenate(sorted(t, key=lambda x:tuple(x))) for t in triangles1]
-    triang1 = set([tuple([rounder(i) for i in t]) for t in triang1])
     triang2 = [np.concatenate(sorted(t, key=lambda x:tuple(x))) for t in triangles2]
-    triang2 = set([tuple([rounder(i) for i in t]) for t in triang2])
-    return triang1 == triang2
+    # Sort the resulting 9-element "tuples"
+    triang1 = np.array(sorted([tuple(x) for x in triang1]))
+    triang2 = np.array(sorted([tuple(x) for x in triang2]))
+    return triang1.shape == triang2.shape and np.allclose(triang1, triang2, 0, tol)
+
 
 def test_both_algs_same_result_donut():
     # Performing this test on data that does not have ambiguities
@@ -145,9 +151,12 @@ def test_both_algs_same_result_donut():
     vertices2, faces2, *_ = marching_cubes_lewiner(vol, 0)
     vertices3, faces3, *_ = marching_cubes_lewiner(vol, 0, use_classic=True)
     
+    # Old and new alg are different
     assert not _same_mesh(vertices1, faces1, vertices2, faces2)
-    #assert _same_mesh(vertices1, faces1, vertices3, faces3)  # would have been nice
+    # New classic and new Lewiner are different
     assert not _same_mesh(vertices2, faces2, vertices3, faces3)
+    # Would have been nice if old and new classic would have been the same
+    # assert _same_mesh(vertices1, faces1, vertices3, faces3, 5)
 
 
 if __name__ == '__main__':

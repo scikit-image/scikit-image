@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2012, Almar Klein
 
 """ Create lookup tables for the marching cubes algorithm, by parsing
 the file "LookUpTable.h". This prints a text to the stdout wich

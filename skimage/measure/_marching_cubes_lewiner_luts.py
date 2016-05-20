@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2012, Almar Klein
-# Copyright (C) 2002, Thomas Lewiner
 
 # This file was auto-generated from LookUpTable.h by createluts.py.
+# The luts are Copyright (C) 2002 by Thomas Lewiner
 
 #static const char casesClassic[256][16]
 CASESCLASSIC = (256, 16), """

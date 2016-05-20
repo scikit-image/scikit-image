@@ -24,8 +24,9 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     
     Parameters
     ----------
-    volume : (M, N, P) array (the data is internally converted to
-        float32 if necessary)
+    volume : (M, N, P) array
+        Input data volume to find isosurfaces. Will internally be
+        converted to float32 if necessary.
     level : float
         Contour value to search for isosurfaces in `volume`. If not
         given or None, the average of the min and max of vol is used.
@@ -73,18 +74,24 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     Notes about the algorithm
     -------------------------
     
-    This is an implementation of:
-        
-        Efficient implementation of Marching Cubes' cases with
-        topological guarantees. Thomas Lewiner, Helio Lopes, Antonio
-        Wilson Vieira and Geovan Tavares. Journal of Graphics Tools
-        8(2): pp. 1-15 (december 2003)
-    
-    The algorithm is an improved version of Chernyaev's Marching Cubes 33
+    The algorithm [1] is an improved version of Chernyaev's Marching Cubes 33
     algorithm, originally written in C++. It is an efficient algorithm
     that relies on heavy use of lookup tables to handle the many different 
     cases. This keeps the algorithm relatively easy. The current algorithm
     is a port of Lewiner's algorithm and written in Cython.
+    
+    References
+    ----------
+    ..  [1] Thomas Lewiner, Helio Lopes, Antonio Wilson Vieira and Geovan
+            Tavares. Efficient implementation of Marching Cubes' cases with
+            topological guarantees. Journal of Graphics Tools 8(2)
+            pp. 1-15 (december 2003).
+    
+    See Also
+    --------
+    skimage.measure.marching_cubes
+    skimage.measure.mesh_surface_area
+
     """ 
     
     # Check volume and ensure its in the format that the alg needs
@@ -113,7 +120,7 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     use_classic = bool(use_classic)
     
     # Get LutProvider class (reuse if possible) 
-    L = _getMCLuts()
+    L = _get_mc_luts()
     
     # Apply algorithm
     func = _marching_cubes_lewiner_cy.marching_cubes
@@ -144,7 +151,7 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
         return fun(vertices, faces, normals, values)
 
 
-def _toArray(args):
+def _to_array(args):
     shape, text = args
     byts = base64decode(text.encode('utf-8'))
     ar = np.frombuffer(byts, dtype='int8')
@@ -163,7 +170,7 @@ EDGETORELATIVEPOSY = np.array([ [0,0],[0,1],[1,1],[1,0], [0,0],[0,1],[1,1],[1,0]
 EDGETORELATIVEPOSZ = np.array([ [0,0],[0,0],[0,0],[0,0], [1,1],[1,1],[1,1],[1,1], [0,1],[0,1],[0,1],[0,1] ], 'int8')
 
 
-def _getMCLuts():
+def _get_mc_luts():
     """ Kind of lazy obtaining of the luts.
     """ 
     if not hasattr(mcluts, 'THE_LUTS'):
@@ -171,24 +178,24 @@ def _getMCLuts():
         mcluts.THE_LUTS = _marching_cubes_lewiner_cy.LutProvider(
                 EDGETORELATIVEPOSX, EDGETORELATIVEPOSY, EDGETORELATIVEPOSZ, 
                 
-                _toArray(mcluts.CASESCLASSIC), _toArray(mcluts.CASES),
+                _to_array(mcluts.CASESCLASSIC), _to_array(mcluts.CASES),
                 
-                _toArray(mcluts.TILING1), _toArray(mcluts.TILING2), _toArray(mcluts.TILING3_1), _toArray(mcluts.TILING3_2), 
-                _toArray(mcluts.TILING4_1), _toArray(mcluts.TILING4_2), _toArray(mcluts.TILING5), _toArray(mcluts.TILING6_1_1),
-                _toArray(mcluts.TILING6_1_2), _toArray(mcluts.TILING6_2), _toArray(mcluts.TILING7_1), 
-                _toArray(mcluts.TILING7_2), _toArray(mcluts.TILING7_3), _toArray(mcluts.TILING7_4_1), 
-                _toArray(mcluts.TILING7_4_2), _toArray(mcluts.TILING8), _toArray(mcluts.TILING9), 
-                _toArray(mcluts.TILING10_1_1), _toArray(mcluts.TILING10_1_1_), _toArray(mcluts.TILING10_1_2), 
-                _toArray(mcluts.TILING10_2), _toArray(mcluts.TILING10_2_), _toArray(mcluts.TILING11), 
-                _toArray(mcluts.TILING12_1_1), _toArray(mcluts.TILING12_1_1_), _toArray(mcluts.TILING12_1_2), 
-                _toArray(mcluts.TILING12_2), _toArray(mcluts.TILING12_2_), _toArray(mcluts.TILING13_1), 
-                _toArray(mcluts.TILING13_1_), _toArray(mcluts.TILING13_2), _toArray(mcluts.TILING13_2_), 
-                _toArray(mcluts.TILING13_3), _toArray(mcluts.TILING13_3_), _toArray(mcluts.TILING13_4), 
-                _toArray(mcluts.TILING13_5_1), _toArray(mcluts.TILING13_5_2), _toArray(mcluts.TILING14),
+                _to_array(mcluts.TILING1), _to_array(mcluts.TILING2), _to_array(mcluts.TILING3_1), _to_array(mcluts.TILING3_2), 
+                _to_array(mcluts.TILING4_1), _to_array(mcluts.TILING4_2), _to_array(mcluts.TILING5), _to_array(mcluts.TILING6_1_1),
+                _to_array(mcluts.TILING6_1_2), _to_array(mcluts.TILING6_2), _to_array(mcluts.TILING7_1), 
+                _to_array(mcluts.TILING7_2), _to_array(mcluts.TILING7_3), _to_array(mcluts.TILING7_4_1), 
+                _to_array(mcluts.TILING7_4_2), _to_array(mcluts.TILING8), _to_array(mcluts.TILING9), 
+                _to_array(mcluts.TILING10_1_1), _to_array(mcluts.TILING10_1_1_), _to_array(mcluts.TILING10_1_2), 
+                _to_array(mcluts.TILING10_2), _to_array(mcluts.TILING10_2_), _to_array(mcluts.TILING11), 
+                _to_array(mcluts.TILING12_1_1), _to_array(mcluts.TILING12_1_1_), _to_array(mcluts.TILING12_1_2), 
+                _to_array(mcluts.TILING12_2), _to_array(mcluts.TILING12_2_), _to_array(mcluts.TILING13_1), 
+                _to_array(mcluts.TILING13_1_), _to_array(mcluts.TILING13_2), _to_array(mcluts.TILING13_2_), 
+                _to_array(mcluts.TILING13_3), _to_array(mcluts.TILING13_3_), _to_array(mcluts.TILING13_4), 
+                _to_array(mcluts.TILING13_5_1), _to_array(mcluts.TILING13_5_2), _to_array(mcluts.TILING14),
                 
-                _toArray(mcluts.TEST3), _toArray(mcluts.TEST4), _toArray(mcluts.TEST6), 
-                _toArray(mcluts.TEST7), _toArray(mcluts.TEST10), _toArray(mcluts.TEST12), 
-                _toArray(mcluts.TEST13), _toArray(mcluts.SUBCONFIG13),
+                _to_array(mcluts.TEST3), _to_array(mcluts.TEST4), _to_array(mcluts.TEST6), 
+                _to_array(mcluts.TEST7), _to_array(mcluts.TEST10), _to_array(mcluts.TEST12), 
+                _to_array(mcluts.TEST13), _to_array(mcluts.SUBCONFIG13),
                 )
     
     return mcluts.THE_LUTS

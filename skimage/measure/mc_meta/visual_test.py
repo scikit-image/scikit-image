@@ -13,7 +13,7 @@ from skimage.draw import ellipsoid
 
 
 # Create test volume
-SELECT = 4
+SELECT = 3
 gradient_dir = 'descent'  # ascent or descent
 
 if SELECT == 1:

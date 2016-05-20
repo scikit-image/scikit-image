@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2012, Almar Klein
-# Copyright (C) 2002, Thomas Lewiner
 #
 #cython: cdivision=True
 #cython: boundscheck=False
@@ -14,11 +12,12 @@ Efficient implementation of Marching Cubes' cases with topological guarantees.
 Thomas Lewiner, Helio Lopes, Antonio Wilson Vieira and Geovan Tavares.
 Journal of Graphics Tools 8(2): pp. 1-15 (december 2003)
 
-I selected this algorithm because it provides topologically correct results,
-and because the algorithms implementation is relatively simple. Most of
-the magic is in the lookup tables, which are provided as open source.
+This algorithm has the advantage that it provides topologically correct
+results, and the algorithms implementation is relatively simple. Most
+of the magic is in the lookup tables, which are provided as open source.
 
-This code is distributed under the terms of the (new) BSD License.
+Originally implemented in C++ by Thomas Lewiner in 2002, ported to Cython
+by Almar Klein in 2012. Adapted for scikit-image in 2016.
 
 """ 
 
