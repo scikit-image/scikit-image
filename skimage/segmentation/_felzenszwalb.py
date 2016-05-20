@@ -41,6 +41,13 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20):
     ----------
     .. [1] Efficient graph-based image segmentation, Felzenszwalb, P.F. and
            Huttenlocher, D.P.  International Journal of Computer Vision, 2004
+
+    Examples
+    --------
+    >>> from skimage.segmentation import felzenszwalb
+    >>> from skimage.data import coffee
+    >>> img = coffee()
+    >>> segments = felzenszwalb(img, scale=3.0, sigma=0.95, min_size=5)
     """
 
     if image.ndim == 2:
