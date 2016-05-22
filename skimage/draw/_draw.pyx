@@ -313,7 +313,7 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     ----------
     cy, cx : int
         Centre coordinate of circle.
-    radius: int
+    radius : int
         Radius of circle.
     method : {'bresenham', 'andres'}, optional
         bresenham : Bresenham method (default)
@@ -424,7 +424,7 @@ def circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     ----------
     cy, cx : int
         Centre coordinate of circle.
-    radius: int
+    radius : int
         Radius of circle.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output pixel

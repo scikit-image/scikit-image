@@ -88,7 +88,7 @@ def circle(r, c, radius, shape=None):
     ----------
     r, c : double
         Centre coordinate of circle.
-    radius: double
+    radius : double
         Radius of circle.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output pixel
