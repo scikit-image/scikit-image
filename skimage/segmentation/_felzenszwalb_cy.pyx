@@ -24,19 +24,19 @@ def _felzenszwalb_grey(image, double scale=1, sigma=0.8,
 
     Parameters
     ----------
-    image: ndarray
+    image : ndarray
         Input image.
-    scale: float, optional (default 1)
+    scale : float, optional (default 1)
         Sets the obervation level. Higher means larger clusters.
-    sigma: float, optional (default 0.8)
+    sigma : float, optional (default 0.8)
         Width of Gaussian smoothing kernel used in preprocessing.
         Larger sigma gives smother segment boundaries.
-    min_size: int, optional (default 20)
+    min_size : int, optional (default 20)
         Minimum component size. Enforced using postprocessing.
 
     Returns
     -------
-    segment_mask: (height, width) ndarray
+    segment_mask : (height, width) ndarray
         Integer mask indicating segment labels.
     """
     if image.ndim != 2:
@@ -139,19 +139,19 @@ def _felzenszwalb_rgb(image, double scale=1, sigma=0.8,
 
     Parameters
     ----------
-    image: ndarray
+    image : ndarray
         Input image.
-    scale: float, optional (default 1)
+    scale : float, optional (default 1)
         Sets the obervation level. Higher means larger clusters.
-    sigma: float, optional (default 0.8)
+    sigma : float, optional (default 0.8)
         Width of Gaussian smoothing kernel used in preprocessing.
         Larger sigma gives smother segment boundaries.
-    min_size: int, optional (default 20)
+    min_size : int, optional (default 20)
         Minimum component size. Enforced using postprocessing.
 
     Returns
     -------
-    segment_mask: (height, width) ndarray
+    segment_mask : (height, width) ndarray
         Integer mask indicating segment labels.
     """
     if image.ndim != 3:
