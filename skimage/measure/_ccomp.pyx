@@ -405,6 +405,10 @@ def label(input, neighbors=None, background=0, return_num=False,
         Number of labels, which equals the maximum label index and is only
         returned if return_num is `True`.
 
+    See Also
+    --------
+    regionprops
+
     Examples
     --------
     >>> import numpy as np

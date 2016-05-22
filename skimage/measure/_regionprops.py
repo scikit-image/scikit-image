@@ -490,6 +490,10 @@ def regionprops(label_image, intensity_image=None, cache=True):
       for prop in region:
           print(prop, region[prop])
 
+    See Also
+    --------
+    label
+
     References
     ----------
     .. [1] Wilhelm Burger, Mark Burge. Principles of Digital Image Processing:
