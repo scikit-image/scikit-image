@@ -2,7 +2,8 @@ __all__ = ['threshold_adaptive',
            'threshold_otsu',
            'threshold_yen',
            'threshold_isodata',
-           'threshold_li', ]
+           'threshold_li',
+           'threshold_multiotsu']
 
 import numpy as np
 from scipy import ndimage as ndi
@@ -517,4 +518,4 @@ def threshold_multiotsu(image, nclass=3, nbins=256):
                             idx_thresh[3] = idx4
                             max_sigma = part_sigma
 
-    return idx_thresh
+    return idx_thresh.astype(int)
