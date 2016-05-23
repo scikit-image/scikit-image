@@ -34,7 +34,6 @@ Vcs-Browser: https://github.com/scikit-image/scikit-image
 Vcs-Git: https://github.com/scikit-image/scikit-image.git -b debian
 X-Python-Version: >= 2.6
 X-Python3-Version: >= 3.2
-XS-Testsuite: autopkgtest
 
 Package: python-skimage
 Architecture: all
