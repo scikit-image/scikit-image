@@ -227,3 +227,6 @@
 
 - Alex Izvorski
   Color spaces for YUV and related spaces
+
+- Jeff Hemmelgarn
+  Minimum threshold

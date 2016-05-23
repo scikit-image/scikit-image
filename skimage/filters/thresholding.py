@@ -101,7 +101,7 @@ def threshold_otsu(image, nbins=256):
 
     Parameters
     ----------
-    image : array
+    image : (M, N) ndarray
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -211,8 +211,9 @@ def threshold_yen(image, nbins=256):
     P1_sq = np.cumsum(pmf ** 2)
     # Get cumsum calculated from end of squared array:
     P2_sq = np.cumsum(pmf[::-1] ** 2)[::-1]
-    # P2_sq indexes is shifted +1. I assume, with P1[:-1] it's help avoid '-inf'
-    # in crit. ImageJ Yen implementation replaces those values by zero.
+    # P2_sq indexes is shifted +1.
+    # I assume, with P1[:-1] it helps to avoid '-inf' in crit.
+    # ImageJ Yen implementation replaces those values by zero.
     crit = np.log(((P1_sq[:-1] * P2_sq[1:]) ** -1) *
                   (P1[:-1] * (1.0 - P1[:-1])) ** 2)
     return bin_centers[crit.argmax()]
@@ -345,7 +346,8 @@ def threshold_li(image):
     .. [1] Li C.H. and Lee C.K. (1993) "Minimum Cross Entropy Thresholding"
            Pattern Recognition, 26(4): 617-625
     .. [2] Li C.H. and Tam P.K.S. (1998) "An Iterative Algorithm for Minimum
-           Cross Entropy Thresholding" Pattern Recognition Letters, 18(8): 771-776
+           Cross Entropy Thresholding" Pattern Recognition Letters,
+           18(8): 771-776
     .. [3] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
            Techniques and Quantitative Performance Evaluation" Journal of
            Electronic Imaging, 13(1): 146-165
@@ -401,12 +403,12 @@ def threshold_minimum(image, nbins=256, bias='min'):
 
     Parameters
     ----------
-    image : array
+    image : (M, N) ndarray
         Input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
-    bias : {'min, 'mid', 'max'}, optional
+    bias : {'min', 'mid', 'max'}, optional
         'min', 'mid', 'max' return lowest, middle, or highest pixel value
         with minimum histogram value.
 
@@ -414,7 +416,12 @@ def threshold_minimum(image, nbins=256, bias='min'):
     -------
     threshold : float
         Computed threshold value.
-        May return 0 if the algorithm fails.
+
+    Raises
+    ------
+    RuntimeError
+        If unable to find two local maxima in the histogram or if the
+        smoothing takes more than 1e4 iterations.
 
     References
     ----------
@@ -430,8 +437,10 @@ def threshold_minimum(image, nbins=256, bias='min'):
     """
 
     def find_local_maxima(hist):
+        # We can't use scipy.signal.argrelmax
+        # as it fails on plateaus
         maximums = list()
-        direction = +1
+        direction = 1
         for i in range(hist.shape[0] - 1):
             if direction > 0:
                 if hist[i + 1] < hist[i]:
@@ -439,31 +448,33 @@ def threshold_minimum(image, nbins=256, bias='min'):
                     maximums.append(i)
             else:
                 if hist[i + 1] > hist[i]:
-                    direction = +1
+                    direction = 1
         return maximums
 
+    if bias not in ('min', 'mid', 'max'):
+        raise ValueError("Unknown bias: {0}".format(bias))
+
     hist, bin_centers = histogram(image.ravel(), nbins)
-    # On blank images (e.g. filled with 0) with int dtype, `histogram()`
-    # returns `bin_centers` containing only one value. Speed up with it.
-    if bin_centers.size == 1:
-        return bin_centers[0]
 
-    threshold = 0
+    max_iter = 10000
     smooth_hist = np.copy(hist)
-    smooth_hist = ndif.uniform_filter1d(smooth_hist, 3)
-    maximums = find_local_maxima(smooth_hist)
-    while len(maximums) > 2:
-        smooth_hist = ndif.uniform_filter1d(smooth_hist, 3)
-        maximums = find_local_maxima(smooth_hist)
-
-    # If we don't have 2 maxima the algorithm failed
-    if len(maximums) != 2:
-        raise RuntimeError('Failure: Unable to find two maxima in histogram')
+    try:
+        for counter in range(max_iter):
+            smooth_hist = ndif.uniform_filter1d(smooth_hist, 3)
+            maximums = find_local_maxima(smooth_hist)
+            if len(maximums) < 3:
+                raise StopIteration
+    except StopIteration:
+        if len(maximums) != 2:
+            raise RuntimeError('Unable to find two maxima in histogram')
+    else:
+        raise RuntimeError('Maximum iteration reached for histogram histogram'
+                           'smoothing')
 
     # Find lowest point between the maxima, biased to the low end (min)
     minimum = smooth_hist[maximums[0]]
     threshold = maximums[0]
-    for i in range(maximums[0], maximums[1]):
+    for i in range(maximums[0], maximums[1]+1):
         if smooth_hist[i] < minimum:
             minimum = smooth_hist[i]
             threshold = i
@@ -471,11 +482,11 @@ def threshold_minimum(image, nbins=256, bias='min'):
     if bias == 'min':
         return bin_centers[threshold]
     else:
-        i = threshold
-        while smooth_hist[i] == smooth_hist[threshold]:
-            i += 1
-        i -= 1
+        upper_bound = threshold
+        while smooth_hist[upper_bound] == smooth_hist[threshold]:
+            upper_bound += 1
+        upper_bound -= 1
         if bias == 'max':
-            return bin_centers[i]
-        else:
-            return bin_centers[(threshold + i) // 2]
+            return bin_centers[upper_bound]
+        elif bias == 'mid':
+            return bin_centers[(threshold + upper_bound) // 2]
