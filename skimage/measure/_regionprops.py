@@ -517,10 +517,13 @@ def regionprops(label_image, intensity_image=None, cache=True):
 
     """
 
-    label_image = np.squeeze(label_image)
+    squeezed_label_image = np.squeeze(label_image)
 
-    if label_image.ndim not in (2, 3):
-        raise TypeError('Only 2-D and 3-D images supported.')
+    if squeezed_label_image.ndim not in (2, 3):
+        if label_image.ndim not in (2, 3):
+            raise TypeError('Only 2-D and 3-D images supported.')
+    else:
+        label_image = squeezed_label_image
 
     if not np.issubdtype(label_image.dtype, np.integer):
         raise TypeError('Label image must be of integral type.')
