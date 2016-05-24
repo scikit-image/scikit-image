@@ -15,6 +15,7 @@ skimage (0.12.3-1) unstable; urgency=medium
   * VCS fields in https mode.
   * Drop useless XS testsuite in control file.
   * Fix copyright file
+  * Update Stefan mail address
 
   [ Yaroslav Halchenko ]
   * Fresh upstream release (previous version, never uploaded)
@@ -25,7 +26,7 @@ skimage (0.12.3-1) unstable; urgency=medium
   * debian/tests/python*
     - for now exclude testing of test_tools.py due to #779847 in mpl
 
- -- Stefan van der Walt <stefan@sun.ac.za>  Mon, 23 May 2016 11:11:52 +0200
+ -- Stefan van der Walt <stefanv@berkeley.edu>  Mon, 23 May 2016 11:11:52 +0200
 
 skimage (0.10.1-2) unstable; urgency=medium
 

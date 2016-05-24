@@ -1,7 +1,7 @@
 Source: skimage
 Section: python
 Priority: optional
-Maintainer: Stefan van der Walt <stefan@sun.ac.za>
+Maintainer: Stefan van der Walt <stefanv@berkeley.edu>
 Uploaders: Yaroslav Halchenko <debian@onerussian.com>
 Build-Depends: cython (>= 0.23),
                cython3 (>= 0.23),
