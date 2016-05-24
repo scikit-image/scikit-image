@@ -1,0 +1,26 @@
+## Description: add some description
+## Origin/Author: add some origin or author
+## Bug: bug URL
+From 35b35c5139dfd1663d932593f62948c7e00ee3c3 Mon Sep 17 00:00:00 2001
+From: Shaun Singh
+ <shaunsingh@airbears2-10-142-58-134.airbears2.1918.berkeley.edu>
+Date: Wed, 30 Mar 2016 17:02:19 -0700
+Subject: [PATCH] Fix broken Sphinx
+
+---
+ doc/source/conf.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/doc/source/conf.py b/doc/source/conf.py
+index e0ae6f6..ebf4b1b 100644
+--- a/doc/source/conf.py
++++ b/doc/source/conf.py
+@@ -28,7 +28,7 @@
+ # Add any Sphinx extension module names here, as strings. They can be extensions
+ # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
+ extensions = ['sphinx.ext.autodoc',
+-              'sphinx.ext.pngmath',
++              'sphinx.ext.imgmath',
+               'numpydoc',
+               'sphinx.ext.autosummary',
+               'plot2rst',
