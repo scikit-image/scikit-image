@@ -459,6 +459,12 @@ def test_docstrings_and_props():
     assert len(ds.split('\n')) > 3
 
 
+def test_tiny_image_dims():
+    image = np.ones((1, 1), dtype=np.uint8)
+    p = regionprops(image)
+    assert_equal(p[0].area, 1)
+
+
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
     run_module_suite()
