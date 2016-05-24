@@ -10,7 +10,8 @@ from skimage.filters.thresholding import (threshold_adaptive,
                                           threshold_otsu,
                                           threshold_li,
                                           threshold_yen,
-                                          threshold_isodata)
+                                          threshold_isodata,
+                                          threshold_minimum)
 
 
 class TestSimpleImage():
@@ -271,6 +272,46 @@ def test_isodata_moon_image_negative_float():
     assert_almost_equal(thresholds,
                         [-13.83789062, -12.84179688, -11.84570312, 22.02148438,
                          23.01757812, 24.01367188, 38.95507812, 39.95117188])
+
+
+def test_threshold_minimum():
+    camera = skimage.img_as_ubyte(data.camera())
+
+    threshold = threshold_minimum(camera)
+    assert threshold == 76
+
+    threshold = threshold_minimum(camera, bias='max')
+    assert threshold == 77
+
+    astronaut = skimage.img_as_ubyte(data.astronaut())
+    threshold = threshold_minimum(astronaut)
+    assert threshold == 117
+
+
+def test_threshold_minimum_synthetic():
+    img = np.zeros((25*25), dtype=np.uint8)
+    for i in range(25*25) :
+        img[i] = i % 256
+    img = np.reshape(img, (25,25))
+    img[0:9,:] = 50
+    img[14:25,:] = 250
+
+    threshold = threshold_minimum(img, bias='min')
+    assert threshold == 93
+
+    threshold = threshold_minimum(img, bias='mid')
+    assert threshold == 159
+
+    threshold = threshold_minimum(img, bias='max')
+    assert threshold == 225
+
+
+def test_threshold_minimum_failure():
+    img = np.zeros((16*16), dtype=np.uint8)
+    for i in range(16*16) :
+        img[i] = i % 256
+    img = np.reshape(img, (16,16))
+    assert_raises(RuntimeError, threshold_minimum, img)
 
 
 if __name__ == '__main__':
