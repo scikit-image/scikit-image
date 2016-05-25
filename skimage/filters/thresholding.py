@@ -1,8 +1,153 @@
+__all__ = ['mosaic_threshold',
+           'threshold_adaptive',
+           'threshold_otsu',
+           'threshold_yen',
+           'threshold_isodata',
+           'threshold_li',
+           'threshold_minimum', ]
+
+import math
 import numpy as np
 from scipy import ndimage as ndi
 from scipy.ndimage import filters as ndif
+from matplotlib import pyplot as plt
+from collections import OrderedDict
 from ..exposure import histogram
 from .._shared.utils import assert_nD, warn
+from ..morphology import disk
+from ..filters.rank import otsu
+
+
+def _mosaic(image, methods=None, figsize=None, num_cols=2, verbose=True):
+    """Returns a figure comparing the outputs of different methods.
+
+    Parameters
+    ----------
+    image : (N, M) ndarray
+        Input image.
+    methods : dict, optional
+        Names and associated functions of the algorithms.
+        The functions must return an image.
+    figsize : tuple, optional
+        Figure size (in inches).
+    num_cols : int, optional
+        Number of columns.
+    verbose : bool, optional
+        Print the function name for each method.
+
+    Returns
+    -------
+    fig, ax : tuple
+        Matplotlib figure and axes.
+    """
+    num_rows = math.ceil((len(methods) + 1) / 2.)
+    num_rows = int(num_rows) # Python 2.7 support
+    fig, ax = plt.subplots(num_rows, num_cols, figsize=figsize,
+                           sharex=True, sharey=True,
+                           subplot_kw={'adjustable': 'box-forced'})
+    ax = ax.ravel()
+
+    ax[0].imshow(image)
+    ax[0].set_title('Original')
+
+    i = 1
+    for name, func in methods.items():
+        ax[i].imshow(func(image))
+        ax[i].set_title(name)
+        i += 1
+        if verbose:
+            print(func.__orifunc__)
+
+    for a in ax:
+        a.axis('off')
+
+    fig.tight_layout()
+    plt.close()
+    return fig, ax
+
+
+def mosaic_threshold(image, radius=None, figsize=(8, 5), verbose=True):
+    """Returns a figure comparing the outputs of different thresholding methods.
+
+    Parameters
+    ----------
+    image : (N, M) ndarray
+        Input image.
+    radius : int, optinal
+        Lengthscale used for local methods.
+        If None, local methods are not called.
+    figsize : tuple, optional
+        Figure size (in inches).
+    verbose : bool, optional
+        Print the function name for each method.
+
+    Returns
+    -------
+    fig, ax : tuple
+        Matplotlib figure and axes.
+
+    Notes
+    -----
+    The following algorithms are used:
+
+    * isodata
+    * otsu
+    * li
+    * yen
+    * adaptive threshold (local)
+    * rank otsu (local)
+
+    Example
+    -------
+    >>> from skimage.data import text
+    >>> fig, ax = mosaic_threshold(text(), radius=20,
+    ...                            figsize=(10, 6), verbose=None)
+    """
+
+    def include_selem(func, *args, **kwargs):
+        """
+        A wrapper function to embed a threshold range.
+        """
+        def wrapper(im):
+            return func(im, *args, **kwargs)
+        try:
+            wrapper.__orifunc__ = func.__orifunc__
+        except AttributeError:
+            wrapper.__orifunc__ = func.__module__ + '.' +  func.__name__
+        return wrapper
+
+
+    def thresh(func):
+        """
+        A wrapper function to return a thresholded image.
+        """
+        def wrapper(im):
+            return im > func(im)
+        try:
+            wrapper.__orifunc__ = func.__orifunc__
+        except AttributeError:
+            wrapper.__orifunc__ = func.__module__ + '.' +  func.__name__
+        return wrapper
+
+    # Global algorithms.
+    methods = OrderedDict({'Isodata': thresh(threshold_isodata),
+                           'Li': thresh(threshold_li),
+                           'Otsu': thresh(threshold_otsu),
+                           'Yen': thresh(threshold_yen)})
+
+    # Local algorithms.
+    if radius is not None:
+        selem = disk(radius)
+        local_otsu = include_selem(otsu, selem)
+        methods['Local Otsu'] = thresh(local_otsu)
+
+        block_size = 2 * int(radius) + 1
+        adaptive_threshold = include_selem(threshold_adaptive, block_size, offset=10)
+        methods['Adaptive threshold'] = adaptive_threshold
+
+
+    return _mosaic(image, figsize=figsize,
+                   methods=methods, verbose=verbose)
 
 __all__ = ['threshold_adaptive',
            'threshold_otsu',
