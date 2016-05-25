@@ -2,4 +2,3 @@ dask-optional-dep.patch
 search-html.patch
 fix-doc-links.patch
 doc-privacy.patch
-35b35c5139dfd1663d932593f62948c7e00ee3c3.patch
