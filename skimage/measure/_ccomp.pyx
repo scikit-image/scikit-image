@@ -8,21 +8,6 @@ from .._shared.utils import warn
 
 cimport numpy as cnp
 
-"""
-See also:
-
-  Christophe Fiorio and Jens Gustedt,
-  "Two linear time Union-Find strategies for image processing",
-  Theoretical Computer Science 154 (1996), pp. 165-181.
-
-  Kensheng Wu, Ekow Otoo and Arie Shoshani,
-  "Optimizing connected component labeling algorithms",
-  Paper LBNL-56864, 2005,
-  Lawrence Berkeley National Laboratory
-  (University of California),
-  http://repositories.cdlib.org/lbnl/LBNL-56864
-
-"""
 
 DTYPE = np.intp
 
@@ -357,114 +342,19 @@ def undo_reshape_array(arr, swaps):
     return reshaped
 
 
-# Connected components search as described in Fiorio et al.
-def label(input, neighbors=None, background=0, return_num=False,
-          connectivity=None):
-    r"""Label connected regions of an integer array.
-
-    Two pixels are connected when they are neighbors and have the same value.
-    In 2D, they can be neighbors either in a 1- or 2-connected sense.
-    The value refers to the maximum number of orthogonal hops to consider a
-    pixel/voxel a neighbor::
-
-      1-connectivity      2-connectivity     diagonal connection close-up
-
-           [ ]           [ ]  [ ]  [ ]         [ ]
-            |               \  |  /             |  <- hop 2
-      [ ]--[x]--[ ]      [ ]--[x]--[ ]    [x]--[ ]
-            |               /  |  \         hop 1
-           [ ]           [ ]  [ ]  [ ]
-
-    Parameters
-    ----------
-    input : ndarray of dtype int
-        Image to label.
-    neighbors : {4, 8}, int, optional
-        Whether to use 4- or 8-"connectivity".
-        In 3D, 4-"connectivity" means connected pixels have to share face,
-        whereas with 8-"connectivity", they have to share only edge or vertex.
-        **Deprecated, use ``connectivity`` instead.**
-    background : int, optional
-        Consider all pixels with this value as background pixels, and label
-        them as 0. By default, 0-valued pixels are considered as background
-        pixels.
-    return_num : bool, optional
-        Whether to return the number of assigned labels.
-    connectivity : int, optional
-        Maximum number of orthogonal hops to consider a pixel/voxel
-        as a neighbor.
-        Accepted values are ranging from  1 to input.ndim. If ``None``, a full
-        connectivity of ``input.ndim`` is used.
-
-    Returns
-    -------
-    labels : ndarray of dtype int
-        Labeled array, where all connected regions are assigned the
-        same integer value.
-    num : int, optional
-        Number of labels, which equals the maximum label index and is only
-        returned if return_num is `True`.
-
-    See Also
-    --------
-    regionprops
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> x = np.eye(3).astype(int)
-    >>> print(x)
-    [[1 0 0]
-     [0 1 0]
-     [0 0 1]]
-    >>> from skimage.measure import label
-    >>> print(label(x, connectivity=1))
-    [[1 0 0]
-     [0 2 0]
-     [0 0 3]]
-
-    >>> print(label(x, connectivity=2))
-    [[1 0 0]
-     [0 1 0]
-     [0 0 1]]
-
-    >>> print(label(x, background=-1))
-    [[1 2 2]
-     [2 1 2]
-     [2 2 1]]
-
-    >>> x = np.array([[1, 0, 0],
-    ...               [1, 1, 5],
-    ...               [0, 0, 0]])
-
-    >>> print(label(x))
-    [[1 0 0]
-     [1 1 2]
-     [0 0 0]]
-    """
+def label_cython(input, neighbors=None, background=None, return_num=False,
+                 connectivity=None):
+    # Connected components search as described in Fiorio et al.
     # We have to ensure that the shape of the input can be handled by the
     # algorithm the input if it is the case
     input_corrected, swaps = reshape_array(input)
 
-    # Do the labelling
-    res, ctr = _label(input_corrected, neighbors, background, connectivity)
-
-    res_orig = undo_reshape_array(res, swaps)
-
-    if return_num:
-        return res_orig, ctr
-    else:
-        return res_orig
-
-
-# Connected components search as described in Fiorio et al.
-def _label(input, neighbors=None, background=None, connectivity=None):
     cdef cnp.ndarray[DTYPE_t, ndim=1] data
     cdef cnp.ndarray[DTYPE_t, ndim=1] forest
 
     # Having data a 2D array slows down access considerably using linear
     # indices even when using the data_p pointer :-(
-    data = np.copy(input.flatten().astype(DTYPE))
+    data = np.copy(input_corrected.flatten().astype(DTYPE))
     forest = np.arange(data.size, dtype=DTYPE)
 
     cdef DTYPE_t *forest_p = <DTYPE_t*>forest.data
@@ -473,12 +363,12 @@ def _label(input, neighbors=None, background=None, connectivity=None):
     cdef shape_info shapeinfo
     cdef bginfo bg
 
-    get_shape_info(input.shape, &shapeinfo)
+    get_shape_info(input_corrected.shape, &shapeinfo)
     get_bginfo(background, &bg)
 
     if neighbors is None and connectivity is None:
         # use the full connectivity by default
-        connectivity = input.ndim
+        connectivity = input_corrected.ndim
     elif neighbors is not None:
         DeprecationWarning("The argument 'neighbors' is deprecated, use "
                            "'connectivity' instead")
@@ -486,15 +376,15 @@ def _label(input, neighbors=None, background=None, connectivity=None):
         if neighbors == 4:
             connectivity = 1
         elif neighbors == 8:
-            connectivity = input.ndim
+            connectivity = input_corrected.ndim
         else:
             raise ValueError("Neighbors must be either 4 or 8, got '%d'.\n"
                              % neighbors)
 
-    if not 1 <= connectivity <= input.ndim:
+    if not 1 <= connectivity <= input_corrected.ndim:
         raise ValueError(
             "Connectivity below 1 or above %d is illegal."
-            % input.ndim)
+            % input_corrected.ndim)
 
     scanBG(data_p, forest_p, &shapeinfo, &bg)
     # the data are treated as degenerated 3D arrays if needed
@@ -509,9 +399,14 @@ def _label(input, neighbors=None, background=None, connectivity=None):
     if data.dtype == np.int32:
         data = data.view(np.int32)
 
-    res = data.reshape(input.shape)
+    res = data.reshape(input_corrected.shape)
 
-    return res, ctr
+    res_orig = undo_reshape_array(res, swaps)
+
+    if return_num:
+        return res_orig, ctr
+    else:
+        return res_orig
 
 
 cdef DTYPE_t resolve_labels(DTYPE_t *data_p, DTYPE_t *forest_p,
