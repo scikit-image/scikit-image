@@ -94,7 +94,8 @@ class _RegionProperties(object):
 
         if intensity_image is not None:
             if not intensity_image.shape == label_image.shape:
-                raise ValueError('Label and intensity image must have the same shape.')
+                raise ValueError('Label and intensity image must have the'
+                                 'same shape.')
 
         self.label = label
 
@@ -282,7 +283,8 @@ class _RegionProperties(object):
     @_cached
     @only2d
     def weighted_moments(self):
-        return _moments.moments_central(self._intensity_image_double(), 0, 0, 3)
+        return _moments.moments_central(self._intensity_image_double(),
+                                        0, 0, 3)
 
     @_cached
     @only2d
