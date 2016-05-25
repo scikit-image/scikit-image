@@ -1,7 +1,7 @@
 Source: skimage
 Section: python
 Priority: optional
-Maintainer: Stefan van der Walt <stefan@sun.ac.za>
+Maintainer: Stefan van der Walt <stefanv@berkeley.edu>
 Uploaders: Yaroslav Halchenko <debian@onerussian.com>
 Build-Depends: cython (>= 0.23),
                cython3 (>= 0.23),
@@ -28,13 +28,12 @@ Build-Depends: cython (>= 0.23),
                python3-six (>= 1.3.0),
                xauth,
                xvfb
-Standards-Version: 3.9.7
+Standards-Version: 3.9.8
 Homepage: http://scikit-image.org
 Vcs-Browser: https://github.com/scikit-image/scikit-image
-Vcs-Git: git://github.com/scikit-image/scikit-image.git -b debian
+Vcs-Git: https://github.com/scikit-image/scikit-image.git -b debian
 X-Python-Version: >= 2.6
 X-Python3-Version: >= 3.2
-XS-Testsuite: autopkgtest
 
 Package: python-skimage
 Architecture: all

@@ -1,3 +1,5 @@
+Description: Make dask an optional dependency.
+
 --- a/skimage/util/apply_parallel.py
 +++ b/skimage/util/apply_parallel.py
 @@ -4,6 +4,13 @@

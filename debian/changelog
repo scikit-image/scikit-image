@@ -1,5 +1,6 @@
-skimage (0.12.3-1) experimental; urgency=medium
+skimage (0.12.3-1) unstable; urgency=medium
 
+  [ Stefan van der Walt ]
   * Fresh upstream release
     - Removes lena images (Closes: #794859)
     - Removes freeimage plugin (Closes: #783818)
@@ -8,13 +9,18 @@ skimage (0.12.3-1) experimental; urgency=medium
   * Patch: turn dask into an optional dependency
   * Update license for tifffile
   * debian/control
-    - boosted policy to 3.9.7
+    - boosted policy to 3.9.8
 
- -- Stefan van der Walt <stefanv@berkeley.edu>  Mon, 07 Mar 2016 13:17:24 -0800
+  [ Gianfranco Costamagna ]
+  * VCS fields in https mode.
+  * Drop useless XS testsuite in control file.
+  * Fix copyright file
+  * Update Stefan mail address
+  * debian/patches/35b35c5139dfd1663d932593f62948c7e00ee3c3.patch:
+    - upstream fix for new sphinx
 
-skimage (0.11.3-1) experimental; urgency=medium
-
-  * Fresh upstream release
+  [ Yaroslav Halchenko ]
+  * Fresh upstream release (previous version, never uploaded)
     - includes slicing-error.patch freeimage-fix.patch
   * Updated debian/watch to avoid deprecated redirector
   * debian/{,tests/}control
@@ -22,7 +28,7 @@ skimage (0.11.3-1) experimental; urgency=medium
   * debian/tests/python*
     - for now exclude testing of test_tools.py due to #779847 in mpl
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 02 Apr 2015 20:31:22 -0400
+ -- Stefan van der Walt <stefanv@berkeley.edu>  Mon, 23 May 2016 11:11:52 +0200
 
 skimage (0.10.1-2) unstable; urgency=medium
 
