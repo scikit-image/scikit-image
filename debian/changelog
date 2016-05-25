@@ -16,8 +16,6 @@ skimage (0.12.3-1) unstable; urgency=medium
   * Drop useless XS testsuite in control file.
   * Fix copyright file
   * Update Stefan mail address
-  * debian/patches/35b35c5139dfd1663d932593f62948c7e00ee3c3.patch:
-    - upstream fix for new sphinx
 
   [ Yaroslav Halchenko ]
   * Fresh upstream release (previous version, never uploaded)
