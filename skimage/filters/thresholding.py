@@ -2,7 +2,9 @@ __all__ = ['threshold_adaptive',
            'threshold_otsu',
            'threshold_yen',
            'threshold_isodata',
-           'threshold_li', ]
+           'threshold_li',
+           'threshold_mean',
+           'threshold_triangle',]
 
 import numpy as np
 from scipy import ndimage as ndi
@@ -110,7 +112,7 @@ def threshold_otsu(image, nbins=256):
     threshold : float
         Upper threshold value. All pixels intensities that less or equal of
         this value assumed as foreground.
-        
+
     Raises
     ------
     ValueError
@@ -389,3 +391,109 @@ def threshold_li(image):
             new_thresh = temp + tolerance
 
     return threshold + immin
+
+
+def threshold_mean(image):
+    """Return threshold value based on the of grayscale values.
+
+    Parameters
+    ----------
+    image : array
+        Grayscale input image.
+
+    Returns
+    -------
+    threshold : float
+        Upper threshold value. All pixels intensities that less or equal of
+        this value assumed as foreground.
+
+    References
+    ----------
+    .. [1] C. A. Glasbey, "An analysis of histogram-based thresholding
+        algorithms," CVGIP: Graphical Models and Image Processing,
+        vol. 55, pp. 532-537, 1993.
+
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> image = camera()
+    >>> thresh = threshold_mean(image)
+    >>> binary = image > thresh
+    """
+    return np.mean(image.ravel())
+
+
+def threshold_triangle(image, nbins=256):
+    """Return threshold value based on triangle algorithm.
+
+    Parameters
+    ----------
+    image : array
+        Grayscale input image.
+    nbins : int, optional
+        Number of bins used to calculate histogram. This value is ignored for
+        integer arrays.
+
+    Returns
+    -------
+    threshold : float
+        Upper threshold value. All pixels intensities that less or equal of
+        this value assumed as foreground.
+
+    References
+    ----------
+    .. [1] Zack, G. W., Rogers, W. E. and Latt, S. A., 1977,
+       Automatic Measurement of Sister Chromatid Exchange Frequency,
+       Journal of Histochemistry and Cytochemistry 25 (7), pp. 741-753
+
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> image = camera()
+    >>> thresh = threshold_triangle(image)
+    >>> binary = image > thresh
+    """
+    # nbins is ignored for interger arrays
+    # so, we recalculate the effective nbins.
+    hist, bin_centers = histogram(image.ravel(), nbins)
+    nbins = bin_centers[-1] - bin_centers[0] + 1
+
+    # Find peak and histogram extremities.
+    argpeak_height = np.argmax(hist)
+    peak_height = np.max(hist)
+    arglefth = np.where(hist>0)[0][0]
+    argrighth = np.where(hist>0)[0][-1]
+
+    # Flip is true if left tail is shorter.
+    flip = argpeak_height - arglefth < argrighth - argpeak_height
+    if flip:
+        hist = hist[::-1]
+        arglefth = nbins - argrighth - 1
+        argpeak_height = nbins - argpeak_height - 1
+
+    # If flip == True, argright becomes incorrect
+    # but we don't need it anymore.
+    del(argrighth)
+
+    # Set up the coordinate system.
+    width = argpeak_height - arglefth
+    x1 = np.arange(width)
+    y1 = hist[x1 + arglefth]
+
+    # Normalize.
+    norm = np.sqrt(peak_height**2 + width**2)
+    peak_height /= norm
+    width /= norm
+
+    # Maximize the length.
+    d = peak_height * arglefth - width * hist[arglefth]
+    length = peak_height * x1 - width * y1 - d
+    level = np.argmax(length) + arglefth
+
+    if flip:
+        level = nbins - level - 1
+
+    # The histogram doesn't start at zero, shift it.
+    level += bin_centers[0]
+
+    return level

@@ -58,4 +58,6 @@ __all__ = ['inverse',
            'threshold_yen',
            'threshold_isodata',
            'threshold_li',
+           'threshold_mean',
+           'threshold_triangle',
            'rank']
