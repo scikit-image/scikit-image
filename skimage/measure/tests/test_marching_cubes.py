@@ -17,7 +17,7 @@ def test_marching_cubes_isotropic():
     assert surf > surf_calc and surf_calc > surf * 0.99
     
     # Lewiner
-    verts, faces, *_ = marching_cubes_lewiner(ellipsoid_isotropic, 0.)
+    verts, faces = marching_cubes_lewiner(ellipsoid_isotropic, 0.)[:2]
     surf_calc = mesh_surface_area(verts, faces)
     # Test within 1% tolerance for isotropic. Will always underestimate.
     assert surf > surf_calc and surf_calc > surf * 0.99
@@ -37,8 +37,7 @@ def test_marching_cubes_anisotropic():
     assert surf > surf_calc and surf_calc > surf * 0.985
     
     # Lewiner
-    verts, faces, *_ = marching_cubes_lewiner(ellipsoid_anisotropic, 0.,
-                                              spacing=spacing)
+    verts, faces = marching_cubes_lewiner(ellipsoid_anisotropic, 0., spacing=spacing)[:2]
     surf_calc = mesh_surface_area(verts, faces)
     # Test within 1.5% tolerance for anisotropic. Will always underestimate.
     assert surf > surf_calc and surf_calc > surf * 0.985
@@ -102,9 +101,9 @@ def test_both_algs_same_result_ellipse():
     
     sphere_small = ellipsoid(1, 1, 1, levelset=True)
     
-    vertices1, faces1, *_ = marching_cubes(sphere_small, 0)
-    vertices2, faces2, *_ = marching_cubes_lewiner(sphere_small, 0, allow_degenerate=False)
-    vertices3, faces3, *_ = marching_cubes_lewiner(sphere_small, 0, allow_degenerate=False, use_classic=True)
+    vertices1, faces1 = marching_cubes(sphere_small, 0)[:2]
+    vertices2, faces2 = marching_cubes_lewiner(sphere_small, 0, allow_degenerate=False)[:2]
+    vertices3, faces3 = marching_cubes_lewiner(sphere_small, 0, allow_degenerate=False, use_classic=True)[:2]
     
     # Order is different, best we can do is test equal shape and same vertices present
     assert _same_mesh(vertices1, faces1, vertices2, faces2)
@@ -148,9 +147,9 @@ def test_both_algs_same_result_donut():
                     64 * ( ((8*y-2)+4)*((8*y-2)+4) + (8*z)**2 
                     ) ) + 1025
     
-    vertices1, faces1, *_ = marching_cubes(vol, 0)
-    vertices2, faces2, *_ = marching_cubes_lewiner(vol, 0)
-    vertices3, faces3, *_ = marching_cubes_lewiner(vol, 0, use_classic=True)
+    vertices1, faces1 = marching_cubes(vol, 0)[:2]
+    vertices2, faces2 = marching_cubes_lewiner(vol, 0)[:2]
+    vertices3, faces3 = marching_cubes_lewiner(vol, 0, use_classic=True)[:2]
     
     # Old and new alg are different
     assert not _same_mesh(vertices1, faces1, vertices2, faces2)
