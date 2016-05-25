@@ -27,7 +27,7 @@ elif SELECT == 2:
     isovalue = 0.2
 
 elif SELECT == 3:
-    # Generate two donuts
+    # Generate two donuts using a formula by Thomas Lewiner
     n = 48
     a, b = 2.5/n, -1.25
     isovalue = 0.0
@@ -53,7 +53,7 @@ elif SELECT == 4:
 
 # Get surface meshes
 t0 = time.time()
-vertices1, faces1, *_ = marching_cubes_lewiner(vol, isovalue, gradient_direction=gradient_dir, use_classic=False)
+vertices1, faces1, *_ = marching_cubes_lewiner(vol, isovalue, gradient_direction=gradient_dir, use_classic=True)
 print('finding surface lewiner took %1.0f ms' % (1000*(time.time()-t0)) )
 
 t0 = time.time()

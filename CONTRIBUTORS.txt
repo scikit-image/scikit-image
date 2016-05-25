@@ -230,6 +230,9 @@
 - Alex Izvorski
   Color spaces for YUV and related spaces
 
+- Thomas Lewiner
+  Design and original implementation of the Lewiner marching cubes algorithm
+
 - Jeff Hemmelgarn
   Minimum threshold
 

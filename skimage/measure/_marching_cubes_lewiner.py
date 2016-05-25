@@ -52,7 +52,9 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
         If given and True, the classic marching cubes by Lorensen (1987)
         is used. This option is included for reference purposes. Note
         that this algorithm has ambiguities and is not guaranteed to
-        produce a topologically correct result.
+        produce a topologically correct result. The results with using
+        this option are *not* generally the same as the ``marching_cubes()``
+        function.
     
     Returns
     -------
@@ -74,11 +76,11 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     Notes about the algorithm
     -------------------------
     
-    The algorithm [1] is an improved version of Chernyaev's Marching Cubes 33
-    algorithm, originally written in C++. It is an efficient algorithm
-    that relies on heavy use of lookup tables to handle the many different 
-    cases. This keeps the algorithm relatively easy. The current algorithm
-    is a port of Lewiner's algorithm and written in Cython.
+    The algorithm [1] is an improved version of Chernyaev's Marching
+    Cubes 33 algorithm. It is an efficient algorithm that relies on
+    heavy use of lookup tables to handle the many different cases,
+    keeping the algorithm relatively easy. This implementation is
+    written in Cython, ported from Lewiner's C++ implementation.
     
     References
     ----------

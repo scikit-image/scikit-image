@@ -138,6 +138,7 @@ def test_both_algs_same_result_donut():
     for iz in range(vol.shape[0]):
         for iy in range(vol.shape[1]):
             for ix in range(vol.shape[2]):
+                # Double-torii formula by Thomas Lewiner
                 z, y, x = float(iz)*a+b, float(iy)*a+b, float(ix)*a+b
                 vol[iz,iy,ix] = ( ( 
                     (8*x)**2 + (8*y-2)**2 + (8*z)**2 + 16 - 1.85*1.85 ) * ( (8*x)**2 +
