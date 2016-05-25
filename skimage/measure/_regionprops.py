@@ -9,7 +9,6 @@ from . import _moments
 
 
 from functools import wraps
-from collections import defaultdict
 
 __all__ = ['regionprops', 'perimeter']
 
