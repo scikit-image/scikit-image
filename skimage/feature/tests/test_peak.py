@@ -5,9 +5,6 @@ from scipy import ndimage as ndi
 from skimage.feature import peak
 
 
-np.random.seed(21)
-
-
 def test_trivial_case():
     trivial = np.zeros((25, 25))
     peak_indices = peak.peak_local_max(trivial, min_distance=1, indices=True)
@@ -21,6 +18,7 @@ def test_noisy_peaks():
     peak_locations = [(7, 7), (7, 13), (13, 7), (13, 13)]
 
     # image with noise of amplitude 0.8 and peaks of amplitude 1
+    np.random.seed(21)
     image = 0.8 * np.random.rand(20, 20)
     for r, c in peak_locations:
         image[r, c] = 1
@@ -102,6 +100,7 @@ def test_num_peaks_and_labels():
 
 
 def test_num_peaks_tot_vs_labels_4quadrants():
+    np.random.seed(21)
     image = np.random.uniform(size=(20, 30))
     i, j = np.mgrid[0:20, 0:30]
     labels = 1 + (i >= 10) + (j >= 15) * 2
@@ -135,6 +134,7 @@ def test_num_peaks3D():
 
 
 def test_reorder_labels():
+    np.random.seed(21)
     image = np.random.uniform(size=(40, 60))
     i, j = np.mgrid[0:40, 0:60]
     labels = 1 + (i >= 20) + (j >= 30) * 2
@@ -154,6 +154,7 @@ def test_reorder_labels():
 
 
 def test_indices_with_labels():
+    np.random.seed(21)
     image = np.random.uniform(size=(40, 60))
     i, j = np.mgrid[0:40, 0:60]
     labels = 1 + (i >= 20) + (j >= 30) * 2
@@ -312,6 +313,7 @@ def test_adjacent_different_objects():
 
 
 def test_four_quadrants():
+    np.random.seed(21)
     image = np.random.uniform(size=(20, 30))
     i, j = np.mgrid[0:20, 0:30]
     labels = 1 + (i >= 10) + (j >= 15) * 2
@@ -333,6 +335,7 @@ def test_disk():
     '''regression test of img-1194, footprint = [1]
     Test peak.peak_local_max when every point is a local maximum
     '''
+    np.random.seed(21)
     image = np.random.uniform(size=(10, 20))
     footprint = np.array([[1]])
     result = peak.peak_local_max(image, labels=np.ones((10, 20)),
