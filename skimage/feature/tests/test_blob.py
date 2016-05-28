@@ -1,6 +1,8 @@
 import numpy as np
 from skimage.draw import circle
+from skimage.draw.draw3d import ellipsoid
 from skimage.feature import blob_dog, blob_log, blob_doh
+from skimage import util
 import math
 from numpy.testing import assert_raises
 
@@ -8,7 +10,6 @@ from numpy.testing import assert_raises
 def test_blob_dog():
     r2 = math.sqrt(2)
     img = np.ones((512, 512))
-    img3 = np.ones((5, 5, 5))
 
     xs, ys = circle(400, 130, 5)
     img[xs, ys] = 255
@@ -39,13 +40,24 @@ def test_blob_dog():
     assert abs(b[1] - 350) <= thresh
     assert abs(radius(b) - 45) <= thresh
 
-    assert_raises(ValueError, blob_dog, img3)
+    r = 10
+    pad = 10
+    im3 = ellipsoid(r, r, r)
+    im3 = util.pad(im3, pad, mode='constant')
+
+    blobs = blob_dog(im3, min_sigma=3, max_sigma=10,
+                          sigma_ratio=1.2, threshold=0.1)
+    b = blobs[0]
+
+    assert b[0] == r + pad + 1
+    assert b[1] == r + pad + 1
+    assert b[2] == r + pad + 1
+    assert abs(math.sqrt(3) * b[3] - r) < 1
 
 
 def test_blob_log():
     r2 = math.sqrt(2)
     img = np.ones((256, 256))
-    img3 = np.ones((5, 5, 5))
 
     xs, ys = circle(200, 65, 5)
     img[xs, ys] = 255
@@ -113,7 +125,18 @@ def test_blob_log():
     assert abs(b[1] - 175) <= thresh
     assert abs(radius(b) - 30) <= thresh
 
-    assert_raises(ValueError, blob_log, img3)
+    r = 6
+    pad = 10
+    im3 = ellipsoid(r, r, r)
+    im3 = util.pad(im3, pad, mode='constant')
+
+    blobs = blob_log(im3, min_sigma=3, max_sigma=10)
+    b = blobs[0]
+
+    assert b[0] == r + pad + 1
+    assert b[1] == r + pad + 1
+    assert b[2] == r + pad + 1
+    assert abs(math.sqrt(3) * b[3] - r) < 1
 
 
 def test_blob_doh():
