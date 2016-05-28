@@ -458,16 +458,14 @@ def threshold_minimum(image, nbins=256, bias='min'):
 
     max_iter = 10000
     smooth_hist = np.copy(hist)
-    try:
-        for counter in range(max_iter):
-            smooth_hist = ndif.uniform_filter1d(smooth_hist, 3)
-            maximums = find_local_maxima(smooth_hist)
-            if len(maximums) < 3:
-                raise StopIteration
-    except StopIteration:
-        if len(maximums) != 2:
-            raise RuntimeError('Unable to find two maxima in histogram')
-    else:
+    for counter in range(max_iter):
+        smooth_hist = ndif.uniform_filter1d(smooth_hist, 3)
+        maximums = find_local_maxima(smooth_hist)
+        if len(maximums) < 3:
+            break
+    if len(maximums) != 2:
+        raise RuntimeError('Unable to find two maxima in histogram')
+    elif counter == max_iter - 1:
         raise RuntimeError('Maximum iteration reached for histogram histogram'
                            'smoothing')
 
