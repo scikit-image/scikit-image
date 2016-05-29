@@ -67,11 +67,12 @@ def _blob_overlap(blob1, blob2):
         b = d - r2 + r1
         c = d + r2 - r1
         d = d + r2 + r1
-        area = r1 ** 2 * acos1 + r2 ** 2 * acos2 - 0.5 * sqrt(abs(a * b * c * d))
+        area = r1 ** 2 * acos1 + r2 ** 2 * acos2 \
+              - 0.5 * sqrt(abs(a * b * c * d))
 
         return area / (math.pi * (min(r1, r2) ** 2))
 
-    else: # http://mathworld.wolfram.com/Sphere-SphereIntersection.html
+    else:  # http://mathworld.wolfram.com/Sphere-SphereIntersection.html
         vol = math.pi / (12 * d) * (r1 + r2 - d)**2 * \
                 (d**2 + 2 * d * (r1 + r2) - 3 * (r1**2 + r2**2) + 6 * r1 * r2)
         return vol
@@ -185,7 +186,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     Notes
     -----
     The radius of each blob is approximately :math:`\sqrt{2}sigma` for
-    a 2-D image and :math:`\sqrt{3}sigma` for a 3-D image. 
+    a 2-D image and :math:`\sqrt{3}sigma` for a 3-D image.
     """
     image = img_as_float(image)
 
@@ -202,7 +203,13 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     # multiplying with standard deviation provides scale invariance
     dog_images = [(gaussian_images[i] - gaussian_images[i + 1])
                   * sigma_list[i] for i in range(k)]
-    image_cube = np.stack(dog_images, axis=-1)
+
+    # Replace by image_cube = np.stack(hessian_images, axis=-1)
+    # When we upgrade minimal requirements to NumPy 1.10
+    sl = (slice(None),) * image.ndim + (np.newaxis,)
+    arrays = [np.asanyarray(arr) for arr in dog_images]
+    extended_arrays = [arr[sl] for arr in arrays]
+    image_cube = np.concatenate(extended_arrays, axis=-1)
 
     # local_maxima = get_local_maxima(image_cube, threshold)
     local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
@@ -213,8 +220,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     lm = local_maxima.astype(np.float64)
     # Convert the last index to its corresponding scale value
     lm[:, -1] = sigma_list[local_maxima[:, -1]]
-    local_maxima = lm
-    return _prune_blobs(local_maxima, overlap)
+    return _prune_blobs(lm, overlap)
 
 
 def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
@@ -304,7 +310,13 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     # computing gaussian laplace
     # s**2 provides scale invariance
     gl_images = [-gaussian_laplace(image, s) * s ** 2 for s in sigma_list]
-    image_cube = np.stack(gl_images, axis=-1)
+
+    # Replace by image_cube = np.stack(hessian_images, axis=-1)
+    # When we upgrade minimal requirements to NumPy 1.10
+    sl = (slice(None),) * image.ndim + (np.newaxis,)
+    arrays = [np.asanyarray(arr) for arr in gl_images]
+    extended_arrays = [arr[sl] for arr in arrays]
+    image_cube = np.concatenate(extended_arrays, axis=-1)
 
     local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
                                   footprint=np.ones((3,) * (image.ndim + 1)),
@@ -315,8 +327,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     lm = local_maxima.astype(np.float64)
     # Convert the last index to its corresponding scale value
     lm[:, -1] = sigma_list[local_maxima[:, -1]]
-    local_maxima = lm
-    return _prune_blobs(local_maxima, overlap)
+    return _prune_blobs(lm, overlap)
 
 
 def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
@@ -413,7 +424,13 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
         sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
 
     hessian_images = [_hessian_matrix_det(image, s) for s in sigma_list]
-    image_cube = np.stack(hessian_images, axis=-1)
+
+    # Replace by image_cube = np.stack(hessian_images, axis=-1)
+    # When we upgrade minimal requirements to NumPy 1.10
+    sl = (slice(None),) * image.ndim + (np.newaxis,)
+    arrays = [np.asanyarray(arr) for arr in hessian_images]
+    extended_arrays = [arr[sl] for arr in arrays]
+    image_cube = np.concatenate(extended_arrays, axis=-1)
 
     local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
                                   footprint=np.ones((3,) * image_cube.ndim),
@@ -424,5 +441,4 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     lm = local_maxima.astype(np.float64)
     # Convert the last index to its corresponding scale value
     lm[:, -1] = sigma_list[local_maxima[:, -1]]
-    local_maxima = lm
-    return _prune_blobs(local_maxima, overlap)
+    return _prune_blobs(lm, overlap)
