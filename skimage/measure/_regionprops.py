@@ -371,7 +371,9 @@ def regionprops(label_image, intensity_image=None, cache=True):
     **area** : int
         Number of pixels of region.
     **bbox** : tuple
-        Bounding box ``(min_row, min_col, max_row, max_col)``
+        Bounding box ``(min_row, min_col, max_row, max_col)``.
+        Pixels belonging to the bounding box are in the half-open interval
+        ``[min_row; max_row)`` and ``[min_col; max_col)``.
     **centroid** : array
         Centroid coordinate tuple ``(row, col)``.
     **convex_area** : int
