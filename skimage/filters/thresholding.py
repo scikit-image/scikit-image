@@ -62,7 +62,7 @@ def _mosaic(image, methods=None, figsize=None, num_cols=2, verbose=True):
         a.axis('off')
 
     fig.tight_layout()
-    plt.close()
+    #plt.close()
     return fig, ax
 
 
