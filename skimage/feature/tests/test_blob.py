@@ -246,3 +246,22 @@ def test_blob_overlap():
         threshold=.05)
 
     assert len(blobs) == 1
+
+    r1, r2 = 7, 6
+    pad1, pad2 = 11, 12
+    blob1 = ellipsoid(r1, r1, r1)
+    blob1 = util.pad(blob1, pad1, mode='constant')
+    blob2 = ellipsoid(r2, r2, r2)
+    blob2 = util.pad(blob2, [(pad2, pad2), (pad2 - 9, pad2 + 9),
+                                           (pad2, pad2)],
+                            mode='constant')
+    im3 = np.logical_or(blob1, blob2)
+
+    blobs = blob_log(im3,  min_sigma=2, max_sigma=10, overlap=0.1)
+    assert len(blobs) == 1
+
+
+def test_no_blob():
+    im = np.zeros((10, 10))
+    blobs = blob_log(im,  min_sigma=2, max_sigma=5, num_sigma=4)
+    assert len(blobs) == 0

@@ -5,6 +5,7 @@ import itertools as itt
 import math
 from math import sqrt, hypot, log
 from numpy import arccos
+from scipy import spatial
 from ..util import img_as_float
 from .peak import peak_local_max
 from ._hessian_det_appx import _hessian_matrix_det
@@ -75,7 +76,7 @@ def _blob_overlap(blob1, blob2):
     else:  # http://mathworld.wolfram.com/Sphere-SphereIntersection.html
         vol = math.pi / (12 * d) * (r1 + r2 - d)**2 * \
                 (d**2 + 2 * d * (r1 + r2) - 3 * (r1**2 + r2**2) + 6 * r1 * r2)
-        return vol
+        return vol / (4./3 * math.pi * min(r1, r2) ** 3)
 
 
 def _prune_blobs(blobs_array, overlap):
@@ -100,14 +101,23 @@ def _prune_blobs(blobs_array, overlap):
 
     # iterating again might eliminate more blobs, but one iteration suffices
     # for most cases
-    for blob1, blob2 in itt.combinations(blobs_array, 2):
-        if _blob_overlap(blob1, blob2) > overlap:
-            if blob1[-1] > blob2[-1]:
-                blob2[-1] = -1
-            else:
-                blob1[-1] = -1
+    if len(blobs_array) == 0:
+        return np.array([])
+    tree = spatial.cKDTree(blobs_array[:, :-1])
+    sigma = blobs_array[:, -1].max()
+    distance = 2 * sigma * sqrt(blobs_array.shape[1] - 1)
+    pairs = np.array(list(tree.query_pairs(distance)))
+    if len(pairs) == 0:
+        return blobs_array
+    else:
+        for (i, j) in pairs:
+            blob1, blob2 = blobs_array[i], blobs_array[j]
+            if _blob_overlap(blob1, blob2) > overlap:
+                if blob1[-1] > blob2[-1]:
+                    blob2[-1] = -1
+                else:
+                    blob1[-1] = -1
 
-    # return blobs_array[blobs_array[:, 2] > 0]
     return np.array([b for b in blobs_array if b[-1] > 0])
 
 
