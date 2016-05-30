@@ -17,6 +17,10 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     and multichannel 2D images. Snakes can be periodic (for segmentation) or
     have fixed and/or free ends.
 
+    The input snake is a set of points that will each be repositioned such that
+    the new snake minimizes energy as described in [1]_. No points are added
+    or removed.
+
     Parameters
     ----------
     image : (N, M) or (N, M, 3) ndarray
@@ -24,6 +28,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     snake : (N, 2) ndarray
         Initialisation coordinates of snake. For periodic snakes, it should
         not include duplicate endpoints.
+        N is not necessarily the same N as the input image dimension.
     alpha : float, optional
         Snake length shape parameter. Higher values makes snake contract
         faster.
