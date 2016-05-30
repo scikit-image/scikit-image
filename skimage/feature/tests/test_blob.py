@@ -2,9 +2,10 @@ import numpy as np
 from skimage.draw import circle
 from skimage.draw.draw3d import ellipsoid
 from skimage.feature import blob_dog, blob_log, blob_doh
-from skimage._shared import testing
+from skimage.feature.blob import _blob_overlap
 from skimage import util
 import math
+from numpy.testing import assert_almost_equal
 
 
 def test_blob_dog():
@@ -230,7 +231,7 @@ def test_blob_doh():
 
 
 def test_blob_overlap():
-    img = np.ones((512, 512), dtype=np.uint8)
+    img = np.ones((256, 256), dtype=np.uint8)
 
     xs, ys = circle(100, 100, 20)
     img[xs, ys] = 255
@@ -260,6 +261,11 @@ def test_blob_overlap():
     blobs = blob_log(im3,  min_sigma=2, max_sigma=10, overlap=0.1)
     assert len(blobs) == 1
 
+    # Two circles with distance between centers equal to radius
+    overlap = _blob_overlap(np.array([0, 0, 10 / math.sqrt(2)]),
+                            np.array([0, 10, 10 / math.sqrt(2)]))
+    assert_almost_equal(overlap,
+                        1./math.pi * (2 * math.acos(1./2) - math.sqrt(3)/2.))
 
 def test_no_blob():
     im = np.zeros((10, 10))
