@@ -167,7 +167,7 @@ def test_otsu_astro_image():
 
 def test_otsu_one_color_image():
     img = np.ones((10, 10), dtype=np.uint8)
-    assert_raises(TypeError, threshold_otsu, img)
+    assert_raises(ValueError, threshold_otsu, img)
 
 def test_li_camera_image():
     camera = skimage.img_as_ubyte(data.camera())
