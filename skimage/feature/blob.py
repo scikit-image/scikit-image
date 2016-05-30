@@ -103,10 +103,14 @@ def _prune_blobs(blobs_array, overlap):
     # for most cases
     if len(blobs_array) == 0:
         return np.array([])
-    tree = spatial.cKDTree(blobs_array[:, :-1])
     sigma = blobs_array[:, -1].max()
     distance = 2 * sigma * sqrt(blobs_array.shape[1] - 1)
-    pairs = np.array(list(tree.query_pairs(distance)))
+    try:
+        tree = spatial.cKDTree(blobs_array[:, :-1])
+        pairs = np.array(list(tree.query_pairs(distance)))
+    except AttributeError:  # scipy 0.9, min requirements
+        tree = spatial.KDTree(blobs_array[:, :-1])
+        pairs = np.array(list(tree.query_pairs(distance)))
     if len(pairs) == 0:
         return blobs_array
     else:
