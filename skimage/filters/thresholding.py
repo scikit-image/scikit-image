@@ -113,7 +113,6 @@ def threshold_otsu(image, nbins=256):
         
     Raises
     ------
-    
     ValueError
          If `image` only contains a single grayscale value.
 
