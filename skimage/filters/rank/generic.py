@@ -1,11 +1,43 @@
-"""The local histogram is computed using a sliding window similar to the method
-described in [1]_.
+"""
+
+General Description
+-------------------
+
+These filters compute the local histogram at each pixel, using a sliding window 
+similar to the method described in [1]_. A histogram is built using a moving 
+window in order to limit redundant computation. The moving window follows a
+snake-like path:
+
+...------------------------\
+/--------------------------/
+\--------------------------...
+
+The local histogram is updated at each pixel as the structuring element window
+moves by, i.e. only those pixels entering and leaving the structuring element
+update the local histogram. The histogram size is 8-bit (256 bins) for 8-bit
+images and 2- to 16-bit for 16-bit images depending on the maximum value of the
+image.
+
+The filter is applied up to the image border, the neighborhood used is
+adjusted accordingly. The user may provide a mask image (same size as input
+image) where non zero values are the part of the image participating in the
+histogram computation. By default the entire image is filtered.
+
+This implementation outperforms grey.dilation for large structuring elements.
 
 Input image can be 8-bit or 16-bit, for 16-bit input images, the number of
 histogram bins is determined from the maximum value present in the image.
 
 Result image is 8-/16-bit or double with respect to the input image and the
 rank filter operation.
+
+To do
+-----
+
+* add simple examples, adapt documentation on existing examples
+* add/check existing doc
+* adapting tests for each type of filter
+
 
 References
 ----------
