@@ -110,6 +110,12 @@ def threshold_otsu(image, nbins=256):
     threshold : float
         Upper threshold value. All pixels intensities that less or equal of
         this value assumed as foreground.
+        
+    Raises
+    ------
+    
+    ValueError
+         If `image` only contains a single grayscale value.
 
     References
     ----------
