@@ -1,10 +1,8 @@
 
 import numpy as np
 from scipy.ndimage import gaussian_filter, gaussian_laplace
-import itertools as itt
 import math
-from math import sqrt, hypot, log
-from numpy import arccos
+from math import sqrt, log
 from scipy import spatial
 from ..util import img_as_float
 from .peak import peak_local_max
@@ -25,14 +23,16 @@ def _blob_overlap(blob1, blob2):
 
     Parameters
     ----------
-    blob1 : sequence
-        A sequence of ``(r,c,sigma)`` or ``(f,r,c,sigma)``, where ``r,c``
-        (or ``(f,r,c,sigma)``) are coordinates of blob and ``sigma`` is
-        the standard deviation of the Gaussian kernel which detected the blob.
-    blob2 : sequence
-        A sequence of ``(r,c,sigma)`` or ``(f,r,c,sigma)``, where ``r,c``
-        (or ``(f,r,c,sigma)``) are coordinates of blob and ``sigma`` is
-        the standard deviation of the Gaussian kernel which detected the blob.
+    blob1 : sequence of arrays
+        A sequence of ``(row, col, sigma)`` or ``(pln, row, col, sigma)``,
+        where ``row, col`` (or ``(pln, row, col, sigma)``) are coordinates
+        of blob and ``sigma`` is the standard deviation of the Gaussian kernel
+        which detected the blob.
+    blob2 : sequence of arrays
+        A sequence of ``(row, col, sigma)`` or ``(pln, row, col, sigma)``,
+        where ``row, col`` (or ``(pln, row, col, sigma)``) are coordinates
+        of blob and ``sigma`` is the standard deviation of the Gaussian kernel
+        which detected the blob.
 
     Returns
     -------
@@ -40,14 +40,13 @@ def _blob_overlap(blob1, blob2):
         Fraction of overlapped area (or volume in 3D).
     """
     n_dim = len(blob1) - 1
-    root2 = sqrt(n_dim)
+    root_ndim = sqrt(n_dim)
 
     # extent of the blob is given by sqrt(2)*scale
-    r1 = blob1[-1] * root2
-    r2 = blob2[-1] * root2
+    r1 = blob1[-1] * root_ndim
+    r2 = blob2[-1] * root_ndim
 
-    d = sqrt(np.sum((blob1 - blob2)**2))
-
+    d = sqrt(np.sum((blob1[:-1] - blob2[:-1])**2))
     if d > r1 + r2:
         return 0
 
@@ -56,21 +55,20 @@ def _blob_overlap(blob1, blob2):
         return 1
 
     if n_dim == 2:
-        ratio1 = (d ** 2 + r1 ** 2 - r2 ** 2) / (2 * d * r1)
+        ratio1 = (d ** 2 + r1 ** 2 - r2 ** 2) / (2. * d * r1)
         ratio1 = np.clip(ratio1, -1, 1)
-        acos1 = arccos(ratio1)
+        acos1 = math.acos(ratio1)
 
-        ratio2 = (d ** 2 + r2 ** 2 - r1 ** 2) / (2 * d * r2)
+        ratio2 = (d ** 2 + r2 ** 2 - r1 ** 2) / (2. * d * r2)
         ratio2 = np.clip(ratio2, -1, 1)
-        acos2 = arccos(ratio2)
+        acos2 = math.acos(ratio2)
 
         a = -d + r2 + r1
         b = d - r2 + r1
         c = d + r2 - r1
         d = d + r2 + r1
-        area = r1 ** 2 * acos1 + r2 ** 2 * acos2 \
-              - 0.5 * sqrt(abs(a * b * c * d))
-
+        area = (r1 ** 2 * acos1 + r2 ** 2 * acos2 -
+                0.5 * sqrt(abs(a * b * c * d)))
         return area / (math.pi * (min(r1, r2) ** 2))
 
     else:  # http://mathworld.wolfram.com/Sphere-SphereIntersection.html
@@ -85,10 +83,11 @@ def _prune_blobs(blobs_array, overlap):
     Parameters
     ----------
     blobs_array : ndarray
-        A 2d array with each row representing 3 (or 4) values, ``(r,c,sigma)``
-        or ``(f,r,c,sigma)`` in 3D,  where ``(r,c)`` (``(f,r,c)``) are
-        coordinates of the blob and ``sigma`` is the standard deviation of the
-        Gaussian kernel which detected the blob.
+        A 2d array with each row representing 3 (or 4) values,
+        ``(row, col, sigma)`` or ``(pln, row, col, sigma)`` in 3D,
+        where ``(row, col)`` (``(pln, row, col)``) are coordinates of the blob
+        and ``sigma`` is the standard deviation of the Gaussian kernel which
+        detected the blob.
     overlap : float
         A value between 0 and 1. If the fraction of area overlapping for 2
         blobs is greater than `overlap` the smaller blob is eliminated.
@@ -438,13 +437,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
         sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
 
     hessian_images = [_hessian_matrix_det(image, s) for s in sigma_list]
-
-    # Replace by image_cube = np.stack(hessian_images, axis=-1)
-    # When we upgrade minimal requirements to NumPy 1.10
-    sl = (slice(None),) * image.ndim + (np.newaxis,)
-    arrays = [np.asanyarray(arr) for arr in hessian_images]
-    extended_arrays = [arr[sl] for arr in arrays]
-    image_cube = np.concatenate(extended_arrays, axis=-1)
+    image_cube = np.dstack(hessian_images)
 
     local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
                                   footprint=np.ones((3,) * image_cube.ndim),
