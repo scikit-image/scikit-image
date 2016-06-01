@@ -101,7 +101,7 @@ def threshold_otsu(image, nbins=256):
 
     Parameters
     ----------
-    image : array
+    image : (N, M) ndarray
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -110,8 +110,8 @@ def threshold_otsu(image, nbins=256):
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels intensities that less or equal of
-        this value assumed as foreground.
+        Upper threshold value. All pixels with intensities more than
+        this value are assumed to be foreground.
 
     Raises
     ------
@@ -169,7 +169,7 @@ def threshold_yen(image, nbins=256):
 
     Parameters
     ----------
-    image : array
+    image : (N, M) ndarray
         Input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -178,8 +178,8 @@ def threshold_yen(image, nbins=256):
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels intensities that less or equal of
-        this value assumed as foreground.
+        Upper threshold value. All pixels with intensities more than
+        this value are assumed to be foreground.
 
     References
     ----------
@@ -199,6 +199,7 @@ def threshold_yen(image, nbins=256):
     >>> thresh = threshold_yen(image)
     >>> binary = image <= thresh
     """
+    assert_nD(image, 2)
     hist, bin_centers = histogram(image.ravel(), nbins)
     # On blank images (e.g. filled with 0) with int dtype, `histogram()`
     # returns `bin_centers` containing only one value. Speed up with it.
@@ -236,7 +237,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
 
     Parameters
     ----------
-    image : array
+    image : (N, M) ndarray
         Input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -270,6 +271,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
     >>> thresh = threshold_isodata(image)
     >>> binary = image > thresh
     """
+    assert_nD(image, 2)
     hist, bin_centers = histogram(image.ravel(), nbins)
 
     # image only contains one unique value
@@ -331,13 +333,13 @@ def threshold_li(image):
 
     Parameters
     ----------
-    image : array
+    image : (N, M) ndarray
         Input image.
 
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels intensities more than
+        Upper threshold value. All pixels with intensities more than
         this value are assumed to be foreground.
 
     References
@@ -359,6 +361,7 @@ def threshold_li(image):
     >>> thresh = threshold_li(image)
     >>> binary = image > thresh
     """
+    assert_nD(image, 2)
     # Copy to ensure input image is not modified
     image = image.copy()
     # Requires positive image (because of log(mean))
@@ -394,18 +397,18 @@ def threshold_li(image):
 
 
 def threshold_mean(image):
-    """Return threshold value based on the of grayscale values.
+    """Return threshold value based on the mean of grayscale values.
 
     Parameters
     ----------
-    image : array
+    image : (N, M) ndarray
         Grayscale input image.
 
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels intensities that less or equal of
-        this value assumed as foreground.
+        Upper threshold value. All pixels with intensities more than
+        this value are assumed to be foreground.
 
     References
     ----------
@@ -420,15 +423,16 @@ def threshold_mean(image):
     >>> thresh = threshold_mean(image)
     >>> binary = image > thresh
     """
-    return np.mean(image.ravel())
+    assert_nD(image, 2)
+    return np.mean(image)
 
 
 def threshold_triangle(image, nbins=256):
-    """Return threshold value based on triangle algorithm.
+    """Return threshold value based on the triangle algorithm.
 
     Parameters
     ----------
-    image : array
+    image : (N, M) ndarray
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -437,8 +441,8 @@ def threshold_triangle(image, nbins=256):
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels intensities that less or equal of
-        this value assumed as foreground.
+        Upper threshold value. All pixels with intensities more than
+        this value are assumed to be foreground.
 
     References
     ----------
@@ -453,32 +457,33 @@ def threshold_triangle(image, nbins=256):
     >>> thresh = threshold_triangle(image)
     >>> binary = image > thresh
     """
+    assert_nD(image, 2)
     # nbins is ignored for interger arrays
     # so, we recalculate the effective nbins.
     hist, bin_centers = histogram(image.ravel(), nbins)
     nbins = bin_centers[-1] - bin_centers[0] + 1
 
-    # Find peak and histogram extremities.
-    argpeak_height = np.argmax(hist)
-    peak_height = np.max(hist)
-    arglefth = np.where(hist>0)[0][0]
-    argrighth = np.where(hist>0)[0][-1]
+    # Find peak, lowest and highest gray levels.
+    arg_peak_height = np.argmax(hist)
+    peak_height = hist[arg_peak_height]
+    arg_low_level = np.where(hist>0)[0][0]
+    arg_high_level = np.where(hist>0)[0][-1]
 
-    # Flip is true if left tail is shorter.
-    flip = argpeak_height - arglefth < argrighth - argpeak_height
+    # Flip is True if left tail is shorter.
+    flip = arg_peak_height - arg_low_level < arg_high_level - arg_peak_height
     if flip:
         hist = hist[::-1]
-        arglefth = nbins - argrighth - 1
-        argpeak_height = nbins - argpeak_height - 1
+        arg_low_level = nbins - arg_high_level - 1
+        arg_peak_height = nbins - arg_peak_height - 1
 
-    # If flip == True, argright becomes incorrect
+    # If flip == True, arg_high_level becomes incorrect
     # but we don't need it anymore.
-    del(argrighth)
+    del(arg_high_level)
 
     # Set up the coordinate system.
-    width = argpeak_height - arglefth
+    width = arg_peak_height - arg_low_level
     x1 = np.arange(width)
-    y1 = hist[x1 + arglefth]
+    y1 = hist[x1 + arg_low_level]
 
     # Normalize.
     norm = np.sqrt(peak_height**2 + width**2)
@@ -486,9 +491,9 @@ def threshold_triangle(image, nbins=256):
     width /= norm
 
     # Maximize the length.
-    d = peak_height * arglefth - width * hist[arglefth]
+    d = peak_height * arg_low_level - width * hist[arg_low_level]
     length = peak_height * x1 - width * y1 - d
-    level = np.argmax(length) + arglefth
+    level = np.argmax(length) + arg_low_level
 
     if flip:
         level = nbins - level - 1

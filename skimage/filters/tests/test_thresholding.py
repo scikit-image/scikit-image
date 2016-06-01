@@ -292,7 +292,7 @@ def test_triangle_images():
 
 
 def test_triangle_flip():
-    # Depending on the skewness, the agorithm flips the histogram.
+    # Depending on the skewness, the algorithm flips the histogram.
     # We check that the flip doesn't affect too much the result.
     img = data.camera()
     inv_img = np.invert(img)
@@ -306,7 +306,7 @@ def test_triangle_flip():
     # Check that most of the pixels are identical
     # See numpy #7685 for a future np.testing API
     unequal_pos = np.where(t_img.ravel() != t_inv_inv_img.ravel())
-    assert(len(unequal_pos[0])/len(t_img.ravel()) < 1e-2)
+    assert(len(unequal_pos[0]) / len(t_img.ravel()) < 1e-2)
 
 
 if __name__ == '__main__':
