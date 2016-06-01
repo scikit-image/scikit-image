@@ -9,7 +9,6 @@ from . import _moments
 
 
 from functools import wraps
-from collections import defaultdict
 
 __all__ = ['regionprops', 'perimeter']
 
@@ -95,7 +94,8 @@ class _RegionProperties(object):
 
         if intensity_image is not None:
             if not intensity_image.shape == label_image.shape:
-                raise ValueError('Label and intensity image must have the same shape.')
+                raise ValueError('Label and intensity image must have the'
+                                 'same shape.')
 
         self.label = label
 
@@ -283,7 +283,8 @@ class _RegionProperties(object):
     @_cached
     @only2d
     def weighted_moments(self):
-        return _moments.moments_central(self._intensity_image_double(), 0, 0, 3)
+        return _moments.moments_central(self._intensity_image_double(),
+                                        0, 0, 3)
 
     @_cached
     @only2d
@@ -370,7 +371,9 @@ def regionprops(label_image, intensity_image=None, cache=True):
     **area** : int
         Number of pixels of region.
     **bbox** : tuple
-        Bounding box ``(min_row, min_col, max_row, max_col)``
+        Bounding box ``(min_row, min_col, max_row, max_col)``.
+        Pixels belonging to the bounding box are in the half-open interval
+        ``[min_row; max_row)`` and ``[min_col; max_col)``.
     **centroid** : array
         Centroid coordinate tuple ``(row, col)``.
     **convex_area** : int
@@ -489,6 +492,10 @@ def regionprops(label_image, intensity_image=None, cache=True):
 
       for prop in region:
           print(prop, region[prop])
+
+    See Also
+    --------
+    label
 
     References
     ----------
