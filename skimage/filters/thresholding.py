@@ -110,6 +110,11 @@ def threshold_otsu(image, nbins=256):
     threshold : float
         Upper threshold value. All pixels intensities that less or equal of
         this value assumed as foreground.
+        
+    Raises
+    ------
+    ValueError
+         If `image` only contains a single grayscale value.
 
     References
     ----------
@@ -133,9 +138,9 @@ def threshold_otsu(image, nbins=256):
 
     # Check if the image is multi-colored or not
     if image.min() == image.max():
-        raise TypeError("threshold_otsu is expected to work with images " \
-                        "having more than one color. The input image seems " \
-                        "to have just one color {0}.".format(image.min()))
+        raise ValueError("threshold_otsu is expected to work with images " \
+                         "having more than one color. The input image seems " \
+                         "to have just one color {0}.".format(image.min()))
 
     hist, bin_centers = histogram(image.ravel(), nbins)
     hist = hist.astype(float)
