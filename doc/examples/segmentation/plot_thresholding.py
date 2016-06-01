@@ -7,11 +7,11 @@ Thresholding is used to create a binary image from a grayscale image [1]_.
 
 Thresholding algorithms can be separated in two categories:
 
-* Histogram-based. The histogram of the pixel intensity is used and
-assumptions may be made on the properties of this histogram (e.g. bimodal).
+- Histogram-based. The histogram of the pixel intensity is used and
+  assumptions may be made on the properties of this histogram (e.g. bimodal).
+- Local. To process a pixel, only the neighboring pixels are used.
+  These algorithms often require more computation time.
 
-* Local. To process a pixel, only the neighboring pixels are used.
-These algorithms often require more computation time.
 
 Scikit-image includes a function to test thresholding algorithms provided
 in the library. Therefore, in a glance, you can select the best algorithm
@@ -30,9 +30,9 @@ img = page()
 
 # Here, we specify a radius for local thresholding algorithm.
 # If it is not specified, only global algorithms are called.
-fig, ax = thresholding.mosaic_threshold(img, radius=20,
-                                        figsize=(10,8), verbose=False)
-fig.show()
+fig, ax = thresholding.try_all_threshold(img, radius=20,
+                                         figsize=(10,8), verbose=False)
+plt.show()
 
 """
 

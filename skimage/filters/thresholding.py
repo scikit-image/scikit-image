@@ -1,11 +1,3 @@
-__all__ = ['mosaic_threshold',
-           'threshold_adaptive',
-           'threshold_otsu',
-           'threshold_yen',
-           'threshold_isodata',
-           'threshold_li',
-           'threshold_minimum', ]
-
 import math
 import numpy as np
 from scipy import ndimage as ndi
@@ -18,7 +10,16 @@ from ..morphology import disk
 from ..filters.rank import otsu
 
 
-def _mosaic(image, methods=None, figsize=None, num_cols=2, verbose=True):
+__all__ = ['try_all_threshold',
+           'threshold_adaptive',
+           'threshold_otsu',
+           'threshold_yen',
+           'threshold_isodata',
+           'threshold_li',
+           'threshold_minimum', ]
+
+
+def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     """Returns a figure comparing the outputs of different methods.
 
     Parameters
@@ -26,14 +27,14 @@ def _mosaic(image, methods=None, figsize=None, num_cols=2, verbose=True):
     image : (N, M) ndarray
         Input image.
     methods : dict, optional
-        Names and associated functions of the algorithms.
-        The functions must return an image.
+        Names and associated functions.
+        Functions must take and return an image.
     figsize : tuple, optional
         Figure size (in inches).
     num_cols : int, optional
         Number of columns.
     verbose : bool, optional
-        Print the function name for each method.
+        Print function name for each method.
 
     Returns
     -------
@@ -41,7 +42,7 @@ def _mosaic(image, methods=None, figsize=None, num_cols=2, verbose=True):
         Matplotlib figure and axes.
     """
     num_rows = math.ceil((len(methods) + 1) / 2.)
-    num_rows = int(num_rows) # Python 2.7 support
+    num_rows = int(num_rows)  # Python 2.7 support
     fig, ax = plt.subplots(num_rows, num_cols, figsize=figsize,
                            sharex=True, sharey=True,
                            subplot_kw={'adjustable': 'box-forced'})
@@ -62,11 +63,10 @@ def _mosaic(image, methods=None, figsize=None, num_cols=2, verbose=True):
         a.axis('off')
 
     fig.tight_layout()
-    #plt.close()
     return fig, ax
 
 
-def mosaic_threshold(image, radius=None, figsize=(8, 5), verbose=True):
+def try_all_threshold(image, radius=None, figsize=(8, 5), verbose=True):
     """Returns a figure comparing the outputs of different thresholding methods.
 
     Parameters
@@ -75,11 +75,11 @@ def mosaic_threshold(image, radius=None, figsize=(8, 5), verbose=True):
         Input image.
     radius : int, optinal
         Lengthscale used for local methods.
-        If None, local methods are not called.
+        If None, local methods are ignored.
     figsize : tuple, optional
         Figure size (in inches).
     verbose : bool, optional
-        Print the function name for each method.
+        Print function name for each method.
 
     Returns
     -------
@@ -100,22 +100,21 @@ def mosaic_threshold(image, radius=None, figsize=(8, 5), verbose=True):
     Example
     -------
     >>> from skimage.data import text
-    >>> fig, ax = mosaic_threshold(text(), radius=20,
-    ...                            figsize=(10, 6), verbose=None)
+    >>> fig, ax = try_all_threshold(text(), radius=20,
+    ...                            figsize=(10, 6), verbose=False)
     """
 
     def include_selem(func, *args, **kwargs):
         """
-        A wrapper function to embed a threshold range.
+        A wrapper function to embed a threshold range for local algorithms.
         """
         def wrapper(im):
             return func(im, *args, **kwargs)
         try:
             wrapper.__orifunc__ = func.__orifunc__
         except AttributeError:
-            wrapper.__orifunc__ = func.__module__ + '.' +  func.__name__
+            wrapper.__orifunc__ = func.__module__ + '.' + func.__name__
         return wrapper
-
 
     def thresh(func):
         """
@@ -126,7 +125,7 @@ def mosaic_threshold(image, radius=None, figsize=(8, 5), verbose=True):
         try:
             wrapper.__orifunc__ = func.__orifunc__
         except AttributeError:
-            wrapper.__orifunc__ = func.__module__ + '.' +  func.__name__
+            wrapper.__orifunc__ = func.__module__ + '.' + func.__name__
         return wrapper
 
     # Global algorithms.
@@ -142,12 +141,12 @@ def mosaic_threshold(image, radius=None, figsize=(8, 5), verbose=True):
         methods['Local Otsu'] = thresh(local_otsu)
 
         block_size = 2 * int(radius) + 1
-        adaptive_threshold = include_selem(threshold_adaptive, block_size, offset=10)
+        adaptive_threshold = include_selem(threshold_adaptive, block_size,
+                                           offset=10)
         methods['Adaptive threshold'] = adaptive_threshold
 
-
-    return _mosaic(image, figsize=figsize,
-                   methods=methods, verbose=verbose)
+    return _try_all(image, figsize=figsize,
+                    methods=methods, verbose=verbose)
 
 __all__ = ['threshold_adaptive',
            'threshold_otsu',
