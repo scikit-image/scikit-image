@@ -110,7 +110,7 @@ def threshold_otsu(image, nbins=256):
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels with intensities more than
+        Upper threshold value. All pixels with an intensity higher than
         this value are assumed to be foreground.
 
     Raises
@@ -178,7 +178,7 @@ def threshold_yen(image, nbins=256):
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels with intensities more than
+        Upper threshold value. All pixels with an intensity higher than
         this value are assumed to be foreground.
 
     References
@@ -339,7 +339,7 @@ def threshold_li(image):
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels with intensities more than
+        Upper threshold value. All pixels with an intensity higher than
         this value are assumed to be foreground.
 
     References
@@ -407,7 +407,7 @@ def threshold_mean(image):
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels with intensities more than
+        Upper threshold value. All pixels with an intensity higher than
         this value are assumed to be foreground.
 
     References
@@ -441,7 +441,7 @@ def threshold_triangle(image, nbins=256):
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels with intensities more than
+        Upper threshold value. All pixels with an intensity higher than
         this value are assumed to be foreground.
 
     References
