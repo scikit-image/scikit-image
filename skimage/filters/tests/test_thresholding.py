@@ -292,10 +292,7 @@ def test_threshold_minimum():
 
 
 def test_threshold_minimum_synthetic():
-    img = np.zeros((25*25), dtype=np.uint8)
-    for i in range(25*25):
-        img[i] = i % 256
-    img = np.reshape(img, (25, 25))
+    img = np.arange(25*25, dtype=np.uint8).reshape((25, 25))
     img[0:9, :] = 50
     img[14:25, :] = 250
 
