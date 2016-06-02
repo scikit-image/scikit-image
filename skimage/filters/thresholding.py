@@ -112,7 +112,7 @@ def threshold_otsu(image, nbins=256):
     threshold : float
         Upper threshold value. All pixels intensities that less or equal of
         this value assumed as foreground.
-        
+
     Raises
     ------
     ValueError
@@ -395,11 +395,11 @@ def threshold_li(image):
     return threshold + immin
 
 
-def threshold_minimum(image, nbins=256, bias='min'):
+def threshold_minimum(image, nbins=256, bias='min', max_iter=10000):
     """Return threshold value based on minimum method.
 
-    A histogram is computed and smoothed until there are only two maximums.
-    Then the minimum between these is found.
+    The histogram of the input `image` is computed and smoothed until there are
+    only two maxima. Then the minimum in between is the threshold value.
 
     Parameters
     ----------
@@ -411,11 +411,14 @@ def threshold_minimum(image, nbins=256, bias='min'):
     bias : {'min', 'mid', 'max'}, optional
         'min', 'mid', 'max' return lowest, middle, or highest pixel value
         with minimum histogram value.
+    max_iter: int, optional
+        Maximum number of iterations to smooth the histogram.
 
     Returns
     -------
     threshold : float
-        Computed threshold value.
+        Upper threshold value. All pixels with an intensity higher than
+        this value are assumed to be foreground.
 
     Raises
     ------
@@ -456,7 +459,6 @@ def threshold_minimum(image, nbins=256, bias='min'):
 
     hist, bin_centers = histogram(image.ravel(), nbins)
 
-    max_iter = 10000
     smooth_hist = np.copy(hist)
     for counter in range(max_iter):
         smooth_hist = ndif.uniform_filter1d(smooth_hist, 3)
@@ -466,7 +468,7 @@ def threshold_minimum(image, nbins=256, bias='min'):
     if len(maximums) != 2:
         raise RuntimeError('Unable to find two maxima in histogram')
     elif counter == max_iter - 1:
-        raise RuntimeError('Maximum iteration reached for histogram histogram'
+        raise RuntimeError('Maximum iteration reached for histogram'
                            'smoothing')
 
     # Find lowest point between the maxima, biased to the low end (min)

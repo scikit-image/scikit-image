@@ -7,7 +7,7 @@ The minimum algorithm takes a histogram of the image and smooths it
 repeatedly until there are only two peaks in the histogram.  Then it
 finds the minimum value between the two peaks.  After smoothing the
 histogram, there can be multiple pixel values with the minimum histogram
-count, so you can pick 'min', 'mid', or 'max' of these values.
+count, so you can pick the 'min', 'mid', or 'max' of these values.
 
 """
 import matplotlib.pyplot as plt
