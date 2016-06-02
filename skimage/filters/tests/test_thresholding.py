@@ -10,7 +10,8 @@ from skimage.filters.thresholding import (threshold_adaptive,
                                           threshold_otsu,
                                           threshold_li,
                                           threshold_yen,
-                                          threshold_isodata)
+                                          threshold_isodata,
+                                          threshold_minimum)
 
 
 class TestSimpleImage():
@@ -59,7 +60,7 @@ class TestSimpleImage():
         assert threshold_yen(image) == 127
 
     def test_yen_binary(self):
-        image = np.zeros([2,256], dtype=np.uint8)
+        image = np.zeros([2, 256], dtype=np.uint8)
         image[0] = 255
         assert threshold_yen(image) < 1
 
@@ -118,7 +119,8 @@ class TestSimpleImage():
         out = threshold_adaptive(self.image, 3, method='gaussian')
         assert_equal(ref, out)
 
-        out = threshold_adaptive(self.image, 3, method='gaussian', param=1.0 / 3.0)
+        out = threshold_adaptive(self.image, 3, method='gaussian',
+                                 param=1.0 / 3.0)
         assert_equal(ref, out)
 
     def test_threshold_adaptive_mean(self):
@@ -169,6 +171,7 @@ def test_otsu_one_color_image():
     img = np.ones((10, 10), dtype=np.uint8)
     assert_raises(ValueError, threshold_otsu, img)
 
+
 def test_li_camera_image():
     camera = skimage.img_as_ubyte(data.camera())
     assert 63 < threshold_li(camera) < 65
@@ -187,6 +190,7 @@ def test_li_coins_image_as_float():
 def test_li_astro_image():
     img = skimage.img_as_ubyte(data.astronaut())
     assert 66 < threshold_li(img) < 68
+
 
 def test_yen_camera_image():
     camera = skimage.img_as_ubyte(data.camera())
@@ -271,6 +275,40 @@ def test_isodata_moon_image_negative_float():
     assert_almost_equal(thresholds,
                         [-13.83789062, -12.84179688, -11.84570312, 22.02148438,
                          23.01757812, 24.01367188, 38.95507812, 39.95117188])
+
+
+def test_threshold_minimum():
+    camera = skimage.img_as_ubyte(data.camera())
+
+    threshold = threshold_minimum(camera)
+    assert threshold == 76
+
+    threshold = threshold_minimum(camera, bias='max')
+    assert threshold == 77
+
+    astronaut = skimage.img_as_ubyte(data.astronaut())
+    threshold = threshold_minimum(astronaut)
+    assert threshold == 117
+
+
+def test_threshold_minimum_synthetic():
+    img = np.arange(25*25, dtype=np.uint8).reshape((25, 25))
+    img[0:9, :] = 50
+    img[14:25, :] = 250
+
+    threshold = threshold_minimum(img, bias='min')
+    assert threshold == 93
+
+    threshold = threshold_minimum(img, bias='mid')
+    assert threshold == 159
+
+    threshold = threshold_minimum(img, bias='max')
+    assert threshold == 225
+
+
+def test_threshold_minimum_failure():
+    img = np.zeros((16*16), dtype=np.uint8)
+    assert_raises(RuntimeError, threshold_minimum, img)
 
 
 if __name__ == '__main__':
