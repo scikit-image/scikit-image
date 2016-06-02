@@ -131,6 +131,7 @@ def try_all_threshold(image, radius=None, figsize=(8, 5), verbose=True):
     # Global algorithms.
     methods = OrderedDict({'Isodata': thresh(threshold_isodata),
                            'Li': thresh(threshold_li),
+                           'Minimum': thresh(threshold_minimum),
                            'Otsu': thresh(threshold_otsu),
                            'Yen': thresh(threshold_yen)})
 
