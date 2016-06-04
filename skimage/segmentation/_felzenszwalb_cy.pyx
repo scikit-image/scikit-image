@@ -12,11 +12,11 @@ from ..measure._ccomp cimport find_root, join_trees
 from ..util import img_as_float
 
 
-def _felzenszwalb_grey(image, double scale=1, sigma=0.8,
+def _felzenszwalb_rgb(image, double scale=1, sigma=0.8,
                        Py_ssize_t min_size=20):
-    """Felzenszwalb's efficient graph based segmentation for a single channel.
+    """Felzenszwalb's efficient graph based segmentation for multiple channels.
 
-    Produces an oversegmentation of a 2d image using a fast, minimum spanning
+    Produces an oversegmentation of a multi-channel image using a fast, minimum spanning
     tree based clustering on the image grid.
     The number of produced segments as well as their size can only be
     controlled indirectly through ``scale``. Segment size within an image can
@@ -24,36 +24,36 @@ def _felzenszwalb_grey(image, double scale=1, sigma=0.8,
 
     Parameters
     ----------
-    image: ndarray
+    image : ndarray
         Input image.
-    scale: float, optional (default 1)
+    scale : float, optional (default 1)
         Sets the obervation level. Higher means larger clusters.
-    sigma: float, optional (default 0.8)
+    sigma : float, optional (default 0.8)
         Width of Gaussian smoothing kernel used in preprocessing.
         Larger sigma gives smother segment boundaries.
-    min_size: int, optional (default 20)
+    min_size : int, optional (default 20)
         Minimum component size. Enforced using postprocessing.
 
     Returns
     -------
-    segment_mask: (height, width) ndarray
+    segment_mask : (height, width) ndarray
         Integer mask indicating segment labels.
     """
-    if image.ndim != 2:
-        raise ValueError("This algorithm works only on single-channel 2d"
+    if image.ndim != 3:
+        raise ValueError("This algorithm works only on multi-channel 3d"
                 "images. Got image of shape %s" % str(image.shape))
 
     image = img_as_float(image)
 
     # rescale scale to behave like in reference implementation
     scale = float(scale) / 255.
-    image = ndi.gaussian_filter(image, sigma=sigma)
+    image = ndi.gaussian_filter(image, sigma=[sigma, sigma, 0])
 
     # compute edge weights in 8 connectivity:
-    right_cost = np.abs((image[1:, :] - image[:-1, :]))
-    down_cost = np.abs((image[:, 1:] - image[:, :-1]))
-    dright_cost = np.abs((image[1:, 1:] - image[:-1, :-1]))
-    uright_cost = np.abs((image[1:, :-1] - image[:-1, 1:]))
+    right_cost = np.sqrt(np.sum((image[1:, :,:] - image[:-1, :,:])*(image[1:, :,:] - image[:-1, :,:]), axis=-1))
+    down_cost = np.sqrt(np.sum((image[:, 1:,:] - image[:, :-1,:])*(image[:, 1:,:] - image[:, :-1,:]), axis=-1))
+    dright_cost = np.sqrt(np.sum((image[1:, 1:,:] - image[:-1, :-1,:])*(image[1:, 1:,:] - image[:-1, :-1,:]), axis=-1))
+    uright_cost = np.sqrt(np.sum((image[1:, :-1,:] - image[:-1, 1:,:])*(image[1:, :-1,:] - image[:-1, 1:,:]), axis=-1))
     cdef cnp.ndarray[cnp.float_t, ndim=1] costs = np.hstack([right_cost.ravel(),
         down_cost.ravel(), dright_cost.ravel(),
         uright_cost.ravel()]).astype(np.float)
