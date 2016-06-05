@@ -70,22 +70,22 @@ fb2_montage = montage2d(fb2, rescale_intensity=True)
 
 # --
 fig, axes = plt.subplots(2, 2, figsize=(7, 6))
-ax0, ax1, ax2, ax3 = axes.ravel()
+ax = axes.ravel()
 
-ax0.imshow(astro, cmap=plt.cm.gray)
-ax0.set_title("Image (original)")
+ax[0].imshow(astro, cmap=plt.cm.gray)
+ax[0].set_title("Image (original)")
 
-ax1.imshow(fb1_montage, cmap=plt.cm.gray, interpolation='nearest')
-ax1.set_title("K-means filterbank (codebook)\non original image")
+ax[1].imshow(fb1_montage, cmap=plt.cm.gray, interpolation='nearest')
+ax[1].set_title("K-means filterbank (codebook)\non original image")
 
-ax2.imshow(astro_dog, cmap=plt.cm.gray)
-ax2.set_title("Image (LGN-like DoG)")
+ax[2].imshow(astro_dog, cmap=plt.cm.gray)
+ax[2].set_title("Image (LGN-like DoG)")
 
-ax3.imshow(fb2_montage, cmap=plt.cm.gray, interpolation='nearest')
-ax3.set_title("K-means filterbank (codebook)\non LGN-like DoG image")
+ax[3].imshow(fb2_montage, cmap=plt.cm.gray, interpolation='nearest')
+ax[3].set_title("K-means filterbank (codebook)\non LGN-like DoG image")
 
-for ax in axes.ravel():
-    ax.axis('off')
+for a in ax.ravel():
+    a.axis('off')
 
 fig.tight_layout()
 plt.show()

@@ -67,30 +67,30 @@ noisy_image = img_as_ubyte(data.camera())
 noisy_image[noise > 0.99] = 255
 noisy_image[noise < 0.01] = 0
 
-fig, ax = plt.subplots(2, 2, figsize=(10, 7), sharex=True, sharey=True)
-ax1, ax2, ax3, ax4 = ax.ravel()
+fig, axes = plt.subplots(2, 2, figsize=(10, 7), sharex=True, sharey=True)
+ax = axes.ravel()
 
-ax1.imshow(noisy_image, vmin=0, vmax=255, cmap=plt.cm.gray)
-ax1.set_title('Noisy image')
-ax1.axis('off')
-ax1.set_adjustable('box-forced')
+ax[0].imshow(noisy_image, vmin=0, vmax=255, cmap=plt.cm.gray)
+ax[0].set_title('Noisy image')
+ax[0].axis('off')
+ax[0].set_adjustable('box-forced')
 
-ax2.imshow(median(noisy_image, disk(1)), vmin=0, vmax=255, cmap=plt.cm.gray)
-ax2.set_title('Median $r=1$')
-ax2.axis('off')
-ax2.set_adjustable('box-forced')
-
-
-ax3.imshow(median(noisy_image, disk(5)), vmin=0, vmax=255, cmap=plt.cm.gray)
-ax3.set_title('Median $r=5$')
-ax3.axis('off')
-ax3.set_adjustable('box-forced')
+ax[1].imshow(median(noisy_image, disk(1)), vmin=0, vmax=255, cmap=plt.cm.gray)
+ax[1].set_title('Median $r=1$')
+ax[1].axis('off')
+ax[1].set_adjustable('box-forced')
 
 
-ax4.imshow(median(noisy_image, disk(20)), vmin=0, vmax=255, cmap=plt.cm.gray)
-ax4.set_title('Median $r=20$')
-ax4.axis('off')
-ax4.set_adjustable('box-forced')
+ax[2].imshow(median(noisy_image, disk(5)), vmin=0, vmax=255, cmap=plt.cm.gray)
+ax[2].set_title('Median $r=5$')
+ax[2].axis('off')
+ax[2].set_adjustable('box-forced')
+
+
+ax[3].imshow(median(noisy_image, disk(20)), vmin=0, vmax=255, cmap=plt.cm.gray)
+ax[3].set_title('Median $r=20$')
+ax[3].axis('off')
+ax[3].set_adjustable('box-forced')
 
 
 ######################################################################
@@ -142,26 +142,26 @@ noisy_image = img_as_ubyte(data.camera())
 
 bilat = mean_bilateral(noisy_image.astype(np.uint16), disk(20), s0=10, s1=10)
 
-fig, ax = plt.subplots(2, 2, figsize=(10, 7), sharex='row', sharey='row')
-ax1, ax2, ax3, ax4 = ax.ravel()
+fig, axes = plt.subplots(2, 2, figsize=(10, 7), sharex='row', sharey='row')
+ax = axes.ravel()
 
-ax1.imshow(noisy_image, cmap=plt.cm.gray)
-ax1.set_title('Original')
-ax1.axis('off')
-ax1.set_adjustable('box-forced')
+ax[0].imshow(noisy_image, cmap=plt.cm.gray)
+ax[0].set_title('Original')
+ax[0].axis('off')
+ax[0].set_adjustable('box-forced')
 
-ax2.imshow(bilat, cmap=plt.cm.gray)
-ax2.set_title('Bilateral mean')
-ax2.axis('off')
-ax2.set_adjustable('box-forced')
+ax[1].imshow(bilat, cmap=plt.cm.gray)
+ax[1].set_title('Bilateral mean')
+ax[1].axis('off')
+ax[1].set_adjustable('box-forced')
 
-ax3.imshow(noisy_image[200:350, 350:450], cmap=plt.cm.gray)
-ax3.axis('off')
-ax3.set_adjustable('box-forced')
+ax[2].imshow(noisy_image[200:350, 350:450], cmap=plt.cm.gray)
+ax[2].axis('off')
+ax[2].set_adjustable('box-forced')
 
-ax4.imshow(bilat[200:350, 350:450], cmap=plt.cm.gray)
-ax4.axis('off')
-ax4.set_adjustable('box-forced')
+ax[3].imshow(bilat[200:350, 350:450], cmap=plt.cm.gray)
+ax[3].axis('off')
+ax[3].set_adjustable('box-forced')
 
 ######################################################################
 # One can see that the large continuous part of the image (e.g. sky) is
@@ -193,26 +193,26 @@ hist = np.histogram(noisy_image, bins=np.arange(0, 256))
 glob_hist = np.histogram(glob, bins=np.arange(0, 256))
 loc_hist = np.histogram(loc, bins=np.arange(0, 256))
 
-fig, ax = plt.subplots(3, 2, figsize=(10, 10))
-ax1, ax2, ax3, ax4, ax5, ax6 = ax.ravel()
+fig, axes = plt.subplots(3, 2, figsize=(10, 10))
+ax = axes.ravel()
 
-ax1.imshow(noisy_image, interpolation='nearest', cmap=plt.cm.gray)
-ax1.axis('off')
+ax[0].imshow(noisy_image, interpolation='nearest', cmap=plt.cm.gray)
+ax[0].axis('off')
 
-ax2.plot(hist[1][:-1], hist[0], lw=2)
-ax2.set_title('Histogram of gray values')
+ax[1].plot(hist[1][:-1], hist[0], lw=2)
+ax[1].set_title('Histogram of gray values')
 
-ax3.imshow(glob, interpolation='nearest', cmap=plt.cm.gray)
-ax3.axis('off')
+ax[2].imshow(glob, interpolation='nearest', cmap=plt.cm.gray)
+ax[2].axis('off')
 
-ax4.plot(glob_hist[1][:-1], glob_hist[0], lw=2)
-ax4.set_title('Histogram of gray values')
+ax[3].plot(glob_hist[1][:-1], glob_hist[0], lw=2)
+ax[3].set_title('Histogram of gray values')
 
-ax5.imshow(loc, interpolation='nearest', cmap=plt.cm.gray)
-ax5.axis('off')
+ax[4].imshow(loc, interpolation='nearest', cmap=plt.cm.gray)
+ax[4].axis('off')
 
-ax6.plot(loc_hist[1][:-1], loc_hist[0], lw=2)
-ax6.set_title('Histogram of gray values')
+ax[5].plot(loc_hist[1][:-1], loc_hist[0], lw=2)
+ax[5].set_title('Histogram of gray values')
 
 ######################################################################
 # Another way to maximize the number of gray-levels used for an image is to
@@ -261,7 +261,6 @@ loc_perc_autolevel2 = autolevel_percentile(image, selem=selem, p0=.05, p1=.95)
 loc_perc_autolevel3 = autolevel_percentile(image, selem=selem, p0=.1, p1=.9)
 
 fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(7, 8), sharex=True, sharey=True)
-ax0, ax1, ax2 = axes
 plt.gray()
 
 title_list = ['Original',
@@ -276,9 +275,9 @@ image_list = [image,
                 loc_perc_autolevel1,
                 loc_perc_autolevel2,
                 loc_perc_autolevel3]
-axes_list = axes.ravel().tolist()
+axes_list = axes.ravel()
 
-for i in range(0,len(image_list)):
+for i in range(0, len(image_list)):
     axes_list[i].imshow(image_list[i], cmap=plt.cm.gray, vmin=0, vmax=255)
     axes_list[i].set_title(title_list[i])
     axes_list[i].axis('off')
@@ -295,26 +294,26 @@ noisy_image = img_as_ubyte(data.camera())
 
 enh = enhance_contrast(noisy_image, disk(5))
 
-fig, ax = plt.subplots(2, 2, figsize=[10, 7], sharex='row', sharey='row')
-ax1, ax2, ax3, ax4 = ax.ravel()
+fig, axes = plt.subplots(2, 2, figsize=[10, 7], sharex='row', sharey='row')
+ax = axes.ravel()
 
-ax1.imshow(noisy_image, cmap=plt.cm.gray)
-ax1.set_title('Original')
-ax1.axis('off')
-ax1.set_adjustable('box-forced')
+ax[0].imshow(noisy_image, cmap=plt.cm.gray)
+ax[0].set_title('Original')
+ax[0].axis('off')
+ax[0].set_adjustable('box-forced')
 
-ax2.imshow(enh, cmap=plt.cm.gray)
-ax2.set_title('Local morphological contrast enhancement')
-ax2.axis('off')
-ax2.set_adjustable('box-forced')
+ax[1].imshow(enh, cmap=plt.cm.gray)
+ax[1].set_title('Local morphological contrast enhancement')
+ax[1].axis('off')
+ax[1].set_adjustable('box-forced')
 
-ax3.imshow(noisy_image[200:350, 350:450], cmap=plt.cm.gray)
-ax3.axis('off')
-ax3.set_adjustable('box-forced')
+ax[2].imshow(noisy_image[200:350, 350:450], cmap=plt.cm.gray)
+ax[2].axis('off')
+ax[2].set_adjustable('box-forced')
 
-ax4.imshow(enh[200:350, 350:450], cmap=plt.cm.gray)
-ax4.axis('off')
-ax4.set_adjustable('box-forced')
+ax[3].imshow(enh[200:350, 350:450], cmap=plt.cm.gray)
+ax[3].axis('off')
+ax[3].set_adjustable('box-forced')
 
 ######################################################################
 # The percentile version of the local morphological contrast enhancement uses
@@ -326,22 +325,22 @@ noisy_image = img_as_ubyte(data.camera())
 
 penh = enhance_contrast_percentile(noisy_image, disk(5), p0=.1, p1=.9)
 
-fig, ax = plt.subplots(2, 2, figsize=[10, 7], sharex='row', sharey='row')
-ax1, ax2, ax3, ax4 = ax.ravel()
+fig, axes = plt.subplots(2, 2, figsize=[10, 7], sharex='row', sharey='row')
+ax = axes.ravel()
 
-ax1.imshow(noisy_image, cmap=plt.cm.gray)
-ax1.set_title('Original')
+ax[0].imshow(noisy_image, cmap=plt.cm.gray)
+ax[0].set_title('Original')
 
-ax2.imshow(penh, cmap=plt.cm.gray)
-ax2.set_title('Local percentile morphological\n contrast enhancement')
+ax[1].imshow(penh, cmap=plt.cm.gray)
+ax[1].set_title('Local percentile morphological\n contrast enhancement')
 
-ax3.imshow(noisy_image[200:350, 350:450], cmap=plt.cm.gray)
+ax[2].imshow(noisy_image[200:350, 350:450], cmap=plt.cm.gray)
 
-ax4.imshow(penh[200:350, 350:450], cmap=plt.cm.gray)
+ax[3].imshow(penh[200:350, 350:450], cmap=plt.cm.gray)
 
-for ax in ax.ravel():
-    ax.axis('off')
-    ax.set_adjustable('box-forced')
+for a in ax:
+    a.axis('off')
+    a.set_adjustable('box-forced')
 
 ######################################################################
 #
@@ -379,24 +378,24 @@ loc_otsu = p8 >= t_loc_otsu
 t_glob_otsu = threshold_otsu(p8)
 glob_otsu = p8 >= t_glob_otsu
 
-fig, ax = plt.subplots(2, 2, sharex=True, sharey=True)
-ax1, ax2, ax3, ax4 = ax.ravel()
+fig, axes = plt.subplots(2, 2, sharex=True, sharey=True)
+ax = axes.ravel()
 
 fig.colorbar(ax1.imshow(p8, cmap=plt.cm.gray), ax=ax1)
-ax1.set_title('Original')
+ax[0].set_title('Original')
 
-fig.colorbar(ax2.imshow(t_loc_otsu, cmap=plt.cm.gray), ax=ax2)
-ax2.set_title('Local Otsu ($r=%d$)' % radius)
+fig.colorbar(ax[1].imshow(t_loc_otsu, cmap=plt.cm.gray), ax=ax2)
+ax[1].set_title('Local Otsu ($r=%d$)' % radius)
 
-ax3.imshow(p8 >= t_loc_otsu, cmap=plt.cm.gray)
-ax3.set_title('Original >= local Otsu' % t_glob_otsu)
+ax[2].imshow(p8 >= t_loc_otsu, cmap=plt.cm.gray)
+ax[2].set_title('Original >= local Otsu' % t_glob_otsu)
 
-ax4.imshow(glob_otsu, cmap=plt.cm.gray)
-ax4.set_title('Global Otsu ($t=%d$)' % t_glob_otsu)
+ax[3].imshow(glob_otsu, cmap=plt.cm.gray)
+ax[3].set_title('Global Otsu ($t=%d$)' % t_glob_otsu)
 
-for ax in ax.ravel():
-    ax.axis('off')
-    ax.set_adjustable('box-forced')
+for a in ax:
+    a.axis('off')
+    a.set_adjustable('box-forced')
 
 ######################################################################
 # The following example shows how local Otsu thresholding handles a global
@@ -446,24 +445,24 @@ opening = minimum(maximum(noisy_image, disk(5)), disk(5))
 grad = gradient(noisy_image, disk(5))
 
 # display results
-fig, ax = plt.subplots(2, 2, figsize=[10, 7], sharex=True, sharey=True)
-ax1, ax2, ax3, ax4 = ax.ravel()
+fig, axes = plt.subplots(2, 2, figsize=[10, 7], sharex=True, sharey=True)
+ax = axes.ravel()
 
-ax1.imshow(noisy_image, cmap=plt.cm.gray)
-ax1.set_title('Original')
+ax[0].imshow(noisy_image, cmap=plt.cm.gray)
+ax[0].set_title('Original')
 
-ax2.imshow(closing, cmap=plt.cm.gray)
-ax2.set_title('Gray-level closing')
+ax[1].imshow(closing, cmap=plt.cm.gray)
+ax[1].set_title('Gray-level closing')
 
-ax3.imshow(opening, cmap=plt.cm.gray)
-ax3.set_title('Gray-level opening')
+ax[2].imshow(opening, cmap=plt.cm.gray)
+ax[2].set_title('Gray-level opening')
 
-ax4.imshow(grad, cmap=plt.cm.gray)
-ax4.set_title('Morphological gradient')
+ax[3].imshow(grad, cmap=plt.cm.gray)
+ax[3].set_title('Morphological gradient')
 
-for ax in ax.ravel():
-    ax.axis('off')
-    ax.set_adjustable('box-forced')
+for a in ax:
+    a.axis('off')
+    a.set_adjustable('box-forced')
 ######################################################################
 #
 # Feature extraction
