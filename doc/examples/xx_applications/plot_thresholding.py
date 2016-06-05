@@ -90,26 +90,41 @@ from skimage.filters.thresholding import threshold_minimum
 
 image = data.camera()
 
-thresh = threshold_minimum(image, bias='min')
-binary = image > thresh
+thresh_min = threshold_minimum(image, bias='min')
+binary_min = image > thresh_min
+thresh_mid = threshold_minimum(image, bias='mid')
+binary_mid = image > thresh_mid
+thresh_max = threshold_minimum(image, bias='max')
+binary_max = image > thresh_max
 
-fig = plt.figure(figsize=(8, 2.5))
-ax1 = plt.subplot(1, 3, 1, adjustable='box-forced')
-ax2 = plt.subplot(1, 3, 2)
-ax3 = plt.subplot(1, 3, 3, sharex=ax1, sharey=ax1, adjustable='box-forced')
+fig, ax = plt.subplots(4, 2, figsize=(10, 10))
+axes = ax.ravel()
 
-ax1.imshow(image, cmap=plt.cm.gray)
-ax1.set_title('Original')
-ax1.axis('off')
+axes[0].imshow(image, cmap=plt.cm.gray)
+axes[0].set_title('Original')
+axes[0].axis('off')
 
-ax2.hist(image)
-ax2.set_title('Histogram')
-ax2.axvline(thresh, color='r')
+axes[1].hist(image.ravel(), bins=256)
+axes[1].set_title('Histogram')
 
-ax3.imshow(binary, cmap=plt.cm.gray)
-ax3.set_title('Thresholded')
-ax3.axis('off')
+axes[2].imshow(binary_min, cmap=plt.cm.gray)
+axes[2].set_title('Thresholded (min)')
 
+axes[3].hist(image.ravel(), bins=256)
+axes[3].axvline(thresh_min, color='r')
+
+axes[4].imshow(binary_mid, cmap=plt.cm.gray)
+axes[4].set_title('Thresholded (mid)')
+axes[5].hist(image.ravel(), bins=256)
+axes[5].axvline(thresh_mid, color='r')
+
+axes[6].imshow(binary_max, cmap=plt.cm.gray)
+axes[6].set_title('Thresholded (max)')
+axes[7].hist(image.ravel(), bins=256)
+axes[7].axvline(thresh_max, color='r')
+
+for a in axes[::2]:
+    a.axis('off')
 plt.show()
 
 """
@@ -147,7 +162,7 @@ ax1.imshow(image, cmap=plt.cm.gray)
 ax1.set_title('Original')
 ax1.axis('off')
 
-ax2.hist(image)
+ax2.hist(image.ravel(), bins=256)
 ax2.set_title('Histogram')
 ax2.axvline(thresh, color='r')
 
@@ -261,3 +276,7 @@ ax3.set_title('Global Otsu (threshold = %d)' % threshold_global_otsu)
 ax3.axis('off')
 
 plt.show()
+"""
+.. image:: PLOT2RST.current_figure
+
+"""
