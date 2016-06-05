@@ -1,7 +1,7 @@
 """
-===============================================================
-Comparing edge-based segmentation and region-based segmentation
-===============================================================
+==================================================
+Comparing edge-based and region-based segmentation
+==================================================
 
 In this example, we will see how to segment objects from a background. We use
 the ``coins`` image from ``skimage.data``, which shows several coins outlined
