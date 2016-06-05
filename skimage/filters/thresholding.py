@@ -91,8 +91,9 @@ def try_all_threshold(image, radius=None, figsize=(8, 5), verbose=True):
     The following algorithms are used:
 
     * isodata
-    * otsu
     * li
+    * minimum
+    * otsu
     * yen
     * adaptive threshold (local)
     * rank otsu (local)
