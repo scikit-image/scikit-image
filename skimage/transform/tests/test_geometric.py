@@ -93,7 +93,6 @@ def test_euclidean_init():
     assert_almost_equal(tform.rotation, rotation)
     assert_almost_equal(tform.translation, translation)
 
-
     # test special case for scale if rotation=90deg
     rotation = np.pi / 2
     translation = (1, 1)
