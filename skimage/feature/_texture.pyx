@@ -21,7 +21,7 @@ def _glcm_loop(cnp.uint16_t[:, ::1] image, double[:] distances,
     Parameters
     ----------
     image : ndarray
-        Input image, which is converted to the uint8 data type.
+        Input image. The image will be cast to uint16.
     distances : ndarray
         List of pixel pair distance offsets.
     angles : ndarray
@@ -29,10 +29,8 @@ def _glcm_loop(cnp.uint16_t[:, ::1] image, double[:] distances,
     levels : int
         The input image should contain integers in [0, levels-1],
         where levels indicate the number of grey-levels counted
-        (typically 256 for an 8-bit image). Be aware that the co-occurrence
-        matrix for every angle and every distance is of size levels x levels. 
-        Choosing a too large level might result in exceedingly large matrix.
-        If you have 16 bit or 32 bit images, consider binning. 
+        (typically 256 for an 8-bit image). This argument is required for
+        16-bit images and is typically the maximum of the image. 
     out : ndarray
         On input a 4D array of zeros, and on output it contains
         the results of the GLCM computation.

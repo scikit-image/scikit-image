@@ -105,7 +105,7 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
     #if image.dtype in [np.float, np.float16, np.float32, np.float]
     if image.dtype == np.float:
         raise ValueError("Float images are not supported by greycomatrix."
-                         "The image needs to be casted to uint8 or uint16.")
+                         "The image needs to be casted to an unsigned integer type.")
     
     # for 16 bit images, levels must be set.
     if image.dtype != np.uint8:
