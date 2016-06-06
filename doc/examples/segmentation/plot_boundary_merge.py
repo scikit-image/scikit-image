@@ -63,7 +63,7 @@ edges = filters.sobel(color.rgb2gray(img))
 labels = segmentation.slic(img, compactness=30, n_segments=400)
 g = graph.rag_boundary(labels, edges)
 
-graph.show_rag(labels, g, img)
+graph.draw_rag(labels, g, img)
 plt.title('Initial RAG')
 
 labels2 = graph.merge_hierarchical(labels, g, thresh=0.08, rag_copy=False,
@@ -71,7 +71,7 @@ labels2 = graph.merge_hierarchical(labels, g, thresh=0.08, rag_copy=False,
                                    merge_func=merge_boundary,
                                    weight_func=weight_boundary)
 
-graph.show_rag(labels, g, img)
+graph.draw_rag(labels, g, img)
 plt.title('RAG after hierarchical merging')
 
 plt.figure()

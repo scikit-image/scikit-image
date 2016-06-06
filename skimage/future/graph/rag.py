@@ -420,7 +420,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
     return rag
 
 
-def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
+def draw_rag(labels, rag, img, border_color='black', edge_width=1.5,
              edge_cmap='magma', img_cmap='bone', in_place=True, ax=None):
     """Draw a Region Adjacency Graph on an image.
 
@@ -466,7 +466,7 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     >>> img = data.coffee()
     >>> labels = segmentation.slic(img)
     >>> g =  graph.rag_mean_color(img, labels)
-    >>> lc = graph.show_rag(labels, g, img)
+    >>> lc = graph.draw_rag(labels, g, img)
     >>> cbar = plt.colorbar(lc)
     """
 
