@@ -30,39 +30,31 @@ eimg = filters.sobel(color.rgb2gray(img))
 plt.title('Original Image')
 plt.imshow(img)
 
-"""
-.. image:: PLOT2RST.current_figure
-"""
+######################################################################
 
 resized = transform.resize(img, (img.shape[0], img.shape[1] - 200))
 plt.figure()
 plt.title('Resized Image')
 plt.imshow(resized)
 
-"""
-.. image:: PLOT2RST.current_figure
-"""
+######################################################################
 
 out = transform.seam_carve(img, eimg, 'vertical', 200)
 plt.figure()
 plt.title('Resized using Seam Carving')
 plt.imshow(out)
 
-"""
-.. image:: PLOT2RST.current_figure
-
-Resizing distorts the rocket and surrounding objects, whereas seam carving
-removes empty spaces and preserves object proportions.
-
-Object Removal
---------------
-
-Seam carving can also be used to remove artifacts from images.
-This requires weighting the artifact with low values. Recall lower weights are
-preferentially removed in seam carving. The following code masks the rocket's
-region with low weights, indicating it should be removed.
-
-"""
+######################################################################
+# Resizing distorts the rocket and surrounding objects, whereas seam carving
+# removes empty spaces and preserves object proportions.
+#
+# Object Removal
+# --------------
+#
+# Seam carving can also be used to remove artifacts from images. This
+# requires weighting the artifact with low values. Recall lower weights are
+# preferentially removed in seam carving. The following code masks the
+# rocket's region with low weights, indicating it should be removed.
 
 masked_img = img.copy()
 
@@ -78,9 +70,7 @@ plt.title('Object Marked')
 
 plt.imshow(masked_img)
 
-"""
-.. image:: PLOT2RST.current_figure
-"""
+######################################################################
 
 eimg[rr, cc] -= 1000
 
@@ -91,6 +81,4 @@ resized = transform.resize(img, out.shape)
 plt.imshow(out)
 plt.show()
 
-"""
-.. image:: PLOT2RST.current_figure
-"""
+######################################################################

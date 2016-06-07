@@ -1,4 +1,3 @@
-from __future__ import division
 """
 ========================
 Sliding window histogram
@@ -35,6 +34,7 @@ References
 .. [2] S.Perreault and P.Hebert. Median filtering in constant time.
        Trans. Image Processing, 16(9):2389-2394, 2007.
 """
+from __future__ import division
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt

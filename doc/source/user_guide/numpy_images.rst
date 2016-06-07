@@ -81,7 +81,7 @@ disk: ::
     ...                    (nrows / 2)**2)
     >>> camera[outer_disk_mask] = 0
 
-.. image:: ../auto_examples/numpy_operations/images/plot_camera_numpy_1.png
+.. image:: ../auto_examples/numpy_operations/images/sphx_glr_plot_camera_numpy_001.png
     :width: 45%
     :target: ../auto_examples/numpy_operations/plot_camera_numpy.html
 

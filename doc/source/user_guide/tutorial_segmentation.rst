@@ -11,7 +11,7 @@ the coins cannot be done directly from the histogram of grey values,
 because the background shares enough grey levels with the coins that a
 thresholding segmentation is not sufficient.
 
-.. image:: ../auto_examples/xx_applications/images/plot_coins_segmentation_1.png
+.. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_001.png
    :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
    :align: center
 
@@ -26,7 +26,7 @@ Simply thresholding the image leads either to missing significant parts
 of the coins, or to merging parts of the background with the
 coins. This is due to the inhomogeneous lighting of the image. 
 
-.. image:: ../auto_examples/xx_applications/images/plot_coins_segmentation_2.png
+.. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_002.png
    :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
    :align: center
 
@@ -53,7 +53,7 @@ boundary of the coins, or inside the coins.
     >>> from scipy import ndimage as ndi
     >>> fill_coins = ndi.binary_fill_holes(edges)
 
-.. image:: ../auto_examples/xx_applications/images/plot_coins_segmentation_3.png
+.. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_003.png
    :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
    :align: center
 
@@ -62,7 +62,7 @@ we fill the inner part of the coins using the
 ``ndi.binary_fill_holes`` function, which uses mathematical morphology
 to fill the holes.
 
-.. image:: ../auto_examples/xx_applications/images/plot_coins_segmentation_4.png
+.. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_004.png
    :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
    :align: center
 
@@ -83,7 +83,7 @@ has not been segmented correctly at all. The reason is that the contour
 that we got from the Canny detector was not completely closed, therefore
 the filling function did not fill the inner part of the coin. 
 
-.. image:: ../auto_examples/xx_applications/images/plot_coins_segmentation_5.png
+.. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_005.png
    :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
    :align: center
 
@@ -128,7 +128,7 @@ separate the coins from the background.
 
 and here is the corresponding 2-D plot:
 
-.. image:: ../auto_examples/xx_applications/images/plot_coins_segmentation_6.png
+.. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_006.png
    :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
    :align: center
 
@@ -139,7 +139,7 @@ extreme parts of the histogram of grey values::
     >>> markers[coins < 30] = 1
     >>> markers[coins > 150] = 2
 
-.. image:: ../auto_examples/xx_applications/images/plot_coins_segmentation_7.png
+.. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_007.png
    :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
    :align: center
 
@@ -148,7 +148,7 @@ Let us now compute the watershed transform::
     >>> from skimage.morphology import watershed
     >>> segmentation = watershed(elevation_map, markers)
 
-.. image:: ../auto_examples/xx_applications/images/plot_coins_segmentation_8.png
+.. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_008.png
    :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
    :align: center
 
@@ -165,7 +165,7 @@ We can now label all the coins one by one using ``ndi.label``::
 
     >>> labeled_coins, _ = ndi.label(segmentation)
 
-.. image:: ../auto_examples/xx_applications/images/plot_coins_segmentation_9.png
+.. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_009.png
    :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
    :align: center
 

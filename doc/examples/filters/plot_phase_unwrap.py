@@ -42,14 +42,12 @@ ax3.set_title('After phase unwrapping')
 fig.colorbar(ax4.imshow(image_unwrapped - image, cmap='gray'), ax=ax4)
 ax4.set_title('Unwrapped minus original')
 
-"""
-.. image:: PLOT2RST.current_figure
 
-The unwrapping procedure accepts masked arrays, and can also optionally
-assume cyclic boundaries to connect edges of an image. In the example below,
-we study a simple phase ramp which has been split in two by masking
-a row of the image.
-"""
+###########################################################################
+# The unwrapping procedure accepts masked arrays, and can also optionally
+# assume cyclic boundaries to connect edges of an image. In the example below,
+# we study a simple phase ramp which has been split in two by masking
+# a row of the image.
 
 # Create a simple ramp
 image = np.ones((100, 100)) * np.linspace(0, 8 * np.pi, 100).reshape((-1, 1))
@@ -84,24 +82,22 @@ ax4.set_title('Unwrapped with wrap_around')
 
 plt.show()
 
-"""
-.. image:: PLOT2RST.current_figure
 
-In the figures above, the masked row can be seen as a white line across
-the image. The difference between the two unwrapped images in the bottom row
-is clear: Without unwrapping (lower left), the regions above and below the
-masked boundary do not interact at all, resulting in an offset between the
-two regions of an arbitrary integer times two pi. We could just as well have
-unwrapped the regions as two separate images. With wrap around enabled for the
-vertical direction (lower right), the situation changes: Unwrapping paths are
-now allowed to pass from the bottom to the top of the image and vice versa, in
-effect providing a way to determine the offset between the two regions.
-
-References
-----------
-
-.. [1] Miguel Arevallilo Herraez, David R. Burton, Michael J. Lalor,
-       and Munther A. Gdeisat, "Fast two-dimensional phase-unwrapping
-       algorithm based on sorting by reliability following a noncontinuous
-       path", Journal Applied Optics, Vol. 41, No. 35, pp. 7437, 2002
-"""
+###########################################################################
+# In the figures above, the masked row can be seen as a white line across
+# the image. The difference between the two unwrapped images in the bottom row
+# is clear: Without unwrapping (lower left), the regions above and below the
+# masked boundary do not interact at all, resulting in an offset between the
+# two regions of an arbitrary integer times two pi. We could just as well have
+# unwrapped the regions as two separate images. With wrap around enabled for the
+# vertical direction (lower right), the situation changes: Unwrapping paths are
+# now allowed to pass from the bottom to the top of the image and vice versa, in
+# effect providing a way to determine the offset between the two regions.
+# 
+# References
+# ----------
+# 
+# .. [1] Miguel Arevallilo Herraez, David R. Burton, Michael J. Lalor,
+#        and Munther A. Gdeisat, "Fast two-dimensional phase-unwrapping
+#        algorithm based on sorting by reliability following a noncontinuous
+#        path", Journal Applied Optics, Vol. 41, No. 35, pp. 7437, 2002

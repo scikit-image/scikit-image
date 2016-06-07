@@ -18,14 +18,14 @@ Usually, lines are parameterised as :math:`y = mx + c`, with a gradient
 infinity for vertical lines. Instead, we therefore construct a segment
 perpendicular to the line, leading to the origin. The line is represented by
 the length of that segment, :math:`r`, and the angle it makes with the x-axis,
-:math:`\theta`.
+:math:`\\theta`.
 
 The Hough transform constructs a histogram array representing the parameter
-space (i.e., an :math:`M \times N` matrix, for :math:`M` different values of
-the radius and :math:`N` different values of :math:`\theta`).  For each
-parameter combination, :math:`r` and :math:`\theta`, we then find the number of
+space (i.e., an :math:`M \\times N` matrix, for :math:`M` different values of
+the radius and :math:`N` different values of :math:`\\theta`).  For each
+parameter combination, :math:`r` and :math:`\\theta`, we then find the number of
 non-zero pixels in the input image that would fall close to the corresponding
-line, and increment the array at position :math:`(r, \theta)` appropriately.
+line, and increment the array at position :math:`(r, \\theta)` appropriately.
 
 We can think of each non-zero pixel "voting" for potential line candidates. The
 local maxima in the resulting histogram indicates the parameters of the most

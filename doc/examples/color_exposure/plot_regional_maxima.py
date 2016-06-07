@@ -31,10 +31,9 @@ mask = image
 
 dilated = reconstruction(seed, mask, method='dilation')
 
-"""
-Subtracting the dilated image leaves an image with just the coins and a flat,
-black background, as shown below.
-"""
+######################################################################
+# Subtracting the dilated image leaves an image with just the coins and a
+# flat, black background, as shown below.
 
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(8, 2.5), sharex=True, sharey=True)
 
@@ -55,29 +54,25 @@ ax3.set_adjustable('box-forced')
 
 fig.tight_layout()
 
-"""
-
-.. image:: PLOT2RST.current_figure
-
-Although the features (i.e. the coins) are clearly isolated, the coins
-surrounded by a bright background in the original image are dimmer in the
-subtracted image. We can attempt to correct this using a different seed image.
-
-Instead of creating a seed image with maxima along the image border, we can use
-the features of the image itself to seed the reconstruction process. Here, the
-seed image is the original image minus a fixed value, ``h``.
-"""
+######################################################################
+# Although the features (i.e. the coins) are clearly isolated, the coins
+# surrounded by a bright background in the original image are dimmer in the
+# subtracted image. We can attempt to correct this using a different seed
+# image.
+#
+# Instead of creating a seed image with maxima along the image border, we can
+# use the features of the image itself to seed the reconstruction process.
+# Here, the seed image is the original image minus a fixed value, ``h``.
 
 h = 0.4
 seed = image - h
 dilated = reconstruction(seed, mask, method='dilation')
 hdome = image - dilated
 
-"""
-To get a feel for the reconstruction process, we plot the intensity of the
-mask, seed, and dilated images along a slice of the image (indicated by red
-line).
-"""
+######################################################################
+# To get a feel for the reconstruction process, we plot the intensity of the
+# mask, seed, and dilated images along a slice of the image (indicated by red
+# line).
 
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(8, 2.5))
 
@@ -104,14 +99,11 @@ ax3.axis('off')
 fig.tight_layout()
 plt.show()
 
-"""
-.. image:: PLOT2RST.current_figure
-
-As you can see in the image slice, each coin is given a different baseline
-intensity in the reconstructed image; this is because we used the local
-intensity (shifted by ``h``) as a seed value. As a result, the coins in the
-subtracted image have similar pixel intensities. The final result is known as
-the h-dome of an image since this tends to isolate regional maxima of height
-``h``. This operation is particularly useful when your images are unevenly
-illuminated.
-"""
+######################################################################
+# As you can see in the image slice, each coin is given a different baseline
+# intensity in the reconstructed image; this is because we used the local
+# intensity (shifted by ``h``) as a seed value. As a result, the coins in the
+# subtracted image have similar pixel intensities. The final result is known
+# as the h-dome of an image since this tends to isolate regional maxima of
+# height ``h``. This operation is particularly useful when your images are
+# unevenly illuminated.
