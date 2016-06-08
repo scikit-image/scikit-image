@@ -229,7 +229,8 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
 
 
 def hough_line(cnp.ndarray img,
-               cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=None):
+               cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=None,
+               int num_rho=None):
     """Perform a straight line Hough transform.
 
     Parameters
@@ -289,8 +290,12 @@ def hough_line(cnp.ndarray img,
 
     max_distance = 2 * <Py_ssize_t>ceil(sqrt(img.shape[0] * img.shape[0] +
                                              img.shape[1] * img.shape[1]))
-    accum = np.zeros((max_distance, theta.shape[0]), dtype=np.uint64)
-    bins = np.linspace(-max_distance / 2.0, max_distance / 2.0, max_distance)
+
+    if ((num_rho is None) or (num_rho > max_distance)):
+        num_rho = max_distance
+
+    accum = np.zeros((num_rho, theta.shape[0]), dtype=np.uint64)
+    bins = np.linspace(-max_distance / 2.0, max_distance / 2.0, num_rho)
     offset = max_distance / 2
 
     # compute the nonzero indexes
@@ -308,6 +313,7 @@ def hough_line(cnp.ndarray img,
             y = y_idxs[i]
             for j in range(nthetas):
                 accum_idx = <int>round((ctheta[j] * x + stheta[j] * y)) + offset
+                accum_idx = np.searchsorted(bins, accum_idx, 'right') - 1
                 accum[accum_idx, j] += 1
 
     return accum, theta, bins
