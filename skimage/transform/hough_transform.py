@@ -17,14 +17,14 @@ def hough_line(img, theta=None):
         Input image with nonzero values representing edges.
     theta : 1D ndarray of double
         Angles at which to compute the transform, in radians.
-        Defaults to -pi/2 .. pi/2
+        Defaults to a vector of 180 angles evenly spaced from -pi/2 to pi/2.
 
     Returns
     -------
-    H : 2-D ndarray of uint64
+    hspace : 2-D ndarray of uint64
         Hough transform accumulator.
-    theta : ndarray
-        Angles at which the transform was computed, in radians.
+    angles : ndarray
+        Angles at which the transform is computed, in radians.
     distances : ndarray
         Distance values.
 
@@ -34,6 +34,8 @@ def hough_line(img, theta=None):
     X and Y axis are horizontal and vertical edges respectively.
     The distance is the minimal algebraic distance from the origin
     to the detected line.
+    The angle accuracy can be improved by decreasing the step size in
+    the `theta` array.
 
     Examples
     --------
@@ -66,7 +68,7 @@ def hough_line(img, theta=None):
 
 def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
                      threshold=None, num_peaks=np.inf):
-    """Return peaks in hough transform.
+    """Return peaks in a straight line Hough transform.
 
     Identifies most prominent lines separated by a certain angle and distance
     in a hough transform. Non-maximum suppression with different sizes is
@@ -96,7 +98,7 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
 
     Returns
     -------
-    hspace, angles, dists : tuple of array
+    hspace, angles, distances : tuple of array
         Peak values in hough space, angles and distances.
 
     Examples
