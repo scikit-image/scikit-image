@@ -148,13 +148,15 @@ error = reconstruction_sart - image
 print('SART (1 iteration) rms reconstruction error: %.3g'
       % np.sqrt(np.mean(error**2)))
 
-fig, ax = plt.subplots(2, 2, figsize=(8, 8.5), sharex=True, sharey=True,
-                       subplot_kw={'adjustable': 'box-forced'})
-ax1, ax2, ax3, ax4 = ax.ravel()
-ax1.set_title("Reconstruction\nSART")
-ax1.imshow(reconstruction_sart, cmap=plt.cm.Greys_r)
-ax2.set_title("Reconstruction error\nSART")
-ax2.imshow(reconstruction_sart - image, cmap=plt.cm.Greys_r, **imkwargs)
+fig, axes = plt.subplots(2, 2, figsize=(8, 8.5), sharex=True, sharey=True,
+                         subplot_kw={'adjustable': 'box-forced'})
+ax = axes.ravel()
+
+ax[0].set_title("Reconstruction\nSART")
+ax[0].imshow(reconstruction_sart, cmap=plt.cm.Greys_r)
+
+ax[1].set_title("Reconstruction error\nSART")
+ax[1].imshow(reconstruction_sart - image, cmap=plt.cm.Greys_r, **imkwargs)
 
 # Run a second iteration of SART by supplying the reconstruction
 # from the first iteration as an initial estimate
@@ -164,10 +166,11 @@ error = reconstruction_sart2 - image
 print('SART (2 iterations) rms reconstruction error: %.3g'
       % np.sqrt(np.mean(error**2)))
 
-ax3.set_title("Reconstruction\nSART, 2 iterations")
-ax3.imshow(reconstruction_sart2, cmap=plt.cm.Greys_r)
-ax4.set_title("Reconstruction error\nSART, 2 iterations")
-ax4.imshow(reconstruction_sart2 - image, cmap=plt.cm.Greys_r, **imkwargs)
+ax[2].set_title("Reconstruction\nSART, 2 iterations")
+ax[2].imshow(reconstruction_sart2, cmap=plt.cm.Greys_r)
+
+ax[3].set_title("Reconstruction error\nSART, 2 iterations")
+ax[3].imshow(reconstruction_sart2 - image, cmap=plt.cm.Greys_r, **imkwargs)
 plt.show()
 
 ######################################################################

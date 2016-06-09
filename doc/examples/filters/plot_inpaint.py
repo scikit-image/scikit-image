@@ -42,23 +42,22 @@ for layer in range(image_defect.shape[-1]):
 image_result = inpaint.inpaint_biharmonic(image_defect, mask, multichannel=True)
 
 fig, axes = plt.subplots(ncols=2, nrows=2)
-ax0, ax1, ax2, ax3 = axes.ravel()
+ax = axes.ravel()
 
-ax0.set_title('Original image')
-ax0.imshow(image_orig)
-ax0.axis('off')
+ax[0].set_title('Original image')
+ax[0].imshow(image_orig)
 
-ax1.set_title('Mask')
-ax1.imshow(mask, cmap=plt.cm.gray)
-ax1.axis('off')
+ax[1].set_title('Mask')
+ax[1].imshow(mask, cmap=plt.cm.gray)
 
-ax2.set_title('Defected image')
-ax2.imshow(image_defect)
-ax2.axis('off')
+ax[2].set_title('Defected image')
+ax[2].imshow(image_defect)
 
-ax3.set_title('Inpainted image')
-ax3.imshow(image_result)
-ax3.axis('off')
+ax[3].set_title('Inpainted image')
+ax[3].imshow(image_result)
+
+for a in ax:
+    a.axis('off')
 
 fig.tight_layout()
 plt.show()
