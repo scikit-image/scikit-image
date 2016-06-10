@@ -1,15 +1,17 @@
-__all__ = ['threshold_adaptive',
-           'threshold_otsu',
-           'threshold_yen',
-           'threshold_isodata',
-           'threshold_li',
-           'threshold_minimum', ]
-
 import numpy as np
 from scipy import ndimage as ndi
 from scipy.ndimage import filters as ndif
 from ..exposure import histogram
 from .._shared.utils import assert_nD, warn
+
+__all__ = ['threshold_adaptive',
+           'threshold_otsu',
+           'threshold_yen',
+           'threshold_isodata',
+           'threshold_li',
+           'threshold_minimum',
+           'threshold_mean',
+           'threshold_triangle']
 
 
 def threshold_adaptive(image, block_size, method='gaussian', offset=0,
@@ -101,7 +103,7 @@ def threshold_otsu(image, nbins=256):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : (N, M) ndarray
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -110,8 +112,8 @@ def threshold_otsu(image, nbins=256):
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels intensities that less or equal of
-        this value assumed as foreground.
+        Upper threshold value. All pixels with an intensity higher than
+        this value are assumed to be foreground.
 
     Raises
     ------
@@ -169,7 +171,7 @@ def threshold_yen(image, nbins=256):
 
     Parameters
     ----------
-    image : array
+    image : (N, M) ndarray
         Input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -178,8 +180,8 @@ def threshold_yen(image, nbins=256):
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels intensities that less or equal of
-        this value assumed as foreground.
+        Upper threshold value. All pixels with an intensity higher than
+        this value are assumed to be foreground.
 
     References
     ----------
@@ -211,9 +213,8 @@ def threshold_yen(image, nbins=256):
     P1_sq = np.cumsum(pmf ** 2)
     # Get cumsum calculated from end of squared array:
     P2_sq = np.cumsum(pmf[::-1] ** 2)[::-1]
-    # P2_sq indexes is shifted +1.
-    # I assume, with P1[:-1] it helps to avoid '-inf' in crit.
-    # ImageJ Yen implementation replaces those values by zero.
+    # P2_sq indexes is shifted +1. I assume, with P1[:-1] it's help avoid '-inf'
+    # in crit. ImageJ Yen implementation replaces those values by zero.
     crit = np.log(((P1_sq[:-1] * P2_sq[1:]) ** -1) *
                   (P1[:-1] * (1.0 - P1[:-1])) ** 2)
     return bin_centers[crit.argmax()]
@@ -237,7 +238,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
 
     Parameters
     ----------
-    image : array
+    image : (N, M) ndarray
         Input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -332,13 +333,13 @@ def threshold_li(image):
 
     Parameters
     ----------
-    image : array
+    image : (N, M) ndarray
         Input image.
 
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels intensities more than
+        Upper threshold value. All pixels with an intensity higher than
         this value are assumed to be foreground.
 
     References
@@ -346,8 +347,7 @@ def threshold_li(image):
     .. [1] Li C.H. and Lee C.K. (1993) "Minimum Cross Entropy Thresholding"
            Pattern Recognition, 26(4): 617-625
     .. [2] Li C.H. and Tam P.K.S. (1998) "An Iterative Algorithm for Minimum
-           Cross Entropy Thresholding" Pattern Recognition Letters,
-           18(8): 771-776
+           Cross Entropy Thresholding" Pattern Recognition Letters, 18(8): 771-776
     .. [3] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
            Techniques and Quantitative Performance Evaluation" Journal of
            Electronic Imaging, 13(1): 146-165
@@ -490,3 +490,108 @@ def threshold_minimum(image, nbins=256, bias='min', max_iter=10000):
             return bin_centers[upper_bound]
         elif bias == 'mid':
             return bin_centers[(threshold + upper_bound) // 2]
+
+
+def threshold_mean(image):
+    """Return threshold value based on the mean of grayscale values.
+
+    Parameters
+    ----------
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
+
+    Returns
+    -------
+    threshold : float
+        Upper threshold value. All pixels with an intensity higher than
+        this value are assumed to be foreground.
+
+    References
+    ----------
+    .. [1] C. A. Glasbey, "An analysis of histogram-based thresholding
+        algorithms," CVGIP: Graphical Models and Image Processing,
+        vol. 55, pp. 532-537, 1993.
+
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> image = camera()
+    >>> thresh = threshold_mean(image)
+    >>> binary = image > thresh
+    """
+    return np.mean(image)
+
+
+def threshold_triangle(image, nbins=256):
+    """Return threshold value based on the triangle algorithm.
+
+    Parameters
+    ----------
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
+    nbins : int, optional
+        Number of bins used to calculate histogram. This value is ignored for
+        integer arrays.
+
+    Returns
+    -------
+    threshold : float
+        Upper threshold value. All pixels with an intensity higher than
+        this value are assumed to be foreground.
+
+    References
+    ----------
+    .. [1] Zack, G. W., Rogers, W. E. and Latt, S. A., 1977,
+       Automatic Measurement of Sister Chromatid Exchange Frequency,
+       Journal of Histochemistry and Cytochemistry 25 (7), pp. 741-753
+
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> image = camera()
+    >>> thresh = threshold_triangle(image)
+    >>> binary = image > thresh
+    """
+    # nbins is ignored for interger arrays
+    # so, we recalculate the effective nbins.
+    hist, bin_centers = histogram(image.ravel(), nbins)
+    nbins = bin_centers[-1] - bin_centers[0] + 1
+
+    # Find peak, lowest and highest gray levels.
+    arg_peak_height = np.argmax(hist)
+    peak_height = hist[arg_peak_height]
+    arg_low_level, arg_high_level = np.where(hist>0)[0][[0, -1]]
+
+    # Flip is True if left tail is shorter.
+    flip = arg_peak_height - arg_low_level < arg_high_level - arg_peak_height
+    if flip:
+        hist = hist[::-1]
+        arg_low_level = nbins - arg_high_level - 1
+        arg_peak_height = nbins - arg_peak_height - 1
+
+    # If flip == True, arg_high_level becomes incorrect
+    # but we don't need it anymore.
+    del(arg_high_level)
+
+    # Set up the coordinate system.
+    width = arg_peak_height - arg_low_level
+    x1 = np.arange(width)
+    y1 = hist[x1 + arg_low_level]
+
+    # Normalize.
+    norm = np.sqrt(peak_height**2 + width**2)
+    peak_height /= norm
+    width /= norm
+
+    # Maximize the length.
+    d = peak_height * arg_low_level - width * hist[arg_low_level]
+    length = peak_height * x1 - width * y1 - d
+    level = np.argmax(length) + arg_low_level
+
+    if flip:
+        level = nbins - level - 1
+
+    # The histogram doesn't start at zero, shift it.
+    level += bin_centers[0]
+
+    return level

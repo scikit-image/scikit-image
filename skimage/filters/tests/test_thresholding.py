@@ -11,6 +11,8 @@ from skimage.filters.thresholding import (threshold_adaptive,
                                           threshold_li,
                                           threshold_yen,
                                           threshold_isodata,
+                                          threshold_mean,
+                                          threshold_triangle,
                                           threshold_minimum)
 
 
@@ -120,7 +122,7 @@ class TestSimpleImage():
         assert_equal(ref, out)
 
         out = threshold_adaptive(self.image, 3, method='gaussian',
-                                 param=1.0 / 3.0)
+                                 param=1./3.)
         assert_equal(ref, out)
 
     def test_threshold_adaptive_mean(self):
@@ -309,6 +311,38 @@ def test_threshold_minimum_synthetic():
 def test_threshold_minimum_failure():
     img = np.zeros((16*16), dtype=np.uint8)
     assert_raises(RuntimeError, threshold_minimum, img)
+
+
+def test_mean():
+    img = np.zeros((2, 6))
+    img[:, 2:4] = 1
+    img[:, 4:] = 2
+    assert(threshold_mean(img) == 1.)
+
+
+def test_triangle_images():
+    assert(threshold_triangle(np.invert(data.text())) == 151)
+    assert(threshold_triangle(data.text()) == 104)
+    assert(threshold_triangle(data.coins()) == 80)
+    assert(threshold_triangle(np.invert(data.coins())) == 175)
+
+
+def test_triangle_flip():
+    # Depending on the skewness, the algorithm flips the histogram.
+    # We check that the flip doesn't affect too much the result.
+    img = data.camera()
+    inv_img = np.invert(img)
+    t = threshold_triangle(inv_img)
+    t_inv_img = inv_img > t
+    t_inv_inv_img = np.invert(t_inv_img)
+
+    t = threshold_triangle(img)
+    t_img = img > t
+
+    # Check that most of the pixels are identical
+    # See numpy #7685 for a future np.testing API
+    unequal_pos = np.where(t_img.ravel() != t_inv_inv_img.ravel())
+    assert(len(unequal_pos[0]) / t_img.size < 1e-2)
 
 
 if __name__ == '__main__':
