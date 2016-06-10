@@ -106,8 +106,6 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
 
     image_max = image.max()
 
-    #if image.dtype in [np.float, np.float16, np.float32, np.float]
-    #if image.dtype == np.float:
     if np.issubdtype(image.dtype, np.float):
         raise ValueError("Float images are not supported by greycomatrix. "
                          "The image needs to be cast to an unsigned integer type.")
@@ -123,9 +121,6 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
         levels = 256
 
     assert image_max < levels, "The image maximum needs to be smaller than `levels`."
-
-    # image is cast to uint16 (because of fixed typing in cython) 
-    #image = image.astype(np.uint16)
 
     distances = np.ascontiguousarray(distances, dtype=np.float64)
     angles = np.ascontiguousarray(angles, dtype=np.float64)

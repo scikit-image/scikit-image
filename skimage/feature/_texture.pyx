@@ -12,7 +12,6 @@ from .._shared.transform cimport integrate
 cdef extern from "numpy/npy_math.h":
     double NAN "NPY_NAN"
 
-
 ctypedef fused uint_8_16:
     cnp.uint8_t
     cnp.uint16_t
