@@ -13,6 +13,22 @@ cdef extern from "numpy/npy_math.h":
     double NAN "NPY_NAN"
 
 
+#ctypedef fused uint_8_16:
+#    cython.uint8_t
+#    cython.uint16_t
+
+
+#cpdef char_or_float plus_one(char_or_float var):
+#    return var + 1
+
+
+#def show_me():
+#    cdef:
+#        cython.char a = 127
+#        cython.float b = 127
+#    print 'char', plus_one(a)
+#    print 'float', plus_one(b)
+    
 def _glcm_loop(cnp.uint16_t[:, ::1] image, double[:] distances,
                double[:] angles, Py_ssize_t levels,
                cnp.uint32_t[:, :, :, ::1] out):
@@ -21,16 +37,20 @@ def _glcm_loop(cnp.uint16_t[:, ::1] image, double[:] distances,
     Parameters
     ----------
     image : ndarray
-        Input image. The image will be cast to uint16.
+        Integer typed input image. Only positive valued images are supported. 
+        If type is uint16, the argument `levels` needs to be set.
     distances : ndarray
         List of pixel pair distance offsets.
     angles : ndarray
         List of pixel pair angles in radians.
     levels : int
-        The input image should contain integers in [0, levels-1],
+        The input image should contain integers in [0, `levels`-1],
         where levels indicate the number of grey-levels counted
         (typically 256 for an 8-bit image). This argument is required for
         16-bit images and is typically the maximum of the image. 
+        As the output matrix is at least `levels` x `levels`, it might
+        be preferable to use binning of the input image rather than 
+        large values for `levels`. 
     out : ndarray
         On input a 4D array of zeros, and on output it contains
         the results of the GLCM computation.

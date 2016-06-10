@@ -13,7 +13,7 @@ from ._texture import (_glcm_loop,
 
 def greycomatrix(image, distances, angles, levels=None, symmetric=False,
                  normed=False):
-    """ *** YOYO *** Calculate the grey-level co-occurrence matrix.
+    """Calculate the grey-level co-occurrence matrix.
 
     A grey level co-occurrence matrix is a histogram of co-occurring
     greyscale values at a given offset over an image.
@@ -21,16 +21,20 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
     Parameters
     ----------
     image : array_like of uint8 or uint16.
-        Integer typed input image. The image will be cast to uint16.
+        Integer typed input image. Only positive valued images are supported. 
+        If type is uint16, the argument `levels` needs to be set.
     distances : array_like
         List of pixel pair distance offsets.
     angles : array_like
         List of pixel pair angles in radians.
     levels : int, optional
-        The input image should contain integers in [0, levels-1],
+        The input image should contain integers in [0, `levels`-1],
         where levels indicate the number of grey-levels counted
         (typically 256 for an 8-bit image). This argument is required for
         16-bit images and is typically the maximum of the image. 
+        As the output matrix is at least `levels` x `levels`, it might
+        be preferable to use binning of the input image rather than 
+        large values for `levels`. 
     symmetric : bool, optional
         If True, the output matrix `P[:, :, d, theta]` is symmetric. This
         is accomplished by ignoring the order of value pairs, so both
@@ -103,21 +107,22 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
     image_max = image.max()
 
     #if image.dtype in [np.float, np.float16, np.float32, np.float]
-    if image.dtype == np.float:
-        raise ValueError("Float images are not supported by greycomatrix."
-                         "The image needs to be casted to an unsigned integer type.")
+    #if image.dtype == np.float:
+    if np.issubdtype(image.dtype, np.float):
+        raise ValueError("Float images are not supported by greycomatrix. "
+                         "The image needs to be cast to an unsigned integer type.")
     
     # for 16 bit images, levels must be set.
     if image.dtype != np.uint8:
         if levels is None:
-            raise ValueError("For images other than 8 bit images, argument levels must be set to a user defined value."
-                             "A large value will produce a large output matrix, potentially causing memory problems."
-                             "In this case, one might consider binning the image prior to calling greycomatrix.")
+            raise ValueError("The levels argument is required for data types other than uint8. "
+                             "The resulting matrix will be at least levels ** 2 in size.")
+                             
         
     if levels is None:    
         levels = 256
 
-    assert image_max < levels
+    assert image_max < levels, "The image maximum needs to be smaller than `levels`."
 
     # image is cast to uint16 (because of fixed typing in cython) 
     image = image.astype(np.uint16)
