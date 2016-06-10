@@ -3,6 +3,7 @@
 Adaptive Thresholding
 =====================
 
+
 Thresholding is the simplest way to segment objects from a background. If that
 background is relatively uniform, then you can use a global threshold value to
 binarize the image by pixel-intensity. If there's large variation in the

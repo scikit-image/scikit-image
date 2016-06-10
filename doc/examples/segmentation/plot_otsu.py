@@ -13,6 +13,7 @@ the intra-class variance.
 
 .. [1] http://en.wikipedia.org/wiki/Otsu's_method
 
+.. seealso:: :ref:`example_segmentation_plot_local_otsu.py`
 """
 import matplotlib
 import matplotlib.pyplot as plt
