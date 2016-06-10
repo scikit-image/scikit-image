@@ -13,23 +13,17 @@ cdef extern from "numpy/npy_math.h":
     double NAN "NPY_NAN"
 
 
-#ctypedef fused uint_8_16:
-#    cython.uint8_t
-#    cython.uint16_t
-
-
-#cpdef char_or_float plus_one(char_or_float var):
-#    return var + 1
-
-
-#def show_me():
-#    cdef:
-#        cython.char a = 127
-#        cython.float b = 127
-#    print 'char', plus_one(a)
-#    print 'float', plus_one(b)
-    
-def _glcm_loop(cnp.uint16_t[:, ::1] image, double[:] distances,
+ctypedef fused uint_8_16:
+    cnp.uint8_t
+    cnp.uint16_t
+    cnp.uint32_t
+    cnp.uint64_t
+    cnp.int8_t
+    cnp.int16_t
+    cnp.int32_t
+    cnp.int64_t
+        
+def _glcm_loop(uint_8_16[:, ::1] image, double[:] distances,
                double[:] angles, Py_ssize_t levels,
                cnp.uint32_t[:, :, :, ::1] out):
     """Perform co-occurrence matrix accumulation.
@@ -59,7 +53,7 @@ def _glcm_loop(cnp.uint16_t[:, ::1] image, double[:] distances,
 
     cdef:
         Py_ssize_t a_idx, d_idx, r, c, rows, cols, row, col
-        cnp.uint16_t i, j
+        uint_8_16 i, j
         cnp.float64_t angle, distance
 
     with nogil:
