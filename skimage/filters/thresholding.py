@@ -49,12 +49,12 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
                            subplot_kw={'adjustable': 'box-forced'})
     ax = ax.ravel()
 
-    ax[0].imshow(image)
+    ax[0].imshow(image, cmap=plt.cm.gray)
     ax[0].set_title('Original')
 
     i = 1
     for name, func in methods.items():
-        ax[i].imshow(func(image))
+        ax[i].imshow(func(image), cmap=plt.cm.gray)
         ax[i].set_title(name)
         i += 1
         if verbose:
