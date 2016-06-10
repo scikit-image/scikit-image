@@ -9,14 +9,15 @@ from .._shared.utils import assert_nD, warn
 from ..morphology import disk
 from ..filters.rank import otsu
 
-
 __all__ = ['try_all_threshold',
            'threshold_adaptive',
            'threshold_otsu',
            'threshold_yen',
            'threshold_isodata',
            'threshold_li',
-           'threshold_minimum', ]
+           'threshold_minimum',
+           'threshold_mean',
+           'threshold_triangle']
 
 
 def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
@@ -92,8 +93,10 @@ def try_all_threshold(image, radius=None, figsize=(8, 5), verbose=True):
 
     * isodata
     * li
+    * mean
     * minimum
     * otsu
+    * triangle
     * yen
     * adaptive threshold (local)
     * rank otsu (local)
@@ -132,8 +135,10 @@ def try_all_threshold(image, radius=None, figsize=(8, 5), verbose=True):
     # Global algorithms.
     methods = OrderedDict({'Isodata': thresh(threshold_isodata),
                            'Li': thresh(threshold_li),
+                           'Mean': thresh(threshold_mean),
                            'Minimum': thresh(threshold_minimum),
                            'Otsu': thresh(threshold_otsu),
+                           'Triangle': thresh(threshold_triangle),
                            'Yen': thresh(threshold_yen)})
 
     # Local algorithms.
@@ -149,15 +154,6 @@ def try_all_threshold(image, radius=None, figsize=(8, 5), verbose=True):
 
     return _try_all(image, figsize=figsize,
                     methods=methods, verbose=verbose)
-
-__all__ = ['threshold_adaptive',
-           'threshold_otsu',
-           'threshold_yen',
-           'threshold_isodata',
-           'threshold_li',
-           'threshold_minimum',
-           'threshold_mean',
-           'threshold_triangle']
 
 
 def threshold_adaptive(image, block_size, method='gaussian', offset=0,
@@ -288,8 +284,8 @@ def threshold_otsu(image, nbins=256):
 
     # Check if the image is multi-colored or not
     if image.min() == image.max():
-        raise ValueError("threshold_otsu is expected to work with images " \
-                         "having more than one color. The input image seems " \
+        raise ValueError("threshold_otsu is expected to work with images "
+                         "having more than one color. The input image seems "
                          "to have just one color {0}.".format(image.min()))
 
     hist, bin_centers = histogram(image.ravel(), nbins)
