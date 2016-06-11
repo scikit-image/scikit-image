@@ -218,7 +218,7 @@ class ProjectiveTransform(GeometricTransform):
         return self._apply_mat(coords, self._inv_matrix)
 
     def estimate(self, src, dst):
-        """Set the transformation matrix with the explicit transformation
+        r"""Set the transformation matrix with the explicit transformation
         parameters.
 
         You can determine the over-, well- and under-determined parameters
@@ -226,15 +226,21 @@ class ProjectiveTransform(GeometricTransform):
 
         Number of source and destination coordinates must match.
 
-        The transformation is defined as::
+        The transformation is defined as:
 
-            X = (a0*x + a1*y + a2) / (c0*x + c1*y + 1)
-            Y = (b0*x + b1*y + b2) / (c0*x + c1*y + 1)
+        .. math::
 
-        These equations can be transformed to the following form::
+            X = \frac{a_0\,x + a_1\,y + a_2}{c_0\,x + c_1\,y + 1}
 
-            0 = a0*x + a1*y + a2 - c0*x*X - c1*y*X - X
-            0 = b0*x + b1*y + b2 - c0*x*Y - c1*y*Y - Y
+            Y = \frac{b_0\,x + b_1\,y + b_2}{c_0\,x + c_1\,y + 1}
+
+        These equations can be transformed to the following form:
+
+        .. math::
+
+            0 = a_0\,x + a_1\,y + a_2 - c_0\,x\,X - c_1\,y\,X - X
+
+            0 = b_0\,x + b_1\,y + b_2 - c_0\,x\,Y - c_1\,y\,Y - Y
 
         which exist for each set of corresponding points, so we have a set of
         N * 2 equations. The coefficients appear linearly so we can write
@@ -322,9 +328,7 @@ class ProjectiveTransform(GeometricTransform):
         return True
 
     def __add__(self, other):
-        """Combine this transformation with another.
-
-        """
+        """Combine this transformation with another."""
         if isinstance(other, ProjectiveTransform):
             # combination of the same types result in a transformation of this
             # type again, otherwise use general projective transformation
@@ -346,13 +350,13 @@ class AffineTransform(ProjectiveTransform):
 
     """2D affine transformation of the form:
 
-    ..:math:
+    .. math::
 
-        X = a0*x + a1*y + a2 =
-          = sx*x*cos(rotation) - sy*y*sin(rotation + shear) + a2
+        X = a_0 \, x + a_1 \, y + a_2
+          = s_x \, x \cos(rotation) - s_y \, y \sin(rotation + shear) + a_2
 
-        Y = b0*x + b1*y + b2 =
-          = sx*x*sin(rotation) + sy*y*cos(rotation + shear) + b2
+        Y = b_0 x + b_1 y + b_2
+          = s_x x \sin(rotation) + s_y y \cos(rotation + shear) + b_2
 
     where ``sx`` and ``sy`` are zoom factors in the x and y directions,
     and the homogeneous transformation matrix is::
@@ -574,13 +578,13 @@ class PiecewiseAffineTransform(GeometricTransform):
 class SimilarityTransform(ProjectiveTransform):
     """2D similarity transformation of the form:
 
-    ..:math:
+    .. math::
 
-        X = a0 * x - b0 * y + a1 =
-          = m * x * cos(rotation) - m * y * sin(rotation) + a1
+        X = a_0\,x - b_0\,y + a_1
+          = m\,x  cos(rotation) - m\,y  \sin(rotation) + a_1
 
-        Y = b0 * x + a0 * y + b1 =
-          = m * x * sin(rotation) + m * y * cos(rotation) + b1
+        Y = b_0\,x + a_0\,y + b_1
+          = m\,x  \sin(rotation) + m\,y  \cos(rotation) + b_1
 
     where ``m`` is a zoom factor and the homogeneous transformation matrix is::
 
@@ -645,15 +649,19 @@ class SimilarityTransform(ProjectiveTransform):
 
         Number of source and destination coordinates must match.
 
-        The transformation is defined as::
+        The transformation is defined as:
 
-            X = a0 * x - b0 * y + a1
-            Y = b0 * x + a0 * y + b1
+        .. math::
 
-        These equations can be transformed to the following form::
+            X = a_0 \, x - b_0 \, y + a_1
+            Y = b_0 \, x + a_0 \, y + b_1
 
-            0 = a0 * x - b0 * y + a1 - X
-            0 = b0 * x + a0 * y + b1 - Y
+        These equations can be transformed to the following form:
+
+        .. math::
+
+            0 = a_0 \, x - b_0 \, y + a_1 - X
+            0 = b_0 \, x + a_0 \, y + b_1 - Y
 
         which exist for each set of corresponding points, so we have a set of
         N * 2 equations. The coefficients appear linearly so we can write
@@ -746,10 +754,11 @@ class SimilarityTransform(ProjectiveTransform):
 class PolynomialTransform(GeometricTransform):
     """2D transformation of the form:
 
-    ..:math:
+    .. math::
 
-        X = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
-        Y = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
+        X = \sum_{j=0}^{order} \sum_{i=0}^{j} a_{ji} x^{j - i} y^i
+
+        Y = \sum_{j=0}^{order} \sum_{i=0}^{j} b_{ji} x^{j - i} y^i
 
     Parameters
     ----------
@@ -782,15 +791,21 @@ class PolynomialTransform(GeometricTransform):
 
         Number of source and destination coordinates must match.
 
-        The transformation is defined as::
+        The transformation is defined as:
 
-            X = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
-            Y = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
+        .. math::
 
-        These equations can be transformed to the following form::
+            X = \sum_{j=0}^{order} \sum_{i=0}^{j} a_{ji}  x^{j - i}  y^i
 
-            0 = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i )) - X
-            0 = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i )) - Y
+            Y = \sum_{j=0}^{order} \sum_{i=0}^{j} b_{ji}  x^{j - i}  y^i
+
+        These equations can be transformed to the following form:
+
+        .. math::
+
+            0 = \sum_{j=0}^{order} \sum_{i=0}^{j} a_{ji}  x^{j - i}  y^i  - X
+
+            0 = \sum_{j=0}^{order} \sum_{i=0}^{j} b_{ji}  x^{j - i}  y^i  - Y
 
         which exist for each set of corresponding points, so we have a set of
         N * 2 equations. The coefficients appear linearly so we can write
