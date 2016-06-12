@@ -63,7 +63,7 @@ plt.show()
 ######################################################################
 # **skeletonize vs skeletonize 3d**
 #
-# ``skeletonize`` [Zha84]_ works by making successive passes of
+# ``skeletonize`` [Zha84]_ works by making successive passes of
 # the image, removing pixels on object borders. This continues until no
 # more pixels can be removed.  The image is correlated with a
 # mask that assigns each pixel a number in the range [0...255]
