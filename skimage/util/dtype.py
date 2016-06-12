@@ -36,7 +36,7 @@ def dtype_limits(image, clip_negative=True):
     ----------
     image : ndarray
         Input image.
-    clip_negative : bool
+    clip_negative : bool, optional
         If True, clip the negative range (i.e. return 0 for min intensity)
         even if the image dtype allows negative values.
     """
@@ -67,9 +67,9 @@ def convert(image, dtype, force_copy=False, uniform=False):
         Input image.
     dtype : dtype
         Target data-type.
-    force_copy : bool
+    force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
-    uniform : bool
+    uniform : bool, optional
         Uniformly quantize the floating point range to the integer range.
         By default (uniform=False) floating point values are scaled and
         rounded to the nearest integers, which minimizes back and forth
@@ -284,7 +284,7 @@ def img_as_float(image, force_copy=False):
     ----------
     image : ndarray
         Input image.
-    force_copy : bool
+    force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
 
     Returns
@@ -308,7 +308,7 @@ def img_as_uint(image, force_copy=False):
     ----------
     image : ndarray
         Input image.
-    force_copy : bool
+    force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
 
     Returns
@@ -332,7 +332,7 @@ def img_as_int(image, force_copy=False):
     ----------
     image : ndarray
         Input image.
-    force_copy : bool
+    force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
 
     Returns
@@ -357,7 +357,7 @@ def img_as_ubyte(image, force_copy=False):
     ----------
     image : ndarray
         Input image.
-    force_copy : bool
+    force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
 
     Returns
@@ -381,7 +381,7 @@ def img_as_bool(image, force_copy=False):
     ----------
     image : ndarray
         Input image.
-    force_copy : bool
+    force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
 
     Returns
