@@ -2,7 +2,6 @@ import math
 import numpy as np
 from scipy import ndimage as ndi
 from scipy.ndimage import filters as ndif
-from matplotlib import pyplot as plt
 from collections import OrderedDict
 from ..exposure import histogram
 from .._shared.utils import assert_nD, warn
@@ -42,6 +41,8 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     fig, ax : tuple
         Matplotlib figure and axes.
     """
+    from matplotlib import pyplot as plt
+
     num_rows = math.ceil((len(methods) + 1) / 2.)
     num_rows = int(num_rows)  # Python 2.7 support
     fig, ax = plt.subplots(num_rows, num_cols, figsize=figsize,
