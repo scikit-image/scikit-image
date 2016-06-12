@@ -82,31 +82,12 @@ plt.show()
 
 import numpy as np
 from scipy import ndimage as ndi
-from skimage.morphology import skeletonize, skeletonize_3d
 import matplotlib.pyplot as plt
+from skimage.morphology import skeletonize, skeletonize_3d
+from skimage.data import binary_blobs
 
 
-def microstructure(lsize=256):
-    """
-    Synthetic binary data: binary microstructure with blobs.
-
-    Parameters
-    ----------
-
-    lsize: int, optional
-        linear size of the returned image
-
-    """
-    n = 5
-    x, y = np.ogrid[0:lsize, 0:lsize]
-    mask = np.zeros((lsize, lsize))
-    generator = np.random.RandomState(1)
-    points = lsize * generator.rand(2, n**2)
-    mask[(points[0]).astype(np.int), (points[1]).astype(np.int)] = 1
-    mask = ndi.gaussian_filter(mask, sigma=lsize/(4.*n))
-    return mask > mask.mean()
-
-data = microstructure(lsize=64)
+data = binary_blobs(200, blob_size_fraction=.2, volume_fraction=.35, seed=1)
 
 skeleton = skeletonize(data)
 skeleton3d = skeletonize_3d(data)
@@ -151,7 +132,7 @@ plt.show()
 from skimage.morphology import medial_axis, skeletonize, skeletonize_3d
 
 # Generate the data
-data = microstructure(lsize=64)
+data = binary_blobs(200, blob_size_fraction=.2, volume_fraction=.35, seed=1)
 
 # Compute the medial axis (skeleton) and the distance transform
 skel, distance = medial_axis(data, return_distance=True)
