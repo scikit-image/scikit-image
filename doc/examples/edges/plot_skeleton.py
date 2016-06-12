@@ -72,7 +72,7 @@ plt.show()
 # value of 0, 1, 2 or 3, which are selectively removed during
 # the iterations.
 #
-#  ``skeletonize_3d`` [Lee94]_ uses an octree data
+#  ``skeletonize_3d`` [Lee94]_ uses an octree data
 # structure to examine a 3x3x3 neighborhood of a pixel. The algorithm
 # proceeds by iteratively sweeping
 # over the image, and removing pixels at each iteration until the image
@@ -132,21 +132,21 @@ plt.show()
 
 ######################################################################
 # **Medial axis skeletonization**
-# 
-# The medial axis of an object is the set of all points having more than one
-# closest point on the object's boundary. It is often called the *topological
-# skeleton*, because it is a 1-pixel wide skeleton of the object, with the same
-# connectivity as the original object.
-# 
-# Here, we use the medial axis transform to compute the width of the foreground
-# objects. As the function ``medial_axis`` returns the distance transform in
-# addition to the medial axis (with the keyword
-# argument ``return_distance=True``), it is possible to compute the distance to
-# the background for all points of the medial axis with this function. This gives
-# an estimate of the local width of the objects.
-# 
-# For a skeleton with fewer branches, ``skeletonize`` or ``skeletonize_3d`` must
-# be preferred.
+#
+# The medial axis of an object is the set of all points having more than one
+# closest point on the object's boundary. It is often called the *topological
+# skeleton*, because it is a 1-pixel wide skeleton of the object, with the same
+# connectivity as the original object.
+#
+# Here, we use the medial axis transform to compute the width of the foreground
+# objects. As the function ``medial_axis`` returns the distance transform in
+# addition to the medial axis (with the keyword
+# argument ``return_distance=True``), it is possible to compute the distance to
+# the background for all points of the medial axis with this function. This gives
+# an estimate of the local width of the objects.
+#
+# For a skeleton with fewer branches, ``skeletonize`` or ``skeletonize_3d`` must
+# be preferred.
 
 from skimage.morphology import medial_axis, skeletonize, skeletonize_3d
 
