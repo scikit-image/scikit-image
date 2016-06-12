@@ -23,20 +23,21 @@ img_warp = tf.warp(img_orig, tform)
 detector = CENSURE()
 
 fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(12, 6))
-plt.tight_layout()
 
 detector.detect(img_orig)
 
 ax[0].imshow(img_orig, cmap=plt.cm.gray)
-ax[0].axis('off')
 ax[0].scatter(detector.keypoints[:, 1], detector.keypoints[:, 0],
               2 ** detector.scales, facecolors='none', edgecolors='r')
 
 detector.detect(img_warp)
 
 ax[1].imshow(img_warp, cmap=plt.cm.gray)
-ax[1].axis('off')
 ax[1].scatter(detector.keypoints[:, 1], detector.keypoints[:, 0],
               2 ** detector.scales, facecolors='none', edgecolors='r')
 
+for a in ax:
+    a.axis('off')
+    
+plt.tight_layout()
 plt.show()

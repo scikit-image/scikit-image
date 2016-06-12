@@ -10,9 +10,8 @@ steps are applied:
 2. Close small holes with binary closing
 3. Remove artifacts touching image border
 4. Measure image regions to filter small objects
-
 """
-import numpy as np
+
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
@@ -39,19 +38,17 @@ clear_border(cleared)
 label_image = label(cleared)
 image_label_overlay = label2rgb(label_image, image=image)
 
-fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(6, 6))
+fig, ax = plt.subplots(figsize=(12, 6))
 ax.imshow(image_label_overlay)
 
 for region in regionprops(label_image):
-
     # skip small images
-    if region.area < 100:
-        continue
+    if region.area >= 100:
+        # draw rectangle around segmented coins
+        minr, minc, maxr, maxc = region.bbox
+        rect = mpatches.Rectangle((minc, minr), maxc - minc, maxr - minr,
+                                  fill=False, edgecolor='red', linewidth=2)
+        ax.add_patch(rect)
 
-    # draw rectangle around segmented coins
-    minr, minc, maxr, maxc = region.bbox
-    rect = mpatches.Rectangle((minc, minr), maxc - minc, maxr - minr,
-                              fill=False, edgecolor='red', linewidth=2)
-    ax.add_patch(rect)
-
+plt.tight_layout()
 plt.show()

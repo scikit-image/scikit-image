@@ -19,17 +19,20 @@ image = camera()
 edge_roberts = roberts(image)
 edge_sobel = sobel(image)
 
-fig, (ax0, ax1) = plt.subplots(ncols=2, sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, ax = plt.subplots(ncols=2, sharex=True, sharey=True,
+                       figsize=(12, 6))
 
-ax0.imshow(edge_roberts, cmap=plt.cm.gray)
-ax0.set_title('Roberts Edge Detection')
-ax0.axis('off')
+ax[0].imshow(edge_roberts, cmap=plt.cm.gray)
+ax[0].set_title('Roberts Edge Detection')
 
-ax1.imshow(edge_sobel, cmap=plt.cm.gray)
-ax1.set_title('Sobel Edge Detection')
-ax1.axis('off')
+ax[1].imshow(edge_sobel, cmap=plt.cm.gray)
+ax[1].set_title('Sobel Edge Detection')
+
+for a in ax:
+    a.axis('off')
 
 plt.tight_layout()
+plt.show()
 
 ######################################################################
 # Different operators compute different finite-difference approximations of
@@ -64,23 +67,24 @@ diff_scharr_prewitt = edge_scharr - edge_prewitt
 diff_scharr_sobel = edge_scharr - edge_sobel
 max_diff = np.max(np.maximum(diff_scharr_prewitt, diff_scharr_sobel))
 
-fig, ((ax0, ax1), (ax2, ax3)) = plt.subplots(nrows=2, ncols=2, sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, axes = plt.subplots(nrows=2, ncols=2, sharex=True, sharey=True,
+                         figsize=(12, 12))
+ax = axes.ravel()
 
-ax0.imshow(img, cmap=plt.cm.gray)
-ax0.set_title('Original image')
-ax0.axis('off')
+ax[0].imshow(img, cmap=plt.cm.gray)
+ax[0].set_title('Original image')
 
-ax1.imshow(edge_scharr, cmap=plt.cm.gray)
-ax1.set_title('Scharr Edge Detection')
-ax1.axis('off')
+ax[1].imshow(edge_scharr, cmap=plt.cm.gray)
+ax[1].set_title('Scharr Edge Detection')
 
-ax2.imshow(diff_scharr_prewitt, cmap=plt.cm.gray, vmax=max_diff)
-ax2.set_title('Scharr - Prewitt')
-ax2.axis('off')
+ax[2].imshow(diff_scharr_prewitt, cmap=plt.cm.gray, vmax=max_diff)
+ax[2].set_title('Scharr - Prewitt')
 
-ax3.imshow(diff_scharr_sobel, cmap=plt.cm.gray, vmax=max_diff)
-ax3.set_title('Scharr - Sobel')
-ax3.axis('off')
+ax[3].imshow(diff_scharr_sobel, cmap=plt.cm.gray, vmax=max_diff)
+ax[3].set_title('Scharr - Sobel')
+
+for a in ax:
+    a.axis('off')
 
 plt.tight_layout()
 plt.show()
