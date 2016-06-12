@@ -13,6 +13,9 @@ mechanisms.
 
 .. [1] https://en.wikipedia.org/wiki/Thresholding_%28image_processing%29
 
+.. seealso::
+    :ref:`sphx_glr_auto_examples_xx_applications_plot_thresholding.py`
+
 """
 import matplotlib
 import matplotlib.pyplot as plt

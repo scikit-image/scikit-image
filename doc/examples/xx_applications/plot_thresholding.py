@@ -24,6 +24,9 @@ mechanisms.
 
 .. [1] https://en.wikipedia.org/wiki/Thresholding_%28image_processing%29
 
+.. seealso::
+   Presentation on
+   :ref:`sphx_glr_auto_examples_xx_applications_plot_rank_filters.py`.
 """
 import matplotlib
 import matplotlib.pyplot as plt
@@ -218,6 +221,7 @@ plt.show()
 # structuring element.
 #
 # The example compares the local threshold with the global threshold.
+#
 
 from skimage import data
 from skimage.morphology import disk
