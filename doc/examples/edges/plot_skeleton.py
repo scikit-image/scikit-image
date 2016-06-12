@@ -9,7 +9,6 @@ can be useful for feature extraction, and/or representing an object's topology.
 ``skeletonize`` works by making successive passes of the image. On each pass,
 border pixels are identified and removed on the condition that they do not
 break the connectivity of the corresponding object.
-
 """
 from skimage.morphology import skeletonize
 from skimage import draw
@@ -72,7 +71,7 @@ plt.show()
 # value of 0, 1, 2 or 3, which are selectively removed during
 # the iterations.
 #
-#  ``skeletonize_3d`` [Lee94]_ uses an octree data
+# ``skeletonize_3d`` [Lee94]_ uses an octree data
 # structure to examine a 3x3x3 neighborhood of a pixel. The algorithm
 # proceeds by iteratively sweeping
 # over the image, and removing pixels at each iteration until the image
