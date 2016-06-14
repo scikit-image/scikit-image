@@ -20,9 +20,9 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
 
     Parameters
     ----------
-    image : array_like of uint8 or uint16.
+    image : array_like
         Integer typed input image. Only positive valued images are supported. 
-        If type is uint16, the argument `levels` needs to be set.
+        If type is other than uint8, the argument `levels` needs to be set.
     distances : array_like
         List of pixel pair distance offsets.
     angles : array_like
@@ -31,7 +31,7 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
         The input image should contain integers in [0, `levels`-1],
         where levels indicate the number of grey-levels counted
         (typically 256 for an 8-bit image). This argument is required for
-        16-bit images and is typically the maximum of the image. 
+        16-bit images or higher and is typically the maximum of the image. 
         As the output matrix is at least `levels` x `levels`, it might
         be preferable to use binning of the input image rather than 
         large values for `levels`. 

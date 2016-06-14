@@ -12,7 +12,7 @@ from .._shared.transform cimport integrate
 cdef extern from "numpy/npy_math.h":
     double NAN "NPY_NAN"
 
-ctypedef fused uint_8_16:
+ctypedef fused any_int:
     cnp.uint8_t
     cnp.uint16_t
     cnp.uint32_t
@@ -22,7 +22,7 @@ ctypedef fused uint_8_16:
     cnp.int32_t
     cnp.int64_t
         
-def _glcm_loop(uint_8_16[:, ::1] image, double[:] distances,
+def _glcm_loop(any_int[:, ::1] image, double[:] distances,
                double[:] angles, Py_ssize_t levels,
                cnp.uint32_t[:, :, :, ::1] out):
     """Perform co-occurrence matrix accumulation.
@@ -31,7 +31,7 @@ def _glcm_loop(uint_8_16[:, ::1] image, double[:] distances,
     ----------
     image : ndarray
         Integer typed input image. Only positive valued images are supported. 
-        If type is uint16, the argument `levels` needs to be set.
+        If type is other than uint8, the argument `levels` needs to be set.
     distances : ndarray
         List of pixel pair distance offsets.
     angles : ndarray
@@ -40,7 +40,7 @@ def _glcm_loop(uint_8_16[:, ::1] image, double[:] distances,
         The input image should contain integers in [0, `levels`-1],
         where levels indicate the number of grey-levels counted
         (typically 256 for an 8-bit image). This argument is required for
-        16-bit images and is typically the maximum of the image. 
+        16-bit images or higher and is typically the maximum of the image. 
         As the output matrix is at least `levels` x `levels`, it might
         be preferable to use binning of the input image rather than 
         large values for `levels`. 
@@ -52,7 +52,7 @@ def _glcm_loop(uint_8_16[:, ::1] image, double[:] distances,
 
     cdef:
         Py_ssize_t a_idx, d_idx, r, c, rows, cols, row, col
-        uint_8_16 i, j
+        any_int i, j
         cnp.float64_t angle, distance
 
     with nogil:
