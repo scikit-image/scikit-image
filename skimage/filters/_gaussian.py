@@ -9,7 +9,7 @@ from .._shared.utils import warn
 __all__ = ['gaussian']
 
 
-def gaussian(image, sigma, output=None, mode='nearest', cval=0,
+def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
              multichannel=None):
     """Multi-dimensional Gaussian filter
 
@@ -17,7 +17,7 @@ def gaussian(image, sigma, output=None, mode='nearest', cval=0,
     ----------
     image : array-like
         input image (grayscale or color) to filter.
-    sigma : scalar or sequence of scalars
+    sigma : scalar or sequence of scalars, optional
         standard deviation for Gaussian kernel. The standard
         deviations of the Gaussian filter are given for each axis as a
         sequence, or as a single number, in which case it is equal for

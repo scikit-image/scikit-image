@@ -19,6 +19,12 @@ def test_null_sigma():
     assert np.all(gaussian(a, 0) == a)
 
 
+def test_default_sigma():
+    a = np.zeros((3, 3))
+    a[1, 1] = 1.
+    assert np.all(gaussian(a) == gaussian(a, sigma=1))
+
+
 def test_energy_decrease():
     a = np.zeros((3, 3))
     a[1, 1] = 1.
