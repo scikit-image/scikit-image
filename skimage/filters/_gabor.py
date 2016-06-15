@@ -3,7 +3,7 @@ from scipy import ndimage as ndi
 from .._shared.utils import assert_nD
 
 
-__all__ = ['gabor_kernel', 'gabor']
+__all__ = ['gabor_kernel', 'gabor', 'morlet_kernel']
 
 
 def _sigma_prefactor(bandwidth):
@@ -14,7 +14,7 @@ def _sigma_prefactor(bandwidth):
 
 
 def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
-                 n_stds=3, offset=0, no_DC_offset=False):
+                 n_stds=3, offset=0):
     """Return complex 2D Gabor filter kernel.
 
     Gabor kernel is a Gaussian kernel modulated by a complex harmonic function.
@@ -74,6 +74,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
     >>> io.imshow(gk.real)  # doctest: +SKIP
     >>> io.show()           # doctest: +SKIP
     """
+
     if sigma_x is None:
         sigma_x = _sigma_prefactor(bandwidth) / frequency
     if sigma_y is None:
@@ -91,10 +92,20 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
     g = np.zeros(y.shape, dtype=np.complex)
     g[:] = np.exp(-0.5 * (rotx ** 2 / sigma_x ** 2 + roty ** 2 / sigma_y ** 2))
     g /= 2 * np.pi * sigma_x * sigma_y
-    w = g * np.exp(1j * (2 * np.pi * frequency * rotx + offset))
+    g *= np.exp(1j * (2 * np.pi * frequency * rotx + offset))
 
-    if no_DC_offset:
-        w = w - w.sum() / g.sum() * g
+    return g
+
+
+def morlet_kernel(frequency, theta=0, bandwidth=1,
+                      sigma_x=None, sigma_y=None, n_stds=3, offset=0):
+
+
+    w = gabor_kernel(frequency, theta=theta, bandwidth=bandwidth,
+                     sigma_x=sigma_x, sigma_y=sigma_y,
+                     n_stds=n_stds, offset=offset)
+    envelop = np.abs(w)
+    w -= w.sum() / envelop.sum() * envelop
 
     return w
 

@@ -1,21 +1,22 @@
 """
-====================
-Apply a set of Gabor and Morlet filters to an picture
-====================
+=====================
+Apply a set of "Gabor" and "Morlet" filters to an picture
+=====================
 
 In this example, we show the difference between filtering an image with the
-gabor filter and the morlet filter.
+Gabor filter and the Morlet filter.
 
 
 Morlet Filter
-----------------------
+---------------------
 
-Zero sum version of the Gabor filter
+Zero sum version of the Gabor filter.
 
 """
 import numpy as np
 import skimage
 from skimage.filters import gabor_kernel
+from skimage.filters import morlet_kernel
 import matplotlib.pylab as plt
 from skimage import data
 from skimage.util import img_as_float
@@ -27,7 +28,7 @@ image = image[0:64,0:64]
 
 J = 4
 L = 8
-xi_psi = 3. / 4 * np.pi  # for Q=1
+xi_psi = 3. / 4 * np.pi
 sigma_xi = .8
 slant = 4. / L
 
@@ -70,7 +71,7 @@ for j, scale in enumerate(2 ** np.arange(J)):
         sigma_y = sigma / slant
         freq = xi / (np.pi * 2)
 
-        morlet = gabor_kernel(freq, theta=theta, sigma_x=sigma_x, sigma_y=sigma_y, no_DC_offset=True)
+        morlet = morlet_kernel(freq, theta=theta, sigma_x=sigma_x, sigma_y=sigma_y)
 
         im_filtered = np.abs(ndi.convolve(image, morlet, mode='wrap'))
 
@@ -82,3 +83,17 @@ for j, scale in enumerate(2 ** np.arange(J)):
 plt.suptitle('Morlet (different scales and orientations)')
 
 plt.show()
+
+print('The energy of the filtered image changes with the gabor fiter but not with the Gabor:')
+im_filtered = np.abs(ndi.convolve(image, morlet, mode='wrap'))
+print('[Morlet] energy:',im_filtered.sum())
+im_filtered100 = np.abs(ndi.convolve(image+100, morlet, mode='wrap'))
+print('[Morlet] energy (im+100):',im_filtered100.sum())
+
+im_filtered = np.abs(ndi.convolve(image, gabor, mode='wrap'))
+print('[Gabor] energy:',im_filtered.sum())
+im_filtered100 = np.abs(ndi.convolve(image+100, gabor, mode='wrap'))
+print('[Gabor] energy (im+100):',im_filtered100.sum())
+
+
+

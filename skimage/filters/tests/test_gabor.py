@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import (assert_equal, assert_almost_equal,
                            assert_array_almost_equal)
 
-from skimage.filters._gabor import gabor_kernel, gabor, _sigma_prefactor
+from skimage.filters._gabor import gabor_kernel, gabor, _sigma_prefactor, morlet_kernel
 
 
 def test_gabor_kernel_size():
@@ -82,9 +82,8 @@ def test_morlet_zero_sum():
         for sigma_y in range(1, 10, 2):
             for frequency in range(0, 10, 2):
                 for theta in range(0, 10, 2):
-                    kernel = gabor_kernel(frequency + 0.1, theta=theta,
-                                           sigma_x=sigma_x, sigma_y=sigma_y,
-                                           no_DC_offset=True)
+                    kernel = morlet_kernel(frequency + 0.1, theta=theta,
+                                           sigma_x=sigma_x, sigma_y=sigma_y)
 
                     assert_array_almost_equal(np.sum(kernel), 0)
 
