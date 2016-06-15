@@ -6,6 +6,9 @@ Version 0.13
 - Deprecated filters `hsobel`, `vsobel`, `hscharr`, `vscharr`, `hprewitt`,
   `vprewitt`, `roberts_positive_diagonal`, `roberts_negative_diagonal` have
   been removed from `skimage.filters.edges`.
+- The `sigma` parameter of `skimage.filters.gaussian` and the `selem` parameter
+  of `skimage.filters.median` have been made optional, with default
+  values.
 
 Version 0.12
 ------------
