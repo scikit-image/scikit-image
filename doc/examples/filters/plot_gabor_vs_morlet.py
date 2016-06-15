@@ -1,7 +1,7 @@
 """
-=====================
+==========================================================
 Apply a set of "Gabor" and "Morlet" filters to an picture
-=====================
+==========================================================
 
 In this example, we show the difference between filtering an image with the
 Gabor filter and the Morlet filter.
