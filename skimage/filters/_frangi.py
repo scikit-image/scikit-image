@@ -3,7 +3,7 @@ import numpy as np
 __all__ = ['frangi', 'hessian']
 
 
-def filtered_image_calculation(image, scale, scale_step, beta1, beta2,
+def _frangi_hessian_common_filter(image, scale, scale_step, beta1, beta2,
                                frangi_=True, black_ridges=True):
     """This is an intermediate function for Frangi and Hessian filters.
 
@@ -48,7 +48,6 @@ def filtered_image_calculation(image, scale, scale_step, beta1, beta2,
 
     # Frangi filter for all sigmas
     for sigma in sigmas:
-
         # Make 2D hessian
         (Dxx, Dxy, Dyy) = hessian_matrix(image, sigma)
 
@@ -61,7 +60,7 @@ def filtered_image_calculation(image, scale, scale_step, beta1, beta2,
         (Lambda1, Lambda2) = hessian_matrix_eigvals(Dxx, Dxy, Dyy)
 
         # Compute some similarity measures
-        Lambda1[np.where(Lambda1 == 0)] = 1e-10
+        Lambda1[Lambda1 == 0] = 1e-10
         Rb = (Lambda2 / Lambda1) ** 2
         S2 = Lambda1 ** 2 + Lambda2 ** 2
 
@@ -70,21 +69,24 @@ def filtered_image_calculation(image, scale, scale_step, beta1, beta2,
                                           np.exp(-S2 / beta2))
         if frangi_:
             if black_ridges:
-                filtered[np.where(Lambda1 < 0)] = 0
+                filtered[Lambda1 < 0] = 0
             else:
-                filtered[np.where(Lambda1 >= 0)] = 0
+                filtered[Lambda1 >= 0] = 0
         else:
-            filtered[np.where(Lambda1 < 0)] = 0
+            filtered[Lambda1 < 0] = 0
 
         # Store the results in 3D matrices
         filtered_list.append(filtered)
-
     return filtered_list
 
 
 def frangi(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15,
                   black_ridges=True):
-    """Returns image filtered with Frangi filter.
+    """Filter an image with the Frangi filter.
+
+    This filter can be used to detect continous edges, e.g. vessels,
+    wrinkles, rivers. It can be useful for calculation of fraction
+    of image, containing such objects.
 
     Calculates the eigenvectors of the Hessian to compute the likeliness of
     an image region to vessels, according to the method described in _[1].
@@ -124,7 +126,7 @@ def frangi(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15,
     .. [3] http://mplab.ucsd.edu/tutorials/gabor.pdf.
     """
 
-    filtered_list = filtered_image_calculation(image, scale, scale_step,
+    filtered_list = _frangi_hessian_common_filter(image, scale, scale_step,
                                                beta1, beta2)
 
 
@@ -135,10 +137,14 @@ def frangi(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15,
 
 
 def hessian(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15):
-    """Returns image filtered with hybrid Hessian filter.
+    """Filter an image with the Hessian filter.
+
+    This filter can be used to detect continous edges, e.g. vessels,
+    wrinkles, rivers. It can be useful for calculation of fraction
+    of image, containing such objects.
 
     Almost equal to frangi filter, but uses alternative method of smoothing.
-    Can be used to detect edges.
+    Address _[1] to find the differences between Frangi and Hessian filters.
 
     Parameters
     ----------
@@ -170,7 +176,8 @@ def hessian(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15):
     """
 
     frangi_ = False
-    filtered_list = filtered_image_calculation(image, scale, scale_step, beta1, beta2, frangi_)
+    filtered_list = _frangi_hessian_common_filter(image, scale, scale_step,
+                                                beta1, beta2, frangi_)
 
     # Return for every pixel the value of the scale(sigma) with the maximum
     # output pixel value
