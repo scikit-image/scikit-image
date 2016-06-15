@@ -5,7 +5,7 @@ __all__ = ['frangi', 'hessian']
 
 def filtered_image_calculation(image, scale, scale_step, beta1, beta2,
                                frangi_=True, black_ridges=True):
-    """This is an intermediate function for frangi and hessian filters.
+    """This is an intermediate function for Frangi and Hessian filters.
 
     Shares the common code for frangi and hessian functions.
 
@@ -134,7 +134,7 @@ def frangi(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15,
 
 
 def hessian(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15):
-    """Returns image filtered with hybrid hessian filter.
+    """Returns image filtered with hybrid Hessian filter.
 
     Almost equal to frangi filter, but uses alternative method of smoothing.
     Can be used to detect edges.
