@@ -124,7 +124,8 @@ def frangi(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15,
     .. [3] http://mplab.ucsd.edu/tutorials/gabor.pdf.
     """
 
-    filtered_list = filtered_image_calculation(image, scale, scale_step, beta1, beta2)
+    filtered_list = filtered_image_calculation(image, scale, scale_step,
+                                               beta1, beta2)
 
 
     # Return for every pixel the value of the scale(sigma) with the maximum
