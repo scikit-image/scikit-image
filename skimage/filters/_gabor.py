@@ -14,7 +14,7 @@ def _sigma_prefactor(bandwidth):
 
 
 def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
-                 n_stds=3, offset=0):
+                 n_stds=3, offset=0, no_DC_offset=False):
     """Return complex 2D Gabor filter kernel.
 
     Gabor kernel is a Gaussian kernel modulated by a complex harmonic function.
@@ -43,6 +43,8 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
         deviations
     offset : float, optional
         Phase offset of harmonic function in radians.
+    no_DC_offset: bool, optional, default False
+        Removes offset of cosine part of Gabor yielding a Morlet wavelet
 
     Returns
     -------
@@ -89,9 +91,12 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
     g = np.zeros(y.shape, dtype=np.complex)
     g[:] = np.exp(-0.5 * (rotx ** 2 / sigma_x ** 2 + roty ** 2 / sigma_y ** 2))
     g /= 2 * np.pi * sigma_x * sigma_y
-    g *= np.exp(1j * (2 * np.pi * frequency * rotx + offset))
+    w = g * np.exp(1j * (2 * np.pi * frequency * rotx + offset))
 
-    return g
+    if no_DC_offset:
+        w = w - w.sum() / g.sum() * g
+
+    return w
 
 
 def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
