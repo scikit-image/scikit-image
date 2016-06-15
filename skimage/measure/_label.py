@@ -1,19 +1,6 @@
 from ._ccomp import label_cython as clabel
 
 
-"""
-    References
-    ----------
-    .. [1] Christophe Fiorio and Jens Gustedt, "Two linear time Union-Find
-           strategies for image processing", Theoretical Computer Science
-           154 (1996), pp. 165-181.
-
-    .. [2] Kensheng Wu, Ekow Otoo and Arie Shoshani, "Optimizing connected
-           component labeling algorithms", Paper LBNL-56864, 2005,
-           Lawrence Berkeley National Laboratory (University of California),
-           http://repositories.cdlib.org/lbnl/LBNL-56864
-"""
-
 def label(input, neighbors=None, background=None, return_num=False,
           connectivity=None):
     r"""Label connected regions of an integer array.
@@ -65,6 +52,15 @@ def label(input, neighbors=None, background=None, return_num=False,
     --------
     regionprops
 
+    References
+    ----------
+    .. [1] Christophe Fiorio and Jens Gustedt, "Two linear time Union-Find
+           strategies for image processing", Theoretical Computer Science
+           154 (1996), pp. 165-181.
+    .. [2] Kensheng Wu, Ekow Otoo and Arie Shoshani, "Optimizing connected
+           component labeling algorithms", Paper LBNL-56864, 2005,
+           Lawrence Berkeley National Laboratory (University of California),
+           http://repositories.cdlib.org/lbnl/LBNL-56864
 
     Examples
     --------
