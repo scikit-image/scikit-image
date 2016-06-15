@@ -94,6 +94,3 @@ im_filtered = np.abs(ndi.convolve(image, gabor, mode='wrap'))
 print('[Gabor] energy:',im_filtered.sum())
 im_filtered100 = np.abs(ndi.convolve(image+100, gabor, mode='wrap'))
 print('[Gabor] energy (im+100):',im_filtered100.sum())
-
-
-
