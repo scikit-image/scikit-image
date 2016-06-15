@@ -77,6 +77,18 @@ def test_gabor():
     assert responses[1, 1] > responses[1, 0]
 
 
+def test_morlet_zero_sum():
+    for sigma_x in range(1, 10, 2):
+        for sigma_y in range(1, 10, 2):
+            for frequency in range(0, 10, 2):
+                for theta in range(0, 10, 2):
+                    kernel = gabor_kernel(frequency + 0.1, theta=theta,
+                                           sigma_x=sigma_x, sigma_y=sigma_y,
+                                           no_DC_offset=True)
+
+                    assert_array_almost_equal(np.sum(kernel), 0)
+
+
 if __name__ == "__main__":
     from numpy import testing
     testing.run_module_suite()
