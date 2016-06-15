@@ -15,6 +15,7 @@ class TestGLCM():
                                [0, 2, 2, 2],
                                [2, 2, 3, 3]], dtype=np.uint8)
 
+
     @test_parallel()
     def test_output_angles(self):
         result = greycomatrix(self.image, [1], [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4], 4)
@@ -50,6 +51,20 @@ class TestGLCM():
                              [0, 0, 2, 0]], dtype=np.uint32)
         np.testing.assert_array_equal(result[:, :, 0, 0], expected)
 
+    def test_image_data_types(self):
+        for dtype in [np.uint16, np.uint32, np.uint64, np.int16, np.int32, np.int64]: 
+            img = self.image.astype(dtype)
+            result = greycomatrix(img, [1], [np.pi / 2], 4,
+                                  symmetric=True)
+            assert result.shape == (4, 4, 1, 1)
+            expected = np.array([[6, 0, 2, 0],
+                                 [0, 4, 2, 0],
+                                 [2, 2, 2, 2],
+                                 [0, 0, 2, 0]], dtype=np.uint32)
+            np.testing.assert_array_equal(result[:, :, 0, 0], expected)
+            
+        return
+    
     def test_output_distance(self):
         im = np.array([[0, 0, 0, 0],
                        [1, 0, 0, 1],

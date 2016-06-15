@@ -7,7 +7,7 @@ cimport numpy as cnp
 from libc.math cimport sin, cos, abs
 from .._shared.interpolation cimport bilinear_interpolation, round
 from .._shared.transform cimport integrate
-
+import cython
 
 cdef extern from "numpy/npy_math.h":
     double NAN "NPY_NAN"
@@ -21,7 +21,8 @@ ctypedef fused any_int:
     cnp.int16_t
     cnp.int32_t
     cnp.int64_t
-        
+
+
 def _glcm_loop(any_int[:, ::1] image, double[:] distances,
                double[:] angles, Py_ssize_t levels,
                cnp.uint32_t[:, :, :, ::1] out):
