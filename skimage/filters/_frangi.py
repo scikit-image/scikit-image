@@ -3,8 +3,7 @@ import numpy as np
 __all__ = ['frangi', 'hessian']
 
 
-def _frangi_hessian_common_filter(image, scale, scale_step, beta1, beta2,
-                                  frangi_=True, black_ridges=True):
+def _frangi_hessian_common_filter(image, scale, scale_step, beta1, beta2):
     """This is an intermediate function for Frangi and Hessian filters.
 
     Shares the common code for Frangi and Hessian functions.
@@ -34,6 +33,7 @@ def _frangi_hessian_common_filter(image, scale, scale_step, beta1, beta2,
     # Import has to be here due to circular import error
     from ..feature import hessian_matrix, hessian_matrix_eigvals
 
+
     sigmas = np.arange(scale[0], scale[1], scale_step)
 
     if np.any(np.asarray(sigmas) < 0.0):
@@ -42,10 +42,13 @@ def _frangi_hessian_common_filter(image, scale, scale_step, beta1, beta2,
     beta1 = 2 * beta1 ** 2
     beta2 = 2 * beta2 ** 2
 
-    filtered_array = np.zeros(np.shape(image),len(sigmas))
+    filtered_array = np.zeros((len(sigmas), np.shape(image)[0],
+                               np.shape(image)[1]))
+    lambdas_array = np.zeros((len(sigmas), np.shape(image)[0],
+                              np.shape(image)[1]))
 
     # Filtering for all sigmas
-    for sigma in sigmas:
+    for i, sigma in enumerate(sigmas):
         # Make 2D hessian
         (Dxx, Dxy, Dyy) = hessian_matrix(image, sigma)
 
@@ -67,8 +70,9 @@ def _frangi_hessian_common_filter(image, scale, scale_step, beta1, beta2,
                                           np.exp(-s2 / beta2))
 
         # Store the results in 3D matrices
-        filtered_array.append([filtered, lambda1])
-    return filtered_array
+        filtered_array[i] = filtered
+        lambdas_array[i] = lambda1
+    return filtered_array, lambdas_array
 
 
 def frangi(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15,
@@ -111,28 +115,25 @@ def frangi(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15,
     References
     ----------
     .. [1] A. Frangi, W. Niessen, K. Vincken, and M. Viergever. "Multiscale
-    vessel enhancement filtering," In LNCS, vol. 1496, pages 130-137,
-    Germany, 1998. Springer-Verlag.
+           vessel enhancement filtering," In LNCS, vol. 1496, pages 130-137,
+           Germany, 1998. Springer-Verlag.
     .. [2] Kroon, D.J.: Hessian based frangi vesselness filter.
     .. [3] http://mplab.ucsd.edu/tutorials/gabor.pdf.
     """
 
-    filtered_array = _frangi_hessian_common_filter(image, scale, scale_step,
-                                                   beta1, beta2)
+    filtered, lambdas = _frangi_hessian_common_filter(image, scale, scale_step,
+                                                      beta1, beta2)
 
-    for i in range(len(filtered_array)):
-        filtered = filtered_array[i][0]
-        Lambda1 = filtered_array[i][1]
-        if black_ridges:
-            filtered[Lambda1 < 0] = 0
-        else:
-            filtered[Lambda1 >= 0] = 0
-        filtered_array[i][0] = filtered
+    if black_ridges:
+        filtered[lambdas < 0] = 0
+    else:
+        filtered[lambdas > 0] = 0
 
     # Return for every pixel the value of the scale(sigma) with the maximum
     # output pixel value
 
-    return np.max(filtered_array, axis=0)[0]
+    return np.max(filtered, axis=0)
+
 
 
 def hessian(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15):
@@ -171,22 +172,18 @@ def hessian(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15):
     References
     ----------
     .. [1] Choon-Ching Ng, Moi Hoon Yap, Nicholas Costen and Baihua Li,
-    "Automatic Wrinkle Detection using Hybrid Hessian Filter".
+           "Automatic Wrinkle Detection using Hybrid Hessian Filter".
     """
 
-    filtered_array = _frangi_hessian_common_filter(image, scale, scale_step,
-                                                   beta1, beta2)
+    filtered, lambdas = _frangi_hessian_common_filter(image, scale, scale_step,
+                                                      beta1, beta2)
 
-    for i in range(len(filtered_array)):
-        filtered = filtered_array[i][0]
-        Lambda1 = filtered_array[i][1]
-        filtered[Lambda1 < 0] = 0
-        filtered_array[i][0] = filtered
+    filtered[lambdas < 0] = 0
 
     # Return for every pixel the value of the scale(sigma) with the maximum
     # output pixel value
-    out = np.max(filtered_array, axis=0)
+    out = np.max(filtered, axis=0)
     out[out <= 0] = 1
 
-    return out[0]
+    return out
 
