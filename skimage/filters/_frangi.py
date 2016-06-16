@@ -20,8 +20,6 @@ def _frangi_hessian_common_filter(image, scale, scale_step, beta1, beta2):
         Frangi correction constant.
     beta2 : float, optional
         Frangi correction constant.
-    black_ridges : boolean, optional
-        If True (default), detects black ridges, if False - white ones.
 
     Returns
     -------
@@ -29,23 +27,18 @@ def _frangi_hessian_common_filter(image, scale, scale_step, beta1, beta2):
         List of pre-filtered images.
 
     """
-
     # Import has to be here due to circular import error
     from ..feature import hessian_matrix, hessian_matrix_eigvals
 
-
     sigmas = np.arange(scale[0], scale[1], scale_step)
-
     if np.any(np.asarray(sigmas) < 0.0):
         raise ValueError("Sigma values less than zero are not valid")
 
     beta1 = 2 * beta1 ** 2
     beta2 = 2 * beta2 ** 2
 
-    filtered_array = np.zeros((len(sigmas), np.shape(image)[0],
-                               np.shape(image)[1]))
-    lambdas_array = np.zeros((len(sigmas), np.shape(image)[0],
-                              np.shape(image)[1]))
+    filtered_array = np.zeros(sigmas.shape + image.shape)
+    lambdas_array = np.zeros(sigmas.shape + image.shape)
 
     # Filtering for all sigmas
     for i, sigma in enumerate(sigmas):
@@ -79,11 +72,11 @@ def frangi(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15,
            black_ridges=True):
     """Filter an image with the Frangi filter.
 
-    This filter can be used to detect continous edges, e.g. vessels,
+    This filter can be used to detect continuous edges, e.g. vessels,
     wrinkles, rivers. It can be used to calculate the fraction of the
     whole image containing such objects.
 
-    Calculates the eigenvectors of the Hessian to compute the likeliness of
+    Calculates the eigenvectors of the Hessian to compute the similarity of
     an image region to vessels, according to the method described in _[1].
 
     Parameters
@@ -99,8 +92,8 @@ def frangi(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15,
     beta2 : float, optional
         Frangi correction constant.
     black_ridges : boolean, optional
-        Detect black ridges (default) set to true, for
-        white ridges set to false.
+        When True (the default), the filter detects black ridges; when
+        False, it detects white ridges.
 
     Returns
     -------
@@ -117,13 +110,11 @@ def frangi(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15,
     .. [1] A. Frangi, W. Niessen, K. Vincken, and M. Viergever. "Multiscale
            vessel enhancement filtering," In LNCS, vol. 1496, pages 130-137,
            Germany, 1998. Springer-Verlag.
-    .. [2] Kroon, D.J.: Hessian based frangi vesselness filter.
+    .. [2] Kroon, D.J.: Hessian based Frangi vesselness filter.
     .. [3] http://mplab.ucsd.edu/tutorials/gabor.pdf.
     """
-
     filtered, lambdas = _frangi_hessian_common_filter(image, scale, scale_step,
                                                       beta1, beta2)
-
     if black_ridges:
         filtered[lambdas < 0] = 0
     else:
@@ -131,20 +122,18 @@ def frangi(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15,
 
     # Return for every pixel the value of the scale(sigma) with the maximum
     # output pixel value
-
     return np.max(filtered, axis=0)
-
 
 
 def hessian(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15):
     """Filter an image with the Hessian filter.
 
-    This filter can be used to detect continous edges, e.g. vessels,
+    This filter can be used to detect continuous edges, e.g. vessels,
     wrinkles, rivers. It can be used to calculate the fraction of the whole
-    image containing such objects
+    image containing such objects.
 
-    Almost equal to frangi filter, but uses alternative method of smoothing.
-    Address _[1] to find the differences between Frangi and Hessian filters.
+    Almost equal to Frangi filter, but uses alternative method of smoothing.
+    Refer to _[1] to find the differences between Frangi and Hessian filters.
 
     Parameters
     ----------
@@ -177,13 +166,11 @@ def hessian(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15):
 
     filtered, lambdas = _frangi_hessian_common_filter(image, scale, scale_step,
                                                       beta1, beta2)
-
     filtered[lambdas < 0] = 0
 
     # Return for every pixel the value of the scale(sigma) with the maximum
     # output pixel value
     out = np.max(filtered, axis=0)
     out[out <= 0] = 1
-
     return out
 

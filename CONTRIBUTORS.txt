@@ -233,4 +233,4 @@
   Minimum threshold
 
 - Kirill Malev
-  Frangi and hessian filters implementation
+  Frangi and Hessian filters implementation
