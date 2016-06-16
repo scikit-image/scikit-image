@@ -3,7 +3,8 @@ import numpy as np
 __all__ = ['frangi', 'hessian']
 
 
-def _frangi_hessian_common_filter(image, scale, scale_step, beta1, beta2):
+def _frangi_hessian_common_filter(image, scale_range, scale_step,
+                                  beta1, beta2):
     """This is an intermediate function for Frangi and Hessian filters.
 
     Shares the common code for Frangi and Hessian functions.
@@ -12,7 +13,7 @@ def _frangi_hessian_common_filter(image, scale, scale_step, beta1, beta2):
     ----------
     image : (N, M) ndarray
         Array with input image data.
-    scale : tuple of floats, optional
+    scale_range : tuple of floats, optional
         The range of sigmas used.
     scale_step : float, optional
         Step size between sigmas.
@@ -30,7 +31,7 @@ def _frangi_hessian_common_filter(image, scale, scale_step, beta1, beta2):
     # Import has to be here due to circular import error
     from ..feature import hessian_matrix, hessian_matrix_eigvals
 
-    sigmas = np.arange(scale[0], scale[1], scale_step)
+    sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
     if np.any(np.asarray(sigmas) < 0.0):
         raise ValueError("Sigma values less than zero are not valid")
 
@@ -68,7 +69,7 @@ def _frangi_hessian_common_filter(image, scale, scale_step, beta1, beta2):
     return filtered_array, lambdas_array
 
 
-def frangi(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15,
+def frangi(image, scale_range=(1, 10), scale_step=2, beta1=0.5, beta2=15,
            black_ridges=True):
     """Filter an image with the Frangi filter.
 
@@ -83,7 +84,7 @@ def frangi(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15,
     ----------
     image : (N, M) ndarray
         Array with input image data.
-    scale : tuple of floats, optional
+    scale_range : tuple of floats, optional
         The range of sigmas used.
     scale_step : float, optional
         Step size between sigmas.
@@ -113,7 +114,8 @@ def frangi(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15,
     .. [2] Kroon, D.J.: Hessian based Frangi vesselness filter.
     .. [3] http://mplab.ucsd.edu/tutorials/gabor.pdf.
     """
-    filtered, lambdas = _frangi_hessian_common_filter(image, scale, scale_step,
+    filtered, lambdas = _frangi_hessian_common_filter(image,
+                                                      scale_range, scale_step,
                                                       beta1, beta2)
     if black_ridges:
         filtered[lambdas < 0] = 0
@@ -125,7 +127,7 @@ def frangi(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15,
     return np.max(filtered, axis=0)
 
 
-def hessian(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15):
+def hessian(image, scale_range=(1, 10), scale_step=2, beta1=0.5, beta2=15):
     """Filter an image with the Hessian filter.
 
     This filter can be used to detect continuous edges, e.g. vessels,
@@ -139,7 +141,7 @@ def hessian(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15):
     ----------
     image : (N, M) ndarray
         Array with input image data.
-    scale : tuple of floats, optional
+    scale_range : tuple of floats, optional
         The range of sigmas used.
     scale_step : float, optional
         Step size between sigmas.
@@ -164,7 +166,8 @@ def hessian(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15):
            "Automatic Wrinkle Detection using Hybrid Hessian Filter".
     """
 
-    filtered, lambdas = _frangi_hessian_common_filter(image, scale, scale_step,
+    filtered, lambdas = _frangi_hessian_common_filter(image,
+                                                      scale_range, scale_step,
                                                       beta1, beta2)
     filtered[lambdas < 0] = 0
 
