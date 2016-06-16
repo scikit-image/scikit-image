@@ -51,6 +51,20 @@ class TestGLCM():
                              [0, 0, 2, 0]], dtype=np.uint32)
         np.testing.assert_array_equal(result[:, :, 0, 0], expected)
 
+    def test_error_raise_float(self):
+        for dtype in [np.float, np.double, np.float16, np.float32, np.float64]: 
+            np.testing.assert_raises(ValueError, greycomatrix, self.image.astype(dtype), [1], [np.pi], 4)
+
+    def test_error_raise_int_types(self):
+        for dtype in [np.int16, np.int32, np.int64, np.uint16, np.uint32, np.uint64]: 
+            np.testing.assert_raises(ValueError, greycomatrix, self.image.astype(dtype), [1], [np.pi])
+
+    def test_error_raise_negative(self):
+        np.testing.assert_raises(ValueError, greycomatrix, self.image.astype(np.int16) - 1, [1], [np.pi], 4)
+
+    def test_error_raise_levels_smaller_max(self):
+        np.testing.assert_raises(ValueError, greycomatrix, self.image - 1, [1], [np.pi], 3)
+        
     def test_image_data_types(self):
         for dtype in [np.uint16, np.uint32, np.uint64, np.int16, np.int32, np.int64]: 
             img = self.image.astype(dtype)

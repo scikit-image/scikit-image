@@ -102,7 +102,6 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
     assert_nD(angles, 1, 'angles')
 
     image = np.ascontiguousarray(image)
-    assert image.min() >= 0
 
     image_max = image.max()
 
@@ -110,17 +109,19 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
         raise ValueError("Float images are not supported by greycomatrix. "
                          "The image needs to be cast to an unsigned integer type.")
     
-    # for 16 bit images (or larger), levels must be set.
-    if image.dtype != np.uint8:
-        if levels is None:
-            raise ValueError("The levels argument is required for data types other than uint8. "
-                             "The resulting matrix will be at least levels ** 2 in size.")
+    # for image type > 8bit, levels must be set.
+    if image.dtype not in (np.uint8, np.int8) and levels is None:         
+        raise ValueError("The levels argument is required for data types other than uint8. "
+                         "The resulting matrix will be at least levels ** 2 in size.")
                              
-        
+    if image.dtype in (np.int8, np.int16, np.int32, np.int64) and np.any(image < 0):
+        raise ValueError("Negative valued images are not supported.")
+
     if levels is None:    
         levels = 256
 
-    assert image_max < levels, "The image maximum needs to be smaller than `levels`."
+    if image_max >= levels:
+        raise ValueError("The image maximum needs to be smaller than `levels`.")
 
     distances = np.ascontiguousarray(distances, dtype=np.float64)
     angles = np.ascontiguousarray(angles, dtype=np.float64)
