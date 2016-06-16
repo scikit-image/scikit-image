@@ -42,10 +42,12 @@ def _frangi_hessian_common_filter(image, scale, scale_step, beta1, beta2,
     beta1 = 2 * beta1 ** 2
     beta2 = 2 * beta2 ** 2
 
-    filtered_array = np.zeros(np.shape(image),len(sigmas))
+    filtered_array = np.zeros(len(sigmas), np.shape(image)[0], np.shape(image)[1])
+    lambdas_array = np.zeros(len(sigmas))
 
     # Filtering for all sigmas
-    for sigma in sigmas:
+    for i in range(len(sigmas)):
+        sigma = sigmas[i]
         # Make 2D hessian
         (Dxx, Dxy, Dyy) = hessian_matrix(image, sigma)
 
@@ -67,8 +69,9 @@ def _frangi_hessian_common_filter(image, scale, scale_step, beta1, beta2,
                                           np.exp(-s2 / beta2))
 
         # Store the results in 3D matrices
-        filtered_array.append([filtered, lambda1])
-    return filtered_array
+        filtered_array[i] = filtered
+        lambdas_array[i] = lambda1
+    return filtered_array, lambdas_array
 
 
 def frangi(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15,
@@ -117,16 +120,16 @@ def frangi(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15,
     .. [3] http://mplab.ucsd.edu/tutorials/gabor.pdf.
     """
 
-    filtered_array = _frangi_hessian_common_filter(image, scale, scale_step,
-                                                   beta1, beta2)
+    (filtered_array, lambdas_array) = _frangi_hessian_common_filter(
+                                      image, scale, scale_step, beta1, beta2)
 
     for i in range(len(filtered_array)):
-        filtered = filtered_array[i][0]
-        Lambda1 = filtered_array[i][1]
+        filtered = filtered_array[i]
+        lambda1 = lambdas_array[i]
         if black_ridges:
-            filtered[Lambda1 < 0] = 0
+            filtered[lambda1 < 0] = 0
         else:
-            filtered[Lambda1 >= 0] = 0
+            filtered[lambda1 >= 0] = 0
         filtered_array[i][0] = filtered
 
     # Return for every pixel the value of the scale(sigma) with the maximum
@@ -174,13 +177,13 @@ def hessian(image, scale=(1, 10), scale_step=2, beta1=0.5, beta2=15):
     "Automatic Wrinkle Detection using Hybrid Hessian Filter".
     """
 
-    filtered_array = _frangi_hessian_common_filter(image, scale, scale_step,
-                                                   beta1, beta2)
+    (filtered_array, lambdas_array) = _frangi_hessian_common_filter(
+                                      image, scale, scale_step, beta1, beta2)
 
     for i in range(len(filtered_array)):
-        filtered = filtered_array[i][0]
-        Lambda1 = filtered_array[i][1]
-        filtered[Lambda1 < 0] = 0
+        filtered = filtered_array[i]
+        lambda1 = lambdas_array[i]
+        filtered[lambda1 < 0] = 0
         filtered_array[i][0] = filtered
 
     # Return for every pixel the value of the scale(sigma) with the maximum
