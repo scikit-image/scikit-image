@@ -23,7 +23,6 @@ def test_energy_decrease():
 def test_values_decreased():
     a = np.multiply(np.ones((3, 3)), 10)
     assert_equal(frangi(a), np.zeros((3, 3)))
-    assert_equal(frangi(a, black_ridges=False), np.zeros((3, 3)))
     assert_equal(hessian(a), np.ones((3, 3)))
 
 
@@ -32,6 +31,7 @@ def test_cropped_camera_image():
     assert_allclose(frangi(image), np.zeros((100, 100)), atol=1e-03)
     assert_allclose(frangi(image, black_ridges=True), np.zeros((100,100)), atol=1e-03)
     assert_allclose(hessian(image), np.ones((100, 100)), atol=1-1e-07)
+
 
 if __name__ == "__main__":
     from numpy import testing

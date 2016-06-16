@@ -4,7 +4,7 @@ Frangi filter
 ==============
 
 Frangi and hybrid Hessian filters can be used for edge detection and
-calculation of part of the image containing edges.
+calculation of fraction of the image containing edges.
 """
 
 from skimage.data import camera
