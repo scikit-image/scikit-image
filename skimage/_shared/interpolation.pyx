@@ -1,7 +1,6 @@
 from interpolation cimport coord_map, get_pixel2d
 import numpy as np
 cimport numpy as cnp
-from .utils import _mode_deprecations
 
 
 def coord_map_py(Py_ssize_t dim, long coord, mode):
@@ -37,7 +36,7 @@ def extend_image(image, pad=10, mode='constant', cval=0):
     function is intended only for testing `get_pixel2d` and demonstrating the
     coordinate mapping modes implemented in `coord_map`.
     """
-    mode = _mode_deprecations(mode)
+
     cdef:
         Py_ssize_t rows = image.shape[0]
         Py_ssize_t cols = image.shape[1]

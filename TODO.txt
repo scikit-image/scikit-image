@@ -22,7 +22,3 @@ Version 0.14
 Version 0.13
 ------------
 * Remove deprecated `None` defaults for `skimage.exposure.rescale_intensity`
-* Remove supported for renamed edge mode, 'nearest' (it is now 'edge').  This
-  involves removing the function _mode_deprecations from skimage._shared.utils
-  as well as any uses of _mode_deprecations from restoration/_denoise.py,
-  _shared/interpolation.pyx, transform/_geometric.py, and transform/_warps.py
