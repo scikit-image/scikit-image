@@ -99,7 +99,9 @@ def morlet_kernel(frequency, theta=0, bandwidth=1,
                       sigma_x=None, sigma_y=None, n_stds=3, offset=0):
     """Return complex 2D morlet filter kernel.
 
-       Morlet kernel is a Gabor kernel with no DC offset.
+       Morlet kernel is a Gabor kernel with no DC offset. This means that not only
+       the imaginary part (sin component), but also the real part (cos component)
+       have zero sum. The filter response to a constant image is zero.
        Harmonic function consists of a complex exponential (carrier) multiplied
        by a Gaussian window (envelope). Spatial frequency is inversely proportional
        to the wavelength of the harmonic and to the standard deviation of a Gaussian
