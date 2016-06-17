@@ -1,10 +1,8 @@
 # coding: utf-8
 import numpy as np
 
-from ._draw import _coords_inside_image
-
+from ._draw import (_coords_inside_image, line)
 from .._shared._geometry import polygon_clip
-from ._draw import line
 
 
 def _ellipse_in_shape(shape, center, radiuses):
@@ -13,7 +11,7 @@ def _ellipse_in_shape(shape, center, radiuses):
     r, c = center
     ry, rx = radiuses
     distances = ((r_lim - r) / ry) ** 2 + ((c_lim - c) / rx) ** 2
-    return np.nonzero(distances < 1)
+    return np.nonzero(distances <= 1)
 
 
 def ellipse(r, c, yradius, xradius, shape=None):
