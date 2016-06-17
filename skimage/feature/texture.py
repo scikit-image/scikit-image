@@ -116,8 +116,7 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
                          "other than uint8. The resulting matrix will be at "
                          "least levels ** 2 in size.")
 
-    if (image.dtype in (np.int8, np.int16, np.int32, np.int64) and
-                                                        np.any(image < 0)):
+    if np.issubdtype(image.dtype, np.signedinteger) and np.any(image < 0):
         raise ValueError("Negative-valued images are not supported.")
 
     if levels is None:
