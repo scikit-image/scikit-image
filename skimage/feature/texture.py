@@ -11,7 +11,7 @@ from ._texture import (_glcm_loop,
                        _multiblock_lbp)
 
 
-def greycomatrix(image, distances, angles, levels=256, symmetric=False,
+def greycomatrix(image, distances, angles, levels=None, symmetric=False,
                  normed=False):
     """Calculate the grey-level co-occurrence matrix.
 
@@ -20,18 +20,21 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
 
     Parameters
     ----------
-    image : array_like of uint8
-        Integer typed input image. The image will be cast to uint8, so
-        the maximum value must be less than 256.
+    image : array_like
+        Integer typed input image. Only positive valued images are supported. 
+        If type is other than uint8, the argument `levels` needs to be set.
     distances : array_like
         List of pixel pair distance offsets.
     angles : array_like
         List of pixel pair angles in radians.
     levels : int, optional
-        The input image should contain integers in [0, levels-1],
+        The input image should contain integers in [0, `levels`-1],
         where levels indicate the number of grey-levels counted
-        (typically 256 for an 8-bit image). The maximum value is
-        256.
+        (typically 256 for an 8-bit image). This argument is required for
+        16-bit images or higher and is typically the maximum of the image. 
+        As the output matrix is at least `levels` x `levels`, it might
+        be preferable to use binning of the input image rather than 
+        large values for `levels`. 
     symmetric : bool, optional
         If True, the output matrix `P[:, :, d, theta]` is symmetric. This
         is accomplished by ignoring the order of value pairs, so both
@@ -50,7 +53,8 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
         `P[i,j,d,theta]` is the number of times that grey-level `j`
         occurs at a distance `d` and at an angle `theta` from
         grey-level `i`. If `normed` is `False`, the output is of
-        type uint32, otherwise it is float64.
+        type uint32, otherwise it is float64. The dimensions are:
+        levels x levels x number of distances x number of angles.
 
     References
     ----------
@@ -97,11 +101,28 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
     assert_nD(distances, 1, 'distances')
     assert_nD(angles, 1, 'angles')
 
-    assert levels <= 256
     image = np.ascontiguousarray(image)
-    assert image.min() >= 0
-    assert image.max() < levels
-    image = image.astype(np.uint8)
+
+    image_max = image.max()
+
+    if np.issubdtype(image.dtype, np.float):
+        raise ValueError("Float images are not supported by greycomatrix. "
+                         "The image needs to be cast to an unsigned integer type.")
+    
+    # for image type > 8bit, levels must be set.
+    if image.dtype not in (np.uint8, np.int8) and levels is None:         
+        raise ValueError("The levels argument is required for data types other than uint8. "
+                         "The resulting matrix will be at least levels ** 2 in size.")
+                             
+    if image.dtype in (np.int8, np.int16, np.int32, np.int64) and np.any(image < 0):
+        raise ValueError("Negative valued images are not supported.")
+
+    if levels is None:    
+        levels = 256
+
+    if image_max >= levels:
+        raise ValueError("The image maximum needs to be smaller than `levels`.")
+
     distances = np.ascontiguousarray(distances, dtype=np.float64)
     angles = np.ascontiguousarray(angles, dtype=np.float64)
 
