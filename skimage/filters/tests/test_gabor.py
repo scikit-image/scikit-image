@@ -36,9 +36,9 @@ def test_sigma_prefactor():
 
 
 def test_gabor_kernel_sum():
-    for sigma_x in range(1, 10, 2):
-        for sigma_y in range(1, 10, 2):
-            for frequency in range(0, 10, 2):
+    for sigma_x in range(1, 6, 2):
+        for sigma_y in range(1, 6, 2):
+            for frequency in range(0, 6, 2):
                 kernel = gabor_kernel(frequency + 0.1, theta=0,
                                       sigma_x=sigma_x, sigma_y=sigma_y)
                 # make sure gaussian distribution is covered nearly 100%
@@ -46,10 +46,10 @@ def test_gabor_kernel_sum():
 
 
 def test_gabor_kernel_theta():
-    for sigma_x in range(1, 10, 2):
-        for sigma_y in range(1, 10, 2):
-            for frequency in range(0, 10, 2):
-                for theta in range(0, 10, 2):
+    for sigma_x in range(1, 6, 2):
+        for sigma_y in range(1, 6, 2):
+            for frequency in range(0, 6, 2):
+                for theta in range(0, 6, 2):
                     kernel0 = gabor_kernel(frequency + 0.1, theta=theta,
                                            sigma_x=sigma_x, sigma_y=sigma_y)
                     kernel180 = gabor_kernel(frequency, theta=theta + np.pi,
@@ -78,10 +78,10 @@ def test_gabor():
 
 
 def test_morlet_zero_sum():
-    for sigma_x in range(1, 10, 2):
-        for sigma_y in range(1, 10, 2):
-            for frequency in range(0, 10, 2):
-                for theta in range(0, 10, 2):
+    for sigma_x in range(1, 6, 2):
+        for sigma_y in range(1, 6, 2):
+            for frequency in range(0, 6, 2):
+                for theta in range(0, 6, 2):
                     kernel = morlet_kernel(frequency + 0.1, theta=theta,
                                            sigma_x=sigma_x, sigma_y=sigma_y)
 
