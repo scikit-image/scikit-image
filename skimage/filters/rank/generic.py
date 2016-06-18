@@ -129,7 +129,7 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
     return out
 
 
-def default_selem(func):
+def _default_selem(func):
     """Decorator to add a default structuring element to morphology functions.
 
     Parameters
@@ -485,7 +485,7 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-@default_selem
+@_default_selem
 def median(image, selem=None, out=None, mask=None,
            shift_x=False, shift_y=False):
     """Return local median of an image.

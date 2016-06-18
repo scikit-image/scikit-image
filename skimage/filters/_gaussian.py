@@ -16,9 +16,9 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     Parameters
     ----------
     image : array-like
-        input image (grayscale or color) to filter.
+        Input image (grayscale or color) to filter.
     sigma : scalar or sequence of scalars, optional
-        standard deviation for Gaussian kernel. The standard
+        Standard deviation for Gaussian kernel. The standard
         deviations of the Gaussian filter are given for each axis as a
         sequence, or as a single number, in which case it is equal for
         all axes.
