@@ -3,6 +3,9 @@ Version 0.13
 - `skimage.filter` has been removed. Use `skimage.filters` instead.
 - `skimage.filters.canny` has been removed.
   `canny` is available only from `skimage.feature` now.
+- Deprecated filters `hsobel`, `vsobel`, `hscharr`, `vscharr`, `hprewitt`,
+  `vprewitt`, `roberts_positive_diagonal`, `roberts_negative_diagonal` have
+  been removed from `skimage.filters.edges`.
 
 Version 0.12
 ------------
