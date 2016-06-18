@@ -496,7 +496,7 @@ def median(image, selem=None, out=None, mask=None,
         Input image.
     selem : 2-D array, optional
         The neighborhood expressed as a 2-D array of 1's and 0's. If None, a
-        square (or cube in 3-D) of size 3 is used.
+        full square of size 3 is used.
     out : 2-D array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray
