@@ -49,9 +49,6 @@ plt.show()
 # the best algorithm for you data without a deep understanding of their
 # mechanisms.
 
-import matplotlib.pyplot as plt
-
-from skimage import data
 from skimage.filters import thresholding
 
 img = data.page()
@@ -61,7 +58,3 @@ img = data.page()
 fig, ax = thresholding.try_all_threshold(img, radius=20,
                                          figsize=(10, 8), verbose=False)
 plt.show()
-
-
-
-

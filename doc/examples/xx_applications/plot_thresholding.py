@@ -51,7 +51,6 @@ plt.show()
 # and naive threshold value, which is sometimes used as a guess value.
 
 from skimage.filters.thresholding import threshold_mean
-from skimage import data
 
 
 image = data.camera()
@@ -83,9 +82,6 @@ plt.show()
 # histogram, there can be multiple pixel values with the minimum histogram
 # count, so you can pick the 'min', 'mid', or 'max' of these values.
 
-import matplotlib.pyplot as plt
-
-from skimage import data
 from skimage.filters.thresholding import threshold_minimum
 
 
@@ -182,9 +178,6 @@ plt.show()
 # each pixel  (i.e. local neighborhoods). Each threshold value is the weighted mean
 # of the local neighborhood minus an offset value.
 
-import matplotlib.pyplot as plt
-
-from skimage import data
 from skimage.filters import threshold_otsu, threshold_adaptive
 
 
@@ -223,13 +216,9 @@ plt.show()
 # The example compares the local threshold with the global threshold.
 #
 
-from skimage import data
 from skimage.morphology import disk
 from skimage.filters import threshold_otsu, rank
 from skimage.util import img_as_ubyte
-
-import matplotlib
-import matplotlib.pyplot as plt
 
 
 img = img_as_ubyte(data.page())

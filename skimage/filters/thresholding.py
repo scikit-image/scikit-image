@@ -43,7 +43,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     """
     from matplotlib import pyplot as plt
 
-    num_rows = math.ceil((len(methods) + 1) / 2.)
+    num_rows = math.ceil((len(methods) + 1.) / num_cols)
     num_rows = int(num_rows)  # Python 2.7 support
     fig, ax = plt.subplots(num_rows, num_cols, figsize=figsize,
                            sharex=True, sharey=True,
@@ -75,7 +75,7 @@ def try_all_threshold(image, radius=None, figsize=(8, 5), verbose=True):
     ----------
     image : (N, M) ndarray
         Input image.
-    radius : int, optinal
+    radius : int, optional
         Lengthscale used for local methods.
         If None, local methods are ignored.
     figsize : tuple, optional
