@@ -1,10 +1,15 @@
+import math
 import numpy as np
 from scipy import ndimage as ndi
 from scipy.ndimage import filters as ndif
+from collections import OrderedDict
 from ..exposure import histogram
 from .._shared.utils import assert_nD, warn
+from ..morphology import disk
+from ..filters.rank import otsu
 
-__all__ = ['threshold_adaptive',
+__all__ = ['try_all_threshold',
+           'threshold_adaptive',
            'threshold_otsu',
            'threshold_yen',
            'threshold_isodata',
@@ -12,6 +17,144 @@ __all__ = ['threshold_adaptive',
            'threshold_minimum',
            'threshold_mean',
            'threshold_triangle']
+
+
+def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
+    """Returns a figure comparing the outputs of different methods.
+
+    Parameters
+    ----------
+    image : (N, M) ndarray
+        Input image.
+    methods : dict, optional
+        Names and associated functions.
+        Functions must take and return an image.
+    figsize : tuple, optional
+        Figure size (in inches).
+    num_cols : int, optional
+        Number of columns.
+    verbose : bool, optional
+        Print function name for each method.
+
+    Returns
+    -------
+    fig, ax : tuple
+        Matplotlib figure and axes.
+    """
+    from matplotlib import pyplot as plt
+
+    num_rows = math.ceil((len(methods) + 1.) / num_cols)
+    num_rows = int(num_rows)  # Python 2.7 support
+    fig, ax = plt.subplots(num_rows, num_cols, figsize=figsize,
+                           sharex=True, sharey=True,
+                           subplot_kw={'adjustable': 'box-forced'})
+    ax = ax.ravel()
+
+    ax[0].imshow(image, cmap=plt.cm.gray)
+    ax[0].set_title('Original')
+
+    i = 1
+    for name, func in methods.items():
+        ax[i].imshow(func(image), cmap=plt.cm.gray)
+        ax[i].set_title(name)
+        i += 1
+        if verbose:
+            print(func.__orifunc__)
+
+    for a in ax:
+        a.axis('off')
+
+    fig.tight_layout()
+    return fig, ax
+
+
+def try_all_threshold(image, radius=None, figsize=(8, 5), verbose=True):
+    """Returns a figure comparing the outputs of different thresholding methods.
+
+    Parameters
+    ----------
+    image : (N, M) ndarray
+        Input image.
+    radius : int, optional
+        Lengthscale used for local methods.
+        If None, local methods are ignored.
+    figsize : tuple, optional
+        Figure size (in inches).
+    verbose : bool, optional
+        Print function name for each method.
+
+    Returns
+    -------
+    fig, ax : tuple
+        Matplotlib figure and axes.
+
+    Notes
+    -----
+    The following algorithms are used:
+
+    * isodata
+    * li
+    * mean
+    * minimum
+    * otsu
+    * triangle
+    * yen
+    * adaptive threshold (local)
+    * rank otsu (local)
+
+    Examples
+    --------
+    >>> from skimage.data import text
+    >>> fig, ax = try_all_threshold(text(), radius=20,
+    ...                            figsize=(10, 6), verbose=False)
+    """
+
+    def include_selem(func, *args, **kwargs):
+        """
+        A wrapper function to embed a threshold range for local algorithms.
+        """
+        def wrapper(im):
+            return func(im, *args, **kwargs)
+        try:
+            wrapper.__orifunc__ = func.__orifunc__
+        except AttributeError:
+            wrapper.__orifunc__ = func.__module__ + '.' + func.__name__
+        return wrapper
+
+    def thresh(func):
+        """
+        A wrapper function to return a thresholded image.
+        """
+        def wrapper(im):
+            return im > func(im)
+        try:
+            wrapper.__orifunc__ = func.__orifunc__
+        except AttributeError:
+            wrapper.__orifunc__ = func.__module__ + '.' + func.__name__
+        return wrapper
+
+    # Global algorithms.
+    methods = OrderedDict({'Isodata': thresh(threshold_isodata),
+                           'Li': thresh(threshold_li),
+                           'Mean': thresh(threshold_mean),
+                           'Minimum': thresh(threshold_minimum),
+                           'Otsu': thresh(threshold_otsu),
+                           'Triangle': thresh(threshold_triangle),
+                           'Yen': thresh(threshold_yen)})
+
+    # Local algorithms.
+    if radius is not None:
+        selem = disk(radius)
+        local_otsu = include_selem(otsu, selem)
+        methods['Local Otsu'] = thresh(local_otsu)
+
+        block_size = 2 * int(radius) + 1
+        adaptive_threshold = include_selem(threshold_adaptive, block_size,
+                                           offset=10)
+        methods['Adaptive threshold'] = adaptive_threshold
+
+    return _try_all(image, figsize=figsize,
+                    methods=methods, verbose=verbose)
 
 
 def threshold_adaptive(image, block_size, method='gaussian', offset=0,
@@ -142,8 +285,8 @@ def threshold_otsu(image, nbins=256):
 
     # Check if the image is multi-colored or not
     if image.min() == image.max():
-        raise ValueError("threshold_otsu is expected to work with images " \
-                         "having more than one color. The input image seems " \
+        raise ValueError("threshold_otsu is expected to work with images "
+                         "having more than one color. The input image seems "
                          "to have just one color {0}.".format(image.min()))
 
     hist, bin_centers = histogram(image.ravel(), nbins)
