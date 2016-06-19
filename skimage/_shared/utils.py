@@ -167,17 +167,6 @@ def assert_nD(array, ndim, arg_name='image'):
         raise ValueError(msg % (arg_name, '-or-'.join([str(n) for n in ndim])))
 
 
-def _mode_deprecations(mode):
-    """Used to update deprecated mode names in
-    `skimage._shared.interpolation.pyx`."""
-    if mode.lower() == 'nearest':
-        warn(skimage_deprecation(
-            "Mode 'nearest' has been renamed to 'edge'. Mode 'nearest' will be "
-            "removed in a future release."))
-        mode = 'edge'
-    return mode
-
-
 def copy_func(f, name=None):
     """Create a copy of a function.
 

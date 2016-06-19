@@ -4,8 +4,7 @@ import numpy as np
 from scipy import spatial
 from scipy import ndimage as ndi
 
-from .._shared.utils import (get_bound_method_class, safe_as_int,
-                             _mode_deprecations, warn)
+from .._shared.utils import (get_bound_method_class, safe_as_int, warn)
 from ..util import img_as_float
 
 from ._warps_cy import _warp_fast
@@ -13,7 +12,6 @@ from ._warps_cy import _warp_fast
 
 def _to_ndimage_mode(mode):
     """Convert from `numpy.pad` mode name to the corresponding ndimage mode."""
-    mode = _mode_deprecations(mode.lower())
     mode_translation_dict = dict(edge='nearest', symmetric='reflect',
                                  reflect='mirror')
     if mode in mode_translation_dict:
@@ -1286,7 +1284,6 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     >>> warped = warp(cube, coords)
 
     """
-    mode = _mode_deprecations(mode)
     image = _convert_warp_input(image, preserve_range)
 
     input_shape = np.array(image.shape)
