@@ -21,6 +21,7 @@ Thresholding is used to create a binary image from a grayscale image [1]_.
 # the intra-class variance.
 #
 # .. [2] http://en.wikipedia.org/wiki/Otsu's_method
+#
 
 import matplotlib.pyplot as plt
 from skimage import data
@@ -59,13 +60,14 @@ plt.show()
 # thresholding algorithms provided by the library. At a glance, you can select
 # the best algorithm for you data without a deep understanding of their
 # mechanisms.
+#
 
-from skimage.filters import thresholding
+from skimage.filters import try_all_threshold
 
 img = data.page()
 
 # Here, we specify a radius for local thresholding algorithms.
 # If it is not specified, only global algorithms are called.
-fig, ax = thresholding.try_all_threshold(img, radius=20,
-                                         figsize=(10, 8), verbose=False)
+fig, ax = try_all_threshold(img, radius=20,
+                            figsize=(10, 8), verbose=False)
 plt.show()

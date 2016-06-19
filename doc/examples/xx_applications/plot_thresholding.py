@@ -32,14 +32,14 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage.filters import thresholding
+from skimage.filters import try_all_threshold
 
 img = data.page()
 
 # Here, we specify a radius for local thresholding algorithms.
 # If it is not specified, only global algorithms are called.
-fig, ax = thresholding.try_all_threshold(img, radius=20,
-                                         figsize=(10, 8), verbose=False)
+fig, ax = try_all_threshold(img, radius=20,
+                            figsize=(10, 8), verbose=False)
 plt.show()
 
 ######################################################################
@@ -49,8 +49,9 @@ plt.show()
 # Now, we illustrate how to apply one of these thresholding algorithms.
 # This example uses the mean value of pixel intensities. It is a simple
 # and naive threshold value, which is sometimes used as a guess value.
+#
 
-from skimage.filters.thresholding import threshold_mean
+from skimage.filters import threshold_mean
 
 
 image = data.camera()
@@ -77,12 +78,13 @@ plt.show()
 #
 # For pictures with a bimodal histogram, more specific algorithms can be used.
 # For instance, the minimum algorithm takes a histogram of the image and smooths it
-# repeatedly until there are only two peaks in the histogram.  Then it
-# finds the minimum value between the two peaks.  After smoothing the
+# repeatedly until there are only two peaks in the histogram. Then it
+# finds the minimum value between the two peaks. After smoothing the
 # histogram, there can be multiple pixel values with the minimum histogram
 # count, so you can pick the 'min', 'mid', or 'max' of these values.
+#
 
-from skimage.filters.thresholding import threshold_minimum
+from skimage.filters import threshold_minimum
 
 
 image = data.camera()
@@ -131,11 +133,8 @@ plt.show()
 # the intra-class variance.
 #
 # .. [2] http://en.wikipedia.org/wiki/Otsu's_method
+#
 
-import matplotlib
-import matplotlib.pyplot as plt
-
-from skimage import data
 from skimage.filters import threshold_otsu
 
 
@@ -175,8 +174,9 @@ plt.show()
 #
 # Here, we binarize an image using the `threshold_adaptive` function, which
 # calculates thresholds in regions with a characteristic size `block_size` surrounding
-# each pixel  (i.e. local neighborhoods). Each threshold value is the weighted mean
-# of the local neighborhood minus an offset value.
+# each pixel (i.e. local neighborhoods). Each threshold value is the weighted mean
+# of the local neighborhood minus an offset value.
+#
 
 from skimage.filters import threshold_otsu, threshold_adaptive
 

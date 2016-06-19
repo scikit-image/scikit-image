@@ -102,8 +102,8 @@ def try_all_threshold(image, radius=None, figsize=(8, 5), verbose=True):
     * adaptive threshold (local)
     * rank otsu (local)
 
-    Example
-    -------
+    Examples
+    --------
     >>> from skimage.data import text
     >>> fig, ax = try_all_threshold(text(), radius=20,
     ...                            figsize=(10, 6), verbose=False)
