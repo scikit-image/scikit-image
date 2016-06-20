@@ -1147,7 +1147,7 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
             output_image[cval_mask] = cval
 
 
-def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
+def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
          mode='constant', cval=0., clip=True, preserve_range=False):
     """Warp an image according to a given coordinate transformation.
 
