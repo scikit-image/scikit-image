@@ -17,8 +17,3 @@ Version 0.14
   deprecation warning test for this alias.
 * Remove deprecated ``sigma_range`` kwargs in ``skimage.restoration.denoise_bilateral``
   and corresponding tests.
-
-
-Version 0.13
-------------
-* Remove deprecated `None` defaults for `skimage.exposure.rescale_intensity`

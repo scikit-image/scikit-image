@@ -289,16 +289,6 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     """
     dtype = image.dtype.type
 
-    if in_range is None:
-        in_range = 'image'
-        msg = "`in_range` should not be set to None. Use {!r} instead."
-        warn(msg.format(in_range))
-
-    if out_range is None:
-        out_range = 'dtype'
-        msg = "`out_range` should not be set to None. Use {!r} instead."
-        warn(msg.format(out_range))
-
     imin, imax = intensity_range(image, in_range)
     omin, omax = intensity_range(image, out_range, clip_negative=(imin >= 0))
 
