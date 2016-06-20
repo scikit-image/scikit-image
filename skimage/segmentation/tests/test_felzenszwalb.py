@@ -34,9 +34,7 @@ def test_minsize():
         segments = felzenszwalb(coffee, min_size=min_size, sigma=3)
         counts = np.bincount(segments.ravel())
         # actually want to test greater or equal.
-        # the construction doesn't guarantee min_size is respected
-        # after intersecting the sementations for the colors
-        assert_greater(np.mean(counts) + 1, min_size)
+        assert_greater(counts.min() + 1, min_size)
 
 
 def test_color():
