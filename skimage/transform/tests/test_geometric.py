@@ -4,9 +4,9 @@ from numpy.testing import (assert_equal, assert_almost_equal,
 from skimage.transform._geometric import _stackcopy
 from skimage.transform._geometric import GeometricTransform
 from skimage.transform import (estimate_transform, matrix_transform,
-                               SimilarityTransform, AffineTransform,
-                               ProjectiveTransform, PolynomialTransform,
-                               PiecewiseAffineTransform)
+                               EuclideanTransform, SimilarityTransform,
+                               AffineTransform, ProjectiveTransform,
+                               PolynomialTransform, PiecewiseAffineTransform)
 from skimage._shared._warnings import expected_warnings
 
 
@@ -42,7 +42,8 @@ def test_stackcopy():
 
 
 def test_estimate_transform():
-    for tform in ('similarity', 'affine', 'projective', 'polynomial'):
+    for tform in ('euclidean', 'similarity', 'affine', 'projective',
+                  'polynomial'):
         estimate_transform(tform, SRC[:2, :], DST[:2, :])
     assert_raises(ValueError, estimate_transform, 'foobar',
                   SRC[:2, :], DST[:2, :])
@@ -53,18 +54,65 @@ def test_matrix_transform():
     assert_equal(tform(SRC), matrix_transform(SRC, tform.params))
 
 
+def test_euclidean_estimation():
+    # exact solution
+    tform = estimate_transform('euclidean', SRC[:2, :], SRC[:2, :] + 10)
+    assert_almost_equal(tform(SRC[:2, :]), SRC[:2, :] + 10)
+    assert_almost_equal(tform.params[0, 0], tform.params[1, 1])
+    assert_almost_equal(tform.params[0, 1], - tform.params[1, 0])
+
+    # over-determined
+    tform2 = estimate_transform('euclidean', SRC, DST)
+    assert_almost_equal(tform2.inverse(tform2(SRC)), SRC)
+    assert_almost_equal(tform2.params[0, 0], tform2.params[1, 1])
+    assert_almost_equal(tform2.params[0, 1], - tform2.params[1, 0])
+
+    # via estimate method
+    tform3 = EuclideanTransform()
+    tform3.estimate(SRC, DST)
+    assert_almost_equal(tform3.params, tform2.params)
+
+
+def test_euclidean_init():
+    # init with implicit parameters
+    rotation = 1
+    translation = (1, 1)
+    tform = EuclideanTransform(rotation=rotation, translation=translation)
+    assert_almost_equal(tform.rotation, rotation)
+    assert_almost_equal(tform.translation, translation)
+
+    # init with transformation matrix
+    tform2 = EuclideanTransform(tform.params)
+    assert_almost_equal(tform2.rotation, rotation)
+    assert_almost_equal(tform2.translation, translation)
+
+    # test special case for scale if rotation=0
+    rotation = 0
+    translation = (1, 1)
+    tform = EuclideanTransform(rotation=rotation, translation=translation)
+    assert_almost_equal(tform.rotation, rotation)
+    assert_almost_equal(tform.translation, translation)
+
+    # test special case for scale if rotation=90deg
+    rotation = np.pi / 2
+    translation = (1, 1)
+    tform = EuclideanTransform(rotation=rotation, translation=translation)
+    assert_almost_equal(tform.rotation, rotation)
+    assert_almost_equal(tform.translation, translation)
+
+
 def test_similarity_estimation():
     # exact solution
     tform = estimate_transform('similarity', SRC[:2, :], DST[:2, :])
     assert_almost_equal(tform(SRC[:2, :]), DST[:2, :])
-    assert_equal(tform.params[0, 0], tform.params[1, 1])
-    assert_equal(tform.params[0, 1], - tform.params[1, 0])
+    assert_almost_equal(tform.params[0, 0], tform.params[1, 1])
+    assert_almost_equal(tform.params[0, 1], - tform.params[1, 0])
 
     # over-determined
     tform2 = estimate_transform('similarity', SRC, DST)
     assert_almost_equal(tform2.inverse(tform2(SRC)), SRC)
-    assert_equal(tform2.params[0, 0], tform2.params[1, 1])
-    assert_equal(tform2.params[0, 1], - tform2.params[1, 0])
+    assert_almost_equal(tform2.params[0, 0], tform2.params[1, 1])
+    assert_almost_equal(tform2.params[0, 1], - tform2.params[1, 0])
 
     # via estimate method
     tform3 = SimilarityTransform()
@@ -240,11 +288,14 @@ def test_invalid_input():
     assert_raises(ValueError, ProjectiveTransform, np.zeros((2, 3)))
     assert_raises(ValueError, AffineTransform, np.zeros((2, 3)))
     assert_raises(ValueError, SimilarityTransform, np.zeros((2, 3)))
+    assert_raises(ValueError, EuclideanTransform, np.zeros((2, 3)))
 
     assert_raises(ValueError, AffineTransform,
                   matrix=np.zeros((2, 3)), scale=1)
     assert_raises(ValueError, SimilarityTransform,
                   matrix=np.zeros((2, 3)), scale=1)
+    assert_raises(ValueError, EuclideanTransform,
+                  matrix=np.zeros((2, 3)), translation=(0, 0))
 
     assert_raises(ValueError, PolynomialTransform, np.zeros((3, 3)))
 
