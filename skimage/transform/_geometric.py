@@ -1,3 +1,4 @@
+from __future__ import division
 import six
 import math
 import numpy as np
@@ -104,7 +105,7 @@ def _umeyama(src, dst, estimate_scale):
     dst_demean = dst - dst_mean
 
     # Eq. (38).
-    A = np.dot(dst_demean.T, src_demean) / float(num)
+    A = np.dot(dst_demean.T, src_demean) / num
 
     # Eq. (39).
     D = np.ones((dim,), dtype=np.double)
@@ -118,7 +119,7 @@ def _umeyama(src, dst, estimate_scale):
     # Eq. (40) and (43).
     rank = np.linalg.matrix_rank(A)
     if rank == 0:
-        return np.nan * np.empty((3, 3))
+        return np.nan * T
     elif rank == dim - 1:
         if np.linalg.det(U) * np.linalg.det(V) > 0:
             T[:dim, :dim] = np.dot(U, V)
@@ -136,8 +137,7 @@ def _umeyama(src, dst, estimate_scale):
     else:
         scale = 1.0
 
-    T[:dim, dim] = dst_mean
-    T[:dim, dim] -= scale * np.dot(T[:dim, :dim], src_mean.T)
+    T[:dim, dim] = dst_mean - scale * np.dot(T[:dim, :dim], src_mean.T)
     T[:dim, :dim] *= scale
 
     return T
@@ -641,9 +641,7 @@ class PiecewiseAffineTransform(GeometricTransform):
 
 
 class EuclideanTransform(ProjectiveTransform):
-    """2D Euclidean transformation of the form:
-
-    ..:math:
+    """2D Euclidean transformation of the form::
 
         X = a0 * x - b0 * y + a1 =
           = x * cos(rotation) - y * sin(rotation) + a1
