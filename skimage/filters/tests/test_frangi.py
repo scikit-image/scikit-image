@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.testing import assert_equal, assert_almost_equal, assert_allclose
-from skimage.filters._frangi import frangi, hessian
+from skimage.filters import frangi, hessian
 from skimage.data import camera
 from skimage.util import crop
 
