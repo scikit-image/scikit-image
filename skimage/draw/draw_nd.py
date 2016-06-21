@@ -46,10 +46,9 @@ def line_nd(start, stop, endpoint=False, round=True):
     """
     start = np.asarray(start)
     stop = np.asarray(stop)
-    npoints = np.max(np.abs(stop - start))
+    npoints = int(np.ceil(np.max(np.abs(stop - start))))
     if endpoint:
         npoints += 1
-    npoints = int(np.ceil(npoints))
     coords = []
     for dim in range(len(start)):
         dimcoords = np.linspace(start[dim], stop[dim], npoints, endpoint)
