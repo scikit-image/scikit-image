@@ -231,3 +231,6 @@
 
 - Jeff Hemmelgarn
   Minimum threshold
+
+- Kirill Malev
+  Frangi and Hessian filters implementation
