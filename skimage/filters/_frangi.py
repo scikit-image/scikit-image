@@ -13,7 +13,7 @@ def _frangi_hessian_common_filter(image, scale_range, scale_step,
     ----------
     image : (N, M) ndarray
         Array with input image data.
-    scale_range : tuple of floats, optional
+    scale_range : 2-tuple of floats, optional
         The range of sigmas used.
     scale_step : float, optional
         Step size between sigmas.
@@ -84,7 +84,7 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=0.5, beta2=15,
     ----------
     image : (N, M) ndarray
         Array with input image data.
-    scale_range : tuple of floats, optional
+    scale_range : 2-tuple of floats, optional
         The range of sigmas used.
     scale_step : float, optional
         Step size between sigmas.
@@ -141,7 +141,7 @@ def hessian(image, scale_range=(1, 10), scale_step=2, beta1=0.5, beta2=15):
     ----------
     image : (N, M) ndarray
         Array with input image data.
-    scale_range : tuple of floats, optional
+    scale_range : 2-tuple of floats, optional
         The range of sigmas used.
     scale_step : float, optional
         Step size between sigmas.
