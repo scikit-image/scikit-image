@@ -122,6 +122,8 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
                 continue
             if segment_size[seg0] < min_size or segment_size[seg1] < min_size:
                 join_trees(segments_p, seg0, seg1)
+                seg_new = find_root(segments_p, seg0)
+                segment_size[seg_new] = segment_size[seg0] + segment_size[seg1]
 
     # unravel the union find tree
     flat = segments.ravel()
