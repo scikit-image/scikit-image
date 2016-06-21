@@ -31,7 +31,7 @@ def _glcm_loop(any_int[:, ::1] image, double[:] distances,
     Parameters
     ----------
     image : ndarray
-        Integer typed input image. Only positive valued images are supported. 
+        Integer typed input image. Only positive valued images are supported.
         If type is other than uint8, the argument `levels` needs to be set.
     distances : ndarray
         List of pixel pair distance offsets.
@@ -40,11 +40,7 @@ def _glcm_loop(any_int[:, ::1] image, double[:] distances,
     levels : int
         The input image should contain integers in [0, `levels`-1],
         where levels indicate the number of grey-levels counted
-        (typically 256 for an 8-bit image). This argument is required for
-        16-bit images or higher and is typically the maximum of the image. 
-        As the output matrix is at least `levels` x `levels`, it might
-        be preferable to use binning of the input image rather than 
-        large values for `levels`. 
+        (typically 256 for an 8-bit image).
     out : ndarray
         On input a 4D array of zeros, and on output it contains
         the results of the GLCM computation.
