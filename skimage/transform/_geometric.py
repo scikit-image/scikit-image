@@ -108,9 +108,9 @@ def _umeyama(src, dst, estimate_scale):
     A = np.dot(dst_demean.T, src_demean) / num
 
     # Eq. (39).
-    D = np.ones((dim,), dtype=np.double)
+    d = np.ones((dim,), dtype=np.double)
     if np.linalg.det(A) < 0:
-        D[dim - 1] = -1
+        d[dim - 1] = -1
 
     T = np.eye(dim + 1, dtype=np.double)
 
@@ -124,16 +124,16 @@ def _umeyama(src, dst, estimate_scale):
         if np.linalg.det(U) * np.linalg.det(V) > 0:
             T[:dim, :dim] = np.dot(U, V)
         else:
-            s = D[dim - 1]
-            D[dim - 1] = -1
-            T[:dim, :dim] = np.dot(U, np.dot(np.diag(D), V))
-            D[dim - 1] = s
+            s = d[dim - 1]
+            d[dim - 1] = -1
+            T[:dim, :dim] = np.dot(U, np.dot(np.diag(d), V))
+            d[dim - 1] = s
     else:
-        T[:dim, :dim] = np.dot(U, np.dot(np.diag(D), V.T))
+        T[:dim, :dim] = np.dot(U, np.dot(np.diag(d), V.T))
 
     if estimate_scale:
         # Eq. (41) and (42).
-        scale = 1.0 / src_demean.var(axis=0).sum() * np.dot(S, D)
+        scale = 1.0 / src_demean.var(axis=0).sum() * np.dot(S, d)
     else:
         scale = 1.0
 
@@ -641,7 +641,7 @@ class PiecewiseAffineTransform(GeometricTransform):
 
 
 class EuclideanTransform(ProjectiveTransform):
-    """2D Euclidean transformation of the form::
+    """2D Euclidean transformation of the form:
 
         X = a0 * x - b0 * y + a1 =
           = x * cos(rotation) - y * sin(rotation) + a1
