@@ -52,9 +52,9 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
     image = ndi.gaussian_filter(image, sigma=[sigma, sigma, 0])
 
     # compute edge weights in 8 connectivity:
-    right_cost = np.sqrt(np.sum((image[1:, :, :] - image[:-1, :, :])
+    down_cost = np.sqrt(np.sum((image[1:, :, :] - image[:-1, :, :])
     	*(image[1:, :, :] - image[:-1, :, :]), axis=-1))
-    down_cost = np.sqrt(np.sum((image[:, 1:, :] - image[:, :-1, :])
+    right_cost = np.sqrt(np.sum((image[:, 1:, :] - image[:, :-1, :])
     	*(image[:, 1:, :] - image[:, :-1, :]), axis=-1))
     dright_cost = np.sqrt(np.sum((image[1:, 1:, :] - image[:-1, :-1, :])
 	*(image[1:, 1:, :] - image[:-1, :-1, :]), axis=-1))
@@ -68,8 +68,8 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
     height, width = image.shape[:2]
     cdef cnp.ndarray[cnp.intp_t, ndim=2] segments \
             = np.arange(width * height, dtype=np.intp).reshape(height, width)
-    right_edges = np.c_[segments[1:, :].ravel(), segments[:-1, :].ravel()]
-    down_edges = np.c_[segments[:, 1:].ravel(), segments[:, :-1].ravel()]
+    down_edges = np.c_[segments[1:, :].ravel(), segments[:-1, :].ravel()]
+    right_edges = np.c_[segments[:, 1:].ravel(), segments[:, :-1].ravel()]
     dright_edges = np.c_[segments[1:, 1:].ravel(), segments[:-1, :-1].ravel()]
     uright_edges = np.c_[segments[:-1, 1:].ravel(), segments[1:, :-1].ravel()]
     cdef cnp.ndarray[cnp.intp_t, ndim=2] edges \
@@ -122,6 +122,8 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
                 continue
             if segment_size[seg0] < min_size or segment_size[seg1] < min_size:
                 join_trees(segments_p, seg0, seg1)
+                seg_new = find_root(segments_p, seg0)
+                segment_size[seg_new] = segment_size[seg0] + segment_size[seg1]
 
     # unravel the union find tree
     flat = segments.ravel()

@@ -7,7 +7,7 @@ from skimage import data
 
 @test_parallel()
 def test_grey():
-    # very weak tests. This algorithm is pretty unstable.
+    # very weak tests.
     img = np.zeros((20, 21))
     img[:10, 10:] = 0.2
     img[10:, :10] = 0.4
@@ -38,7 +38,7 @@ def test_minsize():
 
 
 def test_color():
-    # very weak tests. This algorithm is pretty unstable.
+    # very weak tests.
     img = np.zeros((20, 21, 3))
     img[:10, :10, 0] = 1
     img[10:, :10, 1] = 1
@@ -50,6 +50,17 @@ def test_color():
     assert_array_equal(seg[10:, :10], 2)
     assert_array_equal(seg[:10, 10:], 1)
     assert_array_equal(seg[10:, 10:], 3)
+
+
+def test_merging():
+    # test region merging in the post-processing step
+    img = np.array([[0, 0.3], [0.7, 1]])
+    # With scale=0, only the post-processing is performed.
+    seg = felzenszwalb(img, scale=0, sigma=0, min_size=2)
+    # we expect 2 segments:
+    assert_equal(len(np.unique(seg)), 2)
+    assert_array_equal(seg[0, :], 0)
+    assert_array_equal(seg[1, :], 1)
 
 
 if __name__ == '__main__':
