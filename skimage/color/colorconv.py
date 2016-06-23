@@ -694,19 +694,21 @@ def rgb2gray(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``,
-        or in RGBA format with shape ``(.., .., 4)``.
+        The image in RGB format, in a 3-D or 4-D array of shape
+        ``(.., ..,[ ..,] 3)``, or in RGBA format with shape
+        ``(.., ..,[ ..,] 4)``.
 
     Returns
     -------
     out : ndarray
-        The luminance image, a 2-D array.
+        The luminance image - an array which is the same size as the input
+        array, but with the channel dimension removed.
 
     Raises
     ------
     ValueError
-        If `rgb2gray` is not a 3-D array of shape ``(.., .., 3)`` or
-        ``(.., .., 4)``.
+        If `rgb2gray` is not a 3-D or 4-D arrays of shape
+        ``(.., ..,[ ..,] 3)`` or ``(.., ..,[ ..,] 4)``.
 
     References
     ----------
