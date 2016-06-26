@@ -1,4 +1,4 @@
-
+from __future__ import division
 import numpy as np
 from scipy.ndimage import gaussian_filter, gaussian_laplace
 import math
@@ -14,6 +14,72 @@ from .._shared.utils import assert_nD
 # This basic blob detection algorithm is based on:
 # http://www.cs.utah.edu/~jfishbau/advimproc/project1/ (04.04.2013)
 # Theory behind: http://en.wikipedia.org/wiki/Blob_detection (04.04.2013)
+
+
+def _compute_disk_overlap(d, r1, r2):
+    """
+    Compute surface overlap between two disks of radii ``r1`` and ``r2``,
+    with centers separated by a distance ``d``.
+
+    Parameters
+    ----------
+    d : float
+        Distance between centers.
+    r1 : float
+        Radius of the first disk.
+    r2 : float
+        Radius of the second disk.
+
+    Returns
+    -------
+    vol: float
+        Volume of the overlap between the two disks.
+    """
+
+    ratio1 = (d ** 2 + r1 ** 2 - r2 ** 2) / (2 * d * r1)
+    ratio1 = np.clip(ratio1, -1, 1)
+    acos1 = math.acos(ratio1)
+
+    ratio2 = (d ** 2 + r2 ** 2 - r1 ** 2) / (2 * d * r2)
+    ratio2 = np.clip(ratio2, -1, 1)
+    acos2 = math.acos(ratio2)
+
+    a = -d + r2 + r1
+    b = d - r2 + r1
+    c = d + r2 - r1
+    d = d + r2 + r1
+    area = (r1 ** 2 * acos1 + r2 ** 2 * acos2 -
+            0.5 * sqrt(abs(a * b * c * d)))
+    return area / (math.pi * (min(r1, r2) ** 2))
+
+
+def _compute_sphere_overlap(d, r1, r2):
+    """
+    Compute volume overlap between two spheres of radii ``r1`` and ``r2``,
+    with centers separated by a distance ``d``.
+
+    Parameters
+    ----------
+    d : float
+        Distance between centers.
+    r1 : float
+        Radius of the first sphere.
+    r2 : float
+        Radius of the second sphere.
+
+    Returns
+    -------
+    vol: float
+        Volume of the overlap between the two spheres.
+
+    Notes
+    -----
+    See for example http://mathworld.wolfram.com/Sphere-SphereIntersection.html
+    for more details.
+    """
+    vol = (math.pi / (12 * d) * (r1 + r2 - d)**2 *
+           (d**2 + 2 * d * (r1 + r2) - 3 * (r1**2 + r2**2) + 6 * r1 * r2))
+    return vol / (4./3 * math.pi * min(r1, r2) ** 3)
 
 
 def _blob_overlap(blob1, blob2):
@@ -55,26 +121,10 @@ def _blob_overlap(blob1, blob2):
         return 1
 
     if n_dim == 2:
-        ratio1 = (d ** 2 + r1 ** 2 - r2 ** 2) / (2. * d * r1)
-        ratio1 = np.clip(ratio1, -1, 1)
-        acos1 = math.acos(ratio1)
-
-        ratio2 = (d ** 2 + r2 ** 2 - r1 ** 2) / (2. * d * r2)
-        ratio2 = np.clip(ratio2, -1, 1)
-        acos2 = math.acos(ratio2)
-
-        a = -d + r2 + r1
-        b = d - r2 + r1
-        c = d + r2 - r1
-        d = d + r2 + r1
-        area = (r1 ** 2 * acos1 + r2 ** 2 * acos2 -
-                0.5 * sqrt(abs(a * b * c * d)))
-        return area / (math.pi * (min(r1, r2) ** 2))
+        return _compute_disk_overlap(d, r1, r2)
 
     else:  # http://mathworld.wolfram.com/Sphere-SphereIntersection.html
-        vol = math.pi / (12 * d) * (r1 + r2 - d)**2 * \
-                (d**2 + 2 * d * (r1 + r2) - 3 * (r1**2 + r2**2) + 6 * r1 * r2)
-        return vol / (4./3 * math.pi * min(r1, r2) ** 3)
+        return _compute_sphere_overlap(d, r1, r2)
 
 
 def _prune_blobs(blobs_array, overlap):
@@ -117,9 +167,9 @@ def _prune_blobs(blobs_array, overlap):
             blob1, blob2 = blobs_array[i], blobs_array[j]
             if _blob_overlap(blob1, blob2) > overlap:
                 if blob1[-1] > blob2[-1]:
-                    blob2[-1] = -1
+                    blob2[-1] = 0
                 else:
-                    blob1[-1] = -1
+                    blob1[-1] = 0
 
     return np.array([b for b in blobs_array if b[-1] > 0])
 
@@ -158,8 +208,8 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     -------
     A : (n, image.ndim + 1) ndarray
         A 2d array with each row representing 3 values for a 2D image,
-        and 4 values for a 3D image: ``(r, c, sigma)`` or ``(f, r, c, sigma)``
-        where ``(r, c)`` or ``(f, r, c)`` are coordinates of the blob and
+        and 4 values for a 3D image: ``(r, c, sigma)`` or ``(p, r, c, sigma)``
+        where ``(r, c)`` or ``(p, r, c)`` are coordinates of the blob and
         ``sigma`` is the standard deviation of the Gaussian kernel which
         detected the blob.
 
