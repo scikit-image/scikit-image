@@ -687,6 +687,8 @@ def threshold_triangle(image, nbins=256):
     .. [1] Zack, G. W., Rogers, W. E. and Latt, S. A., 1977,
        Automatic Measurement of Sister Chromatid Exchange Frequency,
        Journal of Histochemistry and Cytochemistry 25 (7), pp. 741-753
+    .. [2] ImageJ AutoThresholder code,
+       http://fiji.sc/wiki/index.php/Auto_Threshold
 
     Examples
     --------
@@ -695,10 +697,10 @@ def threshold_triangle(image, nbins=256):
     >>> thresh = threshold_triangle(image)
     >>> binary = image > thresh
     """
-    # nbins is ignored for interger arrays
+    # nbins is ignored for integer arrays
     # so, we recalculate the effective nbins.
     hist, bin_centers = histogram(image.ravel(), nbins)
-    nbins = bin_centers[-1] - bin_centers[0] + 1
+    nbins = len(hist)
 
     # Find peak, lowest and highest gray levels.
     arg_peak_height = np.argmax(hist)
@@ -727,14 +729,13 @@ def threshold_triangle(image, nbins=256):
     width /= norm
 
     # Maximize the length.
-    d = peak_height * arg_low_level - width * hist[arg_low_level]
-    length = peak_height * x1 - width * y1 - d
-    level = np.argmax(length) + arg_low_level
+    # The ImageJ implementation includes an additional constant when calculating
+    # the length, but here we omit it as it does not affect the location of the
+    # minimum.
+    length = peak_height * x1 - width * y1
+    arg_level = np.argmax(length) + arg_low_level
 
     if flip:
-        level = nbins - level - 1
+        arg_level = nbins - arg_level - 1
 
-    # The histogram doesn't start at zero, shift it.
-    level += bin_centers[0]
-
-    return level
+    return bin_centers[arg_level]
