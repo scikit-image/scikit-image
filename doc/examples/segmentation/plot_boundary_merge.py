@@ -10,7 +10,7 @@ The regions with the lowest edge weights are successively merged until there
 is no edge with weight less than ``thresh``. The hierarchical merging is done
 through the :py:func:`skimage.future.graph.merge_hierarchical` function.
 For an example of how to contruct region boundary based RAGs, see
-:any:`plot_rag_boundary`
+:any:`plot_rag_boundary`.
 
 """
 
