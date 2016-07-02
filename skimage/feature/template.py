@@ -63,12 +63,20 @@ def match_template(image, template, pad_input=False, mode='constant',
     output : array
         Response image with correlation coefficients.
 
+    Notes
+    -----
+    Details on the cross-correlation are presented in [1]_. This implementation
+    uses FFT convolutions of the image and the template. Reference [2]_
+    presents similar derivations but the approximation presented in this
+    reference is not used in our implementation.
+
     References
     ----------
-    .. [1] Briechle and Hanebeck, "Template Matching using Fast Normalized
-           Cross Correlation", Proceedings of the SPIE (2001).
-    .. [2] J. P. Lewis, "Fast Normalized Cross-Correlation", Industrial Light
+    .. [1] J. P. Lewis, "Fast Normalized Cross-Correlation", Industrial Light
            and Magic.
+    .. [2] Briechle and Hanebeck, "Template Matching using Fast Normalized
+           Cross Correlation", Proceedings of the SPIE (2001).
+           DOI:10.1117/12.421129
 
     Examples
     --------
@@ -142,22 +150,22 @@ def match_template(image, template, pad_input=False, mode='constant',
         xcorr = fftconvolve(image, template[::-1, ::-1, ::-1],
                             mode="valid")[1:-1, 1:-1, 1:-1]
 
-    nom = xcorr - image_window_sum * template_mean
+    numerator = xcorr - image_window_sum * template_mean
 
-    denom = image_window_sum2
+    denominator = image_window_sum2
     np.multiply(image_window_sum, image_window_sum, out=image_window_sum)
     np.divide(image_window_sum, template_volume, out=image_window_sum)
-    denom -= image_window_sum
-    denom *= template_ssd
-    np.maximum(denom, 0, out=denom)  # sqrt of negative number not allowed
-    np.sqrt(denom, out=denom)
+    denominator -= image_window_sum
+    denominator *= template_ssd
+    np.maximum(denominator, 0, out=denominator)  # sqrt of negative number not allowed
+    np.sqrt(denominator, out=denominator)
 
     response = np.zeros_like(xcorr, dtype=np.float32)
 
     # avoid zero-division
-    mask = denom > np.finfo(np.float32).eps
+    mask = denominator > np.finfo(np.float32).eps
 
-    response[mask] = nom[mask] / denom[mask]
+    response[mask] = numerator[mask] / denominator[mask]
 
     slices = []
     for i in range(template.ndim):
