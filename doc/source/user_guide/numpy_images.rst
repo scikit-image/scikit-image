@@ -1,5 +1,6 @@
+==================================
 A crash course on NumPy for images
-----------------------------------
+==================================
 
 Images manipulated by ``scikit-image`` are simply NumPy arrays. Hence, a
 large fraction of operations on images will just consist in using NumPy::
