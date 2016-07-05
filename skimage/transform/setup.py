@@ -13,10 +13,14 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('transform', parent_package, top_path)
     config.add_data_dir('tests')
 
+    cython(['_polar.pyx'], working_path=base_path)
     cython(['_hough_transform.pyx'], working_path=base_path)
     cython(['_warps_cy.pyx'], working_path=base_path)
     cython(['_radon_transform.pyx'], working_path=base_path)
     cython(['_seam_carving.pyx'], working_path=base_path)
+
+    config.add_extension('_polar', sources=['_polar.c'],
+                         include_dirs=[get_numpy_include_dirs()])
 
     config.add_extension('_hough_transform', sources=['_hough_transform.c'],
                          include_dirs=[get_numpy_include_dirs()])

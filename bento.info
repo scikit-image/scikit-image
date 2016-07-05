@@ -59,6 +59,9 @@ Library:
     Extension: skimage.io._plugins._histograms
         Sources:
             skimage/io/_plugins/_histograms.pyx
+    Extension: skimage.transform._polar
+        Sources:
+            skimage/transform/_polar.pyx
     Extension: skimage.transform._hough_transform
         Sources:
             skimage/transform/_hough_transform.pyx

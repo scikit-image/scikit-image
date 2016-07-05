@@ -21,6 +21,7 @@ __all__ = ['load',
            'coins',
            'moon',
            'page',
+           'retina',
            'horse',
            'clock',
            'immunohistochemistry',
@@ -158,11 +159,25 @@ def page():
     return load("page.png")
 
 
+def retina():
+    """Human retina.
+
+    This image of a retina is useful for demonstrations requiring circulat
+    images. This image was downloaded from
+    `wikimedia <https://commons.wikimedia.org/wiki/File:Fundus_photograph_of_normal_left_eye.jpg>`.
+
+    This file is made available under the Creative Commons CC0 1.0 Universal
+    Public Domain Dedication.
+
+    """
+    return load("retina.jpg")
+
+
 def horse():
     """Black and white silhouette of a horse.
 
     This image was downloaded from
-    `openclipart <http://openclipart.org/detail/158377/horse-by-marauder>`
+    `openclipart <http://openclipart.org/detail/158377/horse-by-marauder>`.
 
     Released into public domain and drawn and uploaded by Andreas Preuss
     (marauder).
