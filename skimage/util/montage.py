@@ -6,7 +6,7 @@ from .. import exposure
 EPSILON = 1e-6
 
 
-def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None):
+def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, border_padding = 0):
     """Create a 2-dimensional 'montage' from a 3-dimensional input array
     representing an ensemble of equally shaped 2-dimensional images.
 
@@ -39,6 +39,9 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None):
     grid_shape: tuple, optional
         The desired grid shape for the montage (tiles_y, tiles_x).
         The default aspect ratio is square.
+    border_padding: int, optional
+        The size of the spacing to add between tiles in the montage so
+        the boundaries of individual frames are easier to see 
 
     Returns
     -------
@@ -78,10 +81,15 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None):
     """
 
     assert arr_in.ndim == 3
-
+    
+    # -- add border padding (np.pad does all dimensions 
+    # so we remove the padding from the first
+    if border_padding>0:
+        arr_in = np.pad(arr_in, border_padding, mode='constant')[border_padding:-border_padding]
+    else:
+        arr_in = arr_in.copy()
+    
     n_images, height, width = arr_in.shape
-
-    arr_in = arr_in.copy()
 
     # -- rescale intensity if necessary
     if rescale_intensity:
