@@ -250,3 +250,9 @@
 
 - Gleb Goussarov
   Chan-Vese Segmentation
+
+- Scott Sievert
+  Wavelet denoising
+
+- Kevin Mader
+  Montage improvements
