@@ -6,7 +6,7 @@ from .. import exposure
 EPSILON = 1e-6
 
 
-def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, border_padding = 0):
+def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, border_padding=0):
     """Create a 2-dimensional 'montage' from a 3-dimensional input array
     representing an ensemble of equally shaped 2-dimensional images.
 
@@ -28,24 +28,24 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, bor
 
     Parameters
     ----------
-    arr_in: ndarray, shape=[n_images, height, width]
+    arr_in : ndarray, shape=[n_images, height, width]
         3-dimensional input array representing an ensemble of n_images
         of equal shape (i.e. [height, width]).
-    fill: float or 'mean', optional
+    fill : float or 'mean', optional
         How to fill the 2-dimensional output array when sqrt(n_images)
         is not an integer. If 'mean' is chosen, then fill = arr_in.mean().
-    rescale_intensity: bool, optional
+    rescale_intensity : bool, optional
         Whether to rescale the intensity of each image to [0, 1].
-    grid_shape: tuple, optional
+    grid_shape : tuple, optional
         The desired grid shape for the montage (tiles_y, tiles_x).
         The default aspect ratio is square.
-    border_padding: int, optional
-        The size of the spacing to add between tiles in the montage so
-        the boundaries of individual frames are easier to see 
+    border_padding : int, optional
+        The size of the spacing between the tiles to make the 
+        boundaries of individual frames easier to see.
 
     Returns
     -------
-    arr_out: ndarray, shape=[alpha * height, alpha * width]
+    arr_out : ndarray, shape=[alpha * height, alpha * width]
         Output array where 'alpha' has been determined automatically to
         fit (at least) the `n_images` in `arr_in`.
 
@@ -82,9 +82,9 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, bor
 
     assert arr_in.ndim == 3
     
-    # -- add border padding (np.pad does all dimensions 
+    # -- add border padding, np.pad does all dimensions 
     # so we remove the padding from the first
-    if border_padding>0:
+    if border_padding > 0:
         arr_in = np.pad(arr_in, border_padding, mode='constant')[border_padding:-border_padding]
     else:
         arr_in = arr_in.copy()
