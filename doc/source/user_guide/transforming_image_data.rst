@@ -42,6 +42,17 @@ transformed to floating-point type by the conversion operation::
 
 
 
+Conversion from RGBA to RGB - Removing alpha channel through alpha blending
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Converting an RGBA image to an RGB image by alpha blending it with a
+background is realized with :func:`rgba2rgb` :: 
+
+    >>> from skimage.color import rgba2rgb
+    >>> from skimage import data
+    >>> img_rgba = data.horse()
+    >>> img_rgb = rgba2rgb(img_rgba)
+
 Conversion between color and gray values
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
