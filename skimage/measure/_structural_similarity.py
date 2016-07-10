@@ -226,7 +226,7 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
 def structural_similarity(X, Y, win_size=None, gradient=False,
                           dynamic_range=None, multichannel=False,
                           gaussian_weights=False, full=False, **kwargs):
-    """""" + compare_ssim.__doc__
+    """""" + compare_ssim.__doc__ if compare_ssim.__doc__ is not None else ""
     return compare_ssim(X, Y, win_size=win_size, gradient=gradient,
                         dynamic_range=dynamic_range,
                         multichannel=multichannel,

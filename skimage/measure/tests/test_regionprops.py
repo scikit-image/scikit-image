@@ -2,6 +2,7 @@ from numpy.testing import assert_array_equal, assert_almost_equal, \
     assert_array_almost_equal, assert_raises, assert_equal
 import numpy as np
 import math
+import sys
 
 from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
                                           _parse_docs)
@@ -447,16 +448,19 @@ def test_cache():
 def test_docstrings_and_props():
     region = regionprops(SAMPLE)[0]
 
-    docs = _parse_docs()
-    props = [m for m in dir(region) if not m.startswith('_')]
-
-    nr_docs_parsed = len(docs)
-    nr_props = len(props)
-    assert_equal(nr_docs_parsed, nr_props)
-
-    ds = docs['weighted_moments_normalized']
-    assert 'iteration' not in ds
-    assert len(ds.split('\n')) > 3
+    docs = _parse_docs() # None if byte-compilation optimization 2
+    if sys.flags.optimize < 2:
+        props = [m for m in dir(region) if not m.startswith('_')]
+    
+        nr_docs_parsed = len(docs)
+        nr_props = len(props)
+        assert_equal(nr_docs_parsed, nr_props)
+    
+        ds = docs['weighted_moments_normalized']
+        assert 'iteration' not in ds
+        assert len(ds.split('\n')) > 3
+    else:
+        assert docs is None
 
 
 if __name__ == "__main__":

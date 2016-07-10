@@ -597,10 +597,14 @@ def perimeter(image, neighbourhood=4):
 
 
 def _parse_docs():
+    doc = regionprops.__doc__
+    if doc is None:
+        # __doc__ is None if byte-compilation optimized level 2
+        return None
+
     import re
     import textwrap
 
-    doc = regionprops.__doc__
     matches = re.finditer('\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)',
                           doc, flags=re.DOTALL)
     prop_doc = dict((m.group(1), textwrap.dedent(m.group(2))) for m in matches)
@@ -613,11 +617,12 @@ def _install_properties_docs():
 
     for p in [member for member in dir(_RegionProperties)
               if not member.startswith('_')]:
-        try:
-            getattr(_RegionProperties, p).__doc__ = prop_doc[p]
-        except AttributeError:
-            # For Python 2.x
-            getattr(_RegionProperties, p).im_func.__doc__ = prop_doc[p]
+        if prop_doc is not None:
+            try:
+                getattr(_RegionProperties, p).__doc__ = prop_doc[p]
+            except AttributeError:
+                # For Python 2.x
+                getattr(_RegionProperties, p).im_func.__doc__ = prop_doc[p]
 
         setattr(_RegionProperties, p, property(getattr(_RegionProperties, p)))
 
