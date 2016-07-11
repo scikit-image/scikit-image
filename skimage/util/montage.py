@@ -107,12 +107,95 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, bor
         fill = arr_in.mean()
 
     n_missing = int((alpha_y * alpha_x) - n_images)
-    missing = np.ones((n_missing, height, width), dtype=arr_in.dtype) * fill
+    # sometimes the mean returns a float, this ensures the missing
+    # has the same type for non-float images
+    missing = (np.ones((n_missing, height, width), dtype=arr_in.dtype) * fill).astype(arr_in.dtype)
     arr_out = np.vstack((arr_in, missing))
 
     # -- reshape to 2d montage, step by step
     arr_out = arr_out.reshape(alpha_y, alpha_x, height, width)
     arr_out = arr_out.swapaxes(1, 2)
     arr_out = arr_out.reshape(alpha_y * height, alpha_x * width)
+
+    return arr_out
+
+def montage_rgb(arr_in, fill='mean', grid_shape=None, border_padding=0):
+    """Create a 2-dimensional 'montage' from a 3-dimensional input array
+    representing an ensemble of equally shaped 2-dimensional images.
+
+    For example, ``montage2d(arr_in, fill)`` with the following `arr_in`
+
+    +---+---+---+
+    | 1 | 2 | 3 |
+    +---+---+---+
+
+    will return:
+
+    +---+---+
+    | 1 | 2 |
+    +---+---+
+    | 3 | * |
+    +---+---+
+
+    Where the '*' patch will be determined by the `fill` parameter.
+
+    Parameters
+    ----------
+    arr_in : ndarray, shape=[n_images, height, width, n_channels]
+        3-dimensional input array representing an ensemble of n_images
+        of equal shape (i.e. [height, width, n_channels]).
+    fill : float or 'mean', optional
+        How to fill the 2-dimensional output array when sqrt(n_images)
+        is not an integer. If 'mean' is chosen, then fill = arr_in.mean().
+    grid_shape : tuple, optional
+        The desired grid shape for the montage (tiles_y, tiles_x).
+        The default aspect ratio is square.
+    border_padding : int, optional
+        The size of the spacing between the tiles to make the 
+        boundaries of individual frames easier to see.
+
+    Returns
+    -------
+    arr_out : ndarray, shape=[alpha * height, alpha * width, n_channels]
+        Output array where 'alpha' has been determined automatically to
+        fit (at least) the `n_images` in `arr_in`.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.util.montage import montage2d
+    >>> arr_in = np.arange(3 * 2 * 2).reshape(3, 2, 2)
+    """
+    
+    assert arr_in.ndim == 4
+    
+    # -- add border padding, np.pad does all dimensions 
+    # so we remove the padding from the first
+    if border_padding > 0:
+        arr_in = np.pad(arr_in, border_padding, mode='constant')[border_padding:-border_padding,:,:,border_padding:-border_padding]
+    else:
+        arr_in = arr_in.copy()
+    
+    n_images, height, width, n_channels = arr_in.shape
+
+
+    # -- determine alpha
+    if grid_shape:
+        alpha_y, alpha_x = grid_shape
+    else:
+        alpha_y = alpha_x = int(np.ceil(np.sqrt(n_images)))
+
+    # -- fill missing patches
+    if fill == 'mean':
+        fill = arr_in.mean()
+
+    n_missing = int((alpha_y * alpha_x) - n_images)
+    missing = (np.ones((n_missing, height, width, n_channels), dtype=arr_in.dtype) * fill).astype(arr_in.dtype)
+    arr_out = np.vstack((arr_in, missing))
+
+    # -- reshape to 2d montage, step by step
+    arr_out = arr_out.reshape(alpha_y, alpha_x, height, width, n_channels)
+    arr_out = arr_out.swapaxes(1, 2)
+    arr_out = arr_out.reshape(alpha_y * height, alpha_x * width, n_channels)
 
     return arr_out
