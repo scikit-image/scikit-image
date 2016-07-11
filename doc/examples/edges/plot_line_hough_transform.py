@@ -3,12 +3,11 @@
 Straight line Hough transform
 =============================
 
-The Hough transform in its simplest form is a `method to detect straight lines
-<http://en.wikipedia.org/wiki/Hough_transform>`__.
+The Hough transform in its simplest form is a method to detect straight lines.
 
 In the following example, we construct an image with a line intersection. We
-then use the Hough transform to explore a parameter space for straight lines
-that may run through the image.
+then use the `Hough transform  <http://en.wikipedia.org/wiki/Hough_transform>`__.
+to explore a parameter space for straight lines that may run through the image.
 
 Algorithm overview
 ------------------
