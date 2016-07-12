@@ -4,7 +4,7 @@ Region Boundary based RAGs
 ==========================
 
 Construct a region boundary RAG with the ``rag_boundary`` function. The
-function  :py:func:`skimage.future.graph.rag_boundary`, takes an
+function  :py:func:`skimage.future.graph.rag_boundary` takes an
 ``edge_map`` argument, which gives the significance of a feature (such as
 edges) being present at each pixel. In a region boundary RAG, the edge weight
 between two regions is the average value of the corresponding pixels in
