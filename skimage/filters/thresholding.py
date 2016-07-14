@@ -330,10 +330,10 @@ def threshold_yen(image, nbins=256):
     ----------
     .. [1] Yen J.C., Chang F.J., and Chang S. (1995) "A New Criterion
            for Automatic Multilevel Thresholding" IEEE Trans. on Image
-           Processing, 4(3): 370-378
+           Processing, 4(3): 370-378. DOI:10.1109/83.366472
     .. [2] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
            Techniques and Quantitative Performance Evaluation" Journal of
-           Electronic Imaging, 13(1): 146-165,
+           Electronic Imaging, 13(1): 146-165, DOI:10.1117/1.1631315
            http://www.busim.ee.boun.edu.tr/~sankur/SankurFolder/Threshold_survey.pdf
     .. [3] ImageJ AutoThresholder code, http://fiji.sc/wiki/index.php/Auto_Threshold
 
@@ -399,13 +399,14 @@ def threshold_isodata(image, nbins=256, return_all=False):
     ----------
     .. [1] Ridler, TW & Calvard, S (1978), "Picture thresholding using an
            iterative selection method"
-    .. [2] IEEE Transactions on Systems, Man and Cybernetics 8: 630-632,
-           http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=4310039
-    .. [3] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
+           IEEE Transactions on Systems, Man and Cybernetics 8: 630-632,
+           DOI:10.1109/TSMC.1978.4310039
+    .. [2] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
            Techniques and Quantitative Performance Evaluation" Journal of
            Electronic Imaging, 13(1): 146-165,
            http://www.busim.ee.boun.edu.tr/~sankur/SankurFolder/Threshold_survey.pdf
-    .. [4] ImageJ AutoThresholder code,
+           DOI:10.1117/1.1631315
+    .. [3] ImageJ AutoThresholder code,
            http://fiji.sc/wiki/index.php/Auto_Threshold
 
     Examples
@@ -489,12 +490,14 @@ def threshold_li(image):
     ----------
     .. [1] Li C.H. and Lee C.K. (1993) "Minimum Cross Entropy Thresholding"
            Pattern Recognition, 26(4): 617-625
+           DOI:10.1016/0031-3203(93)90115-D
     .. [2] Li C.H. and Tam P.K.S. (1998) "An Iterative Algorithm for Minimum
            Cross Entropy Thresholding" Pattern Recognition Letters, 18(8): 771-776
+           DOI:10.1016/S0167-8655(98)00057-9
     .. [3] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
            Techniques and Quantitative Performance Evaluation" Journal of
            Electronic Imaging, 13(1): 146-165
-           http://citeseer.ist.psu.edu/sezgin04survey.html
+           DOI:10.1117/1.1631315
     .. [4] ImageJ AutoThresholder code, http://fiji.sc/wiki/index.php/Auto_Threshold
 
     Examples
@@ -573,6 +576,7 @@ def threshold_minimum(image, nbins=256, bias='min', max_iter=10000):
     ----------
     .. [1] Prewitt, JMS & Mendelsohn, ML (1966), "The analysis of cell images",
            Annals of the New York Academy of Sciences 128: 1035-1053
+           DOI:10.1111/j.1749-6632.1965.tb11715.x
 
     Examples
     --------
@@ -654,6 +658,7 @@ def threshold_mean(image):
     .. [1] C. A. Glasbey, "An analysis of histogram-based thresholding
         algorithms," CVGIP: Graphical Models and Image Processing,
         vol. 55, pp. 532-537, 1993.
+        DOI:10.1006/cgip.1993.1040
 
     Examples
     --------
@@ -687,6 +692,7 @@ def threshold_triangle(image, nbins=256):
     .. [1] Zack, G. W., Rogers, W. E. and Latt, S. A., 1977,
        Automatic Measurement of Sister Chromatid Exchange Frequency,
        Journal of Histochemistry and Cytochemistry 25 (7), pp. 741-753
+       DOI:10.1177/25.7.70454
     .. [2] ImageJ AutoThresholder code,
        http://fiji.sc/wiki/index.php/Auto_Threshold
 
