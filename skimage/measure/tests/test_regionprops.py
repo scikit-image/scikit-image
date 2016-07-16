@@ -77,6 +77,9 @@ def test_bbox():
     bbox = regionprops(SAMPLE_3D)[0].bbox
     assert_array_almost_equal(bbox, (1, 1, 1, 4, 3, 3))
 
+def test_bbox_area():
+    bbox_area = regionprops(SAMPLE)[0].bbox_area
+    assert_array_almost_equal(bbox_area, SAMPLE.shape[0] * SAMPLE.shape[1])
 
 def test_moments_central():
     mu = regionprops(SAMPLE)[0].moments_central

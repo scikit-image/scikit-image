@@ -21,6 +21,7 @@ STREL_26_3D = np.ones((3, 3, 3), dtype=np.uint8)
 PROPS = {
     'Area': 'area',
     'BoundingBox': 'bbox',
+    'BoundingBoxArea': 'bbox_area',
     'CentralMoments': 'moments_central',
     'Centroid': 'centroid',
     'ConvexArea': 'convex_area',
@@ -120,6 +121,9 @@ class _RegionProperties(object):
         """
         return tuple([self._slice[i].start for i in range(self._ndim)] +
                      [self._slice[i].stop for i in range(self._ndim)])
+
+    def bbox_area(self):
+        return self._label_image.size
 
     def centroid(self):
         return tuple(self.coords.mean(axis=0))
@@ -374,6 +378,8 @@ def regionprops(label_image, intensity_image=None, cache=True):
         Bounding box ``(min_row, min_col, max_row, max_col)``.
         Pixels belonging to the bounding box are in the half-open interval
         ``[min_row; max_row)`` and ``[min_col; max_col)``.
+    **bbox_area** : int
+        Number of pixels of bounding box.
     **centroid** : array
         Centroid coordinate tuple ``(row, col)``.
     **convex_area** : int
