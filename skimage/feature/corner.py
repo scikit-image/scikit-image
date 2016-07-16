@@ -136,41 +136,26 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
     --------
     >>> from skimage.feature import hessian_matrix
     >>> square = np.zeros((5, 5))
-    >>> square[2, 2] = -1.0 / 1591.54943092
+    >>> square[2, 2] = 4
     >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
-    >>> Hxx
+    >>> Hxy
     array([[ 0.,  0.,  0.,  0.,  0.],
+           [ 0.,  1.,  0., -1.,  0.],
            [ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  1.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.],
+           [ 0., -1.,  0.,  1.,  0.],
            [ 0.,  0.,  0.,  0.,  0.]])
-
     """
 
     image = _prepare_grayscale_input_2D(image)
 
-    # Window extent which covers > 99% of the normal distribution.
-    window_ext = max(1, np.ceil(3 * sigma))
+    gaussian_filtered = ndi.gaussian_filter(image, sigma=sigma,
+                                            mode=mode, cval=cval)
 
-    ky, kx = np.mgrid[-window_ext:window_ext + 1, -window_ext:window_ext + 1]
-
-    # Second derivative Gaussian kernels.
-    gaussian_exp = np.exp(-(kx ** 2 + ky ** 2) / (2 * sigma ** 2))
-    kernel_xx = 1 / (2 * np.pi * sigma ** 4) * (kx ** 2 / sigma ** 2 - 1)
-    kernel_xx *= gaussian_exp
-    kernel_xy = 1 / (2 * np.pi * sigma ** 6) * (kx * ky)
-    kernel_xy *= gaussian_exp
-    kernel_yy = kernel_xx.transpose()
-
-    # Remove small kernel values.
-    eps = np.finfo(kernel_xx.dtype).eps
-    kernel_xx[np.abs(kernel_xx) < eps * np.abs(kernel_xx).max()] = 0
-    kernel_xy[np.abs(kernel_xy) < eps * np.abs(kernel_xy).max()] = 0
-    kernel_yy[np.abs(kernel_yy) < eps * np.abs(kernel_yy).max()] = 0
-
-    Hxx = ndi.convolve(image, kernel_xx, mode=mode, cval=cval)
-    Hxy = ndi.convolve(image, kernel_xy, mode=mode, cval=cval)
-    Hyy = ndi.convolve(image, kernel_yy, mode=mode, cval=cval)
+    dy = np.gradient(gaussian_filtered, axis=0)
+    dx = np.gradient(gaussian_filtered, axis=1)
+    Hxx = np.gradient(dx, axis=1)
+    Hxy = np.gradient(dx, axis=0)
+    Hyy = np.gradient(dy, axis=0)
 
     return Hxx, Hxy, Hyy
 
