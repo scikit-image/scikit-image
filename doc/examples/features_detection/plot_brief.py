@@ -2,17 +2,13 @@
 =======================
 BRIEF binary descriptor
 =======================
-
 This example demonstrates the BRIEF binary description algorithm.
-
 The descriptor consists of relatively few bits and can be computed using
 a set of intensity difference tests. The short binary descriptor results
 in low memory footprint and very efficient matching based on the Hamming
 distance metric.
-
 BRIEF does not provide rotation-invariance. Scale-invariance can be achieved by
 detecting and extracting features at different scales.
-
 """
 from skimage import data
 from skimage import transform as tf
