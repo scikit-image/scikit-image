@@ -264,7 +264,7 @@ def test_num_peaks():
     img_corners = corner_harris(rgb2gray(data.astronaut()))
 
     for i in range(20):
-        n = np.random.random_integers(20)
+        n = np.random.randint(1, 21)
         results = peak_local_max(img_corners,
                                  min_distance=10, threshold_rel=0, num_peaks=n)
         assert (results.shape[0] == n)
