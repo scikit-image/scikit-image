@@ -5,8 +5,6 @@ from scipy.ndimage import filters as ndif
 from collections import OrderedDict
 from ..exposure import histogram
 from .._shared.utils import assert_nD, warn
-from ..morphology import disk
-from ..filters.rank import otsu
 
 __all__ = ['try_all_threshold',
            'threshold_adaptive',
@@ -68,16 +66,13 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     return fig, ax
 
 
-def try_all_threshold(image, radius=None, figsize=(8, 5), verbose=True):
+def try_all_threshold(image, figsize=(8, 5), verbose=True):
     """Returns a figure comparing the outputs of different thresholding methods.
 
     Parameters
     ----------
     image : (N, M) ndarray
         Input image.
-    radius : int, optional
-        Lengthscale used for local methods.
-        If None, local methods are ignored.
     figsize : tuple, optional
         Figure size (in inches).
     verbose : bool, optional
@@ -99,28 +94,12 @@ def try_all_threshold(image, radius=None, figsize=(8, 5), verbose=True):
     * otsu
     * triangle
     * yen
-    * adaptive threshold (local)
-    * rank otsu (local)
 
     Examples
     --------
     >>> from skimage.data import text
-    >>> fig, ax = try_all_threshold(text(), radius=20,
-    ...                            figsize=(10, 6), verbose=False)
+    >>> fig, ax = try_all_threshold(text(), figsize=(10, 6), verbose=False)
     """
-
-    def include_selem(func, *args, **kwargs):
-        """
-        A wrapper function to embed a threshold range for local algorithms.
-        """
-        def wrapper(im):
-            return func(im, *args, **kwargs)
-        try:
-            wrapper.__orifunc__ = func.__orifunc__
-        except AttributeError:
-            wrapper.__orifunc__ = func.__module__ + '.' + func.__name__
-        return wrapper
-
     def thresh(func):
         """
         A wrapper function to return a thresholded image.
@@ -141,17 +120,6 @@ def try_all_threshold(image, radius=None, figsize=(8, 5), verbose=True):
                            'Otsu': thresh(threshold_otsu),
                            'Triangle': thresh(threshold_triangle),
                            'Yen': thresh(threshold_yen)})
-
-    # Local algorithms.
-    if radius is not None:
-        selem = disk(radius)
-        local_otsu = include_selem(otsu, selem)
-        methods['Local Otsu'] = thresh(local_otsu)
-
-        block_size = 2 * int(radius) + 1
-        adaptive_threshold = include_selem(threshold_adaptive, block_size,
-                                           offset=10)
-        methods['Adaptive threshold'] = adaptive_threshold
 
     return _try_all(image, figsize=figsize,
                     methods=methods, verbose=verbose)
