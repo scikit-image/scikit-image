@@ -3,7 +3,7 @@ import numpy as np
 from math import ceil
 from .. import img_as_float
 from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
-from .._shared.utils import skimage_deprecation, warn
+from .._shared.utils import _mode_deprecations, skimage_deprecation, warn
 import warnings
 
 
