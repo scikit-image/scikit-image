@@ -334,11 +334,11 @@ def denoise_tv_chambolle(im, weight=0.1, eps=2.e-4, n_iter_max=200,
     return out
 
 
-def _wavelet_threshold(im, wavelet, threshold=None, sigma=None, mode='soft'):
+def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
     """Performs wavelet denoising.
     Parameters
     ----------
-    im : ndarray (2d or 3d) of ints, uints or floats
+    img : ndarray (2d or 3d) of ints, uints or floats
         Input data to be denoised. `im` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
@@ -347,11 +347,12 @@ def _wavelet_threshold(im, wavelet, threshold=None, sigma=None, mode='soft'):
         [pywt.wavelist]_ outputs. For example, this may be any of ``{db1, db2,
         db3, db4, haar}``.
     sigma : float, optional
-        The standard deviation of the noise. The noise is estimated when sigma is None (the default).
+        The standard deviation of the noise. The noise is estimated when sigma
+        is None (the default).
     threshold : float, optional
         The thresholding value. All wavelet coefficients less than this value
-        are set to 0. The default value (None) uses the SureShrink method found in
-        [1]_ to remove noise.
+        are set to 0. The default value (None) uses the SureShrink method found
+        in [1]_ to remove noise.
     mode : {'soft', 'hard'}, optional
         An optional argument to choose the type of denoising performed. It
         noted that choosing soft thresholding given additive noise finds the
@@ -367,10 +368,11 @@ def _wavelet_threshold(im, wavelet, threshold=None, sigma=None, mode='soft'):
     .. [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
            thresholding for image denoising and compression." Image Processing,
            IEEE Transactions on 9.9 (2000): 1532-1546.
+           DOI: 10.1109/83.862633
     """
     import pywt
-    coeffs = pywt.wavedecn(im, wavelet=wavelet)
-    detail_coeffs = coeffs[-1]['d' * im.ndim]
+    coeffs = pywt.wavedecn(img, wavelet=wavelet)
+    detail_coeffs = coeffs[-1]['d' * img.ndim]
 
     if sigma is None:
         # Estimate the noise std.dev as discussed in PR #1837
@@ -378,7 +380,7 @@ def _wavelet_threshold(im, wavelet, threshold=None, sigma=None, mode='soft'):
 
     if threshold is None:
         # The BayesShrink threshold from [1]_ in docstring
-        threshold = sigma**2 / np.sqrt(max(im.var() - sigma**2, 0))
+        threshold = sigma**2 / np.sqrt(max(img.var() - sigma**2, 0))
 
     denoised_detail = [{key: pywt.threshold(level[key], value=threshold,
                        mode=mode) for key in level} for level in coeffs[1:]]
@@ -386,11 +388,11 @@ def _wavelet_threshold(im, wavelet, threshold=None, sigma=None, mode='soft'):
     return pywt.waverecn([denoised_root, *denoised_detail], wavelet)
 
 
-def denoise_wavelet(im, sigma=None, wavelet='db1', mode='soft'):
-    """Performs wavelet denoising on an image.
+def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
+    r"""Performs wavelet denoising on an image.
     Parameters
     ----------
-    im : ndarray (greater than 2d) of ints, uints or floats
+    img : ndarray (greater than 2d) of ints, uints or floats
         Input data to be denoised. `im` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
@@ -405,34 +407,41 @@ def denoise_wavelet(im, sigma=None, wavelet='db1', mode='soft'):
         An optional argument to choose the type of denoising performed. It
         noted that choosing soft thresholding given additive noise finds the
         best approximation of the original image.
+
     Returns
     -------
     out : ndarray
         Denoised image.
+
     Notes
     -----
     As with the Fourier transform, there is an analogue to frequency in the
     wavelet domain. Correspondingly, many pixel values of an image are 0 after
     taking the wavelet transform.
-    By wavelet denoising, we are enforcing that many of the wavelet coefficients
-    are 0 while keeping the error small. When we use soft thresholding, our
-    estimate is
+
+    By wavelet denoising, we are enforcing that many of the wavelet
+    coefficients are 0 while keeping the error small. When we use soft
+    thresholding, our estimate is
+
     .. math:: \widehat{x} = \arg \min_x ||z - x||_2^2 + \lambda ||x||_1
+
     where :math:`z` is the input image wavelet coefficients and :math:`\lambda`
     is the threshold.
-    This function performs wavelet denoising on each color plane separately. The
-    output is clipped between 0 and 1.
+
+    This function performs wavelet denoising on each color plane separately.
+    The output is clipped between 0 and 1.
+
     References
     ----------
     .. [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
            thresholding for image denoising and compression." Image Processing,
            IEEE Transactions on 9.9 (2000): 1532-1546.
-    .. [pywt.wavelist] http://pywavelets.readthedocs.org/en/latest/ref/wavelets.html#wavelet-wavelist
+           DOI: 10.1109/83.862633
 
     Examples
     --------
     >>> from skimage import color, data
-    >>> img = data.astronaut() * 1.0 / 255
+    >>> img = img_as_float(data.astronaut())
     >>> img = color.rgb2gray(img)
     >>> img += 0.5 * img.std() * np.random.randn(*img.shape)
     >>> img = np.clip(img, 0, 1)
@@ -441,17 +450,17 @@ def denoise_wavelet(im, sigma=None, wavelet='db1', mode='soft'):
     >>> assert denoised_img.max() <= 1.0
     """
 
-    if not im.dtype.kind == 'f':
-        im = img_as_float(im)
+    if not img.dtype.kind == 'f':
+        img = img_as_float(img)
 
-    if im.ndim == 2:
-        out = _wavelet_threshold(im, wavelet=wavelet, mode=mode,
+    if img.ndim == 2:
+        out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
                                  sigma=sigma)
 
     else:
-        out = np.dstack([_wavelet_threshold(im[..., c], wavelet=wavelet,
+        out = np.dstack([_wavelet_threshold(img[..., c], wavelet=wavelet,
                                             mode=mode, sigma=sigma)
-                         for c in range(im.ndim)])
+                         for c in range(img.ndim)])
 
     # ensure valid image in 0, 1 is returned
     return np.clip(out, 0, 1)
