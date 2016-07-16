@@ -4,3 +4,4 @@ SimpleITK; python_version != '3.4' and python_version != '3.5'
 astropy
 tifffile
 imageio
+PyWavelet
