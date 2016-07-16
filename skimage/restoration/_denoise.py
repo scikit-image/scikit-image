@@ -344,11 +344,11 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
         of the denoised image.
     wavelet : string
         The type of wavelet to perform. Can be any of the options
-        [pywt.wavelist]_ outputs. For example, this may be any of ``{db1, db2,
+        pywt.wavelist outputs. For example, this may be any of ``{db1, db2,
         db3, db4, haar}``.
     sigma : float, optional
         The standard deviation of the noise. The noise is estimated when sigma
-        is None (the default).
+        is None (the default) by the method in [2]_.
     threshold : float, optional
         The thresholding value. All wavelet coefficients less than this value
         are set to 0. The default value (None) uses the SureShrink method found
@@ -369,13 +369,16 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
            thresholding for image denoising and compression." Image Processing,
            IEEE Transactions on 9.9 (2000): 1532-1546.
            DOI: 10.1109/83.862633
+    .. [2] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
+           by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
+           DOI: 10.1093/biomet/81.3.425
     """
     import pywt
     coeffs = pywt.wavedecn(img, wavelet=wavelet)
     detail_coeffs = coeffs[-1]['d' * img.ndim]
 
     if sigma is None:
-        # Estimate the noise std.dev as discussed in PR #1837
+        # Estimates via the noise via method in [2]
         sigma = np.median(np.abs(detail_coeffs)) / 0.67448975019608171
 
     if threshold is None:
@@ -398,7 +401,8 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
         of the denoised image.
     sigma : float, optional
         The noise standard deviation used when computing the threshold
-        adaptively as described in [1]_.
+        adaptively as described in [1]_. When None (default), the noise
+        standard deviation is estimated via the method in [2]_.
     wavelet : string, optional
         The type of wavelet to perform and can be any of the options
         [pywt.wavelist]_ outputs. The default is `'db1'`. For example,
@@ -437,6 +441,9 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
            thresholding for image denoising and compression." Image Processing,
            IEEE Transactions on 9.9 (2000): 1532-1546.
            DOI: 10.1109/83.862633
+    .. [2] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
+           by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
+           DOI: 10.1093/biomet/81.3.425
 
     Examples
     --------
