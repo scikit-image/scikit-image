@@ -339,7 +339,7 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
     Parameters
     ----------
     img : ndarray (2d or 3d) of ints, uints or floats
-        Input data to be denoised. `im` can be of any numeric type,
+        Input data to be denoised. `img` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
     wavelet : string
@@ -388,7 +388,8 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
     denoised_detail = [{key: pywt.threshold(level[key], value=threshold,
                        mode=mode) for key in level} for level in coeffs[1:]]
     denoised_root = pywt.threshold(coeffs[0], value=threshold, mode=mode)
-    return pywt.waverecn([denoised_root, *denoised_detail], wavelet)
+    denoised_coeffs = [denoised_root] + [d for d in denoised_detail]
+    return pywt.waverecn(denoised_coeffs, wavelet)
 
 
 def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
@@ -396,7 +397,7 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
     Parameters
     ----------
     img : ndarray (greater than 2d) of ints, uints or floats
-        Input data to be denoised. `im` can be of any numeric type,
+        Input data to be denoised. `img` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
     sigma : float, optional
@@ -463,7 +464,6 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
     if img.ndim == 2:
         out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
                                  sigma=sigma)
-
     else:
         out = np.dstack([_wavelet_threshold(img[..., c], wavelet=wavelet,
                                             mode=mode, sigma=sigma)
