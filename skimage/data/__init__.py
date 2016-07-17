@@ -10,7 +10,6 @@ import os as _os
 
 from .. import data_dir
 from ..io import imread, use_plugin
-from .._shared.utils import deprecated
 from .._shared._warnings import expected_warnings
 from ._binary_blobs import binary_blobs
 from .. import img_as_bool
@@ -236,8 +235,8 @@ def hubble_deep_field():
     `HubbleSite
     <http://hubblesite.org/newscenter/archive/releases/2012/37/image/a/>`__.
 
-    The image was captured by NASA and `may be freely used in the
-    public domain <http://www.nasa.gov/audience/formedia/features/MP_Photo_Guidelines.html>`_.
+    The image was captured by NASA and `may be freely used in the public domain
+    <http://www.nasa.gov/audience/formedia/features/MP_Photo_Guidelines.html>`_.
 
     """
     return load("hubble_deep_field.jpg")
