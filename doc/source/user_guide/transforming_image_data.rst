@@ -21,7 +21,7 @@ green and blue channels. However, other color models are widely used,
 such as the `HSV color model
 <http://en.wikipedia.org/wiki/HSL_and_HSV>`_, where hue, saturation and
 value are independent channels, or the `CMYK model
-<http://en.wikipedia.org/wiki/CMYK_color_model>`_ used for printing. 
+<http://en.wikipedia.org/wiki/CMYK_color_model>`_ used for printing.
 
 :mod:`skimage.color` provides utility functions to convert images
 to and from different color spaces. Integer-type arrays can be
@@ -46,7 +46,7 @@ Conversion from RGBA to RGB - Removing alpha channel through alpha blending
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Converting an RGBA image to an RGB image by alpha blending it with a
-background is realized with :func:`rgba2rgb` :: 
+background is realized with :func:`rgba2rgb` ::
 
     >>> from skimage.color import rgba2rgb
     >>> from skimage import data
@@ -57,7 +57,7 @@ Conversion between color and gray values
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Converting an RGB image to a grayscale image is realized with
-:func:`rgb2gray` :: 
+:func:`rgb2gray` ::
 
     >>> from skimage.color import rgb2gray
     >>> from skimage import data
@@ -81,12 +81,24 @@ from RGB to grayscale::
 Converting a grayscale image to RGB with :func:`gray2rgb` simply
 duplicates the gray values over the three color channels.
 
+Image inversion
+~~~~~~~~~~~~~~~
+
+An inverted image is also called complementary image. For binary images, True values
+become False and conversely. For grayscale images, pixel values are replaced by the
+difference of the maximum value of the data type and the actual value. For RGB
+images, the same operation is done for each channel. This operation can be achieved
+with the negation operator ~ on any numpy array::
+
+    >>> img = data.camera()
+    >>> inverted_img = ~img
+
 Painting images with labels
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 :func:`label2rgb` can be used to superimpose colors on a grayscale image
 using an array of labels to encode the regions to be represented with the
-same color. 
+same color.
 
 
 .. image:: ../auto_examples/segmentation/images/sphx_glr_plot_join_segmentations_001.png
@@ -139,7 +151,7 @@ the boundaries of the bins.
 The simplest contrast enhancement :func:`rescale_intensity` consists in
 stretching pixel values to the whole allowed range, using a linear
 transformation::
-    
+
     >>> from skimage import exposure
     >>> text = data.text()
     >>> text.min(), text.max()
