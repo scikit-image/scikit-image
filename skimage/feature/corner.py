@@ -270,14 +270,14 @@ def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
     --------
     >>> from skimage.feature import hessian_matrix, hessian_matrix_eigvals
     >>> square = np.zeros((5, 5))
-    >>> square[2, 2] = -1 / 1591.54943092
+    >>> square[2, 2] = 4
     >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
     >>> hessian_matrix_eigvals(Hxx, Hxy, Hyy)[0]
-    array([[ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  1.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.]])
+    array([[ 0.,  0.,  2.,  0.,  0.],
+           [ 0.,  1.,  0.,  1.,  0.],
+           [ 2.,  0., -2.,  0.,  2.],
+           [ 0.,  1.,  0.,  1.,  0.],
+           [ 0.,  0.,  2.,  0.,  0.]])
 
     """
 
