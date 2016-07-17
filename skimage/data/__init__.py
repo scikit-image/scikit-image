@@ -7,11 +7,13 @@ For more images, see
 """
 
 import os as _os
+import warnings
 
 from .. import data_dir
 from ..io import imread, use_plugin
 from .._shared.utils import deprecated
 from ._binary_blobs import binary_blobs
+from .. import img_as_bool
 
 __all__ = ['load',
            'camera',
@@ -168,7 +170,9 @@ def horse():
     (marauder).
 
     """
-    return load("horse.png")
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        return img_as_bool(load("horse.png"))
 
 
 def clock():
