@@ -286,11 +286,11 @@ cdef:
     Py_ssize_t[::1] mlbp_c_offsets = np.asarray([-1, 0, 1, 1, 1, 0, -1, -1], dtype=np.intp)
 
 
-def _multiblock_lbp(float[:, ::1] int_image,
-                    Py_ssize_t r,
-                    Py_ssize_t c,
-                    Py_ssize_t width,
-                    Py_ssize_t height):
+cpdef int _multiblock_lbp(float[:, ::1] int_image,
+                          Py_ssize_t r,
+                          Py_ssize_t c,
+                          Py_ssize_t width,
+                          Py_ssize_t height) nogil:
     """Multi-block local binary pattern (MB-LBP) [1]_.
 
     Parameters
@@ -329,20 +329,11 @@ def _multiblock_lbp(float[:, ::1] int_image,
         Py_ssize_t r_shift = height - 1
         Py_ssize_t c_shift = width - 1
 
-        # Copy offset array to multiply it by width and height later.
-        Py_ssize_t[::1] r_offsets = mlbp_r_offsets.copy()
-        Py_ssize_t[::1] c_offsets = mlbp_c_offsets.copy()
-
         Py_ssize_t current_rect_r, current_rect_c
         Py_ssize_t element_num, i
         double current_rect_val
         int has_greater_value
         int lbp_code = 0
-
-    # Pre-multiply offsets with width and height.
-    for i in range(8):
-        r_offsets[i] = r_offsets[i]*height
-        c_offsets[i] = c_offsets[i]*width
 
     # Sum of intensity values of central rectangle.
     cdef float central_rect_val = integrate(int_image, central_rect_r, central_rect_c,
@@ -351,8 +342,8 @@ def _multiblock_lbp(float[:, ::1] int_image,
 
     for element_num in range(8):
 
-        current_rect_r = central_rect_r + r_offsets[element_num]
-        current_rect_c = central_rect_c + c_offsets[element_num]
+        current_rect_r = central_rect_r + mlbp_r_offsets[element_num]*height
+        current_rect_c = central_rect_c + mlbp_c_offsets[element_num]*width
 
 
         current_rect_val = integrate(int_image, current_rect_r, current_rect_c,

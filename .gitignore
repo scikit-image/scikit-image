@@ -7,6 +7,7 @@
 *.pyd
 *.bak
 *.c
+*.cpp
 *.new
 *.md5
 *.old

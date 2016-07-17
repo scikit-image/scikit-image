@@ -34,7 +34,7 @@ Library:
     Packages:
         skimage, skimage.color, skimage.data, skimage.draw, skimage.exposure,
         skimage.feature, skimage.filters, skimage.future, skimage.future.graph,
-        skimage.graph, skimage.io,
+        skimage.graph, skimage.io, skimage.future.detect_obj
         skimage.io._plugins, skimage.measure, skimage.morphology,
         skimage.scripts, skimage.restoration, skimage.segmentation,
         skimage.transform, skimage.util
@@ -173,6 +173,9 @@ Library:
     Extension: skimage.transform._seam_carving
         Sources:
             skimage/transform/_seam_carving.pyx
+    Extension: skimage.future.detect.cascade
+        Sources:
+            skimage/future/detect/cascade.pyx
 
 Executable: skivi
     Module: skimage.scripts.skivi

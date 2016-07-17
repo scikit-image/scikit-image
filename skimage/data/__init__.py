@@ -12,6 +12,7 @@ from .. import data_dir
 from ..io import imread, use_plugin
 from .._shared.utils import deprecated
 from ._binary_blobs import binary_blobs
+from . import detect
 
 __all__ = ['load',
            'camera',
@@ -28,7 +29,8 @@ __all__ = ['load',
            'coffee',
            'hubble_deep_field',
            'rocket',
-           'astronaut']
+           'astronaut',
+           'detect']
 
 
 def load(f):
@@ -266,3 +268,4 @@ def rocket():
 
     """
     return load("rocket.jpg")
+
