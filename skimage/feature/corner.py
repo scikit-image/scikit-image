@@ -56,7 +56,7 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     ----------
     image : ndarray
         Input image.
-    sigma : float
+    sigma : float, optional
         Standard deviation used for the Gaussian kernel, which is used as a
         weighting function for the local summation of squared differences.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
