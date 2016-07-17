@@ -158,6 +158,10 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
     H_elems = [np.gradient(gradients[ax0], axis=ax1)
                for ax0, ax1 in combinations_with_replacement(axes, 2)]
 
+    if image.ndim == 2:
+        # The legacy 2D code followed (x, y) convention, so we swap the axis
+        # order to maintain compatibility with old code
+        H_elems.reverse()
     return H_elems
 
 
