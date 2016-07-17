@@ -33,13 +33,15 @@ __all__ = ['load',
            'astronaut']
 
 
-def load(f):
+def load(f, as_grey=False):
     """Load an image file located in the data directory.
 
     Parameters
     ----------
     f : string
         File name.
+    as_grey : bool, optional
+        Convert to greyscale.
 
     Returns
     -------
@@ -47,7 +49,7 @@ def load(f):
         Image loaded from ``skimage.data_dir``.
     """
     use_plugin('pil')
-    return imread(_os.path.join(data_dir, f))
+    return imread(_os.path.join(data_dir, f), as_grey=as_grey)
 
 
 def camera():
@@ -172,7 +174,7 @@ def horse():
     """
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        return img_as_bool(load("horse.png"))
+        return img_as_bool(load("horse.png", as_grey=True))
 
 
 def clock():

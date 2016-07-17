@@ -43,6 +43,7 @@ def test_coffee():
 def test_horse():
     """ Test that "horse" image can be loaded. """
     horse = data.horse()
+    assert_equal(horse.ndim, 2)
     assert_equal(horse.dtype, np.dtype('bool'))
 
 
