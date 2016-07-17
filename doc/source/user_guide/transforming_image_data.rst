@@ -50,7 +50,7 @@ background is realized with :func:`rgba2rgb` ::
 
     >>> from skimage.color import rgba2rgb
     >>> from skimage import data
-    >>> img_rgba = data.horse()
+    >>> img_rgba = data.logo()
     >>> img_rgb = rgba2rgb(img_rgba)
 
 Conversion between color and gray values
