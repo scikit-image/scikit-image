@@ -26,7 +26,6 @@ __all__ = ['load',
            'horse',
            'hubble_deep_field',
            'immunohistochemistry',
-           'lena',
            'logo',
            'moon',
            'page',
@@ -60,22 +59,6 @@ def camera():
 
     """
     return load("camera.png")
-
-
-@deprecated('skimage.data.astronaut')
-def lena():
-    """Colour "Lena" image.
-
-    **This image has been removed from scikit-image due to copyright
-    concerns.**
-
-    The standard, yet sometimes controversial Lena test image was
-    scanned from the November 1972 edition of Playboy magazine.  From
-    an image processing perspective, this image is useful because it
-    contains smooth, textured, shaded as well as detail areas.
-
-    """
-    raise RuntimeError("This image has been removed due to copyright concerns.")
 
 
 def astronaut():
