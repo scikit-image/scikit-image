@@ -160,7 +160,7 @@ def horse():
     (marauder).
 
     """
-    with expected_warnings(['precision loss']):
+    with expected_warnings(['Possible precision loss', 'Possible sign loss']):
         return img_as_bool(load("horse.png", as_grey=True))
 
 
