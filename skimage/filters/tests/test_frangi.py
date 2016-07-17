@@ -13,8 +13,8 @@ def test_null_matrix():
 
 
 def test_energy_decrease():
-    a = np.zeros((3, 3))
-    a[1, 1] = 1.
+    a = np.zeros((5, 5))
+    a[2, 2] = 1.
     assert frangi(a).std() < a.std()
     assert frangi(a, black_ridges=False).std() < a.std()
     assert hessian(a).std() > a.std()

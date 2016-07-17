@@ -1,7 +1,7 @@
 Build Requirements
 ------------------
 * `Python >= 2.7 <http://python.org>`__
-* `Numpy >= 1.7.2 <http://numpy.scipy.org/>`__
+* `Numpy >= 1.11 <http://numpy.scipy.org/>`__
 * `Cython >= 0.23 <http://www.cython.org/>`__
 * `Six >=1.4 <https://pypi.python.org/pypi/six>`__
 * `SciPy >=0.9 <http://scipy.org>`__
