@@ -200,7 +200,7 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
     --------
     >>> from skimage import color
     >>> from skimage import data
-    >>> img_rgba = data.horse()
+    >>> img_rgba = data.logo()
     >>> img_rgb = color.rgba2rgb(img_rgba)
     """
     arr = _prepare_rgba_array(rgba)
