@@ -7,11 +7,11 @@ For more images, see
 """
 
 import os as _os
-import warnings
 
 from .. import data_dir
 from ..io import imread, use_plugin
 from .._shared.utils import deprecated
+from .._shared._warnings import expected_warnings
 from ._binary_blobs import binary_blobs
 from .. import img_as_bool
 
@@ -161,8 +161,7 @@ def horse():
     (marauder).
 
     """
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
+    with expected_warnings(['precision loss']):
         return img_as_bool(load("horse.png", as_grey=True))
 
 
