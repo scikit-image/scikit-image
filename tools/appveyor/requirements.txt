@@ -8,7 +8,7 @@
 # fix the versions of binary packages to force the use of the whl
 # of the rackspace folder instead of trying to install from PyPI
 # wheels are preferred for a given version
-numpy==1.8.1
+numpy>=1.11
 scipy==0.14.0
 cython>=0.21
 matplotlib==1.4.2
