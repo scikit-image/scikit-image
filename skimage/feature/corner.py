@@ -165,7 +165,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
     return H_elems
 
 
-def hessian_matrix_det(image, sigma):
+def hessian_matrix_det(image, sigma=1):
     """Computes the approximate Hessian Determinant over an image.
 
     This method uses box filters over integral images to compute the
@@ -175,7 +175,7 @@ def hessian_matrix_det(image, sigma):
     ----------
     image : array
         The image over which to compute Hessian Determinant.
-    sigma : float
+    sigma : float, optional
         Standard deviation used for the Gaussian kernel, used for the Hessian
         matrix.
 
