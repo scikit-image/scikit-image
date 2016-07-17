@@ -127,9 +127,7 @@ def coins():
 
 
 def logo():
-    """Scikit-image logo, a RGBA image.
-
-    """
+    """Scikit-image logo, a RGBA image."""
     return load("logo.png")
 
 
