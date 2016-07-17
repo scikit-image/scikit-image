@@ -1,3 +1,5 @@
+from itertools import combinations_with_replacement
+
 import numpy as np
 from scipy import ndimage as ndi
 from scipy import stats
@@ -146,18 +148,17 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
            [ 0.,  0.,  0.,  0.,  0.]])
     """
 
-    image = _prepare_grayscale_input_2D(image)
+    image = img_as_float(image)
 
     gaussian_filtered = ndi.gaussian_filter(image, sigma=sigma,
                                             mode=mode, cval=cval)
 
-    dy = np.gradient(gaussian_filtered, axis=0)
-    dx = np.gradient(gaussian_filtered, axis=1)
-    Hxx = np.gradient(dx, axis=1)
-    Hxy = np.gradient(dx, axis=0)
-    Hyy = np.gradient(dy, axis=0)
+    gradients = np.gradient(gaussian_filtered)
+    axes = range(image.ndim)
+    H_elems = [np.gradient(gradients[ax0], axis=ax1)
+               for ax0, ax1 in combinations_with_replacement(axes, 2)]
 
-    return Hxx, Hxy, Hyy
+    return H_elems
 
 
 def hessian_matrix_det(image, sigma):
