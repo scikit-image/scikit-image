@@ -16,21 +16,22 @@ from ._binary_blobs import binary_blobs
 from .. import img_as_bool
 
 __all__ = ['load',
+           'astronaut',
            'camera',
-           'lena',
-           'text',
            'checkerboard',
+           'chelsea',
+           'clock',
+           'coffee',
            'coins',
+           'horse',
+           'hubble_deep_field',
+           'immunohistochemistry',
+           'lena',
+           'logo',
            'moon',
            'page',
-           'horse',
-           'clock',
-           'immunohistochemistry',
-           'chelsea',
-           'coffee',
-           'hubble_deep_field',
-           'rocket',
-           'astronaut']
+           'text',
+           'rocket']
 
 
 def load(f, as_grey=False):
@@ -140,6 +141,13 @@ def coins():
 
     """
     return load("coins.png")
+
+
+def logo():
+    """Scikit-image logo, a RGBA image.
+
+    """
+    return load("logo.png")
 
 
 def moon():

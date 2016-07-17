@@ -57,6 +57,13 @@ def test_immunohistochemistry():
     data.immunohistochemistry()
 
 
+def test_logo():
+    """ Test that "logo" image can be loaded. """
+    logo = data.logo()
+    assert_equal(logo.ndim, 3)
+    assert_equal(logo.shape[2], 4)
+
+
 def test_moon():
     """ Test that "moon" image can be loaded. """
     data.moon()
