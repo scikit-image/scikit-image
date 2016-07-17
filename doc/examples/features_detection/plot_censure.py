@@ -39,10 +39,11 @@ ax[1].imshow(img_warp, cmap=plt.cm.gray)
 ax[1].axis('off')
 ax[1].scatter(detector.keypoints[:, 1], detector.keypoints[:, 0],
               2 ** detector.scales, facecolors='none', edgecolors='r')
-ax[1].set_title("Transformed Image")
+ax[1].set_title('Transformed Image')
 
-ax[1].text(372, 450, 'AffineTransform scale = 1.5', ha='center', va='center', color='yellow')
-ax[1].text(325, 475, 'AffineTransform rotation 28.6 degrees', ha='center', va='center', color='yellow')
-ax[1].text(290, 500, 'AffineTransform translation X = 150  Y = -200', ha='center', va='center', color='yellow')
+print('Transformed Image using AffineTransform parameters:')
+print('\tscale = 1.5')
+print('\trotation 28.6 degrees')
+print('\ttranslation X = 150  translation Y = -200')
 
 plt.show()
