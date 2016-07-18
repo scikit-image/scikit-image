@@ -1,5 +1,5 @@
 import numpy as np
-from ..util import view_as_blocks, pad
+from ..util import view_as_blocks
 
 
 def block_reduce(image, block_size, func=np.sum, cval=0):
@@ -68,8 +68,8 @@ def block_reduce(image, block_size, func=np.sum, cval=0):
             after_width = 0
         pad_width.append((0, after_width))
 
-    image = pad(image, pad_width=pad_width, mode='constant',
-                constant_values=cval)
+    image = np.pad(image, pad_width=pad_width, mode='constant',
+                   constant_values=cval)
 
     out = view_as_blocks(image, block_size)
 

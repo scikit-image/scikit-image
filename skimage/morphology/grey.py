@@ -5,7 +5,7 @@ import functools
 import numpy as np
 from scipy import ndimage as ndi
 from .misc import default_selem
-from ..util import pad, crop
+from ..util import crop
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
            'black_tophat']
@@ -115,7 +115,7 @@ def pad_for_eccentric_selems(func):
                 axis_pad_width = 0
             pad_widths.append((axis_pad_width,) * 2)
         if padding:
-            image = pad(image, pad_widths, mode='edge')
+            image = np.pad(image, pad_widths, mode='edge')
             out_temp = np.empty_like(image)
         else:
             out_temp = out
