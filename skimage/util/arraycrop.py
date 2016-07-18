@@ -155,10 +155,9 @@ def crop(ar, crop_width, copy=False, order='K'):
         ``(n,)`` or ``n`` for integer ``n`` is a shortcut for
         before = after = ``n`` for all axes.
     copy : bool, optional
-        Ensure the returned array is a contiguous copy. Normally, a crop
-        operation will return a discontiguous view of the underlying
-        input array. Passing ``copy=True`` will result in a contiguous
-        copy.
+        If `True`, ensure the returned array is a contiguous copy. Normally,
+        a crop operation will return a discontiguous view of the underlying
+        input array.
     order : {'C', 'F', 'A', 'K'}, optional
         If ``copy==True``, control the memory layout of the copy. See
         ``np.copy``.
