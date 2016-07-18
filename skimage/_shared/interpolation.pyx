@@ -32,7 +32,7 @@ def extend_image(image, pad=10, mode='constant', cval=0):
 
     Notes
     -----
-    For image padding, `skimage.util.pad` should be used instead.  This
+    For all image padding tasks, `np.pad` should be used instead.  This
     function is intended only for testing `get_pixel2d` and demonstrating the
     coordinate mapping modes implemented in `coord_map`.
     """
