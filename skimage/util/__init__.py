@@ -4,7 +4,7 @@ from .shape import view_as_blocks, view_as_windows
 from .noise import random_noise
 from .apply_parallel import apply_parallel
 
-from .arraypad import crop
+from .arraycrop import crop
 from ._regular_grid import regular_grid, regular_seeds
 from .unique import unique_rows
 from ._invert import invert
