@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.signal import fftconvolve
 
-from ..util import pad
 from .._shared.utils import assert_nD
 
 
@@ -125,10 +124,10 @@ def match_template(image, template, pad_input=False, mode='constant',
 
     pad_width = tuple((width, width) for width in template.shape)
     if mode == 'constant':
-        image = pad(image, pad_width=pad_width, mode=mode,
-                    constant_values=constant_values)
+        image = np.pad(image, pad_width=pad_width, mode=mode,
+                       constant_values=constant_values)
     else:
-        image = pad(image, pad_width=pad_width, mode=mode)
+        image = np.pad(image, pad_width=pad_width, mode=mode)
 
     # Use special case for 2-D images for much better performance in
     # computation of integral images

@@ -4,7 +4,7 @@ import numpy as np
 from scipy import ndimage as ndi
 from scipy import stats
 
-from ..util import img_as_float, pad
+from ..util import img_as_float
 from ..feature import peak_local_max
 from ..feature.util import _prepare_grayscale_input_2D
 from ..feature.corner_cy import _corner_fast
@@ -673,7 +673,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     # window extent in one direction
     wext = (window_size - 1) // 2
 
-    image = pad(image, pad_width=wext, mode='constant', constant_values=0)
+    image = np.pad(image, pad_width=wext, mode='constant', constant_values=0)
 
     # add pad width, make sure to not modify the input values in-place
     corners = safe_as_int(corners + wext)
