@@ -1,10 +1,10 @@
 from __future__ import division, absolute_import, print_function
 
-from numpy import pad as numpy_pad
+import numpy as np
 
 
 def pad(array, pad_width, mode, **kwargs):
-    return numpy_pad(array, pad_width, mode, **kwargs)
+    return np.pad(array, pad_width, mode, **kwargs)
 
 # Pull function info / docs from NumPy
-pad.__doc__ = numpy_pad.__doc__
+pad.__doc__ = np.pad.__doc__
