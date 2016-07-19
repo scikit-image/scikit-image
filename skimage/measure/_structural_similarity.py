@@ -7,8 +7,7 @@ from ..util.dtype import dtype_range
 from ..util.arraycrop import crop
 from .._shared.utils import deprecated
 
-__all__ = ['compare_ssim',
-           'structural_similarity']
+__all__ = ['compare_ssim']
 
 
 def compare_ssim(X, Y, win_size=None, gradient=False,
