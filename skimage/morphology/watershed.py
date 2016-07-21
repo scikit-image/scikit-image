@@ -170,18 +170,20 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None):
 
     Examples
     --------
-    The watershed algorithm is very useful to separate overlapping objects
+    The watershed algorithm is useful to separate overlapping objects.
 
-    >>> # Generate an initial image with two overlapping circles
+    We first generate an initial image with two overlapping circles:
+
     >>> x, y = np.indices((80, 80))
     >>> x1, y1, x2, y2 = 28, 28, 44, 52
     >>> r1, r2 = 16, 20
     >>> mask_circle1 = (x - x1)**2 + (y - y1)**2 < r1**2
     >>> mask_circle2 = (x - x2)**2 + (y - y2)**2 < r2**2
     >>> image = np.logical_or(mask_circle1, mask_circle2)
-    >>> # Now we want to separate the two objects in image
-    >>> # Generate the markers as local maxima of the distance
-    >>> # to the background
+
+    Next, we want to separate the two circles. We generate markers at the
+    maxima of the distance to the background:
+
     >>> from scipy import ndimage as ndi
     >>> distance = ndi.distance_transform_edt(image)
     >>> from skimage.feature import peak_local_max
@@ -189,6 +191,9 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None):
     ...                             footprint=np.ones((3, 3)),
     ...                             indices=False)
     >>> markers = ndi.label(local_maxi)[0]
+
+    Finally, we run the watershed on the image and markers:
+
     >>> labels = watershed(-distance, markers, mask=image)
 
     The algorithm works also for 3-D images, and can be used for example to
