@@ -33,7 +33,7 @@ from . import _watershed
 
 
 def _validate_inputs(image, markers, mask):
-    """Ensure that all inputs to watershed have matching shapes.
+    """Ensure that all inputs to watershed have matching shapes and types.
 
     Parameters
     ----------
@@ -43,6 +43,12 @@ def _validate_inputs(image, markers, mask):
         The marker image.
     mask : array, or None
         A boolean mask, True where we want to compute the watershed.
+
+    Returns
+    -------
+    mask : array
+        The validated and formatted mask array. If ``None`` was given, it
+        is a volume of all ``True`` values.
 
     Raises
     ------
@@ -54,6 +60,10 @@ def _validate_inputs(image, markers, mask):
                          "as image (shape %s)" % (markers.ndim, image.ndim))
     if mask is not None and mask.shape != image.shape:
         raise ValueError("mask must have same shape as image")
+    if mask is None:
+        # Use a complete `True` mask if none is provided
+        mask = np.ones(image.shape, bool)
+    return mask
 
 
 def _validate_connectivity(image_dim, connectivity, offset):
@@ -199,13 +209,9 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None):
     The algorithm works also for 3-D images, and can be used for example to
     separate overlapping spheres.
     """
-    _validate_inputs(image, markers, mask)
+    mask = _validate_inputs(image, markers, mask)
     c_connectivity, offset = _validate_connectivity(image.ndim, connectivity,
                                                     offset)
-
-    if mask is None:
-        # Use a complete `True` mask if none is provided
-        mask = np.ones(image.shape, bool)
 
     # pad the image, markers, and mask so that we can use the mask to
     # keep from running off the edges
