@@ -148,7 +148,8 @@ def _compute_neighbors(image, structure, offset):
     return neighborhood
 
 
-def watershed(image, markers, connectivity=1, offset=None, mask=None):
+def watershed(image, markers, connectivity=1, offset=None, mask=None,
+              compactness=0):
     """
     Return a matrix labeled using the watershed segmentation algorithm
 
@@ -171,6 +172,8 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None):
     mask: ndarray of bools or 0s and 1s, optional
         Array of same shape as `image`. Only points at which mask == True
         will be labeled.
+    compactness : float, optional
+        Use compact watershed [3]_ with given compactness parameter.
 
     Returns
     -------
@@ -214,6 +217,11 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None):
     .. [1] http://en.wikipedia.org/wiki/Watershed_%28image_processing%29
 
     .. [2] http://cmm.ensmp.fr/~beucher/wtshed.html
+
+    .. [3] Peer Neubert & Peter Protzel (2014). Compact Watershed and
+           Preemptive SLIC: On Improving Trade-offs of Superpixel Segmentation
+           Algorithms. ICPR 2014, pp 996-1001. DOI:10.1109/ICPR.2014.181
+           https://www.tu-chemnitz.de/etit/proaut/forschung/rsrc/cws_pSLIC_ICPR.pdf
 
     Examples
     --------
@@ -264,10 +272,11 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None):
     flat_neighborhood = _compute_neighbors(image, c_connectivity, offset)
 
     marker_locations = np.flatnonzero(markers).astype(np.int32)
+    image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
     if len(marker_locations) > 0:
         _watershed.watershed(c_image.ravel(),
                              marker_locations, flat_neighborhood,
-                             c_mask,
+                             c_mask, image_strides, compactness,
                              c_output)
     c_output = c_output.reshape(c_image.shape)[[slice(1, -1, None)] *
                                                image.ndim]

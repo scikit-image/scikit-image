@@ -22,11 +22,34 @@ ctypedef cnp.int8_t DTYPE_BOOL_t
 include "heap_watershed.pxi"
 
 
+cdef extern from "math.h":
+    double sqrt(double x)
+
+
+@cython.boundscheck(False)
+@cython.cdivision(True)
+@cython.overflowcheck(False)
+@cython.unraisable_tracebacks(False)
+cdef inline double _euclid_dist(cnp.int32_t pt0, cnp.int32_t pt1,
+                                cnp.int32_t[::1] strides):
+    """Return the Euclidean distance between raveled points pt0 and pt1."""
+    cdef float result = 0
+    cdef float curr = 0
+    for i in range(strides.shape[0]):
+        curr = (pt0 // strides[i]) - (pt1 // strides[i])
+        result += curr * curr
+        pt0 = pt0 % strides[i]
+        pt1 = pt1 % strides[i]
+    return sqrt(result)
+
+
 @cython.boundscheck(False)
 def watershed(cnp.float64_t[::1] image,
               DTYPE_INT32_t[::1] marker_locations,
               DTYPE_INT32_t[::1] structure,
               DTYPE_BOOL_t[::1] mask,
+              cnp.int32_t[::1] strides,
+              cnp.float32_t compactness,
               DTYPE_INT32_t[::1] output):
     """Do heavy lifting of watershed algorithm
 
@@ -87,6 +110,9 @@ def watershed(cnp.float64_t[::1] image,
 
             age += 1
             new_elem.value = image[index]
+            if compactness > 0:
+                new_elem.value += (compactness *
+                                   _euclid_dist(index, elem.source, strides))
             new_elem.age = age
             new_elem.index = index
             new_elem.source = elem.source
