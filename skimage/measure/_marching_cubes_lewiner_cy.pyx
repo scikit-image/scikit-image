@@ -32,18 +32,8 @@ cdef extern from "stdlib.h": # The cimport does not work on my Linux Laptop
    void free(void* ptr)
    void* malloc(size_t size)
 
-# Type defs, we support float32 and float64
-ctypedef np.float32_t FLOAT32_T
-ctypedef np.float64_t FLOAT64_T
-ctypedef np.int32_t INT32_T
-FLOAT32 = np.float32
-FLOAT64 = np.float64
-INT32 = np.float32
-
-
 # Define tiny winy number
 cdef double FLT_EPSILON = np.spacing(1.0) #0.0000001
-
 
 # Define abs function for doubles
 cdef inline double dabs(double a): return a if a>=0 else -a
@@ -58,14 +48,12 @@ def remove_degenerate_faces(vertices, faces, *arrays):
     vertices_map1 = vertices_map0.copy()
     faces_ok = np.ones(len(faces), dtype=np.int32)
     
-    cdef np.ndarray[FLOAT32_T, ndim=2] vertices_ = vertices
-    cdef np.ndarray[FLOAT32_T, ndim=1] v1, v2, v3
-    cdef np.ndarray[INT32_T, ndim=2] faces_ = faces
-    cdef np.ndarray[INT32_T, ndim=1] face_
+    cdef float [:, :] vertices_ = vertices
+    cdef float [:] v1, v2, v3
+    cdef int [:, :]  faces_ = faces
     
-    
-    cdef np.ndarray[INT32_T, ndim=1] vertices_map1_ = vertices_map1
-    cdef np.ndarray[INT32_T, ndim=1] faces_ok_ = faces_ok
+    cdef int [:] vertices_map1_ = vertices_map1
+    cdef int [:] faces_ok_ = faces_ok
     
     cdef int j, i1, i2, i3
     
@@ -353,20 +341,20 @@ cdef class Cell:
     def get_vertices(self):
         """ Get the final vertex array.
         """
-        vertices = np.empty((self._vertexCount,3),'float32')
-        cdef np.ndarray[FLOAT32_T, ndim=2] vertices_ = vertices
+        vertices = np.empty((self._vertexCount,3), np.float32)
+        cdef float [:, :] vertices_ = vertices
         cdef int i, j
         for i in range(self._vertexCount):
             for j in range(3):
-                vertices_[i,j] = self._vertices[i*3+j]
+                vertices_[i, j] = self._vertices[i*3+j]
         return vertices
     
     def get_normals(self):
         """ Get the final normals array. 
         The normals are normalized to unit length.
         """
-        normals = np.empty((self._vertexCount,3),'float32')
-        cdef np.ndarray[FLOAT32_T, ndim=2] normals_ = normals
+        normals = np.empty((self._vertexCount,3), np.float32)
+        cdef float [:, :] normals_ = normals
         
         cdef int i, j
         cdef double length, dtmp
@@ -382,16 +370,16 @@ cdef class Cell:
         return normals
     
     def get_faces(self):
-        faces = np.empty((self._faceCount,),'int32')
-        cdef np.ndarray[INT32_T, ndim=1] faces_ = faces
+        faces = np.empty((self._faceCount,), np.int32)
+        cdef int [:] faces_ = faces
         cdef int i, j
         for i in range(self._faceCount):
             faces_[i] = self._faces[i]
         return faces
     
     def get_values(self):
-        values = np.empty((self._vertexCount,),'float32')
-        cdef np.ndarray[FLOAT32_T, ndim=1] values_ = values
+        values = np.empty((self._vertexCount,), np.float32)
+        cdef float [:] values_ = values
         cdef int i, j
         for i in range(self._vertexCount):
             values_[i] = self._values[i]
@@ -945,7 +933,7 @@ def marching_cubes(im, double isovalue, LutProvider luts, int st=1, int classic=
     """ 
     
     # Typdedef image
-    cdef np.ndarray[FLOAT32_T, ndim=3] im_ = im
+    cdef float [:, :, :] im_ = im
     
     # Get dimemsnions
     cdef int Nx, Ny, Nz

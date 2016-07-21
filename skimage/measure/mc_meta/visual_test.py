@@ -53,7 +53,7 @@ elif SELECT == 4:
 
 # Get surface meshes
 t0 = time.time()
-vertices1, faces1, *_ = marching_cubes_lewiner(vol, isovalue, gradient_direction=gradient_dir, use_classic=True)
+vertices1, faces1, *_ = marching_cubes_lewiner(vol, isovalue, gradient_direction=gradient_dir, use_classic=False)
 print('finding surface lewiner took %1.0f ms' % (1000*(time.time()-t0)) )
 
 t0 = time.time()
