@@ -141,22 +141,16 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
         #
         offset = np.array(c_connectivity.shape) // 2
 
+    if mask is None:
+        # Use a complete `True` mask if none is provided
+        mask = np.ones(image.shape, bool)
+
     # pad the image, markers, and mask so that we can use the mask to
     # keep from running off the edges
-    pads = offset
-
-    def pad(im):
-        new_im = np.zeros(
-            [i + 2 * p for i, p in zip(im.shape, pads)], im.dtype)
-        new_im[[slice(p, -p, None) for p in pads]] = im
-        return new_im
-
-    if mask is not None:
-        mask = pad(mask)
-    else:
-        mask = pad(np.ones(image.shape, bool))
-    image = pad(image)
-    markers = pad(markers)
+    pad_width = [(p, p) for p in offset]
+    image = np.pad(image, pad_width, mode='constant')
+    mask = np.pad(mask, pad_width, mode='constant')
+    markers = np.pad(markers, pad_width, mode='constant')
 
     c_image = rank_order(image)[0].astype(np.int32)
     c_markers = np.ascontiguousarray(markers, dtype=np.int32)
