@@ -32,6 +32,14 @@ from ..filters import rank_order
 from . import _watershed
 
 
+def _validate_inputs(image, mask, markers):
+    if markers.shape != image.shape:
+        raise ValueError("Markers (shape %s) must have same shape "
+                         "as image (shape %s)" % (markers.ndim, image.ndim))
+    if mask is not None and mask.shape != image.shape:
+        raise ValueError("mask must have same shape as image")
+
+
 def watershed(image, markers, connectivity=None, offset=None, mask=None):
     """
     Return a matrix labeled using the watershed segmentation algorithm
@@ -125,6 +133,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     The algorithm works also for 3-D images, and can be used for example to
     separate overlapping spheres.
     """
+    _validate_inputs(image, markers, mask)
 
     if connectivity is None:
         c_connectivity = ndi.generate_binary_structure(image.ndim, 1)
@@ -154,20 +163,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
 
     c_image = rank_order(image)[0].astype(np.int32)
     c_markers = np.ascontiguousarray(markers, dtype=np.int32)
-    if c_markers.ndim != c_image.ndim:
-        raise ValueError("markers (ndim=%d) must have same # of dimensions "
-                         "as image (ndim=%d)" % (c_markers.ndim, c_image.ndim))
-    if c_markers.shape != c_image.shape:
-        raise ValueError("image and markers must have the same shape")
-    if mask is not None:
-        c_mask = np.ascontiguousarray(mask, dtype=bool)
-        if c_mask.ndim != c_markers.ndim:
-            raise ValueError("mask must have same # of dimensions as image")
-        if c_markers.shape != c_mask.shape:
-            raise ValueError("mask must have same shape as image")
-        c_markers[np.logical_not(mask)] = 0
-    else:
-        c_mask = None
+    c_mask = np.ascontiguousarray(mask, dtype=bool)
     c_output = c_markers.copy()
 
     #
