@@ -209,7 +209,7 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None):
     mask = np.pad(mask, pad_width, mode='constant')
     markers = np.pad(markers, pad_width, mode='constant')
 
-    c_image = rank_order(image)[0].astype(np.int32)
+    c_image = image.astype(np.float64)
     c_markers = np.ascontiguousarray(markers, dtype=np.int32)
     c_mask = np.ascontiguousarray(mask, dtype=bool)
     c_output = c_markers.copy()

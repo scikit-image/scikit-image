@@ -10,20 +10,20 @@ All rights reserved.
 Original author: Lee Kamentsky
 """
 import numpy as np
-cimport numpy as np
+cimport numpy as cnp
 cimport cython
 
 
-ctypedef np.int32_t DTYPE_INT32_t
+ctypedef cnp.int32_t DTYPE_INT32_t
 DTYPE_BOOL = np.bool
-ctypedef np.int8_t DTYPE_BOOL_t
+ctypedef cnp.int8_t DTYPE_BOOL_t
 
 
 include "heap_watershed.pxi"
 
 
 @cython.boundscheck(False)
-def watershed(DTYPE_INT32_t[::1] image,
+def watershed(cnp.float64_t[::1] image,
               DTYPE_INT32_t[:, ::1] pq,
               Py_ssize_t age,
               DTYPE_INT32_t[:, ::1] structure,

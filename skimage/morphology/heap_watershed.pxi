@@ -13,7 +13,7 @@ cimport numpy as cnp
 
 
 cdef struct Heapitem:
-    cnp.int32_t value
+    cnp.float64_t value
     cnp.int32_t age
     Py_ssize_t index
 
