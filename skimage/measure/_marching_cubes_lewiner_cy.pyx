@@ -926,14 +926,11 @@ cdef class LutProvider:
         self.SUBCONFIG13 = Lut(SUBCONFIG13)
 
 
-def marching_cubes(im, double isovalue, LutProvider luts, int st=1, int classic=0):
+def marching_cubes(float [:, :, :] im not None, double isovalue, LutProvider luts, int st=1, int classic=0):
     """ marching_cubes(im, double isovalue, LutProvider luts, int st=1, int classic=0)
     This is the main entry to apply marching cubes.
     Returns (vertices, faces, normals, values)
     """ 
-    
-    # Typdedef image
-    cdef float [:, :, :] im_ = im
     
     # Get dimemsnions
     cdef int Nx, Ny, Nz
@@ -975,8 +972,8 @@ def marching_cubes(im, double isovalue, LutProvider luts, int st=1, int classic=
                 
                 # Initialize cell
                 cell.set_cube(isovalue, x, y, z, st,
-                    im_[z   ,y, x], im_[z   ,y, x_st], im_[z   ,y_st, x_st], im_[z   ,y_st, x],
-                    im_[z_st,y, x], im_[z_st,y, x_st], im_[z_st,y_st, x_st], im_[z_st,y_st, x] )
+                    im[z   ,y, x], im[z   ,y, x_st], im[z   ,y_st, x_st], im[z   ,y_st, x],
+                    im[z_st,y, x], im[z_st,y, x_st], im[z_st,y_st, x_st], im[z_st,y_st, x] )
                 
                 # Do classic!
                 if classic:
