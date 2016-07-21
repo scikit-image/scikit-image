@@ -32,7 +32,23 @@ from ..filters import rank_order
 from . import _watershed
 
 
-def _validate_inputs(image, mask, markers):
+def _validate_inputs(image, markers, mask):
+    """Ensure that all inputs to watershed have matching shapes.
+
+    Parameters
+    ----------
+    image : array
+        The input image.
+    markers : array
+        The marker image.
+    mask : array, or None
+        A boolean mask, True where we want to compute the watershed.
+
+    Raises
+    ------
+    ValueError
+        If the shapes of the given arrays don't match.
+    """
     if markers.shape != image.shape:
         raise ValueError("Markers (shape %s) must have same shape "
                          "as image (shape %s)" % (markers.ndim, image.ndim))
@@ -40,7 +56,52 @@ def _validate_inputs(image, mask, markers):
         raise ValueError("mask must have same shape as image")
 
 
-def watershed(image, markers, connectivity=None, offset=None, mask=None):
+def _validate_connectivity(image_dim, connectivity, offset):
+    """Convert any valid connectivity to a structuring element and offset.
+
+    Parameters
+    ----------
+    image_dim : int
+        The number of dimensions of the input image.
+    connectivity : int, array, or None
+        The neighborhood connectivity. An integer is interpreted as in
+        ``scipy.ndimage.generate_binary_structure``, as the maximum number
+        of orthogonal steps to reach a neighbor. An array is directly
+        interpreted as a structuring element and its shape is validated against
+        the input image shape. ``None`` is interpreted as a connectivity of 1.
+    offset : tuple of int, or None
+        The coordinates of the center of the structuring element.
+
+    Returns
+    -------
+    c_connectivity : array of bool
+        The structuring element corresponding to the input `connectivity`.
+    offset : array of int
+        The offset corresponding to the center of the structuring element.
+
+    Raises
+    ------
+    ValueError:
+        If the image dimension and the connectivity or offset dimensions don't
+        match.
+    """
+    if connectivity is None:
+        connectivity = 1
+    if np.isscalar(connectivity):
+        c_connectivity = ndi.generate_binary_structure(image_dim, connectivity)
+    else:
+        c_connectivity = np.array(connectivity, bool)
+        if c_connectivity.ndim != image_dim:
+            raise ValueError("Connectivity dimension must be same as image")
+    if offset is None:
+        if any([x % 2 == 0 for x in c_connectivity.shape]):
+            raise ValueError("Connectivity array must have an unambiguous "
+                             "center")
+        offset = np.array(c_connectivity.shape) // 2
+    return c_connectivity, offset
+
+
+def watershed(image, markers, connectivity=1, offset=None, mask=None):
     """
     Return a matrix labeled using the watershed segmentation algorithm
 
@@ -134,21 +195,8 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     separate overlapping spheres.
     """
     _validate_inputs(image, markers, mask)
-
-    if connectivity is None:
-        c_connectivity = ndi.generate_binary_structure(image.ndim, 1)
-    else:
-        c_connectivity = np.array(connectivity, bool)
-        if c_connectivity.ndim != image.ndim:
-            raise ValueError("Connectivity dimension must be same as image")
-    if offset is None:
-        if any([x % 2 == 0 for x in c_connectivity.shape]):
-            raise ValueError("Connectivity array must have an unambiguous "
-                             "center")
-        #
-        # offset to center of connectivity array
-        #
-        offset = np.array(c_connectivity.shape) // 2
+    c_connectivity, offset = _validate_connectivity(image.ndim, connectivity,
+                                                    offset)
 
     if mask is None:
         # Use a complete `True` mask if none is provided
