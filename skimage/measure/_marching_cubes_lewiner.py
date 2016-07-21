@@ -18,10 +18,10 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     """
     Lewiner marching cubes algorithm to find surfaces in 3d volumetric data
     
-    In contrast to ``marching_cubes()``, this algorithm resolves
-    ambiguities and guarantees topologically correct results. Therefore,
-    this algorithm generally a better choice, unless there is a specific
-    need for the classic algorithm.
+    In contrast to ``marching_cubes()``, this algorithm is faster,
+    resolves ambiguities, and guarantees topologically correct results.
+    Therefore, this algorithm generally a better choice, unless there
+    is a specific need for the classic algorithm.
     
     Parameters
     ----------
