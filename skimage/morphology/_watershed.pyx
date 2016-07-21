@@ -26,7 +26,7 @@ include "heap_watershed.pxi"
 def watershed(cnp.float64_t[::1] image,
               DTYPE_INT32_t[:, ::1] pq,
               Py_ssize_t age,
-              DTYPE_INT32_t[:, ::1] structure,
+              DTYPE_INT32_t[::1] structure,
               DTYPE_BOOL_t[::1] mask,
               DTYPE_INT32_t[::1] output):
     """Do heavy lifting of watershed algorithm
@@ -79,7 +79,7 @@ def watershed(cnp.float64_t[::1] image,
         old_index = elem.index
         for i in range(nneighbors):
             # get the flattened address of the neighbor
-            index = structure[i, 0] + old_index
+            index = structure[i] + old_index
             if index < 0 or index >= max_index or output[index] or \
                     not mask[index]:
                 continue

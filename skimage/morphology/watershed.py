@@ -111,6 +111,43 @@ def _validate_connectivity(image_dim, connectivity, offset):
     return c_connectivity, offset
 
 
+def _compute_neighbors(image, structure, offset):
+    #
+    # We pass a connectivity array that pre-calculates the stride for each
+    # neighbor.
+    #
+    # The result of this bit of code is an array with one row per
+    # point to be considered. The first column is the pre-computed stride
+    # and the second through last are the x,y...whatever offsets
+    # (to do bounds checking).
+    c = []
+    distances = []
+    image_stride = np.array(image.strides) // image.itemsize
+    for i in range(np.product(structure.shape)):
+        multiplier = 1
+        offs = []
+        indexes = []
+        ignore = True
+        for j in range(len(structure.shape)):
+            idx = (i // multiplier) % structure.shape[j]
+            off = idx - offset[j]
+            if off:
+                ignore = False
+            offs.append(off)
+            indexes.append(idx)
+            multiplier *= structure.shape[j]
+        if (not ignore) and structure.__getitem__(tuple(indexes)):
+            stride = np.dot(image_stride, np.array(offs))
+            d = np.sum(np.abs(offs)) - 1
+            offs.insert(0, stride)
+            c.append(offs)
+            distances.append(d)
+
+    c = np.array(c, dtype=np.int32)
+    neighborhood = np.ascontiguousarray(c[np.argsort(distances), 0])
+    return neighborhood
+
+
 def watershed(image, markers, connectivity=1, offset=None, mask=None):
     """
     Return a matrix labeled using the watershed segmentation algorithm
@@ -225,40 +262,8 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None):
     c_mask = np.ascontiguousarray(mask, dtype=bool)
     c_output = c_markers.copy()
 
-    #
-    # We pass a connectivity array that pre-calculates the stride for each
-    # neighbor.
-    #
-    # The result of this bit of code is an array with one row per
-    # point to be considered. The first column is the pre-computed stride
-    # and the second through last are the x,y...whatever offsets
-    # (to do bounds checking).
-    c = []
-    distances = []
-    image_stride = np.array(image.strides) // image.itemsize
-    for i in range(np.product(c_connectivity.shape)):
-        multiplier = 1
-        offs = []
-        indexes = []
-        ignore = True
-        for j in range(len(c_connectivity.shape)):
-            idx = (i // multiplier) % c_connectivity.shape[j]
-            off = idx - offset[j]
-            if off:
-                ignore = False
-            offs.append(off)
-            indexes.append(idx)
-            multiplier *= c_connectivity.shape[j]
-        if (not ignore) and c_connectivity.__getitem__(tuple(indexes)):
-            stride = np.dot(image_stride, np.array(offs))
-            d = np.sum(np.abs(offs)) - 1
-            offs.insert(0, stride)
-            c.append(offs)
-            distances.append(d)
-            
-    c = np.array(c, dtype=np.int32)
-    c = c[np.argsort(distances)]
-    
+    flat_neighborhood = _compute_neighbors(image, c_connectivity, offset)
+
     pq, age = __heapify_markers(c_markers, c_image)
     pq = np.ascontiguousarray(pq, dtype=np.int32)
     if np.product(pq.shape) > 0:
@@ -270,7 +275,7 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None):
         else:
             c_mask = c_mask.astype(np.int8).flatten()
         _watershed.watershed(c_image.flatten(),
-                             pq, age, c,
+                             pq, age, flat_neighborhood,
                              c_mask,
                              c_output)
     c_output = c_output.reshape(c_image.shape)[[slice(1, -1, None)] *
