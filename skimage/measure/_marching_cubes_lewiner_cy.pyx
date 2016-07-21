@@ -72,11 +72,10 @@ def remove_degenerate_faces(vertices, faces, *arrays):
     # Iterate over all faces. When we encounter a degenerate triangle,
     # we update the vertex map, i.e. we merge the corresponding vertices.
     for j in range(faces_.shape[0]):
-        face_ = faces_[j]
-        i1, i2, i3 = face_[0], face_[1], face_[2]
-        v1, v2, v3 = vertices_[face_[0]], vertices_[face_[1]], vertices_[face_[2]]
+        i1, i2, i3 = faces_[j][0], faces_[j][1], faces_[j][2]
+        v1, v2, v3 = vertices_[i1], vertices_[i2], vertices_[i3]
         if v1[0] == v2[0] and v1[1] == v2[1] and v1[2] == v2[2]:
-            vertices_map1_[i1] = vertices_map1_[i1] = imin(vertices_map1_[i1], vertices_map1_[i2])
+            vertices_map1_[i1] = vertices_map1_[i2] = imin(vertices_map1_[i1], vertices_map1_[i2])
             faces_ok_[j] = 0
         if v1[0] == v3[0] and v1[1] == v3[1] and v1[2] == v3[2]:
             vertices_map1_[i1] = vertices_map1_[i3] = imin(vertices_map1_[i1], vertices_map1_[i3])
@@ -956,69 +955,56 @@ def marching_cubes(im, double isovalue, LutProvider luts, int st=1, int classic=
     cdef Cell cell = Cell(luts, Nx, Ny, Nz)
     
     # Typedef variables
-    cdef int x, y, z
+    cdef int x, y, z, x_st, y_st, z_st
     cdef int nt
     cdef int case, config, subconfig
     
-    # Unfortunately, using a step in the for loops degregades performance.
-    # Quick and dirty trick below ...
+    # Unfortunately specifying a step in range() siginificantly degrades
+    # performance. Therefore we use a while loop.
+    # we have:  max_x = Nx_bound + st + st - 1
+    #       ->  Nx_bound = max_allowable_x + 1 - 2 * st
+    #       ->  Nx_bound = Nx - 2 * st
+    assert st > 0
+    cdef int Nx_bound, Ny_bound, Nz_bound
+    Nx_bound, Ny_bound, Nz_bound = Nx - 2 * st, Ny - 2 * st, Nz - 2 * st  # precalculated index range
     
-    if st == 1:
+    z = -st
+    while z < Nz_bound:
+        z += st
+        z_st = z + st
         
-        for z in range(0,Nz-1):
-            cell.new_z_value() # Indicate that we enter a new layer
-            for y in range(0,Ny-1):
-                for x in range(0,Nx-1):
-                    
-                    # Initialize cell
-                    cell.set_cube(isovalue, x, y, z, st,
-                        im_[z   ,y, x], im_[z   ,y, x+st], im_[z   ,y+st, x+st], im_[z   ,y+st, x],
-                        im_[z+st,y, x], im_[z+st,y, x+st], im_[z+st,y+st, x+st], im_[z+st,y+st, x] )
-                    
-                    # Do classic!
-                    if classic:
-                        # Determine number of vertices
-                        nt = 0
-                        while luts.CASESCLASSIC.get2(cell.index, 3*nt) != -1:
-                            nt += 1
-                        # Add triangles
-                        if nt > 0:
-                            cell.add_triangles(luts.CASESCLASSIC, cell.index, nt)
-                    else:
-                        # Get case, if non-nul, enter the big switch
-                        case = luts.CASES.get2(cell.index, 0)
-                        if case > 0:
-                            config = luts.CASES.get2(cell.index, 1)
-                            the_big_switch(luts, cell, case, config)
-    
-    else:
+        cell.new_z_value()  # Indicate that we enter a new layer
         
-        for z in range(0,Nz-st,st):
-            cell.new_z_value() # Indicate that we enter a new layer
-            for y in range(0,Ny-st,st):
-                for x in range(0,Nx-st,st):
-                    
-                    # Initialize cell
-                    cell.set_cube(isovalue, x, y, z, st,
-                        im_[z   ,y, x], im_[z   ,y, x+st], im_[z   ,y+st, x+st], im_[z   ,y+st, x],
-                        im_[z+st,y, x], im_[z+st,y, x+st], im_[z+st,y+st, x+st], im_[z+st,y+st, x] )
-                    
-                    # Do classic!
-                    if classic:
-                        # Determine number of vertices
-                        nt = 0
-                        while luts.CASESCLASSIC.get2(cell.index, 3*nt) != -1:
-                            nt += 1
-                        # Add triangles
-                        if nt > 0:
-                            cell.add_triangles(luts.CASESCLASSIC, cell.index, nt)
-                    else:
-                        # Get case, if non-nul, enter the big switch
-                        case = luts.CASES.get2(cell.index, 0)
-                        if case > 0:
-                            config = luts.CASES.get2(cell.index, 1)
-                            the_big_switch(luts, cell, case, config)
-        
+        y = -st
+        while y < Ny_bound:
+            y += st
+            y_st = y + st
+            
+            x = -st
+            while x < Nx_bound:
+                x += st
+                x_st = x + st
+                
+                # Initialize cell
+                cell.set_cube(isovalue, x, y, z, st,
+                    im_[z   ,y, x], im_[z   ,y, x_st], im_[z   ,y_st, x_st], im_[z   ,y_st, x],
+                    im_[z_st,y, x], im_[z_st,y, x_st], im_[z_st,y_st, x_st], im_[z_st,y_st, x] )
+                
+                # Do classic!
+                if classic:
+                    # Determine number of vertices
+                    nt = 0
+                    while luts.CASESCLASSIC.get2(cell.index, 3*nt) != -1:
+                        nt += 1
+                    # Add triangles
+                    if nt > 0:
+                        cell.add_triangles(luts.CASESCLASSIC, cell.index, nt)
+                else:
+                    # Get case, if non-nul, enter the big switch
+                    case = luts.CASES.get2(cell.index, 0)
+                    if case > 0:
+                        config = luts.CASES.get2(cell.index, 1)
+                        the_big_switch(luts, cell, case, config)
     
     # Done
     return cell.get_vertices(), cell.get_faces(), cell.get_normals(), cell.get_values()
