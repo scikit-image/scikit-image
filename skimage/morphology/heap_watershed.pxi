@@ -19,7 +19,7 @@ cdef struct Heapitem:
 
 
 cdef inline int smaller(Heapitem *a, Heapitem *b):
-    if a.value <> b.value:
+    if a.value != b.value:
         return a.value < b.value
     return a.age < b.age
 
