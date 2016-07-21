@@ -12,7 +12,6 @@ from . import _marching_cubes_lewiner_luts as mcluts
 from . import _marching_cubes_lewiner_cy
 
 
-
 def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
                            gradient_direction='descent', step_size=1,
                            allow_degenerate=True, use_classic=False):
@@ -20,7 +19,9 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     Lewiner marching cubes algorithm to find surfaces in 3d volumetric data
     
     In contrast to ``marching_cubes()``, this algorithm resolves
-    ambiguities and guarantees topologically correct results.
+    ambiguities and guarantees topologically correct results. Therefore,
+    this algorithm generally a better choice, unless there is a specific
+    need for the classic algorithm.
     
     Parameters
     ----------
@@ -73,9 +74,8 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
         near each vertex. This can be used by visualization tools to apply
         a colormap to the mesh.
     
-    Notes about the algorithm
-    -------------------------
-    
+    Notes
+    -----
     The algorithm [1] is an improved version of Chernyaev's Marching
     Cubes 33 algorithm. It is an efficient algorithm that relies on
     heavy use of lookup tables to handle the many different cases,
@@ -93,7 +93,6 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     --------
     skimage.measure.marching_cubes
     skimage.measure.mesh_surface_area
-
     """ 
     
     # Check volume and ensure its in the format that the alg needs

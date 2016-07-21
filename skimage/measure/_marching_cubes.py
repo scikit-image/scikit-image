@@ -111,7 +111,6 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
     --------
     skimage.measure.marching_cubes_lewiner
     skimage.measure.mesh_surface_area
-    
     """
     # Check inputs and ensure `volume` is C-contiguous for memoryviews
     if volume.ndim != 3:
