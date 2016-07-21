@@ -65,6 +65,7 @@ def watershed(cnp.float64_t[::1] image,
         elem.value = pq[i, 0]
         elem.age = pq[i, 1]
         elem.index = pq[i, 2]
+        elem.source = pq[i, 2]
         heappush(hp, &elem)
 
     while hp.items > 0:
@@ -87,6 +88,7 @@ def watershed(cnp.float64_t[::1] image,
             new_elem.value = image[index]
             new_elem.age = age
             new_elem.index = index
+            new_elem.source = elem.source
             
             output[index] = output[old_index]
             #
