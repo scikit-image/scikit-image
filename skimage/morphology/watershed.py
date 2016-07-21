@@ -258,24 +258,15 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None):
     markers = np.pad(markers, pad_width, mode='constant')
 
     c_image = image.astype(np.float64)
-    c_markers = np.ascontiguousarray(markers, dtype=np.int32)
-    c_mask = np.ascontiguousarray(mask, dtype=bool)
-    c_output = c_markers.copy()
+    c_mask = np.ascontiguousarray(mask, dtype=np.int8).ravel()
+    c_output = np.array(markers, dtype=np.int32).ravel()
 
     flat_neighborhood = _compute_neighbors(image, c_connectivity, offset)
 
-    pq, age = __heapify_markers(c_markers, c_image)
-    pq = np.ascontiguousarray(pq, dtype=np.int32)
-    if np.product(pq.shape) > 0:
-        # If nothing is labeled, the output is empty and we don't have to
-        # do anything
-        c_output = c_output.flatten()
-        if c_mask is None:
-            c_mask = np.ones(c_image.shape, np.int8).flatten()
-        else:
-            c_mask = c_mask.astype(np.int8).flatten()
-        _watershed.watershed(c_image.flatten(),
-                             pq, age, flat_neighborhood,
+    marker_locations = np.flatnonzero(markers).astype(np.int32)
+    if len(marker_locations) > 0:
+        _watershed.watershed(c_image.ravel(),
+                             marker_locations, flat_neighborhood,
                              c_mask,
                              c_output)
     c_output = c_output.reshape(c_image.shape)[[slice(1, -1, None)] *

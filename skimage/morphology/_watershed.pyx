@@ -24,8 +24,7 @@ include "heap_watershed.pxi"
 
 @cython.boundscheck(False)
 def watershed(cnp.float64_t[::1] image,
-              DTYPE_INT32_t[:, ::1] pq,
-              Py_ssize_t age,
+              DTYPE_INT32_t[::1] marker_locations,
               DTYPE_INT32_t[::1] structure,
               DTYPE_BOOL_t[::1] mask,
               DTYPE_INT32_t[::1] output):
@@ -55,17 +54,19 @@ def watershed(cnp.float64_t[::1] image,
     cdef Heapitem new_elem
     cdef Py_ssize_t nneighbors = structure.shape[0]
     cdef Py_ssize_t i = 0
+    cdef Py_ssize_t age = 1
     cdef Py_ssize_t index = 0
     cdef Py_ssize_t old_index = 0
     cdef Py_ssize_t max_index = image.shape[0]
 
     cdef Heap *hp = <Heap *> heap_from_numpy2()
 
-    for i in range(pq.shape[0]):
-        elem.value = pq[i, 0]
-        elem.age = pq[i, 1]
-        elem.index = pq[i, 2]
-        elem.source = pq[i, 2]
+    for i in range(marker_locations.shape[0]):
+        index = marker_locations[i]
+        elem.value = image[index]
+        elem.age = 0
+        elem.index = index
+        elem.source = index
         heappush(hp, &elem)
 
     while hp.items > 0:
