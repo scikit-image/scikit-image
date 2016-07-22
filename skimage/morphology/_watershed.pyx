@@ -79,7 +79,6 @@ def watershed(cnp.float64_t[::1] image,
     cdef Py_ssize_t i = 0
     cdef Py_ssize_t age = 1
     cdef Py_ssize_t index = 0
-    cdef Py_ssize_t old_index = 0
     cdef Py_ssize_t max_index = image.shape[0]
 
     cdef Heap *hp = <Heap *> heap_from_numpy2()
@@ -93,17 +92,14 @@ def watershed(cnp.float64_t[::1] image,
         heappush(hp, &elem)
 
     while hp.items > 0:
-        #
-        # Pop off an item to work on
-        #
         heappop(hp, &elem)
-        ####################################################
-        # loop through each of the structuring elements
-        #
-        old_index = elem.index
+        if output[elem.index] and elem.index != elem.source:
+            # non-marker, already visited from another neighbor
+            continue
+        output[elem.index] = output[elem.source]
         for i in range(nneighbors):
             # get the flattened address of the neighbor
-            index = structure[i] + old_index
+            index = structure[i] + elem.index
             if index < 0 or index >= max_index or output[index] or \
                     not mask[index]:
                 continue
@@ -117,9 +113,5 @@ def watershed(cnp.float64_t[::1] image,
             new_elem.index = index
             new_elem.source = elem.source
             
-            output[index] = output[old_index]
-            #
-            # Push the neighbor onto the heap to work on it later
-            #
             heappush(hp, &new_elem)
     heap_done(hp)
