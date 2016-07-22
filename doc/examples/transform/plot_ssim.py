@@ -50,11 +50,11 @@ ssim_none = ssim(img, img, dynamic_range=img.max() - img.min())
 
 mse_noise = mse(img, img_noise)
 ssim_noise = ssim(img, img_noise,
-                  dynamic_range=img_const.max() - img_const.min())
+                  dynamic_range=img_noise.max() - img_noise.min())
 
 mse_const = mse(img, img_const)
 ssim_const = ssim(img, img_const,
-                  dynamic_range=img_noise.max() - img_noise.min())
+                  dynamic_range=img_const.max() - img_const.min())
 
 label = 'MSE: %2.f, SSIM: %.2f'
 
