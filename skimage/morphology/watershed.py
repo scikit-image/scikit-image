@@ -24,10 +24,8 @@ All rights reserved.
 Original author: Lee Kamentsky
 """
 
-from _heapq import heappush, heappop
 import numpy as np
 from scipy import ndimage as ndi
-from ..filters import rank_order
 
 from . import _watershed
 
