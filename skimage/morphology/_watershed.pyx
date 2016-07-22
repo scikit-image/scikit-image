@@ -79,7 +79,6 @@ def watershed(cnp.float64_t[::1] image,
     cdef Py_ssize_t i = 0
     cdef Py_ssize_t age = 1
     cdef Py_ssize_t index = 0
-    cdef Py_ssize_t max_index = image.shape[0]
 
     cdef Heap *hp = <Heap *> heap_from_numpy2()
 
@@ -100,8 +99,8 @@ def watershed(cnp.float64_t[::1] image,
         for i in range(nneighbors):
             # get the flattened address of the neighbor
             index = structure[i] + elem.index
-            if index < 0 or index >= max_index or output[index] or \
-                    not mask[index]:
+            if output[index] or not mask[index]:
+                # previously visited, masked, or border pixel
                 continue
 
             age += 1
