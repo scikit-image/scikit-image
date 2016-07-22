@@ -426,5 +426,25 @@ class TestWatershed(unittest.TestCase):
         dmin = np.min(d, 2)
         self.assertTrue(np.all(d[i, j, out[i, j]-1] == dmin))
 
+
+def test_compact_watershed():
+    image = np.zeros((5, 6))
+    image[:, 3:] = 1
+    seeds = np.zeros((5, 6), dtype=int)
+    seeds[2, 0] = 1
+    seeds[2, 3] = 2
+    compact = watershed(image, seeds, compactness=0.01)
+    expected = np.array([[1, 1, 1, 2, 2, 2],
+                         [1, 1, 1, 2, 2, 2],
+                         [1, 1, 1, 2, 2, 2],
+                         [1, 1, 1, 2, 2, 2],
+                         [1, 1, 1, 2, 2, 2]], dtype=int)
+    np.testing.assert_equal(compact, expected)
+    normal = watershed(image, seeds)
+    expected = np.ones(image.shape, dtype=int)
+    expected[2, 3:] = 2
+    np.testing.assert_equal(normal, expected)
+
+
 if __name__ == "__main__":
     np.testing.run_module_suite()
