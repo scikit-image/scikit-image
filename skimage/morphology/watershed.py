@@ -28,6 +28,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from . import _watershed
+from ..util import crop
 
 
 def _validate_inputs(image, markers, mask):
@@ -44,9 +45,10 @@ def _validate_inputs(image, markers, mask):
 
     Returns
     -------
-    mask : array
-        The validated and formatted mask array. If ``None`` was given, it
-        is a volume of all ``True`` values.
+    image, markers, mask : arrays
+        The validated and formatted arrays. Image will have dtype float64,
+        markers int32, and mask int8. If ``None`` was given for the mask,
+        it is a volume of all 1s.
 
     Raises
     ------
@@ -61,7 +63,9 @@ def _validate_inputs(image, markers, mask):
     if mask is None:
         # Use a complete `True` mask if none is provided
         mask = np.ones(image.shape, bool)
-    return mask
+    return (image.astype(np.float64),
+            markers.astype(np.int32),
+            mask.astype(np.int8))
 
 
 def _validate_connectivity(image_dim, connectivity, offset):
@@ -252,33 +256,26 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
     The algorithm works also for 3-D images, and can be used for example to
     separate overlapping spheres.
     """
-    mask = _validate_inputs(image, markers, mask)
-    c_connectivity, offset = _validate_connectivity(image.ndim, connectivity,
-                                                    offset)
+    image, markers, mask = _validate_inputs(image, markers, mask)
+    connectivity, offset = _validate_connectivity(image.ndim, connectivity,
+                                                  offset)
 
     # pad the image, markers, and mask so that we can use the mask to
     # keep from running off the edges
     pad_width = [(p, p) for p in offset]
     image = np.pad(image, pad_width, mode='constant')
-    mask = np.pad(mask, pad_width, mode='constant')
-    markers = np.pad(markers, pad_width, mode='constant')
+    mask = np.pad(mask, pad_width, mode='constant').ravel()
+    output = np.pad(markers, pad_width, mode='constant')
 
-    c_image = image.astype(np.float64)
-    c_mask = np.ascontiguousarray(mask, dtype=np.int8).ravel()
-    c_output = np.array(markers, dtype=np.int32).ravel()
-
-    flat_neighborhood = _compute_neighbors(image, c_connectivity, offset)
-
-    marker_locations = np.flatnonzero(markers).astype(np.int32)
+    flat_neighborhood = _compute_neighbors(image, connectivity, offset)
+    marker_locations = np.flatnonzero(output).astype(np.int32)
     image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
-    if len(marker_locations) > 0:
-        _watershed.watershed(c_image.ravel(),
-                             marker_locations, flat_neighborhood,
-                             c_mask, image_strides, compactness,
-                             c_output)
-    c_output = c_output.reshape(c_image.shape)[[slice(1, -1, None)] *
-                                               image.ndim]
-    try:
-        return c_output.astype(markers.dtype)
-    except:
-        return c_output
+
+    _watershed.watershed(image.ravel(),
+                         marker_locations, flat_neighborhood,
+                         mask, image_strides, compactness,
+                         output.ravel())
+
+    output = crop(output, pad_width, copy=True)
+
+    return output
