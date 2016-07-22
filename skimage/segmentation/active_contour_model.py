@@ -26,10 +26,9 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     ----------
     image : (N, M) or (N, M, 3) ndarray
         Input image.
-    snake : (N, 2) ndarray
+    snake : (n, 2) ndarray
         Initialisation coordinates of snake. For periodic snakes, it should
         not include duplicate endpoints.
-        N is not necessarily the same N as the input image dimension.
     alpha : float, optional
         Snake length shape parameter. Higher values makes snake contract
         faster.
@@ -55,11 +54,11 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         Maximum iterations to optimize snake shape.
     convergence: float, optional
         Convergence criteria.
-    callback: function, optional
+    callback(snake, i, conv): function, optional
         Called every 11 iterations with three args.
-        1st arg: (N, 2) ndarray -- the current snake.
-        2nd arg: int -- the total number of iterations completed.
-        3rd arg: float -- convergence criterion. This value is computed by
+        snake: (N, 2) ndarray -- the current snake.
+        i: int -- the total number of iterations completed.
+        conv: float -- convergence criterion. This value is computed by
             looking over the previous 10 snakes to find the minimum distance
             that each point has moved, and taking the maximum. If any
             point is moving, the value will be high and the algorithm will
