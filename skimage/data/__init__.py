@@ -10,34 +10,37 @@ import os as _os
 
 from .. import data_dir
 from ..io import imread, use_plugin
-from .._shared.utils import deprecated
+from .._shared._warnings import expected_warnings
 from ._binary_blobs import binary_blobs
+from .. import img_as_bool
 
 __all__ = ['load',
+           'astronaut',
            'camera',
-           'lena',
-           'text',
            'checkerboard',
+           'chelsea',
+           'clock',
+           'coffee',
            'coins',
+           'horse',
+           'hubble_deep_field',
+           'immunohistochemistry',
+           'logo',
            'moon',
            'page',
-           'horse',
-           'clock',
-           'immunohistochemistry',
-           'chelsea',
-           'coffee',
-           'hubble_deep_field',
-           'rocket',
-           'astronaut']
+           'text',
+           'rocket']
 
 
-def load(f):
+def load(f, as_grey=False):
     """Load an image file located in the data directory.
 
     Parameters
     ----------
     f : string
         File name.
+    as_grey : bool, optional
+        Convert to greyscale.
 
     Returns
     -------
@@ -45,7 +48,7 @@ def load(f):
         Image loaded from ``skimage.data_dir``.
     """
     use_plugin('pil')
-    return imread(_os.path.join(data_dir, f))
+    return imread(_os.path.join(data_dir, f), as_grey=as_grey)
 
 
 def camera():
@@ -55,22 +58,6 @@ def camera():
 
     """
     return load("camera.png")
-
-
-@deprecated('skimage.data.astronaut')
-def lena():
-    """Colour "Lena" image.
-
-    **This image has been removed from scikit-image due to copyright
-    concerns.**
-
-    The standard, yet sometimes controversial Lena test image was
-    scanned from the November 1972 edition of Playboy magazine.  From
-    an image processing perspective, this image is useful because it
-    contains smooth, textured, shaded as well as detail areas.
-
-    """
-    raise RuntimeError("This image has been removed due to copyright concerns.")
 
 
 def astronaut():
@@ -138,6 +125,11 @@ def coins():
     return load("coins.png")
 
 
+def logo():
+    """Scikit-image logo, a RGBA image."""
+    return load("logo.png")
+
+
 def moon():
     """Surface of the moon.
 
@@ -168,7 +160,8 @@ def horse():
     (marauder).
 
     """
-    return load("horse.png")
+    with expected_warnings(['Possible precision loss', 'Possible sign loss']):
+        return img_as_bool(load("horse.png", as_grey=True))
 
 
 def clock():
@@ -242,8 +235,8 @@ def hubble_deep_field():
     `HubbleSite
     <http://hubblesite.org/newscenter/archive/releases/2012/37/image/a/>`__.
 
-    The image was captured by NASA and `may be freely used in the
-    public domain <http://www.nasa.gov/audience/formedia/features/MP_Photo_Guidelines.html>`_.
+    The image was captured by NASA and `may be freely used in the public domain
+    <http://www.nasa.gov/audience/formedia/features/MP_Photo_Guidelines.html>`_.
 
     """
     return load("hubble_deep_field.jpg")

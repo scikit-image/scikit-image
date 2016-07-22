@@ -10,7 +10,10 @@ from skimage.filters.thresholding import (threshold_adaptive,
                                           threshold_otsu,
                                           threshold_li,
                                           threshold_yen,
-                                          threshold_isodata)
+                                          threshold_isodata,
+                                          threshold_mean,
+                                          threshold_triangle,
+                                          threshold_minimum)
 
 
 class TestSimpleImage():
@@ -59,7 +62,7 @@ class TestSimpleImage():
         assert threshold_yen(image) == 127
 
     def test_yen_binary(self):
-        image = np.zeros([2,256], dtype=np.uint8)
+        image = np.zeros([2, 256], dtype=np.uint8)
         image[0] = 255
         assert threshold_yen(image) < 1
 
@@ -118,7 +121,8 @@ class TestSimpleImage():
         out = threshold_adaptive(self.image, 3, method='gaussian')
         assert_equal(ref, out)
 
-        out = threshold_adaptive(self.image, 3, method='gaussian', param=1.0 / 3.0)
+        out = threshold_adaptive(self.image, 3, method='gaussian',
+                                 param=1./3.)
         assert_equal(ref, out)
 
     def test_threshold_adaptive_mean(self):
@@ -167,7 +171,8 @@ def test_otsu_astro_image():
 
 def test_otsu_one_color_image():
     img = np.ones((10, 10), dtype=np.uint8)
-    assert_raises(TypeError, threshold_otsu, img)
+    assert_raises(ValueError, threshold_otsu, img)
+
 
 def test_li_camera_image():
     camera = skimage.img_as_ubyte(data.camera())
@@ -187,6 +192,7 @@ def test_li_coins_image_as_float():
 def test_li_astro_image():
     img = skimage.img_as_ubyte(data.astronaut())
     assert 66 < threshold_li(img) < 68
+
 
 def test_yen_camera_image():
     camera = skimage.img_as_ubyte(data.camera())
@@ -271,6 +277,87 @@ def test_isodata_moon_image_negative_float():
     assert_almost_equal(thresholds,
                         [-13.83789062, -12.84179688, -11.84570312, 22.02148438,
                          23.01757812, 24.01367188, 38.95507812, 39.95117188])
+
+
+def test_threshold_minimum():
+    camera = skimage.img_as_ubyte(data.camera())
+
+    threshold = threshold_minimum(camera)
+    assert threshold == 76
+
+    threshold = threshold_minimum(camera, bias='max')
+    assert threshold == 77
+
+    astronaut = skimage.img_as_ubyte(data.astronaut())
+    threshold = threshold_minimum(astronaut)
+    assert threshold == 117
+
+
+def test_threshold_minimum_synthetic():
+    img = np.arange(25*25, dtype=np.uint8).reshape((25, 25))
+    img[0:9, :] = 50
+    img[14:25, :] = 250
+
+    threshold = threshold_minimum(img, bias='min')
+    assert threshold == 93
+
+    threshold = threshold_minimum(img, bias='mid')
+    assert threshold == 159
+
+    threshold = threshold_minimum(img, bias='max')
+    assert threshold == 225
+
+
+def test_threshold_minimum_failure():
+    img = np.zeros((16*16), dtype=np.uint8)
+    assert_raises(RuntimeError, threshold_minimum, img)
+
+
+def test_mean():
+    img = np.zeros((2, 6))
+    img[:, 2:4] = 1
+    img[:, 4:] = 2
+    assert(threshold_mean(img) == 1.)
+
+
+def test_triangle_uint_images():
+    assert(threshold_triangle(np.invert(data.text())) == 151)
+    assert(threshold_triangle(data.text()) == 104)
+    assert(threshold_triangle(data.coins()) == 80)
+    assert(threshold_triangle(np.invert(data.coins())) == 175)
+
+
+def test_triangle_float_images():
+    text = data.text()
+    int_bins = text.max() - text.min() + 1
+    # Set nbins to match the uint case and threshold as float.
+    assert(round(threshold_triangle(
+        text.astype(np.float), nbins=int_bins)) == 104)
+    # Check that rescaling image to floats in unit interval is equivalent.
+    assert(round(threshold_triangle(text / 255., nbins=int_bins) * 255) == 104)
+    # Repeat for inverted image.
+    assert(round(threshold_triangle(
+        np.invert(text).astype(np.float), nbins=int_bins)) == 151)
+    assert (round(threshold_triangle(
+        np.invert(text) / 255., nbins=int_bins) * 255) == 151)
+
+
+def test_triangle_flip():
+    # Depending on the skewness, the algorithm flips the histogram.
+    # We check that the flip doesn't affect too much the result.
+    img = data.camera()
+    inv_img = np.invert(img)
+    t = threshold_triangle(inv_img)
+    t_inv_img = inv_img > t
+    t_inv_inv_img = np.invert(t_inv_img)
+
+    t = threshold_triangle(img)
+    t_img = img > t
+
+    # Check that most of the pixels are identical
+    # See numpy #7685 for a future np.testing API
+    unequal_pos = np.where(t_img.ravel() != t_inv_inv_img.ravel())
+    assert(len(unequal_pos[0]) / t_img.size < 1e-2)
 
 
 if __name__ == '__main__':

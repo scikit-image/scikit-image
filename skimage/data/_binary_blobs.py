@@ -21,6 +21,7 @@ def binary_blobs(length=512, blob_size_fraction=0.1, n_dim=2,
         Should be in [0, 1].
     seed : int, optional
         Seed to initialize the random number generator.
+        If `None`, a random seed from the operating system is used.
 
     Returns
     -------

@@ -76,23 +76,20 @@ ax2.imshow(sinogram, cmap=plt.cm.Greys_r,
 fig.tight_layout()
 plt.show()
 
-"""
-.. image:: PLOT2RST.current_figure
-
-Reconstruction with the Filtered Back Projection (FBP)
-======================================================
-
-The mathematical foundation of the filtered back projection is the Fourier
-slice theorem [2]_. It uses Fourier transform of the projection and
-interpolation in Fourier space to obtain the 2D Fourier transform of the image,
-which is then inverted to form the reconstructed image. The filtered back
-projection is among the fastest methods of performing the inverse Radon
-transform. The only tunable parameter for the FBP is the filter, which is
-applied to the Fourier transformed projections. It may be used to suppress
-high frequency noise in the reconstruction. ``skimage`` provides a few
-different options for the filter.
-
-"""
+######################################################################
+#
+# Reconstruction with the Filtered Back Projection (FBP)
+# ======================================================
+#
+# The mathematical foundation of the filtered back projection is the Fourier
+# slice theorem [2]_. It uses Fourier transform of the projection and
+# interpolation in Fourier space to obtain the 2D Fourier transform of the
+# image, which is then inverted to form the reconstructed image. The filtered
+# back projection is among the fastest methods of performing the inverse
+# Radon transform. The only tunable parameter for the FBP is the filter,
+# which is applied to the Fourier transformed projections. It may be used to
+# suppress high frequency noise in the reconstruction. ``skimage`` provides a
+# few different options for the filter.
 
 from skimage.transform import iradon
 
@@ -110,42 +107,39 @@ ax2.set_title("Reconstruction error\nFiltered back projection")
 ax2.imshow(reconstruction_fbp - image, cmap=plt.cm.Greys_r, **imkwargs)
 plt.show()
 
-"""
-.. image:: PLOT2RST.current_figure
-
-Reconstruction with the Simultaneous Algebraic Reconstruction Technique
-=======================================================================
-
-Algebraic reconstruction techniques for tomography are based on a
-straightforward idea: for a pixelated image the value of a single ray in a
-particular projection is simply a sum of all the pixels the ray passes through
-on its way through the object. This is a way of expressing the forward Radon
-transform. The inverse Radon transform can then be formulated as a (large) set
-of linear equations. As each ray passes through a small fraction of the pixels
-in the image, this set of equations is sparse, allowing iterative solvers for
-sparse linear systems to tackle the system of equations. One iterative method
-has been particularly popular, namely Kaczmarz' method [3]_, which has the
-property that the solution will approach a least-squares solution of the
-equation set.
-
-The combination of the formulation of the reconstruction problem as a set
-of linear equations and an iterative solver makes algebraic techniques
-relatively flexible, hence some forms of prior knowledge can be incorporated
-with relative ease.
-
-``skimage`` provides one of the more popular variations of the algebraic
-reconstruction techniques: the Simultaneous Algebraic Reconstruction Technique
-(SART) [1]_ [4]_. It uses Kaczmarz' method [3]_ as the iterative solver. A good
-reconstruction is normally obtained in a single iteration, making the method
-computationally effective. Running one or more extra iterations will normally
-improve the reconstruction of sharp, high frequency features and reduce the
-mean squared error at the expense of increased high frequency noise (the user
-will need to decide on what number of iterations is best suited to the problem
-at hand. The implementation in ``skimage`` allows prior information of the
-form of a lower and upper threshold on the reconstructed values to be supplied
-to the reconstruction.
-
-"""
+######################################################################
+#
+# Reconstruction with the Simultaneous Algebraic Reconstruction Technique
+# =======================================================================
+#
+# Algebraic reconstruction techniques for tomography are based on a
+# straightforward idea: for a pixelated image the value of a single ray in a
+# particular projection is simply a sum of all the pixels the ray passes
+# through on its way through the object. This is a way of expressing the
+# forward Radon transform. The inverse Radon transform can then be formulated
+# as a (large) set of linear equations. As each ray passes through a small
+# fraction of the pixels in the image, this set of equations is sparse,
+# allowing iterative solvers for sparse linear systems to tackle the system
+# of equations. One iterative method has been particularly popular, namely
+# Kaczmarz' method [3]_, which has the property that the solution will
+# approach a least-squares solution of the equation set.
+#
+# The combination of the formulation of the reconstruction problem as a set
+# of linear equations and an iterative solver makes algebraic techniques
+# relatively flexible, hence some forms of prior knowledge can be
+# incorporated with relative ease.
+#
+# ``skimage`` provides one of the more popular variations of the algebraic
+# reconstruction techniques: the Simultaneous Algebraic Reconstruction
+# Technique (SART) [1]_ [4]_. It uses Kaczmarz' method [3]_ as the iterative
+# solver. A good reconstruction is normally obtained in a single iteration,
+# making the method computationally effective. Running one or more extra
+# iterations will normally improve the reconstruction of sharp, high
+# frequency features and reduce the mean squared error at the expense of
+# increased high frequency noise (the user will need to decide on what number
+# of iterations is best suited to the problem at hand. The implementation in
+# ``skimage`` allows prior information of the form of a lower and upper
+# threshold on the reconstructed values to be supplied to the reconstruction.
 
 from skimage.transform import iradon_sart
 
@@ -154,13 +148,15 @@ error = reconstruction_sart - image
 print('SART (1 iteration) rms reconstruction error: %.3g'
       % np.sqrt(np.mean(error**2)))
 
-fig, ax = plt.subplots(2, 2, figsize=(8, 8.5), sharex=True, sharey=True,
-                       subplot_kw={'adjustable': 'box-forced'})
-ax1, ax2, ax3, ax4 = ax.ravel()
-ax1.set_title("Reconstruction\nSART")
-ax1.imshow(reconstruction_sart, cmap=plt.cm.Greys_r)
-ax2.set_title("Reconstruction error\nSART")
-ax2.imshow(reconstruction_sart - image, cmap=plt.cm.Greys_r, **imkwargs)
+fig, axes = plt.subplots(2, 2, figsize=(8, 8.5), sharex=True, sharey=True,
+                         subplot_kw={'adjustable': 'box-forced'})
+ax = axes.ravel()
+
+ax[0].set_title("Reconstruction\nSART")
+ax[0].imshow(reconstruction_sart, cmap=plt.cm.Greys_r)
+
+ax[1].set_title("Reconstruction error\nSART")
+ax[1].imshow(reconstruction_sart - image, cmap=plt.cm.Greys_r, **imkwargs)
 
 # Run a second iteration of SART by supplying the reconstruction
 # from the first iteration as an initial estimate
@@ -170,25 +166,21 @@ error = reconstruction_sart2 - image
 print('SART (2 iterations) rms reconstruction error: %.3g'
       % np.sqrt(np.mean(error**2)))
 
-ax3.set_title("Reconstruction\nSART, 2 iterations")
-ax3.imshow(reconstruction_sart2, cmap=plt.cm.Greys_r)
-ax4.set_title("Reconstruction error\nSART, 2 iterations")
-ax4.imshow(reconstruction_sart2 - image, cmap=plt.cm.Greys_r, **imkwargs)
+ax[2].set_title("Reconstruction\nSART, 2 iterations")
+ax[2].imshow(reconstruction_sart2, cmap=plt.cm.Greys_r)
+
+ax[3].set_title("Reconstruction error\nSART, 2 iterations")
+ax[3].imshow(reconstruction_sart2 - image, cmap=plt.cm.Greys_r, **imkwargs)
 plt.show()
 
-"""
-.. image:: PLOT2RST.current_figure
-
-
-.. [1]  AC Kak, M Slaney, "Principles of Computerized Tomographic Imaging",
-        IEEE Press 1988. http://www.slaney.org/pct/pct-toc.html
-.. [2]  Wikipedia, Radon transform,
-        http://en.wikipedia.org/wiki/Radon_transform#Relationship_with_the_Fourier_transform
-.. [3]  S Kaczmarz, "Angenaeherte Aufloesung von Systemen linearer
-        Gleichungen", Bulletin International de l'Academie Polonaise des
-        Sciences et des Lettres 35 pp 355--357 (1937)
-.. [4]  AH Andersen, AC Kak, "Simultaneous algebraic reconstruction technique
-        (SART): a superior implementation of the ART algorithm", Ultrasonic
-        Imaging 6 pp 81--94 (1984)
-
-"""
+######################################################################
+# References
+#
+# .. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic Imaging", IEEE Press 1988. http://www.slaney.org/pct/pct-toc.html
+#
+# .. [2] Wikipedia, Radon transform, http://en.wikipedia.org/wiki/Radon_transform#Relationship_with_the_Fourier_transform
+#
+# .. [3] S Kaczmarz, "Angenaeherte Aufloesung von Systemen linearer Gleichungen", Bulletin International de l'Academie Polonaise des Sciences et des Lettres, 35 pp 355--357 (1937)
+#
+# .. [4] AH Andersen, AC Kak, "Simultaneous algebraic reconstruction
+#        technique (SART): a superior implementation of the ART algorithm", Ultrasonic Imaging 6 pp 81--94 (1984)

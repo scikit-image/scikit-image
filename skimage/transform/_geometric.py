@@ -1,11 +1,11 @@
+from __future__ import division
 import six
 import math
 import numpy as np
 from scipy import spatial
 from scipy import ndimage as ndi
 
-from .._shared.utils import (get_bound_method_class, safe_as_int,
-                             _mode_deprecations, warn)
+from .._shared.utils import (get_bound_method_class, safe_as_int, warn)
 from ..util import img_as_float
 
 from ._warps_cy import _warp_fast
@@ -13,7 +13,6 @@ from ._warps_cy import _warp_fast
 
 def _to_ndimage_mode(mode):
     """Convert from `numpy.pad` mode name to the corresponding ndimage mode."""
-    mode = _mode_deprecations(mode.lower())
     mode_translation_dict = dict(edge='nearest', symmetric='reflect',
                                  reflect='mirror')
     if mode in mode_translation_dict:
@@ -69,8 +68,83 @@ def _center_and_normalize_points(points):
     return matrix, new_points
 
 
+def _umeyama(src, dst, estimate_scale):
+    """Estimate N-D similarity transformation with or without scaling.
+
+    Parameters
+    ----------
+    src : (M, N) array
+        Source coordinates.
+    dst : (M, N) array
+        Destination coordinates.
+    estimate_scale : bool
+        Whether to estimate scaling factor.
+
+    Returns
+    -------
+    T : (N + 1, N + 1)
+        The homogeneous similarity transformation matrix. The matrix contains
+        NaN values only if the problem is not well-conditioned.
+
+    References
+    ----------
+    .. [1] "Least-squares estimation of transformation parameters between two
+            point patterns", Shinji Umeyama, PAMI 1991, DOI: 10.1109/34.88573
+
+    """
+
+    num = src.shape[0]
+    dim = src.shape[1]
+
+    # Compute mean of src and dst.
+    src_mean = src.mean(axis=0)
+    dst_mean = dst.mean(axis=0)
+
+    # Subtract mean from src and dst.
+    src_demean = src - src_mean
+    dst_demean = dst - dst_mean
+
+    # Eq. (38).
+    A = np.dot(dst_demean.T, src_demean) / num
+
+    # Eq. (39).
+    d = np.ones((dim,), dtype=np.double)
+    if np.linalg.det(A) < 0:
+        d[dim - 1] = -1
+
+    T = np.eye(dim + 1, dtype=np.double)
+
+    U, S, V = np.linalg.svd(A)
+
+    # Eq. (40) and (43).
+    rank = np.linalg.matrix_rank(A)
+    if rank == 0:
+        return np.nan * T
+    elif rank == dim - 1:
+        if np.linalg.det(U) * np.linalg.det(V) > 0:
+            T[:dim, :dim] = np.dot(U, V)
+        else:
+            s = d[dim - 1]
+            d[dim - 1] = -1
+            T[:dim, :dim] = np.dot(U, np.dot(np.diag(d), V))
+            d[dim - 1] = s
+    else:
+        T[:dim, :dim] = np.dot(U, np.dot(np.diag(d), V.T))
+
+    if estimate_scale:
+        # Eq. (41) and (42).
+        scale = 1.0 / src_demean.var(axis=0).sum() * np.dot(S, d)
+    else:
+        scale = 1.0
+
+    T[:dim, dim] = dst_mean - scale * np.dot(T[:dim, :dim], src_mean.T)
+    T[:dim, :dim] *= scale
+
+    return T
+
+
 class GeometricTransform(object):
-    """Perform geometric transformations on a set of coordinates.
+    """Base class for geometric transformations.
 
     """
     def __call__(self, coords):
@@ -218,8 +292,7 @@ class ProjectiveTransform(GeometricTransform):
         return self._apply_mat(coords, self._inv_matrix)
 
     def estimate(self, src, dst):
-        """Set the transformation matrix with the explicit transformation
-        parameters.
+        """Estimate the transformation from a set of corresponding points.
 
         You can determine the over-, well- and under-determined parameters
         with the total least-squares method.
@@ -343,10 +416,7 @@ class ProjectiveTransform(GeometricTransform):
 
 
 class AffineTransform(ProjectiveTransform):
-
     """2D affine transformation of the form:
-
-    ..:math:
 
         X = a0*x + a1*y + a2 =
           = sx*x*cos(rotation) - sy*y*sin(rotation + shear) + a2
@@ -354,7 +424,7 @@ class AffineTransform(ProjectiveTransform):
         Y = b0*x + b1*y + b2 =
           = sx*x*sin(rotation) + sy*y*cos(rotation + shear) + b2
 
-    where ``sx`` and ``sy`` are zoom factors in the x and y directions,
+    where ``sx`` and ``sy`` are scale factors in the x and y directions,
     and the homogeneous transformation matrix is::
 
         [[a0  a1  a2]
@@ -437,7 +507,6 @@ class AffineTransform(ProjectiveTransform):
 
 
 class PiecewiseAffineTransform(GeometricTransform):
-
     """2D piecewise affine transformation.
 
     Control points are used to define the mapping. The transform is based on
@@ -460,7 +529,7 @@ class PiecewiseAffineTransform(GeometricTransform):
         self.inverse_affines = None
 
     def estimate(self, src, dst):
-        """Set the control points with which to perform the piecewise mapping.
+        """Estimate the transformation from a set of corresponding points.
 
         Number of source and destination coordinates must match.
 
@@ -571,22 +640,121 @@ class PiecewiseAffineTransform(GeometricTransform):
         return out
 
 
-class SimilarityTransform(ProjectiveTransform):
-    """2D similarity transformation of the form:
-
-    ..:math:
+class EuclideanTransform(ProjectiveTransform):
+    """2D Euclidean transformation of the form:
 
         X = a0 * x - b0 * y + a1 =
-          = m * x * cos(rotation) - m * y * sin(rotation) + a1
+          = x * cos(rotation) - y * sin(rotation) + a1
 
         Y = b0 * x + a0 * y + b1 =
-          = m * x * sin(rotation) + m * y * cos(rotation) + b1
+          = x * sin(rotation) + y * cos(rotation) + b1
 
-    where ``m`` is a zoom factor and the homogeneous transformation matrix is::
+    where the homogeneous transformation matrix is::
 
         [[a0  b0  a1]
          [b0  a0  b1]
          [0   0    1]]
+
+    The Euclidean transformation is a rigid transformation with rotation and
+    translation parameters. The similarity transformation extends the Euclidean
+    transformation with a single scaling factor.
+
+    Parameters
+    ----------
+    matrix : (3, 3) array, optional
+        Homogeneous transformation matrix.
+    rotation : float, optional
+        Rotation angle in counter-clockwise direction as radians.
+    translation : (tx, ty) as array, list or tuple, optional
+        x, y translation parameters.
+
+    Attributes
+    ----------
+    params : (3, 3) array
+        Homogeneous transformation matrix.
+
+    """
+
+    def __init__(self, matrix=None, rotation=None, translation=None):
+        params = any(param is not None
+                     for param in (rotation, translation))
+
+        if params and matrix is not None:
+            raise ValueError("You cannot specify the transformation matrix and"
+                             " the implicit parameters at the same time.")
+        elif matrix is not None:
+            if matrix.shape != (3, 3):
+                raise ValueError("Invalid shape of transformation matrix.")
+            self.params = matrix
+        elif params:
+            if rotation is None:
+                rotation = 0
+            if translation is None:
+                translation = (0, 0)
+
+            self.params = np.array([
+                [math.cos(rotation), - math.sin(rotation), 0],
+                [math.sin(rotation),   math.cos(rotation), 0],
+                [                 0,                    0, 1]
+            ])
+            self.params[0:2, 2] = translation
+        else:
+            # default to an identity transform
+            self.params = np.eye(3)
+
+    def estimate(self, src, dst):
+        """Estimate the transformation from a set of corresponding points.
+
+        You can determine the over-, well- and under-determined parameters
+        with the total least-squares method.
+
+        Number of source and destination coordinates must match.
+
+        Parameters
+        ----------
+        src : (N, 2) array
+            Source coordinates.
+        dst : (N, 2) array
+            Destination coordinates.
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+
+        """
+
+        self.params = _umeyama(src, dst, False)
+
+        return True
+
+    @property
+    def rotation(self):
+        return math.atan2(self.params[1, 0], self.params[1, 1])
+
+    @property
+    def translation(self):
+        return self.params[0:2, 2]
+
+
+class SimilarityTransform(EuclideanTransform):
+    """2D similarity transformation of the form:
+
+        X = a0 * x - b0 * y + a1 =
+          = s * x * cos(rotation) - s * y * sin(rotation) + a1
+
+        Y = b0 * x + a0 * y + b1 =
+          = s * x * sin(rotation) + s * y * cos(rotation) + b1
+
+    where ``s`` is a scale factor and the homogeneous transformation matrix is::
+
+        [[a0  b0  a1]
+         [b0  a0  b1]
+         [0   0    1]]
+
+    The similarity transformation extends the Euclidean transformation with a
+    single scaling factor in addition to the rotation and translation
+    parameters.
 
     Parameters
     ----------
@@ -638,37 +806,12 @@ class SimilarityTransform(ProjectiveTransform):
             self.params = np.eye(3)
 
     def estimate(self, src, dst):
-        """Set the transformation matrix with the explicit parameters.
+        """Estimate the transformation from a set of corresponding points.
 
         You can determine the over-, well- and under-determined parameters
         with the total least-squares method.
 
         Number of source and destination coordinates must match.
-
-        The transformation is defined as::
-
-            X = a0 * x - b0 * y + a1
-            Y = b0 * x + a0 * y + b1
-
-        These equations can be transformed to the following form::
-
-            0 = a0 * x - b0 * y + a1 - X
-            0 = b0 * x + a0 * y + b1 - Y
-
-        which exist for each set of corresponding points, so we have a set of
-        N * 2 equations. The coefficients appear linearly so we can write
-        A x = 0, where::
-
-            A   = [[x 1 -y 0 -X]
-                   [y 0  x 1 -Y]
-                    ...
-                    ...
-                  ]
-            x.T = [a0 a1 b0 b1 c3]
-
-        In case of total least-squares the solution of this homogeneous system
-        of equations is the right singular vector of A which corresponds to the
-        smallest singular value normed by the coefficient c3.
 
         Parameters
         ----------
@@ -684,44 +827,7 @@ class SimilarityTransform(ProjectiveTransform):
 
         """
 
-        try:
-            src_matrix, src = _center_and_normalize_points(src)
-            dst_matrix, dst = _center_and_normalize_points(dst)
-        except ZeroDivisionError:
-            self.params = np.nan * np.empty((3, 3))
-            return False
-
-        xs = src[:, 0]
-        ys = src[:, 1]
-        xd = dst[:, 0]
-        yd = dst[:, 1]
-        rows = src.shape[0]
-
-        # params: a0, a1, b0, b1
-        A = np.zeros((rows * 2, 5))
-        A[:rows, 0] = xs
-        A[:rows, 2] = - ys
-        A[:rows, 1] = 1
-        A[rows:, 2] = xs
-        A[rows:, 0] = ys
-        A[rows:, 3] = 1
-        A[:rows, 4] = xd
-        A[rows:, 4] = yd
-
-        _, _, V = np.linalg.svd(A)
-
-        # solution is right singular vector that corresponds to smallest
-        # singular value
-        a0, a1, b0, b1 = - V[-1, :-1] / V[-1, -1]
-
-        S = np.array([[a0, -b0, a1],
-                      [b0,  a0, b1],
-                      [ 0,   0,  1]])
-
-        # De-center and de-normalize
-        S = np.dot(np.linalg.inv(dst_matrix), np.dot(S, src_matrix))
-
-        self.params = S
+        self.params = _umeyama(src, dst, True)
 
         return True
 
@@ -734,19 +840,9 @@ class SimilarityTransform(ProjectiveTransform):
             scale = self.params[0, 0] / math.cos(self.rotation)
         return scale
 
-    @property
-    def rotation(self):
-        return math.atan2(self.params[1, 0], self.params[1, 1])
-
-    @property
-    def translation(self):
-        return self.params[0:2, 2]
-
 
 class PolynomialTransform(GeometricTransform):
-    """2D transformation of the form:
-
-    ..:math:
+    """2D polynomial transformation of the form:
 
         X = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
         Y = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
@@ -774,8 +870,7 @@ class PolynomialTransform(GeometricTransform):
         self.params = params
 
     def estimate(self, src, dst, order=2):
-        """Set the transformation matrix with the explicit transformation
-        parameters.
+        """Estimate the transformation from a set of corresponding points.
 
         You can determine the over-, well- and under-determined parameters
         with the total least-squares method.
@@ -893,6 +988,7 @@ class PolynomialTransform(GeometricTransform):
 
 
 TRANSFORMS = {
+    'euclidean': EuclideanTransform,
     'similarity': SimilarityTransform,
     'affine': AffineTransform,
     'piecewise-affine': PiecewiseAffineTransform,
@@ -917,13 +1013,14 @@ def estimate_transform(ttype, src, dst, **kwargs):
 
     Parameters
     ----------
-    ttype : {'similarity', 'affine', 'piecewise-affine', 'projective', \
-             'polynomial'}
+    ttype : {'euclidean', similarity', 'affine', 'piecewise-affine', \
+             'projective', 'polynomial'}
         Type of transform.
     kwargs : array or int
         Function parameters (src, dst, n, angle)::
 
             NAME / TTYPE        FUNCTION PARAMETERS
+            'euclidean'         `src, `dst`
             'similarity'        `src, `dst`
             'affine'            `src, `dst`
             'piecewise-affine'  `src, `dst`
@@ -1155,7 +1252,7 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
             output_image[cval_mask] = cval
 
 
-def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
+def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
          mode='constant', cval=0., clip=True, preserve_range=False):
     """Warp an image according to a given coordinate transformation.
 
@@ -1292,7 +1389,6 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     >>> warped = warp(cube, coords)
 
     """
-    mode = _mode_deprecations(mode)
     image = _convert_warp_input(image, preserve_range)
 
     input_shape = np.array(image.shape)

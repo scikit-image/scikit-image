@@ -1,5 +1,6 @@
 from .colorconv import (convert_colorspace,
                         guess_spatial_dimensions,
+                        rgba2rgb,
                         rgb2hsv,
                         hsv2rgb,
                         rgb2xyz,

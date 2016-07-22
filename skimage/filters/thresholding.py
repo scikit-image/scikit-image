@@ -1,13 +1,128 @@
-__all__ = ['threshold_adaptive',
+import math
+import numpy as np
+from scipy import ndimage as ndi
+from scipy.ndimage import filters as ndif
+from collections import OrderedDict
+from ..exposure import histogram
+from .._shared.utils import assert_nD, warn
+
+__all__ = ['try_all_threshold',
+           'threshold_adaptive',
            'threshold_otsu',
            'threshold_yen',
            'threshold_isodata',
-           'threshold_li', ]
+           'threshold_li',
+           'threshold_minimum',
+           'threshold_mean',
+           'threshold_triangle']
 
-import numpy as np
-from scipy import ndimage as ndi
-from ..exposure import histogram
-from .._shared.utils import assert_nD, warn
+
+def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
+    """Returns a figure comparing the outputs of different methods.
+
+    Parameters
+    ----------
+    image : (N, M) ndarray
+        Input image.
+    methods : dict, optional
+        Names and associated functions.
+        Functions must take and return an image.
+    figsize : tuple, optional
+        Figure size (in inches).
+    num_cols : int, optional
+        Number of columns.
+    verbose : bool, optional
+        Print function name for each method.
+
+    Returns
+    -------
+    fig, ax : tuple
+        Matplotlib figure and axes.
+    """
+    from matplotlib import pyplot as plt
+
+    num_rows = math.ceil((len(methods) + 1.) / num_cols)
+    num_rows = int(num_rows)  # Python 2.7 support
+    fig, ax = plt.subplots(num_rows, num_cols, figsize=figsize,
+                           sharex=True, sharey=True,
+                           subplot_kw={'adjustable': 'box-forced'})
+    ax = ax.ravel()
+
+    ax[0].imshow(image, cmap=plt.cm.gray)
+    ax[0].set_title('Original')
+
+    i = 1
+    for name, func in methods.items():
+        ax[i].imshow(func(image), cmap=plt.cm.gray)
+        ax[i].set_title(name)
+        i += 1
+        if verbose:
+            print(func.__orifunc__)
+
+    for a in ax:
+        a.axis('off')
+
+    fig.tight_layout()
+    return fig, ax
+
+
+def try_all_threshold(image, figsize=(8, 5), verbose=True):
+    """Returns a figure comparing the outputs of different thresholding methods.
+
+    Parameters
+    ----------
+    image : (N, M) ndarray
+        Input image.
+    figsize : tuple, optional
+        Figure size (in inches).
+    verbose : bool, optional
+        Print function name for each method.
+
+    Returns
+    -------
+    fig, ax : tuple
+        Matplotlib figure and axes.
+
+    Notes
+    -----
+    The following algorithms are used:
+
+    * isodata
+    * li
+    * mean
+    * minimum
+    * otsu
+    * triangle
+    * yen
+
+    Examples
+    --------
+    >>> from skimage.data import text
+    >>> fig, ax = try_all_threshold(text(), figsize=(10, 6), verbose=False)
+    """
+    def thresh(func):
+        """
+        A wrapper function to return a thresholded image.
+        """
+        def wrapper(im):
+            return im > func(im)
+        try:
+            wrapper.__orifunc__ = func.__orifunc__
+        except AttributeError:
+            wrapper.__orifunc__ = func.__module__ + '.' + func.__name__
+        return wrapper
+
+    # Global algorithms.
+    methods = OrderedDict({'Isodata': thresh(threshold_isodata),
+                           'Li': thresh(threshold_li),
+                           'Mean': thresh(threshold_mean),
+                           'Minimum': thresh(threshold_minimum),
+                           'Otsu': thresh(threshold_otsu),
+                           'Triangle': thresh(threshold_triangle),
+                           'Yen': thresh(threshold_yen)})
+
+    return _try_all(image, figsize=figsize,
+                    methods=methods, verbose=verbose)
 
 
 def threshold_adaptive(image, block_size, method='gaussian', offset=0,
@@ -99,7 +214,7 @@ def threshold_otsu(image, nbins=256):
 
     Parameters
     ----------
-    image : array
+    image : (N, M) ndarray
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -108,8 +223,13 @@ def threshold_otsu(image, nbins=256):
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels intensities that less or equal of
-        this value assumed as foreground.
+        Upper threshold value. All pixels with an intensity higher than
+        this value are assumed to be foreground.
+
+    Raises
+    ------
+    ValueError
+         If `image` only contains a single grayscale value.
 
     References
     ----------
@@ -133,9 +253,9 @@ def threshold_otsu(image, nbins=256):
 
     # Check if the image is multi-colored or not
     if image.min() == image.max():
-        raise TypeError("threshold_otsu is expected to work with images " \
-                        "having more than one color. The input image seems " \
-                        "to have just one color {0}.".format(image.min()))
+        raise ValueError("threshold_otsu is expected to work with images "
+                         "having more than one color. The input image seems "
+                         "to have just one color {0}.".format(image.min()))
 
     hist, bin_centers = histogram(image.ravel(), nbins)
     hist = hist.astype(float)
@@ -162,7 +282,7 @@ def threshold_yen(image, nbins=256):
 
     Parameters
     ----------
-    image : array
+    image : (N, M) ndarray
         Input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -171,17 +291,17 @@ def threshold_yen(image, nbins=256):
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels intensities that less or equal of
-        this value assumed as foreground.
+        Upper threshold value. All pixels with an intensity higher than
+        this value are assumed to be foreground.
 
     References
     ----------
     .. [1] Yen J.C., Chang F.J., and Chang S. (1995) "A New Criterion
            for Automatic Multilevel Thresholding" IEEE Trans. on Image
-           Processing, 4(3): 370-378
+           Processing, 4(3): 370-378. DOI:10.1109/83.366472
     .. [2] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
            Techniques and Quantitative Performance Evaluation" Journal of
-           Electronic Imaging, 13(1): 146-165,
+           Electronic Imaging, 13(1): 146-165, DOI:10.1117/1.1631315
            http://www.busim.ee.boun.edu.tr/~sankur/SankurFolder/Threshold_survey.pdf
     .. [3] ImageJ AutoThresholder code, http://fiji.sc/wiki/index.php/Auto_Threshold
 
@@ -229,7 +349,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
 
     Parameters
     ----------
-    image : array
+    image : (N, M) ndarray
         Input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -247,13 +367,14 @@ def threshold_isodata(image, nbins=256, return_all=False):
     ----------
     .. [1] Ridler, TW & Calvard, S (1978), "Picture thresholding using an
            iterative selection method"
-    .. [2] IEEE Transactions on Systems, Man and Cybernetics 8: 630-632,
-           http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=4310039
-    .. [3] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
+           IEEE Transactions on Systems, Man and Cybernetics 8: 630-632,
+           DOI:10.1109/TSMC.1978.4310039
+    .. [2] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
            Techniques and Quantitative Performance Evaluation" Journal of
            Electronic Imaging, 13(1): 146-165,
            http://www.busim.ee.boun.edu.tr/~sankur/SankurFolder/Threshold_survey.pdf
-    .. [4] ImageJ AutoThresholder code,
+           DOI:10.1117/1.1631315
+    .. [3] ImageJ AutoThresholder code,
            http://fiji.sc/wiki/index.php/Auto_Threshold
 
     Examples
@@ -324,25 +445,27 @@ def threshold_li(image):
 
     Parameters
     ----------
-    image : array
+    image : (N, M) ndarray
         Input image.
 
     Returns
     -------
     threshold : float
-        Upper threshold value. All pixels intensities more than
+        Upper threshold value. All pixels with an intensity higher than
         this value are assumed to be foreground.
 
     References
     ----------
     .. [1] Li C.H. and Lee C.K. (1993) "Minimum Cross Entropy Thresholding"
            Pattern Recognition, 26(4): 617-625
+           DOI:10.1016/0031-3203(93)90115-D
     .. [2] Li C.H. and Tam P.K.S. (1998) "An Iterative Algorithm for Minimum
            Cross Entropy Thresholding" Pattern Recognition Letters, 18(8): 771-776
+           DOI:10.1016/S0167-8655(98)00057-9
     .. [3] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
            Techniques and Quantitative Performance Evaluation" Journal of
            Electronic Imaging, 13(1): 146-165
-           http://citeseer.ist.psu.edu/sezgin04survey.html
+           DOI:10.1117/1.1631315
     .. [4] ImageJ AutoThresholder code, http://fiji.sc/wiki/index.php/Auto_Threshold
 
     Examples
@@ -384,3 +507,209 @@ def threshold_li(image):
             new_thresh = temp + tolerance
 
     return threshold + immin
+
+
+def threshold_minimum(image, nbins=256, bias='min', max_iter=10000):
+    """Return threshold value based on minimum method.
+
+    The histogram of the input `image` is computed and smoothed until there are
+    only two maxima. Then the minimum in between is the threshold value.
+
+    Parameters
+    ----------
+    image : (M, N) ndarray
+        Input image.
+    nbins : int, optional
+        Number of bins used to calculate histogram. This value is ignored for
+        integer arrays.
+    bias : {'min', 'mid', 'max'}, optional
+        'min', 'mid', 'max' return lowest, middle, or highest pixel value
+        with minimum histogram value.
+    max_iter: int, optional
+        Maximum number of iterations to smooth the histogram.
+
+    Returns
+    -------
+    threshold : float
+        Upper threshold value. All pixels with an intensity higher than
+        this value are assumed to be foreground.
+
+    Raises
+    ------
+    RuntimeError
+        If unable to find two local maxima in the histogram or if the
+        smoothing takes more than 1e4 iterations.
+
+    References
+    ----------
+    .. [1] Prewitt, JMS & Mendelsohn, ML (1966), "The analysis of cell images",
+           Annals of the New York Academy of Sciences 128: 1035-1053
+           DOI:10.1111/j.1749-6632.1965.tb11715.x
+
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> image = camera()
+    >>> thresh = threshold_minimum(image)
+    >>> binary = image > thresh
+    """
+
+    def find_local_maxima(hist):
+        # We can't use scipy.signal.argrelmax
+        # as it fails on plateaus
+        maximums = list()
+        direction = 1
+        for i in range(hist.shape[0] - 1):
+            if direction > 0:
+                if hist[i + 1] < hist[i]:
+                    direction = -1
+                    maximums.append(i)
+            else:
+                if hist[i + 1] > hist[i]:
+                    direction = 1
+        return maximums
+
+    if bias not in ('min', 'mid', 'max'):
+        raise ValueError("Unknown bias: {0}".format(bias))
+
+    hist, bin_centers = histogram(image.ravel(), nbins)
+
+    smooth_hist = np.copy(hist)
+    for counter in range(max_iter):
+        smooth_hist = ndif.uniform_filter1d(smooth_hist, 3)
+        maximums = find_local_maxima(smooth_hist)
+        if len(maximums) < 3:
+            break
+    if len(maximums) != 2:
+        raise RuntimeError('Unable to find two maxima in histogram')
+    elif counter == max_iter - 1:
+        raise RuntimeError('Maximum iteration reached for histogram'
+                           'smoothing')
+
+    # Find lowest point between the maxima, biased to the low end (min)
+    minimum = smooth_hist[maximums[0]]
+    threshold = maximums[0]
+    for i in range(maximums[0], maximums[1]+1):
+        if smooth_hist[i] < minimum:
+            minimum = smooth_hist[i]
+            threshold = i
+
+    if bias == 'min':
+        return bin_centers[threshold]
+    else:
+        upper_bound = threshold
+        while smooth_hist[upper_bound] == smooth_hist[threshold]:
+            upper_bound += 1
+        upper_bound -= 1
+        if bias == 'max':
+            return bin_centers[upper_bound]
+        elif bias == 'mid':
+            return bin_centers[(threshold + upper_bound) // 2]
+
+
+def threshold_mean(image):
+    """Return threshold value based on the mean of grayscale values.
+
+    Parameters
+    ----------
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
+
+    Returns
+    -------
+    threshold : float
+        Upper threshold value. All pixels with an intensity higher than
+        this value are assumed to be foreground.
+
+    References
+    ----------
+    .. [1] C. A. Glasbey, "An analysis of histogram-based thresholding
+        algorithms," CVGIP: Graphical Models and Image Processing,
+        vol. 55, pp. 532-537, 1993.
+        DOI:10.1006/cgip.1993.1040
+
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> image = camera()
+    >>> thresh = threshold_mean(image)
+    >>> binary = image > thresh
+    """
+    return np.mean(image)
+
+
+def threshold_triangle(image, nbins=256):
+    """Return threshold value based on the triangle algorithm.
+
+    Parameters
+    ----------
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
+    nbins : int, optional
+        Number of bins used to calculate histogram. This value is ignored for
+        integer arrays.
+
+    Returns
+    -------
+    threshold : float
+        Upper threshold value. All pixels with an intensity higher than
+        this value are assumed to be foreground.
+
+    References
+    ----------
+    .. [1] Zack, G. W., Rogers, W. E. and Latt, S. A., 1977,
+       Automatic Measurement of Sister Chromatid Exchange Frequency,
+       Journal of Histochemistry and Cytochemistry 25 (7), pp. 741-753
+       DOI:10.1177/25.7.70454
+    .. [2] ImageJ AutoThresholder code,
+       http://fiji.sc/wiki/index.php/Auto_Threshold
+
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> image = camera()
+    >>> thresh = threshold_triangle(image)
+    >>> binary = image > thresh
+    """
+    # nbins is ignored for integer arrays
+    # so, we recalculate the effective nbins.
+    hist, bin_centers = histogram(image.ravel(), nbins)
+    nbins = len(hist)
+
+    # Find peak, lowest and highest gray levels.
+    arg_peak_height = np.argmax(hist)
+    peak_height = hist[arg_peak_height]
+    arg_low_level, arg_high_level = np.where(hist>0)[0][[0, -1]]
+
+    # Flip is True if left tail is shorter.
+    flip = arg_peak_height - arg_low_level < arg_high_level - arg_peak_height
+    if flip:
+        hist = hist[::-1]
+        arg_low_level = nbins - arg_high_level - 1
+        arg_peak_height = nbins - arg_peak_height - 1
+
+    # If flip == True, arg_high_level becomes incorrect
+    # but we don't need it anymore.
+    del(arg_high_level)
+
+    # Set up the coordinate system.
+    width = arg_peak_height - arg_low_level
+    x1 = np.arange(width)
+    y1 = hist[x1 + arg_low_level]
+
+    # Normalize.
+    norm = np.sqrt(peak_height**2 + width**2)
+    peak_height /= norm
+    width /= norm
+
+    # Maximize the length.
+    # The ImageJ implementation includes an additional constant when calculating
+    # the length, but here we omit it as it does not affect the location of the
+    # minimum.
+    length = peak_height * x1 - width * y1
+    arg_level = np.argmax(length) + arg_low_level
+
+    if flip:
+        arg_level = nbins - arg_level - 1
+
+    return bin_centers[arg_level]

@@ -3,7 +3,15 @@
 Hierarchical Merging of Region Boundary RAGs
 ============================================
 
-TODO: Description
+This example demonstrates how to perform hierarchical merging on region
+boundary Region Adjacency Graphs (RAGs). Region boundary RAGs can be
+constructed with the :py:func:`skimage.future.graph.rag_boundary` function.
+The regions with the lowest edge weights are successively merged until there
+is no edge with weight less than ``thresh``. The hierarchical merging is done
+through the :py:func:`skimage.future.graph.merge_hierarchical` function.
+For an example of how to construct region boundary based RAGs, see
+:any:`plot_rag_boundary`.
+
 """
 
 from skimage import data, segmentation, filters, color

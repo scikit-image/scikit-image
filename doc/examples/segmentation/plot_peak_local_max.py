@@ -25,22 +25,22 @@ image_max = ndi.maximum_filter(im, size=20, mode='constant')
 coordinates = peak_local_max(im, min_distance=20)
 
 # display results
-fig, ax = plt.subplots(1, 3, figsize=(8, 3), sharex=True, sharey=True,
-                       subplot_kw={'adjustable': 'box-forced'})
-ax1, ax2, ax3 = ax.ravel()
-ax1.imshow(im, cmap=plt.cm.gray)
-ax1.axis('off')
-ax1.set_title('Original')
+fig, axes = plt.subplots(1, 3, figsize=(8, 3), sharex=True, sharey=True,
+                         subplot_kw={'adjustable': 'box-forced'})
+ax = axes.ravel()
+ax[0].imshow(im, cmap=plt.cm.gray)
+ax[0].axis('off')
+ax[0].set_title('Original')
 
-ax2.imshow(image_max, cmap=plt.cm.gray)
-ax2.axis('off')
-ax2.set_title('Maximum filter')
+ax[1].imshow(image_max, cmap=plt.cm.gray)
+ax[1].axis('off')
+ax[1].set_title('Maximum filter')
 
-ax3.imshow(im, cmap=plt.cm.gray)
-ax3.autoscale(False)
-ax3.plot(coordinates[:, 1], coordinates[:, 0], 'r.')
-ax3.axis('off')
-ax3.set_title('Peak local max')
+ax[2].imshow(im, cmap=plt.cm.gray)
+ax[2].autoscale(False)
+ax[2].plot(coordinates[:, 1], coordinates[:, 0], 'r.')
+ax[2].axis('off')
+ax[2].set_title('Peak local max')
 
 fig.tight_layout()
 

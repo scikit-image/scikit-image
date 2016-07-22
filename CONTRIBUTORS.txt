@@ -132,9 +132,10 @@
   Dense DAISY feature description, circle perimeter drawing.
 
 - François Boulogne
-  Drawing: Andres Method for circle perimeter, ellipse perimeter drawing,
+  Drawing: Andres Method for circle perimeter, ellipse perimeter,
   Bezier curve, anti-aliasing.
   Circular and elliptical Hough Transforms
+  Thresholding
   Various fixes
 
 - Thouis Jones
@@ -227,3 +228,12 @@
 
 - Alex Izvorski
   Color spaces for YUV and related spaces
+
+- Jeff Hemmelgarn
+  Minimum threshold
+
+- Kirill Malev
+  Frangi and Hessian filters implementation
+
+- Abdeali Kothari
+  Alpha blending to convert from rgba to rgb

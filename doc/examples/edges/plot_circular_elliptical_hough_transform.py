@@ -77,33 +77,30 @@ for idx in np.argsort(accums)[::-1][:5]:
 ax.imshow(image, cmap=plt.cm.gray)
 
 
-"""
-.. image:: PLOT2RST.current_figure
-
-Ellipse detection
-=================
-
-In this second example, the aim is to detect the edge of a coffee cup.
-Basically, this is a projection of a circle, i.e. an ellipse.
-The problem to solve is much more difficult because five parameters have to be
-determined, instead of three for circles.
-
-
-Algorithm overview
-------------------
-
-The algorithm takes two different points belonging to the ellipse. It assumes
-that it is the main axis. A loop on all the other points determines how much
-an ellipse passes to them. A good match corresponds to high accumulator values.
-
-A full description of the algorithm can be found in reference [1]_.
-
-References
-----------
-.. [1] Xie, Yonghong, and Qiang Ji. "A new efficient ellipse detection
-       method." Pattern Recognition, 2002. Proceedings. 16th International
-       Conference on. Vol. 2. IEEE, 2002
-"""
+######################################################################
+# Ellipse detection
+# =================
+#
+# In this second example, the aim is to detect the edge of a coffee cup.
+# Basically, this is a projection of a circle, i.e. an ellipse. The problem
+# to solve is much more difficult because five parameters have to be
+# determined, instead of three for circles.
+#
+# Algorithm overview
+# -------------------
+#
+# The algorithm takes two different points belonging to the ellipse. It
+# assumes that it is the main axis. A loop on all the other points determines
+# how much an ellipse passes to them. A good match corresponds to high
+# accumulator values.
+#
+# A full description of the algorithm can be found in reference [1]_.
+#
+# References
+# ----------
+# .. [1] Xie, Yonghong, and Qiang Ji. "A new efficient
+#        ellipse detection method." Pattern Recognition, 2002. Proceedings.
+#        16th International Conference on. Vol. 2. IEEE, 2002
 
 import matplotlib.pyplot as plt
 
@@ -149,8 +146,3 @@ ax2.set_title('Edge (white) and result (red)')
 ax2.imshow(edges)
 
 plt.show()
-
-"""
-.. image:: PLOT2RST.current_figure
-
-"""

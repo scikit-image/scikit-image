@@ -713,5 +713,14 @@ def test_windowed_histogram():
     assert larger_output.shape[2] == 5
 
 
+def test_median_default_value():
+    a = np.zeros((3, 3), dtype=np.uint8)
+    a[1] = 1
+    full_selem = np.ones((3, 3), dtype=np.uint8)
+    assert_equal(rank.median(a), rank.median(a, full_selem))
+    assert rank.median(a)[1, 1] == 0
+    assert rank.median(a, disk(1))[1, 1] == 1
+
+
 if __name__ == "__main__":
     run_module_suite()

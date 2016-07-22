@@ -43,10 +43,10 @@ lbp_code = multiblock_lbp(int_img, 0, 0, 3, 3)
 
 assert_equal(correct_answer, lbp_code)
 
-"""
-Now let's apply the operator to a real image and see how the
-visualization works.
-"""
+######################################################################
+# Now let's apply the operator to a real image and see how the visualization
+# works.
+
 from skimage import data
 from matplotlib import pyplot as plt
 from skimage.feature import draw_multiblock_lbp
@@ -65,11 +65,9 @@ plt.imshow(img, interpolation='nearest')
 
 plt.show()
 
-"""
-.. image:: PLOT2RST.current_figure
-
-On the above plot we see the result of computing a MB-LBP and visualization of
-the computed feature. The rectangles that have less intensities' sum than the
-central rectangle are marked in cyan. The ones that have higher intensity
-values are marked in white. The central rectangle is left untouched.
-"""
+######################################################################
+# On the above plot we see the result of computing a MB-LBP and visualization
+# of the computed feature. The rectangles that have less intensities' sum
+# than the central rectangle are marked in cyan. The ones that have higher
+# intensity values are marked in white. The central rectangle is left
+# untouched.

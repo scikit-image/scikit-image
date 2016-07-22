@@ -7,13 +7,23 @@ cimport numpy as cnp
 from libc.math cimport sin, cos, abs
 from .._shared.interpolation cimport bilinear_interpolation, round
 from .._shared.transform cimport integrate
-
+import cython
 
 cdef extern from "numpy/npy_math.h":
     double NAN "NPY_NAN"
 
+ctypedef fused any_int:
+    cnp.uint8_t
+    cnp.uint16_t
+    cnp.uint32_t
+    cnp.uint64_t
+    cnp.int8_t
+    cnp.int16_t
+    cnp.int32_t
+    cnp.int64_t
 
-def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
+
+def _glcm_loop(any_int[:, ::1] image, double[:] distances,
                double[:] angles, Py_ssize_t levels,
                cnp.uint32_t[:, :, :, ::1] out):
     """Perform co-occurrence matrix accumulation.
@@ -21,15 +31,16 @@ def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
     Parameters
     ----------
     image : ndarray
-        Input image, which is converted to the uint8 data type.
+        Integer typed input image. Only positive valued images are supported.
+        If type is other than uint8, the argument `levels` needs to be set.
     distances : ndarray
         List of pixel pair distance offsets.
     angles : ndarray
         List of pixel pair angles in radians.
     levels : int
-        The input image should contain integers in [0, levels-1],
+        The input image should contain integers in [0, `levels`-1],
         where levels indicate the number of grey-levels counted
-        (typically 256 for an 8-bit image)
+        (typically 256 for an 8-bit image).
     out : ndarray
         On input a 4D array of zeros, and on output it contains
         the results of the GLCM computation.
@@ -38,7 +49,7 @@ def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
 
     cdef:
         Py_ssize_t a_idx, d_idx, r, c, rows, cols, row, col
-        cnp.uint8_t i, j
+        any_int i, j
         cnp.float64_t angle, distance
 
     with nogil:

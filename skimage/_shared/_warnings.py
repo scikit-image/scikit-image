@@ -82,7 +82,6 @@ def expected_warnings(matching):
     matching : list of strings or compiled regexes
         Regexes for the desired warning to catch
 
-
     Examples
     --------
     >>> from skimage import data, img_as_ubyte, img_as_float
@@ -96,14 +95,14 @@ def expected_warnings(matching):
     pattern(s).
     Raises a ValueError if any match was not found or an unexpected
     warning was raised.
-    Allows for three types of behaviors: "and", "or", and "optional" matches.
+    Allows for three types of behaviors: `and`, `or`, and `optional` matches.
     This is done to accomodate different build enviroments or loop conditions
     that may produce different warnings.  The behaviors can be combined.
-    If you pass multiple patterns, you get an orderless "and", where all of the
+    If you pass multiple patterns, you get an orderless `and`, where all of the
     warnings must be raised.
-    If you use the "|" operator in a pattern, you can catch one of several
+    If you use the `|` operator in a pattern, you can catch one of several
     warnings.
-    Finally, you can use "|\A\Z" in a pattern to signify it as optional.
+    Finally, you can use `|\A\Z` in a pattern to signify it as optional.
 
     """
     with all_warnings() as w:

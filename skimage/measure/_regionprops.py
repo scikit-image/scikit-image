@@ -9,7 +9,6 @@ from . import _moments
 
 
 from functools import wraps
-from collections import defaultdict
 
 __all__ = ['regionprops', 'perimeter']
 
@@ -22,6 +21,7 @@ STREL_26_3D = np.ones((3, 3, 3), dtype=np.uint8)
 PROPS = {
     'Area': 'area',
     'BoundingBox': 'bbox',
+    'BoundingBoxArea': 'bbox_area',
     'CentralMoments': 'moments_central',
     'Centroid': 'centroid',
     'ConvexArea': 'convex_area',
@@ -95,7 +95,8 @@ class _RegionProperties(object):
 
         if intensity_image is not None:
             if not intensity_image.shape == label_image.shape:
-                raise ValueError('Label and intensity image must have the same shape.')
+                raise ValueError('Label and intensity image must have the'
+                                 'same shape.')
 
         self.label = label
 
@@ -120,6 +121,9 @@ class _RegionProperties(object):
         """
         return tuple([self._slice[i].start for i in range(self._ndim)] +
                      [self._slice[i].stop for i in range(self._ndim)])
+
+    def bbox_area(self):
+        return self._label_image.size
 
     def centroid(self):
         return tuple(self.coords.mean(axis=0))
@@ -283,7 +287,8 @@ class _RegionProperties(object):
     @_cached
     @only2d
     def weighted_moments(self):
-        return _moments.moments_central(self._intensity_image_double(), 0, 0, 3)
+        return _moments.moments_central(self._intensity_image_double(),
+                                        0, 0, 3)
 
     @_cached
     @only2d
@@ -370,7 +375,11 @@ def regionprops(label_image, intensity_image=None, cache=True):
     **area** : int
         Number of pixels of region.
     **bbox** : tuple
-        Bounding box ``(min_row, min_col, max_row, max_col)``
+        Bounding box ``(min_row, min_col, max_row, max_col)``.
+        Pixels belonging to the bounding box are in the half-open interval
+        ``[min_row; max_row)`` and ``[min_col; max_col)``.
+    **bbox_area** : int
+        Number of pixels of bounding box.
     **centroid** : array
         Centroid coordinate tuple ``(row, col)``.
     **convex_area** : int
@@ -489,6 +498,10 @@ def regionprops(label_image, intensity_image=None, cache=True):
 
       for prop in region:
           print(prop, region[prop])
+
+    See Also
+    --------
+    label
 
     References
     ----------

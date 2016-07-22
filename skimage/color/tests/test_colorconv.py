@@ -41,6 +41,7 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2yiq, yiq2rgb,
                            rgb2ypbpr, ypbpr2rgb,
                            rgb2ycbcr, ycbcr2rgb,
+                           rgba2rgb,
                            guess_spatial_dimensions
                            )
 
@@ -67,6 +68,9 @@ class TestColorconv(TestCase):
 
     img_rgb = imread(os.path.join(data_dir, 'color.png'))
     img_grayscale = imread(os.path.join(data_dir, 'camera.png'))
+    img_rgba = np.array([[[0, 0.5, 1, 0],
+                          [0, 0.5, 1, 1],
+                          [0, 0.5, 1, 0.5]]]).astype(np.float)
 
     colbars = np.array([[1, 1, 0, 0, 1, 1, 0, 0],
                         [1, 1, 1, 1, 0, 0, 0, 0],
@@ -94,6 +98,22 @@ class TestColorconv(TestCase):
                           [[32.303, -9.400, -130.358]],   # blue
                           [[46.228, -43.774, 56.589]],   # green
                           ])
+
+    # RGBA to RGB
+    def test_rgba2rgb_conversion(self):
+        rgba = self.img_rgba
+        rgb = rgba2rgb(rgba)
+        expected = np.array([[[1, 1, 1],
+                              [0, 0.5, 1],
+                              [0.5, 0.75, 1]]]).astype(np.float)
+        self.assertEqual(rgb.shape, expected.shape)
+        assert_almost_equal(rgb, expected)
+
+    def test_rgba2rgb_error_grayscale(self):
+        self.assertRaises(ValueError, rgba2rgb, self.img_grayscale)
+
+    def test_rgba2rgb_error_rgb(self):
+        self.assertRaises(ValueError, rgba2rgb, self.img_rgb)
 
     # RGB to HSV
     def test_rgb2hsv_conversion(self):

@@ -31,10 +31,30 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.imgmath',
               'numpydoc',
               'sphinx.ext.autosummary',
-              'plot2rst',
               'sphinx.ext.intersphinx',
               'sphinx.ext.linkcode',
+              'sphinx_gallery.gen_gallery'
               ]
+
+autosummary_generate = True
+
+#------------------------------------------------------------------------
+# Sphinx-gallery configuration
+#------------------------------------------------------------------------
+
+sphinx_gallery_conf = {
+    'doc_module'        : 'skimage',
+    # path to your examples scripts
+    'examples_dirs' : '../examples',
+    # path where to save gallery generated examples
+    'gallery_dirs'  : 'auto_examples',
+    'mod_example_dir': 'api',
+    'reference_url'     : {
+            'skimage': None,
+            'matplotlib': 'http://matplotlib.org',
+            'numpy': 'http://docs.scipy.org/doc/numpy-1.6.0',
+            'scipy': 'http://docs.scipy.org/doc/scipy-0.11.0/reference',}
+    }
 
 # Determine if the matplotlib has a recent enough version of the
 # plot_directive, otherwise use the local fork.
@@ -57,7 +77,7 @@ else:
 templates_path = ['_templates']
 
 # The suffix of source filenames.
-source_suffix = '.txt'
+source_suffix = '.rst'
 
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
@@ -366,3 +386,5 @@ def linkcode_resolve(domain, info):
     else:
         return ("http://github.com/scikit-image/scikit-image/blob/"
                 "v%s/skimage/%s%s" % (skimage.__version__, fn, linespec))
+
+

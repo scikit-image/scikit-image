@@ -64,14 +64,11 @@ if new_scipy:
     ax.set_xticks([]), ax.set_yticks([])
     ax.axis([0, img.shape[1], img.shape[0], 0])
 
-"""
-.. image:: PLOT2RST.current_figure
-
-Here we initialize a straight line between two points, `(5, 136)` and
-`(424, 50)`, and require that the spline has its end points there by giving
-the boundary condition `bc='fixed'`. We furthermore make the algorithm search
-for dark lines by giving a negative `w_line` value.
-"""
+######################################################################
+# Here we initialize a straight line between two points, `(5, 136)` and
+# `(424, 50)`, and require that the spline has its end points there by giving
+# the boundary condition `bc='fixed'`. We furthermore make the algorithm
+# search for dark lines by giving a negative `w_line` value.
 
 img = data.text()
 
@@ -93,7 +90,3 @@ if new_scipy:
     ax.axis([0, img.shape[1], img.shape[0], 0])
 
 plt.show()
-
-"""
-.. image:: PLOT2RST.current_figure
-"""

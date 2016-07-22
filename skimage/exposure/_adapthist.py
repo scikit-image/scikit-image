@@ -2,7 +2,7 @@
 Adapted code from "Contrast Limited Adaptive Histogram Equalization" by Karel
 Zuiderveld <karel@cv.ruu.nl>, Graphics Gems IV, Academic Press, 1994.
 
-http://tog.acm.org/resources/GraphicsGems/gems.html#gemsvi
+http://tog.acm.org/resources/GraphicsGems/
 
 The Graphics Gems code is copyright-protected.  In other words, you cannot
 claim the text of the code as your own and resell it. Using the code is
@@ -70,7 +70,7 @@ def equalize_adapthist(image, ntiles_x=None, ntiles_y=None, clip_limit=0.01,
 
     References
     ----------
-    .. [1] http://tog.acm.org/resources/GraphicsGems/gems.html#gemsvi
+    .. [1] http://tog.acm.org/resources/GraphicsGems/
     .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
     """
     image = img_as_uint(image)

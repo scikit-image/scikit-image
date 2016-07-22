@@ -48,7 +48,9 @@ References
 
 """
 
+import functools
 import numpy as np
+from scipy import ndimage as ndi
 from ... import img_as_ubyte
 from ..._shared.utils import assert_nD, warn
 
@@ -125,6 +127,30 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
          out=out, max_bin=max_bin)
 
     return out
+
+
+def _default_selem(func):
+    """Decorator to add a default structuring element to morphology functions.
+
+    Parameters
+    ----------
+    func : function
+        A morphology function such as erosion, dilation, opening, closing,
+        white_tophat, or black_tophat.
+
+    Returns
+    -------
+    func_out : function
+        The function, using a default structuring element of same dimension
+        as the input image with connectivity 1.
+    """
+    @functools.wraps(func)
+    def func_out(image, selem=None, *args, **kwargs):
+        if selem is None:
+            selem = ndi.generate_binary_structure(image.ndim, image.ndim)
+        return func(image, selem=selem, *args, **kwargs)
+
+    return func_out
 
 
 def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -374,7 +400,9 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     return _apply_scalar_per_pixel(generic_cy._mean, image, selem, out=out,
                                    mask=mask, shift_x=shift_x, shift_y=shift_y)
 
-def geometric_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+
+def geometric_mean(image, selem, out=None, mask=None,
+                   shift_x=False, shift_y=False):
     """Return local geometric mean of an image.
 
     Parameters
@@ -457,15 +485,18 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+@_default_selem
+def median(image, selem=None, out=None, mask=None,
+           shift_x=False, shift_y=False):
     """Return local median of an image.
 
     Parameters
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    selem : 2-D array
-        The neighborhood expressed as a 2-D array of 1's and 0's.
+    selem : 2-D array, optional
+        The neighborhood expressed as a 2-D array of 1's and 0's. If None, a
+        full square of size 3 is used.
     out : 2-D array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray

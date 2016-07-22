@@ -15,7 +15,7 @@ export DISPLAY=:99.0
 export PYTHONWARNINGS="d,all:::skimage"
 export TEST_ARGS="--exe --ignore-files=^_test -v --with-doctest \
                   --ignore-files=^setup.py$"
-WHEELBINARIES="matplotlib numpy scipy pillow cython"
+WHEELBINARIES="matplotlib scipy pillow cython"
 
 retry () {
     # https://gist.github.com/fungusakafungus/1026804
@@ -47,6 +47,8 @@ source ~/venv/bin/activate
 
 pip install --upgrade pip
 pip install --retries 3 -q wheel flake8 codecov nose
+# install numpy from PyPI instead of our wheelhouse
+pip install --retries 3 -q wheel numpy
 
 # install wheels
 for requirement in $WHEELBINARIES; do
