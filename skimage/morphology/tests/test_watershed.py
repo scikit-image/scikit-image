@@ -48,7 +48,7 @@ import unittest
 import numpy as np
 from scipy import ndimage as ndi
 
-from skimage.morphology.watershed import watershed, _slow_watershed
+from skimage.morphology.watershed import watershed
 
 eps = 1e-12
 
@@ -112,9 +112,6 @@ class TestWatershed(unittest.TestCase):
                       [-1,  1,  1,  1,  1,  1, -1],
                       [-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1]])
-        error = diff(expected, out)
-        assert error < eps
-        out = _slow_watershed(data, markers, 8)
         error = diff(expected, out)
         assert error < eps
 
