@@ -18,8 +18,9 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     have fixed and/or free ends.
 
     The input snake is a set of points that will each be repositioned such that
-    the new snake minimizes energy as described in [1]_. No points are added
-    or removed.
+    the new snake minimizes energy as described in [1]_.  The number of points
+    is constant, so make sure that the initial snake has enough points to
+    capture the details of the final contour.
 
     Parameters
     ----------
