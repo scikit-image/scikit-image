@@ -271,10 +271,10 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
     marker_locations = np.flatnonzero(output).astype(np.int32)
     image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
 
-    _watershed.watershed(image.ravel(),
-                         marker_locations, flat_neighborhood,
-                         mask, image_strides, compactness,
-                         output.ravel())
+    _watershed.watershed_raveled(image.ravel(),
+                                 marker_locations, flat_neighborhood,
+                                 mask, image_strides, compactness,
+                                 output.ravel())
 
     output = crop(output, pad_width, copy=True)
 

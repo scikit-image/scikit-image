@@ -44,34 +44,42 @@ cdef inline double _euclid_dist(cnp.int32_t pt0, cnp.int32_t pt1,
 
 
 @cython.boundscheck(False)
-def watershed(cnp.float64_t[::1] image,
-              DTYPE_INT32_t[::1] marker_locations,
-              DTYPE_INT32_t[::1] structure,
-              DTYPE_BOOL_t[::1] mask,
-              cnp.int32_t[::1] strides,
-              cnp.float32_t compactness,
-              DTYPE_INT32_t[::1] output):
-    """Do heavy lifting of watershed algorithm
+def watershed_raveled(cnp.float64_t[::1] image,
+                      DTYPE_INT32_t[::1] marker_locations,
+                      DTYPE_INT32_t[::1] structure,
+                      DTYPE_BOOL_t[::1] mask,
+                      cnp.int32_t[::1] strides,
+                      cnp.float32_t compactness,
+                      DTYPE_INT32_t[::1] output):
+    """Perform watershed algorithm using a raveled image and neighborhood.
 
     Parameters
     ----------
 
-    image - the flattened image pixels, converted to rank-order
-    pq    - the priority queue, starts with the marked pixels
-            the first element in each row is the image intensity
-            the second element is the age at entry into the queue
-            the third element is the index into the flattened image or labels
-            the remaining elements are the coordinates of the point
-    age   - the next age to assign to a pixel
-    structure - a numpy int32 array containing the structuring elements
-                that define nearest neighbors. For each row, the first
-                element is the stride from the point to its neighbor
-                in a flattened array. The remaining elements are the
-                offsets from the point to its neighbor in the various
-                dimensions
-    mask  - numpy boolean (char) array indicating which pixels to consider
-            and which to ignore. Also flattened.
-    output - put the image labels in here
+    image : array of float
+        The flattened image pixels.
+    marker_locations : array of int
+        The raveled coordinates of the initial markers (aka seeds) for the
+        watershed. NOTE: these should *all* point to nonzero entries in the
+        output, or the algorithm will never terminate and blow up your memory!
+    structure : array of int
+        A list of coordinate offsets to compute the raveled coordinates of each
+        neighbor from the raveled coordinates of the current pixel.
+    mask : array of int
+        An array of the same shape as `image` where each pixel contains a
+        nonzero value if it is to be considered for flooding with watershed,
+        zero otherwise. NOTE: it is *essential* that the border pixels (those
+        with neighbors falling outside the volume) are all set to zero, or
+        segfaults could occur.
+    strides : array of int
+        An array representing the number of steps to move along each dimension.
+        This is used in computing the Euclidean distance between raveled
+        indices.
+    compactness : float
+        A value >0 implements the compact watershed algorithm (see .py file).
+    output : array of int
+        The output array, which must already contain nonzero entries at all the
+        seed locations.
     """
     cdef Heapitem elem
     cdef Heapitem new_elem
