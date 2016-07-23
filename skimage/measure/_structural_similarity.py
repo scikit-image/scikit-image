@@ -54,7 +54,7 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
 
     Returns
     -------
-    mssim : float or ndarray
+    mssim : float
         The mean structural similarity over the image.
     grad : ndarray
         The gradient of the structural similarity index between X and Y [2]_.
