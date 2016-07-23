@@ -313,11 +313,11 @@ def test_wavelet_denoising():
         img = img.copy() + 0.1 * np.random.randn(*(img.shape))
         img = np.clip(img, 0, 1)
         # less energy in signal
-        assert restoration.denoise_wavelet(img).sum() <= img.sum()
+        assert restoration.denoise_wavelet(img, sigma=0.3).sum() <= img.sum()
 
         # test changing noise_std (higher threshold, so less energy in signal)
-        assert (restoration.denoise_wavelet(img, noise_stdev=0.2).sum() <=
-                restoration.denoise_wavelet(img, noise_stdev=0.1).sum())
+        assert (restoration.denoise_wavelet(img, sigma=0.2).sum() <=
+                restoration.denoise_wavelet(img, sigma=0.1).sum())
 
         # This works for this particular image
         assert (np.sum(restoration.denoise_wavelet(img, wavelet='db2')) <

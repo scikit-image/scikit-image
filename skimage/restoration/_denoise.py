@@ -5,6 +5,7 @@ from .. import img_as_float
 from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 from .._shared.utils import skimage_deprecation, warn
 import warnings
+import pywt
 
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
@@ -336,6 +337,7 @@ def denoise_tv_chambolle(im, weight=0.1, eps=2.e-4, n_iter_max=200,
 
 def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
     """Performs wavelet denoising.
+
     Parameters
     ----------
     img : ndarray (2d or 3d) of ints, uints or floats
@@ -372,8 +374,8 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
     .. [2] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
            by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
            DOI: 10.1093/biomet/81.3.425
+
     """
-    import pywt
     coeffs = pywt.wavedecn(img, wavelet=wavelet)
     detail_coeffs = coeffs[-1]['d' * img.ndim]
 
@@ -393,7 +395,8 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
 
 
 def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
-    r"""Performs wavelet denoising on an image.
+    """Performs wavelet denoising on an image.
+
     Parameters
     ----------
     img : ndarray (greater than 2d) of ints, uints or floats
@@ -406,7 +409,7 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
         standard deviation is estimated via the method in [2]_.
     wavelet : string, optional
         The type of wavelet to perform and can be any of the options
-        [pywt.wavelist]_ outputs. The default is `'db1'`. For example,
+        ``pywt.wavelist`` outputs. The default is `'db1'`. For example,
         ``wavelet`` can be any of ``{'db2', 'haar', 'sym9'}`` and many more.
     mode : {'soft', 'hard'}, optional
         An optional argument to choose the type of denoising performed. It
@@ -423,15 +426,6 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
     As with the Fourier transform, there is an analogue to frequency in the
     wavelet domain. Correspondingly, many pixel values of an image are 0 after
     taking the wavelet transform.
-
-    By wavelet denoising, we are enforcing that many of the wavelet
-    coefficients are 0 while keeping the error small. When we use soft
-    thresholding, our estimate is
-
-    .. math:: \widehat{x} = \arg \min_x ||z - x||_2^2 + \lambda ||x||_1
-
-    where :math:`z` is the input image wavelet coefficients and :math:`\lambda`
-    is the threshold.
 
     This function performs wavelet denoising on each color plane separately.
     The output is clipped between 0 and 1.
@@ -451,11 +445,10 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
     >>> from skimage import color, data
     >>> img = img_as_float(data.astronaut())
     >>> img = color.rgb2gray(img)
-    >>> img += 0.5 * img.std() * np.random.randn(*img.shape)
+    >>> img += 0.1 * np.random.randn(*img.shape)
     >>> img = np.clip(img, 0, 1)
-    >>> denoised_img = denoise_wavelet(img)
-    >>> assert denoised_img.min() >= 0.0
-    >>> assert denoised_img.max() <= 1.0
+    >>> denoised_img = denoise_wavelet(img, sigma=0.1)
+
     """
 
     if not img.dtype.kind == 'f':
