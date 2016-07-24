@@ -25,8 +25,8 @@ NR_OF_GREY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
 
 
 @adapt_rgb(hsv_value)
-def equalize_adapthist(image, ntiles_x=None, ntiles_y=None, clip_limit=0.01,
-                       nbins=256, kernel_size=None):
+def equalize_adapthist(image, kernel_size=None,
+                       clip_limit=0.01, nbins=256, **kwargs):
     """Contrast Limited Adaptive Histogram Equalization (CLAHE).
 
     An algorithm for local contrast enhancement, that uses histograms computed
@@ -38,13 +38,9 @@ def equalize_adapthist(image, ntiles_x=None, ntiles_y=None, clip_limit=0.01,
     image : array-like
         Input image.
     kernel_size: integer or 2-tuple
-        Defines the shape of contextual regions used in the algorithm.
-        If an integer is given, the shape will be a square of
-        sidelength given by this value.
-    ntiles_x : int, optional (deprecated in favor of ``kernel_size``)
-        Number of tile regions in the X direction (horizontal).
-    ntiles_y : int, optional (deprecated in favor of ``kernel_size``)
-        Number of tile regions in the Y direction (vertical).
+        Defines the shape of contextual regions used in the algorithm. If an
+        iterable is passed, it should have the same length as the image
+        dimensionality.
     clip_limit : float: optional
         Clipping limit, normalized between 0 and 1 (higher values give more
         contrast).
@@ -76,19 +72,15 @@ def equalize_adapthist(image, ntiles_x=None, ntiles_y=None, clip_limit=0.01,
     image = img_as_uint(image)
     image = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
 
-    if ntiles_x is not None or ntiles_y is not None:
-        warn('`ntiles_*` have been deprecated in favor of '
-             '`kernel_size`.  The `ntiles_*` keyword arguments '
-             'will be removed in v0.14', skimage_deprecation)
+    if kwargs:
+        if 'ntiles_x' in kwargs or 'ntiles_y' in kwargs:
+            raise ValueError('`ntiles_*` have been deprecated in favor of `kernel_size`')
 
-    if kernel_size is None:
-        ntiles_x = ntiles_x or 8
-        ntiles_y = ntiles_y or 8
-        kernel_size = (np.round(image.shape[0] / ntiles_y),
-                       np.round(image.shape[1] / ntiles_x))
+    if kernel_size == None:
+        kernel_size = (np.round(image.shape[0] / 8), np.round(image.shape[1] / 8))
 
     if isinstance(kernel_size, numbers.Number):
-        kernel_size = (kernel_size, kernel_size)
+        kernel_size = (kernel_size,) * image.ndim
 
     kernel_size = [int(k) for k in kernel_size]
 
