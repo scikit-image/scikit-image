@@ -132,7 +132,7 @@ def test_both_algs_same_result_donut():
     n = 48
     a, b = 2.5/n, -1.25
     isovalue = 0.0
-    #
+    
     vol = np.empty((n,n,n), 'float32')
     for iz in range(vol.shape[0]):
         for iy in range(vol.shape[1]):

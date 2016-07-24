@@ -13,8 +13,7 @@ import sys
 import base64
 
 # Get base64 encode/decode functions
-PY3 = sys.version_info[0] == 3
-if PY3:
+if sys.version_info >= (3, ):
     base64encode = base64.encodebytes
     base64decode = base64.decodebytes
 else:

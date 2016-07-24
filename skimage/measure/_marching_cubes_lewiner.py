@@ -3,7 +3,7 @@ import base64
 
 import numpy as np
 
-if sys.version_info[0] == 3:
+if sys.version_info >= (3, ):
     base64decode = base64.decodebytes
 else:
     base64decode = base64.decodestring
