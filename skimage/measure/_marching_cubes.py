@@ -7,8 +7,11 @@ from . import _marching_cubes_cy
 def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
                    gradient_direction='descent'):
     """
-    Classic marching cubes algorithm to find surfaces in 3d volumetric data
+    Classic marching cubes algorithm to find surfaces in 3d volumetric data.
 
+    Note that the ``marching_cubes_lewiner()`` algorithm is recommended over
+    this algorithm, because it's faster and produces better results.
+    
     Parameters
     ----------
     volume : (M, N, P) array of doubles
@@ -106,7 +109,8 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
     .. [1] Lorensen, William and Harvey E. Cline. Marching Cubes: A High
            Resolution 3D Surface Construction Algorithm. Computer Graphics
            (SIGGRAPH 87 Proceedings) 21(4) July 1987, p. 163-170).
-
+           DOI: 10.1145/37401.37422
+    
     See Also
     --------
     skimage.measure.marching_cubes_lewiner

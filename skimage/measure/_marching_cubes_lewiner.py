@@ -16,7 +16,7 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
                            gradient_direction='descent', step_size=1,
                            allow_degenerate=True, use_classic=False):
     """
-    Lewiner marching cubes algorithm to find surfaces in 3d volumetric data
+    Lewiner marching cubes algorithm to find surfaces in 3d volumetric data.
     
     In contrast to ``marching_cubes()``, this algorithm is faster,
     resolves ambiguities, and guarantees topologically correct results.
@@ -84,10 +84,11 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     
     References
     ----------
-    ..  [1] Thomas Lewiner, Helio Lopes, Antonio Wilson Vieira and Geovan
-            Tavares. Efficient implementation of Marching Cubes' cases with
-            topological guarantees. Journal of Graphics Tools 8(2)
-            pp. 1-15 (december 2003).
+    .. [1] Thomas Lewiner, Helio Lopes, Antonio Wilson Vieira and Geovan
+           Tavares. Efficient implementation of Marching Cubes' cases with
+           topological guarantees. Journal of Graphics Tools 8(2)
+           pp. 1-15 (december 2003).
+           DOI: 10.1080/10867651.2003.10487582
     
     See Also
     --------
