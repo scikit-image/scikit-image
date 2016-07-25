@@ -50,9 +50,9 @@ Library:
     Extension: skimage.measure._moments_cy
         Sources:
             skimage/measure/_moments_cy.pyx
-    Extension: skimage.measure._marching_cubes_cy
+    Extension: skimage.measure._marching_cubes_classic_cy
         Sources:
-            skimage/measure/_marching_cubes_cy.pyx
+            skimage/measure/_marching_cubes_classic_cy.pyx
     Extension: skimage.measure._marching_cubes_lewiner_cy
         Sources:
             skimage/measure/_marching_cubes_lewiner_cy.pyx

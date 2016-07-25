@@ -1,9 +1,38 @@
+import sys
 import numpy as np
 from numpy.testing import assert_raises
 
 from skimage.draw import ellipsoid, ellipsoid_stats
-from skimage.measure import (marching_cubes, marching_cubes_lewiner, 
+from skimage.measure import (marching_cubes,
+                             marching_cubes_classic, marching_cubes_lewiner,
                              mesh_surface_area, correct_mesh_orientation)
+from skimage.measure._marching_cubes_lewiner import expected_output_args
+
+
+def test_expected_output_args():
+    
+    res = []
+    
+    def foo():
+        nout = expected_output_args()
+        print(nout)
+        res.append(nout)
+        return [nout] * int(nout)
+    
+    foo()
+    a = foo()
+    a, b = foo()
+    a, b, c = foo()
+    assert res == [0, 1, 2, 3] or res == [0, 0, 2, 3]
+    # ``a = foo()`` somehow yields 0 in test, which is ok for us;
+    # we only want to distinguish between > 2 args or not
+    
+    if sys.version_info >= (3, 3):
+        res = []
+        exec('*a, b, c = foo()')
+        exec('a, b, c, *d = foo()')
+        exec('a, b, *c, d, e = foo()')
+        assert res == [2.1, 3.1, 4.1]
 
 
 def test_marching_cubes_isotropic():
@@ -11,7 +40,7 @@ def test_marching_cubes_isotropic():
     _, surf = ellipsoid_stats(6, 10, 16)
     
     # Classic
-    verts, faces = marching_cubes(ellipsoid_isotropic, 0.)
+    verts, faces = marching_cubes_classic(ellipsoid_isotropic, 0.)
     surf_calc = mesh_surface_area(verts, faces)
     # Test within 1% tolerance for isotropic. Will always underestimate.
     assert surf > surf_calc and surf_calc > surf * 0.99
@@ -30,8 +59,8 @@ def test_marching_cubes_anisotropic():
     _, surf = ellipsoid_stats(6, 10, 16)
     
     # Classic
-    verts, faces = marching_cubes(ellipsoid_anisotropic, 0.,
-                                  spacing=spacing)
+    verts, faces = marching_cubes_classic(ellipsoid_anisotropic, 0.,
+                                          spacing=spacing)
     surf_calc = mesh_surface_area(verts, faces)
     # Test within 1.5% tolerance for anisotropic. Will always underestimate.
     assert surf > surf_calc and surf_calc > surf * 0.985
@@ -45,11 +74,11 @@ def test_marching_cubes_anisotropic():
 
 def test_invalid_input():
     # Classic
-    assert_raises(ValueError, marching_cubes, np.zeros((2, 2, 1)), 0)
-    assert_raises(ValueError, marching_cubes, np.zeros((2, 2, 1)), 1)
-    assert_raises(ValueError, marching_cubes, np.ones((3, 3, 3)), 1,
+    assert_raises(ValueError, marching_cubes_classic, np.zeros((2, 2, 1)), 0)
+    assert_raises(ValueError, marching_cubes_classic, np.zeros((2, 2, 1)), 1)
+    assert_raises(ValueError, marching_cubes_classic, np.ones((3, 3, 3)), 1,
                   spacing=(1, 2))
-    assert_raises(ValueError, marching_cubes, np.zeros((20, 20)), 0)
+    assert_raises(ValueError, marching_cubes_classic, np.zeros((20, 20)), 0)
     
     # Lewiner
     assert_raises(ValueError, marching_cubes_lewiner, np.zeros((2, 2, 1)), 0)
@@ -101,7 +130,7 @@ def test_both_algs_same_result_ellipse():
     
     sphere_small = ellipsoid(1, 1, 1, levelset=True)
     
-    vertices1, faces1 = marching_cubes(sphere_small, 0)[:2]
+    vertices1, faces1 = marching_cubes_classic(sphere_small, 0)[:2]
     vertices2, faces2 = marching_cubes_lewiner(sphere_small, 0, allow_degenerate=False)[:2]
     vertices3, faces3 = marching_cubes_lewiner(sphere_small, 0, allow_degenerate=False, use_classic=True)[:2]
     
@@ -147,7 +176,7 @@ def test_both_algs_same_result_donut():
                     64 * ( ((8*y-2)+4)*((8*y-2)+4) + (8*z)**2 
                     ) ) + 1025
     
-    vertices1, faces1 = marching_cubes(vol, 0)[:2]
+    vertices1, faces1 = marching_cubes_classic(vol, 0)[:2]
     vertices2, faces2 = marching_cubes_lewiner(vol, 0)[:2]
     vertices3, faces3 = marching_cubes_lewiner(vol, 0, use_classic=True)[:2]
     

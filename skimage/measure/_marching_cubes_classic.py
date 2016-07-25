@@ -1,15 +1,15 @@
 import numpy as np
 import scipy.ndimage as ndi
 from .._shared.utils import warn
-from . import _marching_cubes_cy
+from . import _marching_cubes_classic_cy
 
 
-def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
-                   gradient_direction='descent'):
+def marching_cubes_classic(volume, level=None, spacing=(1., 1., 1.),
+                           gradient_direction='descent'):
     """
     Classic marching cubes algorithm to find surfaces in 3d volumetric data.
 
-    Note that the ``marching_cubes_lewiner()`` algorithm is recommended over
+    Note that the ``marching_cubes()`` algorithm is recommended over
     this algorithm, because it's faster and produces better results.
     
     Parameters
@@ -90,7 +90,7 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
     named `myvolume` about the level 0.0, using the ``mayavi`` package::
 
       >>> from mayavi import mlab # doctest: +SKIP
-      >>> verts, faces = marching_cubes(myvolume, 0.0) # doctest: +SKIP
+      >>> verts, faces = marching_cubes_classic(myvolume, 0.0) # doctest: +SKIP
       >>> mlab.triangular_mesh([vert[0] for vert in verts],
       ...                      [vert[1] for vert in verts],
       ...                      [vert[2] for vert in verts],
@@ -100,7 +100,7 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
     Similarly using the ``visvis`` package::
     
       >>> import visvis as vv # doctest: +SKIP
-      >>> verts, faces = marching_cubes(myvolume, 0.0) # doctest: +SKIP
+      >>> verts, faces = marching_cubes_classic(myvolume, 0.0) # doctest: +SKIP
       >>> vv.mesh(np.fliplr(verts), faces) # doctest: +SKIP
       >>> vv.use().Run() # doctest: +SKIP
       
@@ -113,7 +113,7 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
     
     See Also
     --------
-    skimage.measure.marching_cubes_lewiner
+    skimage.measure.marching_cubes
     skimage.measure.mesh_surface_area
     """
     # Check inputs and ensure `volume` is C-contiguous for memoryviews
@@ -136,11 +136,12 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
     # Note: this algorithm is fast, but returns degenerate "triangles" which
     #   have repeated vertices - and equivalent vertices are redundantly
     #   placed in every triangle they connect with.
-    raw_faces = _marching_cubes_cy.iterate_and_store_3d(volume, float(level))
+    raw_faces = _marching_cubes_classic_cy.iterate_and_store_3d(volume,
+                                                                float(level))
 
     # Find and collect unique vertices, storing triangle verts as indices.
     # Returns a true mesh with no degenerate faces.
-    verts, faces = _marching_cubes_cy.unpack_unique_verts(raw_faces)
+    verts, faces = _marching_cubes_classic_cy.unpack_unique_verts(raw_faces)
 
     verts = np.asarray(verts)
     faces = np.asarray(faces)
@@ -172,7 +173,7 @@ def mesh_surface_area(verts, faces):
 
     Notes
     -----
-    The arguments expected by this function are the exact outputs from
+    The arguments expected by this function are the first two outputs from
     `skimage.measure.marching_cubes`. For unit correct output, ensure correct
     `spacing` was passed to `skimage.measure.marching_cubes`.
 
@@ -182,6 +183,7 @@ def mesh_surface_area(verts, faces):
     See Also
     --------
     skimage.measure.marching_cubes
+    skimage.measure.marching_cubes_classic
     skimage.measure.correct_mesh_orientation
 
     """
@@ -229,7 +231,7 @@ def correct_mesh_orientation(volume, verts, faces, spacing=(1., 1., 1.),
     Certain applications and mesh processing algorithms require all faces
     to be oriented in a consistent way. Generally, this means a normal vector
     points "out" of the meshed shapes. This algorithm corrects the output from
-    `skimage.measure.marching_cubes` by flipping the orientation of
+    `skimage.measure.marching_cubes_classic` by flipping the orientation of
     mis-oriented faces.
 
     Because marching cubes could be used to find isosurfaces either on
@@ -240,21 +242,21 @@ def correct_mesh_orientation(volume, verts, faces, spacing=(1., 1., 1.),
     completely incorrectly, try changing this option.
 
     The arguments expected by this function are the exact outputs from
-    `skimage.measure.marching_cubes`. Only `faces` is corrected and returned,
-    as the vertices do not change; only the order in which they are
+    `skimage.measure.marching_cubes_classic`. Only `faces` is corrected and
+    returned, as the vertices do not change; only the order in which they are
     referenced.
 
     This algorithm assumes ``faces`` provided are all triangles.
 
     See Also
     --------
-    skimage.measure.marching_cubes
+    skimage.measure.marching_cubes_classic
     skimage.measure.mesh_surface_area
 
     """
     warn(DeprecationWarning("`correct_mesh_orientation` is deprecated for "
-                            "removal as `marching_cubes` now guarantess "
-                            "correct mesh orientation."))
+                            "removal as `marching_cubes`_classic now "
+                            "guarantees correct mesh orientation."))
 
     verts = verts.copy()
     verts[:, 0] /= spacing[0]
@@ -303,7 +305,7 @@ def _correct_mesh_orientation(volume, actual_verts, faces,
     Certain applications and mesh processing algorithms require all faces
     to be oriented in a consistent way. Generally, this means a normal vector
     points "out" of the meshed shapes. This algorithm corrects the output from
-    `skimage.measure.marching_cubes` by flipping the orientation of
+    `skimage.measure.marching_cubes_classic` by flipping the orientation of
     mis-oriented faces.
 
     Because marching cubes could be used to find isosurfaces either on
@@ -314,7 +316,7 @@ def _correct_mesh_orientation(volume, actual_verts, faces,
     completely incorrectly, try changing this option.
 
     The arguments expected by this function are the exact outputs from
-    `skimage.measure.marching_cubes` except `actual_verts`, which is an
+    `skimage.measure.marching_cubes_classic` except `actual_verts`, which is an
     uncorrected version of the fancy indexing operation `verts[faces]`.
     Only `faces` is corrected and returned as the vertices do not change,
     only the order in which they are referenced.
@@ -323,7 +325,7 @@ def _correct_mesh_orientation(volume, actual_verts, faces,
 
     See Also
     --------
-    skimage.measure.marching_cubes
+    skimage.measure.marching_cubes_classic
     skimage.measure.mesh_surface_area
 
     """

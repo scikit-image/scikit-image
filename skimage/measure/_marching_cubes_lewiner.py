@@ -1,24 +1,55 @@
 import sys
 import base64
+import dis
+import inspect
 
 import numpy as np
 
 if sys.version_info >= (3, ):
     base64decode = base64.decodebytes
+    ordornot = lambda x:x
 else:
     base64decode = base64.decodestring
+    ordornot = ord
 
 from . import _marching_cubes_lewiner_luts as mcluts
 from . import _marching_cubes_lewiner_cy
+from .._shared.utils import skimage_deprecation, warn
 
 
-def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
-                           gradient_direction='descent', step_size=1,
-                           allow_degenerate=True, use_classic=False):
+def expected_output_args():
+    """ Get number of expected output args.
+    
+    Please don't use this to influence the algorithmic bahaviour of a function.
+    For ``a, b, rest*, c = ...`` syntax, returns n + 0.1 (3.1 in this example).
+    """
+    f = inspect.currentframe().f_back.f_back
+    i = f.f_lasti + 3
+    bytecode = f.f_code.co_code
+    instruction = ordornot(bytecode[i])
+    while True:
+        if instruction == dis.opmap['DUP_TOP']:
+            if ordornot(bytecode[i + 1]) == dis.opmap['UNPACK_SEQUENCE']:
+                return ordornot(bytecode[i + 2])
+            i += 4
+            instruction = ordornot(bytecode[i])
+            continue
+        if instruction == dis.opmap['STORE_NAME']:
+            return 1
+        if instruction == dis.opmap['UNPACK_SEQUENCE']:
+            return ordornot(bytecode[i + 1])
+        if instruction == dis.opmap.get('UNPACK_EX', -1):  # py3k
+            return ordornot(bytecode[i + 1]) + ordornot(bytecode[i + 2]) + 0.1
+        return 0
+
+
+def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
+                   gradient_direction='descent', step_size=1,
+                   allow_degenerate=True, use_classic=False):
     """
     Lewiner marching cubes algorithm to find surfaces in 3d volumetric data.
     
-    In contrast to ``marching_cubes()``, this algorithm is faster,
+    In contrast to ``marching_cubes_classic()``, this algorithm is faster,
     resolves ambiguities, and guarantees topologically correct results.
     Therefore, this algorithm generally a better choice, unless there
     is a specific need for the classic algorithm.
@@ -54,8 +85,8 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
         is used. This option is included for reference purposes. Note
         that this algorithm has ambiguities and is not guaranteed to
         produce a topologically correct result. The results with using
-        this option are *not* generally the same as the ``marching_cubes()``
-        function.
+        this option are *not* generally the same as the
+        ``marching_cubes_classic()`` function.
     
     Returns
     -------
@@ -92,9 +123,31 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     
     See Also
     --------
-    skimage.measure.marching_cubes
+    skimage.measure.marching_cubes_classic
     skimage.measure.mesh_surface_area
     """ 
+    
+    # This signature (output args) of this func changed after 0.12
+    try:
+        nout = expected_output_args()
+    except Exception:
+        nout = 0
+    if nout <= 2:
+        warn(skimage_deprecation('`marching_cubes` now uses a better and '
+                                 'faster algorithm, and returns four instead '
+                                 'of two outputs (see docstring for details). '
+                                 'Backwards compatibility with 0.12 and prior '
+                                 'is available with `marching_cubes_classic`.'))
+    
+    return marching_cubes_lewiner(volume, level, spacing, gradient_direction,
+                                  step_size, allow_degenerate, use_classic)
+
+
+def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
+                           gradient_direction='descent', step_size=1,
+                           allow_degenerate=True, use_classic=False):
+    """ Alias for ``marching_cubes()``.
+    """
     
     # Check volume and ensure its in the format that the alg needs
     if not isinstance(volume, np.ndarray) or (volume.ndim != 3):

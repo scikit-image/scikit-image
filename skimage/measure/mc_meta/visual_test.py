@@ -8,7 +8,7 @@ import time
 import numpy as np
 import visvis as vv
 
-from skimage.measure import marching_cubes, marching_cubes_lewiner
+from skimage.measure import marching_cubes_classic, marching_cubes_lewiner
 from skimage.draw import ellipsoid
 
 
@@ -57,7 +57,7 @@ vertices1, faces1, *_ = marching_cubes_lewiner(vol, isovalue, gradient_direction
 print('finding surface lewiner took %1.0f ms' % (1000*(time.time()-t0)) )
 
 t0 = time.time()
-vertices2, faces2, *_ = marching_cubes(vol, isovalue, gradient_direction=gradient_dir)
+vertices2, faces2, *_ = marching_cubes_classic(vol, isovalue, gradient_direction=gradient_dir)
 print('finding surface classic took %1.0f ms' % (1000*(time.time()-t0)) )
 
 # Show
