@@ -6,7 +6,7 @@ from skimage.draw import ellipsoid, ellipsoid_stats
 from skimage.measure import (marching_cubes,
                              marching_cubes_classic, marching_cubes_lewiner,
                              mesh_surface_area, correct_mesh_orientation)
-from skimage.measure._marching_cubes_lewiner import expected_output_args
+from skimage.measure._marching_cubes_lewiner import _expected_output_args
 
 
 def test_expected_output_args():
@@ -14,7 +14,7 @@ def test_expected_output_args():
     res = []
     
     def foo():
-        nout = expected_output_args()
+        nout = _expected_output_args()
         print(nout)
         res.append(nout)
         return [nout] * int(nout)

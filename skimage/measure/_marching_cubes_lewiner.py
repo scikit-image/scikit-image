@@ -17,7 +17,7 @@ from . import _marching_cubes_lewiner_cy
 from .._shared.utils import skimage_deprecation, warn
 
 
-def expected_output_args():
+def _expected_output_args():
     """ Get number of expected output args.
     
     Please don't use this to influence the algorithmic bahaviour of a function.
@@ -129,7 +129,7 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
     
     # This signature (output args) of this func changed after 0.12
     try:
-        nout = expected_output_args()
+        nout = _expected_output_args()
     except Exception:
         nout = 0
     if nout <= 2:

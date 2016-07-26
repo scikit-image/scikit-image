@@ -255,7 +255,7 @@ def correct_mesh_orientation(volume, verts, faces, spacing=(1., 1., 1.),
 
     """
     warn(DeprecationWarning("`correct_mesh_orientation` is deprecated for "
-                            "removal as `marching_cubes`_classic now "
+                            "removal as `marching_cubes_classic` now "
                             "guarantees correct mesh orientation."))
 
     verts = verts.copy()
