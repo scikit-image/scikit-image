@@ -169,16 +169,15 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
         out = image.copy()
 
         # Salt mode
-        p_salt = kwargs['amount'] * kwargs['salt_vs_pepper']
-        mask = np.random.choice([True, False], size=image.shape,
-                                p=[p_salt, 1 - p_salt])
-        out[mask] = 1
-
-        # Pepper mode
-        p_pepper = kwargs['amount'] * (1 - kwargs['salt_vs_pepper'])
-        mask = np.random.choice([True, False], size=image.shape,
-                                p=[p_pepper, 1 - p_pepper])
-        out[mask] = low_clip
+        p = kwargs['amount']
+        q = kwargs['salt_vs_pepper']
+        flipped = np.random.choice([True, False], size=image.shape,
+                                   p=[p, 1 - p])
+        salted = np.random.choice([True, False], size=image.shape,
+                                  p=[q, 1 - q])
+        peppered = ~salted
+        out[flipped & salted] = 1
+        out[flipped & peppered] = low_clip
 
     elif mode == 'speckle':
         noise = np.random.normal(kwargs['mean'], kwargs['var'] ** 0.5,
