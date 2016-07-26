@@ -166,23 +166,19 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
                            amount=kwargs['amount'], salt_vs_pepper=0.)
 
     elif mode == 's&p':
-        # This mode makes no effort to avoid repeat sampling. Thus, the
-        # exact number of replaced pixels is only approximate.
         out = image.copy()
 
         # Salt mode
-        num_salt = np.ceil(
-            kwargs['amount'] * image.size * kwargs['salt_vs_pepper'])
-        coords = [np.random.randint(0, i - 1, int(num_salt))
-                  for i in image.shape]
-        out[coords] = 1
+        p_salt = kwargs['amount'] * kwargs['salt_vs_pepper']
+        mask = np.random.choice([True, False], size=image.shape,
+                                p=[p_salt, 1 - p_salt])
+        out[mask] = 1
 
         # Pepper mode
-        num_pepper = np.ceil(
-            kwargs['amount'] * image.size * (1. - kwargs['salt_vs_pepper']))
-        coords = [np.random.randint(0, i - 1, int(num_pepper))
-                  for i in image.shape]
-        out[coords] = low_clip
+        p_pepper = kwargs['amount'] * (1 - kwargs['salt_vs_pepper'])
+        mask = np.random.choice([True, False], size=image.shape,
+                                p=[p_pepper, 1 - p_pepper])
+        out[mask] = low_clip
 
     elif mode == 'speckle':
         noise = np.random.normal(kwargs['mean'], kwargs['var'] ** 0.5,
