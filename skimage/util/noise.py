@@ -167,8 +167,6 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
 
     elif mode == 's&p':
         out = image.copy()
-
-        # Salt mode
         p = kwargs['amount']
         q = kwargs['salt_vs_pepper']
         flipped = np.random.choice([True, False], size=image.shape,
