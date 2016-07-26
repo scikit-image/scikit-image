@@ -152,7 +152,7 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
     try:
         nout = _expected_output_args()
     except Exception:
-        nout = 0
+        nout = 0  # always warn if, for whaterver reason, the black magic in above call fails
     if nout <= 2:
         warn(skimage_deprecation('`marching_cubes` now uses a better and '
                                  'faster algorithm, and returns four instead '
