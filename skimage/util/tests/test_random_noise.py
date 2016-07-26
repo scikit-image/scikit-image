@@ -26,6 +26,19 @@ def test_salt():
     assert 0.11 < proportion <= 0.15
 
 
+def test_salt_p1():
+    image = np.random.rand(2, 3)
+    noisy = random_noise(image, mode='salt', amount=1)
+    assert_array_equal(noisy, [[1, 1, 1], [1, 1, 1]])
+
+
+def test_singleton_dim():
+    """Ensure images where size of a given dimension is 1 work correctly."""
+    image = np.random.rand(1, 20)
+    noisy = random_noise(image, mode='salt', amount=0.1, seed=42)
+    assert np.sum(noisy == 1) == 2
+
+
 def test_pepper():
     seed = 42
     cam = img_as_float(camera())
