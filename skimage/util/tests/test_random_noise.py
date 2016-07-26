@@ -82,7 +82,7 @@ def test_salt_and_pepper():
     assert 0.11 < proportion <= 0.18
 
     # Verify the relative amount of salt vs. pepper is close to expected
-    assert 0.18 < saltmask.sum() / float(peppermask.sum()) < 0.32
+    assert 0.18 < saltmask.sum() / float(peppermask.sum()) < 0.33
 
 
 def test_gaussian():
