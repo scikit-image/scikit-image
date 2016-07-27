@@ -21,8 +21,11 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
                       local variance at each point of `image`
         - 'poisson'   Poisson-distributed noise generated from the data.
         - 'salt'      Replaces random pixels with 1.
-        - 'pepper'    Replaces random pixels with 0.
-        - 's&p'       Replaces random pixels with 0 or 1.
+        - 'pepper'    Replaces random pixels with 0 (for unsigned images) or
+                      -1 (for signed images).
+        - 's&p'       Replaces random pixels with either 1 or `low_val`, where
+                      `low_val` is 0 for unsigned images or -1 for signed
+                      images.
         - 'speckle'   Multiplicative noise using out = image + n*image, where
                       n is uniform noise with specified mean & variance.
     seed : int
