@@ -152,8 +152,7 @@ def _compute_neighbors(image, structure, offset):
 
 def watershed(image, markers, connectivity=1, offset=None, mask=None,
               compactness=0):
-    """
-    Return a matrix labeled using the watershed segmentation algorithm
+    """Find watershed basins [1]_ in `image` flooded from given `markers`.
 
     Parameters
     ----------
@@ -176,6 +175,7 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
         will be labeled.
     compactness : float, optional
         Use compact watershed [3]_ with given compactness parameter.
+        This results in more regularly-shaped watershed basins.
 
     Returns
     -------
