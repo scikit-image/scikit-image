@@ -15,15 +15,13 @@ cimport cython
 
 
 ctypedef cnp.int32_t DTYPE_INT32_t
-DTYPE_BOOL = np.bool
 ctypedef cnp.int8_t DTYPE_BOOL_t
 
 
 include "heap_watershed.pxi"
 
 
-cdef extern from "math.h":
-    double sqrt(double x)
+from libc.math cimport sqrt
 
 
 @cython.boundscheck(False)
