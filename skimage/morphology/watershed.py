@@ -114,40 +114,18 @@ def _validate_connectivity(image_dim, connectivity, offset):
 
 
 def _compute_neighbors(image, structure, offset):
-    #
-    # We pass a connectivity array that pre-calculates the stride for each
-    # neighbor.
-    #
-    # The result of this bit of code is an array with one row per
-    # point to be considered. The first column is the pre-computed stride
-    # and the second through last are the x,y...whatever offsets
-    # (to do bounds checking).
-    c = []
-    distances = []
-    image_stride = np.array(image.strides) // image.itemsize
-    for i in range(np.product(structure.shape)):
-        multiplier = 1
-        offs = []
-        indexes = []
-        ignore = True
-        for j in range(len(structure.shape)):
-            idx = (i // multiplier) % structure.shape[j]
-            off = idx - offset[j]
-            if off:
-                ignore = False
-            offs.append(off)
-            indexes.append(idx)
-            multiplier *= structure.shape[j]
-        if (not ignore) and structure.__getitem__(tuple(indexes)):
-            stride = np.dot(image_stride, np.array(offs))
-            d = np.sum(np.abs(offs)) - 1
-            offs.insert(0, stride)
-            c.append(offs)
-            distances.append(d)
+    """Compute neighborhood as an array of linear offsets into the image.
 
-    c = np.array(c, dtype=np.int32)
-    neighborhood = np.ascontiguousarray(c[np.argsort(distances), 0])
-    return neighborhood
+    These are sorted according to Euclidean distance from the center (given
+    by `offset`), ensuring that immediate neighbors are visited first.
+    """
+    structure[tuple(offset)] = 0  # ignore the center; it's not a neighbor
+    locations = np.transpose(np.nonzero(structure))
+    sqdistances = np.sum((locations - offset)**2, axis=1)
+    neighborhood = (np.ravel_multi_index(locations.T, image.shape) -
+                    np.ravel_multi_index(offset, image.shape)).astype(np.int32)
+    sorted_neighborhood = neighborhood[np.argsort(sqdistances)]
+    return sorted_neighborhood
 
 
 def watershed(image, markers, connectivity=1, offset=None, mask=None,
