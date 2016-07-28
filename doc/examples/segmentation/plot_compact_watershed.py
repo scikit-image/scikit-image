@@ -11,8 +11,9 @@ in downstream analyses.
 The *compact* watershed transform remedies this by favoring seeds that are
 close to the pixel being considered.
 
-Both are implemented in the :py:func:`skimage.morphology.watershed` function.
-To use the compact form, simply pass a ``compactness`` value greater than 0.
+Both algorithms are implemented in the :py:func:`skimage.morphology.watershed`
+function. To use the compact form, simply pass a ``compactness`` value greater
+than 0.
 """
 
 import numpy as np
