@@ -33,8 +33,8 @@ cdef extern from "math.h":
 cdef inline double _euclid_dist(cnp.int32_t pt0, cnp.int32_t pt1,
                                 cnp.int32_t[::1] strides):
     """Return the Euclidean distance between raveled points pt0 and pt1."""
-    cdef float result = 0
-    cdef float curr = 0
+    cdef double result = 0
+    cdef double curr = 0
     for i in range(strides.shape[0]):
         curr = (pt0 // strides[i]) - (pt1 // strides[i])
         result += curr * curr
@@ -49,7 +49,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
                       DTYPE_INT32_t[::1] structure,
                       DTYPE_BOOL_t[::1] mask,
                       cnp.int32_t[::1] strides,
-                      cnp.float32_t compactness,
+                      cnp.double_t compactness,
                       DTYPE_INT32_t[::1] output):
     """Perform watershed algorithm using a raveled image and neighborhood.
 
