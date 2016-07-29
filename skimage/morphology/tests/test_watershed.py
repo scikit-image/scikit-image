@@ -443,5 +443,18 @@ def test_compact_watershed():
     np.testing.assert_equal(normal, expected)
 
 
+def test_numeric_seed_watershed():
+    """Test that passing just the number of seeds to watershed works."""
+    image = np.zeros((5, 6))
+    image[:, 3:] = 1
+    compact = watershed(image, 2, compactness=0.01)
+    expected = np.array([[1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2]], dtype=np.int32)
+    np.testing.assert_equal(compact, expected)
+
+
 if __name__ == "__main__":
     np.testing.run_module_suite()

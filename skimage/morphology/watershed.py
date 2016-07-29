@@ -28,7 +28,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from . import _watershed
-from ..util import crop
+from ..util import crop, regular_seeds
 
 
 def _validate_inputs(image, markers, mask):
@@ -38,7 +38,7 @@ def _validate_inputs(image, markers, mask):
     ----------
     image : array
         The input image.
-    markers : array
+    markers : int or array of int
         The marker image.
     mask : array, or None
         A boolean mask, True where we want to compute the watershed.
@@ -55,7 +55,10 @@ def _validate_inputs(image, markers, mask):
     ValueError
         If the shapes of the given arrays don't match.
     """
-    if markers.shape != image.shape:
+    if not isinstance(markers, (np.ndarray, list, tuple)):
+        # not array-like, assume int
+        markers = regular_seeds(image.shape, markers)
+    elif markers.shape != image.shape:
         raise ValueError("Markers (shape %s) must have same shape "
                          "as image (shape %s)" % (markers.ndim, image.ndim))
     if mask is not None and mask.shape != image.shape:
@@ -137,10 +140,9 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
 
     image: ndarray (2-D, 3-D, ...) of integers
         Data array where the lowest value points are labeled first.
-    markers: ndarray of the same shape as `image`
-        An array marking the basins with the values to be assigned in the
-        label matrix. Zero means not a marker. This array should be of an
-        integer type.
+    markers: int, or ndarray of int, same shape as `image`
+        The desired number of markers, or an array marking the basins with the
+        values to be assigned in the label matrix. Zero means not a marker.
     connectivity: ndarray, optional
         An array with the same number of dimensions as `image` whose
         non-zero elements indicate neighbors for connection.
