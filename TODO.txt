@@ -17,3 +17,4 @@ Version 0.14
   deprecation warning test for this alias.
 * Remove deprecated ``sigma_range`` kwargs in ``skimage.restoration.denoise_bilateral``
   and corresponding tests.
+* Remove deprecated ``skimage.data.lena``.
