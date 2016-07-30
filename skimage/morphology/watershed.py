@@ -155,7 +155,7 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
         will be labeled.
     compactness : float, optional
         Use compact watershed [3]_ with given compactness parameter.
-        This results in more regularly-shaped watershed basins.
+        Higher values result in more regularly-shaped watershed basins.
 
     Returns
     -------
