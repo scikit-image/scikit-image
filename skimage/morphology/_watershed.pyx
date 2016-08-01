@@ -74,7 +74,8 @@ def watershed_raveled(cnp.float64_t[::1] image,
         This is used in computing the Euclidean distance between raveled
         indices.
     compactness : float
-        A value >0 implements the compact watershed algorithm (see .py file).
+        A value greater than 0 implements the compact watershed algorithm
+        (see .py file).
     output : array of int
         The output array, which must already contain nonzero entries at all the
         seed locations.
