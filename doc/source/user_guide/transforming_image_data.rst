@@ -88,10 +88,11 @@ An inverted image is also called complementary image. For binary images, True va
 become False and conversely. For grayscale images, pixel values are replaced by the
 difference of the maximum value of the data type and the actual value. For RGB
 images, the same operation is done for each channel. This operation can be achieved
-with the negation operator ~ on any numpy array::
+with :py:func:`skimage.util.invert`::
 
+    >>> from skimage import util
     >>> img = data.camera()
-    >>> inverted_img = ~img
+    >>> inverted_img = util.invert(img)
 
 Painting images with labels
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
