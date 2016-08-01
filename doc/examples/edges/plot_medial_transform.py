@@ -9,14 +9,14 @@ skeleton**, because it is a 1-pixel wide skeleton of the object, with the same
 connectivity as the original object.
 
 Here, we use the medial axis transform to compute the width of the foreground
-objects. As the function ``medial_axis`` (``skimage.morphology.medial_axis``)
+objects. As the function ``medial_axis`` (:py:func:`skimage.morphology.medial_axis`)
 returns the distance transform in addition to the medial axis (with the keyword
 argument ``return_distance=True``), it is possible to compute the distance to
 the background for all points of the medial axis with this function. This gives
 an estimate of the local width of the objects.
 
 For a skeleton with fewer branches, there exists another skeletonization
-algorithm in ``skimage``: ``skimage.morphology.skeletonize``, that computes
+algorithm in ``skimage``: :py:func:`skimage.morphology.skeletonize`, that computes
 a skeleton by iterative morphological thinnings.
 
 """

@@ -134,7 +134,7 @@ ax2.set_adjustable('box-forced')
 # .. note::
 #
 #     A different implementation is available for color images in
-#     ``skimage.filters.denoise_bilateral``.
+#     :py:func:`skimage.filters.denoise_bilateral`.
 
 from skimage.filters.rank import mean_bilateral
 
@@ -353,12 +353,13 @@ for a in ax:
 # pixels of the local neighborhood defined by a structuring element.
 #
 # The example compares the local threshold with the global threshold
-# ``skimage.filters.threshold_otsu``.
+# :py:func:`skimage.filters.threshold_otsu`.
 #
 # .. note::
 #
 #     Local is much slower than global thresholding. A function for global
-#     Otsu thresholding can be found in : ``skimage.filters.threshold_otsu``.
+#     Otsu thresholding can be found in :
+#     :py:func:`skimage.filters.threshold_otsu`.
 #
 # .. [4] http://en.wikipedia.org/wiki/Otsu's_method
 
@@ -473,9 +474,9 @@ for a in ax:
 # logarithm i.e. the filter returns the minimum number of bits needed to
 # encode local gray-level distribution.
 #
-# ``skimage.rank.entropy`` returns the local entropy on a given structuring
-# element. The following example shows applies this filter on 8- and 16-bit
-# images.
+# :py:func:`skimage.rank.entropy` returns the local entropy on a given
+# structuring element. The following example shows applies this filter
+# on 8- and 16-bit images.
 #
 # .. note::
 #

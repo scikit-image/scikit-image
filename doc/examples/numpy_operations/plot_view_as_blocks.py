@@ -4,7 +4,7 @@ Block views on images/arrays
 ============================
 
 This example illustrates the use of ``view_as_blocks`` from
-``skimage.util.shape``.  Block views can be incredibly useful when one
+:py:func:`skimage.util.shape`.  Block views can be incredibly useful when one
 wants to perform local operations on non-overlapping image patches.
 
 We use ``astronaut`` from ``skimage.data`` and virtually 'slice' it into square
