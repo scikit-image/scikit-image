@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_array_equal
 from skimage import dtype_limits
-from skimage.util import invert
+from skimage.util.invert import invert
 
 
 def test_invert_bool():
@@ -13,6 +13,7 @@ def test_invert_bool():
     result = invert(image)
     assert_array_equal(expected, result)
 
+
 def test_invert_uint8():
     dtype = 'uint8'
     image = np.zeros((3, 3), dtype=dtype)
@@ -22,7 +23,8 @@ def test_invert_uint8():
     result = invert(image)
     assert_array_equal(expected, result)
 
-def test_invert_bool():
+
+def test_invert_int8():
     dtype = 'int8'
     image = np.zeros((3, 3), dtype=dtype)
     image[1, :] = dtype_limits(image)[1]
@@ -31,7 +33,8 @@ def test_invert_bool():
     result = invert(image)
     assert_array_equal(expected, result)
 
-def test_invert_bool():
+
+def test_invert_float64():
     dtype = 'float64'
     image = np.zeros((3, 3), dtype=dtype)
     image[1, :] = dtype_limits(image)[1]
