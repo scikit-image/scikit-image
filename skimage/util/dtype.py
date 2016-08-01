@@ -115,8 +115,14 @@ def convert(image, dtype, force_copy=False, uniform=False):
 
     def _dtype2(kind, bits, itemsize=1):
         # Return dtype of `kind` that can store a `bits` wide unsigned int
-        c = lambda x, y: x <= y if kind == 'u' else x < y
-        s = next(i for i in (itemsize, ) + (2, 4, 8) if c(bits, i * 8))
+        def compare(x, y, kind='u'):
+            if kind == 'u':
+                return x <= y
+            else:
+                return x < y
+
+        s = next(i for i in (itemsize, ) + (2, 4, 8) if compare(bits, i * 8,
+                                                                kind=kind))
         return np.dtype(kind + str(s))
 
     def _scale(a, n, m, copy=True):
