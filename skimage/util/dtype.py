@@ -29,7 +29,7 @@ dtype_range[np.float16] = (-1, 1)
 _supported_types += (np.float16, )
 
 
-def dtype_limits(image, clip_negative=True):
+def dtype_limits(image, clip_negative=None):
     """Return intensity limits, i.e. (min, max) tuple, of the image's dtype.
 
     Parameters
@@ -39,7 +39,11 @@ def dtype_limits(image, clip_negative=True):
     clip_negative : bool, optional
         If True, clip the negative range (i.e. return 0 for min intensity)
         even if the image dtype allows negative values.
+        The default behavior (None) is equivalent to True.
     """
+    if clip_negative is None:
+        clip_negative = True
+        warn('The default will change to `False` in version 0.15')
     imin, imax = dtype_range[image.dtype.type]
     if clip_negative:
         imin = 0

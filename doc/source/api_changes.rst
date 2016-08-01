@@ -9,6 +9,9 @@ Version 0.13
 - The `sigma` parameter of `skimage.filters.gaussian` and the `selem` parameter
   of `skimage.filters.median` have been made optional, with default
   values.
+- The `clip_negative` parameter of `skimage.util.dtype_limits` is now set
+  to `None` by default, equivalent to `True`, the former value. In version
+  0.15, will be set to `False`.
 
 Version 0.12
 ------------
