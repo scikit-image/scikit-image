@@ -4,9 +4,9 @@ Find the intersection of two segmentations
 ==========================================
 
 When segmenting an image, you may want to combine multiple alternative
-segmentations. The `skimage.segmentation.join_segmentations` function
+segmentations. The ``skimage.segmentation.join_segmentations`` function
 computes the join of two segmentations, in which a pixel is placed in
-the same segment if and only if it is in the same segment in _both_
+the same segment if and only if it is in the same segment in *both*
 segmentations.
 
 """

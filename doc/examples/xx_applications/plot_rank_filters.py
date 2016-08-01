@@ -27,8 +27,8 @@ Some well known filters are specific cases of rank filters [1]_ e.g.
 morphological dilation, morphological erosion, median filters.
 
 In this example, we will see how to filter a gray-level image using some of the
-linear and non-linear filters available in skimage. We use the `camera` image
-from `skimage.data` for all comparisons.
+linear and non-linear filters available in skimage. We use the ``camera`` image
+from ``skimage.data`` for all comparisons.
 
 .. [1] Pierre Soille, On morphological operators based on rank filters, Pattern
        Recognition 35 (2002) 527-535.
@@ -134,7 +134,7 @@ ax2.set_adjustable('box-forced')
 # .. note::
 #
 #     A different implementation is available for color images in
-#     `skimage.filters.denoise_bilateral`.
+#     ``skimage.filters.denoise_bilateral``.
 
 from skimage.filters.rank import mean_bilateral
 
@@ -353,12 +353,12 @@ for a in ax:
 # pixels of the local neighborhood defined by a structuring element.
 #
 # The example compares the local threshold with the global threshold
-# `skimage.filters.threshold_otsu`.
+# ``skimage.filters.threshold_otsu``.
 #
 # .. note::
 #
 #     Local is much slower than global thresholding. A function for global
-#     Otsu thresholding can be found in : `skimage.filters.threshold_otsu`.
+#     Otsu thresholding can be found in : ``skimage.filters.threshold_otsu``.
 #
 # .. [4] http://en.wikipedia.org/wiki/Otsu's_method
 
@@ -430,8 +430,8 @@ ax2.set_adjustable('box-forced')
 #
 # .. note::
 #
-#     `skimage.dilate` and `skimage.erode` are equivalent filters (see below
-#     for comparison).
+#     ``skimage.dilate`` and ``skimage.erode`` are equivalent filters (see
+#     below for comparison).
 #
 # Here is an example of the classical morphological gray-level filters:
 # opening, closing and morphological gradient.
@@ -473,7 +473,7 @@ for a in ax:
 # logarithm i.e. the filter returns the minimum number of bits needed to
 # encode local gray-level distribution.
 #
-# `skimage.rank.entropy` returns the local entropy on a given structuring
+# ``skimage.rank.entropy`` returns the local entropy on a given structuring
 # element. The following example shows applies this filter on 8- and 16-bit
 # images.
 #
@@ -507,13 +507,13 @@ ax2.set_adjustable('box-forced')
 # Implementation
 # ==============
 #
-# The central part of the `skimage.rank` filters is build on a sliding window
+# The central part of the ``skimage.rank`` filters is build on a sliding window
 # that updates the local gray-level histogram. This approach limits the
 # algorithm complexity to O(n) where n is the number of image pixels. The
 # complexity is also limited with respect to the structuring element size.
 #
 # In the following we compare the performance of different implementations
-# available in `skimage`.
+# available in ``skimage``.
 
 from time import time
 
@@ -555,8 +555,8 @@ def ndi_med(image, n):
 ######################################################################
 #  Comparison between
 #
-# * `filters.rank.maximum`
-# * `morphology.dilate`
+# * ``filters.rank.maximum``
+# * ``morphology.dilate``
 #
 # on increasing structuring element size:
 
@@ -606,8 +606,8 @@ ax.legend(['filters.rank.maximum', 'morphology.dilate'])
 ######################################################################
 # Comparison between:
 #
-# * `filters.rank.median`
-# * `scipy.ndimage.percentile`
+# * ``filters.rank.median``
+# * ``scipy.ndimage.percentile``
 #
 # on increasing structuring element size:
 

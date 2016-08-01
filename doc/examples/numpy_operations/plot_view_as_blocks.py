@@ -3,11 +3,11 @@
 Block views on images/arrays
 ============================
 
-This example illustrates the use of `view_as_blocks` from
-`skimage.util.shape`.  Block views can be incredibly useful when one
+This example illustrates the use of ``view_as_blocks`` from
+``skimage.util.shape``.  Block views can be incredibly useful when one
 wants to perform local operations on non-overlapping image patches.
 
-We use `astronaut` from `skimage.data` and virtually 'slice' it into square
+We use ``astronaut`` from ``skimage.data`` and virtually 'slice' it into square
 blocks.  Then, on each block, we either pool the mean, the max or the
 median value of that block. The results are displayed altogether, along
 with a spline interpolation of order 3 rescaling of the original `astronaut`
