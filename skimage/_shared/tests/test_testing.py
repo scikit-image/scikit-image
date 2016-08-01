@@ -18,10 +18,10 @@ def test_skipper():
     docstring = \
         """ Header
 
-        >>> something # skip if not HAVE_AMODULE
-        >>> something + else
-        >>> a = 1 # skip if not HAVE_BMODULE
-        >>> something2   # skip if HAVE_AMODULE
+            >>> something # skip if not HAVE_AMODULE
+            >>> something + else
+            >>> a = 1 # skip if not HAVE_BMODULE
+            >>> something2   # skip if HAVE_AMODULE
         """
     f.__doc__ = docstring
     c.__doc__ = docstring
@@ -35,22 +35,16 @@ def test_skipper():
     assert_true(f is f2)
     assert_true(c is c2)
 
-    assert_equal(f2.__doc__,
-                 """ Header
+    expected = \
+        """ Header
 
-                 >>> something # doctest: +SKIP
-                 >>> something + else
-                 >>> a = 1
-                 >>> something2
-                 """)
-    assert_equal(c2.__doc__,
-                 """ Header
-
-                 >>> something # doctest: +SKIP
-                 >>> something + else
-                 >>> a = 1
-                 >>> something2
-                 """)
+            >>> something # doctest: +SKIP
+            >>> something + else
+            >>> a = 1
+            >>> something2
+        """
+    assert_equal(f2.__doc__, expected)
+    assert_equal(c2.__doc__, expected)
 
     HAVE_AMODULE = True
     HAVE_BMODULE = False
@@ -60,22 +54,16 @@ def test_skipper():
     c2 = doctest_skip_parser(c)
 
     assert_true(f is f2)
-    assert_equal(f2.__doc__,
-                 """ Header
+    expected = \
+        """ Header
 
-                 >>> something
-                 >>> something + else
-                 >>> a = 1 # doctest: +SKIP
-                 >>> something2   # doctest: +SKIP
-                 """)
-    assert_equal(c2.__doc__,
-                 """ Header
-
-                 >>> something
-                 >>> something + else
-                 >>> a = 1 # doctest: +SKIP
-                 >>> something2   # doctest: +SKIP
-                 """)
+            >>> something
+            >>> something + else
+            >>> a = 1 # doctest: +SKIP
+            >>> something2   # doctest: +SKIP
+        """
+    assert_equal(f2.__doc__, expected)
+    assert_equal(c2.__doc__, expected)
 
     del HAVE_AMODULE
     f.__doc__ = docstring
