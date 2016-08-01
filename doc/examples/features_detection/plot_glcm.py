@@ -3,10 +3,9 @@
 GLCM Texture Features
 =====================
 
-This example illustrates texture classification using texture
-classification using grey level co-occurrence matrices (GLCMs).
-A GLCM is a histogram of co-occurring greyscale values at a given
-offset over an image.
+This example illustrates texture classification using grey level
+co-occurrence matrices (GLCMs). A GLCM is a histogram of co-occurring
+greyscale values at a given offset over an image.
 
 In this example, samples of two different textures are extracted from
 an image: grassy areas and sky areas. For each patch, a GLCM with

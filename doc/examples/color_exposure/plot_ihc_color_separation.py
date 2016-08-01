@@ -3,6 +3,8 @@
 Immunohistochemical staining colors separation
 ==============================================
 
+Color deconvolution consists of the separation of features by their colors.
+
 In this example we separate the immunohistochemical (IHC) staining from the
 hematoxylin counterstaining. The separation is achieved with the method
 described in [1]_, known as "color deconvolution".
