@@ -172,7 +172,7 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
 
     Notes
     -----
-    This function implements a watershed algorithm [1]_that apportions pixels
+    This function implements a watershed algorithm [1]_ that apportions pixels
     into marked basins. The algorithm uses a priority queue to hold the pixels
     with the metric for the priority queue being pixel value, then the time of
     entry into the queue - this settles ties in favor of the closest marker.

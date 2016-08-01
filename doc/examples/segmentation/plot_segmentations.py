@@ -51,7 +51,7 @@ This algorithm simply performs K-means in the 5d space of color information and
 image location and is therefore closely related to quickshift. As the
 clustering method is simpler, it is very efficient. It is essential for this
 algorithm to work in Lab color space to obtain good results.  The algorithm
-quickly gained momentum and is now widely used. See [3] for details.  The
+quickly gained momentum and is now widely used. See [3]_ for details.  The
 ``compactness`` parameter trades off color-similarity and proximity, as in the
 case of Quickshift, while ``n_segments`` chooses the number of centers for
 kmeans.
