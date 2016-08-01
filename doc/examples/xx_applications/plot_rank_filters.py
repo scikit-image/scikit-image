@@ -429,11 +429,6 @@ ax2.set_adjustable('box-forced')
 # Local maximum and local minimum are the base operators for gray-level
 # morphology.
 #
-# .. note::
-#
-#     ``skimage.dilate`` and ``skimage.erode`` are equivalent filters (see
-#     below for comparison).
-#
 # Here is an example of the classical morphological gray-level filters:
 # opening, closing and morphological gradient.
 
