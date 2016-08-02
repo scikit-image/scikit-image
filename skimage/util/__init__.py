@@ -7,6 +7,7 @@ from .apply_parallel import apply_parallel
 from .arraypad import pad, crop
 from ._regular_grid import regular_grid
 from .unique import unique_rows
+from ._invert import invert
 
 
 __all__ = ['img_as_float',
@@ -22,4 +23,5 @@ __all__ = ['img_as_float',
            'random_noise',
            'regular_grid',
            'apply_parallel',
+           'invert',
            'unique_rows']
