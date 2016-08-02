@@ -5,8 +5,8 @@ from ..filters import rank_order
 
 def peak_local_max(image, min_distance=1, threshold_abs=None,
                    threshold_rel=None, exclude_border=True, indices=True,
-                   num_peaks=np.inf, num_peaks_per_label=np.inf,
-                   footprint=None, labels=None):
+                   num_peaks=np.inf, footprint=None, labels=None,
+                   num_peaks_per_label=np.inf):
     """Find peaks in an image as coordinate list or boolean mask.
 
     Peaks are the local maxima in a region of `2 * min_distance + 1`
@@ -42,8 +42,6 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     num_peaks : int, optional
         Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
         return `num_peaks` peaks based on highest peak intensity.
-    num_peaks_per_label : int, optional
-        Maximum number of peaks for each label.
     footprint : ndarray of bools, optional
         If provided, `footprint == 1` represents the local region within which
         to search for peaks at every point in `image`.  Overrides
@@ -51,6 +49,8 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     labels : ndarray of ints, optional
         If provided, each unique region `labels == value` represents a unique
         region to search for peaks. Zero is reserved for background.
+    num_peaks_per_label : int, optional
+        Maximum number of peaks for each label.
 
     Returns
     -------
