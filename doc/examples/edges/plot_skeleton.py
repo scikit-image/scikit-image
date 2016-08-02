@@ -14,9 +14,10 @@ from skimage.morphology import skeletonize
 from skimage import data
 import numpy as np
 import matplotlib.pyplot as plt
+from skimage.util import invert
 
 # Invert the horse image
-image = ~data.horse()
+image = invert(data.horse())
 
 # perform skeletonization
 skeleton = skeletonize(image)
