@@ -7,7 +7,7 @@ from .apply_parallel import apply_parallel
 from .arraypad import pad, crop
 from ._regular_grid import regular_grid
 from .unique import unique_rows
-from .invert import invert
+from ._invert import invert
 
 
 __all__ = ['img_as_float',

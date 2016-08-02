@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_array_equal
 from skimage import dtype_limits
-from skimage.util.invert import invert
+from skimage.util import invert
 
 
 def test_invert_bool():
