@@ -40,10 +40,16 @@ def dtype_limits(image, clip_negative=None):
         If True, clip the negative range (i.e. return 0 for min intensity)
         even if the image dtype allows negative values.
         The default behavior (None) is equivalent to True.
+
+    Returns
+    -------
+    imin, imax : tuple
+        Lower and upper intensity limits.
     """
     if clip_negative is None:
         clip_negative = True
-        warn('The default will change to `False` in version 0.15')
+        warn('The default of `clip_negative` in `skimage.util.dtype_limits` '
+             'will change to `False` in version 0.15.')
     imin, imax = dtype_range[image.dtype.type]
     if clip_negative:
         imin = 0
