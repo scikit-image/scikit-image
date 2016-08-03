@@ -8,82 +8,88 @@ from skimage import data, util, morphology
 from skimage.morphology import grey, disk
 from skimage.filters import rank
 from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import test_parallel
 
 
 class TestRank():
     def setup(self):
         np.random.seed(0)
+        # This image is used along with @test_parallel
+        # to ensure that the same seed is used for each thread.
+        self.image = np.random.rand(25, 25)
+        # Set again the seed for the other tests.
+        np.random.seed(0)
 
     def test_all(self):
+        @test_parallel()
         def check_all():
-            image = np.random.rand(25, 25)
             selem = morphology.disk(1)
             refs = np.load(os.path.join(skimage.data_dir, "rank_filter_tests.npz"))
 
             assert_equal(refs["autolevel"],
-                         rank.autolevel(image, selem))
+                         rank.autolevel(self.image, selem))
             assert_equal(refs["autolevel_percentile"],
-                         rank.autolevel_percentile(image, selem))
+                         rank.autolevel_percentile(self.image, selem))
             assert_equal(refs["bottomhat"],
-                         rank.bottomhat(image, selem))
+                         rank.bottomhat(self.image, selem))
             assert_equal(refs["equalize"],
-                         rank.equalize(image, selem))
+                         rank.equalize(self.image, selem))
             assert_equal(refs["gradient"],
-                         rank.gradient(image, selem))
+                         rank.gradient(self.image, selem))
             assert_equal(refs["gradient_percentile"],
-                         rank.gradient_percentile(image, selem))
+                         rank.gradient_percentile(self.image, selem))
             assert_equal(refs["maximum"],
-                         rank.maximum(image, selem))
+                         rank.maximum(self.image, selem))
             assert_equal(refs["mean"],
-                         rank.mean(image, selem))
+                         rank.mean(self.image, selem))
             assert_equal(refs["geometric_mean"],
-                         rank.geometric_mean(image, selem)),
+                         rank.geometric_mean(self.image, selem)),
             assert_equal(refs["mean_percentile"],
-                         rank.mean_percentile(image, selem))
+                         rank.mean_percentile(self.image, selem))
             assert_equal(refs["mean_bilateral"],
-                         rank.mean_bilateral(image, selem))
+                         rank.mean_bilateral(self.image, selem))
             assert_equal(refs["subtract_mean"],
-                         rank.subtract_mean(image, selem))
+                         rank.subtract_mean(self.image, selem))
             assert_equal(refs["subtract_mean_percentile"],
-                         rank.subtract_mean_percentile(image, selem))
+                         rank.subtract_mean_percentile(self.image, selem))
             assert_equal(refs["median"],
-                         rank.median(image, selem))
+                         rank.median(self.image, selem))
             assert_equal(refs["minimum"],
-                         rank.minimum(image, selem))
+                         rank.minimum(self.image, selem))
             assert_equal(refs["modal"],
-                         rank.modal(image, selem))
+                         rank.modal(self.image, selem))
             assert_equal(refs["enhance_contrast"],
-                         rank.enhance_contrast(image, selem))
+                         rank.enhance_contrast(self.image, selem))
             assert_equal(refs["enhance_contrast_percentile"],
-                         rank.enhance_contrast_percentile(image, selem))
+                         rank.enhance_contrast_percentile(self.image, selem))
             assert_equal(refs["pop"],
-                         rank.pop(image, selem))
+                         rank.pop(self.image, selem))
             assert_equal(refs["pop_percentile"],
-                         rank.pop_percentile(image, selem))
+                         rank.pop_percentile(self.image, selem))
             assert_equal(refs["pop_bilateral"],
-                         rank.pop_bilateral(image, selem))
+                         rank.pop_bilateral(self.image, selem))
             assert_equal(refs["sum"],
-                         rank.sum(image, selem))
+                         rank.sum(self.image, selem))
             assert_equal(refs["sum_bilateral"],
-                         rank.sum_bilateral(image, selem))
+                         rank.sum_bilateral(self.image, selem))
             assert_equal(refs["sum_percentile"],
-                         rank.sum_percentile(image, selem))
+                         rank.sum_percentile(self.image, selem))
             assert_equal(refs["threshold"],
-                         rank.threshold(image, selem))
+                         rank.threshold(self.image, selem))
             assert_equal(refs["threshold_percentile"],
-                         rank.threshold_percentile(image, selem))
+                         rank.threshold_percentile(self.image, selem))
             assert_equal(refs["tophat"],
-                         rank.tophat(image, selem))
+                         rank.tophat(self.image, selem))
             assert_equal(refs["noise_filter"],
-                         rank.noise_filter(image, selem))
+                         rank.noise_filter(self.image, selem))
             assert_equal(refs["entropy"],
-                         rank.entropy(image, selem))
+                         rank.entropy(self.image, selem))
             assert_equal(refs["otsu"],
-                         rank.otsu(image, selem))
+                         rank.otsu(self.image, selem))
             assert_equal(refs["percentile"],
-                         rank.percentile(image, selem))
+                         rank.percentile(self.image, selem))
             assert_equal(refs["windowed_histogram"],
-                         rank.windowed_histogram(image, selem))
+                         rank.windowed_histogram(self.image, selem))
 
         with expected_warnings(['precision loss', 'non-integer|\A\Z']):
             check_all()
