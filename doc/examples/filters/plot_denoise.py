@@ -30,13 +30,13 @@ import matplotlib.pyplot as plt
 
 from skimage import data, img_as_float
 from skimage.restoration import denoise_tv_chambolle, denoise_bilateral, denoise_wavelet
+from skimage.util import random_noise
 
 
 astro = img_as_float(data.astronaut())
 astro = astro[220:300, 220:320]
 
-noisy = astro + 0.6 * astro.std() * np.random.random(astro.shape)
-noisy = np.clip(noisy, 0, 1)
+noisy = random_noise(astro, var=(0.6 * astro.std())**2)
 
 fig, ax = plt.subplots(nrows=2, ncols=4, figsize=(8, 5), sharex=True,
                        sharey=True, subplot_kw={'adjustable': 'box-forced'})
