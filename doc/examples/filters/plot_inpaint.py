@@ -23,7 +23,7 @@ inpainting algorithm based on 'biharmonic equation'-assumption [2]_ [3]_.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage import data, color
+from skimage import data
 from skimage.restoration import inpaint
 
 image_orig = data.astronaut()[0:200, 0:200]

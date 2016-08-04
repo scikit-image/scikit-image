@@ -1,10 +1,12 @@
 from __future__ import division
 
 import numpy as np
-import skimage
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
+import scipy.ndimage as ndi
 from scipy.ndimage.filters import laplace
+import skimage
+from skimage.measure import label
 
 
 def _get_neighborhood(nd_idx, radius, nd_shape):
@@ -121,16 +123,27 @@ def inpaint_biharmonic(img, mask, multichannel=False):
     img = skimage.img_as_float(img)
     mask = mask.astype(np.bool)
 
+    # Split inpainting mask into independent regions
+    kernel = ndi.morphology.generate_binary_structure(mask.ndim, 1)
+    kernel = ndi.iterate_structure(kernel, 2)
+    mask_dilated = ndi.morphology.binary_dilation(mask, structure=kernel)
+    mask_labeled, num_labels = label(mask_dilated, return_num=True)
+    mask_labeled *= mask
+
     if not multichannel:
         img = img[..., np.newaxis]
 
     out = np.copy(img)
 
-    for i in range(img.shape[-1]):
-        known_points = img[..., i][~mask]
+    for idx_channel in range(img.shape[-1]):
+        known_points = img[..., idx_channel][~mask]
         limits = (np.min(known_points), np.max(known_points))
-        _inpaint_biharmonic_single_channel(img[..., i], mask,
-                                           out[..., i], limits)
+
+        for idx_region in range(1, num_labels+1):
+            mask_region = mask_labeled == idx_region
+            _inpaint_biharmonic_single_channel(
+                img[..., idx_channel], mask_region,
+                out[..., idx_channel], limits)
 
     if not multichannel:
         out = out[..., 0]
