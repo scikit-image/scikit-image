@@ -399,7 +399,7 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
 
     Parameters
     ----------
-    img : ndarray (greater than 2d) of ints, uints or floats
+    img : ndarray (2D/3D) of ints, uints or floats
         Input data to be denoised. `img` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
@@ -423,12 +423,16 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
 
     Notes
     -----
-    As with the Fourier transform, there is an analogue to frequency in the
-    wavelet domain. Correspondingly, many pixel values of an image are 0 after
-    taking the wavelet transform.
+    The wavelet domain is a sparse representation of the image, and can be
+    thought of similarly to the frequency domain of the Fourier transform.
+    Sparse representations have most values zero or near-zero and truly random
+    noise is (usually) represented by many small values in the wavelet domain.
+    Setting all values below some threshold to 0 reduces the noise in the
+    image, but larger thresholds also decrease the detail present in the image.
 
-    This function performs wavelet denoising on each color plane separately.
-    The output is clipped between 0 and 1.
+    If the input is 3D, this function performs wavelet denoising on each color
+    plane separately. The output image is clipped between either [-1, 1] and
+    [0, 1] depending on the input image range.
 
     References
     ----------
@@ -451,8 +455,10 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
 
     """
 
-    if not img.dtype.kind == 'f':
-        img = img_as_float(img)
+    img = img_as_float(img)
+
+    if img.ndims not in {2, 3}:
+        raise ValueError('denoise_wavelet only supports 2D and 3D images')
 
     if img.ndim == 2:
         out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
@@ -462,5 +468,5 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
                                             mode=mode, sigma=sigma)
                          for c in range(img.ndim)])
 
-    # ensure valid image in 0, 1 is returned
-    return np.clip(out, 0, 1)
+    clip_range = (-1, 1) if img.min() < 0 else (0, 1)
+    return np.clip(out, *clip_range)
