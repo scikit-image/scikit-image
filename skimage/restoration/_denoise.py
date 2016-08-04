@@ -457,7 +457,7 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
 
     img = img_as_float(img)
 
-    if img.ndims not in {2, 3}:
+    if img.ndim not in {2, 3}:
         raise ValueError('denoise_wavelet only supports 2D and 3D images')
 
     if img.ndim == 2:

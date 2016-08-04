@@ -3,6 +3,7 @@ from numpy.testing import run_module_suite, assert_raises, assert_equal
 
 from skimage import restoration, data, color, img_as_float, measure
 from skimage._shared._warnings import expected_warnings
+from skimage.measure import compare_ssim
 
 np.random.seed(1234)
 
@@ -310,18 +311,15 @@ def test_no_denoising_for_small_h():
 
 def test_wavelet_denoising():
     for img in [astro_gray, astro]:
-        img = img.copy() + 0.1 * np.random.randn(*(img.shape))
-        img = np.clip(img, 0, 1)
+        noisy = img.copy() + 0.1 * np.random.randn(*(img.shape))
+        noisy = np.clip(noisy, 0, 1)
         # less energy in signal
-        assert restoration.denoise_wavelet(img, sigma=0.3).sum() <= img.sum()
+        denoised = restoration.denoise_wavelet(noisy, sigma=0.3)
+        assert denoised.sum()**2 <= img.sum()**2
 
         # test changing noise_std (higher threshold, so less energy in signal)
-        assert (restoration.denoise_wavelet(img, sigma=0.2).sum() <=
-                restoration.denoise_wavelet(img, sigma=0.1).sum())
-
-        # This works for this particular image
-        assert (np.sum(restoration.denoise_wavelet(img, wavelet='db2')) <
-                np.sum(restoration.denoise_wavelet(img, wavelet='db1')))
+        assert (restoration.denoise_wavelet(noisy, sigma=0.2).sum()**2 <=
+                restoration.denoise_wavelet(noisy, sigma=0.1).sum()**2)
 
 
 if __name__ == "__main__":
