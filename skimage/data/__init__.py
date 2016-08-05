@@ -56,6 +56,10 @@ def camera():
 
     Often used for segmentation and denoising examples.
 
+    Returns
+    -------
+    camera : (512, 512) uint8 ndarray
+        Camera image.
     """
     return load("camera.png")
 
@@ -73,6 +77,10 @@ def astronaut():
 
     No known copyright restrictions, released into the public domain.
 
+    Returns
+    -------
+    astronaut : (512, 512, 3) uint8 ndarray
+        Astronaut image.
     """
 
     return load("astronaut.png")
@@ -88,6 +96,10 @@ def text():
 
     No known copyright restrictions, released into the public domain.
 
+    Returns
+    -------
+    text : (172, 448) uint8 ndarray
+        Text image.
     """
 
     return load("text.png")
@@ -100,6 +112,10 @@ def checkerboard():
     corner-points are easy to locate.  Because of the many parallel
     edges, they also visualise distortions particularly well.
 
+    Returns
+    -------
+    checkerboard : (200, 200) uint8 ndarray
+        Checkerboard image.
     """
     return load("chessboard_GRAY.png")
 
@@ -121,12 +137,22 @@ def coins():
 
     No known copyright restrictions.
 
+    Returns
+    -------
+    coins : (303, 384) uint8 ndarray
+        Coins image.
     """
     return load("coins.png")
 
 
 def logo():
-    """Scikit-image logo, a RGBA image."""
+    """Scikit-image logo, a RGBA image.
+
+    Returns
+    -------
+    logo : (500, 500, 4) uint8 ndarray
+        Logo image.
+    """
     return load("logo.png")
 
 
@@ -136,6 +162,10 @@ def moon():
     This low-contrast image of the surface of the moon is useful for
     illustrating histogram equalization and contrast stretching.
 
+    Returns
+    -------
+    moon : (512, 512) uint8 ndarray
+        Moon image.
     """
     return load("moon.png")
 
@@ -146,6 +176,10 @@ def page():
     This image of printed text is useful for demonstrations requiring uneven
     background illumination.
 
+    Returns
+    -------
+    page : (191, 384) uint8 ndarray
+        Page image.
     """
     return load("page.png")
 
@@ -159,6 +193,10 @@ def horse():
     Released into public domain and drawn and uploaded by Andreas Preuss
     (marauder).
 
+    Returns
+    -------
+    horse : (328, 400) bool ndarray
+        Horse image.
     """
     with expected_warnings(['Possible precision loss', 'Possible sign loss']):
         return img_as_bool(load("horse.png", as_grey=True))
@@ -173,6 +211,10 @@ def clock():
 
     Released into the public domain by the photographer (Stefan van der Walt).
 
+    Returns
+    -------
+    clock : (300, 400) uint8 ndarray
+        Clock image.
     """
     return load("clock_motion.png")
 
@@ -189,6 +231,10 @@ def immunohistochemistry():
 
     No known copyright restrictions.
 
+    Returns
+    -------
+    immunohistochemistry : (512, 512, 3) uint8 ndarray
+        Immunohistochemistry image.
     """
     return load("ihc.png")
 
@@ -203,6 +249,10 @@ def chelsea():
     -----
     No copyright restrictions.  CC0 by the photographer (Stefan van der Walt).
 
+    Returns
+    -------
+    chelsea : (300, 451, 3) uint8 ndarray
+        Chelsea image.
     """
     return load("chelsea.png")
 
@@ -218,6 +268,10 @@ def coffee():
     -----
     No copyright restrictions.  CC0 by the photographer (Rachel Michetti).
 
+    Returns
+    -------
+    coffee : (400, 600, 3) uint8 ndarray
+        Coffee image.
     """
     return load("coffee.png")
 
@@ -238,6 +292,10 @@ def hubble_deep_field():
     The image was captured by NASA and `may be freely used in the public domain
     <http://www.nasa.gov/audience/formedia/features/MP_Photo_Guidelines.html>`_.
 
+    Returns
+    -------
+    hubble_deep_field : (872, 1000, 3) uint8 ndarray
+        Hubble deep field image.
     """
     return load("hubble_deep_field.jpg")
 
@@ -257,5 +315,9 @@ def rocket():
     The image was captured by SpaceX and `released in the public domain
     <http://arstechnica.com/tech-policy/2015/03/elon-musk-puts-spacex-photos-into-the-public-domain/>`_.
 
+    Returns
+    -------
+    rocket : (427, 640, 3) uint8 ndarray
+        Rocket image.
     """
     return load("rocket.jpg")
