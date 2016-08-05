@@ -1,17 +1,3 @@
-"""
-radon.py - Radon and inverse radon transforms
-
-Based on code of Justin K. Romberg
-(http://www.clear.rice.edu/elec431/projects96/DSP/bpanalysis.html)
-J. Gillam and Chris Griffin.
-
-References:
-    -B.R. Ramesh, N. Srinivasa, K. Rajgopal, "An Algorithm for Computing
-    the Discrete Radon Transform With Some Applications", Proceedings of
-    the Fourth IEEE Region 10 International Conference, TENCON '89, 1989.
-    -A. C. Kak, Malcolm Slaney, "Principles of Computerized Tomographic
-    Imaging", IEEE Press 1988.
-"""
 from __future__ import division
 import numpy as np
 from scipy.fftpack import fft, ifft, fftfreq
@@ -48,6 +34,19 @@ def radon(image, theta=None, circle=False):
         Radon transform (sinogram).  The tomography rotation axis will lie
         at the pixel index ``radon_image.shape[0] // 2`` along the 0th
         dimension of ``radon_image``.
+
+    References
+    ----------
+    .. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic
+           Imaging", IEEE Press 1988.
+    .. [2] B.R. Ramesh, N. Srinivasa, K. Rajgopal, "An Algorithm for Computing
+           the Discrete Radon Transform With Some Applications", Proceedings of
+           the Fourth IEEE Region 10 International Conference, TENCON '89, 1989
+
+    Notes
+    -----
+    Based on code of Justin K. Romberg
+    (http://www.clear.rice.edu/elec431/projects96/DSP/bpanalysis.html)
 
     """
     if image.ndim != 2:
@@ -159,6 +158,14 @@ def iradon(radon_image, theta=None, output_size=None,
         Reconstructed image. The rotation axis will be located in the pixel
         with indices
         ``(reconstructed.shape[0] // 2, reconstructed.shape[1] // 2)``.
+
+    References
+    ----------
+    .. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic
+           Imaging", IEEE Press 1988.
+    .. [2] B.R. Ramesh, N. Srinivasa, K. Rajgopal, "An Algorithm for Computing
+           the Discrete Radon Transform With Some Applications", Proceedings of
+           the Fourth IEEE Region 10 International Conference, TENCON '89, 1989
 
     Notes
     -----
