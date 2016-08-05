@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 radon.py - Radon and inverse radon transforms
 
@@ -23,7 +22,7 @@ from .. import util
 from warnings import warn
 
 
-__all__ = ["radon", "iradon", "iradon_sart"]
+__all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
 
 
 def radon(image, theta=None, circle=False):
