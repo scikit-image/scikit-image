@@ -31,9 +31,14 @@ Technique (SART).
 
 For further information on tomographic reconstruction, see
 
-- AC Kak, M Slaney, "Principles of Computerized Tomographic Imaging",
-  http://www.slaney.org/pct/pct-toc.html
-- http://en.wikipedia.org/wiki/Radon_transform
+.. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic Imaging", IEEE Press 1988. http://www.slaney.org/pct/pct-toc.html
+
+.. [2] Wikipedia, Radon transform, http://en.wikipedia.org/wiki/Radon_transform#Relationship_with_the_Fourier_transform
+
+.. [3] S Kaczmarz, "Angenaeherte Aufloesung von Systemen linearer Gleichungen", Bulletin International de l'Academie Polonaise des Sciences et des Lettres, 35 pp 355--357 (1937)
+
+.. [4] AH Andersen, AC Kak, "Simultaneous algebraic reconstruction
+        technique (SART): a superior implementation of the ART algorithm", Ultrasonic Imaging 6 pp 81--94 (1984)
 
 The forward transform
 =====================
@@ -45,7 +50,7 @@ same as the number of pixels there are across the object (to see why this
 is so, consider how many unknown pixel values must be determined in the
 reconstruction process and compare this to the number of measurements
 provided by the projections), and we follow that rule here. Below is the
-original image and its Radon transform, often known as its _sinogram_:
+original image and its Radon transform, often known as its *sinogram*:
 """
 
 from __future__ import print_function, division
@@ -172,15 +177,3 @@ ax[2].imshow(reconstruction_sart2, cmap=plt.cm.Greys_r)
 ax[3].set_title("Reconstruction error\nSART, 2 iterations")
 ax[3].imshow(reconstruction_sart2 - image, cmap=plt.cm.Greys_r, **imkwargs)
 plt.show()
-
-######################################################################
-# References
-#
-# .. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic Imaging", IEEE Press 1988. http://www.slaney.org/pct/pct-toc.html
-#
-# .. [2] Wikipedia, Radon transform, http://en.wikipedia.org/wiki/Radon_transform#Relationship_with_the_Fourier_transform
-#
-# .. [3] S Kaczmarz, "Angenaeherte Aufloesung von Systemen linearer Gleichungen", Bulletin International de l'Academie Polonaise des Sciences et des Lettres, 35 pp 355--357 (1937)
-#
-# .. [4] AH Andersen, AC Kak, "Simultaneous algebraic reconstruction
-#        technique (SART): a superior implementation of the ART algorithm", Ultrasonic Imaging 6 pp 81--94 (1984)
