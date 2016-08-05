@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import division
 import numpy as np
 from scipy.fftpack import fft, ifft, fftfreq
