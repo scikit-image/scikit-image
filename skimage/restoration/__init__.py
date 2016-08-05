@@ -21,7 +21,7 @@ References
 from .deconvolution import wiener, unsupervised_wiener, richardson_lucy
 from .unwrap import unwrap_phase
 from ._denoise import denoise_tv_chambolle, denoise_tv_bregman, \
-                      denoise_bilateral
+                      denoise_bilateral, denoise_wavelet
 from .non_local_means import denoise_nl_means
 from .inpaint import inpaint_biharmonic
 from .._shared.utils import copy_func, deprecated
@@ -37,6 +37,7 @@ __all__ = ['wiener',
            'denoise_tv_bregman',
            'denoise_tv_chambolle',
            'denoise_bilateral',
+           'denoise_wavelet',
            'denoise_nl_means',
            'nl_means_denoising',
            'inpaint_biharmonic']

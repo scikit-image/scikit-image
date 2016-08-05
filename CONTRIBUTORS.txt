@@ -241,3 +241,6 @@
 
 - Abdeali Kothari
   Alpha blending to convert from rgba to rgb
+
+- Scott Sievert
+  Wavelet denoising

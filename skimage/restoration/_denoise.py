@@ -5,6 +5,7 @@ from .. import img_as_float
 from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 from .._shared.utils import skimage_deprecation, warn
 import warnings
+import pywt
 
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
@@ -332,3 +333,140 @@ def denoise_tv_chambolle(im, weight=0.1, eps=2.e-4, n_iter_max=200,
     else:
         out = _denoise_tv_chambolle_nd(im, weight, eps, n_iter_max)
     return out
+
+
+def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
+    """Performs wavelet denoising.
+
+    Parameters
+    ----------
+    img : ndarray (2d or 3d) of ints, uints or floats
+        Input data to be denoised. `img` can be of any numeric type,
+        but it is cast into an ndarray of floats for the computation
+        of the denoised image.
+    wavelet : string
+        The type of wavelet to perform. Can be any of the options
+        pywt.wavelist outputs. For example, this may be any of ``{db1, db2,
+        db3, db4, haar}``.
+    sigma : float, optional
+        The standard deviation of the noise. The noise is estimated when sigma
+        is None (the default) by the method in [2]_.
+    threshold : float, optional
+        The thresholding value. All wavelet coefficients less than this value
+        are set to 0. The default value (None) uses the SureShrink method found
+        in [1]_ to remove noise.
+    mode : {'soft', 'hard'}, optional
+        An optional argument to choose the type of denoising performed. It
+        noted that choosing soft thresholding given additive noise finds the
+        best approximation of the original image.
+
+    Returns
+    -------
+    out : ndarray
+        Denoised image.
+
+    References
+    ----------
+    .. [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
+           thresholding for image denoising and compression." Image Processing,
+           IEEE Transactions on 9.9 (2000): 1532-1546.
+           DOI: 10.1109/83.862633
+    .. [2] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
+           by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
+           DOI: 10.1093/biomet/81.3.425
+
+    """
+    coeffs = pywt.wavedecn(img, wavelet=wavelet)
+    detail_coeffs = coeffs[-1]['d' * img.ndim]
+
+    if sigma is None:
+        # Estimates via the noise via method in [2]
+        sigma = np.median(np.abs(detail_coeffs)) / 0.67448975019608171
+
+    if threshold is None:
+        # The BayesShrink threshold from [1]_ in docstring
+        threshold = sigma**2 / np.sqrt(max(img.var() - sigma**2, 0))
+
+    denoised_detail = [{key: pywt.threshold(level[key], value=threshold,
+                       mode=mode) for key in level} for level in coeffs[1:]]
+    denoised_root = pywt.threshold(coeffs[0], value=threshold, mode=mode)
+    denoised_coeffs = [denoised_root] + [d for d in denoised_detail]
+    return pywt.waverecn(denoised_coeffs, wavelet)
+
+
+def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
+    """Performs wavelet denoising on an image.
+
+    Parameters
+    ----------
+    img : ndarray (2D/3D) of ints, uints or floats
+        Input data to be denoised. `img` can be of any numeric type,
+        but it is cast into an ndarray of floats for the computation
+        of the denoised image.
+    sigma : float, optional
+        The noise standard deviation used when computing the threshold
+        adaptively as described in [1]_. When None (default), the noise
+        standard deviation is estimated via the method in [2]_.
+    wavelet : string, optional
+        The type of wavelet to perform and can be any of the options
+        ``pywt.wavelist`` outputs. The default is `'db1'`. For example,
+        ``wavelet`` can be any of ``{'db2', 'haar', 'sym9'}`` and many more.
+    mode : {'soft', 'hard'}, optional
+        An optional argument to choose the type of denoising performed. It
+        noted that choosing soft thresholding given additive noise finds the
+        best approximation of the original image.
+
+    Returns
+    -------
+    out : ndarray
+        Denoised image.
+
+    Notes
+    -----
+    The wavelet domain is a sparse representation of the image, and can be
+    thought of similarly to the frequency domain of the Fourier transform.
+    Sparse representations have most values zero or near-zero and truly random
+    noise is (usually) represented by many small values in the wavelet domain.
+    Setting all values below some threshold to 0 reduces the noise in the
+    image, but larger thresholds also decrease the detail present in the image.
+
+    If the input is 3D, this function performs wavelet denoising on each color
+    plane separately. The output image is clipped between either [-1, 1] and
+    [0, 1] depending on the input image range.
+
+    References
+    ----------
+    .. [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
+           thresholding for image denoising and compression." Image Processing,
+           IEEE Transactions on 9.9 (2000): 1532-1546.
+           DOI: 10.1109/83.862633
+    .. [2] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
+           by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
+           DOI: 10.1093/biomet/81.3.425
+
+    Examples
+    --------
+    >>> from skimage import color, data
+    >>> img = img_as_float(data.astronaut())
+    >>> img = color.rgb2gray(img)
+    >>> img += 0.1 * np.random.randn(*img.shape)
+    >>> img = np.clip(img, 0, 1)
+    >>> denoised_img = denoise_wavelet(img, sigma=0.1)
+
+    """
+
+    img = img_as_float(img)
+
+    if img.ndim not in {2, 3}:
+        raise ValueError('denoise_wavelet only supports 2D and 3D images')
+
+    if img.ndim == 2:
+        out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
+                                 sigma=sigma)
+    else:
+        out = np.dstack([_wavelet_threshold(img[..., c], wavelet=wavelet,
+                                            mode=mode, sigma=sigma)
+                         for c in range(img.ndim)])
+
+    clip_range = (-1, 1) if img.min() < 0 else (0, 1)
+    return np.clip(out, *clip_range)
