@@ -125,7 +125,6 @@ def inpaint_biharmonic(img, mask, multichannel=False):
 
     # Split inpainting mask into independent regions
     kernel = ndi.morphology.generate_binary_structure(mask.ndim, 1)
-    kernel = ndi.iterate_structure(kernel, 2)
     mask_dilated = ndi.morphology.binary_dilation(mask, structure=kernel)
     mask_labeled, num_labels = label(mask_dilated, return_num=True)
     mask_labeled *= mask
