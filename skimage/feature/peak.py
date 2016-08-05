@@ -8,13 +8,14 @@ def _get_high_intensity_peaks(image, mask, num_peaks):
     Return the highest intensity peak coordinates.
     """
     # get coordinates of peaks
-    coord = np.transpose(mask.nonzero())
+    coord = np.nonzero(mask)
     # select num_peaks peaks
-    if coord.shape[0] > num_peaks:
-        intensities = image.flat[np.ravel_multi_index(coord.transpose(),
-                                                      image.shape)]
-        idx_maxsort = np.argsort(intensities)[::-1]
-        coord = coord[idx_maxsort][:num_peaks]
+    if len(coord[0]) > num_peaks:
+        intensities = image[coord]
+        idx_maxsort = np.argsort(intensities)
+        coord = np.transpose(coord)[idx_maxsort][-num_peaks:]
+    else:
+        coord = np.column_stack(coord)
     return coord
 
 
