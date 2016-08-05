@@ -185,7 +185,7 @@ def iradon(radon_image, theta=None, output_size=None,
         raise ValueError("The given ``theta`` does not match the number of "
                          "projections in ``radon_image``.")
     interpolation_types = ('linear', 'nearest', 'cubic')
-    if not interpolation in interpolation_types:
+    if interpolation not in interpolation_types:
         raise ValueError("Unknown interpolation: %s" % interpolation)
     if not output_size:
         # If output size not specified, estimate from input radon image
@@ -410,7 +410,7 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
         raise ValueError('Shape of projection_shifts (%s) does not match the '
                          'number of projections (%d)'
                          % (projection_shifts.shape, radon_image.shape[1]))
-    if not clip is None:
+    if clip is not None:
         if len(clip) != 2:
             raise ValueError('clip must be a length-2 sequence')
         clip = (float(clip[0]), float(clip[1]))
@@ -421,6 +421,6 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
                                               radon_image[:, angle_index],
                                               projection_shifts[angle_index])
         image += relaxation * image_update
-        if not clip is None:
+        if clip is not None:
             image = np.clip(image, clip[0], clip[1])
     return image
