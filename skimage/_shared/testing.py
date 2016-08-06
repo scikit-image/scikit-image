@@ -210,6 +210,9 @@ def teardown_test():
 def test_parallel(num_threads=2):
     """Decorator to run the same function multiple times in parallel.
 
+    This decorator is useful to ensure that separate threads execute
+    concurrently and correctly while releasing the GIL.
+
     Parameters
     ----------
     num_threads : int, optional
