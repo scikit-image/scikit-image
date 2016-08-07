@@ -17,6 +17,7 @@ Runtime requirements
 * `Six >=1.4 <https://pypi.python.org/pypi/six>`__
 * `Pillow >= 1.7.8 <https://pypi.python.org/pypi/Pillow>`__
     (or `PIL <http://www.pythonware.com/products/pil/>`__)
+* `PyWavelets>=0.4.0 <https://pypi.python.org/pypi/PyWavelets/>`__
 
 You can use pip to automatically install the runtime dependencies as follows::
 
