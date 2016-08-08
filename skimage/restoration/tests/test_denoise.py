@@ -355,7 +355,6 @@ def test_wavelet_denoising_nd():
         assert psnr_denoised > psnr_noisy
 
 
-@dec.skipif(not restoration._denoise.pywt_available)
 def test_estimate_sigma_gray():
     rstate = np.random.RandomState(1234)
     # astronaut image
@@ -364,11 +363,10 @@ def test_estimate_sigma_gray():
     # add noise to astronaut
     img += sigma * rstate.standard_normal(img.shape)
 
-    sigma_est = estimate_sigma(img, multichannel=False)
+    sigma_est = restoration.estimate_sigma(img, multichannel=False)
     assert_almost_equal(sigma, sigma_est, decimal=2)
 
 
-@dec.skipif(not restoration._denoise.pywt_available)
 def test_estimate_sigma_masked_image():
     # Verify computation on an image with a large, noise-free border.
     # (zero regions will be masked out by _sigma_est_dwt to avoid returning
@@ -382,11 +380,10 @@ def test_estimate_sigma_masked_image():
 
     img[center_roi] = sigma * rstate.standard_normal(img[center_roi].shape)
 
-    sigma_est = estimate_sigma(img, multichannel=False)
+    sigma_est = restoration.estimate_sigma(img, multichannel=False)
     assert_almost_equal(sigma, sigma_est, decimal=1)
 
 
-@dec.skipif(not restoration._denoise.pywt_available)
 def test_estimate_sigma_color():
     rstate = np.random.RandomState(1234)
     # astronaut image

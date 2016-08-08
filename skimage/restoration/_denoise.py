@@ -7,12 +7,6 @@ from .._shared.utils import skimage_deprecation, warn
 import warnings
 import pywt
 
-try:
-    import pywt
-    pywt_available = True
-except ImportError:
-    pywt_available = False
-
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                       bins=10000, mode='constant', cval=0, multichannel=True,
@@ -556,11 +550,8 @@ def estimate_sigma(im, multichannel, average_sigmas=True):
     >>> img = img_as_float(skimage.data.camera())
     >>> sigma = 0.1
     >>> img = img + sigma * np.random.standard_normal(img.shape)
-    >>> sigma_hat = estimate_sigma(img, multichannel=False)  # doctest: +SKIP
+    >>> sigma_hat = estimate_sigma(img, multichannel=False)
     """
-    if not pywt_available:
-        raise ValueError("estimate_sigma requires PyWavelets to be installed.")
-
     if multichannel:
         nchannels = im.shape[-1]
         sigmas = [estimate_sigma(
