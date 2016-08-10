@@ -353,8 +353,8 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
         is None (the default) by the method in [2]_.
     threshold : float, optional
         The thresholding value. All wavelet coefficients less than this value
-        are set to 0. The default value (None) uses the SureShrink method found
-        in [1]_ to remove noise.
+        are set to 0. The default value (None) uses the BayesShrink method
+        found in [1]_ to remove noise.
     mode : {'soft', 'hard'}, optional
         An optional argument to choose the type of denoising performed. It
         noted that choosing soft thresholding given additive noise finds the
