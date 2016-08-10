@@ -310,16 +310,20 @@ def test_no_denoising_for_small_h():
 
 
 def test_wavelet_denoising():
-    for img in [astro_gray, astro]:
+    for img, multichannel in [(astro_gray, False), (astro, True)]:
         noisy = img.copy() + 0.1 * np.random.randn(*(img.shape))
         noisy = np.clip(noisy, 0, 1)
         # less energy in signal
-        denoised = restoration.denoise_wavelet(noisy, sigma=0.3)
+        denoised = restoration.denoise_wavelet(noisy, sigma=0.3,
+                                               multichannel=multichannel)
         assert denoised.sum()**2 <= img.sum()**2
 
         # test changing noise_std (higher threshold, so less energy in signal)
-        assert (restoration.denoise_wavelet(noisy, sigma=0.2).sum()**2 <=
-                restoration.denoise_wavelet(noisy, sigma=0.1).sum()**2)
+        res1 = restoration.denoise_wavelet(noisy, sigma=0.2,
+                                           multichannel=multichannel)
+        res2 = restoration.denoise_wavelet(noisy, sigma=0.1,
+                                           multichannel=multichannel)
+        assert (res1.sum()**2 <= res2.sum()**2)
 
 
 if __name__ == "__main__":
