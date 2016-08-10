@@ -335,6 +335,15 @@ def denoise_tv_chambolle(im, weight=0.1, eps=2.e-4, n_iter_max=200,
     return out
 
 
+def _bayes_thresh(details, var):
+    """BayesShrink threshold for a zero-mean details coeff array."""
+    # equivalent to:  dvar = np.var(details) for 0-mean details array
+    dvar = np.mean(details*details)
+    eps = np.finfo(details.dtype).eps
+    thresh = var / np.sqrt(max(dvar - var, eps))
+    return thresh
+
+
 def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
     """Performs wavelet denoising.
 
@@ -384,12 +393,24 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
         sigma = np.median(np.abs(detail_coeffs)) / 0.67448975019608171
 
     if threshold is None:
-        # The BayesShrink threshold from [1]_ in docstring
-        threshold = sigma**2 / np.sqrt(max(img.var() - sigma**2, 0))
+        # The BayesShrink thresholds from [1]_ in docstring
+        var = sigma**2
+        threshold = [{key: _bayes_thresh(level[key], var) for key in level}
+                     for level in coeffs[1:]]
 
-    denoised_detail = [{key: pywt.threshold(level[key], value=threshold,
-                       mode=mode) for key in level} for level in coeffs[1:]]
-    denoised_coeffs = [coeffs[0]] + [d for d in denoised_detail]
+    if np.isscalar(threshold):
+        # a single threshold for all coefficient arrays
+        denoised_detail = [{key: pywt.threshold(level[key],
+                                                value=threshold,
+                                                mode=mode) for key in level}
+                           for level in coeffs[-1]]
+    else:
+        # dict of unique threshold coefficients for each detail coeff. array
+        denoised_detail = [{key: pywt.threshold(level[key],
+                                                value=thresh[key],
+                                                mode=mode) for key in level}
+                           for thresh, level in zip(threshold, coeffs[-1])]
+    denoised_coeffs = [coeffs[0]] + denoised_detail
     return pywt.waverecn(denoised_coeffs, wavelet)
 
 
