@@ -394,7 +394,8 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
     return pywt.waverecn(denoised_coeffs, wavelet)
 
 
-def denoise_wavelet(img, multichannel, sigma=None, wavelet='db1', mode='soft'):
+def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
+                    multichannel=False):
     """Performs wavelet denoising on an image.
 
     Parameters
@@ -458,9 +459,10 @@ def denoise_wavelet(img, multichannel, sigma=None, wavelet='db1', mode='soft'):
     img = img_as_float(img)
 
     if multichannel:
-        out = np.stack([_wavelet_threshold(img[..., c], wavelet=wavelet,
-                                           mode=mode, sigma=sigma)
-                        for c in range(img.ndim)], axis=-1)
+        out = np.empty_like(img)
+        for c in range(img.ndim):
+            out[..., c] = _wavelet_threshold(img[..., c], wavelet=wavelet,
+                                             mode=mode, sigma=sigma)
     else:
         out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
                                  sigma=sigma)
