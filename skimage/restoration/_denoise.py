@@ -385,31 +385,44 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
            DOI: 10.1093/biomet/81.3.425
 
     """
-    coeffs = pywt.wavedecn(img, wavelet=wavelet)
-    detail_coeffs = coeffs[-1]['d' * img.ndim]
+    if not isinstance(wavelet, pywt.Wavelet):
+        wavelet = pywt.Wavelet(wavelet)
+
+    # determine the number of wavelet decomposition levels
+    dlen = wavelet.dec_len
+    level = np.min([pywt.dwt_max_level(s, dlen) for s in img.shape])
+    if threshold is None:
+        # Bayes shrink doesn't work well on levels with extremely small
+        # coefficient arrays, so skip a couple of the coarsest levels
+        level = max(level - 2, 1)
+
+    coeffs = pywt.wavedecn(img, wavelet=wavelet, level=level)
+    # detail coefficients at each decomposition level
+    dcoeffs = coeffs[1:]
 
     if sigma is None:
         # Estimates via the noise via method in [2]
+        detail_coeffs = dcoeffs[-1]['d' * img.ndim]
         sigma = np.median(np.abs(detail_coeffs)) / 0.67448975019608171
 
     if threshold is None:
         # The BayesShrink thresholds from [1]_ in docstring
         var = sigma**2
         threshold = [{key: _bayes_thresh(level[key], var) for key in level}
-                     for level in coeffs[1:]]
+                     for level in dcoeffs]
 
     if np.isscalar(threshold):
         # a single threshold for all coefficient arrays
         denoised_detail = [{key: pywt.threshold(level[key],
                                                 value=threshold,
                                                 mode=mode) for key in level}
-                           for level in coeffs[-1]]
+                           for level in dcoeffs]
     else:
         # dict of unique threshold coefficients for each detail coeff. array
         denoised_detail = [{key: pywt.threshold(level[key],
                                                 value=thresh[key],
                                                 mode=mode) for key in level}
-                           for thresh, level in zip(threshold, coeffs[-1])]
+                           for thresh, level in zip(threshold, dcoeffs)]
     denoised_coeffs = [coeffs[0]] + denoised_detail
     return pywt.waverecn(denoised_coeffs, wavelet)
 
