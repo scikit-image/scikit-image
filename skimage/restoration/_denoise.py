@@ -344,7 +344,8 @@ def _bayes_thresh(details, var):
     return thresh
 
 
-def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
+def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
+                       wavelet_levels=None):
     """Performs wavelet denoising.
 
     Parameters
@@ -368,6 +369,10 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
         An optional argument to choose the type of denoising performed. It
         noted that choosing soft thresholding given additive noise finds the
         best approximation of the original image.
+    wavelet_levels : int or None, optional
+        The number of wavelet decomposition levels to use.  The default is
+        three less than the maximum number of possible decomposition levels
+        (where the max depends on the size of `img` and the wavelet to use).
 
     Returns
     -------
@@ -389,14 +394,19 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
         wavelet = pywt.Wavelet(wavelet)
 
     # determine the number of wavelet decomposition levels
-    dlen = wavelet.dec_len
-    level = np.min([pywt.dwt_max_level(s, dlen) for s in img.shape])
-    if threshold is None:
-        # Bayes shrink doesn't work well on levels with extremely small
-        # coefficient arrays, so skip a couple of the coarsest levels
-        level = max(level - 2, 1)
+    if wavelet_levels is None:
+        # determine the maximum number of possible levels for img
+        dlen = wavelet.dec_len
+        wavelet_levels = np.min(
+            [pywt.dwt_max_level(s, dlen) for s in img.shape])
 
-    coeffs = pywt.wavedecn(img, wavelet=wavelet, level=level)
+        # BayesShrink variance estimation doesn't work well on levels with
+        # extremely small coefficient arrays, so skip a few of the coarsest
+        # levels.
+        # Note: ref [1] used a fixed wavelet_levels = 4
+        wavelet_levels = max(wavelet_levels - 3, 1)
+
+    coeffs = pywt.wavedecn(img, wavelet=wavelet, level=wavelet_levels)
     # detail coefficients at each decomposition level
     dcoeffs = coeffs[1:]
 
