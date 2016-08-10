@@ -389,8 +389,7 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
 
     denoised_detail = [{key: pywt.threshold(level[key], value=threshold,
                        mode=mode) for key in level} for level in coeffs[1:]]
-    denoised_root = pywt.threshold(coeffs[0], value=threshold, mode=mode)
-    denoised_coeffs = [denoised_root] + [d for d in denoised_detail]
+    denoised_coeffs = [coeffs[0]] + [d for d in denoised_detail]
     return pywt.waverecn(denoised_coeffs, wavelet)
 
 
