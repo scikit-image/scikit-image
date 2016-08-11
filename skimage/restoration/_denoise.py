@@ -463,7 +463,7 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
 
     if multichannel:
         out = np.empty_like(img)
-        for c in range(img.ndim):
+        for c in range(img.shape[-1]):
             out[..., c] = _wavelet_threshold(img[..., c], wavelet=wavelet,
                                              mode=mode, sigma=sigma)
     else:
