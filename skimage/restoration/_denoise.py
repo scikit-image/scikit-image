@@ -337,7 +337,7 @@ def denoise_tv_chambolle(im, weight=0.1, eps=2.e-4, n_iter_max=200,
 
 def _bayes_thresh(details, var):
     """BayesShrink threshold for a zero-mean details coeff array."""
-    # equivalent to:  dvar = np.var(details) for 0-mean details array
+    # Equivalent to:  dvar = np.var(details) for 0-mean details array
     dvar = np.mean(details*details)
     eps = np.finfo(details.dtype).eps
     thresh = var / np.sqrt(max(dvar - var, eps))
@@ -372,12 +372,23 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
     wavelet_levels : int or None, optional
         The number of wavelet decomposition levels to use.  The default is
         three less than the maximum number of possible decomposition levels
-        (where the max depends on the size of `img` and the wavelet to use).
+        (see Notes below).
 
     Returns
     -------
     out : ndarray
         Denoised image.
+
+    Notes
+    -----
+    Reference [1]_ used four levels of wavelet decomposition.  To be more
+    flexible for a range of input sizes, the implementation here stops 3 levels
+    prior to the maximum level of decomposition for `img` (the exact # of
+    levels thus depends on `img.shape` and the chosen wavelet). BayesShrink
+    variance estimation doesn't work well on levels with extremely small
+    coefficient arrays.  This is the rationale for skipping a few of the
+    coarsest levels.  The user can override the automated setting by explicitly
+    specifying `wavelet_levels`.
 
     References
     ----------
@@ -390,24 +401,20 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
            DOI: 10.1093/biomet/81.3.425
 
     """
-    if not isinstance(wavelet, pywt.Wavelet):
-        wavelet = pywt.Wavelet(wavelet)
+    wavelet = pywt.Wavelet(wavelet)
 
-    # determine the number of wavelet decomposition levels
+    # Determine the number of wavelet decomposition levels
     if wavelet_levels is None:
-        # determine the maximum number of possible levels for img
+        # Determine the maximum number of possible levels for img
         dlen = wavelet.dec_len
         wavelet_levels = np.min(
             [pywt.dwt_max_level(s, dlen) for s in img.shape])
 
-        # BayesShrink variance estimation doesn't work well on levels with
-        # extremely small coefficient arrays, so skip a few of the coarsest
-        # levels.
-        # Note: ref [1] used a fixed wavelet_levels = 4
+        # Skip coarsest wavelet scales (see Notes in docstring).
         wavelet_levels = max(wavelet_levels - 3, 1)
 
     coeffs = pywt.wavedecn(img, wavelet=wavelet, level=wavelet_levels)
-    # detail coefficients at each decomposition level
+    # Detail coefficients at each decomposition level
     dcoeffs = coeffs[1:]
 
     if sigma is None:
@@ -422,13 +429,13 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
                      for level in dcoeffs]
 
     if np.isscalar(threshold):
-        # a single threshold for all coefficient arrays
+        # A single threshold for all coefficient arrays
         denoised_detail = [{key: pywt.threshold(level[key],
                                                 value=threshold,
                                                 mode=mode) for key in level}
                            for level in dcoeffs]
     else:
-        # dict of unique threshold coefficients for each detail coeff. array
+        # Dict of unique threshold coefficients for each detail coeff. array
         denoised_detail = [{key: pywt.threshold(level[key],
                                                 value=thresh[key],
                                                 mode=mode) for key in level}
