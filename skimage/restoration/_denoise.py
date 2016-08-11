@@ -400,7 +400,7 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
 
     Parameters
     ----------
-    img : ndarray (2D/3D) of ints, uints or floats
+    img : ndarray ([M[, N[, ...P]][, C]) of ints, uints or floats
         Input data to be denoised. `img` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
@@ -416,6 +416,9 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
         An optional argument to choose the type of denoising performed. It
         noted that choosing soft thresholding given additive noise finds the
         best approximation of the original image.
+    multichannel : bool, optional
+        Apply wavelet denoising separately for each channel (where channels
+        correspond to the final axis of the array).
 
     Returns
     -------
