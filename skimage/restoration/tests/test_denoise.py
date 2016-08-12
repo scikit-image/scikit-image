@@ -312,7 +312,7 @@ def test_no_denoising_for_small_h():
 def test_wavelet_denoising():
     for img, multichannel in [(astro_gray, False), (astro, True)]:
         sigma = 0.1
-        noisy = img.copy() + sigma * np.random.randn(*(img.shape))
+        noisy = img + sigma * np.random.randn(*(img.shape))
         noisy = np.clip(noisy, 0, 1)
 
         # Verify that SNR is improved when true sigma is used
@@ -335,6 +335,23 @@ def test_wavelet_denoising():
         res2 = restoration.denoise_wavelet(noisy, sigma=sigma,
                                            multichannel=multichannel)
         assert (res1.sum()**2 <= res2.sum()**2)
+
+
+def test_wavelet_denoising_nd():
+    for ndim in range(1, 5):
+        # Generate a very simple test image
+        img = 0.2*np.ones((16, )*ndim)
+        img[[slice(5, 13), ] * ndim] = 0.8
+
+        sigma = 0.1
+        noisy = img + sigma * np.random.randn(*(img.shape))
+        noisy = np.clip(noisy, 0, 1)
+
+        # Verify that SNR is improved with internally estimated sigma
+        denoised = restoration.denoise_wavelet(noisy)
+        psnr_noisy = compare_psnr(img, noisy)
+        psnr_denoised = compare_psnr(img, denoised)
+        assert psnr_denoised > psnr_noisy
 
 
 if __name__ == "__main__":
