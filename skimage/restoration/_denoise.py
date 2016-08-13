@@ -662,9 +662,7 @@ def _rgb2colorspace(img, space):
     if space in {None, 'rgb'}:
         return img.copy()
 
-    rgb2color = {'gray': color.rgb2gray,
-                 'grey': color.rgb2grey,
-                 'hed': color.rgb2hed,
+    rgb2color = {'hed': color.rgb2hed,
                  'hsv': color.rgb2hsv,
                  'lab': color.rgb2lab,
                  'luv': color.rgb2luv,
@@ -680,9 +678,7 @@ def _colorspace2rgb(img, space):
     if space in {None, 'rgb'}:
         return img
 
-    rgb2color = {'gray': color.gray2rgb,
-                 'grey': color.gray2rgb,
-                 'hed': color.hed2rgb,
+    rgb2color = {'hed': color.hed2rgb,
                  'hsv': color.hsv2rgb,
                  'lab': color.lab2rgb,
                  'luv': color.luv2rgb,

@@ -464,6 +464,18 @@ def test_estimate_sigma_color():
     # default multichannel=False should raise a warning about last axis size
     assert_warns(UserWarning, restoration.estimate_sigma, img)
 
+def test_wavelet_denoising_args():
+    img = astro
+    noisy = img.copy() + 0.1 * np.random.randn(*(img.shape))
+
+    # making sure no exceptions are raised
+    colorspaces = {'hed', 'hsv', 'lab', 'luv', 'ycbcr', 'rgbcie', 'xyz',
+                   None, 'rgb'}
+    for colorspace in colorspaces:
+        for sigma in [0.1, [0.1, 0.1, 0.1], None]:
+            restoration.denoise_wavelet(noisy, colorspace=colorspace,
+                                        sigma=sigma)
+
 
 if __name__ == "__main__":
     run_module_suite()
