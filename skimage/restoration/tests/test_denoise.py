@@ -3,7 +3,7 @@ from numpy.testing import run_module_suite, assert_raises, assert_equal
 
 from skimage import restoration, data, color, img_as_float, measure
 from skimage._shared._warnings import expected_warnings
-from skimage.measure import compare_ssim
+from skimage.measure import compare_psnr
 
 np.random.seed(1234)
 
@@ -310,16 +310,48 @@ def test_no_denoising_for_small_h():
 
 
 def test_wavelet_denoising():
-    for img in [astro_gray, astro]:
-        noisy = img.copy() + 0.1 * np.random.randn(*(img.shape))
+    for img, multichannel in [(astro_gray, False), (astro, True)]:
+        sigma = 0.1
+        noisy = img + sigma * np.random.randn(*(img.shape))
         noisy = np.clip(noisy, 0, 1)
-        # less energy in signal
-        denoised = restoration.denoise_wavelet(noisy, sigma=0.3)
-        assert denoised.sum()**2 <= img.sum()**2
 
-        # test changing noise_std (higher threshold, so less energy in signal)
-        assert (restoration.denoise_wavelet(noisy, sigma=0.2).sum()**2 <=
-                restoration.denoise_wavelet(noisy, sigma=0.1).sum()**2)
+        # Verify that SNR is improved when true sigma is used
+        denoised = restoration.denoise_wavelet(noisy, sigma=sigma,
+                                               multichannel=multichannel)
+        psnr_noisy = compare_psnr(img, noisy)
+        psnr_denoised = compare_psnr(img, denoised)
+        assert psnr_denoised > psnr_noisy
+
+        # Verify that SNR is improved with internally estimated sigma
+        denoised = restoration.denoise_wavelet(noisy,
+                                               multichannel=multichannel)
+        psnr_noisy = compare_psnr(img, noisy)
+        psnr_denoised = compare_psnr(img, denoised)
+        assert psnr_denoised > psnr_noisy
+
+        # Test changing noise_std (higher threshold, so less energy in signal)
+        res1 = restoration.denoise_wavelet(noisy, sigma=2*sigma,
+                                           multichannel=multichannel)
+        res2 = restoration.denoise_wavelet(noisy, sigma=sigma,
+                                           multichannel=multichannel)
+        assert (res1.sum()**2 <= res2.sum()**2)
+
+
+def test_wavelet_denoising_nd():
+    for ndim in range(1, 5):
+        # Generate a very simple test image
+        img = 0.2*np.ones((16, )*ndim)
+        img[[slice(5, 13), ] * ndim] = 0.8
+
+        sigma = 0.1
+        noisy = img + sigma * np.random.randn(*(img.shape))
+        noisy = np.clip(noisy, 0, 1)
+
+        # Verify that SNR is improved with internally estimated sigma
+        denoised = restoration.denoise_wavelet(noisy)
+        psnr_noisy = compare_psnr(img, noisy)
+        psnr_denoised = compare_psnr(img, denoised)
+        assert psnr_denoised > psnr_noisy
 
 
 if __name__ == "__main__":

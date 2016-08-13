@@ -394,12 +394,13 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
     return pywt.waverecn(denoised_coeffs, wavelet)
 
 
-def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
+def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
+                    multichannel=False):
     """Performs wavelet denoising on an image.
 
     Parameters
     ----------
-    img : ndarray (2D/3D) of ints, uints or floats
+    img : ndarray ([M[, N[, ...P]][, C]) of ints, uints or floats
         Input data to be denoised. `img` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
@@ -415,6 +416,9 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
         An optional argument to choose the type of denoising performed. It
         noted that choosing soft thresholding given additive noise finds the
         best approximation of the original image.
+    multichannel : bool, optional
+        Apply wavelet denoising separately for each channel (where channels
+        correspond to the final axis of the array).
 
     Returns
     -------
@@ -457,16 +461,14 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft'):
 
     img = img_as_float(img)
 
-    if img.ndim not in {2, 3}:
-        raise ValueError('denoise_wavelet only supports 2D and 3D images')
-
-    if img.ndim == 2:
+    if multichannel:
+        out = np.empty_like(img)
+        for c in range(img.shape[-1]):
+            out[..., c] = _wavelet_threshold(img[..., c], wavelet=wavelet,
+                                             mode=mode, sigma=sigma)
+    else:
         out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
                                  sigma=sigma)
-    else:
-        out = np.dstack([_wavelet_threshold(img[..., c], wavelet=wavelet,
-                                            mode=mode, sigma=sigma)
-                         for c in range(img.ndim)])
 
     clip_range = (-1, 1) if img.min() < 0 else (0, 1)
     return np.clip(out, *clip_range)
