@@ -6,6 +6,7 @@ from .. import img_as_float
 from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 from .._shared.utils import skimage_deprecation, warn
 import pywt
+import skimage.color as color
 
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
@@ -480,7 +481,7 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
 
 
 def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
-                    wavelet_levels=None, multichannel=False):
+                    wavelet_levels=None, multichannel=False, colorspace=''):
     """Perform wavelet denoising on an image.
 
     Parameters
@@ -489,10 +490,11 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
         Input data to be denoised. `img` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
-    sigma : float, optional
+    sigma : float, list, optional
         The noise standard deviation used when computing the threshold
-        adaptively as described in [1]_. When None (default), the noise
-        standard deviation is estimated via the method in [2]_.
+        adaptively as described in [1]_ for each color channel. When None
+        (default), the noise standard deviation is estimated via the method in
+        [2]_.
     wavelet : string, optional
         The type of wavelet to perform and can be any of the options
         ``pywt.wavelist`` outputs. The default is `'db1'`. For example,
@@ -507,6 +509,12 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
     multichannel : bool, optional
         Apply wavelet denoising separately for each channel (where channels
         correspond to the final axis of the array).
+    colorspace : str, optional
+        The colorspace to do wavelet denoising in. Possible values are any of
+        colorspaces RGB can convert to and from in `skimage.color`. e.g.,
+        ``'ycbcr'`` (default for 3D images) specifies to use the YCbCr
+        colorspace.  ``colorspace in {None, 'rgb'}`` will not do any conversion
+        (but still denoise in each colorplane separately).
 
     Returns
     -------
@@ -525,6 +533,12 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
     If the input is 3D, this function performs wavelet denoising on each color
     plane separately. The output image is clipped between either [-1, 1] and
     [0, 1] depending on the input image range.
+
+    Wavelet denoising is often done in the YCbCr colorspace. It is assumed the
+    input image is in RGB. If ``colorspace in {None, 'rgb'}``, no colorspace
+    conversion is done. When conversion is done, every color channel is scaled
+    between 0 and 1, and `sigma` values are applied to these scaled color
+    channels.
 
     References
     ----------
@@ -548,15 +562,37 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
     """
     img = img_as_float(img)
 
-    if multichannel:
+    if multichannel or colorspace in {None, 'rgb', 'RGB'}:
         out = np.empty_like(img)
         for c in range(img.shape[-1]):
             out[..., c] = _wavelet_threshold(img[..., c], wavelet=wavelet,
                                              mode=mode, sigma=sigma,
                                              wavelet_levels=wavelet_levels)
     else:
-        out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
-                                 sigma=sigma, wavelet_levels=wavelet_levels)
+        if img.ndim == 3 and colorspace not in {None, 'rgb', 'RGB'}:
+            colorspace = 'ycbcr' if not colorspace else colorspace
+
+            sigma = [sigma]*3 if type(sigma) not in {list, np.array} else sigma
+            out = _rgb2colorspace(img, colorspace)
+            for i in range(3):
+                if colorspace is not None:
+                    min, max = out[..., i].min(), out[..., i].max()
+                    channel = out[..., i] - min
+                    channel /= max - min
+                else:
+                    channel = out[..., i]
+                out[..., i] = denoise_wavelet(channel, sigma=sigma[i],
+                                              wavelet=wavelet, mode=mode)
+
+                if colorspace is not None:
+                    out[..., i] = out[..., i] * (max - min)
+                    out[..., i] += min
+
+            out = _colorspace2rgb(out, colorspace)
+        else:
+            out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
+                                     sigma=sigma,
+                                     wavelet_levels=wavelet_levels)
 
     clip_range = (-1, 1) if img.min() < 0 else (0, 1)
     return np.clip(out, *clip_range)
@@ -620,3 +656,38 @@ def estimate_sigma(im, average_sigmas=False, multichannel=False):
     coeffs = pywt.dwtn(im, wavelet='db2')
     detail_coeffs = coeffs['d' * im.ndim]
     return _sigma_est_dwt(detail_coeffs, distribution='Gaussian')
+
+
+def _rgb2colorspace(img, space):
+    if space in {None, 'rgb'}:
+        return img.copy()
+
+    rgb2color = {'gray': color.rgb2gray,
+                 'grey': color.rgb2grey,
+                 'hed': color.rgb2hed,
+                 'hsv': color.rgb2hsv,
+                 'lab': color.rgb2lab,
+                 'luv': color.rgb2luv,
+                 'ycbcr': color.rgb2ycbcr,
+                 'rgbcie': color.rgb2rgbcie,
+                 'xyz': color.rgb2xyz}
+
+    out = (rgb2color[space](img) - img.min()) / (img.max() - img.min())
+    return out
+
+
+def _colorspace2rgb(img, space):
+    if space in {None, 'rgb'}:
+        return img
+
+    rgb2color = {'gray': color.gray2rgb,
+                 'grey': color.gray2rgb,
+                 'hed': color.hed2rgb,
+                 'hsv': color.hsv2rgb,
+                 'lab': color.lab2rgb,
+                 'luv': color.luv2rgb,
+                 'ycbcr': color.ycbcr2rgb,
+                 'rgbcie': color.rgbcie2rgb,
+                 'xyz': color.xyz2rgb}
+
+    return rgb2color[space](img)
