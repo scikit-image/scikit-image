@@ -339,6 +339,21 @@ def test_wavelet_denoising():
         assert np.sum(res1**2) <= np.sum(res2**2)
 
 
+def test_wavelet_threshold():
+    rstate = np.random.RandomState(1234)
+
+    img = astro_gray
+    sigma = 0.1
+    noisy = img + sigma * rstate.randn(*(img.shape))
+    noisy = np.clip(noisy, 0, 1)
+
+    # employ a single, uniform threshold instead of BayesShrink sigmas
+    denoised = _wavelet_threshold(noisy, wavelet='db1', threshold=sigma)
+    psnr_noisy = compare_psnr(img, noisy)
+    psnr_denoised = compare_psnr(img, denoised)
+    assert psnr_denoised > psnr_noisy
+
+
 def test_wavelet_denoising_nd():
     rstate = np.random.RandomState(1234)
     for ndim in range(1, 5):
