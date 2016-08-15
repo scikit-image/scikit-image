@@ -5,6 +5,7 @@ from numpy.testing import (run_module_suite, assert_raises, assert_equal,
 from skimage import restoration, data, color, img_as_float, measure
 from skimage._shared._warnings import expected_warnings
 from skimage.measure import compare_psnr
+from skimage.restoration._denoise import _wavelet_threshold
 
 np.random.seed(1234)
 
