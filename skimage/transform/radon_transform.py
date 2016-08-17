@@ -12,7 +12,7 @@ from warnings import warn
 __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
 
 
-def radon(image, theta=None, circle=False):
+def radon(image, theta=None, circle=None):
     """
     Calculates the radon transform of an image given specified
     projection angles.
@@ -28,6 +28,7 @@ def radon(image, theta=None, circle=False):
         Assume image is zero outside the inscribed circle, making the
         width of each projection (the first dimension of the sinogram)
         equal to ``min(image.shape)``.
+        The default behavior (None) is equivalent to False.
 
     Returns
     -------
@@ -54,6 +55,8 @@ def radon(image, theta=None, circle=False):
         raise ValueError('The input image must be 2-D')
     if theta is None:
         theta = np.arange(180)
+    if circle is None:
+        circle = False
 
     if circle:
         radius = min(image.shape) // 2
@@ -121,7 +124,7 @@ def _sinogram_circle_to_square(sinogram):
 
 
 def iradon(radon_image, theta=None, output_size=None,
-           filter="ramp", interpolation="linear", circle=False):
+           filter="ramp", interpolation="linear", circle=None):
     """
     Inverse radon transform.
 
@@ -152,6 +155,7 @@ def iradon(radon_image, theta=None, output_size=None,
         Assume the reconstructed image is zero outside the inscribed circle.
         Also changes the default output_size to match the behaviour of
         ``radon`` called with ``circle=True``.
+        The default behavior (None) is equivalent to False.
 
     Returns
     -------
@@ -195,6 +199,8 @@ def iradon(radon_image, theta=None, output_size=None,
         else:
             output_size = int(np.floor(np.sqrt((radon_image.shape[0]) ** 2
                                                / 2.0)))
+    if circle is None:
+        circle = False
     if circle:
         radon_image = _sinogram_circle_to_square(radon_image)
 
