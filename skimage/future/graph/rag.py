@@ -300,6 +300,14 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
             :math:`e^{-d^2/sigma}` where :math:`d=|c_1 - c_2|`, where
             :math:`c_1` and :math:`c_2` are the mean colors of the two regions.
             It represents how similar two regions are.
+
+            'similarity_and_centroid_proximity' : The weight between two
+            adjacent is :math:`e^{-d^2/sigma} * e^{-x^2/sigma}`
+            where :math:`d=|c_1 - c_2|`, where :math:`c_1` and :math:`c_2` are
+            the mean colors of the two regions and where :math:`x=|x_1 - x_2|`,
+            where :math:`x_1` and :math:`x_2` are the centroid coordinates of
+            the two regions. It represents how similar and spatially close two
+            regions are [see reference 2 section 3.1 equation 11].
     sigma : float, optional
         Used for computation when `mode` is "similarity". It governs how
         close to each other two colors should be, for their corresponding edge
@@ -325,6 +333,10 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
            "Regions Adjacency Graph Applied To Color Image Segmentation"
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.11.5274
 
+    .. [2] Jianbo Shi, & Malik, J. (2000). Normalized cuts and image
+           segmentation. IEEE Transactions on Pattern Analysis and Machine
+           Intelligence, 22(8), 888-905. http://doi.org/10.1109/34.868688
+
     """
     graph = RAG(labels, connectivity=connectivity)
 
@@ -339,6 +351,12 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
         graph.node[current]['pixel count'] += 1
         graph.node[current]['total color'] += image[index]
 
+    regions, _ = rag_node_centroids(labels, graph)
+
+    for n in graph:
+        graph.node[n].update({'centroid': np.array((regions[n]['centroid']),
+                                                   dtype=np.double)})
+
     for n in graph:
         graph.node[n]['mean color'] = (graph.node[n]['total color'] /
                                        graph.node[n]['pixel count'])
@@ -346,10 +364,15 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
     for x, y, d in graph.edges_iter(data=True):
         diff = graph.node[x]['mean color'] - graph.node[y]['mean color']
         diff = np.linalg.norm(diff)
+        prox = graph.node[x]['centroid'] - graph.node[y]['centroid']
+        prox = np.linalg.norm(prox)
         if mode == 'similarity':
             d['weight'] = math.e ** (-(diff ** 2) / sigma)
         elif mode == 'distance':
             d['weight'] = diff
+        elif mode == 'similarity_and_centroid_proximity':
+            d['weight'] = ((math.e ** (-(diff ** 2) / sigma)) *
+                           (math.e ** (-(prox ** 2) / sigma)))
         else:
             raise ValueError("The mode '%s' is not recognised" % mode)
 
@@ -490,18 +513,7 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
         out = img_cmap(out)[:, :, :3]
 
     edge_cmap = cm.get_cmap(edge_cmap)
-
-    # Handling the case where one node has multiple labels
-    # offset is 1 so that regionprops does not ignore 0
-    offset = 1
-    map_array = np.arange(labels.max() + 1)
-    for n, d in rag.nodes_iter(data=True):
-        for label in d['labels']:
-            map_array[label] = offset
-        offset += 1
-
-    rag_labels = map_array[labels]
-    regions = measure.regionprops(rag_labels)
+    regions, rag_labels = rag_node_centroids(labels, rag)
 
     for (n, data), region in zip(rag.nodes_iter(data=True), regions):
         data['centroid'] = tuple(map(int, region['centroid']))
@@ -525,3 +537,29 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     ax.add_collection(lc)
 
     return lc
+
+
+def rag_node_centroids(labels, rag):
+    """ Get centroids of the region adjacency graph nodes
+
+     Parameters
+     ----------
+     labels : ndarray, shape (M, N)
+         The labelled image.
+     rag : RAG
+         The Region Adjacency Graph.
+
+     """
+    # Handling the case where one node has multiple labels
+    # offset is 1 so that regionprops does not ignore 0
+    offset = 1
+    map_array = np.arange(labels.max() + 1)
+    for n, d in rag.nodes_iter(data=True):
+        for label in d['labels']:
+            map_array[label] = offset
+        offset += 1
+
+    rag_labels = map_array[labels]
+    regions = measure.regionprops(rag_labels)
+
+    return regions, rag_labels
