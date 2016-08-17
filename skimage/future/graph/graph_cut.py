@@ -75,7 +75,7 @@ def cut_threshold(labels, rag, thresh, in_place=True):
 
 
 def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
-                   max_edge=1.0):
+                   max_edge=1.0,  max_rec=float('Inf')):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Given an image's labels and its similarity RAG, recursively perform
@@ -101,6 +101,9 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
         The maximum possible value of an edge in the RAG. This corresponds to
         an edge between identical regions. This is used to put self
         edges in the RAG.
+    max_rec : float
+        The maximum number of recursions. A subgraph won't be further
+        subdivided if the number of recursions exceeds `max_rec`.
 
     Returns
     -------
@@ -129,7 +132,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
     for node in rag.nodes_iter():
         rag.add_edge(node, node, weight=max_edge)
 
-    _ncut_relabel(rag, thresh, num_cuts)
+    _ncut_relabel(rag, thresh, num_cuts, max_rec)
 
     map_array = np.zeros(labels.max() + 1, dtype=labels.dtype)
     # Mapping from old labels to new
@@ -236,7 +239,7 @@ def _label_all(rag, attr_name):
         d[attr_name] = new_label
 
 
-def _ncut_relabel(rag, thresh, num_cuts):
+def _ncut_relabel(rag, thresh, num_cuts, max_rec, rec_count=0):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Recursively partition the graph into 2, until further subdivision
@@ -258,9 +261,15 @@ def _ncut_relabel(rag, thresh, num_cuts):
     map_array : array
         The array which maps old labels to new ones. This is modified inside
         the function.
+    max_rec : float
+        The maximum number of recursions. A subgraph won't be further
+        subdivided if the number of recursions exceeds `max_rec`.
+    rec_count : int
+        The recursion count.
     """
     d, w = _ncut.DW_matrices(rag)
     m = w.shape[0]
+    rec_count += 1
 
     if m > 2:
         d2 = d.copy()
@@ -279,13 +288,13 @@ def _ncut_relabel(rag, thresh, num_cuts):
         ev = vectors[:, index2]
 
         cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
-        if (mcut < thresh):
+        if (mcut < thresh) and (rec_count <= max_rec):
             # Sub divide and perform N-cut again
             # Refer Shi & Malik 2001, Section 3.2.5, Page 893
             sub1, sub2 = partition_by_cut(cut_mask, rag)
 
-            _ncut_relabel(sub1, thresh, num_cuts)
-            _ncut_relabel(sub2, thresh, num_cuts)
+            _ncut_relabel(sub1, thresh, num_cuts, max_rec, rec_count)
+            _ncut_relabel(sub2, thresh, num_cuts, max_rec, rec_count)
             return
 
     # The N-cut wasn't small enough, or could not be computed.
