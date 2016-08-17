@@ -849,7 +849,7 @@ def gray2rgb(image, alpha=None):
 
         elif alpha == True and not is_alpha:
             alpha_layer = (np.ones_like(image[..., 0, np.newaxis]) *
-                           dtype_limits(image)[1])
+                           dtype_limits(image, clip_negative=False)[1])
             image = np.concatenate((image, alpha_layer), axis=2)
 
         return image
@@ -858,7 +858,7 @@ def gray2rgb(image, alpha=None):
         image = image[..., np.newaxis]
 
         if alpha:
-            alpha_layer = (np.ones_like(image) * dtype_limits(image)[1])
+            alpha_layer = (np.ones_like(image) * dtype_limits(image, clip_negative=False)[1])
             return np.concatenate(3 * (image,) + (alpha_layer,), axis=-1)
         else:
             return np.concatenate(3 * (image,), axis=-1)

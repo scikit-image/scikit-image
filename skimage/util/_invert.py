@@ -30,4 +30,4 @@ def invert(image):
     if image.dtype == 'bool':
         return ~image
     else:
-        return dtype_limits(image)[1] - image
+        return dtype_limits(image, clip_negative=False)[1] - image
