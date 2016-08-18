@@ -288,7 +288,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
         are considered adjacent. It can range from 1 to `labels.ndim`. Its
         behavior is the same as `connectivity` parameter in
         `scipy.ndimage.generate_binary_structure`.
-    mode : {'distance', 'similarity'}, optional
+    mode : {'distance', 'similarity', 'similarity_and_proximity'}, optional
         The strategy to assign edge weights.
 
             'distance' : The weight between two adjacent regions is the
@@ -301,8 +301,8 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
             :math:`c_1` and :math:`c_2` are the mean colors of the two regions.
             It represents how similar two regions are.
 
-            'similarity_and_centroid_proximity' : The weight between two
-            adjacent is :math:`e^{-d^2/sigma} * e^{-x^2/sigma}`
+            'similarity_and_proximity' : The weight between two
+            adjacent is :math:`e^{-d^2/sigma} * e^{-x^2/sigma_x}`
             where :math:`d=|c_1 - c_2|`, where :math:`c_1` and :math:`c_2` are
             the mean colors of the two regions and where :math:`x=|x_1 - x_2|`,
             where :math:`x_1` and :math:`x_2` are the centroid coordinates of
@@ -370,9 +370,10 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
             d['weight'] = math.e ** (-(diff ** 2) / sigma)
         elif mode == 'distance':
             d['weight'] = diff
-        elif mode == 'similarity_and_centroid_proximity':
+        elif mode == 'similarity_and_proximity':
+            sigma_x = np.linalg.norm(labels.shape)
             d['weight'] = ((math.e ** (-(diff ** 2) / sigma)) *
-                           (math.e ** (-(prox ** 2) / sigma)))
+                           (math.e ** (-(prox ** 2) / sigma_x)))
         else:
             raise ValueError("The mode '%s' is not recognised" % mode)
 
