@@ -31,14 +31,19 @@ Technique (SART).
 
 For further information on tomographic reconstruction, see
 
-.. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic Imaging", IEEE Press 1988. http://www.slaney.org/pct/pct-toc.html
+.. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic Imaging",
+       IEEE Press 1988. http://www.slaney.org/pct/pct-toc.html
 
-.. [2] Wikipedia, Radon transform, http://en.wikipedia.org/wiki/Radon_transform#Relationship_with_the_Fourier_transform
+.. [2] Wikipedia, Radon transform,
+       http://en.wikipedia.org/wiki/Radon_transform#Relationship_with_the_Fourier_transform
 
-.. [3] S Kaczmarz, "Angenaeherte Aufloesung von Systemen linearer Gleichungen", Bulletin International de l'Academie Polonaise des Sciences et des Lettres, 35 pp 355--357 (1937)
+.. [3] S Kaczmarz, "Angenaeherte Aufloesung von Systemen linearer
+       Gleichungen", Bulletin International de l'Academie Polonaise
+       des Sciences et des Lettres, 35 pp 355--357 (1937)
 
 .. [4] AH Andersen, AC Kak, "Simultaneous algebraic reconstruction
-        technique (SART): a superior implementation of the ART algorithm", Ultrasonic Imaging 6 pp 81--94 (1984)
+       technique (SART): a superior implementation of the ART algorithm",
+       Ultrasonic Imaging 6 pp 81--94 (1984)
 
 The forward transform
 =====================
