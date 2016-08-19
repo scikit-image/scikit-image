@@ -56,6 +56,8 @@ def radon(image, theta=None, circle=None):
     if theta is None:
         theta = np.arange(180)
     if circle is None:
+        warn('The default of `circle` in `skimage.transform.radon` '
+             'will change to `False` in version 0.15.')
         circle = False
 
     if circle:
@@ -200,6 +202,8 @@ def iradon(radon_image, theta=None, output_size=None,
             output_size = int(np.floor(np.sqrt((radon_image.shape[0]) ** 2
                                                / 2.0)))
     if circle is None:
+        warn('The default of `circle` in `skimage.transform.iradon` '
+             'will change to `False` in version 0.15.')
         circle = False
     if circle:
         radon_image = _sinogram_circle_to_square(radon_image)
