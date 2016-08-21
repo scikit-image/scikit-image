@@ -902,11 +902,11 @@ def threshold_sauvola(image, method='sauvola', window_size=15, k=0.2, r=128.,
     >>> from skimage import data
     >>> image = data.page()
     >>> binary_sauvola = threshold_sauvola(image, method='sauvola',
-                                           window_size=15, k=0.2, r=128)
+    ...                                    window_size=15, k=0.2, r=128)
     >>> binary_wolf = threshold_sauvola(image, method='wolf',
-                                        window_size=7, k=0.2)
+    ...                                 window_size=7, k=0.2)
     >>> binary_phansalkar = threshold_sauvola(image, method='phansalkar',
-                                              window_size=7, k=0.2, r=128)
+    ...                                       window_size=7, k=0.2, r=128)
     """
     image_norm = None
     if len(image.shape) != 2:
