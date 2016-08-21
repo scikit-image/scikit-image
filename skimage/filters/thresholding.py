@@ -745,7 +745,7 @@ def _mean_std(image, w):
            using integral images." in Document Recognition and
            Retrieval XV, (San Jose, USA), Jan. 2008.
     """
-    from skimage.transform.integral import integral_image  # To avoid
+    from skimage.transform.integral import integral_image
 
     if w == 1 or w % 2 == 0:
         raise ValueError(
@@ -823,15 +823,15 @@ def threshold_niblack(image, window_size=15, k=0.2, offset=0):
     return image > (t - offset)
 
 
-def threshold_sauvola(image, method='sauvola', window_size=15, k=0.2, r=128., offset=0,
-                      p=2, q=10):
+def threshold_sauvola(image, method='sauvola', window_size=15, k=0.2, r=128.,
+                      p=2, q=10, offset=0):
     """Applies Sauvola local threshold to an array. Sauvola is a
     modification of Niblack technique.
 
     In the original method a threshold T is calculated for every pixel
     in the image using the following formula:
 
-    T = m(x,y) * (1 + k * ((s(x,y) / R) - 1))
+    T = m(x,y) * (1 + k * ((s(x,y) / R) - 1)) - offset
 
     where m(x,y) and s(x,y) are the mean and standard deviation of
     pixel (x,y) neighborhood defined by a rectangular window with size w
@@ -841,7 +841,7 @@ def threshold_sauvola(image, method='sauvola', window_size=15, k=0.2, r=128., of
 
     In Wolf's variation the threshold T is given by:
 
-    T = (1 - k) * m(x,y) + k * M + k * (s(x,y) / R) * (m(x,y) - M)
+    T = (1 - k) * m(x,y) + k * M + k * (s(x,y) / R) * (m(x,y) - M) - offset
 
     where R is the maximum standard deviation found in all local
     neighborhoods and M is the minimum pixel intensity in image.
@@ -849,7 +849,7 @@ def threshold_sauvola(image, method='sauvola', window_size=15, k=0.2, r=128., of
     In Phansalkar's variation image pixels are normalized and the
     threshold T is given by:
 
-    T = m * (1 + p * exp(-q * m(x,y)) + k * ((s(x,y) / R) - 1))
+    T = m * (1 + p * exp(-q * m(x,y)) + k * ((s(x,y) / R) - 1)) - offset
 
     where p and q are fixed values of 2 and 10 respectively. The
     other parameters have the same meaning as in the previous methods.
@@ -865,7 +865,6 @@ def threshold_sauvola(image, method='sauvola', window_size=15, k=0.2, r=128., of
         * 'wolf': Uses Wolf's variation described in [2]_.
         * 'phansalkar': Uses Phansalkar's variation described in [3]_.
 
-        Default: 'sauvola'.
     window_size : int, optional
         Odd size of pixel neighborhood window (e.g. 3, 5, 7...).
     k : float, optional
@@ -896,6 +895,7 @@ def threshold_sauvola(image, method='sauvola', window_size=15, k=0.2, r=128., of
            local thresholding for detection of nuclei in diversity
            stained cytology images.", International Conference on
            Communications and Signal Processing (ICCSP): 218-220.
+           DOI:10.1109/ICCSP.2011.5739305
 
     Examples
     --------
