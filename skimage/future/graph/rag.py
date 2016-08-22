@@ -351,26 +351,26 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
         graph.node[current]['pixel count'] += 1
         graph.node[current]['total color'] += image[index]
 
-    regions, _ = rag_node_centroids(labels, graph)
-
-    for n in graph:
-        graph.node[n].update({'centroid': np.array((regions[n]['centroid']),
-                                                   dtype=np.double)})
-
     for n in graph:
         graph.node[n]['mean color'] = (graph.node[n]['total color'] /
                                        graph.node[n]['pixel count'])
 
+    regions, _ = rag_node_centroids(labels, graph)
+
+    for (n, data), region in zip(graph.nodes_iter(data=True), regions):
+        graph.node[n].update({'centroid': np.array(region['centroid'],
+                                                   dtype=np.double)})
+
     for x, y, d in graph.edges_iter(data=True):
         diff = graph.node[x]['mean color'] - graph.node[y]['mean color']
         diff = np.linalg.norm(diff)
-        prox = graph.node[x]['centroid'] - graph.node[y]['centroid']
-        prox = np.linalg.norm(prox)
         if mode == 'similarity':
             d['weight'] = math.e ** (-(diff ** 2) / sigma)
         elif mode == 'distance':
             d['weight'] = diff
         elif mode == 'similarity_and_proximity':
+            prox = graph.node[x]['centroid'] - graph.node[y]['centroid']
+            prox = np.linalg.norm(prox)
             sigma_x = np.linalg.norm(labels.shape)
             d['weight'] = ((math.e ** (-(diff ** 2) / sigma)) *
                            (math.e ** (-(prox ** 2) / sigma_x)))
@@ -541,16 +541,24 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
 
 
 def rag_node_centroids(labels, rag):
-    """ Get centroids of the region adjacency graph nodes
+    """Get centroids of the region adjacency graph nodes
 
-     Parameters
-     ----------
-     labels : ndarray, shape (M, N)
-         The labelled image.
-     rag : RAG
-         The Region Adjacency Graph.
+    Parameters
+    ----------
+    labels : ndarray, shape (M, N)
+        The labelled image.
+    rag : RAG
+        The Region Adjacency Graph.
 
-     """
+    Returns
+    -------
+    regions : list of RegionProperties
+        Please refer to `skimage.measure.regionprops` for more information
+        on the available region properties.
+    rag_labels : ndarray, shape (M, N)
+        The relabelled labelled image.
+
+    """
     # Handling the case where one node has multiple labels
     # offset is 1 so that regionprops does not ignore 0
     offset = 1

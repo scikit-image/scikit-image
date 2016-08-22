@@ -10,4 +10,5 @@ __all__ = ['rag_mean_color',
            'show_rag',
            'merge_hierarchical',
            'rag_boundary',
-           'RAG']
+           'RAG',
+           'rag_node_centroids']
