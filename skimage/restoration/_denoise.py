@@ -1,4 +1,5 @@
 # coding: utf-8
+import scipy.stats
 import numpy as np
 from math import ceil
 from .. import img_as_float
@@ -496,14 +497,14 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
     ----------
     .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
        by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
+       DOI:10.1093/biomet/81.3.425
     """
     # consider regions with detail coefficients exactly zero to be masked out
     detail_coeffs = detail_coeffs[np.nonzero(detail_coeffs)]
 
     if distribution.lower() == 'gaussian':
         # 75th quantile of the underlying, symmetric noise distribution:
-        # denom = scipy.stats.norm.ppf(0.75)
-        denom = 0.67448975019608171
+        denom = scipy.stats.norm.ppf(0.75)
         sigma = np.median(np.abs(detail_coeffs)) / denom
     else:
         raise ValueError("Only Gaussian noise estimation is currently "
@@ -513,7 +514,7 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
 
 def estimate_sigma(im, multichannel, average_sigmas=True):
     """
-    Robust wavelet-based estimator of the noise standard deviation.
+    Robust wavelet-based estimator of the (Gaussian) noise standard deviation.
 
     Parameters
     ----------
@@ -535,13 +536,15 @@ def estimate_sigma(im, multichannel, average_sigmas=True):
 
     Notes
     -----
-    The estimation algorithm is based on the median absolute deviation of the
+    This function assumes the noise follows a Gaussian distribution. The
+    estimation algorithm is based on the median absolute deviation of the
     wavelet detail coefficients as described in section 4.2 of [1]_.
 
     References
     ----------
     .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
        by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
+       DOI:10.1093/biomet/81.3.425
 
     Examples
     --------
