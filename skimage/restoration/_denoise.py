@@ -1,4 +1,5 @@
 # coding: utf-8
+import warnings
 import scipy.stats
 import numpy as np
 from math import ceil
@@ -512,7 +513,7 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
     return sigma
 
 
-def estimate_sigma(im, multichannel, average_sigmas=True):
+def estimate_sigma(im, multichannel=False, average_sigmas=False):
     """
     Robust wavelet-based estimator of the (Gaussian) noise standard deviation.
 
@@ -562,7 +563,11 @@ def estimate_sigma(im, multichannel, average_sigmas=True):
         if average_sigmas:
             sigmas = np.mean(sigmas)
         return sigmas
-
+    elif im.shape[-1] <= 4:
+        warnings.warn(
+            "image is size {} on the last axis, but ".format(im.shape[-1]) +
+            "multichannel is False.  If this is a color image, please set "
+            "multchannel to True for proper noise estimation.")
     coeffs = pywt.dwtn(im, wavelet='db2')
     detail_coeffs = coeffs['d' * im.ndim]
     return _sigma_est_dwt(detail_coeffs, distribution='Gaussian')
