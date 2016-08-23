@@ -5,7 +5,6 @@ from math import ceil
 from .. import img_as_float
 from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 from .._shared.utils import skimage_deprecation, warn
-import warnings
 import pywt
 
 
@@ -89,15 +88,15 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                                  "".format(image.ndim))
         elif image.shape[2] not in (3, 4):
             if image.shape[2] > 4:
-                warnings.warn("The last axis of the input image is interpreted "
-                              "as channels. Input image with shape {0} has {1} "
-                              "channels in last axis. ``denoise_bilateral`` is "
-                              "implemented for 2D grayscale and color images "
-                              "only.".format(image.shape, image.shape[2]))
+                msg = ("The last axis of the input image is interpreted as "
+                       "channels. Input image with shape {0} has {1} channels "
+                       "in last axis. ``denoise_bilateral`` is implemented "
+                       "for 2D grayscale and color images only")
+                warn(msg.format(image.shape, image.shape[2]))
             else:
                 msg = "Input image must be grayscale, RGB, or RGBA; " \
                       "but has shape {0}."
-                warnings.warn(msg.format(image.shape))
+                warn(msg.format(image.shape))
     else:
         if image.ndim > 2:
             raise ValueError("Bilateral filter is not implemented for "
@@ -111,7 +110,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
              '`sigma_color`. The `sigma_range` keyword argument '
              'will be removed in v0.14', skimage_deprecation)
 
-        #If sigma_range is provided, assign it to sigma_color
+        # If sigma_range is provided, assign it to sigma_color
         sigma_color = sigma_range
 
     if win_size is None:
