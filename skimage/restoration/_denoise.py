@@ -1,5 +1,4 @@
 # coding: utf-8
-import warnings
 import scipy.stats
 import numpy as np
 from math import ceil
@@ -564,10 +563,10 @@ def estimate_sigma(im, multichannel=False, average_sigmas=False):
             sigmas = np.mean(sigmas)
         return sigmas
     elif im.shape[-1] <= 4:
-        warnings.warn(
-            "image is size {} on the last axis, but ".format(im.shape[-1]) +
-            "multichannel is False.  If this is a color image, please set "
-            "multchannel to True for proper noise estimation.")
+        msg = ("image is size {0} on the last axis, but multichannel is "
+               "False.  If this is a color image, please set multichannel "
+               "to True for proper noise estimation.")
+        warn(msg.format(im.shape[-1]))
     coeffs = pywt.dwtn(im, wavelet='db2')
     detail_coeffs = coeffs['d' * im.ndim]
     return _sigma_est_dwt(detail_coeffs, distribution='Gaussian')

@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.testing import (run_module_suite, assert_raises, assert_equal,
-                           assert_almost_equal, dec)
+                           assert_almost_equal, dec, assert_warns)
 
 from skimage import restoration, data, color, img_as_float, measure
 from skimage._shared._warnings import expected_warnings
@@ -400,6 +400,9 @@ def test_estimate_sigma_color():
                                             average_sigmas=False)
     assert_equal(len(sigma_list), img.shape[-1])
     assert_almost_equal(sigma_list[0], sigma_est, decimal=2)
+
+    # default multichannel=False should raise a warning about last axis size
+    assert_warns(UserWarning, restoration.estimate_sigma, img)
 
 
 if __name__ == "__main__":
