@@ -71,8 +71,8 @@ class FastDRaW():
             warn('The size of the downsampled image if larger than the '
                  'original image. The computation time could be affected.')
         
-        ## Compute the graph's Laplacian for both the full resolution `L` and the 
-        ## down-sampled `ds_L` images
+        ## Compute the graph's Laplacian for both the full resolution `L` 
+        ## and the down-sampled `ds_L` images
         self.L = self._buildGraph(self.image)
         ratio = float(self.image.shape[0])/self.image.shape[1]
         self.dim = (int(downsampled_size*ratio), downsampled_size)
@@ -162,7 +162,8 @@ class FastDRaW():
             else:
                 return segm
         
-        ## 2- Create down-sampled (coarse) image size and compute the energy map
+        ## 2- Create down-sampled (coarse) image size 
+        ## and compute the energy map
         ds_labels = np.zeros(self.dim)
         ds_entropyMap = 0
         for i in np.unique(labels):
