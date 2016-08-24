@@ -1,10 +1,10 @@
 # coding: utf-8
+import scipy.stats
 import numpy as np
 from math import ceil
 from .. import img_as_float
 from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 from .._shared.utils import skimage_deprecation, warn
-import warnings
 import pywt
 
 
@@ -88,15 +88,15 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                                  "".format(image.ndim))
         elif image.shape[2] not in (3, 4):
             if image.shape[2] > 4:
-                warnings.warn("The last axis of the input image is interpreted "
-                              "as channels. Input image with shape {0} has {1} "
-                              "channels in last axis. ``denoise_bilateral`` is "
-                              "implemented for 2D grayscale and color images "
-                              "only.".format(image.shape, image.shape[2]))
+                msg = ("The last axis of the input image is interpreted as "
+                       "channels. Input image with shape {0} has {1} channels "
+                       "in last axis. ``denoise_bilateral`` is implemented "
+                       "for 2D grayscale and color images only")
+                warn(msg.format(image.shape, image.shape[2]))
             else:
                 msg = "Input image must be grayscale, RGB, or RGBA; " \
                       "but has shape {0}."
-                warnings.warn(msg.format(image.shape))
+                warn(msg.format(image.shape))
     else:
         if image.ndim > 2:
             raise ValueError("Bilateral filter is not implemented for "
@@ -110,7 +110,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
              '`sigma_color`. The `sigma_range` keyword argument '
              'will be removed in v0.14', skimage_deprecation)
 
-        #If sigma_range is provided, assign it to sigma_color
+        # If sigma_range is provided, assign it to sigma_color
         sigma_color = sigma_range
 
     if win_size is None:
@@ -472,3 +472,100 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
 
     clip_range = (-1, 1) if img.min() < 0 else (0, 1)
     return np.clip(out, *clip_range)
+
+
+def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
+    """
+    Calculation of the robust median estimator of the noise standard
+    deviation.
+
+    Parameters
+    ----------
+    detail_coeffs : ndarray
+        The detail coefficients corresponding to the discrete wavelet
+        transform of an image.
+    distribution : str
+        The underlying noise distribution.
+
+    Returns
+    -------
+    sigma : float
+        The estimated noise standard deviation (see section 4.2 of [1]_).
+
+    References
+    ----------
+    .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
+       by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
+       DOI:10.1093/biomet/81.3.425
+    """
+    # consider regions with detail coefficients exactly zero to be masked out
+    detail_coeffs = detail_coeffs[np.nonzero(detail_coeffs)]
+
+    if distribution.lower() == 'gaussian':
+        # 75th quantile of the underlying, symmetric noise distribution:
+        denom = scipy.stats.norm.ppf(0.75)
+        sigma = np.median(np.abs(detail_coeffs)) / denom
+    else:
+        raise ValueError("Only Gaussian noise estimation is currently "
+                         "supported")
+    return sigma
+
+
+def estimate_sigma(im, multichannel=False, average_sigmas=False):
+    """
+    Robust wavelet-based estimator of the (Gaussian) noise standard deviation.
+
+    Parameters
+    ----------
+    im : ndarray
+        Image for which to estimate the noise standard deviation.
+    multichannel : bool
+        Estimate sigma separately for each channel.
+    average_sigmas : bool, optional
+        If true, average the channel estimates of `sigma`.  Otherwise return
+        a list of sigmas corresponding to each channel.
+
+    Returns
+    -------
+    sigma : float or list
+        Estimated noise standard deviation(s).  If `multichannel` is True and
+        `average_sigmas` is False, a separate noise estimate for each channel
+        is returned.  Otherwise, the average of the individual channel
+        estimates is returned.
+
+    Notes
+    -----
+    This function assumes the noise follows a Gaussian distribution. The
+    estimation algorithm is based on the median absolute deviation of the
+    wavelet detail coefficients as described in section 4.2 of [1]_.
+
+    References
+    ----------
+    .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
+       by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
+       DOI:10.1093/biomet/81.3.425
+
+    Examples
+    --------
+    >>> import skimage.data
+    >>> from skimage import img_as_float
+    >>> img = img_as_float(skimage.data.camera())
+    >>> sigma = 0.1
+    >>> img = img + sigma * np.random.standard_normal(img.shape)
+    >>> sigma_hat = estimate_sigma(img, multichannel=False)
+    """
+    if multichannel:
+        nchannels = im.shape[-1]
+        sigmas = [estimate_sigma(
+            im[..., c], multichannel=False) for c in range(nchannels)]
+        if average_sigmas:
+            sigmas = np.mean(sigmas)
+        return sigmas
+    elif im.shape[-1] <= 4:
+        msg = ("image is size {0} on the last axis, but multichannel is "
+               "False.  If this is a color image, please set multichannel "
+               "to True for proper noise estimation.")
+        warn(msg.format(im.shape[-1]))
+    coeffs = pywt.dwtn(im, wavelet='db2')
+    detail_coeffs = coeffs['d' * im.ndim]
+    return _sigma_est_dwt(detail_coeffs, distribution='Gaussian')
