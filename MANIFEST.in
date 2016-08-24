@@ -1,4 +1,3 @@
-include setup.cfg
 include setup*.py
 include MANIFEST.in
 include *.txt
