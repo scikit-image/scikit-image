@@ -197,7 +197,7 @@ function main () {
     InstallMiniconda $env:PYTHON_VERSION $env:PYTHON_ARCH $env:PYTHON
     InstallMinicondaPip $env:PYTHON
     UpdateConda $env:PYTHON
-    InstallCondaPackages $env:PYTHON "numpy scipy cython wheel nose msvc_runtime"
+    InstallCondaPackages $env:PYTHON "numpy scipy cython wheel nose msvc_runtime numpydoc"
 }
 
 main
