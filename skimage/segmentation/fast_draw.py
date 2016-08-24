@@ -1,4 +1,3 @@
-#!/usr/bin/python
 import numpy as np
 from scipy.ndimage import distance_transform_edt
 from scipy.sparse import csr_matrix, coo_matrix
@@ -13,52 +12,61 @@ from ..color import rgb2grey
 from .._shared.utils import warn
 
 class FastDRaW():
+    """A fast segmentation algorithm based on the random walker algorithm.
+        
+    FastDRaW implemented for 2D images as described in [1].
+    The algorithm performs in a two-step segmetnation. In the first step, a
+    random walker segmentation is performed on a small (down-sampled)
+    version of the image to obtain a coarse segmentation contour. In the
+    second step, the result is refined by applying a second random walker
+    segmentation over a narrow strip around the coarse contour.
+    
+    Parameters
+    ----------
+    image : array_like
+        Image to be segmented. If `image` is multi-channel it will
+        be converted to gray-level image before segmentation.
+    beta : float
+        Penalization coefficient for the random walker motion
+        (the greater `beta`, the more difficult the diffusion).
+    downsampled_size : int, default 100
+        The size of the down-sampled image. Should be smaller than the
+        size of the original image. Recommended values between 100 and 200.
+    tol : float
+        tolerance to achieve when solving the linear system, in
+        cg' and 'cg_mg' modes.
+    return_full_prob : bool, default False
+        If True, the probability that a pixel belongs to each of the labels
+        will be returned, instead of boolean array.
+    
+    See also
+    --------
+    skimage.segmentation.random_walker: random walker segmentation
+        The original random walker algorithm.
+        
+    References
+    ----------
+    [1] H.-E. Gueziri, L. Lakhdar, M. J. McGuffin and C. Laporte,
+    "FastDRaW - Fast Delineation by Random Walker: application to large
+    images", MICCAI Workshop on Interactive Medical Image Computing (IMIC),
+    Athens, Greece, (2016).
+    
+    Examples
+    --------
+    >>> from skimage.data import coins
+    >>> image = coins()
+    >>> labels = np.zeros_like(image)
+    >>> labels[[129, 199], [155, 155]] = 1 # label some pixels as foreground
+    >>> labels[[162, 224], [131, 184]] = 2 # label some pixels as background
+    >>> fastdraw = FastDRaW(image, beta=100, downsampled_size=100)
+    >>> segm = fastdraw.update(labels)
+    >>> imshow(image,'gray')
+    >>> imshow(segm, alpha=0.7)
+    """
     
     def __init__(self, image, beta=300, downsampled_size=100,
                  tol=1.e-3, return_full_prob=False):
-        """FastDRaW - Fast Delineation by Random walker algorithm.
         
-        FastDRaW implemented for 2D images as described in
-        H.-E. Gueziri et al. "FastDRaW - Fast Delineation by Random Walker:
-        application to large images", MICCAI Workshop on Interactive Medical
-        Image Computation (IMIC), Athens, Greece, (2016).
-        
-        Parameters
-        ----------
-        image : array_like
-            Image to be segmented. If `image` is multi-channel it will
-            be converted to gray-level image before segmentation.
-        beta : float
-            Penalization coefficient for the random walker motion
-            (the greater `beta`, the more difficult the diffusion).
-        downsampled_size : integer, default 100
-            The size of the down-sampled image. Should be smaller than the
-            size of the original image. Recommended values between 100 and 200.
-        tol : float
-            tolerance to achieve when solving the linear system, in
-            cg' and 'cg_mg' modes.
-        return_full_prob : bool, default False
-            If True, the probability that a pixel belongs to each of the labels
-            will be returned, instead of boolean array.
-        
-        See also
-        --------
-        skimage.segmentation.random_walker: random walker segmentation
-            The original random walker algorithm.
-            
-        Examples
-        --------
-        >>> from skimage.data import coins
-        >>> image = coins()
-        >>> labels = np.zeros_like(image)
-        >>> labels[[129, 199], [155, 155]] = 1
-        >>> labels[[162, 224], [131, 184]] = 2
-        >>> fastdraw = FastDRaW(image, beta=100, downsampled_size=100)
-        >>> segm = fastdraw.update(labels)
-        >>> imshow(image,'gray')
-        >>> imshow(segm, alpha=0.7)
-    """
-    
         assert (beta > 0), 'beta should be positive.'
         self.beta = beta
         self.return_full_prob = return_full_prob
@@ -134,7 +142,7 @@ class FastDRaW():
             Array of seed markers labeled with different positive integers
             (each label category is represented with an integer value). 
             Zero-labeled pixels represent unlabeled pixels.
-        target_label : integer
+        target_label : int
             The label category to comput the segmentation for. `labels` should
             contain at least one pixel with value `target_label`
         
@@ -252,4 +260,18 @@ class FastDRaW():
         else:
             segm = (x0 >= 0.5)
             return segm
-        
+     
+     
+     
+if __name__=="__main__":
+    from skimage.data import coins
+    import matplotlib.pyplot as plt
+    
+    image = coins()
+    labels = np.zeros_like(image)
+    labels[[129, 199], [155, 155]] = 1 # label some pixels as foreground
+    labels[[162, 224], [131, 184]] = 2 # label some pixels as background
+    fastdraw = FastDRaW(image, beta=100, downsampled_size=100)
+    segm = fastdraw.update(labels)
+    imshow(image,'gray')
+    imshow(segm, alpha=0.7)
