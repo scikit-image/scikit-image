@@ -129,7 +129,7 @@ class FastDRaW():
         
         return L
         
-    def update(self, labels, target_label=1):
+    def update(self, labels, target_label=1, k=1):
         """Updates the segmentation according to `labels` using the
         FastDRaW algorithm.
         The segmentation is computed in two stages. (1) coputes a coarse 
@@ -145,6 +145,9 @@ class FastDRaW():
         target_label : int
             The label category to comput the segmentation for. `labels` should
             contain at least one pixel with value `target_label`
+        k : float
+            Control the size of the region of interest (ROI). Large positive
+            value of `k` allows a larger ROI.
         
         Returns
         -------
@@ -177,9 +180,9 @@ class FastDRaW():
         for i in np.unique(labels):
             if i != 0:
                 # 2.1- Compute the coarse label image
-                x,y = np.where(labels == i)
-                ds_labels[np.int32(x*self.full_to_ds_ratio[0]),
-                          np.int32(y*self.full_to_ds_ratio[1])] = i
+                y,x = np.where(labels == i)
+                ds_labels[np.int32(y*self.full_to_ds_ratio[0]),
+                          np.int32(x*self.full_to_ds_ratio[1])] = i
                 # 2.2- Compute the energy map
                 M = np.ones_like(ds_labels)
                 M[ds_labels == i] = 0
@@ -188,7 +191,7 @@ class FastDRaW():
         
         # 2.3- Normalize the energy map and compute the ROI
         ds_entropyMap = ds_entropyMap / ds_entropyMap.max()
-        threshold = ds_entropyMap.mean() + ds_entropyMap.std()
+        threshold = ds_entropyMap.mean() + k*ds_entropyMap.std()
         self.ds_maskROI = self.ds_maskROI | (ds_entropyMap <= threshold)
     
         ## 3- Performe a corse RW segmentation on the down-sampled image
@@ -210,7 +213,7 @@ class FastDRaW():
         ds_proba = np.zeros_like(ds_labels, dtype=np.float32)
         ds_proba[(ds_labels == 0) & (self.ds_maskROI)] = probability
         ds_proba[(ds_labels == target_label) & (self.ds_maskROI)] = 1   
-    
+        
         # 3.4- Compute the corse segmentation result and the refinement region
         #      around the corse result
         mask = ds_proba >= 0.5
@@ -222,25 +225,36 @@ class FastDRaW():
         ## 4- Performe a fine RW segmentation on the full resolution image
         ##    only on the refinement region
         labeledImage = find_label(self.maskROI, background=True)
-        labeledImage = skresize(labeledImage, labels.shape, order=0,
-                                preserve_range=True)
-        labeledImage = labeledImage.astype(np.int8)
+        ds_added_labels = ds_labels
+        # for pixels outside the refinement region (ring), if their connected
+        # region contains `target_label` pixels, than all pixels of the region 
+        # should be labeled as `target_label`.
+        # TODO : this code could be optimized
+        for area in np.unique(labeledImage):
+            if area != -1:
+                if target_label in ds_labels[labeledImage == area]:
+                    ds_added_labels[labeledImage == area] = target_label
         
+        added_labels = skresize(ds_added_labels, labels.shape, order=0,
+                                preserve_range=True)
+
         self.maskROI = skresize(self.maskROI, labels.shape, order=0,
                                 preserve_range=True)
         self.maskROI = self.maskROI.astype(np.bool)
         
+        
+        
         # 4.1- Extract labelled and unlabelled vertices
-        m_unlabeled = (labels == 0) & (self.maskROI)
-        m_foreground = (labels == target_label) | (labeledImage >= 1)
+        m_unlabeled = (added_labels == 0) & (self.maskROI)
+        m_foreground = (added_labels == target_label)
         
         unlabeled = np.ravel_multi_index(np.where(m_unlabeled), labels.shape)
-        labeled = np.ravel_multi_index(np.where((labels > 0) | \
-                                (labeledImage >= 0)), labels.shape)
-        
+        labeled = np.ravel_multi_index(np.where((m_foreground) | \
+                                 (added_labels > 0)), labels.shape)
+
         # 4.2- Preparing the right handside of the equation BT xs
         B = self.L[unlabeled][:, labeled]
-        mask = (m_foreground).flatten()[labeled]
+        mask = (added_labels[added_labels > 0]).flatten() == target_label
         fs = csr_matrix(mask).transpose()
         rhs = B * fs
         
@@ -261,17 +275,3 @@ class FastDRaW():
             segm = (x0 >= 0.5)
             return segm
      
-     
-     
-if __name__=="__main__":
-    from skimage.data import coins
-    import matplotlib.pyplot as plt
-    
-    image = coins()
-    labels = np.zeros_like(image)
-    labels[[129, 199], [155, 155]] = 1 # label some pixels as foreground
-    labels[[162, 224], [131, 184]] = 2 # label some pixels as background
-    fastdraw = FastDRaW(image, beta=100, downsampled_size=100)
-    segm = fastdraw.update(labels)
-    imshow(image,'gray')
-    imshow(segm, alpha=0.7)
