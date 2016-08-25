@@ -36,6 +36,7 @@ retry () {
 
 # add build dependencies
 echo "cython>=0.23.4" >> requirements.txt
+echo "numpydoc>=0.6" >> requirements.txt
 
 if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     sed -i 's/>=/==/g' requirements.txt
