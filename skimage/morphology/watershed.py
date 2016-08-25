@@ -133,7 +133,7 @@ def _compute_neighbors(image, structure, offset):
 
 def watershed(image, markers, connectivity=1, offset=None, mask=None,
               compactness=0):
-    """Find watershed basins [1]_ [2]_ in `image` flooded from given `markers`.
+    """Find watershed basins in `image` flooded from given `markers`.
 
     Parameters
     ----------
@@ -172,10 +172,11 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
 
     Notes
     -----
-    This function implements a watershed algorithm [1]_ that apportions pixels
-    into marked basins. The algorithm uses a priority queue to hold the pixels
-    with the metric for the priority queue being pixel value, then the time of
-    entry into the queue - this settles ties in favor of the closest marker.
+    This function implements a watershed algorithm [1]_ [2]_ that apportions
+    pixels into marked basins. The algorithm uses a priority queue to hold
+    the pixels with the metric for the priority queue being pixel value, then
+    the time of entry into the queue - this settles ties in favor of the
+    closest marker.
 
     Some ideas taken from
     Soille, "Automated Basin Delineation from Digital Elevation Models Using
