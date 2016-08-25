@@ -165,6 +165,8 @@ labels = np.zeros_like(image)
 fig = plt.figure()
 ax1 = fig.add_subplot(131)
 pltimg = plt.imshow(rgb_image)
+ax1.set_title('Original image')
+plt.axis('off')
 
 # set callback functions
 did = fig.canvas.mpl_connect('motion_notify_event', onDraw)
@@ -175,11 +177,13 @@ kid = fig.canvas.mpl_connect('key_press_event', onKeypress)
 ax2 = fig.add_subplot(132)
 ax2.imshow(original_image)
 ax2.set_title('FastDRaW')
+plt.axis('off')
 
 # display Random Walker result image
 ax3 = fig.add_subplot(133)
 ax3.imshow(original_image)
 ax3.set_title('RW')
+plt.axis('off')
 
 # size (in pixels) of the drawing brush
 brush = 3
