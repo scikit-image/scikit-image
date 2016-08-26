@@ -3,11 +3,12 @@ from scipy.ndimage import distance_transform_edt
 from scipy.sparse import csr_matrix, coo_matrix
 from scipy.sparse.linalg import cg as cg_solver
 
-from ..transform import resize as skresize
+from ..transform import resize
 from ..measure import label as find_label
-from ..morphology import dilation, disk
+from ..morphology import binary_dilation, disk
 from ..segmentation import random_walker
 from ..color import rgb2grey
+from .. import img_as_float
 
 from .._shared.utils import warn
 
@@ -74,7 +75,7 @@ class FastDRaW():
         self.image = rgb2grey(image)
         ## It is important to normalize the data between [0,1] so that beta
         ## makes sens
-        self.image = self.image / 255.0
+        self.image = img_as_float(self.image)
         
         if downsampled_size > min(self.image.shape):
             warn('The size of the downsampled image if larger than the '
@@ -85,7 +86,7 @@ class FastDRaW():
         self.L = self._buildGraph(self.image)
         ratio = float(self.image.shape[0])/self.image.shape[1]
         self.dim = (int(downsampled_size*ratio), downsampled_size)
-        self.ds_image = skresize(self.image, self.dim, order=0,
+        self.ds_image = resize(self.image, self.dim, order=0,
                                  preserve_range=True)
         self.ds_L = self._buildGraph(self.ds_image)
         
@@ -101,7 +102,7 @@ class FastDRaW():
         and returns the graph's Laplacian `L`.
         """
         # Building the graph: vertices, edges and weights
-        nsize = reduce(lambda x,y: x*y,image.shape,1)
+        nsize = reduce(lambda x, y : x*y, image.shape,1)
         vertices = np.arange(nsize).reshape(image.shape)
         edges_right = np.vstack((vertices[:, :-1].ravel(),
                                  vertices[:, 1:].ravel()))
@@ -111,7 +112,7 @@ class FastDRaW():
         
         gr_right = np.abs(image[:, :-1] - image[:, 1:]).ravel()
         gr_down = np.abs(image[:-1] - image[1:]).ravel()
-        weights = np.exp(- self.beta * np.r_[gr_right, gr_down]**2)+1e-6
+        weights = np.exp(-self.beta * np.r_[gr_right, gr_down]**2)+1e-6
         
         # Compute the graph's Laplacian L
         pixel_nb = edges.max() + 1
@@ -129,6 +130,140 @@ class FastDRaW():
         L = lap.tocsr()
         
         return L
+        
+    def _check_parameters(self, labels, target_label):
+        if target_label not in np.unique(labels):
+            warn('The target label '+str(target_label)+ \
+                 ' does not match any label')
+            return 1
+        if (labels != 0).all():
+            warn('The segmentation is computed on the unlabeled area '
+                 '(labels == 0). No zero valued areas in labels were '
+                 'found. Returning provided labels.')
+            return -1
+        return 1
+                
+    def _compute_relevance_map(self, labels):
+        """Computes the relevance map from labels and initialize 
+        down-sampled label image `ds_labels`.
+        
+        The relevance map assumes that the object boundary is more likely to
+        be located somwhere between different label categories, i.e. two labels
+        of the same category generate a low energy, where two labels of 
+        different categories generate high energy, therefore precluding 
+        redundent label information. The relevance map is computed using the 
+        sum of the distance transforms for each label category."""
+        
+        self.ds_labels = np.zeros(self.dim)
+        ds_relevance_map = 0
+        for i in np.unique(labels):
+            if i != 0:
+                # 2.1- Compute the coarse label image
+                y,x = np.where(labels == i)
+                self.ds_labels[np.int32(y*self.full_to_ds_ratio[0]),
+                          np.int32(x*self.full_to_ds_ratio[1])] = i
+                # 2.2- Compute the energy map
+                M = np.ones_like(self.ds_labels)
+                M[self.ds_labels == i] = 0
+                distance_map = distance_transform_edt(M)
+                ds_relevance_map +=  distance_map
+        
+        # 2.3- Normalize the energy map and compute the ROI
+        ds_relevance_map = ds_relevance_map / ds_relevance_map.max()
+        return ds_relevance_map
+        
+    def _coarse_random_walker(self, target_label):
+        """Performs a coarse random walker segmentation on the down-sampled
+        image.
+        
+        Parameters
+        ----------
+        target_label : int
+            The label category to comput the segmentation for. `labels` should
+            contain at least one pixel with value `target_label`
+        
+        Returns
+        -------
+        ds_probability : ndarray of the same size as `ds_image`
+            Array of the probability between [0.0, 1.0], of each pixel
+            to belong to `target_label`
+        """
+        unlabeled = np.ravel_multi_index(np.where((self.ds_labels == 0) & \
+                        (self.ds_maskROI)), self.ds_labels.shape)
+        labeled = np.ravel_multi_index(np.where((self.ds_labels > 0) & \
+                        (self.ds_maskROI)), self.ds_labels.shape)
+        # 3.1- Preparing the right handside of the equation BT xs
+        B = self.ds_L[unlabeled][:, labeled]
+        mask = self.ds_labels.flatten()[labeled] == target_label
+        fs = csr_matrix(mask)
+        fs = fs.transpose()
+        rhs = B * fs
+        # 3.2- Preparing the left handside of the equation Lu
+        Lu = self.ds_L[unlabeled][:, unlabeled]
+        # 3.3- Solve the linear equation Lu xu = -BT xs
+        xu = cg_solver(Lu, -rhs.todense(), tol=1e-3, maxiter=120)[0]
+
+        ds_probability = np.zeros_like(self.ds_labels, dtype=np.float32)
+        ds_probability[(self.ds_labels == 0) & (self.ds_maskROI)] = xu
+        ds_probability[(self.ds_labels == target_label) & (self.ds_maskROI)] = 1
+        
+        return ds_probability
+        
+    def _refinement_random_walker(self, target_label, labels):
+        """Performs a random walker segmentation over a small region 
+        `self.maskROI` around the coarse contour on the full resolution image. 
+        
+        Requires `target_label` and `labels`
+        
+        Returns
+        -------
+        probability : ndarray of the same size as `image`
+            Array of the probability between [0.0, 1.0], of each pixel
+            to belong to `target_label`
+        """
+        labeledImage = find_label(self.maskROI, background=True)
+        ds_added_labels = self.ds_labels
+        # for pixels outside the refinement region (ring), if their connected
+        # region contains `target_label` pixels, than all pixels of the region 
+        # should be labeled as `target_label`.
+        # TODO : this code could be optimized
+        for area in np.unique(labeledImage):
+            if area != -1:
+                if target_label in self.ds_labels[labeledImage == area]:
+                    ds_added_labels[labeledImage == area] = target_label
+        
+        added_labels = resize(ds_added_labels, labels.shape, order=0,
+                              preserve_range=True)
+
+        self.maskROI = resize(self.maskROI, labels.shape, order=0,
+                              preserve_range=True)
+        self.maskROI = self.maskROI.astype(np.bool)
+        
+        # Extract labelled and unlabelled vertices
+        m_unlabeled = (added_labels == 0) & (self.maskROI)
+        m_foreground = (added_labels == target_label)
+        
+        unlabeled = np.ravel_multi_index(np.where(m_unlabeled), labels.shape)
+        labeled = np.ravel_multi_index(np.where((m_foreground) | \
+                                 (added_labels > 0)), labels.shape)
+
+        # Preparing the right handside of the equation BT xs
+        B = self.L[unlabeled][:, labeled]
+        mask = (added_labels[added_labels > 0]).flatten() == target_label
+        fs = csr_matrix(mask).transpose()
+        rhs = B * fs
+        
+        # Preparing the left handside of the equation Lu
+        Lu = self.L[unlabeled][:, unlabeled]
+        
+        # Solve the linear equation Lu xu = -BT xs
+        xu = cg_solver(Lu, -rhs.todense(), tol=1e-3, maxiter=120)[0]
+        
+        probability = np.zeros_like(labels, dtype=np.float32)
+        probability[m_unlabeled] = xu
+        probability[m_foreground] = 1
+        
+        return probability
         
     def update(self, labels, target_label=1, k=1):
         """Updates the segmentation according to `labels` using the
@@ -161,13 +296,8 @@ class FastDRaW():
               belong to `target_label`.
           """
         ## 1- Checking if inputs are valide
-        if target_label not in np.unique(labels):
-            warn('The target label '+str(target_label)+ \
-                 ' does not match any label')
-        if (labels != 0).all():
-            warn('The segmentation is computed on the unlabeled area '
-                 '(labels == 0). No zero valued areas in labels were '
-                 'found. Returning provided labels.')
+        _err = self._check_parameters(labels, target_label)
+        if _err == -1:
             segm = labels == target_label
             if self.return_full_prob:
                 return segm.astype(np.float)
@@ -176,103 +306,31 @@ class FastDRaW():
         
         ## 2- Create down-sampled (coarse) image size 
         ## and compute the energy map
-        ds_labels = np.zeros(self.dim)
-        ds_entropyMap = 0
-        for i in np.unique(labels):
-            if i != 0:
-                # 2.1- Compute the coarse label image
-                y,x = np.where(labels == i)
-                ds_labels[np.int32(y*self.full_to_ds_ratio[0]),
-                          np.int32(x*self.full_to_ds_ratio[1])] = i
-                # 2.2- Compute the energy map
-                M = np.ones_like(ds_labels)
-                M[ds_labels == i] = 0
-                distMap = distance_transform_edt(M)
-                ds_entropyMap +=  distMap
+        ds_relevance_map = self._compute_relevance_map(labels)
         
-        # 2.3- Normalize the energy map and compute the ROI
-        ds_entropyMap = ds_entropyMap / ds_entropyMap.max()
-        threshold = ds_entropyMap.mean() + k*ds_entropyMap.std()
-        self.ds_maskROI = self.ds_maskROI | (ds_entropyMap <= threshold)
+        # Threshold the energy map and append new region to the existing ROI
+        threshold = ds_relevance_map.mean() + k*ds_relevance_map.std()
+        self.ds_maskROI = self.ds_maskROI | (ds_relevance_map <= threshold)
     
         ## 3- Performe a corse RW segmentation on the down-sampled image
-        unlabeled = np.ravel_multi_index(np.where((ds_labels == 0) & \
-                        (self.ds_maskROI)), ds_labels.shape)
-        labeled = np.ravel_multi_index(np.where((ds_labels > 0) & \
-                        (self.ds_maskROI)), ds_labels.shape)
-        # 3.1- Preparing the right handside of the equation BT xs
-        B = self.ds_L[unlabeled][:, labeled]
-        mask = ds_labels.flatten()[labeled] == target_label
-        fs = csr_matrix(mask)
-        fs = fs.transpose()
-        rhs = B * fs
-        # 3.2- Preparing the left handside of the equation Lu
-        Lu = self.ds_L[unlabeled][:, unlabeled]
-        # 3.3- Solve the linear equation Lu xu = -BT xs
-        probability = cg_solver(Lu, -rhs.todense(), tol=1e-3, maxiter=120)[0]
-
-        ds_proba = np.zeros_like(ds_labels, dtype=np.float32)
-        ds_proba[(ds_labels == 0) & (self.ds_maskROI)] = probability
-        ds_proba[(ds_labels == target_label) & (self.ds_maskROI)] = 1   
+        ds_probability = self._coarse_random_walker(target_label) 
         
-        # 3.4- Compute the corse segmentation result and the refinement region
-        #      around the corse result
-        mask = ds_proba >= 0.5
-        mask = (dilation(mask, disk(1)) - mask).astype(np.bool)
-        
-        entropyMap = distance_transform_edt(mask != 1)
-        self.maskROI = (entropyMap <= 3)
+        # Compute the corse segmentation result 
+        mask = ds_probability >= 0.5
+        mask = (binary_dilation(mask, disk(1)) - mask).astype(np.bool)
+        # Compute the refinement region around the corse result
+        self.maskROI = binary_dilation(mask, disk(3))
+#        relevance_map = distance_transform_edt(mask != 1)
+#        self.maskROI = (relevance_map <= 3)
             
         ## 4- Performe a fine RW segmentation on the full resolution image
         ##    only on the refinement region
-        labeledImage = find_label(self.maskROI, background=True)
-        ds_added_labels = ds_labels
-        # for pixels outside the refinement region (ring), if their connected
-        # region contains `target_label` pixels, than all pixels of the region 
-        # should be labeled as `target_label`.
-        # TODO : this code could be optimized
-        for area in np.unique(labeledImage):
-            if area != -1:
-                if target_label in ds_labels[labeledImage == area]:
-                    ds_added_labels[labeledImage == area] = target_label
-        
-        added_labels = skresize(ds_added_labels, labels.shape, order=0,
-                                preserve_range=True)
-
-        self.maskROI = skresize(self.maskROI, labels.shape, order=0,
-                                preserve_range=True)
-        self.maskROI = self.maskROI.astype(np.bool)
-        
-        
-        
-        # 4.1- Extract labelled and unlabelled vertices
-        m_unlabeled = (added_labels == 0) & (self.maskROI)
-        m_foreground = (added_labels == target_label)
-        
-        unlabeled = np.ravel_multi_index(np.where(m_unlabeled), labels.shape)
-        labeled = np.ravel_multi_index(np.where((m_foreground) | \
-                                 (added_labels > 0)), labels.shape)
-
-        # 4.2- Preparing the right handside of the equation BT xs
-        B = self.L[unlabeled][:, labeled]
-        mask = (added_labels[added_labels > 0]).flatten() == target_label
-        fs = csr_matrix(mask).transpose()
-        rhs = B * fs
-        
-        # 4.3- Preparing the left handside of the equation Lu
-        Lu = self.L[unlabeled][:, unlabeled]
-        
-        # 4.4- Solve the linear equation Lu xu = -BT xs
-        probability = cg_solver(Lu, -rhs.todense(), tol=1e-3, maxiter=120)[0]
-        
-        x0 = np.zeros_like(labels, dtype=np.float32)
-        x0[m_unlabeled] = probability
-        x0[m_foreground] = 1
+        probability = self._refinement_random_walker(target_label, labels)
         
         # 5- threshold the probability map above 0.5
         if self.return_full_prob:
-            return  x0
+            return  probability
         else:
-            segm = (x0 >= 0.5)
+            segm = (probability >= 0.5)
             return segm
      

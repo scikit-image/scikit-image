@@ -37,9 +37,9 @@ left click for foreground and right click for background. Then, using "space
 bar" to run both segmentation. The computation time is displayed.
 
 .. [1] H.-E. Gueziri, L. Lakhdar, M. J. McGuffin and C. Laporte,
-    *FastDRaW - Fast Delineation by Random Walker: application to large
-    images*, MICCAI Workshop on Interactive Medical Image Computing (IMIC),
-    Athens, Greece, (2016).
+       *FastDRaW - Fast Delineation by Random Walker: application to large
+       images*, MICCAI Workshop on Interactive Medical Image Computing (IMIC),
+       Athens, Greece, (2016).
 .. [2] Leo Grady, *Random walks for image segmentation*, IEEE Trans. Pattern
        Anal. Mach. Intell. 2006 Nov; 28(11):1768-83
 
@@ -55,13 +55,12 @@ from skimage.segmentation import random_walker
 from skimage.segmentation import FastDRaW
 
 """
-Callback functions
-------------------
+First we write functions to define what needs to happen when the user
+clicks on the image.
 """
 # drawing callback function
 def onDraw(event):
-    """This function is called when the mouse moves over the image
-    """
+    """This function is called when the mouse moves over the image"""
     if event.button == 1:
         # if left click is detected during the mouse mouvement
         # get x and y coordinates
@@ -80,39 +79,36 @@ def onDraw(event):
         yy = int(event.ydata)
         xx = int(event.xdata)
         # draw green pixels on the rgb image
-        rgb_image[yy-brush:yy+brush+1,xx-brush:xx+brush+1] = (0,255,0)
+        rgb_image[yy-brush : yy+brush+1, xx-brush : xx+brush+1] = (0,255,0)
         # generate labels as background, 2
-        labels[yy-brush:yy+brush+1,xx-brush:xx+brush+1] = 2
+        labels[yy-brush : yy+brush+1, xx-brush : xx+brush+1] = 2
         # refresh plot
         pltimg.set_data(rgb_image)
         plt.draw()
 
 # one click callback function
 def onClick(event):
-    """This function is called when mouse buttons are clicked
-    """
+    """This function is called when mouse buttons are clicked"""
     # get x and y coordinates
     yy = int(event.ydata)
     xx = int(event.xdata)
     if event.button == 1:
         # draw red pixels on the rgb image
-        rgb_image[yy-brush:yy+brush+1,xx-brush:xx+brush+1] = (255,0,0)
+        rgb_image[yy-brush : yy+brush+1, xx-brush : xx+brush+1] = (255,0,0)
         # generate labels as foreground, 1
-        labels[yy-brush:yy+brush+1,xx-brush:xx+brush+1] = 1
+        labels[yy-brush : yy+brush+1, xx-brush : xx+brush+1] = 1
     elif event.button == 3:
         # draw green pixels on the rgb image
-        rgb_image[yy-brush:yy+brush+1,xx-brush:xx+brush+1] = (0,255,0)
+        rgb_image[yy-brush : yy+brush+1, xx-brush : xx+brush+1] = (0,255,0)
         # generate labels as background, 2
-        labels[yy-brush:yy+brush+1,xx-brush:xx+brush+1] = 2
+        labels[yy-brush : yy+brush+1, xx-brush : xx+brush+1] = 2
     # refresh plot
     pltimg.set_data(rgb_image)
     plt.draw()
     
 # keyboard callback events
 def onKeypress(event):
-    """This function is called when keyboard buttons are pressed
-    """
-    global target_label
+    """This function is called when keyboard buttons are pressed"""
     if event.key == ' ':
         # if space bar is pressed, FastDRaW  and RW segmentations are performed
         
@@ -123,16 +119,16 @@ def onKeypress(event):
         # --- display the contour in red over the original image
         contour = (dilation(segm, disk(1)) - segm).astype(np.bool)
         result = original_image.copy()
-        result[contour,:] = (255,0,0)
+        result[contour, :] = (255, 0, 0)
         # --- show the image
         ax2.imshow(result)
-        ax2.set_title("FastDRaW time "+str(time.clock()-t)+" s")
+        ax2.set_title("FastDRaW time " + str(time.clock()-t) + " s")
         plt.draw()
         
         # RW
         t = time.clock()
         # perform the RW segmentation
-        segm = random_walker(image,labels,beta=beta)
+        segm = random_walker(image, labels, beta=beta)
         # select which label to display
         # since this is a binary case segmentation (foreground/background),
         # segm == 1 is similar to segm == 2
@@ -140,16 +136,15 @@ def onKeypress(event):
         # --- display the contour in red over the original image
         contour = (dilation(segm, disk(1)) - segm).astype(np.bool)
         result = original_image.copy()
-        result[contour,:] = (255,0,0)
+        result[contour, :] = (255, 0, 0)
         # --- show the image
         ax3.imshow(result)
-        ax3.set_title("RW time "+str(time.clock()-t)+" s")
+        ax3.set_title("RW time " + str(time.clock()-t) + " s")
         plt.draw()
     
 
 """
-Main
-----
+Now we write the main analysis script that makes use of those functions.
 """
 # load array like image
 image = data.coins()
@@ -162,11 +157,10 @@ original_image = rgb_image.copy()
 labels = np.zeros_like(image)
 
 # display the original image, on which the user can draw
-fig = plt.figure()
-ax1 = fig.add_subplot(131)
-pltimg = plt.imshow(rgb_image)
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, sharex=True, sharey=True)
+pltimg = ax1.imshow(rgb_image)
 ax1.set_title('Original image')
-plt.axis('off')
+ax1.axis('off')
 
 # set callback functions
 did = fig.canvas.mpl_connect('motion_notify_event', onDraw)
@@ -174,16 +168,14 @@ cid = fig.canvas.mpl_connect('button_press_event', onClick)
 kid = fig.canvas.mpl_connect('key_press_event', onKeypress)
 
 # display FastDRaW result image
-ax2 = fig.add_subplot(132)
 ax2.imshow(original_image)
 ax2.set_title('FastDRaW')
-plt.axis('off')
+ax2.axis('off')
 
 # display Random Walker result image
-ax3 = fig.add_subplot(133)
 ax3.imshow(original_image)
 ax3.set_title('RW')
-plt.axis('off')
+ax3.axis('off')
 
 # size (in pixels) of the drawing brush
 brush = 3
