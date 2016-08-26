@@ -246,7 +246,7 @@ def threshold_otsu(image, nbins=256):
     -----
     The input image must be grayscale.
     """
-    if image.shape[-1] in (3, 4):
+    if len(image.shape) > 2 and image.shape[-1] in (3, 4):
         msg = "threshold_otsu is expected to work correctly only for " \
               "grayscale images; image shape {0} looks like an RGB image"
         warn(msg.format(image.shape))
