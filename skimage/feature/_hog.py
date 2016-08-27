@@ -118,6 +118,8 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
                                        int(centre[0] + dx),
                                        int(centre[1] - dy))
                     hog_image[rr, cc] += orientation_histogram[y, x, o]
+        # Normalize to ensure that values fit in dtype_limits
+        hog_image /= hog_image.max()
 
     # The fourth stage computes normalisation, which takes local groups of
 
