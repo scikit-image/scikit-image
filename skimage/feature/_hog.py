@@ -121,7 +121,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         # Normalize to ensure that values fit in dtype_limits
         hog_image /= hog_image.max()
 
-    # The fourth stage computes normalisation, which takes local groups of
+    # The fourth stage computes normalisation
 
     n_blocksx = (n_cellsx - bx) + 1
     n_blocksy = (n_cellsy - by) + 1
@@ -134,7 +134,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
             eps = 1e-5
             normalised_blocks[y, x, :] = block / np.sqrt(block.sum() ** 2 + eps)
 
-    # The final step collects the HOG descriptors from all blocks of a dense
+    # The final step collects the HOG descriptors from all blocks of a dense
     # overlapping grid of blocks covering the detection window into a combined
     # feature vector for use in the window classifier.
 
