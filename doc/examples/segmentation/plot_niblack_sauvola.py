@@ -7,13 +7,12 @@ are useful for images where the background is not uniform. Instead of
 calculating a single global threshold for the entire image, several
 thresholds are calculated for every pixel by using specific formulas
 that take into account the mean and standard deviation of the local
-neighborhood defined by a rectangular window with size `w` times `w`
-(e.g. 5x5 size for `w`=5) centered around the pixel.
+neighborhood (defined by a window centered around the pixel).
 
 Here, we binarize an image using `threshold_niblack` and
 `threshold_sauvola` and compare it to a common global thresholding
-technique. Parameter `w` determines the size of the window that
-contains the surrounding pixels.
+technique. Parameter `window_size` determines the size of the window
+that contains the surrounding pixels.
 
 .. [1] Niblack, W (1986), An introduction to Digital Image
        Processing, Prentice-Hall.
@@ -43,10 +42,10 @@ image = page()
 binary_global = image > threshold_otsu(image)
 
 window_size = 25
-binary_niblack = threshold_niblack(image, w=window_size, k=0.8)
-binary_sauvola = threshold_sauvola(image, w=window_size)  # Original Sauvola
-binary_wolf = threshold_sauvola(image, w=window_size, method='wolf', k=0.5)
-binary_phansalkar = threshold_sauvola(image, w=window_size,
+binary_niblack = threshold_niblack(image, window_size=window_size, k=0.8)
+binary_sauvola = threshold_sauvola(image, window_size=window_size)  # Original Sauvola
+binary_wolf = threshold_sauvola(image, window_size=window_size, method='wolf', k=0.5)
+binary_phansalkar = threshold_sauvola(image, window_size=window_size,
                                       method='phansalkar', r=50)
 # Parameters k, r, etc. are other parameters that directly affect
 # threshold calculation formula. Check each method's documentation to see the
