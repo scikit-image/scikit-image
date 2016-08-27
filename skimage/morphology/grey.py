@@ -75,7 +75,7 @@ def _invert_selem(selem):
 
     References
     ----------
-    [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285
+    .. [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285
     """
     inverted = selem[(slice(None, None, -1),) * selem.ndim]
     return inverted
