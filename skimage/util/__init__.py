@@ -5,10 +5,14 @@ from .noise import random_noise
 from .apply_parallel import apply_parallel
 
 from .arraycrop import crop
-from .arraypad import pad
 from ._regular_grid import regular_grid, regular_seeds
 from .unique import unique_rows
 from ._invert import invert
+
+from .._shared.utils import copy_func
+
+from numpy import pad as numpy_pad
+pad = copy_func(numpy_pad, name='pad')
 
 
 __all__ = ['img_as_float',
