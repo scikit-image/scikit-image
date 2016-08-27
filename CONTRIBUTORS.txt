@@ -242,5 +242,8 @@
 - Abdeali Kothari
   Alpha blending to convert from rgba to rgb
 
+- Jeyson Molina
+  Niblack and Sauvola Local thresholding
+
 - Scott Sievert
   Wavelet denoising
