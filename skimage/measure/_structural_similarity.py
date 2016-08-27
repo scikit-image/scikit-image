@@ -1,8 +1,9 @@
 from __future__ import division
 
 import numpy as np
-from scipy.ndimage import uniform_filter, gaussian_filter
+from scipy.ndimage import uniform_filter
 
+from ..filters import gaussian
 from ..util.dtype import dtype_range
 from ..util.arraycrop import crop
 from .._shared.utils import deprecated
@@ -154,8 +155,9 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
     if gaussian_weights:
         # sigma = 1.5 to approximately match filter in Wang et. al. 2004
         # this ends up giving a 13-tap rather than 11-tap Gaussian
-        filter_func = gaussian_filter
-        filter_args = {'sigma': sigma}
+        filter_func = gaussian
+        filter_args = {'sigma': sigma,
+                       'multichannel': False}
 
     else:
         filter_func = uniform_filter

@@ -1,8 +1,11 @@
+from __future__ import division, print_function, absolute_import
+
 import numpy as np
 from scipy import sqrt, pi, arctan2, cos, sin, exp
-from scipy.ndimage import gaussian_filter
+
 from .. import img_as_float, draw
 from ..color import gray2rgb
+from ..filters import gaussian
 from .._shared.utils import assert_nD
 
 
@@ -139,8 +142,9 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
     hist_smooth = np.empty((rings + 1,) + hist.shape, dtype=float)
     for i in range(rings + 1):
         for j in range(orientations):
-            hist_smooth[i, j, :, :] = gaussian_filter(hist[j, :, :],
-                                                      sigma=sigmas[i])
+            hist_smooth[i, j, :, :] = gaussian(hist[j, :, :],
+                                               sigma=sigmas[i],
+                                               multichannel=False)
 
     # Assemble descriptor grid.
     theta = [2 * pi * j / histograms for j in range(histograms)]

@@ -1,8 +1,9 @@
-from itertools import combinations_with_replacement
+from __future__ import division, print_function, absolute_import
 
 import numpy as np
 from scipy import ndimage as ndi
 from scipy import stats
+from itertools import combinations_with_replacement
 
 from ..util import img_as_float
 from ..feature import peak_local_max
@@ -11,6 +12,7 @@ from ..feature.corner_cy import _corner_fast
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
 from .._shared.utils import safe_as_int
+from ..filters import gaussian
 
 
 def _compute_derivatives(image, mode='constant', cval=0):
@@ -94,9 +96,9 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     imx, imy = _compute_derivatives(image, mode=mode, cval=cval)
 
     # structure tensore
-    Axx = ndi.gaussian_filter(imx * imx, sigma, mode=mode, cval=cval)
-    Axy = ndi.gaussian_filter(imx * imy, sigma, mode=mode, cval=cval)
-    Ayy = ndi.gaussian_filter(imy * imy, sigma, mode=mode, cval=cval)
+    Axx = gaussian(imx * imx, sigma, mode=mode, cval=cval, multichannel=False)
+    Axy = gaussian(imx * imy, sigma, mode=mode, cval=cval, multichannel=False)
+    Ayy = gaussian(imy * imy, sigma, mode=mode, cval=cval, multichannel=False)
 
     return Axx, Axy, Ayy
 
@@ -150,8 +152,8 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
 
     image = img_as_float(image)
 
-    gaussian_filtered = ndi.gaussian_filter(image, sigma=sigma,
-                                            mode=mode, cval=cval)
+    gaussian_filtered = gaussian(image, sigma=sigma,
+                                 mode=mode, cval=cval, multichannel=False)
 
     gradients = np.gradient(gaussian_filtered)
     axes = range(image.ndim)

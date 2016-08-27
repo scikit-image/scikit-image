@@ -11,11 +11,13 @@ Copyright (c) 2009-2011 Broad Institute
 All rights reserved.
 Original author: Lee Kamentsky
 """
+from __future__ import division, print_function, absolute_import
 
 import numpy as np
 import scipy.ndimage as ndi
-from scipy.ndimage import (gaussian_filter,
-                           generate_binary_structure, binary_erosion, label)
+from scipy.ndimage import (generate_binary_structure, binary_erosion, label)
+
+from ..filters import gaussian
 from .. import dtype_limits
 from .._shared.utils import assert_nD
 
@@ -163,7 +165,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
 
     if mask is None:
         mask = np.ones(image.shape, dtype=bool)
-    fsmooth = lambda x: gaussian_filter(x, sigma, mode='constant')
+    fsmooth = lambda x: gaussian(x, sigma, mode='constant', multichannel=False)
     smoothed = smooth_with_function_and_mask(image, fsmooth, mask)
     jsobel = ndi.sobel(smoothed, axis=1)
     isobel = ndi.sobel(smoothed, axis=0)

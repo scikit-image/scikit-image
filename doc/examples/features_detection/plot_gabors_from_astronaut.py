@@ -38,11 +38,11 @@ is not rocket science.
 """
 import numpy as np
 from scipy.cluster.vq import kmeans2
-from scipy import ndimage as ndi
 import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage import color
+from skimage.filters import gaussian
 from skimage.util.shape import view_as_windows
 from skimage.util.montage import montage2d
 
@@ -61,7 +61,7 @@ fb1 = fb1.reshape((-1,) + patch_shape)
 fb1_montage = montage2d(fb1, rescale_intensity=True)
 
 # -- filterbank2 LGN-like image
-astro_dog = ndi.gaussian_filter(astro, .5) - ndi.gaussian_filter(astro, 1)
+astro_dog = gaussian(astro, .5) - gaussian(astro, 1)
 patches2 = view_as_windows(astro_dog, patch_shape)
 patches2 = patches2.reshape(-1, patch_shape[0] * patch_shape[1])[::8]
 fb2, _ = kmeans2(patches2, n_filters, minit='points')

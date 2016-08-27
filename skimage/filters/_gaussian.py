@@ -1,3 +1,5 @@
+from __future__ import division, print_function, absolute_import
+
 import collections as coll
 import numpy as np
 from scipy import ndimage as ndi
@@ -59,7 +61,6 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
 
     Examples
     --------
-
     >>> a = np.zeros((3, 3))
     >>> a[1, 1] = 1
     >>> a
@@ -83,9 +84,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     >>> from skimage.data import astronaut
     >>> image = astronaut()
     >>> filtered_img = gaussian(image, sigma=1, multichannel=True)
-
     """
-
     spatial_dims = guess_spatial_dimensions(image)
     if spatial_dims is None and multichannel is None:
         msg = ("Images with dimensions (M, N, 3) are interpreted as 2D+RGB "
@@ -93,13 +92,19 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
                "3D image with last dimension of length 3.")
         warn(RuntimeWarning(msg))
         multichannel = True
+
     if np.any(np.asarray(sigma) < 0.0):
         raise ValueError("Sigma values less than zero are not valid")
+
+    # Handle longstanding SciPy bug with NumPy integers passed as sigma
+    sigma = np.asarray(sigma, dtype=np.float64)
+
     if multichannel:
         # do not filter across channels
         if not isinstance(sigma, coll.Iterable):
             sigma = [sigma] * (image.ndim - 1)
         if len(sigma) != image.ndim:
             sigma = np.concatenate((np.asarray(sigma), [0]))
+
     image = img_as_float(image)
     return ndi.gaussian_filter(image, sigma, mode=mode, cval=cval)

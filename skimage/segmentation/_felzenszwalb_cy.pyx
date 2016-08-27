@@ -3,21 +3,21 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 import numpy as np
-from scipy import ndimage as ndi
 
 cimport cython
 cimport numpy as cnp
 from ..measure._ccomp cimport find_root, join_trees
 
+from ..filters import gaussian
 from ..util import img_as_float
 
 
 def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
                          Py_ssize_t min_size=20):
-    """Felzenszwalb's efficient graph based segmentation for 
+    """Felzenszwalb's efficient graph based segmentation for
     single or multiple channels.
 
-    Produces an oversegmentation of a single or multi-channel image 
+    Produces an oversegmentation of a single or multi-channel image
     using a fast, minimum spanning tree based clustering on the image grid.
     The number of produced segments as well as their size can only be
     controlled indirectly through ``scale``. Segment size within an image can
@@ -41,7 +41,7 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
         Integer mask indicating segment labels.
     """
     if image.ndim != 3:
-        raise ValueError("This algorithm works only on single or " 
+        raise ValueError("This algorithm works only on single or "
                          "multi-channel 2d images. "
                          "Got image of shape %s" % str(image.shape))
 
@@ -49,7 +49,7 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
 
     # rescale scale to behave like in reference implementation
     scale = float(scale) / 255.
-    image = ndi.gaussian_filter(image, sigma=[sigma, sigma, 0])
+    image = gaussian(image, sigma=sigma, multichannel=True)
 
     # compute edge weights in 8 connectivity:
     down_cost = np.sqrt(np.sum((image[1:, :, :] - image[:-1, :, :])

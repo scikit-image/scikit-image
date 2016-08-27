@@ -1,10 +1,12 @@
+from __future__ import division, print_function, absolute_import
 
 import numpy as np
-from scipy.ndimage import gaussian_filter, gaussian_laplace
+from scipy.ndimage import gaussian_laplace
 import itertools as itt
-import math
 from math import sqrt, hypot, log
 from numpy import arccos
+
+from ..filters import gaussian
 from ..util import img_as_float
 from .peak import peak_local_max
 from ._hessian_det_appx import _hessian_matrix_det
@@ -67,7 +69,7 @@ def _blob_overlap(blob1, blob2):
     d = d + r2 + r1
     area = r1 ** 2 * acos1 + r2 ** 2 * acos2 - 0.5 * sqrt(abs(a * b * c * d))
 
-    return area / (math.pi * (min(r1, r2) ** 2))
+    return area / (np.pi * (min(r1, r2) ** 2))
 
 
 def _prune_blobs(blobs_array, overlap):
@@ -187,7 +189,8 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     sigma_list = np.array([min_sigma * (sigma_ratio ** i)
                            for i in range(k + 1)])
 
-    gaussian_images = [gaussian_filter(image, s) for s in sigma_list]
+    gaussian_images = [gaussian(image, s, multichannel=False)
+                       for s in sigma_list]
 
     # computing difference between two successive Gaussian blurred images
     # multiplying with standard deviation provides scale invariance

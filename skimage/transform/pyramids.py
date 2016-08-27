@@ -1,6 +1,9 @@
-import math
+from __future__ import division, print_function, absolute_import
+
 import numpy as np
-from scipy import ndimage as ndi
+import math
+
+from ..filters import gaussian
 from ..transform import resize
 from ..util import img_as_float
 
@@ -13,12 +16,12 @@ def _smooth(image, sigma, mode, cval):
     # apply Gaussian filter to all dimensions independently
     if image.ndim == 3:
         for dim in range(image.shape[2]):
-            ndi.gaussian_filter(image[..., dim], sigma,
-                                output=smoothed[..., dim],
-                                mode=mode, cval=cval)
+            gaussian(image[..., dim], sigma,
+                     output=smoothed[..., dim], mode=mode, cval=cval,
+                     multichannel=False)
     else:
-        ndi.gaussian_filter(image, sigma, output=smoothed,
-                            mode=mode, cval=cval)
+        gaussian(image, sigma, output=smoothed, mode=mode, cval=cval,
+                 multichannel=False)
 
     return smoothed
 
@@ -59,7 +62,6 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
     References
     ----------
     .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
-
     """
 
     _check_factor(downscale)
@@ -113,7 +115,6 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
     References
     ----------
     .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
-
     """
 
     _check_factor(upscale)
@@ -178,7 +179,6 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     References
     ----------
     .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
-
     """
 
     _check_factor(downscale)
@@ -260,7 +260,6 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     ----------
     .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
     .. [2] http://sepwww.stanford.edu/data/media/public/sep/morgan/texturematch/paper_html/node3.html
-
     """
 
     _check_factor(downscale)

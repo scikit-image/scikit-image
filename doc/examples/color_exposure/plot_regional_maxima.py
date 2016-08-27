@@ -14,16 +14,16 @@ get dilated in order to reconstruct the background image.
 
 """
 import numpy as np
-from scipy.ndimage import gaussian_filter
 import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage import img_as_float
 from skimage.morphology import reconstruction
+from skimage.filters import gaussian
 
 # Convert to float: Important for subtraction later which won't work with uint8
 image = img_as_float(data.coins())
-image = gaussian_filter(image, 1)
+image = gaussian(image, 1)
 
 seed = np.copy(image)
 seed[1:-1, 1:-1] = image.min()

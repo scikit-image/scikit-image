@@ -1,8 +1,13 @@
+from __future__ import division, print_function, absolute_import
+
 import math
 import numpy as np
+
 from scipy import ndimage as ndi
 from scipy.ndimage import filters as ndif
 from collections import OrderedDict
+
+from ._gaussian import gaussian
 from ..exposure import histogram
 from .._shared.utils import assert_nD, warn
 
@@ -196,7 +201,8 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
             sigma = (block_size - 1) / 6.0
         else:
             sigma = param
-        ndi.gaussian_filter(image, sigma, output=thresh_image, mode=mode)
+        gaussian(image, sigma, output=thresh_image, mode=mode,
+                 multichannel=False)
     elif method == 'mean':
         mask = 1. / block_size * np.ones((block_size,))
         # separation of filters to speedup convolution

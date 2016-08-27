@@ -1,7 +1,8 @@
+from __future__ import division, print_function, absolute_import
+
 import numpy as np
 
-import scipy.ndimage as ndi
-
+from ..filters import gaussian
 from ..util import img_as_float
 from ..color import rgb2lab
 
@@ -65,7 +66,7 @@ def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
     if kernel_size < 1:
         raise ValueError("`kernel_size` should be >= 1.")
 
-    image = ndi.gaussian_filter(image, [sigma, sigma, 0])
+    image = gaussian(image, sigma, multichannel=True)
     image = np.ascontiguousarray(image * ratio)
 
     segment_mask = _quickshift_cython(
