@@ -893,9 +893,11 @@ def threshold_sauvola(image, method='sauvola', window_size=15, k=0.2, r=128.,
     .. [1] J. Sauvola and M. Pietikainen, "Adaptive document image
            binarization," Pattern Recognition 33(2),
            pp. 225-236, 2000.
+           DOI:10.1016/S0031-3203(99)00055-2
     .. [2] C. Wolf, J-M. Jolion, "Extraction and Recognition of
            Artificial Text in Multimedia Documents", Pattern
            Analysis and Applications, 6(4):309-326, (2003).
+           DOI:10.1007/s10044-003-0197-7
     .. [3] Phansalskar, N; More, S & Sabale, A et al. (2011), "Adaptive
            local thresholding for detection of nuclei in diversity
            stained cytology images.", International Conference on
