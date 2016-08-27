@@ -739,8 +739,8 @@ def _mean_std(image, w):
 
     Returns
     -------
-    m : 2-D array of same size of image containning local mean values.
-    s : 2-D array of same size of image containning local standard
+    m : 2-D array of same size of image with local mean values.
+    s : 2-D array of same size of image with local standard
         deviation values.
 
     References
@@ -749,43 +749,41 @@ def _mean_std(image, w):
            implementation of local adaptive thresholding techniques
            using integral images." in Document Recognition and
            Retrieval XV, (San Jose, USA), Jan. 2008.
+           DOI:10.1117/12.767755
     """
     from skimage.transform.integral import integral_image
 
     if w == 1 or w % 2 == 0:
         raise ValueError(
             "Window size w = %s must be odd and greater than 1." % (w))
-    I = integral_image(image)  # Integral Image.
+    integrated = integral_image(image)  # Integral Image.
 
     # Pad left and top of Integral image with zeros
-    I = np.vstack((np.zeros((1, I.shape[1]), I.dtype), I))
-    I = np.hstack((np.zeros((I.shape[0], 1), I.dtype), I))
+    integrated = np.pad(integrated, 1, mode='constant')[:-1,:-1]
 
     kern = np.zeros((w + 1, w + 1))
-    kern[0, 0], kern[-1, -1] = 1, 1
+    kern[0, 0] = 1
+    kern[-1, -1] = 1
     kern[[0, -1], [-1, 0]] = -1
     # w2 holds total of pixels in window for each pixel (usually w x w).
     w2 = ndi.convolve(
         np.ones(image.shape, np.float), np.ones((w, w)), mode='constant')
 
-    m = ndi.convolve(I, kern, mode='nearest')[:-1, :-1] / w2
+    m = ndi.convolve(integrated, kern, mode='nearest')[:-1, :-1] / w2
     g = image.astype(np.float)
-    g2 = g ** 2.
-    m2 = m ** 2.
-    sum_g2 = ndi.convolve(g2, np.ones((w, w)), mode='constant')
-    sum_m2 = w2 * m2
-    s2 = (sum_g2 - sum_m2) / w2
-    s = np.sqrt(s2)
+    sum_g2 = ndi.convolve(g ** 2., np.ones((w, w)), mode='constant')
+    sum_m2 = w2 * m ** 2.
+    s = np.sqrt((sum_g2 - sum_m2) / w2)
     return m, s
 
 
-def threshold_niblack(image, window_size=15, k=0.2, offset=0):
+def threshold_niblack(image, window_size=15, k=0.2):
     """Applies Niblack local threshold to an array.
 
     A threshold T is calculated for every pixel in the image using the
     following formula:
 
-    T = m(x,y) - k * s(x,y) - offset
+    T = m(x,y) - k * s(x,y)
 
     where m(x,y) and s(x,y) are the mean and standard deviation of
     pixel (x,y) neighborhood defined by a rectangular window with size w
@@ -797,17 +795,19 @@ def threshold_niblack(image, window_size=15, k=0.2, offset=0):
     image: (N, M) ndarray
         Input image. Only 2D grayscale images allowed.
     window_size : int, optional
-        Odd size of pixel neighborhood window (e.g. 3, 5, 7,
-        ..., 21, ...).
+        Odd size of pixel neighborhood window (e.g. 3, 5, 7...).
     k : float, optional
         Value of parameter k in threshold formula.
-    offset : float, optional
-        Constant subtracted from obtained local thresholds.
 
     Returns
     -------
     threshold : (N, M) ndarray
-        Thresholded binary image
+        Threshold mask. All pixels with an intensity higher than
+        this value are assumed to be foreground.
+
+    Notes
+    -----
+    This algorithm is originally designed for text recognition.
 
     References
     ----------
@@ -824,69 +824,47 @@ def threshold_niblack(image, window_size=15, k=0.2, offset=0):
         raise ValueError("Image is not 2D grayscale.")
 
     m, s = _mean_std(image, window_size)
-    t = m - k * s
-    return image > (t - offset)
+    return m - k * s
 
 
-def threshold_sauvola(image, method='sauvola', window_size=15, k=0.2, r=128.,
-                      p=2, q=10, offset=0):
+def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     """Applies Sauvola local threshold to an array. Sauvola is a
     modification of Niblack technique.
 
     In the original method a threshold T is calculated for every pixel
     in the image using the following formula:
 
-    T = m(x,y) * (1 + k * ((s(x,y) / R) - 1)) - offset
+    T = m(x,y) * (1 + k * ((s(x,y) / R) - 1))
 
     where m(x,y) and s(x,y) are the mean and standard deviation of
     pixel (x,y) neighborhood defined by a rectangular window with size w
     times w centered around the pixel. k is a configurable parameter
     that weights the effect of standard deviation.
-    R is the maximum standard deviation of a greyscale image (R = 128).
-
-    In Wolf's variation the threshold T is given by:
-
-    T = (1 - k) * m(x,y) + k * M + k * (s(x,y) / R) * (m(x,y) - M) - offset
-
-    where R is the maximum standard deviation found in all local
-    neighborhoods and M is the minimum pixel intensity in image.
-
-    In Phansalkar's variation image pixels are normalized and the
-    threshold T is given by:
-
-    T = m * (1 + p * exp(-q * m(x,y)) + k * ((s(x,y) / R) - 1)) - offset
-
-    where p and q are fixed values of 2 and 10 respectively. The
-    other parameters have the same meaning as in the previous methods.
+    R is the maximum standard deviation of a greyscale image.
 
     Parameters
     ----------
     image: (N, M) ndarray
         Input image. Only 2D grayscale images allowed.
-    method : {'sauvola', 'wolf', 'phansalkar'}, optional.
-        method used for computing local thresholds.
-
-        * 'sauvola': Uses original implementation described in [1]_.
-        * 'wolf': Uses Wolf's variation described in [2]_.
-        * 'phansalkar': Uses Phansalkar's variation described in [3]_.
-
     window_size : int, optional
         Odd size of pixel neighborhood window (e.g. 3, 5, 7...).
     k : float, optional
-        Value of parameter k in threshold formula.
+        Value of the positive parameter k.
     r : float, optional
-        Value of R in threshold formula. Not used by method 'wolf'.
+        Value of R, the dynamic range of standard deviation.
+        If None, set to the half of the image dtype range.
     offset : float, optional
         Constant subtracted from obtained local thresholds.
-    p : float, optional
-        Value of p in 'phansalkar' threshold formula.
-    q : float, optional
-        Value of q in 'phansalkar' threshold formula.
 
     Returns
     -------
     threshold : (N, M) ndarray
-        Thresholded binary image
+        Threshold mask. All pixels with an intensity higher than
+        this value are assumed to be foreground.
+
+    Notes
+    -----
+    This algorithm is originally designed for text recognition.
 
     References
     ----------
@@ -894,48 +872,18 @@ def threshold_sauvola(image, method='sauvola', window_size=15, k=0.2, r=128.,
            binarization," Pattern Recognition 33(2),
            pp. 225-236, 2000.
            DOI:10.1016/S0031-3203(99)00055-2
-    .. [2] C. Wolf, J-M. Jolion, "Extraction and Recognition of
-           Artificial Text in Multimedia Documents", Pattern
-           Analysis and Applications, 6(4):309-326, (2003).
-           DOI:10.1007/s10044-003-0197-7
-    .. [3] Phansalskar, N; More, S & Sabale, A et al. (2011), "Adaptive
-           local thresholding for detection of nuclei in diversity
-           stained cytology images.", International Conference on
-           Communications and Signal Processing (ICCSP): 218-220.
-           DOI:10.1109/ICCSP.2011.5739305
 
     Examples
     --------
     >>> from skimage import data
     >>> image = data.page()
-    >>> binary_sauvola = threshold_sauvola(image, method='sauvola',
-    ...                                    window_size=15, k=0.2, r=128)
-    >>> binary_wolf = threshold_sauvola(image, method='wolf',
-    ...                                 window_size=7, k=0.2)
-    >>> binary_phansalkar = threshold_sauvola(image, method='phansalkar',
-    ...                                       window_size=7, k=0.2, r=128)
+    >>> binary_sauvola = threshold_sauvola(image,
+    ...                                    window_size=15, k=0.2)
     """
-    image_norm = None
     if len(image.shape) != 2:
         raise ValueError("Image is not 2D grayscale.")
-    # Convert img to range [0, 255] if was provided as float with range [0, 1]
-    if (image.dtype == np.float and dtype_limits(image) == (0, 1)):
-        image_norm = image  # Useful for phanlsakar
-        image = img_as_ubyte(image)
+    if r is None:
+        imin, imax = dtype_limits(image, clip_negative=False)
+        r = 0.5 * (imax - imin)
     m, s = _mean_std(image, window_size)
-    if method == 'sauvola':
-        t = m * (1 + k * ((s / r) - 1))
-    elif method == 'wolf':
-        R = s.max()  # Max std_dev used by Wolf.
-        M = image.min()
-        t = (1 - k) * m + k * M + k * (s / R) * (m - M)
-    elif method == 'phansalkar':
-        image = image_norm if image_norm is not None else \
-            image.astype(np.float) / 255.  # Normalized image.
-        m, s = m / 255., s / 255.  # Normalized mean, std
-        rn = r / 255.
-        t = m * (1 + p * np.exp(-q * m) + k * ((s / rn) - 1))
-    else:
-        raise ValueError("Unknown method: %s" % (method))
-
-    return image > (t - offset)
+    return m * (1 + k * ((s / r) - 1))

@@ -61,5 +61,4 @@ __all__ = ['inverse',
            'threshold_niblack',
            'threshold_sauvola',
            'threshold_triangle',
-           'threshold_li',
            'rank']
