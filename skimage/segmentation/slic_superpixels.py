@@ -136,7 +136,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     elif isinstance(sigma, (list, tuple)):
         sigma = np.array(sigma, dtype=np.double)
     if (sigma > 0).any():
-        image = gaussian_filter(image, sigma, multichannel=True)
+        image = gaussian(image, sigma, multichannel=True)
 
     if multichannel and (convert2lab or convert2lab is None):
         if image.shape[-1] != 3 and convert2lab:

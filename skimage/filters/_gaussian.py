@@ -98,6 +98,8 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
 
     # Handle longstanding SciPy bug with NumPy integers passed as sigma
     sigma = np.asarray(sigma, dtype=np.float64)
+    if sigma.ndim == 0:
+        sigma = sigma.tolist()  # Returns just the int/float for rank-0
 
     if multichannel:
         # do not filter across channels
