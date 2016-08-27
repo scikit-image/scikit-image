@@ -50,11 +50,11 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
 
     References
     ----------
-    * http://en.wikipedia.org/wiki/Histogram_of_oriented_gradients
-
-    * Dalal, N and Triggs, B, Histograms of Oriented Gradients for
-      Human Detection, IEEE Computer Society Conference on Computer
-      Vision and Pattern Recognition 2005 San Diego, CA, USA
+    .. [1] http://en.wikipedia.org/wiki/Histogram_of_oriented_gradients
+    .. [2] Dalal, N and Triggs, B, Histograms of Oriented Gradients for
+           Human Detection, IEEE Computer Society Conference on Computer
+           Vision and Pattern Recognition 2005 San Diego, CA, USA
+           DOI:10.1109/CVPR.2005.177
 
     Notes
     -----
