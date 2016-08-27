@@ -122,7 +122,7 @@ def match_template(image, template, pad_input=False, mode='constant',
 
     image_shape = image.shape
 
-    image = np.array(image, dtype=np.float32, copy=False)
+    image = np.array(image, dtype=np.float64, copy=False)
 
     pad_width = tuple((width, width) for width in template.shape)
     if mode == 'constant':
@@ -161,10 +161,10 @@ def match_template(image, template, pad_input=False, mode='constant',
     np.maximum(denominator, 0, out=denominator)  # sqrt of negative number not allowed
     np.sqrt(denominator, out=denominator)
 
-    response = np.zeros_like(xcorr, dtype=np.float32)
+    response = np.zeros_like(xcorr, dtype=np.float64)
 
     # avoid zero-division
-    mask = denominator > np.finfo(np.float32).eps
+    mask = denominator > np.finfo(np.float64).eps
 
     response[mask] = numerator[mask] / denominator[mask]
 
