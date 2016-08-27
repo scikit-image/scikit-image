@@ -19,7 +19,6 @@ from scipy.fftpack import fft, ifft, fftfreq
 from scipy.interpolate import interp1d
 from ._warps_cy import _warp_fast
 from ._radon_transform import sart_projection_update
-from .. import util
 from warnings import warn
 
 
@@ -84,8 +83,8 @@ def radon(image, theta=None, circle=False):
         old_center = [s // 2 for s in image.shape]
         pad_before = [nc - oc for oc, nc in zip(old_center, new_center)]
         pad_width = [(pb, p - pb) for pb, p in zip(pad_before, pad)]
-        padded_image = util.pad(image, pad_width, mode='constant',
-                                constant_values=0)
+        padded_image = np.pad(image, pad_width, mode='constant',
+                              constant_values=0)
     # padded_image is always square
     assert padded_image.shape[0] == padded_image.shape[1]
     radon_image = np.zeros((padded_image.shape[0], len(theta)))
@@ -118,7 +117,7 @@ def _sinogram_circle_to_square(sinogram):
     new_center = diagonal // 2
     pad_before = new_center - old_center
     pad_width = ((pad_before, pad - pad_before), (0, 0))
-    return util.pad(sinogram, pad_width, mode='constant', constant_values=0)
+    return np.pad(sinogram, pad_width, mode='constant', constant_values=0)
 
 
 def iradon(radon_image, theta=None, output_size=None,
@@ -197,7 +196,7 @@ def iradon(radon_image, theta=None, output_size=None,
     projection_size_padded = \
         max(64, int(2 ** np.ceil(np.log2(2 * radon_image.shape[0]))))
     pad_width = ((0, projection_size_padded - radon_image.shape[0]), (0, 0))
-    img = util.pad(radon_image, pad_width, mode='constant', constant_values=0)
+    img = np.pad(radon_image, pad_width, mode='constant', constant_values=0)
 
     # Construct the Fourier filter
     f = fftfreq(projection_size_padded).reshape(-1, 1)   # digital frequency

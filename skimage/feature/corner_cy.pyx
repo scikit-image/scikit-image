@@ -7,7 +7,7 @@ cimport numpy as cnp
 from libc.float cimport DBL_MAX
 from libc.math cimport atan2, fabs
 
-from ..util import img_as_float, pad
+from ..util import img_as_float
 from ..color import rgb2grey
 
 from .util import _prepare_grayscale_input_2D
@@ -252,8 +252,8 @@ def corner_orientations(image, Py_ssize_t[:, :] corners, mask):
     cdef Py_ssize_t mcols = mask.shape[1]
     cdef Py_ssize_t mrows2 = (mrows - 1) / 2
     cdef Py_ssize_t mcols2 = (mcols - 1) / 2
-    cdef double[:, :] cimage = pad(image, (mrows2, mcols2), mode='constant',
-                                   constant_values=0)
+    cdef double[:, :] cimage = np.pad(image, (mrows2, mcols2), mode='constant',
+                                      constant_values=0)
     cdef double[:] orientations = np.zeros(corners.shape[0], dtype=np.double)
     cdef double curr_pixel
     cdef double m01, m10, m01_tmp

@@ -1,14 +1,13 @@
 from __future__ import division
 
-__all__ = ['compare_ssim',
-           'structural_similarity']
-
 import numpy as np
 from scipy.ndimage import uniform_filter, gaussian_filter
 
 from ..util.dtype import dtype_range
-from ..util.arraypad import crop
+from ..util.arraycrop import crop
 from .._shared.utils import deprecated
+
+__all__ = ['compare_ssim']
 
 
 def compare_ssim(X, Y, win_size=None, gradient=False,

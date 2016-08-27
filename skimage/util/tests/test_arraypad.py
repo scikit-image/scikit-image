@@ -5,8 +5,8 @@ from __future__ import division, absolute_import, print_function
 
 import numpy as np
 from numpy.testing import (assert_array_equal, assert_raises, assert_allclose,
-                           assert_equal, TestCase)
-from skimage.util import pad, crop
+                           TestCase)
+from skimage.util import pad
 
 
 class TestConditionalShortcuts(TestCase):
@@ -993,7 +993,7 @@ class ValueError3(TestCase):
 
     def test_mode_not_set(self):
         arr = np.arange(30).reshape(5, 6)
-        assert_raises(ValueError, pad, arr, 4)
+        assert_raises((ValueError, TypeError), pad, arr, 4)
 
     def test_malformed_pad_amount(self):
         arr = np.arange(30).reshape(5, 6)
@@ -1041,50 +1041,6 @@ class TypeError1(TestCase):
         kwargs = dict(mode='mean', stat_length=(3, ))
         assert_raises(TypeError, pad, arr, ((2, 3, 4), (3, 2)),
                       **kwargs)
-
-
-def test_multi_crop():
-    arr = np.arange(45).reshape(9, 5)
-    out = crop(arr, ((1, 2), (2, 1)))
-    assert_array_equal(out[0], [7, 8])
-    assert_array_equal(out[-1], [32, 33])
-    assert_equal(out.shape, (6, 2))
-
-
-def test_pair_crop():
-    arr = np.arange(45).reshape(9, 5)
-    out = crop(arr, (1, 2))
-    assert_array_equal(out[0], [6, 7])
-    assert_array_equal(out[-1], [31, 32])
-    assert_equal(out.shape, (6, 2))
-
-
-def test_int_crop():
-    arr = np.arange(45).reshape(9, 5)
-    out = crop(arr, 1)
-    assert_array_equal(out[0], [6, 7, 8])
-    assert_array_equal(out[-1], [36, 37, 38])
-    assert_equal(out.shape, (7, 3))
-
-
-def test_copy_crop():
-    arr = np.arange(45).reshape(9, 5)
-    out0 = crop(arr, 1, copy=True)
-    assert out0.flags.c_contiguous
-    out0[0, 0] = 100
-    assert not np.any(arr == 100)
-    assert not np.may_share_memory(arr, out0)
-
-    out1 = crop(arr, 1)
-    out1[0, 0] = 100
-    assert arr[1, 1] == 100
-    assert np.may_share_memory(arr, out1)
-
-
-def test_zero_crop():
-    arr = np.arange(45).reshape(9, 5)
-    out = crop(arr, 0)
-    assert out.shape == (9, 5)
 
 
 if __name__ == "__main__":
