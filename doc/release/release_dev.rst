@@ -26,9 +26,10 @@ Improvements
 
 API Changes
 -----------
-
-
-
+- The function ``filters.gaussian``, which wraps the SciPy NDImage function
+  ``gaussian_filter``, incorrectly changed the default padding mode from
+  'reflect' to 'nearest'. This was potentially quite misleading for users, and
+  'reflect' is more correct. The default padding mode 'reflect' was restored.
 
 Deprecations
 ------------
