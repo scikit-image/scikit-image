@@ -427,8 +427,8 @@ def black_tophat(image, selem=None, out=None):
 
     Returns
     -------
-    opening : array, same shape and type as `image`
-       The result of the black top filter.
+    out : array, same shape and type as `image`
+        The result of the morphological black top hat.
 
     Examples
     --------
