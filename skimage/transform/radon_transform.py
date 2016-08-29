@@ -121,7 +121,7 @@ def _sinogram_circle_to_square(sinogram):
 
 
 def iradon(radon_image, theta=None, output_size=None,
-           filter="ramp", interpolation="linear", circle=False):
+           filter="ramp", interpolation="linear", circle=False, freqcutoff=1.0, derivative=False):
     """
     Inverse radon transform.
 
@@ -152,6 +152,11 @@ def iradon(radon_image, theta=None, output_size=None,
         Assume the reconstructed image is zero outside the inscribed circle.
         Also changes the default output_size to match the behaviour of
         ``radon`` called with ``circle=True``.
+    freqcutoff: float, optional (default 1, ie., no cutoff)
+        Enable a cutoff of frequency when filtering. It is normalize to 1. 
+    derivative: boolean, optional (default 'False')
+        Enable the reconstruction of differential projections, i.e., the 
+        derivate of the projections. 
 
     Returns
     -------
@@ -201,22 +206,36 @@ def iradon(radon_image, theta=None, output_size=None,
     # Construct the Fourier filter
     f = fftfreq(projection_size_padded).reshape(-1, 1)   # digital frequency
     omega = 2 * np.pi * f                                # angular frequency
-    fourier_filter = 2 * np.abs(f)                       # ramp filter
+    # enable the possibily of processing the derivative of the projections
+    if derivative:
+        fourier_filter = np.ones_like(f)                    # differential filter
+    else:
+        fourier_filter = 2 * np.abs(f)                       # ramp filter
+    
+    # Extending the standard filter with frequency cutoff
     if filter == "ramp":
         pass
     elif filter == "shepp-logan":
         # Start from first element to avoid divide by zero
-        fourier_filter[1:] = fourier_filter[1:] * np.sin(omega[1:]) / omega[1:]
+        fourier_filter[1:] = fourier_filter[1:] * np.sin(omega[1:]/(2*freqcutoff)) / (omega[1:]/(2*freqcutoff))
     elif filter == "cosine":
-        fourier_filter *= np.cos(omega)
+        fourier_filter *= np.cos(omega/(2*freqcutoff))
     elif filter == "hamming":
-        fourier_filter *= (0.54 + 0.46 * np.cos(omega / 2))
+        fourier_filter *= (0.54 + 0.46 * np.cos(omega / freqcutoff))
     elif filter == "hann":
-        fourier_filter *= (1 + np.cos(omega / 2)) / 2
+        fourier_filter *= (1 + np.cos(omega/freqcutoff)) / 2
     elif filter is None:
         fourier_filter[:] = 1
     else:
         raise ValueError("Unknown filter: %s" % filter)
+    
+    # Effective frequency cutoff
+    fourier_filter[np.where(2*np.abs(f)>freqcutoff)]=0
+    
+    # Change in the filter to adapte it to projection derivatives
+    if derivative:
+        fourier_filter = np.sign(f)*fourier_filter/(1j*np.pi)
+        
     # Apply filter in Fourier domain
     projection = fft(img, axis=0) * fourier_filter
     radon_filtered = np.real(ifft(projection, axis=0))
