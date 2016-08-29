@@ -109,4 +109,5 @@ def gaussian(image, sigma=1, output=None, mode='reflect', cval=0,
             sigma = np.concatenate((np.asarray(sigma), [0]))
 
     image = img_as_float(image)
-    return ndi.gaussian_filter(image, sigma, mode=mode, cval=cval)
+    return ndi.gaussian_filter(image, sigma, output=output, mode=mode,
+                               cval=cval)
