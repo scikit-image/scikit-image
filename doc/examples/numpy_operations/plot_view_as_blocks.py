@@ -3,11 +3,11 @@
 Block views on images/arrays
 ============================
 
-This example illustrates the use of `view_as_blocks` from
-`skimage.util.shape`.  Block views can be incredibly useful when one
+This example illustrates the use of ``view_as_blocks`` from
+:py:func:`skimage.util`.  Block views can be incredibly useful when one
 wants to perform local operations on non-overlapping image patches.
 
-We use `astronaut` from `skimage.data` and virtually 'slice' it into square
+We use ``astronaut`` from ``skimage.data`` and virtually 'slice' it into square
 blocks.  Then, on each block, we either pool the mean, the max or the
 median value of that block. The results are displayed altogether, along
 with a spline interpolation of order 3 rescaling of the original `astronaut`
@@ -21,29 +21,28 @@ import matplotlib.cm as cm
 
 from skimage import data
 from skimage import color
-from skimage.util.shape import view_as_blocks
+from skimage.util import view_as_blocks
 
 
-# -- get `astronaut` from skimage.data in grayscale
+# get astronaut from skimage.data in grayscale
 l = color.rgb2gray(data.astronaut())
 
-# -- size of blocks
+# size of blocks
 block_shape = (4, 4)
 
-# -- see `astronaut` as a matrix of blocks (of shape
-#    `block_shape`)
+# see astronaut as a matrix of blocks (of shape block_shape)
 view = view_as_blocks(l, block_shape)
 
-# -- collapse the last two dimensions in one
+# collapse the last two dimensions in one
 flatten_view = view.reshape(view.shape[0], view.shape[1], -1)
 
-# -- resampling `astronaut` by taking either the `mean`,
-#    the `max` or the `median` value of each blocks.
+# resampling the image by taking either the `mean`,
+# the `max` or the `median` value of each blocks.
 mean_view = np.mean(flatten_view, axis=2)
 max_view = np.max(flatten_view, axis=2)
 median_view = np.median(flatten_view, axis=2)
 
-# -- display resampled images
+# display resampled images
 fig, axes = plt.subplots(2, 2, figsize=(8, 8), sharex=True, sharey=True)
 ax = axes.ravel()
 

@@ -21,8 +21,8 @@ compute the corresponding image value.
 Performing a reverse mapping
 ----------------------------
 To perform a geometric warp in ``skimage``, you simply need to provide the
-reverse mapping to the ``skimage.transform.warp`` function.  E.g., consider the
-case where we would like to shift an image 50 pixels to the left.  The reverse
+reverse mapping to the :py:func:`skimage.transform.warp` function. E.g., consider
+the case where we would like to shift an image 50 pixels to the left. The reverse
 mapping for such a shift would be::
 
     def shift_left(xy):

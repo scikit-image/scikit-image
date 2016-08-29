@@ -4,7 +4,7 @@ Sliding window histogram
 ========================
 
 Histogram matching can be used for object detection in images [1]_. This
-example extracts a single coin from the `skimage.data.coins` image and uses
+example extracts a single coin from the ``skimage.data.coins`` image and uses
 histogram matching to attempt to locate it within the original image.
 
 First, a box-shaped region of the image containing the target coin is
@@ -12,13 +12,13 @@ extracted and a histogram of its greyscale values is computed.
 
 Next, for each pixel in the test image, a histogram of the greyscale values in
 a region of the image surrounding the pixel is computed.
-`skimage.filters.rank.windowed_histogram` is used for this task, as it employs
+``skimage.filters.rank.windowed_histogram`` is used for this task, as it employs
 an efficient sliding window based algorithm that is able to compute these
 histograms quickly [2]_. The local histogram for the region surrounding each
 pixel in the image is compared to that of the single coin, with a similarity
 measure being computed and displayed.
 
-The histogram of the single coin is computed using `numpy.histogram` on a box
+The histogram of the single coin is computed using ``numpy.histogram`` on a box
 shaped region surrounding the coin, while the sliding window histograms are
 computed using a disc shaped structural element of a slightly different size.
 This is done in aid of demonstrating that the technique still finds similarity
