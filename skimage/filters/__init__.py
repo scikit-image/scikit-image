@@ -14,6 +14,9 @@ from .thresholding import (threshold_adaptive, threshold_otsu, threshold_yen,
                            try_all_threshold)
 from . import rank
 from .rank import median
+from .filter_bank import (multiresolution_filter_bank_morlet2d,
+                          filter_bank_morlet2d,
+                          filterbank_to_multiresolutionfilterbank)
 
 from .._shared.utils import deprecated, copy_func
 
@@ -59,4 +62,7 @@ __all__ = ['inverse',
            'threshold_minimum',
            'threshold_mean',
            'threshold_triangle',
-           'rank']
+           'rank',
+           'multiresolution_filter_bank_morlet2d,'
+           'filter_bank_morlet2d',
+           'filterbank_to_multiresolutionfilterbank']
