@@ -12,7 +12,6 @@ break the connectivity of the corresponding object.
 """
 from skimage.morphology import skeletonize
 from skimage import data
-import numpy as np
 import matplotlib.pyplot as plt
 from skimage.util import invert
 
@@ -52,16 +51,13 @@ plt.show()
 # value of 0, 1, 2 or 3, which are selectively removed during
 # the iterations.
 #
-# ``skeletonize_3d`` [Lee94]_ uses an octree data
-# structure to examine a 3x3x3 neighborhood of a pixel. The algorithm
-# proceeds by iteratively sweeping
+# ``skeletonize_3d`` [Lee94]_ uses an octree data structure to examine a 3x3x3
+# neighborhood of a pixel. The algorithm proceeds by iteratively sweeping
 # over the image, and removing pixels at each iteration until the image
 # stops changing. Each iteration consists of two steps: first, a list of
 # candidates for removal is assembled; then pixels from this list are
 # rechecked sequentially, to better preserve connectivity of the image.
 
-import numpy as np
-from scipy import ndimage as ndi
 import matplotlib.pyplot as plt
 from skimage.morphology import skeletonize, skeletonize_3d
 from skimage.data import binary_blobs
@@ -101,13 +97,13 @@ plt.show()
 #
 # Here, we use the medial axis transform to compute the width of the foreground
 # objects. As the function ``medial_axis`` returns the distance transform in
-# addition to the medial axis (with the keyword
-# argument ``return_distance=True``), it is possible to compute the distance to
-# the background for all points of the medial axis with this function. This gives
-# an estimate of the local width of the objects.
+# addition to the medial axis (with the keyword argument ``return_distance=True``),
+# it is possible to compute the distance to the background for all points of
+# the medial axis with this function. This gives an estimate of the local width
+# of the objects.
 #
-# For a skeleton with fewer branches, ``skeletonize`` or ``skeletonize_3d`` must
-# be preferred.
+# For a skeleton with fewer branches, ``skeletonize`` or ``skeletonize_3d``
+# must be preferred.
 
 from skimage.morphology import medial_axis, skeletonize, skeletonize_3d
 
