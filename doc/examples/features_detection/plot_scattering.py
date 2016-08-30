@@ -2,31 +2,19 @@
 ============================================
 Extraction and access to Scattering Features
 ============================================
+Given an image $x$, the scattering transform computes at most (generally) three layers of cascaded convolutions and non-linear operators:
 
-Given an image x, the scattering transform computes at most (generally) three layers of cascaded convolutions and non-linear operators:
+-*Zero-order coefficients:*  $Sx[0] = x \ast \phi$
 
--Zero-order coefficients: Sx[0]=x∗ϕ
+-*First-order coefficients:*   $Sx[1][(i,l)] = | x \ast \psi_{(i,l)} | \ast \phi$
 
--First-order coefficients: Sx[1][(i,l)]=|x∗ψ(i,l)|∗ϕ
+-*Second-order coefficients:*  $Sx[2][(i,l)][(j,l_2)] = | | x \ast \psi_{(i,l)} | \ast \psi_{(j,l_2)}| \ast \phi$
 
--Second-order coefficients: Sx[2][(i,l)][(j,l2)]=||x∗ψ(i,l)|∗ψ(j,l2)|∗ϕ
+where $\psi$ is a band-pass filter, $\phi$ is a low-pass filter (normally a Gaussian), operator $\ast$ is a 2D convolution, and $|\cdot|$ is the complex modulus. If $x$ is of size $(px,px)$, the maximum number of scales is $J=\log_2(px)$ and $i \in [0,J-1]$.
+For second-order coefficients, we compute coefficients with $j>i$, since other coefficients do not have enough energy to be significant.
 
-where ψ is a band-pass filter, ϕ is a low-pass filter (normally a Gaussian), operator ∗ is a 2D convolution, and |⋅| is the complex modulus. If x is of size (px,px), the maximum number of scales is J=log2(px) and i∈[0,J−1]. For second-order coefficients, we compute coefficients with j>i, since other coefficients do not have enough energy to be significant.
-
-Code: Here, we will see how to access the different layers of the scattering transform. This can be done by accessing directly the 'S' matrix, which can be easy for the zero and first layer, but can get cumbersum for the second order cofficients, due tue its intrinsic tree structure and due to the condition j>i. We provide an easy way to accessing directly the different coefficients and layers with the dictionary 'scat_tree'.
-
-# Dictionary access to the scattering coefficients:
-
-Keys:
-* Zero-order: we only have one key for the only coefficient:
-scat_tree[0]
-
-* First-order: keys is a tuple with the scale and angle:
-scat_tree[(i,l)]
-
-* Second-order: key is a tuple of two tuples, with the scale and angle of the first layer and then the scale and angle of the second layer:
-scat_tree[( (i,l)  , (j,l_2) )]
-
+**Code**: Here, we will see how to access the different layers of the scattering transform. This can be done by accessing directly the 'S' matrix, which can be easy for the zero and first layer, but can get cumbersum for the second order cofficients, due tue its intrinsic tree structure and due to the condition $j>i$.
+We provide an easy way to accessing directly the different coefficients and layers with the dictionary 'scat_tree'.
 
 For more information about the scattering tree see
 

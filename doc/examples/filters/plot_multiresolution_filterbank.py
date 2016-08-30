@@ -6,7 +6,8 @@ Here, we show how to create and access a multiresolution wavelet filter bank wit
 We show, for a certain scale (j) and angle (l), the same filter at different resolutions.
 """
 
-
+import matplotlib.pylab as plt
+import numpy as np
 from skimage.filters.filter_bank import multiresolution_filter_bank_morlet2d
 
 J = 5 #number of scales
@@ -25,6 +26,8 @@ print('j=',j,' l=',l)
 #Get the multiresolution filterbank:
 wavelet_bnk,littlewood_p = multiresolution_filter_bank_morlet2d(px, J=J, L=L, sigma_phi=sigma_phi, sigma_xi= sigma_xi)
 
+num_resolutions = len(wavelet_bnk['psi'])
+plt.figure(figsize=(18,6))
 plt.figure(figsize=(18,6))
 for r in np.arange(0,num_resolutions):
     plt.subplot(1,num_resolutions,r+1)
