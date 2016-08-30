@@ -49,7 +49,7 @@ def cut_threshold(labels, rag, thresh, in_place=True):
     ----------
     .. [1] Alain Tremeau and Philippe Colantoni
            "Regions Adjacency Graph Applied To Color Image Segmentation"
-           http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.11.5274
+           DOI:10.1.1.11.5274
 
     """
     if not in_place:
@@ -121,9 +121,9 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
 
     References
     ----------
-    .. [1] Shi, J.; Malik, J., "Normalized cuts and image segmentation",
-           Pattern Analysis and Machine Intelligence,
-           IEEE Transactions on, vol. 22, no. 8, pp. 888-905, August 2000.
+    .. [1] Jianbo Shi, & Malik, J. (2000). Normalized cuts and image
+           segmentation. IEEE Transactions on Pattern Analysis and Machine
+           Intelligence, 22(8), 888-905. DOI:10.1109/34.868688
 
     """
     if not in_place:
