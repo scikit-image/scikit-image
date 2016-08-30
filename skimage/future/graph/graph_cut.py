@@ -290,8 +290,8 @@ def _ncut_relabel(rag, thresh, num_cuts, max_rec):
             # Refer Shi & Malik 2001, Section 3.2.5, Page 893
             sub1, sub2 = partition_by_cut(cut_mask, rag)
 
-            _ncut_relabel(sub1, thresh, num_cuts, max_rec-1)
-            _ncut_relabel(sub2, thresh, num_cuts, max_rec-1)
+            _ncut_relabel(sub1, thresh, num_cuts, max_rec - 1)
+            _ncut_relabel(sub2, thresh, num_cuts, max_rec - 1)
             return
 
     # The N-cut wasn't small enough, or could not be computed.

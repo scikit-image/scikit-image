@@ -71,7 +71,6 @@ def min_weight(graph, src, dst, n):
         both exist.
 
     """
-
     # cover the cases where n only has edge to either `src` or `dst`
     default = {'weight': np.inf}
     w1 = graph[n].get(src, default)['weight']
@@ -108,7 +107,6 @@ def _add_edge_filter(values, graph):
 
 
 class RAG(nx.Graph):
-
     """
     The Region Adjacency Graph (RAG) of an image, subclasses
     `networx.Graph <http://networkx.github.io/documentation/latest/reference/classes.graph.html>`_
@@ -225,27 +223,30 @@ class RAG(nx.Graph):
     def add_node(self, n, attr_dict=None, **attr):
         """Add node `n` while updating the maximum node id.
 
-        .. seealso:: :func:`networkx.Graph.add_node`."""
+        .. seealso:: :func:`networkx.Graph.add_node`.
+        """
         super(RAG, self).add_node(n, attr_dict, **attr)
         self.max_id = max(n, self.max_id)
 
     def add_edge(self, u, v, attr_dict=None, **attr):
         """Add an edge between `u` and `v` while updating max node id.
 
-        .. seealso:: :func:`networkx.Graph.add_edge`."""
+        .. seealso:: :func:`networkx.Graph.add_edge`.
+        """
         super(RAG, self).add_edge(u, v, attr_dict, **attr)
         self.max_id = max(u, v, self.max_id)
 
     def copy(self):
         """Copy the graph with its max node id.
 
-        .. seealso:: :func:`networkx.Graph.copy`."""
+        .. seealso:: :func:`networkx.Graph.copy`.
+        """
         g = super(RAG, self).copy()
         g.max_id = self.max_id
         return g
 
     def next_id(self):
-        """Returns the `id` for the new node to be inserted.
+        """Return the `id` for the new node to be inserted.
 
         The current implementation returns one more than the maximum `id`.
 
@@ -261,7 +262,8 @@ class RAG(nx.Graph):
 
         This is a convenience method used internally.
 
-        .. seealso:: :func:`networkx.Graph.add_node`."""
+        .. seealso:: :func:`networkx.Graph.add_node`.
+        """
         super(RAG, self).add_node(n)
 
 
@@ -381,7 +383,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
 
 
 def rag_boundary(labels, edge_map, connectivity=2):
-    """ Comouter RAG based on region boundaries
+    """Comouter RAG based on region boundaries.
 
     Given an image's initial segmentation and its edge map this method
     constructs the corresponding Region Adjacency Graph (RAG). Each node in the
@@ -411,7 +413,6 @@ def rag_boundary(labels, edge_map, connectivity=2):
     >>> rag = graph.rag_boundary(labels, edge_map)
 
     """
-
     conn = ndi.generate_binary_structure(labels.ndim, connectivity)
     eroded = ndi.grey_erosion(labels, footprint=conn)
     dilated = ndi.grey_dilation(labels, footprint=conn)
@@ -493,7 +494,6 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     >>> lc = graph.show_rag(labels, g, img)
     >>> cbar = plt.colorbar(lc)
     """
-
     if not in_place:
         rag = rag.copy()
 
@@ -541,7 +541,7 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
 
 
 def rag_node_centroids(labels, rag):
-    """Get centroids of the region adjacency graph nodes
+    """Get centroids of the region adjacency graph nodes.
 
     Parameters
     ----------
