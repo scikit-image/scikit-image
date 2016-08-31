@@ -7,11 +7,4 @@ __all__ = ['shortest_path',
            'MCP_Geometric',
            'MCP_Connect',
            'MCP_Flexible',
-           'route_through_array',
-           'rag_mean_color',
-           'cut_threshold',
-           'cut_normalized',
-           'ncut',
-           'draw_rag',
-           'merge_hierarchical',
-           'RAG']
+           'route_through_array']
