@@ -1,8 +1,29 @@
 """
-============================================
-Extraction and access to Scattering Features
-============================================
-Given an image $x$, the scattering transform computes at most (generally) three layers of cascaded convolutions and non-linear operators:
+===================
+Scattering Features
+===================
+
+This example shows how to use the scattering features for image classification.
+They have shown to outperform any other 'non-learned'
+image representations for image classification tasks [2]_.
+Structurally, they are very similar to deep learning representations, with fixed filters, which are Wavelet filters.
+Since the scattering transform is based on the Discrete Wavelet transform (DWT), its stable to deformations.
+It is also invariant to small translations. For more details on its mathematical properties, see [1]_.
+
+Here, we show how to use this implementation to access easily different scattering coefficients stored
+in the scattering vectors. For more information on how to use scattering cefficients for image classification,
+ please check the example 'Scattering features for supervised learning'.
+
+
+ 1) How to use the scattering vectors obtained from MNIST and CIFAR10 databases for classification. These are both very
+ challenging databases widely used in research to compare the quality of image representations and classification methods.
+
+ 2) H
+
+# Mathematical definition of the coefficients
+
+Given an image $x$, the scattering transform computes (generally) three layers of cascaded convolutions
+and non-linear operators:
 
 -*Zero-order coefficients:*  $Sx[0] = x \ast \phi$
 
@@ -10,16 +31,32 @@ Given an image $x$, the scattering transform computes at most (generally) three 
 
 -*Second-order coefficients:*  $Sx[2][(i,l)][(j,l_2)] = | | x \ast \psi_{(i,l)} | \ast \psi_{(j,l_2)}| \ast \phi$
 
-where $\psi$ is a band-pass filter, $\phi$ is a low-pass filter (normally a Gaussian), operator $\ast$ is a 2D convolution, and $|\cdot|$ is the complex modulus. If $x$ is of size $(px,px)$, the maximum number of scales is $J=\log_2(px)$ and $i \in [0,J-1]$.
-For second-order coefficients, we compute coefficients with $j>i$, since other coefficients do not have enough energy to be significant.
+where $\psi$ is a band-pass filter, $\phi$ is a low-pass filter (normally a Gaussian), operator $\ast$ is a
+2D convolution, and $|\cdot|$ is the complex modulus. If $x$ is of size $(px,px)$, the maximum number of scales
+is $J=\log_2(px)$ and $i \in [0,J-1]$. For second-order coefficients, we compute coefficients with $j>i$, since other
+coefficients do not have enough energy to be significant.
 
-**Code**: Here, we will see how to access the different layers of the scattering transform. This can be done by accessing directly the 'S' matrix, which can be easy for the zero and first layer, but can get cumbersum for the second order cofficients, due tue its intrinsic tree structure and due to the condition $j>i$.
-We provide an easy way to accessing directly the different coefficients and layers with the dictionary 'scat_tree'.
+# Implementation: Dictionary access to the scattering coefficients
+Let's see how to access the different layers of the scattering transform. The scattering function outputs a dictionary
+python structure that allows an easy access to the scattering vector (first output of the function). The keys
+ for this dictionary structure are the following:
 
-For more information about the scattering tree see
+- *Zero-order*: we only have one key for the only coefficient:
+                scat_tree[0]
 
-* Bruna, J., Mallat, S. 'Invariant Scattering Convolutional Networks'.IEEE TPAMI, 2012.
-* Oyallon, E. et Mallat, S. 'Deep Roto-translation Scattering for Object Classification'. CVPR 2015
+- *First-order*: keys is a tuple with the scale and angle:
+                scat_tree[(i,l)]
+
+- *Second-order*: key is a tuple of two tuples, with the scale and angle of the first layer and then the
+ scale and angle of the second layer:
+                scat_tree[( (i,l)  , (j,l_2) )]
+
+# Image Classification
+
+
+
+..[1] Bruna, J., Mallat, S. 'Invariant Scattering Convolutional Networks'.IEEE TPAMI, 2012.
+..[2] Oyallon, E. et Mallat, S. 'Deep Roto-translation Scattering for Object Classification'. CVPR 2015
 
 """
 # Load an image
@@ -55,24 +92,25 @@ zero_order_coef_index = 0
 #We can find the zero-order scattering coefficients in the S vector:
 S_zero_order = S[0,zero_order_coef_index,]
 
+plt.suptitle('Zero order scattering coefficients')
 plt.subplot(1,2,1)
+plt.title('Using the vector structure')
 plt.imshow(S_zero_order)
 #or we can access them using the scat_tree structure, which is a view of the S structure.
 plt.subplot(1,2,2)
+plt.title('Using the dictionary structure')
 plt.imshow(scat_tree[0][0,:,:])
 plt.show()
 
-# - First order coefficients: $|x \ast \psi_{(i,l)}| \ast \phi$
-#We have $J \times L$ number of coefficients in the first order scattering vector, for each scale we have $L$ coefficients.
-
+# - First order coefficients
 # we want to access one of the coefficients
 i = 0
 l = 3
 S_first_order = S[0,i*L+l+1,:,:]
 
+plt.suptitle('First order scattering coefficients')
 plt.subplot(1,2,1)
 plt.imshow(S_first_order)
-
 #using the stree structure
 plt.subplot(1,2,2)
 plt.imshow(scat_tree[(i,l)][0,:,:])
@@ -83,4 +121,5 @@ plt.show()
 #We will just access the coefficient using the scat tree structure:
 j = 1
 l_2 = 5
+plt.suptitle('Second order scattering coefficients')
 plt.imshow(scat_tree[((i,l),(j,l_2))][0,:,:])

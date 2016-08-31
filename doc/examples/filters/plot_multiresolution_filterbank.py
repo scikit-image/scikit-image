@@ -27,10 +27,13 @@ print('j=',j,' l=',l)
 wavelet_bnk,littlewood_p = multiresolution_filter_bank_morlet2d(px, J=J, L=L, sigma_phi=sigma_phi, sigma_xi= sigma_xi)
 
 num_resolutions = len(wavelet_bnk['psi'])
+
 plt.figure(figsize=(18,6))
-plt.figure(figsize=(18,6))
+
+plt.suptitle("All resolutions of filter" + "(" + str(j) + "," + str(l) + ")", fontsize=20)
 for r in np.arange(0,num_resolutions):
     plt.subplot(1,num_resolutions,r+1)
+    plt.title("resolution:"+str(r))
     f = wavelet_bnk['psi'][r][j][l,:,:]
     plt.imshow(np.abs(np.fft.fftshift(f)))
 plt.show()

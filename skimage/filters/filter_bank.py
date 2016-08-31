@@ -1,13 +1,12 @@
 """
-    
     Multiresolution Morlet filterbank filters
     
     Original author: Sira Ferradans, based on code developed by Ivan Dokmanic and Michael Eickenberg
-    
 """
 
 import numpy as np
 from skimage.filters import morlet_kernel, gabor_kernel
+
 
 def _ispow2(N):
     return 0 == (N & (N - 1))
@@ -37,11 +36,9 @@ def _get_filter_at_resolution(filt,j):
     
     # NTM: 0.5 is a cute trick for higher dimensions!
     mask = np.hstack((np.ones(int(N / 2 ** (1 + j))), 0.5, np.zeros(int(N - N / 2 ** (j + 1) - 1)))) \
-        + \
-            np.hstack(
-                      (np.zeros(int(N - N / 2 ** (j + 1))), 0.5, np.ones(int(N / 2 ** (1 + j) - 1))))
+        + np.hstack((np.zeros(int(N - N / 2 ** (j + 1))), 0.5, np.ones(int(N / 2 ** (1 + j) - 1))))
 
-mask.shape = N, 1
+    mask.shape = N, 1
     
     filt_lp = filt * mask * mask.T
     if 'cast' in locals():
@@ -51,9 +48,8 @@ mask.shape = N, 1
     # memory) (unlike Matlab)
     fold_size = (int(2 ** j), int(N / 2 ** j), int(2 ** j), int(N / 2 ** j))
     filt_multires = filt_lp.reshape(fold_size).sum(axis=(0, 2))
-    
 
-return filt_multires
+    return filt_multires
 
 def _zero_pad_filter(filter, N):
     """ Zero pad filter to (N,N)
@@ -283,7 +279,7 @@ def filterbank_to_multiresolutionfilterbank(filters, max_resolution):
 
     Returns
     -------
-    Filters_multires : dictionary
+    filters_multires : dictionary
         Set of filters in the Fourier domain, at different scales, angles and resolutions.
         See multiresolution_filter_bank_morlet2d for more details on the Filters_multires structure.
 
@@ -304,9 +300,8 @@ def filterbank_to_multiresolutionfilterbank(filters, max_resolution):
 
         Psi_multires.append(aux_filt_psi)
 
-
-    Filters_multires = dict(phi=Phi_multires, psi=Psi_multires)
-    return Filters_multires
+    filters_multires = dict(phi=Phi_multires, psi=Psi_multires)
+    return filters_multires
 
 
 
