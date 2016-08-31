@@ -222,7 +222,8 @@
   Structuring elements in morphology module.
 
 - Egor Panfilov
-  Inpainting with biharmonic equation
+  Inpainting with biharmonic equation.
+  Coordinate convertion utilities.
 
 - Evgeni Burovski
   Adaptation of ImageJ 3D skeletonization algorithm.
