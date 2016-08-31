@@ -26,7 +26,8 @@ that allows to better separate the different classes. Here we show how reproduce
 obtained with the scattering transform, together with SVM (with Gaussian kernels) in the following papers:
 
 -*MNIST database*: The results were first presented in [1]_ Table 4.
--*CIFAR10* database: This is a very challenging database with 10 classes and 32x32 images.
+-*CIFAR10* database: This is a very challenging database with 10 classes and 32x32 images. We reproduce the results
+obtained in [2]_ Table 1 (Trans., order 1)
 
 
 ..[1] Bruna, J., Mallat, S. 'Invariant Scattering Convolutional Networks'.IEEE TPAMI, 2012.
