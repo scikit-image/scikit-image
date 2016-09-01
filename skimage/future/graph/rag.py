@@ -5,9 +5,6 @@ from scipy import ndimage as ndi
 from scipy import sparse
 import math
 from ... import measure, segmentation, util, color
-from matplotlib import colors, cm
-from matplotlib import pyplot as plt
-from matplotlib.collections import LineCollection
 
 
 def _edge_generator_from_csr(csr_matrix):
@@ -495,12 +492,17 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     --------
     >>> from skimage import data, segmentation
     >>> from skimage.future import graph
+    >>> import matplotlib.pyplot as plt
+    >>>
     >>> img = data.coffee()
     >>> labels = segmentation.slic(img)
     >>> g =  graph.rag_mean_color(img, labels)
     >>> lc = graph.show_rag(labels, g, img)
     >>> cbar = plt.colorbar(lc)
     """
+    from matplotlib import colors, cm
+    from matplotlib import pyplot as plt
+    from matplotlib.collections import LineCollection
 
     if not in_place:
         rag = rag.copy()
