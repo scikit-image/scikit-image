@@ -48,19 +48,17 @@ def rc_to_xy(points=None, image=None):
 
     Parameters
     ----------
-image : (M, N[, C]) ndarray, optional
-        Image stored in `r, c` axes convention.
     points : (K, 2) ndarray, optional
         Array of points' `r, c` coordinates.
-    copy : bool, optional
-        If True, returns copy(s) of array(s) instead of view(s).
+    image : (M, N[, C]) ndarray, optional
+        Image stored in `r, c` axes convention.
 
     Returns
     -------
-    image_out : (M, N[, C]) ndarray
-        Same as `image`, but in `x, y` convention.
     points_out : (K, 2) ndarray
         Array of `points` `x, y` coordinates.
+    image_out : (M, N[, C]) ndarray
+        Same as `image`, but in `x, y` convention.
     """
     if points is not None:
         points_out = np.fliplr(points)
