@@ -1,7 +1,6 @@
 __all__ = ['polygon_clip', 'polygon_area']
 
 import numpy as np
-from matplotlib import _path, path, transforms
 
 
 def polygon_clip(rp, cp, r0, c0, r1, c1):
@@ -25,6 +24,8 @@ def polygon_clip(rp, cp, r0, c0, r1, c1):
     AGG 2.4 and exposed in Matplotlib.
 
     """
+    from matplotlib import _path, path, transforms
+
     poly = path.Path(np.vstack((rp, cp)).T, closed=True)
     clip_rect = transforms.Bbox([[r0, c0], [r1, c1]])
     poly_clipped = poly.clip_to_bbox(clip_rect).to_polygons()[0]
