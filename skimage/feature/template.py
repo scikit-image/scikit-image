@@ -1,3 +1,4 @@
+from __future__ import division
 import numpy as np
 from scipy.signal import fftconvolve
 
@@ -100,7 +101,7 @@ def match_template(image, template, pad_input=False, mode='constant',
     array([[ 1.   , -0.125,  0.   ,  0.   ],
            [-0.125, -0.125,  0.   ,  0.   ],
            [ 0.   ,  0.   ,  0.125,  0.125],
-           [ 0.   ,  0.   ,  0.125, -1.   ]], dtype=float32)
+           [ 0.   ,  0.   ,  0.125, -1.   ]])
     >>> result = match_template(image, template, pad_input=True)
     >>> np.round(result, 3)
     array([[-0.125, -0.125, -0.125,  0.   ,  0.   ,  0.   ],
@@ -108,7 +109,7 @@ def match_template(image, template, pad_input=False, mode='constant',
            [-0.125, -0.125, -0.125,  0.   ,  0.   ,  0.   ],
            [ 0.   ,  0.   ,  0.   ,  0.125,  0.125,  0.125],
            [ 0.   ,  0.   ,  0.   ,  0.125, -1.   ,  0.125],
-           [ 0.   ,  0.   ,  0.   ,  0.125,  0.125,  0.125]], dtype=float32)
+           [ 0.   ,  0.   ,  0.   ,  0.125,  0.125,  0.125]])
     """
     assert_nD(image, (2, 3))
 
@@ -120,7 +121,7 @@ def match_template(image, template, pad_input=False, mode='constant',
 
     image_shape = image.shape
 
-    image = np.array(image, dtype=np.float32, copy=False)
+    image = np.array(image, dtype=np.float64, copy=False)
 
     pad_width = tuple((width, width) for width in template.shape)
     if mode == 'constant':
@@ -159,10 +160,10 @@ def match_template(image, template, pad_input=False, mode='constant',
     np.maximum(denominator, 0, out=denominator)  # sqrt of negative number not allowed
     np.sqrt(denominator, out=denominator)
 
-    response = np.zeros_like(xcorr, dtype=np.float32)
+    response = np.zeros_like(xcorr, dtype=np.float64)
 
     # avoid zero-division
-    mask = denominator > np.finfo(np.float32).eps
+    mask = denominator > np.finfo(np.float64).eps
 
     response[mask] = numerator[mask] / denominator[mask]
 
