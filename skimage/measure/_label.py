@@ -2,7 +2,7 @@ from ._ccomp import label_cython as clabel
 
 
 def label(input, neighbors=None, background=None, return_num=False,
-          connectivity=None):
+          connectivity=None, ratio=None):
     r"""Label connected regions of an integer array.
 
     Two pixels are connected when they are neighbors and have the same value.
@@ -38,6 +38,10 @@ def label(input, neighbors=None, background=None, return_num=False,
         as a neighbor.
         Accepted values are ranging from  1 to input.ndim. If ``None``, a full
         connectivity of ``input.ndim`` is used.
+    ratio : int, optional
+        Check if pixel a is "close enough" to pixel b based on a given ratio
+        rather than checking for equality (e.g. for ratio=3, Check if
+        a/3 < b < a*3).  If not defined, or set to 1, simply check for equality
 
     Returns
     -------
@@ -90,4 +94,4 @@ def label(input, neighbors=None, background=None, return_num=False,
      [1 1 2]
      [0 0 0]]
     """
-    return clabel(input, neighbors, background, return_num, connectivity)
+    return clabel(input, neighbors, background, return_num, connectivity, ratio)
