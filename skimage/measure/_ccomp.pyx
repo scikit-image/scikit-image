@@ -165,9 +165,9 @@ cdef void get_shape_info(inarr_shape, shape_info *res) except *:
 cdef inline bint close(DTYPE_t* data_p, DTYPE_t rindex, INTS_t idxdiff, INTS_t ratio):
     cdef DTYPE_t bigger, smaller;
     if data_p[rindex] > data_p[rindex + idxdiff]:
-        return data_p[rindex] < 3*data_p[rindex + idxdiff]
+        return data_p[rindex] < ratio * data_p[rindex + idxdiff]
     else:
-        return data_p[rindex + idxdiff] < 3*data_p[rindex]
+        return data_p[rindex + idxdiff] < ratio * data_p[rindex]
 
 cdef inline void join_trees_wrapper(DTYPE_t *data_p, DTYPE_t *forest_p,
                                     DTYPE_t rindex, INTS_t idxdiff, INTS_t ratio):
