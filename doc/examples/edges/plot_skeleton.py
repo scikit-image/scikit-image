@@ -57,6 +57,9 @@ plt.show()
 # stops changing. Each iteration consists of two steps: first, a list of
 # candidates for removal is assembled; then pixels from this list are
 # rechecked sequentially, to better preserve connectivity of the image.
+#
+# Note that ``skeletonize_3d`` is designed to be used mostly on 3-D images.
+# However, for illustrative purposes, we apply this algorithm on a 2-D image.
 
 import matplotlib.pyplot as plt
 from skimage.morphology import skeletonize, skeletonize_3d
