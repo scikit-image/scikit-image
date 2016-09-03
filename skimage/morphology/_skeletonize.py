@@ -33,7 +33,7 @@ def skeletonize(image):
 
     Notes
     -----
-    The algorithm [1]_ works by making successive passes of the image,
+    The algorithm [Zha84]_ works by making successive passes of the image,
     removing pixels on object borders. This continues until no
     more pixels can be removed.  The image is correlated with a
     mask that assigns each pixel a number in the range [0...255]
@@ -48,7 +48,7 @@ def skeletonize(image):
 
     References
     ----------
-    .. [1] A fast parallel algorithm for thinning digital patterns,
+    .. [Zha84] A fast parallel algorithm for thinning digital patterns,
            T. Y. Zhang and C. Y. Suen, Communications of the ACM,
            March 1984, Volume 27, Number 3.
 
