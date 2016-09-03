@@ -116,7 +116,7 @@ def test_iradon_center():
 def check_radon_iradon(interpolation_type, filter_type):
     debug = False
     image = PHANTOM
-    reconstructed = iradon(radon(image), filter=filter_type,
+    reconstructed = iradon(radon(image, circle=False), filter=filter_type,
                            interpolation=interpolation_type)
     delta = np.mean(np.abs(image - reconstructed))
     print('\n\tmean error:', delta)
@@ -151,19 +151,18 @@ def test_iradon_angles():
     image = np.tri(size) + np.tri(size)[::-1]
     # Large number of projections: a good quality is expected
     nb_angles = 200
-    radon_image_200 = radon(image, theta=np.linspace(0, 180, nb_angles,
-                                                     endpoint=False))
-    reconstructed = iradon(radon_image_200)
+    theta = np.linspace(0, 180, nb_angles, endpoint=False)
+    radon_image_200 = radon(image, theta=theta, circle=False)
+    reconstructed = iradon(radon_image_200, circle=False)
     delta_200 = np.mean(abs(_rescale_intensity(image) - _rescale_intensity(reconstructed)))
     assert delta_200 < 0.03
     # Lower number of projections
     nb_angles = 80
-    radon_image_80 = radon(image, theta=np.linspace(0, 180, nb_angles,
-                                                    endpoint=False))
+    radon_image_80 = radon(image, theta=theta, circle=False)
     # Test whether the sum of all projections is approximately the same
     s = radon_image_80.sum(axis=0)
     assert np.allclose(s, s[0], rtol=0.01)
-    reconstructed = iradon(radon_image_80)
+    reconstructed = iradon(radon_image_80, circle=False)
     delta_80 = np.mean(abs(image / np.max(image) -
                            reconstructed / np.max(reconstructed)))
     # Loss of quality when the number of projections is reduced
@@ -175,8 +174,8 @@ def check_radon_iradon_minimal(shape, slices):
     theta = np.arange(180)
     image = np.zeros(shape, dtype=np.float)
     image[slices] = 1.
-    sinogram = radon(image, theta)
-    reconstructed = iradon(sinogram, theta)
+    sinogram = radon(image, theta, circle=False)
+    reconstructed = iradon(sinogram, theta, circle=False)
     print('\n\tMaximum deviation:', np.max(np.abs(image - reconstructed)))
     if debug:
         _debug_plot(image, reconstructed, sinogram)
@@ -197,8 +196,8 @@ def test_radon_iradon_minimal():
 
 def test_reconstruct_with_wrong_angles():
     a = np.zeros((3, 3))
-    p = radon(a, theta=[0, 1, 2])
-    iradon(p, theta=[0, 1, 2])
+    p = radon(a, theta=[0, 1, 2], circle=False)
+    iradon(p, theta=[0, 1, 2], circle=False)
     assert_raises(ValueError, iradon, p, theta=[0, 1, 2, 3])
 
 

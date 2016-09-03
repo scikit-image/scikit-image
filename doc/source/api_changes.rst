@@ -12,6 +12,9 @@ Version 0.13
 - The `clip_negative` parameter of `skimage.util.dtype_limits` is now set
   to `None` by default, equivalent to `True`, the former value. In version
   0.15, will be set to `False`.
+- The `circle` parameter of `skimage.transform.radon` and `skimage.transform.iradon`
+  are now set to `None` by default, equivalent to `False`, the former value. In version
+  0.15, will be set to `True`.
 
 Version 0.12
 ------------
