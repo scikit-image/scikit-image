@@ -119,6 +119,13 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
                                   indices=False, num_peaks=np.inf,
                                   footprint=footprint, labels=None)
 
+        out = out.astype(np.bool)
+        if np.count_nonzero(out) > num_peaks:
+            original_inds = np.argwhere(out)
+            sort_inds = np.argsort(image[out])
+            subset_inds = original_inds[sort_inds][::-1][num_peaks:]
+            out[ subset_inds.T[0], subset_inds.T[1] ] = False
+
         if indices is True:
             return np.transpose(out.nonzero())
         else:
