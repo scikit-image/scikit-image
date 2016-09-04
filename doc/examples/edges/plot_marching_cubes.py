@@ -18,14 +18,15 @@ a mesh for regions of bone or bone-like density.
 This implementation also works correctly on anisotropic datasets, where the
 voxel spacing is not equal for every spatial dimension, through use of the
 `spacing` kwarg.
-
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 from skimage import measure
 from skimage.draw import ellipsoid
+
 
 # Generate a level set about zero of two identical ellipsoids in 3D
 ellip_base = ellipsoid(6, 10, 16, levelset=True)
@@ -36,8 +37,8 @@ ellip_double = np.concatenate((ellip_base[:-1, ...],
 verts, faces, normals, values = measure.marching_cubes(ellip_double, 0)
 
 # Display resulting triangular mesh using Matplotlib. This can also be done
-# with mayavi or visvis (see skimage.measure.marching_cubes docstring).
-fig = plt.figure(figsize=(10, 12))
+# with mayavi (see skimage.measure.marching_cubes docstring).
+fig = plt.figure(figsize=(10, 10))
 ax = fig.add_subplot(111, projection='3d')
 
 # Fancy indexing: `verts[faces]` to generate a collection of triangles
@@ -52,4 +53,5 @@ ax.set_xlim(0, 24)  # a = 6 (times two for 2nd ellipsoid)
 ax.set_ylim(0, 20)  # b = 10
 ax.set_zlim(0, 32)  # c = 16
 
+plt.tight_layout()
 plt.show()

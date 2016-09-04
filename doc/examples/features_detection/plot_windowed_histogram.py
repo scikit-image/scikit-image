@@ -34,6 +34,7 @@ References
 .. [2] S.Perreault and P.Hebert. Median filtering in constant time.
        Trans. Image Processing, 16(9):2389-2394, 2007.
 """
+
 from __future__ import division
 import numpy as np
 import matplotlib
@@ -93,12 +94,10 @@ coin = quantized_img[coin_coords[1]:coin_coords[3],
 coin_hist, _ = np.histogram(coin.flatten(), bins=16, range=(0, 16))
 coin_hist = coin_hist.astype(float) / np.sum(coin_hist)
 
-
 # Compute a disk shaped mask that will define the shape of our sliding window
 # Example coin is ~44px across, so make a disk 61px wide (2 * rad + 1) to be
 # big enough for other coins too.
 selem = disk(30)
-
 
 # Compute the similarity across the complete image
 similarity = windowed_histogram_similarity(quantized_img, selem, coin_hist,
@@ -112,7 +111,6 @@ quantized_rotated_image = rotated_img // 16
 rotated_similarity = windowed_histogram_similarity(quantized_rotated_image,
                                                    selem, coin_hist,
                                                    coin_hist.shape[0])
-
 
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10))
 
@@ -134,4 +132,5 @@ axes[1, 1].imshow(rotated_similarity, cmap='hot', alpha=0.5)
 axes[1, 1].set_title('Rotated image with overlaid similarity')
 axes[1, 1].axis('off')
 
+plt.tight_layout()
 plt.show()
