@@ -98,7 +98,7 @@ class TestRank():
         # make sure the size is not a problem
 
         elem = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]], dtype=np.uint8)
-        for m, n in np.random.random_integers(1, 100, size=(10, 2)):
+        for m, n in np.random.randint(1, 101, size=(10, 2)):
             mask = np.ones((m, n), dtype=np.uint8)
 
             image8 = np.ones((m, n), dtype=np.uint8)
