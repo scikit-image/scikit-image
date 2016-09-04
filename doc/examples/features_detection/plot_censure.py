@@ -15,6 +15,7 @@ from skimage.color import rgb2gray
 
 import matplotlib.pyplot as plt
 
+
 img_orig = rgb2gray(data.astronaut())
 tform = tf.AffineTransform(scale=(1.5, 1.5), rotation=0.5,
                            translation=(150, -200))

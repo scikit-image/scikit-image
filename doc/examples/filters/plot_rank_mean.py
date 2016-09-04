@@ -32,7 +32,7 @@ percentile_result = rank.mean_percentile(image, selem=selem, p0=.1, p1=.9)
 bilateral_result = rank.mean_bilateral(image, selem=selem, s0=500, s1=500)
 normal_result = rank.mean(image, selem=selem)
 
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12),
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10),
                          sharex=True, sharey=True)
 ax = axes.ravel()
 

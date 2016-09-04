@@ -32,7 +32,6 @@ from ``skimage.data`` for all comparisons.
 
 .. [1] Pierre Soille, On morphological operators based on rank filters, Pattern
        Recognition 35 (2002) 527-535.
-
 """
 
 import numpy as np
@@ -44,7 +43,7 @@ from skimage import data
 noisy_image = img_as_ubyte(data.camera())
 hist = np.histogram(noisy_image, bins=np.arange(0, 256))
 
-fig, ax = plt.subplots(ncols=2, figsize=(12, 6))
+fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 
 ax[0].imshow(noisy_image, interpolation='nearest', cmap=plt.cm.gray)
 ax[0].axis('off')
@@ -71,7 +70,7 @@ noisy_image = img_as_ubyte(data.camera())
 noisy_image[noise > 0.99] = 255
 noisy_image[noise < 0.01] = 0
 
-fig, axes = plt.subplots(2, 2, figsize=(12, 12), sharex=True, sharey=True)
+fig, axes = plt.subplots(2, 2, figsize=(10, 10), sharex=True, sharey=True)
 ax = axes.ravel()
 
 ax[0].imshow(noisy_image, vmin=0, vmax=255, cmap=plt.cm.gray)
@@ -111,7 +110,7 @@ from skimage.filters.rank import mean
 
 loc_mean = mean(noisy_image, disk(10))
 
-fig, ax = plt.subplots(ncols=2, figsize=(12, 6), sharex=True, sharey=True)
+fig, ax = plt.subplots(ncols=2, figsize=(10, 5), sharex=True, sharey=True)
 
 ax[0].imshow(noisy_image, vmin=0, vmax=255, cmap=plt.cm.gray)
 ax[0].set_title('Original')
@@ -143,7 +142,7 @@ noisy_image = img_as_ubyte(data.camera())
 
 bilat = mean_bilateral(noisy_image.astype(np.uint16), disk(20), s0=10, s1=10)
 
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 6),
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10),
                          sharex='row', sharey='row')
 ax = axes.ravel()
 
@@ -230,7 +229,7 @@ noisy_image = img_as_ubyte(data.camera())
 
 auto = autolevel(noisy_image.astype(np.uint16), disk(20))
 
-fig, ax = plt.subplots(ncols=2, figsize=(12, 6), sharex=True, sharey=True)
+fig, ax = plt.subplots(ncols=2, figsize=(10, 5), sharex=True, sharey=True)
 
 ax[0].imshow(noisy_image, cmap=plt.cm.gray)
 ax[0].set_title('Original')
@@ -264,7 +263,7 @@ loc_perc_autolevel1 = autolevel_percentile(image, selem=selem, p0=.01, p1=.99)
 loc_perc_autolevel2 = autolevel_percentile(image, selem=selem, p0=.05, p1=.95)
 loc_perc_autolevel3 = autolevel_percentile(image, selem=selem, p0=.1, p1=.9)
 
-fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12, 12),
+fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(10, 10),
                          sharex=True, sharey=True)
 ax = axes.ravel()
 
@@ -300,7 +299,7 @@ noisy_image = img_as_ubyte(data.camera())
 
 enh = enhance_contrast(noisy_image, disk(5))
 
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12),
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10),
                          sharex='row', sharey='row')
 ax = axes.ravel()
 
@@ -330,7 +329,7 @@ noisy_image = img_as_ubyte(data.camera())
 
 penh = enhance_contrast_percentile(noisy_image, disk(5), p0=.1, p1=.9)
 
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12),
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10),
                          sharex='row', sharey='row')
 ax = axes.ravel()
 
@@ -421,7 +420,7 @@ m = (np.tile(x, (n, 1)) * np.linspace(0.1, 1, n) * 128 + 128).astype(np.uint8)
 radius = 10
 t = rank.otsu(m, disk(radius))
 
-fig, ax = plt.subplots(ncols=2, figsize=(12, 6),
+fig, ax = plt.subplots(ncols=2, figsize=(10, 5),
                        sharex=True, sharey=True)
 
 ax[0].imshow(m, cmap=plt.cm.gray)
@@ -455,7 +454,7 @@ opening = minimum(maximum(noisy_image, disk(5)), disk(5))
 grad = gradient(noisy_image, disk(5))
 
 # display results
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12),
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10),
                          sharex=True, sharey=True)
 ax = axes.ravel()
 
@@ -588,7 +587,7 @@ for r in e_range:
 
 rec = np.asarray(rec)
 
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(10, 10), sharey=True)
 ax.set_title('Performance with respect to element size')
 ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Element radius')
@@ -652,7 +651,7 @@ ax.set_xlabel('Element radius')
 ######################################################################
 # Comparison of outcome of the three methods:
 
-fig, ax = plt.subplots(ncols=2, figsize=(12, 6), sharex=True, sharey=True)
+fig, ax = plt.subplots(ncols=2, figsize=(10, 5), sharex=True, sharey=True)
 
 ax[0].set_title('filters.rank.median')
 ax[0].imshow(rc, cmap=plt.cm.gray)

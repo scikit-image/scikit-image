@@ -27,12 +27,12 @@ import matplotlib.pyplot as plt
 from skimage import data, img_as_float
 from skimage.measure import compare_ssim as ssim
 
+
 img = img_as_float(data.camera())
 rows, cols = img.shape
 
 noise = np.ones_like(img) * 0.2 * (img.max() - img.min())
 noise[np.random.random(size=noise.shape) > 0.5] *= -1
-
 
 def mse(x, y):
     return np.linalg.norm(x - y)
@@ -40,10 +40,10 @@ def mse(x, y):
 img_noise = img + noise
 img_const = img + abs(noise)
 
-fig, (ax0, ax1, ax2) = plt.subplots(nrows=1, ncols=3, figsize=(16, 6),
-                                    sharex=True, sharey=True,
-                                    subplot_kw={'adjustable': 'box-forced'})
-plt.tight_layout()
+fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 4),
+                         sharex=True, sharey=True,
+                         subplot_kw={'adjustable': 'box-forced'})
+ax = axes.ravel()
 
 mse_none = mse(img, img)
 ssim_none = ssim(img, img, dynamic_range=img.max() - img.min())
@@ -56,21 +56,19 @@ mse_const = mse(img, img_const)
 ssim_const = ssim(img, img_const,
                   dynamic_range=img_const.max() - img_const.min())
 
-label = 'MSE: %2.f, SSIM: %.2f'
+label = 'MSE: {:.2f}, SSIM: {:.2f}'
 
-ax0.imshow(img, cmap=plt.cm.gray, vmin=0, vmax=1)
-ax0.set_xlabel(label % (mse_none, ssim_none))
-ax0.set_title('Original image')
-ax0.axes.get_yaxis().set_visible(False)
+ax[0].imshow(img, cmap=plt.cm.gray, vmin=0, vmax=1)
+ax[0].set_xlabel(label.format(mse_none, ssim_none))
+ax[0].set_title('Original image')
 
-ax1.imshow(img_noise, cmap=plt.cm.gray, vmin=0, vmax=1)
-ax1.set_xlabel(label % (mse_noise, ssim_noise))
-ax1.set_title('Image with noise')
-ax1.axes.get_yaxis().set_visible(False)
+ax[1].imshow(img_noise, cmap=plt.cm.gray, vmin=0, vmax=1)
+ax[1].set_xlabel(label.format(mse_noise, ssim_noise))
+ax[1].set_title('Image with noise')
 
-ax2.imshow(img_const, cmap=plt.cm.gray, vmin=0, vmax=1)
-ax2.set_xlabel(label % (mse_const, ssim_const))
-ax2.set_title('Image plus constant')
-ax2.axes.get_yaxis().set_visible(False)
+ax[2].imshow(img_const, cmap=plt.cm.gray, vmin=0, vmax=1)
+ax[2].set_xlabel(label.format(mse_const, ssim_const))
+ax[2].set_title('Image plus constant')
 
+plt.tight_layout()
 plt.show()

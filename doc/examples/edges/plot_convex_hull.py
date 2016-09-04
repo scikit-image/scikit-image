@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 
 from skimage.morphology import convex_hull_image
 
+
 image = np.array(
     [[0, 0, 0, 0, 0, 0, 0, 0, 0],
      [0, 0, 0, 0, 1, 0, 0, 0, 0],
@@ -40,15 +41,16 @@ image[chull] += 1
 #  [ 0.  2.  1.  1.  1.  1.  1.  2.  0.]
 #  [ 0.  0.  0.  0.  0.  0.  0.  0.  0.]]
 
-fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(12, 4))
+fig, axes = plt.subplots(1, 2, figsize=(9, 3))
+ax = axes.ravel()
+
+ax[0].set_title('Original picture')
+ax[0].imshow(original_image, cmap=plt.cm.gray, interpolation='nearest')
+ax[0].set_axis_off()
+
+ax[1].set_title('Transformed picture')
+ax[1].imshow(image, cmap=plt.cm.gray, interpolation='nearest')
+ax[1].set_axis_off()
+
 plt.tight_layout()
-
-ax0.set_title('Original picture')
-ax0.imshow(original_image, cmap=plt.cm.gray, interpolation='nearest')
-ax0.set_xticks([]), ax0.set_yticks([])
-
-ax1.set_title('Transformed picture')
-ax1.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
-ax1.set_xticks([]), ax1.set_yticks([])
-
 plt.show()

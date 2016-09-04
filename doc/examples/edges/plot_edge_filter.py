@@ -20,7 +20,7 @@ edge_roberts = roberts(image)
 edge_sobel = sobel(image)
 
 fig, ax = plt.subplots(ncols=2, sharex=True, sharey=True,
-                       figsize=(12, 6))
+                       figsize=(8, 4))
 
 ax[0].imshow(edge_roberts, cmap=plt.cm.gray)
 ax[0].set_title('Roberts Edge Detection')
@@ -68,7 +68,7 @@ diff_scharr_sobel = edge_scharr - edge_sobel
 max_diff = np.max(np.maximum(diff_scharr_prewitt, diff_scharr_sobel))
 
 fig, axes = plt.subplots(nrows=2, ncols=2, sharex=True, sharey=True,
-                         figsize=(12, 12))
+                         figsize=(8, 8))
 ax = axes.ravel()
 
 ax[0].imshow(img, cmap=plt.cm.gray)

@@ -18,9 +18,8 @@ import matplotlib.patches as mpatches
 from skimage import data
 from skimage.filters import threshold_otsu
 from skimage.segmentation import clear_border
-from skimage.measure import label
+from skimage.measure import label, regionprops
 from skimage.morphology import closing, square
-from skimage.measure import regionprops
 from skimage.color import label2rgb
 
 
@@ -38,7 +37,7 @@ clear_border(cleared)
 label_image = label(cleared)
 image_label_overlay = label2rgb(label_image, image=image)
 
-fig, ax = plt.subplots(figsize=(12, 6))
+fig, ax = plt.subplots(figsize=(10, 6))
 ax.imshow(image_label_overlay)
 
 for region in regionprops(label_image):
@@ -50,5 +49,6 @@ for region in regionprops(label_image):
                                   fill=False, edgecolor='red', linewidth=2)
         ax.add_patch(rect)
 
+ax.set_axis_off()
 plt.tight_layout()
 plt.show()

@@ -27,6 +27,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from skimage import measure
 from skimage.draw import ellipsoid
 
+
 # Generate a level set about zero of two identical ellipsoids in 3D
 ellip_base = ellipsoid(6, 10, 16, levelset=True)
 ellip_double = np.concatenate((ellip_base[:-1, ...],
@@ -37,7 +38,7 @@ verts, faces, normals, values = measure.marching_cubes(ellip_double, 0)
 
 # Display resulting triangular mesh using Matplotlib. This can also be done
 # with mayavi (see skimage.measure.marching_cubes docstring).
-fig = plt.figure(figsize=(12, 12))
+fig = plt.figure(figsize=(10, 10))
 ax = fig.add_subplot(111, projection='3d')
 
 # Fancy indexing: `verts[faces]` to generate a collection of triangles
