@@ -14,10 +14,10 @@ from ..util import img_as_float
 
 def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
                          Py_ssize_t min_size=20):
-    """Felzenszwalb's efficient graph based segmentation for 
+    """Felzenszwalb's efficient graph based segmentation for
     single or multiple channels.
 
-    Produces an oversegmentation of a single or multi-channel image 
+    Produces an oversegmentation of a single or multi-channel image
     using a fast, minimum spanning tree based clustering on the image grid.
     The number of produced segments as well as their size can only be
     controlled indirectly through ``scale``. Segment size within an image can
@@ -40,8 +40,8 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
     segment_mask : (N, M) ndarray
         Integer mask indicating segment labels.
     """
-    if image.ndim != 3:
-        raise ValueError("This algorithm works only on single or " 
+    if image.ndim != 3 or image.shape[2] not in [1, 3]:
+        raise ValueError("This algorithm works only on single or "
                          "multi-channel 2d images. "
                          "Got image of shape %s" % str(image.shape))
 

@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_array_equal
+from numpy.testing import assert_equal, assert_array_equal, assert_raises
 
 from skimage._shared.testing import assert_greater, test_parallel
 from skimage.segmentation import felzenszwalb
@@ -36,6 +36,9 @@ def test_minsize():
         # actually want to test greater or equal.
         assert_greater(counts.min() + 1, min_size)
 
+def test_shape():
+    img = np.arange(100).reshape(4,5,5)
+    assert_raises(ValueError, felzenszwalb, img)
 
 def test_color():
     # very weak tests.
