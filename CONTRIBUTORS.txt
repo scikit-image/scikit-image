@@ -234,3 +234,6 @@
 
 - Kirill Malev
   Frangi and Hessian filters implementation
+
+- Kevin Mader
+  Montage improvements 
