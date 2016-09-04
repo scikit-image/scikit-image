@@ -31,7 +31,7 @@ linear and non-linear filters available in skimage. We use the ``camera`` image
 from ``skimage.data`` for all comparisons.
 
 .. [1] Pierre Soille, On morphological operators based on rank filters, Pattern
-       Recognition 35 (2002) 527-535.
+       Recognition 35 (2002) 527-535, DOI:10.1016/S0031-3203(01)00047-4
 """
 
 import numpy as np
