@@ -6,7 +6,7 @@ from .. import exposure
 EPSILON = 1e-6
 
 
-def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, border_padding=0):
+def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, padding_width=0):
     """Create a 2-dimensional 'montage' from a 3-dimensional input array
     representing an ensemble of equally shaped 2-dimensional images.
 
@@ -39,7 +39,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, bor
     grid_shape : tuple, optional
         The desired grid shape for the montage (tiles_y, tiles_x).
         The default aspect ratio is square.
-    border_padding : int, optional
+    padding_width : int, optional
         The size of the spacing between the tiles to make the 
         boundaries of individual frames easier to see.
 
@@ -82,10 +82,16 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, bor
 
     assert arr_in.ndim == 3
     
+    # -- fill missing patches (needs to be calculated before border padding)
+    if fill == 'mean':
+        fill = arr_in.mean()
+    
     # -- add border padding, np.pad does all dimensions 
     # so we remove the padding from the first
-    if border_padding > 0:
-        arr_in = np.pad(arr_in, border_padding, mode='constant')[border_padding:-border_padding]
+    if padding_width > 0:
+        # only pad after to make the width correct
+        bef_aft = (0, padding_width)
+        arr_in = np.pad(arr_in, ((0,0), bef_aft, bef_aft), mode='constant')
     else:
         arr_in = arr_in.copy()
     
@@ -102,9 +108,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, bor
     else:
         alpha_y = alpha_x = int(np.ceil(np.sqrt(n_images)))
 
-    # -- fill missing patches
-    if fill == 'mean':
-        fill = arr_in.mean()
+    
 
     n_missing = int((alpha_y * alpha_x) - n_images)
     # sometimes the mean returns a float, this ensures the missing
@@ -119,25 +123,10 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, bor
 
     return arr_out
 
-def montage_rgb(arr_in, fill='mean', grid_shape=None, border_padding=0):
-    """Create a 2-dimensional 'montage' from a 3-dimensional input array
-    representing an ensemble of equally shaped 2-dimensional images.
+def montage_rgb(arr_in, fill='mean', grid_shape=None, padding_width=0):
+    """Create a 3-dimensional 'montage' from a 4-dimensional input array
+    representing an ensemble of equally shaped 3-dimensional images.
 
-    For example, ``montage2d(arr_in, fill)`` with the following `arr_in`
-
-    +---+---+---+
-    | 1 | 2 | 3 |
-    +---+---+---+
-
-    will return:
-
-    +---+---+
-    | 1 | 2 |
-    +---+---+
-    | 3 | * |
-    +---+---+
-
-    Where the '*' patch will be determined by the `fill` parameter.
 
     Parameters
     ----------
@@ -163,39 +152,37 @@ def montage_rgb(arr_in, fill='mean', grid_shape=None, border_padding=0):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.util.montage import montage2d
-    >>> arr_in = np.arange(3 * 2 * 2).reshape(3, 2, 2)
+    >>> from skimage.util.montage import montage_rgb
+    >>> arr_in = np.arange(3 * 2 * 2 * 3).reshape(3, 2, 2, 3)
+    >>> arr_out = montage_rgb(arr_in)
+    >>> arr_out.shape
+    (4, 4, 3)
+    >>> arr_out # doctest: +NORMALIZE_WHITESPACE
+    array([[[ 0,  1,  2],
+        [ 3,  4,  5],
+        [12, 13, 14],
+        [15, 16, 17]],
+       [[ 6,  7,  8],
+        [ 9, 10, 11],
+        [18, 19, 20],
+        [21, 22, 23]],
+       [[24, 25, 26],
+        [27, 28, 29],
+        [16, 17, 18],
+        [16, 17, 18]],
+       [[30, 31, 32],
+        [33, 34, 35],
+        [16, 17, 18],
+        [16, 17, 18]]])
     """
-    
     assert arr_in.ndim == 4
     
-    # -- add border padding, np.pad does all dimensions 
-    # so we remove the padding from the first
-    if border_padding > 0:
-        arr_in = np.pad(arr_in, border_padding, mode='constant')[border_padding:-border_padding,:,:,border_padding:-border_padding]
-    else:
-        arr_in = arr_in.copy()
-    
     n_images, height, width, n_channels = arr_in.shape
+    
+    out_slices = []
+    for i_chan in range(n_channels):
+        out_slices += [montage2d(arr_in[:,:,:,i_chan], fill=fill, 
+                                 grid_shape=grid_shape, padding_width=padding_width)]
+    
 
-
-    # -- determine alpha
-    if grid_shape:
-        alpha_y, alpha_x = grid_shape
-    else:
-        alpha_y = alpha_x = int(np.ceil(np.sqrt(n_images)))
-
-    # -- fill missing patches
-    if fill == 'mean':
-        fill = arr_in.mean()
-
-    n_missing = int((alpha_y * alpha_x) - n_images)
-    missing = (np.ones((n_missing, height, width, n_channels), dtype=arr_in.dtype) * fill).astype(arr_in.dtype)
-    arr_out = np.vstack((arr_in, missing))
-
-    # -- reshape to 2d montage, step by step
-    arr_out = arr_out.reshape(alpha_y, alpha_x, height, width, n_channels)
-    arr_out = arr_out.swapaxes(1, 2)
-    arr_out = arr_out.reshape(alpha_y * height, alpha_x * width, n_channels)
-
-    return arr_out
+    return np.stack(out_slices,2)
