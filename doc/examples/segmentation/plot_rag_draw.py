@@ -16,8 +16,7 @@ img = data.coffee()
 labels = segmentation.slic(img, compactness=30, n_segments=400)
 g = graph.rag_mean_color(img, labels)
 
-fig, ax = plt.subplots(nrows=2, sharex=True, sharey=True,
-                       figsize=(6, 8))
+fig, ax = plt.subplots(nrows=2, sharex=True, sharey=True, figsize=(6, 8))
 
 ax[0].set_title('RAG drawn with default settings')
 lc = graph.show_rag(labels, g, img, ax=ax[0])

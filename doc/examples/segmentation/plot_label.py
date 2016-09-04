@@ -41,7 +41,7 @@ fig, ax = plt.subplots(figsize=(10, 6))
 ax.imshow(image_label_overlay)
 
 for region in regionprops(label_image):
-    # skip small images
+    # take regions with large enough areas
     if region.area >= 100:
         # draw rectangle around segmented coins
         minr, minc, maxr, maxc = region.bbox
