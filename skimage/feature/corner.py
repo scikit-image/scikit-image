@@ -852,7 +852,7 @@ def corner_moravec(image, window_size=1):
     ----------
     image : ndarray
         Input image.
-    window_size : int, optional (default 1)
+    window_size : int, optional
         Window size.
 
     Returns

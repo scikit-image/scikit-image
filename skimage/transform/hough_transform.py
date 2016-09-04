@@ -160,14 +160,14 @@ def hough_ellipse(img, threshold=4, accuracy=1, min_size=4, max_size=None):
     ----------
     img : (M, N) ndarray
         Input image with nonzero values representing edges.
-    threshold: int, optional (default 4)
+    threshold: int, optional
         Accumulator threshold value.
-    accuracy : double, optional (default 1)
+    accuracy : double, optional
         Bin size on the minor axis used in the accumulator.
-    min_size : int, optional (default 4)
+    min_size : int, optional
         Minimal major axis length.
     max_size : int, optional
-        Maximal minor axis length. (default None)
+        Maximal minor axis length.
         If None, the value is set to the half of the smaller
         image dimension.
 
@@ -177,10 +177,6 @@ def hough_ellipse(img, threshold=4, accuracy=1, min_size=4, max_size=None):
           Where ``(yc, xc)`` is the center, ``(a, b)`` the major and minor
           axes, respectively. The `orientation` value follows
           `skimage.draw.ellipse_perimeter` convention.
-
-    Notes
-    -----
-    This function is a wrapper for Cython code.
 
     Examples
     --------
@@ -223,7 +219,7 @@ def hough_line(img, theta=None):
     -------
     H : 2-D ndarray of uint64
         Hough transform accumulator.
-    theta : ndarray
+    theta : ndarray, optional
         Angles at which the transform was computed, in radians.
     distances : ndarray
         Distance values.
@@ -264,16 +260,17 @@ def probabilistic_hough_line(img, threshold=10, line_length=50,
     ----------
     img : (M, N) ndarray
         Input image with nonzero values representing edges.
-    threshold : int, optional (default 10)
+    threshold : int, optional
         Threshold
-    line_length : int, optional (default 50)
+    line_length : int, optional
         Minimum accepted length of detected lines.
         Increase the parameter to extract longer lines.
-    line_gap : int, optional, (default 10)
+    line_gap : int, optional
         Maximum gap between pixels to still form a line.
         Increase the parameter to merge broken lines more aggresively.
-    theta : 1D ndarray, dtype=double, optional, default (-pi/2 .. pi/2)
+    theta : 1D ndarray, dtype=double, optional
         Angles at which to compute the transform, in radians.
+        If None, use a range from -pi/2 to pi/2.
 
     Returns
     -------
