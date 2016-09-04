@@ -91,6 +91,7 @@ def test_rescale_intensity():
     assert_equal(arr_out.max(), 1.0)
     assert_array_equal(arr_out, gt)
 
+
 def test_simple_padding():
     n_images = 2
     height, width = 2, 2,
@@ -109,6 +110,7 @@ def test_simple_padding():
     )
 
     assert_array_equal(arr_out, gt)
+
 
 def test_simple_rgb():
     
@@ -144,15 +146,18 @@ def test_error_ndim():
     arr_error = np.random.randn(1, 2, 3, 4)
     montage2d(arr_error)
 
+
 @raises(AssertionError)
 def test_error_ndim_rgb_toosmall():
     arr_error = np.random.randn(1, 2, 3)
     montage_rgb(arr_error)
 
+
 @raises(AssertionError)
 def test_error_ndim_rgb_toobig():
     arr_error = np.random.randn(1, 2, 3, 4, 5)
     montage_rgb(arr_error)
+
 
 @raises(AssertionError)
 def test_error_ndim():
