@@ -47,7 +47,7 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
     if multichannel and image.shape[2] not in [1, 3]:
         warn(RuntimeWarning("Got image with third dimension of %s. This image "
                             "will be interpreted as a multichannel 2d image, "
-                            "which may not be intended." % str(image.shape[2]))
+                            "which may not be intended." % str(image.shape[2])))
     elif not multichannel:
         raise ValueError("This algorithm works only on single or "
                          "multi-channel 2d images. ")

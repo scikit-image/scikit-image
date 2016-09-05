@@ -38,7 +38,7 @@ def test_minsize():
 
 def test_3D():
     img = np.zeros((10, 10, 10))
-    assert_raises(ValueError, felzenszwalb, img)
+    assert_raises(ValueError, felzenszwalb, img, multichannel=False)
 
 def test_color():
     # very weak tests.
