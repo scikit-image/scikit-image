@@ -144,7 +144,7 @@ def thin(image, max_iter=None):
     
     See also
     --------
-    skeletonize
+    skeletonize, skeletonize_3d, medial_axis
     
     Notes
     -----
@@ -170,7 +170,7 @@ def thin(image, max_iter=None):
     --------
     >>> square = np.zeros((7, 7), dtype=np.uint8)
     >>> square[1:-1, 2:-2] = 1
-    >>> square[0,1] =  1
+    >>> square[0, 1] =  1
     >>> square
     array([[0, 1, 0, 0, 0, 0, 0],
            [0, 0, 1, 1, 1, 0, 0],
@@ -209,7 +209,7 @@ def thin(image, max_iter=None):
     # neighborhood mask
     mask = np.array([[ 8,  4,  2],
                      [16,  0,  1],
-                     [32, 64,128]],dtype=np.uint8)
+                     [32, 64,128]], dtype=np.uint8)
 
     # iterate either 1) indefinitely or 2) up to iteration limit
     while n != 0:
