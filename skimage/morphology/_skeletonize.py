@@ -209,7 +209,7 @@ def thin(image, max_iter=None):
     # neighborhood mask
     mask = np.array([[ 8,  4,  2],
                      [16,  0,  1],
-                     [32, 64,128]],dtype=np.uint8)
+                     [32, 64,128]], dtype=np.uint8)
 
     # iterate either 1) indefinitely or 2) up to iteration limit
     while n != 0:
