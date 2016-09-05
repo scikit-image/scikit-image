@@ -185,4 +185,4 @@ def montage_rgb(arr_in, fill='mean', grid_shape=None, padding_width=0):
                                  grid_shape=grid_shape, padding_width=padding_width)]
     
 
-    return np.stack(out_slices,2)
+    return np.stack(out_slices, 2)
