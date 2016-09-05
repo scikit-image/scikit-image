@@ -50,8 +50,7 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
                             "which may not be intended." % str(image.shape[2]))
     elif not multichannel:
         raise ValueError("This algorithm works only on single or "
-                         "multi-channel 2d images. "
-                         "Got image of shape %s" % str(image.shape))
+                         "multi-channel 2d images. ")
 
     image = img_as_float(image)
 
