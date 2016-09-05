@@ -122,10 +122,12 @@ class TestThin():
                        [0, 1, 1, 1, 1, 1, 0],
                        [0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
         return ii
+    
     def test_zeros(self):
-        assert np.all(thin(np.zeros((10,10))) == False)
+        assert np.all(thin(np.zeros((10, 10))) == False)
+        
     def test_iter_1(self):
-        result = thin(self.input_image,1).astype(np.uint8)
+        result = thin(self.input_image, 1).astype(np.uint8)
         expected = np.array([[0, 0, 0, 0, 0, 0, 0],
                              [0, 0, 1, 0, 0, 0, 0],
                              [0, 1, 0, 1, 1, 0, 0],
@@ -134,6 +136,7 @@ class TestThin():
                              [0, 0, 0, 0, 0, 0, 0],
                              [0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
         assert np.all(result == expected)
+        
     def test_noiter(self):
         result = thin(self.input_image).astype(np.uint8)
         expected = np.array([[0, 0, 0, 0, 0, 0, 0],
@@ -144,28 +147,19 @@ class TestThin():
                              [0, 0, 0, 0, 0, 0, 0],
                              [0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
         assert np.all(result == expected)
+        
     def test_baditer(self):
         for n_iter in [-1, 0]:
-            try:
-                result = thin(self.input_image,n_iter)
-                assert False
-            except ValueError:
-                pass
+            numpy.testing.assert_raises(ValueError, thin, self.input_image, n_iter)
+            
     def test_badtype(self):
         ii = self.input_image
         ii[2,2] = 5
-        try:
-            result = thin(ii)
-            assert False
-        except ValueError:
-            pass
+        numpy.testing.assert_raises(ValueError, thin, ii)
+        
     def test_baddim(self):
         for ii in [np.zeros((3)), np.zeros((3,3,3))]:
-            try:
-                result = thin(ii)
-                assert False
-            except ValueError:
-                pass
+            numpy.testing.assert_raises(ValueError, thin, ii)
 
 class TestMedialAxis():
     def test_00_00_zeros(self):
