@@ -30,8 +30,7 @@ thresh = threshold_otsu(image)
 bw = closing(image > thresh, square(3))
 
 # remove artifacts connected to image border
-cleared = bw.copy()
-clear_border(cleared)
+cleared = clear_border(bw)
 
 # label image regions
 label_image = label(cleared)
