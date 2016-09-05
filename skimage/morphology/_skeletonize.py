@@ -170,7 +170,7 @@ def thin(image, max_iter=None):
     --------
     >>> square = np.zeros((7, 7), dtype=np.uint8)
     >>> square[1:-1, 2:-2] = 1
-    >>> square[0,1] =  1
+    >>> square[0, 1] =  1
     >>> square
     array([[0, 1, 0, 0, 0, 0, 0],
            [0, 0, 1, 1, 1, 0, 0],
