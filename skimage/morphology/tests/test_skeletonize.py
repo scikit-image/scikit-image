@@ -110,6 +110,7 @@ class TestSkeletonize():
                              [0, 0, 0, 0, 0, 0]], dtype=np.uint8)
         assert np.all(result == expected)
 
+        
 class TestThin():
     @property
     def input_image(self):
@@ -135,7 +136,7 @@ class TestThin():
                              [0, 0, 1, 1, 1, 0, 0],
                              [0, 0, 0, 0, 0, 0, 0],
                              [0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
-        assert np.all(result == expected)
+        numpy.testing.assert_array_equal(result, expected)
         
     def test_noiter(self):
         result = thin(self.input_image).astype(np.uint8)
@@ -146,7 +147,7 @@ class TestThin():
                              [0, 0, 0, 0, 0, 0, 0],
                              [0, 0, 0, 0, 0, 0, 0],
                              [0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
-        assert np.all(result == expected)
+        numpy.testing.assert_array_equal(result, expected)
         
     def test_baditer(self):
         for n_iter in [-1, 0]:
