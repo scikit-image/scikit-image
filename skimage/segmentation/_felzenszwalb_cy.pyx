@@ -10,10 +10,11 @@ cimport numpy as cnp
 from ..measure._ccomp cimport find_root, join_trees
 
 from ..util import img_as_float
+from .._shared.utils import warn
 
 
 def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
-                         Py_ssize_t min_size=20):
+                         Py_ssize_t min_size=20, multichannel=True):
     """Felzenszwalb's efficient graph based segmentation for
     single or multiple channels.
 
@@ -34,13 +35,20 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
         Larger sigma gives smother segment boundaries.
     min_size : int, optional (default 20)
         Minimum component size. Enforced using postprocessing.
+    multichannel : bool, optional (default: True)
+        Whether the last axis of the image is to be interpreted as multiple
+        channels. A value of False, for a 3D image, is not currently supported.
 
     Returns
     -------
     segment_mask : (N, M) ndarray
         Integer mask indicating segment labels.
     """
-    if image.ndim != 3 or image.shape[2] not in [1, 3]:
+    if multichannel and image.shape[2] not in [1, 3]:
+        warn(RuntimeWarning("Got image with third dimension of %s. This image "
+                            "will be interpreted as a multichannel 2d image, "
+                            "which may not be intended." % str(image.shape[2]))
+    elif not multichannel:
         raise ValueError("This algorithm works only on single or "
                          "multi-channel 2d images. "
                          "Got image of shape %s" % str(image.shape))

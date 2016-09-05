@@ -36,8 +36,8 @@ def test_minsize():
         # actually want to test greater or equal.
         assert_greater(counts.min() + 1, min_size)
 
-def test_shape():
-    img = np.arange(100).reshape(4,5,5)
+def test_3D():
+    img = np.zeros((10, 10, 10))
     assert_raises(ValueError, felzenszwalb, img)
 
 def test_color():
