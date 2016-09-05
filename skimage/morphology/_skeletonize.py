@@ -124,7 +124,7 @@ G123P_LUT = np.array([0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0
 
 def thin(image, n_iter=None):
     """
-    Perform morphological thinning of a binary image
+    Perform morphological thinning of a binary image.
     
     Parameters
     ----------
