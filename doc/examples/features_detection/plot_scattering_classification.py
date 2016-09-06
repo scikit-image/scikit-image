@@ -29,7 +29,7 @@ that allows to better separate the different classes [3]_.
 Here, we show how to reproduce the results obtained with the scattering transform, using with SVM (with Gaussian kernels)
 first presented in the following papers:
 
-- *MNIST database*: The results were first presented in [1]_ Table 4. Using this implementation, we were able to obtain the following error results:
+- **MNIST database** : The results were first presented in [1]_ Table 4. Using this implementation, we were able to obtain, on the 10000 image test set, the following error results:
             +-------------------------+---------+
             |num images training set  | % error |
             +-------------------------+---------+
@@ -50,7 +50,7 @@ first presented in the following papers:
             |                 60000   |  0.51   |
             +-------------------------+---------+
 
-- *CIFAR10* database: This is a very challenging database with 10 classes and 32x32 color images. The code presented here can reproduce the results obtained in Table 1 (Trans., order 1) of [2]_, more specifically it can obtain 73.6% success for m=1 and 40000 images in the training set.
+- **CIFAR10 database**: This is a very challenging database with 10 classes and 32x32 color images. The code presented here can reproduce the results obtained in Table 1 (Trans., order 1) of [2]_, more specifically it can obtain 73.6% success for m=1 and 40000 images in the training set.
 
 **Warning: For integration reasons, the code uses very few images in the datasets. To obtain full performance, you need
 to change the variable num_images to 10000 at least**
