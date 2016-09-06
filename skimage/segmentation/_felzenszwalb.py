@@ -52,6 +52,10 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, multichannel=True):
     >>> segments = felzenszwalb(img, scale=3.0, sigma=0.95, min_size=5)
     """
 
+    if not multichannel:
+        raise ValueError("This algorithm works only on single or "
+                         "multi-channel 2d images. ")
+
     image = np.atleast_3d(image)
     return _felzenszwalb_cython(image, scale=scale, sigma=sigma,
-                                min_size=min_size, multichannel=multichannel)
+                                min_size=min_size)
