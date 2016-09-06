@@ -45,10 +45,16 @@ from skimage.filters.filter_bank import multiresolution_filter_bank_morlet2d
 from skimage.feature.scattering import scattering
 
 
-def load_images_mnist(px=32):
+def load_images_mnist(px=32,num_images=500000):
 
     #load database
     (X_train_sm, y_train), (X_test_sm, y_test) = mnist.load_data()
+
+    X_train_sm = X_train_sm[0:num_images, :, :, :]
+    y_train = y_train[0:num_images]
+    X_test_sm = X_test_sm[0:num_images, :, :, :]
+    y_test = y_train[0:num_images]
+
     num_images_ta = X_train_sm.shape[0]
     num_images_te = X_test_sm.shape[0]
 
@@ -91,7 +97,7 @@ def load_scattering(X_train, X_test, px=32, J=3, L=8, m=2,sigma_phi=0.6957, sigm
 
 
 def gethomogeneus_datast(X, y, d, n):
-    num_per_class = np.int(n / d)
+    num_per_class = np.int(min(n, X.shape[0]) / d)
     ytrain = np.reshape(y, (y.shape[0],))
 
     X_out = []
@@ -108,23 +114,24 @@ def gethomogeneus_datast(X, y, d, n):
 
 ## Classification
 # Get dataset
-px=32 #number of pixels
-
-im_train, ytrain, im_test, ytest = load_images_mnist(px=px)
+px=32  # number of pixels
+num_images = 10  # for full data set set to 50000
+im_train, ytrain, im_test, ytest = load_images_mnist(px=px, num_images=num_images)
 Xtrain,Xtest = load_scattering(im_train, im_test, px=px, J=3, L=6, m=2, sigma_phi=0.6957, sigma_xi=0.8506)
 
 #colapse spatial components into a vector
 Xtrain_1d = Xtrain.reshape((len(Xtrain),-1))
 Xtest_1d = Xtest.reshape((len(Xtest),-1))
 
-num_samples,num_features = Xtrain_1d.shape
+num_samples, num_features = Xtrain_1d.shape
 
-n = 10000
-Xa,ya=gethomogeneus_datast(Xtrain_1d,ytrain,10,n)
+num_classes = 10
+n = np.min(10000,num_images)
+Xa, ya = gethomogeneus_datast(Xtrain_1d, ytrain, num_classes, n)
 
 # Classification using SVM with RBF Gaussian kernels
 bestC = 4.3
-bestgamma =10**0.1
+bestgamma = 10**0.1
 
 from sklearn.svm import SVC
 from sklearn.pipeline import make_pipeline
@@ -137,14 +144,14 @@ ns = [300, 1000, 2000, 5000, 10000,20000, 40000, 60000]
 score_gaussian = np.zeros((len(ns),1))
 print('% Error:')
 for i,n in enumerate(ns):
-    gs_gaussian = SVC(kernel='rbf',C=bestC,gamma=bestgamma)
-    pip_gaussian = make_pipeline(MinMaxScaler((-1,1)),Normalizer(),gs_gaussian)
+    gs_gaussian = SVC(kernel='rbf', C=bestC, gamma=bestgamma)
+    pip_gaussian = make_pipeline(MinMaxScaler((-1, 1)), Normalizer(), gs_gaussian)
 
-    Xa,ya=gethomogeneus_datast(Xtrain_1d,ytrain,10,n)
-    pip_gaussian.fit(Xa,ya)
-    out=pip_gaussian.predict(Xtest_1d)
+    Xa, ya = gethomogeneus_datast(Xtrain_1d, ytrain, 10, n)
+    pip_gaussian.fit(Xa, ya)
+    out = pip_gaussian.predict(Xtest_1d)
     score_gaussian[i] = 1.0-accuracy_score(ytest, out)
-    print('num images for training='+str(n)+' err:'+ score_gaussian[i])
+    print('num images for training=' + str(n) + ' err:' + score_gaussian[i])
 
 
 
@@ -154,16 +161,16 @@ from skimage.color.colorconv import rgb2yuv
 from keras.datasets import cifar10
 
 def DB_rgb2yuv(X):
-    num_samples,c,px,px = X.shape
-    Xta = X.transpose((3,2,0,1))/255
-    Iyuv = rgb2yuv(Xta).transpose((2,3,1,0)).copy()
+    num_samples, c, px, px = X.shape
+    Xta = X.transpose((3, 2, 0, 1))/255
+    Iyuv = rgb2yuv(Xta).transpose((2, 3, 1, 0)).copy()
 
     #stack the color channels as 3 images
     Iyuv.shape = (num_samples*3,px,px)
     return Iyuv
 
 
-def load_images_cifar():
+def load_images_cifar(num_images):
     # the data, shuffled and split between train and test sets
     (X_train_sm, y_train), (X_test_sm, y_test) = cifar10.load_data()
 
@@ -171,12 +178,15 @@ def load_images_cifar():
     X_train = DB_rgb2yuv(X_train_sm.astype('float32'))
     X_test = DB_rgb2yuv(X_test_sm.astype('float32'))
 
-    return X_train, y_train, X_test, y_test
+    return X_train[0:num_images, :, :, :], y_train[0:num_images], X_test[0:num_images, :, :, :], y_test[0:num_images]
 
 
-im_train, ytrain, im_test, ytest = load_images_cifar()
+num_images = 10
+
+im_train, ytrain, im_test, ytest = load_images_cifar(num_images)
 Xtrain, Xtest = load_scattering(im_train, im_test, px=px, J=3, L=8, m=1, sigma_phi=0.8, sigma_xi=0.8)
 
+# note that it works better in the log domain!
 epsilon = 1e-6
 Xtrain = np.log(np.abs(Xtrain)+epsilon)
 Xtest = np.log(np.abs(Xtest)+epsilon)
@@ -184,19 +194,19 @@ Xtest = np.log(np.abs(Xtest)+epsilon)
 # putting color channels together
 num_files, scat_coefs, spatial, spatial = Xtrain.shape
 Xtrain.shape = (num_files / 3, 3 * scat_coefs, spatial, spatial)
-#putting color channels together
-num_files,scat_coefs,spatial,spatial = Xtest.shape
-Xtest.shape = (num_files/3,3*scat_coefs,spatial,spatial)
+# putting color channels together
+num_files, scat_coefs, spatial, spatial = Xtest.shape
+Xtest.shape = (num_files/3, 3*scat_coefs, spatial, spatial)
 
-#collapse spatial coefficients
-Xtrain_1d = Xtrain.reshape((len(Xtrain),-1))
-Xtest_1d = Xtest.reshape((len(Xtest),-1))
+# collapse spatial coefficients
+Xtrain_1d = Xtrain.reshape((len(Xtrain), -1))
+Xtest_1d = Xtest.reshape((len(Xtest), -1))
 
 ########### Train for CIFAR10
 from sklearn.preprocessing import StandardScaler
 
-n = 40000 #number of samples for training
-Xa,ya=gethomogeneus_datast(Xtrain_1d, ytrain, 10, n)
+n = 40000 # number of samples for training
+Xa, ya = gethomogeneus_datast(Xtrain_1d, ytrain, 10, n)
 
 bestC = 4.4
 bestgamma = 10**-3.55
@@ -207,6 +217,6 @@ gs_gaussian = SVC(kernel='rbf',C=bestC,gamma=bestgamma)
 pip_gaussian = make_pipeline(MinMaxScaler((-1,1)), StandardScaler(), gs_gaussian)
 
 pip_gaussian.fit(Xa, ya)
-out=pip_gaussian.predict(Xtest_1d)
-score = accuracy_score(ytest, out) # should be 73.6% success fr m=1
+out = pip_gaussian.predict(Xtest_1d)
+score = accuracy_score(ytest, out)  # should be 73.6% success for m=1
 print('% correctly classified:', score)
