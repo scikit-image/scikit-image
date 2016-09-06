@@ -56,7 +56,7 @@ plt.tight_layout()
 
 from skimage.feature import canny
 
-edges = canny(coins / 255.)
+edges = canny(coins)
 
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(edges, cmap=plt.cm.gray, interpolation='nearest')
@@ -80,6 +80,7 @@ ax.axis('off')
 ######################################################################
 # Small spurious objects are easily removed by setting a minimum size for
 # valid objects.
+
 from skimage import morphology
 
 coins_cleaned = morphology.remove_small_objects(fill_coins, 21)
@@ -128,6 +129,7 @@ ax.set_adjustable('box-forced')
 ######################################################################
 # Finally, we use the watershed transform to fill regions of the elevation
 # map starting from the markers determined above:
+
 segmentation = morphology.watershed(elevation_map, markers)
 
 fig, ax = plt.subplots(figsize=(4, 3))
