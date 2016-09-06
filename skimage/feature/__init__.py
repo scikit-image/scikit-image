@@ -1,6 +1,7 @@
 from ._canny import canny
 from ._daisy import daisy
 from ._hog import hog
+from ._kb import kb
 from .texture import (greycomatrix, greycoprops,
                       local_binary_pattern,
                       multiblock_lbp,
@@ -26,6 +27,7 @@ from .blob import blob_dog, blob_log, blob_doh
 __all__ = ['canny',
            'daisy',
            'hog',
+           'kb',
            'greycomatrix',
            'greycoprops',
            'local_binary_pattern',
