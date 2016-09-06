@@ -45,14 +45,14 @@ from skimage.filters.filter_bank import multiresolution_filter_bank_morlet2d
 from skimage.feature.scattering import scattering
 
 
-def load_images_mnist(px=32,num_images=500000):
+def load_images_mnist(px=32, num_images=500000):
 
     #load database
     (X_train_sm, y_train), (X_test_sm, y_test) = mnist.load_data()
 
-    X_train_sm = X_train_sm[0:num_images, :, :, :]
+    X_train_sm = X_train_sm[0:num_images, :, :]
     y_train = y_train[0:num_images]
-    X_test_sm = X_test_sm[0:num_images, :, :, :]
+    X_test_sm = X_test_sm[0:num_images, :, :]
     y_test = y_train[0:num_images]
 
     num_images_ta = X_train_sm.shape[0]
@@ -97,7 +97,7 @@ def load_scattering(X_train, X_test, px=32, J=3, L=8, m=2,sigma_phi=0.6957, sigm
 
 
 def gethomogeneus_datast(X, y, d, n):
-    num_per_class = np.int(min(n, X.shape[0]) / d)
+    num_per_class = np.int(np.min(n, X.shape[0]) / d)
     ytrain = np.reshape(y, (y.shape[0],))
 
     X_out = []
@@ -174,11 +174,12 @@ def load_images_cifar(num_images):
     # the data, shuffled and split between train and test sets
     (X_train_sm, y_train), (X_test_sm, y_test) = cifar10.load_data()
 
-    #need to change to YUV
+    # need to change to YUV
     X_train = DB_rgb2yuv(X_train_sm.astype('float32'))
     X_test = DB_rgb2yuv(X_test_sm.astype('float32'))
 
-    return X_train[0:num_images, :, :, :], y_train[0:num_images], X_test[0:num_images, :, :, :], y_test[0:num_images]
+    return X_train[0:num_images, :, :, :], y_train[0:num_images], \
+        X_test[0:num_images, :, :, :],  y_test[0:num_images]
 
 
 num_images = 10
