@@ -2,9 +2,9 @@
 #
 
 # You can set these variables from the command line.
-PYTHON        ?= python
+PYTHON        ?= python3
 SPHINXOPTS    ?= -j 1
-SPHINXBUILD   ?= python $(shell which sphinx-build)
+SPHINXBUILD   ?= python3 /Users/ferradans/anaconda3/bin/sphinx-build #$(shell which sphinx-build)
 SPHINXCACHE   ?= build/doctrees
 PAPER         ?=
 

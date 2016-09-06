@@ -3,24 +3,19 @@
 Scattering Features
 ===================
 
-This example shows how to use the scattering features for image classification.
-They have shown to outperform any other 'non-learned'
-image representations for image classification tasks [2]_.
-Structurally, they are very similar to deep learning representations, with fixed filters, which are Wavelet filters.
-Since the scattering transform is based on the Discrete Wavelet transform (DWT), its stable to deformations.
-It is also invariant to small translations. For more details on its mathematical properties, see [1]_.
-
-Here, we show how to use this implementation to access easily different scattering coefficients stored
-in the scattering vectors. For more information on how to use scattering cefficients for image classification,
+This example shows how to use the scattering transform and how to access easily different scattering coefficients stored
+in the output vector. For more information on how to use scattering coefficients for image classification,
  please check the example 'Scattering features for supervised learning'.
 
 
- 1) How to use the scattering vectors obtained from MNIST and CIFAR10 databases for classification. These are both very
- challenging databases widely used in research to compare the quality of image representations and classification methods.
+We call the scattering features (or coefficients) the output of the scattering transform applied to an image. These features
+ have shown to outperform any other 'non-learned' image representations for image classification tasks [2]_.
+Structurally, they are very similar to deep learning representations, with fixed filters, which are Morlet filters, in this
+implementation.
+Since the scattering transform is based on the Discrete Wavelet transform (DWT), its stable to deformations.
+It is also invariant to small translations. For more details on its mathematical properties, see [1]_.
 
- 2) H
-
-# Mathematical definition of the coefficients
+# Definition of the scattering coefficients
 
 Given an image $x$, the scattering transform computes (generally) three layers of cascaded convolutions
 and non-linear operators:
@@ -37,23 +32,22 @@ is $J=\log_2(px)$ and $i \in [0,J-1]$. For second-order coefficients, we compute
 coefficients do not have enough energy to be significant.
 
 # Implementation: Dictionary access to the scattering coefficients
-Let's see how to access the different layers of the scattering transform. The scattering function outputs a dictionary
-python structure that allows an easy access to the scattering vector (first output of the function). The keys
- for this dictionary structure are the following:
+Let's see how to access the different layers of the scattering transform. The scattering function outputs a python
+dictionary structure that allows an easy access to the scattering coefficients (first output of the function). The keys
+for this dictionary structure are the following:
 
 - *Zero-order*: we only have one key for the only coefficient:
                 scat_tree[0]
 
-- *First-order*: keys is a tuple with the scale and angle:
+- *First-order*: keys is a tuple with the scale $i$ and angle $l$:
                 scat_tree[(i,l)]
 
-- *Second-order*: key is a tuple of two tuples, with the scale and angle of the first layer and then the
- scale and angle of the second layer:
+- *Second-order*: key is a tuple of two tuples, with the scale $i$ and angle $l$ of the first layer and then the
+ scale $j$ and angle $l_2$ of the second layer:
                 scat_tree[( (i,l)  , (j,l_2) )]
 
-# Image Classification
 
-
+Note that the output of any layer is a matrix of size (Num_images, spatial_dimensions, spatial_dimensions).
 
 ..[1] Bruna, J., Mallat, S. 'Invariant Scattering Convolutional Networks'.IEEE TPAMI, 2012.
 ..[2] Oyallon, E. et Mallat, S. 'Deep Roto-translation Scattering for Object Classification'. CVPR 2015
@@ -73,7 +67,7 @@ plt.imshow(abs(im))
 ###### Compute the scattering
 
 from skimage.filters.filter_bank import multiresolution_filter_bank_morlet2d
-from skimage.features.scattering import scattering
+from skimage.feature.scattering import scattering
 
 J=3 #number of scales
 L=8 #number of angles

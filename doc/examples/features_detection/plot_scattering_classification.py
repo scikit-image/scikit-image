@@ -6,32 +6,35 @@ Scattering features for supervised learning
 This example shows how to use the scattering features for image classification.
 They have shown to outperform any other 'non-learned'
 image representations for image classification tasks [2]_.
-Structurally, they are very similar to deep learning representations, with fixed filters, which are Wavelet filters.
+Structurally, they are very similar to deep learning representations, with fixed filters, in this implementation
+ Morlet filters.
 Since the scattering transform is based on the Discrete Wavelet transform (DWT), its stable to deformations.
 It is also invariant to small translations. For more details on its mathematical properties and exact definition,
  see [1]_ and [2]_.
 
-Here, we show how to use the scattering vectors obtained from MNIST and CIFAR10 databases for classification. These are
-both very challenging databases widely used in research to compare the quality of image representations and
+Here, we show how to use the scattering vectors obtained from MNIST and CIFAR10 databases for classification. These two
+databases are widely used in research to compare the quality of image representations and
 classification methods.
 
 # Image Classification:
 
-The first task in supervised image classification  is to collect a set of images tagged with a class. In case of the MNIST
-database we have pictures of digits, and the class is the corresponding number. The most common practice in image
-classification is to compute, for every image its feature, which in our case is the scattering vector. Once we have the complete
+The first task in supervised image classification is to collect a set of images tagged with a class. In case of the MNIST
+database we have pictures of digits, and the class is the corresponding number. Then, for every image
+ we compute a feature vector, which in our case is the scattering vector. Once we have the complete
 database, we 'train' a classifier, meaning, we find the best parameters that allows to correctly classify the images.
 A widely used classifier is Support Vector Machine (SVM), which searches the high dimensional plane
-that allows to better separate the different classes. Here we show how reproduce the state of the art results for non-learned features
-obtained with the scattering transform, together with SVM (with Gaussian kernels) in the following papers:
+that allows to better separate the different classes [3]_.
+
+Here, we show how to reproduce the results obtained with the scattering transform, using with SVM (with Gaussian kernels)
+first presented in the following papers:
 
 -*MNIST database*: The results were first presented in [1]_ Table 4.
 -*CIFAR10* database: This is a very challenging database with 10 classes and 32x32 images. We reproduce the results
 obtained in [2]_ Table 1 (Trans., order 1)
 
-
 ..[1] Bruna, J., Mallat, S. 'Invariant Scattering Convolutional Networks'.IEEE TPAMI, 2012.
 ..[2] Oyallon, E. et Mallat, S. 'Deep Roto-translation Scattering for Object Classification'. CVPR 2015
+..[3] https://en.wikipedia.org/wiki/Support_vector_machine
 """
 
 import time as time
@@ -39,7 +42,7 @@ import time as time
 from keras.datasets import mnist
 import numpy as np
 from skimage.filters.filter_bank import multiresolution_filter_bank_morlet2d
-from skimage.features.scattering import scattering
+from skimage.feature.scattering import scattering
 
 
 def load_images_mnist(px=32):
@@ -64,9 +67,6 @@ def load_images_mnist(px=32):
 
 def load_scattering(X_train, X_test, px=32, J=3, L=8, m=2,sigma_phi=0.6957, sigma_xi=0.8506):
     i = -1
-    t_images = time.time()
-
-    print(X_train.shape[0], ' images loaded in ', time.time() - t_images, ' secs')
 
     #Create filters
     Filters,lw = multiresolution_filter_bank_morlet2d(px, J=J, L=L, sigma_phi=sigma_phi, sigma_xi=sigma_xi)
