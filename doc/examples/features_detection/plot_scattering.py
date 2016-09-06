@@ -16,19 +16,20 @@ It is also invariant to small translations. For more details on its mathematical
 
 **Definition of the scattering coefficients**
 
-Given an image $x$, the scattering transform computes (generally) three layers of cascaded convolutions
+Given an image :math:`x`, the scattering transform computes (generally) three layers of cascaded convolutions
 and non-linear operators:
 
--*Zero-order coefficients:*  $Sx[0] = x \ast \phi$
+-*Zero-order coefficients:*  :math:`Sx[0] = x * \phi`
 
--*First-order coefficients:*   $Sx[1][(i,l)] = | x \ast \psi_{(i,l)} | \ast \phi$
+-*First-order coefficients:*   :math:`Sx[1][(i,l)] = | x * \psi_{(i,l)} | * \phi`
 
--*Second-order coefficients:*  $Sx[2][(i,l)][(j,l_2)] = | | x \ast \psi_{(i,l)} | \ast \psi_{(j,l_2)}| \ast \phi$
+-*Second-order coefficients:*  :math:`Sx[2][(i,l)][(j,l_2)] = || x * \psi_{(i,l)} | * \psi_{(j,l_2)}| * \phi`
 
-where $\psi$ is a band-pass filter, $\phi$ is a low-pass filter (normally a Gaussian), operator $\ast$ is a
-2D convolution, and $|\cdot|$ is the complex modulus. If $x$ is of size $(px,px)$, the maximum number of scales
-is $J=\log_2(px)$ and $i \in [0,J-1]$. For second-order coefficients, we compute coefficients with $j>i$, since other
+where :math:`\psi` is a band-pass filter, :math:`\phi` is a low-pass filter (normally a Gaussian), operator :math:`*` is a
+2D convolution, and :math:`|\cdot|` is the complex modulus. If :math:`x` is of size :math:`(px,px)`, the maximum number of scales
+is :math:`J=\log_2(px)` and :math:`i \in [0,J-1]`. For every scale :math:`i`, we have :math:`L` angles, thus :math:`l \in (0,L)`. For second-order coefficients, we compute coefficients with :math:`j>i`, since other
 coefficients do not have enough energy to be significant.
+
 
 **Implementation: Dictionary access to the scattering coefficients**
 
@@ -36,15 +37,15 @@ Let's see how to access the different layers of the scattering transform. The sc
 dictionary structure that allows an easy access to the scattering coefficients (first output of the function). The keys
 for this dictionary structure are the following:
 
--*Zero-order*: we only have one key for the only coefficient:
-                            scat_tree[0]
+-Zero-order coefficients:    we only have one key for the only coefficient:
+                scat_tree[0]
 
--*First-order*: keys is a tuple with the scale $i$ and angle $l$:
+
+-First-order coefficients:   keys is a tuple with the scale :math:`i` and angle :math:`l`:
                             scat_tree[(i,l)]
 
--*Second-order*: key is a tuple of two tuples, with the scale $i$ and angle $l$ of the first layer and then the scale $j$ and angle $l_2$ of the second layer:
+-Second-order coefficients:  key is a tuple of two tuples, with the scale :math:`i` and angle :math:`l` of the first layer and then the scale :math:`j` and angle :math:`l_2` of the second layer:
                             scat_tree[( (i,l)  , (j,l_2) )]
-
 
 Note that the output of any layer is a matrix of size (Num_images, spatial_dimensions, spatial_dimensions).
 
@@ -63,7 +64,7 @@ from skimage.feature.scattering import scattering
 
 # Load an image
 px = 32 # size of the image (squared)
-im= resize( d.camera(), (px,px))
+im= resize(d.camera(), (px, px))
 plt.imshow(abs(im))
 
 # Compute the scattering
@@ -82,9 +83,9 @@ num_images,coef_index, spatial, spatial = S.shape
 # Zero order scattering coefficients
 zero_order_coef_index = 0
 #We can find the zero-order scattering coefficients in the S vector:
-S_zero_order = S[0,zero_order_coef_index,]
+S_zero_order = S[0, zero_order_coef_index, ]
 
-plt.figure(figsize=(16,8))
+plt.figure(figsize=(8,4))
 plt.suptitle('Zero order scattering coefficients')
 plt.subplot(1,2,1)
 plt.title('Using the vector structure')
@@ -104,7 +105,7 @@ i = 0
 l = 3
 S_first_order = S[0, i*L+l+1, :, :]
 
-plt.figure(figsize=(16,8))
+plt.figure(figsize=(8,3))
 plt.suptitle('First order scattering coeff. (i,l)=(' + str(i) + ',' + str(l) + ')')
 plt.subplot(1, 2, 1)
 plt.imshow(S_first_order)
@@ -115,12 +116,12 @@ plt.show()
 
 #########################
 # Second order coefficients:
-# $|x \ast \psi_i| \ast \psi_j| \ast \phi$
-# The complete number of coefficients second order coefficients is: $\frac{J (J-1) L^2}{2}$
+# :math:`||x * \psi_i| * \psi_j| * \phi`
+# The complete number of coefficients second order coefficients is: :math:`\frac{J (J-1) L^2}{2}`
 # We will just access the coefficient using the scat tree structure:
 j = 1
 l_2 = 5
-plt.figure(figsize=(16,8))
+plt.figure(figsize=(8,4))
 plt.suptitle('Second order scattering coefficients')
 plt.title('(i,l)=(' + str(i) + ',' + str(l) + '),(j,l_2)=(' + str(i) + ',' + str(l) + ')')
 plt.imshow(scat_tree[((i, l), (j, l_2))][0, :, :])

@@ -25,17 +25,11 @@ sigma_xi = 0.8506  # std_0 of the band pass filters
 j = 3
 l = 5
 
-print('We can fix a certain j and l, and observe the filters for different resolutions')
-print('j=', j, ' l=', l)
-
-
 # Get the multiresolution filterbank:
 wavelet_bnk, littlewood_p = multiresolution_filter_bank_morlet2d(px, J=J, L=L, sigma_phi=sigma_phi, sigma_xi= sigma_xi)
-
 num_resolutions = len(wavelet_bnk['psi'])
 
 plt.figure(figsize=(18,6))
-
 plt.suptitle("All resolutions of filter" + "(" + str(j) + "," + str(l) + ")", fontsize=20)
 for r in np.arange(0,num_resolutions):
     plt.subplot(1,num_resolutions,r+1)

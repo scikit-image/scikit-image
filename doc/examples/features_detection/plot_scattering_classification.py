@@ -154,7 +154,6 @@ bestgamma = 10**0.1
 ns = [300, 1000, 2000, 5000, 10000, 20000, 40000, 60000]
 score_gaussian = np.zeros((len(ns), 1))
 
-print('% Error with ')
 for i,n in enumerate(ns):
     # resample the dataset to have a uniform distribution on the classes
     Xa, ya = gethomogeneus_datast(Xtrain_1d, ytrain, num_classes, n)
@@ -184,7 +183,6 @@ def DB_rgb2yuv(X):
     # stack the color channels as 3 images
     Iyuv.shape = (num_samples*3, px, px)
     return Iyuv
-
 
 def load_images_cifar(num_images):
     # the data, shuffled and split between train and test sets
