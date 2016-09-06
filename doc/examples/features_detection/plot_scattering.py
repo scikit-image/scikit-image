@@ -91,30 +91,30 @@ plt.suptitle('Zero order scattering coefficients')
 plt.subplot(1,2,1)
 plt.title('Using the vector structure')
 plt.imshow(S_zero_order)
-#or we can access them using the scat_tree structure, which is a view of the S structure.
+# or we can access them using the scat_tree structure, which is a view of the S structure.
 plt.subplot(1,2,2)
 plt.title('Using the dictionary structure')
-plt.imshow(scat_tree[0][0,:,:])
+plt.imshow(scat_tree[0][0, :, :])
 plt.show()
 
 # - First order coefficients
 # we want to access one of the coefficients
 i = 0
 l = 3
-S_first_order = S[0,i*L+l+1,:,:]
+S_first_order = S[0, i*L+l+1, :, :]
 
 plt.suptitle('First order scattering coefficients')
-plt.subplot(1,2,1)
+plt.subplot(1, 2, 1)
 plt.imshow(S_first_order)
-#using the stree structure
+# using the stree structure
 plt.subplot(1,2,2)
 plt.imshow(scat_tree[(i,l)][0,:,:])
 plt.show()
 
 # - Second order coefficients: $|x \ast \psi_i| \ast \psi_j| \ast \phi$
-#The complete number of coefficients second order coefficients is: $\frac{J (J-1) L^2}{2}$
-#We will just access the coefficient using the scat tree structure:
+# The complete number of coefficients second order coefficients is: $\frac{J (J-1) L^2}{2}$
+# We will just access the coefficient using the scat tree structure:
 j = 1
 l_2 = 5
 plt.suptitle('Second order scattering coefficients')
-plt.imshow(scat_tree[((i,l),(j,l_2))][0,:,:])
+plt.imshow(scat_tree[((i, l), (j, l_2))][0, :, :])
