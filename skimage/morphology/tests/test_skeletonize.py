@@ -110,6 +110,7 @@ class TestSkeletonize():
                              [0, 0, 0, 0, 0, 0]], dtype=np.uint8)
         assert np.all(result == expected)
 
+        
 class TestThin():
     @property
     def input_image(self):
