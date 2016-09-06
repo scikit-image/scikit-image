@@ -39,9 +39,11 @@ def label(input, neighbors=None, background=None, return_num=False,
         Accepted values are ranging from  1 to input.ndim. If ``None``, a full
         connectivity of ``input.ndim`` is used.
     ratio : int, optional
-        Check if pixel a is "close enough" to pixel b based on a given ratio
-        rather than checking for equality (e.g. for ratio=3, Check if
-        a/3 < b < a*3).  If not defined, or set to 1, simply check for equality
+        Rather than connecting only pixels with equal values, connect pixels
+        that have a similar value, within the ratio specified by this argument.
+        For example, if R is the ratio, a is the value of one pixel, and b is
+        the value of one of its neighbors, those two pixels will be considered
+        connected if a/R < b < a*R is true.
 
     Returns
     -------
