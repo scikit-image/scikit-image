@@ -418,7 +418,7 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
     dcoeffs = coeffs[1:]
 
     if sigma is None:
-        # Estimates via the noise via method in [2]
+        # Estimate the noise via the method in [2]_
         detail_coeffs = dcoeffs[-1]['d' * img.ndim]
         sigma = np.median(np.abs(detail_coeffs)) / 0.67448975019608171
 
