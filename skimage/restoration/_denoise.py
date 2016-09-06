@@ -346,7 +346,7 @@ def _bayes_thresh(details, var):
 
 def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
                        wavelet_levels=None):
-    """Performs wavelet denoising.
+    """Perform wavelet denoising.
 
     Parameters
     ----------
@@ -445,8 +445,8 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
 
 
 def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
-                    multichannel=False):
-    """Performs wavelet denoising on an image.
+                    multichannel=False, wavelet_levels=None):
+    """Perform wavelet denoising on an image.
 
     Parameters
     ----------
@@ -469,6 +469,9 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
     multichannel : bool, optional
         Apply wavelet denoising separately for each channel (where channels
         correspond to the final axis of the array).
+    wavelet_levels : int or None, optional
+        The number of wavelet decomposition levels to use.  The default is
+        three less than the maximum number of possible decomposition levels.
 
     Returns
     -------
@@ -508,17 +511,17 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
     >>> denoised_img = denoise_wavelet(img, sigma=0.1)
 
     """
-
     img = img_as_float(img)
 
     if multichannel:
         out = np.empty_like(img)
         for c in range(img.shape[-1]):
             out[..., c] = _wavelet_threshold(img[..., c], wavelet=wavelet,
-                                             mode=mode, sigma=sigma)
+                                             mode=mode, sigma=sigma,
+                                             wavelet_levels=wavelet_levels)
     else:
         out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
-                                 sigma=sigma)
+                                 sigma=sigma, wavelet_levels=wavelet_levels)
 
     clip_range = (-1, 1) if img.min() < 0 else (0, 1)
     return np.clip(out, *clip_range)
