@@ -53,6 +53,7 @@ Note that the output of any layer is a matrix of size (Num_images, spatial_dimen
 ..[2] Oyallon, E. et Mallat, S. 'Deep Roto-translation Scattering for Object Classification'. CVPR 2015
 
 """
+
 # Load an image
 
 import numpy as np
