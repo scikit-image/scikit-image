@@ -127,7 +127,6 @@ G123P_LUT = np.array([0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,
                       0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                       0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=np.bool)
 
-
 def thin(image, max_iter=None):
     """
     Perform morphological thinning of a binary image.
@@ -136,7 +135,7 @@ def thin(image, max_iter=None):
     ----------
     image : binary (M, N) ndarray
         The image to be thinned.
-
+    
     max_iter : int, number of iterations, optional
         Regardless of the value of this parameter, the thinned image
         is returned immediately if an iteration produces no change.
@@ -195,6 +194,7 @@ def thin(image, max_iter=None):
            [0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
+
     # check parameters
     if max_iter is None:
         n = -1
