@@ -4,15 +4,15 @@ FastDRaW segmentation
 =====================
 
 The FastDRaW algorithm [1]_ is based on the Random Walker (RW) algorithm [2]_
-to perform fast image segmentation using a set of pixels labeled as belonging 
-to different objects (e.g., foreground and background labels). The 
+to perform fast image segmentation using a set of pixels labeled as belonging
+to different objects (e.g., foreground and background labels). The
 computational bottleneck for RW is solving a linear system whose size increases
 with the image size. To reduce the computation time, the FastDRaW algorithm
 relies on a coarse-to-fine segmentation strategy, performed in two steps:
 First, on a low-resolution version of the image, a coarse RW segmentation is
-computed over a restricted region of interest (ROI). Second, the result is 
+computed over a restricted region of interest (ROI). Second, the result is
 refined by applying the RW algorithm at full resolution over a narrow strip
-around the coarse contour. 
+around the coarse contour.
 
 Note: Where RW computes the probabilities of pixels belonging to each label
 category, FastDRaW computes the probabilities of pixels belonging to a target
@@ -22,15 +22,15 @@ when label 1 is considered as belonging to the object.
 
 Pros:
 - FastDRaW allows a major gain in computation time
-- Implicit labeling of pixels lying outside the ROI as not belonging to the 
-  target label category, which reduces the required amount of labels to 
+- Implicit labeling of pixels lying outside the ROI as not belonging to the
+  target label category, which reduces the required amount of labels to
   acheive the segmentation
 Cons:
 - The sum of probabilities of each label category is no longer ensured to be
   equal to 1. This is due to the target label strategy which forces the pixels
   outside the ROI to have zero probability belonging to the target label.
-  
-In this example, we create an interactive window to compare between RW and 
+
+In this example, we create an interactive window to compare between RW and
 FastDRaW segmetnations in the case of two label categories (foreground and
 background). The user labels the original image (at left) using the mouse:
 left click for foreground and right click for background. Then, using "space
@@ -105,17 +105,18 @@ def onClick(event):
     # refresh plot
     pltimg.set_data(rgb_image)
     plt.draw()
-    
+
 # keyboard callback events
 def onKeypress(event):
     """This function is called when keyboard buttons are pressed"""
     if event.key == ' ':
         # if space bar is pressed, FastDRaW  and RW segmentations are performed
-        
+
         # FastDRaW
         t = time.clock()
         # --- perform the FastDRaW segmentation
-        segm = fastdraw.update(labels, target_label=target_label, k=0.5)
+        segm = fast_draw(image, labels, target_label=1, beta=beta,
+                        downsampled_size=100, k=0.5, multichannel=multichannel)
         # --- display the contour in red over the original image
         contour = (dilation(segm, disk(1)) - segm).astype(np.bool)
         result = original_image.copy()
@@ -124,7 +125,7 @@ def onKeypress(event):
         ax2.imshow(result)
         ax2.set_title("FastDRaW time " + str(time.clock()-t) + " s")
         plt.draw()
-        
+
         # RW
         t = time.clock()
         # perform the RW segmentation
@@ -132,7 +133,7 @@ def onKeypress(event):
         # select which label to display
         # since this is a binary case segmentation (foreground/background),
         # segm == 1 is similar to segm == 2
-        segm = segm == 1 
+        segm = segm == 1
         # --- display the contour in red over the original image
         contour = (dilation(segm, disk(1)) - segm).astype(np.bool)
         result = original_image.copy()
@@ -141,7 +142,7 @@ def onKeypress(event):
         ax3.imshow(result)
         ax3.set_title("RW time " + str(time.clock()-t) + " s")
         plt.draw()
-    
+
 
 """
 Now we write the main analysis script that makes use of those functions.
@@ -182,9 +183,5 @@ brush = 3
 # set beta to 100 (default 300 for FastDRaW and 130 for RW)
 # for comparison purposes, beta is set to the same value
 beta = 100
-# set target label category to 1
-target_label = 1
-# create an instance of `FastDRaW` (optional: beta and down-sampled image size)
-fastdraw = FastDRaW(image, beta=beta, downsampled_size=100)
 
 plt.show()
