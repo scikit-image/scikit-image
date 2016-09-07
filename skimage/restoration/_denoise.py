@@ -344,6 +344,41 @@ def _bayes_thresh(details, var):
     return thresh
 
 
+def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
+    """Calculate the robust median estimator of the noise standard deviation.
+
+    Parameters
+    ----------
+    detail_coeffs : ndarray
+        The detail coefficients corresponding to the discrete wavelet
+        transform of an image.
+    distribution : str
+        The underlying noise distribution.
+
+    Returns
+    -------
+    sigma : float
+        The estimated noise standard deviation (see section 4.2 of [1]_).
+
+    References
+    ----------
+    .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
+       by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
+       DOI:10.1093/biomet/81.3.425
+    """
+    # Consider regions with detail coefficients exactly zero to be masked out
+    detail_coeffs = detail_coeffs[np.nonzero(detail_coeffs)]
+
+    if distribution.lower() == 'gaussian':
+        # 75th quantile of the underlying, symmetric noise distribution
+        denom = scipy.stats.norm.ppf(0.75)
+        sigma = np.median(np.abs(detail_coeffs)) / denom
+    else:
+        raise ValueError("Only Gaussian noise estimation is currently "
+                         "supported")
+    return sigma
+
+
 def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
                        wavelet_levels=None):
     """Perform wavelet denoising.
@@ -420,7 +455,7 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
     if sigma is None:
         # Estimate the noise via the method in [2]_
         detail_coeffs = dcoeffs[-1]['d' * img.ndim]
-        sigma = np.median(np.abs(detail_coeffs)) / 0.67448975019608171
+        sigma = _sigma_est_dwt(detail_coeffs, distribution='Gaussian')
 
     if threshold is None:
         # The BayesShrink thresholds from [1]_ in docstring
@@ -525,43 +560,6 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
 
     clip_range = (-1, 1) if img.min() < 0 else (0, 1)
     return np.clip(out, *clip_range)
-
-
-def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
-    """
-    Calculation of the robust median estimator of the noise standard
-    deviation.
-
-    Parameters
-    ----------
-    detail_coeffs : ndarray
-        The detail coefficients corresponding to the discrete wavelet
-        transform of an image.
-    distribution : str
-        The underlying noise distribution.
-
-    Returns
-    -------
-    sigma : float
-        The estimated noise standard deviation (see section 4.2 of [1]_).
-
-    References
-    ----------
-    .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
-       by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
-       DOI:10.1093/biomet/81.3.425
-    """
-    # consider regions with detail coefficients exactly zero to be masked out
-    detail_coeffs = detail_coeffs[np.nonzero(detail_coeffs)]
-
-    if distribution.lower() == 'gaussian':
-        # 75th quantile of the underlying, symmetric noise distribution:
-        denom = scipy.stats.norm.ppf(0.75)
-        sigma = np.median(np.abs(detail_coeffs)) / denom
-    else:
-        raise ValueError("Only Gaussian noise estimation is currently "
-                         "supported")
-    return sigma
 
 
 def estimate_sigma(im, multichannel=False, average_sigmas=False):
