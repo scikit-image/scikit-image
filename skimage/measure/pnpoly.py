@@ -1,5 +1,6 @@
 from ._pnpoly import _grid_points_in_poly, _points_in_poly
 
+
 def grid_points_in_poly(shape, verts):
     """Test whether points on a specified grid are inside a polygon.
 
@@ -30,6 +31,7 @@ def grid_points_in_poly(shape, verts):
 
     """
     return _grid_points_in_poly(shape, verts)
+
 
 def points_in_poly(points, verts):
     """Test whether points lie inside a polygon.

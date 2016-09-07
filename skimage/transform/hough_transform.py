@@ -7,7 +7,7 @@ from ._hough_transform import (_hough_circle, _hough_ellipse,
 
 def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
                      threshold=None, num_peaks=np.inf):
-    """Return peaks in hough transform.
+    """Return peaks in Hough transform.
 
     Identifies most prominent lines separated by a certain angle and distance
     in a hough transform. Non-maximum suppression with different sizes is
@@ -251,6 +251,7 @@ def hough_line(img, theta=None):
 
     """
     return _hough_line(img, theta)
+
 
 def probabilistic_hough_line(img, threshold=10, line_length=50,
                              line_gap=10, theta=None):

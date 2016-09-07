@@ -38,7 +38,7 @@ def _coords_inside_image(rr, cc, shape, val=None):
         return rr[mask], cc[mask], val[mask]
 
 
-def _line(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y2, Py_ssize_t x2):
+def _line(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y1, Py_ssize_t x1):
     """Generate line pixel coordinates.
 
     Parameters
@@ -774,9 +774,9 @@ def _bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
 
 
 def _bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
-                 Py_ssize_t y1, Py_ssize_t x1,
-                 Py_ssize_t y2, Py_ssize_t x2,
-                 double weight, shape=None):
+                  Py_ssize_t y1, Py_ssize_t x1,
+                  Py_ssize_t y2, Py_ssize_t x2,
+                  double weight, shape=None):
     """Generate Bezier curve coordinates.
 
     Parameters
