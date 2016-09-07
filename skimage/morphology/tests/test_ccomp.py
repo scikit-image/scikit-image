@@ -96,6 +96,17 @@ class TestConnectedComponents:
 
         assert_array_equal(label(x, background=-1, return_num=True)[1], 4)
 
+    def test_ratio(self):
+        x = np.array([[0,  1,  2,  3],
+                      [0, 10, 20, 30],
+                      [3,  0,  1,  1],
+                      [2,  0,  1,  2]])
+        result = np.array([[0,  1,  1,  1],
+                           [0,  2,  2,  2],
+                           [3,  0,  4,  4],
+                           [3,  0,  4,  4]])
+        assert_array_equal(label(x, ratio=3), result)
+
 
 class TestConnectedComponents3d:
     def setup(self):
