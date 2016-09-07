@@ -445,7 +445,7 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
 
 
 def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
-                    multichannel=False, wavelet_levels=None):
+                    wavelet_levels=None, multichannel=False):
     """Perform wavelet denoising on an image.
 
     Parameters
