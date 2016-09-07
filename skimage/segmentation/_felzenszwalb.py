@@ -52,7 +52,7 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, multichannel=True):
     >>> segments = felzenszwalb(img, scale=3.0, sigma=0.95, min_size=5)
     """
 
-    if not multichannel:
+    if not multichannel and image.ndim > 2:
         raise ValueError("This algorithm works only on single or "
                          "multi-channel 2d images. ")
 

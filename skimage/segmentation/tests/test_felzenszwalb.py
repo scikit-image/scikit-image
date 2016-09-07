@@ -1,5 +1,6 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_array_equal, assert_raises
+from numpy.testing import (assert_equal, assert_array_equal, assert_raises,
+    assert_warns, assert_no_warnings)
 
 from skimage._shared.testing import assert_greater, test_parallel
 from skimage.segmentation import felzenszwalb
@@ -37,8 +38,18 @@ def test_minsize():
         assert_greater(counts.min() + 1, min_size)
 
 def test_3D():
-    img = np.zeros((10, 10, 10))
-    assert_raises(ValueError, felzenszwalb, img, multichannel=False)
+    grey_img = np.zeros((10, 10))
+    rgb_img = np.zeros((10, 10, 3))
+    three_d_img = np.zeros((10, 10, 10))
+    with assert_no_warnings():
+        felzenszwalb(grey_img, multichannel=True)
+        felzenszwalb(grey_img, multichannel=False)
+        felzenszwalb(rgb_img, multichannel=True)
+    with assert_warns(RuntimeWarning):
+        felzenszwalb(three_d_img, multichannel=True)
+    with assert_raises(ValueError):
+        felzenszwalb(rgb_img, multichannel=False)
+        felzenszwalb(three_d_img, multichannel=False)
 
 def test_color():
     # very weak tests.
