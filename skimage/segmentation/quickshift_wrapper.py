@@ -1,5 +1,6 @@
 from ._quickshift import quickshift as _quickshift
 
+
 def quickshift(image, ratio=1., kernel_size=5, max_dist=10,
                return_tree=False, sigma=0, convert2lab=True, random_seed=None):
     """Segments image using quickshift clustering in Color-(x,y) space.

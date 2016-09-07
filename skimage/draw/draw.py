@@ -274,12 +274,12 @@ def set_color(img, coords, color, alpha=1):
     img[rr, cc] = vals + color
 
 
-def line(y, x, y2, x2):
+def line(y1, x1, y2, x2):
     """Generate line pixel coordinates.
 
     Parameters
     ----------
-    y, x : int
+    y1, x1 : int
         Starting position (row, column).
     y2, x2 : int
         End position (row, column).
@@ -315,7 +315,8 @@ def line(y, x, y2, x2):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    return _line(y, x, y2, x2)
+    return _line(y1, x1, y2, x2)
+
 
 def line_aa(y1, x1, y2, x2):
     """Generate anti-aliased line pixel coordinates.
@@ -361,6 +362,7 @@ def line_aa(y1, x1, y2, x2):
            [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
     """
     return _line_aa(y1, x1, y2, x2)
+
 
 def polygon(y, x, shape=None):
     """Generate coordinates of pixels within polygon.
@@ -409,6 +411,7 @@ def polygon(y, x, shape=None):
 
     """
     return _polygon(y, x, shape)
+
 
 def circle_perimeter(cy, cx, radius,
                      method='bresenham', shape=None):
@@ -526,6 +529,7 @@ def circle_perimeter_aa(cy, cx, radius, shape=None):
     """
     return _circle_perimeter_aa(cy, cx, radius, shape)
 
+
 def ellipse_perimeter(cy, cx, yradius, xradius, orientation=0, shape=None):
     """Generate ellipse perimeter coordinates.
 
@@ -535,12 +539,12 @@ def ellipse_perimeter(cy, cx, yradius, xradius, orientation=0, shape=None):
         Centre coordinate of ellipse.
     yradius, xradius : int
         Minor and major semi-axes. ``(x/xradius)**2 + (y/yradius)**2 = 1``.
-    orientation : double, optional (default 0)
+    orientation : double, optional
         Major axis orientation in clockwise direction as radians.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output pixel
         coordinates. This is useful for ellipses which exceed the image size.
-        By default the full extent of the ellipse are used.
+        If None, the full extent of the ellipse are used.
 
     Returns
     -------
@@ -579,6 +583,7 @@ def ellipse_perimeter(cy, cx, yradius, xradius, orientation=0, shape=None):
     """
     return _ellipse_perimeter(cy, cx, yradius, xradius, orientation, shape)
 
+
 def bezier_curve(y0, x0, y1, x1, y2, x2, weight, shape=None):
     """Generate Bezier curve coordinates.
 
@@ -595,7 +600,7 @@ def bezier_curve(y0, x0, y1, x1, y2, x2, weight, shape=None):
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for curves which exceed the image
-        size. By default the full extent of the curve are used.
+        size. If None, the full extent of the curve are used.
 
     Returns
     -------

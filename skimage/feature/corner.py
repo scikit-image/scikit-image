@@ -842,6 +842,7 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
     else:
         return peaks
 
+
 def corner_moravec(image, window_size=1):
     """Compute Moravec corner measure response image.
 
@@ -892,6 +893,7 @@ def corner_moravec(image, window_size=1):
            [0, 0, 0, 0, 0, 0, 0]])
     """
     return _corner_moravec(image, window_size)
+
 
 def corner_orientations(image, corners, mask):
     """Compute the orientation of corners.
