@@ -1,6 +1,6 @@
 """
     Scattering transform code licensed under
-    both GPL and BSD licenses.
+    BSD licenses.
     
     Original author: Sira Ferradans, based on a code developed by Ivan Dokmanic and Michael Eickenberg
 """

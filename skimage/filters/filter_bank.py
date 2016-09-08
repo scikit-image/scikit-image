@@ -86,7 +86,7 @@ def _zero_pad_filter(filter, N):
     return padded_filter
 
 
-def multiresolution_filter_bank_morlet2d(N, J=4, L=8, sigma_phi = 0.8, sigma_xi = 0.8):
+def multiresolution_filter_bank_morlet2d(N, J, L=8, sigma_phi = 0.8, sigma_xi = 0.8):
     """ Generates the multiresolution filter bank of 2D Morlet filters in the Fourier domain.
        Computes a set of 2D Morlet filters at different scales and angles, plus a low pass filter. All of them at
         at different resolutions.
@@ -128,7 +128,6 @@ def multiresolution_filter_bank_morlet2d(N, J=4, L=8, sigma_phi = 0.8, sigma_xi 
             plt.subplot(1,num_resolutions,r+1)
             f = wavelet_bnk['psi'][r][j][l,:,:]
             plt.imshow(np.abs(np.fft.fftshift(f)))
-
 
      """
 
