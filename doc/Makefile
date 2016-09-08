@@ -12,7 +12,8 @@ PAPER         ?=
 PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d $(SPHINXCACHE) $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
-DEST = build
+DEST            = build
+
 .PHONY: all help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest gitwash gh-pages release_notes
 
 all: html
@@ -32,10 +33,13 @@ help:
 	@echo "  linkcheck to check all external links for integrity"
 	@echo "  doctest   to run all doctests embedded in the documentation (if enabled)"
 	@echo "  gitwash   to update the gitwash documentation"
+
 clean:
-	-rm -rf $(DEST)/*
+	-rm -rf $(DEST)
+	-rm -rf api
 	-rm -rf source/api
 	-find ./source/auto_examples/* -type f | grep -v blank | xargs rm -f
+
 api:
 	@mkdir -p source/api
 	$(PYTHON) tools/build_modref_templates.py

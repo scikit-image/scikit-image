@@ -16,11 +16,11 @@ from skimage import data
 coins = data.coins()
 hist = np.histogram(coins, bins=np.arange(0, 256))
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 3))
-ax1.imshow(coins, cmap=plt.cm.gray, interpolation='nearest')
-ax1.axis('off')
-ax2.plot(hist[1][:-1], hist[0], lw=2)
-ax2.set_title('histogram of grey values')
+fig, axes = plt.subplots(1, 2, figsize=(8, 3))
+axes[0].imshow(coins, cmap=plt.cm.gray, interpolation='nearest')
+axes[0].axis('off')
+axes[1].plot(hist[1][:-1], hist[0], lw=2)
+axes[1].set_title('histogram of grey values')
 
 ######################################################################
 #
@@ -32,17 +32,19 @@ ax2.set_title('histogram of grey values')
 # binary image that either misses significant parts of the coins or merges
 # parts of the background with the coins:
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6, 3), sharex=True, sharey=True)
-ax1.imshow(coins > 100, cmap=plt.cm.gray, interpolation='nearest')
-ax1.set_title('coins > 100')
-ax1.axis('off')
-ax1.set_adjustable('box-forced')
-ax2.imshow(coins > 150, cmap=plt.cm.gray, interpolation='nearest')
-ax2.set_title('coins > 150')
-ax2.axis('off')
-ax2.set_adjustable('box-forced')
-margins = dict(hspace=0.01, wspace=0.01, top=1, bottom=0, left=0, right=1)
-fig.subplots_adjust(**margins)
+fig, axes = plt.subplots(1, 2, figsize=(8, 3), sharey=True)
+
+axes[0].imshow(coins > 100, cmap=plt.cm.gray, interpolation='nearest')
+axes[0].set_title('coins > 100')
+
+axes[1].imshow(coins > 150, cmap=plt.cm.gray, interpolation='nearest')
+axes[1].set_title('coins > 150')
+
+for a in axes:
+    a.axis('off')
+    a.set_adjustable('box-forced')
+
+plt.tight_layout()
 
 ######################################################################
 # Edge-based segmentation
@@ -53,12 +55,14 @@ fig.subplots_adjust(**margins)
 # Canny edge-detector.
 
 from skimage.feature import canny
-edges = canny(coins/255.)
+
+edges = canny(coins)
 
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(edges, cmap=plt.cm.gray, interpolation='nearest')
-ax.axis('off')
 ax.set_title('Canny detector')
+ax.axis('off')
+ax.set_adjustable('box-forced')
 
 ######################################################################
 # These contours are then filled using mathematical morphology.
@@ -69,30 +73,34 @@ fill_coins = ndi.binary_fill_holes(edges)
 
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(fill_coins, cmap=plt.cm.gray, interpolation='nearest')
+ax.set_title('filling the holes')
 ax.axis('off')
-ax.set_title('Filling the holes')
+
 
 ######################################################################
 # Small spurious objects are easily removed by setting a minimum size for
 # valid objects.
+
 from skimage import morphology
+
 coins_cleaned = morphology.remove_small_objects(fill_coins, 21)
 
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(coins_cleaned, cmap=plt.cm.gray, interpolation='nearest')
+ax.set_title('removing small objects')
 ax.axis('off')
-ax.set_title('Removing small objects')
+ax.set_adjustable('box-forced')
 
 ######################################################################
 # However, this method is not very robust, since contours that are not
 # perfectly closed are not filled correctly, as is the case for one unfilled
 # coin above.
 #
-#Region-based segmentation
-#=========================
+# Region-based segmentation
+# =========================
 #
-#We therefore try a region-based method using the watershed transform.
-#First, we find an elevation map using the Sobel gradient of the image.
+# We therefore try a region-based method using the watershed transform.
+# First, we find an elevation map using the Sobel gradient of the image.
 
 from skimage.filters import sobel
 
@@ -100,8 +108,9 @@ elevation_map = sobel(coins)
 
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(elevation_map, cmap=plt.cm.gray, interpolation='nearest')
+ax.set_title('elevation map')
 ax.axis('off')
-ax.set_title('elevation_map')
+ax.set_adjustable('box-forced')
 
 ######################################################################
 # Next we find markers of the background and the coins based on the extreme
@@ -113,18 +122,21 @@ markers[coins > 150] = 2
 
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(markers, cmap=plt.cm.spectral, interpolation='nearest')
-ax.axis('off')
 ax.set_title('markers')
+ax.axis('off')
+ax.set_adjustable('box-forced')
 
 ######################################################################
 # Finally, we use the watershed transform to fill regions of the elevation
 # map starting from the markers determined above:
+
 segmentation = morphology.watershed(elevation_map, markers)
 
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(segmentation, cmap=plt.cm.gray, interpolation='nearest')
-ax.axis('off')
 ax.set_title('segmentation')
+ax.axis('off')
+ax.set_adjustable('box-forced')
 
 ######################################################################
 # This last method works even better, and the coins can be segmented and
@@ -136,14 +148,13 @@ segmentation = ndi.binary_fill_holes(segmentation - 1)
 labeled_coins, _ = ndi.label(segmentation)
 image_label_overlay = label2rgb(labeled_coins, image=coins)
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6, 3), sharex=True, sharey=True)
-ax1.imshow(coins, cmap=plt.cm.gray, interpolation='nearest')
-ax1.contour(segmentation, [0.5], linewidths=1.2, colors='y')
-ax1.axis('off')
-ax1.set_adjustable('box-forced')
-ax2.imshow(image_label_overlay, interpolation='nearest')
-ax2.axis('off')
-ax2.set_adjustable('box-forced')
+fig, axes = plt.subplots(1, 2, figsize=(8, 3), sharey=True)
+axes[0].imshow(coins, cmap=plt.cm.gray, interpolation='nearest')
+axes[0].contour(segmentation, [0.5], linewidths=1.2, colors='y')
+axes[1].imshow(image_label_overlay, interpolation='nearest')
 
-fig.subplots_adjust(**margins)
+for a in axes:
+    a.axis('off')
+    a.set_adjustable('box-forced')
 
+plt.tight_layout()
