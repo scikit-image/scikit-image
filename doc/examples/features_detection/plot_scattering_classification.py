@@ -3,33 +3,34 @@
 Scattering features for supervised learning
 ===========================================
 
-This example shows how to use the scattering features for image classification.
-Scattering features have shown to outperform any other 'non-learned'
-image representations for image classification tasks [2]_.
-Structurally, they are very similar to deep learning representations, with fixed filters, in this implementation,
-to Morlet filters.
-
-Since the scattering transform is based on the Discrete Wavelet transform (DWT), its stable to deformations.
-It is also invariant to small translations. For more details on its mathematical properties and exact definition,
-see [1]_ and [2]_.
-
-Here, we show how to use the scattering vectors obtained from MNIST and CIFAR10 databases for classification. These two
+This example shows how to use the scattering features for image classification. More specifically, we compute
+the scattering vectors from the MNIST and CIFAR10 databases and show how to successfully
+classify their images using Support Vector Machine (SVM) with Gaussian kernels. These two
 databases are widely used in research to compare the quality of image representations and
-classification methods.
+classification methods. We provide the parameters obtained by crossvalidation to reproduce the results obtained
+in [1]_ and [2]_.
+
+Scattering features have shown to outperform any other 'non-learned' image representations for image classification
+tasks [2]_.
+Structurally, they are very similar to deep learning representations, with fixed filters, Morlet filters in this implementation.
+Since the scattering transform is based on the Discrete Wavelet transform (DWT), it is stable to deformations.
+It is also invariant to small translations. For more details on its mathematical properties and exact definition,
+see the example *Scattering Features* or check [1]_ and [2]_.
 
 **Supervised Learning: Image Classification**
 
 The first task in supervised image classification is to collect a set of images tagged with a class. In case of the MNIST
 database we have pictures of digits, and the class is the corresponding number. Then, for every image
-we compute a feature vector, which in our case is the scattering vector. Once we have the complete
-database, we 'train' a classifier, meaning, we find the best parameters that allows to correctly classify the images.
+we compute a feature vector which, in our case, is the scattering vector. Once we have the complete
+database, we 'train' a classifier, meaning, we find the best parameters that allow to correctly classify the images.
 
 A widely used classifier is Support Vector Machine (SVM), which searches the high dimensional plane
-that allows to better separate the different classes [3]_.
-Here, we show how to reproduce the results obtained with the scattering transform, using with SVM (with Gaussian kernels)
+that allows to better separate each pair of classes, see [3]_ for more information.
+Here, we show how to reproduce the results obtained with the scattering transform, using SVM (with Gaussian kernels)
 first presented in the following papers:
 
-- **MNIST database** : The results were first presented in [1]_ Table 4. Using this implementation, we were able to obtain, on the 10000 image test set, the following error results:
+- **MNIST database** : The results were first presented in [1]_ Table 4. Using this implementation and a 10000 image test set, we were able to obtain, the following error results :
+
             +-------------------------+---------+
             |num images training set  | % error |
             +-------------------------+---------+
@@ -139,7 +140,6 @@ px=32  # number of pixels
 num_images = 50  # for full data set set to 50000
 n = np.amin([10000, num_images])
 
-print('Warning: For exact error performance, we need at least num_images=10000.')
 im_train, ytrain, im_test, ytest = load_images_mnist(px=px, num_images=num_images)
 Xtrain, Xtest = load_scattering(im_train, im_test, px=px, J=3, L=6, m=2, sigma_phi=0.6957, sigma_xi=0.8506)
 
@@ -164,7 +164,7 @@ for i,n in enumerate(ns):
     out = pip_gaussian.predict(Xtest_1d)
     score_gaussian[i] = 1.0-accuracy_score(ytest, out)
     #print('num training images:' + str(n) + ' err:' + str(score_gaussian[i]*100) + '%')
-
+print('Warning: For exact error performance, we need at least num_images=10000.')
 
 
 ############################

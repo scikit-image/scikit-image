@@ -3,15 +3,15 @@
 Scattering Features
 ===================
 
-This example shows how to use the scattering transform and how to access easily different scattering coefficients stored
-in the output vector. For more information on how to use scattering coefficients for image classification,
+This example shows how to use the scattering transform on images. It explains how to access easily different scattering
+coefficients stored in the output vector. For more information on how to use scattering coefficients for image classification,
 please check the example *Scattering features for supervised learning*.
 
 We call the scattering features (or coefficients) the output of the scattering transform applied to an image. These features
 have shown to outperform any other 'non-learned' image representations for image classification tasks [2]_.
-Structurally, they are very similar to deep learning representations, with fixed filters, which are Morlet filters, in this
+Structurally, they are very similar to deep learning representations, with fixed filters which are Morlet filters, in this
 implementation.
-Since the scattering transform is based on the Discrete Wavelet transform (DWT), its stable to deformations.
+Since the scattering transform is based on the Discrete Wavelet transform (DWT), it is stable to deformations.
 It is also invariant to small translations. For more details on its mathematical properties, see [1]_.
 
 **Definition of the scattering coefficients**
@@ -34,17 +34,17 @@ coefficients do not have enough energy to be significant.
 **Implementation: Dictionary access to the scattering coefficients**
 
 Let's see how to access the different layers of the scattering transform. The scattering function outputs a python
-dictionary structure that allows an easy access to the scattering coefficients (first output of the function). The keys
+dictionary structure that allows an easy access to the scattering coefficients (first output of the function). The *keys*
 for this dictionary structure are the following:
 
--Zero-order coefficients:    we only have one key for the only coefficient:
+-*Zero-order coefficients*:  we only have one key for the only coefficient:
                 scat_tree[0]
 
 
--First-order coefficients:   keys is a tuple with the scale :math:`i` and angle :math:`l`:
+-*First-order coefficients*:   the keys are tuples with the scale :math:`i` and angle :math:`l`:
                             scat_tree[(i,l)]
 
--Second-order coefficients:  key is a tuple of two tuples, with the scale :math:`i` and angle :math:`l` of the first layer and then the scale :math:`j` and angle :math:`l_2` of the second layer:
+-*Second-order coefficients*:  the keys are tuple of two tuples, with the scale :math:`i` and angle :math:`l` of the first layer and then the scale :math:`j` and angle :math:`l_2` of the second layer:
                             scat_tree[( (i,l)  , (j,l_2) )]
 
 Note that the output of any layer is a matrix of size (Num_images, spatial_dimensions, spatial_dimensions).
@@ -65,7 +65,10 @@ from skimage.feature.scattering import scattering
 # Load an image
 px = 32 # size of the image (squared)
 im= resize(d.camera(), (px, px))
+
+plt.figure(figsize=(6,3))
 plt.imshow(abs(im))
+plt.show()
 
 # Compute the scattering
 J=3 #number of scales
@@ -76,8 +79,8 @@ m=2 # compute up to the second order scattering coeffs.
 wavelet_filters, lw = multiresolution_filter_bank_morlet2d(px, J=J, L=L)
 
 #scattering coefficients (S) and the access tree (scat_tree)
-S,u,scat_tree = scattering(im[np.newaxis,:,:], wavelet_filters,m=m)
-num_images,coef_index, spatial, spatial = S.shape
+S,u,scat_tree = scattering(im[np.newaxis,:,:], wavelet_filters, m=m)
+num_images, coef_index, spatial, spatial = S.shape
 
 ###############################
 # Zero order scattering coefficients
@@ -105,23 +108,22 @@ i = 0
 l = 3
 S_first_order = S[0, i*L+l+1, :, :]
 
-plt.figure(figsize=(8,3))
+plt.figure(figsize=(8, 3))
 plt.suptitle('First order scattering coeff. (i,l)=(' + str(i) + ',' + str(l) + ')')
 plt.subplot(1, 2, 1)
 plt.imshow(S_first_order)
 # using the stree structure
-plt.subplot(1,2,2)
-plt.imshow(scat_tree[(i,l)][0,:,:])
+plt.subplot(1, 2, 2)
+plt.imshow(scat_tree[(i,l)][0, :, :])
 plt.show()
 
 #########################
 # Second order coefficients:
-# :math:`||x * \psi_i| * \psi_j| * \phi`
+# :math:`||x * \psi_{(i,l)}| * \psi_{(j,l_2)}| * \phi`
 # The complete number of coefficients second order coefficients is: :math:`\frac{J (J-1) L^2}{2}`
 # We will just access the coefficient using the scat tree structure:
 j = 1
 l_2 = 5
 plt.figure(figsize=(8,4))
-plt.suptitle('Second order scattering coefficients')
-plt.title('(i,l)=(' + str(i) + ',' + str(l) + '),(j,l_2)=(' + str(i) + ',' + str(l) + ')')
+plt.suptitle('Second order scattering coefficients: (i,l)=(' + str(i) + ',' + str(l) + '),(j,l_2)=(' + str(i) + ',' + str(l) + ')')
 plt.imshow(scat_tree[((i, l), (j, l_2))][0, :, :])
