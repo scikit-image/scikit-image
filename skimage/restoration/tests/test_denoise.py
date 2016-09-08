@@ -5,6 +5,9 @@ from numpy.testing import (run_module_suite, assert_raises, assert_equal,
 from skimage import restoration, data, color, img_as_float, measure
 from skimage._shared._warnings import expected_warnings
 from skimage.measure import compare_psnr
+from skimage.restoration._denoise import _wavelet_threshold
+
+import pywt
 
 np.random.seed(1234)
 
@@ -311,9 +314,10 @@ def test_no_denoising_for_small_h():
 
 
 def test_wavelet_denoising():
+    rstate = np.random.RandomState(1234)
     for img, multichannel in [(astro_gray, False), (astro, True)]:
         sigma = 0.1
-        noisy = img + sigma * np.random.randn(*(img.shape))
+        noisy = img + sigma * rstate.randn(*(img.shape))
         noisy = np.clip(noisy, 0, 1)
 
         # Verify that SNR is improved when true sigma is used
@@ -335,17 +339,33 @@ def test_wavelet_denoising():
                                            multichannel=multichannel)
         res2 = restoration.denoise_wavelet(noisy, sigma=sigma,
                                            multichannel=multichannel)
-        assert (res1.sum()**2 <= res2.sum()**2)
+        assert np.sum(res1**2) <= np.sum(res2**2)
+
+
+def test_wavelet_threshold():
+    rstate = np.random.RandomState(1234)
+
+    img = astro_gray
+    sigma = 0.1
+    noisy = img + sigma * rstate.randn(*(img.shape))
+    noisy = np.clip(noisy, 0, 1)
+
+    # employ a single, uniform threshold instead of BayesShrink sigmas
+    denoised = _wavelet_threshold(noisy, wavelet='db1', threshold=sigma)
+    psnr_noisy = compare_psnr(img, noisy)
+    psnr_denoised = compare_psnr(img, denoised)
+    assert psnr_denoised > psnr_noisy
 
 
 def test_wavelet_denoising_nd():
+    rstate = np.random.RandomState(1234)
     for ndim in range(1, 5):
         # Generate a very simple test image
         img = 0.2*np.ones((16, )*ndim)
         img[[slice(5, 13), ] * ndim] = 0.8
 
         sigma = 0.1
-        noisy = img + sigma * np.random.randn(*(img.shape))
+        noisy = img + sigma * rstate.randn(*(img.shape))
         noisy = np.clip(noisy, 0, 1)
 
         # Verify that SNR is improved with internally estimated sigma
@@ -353,6 +373,38 @@ def test_wavelet_denoising_nd():
         psnr_noisy = compare_psnr(img, noisy)
         psnr_denoised = compare_psnr(img, denoised)
         assert psnr_denoised > psnr_noisy
+
+
+def test_wavelet_denoising_levels():
+    rstate = np.random.RandomState(1234)
+    ndim = 2
+    N = 256
+    wavelet = 'db1'
+    # Generate a very simple test image
+    img = 0.2*np.ones((N, )*ndim)
+    img[[slice(5, 13), ] * ndim] = 0.8
+
+    sigma = 0.1
+    noisy = img + sigma * rstate.randn(*(img.shape))
+    noisy = np.clip(noisy, 0, 1)
+
+    denoised = restoration.denoise_wavelet(noisy, wavelet=wavelet)
+    denoised_1 = restoration.denoise_wavelet(noisy, wavelet=wavelet,
+                                             wavelet_levels=1)
+    psnr_noisy = compare_psnr(img, noisy)
+    psnr_denoised = compare_psnr(img, denoised)
+    psnr_denoised_1 = compare_psnr(img, denoised_1)
+
+    # multi-level case should outperform single level case
+    assert psnr_denoised > psnr_denoised_1 > psnr_noisy
+
+    # invalid number of wavelet levels results in a ValueError
+    max_level = pywt.dwt_max_level(np.min(img.shape),
+                                   pywt.Wavelet(wavelet).dec_len)
+    assert_raises(ValueError, restoration.denoise_wavelet, noisy,
+                  wavelet=wavelet, wavelet_levels=max_level+1)
+    assert_raises(ValueError, restoration.denoise_wavelet, noisy,
+                  wavelet=wavelet, wavelet_levels=-1)
 
 
 def test_estimate_sigma_gray():

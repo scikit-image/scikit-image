@@ -335,8 +335,53 @@ def denoise_tv_chambolle(im, weight=0.1, eps=2.e-4, n_iter_max=200,
     return out
 
 
-def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
-    """Performs wavelet denoising.
+def _bayes_thresh(details, var):
+    """BayesShrink threshold for a zero-mean details coeff array."""
+    # Equivalent to:  dvar = np.var(details) for 0-mean details array
+    dvar = np.mean(details*details)
+    eps = np.finfo(details.dtype).eps
+    thresh = var / np.sqrt(max(dvar - var, eps))
+    return thresh
+
+
+def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
+    """Calculate the robust median estimator of the noise standard deviation.
+
+    Parameters
+    ----------
+    detail_coeffs : ndarray
+        The detail coefficients corresponding to the discrete wavelet
+        transform of an image.
+    distribution : str
+        The underlying noise distribution.
+
+    Returns
+    -------
+    sigma : float
+        The estimated noise standard deviation (see section 4.2 of [1]_).
+
+    References
+    ----------
+    .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
+       by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
+       DOI:10.1093/biomet/81.3.425
+    """
+    # Consider regions with detail coefficients exactly zero to be masked out
+    detail_coeffs = detail_coeffs[np.nonzero(detail_coeffs)]
+
+    if distribution.lower() == 'gaussian':
+        # 75th quantile of the underlying, symmetric noise distribution
+        denom = scipy.stats.norm.ppf(0.75)
+        sigma = np.median(np.abs(detail_coeffs)) / denom
+    else:
+        raise ValueError("Only Gaussian noise estimation is currently "
+                         "supported")
+    return sigma
+
+
+def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
+                       wavelet_levels=None):
+    """Perform wavelet denoising.
 
     Parameters
     ----------
@@ -353,17 +398,32 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
         is None (the default) by the method in [2]_.
     threshold : float, optional
         The thresholding value. All wavelet coefficients less than this value
-        are set to 0. The default value (None) uses the SureShrink method found
-        in [1]_ to remove noise.
+        are set to 0. The default value (None) uses the BayesShrink method
+        found in [1]_ to remove noise.
     mode : {'soft', 'hard'}, optional
         An optional argument to choose the type of denoising performed. It
         noted that choosing soft thresholding given additive noise finds the
         best approximation of the original image.
+    wavelet_levels : int or None, optional
+        The number of wavelet decomposition levels to use.  The default is
+        three less than the maximum number of possible decomposition levels
+        (see Notes below).
 
     Returns
     -------
     out : ndarray
         Denoised image.
+
+    Notes
+    -----
+    Reference [1]_ used four levels of wavelet decomposition.  To be more
+    flexible for a range of input sizes, the implementation here stops 3 levels
+    prior to the maximum level of decomposition for `img` (the exact # of
+    levels thus depends on `img.shape` and the chosen wavelet). BayesShrink
+    variance estimation doesn't work well on levels with extremely small
+    coefficient arrays.  This is the rationale for skipping a few of the
+    coarsest levels.  The user can override the automated setting by explicitly
+    specifying `wavelet_levels`.
 
     References
     ----------
@@ -376,27 +436,52 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft'):
            DOI: 10.1093/biomet/81.3.425
 
     """
-    coeffs = pywt.wavedecn(img, wavelet=wavelet)
-    detail_coeffs = coeffs[-1]['d' * img.ndim]
+    wavelet = pywt.Wavelet(wavelet)
+
+    # Determine the number of wavelet decomposition levels
+    if wavelet_levels is None:
+        # Determine the maximum number of possible levels for img
+        dlen = wavelet.dec_len
+        wavelet_levels = np.min(
+            [pywt.dwt_max_level(s, dlen) for s in img.shape])
+
+        # Skip coarsest wavelet scales (see Notes in docstring).
+        wavelet_levels = max(wavelet_levels - 3, 1)
+
+    coeffs = pywt.wavedecn(img, wavelet=wavelet, level=wavelet_levels)
+    # Detail coefficients at each decomposition level
+    dcoeffs = coeffs[1:]
 
     if sigma is None:
-        # Estimates via the noise via method in [2]
-        sigma = np.median(np.abs(detail_coeffs)) / 0.67448975019608171
+        # Estimate the noise via the method in [2]_
+        detail_coeffs = dcoeffs[-1]['d' * img.ndim]
+        sigma = _sigma_est_dwt(detail_coeffs, distribution='Gaussian')
 
     if threshold is None:
-        # The BayesShrink threshold from [1]_ in docstring
-        threshold = sigma**2 / np.sqrt(max(img.var() - sigma**2, 0))
+        # The BayesShrink thresholds from [1]_ in docstring
+        var = sigma**2
+        threshold = [{key: _bayes_thresh(level[key], var) for key in level}
+                     for level in dcoeffs]
 
-    denoised_detail = [{key: pywt.threshold(level[key], value=threshold,
-                       mode=mode) for key in level} for level in coeffs[1:]]
-    denoised_root = pywt.threshold(coeffs[0], value=threshold, mode=mode)
-    denoised_coeffs = [denoised_root] + [d for d in denoised_detail]
+    if np.isscalar(threshold):
+        # A single threshold for all coefficient arrays
+        denoised_detail = [{key: pywt.threshold(level[key],
+                                                value=threshold,
+                                                mode=mode) for key in level}
+                           for level in dcoeffs]
+    else:
+        # Dict of unique threshold coefficients for each detail coeff. array
+        denoised_detail = [{key: pywt.threshold(level[key],
+                                                value=thresh[key],
+                                                mode=mode) for key in level}
+                           for thresh, level in zip(threshold, dcoeffs)]
+    denoised_coeffs = [coeffs[0]] + denoised_detail
     return pywt.waverecn(denoised_coeffs, wavelet)
 
 
 def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
-                    multichannel=False):
-    """Performs wavelet denoising on an image.
+                    wavelet_levels=None, multichannel=False):
+    """Perform wavelet denoising on an image.
 
     Parameters
     ----------
@@ -416,6 +501,9 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
         An optional argument to choose the type of denoising performed. It
         noted that choosing soft thresholding given additive noise finds the
         best approximation of the original image.
+    wavelet_levels : int or None, optional
+        The number of wavelet decomposition levels to use.  The default is
+        three less than the maximum number of possible decomposition levels.
     multichannel : bool, optional
         Apply wavelet denoising separately for each channel (where channels
         correspond to the final axis of the array).
@@ -458,60 +546,23 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
     >>> denoised_img = denoise_wavelet(img, sigma=0.1)
 
     """
-
     img = img_as_float(img)
 
     if multichannel:
         out = np.empty_like(img)
         for c in range(img.shape[-1]):
             out[..., c] = _wavelet_threshold(img[..., c], wavelet=wavelet,
-                                             mode=mode, sigma=sigma)
+                                             mode=mode, sigma=sigma,
+                                             wavelet_levels=wavelet_levels)
     else:
         out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
-                                 sigma=sigma)
+                                 sigma=sigma, wavelet_levels=wavelet_levels)
 
     clip_range = (-1, 1) if img.min() < 0 else (0, 1)
     return np.clip(out, *clip_range)
 
 
-def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
-    """
-    Calculation of the robust median estimator of the noise standard
-    deviation.
-
-    Parameters
-    ----------
-    detail_coeffs : ndarray
-        The detail coefficients corresponding to the discrete wavelet
-        transform of an image.
-    distribution : str
-        The underlying noise distribution.
-
-    Returns
-    -------
-    sigma : float
-        The estimated noise standard deviation (see section 4.2 of [1]_).
-
-    References
-    ----------
-    .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
-       by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
-       DOI:10.1093/biomet/81.3.425
-    """
-    # consider regions with detail coefficients exactly zero to be masked out
-    detail_coeffs = detail_coeffs[np.nonzero(detail_coeffs)]
-
-    if distribution.lower() == 'gaussian':
-        # 75th quantile of the underlying, symmetric noise distribution:
-        denom = scipy.stats.norm.ppf(0.75)
-        sigma = np.median(np.abs(detail_coeffs)) / denom
-    else:
-        raise ValueError("Only Gaussian noise estimation is currently "
-                         "supported")
-    return sigma
-
-
-def estimate_sigma(im, multichannel=False, average_sigmas=False):
+def estimate_sigma(im, average_sigmas=False, multichannel=False):
     """
     Robust wavelet-based estimator of the (Gaussian) noise standard deviation.
 
@@ -519,11 +570,11 @@ def estimate_sigma(im, multichannel=False, average_sigmas=False):
     ----------
     im : ndarray
         Image for which to estimate the noise standard deviation.
-    multichannel : bool
-        Estimate sigma separately for each channel.
     average_sigmas : bool, optional
         If true, average the channel estimates of `sigma`.  Otherwise return
         a list of sigmas corresponding to each channel.
+    multichannel : bool
+        Estimate sigma separately for each channel.
 
     Returns
     -------
