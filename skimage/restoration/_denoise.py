@@ -562,7 +562,7 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
     return np.clip(out, *clip_range)
 
 
-def estimate_sigma(im, multichannel=False, average_sigmas=False):
+def estimate_sigma(im, average_sigmas=False, multichannel=False):
     """
     Robust wavelet-based estimator of the (Gaussian) noise standard deviation.
 
@@ -570,11 +570,11 @@ def estimate_sigma(im, multichannel=False, average_sigmas=False):
     ----------
     im : ndarray
         Image for which to estimate the noise standard deviation.
-    multichannel : bool
-        Estimate sigma separately for each channel.
     average_sigmas : bool, optional
         If true, average the channel estimates of `sigma`.  Otherwise return
         a list of sigmas corresponding to each channel.
+    multichannel : bool
+        Estimate sigma separately for each channel.
 
     Returns
     -------
