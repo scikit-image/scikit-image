@@ -501,12 +501,12 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
         An optional argument to choose the type of denoising performed. It
         noted that choosing soft thresholding given additive noise finds the
         best approximation of the original image.
-    multichannel : bool, optional
-        Apply wavelet denoising separately for each channel (where channels
-        correspond to the final axis of the array).
     wavelet_levels : int or None, optional
         The number of wavelet decomposition levels to use.  The default is
         three less than the maximum number of possible decomposition levels.
+    multichannel : bool, optional
+        Apply wavelet denoising separately for each channel (where channels
+        correspond to the final axis of the array).
 
     Returns
     -------
