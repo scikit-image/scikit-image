@@ -34,37 +34,15 @@ def kb(image, min_scale=10, max_scale=25, saliency_threshold=0.6, clustering_thr
     References
     ----------
     https://en.wikipedia.org/wiki/Kadir–Brady_saliency_detector
-
+    
     Examples
     --------
     >>> from skimage.feature import kb
+    >>> from skimage.color import rgb2gray
     >>> from skimage.data import astronaut
     >>> image = astronaut()[100:300, 100:300]
-    >>> kb(image)
-        [[  12.75     0.875  102.625]
-         [  12.     127.875   72.125]
-         [  12.       1.875  146.125]
-         [  14.     163.875  149.875]
-         [  14.      14.875   75.125]
-         [  12.     155.125  105.875]
-         [  14.      92.75    46.625]
-         [  18.25   159.625  127.25 ]
-         [  12.25   107.625   16.5  ]
-         [  14.5      0.875  191.875]
-         [  12.5     45.625  142.125]
-         [  12.25   137.875  192.   ]
-         [  13.     106.625   59.125]
-         [  13.25    91.375   18.5  ]
-         [  12.5    152.     184.125]
-         [  12.     149.125   91.125]
-         [  12.75   122.75    28.875]
-         [  13.75    82.625  120.   ]
-         [  12.25    95.875   30.75 ]
-         [  15.75    16.125  165.25 ]
-         [  23.5     57.875   76.375]
-         [  12.      86.125   56.5  ]
-         [  12.5     80.75    29.875]]
-
+    >>> kb(rgb2gray(image))
+        
     Notes
     -----
     The radius of each region is 'scale/2'.
@@ -100,7 +78,6 @@ def detect(image, scales):
         where '(y, x)' are coordinates of the region, 'scale' is the
         size of salient region, and 'gamma' is the saliency score.
     """
-
     image = img_as_ubyte(image)
     nr, nc = image.shape
     # find pixels that we are going to examine
@@ -179,7 +156,7 @@ def prune(candidate_regions, saliency_threshold, v_th, K=7):
     Parameters
     ----------
     candidate_regions : (4, n) ndarray
-        Keypoints detected in the image
+        A 2d array with each column representing gamma,scale,y,x.
     saliency_threshold : float, optional.
         Features with saliency score more than this will be considered.
     v_th : int, optional
@@ -260,6 +237,5 @@ def prune(candidate_regions, saliency_threshold, v_th, K=7):
             scale = np.append(scale, center[2])
             gamma = np.append(gamma, t_gamma[index])
 
-    return np.array([scale, row, column])
-
+    return np.array([row, column, scale])
 
