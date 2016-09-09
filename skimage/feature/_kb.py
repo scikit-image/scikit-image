@@ -5,9 +5,9 @@ from .._shared.utils import assert_nD
 
 
 def kb(image, min_scale=10, max_scale=25, saliency_threshold=0.6, clustering_threshold=7):
-    """Finds salient regions in the given grayscale image.For each point x 
-    the method picks a scale s and calculates salient score Y(x,s). 
-    By comparing Y(x,s) of different points x the detector can rank 
+    """Finds salient regions in the given grayscale image.For each point x
+    the method picks a scale s and calculates salient score Y(x,s).
+    By comparing Y(x,s) of different points x the detector can rank
     the saliency of points and pick the most representative ones.
 
     Parameters
@@ -34,7 +34,7 @@ def kb(image, min_scale=10, max_scale=25, saliency_threshold=0.6, clustering_thr
     References
     ----------
     https://en.wikipedia.org/wiki/Kadir–Brady_saliency_detector
-    
+
     Examples
     --------
     >>> from skimage.feature import kb
@@ -42,12 +42,12 @@ def kb(image, min_scale=10, max_scale=25, saliency_threshold=0.6, clustering_thr
     >>> from skimage.data import astronaut
     >>> image = astronaut()[100:300, 100:300]
     >>> kb(rgb2gray(image))
-        
+
     Notes
     -----
     The radius of each region is 'scale/2'.
     """
-    
+
     assert_nD(image, 2)
 
     # scales for keypoints
@@ -56,7 +56,7 @@ def kb(image, min_scale=10, max_scale=25, saliency_threshold=0.6, clustering_thr
     base_regions = detect(image, scales)
     # pruning based on thresholds
     regions = prune(base_regions, saliency_threshold, clustering_threshold, K=7)
-   
+
     return regions.T
 
 
@@ -150,7 +150,7 @@ def detect(image, scales):
 def prune(candidate_regions, saliency_threshold, v_th, K=7):
     """ It selects highly salient points that have local support
     i.e. nearby points with similar saliency and scale. Each region is
-    sufficiently distant from all others (in Scale-space regions) to 
+    sufficiently distant from all others (in Scale-space regions) to
     qualify as a separate entity.
 
     Parameters
@@ -192,7 +192,7 @@ def prune(candidate_regions, saliency_threshold, v_th, K=7):
     for i in range(n):
         pt = pts[i][:]
         # calculate the distances b/w regions
-        dists = np.sqrt(((pts-np.tile(pt, (pts.shape[0], 1)))**2).sum(axis = 1))
+        dists = np.sqrt(((pts-np.tile(pt, (pts.shape[0], 1)))**2).sum(axis=1))
         D[i, :], D[:, i] = dists.T, dists
 
     nReg = 0
@@ -212,7 +212,7 @@ def prune(candidate_regions, saliency_threshold, v_th, K=7):
             cluster[2, j+1] = t_scale[s_i[j+1]]
 
         # clusters center point
-        center = np.array([np.mean(cluster, axis = 1)])
+        center = np.array([np.mean(cluster, axis=1)])
 
         # check if the regions are "suffiently clustered", if variance is less than threshold
         v = np.var(np.sqrt(((cluster - np.tile(center.T, (1, K+1)))**2).sum(axis=0)))
@@ -238,4 +238,3 @@ def prune(candidate_regions, saliency_threshold, v_th, K=7):
             gamma = np.append(gamma, t_gamma[index])
 
     return np.array([row, column, scale])
-
