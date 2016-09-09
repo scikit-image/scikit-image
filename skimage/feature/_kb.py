@@ -33,7 +33,7 @@ def kb(image, min_scale=10, max_scale=25, saliency_threshold=0.6, clustering_thr
 
     References
     ----------
-    https://en.wikipedia.org/wiki/Kadir–Brady_saliency_detector
+    https://en.wikipedia.org/wiki/Kadir-Brady_saliency_detector
 
     Examples
     --------
@@ -42,6 +42,29 @@ def kb(image, min_scale=10, max_scale=25, saliency_threshold=0.6, clustering_thr
     >>> from skimage.data import astronaut
     >>> image = astronaut()[100:300, 100:300]
     >>> kb(rgb2gray(image))
+    array([[   0.875,  102.625,   12.75 ],
+           [ 127.875,   72.125,   12.   ],
+           [   1.875,  146.125,   12.   ],
+           [ 163.875,  149.875,   14.   ],
+           [  14.875,   75.125,   14.   ],
+           [ 155.125,  105.875,   12.   ],
+           [  92.75 ,   46.625,   14.   ],
+           [ 159.625,  127.25 ,   18.25 ],
+           [ 107.625,   16.5  ,   12.25 ],
+           [   0.875,  191.875,   14.5  ],
+           [  45.625,  142.125,   12.5  ],
+           [ 137.875,  192.   ,   12.25 ],
+           [ 106.625,   59.125,   13.   ],
+           [  91.375,   18.5  ,   13.25 ],
+           [ 152.   ,  184.125,   12.5  ],
+           [ 149.125,   91.125,   12.   ],
+           [ 122.75 ,   28.875,   12.75 ],
+           [  82.625,  120.   ,   13.75 ],
+           [  95.875,   30.75 ,   12.25 ],
+           [  16.125,  165.25 ,   15.75 ],
+           [  57.875,   76.375,   23.5  ],
+           [  86.125,   56.5  ,   12.   ],
+           [  80.75 ,   29.875,   12.5  ]])
 
     Notes
     -----
