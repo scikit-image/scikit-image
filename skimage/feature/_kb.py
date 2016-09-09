@@ -165,10 +165,10 @@ def prune(candidate_regions, saliency_threshold, v_th, K=7):
 
     Returns
     -------
-    A : (4, n) ndarray
-        A 2d array with each column representing 4 values, '(gamma, scale, y, x)'
-        where '(y, x)' are coordinates of the region, 'scale' is the
-        size of salient region, and 'gamma' is the saliency score.
+    A : (3, n) ndarray
+        A 2d array with each column representing 3 values, '(y, x, scale)'
+        where '(y,x)' are coordinates of the region and 'scale' is the
+        size of corresponding salient region.
     """
 
     gamma, scale, row, column = (np.array([]) for i in range(4))
