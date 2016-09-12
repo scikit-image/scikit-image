@@ -8,9 +8,9 @@ coefficients stored in the output vector. For more information on how to use sca
 please check the example *Scattering features for supervised learning*.
 
 We call the scattering features (or coefficients) the output of the scattering transform applied to an image. These features
-have shown to outperform any other 'non-learned' image representations for image classification tasks [2]_.
-Structurally, they are very similar to deep learning representations, with fixed filters which are Morlet filters, in this
-implementation.
+have been shown to outperform any other 'non-learned' image representations for image classification tasks [2]_.
+Structurally, they are very similar to deep learning representations, with fixed filters (here Morlet filters).
+
 Since the scattering transform is based on the Discrete Wavelet transform (DWT), it is stable to deformations.
 It is also invariant to small translations. For more details on its mathematical properties, see [1]_.
 
