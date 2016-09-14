@@ -1,3 +1,4 @@
+from __future__ import print_function, division
 import numpy as np
 from scipy import ndimage as ndi
 from ..util import img_as_ubyte
