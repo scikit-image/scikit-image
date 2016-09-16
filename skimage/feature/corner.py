@@ -285,6 +285,67 @@ def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
     return _image_orthogonal_matrix22_eigvals(Hxx, Hxy, Hyy)
 
 
+def shape_index(image, sigma=1, mode='constant', cval=0):
+    """Compute the shape index. The shape index is a single valued measure
+    of local curvature, defined by Koenderink & van Doorn [1].
+
+    Its values range from -1 to 1 (and may be nan), with following ranges
+    representing following shapes:
+
+    * s in [  -1, -7/8): Spherical cup
+    * s in [-7/8, -5/8): Through
+    * s in [-5/8, -3/8): Rut
+    * s in [-3/8, -1/8): Saddle rut
+    * s in [-1/8, +1/8): Saddle
+    * s in [+1/8, +3/8): Saddle ridge
+    * s in [+3/8, +5/8): Ridge
+    * s in [+5/8, +7/8): Dome
+    * s in [+7/8,   +1]: Spherical cap
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    sigma : float
+        Standard deviation used for the Gaussian kernel, which is used as
+        weighting function for the auto-correlation matrix.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
+
+    Returns
+    -------
+    s : ndarray
+        Shape index
+
+    References
+    ----------
+    .. [1] Koenderink, J. J. & van Doorn, A. J., "Surface shape and curvature scales",
+           Image and Vision Computing, 1992, 10, 557-564.
+
+
+    Examples
+    --------
+    >>> from skimage.feature import shape_index
+    >>> square = np.zeros((5, 5))
+    >>> square[2, 2] = 4
+    >>> s = shape_index(square, sigma=0.1)
+    >>> s
+    array([[ nan,  nan, -0.5,  nan,  nan],
+           [ nan, -0. ,  nan, -0. ,  nan],
+           [-0.5,  nan, -1. ,  nan, -0.5],
+           [ nan, -0. ,  nan, -0. ,  nan],
+           [ nan,  nan, -0.5,  nan,  nan]])
+    """
+
+    Hxx, Hxy, Hyy = hessian_matrix(image, sigma=sigma, mode=mode, cval=cval)
+    l1, l2 = hessian_matrix_eigvals(Hxx, Hxy, Hyy)
+
+    return (2.0 / np.pi) * np.arctan((l2 + l1) / (l2 - l1))
+
+
 def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
     """Compute Kitchen and Rosenfeld corner measure response image.
 
