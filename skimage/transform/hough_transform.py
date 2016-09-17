@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import ndimage
-from .. import measure, morphology
+from .. import measure
 from ._hough_transform import (_hough_circle, _hough_ellipse,
                                _hough_line, _probabilistic_hough_line)
 
@@ -153,6 +153,7 @@ def hough_circle(image, radius, normalize=True, full_output=False):
     return _hough_circle(image, radius.astype(np.intp),
                          normalize=normalize, full_output=full_output)
 
+
 def hough_ellipse(img, threshold=4, accuracy=1, min_size=4, max_size=None):
     """Perform an elliptical Hough transform.
 
@@ -204,6 +205,7 @@ def hough_ellipse(img, threshold=4, accuracy=1, min_size=4, max_size=None):
     """
     return _hough_ellipse(img, threshold, accuracy, min_size, max_size)
 
+
 def hough_line(img, theta=None):
     """Perform a straight line Hough transform.
 
@@ -211,7 +213,7 @@ def hough_line(img, theta=None):
     ----------
     img : (M, N) ndarray
         Input image with nonzero values representing edges.
-    theta : 1D ndarray of double
+    theta : 1D ndarray of double, optional
         Angles at which to compute the transform, in radians.
         Defaults to -pi/2 .. pi/2
 
@@ -219,7 +221,7 @@ def hough_line(img, theta=None):
     -------
     H : 2-D ndarray of uint64
         Hough transform accumulator.
-    theta : ndarray, optional
+    theta : ndarray
         Angles at which the transform was computed, in radians.
     distances : ndarray
         Distance values.

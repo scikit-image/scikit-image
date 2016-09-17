@@ -7,6 +7,7 @@ from ._draw import (_coords_inside_image, _line, _line_aa,
                     _circle_perimeter, _circle_perimeter_aa,
                     _bezier_curve)
 
+
 def _ellipse_in_shape(shape, center, radiuses):
     """Generate coordinates of points within ellipse bounded by shape."""
     r_lim, c_lim = np.ogrid[0:float(shape[0]), 0:float(shape[1])]
@@ -476,6 +477,7 @@ def circle_perimeter(cy, cx, radius,
 
     """
     return _circle_perimeter(cy, cx, radius, method, shape)
+
 
 def circle_perimeter_aa(cy, cx, radius, shape=None):
     """Generate anti-aliased circle perimeter coordinates.

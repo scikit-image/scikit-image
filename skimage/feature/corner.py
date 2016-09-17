@@ -13,6 +13,7 @@ from ..transform import integral_image
 from .._shared.utils import safe_as_int
 from .corner_cy import _corner_moravec, _corner_orientations
 
+
 def _compute_derivatives(image, mode='constant', cval=0):
     """Compute derivatives in x and y direction using the Sobel operator.
 
