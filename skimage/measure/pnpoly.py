@@ -20,10 +20,6 @@ def grid_points_in_poly(shape, verts):
     --------
     points_in_poly
 
-    Notes
-    -----
-    This function is a wrapper for Cython code.
-
     Returns
     -------
     mask : (M, N) ndarray of bool
@@ -47,10 +43,6 @@ def points_in_poly(points, verts):
     See Also
     --------
     grid_points_in_poly
-
-    Notes
-    -----
-    This function is a wrapper for Cython code.
 
     Returns
     -------

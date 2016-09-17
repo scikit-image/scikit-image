@@ -862,10 +862,6 @@ def corner_moravec(image, window_size=1):
     response : ndarray
         Moravec response image.
 
-    Notes
-    -----
-    This function is a wrapper for Cython code.
-
     References
     ----------
     .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/moravec.htm
@@ -919,10 +915,6 @@ def corner_orientations(image, corners, mask):
     -------
     orientations : (N, 1) array
         Orientations of corners in the range [-pi, pi].
-
-    Notes
-    -----
-    This function is a wrapper for Cython code.
 
     References
     ----------

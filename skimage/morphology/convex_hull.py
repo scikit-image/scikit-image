@@ -1,6 +1,6 @@
 """Convex Hull."""
 import numpy as np
-from ..measure._pnpoly import grid_points_in_poly
+from ..measure.pnpoly import grid_points_in_poly
 from ._convex_hull import possible_hull
 from ..measure._label import label
 from ..util import unique_rows

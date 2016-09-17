@@ -43,8 +43,6 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10,
     segmentation, though this is not strictly necessary. For this to work, the
     image must be given in RGB format.
 
-    This function is a wrapper for Cython code.
-
     References
     ----------
     .. [1] Quick shift and kernel methods for mode seeking,

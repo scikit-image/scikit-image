@@ -186,16 +186,14 @@ def hough_ellipse(img, threshold=4, accuracy=1, min_size=4, max_size=None):
     >>> rr, cc = ellipse_perimeter(10, 10, 6, 8)
     >>> img[cc, rr] = 1
     >>> result = hough_ellipse(img, threshold=8)
-    >>> result
-    [(10, 10.0, 8.0, 6.0, 0.0, 10.0)]
+    >>> result.tolist()
+    [(10, 10.0, 10.0, 8.0, 6.0, 0.0)]
 
     Notes
     -----
     The accuracy must be chosen to produce a peak in the accumulator
     distribution. In other words, a flat accumulator distribution with low
     values may be caused by a too low bin size.
-
-    This function is a wrapper for Cython code.
 
     References
     ----------
@@ -280,10 +278,6 @@ def probabilistic_hough_line(img, threshold=10, line_length=50,
     lines : list
       List of lines identified, lines in format ((x0, y0), (x1, y0)),
       indicating line start and end.
-
-    Notes
-    -----
-    This function is a wrapper for Cython code.
 
     References
     ----------

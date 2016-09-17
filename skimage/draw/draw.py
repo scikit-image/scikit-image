@@ -103,10 +103,6 @@ def circle(r, c, radius, shape=None):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
 
-    Notes
-    -----
-        This function is a wrapper for skimage.draw.ellipse()
-
     Examples
     --------
     >>> from skimage.draw import circle
@@ -157,7 +153,6 @@ def polygon_perimeter(cr, cc, shape=None, clip=False):
 
     Examples
     --------
-    >>> from skimage.draw import polygon_perimeter
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = polygon_perimeter([5, -1, 5, 10],
     ...                            [-1, 5, 11, 5],
@@ -295,7 +290,6 @@ def line(y1, x1, y2, x2):
     Notes
     -----
     Anti-aliased line generator is available with `line_aa`.
-    This function is a wrapper for Cython code.
 
     Examples
     --------
@@ -335,10 +329,6 @@ def line_aa(y1, x1, y2, x2):
         Indices of pixels (`rr`, `cc`) and intensity values (`val`).
         ``img[rr, cc] = val``.
 
-    Notes
-    -----
-    This function is a wrapper for Cython code.
-
     References
     ----------
     .. [1] A Rasterizing Algorithm for Drawing Curves, A. Zingl, 2012
@@ -352,14 +342,14 @@ def line_aa(y1, x1, y2, x2):
     >>> img[rr, cc] = val * 255
     >>> img
     array([[  0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
-           [  0, 255,  56,   0,   0,   0,   0,   0,   0,   0],
-           [  0,  56, 255,  56,   0,   0,   0,   0,   0,   0],
-           [  0,   0,  56, 255,  56,   0,   0,   0,   0,   0],
-           [  0,   0,   0,  56, 255,  56,   0,   0,   0,   0],
-           [  0,   0,   0,   0,  56, 255,  56,   0,   0,   0],
-           [  0,   0,   0,   0,   0,  56, 255,  56,   0,   0],
-           [  0,   0,   0,   0,   0,   0,  56, 255,  56,   0],
-           [  0,   0,   0,   0,   0,   0,   0,  56, 255,   0],
+           [  0, 255,  74,   0,   0,   0,   0,   0,   0,   0],
+           [  0,  74, 255,  74,   0,   0,   0,   0,   0,   0],
+           [  0,   0,  74, 255,  74,   0,   0,   0,   0,   0],
+           [  0,   0,   0,  74, 255,  74,   0,   0,   0,   0],
+           [  0,   0,   0,   0,  74, 255,  74,   0,   0,   0],
+           [  0,   0,   0,   0,   0,  74, 255,  74,   0,   0],
+           [  0,   0,   0,   0,   0,   0,  74, 255,  74,   0],
+           [  0,   0,   0,   0,   0,   0,   0,  74, 255,   0],
            [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
     """
     return _line_aa(y1, x1, y2, x2)
@@ -385,10 +375,6 @@ def polygon(y, x, shape=None):
         Pixel coordinates of polygon.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
-
-    Notes
-    -----
-    This function is a wrapper for Cython code.
 
     Examples
     --------
@@ -448,8 +434,6 @@ def circle_perimeter(cy, cx, radius,
     Bresenham method is also known as midpoint circle algorithm.
     Anti-aliased circle generator is available with `circle_perimeter_aa`.
 
-    This function is a wrapper for Cython code.
-
     References
     ----------
     .. [1] J.E. Bresenham, "Algorithm for computer control of a digital
@@ -504,8 +488,6 @@ def circle_perimeter_aa(cy, cx, radius, shape=None):
     Wu's method draws anti-aliased circle. This implementation doesn't use
     lookup table optimization.
 
-    This function is a wrapper for Cython code.
-
     References
     ----------
     .. [1] X. Wu, "An efficient antialiasing technique", In ACM SIGGRAPH
@@ -554,10 +536,6 @@ def ellipse_perimeter(cy, cx, yradius, xradius, orientation=0, shape=None):
         Indices of pixels that belong to the ellipse perimeter.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
-
-    Notes
-    -----
-    This function is a wrapper for Cython code.
 
     References
     ----------
@@ -615,8 +593,6 @@ def bezier_curve(y0, x0, y1, x1, y2, x2, weight, shape=None):
     -----
     The algorithm is the rational quadratic algorithm presented in
     reference [1]_.
-
-    This function is a wrapper for Cython code.
 
     References
     ----------
