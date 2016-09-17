@@ -1,0 +1,10 @@
+{% if pagename != 'index' %}
+
+    {%- if display_toc %}
+        <h4 class="sidebar-box-heading">Contents</h4>
+        <div class="well sidebar-box toc">
+            {{ toc|replace('<ul>', '<ul class="nav nav-list">') }}
+        </div>
+    {%- endif %}
+
+{% endif %}

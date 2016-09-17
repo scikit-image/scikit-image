@@ -1,0 +1,119 @@
+How to make a new release of ``skimage``
+========================================
+
+- Check ``TODO.txt`` for any outstanding tasks.
+
+- Update release notes.
+
+  1. Review and cleanup ``doc/release/release_dev.txt``
+
+     - To show a list of merges and contributors, run
+       ``doc/release/contribs.py <tag of prev release>``.
+
+  2. Rename to ``doc/release/release_X.txt``
+
+  3. Copy ``doc/release/release_template.txt`` to
+     ``doc/release/release_dev.txt`` for the next release.
+
+- Update the version number in ``skimage/__init__.py`` and ``bento.info`` and commit
+
+- Update the docs:
+
+  - Edit ``doc/source/_static/docversions.js`` and commit
+  - Build a clean version of the docs.  Run ``python setup.py install`` in the
+    root dir, then ``rm -rf build; make html`` in the docs.
+  - Build using ``make gh-pages``.
+  - Update the symlink to ``stable``.
+  - Push upstream: ``git push origin gh-pages`` in ``doc/gh-pages``.
+
+- Add the version number as a tag in git::
+
+   git tag -s v0.X.0
+
+  (If you do not have a gpg key, use -m instead; it is important for
+  Debian packaging that the tags are annotated)
+
+- Push the new meta-data to github::
+
+   git push --tags origin master
+
+- Publish on PyPi::
+
+   python setup.py register
+   python setup.py sdist upload
+
+  Go to https://travis-ci.org/scikit-image/scikit-image-wheels, select the
+  "Current" tab, and click (on the right) on the "Restart Build" icon.  After
+  the wheels become available at http://wheels.scikit-image.org/ (approx 15
+  mins), execute ``tools/osx_wheel_upload.sh``.  Note that, if you rebuild the
+  same wheels, it can take up to 15 minutes for the the files in the http
+  directory to update to the versions that Travis-CI uploaded. You may want to
+  check the timestamps in the http directory listing to check that you will get
+  the latest version.
+
+- Increase the version number
+
+  - In ``setup.py``, set to ``0.Xdev``.
+  - In ``bento.info``, set to ``0.X.dev0``.
+
+- Update the web frontpage:
+  The webpage is kept in a separate repo: scikit-image-web
+
+  - Sync your branch with the remote repo: ``git pull``.
+    If you try to ``make gh-pages`` when your branch is out of sync, it
+    creates headaches.
+  - Add release date to ``index.rst`` under "Announcements".
+  - Add previous stable version documentation path to disallowed paths
+    in `robots.txt`
+  - Build using ``make gh-pages``.
+  - Push upstream: ``git push origin master`` in ``gh-pages``.
+
+- Update the development docs for the new version ``0.Xdev`` just like above
+
+- Post release notes on mailing lists, blog, G+, etc.
+
+  - scikit-image@googlegroups.com
+  - scipy-user@scipy.org
+  - scikit-learn-general@lists.sourceforge.net
+  - pythonvision@googlegroups.com
+
+- Update the version and the release date on wikipedia
+  https://en.wikipedia.org/wiki/Scikit-image
+
+Debian
+------
+
+- Tag the release as per instructions above.
+- git checkout debian
+- git merge v0.x.x
+- uscan <- not sure if this step is necessary
+- Update changelog (emacs has a good mode, requires package dpkg-dev-el)
+  - C-C C-v add new version, C-c C-c timestamp / save
+- git commit -m 'Changelog entry for 0.x.x'
+- git-buildpackage -uc -us -rfakeroot
+- Sign the changes: debsign skimage_0.x.x-x_amd64.changes
+- cd ../build-area && dput mentors skimage_0.x.x-x_amd64.changes
+- The package should now be available at:
+
+  http://mentors.debian.net/package/skimage
+
+For the last lines above to work, you need ``~/.gbp.conf``::
+
+  [DEFAULT]
+  upstream-tag = %(version)s
+
+  [git-buildpackage]
+  sign-tags = True
+  export-dir = ../build-area/
+  tarball-dir = ../tarballs/
+
+As well as ``~/dput.cf``::
+
+  [mentors]
+  fqdn = mentors.debian.net
+  incoming = /upload
+  method = http
+  allow_unsigned_uploads = 0
+  progress_indicator = 2
+  # Allow uploads for UNRELEASED packages
+  allowed_distributions = .*

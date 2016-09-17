@@ -1,0 +1,26 @@
+Remember to list any API changes below in `doc/source/api_changes.txt`.
+
+
+
+Version 0.14
+------------
+* Remove deprecated ``ntiles_*` kwargs in ``equalize_adapthist``.
+* Remove deprecated ``skimage.restoration.nl_means_denoising``.
+* Remove deprecated ``skimage.filters.gaussian_filter``.
+* Remove deprecated ``skimage.filters.gabor_filter``.
+* Remove deprecated ``skimage.measure.LineModel`` and
+  add an alias LineModel = LineModelND. While the deprecated LineModel has for
+  parameters `(dist, theta)`, LineModelND has the more general parameters
+  `(origin, direction)`.
+* Remove deprecated old syntax support for ``skimage.transform.integrate``.
+* Remove deprecated ``skimage.measure.structural_similarity`` alias and
+  deprecation warning test for this alias.
+* Remove deprecated ``sigma_range`` kwargs in ``skimage.restoration.denoise_bilateral``
+  and corresponding tests.
+
+
+Version 0.15
+------------
+* In ``skimage.util.dtype_limits``, set default behavior of `clip_negative` to `False`.
+* In ``skimage.transform.radon``, set default behavior of `circle` to `True`.
+* In ``skimage.transform.iradon``, set default behavior of `circle` to `True`.

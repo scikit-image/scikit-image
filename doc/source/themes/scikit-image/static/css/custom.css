@@ -1,0 +1,245 @@
+body {
+    font-family: "Lato", sans-serif;
+    letter-spacing: 0.02em;
+    font-size: 102%;
+    line-height: 23px;
+}
+a {
+    color: #CE5C00;
+}
+li {
+    line-height: 23px;
+}
+code, pre {
+    font-family: monospace;
+}
+input,
+button,
+select,
+textarea {
+    font-family: "Lato", sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    clear: left;
+}
+h1 {
+    font-size: 30px;
+    line-height: 36px;
+}
+h2 {
+    font-size: 24px;
+    line-height: 30px;
+}
+h3 {
+    font-size: 19px;
+    line-height: 21px;
+}
+h4 {
+    font-size: 17px;
+    line-height: 19px;
+}
+h5 {
+    font-size: 15px;
+    line-height: 17px;
+}
+h6 {
+    font-size: 13px;
+    line-height: 15px;
+}
+
+.logo {
+    float: left;
+    margin: 20px 0 20px 22px;
+}
+.logo img {
+    height: 70px;
+}
+
+.hero {
+    padding: 10px 25px 15px 25px;
+}
+
+.gallery-random {
+    float: right;
+    line-height: 180px;
+    margin-left: 10px;
+}
+.gallery-random img {
+    max-height: 180px;
+    max-width: 180px;
+}
+
+.coins-sample {
+    float: left;
+    padding: 5px;
+}
+
+.sidebar-box {
+    padding: 0;
+}
+.sidebar-box-heading {
+    padding-left: 15px;
+}
+
+.headerlink {
+    margin-left: 10px;
+    color: #ddd;
+    display: none;
+}
+h1:hover .headerlink,
+h2:hover .headerlink,
+h3:hover .headerlink,
+h4:hover .headerlink,
+h5:hover .headerlink,
+h6:hover .headerlink {
+    display: inline;
+}
+.headerlink:hover {
+    color: #CE5C00;
+    text-decoration: none;
+}
+
+.footer {
+    margin-top: 30px;
+    padding: 5px 10px;
+    color: #999;
+}
+.footer a {
+    color: #999;
+    text-decoration: underline;
+}
+
+.gplus-use {
+    float: left;
+    margin: 0 0 10px 15px;
+}
+
+/* Documentation */
+
+/* general table settings */
+table.docutils {
+    margin-bottom: 10px;
+    border-color: #ccc;
+}
+table.docutils td, table.docutils th {
+    padding: 5px;
+    border-color: #ccc;
+    text-align: left;
+}
+
+.toc ul ul {
+    font-size: 13px;
+    margin-right: -15px;
+}
+
+/* master content table */
+.contentstable.docutils, .contentstable.docutils td {
+    border-color: transparent;
+}
+.contentstable.docutils .first {
+    font-weight: bold;
+}
+.contentstable.docutils .last {
+    padding-left: 10px;
+}
+
+.docutils .label, .docutils .badge {
+    background: transparent;
+    text-shadow: none;
+    font-size: 13px;
+    padding: 5px;
+    line-height: 20px;
+    color: #333;
+}
+
+/* module summary table */
+.longtable.docutils {
+    font-size: 12px;
+    margin-bottom: 30px;
+}
+.longtable.docutils, .longtable.docutils td {
+    border-color: #ccc;
+}
+
+/* function and class description */
+dl.class, dl.function, dl.method, dl.attribute {
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
+}
+.descclassname {
+    color: #aaa;
+    font-weight: normal;
+    font-family: monospace;
+}
+.descname {
+    font-family: monospace;
+}
+dl.class em, dl.function em, dl.class big, dl.function big {
+    font-weight: normal;
+    font-family: monospace;
+}
+dl.class dd, dl.function dd {
+    padding: 10px;
+}
+.docutils.field-list th {
+    background-color: #eee;
+    padding: 10px;
+    text-align: left;
+    vertical-align: top;
+    width: 100px;
+}
+.docutils.field-list td {
+    padding: 10px 10px 10px 20px;
+    text-align: left;
+    vertical-align: top;
+}
+.docutils.field-list td blockquote p {
+    font-size: 13px;
+    line-height: 18px;
+}
+p.rubric {
+    font-weight: bold;
+    font-size: 19px;
+    margin: 15px 0 10px 0;
+}
+p.admonition-title {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+/* example gallery */
+
+.gallery {
+    height: 200px;
+}
+
+.figure {
+    float: left;
+    margin: 1em;
+}
+
+.figure img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    max-height: 150px;
+    max-width: 200px;
+}
+
+.figure .caption {
+    width: 200px;
+    text-align: center !important;
+}
+
+.summary-box {
+    /* Should derive width from span8 */
+    width: 640px;
+}
+
+.citation {
+    color: #3a87ad;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+/*    padding: 1em;*/
+}

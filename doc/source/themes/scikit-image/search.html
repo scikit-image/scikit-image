@@ -1,0 +1,46 @@
+{#
+    basic/search.html
+    ~~~~~~~~~~~~~~~~~
+
+    Template for the search page.
+
+    :copyright: Copyright 2007-2011 by the Sphinx team, see AUTHORS.
+    :license: BSD, see LICENSE for details.
+#}
+{% extends "layout.html" %}
+{% set title = _('Search') %}
+{% set script_files = script_files + ['_static/searchtools.js'] %}
+{% set script_files = script_files + ['searchindex.js'] %}
+{% block body %}
+  <h1 id="search-documentation">{{ _('Search') }}</h1>
+  <div id="fallback" class="admonition warning">
+  <script type="text/javascript">
+    $('#fallback').hide();
+    $("input.search").focus();
+  </script>
+  <p>
+    {% trans %}Please activate JavaScript to enable the search
+    functionality.{% endtrans %}
+  </p>
+  </div>
+  <p>
+    {% trans %}From here you can search these documents. Enter your search
+    words into the box in the navigation bar and press "Enter". Note that the
+    search function will automatically search for all of the words. Pages
+    containing fewer words won't appear in the result list.{% endtrans %}
+  </p>
+  {% if search_performed %}
+    {% if not search_results %}
+      <p>{{ _('Your search did not match any results.') }}</p>
+    {% endif %}
+  {% endif %}
+  <div id="search-results">
+  {% if search_results %}
+    <ul>
+    {% for href, caption, context in search_results %}
+      <li class="well"><a href="{{ pathto(item.href) }}">{{ caption }}</a></li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  </div>
+{% endblock %}

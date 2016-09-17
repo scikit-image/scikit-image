@@ -1,0 +1,22 @@
+<h4 class="sidebar-box-heading">{{ _('Navigation') }}</h4>
+<div class="well sidebar-box">
+    <ul class="nav nav-list">
+        <li><a href="{{ pathto(master_doc) }}">Documentation Home</a></li>
+    </ul>
+</div>
+{%- if prev %}
+    <h4 class="sidebar-box-heading">{{ _('Previous topic') }}</h4>
+    <div class="well sidebar-box">
+        <ul class="nav nav-list">
+            <li><a href="{{ prev.link|e }}" title="{{ _('previous chapter') }}">{{ prev.title }}</a></li>
+        </ul>
+    </div>
+{%- endif %}
+{%- if next %}
+    <h4 class="sidebar-box-heading">{{ _('Next topic') }}</h4>
+    <div class="well sidebar-box">
+        <ul class="nav nav-list">
+            <li><a href="{{ next.link|e }}" title="{{ _('next chapter') }}">{{ next.title }}</a></li>
+        </ul>
+    </div>
+{%- endif %}

@@ -1,0 +1,15 @@
+include setup*.py
+include MANIFEST.in
+include *.txt
+include Makefile
+recursive-include skimage *.pyx *.pxd *.pxi *.py *.c *.h *.ini *.md5 *.npy *.txt *.in
+recursive-include skimage/data *
+
+include doc/Makefile
+recursive-include doc/examples *.txt
+recursive-include doc/source *.rst
+recursive-include doc/tools *.txt
+recursive-include doc/source/_templates *.html
+recursive-include doc *.py
+prune doc/build
+prune doc/gh-pages

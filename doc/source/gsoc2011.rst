@@ -1,0 +1,14 @@
+Project ideas for Google Summer of Code 2011
+============================================
+
+- Vastly increase the number of algorithms covered by the SciKit, by
+  implementing several prominent algorithms (probabilistic hough, radon
+  transform, etc.) from papers.  Also incorporate code from the Broad
+  Institute's CellProfiler team.
+
+- Implement a new backend infrastructure so that the same results may be
+  obtained using either NumPy, OpenCL, Theano, etc.
+
+- Implement optimised core routines, such as fast 2D convolution.  This should
+  be as fast as CvFilter2D (which is faster than ndimage, for example).
+
