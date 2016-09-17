@@ -229,7 +229,7 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
 
 
 def _hough_line(cnp.ndarray img,
-                cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=None):
+                cnp.ndarray[ndim=1, dtype=cnp.double_t] theta):
     """Perform a straight line Hough transform.
 
     Parameters
@@ -238,7 +238,6 @@ def _hough_line(cnp.ndarray img,
         Input image with nonzero values representing edges.
     theta : 1D ndarray of double
         Angles at which to compute the transform, in radians.
-        Defaults to -pi/2 .. pi/2
 
     Returns
     -------
@@ -313,24 +312,24 @@ def _hough_line(cnp.ndarray img,
     return accum, theta, bins
 
 
-def _probabilistic_hough_line(cnp.ndarray img, int threshold=10,
-                              int line_length=50, int line_gap=10,
-                              cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=None):
+def _probabilistic_hough_line(cnp.ndarray img, int threshold,
+                              int line_length, int line_gap,
+                              cnp.ndarray[ndim=1, dtype=cnp.double_t] theta):
     """Return lines from a progressive probabilistic line Hough transform.
 
     Parameters
     ----------
     img : (M, N) ndarray
         Input image with nonzero values representing edges.
-    threshold : int, optional (default 10)
+    threshold : int
         Threshold
-    line_length : int, optional (default 50)
+    line_length : int
         Minimum accepted length of detected lines.
         Increase the parameter to extract longer lines.
-    line_gap : int, optional, (default 10)
+    line_gap : int
         Maximum gap between pixels to still form a line.
         Increase the parameter to merge broken lines more aggresively.
-    theta : 1D ndarray, dtype=double, optional, default (-pi/2 .. pi/2)
+    theta : 1D ndarray, dtype=double
         Angles at which to compute the transform, in radians.
 
     Returns

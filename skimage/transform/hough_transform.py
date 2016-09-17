@@ -73,7 +73,10 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     hspace_t = hspace > threshold
 
     label_hspace = measure.label(hspace_t)
-    props = measure.regionprops(label_hspace)
+    props = measure.regionprops(label_hspace, hspace_max)
+    # Sort the list of peaks by intensity, not left-right, so larger peaks
+    # in Hough space cannot be arbitrarily suppressed by smaller neighbors
+    props = sorted(props, key=lambda x: x.max_intensity)[::-1]
     coords = np.array([np.round(p.centroid) for p in props], dtype=int)
 
     hspace_peaks = []
@@ -150,6 +153,10 @@ def hough_circle(image, radius, normalize=True, full_output=False):
         R designates the larger radius if full_output is True.
         Otherwise, R = 0.
     """
+    if type(radius) is list:
+        radius = np.array(radius)
+    elif type(radius) is not np.ndarray:
+        radius = np.array([radius])
     return _hough_circle(image, radius.astype(np.intp),
                          normalize=normalize, full_output=full_output)
 
@@ -250,6 +257,9 @@ def hough_line(img, theta=None):
     .. plot:: hough_tf.py
 
     """
+    if theta is None:
+        # These values are approximations of pi/2
+        theta = np.linspace(-np.pi / 2, np.pi / 2, 180)
     return _hough_line(img, theta)
 
 
@@ -285,5 +295,7 @@ def probabilistic_hough_line(img, threshold=10, line_length=50,
            Hough transform for line detection", in IEEE Computer Society
            Conference on Computer Vision and Pattern Recognition, 1999.
     """
+    if theta is None:
+        theta = np.linspace(-np.pi / 2, np.pi / 2, 180)
     return _probabilistic_hough_line(img, threshold, line_length,
                                      line_gap, theta)
