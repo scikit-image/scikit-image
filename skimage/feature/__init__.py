@@ -11,8 +11,8 @@ from .corner import (corner_kitchen_rosenfeld, corner_harris,
                      corner_shi_tomasi, corner_foerstner, corner_subpix,
                      corner_peaks, corner_fast, structure_tensor,
                      structure_tensor_eigvals, hessian_matrix,
-                     hessian_matrix_eigvals, hessian_matrix_det)
-from .corner_cy import corner_moravec, corner_orientations
+                     hessian_matrix_eigvals, hessian_matrix_det,
+                     corner_moravec, corner_orientations)
 from .template import match_template
 from .register_translation import register_translation
 from .brief import BRIEF
