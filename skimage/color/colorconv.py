@@ -844,10 +844,10 @@ def gray2rgb(image, alpha=None):
             is_rgb = True
 
     if is_rgb:
-        if alpha == False:
+        if alpha is False:
             image = image[..., :3]
 
-        elif alpha == True and not is_alpha:
+        elif alpha is True and is_alpha is False:
             alpha_layer = (np.ones_like(image[..., 0, np.newaxis]) *
                            dtype_limits(image, clip_negative=False)[1])
             image = np.concatenate((image, alpha_layer), axis=2)
@@ -867,6 +867,7 @@ def gray2rgb(image, alpha=None):
         raise ValueError("Input image expected to be RGB, RGBA or gray.")
 
 grey2rgb = gray2rgb
+
 
 def xyz2lab(xyz, illuminant="D65", observer="2"):
     """XYZ to CIE-LAB color space conversion.
