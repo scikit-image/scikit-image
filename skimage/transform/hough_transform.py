@@ -136,8 +136,9 @@ def hough_circle(image, radius, normalize=True, full_output=False):
     ----------
     image : (M, N) ndarray
         Input image with nonzero values representing edges.
-    radius : ndarray
+    radius : scalar or ndarray
         Radii at which to compute the Hough transform.
+        Floats are converted to integers.
     normalize : boolean, optional (default True)
         Normalize the accumulator with the number
         of pixels used to draw the radius.
@@ -295,7 +296,12 @@ def probabilistic_hough_line(img, threshold=10, line_length=50,
            Hough transform for line detection", in IEEE Computer Society
            Conference on Computer Vision and Pattern Recognition, 1999.
     """
+
+    if img.ndim != 2:
+        raise ValueError('The input image `img` must be 2D.')
+
     if theta is None:
         theta = np.linspace(-np.pi / 2, np.pi / 2, 180)
+
     return _probabilistic_hough_line(img, threshold, line_length,
                                      line_gap, theta)

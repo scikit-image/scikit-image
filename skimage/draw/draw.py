@@ -153,6 +153,7 @@ def polygon_perimeter(cr, cc, shape=None, clip=False):
 
     Examples
     --------
+    >>> from skimage.draw import polygon_perimeter
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = polygon_perimeter([5, -1, 5, 10],
     ...                            [-1, 5, 11, 5],
@@ -270,14 +271,14 @@ def set_color(img, coords, color, alpha=1):
     img[rr, cc] = vals + color
 
 
-def line(y1, x1, y2, x2):
+def line(y0, x0, y1, x1):
     """Generate line pixel coordinates.
 
     Parameters
     ----------
-    y1, x1 : int
+    y0, x0 : int
         Starting position (row, column).
-    y2, x2 : int
+    y1, x1 : int
         End position (row, column).
 
     Returns
@@ -310,17 +311,17 @@ def line(y1, x1, y2, x2):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    return _line(y1, x1, y2, x2)
+    return _line(y0, x0, y1, x1)
 
 
-def line_aa(y1, x1, y2, x2):
+def line_aa(y0, x0, y1, x1):
     """Generate anti-aliased line pixel coordinates.
 
     Parameters
     ----------
-    y1, x1 : int
+    y0, x0 : int
         Starting position (row, column).
-    y2, x2 : int
+    y1, x1 : int
         End position (row, column).
 
     Returns
@@ -352,7 +353,7 @@ def line_aa(y1, x1, y2, x2):
            [  0,   0,   0,   0,   0,   0,   0,  74, 255,   0],
            [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
     """
-    return _line_aa(y1, x1, y2, x2)
+    return _line_aa(y0, x0, y1, x1)
 
 
 def polygon(y, x, shape=None):
@@ -400,8 +401,7 @@ def polygon(y, x, shape=None):
     return _polygon(y, x, shape)
 
 
-def circle_perimeter(cy, cx, radius,
-                     method='bresenham', shape=None):
+def circle_perimeter(cy, cx, radius, method='bresenham', shape=None):
     """Generate circle perimeter coordinates.
 
     Parameters

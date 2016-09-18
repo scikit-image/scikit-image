@@ -13,7 +13,7 @@ def grid_points_in_poly(shape, verts):
         Shape of the grid.
     verts : (V, 2) array
         Specify the V vertices of the polygon, sorted either clockwise
-        or anti-clockwise.  The first point may (but does not need to be)
+        or anti-clockwise. The first point may (but does not need to be)
         duplicated.
 
     See Also
