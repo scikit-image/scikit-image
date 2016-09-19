@@ -894,8 +894,8 @@ def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
         xx = (x1 - x0) * (yy - y0) / (y1 - y0) + x0
 
         rr, cc = _bezier_segment(y0, x0, y, <int>(xx + 0.5), y, x, ww)
-        px.extend(rr)
-        py.extend(cc)
+        py.extend(rr)
+        px.extend(cc)
 
         xx = (x1 - x2) * (yy - y2) / (y1 - y2) + x2
         x1 = <int>(xx + 0.5)
@@ -903,8 +903,8 @@ def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
         y0 = y1 = y
 
     rr, cc = _bezier_segment(y0, x0, y1, x1, y2, x2, weight * weight)
-    px.extend(rr)
-    py.extend(cc)
+    py.extend(rr)
+    px.extend(cc)
 
     if shape is not None:
         return _coords_inside_image(np.array(px, dtype=np.intp),
