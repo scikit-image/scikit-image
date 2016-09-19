@@ -344,7 +344,7 @@ def _swirl_mapping(xy, center, rotation, strength, radius):
 
 
 def swirl(image, center=None, strength=1, radius=100, rotation=0,
-          output_shape=None, order=1, mode='None', cval=0, clip=True,
+          output_shape=None, order=1, mode=None, cval=0, clip=True,
           preserve_range=False):
     """Perform a swirl transformation.
 
