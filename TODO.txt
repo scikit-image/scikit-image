@@ -24,3 +24,4 @@ Version 0.15
 * In ``skimage.util.dtype_limits``, set default behavior of `clip_negative` to `False`.
 * In ``skimage.transform.radon``, set default behavior of `circle` to `True`.
 * In ``skimage.transform.iradon``, set default behavior of `circle` to `True`.
+* In ``skimage.transform.warp``, set default behavior of `mode` to `reflect`.

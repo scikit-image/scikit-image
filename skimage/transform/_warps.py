@@ -344,7 +344,7 @@ def _swirl_mapping(xy, center, rotation, strength, radius):
 
 
 def swirl(image, center=None, strength=1, radius=100, rotation=0,
-          output_shape=None, order=1, mode='constant', cval=0, clip=True,
+          output_shape=None, order=1, mode='None', cval=0, clip=True,
           preserve_range=False):
     """Perform a swirl transformation.
 
@@ -390,6 +390,10 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
         image is converted according to the conventions of `img_as_float`.
 
     """
+    if mode is None:
+        warn('The default of `mode` in `skimage.transform.warp` '
+             'will change to `reflect` in version 0.15.')
+        mode = 'constant'     
 
     if center is None:
         center = np.array(image.shape)[:2] / 2
