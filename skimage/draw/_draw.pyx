@@ -909,4 +909,4 @@ def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
     if shape is not None:
         return _coords_inside_image(np.array(px, dtype=np.intp),
                                     np.array(py, dtype=np.intp), shape)
-    return np.array(px, dtype=np.intp), np.array(py, dtype=np.intp)
+    return np.array(py, dtype=np.intp), np.array(px, dtype=np.intp)
