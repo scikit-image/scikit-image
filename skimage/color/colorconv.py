@@ -1028,6 +1028,9 @@ def rgb2lab(rgb, illuminant="D65", observer="2"):
     Notes
     -----
     This function uses rgb2xyz and xyz2lab.
+    By default Observer= 2A, Illuminant= D65. CIE XYZ tristimulus values
+    x_ref=95.047, y_ref=100., z_ref=108.883. See function `get_xyz_coords` for
+    a list of supported illuminants.
     """
     return xyz2lab(rgb2xyz(rgb), illuminant, observer)
 
@@ -1057,6 +1060,9 @@ def lab2rgb(lab, illuminant="D65", observer="2"):
     Notes
     -----
     This function uses lab2xyz and xyz2rgb.
+    By default Observer= 2A, Illuminant= D65. CIE XYZ tristimulus values
+    x_ref=95.047, y_ref=100., z_ref=108.883. See function `get_xyz_coords` for
+    a list of supported illuminants.
     """
     return xyz2rgb(lab2xyz(lab, illuminant, observer))
 
