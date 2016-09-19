@@ -11,7 +11,7 @@ from ._frangi import frangi, hessian
 from .thresholding import (threshold_adaptive, threshold_otsu, threshold_yen,
                            threshold_isodata, threshold_li, threshold_minimum,
                            threshold_mean, threshold_triangle,
-                           try_all_threshold)
+                           threshold_multiotsu, try_all_threshold)
 from . import rank
 from .rank import median
 
