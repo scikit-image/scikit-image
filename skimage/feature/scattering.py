@@ -1,5 +1,5 @@
 """ Scattering transform code licensed under
-    BSD licenses.
+    BSD license.
     Original author: Sira Ferradans, based on a code developed by
     Ivan Dokmanic and Michael Eickenberg
 """
