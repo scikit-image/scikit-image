@@ -5,7 +5,7 @@ from scipy.ndimage import filters as ndif
 from collections import OrderedDict
 from ..exposure import histogram
 from .._shared.utils import assert_nD, warn
-from ..util.dtype import img_as_ubyte
+from ..util.dtype import dtype_limits
 
 __all__ = ['try_all_threshold',
            'threshold_adaptive',
@@ -717,7 +717,7 @@ def threshold_triangle(image, nbins=256):
     return bin_centers[arg_level]
 
 
-def threshold_multiotsu(image, nclass=3):
+def threshold_multiotsu(image, nclass=3, nbins=255):
     """Generates multiple thresholds for an input image. Based on the
     Multi-Otsu approach by Liao, Chen and Chung.
 
@@ -727,35 +727,36 @@ def threshold_multiotsu(image, nclass=3):
         Grayscale input image.
     nclass : int, optional
         Number of classes to be thresholded, i.e. the number of resulting
-        regions. Accepts an integer from 2 to 5.
+        regions. Accepts an integer from 2 to 5. Default is 3.
     nbins : int, optional
-        Number of bins used to calculate the histogram. This value is
-        ignored for integer arrays.
+        Number of bins used to calculate the histogram. Default is 255.
 
     Returns
     -------
-    idx_thresh : array
+    idx_thresh : (nclass) array
         Array containing the threshold values for the desired classes.
+    max_sigma : float
+        Maximum sigma value achieved on the classes.
 
     References
     ----------
     .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
     multilevel thresholding", Journal of Information Science and
-    Engineering 17 (5): 713-727, 2001.
+    Engineering 17 (5): 713-727, 2001. Available at:
+    http://www.iis.sinica.edu.tw/page/jise/2001/200109_01.html
     .. [2] Tosa, Y., "Multi-Otsu Threshold", a java plugin for ImageJ.
     Available at:
     http://imagej.net/plugins/download/Multi_OtsuThreshold.java
 
     Examples
     --------
-    >>> from skimage.data import camera
-    >>> image = camera()
+    >>> from skimage import data
+    >>> image = data.camera()
     >>> thresh = threshold_multiotsu(image)
     >>> region1 = image <= thresh[0]
     >>> region2 = (image > thresh[0]) & (image <= thresh[1])
     >>> region3 = image > thresh[1]
     """
-
     if image.shape[-1] in (3, 4):
         raise TypeError("The input image seems to be RGB (shape: {0}. Please"
                         "use a grayscale image.".format(image.shape))
@@ -766,15 +767,15 @@ def threshold_multiotsu(image, nclass=3):
 
     # check if nclass is between 2 and 5.
     if nclass not in np.array((2, 3, 4, 5)):
-        raise ValueError("Please choose a number of classes between"
+        raise ValueError("Please choose a number of classes between "
                          "2 and 5.")
 
-    # image needs to be between [0, 255].
-    nbins = 256
-    image = img_as_ubyte(image)
+    # receiving minimum and maximum values for the image type.
+    type_min, type_max = dtype_limits(image)
 
     # calculating the histogram and the probability of each gray level.
-    hist, _ = np.histogram(image.ravel(), bins=nbins, range=(0, nbins))
+    hist, _ = np.histogram(image.ravel(), bins=nbins,
+                           range=(type_min, type_max))
     prob = hist / image.size
 
     max_sigma = 0
@@ -811,7 +812,7 @@ def threshold_multiotsu(image, nclass=3):
         for idx in range(1, nbins - nclass):
             part_sigma = var_btwcls[1, idx] + var_btwcls[idx+1, nbins-1]
             if max_sigma < part_sigma:
-                idx_thresh = idx
+                aux_thresh = idx
                 max_sigma = part_sigma
 
     elif nclass == 3:
@@ -822,7 +823,7 @@ def threshold_multiotsu(image, nclass=3):
                             var_btwcls[idx2+1, nbins-1]
 
                 if max_sigma < part_sigma:
-                    idx_thresh = idx1, idx2
+                    aux_thresh = idx1, idx2
                     max_sigma = part_sigma
 
     elif nclass == 4:
@@ -835,7 +836,7 @@ def threshold_multiotsu(image, nclass=3):
                                 var_btwcls[idx3+1, nbins-1]
 
                     if max_sigma < part_sigma:
-                        idx_thresh = idx1, idx2, idx3
+                        aux_thresh = idx1, idx2, idx3
                         max_sigma = part_sigma
 
     elif nclass == 5:
@@ -850,7 +851,10 @@ def threshold_multiotsu(image, nclass=3):
                             var_btwcls[idx4+1, nbins-1]
 
                         if max_sigma < part_sigma:
-                            idx_thresh = idx1, idx2, idx3, idx4
+                            aux_thresh = idx1, idx2, idx3, idx4
                             max_sigma = part_sigma
 
-    return np.array(idx_thresh)
+    # correcting values according to minimum and maximum values.
+    idx_thresh = np.asarray(aux_thresh) * (type_max-type_min) / nbins
+
+    return idx_thresh, max_sigma

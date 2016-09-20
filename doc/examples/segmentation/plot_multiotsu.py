@@ -3,9 +3,9 @@
 Multi-Otsu Thresholding
 =======================
 
-In this example we use multi-Otsu threshold to separate the pixels of an
-input image into three different classes, each one obtained according to
-the intensity of the gray levels within the image.
+Multi-Otsu threshold is used to separate the pixels of an input image
+into three different classes, each one obtained according to the
+intensity of the gray levels within the image.
 
 Multi-Otsu calculates several thresholds, determined by the number of desired
 classes. The default number of classes is 3: for obtaining three classes, the
@@ -17,18 +17,19 @@ thresholding", Journal of Information Science and Engineering 17 (5):
 713-727, 2001.
 """
 
-from skimage.data import camera
+from skimage import data
 from skimage.filters import threshold_multiotsu
 
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 # Stablishing the font size for all plots.
 matplotlib.rcParams['font.size'] = 9
 
 # The input image.
-image = camera()
+image = data.camera()
 
 # Applying multi-Otsu threshold for the default value, generating
 # three classes.
@@ -52,8 +53,8 @@ plt.axis('off')
 plt.subplot(1, 2, 2)
 plt.hist(image)
 plt.title('Histogram')
-for i in enumerate(thresh):
-    plt.axvline(i[1], color='r')
+for i in range(len(thresh)):
+    plt.axvline(thresh[i], color='r')
 
 # Plotting the three resulting regions.
 plt.figure(figsize=(9, 2.5))
