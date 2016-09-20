@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.testing import (run_module_suite, assert_raises, assert_equal,
-                           assert_almost_equal, dec, assert_warns)
+                           assert_almost_equal, assert_warns, assert_)
 
 from skimage import restoration, data, color, img_as_float, measure
 from skimage._shared._warnings import expected_warnings
@@ -28,14 +28,13 @@ def test_denoise_tv_chambolle_2d():
     # denoise
     denoised_astro = restoration.denoise_tv_chambolle(img, weight=0.1)
     # which dtype?
-    assert denoised_astro.dtype in [np.float, np.float32, np.float64]
+    assert_(denoised_astro.dtype in [np.float, np.float32, np.float64])
     from scipy import ndimage as ndi
     grad = ndi.morphological_gradient(img, size=((3, 3)))
     grad_denoised = ndi.morphological_gradient(denoised_astro, size=((3, 3)))
     # test if the total variation has decreased
-    assert grad_denoised.dtype == np.float
-    assert (np.sqrt((grad_denoised**2).sum())
-            < np.sqrt((grad**2).sum()))
+    assert_(grad_denoised.dtype == np.float)
+    assert_(np.sqrt((grad_denoised**2).sum()) < np.sqrt((grad**2).sum()))
 
 
 def test_denoise_tv_chambolle_multichannel():
@@ -58,13 +57,13 @@ def test_denoise_tv_chambolle_float_result_range():
     # astronaut image
     img = astro_gray
     int_astro = np.multiply(img, 255).astype(np.uint8)
-    assert np.max(int_astro) > 1
+    assert_(np.max(int_astro) > 1)
     denoised_int_astro = restoration.denoise_tv_chambolle(int_astro,
                                                           weight=0.1)
     # test if the value range of output float data is within [0.0:1.0]
-    assert denoised_int_astro.dtype == np.float
-    assert np.max(denoised_int_astro) <= 1.0
-    assert np.min(denoised_int_astro) >= 0.0
+    assert_(denoised_int_astro.dtype == np.float)
+    assert_(np.max(denoised_int_astro) <= 1.0)
+    assert_(np.min(denoised_int_astro) >= 0.0)
 
 
 def test_denoise_tv_chambolle_3d():
@@ -77,8 +76,8 @@ def test_denoise_tv_chambolle_3d():
     mask[mask < 0] = 0
     mask[mask > 255] = 255
     res = restoration.denoise_tv_chambolle(mask.astype(np.uint8), weight=0.1)
-    assert res.dtype == np.float
-    assert res.std() * 255 < mask.std()
+    assert_(res.dtype == np.float)
+    assert_(res.std() * 255 < mask.std())
 
 
 def test_denoise_tv_chambolle_1d():
@@ -87,16 +86,16 @@ def test_denoise_tv_chambolle_1d():
     x += 20 * np.random.rand(x.size)
     x = np.clip(x, 0, 255)
     res = restoration.denoise_tv_chambolle(x.astype(np.uint8), weight=0.1)
-    assert res.dtype == np.float
-    assert res.std() * 255 < x.std()
+    assert_(res.dtype == np.float)
+    assert_(res.std() * 255 < x.std())
 
 
 def test_denoise_tv_chambolle_4d():
     """ TV denoising for a 4D input."""
     im = 255 * np.random.rand(8, 8, 8, 8)
     res = restoration.denoise_tv_chambolle(im.astype(np.uint8), weight=0.1)
-    assert res.dtype == np.float
-    assert res.std() * 255 < im.std()
+    assert_(res.dtype == np.float)
+    assert_(res.std() * 255 < im.std())
 
 
 def test_denoise_tv_chambolle_weighting():
@@ -113,8 +112,8 @@ def test_denoise_tv_chambolle_weighting():
     w = 0.2
     denoised_2d = restoration.denoise_tv_chambolle(img2d, weight=w)
     denoised_4d = restoration.denoise_tv_chambolle(img4d, weight=w)
-    assert measure.compare_ssim(denoised_2d,
-                                denoised_4d[:, :, 0, 0]) > 0.99
+    assert_(measure.compare_ssim(denoised_2d,
+                                 denoised_4d[:, :, 0, 0]) > 0.99)
 
 
 def test_denoise_tv_bregman_2d():
@@ -127,20 +126,20 @@ def test_denoise_tv_bregman_2d():
     out2 = restoration.denoise_tv_bregman(img, weight=5)
 
     # make sure noise is reduced in the checkerboard cells
-    assert img[30:45, 5:15].std() > out1[30:45, 5:15].std()
-    assert out1[30:45, 5:15].std() > out2[30:45, 5:15].std()
+    assert_(img[30:45, 5:15].std() > out1[30:45, 5:15].std())
+    assert_(out1[30:45, 5:15].std() > out2[30:45, 5:15].std())
 
 
 def test_denoise_tv_bregman_float_result_range():
     # astronaut image
     img = astro_gray.copy()
     int_astro = np.multiply(img, 255).astype(np.uint8)
-    assert np.max(int_astro) > 1
+    assert_(np.max(int_astro) > 1)
     denoised_int_astro = restoration.denoise_tv_bregman(int_astro, weight=60.0)
     # test if the value range of output float data is within [0.0:1.0]
-    assert denoised_int_astro.dtype == np.float
-    assert np.max(denoised_int_astro) <= 1.0
-    assert np.min(denoised_int_astro) >= 0.0
+    assert_(denoised_int_astro.dtype == np.float)
+    assert_(np.max(denoised_int_astro) <= 1.0)
+    assert_(np.min(denoised_int_astro) >= 0.0)
 
 
 def test_denoise_tv_bregman_3d():
@@ -153,8 +152,8 @@ def test_denoise_tv_bregman_3d():
     out2 = restoration.denoise_tv_bregman(img, weight=5)
 
     # make sure noise is reduced in the checkerboard cells
-    assert img[30:45, 5:15].std() > out1[30:45, 5:15].std()
-    assert out1[30:45, 5:15].std() > out2[30:45, 5:15].std()
+    assert_(img[30:45, 5:15].std() > out1[30:45, 5:15].std())
+    assert_(out1[30:45, 5:15].std() > out2[30:45, 5:15].std())
 
 
 def test_denoise_bilateral_2d():
@@ -169,26 +168,28 @@ def test_denoise_bilateral_2d():
                                          sigma_spatial=20, multichannel=False)
 
     # make sure noise is reduced in the checkerboard cells
-    assert img[30:45, 5:15].std() > out1[30:45, 5:15].std()
-    assert out1[30:45, 5:15].std() > out2[30:45, 5:15].std()
+    assert_(img[30:45, 5:15].std() > out1[30:45, 5:15].std())
+    assert_(out1[30:45, 5:15].std() > out2[30:45, 5:15].std())
 
 
 def test_denoise_bilateral_color():
-    img = checkerboard.copy()[:50,:50]
+    img = checkerboard.copy()[:50, :50]
     # add some random noise
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
 
-    out1 = restoration.denoise_bilateral(img, sigma_color=0.1, sigma_spatial=10)
-    out2 = restoration.denoise_bilateral(img, sigma_color=0.2, sigma_spatial=20)
+    out1 = restoration.denoise_bilateral(img, sigma_color=0.1,
+                                         sigma_spatial=10)
+    out2 = restoration.denoise_bilateral(img, sigma_color=0.2,
+                                         sigma_spatial=20)
 
     # make sure noise is reduced in the checkerboard cells
-    assert img[30:45, 5:15].std() > out1[30:45, 5:15].std()
-    assert out1[30:45, 5:15].std() > out2[30:45, 5:15].std()
+    assert_(img[30:45, 5:15].std() > out1[30:45, 5:15].std())
+    assert_(out1[30:45, 5:15].std() > out2[30:45, 5:15].std())
 
 
 def test_denoise_bilateral_3d_grayscale():
-    img =  np.ones((50, 50, 3))
+    img = np.ones((50, 50, 3))
     assert_raises(ValueError, restoration.denoise_bilateral, img,
                   multichannel=False)
 
@@ -216,31 +217,38 @@ def test_denoise_bilateral_nan():
     out = restoration.denoise_bilateral(img, multichannel=False)
     assert_equal(img, out)
 
+
 def test_denoise_sigma_range():
-    img = checkerboard_gray.copy()[:50,:50]
+    img = checkerboard_gray.copy()[:50, :50]
     # add some random noise
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
     out1 = restoration.denoise_bilateral(img, sigma_color=0.1,
                                          sigma_spatial=10, multichannel=False)
-    with expected_warnings('`sigma_range` has been deprecated in favor of `sigma_color`. '
-                           'The `sigma_range` keyword argument will be removed in v0.14'):
+    with expected_warnings(
+            '`sigma_range` has been deprecated in favor of `sigma_color`. '
+            'The `sigma_range` keyword argument will be removed in v0.14'):
         out2 = restoration.denoise_bilateral(img, sigma_range=0.1,
-                                             sigma_spatial=10, multichannel=False)
+                                             sigma_spatial=10,
+                                             multichannel=False)
     assert_equal(out1, out2)
 
+
 def test_denoise_sigma_range_and_sigma_color():
-    img = checkerboard_gray.copy()[:50,:50]
+    img = checkerboard_gray.copy()[:50, :50]
     # add some random noise
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
     out1 = restoration.denoise_bilateral(img, sigma_color=0.1,
                                          sigma_spatial=10, multichannel=False)
-    with expected_warnings('`sigma_range` has been deprecated in favor of `sigma_color`. '
-                           'The `sigma_range` keyword argument will be removed in v0.14'):
-        out2 = restoration.denoise_bilateral(img, sigma_color=0.2, sigma_range=0.1,
-                                             sigma_spatial=10, multichannel=False)
+    with expected_warnings(
+            '`sigma_range` has been deprecated in favor of `sigma_color`. '
+            'The `sigma_range` keyword argument will be removed in v0.14'):
+        out2 = restoration.denoise_bilateral(img, sigma_color=0.2,
+                                             sigma_range=0.1, sigma_spatial=10,
+                                             multichannel=False)
     assert_equal(out1, out2)
+
 
 def test_nl_means_denoising_2d():
     img = np.zeros((40, 40))
@@ -248,10 +256,10 @@ def test_nl_means_denoising_2d():
     img += 0.3*np.random.randn(*img.shape)
     denoised = restoration.denoise_nl_means(img, 7, 5, 0.2, fast_mode=True)
     # make sure noise is reduced
-    assert img.std() > denoised.std()
+    assert_(img.std() > denoised.std())
     denoised = restoration.denoise_nl_means(img, 7, 5, 0.2, fast_mode=False)
     # make sure noise is reduced
-    assert img.std() > denoised.std()
+    assert_(img.std() > denoised.std())
 
 
 def test_denoise_nl_means_2drgb():
@@ -262,10 +270,10 @@ def test_denoise_nl_means_2drgb():
     img = np.clip(img, 0, 1)
     denoised = restoration.denoise_nl_means(img, 7, 9, 0.3, fast_mode=True)
     # make sure noise is reduced
-    assert img.std() > denoised.std()
+    assert_(img.std() > denoised.std())
     denoised = restoration.denoise_nl_means(img, 7, 9, 0.3, fast_mode=False)
     # make sure noise is reduced
-    assert img.std() > denoised.std()
+    assert_(img.std() > denoised.std())
 
 
 def test_denoise_nl_means_3d():
@@ -273,28 +281,28 @@ def test_denoise_nl_means_3d():
     img[5:-5, 5:-5, 3:-3] = 1.
     img += 0.3*np.random.randn(*img.shape)
     denoised = restoration.denoise_nl_means(img, 5, 4, 0.2, fast_mode=True,
-                                              multichannel=False)
+                                            multichannel=False)
     # make sure noise is reduced
-    assert img.std() > denoised.std()
+    assert_(img.std() > denoised.std())
     denoised = restoration.denoise_nl_means(img, 5, 4, 0.2, fast_mode=False,
-                                              multichannel=False)
+                                            multichannel=False)
     # make sure noise is reduced
-    assert img.std() > denoised.std()
+    assert_(img.std() > denoised.std())
 
 
 def test_denoise_nl_means_multichannel():
     img = np.zeros((21, 20, 10))
     img[10, 9:11, 2:-2] = 1.
     img += 0.3*np.random.randn(*img.shape)
-    denoised_wrong_multichannel = restoration.denoise_nl_means(img,
-                    5, 4, 0.1, fast_mode=True, multichannel=True)
-    denoised_ok_multichannel = restoration.denoise_nl_means(img,
-                    5, 4, 0.1, fast_mode=True, multichannel=False)
+    denoised_wrong_multichannel = restoration.denoise_nl_means(
+        img, 5, 4, 0.1, fast_mode=True, multichannel=True)
+    denoised_ok_multichannel = restoration.denoise_nl_means(
+        img, 5, 4, 0.1, fast_mode=True, multichannel=False)
     snr_wrong = 10 * np.log10(1. /
-                            ((denoised_wrong_multichannel - img)**2).mean())
+                              ((denoised_wrong_multichannel - img)**2).mean())
     snr_ok = 10 * np.log10(1. /
-                            ((denoised_ok_multichannel - img)**2).mean())
-    assert snr_ok > snr_wrong
+                           ((denoised_ok_multichannel - img)**2).mean())
+    assert_(snr_ok > snr_wrong)
 
 
 def test_denoise_nl_means_wrong_dimension():
@@ -308,9 +316,9 @@ def test_no_denoising_for_small_h():
     img += 0.3*np.random.randn(*img.shape)
     # very small h should result in no averaging with other patches
     denoised = restoration.denoise_nl_means(img, 7, 5, 0.01, fast_mode=True)
-    assert np.allclose(denoised, img)
+    assert_(np.allclose(denoised, img))
     denoised = restoration.denoise_nl_means(img, 7, 5, 0.01, fast_mode=False)
-    assert np.allclose(denoised, img)
+    assert_(np.allclose(denoised, img))
 
 
 def test_wavelet_denoising():
@@ -325,21 +333,21 @@ def test_wavelet_denoising():
                                                multichannel=multichannel)
         psnr_noisy = compare_psnr(img, noisy)
         psnr_denoised = compare_psnr(img, denoised)
-        assert psnr_denoised > psnr_noisy
+        assert_(psnr_denoised > psnr_noisy)
 
         # Verify that SNR is improved with internally estimated sigma
         denoised = restoration.denoise_wavelet(noisy,
                                                multichannel=multichannel)
         psnr_noisy = compare_psnr(img, noisy)
         psnr_denoised = compare_psnr(img, denoised)
-        assert psnr_denoised > psnr_noisy
+        assert_(psnr_denoised > psnr_noisy)
 
         # Test changing noise_std (higher threshold, so less energy in signal)
         res1 = restoration.denoise_wavelet(noisy, sigma=2*sigma,
                                            multichannel=multichannel)
         res2 = restoration.denoise_wavelet(noisy, sigma=sigma,
                                            multichannel=multichannel)
-        assert np.sum(res1**2) <= np.sum(res2**2)
+        assert_(np.sum(res1**2) <= np.sum(res2**2))
 
 
 def test_wavelet_threshold():
@@ -354,7 +362,7 @@ def test_wavelet_threshold():
     denoised = _wavelet_threshold(noisy, wavelet='db1', threshold=sigma)
     psnr_noisy = compare_psnr(img, noisy)
     psnr_denoised = compare_psnr(img, denoised)
-    assert psnr_denoised > psnr_noisy
+    assert_(psnr_denoised > psnr_noisy)
 
 
 def test_wavelet_denoising_nd():
@@ -372,7 +380,7 @@ def test_wavelet_denoising_nd():
         denoised = restoration.denoise_wavelet(noisy)
         psnr_noisy = compare_psnr(img, noisy)
         psnr_denoised = compare_psnr(img, denoised)
-        assert psnr_denoised > psnr_noisy
+        assert_(psnr_denoised > psnr_noisy)
 
 
 def test_wavelet_denoising_levels():
@@ -396,7 +404,7 @@ def test_wavelet_denoising_levels():
     psnr_denoised_1 = compare_psnr(img, denoised_1)
 
     # multi-level case should outperform single level case
-    assert psnr_denoised > psnr_denoised_1 > psnr_noisy
+    assert_(psnr_denoised > psnr_denoised_1 > psnr_noisy)
 
     # invalid number of wavelet levels results in a ValueError
     max_level = pywt.dwt_max_level(np.min(img.shape),
