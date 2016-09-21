@@ -136,6 +136,27 @@ def load_scattering(X_train, X_test, J=3, L=8, m=2,
 
 
 def gethomogeneus_datast(X, y, d, n):
+ """Extract from the data set of images the same number
+ of samples per class.
+     Parameters
+     ----------
+     X: nd array
+       matrix of features times samples (exemplars)
+     y: 1d array
+       class of each sample, ordered as X. 
+     d: int 
+       number of classes
+     n: int 
+       number of samples per class in the output set
+     Returns
+     -------
+     X_out: nd array
+       matrix of features times samples, with the same 
+       number of samples per class.
+     y_out: 1d array
+       class of each sample, ordered as X_out, with the 
+       same number of samples per class.
+ """
     num_per_class = np.int(np.amin([n, X.shape[0]]) / d)
     ytrain = np.reshape(y, (y.shape[0],))
     X_out = []
@@ -200,7 +221,7 @@ from keras.datasets import cifar10
 
 
 def DB_rgb2yuv(X):
- """Change the database of images in RGB space into YUV, 
+ """Change the database of images from RGB space to YUV, 
  maintaining the input format (num_images,color,pixels,pixels)
     Parameters
     ----------
