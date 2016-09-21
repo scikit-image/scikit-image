@@ -767,8 +767,8 @@ def _bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
 
     # Plot line
     rr, cc = line(x0, y0, x2, y2)
-    py.extend(rr)
-    px.extend(cc)
+    px.extend(rr)
+    py.extend(cc)
 
     return np.array(py, dtype=np.intp), np.array(px, dtype=np.intp)
 
