@@ -33,11 +33,11 @@ and non-linear operators:
 -*First-order coefficients:*
 :math:`Sx[1][(i,l)] = | x * \psi_{(i,l)} | * \phi`
 
--*Second-order coefficients:* :math:`Sx[2][(i,l)][(j,l_2)]=|| x * \psi_{(i,l)}|*\psi_{(j,l_2)}|*\phi`,
+-*Second-order coefficients:*
+:math:`Sx[2][(i,l)][(j,l_2)]=|| x * \psi_{(i,l)}|*\psi_{(j,l_2)}|*\phi`,
  where :math:`\psi` is a band-pass filter, :math:`\phi` is a low-pass filter
  (normally a Gaussian), operator :math:`*` is a 2D convolution,
- and :math:`|\cdot|` is
- the complex modulus. If :math:`x` is of size
+ and :math:`|\cdot|` is the complex modulus. If :math:`x` is of size
  :math:`(px,px)`, the maximum number of scales
  is :math:`J=\log_2(px)` and :math:`i \in [0,J-1]`. For every scale
  :math:`i`, we have :math:`L` angles, thus
@@ -70,8 +70,8 @@ coefficients (first output of the function). The
 Note that the output of any layer is a matrix of size
 (Num_images, spatial_dimensions, spatial_dimensions).
 
-.. [1] Bruna, J., Mallat, S. 'Invariant Scattering Convolutional Networks'. IEEE
- TPAMI, 2012.
+.. [1] Bruna, J., Mallat, S. 'Invariant Scattering Convolutional Networks'.
+ IEEE TPAMI, 2012.
 
 .. [2] Oyallon, E. et Mallat, S. 'Deep Roto-translation Scattering
  for Object Classification'. CVPR 2015
