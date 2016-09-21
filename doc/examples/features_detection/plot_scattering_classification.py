@@ -44,8 +44,8 @@ first presented in the following papers:
 
 - **MNIST database** :
  The results were first presented in [1]_ Table 4. Using this
- implementation and a 10000 image test set, we were able to obtain, the following
- error results :
+ implementation and a 10000 image test set, we were able to obtain, 
+ the following error results :
             +-------------------------+---------+
             |num images training set  | % error |
             +-------------------------+---------+
@@ -117,9 +117,10 @@ def load_images_mnist(px=32, num_images=500000):
     return X_train, y_train, X_test, y_test
 
 
-def load_scattering(X_train, X_test, px=32, J=3, L=8, m=2,
+def load_scattering(X_train, X_test, J=3, L=8, m=2,
                     sigma_phi=0.6957, sigma_xi=0.8506):
     # Create filters
+    px = X_train.shape[-1] # squared images
     Filters, lw = multiresolution_filter_bank_morlet2d(px, J=J, L=L,
                                                        sigma_phi=sigma_phi,
                                                        sigma_xi=sigma_xi)
@@ -172,7 +173,7 @@ Xtest_1d = Xtest.reshape((len(Xtest), -1))
 bestC = 4.3   # parameters obtained by crossvalidation with 10000 images
 bestgamma = 10**0.1
 ns = [300, 1000, 2000, 5000, 10000, 20000, 40000, 60000]
-score_gaussian = np.zeros((len(ns), 1))
+score_gaussian = np.zeros(len(ns))
 for i, n in enumerate(ns):
     # resample the dataset to have a uniform distribution on the classes
     Xa, ya = gethomogeneus_datast(Xtrain_1d, ytrain, num_classes, n)
@@ -199,6 +200,20 @@ from keras.datasets import cifar10
 
 
 def DB_rgb2yuv(X):
+ """Change the database of images in RGB space into YUV, 
+ maintaining the input format (num_images,color,pixels,pixels)
+    Parameters
+    ----------
+    X: 4D nd array 
+       Group of color images in the range [0,255] stacked in a 
+       4D matrix.
+    Returns
+    -------
+    Iyuv: 4D nd array
+       Group of images in the YUV color space, with shape
+       (num_images,color,pixels,pixels).
+ """
+ 
     num_samples, c, px, px = X.shape
     Xta = X.transpose((3, 2, 0, 1)).astype('float32')/255
     Iyuv = rgb2yuv(Xta).transpose((2, 3, 1, 0)).copy()
