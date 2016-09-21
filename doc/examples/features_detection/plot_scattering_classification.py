@@ -99,7 +99,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import MinMaxScaler, Normalizer, StandardScaler
 
 
-def load_images_mnist(px=32, num_images=500000):
+def load_images_mnist(px=32, num_images=60000):
     (X_train_sm, y_train), (X_test_sm, y_test) = mnist.load_data()
     X_train_sm = X_train_sm[0:num_images, :, :]
     y_train = y_train[0:num_images]
