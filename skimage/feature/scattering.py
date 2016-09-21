@@ -6,19 +6,23 @@
 import numpy as np
 from skimage._shared.utils import assert_nD
 from skimage.filters.filter_bank import multiresolution_filter_bank_morlet2d
-import warnings
+import warnings, sys
 
 
 def _apply_fourier_mult(signals, filters):
-    """Spatial subsampling on the last two dimensions of X at a
-    rate that depends on 2**j.
+    """Pointwise multiplication of the filters and signals 
+    in the Fourier domain.
+        This function applies a filtering of the signals in the
+    Fourier domain using the filters, also in the Fourier domain. Note
+    that we apply for every signal (num_signal) a number L of filters, 
+    thus the output is (num_signals, L, N, N).
         Parameters
         ----------
         signals: ndarray (3D)
-            Signals in the Fourier domain stacked as (num_signals, N,N).
+            Signals in the Fourier domain stacked as (num_signals, N, N).
             Note that color images can be stacked as 'num_signals'.
         filters: ndarray (3D)
-            Filters in the Fourier domain, stacked as (L,N,N) where
+            Filters in the Fourier domain, stacked as (L, N, N) where
             L is the num. of filters to apply
         Returns
         -------
@@ -36,8 +40,8 @@ def _subsample(X, j):
     Parameters
     ----------
     X : array like variable.
-        3D dnarray with shape (N,L,n,n) or (N,n,n). The subsampling is produced
-         in the last two dimensions (n,n)
+        3D ndarray with shape (N, L, n, n) or (N, n, n). The subsampling is 
+        produced in the last two dimensions (n, n)
     j : int
         Rate of subsampling is 2**j
     Returns
@@ -50,18 +54,18 @@ def _subsample(X, j):
 
 
 def _apply_lowpass(img, phi, J, n_scat):
-    """Applies a low pass filter on the 'img' set of 2D arrays and subsamples.
+    """Apply a low pass filter 'phi' to images 'img' and subsample.
     Convolution the filter phi (in the Fourier domain) on the set of images
     defined by img. The convolution is done in the Fourier domain, thus it is
     a pointwise multiplication of the filter phi and the images, stored in the
-    last 2 dimensions of img. Then, the images are subsampled at the appropiate
+    last 2 dimensions of img. Then the images are subsampled at the appropiate
     rate to have 'n_scat' spatial coefficients
     Parameters
     ----------
-    img : ndarray of (N,L,n,n) or (N,n,n) shape.
+    img : ndarray of (N, L, n, n) or (N, n, n) shape.
         Input images in the spatial domain, stacked along the first dimensions.
     phi : Low pass filter as a 2D ndarray
-        Low pass filter in the Fourier domain, stored as (n,n) matrix
+        Low pass filter in the Fourier domain, stored as (n, n) matrix
     J : int
         Rate of subsampling 2**J
     n_scat : int
@@ -71,7 +75,7 @@ def _apply_lowpass(img, phi, J, n_scat):
     XX : ndarray
         stacked images after being filtered and subsampled
     """
-    img_filtered = np.real(np.fft.ifft2(np.fft.fft2(img)*phi))
+    img_filtered = np.real(np.fft.ifft2(np.fft.fft2(img) * phi))
     n_nolp = img.shape[-1]
     ds = int(n_nolp / n_scat)
     return 2 ** (J - 1) * img_filtered[..., ::ds, ::ds]
@@ -84,34 +88,34 @@ def scattering(x, wavelet_filters=None, m=2):
     'wavelet_filters'.
     Notes
     -----
-    **Bondary values: The scattering transform applies a set of convolutions
+    **Boundary values: The scattering transform applies a set of convolutions
     to the input signals. These convolutions are computed as the point-wise
     multiplication in the Fourier domain, thus the boundary values of the
-    image are circular or cyclic. In case you need other
-    kind of boundary values, for instance zero-padded, you should
-    edit the images before calling this function.
-    **Shape of x: The signals x must be squared shaped, thus (N,px,px)
-    and not (N,px,py) for py != px. In case the images are rectangular,
+    image are circular or cyclic. In case other
+    kind of boundary values are needed, for instance zero-padded, the images
+    should be preprocessed appropriately before calling this function.
+    **Shape of x: The signals x must be squared shaped, thus (N, px, px)
+    and not (N, px, py) for py != px. In case the images are rectangular,
     they will be cropped to the smallest dimension, px or py.
     Parameters
     ----------
     x : array_like
-        3D dnarray with N images (2D arrays) of size (px,px), thus x has size
-         (N,px,px)
-        In case the array is rectangular (N,px,py) for px not equal to py, t
+        3D dnarray with N images (2D arrays) of size (px, px), thus x has size
+         (N, px, px)
+        In case the array is rectangular (N, px, py) for px not equal to py, t
         he images will be cropped.
     wavelet_filters : Dictionary with the multiresolution wavelet filter bank
         Dictionary of vectors obtained after calling:
             >>>> px = 32 #number of pixels of the images
             >>>> J = np.log2(px) #number of scales
-            >>>> wavelet_filters = multiresolution_filter_bank_morlet2d(px,J=J)
+            >>>> wavelet_filters = multiresolution_filter_bank_morlet2d(px, J=J)
     m : int
         Order of the scattering transform, which can be 0, 1 or 2.
     Returns
     -------
     S : 4D array_like
         Scattering transform of the x signals, of size
-        (N,num_coeffs,spatial_coefs,spatial_coefs). For more information
+        (N, num_coeffs, spatial_coefs, spatial_coefs). For more information
         see _[1] _[2]
     U : array_like
         Result before applying the lowpass filter and subsampling.
@@ -122,25 +126,25 @@ def scattering(x, wavelet_filters=None, m=2):
             S_tree[0] : returns all the coefficients of the 0-order scattering
              transform
 
-            First-order layer: The keys are tuples with (j,l) indexing
-            S_tree[(j,l)] : returns the first order coefficients for scale 'j'
+            First-order layer: The keys are tuples with (j, l) indexing
+            S_tree[(j, l)] : returns the first order coefficients for scale 'j'
              and angle 'l'
-            S_tree[((j1,l1),(j2,l2))] : the second order for scale 'j1',
+            S_tree[((j1, l1), (j2, l2))] : the second order for scale 'j1',
             angle 'l1' on the first layer, and 'j2', 'l2' in the second layer.
 
         The number of coefficients for each entry is
-        (N,spatial_coefs,spatial_coefs)
+        (N, spatial_coefs, spatial_coefs)
     Raises
     ------
     UserWarning
-        If the size of x is not (N,px,px) and informs that the images with be
-        cropped to (N,px,px)
+        If the size of x is not (N, px, px) and informs that the images with be
+        cropped to (N, px, px)
     UserWarning
         If no wavelet filters, the function creates a multiresolution set of
         filters with predefined settings, but warns about the parameters and
         suggests precomputing the filters.
-    UserWarning
-        If the value of m is not 0,1, or 2.
+    ValueError
+        If the value of m is not 0, 1, or 2.
     References
     ----------
     .. [1] Bruna, J., Mallat, S. 'Invariant Scattering Convolutional Networks'.
@@ -196,9 +200,9 @@ def scattering(x, wavelet_filters=None, m=2):
         2: int(1 + J * L + J * (J - 1) * L ** 2 / 2)
     }.get(m, -1)
     if num_coefs == -1:
-        warning_string = "Parameter m out of bounds, " \
-                         "valid values are 0,1,2 not {0}"
-        warnings.warn(warning_string.format(m))
+        error_string = "Parameter m out of bounds, " \
+                       "valid values are 0,1,2 not {0}"
+        raise ValueError(error_string.format(m))
         return
     # constants
     spatial_coefs = int(x.shape[1]/2**(J-1))
