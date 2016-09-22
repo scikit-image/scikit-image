@@ -156,6 +156,70 @@ def _prepare_colorarray(arr):
     return dtype.img_as_float(arr)
 
 
+def _prepare_rgba_array(arr):
+    """Check the shape of the array to be RGBA and convert it to
+    floating point representation.
+
+    """
+    arr = np.asanyarray(arr)
+
+    if arr.ndim not in [3, 4] or arr.shape[-1] != 4:
+        msg = ("the input array must have a shape == (.., ..,[ ..,] 4)), "
+               "got {0}".format(arr.shape))
+        raise ValueError(msg)
+
+    return dtype.img_as_float(arr)
+
+
+def rgba2rgb(rgba, background=(1, 1, 1)):
+    """RGBA to RGB conversion.
+
+    Parameters
+    ----------
+    rgba : array_like
+        The image in RGBA format, in a 3-D array of shape ``(.., .., 4)``.
+    background : array_like
+        The color of the background to blend the image with. A tuple
+        containing 3 floats between 0 to 1 - the RGB value of the background.
+
+    Returns
+    -------
+    out : ndarray
+        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
+
+    Raises
+    ------
+    ValueError
+        If `rgba` is not a 3-D array of shape ``(.., .., 4)``.
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Alpha_compositing#Alpha_blending
+
+    Examples
+    --------
+    >>> from skimage import color
+    >>> from skimage import data
+    >>> img_rgba = data.logo()
+    >>> img_rgb = color.rgba2rgb(img_rgba)
+    """
+    arr = _prepare_rgba_array(rgba)
+    if isinstance(background, tuple) and len(background) != 3:
+        raise ValueError('the background must be a tuple with 3 items - the '
+                         'RGB color of the background. Got {0} items.'
+                         .format(len(background)))
+
+    alpha = arr[..., -1]
+    channels = arr[..., :-1]
+    out = np.empty_like(channels)
+
+    for ichan in range(channels.shape[-1]):
+        out[..., ichan] = np.clip(
+            (1 - alpha) * background[ichan] + alpha * channels[..., ichan],
+            a_min=0, a_max=1)
+    return out
+
+
 def rgb2hsv(rgb):
     """RGB to HSV color space conversion.
 
@@ -780,12 +844,12 @@ def gray2rgb(image, alpha=None):
             is_rgb = True
 
     if is_rgb:
-        if alpha == False:
+        if alpha is False:
             image = image[..., :3]
 
-        elif alpha == True and not is_alpha:
+        elif alpha is True and is_alpha is False:
             alpha_layer = (np.ones_like(image[..., 0, np.newaxis]) *
-                           dtype_limits(image)[1])
+                           dtype_limits(image, clip_negative=False)[1])
             image = np.concatenate((image, alpha_layer), axis=2)
 
         return image
@@ -794,7 +858,7 @@ def gray2rgb(image, alpha=None):
         image = image[..., np.newaxis]
 
         if alpha:
-            alpha_layer = (np.ones_like(image) * dtype_limits(image)[1])
+            alpha_layer = (np.ones_like(image) * dtype_limits(image, clip_negative=False)[1])
             return np.concatenate(3 * (image,) + (alpha_layer,), axis=-1)
         else:
             return np.concatenate(3 * (image,), axis=-1)
@@ -803,6 +867,7 @@ def gray2rgb(image, alpha=None):
         raise ValueError("Input image expected to be RGB, RGBA or gray.")
 
 grey2rgb = gray2rgb
+
 
 def xyz2lab(xyz, illuminant="D65", observer="2"):
     """XYZ to CIE-LAB color space conversion.

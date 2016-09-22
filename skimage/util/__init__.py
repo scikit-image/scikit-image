@@ -4,9 +4,15 @@ from .shape import view_as_blocks, view_as_windows
 from .noise import random_noise
 from .apply_parallel import apply_parallel
 
-from .arraypad import pad, crop
-from ._regular_grid import regular_grid
+from .arraycrop import crop
+from ._regular_grid import regular_grid, regular_seeds
 from .unique import unique_rows
+from ._invert import invert
+
+from .._shared.utils import copy_func
+
+from numpy import pad as numpy_pad
+pad = copy_func(numpy_pad, name='pad')
 
 
 __all__ = ['img_as_float',
@@ -21,5 +27,7 @@ __all__ = ['img_as_float',
            'crop',
            'random_noise',
            'regular_grid',
+           'regular_seeds',
            'apply_parallel',
+           'invert',
            'unique_rows']

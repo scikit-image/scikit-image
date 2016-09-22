@@ -244,6 +244,9 @@
 
 - Scott Sievert
   Wavelet denoising
+<<<<<<< HEAD
   
 - Kevin Mader
   Montage improvements
+=======
+>>>>>>> upstream/master

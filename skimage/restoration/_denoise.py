@@ -1,10 +1,11 @@
 # coding: utf-8
+import scipy.stats
 import numpy as np
 from math import ceil
 from .. import img_as_float
 from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 from .._shared.utils import skimage_deprecation, warn
-import warnings
+import pywt
 
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
@@ -87,15 +88,15 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                                  "".format(image.ndim))
         elif image.shape[2] not in (3, 4):
             if image.shape[2] > 4:
-                warnings.warn("The last axis of the input image is interpreted "
-                              "as channels. Input image with shape {0} has {1} "
-                              "channels in last axis. ``denoise_bilateral`` is "
-                              "implemented for 2D grayscale and color images "
-                              "only.".format(image.shape, image.shape[2]))
+                msg = ("The last axis of the input image is interpreted as "
+                       "channels. Input image with shape {0} has {1} channels "
+                       "in last axis. ``denoise_bilateral`` is implemented "
+                       "for 2D grayscale and color images only")
+                warn(msg.format(image.shape, image.shape[2]))
             else:
                 msg = "Input image must be grayscale, RGB, or RGBA; " \
                       "but has shape {0}."
-                warnings.warn(msg.format(image.shape))
+                warn(msg.format(image.shape))
     else:
         if image.ndim > 2:
             raise ValueError("Bilateral filter is not implemented for "
@@ -109,7 +110,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
              '`sigma_color`. The `sigma_range` keyword argument '
              'will be removed in v0.14', skimage_deprecation)
 
-        #If sigma_range is provided, assign it to sigma_color
+        # If sigma_range is provided, assign it to sigma_color
         sigma_color = sigma_range
 
     if win_size is None:
@@ -332,3 +333,290 @@ def denoise_tv_chambolle(im, weight=0.1, eps=2.e-4, n_iter_max=200,
     else:
         out = _denoise_tv_chambolle_nd(im, weight, eps, n_iter_max)
     return out
+
+
+def _bayes_thresh(details, var):
+    """BayesShrink threshold for a zero-mean details coeff array."""
+    # Equivalent to:  dvar = np.var(details) for 0-mean details array
+    dvar = np.mean(details*details)
+    eps = np.finfo(details.dtype).eps
+    thresh = var / np.sqrt(max(dvar - var, eps))
+    return thresh
+
+
+def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
+    """Calculate the robust median estimator of the noise standard deviation.
+
+    Parameters
+    ----------
+    detail_coeffs : ndarray
+        The detail coefficients corresponding to the discrete wavelet
+        transform of an image.
+    distribution : str
+        The underlying noise distribution.
+
+    Returns
+    -------
+    sigma : float
+        The estimated noise standard deviation (see section 4.2 of [1]_).
+
+    References
+    ----------
+    .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
+       by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
+       DOI:10.1093/biomet/81.3.425
+    """
+    # Consider regions with detail coefficients exactly zero to be masked out
+    detail_coeffs = detail_coeffs[np.nonzero(detail_coeffs)]
+
+    if distribution.lower() == 'gaussian':
+        # 75th quantile of the underlying, symmetric noise distribution
+        denom = scipy.stats.norm.ppf(0.75)
+        sigma = np.median(np.abs(detail_coeffs)) / denom
+    else:
+        raise ValueError("Only Gaussian noise estimation is currently "
+                         "supported")
+    return sigma
+
+
+def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
+                       wavelet_levels=None):
+    """Perform wavelet denoising.
+
+    Parameters
+    ----------
+    img : ndarray (2d or 3d) of ints, uints or floats
+        Input data to be denoised. `img` can be of any numeric type,
+        but it is cast into an ndarray of floats for the computation
+        of the denoised image.
+    wavelet : string
+        The type of wavelet to perform. Can be any of the options
+        pywt.wavelist outputs. For example, this may be any of ``{db1, db2,
+        db3, db4, haar}``.
+    sigma : float, optional
+        The standard deviation of the noise. The noise is estimated when sigma
+        is None (the default) by the method in [2]_.
+    threshold : float, optional
+        The thresholding value. All wavelet coefficients less than this value
+        are set to 0. The default value (None) uses the BayesShrink method
+        found in [1]_ to remove noise.
+    mode : {'soft', 'hard'}, optional
+        An optional argument to choose the type of denoising performed. It
+        noted that choosing soft thresholding given additive noise finds the
+        best approximation of the original image.
+    wavelet_levels : int or None, optional
+        The number of wavelet decomposition levels to use.  The default is
+        three less than the maximum number of possible decomposition levels
+        (see Notes below).
+
+    Returns
+    -------
+    out : ndarray
+        Denoised image.
+
+    Notes
+    -----
+    Reference [1]_ used four levels of wavelet decomposition.  To be more
+    flexible for a range of input sizes, the implementation here stops 3 levels
+    prior to the maximum level of decomposition for `img` (the exact # of
+    levels thus depends on `img.shape` and the chosen wavelet). BayesShrink
+    variance estimation doesn't work well on levels with extremely small
+    coefficient arrays.  This is the rationale for skipping a few of the
+    coarsest levels.  The user can override the automated setting by explicitly
+    specifying `wavelet_levels`.
+
+    References
+    ----------
+    .. [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
+           thresholding for image denoising and compression." Image Processing,
+           IEEE Transactions on 9.9 (2000): 1532-1546.
+           DOI: 10.1109/83.862633
+    .. [2] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
+           by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
+           DOI: 10.1093/biomet/81.3.425
+
+    """
+    wavelet = pywt.Wavelet(wavelet)
+
+    # Determine the number of wavelet decomposition levels
+    if wavelet_levels is None:
+        # Determine the maximum number of possible levels for img
+        dlen = wavelet.dec_len
+        wavelet_levels = np.min(
+            [pywt.dwt_max_level(s, dlen) for s in img.shape])
+
+        # Skip coarsest wavelet scales (see Notes in docstring).
+        wavelet_levels = max(wavelet_levels - 3, 1)
+
+    coeffs = pywt.wavedecn(img, wavelet=wavelet, level=wavelet_levels)
+    # Detail coefficients at each decomposition level
+    dcoeffs = coeffs[1:]
+
+    if sigma is None:
+        # Estimate the noise via the method in [2]_
+        detail_coeffs = dcoeffs[-1]['d' * img.ndim]
+        sigma = _sigma_est_dwt(detail_coeffs, distribution='Gaussian')
+
+    if threshold is None:
+        # The BayesShrink thresholds from [1]_ in docstring
+        var = sigma**2
+        threshold = [{key: _bayes_thresh(level[key], var) for key in level}
+                     for level in dcoeffs]
+
+    if np.isscalar(threshold):
+        # A single threshold for all coefficient arrays
+        denoised_detail = [{key: pywt.threshold(level[key],
+                                                value=threshold,
+                                                mode=mode) for key in level}
+                           for level in dcoeffs]
+    else:
+        # Dict of unique threshold coefficients for each detail coeff. array
+        denoised_detail = [{key: pywt.threshold(level[key],
+                                                value=thresh[key],
+                                                mode=mode) for key in level}
+                           for thresh, level in zip(threshold, dcoeffs)]
+    denoised_coeffs = [coeffs[0]] + denoised_detail
+    return pywt.waverecn(denoised_coeffs, wavelet)
+
+
+def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
+                    wavelet_levels=None, multichannel=False):
+    """Perform wavelet denoising on an image.
+
+    Parameters
+    ----------
+    img : ndarray ([M[, N[, ...P]][, C]) of ints, uints or floats
+        Input data to be denoised. `img` can be of any numeric type,
+        but it is cast into an ndarray of floats for the computation
+        of the denoised image.
+    sigma : float, optional
+        The noise standard deviation used when computing the threshold
+        adaptively as described in [1]_. When None (default), the noise
+        standard deviation is estimated via the method in [2]_.
+    wavelet : string, optional
+        The type of wavelet to perform and can be any of the options
+        ``pywt.wavelist`` outputs. The default is `'db1'`. For example,
+        ``wavelet`` can be any of ``{'db2', 'haar', 'sym9'}`` and many more.
+    mode : {'soft', 'hard'}, optional
+        An optional argument to choose the type of denoising performed. It
+        noted that choosing soft thresholding given additive noise finds the
+        best approximation of the original image.
+    wavelet_levels : int or None, optional
+        The number of wavelet decomposition levels to use.  The default is
+        three less than the maximum number of possible decomposition levels.
+    multichannel : bool, optional
+        Apply wavelet denoising separately for each channel (where channels
+        correspond to the final axis of the array).
+
+    Returns
+    -------
+    out : ndarray
+        Denoised image.
+
+    Notes
+    -----
+    The wavelet domain is a sparse representation of the image, and can be
+    thought of similarly to the frequency domain of the Fourier transform.
+    Sparse representations have most values zero or near-zero and truly random
+    noise is (usually) represented by many small values in the wavelet domain.
+    Setting all values below some threshold to 0 reduces the noise in the
+    image, but larger thresholds also decrease the detail present in the image.
+
+    If the input is 3D, this function performs wavelet denoising on each color
+    plane separately. The output image is clipped between either [-1, 1] and
+    [0, 1] depending on the input image range.
+
+    References
+    ----------
+    .. [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
+           thresholding for image denoising and compression." Image Processing,
+           IEEE Transactions on 9.9 (2000): 1532-1546.
+           DOI: 10.1109/83.862633
+    .. [2] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
+           by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
+           DOI: 10.1093/biomet/81.3.425
+
+    Examples
+    --------
+    >>> from skimage import color, data
+    >>> img = img_as_float(data.astronaut())
+    >>> img = color.rgb2gray(img)
+    >>> img += 0.1 * np.random.randn(*img.shape)
+    >>> img = np.clip(img, 0, 1)
+    >>> denoised_img = denoise_wavelet(img, sigma=0.1)
+
+    """
+    img = img_as_float(img)
+
+    if multichannel:
+        out = np.empty_like(img)
+        for c in range(img.shape[-1]):
+            out[..., c] = _wavelet_threshold(img[..., c], wavelet=wavelet,
+                                             mode=mode, sigma=sigma,
+                                             wavelet_levels=wavelet_levels)
+    else:
+        out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
+                                 sigma=sigma, wavelet_levels=wavelet_levels)
+
+    clip_range = (-1, 1) if img.min() < 0 else (0, 1)
+    return np.clip(out, *clip_range)
+
+
+def estimate_sigma(im, average_sigmas=False, multichannel=False):
+    """
+    Robust wavelet-based estimator of the (Gaussian) noise standard deviation.
+
+    Parameters
+    ----------
+    im : ndarray
+        Image for which to estimate the noise standard deviation.
+    average_sigmas : bool, optional
+        If true, average the channel estimates of `sigma`.  Otherwise return
+        a list of sigmas corresponding to each channel.
+    multichannel : bool
+        Estimate sigma separately for each channel.
+
+    Returns
+    -------
+    sigma : float or list
+        Estimated noise standard deviation(s).  If `multichannel` is True and
+        `average_sigmas` is False, a separate noise estimate for each channel
+        is returned.  Otherwise, the average of the individual channel
+        estimates is returned.
+
+    Notes
+    -----
+    This function assumes the noise follows a Gaussian distribution. The
+    estimation algorithm is based on the median absolute deviation of the
+    wavelet detail coefficients as described in section 4.2 of [1]_.
+
+    References
+    ----------
+    .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
+       by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
+       DOI:10.1093/biomet/81.3.425
+
+    Examples
+    --------
+    >>> import skimage.data
+    >>> from skimage import img_as_float
+    >>> img = img_as_float(skimage.data.camera())
+    >>> sigma = 0.1
+    >>> img = img + sigma * np.random.standard_normal(img.shape)
+    >>> sigma_hat = estimate_sigma(img, multichannel=False)
+    """
+    if multichannel:
+        nchannels = im.shape[-1]
+        sigmas = [estimate_sigma(
+            im[..., c], multichannel=False) for c in range(nchannels)]
+        if average_sigmas:
+            sigmas = np.mean(sigmas)
+        return sigmas
+    elif im.shape[-1] <= 4:
+        msg = ("image is size {0} on the last axis, but multichannel is "
+               "False.  If this is a color image, please set multichannel "
+               "to True for proper noise estimation.")
+        warn(msg.format(im.shape[-1]))
+    coeffs = pywt.dwtn(im, wavelet='db2')
+    detail_coeffs = coeffs['d' * im.ndim]
+    return _sigma_est_dwt(detail_coeffs, distribution='Gaussian')

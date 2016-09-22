@@ -29,19 +29,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data, img_as_float
-from skimage.restoration import denoise_tv_chambolle, denoise_bilateral
+from skimage.restoration import (denoise_tv_chambolle, denoise_bilateral,
+                                 denoise_wavelet, estimate_sigma)
+from skimage.util import random_noise
 
 
 astro = img_as_float(data.astronaut())
 astro = astro[220:300, 220:320]
 
-noisy = astro + 0.6 * astro.std() * np.random.random(astro.shape)
-noisy = np.clip(noisy, 0, 1)
+sigma = 0.155
+noisy = random_noise(astro, var=sigma**2)
 
-fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(8, 5), sharex=True,
+fig, ax = plt.subplots(nrows=2, ncols=4, figsize=(8, 5), sharex=True,
                        sharey=True, subplot_kw={'adjustable': 'box-forced'})
 
 plt.gray()
+
+# Estimate the average noise standard deviation across color channels.
+sigma_est = estimate_sigma(noisy, multichannel=True, average_sigmas=True)
+# Due to clipping in random_noise, the estimate will be a bit smaller than the
+# specified sigma.
+print("Estimated Gaussian noise standard deviation = {}".format(sigma_est))
 
 ax[0, 0].imshow(noisy)
 ax[0, 0].axis('off')
@@ -52,16 +60,24 @@ ax[0, 1].set_title('TV')
 ax[0, 2].imshow(denoise_bilateral(noisy, sigma_color=0.05, sigma_spatial=15))
 ax[0, 2].axis('off')
 ax[0, 2].set_title('Bilateral')
+ax[0, 3].imshow(denoise_wavelet(noisy, sigma=0.85*sigma_est,
+                                multichannel=True))
+ax[0, 3].axis('off')
+ax[0, 3].set_title('Wavelet')
 
-ax[1, 0].imshow(denoise_tv_chambolle(noisy, weight=0.2, multichannel=True))
-ax[1, 0].axis('off')
-ax[1, 0].set_title('(more) TV')
-ax[1, 1].imshow(denoise_bilateral(noisy, sigma_color=0.1, sigma_spatial=15))
+ax[1, 1].imshow(denoise_tv_chambolle(noisy, weight=0.2, multichannel=True))
 ax[1, 1].axis('off')
-ax[1, 1].set_title('(more) Bilateral')
-ax[1, 2].imshow(astro)
+ax[1, 1].set_title('(more) TV')
+ax[1, 2].imshow(denoise_bilateral(noisy, sigma_color=0.1, sigma_spatial=15))
 ax[1, 2].axis('off')
-ax[1, 2].set_title('original')
+ax[1, 2].set_title('(more) Bilateral')
+ax[1, 3].imshow(denoise_wavelet(noisy, sigma=1.25*sigma_est,
+                                multichannel=True))
+ax[1, 3].axis('off')
+ax[1, 3].set_title('(more) Wavelet')
+ax[1, 0].imshow(astro)
+ax[1, 0].axis('off')
+ax[1, 0].set_title('original')
 
 fig.tight_layout()
 

@@ -5,8 +5,6 @@ from scipy.ndimage import filters as ndif
 from collections import OrderedDict
 from ..exposure import histogram
 from .._shared.utils import assert_nD, warn
-from ..morphology import disk
-from ..filters.rank import otsu
 
 __all__ = ['try_all_threshold',
            'threshold_adaptive',
@@ -68,16 +66,13 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     return fig, ax
 
 
-def try_all_threshold(image, radius=None, figsize=(8, 5), verbose=True):
+def try_all_threshold(image, figsize=(8, 5), verbose=True):
     """Returns a figure comparing the outputs of different thresholding methods.
 
     Parameters
     ----------
     image : (N, M) ndarray
         Input image.
-    radius : int, optional
-        Lengthscale used for local methods.
-        If None, local methods are ignored.
     figsize : tuple, optional
         Figure size (in inches).
     verbose : bool, optional
@@ -99,28 +94,12 @@ def try_all_threshold(image, radius=None, figsize=(8, 5), verbose=True):
     * otsu
     * triangle
     * yen
-    * adaptive threshold (local)
-    * rank otsu (local)
 
     Examples
     --------
     >>> from skimage.data import text
-    >>> fig, ax = try_all_threshold(text(), radius=20,
-    ...                            figsize=(10, 6), verbose=False)
+    >>> fig, ax = try_all_threshold(text(), figsize=(10, 6), verbose=False)
     """
-
-    def include_selem(func, *args, **kwargs):
-        """
-        A wrapper function to embed a threshold range for local algorithms.
-        """
-        def wrapper(im):
-            return func(im, *args, **kwargs)
-        try:
-            wrapper.__orifunc__ = func.__orifunc__
-        except AttributeError:
-            wrapper.__orifunc__ = func.__module__ + '.' + func.__name__
-        return wrapper
-
     def thresh(func):
         """
         A wrapper function to return a thresholded image.
@@ -141,17 +120,6 @@ def try_all_threshold(image, radius=None, figsize=(8, 5), verbose=True):
                            'Otsu': thresh(threshold_otsu),
                            'Triangle': thresh(threshold_triangle),
                            'Yen': thresh(threshold_yen)})
-
-    # Local algorithms.
-    if radius is not None:
-        selem = disk(radius)
-        local_otsu = include_selem(otsu, selem)
-        methods['Local Otsu'] = thresh(local_otsu)
-
-        block_size = 2 * int(radius) + 1
-        adaptive_threshold = include_selem(threshold_adaptive, block_size,
-                                           offset=10)
-        methods['Adaptive threshold'] = adaptive_threshold
 
     return _try_all(image, figsize=figsize,
                     methods=methods, verbose=verbose)
@@ -278,7 +246,7 @@ def threshold_otsu(image, nbins=256):
     -----
     The input image must be grayscale.
     """
-    if image.shape[-1] in (3, 4):
+    if len(image.shape) > 2 and image.shape[-1] in (3, 4):
         msg = "threshold_otsu is expected to work correctly only for " \
               "grayscale images; image shape {0} looks like an RGB image"
         warn(msg.format(image.shape))
@@ -330,10 +298,10 @@ def threshold_yen(image, nbins=256):
     ----------
     .. [1] Yen J.C., Chang F.J., and Chang S. (1995) "A New Criterion
            for Automatic Multilevel Thresholding" IEEE Trans. on Image
-           Processing, 4(3): 370-378
+           Processing, 4(3): 370-378. DOI:10.1109/83.366472
     .. [2] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
            Techniques and Quantitative Performance Evaluation" Journal of
-           Electronic Imaging, 13(1): 146-165,
+           Electronic Imaging, 13(1): 146-165, DOI:10.1117/1.1631315
            http://www.busim.ee.boun.edu.tr/~sankur/SankurFolder/Threshold_survey.pdf
     .. [3] ImageJ AutoThresholder code, http://fiji.sc/wiki/index.php/Auto_Threshold
 
@@ -399,13 +367,14 @@ def threshold_isodata(image, nbins=256, return_all=False):
     ----------
     .. [1] Ridler, TW & Calvard, S (1978), "Picture thresholding using an
            iterative selection method"
-    .. [2] IEEE Transactions on Systems, Man and Cybernetics 8: 630-632,
-           http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=4310039
-    .. [3] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
+           IEEE Transactions on Systems, Man and Cybernetics 8: 630-632,
+           DOI:10.1109/TSMC.1978.4310039
+    .. [2] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
            Techniques and Quantitative Performance Evaluation" Journal of
            Electronic Imaging, 13(1): 146-165,
            http://www.busim.ee.boun.edu.tr/~sankur/SankurFolder/Threshold_survey.pdf
-    .. [4] ImageJ AutoThresholder code,
+           DOI:10.1117/1.1631315
+    .. [3] ImageJ AutoThresholder code,
            http://fiji.sc/wiki/index.php/Auto_Threshold
 
     Examples
@@ -489,12 +458,14 @@ def threshold_li(image):
     ----------
     .. [1] Li C.H. and Lee C.K. (1993) "Minimum Cross Entropy Thresholding"
            Pattern Recognition, 26(4): 617-625
+           DOI:10.1016/0031-3203(93)90115-D
     .. [2] Li C.H. and Tam P.K.S. (1998) "An Iterative Algorithm for Minimum
            Cross Entropy Thresholding" Pattern Recognition Letters, 18(8): 771-776
+           DOI:10.1016/S0167-8655(98)00057-9
     .. [3] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
            Techniques and Quantitative Performance Evaluation" Journal of
            Electronic Imaging, 13(1): 146-165
-           http://citeseer.ist.psu.edu/sezgin04survey.html
+           DOI:10.1117/1.1631315
     .. [4] ImageJ AutoThresholder code, http://fiji.sc/wiki/index.php/Auto_Threshold
 
     Examples
@@ -573,6 +544,7 @@ def threshold_minimum(image, nbins=256, bias='min', max_iter=10000):
     ----------
     .. [1] Prewitt, JMS & Mendelsohn, ML (1966), "The analysis of cell images",
            Annals of the New York Academy of Sciences 128: 1035-1053
+           DOI:10.1111/j.1749-6632.1965.tb11715.x
 
     Examples
     --------
@@ -654,6 +626,7 @@ def threshold_mean(image):
     .. [1] C. A. Glasbey, "An analysis of histogram-based thresholding
         algorithms," CVGIP: Graphical Models and Image Processing,
         vol. 55, pp. 532-537, 1993.
+        DOI:10.1006/cgip.1993.1040
 
     Examples
     --------
@@ -687,6 +660,9 @@ def threshold_triangle(image, nbins=256):
     .. [1] Zack, G. W., Rogers, W. E. and Latt, S. A., 1977,
        Automatic Measurement of Sister Chromatid Exchange Frequency,
        Journal of Histochemistry and Cytochemistry 25 (7), pp. 741-753
+       DOI:10.1177/25.7.70454
+    .. [2] ImageJ AutoThresholder code,
+       http://fiji.sc/wiki/index.php/Auto_Threshold
 
     Examples
     --------
@@ -695,10 +671,10 @@ def threshold_triangle(image, nbins=256):
     >>> thresh = threshold_triangle(image)
     >>> binary = image > thresh
     """
-    # nbins is ignored for interger arrays
+    # nbins is ignored for integer arrays
     # so, we recalculate the effective nbins.
     hist, bin_centers = histogram(image.ravel(), nbins)
-    nbins = bin_centers[-1] - bin_centers[0] + 1
+    nbins = len(hist)
 
     # Find peak, lowest and highest gray levels.
     arg_peak_height = np.argmax(hist)
@@ -727,14 +703,13 @@ def threshold_triangle(image, nbins=256):
     width /= norm
 
     # Maximize the length.
-    d = peak_height * arg_low_level - width * hist[arg_low_level]
-    length = peak_height * x1 - width * y1 - d
-    level = np.argmax(length) + arg_low_level
+    # The ImageJ implementation includes an additional constant when calculating
+    # the length, but here we omit it as it does not affect the location of the
+    # minimum.
+    length = peak_height * x1 - width * y1
+    arg_level = np.argmax(length) + arg_low_level
 
     if flip:
-        level = nbins - level - 1
+        arg_level = nbins - arg_level - 1
 
-    # The histogram doesn't start at zero, shift it.
-    level += bin_centers[0]
-
-    return level
+    return bin_centers[arg_level]

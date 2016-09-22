@@ -4,7 +4,7 @@ Sliding window histogram
 ========================
 
 Histogram matching can be used for object detection in images [1]_. This
-example extracts a single coin from the `skimage.data.coins` image and uses
+example extracts a single coin from the ``skimage.data.coins`` image and uses
 histogram matching to attempt to locate it within the original image.
 
 First, a box-shaped region of the image containing the target coin is
@@ -12,13 +12,13 @@ extracted and a histogram of its greyscale values is computed.
 
 Next, for each pixel in the test image, a histogram of the greyscale values in
 a region of the image surrounding the pixel is computed.
-`skimage.filters.rank.windowed_histogram` is used for this task, as it employs
+``skimage.filters.rank.windowed_histogram`` is used for this task, as it employs
 an efficient sliding window based algorithm that is able to compute these
 histograms quickly [2]_. The local histogram for the region surrounding each
 pixel in the image is compared to that of the single coin, with a similarity
 measure being computed and displayed.
 
-The histogram of the single coin is computed using `numpy.histogram` on a box
+The histogram of the single coin is computed using ``numpy.histogram`` on a box
 shaped region surrounding the coin, while the sliding window histograms are
 computed using a disc shaped structural element of a slightly different size.
 This is done in aid of demonstrating that the technique still finds similarity
@@ -34,6 +34,7 @@ References
 .. [2] S.Perreault and P.Hebert. Median filtering in constant time.
        Trans. Image Processing, 16(9):2389-2394, 2007.
 """
+
 from __future__ import division
 import numpy as np
 import matplotlib
@@ -93,12 +94,10 @@ coin = quantized_img[coin_coords[1]:coin_coords[3],
 coin_hist, _ = np.histogram(coin.flatten(), bins=16, range=(0, 16))
 coin_hist = coin_hist.astype(float) / np.sum(coin_hist)
 
-
 # Compute a disk shaped mask that will define the shape of our sliding window
 # Example coin is ~44px across, so make a disk 61px wide (2 * rad + 1) to be
 # big enough for other coins too.
 selem = disk(30)
-
 
 # Compute the similarity across the complete image
 similarity = windowed_histogram_similarity(quantized_img, selem, coin_hist,
@@ -112,7 +111,6 @@ quantized_rotated_image = rotated_img // 16
 rotated_similarity = windowed_histogram_similarity(quantized_rotated_image,
                                                    selem, coin_hist,
                                                    coin_hist.shape[0])
-
 
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10))
 
@@ -134,4 +132,5 @@ axes[1, 1].imshow(rotated_similarity, cmap='hot', alpha=0.5)
 axes[1, 1].set_title('Rotated image with overlaid similarity')
 axes[1, 1].axis('off')
 
+plt.tight_layout()
 plt.show()

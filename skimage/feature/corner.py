@@ -1,8 +1,10 @@
+from itertools import combinations_with_replacement
+
 import numpy as np
 from scipy import ndimage as ndi
 from scipy import stats
 
-from ..util import img_as_float, pad
+from ..util import img_as_float
 from ..feature import peak_local_max
 from ..feature.util import _prepare_grayscale_input_2D
 from ..feature.corner_cy import _corner_fast
@@ -54,7 +56,7 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     ----------
     image : ndarray
         Input image.
-    sigma : float
+    sigma : float, optional
         Standard deviation used for the Gaussian kernel, which is used as a
         weighting function for the local summation of squared differences.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
@@ -136,46 +138,34 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
     --------
     >>> from skimage.feature import hessian_matrix
     >>> square = np.zeros((5, 5))
-    >>> square[2, 2] = -1.0 / 1591.54943092
+    >>> square[2, 2] = 4
     >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
-    >>> Hxx
+    >>> Hxy
     array([[ 0.,  0.,  0.,  0.,  0.],
+           [ 0.,  1.,  0., -1.,  0.],
            [ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  1.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.],
+           [ 0., -1.,  0.,  1.,  0.],
            [ 0.,  0.,  0.,  0.,  0.]])
-
     """
 
-    image = _prepare_grayscale_input_2D(image)
+    image = img_as_float(image)
 
-    # Window extent which covers > 99% of the normal distribution.
-    window_ext = max(1, np.ceil(3 * sigma))
+    gaussian_filtered = ndi.gaussian_filter(image, sigma=sigma,
+                                            mode=mode, cval=cval)
 
-    ky, kx = np.mgrid[-window_ext:window_ext + 1, -window_ext:window_ext + 1]
+    gradients = np.gradient(gaussian_filtered)
+    axes = range(image.ndim)
+    H_elems = [np.gradient(gradients[ax0], axis=ax1)
+               for ax0, ax1 in combinations_with_replacement(axes, 2)]
 
-    # Second derivative Gaussian kernels.
-    gaussian_exp = np.exp(-(kx ** 2 + ky ** 2) / (2 * sigma ** 2))
-    kernel_xx = 1 / (2 * np.pi * sigma ** 4) * (kx ** 2 / sigma ** 2 - 1)
-    kernel_xx *= gaussian_exp
-    kernel_xy = 1 / (2 * np.pi * sigma ** 6) * (kx * ky)
-    kernel_xy *= gaussian_exp
-    kernel_yy = kernel_xx.transpose()
-
-    # Remove small kernel values.
-    eps = np.finfo(kernel_xx.dtype).eps
-    kernel_xx[np.abs(kernel_xx) < eps * np.abs(kernel_xx).max()] = 0
-    kernel_xy[np.abs(kernel_xy) < eps * np.abs(kernel_xy).max()] = 0
-    kernel_yy[np.abs(kernel_yy) < eps * np.abs(kernel_yy).max()] = 0
-
-    Hxx = ndi.convolve(image, kernel_xx, mode=mode, cval=cval)
-    Hxy = ndi.convolve(image, kernel_xy, mode=mode, cval=cval)
-    Hyy = ndi.convolve(image, kernel_yy, mode=mode, cval=cval)
-
-    return Hxx, Hxy, Hyy
+    if image.ndim == 2:
+        # The legacy 2D code followed (x, y) convention, so we swap the axis
+        # order to maintain compatibility with old code
+        H_elems.reverse()
+    return H_elems
 
 
-def hessian_matrix_det(image, sigma):
+def hessian_matrix_det(image, sigma=1):
     """Computes the approximate Hessian Determinant over an image.
 
     This method uses box filters over integral images to compute the
@@ -185,7 +175,7 @@ def hessian_matrix_det(image, sigma):
     ----------
     image : array
         The image over which to compute Hessian Determinant.
-    sigma : float
+    sigma : float, optional
         Standard deviation used for the Gaussian kernel, used for the Hessian
         matrix.
 
@@ -280,14 +270,14 @@ def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
     --------
     >>> from skimage.feature import hessian_matrix, hessian_matrix_eigvals
     >>> square = np.zeros((5, 5))
-    >>> square[2, 2] = -1 / 1591.54943092
+    >>> square[2, 2] = 4
     >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
     >>> hessian_matrix_eigvals(Hxx, Hxy, Hyy)[0]
-    array([[ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  1.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.]])
+    array([[ 0.,  0.,  2.,  0.,  0.],
+           [ 0.,  1.,  0.,  1.,  0.],
+           [ 2.,  0., -2.,  0.,  2.],
+           [ 0.,  1.,  0.,  1.,  0.],
+           [ 0.,  0.,  2.,  0.,  0.]])
 
     """
 
@@ -683,7 +673,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     # window extent in one direction
     wext = (window_size - 1) // 2
 
-    image = pad(image, pad_width=wext, mode='constant', constant_values=0)
+    image = np.pad(image, pad_width=wext, mode='constant', constant_values=0)
 
     # add pad width, make sure to not modify the input values in-place
     corners = safe_as_int(corners + wext)

@@ -48,7 +48,7 @@ import unittest
 import numpy as np
 from scipy import ndimage as ndi
 
-from skimage.morphology.watershed import watershed, _slow_watershed
+from skimage.morphology.watershed import watershed
 
 eps = 1e-12
 
@@ -112,9 +112,6 @@ class TestWatershed(unittest.TestCase):
                       [-1,  1,  1,  1,  1,  1, -1],
                       [-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1]])
-        error = diff(expected, out)
-        assert error < eps
-        out = _slow_watershed(data, markers, 8)
         error = diff(expected, out)
         assert error < eps
 
@@ -425,6 +422,39 @@ class TestWatershed(unittest.TestCase):
              for i0, j0 in ((5, 5), (5, 10), (10, 5), (10, 10))])
         dmin = np.min(d, 2)
         self.assertTrue(np.all(d[i, j, out[i, j]-1] == dmin))
+
+
+def test_compact_watershed():
+    image = np.zeros((5, 6))
+    image[:, 3:] = 1
+    seeds = np.zeros((5, 6), dtype=int)
+    seeds[2, 0] = 1
+    seeds[2, 3] = 2
+    compact = watershed(image, seeds, compactness=0.01)
+    expected = np.array([[1, 1, 1, 2, 2, 2],
+                         [1, 1, 1, 2, 2, 2],
+                         [1, 1, 1, 2, 2, 2],
+                         [1, 1, 1, 2, 2, 2],
+                         [1, 1, 1, 2, 2, 2]], dtype=int)
+    np.testing.assert_equal(compact, expected)
+    normal = watershed(image, seeds)
+    expected = np.ones(image.shape, dtype=int)
+    expected[2, 3:] = 2
+    np.testing.assert_equal(normal, expected)
+
+
+def test_numeric_seed_watershed():
+    """Test that passing just the number of seeds to watershed works."""
+    image = np.zeros((5, 6))
+    image[:, 3:] = 1
+    compact = watershed(image, 2, compactness=0.01)
+    expected = np.array([[1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2]], dtype=np.int32)
+    np.testing.assert_equal(compact, expected)
+
 
 if __name__ == "__main__":
     np.testing.run_module_suite()

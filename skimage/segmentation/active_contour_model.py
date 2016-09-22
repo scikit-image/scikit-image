@@ -63,14 +63,14 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     Examples
     --------
     >>> from skimage.draw import circle_perimeter
-    >>> from skimage.filters import gaussian_filter
+    >>> from skimage.filters import gaussian
 
     Create and smooth image:
 
     >>> img = np.zeros((100, 100))
     >>> rr, cc = circle_perimeter(35, 45, 25)
     >>> img[rr, cc] = 1
-    >>> img = gaussian_filter(img, 2)
+    >>> img = gaussian(img, 2)
 
     Initiliaze spline:
 
@@ -85,7 +85,10 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     25
 
     """
-    scipy_version = list(map(int, scipy.__version__.split('.')))
+    split_version = scipy.__version__.split('.')
+    if not(split_version[-1].isdigit()):
+        split_version.pop()
+    scipy_version = list(map(int, split_version))
     new_scipy = scipy_version[0] > 0 or \
                 (scipy_version[0] == 0 and scipy_version[1] >= 14)
     if not new_scipy:

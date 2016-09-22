@@ -16,8 +16,6 @@ import matplotlib.pyplot as plt
 from skimage import data
 from skimage import transform as tf
 
-margins = dict(hspace=0.01, wspace=0.01, top=1, bottom=0, left=0, right=1)
-
 ######################################################################
 # Basics
 # ======
@@ -31,7 +29,7 @@ margins = dict(hspace=0.01, wspace=0.01, top=1, bottom=0, left=0, right=1)
 #
 # First we create a transformation using explicit parameters:
 
-tform = tf.SimilarityTransform(scale=1, rotation=math.pi / 2,
+tform = tf.SimilarityTransform(scale=1, rotation=math.pi/2,
                                translation=(0, 1))
 print(tform.params)
 
@@ -60,21 +58,22 @@ print(tform2.inverse(tform(coord)))
 
 text = data.text()
 
-tform = tf.SimilarityTransform(scale=1, rotation=math.pi / 4,
-                               translation=(text.shape[0] / 2, -100))
+tform = tf.SimilarityTransform(scale=1, rotation=math.pi/4,
+                               translation=(text.shape[0]/2, -100))
 
 rotated = tf.warp(text, tform)
 back_rotated = tf.warp(rotated, tform.inverse)
 
-fig, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(8, 3))
-fig.subplots_adjust(**margins)
-plt.gray()
-ax1.imshow(text)
-ax1.axis('off')
-ax2.imshow(rotated)
-ax2.axis('off')
-ax3.imshow(back_rotated)
-ax3.axis('off')
+fig, ax = plt.subplots(nrows=3)
+
+ax[0].imshow(text, cmap=plt.cm.gray)
+ax[1].imshow(rotated, cmap=plt.cm.gray)
+ax[2].imshow(back_rotated, cmap=plt.cm.gray)
+
+for a in ax:
+    a.axis('off')
+
+plt.tight_layout()
 
 ######################################################################
 # Parameter estimation
@@ -97,28 +96,20 @@ ax3.axis('off')
 
 text = data.text()
 
-src = np.array((
-    (0, 0),
-    (0, 50),
-    (300, 50),
-    (300, 0)
-))
-dst = np.array((
-    (155, 15),
-    (65, 40),
-    (260, 130),
-    (360, 95)
-))
+src = np.array([[0, 0], [0, 50], [300, 50], [300, 0]])
+dst = np.array([[155, 15], [65, 40], [260, 130], [360, 95]])
 
 tform3 = tf.ProjectiveTransform()
 tform3.estimate(src, dst)
 warped = tf.warp(text, tform3, output_shape=(50, 300))
 
-fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(8, 3))
-fig.subplots_adjust(**margins)
-plt.gray()
-ax1.imshow(text)
-ax1.plot(dst[:, 0], dst[:, 1], '.r')
-ax1.axis('off')
-ax2.imshow(warped)
-ax2.axis('off')
+fig, ax = plt.subplots(nrows=2, figsize=(8, 3))
+
+ax[0].imshow(text, cmap=plt.cm.gray)
+ax[0].plot(dst[:, 0], dst[:, 1], '.r')
+ax[1].imshow(warped, cmap=plt.cm.gray)
+
+for a in ax:
+    a.axis('off')
+
+plt.tight_layout()

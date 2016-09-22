@@ -320,11 +320,26 @@ def test_mean():
     assert(threshold_mean(img) == 1.)
 
 
-def test_triangle_images():
+def test_triangle_uint_images():
     assert(threshold_triangle(np.invert(data.text())) == 151)
     assert(threshold_triangle(data.text()) == 104)
     assert(threshold_triangle(data.coins()) == 80)
     assert(threshold_triangle(np.invert(data.coins())) == 175)
+
+
+def test_triangle_float_images():
+    text = data.text()
+    int_bins = text.max() - text.min() + 1
+    # Set nbins to match the uint case and threshold as float.
+    assert(round(threshold_triangle(
+        text.astype(np.float), nbins=int_bins)) == 104)
+    # Check that rescaling image to floats in unit interval is equivalent.
+    assert(round(threshold_triangle(text / 255., nbins=int_bins) * 255) == 104)
+    # Repeat for inverted image.
+    assert(round(threshold_triangle(
+        np.invert(text).astype(np.float), nbins=int_bins)) == 151)
+    assert (round(threshold_triangle(
+        np.invert(text) / 255., nbins=int_bins) * 255) == 151)
 
 
 def test_triangle_flip():

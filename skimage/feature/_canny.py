@@ -106,11 +106,10 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
 
     References
     -----------
-    Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
-    Pattern Analysis and Machine Intelligence, 8:679-714, 1986
-
-    William Green's Canny tutorial
-    http://dasl.mem.drexel.edu/alumni/bGreen/www.pages.drexel.edu/_weg22/can_tut.html
+    .. [1] Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
+           Pattern Analysis and Machine Intelligence, 8:679-714, 1986
+    .. [2] William Green's Canny tutorial
+           http://dasl.mem.drexel.edu/alumni/bGreen/www.pages.drexel.edu/_weg22/can_tut.html
 
     Examples
     --------
@@ -157,14 +156,17 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     assert_nD(image, 2)
 
     if low_threshold is None:
-        low_threshold = 0.1 * dtype_limits(image)[1]
+        low_threshold = 0.1 * dtype_limits(image, clip_negative=False)[1]
 
     if high_threshold is None:
-        high_threshold = 0.2 * dtype_limits(image)[1]
+        high_threshold = 0.2 * dtype_limits(image, clip_negative=False)[1]
 
     if mask is None:
         mask = np.ones(image.shape, dtype=bool)
-    fsmooth = lambda x: gaussian_filter(x, sigma, mode='constant')
+
+    def fsmooth(x):
+        return gaussian_filter(x, sigma, mode='constant')
+
     smoothed = smooth_with_function_and_mask(image, fsmooth, mask)
     jsobel = ndi.sobel(smoothed, axis=1)
     isobel = ndi.sobel(smoothed, axis=0)

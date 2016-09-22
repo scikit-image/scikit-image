@@ -77,6 +77,8 @@ How to make a new release of ``skimage``
   - scikit-learn-general@lists.sourceforge.net
   - pythonvision@googlegroups.com
 
+- Update the version and the release date on wikipedia
+  https://en.wikipedia.org/wiki/Scikit-image
 
 Debian
 ------

@@ -1,5 +1,4 @@
 import numpy as np
-from skimage import util
 cimport numpy as np
 cimport cython
 from libc.math cimport exp
@@ -178,7 +177,7 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     cdef int row_start, row_end, col_start, col_end
     cdef int row_start_i, row_end_i, col_start_j, col_end_j
     cdef IMGDTYPE [::1] new_values = np.zeros(n_ch).astype(np.float32)
-    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(util.pad(image,
+    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(np.pad(image,
                        ((offset, offset), (offset, offset), (0, 0)),
                         mode='reflect').astype(np.float32))
     cdef IMGDTYPE [:, :, ::1] result = padded.copy()
@@ -278,7 +277,7 @@ def _nl_means_denoising_3d(image, int s=7,
     n_pln, n_row, n_col = image.shape
     cdef int offset = s / 2
     # padd the image so that boundaries are denoised as well
-    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(util.pad(
+    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(np.pad(
                                         image.astype(np.float32),
                                         offset, mode='reflect'))
     cdef IMGDTYPE [:, :, ::1] result = padded.copy()
@@ -550,7 +549,7 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     # Image padding: we need to account for patch size, possible shift,
     # + 1 for the boundary effects in finite differences
     cdef int pad_size = offset + d + 1
-    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(util.pad(image,
+    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(np.pad(image,
                           ((pad_size, pad_size), (pad_size, pad_size), (0, 0)),
                           mode='reflect').astype(np.float32))
     cdef IMGDTYPE [:, :, ::1] result = np.zeros_like(padded)
@@ -660,7 +659,7 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
     # Image padding: we need to account for patch size, possible shift,
     # + 1 for the boundary effects in finite differences
     cdef int pad_size = offset + d + 1
-    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(util.pad(image,
+    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(np.pad(image,
                                 pad_size, mode='reflect').astype(np.float32))
     cdef IMGDTYPE [:, :, ::1] result = np.zeros_like(padded)
     cdef IMGDTYPE [:, :, ::1] weights = np.zeros_like(padded)

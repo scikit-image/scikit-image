@@ -29,7 +29,7 @@ dtype_range[np.float16] = (-1, 1)
 _supported_types += (np.float16, )
 
 
-def dtype_limits(image, clip_negative=True):
+def dtype_limits(image, clip_negative=None):
     """Return intensity limits, i.e. (min, max) tuple, of the image's dtype.
 
     Parameters
@@ -39,7 +39,17 @@ def dtype_limits(image, clip_negative=True):
     clip_negative : bool, optional
         If True, clip the negative range (i.e. return 0 for min intensity)
         even if the image dtype allows negative values.
+        The default behavior (None) is equivalent to True.
+
+    Returns
+    -------
+    imin, imax : tuple
+        Lower and upper intensity limits.
     """
+    if clip_negative is None:
+        clip_negative = True
+        warn('The default of `clip_negative` in `skimage.util.dtype_limits` '
+             'will change to `False` in version 0.15.')
     imin, imax = dtype_range[image.dtype.type]
     if clip_negative:
         imin = 0
@@ -77,14 +87,14 @@ def convert(image, dtype, force_copy=False, uniform=False):
 
     References
     ----------
-    (1) DirectX data conversion rules.
-        http://msdn.microsoft.com/en-us/library/windows/desktop/dd607323%28v=vs.85%29.aspx
-    (2) Data Conversions.
-        In "OpenGL ES 2.0 Specification v2.0.25", pp 7-8. Khronos Group, 2010.
-    (3) Proper treatment of pixels as integers. A.W. Paeth.
-        In "Graphics Gems I", pp 249-256. Morgan Kaufmann, 1990.
-    (4) Dirty Pixels. J. Blinn.
-        In "Jim Blinn's corner: Dirty Pixels", pp 47-57. Morgan Kaufmann, 1998.
+    .. [1] DirectX data conversion rules.
+           http://msdn.microsoft.com/en-us/library/windows/desktop/dd607323%28v=vs.85%29.aspx
+    .. [2] Data Conversions. In "OpenGL ES 2.0 Specification v2.0.25",
+           pp 7-8. Khronos Group, 2010.
+    .. [3] Proper treatment of pixels as integers. A.W. Paeth.
+           In "Graphics Gems I", pp 249-256. Morgan Kaufmann, 1990.
+    .. [4] Dirty Pixels. J. Blinn. In "Jim Blinn's corner: Dirty Pixels",
+           pp 47-57. Morgan Kaufmann, 1998.
 
     """
     image = np.asarray(image)
@@ -115,8 +125,14 @@ def convert(image, dtype, force_copy=False, uniform=False):
 
     def _dtype2(kind, bits, itemsize=1):
         # Return dtype of `kind` that can store a `bits` wide unsigned int
-        c = lambda x, y: x <= y if kind == 'u' else x < y
-        s = next(i for i in (itemsize, ) + (2, 4, 8) if c(bits, i * 8))
+        def compare(x, y, kind='u'):
+            if kind == 'u':
+                return x <= y
+            else:
+                return x < y
+
+        s = next(i for i in (itemsize, ) + (2, 4, 8) if compare(bits, i * 8,
+                                                                kind=kind))
         return np.dtype(kind + str(s))
 
     def _scale(a, n, m, copy=True):
