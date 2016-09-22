@@ -286,29 +286,38 @@ def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
 
 
 def shape_index(image, sigma=1, mode='constant', cval=0):
-    """Compute the shape index. The shape index is a single valued measure
-    of local curvature, defined by Koenderink & van Doorn [1].
+    """Compute the shape index.
 
-    Its values range from -1 to 1 (and may be nan), with following ranges
-    representing following shapes:
+    The shape index is a single valued measure
+    of local curvature, defined by Koenderink & van Doorn [1]_.
 
-    * s in [  -1, -7/8): Spherical cup
-    * s in [-7/8, -5/8): Through
-    * s in [-5/8, -3/8): Rut
-    * s in [-3/8, -1/8): Saddle rut
-    * s in [-1/8, +1/8): Saddle
-    * s in [+1/8, +3/8): Saddle ridge
-    * s in [+3/8, +5/8): Ridge
-    * s in [+5/8, +7/8): Dome
-    * s in [+7/8,   +1]: Spherical cap
+    It is derived from the eigen values of the Hessian, and its
+    value ranges from -1 to 1 (and is undefined (=NaN) in *flat* regions),
+    with following ranges representing following shapes:
+
+    .. table:: Ranges of the shape index and corresponding shapes.
+
+      ===================  =============
+      Interval (s in ...)  Shape
+      ===================  =============
+      [  -1, -7/8)         Spherical cup
+      [-7/8, -5/8)         Through
+      [-5/8, -3/8)         Rut
+      [-3/8, -1/8)         Saddle rut
+      [-1/8, +1/8)         Saddle
+      [+1/8, +3/8)         Saddle ridge
+      [+3/8, +5/8)         Ridge
+      [+5/8, +7/8)         Dome
+      [+7/8,   +1]         Spherical cap
+      ===================  =============
 
     Parameters
     ----------
     image : ndarray
         Input image.
-    sigma : float
-        Standard deviation used for the Gaussian kernel, which is used as
-        weighting function for the auto-correlation matrix.
+    sigma : float, optional
+        Standard deviation used for the Gaussian kernel, which is used for
+        smoothing the input data before Hessian eigen value calculation.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
         How to handle values outside the image borders.
     cval : float, optional
@@ -323,8 +332,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
     References
     ----------
     .. [1] Koenderink, J. J. & van Doorn, A. J., "Surface shape and curvature scales",
-           Image and Vision Computing, 1992, 10, 557-564.
-
+           Image and Vision Computing, 1992, 10, 557-564. DOI:10.1016/0262-8856(92)90076-F
 
     Examples
     --------
