@@ -35,7 +35,8 @@
   and more.
 
 - Almar Klein
-  Binary heap class for graph algorithms
+  Binary heap class and other improvements for graph algorithms
+  Lewiner variant of marching cubes algorithm
 
 - Lee Kamentsky and Thouis Jones of the CellProfiler team, Broad Institute, MIT
   Constant time per pixel median filter, edge detectors, and more.
@@ -229,11 +230,20 @@
 - Alex Izvorski
   Color spaces for YUV and related spaces
 
+- Thomas Lewiner
+  Design and original implementation of the Lewiner marching cubes algorithm
+
 - Jeff Hemmelgarn
   Minimum threshold
 
 - Kirill Malev
   Frangi and Hessian filters implementation
 
+- Abdeali Kothari
+  Alpha blending to convert from rgba to rgb
+
+- Scott Sievert
+  Wavelet denoising
+  
 - Kevin Mader
-  Montage improvements 
+  Montage improvements
