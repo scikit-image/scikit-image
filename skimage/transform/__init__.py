@@ -8,7 +8,8 @@ from .integral import integral_image, integrate
 from ._geometric import (warp, warp_coords, estimate_transform,
                          matrix_transform, EuclideanTransform,
                          SimilarityTransform, AffineTransform,
-                         ProjectiveTransform, PolynomialTransform,
+                         ProjectiveTransform, FundamentalMatrixTransform,
+                         EssentialMatrixTransform, PolynomialTransform,
                          PiecewiseAffineTransform)
 from ._warps import swirl, resize, rotate, rescale, downscale_local_mean
 from .pyramids import (pyramid_reduce, pyramid_expand,
@@ -37,6 +38,8 @@ __all__ = ['hough_circle',
            'SimilarityTransform',
            'AffineTransform',
            'ProjectiveTransform',
+           'EssentialMatrixTransform',
+           'FundamentalMatrixTransform',
            'PolynomialTransform',
            'PiecewiseAffineTransform',
            'swirl',

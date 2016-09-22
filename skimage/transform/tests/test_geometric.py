@@ -203,6 +203,42 @@ def test_piecewise_affine():
     assert_almost_equal(tform.inverse(DST), SRC)
 
 
+def test_fundamental_matrix_estimation():
+    src = np.array([1.839035, 1.924743, 0.543582,  0.375221,
+                    0.473240, 0.142522, 0.964910,  0.598376,
+                    0.102388, 0.140092, 15.994343, 9.622164,
+                    0.285901, 0.430055, 0.091150,  0.254594]).reshape(-1, 2)
+    dst = np.array([1.002114, 1.129644, 1.521742, 1.846002,
+                    1.084332, 0.275134, 0.293328, 0.588992,
+                    0.839509, 0.087290, 1.779735, 1.116857,
+                    0.878616, 0.602447, 0.642616, 1.028681]).reshape(-1, 2)
+
+    tform = estimate_transform('fundamental', src, dst)
+
+    tform_ref = np.array([[-0.217859, 0.419282, -0.0343075],
+                          [-0.0717941, 0.0451643, 0.0216073],
+                          [0.248062, -0.429478, 0.0221019]])
+    assert_almost_equal(tform.params, tform_ref, 6)
+
+
+def test_fundamental_matrix_estimation():
+    src = np.array([1.839035, 1.924743, 0.543582,  0.375221,
+                    0.473240, 0.142522, 0.964910,  0.598376,
+                    0.102388, 0.140092, 15.994343, 9.622164,
+                    0.285901, 0.430055, 0.091150,  0.254594]).reshape(-1, 2)
+    dst = np.array([1.002114, 1.129644, 1.521742, 1.846002,
+                    1.084332, 0.275134, 0.293328, 0.588992,
+                    0.839509, 0.087290, 1.779735, 1.116857,
+                    0.878616, 0.602447, 0.642616, 1.028681]).reshape(-1, 2)
+
+    tform = estimate_transform('essential', src, dst)
+
+    tform_ref = np.array([[-0.0811666, 0.255449, -0.0478999],
+                          [-0.192392, -0.0531675, 0.119547],
+                          [0.177784, -0.22008, -0.015203]])
+    assert_almost_equal(tform.params, tform_ref, 6)
+
+
 def test_projective_estimation():
     # exact solution
     tform = estimate_transform('projective', SRC[:4, :], DST[:4, :])

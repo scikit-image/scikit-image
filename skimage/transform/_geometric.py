@@ -290,15 +290,22 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         # Setup homogeneous linear equation as x2' * F * x1 = 0.
         A = np.zeros((8, 9))
-        A[:, :3] = src
-        A[:, :3] = dst[:, 0]
-        A[:, 3:6] = src
-        A[:, 3:6] = dst[:, 1]
-        A[:, 6:] = src
+        A[:, :2] = src
+        A[:, 2] = 1
+        A[:, 0] *= dst[:, 0]
+        A[:, 1] *= dst[:, 0]
+        A[:, 2] *= dst[:, 0]
+        A[:, 3:5] = src
+        A[:, 5] = 1
+        A[:, 3] *= dst[:, 1]
+        A[:, 4] *= dst[:, 1]
+        A[:, 5] *= dst[:, 1]
+        A[:, 6:8] = src
+        A[:, 8] = 1
 
         # Solve for the nullspace of the constraint matrix.
         _, _, V = np.linalg.svd(A)
-        F_normalized = V[:, -1].reshape(3, 3)
+        F_normalized = V[-1, :].reshape(3, 3)
 
         return F_normalized, src_matrix, dst_matrix
 
@@ -324,13 +331,13 @@ class FundamentalMatrixTransform(GeometricTransform):
         """
 
         F_normalized, src_matrix, dst_matrix = \
-            _setup_constraint_matrix(src, dst)
+            self._setup_constraint_matrix(src, dst)
 
         # Enforcing the internal constraint that two singular values must non-
         # zero and one must be zero.
         U, S, V = np.linalg.svd(F_normalized)
-        S[2, 2] = 0
-        F = np.dot(U, np.dot(S, V))
+        S[2] = 0
+        F = np.dot(U, np.dot(np.diag(S), V))
 
         self.params = np.dot(dst_matrix.T, np.dot(F, src_matrix))
 
@@ -409,15 +416,15 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
         """
 
         E_normalized, src_matrix, dst_matrix = \
-            _setup_constraint_matrix(src, dst)
+            self._setup_constraint_matrix(src, dst)
 
         # Enforcing the internal constraint that two singular values must be
         # equal and one must be zero.
         U, S, V = np.linalg.svd(E_normalized)
-        S[0, 0] = (S[0, 0] + S[1, 1]) / 2.0
-        S[1, 1] = S[0, 0]
-        S[2, 2] = 0
-        E = np.dot(U, np.dot(S, V))
+        S[0] = (S[0] + S[1]) / 2.0
+        S[1] = S[0]
+        S[2] = 0
+        E = np.dot(U, np.dot(np.diag(S), V))
 
         self.params = np.dot(dst_matrix.T, np.dot(E, src_matrix))
 
@@ -1222,6 +1229,8 @@ TRANSFORMS = {
     'affine': AffineTransform,
     'piecewise-affine': PiecewiseAffineTransform,
     'projective': ProjectiveTransform,
+    'fundamental': FundamentalMatrixTransform,
+    'essential': EssentialMatrixTransform,
     'polynomial': PolynomialTransform,
 }
 
