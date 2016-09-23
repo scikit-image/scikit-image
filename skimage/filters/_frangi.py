@@ -44,7 +44,7 @@ def _frangi_hessian_common_filter(image, scale_range, scale_step,
     # Filtering for all sigmas
     for i, sigma in enumerate(sigmas):
         # Make 2D hessian
-        (Dxx, Dxy, Dyy) = hessian_matrix(image, sigma)
+        (Dxx, Dxy, Dyy) = hessian_matrix(image, sigma, Order=None)
 
         # Correct for scale
         Dxx = (sigma ** 2) * Dxx
