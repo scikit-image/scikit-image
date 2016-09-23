@@ -121,7 +121,8 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
         weighting function for the auto-correlation matrix.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
         How to handle values outside the image borders.
-    cval : float, optional
+    cval : float, 'F'
+        else:optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
     order : {'C', 'F'}, optional
@@ -172,6 +173,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
 
     if order == 'F':
         H_elems.reverse()
+
     return H_elems
 
 
@@ -280,7 +282,7 @@ def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
     >>> from skimage.feature import hessian_matrix, hessian_matrix_eigvals
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
+    >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1, order='C')
     >>> hessian_matrix_eigvals(Hxx, Hxy, Hyy)[0]
     array([[ 0.,  0.,  2.,  0.,  0.],
            [ 0.,  1.,  0.,  1.,  0.],
