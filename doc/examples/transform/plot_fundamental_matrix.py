@@ -41,7 +41,7 @@ matches12 = match_descriptors(descriptors1, descriptors2, cross_check=True)
 model, inliers = ransac((keypoints1[matches12[:, 0]],
                          keypoints2[matches12[:, 1]]),
                         FundamentalMatrixTransform, min_samples=8,
-                        residual_threshold=4, max_trials=5000)
+                        residual_threshold=2, max_trials=5000)
 
 print("Number of matches:", matches12.shape[0])
 print("Number of inliers:", inliers.sum())
