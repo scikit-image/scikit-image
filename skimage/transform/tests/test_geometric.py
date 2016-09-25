@@ -1,7 +1,6 @@
 import numpy as np
 from numpy.testing import (assert_equal, assert_almost_equal,
                            assert_raises)
-from skimage.transform._geometric import _stackcopy
 from skimage.transform._geometric import GeometricTransform
 from skimage.transform import (estimate_transform, matrix_transform,
                                EuclideanTransform, SimilarityTransform,
@@ -30,15 +29,6 @@ DST = np.array([
     [3754, 790],
     [1024, 1931],
 ])
-
-
-def test_stackcopy():
-    layers = 4
-    x = np.empty((3, 3, layers))
-    y = np.eye(3, 3)
-    _stackcopy(x, y)
-    for i in range(layers):
-        assert_almost_equal(x[..., i], y)
 
 
 def test_estimate_transform():

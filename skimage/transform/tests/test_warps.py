@@ -3,6 +3,7 @@ from numpy.testing import (assert_almost_equal, run_module_suite,
 import numpy as np
 from scipy.ndimage import map_coordinates
 
+from skimage.transform._warps import _stackcopy
 from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
                                AffineTransform,
                                ProjectiveTransform,
@@ -15,6 +16,15 @@ from skimage._shared.testing import test_parallel
 
 
 np.random.seed(0)
+
+
+def test_stackcopy():
+    layers = 4
+    x = np.empty((3, 3, layers))
+    y = np.eye(3, 3)
+    _stackcopy(x, y)
+    for i in range(layers):
+        assert_almost_equal(x[..., i], y)
 
 
 def test_warp_tform():
