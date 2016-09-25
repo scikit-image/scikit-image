@@ -227,6 +227,16 @@ class FundamentalMatrixTransform(GeometricTransform):
     .. [1] Hartley, Richard, and Andrew Zisserman. Multiple view geometry in
            computer vision. Cambridge university press, 2003.
 
+    Parameters
+    ----------
+    matrix : (3, 3) array, optional
+        Fundamental matrix.
+
+    Attributes
+    ----------
+    params : (3, 3) array
+        Fundamental matrix.
+
     """
 
     def __init__(self, matrix=None):
@@ -364,8 +374,8 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         dst_F_src = np.sum(dst_homogeneous * F_src.T, axis=1)
 
-        return dst_F_src / np.sqrt(F_src[0] ** 2 + F_src[1] ** 2
-                                   + Ft_dst[0] ** 2 + Ft_dst[1] ** 2)
+        return np.abs(dst_F_src) / np.sqrt(F_src[0] ** 2 + F_src[1] ** 2
+                                           + Ft_dst[0] ** 2 + Ft_dst[1] ** 2)
 
 
 class EssentialMatrixTransform(FundamentalMatrixTransform):
@@ -387,7 +397,47 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     .. [1] Hartley, Richard, and Andrew Zisserman. Multiple view geometry in
            computer vision. Cambridge university press, 2003.
 
+    Parameters
+    ----------
+    rotation : (3, 3) array, optional
+        Rotation matrix of the relative camera motion.
+    translation : (3, 1) array, optional
+        Translation vector of the relative camera motion. The vector must
+        have unit length.
+    matrix : (3, 3) array, optional
+        Essential matrix.
+
+    Attributes
+    ----------
+    params : (3, 3) array
+        Essential matrix.
+
     """
+
+    def __init__(self, rotation=None, translation=None, matrix=None):
+        if rotation is not None:
+            if translation is None:
+                raise ValueError("Both rotation and translation required")
+            if rotation.shape != (3, 3):
+                raise ValueError("Invalid shape of rotation matrix")
+            if abs(np.linalg.det(rotation) - 1) > 1e-6:
+                raise ValueError("Rotation matrix must have unit determinant")
+            if translation.size != 3:
+                raise ValueError("Invalid shape of translation vector")
+            if abs(np.linalg.norm(translation) - 1) > 1e-6:
+                raise ValueError("Translation vector must have unit length")
+            # Matrix representation of the cross product for t.
+            t_x = np.array([0, -translation[2], translation[1],
+                            translation[2], 0, -translation[0],
+                            -translation[1], translation[0], 0]).reshape(3, 3)
+            self.params = np.dot(t_x, rotation)
+        elif matrix is not None:
+            if matrix.shape != (3, 3):
+                raise ValueError("Invalid shape of transformation matrix")
+            self.params = matrix
+        else:
+            # default to an identity transform
+            self.params = np.eye(3)
 
     def estimate(self, src, dst):
         """Estimate essential matrix using 8-point algorithm.

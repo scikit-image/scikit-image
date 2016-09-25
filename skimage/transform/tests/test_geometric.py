@@ -4,7 +4,8 @@ from numpy.testing import (assert_equal, assert_almost_equal,
 from skimage.transform._geometric import GeometricTransform
 from skimage.transform import (estimate_transform, matrix_transform,
                                EuclideanTransform, SimilarityTransform,
-                               AffineTransform, ProjectiveTransform,
+                               AffineTransform, FundamentalMatrixTransform,
+                               EssentialMatrixTransform, ProjectiveTransform,
                                PolynomialTransform, PiecewiseAffineTransform)
 from skimage._shared._warnings import expected_warnings
 
@@ -211,7 +212,24 @@ def test_fundamental_matrix_estimation():
     assert_almost_equal(tform.params, tform_ref, 6)
 
 
-def test_fundamental_matrix_estimation():
+def test_fundamental_matrix_residuals():
+    essential_matrix_tform = EssentialMatrixTransform(
+        rotation=np.eye(3), translation=np.array([1, 0, 0]))
+    tform = FundamentalMatrixTransform()
+    tform.params = essential_matrix_tform.params
+    src = np.array([[0, 0], [0, 0], [0, 0]])
+    dst = np.array([[2, 0], [2, 1], [2, 2]])
+    assert_almost_equal(tform.residuals(src, dst)**2, [0, 0.5, 2])
+
+
+def test_essential_matrix_init():
+    tform = EssentialMatrixTransform(rotation=np.eye(3),
+                                     translation=np.array([0, 0, 1]))
+    assert_equal(tform.params,
+                 np.array([0, -1, 0, 1, 0, 0, 0, 0, 0]).reshape(3, 3))
+
+
+def test_essential_matrix_estimation():
     src = np.array([1.839035, 1.924743, 0.543582,  0.375221,
                     0.473240, 0.142522, 0.964910,  0.598376,
                     0.102388, 0.140092, 15.994343, 9.622164,
@@ -227,6 +245,14 @@ def test_fundamental_matrix_estimation():
                           [-0.192392, -0.0531675, 0.119547],
                           [0.177784, -0.22008, -0.015203]])
     assert_almost_equal(tform.params, tform_ref, 6)
+
+
+def test_essential_matrix_residuals():
+    tform = EssentialMatrixTransform(rotation=np.eye(3),
+                                     translation=np.array([1, 0, 0]))
+    src = np.array([[0, 0], [0, 0], [0, 0]])
+    dst = np.array([[2, 0], [2, 1], [2, 2]])
+    assert_almost_equal(tform.residuals(src, dst)**2, [0, 0.5, 2])
 
 
 def test_projective_estimation():
@@ -324,6 +350,23 @@ def test_invalid_input():
                   matrix=np.zeros((2, 3)), translation=(0, 0))
 
     assert_raises(ValueError, PolynomialTransform, np.zeros((3, 3)))
+
+    assert_raises(ValueError, FundamentalMatrixTransform,
+                  matrix=np.zeros((3, 2)))
+    assert_raises(ValueError, EssentialMatrixTransform,
+                  matrix=np.zeros((3, 2)))
+    assert_raises(ValueError, EssentialMatrixTransform,
+                  rotation=np.zeros((3, 2)))
+    assert_raises(ValueError, EssentialMatrixTransform,
+                  rotation=np.zeros((3, 3)))
+    assert_raises(ValueError, EssentialMatrixTransform,
+                  rotation=np.eye(3))
+    assert_raises(ValueError, EssentialMatrixTransform,
+                  rotation=np.eye(3), translation=np.zeros((2,)))
+    assert_raises(ValueError, EssentialMatrixTransform,
+                  rotation=np.eye(3), translation=np.zeros((2,)))
+    assert_raises(ValueError, EssentialMatrixTransform,
+                  rotation=np.eye(3), translation=np.zeros((3,)))
 
 
 def test_degenerate():
