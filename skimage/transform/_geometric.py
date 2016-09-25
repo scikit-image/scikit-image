@@ -289,7 +289,7 @@ class FundamentalMatrixTransform(GeometricTransform):
             return
 
         # Setup homogeneous linear equation as x2' * F * x1 = 0.
-        A = np.zeros((8, 9))
+        A = np.zeros((src.shape[0], 9))
         A[:, :2] = src
         A[:, 2] = 1
         A[:, 0] *= dst[:, 0]
@@ -367,7 +367,7 @@ class FundamentalMatrixTransform(GeometricTransform):
         F_src = np.dot(self.params, src_homogeneous.T)
         Ft_dst = np.dot(self.params.T, dst_homogeneous.T)
 
-        dst_F_src = np.dot(dst_h.T, F_src)
+        dst_F_src = np.sum(dst_homogeneous * F_src.T, axis=1)
 
         return dst_F_src / np.sqrt(F_src[0] ** 2 + F_src[1] ** 2
                                    + Ft_dst[0] ** 2 + Ft_dst[1] ** 2)
