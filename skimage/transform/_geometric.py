@@ -216,12 +216,11 @@ class FundamentalMatrixTransform(GeometricTransform):
     uncalibrated images. The matrix transforms homogeneous image points in one
     image to epipolar lines in the other image.
 
-    The fundamental matrix is only defined for a pair of moving images capturing
-    a non-planar scene. In the case of pure rotation or planar scenes, the
-    homography describes the geometric relation between two images
-    (`ProjectiveTransform`). If the intrinsic calibration of the images is
-    known, the essential matrix describes the metric relation between the two
-    images (`EssentialMatrixTransform`).
+    The fundamental matrix is only defined for a pair of moving images. In the
+    case of pure rotation or planar scenes, the homography describes the
+    geometric relation between two images (`ProjectiveTransform`). If the
+    intrinsic calibration of the images is known, the essential matrix describes
+    the metric relation between the two images (`EssentialMatrixTransform`).
 
     References
     ----------
@@ -380,8 +379,8 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     non-planar scene. In the case of pure rotation or planar scenes, the
     homography describes the geometric relation between two images
     (`ProjectiveTransform`). If the intrinsic calibration of the images is
-    unknown, the fundamental matrix describes the metric relation between the
-    two images (`FundamentalMatrixTransform`).
+    unknown, the fundamental matrix describes the projective relation between
+    the two images (`FundamentalMatrixTransform`).
 
     References
     ----------
