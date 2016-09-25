@@ -29,7 +29,8 @@ __all__ = ['load',
            'moon',
            'page',
            'text',
-           'rocket']
+           'rocket',
+           'middlebury2014_motorcycle']
 
 
 def load(f, as_grey=False):
@@ -321,3 +322,51 @@ def rocket():
         Rocket image.
     """
     return load("rocket.jpg")
+
+
+def middlebury2014_motorcycle():
+    """Rectified stereo image pair.
+
+    The two images are rectified such that every pixel in the left image has its
+    corresponding pixel on the same scanline in the right image. That means that
+    both images are warped such that they have the same orientation but a
+    baseline in the x-direction.
+
+    The two images are part of the Middlebury 2014 stereo benchmark. The dataset
+    was created by Nera Nesic, Porter Westling, Xi Wang, York Kitajima, Greg
+    Krathwohl, and Daniel Scharstein at Middlebury College. A detailed
+    description of the acquisition process can be found in [1]_.
+
+    The images included here are down-sampled versions of the default exposure
+    images in the benchmark. The calibration data in the following is valid for
+    the down-sampled images::
+
+        Focal length:           687.488px
+        Principal point x:      214.021px
+        Principal point y:      176.109px
+        Principal point dx:      21.479px
+        Baseline:               193.001mm
+
+    Returns
+    -------
+    img_left : (512, 345, 3) uint8 ndarray
+        Left stereo image.
+    img_right : (512, 345, 3) uint8 ndarray
+        Right stereo image.
+
+    Notes
+    -----
+    The original resolution images, images with different exposure and lighting,
+    and ground-truth depth maps can be found at the Middlebury website [2]_.
+
+    References
+    ----------
+    .. [1] D. Scharstein, H. Hirschmüller, Y. Kitajima, G. Krathwohl, N. Nesic,
+           X. Wang, and P. Westling. High-resolution stereo datasets with
+           subpixel-accurate ground truth. In German Conference on Pattern
+           Recognition (GCPR 2014), Münster, Germany, September 2014.
+    .. [2] http://vision.middlebury.edu/stereo/data/scenes2014/
+
+    """
+    return (load("middlebury2014_motorcycle_left.png"),
+            load("middlebury2014_motorcycle_right.png"))
