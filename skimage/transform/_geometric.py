@@ -282,6 +282,30 @@ class FundamentalMatrixTransform(GeometricTransform):
         return np.dot(coords_homogeneous, self.params)
 
     def _setup_constraint_matrix(self, src, dst):
+        """Setup and solve the homogeneous epipolar constraint matrix::
+
+            dst' * F * src = 0.
+
+        Parameters
+        ----------
+        src : (N, 2) array
+            Source coordinates.
+        dst : (N, 2) array
+            Destination coordinates.
+
+        Returns
+        -------
+        F_normalized : (3, 3) array
+            The normalized solution to the homogeneous system. If the system
+            is not well-conditioned, this matrix contains NaNs.
+        src_matrix : (3, 3) array
+            The transformation matrix to obtain the normalized source
+            coordinates.
+        dst_matrix : (3, 3) array
+            The transformation matrix to obtain the normalized destination
+            coordinates.
+
+        """
         assert src.shape == dst.shape
         assert src.shape[0] >= 8
 
@@ -290,23 +314,16 @@ class FundamentalMatrixTransform(GeometricTransform):
             src_matrix, src = _center_and_normalize_points(src)
             dst_matrix, dst = _center_and_normalize_points(dst)
         except ZeroDivisionError:
-            self.params = np.nan * np.empty((3, 3))
-            return
+            self.params = np.full((3, 3), np.nan)
+            return 3 * [np.full((3, 3), np.nan)]
 
-        # Setup homogeneous linear equation as x2' * F * x1 = 0.
-        A = np.zeros((src.shape[0], 9))
+        # Setup homogeneous linear equation as dst' * F * src = 0.
+        A = np.ones((src.shape[0], 9))
         A[:, :2] = src
-        A[:, 2] = 1
-        A[:, 0] *= dst[:, 0]
-        A[:, 1] *= dst[:, 0]
-        A[:, 2] *= dst[:, 0]
+        A[:, :3] *= dst[:, 0, np.newaxis]
         A[:, 3:5] = src
-        A[:, 5] = 1
-        A[:, 3] *= dst[:, 1]
-        A[:, 4] *= dst[:, 1]
-        A[:, 5] *= dst[:, 1]
+        A[:, 3:6] *= dst[:, 1, np.newaxis]
         A[:, 6:8] = src
-        A[:, 8] = 1
 
         # Solve for the nullspace of the constraint matrix.
         _, _, V = np.linalg.svd(A)
