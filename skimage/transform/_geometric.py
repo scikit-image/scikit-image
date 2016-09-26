@@ -262,7 +262,7 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         """
         coords_homogeneous = np.column_stack([coords, np.ones(coords.shape[0])])
-        return np.dot(coords.homogeneous, self.params.T)
+        return np.dot(coords_homogeneous, self.params.T)
 
     def inverse(self, coords):
         """Apply inverse transformation.
@@ -279,7 +279,7 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         """
         coords_homogeneous = np.column_stack([coords, np.ones(coords.shape[0])])
-        return np.dot(coords.homogeneous, self.params)
+        return np.dot(coords_homogeneous, self.params)
 
     def _setup_constraint_matrix(self, src, dst):
         assert src.shape == dst.shape

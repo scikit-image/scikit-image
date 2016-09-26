@@ -222,6 +222,24 @@ def test_fundamental_matrix_residuals():
     assert_almost_equal(tform.residuals(src, dst)**2, [0, 0.5, 2])
 
 
+def test_fundamental_matrix_forward():
+    essential_matrix_tform = EssentialMatrixTransform(
+        rotation=np.eye(3), translation=np.array([1, 0, 0]))
+    tform = FundamentalMatrixTransform()
+    tform.params = essential_matrix_tform.params
+    src = np.array([[0, 0], [0, 1], [1, 1]])
+    assert_almost_equal(tform(src), [[0, -1, 0], [0, -1, 1], [0, -1, 1]])
+
+
+def test_fundamental_matrix_inverse():
+    essential_matrix_tform = EssentialMatrixTransform(
+        rotation=np.eye(3), translation=np.array([1, 0, 0]))
+    tform = FundamentalMatrixTransform()
+    tform.params = essential_matrix_tform.params
+    src = np.array([[0, 0], [0, 1], [1, 1]])
+    assert_almost_equal(tform.inverse(src), [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
+
+
 def test_essential_matrix_init():
     tform = EssentialMatrixTransform(rotation=np.eye(3),
                                      translation=np.array([0, 0, 1]))
@@ -245,6 +263,20 @@ def test_essential_matrix_estimation():
                           [-0.192392, -0.0531675, 0.119547],
                           [0.177784, -0.22008, -0.015203]])
     assert_almost_equal(tform.params, tform_ref, 6)
+
+
+def test_essential_matrix_forward():
+    tform = EssentialMatrixTransform(rotation=np.eye(3),
+                                     translation=np.array([1, 0, 0]))
+    src = np.array([[0, 0], [0, 1], [1, 1]])
+    assert_almost_equal(tform(src), [[0, -1, 0], [0, -1, 1], [0, -1, 1]])
+
+
+def test_essential_matrix_inverse():
+    tform = EssentialMatrixTransform(rotation=np.eye(3),
+                                     translation=np.array([1, 0, 0]))
+    src = np.array([[0, 0], [0, 1], [1, 1]])
+    assert_almost_equal(tform.inverse(src), [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
 
 
 def test_essential_matrix_residuals():
