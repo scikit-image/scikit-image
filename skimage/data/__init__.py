@@ -1,3 +1,5 @@
+# coding: utf-8
+
 """Standard test images.
 
 For more images, see
@@ -373,10 +375,10 @@ def stereo_motorcycle():
 
     References
     ----------
-    .. [1] D. Scharstein, H. Hirschmüller, Y. Kitajima, G. Krathwohl, N. Nesic,
+    .. [1] D. Scharstein, H. Hirschmueller, Y. Kitajima, G. Krathwohl, N. Nesic,
            X. Wang, and P. Westling. High-resolution stereo datasets with
            subpixel-accurate ground truth. In German Conference on Pattern
-           Recognition (GCPR 2014), Münster, Germany, September 2014.
+           Recognition (GCPR 2014), Muenster, Germany, September 2014.
     .. [2] http://vision.middlebury.edu/stereo/data/scenes2014/
 
     """
