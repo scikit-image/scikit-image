@@ -206,6 +206,7 @@ def test_fundamental_matrix_estimation():
 
     tform = estimate_transform('fundamental', src, dst)
 
+    # Reference values obtained using COLMAP SfM library.
     tform_ref = np.array([[-0.217859, 0.419282, -0.0343075],
                           [-0.0717941, 0.0451643, 0.0216073],
                           [0.248062, -0.429478, 0.0221019]])
@@ -259,6 +260,7 @@ def test_essential_matrix_estimation():
 
     tform = estimate_transform('essential', src, dst)
 
+    # Reference values obtained using COLMAP SfM library.
     tform_ref = np.array([[-0.0811666, 0.255449, -0.0478999],
                           [-0.192392, -0.0531675, 0.119547],
                           [0.177784, -0.22008, -0.015203]])
