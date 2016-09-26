@@ -30,7 +30,7 @@ __all__ = ['load',
            'page',
            'text',
            'rocket',
-           'middlebury2014_motorcycle']
+           'stereo_motorcycle']
 
 
 def load(f, as_grey=False):
@@ -324,7 +324,7 @@ def rocket():
     return load("rocket.jpg")
 
 
-def middlebury2014_motorcycle():
+def stereo_motorcycle():
     """Rectified stereo image pair.
 
     The two images are rectified such that every pixel in the left image has its

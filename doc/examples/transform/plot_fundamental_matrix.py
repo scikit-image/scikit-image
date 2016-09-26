@@ -24,7 +24,7 @@ from skimage.measure import ransac
 from skimage.transform import FundamentalMatrixTransform
 import matplotlib.pyplot as plt
 
-img1, img2 = map(rgb2gray, data.middlebury2014_motorcycle())
+img1, img2 = map(rgb2gray, data.stereo_motorcycle())
 
 descriptor_extractor = ORB()
 

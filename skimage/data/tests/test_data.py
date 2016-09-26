@@ -79,9 +79,9 @@ def test_text():
     data.text()
 
 
-def test_middlebury2014_motorcycle():
-    """ Test that "middlebury2014_motorcycle" image can be loaded. """
-    data.middlebury2014_motorcycle()
+def test_stereo_motorcycle():
+    """ Test that "stereo_motorcycle" image can be loaded. """
+    data.stereo_motorcycle()
 
 
 def test_binary_blobs():
