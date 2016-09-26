@@ -330,7 +330,7 @@ def stereo_motorcycle():
     The two images are rectified such that every pixel in the left image has its
     corresponding pixel on the same scanline in the right image. That means that
     both images are warped such that they have the same orientation but a
-    baseline in the x-direction.
+    horizontal spatial offset (baseline).
 
     The two images are part of the Middlebury 2014 stereo benchmark. The dataset
     was created by Nera Nesic, Porter Westling, Xi Wang, York Kitajima, Greg
