@@ -228,7 +228,7 @@ def _line_aa(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y1, Py_ssize_t x1):
             1. - np.array(val, dtype=np.float))
 
 
-def _line_sc(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y1, Py_ssize_t x1):
+def _line_sc(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
     """ Generate supercover line pixel coordinates. Differs
     from line() in that every pixel the line travels through is
     set to 1. (When the line passes through a pixel corner, all
@@ -236,9 +236,9 @@ def _line_sc(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y1, Py_ssize_t x1):
 
     Parameters
     ----------
-    y0, x0 : int
+    r0, c0 : int
         Starting position (row, column).
-    y1, x1 : int
+    r1, c1 : int
         End position (row, column).
 
     Returns
@@ -267,52 +267,52 @@ def _line_sc(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y1, Py_ssize_t x1):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    cdef int dx = abs(x1-x0)
-    cdef int dy = abs(y1-y0)
-    cdef int x = x0
-    cdef int y = y0
+    cdef int dc = abs(c1-c0)
+    cdef int dr = abs(r1-r0)
+    cdef int c = c0
+    cdef int r = r0
     cdef int ii = 0
-    cdef int n = dx + dy
-    cdef int err = dx - dy
-    cdef int x_inc = 1 
-    cdef int y_inc = 1 
+    cdef int n = dc + dr
+    cdef int err = dc - dr
+    cdef int c_inc = 1 
+    cdef int r_inc = 1 
 
-    cdef int max_length = (max(dx,dy)+1)*3
+    cdef int max_length = (max(dc,dr)+1)*3
 
     cdef Py_ssize_t[::1] rr = np.zeros(max_length, dtype=np.intp)
     cdef Py_ssize_t[::1] cc = np.zeros(max_length, dtype=np.intp)
 
-    if x1 > x0: x_inc = 1 
-    else:       x_inc = -1
-    if y1 > y0: y_inc = 1 
-    else:       y_inc = -1
+    if c1 > c0: c_inc = 1 
+    else:       c_inc = -1
+    if r1 > r0: r_inc = 1 
+    else:       r_inc = -1
 
-    dx = 2 * dx
-    dy = 2 * dy
+    dc = 2 * dc
+    dr = 2 * dr
 
     while n > 0:
-        rr[ii] = y
-        cc[ii] = x
+        rr[ii] = r
+        cc[ii] = c
         ii = ii + 1
         if (err > 0):
-            x += x_inc
-            err -= dy
+            c += c_inc
+            err -= dr
         elif (err < 0):
-            y += y_inc
-            err += dx
+            r += r_inc
+            err += dc
         else: # If err == 0 the algorithm is on a corner
-            rr[ii] = y + y_inc
-            cc[ii] = x
-            rr[ii+1] = y
-            cc[ii+1] = x + x_inc
+            rr[ii] = r + r_inc
+            cc[ii] = c
+            rr[ii+1] = r
+            cc[ii+1] = c + c_inc
             ii = ii + 2
-            x += x_inc
-            y += y_inc
-            err = err + dx - dy
+            c += c_inc
+            r += r_inc
+            err = err + dc - dr
             n = n - 1
         n = n - 1 
-    rr[ii] = y
-    cc[ii] = x
+    rr[ii] = r
+    cc[ii] = c
         
     return np.asarray(rr[0:ii+1]), np.asarray(cc[0:ii+1])
 

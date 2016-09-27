@@ -126,7 +126,7 @@ def circle(r, c, radius, shape=None):
     return ellipse(r, c, radius, radius, shape)
 
 
-def polygon_perimeter(cr, cc, shape=None, clip=False):
+def polygon_perimeter(cr, cc, shape=None, clip=False, supercover=False):
     """Generate polygon perimeter coordinates.
 
     Parameters
@@ -143,6 +143,9 @@ def polygon_perimeter(cr, cc, shape=None, clip=False):
         Whether to clip the polygon to the provided shape.  If this is set
         to True, the drawn figure will always be a closed polygon with all
         edges visible.
+    supercover : bool, optional
+        Selects whether to use the standard Bresenham line
+        algorithm or the supercover version.
 
     Returns
     -------
@@ -190,7 +193,7 @@ def polygon_perimeter(cr, cc, shape=None, clip=False):
     # Construct line segments
     pr, pc = [], []
     for i in range(len(cr) - 1):
-        line_r, line_c = line(cr[i], cc[i], cr[i + 1], cc[i + 1])
+        line_r, line_c = line(cr[i], cc[i], cr[i + 1], cc[i + 1], supercover = supercover)
         pr.extend(line_r)
         pc.extend(line_c)
 
@@ -271,16 +274,16 @@ def set_color(img, coords, color, alpha=1):
     img[rr, cc] = vals + color
 
 
-def line(y0, x0, y1, x1, supercover = False):
+def line(r0, c0, r1, c1, supercover = False):
     """Generate line pixel coordinates.
 
     Parameters
     ----------
-    y0, x0 : int
+    r0, c0 : int
         Starting position (row, column).
-    y1, x1 : int
+    r1, c1 : int
         End position (row, column).
-    supercover : bool
+    supercover : bool, optional
         Selects whether to use the standard Bresenham line
         algorithm or the supercover version.
 
@@ -329,9 +332,9 @@ def line(y0, x0, y1, x1, supercover = False):
 
     """
     if supercover is False:
-        return _line(y0, x0, y1, x1)
+        return _line(r0, c0, r1, c1)
     else:
-        return _line_sc(y0, x0, y1, x1)
+        return _line_sc(r0, c0, r1, c1)
 
 
 def line_aa(y0, x0, y1, x1):
