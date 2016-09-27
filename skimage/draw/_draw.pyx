@@ -58,6 +58,7 @@ def _line(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y1, Py_ssize_t x1):
     See Also
     --------
     line_aa : Anti-aliased line generator
+    line_sc : Supercover line generator
 
     Examples
     --------
@@ -225,6 +226,95 @@ def _line_aa(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y1, Py_ssize_t x1):
     return (np.array(rr, dtype=np.intp),
             np.array(cc, dtype=np.intp),
             1. - np.array(val, dtype=np.float))
+
+
+def _line_sc(Py_ssize_t y0, Py_ssize_t x0, Py_ssize_t y1, Py_ssize_t x1):
+    """ Generate supercover line pixel coordinates. Differs
+    from line() in that every pixel the line travels through is
+    set to 1. (When the line passes through a pixel corner, all
+    pixels touching that corner are set to 1.)
+
+    Parameters
+    ----------
+    y0, x0 : int
+        Starting position (row, column).
+    y1, x1 : int
+        End position (row, column).
+
+    Returns
+    -------
+    rr, cc : (N,) ndarray of int
+        Indices of pixels that belong to the line.
+        May be used to directly index into an array, e.g.
+        ``img[rr, cc] = 1``.
+
+    Examples
+    --------
+    >>> from skimage.draw import line
+    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> rr, cc = line(1, 1, 6, 8, supercover = True)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+
+    """
+    cdef int dx = abs(x1-x0)
+    cdef int dy = abs(y1-y0)
+    cdef int x = x0
+    cdef int y = y0
+    cdef int ii = 0
+    cdef int n = dx + dy
+    cdef int err = dx - dy
+    cdef int x_inc = 1 
+    cdef int y_inc = 1 
+
+    cdef int max_length = (max(dx,dy)+1)*3
+
+    cdef Py_ssize_t[::1] rr = np.zeros(max_length, dtype=np.intp)
+    cdef Py_ssize_t[::1] cc = np.zeros(max_length, dtype=np.intp)
+
+    if x1 > x0: x_inc = 1 
+    else:       x_inc = -1
+    if y1 > y0: y_inc = 1 
+    else:       y_inc = -1
+
+    dx = 2 * dx
+    dy = 2 * dy
+
+    while n > 0:
+        rr[ii] = y
+        cc[ii] = x
+        ii = ii + 1
+        if (err > 0):
+            x += x_inc
+            err -= dy
+        elif (err < 0):
+            y += y_inc
+            err += dx
+        else: # If err == 0 the algorithm is on a corner
+            rr[ii] = y + y_inc
+            cc[ii] = x
+            rr[ii+1] = y
+            cc[ii+1] = x + x_inc
+            ii = ii + 2
+            x += x_inc
+            y += y_inc
+            err = err + dx - dy
+            n = n - 1
+        n = n - 1 
+    rr[ii] = y
+    cc[ii] = x
+        
+    return np.asarray(rr[0:ii+1]), np.asarray(cc[0:ii+1])
 
 
 def _polygon(y, x, shape=None):

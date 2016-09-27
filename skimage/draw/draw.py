@@ -3,7 +3,7 @@ import numpy as np
 
 from .._shared._geometry import polygon_clip
 from ._draw import (_coords_inside_image, _line, _line_aa,
-                    _polygon, _ellipse_perimeter,
+                    _line_sc, _polygon, _ellipse_perimeter,
                     _circle_perimeter, _circle_perimeter_aa,
                     _bezier_curve)
 
@@ -271,7 +271,7 @@ def set_color(img, coords, color, alpha=1):
     img[rr, cc] = vals + color
 
 
-def line(y0, x0, y1, x1):
+def line(y0, x0, y1, x1, supercover = False):
     """Generate line pixel coordinates.
 
     Parameters
@@ -280,6 +280,9 @@ def line(y0, x0, y1, x1):
         Starting position (row, column).
     y1, x1 : int
         End position (row, column).
+    supercover : bool
+        Selects whether to use the standard Bresenham line
+        algorithm or the supercover version.
 
     Returns
     -------
@@ -296,22 +299,39 @@ def line(y0, x0, y1, x1):
     --------
     >>> from skimage.draw import line
     >>> img = np.zeros((10, 10), dtype=np.uint8)
-    >>> rr, cc = line(1, 1, 8, 8)
+    >>> rr, cc = line(1, 1, 6, 8)
     >>> img[rr, cc] = 1
     >>> img
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> rr, cc = line(1, 1, 6, 8, supercover = True)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    return _line(y0, x0, y1, x1)
+    if supercover is False:
+        return _line(y0, x0, y1, x1)
+    else:
+        return _line_sc(y0, x0, y1, x1)
 
 
 def line_aa(y0, x0, y1, x1):
