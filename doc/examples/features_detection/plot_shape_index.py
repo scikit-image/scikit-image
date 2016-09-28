@@ -23,7 +23,7 @@ global phenomena like uneven illumination.
 
 The blue and green marks are points which deviate no more than 0.05 from the desired shape.
 To attenuate noise in the signal, the green marks are taken from the shape index (s)
- after another Gaussian blur pass (yielding s').
+after another Gaussian blur pass (yielding s').
 
 Note how spots interjoined too closely are *not* detected, as they do not posses the desired shape.
 
