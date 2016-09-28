@@ -68,7 +68,7 @@ def saliency_kadir_brady(image, min_scale=5, max_scale=13, saliency_threshold=0.
 
     Notes
     -----
-    The radius of each region is 'scale/2'.
+    The radius of each region is same as scale.
     """
 
     assert_nD(image, 2)
@@ -76,9 +76,9 @@ def saliency_kadir_brady(image, min_scale=5, max_scale=13, saliency_threshold=0.
     # scales for keypoints
     scales = np.arange(min_scale, max_scale, 2)
     # detect keypoints in scale-space
-    base_regions = detect(image, scales)
+    base_regions = _detect(image, scales)
     # pruning based on thresholds
-    regions = prune(base_regions, saliency_threshold, clustering_threshold, k=15)
+    regions = _prune(base_regions, saliency_threshold, clustering_threshold, k=15)
 
     return regions.T
 
