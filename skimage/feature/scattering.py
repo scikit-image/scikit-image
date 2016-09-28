@@ -30,7 +30,7 @@ def _apply_fourier_mult(signals, filters):
             Filtered signals in the Fourier domain,
             stacked as (num_signals,L,N,N)
         """
-    filtered_s = signals[:, np.newaxis, :, :]*filters[np.newaxis, :, :, :]
+    filtered_s = signals[:, np.newaxis, :, :] * filters[np.newaxis, :, :, :]
     return filtered_s
 
 
@@ -49,8 +49,8 @@ def _subsample(X, j):
     XX : ndarray
         Subsampled images
     """
-    dsf = 2**j
-    return dsf*X[..., ::dsf, ::dsf]
+    dsf = 2 ** j
+    return dsf * X[..., ::dsf, ::dsf]
 
 
 def _apply_lowpass(img, phi, J, n_scat):
@@ -205,7 +205,7 @@ def scattering(x, wavelet_filters=None, m=2):
         raise ValueError(error_string.format(m))
         return
     # constants
-    spatial_coefs = int(x.shape[1]/2**(J-1))
+    spatial_coefs = int(x.shape[1] // 2 ** (J - 1))
     # subsample at a rate a bit lower than the critic frequency
     oversample = 1
     U = []
@@ -225,7 +225,7 @@ def scattering(x, wavelet_filters=None, m=2):
     l_indexing = np.arange(0, L)
     # First order scattering coeffs
     if m > 0:
-        Sview = S[:, 1:J*L+1, :, :].view()
+        Sview = S[:, 1:J * L + 1, :, :].view()
         Sview.shape = (num_signals, J, L, spatial_coefs, spatial_coefs)
         # precompute the fourier transform of the images
         X = np.fft.fft2(x)
@@ -250,8 +250,8 @@ def scattering(x, wavelet_filters=None, m=2):
                 S_tree[first_order_label] = Sview[:, j, i_l, :, :]
     # Second order scattering coeffs
     if m > 1:
-        sec_order_coefs = int(J*(J-1)*L**2/2)
-        S2norder = S[:, J*L+1:num_coefs, :, :]  # view of the data
+        sec_order_coefs = int(J * (J - 1) * L ** 2 / 2)
+        S2norder = S[:, J * L + 1 :num_coefs, :, :]  # view of the data
         S2norder.shape = (num_signals, int(sec_order_coefs/L),
                           L, spatial_coefs, spatial_coefs)
         indx = 0
@@ -286,5 +286,5 @@ def scattering(x, wavelet_filters=None, m=2):
                         S_tree[second_order_label] = \
                             S2norder[:, indx, i_l, :, :]
 
-                    indx = indx+1
+                    indx = indx + 1
     return S, U, S_tree
