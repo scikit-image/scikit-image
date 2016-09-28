@@ -136,27 +136,27 @@ def load_scattering(X_train, X_test, J=3, L=8, m=2,
 
 
 def gethomogeneus_datast(X, y, d, n):
- """Extract from the data set of images the same number
- of samples per class.
+    """ Extract from the data set of images the same number
+    of samples per class.
      Parameters
      ----------
      X: nd array
        matrix of features times samples (exemplars)
      y: 1d array
-       class of each sample, ordered as X. 
-     d: int 
+       class of each sample, ordered as X.
+     d: int
        number of classes
-     n: int 
+     n: int
        number of samples per class in the output set
      Returns
      -------
      X_out: nd array
-       matrix of features times samples, with the same 
+       matrix of features times samples, with the same
        number of samples per class.
      y_out: 1d array
-       class of each sample, ordered as X_out, with the 
+       class of each sample, ordered as X_out, with the
        same number of samples per class.
- """
+    """
     num_per_class = np.int(np.amin([n, X.shape[0]]) / d)
     ytrain = np.reshape(y, (y.shape[0],))
     X_out = []
@@ -185,7 +185,7 @@ n = np.amin([10000, num_images])
 
 im_train, ytrain, im_test, ytest = load_images_mnist(px=px,
                                                      num_images=num_images)
-Xtrain, Xtest = load_scattering(im_train, im_test, px=px,
+Xtrain, Xtest = load_scattering(im_train, im_test,
                                 J=3, L=6, m=2,
                                 sigma_phi=0.6957, sigma_xi=0.8506)
 Xtrain_1d = Xtrain.reshape((len(Xtrain), -1))  # colapse spatial components
@@ -221,19 +221,19 @@ from keras.datasets import cifar10
 
 
 def DB_rgb2yuv(X):
- """Change the database of images from RGB space to YUV, 
- maintaining the input format (num_images,color,pixels,pixels)
+    """Change the database of images from RGB space to YUV,
+    maintaining the input format (num_images,color,pixels,pixels)
     Parameters
     ----------
-    X: 4D nd array 
-       Group of color images in the range [0,255] stacked in a 
+    X: 4D nd array
+       Group of color images in the range [0,255] stacked in a
        4D matrix.
     Returns
     -------
     Iyuv: 4D nd array
        Group of images in the YUV color space, with shape
        (num_images,color,pixels,pixels).
- """
+    """
  
     num_samples, c, px, px = X.shape
     Xta = X.transpose((3, 2, 0, 1)).astype('float32')/255
@@ -261,7 +261,7 @@ num_images = 50  # For accurate error result we need to
 #                 train with 10000 images (not 10!)
 im_train, ytrain, im_test, ytest = load_images_cifar(num_images)
 # We are computing just the first order scattering transform
-Xtrain, Xtest = load_scattering(im_train, im_test, px=px,
+Xtrain, Xtest = load_scattering(im_train, im_test,
                                 J=3, L=8, m=1,
                                 sigma_phi=0.8, sigma_xi=0.8)
 # note that it works better in the log domain!

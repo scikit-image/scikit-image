@@ -76,8 +76,8 @@ def _apply_lowpass(img, phi, J, n_scat):
         stacked images after being filtered and subsampled
     """
     img_filtered = np.real(np.fft.ifft2(np.fft.fft2(img) * phi))
-    n_nolp = img.shape[-1]
-    ds = int(n_nolp / n_scat)
+    n_spatial = img.shape[-1]
+    ds = int(n_spatial / n_scat)
     return 2 ** (J - 1) * img_filtered[..., ::ds, ::ds]
 
 
@@ -159,7 +159,7 @@ def scattering(x, wavelet_filters=None, m=2):
                 import multiresolution_filter_bank_morlet2d
        >>>> from scattering.scattering import scattering
        >>>> px = 32 #number of pixels of the images
-       >>>> images = np.arange(0,3*px*px).reshape(3,px,px) #create images
+       >>>> images = range(0,3*px*px).reshape(3,px,px) #create images
        >>>> wavelet_filters,lp = \
                 multiresolution_filter_bank_morlet2d(px,J=np.log2(px))
        >>>> S,U = scattering(images,m=2)
@@ -194,19 +194,21 @@ def scattering(x, wavelet_filters=None, m=2):
     num_signals = x.shape[0]
     # 3.- Check the Order (m) of the scattering transform, can only be 0,1,2,
     # and that gives us different number of scattering coefficients
-    num_coefs = {
-        0: int(1),
-        1: int(1 + J * L),
-        2: int(1 + J * L + J * (J - 1) * L ** 2 / 2)
-    }.get(m, -1)
-    if num_coefs == -1:
+
+    if m == 0:
+        num_coefs = 1
+    elif m == 1:
+        num_coefs = 1 + J * L
+    elif m == 2:
+        num_coefs = int(1 + J * L + (L ** 2) * (J - 1) * J / 2)
+    else:
         error_string = "Parameter m out of bounds, " \
                        "valid values are 0,1,2 not {0}"
         raise ValueError(error_string.format(m))
         return
     # constants
-    spatial_coefs = int(x.shape[1] // 2 ** (J - 1))
-    # subsample at a rate a bit lower than the critic frequency
+    spatial_coefs = int(x.shape[1] / 2 ** (J - 1))
+    # subsample at a rate a bit lower than the critical frequency
     oversample = 1
     U = []
     V = []
@@ -215,6 +217,7 @@ def scattering(x, wavelet_filters=None, m=2):
     # vars to return (where we save the scattering and its accessing
     # tree-structure (a dictionary)
     S = np.ndarray((num_signals, num_coefs, spatial_coefs, spatial_coefs))
+    print()
     # allows access to the coefficients (S) using the tree structure
     S_tree = {}
     # Start computing the scattering coefficients
@@ -222,69 +225,63 @@ def scattering(x, wavelet_filters=None, m=2):
     S[:, 0, :, :] = _apply_lowpass(x, wavelet_filters['phi'][current_res],
                                    J,  spatial_coefs)
     S_tree[0] = S[:, 0, :, :]
-    l_indexing = np.arange(0, L)
+    l_indexing = range(0, L)
     # First order scattering coeffs
     if m > 0:
-        Sview = S[:, 1:J * L + 1, :, :].view()
-        Sview.shape = (num_signals, J, L, spatial_coefs, spatial_coefs)
+        Sm1 = S[:, 1:J * L + 1, :, :].view()
+        Sm1.shape = (num_signals, J, L, spatial_coefs, spatial_coefs)
         # precompute the fourier transform of the images
         X = np.fft.fft2(x)
-        for j in np.arange(J):
+        for j in range(J):
             filtersj = wavelet_filters['psi'][current_res][j].view()
             # resolution for the next layer
-            resolution = max(j-oversample, 0)
+            resolution = max(j - oversample, 0)
             v_resolution.append(resolution)
             # fft2(| x conv Psi_j |): X is full resolution,
             # as well as the filters
-            aux = _subsample(np.fft.ifft2(_apply_fourier_mult(X, filtersj)),
+            v_j = _subsample(np.fft.ifft2(_apply_fourier_mult(X, filtersj)),
                              resolution)
-            V.append(aux)
-            U.append(np.abs(aux))
-            filter = wavelet_filters['phi'][resolution]
-            Sview[:, j, :, :, :] = _apply_lowpass(U[j],
-                                                  filter, J,
-                                                  spatial_coefs)
-            j_indexing = np.ones((L))*int(j)
-            for i_l, first_order_label in \
-                    enumerate(zip(j_indexing, l_indexing)):
-                S_tree[first_order_label] = Sview[:, j, i_l, :, :]
+            V.append(v_j)
+            U.append(np.abs(v_j))
+            filt = wavelet_filters['phi'][resolution]
+            Sm1[:, j, :, :, :] = _apply_lowpass(U[j],
+                                                filt, J,
+                                                spatial_coefs)
+            for l in range(L):
+                S_tree[(j, l)] = Sm1[:, j, l, :, :]
     # Second order scattering coeffs
     if m > 1:
         sec_order_coefs = int(J * (J - 1) * L ** 2 / 2)
-        S2norder = S[:, J * L + 1 :num_coefs, :, :]  # view of the data
+        S2norder = S[:, (J * L + 1):num_coefs, :, :]  # view of the data
         S2norder.shape = (num_signals, int(sec_order_coefs/L),
                           L, spatial_coefs, spatial_coefs)
         indx = 0
-        for j1 in np.arange(J):
+        for j1 in range(J):
             # U is in the spatial domain
-            Uj1 = np.fft.fft2(U[j1].view())
+            Uj1 = np.fft.fft2(U[j1])
             current_res = v_resolution[j1]
 
-            for l1 in np.arange(Uj1.shape[1]):
+            for l1 in range(Uj1.shape[1]):
                 # all images single angle, all spatial coefficients
-                Ujl1 = Uj1[:, l1, ].view()
+                Ujl1 = Uj1[:, l1, ]
 
-                layer1_indexing = [(int(j1), int(l1))] * L  # for S_tree
+                layer1_indexing = [(j1, l1)] * L  # for S_tree
 
-                for j2 in np.arange(j1+1, J):
+                for j2 in range(j1 + 1, J):
                     # | U_lambda1 conv Psi_lambda2 | conv phi
-                    filter = wavelet_filters['psi'][current_res][j2]
-                    aux = np.abs(np.fft.ifft2(
-                        _apply_fourier_mult(Ujl1, filter)
-                    ))
+                    filt = wavelet_filters['psi'][current_res][j2]
+                    u_j2 = np.abs(np.fft.ifft2(
+                        _apply_fourier_mult(Ujl1, filt)))
                     # computing all angles at once
-                    S2norder[:, indx, :, :, :] = \
-                        _apply_lowpass(aux,
-                                       wavelet_filters['phi'][current_res],
-                                       J, spatial_coefs)
+                    S2norder[:, indx, :, :, :] = _apply_lowpass(
+                                         u_j2,
+                                         wavelet_filters['phi'][current_res],
+                                         J, spatial_coefs)
 
                     # save tree structure
-                    j2_indexing = np.ones((L)) * int(j2)
-                    for i_l, second_order_label in \
-                            enumerate(zip(layer1_indexing,
-                                          zip(j2_indexing, l_indexing))):
-                        S_tree[second_order_label] = \
-                            S2norder[:, indx, i_l, :, :]
+                    for l2 in range(L):
+                        S_tree[((j1, l1), (j2, l2))] = \
+                            S2norder[:, indx, l2, :, :]
 
                     indx = indx + 1
     return S, U, S_tree
