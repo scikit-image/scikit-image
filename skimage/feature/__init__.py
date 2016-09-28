@@ -1,7 +1,7 @@
 from ._canny import canny
 from ._daisy import daisy
 from ._hog import hog
-from ._kb import kb
+from ._kadir_brady import saliency_kadir_brady
 from .texture import (greycomatrix, greycoprops,
                       local_binary_pattern,
                       multiblock_lbp,
@@ -27,7 +27,7 @@ from .blob import blob_dog, blob_log, blob_doh
 __all__ = ['canny',
            'daisy',
            'hog',
-           'kb',
+           'saliency_kadir_brady',
            'greycomatrix',
            'greycoprops',
            'local_binary_pattern',
