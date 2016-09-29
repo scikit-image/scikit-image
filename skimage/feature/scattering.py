@@ -205,7 +205,6 @@ def scattering(x, wavelet_filters=None, m=2):
         error_string = "Parameter m out of bounds, " \
                        "valid values are 0,1,2 not {0}"
         raise ValueError(error_string.format(m))
-        return
     # constants
     spatial_coefs = int(x.shape[1] / 2 ** (J - 1))
     # subsample at a rate a bit lower than the critical frequency
