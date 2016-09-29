@@ -217,7 +217,6 @@ def scattering(x, wavelet_filters=None, m=2):
     # vars to return (where we save the scattering and its accessing
     # tree-structure (a dictionary)
     S = np.ndarray((num_signals, num_coefs, spatial_coefs, spatial_coefs))
-    print()
     # allows access to the coefficients (S) using the tree structure
     S_tree = {}
     # Start computing the scattering coefficients
