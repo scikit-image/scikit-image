@@ -676,7 +676,7 @@ def _bezier_curve(Py_ssize_t r0, Py_ssize_t c0,
         Coordinates of the last control point.
     weight : double
         Middle control point weight, it describes the line tension.
-    shape : tuple, optional
+    shape : tuple
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for curves which exceed the image
         size. By default the full extent of the curve are used.
