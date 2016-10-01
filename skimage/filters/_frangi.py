@@ -44,7 +44,7 @@ def _frangi_hessian_common_filter(image, scale_range, scale_step,
     # Filtering for all sigmas
     for i, sigma in enumerate(sigmas):
         # Make 2D hessian
-        (Dxx, Dxy, Dyy) = hessian_matrix(image, sigma, Order=None)
+        (Dyy, Dxy, Dxx) = hessian_matrix(image, sigma, order='C')
 
         # Correct for scale
         Dxx = (sigma ** 2) * Dxx
@@ -52,7 +52,7 @@ def _frangi_hessian_common_filter(image, scale_range, scale_step,
         Dyy = (sigma ** 2) * Dyy
 
         # Calculate (abs sorted) eigenvalues and vectors
-        (lambda1, lambda2) = hessian_matrix_eigvals(Dxx, Dxy, Dyy)
+        (lambda1, lambda2) = hessian_matrix_eigvals(Dxx, Dxy, Dyy)  # note to self. not sure whether to change
 
         # Compute some similarity measures
         lambda1[lambda1 == 0] = 1e-10
