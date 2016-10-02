@@ -43,7 +43,7 @@ def saliency_kadir_brady(image, min_scale=5, max_scale=13, saliency_threshold=0.
     >>> from skimage.data import astronaut
     >>> image = astronaut()[100:300, 100:300]
     >>> saliency_kadir_brady(rgb2gray(image))
-     array([[ 129.8125,   70.125 ,    7.5   ],
+    array([[ 129.8125,   70.125 ,    7.5   ],
            [  85.25  ,   22.8125,    7.375 ],
            [ 110.125 ,   13.    ,    7.5   ],
            [ 155.1875,  106.4375,   11.    ],
