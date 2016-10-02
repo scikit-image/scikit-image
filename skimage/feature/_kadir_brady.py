@@ -125,6 +125,83 @@ def _detect(image, scales):
     return np.array([gamma, scale, row, column])
 
 
+def _prune(candidate_regions, saliency_threshold, v_th, k):
+    """Clusters the detected keypoints.
+
+    It selects highly salient points that have local support
+    i.e. nearby points with similar saliency and scale. Each region is
+    sufficiently distant from all others (in Scale-space regions) to
+    qualify as a separate entity.
+
+    Parameters
+    ----------
+    candidate_regions : (4, n) ndarray of float
+        A 2d array with each column representing gamma,scale,y,x.
+    saliency_threshold : float, optional.
+        Features with saliency score more than this will be considered.
+    v_th : int, optional
+        Variance among the regions should be smaller than this threshold
+        for sufficient clustering.
+    k : int
+        No. of clusters
+
+    Returns
+    -------
+    A : (3, N) ndarray of float
+        A 2d array with each column representing 3 values, '(y, x, scale)'
+        where '(y,x)' are coordinates of the region and 'scale' is the
+        size of corresponding salient region.
+    """
+
+    t_gamma, t_scale, t_r, t_c, D = _salient_regions(candidate_regions, saliency_threshold)
+    gamma, scale, row, column = (np.array([]) for i in range(4))
+    
+    n = max(t_gamma.shape)
+    n_reg = 0
+    # clusters matrix
+    cluster = np.zeros((3, k + 1))
+
+    # pruning process
+    for index in range(n):
+        cluster[0, 0] = t_c[index]
+        cluster[1, 0] = t_r[index]
+        cluster[2, 0] = t_scale[index]
+        s_i = np.argsort(D[index, :])
+        # fill in the neighbouring regions
+        for j in range(k):
+            cluster[0, j+1] = t_c[s_i[j+1]]
+            cluster[1, j+1] = t_r[s_i[j+1]]
+            cluster[2, j+1] = t_scale[s_i[j+1]]
+
+        # clusters center point
+        center = np.array([np.mean(cluster, axis=1)])
+
+        # check if the regions are "suffiently clustered", if variance is less than threshold
+        v = np.var(np.sqrt(((cluster - np.tile(center.T, (1, k + 1))) ** 2).sum(axis=0)))
+        if v > v_th:
+            continue
+
+        center = np.mean(cluster, axis=1)
+        if n_reg > 0:
+            # make sure the region is "far enough" from already clustered regions
+            d = np.sqrt(((np.array(list(zip(column, row, scale)))
+                            - np.tile(center.T, (n_reg, 1))) ** 2).sum(axis=1))
+            if (center[2] >= 0.6*d).sum() == 0:
+                n_reg = n_reg + 1
+                column = np.append(column, center[0])
+                row = np.append(row, center[1])
+                scale = np.append(scale, center[2])
+                gamma = np.append(gamma, t_gamma[index])
+        else:
+            n_reg = n_reg + 1
+            column = np.append(column, center[0])
+            row = np.append(row, center[1])
+            scale = np.append(scale, center[2])
+            gamma = np.append(gamma, t_gamma[index])
+
+    return np.array([row, column, scale])
+
+
 def _saliency_param(image, scales):
     """Calculate parameters for Saliency metric.
 
@@ -246,76 +323,3 @@ def _salient_regions(candidate_regions, saliency_threshold):
 
     return t_gamma, t_scale, t_r, t_c, D
 
-
-def _prune(candidate_regions, saliency_threshold, v_th, k):
-    """Clusters the detected keypoints.
-
-    It selects highly salient points that have local support
-    i.e. nearby points with similar saliency and scale. Each region is
-    sufficiently distant from all others (in Scale-space regions) to
-    qualify as a separate entity.
-
-    Parameters
-    ----------
-    candidate_regions : (4, n) ndarray of float
-        A 2d array with each column representing gamma,scale,y,x.
-    saliency_threshold : float, optional.
-        Features with saliency score more than this will be considered.
-    v_th : int, optional
-        Variance among the regions should be smaller than this threshold
-        for sufficient clustering.
-
-    Returns
-    -------
-    A : (3, N) ndarray of float
-        A 2d array with each column representing 3 values, '(y, x, scale)'
-        where '(y,x)' are coordinates of the region and 'scale' is the
-        size of corresponding salient region.
-    """
-
-    t_gamma, t_scale, t_r, t_c, D = _salient_regions(candidate_regions, saliency_threshold)
-    gamma, scale, row, column = (np.array([]) for i in range(4))
-
-    n_reg = 0
-    # clusters matrix
-    cluster = np.zeros((3, k + 1))
-
-    # pruning process
-    for index in range(n):
-        cluster[0, 0] = t_c[index]
-        cluster[1, 0] = t_r[index]
-        cluster[2, 0] = t_scale[index]
-        s_i = np.argsort(D[index, :])
-        # fill in the neighbouring regions
-        for j in range(k):
-            cluster[0, j+1] = t_c[s_i[j+1]]
-            cluster[1, j+1] = t_r[s_i[j+1]]
-            cluster[2, j+1] = t_scale[s_i[j+1]]
-
-        # clusters center point
-        center = np.array([np.mean(cluster, axis=1)])
-
-        # check if the regions are "suffiently clustered", if variance is less than threshold
-        v = np.var(np.sqrt(((cluster - np.tile(center.T, (1, k + 1))) ** 2).sum(axis=0)))
-        if v > v_th:
-            continue
-
-        center = np.mean(cluster, axis=1)
-        if n_reg > 0:
-            # make sure the region is "far enough" from already clustered regions
-            d = np.sqrt(((np.array(list(zip(column, row, scale)))
-                            - np.tile(center.T, (n_reg, 1))) ** 2).sum(axis=1))
-            if (center[2] >= 0.6*d).sum() == 0:
-                n_reg = n_reg + 1
-                column = np.append(column, center[0])
-                row = np.append(row, center[1])
-                scale = np.append(scale, center[2])
-                gamma = np.append(gamma, t_gamma[index])
-        else:
-            n_reg = n_reg + 1
-            column = np.append(column, center[0])
-            row = np.append(row, center[1])
-            scale = np.append(scale, center[2])
-            gamma = np.append(gamma, t_gamma[index])
-
-    return np.array([row, column, scale])
