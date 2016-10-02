@@ -166,7 +166,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
     if order is None:
         if image.ndim ==2:
             # The legacy 2D code followed (x, y) convention, so we swap the axis
-            # order to maintain compatibility with old code
+            # order in order to maintain compatibility with old code
             order = 'F'
         else:
             order = 'C'
