@@ -1,7 +1,7 @@
-""" 
+"""
 Script to show the results of the two marching cubes algorithms on different
 data.
-""" 
+"""
 
 import time
 
@@ -29,20 +29,20 @@ elif SELECT == 2:
 elif SELECT == 3:
     # Generate two donuts using a formula by Thomas Lewiner
     n = 48
-    a, b = 2.5/n, -1.25
+    a, b = 2.5 / n, -1.25
     isovalue = 0.0
     #
-    vol = np.empty((n,n,n), 'float32')
+    vol = np.empty((n, n, n), 'float32')
     for iz in range(vol.shape[0]):
         for iy in range(vol.shape[1]):
             for ix in range(vol.shape[2]):
                 z, y, x = float(iz)*a+b, float(iy)*a+b, float(ix)*a+b
-                vol[iz,iy,ix] = ( ( 
+                vol[iz, iy, ix] = ( (
                     (8*x)**2 + (8*y-2)**2 + (8*z)**2 + 16 - 1.85*1.85 ) * ( (8*x)**2 +
                     (8*y-2)**2 + (8*z)**2 + 16 - 1.85*1.85 ) - 64 * ( (8*x)**2 + (8*y-2)**2 )
                     ) * ( ( (8*x)**2 + ((8*y-2)+4)*((8*y-2)+4) + (8*z)**2 + 16 - 1.85*1.85 )
                     * ( (8*x)**2 + ((8*y-2)+4)*((8*y-2)+4) + (8*z)**2 + 16 - 1.85*1.85 ) -
-                    64 * ( ((8*y-2)+4)*((8*y-2)+4) + (8*z)**2 
+                    64 * ( ((8*y-2)+4)*((8*y-2)+4) + (8*z)**2
                     ) ) + 1025
     # Uncommenting the line below will yield different results for classic MC
     #vol = -vol
