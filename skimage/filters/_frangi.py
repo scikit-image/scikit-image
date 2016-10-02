@@ -52,7 +52,7 @@ def _frangi_hessian_common_filter(image, scale_range, scale_step,
         Dxx = (sigma ** 2) * Dxx
 
         # Calculate (abs sorted) eigenvalues and vectors
-        (lambda1, lambda2) = hessian_matrix_eigvals(Dyy, Dxy, Dxx)  # note to self. not sure whether to change
+        (lambda1, lambda2) = hessian_matrix_eigvals(Dyy, Dxy, Dxx)
 
         # Compute some similarity measures
         lambda1[lambda1 == 0] = 1e-10
