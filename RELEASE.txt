@@ -72,7 +72,7 @@ How to make a new release of ``skimage``
 
 - Post release notes on mailing lists, blog, G+, etc.
 
-  - scikit-image@googlegroups.com
+  - scikit-image@python.org
   - scipy-user@scipy.org
   - scikit-learn-general@lists.sourceforge.net
   - pythonvision@googlegroups.com

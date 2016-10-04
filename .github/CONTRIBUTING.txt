@@ -51,7 +51,7 @@ Here's the long and short of it:
      button - click it.
 
    * If you want, post on the `mailing list
-     <http://groups.google.com/group/scikit-image>`_ to explain your changes or
+     <https://mail.python.org/mailman/listinfo/scikit-image>`_ to explain your changes or
      to ask for review.
 
 For a more detailed discussion, read these :doc:`detailed documents
@@ -135,7 +135,7 @@ Guidelines
 * For new functionality, always add an example to the gallery.
 * No changes are ever committed without review and approval by two core
   team members.  Ask on the
-  `mailing list <http://groups.google.com/group/scikit-image>`_ if
+  `mailing list <https://mail.python.org/mailman/listinfo/scikit-image>`_ if
   you get no response to your pull request.
   **Never merge your own pull request.**
 * Examples in the gallery should have a maximum figure width of 8 inches.

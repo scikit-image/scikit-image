@@ -44,9 +44,9 @@ functions include one or more examples.
 Mailing-list
 ------------
 
-The scikit-image mailing-list is scikit-image@googlegroups.com (users
-should join the `Google Group
-<http://groups.google.com/group/scikit-image>`_ before posting). This
+The scikit-image mailing-list is scikit-image@python.org (users
+should `join
+<https://mail.python.org/mailman/listinfo/scikit-image>`_ before posting). This
 mailing-list is shared by users and developers, and it is the right
 place to ask any question about ``skimage``, or in general, image
 processing using Python.  Posting snippets of code with minimal examples
