@@ -288,8 +288,8 @@ def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
 def shape_index(image, sigma=1, mode='constant', cval=0):
     """Compute the shape index.
 
-    The shape index, as defined by defined by Koenderink & van Doorn [1]_,
-    is a single valued measure of local curvature, assuming the image as a 3D plane
+    The shape index, as defined by Koenderink & van Doorn [1]_, is a
+    single valued measure of local curvature, assuming the image as a 3D plane
     with intensities representing heights.
 
     It is derived from the eigen values of the Hessian, and its
@@ -332,8 +332,10 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
 
     References
     ----------
-    .. [1] Koenderink, J. J. & van Doorn, A. J., "Surface shape and curvature scales",
-           Image and Vision Computing, 1992, 10, 557-564. DOI:10.1016/0262-8856(92)90076-F
+    .. [1] Koenderink, J. J. & van Doorn, A. J.,
+           "Surface shape and curvature scales",
+           Image and Vision Computing, 1992, 10, 557-564.
+           DOI:10.1016/0262-8856(92)90076-F
 
     Examples
     --------
