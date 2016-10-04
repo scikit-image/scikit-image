@@ -102,7 +102,7 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     return Axx, Axy, Ayy
 
 
-def hessian_matrix(image, sigma=1, mode='constant', cval=0):
+def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
     """Compute Hessian matrix.
 
     The Hessian matrix is defined as::
@@ -122,9 +122,13 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
         weighting function for the auto-correlation matrix.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
         How to handle values outside the image borders.
-    cval : float, optional
+    cval : float, 'F'
+        else:optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
+    order : {'C', 'F'}, optional
+        this parameter allows for the use of reverse or forward order of
+        returned matrix values
 
     Returns
     -------
@@ -159,10 +163,18 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
     H_elems = [np.gradient(gradients[ax0], axis=ax1)
                for ax0, ax1 in combinations_with_replacement(axes, 2)]
 
-    if image.ndim == 2:
-        # The legacy 2D code followed (x, y) convention, so we swap the axis
-        # order to maintain compatibility with old code
+
+    if order is None:
+        if image.ndim ==2:
+            # The legacy 2D code followed (x, y) convention, so we swap the axis
+            # order to maintain compatibility with old code
+            order = 'F'
+        else:
+            order = 'C'
+
+    if order == 'F':
         H_elems.reverse()
+
     return H_elems
 
 
@@ -249,7 +261,7 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
 
 
 def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
-    """Compute Eigen values of Hessian matrix.
+    """Compute Eigenvalues of Hessian matrix.
 
     Parameters
     ----------
