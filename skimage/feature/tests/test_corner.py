@@ -14,7 +14,7 @@ from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_fast, corner_orientations,
                              structure_tensor, structure_tensor_eigvals,
                              hessian_matrix, hessian_matrix_eigvals,
-                             hessian_matrix_det)
+                             hessian_matrix_det, shape_index)
 
 
 def test_structure_tensor():
@@ -114,6 +114,19 @@ def test_hessian_matrix_det():
     image[2, 2] = 1
     det = hessian_matrix_det(image, 5)
     assert_almost_equal(det, 0, decimal = 3)
+
+
+def test_shape_index():
+    square = np.zeros((5, 5))
+    square[2, 2] = 4
+    s = shape_index(square, sigma=0.1)
+    assert_almost_equal(
+        s, np.array([[ np.nan, np.nan,   -0.5, np.nan, np.nan],
+                     [ np.nan,      0, np.nan,      0, np.nan],
+                     [   -0.5, np.nan,     -1, np.nan,   -0.5],
+                     [ np.nan,      0, np.nan,      0, np.nan],
+                     [ np.nan, np.nan,   -0.5, np.nan, np.nan]])
+    )
 
 
 @test_parallel()
