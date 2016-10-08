@@ -15,6 +15,8 @@ Version 0.13
 - The `circle` parameter of `skimage.transform.radon` and `skimage.transform.iradon`
   are now set to `None` by default, equivalent to `False`, the former value. In version
   0.15, will be set to `True`.
+- Parameters ``ntiles_x``, ``ntiles_y`` has been removed from
+  ``skimage.exposure.equalize_adapthist``.
 
 Version 0.12
 ------------

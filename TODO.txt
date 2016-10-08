@@ -17,7 +17,8 @@ Version 0.14
   deprecation warning test for this alias.
 * Remove deprecated ``sigma_range`` kwargs in ``skimage.restoration.denoise_bilateral``
   and corresponding tests.
-
+* Remove deprecation error on the usage of ``ntiles_x``, ``ntiles_y``
+  ``skimage.exposure.equalize_adapthist``.
 
 Version 0.15
 ------------
