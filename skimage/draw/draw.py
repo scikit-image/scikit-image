@@ -28,8 +28,8 @@ def ellipse(r, c, r_radius, c_radius, shape=None):
         Minor and major semi-axes. ``(r/r_radius)**2 + (c/c_radius)**2 = 1``.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates. This is useful for ellipses which exceed the image
-        size. By default the full extent of the ellipse are used.
+        pixel coordinates. This is useful for ellipses that exceed the image
+        size. If None, the full extent of the ellipse is used.
 
     Returns
     -------
@@ -93,8 +93,8 @@ def circle(r, c, radius, shape=None):
         Radius of circle.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates. This is useful for circles which exceed the image
-        size. By default the full extent of the circle are used.
+        pixel coordinates. This is useful for circles that exceed the image
+        size. If None, the full extent of the circle is used.
 
     Returns
     -------
@@ -135,8 +135,8 @@ def polygon_perimeter(r, c, shape=None, clip=False):
         Column coordinates of vertices of polygon.
     shape : tuple, optional
         Image shape which is used to determine maximum extents of output pixel
-        coordinates. This is useful for polygons which exceed the image size.
-        By default the full extents of the polygon are used.
+        coordinates. This is useful for polygons that exceed the image size.
+        If None, the full extents of the polygon is used.
     clip : bool, optional
         Whether to clip the polygon to the provided shape.  If this is set
         to True, the drawn figure will always be a closed polygon with all
@@ -364,8 +364,8 @@ def polygon(r, c, shape=None):
         Column coordinates of vertices of polygon.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates. This is useful for polygons which exceed the image
-        size. By default the full extent of the polygon are used.
+        pixel coordinates. This is useful for polygons that exceed the image
+        size. If None, the full extent of the polygon is used.
 
     Returns
     -------
@@ -412,8 +412,8 @@ def circle_perimeter(r, c, radius, method='bresenham', shape=None):
         andres : Andres method
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates. This is useful for circles which exceed the image
-        size. By default the full extent of the circle are used.
+        pixel coordinates. This is useful for circles that exceed the image
+        size. If None, the full extent of the circle is used.
 
     Returns
     -------
@@ -470,9 +470,8 @@ def circle_perimeter_aa(r, c, radius, shape=None):
         Radius of circle.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates. This is useful for circles which exceed the image
-        size.
-        By default the full extent of the circle are used.
+        pixel coordinates. This is useful for circles that exceed the image
+        size. If None, the full extent of the circle is used.
 
     Returns
     -------
@@ -524,8 +523,8 @@ def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
         Major axis orientation in clockwise direction as radians.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates. This is useful for ellipses which exceed the image
-        size. If None, the full extent of the ellipse are used.
+        pixel coordinates. This is useful for ellipses that exceed the image
+        size. If None, the full extent of the ellipse is used.
 
     Returns
     -------
@@ -575,8 +574,8 @@ def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
         Middle control point weight, it describes the line tension.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates. This is useful for curves which exceed the image
-        size. If None, the full extent of the curve are used.
+        pixel coordinates. This is useful for curves that exceed the image
+        size. If None, the full extent of the curve is used.
 
     Returns
     -------
