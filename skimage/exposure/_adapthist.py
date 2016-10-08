@@ -35,12 +35,12 @@ def equalize_adapthist(image, kernel_size=None,
 
     Parameters
     ----------
-    image : array-like
+    image : ndarray
         Input image.
-    kernel_size: integer or 2-tuple
+    kernel_size: integer or list-like
         Defines the shape of contextual regions used in the algorithm. If an
-        iterable is passed, it should have the same length as the image
-        dimensionality.
+        iterable is passed, it must have the same number of elements as
+        `image.ndim`. If integer, it is broadcasted to each `image` dimension.
     clip_limit : float: optional
         Clipping limit, normalized between 0 and 1 (higher values give more
         contrast).
@@ -82,6 +82,8 @@ def equalize_adapthist(image, kernel_size=None,
                        np.round(image.shape[1] / 8))
     elif isinstance(kernel_size, numbers.Number):
         kernel_size = (kernel_size,) * image.ndim
+    elif len(kernel_size) != image.ndim:
+        ValueError('Incorrect value of `kernel_size`: {}'.format(kernel_size))
 
     kernel_size = [int(k) for k in kernel_size]
 
