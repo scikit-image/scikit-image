@@ -19,7 +19,7 @@ import numpy as np
 from .. import img_as_float, img_as_uint
 from ..color.adapt_rgb import adapt_rgb, hsv_value
 from ..exposure import rescale_intensity
-from .._shared.utils import skimage_deprecation, warn
+
 
 NR_OF_GREY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
 
@@ -74,12 +74,13 @@ def equalize_adapthist(image, kernel_size=None,
 
     if kwargs:
         if 'ntiles_x' in kwargs or 'ntiles_y' in kwargs:
-            raise ValueError('`ntiles_*` have been deprecated in favor of `kernel_size`')
+            msg = '`ntiles_*` have been deprecated in favor of `kernel_size`'
+            raise ValueError(msg)
 
-    if kernel_size == None:
-        kernel_size = (np.round(image.shape[0] / 8), np.round(image.shape[1] / 8))
-
-    if isinstance(kernel_size, numbers.Number):
+    if kernel_size is None:
+        kernel_size = (np.round(image.shape[0] / 8),
+                       np.round(image.shape[1] / 8))
+    elif isinstance(kernel_size, numbers.Number):
         kernel_size = (kernel_size,) * image.ndim
 
     kernel_size = [int(k) for k in kernel_size]
