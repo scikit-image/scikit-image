@@ -1,4 +1,5 @@
 import numpy as np
+from warnings import warn
 from scipy import ndimage as ndi
 
 from ..measure import block_reduce
@@ -391,7 +392,7 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
 
     """
     if mode is None:
-        warn('The default of `mode` in `skimage.transform.warp` '
+        warn('The default of `mode` in `skimage.transform.swirl` '
              'will change to `reflect` in version 0.15.')
         mode = 'constant'     
 
