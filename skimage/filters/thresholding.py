@@ -475,6 +475,10 @@ def threshold_li(image):
     >>> thresh = threshold_li(image)
     >>> binary = image > thresh
     """
+    # Catch zeros image
+    if np.all(image == 0):
+        return 0
+
     # Copy to ensure input image is not modified
     image = image.copy()
     # Requires positive image (because of log(mean))
