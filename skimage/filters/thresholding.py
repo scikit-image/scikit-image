@@ -475,9 +475,11 @@ def threshold_li(image):
     >>> thresh = threshold_li(image)
     >>> binary = image > thresh
     """
-    # Catch zeros image
-    if np.all(image == 0):
-        return 0
+    # Make sure image has more than one value
+    if np.all(image == image.flat[0]):
+        raise ValueError("threshold_li is expected to work with images "
+                         "having more than one value. The input image seems "
+                         "to have just one value {0}.".format(image.flat[0]))
 
     # Copy to ensure input image is not modified
     image = image.copy()
