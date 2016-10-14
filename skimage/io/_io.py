@@ -130,6 +130,9 @@ def imsave(fname, arr, plugin=None, **plugin_args):
             plugin = 'tifffile'
     if is_low_contrast(arr):
         warn('%s is a low contrast image' % fname)
+    if arr.dtype == bool:
+        warn('%s is a boolean image; converting True to white and False to black.' % fname)
+        arr = arr.astype(np.uint8)*255
     return call_plugin('imsave', fname, arr, plugin=plugin, **plugin_args)
 
 
