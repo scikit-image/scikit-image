@@ -158,12 +158,6 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
     gaussian_filtered = ndi.gaussian_filter(image, sigma=sigma,
                                             mode=mode, cval=cval)
 
-    gradients = np.gradient(gaussian_filtered)
-    axes = range(image.ndim)
-    H_elems = [np.gradient(gradients[ax0], axis=ax1)
-               for ax0, ax1 in combinations_with_replacement(axes, 2)]
-
-
     if order is None:
         if image.ndim ==2:
             # The legacy 2D code followed (x, y) convention, so we swap the axis
@@ -172,8 +166,13 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
         else:
             order = 'C'
 
+    gradients = np.gradient(gaussian_filtered)
+    axes = range(image.ndim)
+    H_elems = [np.gradient(gradients[ax0], axis=ax1)
+               for ax0, ax1 in combinations_with_replacement(axes, 2)]
+
     if order == 'F':
-        H_elems.reverse()
+        H_elems = reversed(H_elems);
 
     return H_elems
 
