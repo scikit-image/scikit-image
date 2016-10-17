@@ -37,19 +37,20 @@ def equalize_adapthist(image, ntiles_x=None, ntiles_y=None, clip_limit=0.01,
     ----------
     image : array-like
         Input image.
-    kernel_size: integer or 2-tuple
-        Defines the shape of contextual regions used in the algorithm.
-        If an integer is given, the shape will be a square of
-        sidelength given by this value.
     ntiles_x : int, optional (deprecated in favor of ``kernel_size``)
         Number of tile regions in the X direction (horizontal).
     ntiles_y : int, optional (deprecated in favor of ``kernel_size``)
         Number of tile regions in the Y direction (vertical).
     clip_limit : float: optional
         Clipping limit, normalized between 0 and 1 (higher values give more
-        contrast).
+        contrast). Value of the clip_limit is dependent on the normalization 
+        of the histogram and the size of the neighbourhood region.
     nbins : int, optional
         Number of gray bins for histogram ("dynamic range").
+    kernel_size: integer or 2-tuple
+        Defines the shape of contextual regions used in the algorithm.
+        If an integer is given, the shape will be a square of
+        sidelength given by this value.
 
     Returns
     -------
