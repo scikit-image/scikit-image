@@ -119,17 +119,18 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     # In the case of labels, recursively build and return an output
     # operating on each label separately
     if labels is not None:
-        label_values = np.unique(labels)
+        labels_copy = labels.copy()
+        label_values = np.unique(labels_copy)
         # Reorder label values to have consecutive integers (no gaps)
         if np.any(np.diff(label_values) != 1):
-            mask = labels >= 1
-            labels[mask] = 1 + rank_order(labels[mask])[0].astype(labels.dtype)
-        labels = labels.astype(np.int32)
+            mask = labels_copy >= 1
+            labels_copy[mask] = 1 + rank_order(labels_copy[mask])[0].astype(labels_copy.dtype)
+        labels_copy = labels_copy.astype(np.int32)
 
         # New values for new ordering
-        label_values = np.unique(labels)
+        label_values = np.unique(labels_copy)
         for label in label_values[label_values != 0]:
-            maskim = (labels == label)
+            maskim = (labels_copy == label)
             out += peak_local_max(image * maskim, min_distance=min_distance,
                                   threshold_abs=threshold_abs,
                                   threshold_rel=threshold_rel,
