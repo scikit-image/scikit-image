@@ -45,6 +45,7 @@ test_img_int = data.camera()
 test_img = skimage.img_as_float(test_img_int)
 test_img = exposure.rescale_intensity(test_img / 5. + 100)
 
+
 def test_equalize_uint8_approx():
     """Check integer bins used for uint8 images."""
     img_eq0 = exposure.equalize_hist(test_img_int)
@@ -121,7 +122,6 @@ def test_intensity_range_clipped_float():
 
 # Test rescale intensity
 # ======================
-
 
 uint10_max = 2**10 - 1
 uint12_max = 2**12 - 1
@@ -300,9 +300,9 @@ def norm_brightness_err(img1, img2):
     return nbe
 
 
-
 # Test Gamma Correction
 # =====================
+
 
 def test_adjust_gamma_one():
     """Same image should be returned for gamma equal to one"""
@@ -322,8 +322,9 @@ def test_adjust_gamma_zero():
 def test_adjust_gamma_less_one():
     """Verifying the output with expected results for gamma
     correction with gamma equal to half"""
-    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
-    expected = np.array([[  0,  31,  45,  55,  63,  71,  78,  84],
+    image = np.arange(0, 255, 4, np.uint8).reshape((8, 8))
+    expected = np.array([
+        [  0,  31,  45,  55,  63,  71,  78,  84],
         [ 90,  95, 100, 105, 110, 115, 119, 123],
         [127, 131, 135, 139, 142, 146, 149, 153],
         [156, 159, 162, 165, 168, 171, 174, 177],
@@ -339,8 +340,9 @@ def test_adjust_gamma_less_one():
 def test_adjust_gamma_greater_one():
     """Verifying the output with expected results for gamma
     correction with gamma equal to two"""
-    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
-    expected = np.array([[  0,   0,   0,   0,   1,   1,   2,   3],
+    image = np.arange(0, 255, 4, np.uint8).reshape((8, 8))
+    expected = np.array([
+        [  0,   0,   0,   0,   1,   1,   2,   3],
         [  4,   5,   6,   7,   9,  10,  12,  14],
         [ 16,  18,  20,  22,  25,  27,  30,  33],
         [ 36,  39,  42,  45,  49,  52,  56,  60],
@@ -354,7 +356,7 @@ def test_adjust_gamma_greater_one():
 
 
 def test_adjust_gamma_neggative():
-    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
+    image = np.arange(0, 255, 4, np.uint8).reshape((8, 8))
     assert_raises(ValueError, exposure.adjust_gamma, image, -1)
 
 
@@ -364,8 +366,9 @@ def test_adjust_gamma_neggative():
 def test_adjust_log():
     """Verifying the output with expected results for logarithmic
     correction with multiplier constant multiplier equal to unity"""
-    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
-    expected = np.array([[  0,   5,  11,  16,  22,  27,  33,  38],
+    image = np.arange(0, 255, 4, np.uint8).reshape((8, 8))
+    expected = np.array([
+        [  0,   5,  11,  16,  22,  27,  33,  38],
         [ 43,  48,  53,  58,  63,  68,  73,  77],
         [ 82,  86,  91,  95, 100, 104, 109, 113],
         [117, 121, 125, 129, 133, 137, 141, 145],
@@ -381,8 +384,9 @@ def test_adjust_log():
 def test_adjust_inv_log():
     """Verifying the output with expected results for inverse logarithmic
     correction with multiplier constant multiplier equal to unity"""
-    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
-    expected = np.array([[  0,   2,   5,   8,  11,  14,  17,  20],
+    image = np.arange(0, 255, 4, np.uint8).reshape((8, 8))
+    expected = np.array([
+        [  0,   2,   5,   8,  11,  14,  17,  20],
         [ 23,  26,  29,  32,  35,  38,  41,  45],
         [ 48,  51,  55,  58,  61,  65,  68,  72],
         [ 76,  79,  83,  87,  90,  94,  98, 102],
@@ -401,8 +405,9 @@ def test_adjust_inv_log():
 def test_adjust_sigmoid_cutoff_one():
     """Verifying the output with expected results for sigmoid correction
     with cutoff equal to one and gain of 5"""
-    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
-    expected = np.array([[  1,   1,   1,   2,   2,   2,   2,   2],
+    image = np.arange(0, 255, 4, np.uint8).reshape((8, 8))
+    expected = np.array([
+        [  1,   1,   1,   2,   2,   2,   2,   2],
         [  3,   3,   3,   4,   4,   4,   5,   5],
         [  5,   6,   6,   7,   7,   8,   9,  10],
         [ 10,  11,  12,  13,  14,  15,  16,  18],
@@ -418,8 +423,9 @@ def test_adjust_sigmoid_cutoff_one():
 def test_adjust_sigmoid_cutoff_zero():
     """Verifying the output with expected results for sigmoid correction
     with cutoff equal to zero and gain of 10"""
-    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
-    expected = np.array([[127, 137, 147, 156, 166, 175, 183, 191],
+    image = np.arange(0, 255, 4, np.uint8).reshape((8, 8))
+    expected = np.array([
+        [127, 137, 147, 156, 166, 175, 183, 191],
         [198, 205, 211, 216, 221, 225, 229, 232],
         [235, 238, 240, 242, 244, 245, 247, 248],
         [249, 250, 250, 251, 251, 252, 252, 253],
@@ -435,8 +441,9 @@ def test_adjust_sigmoid_cutoff_zero():
 def test_adjust_sigmoid_cutoff_half():
     """Verifying the output with expected results for sigmoid correction
     with cutoff equal to half and gain of 10"""
-    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
-    expected = np.array([[  1,   1,   2,   2,   3,   3,   4,   5],
+    image = np.arange(0, 255, 4, np.uint8).reshape((8, 8))
+    expected = np.array([
+        [  1,   1,   2,   2,   3,   3,   4,   5],
         [  5,   6,   7,   9,  10,  12,  14,  16],
         [ 19,  22,  25,  29,  34,  39,  44,  50],
         [ 57,  64,  72,  80,  89,  99, 108, 118],
@@ -452,8 +459,9 @@ def test_adjust_sigmoid_cutoff_half():
 def test_adjust_inv_sigmoid_cutoff_half():
     """Verifying the output with expected results for inverse sigmoid
     correction with cutoff equal to half and gain of 10"""
-    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
-    expected = np.array([[253, 253, 252, 252, 251, 251, 250, 249],
+    image = np.arange(0, 255, 4, np.uint8).reshape((8, 8))
+    expected = np.array([
+        [253, 253, 252, 252, 251, 251, 250, 249],
         [249, 248, 247, 245, 244, 242, 240, 238],
         [235, 232, 229, 225, 220, 215, 210, 204],
         [197, 190, 182, 174, 165, 155, 146, 136],
@@ -467,7 +475,7 @@ def test_adjust_inv_sigmoid_cutoff_half():
 
 
 def test_negative():
-    image = np.arange(-10, 245, 4).reshape(8, 8).astype(np.double)
+    image = np.arange(-10, 245, 4).reshape((8, 8)).astype(np.double)
     assert_raises(ValueError, exposure.adjust_gamma, image)
 
 
