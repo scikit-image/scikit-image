@@ -35,13 +35,15 @@ def equalize_adapthist(image, kernel_size=None,
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N[, C]) ndarray
         Input image.
-    kernel_size: integer or list-like
-        Defines the shape of contextual regions used in the algorithm. If an
+    kernel_size: integer or list-like, optional
+        Defines the shape of contextual regions used in the algorithm. If
         iterable is passed, it must have the same number of elements as
-        `image.ndim`. If integer, it is broadcasted to each `image` dimension.
-    clip_limit : float: optional
+        ``image.ndim`` (without color channel). If integer, it is broadcasted
+        to each `image` dimension. By default, ``kernel_size`` is 1/8 of
+        ``image`` height by 1/8 of its width.
+    clip_limit : float, optional
         Clipping limit, normalized between 0 and 1 (higher values give more
         contrast).
     nbins : int, optional
@@ -49,7 +51,7 @@ def equalize_adapthist(image, kernel_size=None,
 
     Returns
     -------
-    out : ndarray
+    out : (M, N[, C]) ndarray
         Equalized image.
 
     See Also
@@ -78,8 +80,7 @@ def equalize_adapthist(image, kernel_size=None,
             raise ValueError(msg)
 
     if kernel_size is None:
-        kernel_size = (np.round(image.shape[0] / 8),
-                       np.round(image.shape[1] / 8))
+        kernel_size = (image.shape[0] // 8, image.shape[1] // 8)
     elif isinstance(kernel_size, numbers.Number):
         kernel_size = (kernel_size,) * image.ndim
     elif len(kernel_size) != image.ndim:
@@ -97,18 +98,18 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
 
     Parameters
     ----------
-    image : array-like
+    image : (M, N) ndarray
         Input image.
-    kernel_size: 2-tuple
+    kernel_size: 2-tuple of int
         Defines the shape of contextual regions used in the algorithm.
-    clip_limit : float, optional
+    clip_limit : float
         Normalized clipping limit (higher values give more contrast).
     nbins : int, optional
         Number of gray bins for histogram ("dynamic range").
 
     Returns
     -------
-    out : ndarray
+    out : (M, N) ndarray
         Equalized image.
 
     The number of "effective" greylevels in the output image is set by `nbins`;
