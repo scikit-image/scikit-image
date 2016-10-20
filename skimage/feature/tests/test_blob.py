@@ -115,6 +115,10 @@ def test_blob_log():
 
     assert_raises(ValueError, blob_log, img3)
 
+    # Testing no peaks
+    img_empty = np.zeros((100,100))
+    assert blob_log(img_empty).size == 0
+
 
 def test_blob_doh():
     img = np.ones((512, 512), dtype=np.uint8)

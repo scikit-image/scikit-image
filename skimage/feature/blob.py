@@ -302,6 +302,8 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
                                   threshold_rel=0.0,
                                   exclude_border=False)
 
+    if not local_maxima.size > 0:
+        return np.empty((0,3))
     # Convert local_maxima to float64
     lm = local_maxima.astype(np.float64)
     # Convert the last index to its corresponding scale value
