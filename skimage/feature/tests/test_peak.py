@@ -392,6 +392,19 @@ def test_threshold_rel_default():
     assert len(peak.peak_local_max(image, min_distance=0)) == image.size - 1
 
 
+def test_input_labels_unmodified():
+    image = np.zeros((10, 20))
+    labels = np.zeros((10, 20), int)
+    image[5, 5] = 1
+    labels[5, 5] = 1
+    labelsin = labels.copy()
+    result = peak.peak_local_max(image, labels=labels,
+                                 footprint=np.ones((3, 3), bool),
+                                 min_distance=1, threshold_rel=0,
+                                 indices=False, exclude_border=False)
+    assert np.all(labels == labelsin)
+
+
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()
