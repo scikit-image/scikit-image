@@ -107,8 +107,8 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
 
     The Hessian matrix is defined as::
 
-        H = [Hxx Hxy]
-            [Hxy Hyy]
+        H = [Hrr Hrc]
+            [Hrc Hcc]
 
     which is computed by convolving the image with the second derivatives
     of the Gaussian kernel in the respective x- and y-directions.
@@ -126,17 +126,17 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
         else:optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
-    order : {'C', 'F'}, optional
+    order : {'xy', 'rc'}, optional
         this parameter allows for the use of reverse or forward order of
         returned matrix values
 
     Returns
     -------
-    Hxx : ndarray
+    Hrr : ndarray
         Element of the Hessian matrix for each pixel in the input image.
-    Hxy : ndarray
+    Hrc : ndarray
         Element of the Hessian matrix for each pixel in the input image.
-    Hyy : ndarray
+    Hcc : ndarray
         Element of the Hessian matrix for each pixel in the input image.
 
     Examples
@@ -144,8 +144,8 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
     >>> from skimage.feature import hessian_matrix
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
-    >>> Hxy
+    >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1)
+    >>> Hrc
     array([[ 0.,  0.,  0.,  0.,  0.],
            [ 0.,  1.,  0., -1.,  0.],
            [ 0.,  0.,  0.,  0.,  0.],
@@ -163,10 +163,9 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
             # The legacy 2D code followed (x, y) convention, so we swap the axis
             # order to maintain compatibility with old code
             warn('deprecation warning: the default value will be changed to ''xy'' in version 0.15')
-
-            order = 'F'
+            order = 'rc'
         else:
-            order = 'C'
+            order = 'xy'
 
 
     gradients = np.gradient(gaussian_filtered)
@@ -174,7 +173,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
     H_elems = [np.gradient(gradients[ax0], axis=ax1)
                for ax0, ax1 in combinations_with_replacement(axes, 2)]
 
-    if order == 'F':
+    if order == 'rc':
         H_elems = reversed(H_elems);
 
     return H_elems
