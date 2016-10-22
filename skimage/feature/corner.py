@@ -12,7 +12,7 @@ from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
 from .._shared.utils import safe_as_int
 from .corner_cy import _corner_moravec, _corner_orientations
-
+from warnings import warn
 
 def _compute_derivatives(image, mode='constant', cval=0):
     """Compute derivatives in x and y direction using the Sobel operator.
@@ -122,7 +122,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
         weighting function for the auto-correlation matrix.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
         How to handle values outside the image borders.
-    cval : float, 'F'
+    cval : float, optional
         else:optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -162,9 +162,12 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
         if image.ndim ==2:
             # The legacy 2D code followed (x, y) convention, so we swap the axis
             # order to maintain compatibility with old code
+            warn('deprecation warning: the order will be changed in' 'v0.15')
+
             order = 'F'
         else:
             order = 'C'
+
 
     gradients = np.gradient(gaussian_filtered)
     axes = range(image.ndim)
@@ -331,7 +334,8 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
         Standard deviation used for the Gaussian kernel, which is used for
         smoothing the input data before Hessian eigen value calculation.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
-        How to handle values outside the image borders.
+        How to handle values outside the image borders.from .._shared.utils import skimage_deprecation, warn
+
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
