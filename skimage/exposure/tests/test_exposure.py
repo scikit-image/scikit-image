@@ -1,9 +1,8 @@
 import warnings
 
 import numpy as np
-from numpy.testing import assert_array_almost_equal as assert_close
-from numpy.testing import (assert_array_equal, assert_raises,
-                           assert_almost_equal)
+from numpy.testing import (assert_array_equal, assert_array_almost_equal,
+                           assert_raises, assert_almost_equal)
 
 import skimage
 from skimage import data
@@ -133,56 +132,56 @@ def test_rescale_stretch():
     image = np.array([51, 102, 153], dtype=np.uint8)
     out = exposure.rescale_intensity(image)
     assert out.dtype == np.uint8
-    assert_close(out, [0, 127, 255])
+    assert_array_almost_equal(out, [0, 127, 255])
 
 
 def test_rescale_shrink():
     image = np.array([51., 102., 153.])
     out = exposure.rescale_intensity(image)
-    assert_close(out, [0, 0.5, 1])
+    assert_array_almost_equal(out, [0, 0.5, 1])
 
 
 def test_rescale_in_range():
     image = np.array([51., 102., 153.])
     out = exposure.rescale_intensity(image, in_range=(0, 255))
-    assert_close(out, [0.2, 0.4, 0.6])
+    assert_array_almost_equal(out, [0.2, 0.4, 0.6])
 
 
 def test_rescale_in_range_clip():
     image = np.array([51., 102., 153.])
     out = exposure.rescale_intensity(image, in_range=(0, 102))
-    assert_close(out, [0.5, 1, 1])
+    assert_array_almost_equal(out, [0.5, 1, 1])
 
 
 def test_rescale_out_range():
     image = np.array([-10, 0, 10], dtype=np.int8)
     out = exposure.rescale_intensity(image, out_range=(0, 127))
     assert out.dtype == np.int8
-    assert_close(out, [0, 63, 127])
+    assert_array_almost_equal(out, [0, 63, 127])
 
 
 def test_rescale_named_in_range():
     image = np.array([0, uint10_max, uint10_max + 100], dtype=np.uint16)
     out = exposure.rescale_intensity(image, in_range='uint10')
-    assert_close(out, [0, uint16_max, uint16_max])
+    assert_array_almost_equal(out, [0, uint16_max, uint16_max])
 
 
 def test_rescale_named_out_range():
     image = np.array([0, uint16_max], dtype=np.uint16)
     out = exposure.rescale_intensity(image, out_range='uint10')
-    assert_close(out, [0, uint10_max])
+    assert_array_almost_equal(out, [0, uint10_max])
 
 
 def test_rescale_uint12_limits():
     image = np.array([0, uint16_max], dtype=np.uint16)
     out = exposure.rescale_intensity(image, out_range='uint12')
-    assert_close(out, [0, uint12_max])
+    assert_array_almost_equal(out, [0, uint12_max])
 
 
 def test_rescale_uint14_limits():
     image = np.array([0, uint16_max], dtype=np.uint16)
     out = exposure.rescale_intensity(image, out_range='uint14')
-    assert_close(out, [0, uint14_max])
+    assert_array_almost_equal(out, [0, uint14_max])
 
 
 # Test adaptive histogram equalization
@@ -198,11 +197,9 @@ def test_adapthist_scalar():
     assert img.shape == adapted.shape
     full_scale = skimage.exposure.rescale_intensity(skimage.img_as_float(img))
 
-    assert_almost_equal = np.testing.assert_almost_equal
     assert_almost_equal(peak_snr(full_scale, adapted), 102.066, 3)
     assert_almost_equal(norm_brightness_err(full_scale, adapted),
                         0.038, 3)
-    return img, adapted
 
 
 def test_adapthist_grayscale():
@@ -215,9 +212,8 @@ def test_adapthist_grayscale():
         adapted = exposure.equalize_adapthist(img, kernel_size=(57, 51),
                                               clip_limit=0.01, nbins=128)
     assert img.shape == adapted.shape
-    assert_almost_equal(peak_snr(img, adapted),  102.078, 3)
+    assert_almost_equal(peak_snr(img, adapted), 102.078, 3)
     assert_almost_equal(norm_brightness_err(img, adapted), 0.0529, 3)
-    return data, adapted
 
 
 def test_adapthist_color():
@@ -231,7 +227,6 @@ def test_adapthist_color():
     with expected_warnings(['precision loss']):
         adapted = exposure.equalize_adapthist(img, clip_limit=0.01)
 
-    assert_almost_equal = np.testing.assert_almost_equal
     assert adapted.min() == 0
     assert adapted.max() == 1.0
     assert img.shape == adapted.shape
@@ -253,9 +248,16 @@ def test_adapthist_alpha():
     img = img[:, :, :3]
     full_scale = skimage.exposure.rescale_intensity(img)
     assert img.shape == adapted.shape
-    assert_almost_equal = np.testing.assert_almost_equal
     assert_almost_equal(peak_snr(full_scale, adapted), 109.393, 2)
     assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.0248, 3)
+
+
+def test_adapthist_ntiles_raises():
+    img = skimage.img_as_ubyte(data.moon())
+    assert_raises(ValueError, exposure.equalize_adapthist, img, ntiles_x=8)
+    assert_raises(ValueError, exposure.equalize_adapthist, img, ntiles_y=8)
+    assert_raises(ValueError, exposure.equalize_adapthist, img,
+                  ntiles_x=8, ntiles_y=8)
 
 
 def peak_snr(img1, img2):
