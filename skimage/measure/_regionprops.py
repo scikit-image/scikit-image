@@ -110,11 +110,6 @@ class _RegionProperties(object):
 
     @_cached
     def area(self):
-    """
-    Returns
-    -------
-    The number of pixels of the region image as an integer.
-    """
         return np.sum(self.image)
 
     def bbox(self):
@@ -135,11 +130,6 @@ class _RegionProperties(object):
 
     @only2d
     def convex_area(self):
-    """
-    Returns
-    _______
-    The number of pixels of the convex hull image, convex_image, as an integer.
-    """
         return np.sum(self.convex_image)
 
     @_cached
@@ -177,11 +167,6 @@ class _RegionProperties(object):
         return self.area / self.image.size
 
     def filled_area(self):
-    """
-    Returns
-    _______
-    The number of pixels in the filled imaged region, filled_image, as an integer
-    """
         return np.sum(self.filled_image)
 
     @_cached
@@ -364,7 +349,6 @@ class _RegionProperties(object):
 
 def regionprops(label_image, intensity_image=None, cache=True):
     """Measure properties of labeled image regions.
-
     Parameters
     ----------
     label_image : (N, M) ndarray
@@ -376,19 +360,16 @@ def regionprops(label_image, intensity_image=None, cache=True):
         Determine whether to cache calculated properties. The computation is
         much faster for cached properties, whereas the memory consumption
         increases.
-
     Returns
     -------
     properties : list of RegionProperties
         Each item describes one labeled region, and can be accessed using the
         attributes listed below.
-
     Notes
     -----
     The following properties can be accessed as attributes or keys:
-
     **area** : int
-        Number of pixels of region.
+        Number of pixels of the region.
     **bbox** : tuple
         Bounding box ``(min_row, min_col, max_row, max_col)``.
         Pixels belonging to the bounding box are in the half-open interval
@@ -398,7 +379,9 @@ def regionprops(label_image, intensity_image=None, cache=True):
     **centroid** : array
         Centroid coordinate tuple ``(row, col)``.
     **convex_area** : int
-        Number of pixels of convex hull image.
+        Number of pixels of convex hull image, which is the smallest convex 
+        polygon that encloses the region. The size of the convex hull image is 
+        described by the bounding box.
     **convex_image** : (H, J) ndarray
         Binary convex hull image which has the same size as bounding box.
     **coords** : (N, 2) ndarray
@@ -418,7 +401,8 @@ def regionprops(label_image, intensity_image=None, cache=True):
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as ``area / (rows * cols)``
     **filled_area** : int
-        Number of pixels of filled region.
+        Number of pixels of the region will all the holes filled in. Describes 
+        the area of the filled_image.
     **filled_image** : (H, J) ndarray
         Binary region image with filled holes which has the same size as
         bounding box.
@@ -449,24 +433,18 @@ def regionprops(label_image, intensity_image=None, cache=True):
         normalized second central moments as the region.
     **moments** : (3, 3) ndarray
         Spatial moments up to 3rd order::
-
             m_ji = sum{ array(x, y) * x^j * y^i }
-
         where the sum is over the `x`, `y` coordinates of the region.
     **moments_central** : (3, 3) ndarray
         Central moments (translation invariant) up to 3rd order::
-
             mu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
-
         where the sum is over the `x`, `y` coordinates of the region,
         and `x_c` and `y_c` are the coordinates of the region's centroid.
     **moments_hu** : tuple
         Hu moments (translation, scale and rotation invariant).
     **moments_normalized** : (3, 3) ndarray
         Normalized moments (translation and scale invariant) up to 3rd order::
-
             nu_ji = mu_ji / m_00^[(i+j)/2 + 1]
-
         where `m_00` is the zeroth spatial moment.
     **orientation** : float
         Angle between the X-axis and the major axis of the ellipse that has
@@ -485,16 +463,12 @@ def regionprops(label_image, intensity_image=None, cache=True):
         box, weighted with intensity image.
     **weighted_moments** : (3, 3) ndarray
         Spatial moments of intensity image up to 3rd order::
-
             wm_ji = sum{ array(x, y) * x^j * y^i }
-
         where the sum is over the `x`, `y` coordinates of the region.
     **weighted_moments_central** : (3, 3) ndarray
         Central moments (translation invariant) of intensity image up to
         3rd order::
-
             wmu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
-
         where the sum is over the `x`, `y` coordinates of the region,
         and `x_c` and `y_c` are the coordinates of the region's weighted
         centroid.
@@ -504,20 +478,14 @@ def regionprops(label_image, intensity_image=None, cache=True):
     **weighted_moments_normalized** : (3, 3) ndarray
         Normalized moments (translation and scale invariant) of intensity
         image up to 3rd order::
-
             wnu_ji = wmu_ji / wm_00^[(i+j)/2 + 1]
-
         where ``wm_00`` is the zeroth spatial moment (intensity-weighted area).
-
     Each region also supports iteration, so that you can do::
-
       for prop in region:
           print(prop, region[prop])
-
     See Also
     --------
     label
-
     References
     ----------
     .. [1] Wilhelm Burger, Mark Burge. Principles of Digital Image Processing:
@@ -528,7 +496,6 @@ def regionprops(label_image, intensity_image=None, cache=True):
            Features, from Lecture notes in computer science, p. 676. Springer,
            Berlin, 1993.
     .. [4] http://en.wikipedia.org/wiki/Image_moment
-
     Examples
     --------
     >>> from skimage import data, util
@@ -542,7 +509,6 @@ def regionprops(label_image, intensity_image=None, cache=True):
     >>> # centroid of first labeled object
     >>> props[0]['centroid']
     (22.729879860483141, 81.912285234465827)
-
     """
 
     label_image = np.squeeze(label_image)
@@ -571,19 +537,16 @@ def regionprops(label_image, intensity_image=None, cache=True):
 
 def perimeter(image, neighbourhood=4):
     """Calculate total perimeter of all objects in binary image.
-
     Parameters
     ----------
     image : array
         Binary image.
     neighbourhood : 4 or 8, optional
         Neighborhood connectivity for border pixel determination.
-
     Returns
     -------
     perimeter : float
         Total perimeter of all objects in binary image.
-
     References
     ----------
     .. [1] K. Benkrid, D. Crookes. Design and FPGA Implementation of
