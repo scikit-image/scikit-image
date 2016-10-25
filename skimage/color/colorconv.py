@@ -240,9 +240,6 @@ def rgb2hsv(rgb):
 
     Notes
     -----
-    The conversion assumes an input data range of [0, 1] for all
-    color components.
-
     Conversion between RGB and HSV color spaces results in some loss of
     precision, due to integer arithmetic and rounding [1]_.
 
@@ -318,9 +315,6 @@ def hsv2rgb(hsv):
 
     Notes
     -----
-    The conversion assumes an input data range of ``[0, 1]`` for all
-    color components.
-
     Conversion between RGB and HSV color spaces results in some loss of
     precision, due to integer arithmetic and rounding [1]_.
 
