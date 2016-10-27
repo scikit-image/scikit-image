@@ -170,14 +170,14 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
 
     gradients = np.gradient(gaussian_filtered)
     axes = range(image.ndim)
+
+    if order == 'rc':
+        axes = reversed(axes)
+
     H_elems = [np.gradient(gradients[ax0], axis=ax1)
                for ax0, ax1 in combinations_with_replacement(axes, 2)]
 
-    if order == 'rc':
-        H_elems = reversed(H_elems);
-
     return H_elems
-
 
 def hessian_matrix_det(image, sigma=1):
     """Computes the approximate Hessian Determinant over an image.

@@ -41,20 +41,20 @@ def test_structure_tensor():
 def test_hessian_matrix():
     square = np.zeros((5, 5))
     square[2, 2] = 4
-    Hyy, Hxy, Hxx = hessian_matrix(square, sigma=0.1, order='C')
-    assert_almost_equal(Hxx, np.array([[0, 0,  0, 0, 0],
+    Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='C')
+    assert_almost_equal(Hrr, np.array([[0, 0,  0, 0, 0],
                                        [0, 0,  0, 0, 0],
                                        [2, 0, -2, 0, 2],
                                        [0, 0,  0, 0, 0],
                                        [0, 0,  0, 0, 0]]))
 
-    assert_almost_equal(Hxy, np.array([[0,  0, 0,  0, 0],
+    assert_almost_equal(Hrc, np.array([[0,  0, 0,  0, 0],
                                        [0,  1, 0, -1, 0],
                                        [0,  0, 0,  0, 0],
                                        [0, -1, 0,  1, 0],
                                        [0,  0, 0,  0, 0]]))
 
-    assert_almost_equal(Hyy, np.array([[0, 0,  2, 0, 0],
+    assert_almost_equal(Hcc, np.array([[0, 0,  2, 0, 0],
                                        [0, 0,  0, 0, 0],
                                        [0, 0, -2, 0, 0],
                                        [0, 0,  0, 0, 0],
@@ -94,8 +94,8 @@ def test_structure_tensor_eigvals():
 def test_hessian_matrix_eigvals():
     square = np.zeros((5, 5))
     square[2, 2] = 4
-    Hyy, Hxy, Hxx = hessian_matrix(square, sigma=0.1, order='C')
-    l1, l2 = hessian_matrix_eigvals(Hyy, Hxy, Hxx)
+    Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='C')
+    l1, l2 = hessian_matrix_eigvals(Hrr, Hrc, Hcc)
     assert_almost_equal(l1, np.array([[0, 0,  2, 0, 0],
                                       [0, 1,  0, 1, 0],
                                       [2, 0, -2, 0, 2],
