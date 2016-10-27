@@ -378,7 +378,8 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
         be in the range 0-5. See `skimage.transform.warp` for detail.
     mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode.  Modes match the behaviour of `numpy.pad`.
+        to the given mode, with 'constant' used as the default. Modes match 
+        the behaviour of `numpy.pad`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
