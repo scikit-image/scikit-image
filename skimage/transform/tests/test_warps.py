@@ -230,6 +230,14 @@ def test_swirl():
 
     assert np.mean(np.abs(image - unswirled)) < 0.01
 
+    swirl_params.pop('mode')
+
+    with expected_warnings(['Bi-quadratic.*bug', 'default']):
+        swirled = tf.swirl(image, strength=10, **swirl_params)
+        unswirled = tf.swirl(swirled, strength=-10, **swirl_params)
+
+    assert np.mean(np.abs(image[1:-1,1:-1] - unswirled[1:-1,1:-1])) < 0.01
+
 
 def test_const_cval_out_of_range():
     img = np.random.randn(100, 100)
