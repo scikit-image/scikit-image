@@ -194,7 +194,7 @@ def test_multispectral_3d():
     data, labels = make_3d_syntheticdata(lx, ly, lz)
     data = data[..., np.newaxis].repeat(2, axis=-1)  # Expect identical output
     with expected_warnings(['"cg" mode' + '|' + SCIPY_EXPECTED]):
-        multi_labels = random_walker(data, labels, mode='cg', 
+        multi_labels = random_walker(data, labels, mode='cg',
                                      multichannel=True)
     assert data[..., 0].shape == labels.shape
     with expected_warnings(['"cg" mode' + '|' + SCIPY_EXPECTED]):
@@ -331,6 +331,12 @@ def test_bad_inputs():
     labels[6, 8] = 5
     np.testing.assert_raises(ValueError,
                              random_walker, img, labels, spacing=(1,))
+
+    # Invalid mode
+    img = np.random.normal(size=(10, 10))
+    labels = np.zeros((10, 10))
+    np.testing.assert_raises(ValueError,
+                             random_walker, img, labels, mode='bad')
 
 
 if __name__ == '__main__':
