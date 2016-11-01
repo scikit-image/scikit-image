@@ -147,7 +147,7 @@ def safe_as_int(val, atol=1e-3):
 
 def assert_nD(array, ndim, arg_name='image'):
     """
-    Verify an array meets the desired ndims.
+    Verify an array meets the desired ndims and array isn't empty.
 
     Parameters
     ----------
