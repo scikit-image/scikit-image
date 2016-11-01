@@ -1,6 +1,21 @@
-from skimage._shared.utils import copy_func
+from skimage._shared.utils import (copy_func, 
+                                    assert_nD)
 import numpy.testing as npt
+import unittest
 
+
+
+def test_assert_nD():
+    try:
+        z = np.random.random(200**2).reshape((200, 200))
+        x = z[10:30, 30:10]
+        assert_nD(x, 2)
+    except ValueError:
+        pass
+    except Exception as e:
+       unittest.TestCase.fail('Unexpected exception raised:', e)
+    else:
+       unittest.TestCase.fail('ValueError not raised')
 
 def test_copyfunc():
     def foo(a):

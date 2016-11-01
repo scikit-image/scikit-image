@@ -160,14 +160,11 @@ def assert_nD(array, ndim, arg_name='image'):
 
     """
     array = np.asanyarray(array)
-    msg_incorrect_dim = "The parameter `%s` must be a %s-dimensional array"
-    msg_empty_array = "The parameter `%s` cannot be an empty array"
+    msg = "The parameter `%s` must be a %s-dimensional array"
     if isinstance(ndim, int):
         ndim = [ndim]
-    if array.size == 0:
-        raise ValueError(msg_empty_array % (arg_name))
     if not array.ndim in ndim:
-        raise ValueError(msg_incorrect_dim % (arg_name, '-or-'.join([str(n) for n in ndim])))
+        raise ValueError(msg % (arg_name, '-or-'.join([str(n) for n in ndim])))
 
 
 def copy_func(f, name=None):
