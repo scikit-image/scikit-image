@@ -41,7 +41,7 @@ def test_structure_tensor():
 def test_hessian_matrix():
     square = np.zeros((5, 5))
     square[2, 2] = 4
-    Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='C')
+    Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc')
     assert_almost_equal(Hrr, np.array([[0, 0,  0, 0, 0],
                                        [0, 0,  0, 0, 0],
                                        [2, 0, -2, 0, 2],
