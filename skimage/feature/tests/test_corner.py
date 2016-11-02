@@ -94,7 +94,7 @@ def test_structure_tensor_eigvals():
 def test_hessian_matrix_eigvals():
     square = np.zeros((5, 5))
     square[2, 2] = 4
-    Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='C')
+    Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc')
     l1, l2 = hessian_matrix_eigvals(Hrr, Hrc, Hcc)
     assert_almost_equal(l1, np.array([[0, 0,  2, 0, 0],
                                       [0, 1,  0, 1, 0],
