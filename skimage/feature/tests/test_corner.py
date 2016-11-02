@@ -60,6 +60,14 @@ def test_hessian_matrix():
                                        [0, 0,  0, 0, 0],
                                        [0, 0,  2, 0, 0]]))
 
+    matrix2d = np.zeros((2,2))
+    matrix2d = np.diag([1,3])
+    Arr, Arc, Acc = hessian_matrix(matrix2d, sigma=0.1)
+    assert_warns(Warning, hessian_matrix, matrix2d, sigma=0.1)
+
+
+
+
 
 def test_hessian_matrix_3d():
     cube = np.zeros((5, 5, 5))
