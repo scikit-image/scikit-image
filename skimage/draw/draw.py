@@ -17,6 +17,9 @@ def _ellipse_in_shape(shape, center, radiuses):
     return np.nonzero(distances < 1)
 
 
+# todo: add ellipse with rotation by given angle
+
+
 def ellipse(r, c, yradius, xradius, shape=None):
     """Generate coordinates of pixels within ellipse.
 
