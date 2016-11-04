@@ -8,20 +8,32 @@ from ._draw import (_coords_inside_image, _line, _line_aa,
                     _bezier_curve)
 
 
-def _ellipse_in_shape(shape, center, radiuses):
-    """Generate coordinates of points within ellipse bounded by shape."""
+def _ellipse_in_shape(shape, center, radiuses, orientation=0.):
+    """ Generate coordinates of points within ellipse bounded by shape.
+    see: http://www.maa.org/external_archive/joma/Volume8/Kalman/General.html
+
+    :param shape: (int, int) shape of image
+    :param center: (float, float) position of center
+    :param radiuses: (float, float) size of the two half axis
+    :param orientation: float, orientation in radians
+    :return: [int], [int] coordinates of ellipse
+    """
     r_lim, c_lim = np.ogrid[0:float(shape[0]), 0:float(shape[1])]
     r, c = center
     ry, rx = radiuses
-    distances = ((r_lim - r) / ry) ** 2 + ((c_lim - c) / rx) ** 2
+    sin_alpha, cos_alpha = np.sin(orientation), np.cos(orientation)
+    x, y = (r_lim - r), (c_lim - c)
+    distances = ((x * cos_alpha + y * sin_alpha) / ry) ** 2 \
+                + ((x * sin_alpha + y * cos_alpha) / rx) ** 2
     return np.nonzero(distances < 1)
 
 
-# todo: add ellipse with rotation by given angle
-
-
-def ellipse(r, c, yradius, xradius, shape=None):
+def ellipse(r, c, yradius, xradius, shape=None, orientation=0.):
     """Generate coordinates of pixels within ellipse.
+
+    The ellipse equation:
+    ``((x * cos(alpha) + y * sin(alpha)) / xradius) ** 2
+                + ((x * sin(alpha) + y * cos(alpha)) / yradius) ** 2 = 1``
 
     Parameters
     ----------
@@ -33,6 +45,8 @@ def ellipse(r, c, yradius, xradius, shape=None):
         Image shape which is used to determine the maximum extent of output pixel
         coordinates. This is useful for ellipses which exceed the image size.
         By default the full extent of the ellipse are used.
+    orientation : float, optional (default 0.)
+        Set the ellipse orientation (rotation)
 
     Returns
     -------
@@ -59,6 +73,21 @@ def ellipse(r, c, yradius, xradius, shape=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
+    >>> img = np.zeros((10, 12), dtype=np.uint8)
+    >>> rr, cc = ellipse(5, 6, 3, 4, orientation=np.deg2rad(30))
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0],
+           [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+
     """
 
     center = np.array([r, c])
@@ -77,7 +106,8 @@ def ellipse(r, c, yradius, xradius, shape=None):
     shifted_center = center - upper_left
     bounding_shape = lower_right - upper_left + 1
 
-    rr, cc = _ellipse_in_shape(bounding_shape, shifted_center, radiuses)
+    rr, cc = _ellipse_in_shape(bounding_shape, shifted_center, radiuses,
+                               orientation)
     rr.flags.writeable = True
     cc.flags.writeable = True
     rr += upper_left[0]
