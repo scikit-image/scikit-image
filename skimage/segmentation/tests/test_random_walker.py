@@ -1,7 +1,7 @@
 import numpy as np
 from skimage.segmentation import random_walker
 from skimage.transform import resize
-from skimage._shared._warnings import expected_warnings
+from skimage.shared._warnings import expected_warnings
 
 # older versions of scipy raise a warning with new NumPy because they use
 # numpy.rank() instead of arr.ndim or numpy.linalg.matrix_rank.

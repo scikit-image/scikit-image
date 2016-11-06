@@ -7,7 +7,7 @@ from ..morphology import octagon, star
 from ..feature.censure_cy import _censure_dob_loop
 from ..feature.util import (FeatureDetector, _prepare_grayscale_input_2D,
                             _mask_border_keypoints)
-from .._shared.utils import assert_nD
+from ..shared.utils import assert_nD
 
 # The paper(Reference [1]) mentions the sizes of the Octagon shaped filter
 # kernel for the first seven scales only. The sizes of the later scales

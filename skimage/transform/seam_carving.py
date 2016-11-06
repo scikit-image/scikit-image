@@ -1,6 +1,6 @@
 from ._seam_carving import _seam_carve_v
 from .. import util
-from .._shared import utils
+from ..shared import utils
 import numpy as np
 
 

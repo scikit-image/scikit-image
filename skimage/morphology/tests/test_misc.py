@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import (assert_array_equal, assert_equal, assert_raises,
                            assert_warns)
 from skimage.morphology import remove_small_objects, remove_small_holes
-from ..._shared._warnings import expected_warnings
+from ...shared._warnings import expected_warnings
 
 test_image = np.array([[0, 0, 0, 1, 0],
                        [1, 1, 1, 0, 0],

@@ -4,7 +4,7 @@ from scipy import ndimage as ndi
 from scipy.ndimage import filters as ndif
 from collections import OrderedDict
 from ..exposure import histogram
-from .._shared.utils import assert_nD, warn
+from ..shared.utils import assert_nD, warn
 
 __all__ = ['try_all_threshold',
            'threshold_adaptive',

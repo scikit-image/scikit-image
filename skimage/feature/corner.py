@@ -10,7 +10,7 @@ from ..feature.util import _prepare_grayscale_input_2D
 from ..feature.corner_cy import _corner_fast
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
-from .._shared.utils import safe_as_int
+from ..shared.utils import safe_as_int
 from .corner_cy import _corner_moravec, _corner_orientations
 
 

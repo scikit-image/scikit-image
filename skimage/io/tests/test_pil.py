@@ -8,9 +8,9 @@ from tempfile import NamedTemporaryFile
 
 from ... import data_dir, img_as_float
 from .. import imread, imsave, use_plugin, reset_plugins
-from ..._shared.testing import mono_check, color_check
-from ..._shared._warnings import expected_warnings
-from ..._shared._tempfile import temporary_file
+from ...shared.testing import mono_check, color_check
+from ...shared._warnings import expected_warnings
+from ...shared._tempfile import temporary_file
 
 from six import BytesIO
 

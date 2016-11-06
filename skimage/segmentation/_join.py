@@ -1,5 +1,5 @@
 import numpy as np
-from .._shared.utils import deprecated
+from ..shared.utils import deprecated
 
 
 def join_segmentations(s1, s2):

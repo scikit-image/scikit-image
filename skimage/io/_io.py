@@ -7,7 +7,7 @@ from ..io.manage_plugins import call_plugin
 from ..color import rgb2grey
 from .util import file_or_url_context
 from ..exposure import is_low_contrast
-from .._shared.utils import all_warnings, warn
+from ..shared.utils import all_warnings, warn
 
 
 __all__ = ['imread', 'imsave', 'imshow', 'show',

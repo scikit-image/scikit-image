@@ -5,7 +5,7 @@ from .base import Plugin
 from ..utils import ClearColormap, update_axes_image
 
 import six
-from ..._shared.version_requirements import is_installed
+from ...shared.version_requirements import is_installed
 
 
 __all__ = ['OverlayPlugin']

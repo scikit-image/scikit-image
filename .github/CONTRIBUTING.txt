@@ -174,8 +174,8 @@ Stylistic Guidelines
 * Use ``Py_ssize_t`` as data type for all indexing, shape and size variables
   in C/C++ and Cython code.
 
-* Use relative module imports, i.e. ``from .._shared import xyz`` rather than
-  ``from skimage._shared import xyz``.
+* Use relative module imports, i.e. ``from ..shared import xyz`` rather than
+  ``from skimage.shared import xyz``.
 
 * Wrap Cython code in a pure Python function, which defines the API. This
   improves compatibility with code introspection tools, which are often not

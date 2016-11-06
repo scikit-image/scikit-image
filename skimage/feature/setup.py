@@ -29,11 +29,11 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('brief_cy', sources=['brief_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_texture', sources=['_texture.c'],
-                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
+                         include_dirs=[get_numpy_include_dirs(), '../shared'])
     config.add_extension('_hessian_det_appx', sources=['_hessian_det_appx.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_hoghistogram', sources=['_hoghistogram.c'],
-                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
+                         include_dirs=[get_numpy_include_dirs(), '../shared'])
 
     return config
 

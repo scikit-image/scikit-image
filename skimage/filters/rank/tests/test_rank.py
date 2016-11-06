@@ -7,8 +7,8 @@ from skimage import img_as_ubyte, img_as_float
 from skimage import data, util, morphology
 from skimage.morphology import grey, disk
 from skimage.filters import rank
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import test_parallel
+from skimage.shared._warnings import expected_warnings
+from skimage.shared.testing import test_parallel
 
 
 class TestRank():

@@ -1,7 +1,7 @@
 import numpy as np
 import collections
 
-from .._shared.utils import warn
+from ..shared.utils import warn
 
 
 def integral_image(img):

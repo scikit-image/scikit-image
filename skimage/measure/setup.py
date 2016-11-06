@@ -32,7 +32,7 @@ def configuration(parent_package='', top_path=None):
                          sources=['_marching_cubes_lewiner_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_pnpoly', sources=['_pnpoly.c'],
-                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
+                         include_dirs=[get_numpy_include_dirs(), '../shared'])
 
     return config
 

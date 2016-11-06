@@ -10,7 +10,7 @@ import os as _os
 
 from .. import data_dir
 from ..io import imread, use_plugin
-from .._shared._warnings import expected_warnings
+from ..shared._warnings import expected_warnings
 from ._binary_blobs import binary_blobs
 from .. import img_as_bool
 

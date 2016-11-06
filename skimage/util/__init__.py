@@ -9,7 +9,7 @@ from ._regular_grid import regular_grid, regular_seeds
 from .unique import unique_rows
 from ._invert import invert
 
-from .._shared.utils import copy_func
+from ..shared.utils import copy_func
 
 from numpy import pad as numpy_pad
 pad = copy_func(numpy_pad, name='pad')

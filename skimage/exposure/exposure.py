@@ -3,7 +3,7 @@ import numpy as np
 
 from ..color import rgb2gray
 from ..util.dtype import dtype_range, dtype_limits
-from .._shared.utils import warn
+from ..shared.utils import warn
 
 
 __all__ = ['histogram', 'cumulative_distribution', 'equalize_hist',

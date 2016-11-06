@@ -25,7 +25,7 @@ References
 
 import numpy as np
 from ... import img_as_ubyte
-from ..._shared.utils import assert_nD
+from ...shared.utils import assert_nD
 
 from . import bilateral_cy
 from .generic import _handle_input

@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import assert_equal, assert_almost_equal, run_module_suite
 from skimage.feature import ORB
 from skimage import data
-from skimage._shared.testing import test_parallel
+from skimage.shared.testing import test_parallel
 
 
 img = data.coins()

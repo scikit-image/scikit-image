@@ -8,8 +8,8 @@ import os.path
 from skimage.transform import radon, iradon, iradon_sart, rescale
 from skimage.io import imread
 from skimage import data_dir
-from skimage._shared.testing import test_parallel
-from skimage._shared._warnings import expected_warnings
+from skimage.shared.testing import test_parallel
+from skimage.shared._warnings import expected_warnings
 
 PHANTOM = imread(os.path.join(data_dir, "phantom.png"),
                    as_grey=True)[::2, ::2]

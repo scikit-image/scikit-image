@@ -1,5 +1,5 @@
 from skimage.io._plugins.util import prepare_for_display, WindowManager
-from skimage._shared._warnings import expected_warnings
+from skimage.shared._warnings import expected_warnings
 
 from numpy.testing import *
 import numpy as np

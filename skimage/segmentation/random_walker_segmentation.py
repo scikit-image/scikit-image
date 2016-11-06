@@ -11,7 +11,7 @@ significantly the performance.
 import numpy as np
 from scipy import sparse, ndimage as ndi
 
-from .._shared.utils import warn
+from ..shared.utils import warn
 
 
 # executive summary for next code block: try to import umfpack from

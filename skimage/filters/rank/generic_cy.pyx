@@ -8,7 +8,7 @@ from libc.math cimport log, exp
 
 from .core_cy cimport dtype_t, dtype_t_out, _core
 
-from ..._shared.interpolation cimport round 
+from ...shared.interpolation cimport round 
 
 cdef inline void _kernel_autolevel(dtype_t_out* out, Py_ssize_t odepth,
                                    Py_ssize_t* histo,

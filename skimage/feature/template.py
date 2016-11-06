@@ -2,7 +2,7 @@ from __future__ import division
 import numpy as np
 from scipy.signal import fftconvolve
 
-from .._shared.utils import assert_nD
+from ..shared.utils import assert_nD
 
 
 def _window_sum_2d(image, window_shape):

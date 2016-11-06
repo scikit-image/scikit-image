@@ -1,5 +1,5 @@
 import numpy as np
-from skimage._shared.utils import safe_as_int
+from skimage.shared.utils import safe_as_int
 
 
 def test_int_cast_not_possible():

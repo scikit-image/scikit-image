@@ -107,12 +107,12 @@ Library:
     Extension: skimage.feature._texture
         Sources:
             skimage/feature/_texture.pyx
-    Extension: skimage._shared.transform
+    Extension: skimage.shared.transform
         Sources:
-            skimage/_shared/transform.pyx
-    Extension: skimage._shared.interpolation
+            skimage/shared/transform.pyx
+    Extension: skimage.shared.interpolation
         Sources:
-            skimage/_shared/interpolation.pyx
+            skimage/shared/interpolation.pyx
     Extension: skimage.segmentation._slic
         Sources:
             skimage/segmentation/_slic.pyx
@@ -134,9 +134,9 @@ Library:
     Extension: skimage.segmentation._felzenszwalb_cy
         Sources:
             skimage/segmentation/_felzenszwalb_cy.pyx
-    Extension: skimage._shared.geometry
+    Extension: skimage.shared.geometry
         Sources:
-            skimage/_shared/geometry.pyx
+            skimage/shared/geometry.pyx
     Extension: skimage.filters.rank.generic_cy
         Sources:
             skimage/filters/rank/generic_cy.pyx

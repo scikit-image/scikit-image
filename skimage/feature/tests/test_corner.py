@@ -6,7 +6,7 @@ from skimage import data
 from skimage import img_as_float
 from skimage.color import rgb2gray
 from skimage.morphology import octagon
-from skimage._shared.testing import test_parallel
+from skimage.shared.testing import test_parallel
 
 from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_subpix, peak_local_max, corner_peaks,

@@ -11,7 +11,7 @@ from .. import data_dir
 cimport numpy as cnp
 from libc.math cimport sin, cos
 
-from .._shared.interpolation cimport round
+from ..shared.interpolation cimport round
 
 POS = np.loadtxt(os.path.join(data_dir, "orb_descriptor_positions.txt"),
                  dtype=np.int8)

@@ -5,7 +5,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from ...util import dtype as dtypes
 from ...exposure import is_low_contrast
 from ...util.colormap import viridis
-from ..._shared.utils import warn
+from ...shared.utils import warn
 
 _default_colormap = 'gray'
 _nonstandard_colormap = viridis

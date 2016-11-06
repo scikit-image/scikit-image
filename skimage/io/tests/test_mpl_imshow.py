@@ -2,7 +2,7 @@ from __future__ import division
 
 import numpy as np
 from skimage import io
-from skimage._shared._warnings import expected_warnings
+from skimage.shared._warnings import expected_warnings
 import matplotlib.pyplot as plt
 
 

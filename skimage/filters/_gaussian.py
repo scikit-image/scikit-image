@@ -4,7 +4,7 @@ from scipy import ndimage as ndi
 
 from ..util import img_as_float
 from ..color import guess_spatial_dimensions
-from .._shared.utils import warn
+from ..shared.utils import warn
 
 __all__ = ['gaussian']
 

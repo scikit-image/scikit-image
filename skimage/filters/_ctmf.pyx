@@ -20,7 +20,7 @@ from libc.stdlib cimport malloc, free
 from libc.string cimport memset
 
 
-cdef extern from "../_shared/vectorized_ops.h":
+cdef extern from "../shared/vectorized_ops.h":
     void add16(cnp.uint16_t *dest, cnp.uint16_t *src) nogil
     void sub16(cnp.uint16_t *dest, cnp.uint16_t *src) nogil
 

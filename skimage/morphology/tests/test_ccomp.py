@@ -3,7 +3,7 @@ from numpy.testing import assert_array_equal, run_module_suite
 
 from skimage.measure import label
 import skimage.measure._ccomp as ccomp
-from skimage._shared._warnings import expected_warnings
+from skimage.shared._warnings import expected_warnings
 
 # Background value
 BG = 0
