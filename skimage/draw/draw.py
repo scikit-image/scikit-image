@@ -15,12 +15,13 @@ def _ellipse_in_shape(shape, center, radiuses, orientation=0.):
     :param shape: (int, int) shape of image
     :param center: (float, float) position of center
     :param radiuses: (float, float) size of the two half axis
-    :param orientation: float, orientation in radians
+    :param orientation: float, orientation in radians in range (0, PI/2)
     :return: [int], [int] coordinates of ellipse
     """
     r_lim, c_lim = np.ogrid[0:float(shape[0]), 0:float(shape[1])]
     r, c = center
     ry, rx = radiuses
+    orientation = orientation % (np.pi / 2.)
     sin_alpha, cos_alpha = np.sin(orientation), np.cos(orientation)
     x, y = (r_lim - r), (c_lim - c)
     distances = ((x * cos_alpha + y * sin_alpha) / ry) ** 2 \
@@ -46,7 +47,8 @@ def ellipse(r, c, yradius, xradius, shape=None, orientation=0.):
         coordinates. This is useful for ellipses which exceed the image size.
         By default the full extent of the ellipse are used.
     orientation : float, optional (default 0.)
-        Set the ellipse orientation (rotation)
+        Set the ellipse orientation (rotation) in range (0, PI/2)
+        in contra clock wise direction, so 90 degree means swap ellipse axis
 
     Returns
     -------
@@ -92,11 +94,16 @@ def ellipse(r, c, yradius, xradius, shape=None, orientation=0.):
 
     center = np.array([r, c])
     radiuses = np.array([yradius, xradius])
+    # allow just rotation with in range 90 degree
+    orientation = orientation % (np.pi / 2.)
 
-    # The upper_left and lower_right corners of the
-    # smallest rectangle containing the ellipse.
-    upper_left = np.ceil(center - radiuses).astype(int)
-    lower_right = np.floor(center + radiuses).astype(int)
+    # The upper_left and lower_right corners of the smallest rectangle
+    # containing the ellipse.
+    radiuses_yrot = max([yradius * np.sin(orientation), xradius * np.cos(orientation)])
+    radiuses_xrot = max([yradius * np.cos(orientation), xradius * np.sin(orientation)])
+    radiuses_rot = np.array([radiuses_yrot, radiuses_xrot])
+    upper_left = np.ceil(center - radiuses_rot).astype(int)
+    lower_right = np.floor(center + radiuses_rot).astype(int)
 
     if shape is not None:
         # Constrain upper_left and lower_right by shape boundary.
