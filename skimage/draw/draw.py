@@ -8,47 +8,28 @@ from ._draw import (_coords_inside_image, _line, _line_aa,
                     _bezier_curve)
 
 
-def _ellipse_in_shape(shape, center, radiuses, orientation=0.):
-    """ Generate coordinates of points within ellipse bounded by shape.
-    see: http://www.maa.org/external_archive/joma/Volume8/Kalman/General.html
-
-    :param shape: (int, int) shape of image
-    :param center: (float, float) position of center
-    :param radiuses: (float, float) size of the two half axis
-    :param orientation: float, orientation in radians in range (0, PI/2)
-    :return: [int], [int] coordinates of ellipse
-    """
+def _ellipse_in_shape(shape, center, radiuses):
+    """Generate coordinates of points within ellipse bounded by shape."""
     r_lim, c_lim = np.ogrid[0:float(shape[0]), 0:float(shape[1])]
-    r, c = center
-    ry, rx = radiuses
-    orientation = orientation % (np.pi / 2.)
-    sin_alpha, cos_alpha = np.sin(orientation), np.cos(orientation)
-    x, y = (r_lim - r), (c_lim - c)
-    distances = ((x * cos_alpha + y * sin_alpha) / ry) ** 2 \
-                + ((x * sin_alpha + y * cos_alpha) / rx) ** 2
+    r_o, c_o = center
+    r_r, c_r = radiuses
+    distances = ((r_lim - r_o) / r_r) ** 2 + ((c_lim - c_o) / c_r) ** 2
     return np.nonzero(distances < 1)
 
 
-def ellipse(r, c, yradius, xradius, shape=None, orientation=0.):
+def ellipse(r, c, r_radius, c_radius, shape=None):
     """Generate coordinates of pixels within ellipse.
-
-    The ellipse equation:
-    ``((x * cos(alpha) + y * sin(alpha)) / xradius) ** 2
-                + ((x * sin(alpha) + y * cos(alpha)) / yradius) ** 2 = 1``
 
     Parameters
     ----------
     r, c : double
         Centre coordinate of ellipse.
-    yradius, xradius : double
-        Minor and major semi-axes. ``(x/xradius)**2 + (y/yradius)**2 = 1``.
+    r_radius, c_radius : double
+        Minor and major semi-axes. ``(r/r_radius)**2 + (c/c_radius)**2 = 1``.
     shape : tuple, optional
-        Image shape which is used to determine the maximum extent of output pixel
-        coordinates. This is useful for ellipses which exceed the image size.
-        By default the full extent of the ellipse are used.
-    orientation : float, optional (default 0.)
-        Set the ellipse orientation (rotation) in range (0, PI/2)
-        in contra clock wise direction, so 90 degree means swap ellipse axis
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates. This is useful for ellipses that exceed the image
+        size. If None, the full extent of the ellipse is used.
 
     Returns
     -------
@@ -75,35 +56,15 @@ def ellipse(r, c, yradius, xradius, shape=None, orientation=0.):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
-    >>> img = np.zeros((10, 12), dtype=np.uint8)
-    >>> rr, cc = ellipse(5, 6, 3, 4, orientation=np.deg2rad(30))
-    >>> img[rr, cc] = 1
-    >>> img
-    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0],
-           [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0],
-           [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
-           [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-           [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-           [0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
-
     """
 
     center = np.array([r, c])
-    radiuses = np.array([yradius, xradius])
-    # allow just rotation with in range 90 degree
-    orientation = orientation % (np.pi / 2.)
+    radiuses = np.array([r_radius, c_radius])
 
-    # The upper_left and lower_right corners of the smallest rectangle
-    # containing the ellipse.
-    radiuses_yrot = max([yradius * np.sin(orientation), xradius * np.cos(orientation)])
-    radiuses_xrot = max([yradius * np.cos(orientation), xradius * np.sin(orientation)])
-    radiuses_rot = np.array([radiuses_yrot, radiuses_xrot])
-    upper_left = np.ceil(center - radiuses_rot).astype(int)
-    lower_right = np.floor(center + radiuses_rot).astype(int)
+    # The upper_left and lower_right corners of the
+    # smallest rectangle containing the ellipse.
+    upper_left = np.ceil(center - radiuses).astype(int)
+    lower_right = np.floor(center + radiuses).astype(int)
 
     if shape is not None:
         # Constrain upper_left and lower_right by shape boundary.
@@ -113,8 +74,7 @@ def ellipse(r, c, yradius, xradius, shape=None, orientation=0.):
     shifted_center = center - upper_left
     bounding_shape = lower_right - upper_left + 1
 
-    rr, cc = _ellipse_in_shape(bounding_shape, shifted_center, radiuses,
-                               orientation)
+    rr, cc = _ellipse_in_shape(bounding_shape, shifted_center, radiuses)
     rr.flags.writeable = True
     cc.flags.writeable = True
     rr += upper_left[0]
@@ -132,9 +92,9 @@ def circle(r, c, radius, shape=None):
     radius : double
         Radius of circle.
     shape : tuple, optional
-        Image shape which is used to determine the maximum extent of output pixel
-        coordinates. This is useful for circles which exceed the image size.
-        By default the full extent of the circle are used.
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates. This is useful for circles that exceed the image
+        size. If None, the full extent of the circle is used.
 
     Returns
     -------
@@ -160,25 +120,23 @@ def circle(r, c, radius, shape=None):
            [0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
-
     """
-
     return ellipse(r, c, radius, radius, shape)
 
 
-def polygon_perimeter(cr, cc, shape=None, clip=False):
+def polygon_perimeter(r, c, shape=None, clip=False):
     """Generate polygon perimeter coordinates.
 
     Parameters
     ----------
-    cr : (N,) ndarray
-        Row (Y) coordinates of vertices of polygon.
-    cc : (N,) ndarray
-        Column (X) coordinates of vertices of polygon.
+    r : (N,) ndarray
+        Row coordinates of vertices of polygon.
+    c : (N,) ndarray
+        Column coordinates of vertices of polygon.
     shape : tuple, optional
         Image shape which is used to determine maximum extents of output pixel
-        coordinates. This is useful for polygons which exceed the image size.
-        By default the full extents of the polygon are used.
+        coordinates. This is useful for polygons that exceed the image size.
+        If None, the full extents of the polygon is used.
     clip : bool, optional
         Whether to clip the polygon to the provided shape.  If this is set
         to True, the drawn figure will always be a closed polygon with all
@@ -186,10 +144,10 @@ def polygon_perimeter(cr, cc, shape=None, clip=False):
 
     Returns
     -------
-    pr, pc : ndarray of int
+    rr, cc : ndarray of int
         Pixel coordinates of polygon.
         May be used to directly index into an array, e.g.
-        ``img[pr, pc] = 1``.
+        ``img[rr, cc] = 1``.
 
     Examples
     --------
@@ -217,30 +175,30 @@ def polygon_perimeter(cr, cc, shape=None, clip=False):
             raise ValueError("Must specify clipping shape")
         clip_box = np.array([0, 0, shape[0] - 1, shape[1] - 1])
     else:
-        clip_box = np.array([np.min(cr), np.min(cc),
-                             np.max(cr), np.max(cc)])
+        clip_box = np.array([np.min(r), np.min(c),
+                             np.max(r), np.max(c)])
 
     # Do the clipping irrespective of whether clip is set.  This
     # ensures that the returned polygon is closed and is an array.
-    cr, cc = polygon_clip(cr, cc, *clip_box)
+    r, c = polygon_clip(r, c, *clip_box)
 
-    cr = np.round(cr).astype(int)
-    cc = np.round(cc).astype(int)
+    r = np.round(r).astype(int)
+    c = np.round(c).astype(int)
 
     # Construct line segments
-    pr, pc = [], []
-    for i in range(len(cr) - 1):
-        line_r, line_c = line(cr[i], cc[i], cr[i + 1], cc[i + 1])
-        pr.extend(line_r)
-        pc.extend(line_c)
+    rr, cc = [], []
+    for i in range(len(r) - 1):
+        line_r, line_c = line(r[i], c[i], r[i + 1], c[i + 1])
+        rr.extend(line_r)
+        cc.extend(line_c)
 
-    pr = np.asarray(pr)
-    pc = np.asarray(pc)
+    rr = np.asarray(rr)
+    cc = np.asarray(cc)
 
     if shape is None:
-        return pr, pc
+        return rr, cc
     else:
-        return _coords_inside_image(pr, pc, shape)
+        return _coords_inside_image(rr, cc, shape)
 
 
 def set_color(img, coords, color, alpha=1):
@@ -311,14 +269,14 @@ def set_color(img, coords, color, alpha=1):
     img[rr, cc] = vals + color
 
 
-def line(y0, x0, y1, x1):
+def line(r0, c0, r1, c1):
     """Generate line pixel coordinates.
 
     Parameters
     ----------
-    y0, x0 : int
+    r0, c0 : int
         Starting position (row, column).
-    y1, x1 : int
+    r1, c1 : int
         End position (row, column).
 
     Returns
@@ -349,19 +307,18 @@ def line(y0, x0, y1, x1):
            [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
-
     """
-    return _line(y0, x0, y1, x1)
+    return _line(r0, c0, r1, c1)
 
 
-def line_aa(y0, x0, y1, x1):
+def line_aa(r0, c0, r1, c1):
     """Generate anti-aliased line pixel coordinates.
 
     Parameters
     ----------
-    y0, x0 : int
+    r0, c0 : int
         Starting position (row, column).
-    y1, x1 : int
+    r1, c1 : int
         End position (row, column).
 
     Returns
@@ -393,22 +350,22 @@ def line_aa(y0, x0, y1, x1):
            [  0,   0,   0,   0,   0,   0,   0,  74, 255,   0],
            [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
     """
-    return _line_aa(y0, x0, y1, x1)
+    return _line_aa(r0, c0, r1, c1)
 
 
-def polygon(y, x, shape=None):
+def polygon(r, c, shape=None):
     """Generate coordinates of pixels within polygon.
 
     Parameters
     ----------
-    y : (N,) ndarray
-        Y-coordinates of vertices of polygon.
-    x : (N,) ndarray
-        X-coordinates of vertices of polygon.
+    r : (N,) ndarray
+        Row coordinates of vertices of polygon.
+    c : (N,) ndarray
+        Column coordinates of vertices of polygon.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates. This is useful for polygons which exceed the image
-        size. By default the full extent of the polygon are used.
+        pixel coordinates. This is useful for polygons that exceed the image
+        size. If None, the full extent of the polygon is used.
 
     Returns
     -------
@@ -421,9 +378,9 @@ def polygon(y, x, shape=None):
     --------
     >>> from skimage.draw import polygon
     >>> img = np.zeros((10, 10), dtype=np.uint8)
-    >>> x = np.array([1, 7, 4, 1])
-    >>> y = np.array([1, 2, 8, 1])
-    >>> rr, cc = polygon(y, x)
+    >>> r = np.array([1, 2, 8, 1])
+    >>> c = np.array([1, 7, 4, 1])
+    >>> rr, cc = polygon(r, c)
     >>> img[rr, cc] = 1
     >>> img
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -438,15 +395,15 @@ def polygon(y, x, shape=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    return _polygon(y, x, shape)
+    return _polygon(r, c, shape)
 
 
-def circle_perimeter(cy, cx, radius, method='bresenham', shape=None):
+def circle_perimeter(r, c, radius, method='bresenham', shape=None):
     """Generate circle perimeter coordinates.
 
     Parameters
     ----------
-    cy, cx : int
+    r, c : int
         Centre coordinate of circle.
     radius: int
         Radius of circle.
@@ -454,9 +411,9 @@ def circle_perimeter(cy, cx, radius, method='bresenham', shape=None):
         bresenham : Bresenham method (default)
         andres : Andres method
     shape : tuple, optional
-        Image shape which is used to determine the maximum extent of output pixel
-        coordinates. This is useful for circles which exceed the image size.
-        By default the full extent of the circle are used.
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates. This is useful for circles that exceed the image
+        size. If None, the full extent of the circle is used.
 
     Returns
     -------
@@ -498,24 +455,23 @@ def circle_perimeter(cy, cx, radius, method='bresenham', shape=None):
            [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
-
     """
-    return _circle_perimeter(cy, cx, radius, method, shape)
+    return _circle_perimeter(r, c, radius, method, shape)
 
 
-def circle_perimeter_aa(cy, cx, radius, shape=None):
+def circle_perimeter_aa(r, c, radius, shape=None):
     """Generate anti-aliased circle perimeter coordinates.
 
     Parameters
     ----------
-    cy, cx : int
+    r, c : int
         Centre coordinate of circle.
     radius: int
         Radius of circle.
     shape : tuple, optional
-        Image shape which is used to determine the maximum extent of output pixel
-        coordinates. This is useful for circles which exceed the image size.
-        By default the full extent of the circle are used.
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates. This is useful for circles that exceed the image
+        size. If None, the full extent of the circle is used.
 
     Returns
     -------
@@ -551,24 +507,24 @@ def circle_perimeter_aa(cy, cx, radius, shape=None):
            [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
            [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
     """
-    return _circle_perimeter_aa(cy, cx, radius, shape)
+    return _circle_perimeter_aa(r, c, radius, shape)
 
 
-def ellipse_perimeter(cy, cx, yradius, xradius, orientation=0, shape=None):
+def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
     """Generate ellipse perimeter coordinates.
 
     Parameters
     ----------
-    cy, cx : int
+    r, c : int
         Centre coordinate of ellipse.
-    yradius, xradius : int
-        Minor and major semi-axes. ``(x/xradius)**2 + (y/yradius)**2 = 1``.
+    r_radius, c_radius : int
+        Minor and major semi-axes. ``(r/r_radius)**2 + (c/c_radius)**2 = 1``.
     orientation : double, optional
         Major axis orientation in clockwise direction as radians.
     shape : tuple, optional
-        Image shape which is used to determine the maximum extent of output pixel
-        coordinates. This is useful for ellipses which exceed the image size.
-        If None, the full extent of the ellipse are used.
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates. This is useful for ellipses that exceed the image
+        size. If None, the full extent of the ellipse is used.
 
     Returns
     -------
@@ -599,28 +555,27 @@ def ellipse_perimeter(cy, cx, yradius, xradius, orientation=0, shape=None):
            [0, 0, 1, 0, 0, 0, 0, 0, 1, 0],
            [0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
-
     """
-    return _ellipse_perimeter(cy, cx, yradius, xradius, orientation, shape)
+    return _ellipse_perimeter(r, c, r_radius, c_radius, orientation, shape)
 
 
-def bezier_curve(y0, x0, y1, x1, y2, x2, weight, shape=None):
+def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
     """Generate Bezier curve coordinates.
 
     Parameters
     ----------
-    y0, x0 : int
+    r0, c0 : int
         Coordinates of the first control point.
-    y1, x1 : int
+    r1, c1 : int
         Coordinates of the middle control point.
-    y2, x2 : int
+    r2, c2 : int
         Coordinates of the last control point.
     weight : double
         Middle control point weight, it describes the line tension.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates. This is useful for curves which exceed the image
-        size. If None, the full extent of the curve are used.
+        pixel coordinates. This is useful for curves that exceed the image
+        size. If None, the full extent of the curve is used.
 
     Returns
     -------
@@ -658,4 +613,4 @@ def bezier_curve(y0, x0, y1, x1, y2, x2, weight, shape=None):
            [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
-    return _bezier_curve(y0, x0, y1, x1, y2, x2, weight, shape)
+    return _bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape)

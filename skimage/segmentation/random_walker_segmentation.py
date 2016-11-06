@@ -345,6 +345,9 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
             mode = 'cg'
         else:
             mode = 'bf'
+    elif mode not in ('cg_mg', 'cg', 'bf'):
+        raise ValueError("{mode} is not a valid mode. Valid modes are 'cg_mg',"
+                         " 'cg' and 'bf'".format(mode=mode))
 
     if UmfpackContext is None and mode == 'cg':
         warn('"cg" mode will be used, but it may be slower than '

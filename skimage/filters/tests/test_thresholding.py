@@ -46,6 +46,9 @@ class TestSimpleImage():
         image = np.float64(self.image)
         assert 2 <= threshold_li(image) < 3
 
+    def test_li_constant_image(self):
+        assert_raises(ValueError, threshold_li, np.ones((10,10)))
+
     def test_yen(self):
         assert threshold_yen(self.image) == 2
 
