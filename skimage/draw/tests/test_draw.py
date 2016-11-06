@@ -525,6 +525,19 @@ def test_ellipse_negative():
     assert_array_equal(cc, cc_ - 5)
 
 
+def test_ellipse_rotation_symmetry():
+    img1 = np.zeros((10, 12), dtype=np.uint8)
+    img2 = np.zeros((10, 12), dtype=np.uint8)
+    for angle in range(0, 180, 15):
+        img1.fill(0)
+        img2.fill(0)
+        rr, cc = ellipse(5, 6, 3, 4, rotation=np.deg2rad(angle))
+        img1[rr, cc] = 1
+        rr, cc = ellipse(5, 6, 3, 4, rotation=np.deg2rad(angle - 180))
+        img2[rr, cc] = 1
+        assert_array_equal(img1, img2)
+
+
 def test_ellipse_perimeter_dot_zeroangle():
     # dot, angle == 0
     img = np.zeros((30, 15), 'uint8')
