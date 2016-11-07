@@ -126,8 +126,10 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
     order : {'xy', 'rc'}, optional
-        this parameter allows for the use of reverse or forward order of
-        returned matrix values
+        This parameter allows for the use of reverse or forward order of
+        the image axes in gradient computation. 'xy' indicates the usage
+        of the last axis initially (Hxx, Hxy, Hyy), whilst 'rc' indicates
+        the use of the first axis initially (Hrr, Hrc, Hcc).
 
     Returns
     -------
