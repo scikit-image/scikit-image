@@ -1,4 +1,5 @@
-from numpy.testing import assert_array_equal, assert_equal, assert_raises
+from numpy.testing import assert_array_equal, assert_equal, assert_raises, \
+    assert_almost_equal
 import numpy as np
 from skimage._shared.testing import test_parallel
 
@@ -6,6 +7,7 @@ from skimage.draw import (set_color, line, line_aa, polygon, polygon_perimeter,
                           circle, circle_perimeter, circle_perimeter_aa,
                           ellipse, ellipse_perimeter,
                           _bezier_segment, bezier_curve)
+from skimage.measure import regionprops
 
 
 def test_set_color():
@@ -536,6 +538,18 @@ def test_ellipse_rotation_symmetry():
         rr, cc = ellipse(80, 70, 60, 40, rotation=np.deg2rad(angle + 180))
         img2[rr, cc] = 1
         assert_array_equal(img1, img2)
+
+
+def test_ellipse_rotated():
+    img = np.zeros((1000, 1200), dtype=np.uint8)
+    for rot in range(0, 180, 10):
+        img.fill(0)
+        angle = np.deg2rad(rot)
+        rr, cc = ellipse(500, 600, 200, 400, rotation=angle)
+        img[rr, cc] = 1
+        # estimate orientation of ellipse
+        angle_estim = np.round(regionprops(img)[0].orientation, 3) % (np.pi / 2)
+        assert_almost_equal(angle_estim, angle % (np.pi / 2), 2)
 
 
 def test_ellipse_perimeter_dot_zeroangle():

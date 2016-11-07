@@ -57,7 +57,7 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
         By default the full extent of the ellipse are used.
     rotation : float, optional (default 0.)
         Set the ellipse rotation (rotation) in range (-PI, PI)
-        in contra clock wise direction, so 90 degree means swap ellipse axis
+        in contra clock wise direction, so PI/2 degree means swap ellipse axis
 
     Returns
     -------
