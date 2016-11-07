@@ -481,7 +481,8 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
 
 
 def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
-                    wavelet_levels=None, multichannel=False, colorspace=''):
+                    wavelet_levels=None, multichannel=False,
+                    convert2ycbcr=False):
     """Perform wavelet denoising on an image.
 
     Parameters
@@ -509,12 +510,10 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
     multichannel : bool, optional
         Apply wavelet denoising separately for each channel (where channels
         correspond to the final axis of the array).
-    colorspace : str, optional
-        The colorspace to do wavelet denoising in. Possible values are any of
-        colorspaces RGB can convert to and from in `skimage.color`. e.g.,
-        ``'ycbcr'`` (default for 3D images) specifies to use the YCbCr
-        colorspace.  ``colorspace in {None, 'rgb'}`` will not do any conversion
-        (but still denoise in each colorplane separately).
+    convert2ycbcr : bool, options
+        If True do the wavelet denoising in the YCbCr colorspace (typically)
+        instead of the RGB color space. This typically results in better
+        performance for RGB images (default: False).
 
     Returns
     -------
@@ -562,33 +561,31 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
     """
     img = img_as_float(img)
 
-    if multichannel or colorspace in {None, 'rgb', 'RGB'}:
+    if multichannel:
         out = np.empty_like(img)
+        if type(sigma) in {float, int, complex}:
+            sigma = [sigma] * img.shape[-1]
         for c in range(img.shape[-1]):
             out[..., c] = _wavelet_threshold(img[..., c], wavelet=wavelet,
-                                             mode=mode, sigma=sigma,
+                                             mode=mode, sigma=sigma[c],
                                              wavelet_levels=wavelet_levels)
     else:
-        if img.ndim == 3 and colorspace not in {None, 'rgb', 'RGB'}:
-            colorspace = 'ycbcr' if not colorspace else colorspace
-
-            sigma = [sigma]*3 if type(sigma) not in {list, np.array} else sigma
-            out = _rgb2colorspace(img, colorspace)
+        if convert2ycbcr:
+            if type(sigma) in {float, int, complex}:
+                sigma = [sigma] * img.shape[-1]
+            out = color.rgb2ycbcr(img)
             for i in range(3):
-                if colorspace is not None:
-                    min, max = out[..., i].min(), out[..., i].max()
-                    channel = out[..., i] - min
-                    channel /= max - min
-                else:
-                    channel = out[..., i]
+                # renormalizing this color channel to live in [0, 1]
+                min, max = out[..., i].min(), out[..., i].max()
+                channel = out[..., i] - min
+                channel /= max - min
                 out[..., i] = denoise_wavelet(channel, sigma=sigma[i],
                                               wavelet=wavelet, mode=mode)
 
-                if colorspace is not None:
-                    out[..., i] = out[..., i] * (max - min)
-                    out[..., i] += min
+                out[..., i] = out[..., i] * (max - min)
+                out[..., i] += min
 
-            out = _colorspace2rgb(out, colorspace)
+            out = color.ycbcr2rgb(out)
         else:
             out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
                                      sigma=sigma,
@@ -656,34 +653,3 @@ def estimate_sigma(im, average_sigmas=False, multichannel=False):
     coeffs = pywt.dwtn(im, wavelet='db2')
     detail_coeffs = coeffs['d' * im.ndim]
     return _sigma_est_dwt(detail_coeffs, distribution='Gaussian')
-
-
-def _rgb2colorspace(img, space):
-    if space in {None, 'rgb'}:
-        return img.copy()
-
-    rgb2color = {'hed': color.rgb2hed,
-                 'hsv': color.rgb2hsv,
-                 'lab': color.rgb2lab,
-                 'luv': color.rgb2luv,
-                 'ycbcr': color.rgb2ycbcr,
-                 'rgbcie': color.rgb2rgbcie,
-                 'xyz': color.rgb2xyz}
-
-    out = (rgb2color[space](img) - img.min()) / (img.max() - img.min())
-    return out
-
-
-def _colorspace2rgb(img, space):
-    if space in {None, 'rgb'}:
-        return img
-
-    rgb2color = {'hed': color.hed2rgb,
-                 'hsv': color.hsv2rgb,
-                 'lab': color.lab2rgb,
-                 'luv': color.luv2rgb,
-                 'ycbcr': color.ycbcr2rgb,
-                 'rgbcie': color.rgbcie2rgb,
-                 'xyz': color.xyz2rgb}
-
-    return rgb2color[space](img)
