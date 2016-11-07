@@ -123,7 +123,6 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
         How to handle values outside the image borders.
     cval : float, optional
-        else:optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
     order : {'xy', 'rc'}, optional
