@@ -61,7 +61,6 @@ def test_hessian_matrix():
                                        [0, 0,  2, 0, 0]]))
 
     matrix2d = np.random.rand(3,3)
-    Arr, Arc, Acc = hessian_matrix(matrix2d, sigma=0.1)
     assert_warns(UserWarning, hessian_matrix, matrix2d, sigma=0.1)
 
 
