@@ -38,7 +38,7 @@ def _ellipse_in_shape(shape, center, radii, rotation=0.):
     sin_alpha, cos_alpha = np.sin(rotation), np.cos(rotation)
     r, c = (r_lim - r_org), (c_lim - c_org)
     distances = ((r * cos_alpha + c * sin_alpha) / r_rad) ** 2 \
-                + ((r * sin_alpha + c * cos_alpha) / c_rad) ** 2
+                + ((r * sin_alpha - c * cos_alpha) / c_rad) ** 2
     return np.nonzero(distances < 1)
 
 
@@ -70,7 +70,7 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
     -----
     The ellipse equation:
     ``((x * cos(alpha) + y * sin(alpha)) / xradius) ** 2
-                + ((x * sin(alpha) + y * cos(alpha)) / yradius) ** 2 = 1``
+                + ((x * sin(alpha) - y * cos(alpha)) / yradius) ** 2 = 1``
 
     Examples
     --------
@@ -91,37 +91,37 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     >>> img = np.zeros((10, 12), dtype=np.uint8)
-    >>> rr, cc = ellipse(5, 6, 3, 4, rotation=np.deg2rad(30))
+    >>> rr, cc = ellipse(5, 6, 3, 5, rotation=np.deg2rad(30))
     >>> img[rr, cc] = 1
     >>> img
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0],
-           [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
-           [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-           [0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
 
     center = np.array([r, c])
     radii = np.array([r_radius, c_radius])
-    # allow just rotation with in range +/- 90 degree
+    # allow just rotation with in range +/- 180 degree
     rotation %= np.pi
 
-    # compute rotated radiuses by given rotation
-    radiuses_yrot = max(np.abs([r_radius * np.sin(rotation),
-                                c_radius * np.cos(rotation)]))
-    radiuses_xrot = max(np.abs([r_radius * np.cos(rotation),
-                                c_radius * np.sin(rotation)]))
+    # compute rotated radii by given rotation
+    r_radius_rot = abs(r_radius * np.cos(rotation)) \
+                   + c_radius * np.sin(rotation)
+    c_radius_rot = r_radius * np.sin(rotation) \
+                   + abs(c_radius * np.cos(rotation))
     # The upper_left and lower_right corners of the smallest rectangle
     # containing the ellipse.
-    radiuses_rot = np.array([radiuses_yrot, radiuses_xrot])
-    upper_left = np.ceil(center - radiuses_rot).astype(int)
-    lower_right = np.floor(center + radiuses_rot).astype(int)
+    radii_rot = np.array([r_radius_rot, c_radius_rot])
+    upper_left = np.ceil(center - radii_rot).astype(int)
+    lower_right = np.floor(center + radii_rot).astype(int)
 
     if shape is not None:
         # Constrain upper_left and lower_right by shape boundary.
