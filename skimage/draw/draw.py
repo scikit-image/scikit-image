@@ -9,7 +9,7 @@ from ._draw import (_coords_inside_image, _line, _line_aa,
 
 
 def _ellipse_in_shape(shape, center, radii, rotation=0.):
-    """ Generate coordinates of points within ellipse bounded by shape.
+    """Generate coordinates of points within ellipse bounded by shape.
 
     Parameters
     ----------
@@ -43,7 +43,7 @@ def _ellipse_in_shape(shape, center, radii, rotation=0.):
 
 
 def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
-    """ Generate coordinates of pixels within ellipse.
+    """Generate coordinates of pixels within ellipse.
 
     Parameters
     ----------
