@@ -12,7 +12,7 @@ from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
 from .._shared.utils import safe_as_int
 from .corner_cy import _corner_moravec, _corner_orientations
-
+from warnings import warn
 
 def _compute_derivatives(image, mode='constant', cval=0):
     """Compute derivatives in x and y direction using the Sobel operator.
@@ -102,13 +102,13 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     return Axx, Axy, Ayy
 
 
-def hessian_matrix(image, sigma=1, mode='constant', cval=0):
+def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
     """Compute Hessian matrix.
 
     The Hessian matrix is defined as::
 
-        H = [Hxx Hxy]
-            [Hxy Hyy]
+        H = [Hrr Hrc]
+            [Hrc Hcc]
 
     which is computed by convolving the image with the second derivatives
     of the Gaussian kernel in the respective x- and y-directions.
@@ -125,14 +125,19 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
+    order : {'xy', 'rc'}, optional
+        This parameter allows for the use of reverse or forward order of
+        the image axes in gradient computation. 'xy' indicates the usage
+        of the last axis initially (Hxx, Hxy, Hyy), whilst 'rc' indicates
+        the use of the first axis initially (Hrr, Hrc, Hcc).
 
     Returns
     -------
-    Hxx : ndarray
+    Hrr : ndarray
         Element of the Hessian matrix for each pixel in the input image.
-    Hxy : ndarray
+    Hrc : ndarray
         Element of the Hessian matrix for each pixel in the input image.
-    Hyy : ndarray
+    Hcc : ndarray
         Element of the Hessian matrix for each pixel in the input image.
 
     Examples
@@ -140,8 +145,8 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
     >>> from skimage.feature import hessian_matrix
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
-    >>> Hxy
+    >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order = 'rc')
+    >>> Hrc
     array([[ 0.,  0.,  0.,  0.,  0.],
            [ 0.,  1.,  0., -1.,  0.],
            [ 0.,  0.,  0.,  0.,  0.],
@@ -154,17 +159,28 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
     gaussian_filtered = ndi.gaussian_filter(image, sigma=sigma,
                                             mode=mode, cval=cval)
 
+    if order is None:
+        if image.ndim == 2:
+            # The legacy 2D code followed (x, y) convention, so we swap the axis
+            # order to maintain compatibility with old code
+            warn('deprecation warning: the default order of the hessian matrix values '
+                 'will be "row-column" instead of "xy" starting in skimage version 0.15. '
+                 'Use order="rc" or order="xy" to set this explicitly')
+            order = 'xy'
+        else:
+            order = 'rc'
+
+
     gradients = np.gradient(gaussian_filtered)
     axes = range(image.ndim)
+
+    if order == 'rc':
+        axes = reversed(axes)
+
     H_elems = [np.gradient(gradients[ax0], axis=ax1)
                for ax0, ax1 in combinations_with_replacement(axes, 2)]
 
-    if image.ndim == 2:
-        # The legacy 2D code followed (x, y) convention, so we swap the axis
-        # order to maintain compatibility with old code
-        H_elems.reverse()
     return H_elems
-
 
 def hessian_matrix_det(image, sigma=1):
     """Computes the approximate Hessian Determinant over an image.
@@ -249,7 +265,7 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
 
 
 def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
-    """Compute Eigen values of Hessian matrix.
+    """Compute Eigenvalues of Hessian matrix.
 
     Parameters
     ----------
@@ -272,7 +288,7 @@ def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
     >>> from skimage.feature import hessian_matrix, hessian_matrix_eigvals
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
+    >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1, order='rc')
     >>> hessian_matrix_eigvals(Hxx, Hxy, Hyy)[0]
     array([[ 0.,  0.,  2.,  0.,  0.],
            [ 0.,  1.,  0.,  1.,  0.],
@@ -320,7 +336,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
         Standard deviation used for the Gaussian kernel, which is used for
         smoothing the input data before Hessian eigen value calculation.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
-        How to handle values outside the image borders.
+        How to handle values outside the image borders
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -351,7 +367,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
            [ nan,  nan, -0.5,  nan,  nan]])
     """
 
-    Hxx, Hxy, Hyy = hessian_matrix(image, sigma=sigma, mode=mode, cval=cval)
+    Hxx, Hxy, Hyy = hessian_matrix(image, sigma=sigma, mode=mode, cval=cval, order='rc')
     l1, l2 = hessian_matrix_eigvals(Hxx, Hxy, Hyy)
 
     return (2.0 / np.pi) * np.arctan((l2 + l1) / (l2 - l1))
