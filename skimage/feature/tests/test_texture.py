@@ -1,5 +1,4 @@
 import numpy as np
-import unittest
 from skimage.feature import (greycomatrix,
                              greycoprops,
                              local_binary_pattern,
@@ -228,22 +227,6 @@ class TestLBP():
                         [8, 1, 8, 9, 0, 7],
                         [2, 9, 0, 8, 1, 2]])
         np.testing.assert_array_equal(lbp, ref)
-
-    def test_empty(self):
-        # with unittest.TestCase.assertRaises(ValueError):
-        #     z = np.random.random(200**2).reshape((200, 200))
-        #     x = z[10:30, 30:10]
-        #     lbp = feature.local_binary_pattern(x, 8, 1, 'uniform')
-        try:
-            z = np.random.random(200**2).reshape((200, 200))
-            x = z[10:30, 30:10]
-            lbp = local_binary_pattern(x, 8, 1, 'uniform')
-        except ValueError:
-            pass
-        except Exception as e:
-           unittest.TestCase.fail('Unexpected exception raised:', e)
-        else:
-           unittest.TestCase.fail('ValueError not raised')
 
     def test_var(self):
         # Test idea: mean of variance is estimate of overall variance.
