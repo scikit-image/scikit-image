@@ -164,8 +164,8 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
             # The legacy 2D code followed (x, y) convention, so we swap the axis
             # order to maintain compatibility with old code
             warn('deprecation warning: the default order of the hessian matrix values '
-            'will be "row-column" instead of "xy" starting in skimage version 0.15'
-             'Use order="rc" or order="xy" to set this explicitly')
+            'will be "row-column" instead of "xy" starting in skimage version 0.15. '
+            'Use order="rc" or order="xy" to set this explicitly')
             order = 'xy'
         else:
             order = 'rc'
