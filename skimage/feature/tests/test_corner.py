@@ -70,7 +70,7 @@ def test_hessian_matrix():
 def test_hessian_matrix_3d():
     cube = np.zeros((5, 5, 5))
     cube[2, 2, 2] = 4
-    Hs = hessian_matrix(cube, sigma=0.1, order=None)
+    Hs = hessian_matrix(cube, sigma=0.1, order='rc')
     assert len(Hs) == 6, ("incorrect number of Hessian images (%i) for 3D" %
                           len(Hs))
     assert_almost_equal(Hs[2][:, 2, :], np.array([[0,  0,  0,  0,  0],
