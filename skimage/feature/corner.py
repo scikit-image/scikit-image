@@ -367,7 +367,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
            [ nan,  nan, -0.5,  nan,  nan]])
     """
 
-    Hxx, Hxy, Hyy = hessian_matrix(image, sigma=sigma, mode=mode, cval=cval)
+    Hxx, Hxy, Hyy = hessian_matrix(image, sigma=sigma, mode=mode, cval=cval, order='rc')
     l1, l2 = hessian_matrix_eigvals(Hxx, Hxy, Hyy)
 
     return (2.0 / np.pi) * np.arctan((l2 + l1) / (l2 - l1))
