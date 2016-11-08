@@ -166,9 +166,9 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
             warn('deprecation warning: the default order of the hessian matrix values '
             'will be "row-column" instead of "xy" starting in skimage version 0.15'
              'Use order="rc" or order="xy" to set this explicitly')
-            order = 'rc'
-        else:
             order = 'xy'
+        else:
+            order = 'rc'
 
 
     gradients = np.gradient(gaussian_filtered)
