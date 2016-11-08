@@ -336,8 +336,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
         Standard deviation used for the Gaussian kernel, which is used for
         smoothing the input data before Hessian eigen value calculation.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
-        How to handle values outside the image borders.from .._shared.utils import skimage_deprecation, warn
-
+        How to handle values outside the image borders
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
