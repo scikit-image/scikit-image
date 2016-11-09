@@ -177,7 +177,7 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
     label = label.astype(new_type)
 
     mapped_labels_flat, color_cycle = _match_label_with_color(label, colors,
-                                                     bg_label, bg_color)
+                                                              bg_label, bg_color)
 
     if len(mapped_labels_flat) == 0:
         return image
