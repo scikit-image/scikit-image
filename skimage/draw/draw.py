@@ -9,7 +9,7 @@ from ._draw import (_coords_inside_image, _line, _line_aa,
 
 
 def _ellipse_in_shape(shape, center, radii, rotation=0.):
-    """ Generate coordinates of points within ellipse bounded by shape.
+    """Generate coordinates of points within ellipse bounded by shape.
 
     Parameters
     ----------
@@ -43,7 +43,7 @@ def _ellipse_in_shape(shape, center, radii, rotation=0.):
 
 
 def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
-    """ Generate coordinates of pixels within ellipse.
+    """Generate coordinates of pixels within ellipse.
 
     Parameters
     ----------
@@ -66,30 +66,9 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
 
-    Notes
-    -----
-    The ellipse equation:
-    ``((x * cos(alpha) + y * sin(alpha)) / xradius) ** 2
-                + ((x * sin(alpha) - y * cos(alpha)) / yradius) ** 2 = 1``
-
     Examples
     --------
     >>> from skimage.draw import ellipse
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
-    >>> rr, cc = ellipse(5, 5, 3, 4)
-    >>> img[rr, cc] = 1
-    >>> img
-    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
-           [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
-           [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
-           [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
-           [0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
-
     >>> img = np.zeros((10, 12), dtype=np.uint8)
     >>> rr, cc = ellipse(5, 6, 3, 5, rotation=np.deg2rad(30))
     >>> img[rr, cc] = 1
@@ -104,6 +83,13 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
            [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
            [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+
+    Notes
+    -----
+    The ellipse equation::
+
+    ((x * cos(alpha) + y * sin(alpha)) / x_radius) ** 2
+                + ((x * sin(alpha) - y * cos(alpha)) / y_radius) ** 2 = 1
 
     """
 
