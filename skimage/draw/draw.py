@@ -66,12 +66,6 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
 
-    Notes
-    -----
-    The ellipse equation:
-    ``((x * cos(alpha) + y * sin(alpha)) / xradius) ** 2
-                + ((x * sin(alpha) - y * cos(alpha)) / yradius) ** 2 = 1``
-
     Examples
     --------
     >>> from skimage.draw import ellipse
@@ -104,6 +98,12 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
            [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
            [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+
+    Notes
+    -----
+    The ellipse equation:
+    ``((x * cos(alpha) + y * sin(alpha)) / x_radius) ** 2
+                + ((x * sin(alpha) - y * cos(alpha)) / y_radius) ** 2 = 1``
 
     """
 
