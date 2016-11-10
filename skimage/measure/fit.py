@@ -341,13 +341,17 @@ class CircleModel(BaseModel):
 
     """
 
-    def estimate(self, data):
+    def estimate(self, data, init_params=None):
         """Estimate circle model from data using total least squares.
 
         Parameters
         ----------
         data : (N, 2) array
             N points with ``(x, y)`` coordinates, respectively.
+
+        init_params : tuple of 3 values, optional
+            (x_center, y_center, r) is initial guess of parameters.
+            If they are not specified initial guess use a circle model.
 
         Returns
         -------
@@ -381,11 +385,18 @@ class CircleModel(BaseModel):
             #A[2, :] = -1
             return A
 
-        xc0 = x.mean()
-        yc0 = y.mean()
-        r0 = dist(xc0, yc0).mean()
-        params0 = (xc0, yc0, r0)
-        params, _ = optimize.leastsq(fun, params0, Dfun=Dfun, col_deriv=True)
+        if init_params is None:
+            # initial guess of parameters using a circle model
+            xc0 = x.mean()
+            yc0 = y.mean()
+            r0 = dist(xc0, yc0).mean()
+            init_params = (xc0, yc0, r0)
+        elif len(init_params) != 3:
+            raise ValueError('init params expects 3 values, '
+                             'but it got %i values' % len(init_params))
+
+        params, _ = optimize.leastsq(fun, init_params, Dfun=Dfun,
+                                     col_deriv=True)
 
         self.params = params
 
@@ -479,13 +490,17 @@ class EllipseModel(BaseModel):
 
     """
 
-    def estimate(self, data):
+    def estimate(self, data, init_params=None):
         """Estimate circle model from data using total least squares.
 
         Parameters
         ----------
         data : (N, 2) array
             N points with ``(x, y)`` coordinates, respectively.
+
+        init_params : tuple of 5 values, optional
+            (x_center, y_center, a, b, theta) is initial guess of parameters.
+            If they are not specified initial guess use a circle model.
 
         Returns
         -------
@@ -540,12 +555,18 @@ class EllipseModel(BaseModel):
 
             return A
 
-        # initial guess of parameters using a circle model
+        if init_params is None:
+            # initial guess of parameters using a circle model
+            xc0 = x.mean()
+            yc0 = y.mean()
+            r0 = np.sqrt((x - xc0) ** 2 + (y - yc0) ** 2).mean()
+            init_params = (xc0, yc0, r0, 0, 0)
+        elif len(init_params) != 5:
+            raise ValueError('init params expects 5 values, '
+                             'but it got %i values' % len(init_params))
+
         params0 = np.empty((N + 5, ), dtype=np.double)
-        xc0 = x.mean()
-        yc0 = y.mean()
-        r0 = np.sqrt((x - xc0)**2 + (y - yc0)**2).mean()
-        params0[:5] = (xc0, yc0, r0, 0, 0)
+        params0[:5] = init_params
         params0[5:] = np.arctan2(y - yc0, x - xc0)
 
         params, _ = optimize.leastsq(fun, params0, Dfun=Dfun, col_deriv=True)
