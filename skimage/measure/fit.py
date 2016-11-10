@@ -350,6 +350,10 @@ class CircleModel(BaseModel):
             (x_center, y_center, r) is an initial guess of parameters.
             If None, the initial guess uses a circle model based on mean values.
 
+        init_params : tuple of 3 values, optional
+            (x_center, y_center, r) is initial guess of parameters.
+            If they are not specified initial guess use a circle model.
+
         Returns
         -------
         success : bool
@@ -388,7 +392,7 @@ class CircleModel(BaseModel):
             yc0 = y.mean()
             r0 = dist(xc0, yc0).mean()
             init_params = (xc0, yc0, r0)
-        if len(init_params) != 3:
+        elif len(init_params) != 3:
             raise ValueError('init params expects 3 values, '
                              'but it got %i values' % len(init_params))
 
@@ -497,6 +501,10 @@ class EllipseModel(BaseModel):
             (x_center, y_center, a, b, theta) is an initial guess of parameters.
             If None, the initial guess uses a circle model based on mean values.
 
+        init_params : tuple of 5 values, optional
+            (x_center, y_center, a, b, theta) is initial guess of parameters.
+            If they are not specified initial guess use a circle model.
+
         Returns
         -------
         success : bool
@@ -554,15 +562,15 @@ class EllipseModel(BaseModel):
             # initial guess of parameters using a circle model
             xc0 = x.mean()
             yc0 = y.mean()
-            r0 = np.mean([np.std(x), np.std(y)])
+            r0 = np.sqrt((x - xc0) ** 2 + (y - yc0) ** 2).mean()
             init_params = (xc0, yc0, r0, 0, 0)
-        if len(init_params) != 5:
+        elif len(init_params) != 5:
             raise ValueError('init params expects 5 values, '
                              'but it got %i values' % len(init_params))
 
         params0 = np.empty((N + 5, ), dtype=np.double)
         params0[:5] = init_params
-        params0[5:] = np.arctan2(y - init_params[1], x - init_params[0])
+        params0[5:] = np.arctan2(y - yc0, x - xc0)
 
         params, _ = optimize.leastsq(fun, params0, Dfun=Dfun, col_deriv=True)
 
