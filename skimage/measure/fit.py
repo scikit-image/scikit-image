@@ -567,7 +567,7 @@ class EllipseModel(BaseModel):
 
         params0 = np.empty((N + 5, ), dtype=np.double)
         params0[:5] = init_params
-        params0[5:] = np.arctan2(y - yc0, x - xc0)
+        params0[5:] = np.arctan2(y - init_params[1], x - init_params[0])
 
         params, _ = optimize.leastsq(fun, params0, Dfun=Dfun, col_deriv=True)
 
@@ -713,7 +713,7 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
 def ransac(data, model_class, min_samples, residual_threshold,
            is_data_valid=None, is_model_valid=None,
            max_trials=100, stop_sample_num=np.inf, stop_residuals_sum=0,
-           stop_probability=1, random_state=None):
+           stop_probability=1, random_state=None, init_params=None):
     """Fit a model to data with the RANSAC (random sample consensus) algorithm.
 
     RANSAC is an iterative algorithm for the robust estimation of parameters
@@ -911,7 +911,10 @@ def ransac(data, model_class, min_samples, residual_threshold,
         # estimate model for current random sample set
         sample_model = model_class()
 
-        success = sample_model.estimate(*samples)
+        if init_params is None:
+            success = sample_model.estimate(*samples)
+        else:
+            success = sample_model.estimate(*samples, init_params=init_params)
 
         if success is not None:  # backwards compatibility
             if not success:
