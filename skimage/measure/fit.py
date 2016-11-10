@@ -347,10 +347,6 @@ class CircleModel(BaseModel):
         data : (N, 2) array
             N points with ``(x, y)`` coordinates, respectively.
         init_params : tuple of 3 values, optional
-            (x_center, y_center, r) is an initial guess of parameters.
-            If None, the initial guess uses a circle model based on mean values.
-
-        init_params : tuple of 3 values, optional
             (x_center, y_center, r) is initial guess of parameters.
             If they are not specified initial guess use a circle model.
 
@@ -383,7 +379,7 @@ class CircleModel(BaseModel):
             A[0, :] = -(x - xc) / d
             A[1, :] = -(y - yc) / d
             # same for all iterations, so not changed in each iteration
-            # A[2, :] = -1
+            #A[2, :] = -1
             return A
 
         if init_params is None:
@@ -497,10 +493,6 @@ class EllipseModel(BaseModel):
         ----------
         data : (N, 2) array
             N points with ``(x, y)`` coordinates, respectively.
-        init_params : tuple of 5 values, optional
-            (x_center, y_center, a, b, theta) is an initial guess of parameters.
-            If None, the initial guess uses a circle model based on mean values.
-
         init_params : tuple of 5 values, optional
             (x_center, y_center, a, b, theta) is initial guess of parameters.
             If they are not specified initial guess use a circle model.
@@ -797,7 +789,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
         by `np.random`.
     init_inliers : [list, tuple of] (N) array of bool or None, optional
         Initial samples selection for model estimation
-    
+
 
     Returns
     -------
