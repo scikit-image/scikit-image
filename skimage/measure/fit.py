@@ -562,7 +562,7 @@ class EllipseModel(BaseModel):
 
         params0 = np.empty((N + 5, ), dtype=np.double)
         params0[:5] = init_params
-        params0[5:] = np.arctan2(y - yc0, x - xc0)
+        params0[5:] = np.arctan2(y - init_params[1], x - init_params[0])
 
         params, _ = optimize.leastsq(fun, params0, Dfun=Dfun, col_deriv=True)
 
