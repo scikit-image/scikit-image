@@ -25,7 +25,7 @@ addons:
 env:
   global:
     - GH_REF: github.com/scikit-image/docs.git
-    - secure: "h25sS+tTrt1Ab8LzCFmw4nGDY7uKh4vkQ57m7KwVTua0jnI2D/mUrSiwuERF07F0w5xEoICLDUP/9P74g0JuUwSJcnyIK61lNfGXW0WLj/fMWp0iB2cOnFTTJYpUKlEmHooGVY4qqYVVAG3gaiB8s0ElPsSn5v+zoVmzq1BGark="
+    - secure: "Z8uxAGrFb6yNw/savI7YvA5/BfkVKVGD3HUkDSXamotJAvUKMjIlWnzLc7d9S7PY99FRENgRYaNw4fzZqwJ91hDITcl1/wk6ux1j778O8kUQZayzdqcJG8KpfBsy1vJ4fl4uDGlSmUP413rR3R3dvvgJzIpCLy2qiQR/xujrGvs="
 
 notifications:
   webhooks:
