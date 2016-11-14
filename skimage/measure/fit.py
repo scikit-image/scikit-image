@@ -790,7 +790,6 @@ def ransac(data, model_class, min_samples, residual_threshold,
     init_inliers : [list, tuple of] (N) array of bool or None, optional
         Initial samples selection for model estimation
 
-
     Returns
     -------
     model : object
