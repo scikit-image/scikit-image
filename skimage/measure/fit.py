@@ -713,7 +713,7 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
 def ransac(data, model_class, min_samples, residual_threshold,
            is_data_valid=None, is_model_valid=None,
            max_trials=100, stop_sample_num=np.inf, stop_residuals_sum=0,
-           stop_probability=1, random_state=None, init_params=None):
+           stop_probability=1, random_state=None, init_inliers=None):
     """Fit a model to data with the RANSAC (random sample consensus) algorithm.
 
     RANSAC is an iterative algorithm for the robust estimation of parameters
@@ -792,6 +792,8 @@ def ransac(data, model_class, min_samples, residual_threshold,
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance used
         by `np.random`.
+    init_inliers : [list, tuple of] (N) array of bool or None, optional
+        Initial samples selection for model estimation
     
 
     Returns
@@ -901,13 +903,21 @@ def ransac(data, model_class, min_samples, residual_threshold,
     # number of samples
     num_samples = data[0].shape[0]
 
+    if init_inliers is not None and len(init_inliers) != num_samples:
+        raise ValueError("`number init samples %i are les then data %i "
+                         % (len(init_inliers), num_samples))
+
     for num_trials in range(max_trials):
 
         # choose random sample set
         samples = []
-        random_idxs = random_state.randint(0, num_samples, min_samples)
-        for d in data:
-            samples.append(d[random_idxs])
+        if num_trials == 0 and init_inliers is not None:
+            for d in data:
+                samples.append(d[init_inliers])
+        else:
+            random_idxs = random_state.randint(0, num_samples, min_samples)
+            for d in data:
+                samples.append(d[random_idxs])
 
         # check if random sample set is valid
         if is_data_valid is not None and not is_data_valid(*samples):
@@ -916,10 +926,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
         # estimate model for current random sample set
         sample_model = model_class()
 
-        if init_params is None:
-            success = sample_model.estimate(*samples)
-        else:
-            success = sample_model.estimate(*samples, init_params=init_params)
+        success = sample_model.estimate(*samples)
 
         if success is not None:  # backwards compatibility
             if not success:
