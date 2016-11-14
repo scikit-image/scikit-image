@@ -88,8 +88,8 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
     -----
     The ellipse equation::
 
-    ((x * cos(alpha) + y * sin(alpha)) / x_radius) ** 2
-                + ((x * sin(alpha) - y * cos(alpha)) / y_radius) ** 2 = 1
+        ((x * cos(alpha) + y * sin(alpha)) / x_radius) ** 2 +
+        ((x * sin(alpha) - y * cos(alpha)) / y_radius) ** 2 = 1
 
     """
 
