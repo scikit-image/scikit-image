@@ -7,10 +7,9 @@ from numpy.testing import assert_raises
 
 
 def test_assert_nD():
-    try:
-        z = np.random.random(200**2).reshape((200, 200))
-        x = z[10:30, 30:10]
-        assert_raises(ValueError, assert_nDx, 2)
+    z = np.random.random(200**2).reshape((200, 200))
+    x = z[10:30, 30:10]
+    assert_raises(ValueError, assert_nD, 2)
 
 def test_copyfunc():
     def foo(a):
