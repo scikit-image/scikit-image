@@ -10,6 +10,7 @@ cimport numpy as cnp
 
 
 DTYPE = np.intp
+BG_NODE_NULL = -999
 
 # Short int - could be more graceful to the CPU cache
 ctypedef cnp.int32_t INTS_t
@@ -38,7 +39,7 @@ cdef void get_bginfo(background_val, bginfo *ret) except *:
 
     # The node -999 doesn't exist, it will get subsituted by a meaningful value
     # upon the first background pixel occurence
-    ret.background_node = -999
+    ret.background_node = BG_NODE_NULL
     ret.background_label = 0
 
 
@@ -419,13 +420,22 @@ cdef DTYPE_t resolve_labels(DTYPE_t *data_p, DTYPE_t *forest_p,
     cdef DTYPE_t counter = 1, i
 
     for i in range(shapeinfo.numels):
-        if i == bg.background_node:
-            data_p[i] = bg.background_label
-        elif i == forest_p[i]:
+        if i == forest_p[i]:
             # We have stumbled across a root which is something new to us (root
             # is the LOWEST of all prov. labels that are equivalent to it)
-            data_p[i] = counter
-            counter += 1
+
+            # If the root happens to be the background,
+            # assign the background label instead of a
+            # new label from the counter
+            if i == bg.background_node:
+                # Also, if there is no background in the image,
+                # bg.background_node == BG_NODE_NULL < 0 and this never occurs.
+                data_p[i] = bg.background_label
+            else:
+                data_p[i] = counter
+                # The background label is basically hardcoded to 0, so no need
+                # to check that the new counter != bg.background_label
+                counter += 1
         else:
             data_p[i] = data_p[forest_p[i]]
     return counter - 1
@@ -438,7 +448,7 @@ cdef void scanBG(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
     Since this only requires one linar sweep through the array, it is fast
     and it makes sense to do it separately.
 
-    The result of this function is update of forest_p and bg parameter.
+    The purpose of this function is update of forest_p and bg parameter inplace.
     """
     cdef DTYPE_t i, bgval = bg.background_val, firstbg
     # We find the provisional label of the background, which is the index of
@@ -448,6 +458,13 @@ cdef void scanBG(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
             firstbg = i
             bg.background_node = firstbg
             break
+
+    # There is no background, therefore the first background element
+    # is not defined.
+    # Since BG_NODE_NULL < 0, this is enough to ensure
+    # that resolve_labels doesn't worry about background.
+    if bg.background_node == BG_NODE_NULL:
+        return
 
     # And then we apply this provisional label to the whole background
     for i in range(firstbg, shapeinfo.numels):
