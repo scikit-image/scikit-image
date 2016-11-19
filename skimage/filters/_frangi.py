@@ -18,9 +18,11 @@ def _frangi_hessian_common_filter(image, scale_range, scale_step,
     scale_step : float, optional
         Step size between sigmas.
     beta1 : float, optional
-        Frangi correction constant.
+        Frangi correction constant that adjusts the filter's
+        sensitivity to deviation from a blob-like structure.
     beta2 : float, optional
-        Frangi correction constant.
+        Frangi correction constant that adjusts the filter's
+        sensitivity to areas of high variance/texture/structure.
 
     Returns
     -------
@@ -89,9 +91,11 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=0.5, beta2=15,
     scale_step : float, optional
         Step size between sigmas.
     beta1 : float, optional
-        Frangi correction constant.
+        Frangi correction constant that adjusts the filter's
+        sensitivity to deviation from a blob-like structure.
     beta2 : float, optional
-        Frangi correction constant.
+        Frangi correction constant that adjusts the filter's
+        sensitivity to areas of high variance/texture/structure.
     black_ridges : boolean, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
@@ -146,9 +150,11 @@ def hessian(image, scale_range=(1, 10), scale_step=2, beta1=0.5, beta2=15):
     scale_step : float, optional
         Step size between sigmas.
     beta1 : float, optional
-        Frangi correction constant.
+        Frangi correction constant that adjusts the filter's
+        sensitivity to deviation from a blob-like structure.
     beta2 : float, optional
-        Frangi correction constant.
+        Frangi correction constant that adjusts the filter's
+        sensitivity to areas of high variance/texture/structure.
 
     Returns
     -------
