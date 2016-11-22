@@ -67,14 +67,14 @@ def test_ssim_grad():
     X = np.random.rand(N, N) * 255
     Y = np.random.rand(N, N) * 255
 
-    f = ssim(X, Y, dynamic_range=255)
-    g = ssim(X, Y, dynamic_range=255, gradient=True)
+    f = ssim(X, Y, value_range=255)
+    g = ssim(X, Y, value_range=255, gradient=True)
 
     assert f < 0.05
     assert g[0] < 0.05
     assert np.all(g[1] < 0.05)
 
-    mssim, grad, s = ssim(X, Y, dynamic_range=255, gradient=True, full=True)
+    mssim, grad, s = ssim(X, Y, value_range=255, gradient=True, full=True)
     assert np.all(grad < 0.05)
 
 

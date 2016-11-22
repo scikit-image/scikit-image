@@ -49,7 +49,7 @@ def equalize_adapthist(image, ntiles_x=None, ntiles_y=None, clip_limit=0.01,
         Clipping limit, normalized between 0 and 1 (higher values give more
         contrast).
     nbins : int, optional
-        Number of gray bins for histogram ("dynamic range").
+        Number of gray bins for histogram ("value range").
 
     Returns
     -------
@@ -109,7 +109,7 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
     clip_limit : float, optional
         Normalized clipping limit (higher values give more contrast).
     nbins : int, optional
-        Number of gray bins for histogram ("dynamic range").
+        Number of gray bins for histogram ("value range").
 
     Returns
     -------

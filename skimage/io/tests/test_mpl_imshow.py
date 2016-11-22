@@ -75,7 +75,7 @@ def test_float():
 
 
 def test_low_dynamic_range():
-    with expected_warnings(["Low image dynamic range|CObject type is marked",
+    with expected_warnings(["Low image value range|CObject type is marked",
                             "tight_layout : falling back to Agg|\A\Z"]):
         ax_im = io.imshow(im_lo)
     assert ax_im.get_clim() == (im_lo.min(), im_lo.max())
@@ -103,7 +103,7 @@ def test_nonstandard_type():
     # "The CObject type is marked Pending Deprecation in Python 2.7.
     #  Please use capsule objects instead."
     # Ref: https://docs.python.org/2/c-api/cobject.html
-    with expected_warnings(["Low image dynamic range|CObject type is marked",
+    with expected_warnings(["Low image value range|CObject type is marked",
                             "tight_layout : falling back to Agg|\A\Z"]):
         ax_im = io.imshow(im64)
     assert ax_im.get_clim() == (im64.min(), im64.max())

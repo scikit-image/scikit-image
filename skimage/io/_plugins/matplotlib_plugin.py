@@ -14,7 +14,7 @@ _diverging_colormap = 'RdBu'
 
 ImageProperties = namedtuple('ImageProperties',
                              ['signed', 'out_of_range_float',
-                              'low_dynamic_range', 'unsupported_dtype'])
+                              'low_value_range', 'unsupported_dtype'])
 
 
 def _get_image_properties(image):
@@ -33,9 +33,9 @@ def _get_image_properties(image):
         - signed: whether the image has negative values.
         - out_of_range_float: if the image has floating point data
           outside of [-1, 1].
-        - low_dynamic_range: if the image is in the standard image
+        - low_value_range: if the image is in the standard image
           range (e.g. [0, 1] for a floating point image) but its
-          dynamic range would be too small to display with standard
+          value range would be too small to display with standard
           image ranges.
         - unsupported_dtype: if the image data type is not a
           standard skimage type, e.g. ``numpy.uint64``.
@@ -50,12 +50,12 @@ def _get_image_properties(image):
     signed = immin < 0
     out_of_range_float = (np.issubdtype(image.dtype, np.float) and
                           (immin < lo or immax > hi))
-    low_dynamic_range = (immin != immax and
+    low_value_range = (immin != immax and
                          is_low_contrast(image))
     unsupported_dtype = image.dtype not in dtypes._supported_types
 
     return ImageProperties(signed, out_of_range_float,
-                           low_dynamic_range, unsupported_dtype)
+                           low_value_range, unsupported_dtype)
 
 
 def _raise_warnings(image_properties):
@@ -70,8 +70,8 @@ def _raise_warnings(image_properties):
     if ip.unsupported_dtype:
         warn("Non-standard image type; displaying image with "
              "stretched contrast.")
-    if ip.low_dynamic_range:
-        warn("Low image dynamic range; displaying image with "
+    if ip.low_value_range:
+        warn("Low image value range; displaying image with "
              "stretched contrast.")
     if ip.out_of_range_float:
         warn("Float image out of standard range; displaying "

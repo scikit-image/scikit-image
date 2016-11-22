@@ -22,7 +22,7 @@ def test_PSNR_vs_IPOL():
 
 def test_PSNR_float():
     p_uint8 = compare_psnr(cam, cam_noisy)
-    p_float64 = compare_psnr(cam/255., cam_noisy/255., dynamic_range=1)
+    p_float64 = compare_psnr(cam/255., cam_noisy/255., value_range=1)
     assert_almost_equal(p_uint8, p_float64, decimal=5)
 
 
