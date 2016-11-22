@@ -37,10 +37,11 @@ def equalize_adapthist(image, ntiles_x=None, ntiles_y=None, clip_limit=0.01,
     ----------
     image : array-like
         Input image.
-    kernel_size: integer or 2-tuple
+    kernel_size: integer or 2-tuple, optional
         Defines the shape of contextual regions used in the algorithm.
         If an integer is given, the shape will be a square of
         sidelength given by this value.
+        By default, ``kernel_size`` is chosen so as to have 8x8 tile regions.
     ntiles_x : int, optional (deprecated in favor of ``kernel_size``)
         Number of tile regions in the X direction (horizontal).
     ntiles_y : int, optional (deprecated in favor of ``kernel_size``)
