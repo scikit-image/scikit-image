@@ -74,7 +74,7 @@ def test_float():
     assert ax_im.colorbar is None
 
 
-def test_low_dynamic_range():
+def test_low_value_range():
     with expected_warnings(["Low image value range|CObject type is marked",
                             "tight_layout : falling back to Agg|\A\Z"]):
         ax_im = io.imshow(im_lo)
