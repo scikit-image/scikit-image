@@ -1,0 +1,10 @@
+Cython/Runtime/refnanny.so
+Cython/Tempita/_tempita.so
+Cython/Plex/Actions.so
+Cython/Plex/Scanners.so
+Cython/Compiler/FlowControl.so
+Cython/Compiler/Visitor.so
+Cython/Compiler/Code.so
+Cython/Compiler/Scanning.so
+Cython/Compiler/Lexicon.so
+Cython/Compiler/Parsing.so

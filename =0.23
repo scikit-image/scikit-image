@@ -1,0 +1,31 @@
+Downloading/unpacking Cython from https://pypi.python.org/packages/b7/67/7e2a817f9e9c773ee3995c1e15204f5d01c8da71882016cac10342ef031b/Cython-0.25.2.tar.gz#md5=642c81285e1bb833b14ab3f439964086
+  Running setup.py (path:/tmp/pip_build_borovji3/Cython/setup.py) egg_info for package Cython
+    Unable to find pgen, not compiling formal grammar.
+    
+    warning: no files found matching '*.pyx' under directory 'Cython/Debugger/Tests'
+    warning: no files found matching '*.pxd' under directory 'Cython/Debugger/Tests'
+    warning: no files found matching '*.h' under directory 'Cython/Debugger/Tests'
+    warning: no files found matching '*.pxd' under directory 'Cython/Utility'
+Installing collected packages: Cython
+  Found existing installation: Cython 0.21.1
+    Uninstalling Cython:
+Cleaning up...
+Exception:
+Traceback (most recent call last):
+  File "/usr/lib/python2.7/dist-packages/pip/basecommand.py", line 122, in main
+    status = self.run(options, args)
+  File "/usr/lib/python2.7/dist-packages/pip/commands/install.py", line 283, in run
+    requirement_set.install(install_options, global_options, root=options.root_path)
+  File "/usr/lib/python2.7/dist-packages/pip/req.py", line 1431, in install
+    requirement.uninstall(auto_confirm=True)
+  File "/usr/lib/python2.7/dist-packages/pip/req.py", line 598, in uninstall
+    paths_to_remove.remove(auto_confirm)
+  File "/usr/lib/python2.7/dist-packages/pip/req.py", line 1836, in remove
+    renames(path, new_path)
+  File "/usr/lib/python2.7/dist-packages/pip/util.py", line 295, in renames
+    shutil.move(old, new)
+  File "/usr/lib/python2.7/shutil.py", line 303, in move
+    os.unlink(src)
+OSError: [Errno 13] Permission denied: '/usr/lib/python2.7/dist-packages/Cython-0.21.1.egg-info'
+
+Storing debug log for failure in /home.dokt/borovji3/.pip/pip.log
