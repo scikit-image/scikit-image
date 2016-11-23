@@ -350,8 +350,8 @@ class CircleModel(BaseModel):
             N points with ``(x, y)`` coordinates, respectively.
 
         init_params : tuple of 3 values, optional
-            (x_center, y_center, r) is initial guess of parameters.
-            If they are not specified initial guess use a circle model.
+            (x_center, y_center, r) is an initial guess of parameters.
+            If None, the initial guess uses a circle model based on mean values.
 
         Returns
         -------
@@ -499,8 +499,8 @@ class EllipseModel(BaseModel):
             N points with ``(x, y)`` coordinates, respectively.
 
         init_params : tuple of 5 values, optional
-            (x_center, y_center, a, b, theta) is initial guess of parameters.
-            If they are not specified initial guess use a circle model.
+            (x_center, y_center, a, b, theta) is an initial guess of parameters.
+            If None, the initial guess uses a circle model based on mean values.
 
         Returns
         -------
@@ -559,7 +559,7 @@ class EllipseModel(BaseModel):
             # initial guess of parameters using a circle model
             xc0 = x.mean()
             yc0 = y.mean()
-            r0 = np.sqrt((x - xc0) ** 2 + (y - yc0) ** 2).mean()
+            r0 = np.mean([np.std(x), np.std(y)])
             init_params = (xc0, yc0, r0, 0, 0)
         elif len(init_params) != 5:
             raise ValueError('init params expects 5 values, '
@@ -758,9 +758,9 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
         where `success` indicates whether the model estimation succeeded
         (`True` or `None` for success, `False` for failure).
-    min_samples : int or float
+    min_samples : int or float in range [0, 1]
         The minimum number of data points to fit a model to.
-        If the number is float in range [0, 1] it set the percentage of all data
+        If the number type is float, the value sets the percentage of all data.
     residual_threshold : float
         Maximum distance for a data point to be classified as an inlier.
     is_data_valid : function, optional
@@ -882,12 +882,12 @@ def ransac(data, model_class, min_samples, residual_threshold,
     
     random_state = check_random_state(random_state)
 
-    if isinstance(min_samples, int) and min_samples < 0:
-        raise ValueError("`min_samples` must be greater than zero")
-    elif isinstance(min_samples, float):
+    if isinstance(min_samples, float):
         if not (0 < min_samples <= 1):
             raise ValueError("`min_samples` must be in range [0, 1]")
         min_samples = int(min_samples * len(data))
+    if isinstance(min_samples, int) and min_samples < 0:
+        raise ValueError("`min_samples` must be greater than zero")
 
     if max_trials < 0:
         raise ValueError("`max_trials` must be greater than zero")
