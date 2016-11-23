@@ -15,7 +15,7 @@ from .thresholding import (threshold_adaptive, threshold_otsu, threshold_yen,
 from . import rank
 from .rank import median
 
-from .._shared.utils import deprecated, copy_func
+from ..shared.utils import deprecated, copy_func
 
 
 gaussian_filter = copy_func(gaussian, name='gaussian_filter')

@@ -1,4 +1,4 @@
-from .._shared.utils import warn
+from ..shared.utils import warn
 from .viewers import ImageViewer, CollectionViewer
 from .qt import has_qt
 

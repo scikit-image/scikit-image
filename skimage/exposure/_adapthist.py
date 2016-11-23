@@ -19,7 +19,7 @@ import numpy as np
 from .. import img_as_float, img_as_uint
 from ..color.adapt_rgb import adapt_rgb, hsv_value
 from ..exposure import rescale_intensity
-from .._shared.utils import skimage_deprecation, warn
+from ..shared.utils import skimage_deprecation, warn
 
 NR_OF_GREY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
 

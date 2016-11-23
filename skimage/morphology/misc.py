@@ -1,7 +1,7 @@
 import numpy as np
 import functools
 from scipy import ndimage as ndi
-from .._shared.utils import warn
+from ..shared.utils import warn
 from .selem import _default_selem
 
 # Our function names don't exactly correspond to ndimages.

@@ -5,7 +5,7 @@ import numpy as np
 from skimage import img_as_float, img_as_uint
 from skimage import color, data, filters
 from skimage.color.adapt_rgb import adapt_rgb, each_channel, hsv_value
-from skimage._shared._warnings import expected_warnings
+from skimage.shared._warnings import expected_warnings
 
 # Down-sample image for quicker testing.
 COLOR_IMAGE = data.astronaut()[::5, ::5]

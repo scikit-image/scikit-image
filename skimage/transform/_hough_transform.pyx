@@ -12,7 +12,7 @@ from libc.stdlib cimport rand
 
 from ..draw import circle_perimeter
 
-from .._shared.interpolation cimport round
+from ..shared.interpolation cimport round
 
 
 def _hough_circle(cnp.ndarray img,

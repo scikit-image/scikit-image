@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import ndimage as ndi
-from .._shared.utils import assert_nD
+from ..shared.utils import assert_nD
 
 
 __all__ = ['gabor_kernel', 'gabor']

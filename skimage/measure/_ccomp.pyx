@@ -4,7 +4,7 @@
 #cython: wraparound=False
 
 import numpy as np
-from .._shared.utils import warn
+from ..shared.utils import warn
 
 cimport numpy as cnp
 

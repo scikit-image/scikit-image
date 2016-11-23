@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_raises
 from skimage.data import moon
 from skimage.feature import CENSURE
-from skimage._shared.testing import test_parallel
+from skimage.shared.testing import test_parallel
 from skimage.transform import rescale
 
 

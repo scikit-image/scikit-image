@@ -3,7 +3,7 @@
 
 import numpy as np
 from nose.tools import (assert_true, assert_raises, assert_equal)
-from skimage._shared.testing import doctest_skip_parser, test_parallel
+from skimage.shared.testing import doctest_skip_parser, test_parallel
 
 
 def test_skipper():

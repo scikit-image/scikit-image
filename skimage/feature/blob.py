@@ -9,7 +9,7 @@ from ..util import img_as_float
 from .peak import peak_local_max
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
-from .._shared.utils import assert_nD
+from ..shared.utils import assert_nD
 
 
 # This basic blob detection algorithm is based on:

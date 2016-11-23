@@ -10,7 +10,7 @@ cimport numpy as cnp
 from ..measure._ccomp cimport find_root, join_trees
 
 from ..util import img_as_float
-from .._shared.utils import warn
+from ..shared.utils import warn
 
 
 def _felzenszwalb_cython(image, double scale=1, sigma=0.8,

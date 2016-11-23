@@ -5,7 +5,7 @@ import numpy as np
 from scipy import spatial
 from scipy import ndimage as ndi
 
-from .._shared.utils import (get_bound_method_class, safe_as_int, warn)
+from ..shared.utils import (get_bound_method_class, safe_as_int, warn)
 from ..util import img_as_float
 
 from ._warps_cy import _warp_fast

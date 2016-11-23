@@ -15,7 +15,7 @@ def configuration(parent_package='', top_path=None):
     cython(['_draw.pyx'], working_path=base_path)
 
     config.add_extension('_draw', sources=['_draw.c'],
-                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
+                         include_dirs=[get_numpy_include_dirs(), '../shared'])
 
     return config
 

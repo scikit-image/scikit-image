@@ -7,7 +7,7 @@ from skimage.transform import (estimate_transform, matrix_transform,
                                EuclideanTransform, SimilarityTransform,
                                AffineTransform, ProjectiveTransform,
                                PolynomialTransform, PiecewiseAffineTransform)
-from skimage._shared._warnings import expected_warnings
+from skimage.shared._warnings import expected_warnings
 
 
 SRC = np.array([

@@ -1,6 +1,6 @@
 import numpy as np
 from ..qt import QtWidgets, has_qt, FigureManagerQT, FigureCanvasQTAgg
-from ..._shared.utils import warn
+from ...shared.utils import warn
 import matplotlib as mpl
 from matplotlib.figure import Figure
 from matplotlib import _pylab_helpers

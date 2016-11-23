@@ -10,8 +10,8 @@ from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
                                downscale_local_mean)
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import test_parallel
+from skimage.shared._warnings import expected_warnings
+from skimage.shared.testing import test_parallel
 
 
 np.random.seed(0)

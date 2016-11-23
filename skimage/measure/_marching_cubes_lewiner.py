@@ -14,7 +14,7 @@ else:
 
 from . import _marching_cubes_lewiner_luts as mcluts
 from . import _marching_cubes_lewiner_cy
-from .._shared.utils import skimage_deprecation, warn
+from ..shared.utils import skimage_deprecation, warn
 
 
 def _expected_output_args():

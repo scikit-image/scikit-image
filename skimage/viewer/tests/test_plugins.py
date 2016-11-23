@@ -12,7 +12,7 @@ from skimage.viewer.plugins import (
     PlotPlugin)
 from numpy.testing import assert_equal, assert_allclose, assert_almost_equal
 from numpy.testing.decorators import skipif
-from skimage._shared._warnings import expected_warnings
+from skimage.shared._warnings import expected_warnings
 
 
 def setup_line_profile(image, limits='image'):

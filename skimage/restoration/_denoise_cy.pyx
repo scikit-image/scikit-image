@@ -7,7 +7,7 @@ cimport numpy as cnp
 import numpy as np
 from libc.math cimport exp, fabs, sqrt
 from libc.float cimport DBL_MAX
-from .._shared.interpolation cimport get_pixel3d
+from ..shared.interpolation cimport get_pixel3d
 from ..util import img_as_float
 
 

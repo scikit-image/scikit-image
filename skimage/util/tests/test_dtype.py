@@ -3,7 +3,7 @@ from numpy.testing import assert_equal, assert_raises
 from skimage import img_as_int, img_as_float, \
                     img_as_uint, img_as_ubyte
 from skimage.util.dtype import convert
-from skimage._shared._warnings import expected_warnings
+from skimage.shared._warnings import expected_warnings
 
 
 dtype_range = {np.uint8: (0, 255),

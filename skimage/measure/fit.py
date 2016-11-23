@@ -1,7 +1,7 @@
 import math
 import numpy as np
 from scipy import optimize
-from .._shared.utils import check_random_state, skimage_deprecation, warn
+from ..shared.utils import check_random_state, skimage_deprecation, warn
 
 
 def _check_data_dim(data, dim):

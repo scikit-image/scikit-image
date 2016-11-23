@@ -1,4 +1,4 @@
-from skimage._shared.utils import copy_func
+from skimage.shared.utils import copy_func
 import numpy.testing as npt
 
 

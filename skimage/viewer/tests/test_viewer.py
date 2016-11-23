@@ -9,8 +9,8 @@ from skimage.transform import pyramid_gaussian
 from skimage.filters import sobel
 from numpy.testing import assert_equal
 from numpy.testing.decorators import skipif
-from skimage._shared.version_requirements import is_installed
-from skimage._shared._warnings import expected_warnings
+from skimage.shared.version_requirements import is_installed
+from skimage.shared._warnings import expected_warnings
 
 
 @skipif(not has_qt)

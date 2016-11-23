@@ -4,7 +4,7 @@
 #cython: wraparound=False
 import numpy as np
 cimport numpy as cnp
-from .._shared.interpolation cimport (nearest_neighbour_interpolation,
+from ..shared.interpolation cimport (nearest_neighbour_interpolation,
                                       bilinear_interpolation,
                                       biquadratic_interpolation,
                                       bicubic_interpolation)

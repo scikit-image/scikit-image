@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_raises
 from skimage.filters._gaussian import gaussian
-from skimage._shared._warnings import expected_warnings
+from skimage.shared._warnings import expected_warnings
 
 
 def test_negative_sigma():

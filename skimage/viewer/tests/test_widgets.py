@@ -10,7 +10,7 @@ from skimage.viewer.plugins.base import Plugin
 
 from numpy.testing import assert_almost_equal, assert_equal
 from numpy.testing.decorators import skipif
-from skimage._shared._warnings import expected_warnings
+from skimage.shared._warnings import expected_warnings
 
 
 def get_image_viewer():

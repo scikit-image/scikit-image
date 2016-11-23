@@ -1,4 +1,4 @@
-from skimage._shared.interpolation import coord_map_py
+from skimage.shared.interpolation import coord_map_py
 from numpy.testing import assert_array_equal
 
 

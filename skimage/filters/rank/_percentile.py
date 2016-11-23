@@ -23,7 +23,7 @@ References
 """
 
 import numpy as np
-from ..._shared.utils import assert_nD
+from ...shared.utils import assert_nD
 
 from . import percentile_cy
 from .generic import _handle_input

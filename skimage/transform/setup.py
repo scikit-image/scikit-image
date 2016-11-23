@@ -22,7 +22,7 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
 
     config.add_extension('_warps_cy', sources=['_warps_cy.c'],
-                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
+                         include_dirs=[get_numpy_include_dirs(), '../shared'])
 
     config.add_extension('_radon_transform',
                          sources=['_radon_transform.c'],

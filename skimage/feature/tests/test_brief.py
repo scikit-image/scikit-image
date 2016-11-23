@@ -4,7 +4,7 @@ from skimage import data
 from skimage import transform as tf
 from skimage.color import rgb2gray
 from skimage.feature import BRIEF, corner_peaks, corner_harris
-from skimage._shared.testing import test_parallel
+from skimage.shared.testing import test_parallel
 
 
 def test_color_image_unsupported_error():

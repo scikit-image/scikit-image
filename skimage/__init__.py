@@ -151,7 +151,7 @@ if __SKIMAGE_SETUP__:
     # process, as it may not be compiled yet
 else:
     try:
-        from ._shared import geometry
+        from .shared import geometry
         del geometry
     except ImportError as e:
         _raise_build_error(e)

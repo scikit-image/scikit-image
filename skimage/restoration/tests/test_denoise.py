@@ -3,7 +3,7 @@ from numpy.testing import (run_module_suite, assert_raises, assert_equal,
                            assert_almost_equal, assert_warns, assert_)
 
 from skimage import restoration, data, color, img_as_float, measure
-from skimage._shared._warnings import expected_warnings
+from skimage.shared._warnings import expected_warnings
 from skimage.measure import compare_psnr
 from skimage.restoration._denoise import _wavelet_threshold
 

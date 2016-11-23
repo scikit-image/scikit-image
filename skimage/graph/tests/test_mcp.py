@@ -4,7 +4,7 @@ from numpy.testing import (assert_array_equal,
                            )
 
 import skimage.graph.mcp as mcp
-from skimage._shared._warnings import expected_warnings
+from skimage.shared._warnings import expected_warnings
 
 np.random.seed(0)
 a = np.ones((8, 8), dtype=np.float32)

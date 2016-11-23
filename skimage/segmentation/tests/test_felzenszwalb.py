@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import (assert_equal, assert_array_equal, assert_raises,
     assert_warns, assert_no_warnings)
 
-from skimage._shared.testing import assert_greater, test_parallel
+from skimage.shared.testing import assert_greater, test_parallel
 from skimage.segmentation import felzenszwalb
 from skimage import data
 

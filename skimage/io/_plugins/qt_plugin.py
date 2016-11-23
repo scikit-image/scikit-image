@@ -1,6 +1,6 @@
 import numpy as np
 from .util import prepare_for_display, window_manager
-from ..._shared.utils import warn
+from ...shared.utils import warn
 
 
 # We try to aquire the gui lock first or else the gui import might

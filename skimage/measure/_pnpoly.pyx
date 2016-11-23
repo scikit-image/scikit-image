@@ -5,7 +5,7 @@
 import numpy as np
 
 cimport numpy as cnp
-from .._shared.geometry cimport point_in_polygon, points_in_polygon
+from ..shared.geometry cimport point_in_polygon, points_in_polygon
 
 
 def _grid_points_in_poly(shape, verts):

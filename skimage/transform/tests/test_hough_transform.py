@@ -3,8 +3,8 @@ from numpy.testing import assert_almost_equal, assert_equal, assert_raises
 
 import skimage.transform as tf
 from skimage.draw import line, circle_perimeter, ellipse_perimeter
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import test_parallel
+from skimage.shared._warnings import expected_warnings
+from skimage.shared.testing import test_parallel
 
 
 @test_parallel()

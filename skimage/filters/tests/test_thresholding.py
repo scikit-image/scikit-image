@@ -5,7 +5,7 @@ from numpy.testing import (assert_equal,
 
 import skimage
 from skimage import data
-from skimage._shared._warnings import expected_warnings
+from skimage.shared._warnings import expected_warnings
 from skimage.filters.thresholding import (threshold_adaptive,
                                           threshold_otsu,
                                           threshold_li,

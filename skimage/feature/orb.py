@@ -7,7 +7,7 @@ from ..feature.util import (FeatureDetector, DescriptorExtractor,
 from ..feature import (corner_fast, corner_orientations, corner_peaks,
                              corner_harris)
 from ..transform import pyramid_gaussian
-from .._shared.utils import assert_nD
+from ..shared.utils import assert_nD
 
 from .orb_cy import _orb_loop
 

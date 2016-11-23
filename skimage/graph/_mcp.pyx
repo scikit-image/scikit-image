@@ -36,7 +36,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import cython
 import numpy as np
 import heap
-from .._shared.utils import warn
+from ..shared.utils import warn
 
 cimport numpy as cnp
 cimport heap

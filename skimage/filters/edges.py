@@ -11,7 +11,7 @@ Original author: Lee Kamentsky
 """
 import numpy as np
 from .. import img_as_float
-from .._shared.utils import assert_nD
+from ..shared.utils import assert_nD
 from scipy.ndimage import convolve, binary_erosion, generate_binary_structure
 
 from ..restoration.uft import laplacian

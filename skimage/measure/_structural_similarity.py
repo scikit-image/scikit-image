@@ -5,7 +5,7 @@ from scipy.ndimage import uniform_filter, gaussian_filter
 
 from ..util.dtype import dtype_range
 from ..util.arraycrop import crop
-from .._shared.utils import deprecated
+from ..shared.utils import deprecated
 
 __all__ = ['compare_ssim']
 

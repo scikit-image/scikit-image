@@ -1,7 +1,7 @@
 import numpy as np
 
 from ..util import img_as_float
-from .._shared.utils import assert_nD
+from ..shared.utils import assert_nD
 
 
 class FeatureDetector(object):

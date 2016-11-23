@@ -3,7 +3,7 @@ Methods to characterize image textures.
 """
 
 import numpy as np
-from .._shared.utils import assert_nD
+from ..shared.utils import assert_nD
 from ..util import img_as_float
 from ..color import gray2rgb
 from ._texture import (_glcm_loop,

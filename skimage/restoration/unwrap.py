@@ -1,7 +1,7 @@
 import numpy as np
 from six import string_types
 
-from .._shared.utils import warn
+from ..shared.utils import warn
 
 from ._unwrap_1d import unwrap_1d
 from ._unwrap_2d import unwrap_2d

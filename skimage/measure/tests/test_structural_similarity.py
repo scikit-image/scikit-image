@@ -8,7 +8,7 @@ from skimage.measure import compare_ssim as ssim
 import skimage.data
 from skimage.io import imread
 from skimage import data_dir
-from skimage._shared._warnings import expected_warnings
+from skimage.shared._warnings import expected_warnings
 
 np.random.seed(5)
 cam = skimage.data.camera()
