@@ -384,7 +384,7 @@ def test_ransac_initial_guess():
     init_inliers = (dists <= np.mean(dists))[:, 0]
     ransac_model, inliers = ransac(points, EllipseModel, min_samples=0.4,
                                    residual_threshold=15, max_trials=50,
-                                   init_samples=init_inliers)
+                                   init_inliers=init_inliers)
     nb_inliers_w_init = np.sum(inliers)
     assert  nb_inliers_no_init < nb_inliers_w_init
 
