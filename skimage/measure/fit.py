@@ -844,7 +844,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     >>> ransac_model, inliers = ransac(data, EllipseModel, 5, 3, max_trials=50)
     >>> ransac_model.params
-    array([ 20.12762373,  29.73563063,   4.81499637,  10.4743584 ,   0.05217117])
+    array([ 20.12762538,  29.73563452,   4.81499857,  10.47435549,   0.05217225])
     >>> inliers
     array([False, False, False, False,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
@@ -886,7 +886,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
         if not (0 < min_samples <= 1):
             raise ValueError("`min_samples` must be in range [0, 1]")
         min_samples = int(min_samples * len(data))
-    if isinstance(min_samples, int) and min_samples < 0:
+    if isinstance(min_samples, int) and min_samples <= 0:
         raise ValueError("`min_samples` must be greater than zero")
 
     if max_trials < 0:
