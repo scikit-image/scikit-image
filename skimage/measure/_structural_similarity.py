@@ -6,6 +6,7 @@ from scipy.ndimage import uniform_filter, gaussian_filter
 from ..util.dtype import dtype_range
 from ..util.arraycrop import crop
 from .._shared.utils import deprecated
+from .._shared.utils import skimage_deprecation, warn
 
 __all__ = ['compare_ssim']
 
