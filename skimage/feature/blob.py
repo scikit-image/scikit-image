@@ -187,13 +187,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     sigma_list = np.array([min_sigma * (sigma_ratio ** i)
                            for i in range(k + 1)])
 
-    gaussian_images = [gaussian_filter(image, s) for s in sigma_list]
-
-    # computing difference between two successive Gaussian blurred images
-    # multiplying with standard deviation provides scale invariance
-    dog_images = [(gaussian_images[i] - gaussian_images[i + 1])
-                  * sigma_list[i] for i in range(k)]
-    image_cube = np.dstack(dog_images)
+    image_cube = scale_space_dog(image, min_sigma, max_sigma, sigma_ratio)
 
     # local_maxima = get_local_maxima(image_cube, threshold)
     local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
@@ -292,22 +286,105 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     else:
         sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
 
-    # computing gaussian laplace
-    # s**2 provides scale invariance
-    gl_images = [-gaussian_laplace(image, s) * s ** 2 for s in sigma_list]
-    image_cube = np.dstack(gl_images)
+    image_cube = scale_space_log(image, min_sigma, max_sigma, num_sigma, 
+                                 log_scale)
+    print("hello")
 
     local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
                                   footprint=np.ones((3, 3, 3)),
                                   threshold_rel=0.0,
                                   exclude_border=False)
-
     # Convert local_maxima to float64
     lm = local_maxima.astype(np.float64)
     # Convert the last index to its corresponding scale value
     lm[:, 2] = sigma_list[local_maxima[:, 2]]
     local_maxima = lm
     return _prune_blobs(local_maxima, overlap)
+
+
+def scale_space_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6):
+    """Finds the difference of Gaussians of the given image.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input grayscale image.
+    min_sigma : float, optional
+        The minimum standard deviation for Gaussian Kernel.
+    max_sigma : float, optional
+        The maximum standard deviation for Gaussian Kernel. 
+    sigma_ratio : float, optional
+        The ratio between the standard deviation of Gaussian Kernels used for
+        computing the Difference of Gaussians. 
+
+    Returns
+    -------
+    image_cube : 3D ndarray
+        The Difference of Gaussians of the image.
+    """
+    assert_nD(image, 2)
+
+    image = img_as_float(image)
+
+    # k such that min_sigma*(sigma_ratio**k) > max_sigma
+    k = int(log(float(max_sigma) / min_sigma, sigma_ratio)) + 1
+
+    # a geometric progression of standard deviations for gaussian kernels
+    sigma_list = np.array([min_sigma * (sigma_ratio ** i)
+                           for i in range(k + 1)])
+
+    gaussian_images = [gaussian_filter(image, s) for s in sigma_list]
+
+    # computing difference between two successive Gaussian blurred images
+    # multiplying with standard deviation provides scale invariance
+    dog_images = [(gaussian_images[i] - gaussian_images[i + 1])
+                  * sigma_list[i] for i in range(k)]
+    image_cube = np.dstack(dog_images)
+
+    return image_cube
+
+
+def scale_space_log(image, min_sigma=1, max_sigma=50, num_sigma=10, 
+                    log_scale=False):
+    """Finds the Laplacian of Gaussian of the given image. 
+
+    Parameters
+    ----------
+    image : ndarray
+        Input grayscale image.
+    min_sigma : float, optional
+        The minimum standard deviation for Gaussian Kernel.
+    max_sigma : float, optional
+        The maximum standard deviation for Gaussian Kernel. 
+    num_sigma : int, optional
+        The number of intermediate values of standard deviations to consider
+        between `min_sigma` and `max_sigma`.
+    log_scale : bool, optional
+        If set intermediate values of standard deviations are interpolated
+        using a logarithmic scale to the base `10`. If not, linear
+        interpolation is used.
+
+    Returns
+    -------
+    image_cube : 3D ndarray
+        The Laplacian of Gaussians of the image.
+    """
+    assert_nD(image, 2)
+
+    image = img_as_float(image)
+
+    if log_scale:
+        start, stop = log(min_sigma, 10), log(max_sigma, 10)
+        sigma_list = np.logspace(start, stop, num_sigma)
+    else:
+        sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
+
+    # computing gaussian laplace
+    # s**2 provides scale invariance
+    gl_images = [-gaussian_laplace(image, s) * s ** 2 for s in sigma_list]
+    image_cube = np.dstack(gl_images)
+
+    return image_cube
 
 
 def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
