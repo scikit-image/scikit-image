@@ -288,7 +288,6 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
     image_cube = scale_space_log(image, min_sigma, max_sigma, num_sigma, 
                                  log_scale)
-    print("hello")
 
     local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
                                   footprint=np.ones((3, 3, 3)),
