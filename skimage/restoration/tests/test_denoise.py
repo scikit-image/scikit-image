@@ -465,16 +465,23 @@ def test_estimate_sigma_color():
     assert_warns(UserWarning, restoration.estimate_sigma, img)
 
 def test_wavelet_denoising_args():
+    """
+    Some of the functions inside wavelet denoising throw an error the wrong
+    arguments are passed. This protects against that and verifies that all
+    arguments can be passed.
+    """
     img = astro
     noisy = img.copy() + 0.1 * np.random.randn(*(img.shape))
 
     for convert2ycbcr in [True, False]:
         for multichannel in [True, False]:
             for sigma in [0.1, [0.1, 0.1, 0.1], None]:
-                if not multichannel and not convert2ycbcr:
+                if (not multichannel and not convert2ycbcr) or \
+                        (isinstance(sigma, list) and not multichannel):
                     continue
-                restoration.denoise_wavelet(noisy, convert2ycbcr=convert2ycbcr,
-                                            sigma=sigma)
+                restoration.denoise_wavelet(noisy, sigma=sigma,
+                                            convert2ycbcr=convert2ycbcr,
+                                            multichannel=multichannel)
 
 
 if __name__ == "__main__":

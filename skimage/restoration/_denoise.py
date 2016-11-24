@@ -7,6 +7,7 @@ from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 from .._shared.utils import skimage_deprecation, warn
 import pywt
 import skimage.color as color
+import numbers
 
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
@@ -510,10 +511,10 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
     multichannel : bool, optional
         Apply wavelet denoising separately for each channel (where channels
         correspond to the final axis of the array).
-    convert2ycbcr : bool, options
-        If True do the wavelet denoising in the YCbCr colorspace (typically)
-        instead of the RGB color space. This typically results in better
-        performance for RGB images (default: False).
+    convert2ycbcr : bool, optional
+        If True and multichannel True, do the wavelet denoising in the YCbCr
+        colorspace (typically) instead of the RGB color space. This typically
+        results in better performance for RGB images.
 
     Returns
     -------
@@ -533,11 +534,8 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
     plane separately. The output image is clipped between either [-1, 1] and
     [0, 1] depending on the input image range.
 
-    Wavelet denoising is often done in the YCbCr colorspace. It is assumed the
-    input image is in RGB. If ``colorspace in {None, 'rgb'}``, no colorspace
-    conversion is done. When conversion is done, every color channel is scaled
-    between 0 and 1, and `sigma` values are applied to these scaled color
-    channels.
+    When YCbCr conversion is done, every color channel is scaled between 0
+    and 1, and `sigma` values are applied to these scaled color channels.
 
     References
     ----------
@@ -562,17 +560,10 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
     img = img_as_float(img)
 
     if multichannel:
-        out = np.empty_like(img)
-        if type(sigma) in {float, int, complex}:
+        if isinstance(sigma, numbers.Number) or sigma is None:
             sigma = [sigma] * img.shape[-1]
-        for c in range(img.shape[-1]):
-            out[..., c] = _wavelet_threshold(img[..., c], wavelet=wavelet,
-                                             mode=mode, sigma=sigma[c],
-                                             wavelet_levels=wavelet_levels)
-    else:
+
         if convert2ycbcr:
-            if type(sigma) in {float, int, complex}:
-                sigma = [sigma] * img.shape[-1]
             out = color.rgb2ycbcr(img)
             for i in range(3):
                 # renormalizing this color channel to live in [0, 1]
@@ -587,9 +578,16 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
 
             out = color.ycbcr2rgb(out)
         else:
-            out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
-                                     sigma=sigma,
-                                     wavelet_levels=wavelet_levels)
+            out = np.empty_like(img)
+            for c in range(img.shape[-1]):
+                out[..., c] = _wavelet_threshold(img[..., c], wavelet=wavelet,
+                                                 mode=mode, sigma=sigma[c],
+                                                 wavelet_levels=wavelet_levels)
+
+    else:
+        out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
+                                 sigma=sigma,
+                                 wavelet_levels=wavelet_levels)
 
     clip_range = (-1, 1) if img.min() < 0 else (0, 1)
     return np.clip(out, *clip_range)
