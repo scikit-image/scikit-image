@@ -15,7 +15,7 @@ from .corner_cy import _corner_moravec, _corner_orientations
 from warnings import warn
 
 def _compute_derivatives(image, mode='constant', cval=0):
-    """Compute derivatives in x and y direction using the Sobel operator.
+    """Compute derivatives in multiple directions using the Sobel operator.
 
     Parameters
     ----------
@@ -34,13 +34,18 @@ def _compute_derivatives(image, mode='constant', cval=0):
     imy : ndarray
         Derivative in y-direction.
 
+    derivatives_arr : ndarray
+        An array of derivatives in number of image.ndim directions.
+
     """
 
-    imy = ndi.sobel(image, axis=0, mode=mode, cval=cval)
-    imx = ndi.sobel(image, axis=1, mode=mode, cval=cval)
+    # imy = ndi.sobel(image, axis=0, mode=mode, cval=cval)
+    # imx = ndi.sobel(image, axis=1, mode=mode, cval=cval)
 
-    return imx, imy
+    # return imx, imy
 
+    derivatives = (ndi.sobel(image, axis=i, mode=mode, cval=cval) for i in range(image.ndim -1, -1, -1))
+    return derivatives
 
 def structure_tensor(image, sigma=1, mode='constant', cval=0):
     """Compute structure tensor using sum of squared differences.
@@ -90,16 +95,24 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
 
     """
 
-    image = _prepare_grayscale_input_2D(image)
+    # image = _prepare_grayscale_input_2D(image)
 
-    imx, imy = _compute_derivatives(image, mode=mode, cval=cval)
+    # imx, imy = _compute_derivatives(image, mode=mode, cval=cval)
 
-    # structure tensore
-    Axx = ndi.gaussian_filter(imx * imx, sigma, mode=mode, cval=cval)
-    Axy = ndi.gaussian_filter(imx * imy, sigma, mode=mode, cval=cval)
-    Ayy = ndi.gaussian_filter(imy * imy, sigma, mode=mode, cval=cval)
+    # # structure tensore
+    # Axx = ndi.gaussian_filter(imx * imx, sigma, mode=mode, cval=cval)
+    # Axy = ndi.gaussian_filter(imx * imy, sigma, mode=mode, cval=cval)
+    # Ayy = ndi.gaussian_filter(imy * imy, sigma, mode=mode, cval=cval)
 
-    return Axx, Axy, Ayy
+    # return Axx, Axy, Ayy
+
+    out = ()
+    derivatives = list(_compute_derivatives(image, mode=mode, cval=cval))
+    for i in range(len(derivatives)):
+        for j in range(len(derivatives)):
+            if i <= j:
+                out += (ndi.gaussian_filter(derivatives[i] * derivatives[j], sigma, mode=mode, cval=cval),)
+    return out
 
 
 def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
