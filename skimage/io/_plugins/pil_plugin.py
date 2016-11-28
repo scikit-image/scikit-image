@@ -250,7 +250,7 @@ def imsave(fname, arr, format_str=None, **kwargs):
         arr = arr.astype(np.uint8)
 
     if arr.ndim not in (2, 3):
-        raise ValueError("Invalid shape for image array: %s" % arr.shape)
+        raise ValueError("Invalid shape for image array: %s" % (arr.shape, ))
 
     if arr.ndim == 3:
         if arr.shape[2] not in (3, 4):
