@@ -1,5 +1,4 @@
-from skimage._shared.utils import (copy_func, 
-                                    assert_nD)
+from skimage._shared.utils import (copy_func, assert_nD)
 import numpy.testing as npt
 from numpy.testing import assert_raises 
 
@@ -9,7 +8,7 @@ from numpy.testing import assert_raises
 def test_assert_nD():
     z = np.random.random(200**2).reshape((200, 200))
     x = z[10:30, 30:10]
-    assert_raises(ValueError, assert_nD, 2)
+    assert_raises(ValueError, assert_nD, x, 2)
 
 def test_copyfunc():
     def foo(a):
