@@ -69,7 +69,7 @@ def test_ssim_grad():
 
     f = ssim(X, Y, value_range=255)
     g = ssim(X, Y, value_range=255, gradient=True)
-    print(f)
+
     assert f < 0.05
 
     assert g[0] < 0.05
