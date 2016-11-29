@@ -139,7 +139,7 @@ def test_jpg_quality_arg():
         imsave(jpg, chessboard, quality=95)
         im = imread(jpg)
         sim = ssim(chessboard, im,
-                   value_range=chessboard.max() - chessboard.min())
+                   data_range=chessboard.max() - chessboard.min())
         assert sim > 0.99
 
 
@@ -252,7 +252,7 @@ def test_cmyk():
     for i in range(3):
         newi = np.ascontiguousarray(new_lab[:, :, i])
         refi = np.ascontiguousarray(ref_lab[:, :, i])
-        sim = ssim(refi, newi, value_range=refi.max() - refi.min())
+        sim = ssim(refi, newi, data_range=refi.max() - refi.min())
         assert sim > 0.99
 
 if __name__ == "__main__":

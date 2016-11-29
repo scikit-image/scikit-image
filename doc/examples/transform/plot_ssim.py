@@ -46,15 +46,15 @@ fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 4),
 ax = axes.ravel()
 
 mse_none = mse(img, img)
-ssim_none = ssim(img, img, value_range=img.max() - img.min())
+ssim_none = ssim(img, img, data_range=img.max() - img.min())
 
 mse_noise = mse(img, img_noise)
 ssim_noise = ssim(img, img_noise,
-                  value_range=img_noise.max() - img_noise.min())
+                  data_range=img_noise.max() - img_noise.min())
 
 mse_const = mse(img, img_const)
 ssim_const = ssim(img, img_const,
-                  value_range=img_const.max() - img_const.min())
+                  data_range=img_const.max() - img_const.min())
 
 label = 'MSE: {:.2f}, SSIM: {:.2f}'
 

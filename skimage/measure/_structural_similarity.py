@@ -12,7 +12,7 @@ __all__ = ['compare_ssim']
 
 
 def compare_ssim(X, Y, win_size=None, gradient=False,
-                 value_range=None, dynamic_range=None, multichannel=False,
+                 data_range=None, dynamic_range=None, multichannel=False,
                  gaussian_weights=False, full=False, **kwargs):
     """Compute the mean structural similarity index between two images.
 
@@ -26,8 +26,8 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
         window size will depend on `sigma`.
     gradient : bool, optional
         If True, also return the gradient.
-    value_range : int, optional
-        The value range of the input image (distance between minimum and
+    data_range : int, optional
+        The data range of the input image (distance between minimum and
         maximum possible values).  By default, this is estimated from the image
         data-type.
     multichannel : bool, optional
@@ -90,15 +90,15 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
 
     if dynamic_range is not None:
         warn('`dynamic_range` has been deprecated in favor of '
-             '`value_range`. The `dynamic_range` keyword argument '
+             '`data_range`. The `dynamic_range` keyword argument '
              'will be removed in v0.14', skimage_deprecation)
-        value_range = dynamic_range
+        data_range = dynamic_range
 
     if multichannel:
         # loop over channels
         args = dict(win_size=win_size,
                     gradient=gradient,
-                    value_range=value_range,
+                    data_range=data_range,
                     multichannel=False,
                     gaussian_weights=gaussian_weights,
                     full=full)
@@ -154,9 +154,9 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
     if not (win_size % 2 == 1):
         raise ValueError('Window size must be odd.')
 
-    if value_range is None:
+    if data_range is None:
         dmin, dmax = dtype_range[X.dtype.type]
-        value_range = dmax - dmin
+        data_range = dmax - dmin
 
     ndim = X.ndim
 
@@ -194,7 +194,7 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
     vy = cov_norm * (uyy - uy * uy)
     vxy = cov_norm * (uxy - ux * uy)
 
-    R = value_range
+    R = data_range
     C1 = (K1 * R) ** 2
     C2 = (K2 * R) ** 2
 
@@ -236,6 +236,6 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
                           gaussian_weights=False, full=False, **kwargs):
     """""" + compare_ssim.__doc__
     return compare_ssim(X, Y, win_size=win_size, gradient=gradient,
-                        value_range=dynamic_range,
+                        data_range=dynamic_range,
                         multichannel=multichannel,
                         gaussian_weights=gaussian_weights, full=full, **kwargs)
