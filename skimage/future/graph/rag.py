@@ -422,10 +422,10 @@ def rag_boundary(labels, edge_map, connectivity=2):
 
 def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
              edge_cmap='magma', img_cmap='bone', in_place=True, ax=None):
-    """Draw a Region Adjacency Graph on an image.
+    """Show a Region Adjacency Graph on an image.
 
-    Given a labelled image and its corresponding RAG, draw the nodes and edges
-    of the RAG on the image with the specified colors. Edges are drawn between
+    Given a labelled image and its corresponding RAG, show the nodes and edges
+    of the RAG on the image with the specified colors. Edges are displayed between
     the centroid of the 2 adjacent regions in the image.
 
     Parameters

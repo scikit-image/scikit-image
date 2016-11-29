@@ -184,6 +184,10 @@ class TestSave:
     def test_imsave_roundtrip_pil_image(self):
         self.verify_imsave_roundtrip(self.roundtrip_pil_image)
 
+def test_imsave_incorrect_dimension():
+    with temporary_file(suffix='.png') as fname:
+        assert_raises(ValueError, imsave, fname, np.zeros((2, 3, 3, 1)))
+        assert_raises(ValueError, imsave, fname, np.zeros((2, 3, 2)))
 
 def test_imsave_filelike():
     shape = (2, 2)

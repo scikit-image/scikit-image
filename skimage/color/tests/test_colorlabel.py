@@ -70,11 +70,21 @@ def test_bg_and_color_cycle():
     for pixel, color in zip(rgb[0, 1:], itertools.cycle(colors)):
         assert_close(pixel, color)
 
+def test_negative_labels():
+    labels = np.array([0, -1, -2, 0])
+    rout = np.array([(0., 0., 0.), (0., 0., 1.), (1., 0., 0.), (0., 0., 0.)])
+    assert_close(rout, label2rgb(labels, bg_label=0, alpha=1, image_alpha=1))
+
+def test_nonconsecutive():
+    labels = np.array([0, 2, 4, 0])
+    colors=[(1, 0, 0), (0, 0, 1)]
+    rout = np.array([(1., 0., 0.), (0., 0., 1.), (1., 0., 0.), (1., 0., 0.)])
+    assert_close(rout, label2rgb(labels, colors=colors, alpha=1, image_alpha=1))
 
 def test_label_consistency():
     """Assert that the same labels map to the same colors."""
     label_1 = np.arange(5).reshape(1, -1)
-    label_2 = np.array([2, 4])
+    label_2 = np.array([0, 1])
     colors = [(1, 0, 0), (0, 1, 0), (0, 0, 1), (1, 1, 0), (1, 0, 1)]
     # Set alphas just in case the defaults change
     rgb_1 = label2rgb(label_1, colors=colors)
