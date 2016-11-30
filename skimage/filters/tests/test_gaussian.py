@@ -55,6 +55,10 @@ def test_multichannel():
                        [gaussian_rgb_a[..., i].mean() for i in range(3)])
 
 
+def test_preserve_range():
+    img = np.array([[10.0, -10.0], [-4, 3]], dtype=np.float32)
+    gaussian(img, 1, preserve_range=True)
+
 if __name__ == "__main__":
     from numpy import testing
     testing.run_module_suite()
