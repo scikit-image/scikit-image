@@ -56,7 +56,7 @@ from .colorconv import (convert_colorspace,
                         rgb_from_hpx,
                         hpx_from_rgb)
 
-from .colorlabel import color_dict, label2rgb
+from .colorlabel import color_dict, label_colormap, label2rgb
 
 from .delta_e import (deltaE_cie76,
                       deltaE_ciede94,
@@ -118,6 +118,7 @@ __all__ = ['convert_colorspace',
            'rgb_from_hpx',
            'hpx_from_rgb',
            'color_dict',
+           'label_colormap',
            'label2rgb',
            'deltaE_cie76',
            'deltaE_ciede94',
