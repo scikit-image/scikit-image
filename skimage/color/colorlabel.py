@@ -92,10 +92,10 @@ def label_colormap(n_labels):
         return ((byteval & (1 << idx)) != 0)
 
     colormap = np.zeros((n_labels, 3))
-    for i in xrange(0, n_labels):
+    for i in six.moves.range(0, n_labels):
         id = i
         r, g, b = 0, 0, 0
-        for j in xrange(0, 8):
+        for j in six.moves.range(0, 8):
             r = np.bitwise_or(r, (bitget(id, 0) << 7-j))
             g = np.bitwise_or(g, (bitget(id, 1) << 7-j))
             b = np.bitwise_or(b, (bitget(id, 2) << 7-j))

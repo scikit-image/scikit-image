@@ -12,6 +12,7 @@ from skimage.color.colorlabel import label_colormap
 
 import matplotlib.pyplot as plt
 import numpy
+import six
 
 
 def draw_colormap(colormap):
@@ -24,7 +25,7 @@ def draw_colormap(colormap):
     """
     n_colors = len(colormap)
     ret = numpy.zeros((n_colors, 10 * 10, 3))
-    for i in xrange(n_colors):
+    for i in six.moves.range(n_colors):
         ret[i, ...] = colormap[i]
     return ret.reshape((n_colors * 10, 10, 3))
 
