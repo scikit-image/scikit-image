@@ -1,3 +1,13 @@
+"""
+==================
+Colormap for Label
+==================
+
+In this example, we show the colormap generation for a specified number of
+labels. The colormap can be used to colorize label image with known number of
+label values and rectangles for detected object for example.
+
+"""
 from skimage.color.colorlabel import label_colormap
 
 import matplotlib.pyplot as plt
