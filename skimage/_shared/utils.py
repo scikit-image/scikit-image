@@ -7,6 +7,7 @@ import numbers
 
 import six
 
+from ..util import img_as_float
 from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
@@ -211,3 +212,27 @@ def check_random_state(seed):
         return seed
     raise ValueError('%r cannot be used to seed a numpy.random.RandomState'
                      ' instance' % seed)
+
+
+def convert_input(image, preserve_range):
+    """Convert input image to double image with the appropriate range.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    preserve_range : bool
+        Determines if the range of the image should be kept or transformed
+        using img_as_float.
+
+    Returns
+    -------
+    image : ndarray
+        Transformed version of the input.
+    """
+    if preserve_range:
+        image = image.astype(np.double)
+    else:
+        image = img_as_float(image)
+    return image
+

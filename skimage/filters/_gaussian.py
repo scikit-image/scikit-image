@@ -4,7 +4,7 @@ from scipy import ndimage as ndi
 
 from ..util import img_as_float
 from ..color import guess_spatial_dimensions
-from .._shared.utils import warn
+from .._shared.utils import warn, convert_input
 
 
 __all__ = ['gaussian']
@@ -113,5 +113,5 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
             sigma = [sigma] * (image.ndim - 1)
         if len(sigma) != image.ndim:
             sigma = np.concatenate((np.asarray(sigma), [0]))
-    image = _convert_input(image, preserve_range)
+    image = convert_input(image, preserve_range)
     return ndi.gaussian_filter(image, sigma, mode=mode, cval=cval)
