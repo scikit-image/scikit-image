@@ -8,16 +8,21 @@ from ._draw import (_coords_inside_image, _line, _line_aa,
                     _bezier_curve)
 
 
-def _ellipse_in_shape(shape, center, radiuses):
+def _ellipse_in_shape(shape, center, radiuses, orientation):
     """Generate coordinates of points within ellipse bounded by shape."""
     r_lim, c_lim = np.ogrid[0:float(shape[0]), 0:float(shape[1])]
     r_o, c_o = center
     r_r, c_r = radiuses
-    distances = ((r_lim - r_o) / r_r) ** 2 + ((c_lim - c_o) / c_r) ** 2
+
+    distances = (((r_lim - r_o)*np.cos(orientation) +
+                  (c_lim - c_o)*np.sin(orientation)) / r_r) ** 2 +\
+                ((-(r_lim - r_o)*np.sin(orientation) +
+                  (c_lim - c_o)*np.cos(orientation)) / c_r) ** 2
+
     return np.nonzero(distances < 1)
 
 
-def ellipse(r, c, r_radius, c_radius, shape=None):
+def ellipse(r, c, r_radius, c_radius, orientation=0, shape=None):
     """Generate coordinates of pixels within ellipse.
 
     Parameters
@@ -26,6 +31,8 @@ def ellipse(r, c, r_radius, c_radius, shape=None):
         Centre coordinate of ellipse.
     r_radius, c_radius : double
         Minor and major semi-axes. ``(r/r_radius)**2 + (c/c_radius)**2 = 1``.
+    orientation : int
+        Ellipse angle orientation, in degrees. Default is 0.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for ellipses that exceed the image
@@ -40,31 +47,32 @@ def ellipse(r, c, r_radius, c_radius, shape=None):
 
     Examples
     --------
-    >>> from skimage.draw import ellipse
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
-    >>> rr, cc = ellipse(5, 5, 3, 4)
-    >>> img[rr, cc] = 1
-    >>> img
+    >>> image = np.zeros((10, 10), dtype=int)
+    >>> rr, cc = ellipse(5, 5, 2, 4, orientation=75)
+    >>> image[rr, cc] = 1
+    >>> image
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
+           [0, 0, 0, 0, 1, 1, 1, 1, 0, 0],
+           [0, 0, 0, 0, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
-           [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
-           [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
-           [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
-           [0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
-
+           [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
     """
 
     center = np.array([r, c])
     radiuses = np.array([r_radius, c_radius])
+    orientation = np.radians(orientation)
 
     # The upper_left and lower_right corners of the
     # smallest rectangle containing the ellipse.
-    upper_left = np.ceil(center - radiuses).astype(int)
-    lower_right = np.floor(center + radiuses).astype(int)
+    major_vec = np.linalg.norm(radiuses)/np.abs(np.cos(orientation))
+    aux = [major_vec, major_vec]
+    upper_left = np.ceil(center - aux).astype(int)
+    lower_right = np.floor(center + aux).astype(int)
 
     if shape is not None:
         # Constrain upper_left and lower_right by shape boundary.
@@ -74,11 +82,13 @@ def ellipse(r, c, r_radius, c_radius, shape=None):
     shifted_center = center - upper_left
     bounding_shape = lower_right - upper_left + 1
 
-    rr, cc = _ellipse_in_shape(bounding_shape, shifted_center, radiuses)
+    rr, cc = _ellipse_in_shape(bounding_shape, shifted_center, radiuses,
+                               orientation)
     rr.flags.writeable = True
     cc.flags.writeable = True
     rr += upper_left[0]
     cc += upper_left[1]
+
     return rr, cc
 
 
