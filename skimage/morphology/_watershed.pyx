@@ -129,7 +129,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
             if output[index] == wsl_label:
                 continue
 
-            if output[index]>0:
+            if output[index]!=0:
                 # neighbor has a label: the neighbor is not added to the queue. 
                 if wsl:
                     # if the label of the neighbor is different
