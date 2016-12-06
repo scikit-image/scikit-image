@@ -30,8 +30,6 @@ from scipy import ndimage as ndi
 from . import _watershed
 from ..util import crop, regular_seeds
 
-import pdb
-
 def _validate_inputs(image, markers, mask):
     """Ensure that all inputs to watershed have matching shapes and types.
 

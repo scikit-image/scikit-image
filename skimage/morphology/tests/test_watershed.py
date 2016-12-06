@@ -49,6 +49,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from skimage.morphology.watershed import watershed
+from skimage.measure import label
 
 eps = 1e-12
 
@@ -443,7 +444,7 @@ class TestWatershed(unittest.TestCase):
                          [102, 102, 102, 102, 153, 203, 255, 203, 153, 153, 153, 153, 153, 153, 153, 153]])
         markerbin = data==0
         marker = label(markerbin)
-        ws = skimage.morphology.watershed(data, marker, connectivity=2, watershedline=True)
+        ws = watershed(data, marker, connectivity=2, watershedline=True)
         for i, res in zip(range(4), [34,74,74,74]):
             self.assertTrue(np.sum(ws==i)==res)
         
