@@ -112,6 +112,8 @@ def test_line_modelND_under_determined():
 
 def test_circle_model_invalid_input():
     assert_raises(ValueError, CircleModel().estimate, np.empty((5, 3)))
+    assert_raises(ValueError, CircleModel().estimate, np.zeros((5, 2)),
+                  init_params=(0., 0.))
 
 
 def test_circle_model_predict():
@@ -154,6 +156,8 @@ def test_circle_model_residuals():
 
 def test_ellipse_model_invalid_input():
     assert_raises(ValueError, EllipseModel().estimate, np.empty((5, 3)))
+    assert_raises(ValueError, EllipseModel().estimate, np.zeros((5, 2)),
+                  init_params=(0, 0, 0))
 
 
 def test_ellipse_model_predict():
@@ -299,6 +303,8 @@ def test_ransac_invalid_input():
                   residual_threshold=0, stop_probability=-1)
     assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=2,
                   residual_threshold=0, stop_probability=1.01)
+    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=0)
+    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=1.5)
 
 
 def test_ransac_initial_guess():
