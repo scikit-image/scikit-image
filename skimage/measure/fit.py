@@ -379,7 +379,7 @@ class CircleModel(BaseModel):
             A[0, :] = -(x - xc) / d
             A[1, :] = -(y - yc) / d
             # same for all iterations, so not changed in each iteration
-            #A[2, :] = -1
+            # A[2, :] = -1
             return A
 
         if init_params is None:
@@ -388,7 +388,7 @@ class CircleModel(BaseModel):
             yc0 = y.mean()
             r0 = dist(xc0, yc0).mean()
             init_params = (xc0, yc0, r0)
-        elif len(init_params) != 3:
+        if len(init_params) != 3:
             raise ValueError('init params expects 3 values, '
                              'but it got %i values' % len(init_params))
 
@@ -556,7 +556,7 @@ class EllipseModel(BaseModel):
             yc0 = y.mean()
             r0 = np.sqrt((x - xc0) ** 2 + (y - yc0) ** 2).mean()
             init_params = (xc0, yc0, r0, 0, 0)
-        elif len(init_params) != 5:
+        if len(init_params) != 5:
             raise ValueError('init params expects 5 values, '
                              'but it got %i values' % len(init_params))
 
@@ -878,7 +878,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     if isinstance(min_samples, float):
         if not (0 < min_samples <= 1):
-            raise ValueError("`min_samples` must be in range [0, 1]")
+            raise ValueError("`min_samples` as ration must be in range (0, 1)")
         min_samples = int(min_samples * len(data))
     if min_samples <= 0:
         raise ValueError("`min_samples` must be greater than zero")
