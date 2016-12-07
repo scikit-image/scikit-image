@@ -303,8 +303,10 @@ def test_ransac_invalid_input():
                   residual_threshold=0, stop_probability=-1)
     assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=2,
                   residual_threshold=0, stop_probability=1.01)
-    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=0)
-    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=1.5)
+    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=0,
+                  residual_threshold=0)
+    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=1.5,
+                  residual_threshold=0)
 
 
 def test_ransac_initial_guess():
