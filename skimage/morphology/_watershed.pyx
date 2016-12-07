@@ -101,7 +101,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
         elem.index = index
         elem.source = index
         heappush(hp, &elem)
-        if wsl:
+        if wsl:            
             if wsl_label >= output[index]:
                 wsl_label = output[index] - 1
     
@@ -113,7 +113,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
             # wsl labels are not propagated.
             continue
         
-        if output[elem.index]>0 and elem.index != elem.source:
+        if output[elem.index] != 0 and elem.index != elem.source:
             # non-marker, already visited from another neighbor
             continue
         
@@ -129,7 +129,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
             if output[index] == wsl_label:
                 continue
 
-            if output[index]!=0:
+            if output[index] != 0:
                 # neighbor has a label: the neighbor is not added to the queue. 
                 if wsl:
                     # if the label of the neighbor is different
