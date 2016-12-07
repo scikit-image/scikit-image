@@ -109,11 +109,11 @@ def watershed_raveled(cnp.float64_t[::1] image,
         heappop(hp, &elem)
 
         # this can happen if the same pixel entered the queue several times before being processed.
-        if output[elem.index] == wsl_label:
+        if wsl and output[elem.index] == wsl_label:
             # wsl labels are not propagated.
             continue
         
-        if output[elem.index] != 0 and elem.index != elem.source:
+        if output[elem.index] and elem.index != elem.source:
             # non-marker, already visited from another neighbor
             continue
         
@@ -126,11 +126,11 @@ def watershed_raveled(cnp.float64_t[::1] image,
                 # neighbor is not in mask
                 continue
 
-            if output[index] == wsl_label:
+            if wsl and output[index] == wsl_label:
                 continue
 
-            if output[index] != 0:
-                # neighbor has a label: the neighbor is not added to the queue. 
+            if output[index]:
+                # neighbor has a label (but not wsl_label): the neighbor is not added to the queue. 
                 if wsl:
                     # if the label of the neighbor is different
                     # from the label of the pixel taken from the queue, 
