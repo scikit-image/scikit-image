@@ -348,7 +348,6 @@ class CircleModel(BaseModel):
         ----------
         data : (N, 2) array
             N points with ``(x, y)`` coordinates, respectively.
-
         init_params : tuple of 3 values, optional
             (x_center, y_center, r) is an initial guess of parameters.
             If None, the initial guess uses a circle model based on mean values.
@@ -497,7 +496,6 @@ class EllipseModel(BaseModel):
         ----------
         data : (N, 2) array
             N points with ``(x, y)`` coordinates, respectively.
-
         init_params : tuple of 5 values, optional
             (x_center, y_center, a, b, theta) is an initial guess of parameters.
             If None, the initial guess uses a circle model based on mean values.
