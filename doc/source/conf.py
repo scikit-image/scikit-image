@@ -249,7 +249,8 @@ latex_documents = [
 #latex_use_parts = False
 
 # Additional stuff for the LaTeX preamble.
-latex_preamble = r'''
+latex_elements = {}
+latex_elements['preamble'] = r'''
 \usepackage{enumitem}
 \setlistdepth{100}
 
