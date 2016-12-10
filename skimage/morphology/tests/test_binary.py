@@ -48,7 +48,7 @@ def test_binary_opening():
 def test_binary_perimeter():
     bw = np.zeros([10,10])
     bw[3:7,3:7] = 1
-    perim = bw
+    perim = np.copy(bw)
     perim[4:6,4:6] = 0
     strel = selem.square(3)
     binary_res = binary.binary_perimeter(bw, strel)
