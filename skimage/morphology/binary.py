@@ -144,3 +144,35 @@ def binary_closing(image, selem=None, out=None):
     dilated = binary_dilation(image, selem)
     out = binary_erosion(dilated, selem, out=out)
     return out
+
+@default_selem
+def binary_perimeter(image, selem=None):
+    """Return perimeter mask of objects in a binary image
+
+    Find the perimeters of objects in a provided binary image for a given
+    connectivity
+    Uses padding and binary erosion
+
+
+    Parameters
+    ----------
+    image : ndarray
+        Binary input image.
+    selem : ndarray, optional
+        The neighborhood expressed as a N-D array of 1's and 0's
+        where N is the dimensionality of image.
+        If None, use cross-shaped structuring element (connectivity=1).
+
+    Returns
+    -------
+    perim : binary image of perimeters of objects in bw
+
+    """
+
+    bw_pad = np.pad(image, pad_width=1, mode='constant', constant_values=0)
+    bw_eroded = binary_erosion(bw_pad, selem=selem)
+    bw_eroded = bw_eroded[1:-1,1:-1] # unpad output
+
+    perim = np.logical_and(image, ~bw_eroded)
+
+    return perim
