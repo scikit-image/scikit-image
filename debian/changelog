@@ -1,3 +1,11 @@
+skimage (0.12.3-2) unstable; urgency=medium
+
+  * debian/patches
+    - changeset_6807f4ee8f5501703e447f95701190c836deaae1.diff to initialize
+      value of firstbg to avoid segfaults (Closes: #840589)
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 12 Dec 2016 12:41:31 -0500
+
 skimage (0.12.3-1) unstable; urgency=medium
 
   [ Stefan van der Walt ]
