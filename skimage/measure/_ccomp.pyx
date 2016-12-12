@@ -440,7 +440,7 @@ cdef void scanBG(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
 
     The result of this function is update of forest_p and bg parameter.
     """
-    cdef DTYPE_t i, bgval = bg.background_val, firstbg
+    cdef DTYPE_t i, bgval = bg.background_val, firstbg = shapeinfo.numels
     # We find the provisional label of the background, which is the index of
     # the first background pixel
     for i in range(shapeinfo.numels):
