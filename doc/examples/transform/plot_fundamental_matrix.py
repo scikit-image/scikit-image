@@ -43,7 +43,7 @@ keypoints_right = descriptor_extractor.keypoints
 descriptors_right = descriptor_extractor.descriptors
 
 matches = match_descriptors(descriptors_left, descriptors_right,
-                              cross_check=True)
+                            cross_check=True)
 
 # Estimate the epipolar geometry between the left and right image.
 

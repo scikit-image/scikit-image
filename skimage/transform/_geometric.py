@@ -355,8 +355,8 @@ class FundamentalMatrixTransform(GeometricTransform):
         F_normalized, src_matrix, dst_matrix = \
             self._setup_constraint_matrix(src, dst)
 
-        # Enforcing the internal constraint that two singular values must non-
-        # zero and one must be zero.
+        # Enforcing the internal constraint that two singular values must be
+        # non-zero and one must be zero.
         U, S, V = np.linalg.svd(F_normalized)
         S[2] = 0
         F = np.dot(U, np.dot(np.diag(S), V))

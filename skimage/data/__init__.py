@@ -354,7 +354,6 @@ def stereo_motorcycle():
         Principal point dx:      31.086px
         Baseline:               193.001mm
 
-
     Returns
     -------
     img_left : (500, 741, 3) uint8 ndarray
