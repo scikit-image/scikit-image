@@ -1,6 +1,5 @@
 import numpy as np
 from skimage.draw import circle
-from scipy.ndimage import gaussian_filter, gaussian_laplace
 from skimage.feature import (blob_dog, blob_log, blob_doh, 
                             scale_space_dog, scale_space_log)
 import math
