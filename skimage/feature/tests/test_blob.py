@@ -1,8 +1,10 @@
 import numpy as np
 from skimage.draw import circle
-from skimage.feature import blob_dog, blob_log, blob_doh
+from scipy.ndimage import gaussian_filter, gaussian_laplace
+from skimage.feature import (blob_dog, blob_log, blob_doh, 
+                            scale_space_dog, scale_space_log)
 import math
-from numpy.testing import assert_raises
+from numpy.testing import assert_raises, assert_almost_equal
 
 
 def test_blob_dog():
@@ -212,3 +214,56 @@ def test_blob_overlap():
         threshold=.05)
 
     assert len(blobs) == 1
+
+
+def test_scale_space_dog():
+    img = np.ones((512, 512))
+    dog = scale_space_dog(img)
+    for i in range(4):
+        assert_almost_equal(dog[:,:,i], dog[:,:,i+1])
+
+    xs, ys = circle(400, 130, 20)
+    img[xs, ys] = 255
+
+    xs, ys = circle(100, 300, 25)
+    img[xs, ys] = 255
+
+    xs, ys = circle(200, 350, 45)
+    img[xs, ys] = 255
+    
+    thresh = 2
+    dog = scale_space_dog(img, 5, 50)
+    d = blob_dog(dog[:,:,1], min_sigma=5, max_sigma=50)
+    blobs = blob_dog(img, min_sigma=5, max_sigma=50)
+    for i in blobs:
+        assert min([np.linalg.norm(i[:2] - d[j][:2]) 
+            for j in range(d.shape[0])]) <= thresh
+
+
+def test_scale_space_log():
+    img = np.ones((256, 256)) * 255
+    log = scale_space_log(img, min_sigma=5, max_sigma=20)
+    for i in range(10):
+        l = log[:,:,i] - log[:,:,i].mean()
+        zero = np.zeros((256, 256))
+        print(l)
+        assert_almost_equal(l, zero)
+
+    xs, ys = circle(200, 65, 5)
+    img[xs, ys] = 255
+
+    xs, ys = circle(80, 25, 15)
+    img[xs, ys] = 255
+
+    xs, ys = circle(50, 150, 25)
+    img[xs, ys] = 255
+
+    xs, ys = circle(100, 175, 30)
+    img[xs, ys] = 255
+
+    blobs = blob_log(img, min_sigma=5, max_sigma=20, threshold=1)
+    d = blob_log(log[:,:,2], min_sigma=5, max_sigma=20, threshold=1)
+    thresh = 5
+    for i in blobs:
+        assert min([np.linalg.norm(i[:2] - d[j][:2]) 
+                    for j in range(d.shape[0])]) <= thresh

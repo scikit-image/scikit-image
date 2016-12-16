@@ -186,7 +186,6 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     # a geometric progression of standard deviations for gaussian kernels
     sigma_list = np.array([min_sigma * (sigma_ratio ** i)
                            for i in range(k + 1)])
-
     image_cube = scale_space_dog(image, min_sigma, max_sigma, sigma_ratio)
 
     # local_maxima = get_local_maxima(image_cube, threshold)

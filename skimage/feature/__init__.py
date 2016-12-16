@@ -21,7 +21,8 @@ from .censure import CENSURE
 from .orb import ORB
 from .match import match_descriptors
 from .util import plot_matches
-from .blob import blob_dog, blob_log, blob_doh
+from .blob import (blob_dog, blob_log, blob_doh, 
+                   scale_space_dog, scale_space_log)
 
 
 __all__ = ['canny',
@@ -57,4 +58,6 @@ __all__ = ['canny',
            'plot_matches',
            'blob_dog',
            'blob_doh',
-           'blob_log']
+           'blob_log',
+           'scale_space_dog',
+           'scale_space_log']
