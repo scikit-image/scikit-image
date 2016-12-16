@@ -79,6 +79,11 @@ def test_text():
     data.text()
 
 
+def test_stereo_motorcycle():
+    """ Test that "stereo_motorcycle" image can be loaded. """
+    data.stereo_motorcycle()
+
+
 def test_binary_blobs():
     blobs = data.binary_blobs(length=128)
     assert_almost_equal(blobs.mean(), 0.5, decimal=1)
