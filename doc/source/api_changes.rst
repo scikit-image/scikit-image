@@ -41,6 +41,7 @@ Version 0.11
 - The ``skimage.filter`` subpackage has been renamed to ``skimage.filters``.
 - Some edge detectors returned values greater than 1--their results are now
   appropriately scaled with a factor of ``sqrt(2)``.
+- The `normalise` parameter of `skimage.features.hog` is deprecated.
 
 Version 0.10
 ------------
