@@ -17,6 +17,8 @@ Version 0.13
   0.15, will be set to `True`.
 - Parameters ``ntiles_x``, ``ntiles_y`` have been removed from
   ``skimage.exposure.equalize_adapthist``.
+- The ``freeimage`` io plugin is no longer supported, and will use ``imageio``
+  instead.
 
 Version 0.12
 ------------
