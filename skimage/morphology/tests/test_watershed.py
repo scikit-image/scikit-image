@@ -447,7 +447,7 @@ class TestWatershed(unittest.TestCase):
         ws = watershed(data, marker, connectivity=2, watershedline=True)
         for i, res in zip(range(4), [34,74,74,74]):
             self.assertTrue(np.sum(ws==i)==res)
-        
+
 
 
 def test_compact_watershed():

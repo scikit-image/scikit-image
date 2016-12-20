@@ -12,7 +12,6 @@ Original author: Lee Kamentsky
 import numpy as np
 cimport numpy as cnp
 cimport cython
-import pdb
 
 ctypedef cnp.int32_t DTYPE_INT32_t
 ctypedef cnp.int8_t DTYPE_BOOL_t
@@ -81,8 +80,8 @@ def watershed_raveled(cnp.float64_t[::1] image,
         The output array, which must already contain nonzero entries at all the
         seed locations.
     wsl : bool
-        Parameter indicating whether the watershed line is to be calculated or not. 
-        For wsl=False, the watershed line is not calculated. 
+        Parameter indicating whether the watershed line is to be calculated.
+        If wsl is set to False, the watershed line is not calculated.
     """
     cdef Heapitem elem
     cdef Heapitem new_elem
@@ -91,7 +90,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
     cdef Py_ssize_t age = 1
     cdef Py_ssize_t index = 0
     cdef DTYPE_INT32_t wsl_label=-1
-    
+
     cdef Heap *hp = <Heap *> heap_from_numpy2()
 
     for i in range(marker_locations.shape[0]):
@@ -104,19 +103,20 @@ def watershed_raveled(cnp.float64_t[::1] image,
         if wsl:            
             if wsl_label >= output[index]:
                 wsl_label = output[index] - 1
-    
+
     while hp.items > 0:
         heappop(hp, &elem)
 
-        # this can happen if the same pixel entered the queue several times before being processed.
+        # this can happen if the same pixel entered the queue 
+        # several times before being processed.
         if wsl and output[elem.index] == wsl_label:
             # wsl labels are not propagated.
             continue
-        
+
         if output[elem.index] and elem.index != elem.source:
             # non-marker, already visited from another neighbor
             continue
-        
+
         output[elem.index] = output[elem.source]
         for i in range(nneighbors):            
             # get the flattened address of the neighbor
@@ -130,7 +130,8 @@ def watershed_raveled(cnp.float64_t[::1] image,
                 continue
 
             if output[index]:
-                # neighbor has a label (but not wsl_label): the neighbor is not added to the queue. 
+                # neighbor has a label (but not wsl_label): 
+                # the neighbor is not added to the queue. 
                 if wsl:
                     # if the label of the neighbor is different
                     # from the label of the pixel taken from the queue, 
@@ -138,7 +139,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
                     if output[index] != output[elem.index]:
                         output[elem.index] = wsl_label
                 continue
-            
+
             age += 1
             new_elem.value = image[index]
             if compactness > 0:
@@ -149,7 +150,5 @@ def watershed_raveled(cnp.float64_t[::1] image,
             new_elem.source = elem.source
             
             heappush(hp, &new_elem)
-    
-    heap_done(hp)
 
-    
+    heap_done(hp)
