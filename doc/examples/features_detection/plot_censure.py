@@ -41,9 +41,4 @@ ax[1].scatter(detector.keypoints[:, 1], detector.keypoints[:, 0],
               2 ** detector.scales, facecolors='none', edgecolors='r')
 ax[1].set_title('Transformed Image')
 
-print('Transformed Image using AffineTransform parameters:')
-print('\tscale = 1.5')
-print('\trotation 28.6 degrees')
-print('\ttranslation X = 150  translation Y = -200')
-
 plt.show()
