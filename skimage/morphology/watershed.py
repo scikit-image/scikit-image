@@ -157,7 +157,7 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
         Use compact watershed [3]_ with given compactness parameter.
         Higher values result in more regularly-shaped watershed basins.
     watershedline: bool, optional (default=False)
-        For watershedline=True, a one-pixel wide line separates the regions 
+        If watershedline is True, a one-pixel wide line separates the regions
         obtained by the watershed algorithm. The line has the label 0.  
 
     Returns
@@ -258,7 +258,7 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
     _watershed.watershed_raveled(image.ravel(),
                                  marker_locations, flat_neighborhood,
                                  mask, image_strides, compactness,
-                                 output.ravel(), 
+                                 output.ravel(),
                                  watershedline)
 
     output = crop(output, pad_width, copy=True)
