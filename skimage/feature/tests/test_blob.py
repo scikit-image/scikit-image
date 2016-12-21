@@ -217,9 +217,10 @@ def test_blob_overlap():
 
 def test_scale_space_dog():
     img = np.ones((512, 512))
-    dog = scale_space_dog(img)
+    image_cube = scale_space_dog(img)
     for i in range(4):
-        assert_almost_equal(dog[:,:,i], dog[:,:,i+1])
+        assert_almost_equal(image_cube[:, :, i], 
+                            image_cube[:, :, i + 1])
 
     xs, ys = circle(400, 130, 20)
     img[xs, ys] = 255
@@ -231,22 +232,23 @@ def test_scale_space_dog():
     img[xs, ys] = 255
     
     thresh = 2
-    dog = scale_space_dog(img, 5, 50)
-    d = blob_dog(dog[:,:,1], min_sigma=5, max_sigma=50)
+    image_cube = scale_space_dog(img, 5, 50)
+    dog = image_cube[:, :, 1]
     blobs = blob_dog(img, min_sigma=5, max_sigma=50)
-    for i in blobs:
-        assert min([np.linalg.norm(i[:2] - d[j][:2]) 
-            for j in range(d.shape[0])]) <= thresh
+    dog_blobs = blob_dog(dog, min_sigma=5, max_sigma=50)
+    for blob in blobs:
+        assert min([np.linalg.norm(blob[:2] - dog_blobs[i][:2]) 
+            for i in range(dog_blobs.shape[0])]) <= thresh
 
 
 def test_scale_space_log():
     img = np.ones((256, 256)) * 255
-    log = scale_space_log(img, min_sigma=5, max_sigma=20)
+    image_cube = scale_space_log(img, min_sigma=5, max_sigma=20)
+    zero = np.zeros((256, 256))
     for i in range(10):
-        l = log[:,:,i] - log[:,:,i].mean()
-        zero = np.zeros((256, 256))
-        print(l)
-        assert_almost_equal(l, zero)
+        log = image_cube[:, :, i]
+        demeaned_log = log - log.mean()
+        assert_almost_equal(demeaned_log, zero)
 
     xs, ys = circle(200, 65, 5)
     img[xs, ys] = 255
@@ -261,8 +263,7 @@ def test_scale_space_log():
     img[xs, ys] = 255
 
     blobs = blob_log(img, min_sigma=5, max_sigma=20, threshold=1)
-    d = blob_log(log[:,:,2], min_sigma=5, max_sigma=20, threshold=1)
+    log_blobs = blob_log(image_cube[:,:,2], min_sigma=5, max_sigma=20, 
+                         threshold=1)
     thresh = 5
-    for i in blobs:
-        assert min([np.linalg.norm(i[:2] - d[j][:2]) 
-                    for j in range(d.shape[0])]) <= thresh
+    assert min([np.linalg.norm(blobs - log_blobs)]) <= thresh
