@@ -286,11 +286,12 @@ def save_figures(image_path, fig_count, gallery_conf):
     # horizontal list or a single rst call to 'image'.
     images_rst = ""
     if len(figure_list) == 1:
-        figure_name = figure_list[0]
+        figure_name = os.path.relpath(figure_list[0], gallery_conf['src_dir'])
         images_rst = SINGLE_IMAGE % figure_name.lstrip('/')
     elif len(figure_list) > 1:
         images_rst = HLIST_HEADER
         for figure_name in figure_list:
+            figure_name = os.path.relpath(figure_name, gallery_conf['src_dir'])
             images_rst += HLIST_IMAGE_TEMPLATE % figure_name.lstrip('/')
 
     return figure_list, images_rst
@@ -381,7 +382,10 @@ def generate_dir_rst(src_dir, target_dir, gallery_conf, seen_backrefs):
         print(80 * '_')
         return "", []  # because string is an expected return type
 
-    fhindex = open(os.path.join(src_dir, 'README.txt')).read()
+    # suppress "not included in TOCTREE" sphinx warnings
+    fhindex = ":orphan:\n\n"
+    with open(os.path.join(src_dir, 'README.txt')) as fid:
+        fhindex += fid.read()
     # Add empty lines to avoid bug in issue #165
     fhindex += "\n\n"
 
@@ -391,6 +395,7 @@ def generate_dir_rst(src_dir, target_dir, gallery_conf, seen_backrefs):
                       if fname.endswith('.py')]
     entries_text = []
     computation_times = []
+    build_target = os.path.relpath(target_dir, gallery_conf['src_dir'])
     for fname in sorted_listdir:
         amount_of_code, time_elapsed = \
             generate_file_rst(fname, target_dir, src_dir, gallery_conf)
@@ -399,12 +404,12 @@ def generate_dir_rst(src_dir, target_dir, gallery_conf, seen_backrefs):
         intro = extract_intro(new_fname)
         write_backreferences(seen_backrefs, gallery_conf,
                              target_dir, fname, intro)
-        this_entry = _thumbnail_div(target_dir, fname, intro) + """
+        this_entry = _thumbnail_div(build_target, fname, intro) + """
 
 .. toctree::
    :hidden:
 
-   /%s/%s\n""" % (target_dir, fname[:-3])
+   /%s/%s\n""" % (build_target, fname[:-3])
         entries_text.append((amount_of_code, this_entry))
 
     # sort to have the smallest entries in the beginning
@@ -457,8 +462,8 @@ def execute_code_block(code_block, example_globals,
         if my_stdout:
             stdout = CODE_OUTPUT.format(indent(my_stdout, u' ' * 4))
         os.chdir(cwd)
-        fig_list, images_rst = save_figures(
-            block_vars['image_path'], block_vars['fig_count'], gallery_conf)
+        fig_list, images_rst = save_figures(block_vars['image_path'],
+                                            block_vars['fig_count'], gallery_conf)
         fig_num = len(fig_list)
 
     except Exception:
@@ -537,9 +542,11 @@ def generate_file_rst(fname, target_dir, src_dir, gallery_conf):
 
     base_image_name = os.path.splitext(fname)[0]
     image_fname = 'sphx_glr_' + base_image_name + '_{0:03}.png'
+    build_image_dir = os.path.relpath(image_dir, gallery_conf['src_dir'])
     image_path_template = os.path.join(image_dir, image_fname)
 
-    ref_fname = example_file.replace(os.path.sep, '_')
+    ref_fname = os.path.relpath(example_file, gallery_conf['src_dir'])
+    ref_fname = ref_fname.replace(os.path.sep, '_')
     example_rst = """\n\n.. _sphx_glr_{0}:\n\n""".format(ref_fname)
 
     filename_pattern = gallery_conf.get('filename_pattern')
@@ -564,7 +571,8 @@ def generate_file_rst(fname, target_dir, src_dir, gallery_conf):
     time_elapsed = 0
     block_vars = {'execute_script': execute_script, 'fig_count': 0,
                   'image_path': image_path_template, 'src_file': src_file}
-    print('Executing file %s' % src_file)
+    if block_vars['execute_script']:
+        print('Executing file %s' % src_file)
     for blabel, bcontent in script_blocks:
         if blabel == 'code':
             code_output, rtime = execute_code_block(bcontent,
@@ -610,6 +618,7 @@ def generate_file_rst(fname, target_dir, src_dir, gallery_conf):
         example_rst += SPHX_GLR_SIG
         f.write(example_rst)
 
-    print("{0} ran in : {1:.2g} seconds\n".format(src_file, time_elapsed))
+    if block_vars['execute_script']:
+        print("{0} ran in : {1:.2g} seconds\n".format(src_file, time_elapsed))
 
     return amount_of_code, time_elapsed

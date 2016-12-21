@@ -73,6 +73,7 @@ def generate_gallery_rst(app):
     Start the sphinx-gallery configuration and recursively scan the examples
     directories in order to populate the examples gallery
     """
+    print('Generating gallery')
     try:
         plot_gallery = eval(app.builder.config.plot_gallery)
     except TypeError:
@@ -85,6 +86,7 @@ def generate_gallery_rst(app):
         abort_on_example_error=app.builder.config.abort_on_example_error)
 
     # this assures I can call the config in other places
+    gallery_conf['src_dir'] = app.builder.srcdir
     app.config.sphinx_gallery_conf = gallery_conf
     app.config.html_static_path.append(glr_path_static())
 
@@ -98,20 +100,18 @@ def generate_gallery_rst(app):
     if not isinstance(gallery_dirs, list):
         gallery_dirs = [gallery_dirs]
 
-    mod_examples_dir = os.path.relpath(gallery_conf['mod_example_dir'],
-                                       app.builder.srcdir)
+    mod_examples_dir = os.path.join(
+        app.builder.srcdir, gallery_conf['mod_example_dir'])
     seen_backrefs = set()
 
     computation_times = []
 
     # cd to the appropriate directory regardless of sphinx configuration
     working_dir = os.getcwd()
-    os.chdir(app.builder.srcdir)
+    # os.chdir(app.builder.srcdir)
     for examples_dir, gallery_dir in zip(examples_dirs, gallery_dirs):
-        examples_dir = os.path.relpath(examples_dir,
-                                       app.builder.srcdir)
-        gallery_dir = os.path.relpath(gallery_dir,
-                                      app.builder.srcdir)
+        examples_dir = os.path.join(app.builder.srcdir, examples_dir)
+        gallery_dir = os.path.join(app.builder.srcdir, gallery_dir)
 
         for workdir in [examples_dir, gallery_dir, mod_examples_dir]:
             if not os.path.exists(workdir):
@@ -126,7 +126,8 @@ def generate_gallery_rst(app):
         if this_fhindex == "":
             raise FileNotFoundError("Main example directory {0} does not "
                                     "have a README.txt file. Please write "
-                                    "one to introduce your gallery.".format(examples_dir))
+                                    "one to introduce your gallery."
+                                    .format(examples_dir))
 
         computation_times += this_computation_times
 
@@ -151,12 +152,13 @@ def generate_gallery_rst(app):
     # Back to initial directory
     os.chdir(working_dir)
 
-    print("Computation time summary:")
-    for time_elapsed, fname in sorted(computation_times)[::-1]:
-        if time_elapsed is not None:
-            print("\t- %s : %.2g sec" % (fname, time_elapsed))
-        else:
-            print("\t- %s : not run" % fname)
+    if gallery_conf['plot_gallery']:
+        print("Computation time summary:")
+        for time_elapsed, fname in sorted(computation_times)[::-1]:
+            if time_elapsed is not None:
+                print("\t- %s : %.2g sec" % (fname, time_elapsed))
+            else:
+                print("\t- %s : not run" % fname)
 
 
 def touch_empty_backreferences(app, what, name, obj, options, lines):
@@ -188,32 +190,34 @@ def sumarize_failing_examples(app, exception):
         return
 
     gallery_conf = app.config.sphinx_gallery_conf
-    failing_examples = set([os.path.normpath(path) for path in
-                            gallery_conf['failing_examples']])
-    expected_failing_examples = set([os.path.normpath(path) for path in
+    failing_examples = {os.path.normpath(path): traceback
+                        for path, traceback in gallery_conf['failing_examples'].items()}
+
+    expected_failing_examples = set([os.path.normpath(os.path.join(app.srcdir, path))
+                                     for path in
                                      gallery_conf['expected_failing_examples']])
 
-    examples_expected_to_fail = failing_examples.intersection(
+    examples_expected_to_fail = set(failing_examples.keys()).intersection(
         expected_failing_examples)
     expected_fail_msg = []
     if examples_expected_to_fail:
         expected_fail_msg.append("Examples failing as expected:")
         for fail_example in examples_expected_to_fail:
             expected_fail_msg.append(fail_example + ' failed leaving traceback:\n' +
-                                     gallery_conf['failing_examples'][fail_example] + '\n')
+                                     failing_examples[fail_example] + '\n')
         print("\n".join(expected_fail_msg))
 
-    examples_not_expected_to_fail = failing_examples.difference(
+    examples_not_expected_to_fail = set(failing_examples.keys()).difference(
         expected_failing_examples)
     fail_msgs = []
     if examples_not_expected_to_fail:
         fail_msgs.append("Unexpected failing examples:")
         for fail_example in examples_not_expected_to_fail:
             fail_msgs.append(fail_example + ' failed leaving traceback:\n' +
-                             gallery_conf['failing_examples'][fail_example] + '\n')
+                             failing_examples[fail_example] + '\n')
 
     examples_not_expected_to_pass = expected_failing_examples.difference(
-        failing_examples)
+        failing_examples.keys())
     if examples_not_expected_to_pass:
         fail_msgs.append("Examples expected to fail, but not failling:\n" +
                          "Please remove these examples from\n" +
