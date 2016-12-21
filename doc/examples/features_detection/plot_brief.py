@@ -52,22 +52,10 @@ plt.gray()
 plot_matches(ax[0], img1, img2, keypoints1, keypoints2, matches12)
 ax[0].axis('off')
 ax[0].set_title("Original Image VS Transformed Image")
-print('Transformed Image using AffineTransform parameters:')
-print('\tscaleX = 1.2')
-print('\tscaleY = 1.2')
-print('\ttranslateX = 0')
-print('\ttranslateY = -100')
-
 
 plot_matches(ax[1], img1, img3, keypoints1, keypoints3, matches13)
 ax[1].axis('off')
 ax[1].set_title("Original Image VS Transformed Image")
-print('Transformed Image using AffineTransform parameters:')
-print('\tscaleX = 1.2')
-print('\tscaleY = 1.2')
-print('\trotation = 25 degrees')
-print('\ttranslateX = 0')
-print('\ttranslateY = -100')
 
 
 plt.show()
