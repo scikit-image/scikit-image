@@ -157,8 +157,7 @@ class ImageCollection(object):
                  **load_func_kwargs):
         """Load and manage a collection of images."""
         if isinstance(load_pattern, six.string_types):
-            load_pattern = load_pattern.replace(os.pathsep, ':')
-            load_pattern = load_pattern.split(':')
+            load_pattern = load_pattern.split(os.pathsep)
             self._files = []
             for pattern in load_pattern:
                 self._files.extend(glob(pattern))

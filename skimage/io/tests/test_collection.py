@@ -85,7 +85,7 @@ class TestImageCollection():
         def load_fn(x):
             return x
 
-        ic = ImageCollection(':'.join(self.pattern), load_func=load_fn)
+        ic = ImageCollection(os.pathsep.join(self.pattern), load_func=load_fn)
         assert_equal(ic[0], self.pattern[0])
 
     def test_concatenate(self):
