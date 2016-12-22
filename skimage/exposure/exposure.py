@@ -505,3 +505,49 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
     ratio = (limits[1] - limits[0]) / (dlimits[1] - dlimits[0])
 
     return ratio < fraction_threshold
+
+
+def hist_map(old_hist, new_hist):
+    """
+    Build a function that maps from one distribution onto another.
+
+    Parameters
+    ----------
+    old_hist : tuple
+        Histogram arrays ``(count, bins)`` like those from ``numpy.histogram``,
+        where bins give edges, such that ``len(bins) == 1 + len(counts)``.
+    new_hist : tuple
+        Histogram arrays ``(count, bins)`` like those from ``numpy.histogram``,
+        where bins give edges, such that ``len(bins) == 1 + len(counts)``.
+
+    Returns
+    -------
+    f : function
+        signature is ``f(arr)``
+    """
+    old_counts, old_bins = old_hist
+    new_counts, new_bins = new_hist
+
+    # validate input
+    if 1 + len(old_counts) != len(old_bins):
+        raise ValueError("The input old_hist is invalid. "
+                         "Length of bins should be 1 + length of counts")
+    if 1 + len(new_counts) != len(new_bins):
+        raise ValueError("The input new_hist is invalid. "
+                         "Length of bins should be 1 + length of counts")
+
+    # cumulative distribution functions
+    old_cdf = np.insert(np.cumsum(old_counts), 0, 0) / np.sum(old_counts)
+    new_cdf = np.insert(np.cumsum(new_counts), 0, 0) / np.sum(new_counts)
+
+    def f(arr):
+        """
+        Rescale values in ``arr`` from old distribution to new.
+        """
+        # Where in the old cdf did value(s) in arr fall?
+        old_y = np.interp(arr, old_bins, old_cdf)
+
+        # Find the value at the corresponding position in the new cdf.
+        return np.interp(old_y, new_cdf, new_bins)
+
+    return f

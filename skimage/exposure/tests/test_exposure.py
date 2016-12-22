@@ -7,7 +7,7 @@ from numpy.testing import (assert_array_equal, assert_array_almost_equal,
 import skimage
 from skimage import data
 from skimage import exposure
-from skimage.exposure.exposure import intensity_range
+from skimage.exposure.exposure import intensity_range, hist_map
 from skimage.color import rgb2gray
 from skimage.util.dtype import dtype_range
 from skimage._shared._warnings import expected_warnings
@@ -495,6 +495,87 @@ def test_is_low_contrast():
     image = (image.astype(np.uint16)) * 2**8
     assert exposure.is_low_contrast(image)
     assert not exposure.is_low_contrast(image, upper_percentile=100)
+
+
+def test_hist_map():
+    # check that number of bins must be 1 + number of counts
+    assert_raises(ValueError,
+        hist_map, ([1, 2, 3],  [1, 2, 3]),  ([1, 2, 3],  [1, 2, 3, 4]))
+    assert_raises(ValueError,
+        hist_map, ([1, 2, 3],  [1, 2, 3, 4]),  ([1, 2, 3],  [1, 2, 3]))
+
+    # trivial case: map to self
+    old = ([0, 0, 1, 1], [0, 1, 2, 3, 4])
+    new = ([0, 0, 1, 1], [0, 1, 2, 3, 4])
+    f = hist_map(old, new)
+    assert f(1.5) == 2
+    assert f(2) == 2
+    assert f(2.3) == 2.3
+    assert f(2.5) == 2.5
+    assert f(2.6) == 2.6
+    assert f(3) == 3
+    assert f(3.5) == 3.5
+    assert f(4) == 4
+    # limits are bin edges
+    assert f(-1) == 2
+    assert f(1) == 2
+    assert f(10) == 4
+
+    # map a step function to another nonoverlapping step function to its left
+    old = ([1, 1], [2, 3, 4])
+    new = ([1, 1], [0, 1, 2])
+    f = hist_map(old, new)
+    assert f(-1) == 0
+    assert f(0) == 0
+    assert f(1) == 0
+    assert f(2) == 0
+    assert np.allclose(f(2.01), 0.01)
+    assert np.allclose(f(2.49), 0.49)
+    assert np.allclose(f(2.51), 0.51)
+    assert np.allclose(f(2.99), 0.99)
+    assert f(3) == 1
+    assert np.allclose(f(3.01), 1.01)
+    assert np.allclose(f(3.49), 1.49)
+    assert np.allclose(f(3.51), 1.51)
+    assert np.allclose(f(3.99), 1.99)
+    assert f(4) == 2
+    assert f(4.01) == 2
+    assert f(100) == 2
+
+    # map a step function to another nonoverlapping step function to its right
+    old = ([1, 1], [0, 1, 2])
+    new = ([1, 1], [2, 3, 4])
+    f = hist_map(old, new)
+    assert f(-1) == 2
+    assert f(0) == 2
+    assert np.allclose(f(0.01), 2.01)
+    assert np.allclose(f(0.5), 2.5)
+    assert f(1) == 3
+    assert f(2) == 4
+    assert f(10) == 4
+
+    # map a 'valley' to a 'peak'
+    old = ([1, 0, 1], [0, 1, 2, 3])
+    new = ([1], [1, 2])  # has intentionally different normalization
+    f = hist_map(old, new)
+    assert np.allclose(f(0), 1)
+    assert np.allclose(f(0.5), 1.25)
+    assert np.allclose(f(1), 1.5)
+    assert np.allclose(f(1.5), 1.5)
+    assert np.allclose(f(2), 1.5)
+    assert np.allclose(f(2.5), 1.75)
+    assert np.allclose(f(3), 2)
+
+    # map a 'peak' to a 'valley'
+    old = ([1], [1, 2])
+    new = ([1, 0, 1], [0, 1, 2, 3])
+    f = hist_map(old, new)
+    assert np.allclose(f(1), 0)
+    assert np.allclose(f(1.25), 0.5)
+    assert np.allclose(f(1.4999999), 1)
+    assert np.allclose(f(1.5), 2)
+    assert np.allclose(f(1.75), 2.5)
+    assert np.allclose(f(2), 3)
 
 
 if __name__ == '__main__':
