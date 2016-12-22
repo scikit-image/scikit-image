@@ -1,6 +1,8 @@
 Remember to list any API changes below in `doc/source/api_changes.txt`.
 
-
+Version 0.13
+------------
+* Update Sphinx-gallery to a well identified version. See #2410.
 
 Version 0.14
 ------------
