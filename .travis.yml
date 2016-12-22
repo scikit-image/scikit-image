@@ -3,7 +3,7 @@
 # After changing this file, check it on:
 #   http://yaml-online-parser.appspot.com/
 
-# See doc/travis_notes.txt for some guidelines
+# See tools/travis_notes.txt for some guidelines
 
 language: python
 sudo: false
