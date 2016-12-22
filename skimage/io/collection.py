@@ -258,6 +258,7 @@ class ImageCollection(object):
                         kwargs['img_num'] = img_num
                     try:
                         self.data[idx] = self.load_func(fname, **kwargs)
+                    # Account for functions that do not accept an img_num kwarg
                     except TypeError as e:
                         if "unexpected keyword argument 'img_num'" in str(e):
                             del kwargs['img_num']
