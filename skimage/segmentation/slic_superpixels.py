@@ -4,7 +4,6 @@ import collections as coll
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import warn
 from ..util import img_as_float, regular_grid
 from ..segmentation._slic import (_slic_cython,
                                   _enforce_label_connectivity_cython)

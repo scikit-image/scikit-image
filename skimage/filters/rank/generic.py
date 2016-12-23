@@ -3,8 +3,8 @@
 General Description
 -------------------
 
-These filters compute the local histogram at each pixel, using a sliding window 
-similar to the method described in [1]_. A histogram is built using a moving 
+These filters compute the local histogram at each pixel, using a sliding window
+similar to the method described in [1]_. A histogram is built using a moving
 window in order to limit redundant computation. The moving window follows a
 snake-like path:
 

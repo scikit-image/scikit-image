@@ -126,10 +126,10 @@ def convert_colorspace(arr, fromspace, tospace):
     """
     fromdict = {'RGB': lambda im: im, 'HSV': hsv2rgb, 'RGB CIE': rgbcie2rgb,
                 'XYZ': xyz2rgb, 'YUV': yuv2rgb, 'YIQ': yiq2rgb,
-                'YPbPr': ypbpr2rgb, 'YCbCr': ycbcr2rgb }
+                'YPbPr': ypbpr2rgb, 'YCbCr': ycbcr2rgb}
     todict = {'RGB': lambda im: im, 'HSV': rgb2hsv, 'RGB CIE': rgb2rgbcie,
               'XYZ': rgb2xyz, 'YUV': rgb2yuv, 'YIQ': rgb2yiq,
-              'YPbPr': rgb2ypbpr, 'YCbCr': rgb2ycbcr }
+              'YPbPr': rgb2ypbpr, 'YCbCr': rgb2ycbcr}
 
     fromspace = fromspace.upper()
     tospace = tospace.upper()

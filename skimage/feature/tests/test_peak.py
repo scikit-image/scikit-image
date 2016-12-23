@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.testing import (assert_array_almost_equal as assert_close,
-                           assert_equal, assert_raises)
+                           assert_equal)
 from scipy import ndimage as ndi
 from skimage.feature import peak
 
@@ -173,19 +173,19 @@ def test_indices_with_labels():
 
 
 def test_ndarray_indices_false():
-    nd_image = np.zeros((5,5,5))
-    nd_image[2,2,2] = 1
+    nd_image = np.zeros((5, 5, 5))
+    nd_image[2, 2, 2] = 1
     peaks = peak.peak_local_max(nd_image, min_distance=1, indices=False)
     assert (peaks == nd_image.astype(np.bool)).all()
 
 
 def test_ndarray_exclude_border():
-    nd_image = np.zeros((5,5,5))
-    nd_image[[1,0,0],[0,1,0],[0,0,1]] = 1
-    nd_image[3,0,0] = 1
-    nd_image[2,2,2] = 1
+    nd_image = np.zeros((5, 5, 5))
+    nd_image[[1, 0, 0], [0, 1, 0], [0, 0, 1]] = 1
+    nd_image[3, 0, 0] = 1
+    nd_image[2, 2, 2] = 1
     expected = np.zeros_like(nd_image, dtype=np.bool)
-    expected[2,2,2] = True
+    expected[2, 2, 2] = True
     expectedNoBorder = nd_image > 0
     result = peak.peak_local_max(nd_image, min_distance=2,
         exclude_border=2, indices=False)

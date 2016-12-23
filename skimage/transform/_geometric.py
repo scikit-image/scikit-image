@@ -2,9 +2,8 @@ from __future__ import division
 import math
 import numpy as np
 from scipy import spatial
-from scipy import ndimage as ndi
 
-from .._shared.utils import get_bound_method_class, safe_as_int, warn
+from .._shared.utils import get_bound_method_class, safe_as_int
 
 
 def _to_ndimage_mode(mode):

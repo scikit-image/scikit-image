@@ -525,7 +525,7 @@ def laplace(image, ksize=3, mask=None):
 
     Notes
     -----
-    The Laplacian operator is generated using the function 
+    The Laplacian operator is generated using the function
     skimage.restoration.uft.laplacian().
 
     """

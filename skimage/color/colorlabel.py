@@ -52,11 +52,11 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
 
     # map labels to their ranks among all labels from small to large
     unique_labels, mapped_labels = np.unique(label, return_inverse=True)
-    
+
     # get rank of bg_label
     bg_label_rank_list = mapped_labels[label.flat == bg_label]
 
-    # The rank of each label is the index of the color it is matched to in 
+    # The rank of each label is the index of the color it is matched to in
     # color cycle. bg_label should always be mapped to the first color, so
     # its rank must be 0. Other labels should be ranked from small to large
     # from 1.

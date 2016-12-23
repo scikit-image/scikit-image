@@ -3,8 +3,7 @@ import numpy as np
 from numpy.testing import assert_equal
 from scipy.ndimage import binary_dilation, binary_erosion
 import skimage.feature as F
-from skimage import filters, data
-from skimage import img_as_float
+from skimage import data, img_as_float
 
 
 class TestCanny(unittest.TestCase):
@@ -71,7 +70,7 @@ class TestCanny(unittest.TestCase):
         self.assertTrue(np.all(result1 == result2))
 
     def test_use_quantiles(self):
-        image = img_as_float(data.camera()[::50,::50])
+        image = img_as_float(data.camera()[::50, ::50])
 
         # Correct output produced manually with quantiles
         # of 0.8 and 0.6 for high and low respectively
@@ -92,7 +91,7 @@ class TestCanny(unittest.TestCase):
         assert_equal(result, correct_output)
 
     def test_invalid_use_quantiles(self):
-        image = img_as_float(data.camera()[::50,::50])
+        image = img_as_float(data.camera()[::50, ::50])
 
         self.assertRaises(ValueError, F.canny, image, use_quantiles=True,
                           low_threshold=0.5, high_threshold=3.6)

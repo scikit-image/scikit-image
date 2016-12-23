@@ -160,7 +160,7 @@ def assert_nD(array, ndim, arg_name='image'):
 
     """
     array = np.asanyarray(array)
-    msg_incorrect_dim  = "The parameter `%s` must be a %s-dimensional array"
+    msg_incorrect_dim = "The parameter `%s` must be a %s-dimensional array"
     msg_empty_array = "The parameter `%s` cannot be an empty array"
     if isinstance(ndim, int):
         ndim = [ndim]
