@@ -347,8 +347,13 @@ class CircleModel(BaseModel):
         data : (N, 2) array
             N points with ``(x, y)`` coordinates, respectively.
         init_params : tuple of 3 values, optional
+<<<<<<< HEAD
             (x_center, y_center, r) is initial guess of parameters.
             If they are not specified initial guess use a circle model.
+=======
+            (x_center, y_center, r) is an initial guess of parameters.
+            If None, the initial guess uses a circle model based on mean values.
+>>>>>>> 2b5ebdcc18561c338cd4e09b9db333e0007c6b43
 
         Returns
         -------
@@ -494,8 +499,13 @@ class EllipseModel(BaseModel):
         data : (N, 2) array
             N points with ``(x, y)`` coordinates, respectively.
         init_params : tuple of 5 values, optional
+<<<<<<< HEAD
             (x_center, y_center, a, b, theta) is initial guess of parameters.
             If they are not specified initial guess use a circle model.
+=======
+            (x_center, y_center, a, b, theta) is an initial guess of parameters.
+            If None, the initial guess uses a circle model based on mean values.
+>>>>>>> 2b5ebdcc18561c338cd4e09b9db333e0007c6b43
 
         Returns
         -------
@@ -789,6 +799,10 @@ def ransac(data, model_class, min_samples, residual_threshold,
         by `np.random`.
     init_inliers : [list, tuple of] (N) array of bool or None, optional
         Initial samples selection for model estimation
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 2b5ebdcc18561c338cd4e09b9db333e0007c6b43
 
     Returns
     -------
