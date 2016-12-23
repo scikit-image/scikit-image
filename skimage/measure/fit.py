@@ -26,7 +26,6 @@ class BaseModel(object):
 
 
 class LineModel(BaseModel):
-
     """Total least squares estimator for 2D lines.
 
     Lines are parameterized using polar coordinates as functional model::
@@ -320,7 +319,6 @@ class LineModelND(BaseModel):
 
 
 class CircleModel(BaseModel):
-
     """Total least squares estimator for 2D circles.
 
     The functional model of the circle is::
@@ -455,7 +453,6 @@ class CircleModel(BaseModel):
 
 
 class EllipseModel(BaseModel):
-
     """Total least squares estimator for 2D ellipses.
 
     The functional model of the ellipse is::
