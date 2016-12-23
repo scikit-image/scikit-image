@@ -97,13 +97,22 @@ def identify_names(code):
     e.HelloWorld HelloWorld d d
     """
     finder = NameFinder()
-    finder.visit(ast.parse(code))
+    try:
+        finder.visit(ast.parse(code))
+    except SyntaxError:
+        return {}
 
     example_code_obj = {}
     for name, full_name in finder.get_mapping():
         # name is as written in file (e.g. np.asarray)
         # full_name includes resolved import path (e.g. numpy.asarray)
-        module, attribute = full_name.rsplit('.', 1)
+        splitted = full_name.rsplit('.', 1)
+        if len(splitted) == 1:
+            # module without attribute. This is not useful for
+            # backreferences
+            continue
+
+        module, attribute = splitted
         # get shortened module name
         module_short = get_short_module_name(module, attribute)
         cobj = {'name': attribute, 'module': module,
@@ -127,6 +136,8 @@ def scan_used_functions(example_file, gallery_conf):
     return backrefs
 
 
+# XXX This figure:: uses a forward slash even on Windows, but the op.join's
+# elsewhere will use backslashes...
 THUMBNAIL_TEMPLATE = """
 .. raw:: html
 
@@ -165,9 +176,11 @@ def write_backreferences(seen_backrefs, gallery_conf,
     """Writes down back reference files, which include a thumbnail list
     of examples using a certain module"""
     example_file = os.path.join(target_dir, fname)
+    build_target = os.path.relpath(target_dir, gallery_conf['src_dir'])
     backrefs = scan_used_functions(example_file, gallery_conf)
     for backref in backrefs:
-        include_path = os.path.join(gallery_conf['mod_example_dir'],
+        include_path = os.path.join(gallery_conf['src_dir'],
+                                    gallery_conf['mod_example_dir'],
                                     '%s.examples' % backref)
         seen = backref in seen_backrefs
         with open(include_path, 'a' if seen else 'w') as ex_file:
@@ -175,6 +188,6 @@ def write_backreferences(seen_backrefs, gallery_conf,
                 heading = '\n\nExamples using ``%s``' % backref
                 ex_file.write(heading + '\n')
                 ex_file.write('^' * len(heading) + '\n')
-            ex_file.write(_thumbnail_div(target_dir, fname, snippet,
+            ex_file.write(_thumbnail_div(build_target, fname, snippet,
                                          is_backref=True))
             seen_backrefs.add(backref)

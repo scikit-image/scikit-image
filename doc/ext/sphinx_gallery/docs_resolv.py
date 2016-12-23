@@ -11,6 +11,8 @@ import re
 import shelve
 import sys
 
+from sphinx.util.console import fuchsia
+
 # Try Python 2 first, otherwise load from Python 3
 try:
     import cPickle as pickle
@@ -232,22 +234,34 @@ class SphinxDocLinkResolver(object):
                 fname_idx = value[cobj['name']][0]
 
         if fname_idx is not None:
-            fname = self._searchindex['filenames'][fname_idx] + '.html'
+            fname = self._searchindex['filenames'][fname_idx]
+            # In 1.5+ Sphinx seems to have changed from .rst.html to only
+            # .html extension in converted files. But URLs could be
+            # built with < 1.5 or >= 1.5 regardless of what we're currently
+            # building with, so let's just check both :(
+            fnames = [fname + '.html', os.path.splitext(fname)[0] + '.html']
+            for fname in fnames:
+                try:
+                    if self._is_windows:
+                        fname = fname.replace('/', '\\')
+                        link = os.path.join(self.doc_url, fname)
+                    else:
+                        link = posixpath.join(self.doc_url, fname)
 
-            if self._is_windows:
-                fname = fname.replace('/', '\\')
-                link = os.path.join(self.doc_url, fname)
+                    if hasattr(link, 'decode'):
+                        link = link.decode('utf-8', 'replace')
+
+                    if link in self._page_cache:
+                        html = self._page_cache[link]
+                    else:
+                        html = get_data(link, self.gallery_dir)
+                        self._page_cache[link] = html
+                except (HTTPError, URLError, IOError):
+                    pass
+                else:
+                    break
             else:
-                link = posixpath.join(self.doc_url, fname)
-
-            if hasattr(link, 'decode'):
-                link = link.decode('utf-8', 'replace')
-
-            if link in self._page_cache:
-                html = self._page_cache[link]
-            else:
-                html = get_data(link, self.gallery_dir)
-                self._page_cache[link] = html
+                raise
 
             # test if cobj appears in page
             comb_names = [cobj['module_short'] + '.' + cobj['name']]
@@ -317,19 +331,19 @@ class SphinxDocLinkResolver(object):
 
 def _embed_code_links(app, gallery_conf, gallery_dir):
     # Add resolvers for the packages for which we want to show links
-    working_dir = os.getcwd()
-    os.chdir(app.builder.srcdir)
     doc_resolvers = {}
+
+    src_gallery_dir = os.path.join(app.builder.srcdir, gallery_dir)
     for this_module, url in gallery_conf['reference_url'].items():
         try:
             if url is None:
                 doc_resolvers[this_module] = SphinxDocLinkResolver(
                     app.builder.outdir,
-                    gallery_dir,
+                    src_gallery_dir,
                     relative=True)
             else:
                 doc_resolvers[this_module] = SphinxDocLinkResolver(url,
-                                                                   gallery_dir)
+                                                                   src_gallery_dir)
 
         except HTTPError as e:
             print("The following HTTP Error has occurred:\n")
@@ -344,64 +358,78 @@ def _embed_code_links(app, gallery_conf, gallery_dir):
 
     html_gallery_dir = os.path.abspath(os.path.join(app.builder.outdir,
                                                     gallery_dir))
+
     # patterns for replacement
-    link_pattern = '<a href="%s">%s</a>'
+    link_pattern = ('<a href="%s" class="sphx-glr-code-links" '
+                    'tooltip="Link to documentation for %s">%s</a>')
     orig_pattern = '<span class="n">%s</span>'
     period = '<span class="o">.</span>'
 
-    for dirpath, _, filenames in os.walk(html_gallery_dir):
-        for fname in filenames:
-            print('\tprocessing: %s' % fname)
-            full_fname = os.path.join(html_gallery_dir, dirpath, fname)
-            subpath = dirpath[len(html_gallery_dir) + 1:]
-            pickle_fname = os.path.join(gallery_dir, subpath,
-                                        fname[:-5] + '_codeobj.pickle')
-            if os.path.exists(pickle_fname):
-                # we have a pickle file with the objects to embed links for
-                with open(pickle_fname, 'rb') as fid:
-                    example_code_obj = pickle.load(fid)
-                fid.close()
-                str_repl = {}
-                # generate replacement strings with the links
-                for name, cobj in example_code_obj.items():
-                    this_module = cobj['module'].split('.')[0]
-                    if this_module not in doc_resolvers:
-                        continue
+    # This could be turned into a generator if necessary, but should be okay
+    flat = [[dirpath, filename]
+            for dirpath, _, filenames in os.walk(html_gallery_dir)
+            for filename in filenames]
+    iterator = app.status_iterator(
+        flat, os.path.basename(html_gallery_dir), colorfunc=fuchsia,
+        length=len(flat), stringify_func=lambda x: os.path.basename(x[1]))
+    for dirpath, fname in iterator:
+        full_fname = os.path.join(html_gallery_dir, dirpath, fname)
+        subpath = dirpath[len(html_gallery_dir) + 1:]
+        pickle_fname = os.path.join(src_gallery_dir, subpath,
+                                    fname[:-5] + '_codeobj.pickle')
 
-                    try:
-                        link = doc_resolvers[this_module].resolve(cobj,
-                                                                  full_fname)
-                    except (HTTPError, URLError) as e:
-                        print("The following error has occurred:\n")
-                        print(repr(e))
-                        continue
+        if os.path.exists(pickle_fname):
+            # we have a pickle file with the objects to embed links for
+            with open(pickle_fname, 'rb') as fid:
+                example_code_obj = pickle.load(fid)
+            fid.close()
+            str_repl = {}
+            # generate replacement strings with the links
+            for name, cobj in example_code_obj.items():
+                this_module = cobj['module'].split('.')[0]
 
-                    if link is not None:
-                        parts = name.split('.')
-                        name_html = period.join(orig_pattern % part
-                                                for part in parts)
-                        str_repl[name_html] = link_pattern % (link, name_html)
-                # do the replacement in the html file
+                if this_module not in doc_resolvers:
+                    continue
 
-                # ensure greediness
-                names = sorted(str_repl, key=len, reverse=True)
-                expr = re.compile(r'(?<!\.)\b' +  # don't follow . or word
-                                  '|'.join(re.escape(name)
-                                           for name in names))
+                try:
+                    link = doc_resolvers[this_module].resolve(cobj,
+                                                              full_fname)
+                except (HTTPError, URLError) as e:
+                    if isinstance(e, HTTPError):
+                        extra = e.code
+                    else:
+                        extra = e.reason
+                    print("\n\t\tError resolving %s.%s: %r (%s)"
+                          % (cobj['module'], cobj['name'], e, extra))
+                    continue
 
-                def substitute_link(match):
-                    return str_repl[match.group()]
+                if link is not None:
+                    parts = name.split('.')
+                    name_html = period.join(orig_pattern % part
+                                            for part in parts)
+                    full_function_name = '%s.%s' % (
+                        cobj['module'], cobj['name'])
+                    str_repl[name_html] = link_pattern % (
+                        link, full_function_name, name_html)
+            # do the replacement in the html file
 
-                if len(str_repl) > 0:
-                    with open(full_fname, 'rb') as fid:
-                        lines_in = fid.readlines()
-                    with open(full_fname, 'wb') as fid:
-                        for line in lines_in:
-                            line = line.decode('utf-8')
-                            line = expr.sub(substitute_link, line)
-                            fid.write(line.encode('utf-8'))
-    print('[done]')
-    os.chdir(working_dir)
+            # ensure greediness
+            names = sorted(str_repl, key=len, reverse=True)
+            expr = re.compile(r'(?<!\.)\b' +  # don't follow . or word
+                              '|'.join(re.escape(name)
+                                       for name in names))
+
+            def substitute_link(match):
+                return str_repl[match.group()]
+
+            if len(str_repl) > 0:
+                with open(full_fname, 'rb') as fid:
+                    lines_in = fid.readlines()
+                with open(full_fname, 'wb') as fid:
+                    for line in lines_in:
+                        line = line.decode('utf-8')
+                        line = expr.sub(substitute_link, line)
+                        fid.write(line.encode('utf-8'))
 
 
 def embed_code_links(app, exception):
