@@ -996,7 +996,7 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
     return out
 
 
-def rgb2lab(rgb):
+def rgb2lab(rgb, illuminant="D65", observer="2"):
     """RGB to lab color space conversion.
 
     Parameters
@@ -1004,6 +1004,10 @@ def rgb2lab(rgb):
     rgb : array_like
         The image in RGB format, in a 3- or 4-D array of shape
         ``(.., ..,[ ..,] 3)``.
+    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
+        The name of the illuminant (the function is NOT case sensitive).
+    observer : {"2", "10"}, optional
+        The aperture angle of the observer.
 
     Returns
     -------
@@ -1019,17 +1023,24 @@ def rgb2lab(rgb):
     Notes
     -----
     This function uses rgb2xyz and xyz2lab.
+    By default Observer= 2A, Illuminant= D65. CIE XYZ tristimulus values
+    x_ref=95.047, y_ref=100., z_ref=108.883. See function `get_xyz_coords` for
+    a list of supported illuminants.
     """
-    return xyz2lab(rgb2xyz(rgb))
+    return xyz2lab(rgb2xyz(rgb), illuminant, observer)
 
 
-def lab2rgb(lab):
+def lab2rgb(lab, illuminant="D65", observer="2"):
     """Lab to RGB color space conversion.
 
     Parameters
     ----------
     lab : array_like
         The image in Lab format, in a 3-D array of shape ``(.., .., 3)``.
+    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
+        The name of the illuminant (the function is NOT case sensitive).
+    observer : {"2", "10"}, optional
+        The aperture angle of the observer.
 
     Returns
     -------
@@ -1044,8 +1055,11 @@ def lab2rgb(lab):
     Notes
     -----
     This function uses lab2xyz and xyz2rgb.
+    By default Observer= 2A, Illuminant= D65. CIE XYZ tristimulus values
+    x_ref=95.047, y_ref=100., z_ref=108.883. See function `get_xyz_coords` for
+    a list of supported illuminants.
     """
-    return xyz2rgb(lab2xyz(lab))
+    return xyz2rgb(lab2xyz(lab, illuminant, observer))
 
 
 def xyz2luv(xyz, illuminant="D65", observer="2"):
