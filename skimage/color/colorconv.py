@@ -1020,6 +1020,10 @@ def rgb2lab(rgb, illuminant="D65", observer="2"):
     ValueError
         If `rgb` is not a 3- or 4-D array of shape ``(.., ..,[ ..,] 3)``.
 
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Standard_illuminant
+
     Notes
     -----
     This function uses rgb2xyz and xyz2lab.
@@ -1051,6 +1055,10 @@ def lab2rgb(lab, illuminant="D65", observer="2"):
     ------
     ValueError
         If `lab` is not a 3-D array of shape ``(.., .., 3)``.
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Standard_illuminant
 
     Notes
     -----
