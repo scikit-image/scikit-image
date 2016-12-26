@@ -1040,7 +1040,7 @@ def windowed_histogram(image, selem, out=None, mask=None,
     """
 
     if n_bins is None:
-        n_bins = image.max() + 1
+        n_bins = int(image.max()) + 1
 
     return _apply_vector_per_pixel(generic_cy._windowed_hist, image, selem,
                                    out=out, mask=mask,
