@@ -793,7 +793,7 @@ def threshold_niblack(image, window_size=15, k=0.2):
     Parameters
     ----------
     image: (N, M) ndarray
-        Input image. Only 2D grayscale images allowed.
+        Grayscale input image.
     window_size : int, optional
         Odd size of pixel neighborhood window (e.g. 3, 5, 7...).
     k : float, optional
@@ -820,9 +820,7 @@ def threshold_niblack(image, window_size=15, k=0.2):
     >>> image = data.page()
     >>> binary_image = threshold_niblack(image, window_size=7, k=0.1)
     """
-    if len(image.shape) != 2:
-        raise ValueError("Image is not 2D grayscale.")
-
+    assert_nD(image, 2)
     m, s = _mean_std(image, window_size)
     return m - k * s
 
@@ -845,7 +843,7 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     Parameters
     ----------
     image: (N, M) ndarray
-        Input image. Only 2D grayscale images allowed.
+        Grayscale input image.
     window_size : int, optional
         Odd size of pixel neighborhood window (e.g. 3, 5, 7...).
     k : float, optional
@@ -880,8 +878,7 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     >>> binary_sauvola = threshold_sauvola(image,
     ...                                    window_size=15, k=0.2)
     """
-    if len(image.shape) != 2:
-        raise ValueError("Image is not 2D grayscale.")
+    assert_nD(image, 2)
     if r is None:
         imin, imax = dtype_limits(image, clip_negative=False)
         r = 0.5 * (imax - imin)
