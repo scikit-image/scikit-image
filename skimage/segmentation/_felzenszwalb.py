@@ -1,6 +1,5 @@
 import numpy as np
 
-from .._shared.utils import warn
 from ._felzenszwalb_cy import _felzenszwalb_cython
 
 

@@ -3,7 +3,6 @@ import itertools
 import numpy as np
 from numpy import testing
 from skimage.color.colorlabel import label2rgb
-from skimage._shared._warnings import expected_warnings
 from numpy.testing import (assert_array_almost_equal as assert_close,
                            assert_array_equal, assert_warns)
 

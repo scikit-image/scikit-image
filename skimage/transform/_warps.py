@@ -1,6 +1,5 @@
 import six
 import numpy as np
-from warnings import warn
 from scipy import ndimage as ndi
 
 from ._geometric import (SimilarityTransform, AffineTransform,
@@ -388,7 +387,7 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
         be in the range 0-5. See `skimage.transform.warp` for detail.
     mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode, with 'constant' used as the default. Modes match 
+        to the given mode, with 'constant' used as the default. Modes match
         the behaviour of `numpy.pad`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
@@ -405,7 +404,7 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
     if mode is None:
         warn('The default of `mode` in `skimage.transform.swirl` '
              'will change to `reflect` in version 0.15.')
-        mode = 'constant'     
+        mode = 'constant'
 
     if center is None:
         center = np.array(image.shape)[:2] / 2
@@ -809,7 +808,6 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
         ndi_mode = _to_ndimage_mode(mode)
         warped = ndi.map_coordinates(image, coords, prefilter=prefilter,
                                      mode=ndi_mode, order=order, cval=cval)
-
 
     _clip_warp_output(image, warped, order, mode, cval, clip)
 
