@@ -26,7 +26,9 @@ def test_PSNR_float():
     p_float64 = compare_psnr(cam/255., cam_noisy/255., data_range=1)
     assert_almost_equal(p_uint8, p_float64, decimal=5)
 
+
 def test_PSNR_dynamic_range_and_data_range():
+    # Tests deprecation of "dynamic_range" in favor of "data_range"
     out1 = compare_psnr(cam/255., cam_noisy/255., data_range=1)
     with expected_warnings(
             '`dynamic_range` has been deprecated in favor of '

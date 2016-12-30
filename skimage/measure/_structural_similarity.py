@@ -12,8 +12,8 @@ __all__ = ['compare_ssim']
 
 
 def compare_ssim(X, Y, win_size=None, gradient=False,
-                 data_range=None, dynamic_range=None, multichannel=False,
-                 gaussian_weights=False, full=False, **kwargs):
+                 data_range=None, multichannel=False, gaussian_weights=False,
+                 full=False, dynamic_range=None, **kwargs):
     """Compute the mean structural similarity index between two images.
 
     Parameters

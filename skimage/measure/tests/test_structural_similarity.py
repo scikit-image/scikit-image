@@ -78,8 +78,10 @@ def test_ssim_grad():
     mssim, grad, s = ssim(X, Y, data_range=255, gradient=True, full=True)
     assert np.all(grad < 0.05)
 
+
 # NOTE: This test is known to randomly fail on some systems (Mac OS X 10.6)
 def test_ssim_dynamic_range_and_data_range():
+    # Tests deprecation of "dynamic_range" in favor of "data_range"
     N = 30
     X = np.random.rand(N, N) * 255
     Y = np.random.rand(N, N) * 255
