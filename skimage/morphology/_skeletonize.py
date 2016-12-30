@@ -2,6 +2,7 @@
 Algorithms for computing the skeleton of a binary image
 """
 
+import sys
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -245,12 +246,7 @@ def thin(image, max_iter=None):
     """
 
     # check parameters
-    if max_iter is None:
-        n = -1
-    elif max_iter <= 0:
-        raise ValueError('max_iter must be > 0')
-    else:
-        n = max_iter
+    max_iter = max_iter or sys.maxsize
 
     # convert image to uint8
     skel = np.array(image).astype(np.uint8)
@@ -269,7 +265,7 @@ def thin(image, max_iter=None):
                      [32, 64,128]], dtype=np.uint8)
 
     # iterate either 1) indefinitely or 2) up to iteration limit
-    while n != 0:
+    for i in range(max_iter):
         before = np.sum(skel)  # count points before thinning
 
         # for each subiteration
@@ -286,9 +282,6 @@ def thin(image, max_iter=None):
         if before == after:
             # iteration had no effect: finish
             break
-
-        # count down to iteration limit (or endlessly negative)
-        n -= 1
 
     return skel.astype(np.bool)
 
