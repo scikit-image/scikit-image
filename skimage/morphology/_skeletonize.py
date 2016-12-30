@@ -248,16 +248,12 @@ def thin(image, max_iter=None):
     # check parameters
     max_iter = max_iter or sys.maxsize
 
-    # convert image to uint8
-    skel = np.array(image).astype(np.uint8)
+    # convert image to uint8 with values in {0, 1}
+    skel = np.asanyarray(image, dtype=bool).astype(np.uint8)
 
     # check that image is 2d
     if skel.ndim != 2:
         raise ValueError('2D array required')
-
-    # check that image contains only 0s and 1s
-    if not np.all(np.in1d(image.flat, (0, 1))):
-        raise ValueError('Image contains values other than 0 and 1')
 
     # neighborhood mask
     mask = np.array([[ 8,  4,  2],
