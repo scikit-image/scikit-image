@@ -6,7 +6,9 @@ import sys
 import numpy as np
 from scipy import ndimage as ndi
 
-from ._skeletonize_cy import _fast_skeletonize, _skeletonize_loop, _table_lookup_index
+from ._skeletonize_cy import (_fast_skeletonize, _skeletonize_loop,
+                              _table_lookup_index)
+
 from .._shared.utils import assert_nD
 
 
@@ -98,8 +100,8 @@ def skeletonize(image):
 
     return _fast_skeletonize(image)
 
-# --------- Skeletonization and thinning based on Guo and Hall 1989 ---------
 
+# --------- Skeletonization and thinning based on Guo and Hall 1989 ---------
 
 def _generate_thin_luts():
     """generate LUTs for thinning algorithm (for reference)"""
@@ -259,11 +261,10 @@ def thin(image, max_iter=None):
                      [16,  0,  1],
                      [32, 64,128]], dtype=np.uint8)
 
-    # iterate either 1) indefinitely or 2) up to iteration limit
+    # iterate until convergence, up to the iteration limit
     for i in range(max_iter):
         before = np.sum(skel)  # count points before thinning
 
-        # for each subiteration
         for lut in [G123_LUT, G123P_LUT]:
             # correlate image with neighborhood mask
             N = ndi.correlate(skel, mask, mode='constant')
@@ -272,7 +273,7 @@ def thin(image, max_iter=None):
             # perform deletion
             skel[D] = 0
 
-        after = np.sum(skel)  # coint points after thinning
+        after = np.sum(skel)  # count points after thinning
 
         if before == after:
             # iteration had no effect: finish
