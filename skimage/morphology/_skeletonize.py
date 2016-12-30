@@ -7,6 +7,8 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from ._skeletonize_cy import _fast_skeletonize, _skeletonize_loop, _table_lookup_index
+from .._shared.utils import assert_nD
+
 
 # --------- Skeletonization by morphological thinning ---------
 
@@ -244,16 +246,13 @@ def thin(image, max_iter=None):
            [0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
-
     # check parameters
     max_iter = max_iter or sys.maxsize
+    # check that image is 2d
+    assert_nD(image, 2)
 
     # convert image to uint8 with values in {0, 1}
     skel = np.asanyarray(image, dtype=bool).astype(np.uint8)
-
-    # check that image is 2d
-    if skel.ndim != 2:
-        raise ValueError('2D array required')
 
     # neighborhood mask
     mask = np.array([[ 8,  4,  2],
