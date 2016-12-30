@@ -2,7 +2,6 @@ from __future__ import division
 import numpy as np
 from .._shared.utils import assert_nD
 from . import _hoghistogram
-import warnings
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8),

@@ -4,8 +4,8 @@ import numpy as np
 from ..util.dtype import dtype_range
 from .._shared.utils import skimage_deprecation, warn
 
-__all__ = ['compare_mse', 
-           'compare_nrmse', 
+__all__ = ['compare_mse',
+           'compare_nrmse',
            'compare_psnr',
            ]
 

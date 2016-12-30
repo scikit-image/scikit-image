@@ -3,15 +3,12 @@
 BRIEF binary descriptor
 =======================
 
-This example demonstrates the BRIEF binary description algorithm.
-
-The descriptor consists of relatively few bits and can be computed using
-a set of intensity difference tests. The short binary descriptor results
-in low memory footprint and very efficient matching based on the Hamming
-distance metric.
-
-BRIEF does not provide rotation-invariance. Scale-invariance can be achieved by
-detecting and extracting features at different scales.
+This example demonstrates the BRIEF binary description algorithm. The descriptor
+consists of relatively few bits and can be computed using a set of intensity
+difference tests. The short binary descriptor results in low memory footprint
+and very efficient matching based on the Hamming distance metric. BRIEF does not
+provide rotation-invariance. Scale-invariance can be achieved by detecting and
+extracting features at different scales.
 
 """
 from skimage import data
@@ -54,8 +51,11 @@ plt.gray()
 
 plot_matches(ax[0], img1, img2, keypoints1, keypoints2, matches12)
 ax[0].axis('off')
+ax[0].set_title("Original Image vs. Transformed Image")
 
 plot_matches(ax[1], img1, img3, keypoints1, keypoints3, matches13)
 ax[1].axis('off')
+ax[1].set_title("Original Image vs. Transformed Image")
+
 
 plt.show()

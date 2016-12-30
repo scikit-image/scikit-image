@@ -60,11 +60,8 @@ def test_hessian_matrix():
                                        [0, 0,  0, 0, 0],
                                        [0, 0,  2, 0, 0]]))
 
-    matrix2d = np.random.rand(3,3)
+    matrix2d = np.random.rand(3, 3)
     assert_warns(UserWarning, hessian_matrix, matrix2d, sigma=0.1)
-
-
-
 
 
 def test_hessian_matrix_3d():
@@ -119,7 +116,7 @@ def test_hessian_matrix_det():
     image = np.zeros((5, 5))
     image[2, 2] = 1
     det = hessian_matrix_det(image, 5)
-    assert_almost_equal(det, 0, decimal = 3)
+    assert_almost_equal(det, 0, decimal=3)
 
 
 def test_shape_index():

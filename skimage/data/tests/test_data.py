@@ -1,6 +1,6 @@
 import numpy as np
 import skimage.data as data
-from numpy.testing import assert_equal, assert_almost_equal, assert_raises
+from numpy.testing import assert_equal, assert_almost_equal
 
 
 def test_astronaut():
@@ -77,6 +77,11 @@ def test_rocket():
 def test_text():
     """ Test that "text" image can be loaded. """
     data.text()
+
+
+def test_stereo_motorcycle():
+    """ Test that "stereo_motorcycle" image can be loaded. """
+    data.stereo_motorcycle()
 
 
 def test_binary_blobs():

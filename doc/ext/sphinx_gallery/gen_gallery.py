@@ -12,11 +12,34 @@ when building the documentation.
 
 
 from __future__ import division, print_function, absolute_import
+import copy
 import re
 import os
 from . import glr_path_static
-from .gen_rst import generate_dir_rst
+from .gen_rst import generate_dir_rst, SPHX_GLR_SIG
 from .docs_resolv import embed_code_links
+from .downloads import generate_zipfiles
+
+try:
+    FileNotFoundError
+except NameError:
+    # Python2
+    FileNotFoundError = IOError
+
+DEFAULT_GALLERY_CONF = {
+    'filename_pattern': re.escape(os.sep) + 'plot',
+    'examples_dirs': os.path.join('..', 'examples'),
+    'gallery_dirs': 'auto_examples',
+    'mod_example_dir': os.path.join('modules', 'generated'),
+    'doc_module': (),
+    'reference_url': {},
+    # build options
+    'plot_gallery': True,
+    'download_all_examples': True,
+    'abort_on_example_error': False,
+    'failing_examples': {},
+    'expected_failing_examples': set(),
+}
 
 
 def clean_gallery_out(build_dir):
@@ -50,16 +73,20 @@ def generate_gallery_rst(app):
     Start the sphinx-gallery configuration and recursively scan the examples
     directories in order to populate the examples gallery
     """
+    print('Generating gallery')
     try:
         plot_gallery = eval(app.builder.config.plot_gallery)
     except TypeError:
         plot_gallery = bool(app.builder.config.plot_gallery)
 
+    gallery_conf = copy.deepcopy(DEFAULT_GALLERY_CONF)
     gallery_conf.update(app.config.sphinx_gallery_conf)
     gallery_conf.update(plot_gallery=plot_gallery)
-    gallery_conf.update(abort_on_example_error=app.builder.config.abort_on_example_error)
+    gallery_conf.update(
+        abort_on_example_error=app.builder.config.abort_on_example_error)
 
     # this assures I can call the config in other places
+    gallery_conf['src_dir'] = app.builder.srcdir
     app.config.sphinx_gallery_conf = gallery_conf
     app.config.html_static_path.append(glr_path_static())
 
@@ -73,21 +100,18 @@ def generate_gallery_rst(app):
     if not isinstance(gallery_dirs, list):
         gallery_dirs = [gallery_dirs]
 
-    # cd to the appropriate directory regardless of sphinx configuration
-    working_dir = os.getcwd()
-    os.chdir(app.builder.srcdir)
-
-    mod_examples_dir = os.path.relpath(gallery_conf['mod_example_dir'],
-                                       app.builder.srcdir)
+    mod_examples_dir = os.path.join(
+        app.builder.srcdir, gallery_conf['mod_example_dir'])
     seen_backrefs = set()
 
     computation_times = []
 
+    # cd to the appropriate directory regardless of sphinx configuration
+    working_dir = os.getcwd()
+    # os.chdir(app.builder.srcdir)
     for examples_dir, gallery_dir in zip(examples_dirs, gallery_dirs):
-        examples_dir = os.path.relpath(examples_dir,
-                                       app.builder.srcdir)
-        gallery_dir = os.path.relpath(gallery_dir,
-                                      app.builder.srcdir)
+        examples_dir = os.path.join(app.builder.srcdir, examples_dir)
+        gallery_dir = os.path.join(app.builder.srcdir, gallery_dir)
 
         for workdir in [examples_dir, gallery_dir, mod_examples_dir]:
             if not os.path.exists(workdir):
@@ -99,8 +123,14 @@ def generate_gallery_rst(app):
         this_fhindex, this_computation_times = \
             generate_dir_rst(examples_dir, gallery_dir, gallery_conf,
                              seen_backrefs)
+        if this_fhindex == "":
+            raise FileNotFoundError("Main example directory {0} does not "
+                                    "have a README.txt file. Please write "
+                                    "one to introduce your gallery."
+                                    .format(examples_dir))
 
         computation_times += this_computation_times
+
         fhindex.write(this_fhindex)
         for directory in sorted(os.listdir(examples_dir)):
             if os.path.isdir(os.path.join(examples_dir, directory)):
@@ -112,16 +142,23 @@ def generate_gallery_rst(app):
                 fhindex.write(this_fhindex)
                 computation_times += this_computation_times
 
+        if gallery_conf['download_all_examples']:
+            download_fhindex = generate_zipfiles(gallery_dir)
+            fhindex.write(download_fhindex)
+
+        fhindex.write(SPHX_GLR_SIG)
         fhindex.flush()
+
     # Back to initial directory
     os.chdir(working_dir)
 
-    print("Computation time summary:")
-    for time_elapsed, fname in sorted(computation_times)[::-1]:
-        if time_elapsed is not None:
-            print("\t- %s : %.2g sec" % (fname, time_elapsed))
-        else:
-            print("\t- %s : not run" % fname)
+    if gallery_conf['plot_gallery']:
+        print("Computation time summary:")
+        for time_elapsed, fname in sorted(computation_times)[::-1]:
+            if time_elapsed is not None:
+                print("\t- %s : %.2g sec" % (fname, time_elapsed))
+            else:
+                print("\t- %s : not run" % fname)
 
 
 def touch_empty_backreferences(app, what, name, obj, options, lines):
@@ -131,7 +168,8 @@ def touch_empty_backreferences(app, what, name, obj, options, lines):
     examples for a class / module that is being parsed by autodoc"""
 
     examples_path = os.path.join(app.srcdir,
-                                 app.config.sphinx_gallery_conf["mod_example_dir"],
+                                 app.config.sphinx_gallery_conf[
+                                     "mod_example_dir"],
                                  "%s.examples" % name)
 
     if not os.path.exists(examples_path):
@@ -139,21 +177,72 @@ def touch_empty_backreferences(app, what, name, obj, options, lines):
         open(examples_path, 'w').close()
 
 
-gallery_conf = {
-    'filename_pattern': re.escape(os.sep) + 'plot',
-    'examples_dirs': '../examples',
-    'gallery_dirs': 'auto_examples',
-    'mod_example_dir': os.path.join('modules', 'generated'),
-    'doc_module': (),
-    'reference_url': {},
-}
+def sumarize_failing_examples(app, exception):
+    """Collects the list of falling examples during build and prints them with the traceback
+
+    Raises ValueError if there where failing examples
+    """
+    if exception is not None:
+        return
+
+    # Under no-plot Examples are not run so nothing to summarize
+    if not app.config.sphinx_gallery_conf['plot_gallery']:
+        return
+
+    gallery_conf = app.config.sphinx_gallery_conf
+    failing_examples = {os.path.normpath(path): traceback
+                        for path, traceback in gallery_conf['failing_examples'].items()}
+
+    expected_failing_examples = set([os.path.normpath(os.path.join(app.srcdir, path))
+                                     for path in
+                                     gallery_conf['expected_failing_examples']])
+
+    examples_expected_to_fail = set(failing_examples.keys()).intersection(
+        expected_failing_examples)
+    expected_fail_msg = []
+    if examples_expected_to_fail:
+        expected_fail_msg.append("Examples failing as expected:")
+        for fail_example in examples_expected_to_fail:
+            expected_fail_msg.append(fail_example + ' failed leaving traceback:\n' +
+                                     failing_examples[fail_example] + '\n')
+        print("\n".join(expected_fail_msg))
+
+    examples_not_expected_to_fail = set(failing_examples.keys()).difference(
+        expected_failing_examples)
+    fail_msgs = []
+    if examples_not_expected_to_fail:
+        fail_msgs.append("Unexpected failing examples:")
+        for fail_example in examples_not_expected_to_fail:
+            fail_msgs.append(fail_example + ' failed leaving traceback:\n' +
+                             failing_examples[fail_example] + '\n')
+
+    examples_not_expected_to_pass = expected_failing_examples.difference(
+        failing_examples.keys())
+    if examples_not_expected_to_pass:
+        fail_msgs.append("Examples expected to fail, but not failling:\n" +
+                         "Please remove these examples from\n" +
+                         "sphinx_gallery_conf['expected_failing_examples']\n" +
+                         "in your conf.py file"
+                         "\n".join(examples_not_expected_to_pass))
+
+    if fail_msgs:
+        raise ValueError("Here is a summary of the problems encountered when "
+                         "running the examples\n\n" + "\n".join(fail_msgs) +
+                         "\n" + "-" * 79)
+
+
+def get_default_config_value(key):
+    def default_getter(conf):
+        return conf['sphinx_gallery_conf'].get(key, DEFAULT_GALLERY_CONF[key])
+    return default_getter
 
 
 def setup(app):
     """Setup sphinx-gallery sphinx extension"""
-    app.add_config_value('plot_gallery', True, 'html')
-    app.add_config_value('abort_on_example_error', False, 'html')
-    app.add_config_value('sphinx_gallery_conf', gallery_conf, 'html')
+    app.add_config_value('sphinx_gallery_conf', DEFAULT_GALLERY_CONF, 'html')
+    for key in ['plot_gallery', 'abort_on_example_error']:
+        app.add_config_value(key, get_default_config_value(key), 'html')
+
     app.add_stylesheet('gallery.css')
 
     if 'sphinx.ext.autodoc' in app._extensions:
@@ -161,6 +250,7 @@ def setup(app):
 
     app.connect('builder-inited', generate_gallery_rst)
 
+    app.connect('build-finished', sumarize_failing_examples)
     app.connect('build-finished', embed_code_links)
 
 

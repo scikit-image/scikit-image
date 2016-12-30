@@ -1,7 +1,7 @@
 __all__ = ['polygon_clip', 'polygon_area']
 
 import numpy as np
-from matplotlib import _path, path, transforms
+from matplotlib import path, transforms
 
 
 def polygon_clip(rp, cp, r0, c0, r1, c1):
