@@ -10,17 +10,17 @@ All rights reserved.
 Original author: Lee Kamentsky
 """
 import numpy as np
+from libc.math cimport sqrt
+
 cimport numpy as cnp
 cimport cython
+
 
 ctypedef cnp.int32_t DTYPE_INT32_t
 ctypedef cnp.int8_t DTYPE_BOOL_t
 
 
 include "heap_watershed.pxi"
-
-
-from libc.math cimport sqrt
 
 
 @cython.boundscheck(False)
@@ -80,8 +80,8 @@ def watershed_raveled(cnp.float64_t[::1] image,
         The output array, which must already contain nonzero entries at all the
         seed locations.
     wsl : bool
-        Parameter indicating whether the watershed line is to be calculated.
-        If wsl is set to False, the watershed line is not calculated.
+        Parameter indicating whether the watershed line is calculated.
+        If wsl is set to True, the watershed line is calculated.
     """
     cdef Heapitem elem
     cdef Heapitem new_elem
@@ -89,7 +89,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
     cdef Py_ssize_t i = 0
     cdef Py_ssize_t age = 1
     cdef Py_ssize_t index = 0
-    cdef DTYPE_INT32_t wsl_label=-1
+    cdef DTYPE_INT32_t wsl_label = -1
 
     cdef Heap *hp = <Heap *> heap_from_numpy2()
 
@@ -100,14 +100,13 @@ def watershed_raveled(cnp.float64_t[::1] image,
         elem.index = index
         elem.source = index
         heappush(hp, &elem)
-        if wsl:            
-            if wsl_label >= output[index]:
-                wsl_label = output[index] - 1
+        if wsl and wsl_label >= output[index]:
+            wsl_label = output[index] - 1
 
     while hp.items > 0:
         heappop(hp, &elem)
 
-        # this can happen if the same pixel entered the queue 
+        # this can happen if the same pixel entered the queue
         # several times before being processed.
         if wsl and output[elem.index] == wsl_label:
             # wsl labels are not propagated.
@@ -118,7 +117,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
             continue
 
         output[elem.index] = output[elem.source]
-        for i in range(nneighbors):            
+        for i in range(nneighbors):
             # get the flattened address of the neighbor
             index = structure[i] + elem.index
 
@@ -130,12 +129,12 @@ def watershed_raveled(cnp.float64_t[::1] image,
                 continue
 
             if output[index]:
-                # neighbor has a label (but not wsl_label): 
-                # the neighbor is not added to the queue. 
+                # neighbor has a label (but not wsl_label):
+                # the neighbor is not added to the queue.
                 if wsl:
                     # if the label of the neighbor is different
-                    # from the label of the pixel taken from the queue, 
-                    # the latter takes the WSL label. 
+                    # from the label of the pixel taken from the queue,
+                    # the latter takes the WSL label.
                     if output[index] != output[elem.index]:
                         output[elem.index] = wsl_label
                 continue
@@ -148,7 +147,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
             new_elem.age = age
             new_elem.index = index
             new_elem.source = elem.source
-            
+
             heappush(hp, &new_elem)
 
     heap_done(hp)

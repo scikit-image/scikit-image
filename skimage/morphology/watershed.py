@@ -30,6 +30,7 @@ from scipy import ndimage as ndi
 from . import _watershed
 from ..util import crop, regular_seeds
 
+
 def _validate_inputs(image, markers, mask):
     """Ensure that all inputs to watershed have matching shapes and types.
 
@@ -131,7 +132,7 @@ def _compute_neighbors(image, structure, offset):
 
 
 def watershed(image, markers, connectivity=1, offset=None, mask=None,
-              compactness=0, watershedline=False):
+              compactness=0, watershed_line=False):
     """Find watershed basins in `image` flooded from given `markers`.
 
     Parameters
@@ -141,8 +142,7 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
         Data array where the lowest value points are labeled first.
     markers: int, or ndarray of int, same shape as `image`
         The desired number of markers, or an array marking the basins with the
-        values to be assigned in the label matrix. Zero means not a marker. The 
-        marker labels are supposed to be positive. 
+        values to be assigned in the label matrix. Zero means not a marker.
     connectivity: ndarray, optional
         An array with the same number of dimensions as `image` whose
         non-zero elements indicate neighbors for connection.
@@ -156,9 +156,9 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
     compactness : float, optional
         Use compact watershed [3]_ with given compactness parameter.
         Higher values result in more regularly-shaped watershed basins.
-    watershedline: bool, optional (default=False)
-        If watershedline is True, a one-pixel wide line separates the regions
-        obtained by the watershed algorithm. The line has the label 0.  
+    watershed_line: bool, optional (default=False)
+        If watershed_line is True, a one-pixel wide line separates the regions
+        obtained by the watershed algorithm. The line has the label 0.
 
     Returns
     -------
@@ -259,12 +259,12 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
                                  marker_locations, flat_neighborhood,
                                  mask, image_strides, compactness,
                                  output.ravel(),
-                                 watershedline)
+                                 watershed_line)
 
     output = crop(output, pad_width, copy=True)
 
-    if watershedline:
+    if watershed_line:
         min_val = output.min()
-        output[output==min_val] = 0
+        output[output == min_val] = 0
 
     return output

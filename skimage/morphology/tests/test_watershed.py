@@ -322,11 +322,11 @@ class TestWatershed(unittest.TestCase):
         #
         # The two objects should be the same size, except possibly for the
         # border region
-        #
+#
         size1 = np.sum(out == 1)
         size2 = np.sum(out == 2)
         self.assertTrue(abs(size1 - size2) <= 6)
-        
+
     def test_watershed08(self):
         "The border pixels + an edge are all the same value"
         data = np.array([[255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255],
@@ -442,11 +442,11 @@ class TestWatershed(unittest.TestCase):
                          [ 77,   0,  51, 102, 153, 203, 255, 255, 203, 203, 203, 153, 102,   0, 102, 153],
                          [102,   0,  51, 102, 153, 203, 255, 203, 203, 153, 153, 153, 102, 102, 102, 153],
                          [102, 102, 102, 102, 153, 203, 255, 203, 153, 153, 153, 153, 153, 153, 153, 153]])
-        markerbin = data==0
+        markerbin = (data==0)
         marker = label(markerbin)
-        ws = watershed(data, marker, connectivity=2, watershedline=True)
-        for i, res in zip(range(4), [34,74,74,74]):
-            self.assertTrue(np.sum(ws==i)==res)
+        ws = watershed(data, marker, connectivity=2, watershed_line=True)
+        for lab, area in zip(range(4), [34,74,74,74]):
+            self.assertTrue(np.sum(ws == lab) == area)
 
 
 
