@@ -264,7 +264,7 @@ def thin(image, max_iter=None):
     # iterate until convergence, up to the iteration limit
     for i in range(max_iter):
         before = np.sum(skel)  # count points before thinning
-
+        # perform the two "subiterations" described in the paper
         for lut in [G123_LUT, G123P_LUT]:
             # correlate image with neighborhood mask
             N = ndi.correlate(skel, mask, mode='constant')
