@@ -151,16 +151,6 @@ class TestThin():
                              [0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
         numpy.testing.assert_array_equal(result, expected)
 
-    def test_baditer(self):
-        for n_iter in [-1, 0]:
-            numpy.testing.assert_raises(ValueError, thin, self.input_image,
-                                        n_iter)
-
-    def test_badtype(self):
-        ii = self.input_image
-        ii[2, 2] = 5
-        numpy.testing.assert_raises(ValueError, thin, ii)
-
     def test_baddim(self):
         for ii in [np.zeros((3)), np.zeros((3, 3, 3))]:
             numpy.testing.assert_raises(ValueError, thin, ii)
