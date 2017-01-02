@@ -732,7 +732,7 @@ def _mean_std(image, w):
 
     Parameters
     ----------
-    image : (N, M) ndarray
+    image : ndarray
         Input image.
     w : int
         Odd window size (e.g. 3, 5, 7, ..., 21, ...).
