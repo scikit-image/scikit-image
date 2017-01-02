@@ -1,3 +1,4 @@
+import itertools
 import math
 import numpy as np
 from scipy import ndimage as ndi
@@ -5,6 +6,8 @@ from scipy.ndimage import filters as ndif
 from collections import OrderedDict
 from ..exposure import histogram
 from .._shared.utils import assert_nD, warn
+from ..transform import integral_image
+from .. import util
 from skimage import dtype_limits, img_as_ubyte
 
 __all__ = ['try_all_threshold',
@@ -732,7 +735,7 @@ def _mean_std(image, w):
 
     Parameters
     ----------
-    image : (N, M) ndarray
+    image : ndarray
         Input image.
     w : int
         Odd window size (e.g. 3, 5, 7, ..., 21, ...).
@@ -751,29 +754,25 @@ def _mean_std(image, w):
            Retrieval XV, (San Jose, USA), Jan. 2008.
            DOI:10.1117/12.767755
     """
-    from skimage.transform.integral import integral_image
-
     if w == 1 or w % 2 == 0:
         raise ValueError(
-            "Window size w = %s must be odd and greater than 1." % (w))
-    integrated = integral_image(image)  # Integral Image.
+            "Window size w = %s must be odd and greater than 1." % w)
 
-    # Pad left and top of Integral image with zeros
-    integrated = np.pad(integrated, 1, mode='constant')[:-1,:-1]
+    padded = np.pad(image.astype('float'), (2, 1), mode='reflect')
+    padded_sq = padded * padded
 
-    kern = np.zeros((w + 1, w + 1))
-    kern[0, 0] = 1
-    kern[-1, -1] = 1
-    kern[[0, -1], [-1, 0]] = -1
-    # w2 holds total of pixels in window for each pixel (usually w x w).
-    w2 = ndi.convolve(
-        np.ones(image.shape, np.float), np.ones((w, w)), mode='constant')
+    integral = integral_image(padded)
+    integral_sq = integral_image(padded_sq)
 
-    m = ndi.convolve(integrated, kern, mode='nearest')[:-1, :-1] / w2
-    g = image.astype(np.float)
-    sum_g2 = ndi.convolve(g ** 2., np.ones((w, w)), mode='constant')
-    sum_m2 = w2 * m ** 2.
-    s = np.sqrt((sum_g2 - sum_m2) / w2)
+    kern = np.zeros((w + 1,) * image.ndim)
+    for indices in itertools.product(*([[0, -1]] * image.ndim)):
+        kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
+
+    sum_full = ndi.correlate(integral, kern, mode='constant')
+    m = util.crop(sum_full, (2, 1)) / (w * w)
+    sum_sq_full = ndi.correlate(integral_sq, kern, mode='constant')
+    g2 = util.crop(sum_sq_full, (2, 1)) / (w * w)
+    s = np.sqrt(g2 - m * m)
     return m, s
 
 
@@ -820,7 +819,6 @@ def threshold_niblack(image, window_size=15, k=0.2):
     >>> image = data.page()
     >>> binary_image = threshold_niblack(image, window_size=7, k=0.1)
     """
-    assert_nD(image, 2)
     m, s = _mean_std(image, window_size)
     return m - k * s
 
@@ -878,7 +876,6 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     >>> binary_sauvola = threshold_sauvola(image,
     ...                                    window_size=15, k=0.2)
     """
-    assert_nD(image, 2)
     if r is None:
         imin, imax = dtype_limits(image, clip_negative=False)
         r = 0.5 * (imax - imin)
