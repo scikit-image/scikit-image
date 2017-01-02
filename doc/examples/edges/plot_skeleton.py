@@ -131,7 +131,7 @@ ax[0].imshow(data, cmap=plt.cm.gray, interpolation='nearest')
 ax[0].set_title('original')
 ax[0].axis('off')
 
-ax[1].imshow(dist_on_skel, cmap=plt.cm.spectral, interpolation='nearest')
+ax[1].imshow(dist_on_skel, cmap=plt.cm.magma, interpolation='nearest')
 ax[1].contour(data, [0.5], colors='w')
 ax[1].set_title('medial_axis')
 ax[1].axis('off')
