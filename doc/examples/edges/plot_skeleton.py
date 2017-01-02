@@ -106,7 +106,7 @@ plt.show()
 # of the objects.
 #
 # For a skeleton with fewer branches, ``skeletonize`` or ``skeletonize_3d``
-# must be preferred.
+# should be preferred.
 
 from skimage.morphology import medial_axis, skeletonize, skeletonize_3d
 
