@@ -123,7 +123,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
 
     def _dtype_itemsize(itemsize, *dtypes):
         # Return first of `dtypes` with itemsize greater than `itemsize`
-        return next(dt for dt in dtypes if itemsize < np.dtype(dt).itemsize)
+        return next(dt for dt in dtypes if np.dtype(dt).itemsize >= itemsize)
 
     def _dtype_bits(kind, bits, itemsize=1):
         # Return dtype of `kind` that can store a `bits` wide unsigned int
