@@ -3,6 +3,7 @@ Algorithms for computing the skeleton of a binary image
 """
 
 import sys
+from six.moves import range
 import numpy as np
 from scipy import ndimage as ndi
 
