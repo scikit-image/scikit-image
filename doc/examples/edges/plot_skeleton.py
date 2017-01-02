@@ -123,6 +123,8 @@ skeleton3d = skeletonize_3d(data)
 # Distance to the background for pixels of the skeleton
 dist_on_skel = distance * skel
 
+from skimage.util.colormap import magma
+
 fig, axes = plt.subplots(2, 2, figsize=(8, 8), sharex=True, sharey=True,
                          subplot_kw={'adjustable': 'box-forced'})
 ax = axes.ravel()
@@ -131,7 +133,7 @@ ax[0].imshow(data, cmap=plt.cm.gray, interpolation='nearest')
 ax[0].set_title('original')
 ax[0].axis('off')
 
-ax[1].imshow(dist_on_skel, cmap=plt.cm.magma, interpolation='nearest')
+ax[1].imshow(dist_on_skel, cmap=magma, interpolation='nearest')
 ax[1].contour(data, [0.5], colors='w')
 ax[1].set_title('medial_axis')
 ax[1].axis('off')
