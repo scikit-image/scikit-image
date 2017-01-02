@@ -11,6 +11,7 @@ from ._frangi import frangi, hessian
 from .thresholding import (threshold_adaptive, threshold_otsu, threshold_yen,
                            threshold_isodata, threshold_li, threshold_minimum,
                            threshold_mean, threshold_triangle,
+                           threshold_niblack, threshold_sauvola,
                            try_all_threshold)
 from . import rank
 from .rank import median
@@ -57,5 +58,7 @@ __all__ = ['inverse',
            'threshold_li',
            'threshold_minimum',
            'threshold_mean',
+           'threshold_niblack',
+           'threshold_sauvola',
            'threshold_triangle',
            'rank']

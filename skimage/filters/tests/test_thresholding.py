@@ -11,6 +11,8 @@ from skimage.filters.thresholding import (threshold_adaptive,
                                           threshold_li,
                                           threshold_yen,
                                           threshold_isodata,
+                                          threshold_niblack,
+                                          threshold_sauvola,
                                           threshold_mean,
                                           threshold_triangle,
                                           threshold_minimum)
@@ -148,6 +150,30 @@ class TestSimpleImage():
              [False,  True, False, False, False]]
         )
         out = threshold_adaptive(self.image, 3, method='median')
+        assert_equal(ref, out)
+
+    def test_threshold_niblack(self):
+        ref = np.array(
+            [[False, False, False, True, True],
+             [False, True, True, True, True],
+             [False, True, True, True, False],
+             [False, True, True, True, True],
+             [True, True, False, False, False]]
+        )
+        thres = threshold_niblack(self.image, window_size=3, k=0.5)
+        out = self.image > thres
+        assert_equal(ref, out)
+
+    def test_threshold_sauvola(self):
+        ref = np.array(
+            [[False, False, False, True, True],
+             [False, False, True, True, True],
+             [False, False, True, True, False],
+             [False, True, True, True, False],
+             [True, True, False, False, False]]
+        )
+        thres = threshold_sauvola(self.image, window_size=3, k=0.2, r=128)
+        out = self.image > thres
         assert_equal(ref, out)
 
 

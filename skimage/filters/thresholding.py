@@ -1,3 +1,4 @@
+import itertools
 import math
 import numpy as np
 from scipy import ndimage as ndi
@@ -5,6 +6,9 @@ from scipy.ndimage import filters as ndif
 from collections import OrderedDict
 from ..exposure import histogram
 from .._shared.utils import assert_nD, warn
+from ..transform import integral_image
+from .. import util
+from skimage import dtype_limits, img_as_ubyte
 
 __all__ = ['try_all_threshold',
            'threshold_adaptive',
@@ -14,6 +18,8 @@ __all__ = ['try_all_threshold',
            'threshold_li',
            'threshold_minimum',
            'threshold_mean',
+           'threshold_niblack',
+           'threshold_sauvola',
            'threshold_triangle']
 
 
@@ -719,3 +725,159 @@ def threshold_triangle(image, nbins=256):
         arg_level = nbins - arg_level - 1
 
     return bin_centers[arg_level]
+
+
+def _mean_std(image, w):
+    """Return local mean and standard deviation of each pixel using a
+    neighborhood defined by a rectangular window with size w times w.
+    The algorithm uses integral images to speedup computation. This is
+    used by threshold_niblack and threshold_sauvola.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    w : int
+        Odd window size (e.g. 3, 5, 7, ..., 21, ...).
+
+    Returns
+    -------
+    m : 2-D array of same size of image with local mean values.
+    s : 2-D array of same size of image with local standard
+        deviation values.
+
+    References
+    ----------
+    .. [1] F. Shafait, D. Keysers, and T. M. Breuel, "Efficient
+           implementation of local adaptive thresholding techniques
+           using integral images." in Document Recognition and
+           Retrieval XV, (San Jose, USA), Jan. 2008.
+           DOI:10.1117/12.767755
+    """
+    if w == 1 or w % 2 == 0:
+        raise ValueError(
+            "Window size w = %s must be odd and greater than 1." % w)
+
+    padded = np.pad(image.astype('float'), (2, 1), mode='reflect')
+    padded_sq = padded * padded
+
+    integral = integral_image(padded)
+    integral_sq = integral_image(padded_sq)
+
+    kern = np.zeros((w + 1,) * image.ndim)
+    for indices in itertools.product(*([[0, -1]] * image.ndim)):
+        kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
+
+    sum_full = ndi.correlate(integral, kern, mode='constant')
+    m = util.crop(sum_full, (2, 1)) / (w * w)
+    sum_sq_full = ndi.correlate(integral_sq, kern, mode='constant')
+    g2 = util.crop(sum_sq_full, (2, 1)) / (w * w)
+    s = np.sqrt(g2 - m * m)
+    return m, s
+
+
+def threshold_niblack(image, window_size=15, k=0.2):
+    """Applies Niblack local threshold to an array.
+
+    A threshold T is calculated for every pixel in the image using the
+    following formula:
+
+    T = m(x,y) - k * s(x,y)
+
+    where m(x,y) and s(x,y) are the mean and standard deviation of
+    pixel (x,y) neighborhood defined by a rectangular window with size w
+    times w centered around the pixel. k is a configurable parameter
+    that weights the effect of standard deviation.
+
+    Parameters
+    ----------
+    image: (N, M) ndarray
+        Grayscale input image.
+    window_size : int, optional
+        Odd size of pixel neighborhood window (e.g. 3, 5, 7...).
+    k : float, optional
+        Value of parameter k in threshold formula.
+
+    Returns
+    -------
+    threshold : (N, M) ndarray
+        Threshold mask. All pixels with an intensity higher than
+        this value are assumed to be foreground.
+
+    Notes
+    -----
+    This algorithm is originally designed for text recognition.
+
+    References
+    ----------
+    .. [1] Niblack, W (1986), An introduction to Digital Image
+           Processing, Prentice-Hall.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> image = data.page()
+    >>> binary_image = threshold_niblack(image, window_size=7, k=0.1)
+    """
+    m, s = _mean_std(image, window_size)
+    return m - k * s
+
+
+def threshold_sauvola(image, window_size=15, k=0.2, r=None):
+    """Applies Sauvola local threshold to an array. Sauvola is a
+    modification of Niblack technique.
+
+    In the original method a threshold T is calculated for every pixel
+    in the image using the following formula:
+
+    T = m(x,y) * (1 + k * ((s(x,y) / R) - 1))
+
+    where m(x,y) and s(x,y) are the mean and standard deviation of
+    pixel (x,y) neighborhood defined by a rectangular window with size w
+    times w centered around the pixel. k is a configurable parameter
+    that weights the effect of standard deviation.
+    R is the maximum standard deviation of a greyscale image.
+
+    Parameters
+    ----------
+    image: (N, M) ndarray
+        Grayscale input image.
+    window_size : int, optional
+        Odd size of pixel neighborhood window (e.g. 3, 5, 7...).
+    k : float, optional
+        Value of the positive parameter k.
+    r : float, optional
+        Value of R, the dynamic range of standard deviation.
+        If None, set to the half of the image dtype range.
+    offset : float, optional
+        Constant subtracted from obtained local thresholds.
+
+    Returns
+    -------
+    threshold : (N, M) ndarray
+        Threshold mask. All pixels with an intensity higher than
+        this value are assumed to be foreground.
+
+    Notes
+    -----
+    This algorithm is originally designed for text recognition.
+
+    References
+    ----------
+    .. [1] J. Sauvola and M. Pietikainen, "Adaptive document image
+           binarization," Pattern Recognition 33(2),
+           pp. 225-236, 2000.
+           DOI:10.1016/S0031-3203(99)00055-2
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> image = data.page()
+    >>> binary_sauvola = threshold_sauvola(image,
+    ...                                    window_size=15, k=0.2)
+    """
+    if r is None:
+        imin, imax = dtype_limits(image, clip_negative=False)
+        r = 0.5 * (imax - imin)
+    m, s = _mean_std(image, window_size)
+    return m * (1 + k * ((s / r) - 1))
