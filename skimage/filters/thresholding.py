@@ -755,11 +755,11 @@ def _mean_std(image, w):
 
     if w == 1 or w % 2 == 0:
         raise ValueError(
-            "Window size w = %s must be odd and greater than 1." % (w))
-    integrated = integral_image(image)  # Integral Image.
+            "Window size w = %s must be odd and greater than 1." % w)
+    integrated = integral_image(image)
 
-    # Pad left and top of Integral image with zeros
-    integrated = np.pad(integrated, 1, mode='constant')[:-1,:-1]
+    # Shift integral image to start at 0
+    integrated = ndi.shift(integrated, [1] * integrated.ndim)
 
     kern = np.zeros((w + 1, w + 1))
     kern[0, 0] = 1
