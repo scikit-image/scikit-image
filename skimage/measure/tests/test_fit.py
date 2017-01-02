@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import spatial
 from numpy.testing import assert_equal, assert_raises, assert_almost_equal
 from skimage.measure import LineModelND, CircleModel, EllipseModel, ransac
 from skimage.transform import AffineTransform
@@ -111,6 +112,8 @@ def test_line_modelND_under_determined():
 
 def test_circle_model_invalid_input():
     assert_raises(ValueError, CircleModel().estimate, np.empty((5, 3)))
+    assert_raises(ValueError, CircleModel().estimate, np.zeros((5, 2)),
+                  init_params=(0., 0.))
 
 
 def test_circle_model_predict():
@@ -153,6 +156,8 @@ def test_circle_model_residuals():
 
 def test_ellipse_model_invalid_input():
     assert_raises(ValueError, EllipseModel().estimate, np.empty((5, 3)))
+    assert_raises(ValueError, EllipseModel().estimate, np.zeros((5, 2)),
+                  init_params=(0, 0, 0))
 
 
 def test_ellipse_model_predict():
@@ -298,6 +303,50 @@ def test_ransac_invalid_input():
                   residual_threshold=0, stop_probability=-1)
     assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=2,
                   residual_threshold=0, stop_probability=1.01)
+    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=0,
+                  residual_threshold=0)
+    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=1.5,
+                  residual_threshold=0)
+
+
+def test_ransac_initial_guess():
+    center = [242., 697.]
+    points = np.array(
+        [[105, 835], [105, 845], [105, 865], [105, 875], [107, 855], [115, 825],
+         [115, 835], [116, 845], [115, 865], [115, 885], [117, 855], [125, 825],
+         [125, 835], [125, 895], [135, 818], [134, 893], [137, 888], [144, 832],
+         [146, 825], [144, 895], [141, 826], [155, 897], [155, 675], [156, 695],
+         [155, 825], [157, 685], [153, 831], [163, 726], [164, 824], [165, 902],
+         [165, 645], [166, 655], [165, 665], [164, 705], [164, 715], [166, 735],
+         [166, 745], [166, 674], [165, 695], [167, 684], [173, 724], [173, 705],
+         [175, 715], [175, 818], [175, 635], [175, 645], [174, 755], [175, 902],
+         [176, 655], [177, 665], [176, 735], [177, 745], [177, 765], [185, 754],
+         [184, 885], [184, 635], [186, 822], [186, 895], [185, 774], [182, 893],
+         [188, 763], [194, 884], [193, 777], [196, 768], [195, 785], [195, 817],
+         [192, 881], [203, 824], [205, 876], [204, 777], [203, 885], [200, 781],
+         [204, 788], [214, 783], [215, 794], [215, 892], [216, 816], [221, 876],
+         [223, 825], [225, 886], [225, 784], [225, 795], [225, 805], [227, 834],
+         [234, 793], [230, 880], [235, 883], [245, 875], [245, 605], [245, 801],
+         [240, 799], [244, 814], [247, 826], [255, 796], [253, 864], [255, 605],
+         [251, 860], [265, 607], [274, 606], [275, 596], [285, 597], [284, 607],
+         [295, 605], [294, 616], [295, 625], [297, 764], [304, 615], [303, 635],
+         [305, 625], [305, 647], [306, 656], [307, 715], [306, 744], [307, 762],
+         [313, 635], [313, 645], [312, 734], [314, 756], [316, 767], [312, 665],
+         [313, 684], [313, 695], [317, 654], [314, 705], [315, 745], [315, 725],
+         [318, 674], [317, 715], [323, 665], [323, 695], [322, 735], [323, 685],
+         [325, 705], [325, 763], [325, 725], [327, 675]])
+
+    ransac_model, inliers = ransac(points, EllipseModel, min_samples=0.4,
+                                   residual_threshold=15, max_trials=50)
+    nb_inliers_no_init = np.sum(inliers)
+
+    dists = spatial.distance.cdist(points, [center], metric='euclidean')
+    init_inliers = (dists <= np.mean(dists))[:, 0]
+    ransac_model, inliers = ransac(points, EllipseModel, min_samples=0.4,
+                                   residual_threshold=15, max_trials=50,
+                                   init_inliers=init_inliers)
+    nb_inliers_w_init = np.sum(inliers)
+    assert  nb_inliers_no_init < nb_inliers_w_init
 
 
 if __name__ == "__main__":

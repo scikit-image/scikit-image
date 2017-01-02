@@ -26,7 +26,6 @@ class BaseModel(object):
 
 
 class LineModel(BaseModel):
-
     """Total least squares estimator for 2D lines.
 
     Lines are parameterized using polar coordinates as functional model::
@@ -320,7 +319,6 @@ class LineModelND(BaseModel):
 
 
 class CircleModel(BaseModel):
-
     """Total least squares estimator for 2D circles.
 
     The functional model of the circle is::
@@ -341,13 +339,21 @@ class CircleModel(BaseModel):
 
     """
 
-    def estimate(self, data):
+    def estimate(self, data, init_params=None):
         """Estimate circle model from data using total least squares.
 
         Parameters
         ----------
         data : (N, 2) array
             N points with ``(x, y)`` coordinates, respectively.
+        init_params : tuple of 3 values, optional
+<<<<<<< HEAD
+            (x_center, y_center, r) is initial guess of parameters.
+            If they are not specified initial guess use a circle model.
+=======
+            (x_center, y_center, r) is an initial guess of parameters.
+            If None, the initial guess uses a circle model based on mean values.
+>>>>>>> 2b5ebdcc18561c338cd4e09b9db333e0007c6b43
 
         Returns
         -------
@@ -378,14 +384,21 @@ class CircleModel(BaseModel):
             A[0, :] = -(x - xc) / d
             A[1, :] = -(y - yc) / d
             # same for all iterations, so not changed in each iteration
-            #A[2, :] = -1
+            # A[2, :] = -1
             return A
 
-        xc0 = x.mean()
-        yc0 = y.mean()
-        r0 = dist(xc0, yc0).mean()
-        params0 = (xc0, yc0, r0)
-        params, _ = optimize.leastsq(fun, params0, Dfun=Dfun, col_deriv=True)
+        if init_params is None:
+            # initial guess of parameters using a circle model
+            xc0 = x.mean()
+            yc0 = y.mean()
+            r0 = dist(xc0, yc0).mean()
+            init_params = (xc0, yc0, r0)
+        if len(init_params) != 3:
+            raise ValueError('init params expects 3 values, '
+                             'but it got %i values' % len(init_params))
+
+        params, _ = optimize.leastsq(fun, init_params, Dfun=Dfun,
+                                     col_deriv=True)
 
         self.params = params
 
@@ -445,7 +458,6 @@ class CircleModel(BaseModel):
 
 
 class EllipseModel(BaseModel):
-
     """Total least squares estimator for 2D ellipses.
 
     The functional model of the ellipse is::
@@ -479,13 +491,21 @@ class EllipseModel(BaseModel):
 
     """
 
-    def estimate(self, data):
+    def estimate(self, data, init_params=None):
         """Estimate circle model from data using total least squares.
 
         Parameters
         ----------
         data : (N, 2) array
             N points with ``(x, y)`` coordinates, respectively.
+        init_params : tuple of 5 values, optional
+<<<<<<< HEAD
+            (x_center, y_center, a, b, theta) is initial guess of parameters.
+            If they are not specified initial guess use a circle model.
+=======
+            (x_center, y_center, a, b, theta) is an initial guess of parameters.
+            If None, the initial guess uses a circle model based on mean values.
+>>>>>>> 2b5ebdcc18561c338cd4e09b9db333e0007c6b43
 
         Returns
         -------
@@ -540,13 +560,19 @@ class EllipseModel(BaseModel):
 
             return A
 
-        # initial guess of parameters using a circle model
+        if init_params is None:
+            # initial guess of parameters using a circle model
+            xc0 = x.mean()
+            yc0 = y.mean()
+            r0 = np.sqrt((x - xc0) ** 2 + (y - yc0) ** 2).mean()
+            init_params = (xc0, yc0, r0, 0, 0)
+        if len(init_params) != 5:
+            raise ValueError('init params expects 5 values, '
+                             'but it got %i values' % len(init_params))
+
         params0 = np.empty((N + 5, ), dtype=np.double)
-        xc0 = x.mean()
-        yc0 = y.mean()
-        r0 = np.sqrt((x - xc0)**2 + (y - yc0)**2).mean()
-        params0[:5] = (xc0, yc0, r0, 0, 0)
-        params0[5:] = np.arctan2(y - yc0, x - xc0)
+        params0[:5] = init_params
+        params0[5:] = np.arctan2(y - init_params[1], x - init_params[0])
 
         params, _ = optimize.leastsq(fun, params0, Dfun=Dfun, col_deriv=True)
 
@@ -692,7 +718,7 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
 def ransac(data, model_class, min_samples, residual_threshold,
            is_data_valid=None, is_model_valid=None,
            max_trials=100, stop_sample_num=np.inf, stop_residuals_sum=0,
-           stop_probability=1, random_state=None):
+           stop_probability=1, random_state=None, init_inliers=None):
     """Fit a model to data with the RANSAC (random sample consensus) algorithm.
 
     RANSAC is an iterative algorithm for the robust estimation of parameters
@@ -737,8 +763,9 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
         where `success` indicates whether the model estimation succeeded
         (`True` or `None` for success, `False` for failure).
-    min_samples : int
+    min_samples : int or float in range [0, 1]
         The minimum number of data points to fit a model to.
+        If the number type is float, the value sets the percentage of all data.
     residual_threshold : float
         Maximum distance for a data point to be classified as an inlier.
     is_data_valid : function, optional
@@ -770,7 +797,12 @@ def ransac(data, model_class, min_samples, residual_threshold,
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance used
         by `np.random`.
+    init_inliers : [list, tuple of] (N) array of bool or None, optional
+        Initial samples selection for model estimation
+<<<<<<< HEAD
+=======
     
+>>>>>>> 2b5ebdcc18561c338cd4e09b9db333e0007c6b43
 
     Returns
     -------
@@ -820,7 +852,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     >>> ransac_model, inliers = ransac(data, EllipseModel, 5, 3, max_trials=50)
     >>> ransac_model.params
-    array([ 20.12762373,  29.73563063,   4.81499637,  10.4743584 ,   0.05217117])
+    array([ 20.12762538,  29.73563452,   4.81499857,  10.47435549,   0.05217225])
     >>> inliers
     array([False, False, False, False,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
@@ -858,14 +890,18 @@ def ransac(data, model_class, min_samples, residual_threshold,
     
     random_state = check_random_state(random_state)
 
-    if min_samples < 0:
+    if isinstance(min_samples, float):
+        if not (0 < min_samples <= 1):
+            raise ValueError("`min_samples` as ration must be in range (0, 1)")
+        min_samples = int(min_samples * len(data))
+    if min_samples <= 0:
         raise ValueError("`min_samples` must be greater than zero")
 
     if max_trials < 0:
         raise ValueError("`max_trials` must be greater than zero")
 
     if stop_probability < 0 or stop_probability > 1:
-        raise ValueError("`stop_probability` must be in range [0, 1]")
+        raise ValueError("`stop_probability` must be in range (0, 1)")
 
     if not isinstance(data, list) and not isinstance(data, tuple):
         data = [data]
@@ -875,13 +911,21 @@ def ransac(data, model_class, min_samples, residual_threshold,
     # number of samples
     num_samples = data[0].shape[0]
 
+    if init_inliers is not None and len(init_inliers) != num_samples:
+        raise ValueError("`number init samples %i are les then data %i "
+                         % (len(init_inliers), num_samples))
+
     for num_trials in range(max_trials):
 
         # choose random sample set
         samples = []
-        random_idxs = random_state.randint(0, num_samples, min_samples)
-        for d in data:
-            samples.append(d[random_idxs])
+        if num_trials == 0 and init_inliers is not None:
+            for d in data:
+                samples.append(d[init_inliers])
+        else:
+            random_idxs = random_state.randint(0, num_samples, min_samples)
+            for d in data:
+                samples.append(d[random_idxs])
 
         # check if random sample set is valid
         if is_data_valid is not None and not is_data_valid(*samples):
