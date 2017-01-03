@@ -293,7 +293,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
 
 
 def img_as_float(image, force_copy=False):
-    """Convert an image to 64-bit floating point format.
+    """Convert an image to double-precision (64-bit) floating point format.
 
     Parameters
     ----------
