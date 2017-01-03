@@ -445,7 +445,6 @@ class CircleModel(BaseModel):
 
 
 class EllipseModel(BaseModel):
-
     """Total least squares estimator for 2D ellipses.
 
     The functional model of the ellipse is::
@@ -457,25 +456,19 @@ class EllipseModel(BaseModel):
     where ``(xt, yt)`` is the closest point on the ellipse to ``(x, y)``. Thus
     d is the shortest distance from the point to the ellipse.
 
-    This estimator minimizes the squared distances from all points to the
-    ellipse::
-
-        min{ sum(d_i**2) } = min{ sum((x_i - xt)**2 + (y_i - yt)**2) }
-
-    Thus you have ``2 * N`` equations (x_i, y_i) for ``N + 5`` unknowns (t_i,
-    xc, yc, a, b, theta), which gives you an effective redundancy of ``N - 5``.
+    The estimator is based on a least squares minimization. The optimal
+    solution is computed directly, no iterations are required. This leads
+    to a simple, stable and robust fitting method.
 
     The ``params`` attribute contains the parameters in the following order::
 
         xc, yc, a, b, theta
 
-    A minimum number of 5 points is required to solve for the parameters.
-
     Attributes
     ----------
     params : tuple
-        Ellipse model parameters in the following order `xc`, `yc`, `a`,
-        `b`, `theta`.
+        Ellipse model parameters in the following order `xc`, `yc`, `a`, `b`,
+        `theta`.
 
     """
 
@@ -492,66 +485,79 @@ class EllipseModel(BaseModel):
         success : bool
             True, if model estimation succeeds.
 
-        """
 
+        References:
+        -----------
+        .. [1]  Halir, R.; Flusser, J. "Numerically stable direct least squares
+                fitting of ellipses". In Proc. 6th International Conference in
+                Central Europe on Computer Graphics and Visualization.
+                WSCG (Vol. 98, pp. 125-132).
+
+        """
+        # Original Implementation: Ben Hammel, Nick Sullivan-Molina
+        # another REFERENCE: [2] http://mathworld.wolfram.com/Ellipse.html
         _check_data_dim(data, dim=2)
 
         x = data[:, 0]
         y = data[:, 1]
 
-        N = data.shape[0]
+        # Quadratic part of design matrix [eqn. 15] from [1]
+        D1 = np.vstack([x ** 2, x * y, y ** 2]).T
+        # Linear part of design matrix [eqn. 16] from [1]
+        D2 = np.vstack([x, y, np.ones(len(x))]).T
 
-        # pre-allocate jacobian for all iterations
-        A = np.zeros((N + 5, 2 * N), dtype=np.double)
-        # same for all iterations: xc, yc
-        A[0, :N] = -1
-        A[1, N:] = -1
+        # forming scatter matrix [eqn. 17] from [1]
+        S1 = np.dot(D1.T, D1)
+        S2 = np.dot(D1.T, D2)
+        S3 = np.dot(D2.T, D2)
 
-        diag_idxs = np.diag_indices(N)
+        # Constraint matrix [eqn. 18]
+        C1 = np.array([[0., 0., 2.], [0., -1., 0.], [2., 0., 0.]])
 
-        def fun(params):
-            xyt = self.predict_xy(params[5:], params[:5])
-            fx = x - xyt[:, 0]
-            fy = y - xyt[:, 1]
-            return np.append(fx, fy)
+        # Reduced scatter matrix [eqn. 29]
+        M = np.linalg.inv(C1).dot(S1 - np.dot(S2, np.linalg.inv(S3)).dot(S2.T))
 
-        def Dfun(params):
-            xc, yc, a, b, theta = params[:5]
-            t = params[5:]
+        # M*|a b c >=l|a b c >. Find eigenvalues and eigenvectors
+        # from this equation [eqn. 28]
+        eig_vals, eig_vecs = np.linalg.eig(M)
 
-            ct = np.cos(t)
-            st = np.sin(t)
-            ctheta = math.cos(theta)
-            stheta = math.sin(theta)
+        # eigenvector must meet constraint 4ac - b^2 to be valid.
+        cond = 4 * np.multiply(eig_vecs[0, :], eig_vecs[2, :]) \
+               - np.power(eig_vecs[1, :], 2)
+        a1 = eig_vecs[:, (cond > 0)]
+        # seeks for empty matrix
+        if 0 in a1.shape:
+            return False
+        a, b, c = a1.ravel()
 
-            # derivatives for fx, fy in the following order:
-            #       xc, yc, a, b, theta, t_i
+        # |d f g> = -S3^(-1)*S2^(T)*|a b c> [eqn. 24]
+        a2 = np.dot(-np.linalg.inv(S3), S2.T).dot(a1)
+        d, f, g = a2.ravel()
 
-            # fx
-            A[2, :N] = - ctheta * ct
-            A[3, :N] = stheta * st
-            A[4, :N] = a * stheta * ct + b * ctheta * st
-            A[5:, :N][diag_idxs] = a * ctheta * st + b * stheta * ct
-            # fy
-            A[2, N:] = - stheta * ct
-            A[3, N:] = - ctheta * st
-            A[4, N:] = - a * ctheta * ct + b * stheta * st
-            A[5:, N:][diag_idxs] = a * stheta * st - b * ctheta * ct
+        # eigenvectors are the coefficients of an ellipse in general form
+        # a*x^2 + 2*b*x*y + c*y^2 + 2*d*x + 2*f*y + g = 0 (eqn. 15) from [2]
+        b /= 2.
+        d /= 2.
+        f /= 2.
 
-            return A
+        # finding center of ellipse [eqn.19 and 20] from [2]
+        x0 = (c * d - b * f) / (b ** 2. - a * c)
+        y0 = (a * f - b * d) / (b ** 2. - a * c)
 
-        # initial guess of parameters using a circle model
-        params0 = np.empty((N + 5, ), dtype=np.double)
-        xc0 = x.mean()
-        yc0 = y.mean()
-        r0 = np.sqrt((x - xc0)**2 + (y - yc0)**2).mean()
-        params0[:5] = (xc0, yc0, r0, 0, 0)
-        params0[5:] = np.arctan2(y - yc0, x - xc0)
+        # Find the semi-axes lengths [eqn. 21 and 22] from [2]
+        numerator = a * f ** 2 + c * d ** 2 + g * b ** 2 \
+                    - 2 * b * d * f - a * c * g
+        term = np.sqrt((a - c) ** 2 + 4 * b ** 2)
+        denominator1 = (b ** 2 - a * c) * (term - (a + c))
+        denominator2 = (b ** 2 - a * c) * (- term - (a + c))
+        width = np.sqrt(2 * numerator / denominator1)
+        height = np.sqrt(2 * numerator / denominator2)
 
-        params, _ = optimize.leastsq(fun, params0, Dfun=Dfun, col_deriv=True)
+        # angle of counterclockwise rotation of major-axis of ellipse
+        # to x-axis [eqn. 23] from [2].
+        phi = .5 * np.arctan((2. * b) / (a - c))
 
-        self.params = params[:5]
-
+        self.params = np.nan_to_num([x0, y0, width, height, phi]).tolist()
         return True
 
     def residuals(self, data):
@@ -789,10 +795,8 @@ def ransac(data, model_class, min_samples, residual_threshold,
     Generate ellipse data without tilt and add noise:
 
     >>> t = np.linspace(0, 2 * np.pi, 50)
-    >>> a = 5
-    >>> b = 10
-    >>> xc = 20
-    >>> yc = 30
+    >>> xc, yc = 20, 30
+    >>> a, b = 5, 10
     >>> x = xc + a * np.cos(t)
     >>> y = yc + b * np.sin(t)
     >>> data = np.column_stack([x, y])
@@ -811,23 +815,23 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> model = EllipseModel()
     >>> model.estimate(data)
     True
-    >>> model.params # doctest: +SKIP
-    array([ -3.30354146e+03,  -2.87791160e+03,   5.59062118e+03,
-             7.84365066e+00,   7.19203152e-01])
-
+    >>> np.round(model.params)  # doctest: +SKIP
+    array([ 72.,  75.,  77.,  14.,   1.])
 
     Estimate ellipse model using RANSAC:
 
-    >>> ransac_model, inliers = ransac(data, EllipseModel, 5, 3, max_trials=50)
-    >>> ransac_model.params
-    array([ 20.12762373,  29.73563063,   4.81499637,  10.4743584 ,   0.05217117])
-    >>> inliers
+    >>> ransac_model, inliers = ransac(data, EllipseModel, 20, 3, max_trials=50)
+    >>> abs(np.round(ransac_model.params))
+    array([ 20.,  30.,   5.,  10.,   0.])
+    >>> inliers # doctest: +SKIP
     array([False, False, False, False,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True], dtype=bool)
+    >>> sum(inliers) > 40
+    True
 
     Robustly estimate geometric transformation:
 
@@ -897,8 +901,8 @@ def ransac(data, model_class, min_samples, residual_threshold,
                 continue
 
         # check if estimated model is valid
-        if is_model_valid is not None and not is_model_valid(sample_model,
-                                                             *samples):
+        if is_model_valid is not None \
+                and not is_model_valid(sample_model, *samples):
             continue
 
         sample_model_residuals = np.abs(sample_model.residuals(*data))
