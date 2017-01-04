@@ -48,9 +48,8 @@ from skimage.segmentation import chan_vese
 image = camera().astype(np.float)
 # Feel free to play around with these parameters to see how they impact the
 # result
-cv = chan_vese(image, mu=0.2, lambda1=1, lambda2=1, tol=1e-3, maxiter=200,
-               dt=10, starting_level_set="checkerboard", extended_output=True)
-
+cv = chan_vese(image, mu=0.2, lambda1=1, lambda2=1, tol=1, maxiter=1000,
+               dt=100, starting_level_set="checkerboard", extended_output=True)
 fig, ax = plt.subplots(2, 2, figsize=(8, 8))
 ax[0, 0].imshow(image, cmap="gray", interpolation="nearest")
 ax[0, 0].set_axis_off()
