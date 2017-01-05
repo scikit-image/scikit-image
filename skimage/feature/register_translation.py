@@ -149,7 +149,7 @@ def register_translation(src_image, target_image, upsample_factor=1,
     ----------
     .. [1] Manuel Guizar-Sicairos, Samuel T. Thurman, and James R. Fienup,
            "Efficient subpixel image registration algorithms,"
-           Optics Letters 33, 156-158 (2008).
+           Optics Letters 33, 156-158 (2008). DOI:10.1364/OL.33.000156
     """
     # images must be the same shape
     if src_image.shape != target_image.shape:
