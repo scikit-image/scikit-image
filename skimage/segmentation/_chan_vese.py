@@ -2,29 +2,11 @@ import numpy as np
 from scipy.ndimage import distance_transform_edt as distance
 
 
-def _distance_from_zero_level(phi):
-    H = _cv_heavyside(phi)
-    return distance(H) - distance(H-1)
-
-
-def _cv_curvature1(phi):
-    """
-    Returns the 'curvature' of a level set 'phi'.
-    """
-    P = np.pad(phi, 1, mode='mean')
-    P = _distance_from_zero_level(P)
-    fy = (P[2:, 1:-1] - P[0:-2, 1:-1]) / 2.0
-    fx = (P[1:-1, 2:] - P[1:-1, 0:-2]) / 2.0
-    K = np.sqrt(fx*fx+fy*fy)
-    return _cv_delta(phi)*K
-
-
 def _cv_curvature(phi):
     """
     Returns the 'curvature' of a level set 'phi'.
     """
     P = np.pad(phi, 1, mode='edge')
-    P = _distance_from_zero_level(P)
     fy = (P[2:, 1:-1] - P[0:-2, 1:-1]) / 2.0
     fx = (P[1:-1, 2:] - P[1:-1, 0:-2]) / 2.0
     fyy = P[2:, 1:-1] + P[0:-2, 1:-1] - 2*phi
@@ -33,7 +15,7 @@ def _cv_curvature(phi):
     grad2 = fx**2 + fy**2
     K = ((fxx*fy**2 - 2*fxy*fx*fy + fyy*fx**2) /
          (grad2*np.sqrt(grad2) + 1e-10))
-    return _cv_delta(phi)*K
+    return K
 
 
 def _cv_calculate_variation(img, phi, mu, lambda1, lambda2, dt):
@@ -41,8 +23,8 @@ def _cv_calculate_variation(img, phi, mu, lambda1, lambda2, dt):
     Returns the variation of level set 'phi' based on algorithm
     parameters.
     """
-    eta = 1.0
-    P = np.pad(phi, 1, mode='mean')
+    eta = 1e-16
+    P = np.pad(phi, 1, mode='edge')
 
     phixp = P[1:-1, 2:] - P[1:-1, 1:-1]
     phixn = P[1:-1, 1:-1] - P[1:-1, :-2]
@@ -60,7 +42,7 @@ def _cv_calculate_variation(img, phi, mu, lambda1, lambda2, dt):
     K = (P[1:-1, 2:]*C1 + P[1:-1, :-2]*C2 +
          P[2:, 1:-1]*C3 + P[:-2, 1:-1]*C4)
 
-    Hphi = _cv_heavyside(phi)
+    Hphi = 1 * (phi>0)
     (c1, c2) = _cv_calculate_averages(img, Hphi)
 
     difference_from_average_term = (- lambda1*(img-c1)**2 +
@@ -129,8 +111,9 @@ def _cv_energy(img, phi, mu, lambda1, lambda2, heavyside=_cv_heavyside):
     """
     H = heavyside(phi)
     avgenergy = _cv_difference_from_average_term(img, H, lambda1, lambda2)
-    lenenergy = _cv_edge_length_term(phi, mu)
-    return np.sum(avgenergy) + np.abs(np.sum(lenenergy))
+    #lenenergy = _cv_edge_length_term(phi, mu)
+    lenenergy = mu * np.sum(_cv_delta(phi))
+    return np.sum(avgenergy) + lenenergy
 
 
 def _cv_reset_level_set(phi):
@@ -198,8 +181,8 @@ def _cv_initial_shape(starting_level_set, img):
     return res
 
 
-def chan_vese(img, mu=0.2, lambda1=1.0, lambda2=1.0, tol=1e-3, maxiter=100,
-              dt=1.0, starting_level_set='checkerboard',
+def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, maxiter=500,
+              dt=0.5, starting_level_set='checkerboard',
               extended_output=False):
     """Chan-vese algorithm.
 
@@ -281,8 +264,8 @@ def chan_vese(img, mu=0.2, lambda1=1.0, lambda2=1.0, tol=1e-3, maxiter=100,
     ----
     The 'energy' which this algorithm tries to minimize is defined
     as the sum of the differences from the average within the region
-    weighed by the 'lambda' factors to which is added the length of
-    the contour multiplied by the 'mu' factor.
+    squared and weighed by the 'lambda' factors to which is added the
+    length of the contour multiplied by the 'mu' factor.
 
     References
     ----------
@@ -313,22 +296,22 @@ def chan_vese(img, mu=0.2, lambda1=1.0, lambda2=1.0, tol=1e-3, maxiter=100,
     segmentation = phi > 0
     segchange = True
     area = img.shape[0] * img.shape[1]
-    
-    while((segchange or phivar > tol) and i < maxiter):
-        print i
-        # Save old values
+
+    while(phivar > tol and i < maxiter):
+        # Save old levelset values
         oldphi = phi
         oldseg = segmentation
         # Calculate new level set
         phi = _cv_calculate_variation(img, phi, mu, lambda1, lambda2, dt)
         phi = _cv_reset_level_set(phi)
         phivar = np.sum((phi-oldphi)**2) / area
+        phivar = np.sqrt(phivar)
         # Extract energy and compare to previous level set and
         # segmentation to see if continuin is necessary
         segmentation = phi > 0
         segchange = not np.array_equal(oldseg, segmentation)
         new_energy = _cv_energy(img, phi, mu, lambda1, lambda2)
-        # Save old values
+        # Save old energy values
         energies.append(old_energy)
         delta = np.abs(new_energy - old_energy)
         old_energy = new_energy
