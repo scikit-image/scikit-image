@@ -14,7 +14,7 @@ def test_chan_vese_flat_level_set():
     img[3:6, 3:6] = np.ones((3, 3))
     ls = np.ones((10, 10)) * 1000
     result = chan_vese(img, mu=0.0, tol=1e-3, starting_level_set=ls)
-    assert_array_equal(result.astype(np.float), np.zeros((10, 10)))
+    assert_array_equal(result.astype(np.float), np.ones((10, 10)))
     result = chan_vese(img, mu=0.0, tol=1e-3, starting_level_set=-ls)
     assert_array_equal(result.astype(np.float), np.zeros((10, 10)))
 
