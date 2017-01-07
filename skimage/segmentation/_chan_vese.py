@@ -181,7 +181,7 @@ def _cv_initial_shape(starting_level_set, img):
     return res
 
 
-def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, maxiter=500,
+def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
               dt=0.5, starting_level_set='checkerboard',
               extended_output=False):
     """Chan-vese algorithm.
