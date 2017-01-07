@@ -4,13 +4,18 @@ from skimage.segmentation import chan_vese
 
 
 def test_chan_vese_flat_level_set():
+    # because the algorithm evolves the level set around the
+    # zero-level, it the level-set has no zero level, the algorithm
+    # will not produce results in theory. However, since a continuous
+    # approximation of the delta function is used, the algorithm
+    # still affects the entirety of the level-set. Therefore with
+    # infinite time, the segmentation will still converge.
     img = np.zeros((10, 10))
     img[3:6, 3:6] = np.ones((3, 3))
-    result = chan_vese(img, mu=0.0, tol=1e-3,
-                       starting_level_set=np.ones((10, 10)))
-    assert_array_equal(result.astype(np.float), np.ones((10, 10)))
-    result = chan_vese(img, mu=0.0, tol=1e-3,
-                       starting_level_set=-np.ones((10, 10)))
+    ls = np.ones((10, 10)) * 1000
+    result = chan_vese(img, mu=0.0, tol=1e-3, starting_level_set=ls)
+    assert_array_equal(result.astype(np.float), np.zeros((10, 10)))
+    result = chan_vese(img, mu=0.0, tol=1e-3, starting_level_set=-ls)
     assert_array_equal(result.astype(np.float), np.zeros((10, 10)))
 
 
