@@ -211,7 +211,7 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
         difference of 'energy' between two iterations is below this
         value, the algorithm will assume that the solution was
         reached.
-    maxiter : uint, optional
+    max_iter : uint, optional
         Maximum number of iterations allowed before the algorithm
         interrupts itself.
     dt : float, optional
@@ -297,7 +297,7 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
     segchange = True
     area = img.shape[0] * img.shape[1]
 
-    while(phivar > tol and i < maxiter):
+    while(phivar > tol and i < max_iter):
         # Save old levelset values
         oldphi = phi
         oldseg = segmentation
