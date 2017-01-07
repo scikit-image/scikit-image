@@ -7,16 +7,16 @@ def _get_high_intensity_peaks(image, mask, num_peaks):
     """
     Return the highest intensity peak coordinates.
     """
-    # get coordinates of peaks
     coord = np.nonzero(mask)
-    # select num_peaks peaks
+
+    intensities = image[coord]
+    sorted_indices = np.argsort(intensities)[::-1]
+
+    # num_peaks might be np.inf, so this check is required
     if len(coord[0]) > num_peaks:
-        intensities = image[coord]
-        idx_maxsort = np.argsort(intensities)
-        coord = np.transpose(coord)[idx_maxsort][-num_peaks:]
-    else:
-        coord = np.column_stack(coord)
-    return coord
+        sorted_indices = sorted_indices[:num_peaks]
+
+    return np.transpose(coord)[sorted_indices]
 
 
 def peak_local_max(image, min_distance=1, threshold_abs=None,
@@ -72,7 +72,8 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     -------
     output : ndarray or ndarray of bools
 
-        * If `indices = True`  : (row, column, ...) coordinates of peaks.
+        * If `indices = True`  : (row, column, ...) coordinates of peaks sorted
+          decreasingly w.r.t. the corresponding intensities.
         * If `indices = False` : Boolean array shaped like `image`, with peaks
           represented by True values.
 
