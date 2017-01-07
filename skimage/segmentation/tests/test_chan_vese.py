@@ -49,7 +49,7 @@ def test_chan_vese_remove_noise():
                               [0, 1, 1, 1, 0]])
     img = ref.copy()
     img[8, 3] = 1
-    result = chan_vese(img, mu=0.3, tol=1e-3, maxiter=100, dt=10,
+    result = chan_vese(img, mu=0.3, tol=1e-3, max_iter=100, dt=10,
                        starting_level_set="disk").astype(np.float)
     assert_array_equal(result, ref)
 
