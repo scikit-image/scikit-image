@@ -28,6 +28,24 @@ The ``quick search`` field located in the navigation bar of the html
 documentation can be used to search for specific keywords (segmentation,
 rescaling, denoising, etc.).
 
+API Discovery
+-------------
+
+The users can make use of ``np.lookfor`` method to check the functions 
+in scikit-image. You will need NumPy to make use of the ``lookfor`` method.
+Usage Examples-
+
+``
+import numpy as np
+np.lookfor('boundaries', 'skimage')
+``
+
+Alternatively-
+``
+import skimage
+np.lookfor('boundaries', skimage)
+``
+
 Docstrings
 ----------
 
