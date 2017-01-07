@@ -260,8 +260,8 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, maxiter=500,
         algorithm. This should allow to check whether the algorithm
         converged.
 
-    Note
-    ----
+    Notes
+    -----
     The 'energy' which this algorithm tries to minimize is defined
     as the sum of the differences from the average within the region
     squared and weighed by the 'lambda' factors to which is added the
