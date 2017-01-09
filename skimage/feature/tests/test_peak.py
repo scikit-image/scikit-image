@@ -68,6 +68,11 @@ def test_sorted_peaks():
     peaks = peak.peak_local_max(image, min_distance=1)
     assert peaks.tolist() == [[1, 1], [3, 3]]
 
+    image = np.zeros((3, 10))
+    image[1, (1, 3, 5, 7)] = (1, 3, 2, 4)
+    peaks = peak.peak_local_max(image, min_distance=1)
+    assert peaks.tolist() == [[1, 7], [1, 3], [1, 5], [1, 1]]
+
 
 def test_num_peaks():
     image = np.zeros((7, 7), dtype=np.uint8)
