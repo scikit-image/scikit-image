@@ -138,9 +138,27 @@ def convert(image, dtype, force_copy=False, uniform=False):
         return np.dtype(kind + str(s))
 
     def _scale(a, n, m, copy=True):
-        # Scale unsigned/positive integers from n to m bits.
-        # Numbers can be represented exactly only if `m` is a multiple of `n`.
-        # Output array is of same kind as input.
+        """Scale an array of unsigned/positive integers from `n` to `m` bits.
+
+        Numbers can be represented exactly only if `m` is a multiple of `n`.
+
+        Parameters
+        ----------
+        a : ndarray
+            Input image array.
+        n : int
+            Number of bits currently used to encode the values in `a`.
+        m : int
+            Desired number of bits to encode the values in `out`.
+        copy : bool, optional
+            If True, allocates and returns new array. Otherwise, modifies
+            `a` in place.
+
+        Returns
+        -------
+        out : array
+            Output image array. Has the same kind as `a`.
+        """
         kind = a.dtype.kind
         if n > m and a.max() < 2 ** m:
             mnew = int(np.ceil(m / 2) * 2)
