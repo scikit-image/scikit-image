@@ -403,5 +403,17 @@ def test_mean_std_2d():
     np.testing.assert_allclose(s, expected_s)
 
 
+def test_mean_std_3d():
+    image = np.random.rand(40, 40, 40)
+    window_size = 5
+    mean_kernel = np.ones((window_size,) * 3) / window_size**3
+    m, s = _mean_std(image, w=window_size)
+    expected_m = ndi.convolve(image, mean_kernel, mode='mirror')
+    np.testing.assert_allclose(m, expected_m)
+    expected_s = ndi.generic_filter(image, np.std, size=window_size,
+                                    mode='mirror')
+    np.testing.assert_allclose(s, expected_s)
+
+
 if __name__ == '__main__':
     np.testing.run_module_suite()
