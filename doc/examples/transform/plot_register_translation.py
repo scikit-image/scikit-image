@@ -47,7 +47,7 @@ ax2.set_axis_off()
 ax2.set_title('Offset image')
 
 # Show the output of a cross-correlation to show what the algorithm is
-# doing behind the scene
+# doing behind the scenes
 image_product = np.fft.fft2(image) * np.fft.fft2(offset_image).conj()
 cc_image = np.fft.fftshift(np.fft.ifft2(image_product))
 ax3.imshow(cc_image.real)
@@ -75,8 +75,8 @@ ax2.set_axis_off()
 ax2.set_title('Offset image')
 
 # Calculate the upsampled DFT, again to show what the algorithm is doing
-#    behind the scenes.  Constants correspond to calculated values in routine.
-#    See source code for details.
+# behind the scenes.  Constants correspond to calculated values in routine.
+# See source code for details.
 cc_image = _upsampled_dft(image_product, 150, 100, (shift*100)+75).conj()
 ax3.imshow(cc_image.real)
 ax3.set_axis_off()
