@@ -34,12 +34,12 @@ parameters described above.
 References
 ----------
 .. [1] An Active Contour Model without Edges, Tony Chan and
-       Luminita Vese, Scale-Space Theories in Computer Vision, 1999
+       Luminita Vese, Scale-Space Theories in Computer Vision, 1999,
        http://dx.doi.org/10.1007/3-540-48236-9_13
 .. [2] Chan-Vese Segmentation, Pascal Getreuer, Image Processing On
-       Line, 2 (2012), pp. 214-224.
+       Line, 2 (2012), pp. 214-224,
        https://doi.org/10.5201/ipol.2012.g-cv
-.. [3] The Chan-Vese Algorithm - Project Report, Rami Cohen
+.. [3] The Chan-Vese Algorithm - Project Report, Rami Cohen,
        http://arxiv.org/abs/1107.2782 , 2011
 """
 import numpy as np

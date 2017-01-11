@@ -7,14 +7,14 @@ def _cv_curvature(phi):
     Returns the 'curvature' of a level set 'phi'.
     """
     P = np.pad(phi, 1, mode='edge')
-    fy = (P[2:, 1:-1] - P[0:-2, 1:-1]) / 2.0
-    fx = (P[1:-1, 2:] - P[1:-1, 0:-2]) / 2.0
-    fyy = P[2:, 1:-1] + P[0:-2, 1:-1] - 2*phi
-    fxx = P[1:-1, 2:] + P[1:-1, 0:-2] - 2*phi
+    fy = (P[2:, 1:-1] - P[:-2, 1:-1]) / 2.0
+    fx = (P[1:-1, 2:] - P[1:-1, :-2]) / 2.0
+    fyy = P[2:, 1:-1] + P[:-2, 1:-1] - 2*phi
+    fxx = P[1:-1, 2:] + P[1:-1, :-2] - 2*phi
     fxy = .25 * (P[2:, 2:] + P[:-2, :-2] - P[:-2, 2:] - P[2:, :-2])
     grad2 = fx**2 + fy**2
     K = ((fxx*fy**2 - 2*fxy*fx*fy + fyy*fx**2) /
-         (grad2*np.sqrt(grad2) + 1e-10))
+         (grad2*np.sqrt(grad2) + 1e-8))
     return K
 
 
@@ -39,17 +39,17 @@ def _cv_calculate_variation(img, phi, mu, lambda1, lambda2, dt):
     C3 = 1. / np.sqrt(eta + phix0**2 + phiyp**2)
     C4 = 1. / np.sqrt(eta + phix0**2 + phiyn**2)
 
-    K = (P[1:-1, 2:]*C1 + P[1:-1, :-2]*C2 +
-         P[2:, 1:-1]*C3 + P[:-2, 1:-1]*C4)
+    K = (P[1:-1, 2:] * C1 + P[1:-1, :-2] * C2 +
+         P[2:, 1:-1] * C3 + P[:-2, 1:-1] * C4)
 
     Hphi = 1 * (phi>0)
     (c1, c2) = _cv_calculate_averages(img, Hphi)
 
-    difference_from_average_term = (- lambda1*(img-c1)**2 +
-                                    lambda2*(img-c2)**2)
+    difference_from_average_term = (- lambda1 * (img-c1)**2 +
+                                    lambda2 * (img-c2)**2)
     new_phi = (phi + (dt*_cv_delta(phi)) *
                (mu*K + difference_from_average_term))
-    return new_phi / (1 + mu*dt*_cv_delta(phi)*(C1+C2+C3+C4))
+    return new_phi / (1 + mu * dt * _cv_delta(phi) * (C1+C2+C3+C4))
 
 
 def _cv_heavyside(x, eps=1.):
@@ -57,7 +57,7 @@ def _cv_heavyside(x, eps=1.):
     Returns the result of a regularised heavyside function of the
     input value(s).
     """
-    return 0.5 * (1. + 2./np.pi * np.arctan(x/eps))
+    return 0.5 * (1. + (2./np.pi) * np.arctan(x/eps))
 
 
 def _cv_delta(x, eps=1.):
@@ -91,7 +91,7 @@ def _cv_difference_from_average_term(img, Hphi, lambda_pos, lambda_neg):
     the average value within a region at each point.
     """
     (c1, c2) = _cv_calculate_averages(img, Hphi)
-    Hinv = 1.-Hphi
+    Hinv = 1. - Hphi
     return (lambda_pos * (img-c1)**2 * Hphi +
             lambda_neg * (img-c2)**2 * Hinv)
 
@@ -107,7 +107,7 @@ def _cv_edge_length_term(phi, mu):
 
 def _cv_energy(img, phi, mu, lambda1, lambda2):
     """
-    Returns the total 'energy' of the current level set function
+    Returns the total 'energy' of the current level set function<
     """
     H = _cv_heavyside(phi)
     avgenergy = _cv_difference_from_average_term(img, H, lambda1, lambda2)
@@ -130,8 +130,8 @@ def _cv_checkerboard(image_size, square_size):
     """
     yv = np.arange(image_size[0]).reshape(image_size[0], 1)
     xv = np.arange(image_size[1])
-    return (np.sin(np.pi/square_size * yv) *
-            np.sin(np.pi/square_size * xv))
+    return (np.sin(np.pi/square_size*yv) *
+            np.sin(np.pi/square_size*xv))
 
 
 def _cv_large_disk(image_size):
@@ -156,8 +156,8 @@ def _cv_small_disk(image_size):
     centerY = int((image_size[0]-1) / 2)
     centerX = int((image_size[1]-1) / 2)
     res[centerY, centerX] = 0.
-    radius = float(min(centerX, centerY))
-    return (radius/2 - distance(res)) / (radius*1.5)
+    radius = float(min(centerX, centerY)) / 2.0
+    return (radius-distance(res)) / (radius*3)
 
 
 def _cv_initial_shape(starting_level_set, img):
@@ -183,9 +183,10 @@ def _cv_initial_shape(starting_level_set, img):
 def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
               dt=0.5, starting_level_set='checkerboard',
               extended_output=False):
-    """Segment objects without clearly defined boundaries.
+    """Chan-vese Algorithm.
 
-    Active contour model by evolving a level set.
+    Active contour model by evolving a level set. Can be used to
+    segment objects without clearly defined boundaries.
 
     Parameters
     ----------
@@ -301,10 +302,10 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
            Luminita Vese, Scale-Space Theories in Computer Vision,
            1999, http://dx.doi.org/10.1007/3-540-48236-9_13
     .. [2] Chan-Vese Segmentation, Pascal Getreuer Image Processing On
-           Line, 2 (2012), pp. 214-224.
+           Line, 2 (2012), pp. 214-224,
            https://doi.org/10.5201/ipol.2012.g-cv
-    .. [3] The Chan-Vese Algorithm - Project Report, Rami Cohen
-           http://arxiv.org/abs/1107.2782 , 2011
+    .. [3] The Chan-Vese Algorithm - Project Report, Rami Cohen,
+           http://arxiv.org/abs/1107.2782, 2011
     """
     if len(img.shape) != 2:
         raise ValueError("Input image should be a 2D array.")
