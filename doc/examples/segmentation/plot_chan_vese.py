@@ -6,7 +6,7 @@ Chan-Vese Segmentation
 The Chan-Vese Algorithm is designed to segment objects without clearly
 defined boundaries. This algorithm is based on level sets that are
 evolved iteratively to minimize an energy, which is defined by
-weighted values corresponding to the sum of differences inintensity
+weighted values corresponding to the sum of differences intensity
 from the average value outside the segmented region, the sum of
 differences from the average value inside the segmented region, and a
 term which is dependent on the length of the boundary of the segmented
@@ -35,8 +35,10 @@ References
 ----------
 .. [1] An Active Contour Model without Edges, Tony Chan and
        Luminita Vese, Scale-Space Theories in Computer Vision, 1999
-.. [2] Chan-Vese Segmentation, Pascal Getreuer Image Processing On
+       http://dx.doi.org/10.1007/3-540-48236-9_13
+.. [2] Chan-Vese Segmentation, Pascal Getreuer, Image Processing On
        Line, 2 (2012), pp. 214-224.
+       https://doi.org/10.5201/ipol.2012.g-cv
 .. [3] The Chan-Vese Algorithm - Project Report, Rami Cohen
        http://arxiv.org/abs/1107.2782 , 2011
 """
@@ -50,6 +52,7 @@ image = data.camera().astype(np.float)
 # result
 cv = chan_vese(image, mu=0.25, lambda1=1, lambda2=1, tol=1e-3, max_iter=200,
                dt=0.5, starting_level_set="checkerboard", extended_output=True)
+
 fig, ax = plt.subplots(2, 2, figsize=(8, 8))
 ax[0, 0].imshow(image, cmap="gray", interpolation="nearest")
 ax[0, 0].set_axis_off()
@@ -57,7 +60,7 @@ ax[0, 0].set_title("Original Image", fontsize=12)
 
 ax[0, 1].imshow(cv[0], cmap="gray", interpolation="nearest")
 ax[0, 1].set_axis_off()
-title = "Chan-Vese segmentation - {0} - iterations".format(str(len(cv[2])))
+title = "Chan-Vese segmentation - {0} - iterations".format(len(cv[2]))
 ax[0, 1].set_title(title, fontsize=12)
 
 ax[1, 0].imshow(cv[1], cmap="gray", interpolation="nearest")

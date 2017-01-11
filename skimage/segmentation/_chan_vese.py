@@ -11,7 +11,7 @@ def _cv_curvature(phi):
     fx = (P[1:-1, 2:] - P[1:-1, 0:-2]) / 2.0
     fyy = P[2:, 1:-1] + P[0:-2, 1:-1] - 2*phi
     fxx = P[1:-1, 2:] + P[1:-1, 0:-2] - 2*phi
-    fxy = .25 * (P[2:, 2:]+P[:-2, :-2]-P[:-2, 2:]-P[2:, :-2])
+    fxy = .25 * (P[2:, 2:] + P[:-2, :-2] - P[:-2, 2:] - P[2:, :-2])
     grad2 = fx**2 + fy**2
     K = ((fxx*fy**2 - 2*fxy*fx*fy + fyy*fx**2) /
          (grad2*np.sqrt(grad2) + 1e-10))
@@ -70,7 +70,7 @@ def _cv_delta(x, eps=1.):
 
 def _cv_calculate_averages(img, Hphi):
     """
-    Returns the average values 'inside' and 'outside'
+    Returns the average values 'inside' and 'outside'.
     """
     H = Hphi
     Hinv = 1. - H
@@ -79,9 +79,9 @@ def _cv_calculate_averages(img, Hphi):
     avg_inside = np.sum(img * H)
     avg_oustide = np.sum(img * Hinv)
     if Hsum != 0:
-        avg_inside = avg_inside / Hsum
+        avg_inside /= Hsum
     if Hinvsum != 0:
-        avg_oustide = avg_oustide / Hinvsum
+        avg_oustide /= Hinvsum
     return (avg_inside, avg_oustide)
 
 
@@ -105,15 +105,14 @@ def _cv_edge_length_term(phi, mu):
     return mu * toret
 
 
-def _cv_energy(img, phi, mu, lambda1, lambda2, heavyside=_cv_heavyside):
+def _cv_energy(img, phi, mu, lambda1, lambda2):
     """
     Returns the total 'energy' of the current level set function
     """
-    H = heavyside(phi)
+    H = _cv_heavyside(phi)
     avgenergy = _cv_difference_from_average_term(img, H, lambda1, lambda2)
-    #lenenergy = _cv_edge_length_term(phi, mu)
-    lenenergy = mu * np.sum(_cv_delta(phi))
-    return np.sum(avgenergy) + lenenergy
+    lenenergy = _cv_edge_length_term(phi, mu)
+    return np.sum(avgenergy) + np.sum(lenenergy)
 
 
 def _cv_reset_level_set(phi):
@@ -186,29 +185,28 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
               extended_output=False):
     """Segment objects without clearly defined boundaries.
 
-    Active contour model by evolving a level set. Supports 2D
-    grayscale images only, and does not implement the area term
-    described in the original article.
+    Active contour model by evolving a level set.
 
     Parameters
     ----------
-    img : (M, N) 2D array
+    img : (M, N) ndarray
         Grayscale image to be segmented.
     mu : float
-        'edge length' weight parameter. Higher mu values will produce
-        a 'round' edge, while values closer to zero will detect
-        smaller objects.
+        'edge length' weight parameter. Higher `mu` values will
+        produce a 'round' edge, while values closer to zero will
+        detect smaller objects.
     lambda1 : float, optional
         'difference from average' weight parameter for the output
-        region with value 'True'. If it is lower than lambda2, this
+        region with value 'True'. If it is lower than `lambda2`, this
         region will have a larger range of values than the other.
     lambda2 : float, optional
         'difference from average' weight parameter for the output
-        region with value 'False'. If it is lower than lambda1, this
+        region with value 'False'. If it is lower than `lambda1`, this
         region will have a larger range of values than the other.
     tol : float, positive, optional
-        'energy' variation tolerance between iterations. If the
-        difference of 'energy' between two iterations is below this
+        Level set variation tolerance between iterations. If the
+        L2 norm difference between the level sets of successive
+        iterations normalized by the area of the image is below this
         value, the algorithm will assume that the solution was
         reached.
     max_iter : uint, optional
@@ -219,7 +217,7 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
         serves to accelerate the algorithm. While higher values may
         speed up the algorithm, they may also lead to convergence
         problems.
-    starting_level_set : str or (M, N) 2D array, optional
+    starting_level_set : str or (M, N) ndarray, optional
         Defines the starting level set used by the algorithm.
         If a string is inputted, a level set that matches the image
         size will automatically be generated. Alternatively, it is
@@ -251,9 +249,9 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
 
     Returns
     -------
-    segmentation : (M, N) 2D array, bool
+    segmentation : (M, N) ndarray, bool
         Segmentation produced by the algorithm.
-    phi : (M, N) 2D array, float
+    phi : (M, N) ndarray, float
         Final level set computed by the algorithm.
     energies : list of floats
         Shows the evolution of the 'energy' for each step of the
@@ -262,18 +260,49 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
 
     Notes
     -----
+    The Chan-Vese Algorithm is designed to segment objects without
+    clearly defined boundaries. This algorithm is based on level sets
+    that are evolved iteratively to minimize an energy, which is
+    defined by weighted values corresponding to the sum of differences
+    intensity from the average value outside the segmented region, the
+    sum of differences from the average value inside the segmented
+    region, and a term which is dependent on the length of the
+    boundary of the segmented region.
+
+    This algorithm was first proposed by Tony Chan and Luminita Vese,
+    in a publicaion entitled "An Active Countour Model Without Edges"
+    [1]_.
+
+    This implementation of the algorithm is somewhat simplified in the
+    sense that the area factor 'nu' described in the original paper is
+    not implemented, and is only suitable for grayscale images.
+
+    Typical values for `lambda1` and `lambda2` are 1. If the
+    'background' is very different from the segmented object in terms
+    of distribution (for example, a uniform black image with figures
+    of varying intensity), then these values should be different from
+    each other.
+
+    Typical values for mu are between 0 and 1, though higher values
+    can be used when dealing with shapes with very ill-defined
+    contours.
+
     The 'energy' which this algorithm tries to minimize is defined
     as the sum of the differences from the average within the region
     squared and weighed by the 'lambda' factors to which is added the
     length of the contour multiplied by the 'mu' factor.
 
+    Supports 2D grayscale images only, and does not implement the area
+    term described in the original article.
+
     References
     ----------
     .. [1] An Active Contour Model without Edges, Tony Chan and
            Luminita Vese, Scale-Space Theories in Computer Vision,
-           1999
+           1999, http://dx.doi.org/10.1007/3-540-48236-9_13
     .. [2] Chan-Vese Segmentation, Pascal Getreuer Image Processing On
            Line, 2 (2012), pp. 214-224.
+           https://doi.org/10.5201/ipol.2012.g-cv
     .. [3] The Chan-Vese Algorithm - Project Report, Rami Cohen
            http://arxiv.org/abs/1107.2782 , 2011
     """

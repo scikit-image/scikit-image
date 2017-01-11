@@ -248,5 +248,5 @@
 - Scott Sievert
   Wavelet denoising
 
--Gleb Goussarov
+- Gleb Goussarov
   Chan-Vese Segmentation
