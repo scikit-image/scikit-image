@@ -322,7 +322,7 @@ class TestWatershed(unittest.TestCase):
         #
         # The two objects should be the same size, except possibly for the
         # border region
-#
+        #
         size1 = np.sum(out == 1)
         size2 = np.sum(out == 2)
         self.assertTrue(abs(size1 - size2) <= 6)
@@ -423,6 +423,7 @@ class TestWatershed(unittest.TestCase):
              for i0, j0 in ((5, 5), (5, 10), (10, 5), (10, 10))])
         dmin = np.min(d, 2)
         self.assertTrue(np.all(d[i, j, out[i, j]-1] == dmin))
+
 
     def test_watershed12(self):
         "The watershed line"
