@@ -107,7 +107,7 @@ def _cv_edge_length_term(phi, mu):
 
 def _cv_energy(img, phi, mu, lambda1, lambda2):
     """
-    Returns the total 'energy' of the current level set function<
+    Returns the total 'energy' of the current level set function.
     """
     H = _cv_heavyside(phi)
     avgenergy = _cv_difference_from_average_term(img, H, lambda1, lambda2)
@@ -183,7 +183,7 @@ def _cv_initial_shape(starting_level_set, img):
 def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
               dt=0.5, starting_level_set='checkerboard',
               extended_output=False):
-    """Chan-vese Algorithm.
+    """Chan-Vese Algorithm.
 
     Active contour model by evolving a level set. Can be used to
     segment objects without clearly defined boundaries.
@@ -319,12 +319,10 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
         img = img / np.max(img)
 
     i = 0
-    delta = np.finfo(np.float).max
     old_energy = _cv_energy(img, phi, mu, lambda1, lambda2)
     energies = []
     phivar = tol + 1
     segmentation = phi > 0
-    segchange = True
     area = img.shape[0] * img.shape[1]
 
     while(phivar > tol and i < max_iter):
@@ -343,7 +341,6 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
         new_energy = _cv_energy(img, phi, mu, lambda1, lambda2)
         # Save old energy values
         energies.append(old_energy)
-        delta = np.abs(new_energy - old_energy)
         old_energy = new_energy
         i += 1
 
