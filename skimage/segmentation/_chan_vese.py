@@ -335,7 +335,7 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
         phivar = np.sum((phi-oldphi)**2) / area
         phivar = np.sqrt(phivar)
         # Extract energy and compare to previous level set and
-        # segmentation to see if continuin is necessary
+        # segmentation to see if continuing is necessary
         segmentation = phi > 0
         segchange = not np.array_equal(oldseg, segmentation)
         new_energy = _cv_energy(img, phi, mu, lambda1, lambda2)
