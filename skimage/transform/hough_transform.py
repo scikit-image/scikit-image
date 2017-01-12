@@ -287,7 +287,7 @@ def probabilistic_hough_line(img, threshold=10, line_length=50,
     Returns
     -------
     lines : list
-      List of lines identified, lines in format ((x0, y0), (x1, y0)),
+      List of lines identified, lines in format ((x0, y0), (x1, y1)),
       indicating line start and end.
 
     References
