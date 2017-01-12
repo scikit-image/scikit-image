@@ -61,6 +61,19 @@ def test_flat_peak():
     assert len(peaks) == 4
 
 
+def test_sorted_peaks():
+    image = np.zeros((5, 5), dtype=np.uint8)
+    image[1, 1] = 20
+    image[3, 3] = 10
+    peaks = peak.peak_local_max(image, min_distance=1)
+    assert peaks.tolist() == [[1, 1], [3, 3]]
+
+    image = np.zeros((3, 10))
+    image[1, (1, 3, 5, 7)] = (1, 3, 2, 4)
+    peaks = peak.peak_local_max(image, min_distance=1)
+    assert peaks.tolist() == [[1, 7], [1, 3], [1, 5], [1, 1]]
+
+
 def test_num_peaks():
     image = np.zeros((7, 7), dtype=np.uint8)
     image[1, 1] = 10
@@ -165,11 +178,12 @@ def test_indices_with_labels():
         for jmin, jmax in ((0, 30), (30, 60)):
             expected[imin:imax, jmin:jmax] = ndi.maximum_filter(
                 image[imin:imax, jmin:jmax], footprint=footprint)
-    expected = (expected == image)
+    expected = np.transpose(np.nonzero(expected == image))
+    expected = expected[np.argsort(image[tuple(expected.T)])[::-1]]
     result = peak.peak_local_max(image, labels=labels, min_distance=1,
                                  threshold_rel=0, footprint=footprint,
                                  indices=True, exclude_border=False)
-    assert (result == np.transpose(expected.nonzero())).all()
+    assert (result == expected).all()
 
 
 def test_ndarray_indices_false():
@@ -357,11 +371,12 @@ def test_3D():
                  [[15, 15, 15]])
     assert_equal(peak.peak_local_max(image, min_distance=6, threshold_rel=0),
                  [[15, 15, 15]])
-    assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
-                                     exclude_border=False),
-                 [[5, 5, 5], [15, 15, 15]])
-    assert_equal(peak.peak_local_max(image, min_distance=5, threshold_rel=0),
-                 [[5, 5, 5], [15, 15, 15]])
+    assert sorted(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
+                                      exclude_border=False).tolist()) == \
+        [[5, 5, 5], [15, 15, 15]]
+    assert sorted(peak.peak_local_max(image, min_distance=5,
+                                      threshold_rel=0).tolist()) == \
+        [[5, 5, 5], [15, 15, 15]]
 
 
 def test_4D():
@@ -372,11 +387,12 @@ def test_4D():
                  [[15, 15, 15, 15]])
     assert_equal(peak.peak_local_max(image, min_distance=6, threshold_rel=0),
                  [[15, 15, 15, 15]])
-    assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
-                                     exclude_border=False),
-                 [[5, 5, 5, 5], [15, 15, 15, 15]])
-    assert_equal(peak.peak_local_max(image, min_distance=5, threshold_rel=0),
-                 [[5, 5, 5, 5], [15, 15, 15, 15]])
+    assert sorted(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
+                                      exclude_border=False).tolist()) == \
+        [[5, 5, 5, 5], [15, 15, 15, 15]]
+    assert sorted(peak.peak_local_max(image, min_distance=5,
+                                      threshold_rel=0).tolist()) == \
+        [[5, 5, 5, 5], [15, 15, 15, 15]]
 
 
 def test_threshold_rel_default():
