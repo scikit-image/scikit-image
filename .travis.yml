@@ -48,7 +48,11 @@ matrix:
       env: OPTIONAL_DEPS=1 WITH_PYSIDE=1
     - os: linux
       python: 3.5
+    - os: linux
+      python: 3.5
       env: PIP_FLAGS="--pre"
+    - os: linux
+      python: 3.6
     - os: osx
       osx_image: xcode7.3
       language: objective-c
@@ -58,6 +62,9 @@ before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source tools/travis_osx_install.sh ; fi
     - ccache -s
     - export PATH=/usr/lib/ccache:${PATH}
+    # Attempt to fix bug making virtualenvs for Python 3.6
+    - python -m pip install -U pip
+    - pip install -U virtualenv
     - source tools/travis_before_install.sh
     - which python; python --version
     - python check_bento_build.py

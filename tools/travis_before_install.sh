@@ -5,10 +5,16 @@ set -ex
 export COVERALLS_REPO_TOKEN=7LdFN9232ZbSY3oaXHbQIzLazrSf6w2pQ
 export PIP_DEFAULT_TIMEOUT=60
 
+# This URL is for any extra wheels that are not available on pypi.  As of 14
+# Jan 2017, the major packages such as numpy and matplotlib are up for all
+# platforms.  The URL comes points ot a Rackspace CDN belonging to the
+# scikit-learn team.  Please contact Olivier Grisel or Matthew Brett if you
+# need permissions for this folder.
+EXTRA_WHEELS="https://5cf40426d9f06eb7461d-6fe47d9331aba7cd62fc36c7196769e4.ssl.cf2.rackcdn.com"
+export WHEELHOUSE="--find-links=$EXTRA_WHEELS"
+
 if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
     sh -e /etc/init.d/xvfb start
-    export WHEELHOUSE="--no-index --trusted-host travis-wheels.scikit-image.org \
-                       --find-links=http://travis-wheels.scikit-image.org/"
 fi
 
 export DISPLAY=:99.0
@@ -46,7 +52,7 @@ fi
 virtualenv -p python ~/venv
 source ~/venv/bin/activate
 
-pip install --upgrade pip
+python -m pip install --upgrade pip
 pip install --retries 3 -q wheel flake8 codecov nose
 # install numpy from PyPI instead of our wheelhouse
 pip install --retries 3 -q wheel numpy
