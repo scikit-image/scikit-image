@@ -132,7 +132,7 @@ def _compute_neighbors(image, structure, offset):
 
 
 def watershed(image, markers, connectivity=1, offset=None, mask=None,
-              compactness=0):
+              compactness=0, watershed_line=False):
     """Find watershed basins in `image` flooded from given `markers`.
 
     Parameters
@@ -156,6 +156,9 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
     compactness : float, optional
         Use compact watershed [3]_ with given compactness parameter.
         Higher values result in more regularly-shaped watershed basins.
+    watershed_line : bool, optional
+        If watershed_line is True, a one-pixel wide line separates the regions
+        obtained by the watershed algorithm. The line has the label 0.
 
     Returns
     -------
@@ -255,8 +258,13 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
     _watershed.watershed_raveled(image.ravel(),
                                  marker_locations, flat_neighborhood,
                                  mask, image_strides, compactness,
-                                 output.ravel())
+                                 output.ravel(),
+                                 watershed_line)
 
     output = crop(output, pad_width, copy=True)
+
+    if watershed_line:
+        min_val = output.min()
+        output[output == min_val] = 0
 
     return output
