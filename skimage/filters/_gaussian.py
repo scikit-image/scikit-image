@@ -4,13 +4,22 @@ from scipy import ndimage as ndi
 
 from ..util import img_as_float
 from ..color import guess_spatial_dimensions
-from .._shared.utils import warn
+from .._shared.utils import warn, convert_to_float
+
 
 __all__ = ['gaussian']
 
 
+def _convert_input(image, preserve_range):
+    if preserve_range:
+        image = image.astype(np.double)
+    else:
+        image = img_as_float(image)
+    return image
+
+
 def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
-             multichannel=None):
+             multichannel=None, preserve_range=False):
     """Multi-dimensional Gaussian filter
 
     Parameters
@@ -38,6 +47,9 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         not mixed together). Only 3 channels are supported. If `None`,
         the function will attempt to guess this, and raise a warning if
         ambiguous, when the array has shape (M, N, 3).
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
 
     Returns
     -------
@@ -101,5 +113,5 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
             sigma = [sigma] * (image.ndim - 1)
         if len(sigma) != image.ndim:
             sigma = np.concatenate((np.asarray(sigma), [0]))
-    image = img_as_float(image)
+    image = convert_to_float(image, preserve_range)
     return ndi.gaussian_filter(image, sigma, mode=mode, cval=cval)
