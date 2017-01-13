@@ -214,7 +214,7 @@ def check_random_state(seed):
                      ' instance' % seed)
 
 
-def convert_input(image, preserve_range):
+def convert_to_float(image, preserve_range):
     """Convert input image to double image with the appropriate range.
 
     Parameters

@@ -8,7 +8,7 @@ from ._warps_cy import _warp_fast
 from ..measure import block_reduce
 
 from ..util import img_as_float
-from .._shared.utils import get_bound_method_class, safe_as_int, warn, convert_input
+from .._shared.utils import get_bound_method_class, safe_as_int, warn, convert_to_float
 
 
 HOMOGRAPHY_TRANSFORMS = (
@@ -102,7 +102,7 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
 
         coord_map = np.array([map_rows, map_cols, map_dims])
 
-        image = convert_input(image, preserve_range)
+        image = convert_to_float(image, preserve_range)
 
         out = ndi.map_coordinates(image, coord_map, order=order,
                                   mode=ndi_mode, cval=cval)
