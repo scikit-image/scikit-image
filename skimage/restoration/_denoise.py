@@ -492,7 +492,7 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
         Input data to be denoised. `img` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
-    sigma : float, list, optional
+    sigma : float or list, optional
         The noise standard deviation used when computing the threshold
         adaptively as described in [1]_ for each color channel. When None
         (default), the noise standard deviation is estimated via the method in
@@ -513,8 +513,8 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
         correspond to the final axis of the array).
     convert2ycbcr : bool, optional
         If True and multichannel True, do the wavelet denoising in the YCbCr
-        colorspace (typically) instead of the RGB color space. This typically
-        results in better performance for RGB images.
+        colorspace instead of the RGB color space. This typically results in
+        better performance for RGB images.
 
     Returns
     -------
@@ -563,6 +563,7 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
         if isinstance(sigma, numbers.Number) or sigma is None:
             sigma = [sigma] * img.shape[-1]
 
+    if multichannel:
         if convert2ycbcr:
             out = color.rgb2ycbcr(img)
             for i in range(3):
@@ -575,7 +576,6 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
 
                 out[..., i] = out[..., i] * (max - min)
                 out[..., i] += min
-
             out = color.ycbcr2rgb(out)
         else:
             out = np.empty_like(img)
