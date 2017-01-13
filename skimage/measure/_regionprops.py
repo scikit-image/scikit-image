@@ -349,7 +349,7 @@ class _RegionProperties(object):
 
 def regionprops(label_image, intensity_image=None, cache=True):
     """Measure properties of labeled image regions.
-    
+
     Parameters
     ----------
     label_image : (N, M) ndarray
