@@ -11,11 +11,22 @@ export PIP_DEFAULT_TIMEOUT=60
 # scikit-learn team.  Please contact Olivier Grisel or Matthew Brett if you
 # need permissions for this folder.
 EXTRA_WHEELS="https://5cf40426d9f06eb7461d-6fe47d9331aba7cd62fc36c7196769e4.ssl.cf2.rackcdn.com"
-export WHEELHOUSE="--find-links=$EXTRA_WHEELS"
+WHEELHOUSE="--find-links=$EXTRA_WHEELS"
 
 if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
     sh -e /etc/init.d/xvfb start
+    # This one is for wheels we can only build on the travis precise container.
+    # As of 14 Jan 2017, this is only pyside.  Also on Rackspace, see above.
+    # To build new wheels for this container, consider using:
+    # https://github.com/matthew-brett/travis-wheel-builder . The wheels from
+    # that building repo upload to the container "travis-wheels" available at
+    # https://8167b5c3a2af93a0a9fb-13c6eee0d707a05fa610c311eec04c66.ssl.cf2.rackcdn.com
+    # You then need to transfer them to the container pointed to by the URL
+    # below (called "precise-wheels" on the Rackspace interface).
+    PRECISE_WHEELS="https://7d8d0debcc2964ae0517-cec8b1780d3c0de237cc726d565607b4.ssl.cf2.rackcdn.com"
+    WHEELHOUSE="--find-links=$PRECISE_WHEELS $WHEELHOUSE"
 fi
+export WHEELHOUSE
 
 export DISPLAY=:99.0
 export PYTHONWARNINGS="d,all:::skimage"
