@@ -131,8 +131,9 @@ orientation = best[5]
 # Draw the ellipse on the original image
 cy, cx = ellipse_perimeter(yc, xc, a, b, orientation)
 image_rgb[cy, cx] = (0, 0, 255)
-# Draw the edge (white) and the resulting ellipse (red)
-edges = color.gray2rgb(edges)
+# The edge in white
+edges = color.gray2rgb(edges).astype('uint8') * 255
+# The resulting ellipse in red
 edges[cy, cx] = (250, 0, 0)
 
 fig2, (ax1, ax2) = plt.subplots(ncols=2, nrows=1, figsize=(8, 4), sharex=True,
