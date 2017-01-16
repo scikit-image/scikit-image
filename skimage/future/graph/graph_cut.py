@@ -1,4 +1,3 @@
-
 try:
     import networkx as nx
 except ImportError:
