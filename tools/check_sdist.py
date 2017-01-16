@@ -20,8 +20,8 @@ data = ['./' + l.split(' ->')[0] for l in data]
 
 ignore_exts = ['.pyc', '.so', '.o', '#', '~', '.gitignore']
 ignore_dirs = ['./dist', './tools', './doc', './viewer_examples',
-               './downloads']
-ignore_files = ['./TODO.md', './README.md',
+               './downloads', './scikit_image.egg-info']
+ignore_files = ['./TODO.md', './README.md', './MANIFEST',
                 './.gitignore', './.travis.yml', './.gitmodules',
                 './.mailmap', './.coveragerc', './appveyor.yml',
                 './tools/check_bento_build.py',
