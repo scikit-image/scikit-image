@@ -51,8 +51,9 @@ matrix:
     - os: linux
       python: 3.5
       env: PIP_FLAGS="--pre"
-    - os: linux
-      python: 3.6
+    # This entry waiting for resolution of issue 2450
+    # - os: linux
+    #  python: 3.6
     - os: osx
       osx_image: xcode7.3
       language: objective-c
