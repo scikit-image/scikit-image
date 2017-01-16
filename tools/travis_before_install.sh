@@ -7,9 +7,9 @@ export PIP_DEFAULT_TIMEOUT=60
 
 # This URL is for any extra wheels that are not available on pypi.  As of 14
 # Jan 2017, the major packages such as numpy and matplotlib are up for all
-# platforms.  The URL comes points ot a Rackspace CDN belonging to the
-# scikit-learn team.  Please contact Olivier Grisel or Matthew Brett if you
-# need permissions for this folder.
+# platforms.  The URL points to a Rackspace CDN belonging to the scikit-learn
+# team.  Please contact Olivier Grisel or Matthew Brett if you need
+# permissions for this folder.
 EXTRA_WHEELS="https://5cf40426d9f06eb7461d-6fe47d9331aba7cd62fc36c7196769e4.ssl.cf2.rackcdn.com"
 WHEELHOUSE="--find-links=$EXTRA_WHEELS"
 
