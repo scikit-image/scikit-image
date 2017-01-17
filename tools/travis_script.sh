@@ -55,7 +55,7 @@ if [[ $WITH_QT == 1 ]]; then
         ln -sf $LIB_SYSTEM_PATH/$LIB $LIB_VIRTUALENV_PATH/$LIB
     done
 
-elif [[ $WITH_PYSIDE == 1 ]]; then
+elif [ "$WITH_PYSIDE" == 1 ] && [ -e ~/venv/bin/pyside_postinstall.py ]; then
     python ~/venv/bin/pyside_postinstall.py -install
 fi
 
