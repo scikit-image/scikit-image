@@ -20,7 +20,7 @@ image = data.astronaut()
 rows, cols, dim = image.shape
 pyramid = tuple(pyramid_gaussian(image, downscale=2))
 
-composite_image = np.zeros((rows, cols + cols / 2, 3), dtype=np.double)
+composite_image = np.zeros((rows, cols + cols // 2, 3), dtype=np.double)
 
 composite_image[:rows, :cols, :] = pyramid[0]
 
