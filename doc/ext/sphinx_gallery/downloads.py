@@ -55,14 +55,14 @@ def python_zip(file_list, gallery_path, extension='.py'):
         zip file name, written as `target_dir_{python,jupyter}.zip`
         depending on the extension
     """
-    zipname = gallery_path.replace(os.path.sep, '_')
+    zipname = os.path.basename(gallery_path)
     zipname += '_python' if extension == '.py' else '_jupyter'
     zipname = os.path.join(gallery_path, zipname + '.zip')
 
     zipf = zipfile.ZipFile(zipname, mode='w')
     for fname in file_list:
         file_src = os.path.splitext(fname)[0] + extension
-        zipf.write(file_src)
+        zipf.write(file_src, os.path.relpath(file_src, gallery_path))
     zipf.close()
 
     return zipname
