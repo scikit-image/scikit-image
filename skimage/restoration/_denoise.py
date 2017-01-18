@@ -6,6 +6,8 @@ from .. import img_as_float
 from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 from .._shared.utils import skimage_deprecation, warn
 import pywt
+import skimage.color as color
+import numbers
 
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
@@ -480,7 +482,8 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
 
 
 def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
-                    wavelet_levels=None, multichannel=False):
+                    wavelet_levels=None, multichannel=False,
+                    convert2ycbcr=False):
     """Perform wavelet denoising on an image.
 
     Parameters
@@ -489,10 +492,11 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
         Input data to be denoised. `img` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
-    sigma : float, optional
+    sigma : float or list, optional
         The noise standard deviation used when computing the threshold
-        adaptively as described in [1]_. When None (default), the noise
-        standard deviation is estimated via the method in [2]_.
+        adaptively as described in [1]_ for each color channel. When None
+        (default), the noise standard deviation is estimated via the method in
+        [2]_.
     wavelet : string, optional
         The type of wavelet to perform and can be any of the options
         ``pywt.wavelist`` outputs. The default is `'db1'`. For example,
@@ -507,6 +511,10 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
     multichannel : bool, optional
         Apply wavelet denoising separately for each channel (where channels
         correspond to the final axis of the array).
+    convert2ycbcr : bool, optional
+        If True and multichannel True, do the wavelet denoising in the YCbCr
+        colorspace instead of the RGB color space. This typically results in
+        better performance for RGB images.
 
     Returns
     -------
@@ -525,6 +533,9 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
     If the input is 3D, this function performs wavelet denoising on each color
     plane separately. The output image is clipped between either [-1, 1] and
     [0, 1] depending on the input image range.
+
+    When YCbCr conversion is done, every color channel is scaled between 0
+    and 1, and `sigma` values are applied to these scaled color channels.
 
     References
     ----------
@@ -549,14 +560,34 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
     img = img_as_float(img)
 
     if multichannel:
-        out = np.empty_like(img)
-        for c in range(img.shape[-1]):
-            out[..., c] = _wavelet_threshold(img[..., c], wavelet=wavelet,
-                                             mode=mode, sigma=sigma,
-                                             wavelet_levels=wavelet_levels)
+        if isinstance(sigma, numbers.Number) or sigma is None:
+            sigma = [sigma] * img.shape[-1]
+
+    if multichannel:
+        if convert2ycbcr:
+            out = color.rgb2ycbcr(img)
+            for i in range(3):
+                # renormalizing this color channel to live in [0, 1]
+                min, max = out[..., i].min(), out[..., i].max()
+                channel = out[..., i] - min
+                channel /= max - min
+                out[..., i] = denoise_wavelet(channel, sigma=sigma[i],
+                                              wavelet=wavelet, mode=mode)
+
+                out[..., i] = out[..., i] * (max - min)
+                out[..., i] += min
+            out = color.ycbcr2rgb(out)
+        else:
+            out = np.empty_like(img)
+            for c in range(img.shape[-1]):
+                out[..., c] = _wavelet_threshold(img[..., c], wavelet=wavelet,
+                                                 mode=mode, sigma=sigma[c],
+                                                 wavelet_levels=wavelet_levels)
+
     else:
         out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
-                                 sigma=sigma, wavelet_levels=wavelet_levels)
+                                 sigma=sigma,
+                                 wavelet_levels=wavelet_levels)
 
     clip_range = (-1, 1) if img.min() < 0 else (0, 1)
     return np.clip(out, *clip_range)
