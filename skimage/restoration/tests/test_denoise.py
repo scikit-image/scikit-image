@@ -323,7 +323,13 @@ def test_no_denoising_for_small_h():
 
 def test_wavelet_denoising():
     rstate = np.random.RandomState(1234)
-    for img, multichannel in [(astro_gray, False), (astro, True)]:
+
+    # version with one odd-sized dimension
+    astro_gray_odd = astro_gray[:, :-1]
+    astro_odd = astro[:, :-1]
+
+    for img, multichannel in [(astro_gray, False), (astro_gray_odd, False),
+                              (astro_odd, True)]:
         sigma = 0.1
         noisy = img + sigma * rstate.randn(*(img.shape))
         noisy = np.clip(noisy, 0, 1)
