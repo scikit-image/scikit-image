@@ -429,6 +429,10 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
     """
     wavelet = pywt.Wavelet(wavelet)
 
+    # original_extent is used to workaround PyWavelets issue #80
+    # odd-sized input results in an image with 1 extra sample after waverecn
+    original_extent = [slice(s) for s in img.shape]
+
     # Determine the number of wavelet decomposition levels
     if wavelet_levels is None:
         # Determine the maximum number of possible levels for img
@@ -467,7 +471,7 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
                                                 mode=mode) for key in level}
                            for thresh, level in zip(threshold, dcoeffs)]
     denoised_coeffs = [coeffs[0]] + denoised_detail
-    return pywt.waverecn(denoised_coeffs, wavelet)
+    return pywt.waverecn(denoised_coeffs, wavelet)[original_extent]
 
 
 def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
