@@ -161,7 +161,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
             mask = mask.swapaxes(0, i)
             remove = (footprint.shape[i] if footprint is not None
                       else 2 * exclude_border)
-            mask[:remove // 2] = mask[-remove // 2:] = False
+            mask[:int(remove // 2)] = mask[int(-remove // 2):] = False
             mask = mask.swapaxes(0, i)
 
     # find top peak candidates above a threshold
