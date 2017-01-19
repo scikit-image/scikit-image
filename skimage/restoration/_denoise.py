@@ -383,7 +383,7 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
 
 def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
                        wavelet_levels=None):
-    """Perform wavelet denoising.
+    """Perform wavelet thresholding.
 
     Parameters
     ----------
@@ -415,17 +415,6 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
     -------
     out : ndarray
         Denoised image.
-
-    Notes
-    -----
-    Reference [1]_ used four levels of wavelet decomposition.  To be more
-    flexible for a range of input sizes, the implementation here stops 3 levels
-    prior to the maximum level of decomposition for `img` (the exact # of
-    levels thus depends on `img.shape` and the chosen wavelet). BayesShrink
-    variance estimation doesn't work well on levels with extremely small
-    coefficient arrays.  This is the rationale for skipping a few of the
-    coarsest levels.  The user can override the automated setting by explicitly
-    specifying `wavelet_levels`.
 
     References
     ----------
