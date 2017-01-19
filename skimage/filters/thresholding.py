@@ -758,7 +758,10 @@ def _mean_std(image, w):
         raise ValueError(
             "Window size w = %s must be odd and greater than 1." % w)
 
-    padded = np.pad(image.astype('float'), (2, 1), mode='reflect')
+    left_pad = w // 2 + 1
+    right_pad = w // 2
+    padded = np.pad(image.astype('float'), (left_pad, right_pad),
+                    mode='reflect')
     padded_sq = padded * padded
 
     integral = integral_image(padded)
@@ -769,9 +772,9 @@ def _mean_std(image, w):
         kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
 
     sum_full = ndi.correlate(integral, kern, mode='constant')
-    m = util.crop(sum_full, (2, 1)) / (w * w)
+    m = util.crop(sum_full, (left_pad, right_pad)) / (w ** image.ndim)
     sum_sq_full = ndi.correlate(integral_sq, kern, mode='constant')
-    g2 = util.crop(sum_sq_full, (2, 1)) / (w * w)
+    g2 = util.crop(sum_sq_full, (left_pad, right_pad)) / (w ** image.ndim)
     s = np.sqrt(g2 - m * m)
     return m, s
 

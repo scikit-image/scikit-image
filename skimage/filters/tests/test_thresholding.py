@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import ndimage as ndi
 from numpy.testing import (assert_equal,
                            assert_almost_equal,
                            assert_raises)
@@ -15,7 +16,8 @@ from skimage.filters.thresholding import (threshold_adaptive,
                                           threshold_sauvola,
                                           threshold_mean,
                                           threshold_triangle,
-                                          threshold_minimum)
+                                          threshold_minimum,
+                                          _mean_std)
 
 
 class TestSimpleImage():
@@ -387,6 +389,30 @@ def test_triangle_flip():
     # See numpy #7685 for a future np.testing API
     unequal_pos = np.where(t_img.ravel() != t_inv_inv_img.ravel())
     assert(len(unequal_pos[0]) / t_img.size < 1e-2)
+
+
+def test_mean_std_2d():
+    image = np.random.rand(256, 256)
+    window_size = 11
+    m, s = _mean_std(image, w=window_size)
+    mean_kernel = np.ones((window_size,) * 2) / window_size**2
+    expected_m = ndi.convolve(image, mean_kernel, mode='mirror')
+    np.testing.assert_allclose(m, expected_m)
+    expected_s = ndi.generic_filter(image, np.std, size=window_size,
+                                    mode='mirror')
+    np.testing.assert_allclose(s, expected_s)
+
+
+def test_mean_std_3d():
+    image = np.random.rand(40, 40, 40)
+    window_size = 5
+    mean_kernel = np.ones((window_size,) * 3) / window_size**3
+    m, s = _mean_std(image, w=window_size)
+    expected_m = ndi.convolve(image, mean_kernel, mode='mirror')
+    np.testing.assert_allclose(m, expected_m)
+    expected_s = ndi.generic_filter(image, np.std, size=window_size,
+                                    mode='mirror')
+    np.testing.assert_allclose(s, expected_s)
 
 
 if __name__ == '__main__':
