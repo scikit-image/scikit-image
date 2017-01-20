@@ -2,7 +2,7 @@
 """
 
 import numpy as np
-from nose.tools import (assert_true, assert_raises, assert_equal)
+from numpy.testing import assert_raises, assert_equal
 from skimage._shared.testing import doctest_skip_parser, test_parallel
 
 
@@ -32,8 +32,8 @@ def test_skipper():
 
     f2 = doctest_skip_parser(f)
     c2 = doctest_skip_parser(c)
-    assert_true(f is f2)
-    assert_true(c is c2)
+    assert f is f2
+    assert c is c2
 
     expected = \
         """ Header
@@ -53,7 +53,7 @@ def test_skipper():
     f2 = doctest_skip_parser(f)
     c2 = doctest_skip_parser(c)
 
-    assert_true(f is f2)
+    assert f is f2
     expected = \
         """ Header
 
