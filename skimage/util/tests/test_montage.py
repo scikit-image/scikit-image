@@ -1,4 +1,4 @@
-from nose.tools import assert_equal, raises
+from numpy.testing import assert_equal, assert_raises
 from numpy.testing import assert_array_equal
 
 import numpy as np
@@ -92,10 +92,10 @@ def test_rescale_intensity():
     assert_array_equal(arr_out, gt)
 
 
-@raises(AssertionError)
 def test_error_ndim():
     arr_error = np.random.randn(1, 2, 3, 4)
-    montage2d(arr_error)
+    with assert_raises(AssertionError):
+        montage2d(arr_error)
 
 
 if __name__ == '__main__':
