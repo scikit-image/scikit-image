@@ -1,4 +1,6 @@
-"""Testing utilities."""
+"""
+Testing utilities.
+"""
 
 
 import os
@@ -18,29 +20,18 @@ from .. import data, io, img_as_uint, img_as_float, img_as_int, img_as_ubyte
 SKIP_RE = re.compile("(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
 
 
-def _assert_less(a, b, msg=None):
+def assert_less(a, b, msg=None):
     message = "%r is not lower than %r" % (a, b)
     if msg is not None:
         message += ": " + msg
     assert a < b, message
 
 
-def _assert_greater(a, b, msg=None):
+def assert_greater(a, b, msg=None):
     message = "%r is not greater than %r" % (a, b)
     if msg is not None:
         message += ": " + msg
     assert a > b, message
-
-
-try:
-    from nose.tools import assert_less
-except ImportError:
-    assert_less = _assert_less
-
-try:
-    from nose.tools import assert_greater
-except ImportError:
-    assert_greater = _assert_greater
 
 
 def doctest_skip_parser(func):
