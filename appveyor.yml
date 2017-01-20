@@ -69,8 +69,8 @@ test_script:
     # Use the Agg backend in Matplotlib
   -  echo backend:Agg > matplotlibrc
 
-  # Run unit tests with nose
-  - "python -c \"import nose; nose.main()\" -v -s skimage"
+  # Run unit tests with pytest
+  - "python -c \"import pytest; pytest.main(['skimage'])\""
 
 artifacts:
   # Archive the generated wheel package in the ci.appveyor.com build report.
