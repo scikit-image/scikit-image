@@ -35,7 +35,8 @@ def criteria_opening(image, crit_val, mask=None,
                                                   offset=None)
 
     # TODO : fix the structuring element issue. 
-    seeds = local_minima(image)
+    seeds_bin = local_minima(image)
+    seeds = label(seeds_bin)
 
     image = np.pad(image, 1, mode='constant')
     mask = np.pad(mask, pad_width, mode='constant').ravel()
