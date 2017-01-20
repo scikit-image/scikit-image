@@ -2,7 +2,6 @@ import os
 import tempfile
 
 import numpy as np
-from nose.tools import assert_true
 from numpy.testing import assert_equal, raises, assert_allclose
 from skimage import novice
 from skimage.novice._novice import (array_to_xy_origin, xy_to_array_origin,
@@ -95,7 +94,8 @@ def test_pixel_rgba():
     pixel.rgba = np.arange(4)
 
     assert_equal(pixel.rgba, np.arange(4))
-    for i, channel in enumerate((pixel.red, pixel.green, pixel.blue, pixel.alpha)):
+    pixel_channels = (pixel.red, pixel.green, pixel.blue, pixel.alpha)
+    for i, channel in enumerate(pixel_channels):
         assert_equal(channel, i)
 
     pixel.red = 3
@@ -104,7 +104,8 @@ def test_pixel_rgba():
     pixel.alpha = 6
     assert_equal(pixel.rgba, np.arange(4) + 3)
 
-    for i, channel in enumerate((pixel.red, pixel.green, pixel.blue, pixel.alpha)):
+    pixel_channels = (pixel.red, pixel.green, pixel.blue, pixel.alpha)
+    for i, channel in enumerate(pixel_channels):
         assert_equal(channel, i + 3)
 
 
@@ -141,12 +142,13 @@ def test_reset():
     v = pic[0, 0]
     pic[0, 0] = (1, 1, 1)
     pic.reset()
-    assert_true(pic[0, 0] == v)
+    assert pic[0, 0] == v
 
 
 def test_update_on_save():
     pic = novice.Picture(array=np.zeros((3, 3, 3)))
-    pic[0, 0] = (255, 255, 255)  # prevent attempting to save low-contrast image
+    # prevent attempting to save low-contrast image
+    pic[0, 0] = (255, 255, 255)
 
     with all_warnings():  # precision loss
         pic.size = (6, 6)
