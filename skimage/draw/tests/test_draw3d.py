@@ -1,23 +1,23 @@
 import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose
-from nose.tools import raises
+from numpy.testing import assert_raises
 
 from skimage.draw import ellipsoid, ellipsoid_stats
 
 
-@raises(ValueError)
 def test_ellipsoid_sign_parameters1():
-    ellipsoid(-1, 2, 2)
+    with assert_raises(ValueError):
+        ellipsoid(-1, 2, 2)
 
 
-@raises(ValueError)
 def test_ellipsoid_sign_parameters2():
-    ellipsoid(0, 2, 2)
+    with assert_raises(ValueError):
+        ellipsoid(0, 2, 2)
 
 
-@raises(ValueError)
 def test_ellipsoid_sign_parameters3():
-    ellipsoid(-3, -2, 2)
+    with assert_raises(ValueError):
+        ellipsoid(-3, -2, 2)
 
 
 def test_ellipsoid_bool():
