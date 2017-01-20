@@ -30,3 +30,7 @@ Version 0.15
 * In ``skimage.transform.radon``, set default behavior of `circle` to `True`.
 * In ``skimage.transform.iradon``, set default behavior of `circle` to `True`.
 * In ``skimage.transform.swirl``, set default behavior of `mode` to `reflect`.
+* In ``skimage.restoration.denoise_bilateral``, set default behavior of
+  `multichannel` to False
+* In ``skimage.restoration.denoise_nl_means``, set default behavior of
+  `multichannel` to False
