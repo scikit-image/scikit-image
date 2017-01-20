@@ -3,7 +3,6 @@
 """
 import numpy as np
 from numpy.testing import assert_raises, assert_equal
-import nose
 from skimage._shared import version_requirements as version_req
 
 
@@ -38,4 +37,3 @@ def test_require():
 
 def test_get_module():
     assert_equal(version_req.get_module('numpy'), np)
-    assert_equal(version_req.get_module('nose'), nose)
