@@ -43,7 +43,7 @@ def test_mask_border_keypoints():
                  [0, 0, 0, 0, 1])
 
 
-@pytest.mark.skipif(plt is None)
+@pytest.mark.skipif(plt is None, reason="Matplotlib not installed")
 def test_plot_matches():
     fig, ax = plt.subplots(nrows=1, ncols=1)
 

@@ -78,7 +78,7 @@ def do_event(viewer, etype, button=1, xdata=0, ydata=0, key=None):
 
 
 @cleanup
-@pytest.mark.skipif(not has_qt)
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
 def test_line_tool():
     img = data.camera()
     viewer = ImageViewer(img)
@@ -104,7 +104,7 @@ def test_line_tool():
 
 
 @cleanup
-@pytest.mark.skipif(not has_qt)
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
 def test_thick_line_tool():
     img = data.camera()
     viewer = ImageViewer(img)
@@ -128,7 +128,7 @@ def test_thick_line_tool():
 
 
 @cleanup
-@pytest.mark.skipif(not has_qt)
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
 def test_rect_tool():
     img = data.camera()
     viewer = ImageViewer(img)
@@ -157,7 +157,7 @@ def test_rect_tool():
 
 
 @cleanup
-@pytest.mark.skipif(not has_qt)
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
 def test_paint_tool():
     img = data.moon()
     viewer = ImageViewer(img)
@@ -191,7 +191,7 @@ def test_paint_tool():
 
 
 @cleanup
-@pytest.mark.skipif(not has_qt)
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
 def test_base_tool():
     img = data.moon()
     viewer = ImageViewer(img)

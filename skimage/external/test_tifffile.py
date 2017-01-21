@@ -17,7 +17,7 @@ from .tifffile import imread, imsave
 np.random.seed(0)
 
 
-@pytest.mark.skipif(si is None)
+@pytest.mark.skipif(si is None, reason="skimage not installed")
 def test_imread_uint16():
     expected = np.load(os.path.join(si.data_dir, 'chessboard_GRAY_U8.npy'))
     img = imread(os.path.join(si.data_dir, 'chessboard_GRAY_U16.tif'))
@@ -25,7 +25,7 @@ def test_imread_uint16():
     assert_array_almost_equal(img, expected)
 
 
-@pytest.mark.skipif(si is None)
+@pytest.mark.skipif(si is None, reason="skimage not installed")
 def test_imread_uint16_big_endian():
     expected = np.load(os.path.join(si.data_dir, 'chessboard_GRAY_U8.npy'))
     img = imread(os.path.join(si.data_dir, 'chessboard_GRAY_U16B.tif'))

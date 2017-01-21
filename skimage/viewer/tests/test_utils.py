@@ -5,7 +5,7 @@ from skimage.viewer.qt import QtCore, QtGui, has_qt
 import pytest
 
 
-@pytest.mark.skipif(not has_qt)
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
 def test_event_loop():
     utils.init_qtapp()
     timer = QtCore.QTimer()
@@ -13,7 +13,7 @@ def test_event_loop():
     utils.start_qtapp()
 
 
-@pytest.mark.skipif(not has_qt)
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
 def test_format_filename():
     fname = dialogs._format_filename(('apple', 2))
     assert fname == 'apple'
@@ -21,7 +21,7 @@ def test_format_filename():
     assert fname is None
 
 
-@pytest.mark.skipif(not has_qt)
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
 def test_open_file_dialog():
     utils.init_qtapp()
     timer = QtCore.QTimer()
@@ -30,7 +30,7 @@ def test_open_file_dialog():
     assert filename is None
 
 
-@pytest.mark.skipif(not has_qt)
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
 def test_save_file_dialog():
     utils.init_qtapp()
     timer = QtCore.QTimer()

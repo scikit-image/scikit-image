@@ -13,7 +13,7 @@ from skimage._shared.version_requirements import is_installed
 from skimage._shared._warnings import expected_warnings
 
 
-@pytest.mark.skipif(not has_qt)
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
 def test_viewer():
     astro = data.astronaut()
     coins = data.coins()
@@ -40,7 +40,7 @@ def make_key_event(key):
                            QtCore.Qt.NoModifier)
 
 
-@pytest.mark.skipif(not has_qt)
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
 def test_collection_viewer():
 
     img = data.astronaut()
@@ -56,8 +56,9 @@ def test_collection_viewer():
     view._format_coord(10, 10)
 
 
-@pytest.mark.skipif(not has_qt)
-@pytest.mark.skipif(not is_installed('matplotlib', '>=1.2'))
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
+@pytest.mark.skipif(not is_installed('matplotlib', '>=1.2'),
+                    reason="matplotlib < 1.2")
 def test_viewer_with_overlay():
     img = data.coins()
     ov = OverlayPlugin(image_filter=sobel)
