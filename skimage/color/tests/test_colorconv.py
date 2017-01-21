@@ -18,10 +18,9 @@ import numpy as np
 from numpy.testing import (assert_equal,
                            assert_almost_equal,
                            assert_array_almost_equal,
-                           assert_raises,
                            TestCase,
                            )
-
+import pytest
 from skimage import img_as_float, img_as_ubyte
 from skimage.io import imread
 from skimage.color import (rgb2hsv, hsv2rgb,
@@ -61,7 +60,8 @@ def test_guess_spatial_dimensions():
     assert_equal(guess_spatial_dimensions(im2), 3)
     assert_equal(guess_spatial_dimensions(im3), None)
     assert_equal(guess_spatial_dimensions(im4), 3)
-    assert_raises(ValueError, guess_spatial_dimensions, im5)
+    with pytest.raises(ValueError):
+        guess_spatial_dimensions(im5)
 
 
 class TestColorconv(TestCase):
@@ -492,7 +492,8 @@ class TestColorconv(TestCase):
 
 def test_gray2rgb():
     x = np.array([0, 0.5, 1])
-    assert_raises(ValueError, gray2rgb, x)
+    with pytest.raises(ValueError):
+        ValueError(gray2rgb, x)
 
     x = x.reshape((3, 1))
     y = gray2rgb(x)

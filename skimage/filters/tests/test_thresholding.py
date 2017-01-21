@@ -1,8 +1,8 @@
 import numpy as np
 from scipy import ndimage as ndi
 from numpy.testing import (assert_equal,
-                           assert_almost_equal,
-                           assert_raises)
+                           assert_almost_equal)
+import pytest
 
 import skimage
 from skimage import data
@@ -52,7 +52,8 @@ class TestSimpleImage():
         assert 2 <= threshold_li(image) < 3
 
     def test_li_constant_image(self):
-        assert_raises(ValueError, threshold_li, np.ones((10,10)))
+        with pytest.raises(ValueError):
+            threshold_li(np.ones((10,10)))
 
     def test_yen(self):
         assert threshold_yen(self.image) == 2
@@ -216,7 +217,8 @@ def test_otsu_astro_image():
 
 def test_otsu_one_color_image():
     img = np.ones((10, 10), dtype=np.uint8)
-    assert_raises(ValueError, threshold_otsu, img)
+    with pytest.raises(ValueError):
+        threshold_otsu(img)
 
 
 def test_li_camera_image():
@@ -256,7 +258,8 @@ def test_yen_coins_image_as_float():
 
 def test_adaptive_even_block_size_error():
     img = data.camera()
-    assert_raises(ValueError, threshold_local, img, block_size=4)
+    with pytest.raises(ValueError):
+        threshold_local(img, block_size=4)
 
 
 def test_isodata_camera_image():
@@ -345,7 +348,8 @@ def test_threshold_minimum_synthetic():
 
 def test_threshold_minimum_failure():
     img = np.zeros((16*16), dtype=np.uint8)
-    assert_raises(RuntimeError, threshold_minimum, img)
+    with pytest.raises(RuntimeError):
+        threshold_minimum(img)
 
 
 def test_mean():

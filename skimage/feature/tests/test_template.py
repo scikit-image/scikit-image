@@ -1,5 +1,6 @@
 import numpy as np
-from numpy.testing import assert_almost_equal, assert_equal, assert_raises
+from numpy.testing import assert_almost_equal, assert_equal
+import pytest
 
 from skimage import data, img_as_float
 from skimage.morphology import diamond
@@ -89,7 +90,8 @@ def test_no_nans():
 def test_switched_arguments():
     image = np.ones((5, 5))
     template = np.ones((3, 3))
-    assert_raises(ValueError, match_template, template, image)
+    with pytest.raises(ValueError):
+        match_template(template, image)
 
 
 def test_pad_input():
@@ -160,15 +162,18 @@ def test_padding_reflect():
 def test_wrong_input():
     image = np.ones((5, 5, 1))
     template = np.ones((3, 3))
-    assert_raises(ValueError, match_template, template, image)
+    with pytest.raises(ValueError):
+        match_template(template, image)
 
     image = np.ones((5, 5))
     template = np.ones((3, 3, 2))
-    assert_raises(ValueError, match_template, template, image)
+    with pytest.raises(ValueError):
+        match_template(template, image)
 
     image = np.ones((5, 5, 3, 3))
     template = np.ones((3, 3, 2))
-    assert_raises(ValueError, match_template, template, image)
+    with pytest.raises(ValueError):
+        match_template(template, image)
 
 
 def test_bounding_values():

@@ -2,8 +2,8 @@ import warnings
 
 import numpy as np
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
-                           assert_raises, assert_almost_equal)
-
+                           assert_almost_equal)
+import pytest
 import skimage
 from skimage import data
 from skimage import exposure
@@ -254,10 +254,13 @@ def test_adapthist_alpha():
 
 def test_adapthist_ntiles_raises():
     img = skimage.img_as_ubyte(data.moon())
-    assert_raises(ValueError, exposure.equalize_adapthist, img, ntiles_x=8)
-    assert_raises(ValueError, exposure.equalize_adapthist, img, ntiles_y=8)
-    assert_raises(ValueError, exposure.equalize_adapthist, img,
-                  ntiles_x=8, ntiles_y=8)
+    with pytest.raises(ValueError):
+        exposure.equalize_adapthist(img, ntiles_x=8)
+    with pytest.raises(ValueError):
+        exposure.equalize_adapthist(img, ntiles_y=8)
+    with pytest.raises(ValueError):
+        exposure.equalize_adapthist(
+            img, ntiles_x=8, ntiles_y=8)
 
 
 def peak_snr(img1, img2):
@@ -359,7 +362,8 @@ def test_adjust_gamma_greater_one():
 
 def test_adjust_gamma_neggative():
     image = np.arange(0, 255, 4, np.uint8).reshape((8, 8))
-    assert_raises(ValueError, exposure.adjust_gamma, image, -1)
+    with pytest.raises(ValueError):
+        exposure.adjust_gamma(image, -1)
 
 
 # Test Logarithmic Correction
@@ -478,7 +482,8 @@ def test_adjust_inv_sigmoid_cutoff_half():
 
 def test_negative():
     image = np.arange(-10, 245, 4).reshape((8, 8)).astype(np.double)
-    assert_raises(ValueError, exposure.adjust_gamma, image)
+    with pytest.raises(ValueError):
+        exposure.adjust_gamma(image)
 
 
 def test_is_low_contrast():

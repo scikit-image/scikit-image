@@ -1,8 +1,8 @@
 import numpy as np
+import pytest
 from skimage.draw import circle
 from skimage.feature import blob_dog, blob_log, blob_doh
 import math
-from numpy.testing import assert_raises
 
 
 def test_blob_dog():
@@ -39,7 +39,8 @@ def test_blob_dog():
     assert abs(b[1] - 350) <= thresh
     assert abs(radius(b) - 45) <= thresh
 
-    assert_raises(ValueError, blob_dog, img3)
+    with pytest.raises(ValueError):
+        blob_dog(img3)
 
     # Testing no peaks
     img_empty = np.zeros((100,100))
@@ -117,7 +118,8 @@ def test_blob_log():
     assert abs(b[1] - 175) <= thresh
     assert abs(radius(b) - 30) <= thresh
 
-    assert_raises(ValueError, blob_log, img3)
+    with pytest.raises(ValueError):
+        blob_log(img3)
 
     # Testing no peaks
     img_empty = np.zeros((100,100))
@@ -200,7 +202,8 @@ def test_blob_doh():
     assert abs(b[1] - 350) <= thresh
     assert abs(radius(b) - 50) <= thresh
 
-    assert_raises(ValueError, blob_doh, img3)
+    with pytest.raises(ValueError):
+        blob_doh(img3)
 
     # Testing no peaks
     img_empty = np.zeros((100,100))

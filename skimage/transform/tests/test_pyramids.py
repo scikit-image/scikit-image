@@ -1,4 +1,5 @@
-from numpy.testing import assert_array_equal, assert_raises, run_module_suite
+from numpy.testing import assert_array_equal, run_module_suite
+import pytest
 from skimage import data
 from skimage.transform import pyramids
 
@@ -64,8 +65,10 @@ def test_build_laplacian_pyramid_gray():
 
 
 def test_check_factor():
-    assert_raises(ValueError, pyramids._check_factor, 0.99)
-    assert_raises(ValueError, pyramids._check_factor, - 2)
+    with pytest.raises(ValueError):
+        pyramids._check_factor(0.99)
+    with pytest.raises(ValueError):
+        pyramids._check_factor(- 2)
 
 
 if __name__ == "__main__":

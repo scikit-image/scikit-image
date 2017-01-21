@@ -1,37 +1,37 @@
 import numpy as np
 from numpy.testing import assert_equal, assert_warns
-from numpy.testing import assert_raises
+import pytest
 
 from skimage.util.shape import view_as_blocks, view_as_windows
 
 
 def test_view_as_blocks_block_not_a_tuple():
     A = np.arange(10)
-    with assert_raises(TypeError):
+    with pytest.raises(TypeError):
         view_as_blocks(A, [5])
 
 
 def test_view_as_blocks_negative_shape():
     A = np.arange(10)
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         view_as_blocks(A, (-2,))
 
 
 def test_view_as_blocks_block_too_large():
     A = np.arange(10)
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         view_as_blocks(A, (11,))
 
 
 def test_view_as_blocks_wrong_block_dimension():
     A = np.arange(10)
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         view_as_blocks(A, (2, 2))
 
 
 def test_view_as_blocks_1D_array_wrong_block_shape():
     A = np.arange(10)
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         view_as_blocks(A, (3,))
 
 
@@ -62,31 +62,31 @@ def test_view_as_blocks_3D_array():
 
 def test_view_as_windows_input_not_array():
     A = [1, 2, 3, 4, 5]
-    with assert_raises(TypeError):
+    with pytest.raises(TypeError):
         view_as_windows(A, (2,))
 
 
 def test_view_as_windows_wrong_window_dimension():
     A = np.arange(10)
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         view_as_windows(A, (2, 2))
 
 
 def test_view_as_windows_negative_window_length():
     A = np.arange(10)
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         view_as_windows(A, (-1,))
 
 
 def test_view_as_windows_window_too_large():
     A = np.arange(10)
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         view_as_windows(A, (11,))
 
 
 def test_view_as_windows_step_below_one():
     A = np.arange(10)
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         view_as_windows(A, (11,), step=0.9)
 
 

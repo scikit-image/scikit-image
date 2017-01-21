@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from skimage.morphology import skeletonize, medial_axis, thin
 from skimage.morphology._skeletonize import (_generate_thin_luts,
                                              G123_LUT, G123P_LUT)
@@ -18,22 +19,26 @@ class TestSkeletonize():
 
     def test_skeletonize_wrong_dim1(self):
         im = np.zeros((5))
-        numpy.testing.assert_raises(ValueError, skeletonize, im)
+        with pytest.raises(ValueError):
+            skeletonize(im)
 
     def test_skeletonize_wrong_dim2(self):
         im = np.zeros((5, 5, 5))
-        numpy.testing.assert_raises(ValueError, skeletonize, im)
+        with pytest.raises(ValueError):
+            skeletonize(im)
 
     def test_skeletonize_not_binary(self):
         im = np.zeros((5, 5))
         im[0, 0] = 1
         im[0, 1] = 2
-        numpy.testing.assert_raises(ValueError, skeletonize, im)
+        with pytest.raises(ValueError):
+            skeletonize(im)
 
     def test_skeletonize_unexpected_value(self):
         im = np.zeros((5, 5))
         im[0, 0] = 2
-        numpy.testing.assert_raises(ValueError, skeletonize, im)
+        with pytest.raises(ValueError):
+            skeletonize(im)
 
     def test_skeletonize_all_foreground(self):
         im = np.ones((3, 4))
@@ -153,7 +158,8 @@ class TestThin():
 
     def test_baddim(self):
         for ii in [np.zeros((3)), np.zeros((3, 3, 3))]:
-            numpy.testing.assert_raises(ValueError, thin, ii)
+            with pytest.raises(ValueError):
+                thin(ii)
 
     def test_lut_generation(self):
         g123, g123p = _generate_thin_luts()

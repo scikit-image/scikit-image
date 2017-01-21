@@ -2,7 +2,7 @@ from skimage.io._plugins.util import prepare_for_display, WindowManager
 from skimage._shared._warnings import expected_warnings
 
 from numpy.testing import *
-from numpy.testing import assert_raises
+import pytest
 import numpy as np
 
 np.random.seed(0)
@@ -35,12 +35,12 @@ class TestPrepareForDisplay:
             prepare_for_display(np.random.rand(10, 10, 4))
 
     def test_wrong_dimensionality(self):
-        with assert_raises(ValueError):
+        with pytest.raises(ValueError):
             with expected_warnings(['precision loss']):
                 prepare_for_display(np.random.rand(10, 10, 1, 1))
 
     def test_wrong_depth(self):
-        with assert_raises(ValueError):
+        with pytest.raises(ValueError):
             with expected_warnings(['precision loss']):
                 prepare_for_display(np.random.rand(10, 10, 5))
 

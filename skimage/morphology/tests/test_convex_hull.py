@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_array_equal, assert_raises
+from numpy.testing import assert_array_equal
 import pytest
 from skimage.morphology import convex_hull_image, convex_hull_object
 from skimage.morphology._convex_hull import possible_hull
@@ -33,7 +33,8 @@ def test_basic():
 
     # Test that an error is raised on passing a 3D image:
     image3d = np.empty((5, 5, 5))
-    assert_raises(ValueError, convex_hull_image, image3d)
+    with pytest.raises(ValueError):
+        convex_hull_image(image3d)
 
 
 @pytest.mark.skipif(not scipy_spatial, reason="scipy not installed")
@@ -141,11 +142,13 @@ def test_object():
 
     assert_array_equal(convex_hull_object(image, 8), expected8)
 
-    assert_raises(ValueError, convex_hull_object, image, 7)
+    with pytest.raises(ValueError):
+        convex_hull_object(image, 7)
 
     # Test that an error is raised on passing a 3D image:
     image3d = np.empty((5, 5, 5))
-    assert_raises(ValueError, convex_hull_object, image3d)
+    with pytest.raises(ValueError):
+        convex_hull_object(image3d)
 
 if __name__ == "__main__":
     np.testing.run_module_suite()

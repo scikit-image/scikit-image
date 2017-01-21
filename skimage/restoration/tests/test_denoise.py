@@ -1,7 +1,7 @@
 import numpy as np
-from numpy.testing import (run_module_suite, assert_raises, assert_equal,
+from numpy.testing import (run_module_suite, assert_equal,
                            assert_almost_equal, assert_warns, assert_)
-
+import pytest
 from skimage import restoration, data, color, img_as_float, measure
 from skimage._shared._warnings import expected_warnings
 from skimage.measure import compare_psnr
@@ -200,7 +200,8 @@ def test_denoise_bilateral_color():
 
 def test_denoise_bilateral_3d_grayscale():
     img = np.ones((50, 50, 3))
-    assert_raises(ValueError, restoration.denoise_bilateral, img,
+    with pytest.raises(ValueError):
+        restoration.denoise_bilateral(img,
                   multichannel=False)
 
 
@@ -214,10 +215,11 @@ def test_denoise_bilateral_3d_multichannel():
 
 def test_denoise_bilateral_multidimensional():
     img = np.ones((10, 10, 10, 10))
-    assert_raises(ValueError, restoration.denoise_bilateral, img,
-                  multichannel=False)
-    assert_raises(ValueError, restoration.denoise_bilateral, img,
-                  multichannel=True)
+    with pytest.raises(ValueError):
+        restoration.denoise_bilateral(img, multichannel=False)
+    with pytest.raises(ValueError):
+        restoration.denoise_bilateral(
+            img, multichannel=True)
 
 
 def test_denoise_bilateral_nan():
@@ -319,8 +321,8 @@ def test_denoise_nl_means_multichannel():
 
 def test_denoise_nl_means_wrong_dimension():
     img = np.zeros((5, 5, 5, 5))
-    assert_raises(NotImplementedError, restoration.denoise_nl_means, img,
-                  multichannel=True)
+    with pytest.raises(NotImplementedError):
+        restoration.denoise_nl_means(img, multichannel=True)
 
 
 def test_no_denoising_for_small_h():
@@ -430,10 +432,14 @@ def test_wavelet_denoising_levels():
     # invalid number of wavelet levels results in a ValueError
     max_level = pywt.dwt_max_level(np.min(img.shape),
                                    pywt.Wavelet(wavelet).dec_len)
-    assert_raises(ValueError, restoration.denoise_wavelet, noisy,
-                  wavelet=wavelet, wavelet_levels=max_level+1)
-    assert_raises(ValueError, restoration.denoise_wavelet, noisy,
-                  wavelet=wavelet, wavelet_levels=-1)
+    with pytest.raises(ValueError):
+        restoration.denoise_wavelet(
+            noisy,
+            wavelet=wavelet, wavelet_levels=max_level+1)
+    with pytest.raises(ValueError):
+        restoration.denoise_wavelet(
+            noisy,
+            wavelet=wavelet, wavelet_levels=-1)
 
 
 def test_estimate_sigma_gray():

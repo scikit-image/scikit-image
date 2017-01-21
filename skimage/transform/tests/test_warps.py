@@ -1,6 +1,7 @@
 from numpy.testing import (assert_almost_equal, run_module_suite,
-                           assert_equal, assert_raises)
+                           assert_equal)
 import numpy as np
+import pytest
 from scipy.ndimage import map_coordinates
 
 from skimage.transform._warps import _stackcopy
@@ -302,8 +303,9 @@ def test_downscale_local_mean():
 
 
 def test_invalid():
-    assert_raises(ValueError, warp, np.ones((4, 3, 3, 3)),
-                  SimilarityTransform())
+    with pytest.raises(ValueError):
+        warp(np.ones((4, 3, 3, 3)),
+             SimilarityTransform())
 
 
 def test_inverse():
@@ -316,8 +318,9 @@ def test_inverse():
 def test_slow_warp_nonint_oshape():
     image = np.random.rand(5, 5)
 
-    assert_raises(ValueError, warp, image, lambda xy: xy,
-                  output_shape=(13.1, 19.5))
+    with pytest.raises(ValueError):
+        warp(image, lambda xy: xy,
+             output_shape=(13.1, 19.5))
 
     warp(image, lambda xy: xy, output_shape=(13.0001, 19.9999))
 

@@ -1,5 +1,6 @@
 import numpy as np
-from numpy.testing import assert_array_equal, assert_raises
+from numpy.testing import assert_array_equal
+import pytest
 from skimage.data import moon
 from skimage.feature import CENSURE
 from skimage._shared.testing import test_parallel
@@ -20,19 +21,22 @@ def test_censure_on_rectangular_images():
 
 def test_keypoints_censure_color_image_unsupported_error():
     """Censure keypoints can be extracted from gray-scale images only."""
-    assert_raises(ValueError, CENSURE().detect, np.zeros((20, 20, 3)))
+    with pytest.raises(ValueError):
+        CENSURE().detect(np.zeros((20, 20, 3)))
 
 
 def test_keypoints_censure_mode_validity_error():
     """Mode argument in keypoints_censure can be either DoB, Octagon or
     STAR."""
-    assert_raises(ValueError, CENSURE, mode='dummy')
+    with pytest.raises(ValueError):
+        CENSURE(mode='dummy')
 
 
 def test_keypoints_censure_scale_range_error():
     """Difference between the the max_scale and min_scale parameters in
     keypoints_censure should be greater than or equal to two."""
-    assert_raises(ValueError, CENSURE, min_scale=1, max_scale=2)
+    with pytest.raises(ValueError):
+        CENSURE(min_scale=1, max_scale=2)
 
 
 def test_keypoints_censure_moon_image_dob():

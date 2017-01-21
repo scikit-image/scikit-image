@@ -1,4 +1,5 @@
-from numpy.testing import assert_equal, assert_almost_equal, assert_raises
+from numpy.testing import assert_equal, assert_almost_equal
+import pytest
 import numpy as np
 
 from skimage.measure import (moments, moments_central, moments_normalized,
@@ -51,10 +52,14 @@ def test_moments_normalized():
 
 
 def test_moments_normalized_invalid():
-    assert_raises(TypeError, moments_normalized, np.zeros((3, 3, 3)))
-    assert_raises(TypeError, moments_normalized, np.zeros((3,)))
-    assert_raises(TypeError, moments_normalized, np.zeros((3, 3)), 3)
-    assert_raises(TypeError, moments_normalized, np.zeros((3, 3)), 4)
+    with pytest.raises(TypeError):
+        moments_normalized(np.zeros((3, 3, 3)))
+    with pytest.raises(TypeError):
+        moments_normalized(np.zeros((3,)))
+    with pytest.raises(TypeError):
+        moments_normalized(np.zeros((3, 3)), 3)
+    with pytest.raises(TypeError):
+        moments_normalized(np.zeros((3, 3)), 4)
 
 
 def test_moments_hu():

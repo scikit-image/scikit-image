@@ -1,22 +1,22 @@
 import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose
-from numpy.testing import assert_raises
+import pytest
 
 from skimage.draw import ellipsoid, ellipsoid_stats
 
 
 def test_ellipsoid_sign_parameters1():
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ellipsoid(-1, 2, 2)
 
 
 def test_ellipsoid_sign_parameters2():
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ellipsoid(0, 2, 2)
 
 
 def test_ellipsoid_sign_parameters3():
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ellipsoid(-3, -2, 2)
 
 

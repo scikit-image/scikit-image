@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 
-from numpy.testing import assert_equal, assert_raises
+from numpy.testing import assert_equal
+import pytest
 
 from skimage import io
 from skimage.io import manage_plugins
@@ -51,7 +52,7 @@ def test_use():
 
 
 def test_failed_use():
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         manage_plugins.use_plugin('asd')
 
 

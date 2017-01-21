@@ -3,7 +3,8 @@ from __future__ import print_function, division
 import numpy as np
 from numpy.testing import (run_module_suite, assert_array_almost_equal_nulp,
                            assert_almost_equal, assert_array_equal,
-                           assert_raises, assert_)
+                           assert_)
+import pytest
 import warnings
 
 from skimage.restoration import unwrap_phase
@@ -46,9 +47,11 @@ def test_unwrap_1d():
     image = np.linspace(0, 10 * np.pi, 100)
     check_unwrap(image)
     # Masked arrays are not allowed in 1D
-    assert_raises(ValueError, check_unwrap, image, True)
+    with pytest.raises(ValueError):
+        check_unwrap(image, True)
     # wrap_around is not allowed in 1D
-    assert_raises(ValueError, unwrap_phase, image, True, seed=0)
+    with pytest.raises(ValueError):
+        unwrap_phase(image, True, seed=0)
 
 
 def test_unwrap_2d():
@@ -144,10 +147,14 @@ def test_mask():
 
 
 def test_invalid_input():
-    assert_raises(ValueError, unwrap_phase, np.zeros([]))
-    assert_raises(ValueError, unwrap_phase, np.zeros((1, 1, 1, 1)))
-    assert_raises(ValueError, unwrap_phase, np.zeros((1, 1)), 3 * [False])
-    assert_raises(ValueError, unwrap_phase, np.zeros((1, 1)), 'False')
+    with pytest.raises(ValueError):
+        unwrap_phase(np.zeros([]))
+    with pytest.raises(ValueError):
+        unwrap_phase(np.zeros((1, 1, 1, 1)))
+    with pytest.raises(ValueError):
+        unwrap_phase(np.zeros((1, 1)), 3 * [False])
+    with pytest.raises(ValueError):
+        unwrap_phase(np.zeros((1, 1)), 'False')
 
 
 def test_unwrap_3d_middle_wrap_around():

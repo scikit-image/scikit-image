@@ -1,16 +1,16 @@
 import itertools
 
 import numpy as np
-from numpy import testing
 from skimage.color.colorlabel import label2rgb
 from numpy.testing import (assert_array_almost_equal as assert_close,
                            assert_array_equal, assert_warns)
-
+import pytest
 
 def test_shape_mismatch():
     image = np.ones((3, 3))
     label = np.ones((2, 2))
-    testing.assert_raises(ValueError, label2rgb, image, label)
+    with pytest.raises(ValueError):
+        label2rgb(image, label)
 
 
 def test_rgb():

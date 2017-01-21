@@ -1,11 +1,12 @@
 import os
 
-from numpy.testing import assert_array_equal, assert_raises, run_module_suite
+from numpy.testing import assert_array_equal, run_module_suite
 import numpy as np
 
 import skimage.io as io
 from skimage.io.manage_plugins import plugin_store
 from skimage import data_dir
+import pytest
 
 
 def test_stack_basic():
@@ -16,7 +17,7 @@ def test_stack_basic():
 
 
 def test_stack_non_array():
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         io.push([[1, 2, 3]])
 
 

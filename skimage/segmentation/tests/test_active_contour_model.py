@@ -4,7 +4,7 @@ from skimage.color import rgb2gray
 from skimage.filters import gaussian
 from skimage.segmentation import active_contour
 from skimage.segmentation.active_contour import new_scipy
-from numpy.testing import assert_equal, assert_allclose, assert_raises
+from numpy.testing import assert_equal, assert_allclose
 import pytest
 
 
@@ -108,10 +108,12 @@ def test_bad_input():
     x = np.linspace(5, 424, 100)
     y = np.linspace(136, 50, 100)
     init = np.array([x, y]).T
-    assert_raises(ValueError, active_contour, img, init,
-                            bc='wrong')
-    assert_raises(ValueError, active_contour, img, init,
-                            max_iterations=-15)
+    with pytest.raises(ValueError):
+        active_contour(img, init,
+                       bc='wrong')
+    with pytest.raises(ValueError):
+        active_contour(img, init,
+                       max_iterations=-15)
 
 
 if __name__ == "__main__":

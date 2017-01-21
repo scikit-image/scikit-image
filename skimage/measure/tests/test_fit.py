@@ -1,14 +1,17 @@
 import numpy as np
 from numpy.testing import assert_equal, assert_almost_equal, assert_array_less
-from numpy.testing import assert_raises, assert_array_less
+from numpy.testing import assert_array_less
 from skimage.measure import LineModel, LineModelND, CircleModel, EllipseModel, ransac
+import pytest
+from skimage.measure import LineModelND, CircleModel, EllipseModel, ransac
 from skimage.transform import AffineTransform
 from skimage.measure.fit import _dynamic_max_trials
 from skimage._shared._warnings import expected_warnings
 
 
 def test_line_model_invalid_input():
-    assert_raises(ValueError, LineModelND().estimate, np.empty((1, 3)))
+    with pytest.raises(ValueError):
+        LineModelND().estimate(np.empty((1, 3)))
 
 
 def test_line_model_predict():
@@ -52,16 +55,35 @@ def test_line_model_residuals():
 
 
 def test_line_model_under_determined():
-    assert_raises(ValueError, LineModel().estimate, np.empty((1, 2)))
+    with pytest.raises(ValueError):
+        LineModel().estimate(np.empty((1, 2)))
 
 
 def test_line_model_nd_invalid_input():
-    assert_raises(AssertionError, LineModelND().predict_x, np.zeros(1))
-    assert_raises(ValueError, LineModelND().predict_x, np.zeros(1), np.zeros(1))
-    assert_raises(AssertionError, LineModelND().predict_y, np.zeros(1))
-    assert_raises(ValueError, LineModelND().predict_y, np.zeros(1), np.zeros(1))
-    assert_raises(ValueError, LineModelND().estimate, np.empty((1, 3)))
-    assert_raises(AssertionError, LineModelND().residuals, np.empty((1, 3)))
+    with pytest.raises(AssertionError):
+        LineModelND().predict_x(np.zeros(1))
+
+    with pytest.raises(ValueError):
+        LineModelND().predict_y(np.zeros(1))
+
+    with pytest.raises(ValueError):
+        LineModelND().predict_x(np.zeros(1), np.zeros(1))
+
+    with pytest.raises(AssertionError):
+        LineModelND().predict_y(np.zeros(1))
+
+    with pytest.raises(ValueError):
+        LineModelND().predict_y(np.zeros(1), np.zeros(1))
+
+    with pytest.raises(ValueError):
+        LineModelND().estimate(np.empty((1, 3)))
+
+    with pytest.raises(AssertionError):
+        LineModelND().residuals(np.empty((1, 3)))
+
+    data = np.empty((1, 2))
+    with pytest.raises(ValueError):
+        LineModelND().estimate(data)
 
 
 def test_line_model_nd_predict():
@@ -112,12 +134,15 @@ def test_line_model_nd_residuals():
     assert_equal(abs(model.residuals(np.array([[10, 0, 0]]))), 10)
 
 
-def test_line_model_nd_under_determined():
-    assert_raises(ValueError, LineModelND().estimate, np.empty((1, 3)))
+def test_line_modelND_under_determined():
+    data = np.empty((1, 3))
+    with pytest.raises(ValueError):
+        LineModelND().estimate(data)
 
 
 def test_circle_model_invalid_input():
-    assert_raises(ValueError, CircleModel().estimate, np.empty((5, 3)))
+    with pytest.raises(ValueError):
+        CircleModel().estimate(np.empty((5, 3)))
 
 
 def test_circle_model_predict():
@@ -159,7 +184,8 @@ def test_circle_model_residuals():
 
 
 def test_ellipse_model_invalid_input():
-    assert_raises(ValueError, EllipseModel().estimate, np.empty((5, 3)))
+    with pytest.raises(ValueError):
+        EllipseModel().estimate(np.empty((5, 3)))
 
 
 def test_ellipse_model_predict():
@@ -344,12 +370,15 @@ def test_ransac_dynamic_max_trials():
 
 
 def test_ransac_invalid_input():
-    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=2,
-                  residual_threshold=0, max_trials=-1)
-    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=2,
-                  residual_threshold=0, stop_probability=-1)
-    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=2,
-                  residual_threshold=0, stop_probability=1.01)
+    with pytest.raises(ValueError):
+        ransac(np.zeros((10, 2)), None, min_samples=2,
+               residual_threshold=0, max_trials=-1)
+    with pytest.raises(ValueError):
+        ransac(np.zeros((10, 2)), None, min_samples=2,
+               residual_threshold=0, stop_probability=-1)
+    with pytest.raises(ValueError):
+        ransac(np.zeros((10, 2)), None, min_samples=2,
+               residual_threshold=0, stop_probability=1.01)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 import numpy as np
-from numpy.testing import assert_array_equal, assert_raises
+from numpy.testing import assert_array_equal
+import pytest
 from skimage import data
 from skimage.feature import BRIEF, corner_peaks, corner_harris
 from skimage._shared.testing import test_parallel
@@ -9,7 +10,8 @@ def test_color_image_unsupported_error():
     """Brief descriptors can be evaluated on gray-scale images only."""
     img = np.zeros((20, 20, 3))
     keypoints = np.asarray([[7, 5], [11, 13]])
-    assert_raises(ValueError, BRIEF().extract, img, keypoints)
+    with pytest.raises(ValueError):
+        BRIEF().extract(img, keypoints)
 
 
 def test_normal_mode():
@@ -59,7 +61,8 @@ def test_uniform_mode():
 
 
 def test_unsupported_mode():
-    assert_raises(ValueError, BRIEF, mode='foobar')
+    with pytest.raises(ValueError):
+        BRIEF(mode='foobar')
 
 
 def test_border():

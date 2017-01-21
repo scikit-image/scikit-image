@@ -48,9 +48,8 @@ def test_imageio_palette():
 def test_imageio_truncated_jpg():
     # imageio>2.0 uses Pillow / PIL to try and load the file.
     # Oddly, PIL explicitly raises a SyntaxError when the file read fails.
-    assert_raises((RuntimeError, ValueError, SyntaxError),
-                  imread,
-                  os.path.join(data_dir, 'truncated.jpg'))
+    with pytest.raises(RuntimeError, ValueError, SyntaxError):
+        imread(os.path.join(data_dir, 'truncated.jpg'))
 
 
 class TestSave:

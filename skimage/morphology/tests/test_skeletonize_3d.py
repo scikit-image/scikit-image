@@ -4,9 +4,8 @@ import os
 import warnings
 
 import numpy as np
-from numpy.testing import (assert_equal, run_module_suite, assert_raises,
-                           assert_)
-
+from numpy.testing import assert_equal, run_module_suite, assert_
+import pytest
 import scipy.ndimage as ndi
 
 import skimage
@@ -21,10 +20,12 @@ from skimage.morphology import skeletonize_3d
 
 def test_skeletonize_wrong_dim():
     im = np.zeros(5, dtype=np.uint8)
-    assert_raises(ValueError, skeletonize_3d, im)
+    with pytest.raises(ValueError):
+        skeletonize_3d(im)
 
     im = np.zeros((5, 5, 5, 5), dtype=np.uint8)
-    assert_raises(ValueError, skeletonize_3d, im)
+    with pytest.raises(ValueError):
+        skeletonize_3d(im)
 
 
 def test_skeletonize_1D():

@@ -1,6 +1,7 @@
 import itertools as it
 import numpy as np
-from numpy.testing import assert_equal, assert_raises
+from numpy.testing import assert_equal
+import pytest
 from skimage.segmentation import slic
 from skimage._shared.testing import test_parallel
 
@@ -140,7 +141,8 @@ def test_spacing():
 def test_invalid_lab_conversion():
     img = np.array([[1, 1, 1, 0, 0],
                     [1, 1, 0, 0, 0]], np.float) + 1
-    assert_raises(ValueError, slic, img, multichannel=True, convert2lab=True)
+    with pytest.raises(ValueError):
+        slic(img, multichannel=True, convert2lab=True)
 
 
 def test_enforce_connectivity():

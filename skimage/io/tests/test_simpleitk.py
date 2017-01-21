@@ -1,7 +1,6 @@
 import os.path
 import numpy as np
 import pytest
-from numpy.testing import assert_raises
 
 from tempfile import NamedTemporaryFile
 

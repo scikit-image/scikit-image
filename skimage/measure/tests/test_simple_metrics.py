@@ -1,6 +1,7 @@
 import numpy as np
-from numpy.testing import (run_module_suite, assert_equal, assert_raises,
+from numpy.testing import (run_module_suite, assert_equal,
                            assert_almost_equal)
+import pytest
 
 from skimage.measure import compare_psnr, compare_nrmse, compare_mse
 import skimage.data
@@ -39,8 +40,10 @@ def test_PSNR_dynamic_range_and_data_range():
 
 
 def test_PSNR_errors():
-    assert_raises(ValueError, compare_psnr, cam, cam.astype(np.float32))
-    assert_raises(ValueError, compare_psnr, cam, cam[:-1, :])
+    with pytest.raises(ValueError):
+        compare_psnr(cam, cam.astype(np.float32))
+    with pytest.raises(ValueError):
+        compare_psnr(cam, cam[:-1, :])
 
 
 def test_NRMSE():
@@ -62,11 +65,13 @@ def test_NRMSE_no_int_overflow():
 
 def test_NRMSE_errors():
     x = np.ones(4)
-    assert_raises(ValueError, compare_nrmse,
-                  x.astype(np.uint8), x.astype(np.float32))
-    assert_raises(ValueError, compare_nrmse, x[:-1], x)
+    with pytest.raises(ValueError):
+        compare_nrmse(x.astype(np.uint8), x.astype(np.float32))
+    with pytest.raises(ValueError):
+        compare_nrmse(x[:-1], x)
     # invalid normalization name
-    assert_raises(ValueError, compare_nrmse, x, x, 'foo')
+    with pytest.raises(ValueError):
+        compare_nrmse(x, x, 'foo')
 
 
 if __name__ == "__main__":

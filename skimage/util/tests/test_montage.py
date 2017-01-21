@@ -1,5 +1,6 @@
-from numpy.testing import assert_equal, assert_raises
+from numpy.testing import assert_equal
 from numpy.testing import assert_array_equal
+import pytest
 
 import numpy as np
 from skimage.util.montage import montage2d
@@ -94,7 +95,7 @@ def test_rescale_intensity():
 
 def test_error_ndim():
     arr_error = np.random.randn(1, 2, 3, 4)
-    with assert_raises(AssertionError):
+    with pytest.raises(AssertionError):
         montage2d(arr_error)
 
 

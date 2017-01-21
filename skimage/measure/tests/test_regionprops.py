@@ -1,5 +1,6 @@
 from numpy.testing import assert_array_equal, assert_almost_equal, \
-    assert_array_almost_equal, assert_raises, assert_equal
+    assert_array_almost_equal, assert_equal
+import pytest
 import numpy as np
 import math
 
@@ -44,10 +45,10 @@ def test_all_props_3d():
 def test_dtype():
     regionprops(np.zeros((10, 10), dtype=np.int))
     regionprops(np.zeros((10, 10), dtype=np.uint))
-    assert_raises((TypeError), regionprops,
-                  np.zeros((10, 10), dtype=np.float))
-    assert_raises((TypeError), regionprops,
-                  np.zeros((10, 10), dtype=np.double))
+    with pytest.raises(TypeError):
+        regionprops(np.zeros((10, 10), dtype=np.float))
+    with pytest.raises(TypeError):
+        regionprops(np.zeros((10, 10), dtype=np.double))
 
 
 def test_ndim():
@@ -55,7 +56,8 @@ def test_ndim():
     regionprops(np.zeros((10, 10, 1), dtype=np.int))
     regionprops(np.zeros((10, 10, 1, 1), dtype=np.int))
     regionprops(np.zeros((10, 10, 10), dtype=np.int))
-    assert_raises(TypeError, regionprops, np.zeros((10, 10, 10, 2), dtype=np.int))
+    with pytest.raises(TypeError):
+        regionprops(np.zeros((10, 10, 10, 2), dtype=np.int))
 
 
 def test_area():
@@ -397,12 +399,14 @@ def test_invalid():
     def get_intensity_image():
         ps[0].intensity_image
 
-    assert_raises(AttributeError, get_intensity_image)
+    with pytest.raises(AttributeError):
+        get_intensity_image()
 
 
 def test_invalid_size():
     wrong_intensity_sample = np.array([[1], [1]])
-    assert_raises(ValueError, regionprops, SAMPLE, wrong_intensity_sample)
+    with pytest.raises(ValueError):
+        regionprops(SAMPLE, wrong_intensity_sample)
 
 
 def test_equals():

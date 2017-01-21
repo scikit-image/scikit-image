@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from skimage.segmentation import random_walker
 from skimage.transform import resize
 from skimage._shared._warnings import expected_warnings
@@ -312,31 +313,33 @@ def test_bad_inputs():
     # Too few dimensions
     img = np.ones(10)
     labels = np.arange(10)
-    np.testing.assert_raises(ValueError, random_walker, img, labels)
-    np.testing.assert_raises(ValueError,
-                             random_walker, img, labels, multichannel=True)
+    with pytest.raises(ValueError):
+        random_walker(img, labels)
+    with pytest.raises(ValueError):
+        random_walker(img, labels, multichannel=True)
 
     # Too many dimensions
     np.random.seed(42)
     img = np.random.normal(size=(3, 3, 3, 3, 3))
     labels = np.arange(3 ** 5).reshape(img.shape)
-    np.testing.assert_raises(ValueError, random_walker, img, labels)
-    np.testing.assert_raises(ValueError,
-                             random_walker, img, labels, multichannel=True)
+    with pytest.raises(ValueError):
+        random_walker(img, labels)
+    with pytest.raises(ValueError):
+        random_walker(img, labels, multichannel=True)
 
     # Spacing incorrect length
     img = np.random.normal(size=(10, 10))
     labels = np.zeros((10, 10))
     labels[2, 4] = 2
     labels[6, 8] = 5
-    np.testing.assert_raises(ValueError,
-                             random_walker, img, labels, spacing=(1,))
+    with pytest.raises(ValueError):
+        random_walker(img, labels, spacing=(1,))
 
     # Invalid mode
     img = np.random.normal(size=(10, 10))
     labels = np.zeros((10, 10))
-    np.testing.assert_raises(ValueError,
-                             random_walker, img, labels, mode='bad')
+    with pytest.raises(ValueError):
+        random_walker(img, labels, mode='bad')
 
 
 if __name__ == '__main__':

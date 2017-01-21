@@ -1,6 +1,6 @@
 import numpy as np
-from numpy.testing import (assert_raises, assert_, assert_equal,
-                           run_module_suite)
+import pytest
+from numpy.testing import assert_, assert_equal, run_module_suite
 
 from skimage import data
 from skimage.filters import LPIFilter2D, inverse, wiener
@@ -53,7 +53,8 @@ class TestLPIFilter2D(object):
         assert_((g - g1[::-1, ::-1]).sum() < 1)
 
     def test_non_callable(self):
-        assert_raises(ValueError, LPIFilter2D, None)
+        with pytest.raises(ValueError):
+            LPIFilter2D(None)
 
 
 if __name__ == "__main__":

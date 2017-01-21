@@ -3,7 +3,7 @@ try:
     import matplotlib.pyplot as plt
 except ImportError:
     plt = None
-from numpy.testing import assert_equal, assert_raises
+from numpy.testing import assert_equal
 import pytest
 
 from skimage.feature.util import (FeatureDetector, DescriptorExtractor,
@@ -12,18 +12,22 @@ from skimage.feature.util import (FeatureDetector, DescriptorExtractor,
 
 
 def test_feature_detector():
-    assert_raises(NotImplementedError, FeatureDetector().detect, None)
+    with pytest.raises(NotImplementedError):
+        FeatureDetector().detect(None)
 
 
 def test_descriptor_extractor():
-    assert_raises(NotImplementedError, DescriptorExtractor().extract,
-                  None, None)
+    with pytest.raises(NotImplementedError):
+        DescriptorExtractor().extract(None, None)
 
 
 def test_prepare_grayscale_input_2D():
-    assert_raises(ValueError, _prepare_grayscale_input_2D, np.zeros((3, 3, 3)))
-    assert_raises(ValueError, _prepare_grayscale_input_2D, np.zeros((3, 1)))
-    assert_raises(ValueError, _prepare_grayscale_input_2D, np.zeros((3, 1, 1)))
+    with pytest.raises(ValueError):
+        _prepare_grayscale_input_2D(np.zeros((3, 3, 3)))
+    with pytest.raises(ValueError):
+        _prepare_grayscale_input_2D(np.zeros((3, 1)))
+    with pytest.raises(ValueError):
+        _prepare_grayscale_input_2D(np.zeros((3, 1, 1)))
     img = _prepare_grayscale_input_2D(np.zeros((3, 3)))
     img = _prepare_grayscale_input_2D(np.zeros((3, 3, 1)))
     img = _prepare_grayscale_input_2D(np.zeros((1, 3, 3)))

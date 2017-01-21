@@ -6,8 +6,8 @@ from skimage import data, data_dir
 from skimage import feature
 from skimage import img_as_float
 from skimage import draw
-from numpy.testing import (assert_raises,
-                           assert_almost_equal)
+from numpy.testing import assert_almost_equal
+import pytest
 
 
 def test_hog_output_size():
@@ -52,7 +52,8 @@ def test_hog_image_size_cell_size_mismatch():
 
 def test_hog_color_image_unsupported_error():
     image = np.zeros((20, 20, 3))
-    assert_raises(ValueError, feature.hog, image)
+    with pytest.raises(ValueError):
+        feature.hog(image)
 
 
 def test_hog_basic_orientations_and_data_types():
@@ -124,7 +125,8 @@ def test_hog_basic_orientations_and_data_types():
         assert_almost_equal(hog_float, hog_uint8)
         assert_almost_equal(hog_img_float, hog_img_uint8)
 
-        # resulting features should be almost equal when 'transform_sqrt' is enabled
+        # resulting features should be almost equal
+        # when 'transform_sqrt' is enabled
         # or disabled (for current simple testing image)
         assert_almost_equal(hog_float, hog_float_norm, decimal=4)
         assert_almost_equal(hog_float, hog_uint8_norm, decimal=4)
@@ -201,12 +203,14 @@ def test_hog_orientations_circle():
 
 def test_hog_normalise_none_error_raised():
     img = np.array([1, 2, 3])
-    assert_raises(ValueError, feature.hog, img, normalise=True)
+    with pytest.raises(ValueError):
+        feature.hog(img, normalise=True)
 
 
 def test_hog_block_normalization_incorrect_error():
     img = np.eye(4)
-    assert_raises(ValueError, feature.hog, img, block_norm='Linf')
+    with pytest.raises(ValueError):
+        feature.hog(img, block_norm='Linf')
 
 
 if __name__ == '__main__':

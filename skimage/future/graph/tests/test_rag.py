@@ -2,7 +2,6 @@ import numpy as np
 from skimage.future import graph
 from skimage._shared.version_requirements import is_installed
 from skimage import segmentation
-from numpy import testing
 import pytest
 
 
@@ -110,8 +109,9 @@ def test_rag_error():
     labels = np.zeros((10, 10), dtype='uint8')
     labels[:5, :] = 0
     labels[5:, :] = 1
-    testing.assert_raises(ValueError, graph.rag_mean_color, img, labels,
-                          2, 'non existant mode')
+    with pytest.raises(ValueError):
+        graph.rag_mean_color(img, labels,
+                             2, 'non existant mode')
 
 
 def _weight_mean_color(graph, src, dst, n):

@@ -1,5 +1,6 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_raises
+from numpy.testing import assert_equal
+import pytest
 from skimage import data
 from skimage import transform as tf
 from skimage.color import rgb2gray
@@ -13,7 +14,8 @@ def test_binary_descriptors_unequal_descriptor_sizes_error():
                      [False, True, False, True]])
     descs2 = np.array([[True, False, False, True, False],
                      [False, True, True, True, False]])
-    assert_raises(ValueError, match_descriptors, descs1, descs2)
+    with pytest.raises(ValueError):
+        match_descriptors(descs1, descs2)
 
 
 def test_binary_descriptors():
