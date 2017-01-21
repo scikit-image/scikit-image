@@ -2,7 +2,7 @@ import os
 import os.path
 import numpy as np
 from numpy.testing import *
-from numpy.testing.decorators import skipif
+import pytest
 
 from tempfile import NamedTemporaryFile
 
@@ -28,7 +28,7 @@ def teardown():
     reset_plugins()
 
 
-@skipif(not imread_available)
+@pytest.mark.skipif(not imread_available)
 def test_imread_flatten():
     # a color image is flattened
     img = imread(os.path.join(data_dir, 'color.png'), flatten=True)
@@ -39,20 +39,20 @@ def test_imread_flatten():
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 
-@skipif(not imread_available)
+@pytest.mark.skipif(not imread_available)
 def test_imread_palette():
     img = imread(os.path.join(data_dir, 'palette_color.png'))
     assert img.ndim == 3
 
 
-@skipif(not imread_available)
+@pytest.mark.skipif(not imread_available)
 def test_imread_truncated_jpg():
     assert_raises((RuntimeError, ValueError),
                   sio.imread,
                   os.path.join(data_dir, 'truncated.jpg'))
 
 
-@skipif(not imread_available)
+@pytest.mark.skipif(not imread_available)
 def test_bilevel():
     expected = np.zeros((10, 10), bool)
     expected[::2] = 1
@@ -71,7 +71,7 @@ class TestSave:
 
         assert_array_almost_equal((x * scaling).astype(np.int32), y)
 
-    @skipif(not imread_available)
+    @pytest.mark.skipif(not imread_available)
     def test_imsave_roundtrip(self):
         dtype = np.uint8
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:

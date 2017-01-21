@@ -4,6 +4,7 @@ try:
 except ImportError:
     plt = None
 from numpy.testing import assert_equal, assert_raises
+import pytest
 
 from skimage.feature.util import (FeatureDetector, DescriptorExtractor,
                                   _prepare_grayscale_input_2D,
@@ -42,7 +43,7 @@ def test_mask_border_keypoints():
                  [0, 0, 0, 0, 1])
 
 
-@np.testing.decorators.skipif(plt is None)
+@pytest.mark.skipif(plt is None)
 def test_plot_matches():
     fig, ax = plt.subplots(nrows=1, ncols=1)
 

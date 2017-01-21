@@ -2,8 +2,8 @@ from collections import namedtuple
 
 import numpy as np
 from numpy.testing import assert_equal
-from numpy.testing.decorators import skipif
 from skimage import data
+import pytest
 from skimage.viewer import ImageViewer, has_qt
 from skimage.viewer.canvastools import (
     LineTool, ThickLineTool, RectangleTool, PaintTool)
@@ -78,7 +78,7 @@ def do_event(viewer, etype, button=1, xdata=0, ydata=0, key=None):
 
 
 @cleanup
-@skipif(not has_qt)
+@pytest.mark.skipif(not has_qt)
 def test_line_tool():
     img = data.camera()
     viewer = ImageViewer(img)
@@ -104,7 +104,7 @@ def test_line_tool():
 
 
 @cleanup
-@skipif(not has_qt)
+@pytest.mark.skipif(not has_qt)
 def test_thick_line_tool():
     img = data.camera()
     viewer = ImageViewer(img)
@@ -128,7 +128,7 @@ def test_thick_line_tool():
 
 
 @cleanup
-@skipif(not has_qt)
+@pytest.mark.skipif(not has_qt)
 def test_rect_tool():
     img = data.camera()
     viewer = ImageViewer(img)
@@ -157,7 +157,7 @@ def test_rect_tool():
 
 
 @cleanup
-@skipif(not has_qt)
+@pytest.mark.skipif(not has_qt)
 def test_paint_tool():
     img = data.moon()
     viewer = ImageViewer(img)
@@ -191,7 +191,7 @@ def test_paint_tool():
 
 
 @cleanup
-@skipif(not has_qt)
+@pytest.mark.skipif(not has_qt)
 def test_base_tool():
     img = data.moon()
     viewer = ImageViewer(img)

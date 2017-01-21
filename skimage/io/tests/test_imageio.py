@@ -2,7 +2,7 @@ import os
 import os.path
 import numpy as np
 from numpy.testing import *
-from numpy.testing.decorators import skipif
+import pytest
 
 from tempfile import NamedTemporaryFile
 
@@ -27,7 +27,7 @@ def teardown():
     reset_plugins()
 
 
-@skipif(not imageio_available)
+@pytest.mark.skipif(not imageio_available)
 def test_imageio_flatten():
     # a color image is flattened
     img = imread(os.path.join(data_dir, 'color.png'), flatten=True)
@@ -38,13 +38,13 @@ def test_imageio_flatten():
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 
-@skipif(not imageio_available)
+@pytest.mark.skipif(not imageio_available)
 def test_imageio_palette():
     img = imread(os.path.join(data_dir, 'palette_color.png'))
     assert img.ndim == 3
 
 
-@skipif(not imageio_available)
+@pytest.mark.skipif(not imageio_available)
 def test_imageio_truncated_jpg():
     # imageio>2.0 uses Pillow / PIL to try and load the file.
     # Oddly, PIL explicitly raises a SyntaxError when the file read fails.
@@ -64,7 +64,7 @@ class TestSave:
 
         assert_array_almost_equal((x * scaling).astype(np.int32), y)
 
-    @skipif(not imageio_available)
+    @pytest.mark.skipif(not imageio_available)
     def test_imsave_roundtrip(self):
         dtype = np.uint8
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
