@@ -999,7 +999,7 @@ class ValueError3(TestCase):
 
     def test_mode_not_set(self):
         arr = np.arange(30).reshape(5, 6)
-        with pytest.raises(ValueError, TypeError):
+        with pytest.raises(TypeError):
             pad(arr, 4)
 
     def test_malformed_pad_amount(self):

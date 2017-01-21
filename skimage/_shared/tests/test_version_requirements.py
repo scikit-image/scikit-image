@@ -38,4 +38,4 @@ def test_require():
 
 
 def test_get_module():
-    assert_equal(version_req.get_module('numpy'), np)
+    assert version_req.get_module("numpy") is np

@@ -1,7 +1,8 @@
 import os
 import os.path
 import numpy as np
-from numpy.testing import *
+from numpy.testing import assert_array_almost_equal
+import unittest
 import pytest
 
 from tempfile import NamedTemporaryFile
@@ -52,7 +53,7 @@ def test_imageio_truncated_jpg():
         imread(os.path.join(data_dir, 'truncated.jpg'))
 
 
-class TestSave:
+class TestSave(unittest.TestCase):
 
     def roundtrip(self, x, scaling=1):
         f = NamedTemporaryFile(suffix='.png')
@@ -76,4 +77,5 @@ class TestSave:
                 yield self.roundtrip, x
 
 if __name__ == "__main__":
+    from numpy.testing import run_module_suite
     run_module_suite()

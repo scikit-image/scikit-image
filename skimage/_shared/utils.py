@@ -124,9 +124,9 @@ def safe_as_int(val, atol=1e-3):
     7
 
     >>> safe_as_int([9, 4, 2.9999999999])
-    array([9, 4, 3], dtype=int32)
+    array([9, 4, 3])
 
-    >>> safe_as_int(53.01)
+    >>> safe_as_int(53.1)
     Traceback (most recent call last):
         ...
     ValueError: Integer argument required but received 53.1, check inputs.

@@ -1,6 +1,7 @@
 import os
 import numpy as np
 from numpy.testing import run_module_suite, assert_equal
+import pytest
 
 import skimage
 from skimage import img_as_ubyte, img_as_float

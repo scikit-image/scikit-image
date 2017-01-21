@@ -1,8 +1,9 @@
 import os
 import os.path
 import numpy as np
-from numpy.testing import *
+from numpy.testing import assert_array_equal, assert_array_almost_equal
 import pytest
+import unittest
 
 from tempfile import NamedTemporaryFile
 
@@ -60,7 +61,7 @@ def test_bilevel():
     assert_array_equal(img.astype(bool), expected)
 
 
-class TestSave:
+class TestSave(unittest.TestCase):
     def roundtrip(self, x, scaling=1):
         f = NamedTemporaryFile(suffix='.png')
         fname = f.name
@@ -83,4 +84,5 @@ class TestSave:
                 yield self.roundtrip, x
 
 if __name__ == "__main__":
+    from numpy.testing import run_module_suite
     run_module_suite()

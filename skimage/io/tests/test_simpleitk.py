@@ -1,6 +1,7 @@
 import os.path
 import numpy as np
 import pytest
+import unittest
 
 from tempfile import NamedTemporaryFile
 
@@ -77,7 +78,7 @@ def test_imread_uint16_big_endian():
     np.testing.assert_array_almost_equal(img, expected)
 
 
-class TestSave:
+class TestSave(unittest.TestCase):
     def roundtrip(self, dtype, x):
         f = NamedTemporaryFile(suffix='.mha')
         fname = f.name

@@ -39,10 +39,11 @@ def doctest_skip_parser(func):
 
     Say a function has a docstring::
         
-        >>> something, HAVE_AMODULE, HAVE_BMODULE = None, False, False
+        >>> something, HAVE_AMODULE, HAVE_BMODULE = 0, False, False
         >>> something # skip if not HAVE_AMODULE
-        >>> something + else
+        0
         >>> something # skip if HAVE_BMODULE
+        0
 
     This decorator will evaluate the expression after ``skip if``.  If this
     evaluates to True, then the comment is replaced by ``# doctest: +SKIP``. If
@@ -53,8 +54,8 @@ def doctest_skip_parser(func):
     global ``HAVE_BMODULE`` is False, the returned function will have docstring::
 
         >>> something # doctest: +SKIP
-        >>> something + else
-        >>> something
+        >>> something + else # doctest: +SKIP
+        >>> something # doctest: +SKIP
 
     """
     lines = func.__doc__.split('\n')

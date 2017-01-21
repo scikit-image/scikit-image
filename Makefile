@@ -10,7 +10,7 @@ clean:
 	find . -name "*.pyx" -exec ./tools/rm_pyx_c_file.sh {} \;
 
 test:
-	$(PYTHON) -c "import skimage, sys, io; sys.exit(skimage.test_verbose())"
+	$(PYTESTS) skimage --doctest-modules
 
 doctest:
 	$(PYTHON) -c "import skimage, sys, io; sys.exit(skimage.doctest_verbose())"

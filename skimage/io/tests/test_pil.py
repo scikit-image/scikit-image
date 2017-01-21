@@ -130,7 +130,7 @@ def test_imread_uint16():
 
 
 def test_imread_truncated_jpg():
-    with pytest.raises(IOError, ValueError):
+    with pytest.raises(IOError):
         imread(os.path.join(data_dir, 'truncated.jpg'))
 
 

@@ -2,6 +2,7 @@ import numpy as np
 from numpy.testing import (assert_array_equal, assert_equal,
                            assert_warns)
 from skimage.morphology import remove_small_objects, remove_small_holes
+import pytest
 from ..._shared._warnings import expected_warnings
 
 test_image = np.array([[0, 0, 0, 1, 0],
@@ -73,7 +74,7 @@ def test_float_input():
 
 def test_negative_input():
     negative_int = np.random.randint(-4, -1, size=(5, 5))
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         remove_small_objects(negative_int)
 
 test_holes_image = np.array([[0,0,0,0,0,0,1,0,0,0],

@@ -1,14 +1,15 @@
 from skimage.io._plugins.util import prepare_for_display, WindowManager
 from skimage._shared._warnings import expected_warnings
 
-from numpy.testing import *
+from numpy.testing import assert_array_equal
+import unittest
 import pytest
 import numpy as np
 
 np.random.seed(0)
 
 
-class TestPrepareForDisplay:
+class TestPrepareForDisplay(unittest.TestCase):
     def test_basic(self):
         with expected_warnings(['precision loss']):
             prepare_for_display(np.random.rand(10, 10))
@@ -45,9 +46,10 @@ class TestPrepareForDisplay:
                 prepare_for_display(np.random.rand(10, 10, 5))
 
 
-class TestWindowManager:
+class TestWindowManager(unittest.TestCase):
     callback_called = False
 
+    @pytest.fixture(autouse=True)
     def setup(self):
         self.wm = WindowManager()
         self.wm.acquire('test')
@@ -74,4 +76,5 @@ class TestWindowManager:
         self.wm._release('test')
 
 if __name__ == "__main__":
+    from numpy.testing import run_module_suite
     run_module_suite()

@@ -1,17 +1,19 @@
 import numpy as np
 import pytest
 from numpy.testing import assert_, assert_equal, run_module_suite
+import unittest
 
 from skimage import data
 from skimage.filters import LPIFilter2D, inverse, wiener
 
 
-class TestLPIFilter2D(object):
+class TestLPIFilter2D(unittest.TestCase):
     img = data.camera()[:50, :50]
 
     def filt_func(self, r, c):
         return np.exp(-np.hypot(r, c) / 1)
 
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.f = LPIFilter2D(self.filt_func)
 
