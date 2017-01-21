@@ -38,7 +38,8 @@ def doctest_skip_parser(func):
     """ Decorator replaces custom skip test markup in doctests
 
     Say a function has a docstring::
-
+        
+        >>> something, HAVE_AMODULE, HAVE_BMODULE = None, False, False
         >>> something # skip if not HAVE_AMODULE
         >>> something + else
         >>> something # skip if HAVE_BMODULE
