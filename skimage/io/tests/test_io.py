@@ -1,6 +1,6 @@
 import os
 
-from numpy.testing import assert_array_equal, raises, run_module_suite
+from numpy.testing import assert_array_equal, assert_raises, run_module_suite
 import numpy as np
 
 import skimage.io as io
@@ -15,9 +15,9 @@ def test_stack_basic():
     assert_array_equal(io.pop(), x)
 
 
-@raises(ValueError)
 def test_stack_non_array():
-    io.push([[1, 2, 3]])
+    with assert_raises(ValueError):
+        io.push([[1, 2, 3]])
 
 
 def test_imread_url():

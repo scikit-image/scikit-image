@@ -2,7 +2,7 @@ import os
 import tempfile
 
 import numpy as np
-from numpy.testing import assert_equal, raises, assert_allclose
+from numpy.testing import assert_equal, assert_raises, assert_allclose
 from skimage import novice
 from skimage.novice._novice import (array_to_xy_origin, xy_to_array_origin,
                                     rgb_transpose)
@@ -261,64 +261,64 @@ def test_getitem_with_step():
     assert sliced_pic == novice.Picture(array=array[::2, ::2])
 
 
-@raises(IndexError)
 def test_1d_getitem_raises():
     pic = novice.Picture.from_size((1, 1))
-    pic[1]
+    with assert_raises(IndexError):
+        pic[1]
 
 
-@raises(IndexError)
 def test_3d_getitem_raises():
     pic = novice.Picture.from_size((1, 1))
-    pic[1, 2, 3]
+    with assert_raises(IndexError):
+        pic[1, 2, 3]
 
 
-@raises(IndexError)
 def test_1d_setitem_raises():
     pic = novice.Picture.from_size((1, 1))
-    pic[1] = 0
+    with assert_raises(IndexError):
+        pic[1] = 0
 
 
-@raises(IndexError)
 def test_3d_setitem_raises():
     pic = novice.Picture.from_size((1, 1))
-    pic[1, 2, 3] = 0
+    with assert_raises(IndexError):
+        pic[1, 2, 3] = 0
 
 
-@raises(IndexError)
 def test_out_of_bounds_indexing():
     pic = novice.open(SMALL_IMAGE_PATH)
-    pic[pic.width, pic.height]
+    with assert_raises(IndexError):
+        pic[pic.width, pic.height]
 
 
-@raises(ValueError)
 def test_pixel_rgb_raises():
     pixel = novice.Picture.from_size((1, 1))[0, 0]
-    pixel.rgb = (-1, -1, -1)
+    with assert_raises(ValueError):
+        pixel.rgb = (-1, -1, -1)
 
 
-@raises(ValueError)
 def test_pixel_red_raises():
     pixel = novice.Picture.from_size((1, 1))[0, 0]
-    pixel.red = 256
+    with assert_raises(ValueError):
+        pixel.red = 256
 
 
-@raises(ValueError)
 def test_pixel_green_raises():
     pixel = novice.Picture.from_size((1, 1))[0, 0]
-    pixel.green = 256
+    with assert_raises(ValueError):
+        pixel.green = 256
 
 
-@raises(ValueError)
 def test_pixel_blue_raises():
     pixel = novice.Picture.from_size((1, 1))[0, 0]
-    pixel.blue = 256
+    with assert_raises(ValueError):
+        pixel.blue = 256
 
 
-@raises(ValueError)
 def test_pixel_alpha_raises():
     pixel = novice.Picture.from_size((1, 1))[0, 0]
-    pixel.alpha = 256
+    with assert_raises(ValueError):
+        pixel.alpha = 256
 
 
 if __name__ == '__main__':
