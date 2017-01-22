@@ -1,4 +1,5 @@
 import numpy as np
+from .._shared.utils import skimage_deprecation, warn
 from ._nl_means_denoising import (
     _nl_means_denoising_2d,
     _nl_means_denoising_3d,
@@ -7,7 +8,7 @@ from ._nl_means_denoising import (
 
 
 def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
-                     multichannel=True, fast_mode=True):
+                     multichannel=None, fast_mode=True):
     """
     Perform non-local means denoising on 2-D or 3-D grayscale images, and
     2-D RGB images.
@@ -103,6 +104,10 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     >>> a += 0.3 * np.random.randn(*a.shape)
     >>> denoised_a = denoise_nl_means(a, 7, 5, 0.1)
     """
+    if multichannel is None:
+        warn('denoise_nl_means will default to multichannel=False in v0.15')
+        multichannel = True
+
     if image.ndim == 2:
         image = image[..., np.newaxis]
         multichannel = True

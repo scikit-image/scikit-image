@@ -179,9 +179,9 @@ def test_denoise_bilateral_color():
     img = np.clip(img, 0, 1)
 
     out1 = restoration.denoise_bilateral(img, sigma_color=0.1,
-                                         sigma_spatial=10)
+                                         sigma_spatial=10, multichannel=True)
     out2 = restoration.denoise_bilateral(img, sigma_color=0.2,
-                                         sigma_spatial=20)
+                                         sigma_spatial=20, multichannel=True)
 
     # make sure noise is reduced in the checkerboard cells
     assert_(img[30:45, 5:15].std() > out1[30:45, 5:15].std())
@@ -197,7 +197,7 @@ def test_denoise_bilateral_3d_grayscale():
 def test_denoise_bilateral_3d_multichannel():
     img = np.ones((50, 50, 50))
     with expected_warnings(["grayscale"]):
-        result = restoration.denoise_bilateral(img)
+        result = restoration.denoise_bilateral(img, multichannel=True)
 
     expected = np.empty_like(img)
     expected.fill(np.nan)
@@ -207,7 +207,8 @@ def test_denoise_bilateral_3d_multichannel():
 
 def test_denoise_bilateral_multidimensional():
     img = np.ones((10, 10, 10, 10))
-    assert_raises(ValueError, restoration.denoise_bilateral, img)
+    assert_raises(ValueError, restoration.denoise_bilateral, img,
+                  multichannel=False)
     assert_raises(ValueError, restoration.denoise_bilateral, img,
                   multichannel=True)
 
@@ -254,10 +255,12 @@ def test_nl_means_denoising_2d():
     img = np.zeros((40, 40))
     img[10:-10, 10:-10] = 1.
     img += 0.3*np.random.randn(*img.shape)
-    denoised = restoration.denoise_nl_means(img, 7, 5, 0.2, fast_mode=True)
+    denoised = restoration.denoise_nl_means(img, 7, 5, 0.2, fast_mode=True,
+                                            multichannel=True)
     # make sure noise is reduced
     assert_(img.std() > denoised.std())
-    denoised = restoration.denoise_nl_means(img, 7, 5, 0.2, fast_mode=False)
+    denoised = restoration.denoise_nl_means(img, 7, 5, 0.2, fast_mode=False,
+                                            multichannel=True)
     # make sure noise is reduced
     assert_(img.std() > denoised.std())
 
@@ -268,10 +271,12 @@ def test_denoise_nl_means_2drgb():
     # add some random noise
     img += 0.5 * img.std() * np.random.random(img.shape)
     img = np.clip(img, 0, 1)
-    denoised = restoration.denoise_nl_means(img, 7, 9, 0.3, fast_mode=True)
+    denoised = restoration.denoise_nl_means(img, 7, 9, 0.3, fast_mode=True,
+                                            multichannel=True)
     # make sure noise is reduced
     assert_(img.std() > denoised.std())
-    denoised = restoration.denoise_nl_means(img, 7, 9, 0.3, fast_mode=False)
+    denoised = restoration.denoise_nl_means(img, 7, 9, 0.3, fast_mode=False,
+                                            multichannel=True)
     # make sure noise is reduced
     assert_(img.std() > denoised.std())
 
@@ -307,7 +312,8 @@ def test_denoise_nl_means_multichannel():
 
 def test_denoise_nl_means_wrong_dimension():
     img = np.zeros((5, 5, 5, 5))
-    assert_raises(NotImplementedError, restoration.denoise_nl_means, img)
+    assert_raises(NotImplementedError, restoration.denoise_nl_means, img,
+                  multichannel=True)
 
 
 def test_no_denoising_for_small_h():
@@ -315,9 +321,11 @@ def test_no_denoising_for_small_h():
     img[10:-10, 10:-10] = 1.
     img += 0.3*np.random.randn(*img.shape)
     # very small h should result in no averaging with other patches
-    denoised = restoration.denoise_nl_means(img, 7, 5, 0.01, fast_mode=True)
+    denoised = restoration.denoise_nl_means(img, 7, 5, 0.01, fast_mode=True,
+                                            multichannel=True)
     assert_(np.allclose(denoised, img))
-    denoised = restoration.denoise_nl_means(img, 7, 5, 0.01, fast_mode=False)
+    denoised = restoration.denoise_nl_means(img, 7, 5, 0.01, fast_mode=False,
+                                            multichannel=True)
     assert_(np.allclose(denoised, img))
 
 
@@ -488,6 +496,12 @@ def test_wavelet_denoising_args():
                 restoration.denoise_wavelet(noisy, sigma=sigma,
                                             convert2ycbcr=convert2ycbcr,
                                             multichannel=multichannel)
+
+
+def test_multichannel_warnings():
+    img = data.astronaut()
+    assert_warns(UserWarning, restoration.denoise_bilateral, img)
+    assert_warns(UserWarning, restoration.denoise_nl_means, img)
 
 
 if __name__ == "__main__":

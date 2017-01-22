@@ -11,7 +11,7 @@ import numbers
 
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
-                      bins=10000, mode='constant', cval=0, multichannel=True,
+                      bins=10000, mode='constant', cval=0, multichannel=None,
                       sigma_range=None):
     """Denoise image using bilateral filter.
 
@@ -75,6 +75,10 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     >>> noisy = np.clip(noisy, 0, 1)
     >>> denoised = denoise_bilateral(noisy, sigma_color=0.05, sigma_spatial=15)
     """
+    if multichannel is None:
+        warn('denoise_bilateral will default to multichannel=False in v0.15')
+        multichannel = True
+
     if multichannel:
         if image.ndim != 3:
             if image.ndim == 2:
