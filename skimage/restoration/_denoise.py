@@ -340,6 +340,10 @@ def _bayes_thresh(details, var):
     thresh = var / np.sqrt(max(dvar - var, eps))
     return thresh
 
+def _universal_thresh(img, details, sigma):
+    """ Universal threshold used by the VisuShrink method """
+    return sigma*np.sqrt(2*np.log(img.size))
+
 
 def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
     """Calculate the robust median estimator of the noise standard deviation.
@@ -376,7 +380,7 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
     return sigma
 
 
-def _wavelet_threshold(image, wavelet, threshold=None, sigma=None, mode='soft',
+def _wavelet_threshold(image, wavelet, method, threshold=None, sigma=None, mode='soft',
                        wavelet_levels=None):
     """Perform wavelet thresholding.
 
@@ -390,6 +394,9 @@ def _wavelet_threshold(image, wavelet, threshold=None, sigma=None, mode='soft',
         The type of wavelet to perform. Can be any of the options
         pywt.wavelist outputs. For example, this may be any of ``{db1, db2,
         db3, db4, haar}``.
+    method: string
+        The thresholding method to be used. Currently supported is
+        "BayesShrink" and "VisuShrink".
     sigma : float, optional
         The standard deviation of the noise. The noise is estimated when sigma
         is None (the default) by the method in [2]_.
@@ -450,8 +457,13 @@ def _wavelet_threshold(image, wavelet, threshold=None, sigma=None, mode='soft',
     if threshold is None:
         # The BayesShrink thresholds from [1]_ in docstring
         var = sigma**2
-        threshold = [{key: _bayes_thresh(level[key], var) for key in level}
-                     for level in dcoeffs]
+        if method == "BayesShrink":
+            # The BayesShrink thresholds from [1]_ in docstring
+            threshold = [{key: _bayes_thresh(level[key], var) for key in level}
+                         for level in dcoeffs]
+        else:
+            threshold = [{key: _universal_thresh(image, level[key], sigma)
+                         for key in level} for level in dcoeffs]
 
     if np.isscalar(threshold):
         # A single threshold for all coefficient arrays
@@ -469,8 +481,8 @@ def _wavelet_threshold(image, wavelet, threshold=None, sigma=None, mode='soft',
     return pywt.waverecn(denoised_coeffs, wavelet)[original_extent]
 
 
-def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
-                    wavelet_levels=None, multichannel=False,
+def denoise_wavelet(image, sigma=None, method='BayesShrink', wavelet='db1',
+                    mode='soft', wavelet_levels=None, multichannel=False,
                     convert2ycbcr=False):
     """Perform wavelet denoising on an image.
 
@@ -485,6 +497,9 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
         adaptively as described in [1]_ for each color channel. When None
         (default), the noise standard deviation is estimated via the method in
         [2]_.
+    method : string, optional
+        Thresholding method to be used. Currently supported methods are
+        "BayesShrink" and "VisuShrink". Defaults to "BayesShrink".
     wavelet : string, optional
         The type of wavelet to perform and can be any of the options
         ``pywt.wavelist`` outputs. The default is `'db1'`. For example,
@@ -545,6 +560,10 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     >>> denoised_img = denoise_wavelet(img, sigma=0.1)
 
     """
+    if method not in ["BayesShrink", "VisuShrink"]:
+        raise ValueError("Invalid method encountered. Currently supported "
+                         "methods are \"BayesShrink\" and \"VisuShrink\"")
+
     image = img_as_float(image)
 
     if multichannel:
@@ -572,10 +591,10 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
                 out[..., c] = _wavelet_threshold(image[..., c], sigma=sigma[c],
                                                  wavelet=wavelet, mode=mode,
                                                  wavelet_levels=wavelet_levels)
-
     else:
-        out = _wavelet_threshold(image, sigma=sigma, wavelet=wavelet,
-                                 mode=mode, wavelet_levels=wavelet_levels)
+        out = _wavelet_threshold(image, wavelet=wavelet, method=method,
+                                 sigma=sigma, mode=mode,
+                                 wavelet_levels=wavelet_levels)
 
     clip_range = (-1, 1) if image.min() < 0 else (0, 1)
     return np.clip(out, *clip_range)
