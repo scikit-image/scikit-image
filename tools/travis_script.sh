@@ -112,7 +112,7 @@ section "Test.with.optional.dependencies"
 
 # run tests again with optional dependencies to get more coverage
 if [[ $OPTIONAL_DEPS == 1 ]]; then
-    TEST_ARGS="$TEST_ARGS --with-cov --cover-package skimage"
+    TEST_ARGS="$TEST_ARGS --cov=skimage"
 fi
 py.test $TEST_ARGS
 

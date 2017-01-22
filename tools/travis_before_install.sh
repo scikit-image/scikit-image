@@ -63,7 +63,7 @@ virtualenv -p python ~/venv
 source ~/venv/bin/activate
 
 python -m pip install --upgrade pip
-pip install --retries 3 -q wheel flake8 codecov pytest
+pip install --retries 3 -q wheel flake8 codecov pytest pytest-cov
 # install numpy from PyPI instead of our wheelhouse
 pip install --retries 3 -q wheel numpy
 
