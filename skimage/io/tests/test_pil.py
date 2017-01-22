@@ -202,7 +202,22 @@ def test_imsave_filelike():
 
     # save to file-like object
     with expected_warnings(['precision loss',
-                            'is a low contrast image',
+                            'is a low contrast image']):
+        imsave(s, image)
+
+    # read from file-like object
+    s.seek(0)
+    out = imread(s)
+    assert out.shape == shape
+    assert_allclose(out, image)
+
+def test_imsave_boolean_input():
+    shape = (2, 2)
+    image = np.zeros(shape)
+    s = BytesIO()
+
+    # save to file-like object
+    with expected_warnings(['is a low contrast image',
                             'is a boolean image: setting True to 1 and False to 0']):
         imsave(s, image.astype(bool))
 
@@ -211,7 +226,6 @@ def test_imsave_filelike():
     out = imread(s)
     assert out.shape == shape
     assert_allclose(out, image)
-
 
 def test_imexport_imimport():
     shape = (2, 2)
