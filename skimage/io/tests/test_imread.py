@@ -48,7 +48,7 @@ def test_imread_palette():
 
 @pytest.mark.skipif(not imread_available, reason="imageread not installed")
 def test_imread_truncated_jpg():
-    with pytest.raises(RuntimeError, ValueError):
+    with pytest.raises(RuntimeError):
         sio.imread(os.path.join(data_dir, 'truncated.jpg'))
 
 
