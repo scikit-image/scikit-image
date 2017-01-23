@@ -2,7 +2,9 @@ include setup*.py
 include MANIFEST.in
 include *.txt
 include Makefile
-recursive-include skimage *.pyx *.pxd *.pxi *.py *.c *.h *.ini *.md5 *.npy *.txt *.in
+include bento.info
+include skimage/scripts/skivi
+recursive-include skimage *.pyx *.pxd *.pxi *.py *.c *.h *.ini *.md5 *.npy *.txt *.in *.cpp *.md
 recursive-include skimage/data *
 
 include doc/Makefile

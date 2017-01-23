@@ -23,6 +23,7 @@ import sys
 
 import setuptools
 from distutils.command.build_py import build_py
+from distutils.command.sdist import sdist
 
 if sys.version_info[0] < 3:
     import __builtin__ as builtins
@@ -145,6 +146,7 @@ if __name__ == "__main__":
             'console_scripts': ['skivi = skimage.scripts.skivi:main'],
         },
 
-        cmdclass={'build_py': build_py},
+        cmdclass={'build_py': build_py,
+                  'sdist': sdist},
         **extra
     )

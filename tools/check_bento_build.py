@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Check that Cython extensions in setup.py files match those in bento.info.
 """
