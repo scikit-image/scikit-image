@@ -83,7 +83,7 @@ from .downloads import CODE_DOWNLOAD
 from .py_source_parser import (get_docstring_and_rest,
                                split_code_and_text_blocks)
 
-from .notebook import jupyter_notebook, text2string, save_notebook
+from .notebook import jupyter_notebook, save_notebook
 
 try:
     basestring
@@ -243,15 +243,14 @@ def save_figures(image_path, fig_count, gallery_conf):
 
     Returns
     -------
-    figure_list : list of str
-        strings containing the full path to each figure
     images_rst : str
         rst code to embed the images in the document
+    fig_num : int
+        number of figures saved
     """
     figure_list = []
 
-    fig_numbers = plt.get_fignums()
-    for fig_num in fig_numbers:
+    for fig_num in plt.get_fignums():
         # Set the fig_num figure as the current figure as we can't
         # save a figure that's not the current figure.
         fig = plt.figure(fig_num)
@@ -282,19 +281,42 @@ def save_figures(image_path, fig_count, gallery_conf):
             figure_list.append(current_fig)
         mlab.close(all=True)
 
-    # Depending on whether we have one or more figures, we're using a
-    # horizontal list or a single rst call to 'image'.
+    return figure_rst(figure_list, gallery_conf['src_dir'])
+
+
+def figure_rst(figure_list, sources_dir):
+    """Given a list of paths to figures generate the corresponding rst
+
+    Depending on whether we have one or more figures, we use a
+    single rst call to 'image' or a horizontal list.
+
+    Parameters
+    ----------
+    figure_list : list of str
+        Strings are the figures' absolute paths
+    sources_dir : str
+        absolute path of Sphinx documentation sources
+
+    Returns
+    -------
+    images_rst : str
+        rst code to embed the images in the document
+    fig_num : int
+        number of figures saved
+    """
+
+    figure_list = [os.path.relpath(figure_path, sources_dir)
+                   for figure_path in figure_list]
     images_rst = ""
     if len(figure_list) == 1:
-        figure_name = os.path.relpath(figure_list[0], gallery_conf['src_dir'])
+        figure_name = figure_list[0]
         images_rst = SINGLE_IMAGE % figure_name.lstrip('/')
     elif len(figure_list) > 1:
         images_rst = HLIST_HEADER
         for figure_name in figure_list:
-            figure_name = os.path.relpath(figure_name, gallery_conf['src_dir'])
             images_rst += HLIST_IMAGE_TEMPLATE % figure_name.lstrip('/')
 
-    return figure_list, images_rst
+    return images_rst, len(figure_list)
 
 
 def scale_image(in_fname, out_fname, max_width, max_height):
@@ -382,10 +404,8 @@ def generate_dir_rst(src_dir, target_dir, gallery_conf, seen_backrefs):
         print(80 * '_')
         return "", []  # because string is an expected return type
 
-    # suppress "not included in TOCTREE" sphinx warnings
-    fhindex = ":orphan:\n\n"
     with open(os.path.join(src_dir, 'README.txt')) as fid:
-        fhindex += fid.read()
+        fhindex = fid.read()
     # Add empty lines to avoid bug in issue #165
     fhindex += "\n\n"
 
@@ -395,7 +415,7 @@ def generate_dir_rst(src_dir, target_dir, gallery_conf, seen_backrefs):
                       if fname.endswith('.py')]
     entries_text = []
     computation_times = []
-    build_target = os.path.relpath(target_dir, gallery_conf['src_dir'])
+    build_target_dir = os.path.relpath(target_dir, gallery_conf['src_dir'])
     for fname in sorted_listdir:
         amount_of_code, time_elapsed = \
             generate_file_rst(fname, target_dir, src_dir, gallery_conf)
@@ -404,12 +424,12 @@ def generate_dir_rst(src_dir, target_dir, gallery_conf, seen_backrefs):
         intro = extract_intro(new_fname)
         write_backreferences(seen_backrefs, gallery_conf,
                              target_dir, fname, intro)
-        this_entry = _thumbnail_div(build_target, fname, intro) + """
+        this_entry = _thumbnail_div(build_target_dir, fname, intro) + """
 
 .. toctree::
    :hidden:
 
-   /%s/%s\n""" % (build_target, fname[:-3])
+   /%s/%s\n""" % (build_target_dir, fname[:-3])
         entries_text.append((amount_of_code, this_entry))
 
     # sort to have the smallest entries in the beginning
@@ -462,9 +482,8 @@ def execute_code_block(code_block, example_globals,
         if my_stdout:
             stdout = CODE_OUTPUT.format(indent(my_stdout, u' ' * 4))
         os.chdir(cwd)
-        fig_list, images_rst = save_figures(block_vars['image_path'],
-                                            block_vars['fig_count'], gallery_conf)
-        fig_num = len(fig_list)
+        images_rst, fig_num = save_figures(block_vars['image_path'],
+                                           block_vars['fig_count'], gallery_conf)
 
     except Exception:
         formatted_exception = traceback.format_exc()
@@ -525,7 +544,7 @@ def generate_file_rst(fname, target_dir, src_dir, gallery_conf):
         seconds required to run the script
     """
 
-    src_file = os.path.join(src_dir, fname)
+    src_file = os.path.normpath(os.path.join(src_dir, fname))
     example_file = os.path.join(target_dir, fname)
     shutil.copyfile(src_file, example_file)
     script_blocks = split_code_and_text_blocks(src_file)
@@ -593,7 +612,7 @@ def generate_file_rst(fname, target_dir, src_dir, gallery_conf):
                 example_rst += codestr2rst(bcontent) + '\n'
 
         else:
-            example_rst += text2string(bcontent) + '\n'
+            example_rst += bcontent + '\n\n'
 
     clean_modules()
 
