@@ -4,6 +4,33 @@ from .._shared.utils import assert_nD
 from . import _hoghistogram
 
 
+def compute_image_gradients(image):
+    """ Computes the gradient image in x and y
+
+    Parameters
+    ----------
+    image : (M, N) 2darray
+        Input image.
+
+    Returns
+    -------
+    gx: gradient of the image in x
+    gy: gradient ofthe image in y
+
+    """
+    assert_nD(image, 2)
+
+    gx = np.empty(image.shape, dtype=np.double)
+    gx[:, 0] = 0
+    gx[:, -1] = 0
+    gx[:, 1:-1] = image[:, 2:] - image[:, :-2]
+    gy = np.empty(image.shape, dtype=np.double)
+    gy[0, :] = 0
+    gy[-1, :] = 0
+    gy[1:-1, :] = image[2:, :] - image[:-2, :]
+
+    return gx, gy
+
 def hog(image, orientations=9, pixels_per_cell=(8, 8),
         cells_per_block=(3, 3), visualise=False, transform_sqrt=False,
         feature_vector=True, normalise=None):
@@ -65,6 +92,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     """
     image = np.atleast_2d(image)
 
+
     """
     The first stage applies an optional global image normalisation
     equalisation that is designed to reduce the influence of illumination
@@ -75,7 +103,6 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     shadowing and illumination variations.
     """
 
-    assert_nD(image, 2)
 
     if normalise is not None:
         raise ValueError("The normalise parameter was removed due to incorrect "
@@ -96,19 +123,30 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     e.g. bar like structures in bicycles and limbs in humans.
     """
 
+
     if image.dtype.kind == 'u':
         # convert uint image to float
         # to avoid problems with subtracting unsigned numbers in np.diff()
         image = image.astype('float')
 
-    gx = np.empty(image.shape, dtype=np.double)
-    gx[:, 0] = 0
-    gx[:, -1] = 0
-    gx[:, 1:-1] = image[:, 2:] - image[:, :-2]
-    gy = np.empty(image.shape, dtype=np.double)
-    gy[0, :] = 0
-    gy[-1, :] = 0
-    gy[1:-1, :] = image[2:, :] - image[:-2, :]
+    if len(image.shape) == 3:
+        #If image is a color image
+        x_gradient = np.zeros(image.shape)
+        y_gradient = np.zeros(image.shape)
+        gradient_magnitude = np.zeros(image.shape)
+
+        for dimension in range(image.shape[2]):
+            x_gradient[:, :, dimension], y_gradient[:, :, dimension] = compute_image_gradients(image[:, :, dimension])
+            gradient_magnitude[:, :, dimension] = np.hypot(x_gradient[:, :, dimension], y_gradient[:, :, dimension])
+
+        max_index_array = gradient_magnitude.argmax(axis=2)
+        rr, cc = np.meshgrid(np.arange(image.shape[0]), np.arange(image.shape[1]))
+
+        gx = x_gradient[rr, cc, max_index_array]
+        gy = y_gradient[rr, cc, max_index_array]
+
+    else:
+        gx, gy = compute_image_gradients(image)
 
     """
     The third stage aims to produce an encoding that is sensitive to
@@ -125,7 +163,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     cell are used to vote into the orientation histogram.
     """
 
-    sy, sx = image.shape
+    sy, sx = image.shape[0:2]
     cx, cy = pixels_per_cell
     bx, by = cells_per_block
 
@@ -137,6 +175,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
 
     _hoghistogram.hog_histograms(gx, gy, cx, cy, sx, sy, n_cellsx, n_cellsy,
                                  orientations, orientation_histogram)
+
 
     # now for each cell, compute the histogram
     hog_image = None

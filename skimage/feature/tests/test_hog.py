@@ -39,10 +39,6 @@ def test_hog_image_size_cell_size_mismatch():
     assert len(fd) == 9 * (150 // 8) * (200 // 8)
 
 
-def test_hog_color_image_unsupported_error():
-    image = np.zeros((20, 20, 3))
-    assert_raises(ValueError, feature.hog, image)
-
 
 def test_hog_basic_orientations_and_data_types():
     # scenario:
