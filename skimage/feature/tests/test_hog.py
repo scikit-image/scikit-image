@@ -1,18 +1,16 @@
 import os
 import numpy as np
 from scipy import ndimage as ndi
-import skimage as si
 from skimage import color
-from skimage import data
+from skimage import data, data_dir
 from skimage import feature
 from skimage import img_as_float
 from skimage import draw
 from numpy.testing import (assert_raises,
-                           assert_almost_equal,
-                           )
+                           assert_almost_equal)
 
 
-def test_histogram_of_oriented_gradients_output_size():
+def test_hog_output_size():
     img = img_as_float(data.astronaut()[:256, :].mean(axis=2))
 
     fd = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
@@ -21,14 +19,27 @@ def test_histogram_of_oriented_gradients_output_size():
     assert len(fd) == 9 * (256 // 8) * (512 // 8)
 
 
-def test_histogram_of_oriented_gradients_output_correctness():
+def test_hog_output_correctness_l1_norm():
     img = color.rgb2gray(data.astronaut())
-    correct_output = np.load(os.path.join(si.data_dir, 'astronaut_GRAY_hog.npy'))
+    correct_output = np.load(
+        os.path.join(data_dir, 'astronaut_GRAY_hog_L1.npy'))
 
     output = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
-                         cells_per_block=(3, 3), feature_vector=True,
-                         transform_sqrt=False, visualise=False)
+                         cells_per_block=(3, 3), block_norm='L1',
+                         feature_vector=True, transform_sqrt=False,
+                         visualise=False)
+    assert_almost_equal(output, correct_output)
 
+
+def test_hog_output_correctness_l2hys_norm():
+    img = color.rgb2gray(data.astronaut())
+    correct_output = np.load(
+        os.path.join(data_dir, 'astronaut_GRAY_hog_L2-Hys.npy'))
+
+    output = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
+                         cells_per_block=(3, 3), block_norm='L2-Hys',
+                         feature_vector=True, transform_sqrt=False,
+                         visualise=False)
     assert_almost_equal(output, correct_output)
 
 
@@ -114,7 +125,7 @@ def test_hog_basic_orientations_and_data_types():
         assert_almost_equal(hog_img_float, hog_img_uint8)
 
         # resulting features should be almost equal when 'transform_sqrt' is enabled
-        #  or disabled (for current simple testing image)
+        # or disabled (for current simple testing image)
         assert_almost_equal(hog_float, hog_float_norm, decimal=4)
         assert_almost_equal(hog_float, hog_uint8_norm, decimal=4)
 
@@ -191,6 +202,11 @@ def test_hog_orientations_circle():
 def test_hog_normalise_none_error_raised():
     img = np.array([1, 2, 3])
     assert_raises(ValueError, feature.hog, img, normalise=True)
+
+
+def test_hog_block_normalization_incorrect_error():
+    img = np.eye(4)
+    assert_raises(ValueError, feature.hog, img, block_norm='Linf')
 
 
 if __name__ == '__main__':

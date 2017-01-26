@@ -22,6 +22,7 @@ Version 0.14
 * Remove deprecation error on the usage of ``ntiles_x``, ``ntiles_y`` in
   ``skimage.exposure.equalize_adapthist`` and the corresponding test.
 * Remove the freeimage plugin shim to imageio.
+* Remove deprecated `normalise` and corresponding test for ``skimage.feature.hog``. 
 
 
 Version 0.15
@@ -34,3 +35,5 @@ Version 0.15
   `multichannel` to False
 * In ``skimage.restoration.denoise_nl_means``, set default behavior of
   `multichannel` to False
+* Change the default value of `block_norm` in ``skimage.feature.hog` to L2-Hys,
+  update the reference .npy in ``skimage.data`` and `skimage/feature/tests/test_hog.py`.
