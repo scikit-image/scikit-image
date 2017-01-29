@@ -100,12 +100,13 @@ def convert_colorspace(arr, fromspace, tospace):
         The image to convert.
     fromspace : str
         The color space to convert from. Valid color space strings are
-        ``['RGB', 'HSV', 'RGB CIE', 'XYZ']``. Value may also be specified as
-        lower case.
+        ``['RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV', 'YIQ', 'YPbPr', 'YCbCr']``.
+        Value may also be specified as lower case.
+
     tospace : str
         The color space to convert to. Valid color space strings are
-        ``['RGB', 'HSV', 'RGB CIE', 'XYZ']``. Value may also be specified as
-        lower case.
+        ``['RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV', 'YIQ', 'YPbPr', 'YCbCr']``.
+        Value may also be specified as lower case.
 
     Returns
     -------
@@ -1239,6 +1240,13 @@ def rgb2luv(rgb):
     Notes
     -----
     This function uses rgb2xyz and xyz2luv.
+
+    References
+    ----------
+    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
+    .. [2] http://www.easyrgb.com/index.php?X=MATH&H=02#text2
+    .. [3] http://en.wikipedia.org/wiki/CIELUV
+
     """
     return xyz2luv(rgb2xyz(rgb))
 
@@ -1586,6 +1594,11 @@ def rgb2yuv(rgb):
     -----
     Y is between 0 and 1.  Use YCbCr instead of YUV for the color space which
     is commonly used by video codecs (where Y ranges from 16 to 235)
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/YUV
+
     """
     return _convert(yuv_from_rgb, rgb)
 
@@ -1614,7 +1627,7 @@ def rgb2yiq(rgb):
 
 
 def rgb2ypbpr(rgb):
-    """RGB to YIQ color space conversion.
+    """RGB to YPbPr color space conversion.
 
     Parameters
     ----------
@@ -1625,13 +1638,18 @@ def rgb2ypbpr(rgb):
     Returns
     -------
     out : ndarray
-        The image in YIQ format, in a 3- or 4-D array of shape
+        The image in YPbPr format, in a 3- or 4-D array of shape
         ``(M, N, [P,] 3)``.
 
     Raises
     ------
     ValueError
         If `rgb` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/YPbPr
+
     """
     return _convert(ypbpr_from_rgb, rgb)
 
@@ -1660,6 +1678,11 @@ def rgb2ycbcr(rgb):
     -----
     Y is between 16 and 235.  This is the color space which is commonly used
     by video codecs, it is sometimes incorrectly called "YUV"
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/YCbCr
+
     """
     arr = _convert(ycbcr_from_rgb, rgb)
     arr[..., 0] += 16
@@ -1669,24 +1692,29 @@ def rgb2ycbcr(rgb):
 
 
 def yuv2rgb(yuv):
-    """RGB to YIQ color space conversion.
+    """YUV to RGB color space conversion.
 
     Parameters
     ----------
-    rgb : array_like
-        The image in RGB format, in a 3- or 4-D array of shape
+    yuv : array_like
+        The image in YUV format, in a 3- or 4-D array of shape
         ``(M, N, [P,] 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in YIQ format, in a 3- or 4-D array of shape
+        The image in RGB format, in a 3- or 4-D array of shape
         ``(M, N, [P,] 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+        If `yuv` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/YUV
+
     """
     return _convert(rgb_from_yuv, yuv)
 
@@ -1733,6 +1761,11 @@ def ypbpr2rgb(ypbpr):
     ------
     ValueError
         If `ypbpr` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/YPbPr
+
     """
     return _convert(rgb_from_ypbpr, ypbpr)
 
@@ -1761,6 +1794,11 @@ def ycbcr2rgb(ycbcr):
     -----
     Y is between 16 and 235.  This is the color space which is commonly used
     by video codecs, it is sometimes incorrectly called "YUV"
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/YCbCr
+
     """
     arr = ycbcr.copy()
     arr[..., 0] -= 16
