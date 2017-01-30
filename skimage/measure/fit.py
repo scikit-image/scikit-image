@@ -470,6 +470,19 @@ class EllipseModel(BaseModel):
         Ellipse model parameters in the following order `xc`, `yc`, `a`, `b`,
         `theta`.
 
+    Examples
+    --------
+
+    >>> xy = EllipseModel().predict_xy(np.linspace(0, 2 * np.pi, 25),
+    ...                                params=(10, 15, 4, 8, np.deg2rad(30)))
+    >>> ellipse = EllipseModel()
+    >>> ellipse.estimate(xy)
+    True
+    >>> np.round(ellipse.params, 2)
+    array([ 10.  ,  15.  ,   4.  ,   8.  ,   0.52])
+    >>> np.round(abs(ellipse.residuals(xy)), 5)
+    array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+            0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
     """
 
     def estimate(self, data):
@@ -514,8 +527,12 @@ class EllipseModel(BaseModel):
         # Constraint matrix [eqn. 18]
         C1 = np.array([[0., 0., 2.], [0., -1., 0.], [2., 0., 0.]])
 
-        # Reduced scatter matrix [eqn. 29]
-        M = np.linalg.inv(C1).dot(S1 - np.dot(S2, np.linalg.inv(S3)).dot(S2.T))
+        try:
+            # Reduced scatter matrix [eqn. 29]
+            M = np.linalg.inv(C1).dot(
+                S1 - np.dot(S2, np.linalg.inv(S3)).dot(S2.T))
+        except np.linalg.LinAlgError:  # LinAlgError: Singular matrix
+            return False
 
         # M*|a b c >=l|a b c >. Find eigenvalues and eigenvectors
         # from this equation [eqn. 28]
@@ -526,7 +543,7 @@ class EllipseModel(BaseModel):
                - np.power(eig_vecs[1, :], 2)
         a1 = eig_vecs[:, (cond > 0)]
         # seeks for empty matrix
-        if 0 in a1.shape:
+        if 0 in a1.shape or len(a1.ravel()) != 3:
             return False
         a, b, c = a1.ravel()
 
@@ -555,9 +572,12 @@ class EllipseModel(BaseModel):
 
         # angle of counterclockwise rotation of major-axis of ellipse
         # to x-axis [eqn. 23] from [2].
-        phi = .5 * np.arctan((2. * b) / (a - c))
+        phi = 0.5 * np.arctan((2. * b) / (a - c))
+        if a > c:
+            phi += 0.5 * np.pi
 
         self.params = np.nan_to_num([x0, y0, width, height, phi]).tolist()
+        self.params = [float(np.real(x)) for x in self.params]
         return True
 
     def residuals(self, data):
@@ -594,7 +614,7 @@ class EllipseModel(BaseModel):
             st = math.sin(t)
             xt = xc + a * ctheta * ct - b * stheta * st
             yt = yc + a * stheta * ct + b * ctheta * st
-            return (xi - xt)**2 + (yi - yt)**2
+            return (xi - xt) ** 2 + (yi - yt) ** 2
 
         # def Dfun(t, xi, yi):
         #     ct = math.cos(t)
@@ -642,6 +662,7 @@ class EllipseModel(BaseModel):
 
         if params is None:
             params = self.params
+
         xc, yc, a, b, theta = params
 
         ct = np.cos(t)
