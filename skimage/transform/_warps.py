@@ -75,7 +75,7 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
     >>> from skimage import data
     >>> from skimage.transform import resize
     >>> image = data.camera()
-    >>> resize(image, (100, 100)).shape
+    >>> resize(image, (100, 100), mode='reflect').shape
     (100, 100)
 
     """
@@ -184,9 +184,9 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
     >>> from skimage import data
     >>> from skimage.transform import rescale
     >>> image = data.camera()
-    >>> rescale(image, 0.1).shape
+    >>> rescale(image, 0.1, mode='reflect').shape
     (51, 51)
-    >>> rescale(image, 0.5).shape
+    >>> rescale(image, 0.5, mode='reflect').shape
     (256, 256)
 
     """
