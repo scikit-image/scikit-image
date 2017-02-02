@@ -3,7 +3,7 @@ from skimage import data
 from skimage.color import rgb2gray
 from skimage.filters import gaussian
 from skimage.segmentation import active_contour
-from skimage.segmentation.active_contour import new_scipy
+from skimage.segmentation.active_contour_model import new_scipy
 from numpy.testing import assert_equal, assert_allclose
 import pytest
 

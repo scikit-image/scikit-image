@@ -196,7 +196,7 @@ Tests for a module should ideally cover all code in that module,
 i.e., statement coverage should be at 100%.
 
 To measure the test coverage, install
-`pytest-cov <<http://pytest-cov.readthedocs.io/en/latest/>`__
+`pytest-cov <http://pytest-cov.readthedocs.io/en/latest/>`__
 (using ``easy_install pytest-cov``) and then run::
 
   $ make coverage

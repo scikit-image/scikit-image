@@ -63,7 +63,7 @@ def test_line_model_nd_invalid_input():
     with pytest.raises(AssertionError):
         LineModelND().predict_x(np.zeros(1))
 
-    with pytest.raises(ValueError):
+    with pytest.raises(AssertionError):
         LineModelND().predict_y(np.zeros(1))
 
     with pytest.raises(ValueError):

@@ -1,7 +1,7 @@
 import numpy as np
 import unittest
 from numpy.testing import (assert_array_almost_equal as assert_close,
-                           assert_equal, assert_raises)
+                           assert_equal)
 from scipy import ndimage as ndi
 from skimage.feature import peak
 
@@ -445,6 +445,3 @@ class TestProminentPeaks(unittest.TestCase):
                                      min_distance=1, threshold_rel=0,
                                      indices=False, exclude_border=False)
         assert np.all(labels == labelsin)
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()
