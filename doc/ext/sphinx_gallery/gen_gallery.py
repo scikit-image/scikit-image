@@ -84,9 +84,9 @@ def generate_gallery_rst(app):
     gallery_conf.update(plot_gallery=plot_gallery)
     gallery_conf.update(
         abort_on_example_error=app.builder.config.abort_on_example_error)
+    gallery_conf['src_dir'] = app.builder.srcdir
 
     # this assures I can call the config in other places
-    gallery_conf['src_dir'] = app.builder.srcdir
     app.config.sphinx_gallery_conf = gallery_conf
     app.config.html_static_path.append(glr_path_static())
 
@@ -106,9 +106,6 @@ def generate_gallery_rst(app):
 
     computation_times = []
 
-    # cd to the appropriate directory regardless of sphinx configuration
-    working_dir = os.getcwd()
-    # os.chdir(app.builder.srcdir)
     for examples_dir, gallery_dir in zip(examples_dirs, gallery_dirs):
         examples_dir = os.path.join(app.builder.srcdir, examples_dir)
         gallery_dir = os.path.join(app.builder.srcdir, gallery_dir)
@@ -116,8 +113,6 @@ def generate_gallery_rst(app):
         for workdir in [examples_dir, gallery_dir, mod_examples_dir]:
             if not os.path.exists(workdir):
                 os.makedirs(workdir)
-        # we create an index.rst with all examples
-        fhindex = open(os.path.join(gallery_dir, 'index.rst'), 'w')
         # Here we don't use an os.walk, but we recurse only twice: flat is
         # better than nested.
         this_fhindex, this_computation_times = \
@@ -131,7 +126,10 @@ def generate_gallery_rst(app):
 
         computation_times += this_computation_times
 
-        fhindex.write(this_fhindex)
+        # we create an index.rst with all examples
+        fhindex = open(os.path.join(gallery_dir, 'index.rst'), 'w')
+        # :orphan: to suppress "not included in TOCTREE" sphinx warnings
+        fhindex.write(":orphan:\n\n" + this_fhindex)
         for directory in sorted(os.listdir(examples_dir)):
             if os.path.isdir(os.path.join(examples_dir, directory)):
                 src_dir = os.path.join(examples_dir, directory)
@@ -148,9 +146,6 @@ def generate_gallery_rst(app):
 
         fhindex.write(SPHX_GLR_SIG)
         fhindex.flush()
-
-    # Back to initial directory
-    os.chdir(working_dir)
 
     if gallery_conf['plot_gallery']:
         print("Computation time summary:")
@@ -190,34 +185,32 @@ def sumarize_failing_examples(app, exception):
         return
 
     gallery_conf = app.config.sphinx_gallery_conf
-    failing_examples = {os.path.normpath(path): traceback
-                        for path, traceback in gallery_conf['failing_examples'].items()}
-
+    failing_examples = set(gallery_conf['failing_examples'].keys())
     expected_failing_examples = set([os.path.normpath(os.path.join(app.srcdir, path))
                                      for path in
                                      gallery_conf['expected_failing_examples']])
 
-    examples_expected_to_fail = set(failing_examples.keys()).intersection(
+    examples_expected_to_fail = failing_examples.intersection(
         expected_failing_examples)
     expected_fail_msg = []
     if examples_expected_to_fail:
-        expected_fail_msg.append("Examples failing as expected:")
+        expected_fail_msg.append("\n\nExamples failing as expected:")
         for fail_example in examples_expected_to_fail:
             expected_fail_msg.append(fail_example + ' failed leaving traceback:\n' +
-                                     failing_examples[fail_example] + '\n')
+                                     gallery_conf['failing_examples'][fail_example] + '\n')
         print("\n".join(expected_fail_msg))
 
-    examples_not_expected_to_fail = set(failing_examples.keys()).difference(
+    examples_not_expected_to_fail = failing_examples.difference(
         expected_failing_examples)
     fail_msgs = []
     if examples_not_expected_to_fail:
         fail_msgs.append("Unexpected failing examples:")
         for fail_example in examples_not_expected_to_fail:
             fail_msgs.append(fail_example + ' failed leaving traceback:\n' +
-                             failing_examples[fail_example] + '\n')
+                             gallery_conf['failing_examples'][fail_example] + '\n')
 
     examples_not_expected_to_pass = expected_failing_examples.difference(
-        failing_examples.keys())
+        failing_examples)
     if examples_not_expected_to_pass:
         fail_msgs.append("Examples expected to fail, but not failling:\n" +
                          "Please remove these examples from\n" +
