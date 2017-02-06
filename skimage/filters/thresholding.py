@@ -5,7 +5,7 @@ from scipy import ndimage as ndi
 from scipy.ndimage import filters as ndif
 from collections import OrderedDict
 from ..exposure import histogram
-from .._shared.utils import assert_nD, warn
+from .._shared.utils import assert_nD, warn, deprecated
 from ..transform import integral_image
 from .. import util
 from skimage import dtype_limits, img_as_ubyte
@@ -131,14 +131,14 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
                     methods=methods, verbose=verbose)
 
 
-def threshold_adaptive(image, block_size, method='gaussian', offset=0,
-                       mode='reflect', param=None):
-    """Applies an adaptive threshold to an array.
+def threshold_local(image, block_size, method='gaussian', offset=0,
+                    mode='reflect', param=None):
+    """Compute a threshold mask image based on local pixel neighborhood.
 
-    Also known as local or dynamic thresholding where the threshold value is
+    Also known as adaptive or dynamic thresholding. The threshold value is
     the weighted mean for the local neighborhood of a pixel subtracted by a
-    constant. Alternatively the threshold can be determined dynamically by a a
-    given function using the 'generic' method.
+    constant. Alternatively the threshold can be determined dynamically by a
+    given function, using the 'generic' method.
 
     Parameters
     ----------
@@ -174,7 +174,8 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
     Returns
     -------
     threshold : (N, M) ndarray
-        Thresholded binary image
+        Threshold image. All pixels in the input image higher than the
+        corresponding pixel in the threshold image are considered foreground.
 
     References
     ----------
@@ -212,7 +213,18 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
     elif method == 'median':
         ndi.median_filter(image, block_size, output=thresh_image, mode=mode)
 
-    return image > (thresh_image - offset)
+    return thresh_image - offset
+
+
+
+@deprecated('threshold_local')
+def threshold_adaptive(image, block_size, method='gaussian', offset=0,
+                       mode='reflect', param=None):
+    warn('The return value of `threshold_local` is not the same as that '
+         'of `threshold_adaptive`.')
+    return image > threshold_local(image, block_size=block_size,
+                                   method=method, offset=offset, mode=mode,
+                                   param=param)
 
 
 def threshold_otsu(image, nbins=256):
