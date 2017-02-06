@@ -185,9 +185,10 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     --------
     >>> from skimage.data import camera
     >>> image = camera()[:50, :50]
-    >>> binary_image1 = threshold_adaptive(image, 15, 'mean')
+    >>> binary_image1 = image > threshold_local(image, 15, 'mean')
     >>> func = lambda arr: arr.mean()
-    >>> binary_image2 = threshold_adaptive(image, 15, 'generic', param=func)
+    >>> binary_image2 = image > threshold_local(image, 15, 'generic',
+    ...                                         param=func)
     """
     if block_size % 2 == 0:
         raise ValueError("The kwarg ``block_size`` must be odd! Given "
