@@ -217,8 +217,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     return thresh_image - offset
 
 
-
-@deprecated('threshold_local')
+@deprecated('threshold_local', removed_version='0.15')
 def threshold_adaptive(image, block_size, method='gaussian', offset=0,
                        mode='reflect', param=None):
     warn('The return value of `threshold_local` is a threshold image, while '
