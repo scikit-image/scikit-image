@@ -34,20 +34,27 @@ class deprecated(object):
     behavior : {'warn', 'raise'}
         Behavior during call to deprecated function: 'warn' = warn user that
         function is deprecated; 'raise' = raise error.
+    removed_version : str
+        The package version in which the deprecated function will be removed.
     """
 
-    def __init__(self, alt_func=None, behavior='warn'):
+    def __init__(self, alt_func=None, behavior='warn', removed_version=None):
         self.alt_func = alt_func
         self.behavior = behavior
+        self.removed_version = removed_version
 
     def __call__(self, func):
 
         alt_msg = ''
         if self.alt_func is not None:
             alt_msg = ' Use ``%s`` instead.' % self.alt_func
+        rmv_msg = ''
+        if self.removed_version is not None:
+            rmv_msg = (' and will be removed in version %s' %
+                       self.removed_version)
 
-        msg = 'Call to deprecated function ``%s``.' % func.__name__
-        msg += alt_msg
+        msg = ('Function ``%s`` is deprecated' % func.__name__ +
+               rmv_msg + '.' + alt_msg)
 
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
