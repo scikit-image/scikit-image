@@ -4,7 +4,7 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal
 from numpy.testing.decorators import skipif
 
-from skimage.filters import threshold_adaptive, gaussian
+from skimage.filters import threshold_local, gaussian
 from skimage.util.apply_parallel import apply_parallel, dask_available
 
 
@@ -14,8 +14,8 @@ def test_apply_parallel():
     a = np.arange(144).reshape(12, 12).astype(float)
 
     # apply the filter
-    expected1 = threshold_adaptive(a, 3)
-    result1 = apply_parallel(threshold_adaptive, a, chunks=(6, 6), depth=5,
+    expected1 = threshold_local(a, 3)
+    result1 = apply_parallel(threshold_local, a, chunks=(6, 6), depth=5,
                              extra_arguments=(3,),
                              extra_keywords={'mode': 'reflect'})
 
