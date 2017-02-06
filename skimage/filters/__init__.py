@@ -8,7 +8,8 @@ from .edges import (sobel, sobel_h, sobel_v,
 from ._rank_order import rank_order
 from ._gabor import gabor_kernel, gabor
 from ._frangi import frangi, hessian
-from .thresholding import (threshold_adaptive, threshold_otsu, threshold_yen,
+from .thresholding import (threshold_local,
+                           threshold_adaptive, threshold_otsu, threshold_yen,
                            threshold_isodata, threshold_li, threshold_minimum,
                            threshold_mean, threshold_triangle,
                            threshold_niblack, threshold_sauvola,
