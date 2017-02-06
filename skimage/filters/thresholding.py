@@ -221,8 +221,8 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
 @deprecated('threshold_local')
 def threshold_adaptive(image, block_size, method='gaussian', offset=0,
                        mode='reflect', param=None):
-    warn('The return value of `threshold_local` is not the same as that '
-         'of `threshold_adaptive`.')
+    warn('The return value of `threshold_local` is a threshold image, while '
+         '`threshold_adaptive` returned the *thresholded* image.')
     return image > threshold_local(image, block_size=block_size,
                                    method=method, offset=offset, mode=mode,
                                    param=param)
