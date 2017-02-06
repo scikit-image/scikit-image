@@ -7,7 +7,8 @@ from numpy.testing import (assert_equal,
 import skimage
 from skimage import data
 from skimage._shared._warnings import expected_warnings
-from skimage.filters.thresholding import (threshold_adaptive,
+from skimage.filters.thresholding import (threshold_local,
+                                          threshold_adaptive,
                                           threshold_otsu,
                                           threshold_li,
                                           threshold_yen,
@@ -104,6 +105,17 @@ class TestSimpleImage():
         assert all(0.49 < threshold_isodata(imfloat, nbins=1024,
                                             return_all=True))
 
+    def test_threshold_local_equals_adaptive(self):
+        def func(arr):
+            return arr.sum() / arr.shape[0]
+        with expected_warnings(['deprecated', 'return value']):
+            thresholded_original = threshold_adaptive(self.image, 3,
+                                                      method='generic',
+                                                      param=func)
+        threshold_new = threshold_local(self.image, 3, method='generic',
+                                        param=func)
+        assert_equal(thresholded_original, self.image > threshold_new)
+
     def test_threshold_adaptive_generic(self):
         def func(arr):
             return arr.sum() / arr.shape[0]
@@ -114,10 +126,12 @@ class TestSimpleImage():
              [False,  True,  True, False, False],
              [ True,  True, False, False, False]]
         )
-        out = threshold_adaptive(self.image, 3, method='generic', param=func)
+        with expected_warnings(['deprecated', 'return value']):
+            out = threshold_adaptive(self.image, 3, method='generic',
+                                     param=func)
         assert_equal(ref, out)
 
-    def test_threshold_adaptive_gaussian(self):
+    def test_threshold_local_gaussian(self):
         ref = np.array(
             [[False, False, False, False,  True],
              [False, False,  True, False,  True],
@@ -125,14 +139,14 @@ class TestSimpleImage():
              [False,  True,  True, False, False],
              [ True,  True, False, False, False]]
         )
-        out = threshold_adaptive(self.image, 3, method='gaussian')
-        assert_equal(ref, out)
+        out = threshold_local(self.image, 3, method='gaussian')
+        assert_equal(ref, self.image > out)
 
-        out = threshold_adaptive(self.image, 3, method='gaussian',
-                                 param=1./3.)
-        assert_equal(ref, out)
+        out = threshold_local(self.image, 3, method='gaussian',
+                              param=1./3.)
+        assert_equal(ref, self.image > out)
 
-    def test_threshold_adaptive_mean(self):
+    def test_threshold_local_mean(self):
         ref = np.array(
             [[False, False, False, False,  True],
              [False, False,  True, False,  True],
@@ -140,10 +154,10 @@ class TestSimpleImage():
              [False,  True,  True, False, False],
              [ True,  True, False, False, False]]
         )
-        out = threshold_adaptive(self.image, 3, method='mean')
-        assert_equal(ref, out)
+        out = threshold_local(self.image, 3, method='mean')
+        assert_equal(ref, self.image > out)
 
-    def test_threshold_adaptive_median(self):
+    def test_threshold_local_median(self):
         ref = np.array(
             [[False, False, False, False,  True],
              [False, False,  True, False, False],
@@ -151,8 +165,8 @@ class TestSimpleImage():
              [False, False,  True,  True, False],
              [False,  True, False, False, False]]
         )
-        out = threshold_adaptive(self.image, 3, method='median')
-        assert_equal(ref, out)
+        out = threshold_local(self.image, 3, method='median')
+        assert_equal(ref, self.image > out)
 
     def test_threshold_niblack(self):
         ref = np.array(
@@ -242,7 +256,7 @@ def test_yen_coins_image_as_float():
 
 def test_adaptive_even_block_size_error():
     img = data.camera()
-    assert_raises(ValueError, threshold_adaptive, img, block_size=4)
+    assert_raises(ValueError, threshold_local, img, block_size=4)
 
 
 def test_isodata_camera_image():
