@@ -388,15 +388,13 @@ def stereo_motorcycle():
 
 
 def hdr_images():
-    """Bracket images taken from the UNIS building on Svalbard, overlooking the
-    Hjorthfjellet mountain
-
-    These bracketed images are useful for showing the application of High
-    Dynamic Range (HDR) imaging.
-
+    """
+    Bracket images useful for High Dynamic Range (HDR) imaging.
+    Images taken from the UNIS building on Svalbard, overlooking the 
+    Hjorthfjellet mountain.
+  
     Returns
     -------
-
     ims : list 
           list containing the images
     exp : list
@@ -405,7 +403,7 @@ def hdr_images():
     Notes
     -----
     These images were taken by Pål Ellingsen and are released into the public
-    domain (CC-0)
+    domain (CC-0).
     """
 
     files = ['UNIS_EV-2.jpg',

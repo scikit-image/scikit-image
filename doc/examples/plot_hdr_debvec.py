@@ -9,7 +9,7 @@ taken with different exposure times)
 In this example, we show the use of a image series to create a hdr image
 
 The Debevec algorithm is published by:
-Debevec and Malik, J. (1997). doi:10.1145/258734.258884
+Debevec and Malik, J. (1997). DOI:10.1145/258734.258884
 High dynamic imageing is nicely covered at 'Wikipedia
 <https://en.wikipedia.org/wiki/High-dynamic-range_imaging>`
 
@@ -59,19 +59,17 @@ axes[1].imshow(adjust_gamma(hdr_norm, gamma=0.25))
 # axes[2].imshow(hdr_im / (hdr_im + 1))
 plt.show()
 
-
-# Optional saving the image as a hdr image for importing it into other software
-# the only working format is tiff, as the freeimage plugin doesn't export .hdr
-# and .exr files correctly
+## Below follows a commented out example for saving the image as a hdr image 
+## importable by other processing software
+## We only have on working format, tiff, as currently the freeimage plugin 
+## does not export to .hdr  and .exr files correctly
 # imsave(fname, hdr_norm.astype(np.float32), plugin='tifffile')
 
 
-# Show histogram equalized  hdr image.
+## Plotting a histogram equalized  hdr image.
 # hdr_hist = np.zeros_like(hdr_norm)
 # for ii in range(3):
 #     hdr_hist[:, :, ii] = hdr_norm / (hdr_norm + 1)
-
-
 # tone_mapped = np.zeros_like(hdr_im)
 # selem = disk(10)
 # eq = rank.equalize(I, selem=selem)
