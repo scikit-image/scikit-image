@@ -33,3 +33,5 @@ Version 0.15
   `multichannel` to False
 * Change the default value of `block_norm` in ``skimage.feature.hog` to L2-Hys,
   update the reference .npy in ``skimage.data`` and `skimage/feature/tests/test_hog.py`.
+* Remove deprecated function ``threshold_adaptive`` in
+  ``skimage/filters/thresholding.py``.

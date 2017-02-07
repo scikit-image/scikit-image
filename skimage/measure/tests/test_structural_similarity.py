@@ -23,9 +23,7 @@ np.random.seed(1234)
 # for compare_ssim
 def test_old_name_deprecated():
     from skimage.measure import structural_similarity
-    with expected_warnings('Call to deprecated function '
-                           '``structural_similarity``. Use '
-                           '``compare_ssim`` instead.'):
+    with expected_warnings('deprecated'):
         ssim_result = structural_similarity(cam, cam_noisy, win_size=31)
 
 

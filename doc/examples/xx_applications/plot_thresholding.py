@@ -169,13 +169,13 @@ plt.show()
 # thresholding) may produce better results. Note that local is much slower than
 # global thresholding.
 #
-# Here, we binarize an image using the `threshold_adaptive` function, which
+# Here, we binarize an image using the `threshold_local` function, which
 # calculates thresholds in regions with a characteristic size `block_size` surrounding
 # each pixel (i.e. local neighborhoods). Each threshold value is the weighted mean
 # of the local neighborhood minus an offset value.
 #
 
-from skimage.filters import threshold_otsu, threshold_adaptive
+from skimage.filters import threshold_otsu, threshold_local
 
 
 image = data.page()
@@ -184,7 +184,8 @@ global_thresh = threshold_otsu(image)
 binary_global = image > global_thresh
 
 block_size = 35
-binary_adaptive = threshold_adaptive(image, block_size, offset=10)
+adaptive_thresh = threshold_local(image, block_size, offset=10)
+binary_adaptive = image > adaptive_thresh
 
 fig, axes = plt.subplots(nrows=3, figsize=(7, 8))
 ax = axes.ravel()
