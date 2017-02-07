@@ -18,7 +18,7 @@ Version 0.14
 * Remove deprecation error on the usage of ``ntiles_x``, ``ntiles_y`` in
   ``skimage.exposure.equalize_adapthist`` and the corresponding test.
 * Remove the freeimage plugin shim to imageio.
-* Remove deprecated `normalise` and corresponding test for ``skimage.feature.hog``. 
+* Remove deprecated `normalise` and corresponding test for ``skimage.feature.hog``.
 
 
 Version 0.15
@@ -35,3 +35,7 @@ Version 0.15
   update the reference .npy in ``skimage.data`` and `skimage/feature/tests/test_hog.py`.
 * Remove deprecated function ``threshold_adaptive`` in
   ``skimage/filters/thresholding.py``.
+* In ``skimage.transform.resize``, set default value of ``mode`` to
+  ``'reflect'``.
+* In ``skimage.transform.rescale``, set default value of ``mode`` to
+  ``'reflect'``.

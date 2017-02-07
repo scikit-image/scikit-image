@@ -32,7 +32,8 @@ plt.imshow(img)
 
 ######################################################################
 
-resized = transform.resize(img, (img.shape[0], img.shape[1] - 200))
+resized = transform.resize(img, (img.shape[0], img.shape[1] - 200),
+                           mode='reflect')
 plt.figure()
 plt.title('Resized Image')
 plt.imshow(resized)
@@ -77,7 +78,7 @@ eimg[rr, cc] -= 1000
 plt.figure()
 plt.title('Object Removed')
 out = transform.seam_carve(img, eimg, 'vertical', 90)
-resized = transform.resize(img, out.shape)
+resized = transform.resize(img, out.shape, mode='reflect')
 plt.imshow(out)
 plt.show()
 

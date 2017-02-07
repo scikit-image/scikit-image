@@ -13,7 +13,7 @@ from skimage._shared._warnings import expected_warnings
 
 PHANTOM = imread(os.path.join(data_dir, "phantom.png"),
                    as_grey=True)[::2, ::2]
-PHANTOM = rescale(PHANTOM, 0.5, order=1)
+PHANTOM = rescale(PHANTOM, 0.5, order=1, mode='reflect')
 
 
 def _debug_plot(original, result, sinogram=None):
@@ -315,7 +315,7 @@ def test_order_angles_golden_ratio():
 def test_iradon_sart():
     debug = False
 
-    image = rescale(PHANTOM, 0.8)
+    image = rescale(PHANTOM, 0.8, mode='reflect')
     theta_ordered = np.linspace(0., 180., image.shape[0], endpoint=False)
     theta_missing_wedge = np.linspace(0., 150., image.shape[0], endpoint=True)
     for theta, error_factor in ((theta_ordered, 1.),
