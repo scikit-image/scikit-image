@@ -230,7 +230,7 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
             return mssim
 
 
-@deprecated('compare_ssim')
+@deprecated('compare_ssim', removed_version='0.14')
 def structural_similarity(X, Y, win_size=None, gradient=False,
                           dynamic_range=None, multichannel=False,
                           gaussian_weights=False, full=False, **kwargs):
