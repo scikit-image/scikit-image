@@ -191,6 +191,46 @@ def test_hough_circle_extended():
     assert_equal(y[0], y_0 + radius)
 
 
+def test_hough_circle_peaks():
+    x_0, y_0, rad_0 = (99, 50, 20)
+    img = np.zeros((120, 100), dtype=int)
+    y, x = circle_perimeter(y_0, x_0, rad_0)
+    img[x, y] = 1
+
+    x_1, y_1, rad_1 = (49, 60, 30)
+    y, x = circle_perimeter(y_1, x_1, rad_1)
+    img[x, y] = 1
+
+    radii = [rad_0, rad_1]
+    hspaces = tf.hough_circle(img, radii)
+    out = tf.hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
+                                threshold=None, num_peaks=np.inf, total_num_peaks=np.inf)
+    s = np.argsort(out[3]) # sort by radii
+    assert_equal(out[1][s], np.array([y_0, y_1]))
+    assert_equal(out[2][s], np.array([x_0, x_1]))
+    assert_equal(out[3][s], np.array([rad_0, rad_1]))
+
+
+def test_hough_circle_peaks_total_peak():
+    img = np.zeros((120, 100), dtype=int)
+
+    x_0, y_0, rad_0 = (99, 50, 20)
+    y, x = circle_perimeter(y_0, x_0, rad_0)
+    img[x, y] = 1
+
+    x_1, y_1, rad_1 = (49, 60, 30)
+    y, x = circle_perimeter(y_1, x_1, rad_1)
+    img[x, y] = 1
+
+    radii = [rad_0, rad_1]
+    hspaces = tf.hough_circle(img, radii)
+    out = tf.hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
+                                threshold=None, num_peaks=np.inf, total_num_peaks=1)
+    assert_equal(out[1][0], np.array([y_1,]))
+    assert_equal(out[2][0], np.array([x_1,]))
+    assert_equal(out[3][0], np.array([rad_1,]))
+
+
 def test_hough_ellipse_zero_angle():
     img = np.zeros((25, 25), dtype=int)
     rx = 6
