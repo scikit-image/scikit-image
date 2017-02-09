@@ -13,6 +13,8 @@ Here's the long and short of it:
 
       git clone https://github.com/your-username/scikit-image.git
 
+   * cd scikit-image
+
    * Add the upstream repository::
 
       git remote add upstream https://github.com/scikit-image/scikit-image.git
