@@ -10,13 +10,14 @@ Refer to the tifffile.py module for documentation and tests.
 :Organization:
   Laboratory for Fluorescence Dynamics, University of California, Irvine
 
-:Version: 2016.04.13
+:Version: 2017.01.10
 
 Requirements
 ------------
 * `CPython 2.7 or 3.5 <http://www.python.org>`_
-* `Numpy 1.10 <http://www.numpy.org>`_
+* `Numpy 1.11 <http://www.numpy.org>`_
 * A Python distutils compatible C compiler  (build)
+* `stdint.h <https://github.com/chemeris/msinttypes/>`_ for msvc9 compiler
 
 Install
 -------
@@ -32,8 +33,8 @@ Use this Python distutils setup script to build the extension module::
 
 License
 -------
-Copyright (c) 2008-2016, Christoph Gohlke
-Copyright (c) 2008-2016, The Regents of the University of California
+Copyright (c) 2008-2017, Christoph Gohlke
+Copyright (c) 2008-2017, The Regents of the University of California
 Produced at the Laboratory for Fluorescence Dynamics
 All rights reserved.
 
@@ -62,7 +63,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-#define _VERSION_ "2016.04.13"
+#define _VERSION_ "2017.01.10"
 
 #define WIN32_LEAN_AND_MEAN
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
@@ -70,6 +71,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Python.h"
 #include "string.h"
 #include "numpy/arrayobject.h"
+
+#include <stdint.h>
 
 /* little endian by default */
 #ifndef MSB
@@ -87,32 +90,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #define NO_ERROR 0
 #define VALUE_ERROR -1
 
-#if defined(_MSC_VER) && _MSC_VER < 1600
-typedef unsigned __int8  uint8_t;
-typedef unsigned __int16  uint16_t;
-typedef unsigned __int32  uint32_t;
-typedef unsigned __int64  uint64_t;
-#ifdef _WIN64
-typedef __int64  ssize_t;
-typedef signed __int64  intptr_t;
-typedef unsigned __int64  uintptr_t;
-#else
-typedef int ssize_t;
-typedef _W64 signed int  intptr_t;
-typedef _W64 unsigned int  uintptr_t;
-#endif
-#else
-/* non MS compilers */
-#include <stdint.h>
-#include <limits.h>
-#endif
-
 #ifndef SSIZE_MAX
-#ifdef _WIN64
-#define SSIZE_MAX (9223372036854775808L)
-#else
-#define SSIZE_MAX (2147483648)
-#endif
+#define SSIZE_MAX INTPTR_MAX
 #endif
 
 #define SWAP2BYTES(x) \
@@ -128,12 +107,6 @@ typedef _W64 unsigned int  uintptr_t;
    (((x) << 8)  & 0x000000FF00000000) | (((x) << 24) & 0x0000FF0000000000) | \
    (((x) << 40) & 0x00FF000000000000) | (((x) << 56) & 0xFF00000000000000))
 
-struct BYTE_STRING {
-    unsigned int ref; /* reference count */
-    unsigned int len; /* length of string */
-    char *str;        /* pointer to bytes */
-};
-
 typedef union {
    uint8_t b[2];
    uint16_t i;
@@ -148,6 +121,11 @@ typedef union {
    uint8_t b[8];
    uint64_t i;
 } u_uint64;
+
+typedef struct {
+    ssize_t len;
+    char* str;
+} string_t;
 
 /*****************************************************************************/
 /* C functions */
@@ -173,11 +151,11 @@ if itemsize not in (1, 2, 4, 8, 16, 24, 32, 64).
 
 */
 int unpackbits(
-    unsigned char *data,
+    unsigned char* data,
     const ssize_t size,  /** size of data in bytes */
     const int itemsize,  /** number of bits in integer */
     ssize_t numitems,  /** number of items to unpack */
-    unsigned char *result  /** buffer to store unpacked items */
+    unsigned char* result  /** buffer to store unpacked items */
     )
 {
     ssize_t i, j, k, storagesize;
@@ -365,14 +343,14 @@ char py_reverse_bitorder_doc[] =
     "Reverse bits in each byte of byte string or numpy array.";
 
 static PyObject*
-py_reverse_bitorder(PyObject *obj, PyObject *args)
+py_reverse_bitorder(PyObject* obj, PyObject* args)
 {
-    PyObject *dataobj = NULL;
-    PyObject *result = NULL;
-    PyArray_Descr *dtype = NULL;
-    PyArrayIterObject *iter = NULL;
-    unsigned char *dataptr = NULL;
-    unsigned char *resultptr = NULL;
+    PyObject* dataobj = NULL;
+    PyObject* result = NULL;
+    PyArray_Descr* dtype = NULL;
+    PyArrayIterObject* iter = NULL;
+    unsigned char* dataptr = NULL;
+    unsigned char* resultptr = NULL;
     Py_ssize_t size, stride;
     Py_ssize_t i, j;
     int axis = -1;
@@ -383,7 +361,7 @@ py_reverse_bitorder(PyObject *obj, PyObject *args)
     Py_INCREF(dataobj);
 
     if (PyBytes_Check(dataobj)) {
-        dataptr = (unsigned char *)PyBytes_AS_STRING(dataobj);
+        dataptr = (unsigned char*)PyBytes_AS_STRING(dataobj);
         size = PyBytes_GET_SIZE(dataobj);
 
         result = PyBytes_FromStringAndSize(NULL, size);
@@ -391,7 +369,7 @@ py_reverse_bitorder(PyObject *obj, PyObject *args)
             PyErr_Format(PyExc_MemoryError, "unable to allocate result");
             goto _fail;
         }
-        resultptr = (unsigned char *)PyBytes_AS_STRING(result);
+        resultptr = (unsigned char*)PyBytes_AS_STRING(result);
 
         Py_BEGIN_ALLOW_THREADS
         for (i = 0; i < size; i++) {
@@ -411,18 +389,19 @@ py_reverse_bitorder(PyObject *obj, PyObject *args)
             PyErr_Format(PyExc_ValueError, "can not handle dtype");
             goto _fail;
         }
-        iter = (PyArrayIterObject *)PyArray_IterAllButAxis(dataobj, &axis);
-        size = PyArray_DIM((PyArrayObject *)dataobj, axis);
-        stride = PyArray_STRIDE((PyArrayObject *)dataobj, axis);
+        iter = (PyArrayIterObject*)PyArray_IterAllButAxis(dataobj, &axis);
+        size = PyArray_DIM((PyArrayObject*)dataobj, axis);
+        stride = PyArray_STRIDE((PyArrayObject*)dataobj, axis);
         stride -= dtype->elsize;
 
         Py_BEGIN_ALLOW_THREADS
         while (iter->index < iter->size) {
-            dataptr = (unsigned char *)iter->dataptr;
+            dataptr = (unsigned char*)iter->dataptr;
             for(i = 0; i < size; i++) {
                 for(j = 0; j < dtype->elsize; j++) {
-                    *dataptr++ = (unsigned char)(((*dataptr * 0x80200802ULL) &
-                                     0x0884422110ULL) * 0x0101010101ULL >> 32);
+                    *dataptr = (unsigned char)(((*dataptr * 0x80200802ULL) &
+                                    0x0884422110ULL) * 0x0101010101ULL >> 32);
+                    dataptr++;
                 }
                 dataptr += stride;
             }
@@ -433,8 +412,7 @@ py_reverse_bitorder(PyObject *obj, PyObject *args)
         Py_DECREF(iter);
         Py_DECREF(dataobj);
         Py_RETURN_NONE;
-    }
-    else {
+    } else {
         PyErr_Format(PyExc_TypeError, "not a byte string or ndarray");
         goto _fail;
     }
@@ -451,13 +429,13 @@ py_reverse_bitorder(PyObject *obj, PyObject *args)
 char py_unpackints_doc[] = "Unpack groups of bits into numpy array.";
 
 static PyObject*
-py_unpackints(PyObject *obj, PyObject *args, PyObject *kwds)
+py_unpackints(PyObject* obj, PyObject* args, PyObject* kwds)
 {
-    PyObject *byteobj = NULL;
-    PyArrayObject *result = NULL;
-    PyArray_Descr *dtype = NULL;
-    char *encoded = NULL;
-    char *decoded = NULL;
+    PyObject* byteobj = NULL;
+    PyArrayObject* result = NULL;
+    PyArray_Descr* dtype = NULL;
+    char* encoded = NULL;
+    char* decoded = NULL;
     Py_ssize_t encoded_len = 0;
     Py_ssize_t decoded_len = 0;
     Py_ssize_t runlen = 0;
@@ -465,7 +443,7 @@ py_unpackints(PyObject *obj, PyObject *args, PyObject *kwds)
     int storagesize, bytesize;
     int itemsize = 0;
     int skipbits = 0;
-    static char *kwlist[] = {"data", "dtype", "itemsize", "runlen", NULL};
+    static char* kwlist[] = {"data", "dtype", "itemsize", "runlen", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO&i|i", kwlist,
         &byteobj, PyArray_DescrConverter, &dtype, &itemsize, &runlen))
@@ -506,20 +484,20 @@ py_unpackints(PyObject *obj, PyObject *args, PyObject *kwds)
     decoded_len = (Py_ssize_t)((uint64_t)runlen * (((uint64_t)encoded_len*8) /
         ((uint64_t)runlen*(uint64_t)itemsize + (uint64_t)skipbits)));
 
-    result = (PyArrayObject *)PyArray_SimpleNew(1, &decoded_len,
+    result = (PyArrayObject*)PyArray_SimpleNew(1, &decoded_len,
                                                 dtype->type_num);
     if (result == NULL) {
         PyErr_Format(PyExc_MemoryError, "unable to allocate output array");
         goto _fail;
     }
-    decoded = (char *)PyArray_DATA(result);
+    decoded = (char*)PyArray_DATA(result);
 
     for (i = 0; i < decoded_len; i+=runlen) {
-        if (NO_ERROR != unpackbits((unsigned char *) encoded,
+        if (NO_ERROR != unpackbits((unsigned char*) encoded,
                                    (ssize_t) encoded_len,
                                    (int) itemsize,
                                    (ssize_t) runlen,
-                                   (unsigned char *) decoded)) {
+                                   (unsigned char*) decoded)) {
                 PyErr_Format(PyExc_ValueError, "unpackbits() failed");
                 goto _fail;
             }
@@ -531,21 +509,21 @@ py_unpackints(PyObject *obj, PyObject *args, PyObject *kwds)
     if ((dtype->byteorder != BOC) && (itemsize % 8 == 0)) {
         switch (dtype->elsize) {
         case 2: {
-            uint16_t *d = (uint16_t *)PyArray_DATA(result);
+            uint16_t* d = (uint16_t*)PyArray_DATA(result);
             for (i = 0; i < PyArray_SIZE(result); i++) {
                 *d = SWAP2BYTES(*d);
                 d++;
             }
             break; }
         case 4: {
-            uint32_t *d = (uint32_t *)PyArray_DATA(result);
+            uint32_t* d = (uint32_t*)PyArray_DATA(result);
             for (i = 0; i < PyArray_SIZE(result); i++) {
                 *d = SWAP4BYTES(*d);
                 d++;
             }
             break; }
         case 8: {
-            uint64_t *d = (uint64_t *)PyArray_DATA(result);
+            uint64_t* d = (uint64_t*)PyArray_DATA(result);
             for (i = 0; i < PyArray_SIZE(result); i++) {
                 *d = SWAP8BYTES(*d);
                 d++;
@@ -568,19 +546,19 @@ py_unpackints(PyObject *obj, PyObject *args, PyObject *kwds)
 /** Decode TIFF PackBits encoded string. */
 char py_decodepackbits_doc[] = "Return TIFF PackBits decoded string.";
 
-static PyObject *
-py_decodepackbits(PyObject *obj, PyObject *args)
+static PyObject*
+py_decodepackbits(PyObject* obj, PyObject* args)
 {
     int n;
     char e;
-    char *decoded = NULL;
-    char *encoded = NULL;
-    char *encoded_end = NULL;
-    char *encoded_pos = NULL;
+    char* decoded = NULL;
+    char* encoded = NULL;
+    char* encoded_end = NULL;
+    char* encoded_pos = NULL;
     unsigned int encoded_len;
     unsigned int decoded_len;
-    PyObject *byteobj = NULL;
-    PyObject *result = NULL;
+    PyObject* byteobj = NULL;
+    PyObject* result = NULL;
 
     if (!PyArg_ParseTuple(args, "O", &byteobj))
         return NULL;
@@ -659,29 +637,30 @@ py_decodepackbits(PyObject *obj, PyObject *args)
 /** Decode TIFF LZW encoded string. */
 char py_decodelzw_doc[] = "Return TIFF LZW decoded string.";
 
-static PyObject *
-py_decodelzw(PyObject *obj, PyObject *args)
+#define GET_NEXT_CODE \
+    code = *((uint32_t*)((void*)(encoded + (bitcount >> 3)))); \
+    if (little_endian) \
+        code = SWAP4BYTES(code); \
+    code <<= (uint32_t)(bitcount % 8); \
+    code &= mask; \
+    code >>= shr; \
+    bitcount += bitw; \
+
+static PyObject*
+py_decodelzw(PyObject* obj, PyObject* args)
 {
-    PyThreadState *_save = NULL;
-    PyObject *byteobj = NULL;
-    PyObject *result = NULL;
-    int i, j;
-    unsigned int encoded_len = 0;
-    unsigned int decoded_len = 0;
-    unsigned int result_len = 0;
-    unsigned int table_len = 0;
-    unsigned int len;
-    unsigned int code, c, oldcode, mask, shr;
-    uint64_t bitcount, bitw;
-    char *encoded = NULL;
-    char *result_ptr = NULL;
-    char *table2 = NULL;
-    char *cptr;
-    struct BYTE_STRING *decoded = NULL;
-    struct BYTE_STRING *decoded_ptr = NULL;
-    struct BYTE_STRING *table[4096];
-    struct BYTE_STRING *newentry, *newresult, *t;
-    int little_endian = 0;
+    PyObject* byteobj = NULL;
+    PyObject* decoded = NULL;
+    string_t* table = NULL;
+    char* encoded = NULL;
+    char* buffer = NULL;
+    char* pbuffer = NULL;
+    char* pdecoded = NULL;
+    char* pstr = NULL;
+    int little_endian;
+    uint32_t code, oldcode, mask, shr, table_size;
+    ssize_t i, decoded_size, buffersize, buffer_size;
+    uint64_t bitcount, bitw, encoded_size;
 
     if (!PyArg_ParseTuple(args, "O", &byteobj))
         return NULL;
@@ -693,267 +672,220 @@ py_decodelzw(PyObject *obj, PyObject *args)
 
     Py_INCREF(byteobj);
     encoded = PyBytes_AS_STRING(byteobj);
-    encoded_len = (unsigned int)PyBytes_GET_SIZE(byteobj);
+    encoded_size = (uint64_t)PyBytes_GET_SIZE(byteobj);
     /*
-    if (encoded_len >= 512 * 1024 * 1024) {
+    if (encoded_size >= 512 * 1024 * 1024) {
         PyErr_Format(PyExc_ValueError, "encoded data > 512 MB not supported");
         goto _fail;
     }
     */
-    /* release GIL: byte/string objects are immutable */
-    _save = PyEval_SaveThread();
+    encoded_size *= 8;  /* bits */
 
     if ((*encoded != -128) || ((*(encoded+1) & 128))) {
-        PyEval_RestoreThread(_save);
         PyErr_Format(PyExc_ValueError,
             "strip must begin with CLEAR code");
         goto _fail;
     }
-    little_endian = (*(unsigned short *)encoded) & 128;
+    little_endian = (*(uint16_t*)encoded) & 128;
 
-    /* allocate buffer for codes and pointers */
-    decoded_len = 0;
-    len = (encoded_len + encoded_len/9) * sizeof(decoded);
-    decoded = PyMem_Malloc(len * sizeof(void *));
-    if (decoded == NULL) {
-        PyEval_RestoreThread(_save);
-        PyErr_Format(PyExc_MemoryError, "failed to allocate decoded");
+    table = PyMem_Malloc(4096 * sizeof(string_t));
+    if (table == NULL) {
+        PyErr_Format(PyExc_MemoryError, "failed to allocate table");
         goto _fail;
     }
-    memset((void *)decoded, 0, len * sizeof(void *));
-    decoded_ptr = decoded;
-
-    /* cache strings of length 2 */
-    cptr = table2 = PyMem_Malloc(256*256*2 * sizeof(char));
-    if (table2 == NULL) {
-        PyEval_RestoreThread(_save);
-        PyErr_Format(PyExc_MemoryError, "failed to allocate table2");
-        goto _fail;
-    }
-    for (i = 0; i < 256; i++) {
-        for (j = 0; j < 256; j++) {
-            *cptr++ = (char)i;
-            *cptr++ = (char)j;
-        }
+    for (i = 0; i < 4096; i++) {
+        table[i].len = 1;
     }
 
-    memset(table, 0, sizeof(table));
-    table_len = 258;
+    /* determine length of output and string buffer */
+    table_size = 258;
     bitw = 9;
     shr = 23;
     mask = 4286578688u;
     bitcount = 0;
-    result_len = 0;
+    decoded_size = 0;
+    buffer_size = 0;
+    buffersize = 0;
     code = 0;
     oldcode = 0;
 
-    while ((unsigned int)((bitcount + bitw) / 8) <= encoded_len) {
+    Py_BEGIN_ALLOW_THREADS
+    while ((bitcount + bitw) <= encoded_size) {
         /* read next code */
-        code = *((unsigned int *)((void *)(encoded + (bitcount / 8))));
-        if (little_endian)
-            code = SWAP4BYTES(code);
-        code <<= (unsigned int)(bitcount % 8);
-        code &= mask;
-        code >>= shr;
-        bitcount += bitw;
+        GET_NEXT_CODE
 
-        if (code == 257) /* end of information */
-            break;
+        if (code == 257) break;  /* end of information */
 
         if (code == 256) {  /* clearcode */
-            /* initialize table and switch to 9 bit */
-            while (table_len > 258) {
-                t = table[--table_len];
-                t->ref--;
-                if (t->ref == 0) {
-                    if (t->len > 2)
-                        PyMem_Free(t->str);
-                    PyMem_Free(t);
-                }
-            }
+            /* initialize table and switch to 9-bit */
+            table_size = 258;
             bitw = 9;
             shr = 23;
             mask = 4286578688u;
+            if (buffersize > buffer_size)
+                buffer_size = buffersize;
+            buffersize = 0;
 
             /* read next code, skip clearcodes */
-            /* TODO: bounds checking */
-            do {
-                code = *((unsigned int *)((void *)(encoded + (bitcount / 8))));
-                if (little_endian)
-                    code = SWAP4BYTES(code);
-                code <<= bitcount % 8;
-                code &= mask;
-                code >>= shr;
-                bitcount += bitw;
-            } while (code == 256);
+            do { GET_NEXT_CODE } while (code == 256);
 
-            if (code == 257) /* end of information */
-                break;
+            if (code == 257) break;  /* end of information */
 
-            /* decoded.append(table[code]) */
-            if (code < 256) {
-                result_len++;
-                *((int *)decoded_ptr++) = code;
-            } else {
-                newresult = table[code];
-                newresult->ref++;
-                result_len += newresult->len;
-                *(struct BYTE_STRING **)decoded_ptr++ = newresult;
-            }
+            decoded_size++;
         } else {
-            if (code < table_len) {
+            if (code < table_size) {
                 /* code is in table */
-                /* newresult = table[code]; */
-                /* newentry = table[oldcode] + table[code][0] */
-                /* decoded.append(newresult); table.append(newentry) */
-                if (code < 256) {
-                    c = code;
-                    *((unsigned int *)decoded_ptr++) = code;
-                    result_len++;
-                } else {
-                    newresult = table[code];
-                    newresult->ref++;
-                    c = (unsigned int) *newresult->str;
-                    *(struct BYTE_STRING **)decoded_ptr++ = newresult;
-                    result_len += newresult->len;
-                }
-                newentry = PyMem_Malloc(sizeof(struct BYTE_STRING));
-                newentry->ref = 1;
-                if (oldcode < 256) {
-                    newentry->len = 2;
-                    newentry->str = table2 + (oldcode << 9) +
-                                                       ((unsigned char)c << 1);
-                } else {
-                    len = table[oldcode]->len;
-                    newentry->len = len + 1;
-                    newentry->str = PyMem_Malloc(newentry->len);
-                    if (newentry->str == NULL)
-                        break;
-                    memmove(newentry->str, table[oldcode]->str, len);
-                    newentry->str[len] = c;
-                }
-                table[table_len++] = newentry;
+                decoded_size += table[code].len;
+                buffersize += table[oldcode].len + 1;
             } else {
                 /* code is not in table */
-                /* newentry = newresult = table[oldcode] + table[oldcode][0] */
-                /* decoded.append(newresult); table.append(newentry) */
-                newresult = PyMem_Malloc(sizeof(struct BYTE_STRING));
-                newentry = newresult;
-                newentry->ref = 2;
-                if (oldcode < 256) {
-                    newentry->len = 2;
-                    newentry->str = table2 + 514*oldcode;
-                } else {
-                    len = table[oldcode]->len;
-                    newentry->len = len + 1;
-                    newentry->str = PyMem_Malloc(newentry->len);
-                    if (newentry->str == NULL)
-                        break;
-                    memmove(newentry->str, table[oldcode]->str, len);
-                    newentry->str[len] = *table[oldcode]->str;
-                }
-                table[table_len++] = newentry;
-                *(struct BYTE_STRING **)decoded_ptr++ = newresult;
-                result_len += newresult->len;
+                decoded_size += table[oldcode].len + 1;
+            }
+            table[table_size++].len = table[oldcode].len + 1;
+
+            /* increase bit-width if necessary */
+            switch (table_size) {
+                case 511:
+                    bitw = 10; shr = 22; mask = 4290772992u;
+                    break;
+                case 1023:
+                    bitw = 11; shr = 21; mask = 4292870144u;
+                    break;
+                case 2047:
+                    bitw = 12; shr = 20; mask = 4293918720u;
             }
         }
         oldcode = code;
-        /* increase bit-width if necessary */
-        switch (table_len) {
-            case 511:
-                bitw = 10;
-                shr = 22;
-                mask = 4290772992u;
-                break;
-            case 1023:
-                bitw = 11;
-                shr = 21;
-                mask = 4292870144u;
-                break;
-            case 2047:
-                bitw = 12;
-                shr = 20;
-                mask = 4293918720u;
-        }
     }
+    Py_END_ALLOW_THREADS
 
-    PyEval_RestoreThread(_save);
+    if (buffersize > buffer_size)
+        buffer_size = buffersize;
 
     if (code != 257) {
         PyErr_WarnEx(
             NULL, "py_decodelzw encountered unexpected end of stream", 1);
     }
 
-    /* result = ''.join(decoded) */
-    decoded_len = (unsigned int)(decoded_ptr - decoded);
-    decoded_ptr = decoded;
-    result = PyBytes_FromStringAndSize(0, result_len);
-    if (result == NULL) {
+    /* allocate output and buffer string */
+    decoded = PyBytes_FromStringAndSize(0, decoded_size);
+    if (decoded == NULL) {
         PyErr_Format(PyExc_MemoryError, "failed to allocate decoded string");
         goto _fail;
     }
-    result_ptr = PyBytes_AS_STRING(result);
+    pdecoded = PyBytes_AS_STRING(decoded);
 
-    _save = PyEval_SaveThread();
+    buffer = PyMem_Malloc(buffer_size);
+    if (buffer == NULL) {
+        PyErr_Format(PyExc_MemoryError, "failed to allocate string buffer");
+        goto _fail;
+    }
 
-    while (decoded_len--) {
-        code = *((unsigned int *)decoded_ptr);
-        if (code < 256) {
-            *result_ptr++ = (char)code;
+    /* decode input to output string */
+    table_size = 258;
+    bitw = 9;
+    shr = 23;
+    mask = 4286578688u;
+    bitcount = 0;
+    pbuffer = buffer;
+
+    Py_BEGIN_ALLOW_THREADS
+    while ((bitcount + bitw) <= encoded_size) {
+        /* read next code */
+        GET_NEXT_CODE
+
+        if (code == 257) break;  /* end of information */
+
+        if (code == 256) {  /* clearcode */
+            /* initialize table and switch to 9-bit */
+            table_size = 258;
+            bitw = 9;
+            shr = 23;
+            mask = 4286578688u;
+            pbuffer = buffer;
+
+            /* read next code, skip clearcodes */
+            do { GET_NEXT_CODE } while (code == 256);
+
+            if (code == 257) break;  /* end of information */
+
+            *pdecoded++ = code;
         } else {
-            t = *((struct BYTE_STRING **)decoded_ptr);
-            memmove(result_ptr, t->str, t->len);
-            result_ptr +=  t->len;
-            if (--t->ref == 0) {
-                if (t->len > 2)
-                    PyMem_Free(t->str);
-                PyMem_Free(t);
-            }
-        }
-        decoded_ptr++;
-    }
-    PyMem_Free(decoded);
-
-    while (table_len-- > 258) {
-        t = table[table_len];
-        if (t->len > 2)
-            PyMem_Free(t->str);
-        PyMem_Free(t);
-    }
-    PyMem_Free(table2);
-
-    PyEval_RestoreThread(_save);
-
-    Py_DECREF(byteobj);
-    return result;
-
-  _fail:
-    if (table2 != NULL)
-        PyMem_Free(table2);
-    if (decoded != NULL) {
-        /* Bug? are decoded_ptr and decoded_len correct? */
-        while (decoded_len--) {
-            code = *((unsigned int *) decoded_ptr);
-            if (code > 258) {
-                t = *((struct BYTE_STRING **) decoded_ptr);
-                if (--t->ref == 0) {
-                    if (t->len > 2)
-                        PyMem_Free(t->str);
-                    PyMem_Free(t);
+            if (code < table_size) {
+                /* code is in table */
+                /* decoded.append(table[code]) */
+                if (code < 256) {
+                    *pdecoded++ = code;
+                } else {
+                    pstr = table[code].str;
+                    for (i = 0; i < table[code].len; i++) {
+                        *pdecoded++ = *pstr++;
+                    }
+                }
+                /* table.append(table[oldcode] + table[code][0]) */
+                table[table_size].str = pbuffer;
+                if (oldcode < 256) {
+                    *pbuffer++ = oldcode;
+                } else {
+                    pstr = table[oldcode].str;
+                    for (i = 0; i < table[oldcode].len; i++) {
+                        *pbuffer++ = *pstr++;
+                    }
+                }
+                if (code < 256) {
+                    *pbuffer++ = code;
+                } else {
+                    *pbuffer++ = table[code].str[0];
+                }
+            } else {
+                /* code is not in table */
+                /* outstring = table[oldcode] + table[oldcode][0] */
+                /* decoded.append(outstring) */
+                /* table.append(outstring) */
+                table[table_size].str = pdecoded;
+                if (oldcode < 256) {
+                    *pdecoded++ = oldcode;
+                    *pdecoded++ = oldcode;
+                } else {
+                    pstr = table[oldcode].str;
+                    for (i = 0; i < table[oldcode].len; i++) {
+                        *pdecoded++ = *pstr++;
+                    }
+                    *pdecoded++ = table[oldcode].str[0];
                 }
             }
+            table[table_size++].len = table[oldcode].len + 1;
+
+            /* increase bit-width if necessary */
+            switch (table_size) {
+                case 511:
+                    bitw = 10; shr = 22; mask = 4290772992u;
+                    break;
+                case 1023:
+                    bitw = 11; shr = 21; mask = 4292870144u;
+                    break;
+                case 2047:
+                    bitw = 12; shr = 20; mask = 4293918720u;
+            }
         }
-        PyMem_Free(decoded);
+        oldcode = code;
     }
-    while (table_len-- > 258) {
-        t = table[table_len];
-        if (t->len > 2)
-            PyMem_Free(t->str);
-        PyMem_Free(t);
-    }
+    Py_END_ALLOW_THREADS
+
+    PyMem_Free(buffer);
+    PyMem_Free(table);
+    Py_DECREF(byteobj);
+    return decoded;
+
+  _fail:
+
+    if (table)
+        PyMem_Free(table);
+    if (buffer)
+        PyMem_Free(buffer);
 
     Py_XDECREF(byteobj);
-    Py_XDECREF(result);
+    Py_XDECREF(decoded);
 
     return NULL;
 }
@@ -986,17 +918,17 @@ static PyMethodDef module_methods[] = {
 #if PY_MAJOR_VERSION >= 3
 
 struct module_state {
-    PyObject *error;
+    PyObject* error;
 };
 
 #define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
 
-static int module_traverse(PyObject *m, visitproc visit, void *arg) {
+static int module_traverse(PyObject* m, visitproc visit, void *arg) {
     Py_VISIT(GETSTATE(m)->error);
     return 0;
 }
 
-static int module_clear(PyObject *m) {
+static int module_clear(PyObject* m) {
     Py_CLEAR(GETSTATE(m)->error);
     return 0;
 }
@@ -1027,9 +959,9 @@ init_tifffile(void)
 
 #endif
 {
-    PyObject *module;
+    PyObject* module;
 
-    char *doc = (char *)PyMem_Malloc(sizeof(module_doc) + sizeof(_VERSION_));
+    char* doc = (char*)PyMem_Malloc(sizeof(module_doc) + sizeof(_VERSION_));
     PyOS_snprintf(doc, sizeof(module_doc) + sizeof(_VERSION_),
                   module_doc, _VERSION_);
 
@@ -1052,11 +984,11 @@ init_tifffile(void)
 
     {
 #if PY_MAJOR_VERSION < 3
-    PyObject *s = PyString_FromString(_VERSION_);
+    PyObject* s = PyString_FromString(_VERSION_);
 #else
-    PyObject *s = PyUnicode_FromString(_VERSION_);
+    PyObject* s = PyUnicode_FromString(_VERSION_);
 #endif
-    PyObject *dict = PyModule_GetDict(module);
+    PyObject* dict = PyModule_GetDict(module);
     PyDict_SetItemString(dict, "__version__", s);
     Py_DECREF(s);
     }
