@@ -3231,15 +3231,6 @@ class TiffSequence(object):
     axes : str
         Labels of axes in shape.
 
-    Examples
-    --------
-    >>> tifs = TiffSequence("test.oif.files/*.tif")
-    >>> tifs.shape, tifs.axes
-    ((2, 100), 'CT')
-    >>> data = tifs.asarray()
-    >>> data.shape
-    (2, 100, 256, 256)
-
     """
     _patterns = {
         'axes': r"""
@@ -4657,16 +4648,6 @@ def reverse_bitorder(data):
         The data to be bit reversed. If byte string, a new bit-reversed byte
         string is returned. Numpy arrays are bit-reversed in-place.
 
-    Examples
-    --------
-    >>> reverse_bitorder(b'\x01\x64')
-    b'\x80&'
-
-    >>> data = numpy.array([1, 666], dtype='uint16')
-    >>> reverse_bitorder(data)
-    >>> data
-    array([  128, 16473], dtype=uint16)
-
     """
     table = (
         b'\x00\x80@\xc0 \xa0`\xe0\x10\x90P\xd00\xb0p\xf0\x08\x88H\xc8(\xa8h'
@@ -4892,11 +4873,6 @@ def stripnull(string, null=b'\x00'):
 
     Clean NULL terminated C strings. For unicode strings use null='\\0'.
 
-    >>> stripnull(b'string\\x00')
-    b'string'
-    >>> stripnull('string\\x00', null='\\0')
-    'string'
-
     """
     i = string.find(null)
     return string if (i < 0) else string[:i]
@@ -4906,11 +4882,6 @@ def stripascii(string):
     """Return string truncated at last byte that is 7bit ASCII.
 
     Clean NULL separated and terminated TIFF strings.
-
-    >>> stripascii(b'string\\x00string\\n\\x01\\x00')
-    b'string\\x00string\\n'
-    >>> stripascii(b'\\x00')
-    b''
 
     """
     # TODO: pythonize this
