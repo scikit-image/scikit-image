@@ -12,8 +12,7 @@ def configuration(parent_package='', top_path=None):
 
     config.add_extension('tifffile._tifffile',
                          sources=['tifffile/tifffile.c'],
-                         include_dirs=([get_numpy_include_dirs()] +
-                                       [os.path.dirname(__file__)]))
+                         include_dirs=[get_numpy_include_dirs()])
     return config
 
 if __name__ == '__main__':
