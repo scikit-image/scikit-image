@@ -72,7 +72,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "string.h"
 #include "numpy/arrayobject.h"
 
-#include <stdint.h>
+#include "stdint.h"
 
 /* little endian by default */
 #ifndef MSB
