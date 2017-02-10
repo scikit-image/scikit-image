@@ -69,6 +69,11 @@ def test_page():
     data.page()
 
 
+def test_retina():
+    """ Test that "retina" image can be loaded. """
+    data.retina()
+
+
 def test_rocket():
     """ Test that "rocket" image can be loaded. """
     data.rocket()
