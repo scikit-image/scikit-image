@@ -11,7 +11,7 @@ from ._geometric import (estimate_transform,
                          ProjectiveTransform, FundamentalMatrixTransform,
                          EssentialMatrixTransform, PolynomialTransform,
                          PiecewiseAffineTransform)
-from ._warps import (swirl, resize, rotate, rescale,
+from ._warps import (polar2cart, swirl, resize, rotate, rescale,
                      downscale_local_mean, warp, warp_coords)
 from .pyramids import (pyramid_reduce, pyramid_expand,
                        pyramid_gaussian, pyramid_laplacian)
@@ -44,6 +44,7 @@ __all__ = ['hough_circle',
            'FundamentalMatrixTransform',
            'PolynomialTransform',
            'PiecewiseAffineTransform',
+           'polar2cart',
            'swirl',
            'resize',
            'rotate',
