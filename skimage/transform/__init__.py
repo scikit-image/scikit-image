@@ -1,6 +1,6 @@
 from .hough_transform import (hough_line, hough_line_peaks,
                               probabilistic_hough_line, hough_circle,
-                              hough_ellipse)
+                              hough_circle_peaks, hough_ellipse)
 from .radon_transform import (radon, iradon, iradon_sart,
                               order_angles_golden_ratio)
 from .finite_radon_transform import frt2, ifrt2
@@ -22,6 +22,7 @@ __all__ = ['hough_circle',
            'hough_ellipse',
            'hough_line',
            'probabilistic_hough_line',
+           'hough_circle_peaks',
            'hough_line_peaks',
            'radon',
            'iradon',
