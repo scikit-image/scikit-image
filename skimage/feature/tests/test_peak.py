@@ -23,7 +23,8 @@ def test_noisy_peaks():
     for r, c in peak_locations:
         image[r, c] = 1
 
-    peaks_detected = peak.peak_local_max(image, min_distance=5)
+    peaks_detected = peak.peak_local_max(image, min_distance=5,
+                                         exclude_border=True)
 
     assert len(peaks_detected) == len(peak_locations)
     for loc in peaks_detected:
@@ -367,14 +368,16 @@ def test_3D():
     image = np.zeros((30, 30, 30))
     image[15, 15, 15] = 1
     image[5, 5, 5] = 1
-    assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0),
+    assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
+                                     exclude_border=True),
                  [[15, 15, 15]])
-    assert_equal(peak.peak_local_max(image, min_distance=6, threshold_rel=0),
+    assert_equal(peak.peak_local_max(image, min_distance=6, threshold_rel=0,
+                                     exclude_border=True),
                  [[15, 15, 15]])
     assert sorted(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
                                       exclude_border=False).tolist()) == \
         [[5, 5, 5], [15, 15, 15]]
-    assert sorted(peak.peak_local_max(image, min_distance=5,
+    assert sorted(peak.peak_local_max(image, min_distance=5, exclude_border=True,
                                       threshold_rel=0).tolist()) == \
         [[5, 5, 5], [15, 15, 15]]
 
@@ -383,14 +386,16 @@ def test_4D():
     image = np.zeros((30, 30, 30, 30))
     image[15, 15, 15, 15] = 1
     image[5, 5, 5, 5] = 1
-    assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0),
+    assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
+                                     exclude_border=True),
                  [[15, 15, 15, 15]])
-    assert_equal(peak.peak_local_max(image, min_distance=6, threshold_rel=0),
+    assert_equal(peak.peak_local_max(image, min_distance=6, threshold_rel=0,
+                                     exclude_border=True),
                  [[15, 15, 15, 15]])
     assert sorted(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
                                       exclude_border=False).tolist()) == \
         [[5, 5, 5, 5], [15, 15, 15, 15]]
-    assert sorted(peak.peak_local_max(image, min_distance=5,
+    assert sorted(peak.peak_local_max(image, min_distance=5, exclude_border=True,
                                       threshold_rel=0).tolist()) == \
         [[5, 5, 5, 5], [15, 15, 15, 15]]
 

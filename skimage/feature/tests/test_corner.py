@@ -138,24 +138,26 @@ def test_square_image():
     im[:25, :25] = 1.
 
     # Moravec
-    results = peak_local_max(corner_moravec(im),
+    results = peak_local_max(corner_moravec(im), exclude_border=True,
                              min_distance=10, threshold_rel=0)
     # interest points along edge
     assert len(results) == 57
 
     # Harris
     results = peak_local_max(corner_harris(im, method='k'),
-                             min_distance=10, threshold_rel=0)
+                             min_distance=10, threshold_rel=0,
+                             exclude_border=True)
     # interest at corner
     assert len(results) == 1
 
     results = peak_local_max(corner_harris(im, method='eps'),
-                             min_distance=10, threshold_rel=0)
+                             min_distance=10, threshold_rel=0,
+                             exclude_border=True)
     # interest at corner
     assert len(results) == 1
 
     # Shi-Tomasi
-    results = peak_local_max(corner_shi_tomasi(im),
+    results = peak_local_max(corner_shi_tomasi(im), exclude_border=True,
                              min_distance=10, threshold_rel=0)
     # interest at corner
     assert len(results) == 1
@@ -175,15 +177,18 @@ def test_noisy_square_image():
 
     # Harris
     results = peak_local_max(corner_harris(im, method='k'),
-                             min_distance=10, threshold_rel=0)
+                             min_distance=10, threshold_rel=0,
+                             exclude_border=True)
     assert len(results) == 1
     results = peak_local_max(corner_harris(im, method='eps'),
-                             min_distance=10, threshold_rel=0)
+                             min_distance=10, threshold_rel=0,
+                             exclude_border=True)
     assert len(results) == 1
 
     # Shi-Tomasi
     results = peak_local_max(corner_shi_tomasi(im, sigma=1.5),
-                             min_distance=10, threshold_rel=0)
+                             min_distance=10, threshold_rel=0,
+                             exclude_border=True)
     assert len(results) == 1
 
 
@@ -195,12 +200,12 @@ def test_squared_dot():
     # Moravec fails
 
     # Harris
-    results = peak_local_max(corner_harris(im),
+    results = peak_local_max(corner_harris(im), exclude_border=True,
                              min_distance=10, threshold_rel=0)
     assert (results == np.array([[6, 6]])).all()
 
     # Shi-Tomasi
-    results = peak_local_max(corner_shi_tomasi(im),
+    results = peak_local_max(corner_shi_tomasi(im), exclude_border=True,
                              min_distance=10, threshold_rel=0)
     assert (results == np.array([[6, 6]])).all()
 

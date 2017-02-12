@@ -20,7 +20,7 @@ def _get_high_intensity_peaks(image, mask, num_peaks):
 
 
 def peak_local_max(image, min_distance=1, threshold_abs=None,
-                   threshold_rel=None, exclude_border=True, indices=True,
+                   threshold_rel=None, exclude_border=False, indices=True,
                    num_peaks=np.inf, footprint=None, labels=None,
                    num_peaks_per_label=np.inf):
     """Find peaks in an image as coordinate list or boolean mask.
@@ -48,9 +48,10 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         the minimum intensity of the image.
     threshold_rel : float, optional
         Minimum intensity of peaks, calculated as `max(image) * threshold_rel`.
-    exclude_border : int, optional
+    exclude_border : int or bool, optional
         If nonzero, `exclude_border` excludes peaks from
-        within `exclude_border`-pixels of the border of the image.
+        within `exclude_border`-pixels of the border of the image. `True`
+        defaults to `min_distance` while `False` defaults to 0.
     indices : bool, optional
         If True, the output will be an array representing peak
         coordinates.  If False, the output will be a boolean array shaped as
