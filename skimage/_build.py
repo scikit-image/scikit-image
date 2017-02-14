@@ -3,6 +3,8 @@ import os
 import hashlib
 from distutils.version import LooseVersion
 
+CYTHON_VERSION = '0.23'
+
 # WindowsError is not defined on unix systems
 try:
     WindowsError
@@ -26,8 +28,8 @@ def cython(pyx_files, working_path=''):
 
     try:
         from Cython import __version__
-        if LooseVersion(__version__) < '0.23':
-            raise ImportError
+        if LooseVersion(__version__) < CYTHON_VERSION:
+            raise RuntimeError('Cython >= %s needed to build scikit-image' % CYTHON_VERSION)
 
         from Cython.Build import cythonize
     except ImportError:
@@ -36,10 +38,11 @@ def cython(pyx_files, working_path=''):
         c_files = [f.replace('.pyx.in', '.c').replace('.pyx', '.c') for f in pyx_files]
         for cfile in [os.path.join(working_path, f) for f in c_files]:
             if not os.path.isfile(cfile):
-                raise RuntimeError('Cython >= 0.23 is required to build scikit-image from git checkout')
+                raise RuntimeError('Cython >= %s is required to build scikit-image from git checkout' \
+                                   % CYTHON_VERSION)
 
-        print("Cython >= 0.23 not found; falling back to pre-built %s" \
-              % " ".join(c_files))
+        print("Cython >= %s not found; falling back to pre-built %s" \
+              % (CYTHON_VERSION, " ".join(c_files)))
     else:
         for pyxfile in [os.path.join(working_path, f) for f in pyx_files]:
 
