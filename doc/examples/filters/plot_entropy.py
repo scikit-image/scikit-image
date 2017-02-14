@@ -39,13 +39,13 @@ img = noise + 128
 
 entr_img = entropy(img, disk(10))
 
-fig, (ax0, ax1, ax2) = plt.subplots(1, 3, figsize=(8, 3))
+fig, (ax0, ax1, ax2) = plt.subplots(nrows=1, ncols=3, figsize=(10, 4))
 
-ax0.imshow(noise_mask, cmap=plt.cm.gray)
+ax0.imshow(noise_mask, cmap='gray')
 ax0.set_xlabel("Noise mask")
-ax1.imshow(img, cmap=plt.cm.gray)
+ax1.imshow(img, cmap='gray')
 ax1.set_xlabel("Noisy image")
-ax2.imshow(entr_img)
+ax2.imshow(entr_img, cmap='viridis')
 ax2.set_xlabel("Local entropy")
 
 fig.tight_layout()
@@ -54,7 +54,9 @@ fig.tight_layout()
 
 image = img_as_ubyte(data.camera())
 
-fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(10, 4), sharex=True,
+fig, (ax0, ax1) = plt.subplots(ncols=2,
+                               figsize=(12, 4),
+                               sharex=True,
                                sharey=True,
                                subplot_kw={"adjustable": "box-forced"})
 
@@ -63,7 +65,7 @@ ax0.set_title("Image")
 ax0.axis("off")
 fig.colorbar(img0, ax=ax0)
 
-img1 = ax1.imshow(entropy(image, disk(5)), cmap=plt.cm.gray)
+img1 = ax1.imshow(entropy(image, disk(5)), cmap='gray')
 ax1.set_title("Entropy")
 ax1.axis("off")
 fig.colorbar(img1, ax=ax1)
