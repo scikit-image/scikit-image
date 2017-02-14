@@ -3,10 +3,10 @@
 HDR Image
 ===========
 
-The hdr image is a combination of bracketed images into one (a series of images
-taken with different exposure times)
+An HDR image is a combination of bracketed images into one (a series of images
+taken with different exposure times).
 
-In this example, we show the use of a image series to create a hdr image
+In this example, we show the use of a image series to create an HDR image.
 
 The Debevec algorithm is published by:
 Debevec and Malik, J. (1997). DOI:10.1145/258734.258884
@@ -25,7 +25,6 @@ from matplotlib.colors import LogNorm
 from skimage.filters import rank
 from skimage.color import rgb2gray
 from skimage.io import imsave
-import skimage
 
 # Get example images
 ims, exp = data.hdr_images()
