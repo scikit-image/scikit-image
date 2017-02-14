@@ -329,6 +329,8 @@ def img_as_float(image, force_copy=False):
     -----
     The range of a floating point image is [0.0, 1.0] or [-1.0, 1.0] when
     converting from unsigned or signed datatypes, respectively.
+    If the input image has a float type, intensity values are not modified
+    and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
     return convert(image, np.float64, force_copy)
