@@ -3,21 +3,22 @@
 HDR Image
 ===========
 
-An HDR image is a combination of bracketed images into one (a series of images
-taken with different exposure times).
+A HDR (High Dynamic Range) image is a combination of bracketed images into one
+(a series of images taken with different exposure times).
 
-In this example, we show the use of a image series to create an HDR image.
+In this example, we show the use of a series of images at different exposures to
+create a HDR image.
 
-The Debevec algorithm is published by:
-Debevec and Malik, J. (1997). DOI:10.1145/258734.258884
-High dynamic imageing is nicely covered at 'Wikipedia
-<https://en.wikipedia.org/wiki/High-dynamic-range_imaging>`
+References
+----------
+.. [1] Debevec and Malik, J. (1997). DOI:10.1145/258734.258884
+.. [2] https://en.wikipedia.org/wiki/High-dynamic-range_imaging
 
 """
 
+import numpy as np
 import matplotlib.pyplot as plt
 
-import numpy as np
 from skimage.exposure import adjust_gamma, hdr
 from skimage import data
 from skimage.morphology import disk
