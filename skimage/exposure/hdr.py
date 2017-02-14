@@ -3,23 +3,23 @@ import numpy as np
 
 def get_radiance(images, exposure, radiance_map):
     """
-    Return the radiance for a series of images based upon a camera response 
-    function
+    Return the radiance for a series of images based upon a camera response
+    function.
 
     Parameters
     ----------
     images: list
-          list of images in the for of numpy arrays. Either mono or colour
-          (RGB, MxNx3)
+        List of images in the for of numpy arrays. Either mono or color
+        (RGB, MxNx3).
     exposure : numpy 1D array
-          array of exposure times in seconds
+        Array of exposure times in seconds.
     radiacenMap : numpy array
-                  array mapping the counts to radiance
+        Array mapping the counts to radiance
 
     Returns
-    ----------
+    -------
     hdr : numpy array
-          resulting image with radiance values
+        Resulting image with radiance values.
     """
 
     den = np.ones(images[0].shape)
@@ -49,26 +49,25 @@ def make_hdr(images, exposure, radiance_map, depth=16):
     Parameters
     ----------
     images: list
-          list of images in the for of numpy arrays. Either grayscale or colour
-          (RGB).
+        List of images in the for of numpy arrays. Either grayscale or color
+        (RGB).
     exposure : numpy 1D array
-          array of exposure times in seconds.
+        Array of exposure times in seconds.
     radiance_map : numpy array
-               array (idx) mapping counts to radiance value, if input is RGB 
-               this must be Nx3.
+        Array (idx) mapping counts to radiance value, if input is RGB this must
+        be Nx3.
     depth : int, optional
-            pixel depth, default=16
+        Pixel depth.
 
     Returns
-    ----------
+    -------
     hdr : numpy array
-          The HDR image either grayscale or RGB depending on input in ln(E)
+        The HDR image either grayscale or RGB depending on input in ln(E).
 
     References
     ----------
-        Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 
-        3-8.
-        DOI:10.1145/258734.258884
+    .. [1]  Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc.,
+            August, 3-8. DOI:10.1145/258734.258884
     """
     B = np.log(np.array(exposure))
 
@@ -115,42 +114,39 @@ def get_crf(images, exposure, depth=16, l=200, depth_max=10):
     """
     Compute the camera response function from a set of images and exposures.
 
-
     Parameters
     ----------
     images: list
-          List of images in the for of numpy arrays. Either grayscale or colour
-          (RGB).
+        List of images in the for of numpy arrays. Either grayscale or color
+        (RGB).
     exposure: numpy 1D array
-            Array of exposure times in seconds.
+        Array of exposure times in seconds.
     depth : int, optional
-          pixel depth, default=16
+        Pixel depth.
     l : int, optional
         Smoothness parameter, default 200, increase for noisy images.
-        Can help to increase this for better smoothness in large bit depths 
+        Can help to increase this for better smoothness in large bit depths
         (depth_max > 10).
     depth_max : int, optional
-              Depth used for the SVC is reduced to this if depth is larger.
-              Used to reduce the size of the matrix solved by the SVC for 
-              images with more than 8 bits per colour channel.
-              Note that the scaling of memory requirements and computational 
-              time with this parameter is highly non-linear.
-              The resulting radiance is interpolated up to depth before being 
-              returned.
-              default = 10
+        Depth used for the SVC is reduced to this if depth is larger.
+        Used to reduce the size of the matrix solved by the SVC for
+        images with more than 8 bits per colour channel.
+        Note that the scaling of memory requirements and computational
+        time with this parameter is highly non-linear.
+        The resulting radiance is interpolated up to depth before being
+        returned.
 
     Returns
-    ----------  
+    -------
     radiance_map : numpy array
-                 Array (idx) mapping counts to radiance value, if input is RGB 
-                 this is 2**depth x 3.
-                 Order of colours is same as input.
+        Array (idx) mapping counts to radiance value, if input is RGB
+        this is 2**depth x 3.
+        Order of colours is same as input.
 
     References
     ----------
-        Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 
-        3-8.
-        DOI:10.1145/258734.258884
+    .. [1]  Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc.,
+            August, 3-8. DOI:10.1145/258734.258884
     """
 
     # Calculate number of samples from image necessary for an overdetermined
@@ -201,28 +197,26 @@ def gsolve(Z, B, l, depth=16, depth_max=12):
     B : numpy array
         The ln of the shutter speed for image j.
     l : int
-            l determines the amount of smoothness.
+        l determines the amount of smoothness.
     depth : int, optional
-            pixel depth, default=16
+        Pixel depth, default=16
     depth_max : int, optional
-              Depth used for the SVC is reduced to this if depth is larger than
-              this value.
-              g is interpolated to depth if this is smaller than depth
-              Used to reduce the size of the matrix solved by the SVC.
-              default = 12
+        Depth used for the SVC is reduced to this if depth is larger than
+        this value.
+        g is interpolated to depth if this is smaller than depth
+        Used to reduce the size of the matrix solved by the SVC.
 
     Returns
-    ----------
-    g : numpy array 
-        ln exposure corresponding to pixel value z. 
-    LE : numpy array 
-         ln film irradiance at pixel location i.
+    -------
+    g : numpy array
+        ln exposure corresponding to pixel value z.
+    LE : numpy array
+        ln film irradiance at pixel location i.
 
     References
     ----------
-        Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 
-        3-8.
-        DOI:10.1145/258734.258884
+    .. [1]  Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc.,
+            August, 3-8. DOI:10.1145/258734.258884
     """
     # Reduce the bit depth to preserve memory and computational time
     if depth > depth_max:
@@ -267,61 +261,48 @@ def gsolve(Z, B, l, depth=16, depth_max=12):
     return g, LE
 
 
-def weight_func(I, depth=16):
+def weight_func(intensity, depth=16):
     """
     Weight function.
 
     Parameters
     ----------
-    I : int 
-        intensity
+    intensity : int
+        Intensity.
     depth : int, optional
-            pixel depth, default=16
+        Pixel depth.
 
     Returns
-    ----------
+    -------
     w : int
         Weight for given intensity.
-
-    References
-    ----------
-        Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 
-        3-8.
-        DOI:10.1145/258734.258884
     """
 
     # This assumes Z_min = 0
-    if I <= (2**depth / 2):
-        return I
+    if intensity <= (2**depth / 2):
+        return intensity
     else:
-        return (2**depth - 1) - I
+        return (2**depth - 1) - intensity
 
 
-def weight_func_arr(I, depth=16):
+def weight_func_arr(intensity, depth=16):
     """
     Weight function for arrays.
 
     Parameters
     ----------
-    I : array 
-        intensities 
+    intensity : array
+        Intensities
     depth : int, optional
-            pixel depth, default=16
+        Pixel depth, default=16
 
     Returns
-    ----------
+    -------
     w : int
         Weight for given intensity.
-
-    References
-    ----------
-        Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 
-        3-8.
-        DOI:10.1145/258734.258884
     """
 
     # This assumes Z_min = 0
-
-    Iout = I.copy()
-    Iout[I > (2**depth / 2)] = (2**depth - 1) - I[I > (2**depth / 2)]
+    Iout = intensity.copy()
+    Iout[intensity > (2**depth / 2)] = (2**depth - 1) - intensity[intensity > (2**depth / 2)]
     return Iout
