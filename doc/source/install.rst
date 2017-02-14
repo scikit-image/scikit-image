@@ -19,7 +19,7 @@ Windows
 -------
 ``scikit-image`` comes pre-installed with several Python
 distributions, including Anaconda_, `Enthought Canopy`_,
-`Python(x,y)`_ and `WinPython`.
+`Python(x,y)`_ and `WinPython`_.
 
 .. _Anaconda: https://store.continuum.io/cshop/anaconda/
 .. _Enthought Canopy: https://www.enthought.com/products/canopy/
@@ -47,13 +47,43 @@ Execute the following command from the shell::
 
 Windows
 ```````
-If you experience the error ``Error:unable to find vcvarsall.bat`` it means that
-distutils is not correctly configured to use the C compiler. Modify (or create,
-if not existing) the configuration file ``distutils.cfg`` (located for
-example at ``C:\Python26\Lib\distutils\distutils.cfg``) to contain::
+Before installing the development version, uninstall the standard version of
+scikit-image using pip as::
 
-    [build]
-    compiler=mingw32
+  pip uninstall scikit-image
+
+or using conda (for Anaconda users) as::
+
+  pip uninstall scikit-image
+
+Now clone scikit-image on your local computer::
+
+  git clone https://github.com/scikit-image/scikit-image.git
+
+Change the directory and build from source code::
+
+  cd scikit-image
+  python setup.py develop
+
+If you experience the error ``Error:unable to find vcvarsall.bat`` it means that
+your computer does not have recommended compilers for python. You can download and
+install Windows compilers from `here <goo.gl/s8p9Y3>`_  or correctly configure distutils
+to use the C compiler. Modify (or create, if not existing) the configuration file
+``distutils.cfg`` (located for example at ``C:\Python26\Lib\distutils\distutils.cfg``)
+to contain::
+
+  [build]
+   compiler=mingw32
+
+Once the build process is successful, run::
+
+   pip install -U -e .
+
+Make sure to give space after ``-e`` and add dot at the end of the above command.
+This will install scikit-image along with required dependencies if not previously present. Otherwise,
+you can run the following command to skip installation of dependencies::
+
+   pip install -U [--no-deps] -e .
 
 For more details on compiling in Windows, there is a lot of knowledge iterated
 into the `setup of appveyor`_ (a continuous integration service).
