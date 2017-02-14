@@ -67,7 +67,7 @@ Change the directory and build from source code::
 
 If you experience the error ``Error:unable to find vcvarsall.bat`` it means that
 your computer does not have recommended compilers for python. You can download and
-install Windows compilers from `here <goo.gl/s8p9Y3>`_  or correctly configure distutils
+install Windows compilers from `here`_  or correctly configure distutils
 to use the C compiler. Modify (or create, if not existing) the configuration file
 ``distutils.cfg`` (located for example at ``C:\Python26\Lib\distutils\distutils.cfg``)
 to contain::
@@ -75,13 +75,13 @@ to contain::
   [build]
    compiler=mingw32
 
-Once the build process is successful, run::
+Once the build process is complete, run::
 
    pip install -U -e .
 
-Make sure to give space after ``-e`` and add dot at the end of the above command.
-This will install scikit-image along with required dependencies if not previously present. Otherwise,
-you can run the following command to skip installation of dependencies::
+Make sure to give space after ``-e`` and add dot at the end. This will install scikit-image along
+with required dependencies if not previously present. Otherwise, you can run the following command
+to skip installation of dependencies::
 
    pip install -U [--no-deps] -e .
 
@@ -92,6 +92,7 @@ into the `setup of appveyor`_ (a continuous integration service).
 .. _python.org: http://python.org/
 .. _Christoph Gohlke's: http://www.lfd.uci.edu/~gohlke/pythonlibs/
 .. _setup of appveyor: https://github.com/scikit-image/scikit-image/blob/master/appveyor.yml
+.. _here: https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.0_standalone:_Visual_C.2B-.2B-_Build_Tools_2015_.28x86.2C_x64.2C_ARM.29
 
 Debian and Ubuntu
 `````````````````
