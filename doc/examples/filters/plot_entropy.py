@@ -45,7 +45,7 @@ ax0.imshow(noise_mask, cmap='gray')
 ax0.set_xlabel("Noise mask")
 ax1.imshow(img, cmap='gray')
 ax1.set_xlabel("Noisy image")
-ax2.imshow(entr_img, cmap='magma')
+ax2.imshow(entr_img, cmap='viridis')
 ax2.set_xlabel("Local entropy")
 
 fig.tight_layout()
