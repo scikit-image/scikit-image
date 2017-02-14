@@ -43,6 +43,7 @@ ax = fig.add_subplot(111, projection='3d')
 
 # Fancy indexing: `verts[faces]` to generate a collection of triangles
 mesh = Poly3DCollection(verts[faces])
+mesh.set_edgecolor('k')
 ax.add_collection3d(mesh)
 
 ax.set_xlabel("x-axis: a = 6 per ellipsoid")
