@@ -391,15 +391,15 @@ def hdr_images():
     """
     Bracket images useful for High Dynamic Range (HDR) imaging.
 
-    Images taken from the UNIS building on Svalbard, overlooking the 
+    Images taken from the UNIS building on Svalbard, overlooking the
     Hjorthfjellet mountain.
 
     Returns
     -------
-    ims : list 
-          list containing the images
+    ims : list
+        List containing three images.
     exp : list
-         list of exposure times in sec 
+        List of exposure times in seconds.
 
     Notes
     -----
@@ -413,7 +413,5 @@ def hdr_images():
 
     exp = [1 / 1250., 1 / 320., 1 / 40.]
 
-    ims = []
-    for f in files:
-        ims.append(load(f))
+    ims = [load(f) for f in files]
     return ims, exp
