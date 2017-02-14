@@ -11,9 +11,10 @@ create a HDR image.
 
 References
 ----------
-.. [1] Debevec and Malik, J. (1997). DOI:10.1145/258734.258884
-.. [2] https://en.wikipedia.org/wiki/High-dynamic-range_imaging
 
+.. [1] Debevec and Malik, J. (1997). DOI:10.1145/258734.258884
+
+.. [2] https://en.wikipedia.org/wiki/High-dynamic-range_imaging
 """
 
 import numpy as np
@@ -41,7 +42,6 @@ plt.show()
 # Make the HDR image
 hdr_im = hdr.make_hdr(ims, exp, radiance_map, depth=8)
 
-
 # Normalise the hdr image
 hdr_norm = np.zeros_like(hdr_im)
 norm = np.max(np.nan_to_num(hdr_im.flatten()))
@@ -62,16 +62,16 @@ plt.show()
 
 
 # Plotting a histogram equalized  hdr image.
-# hdr_hist = np.zeros_like(hdr_norm)
-# for ii in range(3):
-#     hdr_hist[:, :, ii] = hdr_norm / (hdr_norm + 1)
-# tone_mapped = np.zeros_like(hdr_im)
-# selem = disk(10)
-# eq = rank.equalize(I, selem=selem)
-# for i in range(3):
-#     norm = np.max(np.nan_to_num(hdr_im[:, :, ii].flatten()))
-#     tone_mapped[:, :, i] = hdr_im[:, :, i] * eq / (I * norm)
-# fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 20))
-# axes[0].imshow(I, 'gray', norm=LogNorm())
-# axes[1].imshow(tone_mapped)
-# plt.show()
+# hdr_hist = np.zeros_like(hdr_norm)
+# for ii in range(3):
+#     hdr_hist[:, :, ii] = hdr_norm / (hdr_norm + 1)
+# tone_mapped = np.zeros_like(hdr_im)
+# selem = disk(10)
+# eq = rank.equalize(I, selem=selem)
+# for i in range(3):
+#     norm = np.max(np.nan_to_num(hdr_im[:, :, ii].flatten()))
+#     tone_mapped[:, :, i] = hdr_im[:, :, i] * eq / (I * norm)
+# fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 20))
+# axes[0].imshow(I, 'gray', norm=LogNorm())
+# axes[1].imshow(tone_mapped)
+# plt.show()
