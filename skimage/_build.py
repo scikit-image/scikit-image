@@ -27,15 +27,19 @@ def cython(pyx_files, working_path=''):
     try:
         from Cython import __version__
         if LooseVersion(__version__) < '0.23':
-            raise RuntimeError('Cython >= 0.23 needed to build scikit-image')
+            raise ImportError
 
         from Cython.Build import cythonize
     except ImportError:
-        # If cython is not found, we do nothing -- the build will make use of
-        # the distributed .c files
-        print("Cython not found; falling back to pre-built %s"
-              % " ".join([f.replace('.pyx.in', 'c').replace('.pyx', '.c')
-                          for f in pyx_files]))
+        # If cython is not found, the build will make use of
+        # the distributed .c files if present
+        c_files = [f.replace('.pyx.in', '.c').replace('.pyx', '.c') for f in pyx_files]
+        for cfile in [os.path.join(working_path, f) for f in c_files]:
+            if not os.path.isfile(cfile):
+                raise RuntimeError('Cython >= 0.23 is required to build scikit-image from git checkout')
+
+        print("Cython >= 0.23 not found; falling back to pre-built %s" \
+              % " ".join(c_files))
     else:
         for pyxfile in [os.path.join(working_path, f) for f in pyx_files]:
 
