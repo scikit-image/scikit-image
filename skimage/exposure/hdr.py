@@ -24,7 +24,7 @@ def get_radiance(images, exposure, radiance_map):
 
     den = np.ones(images[0].shape)
     num = np.zeros(images[0].shape)
-    wf = np.vectorized(weight_func)
+    wf = np.vectorized(_weight_func)
     for idx, im in enumerate(images):
         gij = im.copy()
         # For colour
@@ -83,7 +83,7 @@ def make_hdr(images, exposure, radiance_map, depth=16):
     images = np.asarray(images, dtype=np.uint64)
 
     sx, sy, sz = np.shape(images[0])
-    w = weight_func_arr(images, depth)
+    w = _weight_func_arr(images, depth)
 
     if gray:
         num = np.zeros_like(hdr)
@@ -176,17 +176,17 @@ def get_crf(images, exposure, depth=16, l=200, depth_max=10):
 
             for jj in range(len(images)):
                 Z[:, jj] = images[jj][:, :, ii].flatten()[rand_idx]
-            radiance_map[:, ii], LE = gsolve(Z, B, l, depth, depth_max)
+            radiance_map[:, ii], LE = _gsolve(Z, B, l, depth, depth_max)
 
     else:
         for jj in range(len(images)):
             Z[:, jj] = images[jj][:, :, ii].flatten()[rand_idx]
-        radiance_map, LE = gsolve(Z, B, l, depth, depth_max)
+        radiance_map, LE = _gsolve(Z, B, l, depth, depth_max)
 
     return radiance_map
 
 
-def gsolve(Z, B, l, depth=16, depth_max=12):
+def _gsolve(Z, B, l, depth=16, depth_max=12):
     """
     Solves for the camera response function.
 
@@ -231,7 +231,7 @@ def gsolve(Z, B, l, depth=16, depth_max=12):
     k = 0
     for ii in range(Z.shape[0]):
         for jj in range(Z.shape[1]):
-            wij = weight_func(Z[ii, jj] + 1, depth - div)
+            wij = _weight_func(Z[ii, jj] + 1, depth - div)
             A[k, Z[ii, jj] + 1] = wij
             A[k, n + ii] = -wij
             b[k] = wij * B[jj]
@@ -242,9 +242,9 @@ def gsolve(Z, B, l, depth=16, depth_max=12):
     k += 1
 
     for ii in range(n - 2):
-        A[k, ii] = l * weight_func(ii + 1, depth - div)
-        A[k, ii + 1] = -2 * l * weight_func(ii + 1, depth - div)
-        A[k, ii + 2] = l * weight_func(ii + 1, depth - div)
+        A[k, ii] = l * _weight_func(ii + 1, depth - div)
+        A[k, ii + 1] = -2 * l * _weight_func(ii + 1, depth - div)
+        A[k, ii + 2] = l * _weight_func(ii + 1, depth - div)
         k += 1
 
     # Solve the equations with SVD
@@ -261,7 +261,7 @@ def gsolve(Z, B, l, depth=16, depth_max=12):
     return g, LE
 
 
-def weight_func(intensity, depth=16):
+def _weight_func(intensity, depth=16):
     """
     Weight function.
 
@@ -285,7 +285,7 @@ def weight_func(intensity, depth=16):
         return (2**depth - 1) - intensity
 
 
-def weight_func_arr(intensity, depth=16):
+def _weight_func_arr(intensity, depth=16):
     """
     Weight function for arrays.
 
