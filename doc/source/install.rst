@@ -54,7 +54,7 @@ scikit-image using pip as::
 
 or using conda (for Anaconda users) as::
 
-  pip uninstall scikit-image
+  conda uninstall scikit-image
 
 Now clone scikit-image on your local computer::
 
@@ -68,7 +68,7 @@ Change the directory and build from source code::
 If you experience the error ``Error:unable to find vcvarsall.bat`` it means that
 your computer does not have recommended compilers for python. You can download and
 install Windows compilers from `here`_  or correctly configure distutils
-to use the C compiler. Modify (or create, if not existing) the configuration file
+to use the C compiler by modifying (or create, if not existing) the configuration file
 ``distutils.cfg`` (located for example at ``C:\Python26\Lib\distutils\distutils.cfg``)
 to contain::
 
