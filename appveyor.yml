@@ -42,6 +42,10 @@ install:
   - "python --version"
   - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
 
+  # Get stdint headers needed by tifffile.c.
+  - "curl https://raw.githubusercontent.com/chemeris/msinttypes/master/inttypes.h -o skimage/external/tifffile/inttypes.h"
+  - "curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o skimage/external/tifffile/stdint.h"
+
   # Install the build and runtime dependencies of the project.
   - "%CMD_IN_ENV% pip install -v -r requirements.txt"
   - "%CMD_IN_ENV% python setup.py bdist_wheel bdist_wininst"
