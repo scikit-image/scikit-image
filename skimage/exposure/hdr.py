@@ -35,7 +35,7 @@ def get_radiance(images, exposure, radiance_map):
             gij[:, :] = radiance_map[im[:, :, ii] + 1]
         gij = gij - np.log(exposure[idx])
 
-        wij = wf(zij)
+        wij = wf(gij)
         num = num + wij * gij
         den = den + wij
 
@@ -81,7 +81,7 @@ def make_hdr(images, exposure, radiance_map, depth=16):
         hdr = np.zeros([sx, sy], dtype=np.float)
         gray = True
 
-    images= np.asarray(images, dtype=np.uint64)
+    images = np.asarray(images, dtype=np.uint64)
 
     sx, sy, sz = np.shape(images[0])
     w = weight_func_arr(images, depth)
@@ -112,7 +112,6 @@ def make_hdr(images, exposure, radiance_map, depth=16):
 
 
 def get_crf(images, exposure, depth=16, l=200, depth_max=10):
-    
     """
     Compute the camera response function from a set of images and exposures.
 
@@ -163,7 +162,7 @@ def get_crf(images, exposure, depth=16, l=200, depth_max=10):
     else:
         div = 0
 
-    samples = 4 * (2**(depth - div)) // (len(images) - 1)
+    samples = int(4 * (2**(depth - div)) / (len(images) - 1))
 
     # Find if it is grayscale or colour
     colour = (images[0].ndim == 3)
@@ -231,7 +230,7 @@ def gsolve(Z, B, l, depth=16, depth_max=12):
     else:
         div = 0
     n = 2**(depth - div)
-    Z = Z / (2**div)
+    Z = np.array(Z / (2**div), dtype=np.int64)  # Make sure it stays int
 
     A = np.zeros([Z.size + n + 1, n + Z.shape[0]])
     b = np.zeros(A.shape[0])
@@ -245,7 +244,7 @@ def gsolve(Z, B, l, depth=16, depth_max=12):
             k += 1
 
     #  Fix the curve by setting its middle value to 0 = ln(1)
-    A[k, n / 2] = 1
+    A[k, int(n / 2)] = 1
     k += 1
 
     for ii in range(n - 2):
@@ -283,7 +282,7 @@ def weight_func(I, depth=16):
     ----------
     w : int
         Weight for given intensity.
-    
+
     References
     ----------
         Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 
@@ -313,7 +312,7 @@ def weight_func_arr(I, depth=16):
     ----------
     w : int
         Weight for given intensity.
-    
+
     References
     ----------
         Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc., August, 

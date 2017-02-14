@@ -54,19 +54,14 @@ fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 20))
 axes[0].imshow(hdr_norm)
 # Show gamma adjusted hdr image.
 axes[1].imshow(adjust_gamma(hdr_norm, gamma=0.25))
-#
-# print(np.max(np.nan_to_num(hdr_hist)))
-# axes[2].imshow(hdr_im / (hdr_im + 1))
 plt.show()
 
-## Below follows a commented out example for saving the image as a hdr image 
-## importable by other processing software
-## We only have on working format, tiff, as currently the freeimage plugin 
-## does not export to .hdr  and .exr files correctly
+# Below follows a commented out example for saving the image as a hdr image
+# importable by other processing software
 # imsave(fname, hdr_norm.astype(np.float32), plugin='tifffile')
 
 
-## Plotting a histogram equalized  hdr image.
+# Plotting a histogram equalized  hdr image.
 # hdr_hist = np.zeros_like(hdr_norm)
 # for ii in range(3):
 #     hdr_hist[:, :, ii] = hdr_norm / (hdr_norm + 1)

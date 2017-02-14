@@ -390,9 +390,10 @@ def stereo_motorcycle():
 def hdr_images():
     """
     Bracket images useful for High Dynamic Range (HDR) imaging.
+
     Images taken from the UNIS building on Svalbard, overlooking the 
     Hjorthfjellet mountain.
-  
+
     Returns
     -------
     ims : list 
@@ -410,7 +411,7 @@ def hdr_images():
              'UNIS_EV0.jpg',
              'UNIS_EV2.jpg']
 
-    exp = [1 / 1250., 1 / 320, 1 / 40]
+    exp = [1 / 1250., 1 / 320., 1 / 40.]
 
     ims = []
     for f in files:
