@@ -47,8 +47,11 @@ Execute the following command from the shell::
 
 Windows
 ```````
-Before installing the development version, uninstall the standard version of
-scikit-image using pip as::
+We are assuming that you have default Python environment already configured and you want to install
+the scikit-image development version inside of it. For creating and working with Python virtual environments,
+you can follow instructions on `venv`_ and `virtual environments`_.
+
+Before installing scikit-image development version, uninstall the standard version of scikit-image using pip as::
 
   pip uninstall scikit-image
 
@@ -79,11 +82,15 @@ Once the build process is complete, run::
 
    pip install -U -e .
 
-Make sure to give space after ``-e`` and add dot at the end. This will install scikit-image along
-with required dependencies if not previously present. Otherwise, you can run the following command
+Make sure to give space after ``-e`` and add dot at the end. This will install scikit-image development version
+and upgrade (or install) all the required dependencies. Otherwise, you can run the following command
 to skip installation of dependencies::
 
-   pip install -U [--no-deps] -e .
+   pip install -U[--no-deps] -e .
+
+You can install or upgrade dependencies required for scikit-image anytime after installation using::
+
+   pip install -r requirements.txt --upgrade
 
 For more details on compiling in Windows, there is a lot of knowledge iterated
 into the `setup of appveyor`_ (a continuous integration service).
@@ -93,6 +100,8 @@ into the `setup of appveyor`_ (a continuous integration service).
 .. _Christoph Gohlke's: http://www.lfd.uci.edu/~gohlke/pythonlibs/
 .. _setup of appveyor: https://github.com/scikit-image/scikit-image/blob/master/appveyor.yml
 .. _here: https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.0_standalone:_Visual_C.2B-.2B-_Build_Tools_2015_.28x86.2C_x64.2C_ARM.29
+.. _venv: https://docs.python.org/3/library/venv.html
+.. _virtual environments: http://docs.python-guide.org/en/latest/dev/virtualenvs/
 
 Debian and Ubuntu
 `````````````````
