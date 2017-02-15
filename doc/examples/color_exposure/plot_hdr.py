@@ -14,7 +14,7 @@ References
 
 .. [1] Debevec and Malik, J. (1997). DOI:10.1145/258734.258884
 
-.. [2] https://en.wikipedia.org/wiki/High-dynamic-range_imaging
+.. [2] https://en.wikipedia.org/wiki/High-dynamic-range_imaging
 """
 
 import numpy as np
