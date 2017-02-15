@@ -19,8 +19,8 @@ def _convert_input(image, preserve_range):
 
 
 def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
-             multichannel=None, preserve_range=False):
-    """Multi-dimensional Gaussian filter
+             multichannel=None, preserve_range=False, truncate=4.0):
+    """Multi-dimensional Gaussian filter.
 
     Parameters
     ----------
@@ -50,6 +50,8 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
+    truncate : float, optional
+        Truncate the filter at this many standard deviations.
 
     Returns
     -------
@@ -114,4 +116,5 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         if len(sigma) != image.ndim:
             sigma = np.concatenate((np.asarray(sigma), [0]))
     image = convert_to_float(image, preserve_range)
-    return ndi.gaussian_filter(image, sigma, mode=mode, cval=cval)
+    return ndi.gaussian_filter(image, sigma, mode=mode, cval=cval,
+                               truncate=truncate)
