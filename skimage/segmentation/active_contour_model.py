@@ -15,6 +15,9 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     Active contours by fitting snakes to features of images. Supports single
     and multichannel 2D images. Snakes can be periodic (for segmentation) or
     have fixed and/or free ends.
+    The output snake has the same length as the input boundary.
+    As the number of points is constant, make sure that the initial snake
+    has enough points to capture the details of the final contour.
 
     Parameters
     ----------
