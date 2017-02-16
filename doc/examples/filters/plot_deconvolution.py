@@ -87,7 +87,6 @@ the noise power and the image frequency power.
 """
 import numpy as np
 import matplotlib.pyplot as plt
-
 from skimage import color, data, restoration
 
 astro = color.rgb2gray(data.astronaut())
