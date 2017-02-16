@@ -124,6 +124,42 @@ may write::
    >>> plt.imshow(out)
 
 
+Working with OpenCV
+===================
+
+It is possible that you may need to use an image created using ``skimage`` with
+OpenCV or vice versa. An image in OpenCV is also a Numpy array, however its
+dtype is uint8 by default (See `Image data types and what they mean`_).
+
+``skimage`` provides various utility functions to convert between different data
+types and properly rescale their values. In case there is a loss of precision,
+a warning is issued.
+
+Using image from ``skimage`` with OpenCV
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This can be achieved with :func:`img_as_ubyte`::
+
+    >>> from skimage import img_as_ubyte
+    >>> cv_image = img_as_ubyte(any_skimage_image)
+
+Using image from OpenCV with ``skimage``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If cv_image is an array of unsigned bytes, ``skimage`` will understand it by
+default. If you prefer working with floating point images, :func:`img_as_float`
+can be used to convert the image::
+
+    >>> from skimage import img_as_float
+    >>> image = img_as_float(any_opencv_image)
+
+Type requirements should be noted in the docstrings.
+
+For color images, note that ``skimage`` uses RGB color space whereas images
+loaded by OpenCV are in BGR mode. There may be a slight pixel difference
+due to this and conversion to corresponding color space will be required.
+
+
 Image processing pipeline
 =========================
 
