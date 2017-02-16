@@ -27,7 +27,8 @@ the image, the noise power and the image frequency power.
 .. [1] François Orieux, Jean-François Giovannelli, and Thomas
        Rodet, "Bayesian estimation of regularization and point
        spread function parameters for Wiener-Hunt deconvolution",
-       J. Opt. Soc. Am. A 27, 1593-1607 (2010)
+       J. Opt. Soc. Am. A 27, 1593-1607 (2010).
+       DOI:10.1364/JOSAA.27.001593
 """
 import numpy as np
 import matplotlib.pyplot as plt
