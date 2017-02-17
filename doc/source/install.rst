@@ -1,57 +1,58 @@
 Installing scikit-image
 =======================
 
-Standard Python installation
-----------------------------
+We are assuming that you have default Python environment already configured on your computer
+and you intend to install ``scikit-image`` inside of it. If you want to create and work with Python
+virtual environments, please follow instructions on `venv`_ and `virtual environments`_.
 
-From the shell, execute::
+There are two ways you can install ``scikit-image`` on your preferred Python environment.
 
-  pip install scikit-image
+1. Standard Installation
+2. Development Installation
 
-Conda-based distributions (Anaconda, Miniconda)
------------------------------------------------
+1. Standard Installation:
+-------------------------
 
-From the shell/command prompt, execute::
+``scikit-image`` comes pre-installed with several Python distributions, including Anaconda_, `Enthought Canopy`_,
+`Python(x,y)`_ and `WinPython`_. However, you can install or upgrade existing ``scikit-image`` via
+shell/command prompt.
 
-  conda install scikit-image
+* Windows
+`````````
 
-Windows
--------
-``scikit-image`` comes pre-installed with several Python
-distributions, including Anaconda_, `Enthought Canopy`_,
-`Python(x,y)`_ and `WinPython`_.
+On Windows, you can install ``scikit-image`` using::
+
+    pip install scikit-image
+
+For Conda-based distributions (Anaconda, Miniconda), execute::
+
+    conda install scikit-image
+
+If you are using pure Python i.e. the distribution from python.org_, you'll need to
+manually download packages (such as numpy, scipy and scikit-image) using Python wheels available from
+`Christoph Gohlke's`_ website. You can install Python wheels using::
+
+    pip install SomePackage-1.0-py2.py3-none-any.whl
 
 .. _Anaconda: https://store.continuum.io/cshop/anaconda/
 .. _Enthought Canopy: https://www.enthought.com/products/canopy/
 .. _Python(x,y): http://code.google.com/p/pythonxy/wiki/Welcome
 .. _WinPython: https://winpython.github.io/
 
-If you are using the distribution from python.org_, you'll need to
-manually download a few packages: numpy, scipy and scikit-image from
-`Christoph Gohlke's`_ website. Python wheels are installed using::
-
-  pip install SomePackage-1.0-py2.py3-none-any.whl
-
-Debian and Ubuntu
------------------
-On Debian and Ubuntu install scikit-image with::
+* Debian and Ubuntu
+```````````````````
+On Debian and Ubuntu, install ``scikit-image`` with::
 
   sudo apt-get install python-skimage
 
-Building from source
---------------------
+2. Development Installation:
+----------------------------
+You can install ``scikit-image`` development version if either your distribution ships an outdated version
+or you want to develop and work on new features before the package is released officially.
 
-Execute the following command from the shell::
-
-  pip install scikit-image
-
-Windows
-```````
-We are assuming that you have default Python environment already configured and you want to install
-the scikit-image development version inside of it. For creating and working with Python virtual environments,
-you can follow instructions on `venv`_ and `virtual environments`_.
-
-Before installing scikit-image development version, uninstall the standard version of scikit-image using pip as::
+* Windows
+`````````
+Before installing the development version, uninstall the standard version of ``scikit-image`` using pip as::
 
   pip uninstall scikit-image
 
@@ -103,29 +104,22 @@ into the `setup of appveyor`_ (a continuous integration service).
 .. _venv: https://docs.python.org/3/library/venv.html
 .. _virtual environments: http://docs.python-guide.org/en/latest/dev/virtualenvs/
 
-Debian and Ubuntu
-`````````````````
-If your distribution ships an outdated version, you may recompile from
-source.  First install the dependencies::
+* Debian and Ubuntu
+```````````````````
+Install all the required dependencies::
 
   sudo apt-get install python-matplotlib python-numpy python-pil python-scipy
 
-Get compilers::
+Get suitable compilers for successful installation::
 
   sudo apt-get install build-essential cython
-
-Then run the pip installation command.
-
-
-Running the development version
--------------------------------
 
 Obtain the source from the git repository at
 ``http://github.com/scikit-image/scikit-image`` by running::
 
   git clone https://github.com/scikit-image/scikit-image.git
 
-After unpacking, change into the source directory and execute:
+After unpacking, change into the source directory and execute::
 
   pip install -e .
 
@@ -134,10 +128,8 @@ To update::
   git pull  # Grab latest source
   python setup.py build_ext -i  # Compile any modified extensions
 
-
-Building with bento
-```````````````````
-
+* Building with bento
+`````````````````````
 Alternatively, ``scikit-image`` can also be built using `bento
 <http://cournape.github.io/Bento/>`__.  Bento depends on `WAF
 <https://code.google.com/p/waf/>`__ for compilation.
