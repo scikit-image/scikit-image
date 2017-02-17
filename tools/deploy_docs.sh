@@ -8,8 +8,8 @@ then
     echo "-- pushing docs --"
 
     (
-    git config user.email "travis@travis-ci.com"
-    git config user.name "Travis Bot"
+    git config --global user.email "travis@travis-ci.com"
+    git config --global user.name "Travis Bot"
 
     git clone --quiet --branch=gh-pages https://${GH_REF} doc_build
     cd doc_build
