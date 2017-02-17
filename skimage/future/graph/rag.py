@@ -71,7 +71,6 @@ def min_weight(graph, src, dst, n):
         both exist.
 
     """
-
     # cover the cases where n only has edge to either `src` or `dst`
     default = {'weight': np.inf}
     w1 = graph[n].get(src, default)['weight']
@@ -108,7 +107,6 @@ def _add_edge_filter(values, graph):
 
 
 class RAG(nx.Graph):
-
     """
     The Region Adjacency Graph (RAG) of an image, subclasses
     `networx.Graph <http://networkx.github.io/documentation/latest/reference/classes.graph.html>`_
@@ -225,27 +223,30 @@ class RAG(nx.Graph):
     def add_node(self, n, attr_dict=None, **attr):
         """Add node `n` while updating the maximum node id.
 
-        .. seealso:: :func:`networkx.Graph.add_node`."""
+        .. seealso:: :func:`networkx.Graph.add_node`.
+        """
         super(RAG, self).add_node(n, attr_dict, **attr)
         self.max_id = max(n, self.max_id)
 
     def add_edge(self, u, v, attr_dict=None, **attr):
         """Add an edge between `u` and `v` while updating max node id.
 
-        .. seealso:: :func:`networkx.Graph.add_edge`."""
+        .. seealso:: :func:`networkx.Graph.add_edge`.
+        """
         super(RAG, self).add_edge(u, v, attr_dict, **attr)
         self.max_id = max(u, v, self.max_id)
 
     def copy(self):
         """Copy the graph with its max node id.
 
-        .. seealso:: :func:`networkx.Graph.copy`."""
+        .. seealso:: :func:`networkx.Graph.copy`.
+        """
         g = super(RAG, self).copy()
         g.max_id = self.max_id
         return g
 
     def next_id(self):
-        """Returns the `id` for the new node to be inserted.
+        """Return the `id` for the new node to be inserted.
 
         The current implementation returns one more than the maximum `id`.
 
@@ -261,7 +262,8 @@ class RAG(nx.Graph):
 
         This is a convenience method used internally.
 
-        .. seealso:: :func:`networkx.Graph.add_node`."""
+        .. seealso:: :func:`networkx.Graph.add_node`.
+        """
         super(RAG, self).add_node(n)
 
 
@@ -288,7 +290,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
         are considered adjacent. It can range from 1 to `labels.ndim`. Its
         behavior is the same as `connectivity` parameter in
         `scipy.ndimage.generate_binary_structure`.
-    mode : {'distance', 'similarity'}, optional
+    mode : {'distance', 'similarity', 'similarity_and_proximity'}, optional
         The strategy to assign edge weights.
 
             'distance' : The weight between two adjacent regions is the
@@ -300,6 +302,14 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
             :math:`e^{-d^2/sigma}` where :math:`d=|c_1 - c_2|`, where
             :math:`c_1` and :math:`c_2` are the mean colors of the two regions.
             It represents how similar two regions are.
+
+            'similarity_and_proximity' : The weight between two
+            adjacent is :math:`e^{-d^2/sigma} * e^{-x^2/sigma_x}`
+            where :math:`d=|c_1 - c_2|`, where :math:`c_1` and :math:`c_2` are
+            the mean colors of the two regions and where :math:`x=|x_1 - x_2|`,
+            where :math:`x_1` and :math:`x_2` are the centroid coordinates of
+            the two regions. It represents how similar and spatially close two
+            regions are [see reference 2 section 3.1 equation 11].
     sigma : float, optional
         Used for computation when `mode` is "similarity". It governs how
         close to each other two colors should be, for their corresponding edge
@@ -323,7 +333,11 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
     ----------
     .. [1] Alain Tremeau and Philippe Colantoni
            "Regions Adjacency Graph Applied To Color Image Segmentation"
-           http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.11.5274
+           DOI:10.1.1.11.5274
+
+    .. [2] Jianbo Shi, & Malik, J. (2000). Normalized cuts and image
+           segmentation. IEEE Transactions on Pattern Analysis and Machine
+           Intelligence, 22(8), 888-905. DOI:10.1109/34.868688
 
     """
     graph = RAG(labels, connectivity=connectivity)
@@ -343,6 +357,12 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
         graph.node[n]['mean color'] = (graph.node[n]['total color'] /
                                        graph.node[n]['pixel count'])
 
+    regions, _ = rag_node_centroids(labels, graph)
+
+    for (n, data), region in zip(graph.nodes_iter(data=True), regions):
+        graph.node[n].update({'centroid': np.array(region['centroid'],
+                                                   dtype=np.double)})
+
     for x, y, d in graph.edges_iter(data=True):
         diff = graph.node[x]['mean color'] - graph.node[y]['mean color']
         diff = np.linalg.norm(diff)
@@ -350,6 +370,12 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
             d['weight'] = math.e ** (-(diff ** 2) / sigma)
         elif mode == 'distance':
             d['weight'] = diff
+        elif mode == 'similarity_and_proximity':
+            prox = graph.node[x]['centroid'] - graph.node[y]['centroid']
+            prox = np.linalg.norm(prox)
+            sigma_x = np.linalg.norm(labels.shape)
+            d['weight'] = ((math.e ** (-(diff ** 2) / sigma)) *
+                           (math.e ** (-(prox ** 2) / sigma_x)))
         else:
             raise ValueError("The mode '%s' is not recognised" % mode)
 
@@ -357,7 +383,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
 
 
 def rag_boundary(labels, edge_map, connectivity=2):
-    """ Comouter RAG based on region boundaries
+    """Comouter RAG based on region boundaries.
 
     Given an image's initial segmentation and its edge map this method
     constructs the corresponding Region Adjacency Graph (RAG). Each node in the
@@ -387,7 +413,6 @@ def rag_boundary(labels, edge_map, connectivity=2):
     >>> rag = graph.rag_boundary(labels, edge_map)
 
     """
-
     conn = ndi.generate_binary_structure(labels.ndim, connectivity)
     eroded = ndi.grey_erosion(labels, footprint=conn)
     dilated = ndi.grey_dilation(labels, footprint=conn)
@@ -469,7 +494,6 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     >>> lc = graph.show_rag(labels, g, img)
     >>> cbar = plt.colorbar(lc)
     """
-
     if not in_place:
         rag = rag.copy()
 
@@ -490,18 +514,7 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
         out = img_cmap(out)[:, :, :3]
 
     edge_cmap = cm.get_cmap(edge_cmap)
-
-    # Handling the case where one node has multiple labels
-    # offset is 1 so that regionprops does not ignore 0
-    offset = 1
-    map_array = np.arange(labels.max() + 1)
-    for n, d in rag.nodes_iter(data=True):
-        for label in d['labels']:
-            map_array[label] = offset
-        offset += 1
-
-    rag_labels = map_array[labels]
-    regions = measure.regionprops(rag_labels)
+    regions, rag_labels = rag_node_centroids(labels, rag)
 
     for (n, data), region in zip(rag.nodes_iter(data=True), regions):
         data['centroid'] = tuple(map(int, region['centroid']))
@@ -525,3 +538,37 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     ax.add_collection(lc)
 
     return lc
+
+
+def rag_node_centroids(labels, rag):
+    """Get centroids of the region adjacency graph nodes.
+
+    Parameters
+    ----------
+    labels : ndarray, shape (M, N)
+        The labelled image.
+    rag : RAG
+        The Region Adjacency Graph.
+
+    Returns
+    -------
+    regions : list of RegionProperties
+        Please refer to `skimage.measure.regionprops` for more information
+        on the available region properties.
+    rag_labels : ndarray, shape (M, N)
+        The relabelled labelled image.
+
+    """
+    # Handling the case where one node has multiple labels
+    # offset is 1 so that regionprops does not ignore 0
+    offset = 1
+    map_array = np.arange(labels.max() + 1)
+    for n, d in rag.nodes_iter(data=True):
+        for label in d['labels']:
+            map_array[label] = offset
+        offset += 1
+
+    rag_labels = map_array[labels]
+    regions = measure.regionprops(rag_labels)
+
+    return regions, rag_labels
