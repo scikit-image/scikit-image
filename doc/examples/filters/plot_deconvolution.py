@@ -8,26 +8,26 @@ algorithms are used to deconvolve an image.
 
 Wiener and unsupervised Wiener filters
 --------------------------------------
-First a noisy version of an image is deconvolved using Wiener
+First, a noisy version of an image is deconvolved using Wiener
 and unsupervised Wiener algorithms. These algorithms are based on
-linear models that can't restore sharp edges as much as non-linear
-methods (like TV restoration), but are much faster.
+linear models that cannot restore sharp edges as much as non-linear
+methods (like TV restoration), but are faster.
 
-The Wiener filter is an inverse filter based on a PSF (Point Spread
-Function), the prior regularization (penalization of high frequency)
-and the tradeoff between the data and prior adequacy. The regularization
-parameter must be hand tuned.
+The Wiener deconvolution algorithm is an inverse filter based on an
+inpulse response function (also named point-spread function, or PSF), a
+filter to penalize the restored image frequencies (regularization), and
+a parameter which tunes the balance between the data and the
+regularization.
 
 The unsupervised Wiener algorithm has self-tuned regularization
-parameters based on data learning. This is not common and based on the
-following publication. The algorithm is based on a iterative Gibbs
-sampler that draw alternatively samples of posterior conditional law of
+parameters based on the Gibbs sampling algorithm. The iterative Gibbs
+sampler draws alternatively samples of posterior conditional law of
 the image, the noise power and the image frequency power.
 
 .. [1] François Orieux, Jean-François Giovannelli, and Thomas
        Rodet, "Bayesian estimation of regularization and point
        spread function parameters for Wiener-Hunt deconvolution",
-       J. Opt. Soc. Am. A 27, 1593-1607 (2010).
+       J. Opt. Soc. Am. A 27, 1593-1607 (2010),
        DOI:10.1364/JOSAA.27.001593
 """
 import numpy as np
