@@ -11,7 +11,7 @@ def marching_cubes_classic(volume, level=None, spacing=(1., 1., 1.),
 
     Note that the ``marching_cubes()`` algorithm is recommended over
     this algorithm, because it's faster and produces better results.
-    
+
     Parameters
     ----------
     volume : (M, N, P) array of doubles
@@ -92,7 +92,7 @@ def marching_cubes_classic(volume, level=None, spacing=(1., 1., 1.),
            Resolution 3D Surface Construction Algorithm. Computer Graphics
            (SIGGRAPH 87 Proceedings) 21(4) July 1987, p. 163-170).
            DOI: 10.1145/37401.37422
-    
+
     See Also
     --------
     skimage.measure.marching_cubes

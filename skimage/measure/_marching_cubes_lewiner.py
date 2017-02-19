@@ -7,7 +7,7 @@ import numpy as np
 
 if sys.version_info >= (3, ):
     base64decode = base64.decodebytes
-    ordornot = lambda x:x
+    ordornot = lambda x: x
 else:
     base64decode = base64.decodestring
     ordornot = ord
@@ -23,8 +23,9 @@ def _expected_output_args():
     Please don't use this to influence the algorithmic bahaviour of a function.
     For ``a, b, rest*, c = ...`` syntax, returns n + 0.1 (3.1 in this example).
     """
+    offset = 2 if sys.version_info >= (3, 6) else 3
     f = inspect.currentframe().f_back.f_back
-    i = f.f_lasti + 3
+    i = f.f_lasti + offset
     bytecode = f.f_code.co_code
     instruction = ordornot(bytecode[i])
     while True:
@@ -39,7 +40,16 @@ def _expected_output_args():
         if instruction == dis.opmap['UNPACK_SEQUENCE']:
             return ordornot(bytecode[i + 1])
         if instruction == dis.opmap.get('UNPACK_EX', -1):  # py3k
-            return ordornot(bytecode[i + 1]) + ordornot(bytecode[i + 2]) + 0.1
+            if ordornot(bytecode[i + 2]) < 10:
+                return ordornot(bytecode[i + 1]) + ordornot(bytecode[i + 2]) + 0.1
+            else:  # 3.6
+                return ordornot(bytecode[i + 1]) + 0.1
+        if instruction == dis.opmap.get('EXTENDED_ARG', -1):  # py 3.6
+            if ordornot(bytecode[i + 2]) == dis.opmap.get('UNPACK_EX', -1):
+                return ordornot(bytecode[i + 1]) + ordornot(bytecode[i + 3]) + 0.1
+            i += 4
+            instruction = ordornot(bytecode[i])
+            continue
         return 0
 
 
@@ -158,7 +168,9 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
                                  'faster algorithm, and returns four instead '
                                  'of two outputs (see docstring for details). '
                                  'Backwards compatibility with 0.12 and prior '
-                                 'is available with `marching_cubes_classic`.'))
+                                 'is available with `marching_cubes_classic`. '
+                                 'This function will be removed in 0.14, '
+                                 'consider switching to `marching_cubes_lewiner`.'))
 
     return marching_cubes_lewiner(volume, level, spacing, gradient_direction,
                                   step_size, allow_degenerate, use_classic)
