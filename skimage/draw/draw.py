@@ -598,6 +598,25 @@ def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
            [0, 0, 1, 0, 0, 0, 0, 0, 1, 0],
            [0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+
+    Note, the positions of `ellipse_perimeter` without specified `shape` can
+    have also negative values as it is correct in the plane. On the other hand
+    using these ellipse positions for an image afterwords may leads to appearing
+    on the other isde of image because ``image[-1, -1] = image[end-1, end-1]``
+
+    >>> rr, cc = ellipse_perimeter(2, 3, 4, 5)
+    >>> img = np.zeros((9, 12), dtype=np.uint8)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+           [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+           [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+           [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+           [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]], dtype=uint8)
     """
     return _ellipse_perimeter(r, c, r_radius, c_radius, orientation, shape)
 
