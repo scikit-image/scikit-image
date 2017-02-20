@@ -11,11 +11,11 @@ def _hog_normalize_block(block, method, eps):
     elif method == 'L1-sqrt':
         out = np.sqrt(block / (np.sum(np.abs(block)) + eps))
     elif method == 'L2':
-        out = block / np.sqrt(np.sqrt(np.sum(block ** 2)) ** 2 + eps ** 2)
+        out = block / np.sqrt(np.sum(block ** 2) + eps ** 2)
     elif method == 'L2-Hys':
-        out = block / np.sqrt(np.sqrt(np.sum(block ** 2)) ** 2 + eps ** 2)
+        out = block / np.sqrt(np.sum(block ** 2) + eps ** 2)
         out = np.minimum(out, 0.2)
-        out = out / np.sqrt(np.sqrt(np.sum(block ** 2)) ** 2 + eps ** 2)
+        out = out / np.sqrt(np.sum(block ** 2) + eps ** 2)
     else:
         raise ValueError('Selected block normalization method is invalid.')
 
