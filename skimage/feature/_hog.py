@@ -57,7 +57,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         ``L2-Hys``
            Normalization using L2-norm, followed by limiting the
            maximum values to 0.2 (`Hys` stands for `hysteresis`) and
-           renormalization using L2-norm.           
+           renormalization using L2-norm.
            For details, see [3]_, [4]_.
 
     visualise : bool, optional
