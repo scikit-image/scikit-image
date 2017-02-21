@@ -19,6 +19,7 @@ Version 0.14
   ``skimage.exposure.equalize_adapthist`` and the corresponding test.
 * Remove the freeimage plugin shim to imageio.
 * Remove deprecated `normalise` and corresponding test for ``skimage.feature.hog``.
+* Remove deprecated ``marching_cubes`` from ``skimage.measure``.
 
 
 Version 0.15
