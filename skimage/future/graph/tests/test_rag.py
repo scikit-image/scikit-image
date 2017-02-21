@@ -45,7 +45,7 @@ def test_rag_merge():
     g.merge_nodes(2, 3)
     n = g.merge_nodes(3, 4, in_place=False)
     assert sorted(g.node[n]['labels']) == list(range(5))
-    assert g.edges() == []
+    assert list(g.edges()) == []
 
 
 @skipif(not is_installed('networkx'))

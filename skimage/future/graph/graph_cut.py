@@ -230,7 +230,8 @@ def _label_all(rag, attr_name):
     attr_name : string
         The attribute to which a unique integer is assigned.
     """
-    node = rag.nodes()[0]
+    # nodes can be generator or list in different networkx implementations
+    node = next(iter(rag.nodes()))
     new_label = rag.node[node]['labels'][0]
     for n, d in rag.nodes_iter(data=True):
         d[attr_name] = new_label
