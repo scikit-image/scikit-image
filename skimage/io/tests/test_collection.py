@@ -80,6 +80,14 @@ class TestImageCollection():
         ic = ImageCollection(load_pattern, load_func=load_fn)
         assert_equal(ic[1], (2, 'two'))
 
+    def test_custom_load_func(self):
+
+        def load_fn(x):
+            return x
+
+        ic = ImageCollection(os.pathsep.join(self.pattern), load_func=load_fn)
+        assert_equal(ic[0], self.pattern[0])
+
     def test_concatenate(self):
         array = self.images_matched.concatenate()
         expected_shape = (len(self.images_matched),) + self.images[0].shape
