@@ -5,7 +5,7 @@ from .._shared.utils import skimage_deprecation, warn
 from . import _hoghistogram
 
 
-def _hog_normalize_block(block, method, eps):
+def _hog_normalize_block(block, method, eps=1e-5):
     if method == 'L1':
         out = block / (np.sum(np.abs(block)) + eps)
     elif method == 'L1-sqrt':
@@ -234,7 +234,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         for y in range(n_blocksy):
             block = orientation_histogram[y:y + by, x:x + bx, :]
             normalized_blocks[y, x, :] = \
-                _hog_normalize_block(block, method=block_norm, eps=1e-5)
+                _hog_normalize_block(block, method=block_norm)
 
     """
     The final step collects the HOG descriptors from all blocks of a dense
