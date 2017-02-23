@@ -770,7 +770,7 @@ def _mean_std(image, w):
         w1 = w
         w2 = w
 
-    if isinstance(w, tuple) and len(w) == 2:
+    if isinstance(w, tuple) and len(w) == image.ndim:
         w1 = w[0] * w[1]
         w2 = max(w)
 
