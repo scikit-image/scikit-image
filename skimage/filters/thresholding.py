@@ -766,12 +766,20 @@ def _mean_std(image, w):
            Retrieval XV, (San Jose, USA), Jan. 2008.
            DOI:10.1117/12.767755
     """
-    if w == 1 or w % 2 == 0:
+    if isinstance(w, int):
+        w1 = w
+        w2 = w
+
+    if isinstance(w, tuple) and len(w) == 2:
+        w1 = w[0] * w[1]
+        w2 = max(w)
+
+    if w1 == 1 or w1 % 2 == 0:
         raise ValueError(
             "Window size w = %s must be odd and greater than 1." % w)
 
-    left_pad = w // 2 + 1
-    right_pad = w // 2
+    left_pad = w2 // 2 + 1
+    right_pad = w2 // 2
     padded = np.pad(image.astype('float'), (left_pad, right_pad),
                     mode='reflect')
     padded_sq = padded * padded
@@ -779,14 +787,14 @@ def _mean_std(image, w):
     integral = integral_image(padded)
     integral_sq = integral_image(padded_sq)
 
-    kern = np.zeros((w + 1,) * image.ndim)
+    kern = np.zeros((w2 + 1,) * image.ndim)
     for indices in itertools.product(*([[0, -1]] * image.ndim)):
         kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
 
     sum_full = ndi.correlate(integral, kern, mode='constant')
-    m = util.crop(sum_full, (left_pad, right_pad)) / (w ** image.ndim)
+    m = util.crop(sum_full, (left_pad, right_pad)) / (w2 ** image.ndim)
     sum_sq_full = ndi.correlate(integral_sq, kern, mode='constant')
-    g2 = util.crop(sum_sq_full, (left_pad, right_pad)) / (w ** image.ndim)
+    g2 = util.crop(sum_sq_full, (left_pad, right_pad)) / (w2 ** image.ndim)
     s = np.sqrt(g2 - m * m)
     return m, s
 
