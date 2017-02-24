@@ -769,10 +769,12 @@ def _mean_std(image, w):
     if isinstance(w, int):
         w1 = w
         w2 = w
+        kern = np.zeros((w2 + 1,) * image.ndim)
 
     if isinstance(w, tuple) and len(w) == image.ndim:
         w1 = w[0] * w[1]
         w2 = max(w)
+        kern = np.zeros(w)
 
     if w1 == 1 or w1 % 2 == 0:
         raise ValueError(
@@ -787,7 +789,6 @@ def _mean_std(image, w):
     integral = integral_image(padded)
     integral_sq = integral_image(padded_sq)
 
-    kern = np.zeros((w2 + 1,) * image.ndim)
     for indices in itertools.product(*([[0, -1]] * image.ndim)):
         kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
 
