@@ -7,19 +7,17 @@ virtual environments, please follow instructions on `venv`_ and `virtual environ
 
 There are two ways you can install ``scikit-image`` on your preferred Python environment.
 
-#. Standard Installation
-#. Development Installation
+1. Standard Installation
+2. Development Installation
 
-
-#. Standard Installation:
+1. Standard Installation:
 -------------------------
 
 ``scikit-image`` comes pre-installed with several Python distributions, including Anaconda_, `Enthought Canopy`_,
 `Python(x,y)`_ and `WinPython`_. However, you can install or upgrade existing ``scikit-image`` via
 shell/command prompt.
 
-
-*. Windows
+a. Windows
 ``````````
 
 On Windows, you can install ``scikit-image`` using::
@@ -41,22 +39,22 @@ manually download packages (such as numpy, scipy and scikit-image) using Python 
 .. _Python(x,y): http://code.google.com/p/pythonxy/wiki/Welcome
 .. _WinPython: https://winpython.github.io/
 
-
-*. Debian and Ubuntu
+b. Debian and Ubuntu
 ````````````````````
+
 On Debian and Ubuntu, install ``scikit-image`` with::
 
   sudo apt-get install python-skimage
 
-
-#. Development Installation:
+2. Development Installation:
 ----------------------------
+
 You can install ``scikit-image`` development version if either your distribution ships an outdated version
 or you want to develop and work on new features before the package is released officially.
 
-
-*. Windows
+a. Windows
 ``````````
+
 Before installing the development version, uninstall the standard version of ``scikit-image`` using pip as::
 
   pip uninstall scikit-image
@@ -109,9 +107,9 @@ into the `setup of appveyor`_ (a continuous integration service).
 .. _venv: https://docs.python.org/3/library/venv.html
 .. _virtual environments: http://docs.python-guide.org/en/latest/dev/virtualenvs/
 
-
-*. Debian and Ubuntu
+b. Debian and Ubuntu
 ````````````````````
+
 Install all the required dependencies::
 
   sudo apt-get install python-matplotlib python-numpy python-pil python-scipy
