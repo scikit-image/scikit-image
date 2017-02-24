@@ -132,8 +132,9 @@ To update::
   git pull  # Grab latest source
   python setup.py build_ext -i  # Compile any modified extensions
 
-    * Building with bento
-    `````````````````````
+c. Building with bento
+``````````````````````
+
 Alternatively, ``scikit-image`` can also be built using `bento
 <http://cournape.github.io/Bento/>`__.  Bento depends on `WAF
 <https://code.google.com/p/waf/>`__ for compilation.
