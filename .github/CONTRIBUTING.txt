@@ -189,6 +189,19 @@ Stylistic Guidelines
   ``with nogil:``.
 
 
+Test with nose
+--------------
+
+`Nose <http://nose.readthedocs.io/en/latest/usage.html>`__ 
+is a Python Unit Testing Framework. To run nose with an existing test file or a directory, use the nosetests command on the command line::
+
+  $ nosetests test_this.py
+
+And with verbose::
+
+  $ nosetests -v test_this.py
+
+
 Test coverage
 -------------
 
