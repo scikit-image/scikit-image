@@ -73,9 +73,9 @@ Change the directory and build from source code::
   python setup.py develop
 
 If you experience the error ``Error:unable to find vcvarsall.bat`` it means that
-your computer does not have recommended compilers for python. You can download and
-install Windows compilers from `here`_  or correctly configure distutils
-to use the C compiler by modifying (or create, if not existing) the configuration file
+your computer does not have recommended compilers for python. You can either download and
+install Windows compilers from `here`_  or use `MinGW compilers`_ . If using `MinGW`, make sure to correctly
+configure distutils by modifying (or create, if not existing) the configuration file
 ``distutils.cfg`` (located for example at ``C:\Python26\Lib\distutils\distutils.cfg``)
 to contain::
 
@@ -106,6 +106,7 @@ into the `setup of appveyor`_ (a continuous integration service).
 .. _here: https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.0_standalone:_Visual_C.2B-.2B-_Build_Tools_2015_.28x86.2C_x64.2C_ARM.29
 .. _venv: https://docs.python.org/3/library/venv.html
 .. _virtual environments: http://docs.python-guide.org/en/latest/dev/virtualenvs/
+.. _MinGW compilers: http://www.mingw.org/wiki/howto_install_the_mingw_gcc_compiler_suite
 
 b. Debian and Ubuntu
 ````````````````````
