@@ -23,7 +23,7 @@ distributions, including Anaconda_, `Enthought Canopy`_,
 
 .. _Anaconda: https://store.continuum.io/cshop/anaconda/
 .. _Enthought Canopy: https://www.enthought.com/products/canopy/
-.. _Python(x,y): http://code.google.com/p/pythonxy/wiki/Welcome
+.. _Python(x,y): http://python-xy.github.io/
 .. _WinPython: https://winpython.github.io/
 
 If you are using the distribution from python.org_, you'll need to
