@@ -36,7 +36,7 @@ manually download packages (such as numpy, scipy and scikit-image) using Python 
 
 .. _Anaconda: https://store.continuum.io/cshop/anaconda/
 .. _Enthought Canopy: https://www.enthought.com/products/canopy/
-.. _Python(x,y): http://code.google.com/p/pythonxy/wiki/Welcome
+.. _Python(x,y): http://python-xy.github.io/
 .. _WinPython: https://winpython.github.io/
 
 b. Debian and Ubuntu
