@@ -78,7 +78,7 @@ def astronaut():
     and 10 minutes in outer space.
 
     This image was downloaded from the NASA Great Images database
-    <http://grin.hq.nasa.gov/ABSTRACTS/GPN-2000-001177.html>`__.
+    <https://flic.kr/p/r9qvLn>`__.
 
     No known copyright restrictions, released into the public domain.
 
