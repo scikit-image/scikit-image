@@ -599,8 +599,15 @@ def threshold_minimum(image, nbins=256, bias='min', max_iter=10000):
     hist, bin_centers = histogram(image.ravel(), nbins)
 
     smooth_hist = np.copy(hist)
+
+    def uniform_filter(x):
+        # The type casting here is needed so that
+        # uniform_filter1d produces the same result on 32-bit
+        # and 64-bit platforms.
+        return ndif.uniform_filter1d(x.astype(np.float32), 3).astype(int)
+
     for counter in range(max_iter):
-        smooth_hist = ndif.uniform_filter1d(smooth_hist, 3)
+        smooth_hist = uniform_filter(smooth_hist)
         maximums = find_local_maxima(smooth_hist)
         if len(maximums) < 3:
             break
