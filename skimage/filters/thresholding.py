@@ -29,7 +29,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     Parameters
     ----------
     image : (N, M) ndarray
-        Input image.
+        Grayscale input image.
     methods : dict, optional
         Names and associated functions.
         Functions must take and return an image.
@@ -78,7 +78,7 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
     Parameters
     ----------
     image : (N, M) ndarray
-        Input image.
+        Grayscale input image.
     figsize : tuple, optional
         Figure size (in inches).
     verbose : bool, optional
@@ -143,7 +143,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     Parameters
     ----------
     image : (N, M) ndarray
-        Input image.
+        Grayscale input image.
     block_size : int
         Odd size of pixel neighborhood which is used to calculate the
         threshold value (e.g. 3, 5, 7, ..., 21, ...).
@@ -260,14 +260,8 @@ def threshold_otsu(image, nbins=256):
     >>> thresh = threshold_otsu(image)
     >>> binary = image <= thresh
 
-    Notes
-    -----
-    The input image must be grayscale.
     """
-    if len(image.shape) > 2 and image.shape[-1] in (3, 4):
-        msg = "threshold_otsu is expected to work correctly only for " \
-              "grayscale images; image shape {0} looks like an RGB image"
-        warn(msg.format(image.shape))
+    assert_nD(image, (1, 2))
 
     # Check if the image is multi-colored or not
     if image.min() == image.max():
@@ -301,7 +295,7 @@ def threshold_yen(image, nbins=256):
     Parameters
     ----------
     image : (N, M) ndarray
-        Input image.
+        Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
@@ -330,6 +324,7 @@ def threshold_yen(image, nbins=256):
     >>> thresh = threshold_yen(image)
     >>> binary = image <= thresh
     """
+    assert_nD(image, (1, 2))
     hist, bin_centers = histogram(image.ravel(), nbins)
     # On blank images (e.g. filled with 0) with int dtype, `histogram()`
     # returns `bin_centers` containing only one value. Speed up with it.
@@ -368,7 +363,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
     Parameters
     ----------
     image : (N, M) ndarray
-        Input image.
+        Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
@@ -402,6 +397,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
     >>> thresh = threshold_isodata(image)
     >>> binary = image > thresh
     """
+    assert_nD(image, (1, 2))
     hist, bin_centers = histogram(image.ravel(), nbins)
 
     # image only contains one unique value
@@ -464,7 +460,7 @@ def threshold_li(image):
     Parameters
     ----------
     image : (N, M) ndarray
-        Input image.
+        Grayscale input image.
 
     Returns
     -------
@@ -493,6 +489,7 @@ def threshold_li(image):
     >>> thresh = threshold_li(image)
     >>> binary = image > thresh
     """
+    assert_nD(image, (1, 2))
     # Make sure image has more than one value
     if np.all(image == image.flat[0]):
         raise ValueError("threshold_li is expected to work with images "
@@ -542,7 +539,7 @@ def threshold_minimum(image, nbins=256, bias='min', max_iter=10000):
     Parameters
     ----------
     image : (M, N) ndarray
-        Input image.
+        Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
@@ -593,6 +590,7 @@ def threshold_minimum(image, nbins=256, bias='min', max_iter=10000):
                     direction = 1
         return maximums
 
+    assert_nD(image, (1, 2))
     if bias not in ('min', 'mid', 'max'):
         raise ValueError("Unknown bias: {0}".format(bias))
 
@@ -636,7 +634,7 @@ def threshold_mean(image):
 
     Parameters
     ----------
-    image : (N, M[, ..., P]) ndarray
+    image : (M, N) ndarray
         Grayscale input image.
 
     Returns
@@ -659,6 +657,7 @@ def threshold_mean(image):
     >>> thresh = threshold_mean(image)
     >>> binary = image > thresh
     """
+    assert_nD(image, (1, 2))
     return np.mean(image)
 
 
@@ -667,7 +666,7 @@ def threshold_triangle(image, nbins=256):
 
     Parameters
     ----------
-    image : (N, M[, ..., P]) ndarray
+    image : (M, N) ndarray
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -695,6 +694,7 @@ def threshold_triangle(image, nbins=256):
     >>> thresh = threshold_triangle(image)
     >>> binary = image > thresh
     """
+    assert_nD(image, (1, 2))
     # nbins is ignored for integer arrays
     # so, we recalculate the effective nbins.
     hist, bin_centers = histogram(image.ravel(), nbins)
