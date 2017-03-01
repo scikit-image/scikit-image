@@ -138,7 +138,7 @@ def coins():
     -----
     This image was downloaded from the
     `Brooklyn Museum Collection
-    <http://www.brooklynmuseum.org/opencollection/archives/image/617/image>`__.
+    <http://www.brooklynmuseum.org/opencollection/archives/image/33814>`__.
 
     No known copyright restrictions.
 
