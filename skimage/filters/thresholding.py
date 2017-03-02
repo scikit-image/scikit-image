@@ -533,7 +533,7 @@ def threshold_li(image):
     return threshold + immin
 
 
-def threshold_minimum(image, nbins=256, bias='min', max_iter=10000):
+def threshold_minimum(image, nbins=256, max_iter=10000):
     """Return threshold value based on minimum method.
 
     The histogram of the input `image` is computed and smoothed until there are
@@ -546,9 +546,6 @@ def threshold_minimum(image, nbins=256, bias='min', max_iter=10000):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
-    bias : {'min', 'mid', 'max'}, optional
-        'min', 'mid', 'max' return lowest, middle, or highest pixel value
-        with minimum histogram value.
     max_iter: int, optional
         Maximum number of iterations to smooth the histogram.
 
@@ -566,8 +563,11 @@ def threshold_minimum(image, nbins=256, bias='min', max_iter=10000):
 
     References
     ----------
-    .. [1] Prewitt, JMS & Mendelsohn, ML (1966), "The analysis of cell images",
-           Annals of the New York Academy of Sciences 128: 1035-1053
+    .. [1] C. A. Glasbey, "An analysis of histogram-based thresholding
+           algorithms," CVGIP: Graphical Models and Image Processing,
+           vol. 55, pp. 532-537, 1993.
+    .. [2] Prewitt, JMS & Mendelsohn, ML (1966), "The analysis of cell
+           images", Annals of the New York Academy of Sciences 128: 1035-1053
            DOI:10.1111/j.1749-6632.1965.tb11715.x
 
     Examples
@@ -578,64 +578,43 @@ def threshold_minimum(image, nbins=256, bias='min', max_iter=10000):
     >>> binary = image > thresh
     """
 
-    def find_local_maxima(hist):
+    def find_local_maxima_idx(hist):
         # We can't use scipy.signal.argrelmax
         # as it fails on plateaus
-        maximums = list()
+        maximum_idxs = list()
         direction = 1
+
         for i in range(hist.shape[0] - 1):
             if direction > 0:
                 if hist[i + 1] < hist[i]:
                     direction = -1
-                    maximums.append(i)
+                    maximum_idxs.append(i)
             else:
                 if hist[i + 1] > hist[i]:
                     direction = 1
-        return maximums
 
-    if bias not in ('min', 'mid', 'max'):
-        raise ValueError("Unknown bias: {0}".format(bias))
+        return maximum_idxs
 
     hist, bin_centers = histogram(image.ravel(), nbins)
 
-    smooth_hist = np.copy(hist)
-
-    def uniform_filter(x):
-        # The type casting here is needed so that
-        # uniform_filter1d produces the same result on 32-bit
-        # and 64-bit platforms.
-        return ndif.uniform_filter1d(x.astype(np.float32), 3).astype(int)
+    smooth_hist = np.copy(hist).astype(np.float64)
 
     for counter in range(max_iter):
-        smooth_hist = uniform_filter(smooth_hist)
-        maximums = find_local_maxima(smooth_hist)
-        if len(maximums) < 3:
+        smooth_hist = ndif.uniform_filter1d(smooth_hist, 3)
+        maximum_idxs = find_local_maxima_idx(smooth_hist)
+        if len(maximum_idxs) < 3:
             break
-    if len(maximums) != 2:
+
+    if len(maximum_idxs) != 2:
         raise RuntimeError('Unable to find two maxima in histogram')
     elif counter == max_iter - 1:
         raise RuntimeError('Maximum iteration reached for histogram'
                            'smoothing')
 
-    # Find lowest point between the maxima, biased to the low end (min)
-    minimum = smooth_hist[maximums[0]]
-    threshold = maximums[0]
-    for i in range(maximums[0], maximums[1]+1):
-        if smooth_hist[i] < minimum:
-            minimum = smooth_hist[i]
-            threshold = i
+    # Find lowest point between the maxima
+    threshold_idx = np.argmin(smooth_hist[maximum_idxs[0]:maximum_idxs[1] + 1])
 
-    if bias == 'min':
-        return bin_centers[threshold]
-    else:
-        upper_bound = threshold
-        while smooth_hist[upper_bound] == smooth_hist[threshold]:
-            upper_bound += 1
-        upper_bound -= 1
-        if bias == 'max':
-            return bin_centers[upper_bound]
-        elif bias == 'mid':
-            return bin_centers[(threshold + upper_bound) // 2]
+    return bin_centers[maximum_idxs[0] + threshold_idx]
 
 
 def threshold_mean(image):
