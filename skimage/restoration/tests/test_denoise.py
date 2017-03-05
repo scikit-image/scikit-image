@@ -172,6 +172,16 @@ def test_denoise_bilateral_2d():
     assert_(out1[30:45, 5:15].std() > out2[30:45, 5:15].std())
 
 
+def test_denoise_bilateral_zeros():
+    img = np.zeros((10, 10))
+    assert_equal(img, restoration.denoise_bilateral(img, multichannel=False))
+
+
+def test_denoise_bilateral_constant():
+    img = np.ones((10, 10)) * 5
+    assert_equal(img, restoration.denoise_bilateral(img, multichannel=False))
+
+
 def test_denoise_bilateral_color():
     img = checkerboard.copy()[:50, :50]
     # add some random noise
@@ -199,10 +209,7 @@ def test_denoise_bilateral_3d_multichannel():
     with expected_warnings(["grayscale"]):
         result = restoration.denoise_bilateral(img, multichannel=True)
 
-    expected = np.empty_like(img)
-    expected.fill(np.nan)
-
-    assert_equal(result, expected)
+    assert_equal(result, img)
 
 
 def test_denoise_bilateral_multidimensional():

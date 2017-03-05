@@ -11,11 +11,11 @@ def _hog_normalize_block(block, method, eps=1e-5):
     elif method == 'L1-sqrt':
         out = np.sqrt(block / (np.sum(np.abs(block)) + eps))
     elif method == 'L2':
-        out = block / np.sqrt(np.sqrt(np.sum(block ** 2)) ** 2 + eps ** 2)
+        out = block / np.sqrt(np.sum(block ** 2) + eps ** 2)
     elif method == 'L2-Hys':
-        out = block / np.sqrt(np.sqrt(np.sum(block ** 2)) ** 2 + eps ** 2)
+        out = block / np.sqrt(np.sum(block ** 2) + eps ** 2)
         out = np.minimum(out, 0.2)
-        out = out / np.sqrt(np.sqrt(np.sum(block ** 2)) ** 2 + eps ** 2)
+        out = out / np.sqrt(np.sum(block ** 2) + eps ** 2)
     else:
         raise ValueError('Selected block normalization method is invalid.')
 
@@ -57,7 +57,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         ``L2-Hys``
            Normalization using L2-norm, followed by limiting the
            maximum values to 0.2 (`Hys` stands for `hysteresis`) and
-           renormalization using L2-norm.           
+           renormalization using L2-norm.
            For details, see [3]_, [4]_.
 
     visualise : bool, optional
@@ -230,7 +230,6 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     normalized_blocks = np.zeros((n_blocksy, n_blocksx,
                                   by, bx, orientations))
 
-    eps = 1e-8
     for x in range(n_blocksx):
         for y in range(n_blocksy):
             block = orientation_histogram[y:y + by, x:x + bx, :]

@@ -8,15 +8,16 @@ then
     echo "-- pushing docs --"
 
     (
+    git config --global user.email "travis@travis-ci.com"
+    git config --global user.name "Travis Bot"
+
     git clone --quiet --branch=gh-pages https://${GH_REF} doc_build
-    rm -r doc_build/dev
-    cp -r doc/build/html doc_build/dev
-
     cd doc_build
-    git config user.email "travis@travis-ci.com"
-    git config user.name "Travis Bot"
 
+    git rm -r dev
+    cp -r ../doc/build/html dev
     git add dev
+
     git commit -m "Deployed to GitHub Pages"
     git push --force --quiet "https://${GH_TOKEN}@${GH_REF}" gh-pages > /dev/null 2>&1
     )

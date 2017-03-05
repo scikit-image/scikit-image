@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.testing import assert_equal, assert_almost_equal, assert_array_less
-from numpy.testing import assert_raises
+from numpy.testing import assert_raises, assert_array_less
 from skimage.measure import LineModelND, CircleModel, EllipseModel, ransac
 from skimage.transform import AffineTransform
 from skimage.measure.fit import _dynamic_max_trials
@@ -158,7 +158,6 @@ def test_ellipse_model_invalid_input():
 
 def test_ellipse_model_predict():
     model = EllipseModel()
-    r = 5
     model.params = (0, 0, 5, 10, 0)
     t = np.arange(0, 2 * np.pi, np.pi / 2)
 
@@ -167,22 +166,27 @@ def test_ellipse_model_predict():
 
 
 def test_ellipse_model_estimate():
-    # generate original data without noise
-    model0 = EllipseModel()
-    model0.params = (10, 20, 15, 25, 0)
-    t = np.linspace(0, 2 * np.pi, 100)
-    data0 = model0.predict_xy(t)
+    for angle in range(0, 180, 15):
+        rad = np.deg2rad(angle)
+        # generate original data without noise
+        model0 = EllipseModel()
+        model0.params = (10, 20, 15, 25, rad)
+        t = np.linspace(0, 2 * np.pi, 100)
+        data0 = model0.predict_xy(t)
 
-    # add gaussian noise to data
-    random_state = np.random.RandomState(1234)
-    data = data0 + random_state.normal(size=data0.shape)
+        # add gaussian noise to data
+        random_state = np.random.RandomState(1234)
+        data = data0 + random_state.normal(size=data0.shape)
 
-    # estimate parameters of noisy data
-    model_est = EllipseModel()
-    model_est.estimate(data)
+        # estimate parameters of noisy data
+        model_est = EllipseModel()
+        model_est.estimate(data)
 
-    # test whether estimated parameters almost equal original parameters
-    assert_almost_equal(model0.params[:4], model_est.params[:4], 0)
+        # test whether estimated parameters almost equal original parameters
+        assert_almost_equal(model0.params[:2], model_est.params[:2], 0)
+        res = model_est.residuals(data0)
+        assert_array_less(res, np.ones(res.shape))
+
 
 def test_ellipse_model_estimate_from_data():
     data = np.array([
@@ -216,6 +220,13 @@ def test_ellipse_model_estimate_from_data():
 
     # test whether estimated parameters are smaller then 1000, so means stable
     assert_array_less(np.abs(model.params[:4]), np.array([2e3] * 4))
+
+
+def test_ellipse_model_estimate_failers():
+    # estimate parameters of real data
+    model = EllipseModel()
+    assert not model.estimate(np.ones((5, 2)))
+    assert not model.estimate(np.array([[50, 80], [51, 81], [52, 80]]))
 
 
 def test_ellipse_model_residuals():

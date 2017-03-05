@@ -226,14 +226,22 @@ class RAG(nx.Graph):
         """Add node `n` while updating the maximum node id.
 
         .. seealso:: :func:`networkx.Graph.add_node`."""
-        super(RAG, self).add_node(n, attr_dict, **attr)
+        if attr_dict is None:  # compatibility with old networkx
+            attr_dict = attr
+        else:
+            attr_dict.update(attr)
+        super(RAG, self).add_node(n, **attr_dict)
         self.max_id = max(n, self.max_id)
 
     def add_edge(self, u, v, attr_dict=None, **attr):
         """Add an edge between `u` and `v` while updating max node id.
 
         .. seealso:: :func:`networkx.Graph.add_edge`."""
-        super(RAG, self).add_edge(u, v, attr_dict, **attr)
+        if attr_dict is None:  # compatibility with old networkx
+            attr_dict = attr
+        else:
+            attr_dict.update(attr)
+        super(RAG, self).add_edge(u, v, **attr_dict)
         self.max_id = max(u, v, self.max_id)
 
     def copy(self):
@@ -264,6 +272,30 @@ class RAG(nx.Graph):
         .. seealso:: :func:`networkx.Graph.add_node`."""
         super(RAG, self).add_node(n)
 
+    def nodes_iter(self, *args, **kwargs):
+        """ Iterate over nodes
+
+        For compatibility with older versions of networkx.  Versions <= 1.11
+        have an ``nodes_iter`` method, but later versions return an iterator from
+        the nodes method, and lack ``nodes_iter``.
+        """
+        try:
+            return super(RAG, self).nodes_iter(*args, **kwargs)
+        except AttributeError:
+            return super(RAG, self).nodes(*args, **kwargs)
+
+    def edges_iter(self, *args, **kwargs):
+        """ Iterate over edges
+
+        For compatibility with older versions of networkx.  Versions <= 1.11
+        have an ``edges_iter`` method, but later versions return an iterator from
+        the edges method, and lack ``edges_iter``.
+        """
+        try:
+            return super(RAG, self).edges_iter(*args, **kwargs)
+        except AttributeError:
+            return super(RAG, self).edges(*args, **kwargs)
+
 
 def rag_mean_color(image, labels, connectivity=2, mode='distance',
                    sigma=255.0):
@@ -279,7 +311,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
     ----------
     image : ndarray, shape(M, N, [..., P,] 3)
         Input image.
-    labels : ndarray, shape(M, N, [..., P,])
+    labels : ndarray, shape(M, N, [..., P])
         The labelled image. This should have one dimension less than
         `image`. If `image` has dimensions `(M, N, 3)` `labels` should have
         dimensions `(M, N)`.
@@ -287,7 +319,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
         Pixels with a squared distance less than `connectivity` from each other
         are considered adjacent. It can range from 1 to `labels.ndim`. Its
         behavior is the same as `connectivity` parameter in
-        `scipy.ndimage.generate_binary_structure`.
+        ``scipy.ndimage.generate_binary_structure``.
     mode : {'distance', 'similarity'}, optional
         The strategy to assign edge weights.
 
