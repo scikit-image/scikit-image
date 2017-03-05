@@ -75,51 +75,31 @@ plt.show()
 #
 # For pictures with a bimodal histogram, more specific algorithms can be used.
 # For instance, the minimum algorithm takes a histogram of the image and smooths it
-# repeatedly until there are only two peaks in the histogram. Then it
-# finds the minimum value between the two peaks. After smoothing the
-# histogram, there can be multiple pixel values with the minimum histogram
-# count, so you can pick the 'min', 'mid', or 'max' of these values.
-#
+# repeatedly until there are only two peaks in the histogram.
 
 from skimage.filters import threshold_minimum
 
 
 image = data.camera()
 
-thresh_min = threshold_minimum(image, bias='min')
+thresh_min = threshold_minimum(image)
 binary_min = image > thresh_min
-thresh_mid = threshold_minimum(image, bias='mid')
-binary_mid = image > thresh_mid
-thresh_max = threshold_minimum(image, bias='max')
-binary_max = image > thresh_max
 
-fig, axes = plt.subplots(4, 2, figsize=(10, 10))
-ax = axes.ravel()
+fig, ax = plt.subplots(2, 2, figsize=(10, 10))
 
-ax[0].imshow(image, cmap=plt.cm.gray)
-ax[0].set_title('Original')
-ax[0].axis('off')
+ax[0, 0].imshow(image, cmap=plt.cm.gray)
+ax[0, 0].set_title('Original')
 
-ax[1].hist(image.ravel(), bins=256)
-ax[1].set_title('Histogram')
+ax[0, 1].hist(image.ravel(), bins=256)
+ax[0, 1].set_title('Histogram')
 
-ax[2].imshow(binary_min, cmap=plt.cm.gray)
-ax[2].set_title('Thresholded (min)')
+ax[1, 0].imshow(binary_min, cmap=plt.cm.gray)
+ax[1, 0].set_title('Thresholded (min)')
 
-ax[3].hist(image.ravel(), bins=256)
-ax[3].axvline(thresh_min, color='r')
+ax[1, 1].hist(image.ravel(), bins=256)
+ax[1, 1].axvline(thresh_min, color='r')
 
-ax[4].imshow(binary_mid, cmap=plt.cm.gray)
-ax[4].set_title('Thresholded (mid)')
-ax[5].hist(image.ravel(), bins=256)
-ax[5].axvline(thresh_mid, color='r')
-
-ax[6].imshow(binary_max, cmap=plt.cm.gray)
-ax[6].set_title('Thresholded (max)')
-ax[7].hist(image.ravel(), bins=256)
-ax[7].axvline(thresh_max, color='r')
-
-for a in ax[::2]:
+for a in ax[:, 0]:
     a.axis('off')
 plt.show()
 
