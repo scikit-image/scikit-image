@@ -5,8 +5,9 @@ from numpy import testing
 from scipy import ndimage as ndi
 
 from skimage import color, data, transform
-from skimage import img_as_uint, img_as_ubyte, data_dir
-from skimage.morphology import grey, selem
+from skimage import image_as_uint, image_as_ubyte, data_dir
+from skimage.morphology import grey
+from skimage.shapes import selem
 from skimage._shared._warnings import expected_warnings
 
 
@@ -28,7 +29,7 @@ class TestMorphology():
                      selem.disk, selem.star)
 
         with expected_warnings(['Possible precision loss']):
-            image = img_as_ubyte(transform.downscale_local_mean(
+            image = image_as_ubyte(transform.downscale_local_mean(
                 color.rgb2gray(data.coffee()), (20, 20)))
 
         output = {}
@@ -235,7 +236,7 @@ def test_float():
 def test_uint16():
     with expected_warnings(['Possible precision loss']):
         im16, eroded16, dilated16, opened16, closed16 = (
-            map(img_as_uint, [im, eroded, dilated, opened, closed]))
+            map(image_as_uint, [im, eroded, dilated, opened, closed]))
     np.testing.assert_allclose(grey.erosion(im16), eroded16)
     np.testing.assert_allclose(grey.dilation(im16), dilated16)
     np.testing.assert_allclose(grey.opening(im16), opened16)

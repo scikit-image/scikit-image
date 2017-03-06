@@ -276,7 +276,7 @@ def octagon(m, n, dtype=np.uint8):
         are 1 and 0 otherwise.
 
     """
-    from . import convex_hull_image
+    from ..morphology import convex_hull_image
     selem = np.zeros((m + 2 * n, m + 2 * n))
     selem[0, n] = 1
     selem[n, 0] = 1
@@ -315,7 +315,7 @@ def star(a, dtype=np.uint8):
         are 1 and 0 otherwise.
 
     """
-    from . import convex_hull_image
+    from ..morphology import convex_hull_image
 
     if a == 1:
         bfilter = np.zeros((3, 3), dtype)

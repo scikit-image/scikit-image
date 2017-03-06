@@ -40,3 +40,5 @@ Version 0.15
   ``'reflect'``.
 * In ``skimage.transform.rescale``, set default value of ``mode`` to
   ``'reflect'``.
+* In ``skimage.util.dtype``, remove deprecated functions and warnings.
+* In ``skimage.morphology``, remove deprecated shapes in ``selem`` and ``tests.test_selem``. Ensure new ``skim age.shapes`` works correctly and that all old dependencies point to it.
