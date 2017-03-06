@@ -128,12 +128,15 @@ Working with OpenCV
 ===================
 
 It is possible that you may need to use an image created using ``skimage`` with
-OpenCV or vice versa. An image in OpenCV is also a Numpy array, however its
+OpenCV or vice versa. OpenCV image data can be accessed (without copying) in
+NumPy.
+OpenCV uses BGR (instead of scikit-image's RGB) for color images, and its
 dtype is uint8 by default (See `Image data types and what they mean`_).
 
 ``skimage`` provides various utility functions to convert between different data
 types and properly rescale their values. In case there is a loss of precision,
 a warning is issued.
+
 
 Using image from ``skimage`` with OpenCV
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -158,6 +161,17 @@ Type requirements should be noted in the docstrings.
 For color images, note that ``skimage`` uses RGB color space whereas images
 loaded by OpenCV are in BGR mode. There may be a slight pixel difference
 due to this and conversion to corresponding color space will be required.
+
+Converting BGR mode to RGB mode or vice-versa
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The color images in ``skimage`` and OpenCV have 3 dimensions: width, height and
+color. RGB stands for Red Green Blue. BGR is the same, except the order of colors
+is reversed.
+The following program effectively reverses the order of the colors, leaving the
+width and height unaffected.
+
+    >>> img = img[:,:,::-1]
 
 
 Image processing pipeline
@@ -236,4 +250,3 @@ References
 
 .. _numpy: http://docs.scipy.org/doc/numpy/user/
 .. [1] http://docs.scipy.org/doc/numpy/user/basics.types.html
-
