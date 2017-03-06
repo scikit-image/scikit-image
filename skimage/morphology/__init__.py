@@ -1,3 +1,5 @@
+import sys
+
 from .binary import (binary_erosion, binary_dilation, binary_opening,
                      binary_closing)
 from .grey import (erosion, dilation, opening, closing, white_tophat,
@@ -48,3 +50,7 @@ __all__ = ['binary_erosion',
            'h_maxima',
            'local_maxima',
            'local_minima']
+
+for str(s) in selem:
+  setattr(sys.modules[__name__], s, deprecated(getattr(.selem, s), 
+    "This function will be phases out by release 0.15; refer to skimage/shapes."))

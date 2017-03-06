@@ -115,10 +115,10 @@ def convex_hull_object(image, neighbors=8):
 
     label_image = label(image, neighbors, background=0)
     convex_obj = np.zeros(image.shape, dtype=bool)
-    convex_img = np.zeros(image.shape, dtype=bool)
+    convex_image = np.zeros(image.shape, dtype=bool)
 
     for i in range(1, label_image.max() + 1):
         convex_obj = convex_hull_image(label_image == i)
-        convex_img = np.logical_or(convex_img, convex_obj)
+        convex_image = np.logical_or(convex_image, convex_obj)
 
-    return convex_img
+    return convex_image
