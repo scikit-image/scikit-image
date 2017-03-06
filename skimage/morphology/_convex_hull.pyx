@@ -7,12 +7,12 @@ import numpy as np
 cimport numpy as cnp
 
 
-def possible_hull(cnp.uint8_t[:, ::1] img):
+def possible_hull(cnp.uint8_t[:, ::1] image):
     """Return positions of pixels that possibly belong to the convex hull.
 
     Parameters
     ----------
-    img : ndarray of bool
+    image : ndarray of bool
         Binary input image.
 
     Returns
@@ -23,8 +23,8 @@ def possible_hull(cnp.uint8_t[:, ::1] img):
 
     """
     cdef Py_ssize_t r, c
-    cdef Py_ssize_t rows = img.shape[0]
-    cdef Py_ssize_t cols = img.shape[1]
+    cdef Py_ssize_t rows = image.shape[0]
+    cdef Py_ssize_t cols = image.shape[1]
 
     # Output: rows storage slots for left boundary pixels
     #         cols storage slots for top boundary pixels
@@ -44,7 +44,7 @@ def possible_hull(cnp.uint8_t[:, ::1] img):
 
         for c in range(cols):
 
-            if img[r, c] != 0:
+            if image[r, c] != 0:
 
                 rows_c = rows + c
                 rows_2_cols_c = rows_2_cols + c

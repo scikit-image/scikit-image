@@ -64,15 +64,15 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
     rr, cc : ndarray of int
         Pixel coordinates of ellipse.
         May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
+        ``image[rr, cc] = 1``.
 
     Examples
     --------
     >>> from skimage.draw import ellipse
-    >>> img = np.zeros((10, 12), dtype=np.uint8)
+    >>> image = np.zeros((10, 12), dtype=np.uint8)
     >>> rr, cc = ellipse(5, 6, 3, 5, rotation=np.deg2rad(30))
-    >>> img[rr, cc] = 1
-    >>> img
+    >>> image[rr, cc] = 1
+    >>> image
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0],
@@ -144,15 +144,15 @@ def circle(r, c, radius, shape=None):
     rr, cc : ndarray of int
         Pixel coordinates of circle.
         May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
+        ``image[rr, cc] = 1``.
 
     Examples
     --------
     >>> from skimage.draw import circle
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> image = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = circle(4, 4, 5)
-    >>> img[rr, cc] = 1
-    >>> img
+    >>> image[rr, cc] = 1
+    >>> image
     array([[0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
            [0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
@@ -190,17 +190,17 @@ def polygon_perimeter(r, c, shape=None, clip=False):
     rr, cc : ndarray of int
         Pixel coordinates of polygon.
         May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
+        ``image[rr, cc] = 1``.
 
     Examples
     --------
     >>> from skimage.draw import polygon_perimeter
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> image = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = polygon_perimeter([5, -1, 5, 10],
     ...                            [-1, 5, 11, 5],
-    ...                            shape=img.shape, clip=True)
-    >>> img[rr, cc] = 1
-    >>> img
+    ...                            shape=image.shape, clip=True)
+    >>> image[rr, cc] = 1
+    >>> image
     array([[0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
            [0, 0, 0, 1, 0, 0, 0, 1, 0, 0],
            [0, 0, 1, 0, 0, 0, 0, 0, 1, 0],
@@ -244,14 +244,14 @@ def polygon_perimeter(r, c, shape=None, clip=False):
         return _coords_inside_image(rr, cc, shape)
 
 
-def set_color(img, coords, color, alpha=1):
+def set_color(image, coords, color, alpha=1):
     """Set pixel color in the image at the given coordinates.
 
     Coordinates that exceed the shape of the image will be ignored.
 
     Parameters
     ----------
-    img : (M, N, D) ndarray
+    image : (M, N, D) ndarray
         Image
     coords : tuple of ((P,) ndarray, (P,) ndarray)
         Row and column coordinates of pixels to be colored.
@@ -263,16 +263,16 @@ def set_color(img, coords, color, alpha=1):
 
     Returns
     -------
-    img : (M, N, D) ndarray
+    image : (M, N, D) ndarray
         The updated image.
 
     Examples
     --------
     >>> from skimage.draw import line, set_color
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> image = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = line(1, 1, 20, 20)
-    >>> set_color(img, (rr, cc), 1)
-    >>> img
+    >>> set_color(image, (rr, cc), 1)
+    >>> image
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
@@ -287,29 +287,29 @@ def set_color(img, coords, color, alpha=1):
     """
     rr, cc = coords
 
-    if img.ndim == 2:
-        img = img[..., np.newaxis]
+    if image.ndim == 2:
+        image = image[..., np.newaxis]
 
     color = np.array(color, ndmin=1, copy=False)
 
-    if img.shape[-1] != color.shape[-1]:
+    if image.shape[-1] != color.shape[-1]:
         raise ValueError('Color shape ({}) must match last '
                          'image dimension ({}).'.format(color.shape[0],
-                                                        img.shape[-1]))
+                                                        image.shape[-1]))
 
     if np.isscalar(alpha):
         # Can be replaced by ``full_like`` when numpy 1.8 becomes
         # minimum dependency
         alpha = np.ones_like(rr) * alpha
 
-    rr, cc, alpha = _coords_inside_image(rr, cc, img.shape, val=alpha)
+    rr, cc, alpha = _coords_inside_image(rr, cc, image.shape, val=alpha)
 
     alpha = alpha[..., np.newaxis]
 
     color = color * alpha
-    vals = img[rr, cc] * (1 - alpha)
+    vals = image[rr, cc] * (1 - alpha)
 
-    img[rr, cc] = vals + color
+    image[rr, cc] = vals + color
 
 
 def line(r0, c0, r1, c1):
@@ -327,7 +327,7 @@ def line(r0, c0, r1, c1):
     rr, cc : (N,) ndarray of int
         Indices of pixels that belong to the line.
         May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
+        ``image[rr, cc] = 1``.
 
     Notes
     -----
@@ -336,10 +336,10 @@ def line(r0, c0, r1, c1):
     Examples
     --------
     >>> from skimage.draw import line
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> image = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = line(1, 1, 8, 8)
-    >>> img[rr, cc] = 1
-    >>> img
+    >>> image[rr, cc] = 1
+    >>> image
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
@@ -368,7 +368,7 @@ def line_aa(r0, c0, r1, c1):
     -------
     rr, cc, val : (N,) ndarray (int, int, float)
         Indices of pixels (`rr`, `cc`) and intensity values (`val`).
-        ``img[rr, cc] = val``.
+        ``image[rr, cc] = val``.
 
     References
     ----------
@@ -378,10 +378,10 @@ def line_aa(r0, c0, r1, c1):
     Examples
     --------
     >>> from skimage.draw import line_aa
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> image = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc, val = line_aa(1, 1, 8, 8)
-    >>> img[rr, cc] = val * 255
-    >>> img
+    >>> image[rr, cc] = val * 255
+    >>> image
     array([[  0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
            [  0, 255,  74,   0,   0,   0,   0,   0,   0,   0],
            [  0,  74, 255,  74,   0,   0,   0,   0,   0,   0],
@@ -415,17 +415,17 @@ def polygon(r, c, shape=None):
     rr, cc : ndarray of int
         Pixel coordinates of polygon.
         May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
+        ``image[rr, cc] = 1``.
 
     Examples
     --------
     >>> from skimage.draw import polygon
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> image = np.zeros((10, 10), dtype=np.uint8)
     >>> r = np.array([1, 2, 8, 1])
     >>> c = np.array([1, 7, 4, 1])
     >>> rr, cc = polygon(r, c)
-    >>> img[rr, cc] = 1
-    >>> img
+    >>> image[rr, cc] = 1
+    >>> image
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
@@ -464,7 +464,7 @@ def circle_perimeter(r, c, radius, method='bresenham', shape=None):
         Bresenham and Andres' method:
         Indices of pixels that belong to the circle perimeter.
         May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
+        ``image[rr, cc] = 1``.
 
     Notes
     -----
@@ -484,10 +484,10 @@ def circle_perimeter(r, c, radius, method='bresenham', shape=None):
     Examples
     --------
     >>> from skimage.draw import circle_perimeter
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> image = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = circle_perimeter(4, 4, 3)
-    >>> img[rr, cc] = 1
-    >>> img
+    >>> image[rr, cc] = 1
+    >>> image
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
            [0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
@@ -520,7 +520,7 @@ def circle_perimeter_aa(r, c, radius, shape=None):
     -------
     rr, cc, val : (N,) ndarray (int, int, float)
         Indices of pixels (`rr`, `cc`) and intensity values (`val`).
-        ``img[rr, cc] = val``.
+        ``image[rr, cc] = val``.
 
     Notes
     -----
@@ -535,10 +535,10 @@ def circle_perimeter_aa(r, c, radius, shape=None):
     Examples
     --------
     >>> from skimage.draw import circle_perimeter_aa
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> image = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc, val = circle_perimeter_aa(4, 4, 3)
-    >>> img[rr, cc] = val * 255
-    >>> img
+    >>> image[rr, cc] = val * 255
+    >>> image
     array([[  0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
            [  0,   0,  60, 211, 255, 211,  60,   0,   0,   0],
            [  0,  60, 194,  43,   0,  43, 194,  60,   0,   0],
@@ -574,7 +574,7 @@ def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
     rr, cc : (N,) ndarray of int
         Indices of pixels that belong to the ellipse perimeter.
         May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
+        ``image[rr, cc] = 1``.
 
     References
     ----------
@@ -584,10 +584,10 @@ def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
     Examples
     --------
     >>> from skimage.draw import ellipse_perimeter
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> image = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = ellipse_perimeter(5, 5, 3, 4)
-    >>> img[rr, cc] = 1
-    >>> img
+    >>> image[rr, cc] = 1
+    >>> image
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
@@ -625,7 +625,7 @@ def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
     rr, cc : (N,) ndarray of int
         Indices of pixels that belong to the Bezier curve.
         May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
+        ``image[rr, cc] = 1``.
 
     Notes
     -----
@@ -641,10 +641,10 @@ def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
     --------
     >>> import numpy as np
     >>> from skimage.draw import bezier_curve
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> image = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = bezier_curve(1, 5, 5, -2, 8, 8, 2)
-    >>> img[rr, cc] = 1
-    >>> img
+    >>> image[rr, cc] = 1
+    >>> image
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
            [0, 0, 0, 1, 1, 0, 0, 0, 0, 0],

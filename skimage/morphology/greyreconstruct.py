@@ -194,6 +194,6 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
                         image_stride)
 
     # Reshape reconstructed image to original image shape and remove padding.
-    rec_img = value_map[value_rank[:image_stride]]
-    rec_img.shape = np.array(seed.shape) + 2 * padding
-    return rec_img[inside_slices]
+    rec_image = value_map[value_rank[:image_stride]]
+    rec_image.shape = np.array(seed.shape) + 2 * padding
+    return rec_image[inside_slices]

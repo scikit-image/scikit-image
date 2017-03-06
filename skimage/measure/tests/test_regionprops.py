@@ -113,7 +113,7 @@ def test_convex_area():
 
 
 def test_convex_image():
-    img = regionprops(SAMPLE)[0].convex_image
+    image = regionprops(SAMPLE)[0].convex_image
     # determined with MATLAB
     ref = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
@@ -127,7 +127,7 @@ def test_convex_image():
          [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
          [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
     )
-    assert_array_equal(img, ref)
+    assert_array_equal(image, ref)
 
 
 def test_coordinates():
@@ -147,9 +147,9 @@ def test_eccentricity():
     eps = regionprops(SAMPLE)[0].eccentricity
     assert_almost_equal(eps, 0.814629313427)
 
-    img = np.zeros((5, 5), dtype=np.int)
-    img[2, 2] = 1
-    eps = regionprops(img)[0].eccentricity
+    image = np.zeros((5, 5), dtype=np.int)
+    image[2, 2] = 1
+    eps = regionprops(image)[0].eccentricity
     assert_almost_equal(eps, 0)
 
 
@@ -190,11 +190,11 @@ def test_moments_hu():
 
 
 def test_image():
-    img = regionprops(SAMPLE)[0].image
-    assert_array_equal(img, SAMPLE)
+    image = regionprops(SAMPLE)[0].image
+    assert_array_equal(image, SAMPLE)
 
-    img = regionprops(SAMPLE_3D)[0].image
-    assert_array_equal(img, SAMPLE_3D[1:4, 1:3, 1:3])
+    image = regionprops(SAMPLE_3D)[0].image
+    assert_array_equal(image, SAMPLE_3D[1:4, 1:3, 1:3])
 
 
 def test_label():
@@ -216,8 +216,8 @@ def test_filled_area():
 
 
 def test_filled_image():
-    img = regionprops(SAMPLE)[0].filled_image
-    assert_array_equal(img, SAMPLE)
+    image = regionprops(SAMPLE)[0].filled_image
+    assert_array_equal(image, SAMPLE)
 
 
 def test_major_axis_length():

@@ -4,7 +4,7 @@ import numpy as np
 from scipy import ndimage as ndi
 from scipy import stats
 
-from ..util import img_as_float
+from ..util import image_as_float
 from ..feature import peak_local_max
 from ..feature.util import _prepare_grayscale_input_2D
 from ..feature.corner_cy import _corner_fast
@@ -154,7 +154,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
            [ 0.,  0.,  0.,  0.,  0.]])
     """
 
-    image = img_as_float(image)
+    image = image_as_float(image)
 
     gaussian_filtered = ndi.gaussian_filter(image, sigma=sigma,
                                             mode=mode, cval=cval)
@@ -216,7 +216,7 @@ def hessian_matrix_det(image, sigma=1):
     determinant.
     """
 
-    image = img_as_float(image)
+    image = image_as_float(image)
     image = integral_image(image)
     return np.array(_hessian_matrix_det(image, sigma))
 
@@ -738,10 +738,10 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     Examples
     --------
     >>> from skimage.feature import corner_harris, corner_peaks, corner_subpix
-    >>> img = np.zeros((10, 10))
-    >>> img[:5, :5] = 1
-    >>> img[5:, 5:] = 1
-    >>> img.astype(int)
+    >>> image = np.zeros((10, 10))
+    >>> image[:5, :5] = 1
+    >>> image[5:, 5:] = 1
+    >>> image.astype(int)
     array([[1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
            [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
            [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
@@ -752,8 +752,8 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]])
-    >>> coords = corner_peaks(corner_harris(img), min_distance=2)
-    >>> coords_subpix = corner_subpix(img, coords, window_size=7)
+    >>> coords = corner_peaks(corner_harris(image), min_distance=2)
+    >>> coords_subpix = corner_subpix(image, coords, window_size=7)
     >>> coords_subpix
     array([[ 4.5,  4.5]])
 

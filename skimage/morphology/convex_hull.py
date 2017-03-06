@@ -113,12 +113,12 @@ def convex_hull_object(image, neighbors=8):
     if neighbors != 4 and neighbors != 8:
         raise ValueError('Neighbors must be either 4 or 8.')
 
-    labeled_im = label(image, neighbors, background=0)
+    label_image = label(image, neighbors, background=0)
     convex_obj = np.zeros(image.shape, dtype=bool)
     convex_img = np.zeros(image.shape, dtype=bool)
 
-    for i in range(1, labeled_im.max() + 1):
-        convex_obj = convex_hull_image(labeled_im == i)
+    for i in range(1, label_image.max() + 1):
+        convex_obj = convex_hull_image(label_image == i)
         convex_img = np.logical_or(convex_img, convex_obj)
 
     return convex_img
