@@ -546,12 +546,12 @@ class EllipseModel(BaseModel):
             True, if model estimation succeeds.
 
 
-        References
-        ----------
-        .. [1] Halir, R.; Flusser, J. "Numerically stable direct least squares
-               fitting of ellipses". In Proc. 6th International Conference in
-               Central Europe on Computer Graphics and Visualization.
-               WSCG (Vol. 98, pp. 125-132).
+        References:
+        -----------
+        .. [1]  Halir, R.; Flusser, J. "Numerically stable direct least squares
+                fitting of ellipses". In Proc. 6th International Conference in
+                Central Europe on Computer Graphics and Visualization.
+                WSCG (Vol. 98, pp. 125-132).
 
         """
         # Original Implementation: Ben Hammel, Nick Sullivan-Molina

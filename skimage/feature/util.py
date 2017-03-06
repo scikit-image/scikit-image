@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..util import img_as_float
+from ..util import image_as_float
 from .._shared.utils import assert_nD
 
 
@@ -70,8 +70,8 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
 
     """
 
-    image1 = img_as_float(image1)
-    image2 = img_as_float(image2)
+    image1 = image_as_float(image1)
+    image2 = image_as_float(image2)
 
     new_shape1 = list(image1.shape)
     new_shape2 = list(image2.shape)
@@ -126,7 +126,7 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
 def _prepare_grayscale_input_2D(image):
     image = np.squeeze(image)
     assert_nD(image, 2)
-    return img_as_float(image)
+    return image_as_float(image)
 
 
 def _mask_border_keypoints(image_shape, keypoints, distance):

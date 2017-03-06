@@ -46,12 +46,12 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     --------
     >>> from skimage.transform import hough_line, hough_line_peaks
     >>> from skimage.draw import line
-    >>> img = np.zeros((15, 15), dtype=np.bool_)
+    >>> image = np.zeros((15, 15), dtype=np.bool_)
     >>> rr, cc = line(0, 0, 14, 14)
-    >>> img[rr, cc] = 1
+    >>> image[rr, cc] = 1
     >>> rr, cc = line(0, 14, 14, 0)
-    >>> img[cc, rr] = 1
-    >>> hspace, angles, dists = hough_line(img)
+    >>> image[cc, rr] = 1
+    >>> hspace, angles, dists = hough_line(image)
     >>> hspace, angles, dists = hough_line_peaks(hspace, angles, dists)
     >>> len(angles)
     2
@@ -95,11 +95,11 @@ def hough_circle(image, radius, normalize=True, full_output=False):
     --------
     >>> from skimage.transform import hough_circle
     >>> from skimage.draw import circle_perimeter
-    >>> img = np.zeros((100, 100), dtype=np.bool_)
+    >>> image = np.zeros((100, 100), dtype=np.bool_)
     >>> rr, cc = circle_perimeter(25, 35, 23)
-    >>> img[rr, cc] = 1
+    >>> image[rr, cc] = 1
     >>> try_radii = np.arange(5, 50)
-    >>> res = hough_circle(img, try_radii)
+    >>> res = hough_circle(image, try_radii)
     >>> ridx, r, c = np.unravel_index(np.argmax(res), res.shape)
     >>> r, c, try_radii[ridx]
     (25, 35, 23)
@@ -111,12 +111,12 @@ def hough_circle(image, radius, normalize=True, full_output=False):
                          normalize=normalize, full_output=full_output)
 
 
-def hough_ellipse(img, threshold=4, accuracy=1, min_size=4, max_size=None):
+def hough_ellipse(image, threshold=4, accuracy=1, min_size=4, max_size=None):
     """Perform an elliptical Hough transform.
 
     Parameters
     ----------
-    img : (M, N) ndarray
+    image : (M, N) ndarray
         Input image with nonzero values representing edges.
     threshold: int, optional
         Accumulator threshold value.
@@ -140,10 +140,10 @@ def hough_ellipse(img, threshold=4, accuracy=1, min_size=4, max_size=None):
     --------
     >>> from skimage.transform import hough_ellipse
     >>> from skimage.draw import ellipse_perimeter
-    >>> img = np.zeros((25, 25), dtype=np.uint8)
+    >>> image = np.zeros((25, 25), dtype=np.uint8)
     >>> rr, cc = ellipse_perimeter(10, 10, 6, 8)
-    >>> img[cc, rr] = 1
-    >>> result = hough_ellipse(img, threshold=8)
+    >>> image[cc, rr] = 1
+    >>> result = hough_ellipse(image, threshold=8)
     >>> result.tolist()
     [(10, 10.0, 10.0, 8.0, 6.0, 0.0)]
 
@@ -159,16 +159,16 @@ def hough_ellipse(img, threshold=4, accuracy=1, min_size=4, max_size=None):
            method." Pattern Recognition, 2002. Proceedings. 16th International
            Conference on. Vol. 2. IEEE, 2002
     """
-    return _hough_ellipse(img, threshold=threshold, accuracy=accuracy,
+    return _hough_ellipse(image, threshold=threshold, accuracy=accuracy,
                           min_size=min_size, max_size=max_size)
 
 
-def hough_line(img, theta=None):
+def hough_line(image, theta=None):
     """Perform a straight line Hough transform.
 
     Parameters
     ----------
-    img : (M, N) ndarray
+    image : (M, N) ndarray
         Input image with nonzero values representing edges.
     theta : 1D ndarray of double, optional
         Angles at which to compute the transform, in radians.
@@ -196,38 +196,38 @@ def hough_line(img, theta=None):
     --------
     Generate a test image:
 
-    >>> img = np.zeros((100, 150), dtype=bool)
-    >>> img[30, :] = 1
-    >>> img[:, 65] = 1
-    >>> img[35:45, 35:50] = 1
+    >>> image = np.zeros((100, 150), dtype=bool)
+    >>> image[30, :] = 1
+    >>> image[:, 65] = 1
+    >>> image[35:45, 35:50] = 1
     >>> for i in range(90):
-    ...     img[i, i] = 1
-    >>> img += np.random.random(img.shape) > 0.95
+    ...     image[i, i] = 1
+    >>> image += np.random.random(image.shape) > 0.95
 
     Apply the Hough transform:
 
-    >>> out, angles, d = hough_line(img)
+    >>> out, angles, d = hough_line(image)
 
     .. plot:: hough_tf.py
 
     """
-    if img.ndim != 2:
-        raise ValueError('The input image `img` must be 2D.')
+    if image.ndim != 2:
+        raise ValueError('The input image `image` must be 2D.')
 
     if theta is None:
         # These values are approximations of pi/2
         theta = np.linspace(-np.pi / 2, np.pi / 2, 180)
 
-    return _hough_line(img, theta=theta)
+    return _hough_line(image, theta=theta)
 
 
-def probabilistic_hough_line(img, threshold=10, line_length=50, line_gap=10,
+def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
                              theta=None):
     """Return lines from a progressive probabilistic line Hough transform.
 
     Parameters
     ----------
-    img : (M, N) ndarray
+    image : (M, N) ndarray
         Input image with nonzero values representing edges.
     threshold : int, optional
         Threshold
@@ -254,13 +254,13 @@ def probabilistic_hough_line(img, threshold=10, line_length=50, line_gap=10,
            Conference on Computer Vision and Pattern Recognition, 1999.
     """
 
-    if img.ndim != 2:
-        raise ValueError('The input image `img` must be 2D.')
+    if image.ndim != 2:
+        raise ValueError('The input image `image` must be 2D.')
 
     if theta is None:
         theta = np.pi / 2 - np.arange(180) / 180.0 * np.pi
 
-    return _prob_hough_line(img, threshold=threshold, line_length=line_length,
+    return _prob_hough_line(image, threshold=threshold, line_length=line_length,
                             line_gap=line_gap, theta=theta)
 
 
@@ -309,11 +309,11 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
     --------
     >>> from skimage import transform as tf
     >>> from skimage import draw
-    >>> img = np.zeros((120, 100), dtype=int)
+    >>> image = np.zeros((120, 100), dtype=int)
     >>> radius, x_0, y_0 = (20, 99, 50)
     >>> y, x = draw.circle_perimeter(y_0, x_0, radius)
-    >>> img[x, y] = 1
-    >>> hspaces = tf.hough_circle(img, radius)
+    >>> image[x, y] = 1
+    >>> hspaces = tf.hough_circle(image, radius)
     >>> accum, cx, cy, rad = hough_circle_peaks(hspaces, [radius,])
     """
     from skimage.feature.peak import _prominent_peaks

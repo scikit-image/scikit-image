@@ -53,7 +53,7 @@ def _line(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
     rr, cc : (N,) ndarray of int
         Indices of pixels that belong to the line.
         May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
+        ``image[rr, cc] = 1``.
 
     See Also
     --------
@@ -120,7 +120,7 @@ def _line_aa(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
     -------
     rr, cc, val : (N,) ndarray (int, int, float)
         Indices of pixels (`rr`, `cc`) and intensity values (`val`).
-        ``img[rr, cc] = val``.
+        ``image[rr, cc] = val``.
 
     References
     ----------
@@ -209,7 +209,7 @@ def _polygon(r, c, shape):
     rr, cc : ndarray of int
         Pixel coordinates of polygon.
         May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
+        ``image[rr, cc] = 1``.
     """
     r = np.asanyarray(r)
     c = np.asanyarray(c)
@@ -271,7 +271,7 @@ def _circle_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t radius,
         Bresenham and Andres' method:
         Indices of pixels that belong to the circle perimeter.
         May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
+        ``image[rr, cc] = 1``.
 
     Notes
     -----
@@ -359,7 +359,7 @@ def _circle_perimeter_aa(Py_ssize_t r_o, Py_ssize_t c_o,
     -------
     rr, cc, val : (N,) ndarray (int, int, float)
         Indices of pixels (`rr`, `cc`) and intensity values (`val`).
-        ``img[rr, cc] = val``.
+        ``image[rr, cc] = val``.
 
     Notes
     -----
@@ -430,7 +430,7 @@ def _ellipse_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t r_radius,
     rr, cc : (N,) ndarray of int
         Indices of pixels that belong to the ellipse perimeter.
         May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
+        ``image[rr, cc] = 1``.
 
     References
     ----------
@@ -554,7 +554,7 @@ def _bezier_segment(Py_ssize_t r0, Py_ssize_t c0,
     rr, cc : (N,) ndarray of int
         Indices of pixels that belong to the Bezier curve.
         May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
+        ``image[rr, cc] = 1``.
 
     Notes
     -----
@@ -686,7 +686,7 @@ def _bezier_curve(Py_ssize_t r0, Py_ssize_t c0,
     rr, cc : (N,) ndarray of int
         Indices of pixels that belong to the Bezier curve.
         May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
+        ``image[rr, cc] = 1``.
 
     Notes
     -----
