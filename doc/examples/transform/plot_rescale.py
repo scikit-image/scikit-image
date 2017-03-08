@@ -5,6 +5,9 @@ Rescale
 The rescale operation resizes an image by a given scaling factor.
 The scaling factor can either be a single floating point value,
 or multiple values---one along each axis.
+
+The Example takes a camera image as input and rescales it by a
+factor of 0.5.
 """
 
 
