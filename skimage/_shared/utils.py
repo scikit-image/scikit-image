@@ -7,7 +7,7 @@ import numbers
 
 import six
 
-from ..util import img_as_float
+from ..util import image_as_float
 from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
@@ -230,7 +230,7 @@ def convert_to_float(image, preserve_range):
         Input image.
     preserve_range : bool
         Determines if the range of the image should be kept or transformed
-        using img_as_float.
+        using image_as_float.
 
     Returns
     -------
@@ -240,6 +240,6 @@ def convert_to_float(image, preserve_range):
     if preserve_range:
         image = image.astype(np.double)
     else:
-        image = img_as_float(image)
+        image = image_as_float(image)
     return image
 
