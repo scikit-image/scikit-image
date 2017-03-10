@@ -24,7 +24,7 @@ def _get_high_intensity_peaks(image, mask, num_peaks):
 
 def peak_local_max(image, min_distance=1, threshold_abs=None,
                    threshold_rel=None, exclude_border=True, indices=True,
-                   num_peaks=np.inf, footprint=None, labels=None,
+                   num_peaks=np.inf, footprint=None, label_image=None,
                    num_peaks_per_label=np.inf):
     """Find peaks in an image as coordinate list or boolean mask.
 
@@ -65,8 +65,8 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         If provided, `footprint == 1` represents the local region within which
         to search for peaks at every point in `image`.  Overrides
         `min_distance` (also for `exclude_border`).
-    labels : ndarray of ints, optional
-        If provided, each unique region `labels == value` represents a unique
+    label_image : ndarray of ints, optional
+        If provided, each unique region `label_image == value` represents a unique
         region to search for peaks. Zero is reserved for background.
     num_peaks_per_label : int, optional
         Maximum number of peaks for each label.
@@ -119,26 +119,26 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
 
     out = np.zeros_like(image, dtype=np.bool)
 
-    # In the case of labels, recursively build and return an output
+    # In the case of label_image, recursively build and return an output
     # operating on each label separately
-    if labels is not None:
-        label_values = np.unique(labels)
+    if label_image is not None:
+        label_values = np.unique(label_image)
         # Reorder label values to have consecutive integers (no gaps)
         if np.any(np.diff(label_values) != 1):
-            mask = labels >= 1
-            labels[mask] = 1 + rank_order(labels[mask])[0].astype(labels.dtype)
-        labels = labels.astype(np.int32)
+            mask = label_image >= 1
+            label_image[mask] = 1 + rank_order(label_image[mask])[0].astype(label_image.dtype)
+        label_image = label_image.astype(np.int32)
 
         # New values for new ordering
-        label_values = np.unique(labels)
+        label_values = np.unique(label_image)
         for label in label_values[label_values != 0]:
-            maskim = (labels == label)
+            maskim = (label_image == label)
             out += peak_local_max(image * maskim, min_distance=min_distance,
                                   threshold_abs=threshold_abs,
                                   threshold_rel=threshold_rel,
                                   exclude_border=exclude_border,
                                   indices=False, num_peaks=num_peaks_per_label,
-                                  footprint=footprint, labels=None)
+                                  footprint=footprint, label_image=None)
 
         # Select highest intensities (num_peaks)
         coordinates = _get_high_intensity_peaks(image, out, num_peaks)
