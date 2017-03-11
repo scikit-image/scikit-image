@@ -15,15 +15,18 @@ This implementation provides functions for
 
 Dynamics openings and closings can also be implemented by greyreconstruct.
 """
+import numpy as np
 
-from . import extrema
 from .watershed import _validate_connectivity
 from .watershed import _compute_neighbors
 
 from .extrema import local_minima
+from ..measure import label
 
-def criteria_opening(image, crit_val, mask=None, 
-                     connectivity=1):
+from . import _criteria
+
+def area_closing(image, area_threshold, mask=None, connectivity=1,
+                 compactness=0.0):
 
     if mask is not None and mask.shape != image.shape:
         raise ValueError("mask must have same shape as image")
@@ -34,14 +37,30 @@ def criteria_opening(image, crit_val, mask=None,
     connectivity, offset = _validate_connectivity(image.ndim, connectivity,
                                                   offset=None)
 
-    # TODO : fix the structuring element issue. 
+    # TODO : fix the structuring element issue.
+    # labeling and minima detection need to rely on the same connectivity.
     seeds_bin = local_minima(image)
     seeds = label(seeds_bin)
+    output = image.copy()
 
     image = np.pad(image, 1, mode='constant')
-    mask = np.pad(mask, pad_width, mode='constant').ravel()
-    output = np.pad(seeds, 1, mode='constant')
+    mask = np.pad(mask, 1, mode='constant')
+    seeds = np.pad(seeds, 1, mode='constant')
+    output = np.pad(output, 1, mode='constant')
 
     flat_neighborhood = _compute_neighbors(image, connectivity, offset)
     image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
+
+    _criteria.area_closing(image.ravel(),
+                           area_threshold,
+                           seeds.ravel(),
+                           flat_neighborhood,
+                           mask.ravel(),
+                           image_strides,
+                           0.000001,
+                           compactness,
+                           output.ravel()
+                           )
+
+
 
