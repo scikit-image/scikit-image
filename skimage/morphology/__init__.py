@@ -14,6 +14,8 @@ from .misc import remove_small_objects, remove_small_holes
 from .extrema import (h_minima, h_maxima, local_maxima, local_minima)
 
 
+from .criteria import area_closing
+
 __all__ = ['binary_erosion',
            'binary_dilation',
            'binary_opening',
@@ -48,3 +50,5 @@ __all__ = ['binary_erosion',
            'h_maxima',
            'local_maxima',
            'local_minima']
+           'remove_small_holes',
+           'area_closing']
