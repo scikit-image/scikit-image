@@ -139,13 +139,17 @@ Converting BGR to RGB or vice versa
 The color images in ``skimage`` and OpenCV have 3 dimensions: width, height and
 color. RGB stands for Red Green Blue. BGR uses the same color space, except the
 order of colors is reversed.
-The following program effectively reverses the order of the colors, leaving the width
-and height unaffected.
 
-    >>> img = img[:,:,::-1]
+Note that in ``scikit-image`` we usually refer to ``rows`` and ``columns`` instead of
+width and height (see `Coordinate conventions`_).
 
-Using image from OpenCV with ``skimage``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The following program effectively reverses the order of the colors, leaving the rows
+and columns unaffected.
+
+    >>> image = image[:, :, ::-1]
+
+Using an image from OpenCV with ``skimage``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If cv_image is an array of unsigned bytes, ``skimage`` will understand it by
 default. If you prefer working with floating point images, :func:`img_as_float`
@@ -154,10 +158,10 @@ can be used to convert the image::
     >>> from skimage import img_as_float
     >>> image = img_as_float(any_opencv_image)
 
-Using image from ``skimage`` with OpenCV
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Using an image from ``skimage`` with OpenCV
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This can be achieved with :func:`img_as_ubyte`::
+The reverse can be achieved with :func:`img_as_ubyte`::
 
     >>> from skimage import img_as_ubyte
     >>> cv_image = img_as_ubyte(any_skimage_image)
