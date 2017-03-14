@@ -140,8 +140,8 @@ The color images in ``skimage`` and OpenCV have 3 dimensions: width, height and
 color. RGB stands for Red Green Blue. BGR uses the same color space, except the
 order of colors is reversed.
 
-Note that in ``scikit-image`` we usually refer to ``rows`` and ``columns`` instead of
-width and height (see `Coordinate conventions`_).
+Note that in ``scikit-image`` we usually refer to ``rows`` and ``columns`` instead
+of width and height (see :ref:`numpy-images-coordinate-conventions`).
 
 The following program effectively reverses the order of the colors, leaving the rows
 and columns unaffected.
