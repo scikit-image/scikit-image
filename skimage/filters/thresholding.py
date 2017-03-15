@@ -8,7 +8,8 @@ from ..exposure import histogram
 from .._shared.utils import assert_nD, warn, deprecated
 from ..transform import integral_image
 from .. import util
-from skimage import dtype_limits, img_as_ubyte
+from skimage import dtype_limits
+
 
 __all__ = ['try_all_threshold',
            'threshold_adaptive',
@@ -850,8 +851,6 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     r : float, optional
         Value of R, the dynamic range of standard deviation.
         If None, set to the half of the image dtype range.
-    offset : float, optional
-        Constant subtracted from obtained local thresholds.
 
     Returns
     -------
