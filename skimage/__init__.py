@@ -65,7 +65,7 @@ import sys
 pkg_dir = osp.abspath(osp.dirname(__file__))
 data_dir = osp.join(pkg_dir, 'data')
 
-__version__ = '0.13dev'
+__version__ = '0.12.3'
 
 try:
     imp.find_module('nose')
