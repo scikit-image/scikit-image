@@ -59,10 +59,10 @@ def _validate_inputs(image, markers, mask):
         # not array-like, assume int
         markers = regular_seeds(image.shape, markers)
     elif markers.shape != image.shape:
-        raise ValueError("Markers (shape %s) must have same shape "
-                         "as image (shape %s)" % (markers.ndim, image.ndim))
+        raise ValueError("`markers` (shape {}) must have same shape "
+                         "as `image` (shape {})".format(markers.shape, image.shape))
     if mask is not None and mask.shape != image.shape:
-        raise ValueError("mask must have same shape as image")
+        raise ValueError("`mask` must have same shape as `image`")
     if mask is None:
         # Use a complete `True` mask if none is provided
         mask = np.ones(image.shape, bool)
@@ -137,7 +137,6 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
 
     Parameters
     ----------
-
     image: ndarray (2-D, 3-D, ...) of integers
         Data array where the lowest value points are labeled first.
     markers: int, or ndarray of int, same shape as `image`
@@ -167,7 +166,6 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
 
     See also
     --------
-
     skimage.segmentation.random_walker: random walker segmentation
         A segmentation algorithm based on anisotropic diffusion, usually
         slower than the watershed but with good results on noisy data and
