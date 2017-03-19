@@ -9,7 +9,6 @@ from ..color import gray2rgb
 from ._texture import (_glcm_loop,
                        _local_binary_pattern,
                        _multiblock_lbp)
-import re
 from warnings import warn
 
 
@@ -309,9 +308,8 @@ def local_binary_pattern(image, P, R, method='default'):
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.214.6851,
            2004.
     """
-    match_datatype = re.search('int', str(image.dtype))
 
-    if not match_datatype:
+    if image.dtype.kind not in ('i', 'u'):
         warn('Image data type incorrect. Convert the image to integer type for'
              ' local_binary_pattern')
 
