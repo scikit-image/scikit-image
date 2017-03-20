@@ -128,23 +128,23 @@ Working with OpenCV
 ===================
 
 It is possible that you may need to use an image created using ``skimage`` with
-OpenCV or vice versa. OpenCV image data can be accessed (without copying) in
+OpenCV_ or vice versa. OpenCV image data can be accessed (without copying) in
 NumPy (and, thus, in scikit-image).
 OpenCV uses BGR (instead of scikit-image's RGB) for color images, and its
-dtype is uint8 by default (See `Image data types and what they mean`_).
+dtype is uint8 by default (See `Image data types and what they mean`_). BGR stands
+for Blue Green Red.
 
 Converting BGR to RGB or vice versa
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The color images in ``skimage`` and OpenCV have 3 dimensions: width, height and
-color. RGB stands for Red Green Blue. BGR uses the same color space, except the
-order of colors is reversed.
+color. RGB and BGR use the same color space, except the order of colors is reversed.
 
 Note that in ``scikit-image`` we usually refer to ``rows`` and ``columns`` instead
 of width and height (see :ref:`numpy-images-coordinate-conventions`).
 
-The following program effectively reverses the order of the colors, leaving the rows
-and columns unaffected.
+The following instruction effectively reverses the order of the colors, leaving
+the rows and columns unaffected.
 
     >>> image = image[:, :, ::-1]
 
@@ -243,3 +243,4 @@ References
 
 .. _numpy: http://docs.scipy.org/doc/numpy/user/
 .. [1] http://docs.scipy.org/doc/numpy/user/basics.types.html
+.. _OpenCV: http://opencv.org/
