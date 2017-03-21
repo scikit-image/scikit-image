@@ -13,6 +13,7 @@ from .profile import profile_line
 from .fit import LineModel, LineModelND, CircleModel, EllipseModel, ransac
 from .block import block_reduce
 from ._label import label
+from .entropy import shannon_entropy
 
 
 __all__ = ['find_contours',
@@ -44,4 +45,5 @@ __all__ = ['find_contours',
            'compare_mse',
            'compare_nrmse',
            'compare_psnr',
+           'shannon_entropy',
            ]
