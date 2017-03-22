@@ -74,7 +74,7 @@ ax.plot(xs[:len(grass_patches)], ys[:len(grass_patches)], 'go',
 ax.plot(xs[len(grass_patches):], ys[len(grass_patches):], 'bo',
         label='Sky')
 ax.set_xlabel('GLCM Dissimilarity')
-ax.set_ylabel('GLVM Correlation')
+ax.set_ylabel('GLCM Correlation')
 ax.legend()
 
 # display the image patches
