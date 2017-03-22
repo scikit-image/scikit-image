@@ -25,6 +25,11 @@ from ..measure import label
 
 from . import _criteria
 
+from ..util import crop
+
+import pdb
+
+
 def area_closing(image, area_threshold, mask=None, connectivity=1,
                  compactness=0.0):
 
@@ -40,7 +45,7 @@ def area_closing(image, area_threshold, mask=None, connectivity=1,
     # TODO : fix the structuring element issue.
     # labeling and minima detection need to rely on the same connectivity.
     seeds_bin = local_minima(image)
-    seeds = label(seeds_bin)
+    seeds = label(seeds_bin).astype(np.uint64)
     output = image.copy()
 
     image = np.pad(image, 1, mode='constant')
@@ -51,16 +56,21 @@ def area_closing(image, area_threshold, mask=None, connectivity=1,
     flat_neighborhood = _compute_neighbors(image, connectivity, offset)
     image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
 
+    pdb.set_trace()
+    
+    #pdb.set_trace()
     _criteria.area_closing(image.ravel(),
                            area_threshold,
                            seeds.ravel(),
                            flat_neighborhood,
-                           mask.ravel(),
+                           mask.ravel().astype(np.uint8),
                            image_strides,
                            0.000001,
                            compactness,
                            output.ravel()
                            )
-
+    output = crop(output, 1, copy=True)
+    pdb.set_trace()
+    return(output)
 
 
