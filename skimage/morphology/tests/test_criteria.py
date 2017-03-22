@@ -20,7 +20,7 @@ def diff(a, b):
 class TestExtrema(unittest.TestCase):
 
     def test_area_closing(self):
-        "Adding/subtracting a constant and clipping"
+        "test for area closing"
         data = np.ones((10, 10), dtype=np.uint8) * 250
         data[5:,5:] += 5
         data[2:4,2:4] = 100

@@ -8,13 +8,20 @@ of the hierarchical queue provided in heap_general.pyx
 #from IPython.html.widgets.interaction import _get_min_max_value
 #from ._watershed import _euclid_dist
 
-cimport numpy as cnp
+import numpy as np
+from libc.math cimport sqrt
 
-ctypedef cnp.float64_t DTYPE_FLOAT64_t
-ctypedef cnp.int32_t DTYPE_INT32_t
-ctypedef cnp.uint32_t DTYPE_UINT32_t
-ctypedef cnp.uint64_t DTYPE_UINT64_t
-ctypedef cnp.int8_t DTYPE_BOOL_t
+cimport numpy as np
+cimport cython
+
+ctypedef np.float64_t DTYPE_FLOAT64_t
+ctypedef np.int32_t DTYPE_INT32_t
+ctypedef np.uint32_t DTYPE_UINT32_t
+ctypedef np.uint64_t DTYPE_UINT64_t
+ctypedef np.int64_t DTYPE_INT64_t
+ctypedef np.uint8_t DTYPE_BOOL_t
+
+temp_folder = '/Users/twalter/src/area_closing_test'
 
 
 include "heap_watershed.pxi"
@@ -29,13 +36,13 @@ cdef struct Area:
 
 @cython.boundscheck(False)
 def area_closing(DTYPE_FLOAT64_t[::1] image,
-                 DTYPE_UINT32_t area_threshold,
+                 DTYPE_UINT64_t area_threshold,
                  DTYPE_UINT64_t[::1] label_img,
                  DTYPE_INT32_t[::1] structure,
                  DTYPE_BOOL_t[::1] mask,
-                 cnp.int32_t[::1] strides,
+                 np.int32_t[::1] strides,
                  DTYPE_FLOAT64_t eps,
-                 cnp.double_t compactness,
+                 np.double_t compactness,
                  DTYPE_FLOAT64_t[::1] output,
                  ):
     """Perform criteria based closings using.
@@ -93,25 +100,27 @@ def area_closing(DTYPE_FLOAT64_t[::1] image,
     cdef Heap *hp = <Heap *> heap_from_numpy2()
 
     # array for characterization of minima
-    cdef int number_of_minima = label_img.max() + 1
+    cdef int number_of_minima = np.max(label_img) + 1
     cdef Area* area_array = <Area *>malloc(sizeof(Area) * number_of_minima)
     cdef Area[:] area_vec = <Area[:number_of_minima]> area_array
 
-    min_val = cnp.min(image)
-    max_val = cnp.max(image)
+    min_val = np.min(image)
+    max_val = np.max(image)
     for i in range(len(label_img)):
         l = label_img[i]
 
         # label 0 (background) is not of interest
-        if label1==0:
+        if l==0:
             continue
 
         value = image[i]
 
         # initialization of the criteria vector
-        area_vec[l].area += 1
-        area_vec[l].equivalence = l
+#        area_vec[l].area += 1
+        area_vec[l].equivalent_label = l
         area_vec[l].value_of_min = value
+        area_vec[l].stop_level = max_val
+        area_vec[l].area = 0
 
         # queue initialization
         elem.value = value
@@ -120,14 +129,8 @@ def area_closing(DTYPE_FLOAT64_t[::1] image,
         elem.source = i
         heappush(hp, &elem)
 
-    for l in range(1, number_of_minima):
-        if area_vec[l].area >= area_threshold:
-            area_vec[l].stop_level = area_vec[l].value_of_min
-        else:
-            area_vec[l].stop_level = max_val
-
     level_before = min_val
-    area_vec[0].equivalence = 0
+    area_vec[0].equivalent_label = 0
 
     while hp.items > 0:
         heappop(hp, &elem)
@@ -135,9 +138,9 @@ def area_closing(DTYPE_FLOAT64_t[::1] image,
         # check all lakes and determine the stop levels if needed.
         if elem.value > level_before + eps:
             for l in range(number_of_minima):
-                equ_l = area_vec[l].equivalence
-                while equ_l != area_vec[equ_l].equivalence:
-                    equ_l = area_vec[equ_l].equivalence
+                equ_l = area_vec[l].equivalent_label
+                while equ_l != area_vec[equ_l].equivalent_label:
+                    equ_l = area_vec[equ_l].equivalent_label
                 if (area_vec[equ_l].area >= area_threshold and area_vec[l].stop_level >= max_val):
                     area_vec[l].stop_level = level_before
             level_before = elem.value
@@ -148,11 +151,15 @@ def area_closing(DTYPE_FLOAT64_t[::1] image,
 
         # we find the label of the dominating lake
         label1 = label_img[elem.source]
-        while label1 != area_vec[label1].equivalence:
-            label1 = area_vec[label1].equivalence
+        while label1 != area_vec[label1].equivalent_label:
+            label1 = area_vec[label1].equivalent_label
+
+        # if the criterion is met, nothing happens
+        if area_vec[label1].stop_level < max_val:
+            continue
 
         # the non-labeled pixel from the queue is marked with the
-        # value of the domainting lake of its source label.
+        # value of the dominating lake of its source label.
         label_img[elem.index] = label1
 
         # The corresponding lake is updated.
@@ -172,8 +179,8 @@ def area_closing(DTYPE_FLOAT64_t[::1] image,
                 # neighbor has a label
 
                 # find the label of the dominating lake
-                while label2 != area_vec[label2].equivalence:
-                    label2 = area_vec[label2].equivalence
+                while label2 != area_vec[label2].equivalent_label:
+                    label2 = area_vec[label2].equivalent_label
 
                 # if the label of the neighbor is different
                 # from the label of the pixel taken from the queue,
@@ -182,10 +189,10 @@ def area_closing(DTYPE_FLOAT64_t[::1] image,
                     # fusion of two lakes: the bigger eats the smaller one.
                     if area_vec[label1].area >= area_vec[label2].area:
                         area_vec[label1].area += area_vec[label2].area
-                        area_vec[label2].equivalence = label1
+                        area_vec[label2].equivalent_label = label1
                     else:
                         area_vec[label2].area += area_vec[label1].area
-                        area_vec[label1].equivalence = label2
+                        area_vec[label1].equivalent_label = label2
 
                 # the neighbor is not added to the queue.
                 continue
@@ -204,10 +211,10 @@ def area_closing(DTYPE_FLOAT64_t[::1] image,
             heappush(hp, &new_elem)
 
     heap_done(hp)
-    
+
     for i in range(len(label_img)):
         label1 = label_img[i]
-        if label_img[i]:
+        if label_img[i] > 0:
             output[i] = area_vec[label1].stop_level
         else:
             output[i] = image[i]
