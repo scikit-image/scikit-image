@@ -1,0 +1,40 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.IX Title "SKIMAGE 1"
+.TH SKIMAGE 1
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+skivi \- a scikit-image viewer
+.SH SYNOPSIS
+.B skivi
+.I "filename"
+.SH DESCRIPTION
+An image viewer built on the scikit-image QT display plugin, that allows
+adjusting color balance, exposure, etc.
+
+\fBskivi\fP is a convenience wrapper around the following code:
+
+.nf
+  from skimage import io
+  import sys
+
+  io.use_plugin('qt')
+  image = io.imread(sys.argv[1])
+  io.imshow(image, fancy=True)
+.fi
+.SH AUTHOR
+The scikit-image team: http://scikit-image.org
+

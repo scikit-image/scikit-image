@@ -1,0 +1,10 @@
+Document: scikit-image
+Title: scikit-image User Manual
+Author: scikit-image developers
+Abstract: This manual describes features of scikit-image, provides
+ examples, API reference, and a user guide.
+Section: Science/Data Analysis
+
+Format: HTML
+Index: /usr/share/doc/python-skimage-doc/html/index.html
+Files: /usr/share/doc/python-skimage-doc/html/*

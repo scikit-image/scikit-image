@@ -1,0 +1,2 @@
+#!/bin/sh
+find debian/tmp/usr/lib/python2* -name "*.so"

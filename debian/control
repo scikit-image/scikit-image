@@ -1,0 +1,108 @@
+Source: skimage
+Section: python
+Priority: optional
+Maintainer: Stefan van der Walt <stefanv@berkeley.edu>
+Uploaders: Yaroslav Halchenko <debian@onerussian.com>
+Build-Depends: cython (>= 0.23),
+               cython3 (>= 0.23),
+               debhelper (>= 9~),
+               libjs-twitter-bootstrap,
+               python-all-dev (>= 2.6.6-3~),
+               python-matplotlib (>= 1.3.1),
+               python-nose,
+               python-numpy (>= 1.7.2),
+               python-pil (>= 1.7.8) | python-imaging,
+               python-scipy (>= 0.10),
+               python-networkx (>= 1.8),
+               python-setuptools,
+               python-six (>= 1.4),
+               python-sphinx (>= 1.3.0),
+               python3-all-dev,
+               python3-matplotlib (>= 1.3.1),
+               python3-nose,
+               python3-numpy (>= 1.7.2),
+               python3-pil (>= 1.7.8) | python3-imaging,
+               python3-scipy,
+               python3-networkx (>= 1.8),
+               python3-setuptools,
+               python3-six (>= 1.3.0),
+               xauth,
+               xvfb
+Standards-Version: 3.9.8
+Homepage: http://scikit-image.org
+Vcs-Browser: https://github.com/scikit-image/scikit-image
+Vcs-Git: https://github.com/scikit-image/scikit-image.git -b debian
+X-Python-Version: >= 2.6
+X-Python3-Version: >= 3.2
+
+Package: python-skimage
+Architecture: all
+Depends: python-numpy,
+         python-scipy (>= 0.10),
+         python-six (>= 1.4),
+         python-matplotlib (>= 1.3.1),
+         python-pil (>= 1.7.8) | python-imaging,
+         python-networkx (>= 1.8),
+         python-skimage-lib (>= ${source:Version}),
+         ${misc:Depends},
+         ${python:Depends}
+Recommends: python-nose,
+            python-qt4
+Suggests: python-opencv, python-skimage-doc
+Description: Python modules for image processing
+ scikit-image is a collection of image processing algorithms for
+ Python.  It performs tasks such as image loading, filtering,
+ morphology, segmentation, color conversions, and transformations.
+ .
+ This package provides the Python 2 module.
+
+Package: python3-skimage
+Architecture: all
+Depends: python3-numpy (>= 1.7.2),
+         python3-scipy (>= 0.10),
+         python3-six (>= 1.4),
+         python3-matplotlib (>= 1.3.1),
+         python3-pil (>= 1.7.8) | python3-imaging,
+         python3-networkx (>= 1.8),
+         python3-skimage-lib (>= ${source:Version}),
+         ${misc:Depends},
+         ${python3:Depends}
+Recommends: python3-nose
+Suggests: python-skimage-doc
+Description: Python 3 modules for image processing
+ scikit-image is a collection of image processing algorithms for
+ Python.  It performs tasks such as image loading, filtering,
+ morphology, segmentation, color conversions, and transformations.
+ .
+ This package provides the Python 3 module.
+
+Package: python-skimage-doc
+Architecture: all
+Section: doc
+Depends: ${misc:Depends}, ${sphinxdoc:Depends}
+Suggests: python-skimage
+Description: Documentation and examples for scikit-image
+ This package contains documentation and example scripts for
+ python-skimage.
+
+Package: python-skimage-lib
+Architecture: any
+Depends: python-numpy, ${misc:Depends}, ${python:Depends}, ${shlibs:Depends}
+Recommends: python-skimage
+Provides: ${python:Provides}
+XB-Python-Version: ${python:Versions}
+Description: Optimized low-level algorithms for scikit-image
+ This is an add-on package for python-skimage. It provides
+ optimized, low-level implementations of algorithms.
+ .
+ This package provides the Python 2 libraries.
+
+Package: python3-skimage-lib
+Architecture: any
+Depends: python3-numpy, ${misc:Depends}, ${python3:Depends}, ${shlibs:Depends}
+Recommends: python3-skimage
+Description: Optimized low-level algorithms for Python 3 scikit-image
+ This is an add-on package for python-skimage. It provides
+ optimized, low-level implementations of algorithms.
+ .
+ This package provides the Python 3 libraries.

@@ -1,0 +1,19 @@
+#!/bin/sh
+set -efu
+
+pys="$(py3versions -rv 2>/dev/null)"
+pkgbuild=${pkgbuild:-no}
+
+srcdir=$PWD
+
+for py in $pys; do
+    echo "=== python$py ==="
+    if [ "$pkgbuild" = "yes" ]; then
+        export PYTHONPATH="$srcdir/debian/tmp/usr/lib/python3/dist-packages"
+        cd "$srcdir/build/"
+    else
+        cd "$ADTTMP"
+    fi
+
+    xvfb-run -apython$py /usr/bin/nosetests3 -s -v skimage --exclude test_tools.py 2>&1
+done

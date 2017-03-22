@@ -1,0 +1,5 @@
+Tests: python2
+Depends: python-all, python-nose, python-skimage, python-pil | python-imaging, python-matplotlib, python-tk, python-networkx, xauth, xvfb
+
+Tests: python3
+Depends: python3-all, python3-nose, python3-skimage, python3-pil | python3-imaging, python3-matplotlib, python3-tk, python3-networkx, xauth, xvfb

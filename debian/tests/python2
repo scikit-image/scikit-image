@@ -1,0 +1,19 @@
+#!/bin/sh
+set -efu
+
+pys="$(pyversions -rv 2>/dev/null)"
+pkgbuild=${pkgbuild:-no}
+
+srcdir=$PWD
+
+for py in $pys; do
+    echo "=== python$py ==="
+    if [ "$pkgbuild" = "yes" ]; then
+        export PYTHONPATH="$srcdir/debian/tmp/usr/lib/python$py/dist-packages"
+        cd "$srcdir/build/"
+    else
+        cd "$ADTTMP"
+    fi
+
+    xvfb-run -a python$py /usr/bin/nosetests -s -v --exclude test_tools.py skimage 2>&1
+done

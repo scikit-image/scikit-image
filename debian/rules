@@ -1,0 +1,94 @@
+#!/usr/bin/make -f
+# -*- mode: makefile; coding: utf-8 -*-
+
+PACKAGE2_NAME = python-skimage
+PACKAGE3_NAME = python3-skimage
+PKG_TMP = $(CURDIR)/debian/tmp
+# don't optimize pngs, palette changes break tests and documented examples
+export NO_PNG_PKG_MANGLE=1
+
+PYVERS = $(shell pyversions -vr)
+PYVER = $(shell pyversions  -vd)
+PY3VERS = $(shell py3versions -vr)
+
+# upstream relies on signed chars
+export DEB_CFLAGS_MAINT_APPEND := -fsigned-char
+
+export MPLCONFIGDIR=$(CURDIR)/build
+export HOME=$(CURDIR)/build
+
+export http_proxy = http://127.0.9.1:9
+export https_proxy = http://127.0.9.1:9
+
+# Mega rule
+%:
+	dh $@ --with python2,python3,sphinxdoc --buildsystem python_distutils
+
+override_dh_clean:
+	rm -f install-stamp
+ifeq (,$(filter noclean,$(DEB_BUILD_OPTIONS)))
+	rm -rf build doc/build doc/auto_examples *-stamp skimage.egg-info
+	dh_clean
+endif
+
+# Assure Agg backend for matplotlib to avoid any possible complication
+override_dh_auto_configure:
+	mkdir -p $(MPLCONFIGDIR)
+	echo "backend : Agg" >| $(MPLCONFIGDIR)/matplotlibrc
+	dh_auto_configure
+
+# Build docs during install
+override_dh_auto_install: ${PYVERS:%=python-install%} ${PY3VERS:%=python-install%}
+	: # Build Documentation
+ifeq (,$(filter nodoc,$(DEB_BUILD_OPTIONS)))
+ifneq (,$(findstring -a,$(DH_INTERNAL_OPTIONS)))
+	: # not building documentation in -a
+else
+	export PYTHONPATH=$(PKG_TMP)/usr/lib/python$(PYVER)/dist-packages; \
+	 cd doc; test -d build/html || $(MAKE) html
+endif
+endif
+	touch install-stamp
+
+# Per Python version logic -- install, test, move .so into -lib
+python-install%:
+	python$* setup.py install --install-layout=deb --root=$(CURDIR)/debian/tmp
+
+python-test%: install-stamp
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	pkgbuild=yes debian/tests/python$*
+else
+        : # Skip unittests due to nocheck
+endif
+
+## remove .so libraries from main package, and call dh_numpy*
+_dh_python%: python-test%
+	-find debian/$(PACKAGE$*_NAME)/usr/lib -name "*.so" -delete;
+
+	dh_numpy$(*:2=) -p$(PACKAGE$*_NAME)-lib
+	dh_python$*
+
+override_dh_python2: _dh_python2
+override_dh_python3: _dh_python3
+
+## immediately useable documentation and exemplar scripts/data
+override_dh_compress:
+	dh_compress -X.py -X.html -X.pdf -X.css -X.jpg -X.txt -X.js -X.json -X.rtc
+
+override_dh_sphinxdoc:
+ifeq (,$(findstring nodoc,$(DEB_BUILD_OPTIONS)))
+ifneq (,$(findstring -a,$(DH_INTERNAL_OPTIONS)))
+	: # no documentation in -a -- surprised that sphinxdoc doesn't know that
+else
+	dh_sphinxdoc -ppython-skimage-doc
+endif
+endif
+
+override_dh_installdocs:
+	dh_installdocs -A CONTRIBUTORS.txt README.md CONTRIBUTING.txt TASKS.txt
+	dh_link -ppython-skimage-doc /usr/share/twitter-bootstrap/files/js/bootstrap.min.js \
+	    usr/share/doc/python-skimage-doc/html/_static/js/bootstrap.min.js
+	dh_link -ppython-skimage-doc /usr/share/twitter-bootstrap/files/css/bootstrap.min.css \
+	    usr/share/doc/python-skimage-doc/html/_static/css/bootstrap.min.css
+	dh_link -ppython-skimage-doc /usr/share/twitter-bootstrap/files/css/bootstrap-responsive.css \
+	    usr/share/doc/python-skimage-doc/html/_static/css/bootstrap-responsive.css
