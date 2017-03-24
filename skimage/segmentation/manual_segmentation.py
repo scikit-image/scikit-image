@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.patches import Polygon
+from matplotlib.collections import PatchCollection
 
 
 def manual(image):
@@ -37,7 +39,8 @@ def manual(image):
         raise TypeError('Only 2-D images or 3-D images supported.')
 
     manual.list_of_verts = []
-    manual.line_selections = []
+    manual.polygons_selection = []
+    manual.polygon_list = []
 
     _select_lasso(image)
 
@@ -74,15 +77,23 @@ def _select_lasso(image):
 
 def _onselect(verts):
     manual.list_of_verts.append(verts)
-    previous, = _select_lasso.ax.plot(*zip(*verts), linewidth=1)
-    manual.line_selections.append(previous)
+
+    polygon = Polygon(verts, True)
+    manual.polygon_list.append(polygon)
+
+    p = PatchCollection(manual.polygon_list, alpha=0.4)
+    polygon_object = _select_lasso.ax.add_collection(p)
+
+    manual.polygons_selection.append(polygon_object)
+
     plt.draw()
 
 
 def _undo(event):
     if len(manual.list_of_verts) > 0:
-        del manual.list_of_verts[-1]
-        manual.line_selections[-1].remove()
-        del manual.line_selections[-1]
+        manual.list_of_verts.remove(manual.list_of_verts[-1])
+        manual.polygons_selection[-1].remove()
+        manual.polygons_selection.remove(manual.polygons_selection[-1])
+        manual.polygon_list.remove(manual.polygon_list[-1])
     else:
         pass
