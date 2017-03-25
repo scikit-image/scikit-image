@@ -5,13 +5,17 @@ from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 
 
-def manual(image):
+def manual(image, speed_up=1):
     """Return a binary image based on the selections made with mouse clicks.
 
     Parameters
     ----------
     image : (M, 2) array
         Grayscale or RGB 2D image.
+
+    speed_up : int
+        Skips vertices in integer steps to speed up mask generation. This
+        must be a non-zero integer.
 
     Returns
     -------
@@ -20,7 +24,8 @@ def manual(image):
 
     Notes
     -----
-    Use the cursor to draw objects.
+    Use the cursor to draw objects. Increasing speed_up value will 
+    generate the mask faster, but the objects will be less smoother. 
 
     Examples
     --------
@@ -32,7 +37,6 @@ def manual(image):
     >>> io.show()
 
     """
-
     image = np.squeeze(image)
 
     if image.ndim not in (2, 3):
@@ -46,18 +50,19 @@ def manual(image):
 
     if image.ndim is 3:
         image = np.squeeze(image[:, :, :1])
-    mask = np.zeros_like(image)
+
+    mask = np.zeros(image.shape)
 
     yshape, xshape = image.shape
     y_grid, x_grid = np.mgrid[:yshape, :xshape]
     all_pixels = np.vstack((x_grid.ravel(), y_grid.ravel())).T
 
     for verts in manual.list_of_verts:
-        _path = matplotlib.path.Path(verts, closed=True)
+        verts_ = verts[::speed_up]
+        _path = matplotlib.path.Path(verts_, closed=True)
         _mask = _path.contains_points(all_pixels)
         _mask = _mask.reshape(image.shape)
         mask += _mask
-
     return mask >= 1
 
 
