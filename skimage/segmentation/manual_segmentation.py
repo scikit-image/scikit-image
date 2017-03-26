@@ -3,33 +3,32 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
+from ..draw import polygon
 
 
-def manual(image, speed_up=1):
+def manual(image, alpha=0.4):
     """Return a binary image based on the selections made with mouse clicks.
 
     Parameters
     ----------
-    image : (M, 2) array
-        Grayscale or RGB 2D image.
+    image : (M, N[, 3]) array
+        Grayscale or RGB image.
 
-    speed_up : int
-        Skips vertices in integer steps to speed up mask generation. This
-        must be a non-zero integer.
+    alpha : float or None
+        Transparancy value for polygons draw over the segments.
 
     Returns
     -------
-    mask : (M, 2) binary array
-        Segmented binary mask.
+    mask : (M, N) array
+        Boolean image with segmented regions.
 
     Notes
     -----
-    Use the cursor to draw objects. Increasing speed_up value will 
-    generate the mask faster, but the objects will be less smoother. 
+    Use the cursor to draw objects.
 
     Examples
     --------
-    >>> from skimage import data, segmentation
+    >>> from skimage import data, segmentation, io
     >>> camera = data.camera()
     >>> mask = segmentation.manual(camera)
     >>> # Use the cursor to draw objects
@@ -37,68 +36,58 @@ def manual(image, speed_up=1):
     >>> io.show()
 
     """
+
+    list_of_verts = []
+    polygons_drawn = []
+
+    def _on_select(verts):
+        list_of_verts.append(verts)
+
+        polygon = Polygon(verts, True)
+
+        p = PatchCollection([polygon], match_original=True, alpha=alpha)
+        polygon_object = ax.add_collection(p)
+        polygons_drawn.append(polygon_object)
+        plt.draw()
+
+    def _undo(event):
+        if len(list_of_verts) > 0:
+            list_of_verts.remove(list_of_verts[-1])
+
+            # Remove previous polygon object from the plot.
+            polygons_drawn[-1].remove()
+
+            # Removes latest polygon from a list of all polygon objects.
+            # This enables undo till the first drawn polygon.
+            polygons_drawn.remove(polygons_drawn[-1])
+
+        else:
+            pass
+
     image = np.squeeze(image)
 
     if image.ndim not in (2, 3):
         raise TypeError('Only 2-D images or 3-D images supported.')
 
-    manual.list_of_verts = []
-    manual.polygons_selection = []
-    manual.polygon_list = []
+    fig, ax = plt.subplots()
+    ax.imshow(image)
 
-    _select_lasso(image)
+    buttonpos = plt.axes([0.85, 0.5, 0.1, 0.075])
+    undo_button = matplotlib.widgets.Button(buttonpos, "Undo")
+    undo_button.on_clicked(_undo)
+
+    lasso = matplotlib.widgets.LassoSelector(ax, _on_select)
+    plt.show()
 
     if image.ndim is 3:
         image = np.squeeze(image[:, :, :1])
 
     mask = np.zeros(image.shape)
 
-    yshape, xshape = image.shape
-    y_grid, x_grid = np.mgrid[:yshape, :xshape]
-    all_pixels = np.vstack((x_grid.ravel(), y_grid.ravel())).T
+    for verts in list_of_verts:
+        pr = [r for r, c in verts]
+        pc = [c for r, c in verts]
+        rr, cc = polygon(pr, pc)
+        mask[cc, rr] = 1
 
-    for verts in manual.list_of_verts:
-        verts_ = verts[::speed_up]
-        _path = matplotlib.path.Path(verts_, closed=True)
-        _mask = _path.contains_points(all_pixels)
-        _mask = _mask.reshape(image.shape)
-        mask += _mask
     return mask >= 1
-
-
-def _select_lasso(image):
-    """Uses the LassoSelector widget from matplotlib
-    to crop freehand."""
-    fig, _select_lasso.ax = plt.subplots()
-    _select_lasso.ax.imshow(image)
-
-    buttonpos = plt.axes([0.85, 0.5, 0.1, 0.075])
-    undo_button = matplotlib.widgets.Button(buttonpos, "Undo")
-    undo_button.on_clicked(_undo)
-
-    lasso = matplotlib.widgets.LassoSelector(_select_lasso.ax, _onselect)
-    plt.show()
-
-
-def _onselect(verts):
-    manual.list_of_verts.append(verts)
-
-    polygon = Polygon(verts, True)
-    manual.polygon_list.append(polygon)
-
-    p = PatchCollection(manual.polygon_list, alpha=0.4)
-    polygon_object = _select_lasso.ax.add_collection(p)
-
-    manual.polygons_selection.append(polygon_object)
-
-    plt.draw()
-
-
-def _undo(event):
-    if len(manual.list_of_verts) > 0:
-        manual.list_of_verts.remove(manual.list_of_verts[-1])
-        manual.polygons_selection[-1].remove()
-        manual.polygons_selection.remove(manual.polygons_selection[-1])
-        manual.polygon_list.remove(manual.polygon_list[-1])
-    else:
-        pass
