@@ -1,6 +1,8 @@
 import numpy as np
+import scipy
 from skimage import data
 from skimage.color import rgb2gray
+from skimage.draw import circle_perimeter
 from skimage.filters import gaussian
 from skimage.segmentation import active_contour
 from numpy.testing import assert_equal, assert_allclose, assert_raises
@@ -104,6 +106,25 @@ def test_bad_input():
                             bc='wrong')
     assert_raises(ValueError, active_contour, img, init,
                             max_iterations=-15)
+
+
+def test_callback():
+    iterations = []
+
+    def cb(snake, it, dist):
+        iterations.append(it)
+
+    img = np.zeros((100, 100))
+    rr, cc = circle_perimeter(35, 45, 25)
+    img[rr, cc] = 1
+    img = gaussian(img, 2)
+    s = np.linspace(0, 2*np.pi, 100)
+    init = 50*np.array([np.cos(s), np.sin(s)]).T+50
+    snake = active_contour(img, init, callback=cb)
+
+    assert_equal(iterations,
+                 [10, 21, 32, 43, 54, 65, 76, 87, 98, 109,
+                  120, 131, 142, 153, 164, 175, 186, 197])
 
 
 if __name__ == "__main__":
