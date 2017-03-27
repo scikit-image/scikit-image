@@ -27,12 +27,14 @@ def manual(image, alpha=0.4, return_list=False):
         Transparancy value for polygons draw over the segments.
 
     return_list : bool (optional)
-        returns a list of maks with individual selections.
+        Return a list of mask with individual selections.
 
     Returns
     -------
-    mask : (M, N) array
-        Boolean image with segmented regions.
+    mask : array or list of arrays
+        * if return_list is True : list of (M, N) boolean images.
+        * if return_list is False:
+        (M, N) boolean image with segmented regions.
 
     Notes
     -----
