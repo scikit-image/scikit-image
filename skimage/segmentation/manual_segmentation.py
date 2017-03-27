@@ -14,7 +14,7 @@ def manual(image, alpha=0.4):
     image : (M, N[, 3]) array
         Grayscale or RGB image.
 
-    alpha : float or None
+    alpha : float or None (optional)
         Transparancy value for polygons draw over the segments.
 
     Returns
@@ -31,8 +31,11 @@ def manual(image, alpha=0.4):
     >>> from skimage import data, segmentation, io
     >>> camera = data.camera()
     >>> mask = segmentation.manual(camera)
+    # doctest: +SKIP
     >>> # Use the cursor to draw objects
+    # doctest: +SKIP
     >>> io.imshow(mask)
+    # doctest: +SKIP
     >>> io.show()
 
     """
@@ -73,16 +76,13 @@ def manual(image, alpha=0.4):
     ax.imshow(image)
 
     buttonpos = plt.axes([0.85, 0.5, 0.1, 0.075])
-    undo_button = matplotlib.widgets.Button(buttonpos, "Undo")
+    undo_button = matplotlib.widgets.Button(buttonpos, u'\u27F2')
     undo_button.on_clicked(_undo)
 
     lasso = matplotlib.widgets.LassoSelector(ax, _on_select)
     plt.show()
 
-    if image.ndim is 3:
-        image = np.squeeze(image[:, :, :1])
-
-    mask = np.zeros(image.shape)
+    mask = np.zeros(image.shape[:2])
 
     for verts in list_of_verts:
         pr = [r for r, c in verts]
