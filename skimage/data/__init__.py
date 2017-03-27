@@ -13,7 +13,7 @@ import os as _os
 import numpy as np
 
 from .. import data_dir
-from ..io import imread, use_plugin
+from ..io import imread, imread_collection, use_plugin
 from .._shared._warnings import expected_warnings
 from ._binary_blobs import binary_blobs
 from .. import img_as_bool
@@ -396,8 +396,8 @@ def hdr_images():
 
     Returns
     -------
-    ims : list
-        List containing three images.
+    ims : ImageCollection
+        Collection of images.
     exp : list
         List of exposure times in seconds.
 
@@ -410,8 +410,10 @@ def hdr_images():
     files = ['UNIS_EV-2.jpg',
              'UNIS_EV0.jpg',
              'UNIS_EV2.jpg']
+    # Join the file names with the data dir
+    files = [_os.path.join(data_dir, f) for f in files]
 
     exp = [1 / 1250., 1 / 320., 1 / 40.]
 
-    ims = [load(f) for f in files]
+    ims = imread_collection(files)
     return ims, exp

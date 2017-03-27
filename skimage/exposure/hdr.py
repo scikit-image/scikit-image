@@ -3,7 +3,7 @@ import numpy as np
 
 def get_radiance(images, exposure, radiance_map):
     """
-    Return the radiance for a series of images based upon a camera response
+    Return the radiance image for a series of images based upon a camera response
     function.
 
     Parameters
@@ -13,7 +13,7 @@ def get_radiance(images, exposure, radiance_map):
         (RGB, MxNx3).
     exposure : numpy 1D array
         Array of exposure times in seconds.
-    radiacenMap : numpy array
+    radiance_map : numpy array
         Array mapping the counts to radiance
 
     Returns
@@ -44,25 +44,28 @@ def get_radiance(images, exposure, radiance_map):
 
 def make_hdr(images, exposure, radiance_map, depth=16):
     """
-    Compute the HDR image from a series of images and a racianceMap.
+    Compute the HDR image from a series of images with a given radiance
+    mapping.
 
     Parameters
     ----------
-    images: list
-        List of images in the for of numpy arrays. Either grayscale or color
+    images: list or ImageCollection
+        List of images as numpy arrays. Either grayscale or color
         (RGB).
+        Can also be an ImageCollection
     exposure : numpy 1D array
-        Array of exposure times in seconds.
+        Array of exposure times in seconds. 
+        Images some times have these in the exif information.
     radiance_map : numpy array
         Array (idx) mapping counts to radiance value, if input is RGB this must
-        be Nx3.
+        be Nx3. See get_crf 
     depth : int, optional
         Pixel depth.
 
     Returns
     -------
     hdr : numpy array
-        The HDR image either grayscale or RGB depending on input in ln(E).
+        The HDR image, either grayscale or RGB depending on input, in ln(E).
 
     References
     ----------
@@ -304,5 +307,6 @@ def _weight_func_arr(intensity, depth=16):
 
     # This assumes Z_min = 0
     Iout = intensity.copy()
-    Iout[intensity > (2**depth / 2)] = (2**depth - 1) - intensity[intensity > (2**depth / 2)]
+    Iout[intensity > (2**depth / 2)] = (2**depth - 1) - \
+        intensity[intensity > (2**depth / 2)]
     return Iout

@@ -3,8 +3,8 @@
 HDR Image
 ===========
 
-A HDR (High Dynamic Range) image is a combination of bracketed images into one
-(a series of images taken with different exposure times).
+A HDR (High Dynamic Range) image is a combination of bracketed images (varying
+exposures) into one.
 
 In this example, we show the use of a series of images at different exposures to
 create a HDR image.
@@ -27,6 +27,7 @@ from matplotlib.colors import LogNorm
 from skimage.filters import rank
 from skimage.color import rgb2gray
 from skimage.io import imsave
+from cycler import cycler
 
 # Get example images
 ims, exp = data.hdr_images()
@@ -36,7 +37,12 @@ exp = np.array(exp)
 radiance_map = hdr.get_crf(ims, exp, depth=8, l=100)
 
 # Show radiance map
+plt.rc('axes', prop_cycle=(cycler('color', ['r', 'g', 'b'])))
+plt.title('Camera response function')
+plt.xlabel('Counts')
+plt.ylabel('Radiance')
 plt.plot(radiance_map)
+plt.legend(['Red', 'Green', 'Blue'])
 plt.show()
 
 # Make the HDR image
@@ -49,11 +55,15 @@ for ii in range(3):
     hdr_norm[:, :, ii] = hdr_im[:, :, ii] / norm
 
 
-fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 20))
+fig, axes = plt.subplots(nrows=1, ncols=2)
 # Show hdr image. This is going to be dark due to the range in the image
 axes[0].imshow(hdr_norm)
+axes[0].set_title("HDR image")
+axes[0].set_axis_off()
 # Show gamma adjusted hdr image.
 axes[1].imshow(adjust_gamma(hdr_norm, gamma=0.25))
+axes[1].set_title("HDR image gamma adjusted")
+axes[1].set_axis_off()
 plt.show()
 
 # Below follows a commented out example for saving the image as a hdr image
@@ -61,7 +71,7 @@ plt.show()
 # imsave(fname, hdr_norm.astype(np.float32), plugin='tifffile')
 
 
-# Plotting a histogram equalized  hdr image.
+# Plotting a histogram equalised  hdr image.
 # hdr_hist = np.zeros_like(hdr_norm)
 # for ii in range(3):
 #     hdr_hist[:, :, ii] = hdr_norm / (hdr_norm + 1)
