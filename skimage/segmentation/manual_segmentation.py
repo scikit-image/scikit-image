@@ -6,7 +6,16 @@ from matplotlib.collections import PatchCollection
 from ..draw import polygon
 
 
-def manual(image, alpha=0.4):
+def _mask_from_verts(verts, shape):
+    mask = np.zeros(shape, dtype=bool)
+    pr = [y for x, y in verts]
+    pc = [x for x, y in verts]
+    rr, cc = polygon(pr, pc, shape)
+    mask[rr, cc] = 1
+    return mask
+
+
+def manual(image, alpha=0.4, return_list=False):
     """Return a binary image based on the selections made with mouse clicks.
 
     Parameters
@@ -16,6 +25,9 @@ def manual(image, alpha=0.4):
 
     alpha : float or None (optional)
         Transparancy value for polygons draw over the segments.
+
+    return_list : bool (optional)
+        returns a list of maks with individual selections.
 
     Returns
     -------
@@ -30,13 +42,9 @@ def manual(image, alpha=0.4):
     --------
     >>> from skimage import data, segmentation, io
     >>> camera = data.camera()
-    >>> mask = segmentation.manual(camera)
-    # doctest: +SKIP
-    >>> # Use the cursor to draw objects
-    # doctest: +SKIP
-    >>> io.imshow(mask)
-    # doctest: +SKIP
-    >>> io.show()
+    >>> mask = segmentation.manual(camera)  # doctest: +SKIP
+    >>> io.imshow(mask)  # doctest: +SKIP
+    >>> io.show()  # doctest: +SKIP
 
     """
 
@@ -80,14 +88,15 @@ def manual(image, alpha=0.4):
     undo_button.on_clicked(_undo)
 
     lasso = matplotlib.widgets.LassoSelector(ax, _on_select)
-    plt.show()
+    plt.show(block=True)
 
-    mask = np.zeros(image.shape[:2])
-
-    for verts in list_of_verts:
-        pr = [r for r, c in verts]
-        pc = [c for r, c in verts]
-        rr, cc = polygon(pr, pc)
-        mask[cc, rr] = 1
+    if return_list is False:
+        mask = np.zeros(image.shape[:2], dtype=bool)
+        for verts in list_of_verts:
+            mask += _mask_from_verts(verts, image.shape[:2])
+    else:
+        mask = np.array(
+            [_mask_from_verts(verts,
+                              image.shape[:2]) for verts in list_of_verts])
 
     return mask >= 1
