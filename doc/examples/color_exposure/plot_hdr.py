@@ -22,21 +22,21 @@ import matplotlib.pyplot as plt
 
 from skimage.exposure import adjust_gamma, hdr
 from skimage import data
-from cycler import cycler
 
 # Get example images
 ims, exp = data.hdr_images()
 exp = np.array(exp)
 
-# Get radiance map (how the radiance maps to the counts for each channel
+# Get radiance map (how the radiance maps to the counts for each channel)
 radiance_map = hdr.get_crf(ims, exp, depth=8, l=100)
 
 # Show radiance map
-plt.rc('axes', prop_cycle=(cycler('color', ['r', 'g', 'b'])))
 plt.title('Camera response function')
 plt.xlabel('Counts')
 plt.ylabel('Radiance')
-plt.plot(radiance_map)
+colors = ['r', 'g', 'b']
+for ii in range(radiance_map.shape[1]):
+    plt.plot(radiance_map[:, ii], colors[ii])
 plt.legend(['Red', 'Green', 'Blue'], loc='best')
 plt.show()
 
