@@ -75,7 +75,7 @@ def manual(image, alpha=0.4):
     fig, ax = plt.subplots()
     ax.imshow(image)
 
-    buttonpos = plt.axes([0.85, 0.5, 0.1, 0.075])
+    buttonpos = plt.axes([0.85, 0.45, 0.075, 0.075])
     undo_button = matplotlib.widgets.Button(buttonpos, u'\u27F2')
     undo_button.on_clicked(_undo)
 
