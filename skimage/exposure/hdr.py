@@ -3,8 +3,8 @@ import numpy as np
 
 def get_radiance(images, exposure, radiance_map):
     """
-    Return the radiance image for a series of images based upon a camera response
-    function.
+    Return the radiance image for a series of images based upon a camera
+    response function.
 
     Parameters
     ----------
@@ -24,7 +24,7 @@ def get_radiance(images, exposure, radiance_map):
 
     den = np.ones(images[0].shape)
     num = np.zeros(images[0].shape)
-    wf = np.vectorized(_weight_func)
+    wf = np.vectorize(_weight_func)
     for idx, im in enumerate(images):
         gij = im.copy()
         # For colour
@@ -54,11 +54,11 @@ def make_hdr(images, exposure, radiance_map, depth=16):
         (RGB).
         Can also be an ImageCollection
     exposure : numpy 1D array
-        Array of exposure times in seconds. 
+        Array of exposure times in seconds.
         Images some times have these in the exif information.
     radiance_map : numpy array
         Array (idx) mapping counts to radiance value, if input is RGB this must
-        be Nx3. See get_crf 
+        be Nx3. See get_crf
     depth : int, optional
         Pixel depth.
 
