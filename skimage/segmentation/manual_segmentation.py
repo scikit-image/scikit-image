@@ -23,18 +23,19 @@ def manual(image, alpha=0.4, return_list=False):
     image : (M, N[, 3]) array
         Grayscale or RGB image.
 
-    alpha : float or None (optional)
+    alpha : float, optional
         Transparancy value for polygons draw over the segments.
 
-    return_list : bool (optional)
-        Return a list of mask with individual selections.
+    return_list : bool, optional
+        If True, return a list of mask with individual selections.
 
     Returns
     -------
     mask : array or list of arrays
-        * if return_list is True : list of (M, N) boolean images.
-        * if return_list is False:
-        (M, N) boolean image with segmented regions.
+
+        * if `return_list` is True : list of (M, N) boolean images.
+        * if `return_list` is False: (M, N) boolean image with segmented 
+          regions.
 
     Notes
     -----
