@@ -18,7 +18,8 @@ How to make a new release of ``skimage``
   3. Copy ``doc/release/release_template.txt`` to
      ``doc/release/release_dev.txt`` for the next release.
 
-- Update the version number in ``skimage/__init__.py`` and ``bento.info`` and commit
+- Update the version number in ``skimage/__init__.py`` and ``bento.info`` and
+  commit.
 
 - Update the docs:
 
