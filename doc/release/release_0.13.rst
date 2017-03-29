@@ -22,15 +22,19 @@ This release is the result of a year of work, with over 200 pull requests by
 82 contributors. Highlights include:
 
 - Improved n-dimensional image support. This release adds nD support to:
+
   * ``regionprops`` computation for centroids (#2083)
   * ``segmentation.clear_border`` (#2087)
   * Hessian matrix (#2194)
+
 - In addition, the following new functions support nD images:
+
   * new wavelet denoising function, ``restoration.denoise_wavelet``
     (#1833, #2190, #2238, #2240, #2241, #2242, #2462)
   * new thresholding functions, ``filters.threshold_sauvola`` and
     ``filters.threshold_niblack`` (#2266, #2441)
   * new local maximum, local minimum, hmaxima, hminima functions (#2449)
+
 - Grey level co-occurrence matrix (GLCM) now works with uint16 images
 - ``filters.try_all_threshold`` to rapidly see output of various thresholding
   methods
