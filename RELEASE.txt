@@ -3,6 +3,9 @@ How to make a new release of ``skimage``
 
 - Check ``TODO.txt`` for any outstanding tasks.
 
+- Branch v<major>.<minor>.x from master. You will make your changes on this
+  branch and then cherry-pick them as appropriate to master.
+
 - Update release notes.
 
   1. Review and cleanup ``doc/release/release_dev.txt``
