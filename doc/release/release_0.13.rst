@@ -337,7 +337,7 @@ Pull requests merged in this release
 - [MRG+1] more closesly match the BayesShrink paper in _wavelet_threshold (#2241)
 - Remove usages of ``subplots_adjust`` (#2289)
 - [MRG+1] Change documentation page favicon (#2291)
-- [MRG+1] TST: prefer assert_ from numpy.testing over assert (#2298)
+- [MRG+1] TST: prefer ``assert_`` from numpy.testing over assert (#2298)
 - TSTFIX: Bug fix for development version of scipy (#2302)
 - Enhance ``compare_ssim`` docstring (#2314)
 - Added the missing 'grey2rgb' function. (#2316)
@@ -443,5 +443,5 @@ Pull requests merged in this release
 - NEW: add shannon entropy (#2416)
 - Fix typo in ylabel of GLCM demo (#2576)
 - Detection of local extrema from morphology (#2449)
-- Add extrema functions to __init__ (#2588)
+- Add extrema functions to ``__init__`` (#2588)
 
