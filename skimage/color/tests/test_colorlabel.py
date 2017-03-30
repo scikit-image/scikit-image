@@ -2,9 +2,18 @@ import itertools
 
 import numpy as np
 from numpy import testing
+from skimage.color.colorlabel import label_colormap
 from skimage.color.colorlabel import label2rgb
 from numpy.testing import (assert_array_almost_equal as assert_close,
                            assert_array_equal, assert_warns)
+
+
+def test_label_colormap():
+    colormap = label_colormap(4)
+    assert_close(colormap[0], [0, 0, 0])
+    assert_close(colormap[1], [0.5, 0, 0], decimal=1)
+    assert_close(colormap[2], [0, 0.5, 0], decimal=1)
+    assert_close(colormap[3], [0.5, 0.5, 0], decimal=1)
 
 
 def test_shape_mismatch():

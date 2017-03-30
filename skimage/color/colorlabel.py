@@ -11,7 +11,7 @@ import six
 from six.moves import zip
 
 
-__all__ = ['color_dict', 'label2rgb', 'DEFAULT_COLORS']
+__all__ = ['color_dict', 'label_colormap', 'label2rgb', 'DEFAULT_COLORS']
 
 
 DEFAULT_COLORS = ('red', 'blue', 'yellow', 'magenta', 'green',
@@ -72,6 +72,39 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
     color_cycle = itertools.chain(bg_color, color_cycle)
 
     return mapped_labels, color_cycle
+
+
+def label_colormap(n_labels):
+    """Returns appropriate colormap for the specified number of labels.
+
+    Parameters
+    ----------
+    n_labels: int
+        Number of labels.
+
+    Returns
+    -------
+    colormap: array of float, shape (n_labels, 3)
+        Colormap generated for the specified number of labels.
+    """
+
+    def bitget(byteval, idx):
+        return ((byteval & (1 << idx)) != 0)
+
+    colormap = np.zeros((n_labels, 3))
+    for i in six.moves.range(0, n_labels):
+        id = i
+        r, g, b = 0, 0, 0
+        for j in six.moves.range(0, 8):
+            r = np.bitwise_or(r, (bitget(id, 0) << 7-j))
+            g = np.bitwise_or(g, (bitget(id, 1) << 7-j))
+            b = np.bitwise_or(b, (bitget(id, 2) << 7-j))
+            id = (id >> 3)
+        colormap[i, 0] = r
+        colormap[i, 1] = g
+        colormap[i, 2] = b
+    colormap = colormap.astype(np.float32) / 255
+    return colormap
 
 
 def label2rgb(label, image=None, colors=None, alpha=0.3,
