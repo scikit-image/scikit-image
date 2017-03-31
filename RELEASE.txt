@@ -11,7 +11,8 @@ make a PR to update these notes after you are done with the release. ;-)
   you will make your changes gearing up for release, and cherry-pick them as
   appropriate to master.
 
-- In master, update the version to the next ``-dev`` version, commit, and push.
+- In the master branch, update the version number in ``skimage/__init__.py``
+  and ``bento.info`` to the next ``-dev`` version, commit, and push.
 
 - Back on the release branch, update the release notes:
 
