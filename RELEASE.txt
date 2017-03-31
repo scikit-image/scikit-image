@@ -53,6 +53,8 @@ make a PR to update these notes after you are done with the release. ;-)
 
    git push --tags origin master
 
+  (or ``git push --tags upstream master``, depending on your workflow.)
+
 - Publish on PyPi::
 
    python setup.py register
