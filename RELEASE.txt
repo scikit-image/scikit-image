@@ -3,19 +3,26 @@ How to make a new release of ``skimage``
 
 - Check ``TODO.txt`` for any outstanding tasks.
 
-- Branch v<major>.<minor>.x from master. You will make your changes on this
-  branch and then cherry-pick them as appropriate to master.
+- Branch v<major>.<minor>.x from master. This is the "release branch", where
+  you will make your changes gearing up for release, and cherry-pick them as
+  appropriate to master.
 
-- Update release notes.
+- In master, update the version to the next ``-dev`` version, commit, and push.
 
-  1. Review and cleanup ``doc/release/release_dev.txt``
+- Back on the release branch, update the release notes:
 
-     - To show a list of merges and contributors, run
-       ``doc/release/contribs.py <tag of prev release>``.
+  1. Review and cleanup ``doc/release/release_dev.txt``.
 
-  2. Rename to ``doc/release/release_X.txt``
+  2. Make a list of merges and contributors by running
+     ``doc/release/contribs.py <tag of previous release>``.
 
-  3. Copy ``doc/release/release_template.txt`` to
+  3. Paste this list at the end of the ``release_dev.txt``. Scan the PR titles
+     for highlights, deprecations, and API changes, and mention these in the
+     relevant sections of the notes.
+
+  4. Rename to ``doc/release/release_<major>.<minor>.txt``
+
+  5. Copy ``doc/release/release_template.txt`` to
      ``doc/release/release_dev.txt`` for the next release.
 
 - Update the version number in ``skimage/__init__.py`` and ``bento.info`` and
