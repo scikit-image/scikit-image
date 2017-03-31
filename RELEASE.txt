@@ -43,7 +43,7 @@ make a PR to update these notes after you are done with the release. ;-)
 
 - Add the version number as a tag in git::
 
-   git tag -s v0.X.0
+   git tag -s [-u <key-id>] v<minor>.<major>.0
 
   (If you do not have a gpg key, use -m instead; it is important for
   Debian packaging that the tags are annotated)
