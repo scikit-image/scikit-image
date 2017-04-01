@@ -10,6 +10,8 @@ from .._shared.utils import skimage_deprecation, warn
 
 __all__ = ['compare_ssim']
 
+__all__ = ['compare_ssim']
+
 
 def compare_ssim(X, Y, win_size=None, gradient=False,
                  data_range=None, multichannel=False, gaussian_weights=False,
