@@ -10,6 +10,8 @@ of the hierarchical queue provided in heap_general.pyx
 
 import numpy as np
 from libc.math cimport sqrt
+from lxml.html.builder import AREA
+from __builtin__ import True
 
 cimport numpy as np
 cimport cython
@@ -21,21 +23,54 @@ ctypedef np.uint64_t DTYPE_UINT64_t
 ctypedef np.int64_t DTYPE_INT64_t
 ctypedef np.uint8_t DTYPE_BOOL_t
 
-temp_folder = '/Users/twalter/src/area_closing_test'
+#from numpy cimport uint8_t, uint16_t, double_t
 
 
+ctypedef fused dtype_t:
+    np.uint8_t
+    np.uint16_t
+    np.uint32_t
+    np.uint64_t
+    np.int8_t
+    np.int16_t
+    np.int32_t
+    np.int64_t
+    np.float32_t
+    np.float64_t
+
+    
 include "heap_watershed.pxi"
 include "util.pxi"
 
-cdef struct Area:
+cdef struct OLArea:
     DTYPE_UINT64_t area
     DTYPE_UINT64_t equivalent_label
-    DTYPE_FLOAT64_t value_of_min
-    DTYPE_FLOAT64_t stop_level
 
 
+cdef class Area:
+    cdef DTYPE_UINT64_t area 
+    cdef DTYPE_UINT64_t equivalent_label
+    
+    cdef void increment(self):
+        self.area += 1
+        return
+        
+    cdef bool greater(self, Area other):
+        if self.area >= other.area:
+            return True
+        else:
+            return False
+    
+    cdef void fusion(self, Area other):
+        self.area += other.area 
+        other.equivalent_label = self.equivalent_label
+        return
+    
+    
+        
+    
 @cython.boundscheck(False)
-def area_closing(DTYPE_FLOAT64_t[::1] image,
+def area_closing(dtype_t[::1] image, #DTYPE_FLOAT64_t[::1] image,
                  DTYPE_UINT64_t area_threshold,
                  DTYPE_UINT64_t[::1] label_img,
                  DTYPE_INT32_t[::1] structure,
@@ -43,7 +78,7 @@ def area_closing(DTYPE_FLOAT64_t[::1] image,
                  np.int32_t[::1] strides,
                  DTYPE_FLOAT64_t eps,
                  np.double_t compactness,
-                 DTYPE_FLOAT64_t[::1] output,
+                 dtype_t[::1] output, #DTYPE_FLOAT64_t[::1] output,
                  ):
     """Perform criteria based closings using.
 
@@ -92,17 +127,21 @@ def area_closing(DTYPE_FLOAT64_t[::1] image,
     cdef DTYPE_UINT64_t equ_l = 0
     cdef DTYPE_UINT64_t label1 = 0
     cdef DTYPE_UINT64_t label2 = 0
-    cdef DTYPE_FLOAT64_t min_val, max_val;
-    cdef DTYPE_FLOAT64_t value;
-    cdef DTYPE_FLOAT64_t level_before=0.0;
+
+    cdef dtype_t min_val, max_val;
+    cdef dtype_t value;
+    cdef dtype_t level_before;
 
     # hierarchical queue for the flooding
     cdef Heap *hp = <Heap *> heap_from_numpy2()
 
     # array for characterization of minima
     cdef int number_of_minima = np.max(label_img) + 1
-    cdef Area* area_array = <Area *>malloc(sizeof(Area) * number_of_minima)
-    cdef Area[:] area_vec = <Area[:number_of_minima]> area_array
+    cdef Area* area_vec = <Area *>malloc(sizeof(Area) * number_of_minima)
+
+    # type dependent arrays (cannot be part of the structure due to cython limitation)
+    cdef dtype_t *stop_level = <dtype_t *>malloc(sizeof(dtype_t) * number_of_minima)
+    cdef dtype_t *value_of_min = <dtype_t *>malloc(sizeof(dtype_t) * number_of_minima)
 
     min_val = np.min(image)
     max_val = np.max(image)
@@ -116,14 +155,13 @@ def area_closing(DTYPE_FLOAT64_t[::1] image,
         value = image[i]
 
         # initialization of the criteria vector
-#        area_vec[l].area += 1
         area_vec[l].equivalent_label = l
-        area_vec[l].value_of_min = value
-        area_vec[l].stop_level = max_val
         area_vec[l].area = 0
+        stop_level[l] = max_val
+        value_of_min[l] = value
 
         # queue initialization
-        elem.value = value
+        elem.value = <cnp.float64_t>value
         elem.age = 0
         elem.index = i
         elem.source = i
@@ -135,15 +173,17 @@ def area_closing(DTYPE_FLOAT64_t[::1] image,
     while hp.items > 0:
         heappop(hp, &elem)
 
+        value = <dtype_t>elem.value
+
         # check all lakes and determine the stop levels if needed.
-        if elem.value > level_before + eps:
+        if value > level_before + eps:
             for l in range(number_of_minima):
                 equ_l = area_vec[l].equivalent_label
                 while equ_l != area_vec[equ_l].equivalent_label:
                     equ_l = area_vec[equ_l].equivalent_label
-                if (area_vec[equ_l].area >= area_threshold and area_vec[l].stop_level >= max_val):
-                    area_vec[l].stop_level = level_before
-            level_before = elem.value
+                if (area_vec[equ_l].area >= area_threshold and stop_level[l] >= max_val):
+                    stop_level[l] = level_before
+            level_before = <dtype_t>elem.value
 
         if label_img[elem.index] and elem.index != elem.source:
             # non-marker, already visited from another neighbor
@@ -155,7 +195,7 @@ def area_closing(DTYPE_FLOAT64_t[::1] image,
             label1 = area_vec[label1].equivalent_label
 
         # if the criterion is met, nothing happens
-        if area_vec[label1].stop_level < max_val:
+        if stop_level[label1] < max_val:
             continue
 
         # the non-labeled pixel from the queue is marked with the
@@ -200,9 +240,9 @@ def area_closing(DTYPE_FLOAT64_t[::1] image,
             # the neighbor has no label yet.
             # it is therefore added to the queue.
             age += 1
-            new_elem.value = image[index]
+            new_elem.value = <cnp.float64_t>image[index]
             if compactness > 0:
-                new_elem.value += (compactness *
+                new_elem.value += <cnp.float64_t>(compactness *
                                    euclid_dist(index, elem.source, strides))
             new_elem.age = age
             new_elem.index = index
@@ -215,8 +255,12 @@ def area_closing(DTYPE_FLOAT64_t[::1] image,
     for i in range(len(label_img)):
         label1 = label_img[i]
         if label_img[i] > 0:
-            output[i] = area_vec[label1].stop_level
+            output[i] = stop_level[label1]
         else:
             output[i] = image[i]
+
+    free(stop_level)
+    free(value_of_min)
+    free(area_vec)
 
 

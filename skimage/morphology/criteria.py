@@ -56,9 +56,6 @@ def area_closing(image, area_threshold, mask=None, connectivity=1,
     flat_neighborhood = _compute_neighbors(image, connectivity, offset)
     image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
 
-    pdb.set_trace()
-    
-    #pdb.set_trace()
     _criteria.area_closing(image.ravel(),
                            area_threshold,
                            seeds.ravel(),
@@ -70,7 +67,7 @@ def area_closing(image, area_threshold, mask=None, connectivity=1,
                            output.ravel()
                            )
     output = crop(output, 1, copy=True)
-    pdb.set_trace()
+
     return(output)
 
 
