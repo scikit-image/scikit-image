@@ -75,54 +75,60 @@ def manual(image, alpha=0.4, return_masks=False, draw_lines=False):
 
     def _draw_lines(event):
         # Do not record click events from pressing the Undo button.
-        if x_b < event.x < x_B and y_b < event.y < y_B:
-            pass
+        if event.inaxes is buttonpos:
+            return
+
+        # Do not record click events when toolbar is active.
+        if fig.canvas.manager.toolbar._active is not None:
+            return
+
+        # Do not record click events outside axis.
+        if event.inaxes is None:
+            return
 
         elif event.button == 1:  # Left click
-            if event.inaxes is not None:  # If not clicked outside axes
-                temp_list.append([event.xdata, event.ydata])
+            temp_list.append([event.xdata, event.ydata])
 
-                # Remove previously drawn preview polygon if any.
-                if len(preview_polygon_drawn) > 0:
-                    preview_polygon_drawn[-1].remove()
-                    preview_polygon_drawn.remove(preview_polygon_drawn[-1])
+            # Remove previously drawn preview polygon if any.
+            if len(preview_polygon_drawn) > 0:
+                preview_polygon_drawn[-1].remove()
+                preview_polygon_drawn.remove(preview_polygon_drawn[-1])
 
-                # Preview polygon with selected vertices.
+            # Preview polygon with selected vertices.
+            polygon = _draw_polygon(temp_list, alpha=alpha/1.2)
+            preview_polygon_drawn.append(polygon)
+
+        elif event.button == 2:  # Middle click
+            if len(temp_list) > 1:
+
+                # Remove the previous vertice and update preview polygon
+                temp_list.remove(temp_list[-1])
+                preview_polygon_drawn[-1].remove()
+                preview_polygon_drawn.remove(preview_polygon_drawn[-1])
+
                 polygon = _draw_polygon(temp_list, alpha=alpha/1.2)
                 preview_polygon_drawn.append(polygon)
 
-        elif event.button == 2:  # Middle click
-            if event.inaxes is not None:
-                if len(temp_list) > 1:
-                    # Remove the previous vertice and update preview polygon
-                    temp_list.remove(temp_list[-1])
-                    preview_polygon_drawn[-1].remove()
-                    preview_polygon_drawn.remove(preview_polygon_drawn[-1])
-                    polygon = _draw_polygon(temp_list, alpha=alpha/1.2)
-                    preview_polygon_drawn.append(polygon)
-
-                else:
-                    pass
+            else:
+                return
 
         elif event.button == 3:  # Right click
             if len(temp_list) is 0:
-                pass
+                return
 
-            elif event.inaxes is not None:
-                # Store the vertices of the polygon as shown in preview.
-                # Redraw polygon and store it in polygons_drawn so that
-                # `_undo` works correctly.
+            # Store the vertices of the polygon as shown in preview.
+            # Redraw polygon and store it in polygons_drawn so that
+            # `_undo` works correctly.
+            list_of_verts.append(list(temp_list))
+            polygon_object = _draw_polygon(list_of_verts[-1])
+            polygons_drawn.append(polygon_object)
 
-                list_of_verts.append(list(temp_list))
-                polygon_object = _draw_polygon(list_of_verts[-1])
-                polygons_drawn.append(polygon_object)
+            # Empty the temporary variables.
+            preview_polygon_drawn[-1].remove()
+            preview_polygon_drawn.remove(preview_polygon_drawn[-1])
+            del temp_list[:]
 
-                # Empty the temporary variables.
-                preview_polygon_drawn[-1].remove()
-                preview_polygon_drawn.remove(preview_polygon_drawn[-1])
-                del temp_list[:]
-
-                plt.draw()
+            plt.draw()
 
     def _on_select(verts):
         list_of_verts.append(verts)
@@ -161,10 +167,6 @@ def manual(image, alpha=0.4, return_masks=False, draw_lines=False):
         plt.suptitle(
             "Left click to select vertex. Right click to confirm vertices.\
         \nMiddle click to undo previous vertex.")
-
-        # Coords for the button, so when pressed the events
-        # can be ignored when draw_lines is True.
-        (x_b, y_b), (x_B, y_B) = undo_button.label.clipbox.get_points()
 
         cid = fig.canvas.mpl_connect('button_press_event', _draw_lines)
 
