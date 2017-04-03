@@ -134,6 +134,15 @@ point to the most recent release. You can do this by following these steps:
 Debian
 ------
 
+The below instructions remain here for completeness. However, the Debian
+scientific team has kindly taken over package maintenance. Simply follow the
+procedure described at https://www.debian.org/Bugs/Reporting to report a "bug"
+that there is a new version of scikit-image out (specifying the version
+number), with severity set to "Wishlist".
+
+If you want to take matters into your own hands for some reason, follow the
+instructions detailed below to cut a Debian release yourself.
+
 - Tag the release as per instructions above.
 - git checkout debian
 - git merge v0.x.x
