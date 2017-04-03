@@ -102,6 +102,35 @@ make a PR to update these notes after you are done with the release. ;-)
 - Update the version and the release date on wikipedia
   https://en.wikipedia.org/wiki/Scikit-image
 
+Conda-forge
+-----------
+
+A scikit-image build recipe resides at
+http://github.com/conda-forge/scikit-image-feedstock. You should update it to
+point to the most recent release. You can do this by following these steps:
+
+- Fork the repository at http://github.com/conda-forge/scikit-image-feedstock,
+  and clone it to your machine.
+- Sprout a new branch, e.g. ``v<major>.<minor>``.
+- Find out the SHA256 hash of the source distribution. You can find this at
+  https://pypi.org/project/scikit-image/, or use the following commands:
+
+  - ``sha256sum path/to/scikit-image-*.tar.gz`` (Linux)
+  - ``shasum -a 256 dist/scikit-image-*.tar.gz`` (macOS)
+  - ``CertUtil -hashfile dist\scikit-image-*.tar.gz SHA256`` (Windows)
+
+- Edit the file ``recipe/meta.yaml``:
+
+  - Update the version number on the first line.
+  - Update the SHA256 value on line 10.
+  - If necessary, reset the build number to 0. (line 13)
+  - Update any requirements in the appropriate sections (build or run).
+    Note: don't remove ``numpy x.x``. This tells conda-smithy, conda-forge's
+    build system, that the library must be linked against NumPy at build time.
+
+- Commit the changes, push to your fork, and submit a pull request to the
+  upstream repo.
+
 Debian
 ------
 
