@@ -15,7 +15,7 @@ def _mask_from_verts(verts, shape):
     return mask
 
 
-def manual(image, alpha=0.4, return_list=False):
+def manual(image, alpha=0.4, return_masks=False, draw_lines=False):
     """Return a binary image based on the selections made with mouse clicks.
 
     Parameters
@@ -26,15 +26,23 @@ def manual(image, alpha=0.4, return_list=False):
     alpha : float, optional
         Transparancy value for polygons draw over the segments.
 
-    return_list : bool, optional
+    return_masks : bool, optional
         If True, return a list of mask with individual selections.
+
+    draw_lines : bool, optional
+        If True, select atleast three points to define the edges
+        of a polygon.
+
+        * Left click to select a point as vertice.
+        * Middle click to undo previously selected vertice.
+        * Right click to confirm the selected points as vertices of a polygon.
 
     Returns
     -------
     mask : array or list of arrays
 
-        * if `return_list` is True : list of (M, N) boolean images.
-        * if `return_list` is False: (M, N) boolean image with segmented 
+        * if `return_masks` is True : list of (M, N) boolean images.
+        * if `return_masks` is False: (M, N) boolean image with segmented
           regions.
 
     Notes
@@ -54,13 +62,71 @@ def manual(image, alpha=0.4, return_list=False):
     list_of_verts = []
     polygons_drawn = []
 
+    temp_list = []
+    preview_polygon_drawn = []
+
+    def _draw_polygon(verts, alpha=alpha):
+        polygon = Polygon(verts, closed=True)
+        p = PatchCollection(
+            [polygon], match_original=True, alpha=alpha)
+        polygon_object = ax.add_collection(p)
+        plt.draw()
+        return polygon_object
+
+    def _draw_lines(event):
+        # Do not record click events from pressing the Undo button.
+        if x_b < event.x < x_B and y_b < event.y < y_B:
+            pass
+
+        elif event.button == 1:  # Left click
+            if event.inaxes is not None:  # If not clicked outside axes
+                temp_list.append([event.xdata, event.ydata])
+
+                # Remove previously drawn preview polygon if any.
+                if len(preview_polygon_drawn) > 0:
+                    preview_polygon_drawn[-1].remove()
+                    preview_polygon_drawn.remove(preview_polygon_drawn[-1])
+
+                # Preview polygon with selected vertices.
+                polygon = _draw_polygon(temp_list, alpha=alpha/1.2)
+                preview_polygon_drawn.append(polygon)
+
+        elif event.button == 2:  # Middle click
+            if event.inaxes is not None:
+                if len(temp_list) > 1:
+                    # Remove the previous vertice and update preview polygon
+                    temp_list.remove(temp_list[-1])
+                    preview_polygon_drawn[-1].remove()
+                    preview_polygon_drawn.remove(preview_polygon_drawn[-1])
+                    polygon = _draw_polygon(temp_list, alpha=alpha/1.2)
+                    preview_polygon_drawn.append(polygon)
+
+                else:
+                    pass
+
+        elif event.button == 3:  # Right click
+            if len(temp_list) is 0:
+                pass
+
+            elif event.inaxes is not None:
+                # Store the vertices of the polygon as shown in preview.
+                # Redraw polygon and store it in polygons_drawn so that
+                # `_undo` works correctly.
+
+                list_of_verts.append(list(temp_list))
+                polygon_object = _draw_polygon(list_of_verts[-1])
+                polygons_drawn.append(polygon_object)
+
+                # Empty the temporary variables.
+                preview_polygon_drawn[-1].remove()
+                preview_polygon_drawn.remove(preview_polygon_drawn[-1])
+                del temp_list[:]
+
+                plt.draw()
+
     def _on_select(verts):
         list_of_verts.append(verts)
-
-        polygon = Polygon(verts, True)
-
-        p = PatchCollection([polygon], match_original=True, alpha=alpha)
-        polygon_object = ax.add_collection(p)
+        polygon_object = _draw_polygon(verts)
         polygons_drawn.append(polygon_object)
         plt.draw()
 
@@ -76,7 +142,7 @@ def manual(image, alpha=0.4, return_list=False):
             polygons_drawn.remove(polygons_drawn[-1])
 
         else:
-            pass
+            return
 
     image = np.squeeze(image)
 
@@ -88,12 +154,27 @@ def manual(image, alpha=0.4, return_list=False):
 
     buttonpos = plt.axes([0.85, 0.45, 0.075, 0.075])
     undo_button = matplotlib.widgets.Button(buttonpos, u'\u27F2')
+
     undo_button.on_clicked(_undo)
 
-    lasso = matplotlib.widgets.LassoSelector(ax, _on_select)
+    if draw_lines is True:
+        plt.suptitle(
+            "Left click to select vertex. Right click to confirm vertices.\
+        \nMiddle click to undo previous vertex.")
+
+        # Coords for the button, so when pressed the events
+        # can be ignored when draw_lines is True.
+        (x_b, y_b), (x_B, y_B) = undo_button.label.clipbox.get_points()
+
+        cid = fig.canvas.mpl_connect('button_press_event', _draw_lines)
+
+    else:
+        plt.suptitle("Draw around an object to select for mask generation.")
+        lasso = matplotlib.widgets.LassoSelector(ax, _on_select)
+
     plt.show(block=True)
 
-    if return_list is False:
+    if return_masks is False:
         mask = np.zeros(image.shape[:2], dtype=bool)
         for verts in list_of_verts:
             mask += _mask_from_verts(verts, image.shape[:2])
@@ -101,5 +182,4 @@ def manual(image, alpha=0.4, return_list=False):
         mask = np.array(
             [_mask_from_verts(verts,
                               image.shape[:2]) for verts in list_of_verts])
-
     return mask >= 1
