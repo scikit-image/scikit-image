@@ -64,8 +64,8 @@ make a PR to update these notes after you are done with the release. ;-)
   - Wait until the corresponding wheels appear at
     http://wheels.scikit-image.org (about 15 minutes).
 
-- Upload the wheels to PyPI (you may need to ask Stéfan to give you push
-  access to the scikit-image package on PyPI).
+- Download the wheels and upload them to PyPI (you may need to ask Stéfan to
+  give you push access to the scikit-image package on PyPI).
 
   - Make sure ``twine`` is available. You can install it with
     ``pip install twine``.
@@ -74,24 +74,10 @@ make a PR to update these notes after you are done with the release. ;-)
 
 .. [1] https://github.com/MacPython/terryfy/master/wheel-uploader
 
-- Publish on PyPi::
+- Publish the source distribution on PyPi::
 
-   python setup.py register
-   python setup.py sdist upload
-
-  Go to https://travis-ci.org/scikit-image/scikit-image-wheels, select the
-  "Current" tab, and click (on the right) on the "Restart Build" icon.  After
-  the wheels become available at http://wheels.scikit-image.org/ (approx 15
-  mins), execute ``tools/osx_wheel_upload.sh``.  Note that, if you rebuild the
-  same wheels, it can take up to 15 minutes for the the files in the http
-  directory to update to the versions that Travis-CI uploaded. You may want to
-  check the timestamps in the http directory listing to check that you will get
-  the latest version.
-
-- Increase the version number
-
-  - In ``setup.py``, set to ``0.Xdev``.
-  - In ``bento.info``, set to ``0.X.dev0``.
+   python setup.py sdist
+   twine upload dist/scikit-image-<major>.<minor>.0.tar.gz
 
 - Update the web frontpage:
   The webpage is kept in a separate repo: scikit-image-web
