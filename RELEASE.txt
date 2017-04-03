@@ -55,6 +55,25 @@ make a PR to update these notes after you are done with the release. ;-)
 
   (or ``git push --tags upstream master``, depending on your workflow.)
 
+- Build the package wheels (pre-compiled binaries for various platforms:
+
+  - Clone https://github.com/scikit-image/scikit-image-wheels.
+  - Update its ``.travis.yml`` file so that ``BUILD_COMMIT`` points to this
+    release.
+  - Commit and push.
+  - Wait until the corresponding wheels appear at
+    http://wheels.scikit-image.org (about 15 minutes).
+
+- Upload the wheels to PyPI (you may need to ask Stéfan to give you push
+  access to the scikit-image package on PyPI).
+
+  - Make sure ``twine`` is available. You can install it with
+    ``pip install twine``.
+  - Download ``wheel-uploader`` [1]_ and place it on your PATH.
+  - Run ``tools/upload_wheels.sh``.
+
+.. [1] https://github.com/MacPython/terryfy/master/wheel-uploader
+
 - Publish on PyPi::
 
    python setup.py register
