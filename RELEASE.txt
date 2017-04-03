@@ -93,12 +93,11 @@ make a PR to update these notes after you are done with the release. ;-)
 
 - Update the development docs for the new version ``0.Xdev`` just like above
 
-- Post release notes on mailing lists, blog, G+, etc.
+- Post release notes on mailing lists, blog, Twitter, etc.
 
   - scikit-image@python.org
   - scipy-user@scipy.org
   - scikit-learn-general@lists.sourceforge.net
-  - pythonvision@googlegroups.com
 
 - Update the version and the release date on wikipedia
   https://en.wikipedia.org/wiki/Scikit-image
