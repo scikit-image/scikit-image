@@ -10,8 +10,6 @@ of the hierarchical queue provided in heap_general.pyx
 
 import numpy as np
 from libc.math cimport sqrt
-from lxml.html.builder import AREA
-from __builtin__ import True
 
 cimport numpy as np
 cimport cython
@@ -42,29 +40,29 @@ ctypedef fused dtype_t:
 include "heap_watershed.pxi"
 include "util.pxi"
 
-cdef struct OLArea:
+cdef struct Area:
     DTYPE_UINT64_t area
     DTYPE_UINT64_t equivalent_label
 
 
-cdef class Area:
-    cdef DTYPE_UINT64_t area 
-    cdef DTYPE_UINT64_t equivalent_label
-    
-    cdef void increment(self):
-        self.area += 1
-        return
-        
-    cdef bool greater(self, Area other):
-        if self.area >= other.area:
-            return True
-        else:
-            return False
-    
-    cdef void fusion(self, Area other):
-        self.area += other.area 
-        other.equivalent_label = self.equivalent_label
-        return
+# cdef class NewArea:
+#     cdef DTYPE_UINT64_t area 
+#     cdef DTYPE_UINT64_t equivalent_label
+#     
+#     cdef void increment(self):
+#         self.area += 1
+#         return
+#         
+#     cdef bool greater(self, Area other):
+#         if self.area >= other.area:
+#             return True
+#         else:
+#             return False
+#     
+#     cdef void fusion(self, Area other):
+#         self.area += other.area 
+#         other.equivalent_label = self.equivalent_label
+#         return
     
     
         
