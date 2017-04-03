@@ -96,8 +96,8 @@ make a PR to update these notes after you are done with the release. ;-)
 - Post release notes on mailing lists, blog, Twitter, etc.
 
   - scikit-image@python.org
-  - scipy-user@scipy.org
-  - scikit-learn-general@lists.sourceforge.net
+  - scipy-user@python.org
+  - scikit-learn@python.org
 
 - Update the version and the release date on wikipedia
   https://en.wikipedia.org/wiki/Scikit-image
