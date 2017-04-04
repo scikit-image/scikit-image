@@ -29,15 +29,7 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_skeletonize_3d_cy', sources=['_skeletonize_3d_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
-#     config.add_extension("criteria_classes",
-#                          sources=["criteria_classes.pyx", "criteria_classes_inc.cpp"], 
-#                          include_dirs=[get_numpy_include_dirs()],
-#                          language="c++")
-#    config.add_extension('_criteria', sources=['_criteria.c'],
-#                         include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('_criteria', 
-                         sources=['_criteria.c', 'criteria_classes.pyx', 'criteria_classes_inc.cpp'],
-                         language='c++',
+    config.add_extension('_criteria', sources=['_criteria.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config
