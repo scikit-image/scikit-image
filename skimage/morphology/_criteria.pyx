@@ -41,7 +41,7 @@ ctypedef fused dtype_t:
     np.float32_t
     np.float64_t
 
-    
+
 include "heap_watershed.pxi"
 include "util.pxi"
 
@@ -50,10 +50,13 @@ cdef struct Area:
     DTYPE_UINT64_t equivalent_label
     DTYPE_FLOAT64_t stop_level
     DTYPE_FLOAT64_t val_of_min
+#    DTYPE_FLOAT64_t volume
 
+cdef void _update_area(Area* p_element):
+    p_element.area += 1
 
 @cython.boundscheck(False)
-def area_closing(dtype_t[::1] image, #DTYPE_FLOAT64_t[::1] image,
+def _criteria_closing(dtype_t[::1] image, #DTYPE_FLOAT64_t[::1] image,
                  DTYPE_UINT64_t area_threshold,
                  DTYPE_UINT64_t[::1] label_img,
                  DTYPE_INT32_t[::1] structure,
@@ -62,6 +65,7 @@ def area_closing(dtype_t[::1] image, #DTYPE_FLOAT64_t[::1] image,
                  DTYPE_FLOAT64_t eps,
                  np.double_t compactness,
                  dtype_t[::1] output, #DTYPE_FLOAT64_t[::1] output,
+                 void update_functor,
                  ):
     """Perform criteria based closings using.
 
@@ -187,8 +191,9 @@ def area_closing(dtype_t[::1] image, #DTYPE_FLOAT64_t[::1] image,
         label_img[elem.index] = label1
 
         # The corresponding lake is updated.
-        area_vec[label1].area += 1
-        
+        #area_vec[label1].area += 1
+        _update_area(&area_vec[label1])
+
         for i in range(nneighbors):
             # get the flattened address of the neighbor
             index = structure[i] + elem.index
@@ -248,4 +253,24 @@ def area_closing(dtype_t[::1] image, #DTYPE_FLOAT64_t[::1] image,
     #free(value_of_min)
     free(area_vec)
 
+def area_closing(dtype_t[::1] image, #DTYPE_FLOAT64_t[::1] image,
+                 DTYPE_UINT64_t area_threshold,
+                 DTYPE_UINT64_t[::1] label_img,
+                 DTYPE_INT32_t[::1] structure,
+                 DTYPE_BOOL_t[::1] mask,
+                 np.int32_t[::1] strides,
+                 DTYPE_FLOAT64_t eps,
+                 np.double_t compactness,
+                 dtype_t[::1] output, #DTYPE_FLOAT64_t[::1] output,
+                 ):
+    _criteria_closing(image,
+                      area_threshold,
+                      label_img,
+                      structure,
+                      mask,
+                      strides,
+                      eps,
+                      compactness,
+                      output, 
+                      _update_area)
 
