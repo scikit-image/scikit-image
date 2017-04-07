@@ -1403,7 +1403,8 @@ def separate_stains(rgb, conv_matrix):
     rgb = dtype.img_as_float(rgb, force_copy=True)
     rgb += 2
     stains = np.dot(np.reshape(-np.log(rgb), (-1, 3)), conv_matrix)
-    return np.reshape(stains, rgb.shape)
+    return rescale_intensity(np.reshape(stains, rgb.shape)
+                             in_range=(-1, 1))
 
 
 def combine_stains(stains, conv_matrix):
