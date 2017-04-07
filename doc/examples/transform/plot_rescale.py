@@ -20,13 +20,13 @@ image = data.camera()
 
 rescale_image = rescale(image, 0.5)
 
-resize_image=  resize(image, (100, 100), mode='reflect')
+resize_image = resize(image, (100, 100), mode='reflect')
 
-image_downscale= downscale_local_mean(image, (3, 4))
+image_downscale = downscale_local_mean(image, (3, 4))
 
-fig, (ax0, ax1, ax2 ,ax3) = plt.subplots(nrows=1, ncols=2, figsize=(8, 3),
-                               sharex=True, sharey=True,
-                               subplot_kw={'adjustable':'box-forced'})
+fig, (ax0, ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=2, figsize=(8, 3),
+                                         sharex=True, sharey=True,
+                                         subplot_kw={'adjustable': 'box-forced'})
 
 ax0.imshow(image, cmap=plt.cm.gray)
 ax0.axis('off')
