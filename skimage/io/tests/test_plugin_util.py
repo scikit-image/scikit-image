@@ -25,7 +25,7 @@ class TestPrepareForDisplay:
         assert x[0, 0, 0] == 0
         assert x[3, 2, 0] == 255
 
-    def test_colour(self):
+    def test_color(self):
         with expected_warnings(['precision loss']):
             prepare_for_display(np.random.rand(10, 10, 3))
 

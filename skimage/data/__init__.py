@@ -70,7 +70,7 @@ def camera():
 
 
 def astronaut():
-    """Colour image of the astronaut Eileen Collins.
+    """Color image of the astronaut Eileen Collins.
 
     Photograph of Eileen Collins, an American astronaut. She was selected
     as an astronaut in 1992 and first piloted the space shuttle STS-63 in
