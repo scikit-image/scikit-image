@@ -1,7 +1,7 @@
 """
-==================
-Rescale and resize
-==================
+==============================
+Rescale,resize and Downscaling
+==============================
 
 `Rescale` operation resizes an image by a given scaling factor.
 The scaling factor can either be a single floating point value,
@@ -9,6 +9,10 @@ or multiple values - one along each axis.
 
 `Resize` serves the same purpose, but allows to specify an output
 image shape instead of a scaling factor.
+
+`Downscale` operation serves the purpose of downsampling an 
+n-dimensional image by calculating local mean on the elements of 
+each block of the size factors given as a parameter to the function. 
 """
 
 import matplotlib.pyplot as plt
