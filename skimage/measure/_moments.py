@@ -1,14 +1,16 @@
 # coding: utf-8
 import numpy as np
 from . import _moments_cy
+import itertools
+from warnings import warn
 
 
 def moments(image, order=3):
     """Calculate all raw image moments up to a certain order.
 
     The following properties can be calculated from raw image moments:
-     * Area as: ``m[0, 0]``.
-     * Centroid as: {``m[0, 1] / m[0, 0]``, ``m[1, 0] / m[0, 0]``}.
+     * Area as: ``M[0, 0]``.
+     * Centroid as: {``M[1, 0] / M[0, 0]``, ``M[0, 1] / M[0, 0]``}.
 
     Note that raw moments are neither translation, scale nor rotation
     invariant.
@@ -40,21 +42,20 @@ def moments(image, order=3):
     --------
     >>> image = np.zeros((20, 20), dtype=np.double)
     >>> image[13:17, 13:17] = 1
-    >>> m = moments(image)
-    >>> cr = m[0, 1] / m[0, 0]
-    >>> cc = m[1, 0] / m[0, 0]
+    >>> M = moments(image)
+    >>> cr = M[1, 0] / M[0, 0]
+    >>> cc = M[0, 1] / M[0, 0]
     >>> cr, cc
     (14.5, 14.5)
-
     """
-    return _moments_cy.moments_central(image, 0, 0, order)
+    return moments_central(image, (0,) * image.ndim, order=order)
 
 
-def moments_central(image, cr, cc, order=3):
+def moments_central(image, center=None, cc=None, order=3, **kwargs):
     """Calculate all central image moments up to a certain order.
 
     The center coordinates (cr, cc) can be calculated from the raw moments as:
-    {``m[0, 1] / m[0, 0]``, ``m[1, 0] / m[0, 0]``}.
+    {``M[1, 0] / M[0, 0]``, ``M[0, 1] / M[0, 0]``}.
 
     Note that central moments are translation invariant but not scale and
     rotation invariant.
@@ -63,12 +64,18 @@ def moments_central(image, cr, cc, order=3):
     ----------
     image : 2D double or uint8 array
         Rasterized shape as image.
-    cr : double
-        Center row coordinate.
-    cc : double
-        Center column coordinate.
+    center : tuple of float, optional
+        Coordinates of the image centroid. This will be computed if it
+        is not provided.
     order : int, optional
-        Maximum order of moments. Default is 3.
+        The maximum order of moments computed.
+
+    Other Parameters
+    ----------------
+    cr : double
+        DEPRECATED: Center row coordinate for 2D image.
+    cc : double
+        DEPRECATED: Center column coordinate for 2D image.
 
     Returns
     -------
@@ -90,17 +97,37 @@ def moments_central(image, cr, cc, order=3):
     --------
     >>> image = np.zeros((20, 20), dtype=np.double)
     >>> image[13:17, 13:17] = 1
-    >>> m = moments(image)
-    >>> cr = m[0, 1] / m[0, 0]
-    >>> cc = m[1, 0] / m[0, 0]
-    >>> moments_central(image, cr, cc)
+    >>> M = moments(image)
+    >>> cr = M[1, 0] / M[0, 0]
+    >>> cc = M[0, 1] / M[0, 0]
+    >>> moments_central(image, (cr, cc))
     array([[ 16.,   0.,  20.,   0.],
            [  0.,   0.,   0.,   0.],
            [ 20.,   0.,  25.,   0.],
            [  0.,   0.,   0.,   0.]])
     """
-
-    return _moments_cy.moments_central(image, cr, cc, order)
+    if cc is not None:  # using deprecated interface
+        message = ('Using deprecated 2D-only, xy-coordinate interface to '
+                   'moments_central. This interface will be removed in '
+                   'scikit-image 0.16. Use '
+                   'moments_central(image, center=(cr, cc), order=3).')
+        warn(message)
+        if 'cr' in kwargs and center is None:
+            center = (kwargs['cr'], cc)
+        else:
+            center = (center, cc)
+        return moments_central(image, center=center, order=order).T
+    if center is None:
+        M = moments_central(image, center=(0,) * image.ndim, order=order)
+        center = M[tuple(np.eye(image.ndim, dtype=int))]
+    calc = image.astype(float)
+    for dim, dim_length in enumerate(image.shape):
+        delta = np.arange(dim_length, dtype=float) - center[dim]
+        powers_of_delta = delta[:, np.newaxis] ** np.arange(order + 1)
+        calc = np.rollaxis(calc, dim, image.ndim)
+        calc = np.dot(calc, powers_of_delta)
+        calc = np.rollaxis(calc, -1, dim)
+    return calc
 
 
 def moments_normalized(mu, order=3):
@@ -111,14 +138,15 @@ def moments_normalized(mu, order=3):
 
     Parameters
     ----------
-    mu : (M, M) array
-        Central image moments, where M must be > ``order``.
+    mu : (M,[ ...,] M) array
+        Central image moments, where M must be greater than or equal
+        to ``order``.
     order : int, optional
         Maximum order of moments. Default is 3.
 
     Returns
     -------
-    nu : (``order + 1``, ``order + 1``) array
+    nu : (``order + 1``,[ ...,] ``order + 1``) array
         Normalized central image moments.
 
     References
@@ -147,15 +175,20 @@ def moments_normalized(mu, order=3):
            [ 0.        ,  0.        ,  0.        ,  0.        ]])
 
     """
-    if mu.ndim != 2:
-        raise TypeError("Image moments must be 2-dimension")
-    if mu.shape[0] <= order or mu.shape[1] <= order:
-        raise TypeError("Shape of image moments must be >= `order`")
-    return _moments_cy.moments_normalized(mu.astype(np.double), order)
+    if np.any(np.array(mu.shape) <= order):
+        raise ValueError("Shape of image moments must be >= `order`")
+    nu = np.zeros_like(mu)
+    mu0 = mu.ravel()[0]
+    for powers in itertools.product(range(order + 1), repeat=mu.ndim):
+        if sum(powers) < mu.ndim:
+            nu[powers] = np.nan
+        else:
+            nu[powers] = mu[powers] / (mu0 ** (sum(powers) / nu.ndim + 1))
+    return nu
 
 
 def moments_hu(nu):
-    """Calculate Hu's set of image moments.
+    """Calculate Hu's set of image moments (2D-only).
 
     Note that this set of moments is proofed to be translation, scale and
     rotation invariant.
