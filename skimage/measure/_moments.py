@@ -180,7 +180,7 @@ def moments_normalized(mu, order=3):
     nu = np.zeros_like(mu)
     mu0 = mu.ravel()[0]
     for powers in itertools.product(range(order + 1), repeat=mu.ndim):
-        if sum(powers) < mu.ndim:
+        if sum(powers) < 2:
             nu[powers] = np.nan
         else:
             nu[powers] = mu[powers] / (mu0 ** (sum(powers) / nu.ndim + 1))
@@ -200,7 +200,7 @@ def moments_hu(nu):
 
     Returns
     -------
-    nu : (7, 1) array
+    nu : (7,) array
         Hu's set of image moments.
 
     References
