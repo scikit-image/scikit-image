@@ -1,6 +1,7 @@
 # coding: utf-8
 from __future__ import division
 from math import sqrt, atan2, pi as PI
+import itertools
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -156,10 +157,9 @@ class _RegionProperties(object):
         elif self._ndim == 3:
             return (6 * self.area / PI) ** (1. / 3)
 
-    @only2d
     def euler_number(self):
         euler_array = self.filled_image != self.image
-        _, num = label(euler_array, neighbors=8, return_num=True,
+        _, num = label(euler_array, connectivity=self._ndim, return_num=True,
                        background=0)
         return -num + 1
 
@@ -171,7 +171,7 @@ class _RegionProperties(object):
 
     @_cached
     def filled_image(self):
-        structure = STREL_8 if self._ndim == 2 else STREL_26_3D
+        structure = np.ones((3,) * self._ndim)
         return ndi.binary_fill_holes(self.image, structure)
 
     @_cached
