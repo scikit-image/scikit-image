@@ -255,14 +255,13 @@ class _RegionProperties(object):
     @only2d
     def orientation(self):
         a, b, b, c = self.inertia_tensor.flat
-        b = -b
         if a - c == 0:
-            if b > 0:
+            if b < 0:
                 return -PI / 4.
             else:
                 return PI / 4.
         else:
-            return - 0.5 * atan2(2 * b, (a - c))
+            return -0.5 * atan2(-2 * b, (a - c))
 
     @only2d
     def perimeter(self):
@@ -270,7 +269,7 @@ class _RegionProperties(object):
 
     @only2d
     def solidity(self):
-        return self.moments[0, 0] / np.sum(self.convex_image)
+        return self.area / self.convex_area
 
     @only2d
     def weighted_centroid(self):
