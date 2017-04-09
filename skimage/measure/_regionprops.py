@@ -179,22 +179,27 @@ class _RegionProperties(object):
         return self._label_image[self._slice] == self.label
 
     @_cached
-    @only2d
     def inertia_tensor(self):
         mu = self.moments_central
-        a = mu[2, 0] / mu[0, 0]
-        b = -mu[1, 1] / mu[0, 0]
-        c = mu[0, 2] / mu[0, 0]
-        return np.array([[a, b], [b, c]])
+        mu0 = mu[(0,) * self._ndim]
+        result = np.zeros((self._ndim, self._ndim))
+
+        corners2 = tuple(2 * np.eye(self._ndim, dtype=int))
+        d = np.diag(result)
+        d.flags.writeable = True
+        d[:] = mu[corners2] / mu0
+
+        for dims in itertools.combinations(range(self._ndim), 2):
+            mu_index = np.zeros(self._ndim, dtype=int)
+            mu_index[list(dims)] = 1
+            result[dims] = -mu[tuple(mu_index)] / mu0
+            result.T[dims] = -mu[tuple(mu_index)] / mu0
+        return result
 
     @_cached
-    @only2d
     def inertia_tensor_eigvals(self):
-        a, b, b, c = self.inertia_tensor.flat
-        # eigen values of inertia tensor
-        l1 = (a + c) / 2 + sqrt(4 * b ** 2 + (a - c) ** 2) / 2
-        l2 = (a + c) / 2 - sqrt(4 * b ** 2 + (a - c) ** 2) / 2
-        return l1, l2
+        eigvals = np.linalg.eigvalsh(self.inertia_tensor)
+        return sorted(eigvals, reverse=True)
 
     @_cached
     def intensity_image(self):
@@ -205,12 +210,10 @@ class _RegionProperties(object):
     def _intensity_image_double(self):
         return self.intensity_image.astype(np.double)
 
-    @only2d
     def local_centroid(self):
-        m = self.moments
-        row = m[0, 1] / m[0, 0]
-        col = m[1, 0] / m[0, 0]
-        return row, col
+        M = self.moments
+        return (M[tuple(np.eye(self._ndim, dtype=int))] /
+                M[(0,) * self._ndim])
 
     def max_intensity(self):
         return np.max(self.intensity_image[self.image])
@@ -221,34 +224,28 @@ class _RegionProperties(object):
     def min_intensity(self):
         return np.min(self.intensity_image[self.image])
 
-    @only2d
     def major_axis_length(self):
-        l1, _ = self.inertia_tensor_eigvals
+        l1 = self.inertia_tensor_eigvals[0]
         return 4 * sqrt(l1)
 
-    @only2d
     def minor_axis_length(self):
-        _, l2 = self.inertia_tensor_eigvals
+        l2 = self.inertia_tensor_eigvals[-1]
         return 4 * sqrt(l2)
 
     @_cached
-    @only2d
     def moments(self):
         return _moments.moments(self.image.astype(np.uint8), 3)
 
     @_cached
-    @only2d
     def moments_central(self):
-        row, col = self.local_centroid
         return _moments.moments_central(self.image.astype(np.uint8),
-                                        row, col, 3)
+                                        self.local_centroid, order=3)
 
     @only2d
     def moments_hu(self):
         return _moments.moments_hu(self.moments_normalized)
 
     @_cached
-    @only2d
     def moments_normalized(self):
         return _moments.moments_normalized(self.moments_central, 3)
 
@@ -271,37 +268,31 @@ class _RegionProperties(object):
     def solidity(self):
         return self.area / self.convex_area
 
-    @only2d
     def weighted_centroid(self):
-        row, col = self.weighted_local_centroid
-        return row + self._slice[0].start, col + self._slice[1].start
+        ctr = self.weighted_local_centroid
+        return tuple(idx + slc.start
+                     for idx, slc in zip(ctr, self._slice))
 
-    @only2d
     def weighted_local_centroid(self):
-        m = self.weighted_moments
-        row = m[0, 1] / m[0, 0]
-        col = m[1, 0] / m[0, 0]
-        return row, col
+        M = self.weighted_moments
+        return (M[tuple(np.eye(self._ndim, dtype=int))] /
+                M[(0,) * self._ndim])
 
     @_cached
-    @only2d
     def weighted_moments(self):
-        return _moments.moments_central(self._intensity_image_double(),
-                                        0, 0, 3)
+        return _moments.moments(self._intensity_image_double(), 3)
 
     @_cached
-    @only2d
     def weighted_moments_central(self):
-        row, col = self.weighted_local_centroid
+        ctr = self.weighted_local_centroid
         return _moments.moments_central(self._intensity_image_double(),
-                                        row, col, 3)
+                                        center=ctr, order=3)
 
     @only2d
     def weighted_moments_hu(self):
         return _moments.moments_hu(self.weighted_moments_normalized)
 
     @_cached
-    @only2d
     def weighted_moments_normalized(self):
         return _moments.moments_normalized(self.weighted_moments_central, 3)
 
