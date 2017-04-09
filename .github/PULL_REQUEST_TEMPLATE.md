@@ -16,3 +16,8 @@
 [If this is a bug-fix or enhancement, it closes issue # ]
 [If this is a new feature, it implements the following paper: ]
 
+## For reviewers
+
+- [ ] Check that the PR title is short, concise, and will make sense 1 year
+  later.
+- [ ] Check that new features are mentioned in `doc/release/release_dev.rst`.
