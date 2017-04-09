@@ -51,21 +51,22 @@ make a PR to update these notes after you are done with the release. ;-)
 
 - Push the new meta-data to github::
 
-   git push --tags origin master
+   git push --tags upstream master
 
-  (or ``git push --tags upstream master``, depending on your workflow.)
+  (where ``upstream`` is the name of the
+   ``github.com:scikit-image/scikit-image`` repository.)
 
-- Build the package wheels (pre-compiled binaries for various platforms:
+- Build the package wheels (pre-compiled binaries) for various platforms:
 
   - Clone https://github.com/scikit-image/scikit-image-wheels.
   - Update its ``.travis.yml`` file so that ``BUILD_COMMIT`` points to this
-    release.
+    release tag (e.g. ``v0.13.0``).
   - Commit and push.
   - Wait until the corresponding wheels appear at
     http://wheels.scikit-image.org (about 15 minutes).
 
-- Download the wheels and upload them to PyPI (you may need to ask Stéfan to
-  give you push access to the scikit-image package on PyPI).
+- Download the wheels and upload them to PyPI (you may need to ask Stéfan or
+  Juan to give you push access to the scikit-image package on PyPI).
 
   - Make sure ``twine`` is available. You can install it with
     ``pip install twine``.
