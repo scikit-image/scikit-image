@@ -39,7 +39,7 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
     Returns
     -------
     img_array : ndarray
-        The different colour bands/channels are stored in the
+        The different color bands/channels are stored in the
         third dimension, such that a grey-image is MxN, an
         RGB-image MxNx3 and an RGBA-image MxNx4.
 
