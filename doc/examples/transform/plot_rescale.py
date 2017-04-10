@@ -1,6 +1,6 @@
 """
 =============================
-Rescale, resize and downscale
+Rescale, resize, and downscale
 =============================
 
 `Rescale` operation resizes an image by a given scaling factor.
