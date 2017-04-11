@@ -1,7 +1,7 @@
 """
-=============================
+==============================
 Rescale, resize, and downscale
-=============================
+==============================
 
 `Rescale` operation resizes an image by a given scaling factor.
 The scaling factor can either be a single floating point value,
