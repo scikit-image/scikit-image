@@ -43,5 +43,7 @@ ax[2].set_title("Resized image")
 ax[3].imshow(image_downscaled, cmap='gray')
 ax[3].set_title("Image downscaled using local averaging")
 
+ax[0].set_xlim(0, 512)
+ax[0].set_ylim(512, 0)
 plt.tight_layout()
 plt.show()
