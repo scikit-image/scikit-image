@@ -1,5 +1,4 @@
 import six
-import warnings
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -22,8 +21,8 @@ def _multichannel_default(multichannel, ndim):
     if multichannel is not None:
         return multichannel
     else:
-        warnings.warn('default multichannel argument (None) is deprecated. '
-                      'Specifiy True or False explicitly.')
+        warn('The default multichannel argument (None) is deprecated. '
+             'Specifiy True or False explicitly.')
         # utility for maintaining previous color image default behavior
         if ndim == 3:
             return True
@@ -31,7 +30,7 @@ def _multichannel_default(multichannel, ndim):
             return False
 
 
-def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
+def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
            preserve_range=False):
     """Resize image to match a certain size.
 
@@ -103,6 +102,7 @@ def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
     if ndim_out > image.ndim:
         # append dimensions to input_shape
         input_shape = input_shape + (1, ) * (ndim_out - image.ndim)
+        image = np.reshape(image, input_shape)
     elif ndim_out == image.ndim - 1:
         # multichannel case: append shape of last axis
         output_shape = np.concatenate((output_shape, [image.shape[-1], ]))

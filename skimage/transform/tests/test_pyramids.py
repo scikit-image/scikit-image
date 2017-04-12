@@ -13,14 +13,14 @@ image_gray = image[..., 0]
 
 def test_pyramid_reduce_rgb():
     rows, cols, dim = image.shape
-    with expected_warnings(['default multichannel']):
+    with expected_warnings(['The default multichannel']):
         out = pyramids.pyramid_reduce(image, downscale=2)
     assert_array_equal(out.shape, (rows / 2, cols / 2, dim))
 
 
 def test_pyramid_reduce_gray():
     rows, cols = image_gray.shape
-    with expected_warnings(['default multichannel']):
+    with expected_warnings(['The default multichannel']):
         out = pyramids.pyramid_reduce(image_gray, downscale=2)
     assert_array_equal(out.shape, (rows / 2, cols / 2))
 
@@ -36,14 +36,14 @@ def test_pyramid_reduce_nd():
 
 def test_pyramid_expand_rgb():
     rows, cols, dim = image.shape
-    with expected_warnings(['default multichannel']):
+    with expected_warnings(['The default multichannel']):
         out = pyramids.pyramid_expand(image, upscale=2)
     assert_array_equal(out.shape, (rows * 2, cols * 2, dim))
 
 
 def test_pyramid_expand_gray():
     rows, cols = image_gray.shape
-    with expected_warnings(['default multichannel']):
+    with expected_warnings(['The default multichannel']):
         out = pyramids.pyramid_expand(image_gray, upscale=2)
     assert_array_equal(out.shape, (rows * 2, cols * 2))
 
@@ -59,7 +59,7 @@ def test_pyramid_expand_nd():
 
 def test_build_gaussian_pyramid_rgb():
     rows, cols, dim = image.shape
-    with expected_warnings(['default multichannel']):
+    with expected_warnings(['The default multichannel']):
         pyramid = pyramids.pyramid_gaussian(image, downscale=2)
         for layer, out in enumerate(pyramid):
             layer_shape = (rows / 2 ** layer, cols / 2 ** layer, dim)
@@ -68,7 +68,7 @@ def test_build_gaussian_pyramid_rgb():
 
 def test_build_gaussian_pyramid_gray():
     rows, cols = image_gray.shape
-    with expected_warnings(['default multichannel']):
+    with expected_warnings(['The default multichannel']):
         pyramid = pyramids.pyramid_gaussian(image_gray, downscale=2)
         for layer, out in enumerate(pyramid):
             layer_shape = (rows / 2 ** layer, cols / 2 ** layer)
@@ -88,7 +88,7 @@ def test_build_gaussian_pyramid_nd():
 
 def test_build_laplacian_pyramid_rgb():
     rows, cols, dim = image.shape
-    with expected_warnings(['default multichannel']):
+    with expected_warnings(['The default multichannel']):
         pyramid = pyramids.pyramid_laplacian(image, downscale=2)
         for layer, out in enumerate(pyramid):
             layer_shape = (rows / 2 ** layer, cols / 2 ** layer, dim)
