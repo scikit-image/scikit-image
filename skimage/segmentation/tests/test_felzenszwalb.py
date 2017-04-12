@@ -1,7 +1,7 @@
 import numpy as np
-from numpy.testing import (assert_equal, assert_array_equal, assert_raises,
+from numpy.testing import (assert_equal, assert_array_equal,
     assert_warns, assert_no_warnings)
-
+import pytest
 from skimage._shared.testing import assert_greater, test_parallel
 from skimage.segmentation import felzenszwalb
 from skimage import data
@@ -47,7 +47,7 @@ def test_3D():
         felzenszwalb(rgb_img, multichannel=True)
     with assert_warns(RuntimeWarning):
         felzenszwalb(three_d_img, multichannel=True)
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         felzenszwalb(rgb_img, multichannel=False)
         felzenszwalb(three_d_img, multichannel=False)
 

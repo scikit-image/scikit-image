@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_raises
+import pytest
 from skimage.filters._gaussian import gaussian
 from skimage._shared._warnings import expected_warnings
 
@@ -7,10 +7,13 @@ from skimage._shared._warnings import expected_warnings
 def test_negative_sigma():
     a = np.zeros((3, 3))
     a[1, 1] = 1.
-    assert_raises(ValueError, gaussian, a, sigma=-1.0)
-    assert_raises(ValueError, gaussian, a, sigma=[-1.0, 1.0])
-    assert_raises(ValueError, gaussian, a,
-                  sigma=np.asarray([-1.0, 1.0]))
+    with pytest.raises(ValueError):
+        gaussian(a, sigma=-1.0)
+    with pytest.raises(ValueError):
+        gaussian(a, sigma=[-1.0, 1.0])
+    with pytest.raises(ValueError):
+        gaussian(a,
+                 sigma=np.asarray([-1.0, 1.0]))
 
 
 def test_null_sigma():

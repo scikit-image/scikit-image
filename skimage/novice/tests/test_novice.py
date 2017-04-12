@@ -2,8 +2,8 @@ import os
 import tempfile
 
 import numpy as np
-from nose.tools import assert_true
-from numpy.testing import assert_equal, raises, assert_allclose
+from numpy.testing import assert_equal, assert_allclose
+import pytest
 from skimage import novice
 from skimage.novice._novice import (array_to_xy_origin, xy_to_array_origin,
                                     rgb_transpose)
@@ -95,7 +95,8 @@ def test_pixel_rgba():
     pixel.rgba = np.arange(4)
 
     assert_equal(pixel.rgba, np.arange(4))
-    for i, channel in enumerate((pixel.red, pixel.green, pixel.blue, pixel.alpha)):
+    pixel_channels = (pixel.red, pixel.green, pixel.blue, pixel.alpha)
+    for i, channel in enumerate(pixel_channels):
         assert_equal(channel, i)
 
     pixel.red = 3
@@ -104,7 +105,8 @@ def test_pixel_rgba():
     pixel.alpha = 6
     assert_equal(pixel.rgba, np.arange(4) + 3)
 
-    for i, channel in enumerate((pixel.red, pixel.green, pixel.blue, pixel.alpha)):
+    pixel_channels = (pixel.red, pixel.green, pixel.blue, pixel.alpha)
+    for i, channel in enumerate(pixel_channels):
         assert_equal(channel, i + 3)
 
 
@@ -141,12 +143,13 @@ def test_reset():
     v = pic[0, 0]
     pic[0, 0] = (1, 1, 1)
     pic.reset()
-    assert_true(pic[0, 0] == v)
+    assert pic[0, 0] == v
 
 
 def test_update_on_save():
     pic = novice.Picture(array=np.zeros((3, 3, 3)))
-    pic[0, 0] = (255, 255, 255)  # prevent attempting to save low-contrast image
+    # prevent attempting to save low-contrast image
+    pic[0, 0] = (255, 255, 255)
 
     with all_warnings():  # precision loss
         pic.size = (6, 6)
@@ -259,64 +262,64 @@ def test_getitem_with_step():
     assert sliced_pic == novice.Picture(array=array[::2, ::2])
 
 
-@raises(IndexError)
 def test_1d_getitem_raises():
     pic = novice.Picture.from_size((1, 1))
-    pic[1]
+    with pytest.raises(IndexError):
+        pic[1]
 
 
-@raises(IndexError)
 def test_3d_getitem_raises():
     pic = novice.Picture.from_size((1, 1))
-    pic[1, 2, 3]
+    with pytest.raises(IndexError):
+        pic[1, 2, 3]
 
 
-@raises(IndexError)
 def test_1d_setitem_raises():
     pic = novice.Picture.from_size((1, 1))
-    pic[1] = 0
+    with pytest.raises(IndexError):
+        pic[1] = 0
 
 
-@raises(IndexError)
 def test_3d_setitem_raises():
     pic = novice.Picture.from_size((1, 1))
-    pic[1, 2, 3] = 0
+    with pytest.raises(IndexError):
+        pic[1, 2, 3] = 0
 
 
-@raises(IndexError)
 def test_out_of_bounds_indexing():
     pic = novice.open(SMALL_IMAGE_PATH)
-    pic[pic.width, pic.height]
+    with pytest.raises(IndexError):
+        pic[pic.width, pic.height]
 
 
-@raises(ValueError)
 def test_pixel_rgb_raises():
     pixel = novice.Picture.from_size((1, 1))[0, 0]
-    pixel.rgb = (-1, -1, -1)
+    with pytest.raises(ValueError):
+        pixel.rgb = (-1, -1, -1)
 
 
-@raises(ValueError)
 def test_pixel_red_raises():
     pixel = novice.Picture.from_size((1, 1))[0, 0]
-    pixel.red = 256
+    with pytest.raises(ValueError):
+        pixel.red = 256
 
 
-@raises(ValueError)
 def test_pixel_green_raises():
     pixel = novice.Picture.from_size((1, 1))[0, 0]
-    pixel.green = 256
+    with pytest.raises(ValueError):
+        pixel.green = 256
 
 
-@raises(ValueError)
 def test_pixel_blue_raises():
     pixel = novice.Picture.from_size((1, 1))[0, 0]
-    pixel.blue = 256
+    with pytest.raises(ValueError):
+        pixel.blue = 256
 
 
-@raises(ValueError)
 def test_pixel_alpha_raises():
     pixel = novice.Picture.from_size((1, 1))[0, 0]
-    pixel.alpha = 256
+    with pytest.raises(ValueError):
+        pixel.alpha = 256
 
 
 if __name__ == '__main__':

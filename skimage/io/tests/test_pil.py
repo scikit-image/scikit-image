@@ -1,8 +1,9 @@
 import os.path
 import numpy as np
 from numpy.testing import (
-    assert_array_equal, assert_array_almost_equal, assert_raises,
+    assert_array_equal, assert_array_almost_equal,
     assert_allclose, run_module_suite)
+import pytest
 
 from tempfile import NamedTemporaryFile
 
@@ -129,8 +130,8 @@ def test_imread_uint16():
 
 
 def test_imread_truncated_jpg():
-    assert_raises((IOError, ValueError), imread,
-                  os.path.join(data_dir, 'truncated.jpg'))
+    with pytest.raises(IOError):
+        imread(os.path.join(data_dir, 'truncated.jpg'))
 
 
 def test_jpg_quality_arg():
@@ -186,8 +187,10 @@ class TestSave:
 
 def test_imsave_incorrect_dimension():
     with temporary_file(suffix='.png') as fname:
-        assert_raises(ValueError, imsave, fname, np.zeros((2, 3, 3, 1)))
-        assert_raises(ValueError, imsave, fname, np.zeros((2, 3, 2)))
+        with pytest.raises(ValueError):
+            imsave(fname, np.zeros((2, 3, 3, 1)))
+        with pytest.raises(ValueError):
+            imsave(fname, np.zeros((2, 3, 2)))
 
 def test_imsave_filelike():
     shape = (2, 2)

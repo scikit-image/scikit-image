@@ -3,6 +3,8 @@ import os.path
 import numpy as np
 from numpy import testing
 from scipy import ndimage as ndi
+import unittest
+import pytest
 
 from skimage import color, data, transform
 from skimage import img_as_uint, img_as_ubyte, data_dir
@@ -10,7 +12,7 @@ from skimage.morphology import grey, selem
 from skimage._shared._warnings import expected_warnings
 
 
-class TestMorphology():
+class TestMorphology(unittest.TestCase):
 
     # These expected outputs were generated with skimage v0.12.1
     # using:
@@ -46,8 +48,8 @@ class TestMorphology():
         testing.assert_equal(expected, calculated)
 
 
-class TestEccentricStructuringElements():
-
+class TestEccentricStructuringElements(unittest.TestCase):
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.black_pixel = 255 * np.ones((4, 4), dtype=np.uint8)
         self.black_pixel[1, 1] = 0

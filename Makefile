@@ -1,6 +1,6 @@
 .PHONY: all clean test
 PYTHON=python
-NOSETESTS=nosetests
+PYTESTS=py.test
 
 all:
 	$(PYTHON) setup.py build_ext --inplace
@@ -10,13 +10,13 @@ clean:
 	find . -name "*.pyx" -exec ./tools/rm_pyx_c_file.sh {} \;
 
 test:
-	$(PYTHON) -c "import skimage, sys, io; sys.exit(skimage.test_verbose())"
+	$(PYTESTS) skimage --doctest-modules
 
 doctest:
 	$(PYTHON) -c "import skimage, sys, io; sys.exit(skimage.doctest_verbose())"
 
 coverage:
-	$(NOSETESTS) skimage --with-coverage --cover-package=skimage
+	$(PYTESTS) skimage --cov=skimage
 
 html:
 	pip install -q sphinx

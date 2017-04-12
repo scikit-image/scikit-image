@@ -2,13 +2,13 @@ from __future__ import absolute_import
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal
-from numpy.testing.decorators import skipif
+import pytest
 
 from skimage.filters import threshold_local, gaussian
 from skimage.util.apply_parallel import apply_parallel, dask_available
 
 
-@skipif(not dask_available)
+@pytest.mark.skipif(not dask_available, reason="dask not installed")
 def test_apply_parallel():
     # data
     a = np.arange(144).reshape(12, 12).astype(float)
@@ -30,7 +30,7 @@ def test_apply_parallel():
     assert_array_almost_equal(result2, expected2)
 
 
-@skipif(not dask_available)
+@pytest.mark.skipif(not dask_available, reason="dask not installed")
 def test_no_chunks():
     a = np.ones(1 * 4 * 8 * 9).reshape(1, 4, 8, 9)
 
@@ -43,7 +43,7 @@ def test_no_chunks():
     assert_array_almost_equal(result, expected)
 
 
-@skipif(not dask_available)
+@pytest.mark.skipif(not dask_available, reason="dask not installed")
 def test_apply_parallel_wrap():
     def wrapped(arr):
         return gaussian(arr, 1, mode='wrap')
@@ -54,7 +54,7 @@ def test_apply_parallel_wrap():
     assert_array_almost_equal(result, expected)
 
 
-@skipif(not dask_available)
+@pytest.mark.skipif(not dask_available, reason="dask not installed")
 def test_apply_parallel_nearest():
     def wrapped(arr):
         return gaussian(arr, 1, mode='nearest')

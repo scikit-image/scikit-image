@@ -1,9 +1,9 @@
 import os
 import numpy as np
 import scipy.io
-from numpy.testing import (assert_equal, assert_raises, assert_almost_equal,
+from numpy.testing import (assert_equal, assert_almost_equal,
                            assert_array_almost_equal)
-
+import pytest
 from skimage.measure import compare_ssim as ssim
 import skimage.data
 from skimage.io import imread
@@ -138,7 +138,8 @@ def test_ssim_multichannel():
     assert_equal(S3.shape, Xc.shape)
 
     # fail if win_size exceeds any non-channel dimension
-    assert_raises(ValueError, ssim, Xc, Yc, win_size=7, multichannel=False)
+    with pytest.raises(ValueError):
+        ssim(Xc, Yc, win_size=7, multichannel=False)
 
 
 def test_ssim_nD():
@@ -222,20 +223,27 @@ def test_mssim_vs_legacy():
 def test_invalid_input():
     X = np.zeros((3, 3), dtype=np.double)
     Y = np.zeros((3, 3), dtype=np.int)
-    assert_raises(ValueError, ssim, X, Y)
+    with pytest.raises(ValueError):
+        ssim(X, Y)
 
     Y = np.zeros((4, 4), dtype=np.double)
-    assert_raises(ValueError, ssim, X, Y)
+    with pytest.raises(ValueError):
+        ssim(X, Y)
 
-    assert_raises(ValueError, ssim, X, X, win_size=8)
+    with pytest.raises(ValueError):
+        ssim(X, X, win_size=8)
 
     # do not allow both image content weighting and gradient calculation
-    assert_raises(ValueError, ssim, X, X, image_content_weighting=True,
+    with pytest.raises(ValueError):
+        ssim(X, X, image_content_weighting=True,
                   gradient=True)
     # some kwarg inputs must be non-negative
-    assert_raises(ValueError, ssim, X, X, K1=-0.1)
-    assert_raises(ValueError, ssim, X, X, K2=-0.1)
-    assert_raises(ValueError, ssim, X, X, sigma=-1.0)
+    with pytest.raises(ValueError):
+        ssim(X, X, K1=-0.1)
+    with pytest.raises(ValueError):
+        ssim(X, X, K2=-0.1)
+    with pytest.raises(ValueError):
+        ssim(X, X, sigma=-1.0)
 
 
 if __name__ == "__main__":

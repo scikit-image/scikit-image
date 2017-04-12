@@ -1,6 +1,7 @@
 import os
 import numpy as np
-from numpy.testing import run_module_suite, assert_equal, assert_raises
+from numpy.testing import run_module_suite, assert_equal
+import pytest
 
 import skimage
 from skimage import img_as_ubyte, img_as_float
@@ -252,7 +253,8 @@ class TestRank():
         selem = disk(20)
         image = (np.random.rand(500, 500) * 256).astype(np.uint8)
         out = image
-        assert_raises(NotImplementedError, rank.mean, image, selem, out=out)
+        with pytest.raises(NotImplementedError):
+            rank.mean(image, selem, out=out)
 
 
     def test_compare_autolevels(self):

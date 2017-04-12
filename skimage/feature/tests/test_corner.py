@@ -1,7 +1,7 @@
 import numpy as np
-from numpy.testing import (assert_array_equal, assert_raises,
+from numpy.testing import (assert_array_equal,
                            assert_almost_equal, assert_warns)
-
+import pytest
 from skimage import data
 from skimage import img_as_float
 from skimage.color import rgb2gray
@@ -332,7 +332,8 @@ def test_blank_image_nans():
 
 def test_corner_fast_image_unsupported_error():
     img = np.zeros((20, 20, 3))
-    assert_raises(ValueError, corner_fast, img)
+    with pytest.raises(ValueError):
+        corner_fast(img)
 
 
 @test_parallel()
@@ -382,14 +383,18 @@ def test_corner_fast_astronaut():
 
 def test_corner_orientations_image_unsupported_error():
     img = np.zeros((20, 20, 3))
-    assert_raises(ValueError, corner_orientations, img,
-                  np.asarray([[7, 7]]), np.ones((3, 3)))
+    with pytest.raises(ValueError):
+        corner_orientations(
+            img,
+            np.asarray([[7, 7]]), np.ones((3, 3)))
 
 
 def test_corner_orientations_even_shape_error():
     img = np.zeros((20, 20))
-    assert_raises(ValueError, corner_orientations, img,
-                  np.asarray([[7, 7]]), np.ones((4, 4)))
+    with pytest.raises(ValueError):
+        corner_orientations(
+            img,
+            np.asarray([[7, 7]]), np.ones((4, 4)))
 
 
 @test_parallel()

@@ -1,7 +1,8 @@
 import numpy as np
-from numpy.testing import (assert_array_equal, assert_equal, assert_raises,
+from numpy.testing import (assert_array_equal, assert_equal,
                            assert_warns)
 from skimage.morphology import remove_small_objects, remove_small_holes
+import pytest
 from ..._shared._warnings import expected_warnings
 
 test_image = np.array([[0, 0, 0, 1, 0],
@@ -67,12 +68,14 @@ def test_single_label_warning():
 
 def test_float_input():
     float_test = np.random.rand(5, 5)
-    assert_raises(TypeError, remove_small_objects, float_test)
+    with pytest.raises(TypeError):
+        remove_small_objects(float_test)
 
 
 def test_negative_input():
     negative_int = np.random.randint(-4, -1, size=(5, 5))
-    assert_raises(ValueError, remove_small_objects, negative_int)
+    with pytest.raises(ValueError):
+        remove_small_objects(negative_int)
 
 test_holes_image = np.array([[0,0,0,0,0,0,1,0,0,0],
                              [0,1,1,1,1,1,0,0,0,0],
@@ -169,7 +172,8 @@ def test_label_warning_holes():
 
 def test_float_input_holes():
     float_test = np.random.rand(5, 5)
-    assert_raises(TypeError, remove_small_holes, float_test)
+    with pytest.raises(TypeError):
+        remove_small_holes(float_test)
   
 if __name__ == "__main__":
     np.testing.run_module_suite()

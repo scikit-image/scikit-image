@@ -1,7 +1,6 @@
 import sys
 import numpy as np
-from numpy.testing import assert_raises
-
+import pytest
 from skimage.draw import ellipsoid, ellipsoid_stats
 from skimage.measure import (marching_cubes,
                              marching_cubes_classic, marching_cubes_lewiner,
@@ -76,18 +75,26 @@ def test_marching_cubes_anisotropic():
 
 def test_invalid_input():
     # Classic
-    assert_raises(ValueError, marching_cubes_classic, np.zeros((2, 2, 1)), 0)
-    assert_raises(ValueError, marching_cubes_classic, np.zeros((2, 2, 1)), 1)
-    assert_raises(ValueError, marching_cubes_classic, np.ones((3, 3, 3)), 1,
+    with pytest.raises(ValueError):
+        marching_cubes_classic(np.zeros((2, 2, 1)), 0)
+    with pytest.raises(ValueError):
+        marching_cubes_classic(np.zeros((2, 2, 1)), 1)
+    with pytest.raises(ValueError):
+        marching_cubes_classic(np.ones((3, 3, 3)), 1,
                   spacing=(1, 2))
-    assert_raises(ValueError, marching_cubes_classic, np.zeros((20, 20)), 0)
+    with pytest.raises(ValueError):
+        marching_cubes_classic(np.zeros((20, 20)), 0)
     
     # Lewiner
-    assert_raises(ValueError, marching_cubes_lewiner, np.zeros((2, 2, 1)), 0)
-    assert_raises(ValueError, marching_cubes_lewiner, np.zeros((2, 2, 1)), 1)
-    assert_raises(ValueError, marching_cubes_lewiner, np.ones((3, 3, 3)), 1,
-                  spacing=(1, 2))
-    assert_raises(ValueError, marching_cubes_lewiner, np.zeros((20, 20)), 0)
+    with pytest.raises(ValueError):
+        marching_cubes_lewiner(np.zeros((2, 2, 1)), 0)
+    with pytest.raises(ValueError):
+        marching_cubes_lewiner(np.zeros((2, 2, 1)), 1)
+    with pytest.raises(ValueError):
+        marching_cubes_lewiner(np.ones((3, 3, 3)), 1,
+                               spacing=(1, 2))
+    with pytest.raises(ValueError):
+        marching_cubes_lewiner(np.zeros((20, 20)), 0)
 
 
 def test_correct_mesh_orientation():

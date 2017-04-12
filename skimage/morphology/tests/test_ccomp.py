@@ -1,5 +1,6 @@
 import numpy as np
 from numpy.testing import assert_array_equal, run_module_suite
+import pytest
 
 from skimage.measure import label
 import skimage.measure._ccomp as ccomp
@@ -261,7 +262,8 @@ class TestConnectedComponents3d:
 
     def test_nd(self):
         x = np.ones((1, 2, 3, 4))
-        np.testing.assert_raises(NotImplementedError, label, x)
+        with pytest.raises(NotImplementedError):
+            label(x)
 
 
 class TestSupport:

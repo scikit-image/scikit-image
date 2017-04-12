@@ -6,6 +6,19 @@ from scipy.interpolate import RectBivariateSpline, interp2d
 from skimage.filters import sobel
 
 
+def _scipy_version():
+    split_version = scipy.__version__.split('.')
+    if not(split_version[-1].isdigit()):
+        split_version.pop()
+    scipy_version = list(map(int, split_version))
+    new_scipy = (scipy_version[0] > 0 or \
+                 (scipy_version[0] == 0 and scipy_version[1] >= 14))
+    return new_scipy
+
+
+new_scipy = _scipy_version()
+
+
 def active_contour(image, snake, alpha=0.01, beta=0.1,
                    w_line=0, w_edge=1, gamma=0.01,
                    bc='periodic', max_px_move=1.0,
@@ -88,12 +101,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     25
 
     """
-    split_version = scipy.__version__.split('.')
-    if not(split_version[-1].isdigit()):
-        split_version.pop()
-    scipy_version = list(map(int, split_version))
-    new_scipy = scipy_version[0] > 0 or \
-                (scipy_version[0] == 0 and scipy_version[1] >= 14)
+    new_scipy = _scipy_version()
     if not new_scipy:
         raise NotImplementedError('You are using an old version of scipy. '
                       'Active contours is implemented for scipy versions '

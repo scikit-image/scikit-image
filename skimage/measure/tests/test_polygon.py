@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from skimage.measure import approximate_polygon, subdivide_polygon
 from skimage.measure._polygon import _SUBDIVISION_MASKS
 
@@ -54,8 +55,10 @@ def test_subdivide_polygon():
                                     2 * (square3.shape[0] - mask_len + 2))
 
     # not supported B-Spline degree
-    np.testing.assert_raises(ValueError, subdivide_polygon, square, 0)
-    np.testing.assert_raises(ValueError, subdivide_polygon, square, 8)
+    with pytest.raises(ValueError):
+        subdivide_polygon(square, 0)
+    with pytest.raises(ValueError):
+        subdivide_polygon(square, 8)
 
 
 if __name__ == "__main__":

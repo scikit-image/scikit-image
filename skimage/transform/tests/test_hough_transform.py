@@ -1,5 +1,6 @@
 import numpy as np
-from numpy.testing import assert_almost_equal, assert_equal, assert_raises
+from numpy.testing import assert_almost_equal, assert_equal
+import pytest
 
 import skimage.transform as tf
 from skimage.draw import line, circle_perimeter, ellipse_perimeter
@@ -38,7 +39,8 @@ def test_hough_line_bad_input():
     img[10] = 1
 
     # Expected error, img must be 2D
-    assert_raises(ValueError, tf.hough_line, img, np.linspace(0, 360, 10))
+    with pytest.raises(ValueError):
+        tf.hough_line(img, np.linspace(0, 360, 10))
 
 
 def test_probabilistic_hough():
@@ -72,7 +74,8 @@ def test_probabilistic_hough_bad_input():
     img[10] = 1
 
     # Expected error, img must be 2D
-    assert_raises(ValueError, tf.probabilistic_hough_line, img)
+    with pytest.raises(ValueError):
+        tf.probabilistic_hough_line(img)
 
 
 def test_hough_line_peaks():

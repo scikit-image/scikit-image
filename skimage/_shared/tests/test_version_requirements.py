@@ -2,16 +2,16 @@
 
 """
 import numpy as np
-from numpy.testing import assert_raises, assert_equal
-import nose
+from numpy.testing import assert_equal
+import pytest
 from skimage._shared import version_requirements as version_req
 
 
 def test_get_module_version():
     assert version_req.get_module_version('numpy')
     assert version_req.get_module_version('scipy')
-    assert_raises(ImportError,
-                  lambda: version_req.get_module_version('fakenumpy'))
+    with pytest.raises(ImportError):
+        version_req.get_module_version('fakenumpy')
 
 
 def test_is_installed():
@@ -33,9 +33,9 @@ def test_require():
     def bar():
         return 0
 
-    assert_raises(ImportError, lambda: bar())
+    with pytest.raises(ImportError):
+        bar()
 
 
 def test_get_module():
-    assert_equal(version_req.get_module('numpy'), np)
-    assert_equal(version_req.get_module('nose'), nose)
+    assert version_req.get_module("numpy") is np

@@ -68,31 +68,30 @@ data_dir = osp.join(pkg_dir, 'data')
 __version__ = '0.14dev'
 
 try:
-    imp.find_module('nose')
+    imp.find_module('pytest')
 except ImportError:
     def _test(doctest=False, verbose=False):
-        """This would run all unit tests, but nose couldn't be
+        """This would run all unit tests, but pytest couldn't be
         imported so the test suite can not run.
         """
-        raise ImportError("Could not load nose. Unit tests not available.")
+        raise ImportError("Could not load pytest. Unit tests not available.")
 
 else:
     def _test(doctest=False, verbose=False):
         """Run all unit tests."""
-        import nose
+        import pytest
         import warnings
-        args = ['', pkg_dir, '--exe', '--ignore-files=^_test']
+        args = ['skimage']
         if verbose:
             args.extend(['-v', '-s'])
         if doctest:
-            args.extend(['--with-doctest', '--ignore-files=^\.',
-                         '--ignore-files=^setup\.py$$', '--ignore-files=test'])
+            args.extend(['--doctest-modules'])
             # Make sure warnings do not break the doc tests
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                success = nose.run('skimage', argv=args)
+                success = pytest.main(args)
         else:
-            success = nose.run('skimage', argv=args)
+            success = pytest.main(args)
         # Return sys.exit code
         if success:
             return 0

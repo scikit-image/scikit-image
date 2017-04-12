@@ -1,7 +1,9 @@
 import os.path
 
 import numpy as np
-from numpy.testing import assert_raises, assert_equal, assert_allclose
+from numpy.testing import assert_equal, assert_allclose
+import pytest
+import unittest
 
 from skimage import data_dir
 from skimage.io.collection import ImageCollection, alphanumeric_key
@@ -23,14 +25,15 @@ def test_string_sort():
     assert_equal(sorted_filenames, sorted_filenames)
 
 
-class TestImageCollection():
+class TestImageCollection(unittest.TestCase):
 
     pattern = [os.path.join(data_dir, pic)
                for pic in ['camera.png', 'color.png']]
 
     pattern_matched = [os.path.join(data_dir, pic)
                        for pic in ['camera.png', 'moon.png']]
-
+                       
+    @pytest.fixture(autouse=True)
     def setUp(self):
         reset_plugins()
         # Generic image collection with images of different shapes.
@@ -48,11 +51,12 @@ class TestImageCollection():
         assert_allclose(self.images[0],
                                   self.images[-num])
 
-        # assert_raises expects a callable, hence this thin wrapper function.
         def return_img(n):
             return self.images[n]
-        assert_raises(IndexError, return_img, num)
-        assert_raises(IndexError, return_img, -num - 1)
+        with pytest.raises(IndexError):
+            return_img(num)
+        with pytest.raises(IndexError):
+            return_img(-num - 1)
 
     def test_slicing(self):
         assert type(self.images[:]) is ImageCollection
@@ -69,7 +73,8 @@ class TestImageCollection():
 
         def set_files(f):
             self.images.files = f
-        assert_raises(AttributeError, set_files, 'newfiles')
+        with pytest.raises(AttributeError):
+            set_files('newfiles')
 
     def test_custom_load(self):
         load_pattern = [(1, 'one'), (2, 'two')]
@@ -94,7 +99,8 @@ class TestImageCollection():
         assert_equal(array.shape, expected_shape)
 
     def test_concatentate_mismatched_image_shapes(self):
-        assert_raises(ValueError, self.images.concatenate)
+        with pytest.raises(ValueError):
+            self.images.concatenate()
 
 
 if __name__ == "__main__":

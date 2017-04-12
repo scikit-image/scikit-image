@@ -1,4 +1,3 @@
-from nose.tools import *
 from numpy.testing import assert_equal, run_module_suite
 from tempfile import NamedTemporaryFile
 import os

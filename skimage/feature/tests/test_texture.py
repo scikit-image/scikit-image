@@ -3,7 +3,7 @@ from skimage.feature import (greycomatrix,
                              greycoprops,
                              local_binary_pattern,
                              multiblock_lbp)
-
+import pytest
 from skimage._shared.testing import test_parallel
 from skimage.transform import integral_image
 
@@ -53,17 +53,21 @@ class TestGLCM():
 
     def test_error_raise_float(self):
         for dtype in [np.float, np.double, np.float16, np.float32, np.float64]:
-            np.testing.assert_raises(ValueError, greycomatrix, self.image.astype(dtype), [1], [np.pi], 4)
+            with pytest.raises(ValueError):
+                greycomatrix(self.image.astype(dtype), [1], [np.pi], 4)
 
     def test_error_raise_int_types(self):
         for dtype in [np.int16, np.int32, np.int64, np.uint16, np.uint32, np.uint64]:
-            np.testing.assert_raises(ValueError, greycomatrix, self.image.astype(dtype), [1], [np.pi])
+            with pytest.raises(ValueError):
+                greycomatrix(self.image.astype(dtype), [1], [np.pi])
 
     def test_error_raise_negative(self):
-        np.testing.assert_raises(ValueError, greycomatrix, self.image.astype(np.int16) - 1, [1], [np.pi], 4)
+        with pytest.raises(ValueError):
+            greycomatrix(self.image.astype(np.int16) - 1, [1], [np.pi], 4)
 
     def test_error_raise_levels_smaller_max(self):
-        np.testing.assert_raises(ValueError, greycomatrix, self.image - 1, [1], [np.pi], 3)
+        with pytest.raises(ValueError):
+            greycomatrix(self.image - 1, [1], [np.pi], 3)
 
     def test_image_data_types(self):
         for dtype in [np.uint16, np.uint32, np.uint64, np.int16, np.int32, np.int64]:
@@ -156,8 +160,8 @@ class TestGLCM():
 
     def test_invalid_property(self):
         result = greycomatrix(self.image, [1], [0], 4)
-        np.testing.assert_raises(ValueError, greycoprops,
-                                 result, 'ABC')
+        with pytest.raises(ValueError):
+            greycoprops(result, 'ABC')
 
     def test_homogeneity(self):
         result = greycomatrix(self.image, [1], [0, 6], 4, normed=True,

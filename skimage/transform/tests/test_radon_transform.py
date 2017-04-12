@@ -1,7 +1,7 @@
 from __future__ import print_function, division
 
 import numpy as np
-from numpy.testing import assert_raises
+import pytest
 import itertools
 import os.path
 
@@ -198,7 +198,8 @@ def test_reconstruct_with_wrong_angles():
     a = np.zeros((3, 3))
     p = radon(a, theta=[0, 1, 2], circle=False)
     iradon(p, theta=[0, 1, 2], circle=False)
-    assert_raises(ValueError, iradon, p, theta=[0, 1, 2, 3])
+    with pytest.raises(ValueError):
+        iradon(p, theta=[0, 1, 2, 3])
 
 
 def _random_circle(shape):

@@ -1,21 +1,31 @@
 import numpy as np
+import pytest
 from skimage._shared.utils import safe_as_int
 
 
 def test_int_cast_not_possible():
-    np.testing.assert_raises(ValueError, safe_as_int, 7.1)
-    np.testing.assert_raises(ValueError, safe_as_int, [7.1, 0.9])
-    np.testing.assert_raises(ValueError, safe_as_int, np.r_[7.1, 0.9])
-    np.testing.assert_raises(ValueError, safe_as_int, (7.1, 0.9))
-    np.testing.assert_raises(ValueError, safe_as_int, ((3,   4,   1),
-                                                       (2, 7.6, 289)))
-
-    np.testing.assert_raises(ValueError, safe_as_int, 7.1, 0.09)
-    np.testing.assert_raises(ValueError, safe_as_int, [7.1, 0.9], 0.09)
-    np.testing.assert_raises(ValueError, safe_as_int, np.r_[7.1, 0.9], 0.09)
-    np.testing.assert_raises(ValueError, safe_as_int, (7.1, 0.9), 0.09)
-    np.testing.assert_raises(ValueError, safe_as_int, ((3,   4,   1),
-                                                       (2, 7.6, 289)), 0.25)
+    with pytest.raises(ValueError):
+        safe_as_int(7.1)
+    with pytest.raises(ValueError):
+        safe_as_int([7.1, 0.9])
+    with pytest.raises(ValueError):
+        safe_as_int(np.r_[7.1, 0.9])
+    with pytest.raises(ValueError):
+        safe_as_int((7.1, 0.9))
+    with pytest.raises(ValueError):
+        safe_as_int(((3,   4,   1),
+                     (2, 7.6, 289)))
+    with pytest.raises(ValueError):
+        safe_as_int(7.1, 0.09)
+    with pytest.raises(ValueError):
+        safe_as_int([7.1, 0.9], 0.09)
+    with pytest.raises(ValueError):
+        safe_as_int(np.r_[7.1, 0.9], 0.09)
+    with pytest.raises(ValueError):
+        safe_as_int((7.1, 0.9), 0.09)
+    with pytest.raises(ValueError):
+        safe_as_int(((3,   4,   1),
+                     (2, 7.6, 289)), 0.25)
 
 
 def test_int_cast_possible():

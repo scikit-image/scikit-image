@@ -3,9 +3,12 @@ from skimage import data
 from skimage.color import rgb2gray
 from skimage.filters import gaussian
 from skimage.segmentation import active_contour
-from numpy.testing import assert_equal, assert_allclose, assert_raises
+from skimage.segmentation.active_contour_model import new_scipy
+from numpy.testing import assert_equal, assert_allclose
+import pytest
 
 
+@pytest.mark.skipif(not new_scipy, reason="scipy < 0.14")
 def test_periodic_reference():
     img = data.astronaut()
     img = rgb2gray(img)
@@ -21,6 +24,7 @@ def test_periodic_reference():
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refy)
 
 
+@pytest.mark.skipif(not new_scipy, reason="scipy < 0.14")
 def test_fixed_reference():
     img = data.text()
     x = np.linspace(5, 424, 100)
@@ -34,6 +38,7 @@ def test_fixed_reference():
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refy)
 
 
+@pytest.mark.skipif(not new_scipy, reason="scipy < 0.14")
 def test_free_reference():
     img = data.text()
     x = np.linspace(5, 424, 100)
@@ -47,6 +52,7 @@ def test_free_reference():
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refy)
 
 
+@pytest.mark.skipif(not new_scipy, reason="scipy < 0.14")
 def test_RGB():
     img = gaussian(data.text(), 1)
     imgR = np.zeros((img.shape[0], img.shape[1], 3))
@@ -74,6 +80,7 @@ def test_RGB():
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refy)
 
 
+@pytest.mark.skipif(not new_scipy, reason="scipy < 0.14")
 def test_end_points():
     img = data.astronaut()
     img = rgb2gray(img)
@@ -95,15 +102,18 @@ def test_end_points():
     assert_allclose(snake[0, :], [x[0], y[0]], atol=1e-5)
 
 
+@pytest.mark.skipif(not new_scipy, reason="scipy < 0.14")
 def test_bad_input():
     img = np.zeros((10, 10))
     x = np.linspace(5, 424, 100)
     y = np.linspace(136, 50, 100)
     init = np.array([x, y]).T
-    assert_raises(ValueError, active_contour, img, init,
-                            bc='wrong')
-    assert_raises(ValueError, active_contour, img, init,
-                            max_iterations=-15)
+    with pytest.raises(ValueError):
+        active_contour(img, init,
+                       bc='wrong')
+    with pytest.raises(ValueError):
+        active_contour(img, init,
+                       max_iterations=-15)
 
 
 if __name__ == "__main__":

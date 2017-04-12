@@ -1,5 +1,6 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_raises
+from numpy.testing import assert_equal
+import pytest
 from skimage import img_as_int, img_as_float, \
                     img_as_uint, img_as_ubyte
 from skimage.util.dtype import convert
@@ -82,10 +83,12 @@ def test_downcast():
 
 def test_float_out_of_range():
     too_high = np.array([2], dtype=np.float32)
-    assert_raises(ValueError, img_as_int, too_high)
+    with pytest.raises(ValueError):
+        img_as_int(too_high)
     too_low = np.array([-2], dtype=np.float32)
-    assert_raises(ValueError, img_as_int, too_low)
-
+    with pytest.raises(ValueError):
+        img_as_int(too_low)
+    
 
 def test_copy():
     x = np.array([1], dtype=np.float64)
