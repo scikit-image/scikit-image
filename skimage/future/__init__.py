@@ -6,5 +6,6 @@ production code that will depend on updated skimage versions.
 """
 
 from . import graph
+from .manual_segmentation import manual
 
-__all__ = ['graph']
+__all__ = ['graph', 'manual']

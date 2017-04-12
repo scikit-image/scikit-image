@@ -2,6 +2,7 @@ Remember to list any API changes below in `doc/source/api_changes.txt`.
 
 Version 0.14
 ------------
+* Finalize ``skimage.future.graph`` API.
 * Remove deprecated ``ntiles_*` kwargs in ``equalize_adapthist``.
 * Remove deprecated ``skimage.restoration.nl_means_denoising``.
 * Remove deprecated ``skimage.filters.gaussian_filter``.
@@ -24,6 +25,7 @@ Version 0.14
 
 Version 0.15
 ------------
+* Finalize ``skimage.future.manual_segmentation`` API.
 * In ``skimage.util.dtype_limits``, set default behavior of `clip_negative` to `False`.
 * In ``skimage.transform.radon``, set default behavior of `circle` to `True`.
 * In ``skimage.transform.iradon``, set default behavior of `circle` to `True`.
