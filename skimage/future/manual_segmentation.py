@@ -38,13 +38,9 @@ def manual(image, alpha=0.4, overlap='overwrite'):
 
     Returns
     -------
-    mask : array or list of arrays
-
-        * if `overlap` is "merge" : (M, N) boolean image with segmented
-          regions.
-        * if `overlap` is "overwrite" : (M, N) labelled image with segmented
-          regions.
-        * if `overlap` is "seperate" : array of (M, N) boolean images.
+    labels : array of int, shape ([Q, ]M, N)
+        The segmented regions. If mode is `'separate'`, the leading dimension
+        of the array corresponds to the number of regions that the user drew.
 
     Notes
     -----
@@ -237,19 +233,19 @@ def manual(image, alpha=0.4, overlap='overwrite'):
     plt.show(block=True)
 
     if "seperate" in overlap:
-        mask = np.array(
+        labels = np.array(
             [_mask_from_verts(verts,
                               image.shape[:2]) for verts in list_of_verts])
-        return mask
+        return labels
 
-    mask = np.zeros(image.shape[:2], dtype=int)
+    labels = np.zeros(image.shape[:2], dtype=int)
 
     for i, verts in enumerate(list_of_verts, start=1):
         cur_mask = _mask_from_verts(verts, image.shape[:2])
-        mask[cur_mask] = i
+        labels[cur_mask] = i
 
     if "overwrite" in overlap:
-        return mask
+        return labels
 
     elif "merge" in overlap:
-        return mask > 0
+        return labels > 0
