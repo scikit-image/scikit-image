@@ -491,9 +491,9 @@ class TestColorconv(TestCase):
 
 def test_gray2rgb():
     x = np.array([0, 0.5, 1])
-    # FIXME the latter does not raise a ValueError…
-    # with pytest.raises(ValueError):
-    #     ValueError(gray2rgb, x)
+
+    with pytest.raises(ValueError):
+        gray2rgb(x)
 
     x = x.reshape((3, 1))
     y = gray2rgb(x)

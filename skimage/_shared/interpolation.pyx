@@ -1,9 +1,7 @@
-from interpolation cimport coord_map, get_pixel2d
-import numpy as np
-cimport numpy as cnp
+from interpolation cimport coord_map
 
 
-def coord_map_py(Py_ssize_t dim, long coord, mode):
+def coord_map_py(dim, coord, mode):
     """Python wrapper for `interpolation.coord_map`."""
-    cdef char mode_c = ord(mode[0].upper())
+    mode_c = ord(mode[0].upper())
     return coord_map(dim, coord, mode_c)
