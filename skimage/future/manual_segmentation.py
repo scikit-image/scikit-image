@@ -15,7 +15,7 @@ def _mask_from_verts(verts, shape):
     return mask
 
 
-def manual(image, alpha=0.4, overlap="merge", mouse=[1, 2, 3]):
+def manual(image, alpha=0.4, overlap='overwrite'):
     """Return a label image based on selections made with the mouse.
 
     Parameters
@@ -26,28 +26,15 @@ def manual(image, alpha=0.4, overlap="merge", mouse=[1, 2, 3]):
     alpha : float, optional
         Transparency value for polygons drawn over the image.
 
-    overlap : string, optional
-        Determines the behaviour of mask generation with respect to overlapping
-        regions of polygons.
+    overlap : {'merge', 'overwrite', 'separate'}, optional
+        Define the behavior of mask generation with respect to overlapping
+        regions of input polygons.
 
-        * if "merge" : overlapping selections will be merged as a single
-            object.
-        * if "overwrite" : The last polygon overwrites the regions where
-            it intersects with previously drawn polygon.
-        * if "seperate" : overlapping selections will be returned as
-            an array of masks.
-
-    mouse : list of int, optional
-        Customize the mouse click behaviour when selecting vertices with
-        the polygonal mode. [left, middle, right] is the default behaviour.
-
-        * `1` : select a vertex.
-        * '2' : undo previously selected vertex.
-        * '3' : confirm selected polygon.
-
-        To use right click to undo previously selected vertex, and middle
-        button to confirm selection, pass `mouse=[1,3,2]` to the function.
-
+        * 'merge': overlapping selections will be merged as a single object.
+        * 'overwrite': The last polygon overwrites the regions where
+          it intersects with previously drawn polygon.
+        * 'seperate' : overlapping selections will be returned as
+          an array of masks.
 
     Returns
     -------
@@ -68,12 +55,6 @@ def manual(image, alpha=0.4, overlap="merge", mouse=[1, 2, 3]):
 
     In polygon mode, use left click to select the vertices of the polygon
     and right click to confirm the selection once the vertices are selected.
-    Middle click will undo the previously selected vertex. This behaviour can
-    be customized by with the optional 'mouse' parameter.
-
-    By default, overlapping segments are merged into a single object.
-    The optional paramter 'return_masks if 'True' will return an array of
-    masks with a single selection per array.
 
     Examples
     --------
@@ -92,7 +73,7 @@ def manual(image, alpha=0.4, overlap="merge", mouse=[1, 2, 3]):
     temp_list = []
     preview_polygon_drawn = []
 
-    left, middle, right = mouse
+    left, middle, right = range(1, 4)
 
     def _draw_polygon(verts, alpha=alpha):
         polygon = Polygon(verts, closed=True)
