@@ -16,7 +16,7 @@ def _mask_from_verts(verts, shape):
 
 
 def manual(image, alpha=0.4, overlap="merge", mouse=[1, 2, 3]):
-    """Return a binary image based on the selections made with mouse clicks.
+    """Return a label image based on selections made with the mouse.
 
     Parameters
     ----------
@@ -24,7 +24,7 @@ def manual(image, alpha=0.4, overlap="merge", mouse=[1, 2, 3]):
         Grayscale or RGB image.
 
     alpha : float, optional
-        Transparancy value for polygons draw over the segments.
+        Transparency value for polygons drawn over the image.
 
     overlap : string, optional
         Determines the behaviour of mask generation with respect to overlapping
@@ -63,10 +63,10 @@ def manual(image, alpha=0.4, overlap="merge", mouse=[1, 2, 3]):
     -----
     Use the cursor to mark objects in the image.
 
-    In the lasso mode, press and hold the left mouse button and draw around
+    In lasso mode, press and hold the left mouse button and draw around
     the object.
 
-    In the polygon mode, use left click to select the vertices of the polygon
+    In polygon mode, use left click to select the vertices of the polygon
     and right click to confirm the selection once the vertices are selected.
     Middle click will undo the previously selected vertex. This behaviour can
     be customized by with the optional 'mouse' parameter.
@@ -96,8 +96,8 @@ def manual(image, alpha=0.4, overlap="merge", mouse=[1, 2, 3]):
 
     def _draw_polygon(verts, alpha=alpha):
         polygon = Polygon(verts, closed=True)
-        p = PatchCollection(
-            [polygon], match_original=True, cmap=plt.cm.spectral, alpha=alpha)
+        p = PatchCollection([polygon], match_original=True,
+                            cmap=plt.cm.spectral, alpha=alpha)
         polygon_object = ax.add_collection(p)
         plt.draw()
         return polygon_object
@@ -261,7 +261,7 @@ def manual(image, alpha=0.4, overlap="merge", mouse=[1, 2, 3]):
                               image.shape[:2]) for verts in list_of_verts])
         return mask
 
-    mask = np.zeros(image.shape[:2])
+    mask = np.zeros(image.shape[:2], dtype=int)
 
     for i, verts in enumerate(list_of_verts, start=1):
         cur_mask = _mask_from_verts(verts, image.shape[:2])
