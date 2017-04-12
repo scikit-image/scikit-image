@@ -47,7 +47,8 @@ def test_warp_callable():
     refx = np.zeros((5, 5), dtype=np.double)
     refx[1, 1] = 1
 
-    shift = lambda xy: xy + 1
+    def shift(xy):
+        return xy + 1
 
     outx = warp(x, shift, order=1)
     assert_almost_equal(outx, refx)
@@ -320,7 +321,7 @@ def test_swirl():
         swirled = tf.swirl(image, strength=10, **swirl_params)
         unswirled = tf.swirl(swirled, strength=-10, **swirl_params)
 
-    assert np.mean(np.abs(image[1:-1,1:-1] - unswirled[1:-1,1:-1])) < 0.01
+    assert np.mean(np.abs(image[1:-1, 1:-1] - unswirled[1:-1, 1:-1])) < 0.01
 
 
 def test_const_cval_out_of_range():
@@ -355,14 +356,14 @@ def test_warp_coords_example():
 def test_downscale_local_mean():
     image1 = np.arange(4 * 6).reshape(4, 6)
     out1 = downscale_local_mean(image1, (2, 3))
-    expected1 = np.array([[ 4.,   7.],
-                          [16.,  19.]])
+    expected1 = np.array([[4., 7.],
+                          [16., 19.]])
     assert_equal(expected1, out1)
 
     image2 = np.arange(5 * 8).reshape(5, 8)
     out2 = downscale_local_mean(image2, (4, 5))
-    expected2 = np.array([[14. ,  10.8],
-                          [ 8.5,   5.7]])
+    expected2 = np.array([[14., 10.8],
+                          [8.5, 5.7]])
     assert_equal(expected2, out2)
 
 

@@ -7,8 +7,8 @@ from ._geometric import (SimilarityTransform, AffineTransform,
 from ._warps_cy import _warp_fast
 from ..measure import block_reduce
 
-from ..util import img_as_float
-from .._shared.utils import get_bound_method_class, safe_as_int, warn, convert_to_float
+from .._shared.utils import (get_bound_method_class, safe_as_int, warn,
+                             convert_to_float)
 
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,
@@ -36,8 +36,8 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
 
     Performs interpolation to up-size or down-size images. For down-sampling
     N-dimensional images by applying a function or the arithmetic mean, see
-    `skimage.measure.block_reduce` and `skimage.transform.downscale_local_mean`,
-    respectively.
+    `skimage.measure.block_reduce` and
+    `skimage.transform.downscale_local_mean`, respectively.
 
     Parameters
     ----------
@@ -585,8 +585,8 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
         min_val = input_image.min()
         max_val = input_image.max()
 
-        preserve_cval = mode == 'constant' and not \
-                        (min_val <= cval <= max_val)
+        preserve_cval = (mode == 'constant' and not
+                         (min_val <= cval <= max_val))
 
         if preserve_cval:
             cval_mask = output_image == cval
@@ -769,10 +769,9 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
             # inverse_map is a homography
             matrix = inverse_map.params
 
-        elif (hasattr(inverse_map, '__name__')
-              and inverse_map.__name__ == 'inverse'
-              and get_bound_method_class(inverse_map) \
-                  in HOMOGRAPHY_TRANSFORMS):
+        elif (hasattr(inverse_map, '__name__') and
+              inverse_map.__name__ == 'inverse' and
+              get_bound_method_class(inverse_map) in HOMOGRAPHY_TRANSFORMS):
             # inverse_map is the inverse of a homography
             matrix = np.linalg.inv(six.get_method_self(inverse_map).params)
 
@@ -780,8 +779,8 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
             matrix = matrix.astype(np.double)
             if image.ndim == 2:
                 warped = _warp_fast(image, matrix,
-                                 output_shape=output_shape,
-                                 order=order, mode=mode, cval=cval)
+                                    output_shape=output_shape,
+                                    order=order, mode=mode, cval=cval)
             elif image.ndim == 3:
                 dims = []
                 for dim in range(image.shape[2]):
@@ -793,8 +792,8 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
     if warped is None:
         # use ndi.map_coordinates
 
-        if (isinstance(inverse_map, np.ndarray)
-                and inverse_map.shape == (3, 3)):
+        if (isinstance(inverse_map, np.ndarray) and
+                inverse_map.shape == (3, 3)):
             # inverse_map is a transformation matrix as numpy array,
             # this is only used for order >= 4.
             inverse_map = ProjectiveTransform(matrix=inverse_map)
