@@ -7,6 +7,10 @@ from matplotlib.collections import PatchCollection
 from ..draw import polygon
 
 
+LEFT_CLICK = 1
+RIGHT_CLICK = 3
+
+
 def _mask_from_vertices(vertices, shape, label):
     mask = np.zeros(shape, dtype=int)
     pr = [y for x, y in vertices]
@@ -75,8 +79,6 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
     ax.imshow(image, cmap="gray")
     ax.set_axis_off()
 
-    left, middle, right = range(1, 4)
-
     def _undo(*args, **kwargs):
         if list_of_vertex_lists:
             list_of_vertex_lists.pop()
@@ -97,7 +99,7 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
         if fig.canvas.manager.toolbar._active is not None:
             return
 
-        if event.button == left:  # Select vertex
+        if event.button == LEFT_CLICK:  # Select vertex
             temp_list.append([event.xdata, event.ydata])
             # Remove previously drawn preview polygon if any.
             if preview_polygon_drawn:
@@ -108,7 +110,7 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
             polygon = _draw_polygon(ax, temp_list, alpha=(alpha / 1.4))
             preview_polygon_drawn.append(polygon)
 
-        elif event.button == right:  # Confirm the selection
+        elif event.button == RIGHT_CLICK:  # Confirm the selection
             if not temp_list:
                 return
 
