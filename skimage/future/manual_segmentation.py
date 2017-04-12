@@ -1,3 +1,4 @@
+from functools import reduce
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -6,17 +7,26 @@ from matplotlib.collections import PatchCollection
 from ..draw import polygon
 
 
-def _mask_from_verts(verts, shape):
-    mask = np.zeros(shape, dtype=bool)
-    pr = [y for x, y in verts]
-    pc = [x for x, y in verts]
+def _mask_from_vertices(vertices, shape, label):
+    mask = np.zeros(shape, dtype=int)
+    pr = [y for x, y in vertices]
+    pc = [x for x, y in vertices]
     rr, cc = polygon(pr, pc, shape)
-    mask[rr, cc] = 1
+    mask[rr, cc] = label
     return mask
 
 
-def manual(image, alpha=0.4, overlap='overwrite'):
-    """Return a label image based on selections made with the mouse.
+def _draw_polygon(ax, vertices, alpha=0.4):
+    polygon = Polygon(vertices, closed=True)
+    p = PatchCollection([polygon], match_original=True,
+                        cmap=plt.cm.spectral, alpha=alpha)
+    polygon_object = ax.add_collection(p)
+    plt.draw()
+    return polygon_object
+
+
+def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
+    """Return a label image based on polygon selections made with the mouse.
 
     Parameters
     ----------
@@ -26,15 +36,10 @@ def manual(image, alpha=0.4, overlap='overwrite'):
     alpha : float, optional
         Transparency value for polygons drawn over the image.
 
-    overlap : {'merge', 'overwrite', 'separate'}, optional
-        Define the behavior of mask generation with respect to overlapping
-        regions of input polygons.
-
-        * 'merge': overlapping selections will be merged as a single object.
-        * 'overwrite': The last polygon overwrites the regions where
-          it intersects with previously drawn polygon.
-        * 'seperate' : overlapping selections will be returned as
-          an array of masks.
+    return_all : bool, optional
+        If True, an array containing each separate polygon drawn is returned.
+        (The polygons may overlap.) If False (default), later polygons
+        "overwrite" earlier ones where they overlap.
 
     Returns
     -------
@@ -44,208 +49,167 @@ def manual(image, alpha=0.4, overlap='overwrite'):
 
     Notes
     -----
-    Use the cursor to mark objects in the image.
-
-    In lasso mode, press and hold the left mouse button and draw around
-    the object.
-
-    In polygon mode, use left click to select the vertices of the polygon
-    and right click to confirm the selection once the vertices are selected.
+    Use left click to select the vertices of the polygon
+    and right click to confirm the selection once all vertices are selected.
 
     Examples
     --------
-    >>> from skimage import data, segmentation, io
+    >>> from skimage import data, future, io
     >>> camera = data.camera()
-    >>> mask = segmentation.manual(camera)  # doctest: +SKIP
+    >>> mask = future.manual_polygon_segmentation(camera)  # doctest: +SKIP
     >>> io.imshow(mask)  # doctest: +SKIP
     >>> io.show()  # doctest: +SKIP
-
     """
-
-    list_of_verts = []
+    list_of_vertex_lists = []
     polygons_drawn = []
     patch_objects = []
 
     temp_list = []
     preview_polygon_drawn = []
 
-    left, middle, right = range(1, 4)
-
-    def _draw_polygon(verts, alpha=alpha):
-        polygon = Polygon(verts, closed=True)
-        p = PatchCollection([polygon], match_original=True,
-                            cmap=plt.cm.spectral, alpha=alpha)
-        polygon_object = ax.add_collection(p)
-        plt.draw()
-        return polygon_object
-
-    def _draw_lines(event):
-        # Do not record click events from pressing the buttons.
-        if (event.inaxes is lasso_pos or
-                event.inaxes is polygon_pos or
-                event.inaxes is undo_pos or
-                event.inaxes is clear_pos):
-            return
-
-        # Do not record click events when toolbar is active.
-        elif fig.canvas.manager.toolbar._active is not None:
-            return
-
-        # Do not record click events outside axis.
-        elif event.inaxes is None:
-            return
-
-        elif event.button == left:  # Select vertex
-            temp_list.append([event.xdata, event.ydata])
-            # Remove previously drawn preview polygon if any.
-            if len(preview_polygon_drawn) > 0:
-                preview_polygon_drawn[-1].remove()
-                preview_polygon_drawn.remove(preview_polygon_drawn[-1])
-
-            # Preview polygon with selected vertices.
-            polygon = _draw_polygon(temp_list, alpha=alpha/1.4)
-            preview_polygon_drawn.append(polygon)
-
-        elif event.button == middle:  # Undo previously selected vertex
-            if len(temp_list) > 1:
-
-                # Remove the previous vertice and update preview polygon
-                temp_list.remove(temp_list[-1])
-                preview_polygon_drawn[-1].remove()
-                preview_polygon_drawn.remove(preview_polygon_drawn[-1])
-
-                polygon = _draw_polygon(temp_list, alpha=alpha/1.4)
-                preview_polygon_drawn.append(polygon)
-
-            else:
-                return
-
-        elif event.button == right:  # Confirm the selection
-            if len(temp_list) is 0:
-                return
-
-            # Store the vertices of the polygon as shown in preview.
-            # Redraw polygon and store it in polygons_drawn so that
-            # `_undo` works correctly.
-            list_of_verts.append(list(temp_list))
-            polygon_object = _draw_polygon(list_of_verts[-1])
-            polygons_drawn.append(polygon_object)
-
-            # Empty the temporary variables.
-            preview_polygon_drawn[-1].remove()
-            preview_polygon_drawn.remove(preview_polygon_drawn[-1])
-            del temp_list[:]
-
-            plt.draw()
-
-    def _on_select(verts):
-        if len(verts) < 3:
-            return
-        list_of_verts.append(verts)
-        polygon_object = _draw_polygon(verts)
-        polygons_drawn.append(polygon_object)
-        plt.draw()
-
-    def _undo(event):
-        if len(list_of_verts) > 0:
-            list_of_verts.remove(list_of_verts[-1])
-
-            # Remove previous polygon object from the plot.
-            polygons_drawn[-1].remove()
-
-            # Removes latest polygon from a list of all polygon objects.
-            # This enables undo till the first drawn polygon.
-            polygons_drawn.remove(polygons_drawn[-1])
-
-        else:
-            return
-
-    def _undo_all(event):
-        for _ in range(len(list_of_verts)):
-            _undo(None)
-
-    def _mode_lasso(event):
-        global cid
-
-        plt.suptitle("Draw around an object to select for mask generation.")
-
-        # Disconnects previous lasso objects.
-        # This is useful when switching between segmentation modes.
-        if len(lasso_objects) > 0:
-            lasso_objects[-1].disconnect_events()
-            lasso_objects.remove(lasso_objects[-1])
-
-        lasso = matplotlib.widgets.LassoSelector(ax, _on_select)
-        lasso_objects.append(lasso)
-
-        # When switching from polygonal selection mode.
-        fig.canvas.mpl_disconnect(cid)
-        plt.show(block=True)
-
-    def _mode_polygonal(event):
-        global cid
-        if mouse is [1, 2, 3]:
-            plt.suptitle(
-                "Left click to select vertex. Right click to confirm vertices.\
-            \nMiddle click to undo previous vertex.")
-
-        # When switching from lasso selection mode.
-        if len(lasso_objects) > 0:
-            lasso_objects[-1].disconnect_events()
-            lasso_objects.remove(lasso_objects[-1])
-
-        cid = fig.canvas.mpl_connect('button_press_event', _draw_lines)
-
-    global cid
-    cid = None
-
-    lasso_objects = []
-
-    image = np.squeeze(image)
-
     if image.ndim not in (2, 3):
-        raise ValueError('Only 2-D images or 3-D images supported.')
+        raise ValueError('Only 2D grayscale or RGB images are supported.')
 
     fig, ax = plt.subplots()
     plt.subplots_adjust(bottom=0.2)
     ax.imshow(image, cmap="gray")
     ax.set_axis_off()
 
-    # Buttons
-    lasso_pos = plt.axes([0.85, 0.75, 0.10, 0.075])
-    lasso_button = matplotlib.widgets.Button(lasso_pos, "Lasso")
-    lasso_button.on_clicked(_mode_lasso)
+    left, middle, right = range(1, 4)
 
-    polygon_pos = plt.axes([0.85, 0.65, 0.10, 0.075])
-    line_button = matplotlib.widgets.Button(polygon_pos, "Polygon")
-    line_button.on_clicked(_mode_polygonal)
+    def _undo(*args, **kwargs):
+        if list_of_vertex_lists:
+            list_of_vertex_lists.pop()
+            # Remove last polygon from list of polygons...
+            last_poly = polygons_drawn.pop()
+            # ... then from the plot
+            last_poly.remove()
 
-    undo_pos = plt.axes([0.59, 0.05, 0.075, 0.075])
+    undo_pos = plt.axes([0.85, 0.05, 0.075, 0.075])
     undo_button = matplotlib.widgets.Button(undo_pos, u'\u27F2')
     undo_button.on_clicked(_undo)
 
-    clear_pos = plt.axes([0.675, 0.05, 0.10, 0.075])
-    clear_button = matplotlib.widgets.Button(clear_pos, "Clear All")
-    clear_button.on_clicked(_undo_all)
+    def _extend_polygon(event):
+        # Do not record click events outside axis or in undo button
+        if event.inaxes is None or event.inaxes is undo_pos:
+            return
+        # Do not record click events when toolbar is active
+        if fig.canvas.manager.toolbar._active is not None:
+            return
 
-    # Default mode
-    default = _mode_lasso(None)
+        if event.button == left:  # Select vertex
+            temp_list.append([event.xdata, event.ydata])
+            # Remove previously drawn preview polygon if any.
+            if preview_polygon_drawn:
+                poly = preview_polygon_drawn.pop()
+                poly.remove()
+
+            # Preview polygon with selected vertices.
+            polygon = _draw_polygon(ax, temp_list, alpha=(alpha / 1.4))
+            preview_polygon_drawn.append(polygon)
+
+        elif event.button == right:  # Confirm the selection
+            if not temp_list:
+                return
+
+            # Store the vertices of the polygon as shown in preview.
+            # Redraw polygon and store it in polygons_drawn so that
+            # `_undo` works correctly.
+            list_of_vertex_lists.append(temp_list.copy())
+            polygon_object = _draw_polygon(ax, temp_list, alpha=alpha)
+            polygons_drawn.append(polygon_object)
+
+            # Empty the temporary variables.
+            preview_poly = preview_polygon_drawn.pop()
+            preview_poly.remove()
+            del temp_list[:]
+
+            plt.draw()
+
+    fig.canvas.mpl_connect('button_press_event', _extend_polygon)
+
     plt.show(block=True)
 
-    if "seperate" in overlap:
-        labels = np.array(
-            [_mask_from_verts(verts,
-                              image.shape[:2]) for verts in list_of_verts])
-        return labels
+    labels = (_mask_from_vertices(vertices, image.shape[:2], i)
+              for i, vertices in enumerate(list_of_vertex_lists, start=1))
+    if return_all:
+        return np.stack(labels)
+    else:
+        return reduce(np.maximum, labels)
 
-    labels = np.zeros(image.shape[:2], dtype=int)
 
-    for i, verts in enumerate(list_of_verts, start=1):
-        cur_mask = _mask_from_verts(verts, image.shape[:2])
-        labels[cur_mask] = i
+def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
+    """Return a label image based on freeform selections made with the mouse.
 
-    if "overwrite" in overlap:
-        return labels
+    Parameters
+    ----------
+    image : (M, N[, 3]) array
+        Grayscale or RGB image.
 
-    elif "merge" in overlap:
-        return labels > 0
+    alpha : float, optional
+        Transparency value for polygons drawn over the image.
+
+    return_all : bool, optional
+        If True, an array containing each separate polygon drawn is returned.
+        (The polygons may overlap.) If False (default), later polygons
+        "overwrite" earlier ones where they overlap.
+
+    Returns
+    -------
+    labels : array of int, shape ([Q, ]M, N)
+        The segmented regions. If mode is `'separate'`, the leading dimension
+        of the array corresponds to the number of regions that the user drew.
+
+    Notes
+    -----
+    Press and hold the left mouse button to draw around each object.
+
+    Examples
+    --------
+    >>> from skimage import data, future, io
+    >>> camera = data.camera()
+    >>> mask = future.manual_lasso_segmentation(camera)  # doctest: +SKIP
+    >>> io.imshow(mask)  # doctest: +SKIP
+    >>> io.show()  # doctest: +SKIP
+    """
+    list_of_vertex_lists = []
+    polygons_drawn = []
+    patch_objects = []
+
+    if image.ndim not in (2, 3):
+        raise ValueError('Only 2D grayscale or RGB images are supported.')
+
+    fig, ax = plt.subplots()
+    ax.imshow(image, cmap="gray")
+    ax.set_axis_off()
+
+    def _undo(*args, **kwargs):
+        if list_of_vertex_lists:
+            list_of_vertex_lists.pop()
+            # Remove last polygon from list of polygons...
+            last_poly = polygons_drawn.pop()
+            # ... then from the plot
+            last_poly.remove()
+
+    undo_pos = plt.axes([0.85, 0.05, 0.075, 0.075])
+    undo_button = matplotlib.widgets.Button(undo_pos, u'\u27F2')
+    undo_button.on_clicked(_undo)
+
+    def _on_lasso_selection(vertices):
+        if len(vertices) < 3:
+            return
+        list_of_vertex_lists.append(vertices)
+        polygon_object = _draw_polygon(ax, vertices, alpha=alpha)
+        polygons_drawn.append(polygon_object)
+        plt.draw()
+
+    lasso = matplotlib.widgets.LassoSelector(ax, _on_lasso_selection)
+
+    plt.show(block=True)
+
+    labels = (_mask_from_vertices(vertices, image.shape[:2], i)
+              for i, vertices in enumerate(list_of_vertex_lists, start=1))
+    if return_all:
+        return np.stack(labels)
+    else:
+        return reduce(np.maximum, labels)
