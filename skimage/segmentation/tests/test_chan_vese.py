@@ -14,16 +14,16 @@ def test_chan_vese_flat_level_set():
     img = np.zeros((10, 10))
     img[3:6, 3:6] = np.ones((3, 3))
     ls = np.ones((10, 10)) * 1000
-    result = chan_vese(img, mu=0.0, tol=1e-3, starting_level_set=ls)
+    result = chan_vese(img, mu=0.0, tol=1e-3, init_level_set=ls)
     assert_array_equal(result.astype(np.float), np.ones((10, 10)))
-    result = chan_vese(img, mu=0.0, tol=1e-3, starting_level_set=-ls)
+    result = chan_vese(img, mu=0.0, tol=1e-3, init_level_set=-ls)
     assert_array_equal(result.astype(np.float), np.zeros((10, 10)))
 
 
 def test_chan_vese_small_disk_level_set():
     img = np.zeros((10, 10))
     img[3:6, 3:6] = np.ones((3, 3))
-    result = chan_vese(img, mu=0.0, tol=1e-3, starting_level_set="small disk")
+    result = chan_vese(img, mu=0.0, tol=1e-3, init_level_set="small disk")
     assert_array_equal(result.astype(np.float), img)
 
 
@@ -51,7 +51,7 @@ def test_chan_vese_remove_noise():
     img = ref.copy()
     img[8, 3] = 1
     result = chan_vese(img, mu=0.3, tol=1e-3, max_iter=100, dt=10,
-                       starting_level_set="disk").astype(np.float)
+                       init_level_set="disk").astype(np.float)
     assert_array_equal(result, ref)
 
 
@@ -59,7 +59,7 @@ def test_chan_vese_incorrect_image_type():
     img = np.zeros((10, 10, 3))
     ls = np.zeros((10, 9))
     with pytest.raises(ValueError):
-        chan_vese(img, mu=0.0, starting_level_set=ls)
+        chan_vese(img, mu=0.0, init_level_set=ls)
 
 
 def test_chan_vese_gap_closing():
@@ -68,7 +68,7 @@ def test_chan_vese_gap_closing():
     img = ref.copy()
     img[:, 6] = np.zeros((20))
     result = chan_vese(img, mu=0.7, tol=1e-3, max_iter=1000, dt=1000,
-                       starting_level_set="disk").astype(np.float)
+                       init_level_set="disk").astype(np.float)
     assert_array_equal(result, ref)
 
 
@@ -76,16 +76,16 @@ def test_chan_vese_incorrect_level_set():
     img = np.zeros((10, 10))
     ls = np.zeros((10, 9))
     with pytest.raises(ValueError):
-        chan_vese(img, mu=0.0, starting_level_set=ls)
+        chan_vese(img, mu=0.0, init_level_set=ls)
     with pytest.raises(ValueError):
-        chan_vese(img, mu=0.0, starting_level_set="a")
+        chan_vese(img, mu=0.0, init_level_set="a")
 
 
 def test_chan_vese_blank_image():
     img = np.zeros((10, 10))
     level_set = np.random.rand(10, 10)
     ref = level_set > 0
-    result = chan_vese(img, mu=0.0, tol=0.0, starting_level_set=level_set)
+    result = chan_vese(img, mu=0.0, tol=0.0, init_level_set=level_set)
     assert_array_equal(result, ref)
 
 
