@@ -136,7 +136,7 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
     if return_all:
         return np.stack(labels)
     else:
-        return reduce(np.maximum, labels)
+        return reduce(np.maximum, labels, np.broadcast_to(0, image.shape[:2]))
 
 
 def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
@@ -213,4 +213,4 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
     if return_all:
         return np.stack(labels)
     else:
-        return reduce(np.maximum, labels)
+        return reduce(np.maximum, labels, np.broadcast_to(0, image.shape[:2]))
