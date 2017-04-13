@@ -41,7 +41,7 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
 
     return_all : bool, optional
         If True, an array containing each separate polygon drawn is returned.
-        (The polygons may overlap.) If False (default), later polygons
+        (The polygons may overlap.) If False (default), latter polygons
         "overwrite" earlier ones where they overlap.
 
     Returns
@@ -65,7 +65,6 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
     """
     list_of_vertex_lists = []
     polygons_drawn = []
-    patch_objects = []
 
     temp_list = []
     preview_polygon_drawn = []
@@ -85,6 +84,7 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
             last_poly = polygons_drawn.pop()
             # ... then from the plot
             last_poly.remove()
+            plt.draw()
 
     undo_pos = plt.axes([0.85, 0.05, 0.075, 0.075])
     undo_button = matplotlib.widgets.Button(undo_pos, u'\u27F2')
@@ -152,7 +152,7 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
 
     return_all : bool, optional
         If True, an array containing each separate polygon drawn is returned.
-        (The polygons may overlap.) If False (default), later polygons
+        (The polygons may overlap.) If False (default), latter polygons
         "overwrite" earlier ones where they overlap.
 
     Returns
@@ -175,7 +175,6 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
     """
     list_of_vertex_lists = []
     polygons_drawn = []
-    patch_objects = []
 
     if image.ndim not in (2, 3):
         raise ValueError('Only 2D grayscale or RGB images are supported.')
@@ -191,6 +190,7 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
             last_poly = polygons_drawn.pop()
             # ... then from the plot
             last_poly.remove()
+            plt.draw()
 
     undo_pos = plt.axes([0.85, 0.05, 0.075, 0.075])
     undo_button = matplotlib.widgets.Button(undo_pos, u'\u27F2')
