@@ -3,8 +3,7 @@ from scipy.ndimage import distance_transform_edt as distance
 
 
 def _cv_curvature(phi):
-    """
-    Returns the 'curvature' of a level set 'phi'.
+    """Returns the 'curvature' of a level set 'phi'.
     """
     P = np.pad(phi, 1, mode='edge')
     fy = (P[2:, 1:-1] - P[:-2, 1:-1]) / 2.0
@@ -19,9 +18,7 @@ def _cv_curvature(phi):
 
 
 def _cv_calculate_variation(img, phi, mu, lambda1, lambda2, dt):
-    """
-    Returns the variation of level set 'phi' based on algorithm
-    parameters.
+    """Returns the variation of level set 'phi' based on algorithm parameters.
     """
     eta = 1e-16
     P = np.pad(phi, 1, mode='edge')
@@ -42,7 +39,7 @@ def _cv_calculate_variation(img, phi, mu, lambda1, lambda2, dt):
     K = (P[1:-1, 2:] * C1 + P[1:-1, :-2] * C2 +
          P[2:, 1:-1] * C3 + P[:-2, 1:-1] * C4)
 
-    Hphi = 1 * (phi>0)
+    Hphi = 1 * (phi > 0)
     (c1, c2) = _cv_calculate_averages(img, Hphi)
 
     difference_from_average_term = (- lambda1 * (img-c1)**2 +
@@ -53,24 +50,21 @@ def _cv_calculate_variation(img, phi, mu, lambda1, lambda2, dt):
 
 
 def _cv_heavyside(x, eps=1.):
-    """
-    Returns the result of a regularised heavyside function of the
+    """Returns the result of a regularised heavyside function of the
     input value(s).
     """
     return 0.5 * (1. + (2./np.pi) * np.arctan(x/eps))
 
 
 def _cv_delta(x, eps=1.):
-    """
-    Returns the result of a regularised dirac function of the
+    """Returns the result of a regularised dirac function of the
     input value(s).
     """
     return eps / (eps**2 + x**2)
 
 
 def _cv_calculate_averages(img, Hphi):
-    """
-    Returns the average values 'inside' and 'outside'.
+    """Returns the average values 'inside' and 'outside'.
     """
     H = Hphi
     Hinv = 1. - H
@@ -86,8 +80,7 @@ def _cv_calculate_averages(img, Hphi):
 
 
 def _cv_difference_from_average_term(img, Hphi, lambda_pos, lambda_neg):
-    """
-    Returns the 'energy' contribution due to the difference from
+    """Returns the 'energy' contribution due to the difference from
     the average value within a region at each point.
     """
     (c1, c2) = _cv_calculate_averages(img, Hphi)
@@ -97,8 +90,7 @@ def _cv_difference_from_average_term(img, Hphi, lambda_pos, lambda_neg):
 
 
 def _cv_edge_length_term(phi, mu):
-    """
-    Returns the 'energy' contribution due to the length of the
+    """Returns the 'energy' contribution due to the length of the
     edge between regions at each point, multiplied by a factor 'mu'.
     """
     toret = _cv_curvature(phi)
@@ -106,8 +98,7 @@ def _cv_edge_length_term(phi, mu):
 
 
 def _cv_energy(img, phi, mu, lambda1, lambda2):
-    """
-    Returns the total 'energy' of the current level set function.
+    """Returns the total 'energy' of the current level set function.
     """
     H = _cv_heavyside(phi)
     avgenergy = _cv_difference_from_average_term(img, H, lambda1, lambda2)
@@ -116,17 +107,16 @@ def _cv_energy(img, phi, mu, lambda1, lambda2):
 
 
 def _cv_reset_level_set(phi):
-    """
-    This is a placeholder function as resetting the level set is not
+    """This is a placeholder function as resetting the level set is not
     strictly necessary, and has not been done for this implementation.
     """
     return phi
 
 
 def _cv_checkerboard(image_size, square_size):
-    """
-    Generates a checkerboard level set function. According to
-    Pascal Getreuer, such a level set function has fast convergence.
+    """Generates a checkerboard level set function.
+
+    According to Pascal Getreuer, such a level set function has fast convergence.
     """
     yv = np.arange(image_size[0]).reshape(image_size[0], 1)
     xv = np.arange(image_size[1])
@@ -135,9 +125,9 @@ def _cv_checkerboard(image_size, square_size):
 
 
 def _cv_large_disk(image_size):
-    """
-    Generates a disk level set function. The disk covers the whole
-    image along its smallest dimension.
+    """Generates a disk level set function.
+
+    The disk covers the whole image along its smallest dimension.
     """
     res = np.ones(image_size)
     centerY = int((image_size[0]-1) / 2)
@@ -148,9 +138,9 @@ def _cv_large_disk(image_size):
 
 
 def _cv_small_disk(image_size):
-    """
-    Generates a disk level set function. The disk covers half of
-    the image along its smallest dimension.
+    """Generates a disk level set function.
+
+    The disk covers half of the image along its smallest dimension.
     """
     res = np.ones(image_size)
     centerY = int((image_size[0]-1) / 2)
@@ -160,30 +150,27 @@ def _cv_small_disk(image_size):
     return (radius-distance(res)) / (radius*3)
 
 
-def _cv_initial_shape(starting_level_set, img):
+def _cv_init_level_set(init_level_set, img):
+    """Generates an initial level set function conditional on input arguments.
     """
-    Generates a checkerboard level set function. According to
-    Pascal Getreuer, such a level set function has fast convergence.
-    """
-    res = []
-    if type(starting_level_set) == str:
-        if starting_level_set == 'checkerboard':
+    if type(init_level_set) == str:
+        if init_level_set == 'checkerboard':
             res = _cv_checkerboard(img.shape, 5)
-        elif starting_level_set == 'disk':
+        elif init_level_set == 'disk':
             res = _cv_large_disk(img.shape)
-        elif starting_level_set == 'small disk':
+        elif init_level_set == 'small disk':
             res = _cv_small_disk(img.shape)
         else:
             raise ValueError("Incorrect name for starting level set preset.")
     else:
-        res = starting_level_set
+        res = init_level_set
     return res
 
 
 def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
-              dt=0.5, starting_level_set='checkerboard',
+              dt=0.5, init_level_set='checkerboard',
               extended_output=False):
-    """Chan-Vese Algorithm.
+    """Chan-Vese segmentation algorithm.
 
     Active contour model by evolving a level set. Can be used to
     segment objects without clearly defined boundaries.
@@ -192,7 +179,7 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
     ----------
     img : (M, N) ndarray
         Grayscale image to be segmented.
-    mu : float
+    mu : float, optional
         'edge length' weight parameter. Higher `mu` values will
         produce a 'round' edge, while values closer to zero will
         detect smaller objects.
@@ -218,13 +205,13 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
         serves to accelerate the algorithm. While higher values may
         speed up the algorithm, they may also lead to convergence
         problems.
-    starting_level_set : str or (M, N) ndarray, optional
+    init_level_set : str or (M, N) ndarray, optional
         Defines the starting level set used by the algorithm.
         If a string is inputted, a level set that matches the image
         size will automatically be generated. Alternatively, it is
         possible to define a custom level set, which should be an
-        array of float values, with the same size as 'img'.
-        Accepted String values are as follows.
+        array of float values, with the same shape as 'img'.
+        Accepted string values are as follows.
 
         'checkerboard'
             the starting level set is defined as
@@ -252,7 +239,7 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
     -------
     segmentation : (M, N) ndarray, bool
         Segmentation produced by the algorithm.
-    phi : (M, N) ndarray, float
+    phi : (M, N) ndarray of floats
         Final level set computed by the algorithm.
     energies : list of floats
         Shows the evolution of the 'energy' for each step of the
@@ -309,10 +296,12 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
     """
     if len(img.shape) != 2:
         raise ValueError("Input image should be a 2D array.")
-    phi = _cv_initial_shape(starting_level_set, img)
+
+    phi = _cv_init_level_set(init_level_set, img)
+
     if type(phi) != np.ndarray or phi.shape != img.shape:
-        raise ValueError("Dimensions of initial level set does not "
-                         "match dimensions of image.")
+        raise ValueError("The dimensions of initial level set do not "
+                         "match the dimensions of image.")
 
     img = img - np.min(img)
     if np.max(img) != 0:
@@ -323,21 +312,21 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
     energies = []
     phivar = tol + 1
     segmentation = phi > 0
-    area = img.shape[0] * img.shape[1]
 
     while(phivar > tol and i < max_iter):
-        # Save old levelset values
+        # Save old level set values
         oldphi = phi
-        oldseg = segmentation
+
         # Calculate new level set
         phi = _cv_calculate_variation(img, phi, mu, lambda1, lambda2, dt)
         phi = _cv_reset_level_set(phi)
-        phivar = np.sum((phi-oldphi)**2) / area
-        phivar = np.sqrt(phivar)
+        phivar = np.sqrt(((phi-oldphi)**2).mean())
+
         # Extract energy and compare to previous level set and
         # segmentation to see if continuing is necessary
         segmentation = phi > 0
         new_energy = _cv_energy(img, phi, mu, lambda1, lambda2)
+
         # Save old energy values
         energies.append(old_energy)
         old_energy = new_energy
