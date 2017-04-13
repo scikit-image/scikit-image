@@ -21,8 +21,9 @@ def _multichannel_default(multichannel, ndim):
     if multichannel is not None:
         return multichannel
     else:
-        warn('The default multichannel argument (None) is deprecated. '
-             'Specifiy True or False explicitly.')
+        warn('The default multichannel argument (None) is deprecated.  Please '
+             'specify either True or False explicitly.  multichannel will '
+             'default to False starting with release 0.16. ')
         # utility for maintaining previous color image default behavior
         if ndim == 3:
             return True
@@ -44,10 +45,10 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
     image : ndarray
         Input image.
     output_shape : tuple or ndarray
-        Size of the generated output image `(rows, cols[, dim])`. If `dim` is
-        not provided, the number of channels is preserved. In case the number
-        of input channels does not equal the number of output channels a
-        3-dimensional interpolation is applied.
+        Size of the generated output image `(rows, cols[, ...][, dim])`. If
+        `dim` is not provided, the number of channels is preserved. In case the
+        number of input channels does not equal the number of output channels a
+        n-dimensional interpolation is applied.
 
     Returns
     -------
@@ -96,7 +97,7 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
         warn("The default mode, 'constant', will be changed to 'reflect' in "
              "skimage 0.15.")
 
-    output_shape = np.asarray(output_shape)
+    output_shape = tuple(output_shape)
     ndim_out = len(output_shape)
     input_shape = image.shape
     if ndim_out > image.ndim:
@@ -105,14 +106,14 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
         image = np.reshape(image, input_shape)
     elif ndim_out == image.ndim - 1:
         # multichannel case: append shape of last axis
-        output_shape = np.concatenate((output_shape, [image.shape[-1], ]))
+        output_shape = output_shape + (image.shape[-1], )
         ndim_out += 1
     elif ndim_out < image.ndim - 1:
         raise ValueError("len(output_shape) cannot be smaller than the image "
                          "dimensions")
 
     input_shape = np.asarray(input_shape, dtype=float)
-    dim_scales = input_shape / output_shape
+    dim_scales = input_shape / np.asarray(output_shape)
 
     # 2-dimensional interpolation
     if ndim_out == 2 or (ndim_out == 3 and output_shape[2] == input_shape[2]):
@@ -139,9 +140,6 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
                    preserve_range=preserve_range)
 
     else:  # n-dimensional interpolation
-        for i in range(ndim_out - image.ndim):
-            image = image[..., np.newaxis]
-
         coord_arrays = [dim_scales[i] * (np.arange(d) + 0.5) - 0.5
                         for i, d in enumerate(output_shape)]
 
@@ -202,8 +200,8 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
     multichannel : bool, optional
-        If True, last axis will not be rescaled.  The default is True for 3D
-        (2D+color) inputs, False otherwise.
+        By default, is set to True for 3D (2D+color) inputs, and False for
+        others.  Starting in release 0.16, this will always default to False.
 
     Examples
     --------
@@ -218,7 +216,8 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
     """
     multichannel = _multichannel_default(multichannel, image.ndim)
     scale = np.atleast_1d(scale)
-    if len(scale) > 1 and len(scale) != image.ndim:
+    if len(scale) > 1 and (len(scale) != image.ndim or
+                           (multichannel and len(scale) != image.ndim - 1)):
         raise ValueError("must supply a single scale or one value per axis.")
     orig_shape = np.asarray(image.shape)
     output_shape = np.round(scale * orig_shape)

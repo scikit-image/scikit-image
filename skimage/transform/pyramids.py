@@ -13,14 +13,9 @@ def _smooth(image, sigma, mode, cval, multichannel=None):
 
     # apply Gaussian filter to all channels independently
     if multichannel:
-        for dim in range(image.shape[-1]):
-            ndi.gaussian_filter(image[..., dim], sigma,
-                                output=smoothed[..., dim],
-                                mode=mode, cval=cval)
-    else:
-        ndi.gaussian_filter(image, sigma, output=smoothed,
-                            mode=mode, cval=cval)
-
+        sigma = (sigma, )*(image.ndim - 1) + (0, )
+    ndi.gaussian_filter(image, sigma, output=smoothed,
+                        mode=mode, cval=cval)
     return smoothed
 
 
@@ -52,8 +47,8 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
     multichannel : bool, optional
-        If True, last axis will not be rescaled.  The default is True for 3D
-        (2D+color) inputs, False otherwise.
+        By default, is set to True for 3D (2D+color) inputs, and False for
+        others.  Starting in release 0.16, this will always default to False.
 
     Returns
     -------
@@ -107,8 +102,8 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
     multichannel : bool, optional
-        If True, last axis will not be rescaled.  The default is True for 3D
-        (2D+color) inputs, False otherwise.
+        By default, is set to True for 3D (2D+color) inputs, and False for
+        others.  Starting in release 0.16, this will always default to False.
 
     Returns
     -------
@@ -174,8 +169,8 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
     multichannel : bool, optional
-        If True, last axis will not be rescaled.  The default is True for 3D
-        (2D+color) inputs, False otherwise.
+        By default, is set to True for 3D (2D+color) inputs, and False for
+        others.  Starting in release 0.16, this will always default to False.
 
     Returns
     -------
@@ -254,8 +249,8 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
     multichannel : bool, optional
-        If True, last axis will not be rescaled.  The default is True for 3D
-        (2D+color) inputs, False otherwise.
+        By default, is set to True for 3D (2D+color) inputs, and False for
+        others.  Starting in release 0.16, this will always default to False.
 
     Returns
     -------
@@ -278,7 +273,6 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
         # automatically determine sigma which covers > 99% of distribution
         sigma = 2 * downscale / 6.0
 
-    layer = 0
     current_shape = image.shape
 
     smoothed_image = _smooth(image, sigma, mode, cval, multichannel)
@@ -286,8 +280,7 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 
     # build downsampled images until max_layer is reached or downscale process
     # does not change image size
-    while layer != max_layer:
-        layer += 1
+    for layer in range(max_layer):
 
         out_shape = tuple(
             [math.ceil(d / float(downscale)) for d in current_shape])
