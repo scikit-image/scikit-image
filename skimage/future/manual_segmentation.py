@@ -116,7 +116,7 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
             # Store the vertices of the polygon as shown in preview.
             # Redraw polygon and store it in polygons_drawn so that
             # `_undo` works correctly.
-            list_of_vertex_lists.append(np.array(temp_list).copy())
+            list_of_vertex_lists.append(temp_list[:])
             polygon_object = _draw_polygon(ax, temp_list, alpha=alpha)
             polygons_drawn.append(polygon_object)
 
