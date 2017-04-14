@@ -3,7 +3,6 @@ import warnings
 import numpy as np
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
-import pytest
 import skimage
 from skimage import data
 from skimage import exposure
@@ -11,6 +10,7 @@ from skimage.exposure.exposure import intensity_range
 from skimage.color import rgb2gray
 from skimage.util.dtype import dtype_range
 from skimage._shared._warnings import expected_warnings
+from skimage._shared import testing
 
 
 # Test integer histograms
@@ -254,6 +254,17 @@ def test_adapthist_alpha():
     assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.0248, 3)
 
 
+def test_adapthist_ntiles_raises():
+    img = skimage.img_as_ubyte(data.moon())
+    with testing.raises(ValueError):
+        exposure.equalize_adapthist(img, ntiles_x=8)
+    with testing.raises(ValueError):
+        exposure.equalize_adapthist(img, ntiles_y=8)
+    with testing.raises(ValueError):
+        exposure.equalize_adapthist(
+            img, ntiles_x=8, ntiles_y=8)
+
+
 def peak_snr(img1, img2):
     """Peak signal to noise ratio of two images
 
@@ -353,7 +364,7 @@ def test_adjust_gamma_greater_one():
 
 def test_adjust_gamma_neggative():
     image = np.arange(0, 255, 4, np.uint8).reshape((8, 8))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         exposure.adjust_gamma(image, -1)
 
 
@@ -473,7 +484,7 @@ def test_adjust_inv_sigmoid_cutoff_half():
 
 def test_negative():
     image = np.arange(-10, 245, 4).reshape((8, 8)).astype(np.double)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         exposure.adjust_gamma(image)
 
 
@@ -491,8 +502,3 @@ def test_is_low_contrast():
     image = (image.astype(np.uint16)) * 2**8
     assert exposure.is_low_contrast(image)
     assert not exposure.is_low_contrast(image, upper_percentile=100)
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()

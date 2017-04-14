@@ -7,7 +7,7 @@ from skimage import feature
 from skimage import img_as_float
 from skimage import draw
 from numpy.testing import assert_almost_equal
-import pytest
+from skimage._shared import testing
 
 
 def test_hog_output_size():
@@ -52,7 +52,7 @@ def test_hog_image_size_cell_size_mismatch():
 
 def test_hog_color_image_unsupported_error():
     image = np.zeros((20, 20, 3))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         feature.hog(image)
 
 
@@ -201,11 +201,13 @@ def test_hog_orientations_circle():
         assert_almost_equal(actual, desired, decimal=1)
 
 
+def test_hog_normalise_none_error_raised():
+    img = np.array([1, 2, 3])
+    with testing.raises(ValueError):
+        feature.hog(img, normalise=True)
+
+
 def test_hog_block_normalization_incorrect_error():
     img = np.eye(4)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         feature.hog(img, block_norm='Linf')
-
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()

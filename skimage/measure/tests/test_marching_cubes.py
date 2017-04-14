@@ -1,9 +1,39 @@
 import sys
 import numpy as np
-import pytest
 from skimage.draw import ellipsoid, ellipsoid_stats
 from skimage.measure import (marching_cubes_classic, marching_cubes_lewiner,
                              mesh_surface_area, correct_mesh_orientation)
+from skimage.measure._marching_cubes_lewiner import _expected_output_args
+from skimage._shared import testing
+
+
+def func_that_knows_about_its_outputs(r):
+    # Must be defined in global scope to avoid syntax error on Python 2 *sigh*
+    nout = _expected_output_args()
+    print(nout)
+    r.append(nout)
+    return [nout] * int(nout)
+
+
+def test_expected_output_args():
+    
+    foo = func_that_knows_about_its_outputs
+    
+    res = []
+    foo(res)
+    a = foo(res)
+    a, b = foo(res)
+    a, b, c = foo(res)
+    assert res == [0, 1, 2, 3] or res == [0, 0, 2, 3]
+    # ``a = foo()`` somehow yields 0 in test, which is ok for us;
+    # we only want to distinguish between > 2 args or not
+    
+    if sys.version_info >= (3, 3):
+        res = []
+        exec('*a, b, c = foo(res)')
+        exec('a, b, c, *d = foo(res)')
+        exec('a, b, *c, d, e = foo(res)')
+        assert res == [2.1, 3.1, 4.1]
 
 
 def test_marching_cubes_isotropic():
@@ -49,25 +79,25 @@ def test_marching_cubes_anisotropic():
 
 def test_invalid_input():
     # Classic
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         marching_cubes_classic(np.zeros((2, 2, 1)), 0)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         marching_cubes_classic(np.zeros((2, 2, 1)), 1)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         marching_cubes_classic(np.ones((3, 3, 3)), 1,
-                               spacing=(1, 2))
-    with pytest.raises(ValueError):
+                  spacing=(1, 2))
+    with testing.raises(ValueError):
         marching_cubes_classic(np.zeros((20, 20)), 0)
     
     # Lewiner
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         marching_cubes_lewiner(np.zeros((2, 2, 1)), 0)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         marching_cubes_lewiner(np.zeros((2, 2, 1)), 1)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         marching_cubes_lewiner(np.ones((3, 3, 3)), 1,
                                spacing=(1, 2))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         marching_cubes_lewiner(np.zeros((20, 20)), 0)
 
 
@@ -169,7 +199,3 @@ def test_both_algs_same_result_donut():
     assert not _same_mesh(vertices2, faces2, vertices3, faces3)
     # Would have been nice if old and new classic would have been the same
     # assert _same_mesh(vertices1, faces1, vertices3, faces3, 5)
-
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()

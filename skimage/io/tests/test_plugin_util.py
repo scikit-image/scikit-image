@@ -3,8 +3,8 @@ from skimage._shared._warnings import expected_warnings
 
 from numpy.testing import assert_array_equal
 import unittest
-import pytest
 import numpy as np
+from skimage._shared import testing
 
 np.random.seed(0)
 
@@ -36,12 +36,12 @@ class TestPrepareForDisplay(unittest.TestCase):
             prepare_for_display(np.random.rand(10, 10, 4))
 
     def test_wrong_dimensionality(self):
-        with pytest.raises(ValueError):
+        with testing.raises(ValueError):
             with expected_warnings(['precision loss']):
                 prepare_for_display(np.random.rand(10, 10, 1, 1))
 
     def test_wrong_depth(self):
-        with pytest.raises(ValueError):
+        with testing.raises(ValueError):
             with expected_warnings(['precision loss']):
                 prepare_for_display(np.random.rand(10, 10, 5))
 
@@ -49,7 +49,7 @@ class TestPrepareForDisplay(unittest.TestCase):
 class TestWindowManager(unittest.TestCase):
     callback_called = False
 
-    @pytest.fixture(autouse=True)
+    @testing.fixture(autouse=True)
     def setup(self):
         self.wm = WindowManager()
         self.wm.acquire('test')
@@ -74,7 +74,3 @@ class TestWindowManager(unittest.TestCase):
 
     def teardown(self):
         self.wm._release('test')
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

@@ -1,13 +1,12 @@
-from numpy.testing import assert_array_equal, assert_almost_equal, \
-    assert_array_almost_equal, assert_equal
-import pytest
+from numpy.testing import (assert_array_equal, assert_almost_equal,
+                           assert_array_almost_equal, assert_equal)
 import numpy as np
 import math
 import functools
 
-
 from skimage.measure._regionprops import (regionprops as regionprops_default,
                                           PROPS, perimeter, _parse_docs)
+from skimage._shared import testing
 
 
 regionprops = functools.partial(regionprops_default, coordinates='rc')
@@ -33,6 +32,7 @@ SAMPLE_3D[1:3, 1:3, 1:3] = 1
 SAMPLE_3D[3, 2, 2] = 1
 INTENSITY_SAMPLE_3D = SAMPLE_3D.copy()
 
+
 def test_all_props():
     region = regionprops(SAMPLE, INTENSITY_SAMPLE)[0]
     for prop in PROPS:
@@ -47,12 +47,13 @@ def test_all_props_3d():
         except NotImplementedError:
             pass
 
+
 def test_dtype():
     regionprops(np.zeros((10, 10), dtype=np.int))
     regionprops(np.zeros((10, 10), dtype=np.uint))
-    with pytest.raises(TypeError):
+    with testing.raises(TypeError):
         regionprops(np.zeros((10, 10), dtype=np.float))
-    with pytest.raises(TypeError):
+    with testing.raises(TypeError):
         regionprops(np.zeros((10, 10), dtype=np.double))
 
 
@@ -61,7 +62,7 @@ def test_ndim():
     regionprops(np.zeros((10, 10, 1), dtype=np.int))
     regionprops(np.zeros((10, 10, 1, 1), dtype=np.int))
     regionprops(np.zeros((10, 10, 10), dtype=np.int))
-    with pytest.raises(TypeError):
+    with testing.raises(TypeError):
         regionprops(np.zeros((10, 10, 10, 2), dtype=np.int))
 
 
@@ -84,10 +85,12 @@ def test_bbox():
     bbox = regionprops(SAMPLE_3D)[0].bbox
     assert_array_almost_equal(bbox, (1, 1, 1, 4, 3, 3))
 
+
 def test_bbox_area():
     padded = np.pad(SAMPLE, 5, mode='constant')
     bbox_area = regionprops(padded)[0].bbox_area
     assert_array_almost_equal(bbox_area, SAMPLE.size)
+
 
 def test_moments_central():
     mu = regionprops(SAMPLE)[0].moments_central
@@ -150,6 +153,7 @@ def test_coordinates():
     sample[coords[:, 0], coords[:, 1], coords[:, 2]] = 1
     prop_coords = regionprops(sample)[0].coords
     assert_array_equal(prop_coords, coords)
+
 
 def test_eccentricity():
     eps = regionprops(SAMPLE)[0].eccentricity
@@ -263,28 +267,29 @@ def test_minor_axis_length():
 def test_moments():
     m = regionprops(SAMPLE)[0].moments.T  # test was written with x/y coords
     # determined with OpenCV
-    assert_almost_equal(m[0,0], 72.0)
-    assert_almost_equal(m[0,1], 408.0)
-    assert_almost_equal(m[0,2], 2748.0)
-    assert_almost_equal(m[0,3], 19776.0)
-    assert_almost_equal(m[1,0], 680.0)
-    assert_almost_equal(m[1,1], 3766.0)
-    assert_almost_equal(m[1,2], 24836.0)
-    assert_almost_equal(m[2,0], 7682.0)
-    assert_almost_equal(m[2,1], 43882.0)
-    assert_almost_equal(m[3,0], 95588.0)
+    assert_almost_equal(m[0, 0], 72.0)
+    assert_almost_equal(m[0, 1], 408.0)
+    assert_almost_equal(m[0, 2], 2748.0)
+    assert_almost_equal(m[0, 3], 19776.0)
+    assert_almost_equal(m[1, 0], 680.0)
+    assert_almost_equal(m[1, 1], 3766.0)
+    assert_almost_equal(m[1, 2], 24836.0)
+    assert_almost_equal(m[2, 0], 7682.0)
+    assert_almost_equal(m[2, 1], 43882.0)
+    assert_almost_equal(m[3, 0], 95588.0)
 
 
 def test_moments_normalized():
-    nu = regionprops(SAMPLE)[0].moments_normalized.T  # test was written with
-                                                      #  x/y coords
+    # test was written with x/y coords
+    nu = regionprops(SAMPLE)[0].moments_normalized.T
+    
     # determined with OpenCV
-    assert_almost_equal(nu[0,2], 0.08410493827160502)
-    assert_almost_equal(nu[1,1], -0.016846707818929982)
-    assert_almost_equal(nu[1,2], -0.002899800614433943)
-    assert_almost_equal(nu[2,0], 0.24301268861454037)
-    assert_almost_equal(nu[2,1], 0.045473992910668816)
-    assert_almost_equal(nu[3,0], -0.017278118992041805)
+    assert_almost_equal(nu[0, 2], 0.08410493827160502)
+    assert_almost_equal(nu[1, 1], -0.016846707818929982)
+    assert_almost_equal(nu[1, 2], -0.002899800614433943)
+    assert_almost_equal(nu[2, 0], 0.24301268861454037)
+    assert_almost_equal(nu[2, 1], 0.045473992910668816)
+    assert_almost_equal(nu[3, 0], -0.017278118992041805)
 
 
 def test_orientation():
@@ -406,13 +411,13 @@ def test_invalid():
     def get_intensity_image():
         ps[0].intensity_image
 
-    with pytest.raises(AttributeError):
+    with testing.raises(AttributeError):
         get_intensity_image()
 
 
 def test_invalid_size():
     wrong_intensity_sample = np.array([[1], [1]])
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         regionprops(SAMPLE, wrong_intensity_sample)
 
 
@@ -476,8 +481,3 @@ def test_docstrings_and_props():
 def test_incorrect_coordinate_convention():
     with pytest.raises(ValueError):
         region = regionprops_default(SAMPLE, coordinates='xyz')[0]
-
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

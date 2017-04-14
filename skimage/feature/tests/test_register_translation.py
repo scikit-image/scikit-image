@@ -1,12 +1,12 @@
 import numpy as np
 from numpy.testing import assert_allclose
-import pytest
 
 from skimage.feature.register_translation import (register_translation,
                                                   _upsampled_dft)
 from skimage.data import camera, binary_blobs
 from scipy.ndimage import fourier_shift
 from skimage import img_as_float
+from skimage._shared import testing
 
 
 def test_correlation():
@@ -75,7 +75,7 @@ def test_3d_input():
                                                     shifted_image,
                                                     space="fourier")
     assert_allclose(result, -np.array(shift), atol=0.5)
-    with pytest.raises(NotImplementedError):
+    with testing.raises(NotImplementedError):
         register_translation(
             reference_image,
             shifted_image, upsample_factor=100,
@@ -84,7 +84,7 @@ def test_3d_input():
 
 def test_unknown_space_input():
     image = np.ones((5, 5))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         register_translation(
             image, image,
             space="frank")
@@ -94,36 +94,31 @@ def test_wrong_input():
     # Dimensionality mismatch
     image = np.ones((5, 5, 1))
     template = np.ones((5, 5))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         register_translation(template, image)
 
     # Greater than 2 dimensions does not support subpixel precision
     #   (TODO: should support 3D at some point.)
     image = np.ones((5, 5, 5))
     template = np.ones((5, 5, 5))
-    with pytest.raises(NotImplementedError):
+    with testing.raises(NotImplementedError):
         register_translation(template, image, 2)
 
     # Size mismatch
     image = np.ones((5, 5))
     template = np.ones((4, 4))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         register_translation(template, image)
 
 
 def test_mismatch_upsampled_region_size():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         _upsampled_dft(
             np.ones((4, 4)),
             upsampled_region_size=[3, 2, 1, 4])
 
 
 def test_mismatch_offsets_size():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         _upsampled_dft(np.ones((4, 4)), 3,
                        axis_offsets=[3, 2, 1, 4])
-
-
-if __name__ == "__main__":
-    from numpy import testing
-    testing.run_module_suite()

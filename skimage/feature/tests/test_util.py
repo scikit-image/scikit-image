@@ -4,29 +4,30 @@ try:
 except ImportError:
     plt = None
 from numpy.testing import assert_equal
-import pytest
 
 from skimage.feature.util import (FeatureDetector, DescriptorExtractor,
                                   _prepare_grayscale_input_2D,
                                   _mask_border_keypoints, plot_matches)
 
+from skimage._shared import testing
+
 
 def test_feature_detector():
-    with pytest.raises(NotImplementedError):
+    with testing.raises(NotImplementedError):
         FeatureDetector().detect(None)
 
 
 def test_descriptor_extractor():
-    with pytest.raises(NotImplementedError):
+    with testing.raises(NotImplementedError):
         DescriptorExtractor().extract(None, None)
 
 
 def test_prepare_grayscale_input_2D():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         _prepare_grayscale_input_2D(np.zeros((3, 3, 3)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         _prepare_grayscale_input_2D(np.zeros((3, 1)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         _prepare_grayscale_input_2D(np.zeros((3, 1, 1)))
     img = _prepare_grayscale_input_2D(np.zeros((3, 3)))
     img = _prepare_grayscale_input_2D(np.zeros((3, 3, 1)))
@@ -47,7 +48,7 @@ def test_mask_border_keypoints():
                  [0, 0, 0, 0, 1])
 
 
-@pytest.mark.skipif(plt is None, reason="Matplotlib not installed")
+@testing.skipif(plt is None, reason="Matplotlib not installed")
 def test_plot_matches():
     fig, ax = plt.subplots(nrows=1, ncols=1)
 
@@ -75,8 +76,3 @@ def test_plot_matches():
                      keypoints_color='r')
         plot_matches(ax, img1, img2, keypoints1, keypoints2, matches,
                      matches_color='r')
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()

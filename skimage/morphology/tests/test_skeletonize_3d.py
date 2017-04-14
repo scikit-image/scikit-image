@@ -5,8 +5,8 @@ import warnings
 
 import numpy as np
 from numpy.testing import assert_equal, run_module_suite, assert_
-import pytest
 import scipy.ndimage as ndi
+from skimage._shared import testing
 
 import skimage
 from skimage import io, draw, data_dir
@@ -20,11 +20,11 @@ from skimage.morphology import skeletonize_3d
 
 def test_skeletonize_wrong_dim():
     im = np.zeros(5, dtype=np.uint8)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         skeletonize_3d(im)
 
     im = np.zeros((5, 5, 5, 5), dtype=np.uint8)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         skeletonize_3d(im)
 
 
@@ -182,7 +182,3 @@ def test_3d_vs_fiji():
     img_s = skeletonize_3d(img)
     img_f = io.imread(os.path.join(data_dir, "_blobs_3d_fiji_skeleton.tif"))
     assert_equal(img_s, img_f)
-
-
-if __name__ == '__main__':
-    run_module_suite()

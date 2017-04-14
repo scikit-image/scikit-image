@@ -2,12 +2,12 @@ import os.path
 
 import numpy as np
 from numpy.testing import assert_equal, assert_allclose
-import pytest
 import unittest
 
 from skimage import data_dir
 from skimage.io.collection import ImageCollection, alphanumeric_key
 from skimage.io import reset_plugins
+from skimage._shared import testing
 
 
 def test_string_split():
@@ -32,8 +32,8 @@ class TestImageCollection(unittest.TestCase):
 
     pattern_matched = [os.path.join(data_dir, pic)
                        for pic in ['camera.png', 'moon.png']]
-                       
-    @pytest.fixture(autouse=True)
+
+    @testing.fixture(autouse=True)
     def setUp(self):
         reset_plugins()
         # Generic image collection with images of different shapes.
@@ -49,13 +49,13 @@ class TestImageCollection(unittest.TestCase):
         for i in range(-num, num):
             assert type(self.images[i]) is np.ndarray
         assert_allclose(self.images[0],
-                                  self.images[-num])
+                        self.images[-num])
 
         def return_img(n):
             return self.images[n]
-        with pytest.raises(IndexError):
+        with testing.raises(IndexError):
             return_img(num)
-        with pytest.raises(IndexError):
+        with testing.raises(IndexError):
             return_img(-num - 1)
 
     def test_slicing(self):
@@ -73,7 +73,7 @@ class TestImageCollection(unittest.TestCase):
 
         def set_files(f):
             self.images.files = f
-        with pytest.raises(AttributeError):
+        with testing.raises(AttributeError):
             set_files('newfiles')
 
     def test_custom_load(self):
@@ -99,10 +99,5 @@ class TestImageCollection(unittest.TestCase):
         assert_equal(array.shape, expected_shape)
 
     def test_concatentate_mismatched_image_shapes(self):
-        with pytest.raises(ValueError):
+        with testing.raises(ValueError):
             self.images.concatenate()
-
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

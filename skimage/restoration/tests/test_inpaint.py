@@ -1,9 +1,9 @@
 from __future__ import print_function, division
 
 import numpy as np
-from numpy.testing import run_module_suite, assert_allclose
-import pytest
+from numpy.testing import assert_allclose
 from skimage.restoration import inpaint
+from skimage._shared import testing
 
 
 def test_inpaint_biharmonic_2d():
@@ -52,18 +52,14 @@ def test_inpaint_biharmonic_3d():
 
 def test_invalid_input():
     img, mask = np.zeros([]), np.zeros([])
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         inpaint.inpaint_biharmonic(img, mask)
 
     img, mask = np.zeros((2, 2)), np.zeros((4, 1))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         inpaint.inpaint_biharmonic(img, mask)
 
     img = np.ma.array(np.zeros((2, 2)), mask=[[0, 0], [0, 0]])
     mask = np.zeros((2, 2))
-    with pytest.raises(TypeError):
+    with testing.raises(TypeError):
         inpaint.inpaint_biharmonic(img, mask)
-
-
-if __name__ == '__main__':
-    run_module_suite()

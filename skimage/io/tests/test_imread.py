@@ -2,7 +2,6 @@ import os
 import os.path
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
-import pytest
 import unittest
 
 from tempfile import NamedTemporaryFile
@@ -10,6 +9,7 @@ from tempfile import NamedTemporaryFile
 from skimage import data_dir
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 import skimage.io as sio
+from skimage._shared import testing
 
 try:
     import imread as _imread
@@ -29,7 +29,7 @@ def teardown():
     reset_plugins()
 
 
-@pytest.mark.skipif(not imread_available, reason="imageread not installed")
+@testing.skipif(not imread_available, reason="imageread not installed")
 def test_imread_flatten():
     # a color image is flattened
     img = imread(os.path.join(data_dir, 'color.png'), flatten=True)
@@ -40,19 +40,19 @@ def test_imread_flatten():
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 
-@pytest.mark.skipif(not imread_available, reason="imageread not installed")
+@testing.skipif(not imread_available, reason="imageread not installed")
 def test_imread_palette():
     img = imread(os.path.join(data_dir, 'palette_color.png'))
     assert img.ndim == 3
 
 
-@pytest.mark.skipif(not imread_available, reason="imageread not installed")
+@testing.skipif(not imread_available, reason="imageread not installed")
 def test_imread_truncated_jpg():
-    with pytest.raises(RuntimeError):
+    with testing.raises(RuntimeError):
         sio.imread(os.path.join(data_dir, 'truncated.jpg'))
 
 
-@pytest.mark.skipif(not imread_available, reason="imageread not installed")
+@testing.skipif(not imread_available, reason="imageread not installed")
 def test_bilevel():
     expected = np.zeros((10, 10), bool)
     expected[::2] = 1
@@ -71,7 +71,7 @@ class TestSave(unittest.TestCase):
 
         assert_array_almost_equal((x * scaling).astype(np.int32), y)
 
-    @pytest.mark.skipif(not imread_available, reason="imageread not installed")
+    @testing.skipif(not imread_available, reason="imageread not installed")
     def test_imsave_roundtrip(self):
         dtype = np.uint8
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
@@ -82,7 +82,3 @@ class TestSave(unittest.TestCase):
             else:
                 x = (x * 255).astype(dtype)
                 yield self.roundtrip, x
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

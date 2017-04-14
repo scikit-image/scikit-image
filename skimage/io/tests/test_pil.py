@@ -3,8 +3,8 @@ import numpy as np
 from numpy.testing import (
     assert_equal, assert_array_equal, assert_array_almost_equal,
     assert_allclose, run_module_suite)
-import pytest
 
+from skimage._shared import testing
 from tempfile import NamedTemporaryFile
 
 from ... import data_dir, img_as_float
@@ -130,7 +130,7 @@ def test_imread_uint16():
 
 
 def test_imread_truncated_jpg():
-    with pytest.raises(IOError):
+    with testing.raises(IOError):
         imread(os.path.join(data_dir, 'truncated.jpg'))
 
 
@@ -187,9 +187,9 @@ class TestSave:
 
 def test_imsave_incorrect_dimension():
     with temporary_file(suffix='.png') as fname:
-        with pytest.raises(ValueError):
+        with testing.raises(ValueError):
             imsave(fname, np.zeros((2, 3, 3, 1)))
-        with pytest.raises(ValueError):
+        with testing.raises(ValueError):
             imsave(fname, np.zeros((2, 3, 2)))
 
 def test_imsave_filelike():

@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 from skimage.morphology import skeletonize, medial_axis, thin
 from skimage.morphology._skeletonize import (_generate_thin_luts,
                                              G123_LUT, G123P_LUT)
@@ -8,6 +7,7 @@ from skimage import draw
 from scipy.ndimage import correlate
 from skimage.io import imread
 from skimage import data_dir
+from skimage._shared import testing
 import os.path
 
 
@@ -19,25 +19,25 @@ class TestSkeletonize():
 
     def test_skeletonize_wrong_dim1(self):
         im = np.zeros((5))
-        with pytest.raises(ValueError):
+        with testing.raises(ValueError):
             skeletonize(im)
 
     def test_skeletonize_wrong_dim2(self):
         im = np.zeros((5, 5, 5))
-        with pytest.raises(ValueError):
+        with testing.raises(ValueError):
             skeletonize(im)
 
     def test_skeletonize_not_binary(self):
         im = np.zeros((5, 5))
         im[0, 0] = 1
         im[0, 1] = 2
-        with pytest.raises(ValueError):
+        with testing.raises(ValueError):
             skeletonize(im)
 
     def test_skeletonize_unexpected_value(self):
         im = np.zeros((5, 5))
         im[0, 0] = 2
-        with pytest.raises(ValueError):
+        with testing.raises(ValueError):
             skeletonize(im)
 
     def test_skeletonize_all_foreground(self):
@@ -158,7 +158,7 @@ class TestThin():
 
     def test_baddim(self):
         for ii in [np.zeros((3)), np.zeros((3, 3, 3))]:
-            with pytest.raises(ValueError):
+            with testing.raises(ValueError):
                 thin(ii)
 
     def test_lut_generation(self):
@@ -227,7 +227,3 @@ class TestMedialAxis():
         image[:, 1:-1] = True
         result = medial_axis(image)
         assert np.all(result == image)
-
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()

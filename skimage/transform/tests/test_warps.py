@@ -1,7 +1,6 @@
-from numpy.testing import (assert_almost_equal, run_module_suite,
+from numpy.testing import (assert_almost_equal,
                            assert_equal)
 import numpy as np
-import pytest
 from scipy.ndimage import map_coordinates
 
 from skimage.transform._warps import _stackcopy
@@ -14,6 +13,7 @@ from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import test_parallel
+from skimage._shared import testing
 
 
 np.random.seed(0)
@@ -246,7 +246,7 @@ def test_resize3d_keep():
     x[1, 1, :] = 1
     with expected_warnings(['The default mode']):
         resized = resize(x, (10, 10), order=0, anti_aliasing=False)
-        with pytest.raises(ValueError):
+        with testing.raises(ValueError):
             # output_shape too short
             resize(x, (10, ), order=0, anti_aliasing=False)
     ref = np.zeros((10, 10, 3))
@@ -432,7 +432,7 @@ def test_downscale_local_mean():
 
 
 def test_invalid():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         warp(np.ones((4, 3, 3, 3)),
              SimilarityTransform())
 
@@ -447,7 +447,7 @@ def test_inverse():
 def test_slow_warp_nonint_oshape():
     image = np.random.rand(5, 5)
 
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         warp(image, lambda xy: xy,
              output_shape=(13.1, 19.5))
 
@@ -475,7 +475,3 @@ def test_keep_range():
                       clip=True, order=0)
     assert out.min() == 0
     assert out.max() == 2 / 255.0
-
-
-if __name__ == "__main__":
-    run_module_suite()

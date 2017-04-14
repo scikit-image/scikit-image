@@ -2,10 +2,11 @@ import numpy as np
 from numpy.testing import assert_equal
 import pytest
 import itertools
-from skimage import img_as_int, img_as_float, \
-                    img_as_uint, img_as_ubyte
+from skimage import (img_as_int, img_as_float,
+                     img_as_uint, img_as_ubyte)
 from skimage.util.dtype import convert
 from skimage._shared._warnings import expected_warnings
+from skimage._shared import testing
 
 
 dtype_range = {np.uint8: (0, 255),
@@ -87,10 +88,10 @@ def test_downcast():
 
 def test_float_out_of_range():
     too_high = np.array([2], dtype=np.float32)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         img_as_int(too_high)
     too_low = np.array([-2], dtype=np.float32)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         img_as_int(too_low)
 
 
@@ -109,13 +110,10 @@ def test_bool():
     img_[1, 1] = True
     img8[1, 1] = True
     for (func, dt) in [(img_as_int, np.int16),
-                    (img_as_float, np.float64),
-                    (img_as_uint, np.uint16),
-                    (img_as_ubyte, np.ubyte)]:
+                       (img_as_float, np.float64),
+                       (img_as_uint, np.uint16),
+                       (img_as_ubyte, np.ubyte)]:
         converted_ = func(img_)
         assert np.sum(converted_) == dtype_range[dt][1]
         converted8 = func(img8)
         assert np.sum(converted8) == dtype_range[dt][1]
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()

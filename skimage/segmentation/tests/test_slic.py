@@ -1,9 +1,9 @@
 import itertools as it
 import numpy as np
 from numpy.testing import assert_equal
-import pytest
 from skimage.segmentation import slic
 from skimage._shared.testing import test_parallel
+from skimage._shared import testing
 
 
 @test_parallel()
@@ -141,7 +141,7 @@ def test_spacing():
 def test_invalid_lab_conversion():
     img = np.array([[1, 1, 1, 0, 0],
                     [1, 1, 0, 0, 0]], np.float) + 1
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         slic(img, multichannel=True, convert2lab=True)
 
 
@@ -209,9 +209,3 @@ def test_more_segments_than_pixels():
     seg = slic(img, sigma=0, n_segments=500, compactness=1,
                multichannel=False, convert2lab=False)
     assert np.all(seg.ravel() == np.arange(seg.size))
-
-
-if __name__ == '__main__':
-    from numpy import testing
-
-    testing.run_module_suite()

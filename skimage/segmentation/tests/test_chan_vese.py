@@ -1,7 +1,7 @@
 import numpy as np
 from skimage.segmentation import chan_vese
 from numpy.testing import assert_array_equal
-import pytest
+from skimage._shared import testing
 
 
 def test_chan_vese_flat_level_set():
@@ -58,7 +58,7 @@ def test_chan_vese_remove_noise():
 def test_chan_vese_incorrect_image_type():
     img = np.zeros((10, 10, 3))
     ls = np.zeros((10, 9))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         chan_vese(img, mu=0.0, init_level_set=ls)
 
 
@@ -75,9 +75,9 @@ def test_chan_vese_gap_closing():
 def test_chan_vese_incorrect_level_set():
     img = np.zeros((10, 10))
     ls = np.zeros((10, 9))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         chan_vese(img, mu=0.0, init_level_set=ls)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         chan_vese(img, mu=0.0, init_level_set="a")
 
 
@@ -87,7 +87,3 @@ def test_chan_vese_blank_image():
     ref = level_set > 0
     result = chan_vese(img, mu=0.0, tol=0.0, init_level_set=level_set)
     assert_array_equal(result, ref)
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

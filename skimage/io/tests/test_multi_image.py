@@ -2,18 +2,18 @@ import os
 
 import numpy as np
 from numpy.testing import assert_equal, assert_allclose
-import pytest
 import unittest
 
 from skimage.io import use_plugin
 from skimage import data_dir
 from skimage.io.collection import MultiImage, ImageCollection
+from skimage._shared import testing
 
 import six
 
 
 class TestMultiImage(unittest.TestCase):
-    @pytest.fixture(autouse=True)
+    @testing.fixture(autouse=True)
     def setUp(self):
         # This multipage TIF file was created with imagemagick:
         # convert im1.tif im2.tif -adjoin multipage.tif
@@ -60,12 +60,12 @@ class TestMultiImage(unittest.TestCase):
                 assert type(img[i]) is np.ndarray
             assert_allclose(img[0], img[-num])
 
-            with pytest.raises(AssertionError):
+            with testing.raises(AssertionError):
                 assert_allclose(img[0], img[1])
 
-            with pytest.raises(IndexError):
+            with testing.raises(IndexError):
                 img[num]
-            with pytest.raises(IndexError):
+            with testing.raises(IndexError):
                 img[-num - 1]
 
     def test_files_property(self):
@@ -75,26 +75,21 @@ class TestMultiImage(unittest.TestCase):
 
             assert isinstance(img.filename, six.string_types)
 
-            with pytest.raises(AttributeError):
+            with testing.raises(AttributeError):
                 img.filename = "newfile"
 
     def test_conserve_memory_property(self):
         for img in self.imgs:
             assert isinstance(img.conserve_memory, bool)
 
-            with pytest.raises(AttributeError):
+            with testing.raises(AttributeError):
                 img.conserve_memory = True
 
     def test_concatenate(self):
         for img in self.imgs:
             if img[0].shape != img[-1].shape:
-                with pytest.raises(ValueError):
+                with testing.raises(ValueError):
                     img.concatenate()
                 continue
             array = img.concatenate()
             assert_equal(array.shape, (len(img),) + img[0].shape)
-
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

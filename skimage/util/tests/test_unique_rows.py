@@ -1,7 +1,7 @@
 import numpy as np
-import pytest
 from numpy.testing import assert_equal
 from skimage.util import unique_rows
+from skimage._shared import testing
 
 
 def test_discontiguous_array():
@@ -29,15 +29,11 @@ def test_float_array():
 
 def test_1d_array():
     ar = np.array([1, 0, 1, 1], np.uint8)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         unique_rows(ar)
 
 
 def test_3d_array():
     ar = np.arange(8).reshape((2, 2, 2))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         unique_rows(ar)
-
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()

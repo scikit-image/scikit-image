@@ -9,16 +9,16 @@ except Exception:
 
 from numpy.testing import (
     assert_array_equal, assert_array_almost_equal, run_module_suite)
-import pytest
 
 from tempfile import NamedTemporaryFile
 from .tifffile import imread, imsave
+from skimage._shared.testing import skipif
 
 
 np.random.seed(0)
 
 
-@pytest.mark.skipif(si is None, reason="skimage not installed")
+@skipif(si is None, reason="skimage not installed")
 def test_imread_uint16():
     expected = np.load(os.path.join(si.data_dir, 'chessboard_GRAY_U8.npy'))
     img = imread(os.path.join(si.data_dir, 'chessboard_GRAY_U16.tif'))
@@ -26,7 +26,7 @@ def test_imread_uint16():
     assert_array_almost_equal(img, expected)
 
 
-@pytest.mark.skipif(si is None, reason="skimage not installed")
+@skipif(si is None, reason="skimage not installed")
 def test_imread_uint16_big_endian():
     expected = np.load(os.path.join(si.data_dir, 'chessboard_GRAY_U8.npy'))
     img = imread(os.path.join(si.data_dir, 'chessboard_GRAY_U16B.tif'))

@@ -1,12 +1,11 @@
-from numpy.testing import (assert_array_equal, assert_, assert_equal,
-                           run_module_suite)
-import pytest
+from numpy.testing import assert_array_equal, assert_, assert_equal
 
 import math
 import numpy as np
 from skimage import data
 from skimage.transform import pyramids
 from skimage._shared._warnings import expected_warnings
+from skimage._shared import testing
 
 
 image = data.astronaut()
@@ -128,11 +127,7 @@ def test_laplacian_pyramid_max_layers():
 
 
 def test_check_factor():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         pyramids._check_factor(0.99)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         pyramids._check_factor(- 2)
-
-
-if __name__ == "__main__":
-    run_module_suite()

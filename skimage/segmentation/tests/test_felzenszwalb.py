@@ -1,10 +1,11 @@
 import numpy as np
 from numpy.testing import (assert_equal, assert_array_equal,
     assert_warns, assert_no_warnings)
-import pytest
 from skimage._shared.testing import assert_greater, test_parallel
 from skimage.segmentation import felzenszwalb
 from skimage import data
+from skimage._shared import testing
+
 
 @test_parallel()
 def test_grey():
@@ -47,7 +48,7 @@ def test_3D():
         felzenszwalb(rgb_img, multichannel=True)
     with assert_warns(RuntimeWarning):
         felzenszwalb(three_d_img, multichannel=True)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         felzenszwalb(rgb_img, multichannel=False)
         felzenszwalb(three_d_img, multichannel=False)
 
@@ -75,8 +76,3 @@ def test_merging():
     assert_equal(len(np.unique(seg)), 2)
     assert_array_equal(seg[0, :], 0)
     assert_array_equal(seg[1, :], 1)
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()

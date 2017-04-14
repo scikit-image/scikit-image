@@ -1,7 +1,6 @@
 import numpy as np
 from numpy.testing import assert_array_equal
-import pytest
-
+from skimage._shared import testing
 from skimage.measure import find_contours
 
 a = np.ones((8, 8), dtype=np.float32)
@@ -66,12 +65,7 @@ def test_memory_order():
 
 
 def test_invalid_input():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         find_contours(r, 0.5, 'foo', 'bar')
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         find_contours(r[..., None], 0.5)
-
-
-if __name__ == '__main__':
-    from numpy.testing import run_module_suite
-    run_module_suite()

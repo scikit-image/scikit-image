@@ -9,9 +9,9 @@ Original author: Lee Kamentsky
 """
 import numpy as np
 from numpy.testing import assert_array_almost_equal as assert_close
-import pytest
 
 from skimage.morphology.greyreconstruct import reconstruction
+from skimage._shared import testing
 
 
 def test_zeros():
@@ -81,10 +81,10 @@ def test_fill_hole():
 def test_invalid_seed():
     seed = np.ones((5, 5))
     mask = np.ones((5, 5))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         reconstruction(seed * 2, mask,
                        method='dilation')
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         reconstruction(seed * 0.5, mask,
                        method='erosion')
 
@@ -92,10 +92,10 @@ def test_invalid_seed():
 def test_invalid_selem():
     seed = np.ones((5, 5))
     mask = np.ones((5, 5))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         reconstruction(seed, mask,
                        selem=np.ones((4, 4)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         reconstruction(seed, mask,
                        selem=np.ones((3, 4)))
     reconstruction(seed, mask, selem=np.ones((3, 3)))
@@ -104,10 +104,5 @@ def test_invalid_selem():
 def test_invalid_method():
     seed = np.array([0, 8, 8, 8, 8, 8, 8, 8, 8, 0])
     mask = np.array([0, 3, 6, 2, 1, 1, 1, 4, 2, 0])
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         reconstruction(seed, mask, method='foo')
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()

@@ -1,7 +1,7 @@
 import os
 import numpy as np
-from numpy.testing import run_module_suite, assert_equal
-import pytest
+from numpy.testing import assert_equal
+from skimage._shared import testing
 
 import skimage
 from skimage import img_as_ubyte, img_as_float
@@ -253,7 +253,7 @@ class TestRank():
         selem = disk(20)
         image = (np.random.rand(500, 500) * 256).astype(np.uint8)
         out = image
-        with pytest.raises(NotImplementedError):
+        with testing.raises(NotImplementedError):
             rank.mean(image, selem, out=out)
 
 
@@ -727,7 +727,3 @@ class TestRank():
         assert_equal(rank.median(a), rank.median(a, full_selem))
         assert rank.median(a)[1, 1] == 0
         assert rank.median(a, disk(1))[1, 1] == 1
-
-
-if __name__ == "__main__":
-    run_module_suite()

@@ -1,22 +1,22 @@
 import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose
-import pytest
 
 from skimage.draw import ellipsoid, ellipsoid_stats, rectangle
+from skimage._shared import testing
 
 
 def test_ellipsoid_sign_parameters1():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         ellipsoid(-1, 2, 2)
 
 
 def test_ellipsoid_sign_parameters2():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         ellipsoid(0, 2, 2)
 
 
 def test_ellipsoid_sign_parameters3():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         ellipsoid(-3, -2, 2)
 
 
@@ -172,7 +172,3 @@ def test_rect_3d_end():
     pp, rr, cc = rectangle(start, end=end, shape=img.shape)
     img[pp, rr, cc] = 1
     assert_array_equal(img, expected)
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

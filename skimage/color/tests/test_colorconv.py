@@ -44,8 +44,8 @@ from skimage.color import (rgb2hsv, hsv2rgb,
 
 from skimage import data_dir
 from skimage._shared._warnings import expected_warnings
+from skimage._shared import testing
 import colorsys
-import pytest
 
 
 def test_guess_spatial_dimensions():
@@ -58,7 +58,7 @@ def test_guess_spatial_dimensions():
     assert_equal(guess_spatial_dimensions(im2), 3)
     assert_equal(guess_spatial_dimensions(im3), None)
     assert_equal(guess_spatial_dimensions(im4), 3)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         guess_spatial_dimensions(im5)
 
 
@@ -536,8 +536,3 @@ def test_gray2rgb_alpha():
                           alpha=True)[0, 0, 3], 1)
     assert_equal(gray2rgb(np.array([[1, 2], [3, 4]], dtype=np.uint8),
                           alpha=True)[0, 0, 3], 255)
-
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

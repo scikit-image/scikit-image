@@ -1,11 +1,11 @@
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_equal
-import pytest
 
 import skimage.transform as tf
 from skimage.draw import line, circle_perimeter, ellipse_perimeter
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import test_parallel
+from skimage._shared import testing
 
 
 @test_parallel()
@@ -39,7 +39,7 @@ def test_hough_line_bad_input():
     img[10] = 1
 
     # Expected error, img must be 2D
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         tf.hough_line(img, np.linspace(0, 360, 10))
 
 
@@ -74,7 +74,7 @@ def test_probabilistic_hough_bad_input():
     img[10] = 1
 
     # Expected error, img must be 2D
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         tf.probabilistic_hough_line(img)
 
 
@@ -442,7 +442,3 @@ def test_hough_ellipse_non_zero_negangle4():
                                  orientation=best[5])
     assert_equal(rr, rr2)
     assert_equal(cc, cc2)
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

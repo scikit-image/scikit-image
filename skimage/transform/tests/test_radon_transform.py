@@ -1,9 +1,9 @@
 from __future__ import print_function, division
 
 import numpy as np
-import pytest
 import itertools
 import os.path
+from skimage._shared import testing
 
 from skimage.transform import radon, iradon, iradon_sart, rescale
 from skimage.io import imread
@@ -230,7 +230,7 @@ def test_reconstruct_with_wrong_angles():
     a = np.zeros((3, 3))
     p = radon(a, theta=[0, 1, 2], circle=False)
     iradon(p, theta=[0, 1, 2], circle=False)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         iradon(p, theta=[0, 1, 2, 3])
 
 
@@ -416,8 +416,3 @@ def test_iradon_sart():
         delta = np.mean(np.abs(reconstructed - image))
         print('delta (1 iteration, shifted sinogram) =', delta)
         assert delta < 0.022 * error_factor
-
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

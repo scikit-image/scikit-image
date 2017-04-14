@@ -4,13 +4,13 @@ import numpy as np
 from skimage.color.colorlabel import label2rgb
 from numpy.testing import (assert_array_almost_equal as assert_close,
                            assert_array_equal, assert_warns)
-import pytest
+from skimage._shared import testing
 
 
 def test_shape_mismatch():
     image = np.ones((3, 3))
     label = np.ones((2, 2))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         label2rgb(image, label)
 
 
@@ -79,7 +79,7 @@ def test_negative_labels():
 
 def test_nonconsecutive():
     labels = np.array([0, 2, 4, 0])
-    colors=[(1, 0, 0), (0, 0, 1)]
+    colors = [(1, 0, 0), (0, 0, 1)]
     rout = np.array([(1., 0., 0.), (0., 0., 1.), (1., 0., 0.), (1., 0., 0.)])
     assert_close(rout, label2rgb(labels, colors=colors, alpha=1, image_alpha=1))
 
