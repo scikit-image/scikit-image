@@ -73,7 +73,7 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
         raise ValueError('Only 2D grayscale or RGB images are supported.')
 
     fig, ax = plt.subplots()
-    plt.subplots_adjust(bottom=0.2)
+    fig.subplots_adjust(bottom=0.2)
     ax.imshow(image, cmap="gray")
     ax.set_axis_off()
 
@@ -84,9 +84,9 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
             last_poly = polygons_drawn.pop()
             # ... then from the plot
             last_poly.remove()
-            plt.draw()
+            fig.canvas.draw_idle()
 
-    undo_pos = plt.axes([0.85, 0.05, 0.075, 0.075])
+    undo_pos = fig.add_axes([0.85, 0.05, 0.075, 0.075])
     undo_button = matplotlib.widgets.Button(undo_pos, u'\u27F2')
     undo_button.on_clicked(_undo)
 
@@ -180,6 +180,7 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
         raise ValueError('Only 2D grayscale or RGB images are supported.')
 
     fig, ax = plt.subplots()
+    fig.subplots_adjust(bottom=0.2)
     ax.imshow(image, cmap="gray")
     ax.set_axis_off()
 
@@ -190,9 +191,9 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
             last_poly = polygons_drawn.pop()
             # ... then from the plot
             last_poly.remove()
-            plt.draw()
+            fig.canvas.draw_idle()
 
-    undo_pos = plt.axes([0.85, 0.05, 0.075, 0.075])
+    undo_pos = fig.add_axes([0.85, 0.05, 0.075, 0.075])
     undo_button = matplotlib.widgets.Button(undo_pos, u'\u27F2')
     undo_button.on_clicked(_undo)
 
