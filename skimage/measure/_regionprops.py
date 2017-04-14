@@ -536,7 +536,7 @@ def regionprops(label_image, intensity_image=None, cache=True):
         raise TypeError('Only 2-D and 3-D images supported.')
 
     if not np.issubdtype(label_image.dtype, np.integer):
-        raise TypeError('Label image must be of integral type.')
+        raise TypeError('Label image must be of integer type.')
 
     regions = []
 
