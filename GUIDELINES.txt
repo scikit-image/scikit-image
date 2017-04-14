@@ -1,0 +1,54 @@
+Guidelines and Coding Conventions
+=================================
+
+Import
+------
+
+The following import conventions are used throughout the NumPy source
+and documentation::
+
+   import numpy as np
+   import matplotlib as mpl
+   import matplotlib.pyplot as plt
+
+Do not abbreviate ``scipy``. There is no motivating use case to
+abbreviate it in the real world, so we avoid it in the documentation
+to avoid confusion.
+
+In our examples, we import the ``data`` submodule instead of its function,
+such that the image can be changed easily::
+
+    from skimage import data
+
+    img = data.coins()
+
+
+Arguments
+---------
+
+* `image`: input image as numpy ndarray.
+
+
+Keyword arguments
+-----------------
+
+* `multichannel` (default: ): Whether the last axis of the image is to be
+interpreted as multiple channels. See #4294 for `multichannel` vs `channel_axis`.
+See #2613 for default value.
+* `selem`, `structure`, `footprint`: The neighborhood expressed as an array of 1's and 0's. See #4154
+* `in_place`, `out` (default: ) See #4563
+* `max_iter`, `max_iterations`, `iterations`, `n_iter_max`, `niter`: Maximum number of iterations. See #4154
+* `tol`: Tolerance
+* `copy`, `force_copy`
+* `method`
+* `mode`
+
+
+
+Spelling
+--------
+
+For consistency, we choose to use American English spelling:
+
+* color (instead of colour)
+* gray (instead of grey)
