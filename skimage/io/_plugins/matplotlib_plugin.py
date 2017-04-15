@@ -111,7 +111,7 @@ def _get_display_range(image):
     return lo, hi, cmap
 
 
-def imshow(im, ax=None, show_cbar=None, **kwargs):
+def imshow(image, ax=None, show_cbar=None, **kwargs):
     """Show the input image and return the current axes.
 
     By default, the image is displayed in greyscale, rather than
@@ -130,7 +130,7 @@ def imshow(im, ax=None, show_cbar=None, **kwargs):
 
     Parameters
     ----------
-    im : array, shape (M, N[, 3])
+    image : array, shape (M, N[, 3])
         The image to display.
     ax: `matplotlib.axes.Axes`, optional
         The axis to use for the image, defaults to plt.gca().
@@ -146,7 +146,7 @@ def imshow(im, ax=None, show_cbar=None, **kwargs):
     """
     if kwargs.get('cmap', None) == 'viridis':
         kwargs['cmap'] = viridis
-    lo, hi, cmap = _get_display_range(im)
+    lo, hi, cmap = _get_display_range(image)
 
     kwargs.setdefault('interpolation', 'nearest')
     kwargs.setdefault('cmap', cmap)
@@ -154,7 +154,7 @@ def imshow(im, ax=None, show_cbar=None, **kwargs):
     kwargs.setdefault('vmax', hi)
 
     ax = ax or plt.gca()
-    ax_im = ax.imshow(im, **kwargs)
+    ax_im = ax.imshow(image, **kwargs)
     if (cmap != _default_colormap and show_cbar is not False) or show_cbar:
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("right", size="5%", pad=0.05)

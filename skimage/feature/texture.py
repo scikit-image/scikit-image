@@ -367,7 +367,7 @@ def multiblock_lbp(int_image, r, c, width, height):
     return lbp_code
 
 
-def draw_multiblock_lbp(img, r, c, width, height,
+def draw_multiblock_lbp(image, r, c, width, height,
                         lbp_code=0,
                         color_greater_block=[1, 1, 1],
                         color_less_block=[0, 0.69, 0.96],
@@ -381,7 +381,7 @@ def draw_multiblock_lbp(img, r, c, width, height,
 
     Parameters
     ----------
-    img : ndarray of float or uint
+    image : ndarray of float or uint
         Image on which to visualize the pattern.
     r : int
         Row-coordinate of top left corner of a rectangle containing feature.
@@ -429,11 +429,11 @@ def draw_multiblock_lbp(img, r, c, width, height,
     color_less_block = np.asarray(color_less_block, dtype=np.float64)
 
     # Copy array to avoid the changes to the original one.
-    output = np.copy(img)
+    output = np.copy(image)
 
     # As the visualization uses RGB color we need 3 bands.
-    if len(img.shape) < 3:
-        output = gray2rgb(img)
+    if len(image.shape) < 3:
+        output = gray2rgb(image)
 
     # Colors are specified in floats.
     output = img_as_float(output)

@@ -81,14 +81,14 @@ def doctest_skip_parser(func):
     return func
 
 
-def roundtrip(img, plugin, suffix):
+def roundtrip(image, plugin, suffix):
     """Save and read an image using a specified plugin"""
     if '.' not in suffix:
         suffix = '.' + suffix
     temp_file = NamedTemporaryFile(suffix=suffix, delete=False)
     fname = temp_file.name
     temp_file.close()
-    io.imsave(fname, img, plugin=plugin)
+    io.imsave(fname, image, plugin=plugin)
     new = io.imread(fname, plugin=plugin)
     try:
         os.remove(fname)

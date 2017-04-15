@@ -6,7 +6,7 @@ from ..color import gray2rgb
 from .._shared.utils import assert_nD
 
 
-def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
+def daisy(image, step=4, radius=15, rings=3, histograms=8, orientations=8,
           normalization='l1', sigmas=None, ring_radii=None, visualize=False):
     '''Extract DAISY feature descriptors densely for the given image.
 
@@ -27,7 +27,7 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
 
     Parameters
     ----------
-    img : (M, N) array
+    image : (M, N) array
         Input image (greyscale).
     step : int, optional
         Distance between descriptor sampling points.
@@ -94,9 +94,9 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
     .. [2] http://cvlab.epfl.ch/software/daisy
     '''
 
-    assert_nD(img, 2, 'img')
+    assert_nD(image, 2, 'img')
 
-    img = img_as_float(img)
+    image = img_as_float(image)
 
     # Validate parameters.
     if sigmas is not None and ring_radii is not None \
@@ -115,10 +115,10 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
         raise ValueError('Invalid normalization method.')
 
     # Compute image derivatives.
-    dx = np.zeros(img.shape)
-    dy = np.zeros(img.shape)
-    dx[:, :-1] = np.diff(img, n=1, axis=1)
-    dy[:-1, :] = np.diff(img, n=1, axis=0)
+    dx = np.zeros(image.shape)
+    dy = np.zeros(image.shape)
+    dx[:, :-1] = np.diff(image, n=1, axis=1)
+    dy[:-1, :] = np.diff(image, n=1, axis=0)
 
     # Compute gradient orientation and magnitude and their contribution
     # to the histograms.
@@ -127,7 +127,7 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
     orientation_kappa = orientations / pi
     orientation_angles = [2 * o * pi / orientations - pi
                           for o in range(orientations)]
-    hist = np.empty((orientations,) + img.shape, dtype=float)
+    hist = np.empty((orientations,) + image.shape, dtype=float)
     for i, o in enumerate(orientation_angles):
         # Weigh bin contribution by the circular normal distribution
         hist[i, :, :] = exp(orientation_kappa * cos(grad_ori - o))
@@ -145,8 +145,8 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
     # Assemble descriptor grid.
     theta = [2 * pi * j / histograms for j in range(histograms)]
     desc_dims = (rings * histograms + 1) * orientations
-    descs = np.empty((desc_dims, img.shape[0] - 2 * radius,
-                      img.shape[1] - 2 * radius))
+    descs = np.empty((desc_dims, image.shape[0] - 2 * radius,
+                      image.shape[1] - 2 * radius))
     descs[:orientations, :, :] = hist_smooth[0, :, radius:-radius,
                                              radius:-radius]
     idx = orientations
@@ -177,7 +177,7 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
                 descs[:, :, i:i + orientations] /= norms[:, :, np.newaxis]
 
     if visualize:
-        descs_img = gray2rgb(img)
+        descs_img = gray2rgb(image)
         for i in range(descs.shape[0]):
             for j in range(descs.shape[1]):
                 # Draw center histogram sigma

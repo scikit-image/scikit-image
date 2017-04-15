@@ -173,12 +173,12 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     return _denoise_tv_bregman(image, weight, max_iter, eps, isotropic)
 
 
-def _denoise_tv_chambolle_nd(im, weight=0.1, eps=2.e-4, n_iter_max=200):
+def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):
     """Perform total-variation denoising on n-dimensional images.
 
     Parameters
     ----------
-    im : ndarray
+    image : ndarray
         n-D input data to be denoised.
     weight : float, optional
         Denoising weight. The greater `weight`, the more denoising (at
@@ -203,10 +203,10 @@ def _denoise_tv_chambolle_nd(im, weight=0.1, eps=2.e-4, n_iter_max=200):
 
     """
 
-    ndim = im.ndim
-    p = np.zeros((im.ndim, ) + im.shape, dtype=im.dtype)
+    ndim = image.ndim
+    p = np.zeros((image.ndim, ) + image.shape, dtype=image.dtype)
     g = np.zeros_like(p)
-    d = np.zeros_like(im)
+    d = np.zeros_like(image)
     i = 0
     while i < n_iter_max:
         if i > 0:
@@ -221,9 +221,9 @@ def _denoise_tv_chambolle_nd(im, weight=0.1, eps=2.e-4, n_iter_max=200):
                 d[slices_d] += p[slices_p]
                 slices_d[ax] = slice(None)
                 slices_p[ax+1] = slice(None)
-            out = im + d
+            out = image + d
         else:
-            out = im
+            out = image
         E = (d ** 2).sum()
 
         # g stores the gradients of out along each axis
@@ -242,7 +242,7 @@ def _denoise_tv_chambolle_nd(im, weight=0.1, eps=2.e-4, n_iter_max=200):
         norm += 1.
         p -= tau * g
         p /= norm
-        E /= float(im.size)
+        E /= float(image.size)
         if i == 0:
             E_init = E
             E_previous = E
@@ -255,14 +255,14 @@ def _denoise_tv_chambolle_nd(im, weight=0.1, eps=2.e-4, n_iter_max=200):
     return out
 
 
-def denoise_tv_chambolle(im, weight=0.1, eps=2.e-4, n_iter_max=200,
+def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
                          multichannel=False):
     """Perform total-variation denoising on n-dimensional images.
 
     Parameters
     ----------
-    im : ndarray of ints, uints or floats
-        Input data to be denoised. `im` can be of any numeric type,
+    image : ndarray of ints, uints or floats
+        Input data to be denoised. `image` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
     weight : float, optional
@@ -327,17 +327,17 @@ def denoise_tv_chambolle(im, weight=0.1, eps=2.e-4, n_iter_max=200,
 
     """
 
-    im_type = im.dtype
+    im_type = image.dtype
     if not im_type.kind == 'f':
-        im = img_as_float(im)
+        image = img_as_float(image)
 
     if multichannel:
-        out = np.zeros_like(im)
-        for c in range(im.shape[-1]):
-            out[..., c] = _denoise_tv_chambolle_nd(im[..., c], weight, eps,
+        out = np.zeros_like(image)
+        for c in range(image.shape[-1]):
+            out[..., c] = _denoise_tv_chambolle_nd(image[..., c], weight, eps,
                                                    n_iter_max)
     else:
-        out = _denoise_tv_chambolle_nd(im, weight, eps, n_iter_max)
+        out = _denoise_tv_chambolle_nd(image, weight, eps, n_iter_max)
     return out
 
 
@@ -385,14 +385,14 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
     return sigma
 
 
-def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
+def _wavelet_threshold(image, wavelet, threshold=None, sigma=None, mode='soft',
                        wavelet_levels=None):
     """Perform wavelet thresholding.
 
     Parameters
     ----------
-    img : ndarray (2d or 3d) of ints, uints or floats
-        Input data to be denoised. `img` can be of any numeric type,
+    image : ndarray (2d or 3d) of ints, uints or floats
+        Input data to be denoised. `image` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
     wavelet : string
@@ -435,25 +435,25 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
 
     # original_extent is used to workaround PyWavelets issue #80
     # odd-sized input results in an image with 1 extra sample after waverecn
-    original_extent = [slice(s) for s in img.shape]
+    original_extent = [slice(s) for s in image.shape]
 
     # Determine the number of wavelet decomposition levels
     if wavelet_levels is None:
-        # Determine the maximum number of possible levels for img
+        # Determine the maximum number of possible levels for image
         dlen = wavelet.dec_len
         wavelet_levels = np.min(
-            [pywt.dwt_max_level(s, dlen) for s in img.shape])
+            [pywt.dwt_max_level(s, dlen) for s in image.shape])
 
         # Skip coarsest wavelet scales (see Notes in docstring).
         wavelet_levels = max(wavelet_levels - 3, 1)
 
-    coeffs = pywt.wavedecn(img, wavelet=wavelet, level=wavelet_levels)
+    coeffs = pywt.wavedecn(image, wavelet=wavelet, level=wavelet_levels)
     # Detail coefficients at each decomposition level
     dcoeffs = coeffs[1:]
 
     if sigma is None:
         # Estimate the noise via the method in [2]_
-        detail_coeffs = dcoeffs[-1]['d' * img.ndim]
+        detail_coeffs = dcoeffs[-1]['d' * image.ndim]
         sigma = _sigma_est_dwt(detail_coeffs, distribution='Gaussian')
 
     if threshold is None:
@@ -478,15 +478,15 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
     return pywt.waverecn(denoised_coeffs, wavelet)[original_extent]
 
 
-def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
+def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
                     wavelet_levels=None, multichannel=False,
                     convert2ycbcr=False):
     """Perform wavelet denoising on an image.
 
     Parameters
     ----------
-    img : ndarray ([M[, N[, ...P]][, C]) of ints, uints or floats
-        Input data to be denoised. `img` can be of any numeric type,
+    image : ndarray ([M[, N[, ...P]][, C]) of ints, uints or floats
+        Input data to be denoised. `image` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
     sigma : float or list, optional
@@ -554,15 +554,15 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
     >>> denoised_img = denoise_wavelet(img, sigma=0.1)
 
     """
-    img = img_as_float(img)
+    image = img_as_float(image)
 
     if multichannel:
         if isinstance(sigma, numbers.Number) or sigma is None:
-            sigma = [sigma] * img.shape[-1]
+            sigma = [sigma] * image.shape[-1]
 
     if multichannel:
         if convert2ycbcr:
-            out = color.rgb2ycbcr(img)
+            out = color.rgb2ycbcr(image)
             for i in range(3):
                 # renormalizing this color channel to live in [0, 1]
                 min, max = out[..., i].min(), out[..., i].max()
@@ -575,28 +575,28 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
                 out[..., i] += min
             out = color.ycbcr2rgb(out)
         else:
-            out = np.empty_like(img)
-            for c in range(img.shape[-1]):
-                out[..., c] = _wavelet_threshold(img[..., c], wavelet=wavelet,
+            out = np.empty_like(image)
+            for c in range(image.shape[-1]):
+                out[..., c] = _wavelet_threshold(image[..., c], wavelet=wavelet,
                                                  mode=mode, sigma=sigma[c],
                                                  wavelet_levels=wavelet_levels)
 
     else:
-        out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
+        out = _wavelet_threshold(image, wavelet=wavelet, mode=mode,
                                  sigma=sigma,
                                  wavelet_levels=wavelet_levels)
 
-    clip_range = (-1, 1) if img.min() < 0 else (0, 1)
+    clip_range = (-1, 1) if image.min() < 0 else (0, 1)
     return np.clip(out, *clip_range)
 
 
-def estimate_sigma(im, average_sigmas=False, multichannel=False):
+def estimate_sigma(image, average_sigmas=False, multichannel=False):
     """
     Robust wavelet-based estimator of the (Gaussian) noise standard deviation.
 
     Parameters
     ----------
-    im : ndarray
+    image : ndarray
         Image for which to estimate the noise standard deviation.
     average_sigmas : bool, optional
         If true, average the channel estimates of `sigma`.  Otherwise return
@@ -634,17 +634,17 @@ def estimate_sigma(im, average_sigmas=False, multichannel=False):
     >>> sigma_hat = estimate_sigma(img, multichannel=False)
     """
     if multichannel:
-        nchannels = im.shape[-1]
+        nchannels = image.shape[-1]
         sigmas = [estimate_sigma(
-            im[..., c], multichannel=False) for c in range(nchannels)]
+            image[..., c], multichannel=False) for c in range(nchannels)]
         if average_sigmas:
             sigmas = np.mean(sigmas)
         return sigmas
-    elif im.shape[-1] <= 4:
+    elif image.shape[-1] <= 4:
         msg = ("image is size {0} on the last axis, but multichannel is "
                "False.  If this is a color image, please set multichannel "
                "to True for proper noise estimation.")
-        warn(msg.format(im.shape[-1]))
-    coeffs = pywt.dwtn(im, wavelet='db2')
-    detail_coeffs = coeffs['d' * im.ndim]
+        warn(msg.format(image.shape[-1]))
+    coeffs = pywt.dwtn(image, wavelet='db2')
+    detail_coeffs = coeffs['d' * image.ndim]
     return _sigma_est_dwt(detail_coeffs, distribution='Gaussian')

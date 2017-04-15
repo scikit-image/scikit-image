@@ -2,13 +2,13 @@ import numpy as np
 from scipy import ndimage as ndi
 
 
-def profile_line(img, src, dst, linewidth=1,
+def profile_line(image, src, dst, linewidth=1,
                  order=1, mode='constant', cval=0.0):
     """Return the intensity profile of an image measured along a scan line.
 
     Parameters
     ----------
-    img : numeric array, shape (M, N[, C])
+    image : numeric array, shape (M, N[, C])
         The image, either grayscale (2D array) or multichannel
         (3D array, where the final axis contains the channel
         information).
@@ -57,13 +57,13 @@ def profile_line(img, src, dst, linewidth=1,
     array([ 1.,  1.,  1.,  2.,  2.,  2.])
     """
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
-    if img.ndim == 3:
-        pixels = [ndi.map_coordinates(img[..., i], perp_lines,
+    if image.ndim == 3:
+        pixels = [ndi.map_coordinates(image[..., i], perp_lines,
                                       order=order, mode=mode, cval=cval)
-                  for i in range(img.shape[2])]
+                  for i in range(image.shape[2])]
         pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
     else:
-        pixels = ndi.map_coordinates(img, perp_lines,
+        pixels = ndi.map_coordinates(image, perp_lines,
                                      order=order, mode=mode, cval=cval)
     intensities = pixels.mean(axis=1)
 

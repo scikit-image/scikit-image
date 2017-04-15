@@ -449,7 +449,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
     return rag
 
 
-def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
+def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
              edge_cmap='magma', img_cmap='bone', in_place=True, ax=None):
     """Show a Region Adjacency Graph on an image.
 
@@ -463,7 +463,7 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
         The labelled image.
     rag : RAG
         The Region Adjacency Graph.
-    img : ndarray, shape (M, N[, 3])
+    image : ndarray, shape (M, N[, 3])
         Input image. If `colormap` is `None`, the image should be in RGB
         format.
     border_color : color spec, optional
@@ -509,17 +509,17 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
 
     if ax is None:
         fig, ax = plt.subplots()
-    out = util.img_as_float(img, force_copy=True)
+    out = util.img_as_float(image, force_copy=True)
 
     if img_cmap is None:
-        if img.ndim < 3 or img.shape[2] not in [3, 4]:
+        if image.ndim < 3 or image.shape[2] not in [3, 4]:
             msg = 'If colormap is `None`, an RGB or RGBA image should be given'
             raise ValueError(msg)
         # Ignore the alpha channel
-        out = img[:, :, :3]
+        out = image[:, :, :3]
     else:
         img_cmap = cm.get_cmap(img_cmap)
-        out = color.rgb2gray(img)
+        out = color.rgb2gray(image)
         # Ignore the alpha channel
         out = img_cmap(out)[:, :, :3]
 

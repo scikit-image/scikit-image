@@ -17,7 +17,7 @@ def _cv_curvature(phi):
     return K
 
 
-def _cv_calculate_variation(img, phi, mu, lambda1, lambda2, dt):
+def _cv_calculate_variation(image, phi, mu, lambda1, lambda2, dt):
     """Returns the variation of level set 'phi' based on algorithm parameters.
     """
     eta = 1e-16
@@ -40,10 +40,10 @@ def _cv_calculate_variation(img, phi, mu, lambda1, lambda2, dt):
          P[2:, 1:-1] * C3 + P[:-2, 1:-1] * C4)
 
     Hphi = 1 * (phi > 0)
-    (c1, c2) = _cv_calculate_averages(img, Hphi)
+    (c1, c2) = _cv_calculate_averages(image, Hphi)
 
-    difference_from_average_term = (- lambda1 * (img-c1)**2 +
-                                    lambda2 * (img-c2)**2)
+    difference_from_average_term = (- lambda1 * (image-c1)**2 +
+                                    lambda2 * (image-c2)**2)
     new_phi = (phi + (dt*_cv_delta(phi)) *
                (mu*K + difference_from_average_term))
     return new_phi / (1 + mu * dt * _cv_delta(phi) * (C1+C2+C3+C4))
@@ -63,15 +63,15 @@ def _cv_delta(x, eps=1.):
     return eps / (eps**2 + x**2)
 
 
-def _cv_calculate_averages(img, Hphi):
+def _cv_calculate_averages(image, Hphi):
     """Returns the average values 'inside' and 'outside'.
     """
     H = Hphi
     Hinv = 1. - H
     Hsum = np.sum(H)
     Hinvsum = np.sum(Hinv)
-    avg_inside = np.sum(img * H)
-    avg_oustide = np.sum(img * Hinv)
+    avg_inside = np.sum(image * H)
+    avg_oustide = np.sum(image * Hinv)
     if Hsum != 0:
         avg_inside /= Hsum
     if Hinvsum != 0:
@@ -79,14 +79,14 @@ def _cv_calculate_averages(img, Hphi):
     return (avg_inside, avg_oustide)
 
 
-def _cv_difference_from_average_term(img, Hphi, lambda_pos, lambda_neg):
+def _cv_difference_from_average_term(image, Hphi, lambda_pos, lambda_neg):
     """Returns the 'energy' contribution due to the difference from
     the average value within a region at each point.
     """
-    (c1, c2) = _cv_calculate_averages(img, Hphi)
+    (c1, c2) = _cv_calculate_averages(image, Hphi)
     Hinv = 1. - Hphi
-    return (lambda_pos * (img-c1)**2 * Hphi +
-            lambda_neg * (img-c2)**2 * Hinv)
+    return (lambda_pos * (image-c1)**2 * Hphi +
+            lambda_neg * (image-c2)**2 * Hinv)
 
 
 def _cv_edge_length_term(phi, mu):
@@ -97,11 +97,11 @@ def _cv_edge_length_term(phi, mu):
     return mu * toret
 
 
-def _cv_energy(img, phi, mu, lambda1, lambda2):
+def _cv_energy(image, phi, mu, lambda1, lambda2):
     """Returns the total 'energy' of the current level set function.
     """
     H = _cv_heavyside(phi)
-    avgenergy = _cv_difference_from_average_term(img, H, lambda1, lambda2)
+    avgenergy = _cv_difference_from_average_term(image, H, lambda1, lambda2)
     lenenergy = _cv_edge_length_term(phi, mu)
     return np.sum(avgenergy) + np.sum(lenenergy)
 
@@ -150,16 +150,16 @@ def _cv_small_disk(image_size):
     return (radius-distance(res)) / (radius*3)
 
 
-def _cv_init_level_set(init_level_set, img):
+def _cv_init_level_set(init_level_set, image_shape):
     """Generates an initial level set function conditional on input arguments.
     """
     if type(init_level_set) == str:
         if init_level_set == 'checkerboard':
-            res = _cv_checkerboard(img.shape, 5)
+            res = _cv_checkerboard(image_shape, 5)
         elif init_level_set == 'disk':
-            res = _cv_large_disk(img.shape)
+            res = _cv_large_disk(image_shape)
         elif init_level_set == 'small disk':
-            res = _cv_small_disk(img.shape)
+            res = _cv_small_disk(image_shape)
         else:
             raise ValueError("Incorrect name for starting level set preset.")
     else:
@@ -167,7 +167,7 @@ def _cv_init_level_set(init_level_set, img):
     return res
 
 
-def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
+def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
               dt=0.5, init_level_set='checkerboard',
               extended_output=False):
     """Chan-Vese segmentation algorithm.
@@ -177,7 +177,7 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
 
     Parameters
     ----------
-    img : (M, N) ndarray
+    image : (M, N) ndarray
         Grayscale image to be segmented.
     mu : float, optional
         'edge length' weight parameter. Higher `mu` values will
@@ -210,7 +210,7 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
         If a string is inputted, a level set that matches the image
         size will automatically be generated. Alternatively, it is
         possible to define a custom level set, which should be an
-        array of float values, with the same shape as 'img'.
+        array of float values, with the same shape as 'image'.
         Accepted string values are as follows.
 
         'checkerboard'
@@ -294,21 +294,21 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
     .. [3] The Chan-Vese Algorithm - Project Report, Rami Cohen,
            http://arxiv.org/abs/1107.2782, 2011
     """
-    if len(img.shape) != 2:
+    if len(image.shape) != 2:
         raise ValueError("Input image should be a 2D array.")
 
-    phi = _cv_init_level_set(init_level_set, img)
+    phi = _cv_init_level_set(init_level_set, image.shape)
 
-    if type(phi) != np.ndarray or phi.shape != img.shape:
+    if type(phi) != np.ndarray or phi.shape != image.shape:
         raise ValueError("The dimensions of initial level set do not "
                          "match the dimensions of image.")
 
-    img = img - np.min(img)
-    if np.max(img) != 0:
-        img = img / np.max(img)
+    image = image - np.min(image)
+    if np.max(image) != 0:
+        image = image / np.max(image)
 
     i = 0
-    old_energy = _cv_energy(img, phi, mu, lambda1, lambda2)
+    old_energy = _cv_energy(image, phi, mu, lambda1, lambda2)
     energies = []
     phivar = tol + 1
     segmentation = phi > 0
@@ -318,14 +318,14 @@ def chan_vese(img, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
         oldphi = phi
 
         # Calculate new level set
-        phi = _cv_calculate_variation(img, phi, mu, lambda1, lambda2, dt)
+        phi = _cv_calculate_variation(image, phi, mu, lambda1, lambda2, dt)
         phi = _cv_reset_level_set(phi)
         phivar = np.sqrt(((phi-oldphi)**2).mean())
 
         # Extract energy and compare to previous level set and
         # segmentation to see if continuing is necessary
         segmentation = phi > 0
-        new_energy = _cv_energy(img, phi, mu, lambda1, lambda2)
+        new_energy = _cv_energy(image, phi, mu, lambda1, lambda2)
 
         # Save old energy values
         energies.append(old_energy)
