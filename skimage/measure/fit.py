@@ -44,8 +44,8 @@ class LineModel(BaseModel):
     params : tuple
         Line model parameters in the following order `dist`, `theta`.
 
-    Example
-    -------
+    Examples
+    --------
     >>> x = np.linspace(1, 2, 25)
     >>> y = LineModel().predict_y(x, params=(1.5, 3))
     >>> lm = LineModel()
@@ -193,8 +193,8 @@ class LineModelND(BaseModel):
     params : tuple
         Line model parameters in the following order `origin`, `direction`.
 
-    Example
-    -------
+    Examples
+    --------
     >>> x = np.linspace(1, 2, 25)
     >>> y = LineModel().predict_y(x, params=(1.5, 3))
     >>> lm = LineModelND()
@@ -381,8 +381,8 @@ class CircleModel(BaseModel):
     params : tuple
         Circle model parameters in the following order `xc`, `yc`, `r`.
 
-    Example
-    -------
+    Examples
+    --------
     >>> t = np.linspace(0, 2 * np.pi, 25)
     >>> xy = CircleModel().predict_xy(t, params=(2, 3, 4))
     >>> model = CircleModel()
@@ -844,7 +844,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance used
         by `np.random`.
-    
+
 
     Returns
     -------
@@ -927,7 +927,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     best_inlier_num = 0
     best_inlier_residuals_sum = np.inf
     best_inliers = None
-    
+
     random_state = check_random_state(random_state)
 
     if min_samples < 0:
