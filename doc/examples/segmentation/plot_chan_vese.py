@@ -19,15 +19,15 @@ This implementation of the algorithm is somewhat simplified in the
 sense that the area factor 'nu' described in the original paper is not
 implemented, and is only suitable for grayscale images.
 
-Typical values for lambda1 and lambda2 are 1. If the 'background' is
+Typical values for ``lambda1`` and ``lambda2`` are 1. If the 'background' is
 very different from the segmented object in terms of distribution (for
 example, a uniform black image with figures of varying intensity), then
 these values should be different from each other.
 
-Typical values for mu are between 0 and 1, though higher values can be
+Typical values for ``mu`` are between 0 and 1, though higher values can be
 used when dealing with shapes with very ill-defined contours.
 
-The algorithm also returns a list of values which corresponds to the
+The algorithm also returns a list of values that corresponds to the
 energy at each iteration. This can be used to adjust the various
 parameters described above.
 
@@ -35,19 +35,19 @@ References
 ----------
 .. [1] An Active Contour Model without Edges, Tony Chan and
        Luminita Vese, Scale-Space Theories in Computer Vision, 1999,
-       http://dx.doi.org/10.1007/3-540-48236-9_13
+       DOI:10.1007/3-540-48236-9_13
 .. [2] Chan-Vese Segmentation, Pascal Getreuer, Image Processing On
        Line, 2 (2012), pp. 214-224,
-       https://doi.org/10.5201/ipol.2012.g-cv
+       DOI:10.5201/ipol.2012.g-cv
 .. [3] The Chan-Vese Algorithm - Project Report, Rami Cohen,
        http://arxiv.org/abs/1107.2782 , 2011
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage import data
+from skimage import data, img_as_float
 from skimage.segmentation import chan_vese
 
-image = data.camera().astype(np.float)
+image = img_as_float(data.camera())
 # Feel free to play around with the parameters to see how they impact the result
 cv = chan_vese(image, mu=0.25, lambda1=1, lambda2=1, tol=1e-3, max_iter=200,
                dt=0.5, init_level_set="checkerboard", extended_output=True)
