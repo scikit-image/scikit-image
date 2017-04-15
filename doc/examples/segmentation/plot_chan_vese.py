@@ -19,15 +19,15 @@ This implementation of the algorithm is somewhat simplified in the
 sense that the area factor 'nu' described in the original paper is not
 implemented, and is only suitable for grayscale images.
 
-Typical values for lambda1 and lambda2 are 1. If the 'background' is
+Typical values for ``lambda1`` and ``lambda2`` are 1. If the 'background' is
 very different from the segmented object in terms of distribution (for
 example, a uniform black image with figures of varying intensity), then
 these values should be different from each other.
 
-Typical values for mu are between 0 and 1, though higher values can be
+Typical values for ``mu`` are between 0 and 1, though higher values can be
 used when dealing with shapes with very ill-defined contours.
 
-The algorithm also returns a list of values which corresponds to the
+The algorithm also returns a list of values that corresponds to the
 energy at each iteration. This can be used to adjust the various
 parameters described above.
 
