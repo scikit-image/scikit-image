@@ -53,4 +53,4 @@ __all__ = ['binary_erosion',
 
 for str(s) in selem:
   setattr(sys.modules[__name__], s, deprecated(getattr(.selem, s), 
-    "This function will be phases out by release 0.15; refer to skimage/shapes."))
+    "This function will be phased out by release 0.15; refer to skimage/shapes."))
