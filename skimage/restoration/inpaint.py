@@ -15,7 +15,7 @@ def _get_neighborhood(nd_idx, radius, nd_shape):
     return bounds_lo, bounds_hi
 
 
-def _inpaint_biharmonic_single_channel(img, mask, out, limits):
+def _inpaint_biharmonic_single_channel(mask, out, limits):
     # Initialize sparse matrices
     matrix_unknown = sparse.lil_matrix((np.sum(mask), out.size))
     matrix_known = sparse.lil_matrix((np.sum(mask), out.size))
@@ -140,8 +140,7 @@ def inpaint_biharmonic(image, mask, multichannel=False):
 
         for idx_region in range(1, num_labels+1):
             mask_region = mask_labeled == idx_region
-            _inpaint_biharmonic_single_channel(
-                image[..., idx_channel], mask_region,
+            _inpaint_biharmonic_single_channel(mask_region,
                 out[..., idx_channel], limits)
 
     if not multichannel:
