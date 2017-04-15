@@ -17,14 +17,6 @@ from .thresholding import (threshold_local,
 from . import rank
 from .rank import median
 
-from .._shared.utils import deprecated, copy_func
-
-
-gaussian_filter = copy_func(gaussian, name='gaussian_filter')
-gaussian_filter = deprecated('skimage.filters.gaussian')(gaussian_filter)
-gabor_filter = copy_func(gabor, name='gabor_filter')
-gabor_filter = deprecated('skimage.filters.gabor')(gabor_filter)
-
 __all__ = ['inverse',
            'wiener',
            'LPIFilter2D',

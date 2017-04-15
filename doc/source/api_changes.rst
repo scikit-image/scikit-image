@@ -1,3 +1,21 @@
+Version 0.14
+------------
+- ``skimage.filters.gaussian_filter`` has been removed. Use
+  ``skimage.filters.gaussian`` instead.
+- ``skimage.filters.gabor_filter`` has been removed. Use
+  ``skimage.filters.gabor`` instead.
+- The old syntax support for ``skimage.transform.integrate`` has been removed.
+- The ``normalise`` parameter of ``skimage.feature.hog`` was removed due to
+  incorrect behavior: it only applied a square root instead of a true
+  normalization. If you wish to duplicate the old behavior, set
+  ``transform_sqrt=True``.
+- ``skimage.measure.structural_similarity`` has been removed. Use
+  ``skimage.measure.compare_ssim`` instead.
+- In ``skimage.measure.compare_ssim``, the `dynamic_range` has been removed in
+  favor of '`data_range`.
+- In ``skimage.restoration.denoise_bilateral``, the `sigma_range` kwarg has
+  been removed in favor of `sigma_color`.
+
 Version 0.13
 ------------
 - `skimage.filter` has been removed. Use `skimage.filters` instead.

@@ -8,7 +8,6 @@ from skimage.measure import compare_ssim as ssim
 import skimage.data
 from skimage.io import imread
 from skimage import data_dir
-from skimage._shared._warnings import expected_warnings
 
 np.random.seed(5)
 cam = skimage.data.camera()
@@ -17,14 +16,6 @@ cam_noisy = np.clip(cam + sigma * np.random.randn(*cam.shape), 0, 255)
 cam_noisy = cam_noisy.astype(cam.dtype)
 
 np.random.seed(1234)
-
-
-# This test to be removed in 0.14, along with the structural_similarity alias
-# for compare_ssim
-def test_old_name_deprecated():
-    from skimage.measure import structural_similarity
-    with expected_warnings('deprecated'):
-        ssim_result = structural_similarity(cam, cam_noisy, win_size=31)
 
 
 def test_ssim_patch_range():
@@ -75,24 +66,6 @@ def test_ssim_grad():
 
     mssim, grad, s = ssim(X, Y, data_range=255, gradient=True, full=True)
     assert np.all(grad < 0.05)
-
-
-# NOTE: This test is known to randomly fail on some systems (Mac OS X 10.6)
-def test_ssim_dynamic_range_and_data_range():
-    # Tests deprecation of "dynamic_range" in favor of "data_range"
-    N = 30
-    X = np.random.rand(N, N) * 255
-    Y = np.random.rand(N, N) * 255
-
-    with expected_warnings(
-            '`dynamic_range` has been deprecated in favor of '
-            '`data_range`. The `dynamic_range` keyword argument '
-            'will be removed in v0.14'):
-        out2 = ssim(X, Y, dynamic_range=255)
-
-    out1 = ssim(X, Y, data_range=255)
-
-    assert_equal(out1, out2)
 
 
 def test_ssim_dtype():

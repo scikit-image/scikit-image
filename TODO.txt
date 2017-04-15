@@ -4,21 +4,13 @@ Version 0.14
 ------------
 * Remove deprecated ``ntiles_*` kwargs in ``equalize_adapthist``.
 * Remove deprecated ``skimage.restoration.nl_means_denoising``.
-* Remove deprecated ``skimage.filters.gaussian_filter``.
-* Remove deprecated ``skimage.filters.gabor_filter``.
 * Remove deprecated ``skimage.measure.LineModel`` and
   add an alias LineModel = LineModelND. While the deprecated LineModel has for
   parameters `(dist, theta)`, LineModelND has the more general parameters
   `(origin, direction)`.
-* Remove deprecated old syntax support for ``skimage.transform.integrate``.
-* Remove deprecated ``skimage.measure.structural_similarity`` alias and
-  deprecation warning test for this alias.
-* Remove deprecated ``sigma_range`` kwargs in ``skimage.restoration.denoise_bilateral``
-  and corresponding tests.
 * Remove deprecation error on the usage of ``ntiles_x``, ``ntiles_y`` in
   ``skimage.exposure.equalize_adapthist`` and the corresponding test.
 * Remove the freeimage plugin shim to imageio.
-* Remove deprecated `normalise` and corresponding test for ``skimage.feature.hog``.
 * Remove deprecated ``marching_cubes`` from ``skimage.measure``.
 * Fix the following tests: ``test_gray2rgb``.
 

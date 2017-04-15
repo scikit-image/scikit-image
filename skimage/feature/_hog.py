@@ -24,7 +24,7 @@ def _hog_normalize_block(block, method, eps=1e-5):
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         block_norm='L1', visualise=False, transform_sqrt=False,
-        feature_vector=True, normalise=None):
+        feature_vector=True):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Compute a Histogram of Oriented Gradients (HOG) by
@@ -69,9 +69,6 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     feature_vector : bool, optional
         Return the data as a feature vector by calling .ravel() on the result
         just before returning.
-    normalise : bool, deprecated
-        The parameter is deprecated. Use `transform_sqrt` for power law
-        compression. `normalise` has been deprecated.
 
     Returns
     -------
@@ -131,14 +128,6 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     """
 
     assert_nD(image, 2)
-
-    if normalise is not None:
-        raise ValueError("The ``normalise`` parameter was removed due to "
-                         "incorrect behavior: it only applied a square root "
-                         "instead of a true normalization. "
-                         "If you wish to duplicate the old behavior, set "
-                         "``transform_sqrt=True``. ``normalise`` will be "
-                         "completely removed in v0.14.")
 
     if transform_sqrt:
         image = np.sqrt(image)
