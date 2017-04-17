@@ -36,6 +36,7 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
 
     Examples
     ----------
+    >>> import numpy as np
     >>> from skimage import data
     >>> from skimage.viewer import ImageViewer
     >>> from skimage.viewer.canvastools import RectangleTool
