@@ -1,6 +1,8 @@
-from numpy.testing import assert_array_equal, run_module_suite
+from numpy.testing import (assert_array_equal, assert_, assert_equal,
+                           run_module_suite)
 import pytest
 
+import math
 import numpy as np
 from skimage import data
 from skimage.transform import pyramids
@@ -97,13 +99,32 @@ def test_build_laplacian_pyramid_rgb():
 
 def test_build_laplacian_pyramid_nd():
     for ndim in [1, 2, 3, 4]:
-        img = np.random.randn(*((8, ) * ndim))
+        img = np.random.randn(*(16, )*ndim)
         original_shape = np.asarray(img.shape)
         pyramid = pyramids.pyramid_laplacian(img, downscale=2,
                                              multichannel=False)
         for layer, out in enumerate(pyramid):
+            print(out.shape)
             layer_shape = original_shape / 2 ** layer
             assert_array_equal(out.shape, layer_shape)
+
+
+def test_laplacian_pyramid_max_layers():
+    for downscale in [2, 3, 5, 7]:
+        img = np.random.randn(32, 8)
+        pyramid = pyramids.pyramid_laplacian(img, downscale=downscale,
+                                             multichannel=False)
+        max_layer = int(np.ceil(math.log(np.max(img.shape), downscale)))
+        for layer, out in enumerate(pyramid):
+            if layer < max_layer:
+                # should not reach all axes as size 1 prior to final level
+                assert_(np.max(out.shape) > 1)
+
+        # total number of images is max_layer + 1
+        assert_equal(max_layer, layer)
+
+        # final layer should be size 1 on all axes
+        assert_array_equal((out.shape), (1, 1))
 
 
 def test_check_factor():
