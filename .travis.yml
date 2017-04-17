@@ -76,7 +76,9 @@ install:
     - python setup.py develop
     - section_end build
 
-script: tools/travis_script.sh
+script:
+    - tools/travis_script.sh
+    - tools/deploy_docs.sh
 
 after_success:
     - codecov
