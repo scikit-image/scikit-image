@@ -68,7 +68,7 @@ from skimage import data_dir
 from skimage.transform import radon, rescale
 
 image = imread(data_dir + "/phantom.png", as_grey=True)
-image = rescale(image, scale=0.4, mode='reflect')
+image = rescale(image, scale=0.4, mode='reflect', multichannel=False)
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5))
 
