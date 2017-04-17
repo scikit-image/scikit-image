@@ -273,6 +273,7 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
         # automatically determine sigma which covers > 99% of distribution
         sigma = 2 * downscale / 6.0
 
+    layer = 0
     current_shape = image.shape
 
     smoothed_image = _smooth(image, sigma, mode, cval, multichannel)
@@ -280,7 +281,8 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 
     # build downsampled images until max_layer is reached or downscale process
     # does not change image size
-    for layer in range(max_layer):
+    while layer != max_layer:
+        layer += 1
 
         out_shape = tuple(
             [math.ceil(d / float(downscale)) for d in current_shape])
