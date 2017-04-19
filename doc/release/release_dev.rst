@@ -14,7 +14,7 @@ http://scikit-image.org
 
 New Features
 ------------
-
+- manual segmentation with matplotlib (#2584)
 
 
 
