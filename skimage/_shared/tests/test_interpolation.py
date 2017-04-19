@@ -19,10 +19,6 @@ def test_coord_map():
     expected_reflect = [0, 1, 2, 3, 2, 1, 0, 1, 2, 3, 2, 1]
     assert_array_equal(reflect, expected_reflect)
 
-    constant = [coord_map_py(4, n, 'C') for n in range(-6, 6)]
-    expected_constant = [0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 0, 0]
-    # FIXME This tests does not pass!!
-    # assert_array_equal(constant, expected_constant)
-
     other = [coord_map_py(4, n, 'undefined') for n in range(-6, 6)]
-    assert_array_equal(other, list(range(-6, 6)))
+    expected_other = list(range(-6, 6))
+    assert_array_equal(other, expected_other)

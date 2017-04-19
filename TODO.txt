@@ -21,7 +21,6 @@ Version 0.14
 * Remove the freeimage plugin shim to imageio.
 * Remove deprecated `normalise` and corresponding test for ``skimage.feature.hog``.
 * Remove deprecated ``marching_cubes`` from ``skimage.measure``.
-* Fix the following tests: ``test_gray2rgb``.
 
 Version 0.15
 ------------
