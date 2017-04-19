@@ -30,7 +30,7 @@ types and how scikit-image treats them.
 
 
 NumPy indexing
---------------
+==============
 
 NumPy indexing can be used both for looking at pixel values, and to
 modify pixel values: ::
@@ -95,7 +95,7 @@ Boolean arithmetic can be used to define more complex masks: ::
 
 
 Color images
-------------
+============
 
 All of the above is true of color images, too: a color image is a
 NumPy array, with an additional trailing dimension for the channels:
@@ -134,7 +134,7 @@ the grayscale image above:
 .. _numpy-images-coordinate-conventions:
 
 Coordinate conventions
-----------------------
+======================
 
 Because we represent images with numpy arrays, our coordinates must
 match accordingly. Two-dimensional (2D) grayscale images (such as
@@ -196,7 +196,7 @@ leading dimension, we can use the following syntax:
 
 
 Notes on array order
---------------------
+====================
 
 Although the labeling of the axes seems arbitrary, it can have a
 significant effect on speed of operations. This is because modern
@@ -237,7 +237,7 @@ one should iterate along the last/rightmost dimension in the
 innermost loop of the computation.
 
 A note on time
---------------
+==============
 
 Although scikit-image does not currently (0.11) provide functions to
 work specifically with time-varying 3D data, our compatibility with
