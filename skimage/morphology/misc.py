@@ -2,7 +2,7 @@ import numpy as np
 import functools
 from scipy import ndimage as ndi
 from .._shared.utils import warn
-from .selem import _default_selem
+from ..shapes.selem import _default_selem
 
 # Our function names don't exactly correspond to ndimages.
 # This dictionary translates from our names to scipy's.

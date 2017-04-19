@@ -5,7 +5,7 @@ import itertools as itt
 import math
 from math import sqrt, hypot, log
 from numpy import arccos
-from ..util import img_as_float
+from ..util import image_as_float
 from .peak import peak_local_max
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
@@ -178,7 +178,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     """
     assert_nD(image, 2)
 
-    image = img_as_float(image)
+    image = image_as_float(image)
 
     # k such that min_sigma*(sigma_ratio**k) > max_sigma
     k = int(log(float(max_sigma) / min_sigma, sigma_ratio)) + 1
@@ -259,9 +259,9 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     Examples
     --------
     >>> from skimage import data, feature, exposure
-    >>> img = data.coins()
-    >>> img = exposure.equalize_hist(img)  # improves detection
-    >>> feature.blob_log(img, threshold = .3)
+    >>> image = data.coins()
+    >>> image = exposure.equalize_hist(image)  # improves detection
+    >>> feature.blob_log(image, threshold = .3)
     array([[ 266.        ,  115.        ,   11.88888889],
            [ 263.        ,  302.        ,   17.33333333],
            [ 263.        ,  244.        ,   17.33333333],
@@ -287,7 +287,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
     assert_nD(image, 2)
 
-    image = img_as_float(image)
+    image = image_as_float(image)
 
     if log_scale:
         start, stop = log(min_sigma, 10), log(max_sigma, 10)
@@ -368,8 +368,8 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     Examples
     --------
     >>> from skimage import data, feature
-    >>> img = data.coins()
-    >>> feature.blob_doh(img)
+    >>> image = data.coins()
+    >>> feature.blob_doh(image)
     array([[ 270.        ,  363.        ,   30.        ],
            [ 265.        ,  113.        ,   23.55555556],
            [ 262.        ,  243.        ,   23.55555556],
@@ -401,7 +401,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
 
     assert_nD(image, 2)
 
-    image = img_as_float(image)
+    image = image_as_float(image)
     image = integral_image(image)
 
     if log_scale:

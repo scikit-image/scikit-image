@@ -24,7 +24,7 @@ def _get_high_intensity_peaks(image, mask, num_peaks):
 
 def peak_local_max(image, min_distance=1, threshold_abs=None,
                    threshold_rel=None, exclude_border=True, indices=True,
-                   num_peaks=np.inf, footprint=None, labels=None,
+                   num_peaks=np.inf, footprint=None, label_image=None,
                    num_peaks_per_label=np.inf):
     """Find peaks in an image as coordinate list or boolean mask.
 
@@ -65,8 +65,8 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         If provided, `footprint == 1` represents the local region within which
         to search for peaks at every point in `image`.  Overrides
         `min_distance` (also for `exclude_border`).
-    labels : ndarray of ints, optional
-        If provided, each unique region `labels == value` represents a unique
+    label_image : ndarray of ints, optional
+        If provided, each unique region `label_image == value` represents a unique
         region to search for peaks. Zero is reserved for background.
     num_peaks_per_label : int, optional
         Maximum number of peaks for each label.
@@ -89,10 +89,10 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
 
     Examples
     --------
-    >>> img1 = np.zeros((7, 7))
-    >>> img1[3, 4] = 1
-    >>> img1[3, 2] = 1.5
-    >>> img1
+    >>> image1 = np.zeros((7, 7))
+    >>> image1[3, 4] = 1
+    >>> image1[3, 2] = 1.5
+    >>> image1
     array([[ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
            [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
            [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
@@ -101,16 +101,16 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
            [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
            [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ]])
 
-    >>> peak_local_max(img1, min_distance=1)
+    >>> peak_local_max(image1, min_distance=1)
     array([[3, 4],
            [3, 2]])
 
-    >>> peak_local_max(img1, min_distance=2)
+    >>> peak_local_max(image1, min_distance=2)
     array([[3, 2]])
 
-    >>> img2 = np.zeros((20, 20, 20))
-    >>> img2[10, 10, 10] = 1
-    >>> peak_local_max(img2, exclude_border=0)
+    >>> image2 = np.zeros((20, 20, 20))
+    >>> image2[10, 10, 10] = 1
+    >>> peak_local_max(image2, exclude_border=0)
     array([[10, 10, 10]])
 
     """
@@ -119,26 +119,26 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
 
     out = np.zeros_like(image, dtype=np.bool)
 
-    # In the case of labels, recursively build and return an output
+    # In the case of label_image, recursively build and return an output
     # operating on each label separately
-    if labels is not None:
-        label_values = np.unique(labels)
+    if label_image is not None:
+        label_values = np.unique(label_image)
         # Reorder label values to have consecutive integers (no gaps)
         if np.any(np.diff(label_values) != 1):
-            mask = labels >= 1
-            labels[mask] = 1 + rank_order(labels[mask])[0].astype(labels.dtype)
-        labels = labels.astype(np.int32)
+            mask = label_image >= 1
+            label_image[mask] = 1 + rank_order(label_image[mask])[0].astype(label_image.dtype)
+        label_image = label_image.astype(np.int32)
 
         # New values for new ordering
-        label_values = np.unique(labels)
+        label_values = np.unique(label_image)
         for label in label_values[label_values != 0]:
-            maskim = (labels == label)
+            maskim = (label_image == label)
             out += peak_local_max(image * maskim, min_distance=min_distance,
                                   threshold_abs=threshold_abs,
                                   threshold_rel=threshold_rel,
                                   exclude_border=exclude_border,
                                   indices=False, num_peaks=num_peaks_per_label,
-                                  footprint=footprint, labels=None)
+                                  footprint=footprint, label_image=None)
 
         # Select highest intensities (num_peaks)
         coordinates = _get_high_intensity_peaks(image, out, num_peaks)
@@ -223,31 +223,31 @@ def _prominent_peaks(image, min_xdistance=1, min_ydistance=1,
         Peak intensity values, x and y indices.
     """
 
-    img = image.copy()
-    rows, cols = img.shape
+    image = image.copy()
+    rows, cols = image.shape
 
     if threshold is None:
-        threshold = 0.5 * np.max(img)
+        threshold = 0.5 * np.max(image)
 
     ycoords_size = 2 * min_ydistance + 1
     xcoords_size = 2 * min_xdistance + 1
-    img_max = ndi.maximum_filter1d(img, size=ycoords_size, axis=0,
+    image_max = ndi.maximum_filter1d(image, size=ycoords_size, axis=0,
                                    mode='constant', cval=0)
-    img_max = ndi.maximum_filter1d(img_max, size=xcoords_size, axis=1,
+    image_max = ndi.maximum_filter1d(image_max, size=xcoords_size, axis=1,
                                    mode='constant', cval=0)
-    mask = (img == img_max)
-    img *= mask
-    img_t = img > threshold
+    mask = (image == image_max)
+    image *= mask
+    image_t = image > threshold
 
-    label_img = measure.label(img_t)
-    props = measure.regionprops(label_img, img_max)
+    label_image = measure.label(image_t)
+    props = measure.regionprops(label_image, image_max)
 
     # Sort the list of peaks by intensity, not left-right, so larger peaks
     # in Hough space cannot be arbitrarily suppressed by smaller neighbors
     props = sorted(props, key=lambda x: x.max_intensity)[::-1]
     coords = np.array([np.round(p.centroid) for p in props], dtype=int)
 
-    img_peaks = []
+    image_peaks = []
     ycoords_peaks = []
     xcoords_peaks = []
 
@@ -256,7 +256,7 @@ def _prominent_peaks(image, min_xdistance=1, min_ydistance=1,
                                         -min_xdistance:min_xdistance + 1]
 
     for ycoords_idx, xcoords_idx in coords:
-        accum = img_max[ycoords_idx, xcoords_idx]
+        accum = image_max[ycoords_idx, xcoords_idx]
         if accum > threshold:
             # absolute coordinate grid for local neighbourhood suppression
             ycoords_nh = ycoords_idx + ycoords_ext
@@ -278,21 +278,21 @@ def _prominent_peaks(image, min_xdistance=1, min_ydistance=1,
             xcoords_nh[xcoords_high] -= cols
 
             # suppress neighbourhood
-            img_max[ycoords_nh, xcoords_nh] = 0
+            image_max[ycoords_nh, xcoords_nh] = 0
 
             # add current feature to peaks
-            img_peaks.append(accum)
+            image_peaks.append(accum)
             ycoords_peaks.append(ycoords_idx)
             xcoords_peaks.append(xcoords_idx)
 
-    img_peaks = np.array(img_peaks)
+    image_peaks = np.array(image_peaks)
     ycoords_peaks = np.array(ycoords_peaks)
     xcoords_peaks = np.array(xcoords_peaks)
 
-    if num_peaks < len(img_peaks):
-        idx_maxsort = np.argsort(img_peaks)[::-1][:num_peaks]
-        img_peaks = img_peaks[idx_maxsort]
+    if num_peaks < len(image_peaks):
+        idx_maxsort = np.argsort(image_peaks)[::-1][:num_peaks]
+        image_peaks = image_peaks[idx_maxsort]
         ycoords_peaks = ycoords_peaks[idx_maxsort]
         xcoords_peaks = xcoords_peaks[idx_maxsort]
 
-    return img_peaks, xcoords_peaks, ycoords_peaks
+    return image_peaks, xcoords_peaks, ycoords_peaks

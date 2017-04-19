@@ -38,7 +38,7 @@ def _filter_image(image, min_scale, max_scale, mode):
         response.strides = (item_size * response.shape[1], item_size,
                             item_size * response.shape[0] * response.shape[1])
 
-        integral_img = integral_image(image)
+        integral_image = integral_image(image)
 
         for i in range(max_scale - min_scale + 1):
             n = min_scale + i
@@ -49,7 +49,7 @@ def _filter_image(image, min_scale, max_scale, mode):
             inner_weight = (1.0 / (2 * n + 1) ** 2)
             outer_weight = (1.0 / (12 * n ** 2 + 4 * n))
 
-            _censure_dob_loop(n, integral_img, response[:, :, i],
+            _censure_dob_loop(n, integral_image, response[:, :, i],
                               inner_weight, outer_weight)
 
     # NOTE : For the Octagon shaped filter, we implemented and evaluated the
@@ -160,9 +160,9 @@ class CENSURE(FeatureDetector):
     >>> from skimage.data import astronaut
     >>> from skimage.color import rgb2gray
     >>> from skimage.feature import CENSURE
-    >>> img = rgb2gray(astronaut()[100:300, 100:300])
+    >>> image = rgb2gray(astronaut()[100:300, 100:300])
     >>> censure = CENSURE()
-    >>> censure.detect(img)
+    >>> censure.detect(image)
     >>> censure.keypoints
     array([[  4, 148],
            [ 12,  73],

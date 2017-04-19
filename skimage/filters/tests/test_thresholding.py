@@ -331,11 +331,14 @@ def test_threshold_minimum():
     camera = skimage.img_as_ubyte(data.camera())
 
     threshold = threshold_minimum(camera)
-    assert_equal(threshold, 76)
+    assert threshold == 76
+
+    threshold = threshold_minimum(camera, bias='max')
+    assert threshold == 77
 
     astronaut = skimage.img_as_ubyte(data.astronaut())
     threshold = threshold_minimum(astronaut)
-    assert_equal(threshold, 114)
+    assert threshold == 117
 
 
 def test_threshold_minimum_synthetic():
@@ -343,8 +346,15 @@ def test_threshold_minimum_synthetic():
     img[0:9, :] = 50
     img[14:25, :] = 250
 
-    threshold = threshold_minimum(img)
-    assert_equal(threshold, 95)
+    threshold = threshold_minimum(img, bias='min')
+    assert threshold == 93
+
+    threshold = threshold_minimum(img, bias='mid')
+    assert threshold == 159
+
+    threshold = threshold_minimum(img, bias='max')
+    assert threshold == 225
+
 
 def test_threshold_minimum_failure():
     img = np.zeros((16*16), dtype=np.uint8)

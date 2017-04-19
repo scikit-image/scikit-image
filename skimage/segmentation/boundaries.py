@@ -3,11 +3,11 @@ from __future__ import division
 import numpy as np
 from scipy import ndimage as ndi
 from ..morphology import dilation, erosion, square
-from ..util import img_as_float, view_as_windows
+from ..util import image_as_float, view_as_windows
 from ..color import gray2rgb
 
 
-def _find_boundaries_subpixel(label_img):
+def _find_boundaries_subpixel(label_image):
     """See ``find_boundaries(..., mode='subpixel')``.
 
     Notes
@@ -16,29 +16,29 @@ def _find_boundaries_subpixel(label_img):
     row and column of the image, for a corresponding shape of $2s - 1$
     for every image dimension of size $s$. These "interstitial" rows
     and columns are filled as ``True`` if they separate two labels in
-    `label_img`, ``False`` otherwise.
+    `label_image`, ``False`` otherwise.
 
     I used ``view_as_windows`` to get the neighborhood of each pixel.
     Then I check whether there are two labels or more in that
     neighborhood.
     """
-    ndim = label_img.ndim
-    max_label = np.iinfo(label_img.dtype).max
+    ndim = label_image.ndim
+    max_label = np.iinfo(label_image.dtype).max
 
-    label_img_expanded = np.zeros([(2 * s - 1) for s in label_img.shape],
-                                  label_img.dtype)
+    label_image_expanded = np.zeros([(2 * s - 1) for s in label_image.shape],
+                                  label_image.dtype)
     pixels = [slice(None, None, 2)] * ndim
-    label_img_expanded[pixels] = label_img
+    label_image_expanded[pixels] = label_image
 
-    edges = np.ones(label_img_expanded.shape, dtype=bool)
+    edges = np.ones(label_image_expanded.shape, dtype=bool)
     edges[pixels] = False
-    label_img_expanded[edges] = max_label
-    windows = view_as_windows(np.pad(label_img_expanded, 1,
+    label_image_expanded[edges] = max_label
+    windows = view_as_windows(np.pad(label_image_expanded, 1,
                                      mode='constant', constant_values=0),
                               (3,) * ndim)
 
     boundaries = np.zeros_like(edges)
-    for index in np.ndindex(label_img_expanded.shape):
+    for index in np.ndindex(label_image_expanded.shape):
         if edges[index]:
             values = np.unique(windows[index].ravel())
             if len(values) > 2:  # single value and max_label
@@ -46,20 +46,20 @@ def _find_boundaries_subpixel(label_img):
     return boundaries
 
 
-def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
+def find_boundaries(label_image, connectivity=1, mode='thick', background=0):
     """Return bool array where boundaries between labeled regions are True.
 
     Parameters
     ----------
-    label_img : array of int or bool
+    label_image : array of int or bool
         An array in which different regions are labeled with either different
         integers or boolean values.
-    connectivity: int in {1, ..., `label_img.ndim`}, optional
+    connectivity: int in {1, ..., `label_image.ndim`}, optional
         A pixel is considered a boundary pixel if any of its neighbors
         has a different label. `connectivity` controls which pixels are
         considered neighbors. A connectivity of 1 (default) means
         pixels sharing an edge (in 2D) or a face (in 3D) will be
-        considered neighbors. A connectivity of `label_img.ndim` means
+        considered neighbors. A connectivity of `label_image.ndim` means
         pixels sharing a corner will be considered neighbors.
     mode: string in {'thick', 'inner', 'outer', 'subpixel'}
         How to mark the boundaries:
@@ -80,10 +80,10 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
 
     Returns
     -------
-    boundaries : array of bool, same shape as `label_img`
+    boundaries : array of bool, same shape as `label_image`
         A bool image where ``True`` represents a boundary pixel. For
         `mode` equal to 'subpixel', ``boundaries.shape[i]`` is equal
-        to ``2 * label_img.shape[i] - 1`` for all ``i`` (a pixel is
+        to ``2 * label_image.shape[i] - 1`` for all ``i`` (a pixel is
         inserted in between all other pairs of pixels).
 
     Examples
@@ -156,32 +156,32 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
            [False,  True,  True, False, False],
            [False,  True,  True, False, False]], dtype=bool)
     """
-    if label_img.dtype == 'bool':
-        label_img = label_img.astype(np.uint8)
-    ndim = label_img.ndim
+    if label_image.dtype == 'bool':
+        label_image = label_image.astype(np.uint8)
+    ndim = label_image.ndim
     selem = ndi.generate_binary_structure(ndim, connectivity)
     if mode != 'subpixel':
-        boundaries = dilation(label_img, selem) != erosion(label_img, selem)
+        boundaries = dilation(label_image, selem) != erosion(label_image, selem)
         if mode == 'inner':
-            foreground_image = (label_img != background)
+            foreground_image = (label_image != background)
             boundaries &= foreground_image
         elif mode == 'outer':
-            max_label = np.iinfo(label_img.dtype).max
-            background_image = (label_img == background)
+            max_label = np.iinfo(label_image.dtype).max
+            background_image = (label_image == background)
             selem = ndi.generate_binary_structure(ndim, ndim)
-            inverted_background = np.array(label_img, copy=True)
+            inverted_background = np.array(label_image, copy=True)
             inverted_background[background_image] = max_label
-            adjacent_objects = ((dilation(label_img, selem) !=
+            adjacent_objects = ((dilation(label_image, selem) !=
                                  erosion(inverted_background, selem)) &
                                 ~background_image)
             boundaries &= (background_image | adjacent_objects)
         return boundaries
     else:
-        boundaries = _find_boundaries_subpixel(label_img)
+        boundaries = _find_boundaries_subpixel(label_image)
         return boundaries
 
 
-def mark_boundaries(image, label_img, color=(1, 1, 0),
+def mark_boundaries(image, label_image, color=(1, 1, 0),
                     outline_color=None, mode='outer', background_label=0):
     """Return image with boundaries between labeled regions highlighted.
 
@@ -189,7 +189,7 @@ def mark_boundaries(image, label_img, color=(1, 1, 0),
     ----------
     image : (M, N[, 3]) array
         Grayscale or RGB image.
-    label_img : (M, N) array of int
+    label_image : (M, N) array of int
         Label array where regions are marked by different integer values.
     color : length-3 sequence, optional
         RGB color of boundaries in the output image.
@@ -212,7 +212,7 @@ def mark_boundaries(image, label_img, color=(1, 1, 0),
     --------
     find_boundaries
     """
-    marked = img_as_float(image, force_copy=True)
+    marked = image_as_float(image, force_copy=True)
     if marked.ndim == 2:
         marked = gray2rgb(marked)
     if mode == 'subpixel':
@@ -222,7 +222,7 @@ def mark_boundaries(image, label_img, color=(1, 1, 0),
         # interpolation, filling in the values of the interposed pixels
         marked = ndi.zoom(marked, [2 - 1/s for s in marked.shape[:-1]] + [1],
                           mode='reflect')
-    boundaries = find_boundaries(label_img, mode=mode,
+    boundaries = find_boundaries(label_image, mode=mode,
                                  background=background_label)
     if outline_color is not None:
         outlines = dilation(boundaries, square(3))

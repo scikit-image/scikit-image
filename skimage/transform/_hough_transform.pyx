@@ -15,14 +15,14 @@ from ..draw import circle_perimeter
 from .._shared.interpolation cimport round
 
 
-def _hough_circle(cnp.ndarray img,
+def _hough_circle(cnp.ndarray image,
                   cnp.ndarray[ndim=1, dtype=cnp.intp_t] radius,
                   char normalize=True, char full_output=False):
     """Perform a circular Hough transform.
 
     Parameters
     ----------
-    img : (M, N) ndarray
+    image : (M, N) ndarray
         Input image with nonzero values representing edges.
     radius : ndarray
         Radii at which to compute the Hough transform.
@@ -41,15 +41,15 @@ def _hough_circle(cnp.ndarray img,
         R designates the larger radius if full_output is True.
         Otherwise, R = 0.
     """
-    if img.ndim != 2:
+    if image.ndim != 2:
         raise ValueError('The input image must be 2D.')
 
-    cdef Py_ssize_t xmax = img.shape[0]
-    cdef Py_ssize_t ymax = img.shape[1]
+    cdef Py_ssize_t xmax = image.shape[0]
+    cdef Py_ssize_t ymax = image.shape[1]
 
     # compute the nonzero indexes
     cdef cnp.ndarray[ndim=1, dtype=cnp.intp_t] x, y
-    x, y = np.nonzero(img)
+    x, y = np.nonzero(image)
 
     cdef Py_ssize_t num_pixels = x.size
 
@@ -66,8 +66,8 @@ def _hough_circle(cnp.ndarray img,
 
     cdef cnp.ndarray[ndim=3, dtype=cnp.double_t] acc = \
          np.zeros((radius.size,
-                   img.shape[0] + 2 * offset,
-                   img.shape[1] + 2 * offset), dtype=np.double)
+                   image.shape[0] + 2 * offset,
+                   image.shape[1] + 2 * offset), dtype=np.double)
 
     for i, rad in enumerate(radius):
         # Store in memory the circle of given radius
@@ -98,13 +98,13 @@ def _hough_circle(cnp.ndarray img,
     return acc
 
 
-def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
+def _hough_ellipse(cnp.ndarray image, int threshold=4, double accuracy=1,
                    int min_size=4, max_size=None):
     """Perform an elliptical Hough transform.
 
     Parameters
     ----------
-    img : (M, N) ndarray
+    image : (M, N) ndarray
         Input image with nonzero values representing edges.
     threshold: int, optional (default 4)
         Accumulator threshold value.
@@ -126,10 +126,10 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
 
     Examples
     --------
-    >>> img = np.zeros((25, 25), dtype=np.uint8)
+    >>> image = np.zeros((25, 25), dtype=np.uint8)
     >>> rr, cc = ellipse_perimeter(10, 10, 6, 8)
-    >>> img[cc, rr] = 1
-    >>> result = hough_ellipse(img, threshold=8)
+    >>> image[cc, rr] = 1
+    >>> result = hough_ellipse(image, threshold=8)
     [(10, 10.0, 8.0, 6.0, 0.0, 10.0)]
 
     Notes
@@ -144,10 +144,10 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
            method." Pattern Recognition, 2002. Proceedings. 16th International
            Conference on. Vol. 2. IEEE, 2002
     """
-    if img.ndim != 2:
+    if image.ndim != 2:
             raise ValueError('The input image must be 2D.')
 
-    cdef Py_ssize_t[:, ::1] pixels = np.row_stack(np.nonzero(img))
+    cdef Py_ssize_t[:, ::1] pixels = np.row_stack(np.nonzero(image))
     cdef Py_ssize_t num_pixels = pixels.shape[1]
     cdef list acc = list()
     cdef list results = list()
@@ -155,10 +155,10 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
 
     cdef int max_b_squared
     if max_size is None:
-        if img.shape[0] < img.shape[1]:
-            max_b_squared = np.round(0.5 * img.shape[0]) ** 2
+        if image.shape[0] < image.shape[1]:
+            max_b_squared = np.round(0.5 * image.shape[0]) ** 2
         else:
-            max_b_squared = np.round(0.5 * img.shape[1]) ** 2
+            max_b_squared = np.round(0.5 * image.shape[1]) ** 2
     else:
         max_b_squared = max_size**2
 
@@ -228,13 +228,13 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
                                     ('orientation', np.double)])
 
 
-def _hough_line(cnp.ndarray img,
+def _hough_line(cnp.ndarray image,
                 cnp.ndarray[ndim=1, dtype=cnp.double_t] theta):
     """Perform a straight line Hough transform.
 
     Parameters
     ----------
-    img : (M, N) ndarray
+    image : (M, N) ndarray
         Input image with nonzero values representing edges.
     theta : 1D ndarray of double
         Angles at which to compute the transform, in radians.
@@ -259,17 +259,17 @@ def _hough_line(cnp.ndarray img,
     --------
     Generate a test image:
 
-    >>> img = np.zeros((100, 150), dtype=bool)
-    >>> img[30, :] = 1
-    >>> img[:, 65] = 1
-    >>> img[35:45, 35:50] = 1
+    >>> image = np.zeros((100, 150), dtype=bool)
+    >>> image[30, :] = 1
+    >>> image[:, 65] = 1
+    >>> image[35:45, 35:50] = 1
     >>> for i in range(90):
-    ...     img[i, i] = 1
-    >>> img += np.random.random(img.shape) > 0.95
+    ...     image[i, i] = 1
+    >>> image += np.random.random(image.shape) > 0.95
 
     Apply the Hough transform:
 
-    >>> out, angles, d = hough_line(img)
+    >>> out, angles, d = hough_line(image)
 
     .. plot:: hough_tf.py
 
@@ -286,15 +286,15 @@ def _hough_line(cnp.ndarray img,
     cdef cnp.ndarray[ndim=1, dtype=cnp.double_t] bins
     cdef Py_ssize_t max_distance, offset
 
-    max_distance = 2 * <Py_ssize_t>ceil(sqrt(img.shape[0] * img.shape[0] +
-                                             img.shape[1] * img.shape[1]))
+    max_distance = 2 * <Py_ssize_t>ceil(sqrt(image.shape[0] * image.shape[0] +
+                                             image.shape[1] * image.shape[1]))
     accum = np.zeros((max_distance, theta.shape[0]), dtype=np.uint64)
     bins = np.linspace(-max_distance / 2.0, max_distance / 2.0, max_distance)
     offset = max_distance / 2
 
     # compute the nonzero indexes
     cdef cnp.ndarray[ndim=1, dtype=cnp.npy_intp] x_idxs, y_idxs
-    y_idxs, x_idxs = np.nonzero(img)
+    y_idxs, x_idxs = np.nonzero(image)
 
     # finally, run the transform
     cdef Py_ssize_t nidxs, nthetas, i, j, x, y, accum_idx
@@ -312,14 +312,14 @@ def _hough_line(cnp.ndarray img,
     return accum, theta, bins
 
 
-def _probabilistic_hough_line(cnp.ndarray img, int threshold,
+def _probabilistic_hough_line(cnp.ndarray image, int threshold,
                               int line_length, int line_gap,
                               cnp.ndarray[ndim=1, dtype=cnp.double_t] theta):
     """Return lines from a progressive probabilistic line Hough transform.
 
     Parameters
     ----------
-    img : (M, N) ndarray
+    image : (M, N) ndarray
         Input image with nonzero values representing edges.
     threshold : int
         Threshold
@@ -344,8 +344,8 @@ def _probabilistic_hough_line(cnp.ndarray img, int threshold,
            Hough transform for line detection", in IEEE Computer Society
            Conference on Computer Vision and Pattern Recognition, 1999.
     """
-    cdef Py_ssize_t height = img.shape[0]
-    cdef Py_ssize_t width = img.shape[1]
+    cdef Py_ssize_t height = image.shape[0]
+    cdef Py_ssize_t width = image.shape[1]
 
     # compute the bins and allocate the accumulator array
     cdef cnp.ndarray[ndim=2, dtype=cnp.uint8_t] mask = \
@@ -362,8 +362,8 @@ def _probabilistic_hough_line(cnp.ndarray img, int threshold,
                     good_line, count
     cdef list lines = list()
 
-    max_distance = 2 * <int>ceil((sqrt(img.shape[0] * img.shape[0] +
-                                       img.shape[1] * img.shape[1])))
+    max_distance = 2 * <int>ceil((sqrt(image.shape[0] * image.shape[0] +
+                                       image.shape[1] * image.shape[1])))
     cdef cnp.int64_t[:, ::1] accum = \
         np.zeros((max_distance, theta.shape[0]), dtype=np.int64)
     offset = max_distance / 2
@@ -374,7 +374,7 @@ def _probabilistic_hough_line(cnp.ndarray img, int threshold,
     cdef cnp.double_t[::1] stheta = np.sin(theta)
 
     # find the nonzero indexes
-    y_idxs, x_idxs = np.nonzero(img)
+    y_idxs, x_idxs = np.nonzero(image)
     cdef list points = list(zip(x_idxs, y_idxs))
     # mask all non-zero indexes
     mask[y_idxs, x_idxs] = 1

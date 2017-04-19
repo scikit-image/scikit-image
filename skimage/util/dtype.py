@@ -2,8 +2,9 @@ from __future__ import division
 import numpy as np
 from warnings import warn
 
-__all__ = ['img_as_float', 'img_as_int', 'img_as_uint', 'img_as_ubyte',
-           'img_as_bool', 'dtype_limits']
+
+__all__ = ['image_as_float', 'image_as_int', 'image_as_uint', 'image_as_ubyte',
+           'image_as_bool', 'dtype_limits']
 
 dtype_range = {np.bool_: (False, True),
                np.bool8: (False, True),
@@ -310,7 +311,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
     return image.astype(dtype_out)
 
 
-def img_as_float(image, force_copy=False):
+def image_as_float(image, force_copy=False):
     """Convert an image to double-precision (64-bit) floating point format.
 
     Parameters
@@ -336,7 +337,7 @@ def img_as_float(image, force_copy=False):
     return convert(image, np.float64, force_copy)
 
 
-def img_as_uint(image, force_copy=False):
+def image_as_uint(image, force_copy=False):
     """Convert an image to 16-bit unsigned integer format.
 
     Parameters
@@ -360,7 +361,7 @@ def img_as_uint(image, force_copy=False):
     return convert(image, np.uint16, force_copy)
 
 
-def img_as_int(image, force_copy=False):
+def image_as_int(image, force_copy=False):
     """Convert an image to 16-bit signed integer format.
 
     Parameters
@@ -385,7 +386,7 @@ def img_as_int(image, force_copy=False):
     return convert(image, np.int16, force_copy)
 
 
-def img_as_ubyte(image, force_copy=False):
+def image_as_ubyte(image, force_copy=False):
     """Convert an image to 8-bit unsigned integer format.
 
     Parameters
@@ -409,7 +410,7 @@ def img_as_ubyte(image, force_copy=False):
     return convert(image, np.uint8, force_copy)
 
 
-def img_as_bool(image, force_copy=False):
+def image_as_bool(image, force_copy=False):
     """Convert an image to boolean format.
 
     Parameters
@@ -431,3 +432,24 @@ def img_as_bool(image, force_copy=False):
 
     """
     return convert(image, np.bool_, force_copy)
+
+
+def img_as_float(image, force_copy=False):
+    warn("Call to deprecated function %s.") % "img_as_float"
+    return image_as_float(image, force_copy)
+
+def img_as_uint(image, force_copy=False):
+    warn("Call to deprecated function %s.") % "img_as_uint"
+    return image_as_uint(image, force_copy)
+
+def img_as_int(image, force_copy=False):
+    warn("Call to deprecated function %s.") % "img_as_int"
+    return image_as_int(image, force_copy)
+
+def img_as_ubyte(image, force_copy=False):
+    warn("Call to deprecated function %s.") % "img_as_ubyte"
+    return image_as_ubyte(image, force_copy)
+
+def img_as_bool(image, force_copy=False):
+    warn("Call to deprecated function %s.") % "img_as_bool"
+    return image_as_bool(image, force_copy)
