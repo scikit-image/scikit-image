@@ -1,12 +1,10 @@
 import os
 import numpy as np
-import scipy.io
 from numpy.testing import (assert_equal, assert_almost_equal,
                            assert_array_almost_equal)
 import pytest
 from skimage.measure import compare_ssim as ssim
 import skimage.data
-from skimage.io import imread
 from skimage import data_dir
 from skimage._shared._warnings import expected_warnings
 
@@ -48,7 +46,7 @@ def test_ssim_image():
     assert(S1 < 0.3)
 
     S2 = ssim(X, Y, win_size=11, gaussian_weights=True)
-    assert(S1 < 0.3)
+    assert(S2 < 0.3)
 
     mssim0, S3 = ssim(X, Y, full=True)
     assert_equal(S3.shape, X.shape)
@@ -236,7 +234,7 @@ def test_invalid_input():
     # do not allow both image content weighting and gradient calculation
     with pytest.raises(ValueError):
         ssim(X, X, image_content_weighting=True,
-                  gradient=True)
+             gradient=True)
     # some kwarg inputs must be non-negative
     with pytest.raises(ValueError):
         ssim(X, X, K1=-0.1)
