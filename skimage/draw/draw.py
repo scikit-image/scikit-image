@@ -244,14 +244,14 @@ def polygon_perimeter(r, c, shape=None, clip=False):
         return _coords_inside_image(rr, cc, shape)
 
 
-def set_color(img, coords, color, alpha=1):
+def set_color(image, coords, color, alpha=1):
     """Set pixel color in the image at the given coordinates.
 
     Coordinates that exceed the shape of the image will be ignored.
 
     Parameters
     ----------
-    img : (M, N, D) ndarray
+    image : (M, N, D) ndarray
         Image
     coords : tuple of ((P,) ndarray, (P,) ndarray)
         Row and column coordinates of pixels to be colored.
@@ -263,7 +263,7 @@ def set_color(img, coords, color, alpha=1):
 
     Returns
     -------
-    img : (M, N, D) ndarray
+    image : (M, N, D) ndarray
         The updated image.
 
     Examples
@@ -287,29 +287,29 @@ def set_color(img, coords, color, alpha=1):
     """
     rr, cc = coords
 
-    if img.ndim == 2:
-        img = img[..., np.newaxis]
+    if image.ndim == 2:
+        image = image[..., np.newaxis]
 
     color = np.array(color, ndmin=1, copy=False)
 
-    if img.shape[-1] != color.shape[-1]:
+    if image.shape[-1] != color.shape[-1]:
         raise ValueError('Color shape ({}) must match last '
                          'image dimension ({}).'.format(color.shape[0],
-                                                        img.shape[-1]))
+                                                        image.shape[-1]))
 
     if np.isscalar(alpha):
         # Can be replaced by ``full_like`` when numpy 1.8 becomes
         # minimum dependency
         alpha = np.ones_like(rr) * alpha
 
-    rr, cc, alpha = _coords_inside_image(rr, cc, img.shape, val=alpha)
+    rr, cc, alpha = _coords_inside_image(rr, cc, image.shape, val=alpha)
 
     alpha = alpha[..., np.newaxis]
 
     color = color * alpha
-    vals = img[rr, cc] * (1 - alpha)
+    vals = image[rr, cc] * (1 - alpha)
 
-    img[rr, cc] = vals + color
+    image[rr, cc] = vals + color
 
 
 def line(r0, c0, r1, c1):

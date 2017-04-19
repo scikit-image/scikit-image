@@ -4,7 +4,7 @@ import collections
 from .._shared.utils import warn
 
 
-def integral_image(img):
+def integral_image(image):
     """Integral image / summed area table.
 
     The integral image contains the sum of all elements above and to the
@@ -16,7 +16,7 @@ def integral_image(img):
 
     Parameters
     ----------
-    img : ndarray
+    image : ndarray
         Input image.
 
     Returns
@@ -30,8 +30,8 @@ def integral_image(img):
            ACM SIGGRAPH Computer Graphics, vol. 18, 1984, pp. 207-212.
 
     """
-    S = img
-    for i in range(img.ndim):
+    S = image
+    for i in range(image.ndim):
         S = S.cumsum(axis=i)
     return S
 

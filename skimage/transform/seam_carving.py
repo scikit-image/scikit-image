@@ -4,7 +4,7 @@ from .._shared import utils
 import numpy as np
 
 
-def seam_carve(img, energy_map, mode, num, border=1, force_copy=True):
+def seam_carve(image, energy_map, mode, num, border=1, force_copy=True):
     """ Carve vertical or horizontal seams off an image.
 
     Carves out vertical/horizontal seams from an image while using the given
@@ -47,8 +47,8 @@ def seam_carve(img, energy_map, mode, num, border=1, force_copy=True):
            http://www.cs.jhu.edu/~misha/ReadingSeminar/Papers/Avidan07.pdf
     """
 
-    utils.assert_nD(img, (2, 3))
-    image = util.img_as_float(img, force_copy)
+    utils.assert_nD(image, (2, 3))
+    image = util.img_as_float(image, force_copy)
     energy_map = util.img_as_float(energy_map, force_copy)
 
     if image.ndim == 2:
