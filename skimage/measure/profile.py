@@ -94,8 +94,8 @@ def _line_profile_coordinates(src, dst, linewidth=1):
     The destination point is included in the profile, in contrast to
     standard numpy indexing.
     """
-    src_row, src_col = src = np.asarray(src, dtype=float)
-    dst_row, dst_col = dst = np.asarray(dst, dtype=float)
+    src_col, src_row = src = np.asarray(src, dtype=float)
+    dst_col, dst_row = dst = np.asarray(dst, dtype=float)
     d_row, d_col = dst - src
     theta = np.arctan2(d_row, d_col)
 
