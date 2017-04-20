@@ -12,8 +12,8 @@ from skimage._shared.testing import test_parallel
 from skimage._shared._warnings import expected_warnings
 
 PHANTOM = imread(os.path.join(data_dir, "phantom.png"),
-                   as_grey=True)[::2, ::2]
-PHANTOM = rescale(PHANTOM, 0.5, order=1, mode='reflect')
+                 as_grey=True)[::2, ::2]
+PHANTOM = rescale(PHANTOM, 0.5, order=1, multichannel=False)
 
 
 def _debug_plot(original, result, sinogram=None):
@@ -154,7 +154,8 @@ def test_iradon_angles():
     theta = np.linspace(0, 180, nb_angles, endpoint=False)
     radon_image_200 = radon(image, theta=theta, circle=False)
     reconstructed = iradon(radon_image_200, circle=False)
-    delta_200 = np.mean(abs(_rescale_intensity(image) - _rescale_intensity(reconstructed)))
+    delta_200 = np.mean(abs(_rescale_intensity(image) -
+                            _rescale_intensity(reconstructed)))
     assert delta_200 < 0.03
     # Lower number of projections
     nb_angles = 80
@@ -244,7 +245,10 @@ def check_sinogram_circle_to_square(size):
     image = _random_circle((size, size))
     theta = np.linspace(0., 180., size, False)
     sinogram_circle = radon(image, theta, circle=True)
-    argmax_shape = lambda a: np.unravel_index(np.argmax(a), a.shape)
+
+    def argmax_shape(a):
+        return np.unravel_index(np.argmax(a), a.shape)
+
     print('\n\targmax of circle:', argmax_shape(sinogram_circle))
     sinogram_square = radon(image, theta, circle=False)
     print('\targmax of square:', argmax_shape(sinogram_square))
@@ -253,8 +257,8 @@ def check_sinogram_circle_to_square(size):
           argmax_shape(sinogram_circle_to_square))
     error = abs(sinogram_square - sinogram_circle_to_square)
     print(np.mean(error), np.max(error))
-    assert (argmax_shape(sinogram_square)
-            == argmax_shape(sinogram_circle_to_square))
+    assert (argmax_shape(sinogram_square) ==
+            argmax_shape(sinogram_circle_to_square))
 
 
 def test_sinogram_circle_to_square():
