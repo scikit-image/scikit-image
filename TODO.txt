@@ -40,3 +40,16 @@ Version 0.15
   ``'reflect'``.
 * In ``skimage.transform.rescale``, set default value of ``mode`` to
   ``'reflect'``.
+
+Version 0.16
+------------
+* In ``skimage.transform.resize``, ``skimage.transform.pyramid_reduce``,
+  ``skimage.transform.pyramid_laplacian``,
+  ``skimage.transform.pyramid_gaussian``,
+  ``skimage.transform.pyramid_expandset``, set default value of
+  ``multichannel`` to False
+* Remove ``_multichannel_default`` from ``skimage.transform._warps.py``, and no
+  longer call it from within the ``resize`` or ``pyramid_*`` transforms.
+* Remove checks for the ``multichannel`` deprecation warnings in several tests
+  in ``skimage.transform.tests.test_pyramids.py`` and
+  ``skimage.transform.tests.test_warps.py``.
