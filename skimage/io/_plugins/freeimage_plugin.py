@@ -21,7 +21,7 @@ def imread(filename):
 
 
 @deprecated('imageio plugin')
-def imsave(filename, img):
+def imsave(filename, img, **kwargs):
     '''
     imsave(filename, img)
 
@@ -33,5 +33,11 @@ def imsave(filename, img):
     ----------
       filename : file name
       img : image to be saved as nd array
+
+    Other parameters
+    ----------------
+    kwargs : keywords
+        When saving as JPEG, supports the ``quality`` keyword argument which is
+        an integer with values in [1, 100]
     '''
-    imsave_imageio(filename, img)
+    imsave_imageio(filename, img, **kwargs)
