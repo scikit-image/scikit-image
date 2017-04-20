@@ -55,7 +55,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
     >>> import numpy as np
     >>> from skimage.util.montage import montage2d
     >>> arr_in = np.arange(3 * 2 * 2).reshape(3, 2, 2)
-    >>> arr_in.astype(int)  # doctest: +NORMALIZE_WHITESPACE
+    >>> arr_in  # doctest: +NORMALIZE_WHITESPACE
     array([[[ 0,  1],
             [ 2,  3]],
            [[ 4,  5],
@@ -66,21 +66,20 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
     >>> arr_out.shape
     (4, 4)
     >>> arr_out
-    array([[  0. ,   1. ,   4. ,   5. ],
-           [  2. ,   3. ,   6. ,   7. ],
-           [  8. ,   9. ,   5.5,   5.5],
-           [ 10. ,  11. ,   5.5,   5.5]])
+    array([[ 0,  1,  4,  5],
+           [ 2,  3,  6,  7],
+           [ 8,  9,  5,  5],
+           [10, 11,  5,  5]])
     >>> arr_in.mean()
     5.5
     >>> arr_out_nonsquare = montage2d(arr_in, grid_shape=(1, 3))
-    >>> arr_out_nonsquare.astype(int)
-    array([[  0,   1,   4,   5,   8,   9],
-           [  2,   3,   6,   7,  10,  11]])
+    >>> arr_out_nonsquare
+    array([[ 0,  1,  4,  5,  8,  9],
+           [ 2,  3,  6,  7, 10, 11]])
     >>> arr_out_nonsquare.shape
     (2, 6)
 
     """
-
     assert arr_in.ndim == 3
 
     # -- fill missing patches (needs to be calculated before border padding)
@@ -158,7 +157,7 @@ def montage_rgb(arr_in, fill='mean', grid_shape=None, padding_width=0):
     >>> arr_out = montage_rgb(arr_in)
     >>> arr_out.shape
     (4, 4, 3)
-    >>> arr_out.astype(int) # doctest: +NORMALIZE_WHITESPACE
+    >>> arr_out # doctest: +NORMALIZE_WHITESPACE
     array([[[ 0,  1,  2],
         [ 3,  4,  5],
         [12, 13, 14],
