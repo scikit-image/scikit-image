@@ -47,8 +47,10 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
     multichannel : bool, optional
-        By default, is set to True for 3D (2D+color) inputs, and False for
-        others.  Starting in release 0.16, this will always default to False.
+        hether the last axis of the image is to be interpreted as multiple
+        channels or another spatial dimension.  By default, is set to True for
+        3D (2D+color) inputs, and False for others.  Starting in release 0.16,
+        this will always default to False.
 
     Returns
     -------
@@ -102,8 +104,11 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
     multichannel : bool, optional
-        By default, is set to True for 3D (2D+color) inputs, and False for
-        others.  Starting in release 0.16, this will always default to False.
+        hether the last axis of the image is to be interpreted as multiple
+        channels or another spatial dimension.  By default, is set to True for
+        3D (2D+color) inputs, and False for others.  Starting in release 0.16,
+        this will always default to False.
+
 
     Returns
     -------
@@ -169,8 +174,11 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
     multichannel : bool, optional
-        By default, is set to True for 3D (2D+color) inputs, and False for
-        others.  Starting in release 0.16, this will always default to False.
+        hether the last axis of the image is to be interpreted as multiple
+        channels or another spatial dimension.  By default, is set to True for
+        3D (2D+color) inputs, and False for others.  Starting in release 0.16,
+        this will always default to False.
+
 
     Returns
     -------
@@ -249,8 +257,11 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
     multichannel : bool, optional
-        By default, is set to True for 3D (2D+color) inputs, and False for
-        others.  Starting in release 0.16, this will always default to False.
+        hether the last axis of the image is to be interpreted as multiple
+        channels or another spatial dimension.  By default, is set to True for
+        3D (2D+color) inputs, and False for others.  Starting in release 0.16,
+        this will always default to False.
+
 
     Returns
     -------
