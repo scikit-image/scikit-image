@@ -173,7 +173,7 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
         Input image.
     scale : {float, tuple of floats}
         Scale factors. Separate scale factors can be defined as
-        `(row_scale, col_scale)`.
+        `(rows, cols[, ...][, dim])`.
 
     Returns
     -------
@@ -200,7 +200,7 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
     multichannel : bool, optional
-        hether the last axis of the image is to be interpreted as multiple
+        Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension.  By default, is set to True for
         3D (2D+color) inputs, and False for others.  Starting in release 0.16,
         this will always default to False.

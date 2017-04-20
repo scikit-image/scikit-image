@@ -30,7 +30,7 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
 
     Parameters
     ----------
-    image : array
+    image : ndarray
         Input image.
     downscale : float, optional
         Downscale factor.
@@ -87,7 +87,7 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
 
     Parameters
     ----------
-    image : array
+    image : ndarray
         Input image.
     upscale : float, optional
         Upscale factor.
@@ -154,7 +154,7 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 
     Parameters
     ----------
-    image : array
+    image : ndarray
         Input image.
     max_layer : int
         Number of layers for the pyramid. 0th layer is the original image.
@@ -237,7 +237,7 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 
     Parameters
     ----------
-    image : array
+    image : ndarray
         Input image.
     max_layer : int
         Number of layers for the pyramid. 0th layer is the original image.
