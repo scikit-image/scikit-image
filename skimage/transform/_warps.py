@@ -152,7 +152,7 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
         Input image.
     scale : {float, tuple of floats}
         Scale factors. Separate scale factors can be defined as
-        `(row_scale, col_scale)`.
+        `(axis_0_scale, axis_1_scale, ..., axis_n_scale)`.
 
     Returns
     -------
@@ -192,16 +192,17 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
     """
 
     try:
-        row_scale, col_scale = scale
+        iter(scale)
     except TypeError:
-        row_scale = col_scale = scale
+        scale = [scale] * image.ndim
 
-    orig_rows, orig_cols = image.shape[0], image.shape[1]
-    rows = np.round(row_scale * orig_rows)
-    cols = np.round(col_scale * orig_cols)
-    output_shape = (rows, cols)
+    orig_dims = image.shape
+    new_dims = []
+    for (orig_dim, dim_scale) in zip(orig_dims, scale):
+        new_dim = np.round(dim_scale * orig_dim)
+        new_dims.append(new_dim)
 
-    return resize(image, output_shape, order=order, mode=mode, cval=cval,
+    return resize(image, new_dims, order=order, mode=mode, cval=cval,
                   clip=clip, preserve_range=preserve_range)
 
 

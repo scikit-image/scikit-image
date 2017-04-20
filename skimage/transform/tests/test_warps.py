@@ -178,6 +178,15 @@ def test_rescale():
     ref[2:4, 1] = 1
     assert_almost_equal(scaled, ref)
 
+    # >2 scale factors
+    x = np.zeros((5, 5, 4), dtype=np.double)
+    x[1, 1, 1] = 1
+    with expected_warnings(['The default mode']):
+        scaled = rescale(x, (2, 1, 3), order=0)
+    ref = np.zeros((10, 5, 12))
+    ref[2:4, 1, 3:6] = 1
+    assert_almost_equal(scaled, ref)
+
 
 def test_resize2d():
     x = np.zeros((5, 5), dtype=np.double)
