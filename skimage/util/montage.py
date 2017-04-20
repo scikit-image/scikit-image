@@ -40,7 +40,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, pad
         The desired grid shape for the montage (tiles_y, tiles_x).
         The default aspect ratio is square.
     padding_width : int, optional
-        The size of the spacing between the tiles to make the 
+        The size of the spacing between the tiles to make the
         boundaries of individual frames easier to see.
 
     Returns
@@ -81,12 +81,12 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, pad
     """
 
     assert arr_in.ndim == 3
-    
+
     # -- fill missing patches (needs to be calculated before border padding)
     if fill == 'mean':
         fill = arr_in.mean()
-    
-    # -- add border padding, np.pad does all dimensions 
+
+    # -- add border padding, np.pad does all dimensions
     # so we remove the padding from the first
     if padding_width > 0:
         # only pad after to make the width correct
@@ -94,7 +94,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, pad
         arr_in = np.pad(arr_in, ((0,0), bef_aft, bef_aft), mode='constant')
     else:
         arr_in = arr_in.copy()
-    
+
     n_images, height, width = arr_in.shape
 
     # -- rescale intensity if necessary
@@ -108,7 +108,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, pad
     else:
         alpha_y = alpha_x = int(np.ceil(np.sqrt(n_images)))
 
-    
+
 
     n_missing = int((alpha_y * alpha_x) - n_images)
     # sometimes the mean returns a float, this ensures the missing
@@ -140,7 +140,7 @@ def montage_rgb(arr_in, fill='mean', grid_shape=None, padding_width=0):
         The desired grid shape for the montage (tiles_y, tiles_x).
         The default aspect ratio is square.
     border_padding : int, optional
-        The size of the spacing between the tiles to make the 
+        The size of the spacing between the tiles to make the
         boundaries of individual frames easier to see.
 
     Returns
@@ -176,13 +176,13 @@ def montage_rgb(arr_in, fill='mean', grid_shape=None, padding_width=0):
         [16, 17, 18]]])
     """
     assert arr_in.ndim == 4
-    
+
     n_images, height, width, n_channels = arr_in.shape
-    
+
     out_slices = []
     for i_chan in range(n_channels):
-        out_slices += [montage2d(arr_in[:,:,:,i_chan], fill=fill, 
+        out_slices += [montage2d(arr_in[:,:,:,i_chan], fill=fill,
                                  grid_shape=grid_shape, padding_width=padding_width)]
-    
+
 
     return np.stack(out_slices, 2)

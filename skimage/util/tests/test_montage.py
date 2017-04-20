@@ -52,8 +52,8 @@ def test_shape():
 
     arr_out = montage2d(arr_in)
     assert_equal(arr_out.shape, (alpha * height, alpha * width))
-    
-    
+
+
 def test_grid_shape():
     n_images = 6
     height, width = 2, 2
@@ -114,14 +114,14 @@ def test_simple_padding():
 
 
 def test_simple_rgb():
-    
+
     n_images = 2
     height, width, n_channels = 2, 2, 2
     arr_in = np.arange(n_images * height * width * n_channels)
     arr_in = arr_in.reshape(n_images, height, width, n_channels)
-    
+
     arr_out = montage_rgb(arr_in)
-    
+
     gt = np.array(
         [[[ 0,  1],
           [ 2,  3],
@@ -142,22 +142,22 @@ def test_simple_rgb():
         )
     assert_array_equal(arr_out, gt)
 
-@raises(AssertionError)
 def test_error_ndim():
     arr_error = np.random.randn(1, 2, 3, 4)
-    montage2d(arr_error)
+    with pytest.raises(AssertionError):
+        montage2d(arr_error)
 
 
-@raises(AssertionError)
 def test_error_ndim_rgb_toosmall():
     arr_error = np.random.randn(1, 2, 3)
-    montage_rgb(arr_error)
+    with pytest.raises(AssertionError):
+        montage_rgb(arr_error)
 
 
-@raises(AssertionError)
 def test_error_ndim_rgb_toobig():
     arr_error = np.random.randn(1, 2, 3, 4, 5)
-    montage_rgb(arr_error)
+    with pytest.raises(AssertionError):
+        montage_rgb(arr_error)
 
 
 def test_error_ndim():
