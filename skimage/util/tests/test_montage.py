@@ -9,7 +9,7 @@ from skimage.util.montage import montage2d, montage_rgb
 def test_simple():
     n_images = 3
     height, width = 2, 3,
-    arr_in = np.arange(n_images * height * width)
+    arr_in = np.arange(n_images * height * width, dtype='float')
     arr_in = arr_in.reshape(n_images, height, width)
 
     arr_out = montage2d(arr_in)
