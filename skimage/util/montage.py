@@ -6,7 +6,8 @@ from .. import exposure
 EPSILON = 1e-6
 
 
-def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, padding_width=0):
+def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
+              padding_width=0):
     """Create a 2-dimensional 'montage' from a 3-dimensional input array
     representing an ensemble of equally shaped 2-dimensional images.
 
@@ -91,7 +92,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, pad
     if padding_width > 0:
         # only pad after to make the width correct
         bef_aft = (0, padding_width)
-        arr_in = np.pad(arr_in, ((0,0), bef_aft, bef_aft), mode='constant')
+        arr_in = np.pad(arr_in, ((0, 0), bef_aft, bef_aft), mode='constant')
     else:
         arr_in = arr_in.copy()
 
@@ -108,12 +109,11 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, pad
     else:
         alpha_y = alpha_x = int(np.ceil(np.sqrt(n_images)))
 
-
-
     n_missing = int((alpha_y * alpha_x) - n_images)
     # sometimes the mean returns a float, this ensures the missing
     # has the same type for non-float images
-    missing = (np.ones((n_missing, height, width), dtype=arr_in.dtype) * fill).astype(arr_in.dtype)
+    missing = (np.ones((n_missing, height, width), dtype=arr_in.dtype)
+               * fill).astype(arr_in.dtype)
     arr_out = np.vstack((arr_in, missing))
 
     # -- reshape to 2d montage, step by step
@@ -122,6 +122,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None, pad
     arr_out = arr_out.reshape(alpha_y * height, alpha_x * width)
 
     return arr_out
+
 
 def montage_rgb(arr_in, fill='mean', grid_shape=None, padding_width=0):
     """Create a 3-dimensional 'montage' from a 4-dimensional input array
@@ -181,8 +182,8 @@ def montage_rgb(arr_in, fill='mean', grid_shape=None, padding_width=0):
 
     out_slices = []
     for i_chan in range(n_channels):
-        out_slices += [montage2d(arr_in[:,:,:,i_chan], fill=fill,
-                                 grid_shape=grid_shape, padding_width=padding_width)]
-
+        out_slices += [montage2d(arr_in[:, :, :, i_chan], fill=fill,
+                                 grid_shape=grid_shape,
+                                 padding_width=padding_width)]
 
     return np.stack(out_slices, 2)
