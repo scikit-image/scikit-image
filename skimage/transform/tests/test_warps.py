@@ -238,6 +238,9 @@ def test_resize3d_keep():
     x[1, 1, :] = 1
     with expected_warnings(['The default mode']):
         resized = resize(x, (10, 10), order=0)
+        with pytest.raises(ValueError):
+            # output_shape too short
+            resize(x, (10, ), order=0)
     ref = np.zeros((10, 10, 3))
     ref[2:4, 2:4, :] = 1
     assert_almost_equal(resized, ref)
