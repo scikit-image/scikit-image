@@ -139,7 +139,7 @@ def montage_rgb(arr_in, fill='mean', grid_shape=None, padding_width=0):
     grid_shape : tuple, optional
         The desired grid shape for the montage (tiles_y, tiles_x).
         The default aspect ratio is square.
-    border_padding : int, optional
+    padding_width : int, optional
         The size of the spacing between the tiles to make the
         boundaries of individual frames easier to see.
 
