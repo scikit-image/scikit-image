@@ -460,7 +460,7 @@ class ApiDocWriter(object):
         # We look at the module name.  If it is `skimage`, display, if `skimage.submodule`, only show `submodule`,
         # if it is `skimage.submodule.subsubmodule`, ignore.
 
-        title = "API Reference for scikit-image version 0.12.3"
+        title = "API Reference for skimage |version|"
         w(title + "\n")
         w("=" * len(title) + "\n\n")
 
