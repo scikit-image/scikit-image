@@ -483,7 +483,7 @@ def test_numeric_seed_watershed():
     np.testing.assert_equal(compact, expected)
 
 
-def test_water(arr1, arr2):
+def test_incorrect_markers_shape():
     with pytest.raises(ValueError):
         image = np.ones((5, 6))
         markers = np.ones((5, 7))
