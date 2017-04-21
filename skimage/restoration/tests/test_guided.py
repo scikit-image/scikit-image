@@ -1,12 +1,11 @@
 import numpy as np
-from numpy.testing import (assert_allclose, assert_raises, assert_equal)
-from skimage.restoration._guided_filter import (_guided_filter,
-                                                _guided_filter_same,
-                                                guided_filter)
+from skimage.restoration._guided_filter import (
+    _guided_filter, _guided_filter_same, guided_filter)
+from numpy.testing import (assert_allclose, assert_equal)
+import pytest
 
 
 class TestGuidedFilter(object):
-
     def setup(self):
         np.random.seed(1111)
         self.image = np.zeros((100, 100))
@@ -70,16 +69,14 @@ class TestGuidedFilter(object):
         """Test error is raised for incorrect input dimensions."""
         one_d = np.zeros(10)
         four_d = np.zeros((2, 2, 2, 2))
-        assert_raises(ValueError, guided_filter, one_d, 0.1, 5)
-        assert_raises(ValueError, guided_filter, four_d, 0.1, 5)
+        with pytest.raises(ValueError):
+            guided_filter(one_d, 0.1, 5)
+        with pytest.raises(ValueError):
+            guided_filter(four_d, 0.1, 5)
 
     def test_incompatible_guide(self):
         """Test error is raised for incompatible channels in image and
         guide."""
-        assert_raises(ValueError, guided_filter, self.multichannel,
-                      0.1, 5, self.multichannel[..., :2])
-
-
-if __name__ == "__main__":
-    from numpy import testing
-    testing.run_module_suite()
+        with pytest.raises(ValueError):
+            guided_filter(self.multichannel, 0.1, 5,
+                          self.multichannel[..., :2])
