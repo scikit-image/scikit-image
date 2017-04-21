@@ -61,7 +61,7 @@ def _bincount_histogram(image, source_range):
     return hist, bin_centers
 
 
-def histogram(image, nbins=256, source_range='image'):
+def histogram(image, nbins=256, source_range=None):
     """Return histogram of image.
 
     Unlike `numpy.histogram`, this function returns the centers of bins and
@@ -83,6 +83,8 @@ def histogram(image, nbins=256, source_range='image'):
         'image' determine the range from the input image.
         'dtype' determine the range from the expected range of the images
         of that data type.
+        `None` corresponds to 'image'. This behavior will change in
+        version 0.16 and set default to 'dtype'.
 
     Returns
     -------
@@ -109,6 +111,10 @@ def histogram(image, nbins=256, source_range='image'):
         warn("This might be a color image. The histogram will be "
              "computed on the flattened image. You can instead "
              "apply this function to each color channel.")
+
+    if source_range is None:
+        warn('The default value of rescale will change to `dtype` in version 0.16')
+        source_range = 'image'
 
     image = image.flatten()
     # For integer types, histogramming with bincount is more efficient.
