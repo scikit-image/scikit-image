@@ -457,9 +457,24 @@ class ApiDocWriter(object):
         w = idx.write
         w('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
 
-        title = "API Reference"
+        title = "API Reference for scikit-image version 0.12.3"
         w(title + "\n")
         w("=" * len(title) + "\n\n")
+
+        for f in self.written_modules:
+            module_name = f.split('.')
+            if len(module_name) > 2:
+                continue
+            elif len(module_name) == 1:
+                module_name = module_name[0]
+            else:
+                module_name = module_name[1]
+            if module_name == "skimage":
+                w('- `{0} <{0}.html>`__\n'.format(os.path.join(module_name)))
+            else:
+                w('- `{0} <skimage.{0}.html>`__\n'.format(os.path.join(module_name)))
+        w('\n')
+
         w('.. toctree::\n\n')
         for f in self.written_modules:
             w('   %s\n' % os.path.join(relpath,f))
