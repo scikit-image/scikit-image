@@ -464,16 +464,26 @@ class ApiDocWriter(object):
         w(title + "\n")
         w("=" * len(title) + "\n\n")
 
+        subtitle = "Submodules"
+        w(subtitle + "\n")
+        w("-" * len(subtitle) + "\n\n")
+
         for f in self.written_modules:
             module_name = f.split('.')
             if len(module_name) > 2:
                 continue
             elif len(module_name) == 1:
                 module_name = module_name[0]
+                prefix = "-"
             elif len(module_name) == 2:
                 module_name = module_name[1]
-            w('- `{0} <{1}.html>`__\n'.format(module_name, os.path.join(f)))
+                prefix = "\n  -"
+            w('{0} `{1} <{2}.html>`__\n'.format(prefix, module_name, os.path.join(f)))
         w('\n')
+
+        subtitle = "Submodule Contents"
+        w(subtitle + "\n")
+        w("-" * len(subtitle) + "\n\n")
 
         w('.. toctree::\n\n')
         for f in self.written_modules:
