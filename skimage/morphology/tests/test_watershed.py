@@ -485,8 +485,8 @@ def test_numeric_seed_watershed():
 
 def test_water(arr1, arr2):
     with pytest.raises(ValueError):
-        image = np.ones((5,6))
-        markers = np.ones((5,7))
+        image = np.ones((5, 6))
+        markers = np.ones((5, 7))
         output = watershed(image, markers)
 
 if __name__ == "__main__":
