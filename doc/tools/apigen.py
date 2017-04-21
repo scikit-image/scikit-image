@@ -457,9 +457,34 @@ class ApiDocWriter(object):
         w = idx.write
         w('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
 
-        title = "API Reference"
+        # We look at the module name.  If it is `skimage`, display, if `skimage.submodule`, only show `submodule`,
+        # if it is `skimage.submodule.subsubmodule`, ignore.
+
+        title = "API Reference for skimage |version|"
         w(title + "\n")
         w("=" * len(title) + "\n\n")
+
+        subtitle = "Submodules"
+        w(subtitle + "\n")
+        w("-" * len(subtitle) + "\n\n")
+
+        for f in self.written_modules:
+            module_name = f.split('.')
+            if len(module_name) > 2:
+                continue
+            elif len(module_name) == 1:
+                module_name = module_name[0]
+                prefix = "-"
+            elif len(module_name) == 2:
+                module_name = module_name[1]
+                prefix = "\n  -"
+            w('{0} `{1} <{2}.html>`__\n'.format(prefix, module_name, os.path.join(f)))
+        w('\n')
+
+        subtitle = "Submodule Contents"
+        w(subtitle + "\n")
+        w("-" * len(subtitle) + "\n\n")
+
         w('.. toctree::\n\n')
         for f in self.written_modules:
             w('   %s\n' % os.path.join(relpath,f))
