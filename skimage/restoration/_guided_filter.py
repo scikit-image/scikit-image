@@ -80,20 +80,20 @@ def guided_filter(image, eta, radius, guide=None):
     --------
     >>> a = np.eye(3)
     >>> # If no guide is specified, the image itself is used.
-    >>> guided_filter(a, 0.1, 1)
+    >>> filtered = guided_filter(a, 0.1, 1)
     >>> # An explicit guide image can be specified.
-    >>> guided_filter(a, 0.1, 1, guide=a*2)
+    >>> filtered = guided_filter(a, 0.1, 1, guide=a*2)
     >>> # A multichannel image can be guided with a single channel image.
     >>> a = np.tile(a[..., np.newaxis], (1, 1, 3))
     >>> b = a[:, :, 0]**2
-    >>> guided_filter(a, 0.1, 1, guide=b)
+    >>> filtered = guided_filter(a, 0.1, 1, guide=b)
     >>> # Or with a multi-channel image.
     >>> b = a**2
-    >>> guided_filter(a, 0.1, 1, guide=b)
+    >>> filtered = guided_filter(a, 0.1, 1, guide=b)
     """
     image = image.astype('float')
     out = np.empty(image.shape)
-    
+
     if guide is None:
         if image.ndim == 2:
             out = _guided_filter_same(image, eta, radius)
