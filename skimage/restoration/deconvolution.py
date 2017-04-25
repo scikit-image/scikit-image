@@ -387,6 +387,7 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
 
     for _ in range(iterations):
         relative_blur = image / convolve_method(im_deconv, psf, 'same')
+        relative_blur[np.isnan(relative_blur)] = 0  # to prevent NaN from propogating throughout convulated matrix
         im_deconv *= convolve_method(relative_blur, psf_mirror, 'same')
 
     if clip:
