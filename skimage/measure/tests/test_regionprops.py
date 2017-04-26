@@ -409,6 +409,11 @@ def test_invalid_size():
         regionprops(SAMPLE, wrong_intensity_sample)
 
 
+def test_invalid_size():
+    wrong_intensity_sample = np.array([[1], [1]])
+    assert_raises(ValueError, regionprops, SAMPLE, wrong_intensity_sample)
+
+
 def test_equals():
     arr = np.zeros((100, 100), dtype=np.int)
     arr[0:25, 0:25] = 1
