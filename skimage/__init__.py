@@ -61,6 +61,7 @@ import imp
 import functools
 import warnings
 import sys
+import numpy as np
 
 pkg_dir = osp.abspath(osp.dirname(__file__))
 data_dir = osp.join(pkg_dir, 'data')
@@ -159,3 +160,7 @@ else:
 
 
 del warnings, functools, osp, imp, sys
+
+
+def lookfor(search_text):
+    return np.lookfor(search_text, sys.modules[__name__])
