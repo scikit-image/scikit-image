@@ -232,8 +232,8 @@ It corresponds to steps one and two in
 Thus, as soon as you push your code to your fork, it will trigger Travis-CI,
 and you will receive an email notification when the process is done.
 
-Every time Travis is triggered, it also calls on `Coveralls
-<http://coveralls.io>`_ to inspect the current test overage.
+Every time Travis is triggered, it also calls on `Codecov
+<http://codecov.io>`_ to inspect the current test overage.
 
 
 Building docs
