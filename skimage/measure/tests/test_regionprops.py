@@ -80,8 +80,12 @@ def test_bbox():
     assert_array_almost_equal(bbox, (1, 1, 1, 4, 3, 3))
 
 def test_bbox_area():
-    bbox_area = regionprops(SAMPLE)[0].bbox_area
-    assert_array_almost_equal(bbox_area, SAMPLE.shape[0] * SAMPLE.shape[1])
+    # We want the object to be INSIDE the image
+    image = np.zeros((20, 20), dtype=np.int)
+    image[5:15, 4:8] = 1
+    bbox_area = regionprops(image)[0].bbox_area
+    expected_area = regionprops(image)[0].convex_image.size
+    assert_array_almost_equal(bbox_area, expected_area)
 
 def test_moments_central():
     mu = regionprops(SAMPLE)[0].moments_central
