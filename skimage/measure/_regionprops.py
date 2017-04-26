@@ -110,6 +110,11 @@ class _RegionProperties(object):
 
     @_cached
     def area(self):
+    """
+    Returns
+    -------
+    The number of pixels of the region image as an integer.
+    """
         return np.sum(self.image)
 
     def bbox(self):
@@ -130,6 +135,11 @@ class _RegionProperties(object):
 
     @only2d
     def convex_area(self):
+    """
+    Returns
+    _______
+    The number of pixels of the convex hull image, convex_image, as an integer.
+    """
         return np.sum(self.convex_image)
 
     @_cached
@@ -167,6 +177,11 @@ class _RegionProperties(object):
         return self.area / self.image.size
 
     def filled_area(self):
+    """
+    Returns
+    _______
+    The number of pixels in the filled imaged region, filled_image, as an integer
+    """
         return np.sum(self.filled_image)
 
     @_cached
