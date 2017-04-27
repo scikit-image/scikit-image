@@ -157,7 +157,7 @@ def test_denoise_tv_bregman_3d():
 
 
 def test_denoise_bilateral_2d():
-    img = checkerboard_gray.copy()[:50,:50]
+    img = checkerboard_gray.copy()[:50, :50]
     # add some random noise
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
@@ -201,8 +201,7 @@ def test_denoise_bilateral_color():
 def test_denoise_bilateral_3d_grayscale():
     img = np.ones((50, 50, 3))
     with pytest.raises(ValueError):
-        restoration.denoise_bilateral(img,
-                  multichannel=False)
+        restoration.denoise_bilateral(img, multichannel=False)
 
 
 def test_denoise_bilateral_3d_multichannel():

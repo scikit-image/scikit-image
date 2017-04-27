@@ -22,9 +22,9 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     distance between two pixels and a certain standard deviation
     (`sigma_spatial`).
 
-    Radiometric similarity is measured by the Gaussian function of the Euclidean
-    distance between two color values and a certain standard deviation
-    (`sigma_color`).
+    Radiometric similarity is measured by the Gaussian function of the
+    Euclidean distance between two color values and a certain standard
+    deviation (`sigma_color`).
 
     Parameters
     ----------
