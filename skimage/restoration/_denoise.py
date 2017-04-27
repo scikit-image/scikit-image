@@ -340,7 +340,8 @@ def _bayes_thresh(details, var):
     thresh = var / np.sqrt(max(dvar - var, eps))
     return thresh
 
-def _universal_thresh(img, details, sigma):
+
+def _universal_thresh(img, sigma):
     """ Universal threshold used by the VisuShrink method """
     return sigma*np.sqrt(2*np.log(img.size))
 
@@ -455,15 +456,16 @@ def _wavelet_threshold(image, wavelet, method, threshold=None, sigma=None, mode=
         sigma = _sigma_est_dwt(detail_coeffs, distribution='Gaussian')
 
     if threshold is None:
-        # The BayesShrink thresholds from [1]_ in docstring
         var = sigma**2
         if method == "BayesShrink":
             # The BayesShrink thresholds from [1]_ in docstring
             threshold = [{key: _bayes_thresh(level[key], var) for key in level}
                          for level in dcoeffs]
+        elif method == "VisuShrink":
+            # The VisuShrink thresholds from [2]_ in docstring
+            threshold = _universal_thresh(image, sigma)
         else:
-            threshold = [{key: _universal_thresh(image, level[key], sigma)
-                         for key in level} for level in dcoeffs]
+            raise ValueError("Unrecognized method: {}".format(method))
 
     if np.isscalar(threshold):
         # A single threshold for all coefficient arrays
@@ -481,9 +483,9 @@ def _wavelet_threshold(image, wavelet, method, threshold=None, sigma=None, mode=
     return pywt.waverecn(denoised_coeffs, wavelet)[original_extent]
 
 
-def denoise_wavelet(image, sigma=None, method='BayesShrink', wavelet='db1',
-                    mode='soft', wavelet_levels=None, multichannel=False,
-                    convert2ycbcr=False):
+def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
+                    wavelet_levels=None, multichannel=False,
+                    convert2ycbcr=False, method='BayesShrink'):
     """Perform wavelet denoising on an image.
 
     Parameters
@@ -493,13 +495,12 @@ def denoise_wavelet(image, sigma=None, method='BayesShrink', wavelet='db1',
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
     sigma : float or list, optional
-        The noise standard deviation used when computing the threshold
-        adaptively as described in [1]_ for each color channel. When None
-        (default), the noise standard deviation is estimated via the method in
-        [2]_.
-    method : string, optional
-        Thresholding method to be used. Currently supported methods are
-        "BayesShrink" and "VisuShrink". Defaults to "BayesShrink".
+        The noise standard deviation used when computing the wavelet detail
+        coefficient threshold(s). When None (default), the noise standard
+        deviation is estimated via the method in [2]_.
+    method : {'BayesShrink', 'VisuShrink'}, optional
+        Thresholding method to be used. The currently supported methods are
+        "BayesShrink" [1]_ and "VisuShrink" [2]_. Defaults to "BayesShrink".
     wavelet : string, optional
         The type of wavelet to perform and can be any of the options
         ``pywt.wavelist`` outputs. The default is `'db1'`. For example,
@@ -540,6 +541,16 @@ def denoise_wavelet(image, sigma=None, method='BayesShrink', wavelet='db1',
     When YCbCr conversion is done, every color channel is scaled between 0
     and 1, and `sigma` values are applied to these scaled color channels.
 
+    Many wavelet coefficient thresholding approaches have been proposed.  By
+    default, ``denoise_wavelet`` applies BayesShrink, which is an adapative
+    thresholding method that computes separate thresholds for each wavelet
+    sub-band as described in [1]_.
+
+    If ``mode == "VisuShrink"``, a single "universal threshold" is applied to
+    all wavelet detail coefficients as described in [2]_.  This threshold
+    is designed to remove all Gaussian noise at a given ``sigma`` with high
+    probability, but tends to produce images that appear overly smooth.
+
     References
     ----------
     .. [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
@@ -561,8 +572,9 @@ def denoise_wavelet(image, sigma=None, method='BayesShrink', wavelet='db1',
 
     """
     if method not in ["BayesShrink", "VisuShrink"]:
-        raise ValueError("Invalid method encountered. Currently supported "
-                         "methods are \"BayesShrink\" and \"VisuShrink\"")
+        raise ValueError(
+            ('Invalid method: {}. Currently supported methods are '
+             '"BayesShrink" and "VisuShrink"').format(method))
 
     image = img_as_float(image)
 
@@ -578,8 +590,9 @@ def denoise_wavelet(image, sigma=None, method='BayesShrink', wavelet='db1',
                 min, max = out[..., i].min(), out[..., i].max()
                 channel = out[..., i] - min
                 channel /= max - min
-                out[..., i] = denoise_wavelet(channel, sigma=sigma[i],
-                                              wavelet=wavelet, mode=mode,
+                out[..., i] = denoise_wavelet(channel, wavelet=wavelet,
+                                              method=method, sigma=sigma[i],
+                                              mode=mode,
                                               wavelet_levels=wavelet_levels)
 
                 out[..., i] = out[..., i] * (max - min)
@@ -588,8 +601,10 @@ def denoise_wavelet(image, sigma=None, method='BayesShrink', wavelet='db1',
         else:
             out = np.empty_like(image)
             for c in range(image.shape[-1]):
-                out[..., c] = _wavelet_threshold(image[..., c], sigma=sigma[c],
-                                                 wavelet=wavelet, mode=mode,
+                out[..., c] = _wavelet_threshold(image[..., c],
+                                                 wavelet=wavelet,
+                                                 method=method,
+                                                 sigma=sigma[c], mode=mode,
                                                  wavelet_levels=wavelet_levels)
     else:
         out = _wavelet_threshold(image, wavelet=wavelet, method=method,
