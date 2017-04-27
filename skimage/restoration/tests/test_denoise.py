@@ -223,7 +223,7 @@ def test_denoise_bilateral_multidimensional():
 
 
 def test_denoise_bilateral_nan():
-    img = np.NaN + np.empty((50, 50))
+    img = np.full((50, 50), np.NaN)
     out = restoration.denoise_bilateral(img, multichannel=False)
     assert_equal(img, out)
 
