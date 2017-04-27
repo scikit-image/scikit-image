@@ -569,7 +569,8 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
                 channel = out[..., i] - min
                 channel /= max - min
                 out[..., i] = denoise_wavelet(channel, sigma=sigma[i],
-                                              wavelet=wavelet, mode=mode)
+                                              wavelet=wavelet, mode=mode,
+                                              wavelet_levels=wavelet_levels)
 
                 out[..., i] = out[..., i] * (max - min)
                 out[..., i] += min
@@ -577,14 +578,13 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
         else:
             out = np.empty_like(image)
             for c in range(image.shape[-1]):
-                out[..., c] = _wavelet_threshold(image[..., c], wavelet=wavelet,
-                                                 mode=mode, sigma=sigma[c],
+                out[..., c] = _wavelet_threshold(image[..., c], sigma=sigma[c],
+                                                 wavelet=wavelet, mode=mode,
                                                  wavelet_levels=wavelet_levels)
 
     else:
-        out = _wavelet_threshold(image, wavelet=wavelet, mode=mode,
-                                 sigma=sigma,
-                                 wavelet_levels=wavelet_levels)
+        out = _wavelet_threshold(image, sigma=sigma, wavelet=wavelet,
+                                 mode=mode, wavelet_levels=wavelet_levels)
 
     clip_range = (-1, 1) if image.min() < 0 else (0, 1)
     return np.clip(out, *clip_range)
