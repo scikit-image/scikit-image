@@ -491,9 +491,12 @@ class TestColorconv(TestCase):
 
 def test_gray2rgb():
     x = np.array([0, 0.5, 1])
+    w = gray2rgb(x)
 
-    with pytest.raises(ValueError):
-        gray2rgb(x)
+    assert_equal(w.shape, (3, 1, 3))
+    assert_equal(w.dtype, x.dtype)
+    assert_equal(w.shape[0], x.shape[0])
+    assert_equal(w[0, 0, :], [0, 0, 0])
 
     x = x.reshape((3, 1))
     y = gray2rgb(x)
