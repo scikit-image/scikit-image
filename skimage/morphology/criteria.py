@@ -56,6 +56,12 @@ def area_closing(image, area_threshold, mask=None, connectivity=1,
     flat_neighborhood = _compute_neighbors(image, connectivity, offset)
     image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
 
+    print 'image_strides'
+    print image_strides
+    
+    print 'flat_neighborhood'
+    print flat_neighborhood
+
     _criteria.area_closing(image.ravel(),
                            area_threshold,
                            seeds.ravel(),
@@ -70,4 +76,43 @@ def area_closing(image, area_threshold, mask=None, connectivity=1,
 
     return(output)
 
+def volume_fill(image, volume_threshold, mask=None, connectivity=1,
+                compactness=0.0):
+
+    if mask is not None and mask.shape != image.shape:
+        raise ValueError("mask must have same shape as image")
+    if mask is None:
+        # Use a complete `True` mask if none is provided
+        mask = np.ones(image.shape, bool)
+
+    connectivity, offset = _validate_connectivity(image.ndim, connectivity,
+                                                  offset=None)
+
+    # TODO : fix the structuring element issue.
+    # labeling and minima detection need to rely on the same connectivity.
+    seeds_bin = local_minima(image)
+    seeds = label(seeds_bin).astype(np.uint64)
+    output = image.copy()
+
+    image = np.pad(image, 1, mode='constant')
+    mask = np.pad(mask, 1, mode='constant')
+    seeds = np.pad(seeds, 1, mode='constant')
+    output = np.pad(output, 1, mode='constant')
+
+    flat_neighborhood = _compute_neighbors(image, connectivity, offset)
+    image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
+
+    _criteria.volume_fill(image.ravel(),
+                          volume_threshold,
+                          seeds.ravel(),
+                          flat_neighborhood,
+                          mask.ravel().astype(np.uint8),
+                          image_strides,
+                          0.000001,
+                          compactness,
+                          output.ravel()
+                          )
+    output = crop(output, 1, copy=True)
+
+    return(output)
 
