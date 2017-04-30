@@ -811,7 +811,7 @@ def gray2rgb(image, alpha=None):
     Parameters
     ----------
     image : array_like
-        Input image of shape ``(M, N [, P])``.
+        Input image of shape ``(M, [N, P])``.
     alpha : bool, optional
         Ensure that the output image has an alpha layer.  If None,
         alpha layers are passed through but not created.
@@ -824,8 +824,12 @@ def gray2rgb(image, alpha=None):
     Raises
     ------
     ValueError
-        If the input is not a 2- or 3-dimensional image.
+        If the input is not a 1-, 2- or 3-dimensional image.
 
+    Notes
+    -----
+    If the input is a 1-dimensional image of shape ``(M, )``, the output
+    will be shape ``(M, 1, 3)``.
     """
     is_rgb = False
     is_alpha = False
@@ -849,7 +853,10 @@ def gray2rgb(image, alpha=None):
 
         return image
 
-    elif image.ndim != 1 and dims in (1, 2, 3):
+    elif dims in (1, 2, 3):
+        if image.ndim == 1:
+            image = image[..., np.newaxis]
+
         image = image[..., np.newaxis]
 
         if alpha:
