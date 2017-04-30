@@ -49,4 +49,5 @@ __all__ = ['binary_erosion',
            'h_maxima',
            'local_maxima',
            'local_minima',
-           'area_closing']
+           'area_closing',
+           'volume_fill']
