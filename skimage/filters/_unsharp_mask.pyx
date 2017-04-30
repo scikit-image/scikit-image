@@ -1,17 +1,16 @@
 import sys
-from libc.stdint cimport intptr_t
 import numpy as np
-cimport numpy as np
-DTYPE = np.int
-ctypedef np.int_t DTYPE_t
-
 from scipy import signal
 from scipy import ndimage
 from scipy import LowLevelCallable
 from skimage import img_as_float
 
-# import _precision_image
-# import _local_var
+cimport numpy as np
+
+from libc.stdint cimport intptr_t
+
+DTYPE = np.int
+ctypedef np.int_t DTYPE_t
 
 def _precision_image(double[:,:,:,:] auto_corr, double[:,:,:] input_arr,
                      double[:,:,:] output_arr):
