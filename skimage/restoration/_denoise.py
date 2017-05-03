@@ -381,8 +381,8 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
     return sigma
 
 
-def _wavelet_threshold(image, wavelet, method, threshold=None, sigma=None,
-                       mode='soft', wavelet_levels=None):
+def _wavelet_threshold(image, wavelet, method=None, threshold=None,
+                       sigma=None, mode='soft', wavelet_levels=None):
     """Perform wavelet thresholding.
 
     Parameters
@@ -395,16 +395,17 @@ def _wavelet_threshold(image, wavelet, method, threshold=None, sigma=None,
         The type of wavelet to perform. Can be any of the options
         pywt.wavelist outputs. For example, this may be any of ``{db1, db2,
         db3, db4, haar}``.
-    method: string
-        The thresholding method to be used. Currently supported is
-        "BayesShrink" and "VisuShrink".
+    method: string or None
+        The thresholding method to be used. Currently supported are
+        "BayesShrink" and "VisuShrink".  If it is set to None, a user-specified
+        ``threshold`` must be supplied instead.
     sigma : float, optional
         The standard deviation of the noise. The noise is estimated when sigma
         is None (the default) by the method in [2]_.
     threshold : float, optional
-        The thresholding value. All wavelet coefficients less than this value
-        are set to 0. The default value (None) uses the BayesShrink method
-        found in [1]_ to remove noise.
+        The thresholding value to apply during wavelet coefficient
+        thresholding. The default value (None) uses the selected ``method`` to
+        estimate appropriate threshold(s) for noise removal.
     mode : {'soft', 'hard'}, optional
         An optional argument to choose the type of denoising performed. It
         noted that choosing soft thresholding given additive noise finds the
@@ -455,9 +456,16 @@ def _wavelet_threshold(image, wavelet, method, threshold=None, sigma=None,
         detail_coeffs = dcoeffs[-1]['d' * image.ndim]
         sigma = _sigma_est_dwt(detail_coeffs, distribution='Gaussian')
 
+    if method is not None and threshold is not None:
+        warn(("Threshold method {} selected.  The user-specified threshold "
+              "will be ignored.").format(method))
+
     if threshold is None:
         var = sigma**2
-        if method == "BayesShrink":
+        if method is None:
+            raise ValueError(
+                "If method is None, a threshold must be provided.")
+        elif method == "BayesShrink":
             # The BayesShrink thresholds from [1]_ in docstring
             threshold = [{key: _bayes_thresh(level[key], var) for key in level}
                          for level in dcoeffs]

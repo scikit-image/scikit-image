@@ -361,11 +361,21 @@ def test_wavelet_threshold():
     noisy = img + sigma * rstate.randn(*(img.shape))
     noisy = np.clip(noisy, 0, 1)
 
-    # employ a single, uniform threshold instead of BayesShrink sigmas
-    denoised = _wavelet_threshold(noisy, wavelet='db1', threshold=sigma)
+    # employ a single, user-specified threshold instead of BayesShrink sigmas
+    denoised = _wavelet_threshold(noisy, wavelet='db1', method=None,
+                                  threshold=sigma)
     psnr_noisy = compare_psnr(img, noisy)
     psnr_denoised = compare_psnr(img, denoised)
     assert_(psnr_denoised > psnr_noisy)
+
+    # either method or threshold must be defined
+    with pytest.raises(ValueError):
+        _wavelet_threshold(noisy, wavelet='db1', method=None, threshold=None)
+
+    # warns if a threshold is provided in a case where it would be ignored
+    with expected_warnings(["Threshold method "]):
+        _wavelet_threshold(noisy, wavelet='db1', method='BayesShrink',
+                           threshold=sigma)
 
 
 def test_wavelet_denoising_nd():
