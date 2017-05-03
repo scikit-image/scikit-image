@@ -381,8 +381,8 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
     return sigma
 
 
-def _wavelet_threshold(image, wavelet, method, threshold=None, sigma=None, mode='soft',
-                       wavelet_levels=None):
+def _wavelet_threshold(image, wavelet, method, threshold=None, sigma=None,
+                       mode='soft', wavelet_levels=None):
     """Perform wavelet thresholding.
 
     Parameters
