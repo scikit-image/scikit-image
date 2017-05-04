@@ -132,6 +132,17 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
             dst_corners[:, 0] = dim_scales[1] * (src_corners[:, 0] + 0.5) - 0.5
             dst_corners[:, 1] = dim_scales[0] * (src_corners[:, 1] + 0.5) - 0.5
 
+            if order == 0:
+                # Small shift empirically observed to avoid results dependent
+                # on differences in floating point roundoff errors as observed
+                # for versions of numpy using different implementations of
+                # BLAS.  see a concrete example in gh-2629.
+                # A negative shift is chosen to give a result equivalent to
+                # the result using the scipy.ndimage based n-dimensional case
+                # below.
+                dst_corners[:, 0] -= 100*np.finfo(np.float64).eps
+                dst_corners[:, 1] -= 100*np.finfo(np.float64).eps
+
             tform = AffineTransform()
             tform.estimate(src_corners, dst_corners)
 
