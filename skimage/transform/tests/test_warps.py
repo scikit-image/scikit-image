@@ -413,5 +413,29 @@ def test_keep_range():
     assert out.max() == 2 / 255.0
 
 
+def test_downscale_labels():
+    # specific test case from gh-2629
+    labels = np.zeros((20, 20), dtype=np.uint8)
+    labels[2:8, 2:8] = 1
+    labels[0:8, 12:18] = 2
+    labels[12:18, 0:8] = 3
+    labels[12:20, 12:20] = 4
+
+    downsized_2d = resize(labels,
+                          (10, 5),
+                          order=0,
+                          mode="edge",
+                          preserve_range=True)
+
+    downsized_3d = resize(labels[..., np.newaxis],
+                          (10, 5, 1),
+                          order=0,
+                          mode="edge",
+                          preserve_range=True)
+
+    # both 2D and nD code paths should give the same result
+    assert_almost_equal(downsized_2d, downsized_3d[..., 0])
+
+
 if __name__ == "__main__":
     run_module_suite()
