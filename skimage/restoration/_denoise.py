@@ -22,9 +22,9 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     distance between two pixels and a certain standard deviation
     (`sigma_spatial`).
 
-    Radiometric similarity is measured by the Gaussian function of the Euclidean
-    distance between two color values and a certain standard deviation
-    (`sigma_color`).
+    Radiometric similarity is measured by the Gaussian function of the
+    Euclidean distance between two color values and a certain standard
+    deviation (`sigma_color`).
 
     Parameters
     ----------
@@ -569,7 +569,8 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
                 channel = out[..., i] - min
                 channel /= max - min
                 out[..., i] = denoise_wavelet(channel, sigma=sigma[i],
-                                              wavelet=wavelet, mode=mode)
+                                              wavelet=wavelet, mode=mode,
+                                              wavelet_levels=wavelet_levels)
 
                 out[..., i] = out[..., i] * (max - min)
                 out[..., i] += min
@@ -582,8 +583,7 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
                                                  wavelet_levels=wavelet_levels)
 
     else:
-        out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
-                                 sigma=sigma,
+        out = _wavelet_threshold(img, wavelet=wavelet, mode=mode, sigma=sigma,
                                  wavelet_levels=wavelet_levels)
 
     clip_range = (-1, 1) if img.min() < 0 else (0, 1)
