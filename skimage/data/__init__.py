@@ -16,9 +16,11 @@ from .. import data_dir
 from ..io import imread, use_plugin
 from .._shared._warnings import expected_warnings, warn
 from .. import img_as_bool
+from ._binary_blobs import binary_blobs
 
 __all__ = ['load',
            'astronaut',
+           'binary_blobs',
            'camera',
            'checkerboard',
            'chelsea',
