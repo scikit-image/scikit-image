@@ -12,7 +12,7 @@ __all__ = ['imread', 'imsave', 'imshow', 'show',
            'imread_collection', 'imshow_collection']
 
 
-def imread(fname, as_grey=False, plugin=None, flatten=None,
+def imread(fname, as_gray=False, as_grey=None, plugin=None, flatten=None,
            **plugin_args):
     """Load an image from file.
 
@@ -20,10 +20,15 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
     ----------
     fname : string
         Image file name, e.g. ``test.jpg`` or URL.
-    as_grey : bool
-        If True, convert color images to grey-scale (64-bit floats).
-        Images that are already in grey-scale format are not converted.
-    plugin : str
+    as_gray : bool, optional
+        If True, convert color images to gray-scale (64-bit floats).
+        Images that are already in gray-scale format are not converted.
+    as_grey : bool or None, optional
+        Deprecated keyword argument. Use `as_gray` instead.
+        If None, `as_gray` is used.
+        If True, convert color images to gray-scale (64-bit floats).
+        Images that are already in gray-scale format are not converted.
+    plugin : str, optional
         Name of plugin to use.  By default, the different plugins are
         tried (starting with the Python Imaging Library) until a suitable
         candidate is found.  If not given and fname is a tiff file, the
@@ -34,7 +39,7 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
     plugin_args : keywords
         Passed to the given plugin.
     flatten : bool
-        Backward compatible keyword, superseded by `as_grey`.
+        Backward compatible keyword, superseded by `as_gray`.
 
     Returns
     -------
@@ -44,9 +49,17 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
         RGB-image MxNx3 and an RGBA-image MxNx4.
 
     """
+    if as_grey is not None:
+        as_gray = as_grey
+        warn('`as_grey` has been deprecated in favor of `as_gray`'
+             ' and will be removed in v0.16.')
+
+
     # Backward compatibility
     if flatten is not None:
-        as_grey = flatten
+        as_gray = flatten
+        warn('`flatten` has been deprecated in favor of `as_gray`'
+             ' and will be removed in v0.16.')
 
     if plugin is None and hasattr(fname, 'lower'):
         if fname.lower().endswith(('.tiff', '.tif')):
@@ -63,7 +76,7 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
             img = np.swapaxes(img, -1, -3)
             img = np.swapaxes(img, -2, -3)
 
-        if as_grey:
+        if as_gray:
             img = rgb2grey(img)
 
     return img
