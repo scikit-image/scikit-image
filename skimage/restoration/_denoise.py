@@ -395,17 +395,16 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
         The type of wavelet to perform. Can be any of the options
         pywt.wavelist outputs. For example, this may be any of ``{db1, db2,
         db3, db4, haar}``.
-    method: string or None
-        The thresholding method to be used. Currently supported are
-        "BayesShrink" and "VisuShrink".  If it is set to None, a user-specified
-        ``threshold`` must be supplied instead.
-    sigma : float, optional
-        The standard deviation of the noise. The noise is estimated when sigma
-        is None (the default) by the method in [2]_.
+    method : {'BayesShrink', 'VisuShrink'}, optional
+        Thresholding method to be used. The currently supported methods are
+        "BayesShrink" [1]_ and "VisuShrink" [2]_. Defaults to "BayesShrink".
     threshold : float, optional
         The thresholding value to apply during wavelet coefficient
         thresholding. The default value (None) uses the selected ``method`` to
         estimate appropriate threshold(s) for noise removal.
+    sigma : float, optional
+        The standard deviation of the noise. The noise is estimated when sigma
+        is None (the default) by the method in [2]_.
     mode : {'soft', 'hard'}, optional
         An optional argument to choose the type of denoising performed. It
         noted that choosing soft thresholding given additive noise finds the
@@ -506,9 +505,6 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
         The noise standard deviation used when computing the wavelet detail
         coefficient threshold(s). When None (default), the noise standard
         deviation is estimated via the method in [2]_.
-    method : {'BayesShrink', 'VisuShrink'}, optional
-        Thresholding method to be used. The currently supported methods are
-        "BayesShrink" [1]_ and "VisuShrink" [2]_. Defaults to "BayesShrink".
     wavelet : string, optional
         The type of wavelet to perform and can be any of the options
         ``pywt.wavelist`` outputs. The default is `'db1'`. For example,
@@ -527,6 +523,9 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
         If True and multichannel True, do the wavelet denoising in the YCbCr
         colorspace instead of the RGB color space. This typically results in
         better performance for RGB images.
+    method : {'BayesShrink', 'VisuShrink'}, optional
+        Thresholding method to be used. The currently supported methods are
+        "BayesShrink" [1]_ and "VisuShrink" [2]_. Defaults to "BayesShrink".
 
     Returns
     -------
@@ -554,7 +553,7 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     thresholding method that computes separate thresholds for each wavelet
     sub-band as described in [1]_.
 
-    If ``mode == "VisuShrink"``, a single "universal threshold" is applied to
+    If ``method == "VisuShrink"``, a single "universal threshold" is applied to
     all wavelet detail coefficients as described in [2]_.  This threshold
     is designed to remove all Gaussian noise at a given ``sigma`` with high
     probability, but tends to produce images that appear overly smooth.
