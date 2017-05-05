@@ -54,7 +54,7 @@ def load(f, as_grey=False):
         Image loaded from ``skimage.data_dir``.
     """
     use_plugin('pil')
-    return imread(_os.path.join(data_dir, f), as_grey=as_grey)
+    return imread(_os.path.join(data_dir, f), as_gray=as_grey)
 
 
 def camera():
