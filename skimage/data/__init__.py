@@ -38,23 +38,32 @@ __all__ = ['load',
            'stereo_motorcycle']
 
 
-def load(f, as_grey=False):
+def load(f, as_gray=False, as_grey=None):
     """Load an image file located in the data directory.
 
     Parameters
     ----------
     f : string
         File name.
-    as_grey : bool, optional
-        Convert to greyscale.
+    as_gray : bool, optional
+        Convert to grayscale.
+    as_grey : bool or None, optional
+        Deprecated keyword argument. Use `as_gray` instead.
+        If None, `as_gray` is used.
+        Convert to grayscale.
 
     Returns
     -------
     img : ndarray
         Image loaded from ``skimage.data_dir``.
     """
+    if as_grey is not None:
+        as_gray = as_grey
+        warn('`as_grey` has been deprecated in favor of `as_gray`'
+             ' and will be removed in v0.16.')
+
     use_plugin('pil')
-    return imread(_os.path.join(data_dir, f), as_gray=as_grey)
+    return imread(_os.path.join(data_dir, f), as_gray=as_gray)
 
 
 def camera():
