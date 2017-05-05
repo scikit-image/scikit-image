@@ -14,8 +14,7 @@ import numpy as _np
 
 from .. import data_dir
 from ..io import imread, use_plugin
-from .._shared._warnings import expected_warnings
-from ._binary_blobs import binary_blobs
+from .._shared._warnings import expected_warnings, warn
 from .. import img_as_bool
 
 __all__ = ['load',
@@ -341,15 +340,15 @@ def rocket():
 def stereo_motorcycle():
     """Rectified stereo image pair with ground-truth disparities.
 
-    The two images are rectified such that every pixel in the left image has its
-    corresponding pixel on the same scanline in the right image. That means that
-    both images are warped such that they have the same orientation but a
+    The two images are rectified such that every pixel in the left image has
+    its corresponding pixel on the same scanline in the right image. That means
+    that both images are warped such that they have the same orientation but a
     horizontal spatial offset (baseline). The ground-truth pixel offset in
     column direction is specified by the included disparity map.
 
-    The two images are part of the Middlebury 2014 stereo benchmark. The dataset
-    was created by Nera Nesic, Porter Westling, Xi Wang, York Kitajima, Greg
-    Krathwohl, and Daniel Scharstein at Middlebury College. A detailed
+    The two images are part of the Middlebury 2014 stereo benchmark. The
+    dataset was created by Nera Nesic, Porter Westling, Xi Wang, York Kitajima,
+    Greg Krathwohl, and Daniel Scharstein at Middlebury College. A detailed
     description of the acquisition process can be found in [1]_.
 
     The images included here are down-sampled versions of the default exposure
@@ -379,14 +378,15 @@ def stereo_motorcycle():
 
     Notes
     -----
-    The original resolution images, images with different exposure and lighting,
-    and ground-truth depth maps can be found at the Middlebury website [2]_.
+    The original resolution images, images with different exposure and
+    lighting, and ground-truth depth maps can be found at the Middlebury
+    website [2]_.
 
     References
     ----------
-    .. [1] D. Scharstein, H. Hirschmueller, Y. Kitajima, G. Krathwohl, N. Nesic,
-           X. Wang, and P. Westling. High-resolution stereo datasets with
-           subpixel-accurate ground truth. In German Conference on Pattern
+    .. [1] D. Scharstein, H. Hirschmueller, Y. Kitajima, G. Krathwohl, N.
+           Nesic, X. Wang, and P. Westling. High-resolution stereo datasets
+           with subpixel-accurate ground truth. In German Conference on Pattern
            Recognition (GCPR 2014), Muenster, Germany, September 2014.
     .. [2] http://vision.middlebury.edu/stereo/data/scenes2014/
 

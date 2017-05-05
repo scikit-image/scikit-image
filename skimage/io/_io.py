@@ -54,7 +54,6 @@ def imread(fname, as_gray=False, as_grey=None, plugin=None, flatten=None,
         warn('`as_grey` has been deprecated in favor of `as_gray`'
              ' and will be removed in v0.16.')
 
-
     # Backward compatibility
     if flatten is not None:
         as_gray = flatten
