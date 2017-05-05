@@ -140,8 +140,8 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
                 # A negative shift is chosen to give a result equivalent to
                 # the result using the scipy.ndimage based n-dimensional case
                 # below.
-                dst_corners[:, 0] -= 100*np.finfo(np.float64).eps
-                dst_corners[:, 1] -= 100*np.finfo(np.float64).eps
+                dst_corners[:, 0] -= 1e-6
+                dst_corners[:, 1] -= 1e-6
 
             tform = AffineTransform()
             tform.estimate(src_corners, dst_corners)
