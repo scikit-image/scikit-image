@@ -114,7 +114,7 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
         idx2 = matches[i, 1]
 
         if matches_color is None:
-            color = np.random.rand(3, 1)
+            color = np.random.rand(3)
         else:
             color = matches_color
 
