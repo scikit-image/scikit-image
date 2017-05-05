@@ -1,8 +1,17 @@
-from concurrent import futures
 from multiprocessing import cpu_count
 from itertools import product
 
 import numpy as np
+from .._shared.utils import warn
+
+has_futures = True
+try:
+    from concurrent import futures
+except ImportError:
+    try:
+        import futures
+    except ImportError:
+        has_futures = False
 
 
 def _generate_shifts(ndim, max_shifts=None, shift_steps=1):
@@ -11,20 +20,20 @@ def _generate_shifts(ndim, max_shifts=None, shift_steps=1):
 
     Examples
     --------
-    print(list(_generate_shifts(2, max_shifts=(1, 2), shift_steps=1)))
-    >>> [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)]
+    >>> print(list(_generate_shifts(2, max_shifts=(1, 2), shift_steps=1)))
+    [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)]
     """
     if max_shifts is None:
-        max_shifts = (0, )*ndim
+        max_shifts = (0, ) * ndim
     elif np.isscalar(max_shifts):
-        max_shifts = (max_shifts, )*ndim
+        max_shifts = (max_shifts, ) * ndim
     elif len(max_shifts) != ndim:
         raise ValueError("max_shifts should have length ndim")
 
     if shift_steps is None:
-        shift_steps = (1, )*ndim
+        shift_steps = (1, ) * ndim
     elif np.isscalar(shift_steps):
-        shift_steps = (shift_steps, )*ndim
+        shift_steps = (shift_steps, ) * ndim
     elif len(shift_steps) != ndim:
         raise ValueError("max_shifts should have length ndim")
 
@@ -40,16 +49,16 @@ def _roll_axes(x, rolls, axes=None):
     Parameters
     ----------
     x : array-like
-        array to roll
+        Array to roll.
     rolls : int or sequence
-        The amount to roll along each axis in ``axes``
-    axes : int or sequence
-        The axes to roll.  Default is the first len(roll) axes of x.
+        The amount to roll along each axis in ``axes``.
+    axes : int or sequence, optional
+        The axes to roll. Default is the first ``len(rolls)`` axes of ``x``.
 
     Returns
     -------
     x : array
-        data with axes rolled
+        Data with axes rolled.
     """
     if np.isscalar(rolls):
         rolls = (rolls, )
@@ -77,27 +86,31 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=1,
     Parameters
     ----------
     x : array-like
-        data
+        Data for input to ``func``.
     func : function
-        A function to apply to circularly shifted versions of x.  Should take
-        x as its first argument.  Any additional arguments can be supplied via
-        ``func_kw``.
-    max_shifts : int or tuple, optional
+        A function to apply to circularly shifted versions of ``x``.  Should
+        take ``x`` as its first argument. Any additional arguments can be
+        supplied via ``func_kw``.
+    max_shifts : int or tuple
         If an integer, shifts in ``range(0, max_shifts+1)`` will be used along
-        each axis of x. If a tuple, ``range(0, max_shifts[i]+1)`` will be used
+        each axis of ``x``. If a tuple, ``range(0, max_shifts[i]+1)`` will be
         along axis i.
     shift_steps : int or tuple, optional
         The step size for the shifts applied along axis, i, are::
-        ``range((0, max_shifts[i]+1, shift_steps[i]))``.  If an integer is
+        ``range((0, max_shifts[i]+1, shift_steps[i]))``. If an integer is
         provided, the same step size is used for all axes.
+    num_workers : int or None, optional
+        The number of parallel threads to use during cycle spinning. If set to
+        ``None`` the maximum number of processors as returned by
+        ``multiprocessing.cpu_count`` will be used.
     func_kw : dict, optional
         Additional keyword arguments to supply to ``func``.
 
     Returns
     -------
     avg_y : np.ndarray
-        The output of ``func(x, **func_kw)`` averaged over all
-        combinations of the specified axis shifts.
+        The output of ``func(x, **func_kw)`` averaged over all combinations of
+        the specified axis shifts.
 
     Notes
     -----
@@ -116,7 +129,7 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=1,
     ..[1] R.R. Coifman and D.L. Donoho.  "Translation-Invariant De-Noising".
           Wavelets and Statistics, Lecture Notes in Statistics, vol.103.
           Springer, New York, 1995, pp.125-150.
-          http://dx.doi.org/10.1007/978-1-4612-2544-7_9
+          DOI:10.1007/978-1-4612-2544-7_9
 
     Examples
     --------
@@ -139,6 +152,13 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=1,
         xs = _roll_axes(x, shift)
         tmp = func(xs, **func_kw)
         return _roll_axes(tmp, -np.asarray(shift))
+
+    if not has_futures:
+        if num_workers is None or num_workers > 1:
+            warn("Setting num_workers to 1 because the futures package was not"
+                 "found. On Python 2.7, futures can be installed via:\n"
+                 "pip install futures")
+        num_workers = 1
 
     avg_y = 0
     if num_workers == 1:

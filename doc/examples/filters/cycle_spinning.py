@@ -61,7 +61,7 @@ max_shifts = [0, 1, 3, 5]
 for n, s in enumerate(max_shifts):
     print("ms = {}".format(s))
     im_bayescs = cycle_spin(noisy, func=denoise_wavelet, max_shifts=s,
-                            num_workers=None, func_kw=denoise_kwargs)
+                            func_kw=denoise_kwargs)
     ax[n+1].imshow(im_bayescs)
     ax[n+1].axis('off')
     psnr = compare_psnr(original, im_bayescs)
