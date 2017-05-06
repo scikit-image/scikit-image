@@ -61,7 +61,7 @@ def _bincount_histogram(image, source_range):
     return hist, bin_centers
 
 
-def histogram(image, nbins=256, source_range=None):
+def histogram(image, nbins=256, source_range=None, normalize=False):
     """Return histogram of image.
 
     Unlike `numpy.histogram`, this function returns the centers of bins and
@@ -85,6 +85,8 @@ def histogram(image, nbins=256, source_range=None):
         of that data type.
         `None` corresponds to 'image'. This behavior will change in
         version 0.16 and set default to 'dtype'.
+    normalize : bool, optional
+        If True, normalize the histogram by the sum of its values.
 
     Returns
     -------
@@ -130,6 +132,8 @@ def histogram(image, nbins=256, source_range=None):
         hist, bin_edges = np.histogram(image.flat, bins=nbins, range=hist_range)
         bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2.
 
+    if normalize:
+        hist = hist.astype('float') / np.sum(hist)
     return hist, bin_centers
 
 

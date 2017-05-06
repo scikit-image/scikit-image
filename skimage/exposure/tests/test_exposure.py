@@ -92,6 +92,20 @@ def test_peak_float_out_of_range_dtype():
     assert_equal(len(bin_centers), 10)
 
 
+def test_normalize():
+    im = np.array([0, 255, 255], dtype=np.uint8)
+    frequencies, bin_centers = exposure.histogram(im, source_range='dtype',
+                                                  normalize=False)
+    expected = np.zeros(256)
+    expected[0] = 1
+    expected[-1] = 2
+    assert_equal(frequencies, expected)
+    frequencies, bin_centers = exposure.histogram(im, source_range='dtype',
+                                                  normalize=True)
+    expected /= 3.
+    assert_equal(frequencies, expected)
+
+
 # Test histogram equalization
 # ===========================
 
