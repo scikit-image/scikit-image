@@ -397,7 +397,8 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
         db3, db4, haar}``.
     method : {'BayesShrink', 'VisuShrink'}, optional
         Thresholding method to be used. The currently supported methods are
-        "BayesShrink" [1]_ and "VisuShrink" [2]_. Defaults to "BayesShrink".
+        "BayesShrink" [1]_ and "VisuShrink" [2]_. If it is set to None, a
+        user-specified ``threshold`` must be supplied instead.
     threshold : float, optional
         The thresholding value to apply during wavelet coefficient
         thresholding. The default value (None) uses the selected ``method`` to
@@ -580,7 +581,7 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     """
     if method not in ["BayesShrink", "VisuShrink"]:
         raise ValueError(
-            ('Invalid method: {}. Currently supported methods are '
+            ('Invalid method: {}. The currently supported methods are '
              '"BayesShrink" and "VisuShrink"').format(method))
 
     image = img_as_float(image)
