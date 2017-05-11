@@ -368,7 +368,7 @@ def flip(image, orientation):
     >>> from skimage import data
     >>> image = data.camera()
     >>> flip(image, 0).shape #horizontal flip
-    (512,512)
+    (512, 512)
     >>> flip(image, 1).shape #vertical flip
     (512, 512)
     """
