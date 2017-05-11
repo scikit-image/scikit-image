@@ -324,6 +324,7 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
     return warp(image, tform, output_shape=output_shape, order=order,
                 mode=mode, cval=cval, clip=clip, preserve_range=preserve_range)
 
+
 def flip(image, orientation):
     """Flip image horizontally or vertically.
 
@@ -333,12 +334,12 @@ def flip(image, orientation):
         Input image
     orientation : bool
         Flip direction as a boolean - '0' - horizontal, '1' - vertical
-    
+
     Returns
     -------
     flipped : ndarray
-        Flipped version of the input.    
-    
+        Flipped version of the input.
+
     Examples
     --------
 
