@@ -70,7 +70,7 @@ test_script:
   -  echo backend:Agg > matplotlibrc
 
   # Run unit tests with pytest
-  - "python -c \"import pytest; pytest.main(['skimage'])\""
+  - "python -c \"import pytest; import skimage; pytest.main([skimage.pkg_dir])\""
 
 artifacts:
   # Archive the generated wheel package in the ci.appveyor.com build report.
