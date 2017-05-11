@@ -14,31 +14,43 @@ except ImportError:
         has_futures = False
 
 
-def _generate_shifts(ndim, max_shifts=None, shift_steps=1):
+def _generate_shifts(ndim, multichannel, max_shifts=None, shift_steps=1):
     """Returns all combinations of shifts in n dimensions over the specified
     max_shifts and step sizes.
 
     Examples
     --------
-    >>> print(list(_generate_shifts(2, max_shifts=(1, 2), shift_steps=1)))
+    >>> s = list(_generate_shifts(2, False, max_shifts=(1, 2), shift_steps=1))
+    >>> print(s)
     [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)]
     """
+    mc = int(multichannel)
     if max_shifts is None:
         max_shifts = (0, ) * ndim
     elif np.isscalar(max_shifts):
-        max_shifts = (max_shifts, ) * ndim
+        max_shifts = (max_shifts, ) * (ndim - mc) + (0, ) * mc
+    elif multichannel and len(max_shifts) == ndim - 1:
+        max_shifts = tuple(max_shifts) + (0, )
     elif len(max_shifts) != ndim:
         raise ValueError("max_shifts should have length ndim")
 
     if shift_steps is None:
         shift_steps = (1, ) * ndim
     elif np.isscalar(shift_steps):
-        shift_steps = (shift_steps, ) * ndim
+        shift_steps = (shift_steps, ) * (ndim - mc) + (1, ) * mc
+    elif multichannel and len(shift_steps) == ndim - 1:
+        shift_steps = tuple(shift_steps) + (1, )
     elif len(shift_steps) != ndim:
         raise ValueError("max_shifts should have length ndim")
 
     if np.any(np.asarray(shift_steps) < 1):
         raise ValueError("shift_steps must all be >= 1")
+
+    if multichannel and max_shifts[-1] != 0:
+        raise ValueError(
+            "Multichannel cycle spinning should not have shifts along the "
+            "last axis.")
+
     return product(*([range(0, s+1, t) for
                       s, t in zip(max_shifts, shift_steps)]))
 
@@ -80,7 +92,7 @@ def _roll_axes(x, rolls, axes=None):
 
 
 def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=1,
-               func_kw={}):
+               multichannel=False, func_kw={}):
     """Cycle spinning (repeatedly apply func to shifted versions of x).
 
     Parameters
@@ -103,6 +115,9 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=1,
         The number of parallel threads to use during cycle spinning. If set to
         ``None`` the maximum number of processors as returned by
         ``multiprocessing.cpu_count`` will be used.
+    multichannel : bool, optional
+        Whether to treat the final axis as channels (no cycle shifts are
+        performed over the channels axis).
     func_kw : dict, optional
         Additional keyword arguments to supply to ``func``.
 
@@ -143,7 +158,8 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=1,
 
     """
     x = np.asanyarray(x)
-    all_shifts = _generate_shifts(x.ndim, max_shifts, shift_steps)
+    all_shifts = _generate_shifts(x.ndim, multichannel, max_shifts,
+                                  shift_steps)
     all_shifts = list(all_shifts)
     nshifts = len(all_shifts)
 
