@@ -11,8 +11,7 @@ import numbers
 
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
-                      bins=10000, mode='constant', cval=0, multichannel=None,
-                      sigma_range=None):
+                      bins=10000, mode='constant', cval=0, multichannel=None):
     """Denoise image using bilateral filter.
 
     This is an edge-preserving, denoising filter. It averages pixels based on
@@ -110,14 +109,6 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                              "but input image has {0} dimension. Use "
                              "``multichannel=True`` for 2-D RGB "
                              "images.".format(image.shape))
-
-    if sigma_range is not None:
-        warn('`sigma_range` has been deprecated in favor of '
-             '`sigma_color`. The `sigma_range` keyword argument '
-             'will be removed in v0.14', skimage_deprecation)
-
-        # If sigma_range is provided, assign it to sigma_color
-        sigma_color = sigma_range
 
     if win_size is None:
         win_size = max(5, 2 * int(ceil(3 * sigma_spatial)) + 1)

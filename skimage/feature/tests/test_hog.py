@@ -201,12 +201,6 @@ def test_hog_orientations_circle():
         assert_almost_equal(actual, desired, decimal=1)
 
 
-def test_hog_normalise_none_error_raised():
-    img = np.array([1, 2, 3])
-    with pytest.raises(ValueError):
-        feature.hog(img, normalise=True)
-
-
 def test_hog_block_normalization_incorrect_error():
     img = np.eye(4)
     with pytest.raises(ValueError):
