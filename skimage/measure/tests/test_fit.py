@@ -1,9 +1,8 @@
 import numpy as np
 from numpy.testing import assert_equal, assert_almost_equal, assert_array_less
 from numpy.testing import assert_array_less
-from skimage.measure import LineModel, LineModelND, CircleModel, EllipseModel, ransac
 import pytest
-from skimage.measure import LineModelND, CircleModel, EllipseModel, ransac
+from skimage.measure import (LineModelND, CircleModel, EllipseModel, ransac)
 from skimage.transform import AffineTransform
 from skimage.measure.fit import _dynamic_max_trials
 from skimage._shared._warnings import expected_warnings
@@ -20,43 +19,6 @@ def test_line_model_predict():
     x = np.arange(-10, 10)
     y = model.predict_y(x)
     assert_almost_equal(x, model.predict_x(y))
-
-
-def test_line_model_estimate():
-    # generate original data without noise
-    model0 = LineModel()
-    model0.params = (0, 1)
-    x0 = np.arange(-100, 100)
-    y0 = model0.predict_y(x0)
-
-    data0 = np.column_stack([x0, y0])
-    data = data0 + (np.random.random(data0.shape) - 0.5)
-
-    # estimate parameters of noisy data
-    model_est = LineModel()
-    model_est.estimate(data)
-    assert_almost_equal(model_est.residuals(data0), np.zeros(len(data)), 1)
-
-    # test whether estimated parameters almost equal original parameters
-    random_state = np.random.RandomState(1234)
-    x = random_state.rand(100, 2)
-    assert_almost_equal(model0.predict_y(x), model_est.predict_y(x), 1)
-
-
-def test_line_model_residuals():
-    model = LineModel()
-    model.params = (0, 0)
-    assert_equal(model.residuals(np.array([[0, 0]])), 0)
-    assert_equal(model.residuals(np.array([[0, 10]])), 10)
-    assert_equal(model.residuals(np.array([[10, 0]])), 0)
-    model.params = (1, 0)
-    assert_equal(model.residuals(np.array([[0, 0]])), 0)
-    assert_almost_equal(model.residuals(np.array([[1, 0]])), np.sqrt(2) / 2.)
-
-
-def test_line_model_under_determined():
-    with pytest.raises(ValueError):
-        LineModel().estimate(np.empty((1, 2)))
 
 
 def test_line_model_nd_invalid_input():
