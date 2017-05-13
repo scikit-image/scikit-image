@@ -15,6 +15,8 @@ Version 0.14
   favor of '`data_range`.
 - In ``skimage.restoration.denoise_bilateral``, the `sigma_range` kwarg has
   been removed in favor of `sigma_color`.
+- ``skimage.measure.marching_cubes`` has been removed in favor of
+  ``skimage.measure.marching_cubes_lewiner``.
 
 Version 0.13
 ------------

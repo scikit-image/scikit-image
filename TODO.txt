@@ -12,7 +12,6 @@ Version 0.14
 * Remove deprecation error on the usage of ``ntiles_x``, ``ntiles_y`` in
   ``skimage.exposure.equalize_adapthist`` and the corresponding test.
 * Remove the freeimage plugin shim to imageio.
-* Remove deprecated ``marching_cubes`` from ``skimage.measure``.
 
 Version 0.15
 ------------
