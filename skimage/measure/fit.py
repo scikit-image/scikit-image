@@ -41,7 +41,7 @@ class LineModelND(BaseModel):
     Examples
     --------
     >>> x = np.linspace(1, 2, 25)
-    >>> y = LineModel().predict_y(x, params=(1.5, 3))
+    >>> y = 1.5 * x + 3
     >>> lm = LineModelND()
     >>> lm.estimate(np.array([x, y]).T)
     True

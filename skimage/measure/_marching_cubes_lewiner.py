@@ -7,6 +7,12 @@ from . import _marching_cubes_lewiner_luts as mcluts
 from . import _marching_cubes_lewiner_cy
 
 
+if sys.version_info >= (3, ):
+    base64decode = base64.decodebytes
+else:
+    base64decode = base64.decodestring
+
+
 def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
                            gradient_direction='descent', step_size=1,
                            allow_degenerate=True, use_classic=False):
