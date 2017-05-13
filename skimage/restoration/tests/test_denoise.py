@@ -227,7 +227,7 @@ def test_denoise_bilateral_nan():
     assert_equal(img, out)
 
 
-def test_nl_means_denoising_2d():
+def test_denoise_nl_means_2d():
     img = np.zeros((40, 40))
     img[10:-10, 10:-10] = 1.
     img += 0.3*np.random.randn(*img.shape)

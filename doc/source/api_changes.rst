@@ -19,6 +19,8 @@ Version 0.14
   ``skimage.measure.marching_cubes_lewiner``.
 - ``ntiles_*`` parameters have been removed from
   ``skimage.exposure.equalize_adapthist``. Use ``kernel_size`` instead.
+- ``skimage.restoration.nl_means_denoising`` has been removed in
+  favor of ``skimage.restoration.denoise_nl_means``.
 
 Version 0.13
 ------------
