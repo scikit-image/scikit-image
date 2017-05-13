@@ -3,14 +3,11 @@ Remember to list any API changes below in `doc/source/api_changes.txt`.
 Version 0.14
 ------------
 * Finalize ``skimage.future.graph`` API.
-* Remove deprecated ``ntiles_*` kwargs in ``equalize_adapthist``.
 * Remove deprecated ``skimage.restoration.nl_means_denoising``.
 * Remove deprecated ``skimage.measure.LineModel`` and
   add an alias LineModel = LineModelND. While the deprecated LineModel has for
   parameters `(dist, theta)`, LineModelND has the more general parameters
   `(origin, direction)`.
-* Remove deprecation error on the usage of ``ntiles_x``, ``ntiles_y`` in
-  ``skimage.exposure.equalize_adapthist`` and the corresponding test.
 * Remove the freeimage plugin shim to imageio.
 
 Version 0.15
