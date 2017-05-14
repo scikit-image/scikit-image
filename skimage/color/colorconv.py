@@ -811,7 +811,7 @@ def gray2rgb(image, alpha=None):
     Parameters
     ----------
     image : array_like
-        Input image of shape ``(M, [N, P])``.
+        Input image of shape ``(M[, N][, P])``.
     alpha : bool, optional
         Ensure that the output image has an alpha layer.  If None,
         alpha layers are passed through but not created.
