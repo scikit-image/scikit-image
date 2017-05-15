@@ -158,7 +158,7 @@ else:
         _raise_build_error(e)
     from .util.dtype import *
 
-_module = sys.modules['name']
+_module = sys.modules[__name__]
 
 del warnings, functools, osp, imp, sys
 
