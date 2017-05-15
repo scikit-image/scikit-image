@@ -1,11 +1,9 @@
 import numpy as np
 from numpy.testing import assert_equal, assert_almost_equal, assert_array_less
-from numpy.testing import assert_array_less
 import pytest
-from skimage.measure import (LineModelND, CircleModel, EllipseModel, ransac)
+from skimage.measure import LineModelND, CircleModel, EllipseModel, ransac
 from skimage.transform import AffineTransform
 from skimage.measure.fit import _dynamic_max_trials
-from skimage._shared._warnings import expected_warnings
 
 
 def test_line_model_invalid_input():

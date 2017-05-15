@@ -18,7 +18,7 @@ References
        Electroacoustics, vol. au-19, no. 4, pp. 285-288, dec. 1971
 """
 
-from .deconvolution import (wiener, unsupervised_wiener, richardson_lucy)
+from .deconvolution import wiener, unsupervised_wiener, richardson_lucy
 from .unwrap import unwrap_phase
 from ._denoise import (denoise_tv_chambolle, denoise_tv_bregman,
                        denoise_bilateral, denoise_wavelet, estimate_sigma)
