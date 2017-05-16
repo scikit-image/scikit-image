@@ -1,5 +1,5 @@
 import numpy as np
-from .._shared.utils import skimage_deprecation, warn
+from .._shared.utils import warn
 from ._nl_means_denoising import (
     _nl_means_denoising_2d,
     _nl_means_denoising_3d,

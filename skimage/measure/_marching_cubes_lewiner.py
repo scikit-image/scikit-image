@@ -1,61 +1,21 @@
 import sys
 import base64
-import dis
-import inspect
 
 import numpy as np
 
-if sys.version_info >= (3, ):
-    base64decode = base64.decodebytes
-    ordornot = lambda x: x
-else:
-    base64decode = base64.decodestring
-    ordornot = ord
-
 from . import _marching_cubes_lewiner_luts as mcluts
 from . import _marching_cubes_lewiner_cy
-from .._shared.utils import skimage_deprecation, warn
 
 
-def _expected_output_args():
-    """ Get number of expected output args.
-
-    Please don't use this to influence the algorithmic bahaviour of a function.
-    For ``a, b, rest*, c = ...`` syntax, returns n + 0.1 (3.1 in this example).
-    """
-    offset = 2 if sys.version_info >= (3, 6) else 3
-    f = inspect.currentframe().f_back.f_back
-    i = f.f_lasti + offset
-    bytecode = f.f_code.co_code
-    instruction = ordornot(bytecode[i])
-    while True:
-        if instruction == dis.opmap['DUP_TOP']:
-            if ordornot(bytecode[i + 1]) == dis.opmap['UNPACK_SEQUENCE']:
-                return ordornot(bytecode[i + 2])
-            i += 4
-            instruction = ordornot(bytecode[i])
-            continue
-        if instruction == dis.opmap['STORE_NAME']:
-            return 1
-        if instruction == dis.opmap['UNPACK_SEQUENCE']:
-            return ordornot(bytecode[i + 1])
-        if instruction == dis.opmap.get('UNPACK_EX', -1):  # py3k
-            if ordornot(bytecode[i + 2]) < 10:
-                return ordornot(bytecode[i + 1]) + ordornot(bytecode[i + 2]) + 0.1
-            else:  # 3.6
-                return ordornot(bytecode[i + 1]) + 0.1
-        if instruction == dis.opmap.get('EXTENDED_ARG', -1):  # py 3.6
-            if ordornot(bytecode[i + 2]) == dis.opmap.get('UNPACK_EX', -1):
-                return ordornot(bytecode[i + 1]) + ordornot(bytecode[i + 3]) + 0.1
-            i += 4
-            instruction = ordornot(bytecode[i])
-            continue
-        return 0
+if sys.version_info >= (3, ):
+    base64decode = base64.decodebytes
+else:
+    base64decode = base64.decodestring
 
 
-def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
-                   gradient_direction='descent', step_size=1,
-                   allow_degenerate=True, use_classic=False):
+def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
+                           gradient_direction='descent', step_size=1,
+                           allow_degenerate=True, use_classic=False):
     """
     Lewiner marching cubes algorithm to find surfaces in 3d volumetric data.
 
@@ -130,7 +90,7 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
     named `myvolume` about the level 0.0, using the ``mayavi`` package::
 
       >>> from mayavi import mlab # doctest: +SKIP
-      >>> verts, faces, normals, values = marching_cubes(myvolume, 0.0) # doctest: +SKIP
+      >>> verts, faces, normals, values = marching_cubes_lewiner(myvolume, 0.0) # doctest: +SKIP
       >>> mlab.triangular_mesh([vert[0] for vert in verts],
       ...                      [vert[1] for vert in verts],
       ...                      [vert[2] for vert in verts],
@@ -140,7 +100,7 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
     Similarly using the ``visvis`` package::
 
       >>> import visvis as vv # doctest: +SKIP
-      >>> verts, faces, normals, values = marching_cubes_classic(myvolume, 0.0) # doctest: +SKIP
+      >>> verts, faces, normals, values = marching_cubes_lewiner(myvolume, 0.0) # doctest: +SKIP
       >>> vv.mesh(np.fliplr(verts), faces, normals, values) # doctest: +SKIP
       >>> vv.use().Run() # doctest: +SKIP
 
@@ -156,30 +116,6 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
     --------
     skimage.measure.marching_cubes_classic
     skimage.measure.mesh_surface_area
-    """
-
-    # This signature (output args) of this func changed after 0.12
-    try:
-        nout = _expected_output_args()
-    except Exception:
-        nout = 0  # always warn if, for whaterver reason, the black magic in above call fails
-    if nout <= 2:
-        warn(skimage_deprecation('`marching_cubes` now uses a better and '
-                                 'faster algorithm, and returns four instead '
-                                 'of two outputs (see docstring for details). '
-                                 'Backwards compatibility with 0.12 and prior '
-                                 'is available with `marching_cubes_classic`. '
-                                 'This function will be removed in 0.14, '
-                                 'consider switching to `marching_cubes_lewiner`.'))
-
-    return marching_cubes_lewiner(volume, level, spacing, gradient_direction,
-                                  step_size, allow_degenerate, use_classic)
-
-
-def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
-                           gradient_direction='descent', step_size=1,
-                           allow_degenerate=True, use_classic=False):
-    """ Alias for ``marching_cubes()``.
     """
 
     # Check volume and ensure its in the format that the alg needs
