@@ -15,9 +15,9 @@ threshold selection:  BayesShrink and VisuShrink.
 VisuShrink
 ----------
 The VisuShrink approach employs a single, universal threshold to all wavelet
-detail coefficients.  This thershold is designed to remove additive Gaussian
+detail coefficients.  This threshold is designed to remove additive Gaussian
 noise with high probability, which tends to result in overly smooth image
-appearance.  By specfying a sigma that is smaller than the true noise standard
+appearance.  By specifying a sigma that is smaller than the true noise standard
 deviation, a more visually agreeable result can be obtained.
 
 BayesShrink
