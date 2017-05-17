@@ -373,7 +373,7 @@ def test_wavelet_threshold():
         _wavelet_threshold(noisy, wavelet='db1', method=None, threshold=None)
 
     # warns if a threshold is provided in a case where it would be ignored
-    with expected_warnings(["Threshold method "]):
+    with expected_warnings(["Thresholding method "]):
         _wavelet_threshold(noisy, wavelet='db1', method='BayesShrink',
                            threshold=sigma)
 
