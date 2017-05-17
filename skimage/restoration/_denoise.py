@@ -457,7 +457,7 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
         sigma = _sigma_est_dwt(detail_coeffs, distribution='Gaussian')
 
     if method is not None and threshold is not None:
-        warn(("Threshold method {} selected.  The user-specified threshold "
+        warn(("Thresholding method {} selected.  The user-specified threshold "
               "will be ignored.").format(method))
 
     if threshold is None:
