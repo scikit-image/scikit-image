@@ -550,7 +550,7 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     and 1, and `sigma` values are applied to these scaled color channels.
 
     Many wavelet coefficient thresholding approaches have been proposed.  By
-    default, ``denoise_wavelet`` applies BayesShrink, which is an adapative
+    default, ``denoise_wavelet`` applies BayesShrink, which is an adaptive
     thresholding method that computes separate thresholds for each wavelet
     sub-band as described in [1]_.
 
