@@ -3,7 +3,7 @@ from skimage import img_as_float
 import scipy
 import scipy.linalg
 from scipy.interpolate import RectBivariateSpline, interp2d
-from skimage.filters import sobel
+from ..filters import sobel
 
 
 def _scipy_version():
