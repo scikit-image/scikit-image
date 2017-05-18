@@ -19,5 +19,5 @@ coverage:
 	$(PYTESTS) skimage --cov=skimage
 
 html:
-	pip install -q sphinx
+	pip install -q 'sphinx<1.6'
 	export SPHINXOPTS=-W; make -C doc html

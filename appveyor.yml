@@ -29,7 +29,7 @@ environment:
 install:
   - ECHO "Filesystem root:"
   - ps: "ls \"C:/\""
-    
+
   # Install Python and all the required packages.
   - "powershell ./tools/appveyor/install.ps1"
 
@@ -59,7 +59,7 @@ build: false
 
 test_script:
   # Build the docs
-  - pip install sphinx
+  - pip install "sphinx<1.6"
   - SET PYTHON=%PYTHON%\\python.exe && cd doc && make html
 
   # Change to a non-source folder to make sure we run the tests on the
