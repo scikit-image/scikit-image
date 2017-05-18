@@ -14,6 +14,7 @@ from .thresholding import (threshold_local,
                            threshold_mean, threshold_triangle,
                            threshold_niblack, threshold_sauvola,
                            try_all_threshold)
+from ._unsharp_mask import unsharp_mask
 from . import rank
 from .rank import median
 
@@ -51,4 +52,5 @@ __all__ = ['inverse',
            'threshold_niblack',
            'threshold_sauvola',
            'threshold_triangle',
-           'rank']
+           'rank',
+           'unsharp_mask']
