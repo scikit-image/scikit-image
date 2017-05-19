@@ -2,11 +2,11 @@ import itertools
 import math
 import numpy as np
 from scipy import ndimage as ndi
-from scipy.ndimage import filters as ndif
 from collections import OrderedDict
 from ..exposure import histogram
 from .._shared.utils import assert_nD, warn, deprecated
 from ..transform import integral_image
+from .. import measure
 from .. import util
 from skimage import dtype_limits
 
@@ -601,7 +601,7 @@ def threshold_minimum(image, nbins=256, max_iter=10000):
     smooth_hist = np.copy(hist).astype(np.float64)
 
     for counter in range(max_iter):
-        smooth_hist = ndif.uniform_filter1d(smooth_hist, 3)
+        smooth_hist = ndi.uniform_filter1d(smooth_hist, 3)
         maximum_idxs = find_local_maxima_idx(smooth_hist)
         if len(maximum_idxs) < 3:
             break
@@ -881,3 +881,43 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
         r = 0.5 * (imax - imin)
     m, s = _mean_std(image, window_size)
     return m * (1 + k * ((s / r) - 1))
+
+
+def apply_hysteresis_threshold(image, low, high):
+    """Apply hysteresis thresholding to `image`.
+
+    This algorithm finds regions where `image` is greater than `high`
+    OR `image` is greater than `low` *and* that region is connected to
+    a region greater than `high`.
+
+    Parameters
+    ----------
+    image : array
+        The input image.
+    low : float
+        The low threshold.
+    high : float
+        The high threshold.
+
+    Returns
+    -------
+    thresholded : array of bool, same shape as `image`
+        Array in which `True` indicates the locations where `image`
+        was above the hysteresis threshold.
+
+    Examples
+    --------
+    >>> image = np.array([1, 2, 3, 2, 1, 2, 1, 3, 2])
+    >>> apply_hysteresis_threshold(image, 1.5, 2.5).astype(int)
+    array([0, 1, 1, 1, 0, 0, 0, 1, 1])
+    """
+    mask_low = image > low
+    mask_high = image > high
+    # Connected components of mask_low
+    labels_low, num_labels = ndi.label(mask_low)
+    # Check which connected components contain pixels from mask_high
+    sums = ndi.sum(mask_high, labels_low, np.arange(num_labels + 1))
+    connected_to_high = sums > 0
+    connected_to_high[0] = False
+    thresholded = connected_to_high[labels_low]
+    return thresholded
