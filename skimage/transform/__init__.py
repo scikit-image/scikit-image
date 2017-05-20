@@ -12,6 +12,7 @@ from ._geometric import (warp, warp_coords, estimate_transform,
 from ._warps import swirl, resize, rotate, rescale, downscale_local_mean
 from .pyramids import (pyramid_reduce, pyramid_expand,
                        pyramid_gaussian, pyramid_laplacian)
+from .steerable import Steerable, buildSteerable, reconSteerable
 
 
 __all__ = ['hough_circle',
