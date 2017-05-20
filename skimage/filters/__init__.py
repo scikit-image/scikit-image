@@ -13,6 +13,7 @@ from .thresholding import (threshold_local,
                            threshold_isodata, threshold_li, threshold_minimum,
                            threshold_mean, threshold_triangle,
                            threshold_niblack, threshold_sauvola,
+                           threshold_wolf, threshold_phansalskar,
                            try_all_threshold)
 from . import rank
 from .rank import median
@@ -50,5 +51,7 @@ __all__ = ['inverse',
            'threshold_mean',
            'threshold_niblack',
            'threshold_sauvola',
+           'threshold_wolf',
+           'threshold_phansalskar',
            'threshold_triangle',
            'rank']

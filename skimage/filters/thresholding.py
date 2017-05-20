@@ -881,3 +881,126 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
         r = 0.5 * (imax - imin)
     m, s = _mean_std(image, window_size)
     return m * (1 + k * ((s / r) - 1))
+
+
+def threshold_wolf(image, window_size=15, k=0.2):
+    """Applies Wolf local threshold to an array.
+
+    The threshold T is given by:
+
+    T = (1 - k) * m(x,y) + k * M + k * (s(x,y) / R) * (m(x,y) - M)
+
+    where m(x,y) and s(x,y) are the mean and standard deviation of
+    pixel (x,y) neighborhood defined by a rectangular window with size w
+    times w centered around the pixel. k is a configurable parameter
+    that weights the effect of standard deviation.
+    R is the maximum standard deviation found in all local
+    neighborhoods and M is the minimum pixel intensity in image.
+
+    Parameters
+    ----------
+    image: (N, M) ndarray
+        Input image. Only 2D grayscale images allowed.
+    window_size : int, optional
+        Odd size of pixel neighborhood window (e.g. 3, 5, 7...).
+    k : float, optional
+        Value of parameter k in threshold formula.
+
+    Returns
+    -------
+    threshold : (N, M) ndarray
+        Local threshold values. All pixels with an intensity higher than
+        this value are assumed to be foreground.
+
+    Notes
+    -----
+    This algorithm is originally designed for text recognition.
+
+    References
+    ----------
+    .. [1] C. Wolf, J-M. Jolion, "Extraction and Recognition of
+           Artificial Text in Multimedia Documents", Pattern
+           Analysis and Applications, 6(4):309-326, (2003).
+           DOI:10.1007/s10044-003-0197-7
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> image = data.page()
+    >>> binary_wolf = threshold_wolf(image,
+    ...                              window_size=7, k=0.2)
+    """
+    if len(image.shape) != 2:
+        raise ValueError("Image is not 2D grayscale.")
+    m, s = _mean_std(image, window_size)
+    R = s.max()  # Max std_dev used by Wolf.
+    M = image.min()
+    t = (1 - k) * m + k * M + k * (s / R) * (m - M)
+
+    return t - offset
+
+
+def threshold_phansalkar(image, window_size=15, k=0.2, r=128.,
+                         p=2, q=10, offset=0):
+    """Applies Phansalskar local threshold to an array.
+
+    The threshold T is given by:
+
+    T = m * (1 + p * exp(-q * m(x,y)) + k * ((s(x,y) / R) - 1)) - offset
+
+    where m(x,y) and s(x,y) are the mean and standard deviation of
+    pixel (x,y) neighborhood defined by a rectangular window with size w
+    times w centered around the pixel. k is a configurable parameter
+    that weights the effect of standard deviation.
+    R is the maximum standard deviation of a greyscale image (R = 128).
+    p and q are fixed values of 2 and 10 respectively. The
+    other parameters have the same meaning as in the previous methods.
+
+    Parameters
+    ----------
+    image: (N, M) ndarray
+        Input image. Only 2D grayscale images allowed.
+    window_size : int, optional
+        Odd size of pixel neighborhood window (e.g. 3, 5, 7...).
+    k : float, optional
+        Value of parameter k in threshold formula.
+    r : float, optional
+        Value of R in threshold formula.
+    offset : float, optional
+        Constant subtracted from obtained local thresholds.
+    p : float, optional
+        Value of p.
+    q : float, optional
+        Value of q.
+
+    Returns
+    -------
+    threshold : (N, M) ndarray
+        Local threshold values. All pixels with an intensity higher than
+        this value are assumed to be foreground.
+
+    Notes
+    -----
+    This algorithm is originally designed for text recognition.
+
+    References
+    ----------
+    .. [1] Phansalskar, N; More, S & Sabale, A et al. (2011), "Adaptive
+           local thresholding for detection of nuclei in diversity
+           stained cytology images.", International Conference on
+           Communications and Signal Processing (ICCSP): 218-220.
+           DOI:10.1109/ICCSP.2011.5739305
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> image = data.page()
+    >>> binary_phansalkar = threshold_phansalkar(image, window_size=7, k=0.2, r=128)
+    """
+    image_norm = None
+    if len(image.shape) != 2:
+        raise ValueError("Image is not 2D grayscale.")
+    m, s = _mean_std(image, window_size)
+    t = m * (1 + p * np.exp(-q * m) + k * ((s / r) - 1)) # TODO inconsistent with docstring
+
+    return t - offset

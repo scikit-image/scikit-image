@@ -15,6 +15,8 @@ from skimage.filters.thresholding import (threshold_local,
                                           threshold_isodata,
                                           threshold_niblack,
                                           threshold_sauvola,
+                                          threshold_phansalkar,
+                                          threshold_wolf,
                                           threshold_mean,
                                           threshold_triangle,
                                           threshold_minimum,
@@ -190,6 +192,30 @@ class TestSimpleImage():
              [True, True, False, False, False]]
         )
         thres = threshold_sauvola(self.image, window_size=3, k=0.2, r=128)
+        out = self.image > thres
+        assert_equal(ref, out)
+
+    def test_threshold_wolf(self):
+        ref = np.array(
+            [[False, False, False, True, True],
+             [False, False, True, True, True],
+             [False, False, True, True, False],
+             [False, True, True, False, False],
+             [True, True, False, False, False]]
+        )
+        thres = threshold_wolf(self.image, window_size=5, k=0.1)
+        out = self.image > thres
+        assert_equal(ref, out)
+
+    def test_threshold_phansalkar(self):
+        ref = np.array(
+                [[False, False,  True,  True,  True],
+                 [False,  True,  True,  True,  True],
+                 [ True,  True,  True,  True,  True],
+                 [ True,  True,  True,  True,  True],
+                 [ True,  True,  True, False, False]]
+        )
+        thres = threshold_phansalkar(self.image, window_size=9, k=0.8, r=64)
         out = self.image > thres
         assert_equal(ref, out)
 
