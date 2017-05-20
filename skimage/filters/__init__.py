@@ -51,5 +51,5 @@ __all__ = ['inverse',
            'threshold_niblack',
            'threshold_sauvola',
            'threshold_triangle',
-           'apply_hysteresis_threshold'
+           'apply_hysteresis_threshold',
            'rank']
