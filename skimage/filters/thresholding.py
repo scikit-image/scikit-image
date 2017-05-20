@@ -918,6 +918,5 @@ def apply_hysteresis_threshold(image, low, high):
     # Check which connected components contain pixels from mask_high
     sums = ndi.sum(mask_high, labels_low, np.arange(num_labels + 1))
     connected_to_high = sums > 0
-    connected_to_high[0] = False
     thresholded = connected_to_high[labels_low]
     return thresholded
