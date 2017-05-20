@@ -1,17 +1,12 @@
-import numpy as np
-from numpy.testing import (assert_raises, assert_, assert_equal,
-                           run_module_suite)
-from skimage.filters.steerable import *
+from numpy.testing import assert_array_almost_equal, assert_raises, run_module_suite
+from skimage.transform import steerable
 
-class TestSteerable(object):
+def test_steerable_reconstruction():
+	im = np.random.randint(0, 255, (128, 128))
+	coeff = steerable.build_steerable(im)
+	out = recon_steerable(coeff)
 
-	def testDifferentSize(self):
-		im = np.random.randint(0, 255, (128, 128))
-		a = Steerable()
-		coeff = a.buildSCFpyr(im)
-		out = a.reconSCFpyr(coeff)
-
-		assert_equal(np.allclose(out, im, atol = 10), True)
+	assert_array_almost_equal(im, out, decimal = 0)
 
 if __name__ == "__main__":
 	run_module_suite()
