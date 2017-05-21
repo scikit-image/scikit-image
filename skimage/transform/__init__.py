@@ -12,7 +12,6 @@ from ._geometric import (warp, warp_coords, estimate_transform,
 from ._warps import swirl, resize, rotate, rescale, downscale_local_mean
 from .pyramids import (pyramid_reduce, pyramid_expand,
                        pyramid_gaussian, pyramid_laplacian)
-from .seam_carving import seam_carve
 from .steerable import build_steerable, recon_steerable
 
 
