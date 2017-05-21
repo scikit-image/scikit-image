@@ -75,5 +75,10 @@ def test_relabel_sequential_dtype():
     assert_array_equal(inv, inv_ref)
 
 
+def test_relabel_sequential_invalid_offset():
+    ar = np.array([1, 2, 3])
+    assert_raises(ValueError, relabel_sequential, ar, -1)
+
+
 if __name__ == "__main__":
     np.testing.run_module_suite()

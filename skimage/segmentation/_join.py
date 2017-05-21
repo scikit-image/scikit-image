@@ -114,20 +114,22 @@ def relabel_sequential(label_field, offset=1):
     >>> relab
     array([5, 5, 6, 6, 7, 9, 8])
     """
+    if offset <= 0:
+        raise ValueError("Offset must be strictly positive")
     m = label_field.max()
     if not np.issubdtype(label_field.dtype, np.int):
         new_type = np.min_scalar_type(int(m))
         label_field = label_field.astype(new_type)
         m = m.astype(new_type)  # Ensures m is an integer
     labels = np.unique(label_field)
-    labels0 = labels[labels != 0]
-    if m == len(labels0):  # nothing to do, already 1...n labels
-        return label_field, labels, labels
+    has_zero, labels = (labels == 0).any(), labels.take(labels.nonzero())[0]
+    relabeled = np.digitize(label_field.ravel(), labels).reshape(label_field.shape)
+    relabeled = np.array([np.add(labeled, offset - 1) for labeled in relabeled if
+                          (labeled.ndim == 0 and labeled != 0) or labeled.ndim != 0])
+    relabeled = np.concatenate((relabeled, [0])) if has_zero and relabeled.ndim == labels.ndim else relabeled
     forward_map = np.zeros(m + 1, int)
-    forward_map[labels0] = np.arange(offset, offset + len(labels0))
-    if not (labels == 0).any():
-        labels = np.concatenate(([0], labels))
-    inverse_map = np.zeros(offset - 1 + len(labels), dtype=np.intp)
-    inverse_map[(offset - 1):] = labels
-    relabeled = forward_map[label_field]
+    forward_map[label_field] = relabeled
+    labels = np.concatenate(([0], labels)) if not has_zero else labels
+    inverse_map = np.concatenate((np.zeros(offset - 1, dtype=np.intp), labels))
+    inverse_map = np.concatenate(([0], inverse_map)) if has_zero else inverse_map
     return relabeled, forward_map, inverse_map
