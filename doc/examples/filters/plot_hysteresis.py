@@ -24,7 +24,7 @@ fig, ax = plt.subplots(nrows=2, ncols=2,
 image = data.coins()
 edges = filters.sobel(image)
 
-low = 0.05
+low = 0.1
 high = 0.35
 
 lowt = (edges > low).astype(int)
