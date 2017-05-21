@@ -21,7 +21,8 @@ __all__ = ['try_all_threshold',
            'threshold_mean',
            'threshold_niblack',
            'threshold_sauvola',
-           'threshold_triangle']
+           'threshold_triangle',
+           'apply_hysteresis_threshold']
 
 
 def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
