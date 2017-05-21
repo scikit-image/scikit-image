@@ -893,12 +893,12 @@ def apply_hysteresis_threshold(image, low, high):
 
     Parameters
     ----------
-    image : array
-        The input image.
+    image : array, shape (M,[ N, ..., P])
+        Grayscale input image.
     low : float
-        The low threshold.
+        Lower threshold.
     high : float
-        The high threshold.
+        Higher threshold.
 
     Returns
     -------
@@ -911,6 +911,13 @@ def apply_hysteresis_threshold(image, low, high):
     >>> image = np.array([1, 2, 3, 2, 1, 2, 1, 3, 2])
     >>> apply_hysteresis_threshold(image, 1.5, 2.5).astype(int)
     array([0, 1, 1, 1, 0, 0, 0, 1, 1])
+
+    References
+    ----------
+    .. [1] J. Canny. A computational approach to edge detection.
+           IEEE Transactions on Pattern Analysis and Machine Intelligence.
+           1986; vol. 8, pp.679-698.
+           DOI: 10.1109/TPAMI.1986.4767851
     """
     mask_low = image > low
     mask_high = image > high
