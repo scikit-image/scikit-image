@@ -4,7 +4,7 @@
 Hysteresis thresholding
 =======================
 
-*Hysteresis* is the lagging of an effect — a kind of inertia. In the
+*Hysteresis* is the lagging of an effect---a kind of inertia. In the
 context of thresholding, it means that areas above some *low* threshold
 are considered to be above the threshold *if* they are also connected
 to areas above a higher, more stringent, threshold. They can thus be
