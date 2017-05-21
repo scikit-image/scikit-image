@@ -23,5 +23,5 @@
 - [ ] Check that the PR title is short, concise, and will make sense 1 year
   later.
 - [ ] Check that new functions are imported in corresponding `__init__.py`.
-- [ ] Check that new features are mentioned in `doc/release/release_dev.rst`.
-- [ ] Check that API changes are mentioned in `doc/release/release_dev.rst`.
+- [ ] Check that new features, API changes, and deprecations are mentioned in
+      `doc/release/release_dev.rst`.
