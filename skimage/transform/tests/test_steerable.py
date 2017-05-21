@@ -1,4 +1,5 @@
-from numpy.testing import assert_equal, assert_array_equal, assert_array_almost_equal, run_module_suite
+from numpy.testing import assert_equal, assert_array_equal,\
+    assert_array_almost_equal, run_module_suite
 from skimage.transform import steerable
 import numpy as np
 from skimage import img_as_float

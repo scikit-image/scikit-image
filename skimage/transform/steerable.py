@@ -18,10 +18,10 @@ def build_steerable(image, height=5):
     -------
     coeff : subbands of Steerable decomposition,
             stored as a list of 'height' sublists,
-            Sublists corresponds to decreasing radius level in Steerable pyramid
+            Sublists correspond to decreasing radius level in Steerable pyramid
             The first sublist contains the high pass subband.
-            The last sublist contains the low pass subband
-            Intermediate sublists is list of subbands coming from different orientations.
+            The last sublist contains the low pass subband.
+            Intermediate sublists contains subbands from different orientations
 
     References
     ----------
@@ -37,12 +37,11 @@ def recon_steerable(coeff):
     Parameters
     ----------
     coeff : subbands of Steerable decomposition,
-            stored as a list containing 'height' sublists,
-            Sublists corresponds to decreasing radius level in Steerable pyramid
+            stored as a list of 'height' sublists,
+            Sublists correspond to decreasing radius level in Steerable pyramid
             The first sublist contains the high pass subband.
-            The last sublist contains the low pass subband
-            Intermediate sublists contains subbands coming from different orientations.
-
+            The last sublist contains the low pass subband.
+            Intermediate sublists contains subbands from different orientations
     Returns
     -------
     image : 2-D array
@@ -64,7 +63,8 @@ class Steerable:
         """
         Parameters
         ----------
-        height : height of the Steerable Decomposition (including high pass and low pass)
+        height : height of the Steerable Decomposition
+        (including high pass and low pass)
         """
         self.nbands = 4
         self.height = height
@@ -129,12 +129,13 @@ class Steerable:
             Xcosn = np.pi * \
                 np.array(range(-(2 * lutsize + 1), (lutsize + 2))) / lutsize
             order = self.nbands - 1
-            const = np.power(2, 2 * order) * np.square(np.math.factorial(order)
-                                                       ) / (self.nbands * np.math.factorial(2 * order))
+            const = np.power(2, 2 * order) * \
+                np.square(np.math.factorial(order)) / \
+                (self.nbands * np.math.factorial(2 * order))
 
             alpha = (Xcosn + np.pi) % (2 * np.pi) - np.pi
-            Ycosn = 2 * np.sqrt(const) * np.power(np.cos(Xcosn),
-                                                  order) * (np.abs(alpha) < np.pi / 2)
+            Ycosn = 2 * np.sqrt(const) * \
+                np.power(np.cos(Xcosn), order) * (np.abs(alpha) < np.pi / 2)
 
             orients = []
 
@@ -199,8 +200,10 @@ class Steerable:
             Xcosn = np.pi * \
                 np.array(range(-(2 * lutsize + 1), (lutsize + 2))) / lutsize
             order = self.nbands - 1
-            const = np.power(2, 2 * order) * np.square(np.math.factorial(order)
-                                                       ) / (self.nbands * np.math.factorial(2 * order))
+            const = np.power(2, 2 * order) * \
+                np.square(np.math.factorial(order)) / \
+                (self.nbands * np.math.factorial(2 * order))
+
             Ycosn = np.sqrt(const) * np.power(np.cos(Xcosn), order)
 
             orientdft = np.zeros(coeff[0][0].shape)
@@ -217,7 +220,9 @@ class Steerable:
             dims = np.array(coeff[0][0].shape)
 
             lostart = (np.ceil((dims + 0.5) / 2) -
-                       np.ceil((np.ceil((dims - 0.5) / 2) + 0.5) / 2)).astype(np.int32)
+                       np.ceil((np.ceil((dims - 0.5) / 2) + 0.5) / 2))\
+                .astype(np.int32)
+
             loend = lostart + np.ceil((dims - 0.5) / 2).astype(np.int32)
 
             nlog_rad = log_rad[lostart[0]:loend[0], lostart[1]:loend[1]]
@@ -239,18 +244,20 @@ class Steerable:
         """
         Parameters
         ----------
-        coeff : is a list containing subbands, which has the following structure
-        first element is high pass subband
-        last element is low pass subband
-        the elements in between are a list  containing subbands from different orientations
-
+        coeff : subbands of Steerable decomposition,
+            stored as a list of 'height' sublists,
+            Sublists correspond to decreasing radius level in Steerable pyramid
+            The first sublist contains the high pass subband.
+            The last sublist contains the low pass subband.
+            Intermediate sublists contains subbands from different orientations
         """
         if (self.height != len(coeff)):
             raise ValueError("Height of coeff should be %d" % self.height)
 
         for i in range(1, self.height - 1):
             if (self.nbands != len(coeff[1])):
-                raise ValueError("Size of intermediate sublist should be %d" % self.nbands)
+                raise ValueError(
+                    "Size of intermediate sublist should be %d" % self.nbands)
 
         M, N = coeff[0].shape
         log_rad, angle = base(M, N)
@@ -269,6 +276,7 @@ class Steerable:
 
         return np.fft.ifft2(np.fft.ifftshift(outdft)).real
 
+
 def base(m, n):
     """
     Helper function that create a grid containing radius from center and angle
@@ -279,8 +287,10 @@ def base(m, n):
 
     Returns
     -------
-    log_rad : [mxn] array: log of the radius with respect to the center of the matrix
-    angle : [mxn] array: the angle of the line originated from center of the matrix
+    log_rad : [mxn] array, log of the radius with respect
+                to the center of the matrix
+    angle : [mxn] array: the angle of the line originated
+                from center of the matrix
     """
 
     ctrm = np.ceil((m + 0.5) / 2).astype(int)
@@ -294,6 +304,7 @@ def base(m, n):
     angle = np.arctan2(yv, xv)
 
     return log_rad, angle
+
 
 def rcos_curve(width, position):
     """
@@ -318,6 +329,7 @@ def rcos_curve(width, position):
 
     X = position + 2 * width / np.pi * (X + np.pi / 4)
     return X, Y
+
 
 def point_op(mask, Y, X):
     """
