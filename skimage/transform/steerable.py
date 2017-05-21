@@ -159,6 +159,7 @@ class Steerable:
             log_rad = log_rad[lostart[0]:loend[0], lostart[1]:loend[1]]
             angle = angle[lostart[0]:loend[0], lostart[1]:loend[1]]
             lodft = lodft[lostart[0]:loend[0], lostart[1]:loend[1]]
+
             YIrcos = np.abs(np.sqrt(1 - Yrcos * Yrcos))
             lomask = point_op(log_rad, YIrcos, Xrcos)
 
