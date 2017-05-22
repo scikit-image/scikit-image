@@ -25,19 +25,19 @@ class TestGLCM():
                              [0, 0, 3, 1],
                              [0, 0, 0, 1]], dtype=np.uint32)
         np.testing.assert_array_equal(result[:, :, 0, 0], expected1)
-        expected2 = np.array([[1, 1, 3, 0],
-                             [0, 1, 1, 0],
-                             [0, 0, 0, 2],
+        expected2 = np.array([[2, 0, 0, 0],
+                             [1, 1, 2, 0],
+                             [0, 0, 2, 1],
                              [0, 0, 0, 0]], dtype=np.uint32)
         np.testing.assert_array_equal(result[:, :, 0, 1], expected2)
         expected3 = np.array([[3, 0, 2, 0],
                              [0, 2, 2, 0],
                              [0, 0, 1, 2],
                              [0, 0, 0, 0]], dtype=np.uint32)
-        np.testing.assert_array_equal(result[:, :, 0, 2], expected3)
-        expected4 = np.array([[2, 0, 0, 0],
-                             [1, 1, 2, 0],
-                             [0, 0, 2, 1],
+        np.testing.assert_array_equal(result[:, :, 0, 2], expected3)        
+        expected4 = np.array([[1, 1, 3, 0],
+                             [0, 1, 1, 0],
+                             [0, 0, 0, 2],
                              [0, 0, 0, 0]], dtype=np.uint32)
         np.testing.assert_array_equal(result[:, :, 0, 3], expected4)
 
