@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 """
@@ -18,7 +19,7 @@ iterations, which needs to be hand-tuned.
        J. Opt. Soc. Am. A 27, 1593-1607 (1972), DOI:10.1364/JOSA.62.000055
 =======
 
-In this example, Wiener, unsupervised Wiener and Richardson-Lucy
+In this example, Wiener, unsupervised Wiener, and Richardson-Lucy
 algorithms are used to deconvolve an image.
 
 Wiener and unsupervised Wiener filters
@@ -35,14 +36,14 @@ methods (like TV restoration), but are faster.
 >>>>>>> Answering requests.
 
 The Wiener deconvolution algorithm is an inverse filter based on an
-inpulse response function (also named point-spread function, or PSF), a
+impulse response function (also called point-spread function, or PSF), a
 filter to penalize the restored image frequencies (regularization), and
 a parameter which tunes the balance between the data and the
 regularization.
 
 The unsupervised Wiener algorithm has self-tuned regularization
 parameters based on the Gibbs sampling algorithm. The iterative Gibbs
-sampler draws alternatively samples of posterior conditional law of
+sampler draws alternatively samples from posterior conditional law of
 the image, the noise power and the image frequency power.
 
 .. [1] François Orieux, Jean-François Giovannelli, and Thomas
