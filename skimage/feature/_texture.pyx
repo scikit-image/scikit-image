@@ -65,7 +65,7 @@ def _glcm_loop(any_int[:, ::1] image, double[:] distances,
                         i = image[r, c]
 
                         # compute the location of the offset pixel
-                        row = r + <int>round(sin(angle) * distance)
+                        row = r + <int>round(sin(-angle) * distance)
                         col = c + <int>round(cos(angle) * distance)
 
                         # make sure the offset is within bounds
