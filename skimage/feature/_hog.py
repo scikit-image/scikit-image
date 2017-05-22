@@ -203,7 +203,8 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         radius = min(cx, cy) // 2 - 1
         orientations_arr = np.arange(orientations)
         # set dx_arr, dy_arr to correspond to midpoints of orientation bins
-        orientation_bin_midpoints = (orientations_arr + .5) / orientations * np.pi
+        orientation_bin_midpoints = (
+            np.pi * (orientations_arr + .5) / orientations)
         dx_arr = radius * np.cos(orientation_bin_midpoints)
         dy_arr = radius * np.sin(orientation_bin_midpoints)
         hog_image = np.zeros((sy, sx), dtype=float)
