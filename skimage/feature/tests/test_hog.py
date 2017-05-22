@@ -201,6 +201,35 @@ def test_hog_orientations_circle():
         assert_almost_equal(actual, desired, decimal=1)
 
 
+def test_hog_visualization_orientation():
+    """Test that the visualization produces a line with correct orientation
+
+    The hog visualization is expected to draw line segments perpendicular to
+    the midpoints of orientation bins.  This example verifies that when
+    orientations=3 and the gradient is entirely in the middle bin (bisected
+    by the y-axis), the line segment drawn by the visualization is horizontal.
+    """
+
+    width = height = 11
+
+    image = np.zeros((height, width), dtype='float')
+    image[height // 2:] = 1
+
+    _, hog_image = feature.hog(
+        image,
+        orientations=3,
+        pixels_per_cell=(width, height),
+        cells_per_block=(1, 1),
+        visualize=True
+    )
+
+    middle_index = height // 2
+    indices_excluding_middle = [x for x in range(height) if x != middle_index]
+
+    assert (hog_image[indices_excluding_middle, :] == 0).all()
+    assert (hog_image[middle_index, 1:-1] > 0).all()
+
+
 def test_hog_block_normalization_incorrect_error():
     img = np.eye(4)
     with testing.raises(ValueError):
