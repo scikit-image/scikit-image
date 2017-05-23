@@ -1,8 +1,10 @@
 from numpy.testing import (assert_almost_equal, run_module_suite,
-                           assert_equal, assert_raises)
+                           assert_equal)
 import numpy as np
+import pytest
 from scipy.ndimage import map_coordinates
 
+from skimage.transform._warps import _stackcopy
 from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
                                AffineTransform,
                                ProjectiveTransform,
@@ -11,9 +13,19 @@ from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
 from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import test_parallel
 
 
 np.random.seed(0)
+
+
+def test_stackcopy():
+    layers = 4
+    x = np.empty((3, 3, layers))
+    y = np.eye(3, 3)
+    _stackcopy(x, y)
+    for i in range(layers):
+        assert_almost_equal(x[..., i], y)
 
 
 def test_warp_tform():
@@ -35,12 +47,14 @@ def test_warp_callable():
     refx = np.zeros((5, 5), dtype=np.double)
     refx[1, 1] = 1
 
-    shift = lambda xy: xy + 1
+    def shift(xy):
+        return xy + 1
 
     outx = warp(x, shift, order=1)
     assert_almost_equal(outx, refx)
 
 
+@test_parallel()
 def test_warp_matrix():
     x = np.zeros((5, 5), dtype=np.double)
     x[2, 2] = 1
@@ -79,10 +93,12 @@ def test_warp_clip():
     x = np.zeros((5, 5), dtype=np.double)
     x[2, 2] = 1
 
-    outx = rescale(x, 3, order=3, clip=False)
+    with expected_warnings(['The default mode', 'The default multichannel']):
+        outx = rescale(x, 3, order=3, clip=False)
     assert outx.min() < 0
 
-    outx = rescale(x, 3, order=3, clip=True)
+    with expected_warnings(['The default mode', 'The default multichannel']):
+        outx = rescale(x, 3, order=3, clip=True)
     assert_almost_equal(outx.min(), 0)
     assert_almost_equal(outx.max(), 1)
 
@@ -130,11 +146,26 @@ def test_rotate_center():
     assert_almost_equal(x0, x)
 
 
+def test_rotate_resize_center():
+    x = np.zeros((10, 10), dtype=np.double)
+    x[0, 0] = 1
+
+    ref_x45 = np.zeros((14, 14), dtype=np.double)
+    ref_x45[6, 0] = 1
+    ref_x45[7, 0] = 1
+
+    x45 = rotate(x, 45, resize=True, center=(3, 3), order=0)
+    # new dimension should be d = sqrt(2 * (10/2)^2)
+    assert x45.shape == (14, 14)
+    assert_equal(x45, ref_x45)
+
+
 def test_rescale():
     # same scale factor
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
-    scaled = rescale(x, 2, order=0)
+    with expected_warnings(['The default mode', 'The default multichannel']):
+        scaled = rescale(x, 2, order=0)
     ref = np.zeros((10, 10))
     ref[2:4, 2:4] = 1
     assert_almost_equal(scaled, ref)
@@ -142,16 +173,60 @@ def test_rescale():
     # different scale factors
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
-    scaled = rescale(x, (2, 1), order=0)
+    with expected_warnings(['The default mode', 'The default multichannel']):
+        scaled = rescale(x, (2, 1), order=0)
     ref = np.zeros((10, 5))
     ref[2:4, 1] = 1
     assert_almost_equal(scaled, ref)
 
 
+def test_rescale_multichannel():
+    # 1D + channels
+    x = np.zeros((8, 3), dtype=np.double)
+    scaled = rescale(x, 2, order=0, multichannel=True)
+    assert_equal(scaled.shape, (16, 3))
+    # 2D
+    scaled = rescale(x, 2, order=0, multichannel=False)
+    assert_equal(scaled.shape, (16, 6))
+
+    # 2D + channels
+    x = np.zeros((8, 8, 3), dtype=np.double)
+    scaled = rescale(x, 2, order=0, multichannel=True)
+    assert_equal(scaled.shape, (16, 16, 3))
+    # 3D
+    scaled = rescale(x, 2, order=0, multichannel=False)
+    assert_equal(scaled.shape, (16, 16, 6))
+
+    # 3D + channels
+    x = np.zeros((8, 8, 8, 3), dtype=np.double)
+    scaled = rescale(x, 2, order=0, multichannel=True)
+    assert_equal(scaled.shape, (16, 16, 16, 3))
+    # 4D
+    scaled = rescale(x, 2, order=0, multichannel=False)
+    assert_equal(scaled.shape, (16, 16, 16, 6))
+
+
+def test_rescale_multichannel_defaults():
+    # ensure multichannel=None matches the previous default behaviour
+
+    # 2D: multichannel should default to False
+    x = np.zeros((8, 3), dtype=np.double)
+    with expected_warnings(['The default mode', 'The default multichannel']):
+        scaled = rescale(x, 2, order=0)
+    assert_equal(scaled.shape, (16, 6))
+
+    # 3D: multichannel should default to True
+    x = np.zeros((8, 8, 3), dtype=np.double)
+    with expected_warnings(['The default mode', 'The default multichannel']):
+        scaled = rescale(x, 2, order=0,)
+    assert_equal(scaled.shape, (16, 16, 3))
+
+
 def test_resize2d():
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
-    resized = resize(x, (10, 10), order=0)
+    with expected_warnings(['The default mode']):
+        resized = resize(x, (10, 10), order=0)
     ref = np.zeros((10, 10))
     ref[2:4, 2:4] = 1
     assert_almost_equal(resized, ref)
@@ -161,11 +236,16 @@ def test_resize3d_keep():
     # keep 3rd dimension
     x = np.zeros((5, 5, 3), dtype=np.double)
     x[1, 1, :] = 1
-    resized = resize(x, (10, 10), order=0)
+    with expected_warnings(['The default mode']):
+        resized = resize(x, (10, 10), order=0)
+        with pytest.raises(ValueError):
+            # output_shape too short
+            resize(x, (10, ), order=0)
     ref = np.zeros((10, 10, 3))
     ref[2:4, 2:4, :] = 1
     assert_almost_equal(resized, ref)
-    resized = resize(x, (10, 10, 3), order=0)
+    with expected_warnings(['The default mode']):
+        resized = resize(x, (10, 10, 3), order=0)
     assert_almost_equal(resized, ref)
 
 
@@ -173,10 +253,44 @@ def test_resize3d_resize():
     # resize 3rd dimension
     x = np.zeros((5, 5, 3), dtype=np.double)
     x[1, 1, :] = 1
-    resized = resize(x, (10, 10, 1), order=0)
+    with expected_warnings(['The default mode']):
+        resized = resize(x, (10, 10, 1), order=0)
     ref = np.zeros((10, 10, 1))
     ref[2:4, 2:4] = 1
     assert_almost_equal(resized, ref)
+
+
+def test_resize3d_2din_3dout():
+    # 3D output with 2D input
+    x = np.zeros((5, 5), dtype=np.double)
+    x[1, 1] = 1
+    with expected_warnings(['The default mode']):
+        resized = resize(x, (10, 10, 1), order=0)
+    ref = np.zeros((10, 10, 1))
+    ref[2:4, 2:4] = 1
+    assert_almost_equal(resized, ref)
+
+
+def test_resize2d_4d():
+    # resize with extra output dimensions
+    x = np.zeros((5, 5), dtype=np.double)
+    x[1, 1] = 1
+    out_shape = (10, 10, 1, 1)
+    resized = resize(x, out_shape, order=0)
+    ref = np.zeros(out_shape)
+    ref[2:4, 2:4, ...] = 1
+    assert_almost_equal(resized, ref)
+
+
+def test_resize_nd():
+    for dim in range(1, 6):
+        shape = 2 + np.arange(dim) * 2
+        x = np.ones(shape)
+        out_shape = np.asarray(shape) * 1.5
+        resized = resize(x, out_shape, order=0, mode='reflect')
+        expected_shape = 1.5 * shape
+        assert_equal(resized.shape, expected_shape)
+        assert np.all(resized == 1)
 
 
 def test_resize3d_bilinear():
@@ -184,7 +298,7 @@ def test_resize3d_bilinear():
     x = np.zeros((5, 5, 2), dtype=np.double)
     x[1, 1, 0] = 0
     x[1, 1, 1] = 1
-    resized = resize(x, (10, 10, 1), order=1)
+    resized = resize(x, (10, 10, 1), order=1, mode='constant')
     ref = np.zeros((10, 10, 1))
     ref[1:5, 1:5, :] = 0.03125
     ref[1:5, 2:4, :] = 0.09375
@@ -197,12 +311,20 @@ def test_swirl():
     image = img_as_float(data.checkerboard())
 
     swirl_params = {'radius': 80, 'rotation': 0, 'order': 2, 'mode': 'reflect'}
-    
+
     with expected_warnings(['Bi-quadratic.*bug']):
         swirled = tf.swirl(image, strength=10, **swirl_params)
         unswirled = tf.swirl(swirled, strength=-10, **swirl_params)
 
     assert np.mean(np.abs(image - unswirled)) < 0.01
+
+    swirl_params.pop('mode')
+
+    with expected_warnings(['Bi-quadratic.*bug', 'default']):
+        swirled = tf.swirl(image, strength=10, **swirl_params)
+        unswirled = tf.swirl(swirled, strength=-10, **swirl_params)
+
+    assert np.mean(np.abs(image[1:-1, 1:-1] - unswirled[1:-1, 1:-1])) < 0.01
 
 
 def test_const_cval_out_of_range():
@@ -218,7 +340,7 @@ def test_warp_identity():
     assert np.allclose(img, warp(img, AffineTransform(rotation=0)))
     assert not np.allclose(img, warp(img, AffineTransform(rotation=0.1)))
     rgb_img = np.transpose(np.asarray([img, np.zeros_like(img), img]),
-                            (1, 2, 0))
+                           (1, 2, 0))
     warped_rgb_img = warp(rgb_img, AffineTransform(rotation=0.1))
     assert np.allclose(rgb_img, warp(rgb_img, AffineTransform(rotation=0)))
     assert not np.allclose(rgb_img, warped_rgb_img)
@@ -237,20 +359,21 @@ def test_warp_coords_example():
 def test_downscale_local_mean():
     image1 = np.arange(4 * 6).reshape(4, 6)
     out1 = downscale_local_mean(image1, (2, 3))
-    expected1 = np.array([[  4.,   7.],
-                          [ 16.,  19.]])
+    expected1 = np.array([[4., 7.],
+                          [16., 19.]])
     assert_equal(expected1, out1)
 
     image2 = np.arange(5 * 8).reshape(5, 8)
     out2 = downscale_local_mean(image2, (4, 5))
-    expected2 = np.array([[ 14. ,  10.8],
-                          [  8.5,   5.7]])
+    expected2 = np.array([[14., 10.8],
+                          [8.5, 5.7]])
     assert_equal(expected2, out2)
 
 
 def test_invalid():
-    assert_raises(ValueError, warp, np.ones((4, 3, 3, 3)),
-                  SimilarityTransform())
+    with pytest.raises(ValueError):
+        warp(np.ones((4, 3, 3, 3)),
+             SimilarityTransform())
 
 
 def test_inverse():
@@ -263,8 +386,9 @@ def test_inverse():
 def test_slow_warp_nonint_oshape():
     image = np.random.rand(5, 5)
 
-    assert_raises(ValueError, warp, image, lambda xy: xy,
-                  output_shape=(13.1, 19.5))
+    with pytest.raises(ValueError):
+        warp(image, lambda xy: xy,
+             output_shape=(13.1, 19.5))
 
     warp(image, lambda xy: xy, output_shape=(13.0001, 19.9999))
 
@@ -272,19 +396,21 @@ def test_slow_warp_nonint_oshape():
 def test_keep_range():
     image = np.linspace(0, 2, 25).reshape(5, 5)
 
-    out = rescale(image, 2, preserve_range=False, clip=True, order=0)
+    with expected_warnings(['The default mode', 'The default multichannel']):
+        out = rescale(image, 2, preserve_range=False, clip=True, order=0)
     assert out.min() == 0
     assert out.max() == 2
 
-    out = rescale(image, 2, preserve_range=True, clip=True, order=0)
+    with expected_warnings(['The default mode', 'The default multichannel']):
+        out = rescale(image, 2, preserve_range=True, clip=True, order=0)
     assert out.min() == 0
     assert out.max() == 2
 
-    out = rescale(image.astype(np.uint8), 2, preserve_range=False,
-                  clip=True, order=0)
+    with expected_warnings(['The default mode', 'The default multichannel']):
+        out = rescale(image.astype(np.uint8), 2, preserve_range=False,
+                      clip=True, order=0)
     assert out.min() == 0
     assert out.max() == 2 / 255.0
-
 
 
 if __name__ == "__main__":

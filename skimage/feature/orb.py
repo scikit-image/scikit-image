@@ -5,7 +5,7 @@ from ..feature.util import (FeatureDetector, DescriptorExtractor,
                             _prepare_grayscale_input_2D)
 
 from ..feature import (corner_fast, corner_orientations, corner_peaks,
-                             corner_harris)
+                       corner_harris)
 from ..transform import pyramid_gaussian
 from .._shared.utils import assert_nD
 
@@ -132,7 +132,8 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
     def _build_pyramid(self, image):
         image = _prepare_grayscale_input_2D(image)
-        return list(pyramid_gaussian(image, self.n_scales - 1, self.downscale))
+        return list(pyramid_gaussian(image, self.n_scales - 1,
+                                     self.downscale, multichannel=False))
 
     def _detect_octave(self, octave_image):
         # Extract keypoints for current octave
@@ -314,9 +315,14 @@ class ORB(FeatureDetector, DescriptorExtractor):
             keypoints_list.append(keypoints[mask] * self.downscale ** octave)
             responses_list.append(responses[mask])
             orientations_list.append(orientations[mask])
-            scales_list.append(self.downscale ** octave
-                               * np.ones(keypoints.shape[0], dtype=np.intp))
+            scales_list.append(self.downscale ** octave *
+                               np.ones(keypoints.shape[0], dtype=np.intp))
             descriptors_list.append(descriptors)
+
+        if len(scales_list) == 0:
+            raise RuntimeError(
+                "ORB found no features. Try passing in an image containing "
+                "greater intensity contrasts between adjacent pixels.")
 
         keypoints = np.vstack(keypoints_list)
         responses = np.hstack(responses_list)

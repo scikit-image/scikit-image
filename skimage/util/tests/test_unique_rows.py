@@ -1,5 +1,6 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_raises
+import pytest
+from numpy.testing import assert_equal
 from skimage.util import unique_rows
 
 
@@ -28,12 +29,14 @@ def test_float_array():
 
 def test_1d_array():
     ar = np.array([1, 0, 1, 1], np.uint8)
-    assert_raises(ValueError, unique_rows, ar)
+    with pytest.raises(ValueError):
+        unique_rows(ar)
 
 
 def test_3d_array():
     ar = np.arange(8).reshape((2, 2, 2))
-    assert_raises(ValueError, unique_rows, ar)
+    with pytest.raises(ValueError):
+        unique_rows(ar)
 
 
 if __name__ == '__main__':

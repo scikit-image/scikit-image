@@ -11,7 +11,9 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import sys
+import os
+import skimage
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -25,9 +27,34 @@ sys.path.append(os.path.join(curpath, '..', 'ext'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.pngmath', 'numpydoc',
-              'sphinx.ext.autosummary', 'plot2rst',
-              'sphinx.ext.intersphinx']
+extensions = ['sphinx.ext.autodoc',
+              'sphinx.ext.imgmath',
+              'numpydoc',
+              'sphinx.ext.autosummary',
+              'sphinx.ext.intersphinx',
+              'sphinx.ext.linkcode',
+              'sphinx_gallery.gen_gallery'
+              ]
+
+autosummary_generate = True
+
+#------------------------------------------------------------------------
+# Sphinx-gallery configuration
+#------------------------------------------------------------------------
+
+sphinx_gallery_conf = {
+    'doc_module'        : 'skimage',
+    # path to your examples scripts
+    'examples_dirs' : '../examples',
+    # path where to save gallery generated examples
+    'gallery_dirs'  : 'auto_examples',
+    'mod_example_dir': 'api',
+    'reference_url'     : {
+            'skimage': None,
+            'matplotlib': 'http://matplotlib.org',
+            'numpy': 'http://docs.scipy.org/doc/numpy-1.6.0',
+            'scipy': 'http://docs.scipy.org/doc/scipy-0.11.0/reference',}
+    }
 
 # Determine if the matplotlib has a recent enough version of the
 # plot_directive, otherwise use the local fork.
@@ -50,7 +77,7 @@ else:
 templates_path = ['_templates']
 
 # The suffix of source filenames.
-source_suffix = '.txt'
+source_suffix = '.rst'
 
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
@@ -68,10 +95,11 @@ copyright = '2013, the scikit-image team'
 #
 # The short X.Y version.
 
-setup_lines = open('../../setup.py').readlines()
+with open('../../skimage/__init__.py') as f:
+    setup_lines = f.readlines()
 version = 'vUndefined'
 for l in setup_lines:
-    if l.startswith('VERSION'):
+    if l.startswith('__version__'):
         version = l.split("'")[1]
         break
 
@@ -140,7 +168,7 @@ html_title = 'skimage v%s docs' % version
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-#html_favicon = None
+html_favicon = '_static/favicon.ico'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -157,7 +185,8 @@ html_static_path = ['_static']
 
 # Custom sidebar templates, maps document names to template names.
 html_sidebars = {
-   '**': ['navigation.html',
+   '**': ['searchbox.html',
+          'navigation.html',
           'localtoc.html',
           'versions.html'],
 }
@@ -220,7 +249,8 @@ latex_documents = [
 #latex_use_parts = False
 
 # Additional stuff for the LaTeX preamble.
-latex_preamble = r'''
+latex_elements = {}
+latex_elements['preamble'] = r'''
 \usepackage{enumitem}
 \setlistdepth{100}
 
@@ -245,7 +275,7 @@ latex_preamble = r'''
 #latex_appendices = []
 
 # If false, no module index is generated.
-latex_use_modindex = False
+latex_domain_indices = False
 
 # -----------------------------------------------------------------------------
 # Numpy extensions
@@ -289,10 +319,74 @@ plot2rst_rcparams = {'image.cmap' : 'gray',
 # -----------------------------------------------------------------------------
 # intersphinx
 # -----------------------------------------------------------------------------
-_python_doc_base = 'http://docs.python.org/2.7'
+_python_version_str = '{0.major}.{0.minor}'.format(sys.version_info)
+_python_doc_base = 'http://docs.python.org/' + _python_version_str
 intersphinx_mapping = {
-    _python_doc_base: None,
-    'http://docs.scipy.org/doc/numpy': None,
-    'http://docs.scipy.org/doc/scipy/reference': None,
-    'http://scikit-learn.org/stable': None
+    'python': (_python_doc_base, None),
+    'numpy': ('http://docs.scipy.org/doc/numpy',
+              (None, './_intersphinx/numpy-objects.inv')),
+    'scipy': ('http://docs.scipy.org/doc/scipy/reference',
+              (None, './_intersphinx/scipy-objects.inv')),
+    'sklearn': ('http://scikit-learn.org/stable',
+                (None, './_intersphinx/sklearn-objects.inv')),
+    'matplotlib': ('http://matplotlib.org/',
+                   (None, 'http://matplotlib.org/objects.inv'))
 }
+
+# ----------------------------------------------------------------------------
+# Source code links
+# ----------------------------------------------------------------------------
+
+import inspect
+from os.path import relpath, dirname
+
+
+# Function courtesy of NumPy to return URLs containing line numbers
+def linkcode_resolve(domain, info):
+    """
+    Determine the URL corresponding to Python object
+    """
+    if domain != 'py':
+        return None
+
+    modname = info['module']
+    fullname = info['fullname']
+
+    submod = sys.modules.get(modname)
+    if submod is None:
+        return None
+
+    obj = submod
+    for part in fullname.split('.'):
+        try:
+            obj = getattr(obj, part)
+        except:
+            return None
+
+    try:
+        fn = inspect.getsourcefile(obj)
+    except:
+        fn = None
+    if not fn:
+        return None
+
+    try:
+        source, lineno = inspect.findsource(obj)
+    except:
+        lineno = None
+
+    if lineno:
+        linespec = "#L%d" % (lineno + 1)
+    else:
+        linespec = ""
+
+    fn = relpath(fn, start=dirname(skimage.__file__))
+
+    if 'dev' in skimage.__version__:
+        return ("http://github.com/scikit-image/scikit-image/blob/"
+                "master/skimage/%s%s" % (fn, linespec))
+    else:
+        return ("http://github.com/scikit-image/scikit-image/blob/"
+                "v%s/skimage/%s%s" % (skimage.__version__, fn, linespec))
+
+

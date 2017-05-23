@@ -1,11 +1,12 @@
 import numpy as np
-from numpy.testing import (assert_array_equal, assert_raises,
-                           assert_almost_equal)
-
+from numpy.testing import (assert_array_equal,
+                           assert_almost_equal, assert_warns)
+import pytest
 from skimage import data
 from skimage import img_as_float
 from skimage.color import rgb2gray
 from skimage.morphology import octagon
+from skimage._shared.testing import test_parallel
 
 from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_subpix, peak_local_max, corner_peaks,
@@ -13,7 +14,7 @@ from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_fast, corner_orientations,
                              structure_tensor, structure_tensor_eigvals,
                              hessian_matrix, hessian_matrix_eigvals,
-                             hessian_matrix_det)
+                             hessian_matrix_det, shape_index)
 
 
 def test_structure_tensor():
@@ -39,23 +40,41 @@ def test_structure_tensor():
 
 def test_hessian_matrix():
     square = np.zeros((5, 5))
-    square[2, 2] = 1
-    Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
-    assert_array_equal(Hxx, np.array([[0, 0, 0, 0, 0],
-                                      [0, 0, 0, 0, 0],
-                                      [0, 0, 1, 0, 0],
-                                      [0, 0, 0, 0, 0],
-                                      [0, 0, 0, 0, 0]]))
-    assert_array_equal(Hxy, np.array([[0, 0, 0, 0, 0],
-                                      [0, 0, 0, 0, 0],
-                                      [0, 0, 0, 0, 0],
-                                      [0, 0, 0, 0, 0],
-                                      [0, 0, 0, 0, 0]]))
-    assert_array_equal(Hyy, np.array([[0, 0, 0, 0, 0],
-                                      [0, 0, 0, 0, 0],
-                                      [0, 0, 1, 0, 0],
-                                      [0, 0, 0, 0, 0],
-                                      [0, 0, 0, 0, 0]]))
+    square[2, 2] = 4
+    Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc')
+    assert_almost_equal(Hrr, np.array([[0, 0,  0, 0, 0],
+                                       [0, 0,  0, 0, 0],
+                                       [2, 0, -2, 0, 2],
+                                       [0, 0,  0, 0, 0],
+                                       [0, 0,  0, 0, 0]]))
+
+    assert_almost_equal(Hrc, np.array([[0,  0, 0,  0, 0],
+                                       [0,  1, 0, -1, 0],
+                                       [0,  0, 0,  0, 0],
+                                       [0, -1, 0,  1, 0],
+                                       [0,  0, 0,  0, 0]]))
+
+    assert_almost_equal(Hcc, np.array([[0, 0,  2, 0, 0],
+                                       [0, 0,  0, 0, 0],
+                                       [0, 0, -2, 0, 0],
+                                       [0, 0,  0, 0, 0],
+                                       [0, 0,  2, 0, 0]]))
+
+    matrix2d = np.random.rand(3, 3)
+    assert_warns(UserWarning, hessian_matrix, matrix2d, sigma=0.1)
+
+
+def test_hessian_matrix_3d():
+    cube = np.zeros((5, 5, 5))
+    cube[2, 2, 2] = 4
+    Hs = hessian_matrix(cube, sigma=0.1, order='rc')
+    assert len(Hs) == 6, ("incorrect number of Hessian images (%i) for 3D" %
+                          len(Hs))
+    assert_almost_equal(Hs[2][:, 2, :], np.array([[0,  0,  0,  0,  0],
+                                                  [0,  1,  0, -1,  0],
+                                                  [0,  0,  0,  0,  0],
+                                                  [0, -1,  0,  1,  0],
+                                                  [0,  0,  0,  0,  0]]))
 
 
 def test_structure_tensor_eigvals():
@@ -77,48 +96,67 @@ def test_structure_tensor_eigvals():
 
 def test_hessian_matrix_eigvals():
     square = np.zeros((5, 5))
-    square[2, 2] = 1
-    Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
-    l1, l2 = hessian_matrix_eigvals(Hxx, Hxy, Hyy)
-    assert_array_equal(l1, np.array([[0, 0, 0, 0, 0],
-                                     [0, 0, 0, 0, 0],
-                                     [0, 0, 1, 0, 0],
-                                     [0, 0, 0, 0, 0],
-                                     [0, 0, 0, 0, 0]]))
-    assert_array_equal(l2, np.array([[0, 0, 0, 0, 0],
-                                     [0, 0, 0, 0, 0],
-                                     [0, 0, 1, 0, 0],
-                                     [0, 0, 0, 0, 0],
-                                     [0, 0, 0, 0, 0]]))
+    square[2, 2] = 4
+    Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc')
+    l1, l2 = hessian_matrix_eigvals(Hrr, Hrc, Hcc)
+    assert_almost_equal(l1, np.array([[0, 0,  2, 0, 0],
+                                      [0, 1,  0, 1, 0],
+                                      [2, 0, -2, 0, 2],
+                                      [0, 1,  0, 1, 0],
+                                      [0, 0,  2, 0, 0]]))
+    assert_almost_equal(l2, np.array([[0,  0,  0,  0, 0],
+                                      [0, -1,  0, -1, 0],
+                                      [0,  0, -2,  0, 0],
+                                      [0, -1,  0, -1, 0],
+                                      [0,  0,  0,  0, 0]]))
 
 
+@test_parallel()
 def test_hessian_matrix_det():
     image = np.zeros((5, 5))
     image[2, 2] = 1
     det = hessian_matrix_det(image, 5)
-    assert_almost_equal(det, 0, decimal = 3)
+    assert_almost_equal(det, 0, decimal=3)
 
 
+def test_shape_index():
+    square = np.zeros((5, 5))
+    square[2, 2] = 4
+    s = shape_index(square, sigma=0.1)
+    assert_almost_equal(
+        s, np.array([[ np.nan, np.nan,   -0.5, np.nan, np.nan],
+                     [ np.nan,      0, np.nan,      0, np.nan],
+                     [   -0.5, np.nan,     -1, np.nan,   -0.5],
+                     [ np.nan,      0, np.nan,      0, np.nan],
+                     [ np.nan, np.nan,   -0.5, np.nan, np.nan]])
+    )
+
+
+@test_parallel()
 def test_square_image():
     im = np.zeros((50, 50)).astype(float)
     im[:25, :25] = 1.
 
     # Moravec
-    results = peak_local_max(corner_moravec(im))
+    results = peak_local_max(corner_moravec(im),
+                             min_distance=10, threshold_rel=0)
     # interest points along edge
     assert len(results) == 57
 
     # Harris
-    results = peak_local_max(corner_harris(im, method='k'))
+    results = peak_local_max(corner_harris(im, method='k'),
+                             min_distance=10, threshold_rel=0)
     # interest at corner
     assert len(results) == 1
 
-    results = peak_local_max(corner_harris(im, method='eps'))
+    results = peak_local_max(corner_harris(im, method='eps'),
+                             min_distance=10, threshold_rel=0)
     # interest at corner
     assert len(results) == 1
 
     # Shi-Tomasi
-    results = peak_local_max(corner_shi_tomasi(im))
+    results = peak_local_max(corner_shi_tomasi(im),
+                             min_distance=10, threshold_rel=0)
     # interest at corner
     assert len(results) == 1
 
@@ -130,18 +168,22 @@ def test_noisy_square_image():
     im = im + np.random.uniform(size=im.shape) * .2
 
     # Moravec
-    results = peak_local_max(corner_moravec(im))
+    results = peak_local_max(corner_moravec(im),
+                             min_distance=10, threshold_rel=0)
     # undefined number of interest points
     assert results.any()
 
     # Harris
-    results = peak_local_max(corner_harris(im, sigma=1.5, method='k'))
+    results = peak_local_max(corner_harris(im, method='k'),
+                             min_distance=10, threshold_rel=0)
     assert len(results) == 1
-    results = peak_local_max(corner_harris(im, sigma=1.5, method='eps'))
+    results = peak_local_max(corner_harris(im, method='eps'),
+                             min_distance=10, threshold_rel=0)
     assert len(results) == 1
 
     # Shi-Tomasi
-    results = peak_local_max(corner_shi_tomasi(im, sigma=1.5))
+    results = peak_local_max(corner_shi_tomasi(im, sigma=1.5),
+                             min_distance=10, threshold_rel=0)
     assert len(results) == 1
 
 
@@ -153,11 +195,13 @@ def test_squared_dot():
     # Moravec fails
 
     # Harris
-    results = peak_local_max(corner_harris(im))
+    results = peak_local_max(corner_harris(im),
+                             min_distance=10, threshold_rel=0)
     assert (results == np.array([[6, 6]])).all()
 
     # Shi-Tomasi
-    results = peak_local_max(corner_shi_tomasi(im))
+    results = peak_local_max(corner_shi_tomasi(im),
+                             min_distance=10, threshold_rel=0)
     assert (results == np.array([[6, 6]])).all()
 
 
@@ -170,20 +214,26 @@ def test_rotated_img():
     im_rotated = im.T
 
     # Moravec
-    results = peak_local_max(corner_moravec(im))
-    results_rotated = peak_local_max(corner_moravec(im_rotated))
+    results = peak_local_max(corner_moravec(im),
+                             min_distance=10, threshold_rel=0)
+    results_rotated = peak_local_max(corner_moravec(im_rotated),
+                                     min_distance=10, threshold_rel=0)
     assert (np.sort(results[:, 0]) == np.sort(results_rotated[:, 1])).all()
     assert (np.sort(results[:, 1]) == np.sort(results_rotated[:, 0])).all()
 
     # Harris
-    results = peak_local_max(corner_harris(im))
-    results_rotated = peak_local_max(corner_harris(im_rotated))
+    results = peak_local_max(corner_harris(im),
+                             min_distance=10, threshold_rel=0)
+    results_rotated = peak_local_max(corner_harris(im_rotated),
+                                     min_distance=10, threshold_rel=0)
     assert (np.sort(results[:, 0]) == np.sort(results_rotated[:, 1])).all()
     assert (np.sort(results[:, 1]) == np.sort(results_rotated[:, 0])).all()
 
     # Shi-Tomasi
-    results = peak_local_max(corner_shi_tomasi(im))
-    results_rotated = peak_local_max(corner_shi_tomasi(im_rotated))
+    results = peak_local_max(corner_shi_tomasi(im),
+                             min_distance=10, threshold_rel=0)
+    results_rotated = peak_local_max(corner_shi_tomasi(im_rotated),
+                                     min_distance=10, threshold_rel=0)
     assert (np.sort(results[:, 0]) == np.sort(results_rotated[:, 1])).all()
     assert (np.sort(results[:, 1]) == np.sort(results_rotated[:, 0])).all()
 
@@ -192,7 +242,8 @@ def test_subpix_edge():
     img = np.zeros((50, 50))
     img[:25, :25] = 255
     img[25:, 25:] = 255
-    corner = peak_local_max(corner_harris(img), num_peaks=1)
+    corner = peak_local_max(corner_harris(img),
+                            min_distance=10, threshold_rel=0, num_peaks=1)
     subpix = corner_subpix(img, corner)
     assert_array_equal(subpix[0], (24.5, 24.5))
 
@@ -200,7 +251,8 @@ def test_subpix_edge():
 def test_subpix_dot():
     img = np.zeros((50, 50))
     img[25, 25] = 255
-    corner = peak_local_max(corner_harris(img), num_peaks=1)
+    corner = peak_local_max(corner_harris(img),
+                            min_distance=10, threshold_rel=0, num_peaks=1)
     subpix = corner_subpix(img, corner)
     assert_array_equal(subpix[0], (25, 25))
 
@@ -211,7 +263,8 @@ def test_subpix_no_class():
     assert_array_equal(subpix[0], (np.nan, np.nan))
 
     img[25, 25] = 1e-10
-    corner = peak_local_max(corner_harris(img), num_peaks=1)
+    corner = peak_local_max(corner_harris(img),
+                            min_distance=10, threshold_rel=0, num_peaks=1)
     subpix = corner_subpix(img, np.array([[25, 25]]))
     assert_array_equal(subpix[0], (np.nan, np.nan))
 
@@ -220,7 +273,7 @@ def test_subpix_border():
     img = np.zeros((50, 50))
     img[1:25,1:25] = 255
     img[25:-1,25:-1] = 255
-    corner = corner_peaks(corner_harris(img), min_distance=1)
+    corner = corner_peaks(corner_harris(img), threshold_rel=0)
     subpix = corner_subpix(img, corner, window_size=11)
     ref = np.array([[ 0.52040816,  0.52040816],
                     [ 0.52040816, 24.47959184],
@@ -240,22 +293,24 @@ def test_num_peaks():
     img_corners = corner_harris(rgb2gray(data.astronaut()))
 
     for i in range(20):
-        n = np.random.random_integers(20)
-        results = peak_local_max(img_corners, num_peaks=n)
+        n = np.random.randint(1, 21)
+        results = peak_local_max(img_corners,
+                                 min_distance=10, threshold_rel=0, num_peaks=n)
         assert (results.shape[0] == n)
 
 
 def test_corner_peaks():
-    response = np.zeros((5, 5))
-    response[2:4, 2:4] = 1
+    response = np.zeros((10, 10))
+    response[2:5, 2:5] = 1
 
-    corners = corner_peaks(response, exclude_border=False)
+    corners = corner_peaks(response, exclude_border=False, min_distance=10,
+                           threshold_rel=0)
     assert len(corners) == 1
 
-    corners = corner_peaks(response, exclude_border=False, min_distance=0)
+    corners = corner_peaks(response, exclude_border=False, min_distance=1)
     assert len(corners) == 4
 
-    corners = corner_peaks(response, exclude_border=False, min_distance=0,
+    corners = corner_peaks(response, exclude_border=False, min_distance=1,
                            indices=False)
     assert np.sum(corners) == 4
 
@@ -277,10 +332,12 @@ def test_blank_image_nans():
 
 def test_corner_fast_image_unsupported_error():
     img = np.zeros((20, 20, 3))
-    assert_raises(ValueError, corner_fast, img)
+    with pytest.raises(ValueError):
+        corner_fast(img)
 
 
-def test_corner_fast_lena():
+@test_parallel()
+def test_corner_fast_astronaut():
     img = rgb2gray(data.astronaut())
     expected = np.array([[101, 198],
                         [140, 205],
@@ -319,27 +376,44 @@ def test_corner_fast_lena():
                         [492, 139],
                         [494, 169],
                         [496, 266]])
-    actual = corner_peaks(corner_fast(img, 12, 0.3))
+    actual = corner_peaks(corner_fast(img, 12, 0.3),
+                          min_distance=10, threshold_rel=0)
     assert_array_equal(actual, expected)
 
 
 def test_corner_orientations_image_unsupported_error():
     img = np.zeros((20, 20, 3))
-    assert_raises(ValueError, corner_orientations, img,
-                  np.asarray([[7, 7]]), np.ones((3, 3)))
+    with pytest.raises(ValueError):
+        corner_orientations(
+            img,
+            np.asarray([[7, 7]]), np.ones((3, 3)))
 
 
 def test_corner_orientations_even_shape_error():
     img = np.zeros((20, 20))
-    assert_raises(ValueError, corner_orientations, img,
-                  np.asarray([[7, 7]]), np.ones((4, 4)))
+    with pytest.raises(ValueError):
+        corner_orientations(
+            img,
+            np.asarray([[7, 7]]), np.ones((4, 4)))
 
 
-def test_corner_orientations_lena():
-    img = rgb2gray(data.lena())
-    corners = corner_peaks(corner_fast(img, 11, 0.35))
-    expected = np.array([-1.9195897 , -3.03159624, -1.05991162, -2.89573739,
-                         -2.61607644, 2.98660159])
+@test_parallel()
+def test_corner_orientations_astronaut():
+    img = rgb2gray(data.astronaut())
+    corners = corner_peaks(corner_fast(img, 11, 0.35),
+                           min_distance=10, threshold_abs=0, threshold_rel=0.1)
+    expected = np.array([-1.75220190e+00,  2.01197383e+00, -2.01162417e+00,
+                         -1.88247204e-01,  1.19134149e+00, -6.61151410e-01,
+                         -2.99143370e+00,  2.17103132e+00, -7.52950306e-04,
+                          1.25854853e+00,  2.43573659e+00, -1.69230287e+00,
+                         -9.88548213e-01,  1.47154532e+00, -1.65449964e+00,
+                          1.09650167e+00,  1.07812134e+00, -1.68885773e+00,
+                         -1.64397304e+00,  3.09780364e+00, -3.49561988e-01,
+                         -1.46554357e+00, -2.81524886e+00,  8.12701702e-01,
+                          2.47305654e+00, -1.63869275e+00,  5.46905279e-02,
+                         -4.40598471e-01,  3.14918803e-01, -1.76069982e+00,
+                          3.05330950e+00,  2.39291733e+00, -1.22091334e-01,
+                         -3.09279990e-01,  1.45931342e+00])
     actual = corner_orientations(img, corners, octagon(3, 2))
     assert_almost_equal(actual, expected)
 
@@ -347,7 +421,8 @@ def test_corner_orientations_lena():
 def test_corner_orientations_square():
     square = np.zeros((12, 12))
     square[3:9, 3:9] = 1
-    corners = corner_peaks(corner_fast(square, 9), min_distance=1)
+    corners = corner_peaks(corner_fast(square, 9),
+                           min_distance=1, threshold_rel=0)
     actual_orientations = corner_orientations(square, corners, octagon(3, 2))
     actual_orientations_degrees = np.rad2deg(actual_orientations)
     expected_orientations_degree = np.array([  45.,  135.,  -45., -135.])

@@ -11,7 +11,7 @@ from .._shared.interpolation cimport (nearest_neighbour_interpolation,
 
 
 cdef inline void _matrix_transform(double x, double y, double* H, double *x_,
-                                   double *y_):
+                                   double *y_) nogil:
     """Apply a homography to a coordinate.
 
     Parameters
@@ -70,20 +70,29 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
         * 1: Bi-linear (default)
         * 2: Bi-quadratic
         * 3: Bi-cubic
-    mode : {'constant', 'reflect', 'wrap', 'nearest'}, optional
-        How to handle values outside the image borders (default is constant).
+    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
+        Points outside the boundaries of the input are filled according
+        to the given mode.  Modes match the behaviour of `numpy.pad`.
     cval : string, optional (default 0)
         Used in conjunction with mode 'C' (constant), the value
         outside the image boundaries.
+
+    Notes
+    -----
+    Modes 'reflect' and 'symmetric' are similar, but differ in whether the edge
+    pixels are duplicated during the reflection.  As an example, if an array
+    has values [0, 1, 2] and was padded to the right by four values using
+    symmetric, the result would be [0, 1, 2, 2, 1, 0, 0], while for reflect it
+    would be [0, 1, 2, 1, 0, 1, 2].
 
     """
 
     cdef double[:, ::1] img = np.ascontiguousarray(image, dtype=np.double)
     cdef double[:, ::1] M = np.ascontiguousarray(H)
 
-    if mode not in ('constant', 'wrap', 'reflect', 'nearest'):
-        raise ValueError("Invalid mode specified.  Please use "
-                         "`constant`, `nearest`, `wrap` or `reflect`.")
+    if mode not in ('constant', 'wrap', 'symmetric', 'reflect', 'edge'):
+        raise ValueError("Invalid mode specified.  Please use `constant`, "
+                         "`edge`, `wrap`, `reflect` or `symmetric`.")
     cdef char mode_c = ord(mode[0].upper())
 
     cdef Py_ssize_t out_r, out_c
@@ -102,7 +111,7 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
     cdef Py_ssize_t cols = img.shape[1]
 
     cdef double (*interp_func)(double*, Py_ssize_t, Py_ssize_t, double, double,
-                               char, double)
+                               char, double) nogil
     if order == 0:
         interp_func = nearest_neighbour_interpolation
     elif order == 1:
@@ -112,10 +121,11 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
     elif order == 3:
         interp_func = bicubic_interpolation
 
-    for tfr in range(out_r):
-        for tfc in range(out_c):
-            _matrix_transform(tfc, tfr, &M[0, 0], &c, &r)
-            out[tfr, tfc] = interp_func(&img[0, 0], rows, cols, r, c,
-                                        mode_c, cval)
+    with nogil:
+        for tfr in range(out_r):
+            for tfc in range(out_c):
+                _matrix_transform(tfc, tfr, &M[0, 0], &c, &r)
+                out[tfr, tfc] = interp_func(&img[0, 0], rows, cols, r, c,
+                                            mode_c, cval)
 
     return np.asarray(out)

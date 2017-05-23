@@ -1,5 +1,6 @@
 import numpy as np
-from numpy.testing import assert_array_equal, assert_raises
+from numpy.testing import assert_array_equal
+import pytest
 from skimage.segmentation import join_segmentations, relabel_sequential
 
 def test_join_segmentations():
@@ -22,7 +23,8 @@ def test_join_segmentations():
 
     # test correct exception when arrays are different shapes
     s3 = np.array([[0, 0, 1, 1], [0, 2, 2, 1]])
-    assert_raises(ValueError, join_segmentations, s1, s3)
+    with pytest.raises(ValueError):
+        join_segmentations(s1, s3)
 
 
 def test_relabel_sequential_offset1():

@@ -18,10 +18,8 @@ import numpy as np
 from numpy.testing import (assert_equal,
                            assert_almost_equal,
                            assert_array_almost_equal,
-                           assert_raises,
                            TestCase,
                            )
-
 from skimage import img_as_float, img_as_ubyte
 from skimage.io import imread
 from skimage.color import (rgb2hsv, hsv2rgb,
@@ -37,13 +35,18 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            xyz2luv, luv2xyz,
                            luv2rgb, rgb2luv,
                            lab2lch, lch2lab,
+                           rgb2yuv, yuv2rgb,
+                           rgb2yiq, yiq2rgb,
+                           rgb2ypbpr, ypbpr2rgb,
+                           rgb2ycbcr, ycbcr2rgb,
+                           rgba2rgb,
                            guess_spatial_dimensions
                            )
 
 from skimage import data_dir
 from skimage._shared._warnings import expected_warnings
-
 import colorsys
+import pytest
 
 
 def test_guess_spatial_dimensions():
@@ -56,13 +59,17 @@ def test_guess_spatial_dimensions():
     assert_equal(guess_spatial_dimensions(im2), 3)
     assert_equal(guess_spatial_dimensions(im3), None)
     assert_equal(guess_spatial_dimensions(im4), 3)
-    assert_raises(ValueError, guess_spatial_dimensions, im5)
+    with pytest.raises(ValueError):
+        guess_spatial_dimensions(im5)
 
 
 class TestColorconv(TestCase):
 
     img_rgb = imread(os.path.join(data_dir, 'color.png'))
     img_grayscale = imread(os.path.join(data_dir, 'camera.png'))
+    img_rgba = np.array([[[0, 0.5, 1, 0],
+                          [0, 0.5, 1, 1],
+                          [0, 0.5, 1, 0.5]]]).astype(np.float)
 
     colbars = np.array([[1, 1, 0, 0, 1, 1, 0, 0],
                         [1, 1, 1, 1, 0, 0, 0, 0],
@@ -90,6 +97,22 @@ class TestColorconv(TestCase):
                           [[32.303, -9.400, -130.358]],   # blue
                           [[46.228, -43.774, 56.589]],   # green
                           ])
+
+    # RGBA to RGB
+    def test_rgba2rgb_conversion(self):
+        rgba = self.img_rgba
+        rgb = rgba2rgb(rgba)
+        expected = np.array([[[1, 1, 1],
+                              [0, 0.5, 1],
+                              [0.5, 0.75, 1]]]).astype(np.float)
+        self.assertEqual(rgb.shape, expected.shape)
+        assert_almost_equal(rgb, expected)
+
+    def test_rgba2rgb_error_grayscale(self):
+        self.assertRaises(ValueError, rgba2rgb, self.img_grayscale)
+
+    def test_rgba2rgb_error_rgb(self):
+        self.assertRaises(ValueError, rgba2rgb, self.img_rgb)
 
     # RGB to HSV
     def test_rgb2hsv_conversion(self):
@@ -225,6 +248,15 @@ class TestColorconv(TestCase):
         assert_array_almost_equal(g, 1)
 
         assert_equal(g.shape, (1, 1))
+
+    def test_rgb2grey_contiguous(self):
+        x = np.random.rand(10, 10, 3)
+        assert rgb2grey(x).flags["C_CONTIGUOUS"]
+        assert rgb2grey(x[:5, :5]).flags["C_CONTIGUOUS"]
+
+    def test_rgb2grey_alpha(self):
+        x = np.random.rand(10, 10, 4)
+        assert rgb2grey(x).ndim == 2
 
     def test_rgb2grey_on_grey(self):
         rgb2grey(np.random.rand(5, 5))
@@ -429,16 +461,47 @@ class TestColorconv(TestCase):
         rgb = img_as_float(self.img_rgb[:1, :1, :])
         return rgb2lab(rgb)[0, 0, :]
 
+    def test_yuv(self):
+        rgb = np.array([[[1.0, 1.0, 1.0]]])
+        assert_array_almost_equal(rgb2yuv(rgb), np.array([[[1, 0, 0]]]))
+        assert_array_almost_equal(rgb2yiq(rgb), np.array([[[1, 0, 0]]]))
+        assert_array_almost_equal(rgb2ypbpr(rgb), np.array([[[1, 0, 0]]]))
+        assert_array_almost_equal(rgb2ycbcr(rgb), np.array([[[235, 128, 128]]]))
+        rgb = np.array([[[0.0, 1.0, 0.0]]])
+        assert_array_almost_equal(rgb2yuv(rgb), np.array([[[0.587, -0.28886916, -0.51496512]]]))
+        assert_array_almost_equal(rgb2yiq(rgb), np.array([[[0.587, -0.27455667, -0.52273617]]]))
+        assert_array_almost_equal(rgb2ypbpr(rgb), np.array([[[0.587, -0.331264, -0.418688]]]))
+        assert_array_almost_equal(rgb2ycbcr(rgb), np.array([[[144.553,   53.797,   34.214]]]))
+
+    def test_yuv_roundtrip(self):
+        img_rgb = img_as_float(self.img_rgb)[::16, ::16]
+        assert_array_almost_equal(yuv2rgb(rgb2yuv(img_rgb)), img_rgb)
+        assert_array_almost_equal(yiq2rgb(rgb2yiq(img_rgb)), img_rgb)
+        assert_array_almost_equal(ypbpr2rgb(rgb2ypbpr(img_rgb)), img_rgb)
+        assert_array_almost_equal(ycbcr2rgb(rgb2ycbcr(img_rgb)), img_rgb)
+
+    def test_rgb2yiq_conversion(self):
+        rgb = img_as_float(self.img_rgb)[::16, ::16]
+        yiq = rgb2yiq(rgb).reshape(-1, 3)
+        gt = np.array([colorsys.rgb_to_yiq(pt[0], pt[1], pt[2])
+                       for pt in rgb.reshape(-1, 3)]
+                      )
+        assert_almost_equal(yiq, gt, decimal=2)
+
 
 def test_gray2rgb():
     x = np.array([0, 0.5, 1])
-    assert_raises(ValueError, gray2rgb, x)
+
+    with pytest.raises(ValueError):
+        gray2rgb(x)
 
     x = x.reshape((3, 1))
     y = gray2rgb(x)
 
     assert_equal(y.shape, (3, 1, 3))
     assert_equal(y.dtype, x.dtype)
+    assert_equal(y[..., 0], x)
+    assert_equal(y[0, 0, :], [0, 0, 0])
 
     x = np.array([[0, 128, 255]], dtype=np.uint8)
     z = gray2rgb(x)
@@ -452,6 +515,23 @@ def test_gray2rgb_rgb():
     x = np.random.rand(5, 5, 4)
     y = gray2rgb(x)
     assert_equal(x, y)
+
+
+def test_gray2rgb_alpha():
+    x = np.random.random((5, 5, 4))
+    assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 4))
+    assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
+    assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
+
+    x = np.random.random((5, 5, 3))
+    assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 3))
+    assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
+    assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
+
+    assert_equal(gray2rgb(np.array([[1, 2], [3, 4.]]),
+                          alpha=True)[0, 0, 3], 1)
+    assert_equal(gray2rgb(np.array([[1, 2], [3, 4]], dtype=np.uint8),
+                          alpha=True)[0, 0, 3], 255)
 
 
 if __name__ == "__main__":

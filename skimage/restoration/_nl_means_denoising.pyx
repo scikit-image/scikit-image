@@ -1,5 +1,4 @@
 import numpy as np
-from skimage import util
 cimport numpy as np
 cimport cython
 from libc.math cimport exp
@@ -178,7 +177,7 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     cdef int row_start, row_end, col_start, col_end
     cdef int row_start_i, row_end_i, col_start_j, col_end_j
     cdef IMGDTYPE [::1] new_values = np.zeros(n_ch).astype(np.float32)
-    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(util.pad(image,
+    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(np.pad(image,
                        ((offset, offset), (offset, offset), (0, 0)),
                         mode='reflect').astype(np.float32))
     cdef IMGDTYPE [:, :, ::1] result = padded.copy()
@@ -278,7 +277,7 @@ def _nl_means_denoising_3d(image, int s=7,
     n_pln, n_row, n_col = image.shape
     cdef int offset = s / 2
     # padd the image so that boundaries are denoised as well
-    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(util.pad(
+    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(np.pad(
                                         image.astype(np.float32),
                                         offset, mode='reflect'))
     cdef IMGDTYPE [:, :, ::1] result = padded.copy()
@@ -359,6 +358,11 @@ cdef inline float _integral_to_distance_2d(IMGDTYPE [:, ::] integral,
     """
     References
     ----------
+    J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
+    nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
+    International Symposium on Biomedical Imaging: From Nano to Macro,
+    2008, pp. 1331-1334.
+
     Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
     Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
 
@@ -381,6 +385,11 @@ cdef inline float _integral_to_distance_3d(IMGDTYPE [:, :, ::] integral,
     """
     References
     ----------
+    J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
+    nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
+    International Symposium on Biomedical Imaging: From Nano to Macro,
+    2008, pp. 1331-1334.
+
     Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
     Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
 
@@ -523,6 +532,16 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     -------
     result : ndarray
         Denoised image, of same shape as input image.
+
+    References
+    ----------
+    J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
+    nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
+    International Symposium on Biomedical Imaging: From Nano to Macro,
+    2008, pp. 1331-1334.
+
+    Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
+    Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
     """
     if s % 2 == 0:
         s += 1  # odd value for symmetric patch
@@ -530,7 +549,7 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     # Image padding: we need to account for patch size, possible shift,
     # + 1 for the boundary effects in finite differences
     cdef int pad_size = offset + d + 1
-    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(util.pad(image,
+    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(np.pad(image,
                           ((pad_size, pad_size), (pad_size, pad_size), (0, 0)),
                           mode='reflect').astype(np.float32))
     cdef IMGDTYPE [:, :, ::1] result = np.zeros_like(padded)
@@ -623,6 +642,16 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
     -------
     result : ndarray
         Denoised image, of same shape as input image.
+
+    References
+    ----------
+    J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
+    nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
+    International Symposium on Biomedical Imaging: From Nano to Macro,
+    2008, pp. 1331-1334.
+
+    Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
+    Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
     """
     if s % 2 == 0:
         s += 1  # odd value for symmetric patch
@@ -630,7 +659,7 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
     # Image padding: we need to account for patch size, possible shift,
     # + 1 for the boundary effects in finite differences
     cdef int pad_size = offset + d + 1
-    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(util.pad(image,
+    cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(np.pad(image,
                                 pad_size, mode='reflect').astype(np.float32))
     cdef IMGDTYPE [:, :, ::1] result = np.zeros_like(padded)
     cdef IMGDTYPE [:, :, ::1] weights = np.zeros_like(padded)

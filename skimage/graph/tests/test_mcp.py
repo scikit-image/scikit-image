@@ -4,15 +4,18 @@ from numpy.testing import (assert_array_equal,
                            )
 
 import skimage.graph.mcp as mcp
+from skimage._shared._warnings import expected_warnings
 
 np.random.seed(0)
 a = np.ones((8, 8), dtype=np.float32)
 a[1:-1, 1] = 0
 a[1, 1:-1] = 0
 
+warning_optional = r'|\A\Z'
 
 def test_basic():
-    m = mcp.MCP(a, fully_connected=True)
+    with expected_warnings(['Upgrading NumPy' + warning_optional]):
+        m = mcp.MCP(a, fully_connected=True)
     costs, traceback = m.find_costs([(1, 6)])
     return_path = m.traceback((7, 2))
     assert_array_equal(costs,
@@ -53,12 +56,14 @@ def test_neg_inf():
                      (6, 1)]
     test_neg = np.where(a == 1, -1, 0)
     test_inf = np.where(a == 1, np.inf, 0)
-    m = mcp.MCP(test_neg, fully_connected=True)
+    with expected_warnings(['Upgrading NumPy' + warning_optional]):
+        m = mcp.MCP(test_neg, fully_connected=True)
     costs, traceback = m.find_costs([(1, 6)])
     return_path = m.traceback((6, 1))
     assert_array_equal(costs, expected_costs)
     assert_array_equal(return_path, expected_path)
-    m = mcp.MCP(test_inf, fully_connected=True)
+    with expected_warnings(['Upgrading NumPy' + warning_optional]):
+        m = mcp.MCP(test_inf, fully_connected=True)
     costs, traceback = m.find_costs([(1, 6)])
     return_path = m.traceback((6, 1))
     assert_array_equal(costs, expected_costs)
@@ -66,8 +71,9 @@ def test_neg_inf():
 
 
 def test_route():
-    return_path, cost = mcp.route_through_array(a, (1, 6), (7, 2),
-                                                geometric=True)
+    with expected_warnings(['Upgrading NumPy' + warning_optional]):
+        return_path, cost = mcp.route_through_array(a, (1, 6), (7, 2),
+                                                    geometric=True)
     assert_almost_equal(cost, np.sqrt(2) / 2)
     assert_array_equal(return_path,
                        [(1, 6),
@@ -84,7 +90,8 @@ def test_route():
 
 
 def test_no_diagonal():
-    m = mcp.MCP(a, fully_connected=False)
+    with expected_warnings(['Upgrading NumPy' + warning_optional]):
+        m = mcp.MCP(a, fully_connected=False)
     costs, traceback = m.find_costs([(1, 6)])
     return_path = m.traceback((7, 2))
     assert_array_equal(costs,
@@ -114,7 +121,8 @@ def test_no_diagonal():
 
 def test_offsets():
     offsets = [(1, i) for i in range(10)] + [(1, -i) for i in range(1, 10)]
-    m = mcp.MCP(a, offsets=offsets)
+    with expected_warnings(['Upgrading NumPy' + warning_optional]):
+        m = mcp.MCP(a, offsets=offsets)
     costs, traceback = m.find_costs([(1, 6)])
     assert_array_equal(traceback,
                        [[-2, -2, -2, -2, -2, -2, -2, -2],
@@ -139,7 +147,8 @@ def _test_random(shape):
               (np.random.rand(len(shape)) * shape).astype(int)]
     ends = [(np.random.rand(len(shape)) * shape).astype(int)
             for i in range(4)]
-    m = mcp.MCP(a, fully_connected=True)
+    with expected_warnings(['Upgrading NumPy' + warning_optional]):
+        m = mcp.MCP(a, fully_connected=True)
     costs, offsets = m.find_costs(starts)
     for point in [(np.random.rand(len(shape)) * shape).astype(int)
                   for i in range(4)]:

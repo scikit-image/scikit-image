@@ -1,7 +1,7 @@
+from __future__ import division
 import numpy as np
 from scipy.signal import fftconvolve
 
-from ..util import pad
 from .._shared.utils import assert_nD
 
 
@@ -63,12 +63,20 @@ def match_template(image, template, pad_input=False, mode='constant',
     output : array
         Response image with correlation coefficients.
 
+    Notes
+    -----
+    Details on the cross-correlation are presented in [1]_. This implementation
+    uses FFT convolutions of the image and the template. Reference [2]_
+    presents similar derivations but the approximation presented in this
+    reference is not used in our implementation.
+
     References
     ----------
-    .. [1] Briechle and Hanebeck, "Template Matching using Fast Normalized
-           Cross Correlation", Proceedings of the SPIE (2001).
-    .. [2] J. P. Lewis, "Fast Normalized Cross-Correlation", Industrial Light
+    .. [1] J. P. Lewis, "Fast Normalized Cross-Correlation", Industrial Light
            and Magic.
+    .. [2] Briechle and Hanebeck, "Template Matching using Fast Normalized
+           Cross Correlation", Proceedings of the SPIE (2001).
+           DOI:10.1117/12.421129
 
     Examples
     --------
@@ -93,7 +101,7 @@ def match_template(image, template, pad_input=False, mode='constant',
     array([[ 1.   , -0.125,  0.   ,  0.   ],
            [-0.125, -0.125,  0.   ,  0.   ],
            [ 0.   ,  0.   ,  0.125,  0.125],
-           [ 0.   ,  0.   ,  0.125, -1.   ]], dtype=float32)
+           [ 0.   ,  0.   ,  0.125, -1.   ]])
     >>> result = match_template(image, template, pad_input=True)
     >>> np.round(result, 3)
     array([[-0.125, -0.125, -0.125,  0.   ,  0.   ,  0.   ],
@@ -101,7 +109,7 @@ def match_template(image, template, pad_input=False, mode='constant',
            [-0.125, -0.125, -0.125,  0.   ,  0.   ,  0.   ],
            [ 0.   ,  0.   ,  0.   ,  0.125,  0.125,  0.125],
            [ 0.   ,  0.   ,  0.   ,  0.125, -1.   ,  0.125],
-           [ 0.   ,  0.   ,  0.   ,  0.125,  0.125,  0.125]], dtype=float32)
+           [ 0.   ,  0.   ,  0.   ,  0.125,  0.125,  0.125]])
     """
     assert_nD(image, (2, 3))
 
@@ -113,14 +121,14 @@ def match_template(image, template, pad_input=False, mode='constant',
 
     image_shape = image.shape
 
-    image = np.array(image, dtype=np.float32, copy=False)
+    image = np.array(image, dtype=np.float64, copy=False)
 
     pad_width = tuple((width, width) for width in template.shape)
     if mode == 'constant':
-        image = pad(image, pad_width=pad_width, mode=mode,
-                    constant_values=constant_values)
+        image = np.pad(image, pad_width=pad_width, mode=mode,
+                       constant_values=constant_values)
     else:
-        image = pad(image, pad_width=pad_width, mode=mode)
+        image = np.pad(image, pad_width=pad_width, mode=mode)
 
     # Use special case for 2-D images for much better performance in
     # computation of integral images
@@ -131,8 +139,9 @@ def match_template(image, template, pad_input=False, mode='constant',
         image_window_sum = _window_sum_3d(image, template.shape)
         image_window_sum2 = _window_sum_3d(image ** 2, template.shape)
 
+    template_mean = template.mean()
     template_volume = np.prod(template.shape)
-    template_ssd = np.sum((template - template.mean()) ** 2)
+    template_ssd = np.sum((template - template_mean) ** 2)
 
     if image.ndim == 2:
         xcorr = fftconvolve(image, template[::-1, ::-1],
@@ -141,22 +150,22 @@ def match_template(image, template, pad_input=False, mode='constant',
         xcorr = fftconvolve(image, template[::-1, ::-1, ::-1],
                             mode="valid")[1:-1, 1:-1, 1:-1]
 
-    nom = xcorr - image_window_sum * (template.sum() / template_volume)
+    numerator = xcorr - image_window_sum * template_mean
 
-    denom = image_window_sum2
+    denominator = image_window_sum2
     np.multiply(image_window_sum, image_window_sum, out=image_window_sum)
     np.divide(image_window_sum, template_volume, out=image_window_sum)
-    denom -= image_window_sum
-    denom *= template_ssd
-    np.maximum(denom, 0, out=denom)  # sqrt of negative number not allowed
-    np.sqrt(denom, out=denom)
+    denominator -= image_window_sum
+    denominator *= template_ssd
+    np.maximum(denominator, 0, out=denominator)  # sqrt of negative number not allowed
+    np.sqrt(denominator, out=denominator)
 
-    response = np.zeros_like(xcorr, dtype=np.float32)
+    response = np.zeros_like(xcorr, dtype=np.float64)
 
     # avoid zero-division
-    mask = denom > np.finfo(np.float32).eps
+    mask = denominator > np.finfo(np.float64).eps
 
-    response[mask] = nom[mask] / denom[mask]
+    response[mask] = numerator[mask] / denominator[mask]
 
     slices = []
     for i in range(template.ndim):

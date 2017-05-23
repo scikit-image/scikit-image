@@ -8,8 +8,8 @@ All rights reserved.
 Original author: Lee Kamentsky
 """
 import numpy as np
-from numpy.testing import (assert_array_almost_equal as assert_close,
-                           assert_raises)
+from numpy.testing import assert_array_almost_equal as assert_close
+import pytest
 
 from skimage.morphology.greyreconstruct import reconstruction
 
@@ -81,26 +81,31 @@ def test_fill_hole():
 def test_invalid_seed():
     seed = np.ones((5, 5))
     mask = np.ones((5, 5))
-    assert_raises(ValueError, reconstruction, seed * 2, mask,
-                  method='dilation')
-    assert_raises(ValueError, reconstruction, seed * 0.5, mask,
-                  method='erosion')
+    with pytest.raises(ValueError):
+        reconstruction(seed * 2, mask,
+                       method='dilation')
+    with pytest.raises(ValueError):
+        reconstruction(seed * 0.5, mask,
+                       method='erosion')
 
 
 def test_invalid_selem():
     seed = np.ones((5, 5))
     mask = np.ones((5, 5))
-    assert_raises(ValueError, reconstruction, seed, mask,
-                  selem=np.ones((4, 4)))
-    assert_raises(ValueError, reconstruction, seed, mask,
-                  selem=np.ones((3, 4)))
+    with pytest.raises(ValueError):
+        reconstruction(seed, mask,
+                       selem=np.ones((4, 4)))
+    with pytest.raises(ValueError):
+        reconstruction(seed, mask,
+                       selem=np.ones((3, 4)))
     reconstruction(seed, mask, selem=np.ones((3, 3)))
 
 
 def test_invalid_method():
     seed = np.array([0, 8, 8, 8, 8, 8, 8, 8, 8, 0])
     mask = np.array([0, 3, 6, 2, 1, 1, 1, 4, 2, 0])
-    assert_raises(ValueError, reconstruction, seed, mask, method='foo')
+    with pytest.raises(ValueError):
+        reconstruction(seed, mask, method='foo')
 
 
 if __name__ == '__main__':

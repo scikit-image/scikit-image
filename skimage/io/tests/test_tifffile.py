@@ -1,6 +1,6 @@
 import os
-import skimage as si
-import skimage.io as sio
+from ... import data_dir
+from .. import imread, imsave, use_plugin, reset_plugins
 import numpy as np
 
 from numpy.testing import (
@@ -8,29 +8,33 @@ from numpy.testing import (
 
 from tempfile import NamedTemporaryFile
 
-_plugins = sio.plugin_order()
-sio.use_plugin('tifffile')
 
-
-np.random.seed(0)
+def setup():
+    use_plugin('tifffile')
+    np.random.seed(0)
 
 
 def teardown():
-    sio.reset_plugins()
+    reset_plugins()
 
 
 def test_imread_uint16():
-    expected = np.load(os.path.join(si.data_dir, 'chessboard_GRAY_U8.npy'))
-    img = sio.imread(os.path.join(si.data_dir, 'chessboard_GRAY_U16.tif'))
+    expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
+    img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16.tif'))
     assert img.dtype == np.uint16
     assert_array_almost_equal(img, expected)
 
 
 def test_imread_uint16_big_endian():
-    expected = np.load(os.path.join(si.data_dir, 'chessboard_GRAY_U8.npy'))
-    img = sio.imread(os.path.join(si.data_dir, 'chessboard_GRAY_U16B.tif'))
+    expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
+    img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16B.tif'))
     assert img.dtype == np.uint16
     assert_array_almost_equal(img, expected)
+
+
+def test_imread_multipage_rgb_tif():
+    img = imread(os.path.join(data_dir, 'multipage_rgb.tif'))
+    assert img.shape == (2, 10, 10, 3), img.shape
 
 
 class TestSave:
@@ -38,8 +42,8 @@ class TestSave:
         f = NamedTemporaryFile(suffix='.tif')
         fname = f.name
         f.close()
-        sio.imsave(fname, x)
-        y = sio.imread(fname)
+        imsave(fname, x)
+        y = imread(fname)
         assert_array_equal(x, y)
 
     def test_imsave_roundtrip(self):

@@ -1,64 +1,68 @@
 import numpy as np
-from numpy.testing import assert_array_equal, assert_raises
+from numpy.testing import assert_array_equal
+import pytest
 from skimage import data
-from skimage import transform as tf
-from skimage.color import rgb2gray
 from skimage.feature import BRIEF, corner_peaks, corner_harris
+from skimage._shared.testing import test_parallel
 
 
 def test_color_image_unsupported_error():
     """Brief descriptors can be evaluated on gray-scale images only."""
     img = np.zeros((20, 20, 3))
     keypoints = np.asarray([[7, 5], [11, 13]])
-    assert_raises(ValueError, BRIEF().extract, img, keypoints)
+    with pytest.raises(ValueError):
+        BRIEF().extract(img, keypoints)
 
 
 def test_normal_mode():
     """Verify the computed BRIEF descriptors with expected for normal mode."""
-    img = rgb2gray(data.lena())
+    img = data.coins()
 
-    keypoints = corner_peaks(corner_harris(img), min_distance=5)
+    keypoints = corner_peaks(corner_harris(img), min_distance=5,
+                             threshold_abs=0, threshold_rel=0.1)
 
     extractor = BRIEF(descriptor_size=8, sigma=2)
 
     extractor.extract(img, keypoints[:8])
 
-    expected = np.array([[ True, False,  True, False,  True,  True, False, False],
+    expected = np.array([[False,  True, False, False,  True, False,  True, False],
+                         [ True, False,  True,  True, False,  True, False, False],
+                         [ True, False, False,  True, False,  True, False,  True],
+                         [ True,  True,  True,  True, False,  True, False,  True],
+                         [ True,  True,  True, False, False,  True,  True,  True],
                          [False, False, False, False,  True, False, False, False],
-                         [ True,  True,  True,  True,  True,  True,  True,  True],
-                         [ True, False,  True,  True, False,  True, False,  True],
-                         [False,  True,  True,  True,  True,  True,  True,  True],
-                         [ True, False, False, False, False,  True, False,  True],
-                         [False,  True,  True,  True, False, False,  True, False],
-                         [False, False, False, False,  True, False, False, False]], dtype=bool)
+                         [False,  True, False, False,  True, False,  True, False],
+                         [False, False, False, False, False, False, False, False]], dtype=bool)
 
     assert_array_equal(extractor.descriptors, expected)
 
 
 def test_uniform_mode():
     """Verify the computed BRIEF descriptors with expected for uniform mode."""
-    img = rgb2gray(data.lena())
+    img = data.coins()
 
-    keypoints = corner_peaks(corner_harris(img), min_distance=5)
+    keypoints = corner_peaks(corner_harris(img), min_distance=5,
+                             threshold_abs=0, threshold_rel=0.1)
 
     extractor = BRIEF(descriptor_size=8, sigma=2, mode='uniform')
 
     extractor.extract(img, keypoints[:8])
 
-    expected = np.array([[ True, False,  True, False, False,  True, False, False],
-                         [False,  True, False, False,  True,  True,  True,  True],
-                         [ True, False, False, False, False, False, False, False],
-                         [False,  True,  True, False, False, False,  True, False],
-                         [False, False, False, False, False, False,  True, False],
-                         [False,  True, False, False,  True, False, False, False],
-                         [False, False,  True,  True, False, False,  True,  True],
-                         [ True,  True, False, False, False, False, False, False]], dtype=bool)
+    expected = np.array([[False, False, False,  True,  True,  True, False, False],
+                         [ True,  True,  True, False,  True, False, False,  True],
+                         [ True,  True,  True, False,  True,  True, False,  True],
+                         [ True,  True,  True,  True, False,  True, False,  True],
+                         [ True,  True,  True,  True,  True,  True, False, False],
+                         [ True,  True,  True,  True,  True,  True,  True,  True],
+                         [False, False, False,  True,  True,  True,  True,  True],
+                         [False,  True, False,  True, False,  True,  True,  True]], dtype=bool)
 
     assert_array_equal(extractor.descriptors, expected)
 
 
 def test_unsupported_mode():
-    assert_raises(ValueError, BRIEF, mode='foobar')
+    with pytest.raises(ValueError):
+        BRIEF(mode='foobar')
 
 
 def test_border():

@@ -8,12 +8,12 @@ from skimage.viewer.plugins import OverlayPlugin
 from skimage.transform import pyramid_gaussian
 from skimage.filters import sobel
 from numpy.testing import assert_equal
-from numpy.testing.decorators import skipif
+import pytest
 from skimage._shared.version_requirements import is_installed
 from skimage._shared._warnings import expected_warnings
 
 
-@skipif(not has_qt)
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
 def test_viewer():
     astro = data.astronaut()
     coins = data.coins()
@@ -40,11 +40,11 @@ def make_key_event(key):
                            QtCore.Qt.NoModifier)
 
 
-@skipif(not has_qt)
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
 def test_collection_viewer():
 
     img = data.astronaut()
-    img_collection = tuple(pyramid_gaussian(img))
+    img_collection = tuple(pyramid_gaussian(img, multichannel=True))
 
     view = CollectionViewer(img_collection)
     make_key_event(48)
@@ -56,8 +56,9 @@ def test_collection_viewer():
     view._format_coord(10, 10)
 
 
-@skipif(not has_qt)
-@skipif(not is_installed('matplotlib', '>=1.2'))
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
+@pytest.mark.skipif(not is_installed('matplotlib', '>=1.2'),
+                    reason="matplotlib < 1.2")
 def test_viewer_with_overlay():
     img = data.coins()
     ov = OverlayPlugin(image_filter=sobel)

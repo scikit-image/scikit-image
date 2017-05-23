@@ -1,7 +1,7 @@
 import math
-import warnings
 import numpy as np
 from scipy import optimize
+from .._shared.utils import check_random_state
 
 
 def _check_data_dim(data, dim):
@@ -9,117 +9,169 @@ def _check_data_dim(data, dim):
         raise ValueError('Input data must have shape (N, %d).' % dim)
 
 
+def _check_data_atleast_2D(data):
+    if data.ndim < 2 or data.shape[1] < 2:
+        raise ValueError('Input data must be at least 2D.')
+
+
+def _norm_along_axis(x, axis):
+    """NumPy < 1.8 does not support the `axis` argument for `np.linalg.norm`."""
+    return np.sqrt(np.einsum('ij,ij->i', x, x))
+
+
 class BaseModel(object):
 
     def __init__(self):
         self.params = None
 
-    @property
-    def _params(self):
-        warnings.warn('`_params` attribute is deprecated, '
-                      'use `params` instead.')
-        return self.params
 
+class LineModelND(BaseModel):
+    """Total least squares estimator for N-dimensional lines.
 
-class LineModel(BaseModel):
+    Lines are defined by a point (origin) and a unit vector (direction)
+    according to the following vector equation::
 
-    """Total least squares estimator for 2D lines.
-
-    Lines are parameterized using polar coordinates as functional model::
-
-        dist = x * cos(theta) + y * sin(theta)
-
-    This parameterization is able to model vertical lines in contrast to the
-    standard line model ``y = a*x + b``.
-
-    This estimator minimizes the squared distances from all points to the
-    line::
-
-        min{ sum((dist - x_i * cos(theta) + y_i * sin(theta))**2) }
-
-    A minimum number of 2 points is required to solve for the parameters.
+        X = origin + lambda * direction
 
     Attributes
     ----------
     params : tuple
-        Line model parameters in the following order `dist`, `theta`.
+        Line model parameters in the following order `origin`, `direction`.
+
+    Examples
+    --------
+    >>> x = np.linspace(1, 2, 25)
+    >>> y = 1.5 * x + 3
+    >>> lm = LineModelND()
+    >>> lm.estimate(np.array([x, y]).T)
+    True
+    >>> tuple(np.round(lm.params, 5))
+    (array([ 1.5 ,  5.25]), array([ 0.5547 ,  0.83205]))
+    >>> res = lm.residuals(np.array([x, y]).T)
+    >>> np.abs(np.round(res, 9))
+    array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+            0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
+    >>> np.round(lm.predict_y(x[:5]), 3)
+    array([ 4.5  ,  4.562,  4.625,  4.688,  4.75 ])
+    >>> np.round(lm.predict_x(y[:5]), 3)
+    array([ 1.   ,  1.042,  1.083,  1.125,  1.167])
 
     """
 
     def estimate(self, data):
-        """Estimate line model from data using total least squares.
+        """Estimate line model from data.
 
         Parameters
         ----------
-        data : (N, 2) array
-            N points with ``(x, y)`` coordinates, respectively.
+        data : (N, dim) array
+            N points in a space of dimensionality dim >= 2.
 
         Returns
         -------
         success : bool
             True, if model estimation succeeds.
-
         """
-
-        _check_data_dim(data, dim=2)
-
-        X0 = data.mean(axis=0)
+        _check_data_atleast_2D(data)
+        # https://www.youtube.com/watch?v=puVoOw3hNGY
+        origin = data.mean(axis=0)
+        data = data - origin
 
         if data.shape[0] == 2:  # well determined
-            theta = np.arctan2(data[1, 1] - data[0, 1],
-                               data[1, 0] - data[0, 0])
+            direction = data[1] - data[0]
+            norm = np.linalg.norm(direction)
+            if norm != 0:  # this should not happen to be norm 0
+                direction /= norm
         elif data.shape[0] > 2:  # over-determined
-            data = data - X0
             # first principal component
-            _, _, v = np.linalg.svd(data)
-            theta = np.arctan2(v[0, 1], v[0, 0])
+            # Note: without full_matrices=False Python dies with joblib parallel_for.
+            _, _, u = np.linalg.svd(data, full_matrices=False)
+            direction = u[0]
         else:  # under-determined
             raise ValueError('At least 2 input points needed.')
 
-        # angle perpendicular to line angle
-        theta = (theta + np.pi / 2) % np.pi
-        # line always passes through mean
-        dist = X0[0] * math.cos(theta) + X0[1] * math.sin(theta)
-
-        self.params = (dist, theta)
+        self.params = (origin, direction)
 
         return True
 
-    def residuals(self, data):
+    def residuals(self, data, params=None):
         """Determine residuals of data to model.
 
         For each point the shortest distance to the line is returned.
+        It is obtained by projecting the data onto the line.
 
         Parameters
         ----------
-        data : (N, 2) array
-            N points with ``(x, y)`` coordinates, respectively.
+        data : (N, dim) array
+            N points in a space of dimension dim.
+        params : (2, ) array, optional
+            Optional custom parameter set in the form (`origin`, `direction`).
 
         Returns
         -------
         residuals : (N, ) array
             Residual for each data point.
-
         """
+        _check_data_atleast_2D(data)
+        if params is None:
+            params = self.params
+        assert params is not None
+        if len(params) != 2:
+            raise ValueError('Parameters are defined by 2 sets.')
 
-        _check_data_dim(data, dim=2)
+        origin, direction = self.params
+        res = (data - origin) - \
+              np.dot(data - origin, direction)[..., np.newaxis] * direction
+        return _norm_along_axis(res, axis=1)
 
-        dist, theta = self.params
+    def predict(self, x, axis=0, params=None):
+        """Predict intersection of the estimated line model with a hyperplane
+        orthogonal to a given axis.
 
-        x = data[:, 0]
-        y = data[:, 1]
+        Parameters
+        ----------
+        x : (n, 1) array
+            coordinates along an axis.
+        axis : int
+            axis orthogonal to the hyperplane intersecting the line.
+        params : (2, ) array, optional
+            Optional custom parameter set in the form (`origin`, `direction`).
 
-        return dist - (x * math.cos(theta) + y * math.sin(theta))
+        Returns
+        -------
+        data : (n, m) array
+            Predicted coordinates.
+
+        If the line is parallel to the given axis, a ValueError is raised.
+        """
+        if params is None:
+            params = self.params
+        assert params is not None
+        if len(params) != 2:
+            raise ValueError('Parameters are defined by 2 sets.')
+
+        origin, direction = params
+
+        if direction[axis] == 0:
+            # line parallel to axis
+            raise ValueError('Line parallel to axis %s' % axis)
+
+        l = (x - origin[axis]) / direction[axis]
+        data = origin + l[..., np.newaxis] * direction
+        return data
 
     def predict_x(self, y, params=None):
-        """Predict x-coordinates using the estimated model.
+        """Predict x-coordinates for 2D lines using the estimated model.
+
+        Alias for::
+
+            predict(y, axis=1)[:, 0]
 
         Parameters
         ----------
         y : array
             y-coordinates.
         params : (2, ) array, optional
-            Optional custom parameter set.
+            Optional custom parameter set in the form (`origin`, `direction`).
 
         Returns
         -------
@@ -127,21 +179,22 @@ class LineModel(BaseModel):
             Predicted x-coordinates.
 
         """
-
-        if params is None:
-            params = self.params
-        dist, theta = params
-        return (dist - y * math.sin(theta)) / math.cos(theta)
+        x = self.predict(y, axis=1, params=params)[:, 0]
+        return x
 
     def predict_y(self, x, params=None):
-        """Predict y-coordinates using the estimated model.
+        """Predict y-coordinates  for 2D lines using the estimated model.
+
+        Alias for::
+
+            predict(x, axis=0)[:, 1]
 
         Parameters
         ----------
         x : array
             x-coordinates.
         params : (2, ) array, optional
-            Optional custom parameter set.
+            Optional custom parameter set in the form (`origin`, `direction`).
 
         Returns
         -------
@@ -149,11 +202,8 @@ class LineModel(BaseModel):
             Predicted y-coordinates.
 
         """
-
-        if params is None:
-            params = self.params
-        dist, theta = params
-        return (dist - x * math.cos(theta)) / math.sin(theta)
+        y = self.predict(x, axis=0, params=params)[:, 1]
+        return y
 
 
 class CircleModel(BaseModel):
@@ -176,6 +226,20 @@ class CircleModel(BaseModel):
     params : tuple
         Circle model parameters in the following order `xc`, `yc`, `r`.
 
+    Examples
+    --------
+    >>> t = np.linspace(0, 2 * np.pi, 25)
+    >>> xy = CircleModel().predict_xy(t, params=(2, 3, 4))
+    >>> model = CircleModel()
+    >>> model.estimate(xy)
+    True
+    >>> tuple(np.round(model.params, 5))
+    (2.0, 3.0, 4.0)
+    >>> res = model.residuals(xy)
+    >>> np.abs(np.round(res, 9))
+    array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+            0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
+
     """
 
     def estimate(self, data):
@@ -197,34 +261,25 @@ class CircleModel(BaseModel):
 
         x = data[:, 0]
         y = data[:, 1]
-        # pre-allocate jacobian for all iterations
-        A = np.zeros((3, data.shape[0]), dtype=np.double)
-        # same for all iterations: r
-        A[2, :] = -1
 
-        def dist(xc, yc):
-            return np.sqrt((x - xc)**2 + (y - yc)**2)
+        # http://www.had2know.com/academics/best-fit-circle-least-squares.html
+        x2y2 = (x ** 2 + y ** 2)
+        sum_x = np.sum(x)
+        sum_y = np.sum(y)
+        sum_xy = np.sum(x * y)
+        m1 = np.array([[np.sum(x ** 2), sum_xy, sum_x],
+                       [sum_xy, np.sum(y ** 2), sum_y],
+                       [sum_x, sum_y, float(len(x))]])
+        m2 = np.array([[np.sum(x * x2y2),
+                        np.sum(y * x2y2),
+                        np.sum(x2y2)]]).T
+        a, b, c = np.linalg.pinv(m1).dot(m2)
+        a, b, c = a[0], b[0], c[0]
+        xc = a / 2
+        yc = b / 2
+        r = np.sqrt(4 * c + a ** 2 + b ** 2) / 2
 
-        def fun(params):
-            xc, yc, r = params
-            return dist(xc, yc) - r
-
-        def Dfun(params):
-            xc, yc, r = params
-            d = dist(xc, yc)
-            A[0, :] = -(x - xc) / d
-            A[1, :] = -(y - yc) / d
-            # same for all iterations, so not changed in each iteration
-            #A[2, :] = -1
-            return A
-
-        xc0 = x.mean()
-        yc0 = y.mean()
-        r0 = dist(xc0, yc0).mean()
-        params0 = (xc0, yc0, r0)
-        params, _ = optimize.leastsq(fun, params0, Dfun=Dfun, col_deriv=True)
-
-        self.params = params
+        self.params = (xc, yc, r)
 
         return True
 
@@ -282,7 +337,6 @@ class CircleModel(BaseModel):
 
 
 class EllipseModel(BaseModel):
-
     """Total least squares estimator for 2D ellipses.
 
     The functional model of the ellipse is::
@@ -294,26 +348,33 @@ class EllipseModel(BaseModel):
     where ``(xt, yt)`` is the closest point on the ellipse to ``(x, y)``. Thus
     d is the shortest distance from the point to the ellipse.
 
-    This estimator minimizes the squared distances from all points to the
-    ellipse::
-
-        min{ sum(d_i**2) } = min{ sum((x_i - xt)**2 + (y_i - yt)**2) }
-
-    Thus you have ``2 * N`` equations (x_i, y_i) for ``N + 5`` unknowns (t_i,
-    xc, yc, a, b, theta), which gives you an effective redundancy of ``N - 5``.
+    The estimator is based on a least squares minimization. The optimal
+    solution is computed directly, no iterations are required. This leads
+    to a simple, stable and robust fitting method.
 
     The ``params`` attribute contains the parameters in the following order::
 
         xc, yc, a, b, theta
 
-    A minimum number of 5 points is required to solve for the parameters.
-
     Attributes
     ----------
     params : tuple
-        Ellipse model parameters in the following order `xc`, `yc`, `a`,
-        `b`, `theta`.
+        Ellipse model parameters in the following order `xc`, `yc`, `a`, `b`,
+        `theta`.
 
+    Examples
+    --------
+
+    >>> xy = EllipseModel().predict_xy(np.linspace(0, 2 * np.pi, 25),
+    ...                                params=(10, 15, 4, 8, np.deg2rad(30)))
+    >>> ellipse = EllipseModel()
+    >>> ellipse.estimate(xy)
+    True
+    >>> np.round(ellipse.params, 2)
+    array([ 10.  ,  15.  ,   4.  ,   8.  ,   0.52])
+    >>> np.round(abs(ellipse.residuals(xy)), 5)
+    array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+            0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
     """
 
     def estimate(self, data):
@@ -329,66 +390,86 @@ class EllipseModel(BaseModel):
         success : bool
             True, if model estimation succeeds.
 
-        """
 
+        References
+        ----------
+        .. [1] Halir, R.; Flusser, J. "Numerically stable direct least squares
+               fitting of ellipses". In Proc. 6th International Conference in
+               Central Europe on Computer Graphics and Visualization.
+               WSCG (Vol. 98, pp. 125-132).
+
+        """
+        # Original Implementation: Ben Hammel, Nick Sullivan-Molina
+        # another REFERENCE: [2] http://mathworld.wolfram.com/Ellipse.html
         _check_data_dim(data, dim=2)
 
         x = data[:, 0]
         y = data[:, 1]
 
-        N = data.shape[0]
+        # Quadratic part of design matrix [eqn. 15] from [1]
+        D1 = np.vstack([x ** 2, x * y, y ** 2]).T
+        # Linear part of design matrix [eqn. 16] from [1]
+        D2 = np.vstack([x, y, np.ones(len(x))]).T
 
-        # pre-allocate jacobian for all iterations
-        A = np.zeros((N + 5, 2 * N), dtype=np.double)
-        # same for all iterations: xc, yc
-        A[0, :N] = -1
-        A[1, N:] = -1
+        # forming scatter matrix [eqn. 17] from [1]
+        S1 = np.dot(D1.T, D1)
+        S2 = np.dot(D1.T, D2)
+        S3 = np.dot(D2.T, D2)
 
-        diag_idxs = np.diag_indices(N)
+        # Constraint matrix [eqn. 18]
+        C1 = np.array([[0., 0., 2.], [0., -1., 0.], [2., 0., 0.]])
 
-        def fun(params):
-            xyt = self.predict_xy(params[5:], params[:5])
-            fx = x - xyt[:, 0]
-            fy = y - xyt[:, 1]
-            return np.append(fx, fy)
+        try:
+            # Reduced scatter matrix [eqn. 29]
+            M = np.linalg.inv(C1).dot(
+                S1 - np.dot(S2, np.linalg.inv(S3)).dot(S2.T))
+        except np.linalg.LinAlgError:  # LinAlgError: Singular matrix
+            return False
 
-        def Dfun(params):
-            xc, yc, a, b, theta = params[:5]
-            t = params[5:]
+        # M*|a b c >=l|a b c >. Find eigenvalues and eigenvectors
+        # from this equation [eqn. 28]
+        eig_vals, eig_vecs = np.linalg.eig(M)
 
-            ct = np.cos(t)
-            st = np.sin(t)
-            ctheta = math.cos(theta)
-            stheta = math.sin(theta)
+        # eigenvector must meet constraint 4ac - b^2 to be valid.
+        cond = 4 * np.multiply(eig_vecs[0, :], eig_vecs[2, :]) \
+               - np.power(eig_vecs[1, :], 2)
+        a1 = eig_vecs[:, (cond > 0)]
+        # seeks for empty matrix
+        if 0 in a1.shape or len(a1.ravel()) != 3:
+            return False
+        a, b, c = a1.ravel()
 
-            # derivatives for fx, fy in the following order:
-            #       xc, yc, a, b, theta, t_i
+        # |d f g> = -S3^(-1)*S2^(T)*|a b c> [eqn. 24]
+        a2 = np.dot(-np.linalg.inv(S3), S2.T).dot(a1)
+        d, f, g = a2.ravel()
 
-            # fx
-            A[2, :N] = - ctheta * ct
-            A[3, :N] = stheta * st
-            A[4, :N] = a * stheta * ct + b * ctheta * st
-            A[5:, :N][diag_idxs] = a * ctheta * st + b * stheta * ct
-            # fy
-            A[2, N:] = - stheta * ct
-            A[3, N:] = - ctheta * st
-            A[4, N:] = - a * ctheta * ct + b * stheta * st
-            A[5:, N:][diag_idxs] = a * stheta * st - b * ctheta * ct
+        # eigenvectors are the coefficients of an ellipse in general form
+        # a*x^2 + 2*b*x*y + c*y^2 + 2*d*x + 2*f*y + g = 0 (eqn. 15) from [2]
+        b /= 2.
+        d /= 2.
+        f /= 2.
 
-            return A
+        # finding center of ellipse [eqn.19 and 20] from [2]
+        x0 = (c * d - b * f) / (b ** 2. - a * c)
+        y0 = (a * f - b * d) / (b ** 2. - a * c)
 
-        # initial guess of parameters using a circle model
-        params0 = np.empty((N + 5, ), dtype=np.double)
-        xc0 = x.mean()
-        yc0 = y.mean()
-        r0 = np.sqrt((x - xc0)**2 + (y - yc0)**2).mean()
-        params0[:5] = (xc0, yc0, r0, 0, 0)
-        params0[5:] = np.arctan2(y - yc0, x - xc0)
+        # Find the semi-axes lengths [eqn. 21 and 22] from [2]
+        numerator = a * f ** 2 + c * d ** 2 + g * b ** 2 \
+                    - 2 * b * d * f - a * c * g
+        term = np.sqrt((a - c) ** 2 + 4 * b ** 2)
+        denominator1 = (b ** 2 - a * c) * (term - (a + c))
+        denominator2 = (b ** 2 - a * c) * (- term - (a + c))
+        width = np.sqrt(2 * numerator / denominator1)
+        height = np.sqrt(2 * numerator / denominator2)
 
-        params, _ = optimize.leastsq(fun, params0, Dfun=Dfun, col_deriv=True)
+        # angle of counterclockwise rotation of major-axis of ellipse
+        # to x-axis [eqn. 23] from [2].
+        phi = 0.5 * np.arctan((2. * b) / (a - c))
+        if a > c:
+            phi += 0.5 * np.pi
 
-        self.params = params[:5]
-
+        self.params = np.nan_to_num([x0, y0, width, height, phi]).tolist()
+        self.params = [float(np.real(x)) for x in self.params]
         return True
 
     def residuals(self, data):
@@ -425,7 +506,7 @@ class EllipseModel(BaseModel):
             st = math.sin(t)
             xt = xc + a * ctheta * ct - b * stheta * st
             yt = yc + a * stheta * ct + b * ctheta * st
-            return (xi - xt)**2 + (yi - yt)**2
+            return (xi - xt) ** 2 + (yi - yt) ** 2
 
         # def Dfun(t, xi, yi):
         #     ct = math.cos(t)
@@ -473,6 +554,7 @@ class EllipseModel(BaseModel):
 
         if params is None:
             params = self.params
+
         xc, yc, a, b, theta = params
 
         ct = np.cos(t)
@@ -529,7 +611,7 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
 def ransac(data, model_class, min_samples, residual_threshold,
            is_data_valid=None, is_model_valid=None,
            max_trials=100, stop_sample_num=np.inf, stop_residuals_sum=0,
-           stop_probability=1):
+           stop_probability=1, random_state=None):
     """Fit a model to data with the RANSAC (random sample consensus) algorithm.
 
     RANSAC is an iterative algorithm for the robust estimation of parameters
@@ -602,6 +684,12 @@ def ransac(data, model_class, min_samples, residual_threshold,
         where the probability (confidence) is typically set to a high value
         such as 0.99, and e is the current fraction of inliers w.r.t. the
         total number of samples.
+    random_state : int, RandomState instance or None, optional
+        If int, random_state is the seed used by the random number generator;
+        If RandomState instance, random_state is the random number generator;
+        If None, the random number generator is the RandomState instance used
+        by `np.random`.
+
 
     Returns
     -------
@@ -620,10 +708,8 @@ def ransac(data, model_class, min_samples, residual_threshold,
     Generate ellipse data without tilt and add noise:
 
     >>> t = np.linspace(0, 2 * np.pi, 50)
-    >>> a = 5
-    >>> b = 10
-    >>> xc = 20
-    >>> yc = 30
+    >>> xc, yc = 20, 30
+    >>> a, b = 5, 10
     >>> x = xc + a * np.cos(t)
     >>> y = yc + b * np.sin(t)
     >>> data = np.column_stack([x, y])
@@ -642,23 +728,23 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> model = EllipseModel()
     >>> model.estimate(data)
     True
-    >>> model.params # doctest: +SKIP
-    array([ -3.30354146e+03,  -2.87791160e+03,   5.59062118e+03,
-             7.84365066e+00,   7.19203152e-01])
-
+    >>> np.round(model.params)  # doctest: +SKIP
+    array([ 72.,  75.,  77.,  14.,   1.])
 
     Estimate ellipse model using RANSAC:
 
-    >>> ransac_model, inliers = ransac(data, EllipseModel, 5, 3, max_trials=50)
-    >>> ransac_model.params
-    array([ 20.12762373,  29.73563063,   4.81499637,  10.4743584 ,   0.05217117])
-    >>> inliers
+    >>> ransac_model, inliers = ransac(data, EllipseModel, 20, 3, max_trials=50)
+    >>> abs(np.round(ransac_model.params))
+    array([ 20.,  30.,   5.,  10.,   0.])
+    >>> inliers # doctest: +SKIP
     array([False, False, False, False,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True], dtype=bool)
+    >>> sum(inliers) > 40
+    True
 
     Robustly estimate geometric transformation:
 
@@ -687,6 +773,8 @@ def ransac(data, model_class, min_samples, residual_threshold,
     best_inlier_residuals_sum = np.inf
     best_inliers = None
 
+    random_state = check_random_state(random_state)
+
     if min_samples < 0:
         raise ValueError("`min_samples` must be greater than zero")
 
@@ -708,7 +796,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
         # choose random sample set
         samples = []
-        random_idxs = np.random.randint(0, num_samples, min_samples)
+        random_idxs = random_state.randint(0, num_samples, min_samples)
         for d in data:
             samples.append(d[random_idxs])
 
@@ -726,8 +814,8 @@ def ransac(data, model_class, min_samples, residual_threshold,
                 continue
 
         # check if estimated model is valid
-        if is_model_valid is not None and not is_model_valid(sample_model,
-                                                             *samples):
+        if is_model_valid is not None \
+                and not is_model_valid(sample_model, *samples):
             continue
 
         sample_model_residuals = np.abs(sample_model.residuals(*data))

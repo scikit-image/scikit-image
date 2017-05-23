@@ -1,5 +1,5 @@
 Name: scikit-image
-Version: 0.12.dev0
+Version: 0.14.dev0
 Summary: Image processing routines for SciPy
 Url: http://scikit-image.org
 DownloadUrl: http://github.com/scikit-image/scikit-image
@@ -50,9 +50,12 @@ Library:
     Extension: skimage.measure._moments_cy
         Sources:
             skimage/measure/_moments_cy.pyx
-    Extension: skimage.measure._marching_cubes_cy
+    Extension: skimage.measure._marching_cubes_classic_cy
         Sources:
-            skimage/measure/_marching_cubes_cy.pyx
+            skimage/measure/_marching_cubes_classic_cy.pyx
+    Extension: skimage.measure._marching_cubes_lewiner_cy
+        Sources:
+            skimage/measure/_marching_cubes_lewiner_cy.pyx
     Extension: skimage.graph._mcp
         Sources:
             skimage/graph/_mcp.pyx
@@ -98,21 +101,30 @@ Library:
     Extension: skimage.feature.corner_cy
         Sources:
             skimage/feature/corner_cy.pyx
+    Extension: skimage.feature._hoghistogram
+        Sources:
+            skimage/feature/_hoghistogram.pyx
     Extension: skimage.feature._texture
         Sources:
             skimage/feature/_texture.pyx
     Extension: skimage._shared.transform
         Sources:
             skimage/_shared/transform.pyx
+    Extension: skimage._shared.interpolation
+        Sources:
+            skimage/_shared/interpolation.pyx
     Extension: skimage.segmentation._slic
         Sources:
             skimage/segmentation/_slic.pyx
-    Extension: skimage.segmentation._quickshift
+    Extension: skimage.segmentation._quickshift_cy
         Sources:
-            skimage/segmentation/_quickshift.pyx
+            skimage/segmentation/_quickshift_cy.pyx
     Extension: skimage.morphology._skeletonize_cy
         Sources:
             skimage/morphology/_skeletonize_cy.pyx
+    Extension: skimage.morphology._skeletonize_3d_cy
+        Sources:
+            skimage/morphology/_skeletonize_3d_cy.pyx
     Extension: skimage.transform._radon_transform
         Sources:
             skimage/transform/_radon_transform.pyx
@@ -161,6 +173,9 @@ Library:
     Extension: skimage.external.tifffile._tifffile
         Sources:
             skimage/external/tifffile/_tifffile.c
+    Extension: skimage.transform._seam_carving
+        Sources:
+            skimage/transform/_seam_carving.pyx
 
 Executable: skivi
     Module: skimage.scripts.skivi

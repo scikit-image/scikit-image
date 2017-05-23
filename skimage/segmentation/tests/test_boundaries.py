@@ -25,6 +25,19 @@ def test_find_boundaries():
     assert_array_equal(result, ref)
 
 
+def test_find_boundaries_bool():
+    image = np.zeros((5, 5), dtype=np.bool)
+    image[2:5, 2:5] = True
+
+    ref = np.array([[False, False, False, False, False],
+                    [False, False,  True,  True,  True],
+                    [False,  True,  True,  True,  True],
+                    [False,  True,  True, False, False],
+                    [False,  True,  True, False, False]], dtype=np.bool)
+    result = find_boundaries(image)
+    assert_array_equal(result, ref)
+
+
 def test_mark_boundaries():
     image = np.zeros((10, 10))
     label_image = np.zeros((10, 10), dtype=np.uint8)
@@ -57,6 +70,27 @@ def test_mark_boundaries():
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
     marked = mark_boundaries(image, label_image, color=white,
                              outline_color=(2, 2, 2), mode='thick')
+    result = np.mean(marked, axis=-1)
+    assert_array_equal(result, ref)
+
+
+def test_mark_boundaries_bool():
+    image = np.zeros((10, 10), dtype=np.bool)
+    label_image = np.zeros((10, 10), dtype=np.uint8)
+    label_image[2:7, 2:7] = 1
+
+    ref = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 1, 1, 0, 0, 0, 1, 1, 0, 0],
+                    [0, 1, 1, 0, 0, 0, 1, 1, 0, 0],
+                    [0, 1, 1, 0, 0, 0, 1, 1, 0, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
+
+    marked = mark_boundaries(image, label_image, color=white, mode='thick')
     result = np.mean(marked, axis=-1)
     assert_array_equal(result, ref)
 

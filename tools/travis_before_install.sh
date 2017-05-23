@@ -1,14 +1,37 @@
 #!/usr/bin/env bash
 set -ex
 
-export WHEELHOUSE="--no-index --find-links=http://travis-wheels.scikit-image.org/"
+
 export COVERALLS_REPO_TOKEN=7LdFN9232ZbSY3oaXHbQIzLazrSf6w2pQ
 export PIP_DEFAULT_TIMEOUT=60
-sh -e /etc/init.d/xvfb start
-export DISPLAY=:99.0
-export PYTHONWARNINGS="all"
-export TEST_ARGS="--exe --ignore-files=^_test -v --with-doctest --ignore-files=^setup.py$"
 
+# This URL is for any extra wheels that are not available on pypi.  As of 14
+# Jan 2017, the major packages such as numpy and matplotlib are up for all
+# platforms.  The URL points to a Rackspace CDN belonging to the scikit-learn
+# team.  Please contact Olivier Grisel or Matthew Brett if you need
+# permissions for this folder.
+EXTRA_WHEELS="https://5cf40426d9f06eb7461d-6fe47d9331aba7cd62fc36c7196769e4.ssl.cf2.rackcdn.com"
+WHEELHOUSE="--find-links=$EXTRA_WHEELS"
+
+if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
+    sh -e /etc/init.d/xvfb start
+    # This one is for wheels we can only build on the travis precise container.
+    # As of 14 Jan 2017, this is only pyside.  Also on Rackspace, see above.
+    # To build new wheels for this container, consider using:
+    # https://github.com/matthew-brett/travis-wheel-builder . The wheels from
+    # that building repo upload to the container "travis-wheels" available at
+    # https://8167b5c3a2af93a0a9fb-13c6eee0d707a05fa610c311eec04c66.ssl.cf2.rackcdn.com
+    # You then need to transfer them to the container pointed to by the URL
+    # below (called "precise-wheels" on the Rackspace interface).
+    PRECISE_WHEELS="https://7d8d0debcc2964ae0517-cec8b1780d3c0de237cc726d565607b4.ssl.cf2.rackcdn.com"
+    WHEELHOUSE="--find-links=$PRECISE_WHEELS $WHEELHOUSE"
+fi
+export WHEELHOUSE
+
+export DISPLAY=:99.0
+export PYTHONWARNINGS="d,all:::skimage"
+export TEST_ARGS="-v --doctest-modules"
+WHEELBINARIES="matplotlib scipy pillow cython"
 
 retry () {
     # https://gist.github.com/fungusakafungus/1026804
@@ -27,37 +50,33 @@ retry () {
     return 0
 }
 
+# add build dependencies
+echo "cython>=0.23.4" >> requirements.txt
+echo "numpydoc>=0.6" >> requirements.txt
 
-# on Python 2.7, use the system versions of numpy, scipy, and matplotlib
-# and the minimum version of cython and networkx
-if [[ $TRAVIS_PYTHON_VERSION == 2.7* ]]; then
-    virtualenv --system-site-packages ~/venv
-    sudo apt-get install python-scipy python-matplotlib python-imaging
-    sed -i 's/cython>=/cython==/g' requirements.txt
-    sed -i 's/networkx>=/networkx==/g' requirements.txt
-    sed -i '/pillow/d' requirements.txt
-else
-    virtualenv -p python --system-site-packages ~/venv
+if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
+    sed -i 's/>=/==/g' requirements.txt
 fi
 
+# create new empty venv
+virtualenv -p python ~/venv
 source ~/venv/bin/activate
-retry pip install wheel flake8 coveralls nose
 
-# install system tk for matplotlib
-sudo apt-get install python-tk
+python -m pip install --upgrade pip
+pip install --retries 3 -q wheel flake8 codecov pytest pytest-cov
+# install numpy from PyPI instead of our wheelhouse
+pip install --retries 3 -q wheel numpy
 
+# install wheels
+for requirement in $WHEELBINARIES; do
+    WHEELS="$WHEELS $(grep $requirement requirements.txt)"
+done
+pip install --retries 3 -q $PIP_FLAGS $WHEELHOUSE $WHEELS
 
-# on Python 3.2, use matplotlib 1.3.1
-if [[ $TRAVIS_PYTHON_VERSION == 3.2 ]]; then
-    sed -i 's/matplotlib>=*.*.*/matplotlib==1.3.1/g' requirements.txt
-fi
+pip install --retries 3 -q $PIP_FLAGS -r requirements.txt
 
-retry pip install $WHEELHOUSE -r requirements.txt
-
-# clean up disk space
-sudo apt-get clean
-sudo rm -rf /tmp/*
-
+# Show what's installed
+pip list
 
 section () {
     echo -en "travis_fold:start:$1\r"

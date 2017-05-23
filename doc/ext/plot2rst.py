@@ -82,7 +82,7 @@ from skimage import io
 from skimage import transform
 from skimage.util.dtype import dtype_range
 
-from notebook import Notebook
+from notebook_doc import Notebook
 
 from docutils.core import publish_parts
 from sphinx.domains.python import PythonDomain
@@ -186,6 +186,11 @@ def setup(app):
 def generate_example_galleries(app):
     cfg = app.builder.config
 
+    if isinstance(cfg.source_suffix, list):
+        cfg.source_suffix_str = cfg.source_suffix[0]
+    else:
+        cfg.source_suffix_str = cfg.source_suffix
+
     doc_src = Path(os.path.abspath(app.builder.srcdir)) # path/to/doc/source
 
     if isinstance(cfg.plot2rst_paths, tuple):
@@ -205,18 +210,17 @@ def generate_examples_and_gallery(example_dir, rst_dir, cfg):
     rst_dir.makedirs()
 
     # we create an index.rst with all examples
-    gallery_index = open(rst_dir.pjoin('index'+cfg.source_suffix), 'w')
-
-    # Here we don't use an os.walk, but we recurse only twice: flat is
-    # better than nested.
-    write_gallery(gallery_index, example_dir, rst_dir, cfg)
-    for d in sorted(example_dir.listdir()):
-        example_sub = example_dir.pjoin(d)
-        if example_sub.isdir:
-            rst_sub = rst_dir.pjoin(d)
-            rst_sub.makedirs()
-            write_gallery(gallery_index, example_sub, rst_sub, cfg, depth=1)
-    gallery_index.flush()
+    with open(rst_dir.pjoin('index'+cfg.source_suffix_str), 'w') as gallery_index:
+        # Here we don't use an os.walk, but we recurse only twice: flat is
+        # better than nested.
+        write_gallery(gallery_index, example_dir, rst_dir, cfg)
+        for d in sorted(example_dir.listdir()):
+            example_sub = example_dir.pjoin(d)
+            if example_sub.isdir:
+                rst_sub = rst_dir.pjoin(d)
+                rst_sub.makedirs()
+                write_gallery(gallery_index, example_sub, rst_sub, cfg, depth=1)
+        gallery_index.flush()
 
 
 def write_gallery(gallery_index, src_dir, rst_dir, cfg, depth=0):
@@ -235,7 +239,7 @@ def write_gallery(gallery_index, src_dir, rst_dir, cfg, depth=0):
     cfg : config object
         Sphinx config object created by Sphinx.
     """
-    index_name = cfg.plot2rst_index_name + cfg.source_suffix
+    index_name = cfg.plot2rst_index_name + cfg.source_suffix_str
     gallery_template = src_dir.pjoin(index_name)
     if not os.path.exists(gallery_template):
         print(src_dir)
@@ -246,7 +250,8 @@ def write_gallery(gallery_index, src_dir, rst_dir, cfg, depth=0):
         print(80*'_')
         return
 
-    gallery_description = open(gallery_template).read()
+    with open(gallery_template) as f:
+        gallery_description = f.read()
     gallery_index.write('\n\n%s\n\n' % gallery_description)
 
     rst_dir.makedirs()
@@ -328,7 +333,8 @@ def write_example(src_name, src_dir, rst_dir, cfg):
     image_path = image_dir.pjoin(base_image_name + '_{0}.png')
 
     basename, py_ext = os.path.splitext(src_name)
-    rst_path = rst_dir.pjoin(basename + cfg.source_suffix)
+
+    rst_path = rst_dir.pjoin(basename + cfg.source_suffix_str)
     notebook_path = notebook_dir.pjoin(basename + '.ipynb')
 
     if _plots_are_current(src_path, image_path) and rst_path.exists and \
@@ -365,9 +371,8 @@ def write_example(src_name, src_dir, rst_dir, cfg):
     ipnotebook_name = './notebook/' + ipnotebook_name
     example_rst += NOTEBOOK_LINK.format(ipnotebook_name)
 
-    f = open(rst_path, 'w')
-    f.write(example_rst)
-    f.flush()
+    with open(rst_path, 'w') as f:
+        f.write(example_rst)
 
     thumb_path = thumb_dir.pjoin(src_name[:-3] + '.png')
     first_image_file = image_dir.pjoin(figure_list[0].lstrip('/'))

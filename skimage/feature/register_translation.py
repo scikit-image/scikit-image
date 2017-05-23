@@ -128,7 +128,7 @@ def register_translation(src_image, target_image, upsample_factor=1,
         ``1 / upsample_factor`` of a pixel. For example
         ``upsample_factor == 20`` means the images will be registered
         within 1/20th of a pixel.  Default is 1 (no upsampling)
-    space : string, one of "real" or "fourier"
+    space : string, one of "real" or "fourier", optional
         Defines how the algorithm interprets input data.  "real" means data
         will be FFT'd to compute the correlation, while "fourier" data will
         bypass FFT of input data.  Case insensitive.
@@ -149,7 +149,9 @@ def register_translation(src_image, target_image, upsample_factor=1,
     ----------
     .. [1] Manuel Guizar-Sicairos, Samuel T. Thurman, and James R. Fienup,
            "Efficient subpixel image registration algorithms,"
-           Optics Letters 33, 156-158 (2008).
+           Optics Letters 33, 156-158 (2008). DOI:10.1364/OL.33.000156
+    .. [2] James R. Fienup, "Invariant error metrics for image reconstruction"
+           Optics Letters 36, 8352-8357 (1997). DOI:10.1364/AO.36.008352
     """
     # images must be the same shape
     if src_image.shape != target_image.shape:

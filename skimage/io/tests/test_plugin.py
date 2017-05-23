@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 
-from numpy.testing import assert_equal, raises
+from numpy.testing import assert_equal
+import pytest
 
 from skimage import io
 from skimage.io import manage_plugins
@@ -41,7 +42,8 @@ def test_show():
 
 
 def test_collection():
-    io.imread_collection('*.png', conserve_memory=False, plugin='test')
+    ic = io.imread_collection('*.png', conserve_memory=False, plugin='test')
+    io.imshow_collection(ic)
 
 
 def test_use():
@@ -49,9 +51,9 @@ def test_use():
     manage_plugins.use_plugin('test', 'imshow')
 
 
-@raises(ValueError)
 def test_failed_use():
-    manage_plugins.use_plugin('asd')
+    with pytest.raises(ValueError):
+        manage_plugins.use_plugin('asd')
 
 
 def test_use_priority():

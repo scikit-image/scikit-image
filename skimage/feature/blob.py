@@ -1,6 +1,6 @@
 
 import numpy as np
-from scipy.ndimage.filters import gaussian_filter, gaussian_laplace
+from scipy.ndimage import gaussian_filter, gaussian_laplace
 import itertools as itt
 import math
 from math import sqrt, hypot, log
@@ -147,30 +147,30 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     --------
     >>> from skimage import data, feature
     >>> feature.blob_dog(data.coins(), threshold=.5, max_sigma=40)
-    array([[ 45, 336,  16],
-           [ 52, 155,  16],
-           [ 52, 216,  16],
-           [ 54,  42,  16],
-           [ 54, 276,  10],
-           [ 58, 100,  10],
-           [120, 272,  16],
-           [124, 337,  10],
-           [125,  45,  16],
-           [125, 208,  10],
-           [127, 102,  10],
-           [128, 154,  10],
-           [185, 347,  16],
-           [193, 213,  16],
-           [194, 277,  16],
-           [195, 102,  16],
-           [196,  43,  10],
-           [198, 155,  10],
-           [260,  46,  16],
-           [261, 173,  16],
-           [263, 245,  16],
-           [263, 302,  16],
-           [267, 115,  10],
-           [267, 359,  16]])
+    array([[ 267.      ,  359.      ,   16.777216],
+           [ 267.      ,  115.      ,   10.48576 ],
+           [ 263.      ,  302.      ,   16.777216],
+           [ 263.      ,  245.      ,   16.777216],
+           [ 261.      ,  173.      ,   16.777216],
+           [ 260.      ,   46.      ,   16.777216],
+           [ 198.      ,  155.      ,   10.48576 ],
+           [ 196.      ,   43.      ,   10.48576 ],
+           [ 195.      ,  102.      ,   16.777216],
+           [ 194.      ,  277.      ,   16.777216],
+           [ 193.      ,  213.      ,   16.777216],
+           [ 185.      ,  347.      ,   16.777216],
+           [ 128.      ,  154.      ,   10.48576 ],
+           [ 127.      ,  102.      ,   10.48576 ],
+           [ 125.      ,  208.      ,   10.48576 ],
+           [ 125.      ,   45.      ,   16.777216],
+           [ 124.      ,  337.      ,   10.48576 ],
+           [ 120.      ,  272.      ,   16.777216],
+           [  58.      ,  100.      ,   10.48576 ],
+           [  54.      ,  276.      ,   10.48576 ],
+           [  54.      ,   42.      ,   16.777216],
+           [  52.      ,  216.      ,   16.777216],
+           [  52.      ,  155.      ,   16.777216],
+           [  45.      ,  336.      ,   16.777216]])
 
     Notes
     -----
@@ -200,9 +200,14 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
                                   footprint=np.ones((3, 3, 3)),
                                   threshold_rel=0.0,
                                   exclude_border=False)
-
+    # Catch no peaks
+    if local_maxima.size == 0:
+        return np.empty((0,3))
+    # Convert local_maxima to float64
+    lm = local_maxima.astype(np.float64)
     # Convert the last index to its corresponding scale value
-    local_maxima[:, 2] = sigma_list[local_maxima[:, 2]]
+    lm[:, 2] = sigma_list[local_maxima[:, 2]]
+    local_maxima = lm
     return _prune_blobs(local_maxima, overlap)
 
 
@@ -257,23 +262,23 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     >>> img = data.coins()
     >>> img = exposure.equalize_hist(img)  # improves detection
     >>> feature.blob_log(img, threshold = .3)
-    array([[113, 323,   1],
-           [121, 272,  17],
-           [124, 336,  11],
-           [126,  46,  11],
-           [126, 208,  11],
-           [127, 102,  11],
-           [128, 154,  11],
-           [185, 344,  17],
-           [194, 213,  17],
-           [194, 276,  17],
-           [197,  44,  11],
-           [198, 103,  11],
-           [198, 155,  11],
-           [260, 174,  17],
-           [263, 244,  17],
-           [263, 302,  17],
-           [266, 115,  11]])
+    array([[ 266.        ,  115.        ,   11.88888889],
+           [ 263.        ,  302.        ,   17.33333333],
+           [ 263.        ,  244.        ,   17.33333333],
+           [ 260.        ,  174.        ,   17.33333333],
+           [ 198.        ,  155.        ,   11.88888889],
+           [ 198.        ,  103.        ,   11.88888889],
+           [ 197.        ,   44.        ,   11.88888889],
+           [ 194.        ,  276.        ,   17.33333333],
+           [ 194.        ,  213.        ,   17.33333333],
+           [ 185.        ,  344.        ,   17.33333333],
+           [ 128.        ,  154.        ,   11.88888889],
+           [ 127.        ,  102.        ,   11.88888889],
+           [ 126.        ,  208.        ,   11.88888889],
+           [ 126.        ,   46.        ,   11.88888889],
+           [ 124.        ,  336.        ,   11.88888889],
+           [ 121.        ,  272.        ,   17.33333333],
+           [ 113.        ,  323.        ,    1.        ]])
 
     Notes
     -----
@@ -300,8 +305,14 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
                                   threshold_rel=0.0,
                                   exclude_border=False)
 
+    # Catch no peaks
+    if local_maxima.size == 0:
+        return np.empty((0,3))
+    # Convert local_maxima to float64
+    lm = local_maxima.astype(np.float64)
     # Convert the last index to its corresponding scale value
-    local_maxima[:, 2] = sigma_list[local_maxima[:, 2]]
+    lm[:, 2] = sigma_list[local_maxima[:, 2]]
+    local_maxima = lm
     return _prune_blobs(local_maxima, overlap)
 
 
@@ -359,24 +370,23 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     >>> from skimage import data, feature
     >>> img = data.coins()
     >>> feature.blob_doh(img)
-    array([[121, 271,  30],
-           [123,  44,  23],
-           [123, 205,  20],
-           [124, 336,  20],
-           [126, 101,  20],
-           [126, 153,  20],
-           [156, 302,  30],
-           [185, 348,  30],
-           [192, 212,  23],
-           [193, 275,  23],
-           [195, 100,  23],
-           [197,  44,  20],
-           [197, 153,  20],
-           [260, 173,  30],
-           [262, 243,  23],
-           [265, 113,  23],
-           [270, 363,  30]])
-
+    array([[ 270.        ,  363.        ,   30.        ],
+           [ 265.        ,  113.        ,   23.55555556],
+           [ 262.        ,  243.        ,   23.55555556],
+           [ 260.        ,  173.        ,   30.        ],
+           [ 197.        ,  153.        ,   20.33333333],
+           [ 197.        ,   44.        ,   20.33333333],
+           [ 195.        ,  100.        ,   23.55555556],
+           [ 193.        ,  275.        ,   23.55555556],
+           [ 192.        ,  212.        ,   23.55555556],
+           [ 185.        ,  348.        ,   30.        ],
+           [ 156.        ,  302.        ,   30.        ],
+           [ 126.        ,  153.        ,   20.33333333],
+           [ 126.        ,  101.        ,   20.33333333],
+           [ 124.        ,  336.        ,   20.33333333],
+           [ 123.        ,  205.        ,   20.33333333],
+           [ 123.        ,   44.        ,   23.55555556],
+           [ 121.        ,  271.        ,   30.        ]])
 
     Notes
     -----
@@ -408,6 +418,12 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
                                   threshold_rel=0.0,
                                   exclude_border=False)
 
+    # Catch no peaks
+    if local_maxima.size == 0:
+        return np.empty((0,3))
+    # Convert local_maxima to float64
+    lm = local_maxima.astype(np.float64)
     # Convert the last index to its corresponding scale value
-    local_maxima[:, 2] = sigma_list[local_maxima[:, 2]]
+    lm[:, 2] = sigma_list[local_maxima[:, 2]]
+    local_maxima = lm
     return _prune_blobs(local_maxima, overlap)

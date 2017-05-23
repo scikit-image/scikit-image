@@ -2,7 +2,7 @@
 Adapted code from "Contrast Limited Adaptive Histogram Equalization" by Karel
 Zuiderveld <karel@cv.ruu.nl>, Graphics Gems IV, Academic Press, 1994.
 
-http://tog.acm.org/resources/GraphicsGems/gems.html#gemsvi
+http://tog.acm.org/resources/GraphicsGems/
 
 The Graphics Gems code is copyright-protected.  In other words, you cannot
 claim the text of the code as your own and resell it. Using the code is
@@ -13,21 +13,20 @@ Gems - authors, editors, publishers, or webmasters - are to be held
 responsible.  Basically, don't be a jerk, and remember that anything free
 comes with no guarantee.
 """
+from __future__ import division
+import numbers
 import numpy as np
 from .. import img_as_float, img_as_uint
 from ..color.adapt_rgb import adapt_rgb, hsv_value
 from ..exposure import rescale_intensity
-from ..util import view_as_blocks, pad
 
 
-MAX_REG_X = 16  # max. # contextual regions in x-direction */
-MAX_REG_Y = 16  # max. # contextual regions in y-direction */
 NR_OF_GREY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
 
 
 @adapt_rgb(hsv_value)
-def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
-                       nbins=256):
+def equalize_adapthist(image, kernel_size=None,
+                       clip_limit=0.01, nbins=256):
     """Contrast Limited Adaptive Histogram Equalization (CLAHE).
 
     An algorithm for local contrast enhancement, that uses histograms computed
@@ -36,21 +35,23 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
 
     Parameters
     ----------
-    image : array-like
+    image : (M, N[, C]) ndarray
         Input image.
-    ntiles_x : int, optional
-        Number of tile regions in the X direction.  Ranges between 1 and 16.
-    ntiles_y : int, optional
-        Number of tile regions in the Y direction.  Ranges between 1 and 16.
-    clip_limit : float: optional
+    kernel_size: integer or list-like, optional
+        Defines the shape of contextual regions used in the algorithm. If
+        iterable is passed, it must have the same number of elements as
+        ``image.ndim`` (without color channel). If integer, it is broadcasted
+        to each `image` dimension. By default, ``kernel_size`` is 1/8 of
+        ``image`` height by 1/8 of its width.
+    clip_limit : float, optional
         Clipping limit, normalized between 0 and 1 (higher values give more
         contrast).
     nbins : int, optional
-        Number of gray bins for histogram ("dynamic range").
+        Number of gray bins for histogram ("data range").
 
     Returns
     -------
-    out : ndarray
+    out : (M, N[, C]) ndarray
         Equalized image.
 
     See Also
@@ -64,43 +65,46 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
        - The CLAHE algorithm is run on the V (Value) channel
        - The image is converted back to RGB space and returned
     * For RGBA images, the original alpha channel is removed.
-    * The CLAHE algorithm relies on image blocks of equal size.  This may
-      result in extra border pixels that would not be handled.  In that case,
-      we pad the image with a repeat of the border pixels, apply the
-      algorithm, and then trim the image to original size.
 
     References
     ----------
-    .. [1] http://tog.acm.org/resources/GraphicsGems/gems.html#gemsvi
+    .. [1] http://tog.acm.org/resources/GraphicsGems/
     .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
     """
     image = img_as_uint(image)
     image = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
-    out = _clahe(image, ntiles_x, ntiles_y, clip_limit * nbins, nbins)
-    image[:out.shape[0], :out.shape[1]] = out
+
+    if kernel_size is None:
+        kernel_size = (image.shape[0] // 8, image.shape[1] // 8)
+    elif isinstance(kernel_size, numbers.Number):
+        kernel_size = (kernel_size,) * image.ndim
+    elif len(kernel_size) != image.ndim:
+        ValueError('Incorrect value of `kernel_size`: {}'.format(kernel_size))
+
+    kernel_size = [int(k) for k in kernel_size]
+
+    image = _clahe(image, kernel_size, clip_limit * nbins, nbins)
     image = img_as_float(image)
     return rescale_intensity(image)
 
 
-def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
+def _clahe(image, kernel_size, clip_limit, nbins=128):
     """Contrast Limited Adaptive Histogram Equalization.
 
     Parameters
     ----------
-    image : array-like
+    image : (M, N) ndarray
         Input image.
-    ntiles_x : int, optional
-        Number of tile regions in the X direction.  Ranges between 2 and 16.
-    ntiles_y : int, optional
-        Number of tile regions in the Y direction.  Ranges between 2 and 16.
-    clip_limit : float, optional
+    kernel_size: 2-tuple of int
+        Defines the shape of contextual regions used in the algorithm.
+    clip_limit : float
         Normalized clipping limit (higher values give more contrast).
     nbins : int, optional
-        Number of gray bins for histogram ("dynamic range").
+        Number of gray bins for histogram ("data range").
 
     Returns
     -------
-    out : ndarray
+    out : (M, N) ndarray
         Equalized image.
 
     The number of "effective" greylevels in the output image is set by `nbins`;
@@ -109,106 +113,87 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
     minimum and maximum value as the input image. A clip limit smaller than 1
     results in standard (non-contrast limited) AHE.
     """
-    ntiles_x = min(ntiles_x, MAX_REG_X)
-    ntiles_y = min(ntiles_y, MAX_REG_Y)
 
     if clip_limit == 1.0:
         return image  # is OK, immediately returns original image.
 
-    h_inner = image.shape[0] - image.shape[0] % ntiles_y
-    w_inner = image.shape[1] - image.shape[1] % ntiles_x
+    nr = int(np.ceil(image.shape[0] / kernel_size[0]))
+    nc = int(np.ceil(image.shape[1] / kernel_size[1]))
 
-    # make the tile size divisible by 2
-    h_inner -= h_inner % (2 * ntiles_y)
-    w_inner -= w_inner % (2 * ntiles_x)
-
-    orig_shape = image.shape
-    width = w_inner // ntiles_x  # Actual size of contextual regions
-    height = h_inner // ntiles_y
-
-    if h_inner != image.shape[0]:
-        ntiles_y += 1
-    if w_inner != image.shape[1]:
-        ntiles_x += 1
-    if h_inner != image.shape[1] or w_inner != image.shape[0]:
-        h_pad = height * ntiles_y - image.shape[0]
-        w_pad = width * ntiles_x - image.shape[1]
-        image = pad(image, ((0, h_pad), (0, w_pad)), mode='reflect')
-        h_inner, w_inner = image.shape
+    row_step = int(np.floor(image.shape[0] / nr))
+    col_step = int(np.floor(image.shape[1] / nc))
 
     bin_size = 1 + NR_OF_GREY // nbins
     lut = np.arange(NR_OF_GREY)
     lut //= bin_size
-    img_blocks = view_as_blocks(image, (height, width))
 
-    map_array = np.zeros((ntiles_y, ntiles_x, nbins), dtype=int)
-    n_pixels = width * height
-
-    if clip_limit > 0.0:  # Calculate actual cliplimit
-        clip_limit = int(clip_limit * (width * height) / nbins)
-        if clip_limit < 1:
-            clip_limit = 1
-    else:
-        clip_limit = NR_OF_GREY  # Large value, do not clip (AHE)
+    map_array = np.zeros((nr, nc, nbins), dtype=int)
 
     # Calculate greylevel mappings for each contextual region
-    for y in range(ntiles_y):
-        for x in range(ntiles_x):
-            sub_img = img_blocks[y, x]
+    for r in range(nr):
+        for c in range(nc):
+            sub_img = image[r * row_step: (r + 1) * row_step,
+                            c * col_step: (c + 1) * col_step]
+
+            if clip_limit > 0.0:  # Calculate actual cliplimit
+                clim = int(clip_limit * sub_img.size / nbins)
+                if clim < 1:
+                    clim = 1
+            else:
+                clim = NR_OF_GREY  # Large value, do not clip (AHE)
+
             hist = lut[sub_img.ravel()]
             hist = np.bincount(hist)
             hist = np.append(hist, np.zeros(nbins - hist.size, dtype=int))
-            hist = clip_histogram(hist, clip_limit)
-            hist = map_histogram(hist, 0, NR_OF_GREY - 1, n_pixels)
-            map_array[y, x] = hist
+            hist = clip_histogram(hist, clim)
+            hist = map_histogram(hist, 0, NR_OF_GREY - 1, sub_img.size)
+            map_array[r, c] = hist
 
     # Interpolate greylevel mappings to get CLAHE image
-    ystart = 0
-    for y in range(ntiles_y + 1):
-        xstart = 0
-        if y == 0:  # special case: top row
-            ystep = height / 2.0
-            yU = 0
-            yB = 0
-        elif y == ntiles_y:  # special case: bottom row
-            ystep = height / 2.0
-            yU = ntiles_y - 1
-            yB = yU
+    rstart = 0
+    for r in range(nr + 1):
+        cstart = 0
+        if r == 0:  # special case: top row
+            r_offset = row_step / 2.0
+            rU = 0
+            rB = 0
+        elif r == nr:  # special case: bottom row
+            r_offset = row_step / 2.0
+            rU = nr - 1
+            rB = rU
         else:  # default values
-            ystep = height
-            yU = y - 1
-            yB = yB + 1
+            r_offset = row_step
+            rU = r - 1
+            rB = rB + 1
 
-        for x in range(ntiles_x + 1):
-            if x == 0:  # special case: left column
-                xstep = width / 2.0
-                xL = 0
-                xR = 0
-            elif x == ntiles_x:  # special case: right column
-                xstep = width / 2.0
-                xL = ntiles_x - 1
-                xR = xL
+        for c in range(nc + 1):
+            if c == 0:  # special case: left column
+                c_offset = col_step / 2.0
+                cL = 0
+                cR = 0
+            elif c == nc:  # special case: right column
+                c_offset = col_step / 2.0
+                cL = nc - 1
+                cR = cL
             else:  # default values
-                xstep = width
-                xL = x - 1
-                xR = xL + 1
+                c_offset = col_step
+                cL = c - 1
+                cR = cL + 1
 
-            mapLU = map_array[yU, xL]
-            mapRU = map_array[yU, xR]
-            mapLB = map_array[yB, xL]
-            mapRB = map_array[yB, xR]
+            mapLU = map_array[rU, cL]
+            mapRU = map_array[rU, cR]
+            mapLB = map_array[rB, cL]
+            mapRB = map_array[rB, cR]
 
-            xslice = np.arange(xstart, xstart + xstep)
-            yslice = np.arange(ystart, ystart + ystep)
-            interpolate(image, xslice, yslice,
+            cslice = np.arange(cstart, cstart + c_offset)
+            rslice = np.arange(rstart, rstart + r_offset)
+
+            interpolate(image, cslice, rslice,
                         mapLU, mapRU, mapLB, mapRB, lut)
 
-            xstart += xstep  # set pointer on next matrix */
+            cstart += c_offset  # set pointer on next matrix */
 
-        ystart += ystep
-
-    if image.shape != orig_shape:
-        image = image[:orig_shape[0], :orig_shape[1]]
+        rstart += r_offset
 
     return image
 
@@ -252,16 +237,24 @@ def clip_histogram(hist, clip_limit):
     n_excess -= mid.size * clip_limit - mid.sum()
     hist[mid_mask] = clip_limit
 
+    prev_n_excess = n_excess
+
     while n_excess > 0:  # Redistribute remaining excess
         index = 0
         while n_excess > 0 and index < hist.size:
+            under_mask = hist < 0
             step_size = int(hist[hist < clip_limit].size / n_excess)
             step_size = max(step_size, 1)
             indices = np.arange(index, hist.size, step_size)
-            under = hist[indices] < clip_limit
-            hist[under] += 1
-            n_excess -= hist[under].size
+            under_mask[indices] = True
+            under_mask = (under_mask) & (hist < clip_limit)
+            hist[under_mask] += 1
+            n_excess -= under_mask.sum()
             index += 1
+        # bail if we have not distributed any excess
+        if prev_n_excess == n_excess:
+            break
+        prev_n_excess = n_excess
 
     return hist
 

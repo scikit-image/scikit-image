@@ -1,11 +1,43 @@
-"""The local histogram is computed using a sliding window similar to the method
-described in [1]_.
+"""
+
+General Description
+-------------------
+
+These filters compute the local histogram at each pixel, using a sliding window
+similar to the method described in [1]_. A histogram is built using a moving
+window in order to limit redundant computation. The moving window follows a
+snake-like path:
+
+...------------------------\
+/--------------------------/
+\--------------------------...
+
+The local histogram is updated at each pixel as the structuring element window
+moves by, i.e. only those pixels entering and leaving the structuring element
+update the local histogram. The histogram size is 8-bit (256 bins) for 8-bit
+images and 2- to 16-bit for 16-bit images depending on the maximum value of the
+image.
+
+The filter is applied up to the image border, the neighborhood used is
+adjusted accordingly. The user may provide a mask image (same size as input
+image) where non zero values are the part of the image participating in the
+histogram computation. By default the entire image is filtered.
+
+This implementation outperforms grey.dilation for large structuring elements.
 
 Input image can be 8-bit or 16-bit, for 16-bit input images, the number of
 histogram bins is determined from the maximum value present in the image.
 
 Result image is 8-/16-bit or double with respect to the input image and the
 rank filter operation.
+
+To do
+-----
+
+* add simple examples, adapt documentation on existing examples
+* add/check existing doc
+* adapting tests for each type of filter
+
 
 References
 ----------
@@ -16,17 +48,19 @@ References
 
 """
 
-import warnings
+import functools
 import numpy as np
+from scipy import ndimage as ndi
 from ... import img_as_ubyte
-from ..._shared.utils import assert_nD
+from ..._shared.utils import assert_nD, warn
 
 from . import generic_cy
 
 
 __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
-           'subtract_mean', 'median', 'minimum', 'modal', 'enhance_contrast',
-           'pop', 'threshold', 'tophat', 'noise_filter', 'entropy', 'otsu']
+           'geometric_mean', 'subtract_mean', 'median', 'minimum', 'modal',
+           'enhance_contrast', 'pop', 'threshold', 'tophat', 'noise_filter',
+           'entropy', 'otsu']
 
 
 def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
@@ -64,8 +98,8 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
 
     bitdepth = int(np.log2(max_bin))
     if bitdepth > 10:
-        warnings.warn("Bitdepth of %d may result in bad rank filter "
-                      "performance due to large number of bins." % bitdepth)
+        warn("Bitdepth of %d may result in bad rank filter "
+             "performance due to large number of bins." % bitdepth)
 
     return image, selem, out, mask, max_bin
 
@@ -93,6 +127,30 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
          out=out, max_bin=max_bin)
 
     return out
+
+
+def _default_selem(func):
+    """Decorator to add a default structuring element to morphology functions.
+
+    Parameters
+    ----------
+    func : function
+        A morphology function such as erosion, dilation, opening, closing,
+        white_tophat, or black_tophat.
+
+    Returns
+    -------
+    func_out : function
+        The function, using a default structuring element of same dimension
+        as the input image with connectivity 1.
+    """
+    @functools.wraps(func)
+    def func_out(image, selem=None, *args, **kwargs):
+        if selem is None:
+            selem = ndi.generate_binary_structure(image.ndim, image.ndim)
+        return func(image, selem=selem, *args, **kwargs)
+
+    return func_out
 
 
 def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -343,6 +401,50 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                                    mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
+def geometric_mean(image, selem, out=None, mask=None,
+                   shift_x=False, shift_y=False):
+    """Return local geometric mean of an image.
+
+    Parameters
+    ----------
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
+    mask : ndarray
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood. If None, the complete image is used (default).
+    shift_x, shift_y : int
+        Offset added to the structuring element center point. Shift is bounded
+        to the structuring element sizes (center must be inside the given
+        structuring element).
+
+    Returns
+    -------
+    out : 2-D array (same dtype as input image)
+        Output image.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.morphology import disk
+    >>> from skimage.filters.rank import mean
+    >>> img = data.camera()
+    >>> avg = geometric_mean(img, disk(5))
+
+    References
+    ----------
+    .. [1] Gonzalez, R. C. and Wood, R. E. "Digital Image Processing (3rd Edition)."
+           Prentice-Hall Inc, 2006.
+
+    """
+
+    return _apply_scalar_per_pixel(generic_cy._geometric_mean, image, selem, out=out,
+                                   mask=mask, shift_x=shift_x, shift_y=shift_y)
+
+
 def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
                   shift_y=False):
     """Return image subtracted from its local mean.
@@ -383,15 +485,18 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+@_default_selem
+def median(image, selem=None, out=None, mask=None,
+           shift_x=False, shift_y=False):
     """Return local median of an image.
 
     Parameters
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    selem : 2-D array
-        The neighborhood expressed as a 2-D array of 1's and 0's.
+    selem : 2-D array, optional
+        The neighborhood expressed as a 2-D array of 1's and 0's. If None, a
+        full square of size 3 is used.
     out : 2-D array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray
@@ -935,7 +1040,7 @@ def windowed_histogram(image, selem, out=None, mask=None,
     """
 
     if n_bins is None:
-        n_bins = image.max() + 1
+        n_bins = int(image.max()) + 1
 
     return _apply_vector_per_pixel(generic_cy._windowed_hist, image, selem,
                                    out=out, mask=mask,
