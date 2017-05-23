@@ -3,37 +3,64 @@
 Steerable Pyramid
 ============
 
+The function steerable.build_steerable takes image as input, and returns a list of lists of subbands.
+The first element of the list is a numpy array represents highpass
+The last element of the list is a numpy array represents lowpass
+Intermediate elements are lists of subband at the same radius level, but different orientations.
+
 Steerable pyramid decomposition
 .. [1] http://http://www.cns.nyu.edu/~eero/steerpyr/
 
 """
-import matplotlib
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
+import numpy as np
 
-from skimage.data import coffee
+from skimage.data import chelsea
 from skimage.color import rgb2gray
 from skimage.transform import steerable
+from skimage.io import imshow
+from skimage import img_as_ubyte
 
 
-matplotlib.rcParams['font.size'] = 9
+def visualize(coeff, normalize=True):
+    rows, cols = coeff[1][0].shape
+    Norients = len(coeff[1])
+    out = np.zeros((rows * 2 - coeff[-1].shape[0] + 1, Norients * cols))
+
+    currentx = 0
+    currenty = 0
+    for i in range(1, len(coeff[:-1])):
+        for j in range(len(coeff[1])):
+            tmp = coeff[i][j].real
+            m, n = tmp.shape
+
+            if normalize:
+                tmp = 255 * tmp / tmp.max()
+
+            tmp[m - 1, :] = 255
+            tmp[:, n - 1] = 255
+
+            out[currentx: currentx + m, currenty: currenty + n] = tmp
+            currenty += n
+        currentx += coeff[i][0].shape[0]
+        currenty = 0
+
+    m, n = coeff[-1].shape
+    out[currentx: currentx + m, currenty: currenty +
+        n] = 255 * coeff[-1] / coeff[-1].max()
+
+    out[0, :] = 255
+    out[:, 0] = 255
+
+    return out
 
 
-image = coffee()
+image = chelsea()
 image = rgb2gray(image)
+
 coeff = steerable.build_steerable(image)
+out = visualize(coeff)
 
-height = len(coeff)
-fig, axes = plt.subplots(height, 4, figsize=(8, 7))
-
-# high pass subband
-axes[0, 0].imshow(coeff[0])
-
-# low pass subband
-axes[height - 1, 0].imshow(coeff[-1])
-
-# oriental subbands
-for i in range(1, height - 1):
-    for j in range(4):
-        axes[i][j].imshow(coeff[i][j])
-
+fig, ax = plt.subplots()
+ax.imshow(out, cmap='gray')
 plt.show()
