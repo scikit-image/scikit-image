@@ -3,10 +3,12 @@
 Steerable Pyramid
 ============
 
-The function `steerable.build_steerable` takes a gray scale image as input, and returns a list of lists of subbands.
-The first element of the list is a numpy array represents highpass
-The last element of the list is a numpy array represents lowpass
-Intermediate elements are lists of subband at the same radius level, but different orientations.
+The function `steerable.build_steerable` takes a gray scale image as input,
+ and returns a list of lists of subbands.
+The first element of the list is a numpy array represents highpass.
+The last element of the list is a numpy array represents lowpass.
+Intermediate elements are lists of subband at the same radius level,
+but different orientations.
 
 Steerable pyramid decomposition
 .. [1] http://http://www.cns.nyu.edu/~eero/steerpyr/
