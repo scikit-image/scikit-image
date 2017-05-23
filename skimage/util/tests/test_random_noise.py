@@ -1,4 +1,5 @@
-from numpy.testing import assert_array_equal, assert_allclose, assert_raises
+from numpy.testing import assert_array_equal, assert_allclose
+import pytest
 
 import numpy as np
 from skimage.data import camera
@@ -24,6 +25,19 @@ def test_salt():
     # Ensure approximately correct amount of noise was added
     proportion = float(saltmask.sum()) / (cam.shape[0] * cam.shape[1])
     assert 0.11 < proportion <= 0.15
+
+
+def test_salt_p1():
+    image = np.random.rand(2, 3)
+    noisy = random_noise(image, mode='salt', amount=1)
+    assert_array_equal(noisy, [[1, 1, 1], [1, 1, 1]])
+
+
+def test_singleton_dim():
+    """Ensure images where size of a given dimension is 1 work correctly."""
+    image = np.random.rand(1, 20)
+    noisy = random_noise(image, mode='salt', amount=0.1, seed=42)
+    assert np.sum(noisy == 1) == 2
 
 
 def test_pepper():
@@ -69,7 +83,7 @@ def test_salt_and_pepper():
     assert 0.11 < proportion <= 0.18
 
     # Verify the relative amount of salt vs. pepper is close to expected
-    assert 0.18 < saltmask.sum() / float(peppermask.sum()) < 0.32
+    assert 0.18 < saltmask.sum() / float(peppermask.sum()) < 0.33
 
 
 def test_gaussian():
@@ -100,12 +114,14 @@ def test_localvar():
 
     # Ensure local variance bounds checking works properly
     bad_local_vars = np.zeros_like(data)
-    assert_raises(ValueError, random_noise, data, mode='localvar', seed=seed,
-                  local_vars=bad_local_vars)
+    with pytest.raises(ValueError):
+        random_noise(data, mode='localvar', seed=seed,
+                     local_vars=bad_local_vars)
     bad_local_vars += 0.1
     bad_local_vars[0, 0] = -1
-    assert_raises(ValueError, random_noise, data, mode='localvar', seed=seed,
-                  local_vars=bad_local_vars)
+    with pytest.raises(ValueError):
+        random_noise(data, mode='localvar', seed=seed,
+                     local_vars=bad_local_vars)
 
 
 def test_speckle():
@@ -194,7 +210,8 @@ def test_clip_speckle():
 
 def test_bad_mode():
     data = np.zeros((64, 64))
-    assert_raises(KeyError, random_noise, data, 'perlin')
+    with pytest.raises(KeyError):
+        random_noise(data, 'perlin')
 
 
 if __name__ == '__main__':

@@ -1,13 +1,15 @@
 from skimage.io._plugins.util import prepare_for_display, WindowManager
 from skimage._shared._warnings import expected_warnings
 
-from numpy.testing import *
+from numpy.testing import assert_array_equal
+import unittest
+import pytest
 import numpy as np
 
 np.random.seed(0)
 
 
-class TestPrepareForDisplay:
+class TestPrepareForDisplay(unittest.TestCase):
     def test_basic(self):
         with expected_warnings(['precision loss']):
             prepare_for_display(np.random.rand(10, 10))
@@ -25,7 +27,7 @@ class TestPrepareForDisplay:
         assert x[0, 0, 0] == 0
         assert x[3, 2, 0] == 255
 
-    def test_colour(self):
+    def test_color(self):
         with expected_warnings(['precision loss']):
             prepare_for_display(np.random.rand(10, 10, 3))
 
@@ -33,20 +35,21 @@ class TestPrepareForDisplay:
         with expected_warnings(['precision loss']):
             prepare_for_display(np.random.rand(10, 10, 4))
 
-    @raises(ValueError)
     def test_wrong_dimensionality(self):
-        with expected_warnings(['precision loss']):
-            prepare_for_display(np.random.rand(10, 10, 1, 1))
+        with pytest.raises(ValueError):
+            with expected_warnings(['precision loss']):
+                prepare_for_display(np.random.rand(10, 10, 1, 1))
 
-    @raises(ValueError)
     def test_wrong_depth(self):
-        with expected_warnings(['precision loss']):
-            prepare_for_display(np.random.rand(10, 10, 5))
+        with pytest.raises(ValueError):
+            with expected_warnings(['precision loss']):
+                prepare_for_display(np.random.rand(10, 10, 5))
 
 
-class TestWindowManager:
+class TestWindowManager(unittest.TestCase):
     callback_called = False
 
+    @pytest.fixture(autouse=True)
     def setup(self):
         self.wm = WindowManager()
         self.wm.acquire('test')
@@ -73,4 +76,5 @@ class TestWindowManager:
         self.wm._release('test')
 
 if __name__ == "__main__":
+    from numpy.testing import run_module_suite
     run_module_suite()

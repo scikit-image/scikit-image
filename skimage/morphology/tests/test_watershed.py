@@ -44,11 +44,12 @@ Original author: Lee Kamentsky
 
 import math
 import unittest
-
+import pytest
 import numpy as np
-import scipy.ndimage
+from scipy import ndimage as ndi
 
-from skimage.morphology.watershed import watershed, _slow_watershed
+from skimage.morphology.watershed import watershed
+from skimage.measure import label
 
 eps = 1e-12
 
@@ -112,9 +113,6 @@ class TestWatershed(unittest.TestCase):
                       [-1,  1,  1,  1,  1,  1, -1],
                       [-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1]])
-        error = diff(expected, out)
-        assert error < eps
-        out = _slow_watershed(data, markers, 8)
         error = diff(expected, out)
         assert error < eps
 
@@ -380,11 +378,116 @@ class TestWatershed(unittest.TestCase):
             markers[x, y] = idx
             idx += 1
 
-        image = scipy.ndimage.gaussian_filter(image, 4)
+        image = ndi.gaussian_filter(image, 4)
         watershed(image, markers, self.eight)
-        scipy.ndimage.watershed_ift(image.astype(np.uint16), markers,
-                                    self.eight)
+        ndi.watershed_ift(image.astype(np.uint16), markers, self.eight)
 
+    def test_watershed10(self):
+        "watershed 10"
+        data = np.array([[1, 1, 1, 1],
+                         [1, 1, 1, 1],
+                         [1, 1, 1, 1],
+                         [1, 1, 1, 1]], np.uint8)
+        markers = np.array([[1, 0, 0, 2],
+                            [0, 0, 0, 0],
+                            [0, 0, 0, 0],
+                            [3, 0, 0, 4]], np.int8)
+        out = watershed(data, markers, self.eight)
+        error = diff([[1, 1, 2, 2],
+                      [1, 1, 2, 2],
+                      [3, 3, 4, 4],
+                      [3, 3, 4, 4]], out)
+        self.assertTrue(error < eps)
+
+    def test_watershed11(self):
+        '''Make sure that all points on this plateau are assigned to closest seed'''
+        # https://github.com/scikit-image/scikit-image/issues/803
+        #
+        # Make sure that no point in a level image is farther away
+        # from its seed than any other
+        #
+        image = np.zeros((21, 21))
+        markers = np.zeros((21, 21), int)
+        markers[5, 5] = 1
+        markers[5, 10] = 2
+        markers[10, 5] = 3
+        markers[10, 10] = 4
+
+        structure = np.array([[False, True, False],
+                              [True, True, True],
+                              [False, True, False]])
+        out = watershed(image, markers, structure)
+        i, j = np.mgrid[0:21, 0:21]
+        d = np.dstack(
+            [np.sqrt((i.astype(float)-i0)**2, (j.astype(float)-j0)**2)
+             for i0, j0 in ((5, 5), (5, 10), (10, 5), (10, 10))])
+        dmin = np.min(d, 2)
+        self.assertTrue(np.all(d[i, j, out[i, j]-1] == dmin))
+
+
+    def test_watershed12(self):
+        "The watershed line"
+        data = np.array([[203, 255, 203, 153, 153, 153, 153, 153, 153, 153, 153, 153, 153, 153, 153, 153],
+                         [203, 255, 203, 153, 153, 153, 102, 102, 102, 102, 102, 102, 153, 153, 153, 153],
+                         [203, 255, 203, 203, 153, 153, 102, 102,  77,   0, 102, 102, 153, 153, 203, 203],
+                         [203, 255, 255, 203, 153, 153, 153, 102, 102, 102, 102, 153, 153, 203, 203, 255],
+                         [203, 203, 255, 203, 203, 203, 153, 153, 153, 153, 153, 153, 203, 203, 255, 255],
+                         [153, 203, 255, 255, 255, 203, 203, 203, 203, 203, 203, 203, 203, 255, 255, 203],
+                         [153, 203, 203, 203, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 203, 203],
+                         [153, 153, 153, 203, 203, 203, 203, 203, 255, 203, 203, 203, 203, 203, 203, 153],
+                         [102, 102, 153, 153, 153, 153, 203, 203, 255, 203, 203, 255, 203, 153, 153, 153],
+                         [102, 102, 102, 102, 102, 153, 203, 255, 255, 203, 203, 203, 203, 153, 102, 153],
+                         [102,  51,  51, 102, 102, 153, 203, 255, 203, 203, 153, 153, 153, 153, 102, 153],
+                         [ 77,  51,  51, 102, 153, 153, 203, 255, 203, 203, 203, 153, 102, 102, 102, 153],
+                         [ 77,   0,  51, 102, 153, 203, 203, 255, 203, 255, 203, 153, 102,  51, 102, 153],
+                         [ 77,   0,  51, 102, 153, 203, 255, 255, 203, 203, 203, 153, 102,   0, 102, 153],
+                         [102,   0,  51, 102, 153, 203, 255, 203, 203, 153, 153, 153, 102, 102, 102, 153],
+                         [102, 102, 102, 102, 153, 203, 255, 203, 153, 153, 153, 153, 153, 153, 153, 153]])
+        markerbin = (data==0)
+        marker = label(markerbin)
+        ws = watershed(data, marker, connectivity=2, watershed_line=True)
+        for lab, area in zip(range(4), [34,74,74,74]):
+            self.assertTrue(np.sum(ws == lab) == area)
+
+
+
+def test_compact_watershed():
+    image = np.zeros((5, 6))
+    image[:, 3:] = 1
+    seeds = np.zeros((5, 6), dtype=int)
+    seeds[2, 0] = 1
+    seeds[2, 3] = 2
+    compact = watershed(image, seeds, compactness=0.01)
+    expected = np.array([[1, 1, 1, 2, 2, 2],
+                         [1, 1, 1, 2, 2, 2],
+                         [1, 1, 1, 2, 2, 2],
+                         [1, 1, 1, 2, 2, 2],
+                         [1, 1, 1, 2, 2, 2]], dtype=int)
+    np.testing.assert_equal(compact, expected)
+    normal = watershed(image, seeds)
+    expected = np.ones(image.shape, dtype=int)
+    expected[2, 3:] = 2
+    np.testing.assert_equal(normal, expected)
+
+
+def test_numeric_seed_watershed():
+    """Test that passing just the number of seeds to watershed works."""
+    image = np.zeros((5, 6))
+    image[:, 3:] = 1
+    compact = watershed(image, 2, compactness=0.01)
+    expected = np.array([[1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2]], dtype=np.int32)
+    np.testing.assert_equal(compact, expected)
+
+
+def test_incorrect_markers_shape():
+    with pytest.raises(ValueError):
+        image = np.ones((5, 6))
+        markers = np.ones((5, 7))
+        output = watershed(image, markers)
 
 if __name__ == "__main__":
     np.testing.run_module_suite()

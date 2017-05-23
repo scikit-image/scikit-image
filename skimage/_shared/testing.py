@@ -1,13 +1,17 @@
-"""Testing utilities."""
+"""
+Testing utilities.
+"""
 
 
 import os
 import re
+import threading
+import functools
 from tempfile import NamedTemporaryFile
 
 from numpy import testing
 import numpy as np
-from skimage._shared._warnings import expected_warnings
+from ._warnings import expected_warnings
 import warnings
 
 from .. import data, io, img_as_uint, img_as_float, img_as_int, img_as_ubyte
@@ -16,42 +20,33 @@ from .. import data, io, img_as_uint, img_as_float, img_as_int, img_as_ubyte
 SKIP_RE = re.compile("(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
 
 
-def _assert_less(a, b, msg=None):
+def assert_less(a, b, msg=None):
     message = "%r is not lower than %r" % (a, b)
     if msg is not None:
         message += ": " + msg
     assert a < b, message
 
 
-def _assert_greater(a, b, msg=None):
+def assert_greater(a, b, msg=None):
     message = "%r is not greater than %r" % (a, b)
     if msg is not None:
         message += ": " + msg
     assert a > b, message
 
 
-try:
-    from nose.tools import assert_less
-except ImportError:
-    assert_less = _assert_less
-
-try:
-    from nose.tools import assert_greater
-except ImportError:
-    assert_greater = _assert_greater
-
-
 def doctest_skip_parser(func):
     """ Decorator replaces custom skip test markup in doctests
 
     Say a function has a docstring::
-
+        
+        >>> something, HAVE_AMODULE, HAVE_BMODULE = 0, False, False
         >>> something # skip if not HAVE_AMODULE
-        >>> something + else
+        0
         >>> something # skip if HAVE_BMODULE
+        0
 
     This decorator will evaluate the expression after ``skip if``.  If this
-    evaluates to True, then the comment is replaced by ``# doctest: +SKIP``.  If
+    evaluates to True, then the comment is replaced by ``# doctest: +SKIP``. If
     False, then the comment is just removed. The expression is evaluated in the
     ``globals`` scope of `func`.
 
@@ -59,8 +54,8 @@ def doctest_skip_parser(func):
     global ``HAVE_BMODULE`` is False, the returned function will have docstring::
 
         >>> something # doctest: +SKIP
-        >>> something + else
-        >>> something
+        >>> something + else # doctest: +SKIP
+        >>> something # doctest: +SKIP
 
     """
     lines = func.__doc__.split('\n')
@@ -86,14 +81,14 @@ def doctest_skip_parser(func):
     return func
 
 
-def roundtrip(img, plugin, suffix):
+def roundtrip(image, plugin, suffix):
     """Save and read an image using a specified plugin"""
-    if not '.' in suffix:
+    if '.' not in suffix:
         suffix = '.' + suffix
     temp_file = NamedTemporaryFile(suffix=suffix, delete=False)
-    temp_file.close()
     fname = temp_file.name
-    io.imsave(fname, img, plugin=plugin)
+    temp_file.close()
+    io.imsave(fname, image, plugin=plugin)
     new = io.imread(fname, plugin=plugin)
     try:
         os.remove(fname)
@@ -117,7 +112,7 @@ def color_check(plugin, fmt='png'):
     testing.assert_allclose(img2.astype(np.uint8), r2)
 
     img3 = img_as_float(img)
-    with expected_warnings(['precision loss|unclosed file']):
+    with expected_warnings(['precision loss']):
         r3 = roundtrip(img3, plugin, fmt)
     testing.assert_allclose(r3, img)
 
@@ -129,12 +124,12 @@ def color_check(plugin, fmt='png'):
             r4 = roundtrip(img4, plugin, fmt)
         testing.assert_allclose(r4, img4)
     else:
-        with expected_warnings(['sign loss|precision loss|unclosed file']):
+        with expected_warnings(['sign loss|precision loss']):
             r4 = roundtrip(img4, plugin, fmt)
             testing.assert_allclose(r4, img_as_ubyte(img4))
 
     img5 = img_as_uint(img)
-    with expected_warnings(['precision loss|unclosed file']):
+    with expected_warnings(['precision loss']):
         r5 = roundtrip(img5, plugin, fmt)
     testing.assert_allclose(r5, img)
 
@@ -154,7 +149,7 @@ def mono_check(plugin, fmt='png'):
     testing.assert_allclose(img2.astype(np.uint8), r2)
 
     img3 = img_as_float(img)
-    with expected_warnings(['precision|unclosed file|\A\Z']):
+    with expected_warnings(['precision|\A\Z']):
         r3 = roundtrip(img3, plugin, fmt)
     if r3.dtype.kind == 'f':
         testing.assert_allclose(img3, r3)
@@ -169,7 +164,7 @@ def mono_check(plugin, fmt='png'):
             r4 = roundtrip(img4, plugin, fmt)
         testing.assert_allclose(r4, img4)
     else:
-        with expected_warnings(['precision loss|sign loss|unclosed file']):
+        with expected_warnings(['precision loss|sign loss']):
             r4 = roundtrip(img4, plugin, fmt)
             testing.assert_allclose(r4, img_as_uint(img4))
 
@@ -181,16 +176,20 @@ def mono_check(plugin, fmt='png'):
 def setup_test():
     """Default package level setup routine for skimage tests.
 
-    Import packages known to raise errors, and then
-    force warnings to raise errors.  
-    Set a random seed
+    Import packages known to raise warnings, and then
+    force warnings to raise errors.
+
+    Also set the random seed to zero.
     """
     warnings.simplefilter('default')
+
     from scipy import signal, ndimage, special, optimize, linalg
     from scipy.io import loadmat
-    from skimage import viewer, filter
+    from skimage import viewer
+
     np.random.seed(0)
-    warnings.simplefilter('error') 
+
+    warnings.simplefilter('error')
 
 
 def teardown_test():
@@ -199,6 +198,43 @@ def teardown_test():
     Restore warnings to default behavior
     """
     warnings.simplefilter('default')
+
+
+def test_parallel(num_threads=2):
+    """Decorator to run the same function multiple times in parallel.
+
+    This decorator is useful to ensure that separate threads execute
+    concurrently and correctly while releasing the GIL.
+
+    Parameters
+    ----------
+    num_threads : int, optional
+        The number of times the function is run in parallel.
+
+    """
+
+    assert num_threads > 0
+
+    def wrapper(func):
+        @functools.wraps(func)
+        def inner(*args, **kwargs):
+            threads = []
+            for i in range(num_threads - 1):
+                thread = threading.Thread(target=func, args=args, kwargs=kwargs)
+                threads.append(thread)
+            for thread in threads:
+                thread.start()
+
+            result = func(*args, **kwargs)
+
+            for thread in threads:
+                thread.join()
+
+            return result
+
+        return inner
+
+    return wrapper
 
 
 if __name__ == '__main__':

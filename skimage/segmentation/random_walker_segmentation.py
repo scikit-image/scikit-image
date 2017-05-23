@@ -8,9 +8,11 @@ Installing pyamg and using the 'cg_mg' mode of random_walker improves
 significantly the performance.
 """
 
-import warnings
 import numpy as np
-from scipy import sparse, ndimage
+from scipy import sparse, ndimage as ndi
+
+from .._shared.utils import warn
+
 
 # executive summary for next code block: try to import umfpack from
 # scipy, but make sure not to raise a fuss if it fails since it's only
@@ -343,19 +345,22 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
             mode = 'cg'
         else:
             mode = 'bf'
+    elif mode not in ('cg_mg', 'cg', 'bf'):
+        raise ValueError("{mode} is not a valid mode. Valid modes are 'cg_mg',"
+                         " 'cg' and 'bf'".format(mode=mode))
 
     if UmfpackContext is None and mode == 'cg':
-        warnings.warn('"cg" mode will be used, but it may be slower than '
-                      '"bf" because SciPy was built without UMFPACK. Consider'
-                      ' rebuilding SciPy with UMFPACK; this will greatly '
-                      'accelerate the conjugate gradient ("cg") solver. '
-                      'You may also install pyamg and run the random_walker '
-                      'function in "cg_mg" mode (see docstring).')
+        warn('"cg" mode will be used, but it may be slower than '
+             '"bf" because SciPy was built without UMFPACK. Consider'
+             ' rebuilding SciPy with UMFPACK; this will greatly '
+             'accelerate the conjugate gradient ("cg") solver. '
+             'You may also install pyamg and run the random_walker '
+             'function in "cg_mg" mode (see docstring).')
 
     if (labels != 0).all():
-        warnings.warn('Random walker only segments unlabeled areas, where '
-                      'labels == 0. No zero valued areas in labels were '
-                      'found. Returning provided labels.')
+        warn('Random walker only segments unlabeled areas, where '
+             'labels == 0. No zero valued areas in labels were '
+             'found. Returning provided labels.')
 
         if return_full_prob:
             # Find and iterate over valid labels
@@ -417,7 +422,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     # If the array has pruned zones, be sure that no isolated pixels
     # exist between pruned zones (they could not be determined)
     if np.any(labels < 0):
-        filled = ndimage.binary_propagation(labels > 0, mask=labels >= 0)
+        filled = ndi.binary_propagation(labels > 0, mask=labels >= 0)
         labels[np.logical_and(np.logical_not(filled), labels == 0)] = -1
         del filled
     labels = np.atleast_3d(labels)
@@ -438,8 +443,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
                       return_full_prob=return_full_prob)
     if mode == 'cg_mg':
         if not amg_loaded:
-            warnings.warn(
-                """pyamg (http://pyamg.org/)) is needed to use
+            warn("""pyamg (http://pyamg.org/)) is needed to use
                 this mode, but is not installed. The 'cg' mode will be used
                 instead.""")
             X = _solve_cg(lap_sparse, B, tol=tol,

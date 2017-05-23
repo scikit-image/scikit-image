@@ -1,10 +1,19 @@
-__all__ = ['all_warnings', 'expected_warnings']
-
 from contextlib import contextmanager
 import sys
 import warnings
 import inspect
 import re
+
+__all__ = ['all_warnings', 'expected_warnings', 'warn']
+
+
+def warn(message, category=None, stacklevel=2):
+    """A version of `warnings.warn` with a default stacklevel of 2.
+    """
+    if category is not None:
+        warnings.warn(message, category=category, stacklevel=stacklevel)
+    else:
+        warnings.warn(message, stacklevel=stacklevel)
 
 
 @contextmanager
@@ -67,12 +76,11 @@ def all_warnings():
 @contextmanager
 def expected_warnings(matching):
     """Context for use in testing to catch known warnings matching regexes
-    
+
     Parameters
     ----------
     matching : list of strings or compiled regexes
         Regexes for the desired warning to catch
-
 
     Examples
     --------
@@ -84,23 +92,24 @@ def expected_warnings(matching):
     -----
     Uses `all_warnings` to ensure all warnings are raised.
     Upon exiting, it checks the recorded warnings for the desired matching
-    pattern(s).  
+    pattern(s).
     Raises a ValueError if any match was not found or an unexpected
-    warning was raised.  
-    Allows for three types of behaviors: "and", "or", and "optional" matches. 
+    warning was raised.
+    Allows for three types of behaviors: `and`, `or`, and `optional` matches.
     This is done to accomodate different build enviroments or loop conditions
     that may produce different warnings.  The behaviors can be combined.
-    If you pass multiple patterns, you get an orderless "and", where all of the
+    If you pass multiple patterns, you get an orderless `and`, where all of the
     warnings must be raised.
-    If you use the "|" operator in a pattern, you can catch one of several warnings.
-    Finally, you can use "|\A\Z" in a pattern to signify it as optional.
+    If you use the `|` operator in a pattern, you can catch one of several
+    warnings.
+    Finally, you can use `|\A\Z` in a pattern to signify it as optional.
 
     """
     with all_warnings() as w:
         # enter context
         yield w
         # exited user context, check the recorded warnings
-        remaining = [m for m in matching if not '\A\Z' in m.split('|')]
+        remaining = [m for m in matching if '\A\Z' not in m.split('|')]
         for warn in w:
             found = False
             for match in matching:

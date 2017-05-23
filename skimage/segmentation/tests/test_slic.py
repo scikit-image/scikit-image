@@ -1,9 +1,12 @@
 import itertools as it
 import numpy as np
-from numpy.testing import assert_equal, assert_raises
+from numpy.testing import assert_equal
+import pytest
 from skimage.segmentation import slic
+from skimage._shared.testing import test_parallel
 
 
+@test_parallel()
 def test_color_2d():
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 21, 3))
@@ -138,7 +141,8 @@ def test_spacing():
 def test_invalid_lab_conversion():
     img = np.array([[1, 1, 1, 0, 0],
                     [1, 1, 0, 0, 0]], np.float) + 1
-    assert_raises(ValueError, slic, img, multichannel=True, convert2lab=True)
+    with pytest.raises(ValueError):
+        slic(img, multichannel=True, convert2lab=True)
 
 
 def test_enforce_connectivity():
@@ -153,6 +157,12 @@ def test_enforce_connectivity():
                                  enforce_connectivity=False,
                                  convert2lab=False)
 
+    # Make sure nothing fatal occurs (e.g. buffer overflow) at low values of
+    # max_size_factor
+    segments_connected_low_max = slic(img, 2, compactness=0.0001,
+                                      enforce_connectivity=True,
+                                      convert2lab=False, max_size_factor=0.8)
+
     result_connected = np.array([[0, 0, 0, 1, 1, 1],
                                  [0, 0, 0, 1, 1, 1],
                                  [0, 0, 0, 1, 1, 1]], np.float)
@@ -163,6 +173,7 @@ def test_enforce_connectivity():
 
     assert_equal(segments_connected, result_connected)
     assert_equal(segments_disconnected, result_disconnected)
+    assert_equal(segments_connected_low_max, result_connected)
 
 
 def test_slic_zero():
@@ -184,6 +195,20 @@ def test_slic_zero():
     assert_equal(seg[10:, :10], 2)
     assert_equal(seg[:10, 10:], 1)
     assert_equal(seg[10:, 10:], 3)
+
+
+def test_more_segments_than_pixels():
+    rnd = np.random.RandomState(0)
+    img = np.zeros((20, 21))
+    img[:10, :10] = 0.33
+    img[10:, :10] = 0.67
+    img[10:, 10:] = 1.00
+    img += 0.0033 * rnd.normal(size=img.shape)
+    img[img > 1] = 1
+    img[img < 0] = 0
+    seg = slic(img, sigma=0, n_segments=500, compactness=1,
+               multichannel=False, convert2lab=False)
+    assert np.all(seg.ravel() == np.arange(seg.size))
 
 
 if __name__ == '__main__':

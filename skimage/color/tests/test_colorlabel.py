@@ -1,17 +1,17 @@
 import itertools
 
 import numpy as np
-from numpy import testing
 from skimage.color.colorlabel import label2rgb
-from skimage._shared._warnings import expected_warnings
 from numpy.testing import (assert_array_almost_equal as assert_close,
                            assert_array_equal, assert_warns)
+import pytest
 
 
 def test_shape_mismatch():
     image = np.ones((3, 3))
     label = np.ones((2, 2))
-    testing.assert_raises(ValueError, label2rgb, image, label)
+    with pytest.raises(ValueError):
+        label2rgb(image, label)
 
 
 def test_rgb():
@@ -71,16 +71,30 @@ def test_bg_and_color_cycle():
         assert_close(pixel, color)
 
 
+def test_negative_labels():
+    labels = np.array([0, -1, -2, 0])
+    rout = np.array([(0., 0., 0.), (0., 0., 1.), (1., 0., 0.), (0., 0., 0.)])
+    assert_close(rout, label2rgb(labels, bg_label=0, alpha=1, image_alpha=1))
+
+
+def test_nonconsecutive():
+    labels = np.array([0, 2, 4, 0])
+    colors=[(1, 0, 0), (0, 0, 1)]
+    rout = np.array([(1., 0., 0.), (0., 0., 1.), (1., 0., 0.), (1., 0., 0.)])
+    assert_close(rout, label2rgb(labels, colors=colors, alpha=1, image_alpha=1))
+
+
 def test_label_consistency():
     """Assert that the same labels map to the same colors."""
     label_1 = np.arange(5).reshape(1, -1)
-    label_2 = np.array([2, 4])
+    label_2 = np.array([0, 1])
     colors = [(1, 0, 0), (0, 1, 0), (0, 0, 1), (1, 1, 0), (1, 0, 1)]
     # Set alphas just in case the defaults change
     rgb_1 = label2rgb(label_1, colors=colors)
     rgb_2 = label2rgb(label_2, colors=colors)
     for label_id in label_2.flat:
         assert_close(rgb_1[label_1 == label_id], rgb_2[label_2 == label_id])
+
 
 def test_leave_labels_alone():
     labels = np.array([-1, 0, 1])
@@ -89,6 +103,7 @@ def test_leave_labels_alone():
     label2rgb(labels)
     label2rgb(labels, bg_label=1)
     assert_array_equal(labels, labels_saved)
+
 
 def test_avg():
     # label image
@@ -140,8 +155,3 @@ def test_negative_intensity():
     labels = np.arange(100).reshape(10, 10)
     image = -1 * np.ones((10, 10))
     assert_warns(UserWarning, label2rgb, labels, image)
-
-
-if __name__ == '__main__':
-    testing.run_module_suite()
-

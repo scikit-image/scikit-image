@@ -14,8 +14,8 @@ class PaintTool(CanvasToolBase):
 
     Parameters
     ----------
-    viewer : :class:`skimage.viewer.Viewer`
-        Skimage viewer object.
+    manager : Viewer or PlotPlugin.
+        Skimage viewer or plot plugin object.
     overlay_shape : shape tuple
         2D shape tuple used to initialize overlay image.
     alpha : float (between [0, 1])
@@ -37,11 +37,29 @@ class PaintTool(CanvasToolBase):
         Overlay of painted labels displayed on top of image.
     label : int
         Current paint color.
+
+    Examples
+    ----------
+    >>> from skimage.data import camera
+    >>> import matplotlib.pyplot as plt
+    >>> from skimage.viewer.canvastools import PaintTool
+    >>> import numpy as np
+
+    >>> img = camera() #doctest: +SKIP
+
+    >>> ax = plt.subplot(111) #doctest: +SKIP 
+    >>> plt.imshow(img, cmap=plt.cm.gray) #doctest: +SKIP
+    >>> p = PaintTool(ax,np.shape(img[:-1]),10,0.2) #doctest: +SKIP
+    >>> plt.show() #doctest: +SKIP
+
+    >>> mask = p.overlay #doctest: +SKIP
+    >>> plt.imshow(mask,cmap=plt.cm.gray) #doctest: +SKIP
+    >>> plt.show() #doctest: +SKIP
     """
-    def __init__(self, viewer, overlay_shape, radius=5, alpha=0.3,
+    def __init__(self, manager, overlay_shape, radius=5, alpha=0.3,
                  on_move=None, on_release=None, on_enter=None,
                  rect_props=None):
-        super(PaintTool, self).__init__(viewer, on_move=on_move,
+        super(PaintTool, self).__init__(manager, on_move=on_move,
                                         on_enter=on_enter,
                                         on_release=on_release)
 
@@ -63,7 +81,7 @@ class PaintTool(CanvasToolBase):
 
         # Note that the order is important: Redraw cursor *after* overlay
         self.artists = [self._overlay_plot, self._cursor]
-        viewer.add_tool(self)
+        self.manager.add_tool(self)
 
     @property
     def label(self):
@@ -136,7 +154,7 @@ class PaintTool(CanvasToolBase):
         self.callback_on_release(self.geometry)
 
     def on_move(self, event):
-        if not self.viewer.ax.in_axes(event):
+        if not self.ax.in_axes(event):
             self._cursor.set_visible(False)
             self.redraw() # make sure cursor is not visible
             return

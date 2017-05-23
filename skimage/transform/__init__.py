@@ -1,28 +1,36 @@
-from ._hough_transform import (hough_ellipse, hough_line,
-                               probabilistic_hough_line)
-from .hough_transform import hough_circle, hough_line_peaks
-from .radon_transform import radon, iradon, iradon_sart
+from .hough_transform import (hough_line, hough_line_peaks,
+                              probabilistic_hough_line, hough_circle,
+                              hough_circle_peaks, hough_ellipse)
+from .radon_transform import (radon, iradon, iradon_sart,
+                              order_angles_golden_ratio)
 from .finite_radon_transform import frt2, ifrt2
 from .integral import integral_image, integrate
-from ._geometric import (warp, warp_coords, estimate_transform,
-                         matrix_transform,
+from ._geometric import (estimate_transform,
+                         matrix_transform, EuclideanTransform,
                          SimilarityTransform, AffineTransform,
-                         ProjectiveTransform, PolynomialTransform,
+                         ProjectiveTransform, FundamentalMatrixTransform,
+                         EssentialMatrixTransform, PolynomialTransform,
                          PiecewiseAffineTransform)
-from ._warps import swirl, resize, rotate, rescale, downscale_local_mean
+from ._warps import (swirl, resize, rotate, rescale, downscale_local_mean,
+                     warp, warp_coords)
 from .pyramids import (pyramid_reduce, pyramid_expand,
                        pyramid_gaussian, pyramid_laplacian)
+
+from .seam_carving import seam_carve
 from .steerable import build_steerable, recon_steerable
+
 
 
 __all__ = ['hough_circle',
            'hough_ellipse',
            'hough_line',
            'probabilistic_hough_line',
+           'hough_circle_peaks',
            'hough_line_peaks',
            'radon',
            'iradon',
            'iradon_sart',
+           'order_angles_golden_ratio',
            'frt2',
            'ifrt2',
            'integral_image',
@@ -31,9 +39,12 @@ __all__ = ['hough_circle',
            'warp_coords',
            'estimate_transform',
            'matrix_transform',
+           'EuclideanTransform',
            'SimilarityTransform',
            'AffineTransform',
            'ProjectiveTransform',
+           'EssentialMatrixTransform',
+           'FundamentalMatrixTransform',
            'PolynomialTransform',
            'PiecewiseAffineTransform',
            'swirl',
@@ -44,4 +55,5 @@ __all__ = ['hough_circle',
            'pyramid_reduce',
            'pyramid_expand',
            'pyramid_gaussian',
-           'pyramid_laplacian']
+           'pyramid_laplacian',
+           'seam_carve']

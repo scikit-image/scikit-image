@@ -1,9 +1,9 @@
 import os.path
 import numpy as np
 from numpy.testing import run_module_suite
-from numpy.testing.decorators import skipif
 import skimage.io as io
 from skimage import data_dir
+import pytest
 
 
 pyfits_available = True
@@ -27,16 +27,16 @@ def test_fits_plugin_import():
     try:
         io.use_plugin('fits')
     except ImportError:
-        assert pyfits_available == False
+        assert not pyfits_available
     else:
-        assert pyfits_available == True
+        assert pyfits_available
 
 
 def teardown():
     io.reset_plugins()
 
 
-@skipif(not pyfits_available)
+@pytest.mark.skipif(not pyfits_available, reason="pyfits not installed")
 def test_imread_MEF():
     io.use_plugin('fits')
     testfile = os.path.join(data_dir, 'multi.fits')
@@ -44,7 +44,7 @@ def test_imread_MEF():
     assert np.all(img == pyfits.getdata(testfile, 1))
 
 
-@skipif(not pyfits_available)
+@pytest.mark.skipif(not pyfits_available, reason="pyfits not installed")
 def test_imread_simple():
     io.use_plugin('fits')
     testfile = os.path.join(data_dir, 'simple.fits')
@@ -52,7 +52,7 @@ def test_imread_simple():
     assert np.all(img == pyfits.getdata(testfile, 0))
 
 
-@skipif(not pyfits_available)
+@pytest.mark.skipif(not pyfits_available, reason="pyfits not installed")
 def test_imread_collection_single_MEF():
     io.use_plugin('fits')
     testfile = os.path.join(data_dir, 'multi.fits')
@@ -62,7 +62,7 @@ def test_imread_collection_single_MEF():
     assert _same_ImageCollection(ic1, ic2)
 
 
-@skipif(not pyfits_available)
+@pytest.mark.skipif(not pyfits_available, reason="pyfits not installed")
 def test_imread_collection_MEF_and_simple():
     io.use_plugin('fits')
     testfile1 = os.path.join(data_dir, 'multi.fits')

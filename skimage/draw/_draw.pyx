@@ -6,7 +6,7 @@ import math
 import numpy as np
 
 cimport numpy as cnp
-from libc.math cimport sqrt, sin, cos, floor, ceil
+from libc.math cimport sqrt, sin, cos, floor, ceil, fabs
 from .._shared.geometry cimport point_in_polygon
 
 
@@ -21,30 +21,31 @@ def _coords_inside_image(rr, cc, shape, val=None):
     shape : tuple
         Image shape which is used to determine the maximum extent of output
         pixel coordinates.
-    val : ndarray of float, optional
-        Values of pixels at coordinates [rr, cc].
+    val : (N, D) ndarray of float, optional
+        Values of pixels at coordinates ``[rr, cc]``.
 
     Returns
     -------
-    rr, cc : (N,) array of int
+    rr, cc : (M,) array of int
         Row and column indices of valid pixels (i.e. those inside `shape`).
-    val : (N,) array of float, optional
+    val : (M, D) array of float, optional
         Values at `rr, cc`. Returned only if `val` is given as input.
     """
     mask = (rr >= 0) & (rr < shape[0]) & (cc >= 0) & (cc < shape[1])
-    if val is not None:
+    if val is None:
+        return rr[mask], cc[mask]
+    else:
         return rr[mask], cc[mask], val[mask]
-    return rr[mask], cc[mask]
 
 
-def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
+def _line(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
     """Generate line pixel coordinates.
 
     Parameters
     ----------
-    y, x : int
+    r0, c0 : int
         Starting position (row, column).
-    y2, x2 : int
+    r1, c1 : int
         End position (row, column).
 
     Returns
@@ -54,80 +55,65 @@ def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
 
-    Notes
-    -----
-    Anti-aliased line generator is available with `line_aa`.
-
-    Examples
+    See Also
     --------
-    >>> from skimage.draw import line
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
-    >>> rr, cc = line(1, 1, 8, 8)
-    >>> img[rr, cc] = 1
-    >>> img
-    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
-
+    line_aa : Anti-aliased line generator
     """
 
     cdef char steep = 0
-    cdef Py_ssize_t dx = abs(x2 - x)
-    cdef Py_ssize_t dy = abs(y2 - y)
-    cdef Py_ssize_t sx, sy, d, i
+    cdef Py_ssize_t r = r0
+    cdef Py_ssize_t c = c0
+    cdef Py_ssize_t dr = abs(r1 - r0)
+    cdef Py_ssize_t dc = abs(c1 - c0)
+    cdef Py_ssize_t sr, sc, d, i
 
-    if (x2 - x) > 0:
-        sx = 1
-    else:
-        sx = -1
-    if (y2 - y) > 0:
-        sy = 1
-    else:
-        sy = -1
-    if dy > dx:
-        steep = 1
-        x, y = y, x
-        dx, dy = dy, dx
-        sx, sy = sy, sx
-    d = (2 * dy) - dx
-
-    cdef Py_ssize_t[::1] rr = np.zeros(int(dx) + 1, dtype=np.intp)
-    cdef Py_ssize_t[::1] cc = np.zeros(int(dx) + 1, dtype=np.intp)
-
-    for i in range(dx):
-        if steep:
-            rr[i] = x
-            cc[i] = y
+    with nogil:
+        if (c1 - c) > 0:
+            sc = 1
         else:
-            rr[i] = y
-            cc[i] = x
-        while d >= 0:
-            y = y + sy
-            d = d - (2 * dx)
-        x = x + sx
-        d = d + (2 * dy)
+            sc = -1
+        if (r1 - r) > 0:
+            sr = 1
+        else:
+            sr = -1
+        if dr > dc:
+            steep = 1
+            c, r = r, c
+            dc, dr = dr, dc
+            sc, sr = sr, sc
+        d = (2 * dr) - dc
 
-    rr[dx] = y2
-    cc[dx] = x2
+    cdef Py_ssize_t[::1] rr = np.zeros(int(dc) + 1, dtype=np.intp)
+    cdef Py_ssize_t[::1] cc = np.zeros(int(dc) + 1, dtype=np.intp)
+
+    with nogil:
+        for i in range(dc):
+            if steep:
+                rr[i] = c
+                cc[i] = r
+            else:
+                rr[i] = r
+                cc[i] = c
+            while d >= 0:
+                r = r + sr
+                d = d - (2 * dc)
+            c = c + sc
+            d = d + (2 * dr)
+
+        rr[dc] = r1
+        cc[dc] = c1
 
     return np.asarray(rr), np.asarray(cc)
 
 
-def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
+def _line_aa(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
     """Generate anti-aliased line pixel coordinates.
 
     Parameters
     ----------
-    y1, x1 : int
+    r0, c0 : int
         Starting position (row, column).
-    y2, x2 : int
+    r1, c1 : int
         End position (row, column).
 
     Returns
@@ -140,92 +126,83 @@ def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
     ----------
     .. [1] A Rasterizing Algorithm for Drawing Curves, A. Zingl, 2012
            http://members.chello.at/easyfilter/Bresenham.pdf
-
-    Examples
-    --------
-    >>> from skimage.draw import line_aa
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
-    >>> rr, cc, val = line_aa(1, 1, 8, 8)
-    >>> img[rr, cc] = val * 255
-    >>> img
-    array([[  0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
-           [  0, 255,  56,   0,   0,   0,   0,   0,   0,   0],
-           [  0,  56, 255,  56,   0,   0,   0,   0,   0,   0],
-           [  0,   0,  56, 255,  56,   0,   0,   0,   0,   0],
-           [  0,   0,   0,  56, 255,  56,   0,   0,   0,   0],
-           [  0,   0,   0,   0,  56, 255,  56,   0,   0,   0],
-           [  0,   0,   0,   0,   0,  56, 255,  56,   0,   0],
-           [  0,   0,   0,   0,   0,   0,  56, 255,  56,   0],
-           [  0,   0,   0,   0,   0,   0,   0,  56, 255,   0],
-           [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
     """
     cdef list rr = list()
     cdef list cc = list()
     cdef list val = list()
 
-    cdef int dx = abs(x1 - x2)
-    cdef int dy = abs(y1 - y2)
-    cdef int err = dx - dy
-    cdef int x, y, e, ed, sign_x, sign_y
+    cdef int dc = abs(c0 - c1)
+    cdef int dc_prime
 
-    if x1 < x2:
-        sign_x = 1
+    cdef int dr = abs(r0 - r1)
+    cdef float err = dc - dr
+    cdef float err_prime
+
+    cdef int c, r, sign_c, sign_r
+    cdef float ed
+
+    if c0 < c1:
+        sign_c = 1
     else:
-        sign_x = -1
+        sign_c = -1
 
-    if y1 < y2:
-        sign_y = 1
+    if r0 < r1:
+        sign_r = 1
     else:
-        sign_y = -1
+        sign_r = -1
 
-    if dx + dy == 0:
+    if dc + dr == 0:
         ed = 1
     else:
-        ed = <int>(sqrt(dx*dx + dy*dy))
+        ed = sqrt(dc*dc + dr*dr)
 
-    x, y = x1, y1
+    c, r = c0, r0
     while True:
-        cc.append(x)
-        rr.append(y)
-        val.append(1. * abs(err - dx + dy) / <float>(ed))
-        e = err
-        if 2 * e >= -dx:
-            if x == x2:
+        cc.append(c)
+        rr.append(r)
+        val.append(fabs(err - dc + dr) / ed)
+
+        err_prime = err
+        c_prime = c
+
+        if (2 * err_prime) >= -dc:
+            if c == c1:
                 break
-            if e + dy < ed:
-                cc.append(x)
-                rr.append(y + sign_y)
-                val.append(1. * abs(e + dy) / <float>(ed))
-            err -= dy
-            x += sign_x
-        if 2 * e <= dy:
-            if y == y2:
+            if (err_prime + dr) < ed:
+                cc.append(c)
+                rr.append(r + sign_r)
+                val.append(fabs(err_prime + dr) / ed)
+            err -= dr
+            c += sign_c
+
+        if 2 * err_prime <= dr:
+            if r == r1:
                 break
-            if dx - e < ed:
-                cc.append(x)
-                rr.append(y)
-                val.append(abs(dx - e) / <float>(ed))
-            err += dx
-            y += sign_y
+            if (dc - err_prime) < ed:
+                cc.append(c_prime + sign_c)
+                rr.append(r)
+                val.append(fabs(dc - err_prime) / ed)
+            err += dc
+            r += sign_r
 
     return (np.array(rr, dtype=np.intp),
             np.array(cc, dtype=np.intp),
             1. - np.array(val, dtype=np.float))
 
 
-def polygon(y, x, shape=None):
+def _polygon(r, c, shape):
     """Generate coordinates of pixels within polygon.
 
     Parameters
     ----------
-    y : (N,) ndarray
-        Y-coordinates of vertices of polygon.
-    x : (N,) ndarray
-        X-coordinates of vertices of polygon.
-    shape : tuple, optional
+    r : (N,) ndarray
+        Row coordinates of vertices of polygon.
+    c : (N,) ndarray
+        Column coordinates of vertices of polygon.
+    shape : tuple
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates. This is useful for polygons which exceed the image
-        size. By default the full extent of the polygon are used.
+        pixel coordinates. This is useful for polygons that exceed the image
+        size. If None, the full extent of the polygon is used.
 
     Returns
     -------
@@ -233,46 +210,27 @@ def polygon(y, x, shape=None):
         Pixel coordinates of polygon.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
-
-    Examples
-    --------
-    >>> from skimage.draw import polygon
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
-    >>> x = np.array([1, 7, 4, 1])
-    >>> y = np.array([1, 2, 8, 1])
-    >>> rr, cc = polygon(y, x)
-    >>> img[rr, cc] = 1
-    >>> img
-    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
-           [0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
-           [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
-           [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
-           [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
-
     """
+    r = np.asanyarray(r)
+    c = np.asanyarray(c)
 
-    cdef Py_ssize_t nr_verts = x.shape[0]
-    cdef Py_ssize_t minr = int(max(0, y.min()))
-    cdef Py_ssize_t maxr = int(ceil(y.max()))
-    cdef Py_ssize_t minc = int(max(0, x.min()))
-    cdef Py_ssize_t maxc = int(ceil(x.max()))
+    cdef Py_ssize_t nr_verts = c.shape[0]
+    cdef Py_ssize_t minr = int(max(0, r.min()))
+    cdef Py_ssize_t maxr = int(ceil(r.max()))
+    cdef Py_ssize_t minc = int(max(0, c.min()))
+    cdef Py_ssize_t maxc = int(ceil(c.max()))
 
     # make sure output coordinates do not exceed image size
     if shape is not None:
         maxr = min(shape[0] - 1, maxr)
         maxc = min(shape[1] - 1, maxc)
 
-    cdef Py_ssize_t r, c
+    cdef Py_ssize_t r_i, c_i
 
     # make contigous arrays for r, c coordinates
     cdef cnp.ndarray contiguous_rdata, contiguous_cdata
-    contiguous_rdata = np.ascontiguousarray(y, dtype=np.double)
-    contiguous_cdata = np.ascontiguousarray(x, dtype=np.double)
+    contiguous_rdata = np.ascontiguousarray(r, dtype=np.double)
+    contiguous_cdata = np.ascontiguousarray(c, dtype=np.double)
     cdef cnp.double_t* rptr = <cnp.double_t*>contiguous_rdata.data
     cdef cnp.double_t* cptr = <cnp.double_t*>contiguous_cdata.data
 
@@ -280,32 +238,32 @@ def polygon(y, x, shape=None):
     cdef list rr = list()
     cdef list cc = list()
 
-    for r in range(minr, maxr+1):
-        for c in range(minc, maxc+1):
-            if point_in_polygon(nr_verts, cptr, rptr, c, r):
-                rr.append(r)
-                cc.append(c)
+    for r_i in range(minr, maxr+1):
+        for c_i in range(minc, maxc+1):
+            if point_in_polygon(nr_verts, cptr, rptr, c_i, r_i):
+                rr.append(r_i)
+                cc.append(c_i)
 
     return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
 
 
-def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
-                     method='bresenham', shape=None):
+def _circle_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t radius,
+                      method, shape):
     """Generate circle perimeter coordinates.
 
     Parameters
     ----------
-    cy, cx : int
+    r_o, c_o : int
         Centre coordinate of circle.
-    radius: int
+    radius : int
         Radius of circle.
-    method : {'bresenham', 'andres'}, optional
+    method : {'bresenham', 'andres'}
         bresenham : Bresenham method (default)
         andres : Andres method
-    shape : tuple, optional
+    shape : tuple
         Image shape which is used to determine the maximum extent of output pixel
-        coordinates. This is useful for circles which exceed the image size.
-        By default the full extent of the circle are used.
+        coordinates. This is useful for circles that exceed the image size.
+        If None, the full extent of the circle is used.
 
     Returns
     -------
@@ -329,32 +287,13 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
            plotter", IBM Systems journal, 4 (1965) 25-30.
     .. [2] E. Andres, "Discrete circles, rings and spheres", Computers &
            Graphics, 18 (1994) 695-706.
-
-    Examples
-    --------
-    >>> from skimage.draw import circle_perimeter
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
-    >>> rr, cc = circle_perimeter(4, 4, 3)
-    >>> img[rr, cc] = 1
-    >>> img
-    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
-           [0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
-           [0, 1, 0, 0, 0, 0, 0, 1, 0, 0],
-           [0, 1, 0, 0, 0, 0, 0, 1, 0, 0],
-           [0, 1, 0, 0, 0, 0, 0, 1, 0, 0],
-           [0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
-           [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
-
     """
 
     cdef list rr = list()
     cdef list cc = list()
 
-    cdef Py_ssize_t x = 0
-    cdef Py_ssize_t y = radius
+    cdef Py_ssize_t c = 0
+    cdef Py_ssize_t r = radius
     cdef Py_ssize_t d = 0
 
     cdef double dceil = 0
@@ -370,50 +309,51 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     else:
         raise ValueError('Wrong method')
 
-    while y >= x:
-        rr.extend([y, -y, y, -y, x, -x, x, -x])
-        cc.extend([x, x, -x, -x, y, y, -y, -y])
+    while r >= c:
+        rr.extend([r, -r, r, -r, c, -c, c, -c])
+        cc.extend([c, c, -c, -c, r, r, -r, -r])
 
         if cmethod == 'b':
             if d < 0:
-                d += 4 * x + 6
+                d += 4 * c + 6
             else:
-                d += 4 * (x - y) + 10
-                y -= 1
-            x += 1
+                d += 4 * (c - r) + 10
+                r -= 1
+            c += 1
         elif cmethod == 'a':
-            if d >= 2 * (x - 1):
-                d = d - 2 * x
-                x = x + 1
-            elif d <= 2 * (radius - y):
-                d = d + 2 * y - 1
-                y = y - 1
+            if d >= 2 * (c - 1):
+                d = d - 2 * c
+                c = c + 1
+            elif d <= 2 * (radius - r):
+                d = d + 2 * r - 1
+                r = r - 1
             else:
-                d = d + 2 * (y - x - 1)
-                y = y - 1
-                x = x + 1
+                d = d + 2 * (r - c - 1)
+                r = r - 1
+                c = c + 1
+
     if shape is not None:
-        return _coords_inside_image(np.array(rr, dtype=np.intp) + cy,
-                                    np.array(cc, dtype=np.intp) + cx,
+        return _coords_inside_image(np.array(rr, dtype=np.intp) + r_o,
+                                    np.array(cc, dtype=np.intp) + c_o,
                                     shape)
-    return (np.array(rr, dtype=np.intp) + cy,
-            np.array(cc, dtype=np.intp) + cx)
+    return (np.array(rr, dtype=np.intp) + r_o,
+            np.array(cc, dtype=np.intp) + c_o)
 
 
-def circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
-                        shape=None):
+def _circle_perimeter_aa(Py_ssize_t r_o, Py_ssize_t c_o,
+                         Py_ssize_t radius, shape):
     """Generate anti-aliased circle perimeter coordinates.
 
     Parameters
     ----------
-    cy, cx : int
+    r_o, c_o : int
         Centre coordinate of circle.
-    radius: int
+    radius : int
         Radius of circle.
-    shape : tuple, optional
-        Image shape which is used to determine the maximum extent of output pixel
-        coordinates. This is useful for circles which exceed the image size.
-        By default the full extent of the circle are used.
+    shape : tuple
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates. This is useful for circles that exceed the image
+        size. If None, the full extent of the circle is used.
 
     Returns
     -------
@@ -430,78 +370,60 @@ def circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     ----------
     .. [1] X. Wu, "An efficient antialiasing technique", In ACM SIGGRAPH
            Computer Graphics, 25 (1991) 143-152.
-
-    Examples
-    --------
-    >>> from skimage.draw import circle_perimeter_aa
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
-    >>> rr, cc, val = circle_perimeter_aa(4, 4, 3)
-    >>> img[rr, cc] = val * 255
-    >>> img
-    array([[  0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
-           [  0,   0,  60, 211, 255, 211,  60,   0,   0,   0],
-           [  0,  60, 194,  43,   0,  43, 194,  60,   0,   0],
-           [  0, 211,  43,   0,   0,   0,  43, 211,   0,   0],
-           [  0, 255,   0,   0,   0,   0,   0, 255,   0,   0],
-           [  0, 211,  43,   0,   0,   0,  43, 211,   0,   0],
-           [  0,  60, 194,  43,   0,  43, 194,  60,   0,   0],
-           [  0,   0,  60, 211, 255, 211,  60,   0,   0,   0],
-           [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
-           [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
     """
 
-    cdef Py_ssize_t x = 0
-    cdef Py_ssize_t y = radius
+    cdef Py_ssize_t c = 0
+    cdef Py_ssize_t r = radius
     cdef Py_ssize_t d = 0
 
     cdef double dceil = 0
     cdef double dceil_prev = 0
 
-    cdef list rr = [y, x,  y,  x, -y, -x, -y, -x]
-    cdef list cc = [x, y, -x, -y,  x,  y, -x, -y]
+    cdef list rr = [r, c,  r,  c, -r, -c, -r, -c]
+    cdef list cc = [c, r, -c, -r,  c,  r, -c, -r]
     cdef list val = [1] * 8
 
-    while y > x + 1:
-        x += 1
-        dceil = sqrt(radius**2 - x**2)
+    while r > c + 1:
+        c += 1
+        dceil = sqrt(radius**2 - c**2)
         dceil = ceil(dceil) - dceil
         if dceil < dceil_prev:
-            y -= 1
-        rr.extend([y, y - 1, x, x, y, y - 1, x, x])
-        cc.extend([x, x, y, y - 1, -x, -x, -y, 1 - y])
+            r -= 1
+        rr.extend([r, r - 1, c, c, r, r - 1, c, c])
+        cc.extend([c, c, r, r - 1, -c, -c, -r, 1 - r])
 
-        rr.extend([-y, 1 - y, -x, -x, -y, 1 - y, -x, -x])
-        cc.extend([x, x, y, y - 1, -x, -x, -y, 1 - y])
+        rr.extend([-r, 1 - r, -c, -c, -r, 1 - r, -c, -c])
+        cc.extend([c, c, r, r - 1, -c, -c, -r, 1 - r])
 
         val.extend([1 - dceil, dceil] * 8)
         dceil_prev = dceil
 
     if shape is not None:
-        return _coords_inside_image(np.array(rr, dtype=np.intp) + cy,
-                                    np.array(cc, dtype=np.intp) + cx,
+        return _coords_inside_image(np.array(rr, dtype=np.intp) + r_o,
+                                    np.array(cc, dtype=np.intp) + c_o,
                                     shape,
                                     val=np.array(val, dtype=np.float))
-    return (np.array(rr, dtype=np.intp) + cy,
-            np.array(cc, dtype=np.intp) + cx,
+    return (np.array(rr, dtype=np.intp) + r_o,
+            np.array(cc, dtype=np.intp) + c_o,
             np.array(val, dtype=np.float))
 
 
-def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
-                      Py_ssize_t xradius, double orientation=0, shape=None):
+def _ellipse_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t r_radius,
+                       Py_ssize_t c_radius, double orientation, shape):
     """Generate ellipse perimeter coordinates.
 
     Parameters
     ----------
-    cy, cx : int
+    r_o, c_o : int
         Centre coordinate of ellipse.
-    yradius, xradius : int
-        Minor and major semi-axes. ``(x/xradius)**2 + (y/yradius)**2 = 1``.
-    orientation : double, optional (default 0)
+    r_radius, c_radius : int
+        Minor and major semi-axes. ``(r/r_radius)**2 + (c/c_radius)**2 = 1``.
+    orientation : double
         Major axis orientation in clockwise direction as radians.
-    shape : tuple, optional
+    shape : tuple
         Image shape which is used to determine the maximum extent of output pixel
-        coordinates. This is useful for ellipses which exceed the image size.
-        By default the full extent of the ellipse are used.
+        coordinates. This is useful for ellipses that exceed the image size.
+        If None, the full extent of the ellipse is used.
 
     Returns
     -------
@@ -514,134 +436,115 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
     ----------
     .. [1] A Rasterizing Algorithm for Drawing Curves, A. Zingl, 2012
            http://members.chello.at/easyfilter/Bresenham.pdf
-
-    Examples
-    --------
-    >>> from skimage.draw import ellipse_perimeter
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
-    >>> rr, cc = ellipse_perimeter(5, 5, 3, 4)
-    >>> img[rr, cc] = 1
-    >>> img
-    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
-           [0, 0, 1, 0, 0, 0, 0, 0, 1, 0],
-           [0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-           [0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-           [0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-           [0, 0, 1, 0, 0, 0, 0, 0, 1, 0],
-           [0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
-
     """
 
     # If both radii == 0, return the center to avoid infinite loop in 2nd set
-    if xradius == 0 and yradius == 0:
-        return np.array(cy), np.array(cx)
+    if r_radius == 0 and c_radius == 0:
+        return np.array(r_o), np.array(c_o)
 
     # Pixels
-    cdef list px = list()
-    cdef list py = list()
+    cdef list rr = list()
+    cdef list cc = list()
 
     # Compute useful values
-    cdef  Py_ssize_t xd = xradius**2
-    cdef  Py_ssize_t yd = yradius**2
+    cdef  Py_ssize_t rd = r_radius**2
+    cdef  Py_ssize_t cd = c_radius**2
 
-    cdef Py_ssize_t x, y, e2, err
+    cdef Py_ssize_t r, c, e2, err
 
-    cdef int ix0, ix1, iy0, iy1, ixd, iyd
-    cdef double sin_angle, xa, ya, za, a, b
+    cdef int ir0, ir1, ic0, ic1, ird, icd
+    cdef double sin_angle, ra, ca, za, a, b
 
     if orientation == 0:
-        x = -xradius
-        y = 0
-        e2 = yd
-        err = x*(2 * e2 + x) + e2
-        while x <= 0:
+        c = -c_radius
+        r = 0
+        e2 = rd
+        err = c * (2 * e2 + c) + e2
+        while c <= 0:
             # Quadrant 1
-            px.append(cx - x)
-            py.append(cy + y)
+            rr.append(r_o + r)
+            cc.append(c_o - c)
             # Quadrant 2
-            px.append(cx + x)
-            py.append(cy + y)
+            rr.append(r_o + r)
+            cc.append(c_o + c)
             # Quadrant 3
-            px.append(cx + x)
-            py.append(cy - y)
+            rr.append(r_o - r)
+            cc.append(c_o + c)
             # Quadrant 4
-            px.append(cx - x)
-            py.append(cy - y)
-            # Adjust x and y
+            rr.append(r_o - r)
+            cc.append(c_o - c)
+            # Adjust `r` and `c`
             e2 = 2 * err
-            if e2 >= (2 * x + 1) * yd:
-                x += 1
-                err += (2 * x + 1) * yd
-            if e2 <= (2 * y + 1) * xd:
-                y += 1
-                err += (2 * y + 1) * xd
-        while y < yradius:
-            y += 1
-            px.append(cx)
-            py.append(cy + y)
-            px.append(cx)
-            py.append(cy - y)
+            if e2 >= (2 * c + 1) * rd:
+                c += 1
+                err += (2 * c + 1) * rd
+            if e2 <= (2 * r + 1) * cd:
+                r += 1
+                err += (2 * r + 1) * cd
+        while r < r_radius:
+            r += 1
+            rr.append(r_o + r)
+            cc.append(c_o)
+            rr.append(r_o - r)
+            cc.append(c_o)
 
     else:
         sin_angle = sin(orientation)
-        za = (xd - yd) * sin_angle
-        xa = sqrt(xd - za * sin_angle)
-        ya = sqrt(yd + za * sin_angle)
+        za = (cd - rd) * sin_angle
+        ca = sqrt(cd - za * sin_angle)
+        ra = sqrt(rd + za * sin_angle)
 
-        a = xa + 0.5
-        b = ya + 0.5
-        za = za * a * b / (xa * ya)
+        a = ca + 0.5
+        b = ra + 0.5
+        za = za * a * b / (ca * ra)
 
-        ix0 = int(cx - a)
-        iy0 = int(cy - b)
-        ix1 = int(cx + a)
-        iy1 = int(cy + b)
+        ir0 = int(r_o - b)
+        ic0 = int(c_o - a)
+        ir1 = int(r_o + b)
+        ic1 = int(c_o + a)
 
-        xa = ix1 - ix0
-        ya = iy1 - iy0
+        ca = ic1 - ic0
+        ra = ir1 - ir0
         za = 4 * za * cos(orientation)
-        w = xa * ya
+        w = ca * ra
         if w != 0:
             w = (w - za) / (w + w)
-        ixd = int(floor(xa * w + 0.5))
-        iyd = int(floor(ya * w + 0.5))
+        icd = int(floor(ca * w + 0.5))
+        ird = int(floor(ra * w + 0.5))
 
         # Draw the 4 quadrants
-        rr, cc = _bezier_segment(iy0 + iyd, ix0, iy0, ix0, iy0, ix0 + ixd, 1-w)
-        py.extend(rr)
-        px.extend(cc)
-        rr, cc = _bezier_segment(iy0 + iyd, ix0, iy1, ix0, iy1, ix1 - ixd, w)
-        py.extend(rr)
-        px.extend(cc)
-        rr, cc = _bezier_segment(iy1 - iyd, ix1, iy1, ix1, iy1, ix1 - ixd, 1-w)
-        py.extend(rr)
-        px.extend(cc)
-        rr, cc = _bezier_segment(iy1 - iyd, ix1, iy0, ix1, iy0, ix0 + ixd,  w)
-        py.extend(rr)
-        px.extend(cc)
+        rr_t, cc_t = _bezier_segment(ir0 + ird, ic0, ir0, ic0, ir0, ic0 + icd, 1-w)
+        rr.extend(rr_t)
+        cc.extend(cc_t)
+        rr_t, cc_t = _bezier_segment(ir0 + ird, ic0, ir1, ic0, ir1, ic1 - icd, w)
+        rr.extend(rr_t)
+        cc.extend(cc_t)
+        rr_t, cc_t = _bezier_segment(ir1 - ird, ic1, ir1, ic1, ir1, ic1 - icd, 1-w)
+        rr.extend(rr_t)
+        cc.extend(cc_t)
+        rr_t, cc_t = _bezier_segment(ir1 - ird, ic1, ir0, ic1, ir0, ic0 + icd,  w)
+        rr.extend(rr_t)
+        cc.extend(cc_t)
 
     if shape is not None:
-        return _coords_inside_image(np.array(py, dtype=np.intp),
-                                    np.array(px, dtype=np.intp), shape)
-    return np.array(py, dtype=np.intp), np.array(px, dtype=np.intp)
+        return _coords_inside_image(np.array(rr, dtype=np.intp),
+                                    np.array(cc, dtype=np.intp), shape)
+    return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
 
 
-def _bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
-                    Py_ssize_t y1, Py_ssize_t x1,
-                    Py_ssize_t y2, Py_ssize_t x2,
+def _bezier_segment(Py_ssize_t r0, Py_ssize_t c0,
+                    Py_ssize_t r1, Py_ssize_t c1,
+                    Py_ssize_t r2, Py_ssize_t c2,
                     double weight):
     """Generate Bezier segment coordinates.
 
     Parameters
     ----------
-    y0, x0 : int
+    r0, c0 : int
         Coordinates of the first control point.
-    y1, x1 : int
+    r1, c1 : int
         Coordinates of the middle control point.
-    y2, x2 : int
+    r2, c2 : int
         Coordinates of the last control point.
     weight : double
         Middle control point weight, it describes the line tension.
@@ -664,119 +567,119 @@ def _bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
            http://members.chello.at/easyfilter/Bresenham.pdf
     """
     # Pixels
-    cdef list px = list()
-    cdef list py = list()
+    cdef list cc = list()
+    cdef list rr = list()
 
     # Steps
-    cdef double sx = x2 - x1
-    cdef double sy = y2 - y1
+    cdef double sc = c2 - c1
+    cdef double sr = r2 - r1
 
-    cdef double dx = x0 - x2
-    cdef double dy = y0 - y2
-    cdef double xx = x0 - x1
-    cdef double yy = y0 - y1
-    cdef double xy = xx * sy + yy * sx
-    cdef double cur = xx * sy - yy * sx
+    cdef double d2c = c0 - c2
+    cdef double d2r = r0 - r2
+    cdef double d1c = c0 - c1
+    cdef double d1r = r0 - r1
+    cdef double rc = d1c * sr + d1r * sc
+    cdef double cur = d1c * sr - d1r * sc
     cdef double err
 
     cdef bint test1, test2
 
-    # if it's not a straight line
+    # If not a straight line
     if cur != 0 and weight > 0:
-        if (sx * sx + sy * sy > xx * xx + yy * yy):
+        if (sc * sc + sr * sr > d1c * d1c + d1r * d1r):
             # Swap point 0 and point 2
             # to start from the longer part
-            x2 = x0
-            x0 -= <Py_ssize_t>(dx)
-            y2 = y0
-            y0 -= <Py_ssize_t>(dy)
+            c2 = c0
+            c0 -= <Py_ssize_t>(d2c)
+            r2 = r0
+            r0 -= <Py_ssize_t>(d2r)
             cur = -cur
-        xx = 2 * (4 * weight * sx * xx + dx * dx)
-        yy = 2 * (4 * weight * sy * yy + dy * dy)
+        d1c = 2 * (4 * weight * sc * d1c + d2c * d2c)
+        d1r = 2 * (4 * weight * sr * d1r + d2r * d2r)
         # Set steps
-        if x0 < x2:
-            sx = 1
+        if c0 < c2:
+            sc = 1
         else:
-            sx = -1
-        if y0 < y2:
-            sy = 1
+            sc = -1
+        if r0 < r2:
+            sr = 1
         else:
-            sy = -1
-        xy = -2 * sx * sy * (2 * weight * xy + dx * dy)
+            sr = -1
+        rc = -2 * sc * sr * (2 * weight * rc + d2c * d2r)
 
-        if cur * sx * sy < 0:
-            xx = -xx
-            yy = -yy
-            xy = -xy
+        if cur * sc * sr < 0:
+            d1c = -d1c
+            d1r = -d1r
+            rc = -rc
             cur = -cur
 
-        dx = 4 * weight * (x1 - x0) * sy * cur + xx / 2 + xy
-        dy = 4 * weight * (y0 - y1) * sx * cur + yy / 2 + xy
+        d2c = 4 * weight * (c1 - c0) * sr * cur + d1c / 2 + rc
+        d2r = 4 * weight * (r0 - r1) * sc * cur + d1r / 2 + rc
 
         # Flat ellipse, algo fails
-        if (weight < 0.5 and (dy > xy or dx < xy)):
+        if weight < 0.5 and (d2r > rc or d2c < rc):
             cur = (weight + 1) / 2
             weight = sqrt(weight)
-            xy = 1. / (weight + 1)
-            # subdivide curve in half
-            sx = floor((x0 + 2 * weight * x1 + x2) * xy * 0.5 + 0.5)
-            sy = floor((y0 + 2 * weight * y1 + y2) * xy * 0.5 + 0.5)
-            dx = floor((weight * x1 + x0) * xy + 0.5)
-            dy = floor((y1 * weight + y0) * xy + 0.5)
-            return _bezier_segment(y0, x0, <Py_ssize_t>(dy), <Py_ssize_t>(dx),
-                                   <Py_ssize_t>(sy), <Py_ssize_t>(sx), cur)
+            rc = 1. / (weight + 1)
+            # Subdivide curve in half
+            sc = floor((c0 + 2 * weight * c1 + c2) * rc * 0.5 + 0.5)
+            sr = floor((r0 + 2 * weight * r1 + r2) * rc * 0.5 + 0.5)
+            d2c = floor((weight * c1 + c0) * rc + 0.5)
+            d2r = floor((r1 * weight + r0) * rc + 0.5)
+            return _bezier_segment(r0, c0, <Py_ssize_t>(d2r), <Py_ssize_t>(d2c),
+                                   <Py_ssize_t>(sr), <Py_ssize_t>(sc), cur)
 
-        err = dx + dy - xy
-        while dy <= xy and dx >= xy:
-            px.append(x0)
-            py.append(y0)
-            if x0 == x2 and y0 == y2:
+        err = d2c + d2r - rc
+        while d2r <= rc and d2c >= rc:
+            cc.append(c0)
+            rr.append(r0)
+            if c0 == c2 and r0 == r2:
                 # The job is done!
-                return np.array(py, dtype=np.intp), np.array(px, dtype=np.intp)
+                return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
 
             # Save boolean values
-            test1 = 2 * err > dy
-            test2 = 2 * (err + yy) < -dy
-            # Move (x0,y0) to the next position
-            if 2 * err < dx or test2:
-                y0 += <Py_ssize_t>(sy)
-                dy += xy
-                dx += xx
-                err += dx
-            if 2 * err > dx or test1:
-                x0 += <Py_ssize_t>(sx)
-                dx += xy
-                dy += yy
-                err += dy
+            test1 = 2 * err > d2r
+            test2 = 2 * (err + d1r) < -d2r
+            # Move (c0, r0) to the next position
+            if 2 * err < d2c or test2:
+                r0 += <Py_ssize_t>(sr)
+                d2r += rc
+                d2c += d1c
+                err += d2c
+            if 2 * err > d2c or test1:
+                c0 += <Py_ssize_t>(sc)
+                d2c += rc
+                d2r += d1r
+                err += d2r
 
     # Plot line
-    rr, cc = line(x0, y0, x2, y2)
-    px.extend(rr)
-    py.extend(cc)
+    cc_t, rr_t = _line(c0, r0, c2, r2)
+    cc.extend(cc_t)
+    rr.extend(rr_t)
 
-    return np.array(py, dtype=np.intp), np.array(px, dtype=np.intp)
+    return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
 
 
-def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
-                 Py_ssize_t y1, Py_ssize_t x1,
-                 Py_ssize_t y2, Py_ssize_t x2,
-                 double weight, shape=None):
+def _bezier_curve(Py_ssize_t r0, Py_ssize_t c0,
+                  Py_ssize_t r1, Py_ssize_t c1,
+                  Py_ssize_t r2, Py_ssize_t c2,
+                  double weight, shape):
     """Generate Bezier curve coordinates.
 
     Parameters
     ----------
-    y0, x0 : int
+    r0, c0 : int
         Coordinates of the first control point.
-    y1, x1 : int
+    r1, c1 : int
         Coordinates of the middle control point.
-    y2, x2 : int
+    r2, c2 : int
         Coordinates of the last control point.
     weight : double
         Middle control point weight, it describes the line tension.
-    shape : tuple, optional
+    shape : tuple
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates. This is useful for curves which exceed the image
-        size. By default the full extent of the curve are used.
+        pixel coordinates. This is useful for curves that exceed the image
+        size. If None, the full extent of the curve is used.
 
     Returns
     -------
@@ -794,103 +697,85 @@ def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
     ----------
     .. [1] A Rasterizing Algorithm for Drawing Curves, A. Zingl, 2012
            http://members.chello.at/easyfilter/Bresenham.pdf
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from skimage.draw import bezier_curve
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
-    >>> rr, cc = bezier_curve(1, 5, 5, -2, 8, 8, 2)
-    >>> img[rr, cc] = 1
-    >>> img
-    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-           [0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
-           [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-           [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
     # Pixels
-    cdef list px = list()
-    cdef list py = list()
+    cdef list cc = list()
+    cdef list rr = list()
 
-    cdef int x, y
-    cdef double xx, yy, ww, t, q
-    x = x0 - 2 * x1 + x2
-    y = y0 - 2 * y1 + y2
+    cdef int vc, vr
+    cdef double dc, dr, ww, t, q
+    vc = c0 - 2 * c1 + c2
+    vr = r0 - 2 * r1 + r2
 
-    xx = x0 - x1
-    yy = y0 - y1
+    dc = c0 - c1
+    dr = r0 - r1
 
-    if xx * (x2 - x1) > 0:
-        if yy * (y2 - y1):
-            if abs(xx * y) > abs(yy * x):
-                x0 = x2
-                x2 = <Py_ssize_t>(xx + x1)
-                y0 = y2
-                y2 = <Py_ssize_t>(yy + y1)
-        if (x0 == x2) or (weight == 1.):
-            t = <double>(x0 - x1) / x
+    if dc * (c2 - c1) > 0:
+        if dr * (r2 - r1):
+            if abs(dc * vr) > abs(dr * vc):
+                c0 = c2
+                c2 = <Py_ssize_t>(dc + c1)
+                r0 = r2
+                r2 = <Py_ssize_t>(dr + r1)
+        if (c0 == c2) or (weight == 1.):
+            t = <double>(c0 - c1) / vc
         else:
-            q = sqrt(4. * weight * weight * (x0 - x1) * (x2 - x1) + (x2 - x0) * floor(x2 - x0))
-            if (x1 < x0):
+            q = sqrt(4. * weight * weight * (c0 - c1) * (c2 - c1) + (c2 - c0) * floor(c2 - c0))
+            if (c1 < c0):
                 q = -q
-            t = (2. * weight * (x0 - x1) - x0 + x2 + q) / (2. * (1. - weight) * (x2 - x0))
+            t = (2. * weight * (c0 - c1) - c0 + c2 + q) / (2. * (1. - weight) * (c2 - c0))
 
         q = 1. / (2. * t * (1. - t) * (weight - 1.) + 1.0)
-        xx = (t * t * (x0 - 2. * weight * x1 + x2) + 2. * t * (weight * x1 - x0) + x0) * q
-        yy = (t * t * (y0 - 2. * weight * y1 + y2) + 2. * t * (weight * y1 - y0) + y0) * q
+        dc = (t * t * (c0 - 2. * weight * c1 + c2) + 2. * t * (weight * c1 - c0) + c0) * q
+        dr = (t * t * (r0 - 2. * weight * r1 + r2) + 2. * t * (weight * r1 - r0) + r0) * q
         ww = t * (weight - 1.) + 1.
         ww *= ww * q
         weight = ((1. - t) * (weight - 1.) + 1.) * sqrt(q)
-        x = <int>(xx + 0.5)
-        y = <int>(yy + 0.5)
-        yy = (xx - x0) * (y1 - y0) / (x1 - x0) + y0
+        vc = <int>(dc + 0.5)
+        vr = <int>(dr + 0.5)
+        dr = (dc - c0) * (r1 - r0) / (c1 - c0) + r0
 
-        rr, cc = _bezier_segment(y0, x0, <int>(yy + 0.5), x, y, x, ww)
-        px.extend(rr)
-        py.extend(cc)
+        rr_t, cc_t = _bezier_segment(r0, c0, <int>(dr + 0.5), vc, vr, vc, ww)
+        cc.extend(cc_t)
+        rr.extend(rr_t)
 
-        yy = (xx - x2) * (y1 - y2) / (x1 - x2) + y2
-        y1 = <int>(yy + 0.5)
-        x0 = x1 = x
-        y0 = y
-    if (y0 - y1) * floor(y2 - y1) > 0:
-        if (y0 == y2) or (weight == 1):
-            t = (y0 - y1) / (y0 - 2. * y1 + y2)
+        dr = (dc - c2) * (r1 - r2) / (c1 - c2) + r2
+        r1 = <int>(dr + 0.5)
+        c0 = c1 = vc
+        r0 = vr
+
+    if (r0 - r1) * floor(r2 - r1) > 0:
+        if (r0 == r2) or (weight == 1):
+            t = (r0 - r1) / (r0 - 2. * r1 + r2)
         else:
-            q = sqrt(4. * weight * weight * (y0 - y1) * (y2 - y1) + (y2 - y0) * floor(y2 - y0))
-            if y1 < y0:
+            q = sqrt(4. * weight * weight * (r0 - r1) * (r2 - r1) + (r2 - r0) * floor(r2 - r0))
+            if r1 < r0:
                 q = -q
-            t = (2. * weight * (y0 - y1) - y0 + y2 + q) / (2. * (1. - weight) * (y2 - y0))
+            t = (2. * weight * (r0 - r1) - r0 + r2 + q) / (2. * (1. - weight) * (r2 - r0))
         q = 1. / (2. * t * (1. - t) * (weight - 1.) + 1.)
-        xx = (t * t * (x0 - 2. * weight * x1 + x2) + 2. * t * (weight * x1 - x0) + x0) * q
-        yy = (t * t * (y0 - 2. * weight * y1 + y2) + 2. * t * (weight * y1 - y0) + y0) * q
+        dc = (t * t * (c0 - 2. * weight * c1 + c2) + 2. * t * (weight * c1 - c0) + c0) * q
+        dr = (t * t * (r0 - 2. * weight * r1 + r2) + 2. * t * (weight * r1 - r0) + r0) * q
         ww = t * (weight - 1.) + 1.
         ww *= ww * q
         weight = ((1. - t) * (weight - 1.) + 1.) * sqrt(q)
-        x = <int>(xx + 0.5)
-        y = <int>(yy + 0.5)
-        xx = (x1 - x0) * (yy - y0) / (y1 - y0) + x0
+        vc = <int>(dc + 0.5)
+        vr = <int>(dr + 0.5)
+        dc = (c1 - c0) * (dr - r0) / (r1 - r0) + c0
 
-        rr, cc = _bezier_segment(y0, x0, y, <int>(xx + 0.5), y, x, ww)
-        px.extend(rr)
-        py.extend(cc)
+        rr_t, cc_t = _bezier_segment(r0, c0, vr, <int>(dc + 0.5), vr, vc, ww)
+        cc.extend(cc_t)
+        rr.extend(rr_t)
 
-        xx = (x1 - x2) * (yy - y2) / (y1 - y2) + x2
-        x1 = <int>(xx + 0.5)
-        x0 = x
-        y0 = y1 = y
+        dc = (c1 - c2) * (dr - r2) / (r1 - r2) + c2
+        c1 = <int>(dc + 0.5)
+        c0 = vc
+        r0 = r1 = vr
 
-    rr, cc = _bezier_segment(y0, x0, y1, x1, y2, x2, weight * weight)
-    px.extend(rr)
-    py.extend(cc)
+    rr_t, cc_t = _bezier_segment(r0, c0, r1, c1, r2, c2, weight * weight)
+    cc.extend(cc_t)
+    rr.extend(rr_t)
 
     if shape is not None:
-        return _coords_inside_image(np.array(px, dtype=np.intp),
-                                    np.array(py, dtype=np.intp), shape)
-    return np.array(px, dtype=np.intp), np.array(py, dtype=np.intp)
+        return _coords_inside_image(np.array(rr, dtype=np.intp),
+                                    np.array(cc, dtype=np.intp), shape)
+    return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)

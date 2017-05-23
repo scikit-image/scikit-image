@@ -18,6 +18,7 @@ def configuration(parent_package='', top_path=None):
     cython(['brief_cy.pyx'], working_path=base_path)
     cython(['_texture.pyx'], working_path=base_path)
     cython(['_hessian_det_appx.pyx'], working_path=base_path)
+    cython(['_hoghistogram.pyx'], working_path=base_path)
 
     config.add_extension('corner_cy', sources=['corner_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
@@ -31,6 +32,8 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs(), '../_shared'])
     config.add_extension('_hessian_det_appx', sources=['_hessian_det_appx.c'],
                          include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_hoghistogram', sources=['_hoghistogram.c'],
+                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
 
     return config
 
@@ -38,7 +41,7 @@ if __name__ == '__main__':
     from numpy.distutils.core import setup
     setup(maintainer='scikit-image Developers',
           author='scikit-image Developers',
-          maintainer_email='scikit-image@googlegroups.com',
+          maintainer_email='scikit-image@python.org',
           description='Features',
           url='https://github.com/scikit-image/scikit-image',
           license='SciPy License (BSD Style)',

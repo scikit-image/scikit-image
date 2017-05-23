@@ -1,5 +1,8 @@
 import numpy as np
-from skimage.morphology import skeletonize, medial_axis
+import pytest
+from skimage.morphology import skeletonize, medial_axis, thin
+from skimage.morphology._skeletonize import (_generate_thin_luts,
+                                             G123_LUT, G123P_LUT)
 import numpy.testing
 from skimage import draw
 from scipy.ndimage import correlate
@@ -16,22 +19,26 @@ class TestSkeletonize():
 
     def test_skeletonize_wrong_dim1(self):
         im = np.zeros((5))
-        numpy.testing.assert_raises(ValueError, skeletonize, im)
+        with pytest.raises(ValueError):
+            skeletonize(im)
 
     def test_skeletonize_wrong_dim2(self):
         im = np.zeros((5, 5, 5))
-        numpy.testing.assert_raises(ValueError, skeletonize, im)
+        with pytest.raises(ValueError):
+            skeletonize(im)
 
     def test_skeletonize_not_binary(self):
         im = np.zeros((5, 5))
         im[0, 0] = 1
         im[0, 1] = 2
-        numpy.testing.assert_raises(ValueError, skeletonize, im)
+        with pytest.raises(ValueError):
+            skeletonize(im)
 
     def test_skeletonize_unexpected_value(self):
         im = np.zeros((5, 5))
         im[0, 0] = 2
-        numpy.testing.assert_raises(ValueError, skeletonize, im)
+        with pytest.raises(ValueError):
+            skeletonize(im)
 
     def test_skeletonize_all_foreground(self):
         im = np.ones((3, 4))
@@ -109,6 +116,56 @@ class TestSkeletonize():
                              [0, 0, 0, 0, 0, 1],
                              [0, 0, 0, 0, 0, 0]], dtype=np.uint8)
         assert np.all(result == expected)
+
+
+class TestThin():
+    @property
+    def input_image(self):
+        """image to test thinning with"""
+        ii = np.array([[0, 0, 0, 0, 0, 0, 0],
+                       [0, 1, 1, 1, 1, 1, 0],
+                       [0, 1, 0, 1, 1, 1, 0],
+                       [0, 1, 1, 1, 1, 1, 0],
+                       [0, 1, 1, 1, 1, 1, 0],
+                       [0, 1, 1, 1, 1, 1, 0],
+                       [0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        return ii
+
+    def test_zeros(self):
+        assert np.all(thin(np.zeros((10, 10))) == False)
+
+    def test_iter_1(self):
+        result = thin(self.input_image, 1).astype(np.uint8)
+        expected = np.array([[0, 0, 0, 0, 0, 0, 0],
+                             [0, 0, 1, 0, 0, 0, 0],
+                             [0, 1, 0, 1, 1, 0, 0],
+                             [0, 0, 1, 1, 1, 0, 0],
+                             [0, 0, 1, 1, 1, 0, 0],
+                             [0, 0, 0, 0, 0, 0, 0],
+                             [0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        numpy.testing.assert_array_equal(result, expected)
+
+    def test_noiter(self):
+        result = thin(self.input_image).astype(np.uint8)
+        expected = np.array([[0, 0, 0, 0, 0, 0, 0],
+                             [0, 0, 1, 0, 0, 0, 0],
+                             [0, 1, 0, 1, 0, 0, 0],
+                             [0, 0, 1, 0, 0, 0, 0],
+                             [0, 0, 0, 0, 0, 0, 0],
+                             [0, 0, 0, 0, 0, 0, 0],
+                             [0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        numpy.testing.assert_array_equal(result, expected)
+
+    def test_baddim(self):
+        for ii in [np.zeros((3)), np.zeros((3, 3, 3))]:
+            with pytest.raises(ValueError):
+                thin(ii)
+
+    def test_lut_generation(self):
+        g123, g123p = _generate_thin_luts()
+
+        numpy.testing.assert_array_equal(g123, G123_LUT)
+        numpy.testing.assert_array_equal(g123p, G123P_LUT)
 
 
 class TestMedialAxis():

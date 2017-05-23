@@ -16,6 +16,7 @@ def configuration(parent_package='', top_path=None):
     cython(['_hough_transform.pyx'], working_path=base_path)
     cython(['_warps_cy.pyx'], working_path=base_path)
     cython(['_radon_transform.pyx'], working_path=base_path)
+    cython(['_seam_carving.pyx'], working_path=base_path)
 
     config.add_extension('_hough_transform', sources=['_hough_transform.c'],
                          include_dirs=[get_numpy_include_dirs()])
@@ -27,13 +28,15 @@ def configuration(parent_package='', top_path=None):
                          sources=['_radon_transform.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
+    config.add_extension('_seam_carving', sources=['_seam_carving.c'],
+                         include_dirs=[get_numpy_include_dirs()])
     return config
 
 if __name__ == '__main__':
     from numpy.distutils.core import setup
     setup(maintainer='scikit-image Developers',
           author='scikit-image Developers',
-          maintainer_email='scikit-image@googlegroups.com',
+          maintainer_email='scikit-image@python.org',
           description='Transforms',
           url='https://github.com/scikit-image/scikit-image',
           license='SciPy License (BSD Style)',

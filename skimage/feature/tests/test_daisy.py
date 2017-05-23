@@ -1,5 +1,6 @@
 import numpy as np
-from numpy.testing import assert_raises, assert_almost_equal
+from numpy.testing import assert_almost_equal
+import pytest
 from numpy import sqrt, ceil
 
 from skimage import data
@@ -9,7 +10,8 @@ from skimage.feature import daisy
 
 def test_daisy_color_image_unsupported_error():
     img = np.zeros((20, 20, 3))
-    assert_raises(ValueError, daisy, img)
+    with pytest.raises(ValueError):
+        daisy(img)
 
 
 def test_daisy_desc_dims():
@@ -56,7 +58,8 @@ def test_daisy_incompatible_sigmas_and_radii():
     img = img_as_float(data.astronaut()[:64, :64].mean(axis=2))
     sigmas = [1, 2]
     radii = [1, 2]
-    assert_raises(ValueError, daisy, img, sigmas=sigmas, ring_radii=radii)
+    with pytest.raises(ValueError):
+        daisy(img, sigmas=sigmas, ring_radii=radii)
 
 
 def test_daisy_normalization():
@@ -89,7 +92,8 @@ def test_daisy_normalization():
         for j in range(descs.shape[1]):
             assert_almost_equal(np.sum(descs[i, j, :]), 0)
 
-    assert_raises(ValueError, daisy, img, normalization='does_not_exist')
+    with pytest.raises(ValueError):
+        daisy(img, normalization='does_not_exist')
 
 
 def test_daisy_visualization():

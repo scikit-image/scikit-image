@@ -14,8 +14,8 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
 
     Parameters
     ----------
-    viewer : :class:`skimage.viewer.Viewer`
-        Skimage viewer object.
+    manager : Viewer or PlotPlugin.
+        Skimage viewer or plot plugin object.
     on_move : function
         Function called whenever a control handle is moved.
         This function must accept the rectangle extents as the only argument.
@@ -58,20 +58,20 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
     ...     set_color(im, (rr4, cc4), [0, 0, 0])
     ...     viewer.image=im
 
-    >>> rect_tool = RectangleTool(viewer.ax, on_enter=print_the_rect) # doctest: +SKIP
+    >>> rect_tool = RectangleTool(viewer, on_enter=print_the_rect) # doctest: +SKIP
     >>> viewer.show() # doctest: +SKIP
     """
 
-    def __init__(self, viewer, on_move=None, on_release=None, on_enter=None,
+    def __init__(self, manager, on_move=None, on_release=None, on_enter=None,
                  maxdist=10, rect_props=None):
         self._rect = None
         props = dict(edgecolor=None, facecolor='r', alpha=0.15)
         props.update(rect_props if rect_props is not None else {})
         if props['edgecolor'] is None:
             props['edgecolor'] = props['facecolor']
-        RectangleSelector.__init__(self, viewer.ax, lambda *args: None,
+        RectangleSelector.__init__(self, manager.ax, lambda *args: None,
                                    rectprops=props)
-        CanvasToolBase.__init__(self, viewer, on_move=on_move,
+        CanvasToolBase.__init__(self, manager, on_move=on_move,
                                 on_enter=on_enter, on_release=on_release)
 
         # Events are handled by the viewer
@@ -107,7 +107,7 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
         self.artists = [self._rect,
                         self._corner_handles.artist,
                         self._edge_handles.artist]
-        viewer.add_tool(self)
+        self.manager.add_tool(self)
 
     @property
     def _rect_bbox(self):

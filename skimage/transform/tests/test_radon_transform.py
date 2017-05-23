@@ -1,18 +1,19 @@
 from __future__ import print_function, division
 
 import numpy as np
-from numpy.testing import assert_raises
+import pytest
 import itertools
 import os.path
 
 from skimage.transform import radon, iradon, iradon_sart, rescale
 from skimage.io import imread
 from skimage import data_dir
-
+from skimage._shared.testing import test_parallel
+from skimage._shared._warnings import expected_warnings
 
 PHANTOM = imread(os.path.join(data_dir, "phantom.png"),
-                   as_grey=True)[::2, ::2]
-PHANTOM = rescale(PHANTOM, 0.5, order=1)
+                 as_grey=True)[::2, ::2]
+PHANTOM = rescale(PHANTOM, 0.5, order=1, multichannel=False)
 
 
 def _debug_plot(original, result, sinogram=None):
@@ -115,7 +116,7 @@ def test_iradon_center():
 def check_radon_iradon(interpolation_type, filter_type):
     debug = False
     image = PHANTOM
-    reconstructed = iradon(radon(image), filter=filter_type,
+    reconstructed = iradon(radon(image, circle=False), filter=filter_type,
                            interpolation=interpolation_type)
     delta = np.mean(np.abs(image - reconstructed))
     print('\n\tmean error:', delta)
@@ -150,19 +151,19 @@ def test_iradon_angles():
     image = np.tri(size) + np.tri(size)[::-1]
     # Large number of projections: a good quality is expected
     nb_angles = 200
-    radon_image_200 = radon(image, theta=np.linspace(0, 180, nb_angles,
-                                                     endpoint=False))
-    reconstructed = iradon(radon_image_200)
-    delta_200 = np.mean(abs(_rescale_intensity(image) - _rescale_intensity(reconstructed)))
+    theta = np.linspace(0, 180, nb_angles, endpoint=False)
+    radon_image_200 = radon(image, theta=theta, circle=False)
+    reconstructed = iradon(radon_image_200, circle=False)
+    delta_200 = np.mean(abs(_rescale_intensity(image) -
+                            _rescale_intensity(reconstructed)))
     assert delta_200 < 0.03
     # Lower number of projections
     nb_angles = 80
-    radon_image_80 = radon(image, theta=np.linspace(0, 180, nb_angles,
-                                                    endpoint=False))
+    radon_image_80 = radon(image, theta=theta, circle=False)
     # Test whether the sum of all projections is approximately the same
     s = radon_image_80.sum(axis=0)
     assert np.allclose(s, s[0], rtol=0.01)
-    reconstructed = iradon(radon_image_80)
+    reconstructed = iradon(radon_image_80, circle=False)
     delta_80 = np.mean(abs(image / np.max(image) -
                            reconstructed / np.max(reconstructed)))
     # Loss of quality when the number of projections is reduced
@@ -174,8 +175,8 @@ def check_radon_iradon_minimal(shape, slices):
     theta = np.arange(180)
     image = np.zeros(shape, dtype=np.float)
     image[slices] = 1.
-    sinogram = radon(image, theta)
-    reconstructed = iradon(sinogram, theta)
+    sinogram = radon(image, theta, circle=False)
+    reconstructed = iradon(sinogram, theta, circle=False)
     print('\n\tMaximum deviation:', np.max(np.abs(image - reconstructed)))
     if debug:
         _debug_plot(image, reconstructed, sinogram)
@@ -196,9 +197,10 @@ def test_radon_iradon_minimal():
 
 def test_reconstruct_with_wrong_angles():
     a = np.zeros((3, 3))
-    p = radon(a, theta=[0, 1, 2])
-    iradon(p, theta=[0, 1, 2])
-    assert_raises(ValueError, iradon, p, theta=[0, 1, 2, 3])
+    p = radon(a, theta=[0, 1, 2], circle=False)
+    iradon(p, theta=[0, 1, 2], circle=False)
+    with pytest.raises(ValueError):
+        iradon(p, theta=[0, 1, 2, 3])
 
 
 def _random_circle(shape):
@@ -214,7 +216,8 @@ def _random_circle(shape):
 
 def test_radon_circle():
     a = np.ones((10, 10))
-    assert_raises(ValueError, radon, a, circle=True)
+    with expected_warnings(['reconstruction circle']):
+        radon(a, circle=True)
 
     # Synthetic data, circular symmetry
     shape = (61, 79)
@@ -242,7 +245,10 @@ def check_sinogram_circle_to_square(size):
     image = _random_circle((size, size))
     theta = np.linspace(0., 180., size, False)
     sinogram_circle = radon(image, theta, circle=True)
-    argmax_shape = lambda a: np.unravel_index(np.argmax(a), a.shape)
+
+    def argmax_shape(a):
+        return np.unravel_index(np.argmax(a), a.shape)
+
     print('\n\targmax of circle:', argmax_shape(sinogram_circle))
     sinogram_square = radon(image, theta, circle=False)
     print('\targmax of square:', argmax_shape(sinogram_square))
@@ -251,8 +257,8 @@ def check_sinogram_circle_to_square(size):
           argmax_shape(sinogram_circle_to_square))
     error = abs(sinogram_square - sinogram_circle_to_square)
     print(np.mean(error), np.max(error))
-    assert (argmax_shape(sinogram_square)
-            == argmax_shape(sinogram_circle_to_square))
+    assert (argmax_shape(sinogram_square) ==
+            argmax_shape(sinogram_circle_to_square))
 
 
 def test_sinogram_circle_to_square():
@@ -310,10 +316,11 @@ def test_order_angles_golden_ratio():
             assert len(indices) == len(set(indices))
 
 
+@test_parallel()
 def test_iradon_sart():
     debug = False
 
-    image = rescale(PHANTOM, 0.8)
+    image = rescale(PHANTOM, 0.8, mode='reflect')
     theta_ordered = np.linspace(0., 180., image.shape[0], endpoint=False)
     theta_missing_wedge = np.linspace(0., 150., image.shape[0], endpoint=True)
     for theta, error_factor in ((theta_ordered, 1.),

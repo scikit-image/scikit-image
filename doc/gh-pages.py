@@ -78,11 +78,11 @@ def init_repo(path):
 # Script starts
 #-----------------------------------------------------------------------------
 if __name__ == '__main__':
-    # find the version number from setup.py
-    setup_lines = open('../setup.py').readlines()
+    # find the version number from skimage/__init__.py
+    setup_lines = open('../skimage/__init__.py').readlines()
     tag = 'vUndefined'
     for l in setup_lines:
-        if l.startswith('VERSION'):
+        if l.startswith('__version__'):
             tag = l.split("'")[1]
 
             if "dev" in tag:

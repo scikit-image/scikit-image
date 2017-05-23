@@ -1,4 +1,5 @@
-try:
-    from tifffile import imread, imsave, TiffFile
-except ImportError:
-    from .tifffile_local import imread, imsave, TiffFile
+from .tifffile import imsave, imread, imshow, TiffFile, TiffWriter, TiffSequence
+
+__version__ = '0.6.2'
+__all__ = ('imsave', 'imread', 'imshow', 'TiffFile', 'TiffWriter',
+           'TiffSequence')

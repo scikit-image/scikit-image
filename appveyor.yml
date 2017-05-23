@@ -9,34 +9,44 @@ environment:
     CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\tools\\appveyor\\run_with_env.cmd"
 
   matrix:
-    - PYTHON: "C:\\Python27_32"
+    - PYTHON: "C:\\Python27-conda32"
       PYTHON_VERSION: "2.7"
       PYTHON_ARCH: "32"
 
-    - PYTHON: "C:\\Python27_64"
-      PYTHON_VERSION: "2.7"
-      PYTHON_ARCH: "64"
+   # disable other builds until they can be run in parallel
+    #- PYTHON: "C:\\Python27-conda64"
+    #  PYTHON_VERSION: "2.7"
+    #  PYTHON_ARCH: "64"
 
-    - PYTHON: "C:\\Python34_32"
-      PYTHON_VERSION: "3.4.2"
-      PYTHON_ARCH: "32"
+    #- PYTHON: "C:\\Python35-conda32"
+    #  PYTHON_VERSION: "3.5"
+    #  PYTHON_ARCH: "32"
 
-    - PYTHON: "C:\\Python24_64"
-      PYTHON_VERSION: "3.4.2"
-      PYTHON_ARCH: "64"
+    #- PYTHON: "C:\\Python35-conda64"
+    #  PYTHON_VERSION: "3.5"
+    #  PYTHON_ARCH: "64"
 
 install:
-  # Install Python (from the official .msi of http://python.org) and pip when
-  # not already installed.
+  - ECHO "Filesystem root:"
+  - ps: "ls \"C:/\""
+
+  # Install Python and all the required packages.
   - "powershell ./tools/appveyor/install.ps1"
+
+  # Prepend newly installed Python to the PATH of this build
+  # (this cannot be done from inside the powershell script as it would require
+  # to restart the parent CMD process).
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
 
   # Check that we have the expected version and architecture for Python
   - "python --version"
   - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
 
+  # Get stdint headers needed by tifffile.c.
+  - "curl https://raw.githubusercontent.com/chemeris/msinttypes/master/inttypes.h -o skimage/external/tifffile/inttypes.h"
+  - "curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o skimage/external/tifffile/stdint.h"
+
   # Install the build and runtime dependencies of the project.
-  - "%CMD_IN_ENV% pip install -v %WHEELHOUSE% -r tools/appveyor/requirements.txt"
   - "%CMD_IN_ENV% pip install -v -r requirements.txt"
   - "%CMD_IN_ENV% python setup.py bdist_wheel bdist_wininst"
   - ps: "ls dist"
@@ -44,12 +54,14 @@ install:
   # Install the generated wheel package to test it
   - "pip install --pre --no-index --find-links dist/ scikit-image"
 
-
-
 # Not a .NET project, we build scikit-image in the install step instead
 build: false
 
 test_script:
+  # Build the docs
+  - pip install "sphinx<1.6"
+  - SET PYTHON=%PYTHON%\\python.exe && cd doc && make html
+
   # Change to a non-source folder to make sure we run the tests on the
   # installed library.
   - "cd C:\\"
@@ -57,8 +69,8 @@ test_script:
     # Use the Agg backend in Matplotlib
   -  echo backend:Agg > matplotlibrc
 
-  # Run unit tests with nose
-  - "python -c \"import nose; nose.main()\" -v -s skimage"
+  # Run unit tests with pytest
+  - "python -c \"import pytest; import skimage; pytest.main([skimage.pkg_dir])\""
 
 artifacts:
   # Archive the generated wheel package in the ci.appveyor.com build report.

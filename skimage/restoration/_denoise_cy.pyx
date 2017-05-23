@@ -6,7 +6,6 @@
 cimport numpy as cnp
 import numpy as np
 from libc.math cimport exp, fabs, sqrt
-from libc.stdlib cimport malloc, free
 from libc.float cimport DBL_MAX
 from .._shared.interpolation cimport get_pixel3d
 from ..util import img_as_float
@@ -16,10 +15,10 @@ cdef inline double _gaussian_weight(double sigma, double value):
     return exp(-0.5 * (value / sigma)**2)
 
 
-cdef double* _compute_color_lut(Py_ssize_t bins, double sigma, double max_value):
+cdef double[:] _compute_color_lut(Py_ssize_t bins, double sigma, double max_value):
 
     cdef:
-        double* color_lut = <double*>malloc(bins * sizeof(double))
+        double[:] color_lut = np.empty(bins, dtype=np.double)
         Py_ssize_t b
 
     for b in range(bins):
@@ -28,10 +27,10 @@ cdef double* _compute_color_lut(Py_ssize_t bins, double sigma, double max_value)
     return color_lut
 
 
-cdef double* _compute_range_lut(Py_ssize_t win_size, double sigma):
+cdef double[:] _compute_range_lut(Py_ssize_t win_size, double sigma):
 
     cdef:
-        double* range_lut = <double*>malloc(win_size**2 * sizeof(double))
+        double[:] range_lut = np.empty(win_size**2, dtype=np.double)
         Py_ssize_t kr, kc
         Py_ssize_t window_ext = (win_size - 1) / 2
         double dist
@@ -44,63 +43,76 @@ cdef double* _compute_range_lut(Py_ssize_t win_size, double sigma):
     return range_lut
 
 
-def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
+cdef inline Py_ssize_t Py_ssize_t_min(Py_ssize_t value1, Py_ssize_t value2):
+    if value1 < value2:
+        return value1
+    else:
+        return value2
+
+
+def _denoise_bilateral(image, Py_ssize_t win_size, sigma_color,
                       double sigma_spatial, Py_ssize_t bins,
                       mode, double cval):
-    image = np.atleast_3d(img_as_float(image))
+    cdef:
+        double min_value, max_value
+
+    min_value = image.min()
+    max_value = image.max()
+
+    if min_value == max_value:
+        return image
 
     # if image.max() is 0, then dist_scale can have an unverified value
     # and color_lut[<int>(dist * dist_scale)] may cause a segmentation fault
     # so we verify we have a positive image and that the max is not 0.0.
-    if image.min() < 0.0:
+    if min_value < 0.0:
         raise ValueError("Image must contain only positive values")
+
+    if max_value == 0.0:
+        raise ValueError("The maximum value found in the image was 0.")
+
+    image = np.atleast_3d(img_as_float(image))
 
     cdef:
         Py_ssize_t rows = image.shape[0]
         Py_ssize_t cols = image.shape[1]
         Py_ssize_t dims = image.shape[2]
         Py_ssize_t window_ext = (win_size - 1) / 2
-
-        double max_value
+        Py_ssize_t max_color_lut_bin = bins - 1
 
         double[:, :, ::1] cimage
         double[:, :, ::1] out
 
-        double* color_lut
-        double* range_lut
+        double[:] color_lut
+        double[:] range_lut
 
-        Py_ssize_t r, c, d, wr, wc, kr, kc, rr, cc, pixel_addr
-        double value, weight, dist, total_weight, csigma_range, color_weight, \
+        Py_ssize_t r, c, d, wr, wc, kr, kc, rr, cc, pixel_addr, color_lut_bin
+        double value, weight, dist, total_weight, csigma_color, color_weight, \
                range_weight
         double dist_scale
-        double* values
-        double* centres
-        double* total_values
+        double[:] values
+        double[:] centres
+        double[:] total_values
 
-    if sigma_range is None:
-        csigma_range = image.std()
+    if sigma_color is None:
+        csigma_color = image.std()
     else:
-        csigma_range = sigma_range
+        csigma_color = sigma_color
 
-    max_value = image.max()
-
-    if max_value == 0.0:
-        raise ValueError("The maximum value found in the image was 0.")
+    if mode not in ('constant', 'wrap', 'symmetric', 'reflect', 'edge'):
+        raise ValueError("Invalid mode specified.  Please use `constant`, "
+                         "`edge`, `wrap`, `symmetric` or `reflect`.")
+    cdef char cmode = ord(mode[0].upper())
 
     cimage = np.ascontiguousarray(image)
 
     out = np.zeros((rows, cols, dims), dtype=np.double)
-    color_lut = _compute_color_lut(bins, csigma_range, max_value)
+    color_lut = _compute_color_lut(bins, csigma_color, max_value)
     range_lut = _compute_range_lut(win_size, sigma_spatial)
     dist_scale = bins / dims / max_value
-    values = <double*>malloc(dims * sizeof(double))
-    centres = <double*>malloc(dims * sizeof(double))
-    total_values = <double*>malloc(dims * sizeof(double))
-
-    if mode not in ('constant', 'wrap', 'reflect', 'nearest'):
-        raise ValueError("Invalid mode specified.  Please use "
-                         "`constant`, `nearest`, `wrap` or `reflect`.")
-    cdef char cmode = ord(mode[0].upper())
+    values = np.empty(dims, dtype=np.double)
+    centres = np.empty(dims, dtype=np.double)
+    total_values = np.empty(dims, dtype=np.double)
 
     for r in range(rows):
         for c in range(cols):
@@ -126,7 +138,10 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
                     dist = sqrt(dist)
 
                     range_weight = range_lut[kr * win_size + kc]
-                    color_weight = color_lut[<int>(dist * dist_scale)]
+
+                    color_lut_bin = Py_ssize_t_min(
+                        <Py_ssize_t>(dist * dist_scale), max_color_lut_bin)
+                    color_weight = color_lut[color_lut_bin]
 
                     weight = range_weight * color_weight
                     for d in range(dims):
@@ -134,12 +149,6 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
                     total_weight += weight
             for d in range(dims):
                 out[r, c, d] = total_values[d] / total_weight
-
-    free(color_lut)
-    free(range_lut)
-    free(values)
-    free(centres)
-    free(total_values)
 
     return np.squeeze(np.asarray(out))
 

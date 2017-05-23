@@ -3,7 +3,7 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 
-"""Colour Mixer
+"""Color Mixer
 
 NumPy does not do overflow checking when adding or multiplying
 integers, so currently the only way to clip results efficiently
@@ -20,7 +20,7 @@ from libc.math cimport exp, pow
 def add(cnp.ndarray[cnp.uint8_t, ndim=3] img,
         cnp.ndarray[cnp.uint8_t, ndim=3] stateimg,
         Py_ssize_t channel, Py_ssize_t amount):
-    """Add a given amount to a colour channel of `stateimg`, and
+    """Add a given amount to a color channel of `stateimg`, and
     store the result in `img`.  Overflow is clipped.
 
     Parameters
@@ -66,7 +66,7 @@ def add(cnp.ndarray[cnp.uint8_t, ndim=3] img,
 def multiply(cnp.ndarray[cnp.uint8_t, ndim=3] img,
              cnp.ndarray[cnp.uint8_t, ndim=3] stateimg,
              Py_ssize_t channel, float amount):
-    """Multiply a colour channel of `stateimg` by a certain amount, and
+    """Multiply a color channel of `stateimg` by a certain amount, and
     store the result in `img`.  Overflow is clipped.
 
     Parameters

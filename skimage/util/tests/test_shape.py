@@ -1,39 +1,38 @@
 import numpy as np
-from nose.tools import raises
 from numpy.testing import assert_equal, assert_warns
+import pytest
 
 from skimage.util.shape import view_as_blocks, view_as_windows
-from skimage._shared._warnings import expected_warnings
 
 
-@raises(TypeError)
 def test_view_as_blocks_block_not_a_tuple():
     A = np.arange(10)
-    view_as_blocks(A, [5])
+    with pytest.raises(TypeError):
+        view_as_blocks(A, [5])
 
 
-@raises(ValueError)
 def test_view_as_blocks_negative_shape():
     A = np.arange(10)
-    view_as_blocks(A, (-2,))
+    with pytest.raises(ValueError):
+        view_as_blocks(A, (-2,))
 
 
-@raises(ValueError)
 def test_view_as_blocks_block_too_large():
     A = np.arange(10)
-    view_as_blocks(A, (11,))
+    with pytest.raises(ValueError):
+        view_as_blocks(A, (11,))
 
 
-@raises(ValueError)
 def test_view_as_blocks_wrong_block_dimension():
     A = np.arange(10)
-    view_as_blocks(A, (2, 2))
+    with pytest.raises(ValueError):
+        view_as_blocks(A, (2, 2))
 
 
-@raises(ValueError)
 def test_view_as_blocks_1D_array_wrong_block_shape():
     A = np.arange(10)
-    view_as_blocks(A, (3,))
+    with pytest.raises(ValueError):
+        view_as_blocks(A, (3,))
 
 
 def test_view_as_blocks_1D_array():
@@ -47,7 +46,7 @@ def test_view_as_blocks_2D_array():
     A = np.arange(4 * 4).reshape(4, 4)
     B = view_as_blocks(A, (2, 2))
     assert_equal(B[0, 1], np.array([[2, 3],
-                                   [6, 7]]))
+                                    [6, 7]]))
     assert_equal(B[1, 0, 1, 1], 13)
 
 
@@ -61,40 +60,35 @@ def test_view_as_blocks_3D_array():
                                           [82, 83]]]]))
 
 
-@raises(TypeError)
 def test_view_as_windows_input_not_array():
     A = [1, 2, 3, 4, 5]
-    view_as_windows(A, (2,))
+    with pytest.raises(TypeError):
+        view_as_windows(A, (2,))
 
 
-@raises(TypeError)
-def test_view_as_windows_window_not_tuple():
-    A = np.arange(10)
-    view_as_windows(A, [2])
-
-
-@raises(ValueError)
 def test_view_as_windows_wrong_window_dimension():
     A = np.arange(10)
-    view_as_windows(A, (2, 2))
+    with pytest.raises(ValueError):
+        view_as_windows(A, (2, 2))
 
 
-@raises(ValueError)
 def test_view_as_windows_negative_window_length():
     A = np.arange(10)
-    view_as_windows(A, (-1,))
+    with pytest.raises(ValueError):
+        view_as_windows(A, (-1,))
 
 
-@raises(ValueError)
 def test_view_as_windows_window_too_large():
     A = np.arange(10)
-    view_as_windows(A, (11,))
+    with pytest.raises(ValueError):
+        view_as_windows(A, (11,))
 
 
-@raises(ValueError)
 def test_view_as_windows_step_below_one():
     A = np.arange(10)
-    view_as_windows(A, (11,), step=0.9)
+    with pytest.raises(ValueError):
+        view_as_windows(A, (11,), step=0.9)
+
 
 def test_view_as_windows_1D():
     A = np.arange(10)
@@ -135,7 +129,7 @@ def test_view_as_windows_2D():
 
 def test_view_as_windows_with_skip():
     A = np.arange(20).reshape((5, 4))
-    B = view_as_windows(A, (2, 2), step=2)
+    B = view_as_windows(A, 2, step=2)
     assert_equal(B, [[[[0, 1],
                        [4, 5]],
                       [[2, 3],
@@ -145,7 +139,7 @@ def test_view_as_windows_with_skip():
                       [[10, 11],
                        [14, 15]]]])
 
-    C = view_as_windows(A, (2, 2), step=4)
+    C = view_as_windows(A, 2, step=4)
     assert_equal(C.shape, (1, 1, 2, 2))
 
 
@@ -155,6 +149,30 @@ def test_views_non_contiguous():
 
     assert_warns(RuntimeWarning, view_as_blocks, A, (2, 2))
     assert_warns(RuntimeWarning, view_as_windows, A, (2, 2))
+
+
+def test_view_as_windows_step_tuple():
+    A = np.arange(24).reshape((6, 4))
+    B = view_as_windows(A, (3, 2), step=3)
+    assert B.shape == (2, 1, 3, 2)
+    assert B.size != A.size
+
+    C = view_as_windows(A, (3, 2), step=(3, 2))
+    assert C.shape == (2, 2, 3, 2)
+    assert C.size == A.size
+
+    assert_equal(C, [[[[0,  1],
+                       [4,  5],
+                       [8,  9]],
+                      [[2,  3],
+                       [6,  7],
+                       [10, 11]]],
+                     [[[12, 13],
+                         [16, 17],
+                         [20, 21]],
+                      [[14, 15],
+                         [18, 19],
+                         [22, 23]]]])
 
 
 if __name__ == '__main__':

@@ -80,9 +80,9 @@ class SaveButtons(BaseWidget):
         notify(msg)
 
     def save_to_file(self, filename=None):
-        if filename is None:
+        if not filename:
             filename = dialogs.save_file_dialog()
-        if filename is None:
+        if not filename:
             return
         image = self.plugin.filtered_image
         if image.dtype == np.bool:

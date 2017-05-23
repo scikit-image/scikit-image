@@ -1,16 +1,23 @@
 body {
-    font-family: "Raleway";
+    font-family: "Lato", sans-serif;
     letter-spacing: 0.02em;
     font-size: 102%;
+    line-height: 23px;
 }
 a {
     color: #CE5C00;
+}
+li {
+    line-height: 23px;
+}
+code, pre {
+    font-family: monospace;
 }
 input,
 button,
 select,
 textarea {
-    font-family: "Raleway";
+    font-family: "Lato", sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -176,7 +183,7 @@ dl.class dd, dl.function dd {
     padding: 10px;
 }
 .docutils.field-list th {
-    background-color: #eee;
+    background-color: #f3f3f3;
     padding: 10px;
     text-align: left;
     vertical-align: top;
@@ -235,4 +242,23 @@ p.admonition-title {
     background-color: #d9edf7;
     border-color: #bce8f1;
 /*    padding: 1em;*/
+}
+
+.viewcode-link {
+    float: right;
+    font-family: monospace;
+}
+
+code.docutils.literal {
+    background-color: transparent;
+    border: none;
+}
+
+td.field-body blockquote {
+    border-left: none;
+    margin-bottom: 0.5em;
+}
+
+td.field-body p {
+    margin-bottom: 0.3em;
 }

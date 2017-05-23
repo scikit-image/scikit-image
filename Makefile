@@ -1,20 +1,23 @@
 .PHONY: all clean test
+PYTHON=python
+PYTESTS=py.test
 
 all:
-	python setup.py build_ext --inplace
+	$(PYTHON) setup.py build_ext --inplace
 
 clean:
-	find . -name "*.so" -o -name "*.pyc" -o -name "*.pyx.md5" | xargs rm -f
+	find . -name "*.so" -o -name "*.pyc" -o -name "*.md5" -o -name "*.pyd" | xargs rm -f
+	find . -name "*.pyx" -exec ./tools/rm_pyx_c_file.sh {} \;
 
 test:
-	python -c "import skimage, sys, io; sys.exit(skimage.test_verbose())"
+	$(PYTESTS) skimage --doctest-modules
 
 doctest:
-	python -c "import skimage, sys, io; sys.exit(skimage.doctest_verbose())"
+	$(PYTHON) -c "import skimage, sys, io; sys.exit(skimage.doctest_verbose())"
 
 coverage:
-	nosetests skimage --with-coverage --cover-package=skimage
+	$(PYTESTS) skimage --cov=skimage
 
 html:
-	pip install -q sphinx
+	pip install -q 'sphinx<1.6'
 	export SPHINXOPTS=-W; make -C doc html

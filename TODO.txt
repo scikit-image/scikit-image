@@ -1,31 +1,39 @@
 Remember to list any API changes below in `doc/source/api_changes.txt`.
 
-Version 0.13
+Version 0.14
 ------------
-* Remove deprecated `None` defaults for `skimage.exposure.rescale_intensity`
-* Remove deprecated `skimage.filters.canny` import in `filters/__init__.py`
-  file (canny is now in `skimage.feature.canny`).
-    * Don't forget to complete api_changes.txt.
-     (`GitHub discuss <https://github.com/scikit-image/scikit-image/pull/1113>`__ )
-* Remove deprecated ``skimage.filter`` module.
-* Remove deprecated edge filters `hsobel`, `vsobel`, `hscharr`, `vscharr`,
-  `hprewitt`, `vprewitt`, `roberts_positive_diagonal`,
-  `roberts_negative_diagonal` in `skimage/filters/edges.py`
+* Finalize ``skimage.future.graph`` API.
+* Remove the freeimage plugin shim to imageio.
 
-Version 0.12
+Version 0.15
 ------------
-* Change `label` to mark background as 0, not -1, which is consistent with
-  SciPy's labelling.
-* Remove `skimage.morphology.label` from `skimage.morphology.__init__`--it now
-  lives in `skimage.measure.label`.
-* Remove deprecated `reverse_map` parameter of `skimage.transform.warp`
-* Change deprecated `enforce_connectivity=False` on skimage.segmentation.slic
-  and set it to True as default
-* Remove deprecated `skimage.measure.fit.BaseModel._params` attribute
-* Remove deprecated `skimage.measure.fit.BaseModel._params`,
-  `skimage.transform.ProjectiveTransform._matrix`,
-  `skimage.transform.PolynomialTransform._params`,
-  `skimage.transform.PiecewiseAffineTransform.affines_*` attributes
-* Remove deprecated functions `skimage.filters.denoise_*`
-* Add 3D phantom in `skimage.data`
-* Add 3D test case of `skimage.feature.phase_correlate`
+* Finalize ``skimage.future.manual_segmentation`` API.
+* In ``skimage.util.dtype_limits``, set default behavior of `clip_negative` to `False`.
+* In ``skimage.transform.radon``, set default behavior of `circle` to `True`.
+* In ``skimage.transform.iradon``, set default behavior of `circle` to `True`.
+* In ``skimage.transform.swirl``, set default behavior of `mode` to `reflect`.
+* In ``skimage.restoration.denoise_bilateral``, set default behavior of
+  `multichannel` to False
+* In ``skimage.restoration.denoise_nl_means``, set default behavior of
+  `multichannel` to False
+* Change the default value of `block_norm` in ``skimage.feature.hog` to L2-Hys,
+  update the reference .npy in ``skimage.data`` and `skimage/feature/tests/test_hog.py`.
+* Remove deprecated function ``threshold_adaptive`` in
+  ``skimage/filters/thresholding.py``.
+* In ``skimage.transform.resize``, set default value of ``mode`` to
+  ``'reflect'``.
+* In ``skimage.transform.rescale``, set default value of ``mode`` to
+  ``'reflect'``.
+
+Version 0.16
+------------
+* In ``skimage.transform.resize``, ``skimage.transform.pyramid_reduce``,
+  ``skimage.transform.pyramid_laplacian``,
+  ``skimage.transform.pyramid_gaussian``,
+  ``skimage.transform.pyramid_expandset``, set default value of
+  ``multichannel`` to False
+* Remove ``_multichannel_default`` from ``skimage.transform._warps.py``, and no
+  longer call it from within the ``resize`` or ``pyramid_*`` transforms.
+* Remove checks for the ``multichannel`` deprecation warnings in several tests
+  in ``skimage.transform.tests.test_pyramids.py`` and
+  ``skimage.transform.tests.test_warps.py``.

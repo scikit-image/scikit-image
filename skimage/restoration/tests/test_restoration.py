@@ -2,7 +2,7 @@ from os.path import abspath, dirname, join as pjoin
 
 import numpy as np
 from scipy.signal import convolve2d
-from scipy import ndimage as nd
+from scipy import ndimage as ndi
 
 import skimage
 from skimage.data import camera
@@ -61,10 +61,10 @@ def test_image_shape():
     """
     point = np.zeros((5, 5), np.float)
     point[2, 2] = 1.
-    psf = nd.gaussian_filter(point, sigma=1.)
+    psf = ndi.gaussian_filter(point, sigma=1.)
     # image shape: (45, 45), as reported in #1172
     image = skimage.img_as_float(camera()[110:155, 225:270]) # just the face
-    image_conv = nd.convolve(image, psf)
+    image_conv = ndi.convolve(image, psf)
     deconv_sup = restoration.wiener(image_conv, psf, 1)
     deconv_un = restoration.unsupervised_wiener(image_conv, psf)[0]
     # test the shape
