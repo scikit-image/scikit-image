@@ -1,7 +1,7 @@
 """
-============
+=================
 Steerable Pyramid
-============
+=================
 
 The function `steerable.build_steerable` takes a gray scale image as input,
  and returns a list of lists of subbands.
