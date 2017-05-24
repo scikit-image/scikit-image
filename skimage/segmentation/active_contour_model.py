@@ -22,7 +22,8 @@ new_scipy = _scipy_version()
 def active_contour(image, snake, alpha=0.01, beta=0.1,
                    w_line=0, w_edge=1, gamma=0.01,
                    bc='periodic', max_px_move=1.0,
-                   max_iterations=2500, convergence=0.1):
+                   max_iterations=2500, convergence=0.1,
+                   callback=None):
     """Active contour model.
 
     Active contours by fitting snakes to features of images. Supports single
@@ -32,11 +33,16 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     As the number of points is constant, make sure that the initial snake
     has enough points to capture the details of the final contour.
 
+    The input snake is a set of points that will each be repositioned such that
+    the new snake minimizes energy as described in [1]_.  The number of points
+    is constant, so make sure that the initial snake has enough points to
+    capture the details of the final contour.
+
     Parameters
     ----------
     image : (N, M) or (N, M, 3) ndarray
         Input image.
-    snake : (N, 2) ndarray
+    snake : (n, 2) ndarray
         Initialisation coordinates of snake. For periodic snakes, it should
         not include duplicate endpoints.
     alpha : float, optional
@@ -64,6 +70,16 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         Maximum iterations to optimize snake shape.
     convergence: float, optional
         Convergence criteria.
+    callback(snake, i, conv): function, optional
+        Called every 11 iterations with three args.
+        snake: (N, 2) ndarray -- the current snake.
+        i: int -- the total number of iterations completed.
+        conv: float -- convergence criterion. This value is computed by
+            looking over the previous 10 snakes to find the minimum distance
+            that each point has moved, and taking the maximum. If any
+            point is moving, the value will be high and the algorithm will
+            continue. If all points are stationary, the value will be low, and
+            the algorithm terminates when the value falls below 'convergence'.
 
     Returns
     -------
@@ -88,7 +104,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     >>> img[rr, cc] = 1
     >>> img = gaussian(img, 2)
 
-    Initiliaze spline:
+    Initialize spline:
 
     >>> s = np.linspace(0, 2*np.pi,100)
     >>> init = 50*np.array([np.cos(s), np.sin(s)]).T+50
@@ -100,6 +116,17 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     >>> int(np.mean(dist)) #doctest: +SKIP
     25
 
+    Watch the snake progress:
+
+    >>> import matplotlib.pyplot as plt
+    >>> def cb(snake, it, dist):
+    ...     pts = plt.scatter(snake[:, 0], snake[:, 1], figure=fig)
+    ...     plt.title('it = %i, dist=%f' % (it, dist))
+    ...     plt.pause(.05)
+    ...     pts.remove()
+    >>> plt.imshow(img, figure=fig)  #doctest: +SKIP
+    >>> snake = active_contour(img, init, callback=cb)  #doctest: +SKIP
+
     """
     new_scipy = _scipy_version()
     if not new_scipy:
@@ -110,6 +137,9 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     max_iterations = int(max_iterations)
     if max_iterations <= 0:
         raise ValueError("max_iterations should be >0.")
+
+    # convergence order is the number of previous snakes to consider when
+    # computing the convergence criterion
     convergence_order = 10
     valid_bcs = ['periodic', 'free', 'fixed', 'free-fixed',
                  'fixed-free', 'fixed-fixed', 'free-free']
@@ -235,14 +265,17 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
 
         # Convergence criteria needs to compare to a number of previous
         # configurations since oscillations can occur.
+        # xsave and ysave track the $converge_order most recent snake positions.
         j = i % (convergence_order+1)
         if j < convergence_order:
             xsave[j, :] = x
             ysave[j, :] = y
         else:
             dist = np.min(np.max(np.abs(xsave-x[None, :]) +
-                   np.abs(ysave-y[None, :]), 1))
+                                 np.abs(ysave-y[None, :]), 1))
             if dist < convergence:
                 break
+            elif callback:
+                callback(np.array([x, y]).T, i, dist)
 
     return np.array([x, y]).T
