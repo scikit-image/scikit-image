@@ -93,24 +93,26 @@ def check_cdf_slope(cdf):
 # ====================
 
 
-def test_intensity_range_uint8():
+@pytest.mark.parametrize("test_input,expected", [
+    ('image', [0, 1]),
+    ('dtype', [0, 255]),
+    ((10, 20), [10, 20])
+])
+def test_intensity_range_uint8(test_input, expected):
     image = np.array([0, 1], dtype=np.uint8)
-    input_and_expected = [('image', [0, 1]),
-                          ('dtype', [0, 255]),
-                          ((10, 20), [10, 20])]
-    for range_values, expected_values in input_and_expected:
-        out = intensity_range(image, range_values=range_values)
-        yield assert_array_equal, out, expected_values
+    out = intensity_range(image, range_values=test_input)
+    assert_array_equal(out, expected)
 
 
-def test_intensity_range_float():
+@pytest.mark.parametrize("test_input,expected", [
+    ('image', [0.1, 0.2]),
+    ('dtype', [-1, 1]),
+    ((0.3, 0.4), [0.3, 0.4])
+])
+def test_intensity_range_float(test_input, expected):
     image = np.array([0.1, 0.2], dtype=np.float64)
-    input_and_expected = [('image', [0.1, 0.2]),
-                          ('dtype', [-1, 1]),
-                          ((0.3, 0.4), [0.3, 0.4])]
-    for range_values, expected_values in input_and_expected:
-        out = intensity_range(image, range_values=range_values)
-        yield assert_array_equal, out, expected_values
+    out = intensity_range(image, range_values=test_input)
+    assert_array_equal(out, expected)
 
 
 def test_intensity_range_clipped_float():
