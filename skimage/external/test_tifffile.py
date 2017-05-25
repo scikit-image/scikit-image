@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import itertools
 
 try:
     import skimage as si
@@ -67,17 +68,19 @@ class TestSave:
         y = imread(b)
         assert_array_equal(x, y)
 
-    def test_imsave_roundtrip(self):
-        for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
-            for dtype in (np.uint8, np.uint16, np.float32, np.int16,
-                          np.float64):
-                x = np.random.rand(*shape)
+    shapes = ((10, 10), (10, 10, 3), (10, 10, 4))
+    dtypes = (np.uint8, np.uint16, np.float32, np.int16, np.float64)
 
-                if not np.issubdtype(dtype, float):
-                    x = (x * np.iinfo(dtype).max).astype(dtype)
-                else:
-                    x = x.astype(dtype)
-                yield self.roundtrip, dtype, x
+    @pytest.mark.parametrize("shape, dtype",
+                             itertools.product(shapes, dtypes))
+    def test_imsave_roundtrip(self, shape, dtype):
+        x = np.random.rand(*shape)
+
+        if not np.issubdtype(dtype, float):
+            x = (x * np.iinfo(dtype).max).astype(dtype)
+        else:
+            x = x.astype(dtype)
+        self.roundtrip(dtype, x)
 
 
 if __name__ == "__main__":
