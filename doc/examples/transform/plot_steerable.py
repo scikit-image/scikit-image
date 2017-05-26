@@ -15,8 +15,10 @@ Intermediate elements are lists of subband at the same radius level
 but different orientations.
 
 
-.. [1] http://http://www.cns.nyu.edu/~eero/steerpyr/
-
+.. [1] E. P. Simoncelli and W. T. Freeman
+    "The Steerable Pyramid: A Flexible Architecture
+    for Multi-Scale Derivative Computation."
+    http://www.cns.nyu.edu/~eero/steerpyr/
 """
 from matplotlib import pyplot as plt
 import numpy as np
