@@ -56,4 +56,6 @@ __all__ = ['hough_circle',
            'pyramid_expand',
            'pyramid_gaussian',
            'pyramid_laplacian',
-           'seam_carve']
+           'seam_carve',
+           'build_steerable',
+           'recon_steerable']
