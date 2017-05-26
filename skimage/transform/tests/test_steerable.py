@@ -43,6 +43,35 @@ def test_steerable_reconstruction_asymmetric():
 
     assert_array_almost_equal(img_as_float(im), out, decimal=1)
 
+def test_steerable_reconstruction_power_of_two_float():
+    im = np.random.uniform(0, 1, size=(128, 128))
+    im = im.astype(np.float)
+    coeff = steerable.build_steerable(im)
+    out = steerable.recon_steerable(coeff)
+
+    assert_array_almost_equal(img_as_float(im), out, decimal=2)
+
+
+def test_steerable_reconstruction_symmetric_float():
+    im = np.random.uniform(0, 1, size=(128, 128))
+    im = im.astype(np.float)
+
+    coeff = steerable.build_steerable(im)
+    out = steerable.recon_steerable(coeff)
+
+    assert_array_almost_equal(img_as_float(im), out, decimal=2)
+
+
+def test_steerable_reconstruction_asymmetric_float():
+    im = np.random.uniform(0, 1, size=(128, 128))
+    im = im.astype(np.float)
+
+    coeff = steerable.build_steerable(im)
+    print(coeff[-1].shape)
+    out = steerable.recon_steerable(coeff)
+
+    assert_array_almost_equal(img_as_float(im), out, decimal=1)
+
 
 if __name__ == "__main__":
     run_module_suite()

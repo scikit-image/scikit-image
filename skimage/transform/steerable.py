@@ -4,8 +4,9 @@ from .._shared.utils import assert_nD
 from ..util import img_as_float
 
 
-def build_steerable(image, height=5):
-    """
+def build_steerable(image, height=5, nbands=4):
+    """ Construct a Steerable subband decomposition of a gray scale image
+
     Parameters
     ----------
     image : 2-D array
@@ -13,35 +14,45 @@ def build_steerable(image, height=5):
     height : integer, optional
         Height of the steerable decomposition. This includes the counting of
         low pass and high pass subbands.
+    nbands : integer, optional
+        Number of orientations in the Steerable decomposition
 
     Returns
     -------
-    coeff : subbands of Steerable decomposition,
-            stored as a list of 'height' sublists,
-            Sublists correspond to decreasing radius level in Steerable pyramid
-            The first sublist contains the high pass subband.
-            The last sublist contains the low pass subband.
-            Intermediate sublists contains subbands from different orientations
+    coeff : list of lists of numpy array
+        subbands of Steerable decomposition,
+        stored as a list of 'height' sublists,
+        Sublists correspond to decreasing radius level in Steerable pyramid
+        The first sublist contains the high pass subband.
+        The last sublist contains the low pass subband.
+        Intermediate sublists contains subbands from different orientations
 
     References
     ----------
+    .. [1] E. P. Simoncelli and W. T. Freeman 
+        "The Steerable Pyramid: A Flexible Architecture
+        for Multi-Scale Derivative Computation." 
+        http://www.cns.nyu.edu/~eero/steerpyr/
     """
-    assert_nD(image, 2)
 
-    s = Steerable(height)
+    assert_nD(image, 2)
+    s = Steerable(height, nbands)
     return s.build_scf_pyramid(image)
 
 
 def recon_steerable(coeff):
-    """
+    """ Reconstruc the image from its Steerable decomposition
+
     Parameters
     ----------
-    coeff : subbands of Steerable decomposition,
-            stored as a list of 'height' sublists,
-            Sublists correspond to decreasing radius level in Steerable pyramid
-            The first sublist contains the high pass subband.
-            The last sublist contains the low pass subband.
-            Intermediate sublists contains subbands from different orientations
+    coeff : list of lists of numpy array
+        subbands of Steerable decomposition,
+        stored as a list of 'height' sublists,
+        Sublists correspond to decreasing radius level in Steerable pyramid
+        The first sublist contains the high pass subband.
+        The last sublist contains the low pass subband.
+        Intermediate sublists contains subbands from different orientations
+
     Returns
     -------
     image : 2-D array
@@ -49,7 +60,12 @@ def recon_steerable(coeff):
 
     References
     ----------
+    .. [1] E. P. Simoncelli and W. T. Freeman 
+        "The Steerable Pyramid: A Flexible Architecture
+        for Multi-Scale Derivative Computation." 
+        http://www.cns.nyu.edu/~eero/steerpyr/
     """
+
     height = len(coeff)
     s = Steerable(height)
     return s.recon_scf_pyramid(coeff)
@@ -59,40 +75,45 @@ class Steerable:
     """Steerable Pyramid: a translation and rotation invariant free wavelet
     """
 
-    def __init__(self, height=5):
+    def __init__(self, height=5, nbands=4):
         """
         Parameters
         ----------
-        height : height of the Steerable Decomposition
-        (including high pass and low pass)
+        height : int
+            height of Steerable decomposition
+            (including high pass and low pass)
+        nbands : int
+            number of orientations in Steerable decomposition
         """
-        self.nbands = 4
+        self.nbands = nbands
         self.height = height
-        self.isSample = True
 
     def build_scf_pyramid(self, im):
         """
         Parameters
         ----------
         im : 2-D array
+            input gray scale image
         """
         assert_nD(im, 2)
 
         im = img_as_float(im)
 
         M, N = im.shape
-        log_rad, angle = base(M, N)
-        Xrcos, Yrcos = rcos_curve(1, -0.5)
+        log_rad, angle = _base(M, N)
+        Xrcos, Yrcos = _rcos_curve(1, -0.5)
+        # Yrcos = np.sqrt(Yrcos)
+        # YIrcos = np.sqrt(1 - Yrcos * Yrcos)
+        YIrcos = np.sqrt(1 - Yrcos)
         Yrcos = np.sqrt(Yrcos)
-        YIrcos = np.sqrt(1 - Yrcos * Yrcos)
 
-        lo0mask = point_op(log_rad, YIrcos, Xrcos)
-        hi0mask = point_op(log_rad, Yrcos, Xrcos)
+        lo0mask = _point_op(log_rad, YIrcos, Xrcos)
+        hi0mask = _point_op(log_rad, Yrcos, Xrcos)
 
         imdft = np.fft.fftshift(np.fft.fft2(im))
         lo0dft = imdft * lo0mask
 
-        coeff = self.build_pyr_level(
+        coeff = self._build_pyr_level(
             lo0dft, log_rad, angle, Xrcos, Yrcos, self.height - 1)
 
         hi0dft = imdft * hi0mask
@@ -102,14 +123,18 @@ class Steerable:
 
         return coeff
 
-    def build_pyr_level(self, lodft, log_rad, angle, Xrcos, Yrcos, ht):
+    def _build_pyr_level(self, lodft, log_rad, angle, Xrcos, Yrcos, ht):
         """
         Parameters
         ----------
-        lodft : DFT matrix of the higher layer
-        log_rad, angle: helper to help create the DFT mask
-        Xrcos, Yrcos: represents the desired filter
-        ht: current level of the pyramid that are being built
+        lodft : 2-D array
+            DFT matrix of the higher layer
+        log_rad, angle: 2-D array
+            helper to help create the DFT mask
+        Xrcos, Yrcos: 2-D array
+            represents the desired filter
+        ht: int
+            current level of the pyramid that are being built
 
         Notes
         -----
@@ -123,7 +148,7 @@ class Steerable:
             Xrcos = Xrcos - 1
 
             # ==================== Orientation bandpass =======================
-            himask = point_op(log_rad, Yrcos, Xrcos)
+            himask = _point_op(log_rad, Yrcos, Xrcos)
 
             lutsize = 1024
             Xcosn = np.pi * \
@@ -140,7 +165,7 @@ class Steerable:
             orients = []
 
             for b in range(self.nbands):
-                anglemask = point_op(
+                anglemask = _point_op(
                     angle, Ycosn, Xcosn + np.pi * b / self.nbands)
                 banddft = np.power(np.complex(
                     0, -1), self.nbands - 1) * lodft * anglemask * himask
@@ -162,24 +187,28 @@ class Steerable:
             lodft = lodft[lostart[0]:loend[0], lostart[1]:loend[1]]
 
             YIrcos = np.abs(np.sqrt(1 - Yrcos * Yrcos))
-            lomask = point_op(log_rad, YIrcos, Xrcos)
+            lomask = _point_op(log_rad, YIrcos, Xrcos)
 
             lodft = lomask * lodft
 
-            coeff = self.build_pyr_level(
+            coeff = self._build_pyr_level(
                 lodft, log_rad, angle, Xrcos, Yrcos, ht - 1)
             coeff.insert(0, orients)
 
         return coeff
 
-    def recon_pyr_level(self, coeff, log_rad, Xrcos, Yrcos, angle):
+    def _recon_pyr_level(self, coeff, log_rad, Xrcos, Yrcos, angle):
         """
         Parameters
         ----------
-        lodft : DFT matrix of the higher layer
-        log_rad, angle: helper to help create the DFT mask
-        Xrcos, Yrcos: represents the desired filter
-        ht: current level of the pyramid that are being built
+        lodft : 2-D array
+            DFT matrix of the higher layer
+        log_rad, angle: 2-D array
+            helper to help create the DFT mask
+        Xrcos, Yrcos: 2-D array
+            represents the desired filter
+        ht: int
+            current level of the pyramid that are being built
 
         Notes
         -----
@@ -194,7 +223,7 @@ class Steerable:
             Xrcos = Xrcos - 1
 
             # ========================== Orientation residue===================
-            himask = point_op(log_rad, Yrcos, Xrcos)
+            himask = _point_op(log_rad, Yrcos, Xrcos)
 
             lutsize = 1024
             Xcosn = np.pi * \
@@ -209,7 +238,7 @@ class Steerable:
             orientdft = np.zeros(coeff[0][0].shape)
 
             for b in range(self.nbands):
-                anglemask = point_op(
+                anglemask = _point_op(
                     angle, Ycosn, Xcosn + np.pi * b / self.nbands)
                 banddft = np.fft.fftshift(np.fft.fft2(coeff[0][b]))
                 orientdft = orientdft + \
@@ -228,12 +257,10 @@ class Steerable:
             nlog_rad = log_rad[lostart[0]:loend[0], lostart[1]:loend[1]]
             nangle = angle[lostart[0]:loend[0], lostart[1]:loend[1]]
             YIrcos = np.sqrt(np.abs(1 - Yrcos * Yrcos))
-            lomask = point_op(nlog_rad, YIrcos, Xrcos)
+            lomask = _point_op(nlog_rad, YIrcos, Xrcos)
 
-            nresdft = self.recon_pyr_level(
+            nresdft = self._recon_pyr_level(
                 coeff[1:], nlog_rad, Xrcos, Yrcos, nangle)
-
-            res = np.fft.fftshift(np.fft.fft2(nresdft))
 
             resdft = np.zeros(dims, 'complex')
             resdft[lostart[0]:loend[0], lostart[1]:loend[1]] = nresdft * lomask
@@ -241,15 +268,22 @@ class Steerable:
             return resdft + orientdft
 
     def recon_scf_pyramid(self, coeff):
-        """
+        """ Reconstruc the image from its Steerable decomposition
+
         Parameters
         ----------
-        coeff : subbands of Steerable decomposition,
+        coeff : list of lists of numpy array
+            subbands of Steerable decomposition,
             stored as a list of 'height' sublists,
             Sublists correspond to decreasing radius level in Steerable pyramid
             The first sublist contains the high pass subband.
             The last sublist contains the low pass subband.
             Intermediate sublists contains subbands from different orientations
+
+        Returns
+        -------
+        image : 2-D array
+        reconstructed image from subbands of Steerable Pyramid decomposition
         """
         if (self.height != len(coeff)):
             raise ValueError("Height of coeff should be %d" % self.height)
@@ -260,16 +294,16 @@ class Steerable:
                     "Size of intermediate sublist should be %d" % self.nbands)
 
         M, N = coeff[0].shape
-        log_rad, angle = base(M, N)
+        log_rad, angle = _base(M, N)
 
-        Xrcos, Yrcos = rcos_curve(1, -0.5)
+        Xrcos, Yrcos = _rcos_curve(1, -0.5)
         Yrcos = np.sqrt(Yrcos)
         YIrcos = np.sqrt(np.abs(1 - Yrcos * Yrcos))
 
-        lo0mask = point_op(log_rad, YIrcos, Xrcos)
-        hi0mask = point_op(log_rad, Yrcos, Xrcos)
+        lo0mask = _point_op(log_rad, YIrcos, Xrcos)
+        hi0mask = _point_op(log_rad, Yrcos, Xrcos)
 
-        tempdft = self.recon_pyr_level(coeff[1:], log_rad, Xrcos, Yrcos, angle)
+        tempdft = self._recon_pyr_level(coeff[1:], log_rad, Xrcos, Yrcos, angle)
 
         hidft = np.fft.fftshift(np.fft.fft2(coeff[0]))
         outdft = tempdft * lo0mask + hidft * hi0mask
@@ -277,20 +311,21 @@ class Steerable:
         return np.fft.ifft2(np.fft.ifftshift(outdft)).real
 
 
-def base(m, n):
+def _base(m, n):
     """
     Helper function that create a grid containing radius from center and angle
 
     Parameters
     ----------
-    m, n : size of the desired grid
+    m, n : int
+        size of the desired grid
 
     Returns
     -------
-    log_rad : [mxn] array, log of the radius with respect
-                to the center of the matrix
-    angle : [mxn] array: the angle of the line originated
-                from center of the matrix
+    log_rad : [mxn] array
+        log of the radius with respect to the center of the matrix
+    angle : [mxn] array
+        the angle of the line originated from center of the matrix
     """
 
     ctrm = np.ceil((m + 0.5) / 2).astype(int)
@@ -306,14 +341,16 @@ def base(m, n):
     return log_rad, angle
 
 
-def rcos_curve(width, position):
+def _rcos_curve(width, position):
     """
     Raised cosine 1D curve
 
     Parameters
     ----------
-    width: width of the transition
-    position: where the cut is
+    width: float
+        width of the transition
+    position: float
+        position of the cut
 
     Returns
     -------
@@ -331,9 +368,22 @@ def rcos_curve(width, position):
     return X, Y
 
 
-def point_op(mask, Y, X):
+def _point_op(mask, Y, X):
     """
     Given a 1D curve defined by X, Y, convert it to a 2D mask
+
+    Parameters
+    ----------
+    mask: 2-D array
+
+    X, Y: vector
+        define a 1D raised cosine curve
+
+    Returns
+    -------
+    out: 2-D array 
+        2-D raised cosine circular mask
+
     """
-    out = np.interp(mask.flatten(), X, Y)
+    out = np.interp(mask.ravel(), X, Y)
     return np.reshape(out, mask.shape)
