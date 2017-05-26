@@ -329,7 +329,8 @@ def _base(m, n):
     ctrm = np.ceil((m + 0.5) / 2).astype(int)
     ctrn = np.ceil((n + 0.5) / 2).astype(int)
     xv, yv = np.meshgrid((np.array(range(n)) + 1 - ctrn) / (n / 2),
-                         (np.array(range(m)) + 1 - ctrm) / (m / 2))
+                         (np.array(range(m)) + 1 - ctrm) / (m / 2),
+                         sparse=True)
 
     rad = np.sqrt(xv**2 + yv**2)
     rad[ctrm - 1, ctrn - 1] = rad[ctrm - 1, ctrn - 2]
