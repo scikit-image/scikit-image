@@ -3,6 +3,9 @@
 Steerable Pyramid
 =================
 
+The steerable pyramid is a multi-resolution image decomposition
+with directional selectivity [1]_.
+
 The function `steerable.build_steerable` takes a gray scale image
 as input, and returns a list of lists of subbands.
 
@@ -22,8 +25,6 @@ import numpy as np
 from skimage.data import chelsea
 from skimage.color import rgb2gray
 from skimage.transform import steerable
-from skimage.io import imshow
-from skimage import img_as_ubyte
 
 
 def visualize(coeff, normalize=True):
@@ -31,40 +32,44 @@ def visualize(coeff, normalize=True):
     Norients = len(coeff[1])
     out = np.zeros((rows * 2 - coeff[-1].shape[0] + 1, Norients * cols))
 
-    currentx = 0
-    currenty = 0
+    r = 0
+    c = 0
     for i in range(1, len(coeff[:-1])):
         for j in range(len(coeff[1])):
-            tmp = coeff[i][j].real
-            m, n = tmp.shape
+            subband = coeff[i][j].real
+            m, n = subband.shape
 
             if normalize:
-                tmp = 255 * tmp / tmp.max()
+                subband = 255 * subband / subband.max()
 
-            tmp[m - 1, :] = 255
-            tmp[:, n - 1] = 255
+            subband[m - 1, :] = 255
+            subband[:, n - 1] = 255
 
-            out[currentx: currentx + m, currenty: currenty + n] = tmp
-            currenty += n
-        currentx += coeff[i][0].shape[0]
-        currenty = 0
+            out[r: r + m, c: c + n] = subband
+            c += n
+        r += coeff[i][0].shape[0]
+        c = 0
 
     m, n = coeff[-1].shape
-    out[currentx: currentx + m, currenty: currenty +
-        n] = 255 * coeff[-1] / coeff[-1].max()
+    out[r: r + m, c: c + n] = \
+        255 * coeff[-1] / coeff[-1].max()
 
     out[0, :] = 255
     out[:, 0] = 255
 
     return out
 
-
-image = chelsea()
-image = rgb2gray(image)
+# create an image of a disk
+x = np.arange(-128, 128)
+xx, yy = np.meshgrid(x, x, sparse=True)
+r = np.sqrt(xx**2 + yy**2)
+image = r < 64
 
 coeff = steerable.build_steerable(image)
 out = visualize(coeff)
 
 fig, ax = plt.subplots()
-ax.imshow(out, cmap='gray')
+ax.imshow(out, cmap=plt.cm.gray)
+ax.set_title("Subbands from Steerable decomposition")
+plt.tight_layout()
 plt.show()

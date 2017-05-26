@@ -29,9 +29,9 @@ def build_steerable(image, height=5, nbands=4):
 
     References
     ----------
-    .. [1] E. P. Simoncelli and W. T. Freeman 
+    .. [1] E. P. Simoncelli and W. T. Freeman
         "The Steerable Pyramid: A Flexible Architecture
-        for Multi-Scale Derivative Computation." 
+        for Multi-Scale Derivative Computation."
         http://www.cns.nyu.edu/~eero/steerpyr/
     """
 
@@ -60,14 +60,13 @@ def recon_steerable(coeff):
 
     References
     ----------
-    .. [1] E. P. Simoncelli and W. T. Freeman 
+    .. [1] E. P. Simoncelli and W. T. Freeman
         "The Steerable Pyramid: A Flexible Architecture
-        for Multi-Scale Derivative Computation." 
+        for Multi-Scale Derivative Computation."
         http://www.cns.nyu.edu/~eero/steerpyr/
     """
 
-    height = len(coeff)
-    s = Steerable(height)
+    s = Steerable(height=len(coeff), nbands=len(coeff[1]))
     return s.recon_scf_pyramid(coeff)
 
 
@@ -102,8 +101,6 @@ class Steerable:
         M, N = im.shape
         log_rad, angle = _base(M, N)
         Xrcos, Yrcos = _rcos_curve(1, -0.5)
-        # Yrcos = np.sqrt(Yrcos)
-        # YIrcos = np.sqrt(1 - Yrcos * Yrcos)
         YIrcos = np.sqrt(1 - Yrcos)
         Yrcos = np.sqrt(Yrcos)
 
@@ -303,7 +300,8 @@ class Steerable:
         lo0mask = _point_op(log_rad, YIrcos, Xrcos)
         hi0mask = _point_op(log_rad, Yrcos, Xrcos)
 
-        tempdft = self._recon_pyr_level(coeff[1:], log_rad, Xrcos, Yrcos, angle)
+        tempdft = self._recon_pyr_level(
+            coeff[1:], log_rad, Xrcos, Yrcos, angle)
 
         hidft = np.fft.fftshift(np.fft.fft2(coeff[0]))
         outdft = tempdft * lo0mask + hidft * hi0mask
@@ -381,7 +379,7 @@ def _point_op(mask, Y, X):
 
     Returns
     -------
-    out: 2-D array 
+    out: 2-D array
         2-D raised cosine circular mask
 
     """

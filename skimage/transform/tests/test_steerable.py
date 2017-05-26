@@ -19,6 +19,14 @@ def test_steerable_shape():
             assert_array_equal(coeff[i][j].shape, np.array([m, m]))
 
 
+def test_different_orientation_height():
+    im = np.random.randint(0, 255, (113, 29), dtype=np.uint8)
+    coeff = steerable.build_steerable(im, height=3, nbands=6)
+    out = steerable.recon_steerable(coeff)
+
+    assert_array_almost_equal(img_as_float(im), out, decimal=1)
+
+
 def test_steerable_reconstruction_power_of_two():
     im = np.random.randint(0, 255, (128, 128), dtype=np.uint8)
     coeff = steerable.build_steerable(im)
@@ -38,10 +46,10 @@ def test_steerable_reconstruction_symmetric():
 def test_steerable_reconstruction_asymmetric():
     im = np.random.randint(0, 255, (113, 29), dtype=np.uint8)
     coeff = steerable.build_steerable(im)
-    print(coeff[-1].shape)
     out = steerable.recon_steerable(coeff)
 
     assert_array_almost_equal(img_as_float(im), out, decimal=1)
+
 
 def test_steerable_reconstruction_power_of_two_float():
     im = np.random.uniform(0, 1, size=(128, 128))
@@ -67,7 +75,16 @@ def test_steerable_reconstruction_asymmetric_float():
     im = im.astype(np.float)
 
     coeff = steerable.build_steerable(im)
-    print(coeff[-1].shape)
+    out = steerable.recon_steerable(coeff)
+
+    assert_array_almost_equal(img_as_float(im), out, decimal=1)
+
+
+def test_steerable_reconstruction_asymmetric_binary():
+    im = np.random.uniform(0, 1, size=(128, 128))
+    im = im > 0.5
+
+    coeff = steerable.build_steerable(im)
     out = steerable.recon_steerable(coeff)
 
     assert_array_almost_equal(img_as_float(im), out, decimal=1)
