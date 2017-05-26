@@ -109,10 +109,12 @@ def check_wrap_around(ndim, axis):
                         image_unwrap_wrap_around[index_last])
 
 
-def test_wrap_around():
-    for ndim in (2, 3):
-        for axis in range(ndim):
-            yield check_wrap_around, ndim, axis
+dim_axis = [(ndim, axis) for ndim in (2, 3) for axis in range(ndim)]
+
+
+@pytest.mark.parametrize("ndim, axis", dim_axis)
+def test_wrap_around(ndim, axis):
+    check_wrap_around(ndim, axis)
 
 
 def test_mask():
