@@ -293,8 +293,8 @@ class Steerable:
                 raise ValueError(
                     "Size of intermediate sublist should be %d" % self.nbands)
 
-        M, N = coeff[0].shape
-        log_rad, angle = _base(M, N)
+        r, c = coeff[0].shape
+        log_rad, angle = _base(r, c)
 
         Xrcos, Yrcos = _rcos_curve(1, -0.5)
         Yrcos = np.sqrt(Yrcos)
