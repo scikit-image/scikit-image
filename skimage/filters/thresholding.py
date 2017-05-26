@@ -874,8 +874,8 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     --------
     >>> from skimage import data
     >>> image = data.page()
-    >>> binary_sauvola = threshold_sauvola(image,
-    ...                                    window_size=15, k=0.2)
+    >>> t_sauvola = threshold_sauvola(image, window_size=15, k=0.2)
+    >>> binary_image = image > t_sauvola
     """
     if r is None:
         imin, imax = dtype_limits(image, clip_negative=False)
