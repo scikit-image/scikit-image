@@ -60,6 +60,7 @@ def visualize(coeff, normalize=True):
 
     return out
 
+
 # create an image of a disk
 x = np.arange(-128, 128)
 xx, yy = np.meshgrid(x, x, sparse=True)
