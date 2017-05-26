@@ -24,7 +24,7 @@ def test_different_orientation_height():
     coeff = steerable.build_steerable(im, height=3, nbands=6)
     out = steerable.recon_steerable(coeff)
 
-    assert_array_almost_equal(img_as_float(im), out, decimal=1)
+    assert_array_almost_equal(img_as_float(im), out, decimal=2)
 
 
 def test_steerable_reconstruction_power_of_two():
@@ -77,7 +77,7 @@ def test_steerable_reconstruction_asymmetric_float():
     coeff = steerable.build_steerable(im)
     out = steerable.recon_steerable(coeff)
 
-    assert_array_almost_equal(img_as_float(im), out, decimal=1)
+    assert_array_almost_equal(img_as_float(im), out, decimal=2)
 
 
 def test_steerable_reconstruction_asymmetric_binary():

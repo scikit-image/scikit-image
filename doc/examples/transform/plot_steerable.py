@@ -15,7 +15,6 @@ Intermediate elements are lists of subband at the same radius level
 but different orientations.
 
 
-Steerable pyramid decomposition
 .. [1] http://http://www.cns.nyu.edu/~eero/steerpyr/
 
 """
