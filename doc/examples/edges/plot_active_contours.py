@@ -4,8 +4,8 @@ Active Contour Model
 ====================
 
 The active contour model is a method to fit open or closed splines to lines or
-edges in an image. It works by minimising an energy that is in part defined by
-the image and part by the spline's shape: length and smoothness. The
+edges in an image [1]_. It works by minimising an energy that is in part
+defined by the image and part by the spline's shape: length and smoothness. The
 minimization is done implicitly in the shape energy and explicitly in the
 image energy.
 
@@ -15,13 +15,13 @@ to the edges of the face and (2) to find the darkest curve between two fixed
 points while obeying smoothness considerations. Typically it is a good idea to
 smooth images a bit before analyzing, as done in the following examples.
 
-.. [1] *Snakes: Active contour models*. Kass, M.; Witkin, A.; Terzopoulos, D.
-       International Journal of Computer Vision 1 (4): 321 (1988).
-
 We initialize a circle around the astronaut's face and use the default boundary
 condition ``bc='periodic'`` to fit a closed curve. The default parameters
 ``w_line=0, w_edge=1`` will make the curve search towards edges, such as the
 boundaries of the face.
+
+.. [1] *Snakes: Active contour models*. Kass, M.; Witkin, A.; Terzopoulos, D.
+       International Journal of Computer Vision 1 (4): 321 (1988).
 """
 
 import numpy as np
