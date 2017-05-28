@@ -3,14 +3,14 @@
 Image Deconvolution
 =====================
 In this example, we deconvolve an image using Richardson-Lucy
-deconvolution algorithm.
+deconvolution algorithm ([1]_, [2]_).
 
 The algorithm is based on a PSF (Point Spread Function),
-where PSF is described as the impulse response of the 
-optical system. The blurred image is sharpened through a number of 
+where PSF is described as the impulse response of the
+optical system. The blurred image is sharpened through a number of
 iterations, which needs to be hand-tuned.
 
-.. [1] William Hadley Richardson, "Bayesian-Based Iterative 
+.. [1] William Hadley Richardson, "Bayesian-Based Iterative
        Method of Image Restoration",
        J. Opt. Soc. Am. A 27, 1593-1607 (1972), DOI:10.1364/JOSA.62.000055
 
@@ -27,7 +27,7 @@ astro = color.rgb2gray(data.astronaut())
 
 psf = np.ones((5, 5)) / 25
 astro = conv2(astro, psf, 'same')
-# Add Noise to Image 
+# Add Noise to Image
 astro_noisy = astro.copy()
 astro_noisy += (np.random.poisson(lam=25, size=astro.shape) - 10) / 255.
 

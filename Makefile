@@ -19,5 +19,5 @@ coverage:
 	$(NOSETESTS) skimage --with-coverage --cover-package=skimage
 
 html:
-	pip install -q sphinx
+	pip install -q sphinx pytest-runner sphinx-gallery
 	export SPHINXOPTS=-W; make -C doc html

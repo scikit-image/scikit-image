@@ -16,7 +16,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     """Denoise image using bilateral filter.
 
     This is an edge-preserving, denoising filter. It averages pixels based on
-    their spatial closeness and radiometric similarity.
+    their spatial closeness and radiometric similarity [1]_.
 
     Spatial closeness is measured by the Gaussian function of the Euclidean
     distance between two pixels and a certain standard deviation
@@ -132,7 +132,7 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     Total-variation denoising (also know as total-variation regularization)
     tries to find an image with less total-variation under the constraint
     of being similar to the input image, which is controlled by the
-    regularization parameter.
+    regularization parameter ([1]_, [2]_, [3]_, [4]_).
 
     Parameters
     ----------
