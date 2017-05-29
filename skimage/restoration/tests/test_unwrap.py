@@ -57,19 +57,19 @@ def test_unwrap_1d():
 def test_unwrap_2d():
     x, y = np.ogrid[:8, :16]
     image = 2 * np.pi * (x * 0.2 + y * 0.1)
-    yield check_unwrap, image
+    check_unwrap(image)
     mask = np.zeros(image.shape, dtype=np.bool)
     mask[4:6, 4:8] = True
-    yield check_unwrap, image, mask
+    check_unwrap(image, mask)
 
 
 def test_unwrap_3d():
     x, y, z = np.ogrid[:8, :12, :16]
     image = 2 * np.pi * (x * 0.2 + y * 0.1 + z * 0.05)
-    yield check_unwrap, image
+    check_unwrap(image)
     mask = np.zeros(image.shape, dtype=np.bool)
     mask[4:6, 4:6, 1:3] = True
-    yield check_unwrap, image, mask
+    check_unwrap(image, mask)
 
 
 def check_wrap_around(ndim, axis):
