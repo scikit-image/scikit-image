@@ -33,7 +33,7 @@ def test_template():
     positions = positions[np.argsort(positions[:, 0])]
 
     for xy_target, xy in zip(target_positions, positions):
-        yield assert_almost_equal, xy, xy_target
+        assert_almost_equal(xy, xy_target)
 
 
 def test_normalization():
