@@ -54,21 +54,25 @@ def test_unwrap_1d():
         unwrap_phase(image, True, seed=0)
 
 
-def test_unwrap_2d():
+@pytest.mark.parametrize("check_with_mask", (False, True))
+def test_unwrap_2d(check_with_mask):
+    mask = None
     x, y = np.ogrid[:8, :16]
     image = 2 * np.pi * (x * 0.2 + y * 0.1)
-    check_unwrap(image)
-    mask = np.zeros(image.shape, dtype=np.bool)
-    mask[4:6, 4:8] = True
+    if check_with_mask:
+        mask = np.zeros(image.shape, dtype=np.bool)
+        mask[4:6, 4:8] = True
     check_unwrap(image, mask)
 
 
-def test_unwrap_3d():
+@pytest.mark.parametrize("check_with_mask", (False, True))
+def test_unwrap_3d(check_with_mask):
+    mask = None
     x, y, z = np.ogrid[:8, :12, :16]
     image = 2 * np.pi * (x * 0.2 + y * 0.1 + z * 0.05)
-    check_unwrap(image)
-    mask = np.zeros(image.shape, dtype=np.bool)
-    mask[4:6, 4:6, 1:3] = True
+    if check_with_mask:
+        mask = np.zeros(image.shape, dtype=np.bool)
+        mask[4:6, 4:6, 1:3] = True
     check_unwrap(image, mask)
 
 
