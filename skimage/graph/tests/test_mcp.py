@@ -6,6 +6,8 @@ from numpy.testing import (assert_array_equal,
 import skimage.graph.mcp as mcp
 from skimage._shared._warnings import expected_warnings
 
+import pytest
+
 np.random.seed(0)
 a = np.ones((8, 8), dtype=np.float32)
 a[1:-1, 1] = 0
@@ -135,9 +137,9 @@ def test_offsets():
                         [10,  0,  1,  2,  3,  4,  5,  6]])
 
 
-def test_crashing():
-    for shape in [(100, 100), (5, 8, 13, 17)] * 5:
-        yield _test_random, shape
+@pytest.mark.parametrize("shape", [(100, 100), (5, 8, 13, 17)] * 5)
+def test_crashing(shape):
+    _test_random(shape)
 
 
 def _test_random(shape):
