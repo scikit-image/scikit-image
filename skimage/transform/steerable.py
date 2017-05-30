@@ -5,7 +5,7 @@ from ..util import img_as_float
 
 
 def build_steerable(image, height=5, nbands=4):
-    """ Construct a Steerable subband decomposition of a gray scale image
+    """ Construct a Steerable subband decomposition of a gray scale image.
 
     Parameters
     ----------
@@ -15,7 +15,7 @@ def build_steerable(image, height=5, nbands=4):
         Height of the steerable decomposition. This includes the counting of
         low pass and high pass subbands.
     nbands : integer, optional
-        Number of orientations in the Steerable decomposition
+        Number of orientations in the Steerable decomposition.
 
     Returns
     -------
@@ -25,7 +25,7 @@ def build_steerable(image, height=5, nbands=4):
         Sublists correspond to decreasing radius level in Steerable pyramid
         The first sublist contains the high pass subband.
         The last sublist contains the low pass subband.
-        Intermediate sublists contains subbands from different orientations
+        Intermediate sublists contain subbands from different orientations.
 
     References
     ----------
@@ -41,7 +41,7 @@ def build_steerable(image, height=5, nbands=4):
 
 
 def recon_steerable(coeff):
-    """ Reconstruc the image from its Steerable decomposition
+    """ Reconstruct the image from its Steerable decomposition.
 
     Parameters
     ----------
@@ -51,12 +51,12 @@ def recon_steerable(coeff):
         Sublists correspond to decreasing radius level in Steerable pyramid
         The first sublist contains the high pass subband.
         The last sublist contains the low pass subband.
-        Intermediate sublists contains subbands from different orientations
+        Intermediate sublists contain subbands from different orientations.
 
     Returns
     -------
     image : 2-D array
-        reconstructed image from subbands of Steerable Pyramid decomposition
+        reconstructed image from subbands of Steerable Pyramid decomposition.
 
     References
     ----------
@@ -71,7 +71,7 @@ def recon_steerable(coeff):
 
 
 class Steerable:
-    """Steerable Pyramid: a translation and rotation invariant free wavelet
+    """Steerable Pyramid: a translation and rotation invariant free wavelet.
     """
 
     def __init__(self, height=5, nbands=4):
@@ -265,7 +265,7 @@ class Steerable:
             return resdft + orientdft
 
     def recon_scf_pyramid(self, coeff):
-        """ Reconstruc the image from its Steerable decomposition
+        """ Reconstruct the image from its Steerable decomposition.
 
         Parameters
         ----------
@@ -275,7 +275,7 @@ class Steerable:
             Sublists correspond to decreasing radius level in Steerable pyramid
             The first sublist contains the high pass subband.
             The last sublist contains the low pass subband.
-            Intermediate sublists contains subbands from different orientations
+            Intermediate sublists contain subbands from different orientations.
 
         Returns
         -------
@@ -311,7 +311,7 @@ class Steerable:
 
 def _base(m, n):
     """
-    Helper function that create a grid containing radius from center and angle
+    Helper function that create a grid containing radius from center and angle.
 
     Parameters
     ----------
@@ -342,7 +342,7 @@ def _base(m, n):
 
 def _rcos_curve(width, position):
     """
-    Raised cosine 1D curve
+    Raised cosine 1D curve.
 
     Parameters
     ----------
@@ -369,7 +369,7 @@ def _rcos_curve(width, position):
 
 def _point_op(mask, Y, X):
     """
-    Given a 1D curve defined by X, Y, convert it to a 2D mask
+    Given a 1D curve defined by X, Y, convert it to a 2D mask.
 
     Parameters
     ----------
