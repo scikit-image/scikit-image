@@ -2,7 +2,8 @@ from __future__ import division
 import numpy as np
 from warnings import warn
 
-__all__ = ['img_as_float', 'img_as_int', 'img_as_uint', 'img_as_ubyte',
+__all__ = ['img_as_float32', 'img_as_float64', 'img_as_float',
+           'img_as_int', 'img_as_uint', 'img_as_ubyte',
            'img_as_bool', 'dtype_limits']
 
 dtype_range = {np.bool_: (False, True),
@@ -310,7 +311,33 @@ def convert(image, dtype, force_copy=False, uniform=False):
     return image.astype(dtype_out)
 
 
-def img_as_float(image, force_copy=False):
+def img_as_float32(image, force_copy=False):
+    """Convert an image to single-precision (32-bit) floating point format.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool, optional
+        Force a copy of the data, irrespective of its current dtype.
+
+    Returns
+    -------
+    out : ndarray of float32
+        Output image.
+
+    Notes
+    -----
+    The range of a floating point image is [0.0, 1.0] or [-1.0, 1.0] when
+    converting from unsigned or signed datatypes, respectively.
+    If the input image has a float type, intensity values are not modified
+    and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
+
+    """
+    return convert(image, np.float32, force_copy)
+
+
+def img_as_float64(image, force_copy=False):
     """Convert an image to double-precision (64-bit) floating point format.
 
     Parameters
@@ -334,6 +361,9 @@ def img_as_float(image, force_copy=False):
 
     """
     return convert(image, np.float64, force_copy)
+
+
+img_as_float = img_as_float64
 
 
 def img_as_uint(image, force_copy=False):
