@@ -1,5 +1,5 @@
 from numpy.testing import assert_equal, assert_array_equal,\
-    assert_array_almost_equal, run_module_suite
+    assert_array_almost_equal, run_module_suite, assert_raises
 from skimage.transform import steerable
 import numpy as np
 from skimage import img_as_float
@@ -45,10 +45,10 @@ def test_steerable_reconstruction_symmetric():
 
 def test_steerable_reconstruction_asymmetric():
     im = np.random.randint(0, 255, (113, 29), dtype=np.uint8)
-    coeff = steerable.build_steerable(im)
+    coeff = steerable.build_steerable(im, height=3)
     out = steerable.recon_steerable(coeff)
 
-    assert_array_almost_equal(img_as_float(im), out, decimal=1)
+    assert_array_almost_equal(img_as_float(im), out, decimal=5)
 
 
 def test_steerable_reconstruction_power_of_two_float():
@@ -71,23 +71,29 @@ def test_steerable_reconstruction_symmetric_float():
 
 
 def test_steerable_reconstruction_asymmetric_float():
-    im = np.random.uniform(0, 1, size=(128, 128))
+    im = np.random.uniform(0, 1, size=(113, 29))
     im = im.astype(np.float)
 
-    coeff = steerable.build_steerable(im)
-    out = steerable.recon_steerable(coeff)
-
-    assert_array_almost_equal(img_as_float(im), out, decimal=1)
-
-
-def test_steerable_reconstruction_asymmetric_binary():
-    im = np.random.uniform(0, 1, size=(128, 128))
-    im = im > 0.5
-
-    coeff = steerable.build_steerable(im)
+    coeff = steerable.build_steerable(im, height=3)
     out = steerable.recon_steerable(coeff)
 
     assert_array_almost_equal(img_as_float(im), out, decimal=5)
+
+
+def test_steerable_reconstruction_asymmetric_binary():
+    im = np.random.uniform(0, 1, size=(113, 29))
+    im = im > 0.5
+
+    coeff = steerable.build_steerable(im, height=3)
+    out = steerable.recon_steerable(coeff)
+
+    assert_array_almost_equal(img_as_float(im), out, decimal=5)
+
+
+def test_warnings():
+    im = np.random.randint(0, 255, (128, 128), dtype=np.uint8)
+    with assert_raises(ValueError):
+        coeff = steerable.build_steerable(im, height=10)
 
 
 if __name__ == "__main__":

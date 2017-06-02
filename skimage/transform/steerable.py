@@ -1,6 +1,6 @@
 from __future__ import division
 import numpy as np
-from .._shared.utils import assert_nD
+from .._shared.utils import assert_nD, warn
 from ..util import img_as_float
 
 
@@ -84,6 +84,13 @@ class Steerable:
         nbands : int
             number of orientations in Steerable decomposition
         """
+
+        if not (isinstance(height, int) and isinstance(nbands, int)):
+            raise ValueError("Height and nbands must be integers")
+
+        if height < 3:
+            raise ValueError("Height must be at least 3")
+
         self.nbands = nbands
         self.height = height
 
@@ -97,8 +104,12 @@ class Steerable:
         assert_nD(im, 2)
 
         im = img_as_float(im)
-
         M, N = im.shape
+
+        if min(M, N) < 2**self.height:
+            raise ValueError("Image is not big enough to "
+                             "apply Steerable decomposition")
+
         log_rad, angle = _base(M, N)
         Xrcos, Yrcos = _rcos_curve(1, -0.5)
         YIrcos = np.sqrt(1 - Yrcos)
