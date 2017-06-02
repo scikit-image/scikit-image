@@ -90,11 +90,5 @@ def test_steerable_reconstruction_asymmetric_binary():
     assert_array_almost_equal(img_as_float(im), out, decimal=5)
 
 
-def test_warnings():
-    im = np.random.randint(0, 255, (128, 128), dtype=np.uint8)
-    with assert_raises(ValueError):
-        coeff = steerable.build_steerable(im, height=10)
-
-
 if __name__ == "__main__":
     run_module_suite()
