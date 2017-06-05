@@ -6,11 +6,10 @@ of the hierarchical queue provided in heap_general.pyx
 """
 
 import numpy as np
-from libc.math cimport sqrt
+#from libc.math cimport sqrt
 
-import skimage.io
-import os
 from libc.stdlib cimport free, malloc, realloc
+#from cProfile import label
 
 cimport numpy as np
 cimport cython
@@ -23,6 +22,7 @@ ctypedef np.int64_t DTYPE_INT64_t
 ctypedef np.uint8_t DTYPE_BOOL_t
 ctypedef np.uint8_t DTYPE_UINT8_t
 
+import skimage.io
 
 ctypedef fused dtype_t:
     np.uint8_t
@@ -36,19 +36,12 @@ ctypedef fused dtype_t:
     np.float32_t
     np.float64_t
 
-
 include "heap_watershed.pxi"
 include "util.pxi"
 
-def print_image(dtype_t[::1] image, int width):
-    print
-    tempStr = ''
-    for i in range(len(image)):
-        tempStr += " %3i" % image[i]
-        if (i+1)%width == 0:
-            print tempStr
-            tempStr = ''
-    print
+cdef inline DTYPE_UINT64_t uint64_max(DTYPE_UINT64_t a, DTYPE_UINT64_t b): return a if a >= b else b
+cdef inline DTYPE_UINT64_t uint64_min(DTYPE_UINT64_t a, DTYPE_UINT64_t b): return a if a <= b else b
+
 
 cdef class PropertyContainer:
     cdef:
@@ -71,8 +64,6 @@ cdef class PropertyContainer:
         self.equivalent_label = <DTYPE_UINT64_t *>malloc(sizeof(DTYPE_UINT64_t) * number_of_minima)
         self.stop_level = <DTYPE_FLOAT64_t *>malloc(sizeof(DTYPE_FLOAT64_t) * number_of_minima)
         self.val_of_min = <DTYPE_FLOAT64_t *>malloc(sizeof(DTYPE_FLOAT64_t) * number_of_minima)
-        print 'PropertyContainer init: %.2f' % max_val 
-
 
     def __dealloc__(self):
         if self.equivalent_label != NULL :
@@ -82,6 +73,12 @@ cdef class PropertyContainer:
         if self.val_of_min != NULL :
             free(self.val_of_min)
 
+    cpdef void flooding_postprocessing(self,
+                                       DTYPE_UINT64_t label,
+                                       DTYPE_FLOAT64_t value,
+                                       DTYPE_FLOAT64_t level_before):
+        return
+    
     cpdef DTYPE_UINT64_t get_equivalent_label(self, DTYPE_UINT64_t label):
         while label != self.equivalent_label[label]:
             label = self.equivalent_label[label]
@@ -96,6 +93,150 @@ cdef class PropertyContainer:
     cpdef DTYPE_FLOAT64_t get_max_val(self):
         return(self.max_val)
 
+cdef class DiameterContainer(PropertyContainer):
+    cdef:
+        DTYPE_UINT64_t * max_extension
+        DTYPE_UINT64_t * max_coordinates
+        DTYPE_UINT64_t * min_coordinates
+
+        DTYPE_UINT64_t[:] point
+        cnp.int32_t[:] image_strides
+        DTYPE_UINT64_t number_of_dimensions
+        
+        # diameter threshold
+        DTYPE_UINT64_t diameter_threshold
+
+
+        
+        
+    def __cinit__(self, 
+                  DTYPE_UINT64_t number_of_minima,
+                  DTYPE_FLOAT64_t max_val,
+                  DTYPE_UINT64_t diameter_threshold,
+                  cnp.int32_t[::1] image_strides):
+
+        # threshold for the filtering
+        self.diameter_threshold = diameter_threshold
+
+        # information for coordinate transformation (index in 1D array -> nD coordinates)
+        self.number_of_dimensions = image_strides.shape[0]
+        self.image_strides = image_strides
+
+        # arrays to store the region properties
+        self.max_extension = <DTYPE_UINT64_t *>malloc(sizeof(DTYPE_UINT64_t) * number_of_minima)
+        self.max_coordinates = <DTYPE_UINT64_t *>malloc(sizeof(DTYPE_UINT64_t) * number_of_minima * self.number_of_dimensions)
+        self.min_coordinates = <DTYPE_UINT64_t *>malloc(sizeof(DTYPE_UINT64_t) * number_of_minima * self.number_of_dimensions)
+
+        # single point coordinates
+        point = np.zeros(self.number_of_dimensions, dtype=np.uint64)
+        self.point = point
+
+    def __dealloc__(self):
+        if self.max_extension != NULL :
+            free(self.max_extension)
+        if self.max_coordinates != NULL :
+            free(self.max_coordinates)
+        if self.min_coordinates != NULL :
+            free(self.min_coordinates)
+
+    cpdef void get_point(self, DTYPE_UINT64_t index):
+        cdef DTYPE_UINT64_t curr_index = index
+        
+        # get coordinates from 1D index
+        for i in range(self.number_of_dimensions):
+            self.point[i] = curr_index // self.image_strides[i]
+            curr_index = curr_index % self.image_strides[i]
+
+        return
+
+    #cpdef UINT64_t get_max_extension(self, DTYPE_UINT64_t label, 
+    #                                 int start_index, int stop_index):
+    #    cdef UINT64_t 
+    #    return max_extension
+    
+    cpdef void update(self, DTYPE_UINT64_t label, DTYPE_UINT64_t index, DTYPE_FLOAT64_t value):
+        cdef DTYPE_UINT64_t[::1] coordinates
+        cdef int i=0
+        cdef int start_index = self.number_of_dimensions * label
+        cdef int stop_index = start_index + self.number_of_dimensions
+        cdef int j=0
+
+        # get coordinates from 1D index and store them in self.point
+        self.get_point(index)
+
+        
+        for i in range(start_index, stop_index):
+            self.max_coordinates[i] = uint64_max(self.point[j], self.max_coordinates[i])
+            self.min_coordinates[i] = uint64_min(self.point[j], self.min_coordinates[i])
+            j += 1
+
+
+        for i in range(start_index, stop_index):
+            self.max_extension[label] = uint64_max(self.max_extension[label],
+                                                   (self.max_coordinates[i] - self.min_coordinates[i] + 1))
+        return
+
+    cpdef void initialize(self, DTYPE_UINT64_t label, DTYPE_FLOAT64_t value):
+        self.max_extension[label] = 0
+        for i in range(self.number_of_dimensions):
+            self.min_coordinates[label*self.number_of_dimensions + i] = np.max(self.image_strides)
+            self.max_coordinates[label*self.number_of_dimensions + i] = 0
+
+        self.equivalent_label[label] = label
+        self.val_of_min[label] = value
+        self.stop_level[label] = self.max_val
+        
+        temp_str = 'initialization label: %02i\tvalue=%.1f\tmax_ext:%i' % (label, value, self.min_coordinates[label])
+        for i in range(self.number_of_dimensions):
+            temp_str += ', min (%i):%i' % (i, self.min_coordinates[label*self.number_of_dimensions + i])
+            temp_str += ', max (%i):%i' % (i, self.max_coordinates[label*self.number_of_dimensions + i])
+        print temp_str
+        return
+
+    cpdef void set_stop_level(self, DTYPE_UINT64_t label,
+                              DTYPE_FLOAT64_t value,
+                              DTYPE_FLOAT64_t level_before):
+        cdef DTYPE_UINT64_t equ_l = self.get_equivalent_label(label)
+        temp_str = 'set_stop_level level_before = %.1f --> value = %.1f\tlabel: %02i --> %02i\tmax_extension:%i\t' % (level_before, value, label, equ_l, self.max_extension[equ_l])
+        for i in range(self.number_of_dimensions):
+            temp_str += ' [min(%i) : %i' % (i, self.min_coordinates[label*self.number_of_dimensions + i])
+            temp_str += ' max(%i) : %i]   ' % (i, self.max_coordinates[label*self.number_of_dimensions + i])
+        print temp_str
+        if (self.max_extension[equ_l] > self.diameter_threshold and 
+            self.stop_level[label] >= self.max_val):
+            self.stop_level[label] = level_before
+        return
+    
+    cpdef DTYPE_BOOL_t is_complete(self, DTYPE_UINT64_t label):
+        return(self.stop_level[label] < self.max_val)
+        #return (self.area[label] >= self.area_threshold)
+    
+    cpdef void fusion(self, DTYPE_UINT64_t label1, DTYPE_UINT64_t label2):
+        cdef int i=0
+        cdef DTYPE_UINT64_t label1_c = label1 * self.number_of_dimensions
+        cdef DTYPE_UINT64_t label2_c = label2 * self.number_of_dimensions
+        
+        if self.max_extension[label1] >= self.max_extension[label2]:
+            for i in range(self.number_of_dimensions): 
+                self.max_coordinates[label1_c + i] = uint64_max(self.max_coordinates[label1_c + i],
+                                                              self.max_coordinates[label2_c + i])
+                self.min_coordinates[label1_c + i] = uint64_min(self.min_coordinates[label1_c + i],
+                                                              self.min_coordinates[label2_c + i])
+                self.max_extension[label1] = uint64_max(self.max_extension[label1], 
+                                                        (self.max_coordinates[label1_c + i] - 
+                                                         self.min_coordinates[label1_c + i] + 1))
+            self.equivalent_label[label2] = label1
+        else:
+            for i in range(self.number_of_dimensions): 
+                self.max_coordinates[label2_c + i] = uint64_max(self.max_coordinates[label1_c + i],
+                                                              self.max_coordinates[label2_c + i])
+                self.min_coordinates[label2_c + i] = uint64_min(self.min_coordinates[label1_c + i],
+                                                              self.min_coordinates[label2_c + i])
+                self.max_extension[label2] = uint64_max(self.max_extension[label2], 
+                                                        (self.max_coordinates[label2_c + i] - 
+                                                         self.min_coordinates[label2_c + i] + 1))
+            self.equivalent_label[label1] = label2
+        return
 
 cdef class AreaContainer(PropertyContainer):
     cdef:
@@ -110,7 +251,6 @@ cdef class AreaContainer(PropertyContainer):
                   DTYPE_UINT64_t area_threshold):
         self.area_threshold = area_threshold
         self.area = <DTYPE_UINT64_t *>malloc(sizeof(DTYPE_UINT64_t) * number_of_minima)
-        print 'AreaContainer init: %.2f' % max_val 
         
     def __dealloc__(self):
         if self.area != NULL :
@@ -120,20 +260,13 @@ cdef class AreaContainer(PropertyContainer):
         self.area[label] += 1
         return
 
-    cpdef void output_all(self):
-        cdef int i=0
-        for i in range(1, self.number_of_minima): 
-            print 'label %i\tarea: %i\tstop_level: %.2f' % (i, self.area[i], self.stop_level[i])
-        return
-    
     cpdef void initialize(self, DTYPE_UINT64_t label, DTYPE_FLOAT64_t value):
         self.area[label] = 0
         self.equivalent_label[label] = label
         self.val_of_min[label] = value
         self.stop_level[label] = self.max_val
-        print 'during initialization: label = %i\tstop_level = %.2f\tmax = %.2f' % (label, self.stop_level[label], self.max_val)
         return
-
+    
     cpdef void set_stop_level(self, DTYPE_UINT64_t label,
                               DTYPE_FLOAT64_t value,
                               DTYPE_FLOAT64_t level_before):
@@ -161,7 +294,7 @@ cdef class VolumeContainer(PropertyContainer):
         DTYPE_UINT64_t * area
         DTYPE_FLOAT64_t * volume
 
-        # area threshold
+        # volume threshold
         DTYPE_FLOAT64_t volume_threshold
 
     def __cinit__(self, 
@@ -190,20 +323,52 @@ cdef class VolumeContainer(PropertyContainer):
         self.stop_level[label] = self.max_val
         return
 
+    cpdef void flooding_postprocessing(self,
+                                       DTYPE_UINT64_t label,
+                                       DTYPE_FLOAT64_t value,
+                                       DTYPE_FLOAT64_t level_before):
+        tempStr = 'updated volume for label %i (levels : %.1f --> %.1f):\tvolume : %.3f' % (label,
+                                                                                            level_before,
+                                                                                            value,
+                                                                                            self.volume[label])
+
+        self.volume[label] += (value - level_before) * self.area[label]
+        tempStr += ', updated volume : %.3f\tarea : %.3f' % (self.volume[label], self.area[label])
+        print tempStr
+        return
+
     cpdef void set_stop_level(self, DTYPE_UINT64_t label,
                               DTYPE_FLOAT64_t value,
                               DTYPE_FLOAT64_t level_before):
-        label = self.get_equivalent_label(label)
-        self.volume[label] += (value - level_before) * self.area[label]
-        if (self.volume[label] >= self.volume_threshold and 
-            self.stop_level[label] >= self.max_val):
-            self.stop_level[label] = level_before
+        cdef DTYPE_UINT64_t equ_l = self.get_equivalent_label(label)
+        cdef DTYPE_FLOAT64_t stop_level = self.max_val
+        if self.val_of_min[label] > level_before:
+            return
+        if self.area[equ_l] > 0:
+            stop_level = (<DTYPE_FLOAT64_t>self.volume_threshold - 
+                          <DTYPE_FLOAT64_t>self.volume[equ_l]) / <DTYPE_FLOAT64_t>self.area[equ_l] + <DTYPE_FLOAT64_t>level_before
+            if stop_level < level_before:
+                stop_level = level_before
+        tempStr = 'setting stop level for label %i (levels : %.1f --> %.1f): \tcalc : %.3f, old : %.3f,\t'
+        tempStr += 'volume : %.3f, vol_thresh : %.3f, area : %i' 
+        tempStr = tempStr% (label, 
+                            level_before,
+                            value,
+                            stop_level, 
+                            self.stop_level[label],
+                            self.volume[equ_l],
+                            self.volume_threshold, 
+                            self.area[equ_l])
+        print tempStr
+        if (stop_level <= value and self.stop_level[label] >= self.max_val):
+            self.stop_level[label] = stop_level
+        #self.volume[equ_l] += (value - level_before) * self.area[equ_l]
+
         return
-    
+
     cpdef DTYPE_BOOL_t is_complete(self, DTYPE_UINT64_t label):
-        #return (self.volume[label] >= self.volume_threshold)
         return(self.stop_level[label] < self.max_val)
-    
+
     cpdef void fusion(self, DTYPE_UINT64_t label1, DTYPE_UINT64_t label2):
         if self.volume[label1] >= self.volume[label2]:
             self.volume[label1] += self.volume[label2]
@@ -215,102 +380,34 @@ cdef class VolumeContainer(PropertyContainer):
             self.equivalent_label[label1] = label2
         return
 
-cdef class BackupAreaContainer:
-    cdef:
-        DTYPE_UINT64_t * area
-        DTYPE_UINT64_t * equivalent_label
-        DTYPE_FLOAT64_t * stop_level
-        DTYPE_FLOAT64_t * val_of_min
-
-        # number of minima
-        DTYPE_UINT64_t number_of_minima
-
-        # area threshold
-        DTYPE_UINT64_t area_threshold
-
-        DTYPE_FLOAT64_t max_val
-
-    def __cinit__(self, 
-                  DTYPE_UINT64_t number_of_minima, 
-                  DTYPE_UINT64_t area_threshold, 
-                  DTYPE_FLOAT64_t max_val):
-        self.number_of_minima = number_of_minima
-        self.area_threshold = area_threshold
-        self.area = <DTYPE_UINT64_t *>malloc(sizeof(DTYPE_UINT64_t) * number_of_minima)
-        self.equivalent_label = <DTYPE_UINT64_t *>malloc(sizeof(DTYPE_UINT64_t) * number_of_minima)
-        self.stop_level = <DTYPE_FLOAT64_t *>malloc(sizeof(DTYPE_FLOAT64_t) * number_of_minima)
-        self.val_of_min = <DTYPE_FLOAT64_t *>malloc(sizeof(DTYPE_FLOAT64_t) * number_of_minima)
-        self.max_val = max_val
-
-    def __dealloc__(self):
-        if self.area != NULL :
-            free(self.area)
-        if self.equivalent_label != NULL :
-            free(self.equivalent_label)
-        if self.stop_level != NULL :
-            free(self.stop_level)
-        if self.val_of_min != NULL :
-            free(self.val_of_min)
-
-    cpdef void update(self, DTYPE_UINT64_t label):
-        self.area[label] += 1
-        return
-
-    cpdef void initialize(self, DTYPE_UINT64_t label, DTYPE_FLOAT64_t value):
-        self.area[label] = 0
-        self.equivalent_label[label] = label
-        self.val_of_min[label] = value
-        self.stop_level[label] = self.max_val 
-        return
-
-    cpdef DTYPE_UINT64_t get_equivalent_label(self, DTYPE_UINT64_t label):
-        while label != self.equivalent_label[label]:
-            label = self.equivalent_label[label]
-        return label
-
-    cpdef DTYPE_UINT64_t get_number_of_minima(self):
-        return(self.number_of_minima)
-
-    cpdef DTYPE_FLOAT64_t get_stop_level(self, DTYPE_UINT64_t label):
-        return self.stop_level[label]
-
-    cpdef void set_stop_level(self, DTYPE_UINT64_t label, DTYPE_FLOAT64_t level_before):
-        label = self.get_equivalent_label(label)
-        if (self.area[label] >= self.area_threshold and 
-            self.stop_level[label] >= self.max_val):
-            self.stop_level[label] = level_before
-        return
-    
-    cpdef DTYPE_BOOL_t is_complete(self, DTYPE_UINT64_t label):
-        return (self.area[label] >= self.area_threshold)
-    
-    cpdef void fusion(self, DTYPE_UINT64_t label1, DTYPE_UINT64_t label2):
-        if self.area[label1] >= self.area[label2]:
-            self.area[label1] += self.area[label2]
-            self.equivalent_label[label2] = label1
-        else:
-            self.area[label2] += self.area[label1]
-            self.equivalent_label[label1] = label2
-        return
-
-
+def make_img(X, strides):
+    width = strides[0]
+    height = len(X) // strides[0]
+    A = np.zeros((width, height), dtype=np.uint64)
+    k = 0
+    for j in range(height):
+        for i in range(width): 
+            A[i,j] = X[k]
+            k+= 1
+    return A
+        
 @cython.boundscheck(False)
-def _criteria_closing(dtype_t[::1] image, #DTYPE_FLOAT64_t[::1] image,
+def _criteria_closing(dtype_t[::1] image,
                       DTYPE_UINT64_t[::1] label_img,
                       DTYPE_INT32_t[::1] structure,
                       DTYPE_BOOL_t[::1] mask,
-                      np.int32_t[::1] strides,
+                      cnp.int32_t[::1] strides,
                       DTYPE_FLOAT64_t eps,
                       np.double_t compactness,
-                      dtype_t[::1] output, #DTYPE_FLOAT64_t[::1] output,
+                      dtype_t[::1] output,
                       property_class,
                       ):
-    """Perform criteria based closings using.
+    """Perform criteria based closings.
 
     Parameters
     ----------
 
-    image : array of float
+    image : array of arbitrary type
         The flattened image pixels.
     marker_locations : array of int
         The raveled coordinates of the initial markers (aka seeds) for the
@@ -364,6 +461,14 @@ def _criteria_closing(dtype_t[::1] image, #DTYPE_FLOAT64_t[::1] image,
 
     cdef DTYPE_UINT64_t[::1] label_final = label_img.copy()
 
+    cdef bint is_float = False
+    if dtype_t is np.float32_t or dtype_t is np.float64_t:#in [np.float32_t, np.float64_t]:
+        print 'type is float.'
+        is_float = True
+        
+    print 'IS FLOAT?'
+    print is_float
+    
     min_val = <DTYPE_FLOAT64_t>np.min(image)
     for i in range(len(label_img)):
         l = label_img[i]
@@ -387,11 +492,6 @@ def _criteria_closing(dtype_t[::1] image, #DTYPE_FLOAT64_t[::1] image,
     level_before = min_val
     property_class.initialize(0, 0.0)
 
-    print
-    print 'INITIALIZATION'
-    property_class.output_all()
-    
-    
     while hp.items > 0:
         heappop(hp, &elem)
 
@@ -400,33 +500,34 @@ def _criteria_closing(dtype_t[::1] image, #DTYPE_FLOAT64_t[::1] image,
             continue
 
         value = elem.value
-
+        
         # check all lakes and determine the stop levels if needed.
         if value > level_before + eps:
             print
-            print 'STEP: ', level_before, ' --> ', value
-            
+            print
+            print 'SETTING STOP_LEVELS:'
+            print
             for l in range(number_of_minima):
                 property_class.set_stop_level(l, value, level_before)
-            property_class.output_all()
+            print
+            print
+            for l in range(number_of_minima):
+                property_class.flooding_postprocessing(l, value, level_before)
+            print 
+            print 'stop levels (%.3f --> %.3f):' % (level_before, value)
+            for l in range(number_of_minima):
+                print 'label %i: %.3f' % (l, property_class.get_stop_level(<DTYPE_UINT64_t>l))
+            li = make_img(label_img, strides)
+            skimage.io.imsave('/Users/twalter/data/test/criteria_closings/label_img_%i_%i.png' % (level_before, value), 
+                              li.T)
+            lf = make_img(label_final, strides)
+            skimage.io.imsave('/Users/twalter/data/test/criteria_closings/label_final_%i_%i.png' % (level_before, value), 
+                              lf.T)
             level_before = value
+            print 
 
-            print
-            print 'LABEL_IMG'
-            print
-            print_image(label_img, 14)
-            print
-            print 'LABEL_FINAL'
-            print
-            print_image(label_final, 14)
-
-            
         # we find the label of the dominating lake
         label1 = property_class.get_equivalent_label(label_img[elem.source])
-
-        # if the criterion is met, nothing happens
-#        if property_class.is_complete(label1):
-#            continue
 
         # the non-labeled pixel from the queue is marked with the
         # value of the dominating lake of its source label.
@@ -435,9 +536,12 @@ def _criteria_closing(dtype_t[::1] image, #DTYPE_FLOAT64_t[::1] image,
 
         # if the criterion is not met, the final label image is updated.
         # regions that fulfill already the criterion do not grow anymore.
-        if not property_class.is_complete(label1):
-            # label_final[elem.index] = label1
+        if not property_class.is_complete(label_img[elem.source]):
             label_final[elem.index] = label_img[elem.source]
+
+        print 'from queue --> pixel %03i : (%02i,%02i)\tvalue = %03.3f\tlabel = %02i, equ label = %02i\tstop(l) = %.3f, stop(equ_l) = %.3f' % (elem.index, elem.index/ 14, elem.index % 14, value, 
+                                                                                                   label_img[elem.source], label1, property_class.get_stop_level(<DTYPE_UINT64_t>label_img[elem.source]), 
+                                                                                                   property_class.get_stop_level(<DTYPE_UINT64_t>label1))
 
         # The corresponding lake is updated.
         property_class.update(label1, elem.index, value)
@@ -485,15 +589,18 @@ def _criteria_closing(dtype_t[::1] image, #DTYPE_FLOAT64_t[::1] image,
 
     heap_done(hp)
 
-    print
-    print 'BEFORE FINAL ASSIGNMENT: LABEL_FINAL'
-    print
-    print_image(label_final, 14)
+    for l in range(number_of_minima):
+        print 'label %i: %.3f' % (l, property_class.get_stop_level(<DTYPE_UINT64_t>l))
 
     for i in range(len(label_img)):
         label1 = label_final[i]
         if label1 > 0:
             output[i] = <dtype_t>property_class.get_stop_level(<DTYPE_UINT64_t>label1)
+            if not is_float:
+                # This corresponds to the "at leat" in volume filling, i.e. if there is 
+                # an in between value, the larger fill level is chosen. 
+                if <DTYPE_FLOAT64_t>output[i] - property_class.get_stop_level(<DTYPE_UINT64_t>label1) < 0:
+                    output[i] += 1
         else:
             output[i] = image[i]
 
@@ -503,7 +610,7 @@ def area_closing(dtype_t[::1] image,
                  DTYPE_UINT64_t[::1] label_img,
                  DTYPE_INT32_t[::1] structure,
                  DTYPE_BOOL_t[::1] mask,
-                 np.int32_t[::1] strides,
+                 cnp.int32_t[::1] strides,
                  DTYPE_FLOAT64_t eps,
                  np.double_t compactness,
                  dtype_t[::1] output,
@@ -526,13 +633,42 @@ def area_closing(dtype_t[::1] image,
                       output, 
                       area_container)
 
+def diameter_closing(dtype_t[::1] image,
+                     DTYPE_UINT64_t diameter_threshold,
+                     DTYPE_UINT64_t[::1] label_img,
+                     DTYPE_INT32_t[::1] structure,
+                     DTYPE_BOOL_t[::1] mask,
+                     cnp.int32_t[::1] strides,
+                     DTYPE_FLOAT64_t eps,
+                     np.double_t compactness,
+                     dtype_t[::1] output,
+                     ):
+    
+    cdef int number_of_minima = np.max(label_img) + 1
+    cdef DTYPE_FLOAT64_t max_val = <DTYPE_FLOAT64_t>np.max(image)
+    cdef DiameterContainer diameter_container = DiameterContainer(number_of_minima,
+                                                                  max_val,
+                                                                  diameter_threshold, 
+                                                                  strides)
+    
+    
+    _criteria_closing(image,
+                      label_img,
+                      structure,
+                      mask,
+                      strides,
+                      eps,
+                      compactness,
+                      output, 
+                      diameter_container)
+
 
 def volume_fill(dtype_t[::1] image,
                 DTYPE_FLOAT64_t volume_threshold,
                 DTYPE_UINT64_t[::1] label_img,
                 DTYPE_INT32_t[::1] structure,
                 DTYPE_BOOL_t[::1] mask,
-                np.int32_t[::1] strides,
+                cnp.int32_t[::1] strides,
                 DTYPE_FLOAT64_t eps,
                 np.double_t compactness,
                 dtype_t[::1] output,
