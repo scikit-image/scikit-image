@@ -325,6 +325,60 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
                 mode=mode, cval=cval, clip=clip, preserve_range=preserve_range)
 
 
+def flip(image, orientation):
+    """Flip image horizontally or vertically.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image
+    orientation : bool
+        Flip direction as a boolean - '0' - horizontal, '1' - vertical
+
+    Returns
+    -------
+    flipped : ndarray
+        Flipped version of the input.
+
+    Examples
+    --------
+
+    Testing code example (1)
+    ------------------------
+
+    from skimage.io import imshow, imread
+    from matplotlib import pyplot as plt
+    import numpy as np
+    image = imread('rectangle.jpg')
+    figure = plt.figure()
+    a = figure.add_subplot(1,2,1)
+    a.set_title('Before')
+    imageplot = plt.imshow(image)
+    result_image = flip(image, 1)
+    a = figure.add_subplot(1,2,2)
+    a.set_title('After')
+    imageplot = plt.imshow(result_image)
+    plt.show()
+
+    Testing code example (2)
+    ------------------------
+    >>> from skimage.io import imshow, imread
+    >>> from matplotlib import pyplot as plt
+    >>> import numpy as np
+    >>> from skimage import data
+    >>> image = data.camera()
+    >>> flip(image, 0).shape #horizontal flip
+    (512, 512)
+    >>> flip(image, 1).shape #vertical flip
+    (512, 512)
+    """
+
+    if orientation == 1:
+        image = np.flipud(image)
+    elif orientation == 0:
+        image = np.fliplr(image)
+    return image
+
 def downscale_local_mean(image, factors, cval=0, clip=True):
     """Down-sample N-dimensional image by local averaging.
 
