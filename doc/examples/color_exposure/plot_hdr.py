@@ -67,21 +67,18 @@ plt.show()
 # imsave(fname, hdr_norm.astype(np.float32), plugin='tifffile')
 
 
-# Plotting a histogram equalised  hdr image.
-# from skimage.morphology import disk
+# # Plotting a histogram equalised  hdr image.
 # from matplotlib.colors import LogNorm
-# from skimage.filters import rank
-# from skimage.color import rgb2gray
-# hdr_hist = np.zeros_like(hdr_norm)
-# for ii in range(3):
-#     hdr_hist[:, :, ii] = hdr_norm / (hdr_norm + 1)
+#
+# from skimage.exposure import equalize_hi
+#
 # tone_mapped = np.zeros_like(hdr_im)
-# selem = disk(10)
-# eq = rank.equalize(I, selem=selem)
-# for i in range(3):
-#     norm = np.max(np.nan_to_num(hdr_im[:, :, ii].flatten()))
-#     tone_mapped[:, :, i] = hdr_im[:, :, i] * eq / (I * norm)
+# for ii in range(3):
+#     tone_mapped[:, :, ii] = equalize_hist(np.nan_to_num(hdr_im[:, :, ii]))
+#
 # fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 20))
-# axes[0].imshow(I, 'gray', norm=LogNorm())
+# axes[0].imshow(hdr_im, 'gray', norm=LogNorm())
+# axes[0].set_title("HDR on log norm")
 # axes[1].imshow(tone_mapped)
+# axes[1].set_title("Tone mapped")
 # plt.show()

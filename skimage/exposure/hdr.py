@@ -170,10 +170,11 @@ def get_crf(images, exposure, depth=16, l=200, depth_max=10):
     rand_idx = np.floor(np.random.randn(samples) * 2**depth).astype(np.int)
     B = np.log(np.array(exposure))
 
-    if colour:
-        radiance_map = np.zeros([2**depth, 3])
+    radiance_map = np.zeros([2**depth, 3])
 
-        Z = np.zeros([rand_idx.size, len(images)])
+    Z = np.zeros([rand_idx.size, len(images)])
+
+    if colour:
 
         for ii in range(3):
 
@@ -183,7 +184,7 @@ def get_crf(images, exposure, depth=16, l=200, depth_max=10):
 
     else:
         for jj in range(len(images)):
-            Z[:, jj] = images[jj][:, :, ii].flatten()[rand_idx]
+            Z[:, jj] = images[jj][:, :].flatten()[rand_idx]
         radiance_map, LE = _gsolve(Z, B, l, depth, depth_max)
 
     return radiance_map
