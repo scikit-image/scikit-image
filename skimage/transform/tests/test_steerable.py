@@ -1,5 +1,5 @@
 from numpy.testing import assert_equal, assert_array_equal,\
-    assert_array_almost_equal, run_module_suite, assert_raises
+    assert_array_almost_equal, run_module_suite
 from skimage.transform import steerable
 import numpy as np
 from skimage import img_as_float
@@ -9,8 +9,8 @@ def test_steerable_shape():
     im = np.random.randint(0, 255, (128, 128), dtype=np.uint8)
     coeff = steerable.build_steerable(im)
 
-    assert_array_equal(coeff[0].shape, [128, 128])
-    assert_array_equal(coeff[-1].shape, [16, 16])
+    assert_array_equal(coeff[0][0].shape, [128, 128])
+    assert_array_equal(coeff[-1][0].shape, [16, 16])
 
     for i in range(1, 4):
         assert_equal(len(coeff[i]), 4)

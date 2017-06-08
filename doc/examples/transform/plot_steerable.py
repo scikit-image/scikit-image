@@ -20,43 +20,40 @@ but different orientations.
     for Multi-Scale Derivative Computation."
     http://www.cns.nyu.edu/~eero/steerpyr/
 """
-from matplotlib import pyplot as plt
+from __future__ import division, print_function
 import numpy as np
-
-from skimage.data import chelsea
-from skimage.color import rgb2gray
+from matplotlib import pyplot as plt
 from skimage.transform import steerable
 
 
-def visualize(coeff, normalize=True):
+def normalize(im):
+    return (im - im.min()) / (im.max() - im.min())
+
+
+def visualize(coeff):
     rows, cols = coeff[1][0].shape
     Norients = len(coeff[1])
-    out = np.zeros((rows * 2 - coeff[-1].shape[0] + 1, Norients * cols))
+    out = np.ones((rows * 2 - coeff[-1][0].shape[0] + 1,
+                   Norients * cols + 1), dtype=np.double)
 
     r = 0
-    c = 0
     for i in range(1, len(coeff[:-1])):
+        m, n = coeff[i][0].shape
+
+        c = 0
         for j in range(len(coeff[1])):
             subband = coeff[i][j].real
-            m, n = subband.shape
+            subband = normalize(subband)
 
-            if normalize:
-                subband = 255 * subband / subband.max()
-
-            subband[m - 1, :] = 255
-            subband[:, n - 1] = 255
+            subband[-1, :] = 1
+            subband[:, -1] = 1
 
             out[r: r + m, c: c + n] = subband
             c += n
-        r += coeff[i][0].shape[0]
-        c = 0
+        r += m
 
-    m, n = coeff[-1].shape
-    out[r: r + m, c: c + n] = \
-        255 * coeff[-1] / coeff[-1].max()
-
-    out[0, :] = 255
-    out[:, 0] = 255
+    m, n = coeff[-1][0].shape
+    out[r: r + m, 0:n] = normalize(coeff[-1][0])
 
     return out
 
@@ -67,11 +64,24 @@ xx, yy = np.meshgrid(x, x, sparse=True)
 r = np.sqrt(xx**2 + yy**2)
 image = r < 64
 
+
+# Steerable subband decomposition
 coeff = steerable.build_steerable(image)
+
+print("Shape of Steerable subbands")
+for i in range(len(coeff)):
+    c = coeff[i]
+    print("Height %d: " % i, end='')
+    for array in c:
+        print(array.shape, end=' ')
+    print("")
+
 out = visualize(coeff)
 
 fig, ax = plt.subplots()
 ax.imshow(out, cmap=plt.cm.gray)
 ax.set_title("Subbands from Steerable decomposition")
+ax.set_xticks([])
+ax.set_yticks([])
 plt.tight_layout()
 plt.show()

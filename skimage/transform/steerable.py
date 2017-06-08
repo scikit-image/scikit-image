@@ -85,7 +85,7 @@ class Steerable:
             number of orientations in Steerable decomposition
         """
 
-        if not (isinstance(height, int) and isinstance(nbands, int)):
+        if not (height % 1 == 0 and nbands % 1 == 0):
             raise ValueError("Height and nbands must be integers")
 
         if height < 3:
@@ -107,8 +107,9 @@ class Steerable:
         M, N = im.shape
 
         if min(M, N) < 2**self.height:
-            raise ValueError("Image is not big enough to "
-                             "apply Steerable decomposition")
+            raise ValueError("For a {} level decomposition,"
+                             " all image dimensions must be at least"
+                             " size {}.".format(height, 2**height))
 
         log_rad, angle = _base(M, N)
         Xrcos, Yrcos = _rcos_curve(1, -0.5)
@@ -127,7 +128,7 @@ class Steerable:
         hi0dft = imdft * hi0mask
         hi0 = np.fft.ifft2(np.fft.ifftshift(hi0dft))
 
-        coeff.insert(0, hi0.real)
+        coeff.insert(0, [hi0.real])
 
         return coeff
 
@@ -150,7 +151,7 @@ class Steerable:
         """
         if (ht <= 1):
             lo0 = np.fft.ifft2(np.fft.ifftshift(lodft))
-            coeff = [lo0.real]
+            coeff = [[lo0.real]]
 
         else:
             Xrcos = Xrcos - 1
@@ -224,7 +225,7 @@ class Steerable:
         """
 
         if (len(coeff) == 1):
-            return np.fft.fftshift(np.fft.fft2(coeff[0]))
+            return np.fft.fftshift(np.fft.fft2(coeff[0][0]))
 
         else:
 
@@ -296,12 +297,18 @@ class Steerable:
         if (self.height != len(coeff)):
             raise ValueError("Height of coeff should be %d" % self.height)
 
+        if (len(coeff[0]) != 1):
+            raise ValueError("High pass sublist should be of length one")
+
+        if (len(coeff[-1]) != 1):
+            raise ValueError("Low pass sublist should be of length one")
+
         for i in range(1, self.height - 1):
-            if (self.nbands != len(coeff[1])):
+            if (self.nbands != len(coeff[i])):
                 raise ValueError(
                     "Size of intermediate sublist should be %d" % self.nbands)
 
-        r, c = coeff[0].shape
+        r, c = coeff[0][0].shape
         log_rad, angle = _base(r, c)
 
         Xrcos, Yrcos = _rcos_curve(1, -0.5)
@@ -314,7 +321,7 @@ class Steerable:
         tempdft = self._recon_pyr_level(
             coeff[1:], log_rad, Xrcos, Yrcos, angle)
 
-        hidft = np.fft.fftshift(np.fft.fft2(coeff[0]))
+        hidft = np.fft.fftshift(np.fft.fft2(coeff[0][0]))
         outdft = tempdft * lo0mask + hidft * hi0mask
 
         return np.fft.ifft2(np.fft.ifftshift(outdft)).real
