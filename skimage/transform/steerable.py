@@ -91,8 +91,8 @@ class Steerable:
         if height < 3:
             raise ValueError("Height must be at least 3")
 
-        self.nbands = nbands
-        self.height = height
+        self.nbands = int(nbands)
+        self.height = int(height)
 
     def build_scf_pyramid(self, im):
         """
