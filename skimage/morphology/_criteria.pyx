@@ -20,8 +20,6 @@ ctypedef np.int64_t DTYPE_INT64_t
 ctypedef np.uint8_t DTYPE_BOOL_t
 ctypedef np.uint8_t DTYPE_UINT8_t
 
-import skimage.io
-
 ctypedef fused dtype_t:
     np.uint8_t
     np.uint16_t
@@ -431,7 +429,7 @@ def _criteria_closing(dtype_t[::1] image,
     cdef DTYPE_UINT64_t[::1] label_final = label_img.copy()
 
     cdef bint is_float = False
-    if dtype_t is np.float32_t or dtype_t is np.float64_t:#in [np.float32_t, np.float64_t]:
+    if dtype_t is np.float32_t or dtype_t is np.float64_t:
         is_float = True
 
     min_val = <DTYPE_FLOAT64_t>np.min(image)
@@ -465,15 +463,15 @@ def _criteria_closing(dtype_t[::1] image,
             continue
 
         value = elem.value
-        
+
         # check all lakes and determine the stop levels if needed.
         if value > level_before + eps:
             # evalue the criterion and set the stop levels
-            for l in range(number_of_minima):
+            for l in range(1, number_of_minima):
                 property_class.set_stop_level(l, value, level_before)
 
             # some post-processing step after having set the stop levels.
-            for l in range(number_of_minima):
+            for l in range(1, number_of_minima):
                 property_class.flooding_postprocessing(l, value, level_before)
 
             level_before = value
@@ -484,11 +482,13 @@ def _criteria_closing(dtype_t[::1] image,
         # the non-labeled pixel from the queue is marked with the
         # value of the dominating lake of its source label.
         label_img[elem.index] = label_img[elem.source]
+        #label_img[elem.index] = label1
 
         # if the criterion is not met, the final label image is updated.
         # regions that fulfill already the criterion do not grow anymore.
         if not property_class.is_complete(label_img[elem.source]):
-            label_final[elem.index] = label_img[elem.source]
+            label_final[elem.index] = label_img[elem.index]
+            #label_final[elem.index] = label1
 
         # The corresponding lake is updated.
         property_class.update(label1, elem.index, value)
@@ -555,27 +555,26 @@ def area_closing(dtype_t[::1] image,
                  DTYPE_BOOL_t[::1] mask,
                  cnp.int32_t[::1] strides,
                  DTYPE_FLOAT64_t eps,
-                 np.double_t compactness,
                  dtype_t[::1] output,
                  ):
-    
+
     cdef int number_of_minima = np.max(label_img) + 1
     cdef DTYPE_FLOAT64_t max_val = <DTYPE_FLOAT64_t>np.max(image)
     cdef AreaContainer area_container = AreaContainer(number_of_minima,
                                                       max_val,
                                                       area_threshold)
-    
-    
+
     _criteria_closing(image,
                       label_img,
                       structure,
                       mask,
                       strides,
                       eps,
-                      compactness,
                       output, 
                       area_container)
 
+# diameter closing fills all minima until the corresponding catchment bassins 
+# have at least a maximal extension of diameter_threshold. 
 def diameter_closing(dtype_t[::1] image,
                      DTYPE_UINT64_t diameter_threshold,
                      DTYPE_UINT64_t[::1] label_img,
@@ -583,29 +582,30 @@ def diameter_closing(dtype_t[::1] image,
                      DTYPE_BOOL_t[::1] mask,
                      cnp.int32_t[::1] strides,
                      DTYPE_FLOAT64_t eps,
-                     np.double_t compactness,
                      dtype_t[::1] output,
                      ):
-    
+
     cdef int number_of_minima = np.max(label_img) + 1
     cdef DTYPE_FLOAT64_t max_val = <DTYPE_FLOAT64_t>np.max(image)
+
+    # The specialization of the PropertyContainer
     cdef DiameterContainer diameter_container = DiameterContainer(number_of_minima,
                                                                   max_val,
                                                                   diameter_threshold, 
                                                                   strides)
-    
-    
+
     _criteria_closing(image,
                       label_img,
                       structure,
                       mask,
                       strides,
                       eps,
-                      compactness,
                       output, 
                       diameter_container)
 
-
+# volume_fill fills the image such that for each minimum the volume that has
+# been added on top of the image has at least a volume (integral of intensities)
+# of volume_threshold.
 def volume_fill(dtype_t[::1] image,
                 DTYPE_FLOAT64_t volume_threshold,
                 DTYPE_UINT64_t[::1] label_img,
@@ -613,10 +613,9 @@ def volume_fill(dtype_t[::1] image,
                 DTYPE_BOOL_t[::1] mask,
                 cnp.int32_t[::1] strides,
                 DTYPE_FLOAT64_t eps,
-                np.double_t compactness,
                 dtype_t[::1] output,
                 ):
-    
+
     cdef int number_of_minima = np.max(label_img) + 1
     cdef DTYPE_FLOAT64_t max_val = <DTYPE_FLOAT64_t>np.max(image)
     cdef VolumeContainer volume_container = VolumeContainer(number_of_minima,
@@ -629,6 +628,5 @@ def volume_fill(dtype_t[::1] image,
                       mask,
                       strides,
                       eps,
-                      compactness,
                       output, 
                       volume_container)
