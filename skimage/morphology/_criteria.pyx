@@ -516,6 +516,11 @@ def _criteria_closing(dtype_t[::1] image,
                     # fusion of two lakes: the bigger eats the smaller one.
                     property_class.fusion(label1, label2)
 
+                    # In this case, the equivalent labels might have changed
+                    # according to the fusion rule defined in the property_class
+                    # label1 therefore needs to be set again (label2 is now obsolete).
+                    label1 = property_class.get_equivalent_label(label1)
+
                 # the neighbor is not added to the queue.
                 continue
 
