@@ -819,7 +819,7 @@ def gray2rgb(image, alpha=None):
     Returns
     -------
     rgb : ndarray
-        RGB image of shape ``(M, N, [, P], 3)``.
+        RGB image of shape ``(M[, N][, P], 3)``.
 
     Raises
     ------
@@ -829,7 +829,7 @@ def gray2rgb(image, alpha=None):
     Notes
     -----
     If the input is a 1-dimensional image of shape ``(M, )``, the output
-    will be shape ``(M, 1, 3)``.
+    will be shape ``(M, 3)``.
     """
     is_rgb = False
     is_alpha = False
@@ -854,9 +854,6 @@ def gray2rgb(image, alpha=None):
         return image
 
     elif dims in (1, 2, 3):
-        if image.ndim == 1:
-            image = image[..., np.newaxis]
-
         image = image[..., np.newaxis]
 
         if alpha:
