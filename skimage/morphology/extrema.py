@@ -331,10 +331,10 @@ def local_minima(image, selem=None):
     4 additional constant maxima.
     The depth of the minima are: 1, 21, 41, 61, 81, 101
 
-    >>> w = 10
+    >>> w = 12
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
-    >>> f[2:4,2:4] = 160; f[2:4,7:9] = 140; f[7:9,2:4] = 120; f[7:9,7:9] = 100
+    >>> f[2:3,1:5] = 160; f[2:4,9:11] = 140; f[9:11,2:4] = 120; f[9:10,9:11] = 100; f[10,10] = 100
     >>> f = f.astype(np.int)
 
     We can calculate all local minima:

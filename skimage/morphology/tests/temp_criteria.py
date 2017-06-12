@@ -51,7 +51,7 @@ def test_diameter_closing():
          [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]], 
         dtype=np.uint8)
 
-    expected_1 = np.array(
+    expected_2 = np.array(
         [[240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240],
          [240, 200, 200, 240, 240, 240, 200, 200, 240, 240, 200, 240],
          [240, 200, 200, 240, 240, 240, 240, 240, 240, 240, 200, 240],
@@ -66,7 +66,7 @@ def test_diameter_closing():
          [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]], 
         dtype=np.uint8)
 
-    expected_2 = np.array(
+    expected_3 = np.array(
         [[240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240],
          [240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 200, 240],
          [240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 200, 240],
@@ -81,8 +81,8 @@ def test_diameter_closing():
          [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]], 
         dtype=np.uint8)
 
-    full_type_test(img, 1, expected_1, criteria.diameter_closing)
     full_type_test(img, 2, expected_2, criteria.diameter_closing)
+    full_type_test(img, 3, expected_3, criteria.diameter_closing)
 
 
 def test_area_closing():

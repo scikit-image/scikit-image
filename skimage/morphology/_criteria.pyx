@@ -254,7 +254,7 @@ cdef class DiameterContainer(PropertyContainer):
                               DTYPE_FLOAT64_t value,
                               DTYPE_FLOAT64_t level_before):
         cdef DTYPE_UINT64_t equ_l = self.get_equivalent_label(label)
-        if (self.max_extension[equ_l] > self.diameter_threshold and 
+        if (self.max_extension[equ_l] >= self.diameter_threshold and 
             self.stop_level[label] >= self.max_val):
             self.stop_level[label] = level_before
         return
@@ -266,7 +266,7 @@ cdef class DiameterContainer(PropertyContainer):
         cdef int i=0
         cdef DTYPE_UINT64_t label1_c = label1 * self.number_of_dimensions
         cdef DTYPE_UINT64_t label2_c = label2 * self.number_of_dimensions
-        
+    
         if self.max_extension[label1] >= self.max_extension[label2]:
             for i in range(self.number_of_dimensions): 
                 self.max_coordinates[label1_c + i] = uint64_max(self.max_coordinates[label1_c + i],
