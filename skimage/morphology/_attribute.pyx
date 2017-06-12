@@ -1,4 +1,4 @@
-"""_criteria.pyx - flooding algorithm for criteria based openings and closings
+"""_attribute.pyx - flooding algorithm for attribute openings and closings
 
 The implementation is inspired by the implementation of the watershed
 transformation (watershed.pyx) and is also based on the implementation
@@ -362,7 +362,7 @@ cdef class VolumeContainer(PropertyContainer):
         return
 
 @cython.boundscheck(False)
-def _criteria_closing(dtype_t[::1] image,
+def _attribute_closing(dtype_t[::1] image,
                       DTYPE_UINT64_t[::1] label_img,
                       DTYPE_INT32_t[::1] structure,
                       DTYPE_BOOL_t[::1] mask,
@@ -371,7 +371,7 @@ def _criteria_closing(dtype_t[::1] image,
                       dtype_t[::1] output,
                       property_class,
                       ):
-    """Perform criteria based closings.
+    """Perform attribute based closings.
 
     Parameters
     ----------
@@ -442,7 +442,7 @@ def _criteria_closing(dtype_t[::1] image,
 
         value = <DTYPE_FLOAT64_t>image[i]
 
-        # initialization of the criteria vector
+        # initialization of the attribute vector
         property_class.initialize(l, value)
 
         # queue initialization
@@ -569,7 +569,7 @@ def area_closing(dtype_t[::1] image,
                                                       max_val,
                                                       area_threshold)
 
-    _criteria_closing(image,
+    _attribute_closing(image,
                       label_img,
                       structure,
                       mask,
@@ -599,7 +599,7 @@ def diameter_closing(dtype_t[::1] image,
                                                                   diameter_threshold, 
                                                                   strides)
 
-    _criteria_closing(image,
+    _attribute_closing(image,
                       label_img,
                       structure,
                       mask,
@@ -627,7 +627,7 @@ def volume_fill(dtype_t[::1] image,
                                                             max_val,
                                                             volume_threshold)
 
-    _criteria_closing(image,
+    _attribute_closing(image,
                       label_img,
                       structure,
                       mask,

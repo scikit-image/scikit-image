@@ -1,6 +1,6 @@
-"""criteria.py - apply criteria based openings and closings
+"""attribute.py - apply criteria based openings and closings
 
-This module provides functions to apply criteria based openings and
+This module provides functions to apply attribute openings and
 closings to arbitrary images. These operators build on the flooding
 algorithm used in the watershed transformation, but instead of
 partitioning the image plane they stop the flooding once a certain
@@ -24,7 +24,7 @@ from .watershed import _compute_neighbors
 from .extrema import local_minima
 from ..measure import label
 
-from . import _criteria
+from . import _attribute
 
 from ..util import crop
 
@@ -74,10 +74,10 @@ def area_closing(image, area_threshold, mask=None, connectivity=2):
     --------
     skimage.morphology.extrema.h_minima
     skimage.morphology.extrema.h_maxima
-    skimage.morphology.criteria.area_opening
-    skimage.morphology.criteria.diameter_opening
-    skimage.morphology.criteria.diameter_closing
-    skimage.morphology.criteria.volume_fill
+    skimage.morphology.attribute.area_opening
+    skimage.morphology.attribute.diameter_opening
+    skimage.morphology.attribute.diameter_closing
+    skimage.morphology.attribute.volume_fill
 
 
     References
@@ -92,7 +92,7 @@ def area_closing(image, area_threshold, mask=None, connectivity=2):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.morphology import criteria
+    >>> from skimage.morphology import attribute
 
     We create an image (quadratic function with a minimum in the center and
     4 additional local minima.
@@ -105,7 +105,7 @@ def area_closing(image, area_threshold, mask=None, connectivity=2):
 
     We can calculate the area closing:
 
-    >>> closed = criteria.area_closing(f, 8, connectivity=1)
+    >>> closed = attribute.area_closing(f, 8, connectivity=1)
 
     The small (but deep) minima are removed.
     """
@@ -130,7 +130,7 @@ def area_closing(image, area_threshold, mask=None, connectivity=2):
     flat_neighborhood = _compute_neighbors(image, neighbors, offset)
     image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
 
-    _criteria.area_closing(image.ravel(),
+    _attribute.area_closing(image.ravel(),
                            area_threshold,
                            seeds.ravel(),
                            flat_neighborhood,
@@ -186,12 +186,12 @@ def area_opening(image, area_threshold, mask=None, connectivity=2):
 
     See also
     --------
-    skimage.morphology.criteria.area_closing
+    skimage.morphology.attribute.area_closing
     skimage.morphology.extrema.h_minima
     skimage.morphology.extrema.h_maxima
-    skimage.morphology.criteria.diameter_opening
-    skimage.morphology.criteria.diameter_closing
-    skimage.morphology.criteria.volume_fill
+    skimage.morphology.attribute.diameter_opening
+    skimage.morphology.attribute.diameter_closing
+    skimage.morphology.attribute.volume_fill
 
 
     References
@@ -206,7 +206,7 @@ def area_opening(image, area_threshold, mask=None, connectivity=2):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.morphology import criteria
+    >>> from skimage.morphology import attribute
 
     We create an image (quadratic function with a maximum in the center and
     4 additional local maxima.
@@ -219,7 +219,7 @@ def area_opening(image, area_threshold, mask=None, connectivity=2):
 
     We can calculate the area opening:
 
-    >>> open = criteria.area_opening(f, 8, connectivity=1)
+    >>> open = attribute.area_opening(f, 8, connectivity=1)
 
     The small (but high) maxima are removed.
     """
@@ -281,12 +281,12 @@ def diameter_closing(image, diameter_threshold, mask=None, connectivity=2):
 
     See also
     --------
-    skimage.morphology.criteria.diameter_opening
-    skimage.morphology.criteria.area_opening
-    skimage.morphology.criteria.area_closing
+    skimage.morphology.attribute.diameter_opening
+    skimage.morphology.attribute.area_opening
+    skimage.morphology.attribute.area_closing
     skimage.morphology.extrema.h_minima
     skimage.morphology.extrema.h_maxima
-    skimage.morphology.criteria.volume_fill
+    skimage.morphology.attribute.volume_fill
 
 
     References
@@ -300,7 +300,7 @@ def diameter_closing(image, diameter_threshold, mask=None, connectivity=2):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.morphology import criteria
+    >>> from skimage.morphology import attribute
 
     We create an image (quadratic function with a minimum in the center and
     4 additional local minima.
@@ -313,7 +313,7 @@ def diameter_closing(image, diameter_threshold, mask=None, connectivity=2):
 
     We can calculate the diameter closing:
 
-    >>> closed = criteria.diameter_closing(f, 3, connectivity=1)
+    >>> closed = attribute.diameter_closing(f, 3, connectivity=1)
 
     The small (but deep) dark objects are removed, except for the longest one.
     """
@@ -339,7 +339,7 @@ def diameter_closing(image, diameter_threshold, mask=None, connectivity=2):
     flat_neighborhood = _compute_neighbors(image, neighbors, offset)
     image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
 
-    _criteria.diameter_closing(image.ravel(),
+    _attribute.diameter_closing(image.ravel(),
                                diameter_threshold,
                                seeds.ravel(),
                                flat_neighborhood,
@@ -402,12 +402,12 @@ def diameter_opening(image, diameter_threshold, mask=None, connectivity=2):
 
     See also
     --------
-    skimage.morphology.criteria.diameter_closing
-    skimage.morphology.criteria.area_opening
-    skimage.morphology.criteria.area_closing
+    skimage.morphology.attribute.diameter_closing
+    skimage.morphology.attribute.area_opening
+    skimage.morphology.attribute.area_closing
     skimage.morphology.extrema.h_minima
     skimage.morphology.extrema.h_maxima
-    skimage.morphology.criteria.volume_fill
+    skimage.morphology.attribute.volume_fill
 
 
     References
@@ -421,7 +421,7 @@ def diameter_opening(image, diameter_threshold, mask=None, connectivity=2):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.morphology import criteria
+    >>> from skimage.morphology import attribute
 
     We create an image (quadratic function with a maximum in the center and
     4 additional local maxima.
@@ -434,7 +434,7 @@ def diameter_opening(image, diameter_threshold, mask=None, connectivity=2):
 
     We can calculate the diameter opening:
 
-    >>> closed = criteria.diameter_opening(f, 3, connectivity=1)
+    >>> closed = attribute.diameter_opening(f, 3, connectivity=1)
 
     The small bright objects are removed, except for the longest one.
     The larger bright object in the middle remains also untouched.
@@ -491,12 +491,12 @@ def volume_fill(image, volume_threshold, mask=None, connectivity=2):
 
     See also
     --------
-    skimage.morphology.criteria.area_opening
-    skimage.morphology.criteria.area_closing
+    skimage.morphology.attribute.area_opening
+    skimage.morphology.attribute.area_closing
     skimage.morphology.extrema.h_minima
     skimage.morphology.extrema.h_maxima
-    skimage.morphology.criteria.diameter_closing
-    skimage.morphology.criteria.diameter_opening
+    skimage.morphology.attribute.diameter_closing
+    skimage.morphology.attribute.diameter_opening
 
 
     References
@@ -507,7 +507,7 @@ def volume_fill(image, volume_threshold, mask=None, connectivity=2):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.morphology import criteria
+    >>> from skimage.morphology import attribute
 
     We create an image (quadratic function with a minimum in the center and
     4 additional local minima.
@@ -520,7 +520,7 @@ def volume_fill(image, volume_threshold, mask=None, connectivity=2):
 
     We can calculate the diameter closing:
 
-    >>> filled = criteria.volume_fill(f, 30, connectivity=1)
+    >>> filled = attribute.volume_fill(f, 30, connectivity=1)
 
     All minima (large minima and small minima) will be filled by the same amount.
     """
@@ -545,7 +545,7 @@ def volume_fill(image, volume_threshold, mask=None, connectivity=2):
     flat_neighborhood = _compute_neighbors(image, neighbors, offset)
     image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
 
-    _criteria.volume_fill(image.ravel(),
+    _attribute.volume_fill(image.ravel(),
                           volume_threshold,
                           seeds.ravel(),
                           flat_neighborhood,
