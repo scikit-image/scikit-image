@@ -19,6 +19,7 @@ def diff(a, b):
     t = ((a - b)**2).sum()
     return math.sqrt(t)
 
+
 def _full_type_test(img, param, expected, func, param_scale=False):
 
     # images as they are
@@ -29,7 +30,7 @@ def _full_type_test(img, param, expected, func, param_scale=False):
     assert error < eps
 
     # unsigned int
-    for dt in [np.uint32, np.uint64]: 
+    for dt in [np.uint32, np.uint64]:
         img_cast = img.astype(dt)
         out = func(img_cast, param)
         exp_cast = expected.astype(dt)
@@ -45,7 +46,7 @@ def _full_type_test(img, param, expected, func, param_scale=False):
         param_cast = param / 255.0
     else:
         param_cast = param
-    for dt in [np.float32, np.float64]: 
+    for dt in [np.float32, np.float64]:
         data_cast = data_float.astype(dt)
         out = func(data_cast, param_cast)
         exp_cast = expected_float.astype(dt)
@@ -84,7 +85,7 @@ class TestExtrema(unittest.TestCase):
              [200, 200, 200, 100, 200, 200, 200, 240, 200, 200, 255, 255],
              [200, 200, 200, 200, 200,  40, 200, 240, 240, 100, 255, 255],
              [200,  40, 255, 255, 255,  40, 200, 255, 200, 200, 255, 255],
-             [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]], 
+             [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]],
             dtype=np.uint8)
 
         # expected diameter closing with diameter 2
@@ -100,7 +101,7 @@ class TestExtrema(unittest.TestCase):
              [200, 200, 200, 100, 200, 200, 200, 240, 200, 200, 255, 255],
              [200, 200, 200, 200, 200,  40, 200, 240, 240, 200, 255, 255],
              [200, 200, 255, 255, 255,  40, 200, 255, 200, 200, 255, 255],
-             [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]], 
+             [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]],
             dtype=np.uint8)
 
         # expected diameter closing with diameter 3
@@ -116,13 +117,12 @@ class TestExtrema(unittest.TestCase):
              [200, 200, 200, 200, 200, 200, 200, 240, 200, 200, 255, 255],
              [200, 200, 200, 200, 200, 200, 200, 240, 240, 200, 255, 255],
              [200, 200, 255, 255, 255, 200, 200, 255, 200, 200, 255, 255],
-             [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]], 
+             [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]],
             dtype=np.uint8)
 
         # _full_type_test makes a test with many image types.
         _full_type_test(img, 2, expected_2, attribute.diameter_closing)
         _full_type_test(img, 3, expected_3, attribute.diameter_closing)
-
 
     def test_area_closing(self):
         "Test for Area Closing (2 diameters, all types)"
@@ -140,7 +140,7 @@ class TestExtrema(unittest.TestCase):
              [200, 200, 200, 100, 200, 200, 200, 240, 200, 200, 255, 255],
              [200, 200, 200, 200, 200,  40, 200, 240, 240, 100, 255, 255],
              [200,  40, 255, 255, 255,  40, 200, 255, 200, 200, 255, 255],
-             [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]], 
+             [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]],
             dtype=np.uint8)
 
         # expected area closing with area 2
@@ -172,13 +172,12 @@ class TestExtrema(unittest.TestCase):
              [200, 200, 200, 200, 200, 200, 200, 240, 200, 200, 255, 255],
              [200, 200, 200, 200, 200, 200, 200, 240, 240, 200, 255, 255],
              [200, 200, 255, 255, 255, 200, 200, 255, 200, 200, 255, 255],
-             [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]], 
+             [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]],
             dtype=np.uint8)
 
         # _full_type_test makes a test with many image types.
         _full_type_test(img, 2, expected_2, attribute.area_closing)
         _full_type_test(img, 4, expected_4, attribute.area_closing)
-
 
     def test_volume_fill(self):
 
@@ -195,7 +194,7 @@ class TestExtrema(unittest.TestCase):
              [200, 200, 200, 100, 200, 200, 200, 240, 200, 200, 255, 255],
              [200, 200, 200, 200, 200,  40, 200, 240, 240, 100, 255, 255],
              [200,  40, 255, 255, 255,  40, 200, 255, 200, 200, 255, 255],
-             [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]], 
+             [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]],
             dtype=np.uint8)
 
         # expected volume filling with area 80
@@ -211,7 +210,7 @@ class TestExtrema(unittest.TestCase):
              [200, 200, 200, 140, 200, 200, 200, 240, 200, 200, 255, 255],
              [200, 200, 200, 200, 200,  80, 200, 240, 240, 180, 255, 255],
              [200, 120, 255, 255, 255,  80, 200, 255, 200, 200, 255, 255],
-             [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]], 
+             [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]],
             dtype=np.uint8)
 
         # expected volume filling with area 201
@@ -227,12 +226,14 @@ class TestExtrema(unittest.TestCase):
              [200, 200, 200, 200, 200, 200, 200, 240, 221, 221, 255, 255],
              [200, 200, 200, 200, 200, 141, 200, 240, 240, 221, 255, 255],
              [200, 200, 255, 255, 255, 141, 200, 255, 221, 221, 255, 255],
-             [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]], 
+             [200, 200, 200, 200, 200, 200, 200, 255, 255, 255, 255, 255]],
             dtype=np.uint8)
 
         # _full_type_test makes a test with many image types.
-        _full_type_test(img, 80, expected_80, attribute.volume_fill, param_scale=True)
-        _full_type_test(img, 201, expected_201, attribute.volume_fill, param_scale=True)
+        _full_type_test(img, 80, expected_80, attribute.volume_fill,
+                        param_scale=True)
+        _full_type_test(img, 201, expected_201, attribute.volume_fill,
+                        param_scale=True)
 
 
 if __name__ == "__main__":
