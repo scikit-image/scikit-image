@@ -1,4 +1,4 @@
-"""attribute.py - apply criteria based openings and closings
+"""attribute.py - apply attribute openings and closings
 
 This module provides functions to apply attribute openings and
 closings to arbitrary images. These operators build on the flooding
@@ -12,6 +12,10 @@ This implementation provides functions for
 1. area openings/closings
 2. volume openings/closings
 3. diameter openings/closings
+
+References: 
+    .. [1] Breen, E.J., Jones, R. (1996). Attribute openings, thinnings and granulometries.
+           Computer Vision and Image Understanding 64 (3), 377-389.
 
 Dynamics openings and closings can be implemented by greyreconstruct.
 They are therefore not implemented here.
@@ -83,9 +87,9 @@ def area_closing(image, area_threshold, mask=None, connectivity=2):
     References
     ----------
     .. [1] Vincent L., Proc. "Grayscale area openings and closings,
-           their efficient implementation and applications,
-           EURASIP Workshop on Mathematical Morphology and its Applications 
-           to Signal Processing, Barcelona, Spain, pp. 22–27, May 1993.
+           their efficient implementation and applications",
+           EURASIP Workshop on Mathematical Morphology and its
+           Applications to Signal Processing, Barcelona, Spain, pp.22-27, May 1993.
     .. [2] Soille, P., "Morphological Image Analysis: Principles and
            Applications" (Chapter 6), 2nd edition (2003), ISBN 3540429883.
 
@@ -197,9 +201,9 @@ def area_opening(image, area_threshold, mask=None, connectivity=2):
     References
     ----------
     .. [1] Vincent L., Proc. "Grayscale area openings and closings,
-           their efficient implementation and applications,
-           EURASIP Workshop on Mathematical Morphology and its Applications 
-           to Signal Processing, Barcelona, Spain, pp. 22–27, May 1993.
+           their efficient implementation and applications",
+           EURASIP Workshop on Mathematical Morphology and its
+           Applications to Signal Processing, Barcelona, Spain, pp.22-27, May 1993.
     .. [2] Soille, P., "Morphological Image Analysis: Principles and
            Applications" (Chapter 6), 2nd edition (2003), ISBN 3540429883.
 
@@ -292,10 +296,11 @@ def diameter_closing(image, diameter_threshold, mask=None, connectivity=2):
     References
     ----------
     .. [1] Walter, T., & Klein, J.-C. (2002). Automatic Detection of Microaneurysms in 
-           Color Fundus images of the human retina by means of the bounding box closing. 
-           In International Symposium on Medical Data Analysis ISMDA (pp. 210–220).
+           Color Fundus images of the human retina by means of the bounding box closing.
+           International Symposium on Medical Data Analysis ISMDA (pp. 210-220).
     .. [2] Breen, E.J., Jones, R. (1996). Attribute openings, thinnings and granulometries.
-           Computer Vision and Image Understanding 64 (3), 377–389.
+           Computer Vision and Image Understanding 64 (3), 377-389.
+
 
     Examples
     --------
@@ -413,10 +418,11 @@ def diameter_opening(image, diameter_threshold, mask=None, connectivity=2):
     References
     ----------
     .. [1] Walter, T., & Klein, J.-C. (2002). Automatic Detection of Microaneurysms in 
-           Color Fundus images of the human retina by means of the bounding box closing. 
-           In International Symposium on Medical Data Analysis ISMDA (pp. 210–220).
+           Color Fundus images of the human retina by means of the bounding box closing.
+           International Symposium on Medical Data Analysis ISMDA (pp. 210-220).
     .. [2] Breen, E.J., Jones, R. (1996). Attribute openings, thinnings and granulometries.
-           Computer Vision and Image Understanding 64 (3), 377–389.
+           Computer Vision and Image Understanding 64 (3), 377-389.
+
 
     Examples
     --------
@@ -502,7 +508,8 @@ def volume_fill(image, volume_threshold, mask=None, connectivity=2):
     References
     ----------
     .. [1] Vachier, C., Meyer, F. (1995). Extinction values: a new measurement of persistence.
-           In: Proceedings of the IEEE Workshop on Non Linear Signal/Image Processing (pp. 254–257).
+           In: Proceedings of the IEEE Workshop on Non Linear Signal and Image Processing (pp. 254-257).
+
 
     Examples
     --------

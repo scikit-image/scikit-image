@@ -17,7 +17,7 @@ def configuration(parent_package='', top_path=None):
     cython(['_convex_hull.pyx'], working_path=base_path)
     cython(['_greyreconstruct.pyx'], working_path=base_path)
     cython(['_skeletonize_3d_cy.pyx.in'], working_path=base_path)
-    cython(['_criteria.pyx'], working_path=base_path)
+    cython(['_attribute.pyx'], working_path=base_path)
     
     config.add_extension('_watershed', sources=['_watershed.c'],
                          include_dirs=[get_numpy_include_dirs()])
@@ -29,21 +29,10 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_skeletonize_3d_cy', sources=['_skeletonize_3d_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('_criteria', sources=['_criteria.c'],
+    config.add_extension('_attribute', sources=['_attribute.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config
-
-#from distutils.core import setup
-#from distutils.extension import Extension
-#from Cython.Distutils import build_ext
-
-#ext = Extension("wrap_area", ["wrap_area.pyx", "area.cpp"], language="c++")
-
-#setup(
-#    cmdclass = {'build_ext': build_ext},
-#    ext_modules = [ext],
-#)
 
 if __name__ == '__main__':
     from numpy.distutils.core import setup

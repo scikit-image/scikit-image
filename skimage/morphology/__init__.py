@@ -13,8 +13,8 @@ from .greyreconstruct import reconstruction
 from .misc import remove_small_objects, remove_small_holes
 from .extrema import (h_minima, h_maxima, local_maxima, local_minima)
 
-from .criteria import (area_closing, area_opening, diameter_closing, diameter_opening,
-                       volume_fill)
+from .attribute import (area_closing, area_opening, diameter_closing,
+                        diameter_opening, volume_fill)
 
 __all__ = ['binary_erosion',
            'binary_dilation',
