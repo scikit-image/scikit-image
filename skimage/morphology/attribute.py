@@ -13,9 +13,10 @@ This implementation provides functions for
 2. volume openings/closings
 3. diameter openings/closings
 
-References: 
-    .. [1] Breen, E.J., Jones, R. (1996). Attribute openings, thinnings and granulometries.
-           Computer Vision and Image Understanding 64 (3), 377-389.
+References:
+    .. [1] Breen, E.J., Jones, R. (1996). Attribute openings, thinnings and
+           granulometries. Computer Vision and Image Understanding 64 (3),
+           377-389.
 
 Dynamics openings and closings can be implemented by greyreconstruct.
 They are therefore not implemented here.
@@ -38,9 +39,9 @@ def area_closing(image, area_threshold, mask=None, connectivity=2):
     """Performs an area closing of the image.
 
     Area closings remove all dark structures of an image with
-    a surface smaller than or equal to area_threshold. 
+    a surface smaller than or equal to area_threshold.
     The output image is thus the smallest image larger than the input
-    for which all local minima have at least a surface of 
+    for which all local minima have at least a surface of
     area_threshold pixels.
 
     Area closings are similar to morphological closings, but
@@ -64,8 +65,8 @@ def area_closing(image, area_threshold, mask=None, connectivity=2):
         will be labeled.
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
-        number of orthogonal steps to reach a neighbor. It is 1 for 4-connectivity
-        and 2 for 8-connectivity. Default value is 1.
+        number of orthogonal steps to reach a neighbor. It is 1 for
+        4-connectivity and 2 for 8-connectivity. Default value is 1.
 
     Returns
     -------
@@ -89,7 +90,8 @@ def area_closing(image, area_threshold, mask=None, connectivity=2):
     .. [1] Vincent L., Proc. "Grayscale area openings and closings,
            their efficient implementation and applications",
            EURASIP Workshop on Mathematical Morphology and its
-           Applications to Signal Processing, Barcelona, Spain, pp.22-27, May 1993.
+           Applications to Signal Processing, Barcelona, Spain, pp.22-27,
+           May 1993.
     .. [2] Soille, P., "Morphological Image Analysis: Principles and
            Applications" (Chapter 6), 2nd edition (2003), ISBN 3540429883.
 
@@ -104,7 +106,8 @@ def area_closing(image, area_threshold, mask=None, connectivity=2):
     >>> w = 12
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
-    >>> f[2:3,1:5] = 160; f[2:4,9:11] = 140; f[9:11,2:4] = 120; f[9:10,9:11] = 100; f[10,10] = 100
+    >>> f[2:3,1:5] = 160; f[2:4,9:11] = 140; f[9:11,2:4] = 120
+    >>> f[9:10,9:11] = 100; f[10,10] = 100
     >>> f = f.astype(np.int)
 
     We can calculate the area closing:
@@ -122,8 +125,8 @@ def area_closing(image, area_threshold, mask=None, connectivity=2):
     neighbors, offset = _validate_connectivity(image.ndim, connectivity,
                                                offset=None)
 
-    seeds_bin = local_minima(image, selem = neighbors)
-    seeds = label(seeds_bin, connectivity = connectivity).astype(np.uint64)
+    seeds_bin = local_minima(image, selem=neighbors)
+    seeds = label(seeds_bin, connectivity=connectivity).astype(np.uint64)
     output = image.copy()
 
     image = np.pad(image, 1, mode='constant')
@@ -135,14 +138,14 @@ def area_closing(image, area_threshold, mask=None, connectivity=2):
     image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
 
     _attribute.area_closing(image.ravel(),
-                           area_threshold,
-                           seeds.ravel(),
-                           flat_neighborhood,
-                           mask.ravel().astype(np.uint8),
-                           image_strides,
-                           0.000001,
-                           output.ravel()
-                           )
+                            area_threshold,
+                            seeds.ravel(),
+                            flat_neighborhood,
+                            mask.ravel().astype(np.uint8),
+                            image_strides,
+                            0.000001,
+                            output.ravel()
+                            )
     output = crop(output, 1, copy=True)
     return(output)
 
@@ -152,9 +155,9 @@ def area_opening(image, area_threshold, mask=None, connectivity=2):
     """Performs an area opening of the image.
 
     Area opening remove all bright structures of an image with
-    a surface smaller than or equal to area_threshold. 
+    a surface smaller than or equal to area_threshold.
     The output image is thus the largest image smaller than the input
-    for which all local maxima have at least a surface of 
+    for which all local maxima have at least a surface of
     area_threshold pixels.
 
     Area openings are similar to morphological openings, but
@@ -178,8 +181,8 @@ def area_opening(image, area_threshold, mask=None, connectivity=2):
         will be labeled.
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
-        number of orthogonal steps to reach a neighbor. It is 1 for 4-connectivity
-        and 2 for 8-connectivity. Default value is 1.
+        number of orthogonal steps to reach a neighbor. It is 1 for
+        4-connectivity and 2 for 8-connectivity. Default value is 1.
 
     Returns
     -------
@@ -203,7 +206,8 @@ def area_opening(image, area_threshold, mask=None, connectivity=2):
     .. [1] Vincent L., Proc. "Grayscale area openings and closings,
            their efficient implementation and applications",
            EURASIP Workshop on Mathematical Morphology and its
-           Applications to Signal Processing, Barcelona, Spain, pp.22-27, May 1993.
+           Applications to Signal Processing, Barcelona, Spain, pp.22-27,
+           May 1993.
     .. [2] Soille, P., "Morphological Image Analysis: Principles and
            Applications" (Chapter 6), 2nd edition (2003), ISBN 3540429883.
 
@@ -218,7 +222,8 @@ def area_opening(image, area_threshold, mask=None, connectivity=2):
     >>> w = 12
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
-    >>> f[2:3,1:5] = 40; f[2:4,9:11] = 60; f[9:11,2:4] = 80; f[9:10,9:11] = 100; f[10,10] = 100
+    >>> f[2:3,1:5] = 40; f[2:4,9:11] = 60; f[9:11,2:4] = 80
+    >>> f[9:10,9:11] = 100; f[10,10] = 100
     >>> f = f.astype(np.int)
 
     We can calculate the area opening:
@@ -239,23 +244,23 @@ def diameter_closing(image, diameter_threshold, mask=None, connectivity=2):
     """Performs a diameter closing of the image.
 
     Diameter closings remove all dark structures of an image with
-    a diameter smaller than or equal to diameter_threshold. 
+    a diameter smaller than or equal to diameter_threshold.
     The output image is thus the smallest image larger than the input
-    for which all local minima have at least a diameter of 
+    for which all local minima have at least a diameter of
     diameter_threshold pixels.
 
     Here, the diameter of a region is defined as its maximal extension.
     The operator is also called bounding box closing, as it removes all
-    dark structures that would be inside of at least one bounding box of 
+    dark structures that would be inside of at least one bounding box of
     maximal extension diameter_threshold.
 
     Diameter closings are similar to morphological closings, but
     they do not use a fixed structuring element, but rather a deformable
-    one, with maximal extension = diameter_threshold. Consequently, the 
+    one, with maximal extension = diameter_threshold. Consequently, the
     diameter_closing with diameter_threshold=1 is the identity.
     This operator is particularly useful in distinguishing small objects
-    from long, thin objects, which is not so easy with traditional morphological
-    closings.
+    from long, thin objects, which is not so easy with traditional
+    morphological closings.
 
     Technically, this operator is based on a flooding operation similar
     to the watershed algorithm. But the flooding stops when the criterion
@@ -273,8 +278,8 @@ def diameter_closing(image, diameter_threshold, mask=None, connectivity=2):
         will be labeled.
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
-        number of orthogonal steps to reach a neighbor. It is 1 for 4-connectivity
-        and 2 for 8-connectivity. Default value is 1.
+        number of orthogonal steps to reach a neighbor. It is 1 for
+        4-connectivity and 2 for 8-connectivity. Default value is 1.
 
     Returns
     -------
@@ -295,11 +300,13 @@ def diameter_closing(image, diameter_threshold, mask=None, connectivity=2):
 
     References
     ----------
-    .. [1] Walter, T., & Klein, J.-C. (2002). Automatic Detection of Microaneurysms in 
-           Color Fundus images of the human retina by means of the bounding box closing.
-           International Symposium on Medical Data Analysis ISMDA (pp. 210-220).
-    .. [2] Breen, E.J., Jones, R. (1996). Attribute openings, thinnings and granulometries.
-           Computer Vision and Image Understanding 64 (3), 377-389.
+    .. [1] Walter, T., & Klein, J.-C. (2002). Automatic Detection of
+           Microaneurysms in Color Fundus images of the human retina by means
+           of the bounding box closing. International Symposium on Medical
+           Data Analysis ISMDA (pp. 210-220).
+    .. [2] Breen, E.J., Jones, R. (1996). Attribute openings, thinnings and
+           granulometries. Computer Vision and Image Understanding 64 (3),
+           377-389.
 
 
     Examples
@@ -313,7 +320,8 @@ def diameter_closing(image, diameter_threshold, mask=None, connectivity=2):
     >>> w = 12
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
-    >>> f[2:3,1:5] = 160; f[2:4,9:11] = 140; f[9:11,2:4] = 120; f[9:10,9:11] = 100; f[10,10] = 100
+    >>> f[2:3,1:5] = 160; f[2:4,9:11] = 140; f[9:11,2:4] = 120
+    >>> f[9:10,9:11] = 100; f[10,10] = 100
     >>> f = f.astype(np.int)
 
     We can calculate the diameter closing:
@@ -330,10 +338,10 @@ def diameter_closing(image, diameter_threshold, mask=None, connectivity=2):
         mask = np.ones(image.shape, bool)
 
     neighbors, offset = _validate_connectivity(image.ndim, connectivity,
-                                                  offset=None)
+                                               offset=None)
 
-    seeds_bin = local_minima(image, selem = neighbors)
-    seeds = label(seeds_bin, connectivity = connectivity).astype(np.uint64)
+    seeds_bin = local_minima(image, selem=neighbors)
+    seeds = label(seeds_bin, connectivity=connectivity).astype(np.uint64)
     output = image.copy()
 
     image = np.pad(image, 1, mode='constant')
@@ -345,14 +353,14 @@ def diameter_closing(image, diameter_threshold, mask=None, connectivity=2):
     image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
 
     _attribute.diameter_closing(image.ravel(),
-                               diameter_threshold,
-                               seeds.ravel(),
-                               flat_neighborhood,
-                               mask.ravel().astype(np.uint8),
-                               image_strides,
-                               0.000001,
-                               output.ravel()
-                               )
+                                diameter_threshold,
+                                seeds.ravel(),
+                                flat_neighborhood,
+                                mask.ravel().astype(np.uint8),
+                                image_strides,
+                                0.000001,
+                                output.ravel()
+                                )
     output = crop(output, 1, copy=True)
 
     return(output)
@@ -362,19 +370,19 @@ def diameter_opening(image, diameter_threshold, mask=None, connectivity=2):
     """Performs a diameter opening of the image.
 
     Diameter openings remove all dark structures of an image with
-    a diameter smaller than or equal to diameter_threshold. 
+    a diameter smaller than or equal to diameter_threshold.
     The output image is thus the largest image smaller than the input
-    for which all local maxima have at least a diameter of 
+    for which all local maxima have at least a diameter of
     diameter_threshold pixels.
 
     Here, the diameter of a region is defined as its maximal extension.
     The operator is also called bounding box closing, as it removes all
-    bright structures that would be inside of at least one bounding box of 
+    bright structures that would be inside of at least one bounding box of
     maximal extension diameter_threshold.
 
     Diameter openings are similar to morphological openings, but
     they do not use a fixed structuring element, but rather a deformable
-    one, with maximal extension = diameter_threshold. Consequently, the 
+    one, with maximal extension = diameter_threshold. Consequently, the
     diameter_opening with diameter_threshold=1 is the identity.
     This operator is particularly useful in distinguishing small objects
     from long, thin objects.
@@ -395,8 +403,8 @@ def diameter_opening(image, diameter_threshold, mask=None, connectivity=2):
         will be labeled.
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
-        number of orthogonal steps to reach a neighbor. It is 1 for 4-connectivity
-        and 2 for 8-connectivity. Default value is 1.
+        number of orthogonal steps to reach a neighbor. It is 1 for
+        4-connectivity and 2 for 8-connectivity. Default value is 1.
 
     Returns
     -------
@@ -417,11 +425,13 @@ def diameter_opening(image, diameter_threshold, mask=None, connectivity=2):
 
     References
     ----------
-    .. [1] Walter, T., & Klein, J.-C. (2002). Automatic Detection of Microaneurysms in 
-           Color Fundus images of the human retina by means of the bounding box closing.
-           International Symposium on Medical Data Analysis ISMDA (pp. 210-220).
-    .. [2] Breen, E.J., Jones, R. (1996). Attribute openings, thinnings and granulometries.
-           Computer Vision and Image Understanding 64 (3), 377-389.
+    .. [1] Walter, T., & Klein, J.-C. (2002). Automatic Detection of
+           Microaneurysms in Color Fundus images of the human retina by means
+           of the bounding box closing. International Symposium on Medical
+           Data Analysis ISMDA (pp. 210-220).
+    .. [2] Breen, E.J., Jones, R. (1996). Attribute openings, thinnings and
+           granulometries. Computer Vision and Image Understanding 64 (3),
+           377-389.
 
 
     Examples
@@ -435,7 +445,8 @@ def diameter_opening(image, diameter_threshold, mask=None, connectivity=2):
     >>> w = 12
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
-    >>> f[2:3,1:5] = 40; f[2:4,9:11] = 60; f[9:11,2:4] = 80; f[9:10,9:11] = 100; f[10,10] = 100
+    >>> f[2:3,1:5] = 40; f[2:4,9:11] = 60; f[9:11,2:4] = 80
+    >>> f[9:10,9:11] = 100; f[10,10] = 100
     >>> f = f.astype(np.int)
 
     We can calculate the diameter opening:
@@ -445,10 +456,13 @@ def diameter_opening(image, diameter_threshold, mask=None, connectivity=2):
     The small bright objects are removed, except for the longest one.
     The larger bright object in the middle remains also untouched.
     """
-    # the diameter opening is implemented as the dual operator of diameter_closing.
+
+    # the diameter opening is implemented as the dual operator of
+    # diameter_closing.
     maxval = img.max()
     temp_img = maxval - img
-    temp_op = diameter_closing(temp_img, area_threshold, mask=None, connectivity=2)
+    temp_op = diameter_closing(temp_img, area_threshold, mask=None,
+                               connectivity=2)
     result = maxval - temp_op
     return(result)
 
@@ -486,8 +500,8 @@ def volume_fill(image, volume_threshold, mask=None, connectivity=2):
         will be labeled.
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
-        number of orthogonal steps to reach a neighbor. It is 1 for 4-connectivity
-        and 2 for 8-connectivity. Default value is 1.
+        number of orthogonal steps to reach a neighbor. It is 1 for
+        4-connectivity and 2 for 8-connectivity. Default value is 1.
 
     Returns
     -------
@@ -507,8 +521,9 @@ def volume_fill(image, volume_threshold, mask=None, connectivity=2):
 
     References
     ----------
-    .. [1] Vachier, C., Meyer, F. (1995). Extinction values: a new measurement of persistence.
-           In: Proceedings of the IEEE Workshop on Non Linear Signal and Image Processing (pp. 254-257).
+    .. [1] Vachier, C., Meyer, F. (1995). Extinction values: a new measurement
+           of persistence. In: Proceedings of the IEEE Workshop on Non Linear
+           Signal and Image Processing (pp. 254-257).
 
 
     Examples
@@ -522,14 +537,16 @@ def volume_fill(image, volume_threshold, mask=None, connectivity=2):
     >>> w = 12
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
-    >>> f[2:3,1:5] = 160; f[2:4,9:11] = 140; f[9:11,2:4] = 120; f[9:10,9:11] = 100; f[10,10] = 100
+    >>> f[2:3,1:5] = 160; f[2:4,9:11] = 140; f[9:11,2:4] = 120
+    >>> f[9:10,9:11] = 100; f[10,10] = 100
     >>> f = f.astype(np.int)
 
     We can calculate the diameter closing:
 
     >>> filled = attribute.volume_fill(f, 30, connectivity=1)
 
-    All minima (large minima and small minima) will be filled by the same amount.
+    All minima (large minima and small minima) will be filled by the same
+    amount.
     """
     if mask is not None and mask.shape != image.shape:
         raise ValueError("mask must have same shape as image")
@@ -538,10 +555,10 @@ def volume_fill(image, volume_threshold, mask=None, connectivity=2):
         mask = np.ones(image.shape, bool)
 
     neighbors, offset = _validate_connectivity(image.ndim, connectivity,
-                                                  offset=None)
+                                               offset=None)
 
-    seeds_bin = local_minima(image, selem = neighbors)
-    seeds = label(seeds_bin, connectivity = connectivity).astype(np.uint64)
+    seeds_bin = local_minima(image, selem=neighbors)
+    seeds = label(seeds_bin, connectivity=connectivity).astype(np.uint64)
     output = image.copy()
 
     image = np.pad(image, 1, mode='constant')
@@ -553,16 +570,14 @@ def volume_fill(image, volume_threshold, mask=None, connectivity=2):
     image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
 
     _attribute.volume_fill(image.ravel(),
-                          volume_threshold,
-                          seeds.ravel(),
-                          flat_neighborhood,
-                          mask.ravel().astype(np.uint8),
-                          image_strides,
-                          0.000001,
-                          output.ravel()
-                          )
+                           volume_threshold,
+                           seeds.ravel(),
+                           flat_neighborhood,
+                           mask.ravel().astype(np.uint8),
+                           image_strides,
+                           0.000001,
+                           output.ravel()
+                           )
     output = crop(output, 1, copy=True)
 
     return(output)
-
-
