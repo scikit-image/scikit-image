@@ -9,6 +9,7 @@ from .arraycrop import crop
 from ._regular_grid import regular_grid, regular_seeds
 from .unique import unique_rows
 from ._invert import invert
+from ._montage import montage, montage2d
 
 from .._shared.utils import copy_func
 
@@ -28,6 +29,8 @@ __all__ = ['img_as_float32',
            'view_as_windows',
            'pad',
            'crop',
+           'montage',
+           'montage2d',
            'random_noise',
            'regular_grid',
            'regular_seeds',

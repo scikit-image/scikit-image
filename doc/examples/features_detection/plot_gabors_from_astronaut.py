@@ -44,7 +44,7 @@ import matplotlib.pyplot as plt
 from skimage import data
 from skimage import color
 from skimage.util.shape import view_as_windows
-from skimage.util.montage import montage2d
+from skimage.util import montage
 
 np.random.seed(42)
 
@@ -58,7 +58,7 @@ patches1 = view_as_windows(astro, patch_shape)
 patches1 = patches1.reshape(-1, patch_shape[0] * patch_shape[1])[::8]
 fb1, _ = kmeans2(patches1, n_filters, minit='points')
 fb1 = fb1.reshape((-1,) + patch_shape)
-fb1_montage = montage2d(fb1, rescale_intensity=True)
+fb1_montage = montage(fb1, rescale_intensity=True)
 
 # -- filterbank2 LGN-like image
 astro_dog = ndi.gaussian_filter(astro, .5) - ndi.gaussian_filter(astro, 1)
@@ -66,9 +66,9 @@ patches2 = view_as_windows(astro_dog, patch_shape)
 patches2 = patches2.reshape(-1, patch_shape[0] * patch_shape[1])[::8]
 fb2, _ = kmeans2(patches2, n_filters, minit='points')
 fb2 = fb2.reshape((-1,) + patch_shape)
-fb2_montage = montage2d(fb2, rescale_intensity=True)
+fb2_montage = montage(fb2, rescale_intensity=True)
 
-# --
+# -- plotting
 fig, axes = plt.subplots(2, 2, figsize=(7, 6))
 ax = axes.ravel()
 
