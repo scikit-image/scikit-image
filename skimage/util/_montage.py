@@ -103,8 +103,7 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
     # Calculate the fill value
     if fill == 'mean':
         fill = arr_in.mean(axis=(0, 1, 2))
-    fill *= np.ones(1)
-    fill = np.asarray(fill, dtype=arr_in.dtype)
+    fill = np.atleast_1d(fill).astype(arr_in.dtype)
 
     # Pre-allocate an array with padding for montage
     n_pad = padding_width
