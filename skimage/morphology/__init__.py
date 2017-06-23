@@ -12,9 +12,9 @@ from .convex_hull import convex_hull_image, convex_hull_object
 from .greyreconstruct import reconstruction
 from .misc import remove_small_objects, remove_small_holes
 from .extrema import (h_minima, h_maxima, local_maxima, local_minima)
-
 from .attribute import (area_closing, area_opening, diameter_closing,
                         diameter_opening, volume_fill)
+from .max_tree import build_max_tree
 
 __all__ = ['binary_erosion',
            'binary_dilation',
@@ -54,4 +54,5 @@ __all__ = ['binary_erosion',
            'area_opening',
            'diameter_closing',
            'diameter_opening',
-           'volume_fill']
+           'volume_fill',
+           'build_max_tree']

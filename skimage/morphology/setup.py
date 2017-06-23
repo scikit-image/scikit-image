@@ -18,6 +18,7 @@ def configuration(parent_package='', top_path=None):
     cython(['_greyreconstruct.pyx'], working_path=base_path)
     cython(['_skeletonize_3d_cy.pyx.in'], working_path=base_path)
     cython(['_attribute.pyx'], working_path=base_path)
+    cython(['_max_tree.pyx'], working_path=base_path)
 
     config.add_extension('_watershed', sources=['_watershed.c'],
                          include_dirs=[get_numpy_include_dirs()])
@@ -31,6 +32,8 @@ def configuration(parent_package='', top_path=None):
                          sources=['_skeletonize_3d_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_attribute', sources=['_attribute.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_max_tree', sources=['_max_tree.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config
