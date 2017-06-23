@@ -10,7 +10,6 @@ from . import _max_tree
 from ..util import crop
 
 def build_max_tree(image, connectivity=2):
-    # Use a complete `True` mask if none is provided
     mask_shrink = np.ones([x-2 for x in image.shape], bool)
     mask = np.pad(mask_shrink, 1, mode='constant')
 
@@ -32,3 +31,27 @@ def build_max_tree(image, connectivity=2):
 
     return parent, tree_traverser
 
+def area_open(image, area_threshold, connectivity=2):
+    output = image.copy()
+
+    P, S = build_max_tree(image, connectivity)
+
+    area = _max_tree._compute_area(image.ravel(), P.ravel(), S)
+
+    _max_tree._apply_attribute(image.ravel(), output.ravel(), P.ravel(), S,
+                               area, area_threshold)
+    return output
+
+def area_close(image, area_threshold, connectivity=2):
+    max_val = image.max()
+    image_inv = max_val - image
+    output = image_inv.copy()
+
+    P, S = build_max_tree(image_inv, connectivity)
+
+    area = _max_tree._compute_area(image_inv.ravel(), P.ravel(), S)
+
+    _max_tree._apply_attribute(image_inv.ravel(), output.ravel(), P.ravel(), S,
+                               area, area_threshold)
+    output = max_val - output
+    return output

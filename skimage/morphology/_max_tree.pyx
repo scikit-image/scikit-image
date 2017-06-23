@@ -102,15 +102,55 @@ cdef DTYPE_UINT8_t _is_valid_coordinate(DTYPE_INT64_t index,
             return 0
     return 1
 
-# cpdef void _compute_area(dtype_t[::1] image,
-#                          DTYPE_INT64_t[::1] parent,
-#                          DTYPE_INT64_t[::1] sorted_indices):
-#     cdef DTYPE_INT64_t p_root = sorted_indices[0]
-#     cdef DTYPE_INT64_t p, q
-#     cdef DTYPE_UINT64_t number_of_pixels = len(image)
-#     for p in sorted_indices:
-#         
-#     return
+cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_area(dtype_t[::1] image,
+                                                        DTYPE_INT64_t[::1] parent,
+                                                        DTYPE_INT64_t[::1] sorted_indices):
+    cdef DTYPE_INT64_t p_root = sorted_indices[0]
+    cdef DTYPE_INT64_t p, q
+    cdef DTYPE_UINT64_t number_of_pixels = len(image)
+    cdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] area = np.ones(number_of_pixels,
+                                                           dtype=np.float64)
+
+    for p in sorted_indices[::-1]:
+        if p == p_root:
+            continue
+        q = parent[p]
+        area[q] = area[q] + area[p] 
+    return area
+
+cpdef void _apply_attribute(dtype_t[::1] image,
+                            dtype_t[::1] output,
+                            DTYPE_INT64_t[::1] parent,
+                            DTYPE_INT64_t[::1] sorted_indices,
+                            DTYPE_FLOAT64_t[::1] attribute,
+                            DTYPE_FLOAT64_t attribute_threshold
+                            ):
+    cdef DTYPE_INT64_t p_root = sorted_indices[0]
+    cdef DTYPE_INT64_t p, q
+    cdef DTYPE_UINT64_t number_of_pixels = len(image)
+
+    if attribute[p_root] < attribute_threshold:
+        output[p_root] = 0
+    else:
+        output[p_root] = image[p_root]
+
+    for p in sorted_indices:
+        if p == p_root:
+            continue
+
+        q = parent[p]
+
+        if image[p] == image[q]:
+            output[p] = image[q]
+            continue
+
+        if attribute[p] < attribute_threshold:
+            output[p] = output[q]
+        else:
+            output[p] = image[p]
+
+    return
+
 
 cpdef void _build_max_tree(dtype_t[::1] image,
                            DTYPE_BOOL_t[::1] mask,
