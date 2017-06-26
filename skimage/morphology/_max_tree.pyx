@@ -150,7 +150,6 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_ellipse_ratio_2d(dtype_t[::1]
         x2_acc[p] = x_acc[p] * x_acc[p]
         y2_acc[p] = y_acc[p] * y_acc[p]
         xy_acc[p] = x_acc[p] * y_acc[p]
-        print 'pixel : %i (%i, %i) ' % (p, x_acc[p], y_acc[p])
 
     for p in sorted_indices[::-1]:
         if p == p_root:
@@ -166,9 +165,6 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_ellipse_ratio_2d(dtype_t[::1]
         area[q] = area[q] + area[p]
 
         # derived features: covariance matrix
-        #m02 = <DTYPE_FLOAT64_t>y2_acc[q] / <DTYPE_FLOAT64_t>area[q] - <DTYPE_FLOAT64_t>(y_acc[q] * y_acc[q]) / <DTYPE_FLOAT64_t>(area[q]**2)
-        #m20 = <DTYPE_FLOAT64_t>x2_acc[q] / <DTYPE_FLOAT64_t>area[q] - <DTYPE_FLOAT64_t>(x_acc[q] * x_acc[q]) / <DTYPE_FLOAT64_t>(area[q]**2)
-        #m11 = <DTYPE_FLOAT64_t>xy_acc[q] / <DTYPE_FLOAT64_t>area[q] - <DTYPE_FLOAT64_t>(x_acc[q] * y_acc[q]) / <DTYPE_FLOAT64_t>(area[q]**2)
         m02 = <DTYPE_FLOAT64_t>y2_acc[q] - <DTYPE_FLOAT64_t>(y_acc[q] * y_acc[q]) / <DTYPE_FLOAT64_t>area[q]
         m20 = <DTYPE_FLOAT64_t>x2_acc[q] - <DTYPE_FLOAT64_t>(x_acc[q] * x_acc[q]) / <DTYPE_FLOAT64_t>area[q]
         m11 = <DTYPE_FLOAT64_t>xy_acc[q] - <DTYPE_FLOAT64_t>(x_acc[q] * y_acc[q]) / <DTYPE_FLOAT64_t>area[q]
@@ -176,14 +172,8 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_ellipse_ratio_2d(dtype_t[::1]
         # eigenvalues of the covariance matrix
         eigenvalue_1 = .5 * (m02 + m20) + .5 * np.sqrt(4 * m11 * m11 + (m20 - m02)**2)
         eigenvalue_2 = .5 * (m02 + m20) - .5 * np.sqrt(4 * m11 * m11 + (m20 - m02)**2)
-        temp_str = 'px: %i, parent: %i\tvalue: %i, value(parent): %i\tarea: %i, xacc = %i, yacc=%i\tl1: %.4f, l2: %.4f' % (p, q, image[p], image[q], area[q],
-                                                                                                                           x_acc[q], y_acc[q],
-                                                                                                                           eigenvalue_1, eigenvalue_2)
 
-        # a = 2 * np.sqrt(eigenvalue_1 / area[q])
-        # b = 2 * np.sqrt(eigenvalue_2 / area[q])
         # the area of an ellipse with the same moments
-        #area_ellipse = np.pi * np.sqrt(eigenvalue_1 * eigenvalue_2)
         area_ellipse = np.pi * 4.0 / <DTYPE_FLOAT64_t>area[q] * np.sqrt(eigenvalue_1 * eigenvalue_2)
 
         # the ratio between ideal area and real area.
@@ -191,8 +181,7 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_ellipse_ratio_2d(dtype_t[::1]
             area_ratio[q] = 0.0
         else:
             area_ratio[q] = 1 - np.abs(area[q] - area_ellipse) / area_ellipse
-        temp_str += '\tarea_ellipse: %.4f\tratio: %.4f' % (area_ellipse, area_ratio[q])
-        print temp_str
+
     return area_ratio
 
 
