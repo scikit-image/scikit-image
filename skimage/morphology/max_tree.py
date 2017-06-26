@@ -38,8 +38,8 @@ def area_open(image, area_threshold, connectivity=2):
 
     area = _max_tree._compute_area(image.ravel(), P.ravel(), S)
 
-    _max_tree._apply_attribute(image.ravel(), output.ravel(), P.ravel(), S,
-                               area, area_threshold)
+    _max_tree._direct_filter(image.ravel(), output.ravel(), P.ravel(), S,
+                             area, area_threshold)
     return output
 
 def area_close(image, area_threshold, connectivity=2):
@@ -51,7 +51,22 @@ def area_close(image, area_threshold, connectivity=2):
 
     area = _max_tree._compute_area(image_inv.ravel(), P.ravel(), S)
 
-    _max_tree._apply_attribute(image_inv.ravel(), output.ravel(), P.ravel(), S,
-                               area, area_threshold)
+    _max_tree._direct_filter(image_inv.ravel(), output.ravel(), P.ravel(), S,
+                             area, area_threshold)
     output = max_val - output
     return output
+
+def ellipse_filter(image, ratio_threshold, connectivity=2):
+    output = image.copy()
+
+    P, S = build_max_tree(image, connectivity)
+
+    image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
+    ellipse_area_ratio = _max_tree._compute_ellipse_ratio_2d(image.ravel(),
+                                                             P.ravel(), S,
+                                                             image_strides)
+
+    _max_tree._direct_filter(image.ravel(), output.ravel(), P.ravel(), S,
+                             ellipse_area_ratio, ratio_threshold)
+    return output
+

@@ -8,7 +8,6 @@ from this representation, namely attribute openings and closings.
 import numpy as np
 
 from libc.stdlib cimport free, malloc, realloc
-from numpy.core.defchararray import index
 
 cimport numpy as np
 cimport cython
@@ -118,13 +117,92 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_area(dtype_t[::1] image,
         area[q] = area[q] + area[p] 
     return area
 
-cpdef void _apply_attribute(dtype_t[::1] image,
-                            dtype_t[::1] output,
-                            DTYPE_INT64_t[::1] parent,
-                            DTYPE_INT64_t[::1] sorted_indices,
-                            DTYPE_FLOAT64_t[::1] attribute,
-                            DTYPE_FLOAT64_t attribute_threshold
-                            ):
+
+cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_ellipse_ratio_2d(dtype_t[::1] image,
+                                                                    DTYPE_INT64_t[::1] parent,
+                                                                    DTYPE_INT64_t[::1] sorted_indices,
+                                                                    DTYPE_INT32_t[::1] strides):
+    cdef DTYPE_INT64_t p_root = sorted_indices[0]
+    cdef DTYPE_INT64_t p, q
+    cdef DTYPE_UINT64_t number_of_pixels = len(image)
+    cdef DTYPE_UINT64_t x, y
+    cdef DTYPE_FLOAT64_t m02, m11, m20
+    cdef DTYPE_FLOAT64_t eigenvalue_1, eigenvalue_2, area_ellipse
+
+    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] area = np.ones(number_of_pixels,
+                                                           dtype=np.uint64)
+    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] x_acc = np.zeros(number_of_pixels,
+                                                             dtype=np.uint64)
+    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] y_acc = np.zeros(number_of_pixels,
+                                                             dtype=np.uint64)
+    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] x2_acc = np.zeros(number_of_pixels,
+                                                              dtype=np.uint64)
+    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] y2_acc = np.zeros(number_of_pixels,
+                                                              dtype=np.uint64)
+    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] xy_acc = np.zeros(number_of_pixels,
+                                                              dtype=np.uint64)
+    cdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] area_ratio = np.zeros(number_of_pixels,
+                                                                  dtype=np.float64)
+
+    for p in sorted_indices[::-1]:
+        y_acc[p] = p // strides[0]
+        x_acc[p] = p % strides[0]
+        x2_acc[p] = x_acc[p] * x_acc[p]
+        y2_acc[p] = y_acc[p] * y_acc[p]
+        xy_acc[p] = x_acc[p] * y_acc[p]
+        print 'pixel : %i (%i, %i) ' % (p, x_acc[p], y_acc[p])
+
+    for p in sorted_indices[::-1]:
+        if p == p_root:
+            continue
+        q = parent[p]
+
+        # accumulative features
+        x_acc[q] = x_acc[q] + x_acc[p]
+        y_acc[q] = y_acc[q] + y_acc[p]
+        x2_acc[q] = x2_acc[q] + x2_acc[p]
+        y2_acc[q] = y2_acc[q] + y2_acc[p]
+        xy_acc[q] = xy_acc[q] + xy_acc[p]
+        area[q] = area[q] + area[p]
+
+        # derived features: covariance matrix
+        #m02 = <DTYPE_FLOAT64_t>y2_acc[q] / <DTYPE_FLOAT64_t>area[q] - <DTYPE_FLOAT64_t>(y_acc[q] * y_acc[q]) / <DTYPE_FLOAT64_t>(area[q]**2)
+        #m20 = <DTYPE_FLOAT64_t>x2_acc[q] / <DTYPE_FLOAT64_t>area[q] - <DTYPE_FLOAT64_t>(x_acc[q] * x_acc[q]) / <DTYPE_FLOAT64_t>(area[q]**2)
+        #m11 = <DTYPE_FLOAT64_t>xy_acc[q] / <DTYPE_FLOAT64_t>area[q] - <DTYPE_FLOAT64_t>(x_acc[q] * y_acc[q]) / <DTYPE_FLOAT64_t>(area[q]**2)
+        m02 = <DTYPE_FLOAT64_t>y2_acc[q] - <DTYPE_FLOAT64_t>(y_acc[q] * y_acc[q]) / <DTYPE_FLOAT64_t>area[q]
+        m20 = <DTYPE_FLOAT64_t>x2_acc[q] - <DTYPE_FLOAT64_t>(x_acc[q] * x_acc[q]) / <DTYPE_FLOAT64_t>area[q]
+        m11 = <DTYPE_FLOAT64_t>xy_acc[q] - <DTYPE_FLOAT64_t>(x_acc[q] * y_acc[q]) / <DTYPE_FLOAT64_t>area[q]
+
+        # eigenvalues of the covariance matrix
+        eigenvalue_1 = .5 * (m02 + m20) + .5 * np.sqrt(4 * m11 * m11 + (m20 - m02)**2)
+        eigenvalue_2 = .5 * (m02 + m20) - .5 * np.sqrt(4 * m11 * m11 + (m20 - m02)**2)
+        temp_str = 'px: %i, parent: %i\tvalue: %i, value(parent): %i\tarea: %i, xacc = %i, yacc=%i\tl1: %.4f, l2: %.4f' % (p, q, image[p], image[q], area[q],
+                                                                                                                           x_acc[q], y_acc[q],
+                                                                                                                           eigenvalue_1, eigenvalue_2)
+
+        # a = 2 * np.sqrt(eigenvalue_1 / area[q])
+        # b = 2 * np.sqrt(eigenvalue_2 / area[q])
+        # the area of an ellipse with the same moments
+        #area_ellipse = np.pi * np.sqrt(eigenvalue_1 * eigenvalue_2)
+        area_ellipse = np.pi * 4.0 / <DTYPE_FLOAT64_t>area[q] * np.sqrt(eigenvalue_1 * eigenvalue_2)
+
+        # the ratio between ideal area and real area.
+        if area_ellipse == 0.0:
+            area_ratio[q] = 0.0
+        else:
+            area_ratio[q] = 1 - np.abs(area[q] - area_ellipse) / area_ellipse
+        temp_str += '\tarea_ellipse: %.4f\tratio: %.4f' % (area_ellipse, area_ratio[q])
+        print temp_str
+    return area_ratio
+
+
+cpdef void _direct_filter(dtype_t[::1] image,
+                          dtype_t[::1] output,
+                          DTYPE_INT64_t[::1] parent,
+                          DTYPE_INT64_t[::1] sorted_indices,
+                          DTYPE_FLOAT64_t[::1] attribute,
+                          DTYPE_FLOAT64_t attribute_threshold
+                          ):
     cdef DTYPE_INT64_t p_root = sorted_indices[0]
     cdef DTYPE_INT64_t p, q
     cdef DTYPE_UINT64_t number_of_pixels = len(image)
@@ -141,7 +219,7 @@ cpdef void _apply_attribute(dtype_t[::1] image,
         q = parent[p]
 
         if image[p] == image[q]:
-            output[p] = image[q]
+            output[p] = output[q]
             continue
 
         if attribute[p] < attribute_threshold:
