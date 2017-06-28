@@ -51,7 +51,7 @@ def _get_image_properties(image):
     out_of_range_float = (np.issubdtype(image.dtype, np.float) and
                           (immin < lo or immax > hi))
     low_data_range = (immin != immax and
-                         is_low_contrast(image))
+                      is_low_contrast(image))
     unsupported_dtype = image.dtype not in dtypes._supported_types
 
     return ImageProperties(signed, out_of_range_float,
@@ -169,10 +169,33 @@ def imshow_collection(ic, *args, **kwargs):
     """Display all images in the collection.
 
     """
-    fig, axes = plt.subplots(1, len(ic))
+    N = len(ic)
+    print N
+    k = (N * 12)**(0.5)
+    r1 = int(k/4)
+    r2 = r1 + 1
+    if N % r1 == 0:
+        c1 = N/r1
+    else:
+        c1 = N/r1 + 1
+    if N % r2 == 0:
+        c2 = N/r2
+    else:
+        c2 = N/r2 + 1
+
+    if float(r1)/c1 - 0.75 > float(r2)/c2 - 0.75:
+        nrows = r2
+        ncols = c2
+    else:
+        nrows = r1
+        ncols = c1
+    fig = plt.figure()
+
     for n, image in enumerate(ic):
-        kwargs['ax'] = axes[n]
+        ax = plt.subplot(nrows, ncols, n+1)
+        kwargs['ax'] = ax
         imshow(image, *args, **kwargs)
+    return fig
 
 
 imread = plt.imread
