@@ -1,3 +1,4 @@
+from __future__ import division
 from collections import namedtuple
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,6 +7,8 @@ from ...util import dtype as dtypes
 from ...exposure import is_low_contrast
 from ...util.colormap import viridis
 from ..._shared.utils import warn
+from math import floor
+
 
 _default_colormap = 'gray'
 _nonstandard_colormap = viridis
@@ -169,28 +172,24 @@ def imshow_collection(ic, *args, **kwargs):
     """Display all images in the collection.
 
     """
+    # N : total images.
+    # Aim : 4 nrows = 3 ncols
+    # 4r = 3c = k
+    # rc = N, => k = (12 N)^(0.5)
+    # r = floor(k/4) or floor(k/4) + 1
+    # c = N/r or N/r + 1
+    # Choose the pair which is closer to 3:4 = 0.75
     N = len(ic)
-    print N
     k = (N * 12)**(0.5)
-    r1 = int(k/4)
+    r1 = floor(k/4)
     r2 = r1 + 1
-    if N % r1 == 0:
-        c1 = N/r1
+    c1 = N // r1 if N % r1 == 0 else N // r1 + 1
+    c2 = N // r2 if N % r2 == 0 else N // r2 + 1
+    if abs(r1/c1 - 0.75) < abs(r2/c2 - 0.75):
+        nrows, ncols = r1, c1
     else:
-        c1 = N/r1 + 1
-    if N % r2 == 0:
-        c2 = N/r2
-    else:
-        c2 = N/r2 + 1
-
-    if float(r1)/c1 - 0.75 > float(r2)/c2 - 0.75:
-        nrows = r2
-        ncols = c2
-    else:
-        nrows = r1
-        ncols = c1
+        nrows, ncols = r2, c2
     fig = plt.figure()
-
     for n, image in enumerate(ic):
         ax = plt.subplot(nrows, ncols, n+1)
         kwargs['ax'] = ax
