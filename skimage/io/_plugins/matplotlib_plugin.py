@@ -8,7 +8,7 @@ from ...exposure import is_low_contrast
 from ...util.colormap import viridis
 from ..._shared.utils import warn
 from math import floor
-
+from math import ceil
 
 _default_colormap = 'gray'
 _nonstandard_colormap = viridis
@@ -183,8 +183,8 @@ def imshow_collection(ic, *args, **kwargs):
     k = (N * 12)**(0.5)
     r1 = floor(k/4)
     r2 = r1 + 1
-    c1 = N // r1 if N % r1 == 0 else N // r1 + 1
-    c2 = N // r2 if N % r2 == 0 else N // r2 + 1
+    c1 = ceil(N/r1)
+    c2 = ceil(N/r2)
     if abs(r1/c1 - 0.75) < abs(r2/c2 - 0.75):
         nrows, ncols = r1, c1
     else:
