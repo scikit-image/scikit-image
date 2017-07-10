@@ -170,7 +170,10 @@ def imshow(image, ax=None, show_cbar=None, **kwargs):
 
 def imshow_collection(ic, *args, **kwargs):
     """Display all images in the collection.
-
+    Returns
+    -------
+    fig : `matplotlib.figure.Figure`
+        The `Figure` object returned by `plt.subplots`.
     """
     # N : total images.
     # Aim : 4 nrows = 3 ncols
@@ -189,11 +192,11 @@ def imshow_collection(ic, *args, **kwargs):
         nrows, ncols = r1, c1
     else:
         nrows, ncols = r2, c2
-    fig = plt.figure()
+    fig, axes = plt.subplots(nrows, ncols)
+    ax = axes.ravel()
     for n, image in enumerate(ic):
-        ax = plt.subplot(nrows, ncols, n+1)
-        kwargs['ax'] = ax
-        imshow(image, *args, **kwargs)
+        ax[n].imshow(image, *args, **kwargs)
+    kwargs['ax'] = axes
     return fig
 
 
