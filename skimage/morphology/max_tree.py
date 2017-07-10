@@ -1,5 +1,38 @@
-"""max_tree.py - max-tree representation of an image and related operators
+"""max_tree.py - max_tree representation of images.
+
+This module provides operators based on the max-tree representation of images.
+A grey scale image can be seen as a pile of nested sets, each of which is the
+result of a threshold operation. These sets can be efficiently represented by
+max-trees, where the inclusion relation between connected components at
+different levels are represented by parent-child relationships.
+
+These representations allow efficient implementations of many algorithms, such
+as attribute operators. Unlike morphological openings and closings, these
+operators do not require a fixed structuring element, but rather act with a
+flexible structuring element that meets a certain criterion.
+
+This implementation provides functions for:
+1. max-tree generation
+2. area openings / closings
+3. diameter openings / closings
+4. ellipse fit filter
+
+References:
+    .. [1] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
+           Connected Operators for Image and Sequence Processing. 
+           IEEE Transactions on Image Processing, 7(4), 555–570.
+    .. [2] Berger, C., Geraud, T., Levillain, R., Widynski, N., Baillard, A.,
+           Bertin, E. (2007). Effective Component Tree Computation with
+           Application to Pattern Recognition in Astronomical Imaging.
+           In International Conference on Image Processing (ICIP) (pp. 41–44).
+    .. [3] Najman, L., & Couprie, M. (2006). Building the component tree in
+           quasi-linear time. IEEE Transactions on Image Processing, 15(11),
+           3531–3539.
+    .. [4] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
+           Component Tree Computation Algorithms. IEEE Transactions on Image
+           Processing, 23(9), 3885–3895.
 """
+
 import numpy as np
 
 from .watershed import _validate_connectivity
@@ -7,9 +40,78 @@ from .watershed import _compute_neighbors
 
 from . import _max_tree
 
-from ..util import crop
 
+# building the max tree.
 def build_max_tree(image, connectivity=2):
+    """Builds the max tree from an image
+
+    Component trees represent the hierarchical structure of the connected
+    components resulting from sequential thresholding operations applied to an
+    image. A connected component at one level is parent of a component at a
+    higher level if the latter is included in the first. A max-tree is an
+    efficient representation of a component tree. A connected component at
+    one level is represented by one reference pixel at this level, which is
+    parent to all other pixels at that level and the reference pixel at the
+    level above.
+
+    Parameters
+    ----------
+    img: ndarray
+        The input image for which the area_closing is to be calculated.
+        This image can be of any type.
+    connectivity: unsigned int, optional
+        The neighborhood connectivity. The integer represents the maximum
+        number of orthogonal steps to reach a neighbor. It is 1 for
+        4-connectivity and 2 for 8-connectivity. Default value is 2.
+
+    Returns
+    -------
+    parent: ndarray, int64
+        The value of each pixel is the index of its parent in the ravelled
+        array
+
+    tree_traverser: 1D array, int64
+        The ordered pixel indices (referring to the ravelled array). The pixels
+        are ordered such that every pixel is preceded by its parent (except for
+        the root which has no parent).
+
+    References:
+    .. [1] Salembier, P., Oliveras, A. & Garrido, L. (1998). Antiextensive
+           Connected Operators for Image and Sequence Processing. 
+           IEEE Transactions on Image Processing, 7(4), 555–570.
+    .. [2] Berger, C., Geraud, T., Levillain, R., Widynski, N., Baillard, A. &
+           Bertin, E. (2007). Effective Component Tree Computation with
+           Application to Pattern Recognition in Astronomical Imaging.
+           In International Conference on Image Processing (ICIP) (pp. 41–44).
+    .. [3] Najman, L. & Couprie, M. (2006). Building the component tree in
+           quasi-linear time. IEEE Transactions on Image Processing, 15(11),
+           3531–3539.
+    .. [4] Carlinet, E. & Geraud, T. (2014). A Comparative Review of
+           Component Tree Computation Algorithms. IEEE Transactions on Image
+           Processing, 23(9), 3885–3895.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.max_tree import build_max_tree
+
+    We create an image (quadratic function with a minimum in the center and
+    4 additional local minima.
+
+    >>> w = 12
+    >>> x, y = np.mgrid[0:w,0:w]
+    >>> f = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
+    >>> f[2:3,1:5] = 160; f[2:4,9:11] = 140; f[9:11,2:4] = 120
+    >>> f[9:10,9:11] = 100; f[10,10] = 100
+    >>> f = f.astype(np.int)
+
+    We can calculate the area closing:
+
+    >>> closed = attribute.area_closing(f, 8, connectivity=1)
+
+    The small (but deep) minima are removed.
+
+    """
     mask_shrink = np.ones([x-2 for x in image.shape], bool)
     mask = np.pad(mask_shrink, 1, mode='constant')
 
