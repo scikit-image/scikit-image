@@ -19,18 +19,18 @@ This implementation provides functions for:
 
 References:
     .. [1] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
-           Connected Operators for Image and Sequence Processing. 
-           IEEE Transactions on Image Processing, 7(4), 555–570.
+           Connected Operators for Image and Sequence Processing.
+       IEEE Transactions on Image Processing, 7(4), 555-570.
     .. [2] Berger, C., Geraud, T., Levillain, R., Widynski, N., Baillard, A.,
            Bertin, E. (2007). Effective Component Tree Computation with
            Application to Pattern Recognition in Astronomical Imaging.
-           In International Conference on Image Processing (ICIP) (pp. 41–44).
+           In International Conference on Image Processing (ICIP) (pp. 41-44).
     .. [3] Najman, L., & Couprie, M. (2006). Building the component tree in
            quasi-linear time. IEEE Transactions on Image Processing, 15(11),
-           3531–3539.
+           3531-3539.
     .. [4] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
-           Processing, 23(9), 3885–3895.
+           Processing, 23(9), 3885-3895.
 """
 
 import numpy as np
@@ -75,43 +75,37 @@ def build_max_tree(image, connectivity=2):
         are ordered such that every pixel is preceded by its parent (except for
         the root which has no parent).
 
-    References:
-    .. [1] Salembier, P., Oliveras, A. & Garrido, L. (1998). Antiextensive
-           Connected Operators for Image and Sequence Processing. 
-           IEEE Transactions on Image Processing, 7(4), 555–570.
-    .. [2] Berger, C., Geraud, T., Levillain, R., Widynski, N., Baillard, A. &
+    References
+    ----------
+    .. [1] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
+           Connected Operators for Image and Sequence Processing.
+           IEEE Transactions on Image Processing, 7(4), 555-570.
+    .. [2] Berger, C., Geraud, T., Levillain, R., Widynski, N., Baillard, A.,
            Bertin, E. (2007). Effective Component Tree Computation with
            Application to Pattern Recognition in Astronomical Imaging.
-           In International Conference on Image Processing (ICIP) (pp. 41–44).
-    .. [3] Najman, L. & Couprie, M. (2006). Building the component tree in
+           In International Conference on Image Processing (ICIP) (pp. 41-44).
+    .. [3] Najman, L., & Couprie, M. (2006). Building the component tree in
            quasi-linear time. IEEE Transactions on Image Processing, 15(11),
-           3531–3539.
-    .. [4] Carlinet, E. & Geraud, T. (2014). A Comparative Review of
+           3531-3539.
+    .. [4] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
-           Processing, 23(9), 3885–3895.
+           Processing, 23(9), 3885-3895.
 
     Examples
     --------
     >>> import numpy as np
     >>> from skimage.max_tree import build_max_tree
 
-    We create an image (quadratic function with a minimum in the center and
-    4 additional local minima.
+    We create a small sample image (Figure 1 from [4]) and build the max-tree.
 
-    >>> w = 12
-    >>> x, y = np.mgrid[0:w,0:w]
-    >>> f = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
-    >>> f[2:3,1:5] = 160; f[2:4,9:11] = 140; f[9:11,2:4] = 120
-    >>> f[9:10,9:11] = 100; f[10,10] = 100
-    >>> f = f.astype(np.int)
-
-    We can calculate the area closing:
-
-    >>> closed = attribute.area_closing(f, 8, connectivity=1)
-
-    The small (but deep) minima are removed.
+    >>> image = np.array([[15, 13, 16], [12, 12, 10], [16, 12, 14]])
+    >>> P, S = build_max_tree(image, connectivity=2)
 
     """
+    # User defined masks are not allowed, as there might be more than one
+    # connected component in the mask (and therefore not a single tree that
+    # represents the image). Mask here is an image that is 0 on the border
+    # and 1 everywhere else.
     mask_shrink = np.ones([x-2 for x in image.shape], bool)
     mask = np.pad(mask_shrink, 1, mode='constant')
 
@@ -123,9 +117,11 @@ def build_max_tree(image, connectivity=2):
     flat_neighborhood = _compute_neighbors(image, neighbors, offset)
     image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
 
+    # pixels need to be sorted according to their grey level.
     tree_traverser = np.argsort(image.ravel(),
                                 kind='quicksort').astype(np.int64)
 
+    # call of cython function.
     _max_tree._build_max_tree(image.ravel(), mask.ravel().astype(np.uint8),
                               flat_neighborhood, image_strides,
                               np.array(image.shape, dtype=np.int32),
