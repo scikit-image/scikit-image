@@ -7,8 +7,8 @@ from ...util import dtype as dtypes
 from ...exposure import is_low_contrast
 from ...util.colormap import viridis
 from ..._shared.utils import warn
-from math import floor
-from math import ceil
+from math import floor, ceil
+
 
 _default_colormap = 'gray'
 _nonstandard_colormap = viridis
@@ -170,30 +170,31 @@ def imshow(image, ax=None, show_cbar=None, **kwargs):
 
 def imshow_collection(ic, *args, **kwargs):
     """Display all images in the collection.
+
     Returns
     -------
     fig : `matplotlib.figure.Figure`
         The `Figure` object returned by `plt.subplots`.
     """
-    # N : total images.
-    # Aim : 4 nrows = 3 ncols
-    # 4r = 3c = k
-    # rc = N, => k = (12 N)^(0.5)
-    # r = floor(k/4) or floor(k/4) + 1
-    # c = N/r or N/r + 1
-    # Choose the pair which is closer to 3:4 = 0.75
-    N = len(ic)
-    k = (N * 12)**(0.5)
-    r1 = floor(k/4)
-    r2 = r1 + 1
-    c1 = ceil(N/r1)
-    c2 = ceil(N/r2)
-    if abs(r1/c1 - 0.75) < abs(r2/c2 - 0.75):
+    if len(ic) < 1:
+        raise ValueError('Number of images to plot must be greater than 0')
+
+    # The target is to plot images on a grid with aspect ratio 4:3
+    num_images = len(ic)
+    # Two pairs of `nrows, ncols` are possible
+    k = (num_images * 12)**0.5
+    r1 = max(1, floor(k / 4))
+    r2 = ceil(k / 4)
+    c1 = ceil(num_images / r1)
+    c2 = ceil(num_images / r2)
+    # Select the one which is closer to 4:3
+    if abs(r1 / c1 - 0.75) < abs(r2 / c2 - 0.75):
         nrows, ncols = r1, c1
     else:
         nrows, ncols = r2, c2
-    fig, axes = plt.subplots(nrows, ncols)
-    ax = axes.ravel()
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
+    ax = np.asarray(axes).ravel()
     for n, image in enumerate(ic):
         ax[n].imshow(image, *args, **kwargs)
     kwargs['ax'] = axes
