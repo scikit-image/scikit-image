@@ -874,8 +874,8 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     --------
     >>> from skimage import data
     >>> image = data.page()
-    >>> binary_sauvola = threshold_sauvola(image,
-    ...                                    window_size=15, k=0.2)
+    >>> t_sauvola = threshold_sauvola(image, window_size=15, k=0.2)
+    >>> binary_image = image > t_sauvola
     """
     if r is None:
         imin, imax = dtype_limits(image, clip_negative=False)
@@ -895,9 +895,9 @@ def apply_hysteresis_threshold(image, low, high):
     ----------
     image : array, shape (M,[ N, ..., P])
         Grayscale input image.
-    low : float
+    low : float, or array of same shape as `image`
         Lower threshold.
-    high : float
+    high : float, or array of same shape as `image`
         Higher threshold.
 
     Returns
@@ -919,6 +919,7 @@ def apply_hysteresis_threshold(image, low, high):
            1986; vol. 8, pp.679-698.
            DOI: 10.1109/TPAMI.1986.4767851
     """
+    low = np.clip(low, a_min=None, a_max=high)  # ensure low always below high
     mask_low = image > low
     mask_high = image > high
     # Connected components of mask_low
