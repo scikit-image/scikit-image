@@ -13,22 +13,35 @@ ctypedef fused image_t:
 
 cpdef moments_central(image_t image, double cr, double cc, Py_ssize_t order):
     cdef Py_ssize_t p, q, r, c
+    cdef double val, fr, fc, dr, dc, dcp, drq
     cdef double[:, ::1] mu = np.zeros((order + 1, order + 1), dtype=np.double)
-    cdef double val, dr, dc, dcp, drq
-    for r in range(image.shape[0]):
-        dr = r - cr
-        for c in range(image.shape[1]):
-            dc = c - cc
-            val = image[r, c]
+
+    if image.ndim > 2:
+        for r in range(image.shape[0]):
+            dr = r - cr
+            for c in range(image.shape[1]):
+                dc = c - cc
+                val = image[r, c]
+                dcp = 1
+                for p in range(order + 1):
+                    drq = 1
+                    for q in range(order + 1):
+                        mu[p, q] += val * drq * dcp
+                        drq *= dr
+                    dcp *= dc
+    else if image.ndim == 2:
+        for fr, fc in image:
+            dr = fr - cr
+            dc = fc - cc
             dcp = 1
             for p in range(order + 1):
                 drq = 1
                 for q in range(order + 1):
-                    mu[p, q] += val * drq * dcp
+                    mu[p, q] += drq * dcp
                     drq *= dr
                 dcp *= dc
-    return np.asarray(mu)
 
+    return np.asarray(mu)
 
 def moments_normalized(double[:, :] mu, Py_ssize_t order=3):
     cdef Py_ssize_t p, q
