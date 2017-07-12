@@ -212,6 +212,10 @@ def _find_min_diff(image):
     Find the minimal difference of grey levels inside the image.
     """
     img_vec = np.unique(image.flatten())
+
+    if img_vec.shape == (1,):
+        return 0
+
     min_diff = np.min(img_vec[1:] - img_vec[:-1])
     return min_diff
 
@@ -278,6 +282,8 @@ def local_maxima(image, selem=None):
     if np.issubdtype(image.dtype, 'half'):
         # find the minimal grey level difference
         h = _find_min_diff(image)
+        if h == 0:
+            return np.zeros(image.shape, np.uint8)
     else:
         h = 1
     local_max = h_maxima(image, h, selem=selem)
@@ -346,6 +352,8 @@ def local_minima(image, selem=None):
     if np.issubdtype(image.dtype, 'half'):
         # find the minimal grey level difference
         h = _find_min_diff(image)
+        if h == 0:
+            return np.zeros(image.shape, np.uint8)
     else:
         h = 1
     local_min = h_minima(image, h, selem=selem)
