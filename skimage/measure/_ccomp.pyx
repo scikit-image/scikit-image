@@ -349,8 +349,8 @@ def label_cython(input_, neighbors=None, background=None, return_num=False,
     # We have to ensure that the shape of the input can be handled by the
     # algorithm.  The input is reshaped as needed for compatibility.
     input_, swaps = reshape_array(input_)
-    shape = image.shape
-    ndim = image.ndim
+    shape = input_.shape
+    ndim = input_.ndim
 
     cdef cnp.ndarray[DTYPE_t, ndim=1] forest
 
