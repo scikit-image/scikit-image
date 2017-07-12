@@ -195,9 +195,9 @@ class TestExtrema(unittest.TestCase):
     def test_local_extrema_uniform(self):
         "local extrema tests for uniform arrays with various data types"
 
-        data = np.array((7,6), 42, dtype=np.uint8)
+        data = np.array((7, 6), 42, dtype=np.uint8)
 
-        expected_result = np.zeros((7,6), dtype=np.uint8)
+        expected_result = np.zeros((7, 6), dtype=np.uint8)
 
         for dtype in [np.uint8, np.uint64, np.int8, np.int64]:
             data = data.astype(dtype)
