@@ -213,7 +213,7 @@ def _find_min_diff(image):
     """
     img_vec = np.unique(image.flatten())
 
-    if img_vec.shape == (1,):
+    if img_vec.size == 1:
         return 0
 
     min_diff = np.min(img_vec[1:] - img_vec[:-1])
@@ -279,12 +279,11 @@ def local_maxima(image, selem=None):
 
     The resulting image will contain all 6 local maxima.
     """
-    if np.issubdtype(image.dtype, 'half'):
-        # find the minimal grey level difference
-        h = _find_min_diff(image)
-        if h == 0:
-            return np.zeros(image.shape, np.uint8)
-    else:
+    # find the minimal grey level difference
+    h = _find_min_diff(image)
+    if h == 0:
+        return np.zeros(image.shape, np.uint8)
+    if not(np.issubdtype(image.dtype, 'half')):
         h = 1
     local_max = h_maxima(image, h, selem=selem)
     return local_max
@@ -349,12 +348,11 @@ def local_minima(image, selem=None):
 
     The resulting image will contain all 6 local minima.
     """
-    if np.issubdtype(image.dtype, 'half'):
-        # find the minimal grey level difference
-        h = _find_min_diff(image)
-        if h == 0:
-            return np.zeros(image.shape, np.uint8)
-    else:
+    # find the minimal grey level difference
+    h = _find_min_diff(image)
+    if h == 0:
+        return np.zeros(image.shape, np.uint8)
+    if not(np.issubdtype(image.dtype, 'half')):
         h = 1
     local_min = h_minima(image, h, selem=selem)
     return local_min

@@ -192,6 +192,42 @@ class TestExtrema(unittest.TestCase):
             assert error < eps
             assert out.dtype == expected_result.dtype
 
+    def test_local_extrema_uniform(self):
+        "local extrema tests for uniform arrays with various data types"
+
+        data = np.array([[42, 42, 42, 42, 42, 42],
+                         [42, 42, 42, 42, 42, 42],
+                         [42, 42, 42, 42, 42, 42],
+                         [42, 42, 42, 42, 42, 42],
+                         [42, 42, 42, 42, 42, 42],
+                         [42, 42, 42, 42, 42, 42],
+                         [42, 42, 42, 42, 42, 42]],
+                        dtype=np.uint8)
+
+        expected_result = np.array([[0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0]],
+                                   dtype=np.uint8)
+
+        for dtype in [np.uint8, np.uint64, np.int8, np.int64]:
+            data = data.astype(dtype)
+
+            # test for local maxima
+            out = extrema.local_maxima(data)
+            error = diff(expected_result, out)
+            assert error < eps
+            assert out.dtype == expected_result.dtype
+
+            # test for local minima
+            out = extrema.local_minima(data)
+            error = diff(expected_result, out)
+            assert error < eps
+            assert out.dtype == expected_result.dtype
+
     def test_extrema_float(self):
         "specific tests for float type"
         data = np.array([[0.10, 0.11, 0.13, 0.14, 0.14, 0.15, 0.14,
