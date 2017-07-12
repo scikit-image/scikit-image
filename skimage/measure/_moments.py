@@ -15,8 +15,8 @@ def moments(image, order=3):
 
     Parameters
     ----------
-    image : 2D double or uint8 array
-        Rasterized shape as image.
+    image : 2D double or uint8 array or a 1D array of double or uint8 points
+        Rasterized shape as image or contour as image.
     order : int, optional
         Maximum order of moments. Default is 3.
 
@@ -34,7 +34,9 @@ def moments(image, order=3):
     .. [3] T. H. Reiss. Recognizing Planar Objects Using Invariant Image
            Features, from Lecture notes in computer science, p. 676. Springer,
            Berlin, 1993.
-    .. [4] http://en.wikipedia.org/wiki/Image_moment
+    .. [4] Johannes Kilian. Simple Image Analysis By Moments. Durham 
+           University, version 0.2, Durham, 2001.
+    .. [5] http://en.wikipedia.org/wiki/Image_moment
 
     Examples
     --------
@@ -61,8 +63,8 @@ def moments_central(image, cr, cc, order=3):
 
     Parameters
     ----------
-    image : 2D double or uint8 array
-        Rasterized shape as image.
+    image : 2D double or uint8 array or a 1D array of double or uint8 points
+        Rasterized shape as image or contour as image.
     cr : double
         Center row coordinate.
     cc : double
@@ -84,7 +86,9 @@ def moments_central(image, cr, cc, order=3):
     .. [3] T. H. Reiss. Recognizing Planar Objects Using Invariant Image
            Features, from Lecture notes in computer science, p. 676. Springer,
            Berlin, 1993.
-    .. [4] http://en.wikipedia.org/wiki/Image_moment
+    .. [4] Johannes Kilian. Simple Image Analysis By Moments. Durham 
+           University, version 0.2, Durham, 2001.
+    .. [5] http://en.wikipedia.org/wiki/Image_moment
 
     Examples
     --------
