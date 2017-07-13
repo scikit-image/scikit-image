@@ -15,8 +15,9 @@ cpdef moments_central(image_t image, double cr, double cc, Py_ssize_t order):
     cdef Py_ssize_t p, q, r, c
     cdef double val, fr, fc, dr, dc, dcp, drq
     cdef double[:, ::1] mu = np.zeros((order + 1, order + 1), dtype=np.double)
+    cdef int ndim = image.ndim
 
-    if image.ndim > 2:
+    if ndim > 2:
         for r in range(image.shape[0]):
             dr = r - cr
             for c in range(image.shape[1]):
@@ -29,7 +30,7 @@ cpdef moments_central(image_t image, double cr, double cc, Py_ssize_t order):
                         mu[p, q] += val * drq * dcp
                         drq *= dr
                     dcp *= dc
-    else if image.ndim == 2:
+    elif ndim == 2:
         for fr, fc in image:
             dr = fr - cr
             dc = fc - cc
