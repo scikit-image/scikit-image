@@ -91,6 +91,32 @@ class TestExtrema(unittest.TestCase):
             assert error < eps
             assert out.dtype == expected_result.dtype
 
+    def test_without_local_maxima(self):
+        "local maxima test without variation"
+        flat = np.ones((5, 5))
+        out = extrema.local_maxima(flat)
+        assert((out == np.zeros_like(flat)).all())
+
+    def test_without_local_minima(self):
+        "local maxima test without variation"
+        flat = np.ones((5, 5))
+        out = extrema.local_minima(flat)
+        assert((out == np.zeros_like(flat)).all())
+
+    def test_min_diff(self):
+        "test minimum difference"
+        img = np.zeros((9, 9))
+        img[2:7, 2:7] = 4
+        img[4, 4] = 5
+        out = extrema._find_min_diff(img)
+        assert(out == 1.0)
+
+    def test_minless_diff(self):
+        "test minimum difference, when there is no difference"
+        img = np.zeros((9, 9))
+        out = extrema._find_min_diff(img)
+        assert(out == 0.0)
+
     def test_local_minima(self):
         "local minima for various data types"
 

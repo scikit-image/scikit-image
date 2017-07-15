@@ -27,7 +27,7 @@ def _add_constant_clip(image, const_value):
                          "with the image data type.")
 
     result = image + const_value
-    result[image > max_dtype-const_value] = max_dtype
+    result[image > max_dtype - const_value] = max_dtype
     return(result)
 
 
@@ -36,7 +36,7 @@ def _subtract_constant_clip(image, const_value):
     """
     min_dtype, max_dtype = dtype_limits(image, clip_negative=False)
 
-    if const_value > (max_dtype-min_dtype):
+    if const_value > (max_dtype - min_dtype):
         raise ValueError("The subtracted constant is not compatible"
                          "with the image data type.")
 
@@ -108,6 +108,7 @@ def h_maxima(image, h, selem=None):
 
     The resulting image will contain 4 local maxima.
     """
+
     if np.issubdtype(image.dtype, 'half'):
         resolution = 2 * np.finfo(image.dtype).resolution
         if h < resolution:
@@ -212,7 +213,9 @@ def _find_min_diff(image):
     Find the minimal difference of grey levels inside the image.
     """
     img_vec = np.unique(image.flatten())
-    min_diff = np.min(img_vec[1:] - img_vec[:-1])
+    min_diff = 0
+    if img_vec.size != 1:
+        min_diff = np.min(img_vec[1:] - img_vec[:-1])
     return min_diff
 
 
@@ -222,6 +225,9 @@ def local_maxima(image, selem=None):
     The local maxima are defined as connected sets of pixels with equal
     grey level strictly greater than the grey levels of all pixels in direct
     neighborhood of the set.
+
+    Flat images return `np.zeros_like(image)`, as there are no neighboring
+    pixels to be strictly greater than.
 
     For integer typed images, this corresponds to the h-maxima with h=1.
     For float typed images, h is determined as the smallest difference
@@ -280,7 +286,8 @@ def local_maxima(image, selem=None):
         h = _find_min_diff(image)
     else:
         h = 1
-    local_max = h_maxima(image, h, selem=selem)
+    local_max = h_maxima(
+        image, h, selem=selem) if h != 0 else np.zeros_like(image)
     return local_max
 
 
@@ -290,6 +297,9 @@ def local_minima(image, selem=None):
     The local minima are defined as connected sets of pixels with equal
     grey level strictly smaller than the grey levels of all pixels in direct
     neighborhood of the set.
+
+    Flat images return `np.zeros_like(image)`, as there are no neighboring
+    pixels to be strictly smaller than.
 
     For integer typed images, this corresponds to the h-minima with h=1.
     For float typed images, h is determined as the smallest difference
@@ -348,5 +358,6 @@ def local_minima(image, selem=None):
         h = _find_min_diff(image)
     else:
         h = 1
-    local_min = h_minima(image, h, selem=selem)
+    local_min = h_minima(
+        image, h, selem=selem) if h != 0 else np.zeros_like(image)
     return local_min
