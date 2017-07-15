@@ -338,7 +338,7 @@ def satellite():
     This image was downloaded from USGS public data portal https://earthexplorer.usgs.gov/
     For copyright info, go to: https://www2.usgs.gov/laws/info_policies.html 
 
-    Credit: U.S. Geological Survey 
+    Courtesy of U.S. Geological Survey 
     Department of the Interior/USGS
 
     Product name: High Resolution Orthoimagery
