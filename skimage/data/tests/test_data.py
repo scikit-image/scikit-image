@@ -1,6 +1,6 @@
 import numpy as np
 import skimage.data as data
-from numpy.testing import assert_equal, assert_almost_equal
+from skimage._shared.testing import assert_equal, assert_almost_equal
 
 
 def test_astronaut():

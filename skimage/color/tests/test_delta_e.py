@@ -2,7 +2,7 @@
 from os.path import abspath, dirname, join as pjoin
 
 import numpy as np
-from numpy.testing import assert_allclose
+from skimage._shared.testing import assert_allclose
 
 from skimage.color import (deltaE_cie76,
                            deltaE_ciede94,

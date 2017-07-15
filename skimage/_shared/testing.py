@@ -10,6 +10,8 @@ import functools
 from tempfile import NamedTemporaryFile
 
 from numpy import testing
+from numpy.testing import assert_array_equal, assert_array_almost_equal
+from numpy.testing import assert_equal, TestCase, assert_allclose
 import numpy as np
 from ._warnings import expected_warnings
 import warnings

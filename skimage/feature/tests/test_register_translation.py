@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_allclose
+from skimage._shared.testing import assert_allclose
 
 from skimage.feature.register_translation import (register_translation,
                                                   _upsampled_dft)

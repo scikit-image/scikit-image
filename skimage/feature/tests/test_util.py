@@ -3,7 +3,8 @@ try:
     import matplotlib.pyplot as plt
 except ImportError:
     plt = None
-from numpy.testing import assert_equal
+
+from skimage._shared.testing import assert_equal
 
 from skimage.feature.util import (FeatureDetector, DescriptorExtractor,
                                   _prepare_grayscale_input_2D,

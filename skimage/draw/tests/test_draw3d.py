@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_array_equal, assert_allclose
+from skimage._shared.testing import assert_array_equal, assert_allclose
 
 from skimage.draw import ellipsoid, ellipsoid_stats, rectangle
 from skimage._shared import testing

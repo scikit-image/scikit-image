@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_almost_equal
+from skimage._shared.testing import assert_almost_equal
 from numpy import sqrt, ceil
 
 from skimage import data

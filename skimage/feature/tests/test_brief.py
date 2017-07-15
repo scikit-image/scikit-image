@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_array_equal
+from skimage._shared.testing import assert_array_equal
 from skimage import data
 from skimage.feature import BRIEF, corner_peaks, corner_harris
 from skimage._shared import testing

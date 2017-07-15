@@ -29,18 +29,14 @@ def test_int_cast_not_possible():
 
 
 def test_int_cast_possible():
-    np.testing.assert_equal(safe_as_int(7.1, atol=0.11), 7)
-    np.testing.assert_equal(safe_as_int(-7.1, atol=0.11), -7)
-    np.testing.assert_equal(safe_as_int(41.9, atol=0.11), 42)
-    np.testing.assert_array_equal(safe_as_int([2, 42, 5789234.0, 87, 4]),
-                                  np.r_[2, 42, 5789234, 87, 4])
-    np.testing.assert_array_equal(safe_as_int(np.r_[[[3, 4,  1.000000001],
-                                                     [7, 2, -8.999999999],
-                                                     [6, 9, -4234918347.]]]),
-                                  np.r_[[[3, 4,           1],
-                                         [7, 2,          -9],
-                                         [6, 9, -4234918347]]])
-
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()
+    testing.assert_equal(safe_as_int(7.1, atol=0.11), 7)
+    testing.assert_equal(safe_as_int(-7.1, atol=0.11), -7)
+    testing.assert_equal(safe_as_int(41.9, atol=0.11), 42)
+    testing.assert_array_equal(safe_as_int([2, 42, 5789234.0, 87, 4]),
+                               np.r_[2, 42, 5789234, 87, 4])
+    testing.assert_array_equal(safe_as_int(np.r_[[[3, 4,  1.000000001],
+                                                  [7, 2, -8.999999999],
+                                                  [6, 9, -4234918347.]]]),
+                               np.r_[[[3, 4,           1],
+                                      [7, 2,          -9],
+                                      [6, 9, -4234918347]]])

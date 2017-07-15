@@ -1,6 +1,6 @@
 import numpy as np
-from numpy.testing import (assert_array_equal,
-                           assert_almost_equal, assert_warns)
+from skimage._shared.testing import assert_array_equal
+from skimage._shared.testing import assert_almost_equal, assert_warns
 from skimage import data
 from skimage import img_as_float
 from skimage.color import rgb2gray

@@ -6,7 +6,7 @@ from skimage import data, data_dir
 from skimage import feature
 from skimage import img_as_float
 from skimage import draw
-from numpy.testing import assert_almost_equal
+from skimage._shared.testing import assert_almost_equal
 from skimage._shared import testing
 
 

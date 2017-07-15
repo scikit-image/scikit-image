@@ -1,7 +1,8 @@
-from numpy.testing import assert_array_equal, assert_equal, assert_almost_equal
 import numpy as np
 from skimage._shared.testing import test_parallel
 from skimage._shared import testing
+from skimage._shared.testing import assert_array_equal, assert_equal
+from skimage._shared.testing import assert_almost_equal
 
 from skimage.draw import (set_color, line, line_aa, polygon, polygon_perimeter,
                           circle, circle_perimeter, circle_perimeter_aa,

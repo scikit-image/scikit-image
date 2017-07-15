@@ -1,7 +1,6 @@
 import numpy as np
-from numpy.testing import (assert_array_almost_equal as assert_close,
-                           assert_, assert_allclose)
-import pytest
+from skimage._shared.testing import assert_array_almost_equal
+from skimage._shared.testing import assert_, assert_allclose
 
 from skimage import filters
 from skimage.filters.edges import _mask_filter_result
@@ -20,7 +19,7 @@ def test_roberts_diagonal1():
                  np.tri(10, 10, -2).astype(bool).transpose())
     expected = _mask_filter_result(expected, None)
     result = filters.roberts(image).astype(bool)
-    assert_close(result, expected)
+    assert_array_almost_equal(result, expected)
 
 
 def test_roberts_diagonal2():
@@ -30,7 +29,7 @@ def test_roberts_diagonal2():
                          np.tri(10, 10, -2).astype(bool).transpose())
     expected = _mask_filter_result(expected, None)
     result = filters.roberts(image).astype(bool)
-    assert_close(result, expected)
+    assert_array_almost_equal(result, expected)
 
 
 def test_sobel_zeros():
@@ -416,8 +415,3 @@ def test_range():
                 "Maximum of `{0}` is larger than 1".format(
                     detector.__name__)
                 )
-
-
-if __name__ == "__main__":
-    from numpy import testing
-    testing.run_module_suite()

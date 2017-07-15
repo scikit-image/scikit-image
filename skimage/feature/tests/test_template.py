@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_almost_equal, assert_equal
+from skimage._shared.testing import assert_almost_equal, assert_equal
 
 from skimage import data, img_as_float
 from skimage.morphology import diamond

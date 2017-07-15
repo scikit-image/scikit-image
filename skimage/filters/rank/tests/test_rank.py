@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from numpy.testing import assert_equal
+from skimage._shared.testing import assert_equal
 from skimage._shared import testing
 
 import skimage

@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_array_equal
+from skimage._shared.testing import assert_array_equal
 from skimage.data import moon
 from skimage.feature import CENSURE
 from skimage._shared.testing import test_parallel

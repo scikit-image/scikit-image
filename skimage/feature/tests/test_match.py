@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_equal
+from skimage._shared.testing import assert_equal
 from skimage import data
 from skimage import transform as tf
 from skimage.color import rgb2gray
