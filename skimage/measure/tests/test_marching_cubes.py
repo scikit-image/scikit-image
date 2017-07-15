@@ -44,7 +44,7 @@ def test_marching_cubes_anisotropic():
 
     # Test spacing together with allow_degenerate=False
     marching_cubes_lewiner(ellipsoid_anisotropic, 0, spacing=spacing,
-        allow_degenerate=False)
+                           allow_degenerate=False)
 
 
 def test_invalid_input():
