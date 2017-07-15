@@ -326,8 +326,8 @@ class Picture(object):
         path : str
             Path (with file extension) where the picture is saved.
         """
-        if (self.array.ndim >= 3 and self.array.shape[-1] >= 4 and
-                os.path.splitext(path)[-1] in ['.jpg', '.jpeg']):
+        if (self.array.ndim == 3 and self.array.shape[-1] == 4 and
+                os.path.splitext(path)[-1].lower() in ['.jpg', '.jpeg']):
             self.array = self.array[..., :-1]
         io.imsave(path, self.array)
         self._modified = False
