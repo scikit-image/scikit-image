@@ -27,7 +27,7 @@ def _add_constant_clip(image, const_value):
                          "with the image data type.")
 
     result = image + const_value
-    result[image > max_dtype-const_value] = max_dtype
+    result[image > max_dtype - const_value] = max_dtype
     return(result)
 
 
@@ -36,7 +36,7 @@ def _subtract_constant_clip(image, const_value):
     """
     min_dtype, max_dtype = dtype_limits(image, clip_negative=False)
 
-    if const_value > (max_dtype-min_dtype):
+    if const_value > (max_dtype - min_dtype):
         raise ValueError("The subtracted constant is not compatible"
                          "with the image data type.")
 
@@ -212,7 +212,7 @@ def _find_min_diff(image):
     """
     Find the minimal difference of grey levels inside the image.
     """
-    img_vec  = np.unique(image.flatten())
+    img_vec = np.unique(image.flatten())
     min_diff = 0
     if img_vec.size != 1:
         min_diff = np.min(img_vec[1:] - img_vec[:-1])
@@ -286,7 +286,8 @@ def local_maxima(image, selem=None):
         h = _find_min_diff(image)
     else:
         h = 1
-    local_max = h_maxima(image, h, selem=selem) if h != 0 else np.zeros_like(image)
+    local_max = h_maxima(
+        image, h, selem=selem) if h != 0 else np.zeros_like(image)
     return local_max
 
 
@@ -357,5 +358,6 @@ def local_minima(image, selem=None):
         h = _find_min_diff(image)
     else:
         h = 1
-    local_min = h_minima(image, h, selem=selem) if h != 0 else np.zeros_like(image)
+    local_min = h_minima(
+        image, h, selem=selem) if h != 0 else np.zeros_like(image)
     return local_min
