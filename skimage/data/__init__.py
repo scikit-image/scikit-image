@@ -350,7 +350,7 @@ def satellite():
     Returns
     -------
     """
-    
+
     return load("satellite.jpg")
 
 
