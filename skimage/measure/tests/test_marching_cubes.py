@@ -42,6 +42,9 @@ def test_marching_cubes_anisotropic():
     # Test within 1.5% tolerance for anisotropic. Will always underestimate.
     assert surf > surf_calc and surf_calc > surf * 0.985
 
+    # Test spacing together with allow_degenerate=False
+    marching_cubes_lewiner(ellipsoid_anisotropic, 0, spacing=spacing,allow_degenerate=False)
+
 
 def test_invalid_input():
     # Classic
