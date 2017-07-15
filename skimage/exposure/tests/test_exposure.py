@@ -190,21 +190,6 @@ def test_rescale_uint14_limits():
 # Test adaptive histogram equalization
 # ====================================
 
-def test_adapthist_scalar():
-    """Test a scalar uint8 image
-    """
-    img = skimage.img_as_ubyte(data.moon())
-    adapted = exposure.equalize_adapthist(img, kernel_size=64, clip_limit=0.02)
-    assert adapted.min() == 0.0
-    assert adapted.max() == 1.0
-    assert img.shape == adapted.shape
-    full_scale = skimage.exposure.rescale_intensity(skimage.img_as_float(img))
-
-    assert_almost_equal(peak_snr(full_scale, adapted), 102.066, 3)
-    assert_almost_equal(norm_brightness_err(full_scale, adapted),
-                        0.038, 3)
-
-
 def test_adapthist_grayscale():
     """Test a grayscale float image
     """
