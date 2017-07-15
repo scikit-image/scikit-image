@@ -16,7 +16,7 @@ import os.path
 
 import numpy as np
 from skimage._shared.testing import assert_equal, assert_almost_equal
-from skimage._shared.testing import assert_array_almost_equal,
+from skimage._shared.testing import assert_array_almost_equal
 from skimage._shared.testing import TestCase
 
 from skimage import img_as_float, img_as_ubyte
