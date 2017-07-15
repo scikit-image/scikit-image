@@ -338,7 +338,7 @@ def satellite():
     -----
     This image was downloaded from USGS public data portal:
     https://earthexplorer.usgs.gov/
-    For copyright info, go to:
+    The data is in US public domain. For copyright info, go to:
     https://www2.usgs.gov/laws/info_policies.html
 
     Courtesy of U.S. Geological Survey
