@@ -331,12 +331,15 @@ def rocket():
 def satellite():
     """Launch photo taken by satellite.
 
-    This is a satellite imagery showing an urban area in Southern California
+    This is a satellite imagery showing an urban area
 
     Notes
     -----
-    This image was downloaded from USGS public data portal:
-    https://earthexplorer.usgs.gov/
+    This image was downloaded from USGS public data portal https://earthexplorer.usgs.gov/
+    For copyright info, go to: https://www2.usgs.gov/laws/info_policies.html 
+
+    Credit: U.S. Geological Survey 
+    Department of the Interior/USGS
 
     Product name: High Resolution Orthoimagery
     Acquisition Date: 27-Oct-14 """
