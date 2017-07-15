@@ -91,17 +91,16 @@ class TestExtrema(unittest.TestCase):
             assert error < eps
             assert out.dtype == expected_result.dtype
 
-
     def test_without_local_maxima(self):
         "local maxima test without variation"
         flat = np.ones((5, 5))
-        out  = extrema.local_maxima(flat)
+        out = extrema.local_maxima(flat)
         assert((out == np.zeros_like(flat)).all())
 
     def test_without_local_minima(self):
         "local maxima test without variation"
         flat = np.ones((5, 5))
-        out  = extrema.local_minima(flat)
+        out = extrema.local_minima(flat)
         assert((out == np.zeros_like(flat)).all())
 
     def test_min_diff(self):
