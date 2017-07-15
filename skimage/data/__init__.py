@@ -349,6 +349,8 @@ def satellite():
 
     Returns
     -------
+    satellite : (655, 639, 3) uint8 ndarray
+        satellite image.
     """
 
     return load("satellite.jpg")
