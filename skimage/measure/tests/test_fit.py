@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.testing import assert_equal, assert_almost_equal, assert_array_less
-from skimage.measure import LineModel, LineModelND, CircleModel, EllipseModel, ransac
+from skimage.measure import LineModelND, CircleModel, EllipseModel, ransac
 from skimage.transform import AffineTransform
 from skimage.measure.fit import _dynamic_max_trials
 from skimage._shared._warnings import expected_warnings
