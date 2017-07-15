@@ -37,3 +37,4 @@ Version 0.16
 * Remove checks for the ``multichannel`` deprecation warnings in several tests
   in ``skimage.transform.tests.test_pyramids.py`` and
   ``skimage.transform.tests.test_warps.py``.
+* Remove deprecated argument ``visualise`` from function skimage.feature.hog
