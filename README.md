@@ -34,7 +34,12 @@ $ pip install .
 If you plan to develop the package, you may run it directly from source:
 
 ```
-$ python setup.py develop       # Do this once to add pkg to Python path
+$ pip install -e .  # Do this once to add package to Python path
+```
+
+Every time you modify Cython files, also run:
+
+```
 $ python setup.py build_ext -i  # Build binary extensions
 ```
 
