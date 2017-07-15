@@ -27,7 +27,7 @@ def test_hog_output_correctness_l1_norm():
     output = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
                          cells_per_block=(3, 3), block_norm='L1',
                          feature_vector=True, transform_sqrt=False,
-                         visualise=False)
+                         visualize=False)
     assert_almost_equal(output, correct_output)
 
 
@@ -39,7 +39,7 @@ def test_hog_output_correctness_l2hys_norm():
     output = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
                          cells_per_block=(3, 3), block_norm='L2-Hys',
                          feature_vector=True, transform_sqrt=False,
-                         visualise=False)
+                         visualize=False)
     assert_almost_equal(output, correct_output)
 
 
@@ -82,16 +82,16 @@ def test_hog_basic_orientations_and_data_types():
 
         (hog_float, hog_img_float) = feature.hog(
             image_float, orientations=4, pixels_per_cell=(8, 8),
-            cells_per_block=(1, 1), visualise=True, transform_sqrt=False)
+            cells_per_block=(1, 1), visualize=True, transform_sqrt=False)
         (hog_uint8, hog_img_uint8) = feature.hog(
             image_uint8, orientations=4, pixels_per_cell=(8, 8),
-            cells_per_block=(1, 1), visualise=True, transform_sqrt=False)
+            cells_per_block=(1, 1), visualize=True, transform_sqrt=False)
         (hog_float_norm, hog_img_float_norm) = feature.hog(
             image_float, orientations=4, pixels_per_cell=(8, 8),
-            cells_per_block=(1, 1), visualise=True, transform_sqrt=True)
+            cells_per_block=(1, 1), visualize=True, transform_sqrt=True)
         (hog_uint8_norm, hog_img_uint8_norm) = feature.hog(
             image_uint8, orientations=4, pixels_per_cell=(8, 8),
-            cells_per_block=(1, 1), visualise=True, transform_sqrt=True)
+            cells_per_block=(1, 1), visualize=True, transform_sqrt=True)
 
         # set to True to enable manual debugging with graphical output,
         # must be False for automatic testing
@@ -169,7 +169,7 @@ def test_hog_orientations_circle():
     for orientations in range(2, 15):
         (hog, hog_img) = feature.hog(image, orientations=orientations,
                                      pixels_per_cell=(8, 8),
-                                     cells_per_block=(1, 1), visualise=True,
+                                     cells_per_block=(1, 1), visualize=True,
                                      transform_sqrt=False)
 
         # set to True to enable manual debugging with graphical output,
