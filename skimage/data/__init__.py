@@ -34,7 +34,8 @@ __all__ = ['load',
            'page',
            'text',
            'rocket',
-           'stereo_motorcycle']
+           'stereo_motorcycle',
+           'satellite']
 
 
 def load(f, as_grey=False):
@@ -327,6 +328,20 @@ def rocket():
     """
     return load("rocket.jpg")
 
+def satellite():
+    """Launch photo taken by satellite.
+
+    This is a satellite imagery showing an urban area in Southern California
+
+    Notes
+    -----
+    This image was downloaded from USGS public data portal:
+    https://earthexplorer.usgs.gov/
+
+    Product name: High Resolution Orthoimagery
+    Acquisition Date: 27-Oct-14 """
+    
+    return load("satellite.jpg")
 
 def stereo_motorcycle():
     """Rectified stereo image pair with ground-truth disparities.
