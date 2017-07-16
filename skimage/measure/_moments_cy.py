@@ -32,10 +32,10 @@ cpdef moments_central(image_t image, double cr, double cc, Py_ssize_t order):
 
 
 cpdef moments_contour_central(image_t contour, double cy, double cx, Py_ssize_t order):
-    cdef Py_ssize_t p, q, r, cols
+    cdef Py_ssize_t p, q, r
     cdef double y, x, dy, dx, dxp, dyq
     cdef double[:, ::1] mu = np.zeros((order + 1, order + 1), dtype=np.double)
-    
+
     for r in range(contour.shape[0]):
         y = contour[r][0]
         x = contour[r][1]
@@ -49,6 +49,18 @@ cpdef moments_contour_central(image_t contour, double cy, double cx, Py_ssize_t 
                 dyq *= dy
             dxp *= dx
     return np.asarray(mu)
+
+
+def moments_normalized(double[:, :] mu, Py_ssize_t order=3):
+    cdef Py_ssize_t p, q
+    cdef double[:, ::1] nu = np.zeros((order + 1, order + 1), dtype=np.double)
+    for p in range(order + 1):
+        for q in range(order + 1):
+            if p + q >= 2:
+                nu[p, q] = mu[p, q] / mu[0, 0] ** (<double>(p + q) / 2 + 1)
+            else:
+                nu[p, q] = np.nan
+    return np.asarray(nu)
 
 
 def moments_hu(double[:, :] nu):
