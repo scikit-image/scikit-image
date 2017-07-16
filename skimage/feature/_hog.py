@@ -23,7 +23,7 @@ def _hog_normalize_block(block, method, eps=1e-5):
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
-        block_norm='L1', visualise=False, transform_sqrt=False,
+        block_norm='L1', visualize=False, visualise=None, transform_sqrt=False,
         feature_vector=True):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
@@ -60,7 +60,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
            renormalization using L2-norm.
            For details, see [3]_, [4]_.
 
-    visualise : bool, optional
+    visualize : bool, optional
         Also return an image of the HOG.
     transform_sqrt : bool, optional
         Apply power law compression to normalize the image before
@@ -74,7 +74,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     -------
     newarr : ndarray
         HOG for the image as a 1D (flattened) array.
-    hog_image : ndarray (if visualise=True)
+    hog_image : ndarray (if visualize=True)
         A visualisation of the HOG image.
 
     References
@@ -181,7 +181,11 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     # now compute the histogram for each cell
     hog_image = None
 
-    if visualise:
+    if visualise is not None:
+        visualize = visualise
+        warn('Argument `visualise` is deprecated and will '
+             'be changed to `visualize` in v0.16', skimage_deprecation)
+    if visualize:
         from .. import draw
 
         radius = min(cx, cy) // 2 - 1
@@ -234,7 +238,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     if feature_vector:
         normalized_blocks = normalized_blocks.ravel()
 
-    if visualise:
+    if visualize:
         return normalized_blocks, hog_image
     else:
         return normalized_blocks
