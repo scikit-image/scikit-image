@@ -279,7 +279,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
             image *= 2.0
             image += 1.0
             image /= imax_in - imin_in
-        return image.astype(dtype_out)
+        return np.asarray(image, dtype_out)
 
     # unsigned int -> signed/unsigned int
     if kind_in == 'u':
