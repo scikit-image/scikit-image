@@ -44,7 +44,7 @@ def test_moments_contour():
 
     contour = np.array([[r, c] for r in range(13, 17)
                         for c in range(13, 17)], dtype=np.double)
-    mu_contour = moments(contour)
+    mu_contour = moments_contour(contour)
     assert_almost_equal(mu_contour, mu_image)
 
 
@@ -55,7 +55,7 @@ def test_moments_contour_central():
 
     contour = np.array([[r, c] for r in range(13, 17)
                         for c in range(13, 17)], dtype=np.double)
-    mu_contour = moments_central(contour, 3, 3)
+    mu_contour = moments__contour_central(contour, 3, 3)
     assert_almost_equal(mu_contour, mu_image)
 
     # shift image by dx=3 dy=3
@@ -65,7 +65,7 @@ def test_moments_contour_central():
 
     contour = np.array([[r, c] for r in range(16, 20)
                         for c in range(16, 20)], dtype=np.double)
-    mu_contour = moments_central(contour, 3, 3)
+    mu_contour = moments_contour_central(contour, 3, 3)
     assert_almost_equal(mu_contour, mu_image)
 
 

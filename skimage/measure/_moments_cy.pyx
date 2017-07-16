@@ -11,39 +11,43 @@ ctypedef fused image_t:
     cython.double[:, :]
 
 
-cpdef moments_central(image_t image, double cy, double cx, Py_ssize_t order):
+cpdef moments_central(image_t image, double cr, double cc, Py_ssize_t order):
+    cdef Py_ssize_t p, q, r, c
+    cdef double val, dr, dc, dcp, drq
+    cdef double[:, ::1] mu = np.zeros((order + 1, order + 1), dtype=np.double)
+
+    for r in range(image.shape[0]):
+        dr = r - cr
+        for c in range(image.shape[1]):
+            dc = c - cc
+            val = image[r, c]
+            dcp = 1
+            for p in range(order + 1):
+                drq = 1
+                for q in range(order + 1):
+                    mu[p, q] += val * drq * dcp
+                    drq *= dr
+                dcp *= dc
+    return np.asarray(mu)
+
+
+cpdef moments_contour_central(image_t contour, double cy, double cx, Py_ssize_t order):
     cdef Py_ssize_t p, q, r, cols
     cdef double y, x, dy, dx, dxp, dyq
     cdef double[:, ::1] mu = np.zeros((order + 1, order + 1), dtype=np.double)
-    cols = image.shape[1]
-    if cols == 2:
-        for r in range(image.shape[0]):
-            y = image[r][0]
-            x = image[r][1]
-            dy = y - cy
-            dx = x - cx
-            dxp = 1
-            for p in range(order + 1):
-                dyq = 1
-                for q in range(order + 1):
-                    mu[p, q] += dyq * dxp
-                    dyq *= dy
-                dxp *= dx
-        return np.asarray(mu)
-
-    cdef Py_ssize_t c
-    for r in range(image.shape[0]):
-        dy = r - cy
-        for c in range(cols):
-            dx = c - cx
-            y = image[r, c]
-            dxp = 1
-            for p in range(order + 1):
-                dyq = 1
-                for q in range(order + 1):
-                    mu[p, q] += y * dyq * dxp
-                    dyq *= dy
-                dxp *= dx
+    
+    for r in range(contour.shape[0]):
+        y = contour[r][0]
+        x = contour[r][1]
+        dy = y - cy
+        dx = x - cx
+        dxp = 1
+        for p in range(order + 1):
+            dyq = 1
+            for q in range(order + 1):
+                mu[p, q] += dyq * dxp
+                dyq *= dy
+            dxp *= dx
     return np.asarray(mu)
 
 

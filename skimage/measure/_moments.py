@@ -15,8 +15,8 @@ def moments(image, order=3):
 
     Parameters
     ----------
-    image : 2D double or uint8 array or a 1D array of double or uint8 points
-        Rasterized shape as image or contour as image.
+    image : 2D double or uint8 array
+        Rasterized shape as image.
     order : int, optional
         Maximum order of moments. Default is 3.
 
@@ -34,9 +34,7 @@ def moments(image, order=3):
     .. [3] T. H. Reiss. Recognizing Planar Objects Using Invariant Image
            Features, from Lecture notes in computer science, p. 676. Springer,
            Berlin, 1993.
-    .. [4] Johannes Kilian. Simple Image Analysis By Moments. Durham 
-           University, version 0.2, Durham, 2001.
-    .. [5] http://en.wikipedia.org/wiki/Image_moment
+    .. [4] http://en.wikipedia.org/wiki/Image_moment
 
     Examples
     --------
@@ -63,8 +61,8 @@ def moments_central(image, cr, cc, order=3):
 
     Parameters
     ----------
-    image : 2D double or uint8 array or a 1D array of double or uint8 points
-        Rasterized shape as image or contour as image.
+    image : 2D double or uint8 array
+        Rasterized shape as image.
     cr : double
         Center row coordinate.
     cc : double
@@ -86,9 +84,7 @@ def moments_central(image, cr, cc, order=3):
     .. [3] T. H. Reiss. Recognizing Planar Objects Using Invariant Image
            Features, from Lecture notes in computer science, p. 676. Springer,
            Berlin, 1993.
-    .. [4] Johannes Kilian. Simple Image Analysis By Moments. Durham 
-           University, version 0.2, Durham, 2001.
-    .. [5] http://en.wikipedia.org/wiki/Image_moment
+    .. [4] http://en.wikipedia.org/wiki/Image_moment
 
     Examples
     --------
@@ -105,6 +101,92 @@ def moments_central(image, cr, cc, order=3):
     """
 
     return _moments_cy.moments_central(image, cr, cc, order)
+
+
+def moments_contour(contour, order=3):
+    """Calculate all raw contour moments up to a certain order.
+
+    The following properties can be calculated from raw contour moments:
+     * Area as: ``m[0, 0]``.
+     * Centroid as: {``m[0, 1] / m[0, 0]``, ``m[1, 0] / m[0, 0]``}.
+
+    Note that raw moments are neither translation, scale nor rotation
+    invariant.
+
+    Parameters
+    ----------
+    contour : (N, 2) double or uint8 array
+        Array of points on a 2D plane.
+    order : int, optional
+        Maximum order of moments. Default is 3.
+
+    Returns
+    -------
+    m : (``order + 1``, ``order + 1``) array
+        Raw contour moments.
+
+    References
+    ----------
+    .. [1] Johannes Kilian. Simple Image Analysis By Moments. Durham
+           University, version 0.2, Durham, 2001.
+
+    Examples
+    --------
+    >>> contour = np.array([[r, c] for r in range(13, 17) for c in range(13, 17)], dtype=np.double)
+    >>> m = moments(contour)
+    >>> cr = m[0, 1] / m[0, 0]
+    >>> cc = m[1, 0] / m[0, 0]
+    >>> cr, cc
+    (14.5, 14.5)
+
+    """
+    return _moments_cy.moments_contour_central(contour, 0, 0, order)
+
+
+def moments_contour_central(contour, cy, cx, order=3):
+    """Calculate all central contour moments up to a certain order.
+
+    The center coordinates (cr, cc) can be calculated from the raw moments as:
+    {``m[0, 1] / m[0, 0]``, ``m[1, 0] / m[0, 0]``}.
+
+    Note that central moments are translation invariant but not scale and
+    rotation invariant.
+
+    Parameters
+    ----------
+    contour : (N, 2) double or uint8 array
+        Array of points.
+    cr : double
+        Center row coordinate.
+    cc : double
+        Center column coordinate.
+    order : int, optional
+        Maximum order of moments. Default is 3.
+
+    Returns
+    -------
+    mu : (``order + 1``, ``order + 1``) array
+        Central contour moments.
+
+    References
+    ----------
+    .. [1] Johannes Kilian. Simple Image Analysis By Moments. Durham
+           University, version 0.2, Durham, 2001.
+
+    Examples
+    --------
+    >>> contour = np.array([[r, c] for r in range(13, 17) for c in range(13, 17)], dtype=np.double)
+    >>> m = moments(contour)
+    >>> cr = m[0, 1] / m[0, 0]
+    >>> cc = m[1, 0] / m[0, 0]
+    >>> moments_central(contour, cr, cc)
+    array([[ 16.,   0.,  20.,   0.],
+           [  0.,   0.,   0.,   0.],
+           [ 20.,   0.,  25.,   0.],
+           [  0.,   0.,   0.,   0.]])
+    """
+
+    return _moments_cy.moments_contour_central(contour, cy, cx, order)
 
 
 def moments_normalized(mu, order=3):
