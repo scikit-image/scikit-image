@@ -1,0 +1,34 @@
+checkout:
+  post:
+    - ./tools/circleci/checkout_merge_commit.sh
+
+machine:
+  environment:
+    MINICONDA_PATH: $HOME/miniconda
+    CONDA_ENV_NAME: testenv
+
+dependencies:
+  cache_directories:
+    - "~/download"
+  # Check whether the doc build is required, install build dependencies and
+  # run sphinx to build the doc.
+  override:
+    - ./tools/circleci/build_doc.sh:
+        timeout: 3600 # seconds
+
+test:
+  override:
+    - |
+      export PATH="$MINICONDA_PATH/bin:$PATH"
+      source activate $CONDA_ENV_NAME
+      make test-sphinxext
+deployment:
+ push:
+   branch: /^master$|^[0-9]+\.[0-9]+\.X$/
+   commands:
+     - bash tools/circleci/push_doc.sh
+general:
+  # Open the doc to the API
+  artifacts:
+    - "doc/_build/html"
+    - "~/log.txt"
