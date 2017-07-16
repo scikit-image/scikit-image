@@ -706,7 +706,7 @@ def rect(origin, extent, shape=None):
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for rectangles that exceed the image
         size. If None, the bounds are determined from the bounds of
-        the rectangle so.
+        the rectangle .
 
     Returns
     -------
@@ -741,6 +741,6 @@ def rect(origin, extent, shape=None):
                            np.array(shape)))
         else:
             raise ValueError("shape and extent must have the same\
-                              number of dimension")
+                              number of dimensions")
     coords = np.meshgrid(*[np.arange(o, ex) for o, ex in zip(origin, extent)])
     return coords
