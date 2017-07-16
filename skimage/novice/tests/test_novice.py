@@ -168,6 +168,16 @@ def test_update_on_save():
         os.unlink(filename)
 
 
+def test_save_with_alpha_channel():
+    # create an image with an alpha channel
+    pic = novice.Picture(array=np.zeros((3, 3, 4)))
+
+    fd, filename = tempfile.mkstemp(suffix=".jpg")
+    os.close(fd)
+    pic.save(filename)
+    os.unlink(filename)
+
+
 def test_indexing():
     array = 128 * np.ones((10, 10, 3), dtype=np.uint8)
     pic = novice.Picture(array=array)
