@@ -16,8 +16,7 @@ inpainting algorithm based on 'biharmonic equation'-assumption [2]_ [3]_.
 .. [2]  Wikipedia. Biharmonic equation
         https://en.wikipedia.org/wiki/Biharmonic_equation
 .. [3]  N.S.Hoang, S.B.Damelin, "On surface completion and image
-        inpainting by biharmonic functions: numerical aspects",
-        http://www.ima.umn.edu/~damelin/biharmonic
+        inpainting by biharmonic functions: numerical aspects"
 """
 
 import numpy as np
@@ -39,7 +38,8 @@ image_defect = image_orig.copy()
 for layer in range(image_defect.shape[-1]):
     image_defect[np.where(mask)] = 0
 
-image_result = inpaint.inpaint_biharmonic(image_defect, mask, multichannel=True)
+image_result = inpaint.inpaint_biharmonic(image_defect, mask,
+                                          multichannel=True)
 
 fig, axes = plt.subplots(ncols=2, nrows=2)
 ax = axes.ravel()

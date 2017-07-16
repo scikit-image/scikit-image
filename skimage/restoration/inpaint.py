@@ -97,8 +97,7 @@ def inpaint_biharmonic(image, mask, multichannel=False):
     References
     ----------
     .. [1]  N.S.Hoang, S.B.Damelin, "On surface completion and image inpainting
-            by biharmonic functions: numerical aspects",
-            http://www.ima.umn.edu/~damelin/biharmonic
+            by biharmonic functions: numerical aspects"
 
     Examples
     --------
