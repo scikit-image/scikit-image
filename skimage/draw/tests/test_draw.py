@@ -6,7 +6,8 @@ from skimage._shared.testing import test_parallel
 from skimage.draw import (set_color, line, line_aa, polygon, polygon_perimeter,
                           circle, circle_perimeter, circle_perimeter_aa,
                           ellipse, ellipse_perimeter,
-                          _bezier_segment, bezier_curve)
+                          _bezier_segment, bezier_curve,rect)
+
 from skimage.measure import regionprops
 
 
@@ -862,6 +863,18 @@ def test_polygon_perimeter_outside_image():
     assert_equal(len(rr), 0)
     assert_equal(len(cc), 0)
 
+def test_rect():
+    expected = np.array([[0, 0, 0, 0, 0],
+                         [0, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 0],
+                         [0, 0, 0, 0, 0]])
+    img = np.zeros((5, 5),dtype=np.uint8)
+    origin = (1,1)
+    extent = (3,3)
+    rr,cc = rect(origin,extent,img.shape)
+    img[rr,cc] = 1
+    assert_array_equal(img,expected)
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite

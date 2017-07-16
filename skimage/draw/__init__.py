@@ -1,7 +1,7 @@
 from .draw import (circle, ellipse, set_color, polygon_perimeter,
                    line, line_aa, polygon, ellipse_perimeter,
                    circle_perimeter, circle_perimeter_aa,
-                   bezier_curve)
+                   bezier_curve,rect)
 from .draw3d import ellipsoid, ellipsoid_stats
 from ._draw import _bezier_segment
 
@@ -17,4 +17,5 @@ __all__ = ['line',
            'circle',
            'circle_perimeter',
            'circle_perimeter_aa',
-           'set_color']
+           'set_color',
+           'rect']

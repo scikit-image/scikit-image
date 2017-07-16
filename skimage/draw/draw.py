@@ -693,3 +693,51 @@ def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
     return _bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape)
+
+def rect(origin,extent,shape = None):
+    """Generate coordinates of pixels within a nd-rectangle.
+
+    Parameters
+    ----------
+    origin, extent : tuple
+        origin and extent of the rectangle.
+    shape : tuple, optional
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates. This is useful for rectangles that exceed the image
+        size. If None, the bounds are determined from the bounds of
+        the rectangle (origin + extent).
+
+    Returns
+    -------
+    coords : sequence of ndarrays of int
+        Pixel coordinates of the nd rectangle.
+        May be used to directly index into an array, 
+        e.g. for a 2d rectangle
+        ``img[rr, cc] = 1``.
+        
+    Examples
+    --------
+    >>> import numpy as np
+    >>> img = np.zeros((5, 5),dtype=np.uint8)
+    >>> origin = (1,1)
+    >>> extent = (2,2)
+    >>> rr,cc = rect(origin,extent,img.shape)
+    >>> img[rr,cc] = 1
+    >>> img
+    array([[0, 0, 0, 0, 0],
+           [0, 1, 1, 0, 0],
+           [0, 1, 1, 0, 0],
+           [0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0]], dtype=uint8)
+       
+    """
+    if not(len(origin) == len(extent)):
+        raise ValueError("origin and extent must have the same number of dimensions")
+    if not(shape==None):
+        if len(shape) == len(extent):
+            extent = tuple(np.minimum(np.array(origin) + np.array(extent),np.array(shape)))
+        else:
+            raise ValueError("shape and extent must have the same number of dimension")
+    coords = np.meshgrid(*[np.arange(o,ex) for o,ex in zip(origin,extent)])
+    return coords
+    
