@@ -63,8 +63,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     visualize : bool, optional
         Also return an image of the HOG.  For each cell and orientation bin,
         the image contains a line segment that is centered at the cell center,
-        is perpendicular to the bisector of the orientation bin, and has
-        intensity proportional to the corresponding histogram value.
+        is perpendicular to the midpoint of the range of angles spanned by the
+        orientation bin, and has intensity proportional to the corresponding
+        histogram value.
     transform_sqrt : bool, optional
         Apply power law compression to normalize the image before
         processing. DO NOT use this if the image contains negative
