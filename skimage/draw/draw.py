@@ -695,18 +695,20 @@ def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
     return _bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape)
 
 
-def rect(origin, extent, shape=None):
-    """Generate coordinates of pixels within a nd-rectangle.
+def rectangle(origin, extent, shape=None):
+    """Generate coordinates of pixels within an nd-rectangle.
 
     Parameters
     ----------
-    origin, extent : tuple
-        origin and extent (width,length,ect..) of the rectangle.
+    origin : tuple
+        origin of the rectangle, (page,row,column,channel)
+    extent : tuple
+        extent (num_pages,num_rows,num_cols,num_chanels..) of the rectangle.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for rectangles that exceed the image
         size. If None, the bounds are determined from the bounds of
-        the rectangle .
+        the rectangle.
 
     Returns
     -------
@@ -719,11 +721,12 @@ def rect(origin, extent, shape=None):
     Examples
     --------
     >>> import numpy as np
-    >>> img = np.zeros((5, 5),dtype=np.uint8)
-    >>> origin = (1,1)
-    >>> extent = (2,2)
-    >>> rr,cc = rect(origin,extent,img.shape)
-    >>> img[rr,cc] = 1
+    >>> from skimage.draw import rectangle
+    >>> img = np.zeros((5, 5), dtype=np.uint8)
+    >>> origin = (1, 1)
+    >>> extent = (2, 2)
+    >>> rr, cc = rectangle(origin, extent, img.shape)
+    >>> img[rr, cc] = 1
     >>> img
     array([[0, 0, 0, 0, 0],
            [0, 1, 1, 0, 0],

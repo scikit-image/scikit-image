@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose
 import pytest
 
-from skimage.draw import ellipsoid, ellipsoid_stats, rect
+from skimage.draw import ellipsoid, ellipsoid_stats, rectangle
 
 
 def test_ellipsoid_sign_parameters1():
@@ -139,7 +139,7 @@ def test_rect_3d():
     img = np.zeros((4, 5, 5),dtype=np.uint8)
     origin = (0,0,2)
     extent = (5,2,3)
-    pp,rr,cc = rect(origin,extent,img.shape)
+    pp,rr,cc = rectangle(origin,extent,img.shape)
     img[pp,rr,cc] = 1
     assert_array_equal(img,expected)
 
