@@ -132,7 +132,9 @@ def moments_contour(contour, order=3):
 
     Examples
     --------
-    >>> contour = np.array([[r, c] for r in range(13, 17) for c in range(13, 17)], dtype=np.double)
+    >>> contour = np.array(
+        [[r, c] for r in range(13, 17) for c in range(13, 17)],
+        dtype=np.double)
     >>> m = moments(contour)
     >>> cr = m[0, 1] / m[0, 0]
     >>> cc = m[1, 0] / m[0, 0]
@@ -175,7 +177,9 @@ def moments_contour_central(contour, cy, cx, order=3):
 
     Examples
     --------
-    >>> contour = np.array([[r, c] for r in range(13, 17) for c in range(13, 17)], dtype=np.double)
+    >>> contour = np.array(
+        [[r, c] for r in range(13, 17) for c in range(13, 17)],
+        dtype=np.double)
     >>> m = moments(contour)
     >>> cr = m[0, 1] / m[0, 0]
     >>> cc = m[1, 0] / m[0, 0]

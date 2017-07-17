@@ -31,7 +31,9 @@ cpdef moments_central(image_t image, double cr, double cc, Py_ssize_t order):
     return np.asarray(mu)
 
 
-cpdef moments_contour_central(image_t contour, double cy, double cx, Py_ssize_t order):
+cpdef moments_contour_central(
+    image_t contour, double cy, double cx, Py_ssize_t order
+    ):
     cdef Py_ssize_t p, q, r
     cdef double y, x, dy, dx, dxp, dyq
     cdef double[:, ::1] mu = np.zeros((order + 1, order + 1), dtype=np.double)
