@@ -33,6 +33,8 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
 
     Other Parameters
     ----------------
+    plugin_args : keywords
+        Passed to the given plugin.
     flatten : bool
         Backward compatible keyword, superseded by `as_grey`.
 
