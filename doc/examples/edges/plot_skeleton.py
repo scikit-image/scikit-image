@@ -60,6 +60,16 @@ plt.show()
 #
 # Note that ``skeletonize_3d`` is designed to be used mostly on 3-D images.
 # However, for illustrative purposes, we apply this algorithm on a 2-D image.
+#
+# .. [Zha84] A fast parallel algorithm for thinning digital patterns,
+#            T. Y. Zhang and C. Y. Suen, Communications of the ACM,
+#            March 1984, Volume 27, Number 3.
+#
+# .. [Lee94] T.-C. Lee, R.L. Kashyap and C.-N. Chu, Building skeleton models
+#            via 3-D medial surface/axis thinning algorithms.
+#            Computer Vision, Graphics, and Image Processing, 56(6):462-478,
+#            1994.
+#
 
 import matplotlib.pyplot as plt
 from skimage.morphology import skeletonize, skeletonize_3d
