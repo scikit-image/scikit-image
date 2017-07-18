@@ -701,9 +701,9 @@ def rectangle(origin, extent, shape=None):
     Parameters
     ----------
     origin : tuple
-        origin of the rectangle, (page,row,column,channel)
+        origin of the rectangle, ([plane], row, column[, ...])
     extent : tuple
-        extent (num_pages,num_rows,num_cols,num_chanels..) of the rectangle.
+        extent ([num_planes], num_rows, num_cols[, ...]) of the rectangle.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for rectangles that exceed the image
@@ -712,8 +712,8 @@ def rectangle(origin, extent, shape=None):
 
     Returns
     -------
-    coords : (M, n) ndarray of int with the
-        Pixel coordinates of the nd rectangle.
+    coords : (M, N)
+        ndarray of int with thePixel coordinates of the nd rectangle.
         May be used to directly index into an array,
         e.g. for a 2d rectangle
         ``img[rr, cc] = 1``.
@@ -735,15 +735,15 @@ def rectangle(origin, extent, shape=None):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    if not(len(origin) == len(extent)):
-        raise ValueError("origin and extent must have the same\
-                          number of dimensions")
-    if not(shape is None):
+    if len(origin) != len(extent):
+        raise ValueError("origin and extent must have the same"
+                         "number of dimensions")
+    if shape is not None:
         if len(shape) == len(extent):
             extent = tuple(np.minimum(np.array(origin) + np.array(extent),
                            np.array(shape)))
         else:
-            raise ValueError("shape and extent must have the same\
-                              number of dimensions")
+            raise ValueError("shape and extent must have the same"
+                             "number of dimensions")
     coords = np.meshgrid(*[np.arange(o, ex) for o, ex in zip(origin, extent)])
     return coords
