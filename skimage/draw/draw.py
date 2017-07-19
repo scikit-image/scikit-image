@@ -712,11 +712,8 @@ def rectangle(origin, extent, shape=None):
 
     Returns
     -------
-    coords : (M, N)
-        ndarray of int with thePixel coordinates of the nd rectangle.
-        May be used to directly index into an array,
-        e.g. for a 2d rectangle
-        ``img[rr, cc] = 1``.
+    coords : array of int, shape (Ndim, Npoints)
+        The coordinates of all pixels in the nD rectangle.
 
     Examples
     --------
@@ -736,14 +733,14 @@ def rectangle(origin, extent, shape=None):
 
     """
     if len(origin) != len(extent):
-        raise ValueError("origin and extent must have the same"
+        raise ValueError("origin and extent must have the same "
                          "number of dimensions")
     if shape is not None:
         if len(shape) == len(extent):
             extent = tuple(np.minimum(np.array(origin) + np.array(extent),
                            np.array(shape)))
         else:
-            raise ValueError("shape and extent must have the same"
+            raise ValueError("shape and extent must have the same "
                              "number of dimensions")
     coords = np.meshgrid(*[np.arange(o, ex) for o, ex in zip(origin, extent)])
     return coords
