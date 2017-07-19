@@ -136,7 +136,7 @@ affected_doc_paths() {
 	skimage_files=$(echo "$files" | grep '^skimage/')
 	if [ -n "$skimage_files" ]
 	then
-		grep -hlR -f<(echo "$skimage_files" | sed 's/^/scikit-image\/blob\/[a-z0-9]*\//') doc/_build/html/stable/modules/generated | cut -d/ -f5-
+		grep -hlR -f<(echo "$skimage_files" | sed 's/^/scikit-image\/blob\/[a-z0-9]*\//') doc/build/html/modules/generated | cut -d/ -f5-
 	fi
 }
 
@@ -149,5 +149,5 @@ then
 	echo '<html><body><ul>'
 	echo "$affected" | sed 's|.*|<li><a href="&">&</a></li>|'
 	echo '</ul></body></html>'
-	) > 'doc/_build/html/stable/_changed.html'
+	) > 'doc/build/html/_changed.html'
 fi
