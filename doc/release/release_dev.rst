@@ -16,7 +16,7 @@ New Features
 ------------
 - manual segmentation with matplotlib (#2584)
 - hysteresis thresholding in filters (#2665)
-
+- lookfor function (#2713)
 
 
 Improvements
