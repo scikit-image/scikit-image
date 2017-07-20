@@ -705,7 +705,7 @@ def rectangle(start, end=None, extent=None, shape=None):
         Origin point of the rectangle, ([plane], row, column[, ...])
     end : tuple
         End point of the rectangle ([num_planes], num_rows, num_cols[, ...]).
-        Either end or extent must be specified."
+        Either end or extent must be specified.
     extent : tuple
         The extent (size) of the drawn rectangle.
         ([num_planes], num_rows, num_cols[, ...])
