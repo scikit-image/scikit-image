@@ -266,5 +266,12 @@ def test_discontiguous_out_array():
     testing.assert_array_equal(out_array_big, expected_erosion)
 
 
+def test_1d_erosion():
+    image = np.array([1, 2, 3, 2, 1])
+    expected = np.array([0, 1, 2, 1, 0])
+    eroded = grey.erosion(image)
+    testing.assert_array_equal(eroded, expected)
+
+
 if __name__ == '__main__':
     testing.run_module_suite()
