@@ -709,7 +709,7 @@ def rectangle(start, end = None, extent = None, shape=None):
         extent vector ([num_planes], num_rows, num_cols[, ...]) of the
         rectangle. Will be added to start to find the end point.
     shape : tuple, optional
-        Image shape which is used to determine the maximum extent of output
+        Image shape which is used to determine the maximum bounds of the output
         pixel coordinates. This is useful for rectangles that exceed the image
         size. If None, the bounds are determined from the bounds of
         the rectangle.
