@@ -695,19 +695,21 @@ def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
     return _bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape)
 
 
-def rectangle(start, end = None, extent = None, shape=None):
+def rectangle(start, end=None, extent=None, shape=None):
     """Generate coordinates of pixels within an nd-rectangle. Either
     end or extent are required but not both: (extent is None) ^ (end is None)
 
     Parameters
     ----------
     start : tuple
-        origin point of the rectangle, ([plane], row, column[, ...])
+        Origin point of the rectangle, ([plane], row, column[, ...])
     end : tuple
-        end point of the rectangle ([num_planes], num_rows, num_cols[, ...]).
+        End point of the rectangle ([num_planes], num_rows, num_cols[, ...]).
+        Either end or extent must be specified."
     extent : tuple
-        extent vector ([num_planes], num_rows, num_cols[, ...]) of the
-        rectangle. Will be added to start to find the end point.
+        The extent (size) of the drawn rectangle.
+        ([num_planes], num_rows, num_cols[, ...])
+        Either end or extent must be specified.
     shape : tuple, optional
         Image shape which is used to determine the maximum bounds of the output
         pixel coordinates. This is useful for rectangles that exceed the image
@@ -726,7 +728,7 @@ def rectangle(start, end = None, extent = None, shape=None):
     >>> img = np.zeros((5, 5), dtype=np.uint8)
     >>> start = (1, 1)
     >>> extent = (3, 3)
-    >>> rr, cc = rectangle(start, extent = extent, shape = img.shape)
+    >>> rr, cc = rectangle(start, extent=extent, shape=img.shape)
     >>> img[rr, cc] = 1
     >>> img
     array([[0, 0, 0, 0, 0],
@@ -739,7 +741,7 @@ def rectangle(start, end = None, extent = None, shape=None):
     >>> img = np.zeros((5, 5), dtype=np.uint8)
     >>> start = (0, 1)
     >>> end = (3, 3)
-    >>> rr, cc = rectangle(start, end = end, shape = img.shape)
+    >>> rr, cc = rectangle(start, end=end, shape=img.shape)
     >>> img[rr, cc] = 1
     >>> img
     array([[0, 1, 1, 1, 0],
