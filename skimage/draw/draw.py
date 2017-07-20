@@ -697,7 +697,7 @@ def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
 
 def rectangle(start, end=None, extent=None, shape=None):
     """Generate coordinates of pixels within an nd-rectangle. Either
-    end or extent are required but not both: (extent is None) ^ (end is None)
+    end or extent are required.
 
     Parameters
     ----------
@@ -751,21 +751,17 @@ def rectangle(start, end=None, extent=None, shape=None):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    if end is None:
-        if extent is None:
-            raise ValueError("either an end or extent must be given")
-        else:
-            end = np.array(start) + np.array(extent)
-    else:
-        if extent is not None:
-            raise ValueError("only end or extent can be given not both")
-    bl = np.minimum(np.array(start), np.array(end))
-    tr = np.maximum(np.array(start), np.array(end))
-    if shape is not None:
-        tr = np.minimum(np.array(shape), np.array(tr))
-        bl = np.maximum(np.zeros_like(shape), np.array(bl))
+    if extent is not None:
+        end = np.array(start) + np.array(extent)
+    elif end is None:
+        raise ValueError("Either an end or extent must be given")
+    tl = np.minimum(start, end)
+    br = np.maximum(start, end)
     if extent is None:
-        tr += 1
-    coords = np.meshgrid(*[np.arange(o, ex) for o, ex in zip(tuple(bl),
-                                                             tuple(tr))])
+        br += 1
+    if shape is not None:
+        br = np.minimum(shape, br)
+        tl = np.maximum(np.zeros_like(shape), tl)
+    coords = np.meshgrid(*[np.arange(st, en) for st, en in zip(tuple(tl),
+                                                               tuple(br))])
     return coords
