@@ -695,15 +695,19 @@ def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
     return _bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape)
 
 
-def rectangle(origin, extent, shape=None):
-    """Generate coordinates of pixels within an nd-rectangle.
+def rectangle(start, end = None, extent = None, shape=None):
+    """Generate coordinates of pixels within an nd-rectangle. Either
+    end or extent are required but not both: (extent is None) ^ (end is None)
 
     Parameters
     ----------
-    origin : tuple
-        origin of the rectangle, ([plane], row, column[, ...])
+    start : tuple
+        origin point of the rectangle, ([plane], row, column[, ...])
+    end : tuple
+        end point of the rectangle ([num_planes], num_rows, num_cols[, ...]).
     extent : tuple
-        extent ([num_planes], num_rows, num_cols[, ...]) of the rectangle.
+        extent vector ([num_planes], num_rows, num_cols[, ...]) of the
+        rectangle. Will be added to start to find the end point.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for rectangles that exceed the image
@@ -720,27 +724,46 @@ def rectangle(origin, extent, shape=None):
     >>> import numpy as np
     >>> from skimage.draw import rectangle
     >>> img = np.zeros((5, 5), dtype=np.uint8)
-    >>> origin = (1, 1)
-    >>> extent = (2, 2)
-    >>> rr, cc = rectangle(origin, extent, img.shape)
+    >>> start = (1, 1)
+    >>> extent = (3, 3)
+    >>> rr, cc = rectangle(start, extent = extent, shape = img.shape)
     >>> img[rr, cc] = 1
     >>> img
     array([[0, 0, 0, 0, 0],
-           [0, 1, 1, 0, 0],
-           [0, 1, 1, 0, 0],
-           [0, 0, 0, 0, 0],
+           [0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0]], dtype=uint8)
+
+
+    >>> img = np.zeros((5, 5), dtype=np.uint8)
+    >>> start = (0, 1)
+    >>> end = (3, 3)
+    >>> rr, cc = rectangle(start, end = end, shape = img.shape)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    if len(origin) != len(extent):
-        raise ValueError("origin and extent must have the same "
-                         "number of dimensions")
-    if shape is not None:
-        if len(shape) == len(extent):
-            extent = tuple(np.minimum(np.array(origin) + np.array(extent),
-                           np.array(shape)))
+    if end is None:
+        if extent is None:
+            raise ValueError("either an end or extent must be given")
         else:
-            raise ValueError("shape and extent must have the same "
-                             "number of dimensions")
-    coords = np.meshgrid(*[np.arange(o, ex) for o, ex in zip(origin, extent)])
+            end = np.array(start) + np.array(extent)
+    else:
+        if extent is not None:
+            raise ValueError("only end or extent can be given not both")
+    bl = np.minimum(np.array(start), np.array(end))
+    tr = np.maximum(np.array(start), np.array(end))
+    if shape is not None:
+        tr = np.minimum(np.array(shape), np.array(tr))
+        bl = np.maximum(np.zeros_like(shape), np.array(bl))
+    if extent is None:
+        tr += 1
+    coords = np.meshgrid(*[np.arange(o, ex) for o, ex in zip(tuple(bl),
+                                                             tuple(tr))])
     return coords

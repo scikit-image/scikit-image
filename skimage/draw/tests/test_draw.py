@@ -863,18 +863,33 @@ def test_polygon_perimeter_outside_image():
     assert_equal(len(rr), 0)
     assert_equal(len(cc), 0)
 
-def test_rectangle():
+
+def test_rectangle_end():
+    expected = np.array([[0, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 0],
+                         [0, 0, 0, 0, 0]], dtype=np.uint8)
+    img = np.zeros((5, 5), dtype=np.uint8)
+    start = (0, 1)
+    end = (3, 3)
+    rr, cc = rectangle(start, end=end, shape=img.shape)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+
+def test_rectangle_extent():
     expected = np.array([[0, 0, 0, 0, 0],
                          [0, 1, 1, 1, 0],
                          [0, 1, 1, 1, 0],
                          [0, 1, 1, 1, 0],
-                         [0, 0, 0, 0, 0]])
-    img = np.zeros((5, 5),dtype=np.uint8)
-    origin = (1,1)
-    extent = (3,3)
-    rr,cc = rectangle(origin,extent,img.shape)
-    img[rr,cc] = 1
-    assert_array_equal(img,expected)
+                         [0, 0, 0, 0, 0]], dtype=np.uint8)
+    img = np.zeros((5, 5), dtype=np.uint8)
+    start = (1, 1)
+    extent = (3, 3)
+    rr, cc = rectangle(start, extent= extent, shape=img.shape)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite

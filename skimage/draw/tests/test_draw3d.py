@@ -115,7 +115,8 @@ def test_ellipsoid_stats():
     assert_allclose(103428 * np.pi, vol, atol=1e-4)
     assert_allclose(37426.3, surf, atol=1e-1)
 
-def test_rect_3d():
+
+def test_rect_3d_extent():
     expected = np.array([[[0, 0, 1, 1, 1],
                           [0, 0, 1, 1, 1],
                           [0, 0, 0, 0, 0],
@@ -136,12 +137,41 @@ def test_rect_3d():
                           [0, 0, 0, 0, 0],
                           [0, 0, 0, 0, 0],
                           [0, 0, 0, 0, 0]]], dtype=np.uint8)
-    img = np.zeros((4, 5, 5),dtype=np.uint8)
-    origin = (0,0,2)
-    extent = (5,2,3)
-    pp,rr,cc = rectangle(origin,extent,img.shape)
-    img[pp,rr,cc] = 1
-    assert_array_equal(img,expected)
+    img = np.zeros((4, 5, 5), dtype=np.uint8)
+    start = (0, 0, 2)
+    extent = (5, 2, 3)
+    pp, rr, cc = rectangle(start, extent=extent, shape=img.shape)
+    img[pp, rr, cc] = 1
+    assert_array_equal(img, expected)
+
+
+def test_rect_3d_end():
+    expected = np.array([[[0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0]],
+                         [[0, 0, 1, 1, 0],
+                          [0, 0, 1, 1, 0],
+                          [0, 0, 1, 1, 0],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0]],
+                         [[0, 0, 1, 1, 0],
+                          [0, 0, 1, 1, 0],
+                          [0, 0, 1, 1, 0],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0]],
+                         [[0, 0, 1, 1, 0],
+                          [0, 0, 1, 1, 0],
+                          [0, 0, 1, 1, 0],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0]]], dtype=np.uint8)
+    img = np.zeros((4, 5, 5), dtype=np.uint8)
+    start = (1, 0, 2)
+    end = (3, 2, 3)
+    pp, rr, cc = rectangle(start, end=end, shape=img.shape)
+    img[pp, rr, cc] = 1
+    assert_array_equal(img, expected)
 
 
 if __name__ == "__main__":
