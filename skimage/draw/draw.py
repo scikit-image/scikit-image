@@ -696,29 +696,28 @@ def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
 
 
 def rectangle(start, end=None, extent=None, shape=None):
-    """Generate coordinates of pixels within an nd-rectangle. Either
-    end or extent are required.
+    """Generate coordinates of pixels within an nd-rectangle.
 
     Parameters
     ----------
     start : tuple
-        Origin point of the rectangle, ([plane], row, column[, ...])
+        Origin point of the rectangle, ('[plane]', 'row', 'column''[, ...]')
     end : tuple
-        End point of the rectangle ([num_planes], num_rows, num_cols[, ...]).
-        Either end or extent must be specified.
+        End point of the rectangle ('[plane]', 'row', 'column''[, ...]').
+        Either 'end' or 'extent' must be specified.
     extent : tuple
         The extent (size) of the drawn rectangle.
-        ([num_planes], num_rows, num_cols[, ...])
-        Either end or extent must be specified.
+        (['num_planes'], 'num_rows', 'num_cols''[, ...]')
+        Either 'end' or 'extent' must be specified.
     shape : tuple, optional
         Image shape which is used to determine the maximum bounds of the output
         pixel coordinates. This is useful for rectangles that exceed the image
-        size. If None, the bounds are determined from the bounds of
+        size. If 'None', the bounds are determined from the bounds of
         the rectangle.
 
     Returns
     -------
-    coords : array of int, shape (Ndim, Npoints)
+    coords : array of int, shape ('Ndim', 'Npoints')
         The coordinates of all pixels in the nD rectangle.
 
     Examples
