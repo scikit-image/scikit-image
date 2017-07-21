@@ -717,7 +717,7 @@ def rectangle(start, end=None, extent=None, shape=None):
 
     Returns
     -------
-    coords : array of int, shape ('Ndim', 'Npoints')
+    coords : array of int, shape (Ndim, Npoints)
         The coordinates of all pixels in the nD rectangle.
 
     Examples
