@@ -696,18 +696,18 @@ def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
 
 
 def rectangle(start, end=None, extent=None, shape=None):
-    """Generate coordinates of pixels within an nd-rectangle.
+    """Generate coordinates of pixels within a rectangle or rectangular volume.
 
     Parameters
     ----------
     start : tuple
-        Origin point of the rectangle, ('[plane]', 'row', 'column''[, ...]')
+        Origin point of the rectangle, ('[plane]', 'row', 'column')
     end : tuple
-        End point of the rectangle ('[plane]', 'row', 'column''[, ...]').
+        End point of the rectangle ('[plane]', 'row', 'column').
         Either 'end' or 'extent' must be specified.
     extent : tuple
         The extent (size) of the drawn rectangle.
-        (['num_planes'], 'num_rows', 'num_cols''[, ...]')
+        (['num_planes'], 'num_rows', 'num_cols')
         Either 'end' or 'extent' must be specified.
     shape : tuple, optional
         Image shape which is used to determine the maximum bounds of the output
@@ -718,7 +718,7 @@ def rectangle(start, end=None, extent=None, shape=None):
     Returns
     -------
     coords : array of int, shape (Ndim, Npoints)
-        The coordinates of all pixels in the nD rectangle.
+        The coordinates of all pixels in the rectangle.
 
     Examples
     --------
@@ -750,10 +750,12 @@ def rectangle(start, end=None, extent=None, shape=None):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
+    if len(start) not in [2, 3]:
+        raise ValueError("len(start) must be 2 or 3")
     if extent is not None:
         end = np.array(start) + np.array(extent)
     elif end is None:
-        raise ValueError("Either an end or extent must be given")
+        raise ValueError("Either an 'end' or 'extent' must be given")
     tl = np.minimum(start, end)
     br = np.maximum(start, end)
     if extent is None:
