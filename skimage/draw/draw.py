@@ -696,7 +696,7 @@ def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
 
 
 def rectangle(start, end=None, extent=None, shape=None):
-    """Generate coordinates of pixels within a rectangle or rectangular volume.
+    """Generate coordinates of pixels within a nd-rectangle.
 
     Parameters
     ----------
@@ -750,8 +750,6 @@ def rectangle(start, end=None, extent=None, shape=None):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    if len(start) not in [2, 3]:
-        raise ValueError("len(start) must be 2 or 3")
     if extent is not None:
         end = np.array(start) + np.array(extent)
     elif end is None:
