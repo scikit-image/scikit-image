@@ -701,19 +701,18 @@ def rectangle(start, end=None, extent=None, shape=None):
     Parameters
     ----------
     start : tuple
-        Origin point of the rectangle, ('[plane]', 'row', 'column')
+        Origin point of the rectangle, e.g., ``([plane,] row, column)``.
     end : tuple
-        End point of the rectangle ('[plane]', 'row', 'column').
-        Either 'end' or 'extent' must be specified.
+        End point of the rectangle ``([plane,] row, column)``.
+        Either `end` or `extent` must be specified.
     extent : tuple
-        The extent (size) of the drawn rectangle.
-        (['num_planes'], 'num_rows', 'num_cols')
-        Either 'end' or 'extent' must be specified.
+        The extent (size) of the drawn rectangle.  E.g.,
+        ``([num_planes,] num_rows, num_cols)``.
+        Either `end` or `extent` must be specified.
     shape : tuple, optional
-        Image shape which is used to determine the maximum bounds of the output
-        pixel coordinates. This is useful for rectangles that exceed the image
-        size. If 'None', the bounds are determined from the bounds of
-        the rectangle.
+        Image shape used to determine the maximum bounds of the output
+        coordinates. This is useful for clipping rectangles that exceed
+        the image size. By default, no clipping is done.
 
     Returns
     -------
@@ -722,8 +721,8 @@ def rectangle(start, end=None, extent=None, shape=None):
 
     Notes
     -----
-    The function will also work for N-dimensions, by passing 'start' and
-    'end' or 'extent' as tuples of lenght N.
+    This function can be applied to N-dimensional images, by passing `start` and
+    `end` or `extent` as tuples of length N.
 
     Examples
     --------
@@ -758,7 +757,7 @@ def rectangle(start, end=None, extent=None, shape=None):
     if extent is not None:
         end = np.array(start) + np.array(extent)
     elif end is None:
-        raise ValueError("Either an 'end' or 'extent' must be given")
+        raise ValueError("Either `end` or `extent` must be given")
     tl = np.minimum(start, end)
     br = np.maximum(start, end)
     if extent is None:
