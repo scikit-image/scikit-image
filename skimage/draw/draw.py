@@ -696,7 +696,7 @@ def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
 
 
 def rectangle(start, end=None, extent=None, shape=None):
-    """Generate coordinates of pixels within a nd-rectangle.
+    """Generate coordinates of pixels within a rectangle.
 
     Parameters
     ----------
@@ -719,6 +719,11 @@ def rectangle(start, end=None, extent=None, shape=None):
     -------
     coords : array of int, shape (Ndim, Npoints)
         The coordinates of all pixels in the rectangle.
+
+    Notes
+    -----
+    The function will also work for N-dimensions, by passing 'start' and
+    'end' or 'extent' as tuples of lenght N.
 
     Examples
     --------
