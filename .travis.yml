@@ -54,7 +54,7 @@ matrix:
     - os: linux
       python: 3.6
     - os: osx
-      osx_image: xcode7.3
+      osx_image: xcode9
       language: objective-c
       env: TRAVIS_PYTHON_VERSION=3.5
 
