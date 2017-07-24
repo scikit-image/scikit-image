@@ -22,7 +22,7 @@ py.test $TEST_ARGS skimage
 section_end "Test.with.min.requirements"
 
 section "Build.docs"
-if [[ $NO_SPHINX != 1 ]]; then
+if [[ $BUILD_DOCS == 1 ]]; then
     export SPHINXCACHE=$HOME/.cache/sphinx; make html
 fi
 section_end "Build.docs"
