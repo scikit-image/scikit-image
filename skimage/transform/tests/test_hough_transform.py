@@ -63,6 +63,7 @@ def test_probabilistic_hough():
         line = list(line)
         line.sort(key=lambda x: x[0])
         sorted_lines.append(line)
+
     assert([(25, 75), (74, 26)] in sorted_lines)
     assert([(25, 25), (74, 74)] in sorted_lines)
 
