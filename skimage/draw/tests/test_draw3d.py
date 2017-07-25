@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose
 import pytest
 
-from skimage.draw import ellipsoid, ellipsoid_stats
+from skimage.draw import ellipsoid, ellipsoid_stats, rectangle
 
 
 def test_ellipsoid_sign_parameters1():
@@ -114,6 +114,64 @@ def test_ellipsoid_stats():
     vol, surf = ellipsoid_stats(17, 27, 169)
     assert_allclose(103428 * np.pi, vol, atol=1e-4)
     assert_allclose(37426.3, surf, atol=1e-1)
+
+
+def test_rect_3d_extent():
+    expected = np.array([[[0, 0, 1, 1, 1],
+                          [0, 0, 1, 1, 1],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0]],
+                         [[0, 0, 1, 1, 1],
+                          [0, 0, 1, 1, 1],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0]],
+                         [[0, 0, 1, 1, 1],
+                          [0, 0, 1, 1, 1],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0]],
+                         [[0, 0, 1, 1, 1],
+                          [0, 0, 1, 1, 1],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0]]], dtype=np.uint8)
+    img = np.zeros((4, 5, 5), dtype=np.uint8)
+    start = (0, 0, 2)
+    extent = (5, 2, 3)
+    pp, rr, cc = rectangle(start, extent=extent, shape=img.shape)
+    img[pp, rr, cc] = 1
+    assert_array_equal(img, expected)
+
+
+def test_rect_3d_end():
+    expected = np.array([[[0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0]],
+                         [[0, 0, 1, 1, 0],
+                          [0, 0, 1, 1, 0],
+                          [0, 0, 1, 1, 0],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0]],
+                         [[0, 0, 1, 1, 0],
+                          [0, 0, 1, 1, 0],
+                          [0, 0, 1, 1, 0],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0]],
+                         [[0, 0, 1, 1, 0],
+                          [0, 0, 1, 1, 0],
+                          [0, 0, 1, 1, 0],
+                          [0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0]]], dtype=np.uint8)
+    img = np.zeros((4, 5, 5), dtype=np.uint8)
+    start = (1, 0, 2)
+    end = (3, 2, 3)
+    pp, rr, cc = rectangle(start, end=end, shape=img.shape)
+    img[pp, rr, cc] = 1
+    assert_array_equal(img, expected)
 
 
 if __name__ == "__main__":

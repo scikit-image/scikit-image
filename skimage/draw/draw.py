@@ -693,3 +693,78 @@ def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
     return _bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape)
+
+
+def rectangle(start, end=None, extent=None, shape=None):
+    """Generate coordinates of pixels within a rectangle.
+
+    Parameters
+    ----------
+    start : tuple
+        Origin point of the rectangle, e.g., ``([plane,] row, column)``.
+    end : tuple
+        End point of the rectangle ``([plane,] row, column)``.
+        Either `end` or `extent` must be specified.
+    extent : tuple
+        The extent (size) of the drawn rectangle.  E.g.,
+        ``([num_planes,] num_rows, num_cols)``.
+        Either `end` or `extent` must be specified.
+    shape : tuple, optional
+        Image shape used to determine the maximum bounds of the output
+        coordinates. This is useful for clipping rectangles that exceed
+        the image size. By default, no clipping is done.
+
+    Returns
+    -------
+    coords : array of int, shape (Ndim, Npoints)
+        The coordinates of all pixels in the rectangle.
+
+    Notes
+    -----
+    This function can be applied to N-dimensional images, by passing `start` and
+    `end` or `extent` as tuples of length N.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.draw import rectangle
+    >>> img = np.zeros((5, 5), dtype=np.uint8)
+    >>> start = (1, 1)
+    >>> extent = (3, 3)
+    >>> rr, cc = rectangle(start, extent=extent, shape=img.shape)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 0, 0, 0, 0],
+           [0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0]], dtype=uint8)
+
+
+    >>> img = np.zeros((5, 5), dtype=np.uint8)
+    >>> start = (0, 1)
+    >>> end = (3, 3)
+    >>> rr, cc = rectangle(start, end=end, shape=img.shape)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0]], dtype=uint8)
+
+    """
+    if extent is not None:
+        end = np.array(start) + np.array(extent)
+    elif end is None:
+        raise ValueError("Either `end` or `extent` must be given")
+    tl = np.minimum(start, end)
+    br = np.maximum(start, end)
+    if extent is None:
+        br += 1
+    if shape is not None:
+        br = np.minimum(shape, br)
+        tl = np.maximum(np.zeros_like(shape), tl)
+    coords = np.meshgrid(*[np.arange(st, en) for st, en in zip(tuple(tl),
+                                                               tuple(br))])
+    return coords
