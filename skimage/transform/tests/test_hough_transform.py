@@ -3,7 +3,6 @@ from numpy.testing import assert_almost_equal, assert_equal
 import pytest
 
 from skimage import data
-from skimage.feature import canny
 import skimage.transform as tf
 from skimage.draw import line, circle_perimeter, ellipse_perimeter
 from skimage._shared._warnings import expected_warnings
@@ -63,6 +62,7 @@ def test_probabilistic_hough():
         line = list(line)
         line.sort(key=lambda x: x[0])
         sorted_lines.append(line)
+
     assert([(25, 75), (74, 26)] in sorted_lines)
     assert([(25, 25), (74, 74)] in sorted_lines)
 
