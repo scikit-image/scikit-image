@@ -23,6 +23,7 @@ section_end "Test.with.min.requirements"
 
 section "Build.docs"
 if [[ $BUILD_DOCS == 1 ]]; then
+    pip install --retries 3 -q -r ./requirements.docs.txt
     export SPHINXCACHE=$HOME/.cache/sphinx; make html
 fi
 section_end "Build.docs"
@@ -36,7 +37,7 @@ section "Install.optional.dependencies"
 
 # Install most of the optional packages
 if [[ $OPTIONAL_DEPS == 1 ]]; then
-    pip install --retries 3 -q -r ./optional_requirements.txt $WHEELHOUSE
+    pip install --retries 3 -q -r ./requirements.optional.txt $WHEELHOUSE
 fi
 
 # Install Qt and then update the Matplotlib settings
