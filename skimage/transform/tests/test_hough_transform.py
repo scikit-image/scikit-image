@@ -2,6 +2,8 @@ import numpy as np
 from numpy.testing import assert_almost_equal, assert_equal
 import pytest
 
+from skimage import data
+from skimage.feature import canny
 import skimage.transform as tf
 from skimage.draw import line, circle_perimeter, ellipse_perimeter
 from skimage._shared._warnings import expected_warnings
@@ -61,12 +63,21 @@ def test_probabilistic_hough():
         line = list(line)
         line.sort(key=lambda x: x[0])
         sorted_lines.append(line)
-
     assert([(25, 75), (74, 26)] in sorted_lines)
     assert([(25, 25), (74, 74)] in sorted_lines)
 
     # Execute with default theta
     tf.probabilistic_hough_line(img, line_length=10, line_gap=3)
+
+
+def test_probabilistic_hough_seed():
+    # Load image that is likely to give a randomly varying number of lines
+    image = data.checkerboard()
+
+    # Use constant seed to ensure a deterministic output
+    lines = tf.probabilistic_hough_line(image, threshold=50, line_length=50,
+                                        line_gap=1, seed=1234)
+    assert len(lines) == 59
 
 
 def test_probabilistic_hough_bad_input():

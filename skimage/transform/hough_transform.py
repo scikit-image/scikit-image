@@ -222,7 +222,7 @@ def hough_line(image, theta=None):
 
 
 def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
-                             theta=None):
+                             theta=None, seed=None):
     """Return lines from a progressive probabilistic line Hough transform.
 
     Parameters
@@ -240,6 +240,8 @@ def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
     theta : 1D ndarray, dtype=double, optional
         Angles at which to compute the transform, in radians.
         If None, use a range from -pi/2 to pi/2.
+    seed : int, optional
+        Seed to initialize the random number generator.
 
     Returns
     -------
@@ -261,7 +263,7 @@ def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
         theta = np.pi / 2 - np.arange(180) / 180.0 * np.pi
 
     return _prob_hough_line(image, threshold=threshold, line_length=line_length,
-                            line_gap=line_gap, theta=theta)
+                            line_gap=line_gap, theta=theta, seed=seed)
 
 
 def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
