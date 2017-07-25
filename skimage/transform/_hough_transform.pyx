@@ -8,7 +8,7 @@ cimport numpy as cnp
 cimport cython
 
 from libc.math cimport abs, fabs, sqrt, ceil, atan2, M_PI
-from libc.stdlib cimport rand
+from libc.stdlib cimport rand, srand
 
 from ..draw import circle_perimeter
 
@@ -314,7 +314,8 @@ def _hough_line(cnp.ndarray img,
 
 def _probabilistic_hough_line(cnp.ndarray img, int threshold,
                               int line_length, int line_gap,
-                              cnp.ndarray[ndim=1, dtype=cnp.double_t] theta):
+                              cnp.ndarray[ndim=1, dtype=cnp.double_t] theta,
+                              seed=None):
     """Return lines from a progressive probabilistic line Hough transform.
 
     Parameters
@@ -331,6 +332,8 @@ def _probabilistic_hough_line(cnp.ndarray img, int threshold,
         Increase the parameter to merge broken lines more aggresively.
     theta : 1D ndarray, dtype=double
         Angles at which to compute the transform, in radians.
+    seed : int, optional
+        Seed to initialize the random number generator.
 
     Returns
     -------
@@ -378,6 +381,9 @@ def _probabilistic_hough_line(cnp.ndarray img, int threshold,
     cdef list points = list(zip(x_idxs, y_idxs))
     # mask all non-zero indexes
     mask[y_idxs, x_idxs] = 1
+
+    if seed is not None:
+        srand(seed)
 
     while 1:
 
