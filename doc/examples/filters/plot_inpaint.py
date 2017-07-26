@@ -20,7 +20,7 @@ inpainting algorithm based on 'biharmonic equation'-assumption [2]_ [3]_ [4]_.
         https://arxiv.org/abs/1707.06567
 .. [4]  C. K. Chui and H. N. Mhaskar, MRA Contextual-Recovery Extension of
         Smooth Functions on Manifolds, Appl. and Comp. Harmonic Anal.,
-        28 (2010), 104–113,
+        28 (2010), 104-113,
         DOI: 10.1016/j.acha.2009.04.004
 """
 
