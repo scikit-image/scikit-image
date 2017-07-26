@@ -172,7 +172,7 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
         return vertices, faces, normals, values
     else:
         fun = _marching_cubes_lewiner_cy.remove_degenerate_faces
-        return fun(vertices.astype(np.float), faces, normals, values)
+        return fun(vertices.astype(np.float32), faces, normals, values)
 
 
 def _to_array(args):
