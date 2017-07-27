@@ -53,7 +53,7 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.util.montage import montage
+    >>> from skimage.util import montage
     >>> arr_in = np.arange(3 * 2 * 2).reshape(3, 2, 2)
     >>> arr_in  # doctest: +NORMALIZE_WHITESPACE
     array([[[ 0,  1],
@@ -180,7 +180,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.util.montage import montage2d
+    >>> from skimage.util import montage2d
     >>> arr_in = np.arange(3 * 2 * 2).reshape(3, 2, 2)
     >>> arr_in  # doctest: +NORMALIZE_WHITESPACE
     array([[[ 0,  1],
