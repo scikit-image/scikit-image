@@ -9,6 +9,9 @@ from .arraycrop import crop
 from ._regular_grid import regular_grid, regular_seeds
 from .unique import unique_rows
 from ._invert import invert
+from ._coord_conv import (xy_to_rc, rc_to_xy,
+                          cart_to_rc, rc_to_cart,
+                          cart_to_xy, xy_to_cart)
 
 from .._shared.utils import copy_func
 
@@ -33,4 +36,11 @@ __all__ = ['img_as_float32',
            'regular_seeds',
            'apply_parallel',
            'invert',
-           'unique_rows']
+           'unique_rows',
+           'xy_to_rc',
+           'rc_to_xy',
+           'cart_to_rc',
+           'rc_to_cart',
+           'cart_to_xy',
+           'xy_to_cart',
+]
