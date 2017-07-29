@@ -80,6 +80,7 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
     (2, 6)
 
     """
+
     if multichannel:
         arr_in = np.asarray(arr_in)
     else:
