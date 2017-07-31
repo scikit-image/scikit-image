@@ -357,34 +357,9 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
     tform3 = SimilarityTransform(translation=-center)
     tform = tform3 + tform2 + tform1
 
-    output_shape = None
-    if resize:
-        # determine shape of output image
-        corners = np.array([
-            [0, 0],
-            [0, rows - 1],
-            [cols - 1, rows - 1],
-            [cols - 1, 0]
-        ])
-        corners = tform.inverse(corners)
-        minc = corners[:, 0].min()
-        minr = corners[:, 1].min()
-        maxc = corners[:, 0].max()
-        maxr = corners[:, 1].max()
-        out_rows = maxr - minr + 1
-        out_cols = maxc - minc + 1
-        output_shape = np.ceil((out_rows, out_cols))
-
-        # fit output image in new shape
-        translation = (minc, minr)
-        tform4 = SimilarityTransform(translation=translation)
-        tform = tform4 + tform
-
-    # Make sure the transform is exactly affine, to ensure fast warping.
-    tform.params[2] = (0, 0, 1)
-
-    return warp(image, tform, output_shape=output_shape, order=order,
-                mode=mode, cval=cval, clip=clip, preserve_range=preserve_range)
+    return warp(image, tform, order=order, mode=mode,
+                cval=cval, clip=clip, preserve_range=preserve_range,
+                fit_output=resize)
 
 
 def downscale_local_mean(image, factors, cval=0, clip=True):
@@ -658,7 +633,8 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
 
 
 def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
-         mode='constant', cval=0., clip=True, preserve_range=False):
+         mode='constant', cval=0., clip=True, preserve_range=False,
+         fit_output=False):
     """Warp an image according to a given coordinate transformation.
 
     Parameters
@@ -726,6 +702,10 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
         image is converted according to the conventions of `img_as_float`.
         Also see
         http://scikit-image.org/docs/dev/user_guide/data_types.html
+    fit_output: bool, optional
+        Determine whether the shape of the output image will be automatically
+        calculated, so the complete warped image exactly fits. Default is
+        False.
 
     Returns
     -------
@@ -839,6 +819,35 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
 
         if matrix is not None:
             matrix = matrix.astype(np.double)
+
+            if fit_output:
+                rows, cols = input_shape[:2]
+                tform = SimilarityTransform(matrix=matrix)
+                # determine shape of output image
+                corners = np.array([
+                    [0, 0],
+                    [0, rows - 1],
+                    [cols - 1, rows - 1],
+                    [cols - 1, 0]
+                ])
+                corners = tform.inverse(corners)
+                minc = corners[:, 0].min()
+                minr = corners[:, 1].min()
+                maxc = corners[:, 0].max()
+                maxr = corners[:, 1].max()
+                out_rows = maxr - minr + 1
+                out_cols = maxc - minc + 1
+                if len(input_shape) == 3:
+                    output_shape = np.ceil((out_rows, out_cols,
+                                            input_shape[2]))
+                else:
+                    output_shape = np.ceil((out_rows, out_cols))
+                # fit output image in new shape
+                translation = (minc, minr)
+                tform4 = SimilarityTransform(translation=translation)
+                tform = tform4 + tform
+                matrix = tform.params
+
             if image.ndim == 2:
                 warped = _warp_fast(image, matrix,
                                     output_shape=output_shape,
