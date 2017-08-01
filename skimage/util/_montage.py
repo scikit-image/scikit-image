@@ -8,7 +8,9 @@ __all__ = ['montage', 'montage2d']
 
 def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
             padding_width=0, multichannel=False):
-    """Create a 2-dimensional 'montage' from a 3-/4-dimensional input array
+    """Create a montage of several single- or multichannel images.
+
+    Create a 2-dimensional 'montage' from a 3-/4-dimensional input array
     representing an ensemble of equally shaped single or multichannel
     2-dimensional images.
 
@@ -25,8 +27,7 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
     Parameters
     ----------
     arr_in : (K, M, N[, C]) ndarray
-        3-/4-dimensional input array representing an ensemble of `K` images
-        of equal shape.
+        An array representing an ensemble of `K` images of equal shape.
     fill : float or array-like of floats or 'mean', optional
         Value to fill the padding areas and/or the extra tiles in
         the output array. Has to be `float` for single channel collections.
@@ -35,7 +36,7 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
     rescale_intensity : bool, optional
         Whether to rescale the intensity of each image to [0, 1].
     grid_shape : tuple, optional
-        The desired grid shape for the montage (ntiles_row, ntiles_column).
+        The desired grid shape for the montage `(ntiles_row, ntiles_column)`.
         The default aspect ratio is square.
     padding_width : int, optional
         The size of the spacing between the tiles and between the tiles and
@@ -47,7 +48,7 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
 
     Returns
     -------
-    arr_out : (K*M+p, K*N+p[, C]) ndarray
+    arr_out : (K*(M+p)+p, K*(N+p)+p[, C]) ndarray
         Output array with input images glued together (including padding `p`).
 
     Examples
@@ -78,7 +79,6 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
            [ 2,  3,  6,  7, 10, 11]])
     >>> arr_out_nonsquare.shape
     (2, 6)
-
     """
 
     if multichannel:
@@ -92,7 +92,7 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
     n_images, n_rows, n_cols, n_chan = arr_in.shape
 
     if grid_shape:
-        ntiles_row, ntiles_col = map(int, grid_shape)
+        ntiles_row, ntiles_col = [int(s) for s in grid_shape]
     else:
         ntiles_row = ntiles_col = int(np.ceil(np.sqrt(n_images)))
 
@@ -206,7 +206,6 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
            [ 2,  3,  6,  7, 10, 11]])
     >>> arr_out_nonsquare.shape
     (2, 6)
-
     """
 
     assert arr_in.ndim == 3
