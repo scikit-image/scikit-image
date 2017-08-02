@@ -10,9 +10,8 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
             padding_width=0, multichannel=False):
     """Create a montage of several single- or multichannel images.
 
-    Create a 2-dimensional 'montage' from a 3-/4-dimensional input array
-    representing an ensemble of equally shaped single or multichannel
-    2-dimensional images.
+    Create a rectangular montage from an input array representing an ensemble
+    of equally shaped single- (gray) or multichannel (color) images.
 
     For example, ``montage(arr_in)`` called with the following `arr_in`
 
