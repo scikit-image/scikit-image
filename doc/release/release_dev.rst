@@ -21,7 +21,7 @@ New Features
 
 Improvements
 ------------
-
+- VisuShrink method for wavelet denoising (#2470)
 
 
 

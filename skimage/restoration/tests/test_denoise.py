@@ -361,29 +361,48 @@ def test_wavelet_threshold():
     noisy = img + sigma * rstate.randn(*(img.shape))
     noisy = np.clip(noisy, 0, 1)
 
-    # employ a single, uniform threshold instead of BayesShrink sigmas
-    denoised = _wavelet_threshold(noisy, wavelet='db1', threshold=sigma)
+    # employ a single, user-specified threshold instead of BayesShrink sigmas
+    denoised = _wavelet_threshold(noisy, wavelet='db1', method=None,
+                                  threshold=sigma)
     psnr_noisy = compare_psnr(img, noisy)
     psnr_denoised = compare_psnr(img, denoised)
     assert_(psnr_denoised > psnr_noisy)
 
+    # either method or threshold must be defined
+    with pytest.raises(ValueError):
+        _wavelet_threshold(noisy, wavelet='db1', method=None, threshold=None)
+
+    # warns if a threshold is provided in a case where it would be ignored
+    with expected_warnings(["Thresholding method "]):
+        _wavelet_threshold(noisy, wavelet='db1', method='BayesShrink',
+                           threshold=sigma)
+
 
 def test_wavelet_denoising_nd():
     rstate = np.random.RandomState(1234)
-    for ndim in range(1, 5):
-        # Generate a very simple test image
-        img = 0.2*np.ones((16, )*ndim)
-        img[[slice(5, 13), ] * ndim] = 0.8
+    for method in ['VisuShrink', 'BayesShrink']:
+        for ndim in range(1, 5):
+            # Generate a very simple test image
+            if ndim < 3:
+                img = 0.2*np.ones((128, )*ndim)
+            else:
+                img = 0.2*np.ones((16, )*ndim)
+            img[[slice(5, 13), ] * ndim] = 0.8
 
-        sigma = 0.1
-        noisy = img + sigma * rstate.randn(*(img.shape))
-        noisy = np.clip(noisy, 0, 1)
+            sigma = 0.1
+            noisy = img + sigma * rstate.randn(*(img.shape))
+            noisy = np.clip(noisy, 0, 1)
 
-        # Verify that SNR is improved with internally estimated sigma
-        denoised = restoration.denoise_wavelet(noisy)
-        psnr_noisy = compare_psnr(img, noisy)
-        psnr_denoised = compare_psnr(img, denoised)
-        assert_(psnr_denoised > psnr_noisy)
+            # Verify that SNR is improved with internally estimated sigma
+            denoised = restoration.denoise_wavelet(noisy, method=method)
+            psnr_noisy = compare_psnr(img, noisy)
+            psnr_denoised = compare_psnr(img, denoised)
+            assert_(psnr_denoised > psnr_noisy)
+
+
+def test_wavelet_invalid_method():
+    with pytest.raises(ValueError):
+        restoration.denoise_wavelet(np.ones(16), method='Unimplemented')
 
 
 def test_wavelet_denoising_levels():
