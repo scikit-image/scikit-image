@@ -24,6 +24,7 @@ Version 0.15
   ``'reflect'``.
 * In ``skimage.transform.rescale``, set default value of ``mode`` to
   ``'reflect'``.
+* Remove deprecated ``skimage.util.montage2d`` and corresponding tests.
 
 Version 0.16
 ------------

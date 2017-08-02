@@ -17,6 +17,7 @@ New Features
 - manual segmentation with matplotlib (#2584)
 - hysteresis thresholding in filters (#2665)
 - lookfor function (#2713)
+- montage function (#2626)
 
 
 Improvements
@@ -24,15 +25,15 @@ Improvements
 - VisuShrink method for wavelet denoising (#2470)
 
 
-
 API Changes
 -----------
-
-
+- ``skimage.util.montage.montage2d`` is now available as ``skimage.util.montage2d``.
 
 
 Deprecations
 ------------
+- ``skimage.util.montage2d`` is deprecated and will be removed in 0.15.
+  Use ``skimage.util.montage`` instead.
 
 
 Contributors to this release
