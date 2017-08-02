@@ -12,7 +12,7 @@ from skimage.color import rgb2gray
 
 from skimage._shared import testing
 from skimage._shared.testing import (assert_almost_equal, assert_equal,
-                                     test_parallel)
+                                     parametrize, test_parallel)
 from skimage._shared._warnings import expected_warnings
 
 
@@ -28,20 +28,22 @@ def test_stackcopy():
         assert_almost_equal(x[..., i], y)
 
 
-def test_warp_tform():
+@parametrize('fit_output', [False, True])
+def test_warp_tform(fit_output):
     x = np.zeros((5, 5), dtype=np.double)
     x[2, 2] = 1
     theta = - np.pi / 2
     tform = SimilarityTransform(scale=1, rotation=theta, translation=(0, 4))
 
-    x90 = warp(x, tform, order=1)
+    x90 = warp(x, tform, order=1, fit_output=fit_output)
     assert_almost_equal(x90, np.rot90(x))
 
-    x90 = warp(x, tform.inverse, order=1)
+    x90 = warp(x, tform.inverse, order=1, fit_output=fit_output)
     assert_almost_equal(x90, np.rot90(x))
 
 
-def test_warp_callable():
+@parametrize('fit_output', [False, True])
+def test_warp_callable(fit_output):
     x = np.zeros((5, 5), dtype=np.double)
     x[2, 2] = 1
     refx = np.zeros((5, 5), dtype=np.double)
@@ -50,7 +52,7 @@ def test_warp_callable():
     def shift(xy):
         return xy + 1
 
-    outx = warp(x, shift, order=1)
+    outx = warp(x, shift, order=1, fit_output=fit_output)
     assert_almost_equal(outx, refx)
 
 
@@ -70,7 +72,8 @@ def test_warp_matrix():
     outx = warp(x, matrix, order=5)
 
 
-def test_warp_nd():
+@parametrize('fit_output', [False, True])
+def test_warp_nd(fit_output):
     for dim in range(2, 8):
         shape = dim * (5,)
 
@@ -84,7 +87,7 @@ def test_warp_nd():
         coord_grid = dim * (slice(0, 5, 1),)
         coords = np.array(np.mgrid[coord_grid]) + 1
 
-        outx = warp(x, coords, order=0, cval=0)
+        outx = warp(x, coords, order=0, cval=0, fit_output=fit_output)
 
         assert_almost_equal(outx, refx)
 
@@ -103,7 +106,8 @@ def test_warp_clip():
     assert_almost_equal(outx.max(), 1)
 
 
-def test_homography():
+@parametrize('fit_output', [False, True])
+def test_homography(fit_output):
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
     theta = -np.pi / 2
@@ -113,7 +117,8 @@ def test_homography():
 
     x90 = warp(x,
                inverse_map=ProjectiveTransform(M).inverse,
-               order=1)
+               order=1,
+               fit_output=fit_output)
     assert_almost_equal(x90, np.rot90(x))
 
 
@@ -361,7 +366,8 @@ def test_const_cval_out_of_range():
     assert np.sum(warped == cval) == (2 * 100 * 10 - 10 * 10)
 
 
-def test_warp_identity():
+@parametrize('fit_output', [False, True])
+def test_warp_identity(fit_output):
     img = img_as_float(rgb2gray(data.astronaut()))
     assert len(img.shape) == 2
     assert np.allclose(img, warp(img, AffineTransform(rotation=0)))
@@ -369,7 +375,10 @@ def test_warp_identity():
     rgb_img = np.transpose(np.asarray([img, np.zeros_like(img), img]),
                            (1, 2, 0))
     warped_rgb_img = warp(rgb_img, AffineTransform(rotation=0.1))
-    assert np.allclose(rgb_img, warp(rgb_img, AffineTransform(rotation=0)))
+    assert np.allclose(
+        rgb_img,
+        warp(rgb_img, AffineTransform(rotation=0), fit_output=fit_output),
+    )
     assert not np.allclose(rgb_img, warped_rgb_img)
     # assert no cross-talk between bands
     assert np.all(0 == warped_rgb_img[:, :, 1])
@@ -451,27 +460,36 @@ def test_downscale_local_mean():
     assert_equal(expected2, out2)
 
 
-def test_invalid():
+@parametrize('fit_output', [False, True])
+def test_invalid(fit_output):
     with testing.raises(ValueError):
         warp(np.ones((4, 3, 3, 3)),
-             SimilarityTransform())
+             SimilarityTransform(),
+             fit_output=fit_output)
 
 
-def test_inverse():
+@parametrize('fit_output', [False, True])
+def test_inverse(fit_output):
     tform = SimilarityTransform(scale=0.5, rotation=0.1)
     inverse_tform = SimilarityTransform(matrix=np.linalg.inv(tform.params))
     image = np.arange(10 * 10).reshape(10, 10).astype(np.double)
-    assert_equal(warp(image, inverse_tform), warp(image, tform.inverse))
+    assert_equal(
+        warp(image, inverse_tform, fit_output=fit_output),
+        warp(image, tform.inverse, fit_output=fit_output),
+    )
 
 
-def test_slow_warp_nonint_oshape():
+@parametrize('fit_output', [False, True])
+def test_slow_warp_nonint_oshape(fit_output):
     image = np.random.rand(5, 5)
 
     with testing.raises(ValueError):
         warp(image, lambda xy: xy,
-             output_shape=(13.1, 19.5))
+             output_shape=(13.1, 19.5),
+             fit_output=fit_output)
 
-    warp(image, lambda xy: xy, output_shape=(13.0001, 19.9999))
+    warp(image, lambda xy: xy, output_shape=(13.0001, 19.9999),
+         fit_output=fit_output)
 
 
 def test_keep_range():
