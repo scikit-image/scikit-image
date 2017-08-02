@@ -15,11 +15,17 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
 
     For example, ``montage(arr_in)`` called with the following `arr_in`
 
-                                  +---+---+
-    +---+---+---+                 | 1 | 2 |
-    | 1 | 2 | 3 |   will return   +---+---+
-    +---+---+---+                 | 3 | * |
-       ---> K                     +---+---+
+    +---+---+---+
+    | 1 | 2 | 3 |
+    +---+---+---+
+
+    will return
+
+    +---+---+
+    | 1 | 2 |
+    +---+---+
+    | 3 | * |
+    +---+---+
 
     where the '*' patch will be determined by the `fill` parameter.
 
