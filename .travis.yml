@@ -17,7 +17,6 @@ addons:
   apt:
     packages:
     - ccache
-    - libfreeimage3
     - texlive
     - texlive-latex-extra
     - dvipng
