@@ -34,10 +34,6 @@ functionality is only available with the following installed:
 * `PyQt4 <http://wiki.python.org/moin/PyQt>`__
    The ``qt`` plugin that provides ``imshow(x, fancy=True)`` and `skivi`.
 
-* `FreeImage <http://freeimage.sf.net>`__
-   The ``freeimage`` plugin provides support for reading various types of
-   image file formats, including multi-page TIFFs.
-
 * `PyAMG <http://pyamg.org/>`__
    The ``pyamg`` module is used for the fast `cg_mg` mode of random
    walker segmentation.
