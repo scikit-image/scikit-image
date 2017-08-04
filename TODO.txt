@@ -3,7 +3,6 @@ Remember to list any API changes below in `doc/source/api_changes.txt`.
 Version 0.14
 ------------
 * Finalize ``skimage.future.graph`` API.
-* Remove the freeimage plugin shim to imageio.
 
 Version 0.15
 ------------
