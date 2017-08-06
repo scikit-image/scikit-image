@@ -3,7 +3,7 @@ import math
 import numpy as np
 from scipy import spatial
 
-from .._shared.utils import get_bound_method_class, safe_as_int
+from .._shared.utils import get_bound_method_class, safe_as_int, interpret_arg
 
 
 def _to_ndimage_mode(mode):
@@ -30,14 +30,14 @@ def _center_and_normalize_points(points):
 
     Parameters
     ----------
-    points : (N, 2) array
+    points : (N, D) array
         The coordinates of the image points.
 
     Returns
     -------
     matrix : (3, 3) array
         The transformation matrix to obtain the new points.
-    new_points : (N, 2) array
+    new_points : (N, D) array
         The transformed image points.
 
     References
@@ -54,9 +54,9 @@ def _center_and_normalize_points(points):
 
     norm_factor = math.sqrt(2) / rms
 
-    matrix = np.array([[norm_factor, 0, -norm_factor * centroid[0]],
-                       [0, norm_factor, -norm_factor * centroid[1]],
-                       [0, 0, 1]])
+    matrix = np.array([[norm_factor, 0,           - norm_factor * centroid[0]],
+                       [0,           norm_factor, - norm_factor * centroid[1]],
+                       [0,           0,             1                        ]])
 
     pointsh = np.row_stack([points.T, np.ones((points.shape[0]),)])
 
@@ -153,12 +153,12 @@ class GeometricTransform(object):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (N, D) array
             Source coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : (N, D) array
             Destination coordinates.
 
         """
@@ -169,12 +169,12 @@ class GeometricTransform(object):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (N, D) array
             Destination coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : (N, D) array
             Source coordinates.
 
         """
@@ -188,9 +188,9 @@ class GeometricTransform(object):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (N, D) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (N, D) array
             Destination coordinates.
 
         Returns
@@ -287,9 +287,9 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (N, D) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (N, D) array
             Destination coordinates.
 
         Returns
@@ -339,9 +339,9 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (N, D) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (N, D) array
             Destination coordinates.
 
         Returns
@@ -371,9 +371,9 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (N, D) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (N, D) array
             Destination coordinates.
 
         Returns
@@ -464,9 +464,9 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (N, D) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (N, D) array
             Destination coordinates.
 
         Returns
@@ -561,12 +561,12 @@ class ProjectiveTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (N, D) array
             Source coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : (N, D) array
             Destination coordinates.
 
         """
@@ -577,12 +577,12 @@ class ProjectiveTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (N, D) array
             Destination coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : (N, D) array
             Source coordinates.
 
         """
@@ -633,9 +633,9 @@ class ProjectiveTransform(GeometricTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (N, D) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (N, D) array
             Destination coordinates.
 
         Returns
@@ -873,12 +873,12 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (N, D) array
             Source coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : (N, D) array
             Transformed coordinates.
 
         """
@@ -908,12 +908,12 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (N, D) array
             Source coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : (N, D) array
             Transformed coordinates.
 
         """
@@ -1009,9 +1009,9 @@ class EuclideanTransform(ProjectiveTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (N, D) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (N, D) array
             Destination coordinates.
 
         Returns
@@ -1112,9 +1112,9 @@ class SimilarityTransform(EuclideanTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (N, D) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (N, D) array
             Destination coordinates.
 
         Returns
@@ -1251,12 +1251,12 @@ class PolynomialTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (N, D) array
             source coordinates
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : (N, D) array
             Transformed coordinates.
 
         """
@@ -1375,14 +1375,14 @@ def matrix_transform(coords, matrix):
 
     Parameters
     ----------
-    coords : (N, 2) array
+    coords : (N, D) array
         x, y coordinates to transform
     matrix : (3, 3) array
         Homogeneous transformation matrix.
 
     Returns
     -------
-    coords : (N, 2) array
+    coords : (N, D) array
         Transformed coordinates.
 
     """
