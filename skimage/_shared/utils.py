@@ -276,13 +276,11 @@ def interpret_arg(arg, times, arg_name='arg', default=0):
 
     Examples
     --------
-    >>> import numpy as np
-
     >>> interpret_arg(None, 3)
-    np.array(0., 0., 0.)
+    array(0., 0., 0.)
 
     >>> interpret_arg((None, 0), 5, default=180)
-    np.array(180, 0, 180, 180, 180)
+    array(180., 0., 180., 180., 180.)
 
     """
     standardized_arg = np.array(arg)
