@@ -283,6 +283,7 @@ def interpret_arg(arg, times, arg_name='arg', default=0):
 
     >>> interpret_arg((None, 0), 5, default=180)
     np.array(180, 0, 180, 180, 180)
+    
     """
     standardized_arg = np.array(arg)
     message = 'The parameter `%s` cannot be of size larger than %s.'
