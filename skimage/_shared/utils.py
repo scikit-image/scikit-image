@@ -255,7 +255,7 @@ def interpret_arg(arg, times, arg_name='arg', default=0):
     it reaches a size equivalent to that of the number of times
     specified.
 
-    All values of `None` within the argument will be replaced with
+    All values of ``None`` within the argument will be replaced with
     the default value.
 
     Parameters
@@ -271,7 +271,7 @@ def interpret_arg(arg, times, arg_name='arg', default=0):
 
     Returns
     -------
-    standardized_arg : (times,) array
+    standardized_arg : (``times``,) array
         The standardized output of the argument.
 
     Examples
