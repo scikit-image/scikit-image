@@ -295,7 +295,7 @@ def interpret_arg(arg, times, arg_name='arg', default=0):
         if standardized_arg.size > times:
             raise ValueError(message % (arg_name, str(times)))
         standardized_arg += ([default]
-                            * (times - standardized_arg.size))
+                             * (times - standardized_arg.size))
     # replace all `None`s with the default value
     standardized_arg[(standardized_arg == None).nonzero()] = default
 

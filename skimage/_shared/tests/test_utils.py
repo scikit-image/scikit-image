@@ -29,7 +29,7 @@ def test_copyfunc():
 def test_interpret_arg():
     standardized_output = interpret_arg(None, 3)
     npt.assert_array_equal(standardized_output, np.zeros(3))
-    
+
     standardized_output = interpret_arg((None, 10), 5, default=1)
     npt.assert_array_equal(standardized_output, np.array([1, 10, 1, 1, 1]))
 
