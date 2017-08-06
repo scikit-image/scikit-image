@@ -11,7 +11,7 @@ from ..util import img_as_float
 from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
-           'safe_as_int', 'assert_nD', 'warn', 'interpret_param']
+           'safe_as_int', 'assert_nD', 'warn', 'interpret_arg']
 
 
 class skimage_deprecation(Warning):
