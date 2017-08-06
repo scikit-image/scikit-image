@@ -11,7 +11,7 @@ from ..util import img_as_float
 from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
-           'safe_as_int', 'assert_nD', 'warn']
+           'safe_as_int', 'assert_nD', 'warn', 'interpret_param']
 
 
 class skimage_deprecation(Warning):
@@ -243,3 +243,60 @@ def convert_to_float(image, preserve_range):
         image = img_as_float(image)
     return image
 
+
+def interpret_arg(arg, times, arg_name='arg', default=0):
+    """Provides an expected/standardized output of the parameter as
+    an ndarray the size of times. Primarily used in n-Dimensional
+    image processing.
+
+    An argument that is not what NumPy considers to be array-like
+    will be repeated the number of times specified. Otherwise,
+    the default value will be appended to the argument until
+    it reaches a size equivalent to that of the number of times
+    specified.
+
+    All values of `None` within the argument will be replaced with
+    the default value.
+
+    Parameters
+    ----------
+    arg : any
+        The argument to interpret and standardize.
+    times : int
+        The number of elements in the output matrix.
+    arg_name : str, optional
+        Name of the argument in the original function.
+    default : any, optional
+        The value to default to when None is provided.
+
+    Returns
+    -------
+    standardized_arg : (times,) array
+        The standardized output of the argument.
+
+    Examples
+    --------
+    >>> import numpy as np
+
+    >>> interpret_arg(None, 3)
+    np.array(0., 0., 0.)
+
+    >>> interpret_arg((None, 0), 5, default=180)
+    np.array(180, 0, 180, 180, 180)
+    """
+    standardized_arg = np.array(arg)
+    message = 'The parameter `%s` cannot be of size larger than %s.'
+    if standardized_arg.ndim == 0:
+        # `param` is not array_like
+        standardized_arg *= np.ones(times)
+    else:
+        # `param` is array_like
+        standardized_arg = standardized_param.ravel()
+        if standardized_arg.size > times:
+            raise ValueError(message % (arg_name, str(times)))
+        standardized_arg += ([default]
+                            * (times - standardized_arg.size))
+    # replace all `None`s with the default value
+    standardized_arg[(standardized_arg == None).nonzero()] = default
+
+    return standardized_arg.astype(None)
