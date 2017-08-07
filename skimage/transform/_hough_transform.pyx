@@ -315,7 +315,7 @@ def _hough_line(cnp.ndarray img,
 def _probabilistic_hough_line(cnp.ndarray img, int threshold,
                               int line_length, int line_gap,
                               cnp.ndarray[ndim=1, dtype=cnp.double_t] theta,
-                              seed=None):
+                              bint use_seed, unsigned int seed):
     """Return lines from a progressive probabilistic line Hough transform.
 
     Parameters
@@ -332,7 +332,9 @@ def _probabilistic_hough_line(cnp.ndarray img, int threshold,
         Increase the parameter to merge broken lines more aggresively.
     theta : 1D ndarray, dtype=double
         Angles at which to compute the transform, in radians.
-    seed : int, optional
+    use_seed : bool
+        Whether to use the seed value.
+    seed : int
         Seed to initialize the random number generator.
 
     Returns
@@ -382,8 +384,7 @@ def _probabilistic_hough_line(cnp.ndarray img, int threshold,
     # mask all non-zero indexes
     mask[y_idxs, x_idxs] = 1
 
-    if seed is not None:
-        srand(seed)
+    random_state = np.random.RandomState(seed if use_seed else None)
 
     while 1:
 
@@ -393,7 +394,7 @@ def _probabilistic_hough_line(cnp.ndarray img, int threshold,
             break
 
         # select random non-zero point
-        index = rand() % count
+        index = random_state.randint(0, count)
         x = points[index][0]
         y = points[index][1]
         del points[index]
