@@ -30,14 +30,14 @@ def _center_and_normalize_points(points):
 
     Parameters
     ----------
-    points : (N, D) array
+    points : (M, N) array
         The coordinates of the image points.
 
     Returns
     -------
-    matrix : (3, 3) array
+    matrix : (N + 1, N + 1) array
         The transformation matrix to obtain the new points.
-    new_points : (N, D) array
+    new_points : (M, N) array
         The transformed image points.
 
     References
@@ -50,21 +50,24 @@ def _center_and_normalize_points(points):
 
     centroid = np.mean(points, axis=0)
 
+    ndim = centroid.size
+
     rms = math.sqrt(np.sum((points - centroid) ** 2) / points.shape[0])
 
     norm_factor = math.sqrt(2) / rms
 
-    matrix = np.array([[norm_factor, 0,           - norm_factor * centroid[0]],
-                       [0,           norm_factor, - norm_factor * centroid[1]],
-                       [0,           0,             1                        ]])
+    matrix = np.eye(ndim + 1) * norm_factor
 
-    pointsh = np.row_stack([points.T, np.ones((points.shape[0]),)])
+    matrix[:, -1][:-1] = - norm_factor * centroid
+
+    matrix[-1, -1] = 1
+
+    pointsh = np.row_stack([points.T, np.ones(points.shape[0])])
 
     new_pointsh = np.dot(matrix, pointsh).T
 
-    new_points = new_pointsh[:, :2]
-    new_points[:, 0] /= new_pointsh[:, 2]
-    new_points[:, 1] /= new_pointsh[:, 2]
+    new_points = new_pointsh[:, :ndim]
+    new_points /= new_pointsh[:, ndim, np.newaxis]
 
     return matrix, new_points
 
