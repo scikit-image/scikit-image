@@ -8,7 +8,6 @@ cimport numpy as cnp
 cimport cython
 
 from libc.math cimport abs, fabs, sqrt, ceil, atan2, M_PI
-from libc.stdlib cimport rand, srand
 
 from ..draw import circle_perimeter
 
