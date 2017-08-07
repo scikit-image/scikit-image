@@ -77,7 +77,7 @@ def test_probabilistic_hough_seed():
     # Use constant seed to ensure a deterministic output
     lines = tf.probabilistic_hough_line(image, threshold=50, line_length=50,
                                         line_gap=1, seed=1234)
-    assert len(lines) == 59
+    assert len(lines) == 64
 
 
 def test_probabilistic_hough_bad_input():
