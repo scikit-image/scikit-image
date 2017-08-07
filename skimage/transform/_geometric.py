@@ -156,12 +156,12 @@ class GeometricTransform(object):
 
         Parameters
         ----------
-        coords : (N, D) array
+        coords : (M, N) array
             Source coordinates.
 
         Returns
         -------
-        coords : (N, D) array
+        coords : (M, N) array
             Destination coordinates.
 
         """
@@ -172,12 +172,12 @@ class GeometricTransform(object):
 
         Parameters
         ----------
-        coords : (N, D) array
+        coords : (M, N) array
             Destination coordinates.
 
         Returns
         -------
-        coords : (N, D) array
+        coords : (M, N) array
             Source coordinates.
 
         """
@@ -191,9 +191,9 @@ class GeometricTransform(object):
 
         Parameters
         ----------
-        src : (N, D) array
+        src : (M, N) array
             Source coordinates.
-        dst : (N, D) array
+        dst : (M, N) array
             Destination coordinates.
 
         Returns
@@ -290,9 +290,9 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         Parameters
         ----------
-        src : (N, D) array
+        src : (M, N) array
             Source coordinates.
-        dst : (N, D) array
+        dst : (M, N) array
             Destination coordinates.
 
         Returns
@@ -342,9 +342,9 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         Parameters
         ----------
-        src : (N, D) array
+        src : (M, N) array
             Source coordinates.
-        dst : (N, D) array
+        dst : (M, N) array
             Destination coordinates.
 
         Returns
@@ -374,9 +374,9 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         Parameters
         ----------
-        src : (N, D) array
+        src : (M, N) array
             Source coordinates.
-        dst : (N, D) array
+        dst : (M, N) array
             Destination coordinates.
 
         Returns
@@ -467,9 +467,9 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
         Parameters
         ----------
-        src : (N, D) array
+        src : (M, N) array
             Source coordinates.
-        dst : (N, D) array
+        dst : (M, N) array
             Destination coordinates.
 
         Returns
@@ -564,12 +564,12 @@ class ProjectiveTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, D) array
+        coords : (M, N) array
             Source coordinates.
 
         Returns
         -------
-        coords : (N, D) array
+        coords : (M, N) array
             Destination coordinates.
 
         """
@@ -580,12 +580,12 @@ class ProjectiveTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, D) array
+        coords : (M, N) array
             Destination coordinates.
 
         Returns
         -------
-        coords : (N, D) array
+        coords : (M, N) array
             Source coordinates.
 
         """
@@ -636,9 +636,9 @@ class ProjectiveTransform(GeometricTransform):
 
         Parameters
         ----------
-        src : (N, D) array
+        src : (M, N) array
             Source coordinates.
-        dst : (N, D) array
+        dst : (M, N) array
             Destination coordinates.
 
         Returns
@@ -876,12 +876,12 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, D) array
+        coords : (M, N) array
             Source coordinates.
 
         Returns
         -------
-        coords : (N, D) array
+        coords : (M, N) array
             Transformed coordinates.
 
         """
@@ -911,12 +911,12 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, D) array
+        coords : (M, N) array
             Source coordinates.
 
         Returns
         -------
-        coords : (N, D) array
+        coords : (M, N) array
             Transformed coordinates.
 
         """
@@ -1012,9 +1012,9 @@ class EuclideanTransform(ProjectiveTransform):
 
         Parameters
         ----------
-        src : (N, D) array
+        src : (M, N) array
             Source coordinates.
-        dst : (N, D) array
+        dst : (M, N) array
             Destination coordinates.
 
         Returns
@@ -1115,9 +1115,9 @@ class SimilarityTransform(EuclideanTransform):
 
         Parameters
         ----------
-        src : (N, D) array
+        src : (M, N) array
             Source coordinates.
-        dst : (N, D) array
+        dst : (M, N) array
             Destination coordinates.
 
         Returns
@@ -1254,12 +1254,12 @@ class PolynomialTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, D) array
+        coords : (M, N) array
             source coordinates
 
         Returns
         -------
-        coords : (N, D) array
+        coords : (M, N) array
             Transformed coordinates.
 
         """
@@ -1378,14 +1378,14 @@ def matrix_transform(coords, matrix):
 
     Parameters
     ----------
-    coords : (N, D) array
+    coords : (M, N) array
         x, y coordinates to transform
     matrix : (3, 3) array
         Homogeneous transformation matrix.
 
     Returns
     -------
-    coords : (N, D) array
+    coords : (M, N) array
         Transformed coordinates.
 
     """
