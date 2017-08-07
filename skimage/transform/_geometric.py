@@ -231,35 +231,38 @@ class FundamentalMatrixTransform(GeometricTransform):
 
     Parameters
     ----------
-    matrix : (3, 3) array, optional
+    matrix : (N, N) array, optional
         Fundamental matrix.
+    ndim : int, optional
+        The intended dimensions of the fundamental matrix.
 
     Attributes
     ----------
-    params : (3, 3) array
+    params : (N, N) array
         Fundamental matrix.
 
     """
 
-    def __init__(self, matrix=None):
+    def __init__(self, matrix=None, ndim=2):
         if matrix is None:
             # default to an identity transform
-            matrix = np.eye(3)
-        if matrix.shape != (3, 3):
+            matrix = np.eye(ndim + 1)
+        if matrix.shape != (ndim + 1, ndim + 1):
             raise ValueError("Invalid shape of transformation matrix")
         self.params = matrix
+        self.ndim = ndim
 
     def __call__(self, coords):
         """Apply forward transformation.
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (M, N) array
             Source coordinates.
 
         Returns
         -------
-        coords : (N, 3) array
+        coords : (M, N + 1) array
             Epipolar lines in the destination image.
 
         """
@@ -271,12 +274,12 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (M, N) array
             Destination coordinates.
 
         Returns
         -------
-        coords : (N, 3) array
+        coords : (M, N + 1) array
             Epipolar lines in the source image.
 
         """
@@ -297,39 +300,41 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         Returns
         -------
-        F_normalized : (3, 3) array
+        F_normalized : (N + 1, N + 1) array
             The normalized solution to the homogeneous system. If the system
             is not well-conditioned, this matrix contains NaNs.
-        src_matrix : (3, 3) array
+        src_matrix : (N + 1, N + 1) array
             The transformation matrix to obtain the normalized source
             coordinates.
-        dst_matrix : (3, 3) array
+        dst_matrix : (N + 1, N + 1) array
             The transformation matrix to obtain the normalized destination
             coordinates.
 
         """
+        ndim = self.ndim
+        size = ndim + 1
+
         assert src.shape == dst.shape
-        assert src.shape[0] >= 8
+        assert src.shape[0] >= 3 * size - 1
 
         # Center and normalize image points for better numerical stability.
         try:
             src_matrix, src = _center_and_normalize_points(src)
             dst_matrix, dst = _center_and_normalize_points(dst)
         except ZeroDivisionError:
-            self.params = np.full((3, 3), np.nan)
-            return 3 * [np.full((3, 3), np.nan)]
+            self.params = np.full((size, size), np.nan)
+            return 3 * [np.full((size, size), np.nan)]
 
         # Setup homogeneous linear equation as dst' * F * src = 0.
-        A = np.ones((src.shape[0], 9))
-        A[:, :2] = src
-        A[:, :3] *= dst[:, 0, np.newaxis]
-        A[:, 3:5] = src
-        A[:, 3:6] *= dst[:, 1, np.newaxis]
-        A[:, 6:8] = src
+        A = np.column_stack(src, np.ones(src.shape[0]))
+        A = A[..., np.newaxis] * np.ones(ndim)
+        A = np.rollaxis(A, -1)
+        A = np.concatenate(A, axis=1)
+        A *= dst.repeat(size, axis=1)
 
         # Solve for the nullspace of the constraint matrix.
         _, _, V = np.linalg.svd(A)
-        F_normalized = V[-1, :].reshape(3, 3)
+        F_normalized = V[-1, :].reshape(size, size)
 
         return F_normalized, src_matrix, dst_matrix
 
@@ -393,8 +398,8 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         dst_F_src = np.sum(dst_homogeneous * F_src.T, axis=1)
 
-        return np.abs(dst_F_src) / np.sqrt(F_src[0] ** 2 + F_src[1] ** 2
-                                           + Ft_dst[0] ** 2 + Ft_dst[1] ** 2)
+        return np.abs(dst_F_src) / np.sqrt((F_src ** 2).sum()
+                                         + (Ft_dst ** 2).sum())
 
 
 class EssentialMatrixTransform(FundamentalMatrixTransform):
