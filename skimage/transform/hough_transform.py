@@ -266,8 +266,7 @@ def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
     seed = 0 if seed is None else seed
 
     return _prob_hough_line(image, threshold=threshold, line_length=line_length,
-                            line_gap=line_gap, theta=theta, use_seed=use_seed,
-                            seed=seed)
+                            line_gap=line_gap, theta=theta, seed=seed)
 
 
 def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
