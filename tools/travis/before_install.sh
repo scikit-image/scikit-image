@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -ex
 
-
-export COVERALLS_REPO_TOKEN=7LdFN9232ZbSY3oaXHbQIzLazrSf6w2pQ
 export PIP_DEFAULT_TIMEOUT=60
 
 # This URL is for any extra wheels that are not available on pypi.  As of 14
