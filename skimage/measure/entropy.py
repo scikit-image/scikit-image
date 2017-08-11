@@ -33,7 +33,7 @@ def shannon_entropy(image, base=2):
     --------
     >>> from skimage import data
     >>> shannon_entropy(data.camera())
-    4.8852702980667759
+    7.0479552324230861
     """
 
     _, counts = unique(image, return_counts=True)
