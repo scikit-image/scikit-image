@@ -268,7 +268,7 @@ def test_discontiguous_out_array():
 
 def test_1d_erosion():
     image = np.array([1, 2, 3, 2, 1])
-    expected = np.array([0, 1, 2, 1, 0])
+    expected = np.array([1, 1, 2, 1, 1])
     eroded = grey.erosion(image)
     testing.assert_array_equal(eroded, expected)
 
