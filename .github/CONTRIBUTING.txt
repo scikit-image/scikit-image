@@ -193,10 +193,10 @@ Testing
 -------
 
 In order to validate implemented algorithms, and to prevent possible
-regressions, ``scikit-image`` heavily exploits
+regressions, ``scikit-image`` makes use of
 `pytest <https://docs.pytest.org/en/latest/>`__  testing framework. Typically,
 the tests related to a particular functionality are located in the same
-directory as the implementation, but in ``tests`` subfolder.
+directory as the implementation, but in the ``tests`` subfolder.
 
 To use ``pytest`` you firstly need to build Cython extensions, and install the
 package in development mode::
@@ -268,7 +268,7 @@ all targets.
 Requirements
 ~~~~~~~~~~~~
 
-`Sphinx <http://www.sphinx-doc.org/en/stable/>`__ and Latex are needed to build
+`Sphinx <http://www.sphinx-doc.org/en/stable/>`__ and LaTeX are needed to build
 the documentation.
 
 **Sphinx:**
@@ -277,13 +277,13 @@ the documentation.
 
     pip install sphinx
 
-**Latex Ubuntu:**
+**LaTeX Ubuntu:**
 
 .. code:: sh
 
     sudo apt-get install -qq texlive texlive-latex-extra dvipng
 
-**Latex Mac:**
+**LaTeX Mac:**
 
 Install the full `MacTex <http://www.tug.org/mactex/>`__ installation or
 install the smaller
