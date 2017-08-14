@@ -3,11 +3,11 @@
 from itertools import cycle
 
 import numpy as np
-from scipy import ndimage
 from scipy.ndimage import binary_dilation, binary_erosion, \
                         gaussian_filter, gaussian_gradient_magnitude
 
 __all__ = ['morph_acwe', 'morph_gac', 'SIoIS', 'ISoSI', 'gborders']
+
 
 class fcycle(object):
     
@@ -152,9 +152,9 @@ def morph_acwe(image, init_level_set, iterations,
     References
     ----------
     .. [1] A Morphological Approach to Curvature-based Evolution of Curves and
-    Surfaces, Pablo Márquez-Neila, Luis Baumela, Luis Álvarez. In IEEE
-    Transactions on Pattern Analysis and Machine Intelligence (PAMI), 2014,
-    DOI 10.1109/TPAMI.2013.106
+           Surfaces, Pablo Márquez-Neila, Luis Baumela, Luis Álvarez. In IEEE
+           Transactions on Pattern Analysis and Machine Intelligence (PAMI),
+           2014, DOI 10.1109/TPAMI.2013.106
     """
     
     # TODO: Make it work with "color" (or multi-channel) images.
@@ -235,10 +235,9 @@ def morph_gac(image, init_level_set, iterations,
     References
     ----------
     .. [1] A Morphological Approach to Curvature-based Evolution of Curves and
-    Surfaces, Pablo Márquez-Neila, Luis Baumela, Luis Álvarez. In IEEE
-    Transactions on Pattern Analysis and Machine Intelligence (PAMI), 2014,
-    DOI 10.1109/TPAMI.2013.106
-    
+           Surfaces, Pablo Márquez-Neila, Luis Baumela, Luis Álvarez. In IEEE
+           Transactions on Pattern Analysis and Machine Intelligence (PAMI),
+           2014, DOI 10.1109/TPAMI.2013.106    
     """
     
     _check_input(image, init_level_set)
