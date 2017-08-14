@@ -58,12 +58,14 @@ matrix:
       env: TRAVIS_PYTHON_VERSION=3.5
 
 before_install:
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source tools/travis/osx_install.sh ; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        source tools/travis/osx_install.sh;
+      else
+        virtualenv -p python ~/venv;
+        source ~/venv/bin/activate;
+      fi
     - ccache -s
     - export PATH=/usr/lib/ccache:${PATH}
-    # Attempt to fix bug making virtualenvs for Python 3.6
-    - python -m pip install -U pip
-    - pip install -U virtualenv
     - source tools/travis/before_install.sh
     - which python; python --version
     - tools/check_bento_build.py

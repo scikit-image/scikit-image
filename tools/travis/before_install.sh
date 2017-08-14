@@ -56,10 +56,6 @@ if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     sed -i 's/>=/==/g' requirements.txt
 fi
 
-# create new empty venv
-virtualenv -p python ~/venv
-source ~/venv/bin/activate
-
 python -m pip install --upgrade pip
 pip install --retries 3 -q wheel flake8 codecov pytest pytest-cov
 # install numpy from PyPI instead of our wheelhouse
