@@ -191,26 +191,35 @@ Stylistic Guidelines
 
 Testing
 -------
+``scikit-image`` has an extensive test suite that ensures correct
+execution on your system.  The test suite has to pass before a pull
+request can be merged, and tests should be added to cover any
+modifications to the code base.
 
-In order to validate implemented algorithms, and to prevent possible
-regressions, ``scikit-image`` makes use of
-`pytest <https://docs.pytest.org/en/latest/>`__  testing framework. Typically,
-the tests related to a particular functionality are located in the same
-directory as the implementation, but in the ``tests`` subfolder.
+We make use of the `pytest <https://docs.pytest.org/en/latest/>`__
+testing framework, with tests located in the various
+``skimage/submodule/tests`` folders.
 
-To use ``pytest`` you firstly need to build Cython extensions, and install the
-package in development mode::
+To use ``pytest``, ensure that Cython extensions are built and that
+the library is installed in development mode::
 
     $ pip install -e .
 
-To run ``pytest`` on a directory of tests (all ``scikit-image`` tests, in this case)::
+Now, run all tests using::
 
     $ PYTHONPATH=. pytest skimage
 
-To run tests from a specific file::
+Or the tests for a specific submodule::
+
+    $ PYTHONPATH=. pytest skimage/morphology
+
+Or tests from a specific file::
 
     $ PYTHONPATH=. pytest skimage/morphology/tests/test_grey.py
 
+Or a single test within that file::
+
+    $ PYTHONPATH=. pytest skimage/morphology/tests/test_grey.py::test_3d_fallback_black_tophat
 
 Test coverage
 -------------
