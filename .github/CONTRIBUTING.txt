@@ -189,6 +189,38 @@ Stylistic Guidelines
   ``with nogil:``.
 
 
+Testing
+-------
+``scikit-image`` has an extensive test suite that ensures correct
+execution on your system.  The test suite has to pass before a pull
+request can be merged, and tests should be added to cover any
+modifications to the code base.
+
+We make use of the `pytest <https://docs.pytest.org/en/latest/>`__
+testing framework, with tests located in the various
+``skimage/submodule/tests`` folders.
+
+To use ``pytest``, ensure that Cython extensions are built and that
+the library is installed in development mode::
+
+    $ pip install -e .
+
+Now, run all tests using::
+
+    $ PYTHONPATH=. pytest skimage
+
+Or the tests for a specific submodule::
+
+    $ PYTHONPATH=. pytest skimage/morphology
+
+Or tests from a specific file::
+
+    $ PYTHONPATH=. pytest skimage/morphology/tests/test_grey.py
+
+Or a single test within that file::
+
+    $ PYTHONPATH=. pytest skimage/morphology/tests/test_grey.py::test_3d_fallback_black_tophat
+
 Test coverage
 -------------
 
@@ -245,7 +277,8 @@ all targets.
 Requirements
 ~~~~~~~~~~~~
 
-Sphinx (>= 1.3) and Latex is needed to build doc.
+`Sphinx <http://www.sphinx-doc.org/en/stable/>`__ and LaTeX are needed to build
+the documentation.
 
 **Sphinx:**
 
@@ -253,13 +286,13 @@ Sphinx (>= 1.3) and Latex is needed to build doc.
 
     pip install sphinx
 
-**Latex Ubuntu:**
+**LaTeX Ubuntu:**
 
 .. code:: sh
 
     sudo apt-get install -qq texlive texlive-latex-extra dvipng
 
-**Latex Mac:**
+**LaTeX Mac:**
 
 Install the full `MacTex <http://www.tug.org/mactex/>`__ installation or
 install the smaller
@@ -308,7 +341,8 @@ Deprecation cycle
 If the behavior of the library has to be changed, a deprecation cycle must be
 followed to warn users.
 
-- a deprecation cycle is *not* necessary when
+- a deprecation cycle is *not* necessary when:
+
     * adding a new function, or
     * adding a new keyword argument to the *end* of a function signature, or
     * fixing what was buggy behaviour
@@ -316,6 +350,7 @@ followed to warn users.
 - a deprecation cycle is necessary for *any breaking API change*, meaning a
     change where the function, invoked with the same arguments, would return a
     different result after the change. This includes:
+
     * changing the order of arguments or keyword arguments, or
     * adding arguments or keyword arguments to a function, or
     * changing a function's name or submodule, or
