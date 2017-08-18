@@ -105,30 +105,50 @@ For a more detailed discussion, read these :doc:`detailed documents
 Divergence between ``upstream master`` and your feature branch
 --------------------------------------------------------------
 
-Do *not* ever merge the main branch into yours. If GitHub indicates that the
-branch of your Pull Request can no longer be merged automatically, rebase
-onto master::
+If GitHub indicates that the branch of your Pull Request can no longer
+be merged automatically, merge the master branch into yours::
 
-   git checkout master
-   git pull upstream master
-   git checkout transform-speedups
-   git rebase master
+   git fetch upstream master
+   git merge upstream/master
 
-If any conflicts occur, fix the according files and continue::
+If any conflicts occur, they need to be fixed before continuing.  See
+which files are in conflict using::
 
-   git add conflict-file1 conflict-file2
-   git rebase --continue
+   git status
 
-However, you should only rebase your own branches and must generally not
-rebase any branch which you collaborate on with someone else.
+Which displays a message like::
 
-Finally, you must push your rebased branch::
+   Unmerged paths:
+     (use "git add <file>..." to mark resolution)
 
-   git push --force origin transform-speedups
+     both modified:   file_with_conflict.txt
 
-(If you are curious, here's a further discussion on the
-`dangers of rebasing <http://tinyurl.com/lll385>`__.
-Also see this `LWN article <http://tinyurl.com/nqcbkj>`__.)
+Inside the conflicted file, you'll find sections like these::
+
+   <<<<<<< HEAD
+   The way the text looks in your branch
+   =======
+   The way the text looks in the master branch
+   >>>>>>> master
+
+Choose one version of the text that should be kept, and delete the
+rest::
+
+   The way the text looks in your branch
+
+Now, add the fixed file::
+
+   git add file_with_conflict.txt
+
+Once you've fixed all merge conflicts, do::
+
+   git commit
+
+.. note::
+
+   Advanced Git users are encouraged to `rebase instead of merge
+   <http://scikit-image.org/docs/dev/gitwash/development_workflow.html#rebasing-on-trunk>`__,
+   but we squash and merge most PRs either way.
 
 Guidelines
 ----------
