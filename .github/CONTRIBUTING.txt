@@ -146,8 +146,9 @@ Once you've fixed all merge conflicts, do::
 
 .. note::
 
-   Advanced Git users may choose to rebase instead of merge, but we
-   squash and merge most PRs either way.
+   Advanced Git users are encouraged to `rebase instead of merge
+   <http://scikit-image.org/docs/dev/gitwash/development_workflow.html#rebasing-on-trunk>`__,
+   but we squash and merge most PRs either way.
 
 Guidelines
 ----------
