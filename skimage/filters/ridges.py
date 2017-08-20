@@ -14,12 +14,9 @@ from warnings import warn
 
 import numpy as np
 
-#from ..util import img_as_float, invert
-#from ..feature import hessian_matrix, hessian_matrix_eigvals
-#from .._shared.utils import assert_nD
-from skimage.util import img_as_float, invert
-from skimage.feature import hessian_matrix, hessian_matrix_eigvals
-from skimage._shared.utils import assert_nD
+from ..util import img_as_float, invert
+from ..feature import hessian_matrix, hessian_matrix_eigvals
+from .._shared.utils import assert_nD
 
 
 def divide_nonzero(array1, array2, cval=1e-10):
@@ -80,7 +77,7 @@ def hessian_nd_matrix(hessian_elements, ndim, order='rc'):
     # Generate empty array for storing Hessian matrices for each pixel
     d_hessian = (ndim, ndim)
     d_image = hessian_elements[0].shape
-    full = np.zeros(d_hessian+d_image)
+    full = np.zeros(d_hessian + d_image)
 
     # Generate list of image dimensions
     axes = range(ndim)
@@ -96,8 +93,8 @@ def hessian_nd_matrix(hessian_elements, ndim, order='rc'):
 
     # Reshape array such that Hessian matrices are given by the last indices
     d_hessian = list(range(2))
-    d_image = list(range(2, 2+ndim))
-    full = np.transpose(full, d_image+d_hessian)
+    d_image = list(range(2, 2 + ndim))
+    full = np.transpose(full, d_image + d_hessian)
 
     # Return array with full Hessian matrices
     return full
@@ -125,8 +122,8 @@ def hessian_nd_eigenvalues(hessian, ndim):
 
     # Reshape array such that eigenvalues are given by the first index
     d_image = list(range(ndim))
-    d_eigen = list(range(ndim, ndim+1))
-    eigenvalues = np.transpose(eigenvalues, d_eigen+d_image)
+    d_eigen = list(range(ndim, ndim + 1))
+    eigenvalues = np.transpose(eigenvalues, d_eigen + d_image)
 
     # Return array with Hessian eigenvalues
     return eigenvalues
@@ -282,7 +279,7 @@ def meijering(image, scale_range=(1, 10), scale_step=2, alpha=None,
 
     # Set parameters
     if alpha is None:
-        alpha = 1.0/ndim
+        alpha = 1.0 / ndim
 
     # Invert image to detect bright ridges on dark background
     if not black_ridges:
@@ -301,18 +298,18 @@ def meijering(image, scale_range=(1, 10), scale_step=2, alpha=None,
         if ndim > 1:
 
             # Set coefficients for scaling eigenvalues
-            coefficients = [alpha]*ndim
+            coefficients = [alpha] * ndim
             coefficients[0] = 1
 
             # Compute auxiliary variables l_i = e_i + sum_{j!=i} alpha * e_j
-            auxiliary = [np.sum([eigenvalues[i]*np.roll(coefficients, j)[i]
+            auxiliary = [np.sum([eigenvalues[i] * np.roll(coefficients, j)[i]
                          for j in range(ndim)], axis=0) for i in range(ndim)]
 
             # Compute maximum over auxiliary variables
             auxiliary = np.max(auxiliary, axis=0)
 
             # Rescale image intensity
-            filtered = np.abs(auxiliary)/np.abs(np.max(auxiliary))
+            filtered = np.abs(auxiliary) / np.abs(np.max(auxiliary))
 
             # Remove background
             filtered = np.where(filtered > 0, filtered, 0)
@@ -533,8 +530,8 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
             r_g = lambda1 ** 2 + lambda2 ** 2
 
             # Compute output image for given (sigma) scale
-            filtered = (np.exp(-r_b / beta)
-                        * (np.ones(shape) - np.exp(-r_g / gamma)))
+            filtered = (np.exp(-r_b / beta) *
+                        (np.ones(shape) - np.exp(-r_g / gamma)))
 
             # Store results in (2+1)D matrices
             filtered_array[i] = filtered

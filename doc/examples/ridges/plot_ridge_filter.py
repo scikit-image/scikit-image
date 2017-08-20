@@ -38,7 +38,7 @@ for i, black_ridges in enumerate([1, 0]):
                        'Hessian vesselness'][j])
 
         if j == 0:
-            plt.ylabel('black_ridges = '+str(bool(black_ridges)))
+            plt.ylabel('black_ridges = ' + str(bool(black_ridges)))
 
         plt.xticks([])
         plt.yticks([])
