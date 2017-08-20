@@ -39,3 +39,6 @@ Version 0.16
   in ``skimage.transform.tests.test_pyramids.py`` and
   ``skimage.transform.tests.test_warps.py``.
 * Remove deprecated argument ``visualise`` from function skimage.feature.hog
+* Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.frangi``
+* Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.hessian``
+
