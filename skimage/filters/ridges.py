@@ -19,7 +19,7 @@ from ..feature import hessian_matrix, hessian_matrix_eigvals
 from .._shared.utils import assert_nD
 
 
-def divide_nonzero(array1, array2, cval=1e-10):
+def _divide_nonzero(array1, array2, cval=1e-10):
     """
     Divides two arrays.
 
@@ -51,85 +51,7 @@ def divide_nonzero(array1, array2, cval=1e-10):
     return np.divide(array1, denominator)
 
 
-def hessian_nd_matrix(hessian_elements, ndim, order='rc'):
-    """
-    Generate fell Hessian matrices from Hessian elements of n-dimensional
-    image.
-
-    Parameters
-    ----------
-    hessian_elements : (E, N, ..., M) ndarray
-        Array with Hessian elements for each image pixel.
-    ndim : int
-        Dimensions of input image.
-     order : {'xy', 'rc'}, optional
-        This parameter allows for the use of reverse or forward order of
-        the image axes in gradient computation. 'xy' indicates the usage
-        of the last axis initially (Hxx, Hxy, Hyy), whilst 'rc' indicates
-        the use of the first axis initially (Hrr, Hrc, Hcc).
-
-    Returns
-    -------
-    full : (n, n, N, ..., M) ndarray
-        Array with full Hessian matrices for each image pixel.
-    """
-
-    # Generate empty array for storing Hessian matrices for each pixel
-    d_hessian = (ndim, ndim)
-    d_image = hessian_elements[0].shape
-    full = np.zeros(d_hessian + d_image)
-
-    # Generate list of image dimensions
-    axes = range(ndim)
-    if order == 'rc':
-        axes = reversed(axes)
-
-    # Fill Hessian matrices with Hessian elements
-    for index, (ax0, ax1) in enumerate(combinations_with_replacement(axes, 2)):
-        element = hessian_elements[index]
-        full[ax0, ax1] = element
-        if ax0 != ax1:
-            full[ax1, ax0] = element
-
-    # Reshape array such that Hessian matrices are given by the last indices
-    d_hessian = list(range(2))
-    d_image = list(range(2, 2 + ndim))
-    full = np.transpose(full, d_image + d_hessian)
-
-    # Return array with full Hessian matrices
-    return full
-
-
-def hessian_nd_eigenvalues(hessian, ndim):
-    """
-    Eigenvalues of Hessian matrices of n-dimensional image.
-
-    Parameters
-    ----------
-    hessian : (n, n, M_1, ..., M_ndim) ndarray
-        Array with n-dimensional Hessian matrices for each image pixel.
-    ndim : int
-        Dimensions of input image.
-
-    Returns
-    -------
-    eigenvalues : (n, M_1, ..., M_ndim) ndarray
-        Array with n Hessian eigenvalues for each image pixel.
-    """
-
-    # Compute Hessian eigenvalues
-    eigenvalues = np.linalg.eigvalsh(hessian)
-
-    # Reshape array such that eigenvalues are given by the first index
-    d_image = list(range(ndim))
-    d_eigen = list(range(ndim, ndim + 1))
-    eigenvalues = np.transpose(eigenvalues, d_eigen + d_image)
-
-    # Return array with Hessian eigenvalues
-    return eigenvalues
-
-
-def sortbyabs(array, axis=0):
+def _sortbyabs(array, axis=0):
     """
     Sort array along a given axis by absolute values.
 
@@ -160,7 +82,85 @@ def sortbyabs(array, axis=0):
     return array[index]
 
 
-def _compute_hessian_eigenvalues(image, sigma, sorting='none'):
+def hessian_nd_matrix(hessian_elements, ndim, order='rc'):
+    """
+    Generate fell Hessian matrices from Hessian elements of n-dimensional
+    image.
+
+    Parameters
+    ----------
+    hessian_elements : (E, N, ..., M) ndarray
+        Array with Hessian elements for each image pixel.
+    ndim : int
+        Dimensions of input image.
+     order : {'xy', 'rc'}, optional
+        This parameter allows for the use of reverse or forward order of
+        the image axes in gradient computation. 'xy' indicates the usage
+        of the last axis initially (Hxx, Hxy, Hyy), whilst 'rc' indicates
+        the use of the first axis initially (Hrr, Hrc, Hcc).
+
+    Returns
+    -------
+    hessian_full : (n, n, N, ..., M) ndarray
+        Array with full Hessian matrices for each image pixel.
+    """
+
+    # Generate empty array for storing Hessian matrices for each pixel
+    d_hessian = (ndim, ndim)
+    d_image = hessian_elements[0].shape
+    hessian_full = np.zeros(d_hessian + d_image)
+
+    # Generate list of image dimensions
+    axes = range(ndim)
+    if order == 'rc':
+        axes = reversed(axes)
+
+    # Fill Hessian matrices with Hessian elements
+    for index, (ax0, ax1) in enumerate(combinations_with_replacement(axes, 2)):
+        element = hessian_elements[index]
+        hessian_full[ax0, ax1] = element
+        if ax0 != ax1:
+            hessian_full[ax1, ax0] = element
+
+    # Reshape array such that Hessian matrices are given by the last indices
+    d_hessian = list(range(2))
+    d_image = list(range(2, 2 + ndim))
+    hessian_full = np.transpose(hessian_full, d_image + d_hessian)
+
+    # Return array with full Hessian matrices
+    return hessian_full
+
+
+def hessian_nd_eigenvalues(hessian_full, ndim):
+    """
+    Eigenvalues of Hessian matrices of n-dimensional image.
+
+    Parameters
+    ----------
+    hessian_full : (n, n, M_1, ..., M_ndim) ndarray
+        Array with n-dimensional Hessian matrices for each image pixel.
+    ndim : int
+        Dimensions of input image.
+
+    Returns
+    -------
+    eigenvalues : (n, M_1, ..., M_ndim) ndarray
+        Array with n Hessian eigenvalues for each image pixel.
+    """
+
+    # Compute Hessian eigenvalues
+    eigenvalues = np.linalg.eigvalsh(hessian_full)
+
+    # Reshape array such that eigenvalues are given by the first index
+    d_image = list(range(ndim))
+    d_eigen = list(range(ndim, ndim + 1))
+    eigenvalues = np.transpose(eigenvalues, d_eigen + d_image)
+
+    # Return array with Hessian eigenvalues
+    return eigenvalues
+
+
+def compute_hessian_eigenvalues(image, sigma, sorting='none'):
     """
     Compute Hessian eigenvalues of nD images.
 
@@ -192,23 +192,24 @@ def _compute_hessian_eigenvalues(image, sigma, sorting='none'):
     image = img_as_float(image)
 
     # Make nD hessian
-    elements = hessian_matrix(image, sigma=sigma, order='rc')
+    hessian_elements = hessian_matrix(image, sigma=sigma, order='rc')
 
     # Correct for scale
-    elements = [(sigma ** 2) * e for e in elements]
+    hessian_elements = [(sigma ** 2) * e for e in hessian_elements]
 
     if ndim == 2:
 
         # Compute 2D Hessian eigenvalues
-        eigenvalues = np.array(hessian_matrix_eigvals(*elements))
+        hessian_eigenvalues = np.array(hessian_matrix_eigvals(
+                                       *hessian_elements))
 
     elif ndim > 2:
 
         # Make nD hessian
-        hessian = hessian_nd_matrix(elements, ndim, order='rc')
+        hessian_full = hessian_nd_matrix(hessian_elements, ndim, order='rc')
 
         # Compute nD Hessian eigenvalues
-        eigenvalues = hessian_nd_eigenvalues(hessian, ndim)
+        hessian_eigenvalues = hessian_nd_eigenvalues(hessian_full, ndim)
 
     else:
 
@@ -218,15 +219,15 @@ def _compute_hessian_eigenvalues(image, sigma, sorting='none'):
     if sorting == 'abs':
 
         # Sort eigenvalues by absolute values in ascending order
-        eigenvalues = sortbyabs(eigenvalues, axis=0)
+        hessian_eigenvalues = _sortbyabs(hessian_eigenvalues, axis=0)
 
     elif sorting == 'val':
 
         # Sort eigenvalues by values in ascending order
-        eigenvalues = np.sort(eigenvalues, axis=0)
+        hessian_eigenvalues = np.sort(hessian_eigenvalues, axis=0)
 
     # Return Hessian eigenvalues
-    return eigenvalues
+    return hessian_eigenvalues
 
 
 def meijering(image, scale_range=(1, 10), scale_step=2, alpha=None,
@@ -293,7 +294,7 @@ def meijering(image, scale_range=(1, 10), scale_step=2, alpha=None,
     for i, sigma in enumerate(sigmas):
 
         # Calculate (sorted) eigenvalues
-        eigenvalues = _compute_hessian_eigenvalues(image, sigma, sorting='val')
+        eigenvalues = compute_hessian_eigenvalues(image, sigma, sorting='val')
 
         if ndim > 1:
 
@@ -386,7 +387,7 @@ def sato(image, scale_range=(1, 10), scale_step=2, black_ridges=True):
     for i, sigma in enumerate(sigmas):
 
         # Calculate (sorted) eigenvalues
-        eigenvalues = _compute_hessian_eigenvalues(image, sigma, sorting='val')
+        eigenvalues = compute_hessian_eigenvalues(image, sigma, sorting='val')
 
         if ndim == 2:
 
@@ -516,7 +517,7 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
     for i, sigma in enumerate(sigmas):
 
         # Calculate (abs sorted) eigenvalues
-        eigenvalues = _compute_hessian_eigenvalues(image, sigma, sorting='abs')
+        eigenvalues = compute_hessian_eigenvalues(image, sigma, sorting='abs')
 
         if ndim == 2:
 
@@ -524,7 +525,7 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
             (lambda1, lambda2) = eigenvalues
 
             # Compute sensitivity to deviation from a blob-like structure
-            r_b = divide_nonzero(lambda1, lambda2) ** 2
+            r_b = _divide_nonzero(lambda1, lambda2) ** 2
 
             # Compute sensitivity to areas of high variance/texture/structure
             r_g = lambda1 ** 2 + lambda2 ** 2
@@ -543,11 +544,11 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
             (lambda1, lambda2, lambda3) = eigenvalues
 
             # Compute sensitivity to deviation from a plate-like structure
-            r_a = divide_nonzero(lambda2, lambda3) ** 2
+            r_a = _divide_nonzero(lambda2, lambda3) ** 2
 
             # Compute sensitivity to deviation from a blob-like structure
-            r_b = divide_nonzero(lambda1,
-                                 np.sqrt(np.abs(lambda2 * lambda3))) ** 2
+            r_b = _divide_nonzero(lambda1,
+                                  np.sqrt(np.abs(lambda2 * lambda3))) ** 2
 
             # Compute sensitivity to areas of high variance/texture/structure
             r_g = lambda1 ** 2 + lambda2 ** 2 + lambda3 ** 2

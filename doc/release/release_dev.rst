@@ -18,11 +18,15 @@ New Features
 - hysteresis thresholding in filters (#2665)
 - lookfor function (#2713)
 - montage function (#2626)
+- Frangi (vesselness) filter for 3D data
+- Meijering (neuriteness) filter for nD data
+- Sato (tubeness) filter for 2D and 3D data
 
 
 Improvements
 ------------
 - VisuShrink method for wavelet denoising (#2470)
+- Correct bright ridge detection for Frangi filter (#2700)
 
 
 API Changes
