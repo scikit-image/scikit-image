@@ -1,8 +1,8 @@
 import numpy as np
-from skimage import img_as_float
 import scipy
 import scipy.linalg
 from scipy.interpolate import RectBivariateSpline, interp2d
+from ..util import img_as_float
 from ..filters import sobel
 
 

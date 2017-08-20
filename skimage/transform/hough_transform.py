@@ -1,10 +1,10 @@
 import numpy as np
 from scipy import ndimage
-from .. import measure
 from ._hough_transform import (_hough_circle,
                                _hough_ellipse,
                                _hough_line,
                                _probabilistic_hough_line as _prob_hough_line)
+from ..feature.peak import _prominent_peaks
 
 
 def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
@@ -57,8 +57,6 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     2
 
     """
-    from skimage.feature.peak import _prominent_peaks
-
     h, a, d = _prominent_peaks(hspace, min_xdistance=min_angle,
                                min_ydistance=min_distance,
                                threshold=threshold,
@@ -105,7 +103,6 @@ def hough_circle(image, radius, normalize=True, full_output=False):
     (25, 35, 23)
 
     """
-
     radius = np.atleast_1d(np.asarray(radius))
     return _hough_circle(image, radius.astype(np.intp),
                          normalize=normalize, full_output=full_output)
@@ -306,17 +303,14 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
 
     Examples
     --------
-    >>> from skimage import transform as tf
-    >>> from skimage import draw
+    >>> from skimage import transform, draw
     >>> img = np.zeros((120, 100), dtype=int)
     >>> radius, x_0, y_0 = (20, 99, 50)
     >>> y, x = draw.circle_perimeter(y_0, x_0, radius)
     >>> img[x, y] = 1
-    >>> hspaces = tf.hough_circle(img, radius)
+    >>> hspaces = transform.hough_circle(img, radius)
     >>> accum, cx, cy, rad = hough_circle_peaks(hspaces, [radius,])
     """
-    from skimage.feature.peak import _prominent_peaks
-
     r = []
     cx = []
     cy = []
