@@ -167,8 +167,8 @@ def test_2d_cropped_camera_image():
     assert_allclose(frangi(a_black, black_ridges=True), zeros, atol=1e-3)
     assert_allclose(frangi(a_white, black_ridges=False), zeros, atol=1e-3)
 
-    assert_allclose(hessian(a_black, black_ridges=True), ones, atol=1-1e-7)
-    assert_allclose(hessian(a_white, black_ridges=False), ones, atol=1-1e-7)
+    assert_allclose(hessian(a_black, black_ridges=True), ones, atol=1 - 1e-7)
+    assert_allclose(hessian(a_white, black_ridges=False), ones, atol=1 - 1e-7)
 
 
 def test_3d_cropped_camera_image():
@@ -189,8 +189,8 @@ def test_3d_cropped_camera_image():
     assert_allclose(frangi(a_black, black_ridges=True), zeros, atol=1e-3)
     assert_allclose(frangi(a_white, black_ridges=False), zeros, atol=1e-3)
 
-    assert_allclose(hessian(a_black, black_ridges=True), ones, atol=1-1e-7)
-    assert_allclose(hessian(a_white, black_ridges=False), ones, atol=1-1e-7)
+    assert_allclose(hessian(a_black, black_ridges=True), ones, atol=1 - 1e-7)
+    assert_allclose(hessian(a_white, black_ridges=False), ones, atol=1 - 1e-7)
 
 
 if __name__ == "__main__":
