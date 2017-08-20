@@ -48,6 +48,11 @@ input image. This is very convenient for automated plotting of different
 filters and comparison to the original image, see gallery example.
 
 
+Close issue:
+
+ #2700: Correct wrong behavior of 'black_ridges' keyword argument.
+ 
+
 Additional note for future contributions:
 
  - The available Hybrid Hessian filter does not agree with its description in 

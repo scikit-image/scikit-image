@@ -103,25 +103,25 @@ def test_2d_linearity():
     a_black = np.ones((3, 3)).astype(np.uint8)
     a_white = invert(a_black)
 
-    assert_allclose(meijering(1*a_black, black_ridges=True),
-                    meijering(10*a_black, black_ridges=True), atol=1e-3)
-    assert_allclose(meijering(1*a_white, black_ridges=False),
-                    meijering(10*a_white, black_ridges=False), atol=1e-3)
+    assert_allclose(meijering(1 * a_black, black_ridges=True),
+                    meijering(10 * a_black, black_ridges=True), atol=1e-3)
+    assert_allclose(meijering(1 * a_white, black_ridges=False),
+                    meijering(10 * a_white, black_ridges=False), atol=1e-3)
 
-    assert_allclose(sato(1*a_black, black_ridges=True),
-                    sato(10*a_black, black_ridges=True), atol=1e-3)
-    assert_allclose(sato(1*a_white, black_ridges=False),
-                    sato(10*a_white, black_ridges=False), atol=1e-3)
+    assert_allclose(sato(1 * a_black, black_ridges=True),
+                    sato(10 * a_black, black_ridges=True), atol=1e-3)
+    assert_allclose(sato(1 * a_white, black_ridges=False),
+                    sato(10 * a_white, black_ridges=False), atol=1e-3)
 
-    assert_allclose(frangi(1*a_black, black_ridges=True),
-                    frangi(10*a_black, black_ridges=True), atol=1e-3)
-    assert_allclose(frangi(1*a_white, black_ridges=False),
-                    frangi(10*a_white, black_ridges=False), atol=1e-3)
+    assert_allclose(frangi(1 * a_black, black_ridges=True),
+                    frangi(10 * a_black, black_ridges=True), atol=1e-3)
+    assert_allclose(frangi(1 * a_white, black_ridges=False),
+                    frangi(10 * a_white, black_ridges=False), atol=1e-3)
 
-    assert_allclose(hessian(1*a_black, black_ridges=True),
-                    hessian(10*a_black, black_ridges=True), atol=1e-3)
-    assert_allclose(hessian(1*a_white, black_ridges=False),
-                    hessian(10*a_white, black_ridges=False), atol=1e-3)
+    assert_allclose(hessian(1 * a_black, black_ridges=True),
+                    hessian(10 * a_black, black_ridges=True), atol=1e-3)
+    assert_allclose(hessian(1 * a_white, black_ridges=False),
+                    hessian(10 * a_white, black_ridges=False), atol=1e-3)
 
 
 def test_3d_linearity():
@@ -129,25 +129,25 @@ def test_3d_linearity():
     a_black = np.ones((3, 3, 3)).astype(np.uint8)
     a_white = invert(a_black)
 
-    assert_allclose(meijering(1*a_black, black_ridges=True),
-                    meijering(10*a_black, black_ridges=True), atol=1e-3)
-    assert_allclose(meijering(1*a_white, black_ridges=False),
-                    meijering(10*a_white, black_ridges=False), atol=1e-3)
+    assert_allclose(meijering(1 * a_black, black_ridges=True),
+                    meijering(10 * a_black, black_ridges=True), atol=1e-3)
+    assert_allclose(meijering(1 * a_white, black_ridges=False),
+                    meijering(10 * a_white, black_ridges=False), atol=1e-3)
 
-    assert_allclose(sato(1*a_black, black_ridges=True),
-                    sato(10*a_black, black_ridges=True), atol=1e-3)
-    assert_allclose(sato(1*a_white, black_ridges=False),
-                    sato(10*a_white, black_ridges=False), atol=1e-3)
+    assert_allclose(sato(1 * a_black, black_ridges=True),
+                    sato(10 * a_black, black_ridges=True), atol=1e-3)
+    assert_allclose(sato(1 * a_white, black_ridges=False),
+                    sato(10 * a_white, black_ridges=False), atol=1e-3)
 
-    assert_allclose(frangi(1*a_black, black_ridges=True),
-                    frangi(10*a_black, black_ridges=True), atol=1e-3)
-    assert_allclose(frangi(1*a_white, black_ridges=False),
-                    frangi(10*a_white, black_ridges=False), atol=1e-3)
+    assert_allclose(frangi(1 * a_black, black_ridges=True),
+                    frangi(10 * a_black, black_ridges=True), atol=1e-3)
+    assert_allclose(frangi(1 * a_white, black_ridges=False),
+                    frangi(10 * a_white, black_ridges=False), atol=1e-3)
 
-    assert_allclose(hessian(1*a_black, black_ridges=True),
-                    hessian(10*a_black, black_ridges=True), atol=1e-3)
-    assert_allclose(hessian(1*a_white, black_ridges=False),
-                    hessian(10*a_white, black_ridges=False), atol=1e-3)
+    assert_allclose(hessian(1 * a_black, black_ridges=True),
+                    hessian(10 * a_black, black_ridges=True), atol=1e-3)
+    assert_allclose(hessian(1 * a_white, black_ridges=False),
+                    hessian(10 * a_white, black_ridges=False), atol=1e-3)
 
 
 def test_2d_cropped_camera_image():
