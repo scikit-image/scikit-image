@@ -1,10 +1,8 @@
 import numpy as np
-from scipy import ndimage
 from ._hough_transform import (_hough_circle,
                                _hough_ellipse,
                                _hough_line,
                                _probabilistic_hough_line as _prob_hough_line)
-from ..feature.peak import _prominent_peaks
 
 
 def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
@@ -57,6 +55,8 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     2
 
     """
+    from ..feature.peak import _prominent_peaks
+
     h, a, d = _prominent_peaks(hspace, min_xdistance=min_angle,
                                min_ydistance=min_distance,
                                threshold=threshold,
@@ -311,6 +311,8 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
     >>> hspaces = transform.hough_circle(img, radius)
     >>> accum, cx, cy, rad = hough_circle_peaks(hspaces, [radius,])
     """
+    from ..feature.peak import _prominent_peaks
+
     r = []
     cx = []
     cy = []
@@ -322,7 +324,6 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
                                          min_ydistance=min_ydistance,
                                          threshold=threshold,
                                          num_peaks=num_peaks)
-
         r.extend((rad,)*len(h_p))
         cx.extend(x_p)
         cy.extend(y_p)
