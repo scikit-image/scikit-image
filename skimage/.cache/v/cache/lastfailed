@@ -1,9 +1,0 @@
-{
-  "viewer/tests/test_plugins.py::test_crop": true,
-  "viewer/tests/test_utils.py::test_event_loop": true,
-  "viewer/tests/test_utils.py::test_open_file_dialog": true,
-  "viewer/tests/test_utils.py::test_save_file_dialog": true,
-  "viewer/tests/test_viewer.py::test_collection_viewer": true,
-  "viewer/tests/test_widgets.py::test_ok_buttons": true,
-  "viewer/tests/test_widgets.py::test_save_buttons": true
-}
