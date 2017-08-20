@@ -36,7 +36,7 @@ _P3[6][[0, 1, 2], :, [2, 1, 0]] = 1
 _P3[7][[0, 1, 2], [0, 1, 2], :] = 1
 _P3[8][[0, 1, 2], [2, 1, 0], :] = 1
 
-_opbuffer = np.zeros((0))
+_opbuffer = np.zeros((0), dtype=np.int8)
 
 
 def SI(u):
@@ -51,7 +51,7 @@ def SI(u):
                          "(should be 2 or 3)")
 
     if u.shape != _opbuffer.shape[1:]:
-        _opbuffer = np.zeros((len(P),) + u.shape)
+        _opbuffer = np.zeros((len(P),) + u.shape, dtype=np.int8)
 
     for _opbuffer_i, P_i in zip(_opbuffer, P):
         _opbuffer_i[:] = ndi.binary_erosion(u, P_i)
@@ -71,7 +71,7 @@ def IS(u):
                          "(should be 2 or 3)")
 
     if u.shape != _opbuffer.shape[1:]:
-        _opbuffer = np.zeros((len(P),) + u.shape)
+        _opbuffer = np.zeros((len(P),) + u.shape, dtype=np.int8)
 
     for _opbuffer_i, P_i in zip(_opbuffer, P):
         _opbuffer_i[:] = ndi.binary_dilation(u, P_i)
@@ -101,8 +101,7 @@ def _check_input(image, init_level_set):
                          "match the dimensions of the image.")
 
 
-def _find_threshold(image, percentile=10):
-
+def _find_threshold(image, percentile=20):
     return np.percentile(image, percentile)
 
 
@@ -110,7 +109,7 @@ def gborders(img, alpha=1.0, sigma=1.0):
     """Stopping criterion for image borders."""
     # The norm of the gradient.
     gradnorm = ndi.gaussian_gradient_magnitude(img, sigma, mode='constant')
-    return 1.0/np.sqrt(1.0 + alpha*gradnorm)
+    return 1.0 / np.sqrt(1.0 + alpha * gradnorm)
 
 
 def morph_acwe(image, init_level_set, iterations,
@@ -189,8 +188,8 @@ def morph_acwe(image, init_level_set, iterations,
         # TODO: test speed
         # inside = u > 0
         # outside = u <= 0
-        c0 = (image * (1 - u)).sum() / float((1 - u).sum())
-        c1 = (image * u).sum() / float(u.sum())
+        c0 = (image * (1 - u)).sum() / float((1 - u).sum() + 1e-8)
+        c1 = (image * u).sum() / float(u.sum() + 1e-8)
 
         # Image attachment
         du = np.gradient(u)
@@ -253,6 +252,20 @@ def morph_gac(image, init_level_set, iterations,
     segmentation : (M, N) or (L, M, N) array
         Final segmentation (i.e., the final level set)
 
+    Notes
+    -----
+
+    This is a version of the Geodesic Active Contours (GAC) algorithm that uses
+    morphological operators instead of solving partial differential equations
+    (PDEs) for the evolution of the contour. The set of morphological operators
+    used in this algorithm are proved to be infinitesimally equivalent to the
+    GAC PDEs (see [1]_). However, morphological operators are do not suffer
+    from the numerical stability issues typically found in PDEs (e.g., it is
+    not necessary to find the right time step for the evolution), and are
+    computationally faster.
+
+    The algorithm and its theoretical derivation are described in [1]_.
+
     References
     ----------
     .. [1] A Morphological Approach to Curvature-based Evolution of Curves and
@@ -269,7 +282,8 @@ def morph_gac(image, init_level_set, iterations,
     structure = np.ones((3,) * len(image.shape), dtype=np.int8)
     dimage = np.gradient(image)
     # threshold_mask = image > threshold
-    threshold_mask_balloon = image > threshold / np.abs(balloon)
+    if balloon != 0:
+        threshold_mask_balloon = image > threshold / np.abs(balloon)
 
     u = np.int8(init_level_set > 0)
 
