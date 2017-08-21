@@ -14,8 +14,8 @@ from .thresholding import (threshold_local,
                            threshold_mean, threshold_triangle,
                            threshold_niblack, threshold_sauvola,
                            try_all_threshold, apply_hysteresis_threshold)
-from .ridges import (compute_hessian_eigenvalues, meijering, sato, frangi, 
-                     hessian
+from .ridges import (compute_hessian_eigenvalues, meijering, sato, frangi,
+                     hessian)
 from . import rank
 from .rank import median
 
