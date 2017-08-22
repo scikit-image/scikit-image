@@ -153,7 +153,7 @@ class CENSURE(FeatureDetector):
     .. [2] Adam Schmidt, Marek Kraft, Michal Fularz and Zuzanna Domagala
            "Comparative Assessment of Point Feature Detectors and
            Descriptors in the Context of Robot Navigation"
-           http://www.jamris.org/01_2013/saveas.php?QUEST=JAMRIS_No01_2013_P_11-20.pdf
+           http://yadda.icm.edu.pl/yadda/element/bwmeta1.element.baztech-268aaf28-0faf-4872-a4df-7e2e61cb364c/c/Schmidt_comparative.pdf
 
     Examples
     --------
