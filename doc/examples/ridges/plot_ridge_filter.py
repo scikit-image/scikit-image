@@ -37,9 +37,11 @@ from skimage.data import page
 from skimage.filters import meijering, sato, frangi, hessian
 import matplotlib.pyplot as plt
 
+
 def identity(image, **kwargs):
     """Return the original image, ignoring any kwargs."""
     return image
+
 
 image = page()
 
