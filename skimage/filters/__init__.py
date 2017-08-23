@@ -5,7 +5,6 @@ from .edges import (sobel, sobel_h, sobel_v,
                     prewitt, prewitt_h, prewitt_v,
                     roberts, roberts_pos_diag, roberts_neg_diag,
                     laplace)
-from ._identity import identity
 from ._rank_order import rank_order
 from ._gabor import gabor_kernel, gabor
 from .thresholding import (threshold_local,

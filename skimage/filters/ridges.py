@@ -268,6 +268,7 @@ def meijering(image, scale_range=(1, 10), scale_step=2, alpha=None,
         Unser, M. (2004). Design and validation of a tool for neurite tracing
         and analysis in fluorescence microscopy images. Cytometry Part A,
         58(2), 167-176.
+        https://imagescience.org/meijering/publications/download/cyto2004.pdf
     """
 
     # Check (sigma) scales
@@ -365,6 +366,8 @@ def sato(image, scale_range=(1, 10), scale_step=2, black_ridges=True):
         Koller, T., ..., Kikinis, R. (1998). Three-dimensional multi-scale line
         filter for segmentation and visualization of curvilinear structures in
         medical images. Medical image analysis, 2(2), 143-168.
+        (https://pdfs.semanticscholar.org/6964/ \
+         59e0c67f729a05a819699adae5d64aaab4b3.pdf)
     """
 
     # Check (sigma) scales
@@ -469,6 +472,7 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
     -----
     Written by Marc Schrijver, November 2001
     Re-Written by D. J. Kroon University of Twente, May 2009, _[2]
+    Adoption of 3D version from D. G. Ellis, Januar 20017, _[3]
 
     References
     ----------
@@ -476,7 +480,9 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
         (1998,). Multiscale vessel enhancement filtering. In International
         Conference on Medical Image Computing and Computer-Assisted
         Intervention (pp. 130-137). Springer Berlin Heidelberg.
-    .. [2] Kroon, D.J.: Hessian based Frangi vesselness filter.
+        http://www.tecn.upf.es/~afrangi/articles/miccai1998.pdf
+    .. [2] Kroon, D. J.: Hessian based Frangi vesselness filter.
+    .. [3] Ellis, D. G.: https://github.com/ellisdg/frangi3d/tree/master/frangi
     """
 
     # Check deprecated keyword parameters
@@ -622,7 +628,9 @@ def hessian(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
     .. [1] Ng, C. C., Yap, M. H., Costen, N., & Li, B. (2014,). Automatic
         wrinkle detection using hybrid Hessian filter. In Asian Conference on
         Computer Vision (pp. 609-622). Springer International Publishing.
-    .. [2] Kroon, D.J.: Hessian based Frangi vesselness filter.
+        (https://dspace.lboro.ac.uk/dspace-jspui/bitstream/ \
+         2134/20252/1/Choon-accv2014final-604.pdf)
+    .. [2] Kroon, D. J.: Hessian based Frangi vesselness filter.
     """
 
     # Check deprecated keyword parameters
