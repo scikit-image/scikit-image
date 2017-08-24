@@ -15,6 +15,7 @@ http://scikit-image.org
 
 New Features
 ------------
+- unsharp mask filtering (#2772)
 
 
 Improvements
