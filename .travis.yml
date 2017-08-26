@@ -35,6 +35,9 @@ notifications:
     on_start: false     # default: false
 
 matrix:
+
+  fast_finish: true
+
   include:
     - os: linux
       python: 2.7
@@ -56,6 +59,9 @@ matrix:
       osx_image: xcode9
       language: objective-c
       env: TRAVIS_PYTHON_VERSION=3.5
+
+  allow_failures:
+    - env: PIP_FLAGS="--pre"
 
 before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
