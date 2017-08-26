@@ -229,8 +229,8 @@ def _generate_random_color(gray, min_pixel_intensity):
     -------
     color: scalar or array
         If gray is True, a single random scalar in the range of
-        [min_pixel_intensity, 255], else an array of three elements, each in the
-        range of [min_pixel_intensity, 255].
+        [min_pixel_intensity, 255], else an array of three elements, each in
+        the range of [min_pixel_intensity, 255].
 
     """
     if not (0 <= min_pixel_intensity <= 255):
@@ -256,12 +256,13 @@ def generate_shapes(width,
     Images can be populated with random shapes with random dimensions, random
     locations, and random colors, with or without overlap.
 
-    Shapes have random (x, y) starting coordinates and random dimensions bounded
-    by min_dimension and max_dimension. It can occur that a randomly generated
-    shape will not fit the image at all. In that case, the algorithm will try
-    again with new starting coordinates a certain number of times. However, it
-    also means that some images may be skipped altogether if no shapes fit. In
-    that case, this function will return fewer images than requested.
+    Shapes have random (x, y) starting coordinates and random dimensions
+    bounded by min_dimension and max_dimension. It can occur that a randomly
+    generated shape will not fit the image at all. In that case, the
+    algorithm will try again with new starting coordinates a certain number
+    of times. However, it also means that some images may be skipped
+    altogether if no shapes fit. In that case, this function will return
+    fewer images than requested.
 
     Parameters
     ----------
