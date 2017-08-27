@@ -109,19 +109,19 @@ def test_can_generate_one_by_one_rectangle():
     assert (crop < 255).sum() == 3  # rgb
 
 
-def test_throws_when_min_intensity_out_of_range():
+def test_throws_when_min_pixel_intensity_out_of_range():
     with pytest.raises(ValueError):
         generate_shapes(
             width=1000,
             height=1234,
             max_shapes=1,
-            min_intensity=256)
+            min_pixel_intensity=256)
     with pytest.raises(ValueError):
         generate_shapes(
             width=2,
             height=2,
             max_shapes=1,
-            min_intensity=-1)
+            min_pixel_intensity=-1)
 
 
 def test_returns_empty_labels_and_white_image_when_cannot_fit_shape():
