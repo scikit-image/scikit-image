@@ -1,2 +1,2 @@
 .. include:: ../../TASKS.txt
-.. include:: ../../.github/CONTRIBUTING.txt
+.. include:: ../../CONTRIBUTING.txt

@@ -241,6 +241,11 @@ Or a single test within that file::
 
     $ PYTHONPATH=. pytest skimage/morphology/tests/test_grey.py::test_3d_fallback_black_tophat
 
+Use ``--doctest-modules`` to run doctests.
+For example, run all tests and all doctests using::
+
+    $ PYTHONPATH=. pytest --doctest-modules skimage
+
 Test coverage
 -------------
 
