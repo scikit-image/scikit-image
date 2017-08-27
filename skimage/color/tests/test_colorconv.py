@@ -40,8 +40,7 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2ypbpr, ypbpr2rgb,
                            rgb2ycbcr, ycbcr2rgb,
                            rgba2rgb,
-                           guess_spatial_dimensions
-                           )
+                           guess_spatial_dimensions)
 
 from skimage import data_dir
 from skimage._shared._warnings import expected_warnings
@@ -223,24 +222,26 @@ class TestColorconv(TestCase):
                             self.colbars_array)
 
     def test_convert_colorspace(self):
-        colspaces = ['HSV', 'RGB CIE', 'XYZ']
-        colfuncs_from = [hsv2rgb, rgbcie2rgb, xyz2rgb]
-        colfuncs_to = [rgb2hsv, rgb2rgbcie, rgb2xyz]
+        colspaces = ['HSV', 'RGB CIE', 'XYZ', 'YCbCr', 'YPbPr']
+        colfuncs_from = [hsv2rgb, rgbcie2rgb, xyz2rgb, ycbcr2rgb, ypbpr2rgb]
+        colfuncs_to = [rgb2hsv, rgb2rgbcie, rgb2xyz, rgb2ycbcr, rgb2ypbpr]
 
-        assert_almost_equal(convert_colorspace(self.colbars_array, 'RGB',
-                                               'RGB'), self.colbars_array)
+        assert_almost_equal(
+            convert_colorspace(self.colbars_array, 'RGB', 'RGB'),
+            self.colbars_array)
+
         for i, space in enumerate(colspaces):
             gt = colfuncs_from[i](self.colbars_array)
-            assert_almost_equal(convert_colorspace(self.colbars_array, space,
-                                                  'RGB'), gt)
+            assert_almost_equal(
+                convert_colorspace(self.colbars_array, space, 'RGB'), gt)
             gt = colfuncs_to[i](self.colbars_array)
-            assert_almost_equal(convert_colorspace(self.colbars_array, 'RGB',
-                                                   space), gt)
+            assert_almost_equal(
+                convert_colorspace(self.colbars_array, 'RGB', space), gt)
 
-        self.assertRaises(ValueError, convert_colorspace, self.colbars_array,
-                                                           'nokey', 'XYZ')
-        self.assertRaises(ValueError, convert_colorspace, self.colbars_array,
-                                                           'RGB', 'nokey')
+        self.assertRaises(ValueError, convert_colorspace,
+                          self.colbars_array, 'nokey', 'XYZ')
+        self.assertRaises(ValueError, convert_colorspace,
+                          self.colbars_array, 'RGB', 'nokey')
 
     def test_rgb2grey(self):
         x = np.array([1, 1, 1]).reshape((1, 1, 3)).astype(np.float)

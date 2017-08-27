@@ -98,26 +98,21 @@ def convert_colorspace(arr, fromspace, tospace):
     ----------
     arr : array_like
         The image to convert.
-    fromspace : str
-        The color space to convert from. Valid color space strings are
-        ``['RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV', 'YIQ', 'YPbPr', 'YCbCr']``.
-        Value may also be specified as lower case.
-
-    tospace : str
-        The color space to convert to. Valid color space strings are
-        ``['RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV', 'YIQ', 'YPbPr', 'YCbCr']``.
-        Value may also be specified as lower case.
+    fromspace : {'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV', 'YIQ', 'YPbPr', 'YCbCr'}
+        The color space to convert from. Can be specified in lower case.
+    tospace : {'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV', 'YIQ', 'YPbPr', 'YCbCr'}
+        The color space to convert to. Can be specified in lower case.
 
     Returns
     -------
-    newarr : ndarray
+    out : ndarray
         The converted image.
 
     Notes
     -----
-    Conversion occurs through the "central" RGB color space, i.e. conversion
-    from XYZ to HSV is implemented as ``XYZ -> RGB -> HSV`` instead of
-    directly.
+    Conversion is performed through the "central" RGB color space,
+    i.e. conversion from XYZ to HSV is implemented as ``XYZ -> RGB -> HSV``
+    instead of directly.
 
     Examples
     --------
@@ -125,19 +120,21 @@ def convert_colorspace(arr, fromspace, tospace):
     >>> img = data.astronaut()
     >>> img_hsv = convert_colorspace(img, 'RGB', 'HSV')
     """
-    fromdict = {'RGB': lambda im: im, 'HSV': hsv2rgb, 'RGB CIE': rgbcie2rgb,
-                'XYZ': xyz2rgb, 'YUV': yuv2rgb, 'YIQ': yiq2rgb,
-                'YPbPr': ypbpr2rgb, 'YCbCr': ycbcr2rgb}
-    todict = {'RGB': lambda im: im, 'HSV': rgb2hsv, 'RGB CIE': rgb2rgbcie,
-              'XYZ': rgb2xyz, 'YUV': rgb2yuv, 'YIQ': rgb2yiq,
-              'YPbPr': rgb2ypbpr, 'YCbCr': rgb2ycbcr}
+    fromdict = {'rgb': lambda im: im, 'hsv': hsv2rgb, 'rgb cie': rgbcie2rgb,
+                'xyz': xyz2rgb, 'yuv': yuv2rgb, 'yiq': yiq2rgb,
+                'ypbpr': ypbpr2rgb, 'ycbcr': ycbcr2rgb}
+    todict = {'rgb': lambda im: im, 'hsv': rgb2hsv, 'rgb cie': rgb2rgbcie,
+              'xyz': rgb2xyz, 'yuv': rgb2yuv, 'yiq': rgb2yiq,
+              'ypbpr': rgb2ypbpr, 'ycbcr': rgb2ycbcr}
 
-    fromspace = fromspace.upper()
-    tospace = tospace.upper()
+    fromspace = fromspace.lower()
+    tospace = tospace.lower()
     if fromspace not in fromdict.keys():
-        raise ValueError('fromspace needs to be one of %s' % fromdict.keys())
+        msg = '`fromspace` has to be one of {}'.format(fromdict.keys())
+        raise ValueError(msg)
     if tospace not in todict.keys():
-        raise ValueError('tospace needs to be one of %s' % todict.keys())
+        msg = '`tospace` has to be one of {}'.format(todict.keys())
+        raise ValueError(msg)
 
     return todict[tospace](fromdict[fromspace](arr))
 
