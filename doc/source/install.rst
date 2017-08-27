@@ -133,28 +133,4 @@ To update::
   git pull  # Grab latest source
   python setup.py build_ext -i  # Compile any modified extensions
 
-c. Building with bento
-``````````````````````
-
-Alternatively, ``scikit-image`` can also be built using `bento
-<http://cournape.github.io/Bento/>`__.  Bento depends on `WAF
-<https://code.google.com/p/waf/>`__ for compilation.
-
-Follow the `Bento installation instructions
-<http://cournape.github.io/Bento/html/install.html>`__ and `download the WAF
-source <http://code.google.com/p/waf/downloads/list>`__.
-
-Tell Bento where to find WAF by setting the ``WAFDIR`` environment variable::
-
-    export WAFDIR=<path/to/waf>
-
-From the ``scikit-image`` source directory::
-
-    bentomaker configure
-    bentomaker build -j     # (add -i for in-place build)
-    bentomaker install      # (when not building in-place)
-
-Depending on file permissions, the install commands may need to be run as
-sudo.
-
 .. include:: ../../DEPENDS.txt
