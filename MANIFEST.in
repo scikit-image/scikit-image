@@ -2,6 +2,8 @@ include setup*.py
 include conftest.py
 include MANIFEST.in
 include *.txt
+recursive-include requirements *.txt
+include requirements/README.md
 include Makefile
 include skimage/scripts/skivi
 recursive-include skimage *.pyx *.pxd *.pxi *.py *.c *.h *.ini *.md5 *.npy *.txt *.in *.cpp *.md
