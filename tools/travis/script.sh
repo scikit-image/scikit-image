@@ -18,7 +18,7 @@ if [[ $TRAVIS_OS_NAME == "osx" ]]; then
 fi
 
 section "Test.with.min.requirements"
-py.test $TEST_ARGS skimage
+pytest $TEST_ARGS skimage
 section_end "Test.with.min.requirements"
 
 section "Build.docs"
@@ -115,7 +115,7 @@ section "Test.with.optional.dependencies"
 if [[ $OPTIONAL_DEPS == 1 ]]; then
     TEST_ARGS="$TEST_ARGS --cov=skimage"
 fi
-py.test $TEST_ARGS
+pytest $TEST_ARGS
 
 section_end "Test.with.optional.dependencies"
 
