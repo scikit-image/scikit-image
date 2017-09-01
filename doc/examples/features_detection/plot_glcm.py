@@ -4,19 +4,24 @@ GLCM Texture Features
 =====================
 
 This example illustrates texture classification using grey level
-co-occurrence matrices (GLCMs). A GLCM is a histogram of co-occurring
+co-occurrence matrices (GLCMs) [1]_. A GLCM is a histogram of co-occurring
 greyscale values at a given offset over an image.
 
 In this example, samples of two different textures are extracted from
 an image: grassy areas and sky areas. For each patch, a GLCM with
-a horizontal offset of 5 is computed. Next, two features of the
-GLCM matrices are computed: dissimilarity and correlation. These are
-plotted to illustrate that the classes form clusters in feature space.
-
+a horizontal offset of 5 (`distance=[5]` and `angles=[0]`) is computed.
+Next, two features of the GLCM matrices are computed: dissimilarity and
+correlation. These are plotted to illustrate that the classes form
+clusters in feature space.
 In a typical classification problem, the final step (not included in
 this example) would be to train a classifier, such as logistic
 regression, to label image patches from new images.
 
+References
+----------
+.. [1] Haralick, RM.; Shanmugam, K., 
+       "Textural features for image classification"
+       IEEE Transactions on systems, man, and cybernetics 6 (1973): 610-621. 
 """
 import matplotlib.pyplot as plt
 
