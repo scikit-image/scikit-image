@@ -70,7 +70,15 @@ def histogram(image, nbins=256, multichannel=True):
              "apply this function to each color channel, or set "
              "multichannel=True")
 
-    hist, bin_edges = _histogram(image, nbins)
+    if multichannel:
+        channels = sh[-1]
+        hist = np.empty(channels, nbins)
+        for chan in range(channels):
+            hist[chan, :], bin_centers[chan, :] = _histogram(image, nbins)
+
+    else:
+        hist, bin_edges = _histogram(image, nbins)
+
     return hist, bin_edges
 
 
