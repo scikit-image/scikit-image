@@ -100,7 +100,7 @@ import warnings
 from ._novice import Picture, open, colors, color_dict
 
 
-warnings.warn("This module was deprecated in version 0.14. "
+warnings.warn("The `skimage.novice` module was deprecated in version 0.14. "
               "It will be removed in 0.16.")
 
 __all__ = ['Picture', 'open', 'colors', 'color_dict']
