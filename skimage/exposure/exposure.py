@@ -62,10 +62,11 @@ def histogram(image, nbins=256, multichannel=True):
     (array([107432, 154712]), array([ 0.25,  0.75]))
     """
     sh = image.shape
-    if len(sh) == 3 and sh[-1] < 4:
+    if len(sh) == 3 and sh[-1] < 4 and not multichannel:
         warn("This might be a color image. The histogram will be "
              "computed on the flattened image. You can instead "
-             "apply this function to each color channel.")
+             "apply this function to each color channel, or set "
+             "multichannel=True")
 
     hist, bin_edges = _histogram(image, nbins)
     return hist, bin_edges
