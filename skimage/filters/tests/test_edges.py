@@ -132,6 +132,7 @@ def test_sobel_v_horizontal():
     result = filters.sobel_v(image)
     assert_allclose(result, 0)
 
+
 def test_sobel_axis_1_line():
     """Sobel over axis 1 on an edge along ax 0 should be a line along
     axis 0."""
@@ -142,6 +143,7 @@ def test_sobel_axis_1_line():
     j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == 1))
     assert (np.all(result[np.abs(j) > 1] == 0))
+
 
 def test_sobel_axis_2_line():
     """Sobel over axis 2 on an edge orthogonal to ax 2 should be a plane
@@ -159,6 +161,7 @@ def test_sobel_axis_2_line():
     assert (np.all(result[grid == 0] >= 1))
     # and most likely < 5000
     assert (np.all(result[np.abs(grid) > 5000] == 0))
+
 
 def test_sobel_axis_3_zero():
     """Sobel over axis 3 on an edge orthogonal to ax 2 should be zero."""

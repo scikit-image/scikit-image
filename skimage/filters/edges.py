@@ -169,6 +169,7 @@ def sobel_v(image, mask=None):
     result = convolve(image, VSOBEL_WEIGHTS)
     return _mask_filter_result(result, mask)
 
+
 def get_sobel_weights(ndim):
     """Produce Sobel kernel for axis 0.
 
@@ -190,8 +191,9 @@ def get_sobel_weights(ndim):
     h = np.array([1, 2, 1])
     for i in range(ndim - 1):
         ret = np.multiply.outer(ret, h)
-    factor = ret.sum(1).max() #  Find maximum factor for normalization
+    factor = ret.sum(1).max()  # Find maximum factor for normalization
     return ret / factor
+
 
 def sobel_axis(image, axis, mask=None):
     """Find the axis edges of an image using the Sobel transform.
