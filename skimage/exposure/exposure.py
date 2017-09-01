@@ -19,7 +19,7 @@ DTYPE_RANGE.update({'uint10': (0, 2 ** 10 - 1),
                     'float': dtype_range[np.float64]})
 
 
-def histogram(image, nbins=256):
+def histogram(image, nbins=256, multichannel=True):
     """Return histogram of image.
 
     Unlike `numpy.histogram`, this function returns the centers of bins and
