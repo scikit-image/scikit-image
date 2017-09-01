@@ -1,6 +1,6 @@
 from .lpi_filter import inverse, wiener, LPIFilter2D
 from ._gaussian import gaussian
-from .edges import (sobel, sobel_h, sobel_v,
+from .edges import (sobel, sobel_h, sobel_v, sobel_axis,
                     scharr, scharr_h, scharr_v,
                     prewitt, prewitt_h, prewitt_v,
                     roberts, roberts_pos_diag, roberts_neg_diag,
@@ -25,6 +25,7 @@ __all__ = ['inverse',
            'sobel',
            'sobel_h',
            'sobel_v',
+           'sobel_axis',
            'scharr',
            'scharr_h',
            'scharr_v',

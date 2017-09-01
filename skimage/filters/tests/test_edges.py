@@ -132,6 +132,42 @@ def test_sobel_v_horizontal():
     result = filters.sobel_v(image)
     assert_allclose(result, 0)
 
+def test_sobel_axis_1_line():
+    """Sobel over axis 1 on an edge along ax 0 should be a line along
+    axis 0."""
+    i, j = np.mgrid[-5:6, -5:6]
+    image = (j >= 0).astype(float)
+    result = filters.sobel_axis(image, 1)
+    # Fudge the eroded points
+    j[np.abs(i) == 5] = 10000
+    assert (np.all(result[j == 0] == 1))
+    assert (np.all(result[np.abs(j) > 1] == 0))
+
+def test_sobel_axis_2_line():
+    """Sobel over axis 2 on an edge orthogonal to ax 2 should be a plane
+    orthogonal to axis 2.
+    """
+    grids = np.mgrid[-5:6, -5:6, -5:6]
+    grid = grids[2]
+    image = (grid >= 0).astype(float)
+    result = filters.sobel_axis(image, 2)
+    # Acknowledge that outer edges are not supposed to be detected
+    for fudge_grid in grids:
+        if grid is not fudge_grid:
+            grid[np.abs(fudge_grid) == 5] = 10000
+    # N-dimensional value of detected pixels will be >=1 (but not always ==1)
+    assert (np.all(result[grid == 0] >= 1))
+    # and most likely < 5000
+    assert (np.all(result[np.abs(grid) > 5000] == 0))
+
+def test_sobel_axis_3_zero():
+    """Sobel over axis 3 on an edge orthogonal to ax 2 should be zero."""
+    grids = np.mgrid[-5:6, -5:6, -5:6, -5:6]
+    grid = grids[2]
+    image = (grid >= 0).astype(float)
+    result = filters.sobel_axis(image, 3)
+    assert_allclose(result, 0)
+
 
 def test_scharr_zeros():
     """Scharr on an array of all zeros."""

@@ -169,6 +169,53 @@ def sobel_v(image, mask=None):
     result = convolve(image, VSOBEL_WEIGHTS)
     return _mask_filter_result(result, mask)
 
+def get_sobel_weights(ndim):
+    """Produce Sobel kernel for axis 0.
+
+    Parameters
+    ----------
+    ndim : number of dimensions
+
+    Returns
+    -------
+    output : max(ndim,1)-dimensional array containing Sobel kernel in
+        direction of axis 0.
+
+    Notes
+    -----
+    If ndim < 0, then ndim is assumed to be 1.
+    To change the axis, use transpose(0, axis).
+    """
+    ret = np.array([1, 0, -1])
+    h = np.array([1, 2, 1])
+    for i in range(ndim - 1):
+        ret = np.multiply.outer(ret, h)
+    factor = ret.sum(1).max() #  Find maximum factor for normalization
+    return ret / factor
+
+def sobel_axis(image, axis, mask=None):
+    """Find the axis edges of an image using the Sobel transform.
+
+    Parameters
+    ----------
+    image : 2-D or 3-D array
+        Image to process.
+    mask : 2-D or 3-D array, optional
+        An optional mask to limit the application to a certain area.
+        Must match the dimensions of image.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : array
+        The Sobel edge map. Matches the dimensions of image.
+    """
+    image = img_as_float(image)
+    weights = get_sobel_weights(image.ndim).swapaxes(0, axis)
+    result = convolve(image, weights)
+    return _mask_filter_result(result, mask)
+
 
 def scharr(image, mask=None):
     """Find the edge magnitude using the Scharr transform.
