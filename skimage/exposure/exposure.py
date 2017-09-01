@@ -64,6 +64,12 @@ def histogram(image, nbins=256):
              "computed on the flattened image. You can instead "
              "apply this function to each color channel.")
 
+    hist, bin_edges = _histogram(image, nbins)
+    return hist, bin_edges
+
+
+def _histogram(image, nbins):
+
     # For integer types, histogramming with bincount is more efficient.
     if np.issubdtype(image.dtype, np.integer):
         offset = 0
