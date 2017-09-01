@@ -37,6 +37,9 @@ def histogram(image, nbins=256, multichannel=True):
     nbins : int
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
+    multichannel : bool, optional
+        If True, calculates the histogram for all the channels using the same
+        binning.
 
     Returns
     -------
