@@ -421,6 +421,9 @@ Here is the process for a 2-release deprecation cycle:
   that it's `True`.
 - In the function, _if_ rescale is set to `None`, set to `True` and warn that the
   default will change to `False` in version N+3.
+- In ``doc/release/release_dev.rst``, create an item in the section related to
+  version N+1 and write "The default value of the `rescale` argument to
+  `a_function` will be `False` in N+3."
 - In ``TODO.txt``, create an item in the section related to version N+3 and write
   "change rescale default to False in a_function".
 
