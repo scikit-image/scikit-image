@@ -96,7 +96,11 @@ An image can also be restored to its original state after modification:
 >>> picture.compare()  # doctest: +SKIP
 
 """
+import warnings
 from ._novice import Picture, open, colors, color_dict
 
+
+warnings.warn("This module was deprecated in version 0.14. "
+              "It will be removed in 0.16.")
 
 __all__ = ['Picture', 'open', 'colors', 'color_dict']

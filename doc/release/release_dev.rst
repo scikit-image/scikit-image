@@ -34,6 +34,7 @@ Deprecations
 ------------
 - ``skimage.util.montage2d`` is deprecated and will be removed in 0.15.
   Use ``skimage.util.montage`` instead.
+- ``skimage.novice`` is deprecated and will be removed in 0.16.
 
 
 Contributors to this release
