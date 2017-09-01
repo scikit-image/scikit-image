@@ -26,9 +26,11 @@ def histogram(image, nbins=256, multichannel=True):
     does not rebin integer arrays. For integer arrays, each integer value has
     its own bin, which improves speed and intensity-resolution.
 
-    The histogram is computed on the flattened image: for color images, the
-    function should be used separately on each channel to obtain a histogram
-    for each color channel.
+    If multichannel is not set, the histogram is computed on the flattened
+    image. For color or multichannel images, the function should either be
+    the function should be either be used separately on each
+    channel to obtain a histogram for each color channel with separate binning,
+    or by setting multichannel=True to use a common binning for all channels.
 
     Parameters
     ----------
