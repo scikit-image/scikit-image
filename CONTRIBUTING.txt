@@ -393,27 +393,24 @@ have
         out = do_something(image, rescale=rescale)
         return out
 
-
 that has to be changed to
 
 .. code-block:: python
 
     def a_function(image, rescale=None):
-    	if rescale is None:
-    	    warn('The default value of rescale will change to `False` in version N+3')
-    	    rescale = True
-    	out = do_something(image, rescale=rescale)
-    	return out
-
+        if rescale is None:
+            warn('The default value of rescale will change to `False` in version N+3')
+            rescale = True
+        out = do_something(image, rescale=rescale)
+        return out
 
 and in version N+3
 
 .. code-block:: python
 
     def a_function(image, rescale=False):
-    	out = do_something(image, rescale=rescale)
-    	return out
-
+        out = do_something(image, rescale=rescale)
+        return out
 
 Here is the process for a 2-release deprecation cycle:
 
@@ -421,9 +418,9 @@ Here is the process for a 2-release deprecation cycle:
   that it's `True`.
 - In the function, _if_ rescale is set to `None`, set to `True` and warn that the
   default will change to `False` in version N+3.
-- In ``doc/release/release_dev.rst``, create an item in the section related to
-  version N+1 and write "The default value of the `rescale` argument to
-  `a_function` will be `False` in N+3."
+- In ``doc/release/release_dev.rst``, create items in the sections related to
+  versions [N+1, N+2] and add "In `a_function`, the `rescale` argument will
+  default to `False` in N+3."
 - In ``TODO.txt``, create an item in the section related to version N+3 and write
   "change rescale default to False in a_function".
 
