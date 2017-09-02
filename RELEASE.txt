@@ -30,6 +30,9 @@ make a PR to update these notes after you are done with the release. ;-)
   5. Copy ``doc/release/release_template.txt`` to
      ``doc/release/release_dev.txt`` for the next release.
 
+  6. Copy relevant deprecations from ``release_<major>_<minor>.txt``
+     to ``release_dev.txt``.
+
 - Update the version number in ``skimage/__init__.py`` and commit.
 
 - Update the docs:
