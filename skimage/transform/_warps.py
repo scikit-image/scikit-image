@@ -394,7 +394,7 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
     ----------
     image : ndarray
         Input image.
-    center : (row, column) tuple or (2,) ndarray, optional
+    center : (column, row) tuple or (2,) ndarray, optional
         Center coordinate of transformation.
     strength : float, optional
         The amount of swirling applied.
@@ -439,7 +439,7 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
         mode = 'constant'
 
     if center is None:
-        center = np.array(image.shape)[:2] / 2
+        center = np.array(image.shape)[:2][::-1] / 2
 
     warp_args = {'center': center,
                  'rotation': rotation,
