@@ -129,10 +129,10 @@ def convert_colorspace(arr, fromspace, tospace):
 
     fromspace = fromspace.lower()
     tospace = tospace.lower()
-    if fromspace not in fromdict.keys():
+    if fromspace not in fromdict:
         msg = '`fromspace` has to be one of {}'.format(fromdict.keys())
         raise ValueError(msg)
-    if tospace not in todict.keys():
+    if tospace not in todict:
         msg = '`tospace` has to be one of {}'.format(todict.keys())
         raise ValueError(msg)
 
