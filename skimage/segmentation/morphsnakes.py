@@ -105,10 +105,33 @@ def _find_threshold(image, percentile=20):
     return np.percentile(image, percentile)
 
 
-def gborders(img, alpha=1.0, sigma=1.0):
-    """Stopping criterion for image borders."""
-    # The norm of the gradient.
-    gradnorm = ndi.gaussian_gradient_magnitude(img, sigma, mode='constant')
+def gborders(image, alpha=100.0, sigma=5.0):
+    """Stopping criterion for image borders.
+
+    Compute the magnitude of the gradients in the image and then inverts the
+    result in the range [0, 1]. Flat areas are assigned values close to 1, while
+    areas close to borders are assigned values close to 0.
+
+    This function or a similar one defined by the user should be applied over
+    the image as a preprocessing step before calling `morph_gac`.
+
+    Parameters
+    ----------
+    image : (M, N) array
+        Grayscale image.
+    alpha : float, optional
+        Controls the steepness of the inversion. A larger value will make the
+        transition between the flat areas and border areas steeper in the
+        resulting array.
+    sigma : float, optional
+        Standard deviation of the Gaussian filter applied over the image.
+
+    Returns
+    -------
+    gimage : (M, N) array
+        Preprocessed image suitable for `morph_gac`.
+    """
+    gradnorm = ndi.gaussian_gradient_magnitude(image, sigma, mode='constant')
     return 1.0 / np.sqrt(1.0 + alpha * gradnorm)
 
 
@@ -208,7 +231,7 @@ def morph_acwe(image, init_level_set, iterations,
     return u
 
 
-def morph_gac(image, init_level_set, iterations,
+def morph_gac(gimage, init_level_set, iterations,
               smoothing=1, threshold='auto', balloon=0,
               iter_callback=lambda x: None):
     """Morphological geodesic active contours.
@@ -219,11 +242,14 @@ def morph_gac(image, init_level_set, iterations,
 
     Parameters
     ----------
-    image : (M, N) or (L, M, N) array
-        Grayscale image to be segmented. This is rarely the original image.
-        Instead, this is usually a preprocessed version of the original image
-        with the borders of the object to segment having low values. See
-        `morphsnakes.gborders` as an example function to perform this task.
+    gimage : (M, N) or (L, M, N) array
+        Preprocessed image to be segmented. This is very rarely the original
+        image. Instead, this is usually a preprocessed version of the original
+        image that enhances and highlights the borders (or other structures) of
+        the object to segment. `morph_gac` will try to stop the contour
+        evolution in areas where `gimage` is small. See `morphsnakes.gborders`
+        as an example function to perform this preprocessing. Note that the
+        quality of `morph_gac` might greatly depend on this preprocessing.
     init_level_set : (M, N) or (L, M, N) array
         Initial level set.
     iterations : uint
@@ -274,6 +300,7 @@ def morph_gac(image, init_level_set, iterations,
            2014, DOI 10.1109/TPAMI.2013.106
     """
 
+    image = gimage
     _check_input(image, init_level_set)
 
     if threshold == 'auto':

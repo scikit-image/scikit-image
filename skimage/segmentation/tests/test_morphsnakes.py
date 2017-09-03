@@ -6,7 +6,7 @@ from numpy.testing import assert_array_equal
 import pytest
 
 
-def circle_levelset(shape, center, radius, scalerow=1.0):
+def circle_levelset(shape, center, radius):
     """Build a binary function with a circle as the 0.5-levelset."""
     grid = np.mgrid[[slice(i) for i in shape]].T - center
     phi = radius - np.sqrt(np.sum((grid.T)**2, 0))
