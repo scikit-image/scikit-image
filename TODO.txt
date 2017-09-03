@@ -10,8 +10,6 @@ Version 0.15
 
 Version 0.16
 ------------
-* In ``skimage.exposure.histogram``, set default behavior of `source_range` to `dtype`
-  and remove deprecation warning.
 * In ``skimage.transform.resize``, ``skimage.transform.pyramid_reduce``,
   ``skimage.transform.pyramid_laplacian``,
   ``skimage.transform.pyramid_gaussian``,

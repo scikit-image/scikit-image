@@ -36,32 +36,24 @@ def _offset_array(arr, low_boundary, high_boundary):
 
 
 def _bincount_histogram(image, source_range):
-    """Efficient histogram calculation for a flat image of integers.
-    """
+    """Efficient histogram calculation for a flat image of integers."""
+    if source_range not in ['image', 'dtype']:
+        raise ValueError('Incorrect value for `source_range` argument: {}'.format(source_range))
     if source_range == 'image':
         image_min = np.min(image).astype(np.int64)
         image_max = np.max(image).astype(np.int64)
-        image, offset = _offset_array(image, image_min, image_max)
-        hist = np.bincount(image)
-        bin_centers = np.arange(len(hist)) + offset
-        # clip histogram to start with a non-zero bin
-        idx = np.nonzero(hist)[0][0]
-        hist, bin_centers = hist[idx:], bin_centers[idx:]
     elif source_range == 'dtype':
         image_min, image_max = dtype_limits(image, clip_negative=False)
-        image, offset = _offset_array(image, image_min, image_max)
-        hist = np.bincount(image)
-        bin_centers = np.arange(image_min, image_max + 1)
-        # Add zeros at the end of the hist array to get the correct size
-        zero_hist = np.zeros(image_max - image_min - hist.shape[0] + 1)
-        hist = np.concatenate((hist, zero_hist))
-    else:
-        ValueError('Wrong value for the `source_range` argument')
-
+    image, offset = _offset_array(image, image_min, image_max)
+    hist = np.bincount(image.ravel(), minlength=image_max - image_min + 1)
+    bin_centers = np.arange(image_min, image_max + 1)
+    if source_range == 'image':
+        idx = max(image_min, 0)
+        hist = hist[idx:]
     return hist, bin_centers
 
 
-def histogram(image, nbins=256, source_range=None, normalize=False):
+def histogram(image, nbins=256, source_range='image', normalize=False):
     """Return histogram of image.
 
     Unlike `numpy.histogram`, this function returns the centers of bins and
@@ -79,12 +71,10 @@ def histogram(image, nbins=256, source_range=None, normalize=False):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
-    source_range : string or tuple, optional
-        'image' determine the range from the input image.
-        'dtype' determine the range from the expected range of the images
+    source_range : string, optional
+        'image' (default) determines the range from the input image.
+        'dtype' determines the range from the expected range of the images
         of that data type.
-        `None` corresponds to 'image'. This behavior will change in
-        version 0.16 and set default to 'dtype'.
     normalize : bool, optional
         If True, normalize the histogram by the sum of its values.
 
@@ -114,10 +104,6 @@ def histogram(image, nbins=256, source_range=None, normalize=False):
              "computed on the flattened image. You can instead "
              "apply this function to each color channel.")
 
-    if source_range is None:
-        warn('The default value of rescale will change to `dtype` in version 0.16')
-        source_range = 'image'
-
     image = image.flatten()
     # For integer types, histogramming with bincount is more efficient.
     if np.issubdtype(image.dtype, np.integer):
@@ -129,11 +115,11 @@ def histogram(image, nbins=256, source_range=None, normalize=False):
             hist_range = dtype_limits(image, clip_negative=False)
         else:
             ValueError('Wrong value for the `source_range` argument')
-        hist, bin_edges = np.histogram(image.flat, bins=nbins, range=hist_range)
+        hist, bin_edges = np.histogram(image, bins=nbins, range=hist_range)
         bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2.
 
     if normalize:
-        hist = hist.astype('float') / np.sum(hist)
+        hist = hist / np.sum(hist)
     return hist, bin_centers
 
 

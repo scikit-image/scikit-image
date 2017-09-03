@@ -12,11 +12,18 @@ from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_equal,
                                      assert_array_almost_equal,
+                                     assert_equal,
                                      assert_almost_equal)
 
 
 # Test integer histograms
 # =======================
+
+def test_wrong_source_range():
+    im = np.array([-1, 100], dtype=np.int8)
+    with testing.raises(ValueError):
+        frequencies, bin_centers = exposure.histogram(im, source_range='foobar')
+
 
 def test_negative_overflow():
     im = np.array([-1, 100], dtype=np.int8)
@@ -39,7 +46,9 @@ def test_all_negative_image():
 def test_int_range_image():
     im = np.array([10, 100], dtype=np.int8)
     frequencies, bin_centers = exposure.histogram(im, source_range='image')
-    assert_array_equal(bin_centers, np.arange(10, 101))
+    assert_equal(len(bin_centers), len(frequencies))
+    assert_equal(bin_centers[0], 10)
+    assert_equal(bin_centers[-1], 100)
 
 
 def test_peak_uint_range_dtype():
@@ -87,8 +96,8 @@ def test_peak_float_out_of_range_dtype():
     im = np.array([10, 100], dtype=np.float16)
     nbins = 10
     frequencies, bin_centers = exposure.histogram(im, nbins=nbins, source_range='dtype')
-    assert_equal(np.min(bin_centers), -0.9)
-    assert_equal(np.max(bin_centers), 0.9)
+    assert_almost_equal(np.min(bin_centers), -0.9, 3)
+    assert_almost_equal(np.max(bin_centers), 0.9, 3)
     assert_equal(len(bin_centers), 10)
 
 
