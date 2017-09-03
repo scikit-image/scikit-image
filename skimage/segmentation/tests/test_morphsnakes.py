@@ -80,7 +80,7 @@ def test_morphsnakes_simple_shape_acwe():
 def test_morphsnakes_simple_shape_gac():
 
     img = np.float_(circle_levelset((11, 11), (5, 5), 3.5))
-    gimg = morphsnakes.gborders(img, alpha=10.0)
+    gimg = morphsnakes.gborders(img, alpha=10.0, sigma=1.0)
     ls = circle_levelset(img.shape, (5, 5), 6)
 
     ref = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
