@@ -29,7 +29,7 @@ def _generate_rectangle_mask(point, image, shape, random):
         The random state to use for random sampling.
 
     Raises
-    -----
+    ------
     ArithmeticError
         When a shape cannot be fit into the image with the given starting
         coordinates (x_0, y_0). This usually means the image dimensions are too
@@ -53,7 +53,6 @@ def _generate_rectangle_mask(point, image, shape, random):
     r, c = random.randint(shape.min_size, available_width + 1, size=2)
     mask = np.zeros((image.nrows, image.ncols, image.depth), dtype=np.uint8)
     mask[point.row:point.row + r, point.column:point.column + c] = shape.color
-    assert mask.sum() > 0
     label = Label('rectangle', point.column, point.column + c, point.row,
                   point.row + r)
 
@@ -77,7 +76,7 @@ def _generate_circle_mask(point, image, shape, random):
         The random state to use for random sampling.
 
     Raises
-    -----
+    ------
     ArithmeticError
         When a shape cannot be fit into the image with the given starting
         coordinates (x_0, y_0). This usually means the image dimensions are too
@@ -106,7 +105,6 @@ def _generate_circle_mask(point, image, shape, random):
     mask = np.zeros((image.nrows, image.ncols, image.depth), dtype=np.uint8)
     circle = draw.circle(point.row, point.column, radius)
     mask[circle] = shape.color
-    assert mask.sum() > 0
     label = Label('circle', point.column - radius + 1, point.column + radius,
                   point.row - radius + 1, point.row + radius)
 
@@ -130,7 +128,7 @@ def _generate_triangle_mask(point, image, shape, random):
         The random state to use for random sampling.
 
     Raises
-    -----
+    ------
     ArithmeticError
         When a shape cannot be fit into the image with the given starting
         coordinates (x_0, y_0). This usually means the image dimensions are too
@@ -157,7 +155,6 @@ def _generate_triangle_mask(point, image, shape, random):
         point.row, point.row - triangle_height, point.row
     ], [point.column, point.column + side // 2, point.column + side])
     mask[triangle] = shape.color
-    assert mask.sum() > 0
     label = Label('triangle', point.column, point.column + side,
                   point.row - triangle_height, point.row)
 
@@ -305,7 +302,6 @@ def generate_shapes(image_shape,
             except ArithmeticError:
                 # Couldn't fit the shape, skip it.
                 continue
-            assert mask.sum() > 0, mask
             # Check if there is an overlap where the mask is nonzero.
             # If image[mask.nonzero()].min() == 255 we haven't touched the mask
             # in the coordinates where the new mask is non-zero.
