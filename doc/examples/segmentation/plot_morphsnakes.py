@@ -58,7 +58,7 @@ from skimage.segmentation import (morph_acwe, morph_gac, gborders,
 # Morphological ACWE
 image = img_as_float(data.camera())
 
-# Initial level set.
+# Initial level set
 init_ls = checkerboard_level_set(image.shape, 6)
 # List with intermediate results for plotting the evolution
 evolution = []
@@ -90,8 +90,10 @@ ax[1].set_title(title, fontsize=12)
 image = img_as_float(data.coins())
 gimage = gborders(image)
 
+# Initial level set
 init_ls = np.zeros(image.shape, dtype=np.int8)
 init_ls[10:-10, 10:-10] = 1
+# List with intermediate results for plotting the evolution
 evolution = []
 ls = morph_gac(gimage, 230, init_ls,
                smoothing=1, balloon=-1, threshold=0.69,

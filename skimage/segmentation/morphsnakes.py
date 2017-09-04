@@ -16,7 +16,7 @@ __all__ = ['morph_acwe',
            ]
 
 
-class fcycle(object):
+class _fcycle(object):
 
     def __init__(self, iterable):
         """Call functions from the iterable each time it is called."""
@@ -97,7 +97,7 @@ def ISoSI(u):
     return IS(SI(u))
 
 
-curvop = fcycle([SIoIS, ISoSI])
+curvop = _fcycle([SIoIS, ISoSI])
 
 
 def _check_input(image, init_level_set):
@@ -140,7 +140,7 @@ def circle_level_set(image_shape, center=None, radius=None):
     ----------
     image_shape : tuple of positive integers
         Shape of the image
-    center : tuple of integers, optional
+    center : tuple of positive integers, optional
         Coordinates of the center of the circle given in (row, column). If not
         given, it defaults to the center of the image.
     radius : float, optional
@@ -149,8 +149,8 @@ def circle_level_set(image_shape, center=None, radius=None):
 
     Returns
     -------
-    out : array
-        Binary level set of the circle.
+    out : array with shape `image_shape`
+        Binary level set of the circle with the given `radius` and `center`.
 
     See also
     --------
@@ -182,7 +182,7 @@ def checkerboard_level_set(image_shape, square_size=5):
 
     Returns
     -------
-    out : array
+    out : array with shape `image_shape`
         Binary level set of the checkerboard.
 
     See also
@@ -270,7 +270,7 @@ def morph_acwe(image, iterations, init_level_set='checkerboard',
 
     Returns
     -------
-    segmentation : (M, N) or (L, M, N) array
+    out : (M, N) array
         Final segmentation (i.e., the final level set)
 
     See also
@@ -345,7 +345,7 @@ def morph_gac(gimage, iterations, init_level_set='circle',
 
     Parameters
     ----------
-    gimage : (M, N) or (L, M, N) array
+    gimage : (M, N) array
         Preprocessed image to be segmented. This is very rarely the original
         image. Instead, this is usually a preprocessed version of the original
         image that enhances and highlights the borders (or other structures) of
@@ -383,7 +383,7 @@ def morph_gac(gimage, iterations, init_level_set='circle',
 
     Returns
     -------
-    segmentation : (M, N) or (L, M, N) array
+    out : (M, N) array
         Final segmentation (i.e., the final level set)
 
     See also
