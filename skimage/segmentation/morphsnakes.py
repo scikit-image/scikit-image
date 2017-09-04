@@ -11,7 +11,8 @@ __all__ = ['morph_acwe',
            'circle_level_set',
            'checkerboard_level_set',
            'SIoIS',
-           'ISoSI'
+           'ISoSI',
+           'curvop'
            ]
 
 
@@ -216,7 +217,7 @@ def gborders(image, alpha=100.0, sigma=5.0):
     gimage : (M, N) array
         Preprocessed image suitable for `morph_gac`.
     """
-    gradnorm = ndi.gaussian_gradient_magnitude(image, sigma, mode='constant')
+    gradnorm = ndi.gaussian_gradient_magnitude(image, sigma, mode='nearest')
     return 1.0 / np.sqrt(1.0 + alpha * gradnorm)
 
 
