@@ -8,10 +8,11 @@ Morphological Snakes
 *Morphological Snakes* [1]_ are a family of methods for image segmentation.
 Their behavior is similar to that of active contours (for example, *Geodesic
 Active Contours* [2]_ or *Active Contours without Edges* [3]_). However,
-*Morphological Snakes* use morphological operators (such as dilation or erosion)
-over a binary array instead of solving PDEs over a floating point array, which
-is the standard approach for active contours. This makes *Morphological Snakes*
-faster and numerically more stable than their traditional counterpart.
+*Morphological Snakes* use morphological operators (such as dilation or
+erosion) over a binary array instead of solving PDEs over a floating point
+array, which is the standard approach for active contours. This makes
+*Morphological Snakes* faster and numerically more stable than their
+traditional counterpart.
 
 There are two *Morphological Snakes* methods available in this implementation:
 *Morphological Geodesic Active Contours* (**MorphGAC**, implemented in the
@@ -20,16 +21,17 @@ function ``morph_gac``) and *Morphological Active Contours without Edges*
 
 **MorphGAC** is suitable for images with visible contours, even when these
 contours might be noisy, cluttered, or partially unclear. It requires, however,
-that the image is preprocessed to highlight the contours. This can be done using
-the function ``gborders``, although the user might want to define its own
+that the image is preprocessed to highlight the contours. This can be done
+using the function ``gborders``, although the user might want to define its own
 version. The quality of the **MorphGAC** segmentation depends greatly on this
 preprocessing step.
 
 On the contrary, **MorphACWE** works well when the pixel values of the inside
-and the outside regions of the object to segment have different averages. Unlike
-**MorphGAC**, **MorphACWE** does not require that the contours of the object are
-well defined, and it works over the original image without any preceding
-processing. This makes **MorphACWE** easier to use and tune than **MorphGAC**.
+and the outside regions of the object to segment have different averages.
+Unlike **MorphGAC**, **MorphACWE** does not require that the contours of the
+object are well defined, and it works over the original image without any
+preceding processing. This makes **MorphACWE** easier to use and tune than
+**MorphGAC**.
 
 References
 ----------
@@ -73,9 +75,12 @@ ax[0].set_title("Morphological ACWE segmentation", fontsize=12)
 
 ax[1].imshow(ls, cmap="gray")
 ax[1].set_axis_off()
-ax[1].contour(evolution[2], [0.5], colors='g').collections[0].set_label("Iteration 2")
-ax[1].contour(evolution[7], [0.5], colors='y').collections[0].set_label("Iteration 7")
-ax[1].contour(evolution[-1], [0.5], colors='r').collections[0].set_label("Iteration 35")
+contour = ax[1].contour(evolution[2], [0.5], colors='g')
+contour.collections[0].set_label("Iteration 2")
+contour = ax[1].contour(evolution[7], [0.5], colors='y')
+contour.collections[0].set_label("Iteration 7")
+contour = ax[1].contour(evolution[-1], [0.5], colors='r')
+contour.collections[0].set_label("Iteration 35")
 ax[1].legend(loc="upper right")
 title = "Morphological ACWE evolution"
 ax[1].set_title(title, fontsize=12)
@@ -99,9 +104,12 @@ ax[2].set_title("Morphological GAC segmentation", fontsize=12)
 
 ax[3].imshow(ls, cmap="gray")
 ax[3].set_axis_off()
-ax[3].contour(evolution[0], [0.5], colors='g').collections[0].set_label("Iteration 0")
-ax[3].contour(evolution[100], [0.5], colors='y').collections[0].set_label("Iteration 100")
-ax[3].contour(evolution[-1], [0.5], colors='r').collections[0].set_label("Iteration 230")
+contour = ax[3].contour(evolution[0], [0.5], colors='g')
+contour.collections[0].set_label("Iteration 0")
+contour = ax[3].contour(evolution[100], [0.5], colors='y')
+contour.collections[0].set_label("Iteration 100")
+contour = ax[3].contour(evolution[-1], [0.5], colors='r')
+contour.collections[0].set_label("Iteration 230")
 ax[3].legend(loc="upper right")
 title = "Morphological GAC evolution"
 ax[3].set_title(title, fontsize=12)

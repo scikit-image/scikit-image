@@ -121,7 +121,8 @@ def _init_level_set(init_level_set, image_shape):
         elif init_level_set == 'circle':
             res = circle_level_set(image_shape)
         else:
-            raise ValueError("`init_level_set` not in ['checkerboard', 'circle']")
+            raise ValueError("`init_level_set` not in "
+                             "['checkerboard', 'circle']")
     else:
         res = init_level_set
     return res
@@ -138,8 +139,8 @@ def circle_level_set(image_shape, center=None, radius=None):
         Coordinates of the center of the circle given in (row, column). If not
         given, it defaults to the center of the image.
     radius : float, optional
-        Radius of the circle. If not given, it is set to the 75% of the smallest
-        image dimension.
+        Radius of the circle. If not given, it is set to the 75% of the
+        smallest image dimension.
 
     Returns
     -------
@@ -195,8 +196,8 @@ def gborders(image, alpha=100.0, sigma=5.0):
     """Stopping criterion for image borders.
 
     Compute the magnitude of the gradients in the image and then inverts the
-    result in the range [0, 1]. Flat areas are assigned values close to 1, while
-    areas close to borders are assigned values close to 0.
+    result in the range [0, 1]. Flat areas are assigned values close to 1,
+    while areas close to borders are assigned values close to 0.
 
     This function or a similar one defined by the user should be applied over
     the image as a preprocessing step before calling `morph_gac`.
