@@ -87,12 +87,13 @@ def IS(u):
     return _opbuffer.min(0)
 
 
-# SIoIS operator.
 def SIoIS(u):
+    """SIoIS operator."""
     return SI(IS(u))
 
 
 def ISoSI(u):
+    """ISoSI operator."""
     return IS(SI(u))
 
 
@@ -100,7 +101,7 @@ curvop = fcycle([SIoIS, ISoSI])
 
 
 def _check_input(image, init_level_set):
-
+    """Check that shapes of `image` and `init_level_set` match."""
     if len(image.shape) not in [2, 3]:
         raise ValueError("Input image is not a 2D or 3D array.")
 
@@ -110,11 +111,15 @@ def _check_input(image, init_level_set):
 
 
 def _find_threshold(image, percentile=20):
+    """Find a proper threshold for `morph_gac` using the given percentile."""
     return np.percentile(image, percentile)
 
 
 def _init_level_set(init_level_set, image_shape):
+    """Auxiliary function for initializing level sets with a string.
 
+    If `init_level_set` is not a string, it is returned as is.
+    """
     if isinstance(init_level_set, str):
         if init_level_set == 'checkerboard':
             res = checkerboard_level_set(image_shape)
