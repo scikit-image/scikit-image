@@ -44,10 +44,13 @@ References
        Transactions on Image Processing, 2001, DOI:10.1109/83.902291
 
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import data, img_as_float
-from skimage.segmentation import morph_acwe, checkerboard_level_set
+from skimage.segmentation import (morph_acwe, morph_gac, gborders,
+                                  checkerboard_level_set)
+
 
 # Morphological ACWE
 image = img_as_float(data.camera())
