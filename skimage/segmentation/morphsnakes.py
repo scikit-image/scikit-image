@@ -154,7 +154,7 @@ def circle_level_set(image_shape, center=None, radius=None):
         center = tuple(i//2 for i in image_shape)
 
     if radius is None:
-        radius = min(image_shape) * 3 / 8
+        radius = min(image_shape) * 3.0 / 8.0
 
     grid = np.mgrid[[slice(i) for i in image_shape]]
     grid = (grid.T - center).T
