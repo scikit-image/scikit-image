@@ -1,17 +1,9 @@
 
 import numpy as np
-from skimage.segmentation import morph_acwe, morph_gac
-from skimage.segmentation import morphsnakes
+from skimage.segmentation import (morph_acwe, morph_gac, gborders,
+                                  circle_level_set, checkerboard_level_set)
 from numpy.testing import assert_array_equal
 import pytest
-
-
-def circle_levelset(shape, center, radius):
-    """Build a binary function with a circle as the 0.5-levelset."""
-    grid = np.mgrid[[slice(i) for i in shape]].T - center
-    phi = radius - np.sqrt(np.sum((grid.T)**2, 0))
-    u = np.int8(phi > 0)
-    return u
 
 
 def gaussian_blob():
@@ -26,9 +18,9 @@ def test_morphsnakes_incorrect_image_shape():
     ls = np.zeros((10, 9))
 
     with pytest.raises(ValueError):
-        morph_acwe(img, init_level_set=ls, iterations=1)
+        morph_acwe(img, iterations=1, init_level_set=ls)
     with pytest.raises(ValueError):
-        morph_gac(img, init_level_set=ls, iterations=1)
+        morph_gac(img, iterations=1, init_level_set=ls)
 
 
 def test_morphsnakes_incorrect_ndim():
@@ -37,27 +29,27 @@ def test_morphsnakes_incorrect_ndim():
     ls = np.zeros((4, 4, 4, 4))
 
     with pytest.raises(ValueError):
-        morph_acwe(img, init_level_set=ls, iterations=1)
+        morph_acwe(img, iterations=1, init_level_set=ls)
     with pytest.raises(ValueError):
-        morph_gac(img, init_level_set=ls, iterations=1)
+        morph_gac(img, iterations=1, init_level_set=ls)
 
 
 def test_morphsnakes_black():
 
     img = np.zeros((11, 11))
-    ls = circle_levelset(img.shape, (5, 5), 3)
+    ls = circle_level_set(img.shape, (5, 5), 3)
 
     ref_zeros = np.zeros(img.shape, dtype=np.int8)
     ref_ones = np.ones(img.shape, dtype=np.int8)
 
-    acwe_ls = morph_acwe(img, ls, iterations=6)
+    acwe_ls = morph_acwe(img, iterations=6, init_level_set=ls)
     assert_array_equal(acwe_ls, ref_zeros)
 
-    gac_ls = morph_gac(img, ls, iterations=6)
+    gac_ls = morph_gac(img, iterations=6, init_level_set=ls)
     assert_array_equal(gac_ls, ref_zeros)
 
-    gac_ls2 = morph_gac(img, ls, iterations=6, balloon=1, threshold=-1,
-                        smoothing=0)
+    gac_ls2 = morph_gac(img, iterations=6, init_level_set=ls,
+                        balloon=1, threshold=-1, smoothing=0)
     assert_array_equal(gac_ls2, ref_ones)
 
     assert acwe_ls.dtype == gac_ls.dtype == gac_ls2.dtype == np.int8
@@ -66,11 +58,11 @@ def test_morphsnakes_black():
 def test_morphsnakes_simple_shape_acwe():
 
     img = gaussian_blob()
-    ls1 = circle_levelset(img.shape, (5, 5), 3)
-    ls2 = circle_levelset(img.shape, (5, 5), 6)
+    ls1 = circle_level_set(img.shape, (5, 5), 3)
+    ls2 = circle_level_set(img.shape, (5, 5), 6)
 
-    acwe_ls1 = morph_acwe(img, ls1, iterations=10)
-    acwe_ls2 = morph_acwe(img, ls2, iterations=10)
+    acwe_ls1 = morph_acwe(img, iterations=10, init_level_set=ls1)
+    acwe_ls2 = morph_acwe(img, iterations=10, init_level_set=ls2)
 
     assert_array_equal(acwe_ls1, acwe_ls2)
 
@@ -79,9 +71,9 @@ def test_morphsnakes_simple_shape_acwe():
 
 def test_morphsnakes_simple_shape_gac():
 
-    img = np.float_(circle_levelset((11, 11), (5, 5), 3.5))
-    gimg = morphsnakes.gborders(img, alpha=10.0, sigma=1.0)
-    ls = circle_levelset(img.shape, (5, 5), 6)
+    img = np.float_(circle_level_set((11, 11), (5, 5), 3.5))
+    gimg = gborders(img, alpha=10.0, sigma=1.0)
+    ls = circle_level_set(img.shape, (5, 5), 6)
 
     ref = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -96,11 +88,34 @@ def test_morphsnakes_simple_shape_gac():
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
                    dtype=np.int8)
 
-    gac_ls = morph_gac(gimg, ls, iterations=10, balloon=-1)
+    gac_ls = morph_gac(gimg, iterations=10, init_level_set=ls, balloon=-1)
 
     assert_array_equal(gac_ls, ref)
 
     assert gac_ls.dtype == np.int8
+
+
+def test_init_level_sets():
+
+    image = np.zeros((6, 6))
+    checkerboard_ls = morph_acwe(image, 0, 'checkerboard')
+    checkerboard_ref = np.array([[0, 0, 0, 0, 0, 1],
+                                 [0, 0, 0, 0, 0, 1],
+                                 [0, 0, 0, 0, 0, 1],
+                                 [0, 0, 0, 0, 0, 1],
+                                 [0, 0, 0, 0, 0, 1],
+                                 [1, 1, 1, 1, 1, 0]], dtype=np.int8)
+
+    circle_ls = morph_gac(image, 0, 'circle')
+    circle_ref = np.array([[0, 0, 0, 0, 0, 0],
+                           [0, 0, 1, 1, 1, 0],
+                           [0, 1, 1, 1, 1, 1],
+                           [0, 1, 1, 1, 1, 1],
+                           [0, 1, 1, 1, 1, 1],
+                           [0, 0, 1, 1, 1, 0]], dtype=np.int8)
+
+    assert_array_equal(checkerboard_ls, checkerboard_ref)
+    assert_array_equal(circle_ls, circle_ref)
 
 
 if __name__ == "__main__":

@@ -5,7 +5,14 @@ from itertools import cycle
 import numpy as np
 from scipy import ndimage as ndi
 
-__all__ = ['morph_acwe', 'morph_gac', 'SIoIS', 'ISoSI', 'gborders']
+__all__ = ['morph_acwe',
+           'morph_gac',
+           'gborders',
+           'circle_level_set',
+           'checkerboard_level_set',
+           'SIoIS',
+           'ISoSI'
+           ]
 
 
 class fcycle(object):
@@ -105,6 +112,84 @@ def _find_threshold(image, percentile=20):
     return np.percentile(image, percentile)
 
 
+def _init_level_set(init_level_set, image_shape):
+
+    if isinstance(init_level_set, str):
+        if init_level_set == 'checkerboard':
+            res = checkerboard_level_set(image_shape)
+        elif init_level_set == 'circle':
+            res = circle_level_set(image_shape)
+        else:
+            raise ValueError("`init_level_set` not in ['checkerboard', 'circle']")
+    else:
+        res = init_level_set
+    return res
+
+
+def circle_level_set(image_shape, center=None, radius=None):
+    """Create a circle level set with binary values.
+
+    Parameters
+    ----------
+    image_shape : tuple of positive integers
+        Shape of the image
+    center : tuple of integers, optional
+        Coordinates of the center of the circle given in (row, column). If not
+        given, it defaults to the center of the image.
+    radius : float, optional
+        Radius of the circle. If not given, it is set to the 75% of the smallest
+        image dimension.
+
+    Returns
+    -------
+    out : array
+        Binary level set of the circle.
+
+    See also
+    --------
+    checkerboard_level_set
+    """
+
+    if center is None:
+        center = tuple(i//2 for i in image_shape)
+
+    if radius is None:
+        radius = min(image_shape) * 3 / 8
+
+    grid = np.mgrid[[slice(i) for i in image_shape]]
+    grid = (grid.T - center).T
+    phi = radius - np.sqrt(np.sum((grid)**2, 0))
+    res = np.int8(phi > 0)
+    return res
+
+
+def checkerboard_level_set(image_shape, square_size=5):
+    """Create a checkerboard level set with binary values.
+
+    Parameters
+    ----------
+    image_shape : tuple of positive integers
+        Shape of the image.
+    square_size : int, optional
+        Size of the squares of the checkerboard. It defaults to 5.
+
+    Returns
+    -------
+    out : array
+        Binary level set of the checkerboard.
+
+    See also
+    --------
+    circle_level_set
+    """
+
+    grid = np.mgrid[[slice(i) for i in image_shape]]
+    grid = (grid // square_size) & 1
+    checkerboard = np.bitwise_xor.reduce(grid, axis=0)
+    res = np.int8(checkerboard)
+    return res
+
+
 def gborders(image, alpha=100.0, sigma=5.0):
     """Stopping criterion for image borders.
 
@@ -135,7 +220,7 @@ def gborders(image, alpha=100.0, sigma=5.0):
     return 1.0 / np.sqrt(1.0 + alpha * gradnorm)
 
 
-def morph_acwe(image, init_level_set, iterations,
+def morph_acwe(image, iterations, init_level_set='checkerboard',
                smoothing=1, lambda1=1, lambda2=1,
                iter_callback=lambda x: None):
     """Morphological active contours without edges (aka Morphological Chan-Vese)
@@ -148,12 +233,17 @@ def morph_acwe(image, init_level_set, iterations,
 
     Parameters
     ----------
-    image : (M, N) or (L, M, N) array
+    image : (M, N) array
         Grayscale image to be segmented.
-    init_level_set : (M, N) or (L, M, N) array
-        Initial level set.
     iterations : uint
         Number of iterations to run
+    init_level_set : str or (M, N) array
+        Initial level set. If an array is given, it will be binarized and used
+        as the initial level set. If a string is given, it defines the method
+        to generate a reasonable initial level set with the shape of the
+        `image`. Accepted values are 'checkerboard' and 'circle'. See the
+        documentation of `checkerboard_level_set` and `circle_level_set`
+        respectively for details about how these level sets are created.
     smoothing : uint, optional
         Number of times the smoothing operator is applied per iteration.
         Reasonable values are around 1-4. Larger values lead to smoother
@@ -175,6 +265,10 @@ def morph_acwe(image, init_level_set, iterations,
     -------
     segmentation : (M, N) or (L, M, N) array
         Final segmentation (i.e., the final level set)
+
+    See also
+    --------
+    circle_level_set, checkerboard_level_set
 
     Notes
     -----
@@ -199,6 +293,8 @@ def morph_acwe(image, init_level_set, iterations,
     """
 
     # TODO: Make it work with "color" (or multi-channel) images.
+
+    init_level_set = _init_level_set(init_level_set, image.shape)
 
     _check_input(image, init_level_set)
 
@@ -231,7 +327,7 @@ def morph_acwe(image, init_level_set, iterations,
     return u
 
 
-def morph_gac(gimage, init_level_set, iterations,
+def morph_gac(gimage, iterations, init_level_set='circle',
               smoothing=1, threshold='auto', balloon=0,
               iter_callback=lambda x: None):
     """Morphological geodesic active contours.
@@ -250,10 +346,15 @@ def morph_gac(gimage, init_level_set, iterations,
         evolution in areas where `gimage` is small. See `morphsnakes.gborders`
         as an example function to perform this preprocessing. Note that the
         quality of `morph_gac` might greatly depend on this preprocessing.
-    init_level_set : (M, N) or (L, M, N) array
-        Initial level set.
     iterations : uint
         Number of iterations to run.
+    init_level_set : (M, N) or (L, M, N) array
+        Initial level set. If an array is given, it will be binarized and used
+        as the initial level set. If a string is given, it defines the method
+        to generate a reasonable initial level set with the shape of the
+        `image`. Accepted values are 'checkerboard' and 'circle'. See the
+        documentation of `checkerboard_level_set` and `circle_level_set`
+        respectively for details about how these level sets are created.
     smoothing : uint, optional
         Number of times the smoothing operator is applied per iteration.
         Reasonable values are around 1-4. Larger values lead to smoother
@@ -278,6 +379,10 @@ def morph_gac(gimage, init_level_set, iterations,
     segmentation : (M, N) or (L, M, N) array
         Final segmentation (i.e., the final level set)
 
+    See also
+    --------
+    gborders, circle_level_set, checkerboard_level_set
+
     Notes
     -----
 
@@ -301,6 +406,8 @@ def morph_gac(gimage, init_level_set, iterations,
     """
 
     image = gimage
+    init_level_set = _init_level_set(init_level_set, image.shape)
+
     _check_input(image, init_level_set)
 
     if threshold == 'auto':

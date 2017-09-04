@@ -8,7 +8,8 @@ from ._clear_border import clear_border
 from ._join import join_segmentations, relabel_from_one, relabel_sequential
 from ..morphology import watershed
 from ._chan_vese import chan_vese
-from .morphsnakes import morph_gac, morph_acwe
+from .morphsnakes import (morph_gac, morph_acwe, gborders,
+                          circle_level_set, checkerboard_level_set)
 
 
 __all__ = ['random_walker',
@@ -25,5 +26,8 @@ __all__ = ['random_walker',
            'watershed',
            'chan_vese',
            'morph_gac',
-           'morph_acwe'
+           'morph_acwe',
+           'gborders',
+           'circle_level_set',
+           'checkerboard_level_set'
            ]
