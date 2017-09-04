@@ -224,7 +224,7 @@ def gborders(image, alpha=100.0, sigma=5.0):
 def morph_acwe(image, iterations, init_level_set='checkerboard',
                smoothing=1, lambda1=1, lambda2=1,
                iter_callback=lambda x: None):
-    """Morphological active contours without edges (aka Morphological Chan-Vese)
+    """Morphological Active Contours without Edges (MorphACWE)
 
     Active contours without edges implemented with morphological operators. It
     can be used to segment objects in images without well defined borders. It
@@ -331,7 +331,7 @@ def morph_acwe(image, iterations, init_level_set='checkerboard',
 def morph_gac(gimage, iterations, init_level_set='circle',
               smoothing=1, threshold='auto', balloon=0,
               iter_callback=lambda x: None):
-    """Morphological geodesic active contours.
+    """Morphological Geodesic Active Contours (MorphGAC).
 
     Geodesic active contours implemented with morphological operators. It can
     be used to segment objects with visible but noisy, cluttered, broken

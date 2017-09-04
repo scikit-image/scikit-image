@@ -5,30 +5,31 @@
 Morphological Snakes
 ====================
 
-Morphological snakes [1]_ are a family of methods for image segmentation. Their
-behavior is similar to that of active contours (for example, Geodesic Active
-Contours [2]_ or Active Contours without Edges [3]_). However, Morphological
-Snakes use morphological operators (such as dilation or erosion) over a binary
-array instead of solving PDEs over a floating point array, which is the standard
-approach for active contours. This makes Morphological Snakes faster and
-numerically more stable than their traditional counterpart.
+*Morphological Snakes* [1]_ are a family of methods for image segmentation.
+Their behavior is similar to that of active contours (for example, *Geodesic
+Active Contours* [2]_ or *Active Contours without Edges* [3]_). However,
+*Morphological Snakes* use morphological operators (such as dilation or erosion)
+over a binary array instead of solving PDEs over a floating point array, which
+is the standard approach for active contours. This makes *Morphological Snakes*
+faster and numerically more stable than their traditional counterpart.
 
-There are two Morphological Snakes methods available in this implementation:
-Morphological Geodesic Active Contours (``morph_gac``) and Morphological Active
-Contours without Edges (``morph_acwe``).
+There are two *Morphological Snakes* methods available in this implementation:
+*Morphological Geodesic Active Contours* (**MorphGAC**, implemented in the
+function ``morph_gac``) and *Morphological Active Contours without Edges*
+(**MorphACWE**, implemented in the function ``morph_acwe``).
 
-``morph_gac`` is suitable for images with visible contours, even when these
+**MorphGAC** is suitable for images with visible contours, even when these
 contours might be noisy, cluttered, or partially unclear. It requires, however,
 that the image is preprocessed to highlight the contours. This can be done using
 the function ``gborders``, although the user might want to define its own
-version. Note that the quality of the segmentation provided by ``morph_gac``
-depends greatly on this preprocessing.
+version. The quality of the **MorphGAC** segmentation depends greatly on this
+preprocessing step.
 
-On the contrary, ``morph_acwe`` works well when the pixel values of the inside
+On the contrary, **MorphACWE** works well when the pixel values of the inside
 and the outside regions of the object to segment have different averages. Unlike
-``morph_gac``, ``morph_acwe`` does not require that the contours of the object
-are well defined and it works over the original image without any preceding
-processing. This makes ``morph_acwe`` easier to use and tune than ``morph_gac``.
+**MorphGAC**, **MorphACWE** does not require that the contours of the object are
+well defined, and it works over the original image without any preceding
+processing. This makes **MorphACWE** easier to use and tune than **MorphGAC**.
 
 References
 ----------
