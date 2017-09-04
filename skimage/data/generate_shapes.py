@@ -261,7 +261,7 @@ def generate_shapes(image_shape,
     --------
     >>> import skimage.data
     >>> image, labels = skimage.data.generate_shapes((32, 32), max_shapes=3)
-    >>> image
+    >>> image # doctest: +SKIP
     array([
        [[255, 255, 255],
         [255, 255, 255],
@@ -270,7 +270,7 @@ def generate_shapes(image_shape,
         [255, 255, 255],
         [255, 255, 255],
         [255, 255, 255]]], dtype=uint8)
-    >>> labels
+    >>> labels # doctest: +SKIP
     [Label(category='circle', x1=22, x2=25, y1=18, y2=21),
      Label(category='triangle', x1=5, x2=13, y1=6, y2=13)]
     """
