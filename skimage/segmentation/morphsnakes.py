@@ -152,7 +152,7 @@ def circle_level_set(image_shape, center=None, radius=None):
     """
 
     if center is None:
-        center = tuple(i//2 for i in image_shape)
+        center = tuple(i // 2 for i in image_shape)
 
     if radius is None:
         radius = min(image_shape) * 3.0 / 8.0
@@ -314,7 +314,7 @@ def morph_acwe(image, iterations, init_level_set='checkerboard',
         # Image attachment
         du = np.gradient(u)
         abs_du = np.abs(du).sum(0)
-        aux = abs_du * (lambda1*(image - c1)**2 - lambda2*(image - c0)**2)
+        aux = abs_du * (lambda1 * (image - c1)**2 - lambda2 * (image - c0)**2)
 
         u[aux < 0] = 1
         u[aux > 0] = 0
