@@ -44,12 +44,10 @@ _P3[6][[0, 1, 2], :, [2, 1, 0]] = 1
 _P3[7][[0, 1, 2], [0, 1, 2], :] = 1
 _P3[8][[0, 1, 2], [2, 1, 0], :] = 1
 
-_opbuffer = np.zeros((0), dtype=np.int8)
-
 
 def SI(u):
     """SI operator."""
-    global _opbuffer
+
     if np.ndim(u) == 2:
         P = _P2
     elif np.ndim(u) == 3:
@@ -58,18 +56,16 @@ def SI(u):
         raise ValueError("u has an invalid number of dimensions "
                          "(should be 2 or 3)")
 
-    if u.shape != _opbuffer.shape[1:]:
-        _opbuffer = np.zeros((len(P),) + u.shape, dtype=np.int8)
+    erosions = []
+    for P_i in P:
+        erosions.append(ndi.binary_erosion(u, P_i))
 
-    for _opbuffer_i, P_i in zip(_opbuffer, P):
-        _opbuffer_i[:] = ndi.binary_erosion(u, P_i)
-
-    return _opbuffer.max(0)
+    return np.array(erosions, dtype=np.int8).max(0)
 
 
 def IS(u):
     """IS operator."""
-    global _opbuffer
+
     if np.ndim(u) == 2:
         P = _P2
     elif np.ndim(u) == 3:
@@ -78,13 +74,11 @@ def IS(u):
         raise ValueError("u has an invalid number of dimensions "
                          "(should be 2 or 3)")
 
-    if u.shape != _opbuffer.shape[1:]:
-        _opbuffer = np.zeros((len(P),) + u.shape, dtype=np.int8)
+    dilations = []
+    for P_i in P:
+        dilations.append(ndi.binary_dilation(u, P_i))
 
-    for _opbuffer_i, P_i in zip(_opbuffer, P):
-        _opbuffer_i[:] = ndi.binary_dilation(u, P_i)
-
-    return _opbuffer.min(0)
+    return np.array(dilations, dtype=np.int8).min(0)
 
 
 def SIoIS(u):
