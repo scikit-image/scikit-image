@@ -10,8 +10,6 @@ __all__ = ['morph_acwe',
            'gborders',
            'circle_level_set',
            'checkerboard_level_set',
-           'SIoIS',
-           'ISoSI',
            'curvop'
            ]
 
@@ -45,7 +43,7 @@ _P3[7][[0, 1, 2], [0, 1, 2], :] = 1
 _P3[8][[0, 1, 2], [2, 1, 0], :] = 1
 
 
-def SI(u):
+def sup_inf(u):
     """SI operator."""
 
     if np.ndim(u) == 2:
@@ -63,7 +61,7 @@ def SI(u):
     return np.array(erosions, dtype=np.int8).max(0)
 
 
-def IS(u):
+def inf_sup(u):
     """IS operator."""
 
     if np.ndim(u) == 2:
@@ -81,17 +79,8 @@ def IS(u):
     return np.array(dilations, dtype=np.int8).min(0)
 
 
-def SIoIS(u):
-    """SIoIS operator."""
-    return SI(IS(u))
-
-
-def ISoSI(u):
-    """ISoSI operator."""
-    return IS(SI(u))
-
-
-curvop = _fcycle([SIoIS, ISoSI])
+curvop = _fcycle([lambda u: sup_inf(inf_sup(u)),   # SIoIS
+                  lambda u: inf_sup(sup_inf(u))])  # ISoSI
 
 
 def _check_input(image, init_level_set):

@@ -22,9 +22,9 @@ function ``morph_gac``) and *Morphological Active Contours without Edges*
 **MorphGAC** is suitable for images with visible contours, even when these
 contours might be noisy, cluttered, or partially unclear. It requires, however,
 that the image is preprocessed to highlight the contours. This can be done
-using the function ``gborders``, although the user might want to define its own
-version. The quality of the **MorphGAC** segmentation depends greatly on this
-preprocessing step.
+using the function ``gborders``, although the user might want to define their
+own version. The quality of the **MorphGAC** segmentation depends greatly on
+this preprocessing step.
 
 On the contrary, **MorphACWE** works well when the pixel values of the inside
 and the outside regions of the object to segment have different averages.
