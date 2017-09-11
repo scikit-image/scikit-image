@@ -33,18 +33,20 @@ def test_all_negative_image():
     assert frequencies[-1] == 1
     assert_array_equal(frequencies[1:-1], 0)
 
+
 # Test multichannel histograms
 # ============================
 
 def test_multichannel_hist_common_bins_uint8():
     """Check that all channels use the same binning."""
-    im = np.array([[0],[127]], dtype=np.int8)
+    im = np.array([[0], [127]], dtype=np.int8)
     frequencies, bin_centers = exposure.histogram(im, multichannel=True)
     assert_array_equal(bin_centers, np.arange(0, 128))
-    assert frequencies[0,  0] == 1
+    assert frequencies[0, 0] == 1
     assert frequencies[0, -1] == 0
-    assert frequencies[1,  0] == 0
+    assert frequencies[1, 0] == 0
     assert frequencies[1, -1] == 1
+
 
 # Test histogram equalization
 # ===========================
