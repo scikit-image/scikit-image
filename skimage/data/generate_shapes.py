@@ -92,8 +92,8 @@ def _generate_circle_mask(point, image, shape, random):
     """
     if shape.min_size == 1 or shape.max_size == 1:
         raise ValueError('size must be > 1 for circles')
-    min_radius = shape.min_size / 2
-    max_radius = shape.max_size / 2
+    min_radius = shape.min_size / 2.0
+    max_radius = shape.max_size / 2.0
     left = point.column
     right = image.ncols - point.column
     top = point.row
@@ -149,11 +149,17 @@ def _generate_triangle_mask(point, image, shape, random):
     if available_side < shape.min_size:
         raise ArithmeticError('cannot fit shape to image')
     side = random.randint(shape.min_size, available_side + 1)
-    triangle_height = int(np.ceil(np.sqrt(3 / 4) * side))
+    triangle_height = int(np.ceil(np.sqrt(3 / 4.0) * side))
     mask = np.zeros((image.nrows, image.ncols, image.depth), dtype=np.uint8)
     triangle = draw.polygon([
-        point.row, point.row - triangle_height, point.row
-    ], [point.column, point.column + side // 2, point.column + side])
+        point.row,
+        point.row - triangle_height,
+        point.row,
+    ], [
+        point.column,
+        point.column + side // 2,
+        point.column + side,
+    ])
     mask[triangle] = shape.color
     label = Label('triangle', point.column, point.column + side,
                   point.row - triangle_height, point.row)
@@ -306,6 +312,7 @@ def generate_shapes(image_shape,
             # If image[mask.nonzero()].min() == 255 we haven't touched the mask
             # in the coordinates where the new mask is non-zero.
             if allow_overlap or image[mask.nonzero()].min() == 255:
+                image[mask.nonzero()] = 255
                 image = (image - mask).clip(0, 255)
                 labels.append(label)
                 break
