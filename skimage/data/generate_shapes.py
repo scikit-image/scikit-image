@@ -288,7 +288,7 @@ def generate_shapes(image_shape,
     user_shape = shape
     image_shape = ImageShape(
         nrows=image_shape[0], ncols=image_shape[1], depth=1 if gray else 3)
-    image = np.ones(image_shape, dtype=np.uint8) * 255
+    image = np.zeros(image_shape, dtype=np.uint8)
     labels = []
     for _ in range(random.randint(min_shapes, max_shapes + 1)):
         color = _generate_random_color(gray, min_pixel_intensity, random)
@@ -308,16 +308,23 @@ def generate_shapes(image_shape,
             except ArithmeticError:
                 # Couldn't fit the shape, skip it.
                 continue
+            # Skip black shapes.
+            nonzero = mask.nonzero()
+            if not nonzero:
+                continue
             # Check if there is an overlap where the mask is nonzero.
-            # If image[mask.nonzero()].min() == 255 we haven't touched the mask
+            # If image[mask.nonzero()].max() == 0 we haven't touched the mask
             # in the coordinates where the new mask is non-zero.
-            if allow_overlap or image[mask.nonzero()].min() == 255:
-                image[mask.nonzero()] = 255
-                image = (image - mask).clip(0, 255)
+            if allow_overlap or image[nonzero].max() == 0:
+                # Reset overlap to fit the new shape.
+                image[nonzero] = 0
+                image = (image + mask).clip(0, 255)
                 labels.append(label)
                 break
         else:
             warn('Could not fit any shapes to image, '
                  'consider reducing the minimum dimension')
 
+    # Flip black to white background.
+    image[image == 0] = 255
     return image, labels

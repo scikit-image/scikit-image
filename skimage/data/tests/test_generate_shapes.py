@@ -16,7 +16,7 @@ def test_generates_gray_images_with_correct_shape():
 
 def test_generates_correct_bounding_boxes_for_rectangles():
     image, labels = generate_shapes(
-        (128, 128), max_shapes=1, shape='rectangle')
+        (128, 128), max_shapes=1, shape='rectangle', min_pixel_intensity=1)
     assert len(labels) == 1
     label = labels[0]
     crop = image[label.y1:label.y2, label.x1:label.x2]
@@ -30,7 +30,8 @@ def test_generates_correct_bounding_boxes_for_rectangles():
 
 
 def test_generates_correct_bounding_boxes_for_triangles():
-    image, labels = generate_shapes((128, 128), max_shapes=1, shape='triangle')
+    image, labels = generate_shapes(
+        (128, 128), max_shapes=1, shape='triangle', min_pixel_intensity=1)
     # assert len(labels) == 1
     label = labels[0]
     crop = image[label.y1:label.y2, label.x1:label.x2]
@@ -45,7 +46,12 @@ def test_generates_correct_bounding_boxes_for_triangles():
 
 def test_generates_correct_bounding_boxes_for_circles():
     image, labels = generate_shapes(
-        (43, 44), max_shapes=1, min_size=20, max_size=20, shape='circle')
+        (43, 44),
+        max_shapes=1,
+        min_size=20,
+        max_size=20,
+        shape='circle',
+        min_pixel_intensity=1)
     assert len(labels) == 1
     label = labels[0]
     crop = image[label.y1:label.y2, label.x1:label.x2]
@@ -72,7 +78,12 @@ def test_generate_triangle_throws_when_size_too_small():
 
 def test_can_generate_one_by_one_rectangle():
     image, labels = generate_shapes(
-        (50, 128), max_shapes=1, min_size=1, max_size=1, shape='rectangle')
+        (50, 128),
+        max_shapes=1,
+        min_size=1,
+        max_size=1,
+        shape='rectangle',
+        min_pixel_intensity=1)
     assert len(labels) == 1
     label = labels[0]
     crop = image[label.y1:label.y2, label.x1:label.x2]
