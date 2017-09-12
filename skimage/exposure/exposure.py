@@ -72,14 +72,15 @@ def histogram(image, nbins=256, multichannel=False):
 
     if multichannel:
         channels = sh[-1]
-        hist = np.empty(channels, nbins)
+        hist = np.empty((channels, nbins))
+        bin_centers = np.empty((channels, nbins))
         for chan in range(channels):
             hist[chan, :], bin_centers[chan, :] = _histogram(image, nbins)
 
     else:
-        hist, bin_edges = _histogram(image, nbins)
+        hist, bin_centers = _histogram(image, nbins)
 
-    return hist, bin_edges
+    return hist, bin_centers
 
 
 def _histogram(image, nbins):
