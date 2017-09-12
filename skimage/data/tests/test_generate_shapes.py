@@ -113,3 +113,10 @@ def test_generate_shapes_is_reproducible_with_seed():
             (128, 128), max_shapes=5, random_seed=random_seed)
         labels.append(l)
     assert all(other == labels[0] for other in labels[1:])
+
+def test_generates_white_image_when_min_pixel_intensity_255():
+    # The circle will never fit this.
+    image, labels = generate_shapes(
+        (128, 128), max_shapes=3, min_pixel_intensity=255)
+    assert len(labels) > 0
+    assert (image == 255).all()

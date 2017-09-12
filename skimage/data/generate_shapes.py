@@ -203,8 +203,8 @@ def _generate_random_color(gray, min_pixel_intensity, random):
     if not (0 <= min_pixel_intensity <= 255):
         raise ValueError('Minimum intensity must be in interval [0, 255]')
     if gray:
-        return random.randint(min_pixel_intensity, 255)
-    return random.randint(min_pixel_intensity, 255, size=3)
+        return random.randint(min_pixel_intensity, 256)
+    return random.randint(min_pixel_intensity, 256, size=3)
 
 
 def generate_shapes(image_shape,
