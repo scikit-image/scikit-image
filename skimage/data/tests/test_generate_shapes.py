@@ -16,7 +16,11 @@ def test_generates_gray_images_with_correct_shape():
 
 def test_generates_correct_bounding_boxes_for_rectangles():
     image, labels = generate_shapes(
-        (128, 128), max_shapes=1, shape='rectangle', min_pixel_intensity=1)
+        (128, 128),
+        max_shapes=1,
+        shape='rectangle',
+        min_pixel_intensity=1,
+        random_seed=42)
     assert len(labels) == 1
     label = labels[0]
     crop = image[label.y1:label.y2, label.x1:label.x2]
@@ -31,7 +35,11 @@ def test_generates_correct_bounding_boxes_for_rectangles():
 
 def test_generates_correct_bounding_boxes_for_triangles():
     image, labels = generate_shapes(
-        (128, 128), max_shapes=1, shape='triangle', min_pixel_intensity=1)
+        (128, 128),
+        max_shapes=1,
+        shape='triangle',
+        min_pixel_intensity=1,
+        random_seed=42)
     # assert len(labels) == 1
     label = labels[0]
     crop = image[label.y1:label.y2, label.x1:label.x2]
@@ -51,7 +59,8 @@ def test_generates_correct_bounding_boxes_for_circles():
         min_size=20,
         max_size=20,
         shape='circle',
-        min_pixel_intensity=1)
+        min_pixel_intensity=1,
+        random_seed=42)
     assert len(labels) == 1
     label = labels[0]
     crop = image[label.y1:label.y2, label.x1:label.x2]
@@ -114,8 +123,9 @@ def test_generate_shapes_is_reproducible_with_seed():
         labels.append(l)
     assert all(other == labels[0] for other in labels[1:])
 
+
 def test_generates_white_image_when_min_pixel_intensity_255():
     image, labels = generate_shapes(
-        (128, 128), max_shapes=3, min_pixel_intensity=255)
+        (128, 128), max_shapes=3, min_pixel_intensity=255, random_seed=42)
     assert len(labels) > 0
     assert (image == 255).all()

@@ -37,11 +37,11 @@ def _generate_rectangle_mask(point, image, shape, random):
 
     Returns
     -------
-    mask : 3-D array
-        The shape mask that can be applied to an image.
     label : Label
         A tuple specifying the category of the shape, as well as its x1, x2, y1
         and y2 bounding box coordinates.
+    indices: 2-D array
+        A mask of indices that the shape fills.
     """
     available_width = min(image.ncols - point.column, shape.max_size)
     if available_width < shape.min_size:
@@ -50,13 +50,23 @@ def _generate_rectangle_mask(point, image, shape, random):
     if available_height < shape.min_size:
         raise ArithmeticError('cannot fit shape to image')
     # Pick random widths and heights.
-    r, c = random.randint(shape.min_size, available_width + 1, size=2)
-    mask = np.zeros((image.nrows, image.ncols, image.depth), dtype=np.uint8)
-    mask[point.row:point.row + r, point.column:point.column + c] = shape.color
+    r = random.randint(shape.min_size, available_height + 1)
+    c = random.randint(shape.min_size, available_width + 1)
+    rectangle = draw.polygon([
+        point.row,
+        point.row + r,
+        point.row + r,
+        point.row,
+    ], [
+        point.column,
+        point.column,
+        point.column + c,
+        point.column + c,
+    ])
     label = Label('rectangle', point.column, point.column + c, point.row,
                   point.row + r)
 
-    return mask, label
+    return rectangle, label
 
 
 def _generate_circle_mask(point, image, shape, random):
@@ -84,11 +94,11 @@ def _generate_circle_mask(point, image, shape, random):
 
     Returns
     -------
-    mask : 3-D array
-        The shape mask that can be applied to an image.
     label : Label
         A tuple specifying the category of the shape, as well as its x1, x2, y1
         and y2 bounding box coordinates.
+    indices: 2-D array
+        A mask of indices that the shape fills.
     """
     if shape.min_size == 1 or shape.max_size == 1:
         raise ValueError('size must be > 1 for circles')
@@ -102,13 +112,11 @@ def _generate_circle_mask(point, image, shape, random):
     if available_radius < min_radius:
         raise ArithmeticError('cannot fit shape to image')
     radius = random.randint(min_radius, available_radius + 1)
-    mask = np.zeros((image.nrows, image.ncols, image.depth), dtype=np.uint8)
     circle = draw.circle(point.row, point.column, radius)
-    mask[circle] = shape.color
     label = Label('circle', point.column - radius + 1, point.column + radius,
                   point.row - radius + 1, point.row + radius)
 
-    return mask, label
+    return circle, label
 
 
 def _generate_triangle_mask(point, image, shape, random):
@@ -136,11 +144,11 @@ def _generate_triangle_mask(point, image, shape, random):
 
     Returns
     -------
-    mask : 3-D array
-        The shape mask that can be applied to an image.
     label : Label
         A tuple specifying the category of the shape, as well as its x1, x2, y1
         and y2 bounding box coordinates.
+    indices: 2-D array
+        A mask of indices that the shape fills.
     """
     if shape.min_size == 1 or shape.max_size == 1:
         raise ValueError('dimension must be > 1 for circles')
@@ -150,7 +158,6 @@ def _generate_triangle_mask(point, image, shape, random):
         raise ArithmeticError('cannot fit shape to image')
     side = random.randint(shape.min_size, available_side + 1)
     triangle_height = int(np.ceil(np.sqrt(3 / 4.0) * side))
-    mask = np.zeros((image.nrows, image.ncols, image.depth), dtype=np.uint8)
     triangle = draw.polygon([
         point.row,
         point.row - triangle_height,
@@ -160,11 +167,10 @@ def _generate_triangle_mask(point, image, shape, random):
         point.column + side // 2,
         point.column + side,
     ])
-    mask[triangle] = shape.color
     label = Label('triangle', point.column, point.column + side,
                   point.row - triangle_height, point.row)
 
-    return mask, label
+    return triangle, label
 
 
 # Allows lookup by key as well as random selection.
@@ -288,7 +294,8 @@ def generate_shapes(image_shape,
     user_shape = shape
     image_shape = ImageShape(
         nrows=image_shape[0], ncols=image_shape[1], depth=1 if gray else 3)
-    image = np.zeros(image_shape, dtype=np.uint8)
+    image = np.ones(image_shape, dtype=np.uint8) * 255
+    filled = np.zeros(image_shape, dtype=bool)
     labels = []
     for _ in range(random.randint(min_shapes, max_shapes + 1)):
         color = _generate_random_color(gray, min_pixel_intensity, random)
@@ -303,28 +310,19 @@ def generate_shapes(image_shape,
             row = random.randint(image_shape.nrows)
             point = Point(row, column)
             try:
-                mask, label = shape_generator(point, image_shape, shape,
-                                              random)
+                indices, label = shape_generator(point, image_shape, shape,
+                                                 random)
             except ArithmeticError:
                 # Couldn't fit the shape, skip it.
                 continue
-            # Skip black shapes.
-            nonzero = mask.nonzero()
-            if not nonzero:
-                continue
             # Check if there is an overlap where the mask is nonzero.
-            # If image[mask.nonzero()].max() == 0 we haven't touched the mask
-            # in the coordinates where the new mask is non-zero.
-            if allow_overlap or image[nonzero].max() == 0:
-                # Reset overlap to fit the new shape.
-                image[nonzero] = 0
-                image = (image + mask).clip(0, 255)
+            if allow_overlap or not filled[indices].any():
+                image[indices] = shape.color
+                filled[indices] = True
                 labels.append(label)
                 break
         else:
             warn('Could not fit any shapes to image, '
                  'consider reducing the minimum dimension')
 
-    # Flip black to white background.
-    image[image == 0] = 255
     return image, labels
