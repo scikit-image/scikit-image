@@ -49,11 +49,11 @@ retry () {
 }
 
 # add build dependencies
-echo "cython>=0.23.4" >> requirements.txt
-echo "numpydoc>=0.6" >> requirements.txt
+echo "cython>=0.23.4" >> requirements/default.txt
+echo "numpydoc>=0.6" >> requirements/default.txt
 
 if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
-    sed -i 's/>=/==/g' requirements.txt
+    sed -i 's/>=/==/g' requirements/default.txt
 fi
 
 python -m pip install --upgrade pip
@@ -63,7 +63,7 @@ pip install --retries 3 -q wheel numpy
 
 # install wheels
 for requirement in $WHEELBINARIES; do
-    WHEELS="$WHEELS $(grep $requirement requirements.txt)"
+    WHEELS="$WHEELS $(grep $requirement requirements/default.txt)"
 done
 pip install --retries 3 -q $PIP_FLAGS $WHEELHOUSE $WHEELS
 
