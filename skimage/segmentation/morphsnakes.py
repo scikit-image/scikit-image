@@ -5,12 +5,13 @@ from itertools import cycle
 import numpy as np
 from scipy import ndimage as ndi
 
-__all__ = ['morph_acwe',
-           'morph_gac',
-           'gborders',
+from .._shared.utils import assert_nD
+
+__all__ = ['morphological_chan_vese',
+           'morphological_geodesic_active_contour',
+           'inverse_gaussian_gradient',
            'circle_level_set',
-           'checkerboard_level_set',
-           'curvop'
+           'checkerboard_level_set'
            ]
 
 
@@ -79,23 +80,17 @@ def inf_sup(u):
     return np.array(dilations, dtype=np.int8).min(0)
 
 
-curvop = _fcycle([lambda u: sup_inf(inf_sup(u)),   # SIoIS
-                  lambda u: inf_sup(sup_inf(u))])  # ISoSI
+_curvop = _fcycle([lambda u: sup_inf(inf_sup(u)),   # SIoIS
+                   lambda u: inf_sup(sup_inf(u))])  # ISoSI
 
 
 def _check_input(image, init_level_set):
     """Check that shapes of `image` and `init_level_set` match."""
-    if len(image.shape) not in [2, 3]:
-        raise ValueError("Input image is not a 2D or 3D array.")
+    assert_nD(image, [2, 3])
 
     if len(image.shape) != len(init_level_set.shape):
         raise ValueError("The dimensions of the initial level set do not "
                          "match the dimensions of the image.")
-
-
-def _find_threshold(image, percentile=20):
-    """Find a proper threshold for `morph_gac` using the given percentile."""
-    return np.percentile(image, percentile)
 
 
 def _init_level_set(init_level_set, image_shape):
@@ -174,21 +169,26 @@ def checkerboard_level_set(image_shape, square_size=5):
     """
 
     grid = np.mgrid[[slice(i) for i in image_shape]]
-    grid = (grid // square_size) & 1
+    grid = (grid // square_size)
+
+    # Alternate 0/1 for even/odd numbers.
+    grid = grid & 1
+
     checkerboard = np.bitwise_xor.reduce(grid, axis=0)
     res = np.int8(checkerboard)
     return res
 
 
-def gborders(image, alpha=100.0, sigma=5.0):
-    """Stopping criterion for image borders.
+def inverse_gaussian_gradient(image, alpha=100.0, sigma=5.0):
+    """Inverse of gradient magnitude.
 
     Compute the magnitude of the gradients in the image and then inverts the
     result in the range [0, 1]. Flat areas are assigned values close to 1,
     while areas close to borders are assigned values close to 0.
 
     This function or a similar one defined by the user should be applied over
-    the image as a preprocessing step before calling `morph_gac`.
+    the image as a preprocessing step before calling
+    `morphological_geodesic_active_contour`.
 
     Parameters
     ----------
@@ -204,15 +204,16 @@ def gborders(image, alpha=100.0, sigma=5.0):
     Returns
     -------
     gimage : (M, N) array
-        Preprocessed image suitable for `morph_gac`.
+        Preprocessed image suitable for
+        `morphological_geodesic_active_contour`.
     """
     gradnorm = ndi.gaussian_gradient_magnitude(image, sigma, mode='nearest')
     return 1.0 / np.sqrt(1.0 + alpha * gradnorm)
 
 
-def morph_acwe(image, iterations, init_level_set='checkerboard',
-               smoothing=1, lambda1=1, lambda2=1,
-               iter_callback=lambda x: None):
+def morphological_chan_vese(image, iterations, init_level_set='checkerboard',
+                            smoothing=1, lambda1=1, lambda2=1,
+                            iter_callback=lambda x: None):
     """Morphological Active Contours without Edges (MorphACWE)
 
     Active contours without edges implemented with morphological operators. It
@@ -223,11 +224,11 @@ def morph_acwe(image, iterations, init_level_set='checkerboard',
 
     Parameters
     ----------
-    image : (M, N) array
-        Grayscale image to be segmented.
+    image : (M, N) or (L, M, N) array
+        Grayscale image or volume to be segmented.
     iterations : uint
         Number of iterations to run
-    init_level_set : str or (M, N) array
+    init_level_set : str, (M, N) array, or (L, M, N) array
         Initial level set. If an array is given, it will be binarized and used
         as the initial level set. If a string is given, it defines the method
         to generate a reasonable initial level set with the shape of the
@@ -253,7 +254,7 @@ def morph_acwe(image, iterations, init_level_set='checkerboard',
 
     Returns
     -------
-    out : (M, N) array
+    out : (M, N) or (L, M, N) array
         Final segmentation (i.e., the final level set)
 
     See also
@@ -282,8 +283,6 @@ def morph_acwe(image, iterations, init_level_set='checkerboard',
            2014, DOI 10.1109/TPAMI.2013.106
     """
 
-    # TODO: Make it work with "color" (or multi-channel) images.
-
     init_level_set = _init_level_set(init_level_set, image.shape)
 
     _check_input(image, init_level_set)
@@ -310,16 +309,17 @@ def morph_acwe(image, iterations, init_level_set='checkerboard',
 
         # Smoothing
         for _ in range(smoothing):
-            u = curvop(u)
+            u = _curvop(u)
 
         iter_callback(u)
 
     return u
 
 
-def morph_gac(gimage, iterations, init_level_set='circle',
-              smoothing=1, threshold='auto', balloon=0,
-              iter_callback=lambda x: None):
+def morphological_geodesic_active_contour(gimage, iterations,
+                                          init_level_set='circle', smoothing=1,
+                                          threshold='auto', balloon=0,
+                                          iter_callback=lambda x: None):
     """Morphological Geodesic Active Contours (MorphGAC).
 
     Geodesic active contours implemented with morphological operators. It can
@@ -328,17 +328,20 @@ def morph_gac(gimage, iterations, init_level_set='circle',
 
     Parameters
     ----------
-    gimage : (M, N) array
-        Preprocessed image to be segmented. This is very rarely the original
-        image. Instead, this is usually a preprocessed version of the original
-        image that enhances and highlights the borders (or other structures) of
-        the object to segment. `morph_gac` will try to stop the contour
-        evolution in areas where `gimage` is small. See `morphsnakes.gborders`
-        as an example function to perform this preprocessing. Note that the
-        quality of `morph_gac` might greatly depend on this preprocessing.
+    gimage : (M, N) or (L, M, N) array
+        Preprocessed image or volume to be segmented. This is very rarely the
+        original image. Instead, this is usually a preprocessed version of the
+        original image that enhances and highlights the borders (or other
+        structures) of the object to segment.
+        `morphological_geodesic_active_contour` will try to stop the contour
+        evolution in areas where `gimage` is small. See
+        `morphsnakes.inverse_gaussian_gradient` as an example function to
+        perform this preprocessing. Note that the quality of
+        `morphological_geodesic_active_contour` might greatly depend on this
+        preprocessing.
     iterations : uint
         Number of iterations to run.
-    init_level_set : (M, N) or (L, M, N) array
+    init_level_set : str, (M, N) array, or (L, M, N) array
         Initial level set. If an array is given, it will be binarized and used
         as the initial level set. If a string is given, it defines the method
         to generate a reasonable initial level set with the shape of the
@@ -366,12 +369,12 @@ def morph_gac(gimage, iterations, init_level_set='circle',
 
     Returns
     -------
-    out : (M, N) array
+    out : (M, N) or (L, M, N) array
         Final segmentation (i.e., the final level set)
 
     See also
     --------
-    gborders, circle_level_set, checkerboard_level_set
+    inverse_gaussian_gradient, circle_level_set, checkerboard_level_set
 
     Notes
     -----
@@ -401,7 +404,7 @@ def morph_gac(gimage, iterations, init_level_set='circle',
     _check_input(image, init_level_set)
 
     if threshold == 'auto':
-        threshold = _find_threshold(image)
+        threshold = np.percentile(image, 40)
 
     structure = np.ones((3,) * len(image.shape), dtype=np.int8)
     dimage = np.gradient(image)
@@ -433,7 +436,7 @@ def morph_gac(gimage, iterations, init_level_set='circle',
 
         # Smoothing
         for _ in range(smoothing):
-            u = curvop(u)
+            u = _curvop(u)
 
         iter_callback(u)
 

@@ -16,15 +16,16 @@ traditional counterpart.
 
 There are two *Morphological Snakes* methods available in this implementation:
 *Morphological Geodesic Active Contours* (**MorphGAC**, implemented in the
-function ``morph_gac``) and *Morphological Active Contours without Edges*
-(**MorphACWE**, implemented in the function ``morph_acwe``).
+function ``morphological_geodesic_active_contour``) and *Morphological Active
+Contours without Edges* (**MorphACWE**, implemented in the function
+``morphological_chan_vese``).
 
 **MorphGAC** is suitable for images with visible contours, even when these
 contours might be noisy, cluttered, or partially unclear. It requires, however,
 that the image is preprocessed to highlight the contours. This can be done
-using the function ``gborders``, although the user might want to define their
-own version. The quality of the **MorphGAC** segmentation depends greatly on
-this preprocessing step.
+using the function ``inverse_gaussian_gradient``, although the user might want
+to define their own version. The quality of the **MorphGAC** segmentation
+depends greatly on this preprocessing step.
 
 On the contrary, **MorphACWE** works well when the pixel values of the inside
 and the outside regions of the object to segment have different averages.
@@ -51,7 +52,9 @@ References
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import data, img_as_float
-from skimage.segmentation import (morph_acwe, morph_gac, gborders,
+from skimage.segmentation import (morphological_chan_vese,
+                                  morphological_geodesic_active_contour,
+                                  inverse_gaussian_gradient,
                                   checkerboard_level_set)
 
 
@@ -62,8 +65,8 @@ image = img_as_float(data.camera())
 init_ls = checkerboard_level_set(image.shape, 6)
 # List with intermediate results for plotting the evolution
 evolution = []
-ls = morph_acwe(image, 35, init_level_set=init_ls, smoothing=3,
-                iter_callback=lambda x: evolution.append(np.copy(x)))
+ls = morphological_chan_vese(image, 35, init_level_set=init_ls, smoothing=3,
+                             iter_callback=lambda x: evolution.append(np.copy(x)))
 
 fig, axes = plt.subplots(2, 2, figsize=(8, 8))
 ax = axes.flatten()
@@ -88,16 +91,17 @@ ax[1].set_title(title, fontsize=12)
 
 # Morphological GAC
 image = img_as_float(data.coins())
-gimage = gborders(image)
+gimage = inverse_gaussian_gradient(image)
 
 # Initial level set
 init_ls = np.zeros(image.shape, dtype=np.int8)
 init_ls[10:-10, 10:-10] = 1
 # List with intermediate results for plotting the evolution
 evolution = []
-ls = morph_gac(gimage, 230, init_ls,
-               smoothing=1, balloon=-1, threshold=0.69,
-               iter_callback=lambda x: evolution.append(np.copy(x)))
+ls = morphological_geodesic_active_contour(gimage, 230, init_ls,
+                                           smoothing=1, balloon=-1,
+                                           threshold=0.69,
+                                           iter_callback=lambda x: evolution.append(np.copy(x)))
 
 ax[2].imshow(image, cmap="gray")
 ax[2].set_axis_off()
