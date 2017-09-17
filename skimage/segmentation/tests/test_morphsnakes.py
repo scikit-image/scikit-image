@@ -62,7 +62,7 @@ def test_morphsnakes_black():
     assert acwe_ls.dtype == gac_ls.dtype == gac_ls2.dtype == np.int8
 
 
-def test_morphsnakes_simple_shape_acwe():
+def test_morphsnakes_simple_shape_chan_vese():
 
     img = gaussian_blob()
     ls1 = circle_level_set(img.shape, (5, 5), 3)
@@ -76,7 +76,7 @@ def test_morphsnakes_simple_shape_acwe():
     assert acwe_ls1.dtype == acwe_ls2.dtype == np.int8
 
 
-def test_morphsnakes_simple_shape_gac():
+def test_morphsnakes_simple_shape_geodesic_active_contour():
 
     img = np.float_(circle_level_set((11, 11), (5, 5), 3.5))
     gimg = inverse_gaussian_gradient(img, alpha=10.0, sigma=1.0)
@@ -125,6 +125,29 @@ def test_init_level_sets():
 
     assert_array_equal(checkerboard_ls, checkerboard_ref)
     assert_array_equal(circle_ls, circle_ref)
+
+
+def test_morphsnakes_3d():
+
+    image = np.zeros((7, 7, 7))
+
+    evolution = []
+
+    def callback(x):
+        evolution.append(x.sum())
+
+    ls = morphological_chan_vese(image, 5, 'circle',
+                                 iter_callback=callback)
+
+    # Check that the initial circle level set is correct
+    assert evolution[0] == 81
+
+    # Check that the final level set is correct
+    assert ls.sum() == 0
+
+    # Check that the contour is shrinking at every iteration
+    for v1, v2 in zip(evolution[:-1], evolution[1:]):
+        assert v1 >= v2
 
 
 if __name__ == "__main__":

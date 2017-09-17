@@ -192,8 +192,8 @@ def inverse_gaussian_gradient(image, alpha=100.0, sigma=5.0):
 
     Parameters
     ----------
-    image : (M, N) array
-        Grayscale image.
+    image : (M, N) or (L, M, N) array
+        Grayscale image or volume.
     alpha : float, optional
         Controls the steepness of the inversion. A larger value will make the
         transition between the flat areas and border areas steeper in the
@@ -203,8 +203,8 @@ def inverse_gaussian_gradient(image, alpha=100.0, sigma=5.0):
 
     Returns
     -------
-    gimage : (M, N) array
-        Preprocessed image suitable for
+    gimage : (M, N) or (L, M, N) array
+        Preprocessed image (or volume) suitable for
         `morphological_geodesic_active_contour`.
     """
     gradnorm = ndi.gaussian_gradient_magnitude(image, sigma, mode='nearest')
@@ -217,10 +217,10 @@ def morphological_chan_vese(image, iterations, init_level_set='checkerboard',
     """Morphological Active Contours without Edges (MorphACWE)
 
     Active contours without edges implemented with morphological operators. It
-    can be used to segment objects in images without well defined borders. It
-    is required that the inside of the object looks different on average than
-    the outside (i.e., the inner area of the object should be darker or lighter
-    than the outer area on average).
+    can be used to segment objects in images and volumes without well defined
+    borders. It is required that the inside of the object looks different on
+    average than the outside (i.e., the inner area of the object should be
+    darker or lighter than the outer area on average).
 
     Parameters
     ----------

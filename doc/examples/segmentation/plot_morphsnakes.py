@@ -58,6 +58,17 @@ from skimage.segmentation import (morphological_chan_vese,
                                   checkerboard_level_set)
 
 
+def store_evolution_in(lst):
+    """Returns a callback function to store the evolution of the level sets in
+    the given list.
+    """
+
+    def _store(x):
+        lst.append(np.copy(x))
+
+    return _store
+
+
 # Morphological ACWE
 image = img_as_float(data.camera())
 
@@ -65,8 +76,9 @@ image = img_as_float(data.camera())
 init_ls = checkerboard_level_set(image.shape, 6)
 # List with intermediate results for plotting the evolution
 evolution = []
+callback = store_evolution_in(evolution)
 ls = morphological_chan_vese(image, 35, init_level_set=init_ls, smoothing=3,
-                             iter_callback=lambda x: evolution.append(np.copy(x)))
+                             iter_callback=callback)
 
 fig, axes = plt.subplots(2, 2, figsize=(8, 8))
 ax = axes.flatten()
@@ -98,10 +110,11 @@ init_ls = np.zeros(image.shape, dtype=np.int8)
 init_ls[10:-10, 10:-10] = 1
 # List with intermediate results for plotting the evolution
 evolution = []
+callback = store_evolution_in(evolution)
 ls = morphological_geodesic_active_contour(gimage, 230, init_ls,
                                            smoothing=1, balloon=-1,
                                            threshold=0.69,
-                                           iter_callback=lambda x: evolution.append(np.copy(x)))
+                                           iter_callback=callback)
 
 ax[2].imshow(image, cmap="gray")
 ax[2].set_axis_off()
