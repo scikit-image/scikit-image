@@ -293,7 +293,6 @@ def morphological_chan_vese(image, iterations, init_level_set='checkerboard',
 
     for _ in range(iterations):
 
-        # TODO: test speed
         # inside = u > 0
         # outside = u <= 0
         c0 = (image * (1 - u)).sum() / float((1 - u).sum() + 1e-8)
