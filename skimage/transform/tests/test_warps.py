@@ -1,5 +1,5 @@
 from numpy.testing import (assert_almost_equal, run_module_suite,
-                           assert_equal)
+                           assert_equal, assert_raises)
 import numpy as np
 import pytest
 from scipy.ndimage import map_coordinates
@@ -9,6 +9,8 @@ from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
                                AffineTransform,
                                ProjectiveTransform,
                                SimilarityTransform,
+                               downsize,
+                               downscale,
                                downscale_local_mean)
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
@@ -354,6 +356,28 @@ def test_warp_coords_example():
     tform = SimilarityTransform(translation=(0, -10))
     coords = warp_coords(tform, (30, 30, 3))
     map_coordinates(image[:, :, 0], coords[:2])
+
+
+def test_downsize():
+    x = np.zeros((10, 10), dtype=np.double)
+    x[2:4, 2:4] = 1
+    scaled = downsize(x, (5, 5), order=0)
+    assert_equal(scaled.shape, (5, 5))
+    assert_equal(scaled[:3, :3].sum(), 1)
+    assert_equal(scaled[3:, :].sum(), 0)
+    assert_equal(scaled[:, 3:].sum(), 0)
+    assert_raises(ValueError, downsize, x, (11, 11))
+
+
+def test_downsize():
+    x = np.zeros((10, 10), dtype=np.double)
+    x[2:4, 2:4] = 1
+    scaled = downscale(x, 2, order=0)
+    assert_equal(scaled.shape, (5, 5))
+    assert_equal(scaled[:3, :3].sum(), 1)
+    assert_equal(scaled[3:, :].sum(), 0)
+    assert_equal(scaled[:, 3:].sum(), 0)
+    assert_raises(ValueError, downscale, x, (0.5, 0.5))
 
 
 def test_downscale_local_mean():
