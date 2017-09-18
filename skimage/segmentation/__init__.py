@@ -8,6 +8,9 @@ from ._clear_border import clear_border
 from ._join import join_segmentations, relabel_from_one, relabel_sequential
 from ..morphology import watershed
 from ._chan_vese import chan_vese
+from .morphsnakes import (morphological_geodesic_active_contour,
+                          morphological_chan_vese, inverse_gaussian_gradient,
+                          circle_level_set, checkerboard_level_set)
 
 
 __all__ = ['random_walker',
@@ -22,5 +25,10 @@ __all__ = ['random_walker',
            'relabel_from_one',
            'relabel_sequential',
            'watershed',
-           'chan_vese'
+           'chan_vese',
+           'morphological_geodesic_active_contour',
+           'morphological_chan_vese',
+           'inverse_gaussian_gradient',
+           'circle_level_set',
+           'checkerboard_level_set'
            ]
