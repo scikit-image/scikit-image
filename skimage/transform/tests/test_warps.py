@@ -9,8 +9,6 @@ from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
                                AffineTransform,
                                ProjectiveTransform,
                                SimilarityTransform,
-                               downsize,
-                               downscale,
                                downscale_local_mean)
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
@@ -96,11 +94,11 @@ def test_warp_clip():
     x[2, 2] = 1
 
     with expected_warnings(['The default mode', 'The default multichannel']):
-        outx = rescale(x, 3, order=3, clip=False)
+        outx = rescale(x, 3, order=3, clip=False, anti_aliasing=False)
     assert outx.min() < 0
 
     with expected_warnings(['The default mode', 'The default multichannel']):
-        outx = rescale(x, 3, order=3, clip=True)
+        outx = rescale(x, 3, order=3, clip=True, anti_aliasing=False)
     assert_almost_equal(outx.min(), 0)
     assert_almost_equal(outx.max(), 1)
 
@@ -167,7 +165,7 @@ def test_rescale():
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
     with expected_warnings(['The default mode', 'The default multichannel']):
-        scaled = rescale(x, 2, order=0)
+        scaled = rescale(x, 2, order=0, anti_aliasing=False)
     ref = np.zeros((10, 10))
     ref[2:4, 2:4] = 1
     assert_almost_equal(scaled, ref)
@@ -176,7 +174,7 @@ def test_rescale():
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
     with expected_warnings(['The default mode', 'The default multichannel']):
-        scaled = rescale(x, (2, 1), order=0)
+        scaled = rescale(x, (2, 1), order=0, anti_aliasing=False)
     ref = np.zeros((10, 5))
     ref[2:4, 1] = 1
     assert_almost_equal(scaled, ref)
@@ -185,26 +183,26 @@ def test_rescale():
 def test_rescale_multichannel():
     # 1D + channels
     x = np.zeros((8, 3), dtype=np.double)
-    scaled = rescale(x, 2, order=0, multichannel=True)
+    scaled = rescale(x, 2, order=0, multichannel=True, anti_aliasing=False)
     assert_equal(scaled.shape, (16, 3))
     # 2D
-    scaled = rescale(x, 2, order=0, multichannel=False)
+    scaled = rescale(x, 2, order=0, multichannel=False, anti_aliasing=False)
     assert_equal(scaled.shape, (16, 6))
 
     # 2D + channels
     x = np.zeros((8, 8, 3), dtype=np.double)
-    scaled = rescale(x, 2, order=0, multichannel=True)
+    scaled = rescale(x, 2, order=0, multichannel=True, anti_aliasing=False)
     assert_equal(scaled.shape, (16, 16, 3))
     # 3D
-    scaled = rescale(x, 2, order=0, multichannel=False)
+    scaled = rescale(x, 2, order=0, multichannel=False, anti_aliasing=False)
     assert_equal(scaled.shape, (16, 16, 6))
 
     # 3D + channels
     x = np.zeros((8, 8, 8, 3), dtype=np.double)
-    scaled = rescale(x, 2, order=0, multichannel=True)
+    scaled = rescale(x, 2, order=0, multichannel=True, anti_aliasing=False)
     assert_equal(scaled.shape, (16, 16, 16, 3))
     # 4D
-    scaled = rescale(x, 2, order=0, multichannel=False)
+    scaled = rescale(x, 2, order=0, multichannel=False, anti_aliasing=False)
     assert_equal(scaled.shape, (16, 16, 16, 6))
 
 
@@ -214,13 +212,13 @@ def test_rescale_multichannel_defaults():
     # 2D: multichannel should default to False
     x = np.zeros((8, 3), dtype=np.double)
     with expected_warnings(['The default mode', 'The default multichannel']):
-        scaled = rescale(x, 2, order=0)
+        scaled = rescale(x, 2, order=0, anti_aliasing=False)
     assert_equal(scaled.shape, (16, 6))
 
     # 3D: multichannel should default to True
     x = np.zeros((8, 8, 3), dtype=np.double)
     with expected_warnings(['The default mode', 'The default multichannel']):
-        scaled = rescale(x, 2, order=0,)
+        scaled = rescale(x, 2, order=0, anti_aliasing=False)
     assert_equal(scaled.shape, (16, 16, 3))
 
 
@@ -228,7 +226,7 @@ def test_resize2d():
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
     with expected_warnings(['The default mode']):
-        resized = resize(x, (10, 10), order=0)
+        resized = resize(x, (10, 10), order=0, anti_aliasing=False)
     ref = np.zeros((10, 10))
     ref[2:4, 2:4] = 1
     assert_almost_equal(resized, ref)
@@ -239,15 +237,15 @@ def test_resize3d_keep():
     x = np.zeros((5, 5, 3), dtype=np.double)
     x[1, 1, :] = 1
     with expected_warnings(['The default mode']):
-        resized = resize(x, (10, 10), order=0)
+        resized = resize(x, (10, 10), order=0, anti_aliasing=False)
         with pytest.raises(ValueError):
             # output_shape too short
-            resize(x, (10, ), order=0)
+            resize(x, (10, ), order=0, anti_aliasing=False)
     ref = np.zeros((10, 10, 3))
     ref[2:4, 2:4, :] = 1
     assert_almost_equal(resized, ref)
     with expected_warnings(['The default mode']):
-        resized = resize(x, (10, 10, 3), order=0)
+        resized = resize(x, (10, 10, 3), order=0, anti_aliasing=False)
     assert_almost_equal(resized, ref)
 
 
@@ -256,7 +254,7 @@ def test_resize3d_resize():
     x = np.zeros((5, 5, 3), dtype=np.double)
     x[1, 1, :] = 1
     with expected_warnings(['The default mode']):
-        resized = resize(x, (10, 10, 1), order=0)
+        resized = resize(x, (10, 10, 1), order=0, anti_aliasing=False)
     ref = np.zeros((10, 10, 1))
     ref[2:4, 2:4] = 1
     assert_almost_equal(resized, ref)
@@ -267,7 +265,7 @@ def test_resize3d_2din_3dout():
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
     with expected_warnings(['The default mode']):
-        resized = resize(x, (10, 10, 1), order=0)
+        resized = resize(x, (10, 10, 1), order=0, anti_aliasing=False)
     ref = np.zeros((10, 10, 1))
     ref[2:4, 2:4] = 1
     assert_almost_equal(resized, ref)
@@ -278,7 +276,7 @@ def test_resize2d_4d():
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
     out_shape = (10, 10, 1, 1)
-    resized = resize(x, out_shape, order=0)
+    resized = resize(x, out_shape, order=0, anti_aliasing=False)
     ref = np.zeros(out_shape)
     ref[2:4, 2:4, ...] = 1
     assert_almost_equal(resized, ref)
@@ -289,7 +287,8 @@ def test_resize_nd():
         shape = 2 + np.arange(dim) * 2
         x = np.ones(shape)
         out_shape = np.asarray(shape) * 1.5
-        resized = resize(x, out_shape, order=0, mode='reflect')
+        resized = resize(x, out_shape, order=0, mode='reflect',
+                         anti_aliasing=False)
         expected_shape = 1.5 * shape
         assert_equal(resized.shape, expected_shape)
         assert np.all(resized == 1)
@@ -300,7 +299,8 @@ def test_resize3d_bilinear():
     x = np.zeros((5, 5, 2), dtype=np.double)
     x[1, 1, 0] = 0
     x[1, 1, 1] = 1
-    resized = resize(x, (10, 10, 1), order=1, mode='constant')
+    resized = resize(x, (10, 10, 1), order=1, mode='constant',
+                     anti_aliasing=False)
     ref = np.zeros((10, 10, 1))
     ref[1:5, 1:5, :] = 0.03125
     ref[1:5, 2:4, :] = 0.09375
@@ -361,23 +361,52 @@ def test_warp_coords_example():
 def test_downsize():
     x = np.zeros((10, 10), dtype=np.double)
     x[2:4, 2:4] = 1
-    scaled = downsize(x, (5, 5), order=0)
+    scaled = resize(x, (5, 5), order=0, anti_aliasing=False)
     assert_equal(scaled.shape, (5, 5))
-    assert_equal(scaled[:3, :3].sum(), 1)
-    assert_equal(scaled[3:, :].sum(), 0)
-    assert_equal(scaled[:, 3:].sum(), 0)
-    assert_raises(ValueError, downsize, x, (11, 11))
+    assert_equal(scaled[1, 1], 1)
+    assert_equal(scaled[2:, :].sum(), 0)
+    assert_equal(scaled[:, 2:].sum(), 0)
 
 
-def test_downsize():
+def test_downsize_anti_aliasing():
     x = np.zeros((10, 10), dtype=np.double)
     x[2:4, 2:4] = 1
-    scaled = downscale(x, 2, order=0)
+    scaled = resize(x, (5, 5), order=0, anti_aliasing=True)
     assert_equal(scaled.shape, (5, 5))
     assert_equal(scaled[:3, :3].sum(), 1)
     assert_equal(scaled[3:, :].sum(), 0)
     assert_equal(scaled[:, 3:].sum(), 0)
-    assert_raises(ValueError, downscale, x, (0.5, 0.5))
+
+
+def test_downsize_anti_aliasing_invalid_stddev():
+    x = np.zeros((10, 10), dtype=np.double)
+    assert_raises(ValueError, resize, x, (5, 5), order=0, anti_aliasing=True,
+                  anti_aliasing_stddev=-1)
+    with expected_warnings(["Anti-aliasing standard deviation greater"]):
+        resize(x, (5, 15), order=0, anti_aliasing=True,
+               anti_aliasing_stddev=(1, 1), mode="reflect")
+        resize(x, (5, 15), order=0, anti_aliasing=True,
+               anti_aliasing_stddev=(0, 1), mode="reflect")
+
+
+def test_downscale():
+    x = np.zeros((10, 10), dtype=np.double)
+    x[2:4, 2:4] = 1
+    scaled = rescale(x, 0.5, order=0, anti_aliasing=False)
+    assert_equal(scaled.shape, (5, 5))
+    assert_equal(scaled[1, 1], 1)
+    assert_equal(scaled[2:, :].sum(), 0)
+    assert_equal(scaled[:, 2:].sum(), 0)
+
+
+def test_downscale_anti_aliasing():
+    x = np.zeros((10, 10), dtype=np.double)
+    x[2:4, 2:4] = 1
+    scaled = rescale(x, 0.5, order=0, anti_aliasing=True)
+    assert_equal(scaled.shape, (5, 5))
+    assert_equal(scaled[:3, :3].sum(), 1)
+    assert_equal(scaled[3:, :].sum(), 0)
+    assert_equal(scaled[:, 3:].sum(), 0)
 
 
 def test_downscale_local_mean():
@@ -421,17 +450,20 @@ def test_keep_range():
     image = np.linspace(0, 2, 25).reshape(5, 5)
 
     with expected_warnings(['The default mode', 'The default multichannel']):
-        out = rescale(image, 2, preserve_range=False, clip=True, order=0)
+        out = rescale(image, 2, preserve_range=False, clip=True, order=0,
+                      anti_aliasing=False)
     assert out.min() == 0
     assert out.max() == 2
 
     with expected_warnings(['The default mode', 'The default multichannel']):
-        out = rescale(image, 2, preserve_range=True, clip=True, order=0)
+        out = rescale(image, 2, preserve_range=True, clip=True, order=0,
+                      anti_aliasing=False)
     assert out.min() == 0
     assert out.max() == 2
 
     with expected_warnings(['The default mode', 'The default multichannel']):
         out = rescale(image.astype(np.uint8), 2, preserve_range=False,
+                      anti_aliasing=False,
                       clip=True, order=0)
     assert out.min() == 0
     assert out.max() == 2 / 255.0

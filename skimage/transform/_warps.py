@@ -31,35 +31,14 @@ def _multichannel_default(multichannel, ndim):
             return False
 
 
-def _compute_resize_shapes(image, output_shape):
-    output_shape = tuple(output_shape)
-    output_ndim = len(output_shape)
-    input_shape = image.shape
-    if output_ndim > image.ndim:
-        # append dimensions to input_shape
-        input_shape = input_shape + (1, ) * (output_ndim - image.ndim)
-        image = np.reshape(image, input_shape)
-    elif output_ndim == image.ndim - 1:
-        # multichannel case: append shape of last axis
-        output_shape = output_shape + (image.shape[-1], )
-    elif output_ndim < image.ndim - 1:
-        raise ValueError("len(output_shape) cannot be smaller than the image "
-                         "dimensions")
-
-    factors = (np.asarray(input_shape, dtype=float) /
-               np.asarray(output_shape, dtype=float))
-
-    return input_shape, output_shape, factors
-
-
 def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
-           preserve_range=False):
+           preserve_range=False, anti_aliasing=None, anti_aliasing_stddev=None):
     """Resize image to match a certain size.
 
-    Performs interpolation to up-size or down-size images. Note that no
-    smoothing of the input image is performed to avoid aliasing artifacts when
-    down-sizing. For down-sampling N-dimensional images with smoothing, see
-    `skimage.transform.downscale` or `skimage.transform.downscale_local_mean`.
+    Performs interpolation to up-size or down-size images. Note that anti-
+    aliasing should be enabled when down-sizing images to avoid aliasing
+    artifacts. For down-sampling N-dimensional images with an integer factor
+    also see `skimage.transform.downscale_local_mean`.
 
     Parameters
     ----------
@@ -95,6 +74,13 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
+    anti_aliasing : bool
+        Whether to apply a Gaussian filter to smooth the image prior to
+        down-scaling. It is crucial to filter when resampling the image to
+        avoid aliasing artifacts.
+    anti_aliasing_stddev : {float, tuple of floats}
+        Standard deviation for Gaussian filtering to avoid aliasing artifacts.
+        By default, this value is chosen as 0.25 times the scale factor.
 
     Notes
     -----
@@ -118,14 +104,44 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
         warn("The default mode, 'constant', will be changed to 'reflect' in "
              "skimage 0.15.")
 
-    # input_shape, output_shape, factors = \
-    #     _compute_resize_shapes(image, output_shape)
+    if anti_aliasing is None:
+        anti_aliasing = False
+        warn("Anti-aliasing will be enabled by default in skimage 0.15 to "
+             "avoid aliasing artifacts when resampling images.")
 
-    input_shape, output_shape, factors = \
-        _compute_resize_shapes(image, output_shape)
+    output_shape = tuple(output_shape)
+    output_ndim = len(output_shape)
+    input_shape = image.shape
+    if output_ndim > image.ndim:
+        # append dimensions to input_shape
+        input_shape = input_shape + (1, ) * (output_ndim - image.ndim)
+        image = np.reshape(image, input_shape)
+    elif output_ndim == image.ndim - 1:
+        # multichannel case: append shape of last axis
+        output_shape = output_shape + (image.shape[-1], )
+    elif output_ndim < image.ndim - 1:
+        raise ValueError("len(output_shape) cannot be smaller than the image "
+                         "dimensions")
 
-    if image.shape != tuple(input_shape):
-        image = image.reshape(input_shape)
+    factors = (np.asarray(input_shape, dtype=float) /
+               np.asarray(output_shape, dtype=float))
+
+    if anti_aliasing:
+        if anti_aliasing_stddev is None:
+            anti_aliasing_stddev = np.maximum(0, (factors - 1) / 2)
+            anti_aliasing_stddev[factors <= 1] = 0
+        else:
+            anti_aliasing_stddev = \
+                np.atleast_1d(anti_aliasing_stddev) * np.ones_like(factors)
+            if np.any(anti_aliasing_stddev < 0):
+                raise ValueError("Anti-aliasing standard deviation must be "
+                                 "greater than zero")
+            elif np.any((anti_aliasing_stddev > 0) & (factors <= 1)):
+                warn("Anti-aliasing standard deviation greater than zero but "
+                     "not down-sampling along all axes")
+
+        image = ndi.gaussian_filter(image, anti_aliasing_stddev,
+                                    cval=cval, mode=mode)
 
     # 2-dimensional interpolation
     if len(output_shape) == 2 or (len(output_shape) == 3 and
@@ -172,13 +188,14 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
 
 
 def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
-            preserve_range=False, multichannel=None):
+            preserve_range=False, multichannel=None,
+            anti_aliasing=None, anti_aliasing_stddev=None):
     """Scale image by a certain factor.
 
-    Performs interpolation to up-scale or down-scale images. Note that no
-    smoothing of the input image is performed to avoid aliasing artifacts when
-    down-scaling. For down-sampling N-dimensional images with smoothing, see
-    `skimage.transform.downscale` or `skimage.transform.downscale_local_mean`.
+    Performs interpolation to up-size or down-size images. Note that anti-
+    aliasing should be enabled when down-sizing images to avoid aliasing
+    artifacts. For down-sampling N-dimensional images with an integer factor
+    also see `skimage.transform.downscale_local_mean`.
 
     Parameters
     ----------
@@ -217,6 +234,13 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
         channels or another spatial dimension. By default, is set to True for
         3D (2D+color) inputs, and False for others. Starting in release 0.16,
         this will always default to False.
+    anti_aliasing : bool
+        Whether to apply a Gaussian filter to smooth the image prior to
+        down-scaling. It is crucial to filter when resampling the image to
+        avoid aliasing artifacts.
+    anti_aliasing_stddev : {float, tuple of floats}
+        Standard deviation for Gaussian filtering to avoid aliasing artifacts.
+        By default, this value is chosen as 0.25 times the scale factor.
 
     Notes
     -----
@@ -248,7 +272,9 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
         output_shape[-1] = orig_shape[-1]
 
     return resize(image, output_shape, order=order, mode=mode, cval=cval,
-                  clip=clip, preserve_range=preserve_range)
+                  clip=clip, preserve_range=preserve_range,
+                  anti_aliasing=anti_aliasing,
+                  anti_aliasing_stddev=anti_aliasing_stddev)
 
 
 def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
@@ -352,162 +378,6 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
 
     return warp(image, tform, output_shape=output_shape, order=order,
                 mode=mode, cval=cval, clip=clip, preserve_range=preserve_range)
-
-
-def downsize(image, output_shape, sigma=None, order=1, mode="reflect", cval=0,
-             clip=True, preserve_range=False):
-    """Downsize image to a certain size using smoothing and interpolation.
-
-    To avoid aliasing artifacts, this function first smooths the image using a
-    Gaussian filter before resampling it to the desired resolution, as opposed
-    to `skimage.transform.resize`.
-
-    Parameters
-    ----------
-    image : ndarray
-        Input image.
-    output_shape : tuple or ndarray
-        Size of the generated output image `(rows, cols[, ...][, dim])`. If
-        `dim` is not provided, the number of channels is preserved. In case the
-        number of input channels does not equal the number of output channels a
-        n-dimensional interpolation is applied.
-    sigma : float or sequence of floats
-        Standard deviation of the Gaussian smoothing prior to interpolation.
-
-    Returns
-    -------
-    resized : ndarray
-        Resized version of the input.
-
-    Other parameters
-    ----------------
-    order : int, optional
-        The order of the spline interpolation, default is 1. The order has to
-        be in the range 0-5. See `skimage.transform.warp` for detail.
-    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
-        Points outside the boundaries of the input are filled according
-        to the given mode.  Modes match the behaviour of `numpy.pad`.  The
-        default mode is 'constant'.
-    cval : float, optional
-        Used in conjunction with mode 'constant', the value outside
-        the image boundaries.
-    clip : bool, optional
-        Whether to clip the output to the range of values of the input image.
-        This is enabled by default, since higher order interpolation may
-        produce values outside the given input range.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-
-    Notes
-    -----
-    Modes 'reflect' and 'symmetric' are similar, but differ in whether the edge
-    pixels are duplicated during the reflection.  As an example, if an array
-    has values [0, 1, 2] and was padded to the right by four values using
-    symmetric, the result would be [0, 1, 2, 2, 1, 0, 0], while for reflect it
-    would be [0, 1, 2, 1, 0, 1, 2].
-
-    Examples
-    --------
-    >>> from skimage import data
-    >>> from skimage.transform import downsize
-    >>> image = data.camera()
-    >>> downsize(image, (51, 51)).shape
-    (51, 51)
-    >>> downsize(image, (256, 256)).shape
-    (256, 256)
-
-    """
-
-    _, output_shape, factors = \
-        _compute_resize_shapes(image, output_shape)
-
-    if np.any(factors < 1):
-        raise ValueError("Image size must be downscaled but specified "
-                         "parameters upscale the image size")
-
-    if sigma is None:
-        sigma = 0.25 * factors
-
-    smoothed_image = ndi.gaussian_filter(image, sigma, cval=cval, mode=mode)
-
-    rescaled_image = resize(smoothed_image, output_shape, order=order,
-                            mode=mode, cval=cval, clip=clip,
-                            preserve_range=preserve_range)
-
-    return rescaled_image
-
-
-def downscale(image, factors, sigma=None, order=1, mode="reflect", cval=0,
-              clip=True, preserve_range=False):
-    """Downscale image by a certain factor using smoothing and interpolation.
-
-    To avoid aliasing artifacts, this function first smooths the image using a
-    Gaussian filter before resampling it to the desired resolution, as opposed
-    to `skimage.transform.rescale`.
-
-    Parameters
-    ----------
-    image : ndarray
-        Input image.
-    factors : {float, tuple of floats}
-        Downscale factors. Separate factors factors can be defined as
-        `(rows, cols[, ...][, dim])`.
-
-    Returns
-    -------
-    scaled : ndarray
-        Scaled version of the input.
-
-    Other parameters
-    ----------------
-    order : int, optional
-        The order of the spline interpolation, default is 1. The order has to
-        be in the range 0-5. See `skimage.transform.warp` for detail.
-    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
-        Points outside the boundaries of the input are filled according
-        to the given mode.  Modes match the behaviour of `numpy.pad`.  The
-        default mode is 'constant'.
-    cval : float, optional
-        Used in conjunction with mode 'constant', the value outside
-        the image boundaries.
-    clip : bool, optional
-        Whether to clip the output to the range of values of the input image.
-        This is enabled by default, since higher order interpolation may
-        produce values outside the given input range.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-
-    Notes
-    -----
-    Modes 'reflect' and 'symmetric' are similar, but differ in whether the edge
-    pixels are duplicated during the reflection.  As an example, if an array
-    has values [0, 1, 2] and was padded to the right by four values using
-    symmetric, the result would be [0, 1, 2, 2, 1, 0, 0], while for reflect it
-    would be [0, 1, 2, 1, 0, 1, 2].
-
-    Examples
-    --------
-    >>> from skimage import data
-    >>> from skimage.transform import downscale
-    >>> image = data.camera()
-    >>> downscale(image, 10).shape
-    (51, 51)
-    >>> downscale(image, 2).shape
-    (256, 256)
-
-    """
-
-    factors = 1 / np.atleast_1d(factors)
-    input_shape = np.asarray(image.shape)
-    output_shape = np.round(factors * input_shape)
-
-    rescaled_image = downsize(image, output_shape, order=order, mode=mode,
-                              cval=cval, clip=clip,
-                              preserve_range=preserve_range)
-
-    return rescaled_image
 
 
 def downscale_local_mean(image, factors, cval=0, clip=True):
