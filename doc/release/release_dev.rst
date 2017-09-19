@@ -18,7 +18,7 @@ New Features
 - hysteresis thresholding in filters (#2665)
 - lookfor function (#2713)
 - montage function (#2626)
-- nD segmentation with morphological snakes (#2791)
+- 2D and 3D segmentation with morphological snakes (#2791)
 
 
 Improvements
