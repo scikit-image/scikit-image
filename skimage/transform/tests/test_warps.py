@@ -381,12 +381,12 @@ def test_downsize_anti_aliasing():
 def test_downsize_anti_aliasing_invalid_stddev():
     x = np.zeros((10, 10), dtype=np.double)
     assert_raises(ValueError, resize, x, (5, 5), order=0, anti_aliasing=True,
-                  anti_aliasing_stddev=-1)
+                  anti_aliasing_sigma=-1)
     with expected_warnings(["Anti-aliasing standard deviation greater"]):
         resize(x, (5, 15), order=0, anti_aliasing=True,
-               anti_aliasing_stddev=(1, 1), mode="reflect")
+               anti_aliasing_sigma=(1, 1), mode="reflect")
         resize(x, (5, 15), order=0, anti_aliasing=True,
-               anti_aliasing_stddev=(0, 1), mode="reflect")
+               anti_aliasing_sigma=(0, 1), mode="reflect")
 
 
 def test_downscale():

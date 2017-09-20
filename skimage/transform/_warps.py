@@ -32,7 +32,7 @@ def _multichannel_default(multichannel, ndim):
 
 
 def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
-           preserve_range=False, anti_aliasing=None, anti_aliasing_stddev=None):
+           preserve_range=False, anti_aliasing=None, anti_aliasing_sigma=None):
     """Resize image to match a certain size.
 
     Performs interpolation to up-size or down-size images. Note that anti-
@@ -76,11 +76,12 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
         image is converted according to the conventions of `img_as_float`.
     anti_aliasing : bool
         Whether to apply a Gaussian filter to smooth the image prior to
-        down-scaling. It is crucial to filter when resampling the image to
+        down-scaling. It is crucial to filter when down-sampling the image to
         avoid aliasing artifacts.
-    anti_aliasing_stddev : {float, tuple of floats}
+    anti_aliasing_sigma : {float, tuple of floats}
         Standard deviation for Gaussian filtering to avoid aliasing artifacts.
-        By default, this value is chosen as 0.25 times the scale factor.
+        By default, this value is chosen as (1 - s) / 2 where s is the
+        down-scaling factor.
 
     Notes
     -----
@@ -107,7 +108,7 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
     if anti_aliasing is None:
         anti_aliasing = False
         warn("Anti-aliasing will be enabled by default in skimage 0.15 to "
-             "avoid aliasing artifacts when resampling images.")
+             "avoid aliasing artifacts when down-sampling images.")
 
     output_shape = tuple(output_shape)
     output_ndim = len(output_shape)
@@ -127,20 +128,19 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
                np.asarray(output_shape, dtype=float))
 
     if anti_aliasing:
-        if anti_aliasing_stddev is None:
-            anti_aliasing_stddev = np.maximum(0, (factors - 1) / 2)
-            anti_aliasing_stddev[factors <= 1] = 0
+        if anti_aliasing_sigma is None:
+            anti_aliasing_sigma = np.maximum(0, (factors - 1) / 2)
         else:
-            anti_aliasing_stddev = \
-                np.atleast_1d(anti_aliasing_stddev) * np.ones_like(factors)
-            if np.any(anti_aliasing_stddev < 0):
+            anti_aliasing_sigma = \
+                np.atleast_1d(anti_aliasing_sigma) * np.ones_like(factors)
+            if np.any(anti_aliasing_sigma < 0):
                 raise ValueError("Anti-aliasing standard deviation must be "
-                                 "greater than zero")
-            elif np.any((anti_aliasing_stddev > 0) & (factors <= 1)):
+                                 "greater than or equal to zero")
+            elif np.any((anti_aliasing_sigma > 0) & (factors <= 1)):
                 warn("Anti-aliasing standard deviation greater than zero but "
                      "not down-sampling along all axes")
 
-        image = ndi.gaussian_filter(image, anti_aliasing_stddev,
+        image = ndi.gaussian_filter(image, anti_aliasing_sigma,
                                     cval=cval, mode=mode)
 
     # 2-dimensional interpolation
@@ -189,7 +189,7 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
 
 def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
             preserve_range=False, multichannel=None,
-            anti_aliasing=None, anti_aliasing_stddev=None):
+            anti_aliasing=None, anti_aliasing_sigma=None):
     """Scale image by a certain factor.
 
     Performs interpolation to up-size or down-size images. Note that anti-
@@ -236,11 +236,12 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
         this will always default to False.
     anti_aliasing : bool
         Whether to apply a Gaussian filter to smooth the image prior to
-        down-scaling. It is crucial to filter when resampling the image to
+        down-scaling. It is crucial to filter when down-sampling the image to
         avoid aliasing artifacts.
-    anti_aliasing_stddev : {float, tuple of floats}
+    anti_aliasing_sigma : {float, tuple of floats}
         Standard deviation for Gaussian filtering to avoid aliasing artifacts.
-        By default, this value is chosen as 0.25 times the scale factor.
+        By default, this value is chosen as (1 - s) / 2 where s is the
+        down-scaling factor.
 
     Notes
     -----
@@ -274,7 +275,7 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
     return resize(image, output_shape, order=order, mode=mode, cval=cval,
                   clip=clip, preserve_range=preserve_range,
                   anti_aliasing=anti_aliasing,
-                  anti_aliasing_stddev=anti_aliasing_stddev)
+                  anti_aliasing_sigma=anti_aliasing_sigma)
 
 
 def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
