@@ -180,6 +180,14 @@ def test_rescale():
     assert_almost_equal(scaled, ref)
 
 
+def test_rescale_invalid_scale():
+    x = np.zeros((10, 10, 3))
+    with pytest.raises(ValueError):
+        rescale(x, (2, 2), multichannel=False)
+    with pytest.raises(ValueError):
+        rescale(x, (2, 2, 2), multichannel=True)
+
+
 def test_rescale_multichannel():
     # 1D + channels
     x = np.zeros((8, 3), dtype=np.double)
