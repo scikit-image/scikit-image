@@ -74,11 +74,11 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
-    anti_aliasing : bool
+    anti_aliasing : bool, optional
         Whether to apply a Gaussian filter to smooth the image prior to
         down-scaling. It is crucial to filter when down-sampling the image to
         avoid aliasing artifacts.
-    anti_aliasing_sigma : {float, tuple of floats}
+    anti_aliasing_sigma : {float, tuple of floats}, optional
         Standard deviation for Gaussian filtering to avoid aliasing artifacts.
         By default, this value is chosen as (1 - s) / 2 where s is the
         down-scaling factor.
@@ -192,7 +192,7 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
             anti_aliasing=None, anti_aliasing_sigma=None):
     """Scale image by a certain factor.
 
-    Performs interpolation to up-size or down-size images. Note that anti-
+    Performs interpolation to up-scale or down-scale images. Note that anti-
     aliasing should be enabled when down-sizing images to avoid aliasing
     artifacts. For down-sampling N-dimensional images with an integer factor
     also see `skimage.transform.downscale_local_mean`.
@@ -234,11 +234,11 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
         channels or another spatial dimension. By default, is set to True for
         3D (2D+color) inputs, and False for others. Starting in release 0.16,
         this will always default to False.
-    anti_aliasing : bool
+    anti_aliasing : bool, optional
         Whether to apply a Gaussian filter to smooth the image prior to
         down-scaling. It is crucial to filter when down-sampling the image to
         avoid aliasing artifacts.
-    anti_aliasing_sigma : {float, tuple of floats}
+    anti_aliasing_sigma : {float, tuple of floats}, optional
         Standard deviation for Gaussian filtering to avoid aliasing artifacts.
         By default, this value is chosen as (1 - s) / 2 where s is the
         down-scaling factor.
