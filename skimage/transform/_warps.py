@@ -23,7 +23,7 @@ def _multichannel_default(multichannel, ndim):
     else:
         warn('The default multichannel argument (None) is deprecated.  Please '
              'specify either True or False explicitly.  multichannel will '
-             'default to False starting with release 0.16. ')
+             'default to False starting with release 0.16.')
         # utility for maintaining previous color image default behavior
         if ndim == 3:
             return True
