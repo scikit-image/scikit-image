@@ -1,5 +1,5 @@
 from numpy.testing import (assert_almost_equal, run_module_suite,
-                           assert_equal, assert_raises)
+                           assert_equal)
 import numpy as np
 import pytest
 from scipy.ndimage import map_coordinates
@@ -380,8 +380,8 @@ def test_downsize_anti_aliasing():
 
 def test_downsize_anti_aliasing_invalid_stddev():
     x = np.zeros((10, 10), dtype=np.double)
-    assert_raises(ValueError, resize, x, (5, 5), order=0, anti_aliasing=True,
-                  anti_aliasing_sigma=-1)
+    with pytest.raises(ValueError):
+        resize(x, (5, 5), order=0, anti_aliasing=True, anti_aliasing_sigma=-1)
     with expected_warnings(["Anti-aliasing standard deviation greater"]):
         resize(x, (5, 15), order=0, anti_aliasing=True,
                anti_aliasing_sigma=(1, 1), mode="reflect")
