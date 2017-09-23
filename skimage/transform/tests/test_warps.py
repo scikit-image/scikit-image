@@ -370,10 +370,10 @@ def test_downsize():
 
 def test_downsize_anti_aliasing():
     x = np.zeros((10, 10), dtype=np.double)
-    x[2:4, 2:4] = 1
-    scaled = resize(x, (5, 5), order=0, anti_aliasing=True)
+    x[2, 2] = 1
+    scaled = resize(x, (5, 5), order=1, anti_aliasing=True)
     assert_equal(scaled.shape, (5, 5))
-    assert_equal(scaled[:3, :3].sum(), 1)
+    assert np.all(scaled[:3, :3] > 0)
     assert_equal(scaled[3:, :].sum(), 0)
     assert_equal(scaled[:, 3:].sum(), 0)
 
@@ -401,10 +401,10 @@ def test_downscale():
 
 def test_downscale_anti_aliasing():
     x = np.zeros((10, 10), dtype=np.double)
-    x[2:4, 2:4] = 1
-    scaled = rescale(x, 0.5, order=0, anti_aliasing=True)
+    x[2, 2] = 1
+    scaled = rescale(x, 0.5, order=1, anti_aliasing=True)
     assert_equal(scaled.shape, (5, 5))
-    assert_equal(scaled[:3, :3].sum(), 1)
+    assert np.all(scaled[:3, :3] > 0)
     assert_equal(scaled[3:, :].sum(), 0)
     assert_equal(scaled[:, 3:].sum(), 0)
 
