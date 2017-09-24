@@ -76,7 +76,8 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
         sigma = 2 * downscale / 6.0
 
     smoothed = _smooth(image, sigma, mode, cval, multichannel)
-    out = resize(smoothed, out_shape, order=order, mode=mode, cval=cval)
+    out = resize(smoothed, out_shape, order=order, mode=mode, cval=cval,
+                 anti_aliasing=False)
 
     return out
 
@@ -134,7 +135,7 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
         sigma = 2 * upscale / 6.0
 
     resized = resize(image, out_shape, order=order,
-                     mode=mode, cval=cval)
+                     mode=mode, cval=cval, anti_aliasing=False)
     out = _smooth(resized, sigma, mode, cval, multichannel)
 
     return out
@@ -302,8 +303,8 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
         if multichannel:
             out_shape = out_shape[:-1]
 
-        resized_image = resize(smoothed_image, out_shape,
-                               order=order, mode=mode, cval=cval)
+        resized_image = resize(smoothed_image, out_shape, order=order,
+                               mode=mode, cval=cval, anti_aliasing=False)
         smoothed_image = _smooth(resized_image, sigma, mode, cval,
                                  multichannel)
         current_shape = np.asarray(resized_image.shape)
