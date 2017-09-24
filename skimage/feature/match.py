@@ -35,7 +35,11 @@ def match_descriptors(descriptors1, descriptors2, metric=None, p=2,
     max_ratio : float
         Maximum ratio of distances between first and second closest descriptor
         in the second set of descriptors. This threshold is useful to filter
-        ambiguous matches between the two descriptor sets.
+        ambiguous matches between the two descriptor sets. The choice of this
+        value depends on the statistics of the chosen descriptor, e.g.,
+        for SIFT descriptors a value of 0.8 is usually chosen, see
+        D.G. Lowe, "Distinctive Image Features from Scale-Invariant Keypoints",
+        International Journal of Computer Vision, 2004.
 
     Returns
     -------
