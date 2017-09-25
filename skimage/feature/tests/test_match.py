@@ -121,6 +121,51 @@ def test_max_distance():
     assert_equal(matches, [[1, 0]])
 
 
+def test_max_ratio():
+    descs1 = 10 * np.arange(10)[:, None].astype(np.float32)
+    descs2 = 10 * np.arange(15)[:, None].astype(np.float32)
+
+    descs2[0] = 5.0
+
+    matches =  match_descriptors(descs1, descs2, metric='euclidean',
+                                 max_ratio=1.0, cross_check=False)
+    assert len(matches) == 10
+
+    matches =  match_descriptors(descs1, descs2, metric='euclidean',
+                                 max_ratio=0.6, cross_check=False)
+    assert len(matches) == 10
+
+    matches =  match_descriptors(descs1, descs2, metric='euclidean',
+                                 max_ratio=0.5, cross_check=False)
+    assert len(matches) == 9
+
+    descs1[0] = 7.5
+
+    matches =  match_descriptors(descs1, descs2, metric='euclidean',
+                                 max_ratio=0.5, cross_check=False)
+    assert len(matches) == 9
+
+    descs2 = 10 * np.arange(1)[:, None].astype(np.float32)
+
+    matches =  match_descriptors(descs1, descs2, metric='euclidean',
+                                 max_ratio=1.0, cross_check=False)
+    assert len(matches) == 10
+
+    matches =  match_descriptors(descs1, descs2, metric='euclidean',
+                                 max_ratio=0.5, cross_check=False)
+    assert len(matches) == 10
+
+    descs1 = 10 * np.arange(1)[:, None].astype(np.float32)
+
+    matches =  match_descriptors(descs1, descs2, metric='euclidean',
+                                 max_ratio=1.0, cross_check=False)
+    assert len(matches) == 1
+
+    matches =  match_descriptors(descs1, descs2, metric='euclidean',
+                                 max_ratio=0.5, cross_check=False)
+    assert len(matches) == 1
+
+
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()
