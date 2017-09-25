@@ -33,7 +33,7 @@ def seam_carve(image, energy_map, mode, num, border=1, force_copy=True):
         If set, the `image` and `energy_map` are copied before being used by
         the method which modifies it in place. Set this to `False` if the
         original image and the energy map are no longer needed after
-        this opetration.
+        this operation.
 
     Returns
     -------
