@@ -12,6 +12,8 @@ include:
 - Bug fixes in ``skimage.util.plot_matches`` and ``denoise_wavelet``,
   by Gregory Lee (#2650, #2640)
 - Documentation updates by Egor Panfilov (#2716) and Jirka Borovec (#2524)
+- Documentation build fixes by Gregory Lee (#2666, #2731), Nelle
+  Varoquaux (#2722), and Stéfan van der Walt (#2723, #2810)
 
 
 Announcement: scikit-image 0.13.0
