@@ -204,7 +204,8 @@ class ApiDocWriter(object):
         """
         mod = __import__(uri, fromlist=[uri.split('.')[-1]])
         # find all public objects in the module.
-        obj_strs = [obj for obj in dir(mod) if not obj.startswith('_')]
+        obj_strs = getattr(mod, '__all__',
+                           [obj for obj in dir(mod) if not obj.startswith('_')])
         functions = []
         classes = []
         submodules = []
@@ -217,7 +218,7 @@ class ApiDocWriter(object):
             # figure out if obj is a function or class
             if isinstance(obj, (FunctionType, BuiltinFunctionType)):
                 functions.append(obj_str)
-            elif isinstance(obj, ModuleType):
+            elif isinstance(obj, ModuleType) and 'skimage' in mod.__name__:
                 submodules.append(obj_str)
             else:
                 try:
