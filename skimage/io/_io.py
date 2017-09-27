@@ -38,9 +38,6 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
     flatten : bool
         Backward compatible keyword, superseded by `as_grey`.
 
-    plugin_args : keywords
-        Passed to the given plugin.
-
     Returns
     -------
     img_array : ndarray

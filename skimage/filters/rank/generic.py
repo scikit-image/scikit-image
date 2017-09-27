@@ -641,7 +641,7 @@ def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
         structuring element).
 
     Returns
-        Output image.
+    -------
     out : 2-D array (same dtype as input image)
         The result of the local enhance_contrast.
 
