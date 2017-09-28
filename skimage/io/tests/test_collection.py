@@ -46,8 +46,12 @@ class TestImageCollection(TestCase):
         num = len(self.images)
         for i in range(-num, num):
             assert type(self.images[i]) is np.ndarray
+<<<<<<< HEAD
         assert_allclose(self.images[0],
                         self.images[-num])
+=======
+        assert_allclose(self.images[0], self.images[-num])
+>>>>>>> Fix whitespace issues
 
         def return_img(n):
             return self.images[n]
