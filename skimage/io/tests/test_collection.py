@@ -64,8 +64,7 @@ class TestImageCollection(TestCase):
         num = len(self.images)
         for i in range(-num, num):
             assert isinstance(self.images[i], np.ndarray)
-        assert_allclose(self.images[0],
-                        self.images[-num])
+        assert_allclose(self.images[0], self.images[-num])
 
         def return_img(n):
             return self.images[n]
