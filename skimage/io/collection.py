@@ -187,6 +187,17 @@ class ImageCollection(object):
         else:
             raise TypeError('Invalid pattern as input.')
 
+        if load_func is None:
+            from ._io import imread
+            self.load_func = imread
+            self._numframes = self._find_images()
+        else:
+            self.load_func = load_func
+            self._numframes = len(self._files)
+            self._frame_index = None
+
+        self.load_func_kwargs = load_func_kwargs
+
         if conserve_memory:
             memory_slots = 1
         else:
@@ -195,13 +206,6 @@ class ImageCollection(object):
         self._conserve_memory = conserve_memory
         self._cached = None
 
-        if load_func is None:
-            from ._io import imread
-            self.load_func = imread
-        else:
-            self.load_func = load_func
-
-        self.load_func_kwargs = load_func_kwargs
         self.data = np.empty(memory_slots, dtype=object)
 
     @property
