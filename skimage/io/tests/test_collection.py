@@ -18,11 +18,10 @@ def test_string_split():
 def test_string_sort():
     filenames = ['f9.10.png', 'f9.9.png', 'f10.10.png', 'f10.9.png',
                  'e9.png', 'e10.png', 'em.png']
-    sorted_filenames = ['e9.png', 'e10.png', 'em.png', 'f9.9.png',
-                        'f9.10.png', 'f10.9.png', 'f10.10.png']
+    expected_filenames = ['e9.png', 'e10.png', 'em.png', 'f9.9.png',
+                          'f9.10.png', 'f10.9.png', 'f10.10.png']
     sorted_filenames = sorted(filenames, key=alphanumeric_key)
-    assert_equal(sorted_filenames, sorted_filenames)
-
+    assert_equal(expected_filenames, sorted_filenames)
 
 class TestImageCollection(TestCase):
 
