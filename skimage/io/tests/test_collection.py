@@ -99,6 +99,19 @@ class TestImageCollection(TestCase):
         assert_equal(ic[0], files[0])
         assert_equal(ic[1], files[1])
 
+    def test_custom_pattern_not_pil(self):
+        load_pattern = os.path.join(data_dir, 'chessboard_*_U8.npz')
+        files = [os.path.join(data_dir, pic)
+                 for pic in ['chessboard_GRAY_U8.npz',
+                             'chessboard_RGB_U8.npz']]
+
+        def load_fn(x):
+            return x
+
+        ic = ImageCollection(load_pattern, load_func=load_fn)
+        assert_equal(ic[0], files[0])
+        assert_equal(ic[1], files[1])
+
     def test_custom_load_func(self):
 
         def load_fn(x):
