@@ -87,6 +87,18 @@ class TestImageCollection(TestCase):
         ic = ImageCollection(load_pattern, load_func=load_fn)
         assert_equal(ic[1], (2, 'two'))
 
+    def test_custom_pattern(self):
+        load_pattern = os.path.join(data_dir, 'b??ck.png')
+        files = [os.path.join(data_dir, pic)
+                 for pic in ['block.png', 'brick.png']]
+
+        def load_fn(x):
+            return x
+
+        ic = ImageCollection(load_pattern, load_func=load_fn)
+        assert_equal(ic[0], files[0])
+        assert_equal(ic[1], files[1])
+
     def test_custom_load_func(self):
 
         def load_fn(x):
