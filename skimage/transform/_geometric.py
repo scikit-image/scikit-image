@@ -47,7 +47,6 @@ def _center_and_normalize_points(points):
            (1997): 580-593.
 
     """
-
     centroid = np.mean(points, axis=0)
 
     ndim = centroid.size
@@ -151,6 +150,7 @@ class GeometricTransform(object):
     """Base class for geometric transformations.
 
     """
+
     def __call__(self, coords):
         """Apply forward transformation.
 
@@ -205,9 +205,7 @@ class GeometricTransform(object):
         return np.sqrt(np.sum((self(src) - dst)**2, axis=1))
 
     def __add__(self, other):
-        """Combine this transformation with another.
-
-        """
+        """Combine this transformation with another."""
         raise NotImplementedError()
 
 
@@ -234,7 +232,8 @@ class FundamentalMatrixTransform(GeometricTransform):
     matrix : (N, N) array, optional
         Fundamental matrix.
     ndim : int, optional
-        The intended dimensions of the fundamental matrix.
+        The dimension of the matrix that this transformation is intended to
+        apply to.
 
     Attributes
     ----------
@@ -423,45 +422,50 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
     Parameters
     ----------
-    rotation : (3, 3) array, optional
+    rotation : (N, N) array, optional
         Rotation matrix of the relative camera motion.
-    translation : (3, 1) array, optional
+    translation : (N, 1) array, optional
         Translation vector of the relative camera motion. The vector must
         have unit length.
-    matrix : (3, 3) array, optional
+    matrix : (N, N) array, optional
         Essential matrix.
-
+    ndim : int, optional
+        The dimension of the matrix that this transformation is intended to
+        apply to.
     Attributes
     ----------
-    params : (3, 3) array
+    params : (N, N) array
         Essential matrix.
 
     """
 
-    def __init__(self, rotation=None, translation=None, matrix=None):
-        if rotation is not None:
-            if translation is None:
+    def __init__(self, rotation=None, translation=None, matrix=None, ndim=2):
+        self.ndim = ndim
+        size = ndim + 1
+        if rotation or translation is not None:
+            if None in [rotation, translation]:
                 raise ValueError("Both rotation and translation required")
-            if rotation.shape != (3, 3):
+            if rotation.shape != (size, size):
                 raise ValueError("Invalid shape of rotation matrix")
             if abs(np.linalg.det(rotation) - 1) > 1e-6:
                 raise ValueError("Rotation matrix must have unit determinant")
-            if translation.size != 3:
+            if translation.size != size:
                 raise ValueError("Invalid shape of translation vector")
             if abs(np.linalg.norm(translation) - 1) > 1e-6:
                 raise ValueError("Translation vector must have unit length")
             # Matrix representation of the cross product for t.
-            t_x = np.array([0, -translation[2], translation[1],
-                            translation[2], 0, -translation[0],
-                            -translation[1], translation[0], 0]).reshape(3, 3)
+            t_x = np.array(
+                [[  0,              - translation[2],   translation[1]],
+                 [  translation[2],   0,              - translation[0]],
+                 [- translation[1],   translation[0],   0             ]])
             self.params = np.dot(t_x, rotation)
         elif matrix is not None:
-            if matrix.shape != (3, 3):
+            if matrix.shape != (size, size):
                 raise ValueError("Invalid shape of transformation matrix")
             self.params = matrix
         else:
             # default to an identity transform
-            self.params = np.eye(3)
+            self.params = np.eye(size)
 
     def estimate(self, src, dst):
         """Estimate essential matrix using 8-point algorithm.
