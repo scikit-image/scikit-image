@@ -23,7 +23,7 @@ def _multichannel_default(multichannel, ndim):
     else:
         warn('The default multichannel argument (None) is deprecated.  Please '
              'specify either True or False explicitly.  multichannel will '
-             'default to False starting with release 0.16. ')
+             'default to False starting with release 0.16.')
         # utility for maintaining previous color image default behavior
         if ndim == 3:
             return True
@@ -32,13 +32,13 @@ def _multichannel_default(multichannel, ndim):
 
 
 def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
-           preserve_range=False):
+           preserve_range=False, anti_aliasing=None, anti_aliasing_sigma=None):
     """Resize image to match a certain size.
 
-    Performs interpolation to up-size or down-size images. For down-sampling
-    N-dimensional images by applying a function or the arithmetic mean, see
-    `skimage.measure.block_reduce` and
-    `skimage.transform.downscale_local_mean`, respectively.
+    Performs interpolation to up-size or down-size images. Note that anti-
+    aliasing should be enabled when down-sizing images to avoid aliasing
+    artifacts. For down-sampling N-dimensional images with an integer factor
+    also see `skimage.transform.downscale_local_mean`.
 
     Parameters
     ----------
@@ -74,6 +74,14 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
+    anti_aliasing : bool, optional
+        Whether to apply a Gaussian filter to smooth the image prior to
+        down-scaling. It is crucial to filter when down-sampling the image to
+        avoid aliasing artifacts.
+    anti_aliasing_sigma : {float, tuple of floats}, optional
+        Standard deviation for Gaussian filtering to avoid aliasing artifacts.
+        By default, this value is chosen as (1 - s) / 2 where s is the
+        down-scaling factor.
 
     Notes
     -----
@@ -97,26 +105,47 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
         warn("The default mode, 'constant', will be changed to 'reflect' in "
              "skimage 0.15.")
 
+    if anti_aliasing is None:
+        anti_aliasing = False
+        warn("Anti-aliasing will be enabled by default in skimage 0.15 to "
+             "avoid aliasing artifacts when down-sampling images.")
+
     output_shape = tuple(output_shape)
-    ndim_out = len(output_shape)
+    output_ndim = len(output_shape)
     input_shape = image.shape
-    if ndim_out > image.ndim:
+    if output_ndim > image.ndim:
         # append dimensions to input_shape
-        input_shape = input_shape + (1, ) * (ndim_out - image.ndim)
+        input_shape = input_shape + (1, ) * (output_ndim - image.ndim)
         image = np.reshape(image, input_shape)
-    elif ndim_out == image.ndim - 1:
+    elif output_ndim == image.ndim - 1:
         # multichannel case: append shape of last axis
         output_shape = output_shape + (image.shape[-1], )
-        ndim_out += 1
-    elif ndim_out < image.ndim - 1:
+    elif output_ndim < image.ndim - 1:
         raise ValueError("len(output_shape) cannot be smaller than the image "
                          "dimensions")
 
-    input_shape = np.asarray(input_shape, dtype=float)
-    dim_scales = input_shape / np.asarray(output_shape)
+    factors = (np.asarray(input_shape, dtype=float) /
+               np.asarray(output_shape, dtype=float))
+
+    if anti_aliasing:
+        if anti_aliasing_sigma is None:
+            anti_aliasing_sigma = np.maximum(0, (factors - 1) / 2)
+        else:
+            anti_aliasing_sigma = \
+                np.atleast_1d(anti_aliasing_sigma) * np.ones_like(factors)
+            if np.any(anti_aliasing_sigma < 0):
+                raise ValueError("Anti-aliasing standard deviation must be "
+                                 "greater than or equal to zero")
+            elif np.any((anti_aliasing_sigma > 0) & (factors <= 1)):
+                warn("Anti-aliasing standard deviation greater than zero but "
+                     "not down-sampling along all axes")
+
+        image = ndi.gaussian_filter(image, anti_aliasing_sigma,
+                                    cval=cval, mode=mode)
 
     # 2-dimensional interpolation
-    if ndim_out == 2 or (ndim_out == 3 and output_shape[2] == input_shape[2]):
+    if len(output_shape) == 2 or (len(output_shape) == 3 and
+                                  output_shape[2] == input_shape[2]):
         rows = output_shape[0]
         cols = output_shape[1]
         input_rows = input_shape[0]
@@ -129,8 +158,8 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
             src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
             dst_corners = np.zeros(src_corners.shape, dtype=np.double)
             # take into account that 0th pixel is at position (0.5, 0.5)
-            dst_corners[:, 0] = dim_scales[1] * (src_corners[:, 0] + 0.5) - 0.5
-            dst_corners[:, 1] = dim_scales[0] * (src_corners[:, 1] + 0.5) - 0.5
+            dst_corners[:, 0] = factors[1] * (src_corners[:, 0] + 0.5) - 0.5
+            dst_corners[:, 1] = factors[0] * (src_corners[:, 1] + 0.5) - 0.5
 
             tform = AffineTransform()
             tform.estimate(src_corners, dst_corners)
@@ -140,7 +169,7 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
                    preserve_range=preserve_range)
 
     else:  # n-dimensional interpolation
-        coord_arrays = [dim_scales[i] * (np.arange(d) + 0.5) - 0.5
+        coord_arrays = [factors[i] * (np.arange(d) + 0.5) - 0.5
                         for i, d in enumerate(output_shape)]
 
         coord_map = np.array(np.meshgrid(*coord_arrays,
@@ -159,13 +188,14 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
 
 
 def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
-            preserve_range=False, multichannel=None):
+            preserve_range=False, multichannel=None,
+            anti_aliasing=None, anti_aliasing_sigma=None):
     """Scale image by a certain factor.
 
-    Performs interpolation to upscale or down-scale images. For down-sampling
-    N-dimensional images with integer factors by applying a function or the
-    arithmetic mean, see `skimage.measure.block_reduce` and
-    `skimage.transform.downscale_local_mean`, respectively.
+    Performs interpolation to up-scale or down-scale images. Note that anti-
+    aliasing should be enabled when down-sizing images to avoid aliasing
+    artifacts. For down-sampling N-dimensional images with an integer factor
+    also see `skimage.transform.downscale_local_mean`.
 
     Parameters
     ----------
@@ -204,6 +234,22 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
         channels or another spatial dimension. By default, is set to True for
         3D (2D+color) inputs, and False for others. Starting in release 0.16,
         this will always default to False.
+    anti_aliasing : bool, optional
+        Whether to apply a Gaussian filter to smooth the image prior to
+        down-scaling. It is crucial to filter when down-sampling the image to
+        avoid aliasing artifacts.
+    anti_aliasing_sigma : {float, tuple of floats}, optional
+        Standard deviation for Gaussian filtering to avoid aliasing artifacts.
+        By default, this value is chosen as (1 - s) / 2 where s is the
+        down-scaling factor.
+
+    Notes
+    -----
+    Modes 'reflect' and 'symmetric' are similar, but differ in whether the edge
+    pixels are duplicated during the reflection.  As an example, if an array
+    has values [0, 1, 2] and was padded to the right by four values using
+    symmetric, the result would be [0, 1, 2, 2, 1, 0, 0], while for reflect it
+    would be [0, 1, 2, 1, 0, 1, 2].
 
     Examples
     --------
@@ -220,14 +266,16 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
     scale = np.atleast_1d(scale)
     if len(scale) > 1 and (len(scale) != image.ndim or
                            (multichannel and len(scale) != image.ndim - 1)):
-        raise ValueError("must supply a single scale or one value per axis.")
+        raise ValueError("must supply a single scale or one value per axis")
     orig_shape = np.asarray(image.shape)
     output_shape = np.round(scale * orig_shape)
     if multichannel:  # don't scale channel dimension
         output_shape[-1] = orig_shape[-1]
 
     return resize(image, output_shape, order=order, mode=mode, cval=cval,
-                  clip=clip, preserve_range=preserve_range)
+                  clip=clip, preserve_range=preserve_range,
+                  anti_aliasing=anti_aliasing,
+                  anti_aliasing_sigma=anti_aliasing_sigma)
 
 
 def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
@@ -271,6 +319,14 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
+
+    Notes
+    -----
+    Modes 'reflect' and 'symmetric' are similar, but differ in whether the edge
+    pixels are duplicated during the reflection.  As an example, if an array
+    has values [0, 1, 2] and was padded to the right by four values using
+    symmetric, the result would be [0, 1, 2, 2, 1, 0, 0], while for reflect it
+    would be [0, 1, 2, 1, 0, 1, 2].
 
     Examples
     --------
@@ -394,7 +450,7 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
     ----------
     image : ndarray
         Input image.
-    center : (row, column) tuple or (2,) ndarray, optional
+    center : (column, row) tuple or (2,) ndarray, optional
         Center coordinate of transformation.
     strength : float, optional
         The amount of swirling applied.
@@ -439,7 +495,7 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
         mode = 'constant'
 
     if center is None:
-        center = np.array(image.shape)[:2] / 2
+        center = np.array(image.shape)[:2][::-1] / 2
 
     warp_args = {'center': center,
                  'rotation': rotation,

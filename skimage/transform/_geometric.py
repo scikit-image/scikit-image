@@ -132,7 +132,7 @@ def _umeyama(src, dst, estimate_scale):
             T[:dim, :dim] = np.dot(U, np.dot(np.diag(d), V))
             d[dim - 1] = s
     else:
-        T[:dim, :dim] = np.dot(U, np.dot(np.diag(d), V.T))
+        T[:dim, :dim] = np.dot(U, np.dot(np.diag(d), V))
 
     if estimate_scale:
         # Eq. (41) and (42).

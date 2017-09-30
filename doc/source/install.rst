@@ -102,7 +102,7 @@ into the `setup of appveyor`_ (a continuous integration service).
 .. _miniconda: http://conda.pydata.org/miniconda.html
 .. _python.org: http://python.org/
 .. _Christoph Gohlke's: http://www.lfd.uci.edu/~gohlke/pythonlibs/
-.. _setup of appveyor: https://github.com/scikit-image/scikit-image/blob/master/appveyor.yml
+.. _setup of appveyor: https://github.com/scikit-image/scikit-image/blob/master/.appveyor.yml
 .. _here: https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.0_standalone:_Visual_C.2B-.2B-_Build_Tools_2015_.28x86.2C_x64.2C_ARM.29
 .. _venv: https://docs.python.org/3/library/venv.html
 .. _virtual environments: http://docs.python-guide.org/en/latest/dev/virtualenvs/
@@ -132,29 +132,5 @@ To update::
 
   git pull  # Grab latest source
   python setup.py build_ext -i  # Compile any modified extensions
-
-c. Building with bento
-``````````````````````
-
-Alternatively, ``scikit-image`` can also be built using `bento
-<http://cournape.github.io/Bento/>`__.  Bento depends on `WAF
-<https://code.google.com/p/waf/>`__ for compilation.
-
-Follow the `Bento installation instructions
-<http://cournape.github.io/Bento/html/install.html>`__ and `download the WAF
-source <http://code.google.com/p/waf/downloads/list>`__.
-
-Tell Bento where to find WAF by setting the ``WAFDIR`` environment variable::
-
-    export WAFDIR=<path/to/waf>
-
-From the ``scikit-image`` source directory::
-
-    bentomaker configure
-    bentomaker build -j     # (add -i for in-place build)
-    bentomaker install      # (when not building in-place)
-
-Depending on file permissions, the install commands may need to be run as
-sudo.
 
 .. include:: ../../DEPENDS.txt

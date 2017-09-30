@@ -33,7 +33,7 @@ def seam_carve(image, energy_map, mode, num, border=1, force_copy=True):
         If set, the `image` and `energy_map` are copied before being used by
         the method which modifies it in place. Set this to `False` if the
         original image and the energy map are no longer needed after
-        this opetration.
+        this operation.
 
     Returns
     -------
@@ -55,12 +55,13 @@ def seam_carve(image, energy_map, mode, num, border=1, force_copy=True):
         image = image[..., np.newaxis]
 
     if mode == 'horizontal':
-        image = np.transpose(image, (1, 0, 2))
+        image = np.swapaxes(image, 0, 1)
+        energy_map = np.swapaxes(energy_map, 0, 1)
 
     image = np.ascontiguousarray(image)
     out = _seam_carve_v(image, energy_map, num, border)
 
     if mode == 'horizontal':
-        out = np.transpose(out, (1, 0, 2))
+        out = np.swapaxes(out, 0, 1)
 
     return np.squeeze(out)
