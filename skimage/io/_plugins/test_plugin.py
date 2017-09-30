@@ -2,6 +2,7 @@
 # to verify the behaviour of the plugin infrastructure
 
 from skimage.io import ImageCollection
+import numpy as np
 
 
 def imread(fname, dtype=None):
@@ -22,7 +23,7 @@ def imshow(arr, plugin_arg=None):
 def imread_collection(x, conserve_memory=True):
     assert conserve_memory == False
     assert x == '*.png'
-    return ImageCollection([0, 1], load_func=lambda x: x)
+    return ImageCollection([5, 10], load_func=lambda x: np.zeros((x, x)))
 
 
 def imshow_collection(x):

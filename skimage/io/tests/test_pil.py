@@ -1,7 +1,7 @@
 import os.path
 import numpy as np
 from numpy.testing import (
-    assert_array_equal, assert_array_almost_equal,
+    assert_equal, assert_array_equal, assert_array_almost_equal,
     assert_allclose, run_module_suite)
 import pytest
 
@@ -261,6 +261,12 @@ def test_cmyk():
         refi = np.ascontiguousarray(ref_lab[:, :, i])
         sim = ssim(refi, newi, data_range=refi.max() - refi.min())
         assert sim > 0.99
+
+
+def test_extreme_palette():
+    img = imread(os.path.join(data_dir, 'green_palette.png'))
+    assert_equal(img.ndim, 3)
+
 
 if __name__ == "__main__":
     run_module_suite()
