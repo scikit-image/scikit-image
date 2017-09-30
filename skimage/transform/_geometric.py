@@ -398,7 +398,7 @@ class FundamentalMatrixTransform(GeometricTransform):
         dst_F_src = np.sum(dst_homogeneous * F_src.T, axis=1)
 
         return np.abs(dst_F_src) / np.sqrt((F_src ** 2).sum()
-                                         + (Ft_dst ** 2).sum())
+                                           + (Ft_dst ** 2).sum())
 
 
 class EssentialMatrixTransform(FundamentalMatrixTransform):
