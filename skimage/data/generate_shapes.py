@@ -40,7 +40,7 @@ def _generate_rectangle_mask(point, image, shape, random):
     label : Label
         A tuple specifying the category of the shape, as well as its x1, x2, y1
         and y2 bounding box coordinates.
-    indices: 2-D array
+    indices : 2-D array
         A mask of indices that the shape fills.
     """
     available_width = min(image.ncols - point.column, shape.max_size)
@@ -97,7 +97,7 @@ def _generate_circle_mask(point, image, shape, random):
     label : Label
         A tuple specifying the category of the shape, as well as its x1, x2, y1
         and y2 bounding box coordinates.
-    indices: 2-D array
+    indices : 2-D array
         A mask of indices that the shape fills.
     """
     if shape.min_size == 1 or shape.max_size == 1:
@@ -147,7 +147,7 @@ def _generate_triangle_mask(point, image, shape, random):
     label : Label
         A tuple specifying the category of the shape, as well as its x1, x2, y1
         and y2 bounding box coordinates.
-    indices: 2-D array
+    indices : 2-D array
         A mask of indices that the shape fills.
     """
     if shape.min_size == 1 or shape.max_size == 1:
@@ -222,7 +222,7 @@ def generate_shapes(image_shape,
                     shape=None,
                     min_pixel_intensity=0,
                     allow_overlap=False,
-                    number_of_attemps_to_fit_shape=100,
+                    num_trials=100,
                     random_seed=None):
     """Generate an image with random shapes, labeled with bounding boxes.
 
@@ -242,23 +242,24 @@ def generate_shapes(image_shape,
         The number of rows and columns of the image to generate.
     max_shapes : int
         The maximum number of shapes to (attempt to) fit into the shape.
-    min_shapes : int
+    min_shapes : int, optional
         The minimum number of shapes to (attempt to) fit into the shape.
-    min_size : int
+    min_size : int, optional
         The minimum dimension of each shape to fit into the image.
-    max_size : int
+    max_size : int, optional
         The maximum dimension of each shape to fit into the image.
-    gray : bool
-        If `True`, generate 1-D monochrome images, else 3-D RGB images.
-    shape : {rectangle, circle, triangle, None} str
+    gray : bool, optional
+        If `True`, generate monochrome images, else color images with multiple
+        channels.
+    shape : {rectangle, circle, triangle, None} str, optional
         The name of the shape to generate or `None` to pick random ones.
-    min_pixel_intensity : [0-255] int
+    min_pixel_intensity : [0-255] int, optional
         The minimum pixel value for colors.
-    allow_overlap : bool
+    allow_overlap : bool, optional
         If `True`, allow shapes to overlap.
-    number_of_attemps_to_fit_shape : int
+    num_trials : int, optional
         How often to attempt to fit a shape into the image before skipping it.
-    seed : int
+    seed : int, optional
         Seed to initialize the random number generator.
         If `None`, a random seed from the operating system is used.
 
@@ -304,7 +305,7 @@ def generate_shapes(image_shape,
         else:
             shape_generator = SHAPE_GENERATORS[user_shape]
         shape = ShapeProperties(min_size, max_size, color)
-        for _ in range(number_of_attemps_to_fit_shape):
+        for _ in range(num_trials):
             # Pick start coordinates.
             column = random.randint(image_shape.ncols)
             row = random.randint(image_shape.nrows)
