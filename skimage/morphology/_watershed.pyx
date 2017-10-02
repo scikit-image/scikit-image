@@ -23,6 +23,7 @@ ctypedef cnp.int8_t DTYPE_BOOL_t
 include "heap_watershed.pxi"
 
 
+@cython.wraparound(False)
 @cython.boundscheck(False)
 @cython.cdivision(True)
 @cython.overflowcheck(False)
@@ -40,7 +41,38 @@ cdef inline double _euclid_dist(cnp.int32_t pt0, cnp.int32_t pt1,
     return sqrt(result)
 
 
+@cython.wraparound(False)
 @cython.boundscheck(False)
+@cython.cdivision(True)
+@cython.unraisable_tracebacks(False)
+cdef inline DTYPE_BOOL_t _diff_neighbors(DTYPE_INT32_t[::1] output,
+                                         DTYPE_INT32_t[::1] structure,
+                                         DTYPE_INT32_t wsl_label,
+                                         Py_ssize_t index):
+    cdef:
+        Py_ssize_t i, neighbor_index
+        DTYPE_INT32_t neighbor_label0, neighbor_label1
+        Py_ssize_t nneighbors = structure.shape[0]
+
+    if output[index] == wsl_label:
+        return True
+
+    neighbor_label0, neighbor_label1 = 0, 0
+    for i in range(nneighbors):
+        neighbor_index = structure[i] + index
+        if not neighbor_label0:
+            if output[neighbor_index] != wsl_label:
+                neighbor_label0 = output[neighbor_index]
+        else:
+            neighbor_label1 = output[neighbor_index]
+            if neighbor_label1 and neighbor_label1 != neighbor_label0:
+                if output[neighbor_index] != wsl_label:
+                    output[index] = wsl_label
+                    return True
+    return False
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
 def watershed_raveled(cnp.float64_t[::1] image,
                       DTYPE_INT32_t[::1] marker_locations,
                       DTYPE_INT32_t[::1] structure,
@@ -107,17 +139,15 @@ def watershed_raveled(cnp.float64_t[::1] image,
     while hp.items > 0:
         heappop(hp, &elem)
 
-        # this can happen if the same pixel entered the queue
-        # several times before being processed.
-        if wsl and output[elem.index] == wsl_label:
-            # wsl labels are not propagated.
-            continue
-
         if compact or wsl:
             if output[elem.index] and elem.index != elem.source:
                 # non-marker, already visited from another neighbor
                 continue
             output[elem.index] = output[elem.source]
+
+        if wsl:
+            if _diff_neighbors(output, structure, wsl_label, elem.index):
+                continue
 
         for i in range(nneighbors):
             # get the flattened address of the neighbor
@@ -133,12 +163,6 @@ def watershed_raveled(cnp.float64_t[::1] image,
             if output[neighbor_index]:
                 # neighbor has a label (but not wsl_label):
                 # the neighbor is not added to the queue.
-                if wsl:
-                    # if the label of the neighbor is different
-                    # from the label of the pixel taken from the queue,
-                    # the latter takes the WSL label.
-                    if output[neighbor_index] != output[elem.index]:
-                        output[elem.index] = wsl_label
                 continue
 
             age += 1
