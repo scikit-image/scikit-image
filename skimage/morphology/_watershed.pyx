@@ -144,6 +144,8 @@ def watershed_raveled(cnp.float64_t[::1] image,
             if compactness > 0:
                 new_elem.value += (compactness *
                                    _euclid_dist(index, elem.source, strides))
+            else:
+                output[index] = output[elem.index]
             new_elem.age = age
             new_elem.index = index
             new_elem.source = elem.source
