@@ -49,6 +49,11 @@ cdef inline DTYPE_BOOL_t _diff_neighbors(DTYPE_INT32_t[::1] output,
                                          DTYPE_INT32_t[::1] structure,
                                          DTYPE_BOOL_t[::1] mask,
                                          Py_ssize_t index):
+    """
+    Return ``True`` and set ``mask[index]`` to ``False`` if the neighbors of
+    ``index`` (as given by the offsets in ``structure``) have more than one
+    distinct nonzero label.
+    """
     cdef:
         Py_ssize_t i, neighbor_index
         DTYPE_INT32_t neighbor_label0, neighbor_label1
