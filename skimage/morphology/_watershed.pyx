@@ -90,6 +90,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
     cdef Py_ssize_t age = 1
     cdef Py_ssize_t index = 0
     cdef DTYPE_INT32_t wsl_label = -1
+    cdef DTYPE_BOOL_t compact = (compactness > 0)
 
     cdef Heap *hp = <Heap *> heap_from_numpy2()
 
@@ -112,11 +113,12 @@ def watershed_raveled(cnp.float64_t[::1] image,
             # wsl labels are not propagated.
             continue
 
-        if output[elem.index] and elem.index != elem.source:
-            # non-marker, already visited from another neighbor
-            continue
+        if compact:
+            if output[elem.index] and elem.index != elem.source:
+                # non-marker, already visited from another neighbor
+                continue
+            output[elem.index] = output[elem.source]
 
-        output[elem.index] = output[elem.source]
         for i in range(nneighbors):
             # get the flattened address of the neighbor
             index = structure[i] + elem.index
@@ -141,7 +143,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
 
             age += 1
             new_elem.value = image[index]
-            if compactness > 0:
+            if compact:
                 new_elem.value += (compactness *
                                    _euclid_dist(index, elem.source, strides))
             else:
