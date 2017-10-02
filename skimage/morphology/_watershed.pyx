@@ -136,10 +136,20 @@ def watershed_raveled(cnp.float64_t[::1] image,
         heappop(hp, &elem)
 
         if compact or wsl:
+            # in the compact case, we need to label pixels as they come off
+            # the heap, because the same pixel can be pushed twice, *and* the
+            # later push can have lower cost because of the compactness.
+            #
+            # In the case of preserving watershed lines, a similar argument
+            # applies: we can only observe that all neighbors have been labeled
+            # as the pixel comes off the heap. Trying to do so at push time
+            # is a bug.
             if output[elem.index] and elem.index != elem.source:
                 # non-marker, already visited from another neighbor
                 continue
             if wsl:
+                # if the current element has different-labeled neighbors and we
+                # want to preserve watershed lines, we mask it and move on
                 if _diff_neighbors(output, structure, mask, elem.index):
                     continue
             output[elem.index] = output[elem.source]
@@ -164,6 +174,12 @@ def watershed_raveled(cnp.float64_t[::1] image,
                                    _euclid_dist(neighbor_index, elem.source,
                                                 strides))
             elif not wsl:
+                # in the simplest watershed case (no compactness and no
+                # watershed lines), we can label a pixel at the time that
+                # we push it onto the heap, because it can't be reached with
+                # lower cost later.
+                # This results in a very significant performance gain, see:
+                # https://github.com/scikit-image/scikit-image/issues/2636
                 output[neighbor_index] = output[elem.index]
             new_elem.age = age
             new_elem.index = neighbor_index
