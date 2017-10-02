@@ -261,8 +261,4 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
 
     output = crop(output, pad_width, copy=True)
 
-    if watershed_line:
-        min_val = output.min()
-        output[output == min_val] = 0
-
     return output

@@ -47,27 +47,26 @@ cdef inline double _euclid_dist(cnp.int32_t pt0, cnp.int32_t pt1,
 @cython.unraisable_tracebacks(False)
 cdef inline DTYPE_BOOL_t _diff_neighbors(DTYPE_INT32_t[::1] output,
                                          DTYPE_INT32_t[::1] structure,
-                                         DTYPE_INT32_t wsl_label,
+                                         DTYPE_BOOL_t[::1] mask,
                                          Py_ssize_t index):
     cdef:
         Py_ssize_t i, neighbor_index
         DTYPE_INT32_t neighbor_label0, neighbor_label1
         Py_ssize_t nneighbors = structure.shape[0]
 
-    if output[index] == wsl_label:
+    if not mask[index]:
         return True
 
     neighbor_label0, neighbor_label1 = 0, 0
     for i in range(nneighbors):
         neighbor_index = structure[i] + index
-        if not neighbor_label0:
-            if output[neighbor_index] != wsl_label:
+        if mask[neighbor_index]:  # neighbor not a watershed line
+            if not neighbor_label0:
                 neighbor_label0 = output[neighbor_index]
-        else:
-            neighbor_label1 = output[neighbor_index]
-            if neighbor_label1 and neighbor_label1 != neighbor_label0:
-                if output[neighbor_index] != wsl_label:
-                    output[index] = wsl_label
+            else:
+                neighbor_label1 = output[neighbor_index]
+                if neighbor_label1 and neighbor_label1 != neighbor_label0:
+                    mask[index] = False
                     return True
     return False
 
@@ -121,7 +120,6 @@ def watershed_raveled(cnp.float64_t[::1] image,
     cdef Py_ssize_t i = 0
     cdef Py_ssize_t age = 1
     cdef Py_ssize_t index = 0
-    cdef DTYPE_INT32_t wsl_label = -1
     cdef DTYPE_BOOL_t compact = (compactness > 0)
 
     cdef Heap *hp = <Heap *> heap_from_numpy2()
@@ -133,8 +131,6 @@ def watershed_raveled(cnp.float64_t[::1] image,
         elem.index = index
         elem.source = index
         heappush(hp, &elem)
-        if wsl and wsl_label >= output[index]:
-            wsl_label = output[index] - 1
 
     while hp.items > 0:
         heappop(hp, &elem)
@@ -143,26 +139,22 @@ def watershed_raveled(cnp.float64_t[::1] image,
             if output[elem.index] and elem.index != elem.source:
                 # non-marker, already visited from another neighbor
                 continue
+            if wsl:
+                if _diff_neighbors(output, structure, mask, elem.index):
+                    continue
             output[elem.index] = output[elem.source]
-
-        if wsl:
-            if _diff_neighbors(output, structure, wsl_label, elem.index):
-                continue
 
         for i in range(nneighbors):
             # get the flattened address of the neighbor
             neighbor_index = structure[i] + elem.index
 
             if not mask[neighbor_index]:
+                # this branch includes basin boundaries, aka watershed lines
                 # neighbor is not in mask
                 continue
 
-            if wsl and output[neighbor_index] == wsl_label:
-                continue
-
             if output[neighbor_index]:
-                # neighbor has a label (but not wsl_label):
-                # the neighbor is not added to the queue.
+                # pre-labeled neighbor is not added to the queue.
                 continue
 
             age += 1
