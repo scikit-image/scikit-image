@@ -121,35 +121,36 @@ def watershed_raveled(cnp.float64_t[::1] image,
 
         for i in range(nneighbors):
             # get the flattened address of the neighbor
-            index = structure[i] + elem.index
+            neighbor_index = structure[i] + elem.index
 
-            if not mask[index]:
+            if not mask[neighbor_index]:
                 # neighbor is not in mask
                 continue
 
-            if wsl and output[index] == wsl_label:
+            if wsl and output[neighbor_index] == wsl_label:
                 continue
 
-            if output[index]:
+            if output[neighbor_index]:
                 # neighbor has a label (but not wsl_label):
                 # the neighbor is not added to the queue.
                 if wsl:
                     # if the label of the neighbor is different
                     # from the label of the pixel taken from the queue,
                     # the latter takes the WSL label.
-                    if output[index] != output[elem.index]:
+                    if output[neighbor_index] != output[elem.index]:
                         output[elem.index] = wsl_label
                 continue
 
             age += 1
-            new_elem.value = image[index]
+            new_elem.value = image[neighbor_index]
             if compact:
                 new_elem.value += (compactness *
-                                   _euclid_dist(index, elem.source, strides))
+                                   _euclid_dist(neighbor_index, elem.source,
+                                                strides))
             else:
-                output[index] = output[elem.index]
+                output[neighbor_index] = output[elem.index]
             new_elem.age = age
-            new_elem.index = index
+            new_elem.index = neighbor_index
             new_elem.source = elem.source
 
             heappush(hp, &new_elem)
