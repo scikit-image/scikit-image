@@ -113,7 +113,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
             # wsl labels are not propagated.
             continue
 
-        if compact:
+        if compact or wsl:
             if output[elem.index] and elem.index != elem.source:
                 # non-marker, already visited from another neighbor
                 continue
@@ -147,7 +147,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
                 new_elem.value += (compactness *
                                    _euclid_dist(neighbor_index, elem.source,
                                                 strides))
-            else:
+            elif not wsl:
                 output[neighbor_index] = output[elem.index]
             new_elem.age = age
             new_elem.index = neighbor_index
