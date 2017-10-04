@@ -382,6 +382,7 @@ def test_horizontal_mask_line(grad_func):
     result = grad_func(vgrad, mask)
     assert_close(result, expected)
 
+
 @pytest.mark.parametrize("grad_func", (
     filters.prewitt_v, filters.sobel_v, filters.scharr_v
 ))
