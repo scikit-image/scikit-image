@@ -358,6 +358,12 @@ def test_union():
     tform = AffineTransform(scale=(0.1, 0.1), rotation=0.3)
     assert_almost_equal((tform + tform.inverse).params, np.eye(3))
 
+    tform1 = SimilarityTransform(scale=0.1, rotation=0.3)
+    tform2 = SimilarityTransform(scale=0.1, rotation=0.9)
+    tform3 = SimilarityTransform(scale=0.1 * 1/0.1, rotation=0.3 - 0.9)
+    tform = tform1 + tform2.inverse
+    assert_almost_equal(tform.params, tform3.params)
+
 
 def test_union_differing_types():
     tform1 = SimilarityTransform()
