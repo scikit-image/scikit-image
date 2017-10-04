@@ -14,7 +14,7 @@ except ImportError:
         has_futures = False
 
 
-def _generate_shifts(ndim, multichannel, max_shifts=None, shift_steps=1):
+def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
     """Returns all combinations of shifts in n dimensions over the specified
     max_shifts and step sizes.
 
@@ -25,18 +25,14 @@ def _generate_shifts(ndim, multichannel, max_shifts=None, shift_steps=1):
     [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)]
     """
     mc = int(multichannel)
-    if max_shifts is None:
-        max_shifts = (0, ) * ndim
-    elif np.isscalar(max_shifts):
+    if np.isscalar(max_shifts):
         max_shifts = (max_shifts, ) * (ndim - mc) + (0, ) * mc
     elif multichannel and len(max_shifts) == ndim - 1:
         max_shifts = tuple(max_shifts) + (0, )
     elif len(max_shifts) != ndim:
         raise ValueError("max_shifts should have length ndim")
 
-    if shift_steps is None:
-        shift_steps = (1, ) * ndim
-    elif np.isscalar(shift_steps):
+    if np.isscalar(shift_steps):
         shift_steps = (shift_steps, ) * (ndim - mc) + (1, ) * mc
     elif multichannel and len(shift_steps) == ndim - 1:
         shift_steps = tuple(shift_steps) + (1, )
@@ -72,16 +68,8 @@ def _roll_axes(x, rolls, axes=None):
     x : array
         Data with axes rolled.
     """
-    if np.isscalar(rolls):
-        rolls = (rolls, )
-    if len(rolls) > x.ndim:
-        raise ValueError("length of rolls should not exceed x.ndim")
     if axes is None:
         axes = np.arange(len(rolls))
-    if np.isscalar(axes):
-        axes = (axes, )
-    if len(rolls) != len(axes):
-        raise ValueError("size mismatch between rolls and axes")
     try:
         # numpy>=1.12 supports tuple for rolls, axes
         return np.roll(x, rolls, axes)
