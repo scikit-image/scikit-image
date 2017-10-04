@@ -10,7 +10,7 @@ For more images, see
 
 import os as _os
 
-import numpy as np
+import numpy as _np
 
 from .. import data_dir
 from ..io import imread, use_plugin
@@ -383,4 +383,4 @@ def stereo_motorcycle():
     """
     return (load("motorcycle_left.png"),
             load("motorcycle_right.png"),
-            np.load(_os.path.join(data_dir, "motorcycle_disp.npz"))["arr_0"])
+            _np.load(_os.path.join(data_dir, "motorcycle_disp.npz"))["arr_0"])
