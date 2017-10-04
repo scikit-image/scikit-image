@@ -145,7 +145,7 @@ def _palette_is_grayscale(pil_image):
     palette = np.asarray(pil_image.getpalette()).reshape((256, 3))
     # Not all palette colors are used; unused colors have junk values.
     start, stop = pil_image.getextrema()
-    valid_palette = palette[start:stop]
+    valid_palette = palette[start:stop + 1]
     # Image is grayscale if channel differences (R - G and G - B)
     # are all zero.
     return np.allclose(np.diff(valid_palette), 0)
