@@ -66,6 +66,7 @@ def test_out_argument():
         testing.assert_(np.any(out != out_saved))
         testing.assert_array_equal(out, func(img, strel))
 
+
 binary_functions = [binary.binary_erosion, binary.binary_dilation,
                     binary.binary_opening, binary.binary_closing]
 
@@ -101,6 +102,7 @@ def test_3d_fallback_default_selem():
     image_expected = np.zeros((7, 7, 7), dtype=bool)
     image_expected[2:5, 2:5, 2:5] = ndi.generate_binary_structure(3, 1)
     testing.assert_array_equal(opened, image_expected)
+
 
 binary_3d_fallback_functions = [binary.binary_opening, binary.binary_closing]
 
