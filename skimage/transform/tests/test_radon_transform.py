@@ -146,7 +146,8 @@ def check_radon_iradon(interpolation_type, filter_type):
 
 filter_types = ["ramp", "shepp-logan", "cosine", "hamming", "hann"]
 interpolation_types = ['linear', 'nearest']
-radon_iradon_inputs = list(itertools.product(interpolation_types, filter_types))
+radon_iradon_inputs = list(itertools.product(interpolation_types,
+                                             filter_types))
 # cubic interpolation is slow; only run one test for it
 radon_iradon_inputs.append(('cubic', 'shepp-logan'))
 
