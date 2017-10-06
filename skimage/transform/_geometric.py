@@ -706,7 +706,7 @@ class ProjectiveTransform(GeometricTransform):
         elif (hasattr(other, '__name__')
                 and other.__name__ == 'inverse'
                 and hasattr(get_bound_method_class(other), '_inv_matrix')):
-            return ProjectiveTransform(self._inv_matrix.dot(self.params))
+            return ProjectiveTransform(other.__self__._inv_matrix.dot(self.params))
         else:
             raise TypeError("Cannot combine transformations of differing "
                             "types.")
