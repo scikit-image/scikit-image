@@ -20,4 +20,5 @@ __all__ = ['wiener',
            'denoise_bilateral',
            'denoise_wavelet',
            'denoise_nl_means',
+           'estimate_sigma',
            'inpaint_biharmonic']
