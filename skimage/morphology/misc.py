@@ -49,9 +49,9 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     If ar is bool, labels connected components and removes objects smaller than
     min_size. If ar is int, assumes objects have already been labelled. This
     means that int arrays with only one value above 0 are treated differently
-    than boolean arrays, and all non-zero pixels are considered a single object,
+    than boolean arrays, and all non-zero pixels are considered a single object
     even if they are not touching.
-    
+
     Parameters
     ----------
     ar : ndarray (arbitrary shape, int or bool type)
@@ -98,7 +98,9 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     >>> d is a
     True
     >>> e = morphology.remove_small_objects(a.astype(int), 6)
-    /usr/local/lib/python3.5/dist-packages/skimage/morphology/misc.py:122: UserWarning: Only one label was provided to `remove_small_objects`. Did you mean to use a boolean array?
+    /usr/local/lib/python3.5/dist-packages/skimage/morphology/misc.py:122:
+    UserWarning: Only one label was provided to `remove_small_objects`.
+    Did you mean to use a boolean array?
   warn("Only one label was provided to `remove_small_objects`. "
     >>> e
     array([[0, 0, 0, 1, 0],
