@@ -61,8 +61,9 @@ shapes_for_test_radon_center = [(16, 16), (17, 17)]
 circles_for_test_radon_center = [False, True]
 
 
-@pytest.mark.parametrize("shape", shapes_for_test_radon_center)
-@pytest.mark.parametrize("circle", circles_for_test_radon_center)
+@pytest.mark.parametrize("shape, circle",
+                         itertools.product(shapes_for_test_radon_center,
+                                           circles_for_test_radon_center))
 def test_radon_center(shape, circle):
     check_radon_center(shape, circle)
 
@@ -118,9 +119,10 @@ thetas_for_test_iradon_center = [0, 90]
 circles_for_test_iradon_center = [False, True]
 
 
-@pytest.mark.parametrize("size", sizes_for_test_iradon_center)
-@pytest.mark.parametrize("theta", thetas_for_test_iradon_center)
-@pytest.mark.parametrize("circle", circles_for_test_radon_center)
+@pytest.mark.parametrize("size, theta, circle",
+                         itertools.product(sizes_for_test_iradon_center,
+                                           thetas_for_test_iradon_center,
+                                           circles_for_test_radon_center))
 def test_iradon_center(size, theta, circle):
     check_iradon_center(size, theta, circle)
 
@@ -290,10 +292,7 @@ def check_sinogram_circle_to_square(size):
             argmax_shape(sinogram_circle_to_square))
 
 
-sizes_for_test_sinogram_circle_to_square = (50, 51)
-
-
-@pytest.mark.parametrize("size", sizes_for_test_sinogram_circle_to_square)
+@pytest.mark.parametrize("size", (50, 51))
 def test_sinogram_circle_to_square(size):
     check_sinogram_circle_to_square(size)
 
@@ -337,9 +336,10 @@ output_sizes = (None,
                 97)
 
 
-@pytest.mark.parametrize("shape", shapes_radon_iradon_circle)
-@pytest.mark.parametrize("interpolation", interpolations)
-@pytest.mark.parametrize("output_size", output_sizes)
+@pytest.mark.parametrize("shape, interpolation, output_size",
+                         itertools.product(shapes_radon_iradon_circle,
+                                           interpolations,
+                                           output_sizes))
 def test_radon_iradon_circle(shape, interpolation, output_size):
     check_radon_iradon_circle(interpolation, shape, output_size)
 

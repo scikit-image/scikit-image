@@ -1,6 +1,7 @@
 import numpy as np
 from numpy.testing import assert_equal
 import pytest
+import itertools
 from skimage import img_as_int, img_as_float, \
                     img_as_uint, img_as_ubyte
 from skimage.util.dtype import convert
@@ -15,10 +16,9 @@ dtype_range = {np.uint8: (0, 255),
                np.float64: (-1.0, 1.0)}
 
 
-img_funcs_and_types = {img_as_int: np.int16,
-                       img_as_float: np.float64,
-                       img_as_uint: np.uint16,
-                       img_as_ubyte: np.ubyte}
+img_funcs = (img_as_int, img_as_float, img_as_uint, img_as_ubyte)
+dtypes_for_img_funcs = (np.int16, np.float64, np.uint16, np.ubyte)
+img_funcs_and_types = zip(img_funcs, dtypes_for_img_funcs)
 
 
 def _verify_range(msg, x, vmin, vmax, dtype):
@@ -27,13 +27,14 @@ def _verify_range(msg, x, vmin, vmax, dtype):
     assert x.dtype == dtype
 
 
-@pytest.mark.parametrize("dtype", dtype_range)
-@pytest.mark.parametrize("f", img_funcs_and_types)
-def test_range(dtype, f):
+@pytest.mark.parametrize("dtype, f_and_dt",
+                         itertools.product(dtype_range,
+                                           img_funcs_and_types))
+def test_range(dtype, f_and_dt):
     imin, imax = dtype_range[dtype]
     x = np.linspace(imin, imax, 10).astype(dtype)
 
-    dt = img_funcs_and_types[f]
+    f, dt = f_and_dt
 
     with expected_warnings(['precision loss|sign loss|\A\Z']):
         y = f(x)
