@@ -289,16 +289,6 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     """
     dtype = image.dtype.type
 
-    if in_range is None:
-        in_range = 'image'
-        msg = "`in_range` should not be set to None. Use {!r} instead."
-        warn(msg.format(in_range))
-
-    if out_range is None:
-        out_range = 'dtype'
-        msg = "`out_range` should not be set to None. Use {!r} instead."
-        warn(msg.format(out_range))
-
     imin, imax = intensity_range(image, in_range)
     omin, omax = intensity_range(image, out_range, clip_negative=(imin >= 0))
 
@@ -510,7 +500,7 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
     if image.ndim == 3 and image.shape[2] in [3, 4]:
         image = rgb2gray(image)
 
-    dlimits = dtype_limits(image)
+    dlimits = dtype_limits(image, clip_negative=False)
     limits = np.percentile(image, [lower_percentile, upper_percentile])
     ratio = (limits[1] - limits[0]) / (dlimits[1] - dlimits[0])
 

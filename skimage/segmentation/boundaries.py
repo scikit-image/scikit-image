@@ -3,7 +3,7 @@ from __future__ import division
 import numpy as np
 from scipy import ndimage as ndi
 from ..morphology import dilation, erosion, square
-from ..util import img_as_float, view_as_windows, pad
+from ..util import img_as_float, view_as_windows
 from ..color import gray2rgb
 
 
@@ -33,8 +33,8 @@ def _find_boundaries_subpixel(label_img):
     edges = np.ones(label_img_expanded.shape, dtype=bool)
     edges[pixels] = False
     label_img_expanded[edges] = max_label
-    windows = view_as_windows(pad(label_img_expanded, 1,
-                                  mode='constant', constant_values=0),
+    windows = view_as_windows(np.pad(label_img_expanded, 1,
+                                     mode='constant', constant_values=0),
                               (3,) * ndim)
 
     boundaries = np.zeros_like(edges)

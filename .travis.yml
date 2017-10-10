@@ -3,7 +3,7 @@
 # After changing this file, check it on:
 #   http://yaml-online-parser.appspot.com/
 
-# See doc/travis_notes.txt for some guidelines
+# See tools/travis_notes.txt for some guidelines
 
 language: python
 sudo: false
@@ -25,7 +25,7 @@ addons:
 env:
   global:
     - GH_REF: github.com/scikit-image/docs.git
-    - secure: "h25sS+tTrt1Ab8LzCFmw4nGDY7uKh4vkQ57m7KwVTua0jnI2D/mUrSiwuERF07F0w5xEoICLDUP/9P74g0JuUwSJcnyIK61lNfGXW0WLj/fMWp0iB2cOnFTTJYpUKlEmHooGVY4qqYVVAG3gaiB8s0ElPsSn5v+zoVmzq1BGark="
+    - secure: "Z8uxAGrFb6yNw/savI7YvA5/BfkVKVGD3HUkDSXamotJAvUKMjIlWnzLc7d9S7PY99FRENgRYaNw4fzZqwJ91hDITcl1/wk6ux1j778O8kUQZayzdqcJG8KpfBsy1vJ4fl4uDGlSmUP413rR3R3dvvgJzIpCLy2qiQR/xujrGvs="
 
 notifications:
   webhooks:
@@ -35,26 +35,49 @@ notifications:
     on_failure: always  # options: [always|never|change] default: always
     on_start: false     # default: false
 
-python:
-  - 2.6
-  - 2.7
-  - 3.3
-  - 3.4
-  - 3.5
+matrix:
+  include:
+    - os: linux
+      python: 2.7
+      env: PIP_FLAGS="--pre"
+    - os: linux
+      python: 2.7
+      env: WITH_PYAMG=1 MINIMUM_REQUIREMENTS=1 WITH_QT=1
+    - os: linux
+      python: 3.4
+      env: OPTIONAL_DEPS=1 WITH_PYSIDE=1
+    - os: linux
+      python: 3.5
+    - os: linux
+      python: 3.5
+      env: PIP_FLAGS="--pre"
+    - os: linux
+      python: 3.6
+    - os: osx
+      osx_image: xcode7.3
+      language: objective-c
+      env: TRAVIS_PYTHON_VERSION=3.5
 
 before_install:
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source tools/travis_osx_install.sh ; fi
     - ccache -s
     - export PATH=/usr/lib/ccache:${PATH}
+    # Attempt to fix bug making virtualenvs for Python 3.6
+    - python -m pip install -U pip
+    - pip install -U virtualenv
     - source tools/travis_before_install.sh
     - which python; python --version
-    - python check_bento_build.py
+    - tools/check_bento_build.py
     - tools/build_versions.py
+    - tools/check_sdist.py
 
 install:
+    - section build
     - python setup.py develop
+    - section_end build
 
 script: tools/travis_script.sh
 
 after_success:
-    - coveralls
+    - codecov
     - bash tools/deploy_docs.sh

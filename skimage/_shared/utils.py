@@ -3,9 +3,11 @@ import functools
 import sys
 import numpy as np
 import types
+import numbers
 
 import six
 
+from ..util import img_as_float
 from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
@@ -32,20 +34,27 @@ class deprecated(object):
     behavior : {'warn', 'raise'}
         Behavior during call to deprecated function: 'warn' = warn user that
         function is deprecated; 'raise' = raise error.
+    removed_version : str
+        The package version in which the deprecated function will be removed.
     """
 
-    def __init__(self, alt_func=None, behavior='warn'):
+    def __init__(self, alt_func=None, behavior='warn', removed_version=None):
         self.alt_func = alt_func
         self.behavior = behavior
+        self.removed_version = removed_version
 
     def __call__(self, func):
 
         alt_msg = ''
         if self.alt_func is not None:
             alt_msg = ' Use ``%s`` instead.' % self.alt_func
+        rmv_msg = ''
+        if self.removed_version is not None:
+            rmv_msg = (' and will be removed in version %s' %
+                       self.removed_version)
 
-        msg = 'Call to deprecated function ``%s``.' % func.__name__
-        msg += alt_msg
+        msg = ('Function ``%s`` is deprecated' % func.__name__ +
+               rmv_msg + '.' + alt_msg)
 
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
@@ -146,7 +155,7 @@ def safe_as_int(val, atol=1e-3):
 
 def assert_nD(array, ndim, arg_name='image'):
     """
-    Verify an array meets the desired ndims.
+    Verify an array meets the desired ndims and array isn't empty.
 
     Parameters
     ----------
@@ -159,22 +168,14 @@ def assert_nD(array, ndim, arg_name='image'):
 
     """
     array = np.asanyarray(array)
-    msg = "The parameter `%s` must be a %s-dimensional array"
+    msg_incorrect_dim = "The parameter `%s` must be a %s-dimensional array"
+    msg_empty_array = "The parameter `%s` cannot be an empty array"
     if isinstance(ndim, int):
         ndim = [ndim]
+    if array.size == 0:
+        raise ValueError(msg_empty_array % (arg_name))
     if not array.ndim in ndim:
-        raise ValueError(msg % (arg_name, '-or-'.join([str(n) for n in ndim])))
-
-
-def _mode_deprecations(mode):
-    """Used to update deprecated mode names in
-    `skimage._shared.interpolation.pyx`."""
-    if mode.lower() == 'nearest':
-        warn(skimage_deprecation(
-            "Mode 'nearest' has been renamed to 'edge'. Mode 'nearest' will be "
-            "removed in a future release."))
-        mode = 'edge'
-    return mode
+        raise ValueError(msg_incorrect_dim % (arg_name, '-or-'.join([str(n) for n in ndim])))
 
 
 def copy_func(f, name=None):
@@ -191,3 +192,54 @@ def copy_func(f, name=None):
     return types.FunctionType(six.get_function_code(f),
                               six.get_function_globals(f), name or f.__name__,
                               six.get_function_defaults(f), six.get_function_closure(f))
+
+
+def check_random_state(seed):
+    """Turn seed into a `np.random.RandomState` instance.
+
+    Parameters
+    ----------
+    seed : None, int or np.random.RandomState
+           If `seed` is None, return the RandomState singleton used by `np.random`.
+           If `seed` is an int, return a new RandomState instance seeded with `seed`.
+           If `seed` is already a RandomState instance, return it.
+
+    Raises
+    ------
+    ValueError
+        If `seed` is of the wrong type.
+
+    """
+    # Function originally from scikit-learn's module sklearn.utils.validation
+    if seed is None or seed is np.random:
+        return np.random.mtrand._rand
+    if isinstance(seed, (numbers.Integral, np.integer)):
+        return np.random.RandomState(seed)
+    if isinstance(seed, np.random.RandomState):
+        return seed
+    raise ValueError('%r cannot be used to seed a numpy.random.RandomState'
+                     ' instance' % seed)
+
+
+def convert_to_float(image, preserve_range):
+    """Convert input image to double image with the appropriate range.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    preserve_range : bool
+        Determines if the range of the image should be kept or transformed
+        using img_as_float.
+
+    Returns
+    -------
+    image : ndarray
+        Transformed version of the input.
+    """
+    if preserve_range:
+        image = image.astype(np.double)
+    else:
+        image = img_as_float(image)
+    return image
+

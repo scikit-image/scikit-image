@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import ndimage as ndi
 from numpy.testing import (assert_equal,
                            assert_almost_equal,
                            assert_raises)
@@ -6,11 +7,18 @@ from numpy.testing import (assert_equal,
 import skimage
 from skimage import data
 from skimage._shared._warnings import expected_warnings
-from skimage.filters.thresholding import (threshold_adaptive,
+from skimage.filters.thresholding import (threshold_local,
+                                          threshold_adaptive,
                                           threshold_otsu,
                                           threshold_li,
                                           threshold_yen,
-                                          threshold_isodata)
+                                          threshold_isodata,
+                                          threshold_niblack,
+                                          threshold_sauvola,
+                                          threshold_mean,
+                                          threshold_triangle,
+                                          threshold_minimum,
+                                          _mean_std)
 
 
 class TestSimpleImage():
@@ -43,6 +51,9 @@ class TestSimpleImage():
         image = np.float64(self.image)
         assert 2 <= threshold_li(image) < 3
 
+    def test_li_constant_image(self):
+        assert_raises(ValueError, threshold_li, np.ones((10,10)))
+
     def test_yen(self):
         assert threshold_yen(self.image) == 2
 
@@ -59,7 +70,7 @@ class TestSimpleImage():
         assert threshold_yen(image) == 127
 
     def test_yen_binary(self):
-        image = np.zeros([2,256], dtype=np.uint8)
+        image = np.zeros([2, 256], dtype=np.uint8)
         image[0] = 255
         assert threshold_yen(image) < 1
 
@@ -94,6 +105,17 @@ class TestSimpleImage():
         assert all(0.49 < threshold_isodata(imfloat, nbins=1024,
                                             return_all=True))
 
+    def test_threshold_local_equals_adaptive(self):
+        def func(arr):
+            return arr.sum() / arr.shape[0]
+        with expected_warnings(['deprecated', 'return value']):
+            thresholded_original = threshold_adaptive(self.image, 3,
+                                                      method='generic',
+                                                      param=func)
+        threshold_new = threshold_local(self.image, 3, method='generic',
+                                        param=func)
+        assert_equal(thresholded_original, self.image > threshold_new)
+
     def test_threshold_adaptive_generic(self):
         def func(arr):
             return arr.sum() / arr.shape[0]
@@ -104,10 +126,12 @@ class TestSimpleImage():
              [False,  True,  True, False, False],
              [ True,  True, False, False, False]]
         )
-        out = threshold_adaptive(self.image, 3, method='generic', param=func)
+        with expected_warnings(['deprecated', 'return value']):
+            out = threshold_adaptive(self.image, 3, method='generic',
+                                     param=func)
         assert_equal(ref, out)
 
-    def test_threshold_adaptive_gaussian(self):
+    def test_threshold_local_gaussian(self):
         ref = np.array(
             [[False, False, False, False,  True],
              [False, False,  True, False,  True],
@@ -115,13 +139,14 @@ class TestSimpleImage():
              [False,  True,  True, False, False],
              [ True,  True, False, False, False]]
         )
-        out = threshold_adaptive(self.image, 3, method='gaussian')
-        assert_equal(ref, out)
+        out = threshold_local(self.image, 3, method='gaussian')
+        assert_equal(ref, self.image > out)
 
-        out = threshold_adaptive(self.image, 3, method='gaussian', param=1.0 / 3.0)
-        assert_equal(ref, out)
+        out = threshold_local(self.image, 3, method='gaussian',
+                              param=1./3.)
+        assert_equal(ref, self.image > out)
 
-    def test_threshold_adaptive_mean(self):
+    def test_threshold_local_mean(self):
         ref = np.array(
             [[False, False, False, False,  True],
              [False, False,  True, False,  True],
@@ -129,10 +154,10 @@ class TestSimpleImage():
              [False,  True,  True, False, False],
              [ True,  True, False, False, False]]
         )
-        out = threshold_adaptive(self.image, 3, method='mean')
-        assert_equal(ref, out)
+        out = threshold_local(self.image, 3, method='mean')
+        assert_equal(ref, self.image > out)
 
-    def test_threshold_adaptive_median(self):
+    def test_threshold_local_median(self):
         ref = np.array(
             [[False, False, False, False,  True],
              [False, False,  True, False, False],
@@ -140,7 +165,31 @@ class TestSimpleImage():
              [False, False,  True,  True, False],
              [False,  True, False, False, False]]
         )
-        out = threshold_adaptive(self.image, 3, method='median')
+        out = threshold_local(self.image, 3, method='median')
+        assert_equal(ref, self.image > out)
+
+    def test_threshold_niblack(self):
+        ref = np.array(
+            [[False, False, False, True, True],
+             [False, True, True, True, True],
+             [False, True, True, True, False],
+             [False, True, True, True, True],
+             [True, True, False, False, False]]
+        )
+        thres = threshold_niblack(self.image, window_size=3, k=0.5)
+        out = self.image > thres
+        assert_equal(ref, out)
+
+    def test_threshold_sauvola(self):
+        ref = np.array(
+            [[False, False, False, True, True],
+             [False, False, True, True, True],
+             [False, False, True, True, False],
+             [False, True, True, True, False],
+             [True, True, False, False, False]]
+        )
+        thres = threshold_sauvola(self.image, window_size=3, k=0.2, r=128)
+        out = self.image > thres
         assert_equal(ref, out)
 
 
@@ -167,7 +216,8 @@ def test_otsu_astro_image():
 
 def test_otsu_one_color_image():
     img = np.ones((10, 10), dtype=np.uint8)
-    assert_raises(TypeError, threshold_otsu, img)
+    assert_raises(ValueError, threshold_otsu, img)
+
 
 def test_li_camera_image():
     camera = skimage.img_as_ubyte(data.camera())
@@ -188,6 +238,7 @@ def test_li_astro_image():
     img = skimage.img_as_ubyte(data.astronaut())
     assert 66 < threshold_li(img) < 68
 
+
 def test_yen_camera_image():
     camera = skimage.img_as_ubyte(data.camera())
     assert 197 < threshold_yen(camera) < 199
@@ -205,7 +256,7 @@ def test_yen_coins_image_as_float():
 
 def test_adaptive_even_block_size_error():
     img = data.camera()
-    assert_raises(ValueError, threshold_adaptive, img, block_size=4)
+    assert_raises(ValueError, threshold_local, img, block_size=4)
 
 
 def test_isodata_camera_image():
@@ -271,6 +322,101 @@ def test_isodata_moon_image_negative_float():
     assert_almost_equal(thresholds,
                         [-13.83789062, -12.84179688, -11.84570312, 22.02148438,
                          23.01757812, 24.01367188, 38.95507812, 39.95117188])
+
+
+def test_threshold_minimum():
+    camera = skimage.img_as_ubyte(data.camera())
+
+    threshold = threshold_minimum(camera)
+    assert_equal(threshold, 76)
+
+    astronaut = skimage.img_as_ubyte(data.astronaut())
+    threshold = threshold_minimum(astronaut)
+    assert_equal(threshold, 114)
+
+
+def test_threshold_minimum_synthetic():
+    img = np.arange(25*25, dtype=np.uint8).reshape((25, 25))
+    img[0:9, :] = 50
+    img[14:25, :] = 250
+
+    threshold = threshold_minimum(img)
+    assert_equal(threshold, 95)
+
+def test_threshold_minimum_failure():
+    img = np.zeros((16*16), dtype=np.uint8)
+    assert_raises(RuntimeError, threshold_minimum, img)
+
+
+def test_mean():
+    img = np.zeros((2, 6))
+    img[:, 2:4] = 1
+    img[:, 4:] = 2
+    assert(threshold_mean(img) == 1.)
+
+
+def test_triangle_uint_images():
+    assert(threshold_triangle(np.invert(data.text())) == 151)
+    assert(threshold_triangle(data.text()) == 104)
+    assert(threshold_triangle(data.coins()) == 80)
+    assert(threshold_triangle(np.invert(data.coins())) == 175)
+
+
+def test_triangle_float_images():
+    text = data.text()
+    int_bins = text.max() - text.min() + 1
+    # Set nbins to match the uint case and threshold as float.
+    assert(round(threshold_triangle(
+        text.astype(np.float), nbins=int_bins)) == 104)
+    # Check that rescaling image to floats in unit interval is equivalent.
+    assert(round(threshold_triangle(text / 255., nbins=int_bins) * 255) == 104)
+    # Repeat for inverted image.
+    assert(round(threshold_triangle(
+        np.invert(text).astype(np.float), nbins=int_bins)) == 151)
+    assert (round(threshold_triangle(
+        np.invert(text) / 255., nbins=int_bins) * 255) == 151)
+
+
+def test_triangle_flip():
+    # Depending on the skewness, the algorithm flips the histogram.
+    # We check that the flip doesn't affect too much the result.
+    img = data.camera()
+    inv_img = np.invert(img)
+    t = threshold_triangle(inv_img)
+    t_inv_img = inv_img > t
+    t_inv_inv_img = np.invert(t_inv_img)
+
+    t = threshold_triangle(img)
+    t_img = img > t
+
+    # Check that most of the pixels are identical
+    # See numpy #7685 for a future np.testing API
+    unequal_pos = np.where(t_img.ravel() != t_inv_inv_img.ravel())
+    assert(len(unequal_pos[0]) / t_img.size < 1e-2)
+
+
+def test_mean_std_2d():
+    image = np.random.rand(256, 256)
+    window_size = 11
+    m, s = _mean_std(image, w=window_size)
+    mean_kernel = np.ones((window_size,) * 2) / window_size**2
+    expected_m = ndi.convolve(image, mean_kernel, mode='mirror')
+    np.testing.assert_allclose(m, expected_m)
+    expected_s = ndi.generic_filter(image, np.std, size=window_size,
+                                    mode='mirror')
+    np.testing.assert_allclose(s, expected_s)
+
+
+def test_mean_std_3d():
+    image = np.random.rand(40, 40, 40)
+    window_size = 5
+    mean_kernel = np.ones((window_size,) * 3) / window_size**3
+    m, s = _mean_std(image, w=window_size)
+    expected_m = ndi.convolve(image, mean_kernel, mode='mirror')
+    np.testing.assert_allclose(m, expected_m)
+    expected_s = ndi.generic_filter(image, np.std, size=window_size,
+                                    mode='mirror')
+    np.testing.assert_allclose(s, expected_s)
 
 
 if __name__ == '__main__':

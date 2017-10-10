@@ -2,7 +2,7 @@
 Adapted code from "Contrast Limited Adaptive Histogram Equalization" by Karel
 Zuiderveld <karel@cv.ruu.nl>, Graphics Gems IV, Academic Press, 1994.
 
-http://tog.acm.org/resources/GraphicsGems/gems.html#gemsvi
+http://tog.acm.org/resources/GraphicsGems/
 
 The Graphics Gems code is copyright-protected.  In other words, you cannot
 claim the text of the code as your own and resell it. Using the code is
@@ -19,14 +19,14 @@ import numpy as np
 from .. import img_as_float, img_as_uint
 from ..color.adapt_rgb import adapt_rgb, hsv_value
 from ..exposure import rescale_intensity
-from .._shared.utils import skimage_deprecation, warn
+
 
 NR_OF_GREY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
 
 
 @adapt_rgb(hsv_value)
-def equalize_adapthist(image, ntiles_x=None, ntiles_y=None, clip_limit=0.01,
-                       nbins=256, kernel_size=None):
+def equalize_adapthist(image, kernel_size=None,
+                       clip_limit=0.01, nbins=256, **kwargs):
     """Contrast Limited Adaptive Histogram Equalization (CLAHE).
 
     An algorithm for local contrast enhancement, that uses histograms computed
@@ -35,25 +35,23 @@ def equalize_adapthist(image, ntiles_x=None, ntiles_y=None, clip_limit=0.01,
 
     Parameters
     ----------
-    image : array-like
+    image : (M, N[, C]) ndarray
         Input image.
-    kernel_size: integer or 2-tuple
-        Defines the shape of contextual regions used in the algorithm.
-        If an integer is given, the shape will be a square of
-        sidelength given by this value.
-    ntiles_x : int, optional (deprecated in favor of ``kernel_size``)
-        Number of tile regions in the X direction (horizontal).
-    ntiles_y : int, optional (deprecated in favor of ``kernel_size``)
-        Number of tile regions in the Y direction (vertical).
-    clip_limit : float: optional
+    kernel_size: integer or list-like, optional
+        Defines the shape of contextual regions used in the algorithm. If
+        iterable is passed, it must have the same number of elements as
+        ``image.ndim`` (without color channel). If integer, it is broadcasted
+        to each `image` dimension. By default, ``kernel_size`` is 1/8 of
+        ``image`` height by 1/8 of its width.
+    clip_limit : float, optional
         Clipping limit, normalized between 0 and 1 (higher values give more
         contrast).
     nbins : int, optional
-        Number of gray bins for histogram ("dynamic range").
+        Number of gray bins for histogram ("data range").
 
     Returns
     -------
-    out : ndarray
+    out : (M, N[, C]) ndarray
         Equalized image.
 
     See Also
@@ -70,25 +68,23 @@ def equalize_adapthist(image, ntiles_x=None, ntiles_y=None, clip_limit=0.01,
 
     References
     ----------
-    .. [1] http://tog.acm.org/resources/GraphicsGems/gems.html#gemsvi
+    .. [1] http://tog.acm.org/resources/GraphicsGems/
     .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
     """
     image = img_as_uint(image)
     image = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
 
-    if ntiles_x is not None or ntiles_y is not None:
-        warn('`ntiles_*` have been deprecated in favor of '
-             '`kernel_size`.  The `ntiles_*` keyword arguments '
-             'will be removed in v0.14', skimage_deprecation)
+    if kwargs:
+        if 'ntiles_x' in kwargs or 'ntiles_y' in kwargs:
+            msg = '`ntiles_*` have been deprecated in favor of `kernel_size`'
+            raise ValueError(msg)
 
     if kernel_size is None:
-        ntiles_x = ntiles_x or 8
-        ntiles_y = ntiles_y or 8
-        kernel_size = (np.round(image.shape[0] / ntiles_y),
-                       np.round(image.shape[1] / ntiles_x))
-
-    if isinstance(kernel_size, numbers.Number):
-        kernel_size = (kernel_size, kernel_size)
+        kernel_size = (image.shape[0] // 8, image.shape[1] // 8)
+    elif isinstance(kernel_size, numbers.Number):
+        kernel_size = (kernel_size,) * image.ndim
+    elif len(kernel_size) != image.ndim:
+        ValueError('Incorrect value of `kernel_size`: {}'.format(kernel_size))
 
     kernel_size = [int(k) for k in kernel_size]
 
@@ -102,18 +98,18 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
 
     Parameters
     ----------
-    image : array-like
+    image : (M, N) ndarray
         Input image.
-    kernel_size: 2-tuple
+    kernel_size: 2-tuple of int
         Defines the shape of contextual regions used in the algorithm.
-    clip_limit : float, optional
+    clip_limit : float
         Normalized clipping limit (higher values give more contrast).
     nbins : int, optional
-        Number of gray bins for histogram ("dynamic range").
+        Number of gray bins for histogram ("data range").
 
     Returns
     -------
-    out : ndarray
+    out : (M, N) ndarray
         Equalized image.
 
     The number of "effective" greylevels in the output image is set by `nbins`;

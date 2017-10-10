@@ -23,9 +23,7 @@ np.random.seed(1234)
 # for compare_ssim
 def test_old_name_deprecated():
     from skimage.measure import structural_similarity
-    with expected_warnings('Call to deprecated function '
-                           '``structural_similarity``. Use '
-                           '``compare_ssim`` instead.'):
+    with expected_warnings('deprecated'):
         ssim_result = structural_similarity(cam, cam_noisy, win_size=31)
 
 
@@ -67,15 +65,34 @@ def test_ssim_grad():
     X = np.random.rand(N, N) * 255
     Y = np.random.rand(N, N) * 255
 
-    f = ssim(X, Y, dynamic_range=255)
-    g = ssim(X, Y, dynamic_range=255, gradient=True)
+    f = ssim(X, Y, data_range=255)
+    g = ssim(X, Y, data_range=255, gradient=True)
 
     assert f < 0.05
+
     assert g[0] < 0.05
     assert np.all(g[1] < 0.05)
 
-    mssim, grad, s = ssim(X, Y, dynamic_range=255, gradient=True, full=True)
+    mssim, grad, s = ssim(X, Y, data_range=255, gradient=True, full=True)
     assert np.all(grad < 0.05)
+
+
+# NOTE: This test is known to randomly fail on some systems (Mac OS X 10.6)
+def test_ssim_dynamic_range_and_data_range():
+    # Tests deprecation of "dynamic_range" in favor of "data_range"
+    N = 30
+    X = np.random.rand(N, N) * 255
+    Y = np.random.rand(N, N) * 255
+
+    with expected_warnings(
+            '`dynamic_range` has been deprecated in favor of '
+            '`data_range`. The `dynamic_range` keyword argument '
+            'will be removed in v0.14'):
+        out2 = ssim(X, Y, dynamic_range=255)
+
+    out1 = ssim(X, Y, data_range=255)
+
+    assert_equal(out1, out2)
 
 
 def test_ssim_dtype():

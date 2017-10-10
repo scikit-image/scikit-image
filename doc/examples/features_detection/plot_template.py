@@ -3,8 +3,8 @@
 Template Matching
 =================
 
-In this example, we use template matching to identify the occurrence of an
-image patch (in this case, a sub-image centered on a single coin). Here, we
+We use template matching to identify the occurrence of an image patch
+(in this case, a sub-image centered on a single coin). Here, we
 return a single match (the exact same coin), so the maximum value in the
 ``match_template`` result corresponds to the coin location. The other coins
 look similar, and thus have local maxima; if you expect multiple matches, you
@@ -38,11 +38,11 @@ ax1 = plt.subplot(1, 3, 1)
 ax2 = plt.subplot(1, 3, 2, adjustable='box-forced')
 ax3 = plt.subplot(1, 3, 3, sharex=ax2, sharey=ax2, adjustable='box-forced')
 
-ax1.imshow(coin)
+ax1.imshow(coin, cmap=plt.cm.gray)
 ax1.set_axis_off()
 ax1.set_title('template')
 
-ax2.imshow(image)
+ax2.imshow(image, cmap=plt.cm.gray)
 ax2.set_axis_off()
 ax2.set_title('image')
 # highlight matched region

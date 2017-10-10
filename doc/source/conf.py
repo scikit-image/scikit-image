@@ -28,13 +28,33 @@ sys.path.append(os.path.join(curpath, '..', 'ext'))
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc',
-              'sphinx.ext.pngmath',
+              'sphinx.ext.imgmath',
               'numpydoc',
               'sphinx.ext.autosummary',
-              'plot2rst',
               'sphinx.ext.intersphinx',
               'sphinx.ext.linkcode',
+              'sphinx_gallery.gen_gallery'
               ]
+
+autosummary_generate = True
+
+#------------------------------------------------------------------------
+# Sphinx-gallery configuration
+#------------------------------------------------------------------------
+
+sphinx_gallery_conf = {
+    'doc_module'        : 'skimage',
+    # path to your examples scripts
+    'examples_dirs' : '../examples',
+    # path where to save gallery generated examples
+    'gallery_dirs'  : 'auto_examples',
+    'mod_example_dir': 'api',
+    'reference_url'     : {
+            'skimage': None,
+            'matplotlib': 'http://matplotlib.org',
+            'numpy': 'http://docs.scipy.org/doc/numpy-1.6.0',
+            'scipy': 'http://docs.scipy.org/doc/scipy-0.11.0/reference',}
+    }
 
 # Determine if the matplotlib has a recent enough version of the
 # plot_directive, otherwise use the local fork.
@@ -57,7 +77,7 @@ else:
 templates_path = ['_templates']
 
 # The suffix of source filenames.
-source_suffix = '.txt'
+source_suffix = '.rst'
 
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
@@ -165,7 +185,8 @@ html_static_path = ['_static']
 
 # Custom sidebar templates, maps document names to template names.
 html_sidebars = {
-   '**': ['navigation.html',
+   '**': ['searchbox.html',
+          'navigation.html',
           'localtoc.html',
           'versions.html'],
 }
@@ -228,7 +249,8 @@ latex_documents = [
 #latex_use_parts = False
 
 # Additional stuff for the LaTeX preamble.
-latex_preamble = r'''
+latex_elements = {}
+latex_elements['preamble'] = r'''
 \usepackage{enumitem}
 \setlistdepth{100}
 
@@ -253,7 +275,7 @@ latex_preamble = r'''
 #latex_appendices = []
 
 # If false, no module index is generated.
-latex_use_modindex = False
+latex_domain_indices = False
 
 # -----------------------------------------------------------------------------
 # Numpy extensions
@@ -307,6 +329,8 @@ intersphinx_mapping = {
               (None, './_intersphinx/scipy-objects.inv')),
     'sklearn': ('http://scikit-learn.org/stable',
                 (None, './_intersphinx/sklearn-objects.inv')),
+    'matplotlib': ('http://matplotlib.org/',
+                   (None, 'http://matplotlib.org/objects.inv'))
 }
 
 # ----------------------------------------------------------------------------
@@ -364,3 +388,5 @@ def linkcode_resolve(domain, info):
     else:
         return ("http://github.com/scikit-image/scikit-image/blob/"
                 "v%s/skimage/%s%s" % (skimage.__version__, fn, linespec))
+
+

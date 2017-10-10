@@ -50,17 +50,28 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
         bg_color = (0, 0, 0)
     bg_color = _rgb_vector([bg_color])
 
-    unique_labels = list(set(label.flat))
-    # Ensure that the background label is in front to match call to `chain`.
-    if bg_label in unique_labels:
-        unique_labels.remove(bg_label)
-    unique_labels.insert(0, bg_label)
+    # map labels to their ranks among all labels from small to large
+    unique_labels, mapped_labels = np.unique(label, return_inverse=True)
+
+    # get rank of bg_label
+    bg_label_rank_list = mapped_labels[label.flat == bg_label]
+
+    # The rank of each label is the index of the color it is matched to in
+    # color cycle. bg_label should always be mapped to the first color, so
+    # its rank must be 0. Other labels should be ranked from small to large
+    # from 1.
+    if len(bg_label_rank_list) > 0:
+        bg_label_rank = bg_label_rank_list[0]
+        mapped_labels[mapped_labels < bg_label_rank] += 1
+        mapped_labels[label.flat == bg_label] = 0
+    else:
+        mapped_labels += 1
 
     # Modify labels and color cycle so background color is used only once.
     color_cycle = itertools.cycle(colors)
     color_cycle = itertools.chain(bg_color, color_cycle)
 
-    return unique_labels, color_cycle
+    return mapped_labels, color_cycle
 
 
 def label2rgb(label, image=None, colors=None, alpha=0.3,
@@ -165,19 +176,22 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         new_type = np.uint8
     label = label.astype(new_type)
 
-    unique_labels, color_cycle = _match_label_with_color(label, colors,
-                                                         bg_label, bg_color)
+    mapped_labels_flat, color_cycle = _match_label_with_color(label, colors,
+                                                              bg_label, bg_color)
 
-    if len(unique_labels) == 0:
+    if len(mapped_labels_flat) == 0:
         return image
 
-    dense_labels = range(max(unique_labels) + 1)
+    dense_labels = range(max(mapped_labels_flat) + 1)
+
     label_to_color = np.array([c for i, c in zip(dense_labels, color_cycle)])
 
-    result = label_to_color[label] * alpha + image * (1 - alpha)
+    mapped_labels = label
+    mapped_labels.flat = mapped_labels_flat
+    result = label_to_color[mapped_labels] * alpha + image * (1 - alpha)
 
     # Remove background label if its color was not specified.
-    remove_background = bg_label in unique_labels and bg_color is None
+    remove_background = 0 in mapped_labels_flat and bg_color is None
     if remove_background:
         result[label == bg_label] = image[label == bg_label]
 

@@ -1,8 +1,6 @@
 import numpy as np
 from numpy.testing import assert_array_equal, assert_raises
 from skimage import data
-from skimage import transform as tf
-from skimage.color import rgb2gray
 from skimage.feature import BRIEF, corner_peaks, corner_harris
 from skimage._shared.testing import test_parallel
 

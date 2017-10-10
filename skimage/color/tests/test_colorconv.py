@@ -37,6 +37,11 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            xyz2luv, luv2xyz,
                            luv2rgb, rgb2luv,
                            lab2lch, lch2lab,
+                           rgb2yuv, yuv2rgb,
+                           rgb2yiq, yiq2rgb,
+                           rgb2ypbpr, ypbpr2rgb,
+                           rgb2ycbcr, ycbcr2rgb,
+                           rgba2rgb,
                            guess_spatial_dimensions
                            )
 
@@ -63,6 +68,9 @@ class TestColorconv(TestCase):
 
     img_rgb = imread(os.path.join(data_dir, 'color.png'))
     img_grayscale = imread(os.path.join(data_dir, 'camera.png'))
+    img_rgba = np.array([[[0, 0.5, 1, 0],
+                          [0, 0.5, 1, 1],
+                          [0, 0.5, 1, 0.5]]]).astype(np.float)
 
     colbars = np.array([[1, 1, 0, 0, 1, 1, 0, 0],
                         [1, 1, 1, 1, 0, 0, 0, 0],
@@ -90,6 +98,22 @@ class TestColorconv(TestCase):
                           [[32.303, -9.400, -130.358]],   # blue
                           [[46.228, -43.774, 56.589]],   # green
                           ])
+
+    # RGBA to RGB
+    def test_rgba2rgb_conversion(self):
+        rgba = self.img_rgba
+        rgb = rgba2rgb(rgba)
+        expected = np.array([[[1, 1, 1],
+                              [0, 0.5, 1],
+                              [0.5, 0.75, 1]]]).astype(np.float)
+        self.assertEqual(rgb.shape, expected.shape)
+        assert_almost_equal(rgb, expected)
+
+    def test_rgba2rgb_error_grayscale(self):
+        self.assertRaises(ValueError, rgba2rgb, self.img_grayscale)
+
+    def test_rgba2rgb_error_rgb(self):
+        self.assertRaises(ValueError, rgba2rgb, self.img_rgb)
 
     # RGB to HSV
     def test_rgb2hsv_conversion(self):
@@ -437,6 +461,33 @@ class TestColorconv(TestCase):
     def _get_lab0(self):
         rgb = img_as_float(self.img_rgb[:1, :1, :])
         return rgb2lab(rgb)[0, 0, :]
+
+    def test_yuv(self):
+        rgb = np.array([[[1.0, 1.0, 1.0]]])
+        assert_array_almost_equal(rgb2yuv(rgb), np.array([[[1, 0, 0]]]))
+        assert_array_almost_equal(rgb2yiq(rgb), np.array([[[1, 0, 0]]]))
+        assert_array_almost_equal(rgb2ypbpr(rgb), np.array([[[1, 0, 0]]]))
+        assert_array_almost_equal(rgb2ycbcr(rgb), np.array([[[235, 128, 128]]]))
+        rgb = np.array([[[0.0, 1.0, 0.0]]])
+        assert_array_almost_equal(rgb2yuv(rgb), np.array([[[0.587, -0.28886916, -0.51496512]]]))
+        assert_array_almost_equal(rgb2yiq(rgb), np.array([[[0.587, -0.27455667, -0.52273617]]]))
+        assert_array_almost_equal(rgb2ypbpr(rgb), np.array([[[0.587, -0.331264, -0.418688]]]))
+        assert_array_almost_equal(rgb2ycbcr(rgb), np.array([[[144.553,   53.797,   34.214]]]))
+
+    def test_yuv_roundtrip(self):
+        img_rgb = img_as_float(self.img_rgb)[::16, ::16]
+        assert_array_almost_equal(yuv2rgb(rgb2yuv(img_rgb)), img_rgb)
+        assert_array_almost_equal(yiq2rgb(rgb2yiq(img_rgb)), img_rgb)
+        assert_array_almost_equal(ypbpr2rgb(rgb2ypbpr(img_rgb)), img_rgb)
+        assert_array_almost_equal(ycbcr2rgb(rgb2ycbcr(img_rgb)), img_rgb)
+
+    def test_rgb2yiq_conversion(self):
+        rgb = img_as_float(self.img_rgb)[::16, ::16]
+        yiq = rgb2yiq(rgb).reshape(-1, 3)
+        gt = np.array([colorsys.rgb_to_yiq(pt[0], pt[1], pt[2])
+                       for pt in rgb.reshape(-1, 3)]
+                      )
+        assert_almost_equal(yiq, gt, decimal=2)
 
 
 def test_gray2rgb():

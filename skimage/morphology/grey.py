@@ -5,7 +5,7 @@ import functools
 import numpy as np
 from scipy import ndimage as ndi
 from .misc import default_selem
-from ..util import pad, crop
+from ..util import crop
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
            'black_tophat']
@@ -75,7 +75,7 @@ def _invert_selem(selem):
 
     References
     ----------
-    [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285
+    .. [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285
     """
     inverted = selem[(slice(None, None, -1),) * selem.ndim]
     return inverted
@@ -115,7 +115,7 @@ def pad_for_eccentric_selems(func):
                 axis_pad_width = 0
             pad_widths.append((axis_pad_width,) * 2)
         if padding:
-            image = pad(image, pad_widths, mode='edge')
+            image = np.pad(image, pad_widths, mode='edge')
             out_temp = np.empty_like(image)
         else:
             out_temp = out
@@ -157,7 +157,7 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
     Notes
     -----
     For ``uint8`` (and ``uint16`` up to a certain bit-depth) data, the
-    lower algorithm complexity makes the `skimage.filter.rank.minimum`
+    lower algorithm complexity makes the `skimage.filters.rank.minimum`
     function more efficient for larger images and structuring elements.
 
     Examples
@@ -217,7 +217,7 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
     Notes
     -----
     For `uint8` (and `uint16` up to a certain bit-depth) data, the lower
-    algorithm complexity makes the `skimage.filter.rank.maximum` function more
+    algorithm complexity makes the `skimage.filters.rank.maximum` function more
     efficient for larger images and structuring elements.
 
     Examples
@@ -427,8 +427,8 @@ def black_tophat(image, selem=None, out=None):
 
     Returns
     -------
-    opening : array, same shape and type as `image`
-       The result of the black top filter.
+    out : array, same shape and type as `image`
+        The result of the morphological black top hat.
 
     Examples
     --------

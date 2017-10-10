@@ -3,9 +3,9 @@
 Contour finding
 ===============
 
-``skimage.measure.find_contours`` uses a marching squares method to find
-constant valued contours in an image.  Array values are linearly interpolated
-to provide better precision of the output contours.  Contours which intersect
+We use a marching squares method to find constant valued contours in an image.
+In ``skimage.measure.find_contours``, array values are linearly interpolated
+to provide better precision of the output contours. Contours which intersect
 the image edge are open; all others are closed.
 
 The `marching squares algorithm

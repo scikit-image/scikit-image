@@ -1,4 +1,5 @@
-from numpy.testing import assert_array_equal, assert_equal, assert_raises
+from numpy.testing import assert_array_equal, assert_equal, assert_raises, \
+    assert_almost_equal
 import numpy as np
 from skimage._shared.testing import test_parallel
 
@@ -6,6 +7,7 @@ from skimage.draw import (set_color, line, line_aa, polygon, polygon_perimeter,
                           circle, circle_perimeter, circle_perimeter_aa,
                           ellipse, ellipse_perimeter,
                           _bezier_segment, bezier_curve)
+from skimage.measure import regionprops
 
 
 def test_set_color():
@@ -116,8 +118,9 @@ def test_line_aa_diagonal():
     # Check that each pixel belonging to line,
     # also belongs to line_aa
     r, c = line(0, 0, 9, 6)
-    for x, y in zip(r, c):
-        assert_equal(img[r, c], 1)
+    for r_i, c_i in zip(r, c):
+        assert_equal(img[r_i, c_i], 1)
+
 
 def test_line_equal_aliasing_horizontally_vertically():
     img0 = np.zeros((25, 25))
@@ -524,6 +527,31 @@ def test_ellipse_negative():
     assert_array_equal(cc, cc_ - 5)
 
 
+def test_ellipse_rotation_symmetry():
+    img1 = np.zeros((150, 150), dtype=np.uint8)
+    img2 = np.zeros((150, 150), dtype=np.uint8)
+    for angle in range(0, 180, 15):
+        img1.fill(0)
+        rr, cc = ellipse(80, 70, 60, 40, rotation=np.deg2rad(angle))
+        img1[rr, cc] = 1
+        img2.fill(0)
+        rr, cc = ellipse(80, 70, 60, 40, rotation=np.deg2rad(angle + 180))
+        img2[rr, cc] = 1
+        assert_array_equal(img1, img2)
+
+
+def test_ellipse_rotated():
+    img = np.zeros((1000, 1200), dtype=np.uint8)
+    for rot in range(0, 180, 10):
+        img.fill(0)
+        angle = np.deg2rad(rot)
+        rr, cc = ellipse(500, 600, 200, 400, rotation=angle)
+        img[rr, cc] = 1
+        # estimate orientation of ellipse
+        angle_estim = np.round(regionprops(img)[0].orientation, 3) % (np.pi / 2)
+        assert_almost_equal(angle_estim, angle % (np.pi / 2), 2)
+
+
 def test_ellipse_perimeter_dot_zeroangle():
     # dot, angle == 0
     img = np.zeros((30, 15), 'uint8')
@@ -601,7 +629,7 @@ def test_ellipse_perimeter_nzeroangle():
     img[rr, cc] = 1
     img_ = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -647,27 +675,23 @@ def test_ellipse_perimeter_shape():
 
 def test_bezier_segment_straight():
     image = np.zeros((200, 200), dtype=int)
-    x0 = 50
-    y0 = 50
-    x1 = 150
-    y1 = 50
-    x2 = 150
-    y2 = 150
-    rr, cc = _bezier_segment(x0, y0, x1, y1, x2, y2, 0)
+    r0, r1, r2 = 50, 150, 150
+    c0, c1, c2 = 50, 50, 150
+    rr, cc = _bezier_segment(r0, c0, r1, c1, r2, c2, 0)
     image[rr, cc] = 1
 
     image2 = np.zeros((200, 200), dtype=int)
-    rr, cc = line(x0, y0, x2, y2)
+    rr, cc = line(r0, c0, r2, c2)
     image2[rr, cc] = 1
     assert_array_equal(image, image2)
 
 
 def test_bezier_segment_curved():
     img = np.zeros((25, 25), 'uint8')
-    x1, y1 = 20, 20
-    x2, y2 = 20, 2
-    x3, y3 = 2, 2
-    rr, cc = _bezier_segment(x1, y1, x2, y2, x3, y3, 1)
+    r0, c0 = 20, 20
+    r1, c1 = 20, 2
+    r2, c2 = 2, 2
+    rr, cc = _bezier_segment(r0, c0, r1, c1, r2, c2, 1)
     img[rr, cc] = 1
     img_ = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -696,37 +720,34 @@ def test_bezier_segment_curved():
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
     )
-    assert_equal(img[x1, y1], 1)
-    assert_equal(img[x3, y3], 1)
+    assert_equal(img[r0, c0], 1)
+    assert_equal(img[r2, c2], 1)
     assert_array_equal(img, img_)
 
 
 def test_bezier_curve_straight():
     image = np.zeros((200, 200), dtype=int)
-    x0 = 50
-    y0 = 50
-    x1 = 150
-    y1 = 50
-    x2 = 150
-    y2 = 150
-    rr, cc = bezier_curve(x0, y0, x1, y1, x2, y2, 0)
-    image [rr, cc] = 1
+    r0, c0 = 50, 50
+    r1, c1 = 150, 50
+    r2, c2 = 150, 150
+    rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 0)
+    image[rr, cc] = 1
 
     image2 = np.zeros((200, 200), dtype=int)
-    rr, cc = line(x0, y0, x2, y2)
-    image2 [rr, cc] = 1
+    rr, cc = line(r0, c0, r2, c2)
+    image2[rr, cc] = 1
     assert_array_equal(image, image2)
 
 
 def test_bezier_curved_weight_eq_1():
     img = np.zeros((23, 8), 'uint8')
-    x1, y1 = (1, 1)
-    x2, y2 = (11, 11)
-    x3, y3 = (21, 1)
-    rr, cc = bezier_curve(x1, y1, x2, y2, x3, y3, 1)
+    r0, c0 = 1, 1
+    r1, c1 = 11, 11
+    r2, c2 = 21, 1
+    rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 1)
     img[rr, cc] = 1
-    assert_equal(img[x1, y1], 1)
-    assert_equal(img[x3, y3], 1)
+    assert_equal(img[r0, c0], 1)
+    assert_equal(img[r2, c2], 1)
     img_ = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0],
          [0, 1, 0, 0, 0, 0, 0, 0],
@@ -757,13 +778,13 @@ def test_bezier_curved_weight_eq_1():
 
 def test_bezier_curved_weight_neq_1():
     img = np.zeros((23, 10), 'uint8')
-    x1, y1 = (1, 1)
-    x2, y2 = (11, 11)
-    x3, y3 = (21, 1)
-    rr, cc = bezier_curve(x1, y1, x2, y2, x3, y3, 2)
+    r0, c0 = 1, 1
+    r1, c1 = 11, 11
+    r2, c2 = 21, 1
+    rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 2)
     img[rr, cc] = 1
-    assert_equal(img[x1, y1], 1)
-    assert_equal(img[x3, y3], 1)
+    assert_equal(img[r0, c0], 1)
+    assert_equal(img[r2, c2], 1)
     img_ = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -794,17 +815,17 @@ def test_bezier_curved_weight_neq_1():
 
 def test_bezier_curve_shape():
     img = np.zeros((15, 20), 'uint8')
-    x1, y1 = (1, 5)
-    x2, y2 = (6, 11)
-    x3, y3 = (1, 14)
-    rr, cc = bezier_curve(x1, y1, x2, y2, x3, y3, 2, shape=(15, 20))
+    r0, c0 = 1, 5
+    r1, c1 = 6, 11
+    r2, c2 = 1, 14
+    rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 2, shape=(15, 20))
     img[rr, cc] = 1
     shift = 5
     img_ = np.zeros((15 + 2 * shift, 20), 'uint8')
-    x1, y1 = (1 + shift, 5)
-    x2, y2 = (6 + shift, 11)
-    x3, y3 = (1 + shift, 14)
-    rr, cc = bezier_curve(x1, y1, x2, y2, x3, y3, 2, shape=None)
+    r0, c0 = 1 + shift, 5
+    r1, c1 = 6 + shift, 11
+    r2, c2 = 1 + shift, 14
+    rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 2, shape=None)
     img_[rr, cc] = 1
     assert_array_equal(img, img_[shift:-shift, :])
 

@@ -53,7 +53,7 @@ def doctest_skip_parser(func):
         >>> something # skip if HAVE_BMODULE
 
     This decorator will evaluate the expression after ``skip if``.  If this
-    evaluates to True, then the comment is replaced by ``# doctest: +SKIP``.  If
+    evaluates to True, then the comment is replaced by ``# doctest: +SKIP``. If
     False, then the comment is just removed. The expression is evaluated in the
     ``globals`` scope of `func`.
 
@@ -90,7 +90,7 @@ def doctest_skip_parser(func):
 
 def roundtrip(img, plugin, suffix):
     """Save and read an image using a specified plugin"""
-    if not '.' in suffix:
+    if '.' not in suffix:
         suffix = '.' + suffix
     temp_file = NamedTemporaryFile(suffix=suffix, delete=False)
     fname = temp_file.name
@@ -192,7 +192,7 @@ def setup_test():
 
     from scipy import signal, ndimage, special, optimize, linalg
     from scipy.io import loadmat
-    from skimage import viewer, filter
+    from skimage import viewer
 
     np.random.seed(0)
 
@@ -209,6 +209,9 @@ def teardown_test():
 
 def test_parallel(num_threads=2):
     """Decorator to run the same function multiple times in parallel.
+
+    This decorator is useful to ensure that separate threads execute
+    concurrently and correctly while releasing the GIL.
 
     Parameters
     ----------

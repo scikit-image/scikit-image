@@ -69,21 +69,18 @@ for ax, values, name in zip(axes, binary_patterns, titles):
     plot_lbp_model(ax, values)
     ax.set_title(name)
 
-"""
-.. image:: PLOT2RST.current_figure
-
-The figure above shows example results with black (or white) representing
-pixels that are less (or more) intense than the central pixel. When surrounding
-pixels are all black or all white, then that image region is flat (i.e.
-featureless). Groups of continuous black or white pixels are considered
-"uniform" patterns that can be interpreted as corners or edges. If pixels
-switch back-and-forth between black and white pixels, the pattern is considered
-"non-uniform".
-
-When using LBP to detect texture, you measure a collection of LBPs over an
-image patch and look at the distribution of these LBPs. Lets apply LBP to
-a brick texture.
-"""
+######################################################################
+# The figure above shows example results with black (or white) representing
+# pixels that are less (or more) intense than the central pixel. When
+# surrounding pixels are all black or all white, then that image region is
+# flat (i.e. featureless). Groups of continuous black or white pixels are
+# considered "uniform" patterns that can be interpreted as corners or edges.
+# If pixels switch back-and-forth between black and white pixels, the pattern
+# is considered "non-uniform".
+#
+# When using LBP to detect texture, you measure a collection of LBPs over an
+# image patch and look at the distribution of these LBPs. Lets apply LBP to a
+# brick texture.
 
 from skimage.transform import rotate
 from skimage.feature import local_binary_pattern
@@ -110,7 +107,7 @@ lbp = local_binary_pattern(image, n_points, radius, METHOD)
 
 
 def hist(ax, lbp):
-    n_bins = lbp.max() + 1
+    n_bins = int(lbp.max() + 1)
     return ax.hist(lbp.ravel(), normed=True, bins=n_bins, range=(0, n_bins),
                    facecolor='0.5')
 
@@ -145,16 +142,13 @@ for ax in ax_img:
     ax.axis('off')
 
 
-"""
-.. image:: PLOT2RST.current_figure
-
-The above plot highlights flat, edge-like, and corner-like regions of the
-image.
-
-The histogram of the LBP result is a good measure to classify textures. Here,
-we test the histogram distributions against each other using the
-Kullback-Leibler-Divergence.
-"""
+######################################################################
+# The above plot highlights flat, edge-like, and corner-like regions of the
+# image.
+#
+# The histogram of the LBP result is a good measure to classify textures.
+# Here, we test the histogram distributions against each other using the
+# Kullback-Leibler-Divergence.
 
 # settings for LBP
 radius = 2
@@ -172,7 +166,7 @@ def match(refs, img):
     best_score = 10
     best_name = None
     lbp = local_binary_pattern(img, n_points, radius, METHOD)
-    n_bins = lbp.max() + 1
+    n_bins = int(lbp.max() + 1)
     hist, _ = np.histogram(lbp, normed=True, bins=n_bins, range=(0, n_bins))
     for name, ref in refs.items():
         ref_hist, _ = np.histogram(ref, normed=True, bins=n_bins,
@@ -221,9 +215,5 @@ ax5.set_xlabel('Uniform LBP values')
 ax3.imshow(wall)
 ax3.axis('off')
 hist(ax6, refs['wall'])
-
-"""
-.. image:: PLOT2RST.current_figure
-"""
 
 plt.show()

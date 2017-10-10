@@ -2,9 +2,10 @@ from __future__ import division
 
 import numpy as np
 from ..util.dtype import dtype_range
+from .._shared.utils import skimage_deprecation, warn
 
-__all__ = ['compare_mse', 
-           'compare_nrmse', 
+__all__ = ['compare_mse',
+           'compare_nrmse',
            'compare_psnr',
            ]
 
@@ -91,7 +92,7 @@ def compare_nrmse(im_true, im_test, norm_type='Euclidean'):
     return np.sqrt(compare_mse(im_true, im_test)) / denom
 
 
-def compare_psnr(im_true, im_test, dynamic_range=None):
+def compare_psnr(im_true, im_test, data_range=None, dynamic_range=None):
     """ Compute the peak signal to noise ratio (PSNR) for an image.
 
     Parameters
@@ -100,8 +101,8 @@ def compare_psnr(im_true, im_test, dynamic_range=None):
         Ground-truth image.
     im_test : ndarray
         Test image.
-    dynamic_range : int
-        The dynamic range of the input image (distance between minimum and
+    data_range : int
+        The data range of the input image (distance between minimum and
         maximum possible values).  By default, this is estimated from the image
         data-type.
 
@@ -116,20 +117,26 @@ def compare_psnr(im_true, im_test, dynamic_range=None):
 
     """
     _assert_compatible(im_true, im_test)
-    if dynamic_range is None:
+    if dynamic_range is not None:
+        warn('`dynamic_range` has been deprecated in favor of '
+             '`data_range`. The `dynamic_range` keyword argument '
+             'will be removed in v0.14', skimage_deprecation)
+        data_range = dynamic_range
+
+    if data_range is None:
         dmin, dmax = dtype_range[im_true.dtype.type]
         true_min, true_max = np.min(im_true), np.max(im_true)
         if true_max > dmax or true_min < dmin:
             raise ValueError(
                 "im_true has intensity values outside the range expected for "
-                "its data type.  Please manually specify the dynamic_range")
+                "its data type.  Please manually specify the data_range")
         if true_min >= 0:
             # most common case (255 for uint8, 1 for float)
-            dynamic_range = dmax
+            data_range = dmax
         else:
-            dynamic_range = dmax - dmin
+            data_range = dmax - dmin
 
     im_true, im_test = _as_floats(im_true, im_test)
 
     err = compare_mse(im_true, im_test)
-    return 10 * np.log10((dynamic_range ** 2) / err)
+    return 10 * np.log10((data_range ** 2) / err)

@@ -1,5 +1,6 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_raises, assert_almost_equal
+from numpy.testing import assert_equal, assert_almost_equal, assert_array_less
+from numpy.testing import assert_raises, assert_array_less
 from skimage.measure import LineModelND, CircleModel, EllipseModel, ransac
 from skimage.transform import AffineTransform
 from skimage.measure.fit import _dynamic_max_trials
@@ -32,7 +33,8 @@ def test_line_model_estimate():
     model_est.estimate(data)
 
     # test whether estimated parameters almost equal original parameters
-    x = np.random.rand(100, 2)
+    random_state = np.random.RandomState(1234)
+    x = random_state.rand(100, 2)
     assert_almost_equal(model0.predict(x), model_est.predict(x), 1)
 
 
@@ -75,8 +77,8 @@ def test_line_modelND_estimate():
              10 * np.arange(-100,100)[...,np.newaxis] * model0.params[1])
 
     # add gaussian noise to data
-    np.random.seed(1234)
-    data = data0 + np.random.normal(size=data0.shape)
+    random_state = np.random.RandomState(1234)
+    data = data0 + random_state.normal(size=data0.shape)
 
     # estimate parameters of noisy data
     model_est = LineModelND()
@@ -130,8 +132,8 @@ def test_circle_model_estimate():
     data0 = model0.predict_xy(t)
 
     # add gaussian noise to data
-    np.random.seed(1234)
-    data = data0 + np.random.normal(size=data0.shape)
+    random_state = np.random.RandomState(1234)
+    data = data0 + random_state.normal(size=data0.shape)
 
     # estimate parameters of noisy data
     model_est = CircleModel()
@@ -156,7 +158,6 @@ def test_ellipse_model_invalid_input():
 
 def test_ellipse_model_predict():
     model = EllipseModel()
-    r = 5
     model.params = (0, 0, 5, 10, 0)
     t = np.arange(0, 2 * np.pi, np.pi / 2)
 
@@ -165,22 +166,67 @@ def test_ellipse_model_predict():
 
 
 def test_ellipse_model_estimate():
-    # generate original data without noise
-    model0 = EllipseModel()
-    model0.params = (10, 20, 15, 25, 0)
-    t = np.linspace(0, 2 * np.pi, 100)
-    data0 = model0.predict_xy(t)
+    for angle in range(0, 180, 15):
+        rad = np.deg2rad(angle)
+        # generate original data without noise
+        model0 = EllipseModel()
+        model0.params = (10, 20, 15, 25, rad)
+        t = np.linspace(0, 2 * np.pi, 100)
+        data0 = model0.predict_xy(t)
 
-    # add gaussian noise to data
-    np.random.seed(1234)
-    data = data0 + np.random.normal(size=data0.shape)
+        # add gaussian noise to data
+        random_state = np.random.RandomState(1234)
+        data = data0 + random_state.normal(size=data0.shape)
 
-    # estimate parameters of noisy data
-    model_est = EllipseModel()
-    model_est.estimate(data)
+        # estimate parameters of noisy data
+        model_est = EllipseModel()
+        model_est.estimate(data)
 
-    # test whether estimated parameters almost equal original parameters
-    assert_almost_equal(model0.params, model_est.params, 0)
+        # test whether estimated parameters almost equal original parameters
+        assert_almost_equal(model0.params[:2], model_est.params[:2], 0)
+        res = model_est.residuals(data0)
+        assert_array_less(res, np.ones(res.shape))
+
+
+def test_ellipse_model_estimate_from_data():
+    data = np.array([
+        [264, 854], [265, 875], [268, 863], [270, 857], [275, 905], [285, 915],
+        [305, 925], [324, 934], [335, 764], [336, 915], [345, 925], [345, 945],
+        [354, 933], [355, 745], [364, 936], [365, 754], [375, 745], [375, 735],
+        [385, 736], [395, 735], [394, 935], [405, 727], [415, 736], [415, 727],
+        [425, 727], [426, 929], [435, 735], [444, 933], [445, 735], [455, 724],
+        [465, 934], [465, 735], [475, 908], [475, 726], [485, 753], [485, 728],
+        [492, 762], [495, 745], [491, 910], [493, 909], [499, 904], [505, 905],
+        [504, 747], [515, 743], [516, 752], [524, 855], [525, 844], [525, 885],
+        [533, 845], [533, 873], [535, 883], [545, 874], [543, 864], [553, 865],
+        [553, 845], [554, 825], [554, 835], [563, 845], [565, 826], [563, 855],
+        [563, 795], [565, 735], [573, 778], [572, 815], [574, 804], [575, 665],
+        [575, 685], [574, 705], [574, 745], [575, 875], [572, 732], [582, 795],
+        [579, 709], [583, 805], [583, 854], [586, 755], [584, 824], [585, 655],
+        [581, 718], [586, 844], [585, 915], [587, 905], [594, 824], [593, 855],
+        [590, 891], [594, 776], [596, 767], [593, 763], [603, 785], [604, 775],
+        [603, 885], [605, 753], [605, 655], [606, 935], [603, 761], [613, 802],
+        [613, 945], [613, 965], [615, 693], [617, 665], [623, 962], [624, 972],
+        [625, 995], [633, 673], [633, 965], [633, 683], [633, 692], [633, 954],
+        [634, 1016], [635, 664], [641, 804], [637, 999], [641, 956], [643, 946],
+        [643, 926], [644, 975], [643, 655], [646, 705], [651, 664], [651, 984],
+        [647, 665], [651, 715], [651, 725], [651, 734], [647, 809], [651, 825],
+        [651, 873], [647, 900], [652, 917], [651, 944], [652, 742], [648, 811],
+        [651, 994], [652, 783], [650, 911], [654, 879]])
+
+    # estimate parameters of real data
+    model = EllipseModel()
+    model.estimate(data)
+
+    # test whether estimated parameters are smaller then 1000, so means stable
+    assert_array_less(np.abs(model.params[:4]), np.array([2e3] * 4))
+
+
+def test_ellipse_model_estimate_failers():
+    # estimate parameters of real data
+    model = EllipseModel()
+    assert not model.estimate(np.ones((5, 2)))
+    assert not model.estimate(np.array([[50, 80], [51, 81], [52, 80]]))
 
 
 def test_ellipse_model_residuals():
@@ -193,8 +239,6 @@ def test_ellipse_model_residuals():
 
 
 def test_ransac_shape():
-    np.random.seed(1)
-
     # generate original data without noise
     model0 = CircleModel()
     model0.params = (10, 12, 3)
@@ -208,7 +252,8 @@ def test_ransac_shape():
     data0[outliers[2], :] = (-100, -10)
 
     # estimate parameters of corrupted data
-    model_est, inliers = ransac(data0, CircleModel, 3, 5)
+    model_est, inliers = ransac(data0, CircleModel, 3, 5,
+                                random_state=1)
 
     # test whether estimated parameters equal original parameters
     assert_equal(model0.params, model_est.params)
@@ -217,10 +262,10 @@ def test_ransac_shape():
 
 
 def test_ransac_geometric():
-    np.random.seed(1)
+    random_state = np.random.RandomState(1)
 
     # generate original data without noise
-    src = 100 * np.random.random((50, 2))
+    src = 100 * random_state.random_sample((50, 2))
     model0 = AffineTransform(scale=(0.5, 0.3), rotation=1,
                              translation=(10, 20))
     dst = model0(src)
@@ -232,7 +277,8 @@ def test_ransac_geometric():
     dst[outliers[2]] = (50, 50)
 
     # estimate parameters of corrupted data
-    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20)
+    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20,
+                                random_state=random_state)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.params, model_est.params)
@@ -240,22 +286,20 @@ def test_ransac_geometric():
 
 
 def test_ransac_is_data_valid():
-    np.random.seed(1)
 
     is_data_valid = lambda data: data.shape[0] > 2
     model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
-                            is_data_valid=is_data_valid)
+                            is_data_valid=is_data_valid, random_state=1)
     assert_equal(model, None)
     assert_equal(inliers, None)
 
 
 def test_ransac_is_model_valid():
-    np.random.seed(1)
 
     def is_model_valid(model, data):
         return False
     model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
-                            is_model_valid=is_model_valid)
+                            is_model_valid=is_model_valid, random_state=1)
     assert_equal(model, None)
     assert_equal(inliers, None)
 
