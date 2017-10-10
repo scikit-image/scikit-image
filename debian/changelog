@@ -1,4 +1,4 @@
-skimage (0.13.0-1) UNRELEASED; urgency=medium
+skimage (0.13.1-1) unstable; urgency=medium
 
   [ Michael Hudson-Doyle ]
   * New upstream release (Closes: #868582)
@@ -13,9 +13,9 @@ skimage (0.13.0-1) UNRELEASED; urgency=medium
   * d/control: add dependencies on python{3,}-pywt. python{3,}-numpydoc.
 
   [ Yaroslav Halchenko ]
-  * Adopted the patch provided in #868582
+  * Adopted the patch provided in #868582, progressed to 0.13.1 upstream release
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Tue, 10 Oct 2017 18:24:47 -0400
+ -- Yaroslav Halchenko <debian@onerussian.com>  Tue, 10 Oct 2017 18:26:16 -0400
 
 skimage (0.12.3-2) unstable; urgency=medium
 
