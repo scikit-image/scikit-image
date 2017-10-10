@@ -15,3 +15,4 @@ if [ "${SK_VERSION:0:1}" != 'v' ]; then
 fi
 echo "Trying download / upload of version ${SK_VERSION:1}"
 wheel-uploader -v scikit_image "${SK_VERSION:1}"
+wheel-uploader -v scikit_image -t manylinux1 "${SK_VERSION:1}"

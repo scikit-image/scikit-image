@@ -48,7 +48,7 @@ sphinx_gallery_conf = {
     'examples_dirs' : '../examples',
     # path where to save gallery generated examples
     'gallery_dirs'  : 'auto_examples',
-    'mod_example_dir': 'api',
+    'backreferences_dir': 'api',
     'reference_url'     : {
             'skimage': None,
             'matplotlib': 'http://matplotlib.org',

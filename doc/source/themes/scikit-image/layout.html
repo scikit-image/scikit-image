@@ -89,13 +89,13 @@
         </div>
     </div>
     <div class="row">
-        <div class="span9">
-            {% block body %}{% endblock %}
-        </div>
         <div class="span3">
             {%- for sidebartemplate in sidebars %}
                 {%- include sidebartemplate %}
             {%- endfor %}
+        </div>
+        <div class="span9">
+            {% block body %}{% endblock %}
         </div>
     </div>
     <div class="well footer">
