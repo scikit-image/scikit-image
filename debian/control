@@ -9,21 +9,25 @@ Build-Depends: cython (>= 0.23),
                libjs-twitter-bootstrap,
                python-all-dev (>= 2.6.6-3~),
                python-matplotlib (>= 1.3.1),
+               python-networkx (>= 1.8),
                python-nose,
                python-numpy (>= 1.7.2),
+               python-numpydoc,
                python-pil (>= 1.7.8) | python-imaging,
+               python-pywt,
                python-scipy (>= 0.10),
-               python-networkx (>= 1.8),
                python-setuptools,
                python-six (>= 1.4),
                python-sphinx (>= 1.3.0),
                python3-all-dev,
                python3-matplotlib (>= 1.3.1),
+               python3-networkx (>= 1.8),
                python3-nose,
                python3-numpy (>= 1.7.2),
+               python3-numpydoc,
                python3-pil (>= 1.7.8) | python3-imaging,
+               python3-pywt,
                python3-scipy,
-               python3-networkx (>= 1.8),
                python3-setuptools,
                python3-six (>= 1.3.0),
                xauth,
@@ -37,17 +41,16 @@ X-Python3-Version: >= 3.2
 
 Package: python-skimage
 Architecture: all
-Depends: python-numpy,
+Depends: python-matplotlib (>= 1.3.1),
+         python-networkx (>= 1.8),
+         python-numpy,
+         python-pil (>= 1.7.8) | python-imaging,
          python-scipy (>= 0.10),
          python-six (>= 1.4),
-         python-matplotlib (>= 1.3.1),
-         python-pil (>= 1.7.8) | python-imaging,
-         python-networkx (>= 1.8),
          python-skimage-lib (>= ${source:Version}),
          ${misc:Depends},
          ${python:Depends}
-Recommends: python-nose,
-            python-qt4
+Recommends: python-nose, python-qt4
 Suggests: python-opencv, python-skimage-doc
 Description: Python modules for image processing
  scikit-image is a collection of image processing algorithms for
@@ -58,12 +61,12 @@ Description: Python modules for image processing
 
 Package: python3-skimage
 Architecture: all
-Depends: python3-numpy (>= 1.7.2),
+Depends: python3-matplotlib (>= 1.3.1),
+         python3-networkx (>= 1.8),
+         python3-numpy (>= 1.7.2),
+         python3-pil (>= 1.7.8) | python3-imaging,
          python3-scipy (>= 0.10),
          python3-six (>= 1.4),
-         python3-matplotlib (>= 1.3.1),
-         python3-pil (>= 1.7.8) | python3-imaging,
-         python3-networkx (>= 1.8),
          python3-skimage-lib (>= ${source:Version}),
          ${misc:Depends},
          ${python3:Depends}

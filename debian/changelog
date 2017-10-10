@@ -1,3 +1,22 @@
+skimage (0.13.0-1) UNRELEASED; urgency=medium
+
+  [ Michael Hudson-Doyle ]
+  * New upstream release (Closes: #868582)
+  * d/patches/:
+    - changeset_6807f4ee8f5501703e447f95701190c836deaae1.diff,
+      dask-optional-dep.patch, fix_shape_type.patch, search-html.patch: dropped,
+      applied upstream.
+    - fix-doc-links.patch: updated
+    - skip_tests_failing_on_some_architectures.patch: split into more targetted
+      skip-failing-test-on-i386.patch & skip-failing-test-on-big-endian.patch.
+  * d/rules: CONTRIBUTING.txt has moved.
+  * d/control: add dependencies on python{3,}-pywt. python{3,}-numpydoc.
+
+  [ Yaroslav Halchenko ]
+  * Adopted the patch provided in #868582
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Tue, 10 Oct 2017 18:24:47 -0400
+
 skimage (0.12.3-2) unstable; urgency=medium
 
   * debian/patches
