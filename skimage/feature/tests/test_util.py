@@ -1,8 +1,8 @@
 import numpy as np
 try:
-  import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt
 except ImportError:
-  plt = None
+    plt = None
 from numpy.testing import assert_equal, assert_raises
 
 from skimage.feature.util import (FeatureDetector, DescriptorExtractor,

@@ -73,6 +73,7 @@ function InstallPython ($python_version, $architecture, $python_home) {
     }
 }
 
+
 function RunCommand ($command, $command_args) {
     Write-Host $command $command_args
     Start-Process -FilePath $command -ArgumentList $command_args -Wait -Passthru
@@ -172,9 +173,31 @@ function InstallMinicondaPip ($python_home) {
     }
 }
 
+
+function UpdateConda ($python_home) {
+    $conda_path = $python_home + "\Scripts\conda.exe"
+    Write-Host "Updating conda..."
+    $args = "update --yes conda"
+    Write-Host $conda_path $args
+    Start-Process -FilePath "$conda_path" -ArgumentList $args -Wait -Passthru
+}
+
+
+function InstallCondaPackages ($python_home, $spec) {
+    $conda_path = $python_home + "\Scripts\conda.exe"
+    $args = "install --yes " + $spec
+    Write-Host ("conda " + $args)
+    Start-Process -FilePath "$conda_path" -ArgumentList $args -Wait -Passthru
+}
+
+
 function main () {
-    InstallPython $env:PYTHON_VERSION $env:PYTHON_ARCH $env:PYTHON
-    InstallPip $env:PYTHON
+    #InstallPython $env:PYTHON_VERSION $env:PYTHON_ARCH $env:PYTHON
+    #InstallPip $env:PYTHON
+    InstallMiniconda $env:PYTHON_VERSION $env:PYTHON_ARCH $env:PYTHON
+    InstallMinicondaPip $env:PYTHON
+    UpdateConda $env:PYTHON
+    InstallCondaPackages $env:PYTHON "numpy scipy cython wheel nose msvc_runtime numpydoc"
 }
 
 main

@@ -4,6 +4,13 @@ from multiprocessing import cpu_count
 __all__ = ['apply_parallel']
 
 
+try:
+    import dask.array as da
+    dask_available = True
+except ImportError:
+    dask_available = False
+
+
 def _get_chunks(shape, ncpu):
     """Split the array into equal sized chunks based on the number of
     available processors. The last chunk in each dimension absorbs the
@@ -82,7 +89,9 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
     equivalent `dask` boundary modes 'reflect', 'periodic' and 'nearest',
     respectively.
     """
-    import dask.array as da
+    if not dask_available:
+        raise RuntimeError("Could not import 'dask'.  Please install "
+                           "using 'pip install dask'")
 
     if chunks is None:
         shape = array.shape

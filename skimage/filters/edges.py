@@ -11,7 +11,7 @@ Original author: Lee Kamentsky
 """
 import numpy as np
 from .. import img_as_float
-from .._shared.utils import assert_nD, deprecated
+from .._shared.utils import assert_nD
 from scipy.ndimage import convolve, binary_erosion, generate_binary_structure
 
 from ..restoration.uft import laplacian
@@ -170,69 +170,6 @@ def sobel_v(image, mask=None):
     return _mask_filter_result(result, mask)
 
 
-@deprecated("skimage.filters.sobel_h")
-def hsobel(image, mask=None):
-    """Find the horizontal edges of an image using the Sobel transform.
-
-    Parameters
-    ----------
-
-    image : 2-D array
-        Image to process.
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
-
-    Returns
-    -------
-    output : 2-D array
-        The absolute Sobel edge map.
-
-    Notes
-    -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
-
-      1   2   1
-      0   0   0
-     -1  -2  -1
-
-    """
-    return np.abs(sobel_h(image, mask))
-
-
-@deprecated("skimage.filters.sobel_v")
-def vsobel(image, mask=None):
-    """Find the vertical edges of an image using the Sobel transform.
-
-    Parameters
-    ----------
-    image : 2-D array
-        Image to process
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
-
-    Returns
-    -------
-    output : 2-D array
-        The absolute Sobel edge map.
-
-    Notes
-    -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
-
-      1   0  -1
-      2   0  -2
-      1   0  -1
-
-    """
-    return np.abs(sobel_v(image, mask))
-
-
 def scharr(image, mask=None):
     """Find the edge magnitude using the Scharr transform.
 
@@ -354,78 +291,6 @@ def scharr_v(image, mask=None):
     return _mask_filter_result(result, mask)
 
 
-@deprecated("skimage.filters.scharr_h")
-def hscharr(image, mask=None):
-    """Find the horizontal edges of an image using the Scharr transform.
-
-    Parameters
-    ----------
-    image : 2-D array
-        Image to process.
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
-
-    Returns
-    -------
-    output : 2-D array
-        The absolute Scharr edge map.
-
-    Notes
-    -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
-
-      3   10   3
-      0    0   0
-     -3  -10  -3
-
-    References
-    ----------
-    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical
-           Optimization of Kernel Based Image Derivatives.
-
-    """
-    return np.abs(scharr_h(image, mask))
-
-
-@deprecated("skimage.filters.scharr_v")
-def vscharr(image, mask=None):
-    """Find the vertical edges of an image using the Scharr transform.
-
-    Parameters
-    ----------
-    image : 2-D array
-        Image to process
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
-
-    Returns
-    -------
-    output : 2-D array
-        The absolute Scharr edge map.
-
-    Notes
-    -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
-
-       3   0   -3
-      10   0  -10
-       3   0   -3
-
-    References
-    ----------
-    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical
-           Optimization of Kernel Based Image Derivatives.
-
-    """
-    return np.abs(scharr_v(image, mask))
-
-
 def prewitt(image, mask=None):
     """Find the edge magnitude using the Prewitt transform.
 
@@ -534,68 +399,6 @@ def prewitt_v(image, mask=None):
     return _mask_filter_result(result, mask)
 
 
-@deprecated("skimage.filters.prewitt_h")
-def hprewitt(image, mask=None):
-    """Find the horizontal edges of an image using the Prewitt transform.
-
-    Parameters
-    ----------
-    image : 2-D array
-        Image to process.
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
-
-    Returns
-    -------
-    output : 2-D array
-        The absolute Prewitt edge map.
-
-    Notes
-    -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
-
-      1   1   1
-      0   0   0
-     -1  -1  -1
-
-    """
-    return np.abs(prewitt_h(image, mask))
-
-
-@deprecated("skimage.filters.prewitt_v")
-def vprewitt(image, mask=None):
-    """Find the vertical edges of an image using the Prewitt transform.
-
-    Parameters
-    ----------
-    image : 2-D array
-        Image to process.
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
-
-    Returns
-    -------
-    output : 2-D array
-        The absolute Prewitt edge map.
-
-    Notes
-    -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
-
-      1   0  -1
-      1   0  -1
-      1   0  -1
-
-    """
-    return np.abs(prewitt_v(image, mask))
-
-
 def roberts(image, mask=None):
     """Find the edge magnitude using Roberts' cross operator.
 
@@ -700,71 +503,6 @@ def roberts_neg_diag(image, mask=None):
     return _mask_filter_result(result, mask)
 
 
-@deprecated("skimage.filters.roberts_pos_diag")
-def roberts_positive_diagonal(image, mask=None):
-    """Find the cross edges of an image using Roberts' cross operator.
-
-    The kernel is applied to the input image to produce separate measurements
-    of the gradient component one orientation.
-
-    Parameters
-    ----------
-    image : 2-D array
-        Image to process.
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
-
-    Returns
-    -------
-    output : 2-D array
-        The absolute Robert's edge map.
-
-    Notes
-    -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
-
-      1   0
-      0  -1
-
-    """
-    return np.abs(roberts_pos_diag(image, mask))
-
-
-@deprecated("skimage.filters.roberts_neg_diag")
-def roberts_negative_diagonal(image, mask=None):
-    """Find the cross edges of an image using the Roberts' Cross operator.
-
-    The kernel is applied to the input image to produce separate measurements
-    of the gradient component one orientation.
-
-    Parameters
-    ----------
-    image : 2-D array
-        Image to process.
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
-
-    Returns
-    -------
-    output : 2-D array
-        The absolute Robert's edge map.
-
-    Notes
-    -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
-
-      0   1
-     -1   0
-
-    """
-    return np.abs(roberts_neg_diag(image, mask))
-
 def laplace(image, ksize=3, mask=None):
     """Find the edges of an image using the Laplace operator.
 
@@ -787,7 +525,7 @@ def laplace(image, ksize=3, mask=None):
 
     Notes
     -----
-    The Laplacian operator is generated using the function 
+    The Laplacian operator is generated using the function
     skimage.restoration.uft.laplacian().
 
     """

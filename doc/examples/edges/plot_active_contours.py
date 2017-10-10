@@ -34,7 +34,10 @@ from skimage.segmentation import active_contour
 # Test scipy version, since active contour is only possible
 # with recent scipy version
 import scipy
-scipy_version = list(map(int, scipy.__version__.split('.')))
+split_version = scipy.__version__.split('.')
+if not(split_version[-1].isdigit()): # Remove dev string if present
+        split_version.pop()
+scipy_version = list(map(int, split_version))
 new_scipy = scipy_version[0] > 0 or \
             (scipy_version[0] == 0 and scipy_version[1] >= 14)
 
@@ -64,14 +67,11 @@ if new_scipy:
     ax.set_xticks([]), ax.set_yticks([])
     ax.axis([0, img.shape[1], img.shape[0], 0])
 
-"""
-.. image:: PLOT2RST.current_figure
-
-Here we initialize a straight line between two points, `(5, 136)` and
-`(424, 50)`, and require that the spline has its end points there by giving
-the boundary condition `bc='fixed'`. We furthermore make the algorithm search
-for dark lines by giving a negative `w_line` value.
-"""
+######################################################################
+# Here we initialize a straight line between two points, `(5, 136)` and
+# `(424, 50)`, and require that the spline has its end points there by giving
+# the boundary condition `bc='fixed'`. We furthermore make the algorithm
+# search for dark lines by giving a negative `w_line` value.
 
 img = data.text()
 
@@ -93,7 +93,3 @@ if new_scipy:
     ax.axis([0, img.shape[1], img.shape[0], 0])
 
 plt.show()
-
-"""
-.. image:: PLOT2RST.current_figure
-"""

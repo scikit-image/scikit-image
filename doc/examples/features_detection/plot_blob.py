@@ -36,12 +36,13 @@ bright blobs are detected. The downside is that small blobs (<3px) are not
 detected accurately. See :py:meth:`skimage.feature.blob_doh` for usage.
 """
 
+from math import sqrt
 from skimage import data
 from skimage.feature import blob_dog, blob_log, blob_doh
-from math import sqrt
 from skimage.color import rgb2gray
 
 import matplotlib.pyplot as plt
+
 
 image = data.hubble_deep_field()[0:500, 0:500]
 image_gray = rgb2gray(image)
@@ -62,20 +63,18 @@ titles = ['Laplacian of Gaussian', 'Difference of Gaussian',
           'Determinant of Hessian']
 sequence = zip(blobs_list, colors, titles)
 
-fig, axes = plt.subplots(1, 3, figsize=(14, 4), sharex=True, sharey=True,
+fig, axes = plt.subplots(1, 3, figsize=(9, 3), sharex=True, sharey=True,
                          subplot_kw={'adjustable': 'box-forced'})
-plt.tight_layout()
+ax = axes.ravel()
 
-axes = axes.ravel()
-for blobs, color, title in sequence:
-    ax = axes[0]
-    axes = axes[1:]
-    ax.set_title(title)
-    ax.imshow(image, interpolation='nearest')
-    ax.set_axis_off()
+for idx, (blobs, color, title) in enumerate(sequence):
+    ax[idx].set_title(title)
+    ax[idx].imshow(image, interpolation='nearest')
     for blob in blobs:
         y, x, r = blob
         c = plt.Circle((x, y), r, color=color, linewidth=2, fill=False)
-        ax.add_patch(c)
+        ax[idx].add_patch(c)
+    ax[idx].set_axis_off()
 
+plt.tight_layout()
 plt.show()

@@ -3,12 +3,11 @@
 Straight line Hough transform
 =============================
 
-The Hough transform in its simplest form is a `method to detect straight lines
-<http://en.wikipedia.org/wiki/Hough_transform>`__.
+The Hough transform in its simplest form is a method to detect straight lines.
 
 In the following example, we construct an image with a line intersection. We
-then use the Hough transform to explore a parameter space for straight lines
-that may run through the image.
+then use the `Hough transform  <http://en.wikipedia.org/wiki/Hough_transform>`__.
+to explore a parameter space for straight lines that may run through the image.
 
 Algorithm overview
 ------------------
@@ -18,14 +17,14 @@ Usually, lines are parameterised as :math:`y = mx + c`, with a gradient
 infinity for vertical lines. Instead, we therefore construct a segment
 perpendicular to the line, leading to the origin. The line is represented by
 the length of that segment, :math:`r`, and the angle it makes with the x-axis,
-:math:`\theta`.
+:math:`\\theta`.
 
 The Hough transform constructs a histogram array representing the parameter
-space (i.e., an :math:`M \times N` matrix, for :math:`M` different values of
-the radius and :math:`N` different values of :math:`\theta`).  For each
-parameter combination, :math:`r` and :math:`\theta`, we then find the number of
+space (i.e., an :math:`M \\times N` matrix, for :math:`M` different values of
+the radius and :math:`N` different values of :math:`\\theta`).  For each
+parameter combination, :math:`r` and :math:`\\theta`, we then find the number of
 non-zero pixels in the input image that would fall close to the corresponding
-line, and increment the array at position :math:`(r, \theta)` appropriately.
+line, and increment the array at position :math:`(r, \\theta)` appropriately.
 
 We can think of each non-zero pixel "voting" for potential line candidates. The
 local maxima in the resulting histogram indicates the parameters of the most
@@ -54,81 +53,83 @@ References
        Detect Lines and Curves in Pictures," Comm. ACM, Vol. 15,
        pp. 11-15 (January, 1972)
 """
+import numpy as np
 
-from matplotlib import cm
 from skimage.transform import (hough_line, hough_line_peaks,
                                probabilistic_hough_line)
 from skimage.feature import canny
 from skimage import data
 
-import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import cm
 
-# Constructing test image.
+
+# Constructing test image
 image = np.zeros((100, 100))
 idx = np.arange(25, 75)
 image[idx[::-1], idx] = 255
 image[idx, idx] = 255
 
-# Classic straight-line Hough transform.
+# Classic straight-line Hough transform
 h, theta, d = hough_line(image)
 
-# Generating figure 1.
-fig, (ax0, ax1, ax2) = plt.subplots(1, 3, figsize=(12, 6))
-plt.tight_layout()
+# Generating figure 1
+fig, axes = plt.subplots(1, 3, figsize=(15, 6),
+                         subplot_kw={'adjustable': 'box-forced'})
+ax = axes.ravel()
 
-ax0.imshow(image, cmap=cm.gray)
-ax0.set_title('Input image')
-ax0.set_axis_off()
+ax[0].imshow(image, cmap=cm.gray)
+ax[0].set_title('Input image')
+ax[0].set_axis_off()
 
-ax1.imshow(np.log(1 + h), extent=[np.rad2deg(theta[-1]), np.rad2deg(theta[0]),
-           d[-1], d[0]], cmap=cm.gray, aspect=1/1.5)
-ax1.set_title('Hough transform')
-ax1.set_xlabel('Angles (degrees)')
-ax1.set_ylabel('Distance (pixels)')
-ax1.axis('image')
+ax[1].imshow(np.log(1 + h),
+             extent=[np.rad2deg(theta[-1]), np.rad2deg(theta[0]), d[-1], d[0]],
+             cmap=cm.gray, aspect=1/1.5)
+ax[1].set_title('Hough transform')
+ax[1].set_xlabel('Angles (degrees)')
+ax[1].set_ylabel('Distance (pixels)')
+ax[1].axis('image')
 
-ax2.imshow(image, cmap=cm.gray)
-row1, col1 = image.shape
+ax[2].imshow(image, cmap=cm.gray)
 for _, angle, dist in zip(*hough_line_peaks(h, theta, d)):
     y0 = (dist - 0 * np.cos(angle)) / np.sin(angle)
-    y1 = (dist - col1 * np.cos(angle)) / np.sin(angle)
-    ax2.plot((0, col1), (y0, y1), '-r')
-ax2.axis((0, col1, row1, 0))
-ax2.set_title('Detected lines')
-ax2.set_axis_off()
+    y1 = (dist - image.shape[1] * np.cos(angle)) / np.sin(angle)
+    ax[2].plot((0, image.shape[1]), (y0, y1), '-r')
+ax[2].set_xlim((0, image.shape[1]))
+ax[2].set_ylim((image.shape[0], 0))
+ax[2].set_axis_off()
+ax[2].set_title('Detected lines')
 
-# Line finding using the Probabilistic Hough Transform.
+plt.tight_layout()
+plt.show()
+
+# Line finding using the Probabilistic Hough Transform
 image = data.camera()
 edges = canny(image, 2, 1, 25)
 lines = probabilistic_hough_line(edges, threshold=10, line_length=5,
                                  line_gap=3)
 
-# Generating figure 2.
-fig, (ax0, ax1, ax2) = plt.subplots(1, 3, figsize=(16, 6), sharex=True,
-                                    sharey=True)
-plt.tight_layout()
+# Generating figure 2
+fig, axes = plt.subplots(1, 3, figsize=(15, 5), sharex=True, sharey=True)
+ax = axes.ravel()
 
-ax0.imshow(image, cmap=cm.gray)
-ax0.set_title('Input image')
-ax0.set_axis_off()
-ax0.set_adjustable('box-forced')
+ax[0].imshow(image, cmap=cm.gray)
+ax[0].set_title('Input image')
 
-ax1.imshow(edges, cmap=cm.gray)
-ax1.set_title('Canny edges')
-ax1.set_axis_off()
-ax1.set_adjustable('box-forced')
+ax[1].imshow(edges, cmap=cm.gray)
+ax[1].set_title('Canny edges')
 
-ax2.imshow(edges * 0)
+ax[2].imshow(edges * 0)
 for line in lines:
     p0, p1 = line
-    ax2.plot((p0[0], p1[0]), (p0[1], p1[1]))
+    ax[2].plot((p0[0], p1[0]), (p0[1], p1[1]))
+ax[2].set_xlim((0, image.shape[1]))
+ax[2].set_ylim((image.shape[0], 0))
+ax[2].set_title('Probabilistic Hough')
 
-row2, col2 = image.shape
-ax2.axis((0, col2, row2, 0))
+for a in ax:
+    a.set_axis_off()
+    a.set_adjustable('box-forced')
 
-ax2.set_title('Probabilistic Hough')
-ax2.set_axis_off()
-ax2.set_adjustable('box-forced')
-
+plt.tight_layout()
 plt.show()

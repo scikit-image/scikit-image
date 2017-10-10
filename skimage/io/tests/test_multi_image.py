@@ -24,7 +24,7 @@ class TestMultiImage():
                      MultiImage(paths[1], conserve_memory=False),
                      ImageCollection(paths[0]),
                      ImageCollection(paths[1], conserve_memory=False),
-                     ImageCollection('%s:%s' % (paths[0], paths[1]))]
+                     ImageCollection(os.pathsep.join(paths))]
 
     def test_shapes(self):
         img = self.imgs[-1]

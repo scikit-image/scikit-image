@@ -1,4 +1,3 @@
-
 try:
     import networkx as nx
 except ImportError:
@@ -230,7 +229,7 @@ def _label_all(rag, attr_name):
     attr_name : string
         The attribute to which a unique integer is assigned.
     """
-    node = rag.nodes()[0]
+    node = min(rag.nodes())
     new_label = rag.node[node]['labels'][0]
     for n, d in rag.nodes_iter(data=True):
         d[attr_name] = new_label

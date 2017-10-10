@@ -36,7 +36,7 @@ class ApiDocWriter(object):
 
     def __init__(self,
                  package_name,
-                 rst_extension='.txt',
+                 rst_extension='.rst',
                  package_skip_patterns=None,
                  module_skip_patterns=None,
                  ):

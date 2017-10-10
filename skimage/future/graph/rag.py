@@ -4,12 +4,10 @@ from numpy.lib.stride_tricks import as_strided
 from scipy import ndimage as ndi
 from scipy import sparse
 import math
-from ... import draw, measure, segmentation, util, color
-try:
-    from matplotlib import colors
-    from matplotlib import cm
-except ImportError:
-    pass
+from ... import measure, segmentation, util, color
+from matplotlib import colors, cm
+from matplotlib import pyplot as plt
+from matplotlib.collections import LineCollection
 
 
 def _edge_generator_from_csr(csr_matrix):
@@ -52,8 +50,9 @@ def _edge_generator_from_csr(csr_matrix):
 def min_weight(graph, src, dst, n):
     """Callback to handle merging nodes by choosing minimum weight.
 
-    Returns either the weight between (`src`, `n`) or (`dst`, `n`)
-    in `graph` or the minimum of the two when both exist.
+    Returns a dictionary with `"weight"` set as either the weight between
+    (`src`, `n`) or (`dst`, `n`) in `graph` or the minimum of the two when
+    both exist.
 
     Parameters
     ----------
@@ -66,9 +65,10 @@ def min_weight(graph, src, dst, n):
 
     Returns
     -------
-    weight : float
-        The weight between (`src`, `n`) or (`dst`, `n`) in `graph` or the
-        minimum of the two when both exist.
+    data : dict
+        A dict with the `"weight"` attribute set the weight between
+        (`src`, `n`) or (`dst`, `n`) in `graph` or the minimum of the two when
+        both exist.
 
     """
 
@@ -76,7 +76,7 @@ def min_weight(graph, src, dst, n):
     default = {'weight': np.inf}
     w1 = graph[n].get(src, default)['weight']
     w2 = graph[n].get(dst, default)['weight']
-    return min(w1, w2)
+    return {'weight': min(w1, w2)}
 
 
 def _add_edge_filter(values, graph):
@@ -173,12 +173,12 @@ class RAG(nx.Graph):
         src, dst : int
             Nodes to be merged.
         weight_func : callable, optional
-            Function to decide edge weight of edges incident on the new node.
-            For each neighbor `n` for `src and `dst`, `weight_func` will be
-            called as follows: `weight_func(src, dst, n, *extra_arguments,
+            Function to decide the attributes of edges incident on the new
+            node. For each neighbor `n` for `src and `dst`, `weight_func` will
+            be called as follows: `weight_func(src, dst, n, *extra_arguments,
             **extra_keywords)`. `src`, `dst` and `n` are IDs of vertices in the
-            RAG object which is in turn a subclass of
-            `networkx.Graph`.
+            RAG object which is in turn a subclass of `networkx.Graph`. It is
+            expected to return a dict of attributes of the resulting edge.
         in_place : bool, optional
             If set to `True`, the merged node has the id `dst`, else merged
             node has a new id which is returned.
@@ -209,9 +209,9 @@ class RAG(nx.Graph):
             self.add_node(new)
 
         for neighbor in neighbors:
-            w = weight_func(self, src, new, neighbor, *extra_arguments,
-                            **extra_keywords)
-            self.add_edge(neighbor, new, weight=w)
+            data = weight_func(self, src, new, neighbor, *extra_arguments,
+                               **extra_keywords)
+            self.add_edge(neighbor, new, attr_dict=data)
 
         self.node[new]['labels'] = (self.node[src]['labels'] +
                                     self.node[dst]['labels'])
@@ -226,14 +226,22 @@ class RAG(nx.Graph):
         """Add node `n` while updating the maximum node id.
 
         .. seealso:: :func:`networkx.Graph.add_node`."""
-        super(RAG, self).add_node(n, attr_dict, **attr)
+        if attr_dict is None:  # compatibility with old networkx
+            attr_dict = attr
+        else:
+            attr_dict.update(attr)
+        super(RAG, self).add_node(n, **attr_dict)
         self.max_id = max(n, self.max_id)
 
     def add_edge(self, u, v, attr_dict=None, **attr):
         """Add an edge between `u` and `v` while updating max node id.
 
         .. seealso:: :func:`networkx.Graph.add_edge`."""
-        super(RAG, self).add_edge(u, v, attr_dict, **attr)
+        if attr_dict is None:  # compatibility with old networkx
+            attr_dict = attr
+        else:
+            attr_dict.update(attr)
+        super(RAG, self).add_edge(u, v, **attr_dict)
         self.max_id = max(u, v, self.max_id)
 
     def copy(self):
@@ -264,6 +272,30 @@ class RAG(nx.Graph):
         .. seealso:: :func:`networkx.Graph.add_node`."""
         super(RAG, self).add_node(n)
 
+    def nodes_iter(self, *args, **kwargs):
+        """ Iterate over nodes
+
+        For compatibility with older versions of networkx.  Versions <= 1.11
+        have an ``nodes_iter`` method, but later versions return an iterator from
+        the nodes method, and lack ``nodes_iter``.
+        """
+        try:
+            return super(RAG, self).nodes_iter(*args, **kwargs)
+        except AttributeError:
+            return super(RAG, self).nodes(*args, **kwargs)
+
+    def edges_iter(self, *args, **kwargs):
+        """ Iterate over edges
+
+        For compatibility with older versions of networkx.  Versions <= 1.11
+        have an ``edges_iter`` method, but later versions return an iterator from
+        the edges method, and lack ``edges_iter``.
+        """
+        try:
+            return super(RAG, self).edges_iter(*args, **kwargs)
+        except AttributeError:
+            return super(RAG, self).edges(*args, **kwargs)
+
 
 def rag_mean_color(image, labels, connectivity=2, mode='distance',
                    sigma=255.0):
@@ -279,7 +311,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
     ----------
     image : ndarray, shape(M, N, [..., P,] 3)
         Input image.
-    labels : ndarray, shape(M, N, [..., P,])
+    labels : ndarray, shape(M, N, [..., P])
         The labelled image. This should have one dimension less than
         `image`. If `image` has dimensions `(M, N, 3)` `labels` should have
         dimensions `(M, N)`.
@@ -287,7 +319,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
         Pixels with a squared distance less than `connectivity` from each other
         are considered adjacent. It can range from 1 to `labels.ndim`. Its
         behavior is the same as `connectivity` parameter in
-        `scipy.ndimage.generate_binary_structure`.
+        ``scipy.ndimage.generate_binary_structure``.
     mode : {'distance', 'similarity'}, optional
         The strategy to assign edge weights.
 
@@ -420,14 +452,13 @@ def rag_boundary(labels, edge_map, connectivity=2):
     return rag
 
 
-def draw_rag(labels, rag, img, border_color=None, node_color='#ffff00',
-             edge_color='#00ff00', colormap=None, thresh=np.inf,
-             desaturate=False, in_place=True):
-    """Draw a Region Adjacency Graph on an image.
+def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
+             edge_cmap='magma', img_cmap='bone', in_place=True, ax=None):
+    """Show a Region Adjacency Graph on an image.
 
-    Given a labelled image and its corresponding RAG, draw the nodes and edges
-    of the RAG on the image with the specified colors. Nodes are marked by
-    the centroids of the corresponding regions.
+    Given a labelled image and its corresponding RAG, show the nodes and edges
+    of the RAG on the image with the specified colors. Edges are displayed between
+    the centroid of the 2 adjacent regions in the image.
 
     Parameters
     ----------
@@ -435,31 +466,30 @@ def draw_rag(labels, rag, img, border_color=None, node_color='#ffff00',
         The labelled image.
     rag : RAG
         The Region Adjacency Graph.
-    img : ndarray, shape (M, N, 3)
-        Input image.
-    border_color : colorspec, optional
-        Any matplotlib colorspec.
-    node_color : colorspec, optional
-        Any matplotlib colorspec. Yellow by default.
-    edge_color : colorspec, optional
-        Any matplotlib colorspec. Green by default.
-    colormap : colormap, optional
-        Any matplotlib colormap. If specified the edges are colormapped with
-        the specified color map.
-    thresh : float, optional
-        Edges with weight below `thresh` are not drawn, or considered for color
-        mapping.
-    desaturate : bool, optional
-        Convert the image to grayscale before displaying. Particularly helps
-        visualization when using the `colormap` option.
+    img : ndarray, shape (M, N[, 3])
+        Input image. If `colormap` is `None`, the image should be in RGB
+        format.
+    border_color : color spec, optional
+        Color with which the borders between regions are drawn.
+    edge_width : float, optional
+        The thickness with which the RAG edges are drawn.
+    edge_cmap : :py:class:`matplotlib.colors.Colormap`, optional
+        Any matplotlib colormap with which the edges are drawn.
+    img_cmap : :py:class:`matplotlib.colors.Colormap`, optional
+        Any matplotlib colormap with which the image is draw. If set to `None`
+        the image is drawn as it is.
     in_place : bool, optional
         If set, the RAG is modified in place. For each node `n` the function
         will set a new attribute ``rag.node[n]['centroid']``.
+    ax : :py:class:`matplotlib.axes.Axes`, optional
+        The axes to draw on. If not specified, new axes are created and drawn
+        on.
 
     Returns
     -------
-    out : ndarray, shape (M, N, 3)
-        The image with the RAG drawn.
+    lc : :py:class:`matplotlib.collections.LineCollection`
+         A colection of lines that represent the edges of the graph. It can be
+         passed to the :meth:`matplotlib.figure.Figure.colorbar` function.
 
     Examples
     --------
@@ -468,20 +498,30 @@ def draw_rag(labels, rag, img, border_color=None, node_color='#ffff00',
     >>> img = data.coffee()
     >>> labels = segmentation.slic(img)
     >>> g =  graph.rag_mean_color(img, labels)
-    >>> out = graph.draw_rag(labels, g, img)
+    >>> lc = graph.show_rag(labels, g, img)
+    >>> cbar = plt.colorbar(lc)
     """
+
     if not in_place:
         rag = rag.copy()
 
-    if desaturate:
-        img = color.rgb2gray(img)
-        img = color.gray2rgb(img)
-
+    if ax is None:
+        fig, ax = plt.subplots()
     out = util.img_as_float(img, force_copy=True)
-    cc = colors.ColorConverter()
 
-    edge_color = cc.to_rgb(edge_color)
-    node_color = cc.to_rgb(node_color)
+    if img_cmap is None:
+        if img.ndim < 3 or img.shape[2] not in [3, 4]:
+            msg = 'If colormap is `None`, an RGB or RGBA image should be given'
+            raise ValueError(msg)
+        # Ignore the alpha channel
+        out = img[:, :, :3]
+    else:
+        img_cmap = cm.get_cmap(img_cmap)
+        out = color.rgb2gray(img)
+        # Ignore the alpha channel
+        out = img_cmap(out)[:, :, :3]
+
+    edge_cmap = cm.get_cmap(edge_cmap)
 
     # Handling the case where one node has multiple labels
     # offset is 1 so that regionprops does not ignore 0
@@ -496,33 +536,24 @@ def draw_rag(labels, rag, img, border_color=None, node_color='#ffff00',
     regions = measure.regionprops(rag_labels)
 
     for (n, data), region in zip(rag.nodes_iter(data=True), regions):
-        data['centroid'] = region['centroid']
+        data['centroid'] = tuple(map(int, region['centroid']))
 
+    cc = colors.ColorConverter()
     if border_color is not None:
         border_color = cc.to_rgb(border_color)
         out = segmentation.mark_boundaries(out, rag_labels, color=border_color)
 
-    if colormap is not None:
-        edge_weight_list = [d['weight'] for x, y, d in
-                            rag.edges_iter(data=True) if d['weight'] < thresh]
-        norm = colors.Normalize()
-        norm.autoscale(edge_weight_list)
-        smap = cm.ScalarMappable(norm, colormap)
+    ax.imshow(out)
 
-    for n1, n2, data in rag.edges_iter(data=True):
+    # Defining the end points of the edges
+    # The tuple[::-1] syntax reverses a tuple as matplotlib uses (x,y)
+    # convention while skimage uses (row, column)
+    lines = [[rag.node[n1]['centroid'][::-1], rag.node[n2]['centroid'][::-1]]
+             for (n1, n2) in rag.edges_iter()]
 
-        if data['weight'] >= thresh:
-            continue
-        r1, c1 = map(int, rag.node[n1]['centroid'])
-        r2, c2 = map(int, rag.node[n2]['centroid'])
-        line = draw.line(r1, c1, r2, c2)
+    lc = LineCollection(lines, linewidths=edge_width, cmap=edge_cmap)
+    edge_weights = [d['weight'] for x, y, d in rag.edges_iter(data=True)]
+    lc.set_array(np.array(edge_weights))
+    ax.add_collection(lc)
 
-        if colormap is not None:
-            out[line] = smap.to_rgba([data['weight']])[0][:-1]
-        else:
-            out[line] = edge_color
-
-        circle = draw.circle(r1, c1, 2)
-        out[circle] = node_color
-
-    return out
+    return lc

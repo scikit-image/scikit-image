@@ -18,12 +18,7 @@ dist
 skimage/version.py
 *.swp
 .coverage
-doc/source/auto_examples/*.py
-doc/source/auto_examples/*.txt
-doc/source/auto_examples/notebook
-doc/source/auto_examples/images/plot_*.png
-doc/source/auto_examples/images/thumb
-doc/source/auto_examples/applications/
+doc/source/auto_examples/**/*
 doc/source/_static/random.js
 .idea/
 *.log

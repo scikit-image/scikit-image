@@ -5,6 +5,7 @@
 import numpy as np
 cimport numpy as cnp
 
+
 cdef float cell_hog(double[:, ::1] magnitude,
                     double[:, ::1] orientation,
                     float orientation_start, float orientation_end,
@@ -72,6 +73,7 @@ cdef float cell_hog(double[:, ::1] magnitude,
 
     return total / (cell_rows * cell_columns)
 
+
 def hog_histograms(double[:, ::1] gradient_columns,
                    double[:, ::1] gradient_rows,
                    int cell_columns, int cell_rows,
@@ -106,24 +108,24 @@ def hog_histograms(double[:, ::1] gradient_columns,
     """
 
     cdef double[:, ::1] magnitude = np.hypot(gradient_columns,
-                                                  gradient_rows)
+                                             gradient_rows)
     cdef double[:, ::1] orientation = \
-        np.arctan2(gradient_rows, gradient_columns) * (180 / np.pi) % 180
+        np.rad2deg(np.arctan2(gradient_rows, gradient_columns)) % 180
     cdef int i, x, y, o, yi, xi, cc, cr, x0, y0, \
         range_rows_start, range_rows_stop, \
         range_columns_start, range_columns_stop
     cdef float orientation_start, orientation_end, \
         number_of_orientations_per_180
 
-    x0 = cell_columns / 2
     y0 = cell_rows / 2
+    x0 = cell_columns / 2
     cc = cell_rows * number_of_cells_rows
     cr = cell_columns * number_of_cells_columns
-    number_of_orientations_per_180 = 180. / number_of_orientations
-    range_rows_stop = cell_rows/2
+    range_rows_stop = cell_rows / 2
     range_rows_start = -range_rows_stop
-    range_columns_stop = cell_columns/2
+    range_columns_stop = cell_columns / 2
     range_columns_start = -range_columns_stop
+    number_of_orientations_per_180 = 180. / number_of_orientations
 
     with nogil:
         # compute orientations integral images
@@ -141,10 +143,13 @@ def hog_histograms(double[:, ::1] gradient_columns,
                 x = x0
 
                 while x < cr:
-                    orientation_histogram[yi, xi, i] = cell_hog(magnitude,
-                        orientation, orientation_start, orientation_end,
-                        cell_columns, cell_rows, x, y, size_columns, size_rows,
-                        range_rows_start, range_rows_stop, range_columns_start, range_columns_stop)
+                    orientation_histogram[yi, xi, i] = \
+                        cell_hog(magnitude, orientation,
+                                 orientation_start, orientation_end,
+                                 cell_columns, cell_rows, x, y,
+                                 size_columns, size_rows,
+                                 range_rows_start, range_rows_stop,
+                                 range_columns_start, range_columns_stop)
                     xi += 1
                     x += cell_columns
 

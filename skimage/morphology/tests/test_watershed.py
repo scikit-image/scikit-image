@@ -48,7 +48,8 @@ import unittest
 import numpy as np
 from scipy import ndimage as ndi
 
-from skimage.morphology.watershed import watershed, _slow_watershed
+from skimage.morphology.watershed import watershed
+from skimage.measure import label
 
 eps = 1e-12
 
@@ -112,9 +113,6 @@ class TestWatershed(unittest.TestCase):
                       [-1,  1,  1,  1,  1,  1, -1],
                       [-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1]])
-        error = diff(expected, out)
-        assert error < eps
-        out = _slow_watershed(data, markers, 8)
         error = diff(expected, out)
         assert error < eps
 
@@ -425,6 +423,65 @@ class TestWatershed(unittest.TestCase):
              for i0, j0 in ((5, 5), (5, 10), (10, 5), (10, 10))])
         dmin = np.min(d, 2)
         self.assertTrue(np.all(d[i, j, out[i, j]-1] == dmin))
+
+
+    def test_watershed12(self):
+        "The watershed line"
+        data = np.array([[203, 255, 203, 153, 153, 153, 153, 153, 153, 153, 153, 153, 153, 153, 153, 153],
+                         [203, 255, 203, 153, 153, 153, 102, 102, 102, 102, 102, 102, 153, 153, 153, 153],
+                         [203, 255, 203, 203, 153, 153, 102, 102,  77,   0, 102, 102, 153, 153, 203, 203],
+                         [203, 255, 255, 203, 153, 153, 153, 102, 102, 102, 102, 153, 153, 203, 203, 255],
+                         [203, 203, 255, 203, 203, 203, 153, 153, 153, 153, 153, 153, 203, 203, 255, 255],
+                         [153, 203, 255, 255, 255, 203, 203, 203, 203, 203, 203, 203, 203, 255, 255, 203],
+                         [153, 203, 203, 203, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 203, 203],
+                         [153, 153, 153, 203, 203, 203, 203, 203, 255, 203, 203, 203, 203, 203, 203, 153],
+                         [102, 102, 153, 153, 153, 153, 203, 203, 255, 203, 203, 255, 203, 153, 153, 153],
+                         [102, 102, 102, 102, 102, 153, 203, 255, 255, 203, 203, 203, 203, 153, 102, 153],
+                         [102,  51,  51, 102, 102, 153, 203, 255, 203, 203, 153, 153, 153, 153, 102, 153],
+                         [ 77,  51,  51, 102, 153, 153, 203, 255, 203, 203, 203, 153, 102, 102, 102, 153],
+                         [ 77,   0,  51, 102, 153, 203, 203, 255, 203, 255, 203, 153, 102,  51, 102, 153],
+                         [ 77,   0,  51, 102, 153, 203, 255, 255, 203, 203, 203, 153, 102,   0, 102, 153],
+                         [102,   0,  51, 102, 153, 203, 255, 203, 203, 153, 153, 153, 102, 102, 102, 153],
+                         [102, 102, 102, 102, 153, 203, 255, 203, 153, 153, 153, 153, 153, 153, 153, 153]])
+        markerbin = (data==0)
+        marker = label(markerbin)
+        ws = watershed(data, marker, connectivity=2, watershed_line=True)
+        for lab, area in zip(range(4), [34,74,74,74]):
+            self.assertTrue(np.sum(ws == lab) == area)
+
+
+
+def test_compact_watershed():
+    image = np.zeros((5, 6))
+    image[:, 3:] = 1
+    seeds = np.zeros((5, 6), dtype=int)
+    seeds[2, 0] = 1
+    seeds[2, 3] = 2
+    compact = watershed(image, seeds, compactness=0.01)
+    expected = np.array([[1, 1, 1, 2, 2, 2],
+                         [1, 1, 1, 2, 2, 2],
+                         [1, 1, 1, 2, 2, 2],
+                         [1, 1, 1, 2, 2, 2],
+                         [1, 1, 1, 2, 2, 2]], dtype=int)
+    np.testing.assert_equal(compact, expected)
+    normal = watershed(image, seeds)
+    expected = np.ones(image.shape, dtype=int)
+    expected[2, 3:] = 2
+    np.testing.assert_equal(normal, expected)
+
+
+def test_numeric_seed_watershed():
+    """Test that passing just the number of seeds to watershed works."""
+    image = np.zeros((5, 6))
+    image[:, 3:] = 1
+    compact = watershed(image, 2, compactness=0.01)
+    expected = np.array([[1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2]], dtype=np.int32)
+    np.testing.assert_equal(compact, expected)
+
 
 if __name__ == "__main__":
     np.testing.run_module_suite()

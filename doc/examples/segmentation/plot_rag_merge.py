@@ -31,13 +31,14 @@ def _weight_mean_color(graph, src, dst, n):
 
     Returns
     -------
-    weight : float
-        The absolute difference of the mean color between node `dst` and `n`.
+    data : dict
+        A dictionary with the `"weight"` attribute set as the absolute
+        difference of the mean color between node `dst` and `n`.
     """
 
     diff = graph.node[dst]['mean color'] - graph.node[n]['mean color']
     diff = np.linalg.norm(diff)
-    return diff
+    return {'weight': diff}
 
 
 def merge_mean_color(graph, src, dst):
@@ -62,7 +63,7 @@ img = data.coffee()
 labels = segmentation.slic(img, compactness=30, n_segments=400)
 g = graph.rag_mean_color(img, labels)
 
-labels2 = graph.merge_hierarchical(labels, g, thresh=40, rag_copy=False,
+labels2 = graph.merge_hierarchical(labels, g, thresh=35, rag_copy=False,
                                    in_place_merge=True,
                                    merge_func=merge_mean_color,
                                    weight_func=_weight_mean_color)

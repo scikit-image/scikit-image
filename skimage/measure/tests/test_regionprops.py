@@ -24,7 +24,7 @@ INTENSITY_SAMPLE[1, 9:11] = 2
 
 SAMPLE_3D = np.zeros((6, 6, 6), dtype=np.uint8)
 SAMPLE_3D[1:3, 1:3, 1:3] = 1
-SAMPLE_3D[3, 2, 2] = 1 
+SAMPLE_3D[3, 2, 2] = 1
 INTENSITY_SAMPLE_3D = SAMPLE_3D.copy()
 
 def test_all_props():
@@ -77,6 +77,9 @@ def test_bbox():
     bbox = regionprops(SAMPLE_3D)[0].bbox
     assert_array_almost_equal(bbox, (1, 1, 1, 4, 3, 3))
 
+def test_bbox_area():
+    bbox_area = regionprops(SAMPLE)[0].bbox_area
+    assert_array_almost_equal(bbox_area, SAMPLE.shape[0] * SAMPLE.shape[1])
 
 def test_moments_central():
     mu = regionprops(SAMPLE)[0].moments_central
@@ -95,6 +98,12 @@ def test_centroid():
     centroid = regionprops(SAMPLE)[0].centroid
     # determined with MATLAB
     assert_array_almost_equal(centroid, (5.66666666666666, 9.444444444444444))
+
+
+def test_centroid_3d():
+    centroid = regionprops(SAMPLE_3D)[0].centroid
+    # determined by mean along axis 1 of SAMPLE_3D.nonzero()
+    assert_array_almost_equal(centroid, (1.66666667, 1.55555556, 1.55555556))
 
 
 def test_convex_area():

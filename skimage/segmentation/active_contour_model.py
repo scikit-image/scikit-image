@@ -15,6 +15,9 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     Active contours by fitting snakes to features of images. Supports single
     and multichannel 2D images. Snakes can be periodic (for segmentation) or
     have fixed and/or free ends.
+    The output snake has the same length as the input boundary.
+    As the number of points is constant, make sure that the initial snake
+    has enough points to capture the details of the final contour.
 
     Parameters
     ----------
@@ -63,14 +66,14 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     Examples
     --------
     >>> from skimage.draw import circle_perimeter
-    >>> from skimage.filters import gaussian_filter
+    >>> from skimage.filters import gaussian
 
     Create and smooth image:
 
     >>> img = np.zeros((100, 100))
     >>> rr, cc = circle_perimeter(35, 45, 25)
     >>> img[rr, cc] = 1
-    >>> img = gaussian_filter(img, 2)
+    >>> img = gaussian(img, 2)
 
     Initiliaze spline:
 
@@ -85,7 +88,10 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     25
 
     """
-    scipy_version = list(map(int, scipy.__version__.split('.')))
+    split_version = scipy.__version__.split('.')
+    if not(split_version[-1].isdigit()):
+        split_version.pop()
+    scipy_version = list(map(int, split_version))
     new_scipy = scipy_version[0] > 0 or \
                 (scipy_version[0] == 0 and scipy_version[1] >= 14)
     if not new_scipy:
@@ -137,7 +143,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
                         np.arange(img.shape[0]), img, kind='cubic',
                         copy=False, bounds_error=False, fill_value=0))
 
-    x, y = snake[:, 0].copy(), snake[:, 1].copy()
+    x, y = snake[:, 0].astype(np.float), snake[:, 1].astype(np.float)
     xsave = np.empty((convergence_order, len(x)))
     ysave = np.empty((convergence_order, len(x)))
 
@@ -216,8 +222,8 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         if efixed:
             dx[-1] = 0
             dy[-1] = 0
-        x[:] += dx
-        y[:] += dy
+        x += dx
+        y += dy
 
         # Convergence criteria needs to compare to a number of previous
         # configurations since oscillations can occur.

@@ -10,7 +10,7 @@ def max_edge(g, src, dst, n):
     default = {'weight': -np.inf}
     w1 = g[n].get(src, default)['weight']
     w2 = g[n].get(dst, default)['weight']
-    return max(w1, w2)
+    return {'weight': max(w1, w2)}
 
 
 @skipif(not is_installed('networkx'))
@@ -45,7 +45,7 @@ def test_rag_merge():
     g.merge_nodes(2, 3)
     n = g.merge_nodes(3, 4, in_place=False)
     assert sorted(g.node[n]['labels']) == list(range(5))
-    assert g.edges() == []
+    assert list(g.edges()) == []
 
 
 @skipif(not is_installed('networkx'))
@@ -113,7 +113,7 @@ def test_rag_error():
 def _weight_mean_color(graph, src, dst, n):
     diff = graph.node[dst]['mean color'] - graph.node[n]['mean color']
     diff = np.linalg.norm(diff)
-    return diff
+    return {'weight': diff}
 
 
 def _pre_merge_mean_color(graph, src, dst):
@@ -168,12 +168,10 @@ def test_ncut_stable_subgraph():
     img = np.zeros((100, 100, 3), dtype='uint8')
 
     labels = np.zeros((100, 100), dtype='uint8')
-    labels[...] = 0
     labels[:50, :50] = 1
     labels[:50, 50:] = 2
 
     rag = graph.rag_mean_color(img, labels, mode='similarity')
-
     new_labels = graph.cut_normalized(labels, rag, in_place=False)
     new_labels, _, _ = segmentation.relabel_sequential(new_labels)
 

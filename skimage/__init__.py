@@ -65,7 +65,7 @@ import sys
 pkg_dir = osp.abspath(osp.dirname(__file__))
 data_dir = osp.join(pkg_dir, 'data')
 
-__version__ = '0.12.3'
+__version__ = '0.13.0'
 
 try:
     imp.find_module('nose')
@@ -80,6 +80,7 @@ else:
     def _test(doctest=False, verbose=False):
         """Run all unit tests."""
         import nose
+        import warnings
         args = ['', pkg_dir, '--exe', '--ignore-files=^_test']
         if verbose:
             args.extend(['-v', '-s'])
@@ -155,12 +156,6 @@ else:
     except ImportError as e:
         _raise_build_error(e)
     from .util.dtype import *
-
-
-if sys.version.startswith('2.6'):
-    msg = ("Python 2.6 is deprecated and will not be supported in "
-           "scikit-image 0.13+")
-    warnings.warn(msg, stacklevel=2)
 
 
 del warnings, functools, osp, imp, sys

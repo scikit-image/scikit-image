@@ -7,6 +7,7 @@ from skimage.feature import (greycomatrix,
 from skimage._shared.testing import test_parallel
 from skimage.transform import integral_image
 
+
 class TestGLCM():
 
     def setup(self):
@@ -49,6 +50,34 @@ class TestGLCM():
                              [2, 2, 2, 2],
                              [0, 0, 2, 0]], dtype=np.uint32)
         np.testing.assert_array_equal(result[:, :, 0, 0], expected)
+
+    def test_error_raise_float(self):
+        for dtype in [np.float, np.double, np.float16, np.float32, np.float64]:
+            np.testing.assert_raises(ValueError, greycomatrix, self.image.astype(dtype), [1], [np.pi], 4)
+
+    def test_error_raise_int_types(self):
+        for dtype in [np.int16, np.int32, np.int64, np.uint16, np.uint32, np.uint64]:
+            np.testing.assert_raises(ValueError, greycomatrix, self.image.astype(dtype), [1], [np.pi])
+
+    def test_error_raise_negative(self):
+        np.testing.assert_raises(ValueError, greycomatrix, self.image.astype(np.int16) - 1, [1], [np.pi], 4)
+
+    def test_error_raise_levels_smaller_max(self):
+        np.testing.assert_raises(ValueError, greycomatrix, self.image - 1, [1], [np.pi], 3)
+
+    def test_image_data_types(self):
+        for dtype in [np.uint16, np.uint32, np.uint64, np.int16, np.int32, np.int64]:
+            img = self.image.astype(dtype)
+            result = greycomatrix(img, [1], [np.pi / 2], 4,
+                                  symmetric=True)
+            assert result.shape == (4, 4, 1, 1)
+            expected = np.array([[6, 0, 2, 0],
+                                 [0, 4, 2, 0],
+                                 [2, 2, 2, 2],
+                                 [0, 0, 2, 0]], dtype=np.uint32)
+            np.testing.assert_array_equal(result[:, :, 0, 0], expected)
+
+        return
 
     def test_output_distance(self):
         im = np.array([[0, 0, 0, 0],
@@ -215,7 +244,7 @@ class TestLBP():
         lbp = local_binary_pattern(image, P, R, 'var')
 
         # Take central part to avoid border effect.
-        lbp = lbp[5:-5,5:-5]
+        lbp = lbp[5:-5, 5:-5]
 
         # The LBP variance is biased (ddof=0), correct for that.
         expected = target_std**2 * (P-1)/P

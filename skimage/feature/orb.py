@@ -318,6 +318,11 @@ class ORB(FeatureDetector, DescriptorExtractor):
                                * np.ones(keypoints.shape[0], dtype=np.intp))
             descriptors_list.append(descriptors)
 
+        if len(scales_list) == 0:
+            raise RuntimeError("ORB found no features. Try passing in an image "
+                               "containing greater intensity contrasts between "
+                               "adjacent pixels.")
+
         keypoints = np.vstack(keypoints_list)
         responses = np.hstack(responses_list)
         scales = np.hstack(scales_list)

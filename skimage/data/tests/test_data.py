@@ -1,11 +1,6 @@
 import numpy as np
 import skimage.data as data
-from numpy.testing import assert_equal, assert_almost_equal, assert_raises
-
-
-def test_lena_removed():
-    """ Test that "Lena" has been removed """
-    assert_raises(RuntimeError, data.lena)
+from numpy.testing import assert_equal, assert_almost_equal
 
 
 def test_astronaut():
@@ -25,9 +20,43 @@ def test_checkerboard():
     data.checkerboard()
 
 
-def test_text():
-    """ Test that "text" image can be loaded. """
-    data.text()
+def test_chelsea():
+    """ Test that "chelsea" image can be loaded. """
+    data.chelsea()
+
+
+def test_clock():
+    """ Test that "clock" image can be loaded. """
+    data.clock()
+
+
+def test_coffee():
+    """ Test that "coffee" image can be loaded. """
+    data.coffee()
+
+
+def test_horse():
+    """ Test that "horse" image can be loaded. """
+    horse = data.horse()
+    assert_equal(horse.ndim, 2)
+    assert_equal(horse.dtype, np.dtype('bool'))
+
+
+def test_hubble():
+    """ Test that "Hubble" image can be loaded. """
+    data.hubble_deep_field()
+
+
+def test_immunohistochemistry():
+    """ Test that "immunohistochemistry" image can be loaded. """
+    data.immunohistochemistry()
+
+
+def test_logo():
+    """ Test that "logo" image can be loaded. """
+    logo = data.logo()
+    assert_equal(logo.ndim, 3)
+    assert_equal(logo.shape[2], 4)
 
 
 def test_moon():
@@ -40,19 +69,19 @@ def test_page():
     data.page()
 
 
-def test_clock():
-    """ Test that "clock" image can be loaded. """
-    data.clock()
+def test_rocket():
+    """ Test that "rocket" image can be loaded. """
+    data.rocket()
 
 
-def test_chelsea():
-    """ Test that "chelsea" image can be loaded. """
-    data.chelsea()
+def test_text():
+    """ Test that "text" image can be loaded. """
+    data.text()
 
 
-def test_coffee():
-    """ Test that "coffee" image can be loaded. """
-    data.coffee()
+def test_stereo_motorcycle():
+    """ Test that "stereo_motorcycle" image can be loaded. """
+    data.stereo_motorcycle()
 
 
 def test_binary_blobs():

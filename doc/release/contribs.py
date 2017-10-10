@@ -10,45 +10,41 @@ if len(sys.argv) != 2:
 
 tag = sys.argv[1]
 
+def call(cmd):
+    return subprocess.check_output(shlex.split(cmd), universal_newlines=True).split('\n')
 
-if not sys.version_info[:2] == (2, 6):
+tag_date = call("git show --format='%%ci' %s" % tag)[0]
+print("Release %s was on %s\n" % (tag, tag_date))
 
-    def call(cmd):
-        return subprocess.check_output(shlex.split(cmd), universal_newlines=True).split('\n')
+merges = call("git log --since='%s' --merges --format='>>>%%B' --reverse" % tag_date)
+merges = [m for m in merges if m.strip()]
+merges = '\n'.join(merges).split('>>>')
+merges = [m.split('\n')[:2] for m in merges]
+merges = [m for m in merges if len(m) == 2 and m[1].strip()]
 
-    tag_date = call("git show --format='%%ci' %s" % tag)[0]
-    print("Release %s was on %s\n" % (tag, tag_date))
+num_commits = call("git rev-list %s..HEAD --count" % tag)[0]
+print("A total of %s changes have been committed.\n" % num_commits)
 
-    merges = call("git log --since='%s' --merges --format='>>>%%B' --reverse" % tag_date)
-    merges = [m for m in merges if m.strip()]
-    merges = '\n'.join(merges).split('>>>')
-    merges = [m.split('\n')[:2] for m in merges]
-    merges = [m for m in merges if len(m) == 2 and m[1].strip()]
+print("It contained the following %d merges:\n" % len(merges))
+for (merge, message) in merges:
+    if merge.startswith('Merge pull request #'):
+        PR = ' (%s)' % merge.split()[3]
+    else:
+        PR = ''
 
-    num_commits = call("git rev-list %s..HEAD --count" % tag)[0]
-    print("A total of %s changes have been committed.\n" % num_commits)
+    print('- ' + message + PR)
 
-    print("It contained the following %d merges:\n" % len(merges))
-    for (merge, message) in merges:
-        if merge.startswith('Merge pull request #'):
-            PR = ' (%s)' % merge.split()[3]
-        else:
-            PR = ''
+print("\nMade by the following committers [alphabetical by last name]:\n")
 
-        print('- ' + message + PR)
+authors = call("git log --since='%s' --format=%%aN" % tag_date)
+authors = [a.strip() for a in authors if a.strip()]
 
+def key(author):
+    author = [v for v in author.split() if v[0] in string.ascii_letters]
+    if len(author) > 0:
+        return author[-1]
 
-    print("\nMade by the following committers [alphabetical by last name]:\n")
+authors = sorted(set(authors), key=key)
 
-    authors = call("git log --since='%s' --format=%%aN" % tag_date)
-    authors = [a.strip() for a in authors if a.strip()]
-
-    def key(author):
-        author = [v for v in author.split() if v[0] in string.ascii_letters]
-        if len(author) > 0:
-            return author[-1]
-
-    authors = sorted(set(authors), key=key)
-
-    for a in authors:
-        print('- ' + a)
+for a in authors:
+    print('- ' + a)

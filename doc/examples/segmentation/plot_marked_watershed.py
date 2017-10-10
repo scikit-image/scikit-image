@@ -46,21 +46,23 @@ labels = watershed(gradient, markers)
 
 # display results
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(8, 8), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
-axes = axes.ravel()
-ax0, ax1, ax2, ax3 = axes
+ax = axes.ravel()
 
-ax0.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
-ax0.set_title("Original")
-ax1.imshow(gradient, cmap=plt.cm.spectral, interpolation='nearest')
-ax1.set_title("Local Gradient")
-ax2.imshow(markers, cmap=plt.cm.spectral, interpolation='nearest')
-ax2.set_title("Markers")
-ax3.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
-ax3.imshow(labels, cmap=plt.cm.spectral, interpolation='nearest', alpha=.7)
-ax3.set_title("Segmented")
+ax[0].imshow(image, cmap=plt.cm.gray, interpolation='nearest')
+ax[0].set_title("Original")
 
-for ax in axes:
-    ax.axis('off')
+ax[1].imshow(gradient, cmap=plt.cm.spectral, interpolation='nearest')
+ax[1].set_title("Local Gradient")
+
+ax[2].imshow(markers, cmap=plt.cm.spectral, interpolation='nearest')
+ax[2].set_title("Markers")
+
+ax[3].imshow(image, cmap=plt.cm.gray, interpolation='nearest')
+ax[3].imshow(labels, cmap=plt.cm.spectral, interpolation='nearest', alpha=.7)
+ax[3].set_title("Segmented")
+
+for a in ax:
+    a.axis('off')
 
 fig.tight_layout()
 plt.show()

@@ -4,21 +4,30 @@ from scipy import ndimage as ndi
 
 from ..util import img_as_float
 from ..color import guess_spatial_dimensions
-from .._shared.utils import warn
+from .._shared.utils import warn, convert_to_float
+
 
 __all__ = ['gaussian']
 
 
-def gaussian(image, sigma, output=None, mode='nearest', cval=0,
-             multichannel=None):
-    """Multi-dimensional Gaussian filter
+def _convert_input(image, preserve_range):
+    if preserve_range:
+        image = image.astype(np.double)
+    else:
+        image = img_as_float(image)
+    return image
+
+
+def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
+             multichannel=None, preserve_range=False, truncate=4.0):
+    """Multi-dimensional Gaussian filter.
 
     Parameters
     ----------
     image : array-like
-        input image (grayscale or color) to filter.
-    sigma : scalar or sequence of scalars
-        standard deviation for Gaussian kernel. The standard
+        Input image (grayscale or color) to filter.
+    sigma : scalar or sequence of scalars, optional
+        Standard deviation for Gaussian kernel. The standard
         deviations of the Gaussian filter are given for each axis as a
         sequence, or as a single number, in which case it is equal for
         all axes.
@@ -38,6 +47,11 @@ def gaussian(image, sigma, output=None, mode='nearest', cval=0,
         not mixed together). Only 3 channels are supported. If `None`,
         the function will attempt to guess this, and raise a warning if
         ambiguous, when the array has shape (M, N, 3).
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
+    truncate : float, optional
+        Truncate the filter at this many standard deviations.
 
     Returns
     -------
@@ -70,7 +84,7 @@ def gaussian(image, sigma, output=None, mode='nearest', cval=0,
     array([[ 0.00163116,  0.03712502,  0.00163116],
            [ 0.03712502,  0.84496158,  0.03712502],
            [ 0.00163116,  0.03712502,  0.00163116]])
-    >>> gaussian(a, sigma=1)  # more smooting
+    >>> gaussian(a, sigma=1)  # more smoothing
     array([[ 0.05855018,  0.09653293,  0.05855018],
            [ 0.09653293,  0.15915589,  0.09653293],
            [ 0.05855018,  0.09653293,  0.05855018]])
@@ -101,5 +115,6 @@ def gaussian(image, sigma, output=None, mode='nearest', cval=0,
             sigma = [sigma] * (image.ndim - 1)
         if len(sigma) != image.ndim:
             sigma = np.concatenate((np.asarray(sigma), [0]))
-    image = img_as_float(image)
-    return ndi.gaussian_filter(image, sigma, mode=mode, cval=cval)
+    image = convert_to_float(image, preserve_range)
+    return ndi.gaussian_filter(image, sigma, mode=mode, cval=cval,
+                               truncate=truncate)

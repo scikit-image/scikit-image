@@ -23,7 +23,7 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
     fname : string
         Image file name, e.g. ``test.jpg`` or URL.
     as_grey : bool
-        If True, convert color images to grey-scale (32-bit floats).
+        If True, convert color images to grey-scale (64-bit floats).
         Images that are already in grey-scale format are not converted.
     plugin : str
         Name of plugin to use.  By default, the different plugins are

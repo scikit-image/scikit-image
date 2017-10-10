@@ -3,7 +3,7 @@ from __future__ import print_function, division
 import numpy as np
 from numpy.testing import (run_module_suite, assert_array_almost_equal_nulp,
                            assert_almost_equal, assert_array_equal,
-                           assert_raises)
+                           assert_raises, assert_)
 import warnings
 
 from skimage.restoration import unwrap_phase
@@ -11,7 +11,7 @@ from skimage._shared._warnings import expected_warnings
 
 
 def assert_phase_almost_equal(a, b, *args, **kwargs):
-    '''An assert_almost_equal insensitive to phase shifts of n*2*pi.'''
+    """An assert_almost_equal insensitive to phase shifts of n*2*pi."""
     shift = 2 * np.pi * np.round((b.mean() - a.mean()) / (2 * np.pi))
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -19,7 +19,7 @@ def assert_phase_almost_equal(a, b, *args, **kwargs):
         print('assert_phase_allclose, rel',
               np.max(np.abs((a - (b - shift)) / a)))
     if np.ma.isMaskedArray(a):
-        assert np.ma.isMaskedArray(b)
+        assert_(np.ma.isMaskedArray(b))
         assert_array_equal(a.mask, b.mask)
         au = np.asarray(a)
         bu = np.asarray(b)
@@ -34,7 +34,7 @@ def assert_phase_almost_equal(a, b, *args, **kwargs):
 
 def check_unwrap(image, mask=None):
     image_wrapped = np.angle(np.exp(1j * image))
-    if not mask is None:
+    if mask is not None:
         print('Testing a masked image')
         image = np.ma.array(image, mask=mask)
         image_wrapped = np.ma.array(image_wrapped, mask=mask)
@@ -89,8 +89,8 @@ def check_wrap_around(ndim, axis):
           image_unwrap_no_wrap_around[index_first],
           image_unwrap_no_wrap_around[index_last])
     # without wrap around, the endpoints of the image should differ
-    assert abs(image_unwrap_no_wrap_around[index_first]
-               - image_unwrap_no_wrap_around[index_last]) > np.pi
+    assert_(abs(image_unwrap_no_wrap_around[index_first] -
+                image_unwrap_no_wrap_around[index_last]) > np.pi)
     # unwrap the image with wrap around
     wrap_around = [n == axis for n in range(ndim)]
     with warnings.catch_warnings():
@@ -131,7 +131,7 @@ def test_mask():
         # The end of the unwrapped array should have value equal to the
         # endpoint of the unmasked ramp
         assert_array_almost_equal_nulp(image_unwrapped[:, -1], image[i, -1])
-        assert np.ma.isMaskedArray(image_unwrapped)
+        assert_(np.ma.isMaskedArray(image_unwrapped))
 
         # Same tests, but forcing use of the 3D unwrapper by reshaping
         with expected_warnings(['length 1 dimension']):
@@ -155,7 +155,7 @@ def test_unwrap_3d_middle_wrap_around():
     # GitHub issue #1171
     image = np.zeros((20, 30, 40), dtype=np.float32)
     unwrap = unwrap_phase(image, wrap_around=[False, True, False])
-    assert np.all(unwrap == 0)
+    assert_(np.all(unwrap == 0))
 
 
 def test_unwrap_2d_compressed_mask():
@@ -163,7 +163,7 @@ def test_unwrap_2d_compressed_mask():
     # elments).  GitHub issue #1346
     image = np.ma.zeros((10, 10))
     unwrap = unwrap_phase(image)
-    assert np.all(unwrap == 0)
+    assert_(np.all(unwrap == 0))
 
 
 def test_unwrap_2d_all_masked():
@@ -173,17 +173,17 @@ def test_unwrap_2d_all_masked():
     image = np.ma.zeros((10, 10))
     image[:] = np.ma.masked
     unwrap = unwrap_phase(image)
-    assert np.ma.isMaskedArray(unwrap)
-    assert np.all(unwrap.mask)
+    assert_(np.ma.isMaskedArray(unwrap))
+    assert_(np.all(unwrap.mask))
 
     # 1 unmasked element, still zero edges
     image = np.ma.zeros((10, 10))
     image[:] = np.ma.masked
     image[0, 0] = 0
     unwrap = unwrap_phase(image)
-    assert np.ma.isMaskedArray(unwrap)
-    assert np.sum(unwrap.mask) == 99    # all but one masked
-    assert unwrap[0, 0] == 0
+    assert_(np.ma.isMaskedArray(unwrap))
+    assert_(np.sum(unwrap.mask) == 99)    # all but one masked
+    assert_(unwrap[0, 0] == 0)
 
 
 def test_unwrap_3d_all_masked():
@@ -191,17 +191,18 @@ def test_unwrap_3d_all_masked():
     image = np.ma.zeros((10, 10, 10))
     image[:] = np.ma.masked
     unwrap = unwrap_phase(image)
-    assert np.ma.isMaskedArray(unwrap)
-    assert np.all(unwrap.mask)
+    assert_(np.ma.isMaskedArray(unwrap))
+    assert_(np.all(unwrap.mask))
 
     # 1 unmasked element, still zero edges
     image = np.ma.zeros((10, 10, 10))
     image[:] = np.ma.masked
     image[0, 0, 0] = 0
     unwrap = unwrap_phase(image)
-    assert np.ma.isMaskedArray(unwrap)
-    assert np.sum(unwrap.mask) == 999   # all but one masked
-    assert unwrap[0, 0, 0] == 0
+    assert_(np.ma.isMaskedArray(unwrap))
+    assert_(np.sum(unwrap.mask) == 999)   # all but one masked
+    assert_(unwrap[0, 0, 0] == 0)
+
 
 if __name__ == "__main__":
     run_module_suite()

@@ -37,6 +37,24 @@ class PaintTool(CanvasToolBase):
         Overlay of painted labels displayed on top of image.
     label : int
         Current paint color.
+
+    Examples
+    ----------
+    >>> from skimage.data import camera
+    >>> import matplotlib.pyplot as plt
+    >>> from skimage.viewer.canvastools import PaintTool
+    >>> import numpy as np
+
+    >>> img = camera() #doctest: +SKIP
+
+    >>> ax = plt.subplot(111) #doctest: +SKIP 
+    >>> plt.imshow(img, cmap=plt.cm.gray) #doctest: +SKIP
+    >>> p = PaintTool(ax,np.shape(img[:-1]),10,0.2) #doctest: +SKIP
+    >>> plt.show() #doctest: +SKIP
+
+    >>> mask = p.overlay #doctest: +SKIP
+    >>> plt.imshow(mask,cmap=plt.cm.gray) #doctest: +SKIP
+    >>> plt.show() #doctest: +SKIP
     """
     def __init__(self, manager, overlay_shape, radius=5, alpha=0.3,
                  on_move=None, on_release=None, on_enter=None,

@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.testing import (assert_array_equal, assert_raises,
-                           assert_almost_equal)
+                           assert_almost_equal, assert_warns)
 
 from skimage import data
 from skimage import img_as_float
@@ -14,7 +14,7 @@ from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_fast, corner_orientations,
                              structure_tensor, structure_tensor_eigvals,
                              hessian_matrix, hessian_matrix_eigvals,
-                             hessian_matrix_det)
+                             hessian_matrix_det, shape_index)
 
 
 def test_structure_tensor():
@@ -40,23 +40,41 @@ def test_structure_tensor():
 
 def test_hessian_matrix():
     square = np.zeros((5, 5))
-    square[2, 2] = 1
-    Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
-    assert_almost_equal(Hxx, np.array([[0, 0, 0, 0, 0],
-                                       [0, 0, 0, 0, 0],
-                                       [0, 0, -1591.549431, 0, 0],
-                                       [0, 0, 0, 0, 0],
-                                       [0, 0, 0, 0, 0]]))
-    assert_almost_equal(Hxy, np.array([[0, 0, 0, 0, 0],
-                                       [0, 0, 0, 0, 0],
-                                       [0, 0, 0, 0, 0],
-                                       [0, 0, 0, 0, 0],
-                                       [0, 0, 0, 0, 0]]))
-    assert_almost_equal(Hyy, np.array([[0, 0, 0, 0, 0],
-                                       [0, 0, 0, 0, 0],
-                                       [0, 0, -1591.549431, 0, 0],
-                                       [0, 0, 0, 0, 0],
-                                       [0, 0, 0, 0, 0]]))
+    square[2, 2] = 4
+    Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc')
+    assert_almost_equal(Hrr, np.array([[0, 0,  0, 0, 0],
+                                       [0, 0,  0, 0, 0],
+                                       [2, 0, -2, 0, 2],
+                                       [0, 0,  0, 0, 0],
+                                       [0, 0,  0, 0, 0]]))
+
+    assert_almost_equal(Hrc, np.array([[0,  0, 0,  0, 0],
+                                       [0,  1, 0, -1, 0],
+                                       [0,  0, 0,  0, 0],
+                                       [0, -1, 0,  1, 0],
+                                       [0,  0, 0,  0, 0]]))
+
+    assert_almost_equal(Hcc, np.array([[0, 0,  2, 0, 0],
+                                       [0, 0,  0, 0, 0],
+                                       [0, 0, -2, 0, 0],
+                                       [0, 0,  0, 0, 0],
+                                       [0, 0,  2, 0, 0]]))
+
+    matrix2d = np.random.rand(3, 3)
+    assert_warns(UserWarning, hessian_matrix, matrix2d, sigma=0.1)
+
+
+def test_hessian_matrix_3d():
+    cube = np.zeros((5, 5, 5))
+    cube[2, 2, 2] = 4
+    Hs = hessian_matrix(cube, sigma=0.1, order='rc')
+    assert len(Hs) == 6, ("incorrect number of Hessian images (%i) for 3D" %
+                          len(Hs))
+    assert_almost_equal(Hs[2][:, 2, :], np.array([[0,  0,  0,  0,  0],
+                                                  [0,  1,  0, -1,  0],
+                                                  [0,  0,  0,  0,  0],
+                                                  [0, -1,  0,  1,  0],
+                                                  [0,  0,  0,  0,  0]]))
 
 
 def test_structure_tensor_eigvals():
@@ -78,19 +96,19 @@ def test_structure_tensor_eigvals():
 
 def test_hessian_matrix_eigvals():
     square = np.zeros((5, 5))
-    square[2, 2] = 1
-    Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
-    l1, l2 = hessian_matrix_eigvals(Hxx, Hxy, Hyy)
-    assert_almost_equal(l1, np.array([[0, 0, 0, 0, 0],
-                                      [0, 0, 0, 0, 0],
-                                      [0, 0, -1591.549431, 0, 0],
-                                      [0, 0, 0, 0, 0],
-                                      [0, 0, 0, 0, 0]]))
-    assert_almost_equal(l2, np.array([[0, 0, 0, 0, 0],
-                                      [0, 0, 0, 0, 0],
-                                      [0, 0, -1591.549431, 0, 0],
-                                      [0, 0, 0, 0, 0],
-                                      [0, 0, 0, 0, 0]]))
+    square[2, 2] = 4
+    Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc')
+    l1, l2 = hessian_matrix_eigvals(Hrr, Hrc, Hcc)
+    assert_almost_equal(l1, np.array([[0, 0,  2, 0, 0],
+                                      [0, 1,  0, 1, 0],
+                                      [2, 0, -2, 0, 2],
+                                      [0, 1,  0, 1, 0],
+                                      [0, 0,  2, 0, 0]]))
+    assert_almost_equal(l2, np.array([[0,  0,  0,  0, 0],
+                                      [0, -1,  0, -1, 0],
+                                      [0,  0, -2,  0, 0],
+                                      [0, -1,  0, -1, 0],
+                                      [0,  0,  0,  0, 0]]))
 
 
 @test_parallel()
@@ -98,7 +116,20 @@ def test_hessian_matrix_det():
     image = np.zeros((5, 5))
     image[2, 2] = 1
     det = hessian_matrix_det(image, 5)
-    assert_almost_equal(det, 0, decimal = 3)
+    assert_almost_equal(det, 0, decimal=3)
+
+
+def test_shape_index():
+    square = np.zeros((5, 5))
+    square[2, 2] = 4
+    s = shape_index(square, sigma=0.1)
+    assert_almost_equal(
+        s, np.array([[ np.nan, np.nan,   -0.5, np.nan, np.nan],
+                     [ np.nan,      0, np.nan,      0, np.nan],
+                     [   -0.5, np.nan,     -1, np.nan,   -0.5],
+                     [ np.nan,      0, np.nan,      0, np.nan],
+                     [ np.nan, np.nan,   -0.5, np.nan, np.nan]])
+    )
 
 
 @test_parallel()
@@ -262,7 +293,7 @@ def test_num_peaks():
     img_corners = corner_harris(rgb2gray(data.astronaut()))
 
     for i in range(20):
-        n = np.random.random_integers(20)
+        n = np.random.randint(1, 21)
         results = peak_local_max(img_corners,
                                  min_distance=10, threshold_rel=0, num_peaks=n)
         assert (results.shape[0] == n)
