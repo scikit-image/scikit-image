@@ -413,18 +413,12 @@ class MultiImage(ImageCollection):
 
     """
 
-    def __init__(self, filename, conserve_memory=True, dtype=None,
-                 **imread_kwargs):
+    def __init__(self, filename, conserve_memory=True, **imread_kwargs):
         """Load a multi-img."""
-        from ._io import imread
-
-        def load_func(fname, **kwargs):
-            kwargs.setdefault('dtype', dtype)
-            return imread(fname, **kwargs)
 
         self._filename = filename
         super(MultiImage, self).__init__(filename, conserve_memory,
-                                         load_func=load_func, **imread_kwargs)
+                                         load_func=None, **imread_kwargs)
 
     @property
     def filename(self):
