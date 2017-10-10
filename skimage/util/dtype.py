@@ -21,13 +21,12 @@ dtype_range = {np.bool_: (False, True),
 integer_types = (np.uint8, np.uint16, np.int8, np.int16)
 
 _supported_types = (np.bool_, np.bool8,
-                    np.uint8, np.uint16, np.uint32,
-                    np.int8, np.int16, np.int32,
+                    np.uint8, np.uint16, np.uint32, np.uint64,
+                    np.int8, np.int16, np.int32, np.int64,
                     np.float32, np.float64)
 
-if np.__version__ >= "1.6.0":
-    dtype_range[np.float16] = (-1, 1)
-    _supported_types += (np.float16, )
+dtype_range[np.float16] = (-1, 1)
+_supported_types += (np.float16, )
 
 
 def dtype_limits(image, clip_negative=True):
@@ -125,7 +124,18 @@ def convert(image, dtype, force_copy=False, uniform=False):
         # Numbers can be represented exactly only if m is a multiple of n
         # Output array is of same kind as input.
         kind = a.dtype.kind
-        if n == m:
+        if n > m and a.max() < 2 ** m:
+            mnew = int(np.ceil(m / 2) * 2)
+            if mnew > m:
+                dtype = "int%s" % mnew
+            else:
+                dtype = "uint%s" % mnew
+            n = int(np.ceil(n / 2) * 2)
+            msg = ("Downcasting %s to %s without scaling because max "
+                   "value %s fits in %s" % (a.dtype, dtype, a.max(), dtype))
+            warn(msg)
+            return a.astype(_dtype2(kind, m))
+        elif n == m:
             return a.copy() if copy else a
         elif n > m:
             # downscale with precision loss

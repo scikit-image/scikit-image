@@ -15,10 +15,11 @@ can be multiple states for a given plugin:
         loaded explicitly by the user.
 
 """
+import sys
 
-try:
+if sys.version.startswith('3'):
     from configparser import ConfigParser  # Python 3
-except ImportError:
+else:
     from ConfigParser import ConfigParser  # Python 2
 
 import os.path
@@ -45,7 +46,8 @@ plugin_meta_data = {}
 preferred_plugins = {
     # Default plugins for all types (overridden by specific types below).
     'all': ['pil', 'matplotlib', 'qt', 'freeimage'],
-    'imshow': ['matplotlib']
+    'imshow': ['matplotlib'],
+    'imshow_collection': ['matplotlib']
 }
 
 
@@ -58,13 +60,15 @@ def _clear_plugins():
                     'imsave': [],
                     'imshow': [],
                     'imread_collection': [],
+                    'imshow_collection': [],
                     '_app_show': []}
 _clear_plugins()
 
 
 def _load_preferred_plugins():
     # Load preferred plugin for each io function.
-    io_types = ['imsave', 'imshow', 'imread_collection', 'imread']
+    io_types = ['imsave', 'imshow', 'imread_collection', 'imshow_collection',
+                'imread']
     for p_type in io_types:
         _set_plugin(p_type, preferred_plugins['all'])
 
@@ -189,8 +193,8 @@ def call_plugin(kind, *args, **kwargs):
     if len(plugin_funcs) == 0:
         msg = ("No suitable plugin registered for %s.\n\n"
                "You may load I/O plugins with the `skimage.io.use_plugin` "
-               "command.  A list of all available plugins can be found using "
-               "`skimage.io.plugins()`.")
+               "command.  A list of all available plugins are shown in the "
+               "`skimage.io` docstring.")
         raise RuntimeError(msg % kind)
 
     plugin = kwargs.pop('plugin', None)
@@ -215,7 +219,7 @@ def use_plugin(name, kind=None):
     ----------
     name : str
         Name of plugin.
-    kind : {'imsave', 'imread', 'imshow', 'imread_collection'}, optional
+    kind : {'imsave', 'imread', 'imshow', 'imread_collection', 'imshow_collection'}, optional
         Set the plugin for this function.  By default,
         the plugin is set for all functions.
 

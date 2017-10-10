@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage import gaussian_filter
 
 from .util import (DescriptorExtractor, _mask_border_keypoints,
                    _prepare_grayscale_input_2D)
@@ -140,7 +140,8 @@ class BRIEF(DescriptorExtractor):
         """
         assert_nD(image, 2)
 
-        np.random.seed(self.sample_seed)
+        random = np.random.RandomState()
+        random.seed(self.sample_seed)
 
         image = _prepare_grayscale_input_2D(image)
 
@@ -151,7 +152,7 @@ class BRIEF(DescriptorExtractor):
         desc_size = self.descriptor_size
         patch_size = self.patch_size
         if self.mode == 'normal':
-            samples = (patch_size / 5.0) * np.random.randn(desc_size * 8)
+            samples = (patch_size / 5.0) * random.randn(desc_size * 8)
             samples = np.array(samples, dtype=np.int32)
             samples = samples[(samples < (patch_size // 2))
                               & (samples > - (patch_size - 2) // 2)]
@@ -159,9 +160,9 @@ class BRIEF(DescriptorExtractor):
             pos1 = samples[:desc_size * 2].reshape(desc_size, 2)
             pos2 = samples[desc_size * 2:desc_size * 4].reshape(desc_size, 2)
         elif self.mode == 'uniform':
-            samples = np.random.randint(-(patch_size - 2) // 2,
-                                        (patch_size // 2) + 1,
-                                        (desc_size * 2, 2))
+            samples = random.randint(-(patch_size - 2) // 2,
+                                     (patch_size // 2) + 1,
+                                     (desc_size * 2, 2))
             samples = np.array(samples, dtype=np.int32)
             pos1, pos2 = np.split(samples, 2)
 

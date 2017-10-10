@@ -199,8 +199,9 @@ class ImageCollection(object):
         index = []
         for fname in self._files:
             if fname.lower().endswith(('.tiff', '.tif')):
-                img = TiffFile(fname)
-                index += [(fname, i) for i in range(len(img.pages))]
+                with open(fname, 'rb') as f:
+                    img = TiffFile(f)
+                    index += [(fname, i) for i in range(len(img.pages))]
             else:
                 try:
                     im = Image.open(fname)
@@ -254,7 +255,7 @@ class ImageCollection(object):
                 kwargs = self.load_func_kwargs
                 if self._frame_index:
                     fname, img_num = self._frame_index[n]
-                    if img_num > 0:
+                    if img_num is not None:
                         self.data[idx] = self.load_func(fname, img_num=img_num,
                                                         **kwargs)
                     else:

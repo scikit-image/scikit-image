@@ -2,9 +2,9 @@
 skimage |version| docs
 ****************************
 
-This SciKit_ is an image processing toolbox for SciPy_.
+Scikit-image is an image processing toolbox for SciPy_.  View the latest
+`release notes here <release_notes_and_installation.html>`_.
 
-.. _SciKit: http://scikits.appspot.com
 .. _SciPy: http://www.scipy.org
 
 
@@ -22,6 +22,7 @@ Sections
    contribute
    license
    auto_examples/index
+   release_notes_and_installation
 
 
 .. list-table::
@@ -59,14 +60,16 @@ Sections
 
 
 
-Indices and Tables
-==================
+Indices
+=======
 
-`Table of Contents <contents.html>`_
-   Lists all sections and subsections.
+.. list-table::
+   :class: contentstable
 
-:ref:`search`
-   Search this documentation.
+   * - :ref:`search`
 
-:ref:`genindex`
-   All functions, classes, terms.
+       Search this documentation.
+
+     - :ref:`genindex`
+
+       All functions, classes, terms.

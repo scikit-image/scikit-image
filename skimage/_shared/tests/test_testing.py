@@ -3,7 +3,7 @@
 
 import numpy as np
 from nose.tools import (assert_true, assert_raises, assert_equal)
-from skimage._shared.testing import doctest_skip_parser
+from skimage._shared.testing import doctest_skip_parser, test_parallel
 
 
 def test_skipper():
@@ -82,6 +82,28 @@ def test_skipper():
     c.__doc__ = docstring
     assert_raises(NameError, doctest_skip_parser, f)
     assert_raises(NameError, doctest_skip_parser, c)
+
+
+def test_test_parallel():
+    state = []
+
+    @test_parallel()
+    def change_state1():
+        state.append(None)
+    change_state1()
+    assert len(state) == 2
+
+    @test_parallel(num_threads=1)
+    def change_state2():
+        state.append(None)
+    change_state2()
+    assert len(state) == 3
+
+    @test_parallel(num_threads=3)
+    def change_state3():
+        state.append(None)
+    change_state3()
+    assert len(state) == 6
 
 
 if __name__ == '__main__':

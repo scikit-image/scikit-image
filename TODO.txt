@@ -1,7 +1,29 @@
 Remember to list any API changes below in `doc/source/api_changes.txt`.
 
+
+
+Version 0.14
+------------
+* Remove deprecated ``ntiles_*` kwargs in ``equalize_adapthist``.
+* Remove deprecated ``skimage.restoration.nl_means_denoising``.
+* Remove deprecated ``skimage.filters.gaussian_filter``.
+* Remove deprecated ``skimage.filters.gabor_filter``.
+* Remove deprecated ``skimage.measure.LineModel`` and
+  add an alias LineModel = LineModelND. While the deprecated LineModel has for
+  parameters `(dist, theta)`, LineModelND has the more general parameters
+  `(origin, direction)`.
+* Remove deprecated old syntax support for ``skimage.transform.integrate``.
+* Remove deprecated ``skimage.data.lena`` and corresponding data files.
+* Remove deprecated ``skimage.measure.structural_similarity`` alias and
+  deprecation warning test for this alias.
+* Remove deprecated ``sigma_range`` kwargs in ``skimage.restoration.denoise_bilateral``
+  and corresponding tests.
+
+
 Version 0.13
 ------------
+* Require Python 2.7+, remove warning in `__init__.py` and 2.6 hack in
+  `doc/release/contribs.py`.
 * Remove deprecated `None` defaults for `skimage.exposure.rescale_intensity`
 * Remove deprecated `skimage.filters.canny` import in `filters/__init__.py`
   file (canny is now in `skimage.feature.canny`).
@@ -11,21 +33,9 @@ Version 0.13
 * Remove deprecated edge filters `hsobel`, `vsobel`, `hscharr`, `vscharr`,
   `hprewitt`, `vprewitt`, `roberts_positive_diagonal`,
   `roberts_negative_diagonal` in `skimage/filters/edges.py`
+* Remove supported for renamed edge mode, 'nearest' (it is now 'edge').  This
+  involves removing the function _mode_deprecations from skimage._shared.utils
+  as well as any uses of _mode_deprecations from restoration/_denoise.py,
+  _shared/interpolation.pyx, transform/_geometric.py, and transform/_warps.py
 
-Version 0.12
-------------
-* Change `label` to mark background as 0, not -1, which is consistent with
-  SciPy's labelling.
-* Remove `skimage.morphology.label` from `skimage.morphology.__init__`--it now
-  lives in `skimage.measure.label`.
-* Remove deprecated `reverse_map` parameter of `skimage.transform.warp`
-* Change deprecated `enforce_connectivity=False` on skimage.segmentation.slic
-  and set it to True as default
-* Remove deprecated `skimage.measure.fit.BaseModel._params` attribute
-* Remove deprecated `skimage.measure.fit.BaseModel._params`,
-  `skimage.transform.ProjectiveTransform._matrix`,
-  `skimage.transform.PolynomialTransform._params`,
-  `skimage.transform.PiecewiseAffineTransform.affines_*` attributes
-* Remove deprecated functions `skimage.filters.denoise_*`
-* Add 3D phantom in `skimage.data`
-* Add 3D test case of `skimage.feature.phase_correlate`
+

@@ -8,7 +8,8 @@ import os.path
 from skimage.transform import radon, iradon, iradon_sart, rescale
 from skimage.io import imread
 from skimage import data_dir
-
+from skimage._shared.testing import test_parallel
+from skimage._shared._warnings import expected_warnings
 
 PHANTOM = imread(os.path.join(data_dir, "phantom.png"),
                    as_grey=True)[::2, ::2]
@@ -214,7 +215,8 @@ def _random_circle(shape):
 
 def test_radon_circle():
     a = np.ones((10, 10))
-    assert_raises(ValueError, radon, a, circle=True)
+    with expected_warnings(['reconstruction circle']):
+        radon(a, circle=True)
 
     # Synthetic data, circular symmetry
     shape = (61, 79)
@@ -310,6 +312,7 @@ def test_order_angles_golden_ratio():
             assert len(indices) == len(set(indices))
 
 
+@test_parallel()
 def test_iradon_sart():
     debug = False
 

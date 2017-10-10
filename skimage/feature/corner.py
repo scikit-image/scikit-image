@@ -1,5 +1,5 @@
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage as ndi
 from scipy import stats
 
 from ..util import img_as_float, pad
@@ -33,8 +33,8 @@ def _compute_derivatives(image, mode='constant', cval=0):
 
     """
 
-    imy = ndimage.sobel(image, axis=0, mode=mode, cval=cval)
-    imx = ndimage.sobel(image, axis=1, mode=mode, cval=cval)
+    imy = ndi.sobel(image, axis=0, mode=mode, cval=cval)
+    imx = ndi.sobel(image, axis=1, mode=mode, cval=cval)
 
     return imx, imy
 
@@ -92,9 +92,9 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     imx, imy = _compute_derivatives(image, mode=mode, cval=cval)
 
     # structure tensore
-    Axx = ndimage.gaussian_filter(imx * imx, sigma, mode=mode, cval=cval)
-    Axy = ndimage.gaussian_filter(imx * imy, sigma, mode=mode, cval=cval)
-    Ayy = ndimage.gaussian_filter(imy * imy, sigma, mode=mode, cval=cval)
+    Axx = ndi.gaussian_filter(imx * imx, sigma, mode=mode, cval=cval)
+    Axy = ndi.gaussian_filter(imx * imy, sigma, mode=mode, cval=cval)
+    Ayy = ndi.gaussian_filter(imy * imy, sigma, mode=mode, cval=cval)
 
     return Axx, Axy, Ayy
 
@@ -136,7 +136,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
     --------
     >>> from skimage.feature import hessian_matrix
     >>> square = np.zeros((5, 5))
-    >>> square[2, 2] = 1
+    >>> square[2, 2] = -1.0 / 1591.54943092
     >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
     >>> Hxx
     array([[ 0.,  0.,  0.,  0.,  0.],
@@ -149,25 +149,28 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
 
     image = _prepare_grayscale_input_2D(image)
 
-    # window extent to the left and right, which covers > 99% of the normal
-    # distribution
+    # Window extent which covers > 99% of the normal distribution.
     window_ext = max(1, np.ceil(3 * sigma))
 
     ky, kx = np.mgrid[-window_ext:window_ext + 1, -window_ext:window_ext + 1]
 
-    # second derivative Gaussian kernels
+    # Second derivative Gaussian kernels.
     gaussian_exp = np.exp(-(kx ** 2 + ky ** 2) / (2 * sigma ** 2))
     kernel_xx = 1 / (2 * np.pi * sigma ** 4) * (kx ** 2 / sigma ** 2 - 1)
     kernel_xx *= gaussian_exp
-    kernel_xx /= kernel_xx.sum()
     kernel_xy = 1 / (2 * np.pi * sigma ** 6) * (kx * ky)
     kernel_xy *= gaussian_exp
-    kernel_xy /= kernel_xx.sum()
     kernel_yy = kernel_xx.transpose()
 
-    Hxx = ndimage.convolve(image, kernel_xx, mode=mode, cval=cval)
-    Hxy = ndimage.convolve(image, kernel_xy, mode=mode, cval=cval)
-    Hyy = ndimage.convolve(image, kernel_yy, mode=mode, cval=cval)
+    # Remove small kernel values.
+    eps = np.finfo(kernel_xx.dtype).eps
+    kernel_xx[np.abs(kernel_xx) < eps * np.abs(kernel_xx).max()] = 0
+    kernel_xy[np.abs(kernel_xy) < eps * np.abs(kernel_xy).max()] = 0
+    kernel_yy[np.abs(kernel_yy) < eps * np.abs(kernel_yy).max()] = 0
+
+    Hxx = ndi.convolve(image, kernel_xx, mode=mode, cval=cval)
+    Hxy = ndi.convolve(image, kernel_xy, mode=mode, cval=cval)
+    Hyy = ndi.convolve(image, kernel_yy, mode=mode, cval=cval)
 
     return Hxx, Hxy, Hyy
 
@@ -277,7 +280,7 @@ def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
     --------
     >>> from skimage.feature import hessian_matrix, hessian_matrix_eigvals
     >>> square = np.zeros((5, 5))
-    >>> square[2, 2] = 1
+    >>> square[2, 2] = -1 / 1591.54943092
     >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
     >>> hessian_matrix_eigvals(Hxx, Hxy, Hyy)[0]
     array([[ 0.,  0.,  0.,  0.,  0.],
@@ -796,7 +799,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     return corners_subpix
 
 
-def corner_peaks(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
+def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
                  exclude_border=True, indices=True, num_peaks=np.inf,
                  footprint=None, labels=None):
     """Find corners in corner measure response image.
@@ -820,18 +823,13 @@ def corner_peaks(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
            [ 0.,  0.,  1.,  1.,  0.],
            [ 0.,  0.,  1.,  1.,  0.],
            [ 0.,  0.,  0.,  0.,  0.]])
-    >>> peak_local_max(response, exclude_border=False)
+    >>> peak_local_max(response)
     array([[2, 2],
            [2, 3],
            [3, 2],
            [3, 3]])
-    >>> corner_peaks(response, exclude_border=False)
+    >>> corner_peaks(response)
     array([[2, 2]])
-    >>> corner_peaks(response, exclude_border=False, min_distance=0)
-    array([[2, 2],
-           [2, 3],
-           [3, 2],
-           [3, 3]])
 
     """
 

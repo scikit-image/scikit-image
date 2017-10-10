@@ -1,16 +1,23 @@
 body {
-    font-family: "Raleway";
+    font-family: "Lato", sans-serif;
     letter-spacing: 0.02em;
     font-size: 102%;
+    line-height: 23px;
 }
 a {
     color: #CE5C00;
+}
+li {
+    line-height: 23px;
+}
+code, pre {
+    font-family: monospace;
 }
 input,
 button,
 select,
 textarea {
-    font-family: "Raleway";
+    font-family: "Lato", sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {

@@ -1,37 +1,40 @@
 import numpy as np
-from scipy.ndimage import label
+from ..measure import label
 
 
-def clear_border(image, buffer_size=0, bgval=0):
-    """Clear objects connected to image border.
+def clear_border(labels, buffer_size=0, bgval=0, in_place=False):
+    """Clear objects connected to the label image border.
 
-    The changes will be applied to the input image.
+    The changes will be applied directly to the input.
 
     Parameters
     ----------
-    image : (N, M) array
-        Binary image.
+    labels : (N, M) array of int
+        Label or binary image.
     buffer_size : int, optional
-        Define additional buffer around image border.
+        The width of the border examined.  By default, only objects
+        that touch the outside of the image are removed.
     bgval : float or int, optional
-        Value for cleared objects.
+        Cleared objects are set to this value.
+    in_place : bool, optional
+        Whether or not to manipulate the labels array in-place.
 
     Returns
     -------
-    image : (N, M) array
+    labels : (N, M) array
         Cleared binary image.
 
     Examples
     --------
     >>> import numpy as np
     >>> from skimage.segmentation import clear_border
-    >>> image = np.array([[0, 0, 0, 0, 0, 0, 0, 1, 0],
-    ...                   [0, 0, 0, 0, 1, 0, 0, 0, 0],
-    ...                   [1, 0, 0, 1, 0, 1, 0, 0, 0],
-    ...                   [0, 0, 1, 1, 1, 1, 1, 0, 0],
-    ...                   [0, 1, 1, 1, 1, 1, 1, 1, 0],
-    ...                   [0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> clear_border(image)
+    >>> labels = np.array([[0, 0, 0, 0, 0, 0, 0, 1, 0],
+    ...                    [0, 0, 0, 0, 1, 0, 0, 0, 0],
+    ...                    [1, 0, 0, 1, 0, 1, 0, 0, 0],
+    ...                    [0, 0, 1, 1, 1, 1, 1, 0, 0],
+    ...                    [0, 1, 1, 1, 1, 1, 1, 1, 0],
+    ...                    [0, 0, 0, 0, 0, 0, 0, 0, 0]])
+    >>> clear_border(labels)
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 1, 0, 0, 0, 0],
            [0, 0, 0, 1, 0, 1, 0, 0, 0],
@@ -40,6 +43,7 @@ def clear_border(image, buffer_size=0, bgval=0):
            [0, 0, 0, 0, 0, 0, 0, 0, 0]])
 
     """
+    image = labels
 
     rows, cols = image.shape
     if buffer_size >= rows or buffer_size >= cols:
@@ -53,7 +57,10 @@ def clear_border(image, buffer_size=0, bgval=0):
     borders[:, :ext] = True
     borders[:, - ext:] = True
 
-    labels, number = label(image)
+    # Re-label, in case we are dealing with a binary image
+    # and to get consistent labeling
+    labels = label(image, background=0)
+    number = np.max(labels) + 1
 
     # determine all objects that are connected to borders
     borders_indices = np.unique(labels[borders])
@@ -62,6 +69,9 @@ def clear_border(image, buffer_size=0, bgval=0):
     label_mask = np.in1d(indices, borders_indices)
     # create mask for pixels to clear
     mask = label_mask[labels.ravel()].reshape(labels.shape)
+
+    if not in_place:
+        image = image.copy()
 
     # clear border pixels
     image[mask] = bgval

@@ -1,6 +1,6 @@
-from ._hough_transform import (hough_ellipse, hough_line,
-                               probabilistic_hough_line)
-from .hough_transform import hough_circle, hough_line_peaks
+from .hough_transform import (hough_line, hough_line_peaks,
+                              probabilistic_hough_line, hough_circle,
+                              hough_ellipse)
 from .radon_transform import radon, iradon, iradon_sart
 from .finite_radon_transform import frt2, ifrt2
 from .integral import integral_image, integrate
@@ -12,6 +12,7 @@ from ._geometric import (warp, warp_coords, estimate_transform,
 from ._warps import swirl, resize, rotate, rescale, downscale_local_mean
 from .pyramids import (pyramid_reduce, pyramid_expand,
                        pyramid_gaussian, pyramid_laplacian)
+from .seam_carving import seam_carve
 
 
 __all__ = ['hough_circle',
@@ -43,4 +44,5 @@ __all__ = ['hough_circle',
            'pyramid_reduce',
            'pyramid_expand',
            'pyramid_gaussian',
-           'pyramid_laplacian']
+           'pyramid_laplacian',
+           'seam_carve']

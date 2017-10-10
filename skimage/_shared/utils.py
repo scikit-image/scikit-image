@@ -2,13 +2,14 @@ import warnings
 import functools
 import sys
 import numpy as np
+import types
 
 import six
 
-from ._warnings import all_warnings
+from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
-           'safe_as_int', 'assert_nD']
+           'safe_as_int', 'assert_nD', 'warn']
 
 
 class skimage_deprecation(Warning):
@@ -163,3 +164,30 @@ def assert_nD(array, ndim, arg_name='image'):
         ndim = [ndim]
     if not array.ndim in ndim:
         raise ValueError(msg % (arg_name, '-or-'.join([str(n) for n in ndim])))
+
+
+def _mode_deprecations(mode):
+    """Used to update deprecated mode names in
+    `skimage._shared.interpolation.pyx`."""
+    if mode.lower() == 'nearest':
+        warn(skimage_deprecation(
+            "Mode 'nearest' has been renamed to 'edge'. Mode 'nearest' will be "
+            "removed in a future release."))
+        mode = 'edge'
+    return mode
+
+
+def copy_func(f, name=None):
+    """Create a copy of a function.
+
+    Parameters
+    ----------
+    f : function
+        Function to copy.
+    name : str, optional
+        Name of new function.
+
+    """
+    return types.FunctionType(six.get_function_code(f),
+                              six.get_function_globals(f), name or f.__name__,
+                              six.get_function_defaults(f), six.get_function_closure(f))

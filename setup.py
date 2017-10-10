@@ -9,19 +9,33 @@ Please refer to the online documentation at
 http://scikit-image.org/
 """
 
-DISTNAME            = 'scikit-image'
-DESCRIPTION         = 'Image processing routines for SciPy'
-LONG_DESCRIPTION    = descr
-MAINTAINER          = 'Stefan van der Walt'
-MAINTAINER_EMAIL    = 'stefan@sun.ac.za'
-URL                 = 'http://scikit-image.org'
-LICENSE             = 'Modified BSD'
-DOWNLOAD_URL        = 'http://github.com/scikit-image/scikit-image'
+DISTNAME = 'scikit-image'
+DESCRIPTION = 'Image processing routines for SciPy'
+LONG_DESCRIPTION = descr
+MAINTAINER = 'Stefan van der Walt'
+MAINTAINER_EMAIL = 'stefan@sun.ac.za'
+URL = 'http://scikit-image.org'
+LICENSE = 'Modified BSD'
+DOWNLOAD_URL = 'http://github.com/scikit-image/scikit-image'
 
 import os
+import sys
 
 import setuptools
 from distutils.command.build_py import build_py
+
+if sys.version_info[0] < 3:
+    import __builtin__ as builtins
+else:
+    import builtins
+
+# This is a bit (!) hackish: we are setting a global variable so that the main
+# skimage __init__ can detect if it is being loaded by the setup routine, to
+# avoid attempting to load components that aren't built yet:
+# the numpy distutils extensions that are used by scikit-image to recursively
+# build the compiled extensions in sub-packages is based on the Python import
+# machinery.
+builtins.__SKIMAGE_SETUP__ = True
 
 
 with open('skimage/__init__.py') as fid:
@@ -33,37 +47,24 @@ with open('skimage/__init__.py') as fid:
 with open('requirements.txt') as fid:
     INSTALL_REQUIRES = [l.strip() for l in fid.readlines() if l]
 
-# development versions do not have the cythonized files
-if VERSION.endswith('dev'):
-    SETUP_REQUIRES = [r for r in INSTALL_REQUIRES if r.startswith('cython')]
-else:
-    INSTALL_REQUIRES = [r for r in INSTALL_REQUIRES
-                                         if not r.startswith('cython')]
-    SETUP_REQUIRES = []
-
-
-# list requirements for PyPI
-REQUIRES = [r.replace('>=', ' (>= ') + ')'
-                      for r in INSTALL_REQUIRES + SETUP_REQUIRES]
+# requirements for those browsing PyPI
+REQUIRES = [r.replace('>=', ' (>= ') + ')' for r in INSTALL_REQUIRES]
 REQUIRES = [r.replace('==', ' (== ') for r in REQUIRES]
-
-
-# do not attempt to install numpy and scipy until they have eggs available
-INSTALL_REQUIRES = [r for r in INSTALL_REQUIRES
-                                     if not r.startswith(('scipy', 'numpy'))]
+REQUIRES = [r.replace('[array]', '') for r in REQUIRES]
 
 
 def configuration(parent_package='', top_path=None):
-    if os.path.exists('MANIFEST'): os.remove('MANIFEST')
+    if os.path.exists('MANIFEST'):
+        os.remove('MANIFEST')
 
     from numpy.distutils.misc_util import Configuration
     config = Configuration(None, parent_package, top_path)
 
     config.set_options(
-            ignore_setup_xxx_py=True,
-            assume_default_configuration=True,
-            delegate_options_to_subpackages=True,
-            quiet=True)
+        ignore_setup_xxx_py=True,
+        assume_default_configuration=True,
+        delegate_options_to_subpackages=True,
+        quiet=True)
 
     config.add_subpackage('skimage')
     config.add_data_dir('skimage/data')
@@ -72,9 +73,36 @@ def configuration(parent_package='', top_path=None):
 
 
 if __name__ == "__main__":
-    # purposely fail loudly if numpy or scipy are not available
-    from numpy.distutils.core import setup
-    import scipy
+    try:
+        from numpy.distutils.core import setup
+        extra = {'configuration': configuration}
+        # Do not try and upgrade larger dependencies
+        for lib in ['scipy', 'numpy', 'matplotlib', 'pillow']:
+            try:
+                __import__(lib)
+                INSTALL_REQUIRES = [i for i in INSTALL_REQUIRES
+                                    if lib not in i]
+            except ImportError:
+                pass
+    except ImportError:
+        if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or
+                                   sys.argv[1] in ('--help-commands',
+                                                   '--version',
+                                                   'clean')):
+            # For these actions, NumPy is not required.
+            #
+            # They are required to succeed without Numpy for example when
+            # pip is used to install scikit-image when Numpy is not yet
+            # present in the system.
+            from setuptools import setup
+            extra = {}
+        else:
+            print('To install scikit-image from source, you will need numpy.\n' +
+                  'Install numpy with pip:\n' +
+                  'pip install numpy\n'
+                  'Or use your operating system package manager. For more\n' +
+                  'details, see http://scikit-image.org/docs/stable/install.html')
+            sys.exit(1)
 
     setup(
         name=DISTNAME,
@@ -102,10 +130,9 @@ if __name__ == "__main__":
             'Operating System :: Unix',
             'Operating System :: MacOS',
         ],
-
-        configuration=configuration,
-        setup_requires=SETUP_REQUIRES,
         install_requires=INSTALL_REQUIRES,
+        # install cython when running setup.py (source install)
+        setup_requires=['cython>=0.21'],
         requires=REQUIRES,
         packages=setuptools.find_packages(exclude=['doc']),
         include_package_data=True,
@@ -116,4 +143,5 @@ if __name__ == "__main__":
         },
 
         cmdclass={'build_py': build_py},
+        **extra
     )

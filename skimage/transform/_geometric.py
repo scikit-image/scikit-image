@@ -1,13 +1,24 @@
 import six
 import math
-import warnings
 import numpy as np
-from scipy import ndimage, spatial
+from scipy import spatial
+from scipy import ndimage as ndi
 
-from .._shared.utils import get_bound_method_class, safe_as_int
+from .._shared.utils import (get_bound_method_class, safe_as_int,
+                             _mode_deprecations, warn)
 from ..util import img_as_float
-from ..exposure import rescale_intensity
+
 from ._warps_cy import _warp_fast
+
+
+def _to_ndimage_mode(mode):
+    """Convert from `numpy.pad` mode name to the corresponding ndimage mode."""
+    mode = _mode_deprecations(mode.lower())
+    mode_translation_dict = dict(edge='nearest', symmetric='reflect',
+                                 reflect='mirror')
+    if mode in mode_translation_dict:
+        mode = mode_translation_dict[mode]
+    return mode
 
 
 def _center_and_normalize_points(points):
@@ -169,12 +180,6 @@ class ProjectiveTransform(GeometricTransform):
         if matrix.shape != (3, 3):
             raise ValueError("invalid shape of transformation matrix")
         self.params = matrix
-
-    @property
-    def _matrix(self):
-        warnings.warn('`_matrix` attribute is deprecated, '
-                      'use `params` instead.')
-        return self.params
 
     @property
     def _inv_matrix(self):
@@ -768,12 +773,6 @@ class PolynomialTransform(GeometricTransform):
             raise ValueError("invalid shape of transformation parameters")
         self.params = params
 
-    @property
-    def _params(self):
-        warnings.warn('`_params` attribute is deprecated, '
-                      'use `params` instead.')
-        return self.params
-
     def estimate(self, src, dst, order=2):
         """Set the transformation matrix with the explicit transformation
         parameters.
@@ -1054,7 +1053,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     users who would like, for example, to re-use a particular coordinate
     mapping, to use specific dtypes at various points along the the
     image-warping process, or to implement different post-processing logic
-    than `warp` performs after the call to `ndimage.map_coordinates`.
+    than `warp` performs after the call to `ndi.map_coordinates`.
 
 
     Examples
@@ -1128,9 +1127,9 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
     order : int, optional
         The order of the spline interpolation, default is 1. The order has to
         be in the range 0-5. See `skimage.transform.warp` for detail.
-    mode : string, optional
+    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
+        to the given mode.  Modes match the behaviour of `numpy.pad`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -1140,7 +1139,6 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
         produce values outside the given input range.
 
     """
-
     if clip and order != 0:
         min_val = input_image.min()
         max_val = input_image.max()
@@ -1211,9 +1209,9 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
          - 3: Bi-cubic
          - 4: Bi-quartic
          - 5: Bi-quintic
-    mode : string, optional
+    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
+        to the given mode.  Modes match the behaviour of `numpy.pad`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -1294,7 +1292,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     >>> warped = warp(cube, coords)
 
     """
-
+    mode = _mode_deprecations(mode)
     image = _convert_warp_input(image, preserve_range)
 
     input_shape = np.array(image.shape)
@@ -1309,13 +1307,13 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     if order == 2:
         # When fixing this issue, make sure to fix the branches further
         # below in this function
-        warnings.warn("Bi-quadratic interpolation behavior has changed due "
-                      "to a bug in the implementation of scikit-image. "
-                      "The new version now serves as a wrapper "
-                      "around SciPy's interpolation functions, which itself "
-                      "is not verified to be a correct implementation. Until "
-                      "skimage's implementation is fixed, we recommend "
-                      "to use bi-linear or bi-cubic interpolation instead.")
+        warn("Bi-quadratic interpolation behavior has changed due "
+             "to a bug in the implementation of scikit-image. "
+             "The new version now serves as a wrapper "
+             "around SciPy's interpolation functions, which itself "
+             "is not verified to be a correct implementation. Until "
+             "skimage's implementation is fixed, we recommend "
+             "to use bi-linear or bi-cubic interpolation instead.")
 
     if order in (0, 1, 3) and not map_args:
         # use fast Cython version for specific interpolation orders and input
@@ -1352,7 +1350,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
                 warped = np.dstack(dims)
 
     if warped is None:
-        # use ndimage.map_coordinates
+        # use ndi.map_coordinates
 
         if (isinstance(inverse_map, np.ndarray)
                 and inverse_map.shape == (3, 3)):
@@ -1388,8 +1386,9 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         # Pre-filtering not necessary for order 0, 1 interpolation
         prefilter = order > 1
 
-        warped = ndimage.map_coordinates(image, coords, prefilter=prefilter,
-                                      mode=mode, order=order, cval=cval)
+        ndi_mode = _to_ndimage_mode(mode)
+        warped = ndi.map_coordinates(image, coords, prefilter=prefilter,
+                                     mode=ndi_mode, order=order, cval=cval)
 
 
     _clip_warp_output(image, warped, order, mode, cval, clip)

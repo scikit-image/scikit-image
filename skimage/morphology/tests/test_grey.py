@@ -2,9 +2,8 @@ import os.path
 
 import numpy as np
 from numpy import testing
-from scipy import ndimage
+from scipy import ndimage as ndi
 
-import skimage
 from skimage import data_dir, img_as_uint
 from skimage.morphology import grey, selem
 from skimage._shared._warnings import expected_warnings
@@ -152,7 +151,7 @@ def test_3d_fallback_default_selem():
 
     # expect a "hyper-cross" centered in the 5x5x5:
     image_expected = np.zeros((7, 7, 7), dtype=bool)
-    image_expected[2:5, 2:5, 2:5] = ndimage.generate_binary_structure(3, 1)
+    image_expected[2:5, 2:5, 2:5] = ndi.generate_binary_structure(3, 1)
     testing.assert_array_equal(opened, image_expected)
 
 def test_3d_fallback_cube_selem():
@@ -174,9 +173,9 @@ def test_3d_fallback_white_tophat():
 
     with expected_warnings(['operator.*deprecated|\A\Z']):
         new_image = grey.white_tophat(image)
-    footprint = ndimage.generate_binary_structure(3,1)
+    footprint = ndi.generate_binary_structure(3,1)
     with expected_warnings(['operator.*deprecated|\A\Z']):
-        image_expected = ndimage.white_tophat(image,footprint=footprint)
+        image_expected = ndi.white_tophat(image,footprint=footprint)
     testing.assert_array_equal(new_image, image_expected)
 
 def test_3d_fallback_black_tophat():
@@ -187,9 +186,9 @@ def test_3d_fallback_black_tophat():
 
     with expected_warnings(['operator.*deprecated|\A\Z']):
         new_image = grey.black_tophat(image)
-    footprint = ndimage.generate_binary_structure(3,1)
+    footprint = ndi.generate_binary_structure(3,1)
     with expected_warnings(['operator.*deprecated|\A\Z']):
-        image_expected = ndimage.black_tophat(image,footprint=footprint)
+        image_expected = ndi.black_tophat(image,footprint=footprint)
     testing.assert_array_equal(new_image, image_expected)
 
 def test_2d_ndimage_equivalence():
@@ -201,9 +200,9 @@ def test_2d_ndimage_equivalence():
     opened = grey.opening(image)
     closed = grey.closing(image)
 
-    selem = ndimage.generate_binary_structure(2, 1)
-    ndimage_opened = ndimage.grey_opening(image, footprint=selem)
-    ndimage_closed = ndimage.grey_closing(image, footprint=selem)
+    selem = ndi.generate_binary_structure(2, 1)
+    ndimage_opened = ndi.grey_opening(image, footprint=selem)
+    ndimage_closed = ndi.grey_closing(image, footprint=selem)
 
     testing.assert_array_equal(opened, ndimage_opened)
     testing.assert_array_equal(closed, ndimage_closed)

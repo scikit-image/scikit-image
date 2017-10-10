@@ -1,7 +1,7 @@
 import math
-import warnings
 import numpy as np
 from scipy import optimize
+from .._shared.utils import skimage_deprecation, warn
 
 
 def _check_data_dim(data, dim):
@@ -9,16 +9,20 @@ def _check_data_dim(data, dim):
         raise ValueError('Input data must have shape (N, %d).' % dim)
 
 
+def _check_data_atleast_2D(data):
+    if data.ndim < 2 or data.shape[1] < 2:
+        raise ValueError('Input data must be at least 2D.')
+
+
+def _norm_along_axis(x, axis):
+    """NumPy < 1.8 does not support the `axis` argument for `np.linalg.norm`."""
+    return np.sqrt(np.einsum('ij,ij->i', x, x))
+
+
 class BaseModel(object):
 
     def __init__(self):
         self.params = None
-
-    @property
-    def _params(self):
-        warnings.warn('`_params` attribute is deprecated, '
-                      'use `params` instead.')
-        return self.params
 
 
 class LineModel(BaseModel):
@@ -39,12 +43,19 @@ class LineModel(BaseModel):
 
     A minimum number of 2 points is required to solve for the parameters.
 
+    **Deprecated class**. Use ``LineModelND`` instead.
+
     Attributes
     ----------
     params : tuple
         Line model parameters in the following order `dist`, `theta`.
 
     """
+
+    def __init__(self):
+        self.params = None
+        warn(skimage_deprecation('`LineModel` is deprecated, '
+             'use `LineModelND` instead.'))
 
     def estimate(self, data):
         """Estimate line model from data using total least squares.
@@ -154,6 +165,158 @@ class LineModel(BaseModel):
             params = self.params
         dist, theta = params
         return (dist - x * math.cos(theta)) / math.sin(theta)
+
+
+class LineModelND(BaseModel):
+    """Total least squares estimator for N-dimensional lines.
+
+    Lines are defined by a point (origin) and a unit vector (direction)
+    according to the following vector equation::
+
+        X = origin + lambda * direction
+
+    Attributes
+    ----------
+    params : tuple
+        Line model parameters in the following order `origin`, `direction`.
+
+    """
+
+    def estimate(self, data):
+        """Estimate line model from data.
+
+        Parameters
+        ----------
+        data : (N, dim) array
+            N points in a space of dimensionality dim >= 2.
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+        """
+
+        _check_data_atleast_2D(data)
+
+        X0 = data.mean(axis=0)
+
+        if data.shape[0] == 2:  # well determined
+            u = data[1] - data[0]
+            norm = np.linalg.norm(u)
+            if norm > 0:
+                u /= norm
+        elif data.shape[0] > 2:  # over-determined
+            data = data - X0
+            # first principal component
+            # Note: without full_matrices=False Python dies with joblib
+            # parallel_for.
+            _, _, u = np.linalg.svd(data, full_matrices=False)
+            u = u[0]
+        else:  # under-determined
+            raise ValueError('At least 2 input points needed.')
+
+        self.params = (X0, u)
+
+        return True
+
+    def residuals(self, data):
+        """Determine residuals of data to model.
+
+        For each point the shortest distance to the line is returned.
+        It is obtained by projecting the data onto the line.
+
+        Parameters
+        ----------
+        data : (N, dim) array
+            N points in a space of dimension dim.
+
+        Returns
+        -------
+        residuals : (N, ) array
+            Residual for each data point.
+        """
+
+        X0, u = self.params
+        return _norm_along_axis((data - X0) -
+                                np.dot(data - X0, u)[..., np.newaxis] * u,
+                                axis=1)
+
+    def predict(self, x, axis=0, params=None):
+        """Predict intersection of the estimated line model with a hyperplane
+        orthogonal to a given axis.
+
+        Parameters
+        ----------
+        x : array
+            coordinates along an axis.
+        axis : int
+            axis orthogonal to the hyperplane intersecting the line.
+        params : (2, ) array, optional
+            Optional custom parameter set in the form (`origin`, `direction`).
+
+        Returns
+        -------
+        y : array
+            Predicted coordinates.
+
+        If the line is parallel to the given axis, a ValueError is raised.
+        """
+
+        if params is None:
+            params = self.params
+
+        X0, u = params
+
+        if u[axis] == 0:
+            # line parallel to axis
+            raise ValueError('Line parallel to axis %s' % axis)
+
+        l = (x - X0[axis]) / u[axis]
+        return X0 + l[..., np.newaxis] * u
+
+    def predict_x(self, y, params=None):
+        """Predict x-coordinates for 2D lines using the estimated model.
+
+        Alias for::
+
+            predict(y, axis=1)[:, 0]
+
+        Parameters
+        ----------
+        y : array
+            y-coordinates.
+        params : (2, ) array, optional
+            Optional custom parameter set in the form (`origin`, `direction`).
+
+        Returns
+        -------
+        x : array
+            Predicted x-coordinates.
+
+        """
+        return self.predict(y, axis=1, params=params)[:, 0]
+
+    def predict_y(self, x, params=None):
+        """Predict y-coordinates  for 2D lines using the estimated model.
+
+        Alias for::
+
+            predict(x, axis=0)[:, 1]
+
+        Parameters
+        ----------
+        x : array
+            x-coordinates.
+        params : (2, ) array, optional
+            Optional custom parameter set in the form (`origin`, `direction`).
+
+        Returns
+        -------
+        y : array
+            Predicted y-coordinates.
+
+        """
+        return self.predict(x, axis=0, params=params)[:, 1]
 
 
 class CircleModel(BaseModel):

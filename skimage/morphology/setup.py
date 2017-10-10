@@ -16,6 +16,7 @@ def configuration(parent_package='', top_path=None):
     cython(['_skeletonize_cy.pyx'], working_path=base_path)
     cython(['_convex_hull.pyx'], working_path=base_path)
     cython(['_greyreconstruct.pyx'], working_path=base_path)
+    cython(['_skeletonize_3d_cy.pyx.in'], working_path=base_path)
 
     config.add_extension('_watershed', sources=['_watershed.c'],
                          include_dirs=[get_numpy_include_dirs()])
@@ -24,6 +25,8 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('_convex_hull', sources=['_convex_hull.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_greyreconstruct', sources=['_greyreconstruct.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_skeletonize_3d_cy', sources=['_skeletonize_3d_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config

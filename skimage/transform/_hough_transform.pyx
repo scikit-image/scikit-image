@@ -12,9 +12,6 @@ from libc.stdlib cimport rand
 
 from ..draw import circle_perimeter
 
-cdef double PI_2 = 1.5707963267948966
-cdef double NEG_PI_2 = -PI_2
-
 from .._shared.interpolation cimport round
 
 
@@ -79,22 +76,24 @@ def _hough_circle(cnp.ndarray img,
 
         num_circle_pixels = circle_x.size
 
-        if normalize:
-            incr = 1.0 / num_circle_pixels
-        else:
-            incr = 1
+        with nogil:
 
-        # For each non zero pixel
-        for p in range(num_pixels):
-            # Plug the circle at (px, py),
-            # its coordinates are (tx, ty)
-            for c in range(num_circle_pixels):
-                tx = circle_x[c] + x[p]
-                ty = circle_y[c] + y[p]
-                if offset:
-                    acc[i, tx, ty] += incr
-                elif 0 <= tx < xmax and 0 <= ty < ymax:
-                    acc[i, tx, ty] += incr
+            if normalize:
+                incr = 1.0 / num_circle_pixels
+            else:
+                incr = 1
+
+            # For each non zero pixel
+            for p in range(num_pixels):
+                # Plug the circle at (px, py),
+                # its coordinates are (tx, ty)
+                for c in range(num_circle_pixels):
+                    tx = circle_x[c] + x[p]
+                    ty = circle_y[c] + y[p]
+                    if offset:
+                        acc[i, tx, ty] += incr
+                    elif 0 <= tx < xmax and 0 <= ty < ymax:
+                        acc[i, tx, ty] += incr
 
     return acc
 
@@ -276,15 +275,9 @@ def hough_line(cnp.ndarray img,
     .. plot:: hough_tf.py
 
     """
-    if img.ndim != 2:
-        raise ValueError('The input image must be 2D.')
-
     # Compute the array of angles and their sine and cosine
     cdef cnp.ndarray[ndim=1, dtype=cnp.double_t] ctheta
     cdef cnp.ndarray[ndim=1, dtype=cnp.double_t] stheta
-
-    if theta is None:
-        theta = np.linspace(NEG_PI_2, PI_2, 180)
 
     ctheta = np.cos(theta)
     stheta = np.sin(theta)
@@ -306,14 +299,17 @@ def hough_line(cnp.ndarray img,
 
     # finally, run the transform
     cdef Py_ssize_t nidxs, nthetas, i, j, x, y, accum_idx
-    nidxs = y_idxs.shape[0]  # x and y are the same shape
-    nthetas = theta.shape[0]
-    for i in range(nidxs):
-        x = x_idxs[i]
-        y = y_idxs[i]
-        for j in range(nthetas):
-            accum_idx = <int>round((ctheta[j] * x + stheta[j] * y)) + offset
-            accum[accum_idx, j] += 1
+
+    with nogil:
+        nidxs = y_idxs.shape[0]  # x and y are the same shape
+        nthetas = theta.shape[0]
+        for i in range(nidxs):
+            x = x_idxs[i]
+            y = y_idxs[i]
+            for j in range(nthetas):
+                accum_idx = <int>round((ctheta[j] * x + stheta[j] * y)) + offset
+                accum[accum_idx, j] += 1
+
     return accum, theta, bins
 
 
@@ -349,12 +345,6 @@ def probabilistic_hough_line(cnp.ndarray img, int threshold=10,
            Hough transform for line detection", in IEEE Computer Society
            Conference on Computer Vision and Pattern Recognition, 1999.
     """
-    if img.ndim != 2:
-        raise ValueError('The input image must be 2D.')
-
-    if theta is None:
-        theta = PI_2 - np.arange(180) / 180.0 * 2 * PI_2
-
     cdef Py_ssize_t height = img.shape[0]
     cdef Py_ssize_t width = img.shape[1]
 

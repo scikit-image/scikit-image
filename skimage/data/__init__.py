@@ -10,7 +10,8 @@ import os as _os
 
 from .. import data_dir
 from ..io import imread, use_plugin
-
+from .._shared.utils import deprecated
+from ._binary_blobs import binary_blobs
 
 __all__ = ['load',
            'camera',
@@ -26,6 +27,7 @@ __all__ = ['load',
            'chelsea',
            'coffee',
            'hubble_deep_field',
+           'rocket',
            'astronaut']
 
 
@@ -40,7 +42,7 @@ def load(f):
     Returns
     -------
     img : ndarray
-        Image loaded from skimage.data_dir.
+        Image loaded from ``skimage.data_dir``.
     """
     use_plugin('pil')
     return imread(_os.path.join(data_dir, f))
@@ -55,6 +57,7 @@ def camera():
     return load("camera.png")
 
 
+@deprecated('skimage.data.astronaut')
 def lena():
     """Colour "Lena" image.
 
@@ -241,3 +244,22 @@ def hubble_deep_field():
 
     """
     return load("hubble_deep_field.jpg")
+
+
+def rocket():
+    """Launch photo of DSCOVR on Falcon 9 by SpaceX.
+
+    This is the launch photo of Falcon 9 carrying DSCOVR lifted off from
+    SpaceX's Launch Complex 40 at Cape Canaveral Air Force Station, FL.
+
+    Notes
+    -----
+    This image was downloaded from
+    `SpaceX Photos
+    <https://www.flickr.com/photos/spacexphotos/16511594820/in/photostream/>`__.
+
+    The image was captured by SpaceX and `released in the public domain
+    <http://arstechnica.com/tech-policy/2015/03/elon-musk-puts-spacex-photos-into-the-public-domain/>`_.
+
+    """
+    return load("rocket.jpg")

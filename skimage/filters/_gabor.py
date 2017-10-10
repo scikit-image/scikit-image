@@ -1,9 +1,9 @@
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage as ndi
 from .._shared.utils import assert_nD
 
 
-__all__ = ['gabor_kernel', 'gabor_filter']
+__all__ = ['gabor_kernel', 'gabor']
 
 
 def _sigma_prefactor(bandwidth):
@@ -56,7 +56,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
 
     Examples
     --------
-    >>> from skimage.filter import gabor_kernel
+    >>> from skimage.filters import gabor_kernel
     >>> from skimage import io
     >>> from matplotlib import pyplot as plt  # doctest: +SKIP
 
@@ -94,8 +94,8 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
     return g
 
 
-def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
-                 sigma_y=None, n_stds=3, offset=0, mode='reflect', cval=0):
+def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
+          sigma_y=None, n_stds=3, offset=0, mode='reflect', cval=0):
     """Return real and imaginary responses to Gabor filter.
 
     The real and imaginary parts of the Gabor filter kernel are applied to the
@@ -129,11 +129,11 @@ def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
         deviations.
     offset : float, optional
         Phase offset of harmonic function in radians.
-    mode : string, optional
-        Mode used to convolve image with a kernel, passed to `ndimage.convolve`
+    mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
+        Mode used to convolve image with a kernel, passed to `ndi.convolve`
     cval : scalar, optional
         Value to fill past edges of input if `mode` of convolution is
-        'constant'. The parameter is passed to `ndimage.convolve`.
+        'constant'. The parameter is passed to `ndi.convolve`.
 
     Returns
     -------
@@ -148,19 +148,19 @@ def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
 
     Examples
     --------
-    >>> from skimage.filter import gabor_filter
+    >>> from skimage.filters import gabor
     >>> from skimage import data, io
     >>> from matplotlib import pyplot as plt  # doctest: +SKIP
 
     >>> image = data.coins()
     >>> # detecting edges in a coin image
-    >>> filt_real, filt_imag = gabor_filter(image, frequency=0.6)
+    >>> filt_real, filt_imag = gabor(image, frequency=0.6)
     >>> plt.figure()            # doctest: +SKIP
     >>> io.imshow(filt_real)    # doctest: +SKIP
     >>> io.show()               # doctest: +SKIP
 
     >>> # less sensitivity to finer details with the lower frequency kernel
-    >>> filt_real, filt_imag = gabor_filter(image, frequency=0.1)
+    >>> filt_real, filt_imag = gabor(image, frequency=0.1)
     >>> plt.figure()            # doctest: +SKIP
     >>> io.imshow(filt_real)    # doctest: +SKIP
     >>> io.show()               # doctest: +SKIP
@@ -169,7 +169,7 @@ def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     g = gabor_kernel(frequency, theta, bandwidth, sigma_x, sigma_y, n_stds,
                      offset)
 
-    filtered_real = ndimage.convolve(image, np.real(g), mode=mode, cval=cval)
-    filtered_imag = ndimage.convolve(image, np.imag(g), mode=mode, cval=cval)
+    filtered_real = ndi.convolve(image, np.real(g), mode=mode, cval=cval)
+    filtered_imag = ndi.convolve(image, np.imag(g), mode=mode, cval=cval)
 
     return filtered_real, filtered_imag

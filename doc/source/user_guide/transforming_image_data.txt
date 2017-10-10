@@ -78,8 +78,8 @@ using an array of labels to encode the regions to be represented with the
 same color. 
 
 
-.. image: ../auto_examples/images/plot_join_segmentations_1.png
-   :target: ../auto_examples/plot_join_segmentations.html
+.. image: ../auto_examples/segmentation/images/plot_join_segmentations_1.png
+   :target: ../auto_examples/segmentation/plot_join_segmentations.html
    :align: center
    :width: 80%
 
@@ -87,9 +87,9 @@ same color.
 
 .. topic:: Examples:
 
-  * :ref:`example_plot_tinting_grayscale_images.py`
-  * :ref:`example_plot_join_segmentations.py`
-  * :ref:`example_plot_rag_mean_color.py`
+  * :ref:`example_color_exposure_plot_tinting_grayscale_images.py`
+  * :ref:`example_segmentation_plot_join_segmentations.py`
+  * :ref:`example_segmentation_plot_rag_mean_color.py`
 
 
 Contrast and exposure
@@ -122,7 +122,7 @@ the image. The histogram of pixel values is computed with
 
 :func:`histogram` returns the number of pixels for each value bin, and
 the centers of the bins. The behavior of :func:`histogram` is therefore
-slightly different from the one of :func:`np.histogram`, which returns
+slightly different from the one of :func:`numpy.histogram`, which returns
 the boundaries of the bins.
 
 The simplest contrast enhancement :func:`rescale_intensity` consists in
@@ -157,16 +157,16 @@ details are enhanced in large regions with poor contrast. As a further
 refinement, histogram equalization can be performed in subregions of the
 image with :func:`equalize_adapthist`, in order to correct for exposure
 gradients across the image. See the example
-:ref:`example_plot_equalize.py`.
+:ref:`example_color_exposure_plot_equalize.py`.
 
-.. image:: ../auto_examples/images/plot_equalize_1.png
-   :target: ../auto_examples/plot_equalize.html
+.. image:: ../auto_examples/color_exposure/images/plot_equalize_1.png
+   :target: ../auto_examples/color_exposure/plot_equalize.html
    :align: center
    :width: 90%
 
 
 .. topic:: Examples:
 
-  * :ref:`example_plot_equalize.py`
+  * :ref:`example_color_exposure_plot_equalize.py`
 
 

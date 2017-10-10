@@ -215,3 +215,12 @@
 
 - Jim Fienup, Alexander Iacchetta
   In-depth review of sub-pixel shift registration
+
+- Damian Eads
+  Structuring elements in morphology module.
+
+- Egor Panfilov
+  Inpainting with biharmonic equation
+
+- Evgeni Burovski
+  Adaptation of ImageJ 3D skeletonization algorithm.

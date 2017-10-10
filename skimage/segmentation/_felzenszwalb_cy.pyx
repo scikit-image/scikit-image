@@ -3,7 +3,7 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 import numpy as np
-import scipy
+from scipy import ndimage as ndi
 
 cimport cython
 cimport numpy as cnp
@@ -42,10 +42,12 @@ def _felzenszwalb_grey(image, double scale=1, sigma=0.8,
     if image.ndim != 2:
         raise ValueError("This algorithm works only on single-channel 2d"
                 "images. Got image of shape %s" % str(image.shape))
+
     image = img_as_float(image)
+
     # rescale scale to behave like in reference implementation
     scale = float(scale) / 255.
-    image = scipy.ndimage.gaussian_filter(image, sigma=sigma)
+    image = ndi.gaussian_filter(image, sigma=sigma)
 
     # compute edge weights in 8 connectivity:
     right_cost = np.abs((image[1:, :] - image[:-1, :]))
@@ -55,6 +57,7 @@ def _felzenszwalb_grey(image, double scale=1, sigma=0.8,
     cdef cnp.ndarray[cnp.float_t, ndim=1] costs = np.hstack([right_cost.ravel(),
         down_cost.ravel(), dright_cost.ravel(),
         uright_cost.ravel()]).astype(np.float)
+
     # compute edges between pixels:
     height, width = image.shape[:2]
     cdef cnp.ndarray[cnp.intp_t, ndim=2] segments \
@@ -65,6 +68,7 @@ def _felzenszwalb_grey(image, double scale=1, sigma=0.8,
     uright_edges = np.c_[segments[:-1, 1:].ravel(), segments[1:, :-1].ravel()]
     cdef cnp.ndarray[cnp.intp_t, ndim=2] edges \
             = np.vstack([right_edges, down_edges, dright_edges, uright_edges])
+
     # initialize data structures for segment size
     # and inner cost, then start greedy iteration over edges.
     edge_queue = np.argsort(costs)
@@ -75,39 +79,43 @@ def _felzenszwalb_grey(image, double scale=1, sigma=0.8,
     cdef cnp.float_t *costs_p = <cnp.float_t*>costs.data
     cdef cnp.ndarray[cnp.intp_t, ndim=1] segment_size \
             = np.ones(width * height, dtype=np.intp)
+
     # inner cost of segments
     cdef cnp.ndarray[cnp.float_t, ndim=1] cint = np.zeros(width * height)
     cdef cnp.intp_t seg0, seg1, seg_new, e
     cdef float cost, inner_cost0, inner_cost1
-    # set costs_p back one. we increase it before we use it
-    # since we might continue before that.
-    costs_p -= 1
-    for e in range(costs.size):
-        seg0 = find_root(segments_p, edges_p[0])
-        seg1 = find_root(segments_p, edges_p[1])
-        edges_p += 2
-        costs_p += 1
-        if seg0 == seg1:
-            continue
-        inner_cost0 = cint[seg0] + scale / segment_size[seg0]
-        inner_cost1 = cint[seg1] + scale / segment_size[seg1]
-        if costs_p[0] < min(inner_cost0, inner_cost1):
-            # update size and cost
-            join_trees(segments_p, seg0, seg1)
-            seg_new = find_root(segments_p, seg0)
-            segment_size[seg_new] = segment_size[seg0] + segment_size[seg1]
-            cint[seg_new] = costs_p[0]
+    cdef Py_ssize_t num_costs = costs.size
 
-    # postprocessing to remove small segments
-    edges_p = <cnp.intp_t*>edges.data
-    for e in range(costs.size):
-        seg0 = find_root(segments_p, edges_p[0])
-        seg1 = find_root(segments_p, edges_p[1])
-        edges_p += 2
-        if seg0 == seg1:
-            continue
-        if segment_size[seg0] < min_size or segment_size[seg1] < min_size:
-            join_trees(segments_p, seg0, seg1)
+    with nogil:
+        # set costs_p back one. we increase it before we use it
+        # since we might continue before that.
+        costs_p -= 1
+        for e in range(num_costs):
+            seg0 = find_root(segments_p, edges_p[0])
+            seg1 = find_root(segments_p, edges_p[1])
+            edges_p += 2
+            costs_p += 1
+            if seg0 == seg1:
+                continue
+            inner_cost0 = cint[seg0] + scale / segment_size[seg0]
+            inner_cost1 = cint[seg1] + scale / segment_size[seg1]
+            if costs_p[0] < min(inner_cost0, inner_cost1):
+                # update size and cost
+                join_trees(segments_p, seg0, seg1)
+                seg_new = find_root(segments_p, seg0)
+                segment_size[seg_new] = segment_size[seg0] + segment_size[seg1]
+                cint[seg_new] = costs_p[0]
+
+        # postprocessing to remove small segments
+        edges_p = <cnp.intp_t*>edges.data
+        for e in range(num_costs):
+            seg0 = find_root(segments_p, edges_p[0])
+            seg1 = find_root(segments_p, edges_p[1])
+            edges_p += 2
+            if seg0 == seg1:
+                continue
+            if segment_size[seg0] < min_size or segment_size[seg1] < min_size:
+                join_trees(segments_p, seg0, seg1)
 
     # unravel the union find tree
     flat = segments.ravel()

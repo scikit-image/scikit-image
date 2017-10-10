@@ -5,7 +5,6 @@ from six import string_types
 from PIL import Image
 
 from ...util import img_as_ubyte, img_as_uint
-from ...external.tifffile import imread as tif_imread, imsave as tif_imsave
 
 
 def imread(fname, dtype=None, img_num=None, **kwargs):
@@ -13,44 +12,31 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
 
     Parameters
     ----------
-    fname : str
-       File name.
+    fname : str or file
+       File name or file-like-object.
     dtype : numpy dtype object or string specifier
        Specifies data type of array elements.
     img_num : int, optional
        Specifies which image to read in a file with multiple images
        (zero-indexed).
     kwargs : keyword pairs, optional
-        Addition keyword arguments to pass through (only applicable to Tiff
-        files for now,  see `tifffile`'s `imread` function).
+        Addition keyword arguments to pass through.
 
     Notes
     -----
-    Tiff files are handled by Christophe Golhke's tifffile.py [1]_, and support many
-    advanced image types including multi-page and floating point.
-
-    All other files are read using the Python Imaging Libary.
-    See PIL docs [2]_ for a list of supported formats.
+    Files are read using the Python Imaging Libary.
+    See PIL docs [1]_ for a list of supported formats.
 
     References
     ----------
-    .. [1] http://www.lfd.uci.edu/~gohlke/code/tifffile.py.html
-    .. [2] http://pillow.readthedocs.org/en/latest/handbook/image-file-formats.html
-
+    .. [1] http://pillow.readthedocs.org/en/latest/handbook/image-file-formats.html
     """
-    if hasattr(fname, 'lower') and dtype is None:
-        kwargs.setdefault('key', img_num)
-        if fname.lower().endswith(('.tiff', '.tif')):
-            return tif_imread(fname, **kwargs)
-
-    im = Image.open(fname)
-    try:
-        # this will raise an IOError if the file is not readable
-        im.getdata()[0]
-    except IOError:
-        site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
-        raise ValueError('Could not load "%s"\nPlease see documentation at: %s' % (fname, site))
+    if isinstance(fname, string_types):
+        with open(fname, 'rb') as f:
+            im = Image.open(f)
+            return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
     else:
+        im = Image.open(fname)
         return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
 
 
@@ -62,6 +48,17 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
     Refer to ``imread``.
 
     """
+    try:
+        # this will raise an IOError if the file is not readable
+        im.getdata()[0]
+    except IOError as e:
+        site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
+        pillow_error_message = str(e)
+        error_message = ('Could not load "%s" \n'
+                         'Reason: "%s"\n'
+                         'Please see documentation at: %s'
+                         % (im.filename, pillow_error_message, site))
+        raise ValueError(error_message)
     frames = []
     grayscale = None
     i = 0
@@ -78,6 +75,9 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
             i += 1
             continue
 
+        if im.format == 'PNG' and im.mode == 'I' and dtype is None:
+            dtype = 'uint16'
+
         if im.mode == 'P':
             if grayscale is None:
                 grayscale = _palette_is_grayscale(im)
@@ -85,7 +85,10 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
             if grayscale:
                 frame = im.convert('L')
             else:
-                frame = im.convert('RGB')
+                if im.format == 'PNG' and 'transparency' in im.info:
+                    frame = im.convert('RGBA')
+                else:
+                    frame = im.convert('RGB')
 
         elif im.mode == '1':
             frame = im.convert('L')
@@ -109,6 +112,9 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
 
         frames.append(frame)
         i += 1
+
+        if img_num is not None:
+            break
 
     if hasattr(im, 'fp') and im.fp:
         im.fp.close()
@@ -196,7 +202,7 @@ def ndarray_to_pil(arr, format_str=None):
     return im
 
 
-def imsave(fname, arr, format_str=None):
+def imsave(fname, arr, format_str=None, **kwargs):
     """Save an image to disk.
 
     Parameters
@@ -210,15 +216,17 @@ def imsave(fname, arr, format_str=None):
     format_str: str
         Format to save as, this is defaulted to PNG if using a file-like
         object; this will be derived from the extension if fname is a string
+    kwargs: dict
+        Keyword arguments to the Pillow save function (or tifffile save
+        function, for Tiff files). These are format dependent. For example,
+        Pillow's JPEG save function supports an integer ``quality`` argument
+        with values in [1, 95], while TIFFFile supports a ``compress``
+        integer argument with values in [0, 9].
 
     Notes
     -----
-    Tiff files are handled by Christophe Golhke's tifffile.py [1]_,
-    and support many advanced image types including multi-page and
-    floating point.
-
-    All other image formats use the Python Imaging Libary.
-    See PIL docs [2]_ for a list of other supported formats.
+    Use the Python Imaging Libary.
+    See PIL docs [1]_ for a list of other supported formats.
     All images besides single channel PNGs are converted using `img_as_uint8`.
     Single Channel PNGs have the following behavior:
     - Integer values in [0, 255] and Boolean types -> img_as_uint8
@@ -226,8 +234,7 @@ def imsave(fname, arr, format_str=None):
 
     References
     ----------
-    .. [1] http://www.lfd.uci.edu/~gohlke/code/tifffile.py.html
-    .. [2] http://pillow.readthedocs.org/en/latest/handbook/image-file-formats.html
+    .. [1] http://pillow.readthedocs.org/en/latest/handbook/image-file-formats.html
     """
     # default to PNG if file-like object
     if not isinstance(fname, string_types) and format_str is None:
@@ -237,22 +244,10 @@ def imsave(fname, arr, format_str=None):
             and fname.lower().endswith(".png")):
         format_str = "PNG"
 
-    arr = np.asanyarray(arr).squeeze()
+    arr = np.asanyarray(arr)
 
     if arr.dtype.kind == 'b':
         arr = arr.astype(np.uint8)
-
-    use_tif = False
-    if hasattr(fname, 'lower'):
-        if fname.lower().endswith(('.tiff', '.tif')):
-            use_tif = True
-    if not format_str is None:
-        if format_str.lower() in ['tiff', 'tif']:
-            use_tif = True
-
-    if use_tif:
-        tif_imsave(fname, arr)
-        return
 
     if arr.ndim not in (2, 3):
         raise ValueError("Invalid shape for image array: %s" % arr.shape)
@@ -262,4 +257,4 @@ def imsave(fname, arr, format_str=None):
             raise ValueError("Invalid number of channels in image array.")
 
     img = ndarray_to_pil(arr, format_str=format_str)
-    img.save(fname, format=format_str)
+    img.save(fname, format=format_str, **kwargs)

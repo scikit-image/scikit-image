@@ -159,3 +159,60 @@ def test_rag_hierarchical():
 
     result = graph.cut_threshold(labels, g, thresh)
     assert np.all(result == result[0, 0])
+
+
+@skipif(not is_installed('networkx'))
+def test_ncut_stable_subgraph():
+    """ Test to catch an error thrown when subgraph has all equal edges. """
+
+    img = np.zeros((100, 100, 3), dtype='uint8')
+
+    labels = np.zeros((100, 100), dtype='uint8')
+    labels[...] = 0
+    labels[:50, :50] = 1
+    labels[:50, 50:] = 2
+
+    rag = graph.rag_mean_color(img, labels, mode='similarity')
+
+    new_labels = graph.cut_normalized(labels, rag, in_place=False)
+    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
+
+    assert new_labels.max() == 0
+
+
+def test_generic_rag_2d():
+    labels = np.array([[1, 2], [3, 4]], dtype=np.uint8)
+    g = graph.RAG(labels)
+    assert g.has_edge(1, 2) and g.has_edge(2, 4) and not g.has_edge(1, 4)
+    h = graph.RAG(labels, connectivity=2)
+    assert h.has_edge(1, 2) and h.has_edge(1, 4) and h.has_edge(2, 3)
+
+
+def test_generic_rag_3d():
+    labels = np.arange(8, dtype=np.uint8).reshape((2, 2, 2))
+    g = graph.RAG(labels)
+    assert g.has_edge(0, 1) and g.has_edge(1, 3) and not g.has_edge(0, 3)
+    h = graph.RAG(labels, connectivity=2)
+    assert h.has_edge(0, 1) and h.has_edge(0, 3) and not h.has_edge(0, 7)
+    k = graph.RAG(labels, connectivity=3)
+    assert k.has_edge(0, 1) and k.has_edge(1, 2) and k.has_edge(2, 5)
+
+
+def test_rag_boundary():
+    labels = np.zeros((16, 16), dtype='uint8')
+    edge_map = np.zeros_like(labels, dtype=float)
+
+    edge_map[8, :] = 0.5
+    edge_map[:, 8] = 1.0
+
+    labels[:8, :8] = 1
+    labels[:8, 8:] = 2
+    labels[8:, :8] = 3
+    labels[8:, 8:] = 4
+
+    g = graph.rag_boundary(labels, edge_map, connectivity=1)
+    assert set(g.nodes()) == set([1, 2, 3, 4])
+    assert set(g.edges()) == set([(1, 2), (1, 3), (2, 4), (3, 4)])
+    assert g[1][3]['weight'] == 0.25
+    assert g[2][4]['weight'] == 0.34375
+    assert g[1][3]['count'] == 16

@@ -1,10 +1,16 @@
-__all__ = ['convex_hull_image', 'convex_hull_object']
-
+"""Convex Hull."""
 import numpy as np
-from ..measure import grid_points_in_poly
+from ..measure._pnpoly import grid_points_in_poly
 from ._convex_hull import possible_hull
 from ..measure._label import label
 from ..util import unique_rows
+
+__all__ = ['convex_hull_image', 'convex_hull_object']
+
+try:
+    from scipy.spatial import Delaunay
+except ImportError:
+    Delaunay = None
 
 
 def convex_hull_image(image):
@@ -15,12 +21,12 @@ def convex_hull_image(image):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) array
         Binary input image. This array is cast to bool before processing.
 
     Returns
     -------
-    hull : ndarray of bool
+    hull : (M, N) array of bool
         Binary image with pixels in convex hull set to True.
 
     References
@@ -28,13 +34,16 @@ def convex_hull_image(image):
     .. [1] http://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/
 
     """
+    if image.ndim > 2:
+        raise ValueError("Input must be a 2D image")
 
-    image = image.astype(bool)
+    if Delaunay is None:
+        raise ImportError("Could not import scipy.spatial.Delaunay, "
+                          "only available in scipy >= 0.9.")
 
     # Here we do an optimisation by choosing only pixels that are
     # the starting or ending pixel of a row or column.  This vastly
-    # limits the number of coordinates to examine for the virtual
-    # hull.
+    # limits the number of coordinates to examine for the virtual hull.
     coords = possible_hull(image.astype(np.uint8))
     N = len(coords)
 
@@ -47,12 +56,6 @@ def convex_hull_image(image):
     # repeated coordinates can *sometimes* cause problems in
     # scipy.spatial.Delaunay, so we remove them.
     coords = unique_rows(coords_corners)
-
-    try:
-        from scipy.spatial import Delaunay
-    except ImportError:
-        raise ImportError('Could not import scipy.spatial, only available in '
-                          'scipy >= 0.9.')
 
     # Subtract offset
     offset = coords.mean(axis=0)
@@ -85,7 +88,7 @@ def convex_hull_object(image, neighbors=8):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) array
         Binary input image.
     neighbors : {4, 8}, int
         Whether to use 4- or 8-connectivity.
@@ -104,6 +107,8 @@ def convex_hull_object(image, neighbors=8):
     convex_hull_image separately on each object.
 
     """
+    if image.ndim > 2:
+        raise ValueError("Input must be a 2D image")
 
     if neighbors != 4 and neighbors != 8:
         raise ValueError('Neighbors must be either 4 or 8.')
@@ -112,7 +117,7 @@ def convex_hull_object(image, neighbors=8):
     convex_obj = np.zeros(image.shape, dtype=bool)
     convex_img = np.zeros(image.shape, dtype=bool)
 
-    for i in range(0, labeled_im.max() + 1):
+    for i in range(1, labeled_im.max() + 1):
         convex_obj = convex_hull_image(labeled_im == i)
         convex_img = np.logical_or(convex_img, convex_obj)
 

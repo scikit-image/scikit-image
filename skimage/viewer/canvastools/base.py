@@ -13,8 +13,8 @@ class CanvasToolBase(object):
 
     Parameters
     ----------
-    viewer : :class:`skimage.viewer.Viewer`
-        Skimage viewer object.
+    manager : Viewer or PlotPlugin.
+        Skimage viewer or plot plugin object.
     on_move : function
         Function called whenever a control handle is moved.
         This function must accept the end points of line as the only argument.
@@ -24,13 +24,12 @@ class CanvasToolBase(object):
         Function called whenever the "enter" key is pressed.
     """
 
-    def __init__(self, viewer, on_move=None, on_enter=None, on_release=None,
-                 useblit=True):
-        self.viewer = viewer
-        self.ax = viewer.ax
+    def __init__(self, manager, on_move=None, on_enter=None, on_release=None,
+                 useblit=True, ax=None):
+        self.manager = manager
+        self.ax = manager.ax
         self.artists = []
         self.active = True
-        viewer.add_tool(self)
 
         self.callback_on_move = _pass if on_move is None else on_move
         self.callback_on_enter = _pass if on_enter is None else on_enter
@@ -48,7 +47,7 @@ class CanvasToolBase(object):
         return False
 
     def redraw(self):
-        self.viewer.redraw()
+        self.manager.redraw()
 
     def set_visible(self, val):
         for artist in self.artists:
@@ -58,7 +57,7 @@ class CanvasToolBase(object):
         if event.key == 'enter':
             self.callback_on_enter(self.geometry)
             self.set_visible(False)
-            self.viewer.redraw()
+            self.manager.redraw()
 
     def on_mouse_press(self, event):
         pass
@@ -73,7 +72,7 @@ class CanvasToolBase(object):
         pass
 
     def remove(self):
-        self.viewer.remove_tool(self)
+        self.manager.remove_tool(self)
 
     @property
     def geometry(self):

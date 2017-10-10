@@ -50,7 +50,8 @@ def smooth_with_function_and_mask(image, function, mask):
     return output_image
 
 
-def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None):
+def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
+          use_quantiles=False):
     """Edge filter an image using the Canny algorithm.
 
     Parameters
@@ -67,6 +68,10 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None):
         If None, high_threshold is set to 20% of dtype's max.
     mask : array, dtype=bool, optional
         Mask to limit the application of Canny to a certain area.
+    use_quantiles : bool, optional
+        If True then treat low_threshold and high_threshold as quantiles of the
+        edge magnitude image, rather than absolute edge magnitude values. If True
+        then the thresholds must be in the range [0, 1].
 
     Returns
     -------
@@ -246,6 +251,19 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None):
     c2 = magnitude[1:, :-1][pts[:-1, 1:]]
     c_minus = c2 * w + c1 * (1 - w) <= m
     local_maxima[pts] = c_plus & c_minus
+
+    #
+    #---- If use_quantiles is set then calculate the thresholds to use
+    #
+    if use_quantiles:
+        if high_threshold > 1.0 or low_threshold > 1.0:
+            raise ValueError("Quantile thresholds must not be > 1.0")
+        if high_threshold < 0.0 or low_threshold < 0.0:
+            raise ValueError("Quantile thresholds must not be < 0.0")
+
+        high_threshold = np.percentile(magnitude, 100.0 * high_threshold)
+        low_threshold = np.percentile(magnitude, 100.0 * low_threshold)
+
     #
     #---- Create two masks at the two thresholds.
     #

@@ -17,15 +17,16 @@ def test_validity():
 
 
 def test_basic():
-    assert_equal(x[12:24, 10:20].sum(), integrate(s, 12, 10, 23, 19))
-    assert_equal(x[:20, :20].sum(), integrate(s, 0, 0, 19, 19))
-    assert_equal(x[:20, 10:20].sum(), integrate(s, 0, 10, 19, 19))
-    assert_equal(x[10:20, :20].sum(), integrate(s, 10, 0, 19, 19))
+    assert_equal(x[12:24, 10:20].sum(), integrate(s, (12, 10), (23, 19)))
+    assert_equal(x[:20, :20].sum(), integrate(s, (0, 0), (19, 19)))
+    assert_equal(x[:20, 10:20].sum(), integrate(s, (0, 10), (19, 19)))
+    assert_equal(x[10:20, :20].sum(), integrate(s, (10, 0), (19, 19)))
 
 
 def test_single():
-    assert_equal(x[0, 0], integrate(s, 0, 0, 0, 0))
-    assert_equal(x[10, 10], integrate(s, 10, 10, 10, 10))
+    assert_equal(x[0, 0], integrate(s, (0, 0), (0, 0)))
+    assert_equal(x[10, 10], integrate(s, (10, 10), (10, 10)))
+
 
 def test_vectorized_integrate():
     r0 = np.array([12, 0, 0, 10, 0, 10, 30])
@@ -40,7 +41,10 @@ def test_vectorized_integrate():
                          x[0,0],
                          x[10, 10],
                          x[30:, 31:].sum()])
-    assert_equal(expected, integrate(s, r0, c0, r1, c1))
+    start_pts = [(r0[i], c0[i]) for i in range(len(r0))]
+    end_pts = [(r1[i], c1[i]) for i in range(len(r0))]
+    assert_equal(expected, integrate(s, r0, c0, r1, c1))  # test deprecated
+    assert_equal(expected, integrate(s, start_pts, end_pts))
 
 
 if __name__ == '__main__':
