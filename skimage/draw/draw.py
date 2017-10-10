@@ -9,7 +9,7 @@ from ._draw import (_coords_inside_image, _line, _line_aa,
 
 
 def _ellipse_in_shape(shape, center, radii, rotation=0.):
-    """ Generate coordinates of points within ellipse bounded by shape.
+    """Generate coordinates of points within ellipse bounded by shape.
 
     Parameters
     ----------
@@ -91,6 +91,22 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
         ((x * cos(alpha) + y * sin(alpha)) / x_radius) ** 2 +
         ((x * sin(alpha) - y * cos(alpha)) / y_radius) ** 2 = 1
 
+
+    Note that the positions of `ellipse` without specified `shape` can have
+    also, negative values, as this is correct on the plane. On the other hand
+    using these ellipse positions for an image afterwards may lead to appearing
+    on the other side of image, because ``image[-1, -1] = image[end-1, end-1]``
+
+    >>> rr, cc = ellipse(1, 2, 3, 6)
+    >>> img = np.zeros((6, 12), dtype=np.uint8)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1]], dtype=uint8)
     """
 
     center = np.array([r, c])
@@ -598,6 +614,26 @@ def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
            [0, 0, 1, 0, 0, 0, 0, 0, 1, 0],
            [0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+
+
+    Note that the positions of `ellipse` without specified `shape` can have 
+    also, negative values, as this is correct on the plane. On the other hand
+    using these ellipse positions for an image afterwards may lead to appearing
+    on the other side of image, because ``image[-1, -1] = image[end-1, end-1]``
+
+    >>> rr, cc = ellipse_perimeter(2, 3, 4, 5)
+    >>> img = np.zeros((9, 12), dtype=np.uint8)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+           [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+           [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+           [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+           [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]], dtype=uint8)
     """
     return _ellipse_perimeter(r, c, r_radius, c_radius, orientation, shape)
 

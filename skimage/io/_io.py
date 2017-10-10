@@ -33,8 +33,13 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
 
     Other Parameters
     ----------------
+    plugin_args : keywords
+        Passed to the given plugin.
     flatten : bool
         Backward compatible keyword, superseded by `as_grey`.
+
+    plugin_args : keywords
+        Passed to the given plugin.
 
     Returns
     -------
@@ -42,11 +47,6 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
         The different colour bands/channels are stored in the
         third dimension, such that a grey-image is MxN, an
         RGB-image MxNx3 and an RGBA-image MxNx4.
-
-    Other parameters
-    ----------------
-    plugin_args : keywords
-        Passed to the given plugin.
 
     """
     # Backward compatibility

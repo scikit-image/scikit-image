@@ -16,15 +16,15 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     """Denoise image using bilateral filter.
 
     This is an edge-preserving, denoising filter. It averages pixels based on
-    their spatial closeness and radiometric similarity.
+    their spatial closeness and radiometric similarity [1]_.
 
     Spatial closeness is measured by the Gaussian function of the Euclidean
     distance between two pixels and a certain standard deviation
     (`sigma_spatial`).
 
-    Radiometric similarity is measured by the Gaussian function of the Euclidean
-    distance between two color values and a certain standard deviation
-    (`sigma_color`).
+    Radiometric similarity is measured by the Gaussian function of the
+    Euclidean distance between two color values and a certain standard
+    deviation (`sigma_color`).
 
     Parameters
     ----------
@@ -132,7 +132,7 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     Total-variation denoising (also know as total-variation regularization)
     tries to find an image with less total-variation under the constraint
     of being similar to the input image, which is controlled by the
-    regularization parameter.
+    regularization parameter ([1]_, [2]_, [3]_, [4]_).
 
     Parameters
     ----------
@@ -569,7 +569,8 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
                 channel = out[..., i] - min
                 channel /= max - min
                 out[..., i] = denoise_wavelet(channel, sigma=sigma[i],
-                                              wavelet=wavelet, mode=mode)
+                                              wavelet=wavelet, mode=mode,
+                                              wavelet_levels=wavelet_levels)
 
                 out[..., i] = out[..., i] * (max - min)
                 out[..., i] += min
@@ -582,8 +583,7 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
                                                  wavelet_levels=wavelet_levels)
 
     else:
-        out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
-                                 sigma=sigma,
+        out = _wavelet_threshold(img, wavelet=wavelet, mode=mode, sigma=sigma,
                                  wavelet_levels=wavelet_levels)
 
     clip_range = (-1, 1) if img.min() < 0 else (0, 1)

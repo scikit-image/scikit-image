@@ -157,7 +157,7 @@ def test_denoise_tv_bregman_3d():
 
 
 def test_denoise_bilateral_2d():
-    img = checkerboard_gray.copy()[:50,:50]
+    img = checkerboard_gray.copy()[:50, :50]
     # add some random noise
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
@@ -221,7 +221,7 @@ def test_denoise_bilateral_multidimensional():
 
 
 def test_denoise_bilateral_nan():
-    img = np.NaN + np.empty((50, 50))
+    img = np.full((50, 50), np.NaN)
     out = restoration.denoise_bilateral(img, multichannel=False)
     assert_equal(img, out)
 
@@ -343,25 +343,38 @@ def test_wavelet_denoising():
     astro_gray_odd = astro_gray[:, :-1]
     astro_odd = astro[:, :-1]
 
-    for img, multichannel in [(astro_gray, False), (astro_gray_odd, False),
-                              (astro_odd, True)]:
+    for img, multichannel, convert2ycbcr in [(astro_gray, False, False),
+                                             (astro_gray_odd, False, False),
+                                             (astro_odd, True, False),
+                                             (astro_odd, True, True)]:
         sigma = 0.1
         noisy = img + sigma * rstate.randn(*(img.shape))
         noisy = np.clip(noisy, 0, 1)
 
         # Verify that SNR is improved when true sigma is used
         denoised = restoration.denoise_wavelet(noisy, sigma=sigma,
-                                               multichannel=multichannel)
+                                               multichannel=multichannel,
+                                               convert2ycbcr=convert2ycbcr)
         psnr_noisy = compare_psnr(img, noisy)
         psnr_denoised = compare_psnr(img, denoised)
         assert_(psnr_denoised > psnr_noisy)
 
         # Verify that SNR is improved with internally estimated sigma
         denoised = restoration.denoise_wavelet(noisy,
-                                               multichannel=multichannel)
+                                               multichannel=multichannel,
+                                               convert2ycbcr=convert2ycbcr)
         psnr_noisy = compare_psnr(img, noisy)
         psnr_denoised = compare_psnr(img, denoised)
         assert_(psnr_denoised > psnr_noisy)
+
+        # SNR is improved less with 1 wavelet level than with the default.
+        denoised_1 = restoration.denoise_wavelet(noisy,
+                                                 multichannel=multichannel,
+                                                 wavelet_levels=1,
+                                                 convert2ycbcr=convert2ycbcr)
+        psnr_denoised_1 = compare_psnr(img, denoised_1)
+        assert_(psnr_denoised > psnr_denoised_1)
+        assert_(psnr_denoised_1 > psnr_noisy)
 
         # Test changing noise_std (higher threshold, so less energy in signal)
         res1 = restoration.denoise_wavelet(noisy, sigma=2*sigma,
@@ -484,6 +497,7 @@ def test_estimate_sigma_color():
 
     # default multichannel=False should raise a warning about last axis size
     assert_warns(UserWarning, restoration.estimate_sigma, img)
+
 
 def test_wavelet_denoising_args():
     """

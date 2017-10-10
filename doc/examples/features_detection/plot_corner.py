@@ -3,8 +3,8 @@
 Corner detection
 ================
 
-Detect corner points using the Harris corner detector and determine subpixel
-position of corners.
+Detect corner points using the Harris corner detector and determine the
+subpixel position of corners ([1]_, [2]_).
 
 .. [1] http://en.wikipedia.org/wiki/Corner_detection
 .. [2] http://en.wikipedia.org/wiki/Interest_point_detection

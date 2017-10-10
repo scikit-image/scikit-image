@@ -32,14 +32,14 @@ def test_rag_merge():
     # We merge nodes and ensure that the minimum weight is chosen
     # when there is a conflict.
     g.merge_nodes(0, 2)
-    assert g.edge[1][2]['weight'] == 10
-    assert g.edge[2][3]['weight'] == 30
+    assert g.adj[1][2]['weight'] == 10
+    assert g.adj[2][3]['weight'] == 30
 
     # We specify `max_edge` as `weight_func` as ensure that maximum
     # weight is chosen in case on conflict
     gc.merge_nodes(0, 2, weight_func=max_edge)
-    assert gc.edge[1][2]['weight'] == 20
-    assert gc.edge[2][3]['weight'] == 40
+    assert gc.adj[1][2]['weight'] == 20
+    assert gc.adj[2][3]['weight'] == 40
 
     g.merge_nodes(1, 4)
     g.merge_nodes(2, 3)

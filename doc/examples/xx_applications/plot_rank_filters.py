@@ -4,10 +4,10 @@ Rank filters
 ============
 
 Rank filters are non-linear filters using the local gray-level ordering to
-compute the filtered value. This ensemble of filters share a common base: the
-local gray-level histogram is computed on the neighborhood of a pixel (defined
-by a 2-D structuring element). If the filtered value is taken as the middle
-value of the histogram, we get the classical median filter.
+compute the filtered value [1]_. This ensemble of filters share a common base:
+the local gray-level histogram is computed on the neighborhood of a pixel
+(defined by a 2-D structuring element). If the filtered value is taken as the
+middle value of the histogram, we get the classical median filter.
 
 Rank filters can be used for several purposes such as:
 
@@ -354,7 +354,7 @@ plt.tight_layout()
 # Image threshold
 # ===============
 #
-# The Otsu threshold [1]_ method can be applied locally using the local gray-
+# The Otsu threshold [4]_ method can be applied locally using the local gray-
 # level distribution. In the example below, for each pixel, an "optimal"
 # threshold is determined by maximizing the variance between two classes of
 # pixels of the local neighborhood defined by a structuring element.
