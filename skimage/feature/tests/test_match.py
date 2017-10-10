@@ -25,9 +25,9 @@ def test_binary_descriptors():
     assert_equal(matches, [[0, 0], [1, 1]])
 
 
-def test_binary_descriptors_lena_rotation_crosscheck_false():
+def test_binary_descriptors_rotation_crosscheck_false():
     """Verify matched keypoints and their corresponding masks results between
-    lena image and its rotated version with the expected keypoint pairs with
+    image and its rotated version with the expected keypoint pairs with
     cross_check disabled."""
     img = data.astronaut()
     img = rgb2gray(img)
@@ -60,9 +60,9 @@ def test_binary_descriptors_lena_rotation_crosscheck_false():
     assert_equal(matches[:, 1], exp_matches2)
 
 
-def test_binary_descriptors_lena_rotation_crosscheck_true():
+def test_binary_descriptors_rotation_crosscheck_true():
     """Verify matched keypoints and their corresponding masks results between
-    lena image and its rotated version with the expected keypoint pairs with
+    image and its rotated version with the expected keypoint pairs with
     cross_check enabled."""
     img = data.astronaut()
     img = rgb2gray(img)

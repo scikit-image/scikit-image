@@ -14,6 +14,7 @@ Version 0.12
   `skimage.transform.PiecewiseAffineTransform.affines_*` attributes
   have been removed.
 - `skimage.filters.denoise_*` have moved to `skimage.restoration.denoise_*`.
+- `skimage.data.lena` has been removed.
 
 Version 0.11
 ------------
