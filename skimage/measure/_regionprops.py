@@ -127,6 +127,9 @@ class _RegionProperties(object):
         elif coordinates is None:
             self._warned = False
             self._transpose_moments = True
+        else:
+            raise ValueError('Incorrect value for regionprops coordinates: %s.'
+                             ' Possible values are: "rc", "xy", or None')
 
     @_cached
     def area(self):

@@ -473,6 +473,11 @@ def test_docstrings_and_props():
     assert len(ds.split('\n')) > 3
 
 
+def test_incorrect_coordinate_convention():
+    with pytest.raises(ValueError):
+        region = regionprops_default(SAMPLE, coordinates='xyz')[0]
+
+
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
     run_module_suite()
