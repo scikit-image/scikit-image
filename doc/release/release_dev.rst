@@ -21,7 +21,7 @@ New Features
 - 2D and 3D segmentation with morphological snakes (#2791)
 - nD support for image moments (#2603)
 - inertia tensor and its eigenvalues can now be computed outside of
-  regionprops (#2603)
+  regionprops; available in ``skimage.measure.inertia_tensor`` (#2603)
 
 
 Improvements

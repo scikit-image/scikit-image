@@ -118,8 +118,7 @@ def moments_central(image, center=None, cc=None, order=3, **kwargs):
             center = (center, cc)
         return moments_central(image, center=center, order=order).T
     if center is None:
-        M = moments_central(image, center=(0,) * image.ndim, order=order)
-        center = M[tuple(np.eye(image.ndim, dtype=int))]
+        center = centroid(image)
     calc = image.astype(float)
     for dim, dim_length in enumerate(image.shape):
         delta = np.arange(dim_length, dtype=float) - center[dim]
@@ -219,3 +218,78 @@ def moments_hu(nu):
 
     """
     return _moments_cy.moments_hu(nu.astype(np.double))
+
+
+def centroid(image):
+    """Return the (weighted) centroid of an image.
+
+    Parameters
+    ----------
+    image : array
+        The input image.
+
+    Returns
+    -------
+    center : tuple of float, length ``image.ndim``
+        The centroid of the (nonzero) pixels in ``image``.
+    """
+    M = moments_central(image, center=(0,) * image.ndim, order=1)
+    center = M[tuple(np.eye(image.ndim, dtype=int))]
+    return center
+
+
+def inertia_tensor(image, mu=None):
+    """Compute the inertia tensor of the input image.
+
+    Parameters
+    ----------
+    image : array
+        The input image.
+    mu : array, optional
+        The pre-computed central moments of ``image``.
+    Returns
+    -------
+    T : array, shape ``(image.ndim, image.ndim)``
+        The inertia tensor of the input image.
+    """
+    if mu is None:
+        mu = moments_central(image)
+    mu0 = mu[(0,) * image.ndim]
+    result = np.zeros((image.ndim, image.ndim))
+
+    corners2 = tuple(2 * np.eye(image.ndim, dtype=int))
+    d = np.diag(result)
+    d.flags.writeable = True
+    d[:] = mu[corners2] / mu0
+
+    for dims in itertools.combinations(range(image.ndim), 2):
+        mu_index = np.zeros(image.ndim, dtype=int)
+        mu_index[list(dims)] = 1
+        result[dims] = -mu[tuple(mu_index)] / mu0
+        result.T[dims] = -mu[tuple(mu_index)] / mu0
+    return result
+
+
+def inertia_tensor_eigvals(image, mu=None, T=None):
+    """Compute the eigenvalues of the inertia tensor of the image.
+
+    Parameters
+    ----------
+    image : array
+        The input image.
+    mu : array, optional
+        The pre-computed central moments of ``image``.
+    T : array, shape ``(image.ndim, image.ndim)``
+        The pre-computed inertia tensor. If ``T`` is given, ``mu`` and
+        ``image`` are ignored.
+
+    Returns
+    -------
+    eigvals : list of float, length ``image.ndim``
+        The eigenvalues of the inertia tensor of ``image``, in descending
+        order.
+    """
+    if T is None:
+        T = inertia_tensor(image, mu)
+    eigvals = np.linalg.eigvalsh(T)
+    return sorted(eigvals, reverse=True)

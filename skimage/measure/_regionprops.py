@@ -203,25 +203,12 @@ class _RegionProperties(object):
     @_cached
     def inertia_tensor(self):
         mu = self.moments_central
-        mu0 = mu[(0,) * self._ndim]
-        result = np.zeros((self._ndim, self._ndim))
-
-        corners2 = tuple(2 * np.eye(self._ndim, dtype=int))
-        d = np.diag(result)
-        d.flags.writeable = True
-        d[:] = mu[corners2] / mu0
-
-        for dims in itertools.combinations(range(self._ndim), 2):
-            mu_index = np.zeros(self._ndim, dtype=int)
-            mu_index[list(dims)] = 1
-            result[dims] = -mu[tuple(mu_index)] / mu0
-            result.T[dims] = -mu[tuple(mu_index)] / mu0
-        return result
+        return _moments.inertia_tensor(self.image, mu)
 
     @_cached
     def inertia_tensor_eigvals(self):
-        eigvals = np.linalg.eigvalsh(self.inertia_tensor)
-        return sorted(eigvals, reverse=True)
+        return _moments.inertia_tensor_eigvals(self.image,
+                                               T=self.inertia_tensor)
 
     @_cached
     def intensity_image(self):
