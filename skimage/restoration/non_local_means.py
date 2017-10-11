@@ -52,18 +52,18 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     to the patch centered on the pixel of interest.
 
     In the original version of the algorithm [1]_, corresponding to
-    ``fast=False``, the computational complexity is
+    ``fast=False``, the computational complexity is::
 
-    image.size * patch_size ** image.ndim * patch_distance ** image.ndim
+        image.size * patch_size ** image.ndim * patch_distance ** image.ndim
 
     Hence, changing the size of patches or their maximal distance has a
     strong effect on computing times, especially for 3-D images.
 
     However, the default behavior corresponds to ``fast_mode=True``, for which
     another version of non-local means [2]_ is used, corresponding to a
-    complexity of
+    complexity of::
 
-    image.size * patch_distance ** image.ndim
+        image.size * patch_distance ** image.ndim
 
     The computing time depends only weakly on the patch size, thanks to
     the computation of the integral of patches distances for a given

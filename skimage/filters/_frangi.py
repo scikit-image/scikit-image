@@ -80,7 +80,7 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=0.5, beta2=15,
     whole image containing such objects.
 
     Calculates the eigenvectors of the Hessian to compute the similarity of
-    an image region to vessels, according to the method described in _[1].
+    an image region to vessels, according to the method described in [1]_.
 
     Parameters
     ----------
@@ -139,7 +139,7 @@ def hessian(image, scale_range=(1, 10), scale_step=2, beta1=0.5, beta2=15):
     image containing such objects.
 
     Almost equal to Frangi filter, but uses alternative method of smoothing.
-    Refer to _[1] to find the differences between Frangi and Hessian filters.
+    Refer to [1]_ to find the differences between Frangi and Hessian filters.
 
     Parameters
     ----------
