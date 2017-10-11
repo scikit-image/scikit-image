@@ -1139,7 +1139,7 @@ class SimilarityTransform(EuclideanTransform):
 
 
 class PolynomialTransform(GeometricTransform):
-    """2D polynomial transformation of the form:
+    """2D polynomial transformation of the form::
 
         X = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
         Y = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
