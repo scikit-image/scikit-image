@@ -1,0 +1,22 @@
+--- a/skimage/io/tests/test_pil.py
++++ b/skimage/io/tests/test_pil.py
+@@ -1,8 +1,10 @@
+ import os.path
+ import numpy as np
++import sys
+ from numpy.testing import (
+     assert_array_equal, assert_array_almost_equal, assert_raises,
+     assert_allclose, run_module_suite)
++from numpy.testing.decorators import skipif
+ 
+ from tempfile import NamedTemporaryFile
+ 
+@@ -220,6 +222,8 @@
+     color_check('pil', 'bmp')
+ 
+ 
++# https://github.com/scikit-image/scikit-image/issues/2120
++@skipif(sys.byteorder == 'big')
+ def test_all_mono():
+     mono_check('pil')
+ 

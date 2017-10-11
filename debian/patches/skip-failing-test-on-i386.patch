@@ -1,0 +1,47 @@
+--- a/skimage/feature/tests/test_orb.py
++++ b/skimage/feature/tests/test_orb.py
+@@ -1,6 +1,8 @@
++import os
+ import numpy as np
+ from numpy.testing import (assert_equal, assert_almost_equal, run_module_suite,
+                            assert_raises)
++from numpy.testing.decorators import skipif
+ from skimage.feature import ORB
+ from skimage import data
+ from skimage._shared.testing import test_parallel
+@@ -69,6 +71,8 @@
+     assert_almost_equal(exp_cols, detector_extractor.keypoints[:, 1])
+ 
+ 
++# https://github.com/scikit-image/scikit-image/issues/2529
++@skipif(os.uname()[4] == 'i686')
+ def test_descriptor_orb():
+     detector_extractor = ORB(fast_n=12, fast_threshold=0.20)
+ 
+--- a/skimage/filters/rank/tests/test_rank.py
++++ b/skimage/filters/rank/tests/test_rank.py
+@@ -10,6 +10,7 @@
+ from skimage._shared._warnings import expected_warnings
+ from skimage._shared.testing import test_parallel
+ 
++machine = os.uname()[4]
+ 
+ class TestRank():
+     def setup(self):
+@@ -82,10 +83,12 @@
+                          rank.tophat(self.image, selem))
+             assert_equal(refs["noise_filter"],
+                          rank.noise_filter(self.image, selem))
+-            assert_equal(refs["entropy"],
+-                         rank.entropy(self.image, selem))
+-            assert_equal(refs["otsu"],
+-                         rank.otsu(self.image, selem))
++            # https://github.com/scikit-image/scikit-image/issues/2528
++            if machine != "i686":
++                assert_equal(refs["entropy"],
++                            rank.entropy(self.image, selem))
++                assert_equal(refs["otsu"],
++                            rank.otsu(self.image, selem))
+             assert_equal(refs["percentile"],
+                          rank.percentile(self.image, selem))
+             assert_equal(refs["windowed_histogram"],
