@@ -97,7 +97,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     >>> d is a
     True
     >>> e = morphology.remove_small_objects(a.astype(int), 6)
-    /usr/local/lib/python3.5/dist-packages/skimage/morphology/misc.py:122:
+    /usr/local/lib/python3.5/dist-packages/skimage/morphology/misc.py:135:
     UserWarning: Only one label was provided to `remove_small_objects`.
     Did you mean to use a boolean array?
   warn("Only one label was provided to `remove_small_objects`. "
