@@ -46,22 +46,21 @@ def _check_dtype_supported(ar):
 
 def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     """Remove objects smaller than the specified size.
-    If ar is bool, labels connected components and removes objects smaller than
-    min_size. If ar is int, assumes objects have already been labelled. This
-    means that int arrays with only one value above 0 are treated differently
-    than boolean arrays, and all non-zero pixels are considered a single object
-    even if they are not touching.
-
+    Expects ar to be an array with labelled objects, and removes objects
+    smaller than min_size. If ar is bool, the image is first labelled.
+    This leads to potentially different behavior for bool and 0-and-1
+    arrays.
+    
     Parameters
     ----------
     ar : ndarray (arbitrary shape, int or bool type)
         The array containing the objects of interest. If the array type is
-        int, it is assumed that it contains already-labeled objects.
-        The ints must be non-negative.
+        int, the ints must be non-negative.
     min_size : int, optional (default: 64)
         The smallest allowable object size.
     connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
-        The connectivity defining the neighborhood of a pixel.
+        The connectivity defining the neighborhood of a pixel. Used during
+        labelling if ar is bool.
     in_place : bool, optional (default: False)
         If `True`, remove the objects in the input array itself.
         Otherwise, make a copy.
