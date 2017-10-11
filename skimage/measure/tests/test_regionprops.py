@@ -3,9 +3,14 @@ from numpy.testing import assert_array_equal, assert_almost_equal, \
 import pytest
 import numpy as np
 import math
+import functools
 
-from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
-                                          _parse_docs)
+
+from skimage.measure._regionprops import (regionprops as regionprops_default,
+                                          PROPS, perimeter, _parse_docs)
+
+
+regionprops = functools.partial(regionprops_default, coordinates='rc')
 
 
 SAMPLE = np.array(

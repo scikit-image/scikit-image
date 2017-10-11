@@ -14,6 +14,13 @@ from functools import wraps
 __all__ = ['regionprops', 'perimeter']
 
 
+XY_TO_RC_DEPRECATION_MESSAGE = (
+    'regionprops and image moments (including moments, normalized moments, '
+    'central moments, and inertia tensor) of 2D images will change from xy '
+    'coordinates to rc coordinates in version 0.16.\nSee '
+    'http://scikit-image.org/docs/0.14.x/release_notes_and_installation.html#deprecations '
+    'for details on how to avoid this message.'
+)
 STREL_4 = np.array([[0, 1, 0],
                     [1, 1, 1],
                     [0, 1, 0]], dtype=np.uint8)
@@ -92,7 +99,7 @@ class _RegionProperties(object):
     """
 
     def __init__(self, slice, label, label_image, intensity_image,
-                 cache_active):
+                 cache_active, coordinates):
 
         if intensity_image is not None:
             if not intensity_image.shape == label_image.shape:
@@ -108,6 +115,18 @@ class _RegionProperties(object):
         self._cache_active = cache_active
         self._cache = {}
         self._ndim = label_image.ndim
+        # Note: in PR 2603, we added support for nD moments in regionprops.
+        # Many properties used xy coordinates, instead of rc. This attribute
+        # helps with the deprecation process and should be removed in 0.16.
+        if label_image.ndim > 2 or coordinates == 'rc':
+            self._warned = True
+            self._transpose_moments = False
+        elif coordinates == 'xy':
+            self._warned = True  # no need to warn if 'xy' given explicitly
+            self._transpose_moments = True
+        elif coordinates is None:
+            self._warned = False
+            self._transpose_moments = True
 
     @_cached
     def area(self):
@@ -212,8 +231,10 @@ class _RegionProperties(object):
 
     def local_centroid(self):
         M = self.moments
-        return (M[tuple(np.eye(self._ndim, dtype=int))] /
-                M[(0,) * self._ndim])
+        if self._transpose_moments:
+            M = M.T
+        return tuple(M[tuple(np.eye(self._ndim, dtype=int))] /
+                     M[(0,) * self._ndim])
 
     def max_intensity(self):
         return np.max(self.intensity_image[self.image])
@@ -234,12 +255,26 @@ class _RegionProperties(object):
 
     @_cached
     def moments(self):
-        return _moments.moments(self.image.astype(np.uint8), 3)
+        M = _moments.moments(self.image.astype(np.uint8), 3)
+        if not self._warned:
+            from warnings import warn
+            warn(XY_TO_RC_DEPRECATION_MESSAGE)
+            self.warned = True
+        if self._transpose_moments:
+            M = M.T
+        return M
 
     @_cached
     def moments_central(self):
-        return _moments.moments_central(self.image.astype(np.uint8),
-                                        self.local_centroid, order=3)
+        mu = _moments.moments_central(self.image.astype(np.uint8),
+                                      self.local_centroid, order=3)
+        if not self._warned:
+            from warnings import warn
+            warn(XY_TO_RC_DEPRECATION_MESSAGE)
+            self.warned = True
+        if self._transpose_moments:
+            mu = mu.T
+        return mu
 
     @only2d
     def moments_hu(self):
@@ -337,7 +372,8 @@ class _RegionProperties(object):
         return True
 
 
-def regionprops(label_image, intensity_image=None, cache=True):
+def regionprops(label_image, intensity_image=None, cache=True,
+                coordinates=None):
     """Measure properties of labeled image regions.
 
     Parameters
@@ -351,6 +387,9 @@ def regionprops(label_image, intensity_image=None, cache=True):
         Determine whether to cache calculated properties. The computation is
         much faster for cached properties, whereas the memory consumption
         increases.
+    coordinates : 'rc' or 'xy', optional
+        Coordinate conventions for 2D images. (Only 'rc' coordinates are
+        supported for 3D images.)
 
     Returns
     -------
@@ -538,7 +577,7 @@ def regionprops(label_image, intensity_image=None, cache=True):
         label = i + 1
 
         props = _RegionProperties(sl, label, label_image, intensity_image,
-                                  cache)
+                                  cache, coordinates=coordinates)
         regions.append(props)
 
     return regions
