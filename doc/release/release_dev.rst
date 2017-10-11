@@ -50,7 +50,10 @@ Deprecations
   using them now with ``regionprops(..., coordinates='rc')``. You can silence
   warning messages, and retain the old behavior, with
   ``regionprops(..., coordinates='xy')``. However, that option will go away
-  in 0.16 and result in an error.
+  in 0.16 and result in an error. This change has a number of consequences.
+  Specifically, the "orientation" region property will measure the
+  anticlockwise angle from a *vertical* line, i.e. from the vector (1, 0) in
+  row-column coordinates.
 
 
 Contributors to this release
