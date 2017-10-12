@@ -50,7 +50,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     smaller than min_size. If ar is bool, the image is first labelled.
     This leads to potentially different behavior for bool and 0-and-1
     arrays.
-    
+
     Parameters
     ----------
     ar : ndarray (arbitrary shape, int or bool type)
