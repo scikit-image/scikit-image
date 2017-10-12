@@ -353,10 +353,10 @@ def threshold_isodata(image, nbins=256, return_all=False):
     """Return threshold value(s) based on ISODATA method.
 
     Histogram-based threshold, known as Ridler-Calvard method or inter-means.
-    Threshold values returned satisfy the following equality:
+    Threshold values returned satisfy the following equality::
 
-    `threshold = (image[image <= threshold].mean() +`
-                 `image[image > threshold].mean()) / 2.0`
+        threshold = (image[image <= threshold].mean() +
+                     image[image > threshold].mean()) / 2.0
 
     That is, returned thresholds are intensities that separate the image into
     two groups of pixels, where the threshold intensity is midway between the
@@ -781,9 +781,9 @@ def threshold_niblack(image, window_size=15, k=0.2):
     """Applies Niblack local threshold to an array.
 
     A threshold T is calculated for every pixel in the image using the
-    following formula:
+    following formula::
 
-    T = m(x,y) - k * s(x,y)
+        T = m(x,y) - k * s(x,y)
 
     where m(x,y) and s(x,y) are the mean and standard deviation of
     pixel (x,y) neighborhood defined by a rectangular window with size w
@@ -829,9 +829,9 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     modification of Niblack technique.
 
     In the original method a threshold T is calculated for every pixel
-    in the image using the following formula:
+    in the image using the following formula::
 
-    T = m(x,y) * (1 + k * ((s(x,y) / R) - 1))
+        T = m(x,y) * (1 + k * ((s(x,y) / R) - 1))
 
     where m(x,y) and s(x,y) are the mean and standard deviation of
     pixel (x,y) neighborhood defined by a rectangular window with size w

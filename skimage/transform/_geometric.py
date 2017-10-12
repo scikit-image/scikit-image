@@ -713,7 +713,9 @@ class ProjectiveTransform(GeometricTransform):
 
 
 class AffineTransform(ProjectiveTransform):
-    """2D affine transformation of the form:
+    """2D affine transformation.
+
+    Has the following form::
 
         X = a0*x + a1*y + a2 =
           = sx*x*cos(rotation) - sy*y*sin(rotation + shear) + a2
@@ -938,7 +940,9 @@ class PiecewiseAffineTransform(GeometricTransform):
 
 
 class EuclideanTransform(ProjectiveTransform):
-    """2D Euclidean transformation of the form:
+    """2D Euclidean transformation.
+
+    Has the following form::
 
         X = a0 * x - b0 * y + a1 =
           = x * cos(rotation) - y * sin(rotation) + a1
@@ -1035,7 +1039,9 @@ class EuclideanTransform(ProjectiveTransform):
 
 
 class SimilarityTransform(EuclideanTransform):
-    """2D similarity transformation of the form:
+    """2D similarity transformation.
+
+    Has the following form::
 
         X = a0 * x - b0 * y + a1 =
           = s * x * cos(rotation) - s * y * sin(rotation) + a1
@@ -1139,7 +1145,9 @@ class SimilarityTransform(EuclideanTransform):
 
 
 class PolynomialTransform(GeometricTransform):
-    """2D polynomial transformation of the form:
+    """2D polynomial transformation.
+
+    Has the following form::
 
         X = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
         Y = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
