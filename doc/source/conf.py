@@ -28,7 +28,7 @@ sys.path.append(os.path.join(curpath, '..', 'ext'))
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc',
-              'sphinx.ext.imgmath',
+              'sphinx.ext.mathjax',
               'numpydoc',
               'sphinx.ext.autosummary',
               'sphinx.ext.intersphinx',

@@ -78,10 +78,10 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     unknown original image, the Wiener filter is
 
     .. math::
-       \hat x = F^\dag (|\Lambda_H|^2 + \lambda |\Lambda_D|^2)
-       \Lambda_H^\dag F y
+       \hat x = F^\dagger (|\Lambda_H|^2 + \lambda |\Lambda_D|^2)
+       \Lambda_H^\dagger F y
 
-    where :math:`F` and :math:`F^\dag` are the Fourier and inverse
+    where :math:`F` and :math:`F^\dagger` are the Fourier and inverse
     Fourier transfroms respectively, :math:`\Lambda_H` the transfer
     function (or the Fourier transfrom of the PSF, see [Hunt] below)
     and :math:`\Lambda_D` the filter to penalize the restored image
