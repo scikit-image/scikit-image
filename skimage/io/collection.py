@@ -417,8 +417,37 @@ class MultiImage(ImageCollection):
         """Load a multi-img."""
 
         self._filename = filename
-        super(MultiImage, self).__init__(filename, conserve_memory,
-                                         load_func=None, **imread_kwargs)
+        self._frame_index = self._find_frames()
+
+        def load_frame(frame_idx, **kwargs):
+            fname, idx = frame_idx
+            from ._io import imread
+            return imread(fname, img_num=idx, **kwargs)
+
+        super(MultiImage, self).__init__(self._frame_index, conserve_memory,
+                                         load_func=load_frame, **imread_kwargs)
+
+    def _find_frames(self):
+        index = []
+        fname = self._filename
+        if fname.lower().endswith(('.tiff', '.tif')):
+            with open(fname, 'rb') as f:
+                img = TiffFile(f)
+                index += [(fname, i) for i in range(len(img.pages))]
+        else:
+            im = Image.open(fname)
+            im.seek(0)
+            i = 0
+            while True:
+                try:
+                    im.seek(i)
+                except EOFError:
+                    break
+                index.append((fname, i))
+                i += 1
+            if hasattr(im, 'fp') and im.fp:
+                im.fp.close()
+        return index
 
     @property
     def filename(self):
