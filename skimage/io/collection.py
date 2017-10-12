@@ -172,20 +172,8 @@ class ImageCollection(object):
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
                  **load_func_kwargs):
         """Load and manage a collection of images."""
-        self._files = []
-        if _is_multipattern(load_pattern):
-            if isinstance(load_pattern, str):
-                load_pattern = load_pattern.split(os.pathsep)
-            for pattern in load_pattern:
-                self._files.extend(glob(pattern))
-            self._files = sorted(self._files, key=alphanumeric_key)
-            self._numframes = self._find_images()
-        elif isinstance(load_pattern, str):
-            self._files.extend(glob(load_pattern))
-            self._files = sorted(self._files, key=alphanumeric_key)
-            self._numframes = self._find_images()
-        else:
-            raise TypeError('Invalid pattern as input.')
+
+        self._files = self._find_files(load_pattern)
 
         if load_func is None:
             from ._io import imread
@@ -315,6 +303,21 @@ class ImageCollection(object):
             else:
                 new_ic.data = self.data[fidx]
             return new_ic
+
+    def _find_files(self, load_pattern):
+        if _is_multipattern(load_pattern):
+            if isinstance(load_pattern, str):
+                load_pattern = load_pattern.split(os.pathsep)
+            files = []
+            for pattern in load_pattern:
+                files.extend(glob(pattern))
+            files = sorted(files, key=alphanumeric_key)
+        elif isinstance(load_pattern, str):
+            files = sorted(glob(load_pattern), key=alphanumeric_key)
+        else:
+            raise TypeError('Invalid pattern as input.')
+
+        return files
 
     def _check_imgnum(self, n):
         """Check that the given image number is valid."""
