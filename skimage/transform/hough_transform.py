@@ -64,7 +64,7 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     if a.any():
         return (h, angles[a], dists[d])
     else:
-        return (np.array([]), np.array([]), np.array([]))
+        return (h, np.array([]), np.array([]))
 
 
 def hough_circle(image, radius, normalize=True, full_output=False):
