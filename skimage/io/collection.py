@@ -156,14 +156,8 @@ class ImageCollection(object):
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
                  **load_func_kwargs):
         """Load and manage a collection of images."""
-        if isinstance(load_pattern, six.string_types):
-            load_pattern = load_pattern.split(os.pathsep)
-            self._files = []
-            for pattern in load_pattern:
-                self._files.extend(glob(pattern))
-            self._files = sorted(self._files, key=alphanumeric_key)
-        else:
-            self._files = load_pattern
+
+        self._files = self._find_files(load_pattern)
 
         if load_func is None:
             from ._io import imread
@@ -294,6 +288,17 @@ class ImageCollection(object):
             else:
                 new_ic.data = self.data[fidx]
             return new_ic
+
+    def _find_files(self, load_pattern):
+        if isinstance(load_pattern, six.string_types):
+            load_pattern = load_pattern.split(os.pathsep)
+            files = []
+            for pattern in load_pattern:
+                files.extend(glob(pattern))
+            files = sorted(files, key=alphanumeric_key)
+        else:
+            files = load_pattern
+        return files
 
     def _check_imgnum(self, n):
         """Check that the given image number is valid."""
