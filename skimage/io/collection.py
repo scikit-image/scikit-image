@@ -380,14 +380,16 @@ def imread_collection_wrapper(imread):
     return imread_collection
 
 
-class MultiImage(ImageCollection):
+class FrameCollection(ImageCollection):
 
-    """A class containing a single multi-frame image.
+    """A class containing all frames from multi-frame images.
 
     Parameters
     ----------
-    filename : str
-        The complete path to the image file.
+    load_pattern : str or list
+        Pattern glob or filenames to load. The path can be absolute or
+        relative.  Multiple patterns should be separated by os.pathsep,
+        e.g. '/tmp/work/*.png:/tmp/other/*.jpg'.
     conserve_memory : bool, optional
         Whether to conserve memory by only caching a single frame. Default is
         True.
@@ -418,10 +420,10 @@ class MultiImage(ImageCollection):
 
     """
 
-    def __init__(self, filename, conserve_memory=True, **imread_kwargs):
-        """Load a multi-img."""
+    def __init__(self, load_pattern, conserve_memory=True, **imread_kwargs):
+        """Load multi-images as a collection of frames."""
 
-        self._filename = filename
+        self._files = super(FrameCollection, self)._find_files(load_pattern)
         self._frame_index = self._find_frames()
 
         def load_frame(frame_idx, **kwargs):
@@ -429,30 +431,54 @@ class MultiImage(ImageCollection):
             from ._io import imread
             return imread(fname, img_num=idx, **kwargs)
 
-        super(MultiImage, self).__init__(self._frame_index, conserve_memory,
-                                         load_func=load_frame, **imread_kwargs)
+        super(FrameCollection, self).__init__(self._frame_index,
+                                              conserve_memory,
+                                              load_func=load_frame,
+                                              **imread_kwargs)
 
     def _find_frames(self):
-        index = []
-        fname = self._filename
-        if fname.lower().endswith(('.tiff', '.tif')):
-            with open(fname, 'rb') as f:
-                img = TiffFile(f)
-                index += [(fname, i) for i in range(len(img.pages))]
-        else:
-            im = Image.open(fname)
-            im.seek(0)
-            i = 0
-            while True:
+        for fname in self._files:
+            index = []
+            if fname.lower().endswith(('.tiff', '.tif')):
+                with open(fname, 'rb') as f:
+                    img = TiffFile(f)
+                    index += [(fname, i) for i in range(len(img.pages))]
+            else:
                 try:
-                    im.seek(i)
-                except EOFError:
-                    break
-                index.append((fname, i))
-                i += 1
-            if hasattr(im, 'fp') and im.fp:
-                im.fp.close()
+                    im = Image.open(fname)
+                    im.seek(0)
+                except (IOError, OSError):
+                    continue
+                i = 0
+                while True:
+                    try:
+                        im.seek(i)
+                    except EOFError:
+                        break
+                    index.append((fname, i))
+                    i += 1
+                if hasattr(im, 'fp') and im.fp:
+                    im.fp.close()
         return index
+
+
+class MultiImage(FrameCollection):
+    """A class containing a single multi-frame image.
+
+    Parameters
+    ----------
+    filename : str
+        The complete path to the image file.
+    conserve_memory : bool, optional
+        Whether to conserve memory by only caching a single frame. Default is
+        True.
+    """
+
+    def __init__(self, filename, conserve_memory=True, **imread_kwargs):
+        """Load a multi-img."""
+        self._filename = filename
+        super(MultiImage, self).__init__(filename, conserve_memory,
+                                         **imread_kwargs)
 
     @property
     def filename(self):
