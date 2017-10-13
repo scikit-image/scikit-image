@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 from skimage import data_dir
-from skimage.io.collection import ImageCollection, alphanumeric_key
+from skimage.io.collection import ImageCollection, FrameCollection, alphanumeric_key
 from skimage.io import reset_plugins
 
 from skimage._shared import testing
@@ -38,6 +38,8 @@ class TestImageCollection(TestCase):
         self.images = ImageCollection(self.pattern)
         # Image collection with images having shapes that match.
         self.images_matched = ImageCollection(self.pattern_matched)
+        # Same images as a collection of frames
+        self.frames_matched = FrameCollection(self.pattern_matched)
 
     def test_len(self):
         assert len(self.images) == 2
@@ -46,12 +48,8 @@ class TestImageCollection(TestCase):
         num = len(self.images)
         for i in range(-num, num):
             assert type(self.images[i]) is np.ndarray
-<<<<<<< HEAD
         assert_allclose(self.images[0],
                         self.images[-num])
-=======
-        assert_allclose(self.images[0], self.images[-num])
->>>>>>> Fix whitespace issues
 
         def return_img(n):
             return self.images[n]
@@ -128,3 +126,7 @@ class TestImageCollection(TestCase):
     def test_concatentate_mismatched_image_shapes(self):
         with testing.raises(ValueError):
             self.images.concatenate()
+
+    def test_framecollection_imagecollection(self):
+        assert_equal(self.images_matched[0], self.frames_matched[0])
+        assert_equal(self.images_matched[1], self.frames_matched[1])
