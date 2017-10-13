@@ -426,9 +426,9 @@ class FrameCollection(ImageCollection):
         self._files = super(FrameCollection, self)._find_files(load_pattern)
         self._frame_index = self._find_frames()
 
+        from ._io import imread
         def load_frame(frame_idx, **kwargs):
             fname, idx = frame_idx
-            from ._io import imread
             return imread(fname, img_num=idx, **kwargs)
 
         super(FrameCollection, self).__init__(self._frame_index,
