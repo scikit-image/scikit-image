@@ -123,7 +123,7 @@ class _RegionProperties(object):
                      [self._slice[i].stop for i in range(self._ndim)])
 
     def bbox_area(self):
-        return self._label_image.size
+        return self.image.size
 
     def centroid(self):
         return tuple(self.coords.mean(axis=0))
