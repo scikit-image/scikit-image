@@ -325,14 +325,12 @@ def check_radon_iradon_circle(interpolation, shape, output_size):
     np.allclose(reconstruction_rectangle, reconstruction_circle)
 
 
-# this might be overkill:
-# in order to allow tests of multiple shapes, the shape is packed in a tuple
-# and using chain to get min or max of all shapes
+# if adding more shapes to test data, you might want to look at commit d0f2bac3f
 shapes_radon_iradon_circle = ((61, 79), )
 interpolations = ('nearest', 'linear')
 output_sizes = (None,
-                min(itertools.chain.from_iterable(shapes_radon_iradon_circle)),
-                max(itertools.chain.from_iterable(shapes_radon_iradon_circle)),
+                min(shapes_radon_iradon_circle[0]),
+                max(shapes_radon_iradon_circle[0]),
                 97)
 
 
