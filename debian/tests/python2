@@ -15,5 +15,5 @@ for py in $pys; do
         cd "$ADTTMP"
     fi
 
-    xvfb-run -a python$py /usr/bin/nosetests -s -v --exclude test_tools.py skimage 2>&1
+    xvfb-run -a python$py /usr/bin/nosetests -s -v --exclude test_update_on_save skimage 2>&1
 done

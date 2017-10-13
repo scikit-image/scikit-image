@@ -15,8 +15,11 @@ skimage (0.13.1-1) unstable; urgency=medium
 
   [ Yaroslav Halchenko ]
   * Adopted the patch provided in #868582, progressed to 0.13.1 upstream release
+  * Do not exclude test_tools.py in tests, but exclude test_update_on_save
+    having issues with PIL 4.2.1
+    (see https://github.com/scikit-image/scikit-image/issues/2843)
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 13 Oct 2017 00:12:44 -0400
+ -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 13 Oct 2017 14:23:49 -0400
 
 skimage (0.12.3-2) unstable; urgency=medium
 
