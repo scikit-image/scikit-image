@@ -9,13 +9,14 @@ skimage (0.13.1-1) unstable; urgency=medium
     - fix-doc-links.patch: updated
     - skip_tests_failing_on_some_architectures.patch: split into more targetted
       skip-failing-test-on-i386.patch & skip-failing-test-on-big-endian.patch.
+    - deb_no_sphinx_galery: to disable absent sphinx galery for now
   * d/rules: CONTRIBUTING.txt has moved.
   * d/control: add dependencies on python{3,}-pywt. python{3,}-numpydoc.
 
   [ Yaroslav Halchenko ]
   * Adopted the patch provided in #868582, progressed to 0.13.1 upstream release
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Tue, 10 Oct 2017 18:26:16 -0400
+ -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 13 Oct 2017 00:12:44 -0400
 
 skimage (0.12.3-2) unstable; urgency=medium
 

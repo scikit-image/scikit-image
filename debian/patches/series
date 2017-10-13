@@ -1,3 +1,4 @@
+deb_no_sphinx_galery
 fix-doc-links.patch
 doc-privacy.patch
 skip-failing-test-on-big-endian.patch

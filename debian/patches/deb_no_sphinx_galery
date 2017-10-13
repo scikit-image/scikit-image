@@ -1,0 +1,11 @@
+--- a/doc/source/conf.py
++++ b/doc/source/conf.py
+@@ -33,7 +33,7 @@ extensions = ['sphinx.ext.autodoc',
+               'sphinx.ext.autosummary',
+               'sphinx.ext.intersphinx',
+               'sphinx.ext.linkcode',
+-              'sphinx_gallery.gen_gallery'
++              #'sphinx_gallery.gen_gallery'
+               ]
+ 
+ autosummary_generate = True
