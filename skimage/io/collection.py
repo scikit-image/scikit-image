@@ -428,8 +428,10 @@ class FrameCollection(ImageCollection):
 
         from ._io import imread
         def load_frame(frame_idx, **kwargs):
-            fname, idx = frame_idx
-            return imread(fname, img_num=idx, **kwargs)
+            fname, img_num = frame_idx
+            if img_num is not None:
+                kwargs['img_num'] = img_num
+            return imread(fname, **kwargs)
 
         super(FrameCollection, self).__init__(self._frame_index,
                                               conserve_memory,
