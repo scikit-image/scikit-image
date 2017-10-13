@@ -439,8 +439,8 @@ class FrameCollection(ImageCollection):
                                               **imread_kwargs)
 
     def _find_frames(self):
+        index = []
         for fname in self._files:
-            index = []
             if fname.lower().endswith(('.tiff', '.tif')):
                 with open(fname, 'rb') as f:
                     img = TiffFile(f)
