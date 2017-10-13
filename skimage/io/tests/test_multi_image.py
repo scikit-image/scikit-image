@@ -4,7 +4,7 @@ import six
 import numpy as np
 from skimage import data_dir
 from skimage.io import use_plugin
-from skimage.io.collection import MultiImage, ImageCollection
+from skimage.io.collection import MultiImage, FrameCollection
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_allclose, TestCase
@@ -22,9 +22,9 @@ class TestMultiImage(TestCase):
                      MultiImage(paths[0], conserve_memory=False),
                      MultiImage(paths[1]),
                      MultiImage(paths[1], conserve_memory=False),
-                     ImageCollection(paths[0]),
-                     ImageCollection(paths[1], conserve_memory=False),
-                     ImageCollection(os.pathsep.join(paths))]
+                     FrameCollection(paths[0]),
+                     FrameCollection(paths[1], conserve_memory=False),
+                     FrameCollection(os.pathsep.join(paths))]
 
     def test_shapes(self):
         img = self.imgs[-1]
@@ -41,7 +41,7 @@ class TestMultiImage(TestCase):
 
     def test_slicing(self):
         img = self.imgs[-1]
-        assert type(img[:]) is ImageCollection
+        assert type(img[:]) is FrameCollection
         assert len(img[:]) == 26, len(img[:])
         assert len(img[:1]) == 1
         assert len(img[1:]) == 25
@@ -68,7 +68,7 @@ class TestMultiImage(TestCase):
 
     def test_files_property(self):
         for img in self.imgs:
-            if isinstance(img, ImageCollection):
+            if isinstance(img, FrameCollection):
                 continue
 
             assert isinstance(img.filename, six.string_types)
