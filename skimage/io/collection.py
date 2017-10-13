@@ -158,15 +158,13 @@ class ImageCollection(object):
         """Load and manage a collection of images."""
 
         self._files = self._find_files(load_pattern)
+        self._numframes = len(self._files)
 
         if load_func is None:
             from ._io import imread
             self.load_func = imread
-            self._numframes = self._find_images()
         else:
             self.load_func = load_func
-            self._numframes = len(self._files)
-            self._frame_index = None
 
         self.load_func_kwargs = load_func_kwargs
 
@@ -187,32 +185,6 @@ class ImageCollection(object):
     @property
     def conserve_memory(self):
         return self._conserve_memory
-
-    def _find_images(self):
-        index = []
-        for fname in self._files:
-            if fname.lower().endswith(('.tiff', '.tif')):
-                with open(fname, 'rb') as f:
-                    img = TiffFile(f)
-                    index += [(fname, i) for i in range(len(img.pages))]
-            else:
-                try:
-                    im = Image.open(fname)
-                    im.seek(0)
-                except (IOError, OSError):
-                    continue
-                i = 0
-                while True:
-                    try:
-                        im.seek(i)
-                    except EOFError:
-                        break
-                    index.append((fname, i))
-                    i += 1
-                if hasattr(im, 'fp') and im.fp:
-                    im.fp.close()
-        self._frame_index = index
-        return len(index)
 
     def __getitem__(self, n):
         """Return selected image(s) in the collection.
@@ -245,21 +217,7 @@ class ImageCollection(object):
             if ((self.conserve_memory and n != self._cached) or
                     (self.data[idx] is None)):
                 kwargs = self.load_func_kwargs
-                if self._frame_index:
-                    fname, img_num = self._frame_index[n]
-                    if img_num is not None:
-                        kwargs['img_num'] = img_num
-                    try:
-                        self.data[idx] = self.load_func(fname, **kwargs)
-                    # Account for functions that do not accept an img_num kwarg
-                    except TypeError as e:
-                        if "unexpected keyword argument 'img_num'" in str(e):
-                            del kwargs['img_num']
-                            self.data[idx] = self.load_func(fname, **kwargs)
-                        else:
-                            raise
-                else:
-                    self.data[idx] = self.load_func(self.files[n], **kwargs)
+                self.data[idx] = self.load_func(self.files[n], **kwargs)
                 self._cached = n
 
             return self.data[idx]
@@ -271,12 +229,7 @@ class ImageCollection(object):
             fidx = range(self._numframes)[n]
             new_ic = copy(self)
 
-            if self._frame_index:
-                new_ic._files = [self._frame_index[i][0] for i in fidx]
-                new_ic._frame_index = [self._frame_index[i] for i in fidx]
-            else:
-                new_ic._files = [self._files[i] for i in fidx]
-
+            new_ic._files = [self._files[i] for i in fidx]
             new_ic._numframes = len(fidx)
 
             if self.conserve_memory:
