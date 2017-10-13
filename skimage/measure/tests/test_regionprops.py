@@ -80,8 +80,9 @@ def test_bbox():
     assert_array_almost_equal(bbox, (1, 1, 1, 4, 3, 3))
 
 def test_bbox_area():
-    bbox_area = regionprops(SAMPLE)[0].bbox_area
-    assert_array_almost_equal(bbox_area, SAMPLE.shape[0] * SAMPLE.shape[1])
+    padded = np.pad(SAMPLE, 5, mode='constant')
+    bbox_area = regionprops(padded)[0].bbox_area
+    assert_array_almost_equal(bbox_area, SAMPLE.size)
 
 def test_moments_central():
     mu = regionprops(SAMPLE)[0].moments_central
