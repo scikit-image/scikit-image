@@ -14,8 +14,8 @@ from PIL import Image
 from ..external.tifffile import TiffFile
 
 
-__all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
-           'imread_collection_wrapper']
+__all__ = ['MultiImage', 'ImageCollection', 'FrameCollection',
+           'concatenate_images', 'imread_collection_wrapper']
 
 
 def concatenate_images(ic):
