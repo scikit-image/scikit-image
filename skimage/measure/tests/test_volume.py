@@ -5,5 +5,7 @@ from .test_regionprops import SAMPLE
 
 def test_expanded_convex_hull():
     coords = np.transpose(np.nonzero(SAMPLE))
-    vol = measure.extended_convex_hull(coords).volume
-    np.testing.assert_allclose(vol, 129.5)
+    vol = measure.expanded_convex_hull(coords).volume
+    np.testing.assert_allclose(vol, 124)
+    vol2 = measure.expanded_convex_hull(coords, square_pixels=True).volume
+    np.testing.assert_allclose(vol2, 131)

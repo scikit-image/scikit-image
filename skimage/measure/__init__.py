@@ -15,7 +15,7 @@ from .fit import LineModelND, CircleModel, EllipseModel, ransac
 from .block import block_reduce
 from ._label import label
 from .entropy import shannon_entropy
-from .volume3d import extended_convex_hull
+from .volume3d import expanded_convex_hull
 
 
 __all__ = ['find_contours',
@@ -45,5 +45,5 @@ __all__ = ['find_contours',
            'compare_nrmse',
            'compare_psnr',
            'shannon_entropy',
-           'extended_convex_hull',
+           'expanded_convex_hull',
 ]
