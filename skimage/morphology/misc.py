@@ -46,8 +46,9 @@ def _check_dtype_supported(ar):
 
 def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     """Remove objects smaller than the specified size.
-    Expects ar to be an array with labelled objects, and removes objects
-    smaller than min_size. If ar is bool, the image is first labelled.
+
+    Expects ar to be an array with labeled objects, and removes objects
+    smaller than min_size. If `ar` is bool, the image is first labeled.
     This leads to potentially different behavior for bool and 0-and-1
     arrays.
 
@@ -60,9 +61,9 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
         The smallest allowable object size.
     connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
         The connectivity defining the neighborhood of a pixel. Used during
-        labelling if ar is bool.
+        labelling if `ar` is bool.
     in_place : bool, optional (default: False)
-        If `True`, remove the objects in the input array itself.
+        If ``True``, remove the objects in the input array itself.
         Otherwise, make a copy.
 
     Raises
@@ -96,15 +97,6 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     >>> d = morphology.remove_small_objects(a, 6, in_place=True)
     >>> d is a
     True
-    >>> e = morphology.remove_small_objects(a.astype(int), 6)
-    /usr/local/lib/python3.5/dist-packages/skimage/morphology/misc.py:135:
-    UserWarning: Only one label was provided to `remove_small_objects`.
-    Did you mean to use a boolean array?
-  warn("Only one label was provided to `remove_small_objects`. "
-    >>> e
-    array([[0, 0, 0, 1, 0],
-           [1, 1, 1, 0, 0],
-           [1, 1, 1, 0, 1]])
     """
     # Raising type error if not int or bool
     _check_dtype_supported(ar)
