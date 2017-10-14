@@ -1,6 +1,7 @@
 import numpy as np
 from numpy.testing import assert_equal
 import pytest
+import itertools
 from skimage import img_as_int, img_as_float, \
                     img_as_uint, img_as_ubyte
 from skimage.util.dtype import convert
@@ -15,62 +16,65 @@ dtype_range = {np.uint8: (0, 255),
                np.float64: (-1.0, 1.0)}
 
 
+img_funcs = (img_as_int, img_as_float, img_as_uint, img_as_ubyte)
+dtypes_for_img_funcs = (np.int16, np.float64, np.uint16, np.ubyte)
+img_funcs_and_types = zip(img_funcs, dtypes_for_img_funcs)
+
+
 def _verify_range(msg, x, vmin, vmax, dtype):
     assert_equal(x[0], vmin)
     assert_equal(x[-1], vmax)
     assert x.dtype == dtype
 
 
-def test_range():
-    for dtype in dtype_range:
-        imin, imax = dtype_range[dtype]
-        x = np.linspace(imin, imax, 10).astype(dtype)
+@pytest.mark.parametrize("dtype, f_and_dt",
+                         itertools.product(dtype_range,
+                                           img_funcs_and_types))
+def test_range(dtype, f_and_dt):
+    imin, imax = dtype_range[dtype]
+    x = np.linspace(imin, imax, 10).astype(dtype)
 
-        for (f, dt) in [(img_as_int, np.int16),
-                        (img_as_float, np.float64),
-                        (img_as_uint, np.uint16),
-                        (img_as_ubyte, np.ubyte)]:
+    f, dt = f_and_dt
 
-            with expected_warnings(['precision loss|sign loss|\A\Z']):
-                y = f(x)
+    with expected_warnings(['precision loss|sign loss|\A\Z']):
+        y = f(x)
 
-            omin, omax = dtype_range[dt]
+    omin, omax = dtype_range[dt]
 
-            if imin == 0 or omin == 0:
-                omin = 0
-                imin = 0
+    if imin == 0 or omin == 0:
+        omin = 0
+        imin = 0
 
-            yield (_verify_range,
-                   "From %s to %s" % (np.dtype(dtype), np.dtype(dt)),
-                   y, omin, omax, np.dtype(dt))
+    _verify_range("From %s to %s" % (np.dtype(dtype), np.dtype(dt)),
+                  y, omin, omax, np.dtype(dt))
 
 
-def test_range_extra_dtypes():
+# Add non-standard data types that are allowed by the `convert` function.
+dtype_range_extra = dtype_range.copy()
+dtype_range_extra.update({np.int32: (-2147483648, 2147483647),
+                          np.uint32: (0, 4294967295)})
+
+dtype_pairs = [(np.uint8, np.uint32),
+               (np.int8, np.uint32),
+               (np.int8, np.int32),
+               (np.int32, np.int8),
+               (np.float64, np.float32),
+               (np.int32, np.float32)]
+
+
+@pytest.mark.parametrize("dtype_in, dt", dtype_pairs)
+def test_range_extra_dtypes(dtype_in, dt):
     """Test code paths that are not skipped by `test_range`"""
 
-    # Add non-standard data types that are allowed by the `convert` function.
-    dtype_range_extra = dtype_range.copy()
-    dtype_range_extra.update({np.int32: (-2147483648, 2147483647),
-                              np.uint32: (0, 4294967295)})
+    imin, imax = dtype_range_extra[dtype_in]
+    x = np.linspace(imin, imax, 10).astype(dtype_in)
 
-    dtype_pairs = [(np.uint8, np.uint32),
-                   (np.int8, np.uint32),
-                   (np.int8, np.int32),
-                   (np.int32, np.int8),
-                   (np.float64, np.float32),
-                   (np.int32, np.float32)]
+    with expected_warnings(['precision loss|sign loss|\A\Z']):
+        y = convert(x, dt)
 
-    for dtype_in, dt in dtype_pairs:
-        imin, imax = dtype_range_extra[dtype_in]
-        x = np.linspace(imin, imax, 10).astype(dtype_in)
-
-        with expected_warnings(['precision loss|sign loss|\A\Z']):
-            y = convert(x, dt)
-
-        omin, omax = dtype_range_extra[dt]
-        yield (_verify_range,
-               "From %s to %s" % (np.dtype(dtype_in), np.dtype(dt)),
-               y, omin, omax, np.dtype(dt))
+    omin, omax = dtype_range_extra[dt]
+    _verify_range("From %s to %s" % (np.dtype(dtype_in), np.dtype(dt)),
+                  y, omin, omax, np.dtype(dt))
 
 
 def test_downcast():
@@ -88,7 +92,7 @@ def test_float_out_of_range():
     too_low = np.array([-2], dtype=np.float32)
     with pytest.raises(ValueError):
         img_as_int(too_low)
-    
+
 
 def test_copy():
     x = np.array([1], dtype=np.float64)

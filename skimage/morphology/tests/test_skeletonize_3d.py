@@ -79,19 +79,20 @@ def test_dtype_conv():
         res = skeletonize_3d(img)
 
     assert_equal(res.dtype, np.uint8)
-    assert_equal(img, orig)  # operation does not clobber the original 
+    assert_equal(img, orig)  # operation does not clobber the original
     assert_equal(res.max(),
                  img_as_ubyte(img).max())    # the intensity range is preserved
 
 
-def test_input():
+@pytest.mark.parametrize("img", [
+    np.ones((8, 8), dtype=float), np.ones((4, 8, 8), dtype=float),
+    np.ones((8, 8), dtype=np.uint8), np.ones((4, 8, 8), dtype=np.uint8),
+    np.ones((8, 8), dtype=bool), np.ones((4, 8, 8), dtype=bool)
+])
+def test_input(img):
     # check that the input is not clobbered
     # for 2D and 3D images of varying dtypes
-    imgs = [np.ones((8, 8), dtype=float), np.ones((4, 8, 8), dtype=float),
-            np.ones((8, 8), dtype=np.uint8), np.ones((4, 8, 8), dtype=np.uint8),
-            np.ones((8, 8), dtype=bool), np.ones((4, 8, 8), dtype=bool)]
-    for img in imgs:
-        yield check_input, img
+    check_input(img)
 
 
 def check_input(img):

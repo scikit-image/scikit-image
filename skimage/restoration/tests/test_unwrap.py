@@ -54,22 +54,26 @@ def test_unwrap_1d():
         unwrap_phase(image, True, seed=0)
 
 
-def test_unwrap_2d():
+@pytest.mark.parametrize("check_with_mask", (False, True))
+def test_unwrap_2d(check_with_mask):
+    mask = None
     x, y = np.ogrid[:8, :16]
     image = 2 * np.pi * (x * 0.2 + y * 0.1)
-    yield check_unwrap, image
-    mask = np.zeros(image.shape, dtype=np.bool)
-    mask[4:6, 4:8] = True
-    yield check_unwrap, image, mask
+    if check_with_mask:
+        mask = np.zeros(image.shape, dtype=np.bool)
+        mask[4:6, 4:8] = True
+    check_unwrap(image, mask)
 
 
-def test_unwrap_3d():
+@pytest.mark.parametrize("check_with_mask", (False, True))
+def test_unwrap_3d(check_with_mask):
+    mask = None
     x, y, z = np.ogrid[:8, :12, :16]
     image = 2 * np.pi * (x * 0.2 + y * 0.1 + z * 0.05)
-    yield check_unwrap, image
-    mask = np.zeros(image.shape, dtype=np.bool)
-    mask[4:6, 4:6, 1:3] = True
-    yield check_unwrap, image, mask
+    if check_with_mask:
+        mask = np.zeros(image.shape, dtype=np.bool)
+        mask[4:6, 4:6, 1:3] = True
+    check_unwrap(image, mask)
 
 
 def check_wrap_around(ndim, axis):
@@ -109,10 +113,12 @@ def check_wrap_around(ndim, axis):
                         image_unwrap_wrap_around[index_last])
 
 
-def test_wrap_around():
-    for ndim in (2, 3):
-        for axis in range(ndim):
-            yield check_wrap_around, ndim, axis
+dim_axis = [(ndim, axis) for ndim in (2, 3) for axis in range(ndim)]
+
+
+@pytest.mark.parametrize("ndim, axis", dim_axis)
+def test_wrap_around(ndim, axis):
+    check_wrap_around(ndim, axis)
 
 
 def test_mask():
