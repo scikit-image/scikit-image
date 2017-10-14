@@ -174,7 +174,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     labels = _slic_cython(image, segments, step, max_iter, spacing, slic_zero)
 
     if enforce_connectivity:
-        segment_size = depth * height * width / n_segments
+        segment_size = depth * height * width / float(n_segments)
         min_size = int(min_size_factor * segment_size)
         max_size = int(max_size_factor * segment_size)
         labels = _enforce_label_connectivity_cython(labels,
