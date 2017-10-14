@@ -289,7 +289,6 @@ class _RegionProperties(object):
     def perimeter(self):
         return perimeter(self.image, 4)
 
-    @only2d
     def solidity(self):
         return self.area / self.convex_area
 
