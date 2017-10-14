@@ -250,7 +250,7 @@ def thin(image, max_iter=None):
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
     # check parameters
-    max_iter = max_iter or sys.maxsize
+    max_iter = max_iter or 2**31-1
     # check that image is 2d
     assert_nD(image, 2)
 
