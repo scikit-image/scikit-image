@@ -8,6 +8,7 @@ from scipy import ndimage as ndi
 
 from ._label import label
 from . import _moments
+from ._volume import expanded_convex_hull
 
 
 from functools import wraps
@@ -152,9 +153,11 @@ class _RegionProperties(object):
     def centroid(self):
         return tuple(self.coords.mean(axis=0))
 
-    @only2d
     def convex_area(self):
-        return np.sum(self.convex_image)
+        if self._ndim == 2:
+            return np.sum(self.convex_image)
+        else:
+            return expanded_convex_hull(self.coords).volume
 
     @_cached
     @only2d
