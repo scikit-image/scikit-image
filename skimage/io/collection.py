@@ -385,6 +385,7 @@ class FrameCollection(ImageCollection):
                  load_func=None, **load_func_kwargs):
         """Load multi-images as a collection of frames."""
 
+        self._filename = load_pattern
         self._searched_files = super(FrameCollection, self)._find_files(
                          load_pattern)
 
@@ -402,6 +403,9 @@ class FrameCollection(ImageCollection):
                                               conserve_memory,
                                               load_func=load_frame,
                                               **load_func_kwargs)
+    @property
+    def filename(self):
+        return self._filename
 
     def _find_frames(self):
         index = []
@@ -447,6 +451,3 @@ class MultiImage(FrameCollection):
         super(MultiImage, self).__init__(filename, conserve_memory,
                                          **imread_kwargs)
 
-    @property
-    def filename(self):
-        return self._filename
