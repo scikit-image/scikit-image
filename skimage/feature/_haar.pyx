@@ -23,7 +23,7 @@ cdef Rectangle** _haar_like_feature_coord(int feature_type, int height,
     """
     # allocate for the worst case scenario
     cdef:
-        int n_feature = height ** 2 * width ** 2
+        int max_feature = height ** 2 * width ** 2
         Rectangle** output = NULL
         int cnt_feat = 0
         int local_n_rectangle = 0
@@ -39,7 +39,7 @@ cdef Rectangle** _haar_like_feature_coord(int feature_type, int height,
 
     output = <Rectangle**> malloc(local_n_rectangle * sizeof(Rectangle*))
     for rect_idx in range(local_n_rectangle):
-        output[rect_idx] = <Rectangle*> malloc(n_feature * sizeof(Rectangle))
+        output[rect_idx] = <Rectangle*> malloc(max_feature * sizeof(Rectangle))
 
     for y in range(height):
         for x in range(width):
