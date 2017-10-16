@@ -135,7 +135,7 @@ def haar_like_feature(roi_img, feature_type):
                                     width=roi_img_integral.shape[1])
 
     rect_feat = [integrate(roi_img_integral, rect_coord[0], rect_coord[1])
-                for rect_coord in coord]
+                 for rect_coord in coord]
 
     # the rectangles with odd indices can always be subtracted to the rectangle
     # with even indices
