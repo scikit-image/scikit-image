@@ -253,3 +253,6 @@
 
 - Kevin Mader
   Montage improvements
+
+- Matti Eskelinen
+  ImageCollection improvements
