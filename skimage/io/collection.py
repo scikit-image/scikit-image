@@ -318,7 +318,7 @@ def imread_collection_wrapper(imread):
         load_pattern : str or list
             Pattern glob or filenames to load. The path can be absolute or
             relative.  Multiple patterns should be separated by a colon,
-            e.g. '/tmp/work/*.png:/tmp/other/*.jpg'.  Also see
+            e.g. ``/tmp/work/*.png:/tmp/other/*.jpg``.  Also see
             implementation notes below.
         conserve_memory : bool, optional
             If True, never keep more than one in memory at a specific
@@ -338,8 +338,8 @@ class MultiImage(ImageCollection):
     ----------
     load_pattern : str or list
         Pattern glob or filenames to load. The path can be absolute or
-        relative.  Multiple patterns should be separated by os.pathsep,
-        e.g. '/tmp/work/*.png:/tmp/other/*.jpg'.
+        relative.  Multiple patterns should be separated by `os.pathsep`,
+        e.g. ``/tmp/work/*.png:/tmp/other/*.jpg``.
     conserve_memory : bool, optional
         Whether to conserve memory by only caching a single frame. Default is
         True.
@@ -358,8 +358,8 @@ class MultiImage(ImageCollection):
     The last accessed frame is cached, all other frames will have to be read
     from file.
 
-    By default, MultiImage builds a list of frames in each image
-    and calls ``imread(filename, img_num=n)`` to read the n:th frame in
+    By default, MultiImage builds a list of frames in each image, and calls
+    ``imread(filename, img_num=n)`` for each n to read the n:th frame in
     filename. If ``load_func`` is specified, it should accept the ``img_num``
     keyword argument.
 
