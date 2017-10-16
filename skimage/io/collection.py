@@ -14,7 +14,7 @@ from PIL import Image
 from ..external.tifffile import TiffFile
 
 
-__all__ = ['MultiImage', 'ImageCollection', 'FrameCollection',
+__all__ = ['MultiImage', 'ImageCollection',
            'concatenate_images', 'imread_collection_wrapper']
 
 
@@ -330,7 +330,7 @@ def imread_collection_wrapper(imread):
     return imread_collection
 
 
-class FrameCollection(ImageCollection):
+class MultiImage(ImageCollection):
 
     """A class containing all frames from multi-frame images.
 
@@ -358,7 +358,7 @@ class FrameCollection(ImageCollection):
     The last accessed frame is cached, all other frames will have to be read
     from file.
 
-    By default, FrameCollection builds a list of frames in each image
+    By default, MultiImage builds a list of frames in each image
     and calls ``imread(filename, img_num=n)`` to read the n:th frame in
     filename. If ``load_func`` is specified, it should accept the ``img_num``
     keyword argument.
@@ -386,7 +386,7 @@ class FrameCollection(ImageCollection):
         """Load multi-images as a collection of frames."""
 
         self._filename = load_pattern
-        self._searched_files = super(FrameCollection, self)._find_files(
+        self._searched_files = super(MultiImage, self)._find_files(
                          load_pattern)
 
         if load_func is None:
@@ -399,10 +399,11 @@ class FrameCollection(ImageCollection):
                 kwargs['img_num'] = img_num
             return load_func(fname, **kwargs)
 
-        super(FrameCollection, self).__init__(self._find_frames(),
-                                              conserve_memory,
-                                              load_func=load_frame,
-                                              **load_func_kwargs)
+        super(MultiImage, self).__init__(self._find_frames(),
+                                         conserve_memory,
+                                         load_func=load_frame,
+                                         **load_func_kwargs)
+
     @property
     def filename(self):
         return self._filename
@@ -431,23 +432,3 @@ class FrameCollection(ImageCollection):
                 if hasattr(im, 'fp') and im.fp:
                     im.fp.close()
         return index
-
-
-class MultiImage(FrameCollection):
-    """A class containing a single multi-frame image.
-
-    Parameters
-    ----------
-    filename : str
-        The complete path to the image file.
-    conserve_memory : bool, optional
-        Whether to conserve memory by only caching a single frame. Default is
-        True.
-    """
-
-    def __init__(self, filename, conserve_memory=True, **imread_kwargs):
-        """Load a multi-img."""
-        self._filename = filename
-        super(MultiImage, self).__init__(filename, conserve_memory,
-                                         **imread_kwargs)
-

@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 from skimage import data_dir
-from skimage.io.collection import ImageCollection, FrameCollection, alphanumeric_key
+from skimage.io.collection import ImageCollection, MultiImage, alphanumeric_key
 from skimage.io import reset_plugins
 
 from skimage._shared import testing
@@ -39,7 +39,7 @@ class TestImageCollection(TestCase):
         # Image collection with images having shapes that match.
         self.images_matched = ImageCollection(self.pattern_matched)
         # Same images as a collection of frames
-        self.frames_matched = FrameCollection(self.pattern_matched)
+        self.frames_matched = MultiImage(self.pattern_matched)
 
     def test_len(self):
         assert len(self.images) == 2
@@ -127,6 +127,6 @@ class TestImageCollection(TestCase):
         with testing.raises(ValueError):
             self.images.concatenate()
 
-    def test_framecollection_imagecollection(self):
+    def test_multiimage_imagecollection(self):
         assert_equal(self.images_matched[0], self.frames_matched[0])
         assert_equal(self.images_matched[1], self.frames_matched[1])
