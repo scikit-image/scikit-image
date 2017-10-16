@@ -344,6 +344,11 @@ class FrameCollection(ImageCollection):
         Whether to conserve memory by only caching a single frame. Default is
         True.
 
+    Other parameters
+    ----------------
+    load_func : callable
+        ``imread`` by default.  See notes below.
+
     Notes
     -----
     If ``conserve_memory=True`` the memory footprint can be reduced, however
@@ -353,8 +358,14 @@ class FrameCollection(ImageCollection):
     The last accessed frame is cached, all other frames will have to be read
     from file.
 
-    The current implementation makes use of ``tifffile`` for Tiff files and
-    PIL otherwise.
+    By default, FrameCollection builds a list of frames in each image
+    and calls ``imread(filename, img_num=n)`` to read the n:th frame in
+    filename. If ``load_func`` is specified, it should accept the ``img_num``
+    keyword argument.
+
+    For finding the frames, the current implementation makes use of
+    ``tifffile`` for Tiff files and PIL otherwise, and will only list frames
+    from files supported by them.
 
     Examples
     --------
@@ -370,23 +381,27 @@ class FrameCollection(ImageCollection):
 
     """
 
-    def __init__(self, load_pattern, conserve_memory=True, **imread_kwargs):
+    def __init__(self, load_pattern, conserve_memory=True,
+                 load_func=None, **load_func_kwargs):
         """Load multi-images as a collection of frames."""
 
         self._files = super(FrameCollection, self)._find_files(load_pattern)
         self._frame_index = self._find_frames()
 
-        from ._io import imread
+        if load_func is None:
+            from ._io import imread
+            load_func = imread
+
         def load_frame(frame_idx, **kwargs):
             fname, img_num = frame_idx
             if img_num is not None:
                 kwargs['img_num'] = img_num
-            return imread(fname, **kwargs)
+            return load_func(fname, **kwargs)
 
         super(FrameCollection, self).__init__(self._frame_index,
                                               conserve_memory,
                                               load_func=load_frame,
-                                              **imread_kwargs)
+                                              **load_func_kwargs)
 
     def _find_frames(self):
         index = []
