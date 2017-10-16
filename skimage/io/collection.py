@@ -385,7 +385,8 @@ class FrameCollection(ImageCollection):
                  load_func=None, **load_func_kwargs):
         """Load multi-images as a collection of frames."""
 
-        self._files = super(FrameCollection, self)._find_files(load_pattern)
+        self._searched_files = super(FrameCollection, self)._find_files(
+                         load_pattern)
         self._frame_index = self._find_frames()
 
         if load_func is None:
@@ -405,7 +406,7 @@ class FrameCollection(ImageCollection):
 
     def _find_frames(self):
         index = []
-        for fname in self._files:
+        for fname in self._searched_files:
             if fname.lower().endswith(('.tiff', '.tif')):
                 with open(fname, 'rb') as f:
                     img = TiffFile(f)
