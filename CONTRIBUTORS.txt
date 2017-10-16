@@ -301,3 +301,6 @@ each and every contributor, regardless of their role.
 
 - David J. Mellert
   Polar and log-polar warping, nD windows
+
+- Matti Eskelinen
+  ImageCollection improvements
