@@ -243,6 +243,7 @@ class ImageCollection(object):
             return new_ic
 
     def _find_files(self, load_pattern):
+        """Expand given pattern to list of files, if possible."""
         if isinstance(load_pattern, six.string_types):
             load_pattern = load_pattern.split(os.pathsep)
             files = []
