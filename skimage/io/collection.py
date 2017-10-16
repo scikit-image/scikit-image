@@ -406,7 +406,6 @@ class FrameCollection(ImageCollection):
 
         self._searched_files = super(FrameCollection, self)._find_files(
                          load_pattern)
-        self._frame_index = self._find_frames()
 
         if load_func is None:
             from ._io import imread
@@ -418,7 +417,7 @@ class FrameCollection(ImageCollection):
                 kwargs['img_num'] = img_num
             return load_func(fname, **kwargs)
 
-        super(FrameCollection, self).__init__(self._frame_index,
+        super(FrameCollection, self).__init__(self._find_frames(),
                                               conserve_memory,
                                               load_func=load_frame,
                                               **load_func_kwargs)
