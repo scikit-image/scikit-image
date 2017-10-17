@@ -24,7 +24,7 @@ cdef Rectangle** _haar_like_feature_coord(int feature_type, int height,
     # allocate for the worst case scenario
     cdef:
         int max_feature = height ** 2 * width ** 2
-        Rectangle** output = NULL
+        Rectangle** rect_feat = NULL
         int cnt_feat = 0
         int local_n_rectangle = 0
         int x = 0, y = 0, dx = 0, dy = 0
@@ -37,92 +37,84 @@ cdef Rectangle** _haar_like_feature_coord(int feature_type, int height,
         local_n_rectangle = 4
     n_rectangle[0] = local_n_rectangle
 
-    output = <Rectangle**> malloc(local_n_rectangle * sizeof(Rectangle*))
+    rect_feat = <Rectangle**> malloc(local_n_rectangle * sizeof(Rectangle*))
     for rect_idx in range(local_n_rectangle):
-        output[rect_idx] = <Rectangle*> malloc(max_feature * sizeof(Rectangle))
+        rect_feat[rect_idx] = <Rectangle*> malloc(max_feature *
+                                                  sizeof(Rectangle))
 
     for y in range(height):
         for x in range(width):
             for dy in range(1, height):
                 for dx in range(1, width):
+                    # type -> 2 rectangles split along x axis
                     if (feature_type == 0 and
                         (y + dy <= height and x + 2 * dx <= width)):
-                        output[0][cnt_feat].top_left.row = y
-                        output[0][cnt_feat].top_left.col = x
-                        output[0][cnt_feat].bottom_right.row = y + dy - 1
-                        output[0][cnt_feat].bottom_right.col = x + dx - 1
-                        output[1][cnt_feat].top_left.row = y
-                        output[1][cnt_feat].top_left.col = x + dx
-                        output[1][cnt_feat].bottom_right.row = y + dy - 1
-                        output[1][cnt_feat].bottom_right.col = x + 2 * dx - 1
+                        set_rectangle_feature(&rect_feat[0][cnt_feat],
+                                              y, x,
+                                              y + dy - 1, x + dx - 1)
+                        set_rectangle_feature(&rect_feat[1][cnt_feat],
+                                              y, x + dx,
+                                              y + dy - 1, x + 2 * dx - 1)
                         cnt_feat += 1
+                    # type -> 2 rectangles split along y axis
                     elif (feature_type == 1 and
                           (y + 2 * dy <= height and x + dx <= width)):
-                        output[0][cnt_feat].top_left.row = y
-                        output[0][cnt_feat].top_left.col = x
-                        output[0][cnt_feat].bottom_right.row = y + dy - 1
-                        output[0][cnt_feat].bottom_right.col = x + dx - 1
-                        output[1][cnt_feat].top_left.row = y + dy
-                        output[1][cnt_feat].top_left.col = x
-                        output[1][cnt_feat].bottom_right.row = y + 2 * dy - 1
-                        output[1][cnt_feat].bottom_right.col = x + dx - 1
+                        set_rectangle_feature(&rect_feat[0][cnt_feat],
+                                              y, x,
+                                              y + dy - 1, x + dx - 1)
+                        set_rectangle_feature(&rect_feat[1][cnt_feat],
+                                              y + dy, x,
+                                              y + 2 * dy - 1, x + dx - 1)
                         cnt_feat += 1
+                    # type -> 3 rectangles split along x axis
                     elif (feature_type == 2 and
                           (y + dy <= height and x + 3 * dx <= width)):
-                        output[0][cnt_feat].top_left.row = y
-                        output[0][cnt_feat].top_left.col = x
-                        output[0][cnt_feat].bottom_right.row = y + dy - 1
-                        output[0][cnt_feat].bottom_right.col = x + dx - 1
-                        output[1][cnt_feat].top_left.row = y
-                        output[1][cnt_feat].top_left.col = x + dx
-                        output[1][cnt_feat].bottom_right.row = y + dy - 1
-                        output[1][cnt_feat].bottom_right.col = x + 2 * dx - 1
-                        output[2][cnt_feat].top_left.row = y
-                        output[2][cnt_feat].top_left.col = x + 2 * dx
-                        output[2][cnt_feat].bottom_right.row = y + dy - 1
-                        output[2][cnt_feat].bottom_right.col = x + 3 * dx - 1
+                        set_rectangle_feature(&rect_feat[0][cnt_feat],
+                                              y, x,
+                                              y + dy - 1, x + dx - 1)
+                        set_rectangle_feature(&rect_feat[1][cnt_feat],
+                                              y, x + dx,
+                                              y + dy - 1, x + 2 * dx - 1)
+                        set_rectangle_feature(&rect_feat[2][cnt_feat],
+                                              y, x + 2 * dx,
+                                              y + dy - 1, x + 3 * dx - 1)
                         cnt_feat += 1
+                    # type -> 3 rectangles split along y axis
                     elif (feature_type == 3 and
                           (y + 3 * dy <= height and x + dx <= width)):
-                        output[0][cnt_feat].top_left.row = y
-                        output[0][cnt_feat].top_left.col = x
-                        output[0][cnt_feat].bottom_right.row = y + dy - 1
-                        output[0][cnt_feat].bottom_right.col = x + dx - 1
-                        output[1][cnt_feat].top_left.row = y + dy
-                        output[1][cnt_feat].top_left.col = x
-                        output[1][cnt_feat].bottom_right.row = y + 2 * dy - 1
-                        output[1][cnt_feat].bottom_right.col = x + dx - 1
-                        output[2][cnt_feat].top_left.row = y + 2 * dy
-                        output[2][cnt_feat].top_left.col = x
-                        output[2][cnt_feat].bottom_right.row = y + 3 * dy - 1
-                        output[2][cnt_feat].bottom_right.col = x + dx - 1
+                        set_rectangle_feature(&rect_feat[0][cnt_feat],
+                                              y, x,
+                                              y + dy - 1, x + dx - 1)
+                        set_rectangle_feature(&rect_feat[1][cnt_feat],
+                                              y + dy, x,
+                                              y + 2 * dy - 1, x + dx - 1)
+                        set_rectangle_feature(&rect_feat[2][cnt_feat],
+                                              y + 2 * dy, x,
+                                              y + 3 * dy - 1, x + dx - 1)
                         cnt_feat += 1
+                    # type -> 4 rectangles split along x and y axis
                     elif (feature_type == 4 and
                           (y + 2 * dy <= height and x + 2 * dx <= width)):
-                        output[0][cnt_feat].top_left.row = y
-                        output[0][cnt_feat].top_left.col = x
-                        output[0][cnt_feat].bottom_right.row = y + dy - 1
-                        output[0][cnt_feat].bottom_right.col = x + dx - 1
-                        output[1][cnt_feat].top_left.row = y
-                        output[1][cnt_feat].top_left.col = x + dx
-                        output[1][cnt_feat].bottom_right.row = y + dy - 1
-                        output[1][cnt_feat].bottom_right.col = x + 2 * dx - 1
-                        output[2][cnt_feat].top_left.row = y + dy
-                        output[2][cnt_feat].top_left.col = x
-                        output[2][cnt_feat].bottom_right.row = y + 2 * dy - 1
-                        output[2][cnt_feat].bottom_right.col = x + 2 * dx - 1
-                        output[3][cnt_feat].top_left.row = y + dy
-                        output[3][cnt_feat].top_left.col = x + dx
-                        output[3][cnt_feat].bottom_right.row = y + 2 * dy - 1
-                        output[3][cnt_feat].bottom_right.col = x + 2 * dx - 1
+                        set_rectangle_feature(&rect_feat[0][cnt_feat],
+                                              y, x,
+                                              y + dy - 1, x + dx - 1)
+                        set_rectangle_feature(&rect_feat[1][cnt_feat],
+                                              y, x + dx,
+                                              y + dy - 1, x + 2 * dx - 1)
+                        set_rectangle_feature(&rect_feat[2][cnt_feat],
+                                              y + dy, x,
+                                              y + 2 * dy - 1, x + 2 * dx - 1)
+                        set_rectangle_feature(&rect_feat[3][cnt_feat],
+                                              y + dy, x + dx,
+                                              y + 2 * dy - 1, x + 2 * dx - 1)
                         cnt_feat += 1
 
     for rect_idx in range(local_n_rectangle):
-        output[rect_idx] = <Rectangle*> realloc(
-            output[rect_idx], cnt_feat * sizeof(Rectangle))
+        rect_feat[rect_idx] = <Rectangle*> realloc(
+            rect_feat[rect_idx], cnt_feat * sizeof(Rectangle))
     n_feature[0] = cnt_feat
 
-    return output
+    return rect_feat
 
 
 cpdef haar_like_feature_coord(feature_type, int height, int width):

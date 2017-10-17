@@ -8,7 +8,7 @@ from .._shared.utils import check_random_state
 
 
 def haar_like_feature_visualize(haar_like_feature, height, width,
-                                max_n_features=10, random_state=None):
+                                max_n_features=None, random_state=None):
     """Helper to visualize Haar-like features.
 
     Parameters
@@ -22,8 +22,9 @@ def haar_like_feature_visualize(haar_like_feature, height, width,
     width : int
         Width of the detection window.
 
-    max_n_features : int
+    max_n_features : int, default=None
         The maximum number of features to be returned.
+        By default, all features are returned.
 
     random_state : int, RandomState instance or None, optional
         If int, random_state is the seed used by the random number generator;
@@ -39,13 +40,17 @@ def haar_like_feature_visualize(haar_like_feature, height, width,
 
     """
     random_state = check_random_state(random_state)
-    features_indices = random_state.choice(range(len(haar_like_feature[0][0])),
-                                           size=max_n_features, replace=False)
+    if max_n_features is None:
+        feature_indices = range(len(haar_like_feature[0][0]))
+    else:
+        feature_indices = random_state.choice(
+            range(len(haar_like_feature[0][0])),
+            size=max_n_features, replace=False)
 
     feature_set = [np.zeros((height, width))
-                   for _ in range(len(features_indices))]
+                   for _ in range(len(feature_indices))]
 
-    for set_idx, feature_idx in enumerate(features_indices):
+    for set_idx, feature_idx in enumerate(feature_indices):
         for idx_rect, rect in enumerate(haar_like_feature):
             coord_start, coord_end = rect
             rect_coord = rectangle(coord_start[feature_idx],
