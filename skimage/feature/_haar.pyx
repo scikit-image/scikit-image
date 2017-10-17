@@ -18,7 +18,7 @@ FEATURE_TYPE = {'type-2-x': 0, 'type-2-y': 1,
 
 cdef Rectangle** _haar_like_feature_coord(int feature_type, int height,
                                           int width, int* n_rectangle,
-                                          int* n_feature):
+                                          int* n_feature) nogil:
     """Private function to compute the coordinates of all Haar-like features.
     """
     # allocate for the worst case scenario
@@ -165,13 +165,35 @@ cpdef haar_like_feature_coord(feature_type, int height, int width):
     return output
 
 
-cpdef haar_like_feature(roi_img, feature_type):
+cdef float[:, ::1] _haar_like_feature(integral_floating[:, ::1] roi_ii,
+                                      Rectangle** coord,
+                                      int n_rectangle, int n_feature):
+    cdef:
+        float[:, ::1] rect_feature = np.zeros((n_rectangle, n_feature),
+                                              dtype=np.float32)
+        int idx_rect = 0
+        int idx_feature = 0
+
+    with nogil:
+        for idx_rect in range(n_rectangle):
+            for idx_feature in range(n_feature):
+                rect_feature[idx_rect, idx_feature] = integrate(
+                    roi_ii,
+                    coord[idx_rect][idx_feature].top_left.row,
+                    coord[idx_rect][idx_feature].top_left.col,
+                    coord[idx_rect][idx_feature].bottom_right.row,
+                    coord[idx_rect][idx_feature].bottom_right.col)
+
+    return rect_feature
+
+cpdef haar_like_feature(integral_floating[:, ::1] roi_ii, feature_type):
     """Compute the Haar-like features.
 
     Parameters
     ----------
-    roi : ndarray
+    roi_ii : ndarray
         The region of an image for which the features need to be computed.
+        This image need to be an integral image
 
     feature_type : string
         The type of feature to consider:
@@ -194,32 +216,16 @@ cpdef haar_like_feature(roi_img, feature_type):
         int n_feature = 0
         int idx_rect = 0
         int idx_feature = 0
-        float[:] integral_feature
-        float[:, ::1] memview_roi
-
-    # compute the integral image and make a memory view
-    roi_img_integral = integral_image(roi_img)
-    memview_roi = roi_img_integral
+        float[:, ::1] rect_feature
 
     # compute all possible coordinates with a specific type of feature
     coord = _haar_like_feature_coord(FEATURE_TYPE[feature_type],
-                                     memview_roi.shape[0],
-                                     memview_roi.shape[1],
+                                     roi_ii.shape[0],
+                                     roi_ii.shape[1],
                                      &n_rectangle, &n_feature)
 
-    rect_feature = [np.zeros(n_feature, dtype=np.float32)
-                    for _ in range(n_rectangle)]
-
-    for idx_rect in range(n_rectangle):
-        # create a memory view from the numpy array
-        integral_feature = rect_feature[idx_rect]
-        for idx_feature in range(n_feature):
-            integral_feature[idx_feature] = integrate(
-                memview_roi,
-                coord[idx_rect][idx_feature].top_left.row,
-                coord[idx_rect][idx_feature].top_left.col,
-                coord[idx_rect][idx_feature].bottom_right.row,
-                coord[idx_rect][idx_feature].bottom_right.col)
+    rect_feature = _haar_like_feature(roi_ii, coord,
+                                      n_rectangle, n_feature)
 
     # deallocate
     for idx_rect in range(n_rectangle):
@@ -228,5 +234,5 @@ cpdef haar_like_feature(roi_img, feature_type):
 
     # the rectangles with odd indices can always be subtracted to the rectangle
     # with even indices
-    return sum([rect if not rect_idx % 2 else -rect
-                for rect_idx, rect in enumerate(rect_feature)])
+    return (np.sum(rect_feature[1::2], axis=0) -
+            np.sum(rect_feature[::2], axis=0))
