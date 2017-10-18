@@ -1,14 +1,17 @@
-cimport cython
-cimport numpy as np
+cimport numpy as cnp
 
 
 ctypedef fused integral_floating:
-    cython.integral
-    cython.floating
-    np.uint8_t
-    np.uint16_t
-    np.uint32_t
-    np.uint64_t
+    cnp.uint8_t
+    cnp.uint16_t
+    cnp.uint32_t
+    cnp.uint64_t
+    cnp.int8_t
+    cnp.int16_t
+    cnp.int32_t
+    cnp.int64_t
+    cnp.float32_t
+    cnp.float64_t
 
 
 cdef struct Point2D:
