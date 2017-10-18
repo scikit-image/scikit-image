@@ -7,14 +7,14 @@ from ..exposure import rescale_intensity
 from .._shared.utils import check_random_state
 
 
-def haar_like_feature_visualize(haar_like_feature, height, width,
+def haar_like_feature_visualize(coord, height, width,
                                 max_n_features=None, random_state=None):
     """Helper to visualize Haar-like features.
 
     Parameters
     ----------
-    haar_like_feature : list of tuple coord, shape (n_features, n_rectangles)
-        Output of the ``haar_like_feature_coord``.
+    coord : list of tuple coord, shape (n_features, 2, n_rectangles)
+        Output of the ``haar_like_feature_coord`` function.
 
     height : int
         Height of the detection window.
@@ -35,23 +35,23 @@ def haar_like_feature_visualize(haar_like_feature, height, width,
 
     Returns
     -------
-    feature_set : list of ndarray, shape (max_n_features, height, width)
+    feature_set : (max_n_features, height, width), ndarray
         A set of images plotting the Haar-like features created.
 
     """
     random_state = check_random_state(random_state)
     if max_n_features is None:
-        feature_indices = range(len(haar_like_feature[0][0]))
+        feature_indices = range(len(coord[0][0]))
     else:
         feature_indices = random_state.choice(
-            range(len(haar_like_feature[0][0])),
+            range(len(coord[0][0])),
             size=max_n_features, replace=False)
 
     feature_set = [np.zeros((height, width))
                    for _ in range(len(feature_indices))]
 
     for set_idx, feature_idx in enumerate(feature_indices):
-        for idx_rect, rect in enumerate(haar_like_feature):
+        for idx_rect, rect in enumerate(coord):
             coord_start, coord_end = rect
             rect_coord = rectangle(coord_start[feature_idx],
                                    coord_end[feature_idx])

@@ -123,7 +123,7 @@ cpdef haar_like_feature_coord(feature_type, height, width):
 
     Parameters
     ----------
-    feature_type : string
+    feature_type : str
         The type of feature to consider:
 
         - 'type-2-x': 2 rectangles varying along the x axis;
@@ -198,11 +198,11 @@ cpdef haar_like_feature(integral_floating[:, ::1] roi_ii, feature_type):
 
     Parameters
     ----------
-    roi_ii : ndarray
-        The region of an image for which the features need to be computed.
-        This image need to be an integral image
+    roi_ii : (M, N) ndarray
+        The region of an integral image for which the features need to be
+        computed.
 
-    feature_type : string
+    feature_type : str
         The type of feature to consider:
 
         - 'type-2-x': 2 rectangles varying along the x axis;
@@ -213,8 +213,8 @@ cpdef haar_like_feature(integral_floating[:, ::1] roi_ii, feature_type):
 
     Returns
     -------
-    haar_features : ndarray, shape (n_features,)
-        Resulting Haar-like features
+    haar_features : (n_features,) ndarray
+        Resulting Haar-like features.
 
     """
     cdef:
