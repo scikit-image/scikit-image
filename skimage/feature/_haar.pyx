@@ -102,10 +102,10 @@ cdef Rectangle** _haar_like_feature_coord(unsigned int feature_type,
                         set_rectangle_feature(&rect_feat[1][cnt_feat],
                                               y, x + dx,
                                               y + dy - 1, x + 2 * dx - 1)
-                        set_rectangle_feature(&rect_feat[2][cnt_feat],
-                                              y + dy, x,
-                                              y + 2 * dy - 1, x + 2 * dx - 1)
                         set_rectangle_feature(&rect_feat[3][cnt_feat],
+                                              y + dy, x,
+                                              y + 2 * dy - 1, x + dx - 1)
+                        set_rectangle_feature(&rect_feat[2][cnt_feat],
                                               y + dy, x + dx,
                                               y + 2 * dy - 1, x + 2 * dx - 1)
                         cnt_feat += 1
@@ -200,7 +200,13 @@ cdef integral_floating[:, ::1] _haar_like_feature(
 
 
 cpdef haar_like_feature(integral_floating[:, ::1] roi_ii, feature_type):
-    """Compute the Haar-like features for an integral region of interest.
+    """Compute the Haar-like features for a region of interest (ROI) of an
+    integral image.
+
+    Haar-like features have been successively used in different computer vision
+    applications to detect different targets, objects, etc. It was first
+    introduced in [1]_ and has been widely used for real-time face detection
+    algorithm proposed in [2]_.
 
     Parameters
     ----------
@@ -227,13 +233,30 @@ cpdef haar_like_feature(integral_floating[:, ::1] roi_ii, feature_type):
     >>> import numpy as np
     >>> from skimage.transform import integral_image
     >>> from skimage.feature import haar_like_feature
-    >>> img = np.ones((5, 5))
+    >>> img = np.ones((5, 5), dtype=np.uint8)
     >>> img_ii = integral_image(img)
     >>> feature = haar_like_feature(img_ii, 'type-4')
     >>> feature
-    array([-1., -2., -2., -4., -1., -2., -2., -4., -1., -2., -1., -2., -1.,
-           -2., -2., -4., -1., -2., -2., -4., -1., -2., -1., -2., -1., -2.,
-           -1., -2., -1., -1., -1., -2., -1., -2., -1., -1.])
+    array([-1, -2, -2, -4, -1, -2, -2, -4, -1, -2, -1, -2, -1, -2, -2, -4, -1,
+           -2, -2, -4, -1, -2, -1, -2, -1, -2, -1, -2, -1, -1, -1, -2, -1, -2,
+           -1, -1])
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Haar-like_feature
+
+    .. [2] Oren, M., Papageorgiou, C., Sinha, P., Osuna, E., & Poggio, T.
+           (1997, June). Pedestrian detection using wavelet templates.
+           In Computer Vision and Pattern Recognition, 1997. Proceedings.,
+           1997 IEEE Computer Society Conference on (pp. 193-199). IEEE.
+           http://tinyurl.com/y6ulxfta
+           DOI: 10.1109/CVPR.1997.609319
+
+    .. [3] Viola, Paul, and Michael J. Jones. "Robust real-time face
+           detection." International journal of computer vision 57.2
+           (2004): 137-154.
+           http://www.merl.com/publications/docs/TR2004-043.pdf
+           DOI: 10.1109/CVPR.2001.990517
 
     """
     cdef:

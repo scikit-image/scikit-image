@@ -55,7 +55,6 @@ def haar_like_feature_visualize(coord, height, width,
             coord_start, coord_end = rect
             rect_coord = rectangle(coord_start[feature_idx],
                                    coord_end[feature_idx])
-            feature_set[set_idx][rect_coord] = idx_rect + 1
-        feature_set[set_idx] = rescale_intensity(feature_set[set_idx])
+            feature_set[set_idx][rect_coord] = (idx_rect + 1) % 2
 
     return feature_set

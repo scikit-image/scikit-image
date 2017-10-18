@@ -24,7 +24,7 @@ def test_haar_like_feature_error():
                           ('type-2-y', (84,), [0.]),
                           ('type-3-x', (42,), [-4., -3., -2., -1.]),
                           ('type-3-y', (42,), [-4., -3., -2., -1.]),
-                          ('type-4', (36,), [-4., -2., -1.])])
+                          ('type-4', (36,), [0.])])
 def test_haar_like_feature(feature_type, shape_feature,
                            expected_feature_value, dtype):
     # test Haar-like feature on a basic one image
@@ -74,7 +74,7 @@ def test_haar_like_feature_fused_type(dtype, feature_type):
                              [(2, 0), (2, 1), (2, 1), (2, 2), (2, 2)]]]),
                           ('type-4', 2, 2,
                            [[[(0, 0)], [(0, 0)]], [[(0, 1)], [(0, 1)]],
-                            [[(1, 0)], [(1, 1)]], [[(1, 1)], [(1, 1)]]])])
+                            [[(1, 1)], [(1, 1)]], [[(1, 0)], [(1, 0)]]])])
 def test_haar_like_feature_coord(feature_type, height, width, expected_coord):
     coord = haar_like_feature_coord(feature_type, height, width)
     assert coord == expected_coord
