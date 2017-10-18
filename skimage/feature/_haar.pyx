@@ -16,18 +16,20 @@ FEATURE_TYPE = {'type-2-x': 0, 'type-2-y': 1,
 
 
 
-cdef Rectangle** _haar_like_feature_coord(int feature_type, int height,
-                                          int width, int* n_rectangle,
-                                          int* n_feature) nogil:
+cdef Rectangle** _haar_like_feature_coord(unsigned int feature_type,
+                                          Py_ssize_t height,
+                                          Py_ssize_t width,
+                                          Py_ssize_t* n_rectangle,
+                                          Py_ssize_t* n_feature) nogil:
     """Private function to compute the coordinates of all Haar-like features.
     """
     # allocate for the worst case scenario
     cdef:
-        int max_feature = height ** 2 * width ** 2
+        Py_ssize_t max_feature = height ** 2 * width ** 2
         Rectangle** rect_feat = NULL
-        int cnt_feat = 0
-        int local_n_rectangle = 0
-        int x = 0, y = 0, dx = 0, dy = 0
+        Py_ssize_t cnt_feat = 0
+        Py_ssize_t local_n_rectangle
+        Py_ssize_t x, y, dx, dy
 
     if feature_type == 0 or feature_type == 1:
         local_n_rectangle = 2
@@ -117,7 +119,7 @@ cdef Rectangle** _haar_like_feature_coord(int feature_type, int height,
     return rect_feat
 
 
-cpdef haar_like_feature_coord(feature_type, int height, int width):
+cpdef haar_like_feature_coord(feature_type, height, width):
     """Compute the coordinates of Haar-like features.
 
     Parameters
@@ -145,13 +147,15 @@ cpdef haar_like_feature_coord(feature_type, int height, int width):
     """
     cdef:
         Rectangle** rect = NULL
-        int n_rectangle = 0
-        int n_feature = 0
-        int i = 0
-        int j = 0
+        Py_ssize_t n_rectangle, n_feature
+        Py_ssize_t i, j
+        # cast the height and width to the right type
+        Py_ssize_t height_win = <Py_ssize_t> height
+        Py_ssize_t width_win = <Py_ssize_t> width
 
     rect = _haar_like_feature_coord(FEATURE_TYPE[feature_type],
-                                    height, width, &n_rectangle, &n_feature)
+                                    height_win, width_win,
+                                    &n_rectangle, &n_feature)
 
     # allocate the output based on the number of rectangle
     output = [[[], []] for _ in range(n_rectangle)]
@@ -168,14 +172,13 @@ cpdef haar_like_feature_coord(feature_type, int height, int width):
 cdef integral_floating[:, ::1] _haar_like_feature(
     integral_floating[:, ::1] roi_ii,
     Rectangle** coord,
-    int n_rectangle, int n_feature):
+    Py_ssize_t n_rectangle, Py_ssize_t n_feature):
     """Private function releasing the GIL to compute the integral for the
     different rectangle."""
     cdef:
         integral_floating[:, ::1] rect_feature = np.zeros(
             (n_rectangle, n_feature), dtype=roi_ii.base.dtype)
-        int idx_rect = 0
-        int idx_feature = 0
+        Py_ssize_t idx_rect, idx_feature
 
     with nogil:
         for idx_rect in range(n_rectangle):
@@ -216,10 +219,8 @@ cpdef haar_like_feature(integral_floating[:, ::1] roi_ii, feature_type):
     """
     cdef:
         Rectangle** coord = NULL
-        int n_rectangle = 0
-        int n_feature = 0
-        int idx_rect = 0
-        int idx_feature = 0
+        Py_ssize_t n_rectangle, n_feature
+        Py_ssize_t idx_rect, idx_feature
         integral_floating[:, ::1] rect_feature
 
     if feature_type not in FEATURE_TYPE.keys():
