@@ -154,17 +154,12 @@ cpdef haar_like_feature_coord(feature_type, height, width):
     >>> import numpy as np
     >>> from skimage.transform import integral_image
     >>> from skimage.feature import haar_like_feature_coord
-    >>> from skimage.feature import haar_like_feature_visualize
     >>> coord = haar_like_feature_coord('type-4', 2, 2)
     >>> coord
     [[[(0, 0)], [(0, 0)]],
      [[(0, 1)], [(0, 1)]],
      [[(1, 1)], [(1, 1)]],
      [[(1, 0)], [(1, 0)]]]
-    >>> feature = haar_like_feature_visualize(coord, 2, 2, max_n_features=1)
-    >>> feature
-    [array([[ 1.,  0.],
-            [ 0.,  1.]])]
 
     """
     cdef:
@@ -264,7 +259,7 @@ cpdef haar_like_feature(integral_floating[:, ::1] int_image,
     >>> from skimage.feature import haar_like_feature
     >>> img = np.ones((5, 5), dtype=np.uint8)
     >>> img_ii = integral_image(img)
-    >>> feature = haar_like_feature(img_ii, 'type-4')
+    >>> feature = haar_like_feature(img_ii, 0, 0, 5, 5, 'type-4')
     >>> feature
     array([-1, -2, -2, -4, -1, -2, -2, -4, -1, -2, -1, -2, -1, -2, -2, -4, -1,
            -2, -2, -4, -1, -2, -1, -2, -1, -2, -1, -2, -1, -1, -1, -2, -1, -2,

@@ -77,18 +77,17 @@ def draw_haar_like_feature(image, r, c, height, width, feature_type,
     --------
     >>> import numpy as np
     >>> from skimage.transform import integral_image
-    >>> from skimage.feature import haar_like_feature_coord
-    >>> from skimage.feature import haar_like_feature_visualize
-    >>> coord = haar_like_feature_coord('type-4', 2, 2)
-    >>> coord
-    [[[(0, 0)], [(0, 0)]],
-     [[(0, 1)], [(0, 1)]],
-     [[(1, 1)], [(1, 1)]],
-     [[(1, 0)], [(1, 0)]]]
-    >>> feature = haar_like_feature_visualize(coord, 2, 2, max_n_features=1)
+    >>> from skimage.feature import draw_haar_like_feature
+    >>> feature = draw_haar_like_feature(np.zeros((2, 2)),
+                                         0, 0, 2, 2,
+                                         'type-4',
+                                         max_n_features=1)
     >>> feature
-    [array([[ 1.,  0.],
-            [ 0.,  1.]])]
+    array([[[ 0.   ,  0.345,  0.48 ],
+            [ 0.5  ,  0.5  ,  0.5  ]],
+
+           [[ 0.5  ,  0.5  ,  0.5  ],
+            [ 0.   ,  0.345,  0.48 ]]])
 
     """
 

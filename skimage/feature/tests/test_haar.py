@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose
 from skimage.transform import integral_image
 from skimage.feature import haar_like_feature
 from skimage.feature import haar_like_feature_coord
-from skimage.feature import haar_like_feature_visualize
+from skimage.feature import draw_haar_like_feature
 
 
 def test_haar_like_feature_error():
@@ -82,13 +82,12 @@ def test_haar_like_feature_coord(feature_type, height, width, expected_coord):
     assert coord == expected_coord
 
 
-@pytest.mark.parametrize("max_n_features,n_features", [(None, 1350),
-                                                       (10, 10)])
-def test_haar_like_feature_visualize(max_n_features, n_features):
-    img = np.ones((5, 5), dtype=np.float32)
-    img_ii = integral_image(img)
-    haar_feature_coord = haar_like_feature_coord('type-2-x', 10, 10)
-    feature_set = haar_like_feature_visualize(haar_feature_coord, 10, 10,
-                                              max_n_features=max_n_features,
-                                              random_state=0)
-    assert len(feature_set) == n_features
+@pytest.mark.parametrize("max_n_features,nnz_values", [(None, 73),
+                                                       (1, 20)])
+def test_draw_haar_like_feature(max_n_features, nnz_values):
+    img = np.zeros((5, 5), dtype=np.float32)
+    image = draw_haar_like_feature(img, 0, 0, 5, 5, 'type-4',
+                                         max_n_features=max_n_features,
+                                         random_state=0)
+    assert image.shape == (5, 5, 3)
+    assert np.count_nonzero(image) == nnz_values
