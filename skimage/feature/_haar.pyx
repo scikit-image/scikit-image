@@ -141,7 +141,13 @@ cpdef haar_like_feature_coord(feature_type, height, width):
     Returns
     -------
     feature_coord : list of tuple coord, shape (n_rectangles, 2, n_features)
-        Coordinates of the rectangles for each feature.
+        Coordinates of the rectangles for each
+        feature. ``feature_coord[0][0][10]`` corresponds to the top-left corner
+        of the first rectangle of the tenth feature while
+        ``feature_coord[1][1][10]`` corresponds to the bottom-left corner of
+        the second rectangle of the tenth feature. A corner is reprented by a
+        tuple (row, col) which can be easily used in the function
+        :func:`skimage.draw.rectangle` for instance.
 
     """
     cdef:
@@ -216,6 +222,19 @@ cpdef haar_like_feature(integral_floating[:, ::1] roi_ii, feature_type):
     haar_features : (n_features,) ndarray
         Resulting Haar-like features.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.transform import integral_image
+    >>> from skimage.feature import haar_like_feature
+    >>> img = np.ones((5, 5))
+    >>> img_ii = integral_image(img)
+    >>> feature = haar_like_feature(img_ii, 'type-4')
+    >>> feature
+    array([-1., -2., -2., -4., -1., -2., -2., -4., -1., -2., -1., -2., -1.,
+           -2., -2., -4., -1., -2., -2., -4., -1., -2., -1., -2., -1., -2.,
+           -1., -2., -1., -1., -1., -2., -1., -2., -1., -1.])
+
     """
     cdef:
         Rectangle** coord = NULL
@@ -242,7 +261,15 @@ cpdef haar_like_feature(integral_floating[:, ::1] roi_ii, feature_type):
         free(coord[idx_rect])
     free(coord)
 
+    # convert the memory view to numpy array and convert it to signed array if
+    # necessary to avoid overflow during subtraction
+    rect_feature_ndarray = np.asarray(rect_feature)
+    data_type = rect_feature_ndarray.dtype
+    if 'uint' in data_type.name:
+        rect_feature_ndarray = rect_feature_ndarray.astype(
+            data_type.name.replace('u', ''))
+
     # the rectangles with odd indices can always be subtracted to the rectangle
     # with even indices
-    return (np.sum(rect_feature[1::2], axis=0) -
-            np.sum(rect_feature[::2], axis=0))
+    return (np.sum(rect_feature_ndarray[1::2], axis=0) -
+            np.sum(rect_feature_ndarray[::2], axis=0))
