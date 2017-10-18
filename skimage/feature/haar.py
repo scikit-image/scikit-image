@@ -1,26 +1,61 @@
 from __future__ import division
 
+from operator import add
+
 import numpy as np
 
-from ..draw import rectangle
+from ._haar import haar_like_feature_coord
+from ..color import gray2rgb
 from ..exposure import rescale_intensity
 from .._shared.utils import check_random_state
+from ..util import img_as_float
 
 
-def haar_like_feature_visualize(coord, height, width,
-                                max_n_features=None, random_state=None):
+def draw_haar_like_feature(image, r, c, height, width, feature_type,
+                           color_positive_block=(1., 1., 1.),
+                           color_negative_block=(0., 0.69, 0.96),
+                           alpha=0.5, max_n_features=None, random_state=None):
     """Helper to visualize Haar-like features.
 
     Parameters
     ----------
-    coord : list of tuple coord, shape (n_features, 2, n_rectangles)
-        Output of the ``haar_like_feature_coord`` function.
+    image : (M, N) ndarray
+        The region of an integral image for which the features need to be
+        computed.
+
+    r : int
+        Row-coordinate of top left corner of the detection window.
+
+    c : int
+        Column-coordinate of top left corner of the detection window.
+
+    width : int
+        Width of the detection window.
 
     height : int
         Height of the detection window.
 
-    width : int
-        Width of the detection window.
+    feature_type : str
+        The type of feature to consider:
+
+        - 'type-2-x': 2 rectangles varying along the x axis;
+        - 'type-2-y': 2 rectangles varying along the y axis;
+        - 'type-3-x': 3 rectangles varying along the x axis;
+        - 'type-3-y': 3 rectangles varying along the y axis;
+        - 'type-4': 4 rectangles varying along x and y axis.
+
+    color_positive_rectangle : tuple of 3 floats
+        Floats specifying the color for the positive block. Corresponding
+        values define (R, G, B) values. Default value is white (1, 1, 1).
+
+    color_negative_block : tuple of 3 floats
+        Floats specifying the color for the negative block Corresponding values
+        define (R, G, B) values. Default value is cyan (0, 0.69, 0.96).
+
+    alpha : float
+        Value in the range [0, 1] that specifies opacity of visualization. 1 -
+        fully transparent, 0 - opaque.
+
 
     max_n_features : int, default=None
         The maximum number of features to be returned.
@@ -55,8 +90,18 @@ def haar_like_feature_visualize(coord, height, width,
     [array([[ 1.,  0.],
             [ 0.,  1.]])]
 
-
     """
+
+    coord = haar_like_feature_coord(feature_type, height, width)
+
+    color_positive_block = np.asarray(color_positive_block, dtype=np.float64)
+    color_negative_block = np.asarray(color_negative_block, dtype=np.float64)
+
+    output = np.copy(image)
+    if len(image.shape) < 3:
+        output = gray2rgb(image)
+    output = img_as_float(output)
+
     random_state = check_random_state(random_state)
     if max_n_features is None:
         feature_indices = range(len(coord[0][0]))
@@ -65,14 +110,23 @@ def haar_like_feature_visualize(coord, height, width,
             range(len(coord[0][0])),
             size=max_n_features, replace=False)
 
-    feature_set = [np.zeros((height, width))
-                   for _ in range(len(feature_indices))]
-
     for set_idx, feature_idx in enumerate(feature_indices):
         for idx_rect, rect in enumerate(coord):
             coord_start, coord_end = rect
-            rect_coord = rectangle(coord_start[feature_idx],
-                                   coord_end[feature_idx])
-            feature_set[set_idx][rect_coord] = (idx_rect + 1) % 2
+            coord_start = tuple(map(add, coord_start[feature_idx], [r, c]))
+            coord_end = tuple(map(add, coord_end[feature_idx], [r, c]))
 
-    return feature_set
+            if ((idx_rect + 1) % 2) == 0:
+                new_value = ((1 - alpha) *
+                             output[coord_start[0]:coord_end[0] + 1,
+                                    coord_start[1]:coord_end[1] + 1] +
+                             alpha * color_positive_block)
+            else:
+                new_value = ((1 - alpha) *
+                             output[coord_start[0]:coord_end[0] + 1,
+                                    coord_start[1]:coord_end[1] + 1] +
+                             alpha * color_negative_block)
+            output[coord_start[0]:coord_end[0] + 1,
+                   coord_start[1]:coord_end[1] + 1] = new_value
+
+    return output

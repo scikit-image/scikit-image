@@ -229,8 +229,7 @@ cpdef haar_like_feature(integral_floating[:, ::1] int_image,
     Parameters
     ----------
     int_image : (M, N) ndarray
-        The region of an integral image for which the features need to be
-        computed.
+        Integral image for which the features need to be computed.
 
     r : int
         Row-coordinate of top left corner of the detection window.

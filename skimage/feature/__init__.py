@@ -23,7 +23,7 @@ from .match import match_descriptors
 from .util import plot_matches
 from .blob import blob_dog, blob_log, blob_doh
 from ._haar import haar_like_feature, haar_like_feature_coord
-from .haar import haar_like_feature_visualize
+from .haar import draw_haar_like_feature
 
 
 __all__ = ['canny',
@@ -62,4 +62,4 @@ __all__ = ['canny',
            'blob_log',
            'haar_like_feature',
            'haar_like_feature_coord',
-           'haar_like_feature_visualize']
+           'draw_haar_like_feature']
