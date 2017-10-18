@@ -248,6 +248,7 @@ def inertia_tensor(image, mu=None):
         The input image.
     mu : array, optional
         The pre-computed central moments of ``image``.
+
     Returns
     -------
     T : array, shape ``(image.ndim, image.ndim)``
