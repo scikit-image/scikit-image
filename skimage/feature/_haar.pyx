@@ -165,12 +165,15 @@ cpdef haar_like_feature_coord(feature_type, int height, int width):
     return output
 
 
-cdef float[:, ::1] _haar_like_feature(integral_floating[:, ::1] roi_ii,
-                                      Rectangle** coord,
-                                      int n_rectangle, int n_feature):
+cdef integral_floating[:, ::1] _haar_like_feature(
+    integral_floating[:, ::1] roi_ii,
+    Rectangle** coord,
+    int n_rectangle, int n_feature):
+    """Private function releasing the GIL to compute the integral for the
+    different rectangle."""
     cdef:
-        float[:, ::1] rect_feature = np.zeros((n_rectangle, n_feature),
-                                              dtype=np.float32)
+        integral_floating[:, ::1] rect_feature = np.zeros(
+            (n_rectangle, n_feature), dtype=roi_ii.base.dtype)
         int idx_rect = 0
         int idx_feature = 0
 
@@ -186,8 +189,9 @@ cdef float[:, ::1] _haar_like_feature(integral_floating[:, ::1] roi_ii,
 
     return rect_feature
 
+
 cpdef haar_like_feature(integral_floating[:, ::1] roi_ii, feature_type):
-    """Compute the Haar-like features.
+    """Compute the Haar-like features for an integral region of interest.
 
     Parameters
     ----------
@@ -216,7 +220,12 @@ cpdef haar_like_feature(integral_floating[:, ::1] roi_ii, feature_type):
         int n_feature = 0
         int idx_rect = 0
         int idx_feature = 0
-        float[:, ::1] rect_feature
+        integral_floating[:, ::1] rect_feature
+
+    if feature_type not in FEATURE_TYPE.keys():
+        raise ValueError('The given feature type is unknown. Got {}'
+                         ' instead of one of {}.'.format(feature_type,
+                                                         FEATURE_TYPE))
 
     # compute all possible coordinates with a specific type of feature
     coord = _haar_like_feature_coord(FEATURE_TYPE[feature_type],

@@ -1,4 +1,6 @@
 cimport cython
+cimport numpy as np
+
 
 ctypedef fused integral_floating:
     cython.integral
@@ -13,7 +15,6 @@ cdef struct Point2D:
 cdef struct Rectangle:
     Point2D top_left
     Point2D bottom_right
-
 
 
 cdef inline void set_rectangle_feature(Rectangle* rectangle,
@@ -33,9 +34,10 @@ cdef Rectangle** _haar_like_feature_coord(int feature_type, int height,
 cpdef haar_like_feature_coord(feature_type, int height, int width)
 
 
-cdef float[:, ::1] _haar_like_feature(integral_floating[:, ::1] roi_ii,
-                                      Rectangle** coord,
-                                      int n_rectangle, int n_feature)
+cdef integral_floating[:, ::1] _haar_like_feature(
+    integral_floating[:, ::1] roi_ii,
+    Rectangle** coord,
+    int n_rectangle, int n_feature)
 
 
 cpdef haar_like_feature(integral_floating[:, ::1] roi_ii, feature_type)
