@@ -19,6 +19,7 @@ New Features
 - lookfor function (#2713)
 - montage function (#2626)
 - 2D and 3D segmentation with morphological snakes (#2791)
+- Haar-like feature (#2848)
 
 
 Improvements
