@@ -15,7 +15,6 @@ FEATURE_TYPE = {'type-2-x': 0, 'type-2-y': 1,
                 'type-4': 4}
 
 
-
 cdef Rectangle** _haar_like_feature_coord(unsigned int feature_type,
                                           Py_ssize_t height,
                                           Py_ssize_t width,
@@ -50,7 +49,7 @@ cdef Rectangle** _haar_like_feature_coord(unsigned int feature_type,
                 for dx in range(1, width):
                     # type -> 2 rectangles split along x axis
                     if (feature_type == 0 and
-                        (y + dy <= height and x + 2 * dx <= width)):
+                            (y + dy <= height and x + 2 * dx <= width)):
                         set_rectangle_feature(&rect_feat[0][cnt_feat],
                                               y, x,
                                               y + dy - 1, x + dx - 1)
@@ -170,9 +169,9 @@ cpdef haar_like_feature_coord(feature_type, height, width):
 
 
 cdef integral_floating[:, ::1] _haar_like_feature(
-    integral_floating[:, ::1] roi_ii,
-    Rectangle** coord,
-    Py_ssize_t n_rectangle, Py_ssize_t n_feature):
+        integral_floating[:, ::1] roi_ii,
+        Rectangle** coord,
+        Py_ssize_t n_rectangle, Py_ssize_t n_feature):
     """Private function releasing the GIL to compute the integral for the
     different rectangle."""
     cdef:
