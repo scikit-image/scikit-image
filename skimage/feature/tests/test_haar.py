@@ -17,7 +17,6 @@ def test_haar_like_feature_error():
         haar_like_feature(img_ii, 'unknown_type')
 
 
-
 @pytest.mark.parametrize("feature_type,shape_feature,expected_feature_value",
                          [('type-2-x', (84,), [0.]),
                           ('type-2-y', (84,), [0.]),
@@ -76,12 +75,12 @@ def test_haar_like_feature_coord(feature_type, height, width, expected_coord):
 
 
 @pytest.mark.parametrize("max_n_features,n_features", [(None, 1350),
-                                                      (10, 10)])
+                                                       (10, 10)])
 def test_haar_like_feature_visualize(max_n_features, n_features):
     img = np.ones((5, 5), dtype=np.float32)
     img_ii = integral_image(img)
     haar_feature_coord = haar_like_feature_coord('type-2-x', 10, 10)
     feature_set = haar_like_feature_visualize(haar_feature_coord, 10, 10,
-                                max_n_features=max_n_features,
-                                random_state=0)
+                                              max_n_features=max_n_features,
+                                              random_state=0)
     assert len(feature_set) == n_features
