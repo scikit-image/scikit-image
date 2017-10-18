@@ -1,3 +1,4 @@
+import cython
 cimport numpy as cnp
 
 
@@ -10,8 +11,7 @@ ctypedef fused integral_floating:
     cnp.int16_t
     cnp.int32_t
     cnp.int64_t
-    cnp.float32_t
-    cnp.float64_t
+    cython.floating
 
 
 cdef integral_floating integrate(integral_floating[:, ::1] sat,

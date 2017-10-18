@@ -192,14 +192,14 @@ cpdef haar_like_feature_coord(feature_type, height, width):
 
 
 cdef integral_floating[:, ::1] _haar_like_feature(
-        integral_floating[:, ::1] roi_ii,
+        integral_floating[:, ::1] int_image,
         Rectangle** coord,
         Py_ssize_t n_rectangle, Py_ssize_t n_feature):
     """Private function releasing the GIL to compute the integral for the
     different rectangle."""
     cdef:
         integral_floating[:, ::1] rect_feature = np.empty(
-            (n_rectangle, n_feature), dtype=roi_ii.base.dtype)
+            (n_rectangle, n_feature), dtype=int_image.base.dtype)
 
         Py_ssize_t idx_rect, idx_feature
 
@@ -207,7 +207,7 @@ cdef integral_floating[:, ::1] _haar_like_feature(
         for idx_rect in range(n_rectangle):
             for idx_feature in range(n_feature):
                 rect_feature[idx_rect, idx_feature] = integrate(
-                    roi_ii,
+                    int_image,
                     coord[idx_rect][idx_feature].top_left.row,
                     coord[idx_rect][idx_feature].top_left.col,
                     coord[idx_rect][idx_feature].bottom_right.row,
@@ -216,7 +216,8 @@ cdef integral_floating[:, ::1] _haar_like_feature(
     return rect_feature
 
 
-cpdef haar_like_feature(integral_floating[:, ::1] roi_ii, feature_type):
+cpdef haar_like_feature(integral_floating[:, ::1] int_image,
+                        r, c, width, height, feature_type):
     """Compute the Haar-like features for a region of interest (ROI) of an
     integral image.
 
@@ -227,9 +228,21 @@ cpdef haar_like_feature(integral_floating[:, ::1] roi_ii, feature_type):
 
     Parameters
     ----------
-    roi_ii : (M, N) ndarray
+    int_image : (M, N) ndarray
         The region of an integral image for which the features need to be
         computed.
+
+    r : int
+        Row-coordinate of top left corner of the detection window.
+
+    c : int
+        Column-coordinate of top left corner of the detection window.
+
+    width : int
+        Width of the detection window.
+
+    height : int
+        Height of the detection window.
 
     feature_type : str
         The type of feature to consider:
@@ -289,12 +302,13 @@ cpdef haar_like_feature(integral_floating[:, ::1] roi_ii, feature_type):
 
     # compute all possible coordinates with a specific type of feature
     coord = _haar_like_feature_coord(FEATURE_TYPE[feature_type],
-                                     roi_ii.shape[0],
-                                     roi_ii.shape[1],
+                                     height,
+                                     width,
                                      &n_rectangle, &n_feature)
 
-    rect_feature = _haar_like_feature(roi_ii, coord,
-                                      n_rectangle, n_feature)
+    rect_feature = _haar_like_feature(int_image[r : r + height,
+                                                c : c + width],
+                                      coord, n_rectangle, n_feature)
 
     # deallocate
     for idx_rect in range(n_rectangle):

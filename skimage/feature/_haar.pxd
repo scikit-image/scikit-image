@@ -1,3 +1,4 @@
+import cython
 cimport numpy as cnp
 
 
@@ -10,8 +11,7 @@ ctypedef fused integral_floating:
     cnp.int16_t
     cnp.int32_t
     cnp.int64_t
-    cnp.float32_t
-    cnp.float64_t
+    cython.floating
 
 
 cdef struct Point2D:
@@ -46,9 +46,10 @@ cpdef haar_like_feature_coord(feature_type, height, width)
 
 
 cdef integral_floating[:, ::1] _haar_like_feature(
-    integral_floating[:, ::1] roi_ii,
+    integral_floating[:, ::1] int_image,
     Rectangle** coord,
     Py_ssize_t n_rectangle, Py_ssize_t n_feature)
 
 
-cpdef haar_like_feature(integral_floating[:, ::1] roi_ii, feature_type)
+cpdef haar_like_feature(integral_floating[:, ::1] int_image,
+                        r, c, width, height, feature_type)

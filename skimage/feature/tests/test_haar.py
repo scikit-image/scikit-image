@@ -14,7 +14,7 @@ def test_haar_like_feature_error():
     img_ii = integral_image(img)
 
     with pytest.raises(ValueError):
-        haar_like_feature(img_ii, 'unknown_type')
+        haar_like_feature(img_ii, 0, 0, 5, 5, 'unknown_type')
 
 
 @pytest.mark.parametrize("dtype", [np.uint8, np.int8,
@@ -30,7 +30,8 @@ def test_haar_like_feature(feature_type, shape_feature,
     # test Haar-like feature on a basic one image
     img = np.ones((5, 5), dtype=dtype)
     img_ii = integral_image(img)
-    haar_feature = haar_like_feature(img_ii, feature_type=feature_type)
+    haar_feature = haar_like_feature(img_ii, 0, 0, 5, 5,
+                                     feature_type=feature_type)
     assert_allclose(np.sort(np.unique(haar_feature)), expected_feature_value)
 
 
@@ -47,7 +48,8 @@ def test_haar_like_feature_fused_type(dtype, feature_type):
     # to avoid overflow, unsigned type are converted to signed
     if 'uint' in expected_dtype.name:
         expected_dtype = np.dtype(expected_dtype.name.replace('u', ''))
-    haar_feature = haar_like_feature(img_ii, feature_type=feature_type)
+    haar_feature = haar_like_feature(img_ii, 0, 0, 5, 5,
+                                     feature_type=feature_type)
     assert haar_feature.dtype == expected_dtype
 
 
