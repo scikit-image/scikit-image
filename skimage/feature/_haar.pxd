@@ -5,6 +5,10 @@ cimport numpy as np
 ctypedef fused integral_floating:
     cython.integral
     cython.floating
+    np.uint8_t
+    np.uint16_t
+    np.uint32_t
+    np.uint64_t
 
 
 cdef struct Point2D:
