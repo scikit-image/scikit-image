@@ -38,6 +38,24 @@ def haar_like_feature_visualize(coord, height, width,
     feature_set : (max_n_features, height, width), ndarray
         A set of images plotting the Haar-like features created.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.transform import integral_image
+    >>> from skimage.feature import haar_like_feature_coord
+    >>> from skimage.feature import haar_like_feature_visualize
+    >>> coord = haar_like_feature_coord('type-4', 2, 2)
+    >>> coord
+    [[[(0, 0)], [(0, 0)]],
+     [[(0, 1)], [(0, 1)]],
+     [[(1, 1)], [(1, 1)]],
+     [[(1, 0)], [(1, 0)]]]
+    >>> feature = haar_like_feature_visualize(coord, 2, 2, max_n_features=1)
+    >>> feature
+    [array([[ 1.,  0.],
+            [ 0.,  1.]])]
+
+
     """
     random_state = check_random_state(random_state)
     if max_n_features is None:

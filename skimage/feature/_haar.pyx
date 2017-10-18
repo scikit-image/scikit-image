@@ -149,6 +149,23 @@ cpdef haar_like_feature_coord(feature_type, height, width):
         tuple (row, col) which can be easily used in the function
         :func:`skimage.draw.rectangle` for instance.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.transform import integral_image
+    >>> from skimage.feature import haar_like_feature_coord
+    >>> from skimage.feature import haar_like_feature_visualize
+    >>> coord = haar_like_feature_coord('type-4', 2, 2)
+    >>> coord
+    [[[(0, 0)], [(0, 0)]],
+     [[(0, 1)], [(0, 1)]],
+     [[(1, 1)], [(1, 1)]],
+     [[(1, 0)], [(1, 0)]]]
+    >>> feature = haar_like_feature_visualize(coord, 2, 2, max_n_features=1)
+    >>> feature
+    [array([[ 1.,  0.],
+            [ 0.,  1.]])]
+
     """
     cdef:
         Rectangle** rect = NULL
