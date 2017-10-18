@@ -175,8 +175,9 @@ cdef integral_floating[:, ::1] _haar_like_feature(
     """Private function releasing the GIL to compute the integral for the
     different rectangle."""
     cdef:
-        integral_floating[:, ::1] rect_feature = np.zeros(
+        integral_floating[:, ::1] rect_feature = np.empty(
             (n_rectangle, n_feature), dtype=roi_ii.base.dtype)
+
         Py_ssize_t idx_rect, idx_feature
 
     with nogil:
