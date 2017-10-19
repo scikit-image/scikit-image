@@ -42,7 +42,7 @@ cdef Rectangle** _haar_like_feature_coord(unsigned int feature_type,
                                           Py_ssize_t* counter_feature) nogil
 
 
-cpdef haar_like_feature_coord(feature_type, height, width)
+cpdef haar_like_feature_coord_wrapper(feature_type, height, width)
 
 
 cdef integral_floating[:, ::1] _haar_like_feature(
@@ -51,5 +51,5 @@ cdef integral_floating[:, ::1] _haar_like_feature(
     Py_ssize_t n_rectangle, Py_ssize_t n_feature)
 
 
-cpdef haar_like_feature(integral_floating[:, ::1] int_image,
-                        r, c, width, height, feature_type)
+cpdef haar_like_feature_wrapper(integral_floating[:, ::1] int_image,
+                                r, c, width, height, feature_type)

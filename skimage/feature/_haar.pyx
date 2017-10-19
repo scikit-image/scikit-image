@@ -118,7 +118,7 @@ cdef Rectangle** _haar_like_feature_coord(unsigned int feature_type,
     return rect_feat
 
 
-cpdef haar_like_feature_coord(feature_type, height, width):
+cpdef haar_like_feature_coord_wrapper(feature_type, height, width):
     """Compute the coordinates of Haar-like features.
 
     Parameters
@@ -211,8 +211,8 @@ cdef integral_floating[:, ::1] _haar_like_feature(
     return rect_feature
 
 
-cpdef haar_like_feature(integral_floating[:, ::1] int_image,
-                        r, c, width, height, feature_type):
+cpdef haar_like_feature_wrapper(integral_floating[:, ::1] int_image,
+                                r, c, width, height, feature_type):
     """Compute the Haar-like features for a region of interest (ROI) of an
     integral image.
 
