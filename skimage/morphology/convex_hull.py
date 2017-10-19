@@ -1,4 +1,5 @@
 """Convex Hull."""
+from itertools import product
 import numpy as np
 from scipy.spatial import ConvexHull
 from ..measure.pnpoly import grid_points_in_poly
@@ -9,7 +10,15 @@ from ..util import unique_rows
 __all__ = ['convex_hull_image', 'convex_hull_object']
 
 
-def convex_hull_image(image):
+def _offsets_diamond(ndim):
+    offsets = np.zeros((2 * ndim, ndim))
+    for vertex, (axis, offset) in \
+                        enumerate(product(range(ndim), (-0.5, 0.5))):
+        offsets[vertex, axis] = offset
+    return offsets
+
+
+def convex_hull_image(image, tolerance=1e-10):
     """Compute the convex hull image of a binary image.
 
     The convex hull is the set of pixels included in the smallest convex
@@ -30,44 +39,43 @@ def convex_hull_image(image):
     .. [1] http://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/
 
     """
-    if image.ndim > 2:
-        raise ValueError("Input must be a 2D image")
+    ndim = image.ndim
 
-    # Here we do an optimisation by choosing only pixels that are
+    # In 2D, we do an optimisation by choosing only pixels that are
     # the starting or ending pixel of a row or column.  This vastly
     # limits the number of coordinates to examine for the virtual hull.
-    coords = possible_hull(image.astype(np.uint8))
-    N = len(coords)
+    if ndim == 2:
+        coords = possible_hull(image.astype(np.uint8))
+    else:
+        coords = np.transpose(np.nonzero(image))
 
     # Add a vertex for the middle of each pixel edge
-    coords_corners = np.empty((N * 4, 2))
-    for i, (x_offset, y_offset) in enumerate(zip((0, 0, -0.5, 0.5),
-                                                 (-0.5, 0.5, 0, 0))):
-        coords_corners[i * N:(i + 1) * N] = coords + [x_offset, y_offset]
+    offsets = _offsets_diamond(image.ndim)
+    coords_corners = (coords[:, np.newaxis, :] + offsets).reshape(-1, ndim)
 
     # repeated coordinates can *sometimes* cause problems in
     # scipy.spatial.ConvexHull, so we remove them.
     coords = unique_rows(coords_corners)
 
-    # Subtract offset
-    offset = coords.mean(axis=0)
-    coords -= offset
-
     # Find the convex hull
-    chull = ConvexHull(coords)
-    v = chull.points[chull.vertices]
+    hull = ConvexHull(coords)
+    vertices = hull.points[hull.vertices]
 
-    # Sort vertices clock-wise
-    v_centred = v - v.mean(axis=0)
-    angles = np.arctan2(v_centred[:, 0], v_centred[:, 1])
-    v = v[np.argsort(angles)]
-
-    # Add back offset
-    v += offset
-
-    # For each pixel coordinate, check whether that pixel
-    # lies inside the convex hull
-    mask = grid_points_in_poly(image.shape[:2], v)
+    # If 2D, sort vertices clock-wise, and use Cython function to locate
+    # convex hull pixels
+    if ndim == 2:
+        offset = np.mean(vertices, axis=0)
+        v_centred = vertices - offset
+        angles = np.arctan2(v_centred[:, 0], v_centred[:, 1])
+        vertices = vertices[np.argsort(angles)]
+        mask = grid_points_in_poly(image.shape, vertices)
+    else:
+        gridcoords = np.reshape(np.mgrid[tuple(map(slice, image.shape))],
+                                (ndim, -1))
+        # A point is in the hull if it satisfies all of the hull's inequalities
+        coords_in_hull = np.all(hull.equations[:, :ndim] @ gridcoords +
+                                hull.equations[:, ndim:] < tolerance, axis=0)
+        mask = np.reshape(coords_in_hull, image.shape)
 
     return mask
 
