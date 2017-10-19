@@ -87,7 +87,7 @@ def test_haar_like_feature_coord(feature_type, height, width, expected_coord):
 def test_draw_haar_like_feature(max_n_features, nnz_values):
     img = np.zeros((5, 5), dtype=np.float32)
     image = draw_haar_like_feature(img, 0, 0, 5, 5, 'type-4',
-                                         max_n_features=max_n_features,
-                                         random_state=0)
+                                   max_n_features=max_n_features,
+                                   random_state=0)
     assert image.shape == (5, 5, 3)
     assert np.count_nonzero(image) == nnz_values
