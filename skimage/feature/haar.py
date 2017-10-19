@@ -6,14 +6,15 @@ import numpy as np
 
 from ._haar import haar_like_feature_coord
 from ..color import gray2rgb
+from ..draw import rectangle
 from ..exposure import rescale_intensity
 from .._shared.utils import check_random_state
 from ..util import img_as_float
 
 
 def draw_haar_like_feature(image, r, c, height, width, feature_type,
-                           color_positive_block=(1., 1., 1.),
-                           color_negative_block=(0., 0.69, 0.96),
+                           color_positive_block=(1., 0., 0.),
+                           color_negative_block=(0., 1., 0.),
                            alpha=0.5, max_n_features=None, random_state=None):
     """Helper to visualize Haar-like features.
 
@@ -46,16 +47,15 @@ def draw_haar_like_feature(image, r, c, height, width, feature_type,
 
     color_positive_rectangle : tuple of 3 floats
         Floats specifying the color for the positive block. Corresponding
-        values define (R, G, B) values. Default value is white (1, 1, 1).
+        values define (R, G, B) values. Default value is red (1, 0, 0).
 
     color_negative_block : tuple of 3 floats
         Floats specifying the color for the negative block Corresponding values
-        define (R, G, B) values. Default value is cyan (0, 0.69, 0.96).
+        define (R, G, B) values. Default value is blue (0, 1, 0).
 
     alpha : float
         Value in the range [0, 1] that specifies opacity of visualization. 1 -
         fully transparent, 0 - opaque.
-
 
     max_n_features : int, default=None
         The maximum number of features to be returned.
@@ -70,8 +70,8 @@ def draw_haar_like_feature(image, r, c, height, width, feature_type,
 
     Returns
     -------
-    feature_set : (max_n_features, height, width), ndarray
-        A set of images plotting the Haar-like features created.
+    features : (M, N), ndarray
+        An image in which the different features will be added.
 
     Examples
     --------
@@ -114,18 +114,14 @@ def draw_haar_like_feature(image, r, c, height, width, feature_type,
             coord_start, coord_end = rect
             coord_start = tuple(map(add, coord_start[feature_idx], [r, c]))
             coord_end = tuple(map(add, coord_end[feature_idx], [r, c]))
+            rr, cc = rectangle(coord_start, coord_end)
 
             if ((idx_rect + 1) % 2) == 0:
                 new_value = ((1 - alpha) *
-                             output[coord_start[0]:coord_end[0] + 1,
-                                    coord_start[1]:coord_end[1] + 1] +
-                             alpha * color_positive_block)
+                             output[rr, cc] + alpha * color_positive_block)
             else:
                 new_value = ((1 - alpha) *
-                             output[coord_start[0]:coord_end[0] + 1,
-                                    coord_start[1]:coord_end[1] + 1] +
-                             alpha * color_negative_block)
-            output[coord_start[0]:coord_end[0] + 1,
-                   coord_start[1]:coord_end[1] + 1] = new_value
+                             output[rr, cc] + alpha * color_negative_block)
+            output[rr, cc] = new_value
 
     return output
