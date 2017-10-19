@@ -1,13 +1,12 @@
 """Convex Hull."""
 import numpy as np
+from scipy.spatial import ConvexHull
 from ..measure.pnpoly import grid_points_in_poly
 from ._convex_hull import possible_hull
 from ..measure._label import label
 from ..util import unique_rows
 
 __all__ = ['convex_hull_image', 'convex_hull_object']
-
-from scipy.spatial import Delaunay
 
 
 def convex_hull_image(image):
@@ -47,7 +46,7 @@ def convex_hull_image(image):
         coords_corners[i * N:(i + 1) * N] = coords + [x_offset, y_offset]
 
     # repeated coordinates can *sometimes* cause problems in
-    # scipy.spatial.Delaunay, so we remove them.
+    # scipy.spatial.ConvexHull, so we remove them.
     coords = unique_rows(coords_corners)
 
     # Subtract offset
@@ -55,8 +54,8 @@ def convex_hull_image(image):
     coords -= offset
 
     # Find the convex hull
-    chull = Delaunay(coords).convex_hull
-    v = coords[np.unique(chull)]
+    chull = ConvexHull(coords)
+    v = chull.points[chull.vertices]
 
     # Sort vertices clock-wise
     v_centred = v - v.mean(axis=0)
