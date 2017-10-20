@@ -100,9 +100,10 @@ def test_haar_like_feature_list():
                            [[[(0, 0), (0, 0)], [(0, 1), (0, 1)],
                              [(1, 1), (1, 1)], [(1, 0), (1, 0)]]])])
 def test_haar_like_feature_coord(feature_type, height, width, expected_coord):
-    coord = haar_like_feature_coord(width, height, feature_type)
-    print(coord)
-    assert coord == expected_coord
+    feat_coord, feat_type = haar_like_feature_coord(width, height,
+                                                    feature_type)
+    assert_array_equal(feat_coord, expected_coord)
+    assert np.all(feat_type == feature_type)
 
 
 @pytest.mark.parametrize("max_n_features,nnz_values", [(None, 46),

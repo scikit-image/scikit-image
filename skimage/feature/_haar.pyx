@@ -177,7 +177,8 @@ cpdef haar_like_feature_coord_wrapper(width, height, feature_type):
                                    rect[i][j].bottom_right.col)])
         output.append(coord_feature)
 
-    return output
+    return (np.array(output, dtype=object),
+            np.array([feature_type] * n_feature, dtype=object))
 
 
 cdef integral_floating[:, ::1] _haar_like_feature(

@@ -60,8 +60,11 @@ def haar_like_feature_coord(width, height, feature_type=None):
 
     Returns
     -------
-    feature_coord : list of tuple coord, shape (n_features, n_rectangles, 2, 2)
+    feature_coord : (n_features, n_rectangles, 2, 2), ndarray of list of tuple coord
         Coordinates of the rectangles for each feature.
+
+    feature_type : (n_features,), ndarray of str
+        The corresponding type for each feature.
 
     Examples
     --------
@@ -75,10 +78,15 @@ def haar_like_feature_coord(width, height, feature_type=None):
     """
     feature_type_ = _validate_feature_type(feature_type)
 
-    return list(chain.from_iterable(
-        haar_like_feature_coord_wrapper(width, height, feat_t)
-        for feat_t in feature_type_))
+    feat_coord, feat_type = [], []
+    for feat_t in feature_type_:
+        feat_t_coord, feat_t_type = haar_like_feature_coord_wrapper(width,
+                                                                    height,
+                                                                    feat_t)
+        feat_coord.append(feat_t_coord)
+        feat_type.append(feat_t_type)
 
+    return np.hstack(feat_coord), np.hstack(feat_type)
 
 def haar_like_feature(int_image, r, c, width, height, feature_type=None):
     """Compute the Haar-like features for a region of interest (ROI) of an
@@ -242,7 +250,7 @@ def draw_haar_like_feature(image, r, c, width, height, feature_type,
         raise ValueError('The given feature type is unknown. Got {}'
                          ' instead of one of {}.'.format(feature_type,
                                                          FEATURE_TYPE))
-    coord = haar_like_feature_coord(width, height, feature_type)
+    coord, _ = haar_like_feature_coord(width, height, feature_type)
 
     color_positive_block = np.asarray(color_positive_block, dtype=np.float64)
     color_negative_block = np.asarray(color_negative_block, dtype=np.float64)
