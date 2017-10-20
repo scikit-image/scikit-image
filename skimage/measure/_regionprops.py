@@ -8,7 +8,6 @@ from scipy import ndimage as ndi
 
 from ._label import label
 from . import _moments
-from ._volume import expanded_convex_hull
 
 
 from functools import wraps
