@@ -15,15 +15,15 @@ FEATURE_TYPE = {'type-2-x': 0, 'type-2-y': 1,
                 'type-4': 4}
 
 
-cdef Rectangle** _haar_like_feature_coord(unsigned int feature_type,
+cdef Rectangle** _haar_like_feature_coord(Py_ssize_t width,
                                           Py_ssize_t height,
-                                          Py_ssize_t width,
+                                          unsigned int feature_type,
                                           Py_ssize_t* n_rectangle,
                                           Py_ssize_t* n_feature) nogil:
     """Private function to compute the coordinates of all Haar-like features.
     """
-    # allocate for the worst case scenario
     cdef:
+        # allocate for the worst case scenario
         Py_ssize_t max_feature = height ** 2 * width ** 2
         Rectangle** rect_feat = NULL
         Py_ssize_t cnt_feat = 0
@@ -118,11 +118,17 @@ cdef Rectangle** _haar_like_feature_coord(unsigned int feature_type,
     return rect_feat
 
 
-cpdef haar_like_feature_coord_wrapper(feature_type, height, width):
+cpdef haar_like_feature_coord_wrapper(width, height, feature_type):
     """Compute the coordinates of Haar-like features.
 
     Parameters
     ----------
+    width : int
+        Width of the detection window.
+
+    height : int
+        Height of the detection window.
+
     feature_type : str
         The type of feature to consider:
 
@@ -132,11 +138,6 @@ cpdef haar_like_feature_coord_wrapper(feature_type, height, width):
         - 'type-3-y': 3 rectangles varying along the y axis;
         - 'type-4': 4 rectangles varying along x and y axis.
 
-    height : int
-        Height of the detection window.
-
-    width : int
-        Width of the detection window.
 
     Returns
     -------
@@ -170,8 +171,8 @@ cpdef haar_like_feature_coord_wrapper(feature_type, height, width):
         Py_ssize_t height_win = <Py_ssize_t> height
         Py_ssize_t width_win = <Py_ssize_t> width
 
-    rect = _haar_like_feature_coord(FEATURE_TYPE[feature_type],
-                                    height_win, width_win,
+    rect = _haar_like_feature_coord(width_win, height_win,
+                                    FEATURE_TYPE[feature_type],
                                     &n_rectangle, &n_feature)
 
     # allocate the output based on the number of rectangle
@@ -295,9 +296,8 @@ cpdef haar_like_feature_wrapper(integral_floating[:, ::1] int_image,
                                                          FEATURE_TYPE))
 
     # compute all possible coordinates with a specific type of feature
-    coord = _haar_like_feature_coord(FEATURE_TYPE[feature_type],
-                                     height,
-                                     width,
+    coord = _haar_like_feature_coord(width, height,
+                                     FEATURE_TYPE[feature_type],
                                      &n_rectangle, &n_feature)
 
     rect_feature = _haar_like_feature(int_image[r : r + height,

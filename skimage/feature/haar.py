@@ -13,11 +13,17 @@ from .._shared.utils import check_random_state
 from ..util import img_as_float
 
 
-def haar_like_feature_coord(feature_type, height, width):
+def haar_like_feature_coord(width, height, feature_type):
     """Compute the coordinates of Haar-like features.
 
     Parameters
     ----------
+    width : int
+        Width of the detection window.
+
+    height : int
+        Height of the detection window.
+
     feature_type : str
         The type of feature to consider:
 
@@ -26,12 +32,6 @@ def haar_like_feature_coord(feature_type, height, width):
         - 'type-3-x': 3 rectangles varying along the x axis;
         - 'type-3-y': 3 rectangles varying along the y axis;
         - 'type-4': 4 rectangles varying along x and y axis.
-
-    height : int
-        Height of the detection window.
-
-    width : int
-        Width of the detection window.
 
     Returns
     -------
@@ -57,7 +57,7 @@ def haar_like_feature_coord(feature_type, height, width):
      [[(1, 0)], [(1, 0)]]]
 
     """
-    return haar_like_feature_coord_wrapper(feature_type, height, width)
+    return haar_like_feature_coord_wrapper(width, height, feature_type)
 
 def haar_like_feature(int_image, r, c, width, height, feature_type):
     """Compute the Haar-like features for a region of interest (ROI) of an
@@ -133,7 +133,7 @@ def haar_like_feature(int_image, r, c, width, height, feature_type):
     return haar_like_feature_wrapper(int_image, r, c, width, height,
                                      feature_type)
 
-def draw_haar_like_feature(image, r, c, height, width, feature_type,
+def draw_haar_like_feature(image, r, c, width, height, feature_type,
                            color_positive_block=(1., 0., 0.),
                            color_negative_block=(0., 1., 0.),
                            alpha=0.5, max_n_features=None, random_state=None):
@@ -151,11 +151,11 @@ def draw_haar_like_feature(image, r, c, height, width, feature_type,
     c : int
         Column-coordinate of top left corner of the detection window.
 
-    width : int
-        Width of the detection window.
-
     height : int
         Height of the detection window.
+
+    width : int
+        Width of the detection window.
 
     feature_type : str
         The type of feature to consider:
@@ -212,7 +212,7 @@ def draw_haar_like_feature(image, r, c, height, width, feature_type,
 
     """
 
-    coord = haar_like_feature_coord(feature_type, height, width)
+    coord = haar_like_feature_coord(width, height, feature_type)
 
     color_positive_block = np.asarray(color_positive_block, dtype=np.float64)
     color_negative_block = np.asarray(color_negative_block, dtype=np.float64)

@@ -78,12 +78,12 @@ def test_haar_like_feature_fused_type(dtype, feature_type):
                            [[[(0, 0)], [(0, 0)]], [[(0, 1)], [(0, 1)]],
                             [[(1, 1)], [(1, 1)]], [[(1, 0)], [(1, 0)]]])])
 def test_haar_like_feature_coord(feature_type, height, width, expected_coord):
-    coord = haar_like_feature_coord(feature_type, height, width)
+    coord = haar_like_feature_coord(width, height, feature_type)
     assert coord == expected_coord
 
 
-@pytest.mark.parametrize("max_n_features,nnz_values", [(None, 73),
-                                                       (1, 20)])
+@pytest.mark.parametrize("max_n_features,nnz_values", [(None, 46),
+                                                       (1, 8)])
 def test_draw_haar_like_feature(max_n_features, nnz_values):
     img = np.zeros((5, 5), dtype=np.float32)
     image = draw_haar_like_feature(img, 0, 0, 5, 5, 'type-4',

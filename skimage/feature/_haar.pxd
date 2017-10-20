@@ -35,14 +35,14 @@ cdef inline void set_rectangle_feature(Rectangle* rectangle,
     rectangle[0].bottom_right.col = bottom_x
 
 
-cdef Rectangle** _haar_like_feature_coord(unsigned int feature_type,
+cdef Rectangle** _haar_like_feature_coord(Py_ssize_t width,
                                           Py_ssize_t height,
-                                          Py_ssize_t width,
+                                          unsigned int feature_type,
                                           Py_ssize_t* n_rectangle,
                                           Py_ssize_t* counter_feature) nogil
 
 
-cpdef haar_like_feature_coord_wrapper(feature_type, height, width)
+cpdef haar_like_feature_coord_wrapper(width, height, feature_type)
 
 
 cdef integral_floating[:, ::1] _haar_like_feature(
