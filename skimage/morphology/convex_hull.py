@@ -18,7 +18,7 @@ def _offsets_diamond(ndim):
     return offsets
 
 
-def convex_hull_image(image, tolerance=1e-10):
+def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     """Compute the convex hull image of a binary image.
 
     The convex hull is the set of pixels included in the smallest convex
@@ -28,6 +28,10 @@ def convex_hull_image(image, tolerance=1e-10):
     ----------
     image : (M, N) array
         Binary input image. This array is cast to bool before processing.
+    offset_coordinates : bool, optional
+        If ``True``, a pixel at coordinate, e.g., (4, 7) will be represented
+        by coordinates (3.5, 7), (4.5, 7), (4, 6.5), and (4, 7.5). This adds
+        some "extent" to a pixel when computing the hull.
     tolerance : float, optional
         Tolerance when determining whether a point is inside the hull. Due
         to numerical floating point errors, a tolerance of 0 can result in
@@ -54,12 +58,13 @@ def convex_hull_image(image, tolerance=1e-10):
         coords = np.transpose(np.nonzero(image))
 
     # Add a vertex for the middle of each pixel edge
-    offsets = _offsets_diamond(image.ndim)
-    coords_corners = (coords[:, np.newaxis, :] + offsets).reshape(-1, ndim)
+    if offset_coordinates:
+        offsets = _offsets_diamond(image.ndim)
+        coords = (coords[:, np.newaxis, :] + offsets).reshape(-1, ndim)
 
     # repeated coordinates can *sometimes* cause problems in
     # scipy.spatial.ConvexHull, so we remove them.
-    coords = unique_rows(coords_corners)
+    coords = unique_rows(coords)
 
     # Find the convex hull
     hull = ConvexHull(coords)
