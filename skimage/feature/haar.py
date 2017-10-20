@@ -1,7 +1,9 @@
 from __future__ import division
 
+from itertools import chain
 from operator import add
 
+import six
 import numpy as np
 
 from ._haar import haar_like_feature_coord_wrapper
@@ -17,6 +19,23 @@ FEATURE_TYPE = ('type-2-x', 'type-2-y',
                 'type-4')
 
 
+def _validate_feature_type(feature_type):
+    """Transform feature type to an iterable and check that it exists."""
+    if feature_type is None:
+        feature_type_ = FEATURE_TYPE
+    else:
+        if isinstance(feature_type, six.string_types):
+            feature_type_ = [feature_type]
+        else:
+            feature_type_ = feature_type
+        for feat_t in feature_type_:
+            if feat_t not in FEATURE_TYPE:
+                raise ValueError('The given feature type is unknown. Got {}'
+                                 ' instead of one of {}.'.format(feat_t,
+                                                                 FEATURE_TYPE))
+    return feature_type_
+
+
 def haar_like_feature_coord(width, height, feature_type=None):
     """Compute the coordinates of Haar-like features.
 
@@ -28,7 +47,7 @@ def haar_like_feature_coord(width, height, feature_type=None):
     height : int
         Height of the detection window.
 
-    feature_type : str or None, optional
+    feature_type : str or list of str or None, optional
         The type of feature to consider:
 
         - 'type-2-x': 2 rectangles varying along the x axis;
@@ -54,20 +73,14 @@ def haar_like_feature_coord(width, height, feature_type=None):
     [[[(0, 0), (0, 0)], [(0, 1), (0, 1)], [(1, 1), (1, 1)], [(1, 0), (1, 0)]]]
 
     """
+    feature_type_ = _validate_feature_type(feature_type)
 
-    if feature_type is None:
-        feature_type_ = FEATURE_TYPE
-    else:
-        if feature_type not in FEATURE_TYPE:
-            raise ValueError('The given feature type is unknown. Got {}'
-                             ' instead of one of {}.'.format(feature_type,
-                                                             FEATURE_TYPE))
-        else:
-            feature_type_ = list(feature_type)
+    return list(chain.from_iterable(
+        haar_like_feature_coord_wrapper(width, height, feat_t)
+        for feat_t in feature_type_))
 
-    return haar_like_feature_coord_wrapper(width, height, feature_type)
 
-def haar_like_feature(int_image, r, c, width, height, feature_type):
+def haar_like_feature(int_image, r, c, width, height, feature_type=None):
     """Compute the Haar-like features for a region of interest (ROI) of an
     integral image.
 
@@ -93,7 +106,7 @@ def haar_like_feature(int_image, r, c, width, height, feature_type):
     height : int
         Height of the detection window.
 
-    feature_type : str
+    feature_type : str or list of str or None, optional
         The type of feature to consider:
 
         - 'type-2-x': 2 rectangles varying along the x axis;
@@ -101,6 +114,8 @@ def haar_like_feature(int_image, r, c, width, height, feature_type):
         - 'type-3-x': 3 rectangles varying along the x axis;
         - 'type-3-y': 3 rectangles varying along the y axis;
         - 'type-4': 4 rectangles varying along x and y axis.
+
+        By default all features are extracted.
 
     Returns
     -------
@@ -138,8 +153,12 @@ def haar_like_feature(int_image, r, c, width, height, feature_type):
            DOI: 10.1109/CVPR.2001.990517
 
     """
-    return haar_like_feature_wrapper(int_image, r, c, width, height,
-                                     feature_type)
+    feature_type_ = _validate_feature_type(feature_type)
+
+    return np.hstack(list(chain.from_iterable(
+        haar_like_feature_wrapper(int_image, r, c, width, height, feat_t)
+        for feat_t in feature_type_)))
+
 
 def draw_haar_like_feature(image, r, c, width, height, feature_type,
                            color_positive_block=(1., 0., 0.),
@@ -219,7 +238,10 @@ def draw_haar_like_feature(image, r, c, width, height, feature_type,
             [ 0. ,  0.5,  0. ]]])
 
     """
-
+    if feature_type not in FEATURE_TYPE:
+        raise ValueError('The given feature type is unknown. Got {}'
+                         ' instead of one of {}.'.format(feature_type,
+                                                         FEATURE_TYPE))
     coord = haar_like_feature_coord(width, height, feature_type)
 
     color_positive_block = np.asarray(color_positive_block, dtype=np.float64)

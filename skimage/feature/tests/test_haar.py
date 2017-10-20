@@ -2,6 +2,7 @@ import pytest
 
 import numpy as np
 from numpy.testing import assert_allclose
+from numpy.testing import assert_array_equal
 
 from skimage.transform import integral_image
 from skimage.feature import haar_like_feature
@@ -13,8 +14,11 @@ def test_haar_like_feature_error():
     img = np.ones((5, 5), dtype=np.float32)
     img_ii = integral_image(img)
 
+    feature_type = 'unknown_type'
     with pytest.raises(ValueError):
-        haar_like_feature(img_ii, 0, 0, 5, 5, 'unknown_type')
+        haar_like_feature(img_ii, 0, 0, 5, 5, feature_type=feature_type)
+        haar_like_feature_coord(5, 5, feature_type=feature_type)
+        draw_haar_like_feature(img, 0, 0, 5, 5, feature_type=feature_type)
 
 
 @pytest.mark.parametrize("dtype", [np.uint8, np.int8,
@@ -51,6 +55,16 @@ def test_haar_like_feature_fused_type(dtype, feature_type):
     haar_feature = haar_like_feature(img_ii, 0, 0, 5, 5,
                                      feature_type=feature_type)
     assert haar_feature.dtype == expected_dtype
+
+
+def test_haar_like_feature_list():
+    img = np.ones((5, 5), dtype=np.int8)
+    img_ii = integral_image(img)
+    feature_type = ['type-2-x', 'type-2-y', 'type-3-x', 'type-3-y', 'type-4']
+    haar_list = haar_like_feature(img_ii, 0, 0, 5, 5,
+                                  feature_type=feature_type)
+    haar_all = haar_like_feature(img_ii, 0, 0, 5, 5)
+    assert_array_equal(haar_list, haar_all)
 
 
 @pytest.mark.parametrize("feature_type,height,width,expected_coord",

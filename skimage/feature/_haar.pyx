@@ -283,11 +283,6 @@ cpdef haar_like_feature_wrapper(integral_floating[:, ::1] int_image,
         Py_ssize_t idx_rect, idx_feature
         integral_floating[:, ::1] rect_feature
 
-    if feature_type not in FEATURE_TYPE.keys():
-        raise ValueError('The given feature type is unknown. Got {}'
-                         ' instead of one of {}.'.format(feature_type,
-                                                         FEATURE_TYPE))
-
     # compute all possible coordinates with a specific type of feature
     coord = _haar_like_feature_coord(width, height,
                                      FEATURE_TYPE[feature_type],
