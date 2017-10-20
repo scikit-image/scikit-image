@@ -28,6 +28,10 @@ def convex_hull_image(image, tolerance=1e-10):
     ----------
     image : (M, N) array
         Binary input image. This array is cast to bool before processing.
+    tolerance : float, optional
+        Tolerance when determining whether a point is inside the hull. Due
+        to numerical floating point errors, a tolerance of 0 can result in
+        some points erroneously being classified as being outside the hull.
 
     Returns
     -------
