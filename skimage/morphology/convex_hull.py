@@ -56,6 +56,12 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
         coords = possible_hull(image.astype(np.uint8))
     else:
         coords = np.transpose(np.nonzero(image))
+        if offset_coordinates:
+            # when offsetting, we multiply number of vertices by 2 * ndim.
+            # therefore, we reduce the number of coordinates by using a
+            # convex hull on the original set, before offsetting.
+            hull0 = ConvexHull(coords)
+            coords = hull0.points[hull0.vertices]
 
     # Add a vertex for the middle of each pixel edge
     if offset_coordinates:
