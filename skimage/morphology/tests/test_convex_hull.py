@@ -31,11 +31,6 @@ def test_basic():
 
     assert_array_equal(convex_hull_image(image), expected)
 
-    # Test that an error is raised on passing a 3D image:
-    image3d = np.empty((5, 5, 5))
-    with pytest.raises(ValueError):
-        convex_hull_image(image3d)
-
 
 @pytest.mark.skipif(not scipy_spatial, reason="scipy not installed")
 def test_qhull_offset_example():
@@ -145,10 +140,6 @@ def test_object():
     with pytest.raises(ValueError):
         convex_hull_object(image, 7)
 
-    # Test that an error is raised on passing a 3D image:
-    image3d = np.empty((5, 5, 5))
-    with pytest.raises(ValueError):
-        convex_hull_object(image3d)
 
 if __name__ == "__main__":
     np.testing.run_module_suite()
