@@ -185,14 +185,15 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
         if feature_coord.shape[0] != feature_type.shape[0]:
             raise ValueError("Inconsistent size between feature coordinates"
                              "and feature types.")
-        # group the feature by type
-        group_feature_coord = {key: [] for key in np.unique(feature_type)}
-        for feat_c, feat_t in zip(feature_coord, feature_type):
-            group_feature_coord[feat_t].append(feat_c)
-        return np.hstack(list(chain.from_iterable(
-            haar_like_feature_wrapper(int_image, r, c, width, height, feat_t,
-                                      group_feature_coord[feat_t])
-            for feat_t in group_feature_coord.keys())))
+
+        haar_feature = []
+        for feat_t in FEATURE_TYPE:
+            mask = feature_type == feat_t
+            if np.count_nonzero(mask):
+                haar_feature.append(
+                    haar_like_feature_wrapper(int_image, r, c, width, height,
+                                              feat_t, feature_coord[mask]))
+        return np.hstack(list(chain.from_iterable(haar_feature)))
 
 
 def draw_haar_like_feature(image, r, c, width, height, feature_type,
