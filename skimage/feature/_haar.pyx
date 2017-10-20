@@ -141,14 +141,8 @@ cpdef haar_like_feature_coord_wrapper(width, height, feature_type):
 
     Returns
     -------
-    feature_coord : list of tuple coord, shape (n_rectangles, 2, n_features)
-        Coordinates of the rectangles for each
-        feature. ``feature_coord[0][0][10]`` corresponds to the top-left corner
-        of the first rectangle of the tenth feature while
-        ``feature_coord[1][1][10]`` corresponds to the bottom-left corner of
-        the second rectangle of the tenth feature. A corner is reprented by a
-        tuple (row, col) which can be easily used in the function
-        :func:`skimage.draw.rectangle` for instance.
+    feature_coord : list of tuple coord, shape (n_features, n_rectangles, 2, 2)
+        Coordinates of the rectangles for each feature.
 
     Examples
     --------
@@ -157,10 +151,7 @@ cpdef haar_like_feature_coord_wrapper(width, height, feature_type):
     >>> from skimage.feature import haar_like_feature_coord
     >>> coord = haar_like_feature_coord('type-4', 2, 2)
     >>> coord
-    [[[(0, 0)], [(0, 0)]],
-     [[(0, 1)], [(0, 1)]],
-     [[(1, 1)], [(1, 1)]],
-     [[(1, 0)], [(1, 0)]]]
+    [[[(0, 0), (0, 0)], [(0, 1), (0, 1)], [(1, 1), (1, 1)], [(1, 0), (1, 0)]]]
 
     """
     cdef:
@@ -176,13 +167,15 @@ cpdef haar_like_feature_coord_wrapper(width, height, feature_type):
                                     &n_rectangle, &n_feature)
 
     # allocate the output based on the number of rectangle
-    output = [[[], []] for _ in range(n_rectangle)]
-    for i in range(n_rectangle):
-        for j in range(n_feature):
-            output[i][0].append((rect[i][j].top_left.row,
-                                 rect[i][j].top_left.col))
-            output[i][1].append((rect[i][j].bottom_right.row,
-                                 rect[i][j].bottom_right.col))
+    output = []
+    for j in range(n_feature):
+        coord_feature = []
+        for i in range(n_rectangle):
+            coord_feature.append([(rect[i][j].top_left.row,
+                                   rect[i][j].top_left.col),
+                                  (rect[i][j].bottom_right.row,
+                                   rect[i][j].bottom_right.col)])
+        output.append(coord_feature)
 
     return output
 

@@ -12,8 +12,12 @@ from ..exposure import rescale_intensity
 from .._shared.utils import check_random_state
 from ..util import img_as_float
 
+FEATURE_TYPE = ('type-2-x', 'type-2-y',
+                'type-3-x', 'type-3-y',
+                'type-4')
 
-def haar_like_feature_coord(width, height, feature_type):
+
+def haar_like_feature_coord(width, height, feature_type=None):
     """Compute the coordinates of Haar-like features.
 
     Parameters
@@ -24,7 +28,7 @@ def haar_like_feature_coord(width, height, feature_type):
     height : int
         Height of the detection window.
 
-    feature_type : str
+    feature_type : str or None, optional
         The type of feature to consider:
 
         - 'type-2-x': 2 rectangles varying along the x axis;
@@ -33,16 +37,12 @@ def haar_like_feature_coord(width, height, feature_type):
         - 'type-3-y': 3 rectangles varying along the y axis;
         - 'type-4': 4 rectangles varying along x and y axis.
 
+        By default all features are extracted.
+
     Returns
     -------
-    feature_coord : list of tuple coord, shape (n_rectangles, 2, n_features)
-        Coordinates of the rectangles for each
-        feature. ``feature_coord[0][0][10]`` corresponds to the top-left corner
-        of the first rectangle of the tenth feature while
-        ``feature_coord[1][1][10]`` corresponds to the bottom-left corner of
-        the second rectangle of the tenth feature. A corner is reprented by a
-        tuple (row, col) which can be easily used in the function
-        :func:`skimage.draw.rectangle` for instance.
+    feature_coord : list of tuple coord, shape (n_features, n_rectangles, 2, 2)
+        Coordinates of the rectangles for each feature.
 
     Examples
     --------
@@ -51,12 +51,20 @@ def haar_like_feature_coord(width, height, feature_type):
     >>> from skimage.feature import haar_like_feature_coord
     >>> coord = haar_like_feature_coord('type-4', 2, 2)
     >>> coord # doctest: +NORMALIZE_WHITESPACE
-    [[[(0, 0)], [(0, 0)]],
-     [[(0, 1)], [(0, 1)]],
-     [[(1, 1)], [(1, 1)]],
-     [[(1, 0)], [(1, 0)]]]
+    [[[(0, 0), (0, 0)], [(0, 1), (0, 1)], [(1, 1), (1, 1)], [(1, 0), (1, 0)]]]
 
     """
+
+    if feature_type is None:
+        feature_type_ = FEATURE_TYPE
+    else:
+        if feature_type not in FEATURE_TYPE:
+            raise ValueError('The given feature type is unknown. Got {}'
+                             ' instead of one of {}.'.format(feature_type,
+                                                             FEATURE_TYPE))
+        else:
+            feature_type_ = list(feature_type)
+
     return haar_like_feature_coord_wrapper(width, height, feature_type)
 
 def haar_like_feature(int_image, r, c, width, height, feature_type):
@@ -224,17 +232,16 @@ def draw_haar_like_feature(image, r, c, width, height, feature_type,
 
     random_state = check_random_state(random_state)
     if max_n_features is None:
-        feature_indices = range(len(coord[0][0]))
+        feature_indices = range(len(coord))
     else:
         feature_indices = random_state.choice(
-            range(len(coord[0][0])),
-            size=max_n_features, replace=False)
+            range(len(coord)), size=max_n_features, replace=False)
 
     for set_idx, feature_idx in enumerate(feature_indices):
-        for idx_rect, rect in enumerate(coord):
+        for idx_rect, rect in enumerate(coord[feature_idx]):
             coord_start, coord_end = rect
-            coord_start = tuple(map(add, coord_start[feature_idx], [r, c]))
-            coord_end = tuple(map(add, coord_end[feature_idx], [r, c]))
+            coord_start = tuple(map(add, coord_start, [r, c]))
+            coord_end = tuple(map(add, coord_end, [r, c]))
             rr, cc = rectangle(coord_start, coord_end)
 
             if ((idx_rect + 1) % 2) == 0:
