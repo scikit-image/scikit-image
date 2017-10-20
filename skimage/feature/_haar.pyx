@@ -14,6 +14,10 @@ FEATURE_TYPE = {'type-2-x': 0, 'type-2-y': 1,
                 'type-3-x': 2, 'type-3-y': 3,
                 'type-4': 4}
 
+N_RECTANGLE = {'type-2-x': 2, 'type-2-y': 2,
+               'type-3-x': 3, 'type-3-y': 3,
+               'type-4': 4}
+
 
 cdef Rectangle** _haar_like_feature_coord(Py_ssize_t width,
                                           Py_ssize_t height,
@@ -207,7 +211,8 @@ cdef integral_floating[:, ::1] _haar_like_feature(
 
 
 cpdef haar_like_feature_wrapper(integral_floating[:, ::1] int_image,
-                                r, c, width, height, feature_type):
+                                r, c, width, height, feature_type,
+                                feature_coord):
     """Compute the Haar-like features for a region of interest (ROI) of an
     integral image.
 
@@ -284,10 +289,27 @@ cpdef haar_like_feature_wrapper(integral_floating[:, ::1] int_image,
         Py_ssize_t idx_rect, idx_feature
         integral_floating[:, ::1] rect_feature
 
-    # compute all possible coordinates with a specific type of feature
-    coord = _haar_like_feature_coord(width, height,
-                                     FEATURE_TYPE[feature_type],
-                                     &n_rectangle, &n_feature)
+    if feature_coord is None:
+        # compute all possible coordinates with a specific type of feature
+        coord = _haar_like_feature_coord(width, height,
+                                         FEATURE_TYPE[feature_type],
+                                         &n_rectangle, &n_feature)
+    else:
+        # build the coordinate from the set provided
+        n_rectangle = N_RECTANGLE[feature_type]
+        n_feature = len(feature_coord)
+
+        coord = <Rectangle**> malloc(n_rectangle * sizeof(Rectangle*))
+        for idx_rect in range(n_rectangle):
+            coord[idx_rect] = <Rectangle*> malloc(n_feature *
+                                                  sizeof(Rectangle))
+            for idx_feature in range(n_feature):
+                set_rectangle_feature(
+                    &coord[idx_rect][idx_feature],
+                    feature_coord[idx_feature][idx_rect][0][0],
+                    feature_coord[idx_feature][idx_rect][0][1],
+                    feature_coord[idx_feature][idx_rect][1][0],
+                    feature_coord[idx_feature][idx_rect][1][1])
 
     rect_feature = _haar_like_feature(int_image[r : r + height,
                                                 c : c + width],

@@ -52,4 +52,5 @@ cdef integral_floating[:, ::1] _haar_like_feature(
 
 
 cpdef haar_like_feature_wrapper(integral_floating[:, ::1] int_image,
-                                r, c, width, height, feature_type)
+                                r, c, width, height, feature_type,
+                                feature_coord)

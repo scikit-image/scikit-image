@@ -88,7 +88,8 @@ def haar_like_feature_coord(width, height, feature_type=None):
 
     return np.hstack(feat_coord), np.hstack(feat_type)
 
-def haar_like_feature(int_image, r, c, width, height, feature_type=None):
+def haar_like_feature(int_image, r, c, width, height, feature_type=None,
+                      feature_coord=None):
     """Compute the Haar-like features for a region of interest (ROI) of an
     integral image.
 
@@ -124,6 +125,13 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None):
         - 'type-4': 4 rectangles varying along x and y axis.
 
         By default all features are extracted.
+
+    feature_coord : ndarray of list of tuples or None, optional
+        The array of coordinates to be extracted. This is useful when you want
+        to recompute only a subset of features. In this case ``feature_type``
+        needs to be an array containing the type of each feature, as returned
+        by :func:`haar_like_feature_coord`. By default, all coordinates are
+        computed.
 
     Returns
     -------
@@ -161,11 +169,25 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None):
            DOI: 10.1109/CVPR.2001.990517
 
     """
-    feature_type_ = _validate_feature_type(feature_type)
+    if feature_coord is None:
+        feature_type_ = _validate_feature_type(feature_type)
 
-    return np.hstack(list(chain.from_iterable(
-        haar_like_feature_wrapper(int_image, r, c, width, height, feat_t)
-        for feat_t in feature_type_)))
+        return np.hstack(list(chain.from_iterable(
+            haar_like_feature_wrapper(int_image, r, c, width, height, feat_t,
+                                      feature_coord)
+            for feat_t in feature_type_)))
+    else:
+        if feature_coord.shape[0] != feature_type.shape[0]:
+            raise ValueError("Inconsistent size between feature coordinates"
+                             "and feature types.")
+        # group the feature by type
+        group_feature_coord = {key: [] for key in np.unique(feature_type)}
+        for feat_c, feat_t in zip(feature_coord, feature_type):
+            group_feature_coord[feat_t].append(feat_c)
+        return np.hstack(list(chain.from_iterable(
+            haar_like_feature_wrapper(int_image, r, c, width, height, feat_t,
+                                      group_feature_coord[feat_t])
+            for feat_t in group_feature_coord.keys())))
 
 
 def draw_haar_like_feature(image, r, c, width, height, feature_type,

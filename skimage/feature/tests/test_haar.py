@@ -20,6 +20,11 @@ def test_haar_like_feature_error():
         haar_like_feature_coord(5, 5, feature_type=feature_type)
         draw_haar_like_feature(img, 0, 0, 5, 5, feature_type=feature_type)
 
+    feat_coord, feat_type = haar_like_feature_coord(5, 5, 'type-2-x')
+    with pytest.raises(ValueError):
+        haar_like_feature(img_ii, 0, 0, 5, 5, feature_type=feat_type[:3],
+                          feature_coord=feat_coord)
+
 
 @pytest.mark.parametrize("dtype", [np.uint8, np.int8,
                                    np.float32, np.float64])
@@ -65,6 +70,19 @@ def test_haar_like_feature_list():
                                   feature_type=feature_type)
     haar_all = haar_like_feature(img_ii, 0, 0, 5, 5)
     assert_array_equal(haar_list, haar_all)
+
+@pytest.mark.parametrize("feature_type", ['type-2-x', 'type-2-y',
+                                          'type-3-x', 'type-3-y',
+                                          'type-4'])
+def test_haar_like_feature_precomputed(feature_type):
+    img = np.ones((5, 5), dtype=np.int8)
+    img_ii = integral_image(img)
+    feat_coord, feat_type = haar_like_feature_coord(5, 5, feature_type)
+    haar_feature_precomputed = haar_like_feature(img_ii, 0, 0, 5, 5,
+                                                 feature_type=feat_type,
+                                                 feature_coord=feat_coord)
+    haar_feature = haar_like_feature(img_ii, 0, 0, 5, 5, feature_type)
+    assert_array_equal(haar_feature_precomputed, haar_feature)
 
 
 @pytest.mark.parametrize("feature_type,height,width,expected_coord",
