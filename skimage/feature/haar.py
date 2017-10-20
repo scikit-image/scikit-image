@@ -60,7 +60,8 @@ def haar_like_feature_coord(width, height, feature_type=None):
 
     Returns
     -------
-    feature_coord : (n_features, n_rectangles, 2, 2), ndarray of list of tuple coord
+    feature_coord : (n_features, n_rectangles, 2, 2), ndarray of list of \
+tuple coord
         Coordinates of the rectangles for each feature.
 
     feature_type : (n_features,), ndarray of str
@@ -87,6 +88,7 @@ def haar_like_feature_coord(width, height, feature_type=None):
         feat_type.append(feat_t_type)
 
     return np.hstack(feat_coord), np.hstack(feat_type)
+
 
 def haar_like_feature(int_image, r, c, width, height, feature_type=None,
                       feature_coord=None):
@@ -125,6 +127,9 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
         - 'type-4': 4 rectangles varying along x and y axis.
 
         By default all features are extracted.
+
+        If using with ``feature_coord``, it should corresponds to the feature
+        type of each associated coordinate feature.
 
     feature_coord : ndarray of list of tuples or None, optional
         The array of coordinates to be extracted. This is useful when you want

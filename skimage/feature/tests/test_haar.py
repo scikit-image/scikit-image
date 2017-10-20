@@ -71,6 +71,7 @@ def test_haar_like_feature_list():
     haar_all = haar_like_feature(img_ii, 0, 0, 5, 5)
     assert_array_equal(haar_list, haar_all)
 
+
 @pytest.mark.parametrize("feature_type", ['type-2-x', 'type-2-y',
                                           'type-3-x', 'type-3-y',
                                           'type-4'])
