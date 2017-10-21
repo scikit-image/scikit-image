@@ -3,14 +3,6 @@ import numpy as np
 from .. import draw
 from .._shared.utils import warn
 
-import collections
-
-Label = collections.namedtuple('Label', 'category, x1, x2, y1, y2')
-Point = collections.namedtuple('Point', 'row, column')
-ShapeProperties = collections.namedtuple('ShapeProperties',
-                                         'min_size, max_size, color')
-ImageShape = collections.namedtuple('ImageShape', 'nrows, ncols, depth')
-
 
 def _generate_rectangle_mask(point, image, shape, random):
     """Generate a mask for a filled rectangle shape.
@@ -19,12 +11,12 @@ def _generate_rectangle_mask(point, image, shape, random):
 
     Parameters
     ----------
-    point : Point
+    point : tuple
         The row and column of the top left corner of the rectangle.
-    image : ImageShape
-        The size of the image into which this shape will be fit.
-    shape : ShapeProperties
-        The minimum and maximum size and color of the shape to fit.
+    image : tuple
+        The height, width and depth of the image into which the shape is placed.
+    shape : tuple
+        The minimum and maximum size of the shape to fit.
     random : np.random.RandomState
         The random state to use for random sampling.
 
@@ -37,34 +29,33 @@ def _generate_rectangle_mask(point, image, shape, random):
 
     Returns
     -------
-    label : Label
+    label : tuple
         A tuple specifying the category of the shape, as well as its x1, x2, y1
         and y2 bounding box coordinates.
     indices : 2-D array
         A mask of indices that the shape fills.
     """
-    available_width = min(image.ncols - point.column, shape.max_size)
-    if available_width < shape.min_size:
+    available_width = min(image[1] - point[1], shape[1])
+    if available_width < shape[0]:
         raise ArithmeticError('cannot fit shape to image')
-    available_height = min(image.nrows - point.row, shape.max_size)
-    if available_height < shape.min_size:
+    available_height = min(image[0] - point[0], shape[1])
+    if available_height < shape[0]:
         raise ArithmeticError('cannot fit shape to image')
     # Pick random widths and heights.
-    r = random.randint(shape.min_size, available_height + 1)
-    c = random.randint(shape.min_size, available_width + 1)
+    r = random.randint(shape[0], available_height + 1)
+    c = random.randint(shape[0], available_width + 1)
     rectangle = draw.polygon([
-        point.row,
-        point.row + r,
-        point.row + r,
-        point.row,
+        point[0],
+        point[0] + r,
+        point[0] + r,
+        point[0],
     ], [
-        point.column,
-        point.column,
-        point.column + c,
-        point.column + c,
+        point[1],
+        point[1],
+        point[1] + c,
+        point[1] + c,
     ])
-    label = Label('rectangle', point.column, point.column + c, point.row,
-                  point.row + r)
+    label = ('rectangle', point[1], point[1] + c, point[0], point[0] + r)
 
     return rectangle, label
 
@@ -76,11 +67,11 @@ def _generate_circle_mask(point, image, shape, random):
 
     Parameters
     ----------
-    point : Point
+    point : tuple
         The row and column of the top left corner of the rectangle.
-    image : ImageShape
-        The size of the image into which this shape will be fit.
-    shape : ShapeProperties
+    image : tuple
+        The height, width and depth of the image into which the shape is placed.
+    shape : tuple
         The minimum and maximum size and color of the shape to fit.
     random : np.random.RandomState
         The random state to use for random sampling.
@@ -94,27 +85,27 @@ def _generate_circle_mask(point, image, shape, random):
 
     Returns
     -------
-    label : Label
+    label : tuple
         A tuple specifying the category of the shape, as well as its x1, x2, y1
         and y2 bounding box coordinates.
     indices : 2-D array
         A mask of indices that the shape fills.
     """
-    if shape.min_size == 1 or shape.max_size == 1:
+    if shape[0] == 1 or shape[1] == 1:
         raise ValueError('size must be > 1 for circles')
-    min_radius = shape.min_size / 2.0
-    max_radius = shape.max_size / 2.0
-    left = point.column
-    right = image.ncols - point.column
-    top = point.row
-    bottom = image.nrows - point.row
+    min_radius = shape[0] / 2.0
+    max_radius = shape[1] / 2.0
+    left = point[1]
+    right = image[1] - point[1]
+    top = point[0]
+    bottom = image[0] - point[0]
     available_radius = min(left, right, top, bottom, max_radius)
     if available_radius < min_radius:
         raise ArithmeticError('cannot fit shape to image')
     radius = random.randint(min_radius, available_radius + 1)
-    circle = draw.circle(point.row, point.column, radius)
-    label = Label('circle', point.column - radius + 1, point.column + radius,
-                  point.row - radius + 1, point.row + radius)
+    circle = draw.circle(point[0], point[1], radius)
+    label = ('circle', point[1] - radius + 1, point[1] + radius,
+             point[0] - radius + 1, point[0] + radius)
 
     return circle, label
 
@@ -126,11 +117,11 @@ def _generate_triangle_mask(point, image, shape, random):
 
     Parameters
     ----------
-    point : Point
+    point : tuple
         The row and column of the top left corner of the rectangle.
-    image : ImageShape
-        The size of the image into which this shape will be fit.
-    shape : ShapeProperties
+    image : tuple
+        The height, width and depth of the image into which the shape is placed.
+    shape : tuple
         The minimum and maximum size and color of the shape to fit.
     random : np.random.RandomState
         The random state to use for random sampling.
@@ -144,31 +135,30 @@ def _generate_triangle_mask(point, image, shape, random):
 
     Returns
     -------
-    label : Label
+    label : tuple
         A tuple specifying the category of the shape, as well as its x1, x2, y1
         and y2 bounding box coordinates.
     indices : 2-D array
         A mask of indices that the shape fills.
     """
-    if shape.min_size == 1 or shape.max_size == 1:
+    if shape[0] == 1 or shape[1] == 1:
         raise ValueError('dimension must be > 1 for circles')
-    available_side = min(image.ncols - point.column, point.row + 1,
-                         shape.max_size)
-    if available_side < shape.min_size:
+    available_side = min(image[1] - point[1], point[0] + 1, shape[1])
+    if available_side < shape[0]:
         raise ArithmeticError('cannot fit shape to image')
-    side = random.randint(shape.min_size, available_side + 1)
+    side = random.randint(shape[0], available_side + 1)
     triangle_height = int(np.ceil(np.sqrt(3 / 4.0) * side))
     triangle = draw.polygon([
-        point.row,
-        point.row - triangle_height,
-        point.row,
+        point[0],
+        point[0] - triangle_height,
+        point[0],
     ], [
-        point.column,
-        point.column + side // 2,
-        point.column + side,
+        point[1],
+        point[1] + side // 2,
+        point[1] + side,
     ])
-    label = Label('triangle', point.column, point.column + side,
-                  point.row - triangle_height, point.row)
+    label = ('triangle', point[1], point[1] + side, point[0] - triangle_height,
+             point[0])
 
     return triangle, label
 
@@ -238,7 +228,7 @@ def generate_shapes(image_shape,
 
     Parameters
     ----------
-    image_shape : (int, int)
+    image_shape : tuple
         The number of rows and columns of the image to generate.
     max_shapes : int
         The maximum number of shapes to (attempt to) fit into the shape.
@@ -268,7 +258,7 @@ def generate_shapes(image_shape,
     image : uint8 array
         An image with the fitted shapes.
     labels : list
-        A list of Label namedtuples, one per shape in the image.
+        A list of labels, one per shape in the image.
 
     Examples
     --------
@@ -284,8 +274,8 @@ def generate_shapes(image_shape,
         [255, 255, 255],
         [255, 255, 255]]], dtype=uint8)
     >>> labels # doctest: +SKIP
-    [Label(category='circle', x1=22, x2=25, y1=18, y2=21),
-     Label(category='triangle', x1=5, x2=13, y1=6, y2=13)]
+    [('circle', 22, 25, 18, 21),
+     ('triangle', 5, 13, 6, 13)]
     """
     if min_size > image_shape[0] or min_size > image_shape[1]:
         raise ValueError('Minimum dimension must be less than ncols and nrows')
@@ -293,8 +283,7 @@ def generate_shapes(image_shape,
 
     random = np.random.RandomState(random_seed)
     user_shape = shape
-    image_shape = ImageShape(
-        nrows=image_shape[0], ncols=image_shape[1], depth=1 if gray else 3)
+    image_shape = (image_shape[0], image_shape[1], 1 if gray else 3)
     image = np.ones(image_shape, dtype=np.uint8) * 255
     filled = np.zeros(image_shape, dtype=bool)
     labels = []
@@ -304,12 +293,12 @@ def generate_shapes(image_shape,
             shape_generator = random.choice(SHAPE_CHOICES)
         else:
             shape_generator = SHAPE_GENERATORS[user_shape]
-        shape = ShapeProperties(min_size, max_size, color)
+        shape = (min_size, max_size)
         for _ in range(num_trials):
             # Pick start coordinates.
-            column = random.randint(image_shape.ncols)
-            row = random.randint(image_shape.nrows)
-            point = Point(row, column)
+            column = random.randint(image_shape[1])
+            row = random.randint(image_shape[0])
+            point = (row, column)
             try:
                 indices, label = shape_generator(point, image_shape, shape,
                                                  random)
@@ -318,7 +307,7 @@ def generate_shapes(image_shape,
                 continue
             # Check if there is an overlap where the mask is nonzero.
             if allow_overlap or not filled[indices].any():
-                image[indices] = shape.color
+                image[indices] = color
                 filled[indices] = True
                 labels.append(label)
                 break

@@ -23,13 +23,13 @@ def test_generates_correct_bounding_boxes_for_rectangles():
         random_seed=42)
     assert len(labels) == 1
     label = labels[0]
-    crop = image[label.y1:label.y2, label.x1:label.x2]
+    crop = image[label[3]:label[4], label[1]:label[2]]
 
     # The crop is filled.
     assert (crop < 255).all()
 
     # The crop is complete.
-    image[label.y1:label.y2, label.x1:label.x2] = 255
+    image[label[3]:label[4], label[1]:label[2]] = 255
     assert (image == 255).all()
 
 
@@ -42,13 +42,13 @@ def test_generates_correct_bounding_boxes_for_triangles():
         random_seed=42)
     # assert len(labels) == 1
     label = labels[0]
-    crop = image[label.y1:label.y2, label.x1:label.x2]
+    crop = image[label[3]:label[4], label[1]:label[2]]
 
     # The crop is filled.
     assert (crop < 255).any()
 
     # The crop is complete.
-    image[label.y1:label.y2, label.x1:label.x2] = 255
+    image[label[3]:label[4], label[1]:label[2]] = 255
     assert (image == 255).all()
 
 
@@ -63,13 +63,13 @@ def test_generates_correct_bounding_boxes_for_circles():
         random_seed=42)
     assert len(labels) == 1
     label = labels[0]
-    crop = image[label.y1:label.y2, label.x1:label.x2]
+    crop = image[label[3]:label[4], label[1]:label[2]]
 
     # The crop is filled.
     assert (crop < 255).any()
 
     # The crop is complete.
-    image[label.y1:label.y2, label.x1:label.x2] = 255
+    image[label[3]:label[4], label[1]:label[2]] = 255
     assert (image == 255).all()
 
 
@@ -95,7 +95,7 @@ def test_can_generate_one_by_one_rectangle():
         min_pixel_intensity=1)
     assert len(labels) == 1
     label = labels[0]
-    crop = image[label.y1:label.y2, label.x1:label.x2]
+    crop = image[label[3]:label[4], label[1]:label[2]]
     assert (crop < 255).sum() == 3  # rgb
 
 
