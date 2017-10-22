@@ -22,34 +22,31 @@ image, labels = result
 print(image.shape, labels)
 
 # We can visualize the images.
-plt.imshow(image.squeeze(), cmap='gray')
-plt.axis('off')
-plt.show()
+fig, axis = plt.subplots()
+axis.imshow(image.squeeze(), cmap='gray')
+axis.set_axis_off()
 
 # The generated images can be much more complex. For example, let's try many
 # shapes of any color. If we want the colors to be particularly light, we can
 # set the min_pixel_intensity to a high value from the range [0,255].
-image, _ = random_shapes((128, 128), max_shapes=10, min_pixel_intensity=100)
+image1, _ = random_shapes((128, 128), max_shapes=10, min_pixel_intensity=100)
 
 # Moar :)
 image2, _ = random_shapes((128, 128), max_shapes=10, min_pixel_intensity=200)
 image3, _ = random_shapes((128, 128), max_shapes=10, min_pixel_intensity=50)
 image4, _ = random_shapes((128, 128), max_shapes=10, min_pixel_intensity=0)
 
-figure = plt.figure(figsize=(10, 10))
-
-for n, i in enumerate([image, image2, image3, image4]):
-    axis = plt.subplot(2, 2, n + 1)
-    axis.tick_params(bottom='off', top='off', left='off', right='off')
-    axis.set_xticklabels([])
-    axis.set_yticklabels([])
-    plt.imshow(i)
-plt.show()
+fig, axes = plt.subplots(2, 2, figsize=(10, 10))
+for ax, image in zip(axes.ravel(), [image1, image2, image3, image4]):
+    ax.imshow(image)
+    ax.set_axis_off()
 
 # These shapes are well suited to test segmentation algorithms. Often, we want
 # shapes to overlap to test the algorithm. This is also possible:
 image, _ = random_shapes(
     (128, 128), min_shapes=5, max_shapes=10, min_size=20, allow_overlap=True)
-plt.imshow(image)
-plt.axis('off')
+fig, axis = plt.subplots()
+axis.imshow(image)
+axis.set_axis_off()
+
 plt.show()
