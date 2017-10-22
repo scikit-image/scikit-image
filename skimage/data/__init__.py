@@ -17,7 +17,6 @@ from ..io import imread, use_plugin
 from .._shared._warnings import expected_warnings
 from ._binary_blobs import binary_blobs
 from .. import img_as_bool
-from .generate_shapes import generate_shapes
 
 __all__ = ['load',
            'astronaut',
@@ -27,7 +26,6 @@ __all__ = ['load',
            'clock',
            'coffee',
            'coins',
-           'generate_shapes',
            'horse',
            'hubble_deep_field',
            'immunohistochemistry',

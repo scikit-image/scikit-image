@@ -1,6 +1,6 @@
 import numpy as np
 
-from .. import draw
+from . import polygon as draw_polygon, circle as draw_circle
 from .._shared.utils import warn
 
 
@@ -44,7 +44,7 @@ def _generate_rectangle_mask(point, image, shape, random):
     # Pick random widths and heights.
     r = random.randint(shape[0], available_height + 1)
     c = random.randint(shape[0], available_width + 1)
-    rectangle = draw.polygon([
+    rectangle = draw_polygon([
         point[0],
         point[0] + r,
         point[0] + r,
@@ -103,7 +103,7 @@ def _generate_circle_mask(point, image, shape, random):
     if available_radius < min_radius:
         raise ArithmeticError('cannot fit shape to image')
     radius = random.randint(min_radius, available_radius + 1)
-    circle = draw.circle(point[0], point[1], radius)
+    circle = draw_circle(point[0], point[1], radius)
     label = ('circle', point[1] - radius + 1, point[1] + radius,
              point[0] - radius + 1, point[0] + radius)
 
@@ -148,7 +148,7 @@ def _generate_triangle_mask(point, image, shape, random):
         raise ArithmeticError('cannot fit shape to image')
     side = random.randint(shape[0], available_side + 1)
     triangle_height = int(np.ceil(np.sqrt(3 / 4.0) * side))
-    triangle = draw.polygon([
+    triangle = draw_polygon([
         point[0],
         point[0] - triangle_height,
         point[0],
@@ -203,7 +203,7 @@ def _generate_random_color(gray, min_pixel_intensity, random):
     return random.randint(min_pixel_intensity, 256, size=3)
 
 
-def generate_shapes(image_shape,
+def random_shapes(image_shape,
                     max_shapes,
                     min_shapes=1,
                     min_size=2,
@@ -262,8 +262,8 @@ def generate_shapes(image_shape,
 
     Examples
     --------
-    >>> import skimage.data
-    >>> image, labels = skimage.data.generate_shapes((32, 32), max_shapes=3)
+    >>> import skimage.draw
+    >>> image, labels = skimage.draw.random_shapes((32, 32), max_shapes=3)
     >>> image # doctest: +SKIP
     array([
        [[255, 255, 255],

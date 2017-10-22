@@ -8,11 +8,11 @@ Example of generating random shapes with particular properties.
 
 import matplotlib.pyplot as plt
 
-from skimage.data import generate_shapes
+from skimage.draw import random_shapes
 
 # Let's start simple and generate a 128x128 image
 # with a single grayscale rectangle.
-result = generate_shapes(
+result = random_shapes(
     (128, 128), max_shapes=1, shape='rectangle', gray=True)
 
 # We get back a tuple consisting of (1) the image with the generated shapes
@@ -29,12 +29,12 @@ plt.show()
 # The generated images can be much more complex. For example, let's try many
 # shapes of any color. If we want the colors to be particularly light, we can
 # set the min_pixel_intensity to a high value from the range [0,255].
-image, _ = generate_shapes((128, 128), max_shapes=10, min_pixel_intensity=100)
+image, _ = random_shapes((128, 128), max_shapes=10, min_pixel_intensity=100)
 
 # Moar :)
-image2, _ = generate_shapes((128, 128), max_shapes=10, min_pixel_intensity=200)
-image3, _ = generate_shapes((128, 128), max_shapes=10, min_pixel_intensity=50)
-image4, _ = generate_shapes((128, 128), max_shapes=10, min_pixel_intensity=0)
+image2, _ = random_shapes((128, 128), max_shapes=10, min_pixel_intensity=200)
+image3, _ = random_shapes((128, 128), max_shapes=10, min_pixel_intensity=50)
+image4, _ = random_shapes((128, 128), max_shapes=10, min_pixel_intensity=0)
 
 figure = plt.figure(figsize=(10, 10))
 
@@ -48,7 +48,7 @@ plt.show()
 
 # These shapes are well suited to test segmentation algorithms. Often, we want
 # shapes to overlap to test the algorithm. This is also possible:
-image, _ = generate_shapes(
+image, _ = random_shapes(
     (128, 128), min_shapes=5, max_shapes=10, min_size=20, allow_overlap=True)
 plt.imshow(image)
 plt.axis('off')
