@@ -88,7 +88,7 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
         gridcoords = np.reshape(np.mgrid[tuple(map(slice, image.shape))],
                                 (ndim, -1))
         # A point is in the hull if it satisfies all of the hull's inequalities
-        coords_in_hull = np.all(hull.equations[:, :ndim] @ gridcoords +
+        coords_in_hull = np.all(hull.equations[:, :ndim].dot(gridcoords) +
                                 hull.equations[:, ndim:] < tolerance, axis=0)
         mask = np.reshape(coords_in_hull, image.shape)
 
