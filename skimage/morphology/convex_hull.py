@@ -12,8 +12,7 @@ __all__ = ['convex_hull_image', 'convex_hull_object']
 
 def _offsets_diamond(ndim):
     offsets = np.zeros((2 * ndim, ndim))
-    for vertex, (axis, offset) in \
-                        enumerate(product(range(ndim), (-0.5, 0.5))):
+    for vertex, (axis, offset) in enumerate(product(range(ndim), (-0.5, 0.5))):
         offsets[vertex, axis] = offset
     return offsets
 
