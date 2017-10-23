@@ -318,8 +318,8 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     -------
     A : (n, image.ndim + 1) ndarray
         A 2d array with each row representing 3 values for a 2D image,
-        and 4 values for a 3D image: ``(r, c, sigma)`` or ``(f, r, c, sigma)``
-        where ``(r, c)`` or ``(f, r, c)`` are coordinates of the blob and
+        and 4 values for a 3D image: ``(r, c, sigma)`` or ``(p, r, c, sigma)``
+        where ``(r, c)`` or ``(p, r, c)`` are coordinates of the blob and
         ``sigma`` is the standard deviation of the Gaussian kernel which
         detected the blob.
 
