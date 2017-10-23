@@ -47,7 +47,7 @@ def haar_like_feature_coord(width, height, feature_type=None):
     height : int
         Height of the detection window.
 
-    feature_type : str or or None, optional
+    feature_type : str or list of str or None, optional
         The type of feature to consider:
 
         - 'type-2-x': 2 rectangles varying along the x axis;
@@ -73,7 +73,7 @@ tuple coord
     >>> from skimage.transform import integral_image
     >>> from skimage.feature import haar_like_feature_coord
     >>> feat_coord, feat_type = haar_like_feature_coord(2, 2, 'type-4')
-    >>> feat_coord # doctest: +NORMALIZE_WHITESPACE
+    >>> feat_coord # doctest: +SKIP
     array([ list([[(0, 0), (0, 0)], [(0, 1), (0, 1)],
                   [(1, 1), (1, 1)], [(1, 0), (1, 0)]])], dtype=object)
     >>> feat_type

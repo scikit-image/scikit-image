@@ -142,20 +142,14 @@ cpdef haar_like_feature_coord_wrapper(width, height, feature_type):
         - 'type-3-y': 3 rectangles varying along the y axis;
         - 'type-4': 4 rectangles varying along x and y axis.
 
-
     Returns
     -------
-    feature_coord : list of tuple coord, shape (n_features, n_rectangles, 2, 2)
+    feature_coord : (n_features, n_rectangles, 2, 2), ndarray of list of \
+tuple coord
         Coordinates of the rectangles for each feature.
 
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from skimage.transform import integral_image
-    >>> from skimage.feature import haar_like_feature_coord
-    >>> coord = haar_like_feature_coord('type-4', 2, 2)
-    >>> coord
-    [[[(0, 0), (0, 0)], [(0, 1), (0, 1)], [(1, 1), (1, 1)], [(1, 0), (1, 0)]]]
+    feature_type : (n_features,), ndarray of str
+        The corresponding type for each feature.
 
     """
     cdef:
@@ -251,18 +245,20 @@ cpdef haar_like_feature_wrapper(integral_floating[:, ::1] int_image,
     haar_features : (n_features,) ndarray
         Resulting Haar-like features.
 
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from skimage.transform import integral_image
-    >>> from skimage.feature import haar_like_feature
-    >>> img = np.ones((5, 5), dtype=np.uint8)
-    >>> img_ii = integral_image(img)
-    >>> feature = haar_like_feature(img_ii, 0, 0, 5, 5, 'type-4')
-    >>> feature
-    array([-1, -2, -2, -4, -1, -2, -2, -4, -1, -2, -1, -2, -1, -2, -2, -4, -1,
-           -2, -2, -4, -1, -2, -1, -2, -1, -2, -1, -2, -1, -1, -1, -2, -1, -2,
-           -1, -1])
+        If using with ``feature_coord``, it should corresponds to the feature
+        type of each associated coordinate feature.
+
+    feature_coord : ndarray of list of tuples or None, optional
+        The array of coordinates to be extracted. This is useful when you want
+        to recompute only a subset of features. In this case ``feature_type``
+        needs to be an array containing the type of each feature, as returned
+        by :func:`haar_like_feature_coord`. By default, all coordinates are
+        computed.
+
+    Returns
+    -------
+    haar_features : (n_features,) ndarray
+        Resulting Haar-like features.
 
     References
     ----------
