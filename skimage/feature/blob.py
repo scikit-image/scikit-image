@@ -263,12 +263,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     dog_images = [(gaussian_images[i] - gaussian_images[i + 1])
                   * sigma_list[i] for i in range(k)]
 
-    # Replace by image_cube = np.stack(hessian_images, axis=-1)
-    # When we upgrade minimal requirements to NumPy 1.10
-    sl = (slice(None),) * image.ndim + (np.newaxis,)
-    arrays = [np.asanyarray(arr) for arr in dog_images]
-    extended_arrays = [arr[sl] for arr in arrays]
-    image_cube = np.concatenate(extended_arrays, axis=-1)
+    image_cube = np.stack(dog_images, axis=-1)
 
     # local_maxima = get_local_maxima(image_cube, threshold)
     local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
@@ -373,12 +368,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     # s**2 provides scale invariance
     gl_images = [-gaussian_laplace(image, s) * s ** 2 for s in sigma_list]
 
-    # Replace by image_cube = np.stack(hessian_images, axis=-1)
-    # When we upgrade minimal requirements to NumPy 1.10
-    sl = (slice(None),) * image.ndim + (np.newaxis,)
-    arrays = [np.asanyarray(arr) for arr in gl_images]
-    extended_arrays = [arr[sl] for arr in arrays]
-    image_cube = np.concatenate(extended_arrays, axis=-1)
+    image_cube = np.stack(gl_images, axis=-1)
 
     local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
                                   footprint=np.ones((3,) * (image.ndim + 1)),
