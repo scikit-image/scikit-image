@@ -91,12 +91,12 @@ def _blob_overlap(blob1, blob2):
     ----------
     blob1 : sequence of arrays
         A sequence of ``(row, col, sigma)`` or ``(pln, row, col, sigma)``,
-        where ``row, col`` (or ``(pln, row, col, sigma)``) are coordinates
+        where ``row, col`` (or ``(pln, row, col)``) are coordinates
         of blob and ``sigma`` is the standard deviation of the Gaussian kernel
         which detected the blob.
     blob2 : sequence of arrays
         A sequence of ``(row, col, sigma)`` or ``(pln, row, col, sigma)``,
-        where ``row, col`` (or ``(pln, row, col, sigma)``) are coordinates
+        where ``row, col`` (or ``(pln, row, col)``) are coordinates
         of blob and ``sigma`` is the standard deviation of the Gaussian kernel
         which detected the blob.
 
