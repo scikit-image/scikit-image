@@ -156,7 +156,15 @@ def test_hough_line_peaks_num():
     assert len(tf.hough_line_peaks(hspace, angles, dists, min_distance=0,
                                    min_angle=0, num_peaks=1)[0]) == 1
 
-
+def test_hough_line_peaks_zero_input():
+    # Test to make sure empty input doesn't cause a failure
+    img = np.zeros((100,100), dtype='uint8')
+    theta = np.linspace(0, np.pi, 100)
+    hspace, angles, dists = tf.hough_line(img, theta)
+    h, a, d = tf.hough_line_peaks(hspace, angles, dists)
+    assert_equal(a, np.array([]))
+    
+    
 @test_parallel()
 def test_hough_circle():
     # Prepare picture
