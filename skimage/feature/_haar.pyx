@@ -129,10 +129,8 @@ cpdef haar_like_feature_coord_wrapper(width, height, feature_type):
     ----------
     width : int
         Width of the detection window.
-
     height : int
         Height of the detection window.
-
     feature_type : str
         The type of feature to consider:
 
@@ -147,7 +145,6 @@ cpdef haar_like_feature_coord_wrapper(width, height, feature_type):
     feature_coord : (n_features, n_rectangles, 2, 2), ndarray of list of \
 tuple coord
         Coordinates of the rectangles for each feature.
-
     feature_type : (n_features,), ndarray of str
         The corresponding type for each feature.
 
@@ -218,19 +215,14 @@ cpdef haar_like_feature_wrapper(integral_floating[:, ::1] int_image,
     ----------
     int_image : (M, N) ndarray
         Integral image for which the features need to be computed.
-
     r : int
         Row-coordinate of top left corner of the detection window.
-
     c : int
         Column-coordinate of top left corner of the detection window.
-
     width : int
         Width of the detection window.
-
     height : int
         Height of the detection window.
-
     feature_type : str
         The type of feature to consider:
 
@@ -247,7 +239,6 @@ cpdef haar_like_feature_wrapper(integral_floating[:, ::1] int_image,
 
         If using with ``feature_coord``, it should corresponds to the feature
         type of each associated coordinate feature.
-
     feature_coord : ndarray of list of tuples or None, optional
         The array of coordinates to be extracted. This is useful when you want
         to recompute only a subset of features. In this case ``feature_type``
@@ -263,14 +254,12 @@ cpdef haar_like_feature_wrapper(integral_floating[:, ::1] int_image,
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Haar-like_feature
-
     .. [2] Oren, M., Papageorgiou, C., Sinha, P., Osuna, E., & Poggio, T.
            (1997, June). Pedestrian detection using wavelet templates.
            In Computer Vision and Pattern Recognition, 1997. Proceedings.,
            1997 IEEE Computer Society Conference on (pp. 193-199). IEEE.
            http://tinyurl.com/y6ulxfta
            DOI: 10.1109/CVPR.1997.609319
-
     .. [3] Viola, Paul, and Michael J. Jones. "Robust real-time face
            detection." International journal of computer vision 57.2
            (2004): 137-154.

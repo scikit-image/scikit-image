@@ -43,10 +43,8 @@ def haar_like_feature_coord(width, height, feature_type=None):
     ----------
     width : int
         Width of the detection window.
-
     height : int
         Height of the detection window.
-
     feature_type : str or list of str or None, optional
         The type of feature to consider:
 
@@ -63,7 +61,6 @@ def haar_like_feature_coord(width, height, feature_type=None):
     feature_coord : (n_features, n_rectangles, 2, 2), ndarray of list of \
 tuple coord
         Coordinates of the rectangles for each feature.
-
     feature_type : (n_features,), ndarray of str
         The corresponding type for each feature.
 
@@ -107,19 +104,14 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
     ----------
     int_image : (M, N) ndarray
         Integral image for which the features need to be computed.
-
     r : int
         Row-coordinate of top left corner of the detection window.
-
     c : int
         Column-coordinate of top left corner of the detection window.
-
     width : int
         Width of the detection window.
-
     height : int
         Height of the detection window.
-
     feature_type : str or list of str or None, optional
         The type of feature to consider:
 
@@ -133,7 +125,6 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
 
         If using with ``feature_coord``, it should corresponds to the feature
         type of each associated coordinate feature.
-
     feature_coord : ndarray of list of tuples or None, optional
         The array of coordinates to be extracted. This is useful when you want
         to recompute only a subset of features. In this case ``feature_type``
@@ -180,14 +171,12 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Haar-like_feature
-
     .. [2] Oren, M., Papageorgiou, C., Sinha, P., Osuna, E., & Poggio, T.
            (1997, June). Pedestrian detection using wavelet templates.
            In Computer Vision and Pattern Recognition, 1997. Proceedings.,
            1997 IEEE Computer Society Conference on (pp. 193-199). IEEE.
            http://tinyurl.com/y6ulxfta
            DOI: 10.1109/CVPR.1997.609319
-
     .. [3] Viola, Paul, and Michael J. Jones. "Robust real-time face
            detection." International journal of computer vision 57.2
            (2004): 137-154.
@@ -233,19 +222,14 @@ def draw_haar_like_feature(image, r, c, width, height, feature_type,
     image : (M, N) ndarray
         The region of an integral image for which the features need to be
         computed.
-
     r : int
         Row-coordinate of top left corner of the detection window.
-
     c : int
         Column-coordinate of top left corner of the detection window.
-
     height : int
         Height of the detection window.
-
     width : int
         Width of the detection window.
-
     feature_type : str
         The type of feature to consider:
 
@@ -258,19 +242,15 @@ def draw_haar_like_feature(image, r, c, width, height, feature_type,
     color_positive_rectangle : tuple of 3 floats
         Floats specifying the color for the positive block. Corresponding
         values define (R, G, B) values. Default value is red (1, 0, 0).
-
     color_negative_block : tuple of 3 floats
         Floats specifying the color for the negative block Corresponding values
         define (R, G, B) values. Default value is blue (0, 1, 0).
-
     alpha : float
         Value in the range [0, 1] that specifies opacity of visualization. 1 -
         fully transparent, 0 - opaque.
-
     max_n_features : int, default=None
         The maximum number of features to be returned.
         By default, all features are returned.
-
     random_state : int, RandomState instance or None, optional
         If int, random_state is the seed used by the random number generator;
         If RandomState instance, random_state is the random number generator;
