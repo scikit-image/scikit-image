@@ -182,11 +182,12 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
 
     return H_elems
 
-def hessian_matrix_det(image, sigma=1):
+
+def hessian_matrix_det(image, sigma=1, approximate=True):
     """Computes the approximate Hessian Determinant over an image.
 
-    This method uses box filters over integral images to compute the
-    approximate Hessian Determinant as described in [1]_.
+    The 2D approximate method uses box filters over integral images to
+    compute the approximate Hessian Determinant, as described in [1]_.
 
     Parameters
     ----------
@@ -195,6 +196,9 @@ def hessian_matrix_det(image, sigma=1):
     sigma : float, optional
         Standard deviation used for the Gaussian kernel, used for the Hessian
         matrix.
+    approximate : bool, optional
+        If ``True`` and the image is 2D, use a much faster approximate
+        computation. This argument has no effect on 3D and higher images.
 
     Returns
     -------
@@ -209,16 +213,24 @@ def hessian_matrix_det(image, sigma=1):
 
     Notes
     -----
-    The running time of this method only depends on size of the image. It is
-    independent of `sigma` as one would expect. The downside is that the
-    result for `sigma` less than `3` is not accurate, i.e., not similar to
-    the result obtained if someone computed the Hessian and took it's
-    determinant.
+    For 2D images when ``approximate=True``, the running time of this method
+    only depends on size of the image. It is independent of `sigma` as one
+    would expect. The downside is that the result for `sigma` less than `3`
+    is not accurate, i.e., not similar to the result obtained if someone
+    computed the Hessian and took its determinant.
     """
-
     image = img_as_float(image)
-    image = integral_image(image)
-    return np.array(_hessian_matrix_det(image, sigma))
+    if image.ndim == 2 and approximate:
+        image = integral_image(image)
+        return np.array(_hessian_matrix_det(image, sigma))
+    else:  # slower brute-force implementation for nD images
+        hessian_mat_array = np.zeros(image.shape + (image.ndim, image.ndim))
+        hessian_list = hessian_matrix(image)
+        for idx, (row, col) in \
+                enumerate(combinations_with_replacement(range(image.ndim), 2)):
+            hessian_mat_array[..., row, col] = hessian_list[idx]
+            hessian_mat_array[..., col, row] = hessian_list[idx]
+        return np.linalg.det(hessian_mat_array)
 
 
 def _image_orthogonal_matrix22_eigvals(M00, M01, M11):
