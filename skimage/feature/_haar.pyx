@@ -171,7 +171,7 @@ cpdef haar_like_feature_coord_wrapper(width, height, feature_type):
                                     &n_rectangle, &n_feature)
 
     # allocate the output based on the number of rectangle
-    output = []
+    output = np.empty((n_feature,), dtype=object)
     for j in range(n_feature):
         coord_feature = []
         for i in range(n_rectangle):
@@ -179,10 +179,9 @@ cpdef haar_like_feature_coord_wrapper(width, height, feature_type):
                                    rect[i][j].top_left.col),
                                   (rect[i][j].bottom_right.row,
                                    rect[i][j].bottom_right.col)])
-        output.append(coord_feature)
+        output[j] = coord_feature
 
-    return (np.array(output, dtype=object),
-            np.array([feature_type] * n_feature, dtype=object))
+    return output, np.array([feature_type] * n_feature, dtype=object)
 
 
 cdef integral_floating[:, ::1] _haar_like_feature(

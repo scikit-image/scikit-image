@@ -1,3 +1,6 @@
+from random import shuffle
+from itertools import chain
+
 import pytest
 
 import numpy as np
@@ -74,11 +77,22 @@ def test_haar_like_feature_list():
 
 @pytest.mark.parametrize("feature_type", ['type-2-x', 'type-2-y',
                                           'type-3-x', 'type-3-y',
-                                          'type-4'])
+                                          'type-4',
+                                          ['type-2-y', 'type-3-x',
+                                           'type-4']])
 def test_haar_like_feature_precomputed(feature_type):
     img = np.ones((5, 5), dtype=np.int8)
     img_ii = integral_image(img)
-    feat_coord, feat_type = haar_like_feature_coord(5, 5, feature_type)
+    if isinstance(feature_type, list):
+        # shuffle the index of the feature to be sure that we are output
+        # the features in the same order
+        shuffle(feature_type)
+        feat_coord, feat_type = zip(*[haar_like_feature_coord(5, 5, feat_t)
+                                      for feat_t in feature_type])
+        feat_coord = np.concatenate(feat_coord)
+        feat_type = np.concatenate(feat_type)
+    else:
+        feat_coord, feat_type = haar_like_feature_coord(5, 5, feature_type)
     haar_feature_precomputed = haar_like_feature(img_ii, 0, 0, 5, 5,
                                                  feature_type=feat_type,
                                                  feature_coord=feat_coord)
@@ -121,6 +135,8 @@ def test_haar_like_feature_precomputed(feature_type):
 def test_haar_like_feature_coord(feature_type, height, width, expected_coord):
     feat_coord, feat_type = haar_like_feature_coord(width, height,
                                                     feature_type)
+    # convert the output to a full numpy array just for comparison
+    feat_coord = np.array([hf for hf in feat_coord])
     assert_array_equal(feat_coord, expected_coord)
     assert np.all(feat_type == feature_type)
 

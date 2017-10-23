@@ -47,7 +47,7 @@ def haar_like_feature_coord(width, height, feature_type=None):
     height : int
         Height of the detection window.
 
-    feature_type : str or list of str or None, optional
+    feature_type : str or or None, optional
         The type of feature to consider:
 
         - 'type-2-x': 2 rectangles varying along the x axis;
@@ -72,9 +72,12 @@ tuple coord
     >>> import numpy as np
     >>> from skimage.transform import integral_image
     >>> from skimage.feature import haar_like_feature_coord
-    >>> coord = haar_like_feature_coord('type-4', 2, 2)
-    >>> coord # doctest: +NORMALIZE_WHITESPACE
-    [[[(0, 0), (0, 0)], [(0, 1), (0, 1)], [(1, 1), (1, 1)], [(1, 0), (1, 0)]]]
+    >>> feat_coord, feat_type = haar_like_feature_coord(2, 2, 'type-4')
+    >>> feat_coord # doctest: +NORMALIZE_WHITESPACE
+    array([ list([[(0, 0), (0, 0)], [(0, 1), (0, 1)],
+                  [(1, 1), (1, 1)], [(1, 0), (1, 0)]])], dtype=object)
+    >>> feat_type
+    array(['type-4'], dtype=object)
 
     """
     feature_type_ = _validate_feature_type(feature_type)
@@ -87,7 +90,7 @@ tuple coord
         feat_coord.append(feat_t_coord)
         feat_type.append(feat_t_type)
 
-    return np.hstack(feat_coord), np.hstack(feat_type)
+    return np.concatenate(feat_coord), np.hstack(feat_type)
 
 
 def haar_like_feature(int_image, r, c, width, height, feature_type=None,
@@ -156,6 +159,24 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
            -2, -3, -4, -1, -2, -3, -4, -1, -2, -3, -1, -2, -3, -1, -2, -3, -1,
            -2, -1, -2, -1, -2, -1, -1, -1])
 
+    You can compute the feature for some pre-computed coordinates.
+
+    >>> from skimage.feature import haar_like_feature_coord
+    >>> feature_coord, feature_type = zip(
+    ...     *[haar_like_feature_coord(5, 5, feat_t)
+    ...       for feat_t in ('type-2-x', 'type-3-x')])
+    >>> # only select one feature over two
+    >>> feature_coord = np.concatenate([x[::2] for x in feature_coord])
+    >>> feature_type = np.concatenate([x[::2] for x in feature_type])
+    >>> feature = haar_like_feature(img_ii, 0, 0, 5, 5,
+    ...                             feature_type=feature_type,
+    ...                             feature_coord=feature_coord)
+    >>> feature
+    array([ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+            0,  0,  0,  0,  0,  0,  0,  0, -1, -3, -1, -3, -1, -3, -1, -3, -1,
+           -3, -1, -3, -1, -3, -2, -1, -3, -2, -2, -2, -1])
+
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Haar-like_feature
@@ -186,14 +207,19 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
             raise ValueError("Inconsistent size between feature coordinates"
                              "and feature types.")
 
-        haar_feature = []
-        for feat_t in FEATURE_TYPE:
-            mask = feature_type == feat_t
-            if np.count_nonzero(mask):
-                haar_feature.append(
-                    haar_like_feature_wrapper(int_image, r, c, width, height,
-                                              feat_t, feature_coord[mask]))
-        return np.hstack(list(chain.from_iterable(haar_feature)))
+        mask_feature = [feature_type == feat_t for feat_t in FEATURE_TYPE]
+        haar_feature_idx, haar_feature = zip(
+            *[(np.flatnonzero(mask),
+               haar_like_feature_wrapper(int_image, r, c, width, height,
+                                         feat_t, feature_coord[mask]))
+              for mask, feat_t in zip(mask_feature, FEATURE_TYPE)
+              if np.count_nonzero(mask)])
+
+        haar_feature_idx = np.concatenate(haar_feature_idx)
+        haar_feature = np.concatenate(haar_feature)
+
+        haar_feature[haar_feature_idx] = haar_feature.copy()
+        return haar_feature
 
 
 def draw_haar_like_feature(image, r, c, width, height, feature_type,
