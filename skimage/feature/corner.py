@@ -183,6 +183,30 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
     return H_elems
 
 
+def _hessian_matrix_image(H_elems):
+    """Convert the upper-diagonal elements of the Hessian matrix to a matrix.
+
+    Parameters
+    ----------
+    H_elems : list of array
+        The upper-diagonal elements of the Hessian matrix, as returned by
+        `hessian_matrix`.
+
+    Returns
+    -------
+    hessian_image : array
+        An array of shape ``(M, N[, ...], image.ndim, image.ndim)``,
+        containing the Hessian matrix corresponding to each coordinate.
+    """
+    image = H_elems[0]
+    hessian_image = np.zeros(image.shape + (image.ndim, image.ndim))
+    for idx, (row, col) in \
+            enumerate(combinations_with_replacement(range(image.ndim), 2)):
+        hessian_image[..., row, col] = H_elems[idx]
+        hessian_image[..., col, row] = H_elems[idx]
+    return hessian_image
+
+
 def hessian_matrix_det(image, sigma=1, approximate=True):
     """Computes the approximate Hessian Determinant over an image.
 
@@ -221,15 +245,10 @@ def hessian_matrix_det(image, sigma=1, approximate=True):
     """
     image = img_as_float(image)
     if image.ndim == 2 and approximate:
-        image = integral_image(image)
-        return np.array(_hessian_matrix_det(image, sigma))
+        integral = integral_image(image)
+        return np.array(_hessian_matrix_det(integral, sigma))
     else:  # slower brute-force implementation for nD images
-        hessian_mat_array = np.zeros(image.shape + (image.ndim, image.ndim))
-        hessian_list = hessian_matrix(image)
-        for idx, (row, col) in \
-                enumerate(combinations_with_replacement(range(image.ndim), 2)):
-            hessian_mat_array[..., row, col] = hessian_list[idx]
-            hessian_mat_array[..., col, row] = hessian_list[idx]
+        hessian_mat_array = _hessian_matrix_image(hessian_matrix(image, sigma))
         return np.linalg.det(hessian_mat_array)
 
 
@@ -276,41 +295,52 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
     return _image_orthogonal_matrix22_eigvals(Axx, Axy, Ayy)
 
 
-def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
+def hessian_matrix_eigvals(H_elems, Hxy=None, Hyy=None, Hxx=None):
     """Compute Eigenvalues of Hessian matrix.
 
     Parameters
     ----------
-    Hxx : ndarray
+    H_elems : list of ndarray
+        The upper-diagonal elements of the Hessian matrix, as returned
+        by `hessian_matrix`.
+    Hxy : ndarray, deprecated
         Element of the Hessian matrix for each pixel in the input image.
-    Hxy : ndarray
+    Hyy : ndarray, deprecated
         Element of the Hessian matrix for each pixel in the input image.
-    Hyy : ndarray
+    Hxx : ndarray, deprecated
         Element of the Hessian matrix for each pixel in the input image.
 
     Returns
     -------
-    l1 : ndarray
-        Larger eigen value for each input matrix.
-    l2 : ndarray
-        Smaller eigen value for each input matrix.
+    eigs : ndarray
+        The eigenvalues of the Hessian matrix, in decreasing order. If
+        the input image is 2D, the eigenvalues are the leading dimension
+        (that is, the array has shape ``(H_elems.ndim,) + H_elems.shape)``).
+        Otherwise, it is the last dimension (that is, the array has shape
+        ``H_elems.shape + (H_elems.ndim,)``.
 
     Examples
     --------
     >>> from skimage.feature import hessian_matrix, hessian_matrix_eigvals
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1, order='rc')
-    >>> hessian_matrix_eigvals(Hxx, Hxy, Hyy)[0]
+    >>> H_elems = hessian_matrix(square, sigma=0.1, order='rc')
+    >>> hessian_matrix_eigvals(H_elems)[0]
     array([[ 0.,  0.,  2.,  0.,  0.],
            [ 0.,  1.,  0.,  1.,  0.],
            [ 2.,  0., -2.,  0.,  2.],
            [ 0.,  1.,  0.,  1.,  0.],
            [ 0.,  0.,  2.,  0.,  0.]])
-
     """
-
-    return _image_orthogonal_matrix22_eigvals(Hxx, Hxy, Hyy)
+    if Hxy is not None:
+        if Hxx is None:
+            Hxx = H_elems
+        H_elems = [Hxx, Hxy, Hyy]
+    if len(H_elems) == 3:
+        return _image_orthogonal_matrix22_eigvals(*H_elems)
+    else:
+        matrices = _hessian_matrix_image(H_elems)
+        return np.linalg.eigvalsh(matrices)
 
 
 def shape_index(image, sigma=1, mode='constant', cval=0):
