@@ -1,8 +1,10 @@
 import numpy as np
 from scipy import signal
+from scipy.spatial import distance_matrix
+from numpy import unravel_index
 
 
-def approximate_polygon(coords, tolerance):
+def approximate_polygon(coords, tolerance, closed=True):
     """Approximate a polygonal chain with the specified tolerance.
 
     It is based on the Douglas-Peucker algorithm.
@@ -18,6 +20,13 @@ def approximate_polygon(coords, tolerance):
         Maximum distance from original points of polygon to approximated
         polygonal chain. If tolerance is 0, the original coordinate array
         is returned.
+    closed : boolean
+        If True, the algorithm assumes the given polygon is closed
+        (the first and last vertices are connected) and approximates using the
+        furthest points. If False, the algorithm assumes the given polygon isn't
+        closed and automatically marks the first and last points of the input
+        to be kept in the approximated curve.
+        Default is True.
 
     Returns
     -------
@@ -27,16 +36,30 @@ def approximate_polygon(coords, tolerance):
     References
     ----------
     .. [1] http://en.wikipedia.org/wiki/Ramer-Douglas-Peucker_algorithm
+    .. [2] http://paulbourke.net/geometry/pointlineplane/
     """
     if tolerance <= 0:
         return coords
 
+    if coords.shape[0] <= 2:
+        return coords
+
     chain = np.zeros(coords.shape[0], 'bool')
+    # if closed, calculate the furthest two points
+    if closed:
+        dist_mat = distance_matrix(coords, coords)
+        furthest_points = unravel_index(dist_mat.argmax(), dist_mat.shape)
+        i, j = furthest_points
+        chain[i] = True
+        chain[j] = True
+        pos_stack = [(j, coords.shape[0] - 1), (i, j), (0, i)]
+    else:
+        chain[0] = True
+        chain[coords.shape[0] - 1] = True
+        pos_stack = [(0, coords.shape[0] - 1)]
+
     # pre-allocate distance array for all points
     dists = np.zeros(coords.shape[0])
-    chain[0] = True
-    chain[-1] = True
-    pos_stack = [(0, chain.shape[0] - 1)]
     end_of_chain = False
 
     while not end_of_chain:
@@ -46,8 +69,6 @@ def approximate_polygon(coords, tolerance):
         r1, c1 = coords[end, :]
         dr = r1 - r0
         dc = c1 - c0
-        segment_angle = - np.arctan2(dr, dc)
-        segment_dist = c0 * np.sin(segment_angle) + r0 * np.cos(segment_angle)
 
         # select points in-between line segment
         segment_coords = coords[start + 1:end, :]
@@ -67,10 +88,11 @@ def approximate_polygon(coords, tolerance):
         perp = np.logical_and(projected_lengths0 > 0,
                               projected_lengths1 > 0)
         eucl = np.logical_not(perp)
+        # Reference [2]
         segment_dists[perp] = np.abs(
-            segment_coords[perp, 0] * np.cos(segment_angle)
-            + segment_coords[perp, 1] * np.sin(segment_angle)
-            - segment_dist
+            (segment_coords[perp, 0] * dc - segment_coords[perp, 1] * dr \
+            + (r1 * c0) - (c1 * r0)) \
+            / float(((dr ** 2 + dc ** 2) ** 0.5))
         )
         segment_dists[eucl] = np.minimum(
             # distance to start point
@@ -89,8 +111,13 @@ def approximate_polygon(coords, tolerance):
         if len(pos_stack) == 0:
             end_of_chain = True
 
-    return coords[chain, :]
+    # connect the first and last point of the approximated curve
+    if closed:
+        for i, p in enumerate(coords):
+            if chain[i]:
+                return np.vstack([coords[chain, :], p])
 
+    return coords[chain, :]
 
 # B-Spline subdivision
 _SUBDIVISION_MASKS = {
