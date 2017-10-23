@@ -244,8 +244,8 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
 
     Notes
     -----
-    The radius of each blob is approximately :math:`\sqrt{2}sigma` for
-    a 2-D image and :math:`\sqrt{3}sigma` for a 3-D image.
+    The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
+    a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
     image = img_as_float(image)
 
@@ -353,8 +353,8 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
     Notes
     -----
-    The radius of each blob is approximately :math:`\sqrt{2}sigma` for
-    a 2-D image and :math:`\sqrt{3}sigma` for a 3-D image.
+    The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
+    a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
     image = img_as_float(image)
 
