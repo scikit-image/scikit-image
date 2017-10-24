@@ -141,6 +141,11 @@ def test_cut_normalized_gen():
     new_labels, _, _ = segmentation.relabel_sequential(new_labels)
     assert new_labels.max() == 2
 
+    thresh_list.append(1e-85)
+    new_labels = next(new_label_gen)
+    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
+    assert new_labels.max() == 1
+
 
 @pytest.mark.skipif(not is_installed('networkx'),
                     reason="networkx not installed")
