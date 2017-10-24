@@ -104,6 +104,46 @@ def test_cut_normalized():
 
 @pytest.mark.skipif(not is_installed('networkx'),
                     reason="networkx not installed")
+def test_cut_normalized_gen():
+
+    img = np.zeros((100, 100, 3), dtype='uint8')
+    img[:50, :50] = 255, 255, 255
+    img[:50, 50:] = 254, 254, 254
+    img[50:, :50] = 2, 2, 2
+    img[50:, 50:] = 1, 1, 1
+    img[25:75,25:75] = 125
+
+    labels = np.zeros((100, 100), dtype='uint8')
+    labels[:50, :50] = 0
+    labels[:50, 50:] = 1
+    labels[50:, :50] = 2
+    labels[50:, 50:] = 3
+    labels[25:75,25:75] = 4
+
+    rag = graph.rag_mean_color(img, labels, mode='similarity')
+    thresh_list = [0]
+    new_label_gen = graph.cut_normalized_gen(labels, rag, 
+            thresh=thresh_list, in_place=False)
+
+    # Step through several partitionings
+    new_labels = next(new_label_gen)
+    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
+    assert new_labels.max() == 0
+
+    # Test thresh_list can be manipulated from calling program
+    thresh_list.append(1e-85)
+    new_labels = next(new_label_gen)
+    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
+    assert new_labels.max() == 1
+
+    thresh_list.append(1e-5)
+    new_labels = next(new_label_gen)
+    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
+    assert new_labels.max() == 2
+
+
+@pytest.mark.skipif(not is_installed('networkx'),
+                    reason="networkx not installed")
 def test_rag_error():
     img = np.zeros((10, 10, 3), dtype='uint8')
     labels = np.zeros((10, 10), dtype='uint8')
@@ -164,6 +204,25 @@ def test_rag_hierarchical():
 
     result = graph.cut_threshold(labels, g, thresh)
     assert np.all(result == result[0, 0])
+
+
+@pytest.mark.skipif(not is_installed('networkx'),
+                    reason="networkx not installed")
+def test_ncut_gen_stable_subgraph():
+    """ Test to catch an error thrown when subgraph has all equal edges. """
+
+    img = np.zeros((100, 100, 3), dtype='uint8')
+
+    labels = np.zeros((100, 100), dtype='uint8')
+    labels[:50, :50] = 1
+    labels[:50, 50:] = 2
+
+    rag = graph.rag_mean_color(img, labels, mode='similarity')
+    new_label_gen = graph.cut_normalized_gen(labels, rag, in_place=False)
+    new_labels = next(new_label_gen)
+    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
+
+    assert new_labels.max() == 0
 
 
 @pytest.mark.skipif(not is_installed('networkx'),
