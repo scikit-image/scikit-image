@@ -145,7 +145,9 @@ def cut_normalized_gen(labels, rag, thresh=[0.001], num_cuts=10, in_place=True,
     Given an image's labels and its similarity RAG, recursively perform
     a 2-way normalized cut on it. All nodes belonging to a subgraph
     that cannot be cut further are assigned a unique label in the
-    output.
+    output. Appending a new value to the thresh list and calling 
+    next on this generator returns a new array of labels updated 
+    for the new thresh value. 
 
     Parameters
     ----------
@@ -198,10 +200,6 @@ def cut_normalized_gen(labels, rag, thresh=[0.001], num_cuts=10, in_place=True,
     for node in rag.nodes():
         rag.add_edge(node, node, weight=max_edge)
 
-    # Threshold values not in ascending order return the same labels
-    if sorted(thresh) != list(thresh):
-        warn('thresh entries smaller than a'
-            ' previous entry do not update labels.')
     cur_thresh = [0]
     ncut_gen = _ncut_relabel_gen(rag, cur_thresh, num_cuts)
     for t in thresh:
@@ -412,45 +410,37 @@ def _ncut_relabel_gen(rag, thresh, num_cuts):
 
         # Pick second smallest eigenvector.
         # Refer Shi & Malik 2000, Section 3.2.3, Page 893
-        # It is correct to use index 1
-        # see https://github.com/hpfem/arpack/blob/master/ARPACK/SRC/dseupd.f
         ev = vectors[:,1]
 
         cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
 
-        # mcut exceeded thresh. Update the labels in the subgraph
-        # and wait until thresh rises above mcut
-        if (mcut >= thresh[0]):
+        calc_subgraph = True
+        while True:
+            # mcut exceeded thresh. Update the labels in the subgraph
+            # and wait until thresh rises above mcut
+            if (mcut >= thresh[0]):
+                _label_all(rag, 'ncut label')
+            while (mcut >= thresh[0]): 
+                yield
+
+            # Only prepare _ncut_relabel_gen generators for subgraphs 
+            # once, and only if necessary
+            if calc_subgraph:
+                sub1, sub2 = partition_by_cut(cut_mask, rag)
+                branch1 = _ncut_relabel_gen(sub1, thresh, num_cuts)
+                branch2 = _ncut_relabel_gen(sub2, thresh, num_cuts)
+                calc_subgraph = False
+
+            # Propagate next() calls to all subgraphs until m < 3
+            while (mcut < thresh[0]):
+                next(branch1) 
+                next(branch2)
+                yield
+    else:
+        # The N-cut wasn't small enough, or could not be computed.
+        # The remaining graph is a region.
+        # Assign `ncut label` by picking any label from the existing nodes, since
+        # `labels` are unique, `new_label` is also unique.
+        while True:
             _label_all(rag, 'ncut label')
-        while (mcut >= thresh[0]): 
             yield
-
-        # Prepare _ncut_relabel_gen generators for subgraphs
-        sub1, sub2 = partition_by_cut(cut_mask, rag)
-        branch1 = _ncut_relabel_gen(sub1, thresh, num_cuts)
-        branch2 = _ncut_relabel_gen(sub2, thresh, num_cuts)
-
-        # Propagate next() calls to all subgraphs
-        # until subgraph threshold value reached or
-        # further subdivision not beneficial
-        branch1_fin = False; branch2_fin = False
-        while not (branch1_fin and branch2_fin):
-            if not branch1_fin:
-                try:
-                    next(branch1) 
-                except StopIteration:
-                    branch1_fin = True
-
-            if not branch2_fin:
-                try:
-                    next(branch2)
-                except StopIteration:
-                    branch2_fin = True
-            yield
-        return
-
-    # The N-cut wasn't small enough, or could not be computed.
-    # The remaining graph is a region.
-    # Assign `ncut label` by picking any label from the existing nodes, since
-    # `labels` are unique, `new_label` is also unique.
-    _label_all(rag, 'ncut label')
