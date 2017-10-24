@@ -247,18 +247,32 @@ def inertia_tensor(image, mu=None):
     image : array
         The input image.
     mu : array, optional
-        The pre-computed central moments of ``image``.
+        The pre-computed central moments of ``image``. The inertia tensor
+        computation requires the central moments of the image. If an
+        application requires both the central moments and the inertia tensor
+        (for example, `skimage.measure.regionprops`), then it is more
+        efficient to pre-compute them and pass them to the inertia tensor
+        call.
 
     Returns
     -------
     T : array, shape ``(image.ndim, image.ndim)``
-        The inertia tensor of the input image.
+        The inertia tensor of the input image. :math:`T_{i, j}` contains
+        the covariance of image intensity along axes :math:`i` and :math:`j`.
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Moment_of_inertia#Inertia_tensor
+    .. [2] Bernd Jähne. Spatio-Temporal Image Processing: Theory and
+           Scientific Applications. (Chapter 8: Tensor Methods) Springer, 1993.
     """
     if mu is None:
         mu = moments_central(image)
     mu0 = mu[(0,) * image.ndim]
     result = np.zeros((image.ndim, image.ndim))
 
+    # nD expression to get coordinates ([2, 0], [0, 2]) (2D),
+    # ([2, 0, 0], [0, 2, 0], [0, 0, 2]) (3D), etc.
     corners2 = tuple(2 * np.eye(image.ndim, dtype=int))
     d = np.diag(result)
     d.flags.writeable = True
@@ -275,6 +289,11 @@ def inertia_tensor(image, mu=None):
 def inertia_tensor_eigvals(image, mu=None, T=None):
     """Compute the eigenvalues of the inertia tensor of the image.
 
+    The inertia tensor measures covariance of the image intensity along
+    the image axes. (See `inertia_tensor`.) The relative magnitude of the
+    eigenvalues of the tensor is thus a measure of the elongation of a
+    (bright) object in the image.
+
     Parameters
     ----------
     image : array
@@ -290,6 +309,12 @@ def inertia_tensor_eigvals(image, mu=None, T=None):
     eigvals : list of float, length ``image.ndim``
         The eigenvalues of the inertia tensor of ``image``, in descending
         order.
+
+    Notes
+    -----
+    Computing the eigenvalues requires the inertia tensor of the input image.
+    This is much faster if the central moments (``mu``) are provided, or,
+    alternatively, one can provide the inertia tensor (``T``) directly.
     """
     if T is None:
         T = inertia_tensor(image, mu)
