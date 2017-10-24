@@ -203,7 +203,8 @@ def cut_normalized_gen(labels, rag, thresh=[0.001], num_cuts=10, in_place=True,
         print('Warning: thresh entries smaller than a'
             ' previous entry do not update labels.')
     cur_thresh = [0]
-    ncut_gen = _ncut_relabel(rag, cur_thresh, num_cuts)
+    ncut_gen = _ncut_relabel_gen(rag, cur_thresh, num_cuts)
+    print(ncut_gen)
     for t in thresh:
         cur_thresh[0] = t
         next(ncut_gen)
@@ -425,10 +426,10 @@ def _ncut_relabel_gen(rag, thresh, num_cuts):
         while (mcut >= thresh[0]): 
             yield
 
-        # Prepare _ncut_relabel generators for subgraphs
+        # Prepare _ncut_relabel_gen generators for subgraphs
         sub1, sub2 = partition_by_cut(cut_mask, rag)
-        branch1 = _ncut_relabel(sub1, thresh, num_cuts)
-        branch2 = _ncut_relabel(sub2, thresh, num_cuts)
+        branch1 = _ncut_relabel_gen(sub1, thresh, num_cuts)
+        branch2 = _ncut_relabel_gen(sub2, thresh, num_cuts)
 
         # Propagate next() calls to all subgraphs
         # until subgraph threshold value reached or
