@@ -6,7 +6,7 @@ from skimage.measure import (moments, moments_central, moments_normalized,
                              moments_hu)
 
 
-def test_moments():
+def test_moments_image():
     image = np.zeros((20, 20), dtype=np.double)
     image[14, 14] = 1
     image[15, 15] = 1
@@ -18,7 +18,7 @@ def test_moments():
     assert_almost_equal(m[1, 0] / m[0, 0], 14.5)
 
 
-def test_moments_central():
+def test_moments_image_central():
     image = np.zeros((20, 20), dtype=np.double)
     image[14, 14] = 1
     image[15, 15] = 1
@@ -35,6 +35,38 @@ def test_moments_central():
     mu2 = moments_central(image2, 14.5 + 2, 14.5 + 2)
     # central moments must be translation invariant
     assert_equal(mu, mu2)
+
+
+def test_moments_contour():
+    image = np.zeros((20, 20), dtype=np.double)
+    image[13:17, 13:17] = 1
+    mu_image = moments(image)
+
+    contour = np.array([[r, c] for r in range(13, 17)
+                        for c in range(13, 17)], dtype=np.double)
+    mu_contour = moments_contour(contour)
+    assert_almost_equal(mu_contour, mu_image)
+
+
+def test_moments_contour_central():
+    image = np.zeros((20, 20), dtype=np.double)
+    image[13:17, 13:17] = 1
+    mu_image = moments_central(image, 3, 3)
+
+    contour = np.array([[r, c] for r in range(13, 17)
+                        for c in range(13, 17)], dtype=np.double)
+    mu_contour = moments__contour_central(contour, 3, 3)
+    assert_almost_equal(mu_contour, mu_image)
+
+    # shift image by dx=3 dy=3
+    image = np.zeros((20, 20), dtype=np.double)
+    image[16:20, 16:20] = 1
+    mu_image = moments_central(image, 3, 3)
+
+    contour = np.array([[r, c] for r in range(16, 20)
+                        for c in range(16, 20)], dtype=np.double)
+    mu_contour = moments_contour_central(contour, 3, 3)
+    assert_almost_equal(mu_contour, mu_image)
 
 
 def test_moments_normalized():
