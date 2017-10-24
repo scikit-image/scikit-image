@@ -201,11 +201,10 @@ def cut_normalized_gen(labels, rag, thresh=[0.001], num_cuts=10, in_place=True,
 
     # Threshold values not in ascending order return the same labels
     if sorted(thresh) != list(thresh):
-        print('Warning: thresh entries smaller than a'
+        warn('thresh entries smaller than a'
             ' previous entry do not update labels.')
     cur_thresh = [0]
     ncut_gen = _ncut_relabel_gen(rag, cur_thresh, num_cuts)
-    print(ncut_gen)
     for t in thresh:
         cur_thresh[0] = t
         next(ncut_gen)
