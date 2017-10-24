@@ -204,16 +204,16 @@ def _generate_random_color(gray, min_pixel_intensity, random):
 
 
 def random_shapes(image_shape,
-                    max_shapes,
-                    min_shapes=1,
-                    min_size=2,
-                    max_size=None,
-                    gray=False,
-                    shape=None,
-                    min_pixel_intensity=0,
-                    allow_overlap=False,
-                    num_trials=100,
-                    random_seed=None):
+                  max_shapes,
+                  min_shapes=1,
+                  min_size=2,
+                  max_size=None,
+                  gray=False,
+                  shape=None,
+                  min_pixel_intensity=0,
+                  allow_overlap=False,
+                  num_trials=100,
+                  random_seed=None):
     """Generate an image with random shapes, labeled with bounding boxes.
 
     The image is populated with random shapes with random sizes, random
