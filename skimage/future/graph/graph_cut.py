@@ -267,15 +267,13 @@ def _ncut_relabel(rag, thresh, num_cuts):
         # the inverse of the square root
         d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
 
-        # Refer Shi & Malik 2001, Equation 7, Page 891
+        # Refer Shi & Malik 2000, Equation 7, Page 891
         vals, vectors = linalg.eigsh(d2 * (d - w) * d2, which='SM',
-                                     k=min(100, m - 2))
+                                     k=min(100, m - 1))
 
         # Pick second smallest eigenvector.
-        # Refer Shi & Malik 2001, Section 3.2.3, Page 893
-        vals, vectors = np.real(vals), np.real(vectors)
-        index2 = _ncut_cy.argmin2(vals)
-        ev = vectors[:, index2]
+        # Refer Shi & Malik 2000, Section 3.2.3, Page 893
+        ev = vectors[:, 1]
 
         cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
         if (mcut < thresh):
