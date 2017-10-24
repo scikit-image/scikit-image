@@ -6,6 +6,7 @@ ncut = cut_normalized
 __all__ = ['rag_mean_color',
            'cut_threshold',
            'cut_normalized',
+           'cut_normalized_gen',
            'ncut',
            'show_rag',
            'merge_hierarchical',
