@@ -195,7 +195,8 @@ def cut_normalized_gen(labels, rag, thresh=[0.001], num_cuts=10, in_place=True,
     if not in_place:
         rag = rag.copy()
 
-    for node in rag.nodes_iter():
+    for node in rag.nodes():
+    for node in rag.nodes():
         rag.add_edge(node, node, weight=max_edge)
 
     # Threshold values not in ascending order return the same labels
@@ -211,7 +212,8 @@ def cut_normalized_gen(labels, rag, thresh=[0.001], num_cuts=10, in_place=True,
 
         map_array = np.zeros(labels.max() + 1, dtype=labels.dtype)
         # Mapping from old labels to new
-        for n, d in rag.nodes_iter(data=True):
+        for n, d in rag.nodes(data=True):
+        for n, d in rag.nodes(data=True):
             map_array[d['labels']] = d['ncut label']
 
         yield map_array[labels]
