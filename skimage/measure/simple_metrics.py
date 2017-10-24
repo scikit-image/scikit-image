@@ -64,20 +64,17 @@ def compare_nrmse(im_true, im_test, norm_type='Euclidean'):
         literature [1]_.  The methods available here are as follows:
 
         - 'Euclidean' : normalize by the averaged Euclidean norm of
-                        ``im_true``, i.e.
+          ``im_true``::
 
-                            NRMSE = RMSE * sqrt(N) / || ``im_true`` ||,
+              NRMSE = RMSE * sqrt(N) / || im_true ||
 
-                        where || . || denotes the Frobenius norm and
-                        N = ``np.size(im_true)`` the size of the input image.
-                        This result is equivalent to:
+          where || . || denotes the Frobenius norm and ``N = im_true.size``.
+          This result is equivalent to::
 
-                            NRMSE = || ``im_true`` - ``im_test`` || /
-                            || ``im_true`` ||
+              NRMSE = || im_true - im_test || / || im_true ||.
 
         - 'min-max'   : normalize by the intensity range of ``im_true``.
-
-        - 'mean'      : normalize by the mean of ``im_true``.
+        - 'mean'      : normalize by the mean of ``im_true``
 
     Returns
     -------
