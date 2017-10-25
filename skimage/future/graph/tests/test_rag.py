@@ -108,10 +108,10 @@ def test_cut_normalized_gen():
 
     img = np.zeros((100, 100, 3), dtype='uint8')
     img[:50, :50] = 255, 255, 255
-    img[:50, 50:] = 254, 254, 254
-    img[50:, :50] = 2, 2, 2
+    img[:50, 50:] = 200, 200, 200
+    img[50:, :50] = 56, 56, 56
     img[50:, 50:] = 1, 1, 1
-    img[25:75,25:75] = 125
+    img[25:75,25:75] = 185
 
     labels = np.zeros((100, 100), dtype='uint8')
     labels[:50, :50] = 0
@@ -131,17 +131,17 @@ def test_cut_normalized_gen():
     assert new_labels.max() == 0
 
     # Test thresh_list can be manipulated from calling program
-    thresh_list.append(1e-85)
+    thresh_list.append(1e-20)
     new_labels = next(new_label_gen)
     new_labels, _, _ = segmentation.relabel_sequential(new_labels)
     assert new_labels.max() == 1
 
-    thresh_list.append(1e-5)
+    thresh_list.append(1e-3)
     new_labels = next(new_label_gen)
     new_labels, _, _ = segmentation.relabel_sequential(new_labels)
     assert new_labels.max() == 2
 
-    thresh_list.append(1e-85)
+    thresh_list.append(1e-20)
     new_labels = next(new_label_gen)
     new_labels, _, _ = segmentation.relabel_sequential(new_labels)
     assert new_labels.max() == 1
