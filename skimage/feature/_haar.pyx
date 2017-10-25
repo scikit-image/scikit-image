@@ -235,21 +235,11 @@ cpdef haar_like_feature_wrapper(integral_floating[:, ::1] int_image,
     Returns
     -------
     haar_features : (n_features,) ndarray
-        Resulting Haar-like features.
-
-        If using with ``feature_coord``, it should corresponds to the feature
-        type of each associated coordinate feature.
-    feature_coord : ndarray of list of tuples or None, optional
-        The array of coordinates to be extracted. This is useful when you want
-        to recompute only a subset of features. In this case ``feature_type``
-        needs to be an array containing the type of each feature, as returned
-        by :func:`haar_like_feature_coord`. By default, all coordinates are
-        computed.
-
-    Returns
-    -------
-    haar_features : (n_features,) ndarray
-        Resulting Haar-like features.
+        Resulting Haar-like features. Each value corresponds to the subtraction
+        of the positive and negative rectangles. The data type depends of the
+        data type of `int_image`: `int` when the data type of `int_image` is
+        `uint` or `int` and `float` when the data type of `int_image` is
+        `float`.
 
     References
     ----------

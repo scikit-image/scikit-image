@@ -24,11 +24,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage.data import astronaut
-
 from skimage.color import rgb2gray
-
-from skimage.io import imshow
-from skimage.io import imshow_collection
 
 from skimage.feature import haar_like_feature
 from skimage.feature import haar_like_feature_coord

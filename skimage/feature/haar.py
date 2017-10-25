@@ -30,9 +30,9 @@ def _validate_feature_type(feature_type):
             feature_type_ = feature_type
         for feat_t in feature_type_:
             if feat_t not in FEATURE_TYPE:
-                raise ValueError('The given feature type is unknown. Got {}'
-                                 ' instead of one of {}.'.format(feat_t,
-                                                                 FEATURE_TYPE))
+                raise ValueError(
+                    'The given feature type is unknown. Got {} instead of one'
+                    ' of {}.'.format(feat_t, FEATURE_TYPE))
     return feature_type_
 
 
@@ -123,19 +123,23 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
 
         By default all features are extracted.
 
-        If using with ``feature_coord``, it should corresponds to the feature
+        If using with `feature_coord`, it should corresponds to the feature
         type of each associated coordinate feature.
     feature_coord : ndarray of list of tuples or None, optional
         The array of coordinates to be extracted. This is useful when you want
-        to recompute only a subset of features. In this case ``feature_type``
+        to recompute only a subset of features. In this case `feature_type`
         needs to be an array containing the type of each feature, as returned
         by :func:`haar_like_feature_coord`. By default, all coordinates are
         computed.
 
     Returns
     -------
-    haar_features : (n_features,) ndarray
-        Resulting Haar-like features.
+    haar_features : (n_features,) ndarray of int or float
+        Resulting Haar-like features. Each value corresponds to the subtraction
+        of the positive and negative rectangles. The data type depends of the
+        data type of `int_image`: `int` when the data type of `int_image` is
+        `uint` or `int` and `float` when the data type of `int_image` is
+        `float`.
 
     Examples
     --------
