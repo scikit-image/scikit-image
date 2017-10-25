@@ -2,6 +2,7 @@
 from __future__ import division
 from math import sqrt, atan2, pi as PI
 import itertools
+from warnings import warn
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -119,13 +120,13 @@ class _RegionProperties(object):
         # Many properties used xy coordinates, instead of rc. This attribute
         # helps with the deprecation process and should be removed in 0.16.
         if label_image.ndim > 2 or coordinates == 'rc':
-            self._warned = True
+            self._use_xy_warning = False
             self._transpose_moments = False
         elif coordinates == 'xy':
-            self._warned = True  # no need to warn if 'xy' given explicitly
+            self._use_xy_warning = False  # don't warn if 'xy' given explicitly
             self._transpose_moments = True
         elif coordinates is None:
-            self._warned = False
+            self._use_xy_warning = True
             self._transpose_moments = True
         else:
             raise ValueError('Incorrect value for regionprops coordinates: %s.'
@@ -246,10 +247,8 @@ class _RegionProperties(object):
     @_cached
     def moments(self):
         M = _moments.moments(self.image.astype(np.uint8), 3)
-        if not self._warned:
-            from warnings import warn
+        if self._use_xy_warning:
             warn(XY_TO_RC_DEPRECATION_MESSAGE)
-            self.warned = True
         if self._transpose_moments:
             M = M.T
         return M
@@ -258,10 +257,8 @@ class _RegionProperties(object):
     def moments_central(self):
         mu = _moments.moments_central(self.image.astype(np.uint8),
                                       self.local_centroid, order=3)
-        if not self._warned:
-            from warnings import warn
+        if self._use_xy_warning:
             warn(XY_TO_RC_DEPRECATION_MESSAGE)
-            self.warned = True
         if self._transpose_moments:
             mu = mu.T
         return mu
