@@ -75,13 +75,8 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     hull = ConvexHull(coords)
     vertices = hull.points[hull.vertices]
 
-    # If 2D, sort vertices clock-wise, and use Cython function to locate
-    # convex hull pixels
+    # If 2D, use fast Cython function to locate convex hull pixels
     if ndim == 2:
-        offset = np.mean(vertices, axis=0)
-        v_centred = vertices - offset
-        angles = np.arctan2(v_centred[:, 0], v_centred[:, 1])
-        vertices = vertices[np.argsort(angles)]
         mask = grid_points_in_poly(image.shape, vertices)
     else:
         gridcoords = np.reshape(np.mgrid[tuple(map(slice, image.shape))],
