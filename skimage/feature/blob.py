@@ -268,7 +268,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
                                   exclude_border=False)
     # Catch no peaks
     if local_maxima.size == 0:
-        return np.empty((0,3))
+        return np.empty((0, 3))
     # Convert local_maxima to float64
     lm = local_maxima.astype(np.float64)
     # Convert the last index to its corresponding scale value
@@ -373,7 +373,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
     # Catch no peaks
     if local_maxima.size == 0:
-        return np.empty((0,3))
+        return np.empty((0, 3))
     # Convert local_maxima to float64
     lm = local_maxima.astype(np.float64)
     # Convert the last index to its corresponding scale value
@@ -484,7 +484,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
 
     # Catch no peaks
     if local_maxima.size == 0:
-        return np.empty((0,3))
+        return np.empty((0, 3))
     # Convert local_maxima to float64
     lm = local_maxima.astype(np.float64)
     # Convert the last index to its corresponding scale value
