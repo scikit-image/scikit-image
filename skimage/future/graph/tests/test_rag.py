@@ -111,19 +111,19 @@ def test_cut_normalized_gen():
     img[:50, 50:] = 200, 200, 200
     img[50:, :50] = 56, 56, 56
     img[50:, 50:] = 1, 1, 1
-    img[25:75,25:75] = 185
+    img[25:75, 25:75] = 185
 
     labels = np.zeros((100, 100), dtype='uint8')
     labels[:50, :50] = 0
     labels[:50, 50:] = 1
     labels[50:, :50] = 2
     labels[50:, 50:] = 3
-    labels[25:75,25:75] = 4
+    labels[25:75, 25:75] = 4
 
     rag = graph.rag_mean_color(img, labels, mode='similarity')
     thresh = 0
-    new_label_gen = graph.cut_normalized_gen(labels, rag, 
-            thresh=thresh, in_place=False)
+    new_label_gen = graph.cut_normalized_gen(labels, rag, thresh=thresh,
+                                             in_place=False)
 
     # Step through several partitionings
     new_labels = next(new_label_gen)
