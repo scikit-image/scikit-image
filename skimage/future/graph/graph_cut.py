@@ -190,7 +190,7 @@ def cut_normalized_gen(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
         rag.add_edge(node, node, weight=max_edge)
 
     # Initialize the generator
-    ncut_gen = _ncut_relabel_gen(rag, 0, num_cuts)
+    ncut_gen = _ncut_relabel(rag, 0, num_cuts)
     next(ncut_gen)
 
     # Generate new labels as thresholds come
@@ -336,64 +336,6 @@ def _ncut_relabel(rag, thresh, num_cuts):
         d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
 
         # Refer Shi & Malik 2000, Equation 7, Page 891
-        vals, vectors = linalg.eigsh(d2 * (d - w) * d2, which='SM',
-                                     k=min(100, m - 1))
-
-        # Pick second smallest eigenvector.
-        # Refer Shi & Malik 2000, Section 3.2.3, Page 893
-        ev = vectors[:, 1]
-
-        cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
-        if (mcut < thresh):
-            # Sub divide and perform N-cut again
-            # Refer Shi & Malik 2001, Section 3.2.5, Page 893
-            sub1, sub2 = partition_by_cut(cut_mask, rag)
-
-            _ncut_relabel(sub1, thresh, num_cuts)
-            _ncut_relabel(sub2, thresh, num_cuts)
-            return
-
-    # The N-cut wasn't small enough, or could not be computed.
-    # The remaining graph is a region.
-    # Assign `ncut label` by picking any label from the existing nodes, since
-    # `labels` are unique, `new_label` is also unique.
-    _label_all(rag, 'ncut label')
-
-
-def _ncut_relabel_gen(rag, thresh, num_cuts):
-    """Perform Normalized Graph cut on the Region Adjacency Graph.
-
-    Recursively partition the graph into two, until further subdivision
-    yields a cut greater than `thresh` or such a cut cannot be computed.
-    For such a subgraph, indices to labels of all its nodes map to a single
-    unique value.
-
-    Parameters
-    ----------
-    labels : ndarray
-        The array of labels.
-    rag : RAG
-        The region adjacency graph.
-    thresh : float
-        The threshold. A subgraph won't be further subdivided if the
-        value of the N-cut exceeds `thresh`.
-    num_cuts : int
-        The number or N-cuts to perform before determining the optimal one.
-    map_array : array
-        The array which maps old labels to new ones. This is modified inside
-        the function.
-    """
-    d, w = _ncut.DW_matrices(rag)
-    m = w.shape[0]
-
-    # If 2 regions not cutting is optimal choice
-    if m > 2:
-        d2 = d.copy()
-        # Since d is diagonal, we can directly operate on its data
-        # the inverse of the square root
-        d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
-
-        # Refer Shi & Malik 2000, Equation 7, Page 891
         # Only the second lowest eigenvector needed
         vals, vectors = linalg.eigsh(d2 * (d - w) * d2, which='SM',
                 k=min(100,m-1))
@@ -416,12 +358,12 @@ def _ncut_relabel_gen(rag, thresh, num_cuts):
             while (mcut >= thresh): 
                 thresh = yield
 
-            # Only prepare _ncut_relabel_gen generators for subgraphs 
+            # Only prepare _ncut_relabel generators for subgraphs 
             # once, and only if necessary
             if calc_subgraph:
                 sub1, sub2 = partition_by_cut(cut_mask, rag)
-                branch1 = _ncut_relabel_gen(sub1, thresh, num_cuts)
-                branch2 = _ncut_relabel_gen(sub2, thresh, num_cuts)
+                branch1 = _ncut_relabel(sub1, thresh, num_cuts)
+                branch2 = _ncut_relabel(sub2, thresh, num_cuts)
                 next(branch1)
                 next(branch2)
                 del cut_mask
