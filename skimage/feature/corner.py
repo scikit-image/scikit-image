@@ -314,11 +314,9 @@ def hessian_matrix_eigvals(H_elems, Hxy=None, Hyy=None, Hxx=None):
     Returns
     -------
     eigs : ndarray
-        The eigenvalues of the Hessian matrix, in decreasing order. If
-        the input image is 2D, the eigenvalues are the leading dimension
-        (that is, the array has shape ``(H_elems.ndim,) + H_elems.shape)``).
-        Otherwise, it is the last dimension (that is, the array has shape
-        ``H_elems.shape + (H_elems.ndim,)``.
+        The eigenvalues of the Hessian matrix, in decreasing order. The
+        eigenvalues are the leading dimension. That is, ``eigs[i, j, k]``
+        contains the ith-largest eigenvalue at position (j, k).
 
     Examples
     --------
@@ -337,11 +335,17 @@ def hessian_matrix_eigvals(H_elems, Hxy=None, Hyy=None, Hxx=None):
         if Hxx is None:
             Hxx = H_elems
         H_elems = [Hxx, Hxy, Hyy]
-    if len(H_elems) == 3:
-        return _image_orthogonal_matrix22_eigvals(*H_elems)
+        warn('The API of `hessian_matrix_eigvals` has changed. Use a list of '
+             'elements instead of separate arguments. The old version of the '
+             'API will be removed in version 0.16.')
+    if len(H_elems) == 3:  # Use fast Cython code for 2D
+        eigvals = np.array(_image_orthogonal_matrix22_eigvals(*H_elems))
     else:
         matrices = _hessian_matrix_image(H_elems)
-        return np.linalg.eigvalsh(matrices)
+        eigvals = np.linalg.eigvalsh(matrices)
+        leading_axes = tuple(range(eigvals.ndim - 1))
+        eigvals = np.transpose(eigvals, (eigvals.ndim - 1,) + leading_axes)
+    return eigvals
 
 
 def shape_index(image, sigma=1, mode='constant', cval=0):
@@ -410,8 +414,8 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
            [ nan,  nan, -0.5,  nan,  nan]])
     """
 
-    Hxx, Hxy, Hyy = hessian_matrix(image, sigma=sigma, mode=mode, cval=cval, order='rc')
-    l1, l2 = hessian_matrix_eigvals(Hxx, Hxy, Hyy)
+    H = hessian_matrix(image, sigma=sigma, mode=mode, cval=cval, order='rc')
+    l1, l2 = hessian_matrix_eigvals(H)
 
     return (2.0 / np.pi) * np.arctan((l2 + l1) / (l2 - l1))
 
