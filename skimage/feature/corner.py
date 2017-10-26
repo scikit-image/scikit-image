@@ -14,6 +14,7 @@ from .._shared.utils import safe_as_int
 from .corner_cy import _corner_moravec, _corner_orientations
 from warnings import warn
 
+
 def _compute_derivatives(image, mode='constant', cval=0):
     """Compute derivatives in x and y direction using the Sobel operator.
 
@@ -208,7 +209,7 @@ def _hessian_matrix_image(H_elems):
 
 
 def hessian_matrix_det(image, sigma=1, approximate=True):
-    """Computes the approximate Hessian Determinant over an image.
+    """Compute the approximate Hessian Determinant over an image.
 
     The 2D approximate method uses box filters over integral images to
     compute the approximate Hessian Determinant, as described in [1]_.
