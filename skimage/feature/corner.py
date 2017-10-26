@@ -342,7 +342,8 @@ def hessian_matrix_eigvals(H_elems, Hxy=None, Hyy=None, Hxx=None):
         eigvals = np.array(_image_orthogonal_matrix22_eigvals(*H_elems))
     else:
         matrices = _hessian_matrix_image(H_elems)
-        eigvals = np.linalg.eigvalsh(matrices)
+        # eigvalsh returns eigenvalues in increasing order. We want decreasing
+        eigvals = np.linalg.eigvalsh(matrices)[..., ::-1]
         leading_axes = tuple(range(eigvals.ndim - 1))
         eigvals = np.transpose(eigvals, (eigvals.ndim - 1,) + leading_axes)
     return eigvals
