@@ -130,5 +130,24 @@ def test_object():
         convex_hull_object(image, 7)
 
 
+@pytest.fixture
+def image3d():
+    from ..measure.tests.test_regionprops import SAMPLE as image
+    image3d = np.stack((image, image, image))
+    return image, image3d
+
+
+def consistent_2d_3d_hulls(image, image3d):
+    chimage = convex_hull_image(image)
+    chimage3d = convex_hull_image(image3d)
+    assert_array_equal(chimage3d[1], chimage)
+
+
+def consistent_2d_3d_no_offset(image, image3d):
+    chimage = convex_hull_image(image, offset_coordinates=False)
+    chimage3d = convex_hull_image(image3d, offset_coordinates=False)
+    assert_array_equal(chimage3d[1], chimage)
+
+
 if __name__ == "__main__":
     np.testing.run_module_suite()
