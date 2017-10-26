@@ -3,9 +3,14 @@ from numpy.testing import assert_array_equal, assert_almost_equal, \
 import pytest
 import numpy as np
 import math
+import functools
 
-from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
-                                          _parse_docs)
+
+from skimage.measure._regionprops import (regionprops as regionprops_default,
+                                          PROPS, perimeter, _parse_docs)
+
+
+regionprops = functools.partial(regionprops_default, coordinates='rc')
 
 
 SAMPLE = np.array(
@@ -87,14 +92,14 @@ def test_bbox_area():
 def test_moments_central():
     mu = regionprops(SAMPLE)[0].moments_central
     # determined with OpenCV
-    assert_almost_equal(mu[0,2], 436.00000000000045)
+    assert_almost_equal(mu[2, 0], 436.00000000000045)
     # different from OpenCV results, bug in OpenCV
-    assert_almost_equal(mu[0,3], -737.333333333333)
-    assert_almost_equal(mu[1,1], -87.33333333333303)
-    assert_almost_equal(mu[1,2], -127.5555555555593)
-    assert_almost_equal(mu[2,0], 1259.7777777777774)
-    assert_almost_equal(mu[2,1], 2000.296296296291)
-    assert_almost_equal(mu[3,0], -760.0246913580195)
+    assert_almost_equal(mu[3, 0], -737.333333333333)
+    assert_almost_equal(mu[1, 1], -87.33333333333303)
+    assert_almost_equal(mu[2, 1], -127.5555555555593)
+    assert_almost_equal(mu[0, 2], 1259.7777777777774)
+    assert_almost_equal(mu[1, 2], 2000.296296296291)
+    assert_almost_equal(mu[0, 3], -760.0246913580195)
 
 
 def test_centroid():
@@ -186,7 +191,7 @@ def test_moments_hu():
          1.23151193e-03,
          1.38882330e-06,
         -2.72586158e-05,
-         6.48350653e-06
+        -6.48350653e-06
     ])
     # bug in OpenCV caused in Central Moments calculation?
     assert_array_almost_equal(hu, ref)
@@ -256,7 +261,7 @@ def test_minor_axis_length():
 
 
 def test_moments():
-    m = regionprops(SAMPLE)[0].moments
+    m = regionprops(SAMPLE)[0].moments.T  # test was written with x/y coords
     # determined with OpenCV
     assert_almost_equal(m[0,0], 72.0)
     assert_almost_equal(m[0,1], 408.0)
@@ -271,7 +276,8 @@ def test_moments():
 
 
 def test_moments_normalized():
-    nu = regionprops(SAMPLE)[0].moments_normalized
+    nu = regionprops(SAMPLE)[0].moments_normalized.T  # test was written with
+                                                      #  x/y coords
     # determined with OpenCV
     assert_almost_equal(nu[0,2], 0.08410493827160502)
     assert_almost_equal(nu[1,1], -0.016846707818929982)
@@ -282,11 +288,11 @@ def test_moments_normalized():
 
 
 def test_orientation():
-    orientation = regionprops(SAMPLE)[0].orientation
+    orientation = regionprops(SAMPLE.T)[0].orientation
     # determined with MATLAB
     assert_almost_equal(orientation, 0.10446844651921)
     # test correct quadrant determination
-    orientation2 = regionprops(SAMPLE.T)[0].orientation
+    orientation2 = regionprops(SAMPLE)[0].orientation
     assert_almost_equal(orientation2, math.pi / 2 - orientation)
     # test diagonal regions
     diag = np.eye(10, dtype=int)
@@ -316,7 +322,7 @@ def test_solidity():
 
 def test_weighted_moments_central():
     wmu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
-                      )[0].weighted_moments_central
+                      )[0].weighted_moments_central.T  # test used x/y coords
     ref = np.array(
         [[  7.4000000000e+01, -2.1316282073e-13,  4.7837837838e+02,
             -7.5943608473e+02],
@@ -347,14 +353,14 @@ def test_weighted_moments_hu():
         1.2565683360e-03,
         8.3014209421e-07,
         -3.5073773473e-05,
-        6.7936409056e-06
+        -6.7936409056e-06
     ])
     assert_array_almost_equal(whu, ref)
 
 
 def test_weighted_moments():
     wm = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
-                     )[0].weighted_moments
+                     )[0].weighted_moments.T  # test used x/y coords
     ref = np.array(
         [[  7.4000000000e+01, 4.1000000000e+02, 2.7500000000e+03,
             1.9778000000e+04],
@@ -370,7 +376,7 @@ def test_weighted_moments():
 
 def test_weighted_moments_normalized():
     wnu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
-                      )[0].weighted_moments_normalized
+                      )[0].weighted_moments_normalized.T  # test used x/y coord
     ref = np.array(
         [[       np.nan,        np.nan,  0.0873590903, -0.0161217406],
          [       np.nan, -0.0160405109, -0.0031421072, -0.0031376984],
@@ -465,6 +471,11 @@ def test_docstrings_and_props():
     ds = docs['weighted_moments_normalized']
     assert 'iteration' not in ds
     assert len(ds.split('\n')) > 3
+
+
+def test_incorrect_coordinate_convention():
+    with pytest.raises(ValueError):
+        region = regionprops_default(SAMPLE, coordinates='xyz')[0]
 
 
 if __name__ == "__main__":

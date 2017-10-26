@@ -7,10 +7,7 @@ from ..util import unique_rows
 
 __all__ = ['convex_hull_image', 'convex_hull_object']
 
-try:
-    from scipy.spatial import Delaunay
-except ImportError:
-    Delaunay = None
+from scipy.spatial import Delaunay
 
 
 def convex_hull_image(image):
@@ -36,10 +33,6 @@ def convex_hull_image(image):
     """
     if image.ndim > 2:
         raise ValueError("Input must be a 2D image")
-
-    if Delaunay is None:
-        raise ImportError("Could not import scipy.spatial.Delaunay, "
-                          "only available in scipy >= 0.9.")
 
     # Here we do an optimisation by choosing only pixels that are
     # the starting or ending pixel of a row or column.  This vastly

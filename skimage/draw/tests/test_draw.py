@@ -550,7 +550,8 @@ def test_ellipse_rotated():
         rr, cc = ellipse(500, 600, 200, 400, rotation=angle)
         img[rr, cc] = 1
         # estimate orientation of ellipse
-        angle_estim = np.round(regionprops(img)[0].orientation, 3) % (np.pi / 2)
+        angle_estim_raw = regionprops(img, coordinates='xy')[0].orientation
+        angle_estim = np.round(angle_estim_raw, 3) % (np.pi / 2)
         assert_almost_equal(angle_estim, angle % (np.pi / 2), 2)
 
 

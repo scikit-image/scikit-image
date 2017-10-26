@@ -19,6 +19,9 @@ New Features
 - lookfor function (#2713)
 - montage function (#2626)
 - 2D and 3D segmentation with morphological snakes (#2791)
+- nD support for image moments (#2603)
+- inertia tensor and its eigenvalues can now be computed outside of
+  regionprops; available in ``skimage.measure.inertia_tensor`` (#2603)
 
 
 Improvements
@@ -43,6 +46,14 @@ Deprecations
 - ``skimage.transform.resize`` and ``skimage.transform.rescale`` have a new
   ``anti_aliasing`` option that avoids aliasing artifacts when down-sampling
   images. This option will be enabled by default in 0.15.
+- ``regionprops`` will use row-column coordinates in 0.16. You can start
+  using them now with ``regionprops(..., coordinates='rc')``. You can silence
+  warning messages, and retain the old behavior, with
+  ``regionprops(..., coordinates='xy')``. However, that option will go away
+  in 0.16 and result in an error. This change has a number of consequences.
+  Specifically, the "orientation" region property will measure the
+  anticlockwise angle from a *vertical* line, i.e. from the vector (1, 0) in
+  row-column coordinates.
 
 
 Contributors to this release
