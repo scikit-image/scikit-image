@@ -121,28 +121,25 @@ def test_cut_normalized_gen():
     labels[25:75,25:75] = 4
 
     rag = graph.rag_mean_color(img, labels, mode='similarity')
-    thresh_list = [0]
+    thresh = 0
     new_label_gen = graph.cut_normalized_gen(labels, rag, 
-            thresh=thresh_list, in_place=False)
+            thresh=thresh, in_place=False)
 
     # Step through several partitionings
     new_labels = next(new_label_gen)
     new_labels, _, _ = segmentation.relabel_sequential(new_labels)
     assert new_labels.max() == 0
 
-    # Test thresh_list can be manipulated from calling program
-    thresh_list.append(1e-20)
-    new_labels = next(new_label_gen)
+    # Test thresh can be manipulated from calling program
+    new_labels = new_label_gen.send(1e-20)
     new_labels, _, _ = segmentation.relabel_sequential(new_labels)
     assert new_labels.max() == 1
 
-    thresh_list.append(1e-3)
-    new_labels = next(new_label_gen)
+    new_labels = new_label_gen.send(1e-3)
     new_labels, _, _ = segmentation.relabel_sequential(new_labels)
     assert new_labels.max() == 2
 
-    thresh_list.append(1e-20)
-    new_labels = next(new_label_gen)
+    new_labels = new_label_gen.send(1e-20)
     new_labels, _, _ = segmentation.relabel_sequential(new_labels)
     assert new_labels.max() == 1
 

@@ -78,7 +78,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Given an image's labels and its similarity RAG, recursively perform
-    a 2-way normalized cut on it. All nodes belonging to a subgraph
+    a two-way normalized cut on it. All nodes belonging to a subgraph
     that cannot be cut further are assigned a unique label in the
     output.
 
@@ -138,12 +138,12 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
     return map_array[labels]
 
 
-def cut_normalized_gen(labels, rag, thresh=[0.001], num_cuts=10, in_place=True,
+def cut_normalized_gen(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
                    max_edge=1.0):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Given an image's labels and its similarity RAG, recursively perform
-    a 2-way normalized cut on it. All nodes belonging to a subgraph
+    a two-way normalized cut on it. All nodes belonging to a subgraph
     that cannot be cut further are assigned a unique label in the
     output. Appending a new value to the thresh list and calling 
     next on this generator returns a new array of labels updated 
@@ -155,8 +155,8 @@ def cut_normalized_gen(labels, rag, thresh=[0.001], num_cuts=10, in_place=True,
         The array of labels.
     rag : RAG
         The region adjacency graph.
-    thresh : list
-        List of threshold values to compute. A subgraph won't be further 
+    thresh : float
+        Initial threshold value to segment with. A subgraph won't be further 
         subdivided if the value of the N-cut exceeds a threshold value. 
     num_cuts : int
         The number or N-cuts to perform before determining the optimal one.
@@ -181,11 +181,11 @@ def cut_normalized_gen(labels, rag, thresh=[0.001], num_cuts=10, in_place=True,
     >>> labels = segmentation.slic(img, compactness=30, n_segments=400)
     >>> rag = graph.rag_mean_color(img, labels, mode='similarity')
     >>> 
-    >>> thresh = [1e-5]
+    >>> thresh = 1e-5
     >>> new_label_gen = graph.cut_normalized_gen(labels, rag, thresh)
     >>> new_labels = next(new_label_gen)
-    >>> thresh.append(1e-4)
-    >>> new_labels = next(new_label_gen)
+    >>> new_labels = new_label_gen.send(1e-3)
+    >>> new_labels = new_label_gen.send(1e-4)
 
     References
     ----------
@@ -200,18 +200,20 @@ def cut_normalized_gen(labels, rag, thresh=[0.001], num_cuts=10, in_place=True,
     for node in rag.nodes():
         rag.add_edge(node, node, weight=max_edge)
 
-    cur_thresh = [0]
-    ncut_gen = _ncut_relabel_gen(rag, cur_thresh, num_cuts)
-    for t in thresh:
-        cur_thresh[0] = t
-        next(ncut_gen)
+    # Initialize the generator
+    ncut_gen = _ncut_relabel_gen(rag, 0, num_cuts)
+    next(ncut_gen)
+
+    # Generate new labels as thresholds come
+    while True:
+        ncut_gen.send(thresh)
 
         map_array = np.zeros(labels.max() + 1, dtype=labels.dtype)
         # Mapping from old labels to new
         for n, d in rag.nodes(data=True):
             map_array[d['labels']] = d['ncut label']
 
-        yield map_array[labels]
+        thresh = yield map_array[labels]
 
 
 def partition_by_cut(cut, rag):
@@ -314,7 +316,7 @@ def _label_all(rag, attr_name):
 def _ncut_relabel(rag, thresh, num_cuts):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
-    Recursively partition the graph into 2, until further subdivision
+    Recursively partition the graph into two, until further subdivision
     yields a cut greater than `thresh` or such a cut cannot be computed.
     For such a subgraph, indices to labels of all its nodes map to a single
     unique value.
@@ -372,7 +374,7 @@ def _ncut_relabel(rag, thresh, num_cuts):
 def _ncut_relabel_gen(rag, thresh, num_cuts):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
-    Recursively partition the graph into 2, until further subdivision
+    Recursively partition the graph into two, until further subdivision
     yields a cut greater than `thresh` or such a cut cannot be computed.
     For such a subgraph, indices to labels of all its nodes map to a single
     unique value.
@@ -383,10 +385,9 @@ def _ncut_relabel_gen(rag, thresh, num_cuts):
         The array of labels.
     rag : RAG
         The region adjacency graph.
-    thresh : list
-        Single element list specifying the threshold. 
-        A subgraph won't be further subdivided if the value of the 
-        N-cut exceeds `thresh`.
+    thresh : float
+        The threshold. A subgraph won't be further subdivided if the
+        value of the N-cut exceeds `thresh`.
     num_cuts : int
         The number or N-cuts to perform before determining the optimal one.
     map_array : array
@@ -404,7 +405,7 @@ def _ncut_relabel_gen(rag, thresh, num_cuts):
         d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
 
         # Refer Shi & Malik 2000, Equation 7, Page 891
-        # Only the second lowest eyyigenvector needed
+        # Only the second lowest eigenvector needed
         vals, vectors = linalg.eigsh(d2 * (d - w) * d2, which='SM',
                 k=min(100,m-1))
 
@@ -414,14 +415,17 @@ def _ncut_relabel_gen(rag, thresh, num_cuts):
 
         cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
 
+        # These variables no longer needed
+        del d, d2, w, vals, vectors, ev
+
         calc_subgraph = True
         while True:
             # mcut exceeded thresh. Update the labels in the subgraph
             # and wait until thresh rises above mcut
-            if (mcut >= thresh[0]):
+            if (mcut >= thresh):
                 _label_all(rag, 'ncut label')
-            while (mcut >= thresh[0]): 
-                yield
+            while (mcut >= thresh): 
+                thresh = yield
 
             # Only prepare _ncut_relabel_gen generators for subgraphs 
             # once, and only if necessary
@@ -429,16 +433,19 @@ def _ncut_relabel_gen(rag, thresh, num_cuts):
                 sub1, sub2 = partition_by_cut(cut_mask, rag)
                 branch1 = _ncut_relabel_gen(sub1, thresh, num_cuts)
                 branch2 = _ncut_relabel_gen(sub2, thresh, num_cuts)
+                next(branch1)
+                next(branch2)
+                del cut_mask
                 calc_subgraph = False
 
-            # Propagate next() calls to all subgraphs until m < 3
-            while (mcut < thresh[0]):
-                next(branch1) 
-                next(branch2)
-                yield
+            # Propagate next() calls to all active subgraphs
+            while (mcut < thresh):
+                branch1.send(thresh)
+                branch2.send(thresh)
+                thresh = yield
     else:
-        # The N-cut wasn't small enough, or could not be computed.
-        # The remaining graph is a region.
+        # There were less than three super pixels to cut. The remaining 
+        # graph is a region.
         # Assign `ncut label` by picking any label from the existing nodes, since
         # `labels` are unique, `new_label` is also unique.
         while True:
