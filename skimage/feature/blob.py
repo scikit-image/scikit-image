@@ -138,6 +138,7 @@ def _prune_blobs(blobs_array, overlap):
         where ``(row, col)`` (``(pln, row, col)``) are coordinates of the blob
         and ``sigma`` is the standard deviation of the Gaussian kernel which
         detected the blob.
+        This array must not have a dimension of size 0.
     overlap : float
         A value between 0 and 1. If the fraction of area overlapping for 2
         blobs is greater than `overlap` the smaller blob is eliminated.
@@ -147,11 +148,6 @@ def _prune_blobs(blobs_array, overlap):
     A : ndarray
         `array` with overlapping blobs removed.
     """
-
-    # iterating again might eliminate more blobs, but one iteration suffices
-    # for most cases
-    if len(blobs_array) == 0:
-        return np.array([])
     sigma = blobs_array[:, -1].max()
     distance = 2 * sigma * sqrt(blobs_array.shape[1] - 1)
     tree = spatial.cKDTree(blobs_array[:, :-1])
