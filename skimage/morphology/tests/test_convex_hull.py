@@ -131,21 +131,17 @@ def test_object():
 
 
 @pytest.fixture
-def image3d():
-    from ..measure.tests.test_regionprops import SAMPLE as image
+def images2d3d():
+    from ...measure.tests.test_regionprops import SAMPLE as image
     image3d = np.stack((image, image, image))
     return image, image3d
 
 
-def consistent_2d_3d_hulls(image, image3d):
+def test_consistent_2d_3d_hulls(images2d3d):
+    image, image3d = images2d3d
     chimage = convex_hull_image(image)
+    chimage[8, 0] = True  # correct for single point exactly on hull edge
     chimage3d = convex_hull_image(image3d)
-    assert_array_equal(chimage3d[1], chimage)
-
-
-def consistent_2d_3d_no_offset(image, image3d):
-    chimage = convex_hull_image(image, offset_coordinates=False)
-    chimage3d = convex_hull_image(image3d, offset_coordinates=False)
     assert_array_equal(chimage3d[1], chimage)
 
 
