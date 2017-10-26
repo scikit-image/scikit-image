@@ -5,7 +5,6 @@ except ImportError:
     warn('RAGs require networkx')
 import numpy as np
 from . import _ncut
-from . import _ncut_cy
 from scipy.sparse import linalg
 
 
@@ -122,21 +121,22 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
            IEEE Transactions on, vol. 22, no. 8, pp. 888-905, August 2000.
 
     """
-    gen = cut_normalized_gen(labels,rag,thresh,num_cuts,in_place,max_edge)
+    gen = cut_normalized_gen(labels, rag, thresh, num_cuts, in_place, max_edge)
     labels = next(gen)
     return labels
 
 
 def cut_normalized_gen(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
-                   max_edge=1.0):
-    """Perform Normalized Graph cut on the Region Adjacency Graph.
+                       max_edge=1.0):
+    """
+    Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Given an image's labels and its similarity RAG, recursively perform
     a two-way normalized cut on it. All nodes belonging to a subgraph
     that cannot be cut further are assigned a unique label in the
-    output. Appending a new value to the thresh list and calling 
-    next on this generator returns a new array of labels updated 
-    for the new thresh value. 
+    output. Appending a new value to the thresh list and calling
+    next on this generator returns a new array of labels updated
+    for the new thresh value.
 
     Parameters
     ----------
@@ -145,8 +145,8 @@ def cut_normalized_gen(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
     rag : RAG
         The region adjacency graph.
     thresh : float
-        Initial threshold value to segment with. A subgraph won't be further 
-        subdivided if the value of the N-cut exceeds a threshold value. 
+        Initial threshold value to segment with. A subgraph won't be further
+        subdivided if the value of the N-cut exceeds a threshold value.
     num_cuts : int
         The number or N-cuts to perform before determining the optimal one.
     in_place : bool
@@ -169,7 +169,7 @@ def cut_normalized_gen(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
     >>> img = data.astronaut()
     >>> labels = segmentation.slic(img, compactness=30, n_segments=400)
     >>> rag = graph.rag_mean_color(img, labels, mode='similarity')
-    >>> 
+    >>>
     >>> thresh = 1e-5
     >>> new_label_gen = graph.cut_normalized_gen(labels, rag, thresh)
     >>> new_labels = next(new_label_gen)
@@ -338,11 +338,11 @@ def _ncut_relabel(rag, thresh, num_cuts):
         # Refer Shi & Malik 2000, Equation 7, Page 891
         # Only the second lowest eigenvector needed
         vals, vectors = linalg.eigsh(d2 * (d - w) * d2, which='SM',
-                k=min(100,m-1))
+                                     k=min(100, m-1))
 
         # Pick second smallest eigenvector.
         # Refer Shi & Malik 2000, Section 3.2.3, Page 893
-        ev = vectors[:,1]
+        ev = vectors[:, 1]
 
         cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
 
@@ -355,10 +355,10 @@ def _ncut_relabel(rag, thresh, num_cuts):
             # and wait until thresh rises above mcut
             if (mcut >= thresh):
                 _label_all(rag, 'ncut label')
-            while (mcut >= thresh): 
+            while (mcut >= thresh):
                 thresh = yield
 
-            # Only prepare _ncut_relabel generators for subgraphs 
+            # Only prepare _ncut_relabel generators for subgraphs
             # once, and only if necessary
             if calc_subgraph:
                 sub1, sub2 = partition_by_cut(cut_mask, rag)
@@ -375,10 +375,10 @@ def _ncut_relabel(rag, thresh, num_cuts):
                 branch2.send(thresh)
                 thresh = yield
     else:
-        # There were less than three super pixels to cut. The remaining 
+        # There were less than three super pixels to cut. The remaining
         # graph is a region.
-        # Assign `ncut label` by picking any label from the existing nodes, since
-        # `labels` are unique, `new_label` is also unique.
+        # Assign `ncut label` by picking any label from the existing
+        # nodes, since `labels` are unique, `new_label` is also unique.
         while True:
             _label_all(rag, 'ncut label')
             yield
