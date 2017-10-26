@@ -200,7 +200,7 @@ cdef integral_floating[:, ::1] _haar_like_feature(
     return rect_feature
 
 
-cpdef haar_like_feature_wrapper(integral_floating[:, ::1] int_image,
+cpdef haar_like_feature_wrapper(cnp.ndarray[integral_floating, ndim=2] int_image,
                                 r, c, width, height, feature_type,
                                 feature_coord):
     """Compute the Haar-like features for a region of interest (ROI) of an
@@ -262,6 +262,11 @@ cpdef haar_like_feature_wrapper(integral_floating[:, ::1] int_image,
         Py_ssize_t n_rectangle, n_feature
         Py_ssize_t idx_rect, idx_feature
         integral_floating[:, ::1] rect_feature
+        # convert to an ndarray to a memory-view to be able to release the
+        # GIL. Furthermore, we need currently a ndarray to be able to use
+        # read-only memmap (for instance when using joblib).
+        integral_floating[:, ::1] int_image_memview = int_image[
+            r : r + height, c : c + width].copy()
 
     if feature_coord is None:
         # compute all possible coordinates with a specific type of feature
@@ -285,8 +290,7 @@ cpdef haar_like_feature_wrapper(integral_floating[:, ::1] int_image,
                     feature_coord[idx_feature][idx_rect][1][0],
                     feature_coord[idx_feature][idx_rect][1][1])
 
-    rect_feature = _haar_like_feature(int_image[r : r + height,
-                                                c : c + width],
+    rect_feature = _haar_like_feature(int_image_memview,
                                       coord, n_rectangle, n_feature)
 
     # deallocate

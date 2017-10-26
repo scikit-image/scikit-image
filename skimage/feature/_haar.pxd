@@ -51,6 +51,7 @@ cdef integral_floating[:, ::1] _haar_like_feature(
     Py_ssize_t n_rectangle, Py_ssize_t n_feature)
 
 
-cpdef haar_like_feature_wrapper(integral_floating[:, ::1] int_image,
-                                r, c, width, height, feature_type,
-                                feature_coord)
+cpdef haar_like_feature_wrapper(
+    cnp.ndarray[integral_floating, ndim=2] int_image,
+    r, c, width, height, feature_type,
+    feature_coord)
