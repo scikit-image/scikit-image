@@ -122,20 +122,9 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
            IEEE Transactions on, vol. 22, no. 8, pp. 888-905, August 2000.
 
     """
-    if not in_place:
-        rag = rag.copy()
-
-    for node in rag.nodes():
-        rag.add_edge(node, node, weight=max_edge)
-
-    _ncut_relabel(rag, thresh, num_cuts)
-
-    map_array = np.zeros(labels.max() + 1, dtype=labels.dtype)
-    # Mapping from old labels to new
-    for n, d in rag.nodes(data=True):
-        map_array[d['labels']] = d['ncut label']
-
-    return map_array[labels]
+    gen = cut_normalized_gen(labels,rag,thresh,num_cuts,in_place,max_edge)
+    labels = next(gen)
+    return labels
 
 
 def cut_normalized_gen(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
