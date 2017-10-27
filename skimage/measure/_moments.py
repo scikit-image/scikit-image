@@ -1,6 +1,7 @@
 # coding: utf-8
 from __future__ import division
 import numpy as np
+from .._shared.utils import assert_nD
 from . import _moments_cy
 import itertools
 from warnings import warn
@@ -44,7 +45,7 @@ def moments_contour(contour, order=3):
     >>> cr, cc
     (14.5, 14.5)
     """
-    moments_contour_central(contour, 0, order=order)
+    return moments_contour_central(contour, 0, order=order)
 
 
 def moments_contour_central(contour, center=None, order=3):
@@ -91,7 +92,33 @@ def moments_contour_central(contour, center=None, order=3):
            [ 20.,   0.,  25.,   0.],
            [  0.,   0.,   0.,   0.]])
     """
-    pass
+    if isinstance(contour, tuple):
+        # Represent as array and rotate to standardize orientation.
+        contour = np.rollaxis(np.asarray(contour), axis=1)
+    assert_nD(contour, 2)
+    ndim = contour.shape[1]
+    if center is None:
+        M = moments_central(contour, center=0, order=order)
+        center = M[tuple(np.eye(ndim, dtype=int))]
+    else:
+        # TODO: Handle broadcasting of `center` argument.
+        if center == 0:
+            center = (0,) * ndim
+
+    calc = contour.astype(float)
+    calc -= center
+    calc = calc[..., np.newaxis] ** np.arange(order + 1)
+    # for a contour of shape (N, D), the following
+    # produces an N x D**2 calculation of moments
+    # for the points, then sums along axis 0
+    calc = np.einsum(('i...,' * ndim)[:-1],
+                     (*
+                      [calc[:, i::ndim].squeeze()
+                       [..., (* ([np.newaxis] * i + [slice(None)]
+                                 + [np.newaxis]*(ndim-i-1)))]
+                       for i in range(ndim)]))
+
+    return calc
 
 
 def moments(image, order=3):
