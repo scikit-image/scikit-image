@@ -327,7 +327,6 @@ def _ncut_relabel(rag, thresh, num_cuts):
     """
     d, w = _ncut.DW_matrices(rag)
     m = w.shape[0]
-    print(w.shape)
 
     # If 2 regions not cutting is optimal choice
     if m > 2:
@@ -338,7 +337,7 @@ def _ncut_relabel(rag, thresh, num_cuts):
 
         # Refer Shi & Malik 2000, Equation 7, Page 891
         # Only the second lowest eigenvector needed
-        vals, vectors = linalg.eigsh(d2 * (d - w) * d2, which='SM',
+        vals, vectors = linalg.eigsh(d2 * (d - w) * d2, which='SM'
                                      k=2, ncv=m)
 
         # Pick second smallest eigenvector.
