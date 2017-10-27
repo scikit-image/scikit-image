@@ -4,7 +4,8 @@ import numpy as np
 
 from skimage._shared._warnings import expected_warnings
 from skimage import draw
-from skimage.measure import (moments, moments_central, moments_normalized,
+from skimage.measure import (moments, moments_central, moments_contour,
+                             moments_contour_central, moments_normalized,
                              moments_hu)
 
 
