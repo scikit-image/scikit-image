@@ -21,7 +21,7 @@ def test_steerable_shape():
 
 def test_different_orientation_height():
     im = np.random.randint(0, 255, (113, 29), dtype=np.uint8)
-    coeff = steerable.build_steerable(im, height=3, nbands=6)
+    coeff = steerable.build_steerable(im, height=3, n_bands=6)
     out = steerable.recon_steerable(coeff)
 
     assert_array_almost_equal(img_as_float(im), out, decimal=5)

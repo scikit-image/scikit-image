@@ -15,26 +15,34 @@ Intermediate elements are lists of subband at the same radius level
 but different orientations.
 
 
-.. [1] E. P. Simoncelli and W. T. Freeman
-    "The Steerable Pyramid: A Flexible Architecture
-    for Multi-Scale Derivative Computation."
-    http://www.cns.nyu.edu/~eero/steerpyr/
+.. [1] Simoncelli, E.P. & Freeman, W.T.
+       (1995). The Steerable Pyramid: A Flexible Architecture for Multi-Scale
+       Derivative Computation. In Proc. 2nd IEEE International Conf. on Image
+       Proc., vol.III pp. 444-447, Oct 1995. 
+       http://www.cns.nyu.edu/~eero/steerpyr/,
+       http://www.cns.nyu.edu/pub/eero/simoncelli95b.pdf,
+       DOI:10.1109/ICIP.1995.537667
 """
+
 from __future__ import division, print_function
 import numpy as np
 from matplotlib import pyplot as plt
 from skimage.transform import steerable
-
-
-def normalize(im):
-    return (im - im.min()) / (im.max() - im.min())
+from skimage.exposure import rescale_intensity
+from skimage.morphology import disk
 
 
 def visualize(coeff):
+    '''
+    Generate a single image, which visualize
+    Steerable subband decomposition 'coeff'
+    Subbands of the same height are on the same row
+    '''
+
     rows, cols = coeff[1][0].shape
-    Norients = len(coeff[1])
-    out = np.ones((rows * 2 - coeff[-1][0].shape[0] + 1,
-                   Norients * cols + 1), dtype=np.double)
+    nr_orients = len(coeff[1])
+    out = np.ones((rows * 2 - coeff[-1][0].shape[0] + 3,
+                   nr_orients * cols + 3), dtype=np.double)
 
     r = 0
     for i in range(1, len(coeff[:-1])):
@@ -43,7 +51,7 @@ def visualize(coeff):
         c = 0
         for j in range(len(coeff[1])):
             subband = coeff[i][j].real
-            subband = normalize(subband)
+            subband = rescale_intensity(subband)
 
             subband[-1, :] = 1
             subband[:, -1] = 1
@@ -53,17 +61,18 @@ def visualize(coeff):
         r += m
 
     m, n = coeff[-1][0].shape
-    out[r: r + m, 0:n] = normalize(coeff[-1][0])
+    out[r: r + m, 0:n] = rescale_intensity(coeff[-1][0])
 
     return out
 
 
 # create an image of a disk
-x = np.arange(-128, 128)
-xx, yy = np.meshgrid(x, x, sparse=True)
-r = np.sqrt(xx**2 + yy**2)
-image = r < 64
-
+# x = np.arange(-128, 128)
+# xx, yy = np.meshgrid(x, x, sparse=True)
+# r = np.sqrt(xx**2 + yy**2)
+# image = r < 64
+image = disk(64)
+print(image.shape)
 
 # Steerable subband decomposition
 coeff = steerable.build_steerable(image)

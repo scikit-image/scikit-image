@@ -4,23 +4,27 @@ from .._shared.utils import assert_nD
 from ..util import img_as_float
 
 
-def build_steerable(image, height=5, nbands=4):
+def build_steerable(image, height=5, n_bands=4):
     """ Construct a Steerable subband decomposition of a gray scale image.
+    
+    The Steerable Pyramid is a linear multi-scale, multi-orientation image 
+    decomposition that provides a useful front-end for image-processing 
+    and computer vision applications. 
 
     Parameters
     ----------
     image : 2-D array
-        input image
+        Input image
     height : integer, optional
         Height of the steerable decomposition. This includes the counting of
         low pass and high pass subbands.
-    nbands : integer, optional
+    n_bands : integer, optional
         Number of orientations in the Steerable decomposition.
 
     Returns
     -------
     coeff : list of lists of numpy array
-        subbands of Steerable decomposition,
+        Subbands of Steerable decomposition,
         stored as a list of 'height' sublists,
         Sublists correspond to decreasing radius level in Steerable pyramid
         The first sublist contains the high pass subband.
@@ -29,24 +33,31 @@ def build_steerable(image, height=5, nbands=4):
 
     References
     ----------
-    .. [1] E. P. Simoncelli and W. T. Freeman
-        "The Steerable Pyramid: A Flexible Architecture
-        for Multi-Scale Derivative Computation."
-        http://www.cns.nyu.edu/~eero/steerpyr/
+    .. [1] Simoncelli, E.P. & Freeman, W.T.
+       (1995). The Steerable Pyramid: A Flexible Architecture for Multi-Scale
+       Derivative Computation. In Proc. 2nd IEEE International Conf. on Image
+       Proc., vol.III pp. 444-447, Oct 1995. 
+       http://www.cns.nyu.edu/~eero/steerpyr/,
+       http://www.cns.nyu.edu/pub/eero/simoncelli95b.pdf,
+       DOI:10.1109/ICIP.1995.537667
     """
 
     assert_nD(image, 2)
-    s = Steerable(height, nbands)
+    s = Steerable(height, n_bands)
     return s.build_scf_pyramid(image)
 
 
 def recon_steerable(coeff):
     """ Reconstruct the image from its Steerable decomposition.
 
+    The Steerable Pyramid is a linear multi-scale, multi-orientation image 
+    decomposition that provides a useful front-end for image-processing 
+    and computer vision applications. 
+
     Parameters
     ----------
     coeff : list of lists of numpy array
-        subbands of Steerable decomposition,
+        Subbands of Steerable decomposition,
         stored as a list of 'height' sublists,
         Sublists correspond to decreasing radius level in Steerable pyramid
         The first sublist contains the high pass subband.
@@ -56,7 +67,7 @@ def recon_steerable(coeff):
     Returns
     -------
     image : 2-D array
-        reconstructed image from subbands of Steerable Pyramid decomposition.
+        Reconstructed image from subbands of Steerable Pyramid decomposition.
 
     References
     ----------
@@ -66,40 +77,46 @@ def recon_steerable(coeff):
         http://www.cns.nyu.edu/~eero/steerpyr/
     """
 
-    s = Steerable(height=len(coeff), nbands=len(coeff[1]))
+    s = Steerable(height=len(coeff), n_bands=len(coeff[1]))
     return s.recon_scf_pyramid(coeff)
 
 
 class Steerable:
     """Steerable Pyramid: a translation and rotation invariant free wavelet.
+    
+    The Steerable Pyramid is a linear multi-scale, multi-orientation 
+    image decomposition that provides a useful front-end for image-processing 
+    and computer vision applications. 
+
     """
 
-    def __init__(self, height=5, nbands=4):
+    def __init__(self, height=5, n_bands=4):
         """
         Parameters
         ----------
         height : int
-            height of Steerable decomposition
+            Height of Steerable decomposition
             (including high pass and low pass)
-        nbands : int
-            number of orientations in Steerable decomposition
+        n_bands : int
+            Number of orientations in Steerable decomposition
         """
 
-        if not (height % 1 == 0 and nbands % 1 == 0):
-            raise ValueError("Height and nbands must be integers")
+        if not (height % 1 == 0 and n_bands % 1 == 0):
+            raise ValueError("Height and n_bands must be integers")
 
         if height < 3:
             raise ValueError("Height must be at least 3")
 
-        self.nbands = int(nbands)
+        self.n_bands = int(n_bands)
         self.height = int(height)
 
     def build_scf_pyramid(self, im):
-        """
+        """ Calculate Steerable subband decomposition of image 'im'
+        
         Parameters
         ----------
         im : 2-D array
-            input gray scale image
+            Input gray scale image
         """
         assert_nD(im, 2)
 
@@ -111,7 +128,7 @@ class Steerable:
                              " all image dimensions must be at least"
                              " size {}.".format(height, 2**height))
 
-        log_rad, angle = _base(M, N)
+        log_rad, angle = _logradius_angle_grid(M, N)
         Xrcos, Yrcos = _rcos_curve(1, -0.5)
         YIrcos = np.sqrt(1 - Yrcos)
         Yrcos = np.sqrt(Yrcos)
@@ -133,17 +150,18 @@ class Steerable:
         return coeff
 
     def _build_pyr_level(self, lodft, log_rad, angle, Xrcos, Yrcos, ht):
-        """
+        """ Recursively calculate Steerable subbands
+
         Parameters
         ----------
         lodft : 2-D array
             DFT matrix of the higher layer
         log_rad, angle: 2-D array
-            helper to help create the DFT mask
+            Helper matrices to help create the DFT mask
         Xrcos, Yrcos: 2-D array
-            represents the desired filter
+            Represents the desired filter
         ht: int
-            current level of the pyramid that are being built
+            Current level of the pyramid that are being built
 
         Notes
         -----
@@ -162,10 +180,10 @@ class Steerable:
             lutsize = 1024
             Xcosn = np.pi * \
                 np.array(range(-(2 * lutsize + 1), (lutsize + 2))) / lutsize
-            order = self.nbands - 1
+            order = self.n_bands - 1
             const = np.power(2, 2 * order) * \
                 np.square(np.math.factorial(order)) / \
-                (self.nbands * np.math.factorial(2 * order))
+                (self.n_bands * np.math.factorial(2 * order))
 
             alpha = (Xcosn + np.pi) % (2 * np.pi) - np.pi
             Ycosn = 2 * np.sqrt(const) * \
@@ -173,11 +191,11 @@ class Steerable:
 
             orients = []
 
-            for b in range(self.nbands):
+            for b in range(self.n_bands):
                 anglemask = _point_op(
-                    angle, Ycosn, Xcosn + np.pi * b / self.nbands)
+                    angle, Ycosn, Xcosn + np.pi * b / self.n_bands)
                 banddft = np.power(np.complex(
-                    0, -1), self.nbands - 1) * lodft * anglemask * himask
+                    0, -1), self.n_bands - 1) * lodft * anglemask * himask
                 band = np.fft.ifft2(np.fft.ifftshift(banddft))
                 orients.append(band)
 
@@ -213,11 +231,11 @@ class Steerable:
         lodft : 2-D array
             DFT matrix of the higher layer
         log_rad, angle: 2-D array
-            helper to help create the DFT mask
+            Helper matrices to help create the DFT mask
         Xrcos, Yrcos: 2-D array
-            represents the desired filter
+            Represents the desired filter
         ht: int
-            current level of the pyramid that are being built
+            Current level of the pyramid that are being built
 
         Notes
         -----
@@ -237,18 +255,18 @@ class Steerable:
             lutsize = 1024
             Xcosn = np.pi * \
                 np.array(range(-(2 * lutsize + 1), (lutsize + 2))) / lutsize
-            order = self.nbands - 1
+            order = self.n_bands - 1
             const = np.power(2, 2 * order) * \
                 np.square(np.math.factorial(order)) / \
-                (self.nbands * np.math.factorial(2 * order))
+                (self.n_bands * np.math.factorial(2 * order))
 
             Ycosn = np.sqrt(const) * np.power(np.cos(Xcosn), order)
 
             orientdft = np.zeros(coeff[0][0].shape)
 
-            for b in range(self.nbands):
+            for b in range(self.n_bands):
                 anglemask = _point_op(
-                    angle, Ycosn, Xcosn + np.pi * b / self.nbands)
+                    angle, Ycosn, Xcosn + np.pi * b / self.n_bands)
                 banddft = np.fft.fftshift(np.fft.fft2(coeff[0][b]))
                 orientdft = orientdft + \
                     np.power(np.complex(0, 1), order) * \
@@ -282,7 +300,7 @@ class Steerable:
         Parameters
         ----------
         coeff : list of lists of numpy array
-            subbands of Steerable decomposition,
+            Subbands of Steerable decomposition,
             stored as a list of 'height' sublists,
             Sublists correspond to decreasing radius level in Steerable pyramid
             The first sublist contains the high pass subband.
@@ -292,8 +310,9 @@ class Steerable:
         Returns
         -------
         image : 2-D array
-        reconstructed image from subbands of Steerable Pyramid decomposition
+            Reconstructed image from subbands of Steerable Pyramid decomposition
         """
+
         if (self.height != len(coeff)):
             raise ValueError("Height of coeff should be %d" % self.height)
 
@@ -304,12 +323,12 @@ class Steerable:
             raise ValueError("Low pass sublist should be of length one")
 
         for i in range(1, self.height - 1):
-            if (self.nbands != len(coeff[i])):
+            if (self.n_bands != len(coeff[i])):
                 raise ValueError(
-                    "Size of intermediate sublist should be %d" % self.nbands)
+                    "Size of intermediate sublist should be %d" % self.n_bands)
 
         r, c = coeff[0][0].shape
-        log_rad, angle = _base(r, c)
+        log_rad, angle = _logradius_angle_grid(r, c)
 
         Xrcos, Yrcos = _rcos_curve(1, -0.5)
         Yrcos = np.sqrt(Yrcos)
@@ -327,21 +346,21 @@ class Steerable:
         return np.fft.ifft2(np.fft.ifftshift(outdft)).real
 
 
-def _base(m, n):
+def _logradius_angle_grid(m, n):
     """
     Helper function that create a grid containing radius from center and angle.
 
     Parameters
     ----------
     m, n : int
-        size of the desired grid
+        Size of the desired grid
 
     Returns
     -------
     log_rad : [mxn] array
-        log of the radius with respect to the center of the matrix
+        Log of the radius with respect to the center of the matrix
     angle : [mxn] array
-        the angle of the line originated from center of the matrix
+        The angle of the line originated from center of the matrix
     """
 
     ctrm = np.ceil((m + 0.5) / 2).astype(int)
