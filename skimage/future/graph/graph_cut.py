@@ -338,7 +338,7 @@ def _ncut_relabel(rag, thresh, num_cuts):
         # Refer Shi & Malik 2000, Equation 7, Page 891
         # Only the second lowest eigenvector needed
         vals, vectors = linalg.eigsh(d2 * (d - w) * d2, which='SM',
-                                     k=2, ncv=m)
+                                     k=min(m-1, 100))
 
         # Pick second smallest eigenvector.
         # Refer Shi & Malik 2000, Section 3.2.3, Page 893

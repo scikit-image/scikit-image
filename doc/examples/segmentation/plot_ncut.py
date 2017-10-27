@@ -36,7 +36,7 @@ labels2 = next(label_gen)
 labels2 = label_gen.send(1e-3)
 
 # Either method yields the same labels
-(labels1 == labels2).all()  # Evaluates to True
+assert (labels1 == labels2).all()
 
 
 out2 = color.label2rgb(labels1, img, kind='avg')
