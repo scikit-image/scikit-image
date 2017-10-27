@@ -6,6 +6,94 @@ import itertools
 from warnings import warn
 
 
+def moments_contour(contour, order=3):
+    """Calculate all raw image moments up to a certain order.
+
+    The following properties can be calculated from raw image moments:
+     * Area as: ``M[0, 0]``.
+     * Centroid as: {``M[1, 0] / M[0, 0]``, ``M[0, 1] / M[0, 0]``}.
+
+    Note that raw moments are neither translation, scale nor rotation
+    invariant.
+
+    Parameters
+    ----------
+    contour : (N, D) double or uint8 array
+        Array of N points that describe an image of D dimensionality in
+        Euclidian space.
+    order : int, optional
+        Maximum order of moments. Default is 3.
+
+    Returns
+    -------
+    m : (``order + 1``, ``order + 1``) array
+        Raw image moments.
+
+    References
+    ----------
+    .. [1] Johannes Kilian. Simple Image Analysis By Moments. Durham
+           University, version 0.2, Durham, 2001.
+
+    Examples
+    --------
+    >>> contour = np.array([[r, c] for r in range(13, 17)
+                  for c in range(13, 17)], dtype=np.double)
+    >>> M = moments_contour(contour)
+    >>> cr = M[1, 0] / M[0, 0]
+    >>> cc = M[0, 1] / M[0, 0]
+    >>> cr, cc
+    (14.5, 14.5)
+    """
+    moments_contour_central(contour, 0, order=order)
+
+
+def moments_contour_central(contour, center=None, order=3):
+    """Calculate all raw image moments up to a certain order.
+
+    The following properties can be calculated from raw image moments:
+     * Area as: ``M[0, 0]``.
+     * Centroid as: {``M[1, 0] / M[0, 0]``, ``M[0, 1] / M[0, 0]``}.
+
+    Note that raw moments are neither translation, scale nor rotation
+    invariant.
+
+    Parameters
+    ----------
+    contour : (N, D) double or uint8 array
+        Array of N points that describe an image of D dimensionality in
+        Euclidian space.
+    center : tuple of float, optional
+        Coordinates of the image centroid. This will be computed if it
+        is not provided.
+    order : int, optional
+        Maximum order of moments. Default is 3.
+
+    Returns
+    -------
+    m : (``order + 1``, ``order + 1``) array
+        Raw image moments.
+
+    References
+    ----------
+    .. [1] Johannes Kilian. Simple Image Analysis By Moments. Durham
+           University, version 0.2, Durham, 2001.
+
+    Examples
+    --------
+    >>> contour = np.array([[r, c] for r in range(13, 17)
+                  for c in range(13, 17)], dtype=np.double)
+    >>> M = moments_contour(contour)
+    >>> cr = M[1, 0] / M[0, 0]
+    >>> cc = M[0, 1] / M[0, 0]
+    >>> moments_contour_central(contour, (cr, cc))
+    array([[ 16.,   0.,  20.,   0.],
+           [  0.,   0.,   0.,   0.],
+           [ 20.,   0.,  25.,   0.],
+           [  0.,   0.,   0.,   0.]])
+    """
+    pass
+
+
 def moments(image, order=3):
     """Calculate all raw image moments up to a certain order.
 
@@ -18,7 +106,7 @@ def moments(image, order=3):
 
     Parameters
     ----------
-    image : 2D double or uint8 array
+    image : nD double or uint8 array
         Rasterized shape as image.
     order : int, optional
         Maximum order of moments. Default is 3.
@@ -63,7 +151,7 @@ def moments_central(image, center=None, cc=None, order=3, **kwargs):
 
     Parameters
     ----------
-    image : 2D double or uint8 array
+    image : nD double or uint8 array
         Rasterized shape as image.
     center : tuple of float, optional
         Coordinates of the image centroid. This will be computed if it
