@@ -35,7 +35,7 @@ label_gen = graph.cut_normalized_gen(super_pixels, g, thresh=1e-4)
 labels2 = next(label_gen)
 labels2 = label_gen.send(1e-3)
 
-# Either method yields the same labels
+# Either method yields the same labels, barring an unlucky random seed
 assert (labels1 == labels2).all()
 
 
