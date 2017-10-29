@@ -24,14 +24,14 @@ def _generate_rectangle_mask(point, image, shape, random):
     ------
     ArithmeticError
         When a shape cannot be fit into the image with the given starting
-        coordinates (x_0, y_0). This usually means the image dimensions are too
-        small or shape dimensions too large.
+        coordinates. This usually means the image dimensions are too small or
+        shape dimensions too large.
 
     Returns
     -------
     label : tuple
-        A tuple specifying the category of the shape, as well as its x1, x2, y1
-        and y2 bounding box coordinates.
+        A (category, ((r0, r1), (c0, c1))) tuple specifying the category and
+        bounding box coordinates of the shape.
     indices : 2-D array
         A mask of indices that the shape fills.
     """
@@ -55,7 +55,7 @@ def _generate_rectangle_mask(point, image, shape, random):
         point[1] + c,
         point[1] + c,
     ])
-    label = ('rectangle', point[1], point[1] + c, point[0], point[0] + r)
+    label = ('rectangle', ((point[0], point[0] + r), (point[1], point[1] + c)))
 
     return rectangle, label
 
@@ -80,14 +80,14 @@ def _generate_circle_mask(point, image, shape, random):
     ------
     ArithmeticError
         When a shape cannot be fit into the image with the given starting
-        coordinates (x_0, y_0). This usually means the image dimensions are too
-        small or shape dimensions too large.
+        coordinates. This usually means the image dimensions are too small or
+        shape dimensions too large.
 
     Returns
     -------
     label : tuple
-        A tuple specifying the category of the shape, as well as its x1, x2, y1
-        and y2 bounding box coordinates.
+        A (category, ((r0, r1), (c0, c1))) tuple specifying the category and
+        bounding box coordinates of the shape.
     indices : 2-D array
         A mask of indices that the shape fills.
     """
@@ -104,8 +104,8 @@ def _generate_circle_mask(point, image, shape, random):
         raise ArithmeticError('cannot fit shape to image')
     radius = random.randint(min_radius, available_radius + 1)
     circle = draw_circle(point[0], point[1], radius)
-    label = ('circle', point[1] - radius + 1, point[1] + radius,
-             point[0] - radius + 1, point[0] + radius)
+    label = ('circle', ((point[0] - radius + 1, point[0] + radius),
+                        (point[1] - radius + 1, point[1] + radius)))
 
     return circle, label
 
@@ -130,14 +130,14 @@ def _generate_triangle_mask(point, image, shape, random):
     ------
     ArithmeticError
         When a shape cannot be fit into the image with the given starting
-        coordinates (x_0, y_0). This usually means the image dimensions are too
-        small or shape dimensions too large.
+        coordinates. This usually means the image dimensions are too small or
+        shape dimensions too large.
 
     Returns
     -------
     label : tuple
-        A tuple specifying the category of the shape, as well as its x1, x2, y1
-        and y2 bounding box coordinates.
+        A (category, ((r0, r1), (c0, c1))) tuple specifying the category and
+        bounding box coordinates of the shape.
     indices : 2-D array
         A mask of indices that the shape fills.
     """
@@ -157,8 +157,8 @@ def _generate_triangle_mask(point, image, shape, random):
         point[1] + side // 2,
         point[1] + side,
     ])
-    label = ('triangle', point[1], point[1] + side, point[0] - triangle_height,
-             point[0])
+    label = ('triangle', ((point[0] - triangle_height, point[0]),
+                          (point[1], point[1] + side)))
 
     return triangle, label
 
@@ -204,16 +204,16 @@ def _generate_random_color(gray, min_pixel_intensity, random):
 
 
 def random_shapes(image_shape,
-                    max_shapes,
-                    min_shapes=1,
-                    min_size=2,
-                    max_size=None,
-                    gray=False,
-                    shape=None,
-                    min_pixel_intensity=0,
-                    allow_overlap=False,
-                    num_trials=100,
-                    random_seed=None):
+                  max_shapes,
+                  min_shapes=1,
+                  min_size=2,
+                  max_size=None,
+                  gray=False,
+                  shape=None,
+                  min_pixel_intensity=0,
+                  allow_overlap=False,
+                  num_trials=100,
+                  random_seed=None):
     """Generate an image with random shapes, labeled with bounding boxes.
 
     The image is populated with random shapes with random sizes, random
@@ -258,7 +258,9 @@ def random_shapes(image_shape,
     image : uint8 array
         An image with the fitted shapes.
     labels : list
-        A list of labels, one per shape in the image.
+        A list of labels, one per shape in the image. Each label is a (category,
+        ((r0, r1), (c0, c1))) tuple specifying the category and bounding box
+        coordinates of the shape.
 
     Examples
     --------
@@ -274,8 +276,8 @@ def random_shapes(image_shape,
         [255, 255, 255],
         [255, 255, 255]]], dtype=uint8)
     >>> labels # doctest: +SKIP
-    [('circle', 22, 25, 18, 21),
-     ('triangle', 5, 13, 6, 13)]
+    [('circle', ((22, 18), (25, 21))),
+     ('triangle', ((5, 6), (13, 13)))]
     """
     if min_size > image_shape[0] or min_size > image_shape[1]:
         raise ValueError('Minimum dimension must be less than ncols and nrows')

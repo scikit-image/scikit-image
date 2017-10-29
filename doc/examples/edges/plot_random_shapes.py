@@ -17,7 +17,7 @@ result = random_shapes(
 
 # We get back a tuple consisting of (1) the image with the generated shapes
 # and (2) a list of label tuples with the kind of shape (e.g. circle, rectangle)
-# and (x1, x2, y1, y2) coordinates.
+# and ((r0, r1), (c0, c1)) coordinates.
 image, labels = result
 print(image.shape, labels)
 

@@ -22,14 +22,16 @@ def test_generates_correct_bounding_boxes_for_rectangles():
         min_pixel_intensity=1,
         random_seed=42)
     assert len(labels) == 1
-    label = labels[0]
-    crop = image[label[3]:label[4], label[1]:label[2]]
+    label, bbox = labels[0]
+    assert label == 'rectangle', label
+
+    crop = image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]]
 
     # The crop is filled.
     assert (crop < 255).all()
 
     # The crop is complete.
-    image[label[3]:label[4], label[1]:label[2]] = 255
+    image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]] = 255
     assert (image == 255).all()
 
 
@@ -40,15 +42,17 @@ def test_generates_correct_bounding_boxes_for_triangles():
         shape='triangle',
         min_pixel_intensity=1,
         random_seed=42)
-    # assert len(labels) == 1
-    label = labels[0]
-    crop = image[label[3]:label[4], label[1]:label[2]]
+    assert len(labels) == 1
+    label, bbox = labels[0]
+    assert label == 'triangle', label
+
+    crop = image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]]
 
     # The crop is filled.
     assert (crop < 255).any()
 
     # The crop is complete.
-    image[label[3]:label[4], label[1]:label[2]] = 255
+    image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]] = 255
     assert (image == 255).all()
 
 
@@ -62,14 +66,16 @@ def test_generates_correct_bounding_boxes_for_circles():
         min_pixel_intensity=1,
         random_seed=42)
     assert len(labels) == 1
-    label = labels[0]
-    crop = image[label[3]:label[4], label[1]:label[2]]
+    label, bbox = labels[0]
+    assert label == 'circle', label
+
+    crop = image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]]
 
     # The crop is filled.
     assert (crop < 255).any()
 
     # The crop is complete.
-    image[label[3]:label[4], label[1]:label[2]] = 255
+    image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]] = 255
     assert (image == 255).all()
 
 
@@ -94,8 +100,8 @@ def test_can_generate_one_by_one_rectangle():
         shape='rectangle',
         min_pixel_intensity=1)
     assert len(labels) == 1
-    label = labels[0]
-    crop = image[label[3]:label[4], label[1]:label[2]]
+    _, bbox = labels[0]
+    crop = image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]]
     assert (crop < 255).sum() == 3  # rgb
 
 
