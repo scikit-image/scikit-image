@@ -2,13 +2,13 @@ import functools
 
 import numpy as np
 
-from .. import color
+from .. import color,data
 from ..util.dtype import convert
 
 
 __all__ = ['adapt_rgb', 'hsv_value', 'each_channel']
 
-
+skimage.color.rgbtohsv(image)
 def is_rgb_like(image):
     """Return True if the image *looks* like it's RGB.
 
