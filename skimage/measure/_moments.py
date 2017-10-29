@@ -102,21 +102,32 @@ def moments_contour_central(contour, center=None, order=3):
         center = M[tuple(np.eye(ndim, dtype=int))]
     else:
         # TODO: Handle broadcasting of `center` argument.
-        if center == 0:
-            center = (0,) * ndim
+        if center is int:
+            center = (center,) * ndim
 
     calc = contour.astype(float)
     calc -= center
+
+    # generate all possible exponents for each axis in the given set of points
+    # produces a matrix of shape (N, D, order + 1)
     calc = calc[..., np.newaxis] ** np.arange(order + 1)
-    # for a contour of shape (N, D), the following
-    # produces an N x D**2 calculation of moments
-    # for the points, then sums along axis 0
-    calc = np.einsum(('i...,' * ndim)[:-1],
-                     (*
-                      [calc[:, i::ndim].squeeze()
-                       [..., (* ([np.newaxis] * i + [slice(None)]
-                                 + [np.newaxis] * (ndim - i - 1)))]
-                       for i in range(ndim)]))
+
+    # FIXME: Find a better way to do this than DIY `fold` function.
+    def _expand(current, mat):
+        """Recursively multiplies each element of mat against each other,
+           generating a matrix of all possible products of mat's elements."""
+        if mat.size == 0:
+            return current
+        first = mat[0]
+        rest = mat[1:]
+        current = current[..., np.newaxis] * first
+        return _expand(current, rest)
+
+    M = []
+    for point in calc:
+        M += [_expand(point[0], point[1:])]
+
+    calc = np.sum(M, axis=0)
 
     return calc
 
