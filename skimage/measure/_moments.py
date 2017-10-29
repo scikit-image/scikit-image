@@ -37,7 +37,7 @@ def moments_contour(contour, order=3):
 
     Examples
     --------
-    >>> contour = np.array([[r, c] for r in range(13, 17)
+    >>> contour = np.array([[r, c] for r in range(13, 17) \
                   for c in range(13, 17)], dtype=np.double)
     >>> M = moments_contour(contour)
     >>> cr = M[1, 0] / M[0, 0]
@@ -81,7 +81,7 @@ def moments_contour_central(contour, center=None, order=3):
 
     Examples
     --------
-    >>> contour = np.array([[r, c] for r in range(13, 17)
+    >>> contour = np.array([[r, c] for r in range(13, 17) \
                   for c in range(13, 17)], dtype=np.double)
     >>> M = moments_contour(contour)
     >>> cr = M[1, 0] / M[0, 0]
@@ -115,7 +115,7 @@ def moments_contour_central(contour, center=None, order=3):
                      (*
                       [calc[:, i::ndim].squeeze()
                        [..., (* ([np.newaxis] * i + [slice(None)]
-                                 + [np.newaxis]*(ndim-i-1)))]
+                                 + [np.newaxis] * (ndim - i - 1)))]
                        for i in range(ndim)]))
 
     return calc
