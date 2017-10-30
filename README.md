@@ -14,12 +14,11 @@
 - **Anaconda:** ``conda install scikit-image``
 - **Windows:** Download [Windows binaries](http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikits.image)
 
-Also see
-[http://scikit-image.org/docs/dev/install.html](http://scikit-image.org/docs/dev/install.html)
+Also see [installing ``scikit-image``](INSTALL.rst).
 
 ## Installation from source
 
-Install [dependencies](DEPENDS.txt) using:
+Install dependencies using:
 
 ```
 pip install -r requirements.txt
