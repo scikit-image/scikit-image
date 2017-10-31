@@ -15,18 +15,26 @@ References
 from skimage import data, segmentation, color
 from skimage.future import graph
 from matplotlib import pyplot as plt
+import numpy as np
 from numpy.random import seed
 from random import seed as rseed
+import pickle
 seed(9001)
 rseed(9002)
 
 
 img = data.coffee()
 
-super_pixels = segmentation.slic(img, compactness=30, n_segments=400)
+super_pixels1 = segmentation.slic(img, compactness=30, n_segments=400)
+super_pixels = np.load('skimage/data/fixed_sp.npy')
 out1 = color.label2rgb(super_pixels, img, kind='avg')
+print((super_pixels1 == super_pixels).all())
 
-g = graph.rag_mean_color(img, super_pixels, mode='similarity')
+g1 = graph.rag_mean_color(img, super_pixels, mode='similarity')
+with open('skimage/data/fixed_rag.pkl','rb') as ragf:
+    g = pickle.load(ragf)
+print(g1.adj == g.adj)
+
 
 # Two ways to apply Normalized Cuts:
 
