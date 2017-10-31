@@ -233,6 +233,7 @@ def partition_by_cut(cut, rag):
 
     nodes1 = [n for i, n in enumerate(rag.nodes()) if cut[i]]
     nodes2 = [n for i, n in enumerate(rag.nodes()) if not cut[i]]
+    #print(nodes1 + nodes2 == rag.nodes())
 
     sub1 = rag.subgraph(nodes1)
     sub2 = rag.subgraph(nodes2)
@@ -344,6 +345,11 @@ def _ncut_relabel(rag, thresh, num_cuts):
         # Pick second smallest eigenvector.
         # Refer Shi & Malik 2000, Section 3.2.3, Page 893
         ev = vectors[:, 1]
+
+        # Make sure first entry in eigenvector non-negative so 
+        # setting seed fixes labels
+        if ev[0] < 0:
+            ev = -ev
 
         cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
 
