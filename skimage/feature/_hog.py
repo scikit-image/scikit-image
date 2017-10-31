@@ -15,7 +15,7 @@ def _hog_normalize_block(block, method, eps=1e-5):
     elif method == 'L2-Hys':
         out = block / np.sqrt(np.sum(block ** 2) + eps ** 2)
         out = np.minimum(out, 0.2)
-        out = out / np.sqrt(np.sum(block ** 2) + eps ** 2)
+        out = out / np.sqrt(np.sum(out ** 2) + eps ** 2)
     else:
         raise ValueError('Selected block normalization method is invalid.')
 
@@ -23,7 +23,7 @@ def _hog_normalize_block(block, method, eps=1e-5):
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
-        block_norm='L1', visualize=False, visualise=None, transform_sqrt=False,
+        block_norm=None, visualize=False, visualise=None, transform_sqrt=False,
         feature_vector=True):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
@@ -74,7 +74,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     -------
     newarr : ndarray
         HOG for the image as a 1D (flattened) array.
-    hog_image : ndarray (if visualize=True)
+    hog_image : ndarray (if visualize==True)
         A visualisation of the HOG image.
 
     References
@@ -111,9 +111,12 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     and then applies the hog algorithm to the image.
     """
 
-    if block_norm == 'L1':
+    if block_norm is None:
+        block_norm = 'L1'
         warn('Default value of `block_norm`==`L1` is deprecated and will '
-             'be changed to `L2-Hys` in v0.15', skimage_deprecation)
+             'be changed to `L2-Hys` in v0.15. To supress this message '
+             'specify explicitly the normalization method.',
+             skimage_deprecation)
 
     image = np.atleast_2d(image)
 
@@ -147,8 +150,14 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         # to avoid problems with subtracting unsigned numbers
         image = image.astype('float')
 
-    gy, gx = [np.ascontiguousarray(g, dtype=np.double)
-              for g in np.gradient(image)]
+    gx = np.empty(image.shape, dtype=np.double)
+    gx[:, 0] = 0
+    gx[:, -1] = 0
+    gx[:, 1:-1] = image[:, 2:] - image[:, :-2]
+    gy = np.empty(image.shape, dtype=np.double)
+    gy[0, :] = 0
+    gy[-1, :] = 0
+    gy[1:-1, :] = image[2:, :] - image[:-2, :]
 
     """
     The third stage aims to produce an encoding that is sensitive to
