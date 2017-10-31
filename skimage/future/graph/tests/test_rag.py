@@ -4,6 +4,7 @@ from skimage._shared.version_requirements import is_installed
 from skimage import segmentation
 from skimage import data
 import pytest
+from random import seed as rseed
 
 
 def max_edge(g, src, dst, n):
@@ -149,6 +150,7 @@ def test_cut_normalized_gen():
                     reason="networkx not installed")
 def test_cut_normalized_stability():
     np.random.seed(349)
+    rseed(350)
     img = data.coffee()
     labels = segmentation.slic(img, compactness=30, n_segments=400)
     rag = graph.rag_mean_color(img, labels, mode='similarity')
