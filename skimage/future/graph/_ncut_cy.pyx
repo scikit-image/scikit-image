@@ -6,6 +6,41 @@ cimport numpy as cnp
 import numpy as np
 
 
+def argmin2(cnp.double_t[:] array):
+    """Return the index of the 2nd smallest value in an array.
+
+    Parameters
+    ----------
+    array : array
+        The array to process.
+
+    Returns
+    -------
+    min_idx2 : int
+        The index of the second smallest value.
+    """
+    cdef cnp.float64_t min1 = np.inf
+    cdef cnp.float64_t min2 = np.inf
+    cdef Py_ssize_t min_idx1 = 0
+    cdef Py_ssize_t min_idx2 = 0
+    cdef Py_ssize_t i = 0
+    cdef Py_ssize_t n = array.shape[0]
+
+    for i in range(n):
+        x = array[i]
+        if x < min1:
+            min2 = min1
+            min_idx2 = min_idx1
+            min1 = x
+            min_idx1 = i
+        elif x > min1 and x < min2:
+            min2 = x
+            min_idx2 = i
+        i += 1
+
+    return min_idx2
+
+
 def cut_cost(cut, W):
     """Return the total weight of crossing edges in a bi-partition.
 
