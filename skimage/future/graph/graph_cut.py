@@ -336,9 +336,10 @@ def _ncut_relabel(rag, thresh, num_cuts):
         d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
 
         # Refer Shi & Malik 2000, Equation 7, Page 891
-        # Only the second lowest eigenvector needed
+        v0 = 2*np.random.random((m,)) - 1  # Define for reproducibility
+        v0 = v0/np.linalg.norm(v0)
         vals, vectors = linalg.eigsh(d2 * (d - w) * d2, which='SM',
-                                     k=min(m-1, 100))
+                                     k=min(m-1, 100), v0=v0)
 
         # Pick second smallest eigenvector.
         # Refer Shi & Malik 2000, Section 3.2.3, Page 893
@@ -369,7 +370,7 @@ def _ncut_relabel(rag, thresh, num_cuts):
                 del cut_mask
                 calc_subgraph = False
 
-            # Propagate next() calls to all active subgraphs
+            # Propagate send() call to subgraphs
             while (mcut < thresh):
                 branch1.send(thresh)
                 branch2.send(thresh)

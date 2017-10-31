@@ -12,10 +12,11 @@ References
        Pattern Analysis and Machine Intelligence,
        IEEE Transactions on, vol. 22, no. 8, pp. 888-905, August 2000.
 """
-
 from skimage import data, segmentation, color
 from skimage.future import graph
 from matplotlib import pyplot as plt
+from numpy.random import seed
+seed(9001)
 
 
 img = data.coffee()
@@ -35,7 +36,7 @@ label_gen = graph.cut_normalized_gen(super_pixels, g, thresh=1e-4)
 labels2 = next(label_gen)
 labels2 = label_gen.send(1e-3)
 
-# Either method yields the same labels, barring an unlucky random seed
+# Either method yields the same labels
 assert (labels1 == labels2).all()
 
 

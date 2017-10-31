@@ -148,8 +148,9 @@ def test_cut_normalized_gen():
 @pytest.mark.skipif(not is_installed('networkx'),
                     reason="networkx not installed")
 def test_cut_normalized_stability():
+    np.random.seed(349)
     img = data.coffee()
-    labels = segmentation.slic(img,compactness=30,n_segments=400)
+    labels = segmentation.slic(img, compactness=30, n_segments=400)
     rag = graph.rag_mean_color(img, labels, mode='similarity')
 
     label_gen = graph.cut_normalized_gen(labels, rag, 0)
