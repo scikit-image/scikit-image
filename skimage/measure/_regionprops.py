@@ -152,12 +152,11 @@ class _RegionProperties(object):
     def centroid(self):
         return tuple(self.coords.mean(axis=0))
 
-    @only2d
+    @_cached
     def convex_area(self):
         return np.sum(self.convex_image)
 
     @_cached
-    @only2d
     def convex_image(self):
         from ..morphology.convex_hull import convex_hull_image
         return convex_hull_image(self.image)
@@ -286,7 +285,6 @@ class _RegionProperties(object):
     def perimeter(self):
         return perimeter(self.image, 4)
 
-    @only2d
     def solidity(self):
         return self.area / self.convex_area
 
