@@ -3,8 +3,12 @@
 
 environment:
   matrix:
-    - PYTHON: "C:\\Python27"
-    - PYTHON: "C:\\Python35-x64"
+    - PYTHON: C:\Python27
+    - PYTHON: C:\Python27-x64
+    - PYTHON: C:\Python35
+    - PYTHON: C:\Python35-x64
+    - PYTHON: C:\Python36
+    - PYTHON: C:\Python36-x64
 
 matrix:
   fast_finish: true
@@ -38,9 +42,9 @@ install:
   # Install the build and runtime dependencies of the project.
   # The --pre flag is necessary to grab a SciPy wheel, which is in
   # pre-release at the time of writing (03-10-2017)
-  - pip install --pre -r requirements.txt"
-  - pip install -r requirements/build.txt"
-  - python setup.py bdist_wheel bdist_wininst"
+  - pip install --pre -r requirements.txt
+  - pip install -r requirements/build.txt
+  - python setup.py bdist_wheel bdist_wininst
   - ps: "ls dist"
 
   # Install the generated wheel package to test it
