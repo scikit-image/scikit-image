@@ -25,7 +25,7 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
 
     Parameters
     ----------
-    image : (M, N) array
+    image : array
         Binary input image. This array is cast to bool before processing.
     offset_coordinates : bool, optional
         If ``True``, a pixel at coordinate, e.g., (4, 7) will be represented
