@@ -5,7 +5,8 @@ except ImportError:
     warn('RAGs require networkx')
 import numpy as np
 from . import _ncut
-from scipy.sparse import linalg
+from scipy import linalg
+from scipy.sparse import csr_matrix
 
 
 def cut_threshold(labels, rag, thresh, in_place=True):
@@ -328,19 +329,23 @@ def _ncut_relabel(rag, thresh, num_cuts):
     """
     d, w = _ncut.DW_matrices(rag)
     m = w.shape[0]
+    d = d.todense()
+    w = w.todense()
 
     # If 2 regions not cutting is optimal choice
     if m > 2:
         d2 = d.copy()
         # Since d is diagonal, we can directly operate on its data
         # the inverse of the square root
-        d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
+        d2 = linalg.inv(np.sqrt(d2))
 
         # Refer Shi & Malik 2000, Equation 7, Page 891
-        v0 = 2*np.random.random((m,)) - 1  # Define for reproducibility
-        v0 = v0/np.linalg.norm(v0)
-        vals, vectors = linalg.eigsh(d2 * (d - w) * d2, which='SM',
-                                     k=min(m-1, 100), v0=v0)
+        #v0 = 2*np.random.random((m,)) - 1  # Define for reproducibility
+        #v0 = v0/np.linalg.norm(v0)
+        #vals, vectors = linalg.eigsh(d2 * (d - w) * d2, which='SM',
+        #                             k=min(m-1, 100), v0=v0)
+
+        vals, vectors = linalg.eigh(d2 * (d - w) * d2)
 
         # Pick second smallest eigenvector.
         # Refer Shi & Malik 2000, Section 3.2.3, Page 893
@@ -351,6 +356,8 @@ def _ncut_relabel(rag, thresh, num_cuts):
         if ev[0] < 0:
             ev = -ev
 
+        d = csr_matrix(d)
+        w = csr_matrix(w)
         cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
 
         # These variables no longer needed
