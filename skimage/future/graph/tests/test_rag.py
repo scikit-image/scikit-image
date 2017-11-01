@@ -148,6 +148,7 @@ def test_threshold_cut():
 @pytest.mark.skipif(not is_installed('networkx'),
                     reason="networkx not installed")
 def test_cut_normalized_stability():
+    print('Test started')
     np.random.seed(349)
     img = data.coffee()
     labels = segmentation.slic(img, compactness=30, n_segments=400)
@@ -167,19 +168,18 @@ def test_cut_normalized_stability():
     assert (labels1 == labels2).all()
 
     labels1 = graph.cut_normalized(labels, rag, 1e-2)
-    labels3 = label_gen.send(1e-2)
+    labels2 = label_gen.send(1e-2)
     labels1, _, _ = segmentation.relabel_sequential(labels1)
-    labels3, _, _ = segmentation.relabel_sequential(labels3)
-    assert (labels1 == labels3).all()
+    labels2, _, _ = segmentation.relabel_sequential(labels2)
+    assert (labels1 == labels2).all()
 
     # If others pass and this fails check labels
     # are being rewritten correctly when threshold falls
-    labels1 = graph.cut_normalized(labels, rag, 1e-4)
-    labels4 = label_gen.send(1e-4)
+    labels1 = graph.cut_normalized(labels, rag, 1e-3)
+    labels2 = label_gen.send(1e-3)
     labels1, _, _ = segmentation.relabel_sequential(labels1)
-    labels4, _, _ = segmentation.relabel_sequential(labels4)
-    assert (labels2 == labels4).all()
-    assert (labels1 == labels4).all()
+    labels2, _, _ = segmentation.relabel_sequential(labels2)
+    assert (labels1 == labels2).all()
 
 
 @pytest.mark.skipif(not is_installed('networkx'),
