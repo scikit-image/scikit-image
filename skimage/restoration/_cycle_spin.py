@@ -2,16 +2,7 @@ from multiprocessing import cpu_count
 from itertools import product
 
 import numpy as np
-from .._shared.utils import warn
-
-has_futures = True
-try:
-    from concurrent import futures
-except ImportError:
-    try:
-        import futures
-    except ImportError:
-        has_futures = False
+import dask
 
 
 def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
@@ -47,8 +38,8 @@ def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
             "Multichannel cycle spinning should not have shifts along the "
             "last axis.")
 
-    return product(*([range(0, s+1, t) for
-                      s, t in zip(max_shifts, shift_steps)]))
+    return product(*[range(0, s+1, t) for
+                     s, t in zip(max_shifts, shift_steps)])
 
 
 def _roll_axes(x, rolls, axes=None):
@@ -70,12 +61,10 @@ def _roll_axes(x, rolls, axes=None):
     """
     if axes is None:
         axes = np.arange(len(rolls))
-    try:
-        # numpy>=1.12 supports tuple for rolls, axes
-        return np.roll(x, rolls, axes)
-    except TypeError:
-        for r, a in zip(rolls, axes):
-            x = np.roll(x, r, a)
+    # Replace this loop with x = np.roll(x, rolls, axes) when NumPy>=1.12
+    # becomes a requirement.
+    for r, a in zip(rolls, axes):
+        x = np.roll(x, r, a)
     return x
 
 
@@ -157,25 +146,18 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=1,
         tmp = func(xs, **func_kw)
         return _roll_axes(tmp, -np.asarray(shift))
 
-    if not has_futures:
-        if num_workers is None or num_workers > 1:
-            warn("Setting num_workers to 1 because the futures package was not"
-                 "found. On Python 2.7, futures can be installed via:\n"
-                 "pip install futures")
-        num_workers = 1
-
+    # compute a running average across the cycle shifts
     avg_y = 0
     if num_workers == 1:
         # serial processing
-        for shift in all_shifts:
-            avg_y += _run_one_shift(shift)
+        for i, shift in enumerate(all_shifts):
+            avg_y += (_run_one_shift(shift) - avg_y) / (i + 1)
     else:
-        # multithread via concurrent.futures ThreadPoolExecutor
+        # multithreaded via dask
         if num_workers is None:
             num_workers = cpu_count()
         num_workers = np.clip(num_workers, 1, nshifts)
-        with futures.ThreadPoolExecutor(max_workers=num_workers) as execute:
-            for y in execute.map(_run_one_shift, all_shifts):
-                avg_y += y
-    avg_y /= nshifts
+        for i, shift in enumerate(all_shifts):
+            avg_y += (dask.delayed(_run_one_shift)(shift) - avg_y) / (i + 1)
+        avg_y = avg_y.compute(get=dask.threaded.get, num_workers=num_workers)
     return avg_y

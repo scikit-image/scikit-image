@@ -3,14 +3,14 @@
 Wavelet denoising
 =================
 
-The discrete wavelet transform is not `shift-invariant`_.  Shift variance can
+The discrete wavelet transform is not `shift-invariant`_.  Shift invariance can
 be achieved through an undecimated wavelet transform (also called stationary
 wavelet transform), at cost of increased redundancy (i.e. more wavelet
 coefficients than input image pixels).  An alternative way to approximate
 shift-invariance in the context of image denoising with the discrete wavelet
-transform is to use the technique known as "cycle spinning".  Essentially this
-involves averaging the results of the following 3-step procedure for multiple
-spatial shifts, n:
+transform is to use the technique known as "cycle spinning".  This involves
+averaging the results of the following 3-step procedure for multiple spatial
+shifts, n:
 
 1.) (circularly) shift the signal by an amount, n
 2.) apply denoising
@@ -38,13 +38,11 @@ noisy = random_noise(original, var=sigma**2)
 fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(10, 4), sharex=False,
                        sharey=False, subplot_kw={'adjustable': 'box-forced'})
 ax = ax.ravel()
-plt.gray()
 
 psnr_noisy = compare_psnr(original, noisy)
 ax[0].imshow(noisy)
 ax[0].axis('off')
 ax[0].set_title('Noisy\nPSNR={:0.4g}'.format(psnr_noisy))
-
 
 
 # Repeat denosing with different amounts of cycle spinning.  e.g.
