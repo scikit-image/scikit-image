@@ -53,4 +53,3 @@ for a in ax:
     a.axis('off')
 
 plt.tight_layout()
-plt.show()

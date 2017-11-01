@@ -7,6 +7,7 @@ import numpy as np
 from . import _ncut
 from scipy import linalg
 from scipy.sparse import csr_matrix
+import pickle
 
 
 def cut_threshold(labels, rag, thresh, in_place=True):
@@ -234,7 +235,6 @@ def partition_by_cut(cut, rag):
 
     nodes1 = [n for i, n in enumerate(rag.nodes()) if cut[i]]
     nodes2 = [n for i, n in enumerate(rag.nodes()) if not cut[i]]
-    #print(nodes1 + nodes2 == rag.nodes())
 
     sub1 = rag.subgraph(nodes1)
     sub2 = rag.subgraph(nodes2)
@@ -344,9 +344,8 @@ def _ncut_relabel(rag, thresh, num_cuts):
         #v0 = v0/np.linalg.norm(v0)
         #vals, vectors = linalg.eigsh(d2 * (d - w) * d2, which='SM',
         #                             k=min(m-1, 100), v0=v0)
-        print('Before eigenpairs')
         vals, vectors = linalg.eigh(d2 * (d - w) * d2)
-        print('After eigenpairs')
+
 
         # Pick second smallest eigenvector.
         # Refer Shi & Malik 2000, Section 3.2.3, Page 893
@@ -371,7 +370,6 @@ def _ncut_relabel(rag, thresh, num_cuts):
             if (mcut >= thresh):
                 _label_all(rag, 'ncut label')
             while (mcut >= thresh):
-                print('small thresh: {}'.format(mcut))
                 thresh = yield
 
             # Only prepare _ncut_relabel generators for subgraphs
@@ -387,17 +385,14 @@ def _ncut_relabel(rag, thresh, num_cuts):
 
             # Propagate send() call to subgraphs
             while (mcut < thresh):
-                print('large thresh: {}'.format(mcut))
                 branch1.send(thresh)
                 branch2.send(thresh)
                 thresh = yield
-            print('completed a loop {}'.format(mcut))
     else:
         # There were less than three super pixels to cut. The remaining
         # graph is a region.
         # Assign `ncut label` by picking any label from the existing
         # nodes, since `labels` are unique, `new_label` is also unique.
         while True:
-            print('Bottomed out')
             _label_all(rag, 'ncut label')
             yield
