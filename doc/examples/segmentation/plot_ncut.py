@@ -16,7 +16,7 @@ from skimage import data, segmentation, color
 from skimage.future import graph
 from matplotlib import pyplot as plt
 from numpy.random import seed
-seed(9001)
+#seed(9001)
 
 
 img = data.coffee()
@@ -37,6 +37,8 @@ labels2 = next(label_gen)
 labels2 = label_gen.send(1e-3)
 
 # Either method yields the same labels
+labels1, _, _ = segmentation.relabel_sequential(labels1)
+labels2, _, _ = segmentation.relabel_sequential(labels2)
 assert (labels1 == labels2).all()
 
 
