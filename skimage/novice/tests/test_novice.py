@@ -2,13 +2,15 @@ import os
 import tempfile
 
 import numpy as np
-from numpy.testing import assert_equal, assert_allclose
 from skimage import novice
 from skimage.novice._novice import (array_to_xy_origin, xy_to_array_origin,
                                     rgb_transpose)
 from skimage import data_dir
-from skimage._shared.utils import all_warnings
+
 from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_allclose
+from skimage._shared.utils import all_warnings
+
 
 IMAGE_PATH = os.path.join(data_dir, "chelsea.png")
 SMALL_IMAGE_PATH = os.path.join(data_dir, "block.png")

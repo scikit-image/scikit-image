@@ -1,5 +1,3 @@
-from numpy.testing import (assert_almost_equal,
-                           assert_equal)
 import numpy as np
 from scipy.ndimage import map_coordinates
 
@@ -11,9 +9,11 @@ from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
                                downscale_local_mean)
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import test_parallel
+
 from skimage._shared import testing
+from skimage._shared.testing import (assert_almost_equal, assert_equal,
+                                     test_parallel)
+from skimage._shared._warnings import expected_warnings
 
 
 np.random.seed(0)
@@ -182,9 +182,9 @@ def test_rescale():
 
 def test_rescale_invalid_scale():
     x = np.zeros((10, 10, 3))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         rescale(x, (2, 2), multichannel=False)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         rescale(x, (2, 2, 2), multichannel=True)
 
 
@@ -388,7 +388,7 @@ def test_downsize_anti_aliasing():
 
 def test_downsize_anti_aliasing_invalid_stddev():
     x = np.zeros((10, 10), dtype=np.double)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         resize(x, (5, 5), order=0, anti_aliasing=True, anti_aliasing_sigma=-1)
     with expected_warnings(["Anti-aliasing standard deviation greater"]):
         resize(x, (5, 15), order=0, anti_aliasing=True,

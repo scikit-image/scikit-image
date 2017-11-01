@@ -1,11 +1,11 @@
-from numpy.testing import assert_array_equal, assert_, assert_equal
-
 import math
 import numpy as np
 from skimage import data
 from skimage.transform import pyramids
-from skimage._shared._warnings import expected_warnings
+
 from skimage._shared import testing
+from skimage._shared.testing import assert_array_equal, assert_, assert_equal
+from skimage._shared._warnings import expected_warnings
 
 
 image = data.astronaut()

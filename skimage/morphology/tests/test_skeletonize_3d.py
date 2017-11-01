@@ -4,16 +4,15 @@ import os
 import warnings
 
 import numpy as np
-from numpy.testing import assert_equal, run_module_suite, assert_
 import scipy.ndimage as ndi
-from skimage._shared import testing
 
-import skimage
 from skimage import io, draw, data_dir
 from skimage.data import binary_blobs
 from skimage.util import img_as_ubyte
-
 from skimage.morphology import skeletonize_3d
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_, parametrize
 
 
 # basic behavior tests (mostly copied over from 2D skeletonize)
@@ -84,7 +83,7 @@ def test_dtype_conv():
                  img_as_ubyte(img).max())    # the intensity range is preserved
 
 
-@pytest.mark.parametrize("img", [
+@parametrize("img", [
     np.ones((8, 8), dtype=float), np.ones((4, 8, 8), dtype=float),
     np.ones((8, 8), dtype=np.uint8), np.ones((4, 8, 8), dtype=np.uint8),
     np.ones((8, 8), dtype=bool), np.ones((4, 8, 8), dtype=bool)
@@ -100,7 +99,7 @@ def check_input(img):
     with warnings.catch_warnings():
         # UserWarning for possible precision loss, expected
         warnings.simplefilter('ignore', UserWarning)
-        res = skeletonize_3d(img)
+        skeletonize_3d(img)
     assert_equal(img, orig)
 
 
@@ -152,7 +151,7 @@ def test_two_hole_image():
                       [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
                       [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-                      dtype=np.uint8)
+                     dtype=np.uint8)
     img_f = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0],
@@ -167,7 +166,7 @@ def test_two_hole_image():
                       [0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-                      dtype=np.uint8)
+                     dtype=np.uint8)
     res = skeletonize_3d(img_o)
     assert_equal(res, img_f)
 

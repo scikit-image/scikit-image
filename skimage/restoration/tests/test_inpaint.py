@@ -1,9 +1,10 @@
 from __future__ import print_function, division
 
 import numpy as np
-from numpy.testing import assert_allclose
 from skimage.restoration import inpaint
+
 from skimage._shared import testing
+from skimage._shared.testing import assert_allclose
 
 
 def test_inpaint_biharmonic_2d():

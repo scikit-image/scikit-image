@@ -1,12 +1,12 @@
 import numpy as np
-from numpy.testing import assert_equal
-import pytest
 import itertools
 from skimage import (img_as_int, img_as_float,
                      img_as_uint, img_as_ubyte)
 from skimage.util.dtype import convert
+
 from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
+from skimage._shared.testing import assert_equal, parametrize
 
 
 dtype_range = {np.uint8: (0, 255),
@@ -28,9 +28,8 @@ def _verify_range(msg, x, vmin, vmax, dtype):
     assert x.dtype == dtype
 
 
-@pytest.mark.parametrize("dtype, f_and_dt",
-                         itertools.product(dtype_range,
-                                           img_funcs_and_types))
+@parametrize("dtype, f_and_dt",
+             itertools.product(dtype_range, img_funcs_and_types))
 def test_range(dtype, f_and_dt):
     imin, imax = dtype_range[dtype]
     x = np.linspace(imin, imax, 10).astype(dtype)
@@ -63,7 +62,7 @@ dtype_pairs = [(np.uint8, np.uint32),
                (np.int32, np.float32)]
 
 
-@pytest.mark.parametrize("dtype_in, dt", dtype_pairs)
+@parametrize("dtype_in, dt", dtype_pairs)
 def test_range_extra_dtypes(dtype_in, dt):
     """Test code paths that are not skipped by `test_range`"""
 

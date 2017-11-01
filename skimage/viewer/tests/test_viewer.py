@@ -1,15 +1,14 @@
-
 from skimage import data
+from skimage.transform import pyramid_gaussian
+from skimage.filters import sobel
 
 from skimage.viewer.qt import QtGui, QtCore, has_qt
 from skimage.viewer import ImageViewer, CollectionViewer
 from skimage.viewer.plugins import OverlayPlugin
 
-from skimage.transform import pyramid_gaussian
-from skimage.filters import sobel
-from numpy.testing import assert_equal
 from skimage._shared.version_requirements import is_installed
 from skimage._shared import testing
+from skimage._shared.testing import assert_equal
 from skimage._shared._warnings import expected_warnings
 
 

@@ -160,8 +160,3 @@ def test_single_color_cmc():
     lab1 = (0.5, 0.5, 0.5)
     lab2 = (0.4, 0.4, 0.4)
     deltaE_cmc(lab1, lab2)
-
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

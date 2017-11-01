@@ -1,5 +1,5 @@
-
 import os
+
 from skimage import data, img_as_float, io, img_as_uint
 
 from skimage.viewer import ImageViewer
@@ -8,9 +8,9 @@ from skimage.viewer.widgets import (
     Slider, OKCancelButtons, SaveButtons, ComboBox, CheckBox, Text)
 from skimage.viewer.plugins.base import Plugin
 
-from numpy.testing import assert_almost_equal, assert_equal
 from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
+from skimage._shared.testing import assert_almost_equal, assert_equal
 
 
 def get_image_viewer():

@@ -1,10 +1,10 @@
 from contextlib import contextmanager
 
-from numpy.testing import assert_equal
-
 from skimage import io
 from skimage.io import manage_plugins
+
 from skimage._shared import testing
+from skimage._shared.testing import assert_equal
 
 
 io.use_plugin('pil')

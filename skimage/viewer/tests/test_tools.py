@@ -1,13 +1,15 @@
 from collections import namedtuple
 
 import numpy as np
-from numpy.testing import assert_equal
 from skimage import data
 from skimage.viewer import ImageViewer, has_qt
-from skimage._shared import testing
 from skimage.viewer.canvastools import (
     LineTool, ThickLineTool, RectangleTool, PaintTool)
 from skimage.viewer.canvastools.base import CanvasToolBase
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal
+
 try:
     from matplotlib.testing.decorators import cleanup
 except ImportError:
@@ -147,7 +149,7 @@ def test_rect_tool():
     do_event(viewer, 'mouse_press', xdata=100, ydata=100)
     do_event(viewer, 'move', xdata=120, ydata=120)
     do_event(viewer, 'mouse_release')
-    #assert_equal(tool.geometry, [120, 150, 120, 150])
+    # assert_equal(tool.geometry, [120, 150, 120, 150])
 
     # create a new line
     do_event(viewer, 'mouse_press', xdata=10, ydata=10)

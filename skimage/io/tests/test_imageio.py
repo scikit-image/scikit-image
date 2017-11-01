@@ -1,14 +1,13 @@
 import os
-import os.path
-import numpy as np
-from numpy.testing import assert_array_almost_equal
-import unittest
-from skimage._shared import testing
-
 from tempfile import NamedTemporaryFile
 
+import numpy as np
 from skimage import data_dir
 from skimage.io import imread, imsave, use_plugin, reset_plugins
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_array_almost_equal, TestCase
+
 
 try:
     import imageio as _imageio
@@ -53,7 +52,7 @@ def test_imageio_truncated_jpg():
         imread(os.path.join(data_dir, 'truncated.jpg'))
 
 
-class TestSave(unittest.TestCase):
+class TestSave(TestCase):
 
     def roundtrip(self, x, scaling=1):
         f = NamedTemporaryFile(suffix='.png')

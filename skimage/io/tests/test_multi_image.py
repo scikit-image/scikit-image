@@ -1,18 +1,16 @@
 import os
-
-import numpy as np
-from numpy.testing import assert_equal, assert_allclose
-import unittest
-
-from skimage.io import use_plugin
-from skimage import data_dir
-from skimage.io.collection import MultiImage, ImageCollection
-from skimage._shared import testing
-
 import six
 
+import numpy as np
+from skimage import data_dir
+from skimage.io import use_plugin
+from skimage.io.collection import MultiImage, ImageCollection
 
-class TestMultiImage(unittest.TestCase):
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_allclose, TestCase
+
+
+class TestMultiImage(TestCase):
     @testing.fixture(autouse=True)
     def setUp(self):
         # This multipage TIF file was created with imagemagick:

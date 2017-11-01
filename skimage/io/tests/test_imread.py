@@ -1,15 +1,13 @@
 import os
-import os.path
-import numpy as np
-from numpy.testing import assert_array_equal, assert_array_almost_equal
-import unittest
-
 from tempfile import NamedTemporaryFile
 
-from skimage import data_dir
+import numpy as np
+from skimage import data_dir, io
 from skimage.io import imread, imsave, use_plugin, reset_plugins
-import skimage.io as sio
+
 from skimage._shared import testing
+from skimage._shared.testing import (TestCase, assert_array_equal,
+                                     assert_array_almost_equal)
 
 try:
     import imread as _imread
@@ -49,7 +47,7 @@ def test_imread_palette():
 @testing.skipif(not imread_available, reason="imageread not installed")
 def test_imread_truncated_jpg():
     with testing.raises(RuntimeError):
-        sio.imread(os.path.join(data_dir, 'truncated.jpg'))
+        io.imread(os.path.join(data_dir, 'truncated.jpg'))
 
 
 @testing.skipif(not imread_available, reason="imageread not installed")
@@ -61,7 +59,7 @@ def test_bilevel():
     assert_array_equal(img.astype(bool), expected)
 
 
-class TestSave(unittest.TestCase):
+class TestSave(TestCase):
     def roundtrip(self, x, scaling=1):
         f = NamedTemporaryFile(suffix='.png')
         fname = f.name

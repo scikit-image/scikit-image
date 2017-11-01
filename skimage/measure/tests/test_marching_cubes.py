@@ -1,4 +1,3 @@
-import sys
 import numpy as np
 from skimage.draw import ellipsoid, ellipsoid_stats
 from skimage.measure import (marching_cubes_classic, marching_cubes_lewiner,
@@ -37,7 +36,8 @@ def test_marching_cubes_anisotropic():
     assert surf > surf_calc and surf_calc > surf * 0.985
     
     # Lewiner
-    verts, faces = marching_cubes_lewiner(ellipsoid_anisotropic, 0., spacing=spacing)[:2]
+    verts, faces = marching_cubes_lewiner(
+        ellipsoid_anisotropic, 0., spacing=spacing)[:2]
     surf_calc = mesh_surface_area(verts, faces)
     # Test within 1.5% tolerance for anisotropic. Will always underestimate.
     assert surf > surf_calc and surf_calc > surf * 0.985
@@ -54,8 +54,7 @@ def test_invalid_input():
     with testing.raises(ValueError):
         marching_cubes_classic(np.zeros((2, 2, 1)), 1)
     with testing.raises(ValueError):
-        marching_cubes_classic(np.ones((3, 3, 3)), 1,
-                  spacing=(1, 2))
+        marching_cubes_classic(np.ones((3, 3, 3)), 1, spacing=(1, 2))
     with testing.raises(ValueError):
         marching_cubes_classic(np.zeros((20, 20)), 0)
     
@@ -114,8 +113,10 @@ def test_both_algs_same_result_ellipse():
     sphere_small = ellipsoid(1, 1, 1, levelset=True)
     
     vertices1, faces1 = marching_cubes_classic(sphere_small, 0)[:2]
-    vertices2, faces2 = marching_cubes_lewiner(sphere_small, 0, allow_degenerate=False)[:2]
-    vertices3, faces3 = marching_cubes_lewiner(sphere_small, 0, allow_degenerate=False, use_classic=True)[:2]
+    vertices2, faces2 = marching_cubes_lewiner(
+        sphere_small, 0, allow_degenerate=False)[:2]
+    vertices3, faces3 = marching_cubes_lewiner(
+        sphere_small, 0, allow_degenerate=False, use_classic=True)[:2]
     
     # Order is different, best we can do is test equal shape and same vertices present
     assert _same_mesh(vertices1, faces1, vertices2, faces2)
@@ -130,22 +131,23 @@ def _same_mesh(vertices1, faces1, vertices2, faces2, tol=1e-10):
     triangles1 = vertices1[np.array(faces1)]
     triangles2 = vertices2[np.array(faces2)]
     # Sort vertices within each triangle
-    triang1 = [np.concatenate(sorted(t, key=lambda x:tuple(x))) for t in triangles1]
-    triang2 = [np.concatenate(sorted(t, key=lambda x:tuple(x))) for t in triangles2]
+    triang1 = [np.concatenate(sorted(t, key=lambda x:tuple(x)))
+               for t in triangles1]
+    triang2 = [np.concatenate(sorted(t, key=lambda x:tuple(x)))
+               for t in triangles2]
     # Sort the resulting 9-element "tuples"
     triang1 = np.array(sorted([tuple(x) for x in triang1]))
     triang2 = np.array(sorted([tuple(x) for x in triang2]))
-    return triang1.shape == triang2.shape and np.allclose(triang1, triang2, 0, tol)
+    assert triang1.shape == triang2.shape
+    assert np.allclose(triang1, triang2, 0, tol)
 
 
 def test_both_algs_same_result_donut():
     # Performing this test on data that does not have ambiguities
-    
     n = 48
     a, b = 2.5/n, -1.25
-    isovalue = 0.0
-    
-    vol = np.empty((n,n,n), 'float32')
+
+    vol = np.empty((n, n, n), 'float32')
     for iz in range(vol.shape[0]):
         for iy in range(vol.shape[1]):
             for ix in range(vol.shape[2]):

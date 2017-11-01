@@ -1,13 +1,13 @@
 from __future__ import print_function, division
 
 import numpy as np
-from numpy.testing import (assert_array_almost_equal_nulp,
-                           assert_almost_equal, assert_array_equal,
-                           assert_)
+from skimage.restoration import unwrap_phase
+
 import warnings
 from skimage._shared import testing
-
-from skimage.restoration import unwrap_phase
+from skimage._shared.testing import (assert_array_almost_equal_nulp,
+                                     assert_almost_equal, assert_array_equal,
+                                     assert_, parametrize)
 from skimage._shared._warnings import expected_warnings
 
 
@@ -54,7 +54,7 @@ def test_unwrap_1d():
         unwrap_phase(image, True, seed=0)
 
 
-@pytest.mark.parametrize("check_with_mask", (False, True))
+@parametrize("check_with_mask", (False, True))
 def test_unwrap_2d(check_with_mask):
     mask = None
     x, y = np.ogrid[:8, :16]
@@ -65,7 +65,7 @@ def test_unwrap_2d(check_with_mask):
     check_unwrap(image, mask)
 
 
-@pytest.mark.parametrize("check_with_mask", (False, True))
+@parametrize("check_with_mask", (False, True))
 def test_unwrap_3d(check_with_mask):
     mask = None
     x, y, z = np.ogrid[:8, :12, :16]
@@ -116,7 +116,7 @@ def check_wrap_around(ndim, axis):
 dim_axis = [(ndim, axis) for ndim in (2, 3) for axis in range(ndim)]
 
 
-@pytest.mark.parametrize("ndim, axis", dim_axis)
+@parametrize("ndim, axis", dim_axis)
 def test_wrap_around(ndim, axis):
     check_wrap_around(ndim, axis)
 
@@ -149,7 +149,8 @@ def test_mask():
             image_unwrapped_3d = unwrap_phase(image_wrapped_3d)
             # remove phase shift
             image_unwrapped_3d -= image_unwrapped_3d[0, 0, 0]
-        assert_array_almost_equal_nulp(image_unwrapped_3d[:, :, -1], image[i, -1])
+        assert_array_almost_equal_nulp(image_unwrapped_3d[:, :, -1],
+                                       image[i, -1])
 
 
 def test_invalid_input():

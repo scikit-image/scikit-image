@@ -1,7 +1,5 @@
 import numpy as np
 from scipy import ndimage as ndi
-from numpy.testing import (assert_equal,
-                           assert_almost_equal)
 
 import skimage
 from skimage import data
@@ -19,6 +17,7 @@ from skimage.filters.thresholding import (threshold_local,
                                           threshold_minimum,
                                           _mean_std)
 from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_almost_equal
 
 
 class TestSimpleImage():
@@ -53,7 +52,7 @@ class TestSimpleImage():
 
     def test_li_constant_image(self):
         with testing.raises(ValueError):
-            threshold_li(np.ones((10,10)))
+            threshold_li(np.ones((10, 10)))
 
     def test_yen(self):
         assert threshold_yen(self.image) == 2
@@ -345,6 +344,7 @@ def test_threshold_minimum_synthetic():
 
     threshold = threshold_minimum(img)
     assert_equal(threshold, 95)
+
 
 def test_threshold_minimum_failure():
     img = np.zeros((16*16), dtype=np.uint8)

@@ -1,13 +1,12 @@
-import os.path
+import os
 
 import numpy as np
-from numpy.testing import assert_equal, assert_allclose
-import unittest
-
 from skimage import data_dir
 from skimage.io.collection import ImageCollection, alphanumeric_key
 from skimage.io import reset_plugins
+
 from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_allclose, TestCase
 
 
 def test_string_split():
@@ -25,7 +24,7 @@ def test_string_sort():
     assert_equal(sorted_filenames, sorted_filenames)
 
 
-class TestImageCollection(unittest.TestCase):
+class TestImageCollection(TestCase):
 
     pattern = [os.path.join(data_dir, pic)
                for pic in ['camera.png', 'color.png']]

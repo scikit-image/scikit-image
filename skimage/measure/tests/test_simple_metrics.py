@@ -1,11 +1,11 @@
 import numpy as np
-from numpy.testing import (run_module_suite, assert_equal,
-                           assert_almost_equal)
 
-from skimage.measure import compare_psnr, compare_nrmse, compare_mse
 import skimage.data
-from skimage._shared._warnings import expected_warnings
+from skimage.measure import compare_psnr, compare_nrmse, compare_mse
+
 from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_almost_equal
+from skimage._shared._warnings import expected_warnings
 
 
 np.random.seed(5)

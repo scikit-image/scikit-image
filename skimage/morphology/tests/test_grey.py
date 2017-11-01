@@ -1,8 +1,6 @@
 import os
-import unittest
 
 import numpy as np
-from numpy.testing import assert_array_equal, assert_equal
 from scipy import ndimage as ndi
 
 from skimage import color, data, transform
@@ -10,9 +8,11 @@ from skimage import img_as_uint, img_as_ubyte, data_dir
 from skimage.morphology import grey, selem
 from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
+from skimage._shared.testing import (assert_array_equal, assert_equal,
+                                     TestCase, parametrize)
 
 
-class TestMorphology(unittest.TestCase):
+class TestMorphology(TestCase):
 
     # These expected outputs were generated with skimage v0.12.1
     # using:
@@ -49,7 +49,7 @@ class TestMorphology(unittest.TestCase):
         assert_equal(expected, calculated)
 
 
-class TestEccentricStructuringElements(unittest.TestCase):
+class TestEccentricStructuringElements(TestCase):
     @testing.fixture(autouse=True)
     def setUp(self):
         self.black_pixel = 255 * np.ones((4, 4), dtype=np.uint8)
@@ -108,7 +108,7 @@ grey_functions = [grey.erosion, grey.dilation,
                   grey.white_tophat, grey.black_tophat]
 
 
-@pytest.mark.parametrize("function", grey_functions)
+@parametrize("function", grey_functions)
 def test_default_selem(function):
     strel = selem.diamond(radius=1)
     image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -145,7 +145,7 @@ def test_3d_fallback_default_selem():
 grey_3d_fallback_functions = [grey.closing, grey.opening]
 
 
-@pytest.mark.parametrize("function", grey_3d_fallback_functions)
+@parametrize("function", grey_3d_fallback_functions)
 def test_3d_fallback_cube_selem(function):
     # 3x3x3 cube inside a 7x7x7 image:
     image = np.zeros((7, 7, 7), np.bool)

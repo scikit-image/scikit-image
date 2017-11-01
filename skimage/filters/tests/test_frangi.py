@@ -1,8 +1,10 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_almost_equal, assert_allclose
 from skimage.filters import frangi, hessian
 from skimage.data import camera
 from skimage.util import crop
+
+from skimage._shared.testing import (assert_equal, assert_almost_equal,
+                                     assert_allclose)
 
 
 def test_null_matrix():
@@ -29,10 +31,6 @@ def test_values_decreased():
 def test_cropped_camera_image():
     image = crop(camera(), ((206, 206), (206, 206)))
     assert_allclose(frangi(image), np.zeros((100, 100)), atol=1e-03)
-    assert_allclose(frangi(image, black_ridges=True), np.zeros((100,100)), atol=1e-03)
+    assert_allclose(frangi(image, black_ridges=True),
+                    np.zeros((100, 100)), atol=1e-03)
     assert_allclose(hessian(image), np.ones((100, 100)), atol=1-1e-07)
-
-
-if __name__ == "__main__":
-    from numpy import testing
-    testing.run_module_suite()

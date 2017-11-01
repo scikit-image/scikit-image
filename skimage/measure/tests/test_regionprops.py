@@ -1,12 +1,12 @@
-from numpy.testing import (assert_array_equal, assert_almost_equal,
-                           assert_array_almost_equal, assert_equal)
-import numpy as np
 import math
 import functools
 
+import numpy as np
 from skimage.measure._regionprops import (regionprops as regionprops_default,
                                           PROPS, perimeter, _parse_docs)
 from skimage._shared import testing
+from skimage._shared.testing import (assert_array_equal, assert_almost_equal,
+                                     assert_array_almost_equal, assert_equal)
 
 
 regionprops = functools.partial(regionprops_default, coordinates='rc')
@@ -194,8 +194,8 @@ def test_moments_hu():
          2.35390060e-02,
          1.23151193e-03,
          1.38882330e-06,
-        -2.72586158e-05,
-        -6.48350653e-06
+         -2.72586158e-05,
+         -6.48350653e-06
     ])
     # bug in OpenCV caused in Central Moments calculation?
     assert_array_almost_equal(hu, ref)
@@ -479,5 +479,5 @@ def test_docstrings_and_props():
 
 
 def test_incorrect_coordinate_convention():
-    with pytest.raises(ValueError):
-        region = regionprops_default(SAMPLE, coordinates='xyz')[0]
+    with testing.raises(ValueError):
+        regionprops_default(SAMPLE, coordinates='xyz')[0]

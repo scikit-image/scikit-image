@@ -1,7 +1,9 @@
 import numpy as np
-from numpy.testing import assert_array_equal
-from skimage._shared import testing
 from skimage.measure import find_contours
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_array_equal
+
 
 a = np.ones((8, 8), dtype=np.float32)
 a[1:-1, 1] = 0
@@ -41,8 +43,6 @@ def test_binary():
     contours = find_contours(a, 0.5, positive_orientation='high')
     assert len(contours) == 1
     assert_array_equal(contours[0][::-1], ref)
-
-
 
 
 def test_float():

@@ -1,11 +1,11 @@
-from numpy.testing import assert_equal, assert_almost_equal
 import numpy as np
-
-from skimage._shared._warnings import expected_warnings
 from skimage import draw
 from skimage.measure import (moments, moments_central, moments_normalized,
                              moments_hu)
+
 from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_almost_equal
+from skimage._shared._warnings import expected_warnings
 
 
 def test_moments():

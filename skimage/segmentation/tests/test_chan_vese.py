@@ -1,7 +1,8 @@
 import numpy as np
 from skimage.segmentation import chan_vese
-from numpy.testing import assert_array_equal
+
 from skimage._shared import testing
+from skimage._shared.testing import assert_array_equal
 
 
 def test_chan_vese_flat_level_set():

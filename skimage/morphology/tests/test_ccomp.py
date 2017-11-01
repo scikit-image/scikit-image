@@ -1,13 +1,13 @@
 import numpy as np
-from numpy.testing import assert_array_equal
-from skimage._shared import testing
 
 from skimage.measure import label
 import skimage.measure._ccomp as ccomp
-from skimage._shared._warnings import expected_warnings
 
-# Background value
-BG = 0
+from skimage._shared import testing
+from skimage._shared.testing import assert_array_equal
+
+
+BG = 0  # background value
 
 
 class TestConnectedComponents:

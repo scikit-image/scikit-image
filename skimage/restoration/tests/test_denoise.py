@@ -1,13 +1,15 @@
 import numpy as np
-from numpy.testing import (assert_equal,
-                           assert_almost_equal, assert_warns, assert_)
+
 from skimage import restoration, data, color, img_as_float, measure
-from skimage._shared._warnings import expected_warnings
 from skimage.measure import compare_psnr
 from skimage.restoration._denoise import _wavelet_threshold
-from skimage._shared import testing
-
 import pywt
+
+from skimage._shared import testing
+from skimage._shared.testing import (assert_equal, assert_almost_equal,
+                                     assert_warns, assert_)
+from skimage._shared._warnings import expected_warnings
+
 
 np.random.seed(1234)
 
@@ -201,8 +203,7 @@ def test_denoise_bilateral_color():
 def test_denoise_bilateral_3d_grayscale():
     img = np.ones((50, 50, 3))
     with testing.raises(ValueError):
-        restoration.denoise_bilateral(img,
-                  multichannel=False)
+        restoration.denoise_bilateral(img, multichannel=False)
 
 
 def test_denoise_bilateral_3d_multichannel():
@@ -218,8 +219,7 @@ def test_denoise_bilateral_multidimensional():
     with testing.raises(ValueError):
         restoration.denoise_bilateral(img, multichannel=False)
     with testing.raises(ValueError):
-        restoration.denoise_bilateral(
-            img, multichannel=True)
+        restoration.denoise_bilateral(img, multichannel=True)
 
 
 def test_denoise_bilateral_nan():
@@ -370,7 +370,7 @@ def test_wavelet_threshold():
     assert_(psnr_denoised > psnr_noisy)
 
     # either method or threshold must be defined
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         _wavelet_threshold(noisy, wavelet='db1', method=None, threshold=None)
 
     # warns if a threshold is provided in a case where it would be ignored
@@ -402,7 +402,7 @@ def test_wavelet_denoising_nd():
 
 
 def test_wavelet_invalid_method():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         restoration.denoise_wavelet(np.ones(16), method='Unimplemented')
 
 

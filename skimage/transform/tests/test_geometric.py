@@ -1,13 +1,13 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_almost_equal
 from skimage.transform._geometric import GeometricTransform
 from skimage.transform import (estimate_transform, matrix_transform,
                                EuclideanTransform, SimilarityTransform,
                                AffineTransform, FundamentalMatrixTransform,
                                EssentialMatrixTransform, ProjectiveTransform,
                                PolynomialTransform, PiecewiseAffineTransform)
-from skimage._shared._warnings import expected_warnings
+
 from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_almost_equal
 
 
 SRC = np.array([
@@ -37,8 +37,7 @@ def test_estimate_transform():
                   'polynomial'):
         estimate_transform(tform, SRC[:2, :], DST[:2, :])
     with testing.raises(ValueError):
-        estimate_transform('foobar',
-                  SRC[:2, :], DST[:2, :])
+        estimate_transform('foobar', SRC[:2, :], DST[:2, :])
 
 
 def test_matrix_transform():
@@ -139,7 +138,6 @@ def test_similarity_init():
     assert_almost_equal(tform.rotation, rotation)
     assert_almost_equal(tform.translation, translation)
 
-
     # test special case for scale if rotation=90deg
     scale = 0.1
     rotation = np.pi / 2
@@ -239,7 +237,8 @@ def test_fundamental_matrix_inverse():
     tform = FundamentalMatrixTransform()
     tform.params = essential_matrix_tform.params
     src = np.array([[0, 0], [0, 1], [1, 1]])
-    assert_almost_equal(tform.inverse(src), [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
+    assert_almost_equal(tform.inverse(src),
+                        [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
 
 
 def test_essential_matrix_init():
@@ -279,7 +278,8 @@ def test_essential_matrix_inverse():
     tform = EssentialMatrixTransform(rotation=np.eye(3),
                                      translation=np.array([1, 0, 0]))
     src = np.array([[0, 0], [0, 1], [1, 1]])
-    assert_almost_equal(tform.inverse(src), [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
+    assert_almost_equal(tform.inverse(src),
+                        [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
 
 
 def test_essential_matrix_residuals():

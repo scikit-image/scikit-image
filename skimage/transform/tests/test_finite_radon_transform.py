@@ -16,8 +16,3 @@ def test_frt():
     f = frt2(L)
     fi = ifrt2(f)
     assert len(np.nonzero(L - fi)[0]) == 0
-
-if __name__ == '__main__':
-    from numpy.testing import run_module_suite
-    run_module_suite()
-

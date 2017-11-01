@@ -1,8 +1,9 @@
 import numpy as np
-from numpy.testing import assert_array_equal
 from skimage.morphology import convex_hull_image, convex_hull_object
 from skimage.morphology._convex_hull import possible_hull
+
 from skimage._shared import testing
+from skimage._shared.testing import assert_array_equal
 
 
 def test_basic():
@@ -23,6 +24,7 @@ def test_basic():
          [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
 
     assert_array_equal(convex_hull_image(image), expected)
+
 
 def test_qhull_offset_example():
     nonzeros = (([1367, 1368, 1368, 1368, 1369, 1369, 1369, 1369, 1369, 1370,
@@ -129,7 +131,7 @@ def test_object():
         convex_hull_object(image, 7)
 
 
-@pytest.fixture
+@testing.fixture
 def images2d3d():
     from ...measure.tests.test_regionprops import SAMPLE as image
     image3d = np.stack((image, image, image))

@@ -1,7 +1,7 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_warns
 
 from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_warns
 from skimage.util.shape import view_as_blocks, view_as_windows
 
 
@@ -168,8 +168,8 @@ def test_view_as_windows_step_tuple():
                        [6,  7],
                        [10, 11]]],
                      [[[12, 13],
-                         [16, 17],
-                         [20, 21]],
+                       [16, 17],
+                       [20, 21]],
                       [[14, 15],
-                         [18, 19],
-                         [22, 23]]]])
+                       [18, 19],
+                       [22, 23]]]])

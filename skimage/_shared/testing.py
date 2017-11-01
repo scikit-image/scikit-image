@@ -2,18 +2,18 @@
 Testing utilities.
 """
 
-
 import os
 import re
 import threading
 import functools
 from tempfile import NamedTemporaryFile
 
+import numpy as np
 from numpy import testing
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 from numpy.testing import assert_equal, TestCase, assert_allclose
 from numpy.testing import assert_almost_equal, assert_, assert_warns
-import numpy as np
+
 from ._warnings import expected_warnings
 import warnings
 
@@ -24,6 +24,7 @@ import pytest
 SKIP_RE = re.compile("(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
 
 skipif = pytest.mark.skipif
+parametrize = pytest.mark.parametrize
 raises = pytest.raises
 fixture = pytest.fixture
 

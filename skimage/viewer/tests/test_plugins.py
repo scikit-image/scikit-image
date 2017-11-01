@@ -10,9 +10,11 @@ from skimage.viewer.widgets import Slider
 from skimage.viewer.plugins import (
     LineProfile, Measure, CannyPlugin, LabelPainter, Crop, ColorHistogram,
     PlotPlugin)
-from numpy.testing import assert_equal, assert_allclose, assert_almost_equal
-from skimage._shared._warnings import expected_warnings
+
 from skimage._shared import testing
+from skimage._shared.testing import (assert_equal, assert_allclose,
+                                     assert_almost_equal)
+from skimage._shared._warnings import expected_warnings
 
 
 def setup_line_profile(image, limits='image'):
