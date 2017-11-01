@@ -153,7 +153,7 @@ def test_cut_normalized_stability():
     labels = segmentation.slic(img, compactness=30, n_segments=400)
     rag = graph.rag_mean_color(img, labels, mode='similarity')
 
-    #raise(Exception('Initialized info'))
+    raise(Exception('Initialized info'))
     label_gen = graph.cut_normalized_gen(labels, rag, 0)
     next(label_gen)
     raise(Exception('Initialized generator'))
