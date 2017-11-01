@@ -75,74 +75,74 @@ def test_threshold_cut():
     assert new_labels.max() == 1
 
 
-@pytest.mark.skipif(not is_installed('networkx'),
-                    reason="networkx not installed")
-def test_cut_normalized():
-
-    img = np.zeros((100, 100, 3), dtype='uint8')
-    img[:50, :50] = 255, 255, 255
-    img[:50, 50:] = 254, 254, 254
-    img[50:, :50] = 2, 2, 2
-    img[50:, 50:] = 1, 1, 1
-
-    labels = np.zeros((100, 100), dtype='uint8')
-    labels[:50, :50] = 0
-    labels[:50, 50:] = 1
-    labels[50:, :50] = 2
-    labels[50:, 50:] = 3
-
-    rag = graph.rag_mean_color(img, labels, mode='similarity')
-
-    new_labels = graph.cut_normalized(labels, rag, in_place=False)
-    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
-    # Two labels
-    assert new_labels.max() == 1
-
-    new_labels = graph.cut_normalized(labels, rag)
-    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
-    assert new_labels.max() == 1
-
-
-@pytest.mark.skipif(not is_installed('networkx'),
-                    reason="networkx not installed")
-def test_cut_normalized_gen():
-
-    img = np.zeros((100, 100, 3), dtype='uint8')
-    img[:50, :50] = 255, 255, 255
-    img[:50, 50:] = 200, 200, 200
-    img[50:, :50] = 56, 56, 56
-    img[50:, 50:] = 1, 1, 1
-    img[25:75, 25:75] = 185
-
-    labels = np.zeros((100, 100), dtype='uint8')
-    labels[:50, :50] = 0
-    labels[:50, 50:] = 1
-    labels[50:, :50] = 2
-    labels[50:, 50:] = 3
-    labels[25:75, 25:75] = 4
-
-    rag = graph.rag_mean_color(img, labels, mode='similarity')
-    thresh = 0
-    new_label_gen = graph.cut_normalized_gen(labels, rag, thresh=thresh,
-                                             in_place=False)
-
-    # Step through several partitionings
-    new_labels = next(new_label_gen)
-    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
-    assert new_labels.max() == 0
-
-    # Test thresh can be manipulated from calling program
-    new_labels = new_label_gen.send(1e-20)
-    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
-    assert new_labels.max() == 1
-
-    new_labels = new_label_gen.send(1e-3)
-    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
-    assert new_labels.max() == 2
-
-    new_labels = new_label_gen.send(1e-20)
-    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
-    assert new_labels.max() == 1
+#@pytest.mark.skipif(not is_installed('networkx'),
+#                    reason="networkx not installed")
+#def test_cut_normalized():
+#
+#    img = np.zeros((100, 100, 3), dtype='uint8')
+#    img[:50, :50] = 255, 255, 255
+#    img[:50, 50:] = 254, 254, 254
+#    img[50:, :50] = 2, 2, 2
+#    img[50:, 50:] = 1, 1, 1
+#
+#    labels = np.zeros((100, 100), dtype='uint8')
+#    labels[:50, :50] = 0
+#    labels[:50, 50:] = 1
+#    labels[50:, :50] = 2
+#    labels[50:, 50:] = 3
+#
+#    rag = graph.rag_mean_color(img, labels, mode='similarity')
+#
+#    new_labels = graph.cut_normalized(labels, rag, in_place=False)
+#    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
+#    # Two labels
+#    assert new_labels.max() == 1
+#
+#    new_labels = graph.cut_normalized(labels, rag)
+#    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
+#    assert new_labels.max() == 1
+#
+#
+#@pytest.mark.skipif(not is_installed('networkx'),
+#                    reason="networkx not installed")
+#def test_cut_normalized_gen():
+#
+#    img = np.zeros((100, 100, 3), dtype='uint8')
+#    img[:50, :50] = 255, 255, 255
+#    img[:50, 50:] = 200, 200, 200
+#    img[50:, :50] = 56, 56, 56
+#    img[50:, 50:] = 1, 1, 1
+#    img[25:75, 25:75] = 185
+#
+#    labels = np.zeros((100, 100), dtype='uint8')
+#    labels[:50, :50] = 0
+#    labels[:50, 50:] = 1
+#    labels[50:, :50] = 2
+#    labels[50:, 50:] = 3
+#    labels[25:75, 25:75] = 4
+#
+#    rag = graph.rag_mean_color(img, labels, mode='similarity')
+#    thresh = 0
+#    new_label_gen = graph.cut_normalized_gen(labels, rag, thresh=thresh,
+#                                             in_place=False)
+#
+#    # Step through several partitionings
+#    new_labels = next(new_label_gen)
+#    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
+#    assert new_labels.max() == 0
+#
+#    # Test thresh can be manipulated from calling program
+#    new_labels = new_label_gen.send(1e-20)
+#    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
+#    assert new_labels.max() == 1
+#
+#    new_labels = new_label_gen.send(1e-3)
+#    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
+#    assert new_labels.max() == 2
+#
+#    new_labels = new_label_gen.send(1e-20)
+#    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
+#    assert new_labels.max() == 1
 
 
 @pytest.mark.skipif(not is_installed('networkx'),
@@ -153,8 +153,10 @@ def test_cut_normalized_stability():
     labels = segmentation.slic(img, compactness=30, n_segments=400)
     rag = graph.rag_mean_color(img, labels, mode='similarity')
 
+    print('Initialized data')
     label_gen = graph.cut_normalized_gen(labels, rag, 0)
     next(label_gen)
+    print('next() call finished on label_gen')
 
     # Tests whether second smallest eigenvector generated by
     # eigsh consistently reproduced
@@ -164,20 +166,20 @@ def test_cut_normalized_stability():
     labels2, _, _ = segmentation.relabel_sequential(labels2)
     assert (labels1 == labels2).all()
 
-    #labels1 = graph.cut_normalized(labels, rag, 1e-2)
-    #labels3 = label_gen.send(1e-2)
-    #labels1, _, _ = segmentation.relabel_sequential(labels1)
-    #labels3, _, _ = segmentation.relabel_sequential(labels3)
-    #assert (labels1 == labels3).all()
+    labels1 = graph.cut_normalized(labels, rag, 1e-2)
+    labels3 = label_gen.send(1e-2)
+    labels1, _, _ = segmentation.relabel_sequential(labels1)
+    labels3, _, _ = segmentation.relabel_sequential(labels3)
+    assert (labels1 == labels3).all()
 
-    ## If others pass and this fails check labels
-    ## are being rewritten correctly when threshold falls
-    #labels1 = graph.cut_normalized(labels, rag, 1e-4)
-    #labels4 = label_gen.send(1e-4)
-    #labels1, _, _ = segmentation.relabel_sequential(labels1)
-    #labels4, _, _ = segmentation.relabel_sequential(labels4)
-    #assert (labels2 == labels4).all()
-    #assert (labels1 == labels4).all()
+    # If others pass and this fails check labels
+    # are being rewritten correctly when threshold falls
+    labels1 = graph.cut_normalized(labels, rag, 1e-4)
+    labels4 = label_gen.send(1e-4)
+    labels1, _, _ = segmentation.relabel_sequential(labels1)
+    labels4, _, _ = segmentation.relabel_sequential(labels4)
+    assert (labels2 == labels4).all()
+    assert (labels1 == labels4).all()
 
 
 @pytest.mark.skipif(not is_installed('networkx'),
