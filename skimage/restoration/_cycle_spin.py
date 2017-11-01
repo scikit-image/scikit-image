@@ -90,8 +90,7 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=1,
         provided, the same step size is used for all axes.
     num_workers : int or None, optional
         The number of parallel threads to use during cycle spinning. If set to
-        ``None`` the maximum number of processors as returned by
-        ``multiprocessing.cpu_count`` will be used.
+        ``None``, the full set of available cores are used.
     multichannel : bool, optional
         Whether to treat the final axis as channels (no cycle shifts are
         performed over the channels axis).
@@ -138,7 +137,6 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=1,
     all_shifts = _generate_shifts(x.ndim, multichannel, max_shifts,
                                   shift_steps)
     all_shifts = list(all_shifts)
-    nshifts = len(all_shifts)
 
     def _run_one_shift(shift):
         # shift, apply function, inverse shift
@@ -154,9 +152,6 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=1,
             avg_y += (_run_one_shift(shift) - avg_y) / (i + 1)
     else:
         # multithreaded via dask
-        if num_workers is None:
-            num_workers = cpu_count()
-        num_workers = np.clip(num_workers, 1, nshifts)
         for i, shift in enumerate(all_shifts):
             avg_y += (dask.delayed(_run_one_shift)(shift) - avg_y) / (i + 1)
         avg_y = avg_y.compute(get=dask.threaded.get, num_workers=num_workers)
