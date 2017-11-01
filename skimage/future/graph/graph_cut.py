@@ -7,7 +7,6 @@ import numpy as np
 from . import _ncut
 from scipy import linalg
 from scipy.sparse import csr_matrix
-import pickle
 
 
 def cut_threshold(labels, rag, thresh, in_place=True):
