@@ -16,7 +16,7 @@ from skimage import data, segmentation, color
 from skimage.future import graph
 from matplotlib import pyplot as plt
 from numpy.random import seed
-#seed(9001)
+seed(9001)
 
 
 img = data.coffee()
