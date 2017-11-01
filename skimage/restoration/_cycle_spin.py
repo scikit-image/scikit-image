@@ -1,4 +1,5 @@
-from multiprocessing import cpu_count
+from __future__ import division
+
 from itertools import product
 
 import numpy as np
@@ -68,7 +69,7 @@ def _roll_axes(x, rolls, axes=None):
     return x
 
 
-def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=1,
+def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
                multichannel=False, func_kw={}):
     """Cycle spinning (repeatedly apply func to shifted versions of x).
 
@@ -145,14 +146,15 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=1,
         return _roll_axes(tmp, -np.asarray(shift))
 
     # compute a running average across the cycle shifts
-    avg_y = 0
     if num_workers == 1:
         # serial processing
-        for i, shift in enumerate(all_shifts):
-            avg_y += (_run_one_shift(shift) - avg_y) / (i + 1)
+        mean = _run_one_shift(all_shifts[0])
+        for shift in all_shifts[1:]:
+            mean += _run_one_shift(shift)
+        mean /= len(all_shifts)
     else:
         # multithreaded via dask
-        for i, shift in enumerate(all_shifts):
-            avg_y += (dask.delayed(_run_one_shift)(shift) - avg_y) / (i + 1)
-        avg_y = avg_y.compute(get=dask.threaded.get, num_workers=num_workers)
-    return avg_y
+        futures = [dask.delayed(_run_one_shift)(s) for s in all_shifts]
+        mean = sum(futures) / len(futures)
+        mean = mean.compute(get=dask.threaded.get, num_workers=num_workers)
+    return mean

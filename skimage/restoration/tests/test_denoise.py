@@ -7,7 +7,7 @@ import pywt
 
 from skimage._shared import testing
 from skimage._shared.testing import (assert_equal, assert_almost_equal,
-                                     assert_warns, assert_, raises)
+                                     assert_warns, assert_)
 from skimage._shared._warnings import expected_warnings
 
 
@@ -569,13 +569,13 @@ def test_cycle_spinning_multichannel():
             assert_(compare_psnr(img, dn_cc) > compare_psnr(img, dn))
 
         for max_shifts in invalid_shifts:
-            with raises(ValueError):
+            with testing.raises(ValueError):
                 dn_cc = restoration.cycle_spin(noisy, denoise_func,
                                                max_shifts=max_shifts,
                                                func_kw=func_kw,
                                                multichannel=multichannel)
         for shift_steps in invalid_steps:
-            with raises(ValueError):
+            with testing.raises(ValueError):
                 dn_cc = restoration.cycle_spin(noisy, denoise_func,
                                                max_shifts=2,
                                                shift_steps=shift_steps,
