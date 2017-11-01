@@ -75,13 +75,9 @@ def test_moments_normalized_3d():
 
 
 def test_moments_normalized_invalid():
-    with testing.raises(TypeError):
-        moments_normalized(np.zeros((3, 3, 3)))
-    with testing.raises(TypeError):
-        moments_normalized(np.zeros((3,)))
-    with testing.raises(TypeError):
+    with testing.raises(ValueError):
         moments_normalized(np.zeros((3, 3)), 3)
-    with testing.raises(TypeError):
+    with testing.raises(ValueError):
         moments_normalized(np.zeros((3, 3)), 4)
 
 

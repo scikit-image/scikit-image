@@ -241,17 +241,6 @@ def test_adapthist_alpha():
     assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.0248, 3)
 
 
-def test_adapthist_ntiles_raises():
-    img = skimage.img_as_ubyte(data.moon())
-    with testing.raises(ValueError):
-        exposure.equalize_adapthist(img, ntiles_x=8)
-    with testing.raises(ValueError):
-        exposure.equalize_adapthist(img, ntiles_y=8)
-    with testing.raises(ValueError):
-        exposure.equalize_adapthist(
-            img, ntiles_x=8, ntiles_y=8)
-
-
 def peak_snr(img1, img2):
     """Peak signal to noise ratio of two images
 

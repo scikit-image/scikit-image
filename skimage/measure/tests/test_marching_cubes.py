@@ -3,6 +3,7 @@ from skimage.draw import ellipsoid, ellipsoid_stats
 from skimage.measure import (marching_cubes_classic, marching_cubes_lewiner,
                              mesh_surface_area, correct_mesh_orientation)
 from skimage._shared import testing
+from skimage._shared.testing import assert_array_equal
 
 
 def test_marching_cubes_isotropic():
@@ -98,13 +99,13 @@ def test_correct_mesh_orientation():
                                                 gradient_direction='ascent')
 
     # Ensure ascent is opposite of descent for all faces
-    np.testing.assert_array_equal(corrected_faces1, corrected_faces2[:, ::-1])
+    assert_array_equal(corrected_faces1, corrected_faces2[:, ::-1])
 
     # Ensure correct faces have been reversed: 1, 4, and 5
     idx = [1, 4, 5]
     expected = faces.copy()
     expected[idx] = expected[idx, ::-1]
-    np.testing.assert_array_equal(expected, corrected_faces1)
+    assert_array_equal(expected, corrected_faces1)
 
 
 def test_both_algs_same_result_ellipse():
@@ -138,8 +139,8 @@ def _same_mesh(vertices1, faces1, vertices2, faces2, tol=1e-10):
     # Sort the resulting 9-element "tuples"
     triang1 = np.array(sorted([tuple(x) for x in triang1]))
     triang2 = np.array(sorted([tuple(x) for x in triang2]))
-    assert triang1.shape == triang2.shape
-    assert np.allclose(triang1, triang2, 0, tol)
+    return (triang1.shape == triang2.shape and
+            np.allclose(triang1, triang2, 0, tol))
 
 
 def test_both_algs_same_result_donut():
