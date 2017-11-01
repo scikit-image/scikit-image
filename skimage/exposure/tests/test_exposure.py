@@ -95,7 +95,7 @@ def check_cdf_slope(cdf):
 # ====================
 
 
-@pytest.mark.parametrize("test_input,expected", [
+@testing.parametrize("test_input,expected", [
     ('image', [0, 1]),
     ('dtype', [0, 255]),
     ((10, 20), [10, 20])
@@ -106,7 +106,7 @@ def test_intensity_range_uint8(test_input, expected):
     assert_array_equal(out, expected)
 
 
-@pytest.mark.parametrize("test_input,expected", [
+@testing.parametrize("test_input,expected", [
     ('image', [0.1, 0.2]),
     ('dtype', [-1, 1]),
     ((0.3, 0.4), [0.3, 0.4])

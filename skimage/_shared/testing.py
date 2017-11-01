@@ -10,9 +10,11 @@ from tempfile import NamedTemporaryFile
 
 import numpy as np
 from numpy import testing
-from numpy.testing import assert_array_equal, assert_array_almost_equal
-from numpy.testing import assert_equal, TestCase, assert_allclose
-from numpy.testing import assert_almost_equal, assert_, assert_warns
+from numpy.testing import (assert_array_equal, assert_array_almost_equal,
+                           assert_array_less, assert_array_almost_equal_nulp,
+                           assert_equal, TestCase, assert_allclose,
+                           assert_almost_equal, assert_, assert_warns,
+                           assert_no_warnings)
 
 from ._warnings import expected_warnings
 import warnings

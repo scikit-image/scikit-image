@@ -7,7 +7,7 @@ import warnings
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_almost_equal_nulp,
                                      assert_almost_equal, assert_array_equal,
-                                     assert_, parametrize)
+                                     assert_)
 from skimage._shared._warnings import expected_warnings
 
 
@@ -54,7 +54,7 @@ def test_unwrap_1d():
         unwrap_phase(image, True, seed=0)
 
 
-@parametrize("check_with_mask", (False, True))
+@testing.parametrize("check_with_mask", (False, True))
 def test_unwrap_2d(check_with_mask):
     mask = None
     x, y = np.ogrid[:8, :16]
@@ -65,7 +65,7 @@ def test_unwrap_2d(check_with_mask):
     check_unwrap(image, mask)
 
 
-@parametrize("check_with_mask", (False, True))
+@testing.parametrize("check_with_mask", (False, True))
 def test_unwrap_3d(check_with_mask):
     mask = None
     x, y, z = np.ogrid[:8, :12, :16]
@@ -116,7 +116,7 @@ def check_wrap_around(ndim, axis):
 dim_axis = [(ndim, axis) for ndim in (2, 3) for axis in range(ndim)]
 
 
-@parametrize("ndim, axis", dim_axis)
+@testing.parametrize("ndim, axis", dim_axis)
 def test_wrap_around(ndim, axis):
     check_wrap_around(ndim, axis)
 
