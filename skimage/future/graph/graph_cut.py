@@ -340,7 +340,8 @@ def _ncut_relabel(rag, thresh, num_cuts, call_count=[0,0,0,0,0]):
         # Since d is diagonal, we can directly operate on its data
         # the inverse of the square root
         start = time()
-        d2 = linalg.inv(np.sqrt(d2))
+        d2 = np.diag(d2)
+        d2 = np.diag(1/(np.sqrt(d2)))
 
         # Refer Shi & Malik 2000, Equation 7, Page 891
         #v0 = 2*np.random.random((m,)) - 1  # Define for reproducibility
