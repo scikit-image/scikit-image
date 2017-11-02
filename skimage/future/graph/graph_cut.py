@@ -7,6 +7,7 @@ import numpy as np
 from . import _ncut
 from scipy import linalg
 from scipy.sparse import csr_matrix
+from time import time
 
 
 def cut_threshold(labels, rag, thresh, in_place=True):
@@ -74,7 +75,7 @@ def cut_threshold(labels, rag, thresh, in_place=True):
 
 
 def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
-                   max_edge=1.0):
+                   max_edge=1.0, call_count=[0,0,0,0,0]):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Given an image's labels and its similarity RAG, recursively perform
@@ -122,13 +123,14 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
            IEEE Transactions on, vol. 22, no. 8, pp. 888-905, August 2000.
 
     """
-    gen = cut_normalized_gen(labels, rag, thresh, num_cuts, in_place, max_edge)
+    gen = cut_normalized_gen(labels, rag, thresh, num_cuts, in_place, max_edge,
+            call_count)
     labels = next(gen)
     return labels
 
 
 def cut_normalized_gen(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
-                       max_edge=1.0):
+                       max_edge=1.0, call_count=[0,0,0,0,0]):
     """
     Perform Normalized Graph cut on the Region Adjacency Graph.
 
@@ -191,7 +193,7 @@ def cut_normalized_gen(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
         rag.add_edge(node, node, weight=max_edge)
 
     # Initialize the generator
-    ncut_gen = _ncut_relabel(rag, 0, num_cuts)
+    ncut_gen = _ncut_relabel(rag, 0, num_cuts, call_count)
     next(ncut_gen)
 
     # Generate new labels as thresholds come
@@ -303,7 +305,7 @@ def _label_all(rag, attr_name):
         d[attr_name] = new_label
 
 
-def _ncut_relabel(rag, thresh, num_cuts):
+def _ncut_relabel(rag, thresh, num_cuts, call_count=[0,0,0,0,0]):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Recursively partition the graph into two, until further subdivision
@@ -326,6 +328,7 @@ def _ncut_relabel(rag, thresh, num_cuts):
         The array which maps old labels to new ones. This is modified inside
         the function.
     """
+    start_all = time()
     d, w = _ncut.DW_matrices(rag)
     m = w.shape[0]
     d = d.todense()
@@ -336,6 +339,7 @@ def _ncut_relabel(rag, thresh, num_cuts):
         d2 = d.copy()
         # Since d is diagonal, we can directly operate on its data
         # the inverse of the square root
+        start = time()
         d2 = linalg.inv(np.sqrt(d2))
 
         # Refer Shi & Malik 2000, Equation 7, Page 891
@@ -344,6 +348,7 @@ def _ncut_relabel(rag, thresh, num_cuts):
         #vals, vectors = linalg.eigsh(d2 * (d - w) * d2, which='SM',
         #                             k=min(m-1, 100), v0=v0)
         vals, vectors = linalg.eigh(d2 * (d - w) * d2)
+        call_count[1] += time() - start
 
 
         # Pick second smallest eigenvector.
@@ -357,7 +362,9 @@ def _ncut_relabel(rag, thresh, num_cuts):
 
         d = csr_matrix(d)
         w = csr_matrix(w)
+        start = time()
         cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
+        call_count[2] += time() - start
 
         # These variables no longer needed
         del d, d2, w, vals, vectors, ev
@@ -367,31 +374,46 @@ def _ncut_relabel(rag, thresh, num_cuts):
             # mcut exceeded thresh. Update the labels in the subgraph
             # and wait until thresh rises above mcut
             if (mcut >= thresh):
+                start = time()
                 _label_all(rag, 'ncut label')
+                call_count[3] += time() - start
             while (mcut >= thresh):
+                call_count[0] += 1
+                call_count[4] += time() - start_all
                 thresh = yield
+                start_all = time()
 
             # Only prepare _ncut_relabel generators for subgraphs
             # once, and only if necessary
             if calc_subgraph:
                 sub1, sub2 = partition_by_cut(cut_mask, rag)
-                branch1 = _ncut_relabel(sub1, thresh, num_cuts)
-                branch2 = _ncut_relabel(sub2, thresh, num_cuts)
+                call_count[4] += time() - start_all
+                branch1 = _ncut_relabel(sub1, thresh, num_cuts, call_count)
+                branch2 = _ncut_relabel(sub2, thresh, num_cuts, call_count)
                 next(branch1)
                 next(branch2)
+                start_all = time()
                 del cut_mask
                 calc_subgraph = False
 
             # Propagate send() call to subgraphs
             while (mcut < thresh):
+                call_count[4] += time() - start_all
                 branch1.send(thresh)
                 branch2.send(thresh)
+                call_count[0] += 1
                 thresh = yield
+                start_all = time()
     else:
         # There were less than three super pixels to cut. The remaining
         # graph is a region.
         # Assign `ncut label` by picking any label from the existing
         # nodes, since `labels` are unique, `new_label` is also unique.
         while True:
+            start = time()
             _label_all(rag, 'ncut label')
+            call_count[3] += time() - start
+            call_count[0] += 1
+            call_count[4] += time() - start_all
             yield
+            start_all = time()
