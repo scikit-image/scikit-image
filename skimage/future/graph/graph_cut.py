@@ -337,6 +337,7 @@ def _ncut_relabel(rag, thresh, num_cuts):
         # the inverse of the square root
         d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
 
+
         # Refer Shi & Malik 2000, Equation 7, Page 891
         v0 = 2*np.random.random((m,)) - 1  # Define for reproducibility
         v0 = v0/np.linalg.norm(v0)
@@ -377,8 +378,7 @@ def _ncut_relabel(rag, thresh, num_cuts):
         if ev2[0] < 0:
             ev2 = -ev2
 
-        #print(ev, ev2)
-        #print(np.abs(ev - ev2).sum())
+        print('d:',d.sum())
         d = csr_matrix(d)
         w = csr_matrix(w)
         cut_mask2, mcut = get_min_ncut(ev2, d, w, num_cuts)
