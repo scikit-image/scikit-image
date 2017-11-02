@@ -7,6 +7,7 @@ import numpy as np
 from . import _ncut
 from scipy import linalg
 from scipy.sparse import csr_matrix
+from scipy.sparse.linalg import eigsh
 
 
 def cut_threshold(labels, rag, thresh, in_place=True):
@@ -328,23 +329,20 @@ def _ncut_relabel(rag, thresh, num_cuts):
     """
     d, w = _ncut.DW_matrices(rag)
     m = w.shape[0]
-    d = d.todense()
-    w = w.todense()
 
     # If 2 regions not cutting is optimal choice
     if m > 2:
         d2 = d.copy()
         # Since d is diagonal, we can directly operate on its data
         # the inverse of the square root
-        d2 = np.diag(d2)
-        d2 = np.diag(1/(np.sqrt(d2)))
+        d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
 
         # Refer Shi & Malik 2000, Equation 7, Page 891
-        #v0 = 2*np.random.random((m,)) - 1  # Define for reproducibility
-        #v0 = v0/np.linalg.norm(v0)
-        #vals, vectors = linalg.eigsh(d2 * (d - w) * d2, which='SM',
-        #                             k=min(m-1, 100), v0=v0)
-        vals, vectors = linalg.eigh(d2 * (d - w) * d2)
+        v0 = 2*np.random.random((m,)) - 1  # Define for reproducibility
+        v0 = v0/np.linalg.norm(v0)
+        vals, vectors = eigsh(d2 * (d - w) * d2, which='SM',
+                                     #k=min(m-1, 100), v0=v0)
+                                     k=2, ncv=m, v0=v0)
 
 
         # Pick second smallest eigenvector.
@@ -356,9 +354,37 @@ def _ncut_relabel(rag, thresh, num_cuts):
         if ev[0] < 0:
             ev = -ev
 
+        cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
+
+
+        # Now with more eigenpairs
+        vals, vectors = eigsh(d2 * (d - w) * d2, which='SM',
+                                     k=min(m-1, 100), v0=v0)
+                                     #k=2, ncv=m, v0=v0)
+        ev1 = vectors[:, 1]
+        if ev1[0] < 0:
+            ev1 = -ev1
+
+        # Same operation but deterministic and w/ dense matrices
+        d = d.todense()
+        w = w.todense()
+        d2 = d.copy()
+        d2 = np.diag(d2)
+        d2 = np.diag(1/(np.sqrt(d2)))
+        vals, vectors = linalg.eigh(d2 * (d - w) * d2)
+        ev2 = vectors[:, 1]
+
+        if ev2[0] < 0:
+            ev2 = -ev2
+
+        #print(ev, ev2)
+        #print(np.abs(ev - ev2).sum())
         d = csr_matrix(d)
         w = csr_matrix(w)
-        cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
+        cut_mask2, mcut = get_min_ncut(ev2, d, w, num_cuts)
+        print(np.abs(ev - ev2).sum())
+        print(np.abs(ev1 - ev2).sum())
+
 
         # These variables no longer needed
         del d, d2, w, vals, vectors, ev

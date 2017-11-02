@@ -78,6 +78,7 @@ def test_threshold_cut():
 @pytest.mark.skipif(not is_installed('networkx'),
                     reason="networkx not installed")
 def test_cut_normalized():
+    np.random.seed(349)
 
     img = np.zeros((100, 100, 3), dtype='uint8')
     img[:50, :50] = 255, 255, 255
@@ -106,6 +107,7 @@ def test_cut_normalized():
 @pytest.mark.skipif(not is_installed('networkx'),
                     reason="networkx not installed")
 def test_cut_normalized_gen():
+    np.random.seed(349)
 
     img = np.zeros((100, 100, 3), dtype='uint8')
     img[:50, :50] = 255, 255, 255
