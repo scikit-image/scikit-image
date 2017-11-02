@@ -8,6 +8,7 @@ from . import _ncut
 from scipy import linalg
 from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import eigsh
+import pdb
 
 
 def cut_threshold(labels, rag, thresh, in_place=True):
@@ -194,6 +195,9 @@ def cut_normalized_gen(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
     # Initialize the generator
     ncut_gen = _ncut_relabel(rag, 0, num_cuts)
     next(ncut_gen)
+    # 0.8855660978873368
+
+    pdb.set_trace()
 
     # Generate new labels as thresholds come
     while True:
@@ -327,8 +331,10 @@ def _ncut_relabel(rag, thresh, num_cuts):
         The array which maps old labels to new ones. This is modified inside
         the function.
     """
+    # 0.21404961941050782
     d, w = _ncut.DW_matrices(rag)
     m = w.shape[0]
+    # 0.21404961941050782
 
     # If 2 regions not cutting is optimal choice
     if m > 2:
@@ -336,11 +342,13 @@ def _ncut_relabel(rag, thresh, num_cuts):
         # Since d is diagonal, we can directly operate on its data
         # the inverse of the square root
         d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
+        # 0.21404961941050782
 
 
         # Refer Shi & Malik 2000, Equation 7, Page 891
         v0 = 2*np.random.random((m,)) - 1  # Define for reproducibility
         v0 = v0/np.linalg.norm(v0)
+        # 0.8855660978873368
         vals, vectors = eigsh(d2 * (d - w) * d2, which='SM',
                                      k=min(m-1, 100), v0=v0)
                                      #k=2, ncv=m, v0=v0)
@@ -379,6 +387,7 @@ def _ncut_relabel(rag, thresh, num_cuts):
             ev2 = -ev2
 
         print('d:',d.sum())
+        print('v0:',v0) #np.abs(v0).sum())
         d = csr_matrix(d)
         w = csr_matrix(w)
         cut_mask2, mcut = get_min_ncut(ev2, d, w, num_cuts)
@@ -403,8 +412,10 @@ def _ncut_relabel(rag, thresh, num_cuts):
             # once, and only if necessary
             if calc_subgraph:
                 sub1, sub2 = partition_by_cut(cut_mask, rag)
+                print(len(sub1.nodes), len(sub2.nodes))
                 branch1 = _ncut_relabel(sub1, thresh, num_cuts)
                 branch2 = _ncut_relabel(sub2, thresh, num_cuts)
+                # 0.8855660978873368
                 next(branch1)
                 next(branch2)
                 del cut_mask
