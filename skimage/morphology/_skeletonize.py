@@ -250,7 +250,11 @@ def thin(image, max_iter=None):
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
     # check parameters
-    max_iter = max_iter or sys.maxsize
+
+    # xrange in cython + win32 is implemented using C long
+    # Also see: https://bugs.python.org/issue26428
+    max_iter = max_iter or 2**31 - 1
+
     # check that image is 2d
     assert_nD(image, 2)
 
