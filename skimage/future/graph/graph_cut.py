@@ -7,6 +7,7 @@ import numpy as np
 from . import _ncut
 from scipy import linalg
 from scipy.sparse import csr_matrix
+from time import time
 
 
 def cut_threshold(labels, rag, thresh, in_place=True):
@@ -74,7 +75,7 @@ def cut_threshold(labels, rag, thresh, in_place=True):
 
 
 def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
-                   max_edge=1.0, call_count=[0]):
+                   max_edge=1.0, call_count=[0,0,0]):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Given an image's labels and its similarity RAG, recursively perform
@@ -129,7 +130,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
 
 
 def cut_normalized_gen(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
-                       max_edge=1.0, call_count=[0]):
+                       max_edge=1.0, call_count=[0,0,0]):
     """
     Perform Normalized Graph cut on the Region Adjacency Graph.
 
@@ -304,7 +305,7 @@ def _label_all(rag, attr_name):
         d[attr_name] = new_label
 
 
-def _ncut_relabel(rag, thresh, num_cuts, call_count=[0]):
+def _ncut_relabel(rag, thresh, num_cuts, call_count=[0,0,0]):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Recursively partition the graph into two, until further subdivision
@@ -344,7 +345,9 @@ def _ncut_relabel(rag, thresh, num_cuts, call_count=[0]):
         #v0 = v0/np.linalg.norm(v0)
         #vals, vectors = linalg.eigsh(d2 * (d - w) * d2, which='SM',
         #                             k=min(m-1, 100), v0=v0)
+        start = time()
         vals, vectors = linalg.eigh(d2 * (d - w) * d2)
+        call_count[1] += time() - start
 
 
         # Pick second smallest eigenvector.
@@ -358,7 +361,9 @@ def _ncut_relabel(rag, thresh, num_cuts, call_count=[0]):
 
         d = csr_matrix(d)
         w = csr_matrix(w)
+        start = time()
         cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
+        call_count[2] += time() - start
 
         # These variables no longer needed
         del d, d2, w, vals, vectors, ev
