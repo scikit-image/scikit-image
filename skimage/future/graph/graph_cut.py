@@ -341,8 +341,8 @@ def _ncut_relabel(rag, thresh, num_cuts):
         v0 = 2*np.random.random((m,)) - 1  # Define for reproducibility
         v0 = v0/np.linalg.norm(v0)
         vals, vectors = eigsh(d2 * (d - w) * d2, which='SM',
-                                     #k=min(m-1, 100), v0=v0)
-                                     k=2, ncv=m, v0=v0)
+                                     k=min(m-1, 100), v0=v0)
+                                     #k=2, ncv=m, v0=v0)
 
 
         # Pick second smallest eigenvector.
@@ -359,8 +359,8 @@ def _ncut_relabel(rag, thresh, num_cuts):
 
         # Now with more eigenpairs
         vals, vectors = eigsh(d2 * (d - w) * d2, which='SM',
-                                     k=min(m-1, 100), v0=v0)
-                                     #k=2, ncv=m, v0=v0)
+                                     #k=min(m-1, 100), v0=v0)
+                                     k=2, ncv=m, v0=v0)
         ev1 = vectors[:, 1]
         if ev1[0] < 0:
             ev1 = -ev1
@@ -382,6 +382,7 @@ def _ncut_relabel(rag, thresh, num_cuts):
         d = csr_matrix(d)
         w = csr_matrix(w)
         cut_mask2, mcut = get_min_ncut(ev2, d, w, num_cuts)
+        print(np.abs(ev2).sum())
         print(np.abs(ev - ev2).sum())
         print(np.abs(ev1 - ev2).sum())
 
