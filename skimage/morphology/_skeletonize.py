@@ -2,7 +2,6 @@
 Algorithms for computing the skeleton of a binary image
 """
 
-import sys
 from six.moves import range
 import numpy as np
 from scipy import ndimage as ndi
@@ -249,12 +248,6 @@ def thin(image, max_iter=None):
            [0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
-    # check parameters
-
-    # xrange in cython + win32 is implemented using C long
-    # Also see: https://bugs.python.org/issue26428
-    max_iter = max_iter or 2**31 - 1
-
     # check that image is 2d
     assert_nD(image, 2)
 
@@ -262,13 +255,16 @@ def thin(image, max_iter=None):
     skel = np.asanyarray(image, dtype=bool).astype(np.uint8)
 
     # neighborhood mask
-    mask = np.array([[ 8,  4,  2],
-                     [16,  0,  1],
-                     [32, 64,128]], dtype=np.uint8)
+    mask = np.array([[ 8,  4,   2],
+                     [16,  0,   1],
+                     [32, 64, 128]], dtype=np.uint8)
 
     # iterate until convergence, up to the iteration limit
-    for i in range(max_iter):
-        before = np.sum(skel)  # count points before thinning
+    iter_cnt = max_iter or np.inf
+    n_pts_old, n_pts_new = np.inf, np.sum(skel)
+    while not np.isclose(n_pts_old, n_pts_new, rtol=0) and iter_cnt > 0:
+        n_pts_old = n_pts_new
+
         # perform the two "subiterations" described in the paper
         for lut in [G123_LUT, G123P_LUT]:
             # correlate image with neighborhood mask
@@ -278,11 +274,8 @@ def thin(image, max_iter=None):
             # perform deletion
             skel[D] = 0
 
-        after = np.sum(skel)  # count points after thinning
-
-        if before == after:
-            # iteration had no effect: finish
-            break
+        n_pts_new = np.sum(skel)  # count points after thinning
+        iter_cnt -= 1
 
     return skel.astype(np.bool)
 
@@ -433,7 +426,7 @@ def medial_axis(image, mask=None, return_distance=False):
     _skeletonize_loop(result, i, j, order, table)
 
     result = result.astype(bool)
-    if not mask is None:
+    if mask is not None:
         result[~mask] = image[~mask]
     if return_distance:
         return result, store_distance
