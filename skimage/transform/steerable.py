@@ -126,7 +126,7 @@ class Steerable:
         if min(M, N) < 2**self.height:
             raise ValueError("For a {} level decomposition,"
                              " all image dimensions must be at least"
-                             " size {}.".format(height, 2**height))
+                             " size {}.".format(self.height, 2**self.height))
 
         log_rad, angle = _logradius_angle_grid(M, N)
         Xrcos, Yrcos = _rcos_curve(1, -0.5)
