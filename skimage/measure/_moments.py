@@ -7,7 +7,7 @@ import itertools
 from warnings import warn
 
 
-def moments_contour(contour, order=3):
+def moments_coords(coords, order=3):
     """Calculate all raw image moments up to a certain order.
 
     The following properties can be calculated from raw image moments:
@@ -19,7 +19,7 @@ def moments_contour(contour, order=3):
 
     Parameters
     ----------
-    contour : (N, D) double or uint8 array
+    coords : (N, D) double or uint8 array
         Array of N points that describe an image of D dimensionality in
         Euclidian space.
     order : int, optional
@@ -37,18 +37,18 @@ def moments_contour(contour, order=3):
 
     Examples
     --------
-    >>> contour = np.array([[r, c] for r in range(13, 17) \
+    >>> coords = np.array([[r, c] for r in range(13, 17) \
                   for c in range(13, 17)], dtype=np.double)
-    >>> M = moments_contour(contour)
+    >>> M = moments_coords(coords)
     >>> cr = M[1, 0] / M[0, 0]
     >>> cc = M[0, 1] / M[0, 0]
     >>> cr, cc
     (14.5, 14.5)
     """
-    return moments_contour_central(contour, 0, order=order)
+    return moments_coords_central(coords, 0, order=order)
 
 
-def moments_contour_central(contour, center=None, order=3):
+def moments_coords_central(coords, center=None, order=3):
     """Calculate all central image moments up to a certain order.
 
     The following properties can be calculated from raw image moments:
@@ -60,7 +60,7 @@ def moments_contour_central(contour, center=None, order=3):
 
     Parameters
     ----------
-    contour : (N, D) double or uint8 array
+    coords : (N, D) double or uint8 array
         Array of N points that describe an image of D dimensionality in
         Euclidian space.
     center : tuple of float, optional
@@ -81,31 +81,31 @@ def moments_contour_central(contour, center=None, order=3):
 
     Examples
     --------
-    >>> contour = np.array([[r, c] for r in range(13, 17) \
+    >>> coords = np.array([[r, c] for r in range(13, 17) \
                   for c in range(13, 17)], dtype=np.double)
-    >>> M = moments_contour(contour)
+    >>> M = moments_coords(coords)
     >>> cr = M[1, 0] / M[0, 0]
     >>> cc = M[0, 1] / M[0, 0]
-    >>> moments_contour_central(contour, (cr, cc))
+    >>> moments_coords_central(coords, (cr, cc))
     array([[ 16.,   0.,  20.,   0.],
            [  0.,   0.,   0.,   0.],
            [ 20.,   0.,  25.,   0.],
            [  0.,   0.,   0.,   0.]])
     """
-    if isinstance(contour, tuple):
+    if isinstance(coords, tuple):
         # Represent as array and rotate to standardize orientation.
-        contour = np.rollaxis(np.asarray(contour), axis=1)
-    assert_nD(contour, 2)
-    ndim = contour.shape[1]
+        coords = np.rollaxis(np.asarray(coords), axis=1)
+    assert_nD(coords, 2)
+    ndim = coords.shape[1]
     if center is None:
-        M = moments_central(contour, center=0, order=order)
+        M = moments_central(coords, center=0, order=order)
         center = M[tuple(np.eye(ndim, dtype=int))]
     else:
         # TODO: Handle broadcasting of `center` argument.
         if center is int:
             center = (center,) * ndim
 
-    calc = contour.astype(float)
+    calc = coords.astype(float)
     calc -= center
 
     # generate all possible exponents for each axis in the given set of points
