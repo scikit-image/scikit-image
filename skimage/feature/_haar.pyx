@@ -262,9 +262,10 @@ cpdef haar_like_feature_wrapper(cnp.ndarray[integral_floating, ndim=2] int_image
         Py_ssize_t n_rectangle, n_feature
         Py_ssize_t idx_rect, idx_feature
         integral_floating[:, ::1] rect_feature
-        # convert to an ndarray to a memory-view to be able to release the
-        # GIL. Furthermore, we need currently a ndarray to be able to use
-        # read-only memmap (for instance when using joblib).
+        # FIXME: convert to an ndarray to a memory-view to be able to release
+        # the GIL. Furthermore, we need currently a ndarray to be able to use
+        # read-only memmap (for instance when using joblib). Check issue
+        # https://github.com/cython/cython/issues/1605 to be resolved
         integral_floating[:, ::1] int_image_memview = int_image[
             r : r + height, c : c + width].copy()
 
