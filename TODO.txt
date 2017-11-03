@@ -41,3 +41,7 @@ Version 0.16
   ``skimage.transform.tests.test_warps.py``.
 * Remove deprecated argument ``visualise`` from function skimage.feature.hog
 * Remove deprecated module ``skimage.novice``
+* In ``skimage.measure._regionprops``, remove all references to 
+  ``coordinates=``, ``_xycoordinates``, and ``_use_xy_warning``.
+* In ``skimage.measure.moments_central``, remove ``cc`` and ``**kwargs``
+  arguments.

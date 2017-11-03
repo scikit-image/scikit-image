@@ -2,6 +2,7 @@ include setup*.py
 include conftest.py
 include MANIFEST.in
 include *.txt
+include *.rst
 recursive-include requirements *.txt
 include requirements/README.md
 include Makefile
