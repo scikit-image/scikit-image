@@ -1,14 +1,15 @@
 import os
 import numpy as np
-from numpy.testing import (assert_equal, assert_almost_equal,
-                           assert_array_almost_equal)
-import pytest
+
+from skimage import data, data_dir
 from skimage.measure import compare_ssim as ssim
-import skimage.data
-from skimage import data_dir
+
+from skimage._shared import testing
+from skimage._shared.testing import (assert_equal, assert_almost_equal,
+                                     assert_array_almost_equal)
 
 np.random.seed(5)
-cam = skimage.data.camera()
+cam = data.camera()
 sigma = 20.0
 cam_noisy = np.clip(cam + sigma * np.random.randn(*cam.shape), 0, 255)
 cam_noisy = cam_noisy.astype(cam.dtype)
@@ -109,7 +110,7 @@ def test_ssim_multichannel():
     assert_equal(S3.shape, Xc.shape)
 
     # fail if win_size exceeds any non-channel dimension
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         ssim(Xc, Yc, win_size=7, multichannel=False)
 
 
@@ -127,7 +128,7 @@ def test_ssim_nD():
 
 def test_ssim_multichannel_chelsea():
     # color image example
-    Xc = skimage.data.chelsea()
+    Xc = data.chelsea()
     sigma = 15.0
     Yc = np.clip(Xc + sigma * np.random.randn(*Xc.shape), 0, 255)
     Yc = Yc.astype(Xc.dtype)
@@ -194,28 +195,24 @@ def test_mssim_vs_legacy():
 def test_invalid_input():
     X = np.zeros((3, 3), dtype=np.double)
     Y = np.zeros((3, 3), dtype=np.int)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         ssim(X, Y)
 
     Y = np.zeros((4, 4), dtype=np.double)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         ssim(X, Y)
 
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         ssim(X, X, win_size=8)
 
     # do not allow both image content weighting and gradient calculation
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         ssim(X, X, image_content_weighting=True,
              gradient=True)
     # some kwarg inputs must be non-negative
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         ssim(X, X, K1=-0.1)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         ssim(X, X, K2=-0.1)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         ssim(X, X, sigma=-1.0)
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

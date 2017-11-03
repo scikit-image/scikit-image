@@ -1,13 +1,13 @@
-from numpy.testing import assert_array_equal, assert_equal, assert_almost_equal
 import numpy as np
-import pytest
 from skimage._shared.testing import test_parallel
+from skimage._shared import testing
+from skimage._shared.testing import assert_array_equal, assert_equal
+from skimage._shared.testing import assert_almost_equal
 
 from skimage.draw import (set_color, line, line_aa, polygon, polygon_perimeter,
                           circle, circle_perimeter, circle_perimeter_aa,
                           ellipse, ellipse_perimeter,
-                          _bezier_segment, bezier_curve,rectangle)
-
+                          _bezier_segment, bezier_curve, rectangle)
 from skimage.measure import regionprops
 
 
@@ -30,7 +30,7 @@ def test_set_color_with_alpha():
     set_color(img, (rr, cc), 1, alpha=alpha)
 
     # Wrong dimensionality color
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         set_color(img, (rr, cc), (255, 0, 0), alpha=alpha)
 
     img = np.zeros((10, 10, 3))
@@ -854,7 +854,7 @@ def test_polygon_perimeter():
     out[rr, cc] = 1
     assert_array_equal(out, expected)
 
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         polygon_perimeter([0], [1], clip=True)
 
 
@@ -888,10 +888,6 @@ def test_rectangle_extent():
     img = np.zeros((5, 5), dtype=np.uint8)
     start = (1, 1)
     extent = (3, 3)
-    rr, cc = rectangle(start, extent= extent, shape=img.shape)
+    rr, cc = rectangle(start, extent=extent, shape=img.shape)
     img[rr, cc] = 1
     assert_array_equal(img, expected)
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

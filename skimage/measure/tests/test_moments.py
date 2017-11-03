@@ -1,11 +1,11 @@
-from numpy.testing import assert_equal, assert_almost_equal
-import pytest
 import numpy as np
-
-from skimage._shared._warnings import expected_warnings
 from skimage import draw
 from skimage.measure import (moments, moments_central, moments_normalized,
                              moments_hu)
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_almost_equal
+from skimage._shared._warnings import expected_warnings
 
 
 def test_moments():
@@ -75,9 +75,9 @@ def test_moments_normalized_3d():
 
 
 def test_moments_normalized_invalid():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         moments_normalized(np.zeros((3, 3)), 3)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         moments_normalized(np.zeros((3, 3)), 4)
 
 
@@ -96,8 +96,3 @@ def test_moments_hu():
     hu2 = moments_hu(nu2)
     # central moments must be translation and scale invariant
     assert_almost_equal(hu, hu2, decimal=1)
-
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

@@ -1,11 +1,8 @@
-from numpy.testing import (assert_array_equal,
-                           assert_almost_equal,
-                           assert_equal,
-                           assert_array_almost_equal,
-                           )
 import numpy as np
-
 import skimage.io._plugins._colormixer as cm
+
+from skimage._shared.testing import (assert_array_equal, assert_almost_equal,
+                                     assert_equal, assert_array_almost_equal)
 
 
 class ColorMixerTest(object):
@@ -137,8 +134,3 @@ class TestColorMixer(object):
     def test_hsv_mul_clip_neg(self):
         cm.hsv_multiply(self.img, self.state, 0, 0, 0)
         assert_equal(self.img, np.zeros_like(self.state))
-
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

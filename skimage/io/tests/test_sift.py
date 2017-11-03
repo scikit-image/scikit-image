@@ -1,8 +1,9 @@
-from numpy.testing import assert_equal, run_module_suite
-from tempfile import NamedTemporaryFile
 import os
+from tempfile import NamedTemporaryFile
 
 from skimage.io import load_sift, load_surf
+
+from skimage._shared.testing import assert_equal
 
 
 def test_load_sift():
@@ -65,6 +66,3 @@ def test_load_surf():
     assert_equal(len(features['data'][0]), 64)
     assert_equal(features['column'][1], 68.5773)
     assert_equal(features['row'][0], 62.0491)
-
-if __name__ == '__main__':
-    run_module_suite()

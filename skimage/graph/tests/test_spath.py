@@ -1,7 +1,7 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_array_equal
-
 import skimage.graph.spath as spath
+
+from skimage._shared.testing import assert_equal, assert_array_equal
 
 
 def test_basic():
@@ -30,7 +30,3 @@ def test_non_square():
     path, cost = spath.shortest_path(x, reach=2)
     assert_array_equal(path, [2, 1, 1, 2, 3, 3, 2])
     assert_equal(cost, 0)
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

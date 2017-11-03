@@ -1,13 +1,13 @@
 from skimage._shared.utils import (copy_func, assert_nD)
 import numpy.testing as npt
 import numpy as np
-import pytest
+from skimage._shared import testing
 
 
 def test_assert_nD():
     z = np.random.random(200**2).reshape((200, 200))
     x = z[10:30, 30:10]
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         assert_nD(x, 2)
 
 

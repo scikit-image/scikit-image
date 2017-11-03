@@ -1,8 +1,5 @@
 import numpy as np
 from scipy import ndimage as ndi
-from numpy.testing import (assert_equal,
-                           assert_almost_equal)
-import pytest
 
 import skimage
 from skimage import data
@@ -19,6 +16,8 @@ from skimage.filters.thresholding import (threshold_local,
                                           threshold_triangle,
                                           threshold_minimum,
                                           _mean_std)
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_almost_equal
 
 
 class TestSimpleImage():
@@ -52,8 +51,8 @@ class TestSimpleImage():
         assert 2 <= threshold_li(image) < 3
 
     def test_li_constant_image(self):
-        with pytest.raises(ValueError):
-            threshold_li(np.ones((10,10)))
+        with testing.raises(ValueError):
+            threshold_li(np.ones((10, 10)))
 
     def test_yen(self):
         assert threshold_yen(self.image) == 2
@@ -217,7 +216,7 @@ def test_otsu_astro_image():
 
 def test_otsu_one_color_image():
     img = np.ones((10, 10), dtype=np.uint8)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         threshold_otsu(img)
 
 
@@ -258,7 +257,7 @@ def test_yen_coins_image_as_float():
 
 def test_adaptive_even_block_size_error():
     img = data.camera()
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         threshold_local(img, block_size=4)
 
 
@@ -346,9 +345,10 @@ def test_threshold_minimum_synthetic():
     threshold = threshold_minimum(img)
     assert_equal(threshold, 95)
 
+
 def test_threshold_minimum_failure():
     img = np.zeros((16*16), dtype=np.uint8)
-    with pytest.raises(RuntimeError):
+    with testing.raises(RuntimeError):
         threshold_minimum(img)
 
 
@@ -421,7 +421,3 @@ def test_mean_std_3d():
     expected_s = ndi.generic_filter(image, np.std, size=window_size,
                                     mode='mirror')
     np.testing.assert_allclose(s, expected_s)
-
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()
