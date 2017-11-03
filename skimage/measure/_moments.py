@@ -49,7 +49,7 @@ def moments_contour(contour, order=3):
 
 
 def moments_contour_central(contour, center=None, order=3):
-    """Calculate all raw image moments up to a certain order.
+    """Calculate all central image moments up to a certain order.
 
     The following properties can be calculated from raw image moments:
      * Area as: ``M[0, 0]``.
