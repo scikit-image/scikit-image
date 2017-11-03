@@ -1,7 +1,7 @@
 import numpy as np
 from skimage import draw
 from skimage.measure import (moments, moments_central, moments_normalized,
-                             moments_hu)
+                             moments_hu, centroid)
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_almost_equal
@@ -27,6 +27,10 @@ def test_moments_central():
     image[14, 15] = 0.5
     image[15, 14] = 0.5
     mu = moments_central(image, (14.5, 14.5))
+
+    # check for proper centroid computation
+    mu_calc_centroid = moments_central(image)
+    assert_equal(mu, mu_calc_centroid)
 
     # shift image by dx=2, dy=2
     image2 = np.zeros((20, 20), dtype=np.double)
