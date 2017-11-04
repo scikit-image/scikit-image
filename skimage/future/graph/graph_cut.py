@@ -8,7 +8,6 @@ from . import _ncut
 from scipy import linalg
 from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import eigsh
-import pdb
 
 
 def cut_threshold(labels, rag, thresh, in_place=True):
@@ -195,9 +194,6 @@ def cut_normalized_gen(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
     # Initialize the generator
     ncut_gen = _ncut_relabel(rag, 0, num_cuts)
     next(ncut_gen)
-    # 0.8855660978873368
-
-    pdb.set_trace()
 
     # Generate new labels as thresholds come
     while True:
@@ -331,10 +327,8 @@ def _ncut_relabel(rag, thresh, num_cuts):
         The array which maps old labels to new ones. This is modified inside
         the function.
     """
-    # 0.21404961941050782
     d, w = _ncut.DW_matrices(rag)
     m = w.shape[0]
-    # 0.21404961941050782
 
     # If 2 regions not cutting is optimal choice
     if m > 2:
@@ -342,59 +336,23 @@ def _ncut_relabel(rag, thresh, num_cuts):
         # Since d is diagonal, we can directly operate on its data
         # the inverse of the square root
         d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
-        # 0.21404961941050782
-
 
         # Refer Shi & Malik 2000, Equation 7, Page 891
         v0 = 2*np.random.random((m,)) - 1  # Define for reproducibility
         v0 = v0/np.linalg.norm(v0)
-        # 0.8855660978873368
         vals, vectors = eigsh(d2 * (d - w) * d2, which='SM',
-                                     k=min(m-1, 100), v0=v0)
-                                     #k=2, ncv=m, v0=v0)
+                              k=min(m-1, 100), v0=v0)
 
-
-        # Pick second smallest eigenvector.
+        # Build vector orthogonal to d from first two eigenvectors
+        # Helps avoid problems from degeneracy
+        # Refer Shi & Malik 2000, Section 2.1.10, Page 891
         # Refer Shi & Malik 2000, Section 3.2.3, Page 893
-        ev = vectors[:, 1]
-
-        # Make sure first entry in eigenvector non-negative so 
-        # setting seed fixes labels
-        if ev[0] < 0:
-            ev = -ev
+        vectors = (vectors[:,:2].T/d2.data).T
+        norm = np.dot(d.data, d.data)
+        ev = (vectors[:,0] - np.dot(vectors[:,0], d.data)*d.data/norm) \
+           + (vectors[:,1] - np.dot(vectors[:,1], d.data)*d.data/norm)
 
         cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
-
-
-        # Now with more eigenpairs
-        vals, vectors = eigsh(d2 * (d - w) * d2, which='SM',
-                                     #k=min(m-1, 100), v0=v0)
-                                     k=2, ncv=m, v0=v0)
-        ev1 = vectors[:, 1]
-        if ev1[0] < 0:
-            ev1 = -ev1
-
-        # Same operation but deterministic and w/ dense matrices
-        d = d.todense()
-        w = w.todense()
-        d2 = d.copy()
-        d2 = np.diag(d2)
-        d2 = np.diag(1/(np.sqrt(d2)))
-        vals, vectors = linalg.eigh(d2 * (d - w) * d2)
-        ev2 = vectors[:, 1]
-
-        if ev2[0] < 0:
-            ev2 = -ev2
-
-        print('d:',d.sum())
-        print('v0:',v0) #np.abs(v0).sum())
-        d = csr_matrix(d)
-        w = csr_matrix(w)
-        cut_mask2, mcut = get_min_ncut(ev2, d, w, num_cuts)
-        print(np.abs(ev2).sum())
-        print(np.abs(ev - ev2).sum())
-        print(np.abs(ev1 - ev2).sum())
-
 
         # These variables no longer needed
         del d, d2, w, vals, vectors, ev
@@ -412,10 +370,8 @@ def _ncut_relabel(rag, thresh, num_cuts):
             # once, and only if necessary
             if calc_subgraph:
                 sub1, sub2 = partition_by_cut(cut_mask, rag)
-                print(len(sub1.nodes), len(sub2.nodes))
                 branch1 = _ncut_relabel(sub1, thresh, num_cuts)
                 branch2 = _ncut_relabel(sub2, thresh, num_cuts)
-                # 0.8855660978873368
                 next(branch1)
                 next(branch2)
                 del cut_mask
