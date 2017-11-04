@@ -1,6 +1,6 @@
 import numpy as np
-import pytest
-from numpy.testing import assert_, assert_equal, run_module_suite
+from numpy.testing import assert_, assert_equal
+from skimage._shared import testing
 import unittest
 
 from skimage import data
@@ -13,7 +13,7 @@ class TestLPIFilter2D(unittest.TestCase):
     def filt_func(self, r, c):
         return np.exp(-np.hypot(r, c) / 1)
 
-    @pytest.fixture(autouse=True)
+    @testing.fixture(autouse=True)
     def setUp(self):
         self.f = LPIFilter2D(self.filt_func)
 
@@ -55,9 +55,5 @@ class TestLPIFilter2D(unittest.TestCase):
         assert_((g - g1[::-1, ::-1]).sum() < 1)
 
     def test_non_callable(self):
-        with pytest.raises(ValueError):
+        with testing.raises(ValueError):
             LPIFilter2D(None)
-
-
-if __name__ == "__main__":
-    run_module_suite()

@@ -1,13 +1,15 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_almost_equal, assert_array_less
-import pytest
 from skimage.measure import LineModelND, CircleModel, EllipseModel, ransac
 from skimage.transform import AffineTransform
 from skimage.measure.fit import _dynamic_max_trials
 
+from skimage._shared import testing
+from skimage._shared.testing import (assert_equal, assert_almost_equal,
+                                     assert_array_less)
+
 
 def test_line_model_invalid_input():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         LineModelND().estimate(np.empty((1, 3)))
 
 
@@ -20,29 +22,29 @@ def test_line_model_predict():
 
 
 def test_line_model_nd_invalid_input():
-    with pytest.raises(AssertionError):
+    with testing.raises(AssertionError):
         LineModelND().predict_x(np.zeros(1))
 
-    with pytest.raises(AssertionError):
+    with testing.raises(AssertionError):
         LineModelND().predict_y(np.zeros(1))
 
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         LineModelND().predict_x(np.zeros(1), np.zeros(1))
 
-    with pytest.raises(AssertionError):
+    with testing.raises(AssertionError):
         LineModelND().predict_y(np.zeros(1))
 
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         LineModelND().predict_y(np.zeros(1), np.zeros(1))
 
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         LineModelND().estimate(np.empty((1, 3)))
 
-    with pytest.raises(AssertionError):
+    with testing.raises(AssertionError):
         LineModelND().residuals(np.empty((1, 3)))
 
     data = np.empty((1, 2))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         LineModelND().estimate(data)
 
 
@@ -57,12 +59,12 @@ def test_line_model_nd_predict():
 def test_line_model_nd_estimate():
     # generate original data without noise
     model0 = LineModelND()
-    model0.params = (np.array([0,0,0], dtype='float'),
-                         np.array([1,1,1], dtype='float')/np.sqrt(3))
+    model0.params = (np.array([0, 0, 0], dtype='float'),
+                     np.array([1, 1, 1], dtype='float')/np.sqrt(3))
     # we scale the unit vector with a factor 10 when generating points on the
     # line in order to compensate for the scale of the random noise
     data0 = (model0.params[0] +
-             10 * np.arange(-100,100)[...,np.newaxis] * model0.params[1])
+             10 * np.arange(-100, 100)[..., np.newaxis] * model0.params[1])
 
     # add gaussian noise to data
     random_state = np.random.RandomState(1234)
@@ -96,12 +98,12 @@ def test_line_model_nd_residuals():
 
 def test_line_modelND_under_determined():
     data = np.empty((1, 3))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         LineModelND().estimate(data)
 
 
 def test_circle_model_invalid_input():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         CircleModel().estimate(np.empty((5, 3)))
 
 
@@ -144,7 +146,7 @@ def test_circle_model_residuals():
 
 
 def test_ellipse_model_invalid_input():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EllipseModel().estimate(np.empty((5, 3)))
 
 
@@ -178,7 +180,6 @@ def test_ellipse_model_estimate():
         assert_almost_equal(model0.params[:2], model_est.params[:2], 0)
         res = model_est.residuals(data0)
         assert_array_less(res, np.ones(res.shape))
-
 
 
 def test_ellipse_model_estimate_from_data():
@@ -279,8 +280,8 @@ def test_ransac_geometric():
 
 
 def test_ransac_is_data_valid():
-
-    is_data_valid = lambda data: data.shape[0] > 2
+    def is_data_valid(data):
+        return data.shape[0] > 2
     model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
                             is_data_valid=is_data_valid, random_state=1)
     assert_equal(model, None)
@@ -288,7 +289,6 @@ def test_ransac_is_data_valid():
 
 
 def test_ransac_is_model_valid():
-
     def is_model_valid(model, data):
         return False
     model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
@@ -330,16 +330,12 @@ def test_ransac_dynamic_max_trials():
 
 
 def test_ransac_invalid_input():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         ransac(np.zeros((10, 2)), None, min_samples=2,
                residual_threshold=0, max_trials=-1)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         ransac(np.zeros((10, 2)), None, min_samples=2,
                residual_threshold=0, stop_probability=-1)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         ransac(np.zeros((10, 2)), None, min_samples=2,
                residual_threshold=0, stop_probability=1.01)
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

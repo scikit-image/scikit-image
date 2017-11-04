@@ -1,10 +1,10 @@
 import numpy as np
-from numpy.testing import (assert_array_almost_equal as assert_close,
-                           assert_, assert_allclose)
-import pytest
-
 from skimage import filters
 from skimage.filters.edges import _mask_filter_result
+
+from skimage._shared import testing
+from skimage._shared.testing import (assert_array_almost_equal,
+                                     assert_, assert_allclose)
 
 
 def test_roberts_zeros():
@@ -20,7 +20,7 @@ def test_roberts_diagonal1():
                  np.tri(10, 10, -2).astype(bool).transpose())
     expected = _mask_filter_result(expected, None)
     result = filters.roberts(image).astype(bool)
-    assert_close(result, expected)
+    assert_array_almost_equal(result, expected)
 
 
 def test_roberts_diagonal2():
@@ -30,7 +30,7 @@ def test_roberts_diagonal2():
                          np.tri(10, 10, -2).astype(bool).transpose())
     expected = _mask_filter_result(expected, None)
     result = filters.roberts(image).astype(bool)
-    assert_close(result, expected)
+    assert_array_almost_equal(result, expected)
 
 
 def test_sobel_zeros():
@@ -364,7 +364,7 @@ def test_laplace_mask():
     assert (np.all(result == 0))
 
 
-@pytest.mark.parametrize("grad_func", (
+@testing.parametrize("grad_func", (
     filters.prewitt_h, filters.sobel_h, filters.scharr_h
 ))
 def test_horizontal_mask_line(grad_func):
@@ -380,10 +380,10 @@ def test_horizontal_mask_line(grad_func):
     expected[4:7, 1:-1] = 0              # but line and neighbors masked
 
     result = grad_func(vgrad, mask)
-    assert_close(result, expected)
+    assert_allclose(result, expected)
 
 
-@pytest.mark.parametrize("grad_func", (
+@testing.parametrize("grad_func", (
     filters.prewitt_v, filters.sobel_v, filters.scharr_v
 ))
 def test_vertical_mask_line(grad_func):
@@ -399,7 +399,7 @@ def test_vertical_mask_line(grad_func):
     expected[1:-1, 4:7] = 0              # but line and neighbors masked
 
     result = grad_func(hgrad, mask)
-    assert_close(result, expected)
+    assert_allclose(result, expected)
 
 
 def test_range():
@@ -416,8 +416,3 @@ def test_range():
                 "Maximum of `{0}` is larger than 1".format(
                     detector.__name__)
                 )
-
-
-if __name__ == "__main__":
-    from numpy import testing
-    testing.run_module_suite()
