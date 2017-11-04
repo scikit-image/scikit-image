@@ -170,8 +170,8 @@ def cut_normalized_gen(labels, rag, init_thresh=0.001, num_cuts=10,
     >>> labels = segmentation.slic(img, compactness=30, n_segments=400)
     >>> rag = graph.rag_mean_color(img, labels, mode='similarity')
     >>>
-    >>> thresh = 1e-5
-    >>> new_label_gen = graph.cut_normalized_gen(labels, rag, thresh)
+    >>> init_thresh = 1e-5
+    >>> new_label_gen = graph.cut_normalized_gen(labels, rag, init_thresh)
     >>> new_labels = next(new_label_gen)
     >>> new_labels = new_label_gen.send(1e-3)
     >>> new_labels = new_label_gen.send(1e-4)

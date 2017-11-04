@@ -28,7 +28,7 @@ g = graph.rag_mean_color(img, super_pixels, mode='similarity')
 labels1 = graph.cut_normalized(super_pixels, g, thresh=1e-3)
 
 # Or using a generator to try several
-label_gen = graph.cut_normalized_gen(super_pixels, g, thresh=1e-4)
+label_gen = graph.cut_normalized_gen(super_pixels, g, init_thresh=1e-4)
 labels2 = next(label_gen)
 labels2 = label_gen.send(1e-3)
 
