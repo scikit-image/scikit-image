@@ -3,6 +3,7 @@ from skimage.future import graph
 from skimage._shared.version_requirements import is_installed
 from skimage import segmentation
 from skimage._shared import testing
+from skimage import data
 
 
 def max_edge(g, src, dst, n):
@@ -51,7 +52,6 @@ def test_rag_merge():
 @testing.skipif(not is_installed('networkx'),
                 reason="networkx not installed")
 def test_threshold_cut():
-
     img = np.zeros((100, 100, 3), dtype='uint8')
     img[:50, :50] = 255, 255, 255
     img[:50, 50:] = 254, 254, 254
@@ -77,8 +77,6 @@ def test_threshold_cut():
 @testing.skipif(not is_installed('networkx'),
                 reason="networkx not installed")
 def test_cut_normalized():
-    np.random.seed(349)
-
     img = np.zeros((100, 100, 3), dtype='uint8')
     img[:50, :50] = 255, 255, 255
     img[:50, 50:] = 254, 254, 254
@@ -106,44 +104,24 @@ def test_cut_normalized():
 @testing.skipif(not is_installed('networkx'),
                     reason="networkx not installed")
 def test_cut_normalized_gen():
-    np.random.seed(349)
-
-    img = np.zeros((100, 100, 3), dtype='uint8')
-    img[:50, :50] = 255, 255, 255
-    img[:50, 50:] = 200, 200, 200
-    img[50:, :50] = 56, 56, 56
-    img[50:, 50:] = 1, 1, 1
-    img[25:75, 25:75] = 185
-
-    labels = np.zeros((100, 100), dtype='uint8')
-    labels[:50, :50] = 0
-    labels[:50, 50:] = 1
-    labels[50:, :50] = 2
-    labels[50:, 50:] = 3
-    labels[25:75, 25:75] = 4
+    img = data.coffee()
+    labels = segmentation.slic(img, compactness=30, n_segments=400)
 
     rag = graph.rag_mean_color(img, labels, mode='similarity')
-    thresh = 0
-    new_label_gen = graph.cut_normalized_gen(labels, rag, thresh=thresh,
+    new_label_gen = graph.cut_normalized_gen(labels, rag, thresh=0,
                                              in_place=False)
+    next(new_label_gen)
 
-    # Step through several partitionings
-    new_labels = next(new_label_gen)
-    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
-    assert new_labels.max() == 0
+    # Test labels reset correctly when returning to a previous labeling
+    new_labels1 = new_label_gen.send(1e-8)
+    new_labels1, _, _ = segmentation.relabel_sequential(new_labels1)
 
-    # Test thresh can be manipulated from calling program
-    new_labels = new_label_gen.send(1e-20)
-    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
-    assert new_labels.max() == 1
+    new_labels2 = new_label_gen.send(1e-5)
+    new_labels2, _, _ = segmentation.relabel_sequential(new_labels2)
 
-    new_labels = new_label_gen.send(1e-3)
-    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
-    assert new_labels.max() == 2
-
-    new_labels = new_label_gen.send(1e-20)
-    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
-    assert new_labels.max() == 1
+    new_labels3 = new_label_gen.send(1e-8)
+    new_labels3, _, _ = segmentation.relabel_sequential(new_labels3)
+    assert (new_labels3 == new_labels1).all()
 
 
 @testing.skipif(not is_installed('networkx'),
