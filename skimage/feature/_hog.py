@@ -185,9 +185,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         image = image.astype('float')
 
     if multichannel:
-        gx_by_ch = np.empty_like(image)
-        gy_by_ch = np.empty_like(image)
-        g_magn = np.empty_like(image)
+        gx_by_ch = np.empty_like(image, dtype=np.double)
+        gy_by_ch = np.empty_like(image, dtype=np.double)
+        g_magn = np.empty_like(image, dtype=np.double)
 
         for idx_ch in range(image.shape[2]):
             gx_by_ch[:, :, idx_ch], gy_by_ch[:, :, idx_ch] = \
