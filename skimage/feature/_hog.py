@@ -1,8 +1,7 @@
 from __future__ import division
 import numpy as np
-from .._shared.utils import assert_nD
-from .._shared.utils import skimage_deprecation, warn
 from . import _hoghistogram
+from .._shared.utils import skimage_deprecation, warn
 
 
 def _hog_normalize_block(block, method, eps=1e-5):
@@ -22,37 +21,33 @@ def _hog_normalize_block(block, method, eps=1e-5):
     return out
 
 
-def compute_image_gradients(image):
-    """ Computes the gradient image in x and y
+def _hog_channel_gradient(channel):
+    """Compute unnormalized gradient image along `x` and `y` axes.
 
     Parameters
     ----------
-    image : (M, N) 2darray
-        Input image.
+    channel : (M, N) ndarray
+        Grayscale image or one of image channel.
 
     Returns
     -------
-    gx: gradient of the image in x
-    gy: gradient ofthe image in y
-
+    gx, gy : channel gradient along x-axis and y-axis correspondingly.
     """
-    assert_nD(image, 2)
-
-    gx = np.empty(image.shape, dtype=np.double)
+    gx = np.empty(channel.shape, dtype=np.double)
     gx[:, 0] = 0
     gx[:, -1] = 0
-    gx[:, 1:-1] = image[:, 2:] - image[:, :-2]
-    gy = np.empty(image.shape, dtype=np.double)
+    gx[:, 1:-1] = channel[:, 2:] - channel[:, :-2]
+    gy = np.empty(channel.shape, dtype=np.double)
     gy[0, :] = 0
     gy[-1, :] = 0
-    gy[1:-1, :] = image[2:, :] - image[:-2, :]
+    gy[1:-1, :] = channel[2:, :] - channel[:-2, :]
 
     return gx, gy
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         block_norm=None, visualize=False, visualise=None, transform_sqrt=False,
-        feature_vector=True):
+        feature_vector=True, multichannel=False):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Compute a Histogram of Oriented Gradients (HOG) by
@@ -65,8 +60,8 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
 
     Parameters
     ----------
-    image : (M, N) ndarray
-        Input image (greyscale).
+    image : (M, N[, C]) ndarray
+        Input image.
     orientations : int, optional
         Number of orientation bins.
     pixels_per_cell : 2-tuple (int, int), optional
@@ -101,10 +96,13 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     feature_vector : bool, optional
         Return the data as a feature vector by calling .ravel() on the result
         just before returning.
+    multichannel : boolean, optional
+        If True, the last `image` dimension is considered as a color channel,
+        otherwise as spatial.
 
     Returns
     -------
-    newarr : ndarray
+    out : ndarray
         HOG for the image as a 1D (flattened) array.
     hog_image : ndarray (if visualize==True)
         A visualisation of the HOG image.
@@ -152,6 +150,11 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
 
     image = np.atleast_2d(image)
 
+    ndim_spatial = image.ndim - 1 if multichannel else image.ndim
+    if ndim_spatial != 2:
+        raise ValueError('Only images with 2 spatial dimensions are '
+                         'supported. If using with color/multichannel '
+                         'images, specify `multichannel=True`.')
 
     """
     The first stage applies an optional global image normalization
@@ -181,23 +184,26 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         # to avoid problems with subtracting unsigned numbers
         image = image.astype('float')
 
-    if len(image.shape) == 3:
-        #If image is a color image
-        x_gradient = np.zeros(image.shape)
-        y_gradient = np.zeros(image.shape)
-        gradient_magnitude = np.zeros(image.shape)
+    if multichannel:
+        gx_by_ch = np.empty_like(image)
+        gy_by_ch = np.empty_like(image)
+        g_magn = np.empty_like(image)
 
-        for dimension in range(image.shape[2]):
-            x_gradient[:, :, dimension], y_gradient[:, :, dimension] = compute_image_gradients(image[:, :, dimension])
-            gradient_magnitude[:, :, dimension] = np.hypot(x_gradient[:, :, dimension], y_gradient[:, :, dimension])
+        for idx_ch in range(image.shape[2]):
+            gx_by_ch[:, :, idx_ch], gy_by_ch[:, :, idx_ch] = \
+                _hog_channel_gradient(image[:, :, idx_ch])
+            g_magn[:, :, idx_ch] = np.hypot(gx_by_ch[:, :, idx_ch],
+                                            gy_by_ch[:, :, idx_ch])
 
-        max_index_array = gradient_magnitude.argmax(axis=2)
-        rr, cc = np.meshgrid(np.arange(image.shape[0]), np.arange(image.shape[1]))
-
-        gx = x_gradient[rr, cc, max_index_array]
-        gy = y_gradient[rr, cc, max_index_array]
+        # For each pixel select the channel with the highest gradient magnitude
+        idcs_max = g_magn.argmax(axis=2)
+        rr, cc = np.meshgrid(np.arange(image.shape[0]),
+                             np.arange(image.shape[1]),
+                             indexing='ij')
+        gx = gx_by_ch[rr, cc, idcs_max]
+        gy = gy_by_ch[rr, cc, idcs_max]
     else:
-        gx, gy = compute_image_gradients(image)
+        gx, gy = _hog_channel_gradient(image)
 
     """
     The third stage aims to produce an encoding that is sensitive to
@@ -214,7 +220,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     cell are used to vote into the orientation histogram.
     """
 
-    sy, sx = image.shape[0:2]
+    sy, sx = image.shape[:2]
     cx, cy = pixels_per_cell
     bx, by = cells_per_block
 
