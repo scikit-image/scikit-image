@@ -15,9 +15,6 @@ References
 from skimage import data, segmentation, color
 from skimage.future import graph
 from matplotlib import pyplot as plt
-from numpy.random import seed
-seed(9001)
-
 
 img = data.coffee()
 
@@ -27,7 +24,6 @@ out1 = color.label2rgb(super_pixels, img, kind='avg')
 g = graph.rag_mean_color(img, super_pixels, mode='similarity')
 
 # Two ways to apply Normalized Cuts:
-
 # Getting the value for a single threshold
 labels1 = graph.cut_normalized(super_pixels, g, thresh=1e-3)
 
@@ -35,11 +31,6 @@ labels1 = graph.cut_normalized(super_pixels, g, thresh=1e-3)
 label_gen = graph.cut_normalized_gen(super_pixels, g, thresh=1e-4)
 labels2 = next(label_gen)
 labels2 = label_gen.send(1e-3)
-
-# Either method yields the same labels
-labels1, _, _ = segmentation.relabel_sequential(labels1)
-labels2, _, _ = segmentation.relabel_sequential(labels2)
-assert (labels1 == labels2).all()
 
 
 out2 = color.label2rgb(labels1, img, kind='avg')
@@ -53,4 +44,3 @@ for a in ax:
     a.axis('off')
 
 plt.tight_layout()
-plt.show()

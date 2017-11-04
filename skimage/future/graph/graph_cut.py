@@ -5,8 +5,6 @@ except ImportError:
     warn('RAGs require networkx')
 import numpy as np
 from . import _ncut
-from scipy import linalg
-from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import eigsh
 
 
@@ -338,7 +336,7 @@ def _ncut_relabel(rag, thresh, num_cuts):
         d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
 
         # Refer Shi & Malik 2000, Equation 7, Page 891
-        v0 = 2*np.random.random((m,)) - 1  # Define for reproducibility
+        v0 = 2*np.random.random((m,)) - 1
         v0 = v0/np.linalg.norm(v0)
         vals, vectors = eigsh(d2 * (d - w) * d2, which='SM',
                               k=min(m-1, 100), v0=v0)
@@ -347,10 +345,10 @@ def _ncut_relabel(rag, thresh, num_cuts):
         # Helps avoid problems from degeneracy
         # Refer Shi & Malik 2000, Section 2.1.10, Page 891
         # Refer Shi & Malik 2000, Section 3.2.3, Page 893
-        vectors = (vectors[:,:2].T/d2.data).T
+        vectors = (vectors[:, :2].T/d2.data).T
         norm = np.dot(d.data, d.data)
-        ev = (vectors[:,0] - np.dot(vectors[:,0], d.data)*d.data/norm) \
-           + (vectors[:,1] - np.dot(vectors[:,1], d.data)*d.data/norm)
+        ev = (vectors[:, 0] - np.dot(vectors[:, 0], d.data)*d.data/norm)\
+           + (vectors[:, 1] - np.dot(vectors[:, 1], d.data)*d.data/norm)
 
         cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
 
