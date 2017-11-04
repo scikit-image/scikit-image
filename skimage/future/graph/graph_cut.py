@@ -126,8 +126,8 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
     return labels
 
 
-def cut_normalized_gen(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
-                       max_edge=1.0):
+def cut_normalized_gen(labels, rag, init_thresh=0.001, num_cuts=10, 
+                       in_place=True, max_edge=1.0):
     """
     Perform Normalized Graph cut on the Region Adjacency Graph.
 
@@ -144,7 +144,7 @@ def cut_normalized_gen(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
         The array of labels.
     rag : RAG
         The region adjacency graph.
-    thresh : float
+    init_thresh : float
         Initial threshold value to segment with. A subgraph won't be further
         subdivided if the value of the N-cut exceeds a threshold value.
     num_cuts : int
@@ -194,6 +194,7 @@ def cut_normalized_gen(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
     next(ncut_gen)
 
     # Generate new labels as thresholds come
+    thresh = init_thresh
     while True:
         ncut_gen.send(thresh)
 
@@ -302,7 +303,7 @@ def _label_all(rag, attr_name):
         d[attr_name] = new_label
 
 
-def _ncut_relabel(rag, thresh, num_cuts):
+def _ncut_relabel(rag, init_thresh, num_cuts):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Recursively partition the graph into two, until further subdivision
@@ -325,6 +326,7 @@ def _ncut_relabel(rag, thresh, num_cuts):
         The array which maps old labels to new ones. This is modified inside
         the function.
     """
+    thresh = init_thresh
     d, w = _ncut.DW_matrices(rag)
     m = w.shape[0]
 
