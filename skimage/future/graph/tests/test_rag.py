@@ -102,13 +102,13 @@ def test_cut_normalized():
 
 
 @testing.skipif(not is_installed('networkx'),
-                    reason="networkx not installed")
+                reason="networkx not installed")
 def test_cut_normalized_gen():
     img = data.coffee()
     labels = segmentation.slic(img, compactness=30, n_segments=400)
 
     rag = graph.rag_mean_color(img, labels, mode='similarity')
-    new_label_gen = graph.cut_normalized_gen(labels, rag, thresh=0,
+    new_label_gen = graph.cut_normalized_gen(labels, rag, init_thresh=0,
                                              in_place=False)
     next(new_label_gen)
 
@@ -189,7 +189,7 @@ def test_rag_hierarchical():
 
 
 @testing.skipif(not is_installed('networkx'),
-                    reason="networkx not installed")
+                reason="networkx not installed")
 def test_ncut_gen_stable_subgraph():
     """ Test to catch an error thrown when subgraph has all equal edges. """
 

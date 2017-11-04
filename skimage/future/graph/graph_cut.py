@@ -126,7 +126,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
     return labels
 
 
-def cut_normalized_gen(labels, rag, init_thresh=0.001, num_cuts=10, 
+def cut_normalized_gen(labels, rag, init_thresh=0.001, num_cuts=10,
                        in_place=True, max_edge=1.0):
     """
     Perform Normalized Graph cut on the Region Adjacency Graph.
