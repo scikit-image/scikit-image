@@ -100,3 +100,13 @@ def test_moments_hu():
     hu2 = moments_hu(nu2)
     # central moments must be translation and scale invariant
     assert_almost_equal(hu, hu2, decimal=1)
+
+
+def test_centroid():
+    image = np.zeros((20, 20), dtype=np.double)
+    image[14, 14] = 1
+    image[15, 15] = 1
+    image[14, 15] = 0.5
+    image[15, 14] = 0.5
+    image_centroid = centroid(image)
+    assert_equal(image_centroid, (14.5, 14.5))
