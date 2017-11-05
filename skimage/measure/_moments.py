@@ -235,7 +235,9 @@ def centroid(image):
         The centroid of the (nonzero) pixels in ``image``.
     """
     M = moments_central(image, center=(0,) * image.ndim, order=1)
-    center = M[tuple(np.eye(image.ndim, dtype=int))]
+    center = (M[tuple(np.eye(image.ndim, dtype=int))]  # array of weighted sums
+                                                       # for each axis
+              / M[(0,) * image.ndim])  # weighted sum of all points
     return center
 
 
