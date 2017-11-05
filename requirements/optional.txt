@@ -1,6 +1,6 @@
-PySide; python_version != '2.7'
-imread; python_version != '2.7'
-SimpleITK; python_version != '3.4' and python_version != '3.5'
+PySide; python_version <= '3.4'
+imread
+SimpleITK
 astropy
 tifffile
 imageio
