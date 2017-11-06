@@ -1,7 +1,8 @@
-#cython: cdivision=True
-#cython: boundscheck=False
-#cython: nonecheck=False
-#cython: wraparound=False
+# cython: cdivision=True
+# cython: boundscheck=False
+# cython: nonecheck=False
+# cython: wraparound=False
+# distutils: language = c++
 
 from libc.stdlib cimport malloc, free, realloc
 
@@ -19,33 +20,31 @@ N_RECTANGLE = {'type-2-x': 2, 'type-2-y': 2,
                'type-4': 4}
 
 
-cdef Rectangle** _haar_like_feature_coord(Py_ssize_t width,
-                                          Py_ssize_t height,
-                                          unsigned int feature_type,
-                                          Py_ssize_t* n_rectangle,
-                                          Py_ssize_t* n_feature) nogil:
+cdef vector[vector[Rectangle]] _haar_like_feature_coord(
+    Py_ssize_t width,
+    Py_ssize_t height,
+    unsigned int feature_type) nogil:
     """Private function to compute the coordinates of all Haar-like features.
     """
     cdef:
-        # allocate for the worst case scenario
         Py_ssize_t max_feature = height ** 2 * width ** 2
-        Rectangle** rect_feat = NULL
-        Py_ssize_t cnt_feat = 0
-        Py_ssize_t local_n_rectangle
+        vector[vector[Rectangle]] rect_feat
+        Rectangle single_rect
+        Py_ssize_t n_rectangle
         Py_ssize_t x, y, dx, dy
 
     if feature_type == 0 or feature_type == 1:
-        local_n_rectangle = 2
+        n_rectangle = 2
     elif feature_type == 2 or feature_type == 3:
-        local_n_rectangle = 3
+        n_rectangle = 3
     else:
-        local_n_rectangle = 4
-    n_rectangle[0] = local_n_rectangle
+        n_rectangle = 4
 
-    rect_feat = <Rectangle**> malloc(local_n_rectangle * sizeof(Rectangle*))
-    for rect_idx in range(local_n_rectangle):
-        rect_feat[rect_idx] = <Rectangle*> malloc(max_feature *
-                                                  sizeof(Rectangle))
+    # Allocate for the number of rectangle (we know from the start)
+    rect_feat = vector[vector[Rectangle]](n_rectangle)
+    # Reserve the maximum space; it will be shrink at the end.
+    for rect in rect_feat:
+        rect.reserve(max_feature)
 
     for y in range(height):
         for x in range(width):
@@ -54,71 +53,77 @@ cdef Rectangle** _haar_like_feature_coord(Py_ssize_t width,
                     # type -> 2 rectangles split along x axis
                     if (feature_type == 0 and
                             (y + dy <= height and x + 2 * dx <= width)):
-                        set_rectangle_feature(&rect_feat[0][cnt_feat],
+                        set_rectangle_feature(&single_rect,
                                               y, x,
                                               y + dy - 1, x + dx - 1)
-                        set_rectangle_feature(&rect_feat[1][cnt_feat],
+                        rect_feat[0].push_back(single_rect)
+                        set_rectangle_feature(&single_rect,
                                               y, x + dx,
                                               y + dy - 1, x + 2 * dx - 1)
-                        cnt_feat += 1
+                        rect_feat[1].push_back(single_rect)
                     # type -> 2 rectangles split along y axis
                     elif (feature_type == 1 and
                           (y + 2 * dy <= height and x + dx <= width)):
-                        set_rectangle_feature(&rect_feat[0][cnt_feat],
+                        set_rectangle_feature(&single_rect,
                                               y, x,
                                               y + dy - 1, x + dx - 1)
-                        set_rectangle_feature(&rect_feat[1][cnt_feat],
+                        rect_feat[0].push_back(single_rect)
+                        set_rectangle_feature(&single_rect,
                                               y + dy, x,
                                               y + 2 * dy - 1, x + dx - 1)
-                        cnt_feat += 1
+                        rect_feat[1].push_back(single_rect)
                     # type -> 3 rectangles split along x axis
                     elif (feature_type == 2 and
                           (y + dy <= height and x + 3 * dx <= width)):
-                        set_rectangle_feature(&rect_feat[0][cnt_feat],
+                        set_rectangle_feature(&single_rect,
                                               y, x,
                                               y + dy - 1, x + dx - 1)
-                        set_rectangle_feature(&rect_feat[1][cnt_feat],
+                        rect_feat[0].push_back(single_rect)
+                        set_rectangle_feature(&single_rect,
                                               y, x + dx,
                                               y + dy - 1, x + 2 * dx - 1)
-                        set_rectangle_feature(&rect_feat[2][cnt_feat],
+                        rect_feat[1].push_back(single_rect)
+                        set_rectangle_feature(&single_rect,
                                               y, x + 2 * dx,
                                               y + dy - 1, x + 3 * dx - 1)
-                        cnt_feat += 1
+                        rect_feat[2].push_back(single_rect)
                     # type -> 3 rectangles split along y axis
                     elif (feature_type == 3 and
                           (y + 3 * dy <= height and x + dx <= width)):
-                        set_rectangle_feature(&rect_feat[0][cnt_feat],
+                        set_rectangle_feature(&single_rect,
                                               y, x,
                                               y + dy - 1, x + dx - 1)
-                        set_rectangle_feature(&rect_feat[1][cnt_feat],
+                        rect_feat[0].push_back(single_rect)
+                        set_rectangle_feature(&single_rect,
                                               y + dy, x,
                                               y + 2 * dy - 1, x + dx - 1)
-                        set_rectangle_feature(&rect_feat[2][cnt_feat],
+                        rect_feat[1].push_back(single_rect)
+                        set_rectangle_feature(&single_rect,
                                               y + 2 * dy, x,
                                               y + 3 * dy - 1, x + dx - 1)
-                        cnt_feat += 1
+                        rect_feat[2].push_back(single_rect)
                     # type -> 4 rectangles split along x and y axis
                     elif (feature_type == 4 and
                           (y + 2 * dy <= height and x + 2 * dx <= width)):
-                        set_rectangle_feature(&rect_feat[0][cnt_feat],
+                        set_rectangle_feature(&single_rect,
                                               y, x,
                                               y + dy - 1, x + dx - 1)
-                        set_rectangle_feature(&rect_feat[1][cnt_feat],
+                        rect_feat[0].push_back(single_rect)
+                        set_rectangle_feature(&single_rect,
                                               y, x + dx,
                                               y + dy - 1, x + 2 * dx - 1)
-                        set_rectangle_feature(&rect_feat[3][cnt_feat],
+                        rect_feat[1].push_back(single_rect)
+                        set_rectangle_feature(&single_rect,
                                               y + dy, x,
                                               y + 2 * dy - 1, x + dx - 1)
-                        set_rectangle_feature(&rect_feat[2][cnt_feat],
+                        rect_feat[3].push_back(single_rect)
+                        set_rectangle_feature(&single_rect,
                                               y + dy, x + dx,
                                               y + 2 * dy - 1, x + 2 * dx - 1)
-                        cnt_feat += 1
+                        rect_feat[2].push_back(single_rect)
 
-    for rect_idx in range(local_n_rectangle):
-        rect_feat[rect_idx] = <Rectangle*> realloc(
-            rect_feat[rect_idx], cnt_feat * sizeof(Rectangle))
-    n_feature[0] = cnt_feat
-
+    for rect in rect_feat:
+        rect.shrink_to_fit()
     return rect_feat
 
 
@@ -150,7 +155,7 @@ tuple coord
 
     """
     cdef:
-        Rectangle** rect = NULL
+        vector[vector[Rectangle]] rect
         Py_ssize_t n_rectangle, n_feature
         Py_ssize_t i, j
         # cast the height and width to the right type
@@ -158,8 +163,9 @@ tuple coord
         Py_ssize_t width_win = <Py_ssize_t> width
 
     rect = _haar_like_feature_coord(width_win, height_win,
-                                    FEATURE_TYPE[feature_type],
-                                    &n_rectangle, &n_feature)
+                                    FEATURE_TYPE[feature_type])
+    n_feature = rect[0].size()
+    n_rectangle = rect.size()
 
     # allocate the output based on the number of rectangle
     output = np.empty((n_feature,), dtype=object)
@@ -177,7 +183,7 @@ tuple coord
 
 cdef integral_floating[:, ::1] _haar_like_feature(
         integral_floating[:, ::1] int_image,
-        Rectangle** coord,
+        vector[vector[Rectangle]] coord,
         Py_ssize_t n_rectangle, Py_ssize_t n_feature):
     """Private function releasing the GIL to compute the integral for the
     different rectangle."""
@@ -200,9 +206,9 @@ cdef integral_floating[:, ::1] _haar_like_feature(
     return rect_feature
 
 
-cpdef haar_like_feature_wrapper(cnp.ndarray[integral_floating, ndim=2] int_image,
-                                r, c, width, height, feature_type,
-                                feature_coord):
+cpdef haar_like_feature_wrapper(
+    cnp.ndarray[integral_floating, ndim=2] int_image,
+    r, c, width, height, feature_type, feature_coord):
     """Compute the Haar-like features for a region of interest (ROI) of an
     integral image.
 
@@ -258,13 +264,16 @@ cpdef haar_like_feature_wrapper(cnp.ndarray[integral_floating, ndim=2] int_image
 
     """
     cdef:
-        Rectangle** coord = NULL
+        vector[vector[Rectangle]] coord
         Py_ssize_t n_rectangle, n_feature
         Py_ssize_t idx_rect, idx_feature
         integral_floating[:, ::1] rect_feature
-        # FIXME: convert to an ndarray to a memory-view to be able to release
-        # the GIL. Furthermore, we need currently a ndarray to be able to use
-        # read-only memmap (for instance when using joblib). Check issue
+        # FIXME: currently cython does not support read-only memory views.
+        # Those are used with joblib when using Parallel. Therefore, we use
+        # ndarray as input. We take a copy of this ndarray to create a memory
+        # view to be able to release the GIL in some later processing.
+        # Check the following issue to check the status of read-only memory
+        # views in cython:
         # https://github.com/cython/cython/issues/1605 to be resolved
         integral_floating[:, ::1] int_image_memview = int_image[
             r : r + height, c : c + width].copy()
@@ -272,17 +281,19 @@ cpdef haar_like_feature_wrapper(cnp.ndarray[integral_floating, ndim=2] int_image
     if feature_coord is None:
         # compute all possible coordinates with a specific type of feature
         coord = _haar_like_feature_coord(width, height,
-                                         FEATURE_TYPE[feature_type],
-                                         &n_rectangle, &n_feature)
+                                         FEATURE_TYPE[feature_type])
+        n_feature = coord[0].size()
+        n_rectangle = coord.size()
     else:
         # build the coordinate from the set provided
         n_rectangle = N_RECTANGLE[feature_type]
         n_feature = len(feature_coord)
 
-        coord = <Rectangle**> malloc(n_rectangle * sizeof(Rectangle*))
+        # the vector can be directly pre-allocated since that the size is known
+        coord = vector[vector[Rectangle]](n_rectangle,
+                                          vector[Rectangle](n_feature))
+
         for idx_rect in range(n_rectangle):
-            coord[idx_rect] = <Rectangle*> malloc(n_feature *
-                                                  sizeof(Rectangle))
             for idx_feature in range(n_feature):
                 set_rectangle_feature(
                     &coord[idx_rect][idx_feature],
@@ -293,11 +304,6 @@ cpdef haar_like_feature_wrapper(cnp.ndarray[integral_floating, ndim=2] int_image
 
     rect_feature = _haar_like_feature(int_image_memview,
                                       coord, n_rectangle, n_feature)
-
-    # deallocate
-    for idx_rect in range(n_rectangle):
-        free(coord[idx_rect])
-    free(coord)
 
     # convert the memory view to numpy array and convert it to signed array if
     # necessary to avoid overflow during subtraction

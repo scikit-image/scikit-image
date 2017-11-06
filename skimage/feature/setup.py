@@ -35,8 +35,9 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_hoghistogram', sources=['_hoghistogram.c'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'])
-    config.add_extension('_haar', sources=['_haar.c'],
-                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
+    config.add_extension('_haar', sources=['_haar.cpp'],
+                         include_dirs=[get_numpy_include_dirs(), '../_shared'],
+                         language="c++")
 
     return config
 

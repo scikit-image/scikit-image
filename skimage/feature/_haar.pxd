@@ -1,4 +1,5 @@
 import cython
+from libcpp.vector cimport vector
 cimport numpy as cnp
 
 
@@ -35,11 +36,10 @@ cdef inline void set_rectangle_feature(Rectangle* rectangle,
     rectangle[0].bottom_right.col = bottom_x
 
 
-cdef Rectangle** _haar_like_feature_coord(Py_ssize_t width,
-                                          Py_ssize_t height,
-                                          unsigned int feature_type,
-                                          Py_ssize_t* n_rectangle,
-                                          Py_ssize_t* counter_feature) nogil
+cdef vector[vector[Rectangle]] _haar_like_feature_coord(
+    Py_ssize_t width,
+    Py_ssize_t height,
+    unsigned int feature_type) nogil
 
 
 cpdef haar_like_feature_coord_wrapper(width, height, feature_type)
@@ -47,7 +47,7 @@ cpdef haar_like_feature_coord_wrapper(width, height, feature_type)
 
 cdef integral_floating[:, ::1] _haar_like_feature(
     integral_floating[:, ::1] int_image,
-    Rectangle** coord,
+    vector[vector[Rectangle]] coord,
     Py_ssize_t n_rectangle, Py_ssize_t n_feature)
 
 
