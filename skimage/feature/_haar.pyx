@@ -42,9 +42,6 @@ cdef vector[vector[Rectangle]] _haar_like_feature_coord(
 
     # Allocate for the number of rectangle (we know from the start)
     rect_feat = vector[vector[Rectangle]](n_rectangle)
-    # Reserve the maximum space; it will be shrink at the end.
-    for rect in rect_feat:
-        rect.reserve(max_feature)
 
     for y in range(height):
         for x in range(width):
@@ -122,8 +119,6 @@ cdef vector[vector[Rectangle]] _haar_like_feature_coord(
                                               y + 2 * dy - 1, x + 2 * dx - 1)
                         rect_feat[2].push_back(single_rect)
 
-    for rect in rect_feat:
-        rect.shrink_to_fit()
     return rect_feat
 
 
