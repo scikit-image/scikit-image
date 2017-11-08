@@ -18,27 +18,39 @@ from matplotlib import pyplot as plt
 
 img = data.coffee()
 
-super_pixels = segmentation.slic(img, compactness=30, n_segments=400)
-out1 = color.label2rgb(super_pixels, img, kind='avg')
+labels0 = segmentation.slic(img, compactness=30, n_segments=400)
+out0 = color.label2rgb(labels0, img, kind='avg')
 
-g = graph.rag_mean_color(img, super_pixels, mode='similarity')
+g = graph.rag_mean_color(img, labels0, mode='similarity')
 
 # Two ways to apply Normalized Cuts:
-# Getting the value for a single threshold
-labels1 = graph.cut_normalized(super_pixels, g, thresh=1e-3)
+# Get the labels for a single threshold
 
-# Or using a generator to try several
-label_gen = graph.cut_normalized_gen(super_pixels, g, init_thresh=1e-4)
+labels1a = graph.cut_normalized(labels0, g, thresh=1e-3)
+
+# Or use a generator to try several thresholds
+
+label_gen = graph.cut_normalized_gen(labels0, g, init_thresh=1e-4)
 labels2 = next(label_gen)
-labels2 = label_gen.send(1e-3)
+labels1b = label_gen.send(1e-3)
 
 
-out2 = color.label2rgb(labels1, img, kind='avg')
+out1a = color.label2rgb(labels1a, img, kind='avg')
+out2 = color.label2rgb(labels2, img, kind='avg')
+out1b = color.label2rgb(labels1b, img, kind='avg')
 
-fig, ax = plt.subplots(nrows=2, sharex=True, sharey=True, figsize=(6, 8))
+fig, ax = plt.subplots(nrows=2, ncols=2, sharex=True, sharey=True,
+                       figsize=(8, 6))
+ax = ax.ravel()
 
-ax[0].imshow(out1)
-ax[1].imshow(out2)
+ax[0].imshow(out0)
+ax[0].set_title('SLIC')
+ax[1].imshow(out1a)
+ax[1].set_title('N-cut threshold: 1e-3')
+ax[2].imshow(out2)
+ax[2].set_title('N-cut generator threshold: 1e-4')
+ax[3].imshow(out1b)
+ax[3].set_title('N-cut generator threshold: 1e-3')
 
 for a in ax:
     a.axis('off')
