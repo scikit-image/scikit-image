@@ -246,7 +246,7 @@ def partition_by_cut(cut, rag):
 def _get_partition_vector(d, w):
     """
     Get vector used to partition a graph into two subgraphs according
-    to the normalized cuts algorithm. 
+    to the normalized cuts algorithm.
 
     Parameters
     ----------
@@ -284,7 +284,7 @@ def _get_partition_vector(d, w):
     ev = ((vectors[:, 0] - np.dot(vectors[:, 0], d.data) * data_normed) +
           (vectors[:, 1] - np.dot(vectors[:, 1], d.data) * data_normed))
     return ev
-        
+
 
 def get_min_ncut(ev, d, w, num_cuts):
     """Threshold an eigenvector evenly, to determine minimum ncut.
