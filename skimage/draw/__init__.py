@@ -4,7 +4,7 @@ from .draw import (circle, ellipse, set_color, polygon_perimeter,
                    bezier_curve,rectangle)
 from .draw3d import ellipsoid, ellipsoid_stats
 from ._draw import _bezier_segment
-from .random_shapes import random_shapes
+from ._random_shapes import random_shapes
 
 __all__ = ['line',
            'line_aa',
