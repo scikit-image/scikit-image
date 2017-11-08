@@ -195,6 +195,9 @@ def cut_normalized_gen(labels, rag, init_thresh=0.001, num_cuts=10,
     # Generate new labels as thresholds come
     thresh = init_thresh
     while True:
+        if thresh is None:
+            raise ValueError('Once generator initialized by calling next(gen),'
+                             ' use gen.send(thresh) to modify threshold.')
         ncut_gen.send(thresh)
 
         map_array = np.zeros(labels.max() + 1, dtype=labels.dtype)
@@ -239,6 +242,49 @@ def partition_by_cut(cut, rag):
 
     return sub1, sub2
 
+
+def _get_partition_vector(d, w):
+    """
+    Get vector used to partition a graph into two subgraphs according
+    to the normalized cuts algorithm. 
+
+    Parameters
+    ----------
+    d : ndarray
+        The diagonal matrix of the graph.
+    w : ndarray
+        The weight matrix of the graph.
+
+    Returns
+    -------
+    cut_mask : array
+        The array of booleans which denotes the bi-partition.
+    mcut : float
+        The value of the minimum ncut.
+    """
+    m = w.shape[0]
+    d2 = d.copy()
+
+    # Since d is diagonal, we can directly operate on its data
+    # the inverse of the square root
+    d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
+
+    # Refer Shi & Malik 2000, Equation 7, Page 891
+    v0 = 2 * np.random.random((m,)) - 1
+    v0 /= np.linalg.norm(v0)
+    vals, vectors = eigsh(d2 * (d - w) * d2, which='SM',
+                          k=min(m-1, 100), v0=v0)
+
+    # Build vector orthogonal to d from first two eigenvectors
+    # Helps avoid problems from degeneracy
+    # Refer Shi & Malik 2000, Section 2.1.10, Page 891
+    # Refer Shi & Malik 2000, Section 3.2.3, Page 893
+    vectors = (vectors[:, :2].T / d2.data).T
+    data_normed = d.data / np.dot(d.data, d.data)
+    ev = ((vectors[:, 0] - np.dot(vectors[:, 0], d.data) * data_normed) +
+          (vectors[:, 1] - np.dot(vectors[:, 1], d.data) * data_normed))
+    return ev
+        
 
 def get_min_ncut(ev, d, w, num_cuts):
     """Threshold an eigenvector evenly, to determine minimum ncut.
@@ -327,34 +373,11 @@ def _ncut_relabel(rag, init_thresh, num_cuts):
     """
     thresh = init_thresh
     d, w = _ncut.DW_matrices(rag)
-    m = w.shape[0]
 
     # If 2 regions not cutting is optimal choice
-    if m > 2:
-        d2 = d.copy()
-        # Since d is diagonal, we can directly operate on its data
-        # the inverse of the square root
-        d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
-
-        # Refer Shi & Malik 2000, Equation 7, Page 891
-        v0 = 2 * np.random.random((m,)) - 1
-        v0 /= np.linalg.norm(v0)
-        vals, vectors = eigsh(d2 * (d - w) * d2, which='SM',
-                              k=min(m-1, 100), v0=v0)
-
-        # Build vector orthogonal to d from first two eigenvectors
-        # Helps avoid problems from degeneracy
-        # Refer Shi & Malik 2000, Section 2.1.10, Page 891
-        # Refer Shi & Malik 2000, Section 3.2.3, Page 893
-        vectors = (vectors[:, :2].T / d2.data).T
-        data_normed = d.data / np.dot(d.data, d.data)
-        ev = ((vectors[:, 0] - np.dot(vectors[:, 0], d.data) * data_normed) +
-              (vectors[:, 1] - np.dot(vectors[:, 1], d.data) * data_normed))
-
+    if w.shape[0] > 2:
+        ev = _get_partition_vector(d, w)
         cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
-
-        # These variables no longer needed
-        del d, d2, w, vals, vectors, ev
 
         calc_subgraph = True
         while True:
