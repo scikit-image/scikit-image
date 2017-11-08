@@ -9,7 +9,7 @@ from . import _ncut_cy
 
 
 def DW_matrices(graph):
-    """Returns the diagonal and weight matrices of a graph.
+    """Return the diagonal and weight matrices of a graph.
 
     Parameters
     ----------
@@ -34,7 +34,7 @@ def DW_matrices(graph):
 
 
 def ncut_cost(cut, D, W):
-    """Returns the N-cut cost of a bi-partition of a graph.
+    """Return the N-cut cost of a bi-partition of a graph.
 
     Parameters
     ----------

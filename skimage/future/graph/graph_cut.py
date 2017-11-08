@@ -128,8 +128,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
 
 def cut_normalized_gen(labels, rag, init_thresh=0.001, num_cuts=10,
                        in_place=True, max_edge=1.0):
-    """
-    Perform Normalized Graph cut on the Region Adjacency Graph.
+    """Generate normalized graph cuts on the region adjacency graph.
 
     Given an image's labels and its similarity RAG, recursively perform
     a two-way normalized cut on it. All nodes belonging to a subgraph
@@ -157,8 +156,8 @@ def cut_normalized_gen(labels, rag, init_thresh=0.001, num_cuts=10,
         an edge between identical regions. This is used to put self
         edges in the RAG.
 
-    Returns
-    -------
+    Yields
+    ------
     out : ndarray
         The new labeled array.
 
@@ -338,8 +337,8 @@ def _ncut_relabel(rag, init_thresh, num_cuts):
         d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
 
         # Refer Shi & Malik 2000, Equation 7, Page 891
-        v0 = 2*np.random.random((m,)) - 1
-        v0 = v0/np.linalg.norm(v0)
+        v0 = 2 * np.random.random((m,)) - 1
+        v0 /= np.linalg.norm(v0)
         vals, vectors = eigsh(d2 * (d - w) * d2, which='SM',
                               k=min(m-1, 100), v0=v0)
 
@@ -347,10 +346,10 @@ def _ncut_relabel(rag, init_thresh, num_cuts):
         # Helps avoid problems from degeneracy
         # Refer Shi & Malik 2000, Section 2.1.10, Page 891
         # Refer Shi & Malik 2000, Section 3.2.3, Page 893
-        vectors = (vectors[:, :2].T/d2.data).T
-        norm = np.dot(d.data, d.data)
-        ev = (vectors[:, 0] - np.dot(vectors[:, 0], d.data)*d.data/norm)\
-           + (vectors[:, 1] - np.dot(vectors[:, 1], d.data)*d.data/norm)
+        vectors = (vectors[:, :2].T / d2.data).T
+        data_normed = d.data / np.dot(d.data, d.data)
+        ev = ((vectors[:, 0] - np.dot(vectors[:, 0], d.data) * data_normed) +
+              (vectors[:, 1] - np.dot(vectors[:, 1], d.data) * data_normed))
 
         cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
 
