@@ -1,6 +1,6 @@
 import pytest
 
-from ..random_shapes import random_shapes
+from skimage.draw import random_shapes
 
 
 def test_generates_color_images_with_correct_shape():
