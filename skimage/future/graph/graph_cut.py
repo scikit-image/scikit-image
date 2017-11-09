@@ -257,10 +257,8 @@ def _get_partition_vector(d, w):
 
     Returns
     -------
-    cut_mask : array
-        The array of booleans which denotes the bi-partition.
-    mcut : float
-        The value of the minimum ncut.
+    part_vec : array
+        The vector to threshold.
     """
     m = w.shape[0]
     d2 = d.copy()
@@ -281,18 +279,18 @@ def _get_partition_vector(d, w):
     # Refer Shi & Malik 2000, Section 3.2.3, Page 893
     vectors = (vectors[:, :2].T / d2.data).T
     data_normed = d.data / np.dot(d.data, d.data)
-    ev = ((vectors[:, 0] - np.dot(vectors[:, 0], d.data) * data_normed) +
-          (vectors[:, 1] - np.dot(vectors[:, 1], d.data) * data_normed))
-    return ev
+    part_vec = ((vectors[:, 0] - np.dot(vectors[:, 0], d.data) * data_normed) +
+                (vectors[:, 1] - np.dot(vectors[:, 1], d.data) * data_normed))
+    return part_vec
 
 
-def get_min_ncut(ev, d, w, num_cuts):
+def get_min_ncut(part_vec, d, w, num_cuts):
     """Threshold an eigenvector evenly, to determine minimum ncut.
 
     Parameters
     ----------
-    ev : array
-        The eigenvector to threshold.
+    part_vec : array
+        The vector to threshold.
     d : ndarray
         The diagonal matrix of the graph.
     w : ndarray
@@ -308,20 +306,20 @@ def get_min_ncut(ev, d, w, num_cuts):
         The value of the minimum ncut.
     """
     mcut = np.inf
-    mn = ev.min()
-    mx = ev.max()
+    mn = part_vec.min()
+    mx = part_vec.max()
 
-    # If all values in `ev` are equal, it implies that the graph can't be
+    # If all values in `part_vec` are equal, it implies that the graph can't be
     # further sub-divided. In this case the bi-partition is the the graph
     # itself and an empty set.
-    min_mask = np.zeros_like(ev, dtype=np.bool)
+    min_mask = np.zeros_like(part_vec, dtype=np.bool)
     if np.allclose(mn, mx):
         return min_mask, mcut
 
     # Refer Shi & Malik 2000, Section 3.1.3, Page 892
     # Perform evenly spaced n-cuts and determine the optimal one.
     for t in np.linspace(mn, mx, num_cuts, endpoint=False):
-        mask = ev > t
+        mask = part_vec > t
         cost = _ncut.ncut_cost(mask, d, w)
         if cost < mcut:
             min_mask = mask
@@ -376,8 +374,8 @@ def _ncut_relabel(rag, init_thresh, num_cuts):
 
     # If 2 regions not cutting is optimal choice
     if w.shape[0] > 2:
-        ev = _get_partition_vector(d, w)
-        cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
+        part_vec = _get_partition_vector(d, w)
+        cut_mask, mcut = get_min_ncut(part_vec, d, w, num_cuts)
 
         calc_subgraph = True
         while True:
