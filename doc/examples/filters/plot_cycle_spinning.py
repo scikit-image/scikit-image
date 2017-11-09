@@ -36,8 +36,7 @@ sigma = 0.155
 noisy = random_noise(original, var=sigma**2)
 
 fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(10, 4), sharex=False,
-                       sharey=False, subplot_kw={'adjustable': 'box-forced'},
-                       gridspec_kw={'wspace': 0.35, 'hspace': 0.35})
+                       sharey=False, subplot_kw={'adjustable': 'box-forced'})
 ax = ax.ravel()
 
 psnr_noisy = compare_psnr(original, noisy)
@@ -75,6 +74,7 @@ ax[5].plot(max_shifts, all_psnr, 'k.-')
 ax[5].set_ylabel('PSNR (dB)')
 ax[5].set_xlabel('max cycle shift along each axis')
 ax[5].grid('on')
+plt.subplots_adjust(wspace=0.35, hspace=0.35)
 
 # Annotate with a cyan arrow on the 6x6 case vs. no cycle shift case to
 # illustrate a region with reduced block-like artifact with cycle shifting
