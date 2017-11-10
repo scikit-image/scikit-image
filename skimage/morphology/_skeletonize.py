@@ -260,9 +260,10 @@ def thin(image, max_iter=None):
                      [32, 64, 128]], dtype=np.uint8)
 
     # iterate until convergence, up to the iteration limit
-    iter_cnt = max_iter or np.inf
+    max_iter = max_iter or np.inf
+    n_iter = 0
     n_pts_old, n_pts_new = np.inf, np.sum(skel)
-    while not np.isclose(n_pts_old, n_pts_new, rtol=0) and iter_cnt > 0:
+    while n_pts_old != n_pts_new and n_iter < max_iter:
         n_pts_old = n_pts_new
 
         # perform the two "subiterations" described in the paper
@@ -275,7 +276,7 @@ def thin(image, max_iter=None):
             skel[D] = 0
 
         n_pts_new = np.sum(skel)  # count points after thinning
-        iter_cnt -= 1
+        n_iter += 1
 
     return skel.astype(np.bool)
 
