@@ -78,13 +78,18 @@ tuple coord
     """
     feature_type_ = _validate_feature_type(feature_type)
 
-    feat_coord, feat_type = [], []
-    for feat_t in feature_type_:
-        feat_t_coord, feat_t_type = haar_like_feature_coord_wrapper(width,
-                                                                    height,
-                                                                    feat_t)
-        feat_coord.append(feat_t_coord)
-        feat_type.append(feat_t_type)
+    feat_coord, feat_type = zip(*[haar_like_feature_coord_wrapper(width,
+                                                                  height,
+                                                                  feat_t)
+                                  for feat_t in feature_type_])
+
+    # feat_coord, feat_type = [], []
+    # for feat_t in feature_type_:
+    #     feat_t_coord, feat_t_type = haar_like_feature_coord_wrapper(width,
+    #                                                                 height,
+    #                                                                 feat_t)
+    #     feat_coord.append(feat_t_coord)
+    #     feat_type.append(feat_t_type)
 
     return np.concatenate(feat_coord), np.hstack(feat_type)
 
