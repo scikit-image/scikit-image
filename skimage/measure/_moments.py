@@ -98,15 +98,14 @@ def moments_coords_central(coords, center=None, order=3):
     assert_nD(coords, 2)
     ndim = coords.shape[1]
     if center is None:
-        M = moments_central(coords, center=0, order=order)
-        center = M[tuple(np.eye(ndim, dtype=int))]
+        center = np.mean(coords, axis=0)
     else:
         # TODO: Handle broadcasting of `center` argument.
-        if center is int:
+        if type(center) not in [tuple, list, np.ndarray]:
             center = (center,) * ndim
 
-    calc = coords.astype(float)
-    calc -= center
+    # centralize calculation
+    calc = coords.astype(float) - center
 
     # generate all possible exponents for each axis in the given set of points
     # produces a matrix of shape (N, D, order + 1)
