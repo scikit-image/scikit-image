@@ -1,10 +1,12 @@
+from __future__ import division
 import numpy as np
 from skimage import draw
 from skimage.measure import (moments, moments_central, moments_normalized,
                              moments_hu, centroid)
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_equal, assert_almost_equal
+from skimage._shared.testing import (assert_equal, assert_almost_equal,
+                                     assert_allclose)
 from skimage._shared._warnings import expected_warnings
 
 
@@ -104,9 +106,7 @@ def test_moments_hu():
 
 def test_centroid():
     image = np.zeros((20, 20), dtype=np.double)
-    image[14, 14] = 1
-    image[15, 15] = 1
-    image[14, 15] = 0.5
-    image[15, 14] = 0.5
+    image[14, 14:16] = 1
+    image[15, 14:16] = 1/3
     image_centroid = centroid(image)
-    assert_equal(image_centroid, (14.5, 14.5))
+    assert_allclose(image_centroid, (14.25, 14.5))
