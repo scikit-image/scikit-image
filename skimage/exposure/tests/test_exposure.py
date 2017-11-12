@@ -1,16 +1,18 @@
 import warnings
 
 import numpy as np
-from numpy.testing import (assert_array_equal, assert_array_almost_equal,
-                           assert_almost_equal)
-import pytest
 import skimage
 from skimage import data
 from skimage import exposure
 from skimage.exposure.exposure import intensity_range
 from skimage.color import rgb2gray
 from skimage.util.dtype import dtype_range
+
 from skimage._shared._warnings import expected_warnings
+from skimage._shared import testing
+from skimage._shared.testing import (assert_array_equal,
+                                     assert_array_almost_equal,
+                                     assert_almost_equal)
 
 
 # Test integer histograms
@@ -93,7 +95,7 @@ def check_cdf_slope(cdf):
 # ====================
 
 
-@pytest.mark.parametrize("test_input,expected", [
+@testing.parametrize("test_input,expected", [
     ('image', [0, 1]),
     ('dtype', [0, 255]),
     ((10, 20), [10, 20])
@@ -104,7 +106,7 @@ def test_intensity_range_uint8(test_input, expected):
     assert_array_equal(out, expected)
 
 
-@pytest.mark.parametrize("test_input,expected", [
+@testing.parametrize("test_input,expected", [
     ('image', [0.1, 0.2]),
     ('dtype', [-1, 1]),
     ((0.3, 0.4), [0.3, 0.4])
@@ -188,21 +190,6 @@ def test_rescale_uint14_limits():
 
 # Test adaptive histogram equalization
 # ====================================
-
-def test_adapthist_scalar():
-    """Test a scalar uint8 image
-    """
-    img = skimage.img_as_ubyte(data.moon())
-    adapted = exposure.equalize_adapthist(img, kernel_size=64, clip_limit=0.02)
-    assert adapted.min() == 0.0
-    assert adapted.max() == 1.0
-    assert img.shape == adapted.shape
-    full_scale = skimage.exposure.rescale_intensity(skimage.img_as_float(img))
-
-    assert_almost_equal(peak_snr(full_scale, adapted), 102.066, 3)
-    assert_almost_equal(norm_brightness_err(full_scale, adapted),
-                        0.038, 3)
-
 
 def test_adapthist_grayscale():
     """Test a grayscale float image
@@ -353,7 +340,7 @@ def test_adjust_gamma_greater_one():
 
 def test_adjust_gamma_neggative():
     image = np.arange(0, 255, 4, np.uint8).reshape((8, 8))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         exposure.adjust_gamma(image, -1)
 
 
@@ -473,7 +460,7 @@ def test_adjust_inv_sigmoid_cutoff_half():
 
 def test_negative():
     image = np.arange(-10, 245, 4).reshape((8, 8)).astype(np.double)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         exposure.adjust_gamma(image)
 
 
@@ -491,8 +478,3 @@ def test_is_low_contrast():
     image = (image.astype(np.uint16)) * 2**8
     assert exposure.is_low_contrast(image)
     assert not exposure.is_low_contrast(image, upper_percentile=100)
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()

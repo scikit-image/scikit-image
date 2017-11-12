@@ -6,8 +6,8 @@ from skimage import data, data_dir
 from skimage import feature
 from skimage import img_as_float
 from skimage import draw
-from numpy.testing import assert_almost_equal
-import pytest
+from skimage._shared.testing import assert_almost_equal
+from skimage._shared import testing
 
 
 def test_hog_output_size():
@@ -52,7 +52,7 @@ def test_hog_image_size_cell_size_mismatch():
 
 def test_hog_color_image_unsupported_error():
     image = np.zeros((20, 20, 3))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         feature.hog(image)
 
 
@@ -201,11 +201,36 @@ def test_hog_orientations_circle():
         assert_almost_equal(actual, desired, decimal=1)
 
 
+def test_hog_visualization_orientation():
+    """Test that the visualization produces a line with correct orientation
+
+    The hog visualization is expected to draw line segments perpendicular to
+    the midpoints of orientation bins.  This example verifies that when
+    orientations=3 and the gradient is entirely in the middle bin (bisected
+    by the y-axis), the line segment drawn by the visualization is horizontal.
+    """
+
+    width = height = 11
+
+    image = np.zeros((height, width), dtype='float')
+    image[height // 2:] = 1
+
+    _, hog_image = feature.hog(
+        image,
+        orientations=3,
+        pixels_per_cell=(width, height),
+        cells_per_block=(1, 1),
+        visualize=True
+    )
+
+    middle_index = height // 2
+    indices_excluding_middle = [x for x in range(height) if x != middle_index]
+
+    assert (hog_image[indices_excluding_middle, :] == 0).all()
+    assert (hog_image[middle_index, 1:-1] > 0).all()
+
+
 def test_hog_block_normalization_incorrect_error():
     img = np.eye(4)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         feature.hog(img, block_norm='Linf')
-
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()

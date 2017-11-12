@@ -1,13 +1,15 @@
 import numpy as np
-from numpy.testing import (run_module_suite, assert_equal,
-                           assert_almost_equal, assert_warns, assert_)
-import pytest
+
 from skimage import restoration, data, color, img_as_float, measure
-from skimage._shared._warnings import expected_warnings
 from skimage.measure import compare_psnr
 from skimage.restoration._denoise import _wavelet_threshold
-
 import pywt
+
+from skimage._shared import testing
+from skimage._shared.testing import (assert_equal, assert_almost_equal,
+                                     assert_warns, assert_)
+from skimage._shared._warnings import expected_warnings
+
 
 np.random.seed(1234)
 
@@ -200,7 +202,7 @@ def test_denoise_bilateral_color():
 
 def test_denoise_bilateral_3d_grayscale():
     img = np.ones((50, 50, 3))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         restoration.denoise_bilateral(img, multichannel=False)
 
 
@@ -214,11 +216,10 @@ def test_denoise_bilateral_3d_multichannel():
 
 def test_denoise_bilateral_multidimensional():
     img = np.ones((10, 10, 10, 10))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         restoration.denoise_bilateral(img, multichannel=False)
-    with pytest.raises(ValueError):
-        restoration.denoise_bilateral(
-            img, multichannel=True)
+    with testing.raises(ValueError):
+        restoration.denoise_bilateral(img, multichannel=True)
 
 
 def test_denoise_bilateral_nan():
@@ -288,7 +289,7 @@ def test_denoise_nl_means_multichannel():
 
 def test_denoise_nl_means_wrong_dimension():
     img = np.zeros((5, 5, 5, 5))
-    with pytest.raises(NotImplementedError):
+    with testing.raises(NotImplementedError):
         restoration.denoise_nl_means(img, multichannel=True)
 
 
@@ -369,7 +370,7 @@ def test_wavelet_threshold():
     assert_(psnr_denoised > psnr_noisy)
 
     # either method or threshold must be defined
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         _wavelet_threshold(noisy, wavelet='db1', method=None, threshold=None)
 
     # warns if a threshold is provided in a case where it would be ignored
@@ -401,7 +402,7 @@ def test_wavelet_denoising_nd():
 
 
 def test_wavelet_invalid_method():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         restoration.denoise_wavelet(np.ones(16), method='Unimplemented')
 
 
@@ -431,11 +432,11 @@ def test_wavelet_denoising_levels():
     # invalid number of wavelet levels results in a ValueError
     max_level = pywt.dwt_max_level(np.min(img.shape),
                                    pywt.Wavelet(wavelet).dec_len)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         restoration.denoise_wavelet(
             noisy,
             wavelet=wavelet, wavelet_levels=max_level+1)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         restoration.denoise_wavelet(
             noisy,
             wavelet=wavelet, wavelet_levels=-1)
@@ -515,7 +516,3 @@ def test_multichannel_warnings():
     img = data.astronaut()
     assert_warns(UserWarning, restoration.denoise_bilateral, img)
     assert_warns(UserWarning, restoration.denoise_nl_means, img)
-
-
-if __name__ == "__main__":
-    run_module_suite()

@@ -1,13 +1,13 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_almost_equal
-import pytest
 from skimage.transform._geometric import GeometricTransform
 from skimage.transform import (estimate_transform, matrix_transform,
                                EuclideanTransform, SimilarityTransform,
                                AffineTransform, FundamentalMatrixTransform,
                                EssentialMatrixTransform, ProjectiveTransform,
                                PolynomialTransform, PiecewiseAffineTransform)
-from skimage._shared._warnings import expected_warnings
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_almost_equal
 
 
 SRC = np.array([
@@ -36,9 +36,8 @@ def test_estimate_transform():
     for tform in ('euclidean', 'similarity', 'affine', 'projective',
                   'polynomial'):
         estimate_transform(tform, SRC[:2, :], DST[:2, :])
-    with pytest.raises(ValueError):
-        estimate_transform('foobar',
-                  SRC[:2, :], DST[:2, :])
+    with testing.raises(ValueError):
+        estimate_transform('foobar', SRC[:2, :], DST[:2, :])
 
 
 def test_matrix_transform():
@@ -139,7 +138,6 @@ def test_similarity_init():
     assert_almost_equal(tform.rotation, rotation)
     assert_almost_equal(tform.translation, translation)
 
-
     # test special case for scale if rotation=90deg
     scale = 0.1
     rotation = np.pi / 2
@@ -239,7 +237,8 @@ def test_fundamental_matrix_inverse():
     tform = FundamentalMatrixTransform()
     tform.params = essential_matrix_tform.params
     src = np.array([[0, 0], [0, 1], [1, 1]])
-    assert_almost_equal(tform.inverse(src), [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
+    assert_almost_equal(tform.inverse(src),
+                        [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
 
 
 def test_essential_matrix_init():
@@ -279,7 +278,8 @@ def test_essential_matrix_inverse():
     tform = EssentialMatrixTransform(rotation=np.eye(3),
                                      translation=np.array([1, 0, 0]))
     src = np.array([[0, 0], [0, 1], [1, 1]])
-    assert_almost_equal(tform.inverse(src), [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
+    assert_almost_equal(tform.inverse(src),
+                        [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
 
 
 def test_essential_matrix_residuals():
@@ -337,7 +337,7 @@ def test_polynomial_default_order():
 
 
 def test_polynomial_inverse():
-    with pytest.raises(Exception):
+    with testing.raises(Exception):
         PolynomialTransform().inverse(0)
 
 
@@ -368,58 +368,58 @@ def test_union():
 def test_union_differing_types():
     tform1 = SimilarityTransform()
     tform2 = PolynomialTransform()
-    with pytest.raises(TypeError):
+    with testing.raises(TypeError):
         tform1.__add__(tform2)
 
 
 def test_geometric_tform():
     tform = GeometricTransform()
-    with pytest.raises(NotImplementedError):
+    with testing.raises(NotImplementedError):
         tform(0)
-    with pytest.raises(NotImplementedError):
+    with testing.raises(NotImplementedError):
         tform.inverse(0)
-    with pytest.raises(NotImplementedError):
+    with testing.raises(NotImplementedError):
         tform.__add__(0)
 
 
 def test_invalid_input():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         ProjectiveTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         AffineTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         SimilarityTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EuclideanTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         AffineTransform(matrix=np.zeros((2, 3)), scale=1)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         SimilarityTransform(matrix=np.zeros((2, 3)), scale=1)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EuclideanTransform(
             matrix=np.zeros((2, 3)), translation=(0, 0))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         PolynomialTransform(np.zeros((3, 3)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         FundamentalMatrixTransform(matrix=np.zeros((3, 2)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EssentialMatrixTransform(matrix=np.zeros((3, 2)))
 
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EssentialMatrixTransform(rotation=np.zeros((3, 2)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EssentialMatrixTransform(
             rotation=np.zeros((3, 3)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EssentialMatrixTransform(
             rotation=np.eye(3))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EssentialMatrixTransform(rotation=np.eye(3),
                                  translation=np.zeros((2,)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EssentialMatrixTransform(rotation=np.eye(3),
                                  translation=np.zeros((2,)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EssentialMatrixTransform(
             rotation=np.eye(3), translation=np.zeros((3,)))
 
@@ -438,8 +438,3 @@ def test_degenerate():
     tform = ProjectiveTransform()
     tform.estimate(src, dst)
     assert np.all(np.isnan(tform.params))
-
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

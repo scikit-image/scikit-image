@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from numpy.testing import assert_equal
+from skimage._shared.testing import assert_equal
 from scipy.ndimage import binary_dilation, binary_erosion
 import skimage.feature as F
 from skimage import data, img_as_float

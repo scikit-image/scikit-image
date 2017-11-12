@@ -1,28 +1,28 @@
 import numpy as np
-from numpy.testing import assert_equal
-import pytest
+from skimage._shared.testing import assert_equal
 from skimage import data
 from skimage import transform as tf
 from skimage.color import rgb2gray
 from skimage.feature import (BRIEF, match_descriptors,
                              corner_peaks, corner_harris)
+from skimage._shared import testing
 
 
 def test_binary_descriptors_unequal_descriptor_sizes_error():
     """Sizes of descriptors of keypoints to be matched should be equal."""
     descs1 = np.array([[True, True, False, True],
-                     [False, True, False, True]])
+                       [False, True, False, True]])
     descs2 = np.array([[True, False, False, True, False],
-                     [False, True, True, True, False]])
-    with pytest.raises(ValueError):
+                       [False, True, True, True, False]])
+    with testing.raises(ValueError):
         match_descriptors(descs1, descs2)
 
 
 def test_binary_descriptors():
     descs1 = np.array([[True, True, False, True, True],
-                     [False, True, False, True, True]])
+                       [False, True, False, True, True]])
     descs2 = np.array([[True, False, False, True, False],
-                     [False, False, True, True, True]])
+                       [False, False, True, True, True]])
     matches = match_descriptors(descs1, descs2)
     assert_equal(matches, [[0, 0], [1, 1]])
 
@@ -127,45 +127,40 @@ def test_max_ratio():
 
     descs2[0] = 5.0
 
-    matches =  match_descriptors(descs1, descs2, metric='euclidean',
-                                 max_ratio=1.0, cross_check=False)
-    assert len(matches) == 10
+    matches = match_descriptors(descs1, descs2, metric='euclidean',
+                                max_ratio=1.0, cross_check=False)
+    assert_equal(len(matches), 10)
 
-    matches =  match_descriptors(descs1, descs2, metric='euclidean',
-                                 max_ratio=0.6, cross_check=False)
-    assert len(matches) == 10
+    matches = match_descriptors(descs1, descs2, metric='euclidean',
+                                max_ratio=0.6, cross_check=False)
+    assert_equal(len(matches), 10)
 
-    matches =  match_descriptors(descs1, descs2, metric='euclidean',
-                                 max_ratio=0.5, cross_check=False)
-    assert len(matches) == 9
+    matches = match_descriptors(descs1, descs2, metric='euclidean',
+                                max_ratio=0.5, cross_check=False)
+    assert_equal(len(matches), 9)
 
     descs1[0] = 7.5
 
-    matches =  match_descriptors(descs1, descs2, metric='euclidean',
-                                 max_ratio=0.5, cross_check=False)
-    assert len(matches) == 9
+    matches = match_descriptors(descs1, descs2, metric='euclidean',
+                                max_ratio=0.5, cross_check=False)
+    assert_equal(len(matches), 9)
 
     descs2 = 10 * np.arange(1)[:, None].astype(np.float32)
 
-    matches =  match_descriptors(descs1, descs2, metric='euclidean',
-                                 max_ratio=1.0, cross_check=False)
-    assert len(matches) == 10
+    matches = match_descriptors(descs1, descs2, metric='euclidean',
+                                max_ratio=1.0, cross_check=False)
+    assert_equal(len(matches), 10)
 
-    matches =  match_descriptors(descs1, descs2, metric='euclidean',
-                                 max_ratio=0.5, cross_check=False)
-    assert len(matches) == 10
+    matches = match_descriptors(descs1, descs2, metric='euclidean',
+                                max_ratio=0.5, cross_check=False)
+    assert_equal(len(matches), 10)
 
     descs1 = 10 * np.arange(1)[:, None].astype(np.float32)
 
-    matches =  match_descriptors(descs1, descs2, metric='euclidean',
-                                 max_ratio=1.0, cross_check=False)
-    assert len(matches) == 1
+    matches = match_descriptors(descs1, descs2, metric='euclidean',
+                                max_ratio=1.0, cross_check=False)
+    assert_equal(len(matches), 1)
 
-    matches =  match_descriptors(descs1, descs2, metric='euclidean',
-                                 max_ratio=0.5, cross_check=False)
-    assert len(matches) == 1
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()
+    matches = match_descriptors(descs1, descs2, metric='euclidean',
+                                max_ratio=0.5, cross_check=False)
+    assert_equal(len(matches), 1)

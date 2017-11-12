@@ -1,9 +1,8 @@
 import os.path
 import numpy as np
-from numpy.testing import run_module_suite
 import skimage.io as io
 from skimage import data_dir
-import pytest
+from skimage._shared import testing
 
 
 pyfits_available = True
@@ -36,7 +35,7 @@ def teardown():
     io.reset_plugins()
 
 
-@pytest.mark.skipif(not pyfits_available, reason="pyfits not installed")
+@testing.skipif(not pyfits_available, reason="pyfits not installed")
 def test_imread_MEF():
     io.use_plugin('fits')
     testfile = os.path.join(data_dir, 'multi.fits')
@@ -44,7 +43,7 @@ def test_imread_MEF():
     assert np.all(img == pyfits.getdata(testfile, 1))
 
 
-@pytest.mark.skipif(not pyfits_available, reason="pyfits not installed")
+@testing.skipif(not pyfits_available, reason="pyfits not installed")
 def test_imread_simple():
     io.use_plugin('fits')
     testfile = os.path.join(data_dir, 'simple.fits')
@@ -52,17 +51,18 @@ def test_imread_simple():
     assert np.all(img == pyfits.getdata(testfile, 0))
 
 
-@pytest.mark.skipif(not pyfits_available, reason="pyfits not installed")
+@testing.skipif(not pyfits_available, reason="pyfits not installed")
 def test_imread_collection_single_MEF():
     io.use_plugin('fits')
     testfile = os.path.join(data_dir, 'multi.fits')
     ic1 = io.imread_collection(testfile)
-    ic2 = io.ImageCollection([(testfile, 1), (testfile, 2), (testfile, 3)],
-              load_func=fplug.FITSFactory)
+    ic2 = io.ImageCollection(
+        [(testfile, 1), (testfile, 2), (testfile, 3)],
+        load_func=fplug.FITSFactory)
     assert _same_ImageCollection(ic1, ic2)
 
 
-@pytest.mark.skipif(not pyfits_available, reason="pyfits not installed")
+@testing.skipif(not pyfits_available, reason="pyfits not installed")
 def test_imread_collection_MEF_and_simple():
     io.use_plugin('fits')
     testfile1 = os.path.join(data_dir, 'multi.fits')
@@ -84,7 +84,3 @@ def _same_ImageCollection(collection1, collection2):
         if not np.all(ext1 == ext2):
             return False
     return True
-
-
-if __name__ == '__main__':
-    run_module_suite()

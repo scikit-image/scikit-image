@@ -2,22 +2,33 @@
 Testing utilities.
 """
 
-
 import os
 import re
 import threading
 import functools
 from tempfile import NamedTemporaryFile
 
-from numpy import testing
 import numpy as np
+from numpy import testing
+from numpy.testing import (assert_array_equal, assert_array_almost_equal,
+                           assert_array_less, assert_array_almost_equal_nulp,
+                           assert_equal, TestCase, assert_allclose,
+                           assert_almost_equal, assert_, assert_warns,
+                           assert_no_warnings)
+
 from ._warnings import expected_warnings
 import warnings
 
 from .. import data, io, img_as_uint, img_as_float, img_as_int, img_as_ubyte
+import pytest
 
 
 SKIP_RE = re.compile("(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
+
+skipif = pytest.mark.skipif
+parametrize = pytest.mark.parametrize
+raises = pytest.raises
+fixture = pytest.fixture
 
 
 def assert_less(a, b, msg=None):
@@ -38,7 +49,7 @@ def doctest_skip_parser(func):
     """ Decorator replaces custom skip test markup in doctests
 
     Say a function has a docstring::
-        
+
         >>> something, HAVE_AMODULE, HAVE_BMODULE = 0, False, False
         >>> something # skip if not HAVE_AMODULE
         0

@@ -15,7 +15,7 @@ def _hog_normalize_block(block, method, eps=1e-5):
     elif method == 'L2-Hys':
         out = block / np.sqrt(np.sum(block ** 2) + eps ** 2)
         out = np.minimum(out, 0.2)
-        out = out / np.sqrt(np.sum(block ** 2) + eps ** 2)
+        out = out / np.sqrt(np.sum(out ** 2) + eps ** 2)
     else:
         raise ValueError('Selected block normalization method is invalid.')
 
@@ -23,7 +23,7 @@ def _hog_normalize_block(block, method, eps=1e-5):
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
-        block_norm='L1', visualize=False, visualise=None, transform_sqrt=False,
+        block_norm=None, visualize=False, visualise=None, transform_sqrt=False,
         feature_vector=True):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
@@ -61,7 +61,11 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
            For details, see [3]_, [4]_.
 
     visualize : bool, optional
-        Also return an image of the HOG.
+        Also return an image of the HOG.  For each cell and orientation bin,
+        the image contains a line segment that is centered at the cell center,
+        is perpendicular to the midpoint of the range of angles spanned by the
+        orientation bin, and has intensity proportional to the corresponding
+        histogram value.
     transform_sqrt : bool, optional
         Apply power law compression to normalize the image before
         processing. DO NOT use this if the image contains negative
@@ -74,7 +78,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     -------
     newarr : ndarray
         HOG for the image as a 1D (flattened) array.
-    hog_image : ndarray (if visualize=True)
+    hog_image : ndarray (if visualize==True)
         A visualisation of the HOG image.
 
     References
@@ -111,9 +115,12 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     and then applies the hog algorithm to the image.
     """
 
-    if block_norm == 'L1':
+    if block_norm is None:
+        block_norm = 'L1'
         warn('Default value of `block_norm`==`L1` is deprecated and will '
-             'be changed to `L2-Hys` in v0.15', skimage_deprecation)
+             'be changed to `L2-Hys` in v0.15. To supress this message '
+             'specify explicitly the normalization method.',
+             skimage_deprecation)
 
     image = np.atleast_2d(image)
 
@@ -147,8 +154,14 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         # to avoid problems with subtracting unsigned numbers
         image = image.astype('float')
 
-    gy, gx = [np.ascontiguousarray(g, dtype=np.double)
-              for g in np.gradient(image)]
+    gx = np.empty(image.shape, dtype=np.double)
+    gx[:, 0] = 0
+    gx[:, -1] = 0
+    gx[:, 1:-1] = image[:, 2:] - image[:, :-2]
+    gy = np.empty(image.shape, dtype=np.double)
+    gy[0, :] = 0
+    gy[-1, :] = 0
+    gy[1:-1, :] = image[2:, :] - image[:-2, :]
 
     """
     The third stage aims to produce an encoding that is sensitive to
@@ -190,8 +203,11 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
 
         radius = min(cx, cy) // 2 - 1
         orientations_arr = np.arange(orientations)
-        dx_arr = radius * np.cos(orientations_arr / orientations * np.pi)
-        dy_arr = radius * np.sin(orientations_arr / orientations * np.pi)
+        # set dx_arr, dy_arr to correspond to midpoints of orientation bins
+        orientation_bin_midpoints = (
+            np.pi * (orientations_arr + .5) / orientations)
+        dx_arr = radius * np.cos(orientation_bin_midpoints)
+        dy_arr = radius * np.sin(orientation_bin_midpoints)
         hog_image = np.zeros((sy, sx), dtype=float)
         for x in range(n_cellsx):
             for y in range(n_cellsy):

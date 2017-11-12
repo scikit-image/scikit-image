@@ -1,6 +1,5 @@
-from numpy.testing import assert_equal
-from numpy.testing import assert_array_equal
-import pytest
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_array_equal
 
 import numpy as np
 from skimage.util import montage2d, montage
@@ -115,7 +114,7 @@ def test_montage2d_simple_padding():
 
 def test_montage2d_error_ndim():
     arr_error = np.random.randn(1, 2, 3, 4)
-    with pytest.raises(AssertionError):
+    with testing.raises(AssertionError):
         montage2d(arr_error)
 
 
@@ -242,21 +241,17 @@ def test_montage_simple_padding_gray():
 
 def test_error_ndim():
     arr_error = np.random.randn(1, 2)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         montage(arr_error)
 
     arr_error = np.random.randn(1, 2, 3, 4)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         montage(arr_error)
 
     arr_error = np.random.randn(1, 2, 3)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         montage(arr_error, multichannel=True)
 
     arr_error = np.random.randn(1, 2, 3, 4, 5)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         montage(arr_error, multichannel=True)
-
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()

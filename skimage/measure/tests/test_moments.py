@@ -1,12 +1,14 @@
-from numpy.testing import assert_equal, assert_almost_equal
-import pytest
+from __future__ import division
 import numpy as np
-
-from skimage._shared._warnings import expected_warnings
 from skimage import draw
 from skimage.measure import (moments, moments_central, moments_coords,
                              moments_coords_central, moments_normalized,
-                             moments_hu)
+                             moments_hu, centroid)
+
+from skimage._shared import testing
+from skimage._shared.testing import (assert_equal, assert_almost_equal,
+                                     assert_allclose)
+from skimage._shared._warnings import expected_warnings
 
 
 def test_moments():
@@ -28,6 +30,10 @@ def test_moments_central():
     image[14, 15] = 0.5
     image[15, 14] = 0.5
     mu = moments_central(image, (14.5, 14.5))
+
+    # check for proper centroid computation
+    mu_calc_centroid = moments_central(image)
+    assert_equal(mu, mu_calc_centroid)
 
     # shift image by dx=2, dy=2
     image2 = np.zeros((20, 20), dtype=np.double)
@@ -59,7 +65,7 @@ def test_moments_coords():
     mu_image = moments(image)
 
     coords = np.array([[r, c] for r in range(13, 17)
-                        for c in range(13, 17)], dtype=np.double)
+                       for c in range(13, 17)], dtype=np.double)
     mu_coords = moments_coords(coords)
     assert_almost_equal(mu_coords, mu_image)
 
@@ -112,9 +118,9 @@ def test_moments_normalized_3d():
 
 
 def test_moments_normalized_invalid():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         moments_normalized(np.zeros((3, 3)), 3)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         moments_normalized(np.zeros((3, 3)), 4)
 
 
@@ -135,6 +141,9 @@ def test_moments_hu():
     assert_almost_equal(hu, hu2, decimal=1)
 
 
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()
+def test_centroid():
+    image = np.zeros((20, 20), dtype=np.double)
+    image[14, 14:16] = 1
+    image[15, 14:16] = 1/3
+    image_centroid = centroid(image)
+    assert_allclose(image_centroid, (14.25, 14.5))

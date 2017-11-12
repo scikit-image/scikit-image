@@ -1,9 +1,10 @@
-import itertools as it
+from itertools import product
+
 import numpy as np
-from numpy.testing import assert_equal
-import pytest
 from skimage.segmentation import slic
-from skimage._shared.testing import test_parallel
+
+from skimage._shared import testing
+from skimage._shared.testing import test_parallel, assert_equal
 
 
 @test_parallel()
@@ -74,8 +75,8 @@ def test_color_3d():
     for dim_size in img.shape[:-1]:
         midpoint = dim_size // 2
         slices.append((slice(None, midpoint), slice(midpoint, None)))
-    slices = list(it.product(*slices))
-    colors = list(it.product(*(([0, 1],) * 3)))
+    slices = list(product(*slices))
+    colors = list(product(*(([0, 1],) * 3)))
     for s, c in zip(slices, colors):
         img[s] = c
     img += 0.01 * rnd.normal(size=img.shape)
@@ -95,7 +96,7 @@ def test_gray_3d():
     for dim_size in img.shape:
         midpoint = dim_size // 2
         slices.append((slice(None, midpoint), slice(midpoint, None)))
-    slices = list(it.product(*slices))
+    slices = list(product(*slices))
     shades = np.arange(0, 1.000001, 1.0 / 7)
     for s, sh in zip(slices, shades):
         img[s] = sh
@@ -141,7 +142,7 @@ def test_spacing():
 def test_invalid_lab_conversion():
     img = np.array([[1, 1, 1, 0, 0],
                     [1, 1, 0, 0, 0]], np.float) + 1
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         slic(img, multichannel=True, convert2lab=True)
 
 
@@ -209,9 +210,3 @@ def test_more_segments_than_pixels():
     seg = slic(img, sigma=0, n_segments=500, compactness=1,
                multichannel=False, convert2lab=False)
     assert np.all(seg.ravel() == np.arange(seg.size))
-
-
-if __name__ == '__main__':
-    from numpy import testing
-
-    testing.run_module_suite()

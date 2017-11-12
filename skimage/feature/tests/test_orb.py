@@ -1,7 +1,7 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_almost_equal
-import pytest
+from skimage._shared.testing import assert_equal, assert_almost_equal
 from skimage.feature import ORB
+from skimage._shared import testing
 from skimage import data
 from skimage._shared.testing import test_parallel
 
@@ -107,5 +107,5 @@ def test_descriptor_orb():
 def test_no_descriptors_extracted_orb():
     img = np.ones((128, 128))
     detector_extractor = ORB()
-    with pytest.raises(RuntimeError):
+    with testing.raises(RuntimeError):
         detector_extractor.detect_and_extract(img)
