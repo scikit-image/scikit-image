@@ -111,20 +111,12 @@ def moments_coords_central(coords, center=None, order=3):
     # produces a matrix of shape (N, D, order + 1)
     calc = calc[..., np.newaxis] ** np.arange(order + 1)
 
-    # FIXME: Find a better way to do this than DIY `fold` function.
-    def _expand(current, mat):
-        """Recursively multiplies each element of mat against each other,
-           generating a matrix of all possible products of mat's elements."""
-        if mat.size == 0:
-            return current
-        first = mat[0]
-        rest = mat[1:]
-        current = current[..., np.newaxis] * first
-        return _expand(current, rest)
-
     M = []
     for point in calc:
-        M += [_expand(point[0], point[1:])]
+        to_add = np.array(1)
+        for axis in point:
+            to_add = to_add[..., np.newaxis] * axis
+        M += [to_add]
 
     calc = np.sum(M, axis=0)
 
