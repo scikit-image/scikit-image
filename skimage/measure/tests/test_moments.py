@@ -67,21 +67,25 @@ def test_moments_coords():
 def test_moments_central_coords():
     image = np.zeros((20, 20), dtype=np.double)
     image[13:17, 13:17] = 1
-    mu_image = moments_central(image, (3, 3))
+    mu_image = moments_central(image, (14.5, 14.5))
 
     coords = np.array([[r, c] for r in range(13, 17)
-                        for c in range(13, 17)], dtype=np.double)
-    mu_coords = moments_coords_central(coords, (3, 3))
+                       for c in range(13, 17)], dtype=np.double)
+    mu_coords = moments_coords_central(coords, (14.5, 14.5))
     assert_almost_equal(mu_coords, mu_image)
+
+    # ensure that center is being calculated normally
+    mu_coords_calc_centroid = moments_coords_central(coords)
+    assert_almost_equal(mu_coords_calc_centroid, mu_coords)
 
     # shift image by dx=3 dy=3
     image = np.zeros((20, 20), dtype=np.double)
     image[16:20, 16:20] = 1
-    mu_image = moments_central(image, (3, 3))
+    mu_image = moments_central(image, (14.5, 14.5))
 
     coords = np.array([[r, c] for r in range(16, 20)
-                        for c in range(16, 20)], dtype=np.double)
-    mu_coords = moments_coords_central(coords, (3, 3))
+                       for c in range(16, 20)], dtype=np.double)
+    mu_coords = moments_coords_central(coords, (14.5, 14.5))
     assert_almost_equal(mu_coords, mu_image)
 
 
