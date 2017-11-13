@@ -28,7 +28,7 @@ def test_generates_correct_bounding_boxes_for_rectangles():
     crop = image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]]
 
     # The crop is filled.
-    assert (crop < 255).all()
+    assert (crop <= 255).all()
 
     # The crop is complete.
     image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]] = 255
@@ -49,7 +49,7 @@ def test_generates_correct_bounding_boxes_for_triangles():
     crop = image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]]
 
     # The crop is filled.
-    assert (crop < 255).any()
+    assert (crop <= 255).any()
 
     # The crop is complete.
     image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]] = 255
@@ -72,7 +72,7 @@ def test_generates_correct_bounding_boxes_for_circles():
     crop = image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]]
 
     # The crop is filled.
-    assert (crop < 255).any()
+    assert (crop <= 255).any()
 
     # The crop is complete.
     image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]] = 255
@@ -102,7 +102,7 @@ def test_can_generate_one_by_one_rectangle():
     assert len(labels) == 1
     _, bbox = labels[0]
     crop = image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]]
-    assert (crop < 255).sum() == 3  # rgb
+    assert (crop <= 255).sum() == 3  # rgb
 
 
 def test_throws_when_min_pixel_intensity_out_of_range():
