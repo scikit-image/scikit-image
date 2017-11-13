@@ -493,7 +493,6 @@ cdef inline _integral_image_3d(IMGDTYPE [:, :, ::] padded,
     by avoiding copies of ``padded``.
     """
     cdef int pln, row, col
-    cdef float distance
     for pln in range(max(1, -t_pln), min(n_pln, n_pln - t_pln)):
         for row in range(max(1, -t_row), min(n_row, n_row - t_row)):
             for col in range(max(1, -t_col), min(n_col, n_col - t_col)):
