@@ -3,12 +3,12 @@ cimport numpy as np
 cimport cython
 from libc.math cimport exp
 
-ctypedef np.float32_t IMGDTYPE
+ctypedef np.float64_t IMGDTYPE
 
 cdef double DISTANCE_CUTOFF = 5.0
 
 @cython.boundscheck(False)
-cdef inline float patch_distance_2d(IMGDTYPE [:, :] p1,
+cdef inline double patch_distance_2d(IMGDTYPE [:, :] p1,
                                     IMGDTYPE [:, :] p2,
                                     IMGDTYPE [:, ::] w, int s):
     """
@@ -27,7 +27,7 @@ cdef inline float patch_distance_2d(IMGDTYPE [:, :] p1,
 
     Returns
     -------
-    distance : float
+    distance : double
         Gaussian distance between the two patches
 
     Notes
@@ -39,11 +39,11 @@ cdef inline float patch_distance_2d(IMGDTYPE [:, :] p1,
     cdef int i, j
     cdef int center = s / 2
     # Check if central pixel is too different in the 2 patches
-    cdef float tmp_diff = p1[center, center] - p2[center, center]
-    cdef float init = w[center, center] * tmp_diff * tmp_diff
+    cdef double tmp_diff = p1[center, center] - p2[center, center]
+    cdef double init = w[center, center] * tmp_diff * tmp_diff
     if init > 1:
         return 0.
-    cdef float distance = 0
+    cdef double distance = 0
     for i in range(s):
         # exp of large negative numbers will be 0, so we'd better stop
         if distance > DISTANCE_CUTOFF:
@@ -56,7 +56,7 @@ cdef inline float patch_distance_2d(IMGDTYPE [:, :] p1,
 
 
 @cython.boundscheck(False)
-cdef inline float patch_distance_2drgb(IMGDTYPE [:, :, :] p1,
+cdef inline double patch_distance_2drgb(IMGDTYPE [:, :, :] p1,
                                        IMGDTYPE [:, :, :] p2,
                                        IMGDTYPE [:, ::] w, int s):
     """
@@ -75,7 +75,7 @@ cdef inline float patch_distance_2drgb(IMGDTYPE [:, :, :] p1,
 
     Returns
     -------
-    distance : float
+    distance : double
         Gaussian distance between the two patches
 
     Notes
@@ -87,8 +87,8 @@ cdef inline float patch_distance_2drgb(IMGDTYPE [:, :, :] p1,
     cdef int i, j
     cdef int center = s / 2
     cdef int color
-    cdef float tmp_diff = 0
-    cdef float distance = 0
+    cdef double tmp_diff = 0
+    cdef double distance = 0
     for i in range(s):
         # exp of large negative numbers will be 0, so we'd better stop
         if distance > DISTANCE_CUTOFF:
@@ -102,7 +102,7 @@ cdef inline float patch_distance_2drgb(IMGDTYPE [:, :, :] p1,
 
 
 @cython.boundscheck(False)
-cdef inline float patch_distance_3d(IMGDTYPE [:, :, :] p1,
+cdef inline double patch_distance_3d(IMGDTYPE [:, :, :] p1,
                                     IMGDTYPE [:, :, :] p2,
                                     IMGDTYPE [:, :, ::] w, int s):
     """
@@ -121,7 +121,7 @@ cdef inline float patch_distance_3d(IMGDTYPE [:, :, :] p1,
 
     Returns
     -------
-    distance : float
+    distance : double
         Gaussian distance between the two patches
 
     Notes
@@ -131,8 +131,8 @@ cdef inline float patch_distance_3d(IMGDTYPE [:, :, :] p1,
     .. math::  \exp( -w (p1 - p2)^2)
     """
     cdef int i, j, k
-    cdef float distance = 0
-    cdef float tmp_diff
+    cdef double distance = 0
+    cdef double tmp_diff
     for i in range(s):
         # exp of large negative numbers will be 0, so we'd better stop
         if distance > DISTANCE_CUTOFF:
@@ -147,7 +147,7 @@ cdef inline float patch_distance_3d(IMGDTYPE [:, :, :] p1,
 
 @cython.cdivision(True)
 @cython.boundscheck(False)
-def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
+def _nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1):
     """
     Perform non-local means denoising on 2-D RGB image
 
@@ -159,7 +159,7 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
         Size of patches used for denoising
     d : int, optional
         Maximal distance in pixels where to search patches used for denoising
-    h : float, optional
+    h : double, optional
         Cut-off distance (in gray levels). The higher h, the more permissive
         one is in accepting patches.
 
@@ -176,19 +176,19 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     cdef int row, col, i, j, color
     cdef int row_start, row_end, col_start, col_end
     cdef int row_start_i, row_end_i, col_start_j, col_end_j
-    cdef IMGDTYPE [::1] new_values = np.zeros(n_ch).astype(np.float32)
+    cdef IMGDTYPE [::1] new_values = np.zeros(n_ch).astype(np.float64)
     cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(np.pad(image,
                        ((offset, offset), (offset, offset), (0, 0)),
-                        mode='reflect').astype(np.float32))
+                        mode='reflect').astype(np.float64))
     cdef IMGDTYPE [:, :, ::1] result = padded.copy()
-    cdef float A = ((s - 1.) / 4.)
-    cdef float new_value
-    cdef float weight_sum, weight
+    cdef double A = ((s - 1.) / 4.)
+    cdef double new_value
+    cdef double weight_sum, weight
     xg_row, xg_col = np.mgrid[-offset:offset + 1, -offset:offset + 1]
     cdef IMGDTYPE [:, ::1] w = np.ascontiguousarray(np.exp(
                              -(xg_row ** 2 + xg_col ** 2) / (2 * A ** 2)).
-                             astype(np.float32))
-    cdef float distance
+                             astype(np.float64))
+    cdef double distance
     w = 1. / (n_ch * np.sum(w) * h ** 2) * w
 
     # Coordinates of central pixel
@@ -250,8 +250,7 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
 
 @cython.cdivision(True)
 @cython.boundscheck(False)
-def _nl_means_denoising_3d(image, int s=7,
-            int d=13, float h=0.1):
+def _nl_means_denoising_3d(image, int s=7, int d=13, double h=0.1):
     """
     Perform non-local means denoising on 3-D array
 
@@ -263,7 +262,7 @@ def _nl_means_denoising_3d(image, int s=7,
         Size of patches used for denoising.
     d : int, optional
         Maximal distance in pixels where to search patches used for denoising.
-    h : float, optional
+    h : double, optional
         Cut-off distance (in gray levels).
 
     Returns
@@ -278,19 +277,19 @@ def _nl_means_denoising_3d(image, int s=7,
     cdef int offset = s / 2
     # padd the image so that boundaries are denoised as well
     cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(np.pad(
-                                        image.astype(np.float32),
+                                        image.astype(np.float64),
                                         offset, mode='reflect'))
     cdef IMGDTYPE [:, :, ::1] result = padded.copy()
-    cdef float A = ((s - 1.) / 4.)
-    cdef float new_value
-    cdef float weight_sum, weight
+    cdef double A = ((s - 1.) / 4.)
+    cdef double new_value
+    cdef double weight_sum, weight
     xg_pln, xg_row, xg_col = np.mgrid[-offset: offset + 1,
                                       -offset: offset + 1,
                                       -offset: offset + 1]
     cdef IMGDTYPE [:, :, ::1] w = np.ascontiguousarray(np.exp(
                             -(xg_pln ** 2 + xg_row ** 2 + xg_col ** 2) /
-                             (2 * A ** 2)).astype(np.float32))
-    cdef float distance
+                             (2 * A ** 2)).astype(np.float64))
+    cdef double distance
     cdef int pln, row, col, i, j, k
     cdef int pln_start, pln_end, row_start, row_end, col_start, col_end
     cdef int pln_start_i, pln_end_i, row_start_j, row_end_j, \
@@ -353,8 +352,8 @@ def _nl_means_denoising_3d(image, int s=7,
 
 @cython.cdivision(True)
 @cython.boundscheck(False)
-cdef inline float _integral_to_distance_2d(IMGDTYPE [:, ::] integral,
-                        int row, int col, int offset, float h2s2):
+cdef inline double _integral_to_distance_2d(IMGDTYPE [:, ::] integral,
+                        int row, int col, int offset, double h2s2):
     """
     References
     ----------
@@ -368,7 +367,7 @@ cdef inline float _integral_to_distance_2d(IMGDTYPE [:, ::] integral,
 
     Used in _fast_nl_means_denoising_2d
     """
-    cdef float distance
+    cdef double distance
     distance =  integral[row + offset, col + offset] + \
                 integral[row - offset, col - offset] - \
                 integral[row - offset, col + offset] - \
@@ -379,9 +378,9 @@ cdef inline float _integral_to_distance_2d(IMGDTYPE [:, ::] integral,
 
 @cython.cdivision(True)
 @cython.boundscheck(False)
-cdef inline float _integral_to_distance_3d(IMGDTYPE [:, :, ::] integral,
+cdef inline double _integral_to_distance_3d(IMGDTYPE [:, :, ::] integral,
                     int pln, int row, int col, int offset,
-                    float s_cube_h_square):
+                    double s_cube_h_square):
     """
     References
     ----------
@@ -395,7 +394,7 @@ cdef inline float _integral_to_distance_3d(IMGDTYPE [:, :, ::] integral,
 
     Used in _fast_nl_means_denoising_3d
     """
-    cdef float distance
+    cdef double distance
     distance = (integral[pln + offset, row + offset, col + offset] -
                 integral[pln - offset, row - offset, col - offset] +
                 integral[pln - offset, row - offset, col + offset] +
@@ -440,7 +439,7 @@ cdef inline _integral_image_2d(IMGDTYPE [:, :, ::] padded,
     by avoiding copies of ``padded``.
     """
     cdef int row, col
-    cdef float distance
+    cdef double distance
     for row in range(max(1, -t_row), min(n_row, n_row - t_row)):
         for col in range(max(1, -t_col), min(n_col, n_col - t_col)):
             if n_ch == 1:
@@ -510,7 +509,7 @@ cdef inline _integral_image_3d(IMGDTYPE [:, :, ::] padded,
 
 @cython.cdivision(True)
 @cython.boundscheck(False)
-def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
+def _fast_nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1):
     """
     Perform fast non-local means denoising on 2-D array, with the outer
     loop on patch shifts in order to reduce the number of operations.
@@ -523,7 +522,7 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
         Size of patches used for denoising.
     d : int, optional
         Maximal distance in pixels where to search patches used for denoising.
-    h : float, optional
+    h : double, optional
         Cut-off distance (in gray levels). The higher h, the more permissive
         one is in accepting patches.
 
@@ -550,17 +549,17 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
     cdef int pad_size = offset + d + 1
     cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(np.pad(image,
                           ((pad_size, pad_size), (pad_size, pad_size), (0, 0)),
-                          mode='reflect').astype(np.float32))
+                          mode='reflect').astype(np.float64))
     cdef IMGDTYPE [:, :, ::1] result = np.zeros_like(padded)
     cdef IMGDTYPE [:, ::1] weights = np.zeros_like(padded[..., 0], order='C')
     cdef IMGDTYPE [:, ::1] integral = np.zeros_like(padded[..., 0], order='C')
     cdef int n_row, n_col, n_ch, t_row, t_col, row, col
-    cdef float weight, distance
-    cdef float alpha
-    cdef float h2 = h ** 2.
-    cdef float s2 = s ** 2.
+    cdef double weight, distance
+    cdef double alpha
+    cdef double h2 = h ** 2.
+    cdef double s2 = s ** 2.
     n_row, n_col, n_ch = image.shape
-    cdef float h2s2 = n_ch * h2 * s2
+    cdef double h2s2 = n_ch * h2 * s2
     n_row += 2 * pad_size
     n_col += 2 * pad_size
 
@@ -620,7 +619,7 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
 
 @cython.cdivision(True)
 @cython.boundscheck(False)
-def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
+def _fast_nl_means_denoising_3d(image, int s=5, int d=7, double h=0.1):
     """
     Perform fast non-local means denoising on 3-D array, with the outer
     loop on patch shifts in order to reduce the number of operations.
@@ -633,7 +632,7 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
         Size of patches used for denoising.
     d : int, optional
         Maximal distance in pixels where to search patches used for denoising.
-    h : float, optional
+    h : double, optional
         cut-off distance (in gray levels). The higher h, the more permissive
         one is in accepting patches.
 
@@ -659,7 +658,7 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
     # + 1 for the boundary effects in finite differences
     cdef int pad_size = offset + d + 1
     cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(np.pad(image,
-                                pad_size, mode='reflect').astype(np.float32))
+                                pad_size, mode='reflect').astype(np.float64))
     cdef IMGDTYPE [:, :, ::1] result = np.zeros_like(padded)
     cdef IMGDTYPE [:, :, ::1] weights = np.zeros_like(padded)
     cdef IMGDTYPE [:, :, ::1] integral = np.zeros_like(padded)
@@ -667,11 +666,11 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
              pln, row, col
     cdef int pln_dist_min, pln_dist_max, row_dist_min, row_dist_max, \
              col_dist_min, col_dist_max
-    cdef float weight, distance
-    cdef float alpha
-    cdef float h_square = h ** 2.
-    cdef float s_cube = s ** 3.
-    cdef float s_cube_h_square = h_square * s_cube
+    cdef double weight, distance
+    cdef double alpha
+    cdef double h_square = h ** 2.0
+    cdef double s_cube = s ** 3.0
+    cdef double s_cube_h_square = h_square * s_cube
     n_pln, n_row, n_col = image.shape
     n_pln += 2 * pad_size
     n_row += 2 * pad_size
