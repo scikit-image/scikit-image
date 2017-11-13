@@ -5,7 +5,7 @@ from libc.math cimport exp
 
 ctypedef np.float32_t IMGDTYPE
 
-cdef float DISTANCE_CUTOFF = 5.
+cdef double DISTANCE_CUTOFF = 5.0
 
 @cython.boundscheck(False)
 cdef inline float patch_distance_2d(IMGDTYPE [:, :] p1,
@@ -696,7 +696,8 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, float h=0.1):
                 if t_col == 0 and (t_pln is not 0 or t_row is not 0):
                     alpha = 0.5
                 else:
-                    alpha = 1.
+                    alpha = 1.0
+
                 # Compute integral image of the squared difference between
                 # padded and the same image shifted by (t_pln, t_row, t_col)
                 integral = np.zeros_like(padded)
