@@ -26,12 +26,15 @@ import matplotlib.pyplot as plt
 from joblib import Parallel, delayed
 
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
 
 from skimage.data import cbcl_database
 from skimage.transform import integral_image
 from skimage.feature import haar_like_feature
 from skimage.feature import haar_like_feature_coord
 from skimage.feature import draw_haar_like_feature
+
 
 ###############################################################################
 # The different Haar-like feature descriptors
@@ -59,47 +62,63 @@ for ax, img, feat_t in zip(np.ravel(axs), images, feature_types):
                                           random_state=0)
     ax.imshow(haar_feature)
     ax.set_title(feat_t)
+    ax.set_xticks([])
+    ax.set_yticks([])
 
 fig.suptitle('The different Haar-like feature descriptors')
 plt.axis('off')
-plt.tight_layout()
 
 ###############################################################################
 # The usual feature extraction scheme
 ###############################################################################
-# The procedure to extract the Haar-like feature for an image is quite easy:
-# a region of interest (ROI) is defined for which all possible feature will
-# be extracted. In order to compute those features, an integral image needs to
-# be provided. Typically, for a ROI of 24 by 24 pixels, the total amount of
-# features which can be extracted is 160,000.
+# The procedure to extract the Haar-like feature for an image is quite easy: a
+# region of interest (ROI) is defined for which all possible feature will be
+# extracted. The integral image of this ROI will be computed and all possible
+# features will be computed.
 
 
-def extract_feature_image(img, feature_type):
+def extract_feature_image(img, feature_type, feature_coord=None):
     """Extract the haar feature for the current image"""
     ii = integral_image(img)
     return haar_like_feature(ii, 0, 0, ii.shape[0], ii.shape[1],
-                             feature_type=feature_type)
+                             feature_type=feature_type,
+                             feature_coord=feature_coord)
 
+
+###############################################################################
+# We will use a subset of the CBCL which is composed of 100 face images and 100
+# non-face images. Each image has been resized to a ROI of 19 by 19 pixels. We
+# will keep 75 images from each group to train a classifier and check which
+# extracted features are the most salient.
 
 images = cbcl_database()
-
+# For a gain of speed, only the two first types of features will be extracted.
 feature_types = ['type-2-x', 'type-2-y']
 
 X = np.array(Parallel(n_jobs=-1)(
     delayed(extract_feature_image)(img, feature_types)
     for img in images))
 y = np.array([1] * 100 + [0] * 100)
+X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=150,
+                                                    random_state=0)
 
+# Extract all possible features to be able to select the salient one.
 feature_coord, feature_type = haar_like_feature_coord(images.shape[2],
                                                       images.shape[1],
                                                       feature_types)
 
+# Train a random forest classifier and check the feature importance
 clf = RandomForestClassifier(n_estimators=1000, max_depth=None,
-                             max_features=100,
-                             n_jobs=-1, random_state=0)
-clf.fit(X, y)
+                             max_features=100, n_jobs=-1, random_state=0)
+clf.fit(X_train, y_train)
 
 idx_sorted = np.argsort(clf.feature_importances_)[::-1]
+
+###############################################################################
+# A random forest classifier can be trained in order to select the most salient
+# features, specifically for face classification. The idea is to check which
+# features are the most often used by the ensemble of trees. Below, we are
+# plotting the six most salient features found by the random forest.
 
 fig, axs = plt.subplots(3, 2)
 for idx, ax in enumerate(axs.ravel()):
@@ -109,36 +128,40 @@ for idx, ax in enumerate(axs.ravel()):
                                    images.shape[1],
                                    [feature_coord[idx_sorted[idx]]])
     ax.imshow(image)
+    ax.set_xticks([])
+    ax.set_yticks([])
 
 fig.suptitle('The most important features')
-plt.tight_layout()
+
+###############################################################################
+# We can select the most important features by checking the cumulative sum of
+# the feature importance index; we kept features representing 70% of the
+# cumulative value which represent only 3% of the total number of features.
+
+cdf_feature_importances = np.cumsum(clf.feature_importances_[idx_sorted[::-1]])
+cdf_feature_importances /= np.max(cdf_feature_importances)
+significant_feature = np.count_nonzero(cdf_feature_importances > 0.3)
+print('There is {} features which are considered important.'.format(
+    significant_feature))
+
+# Select the most informative features
+selected_feature_coord = feature_coord[idx_sorted[:significant_feature]]
+selected_feature_type = feature_type[idx_sorted[:significant_feature]]
+# Note: we could select those features from the
+# original matrix X but we would like to emphasize the usage of `feature_coord`
+# and `feature_type` to recompute a subset of desired features.
+X = np.array(Parallel(n_jobs=-1)(
+    delayed(extract_feature_image)(img, selected_feature_type,
+                                   selected_feature_coord)
+    for img in images))
+y = np.array([1] * 100 + [0] * 100)
+X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=150,
+                                                    random_state=0)
+
+###############################################################################
+# Once the feature are extracted, we can train and test the a new classifier.
+
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+print(classification_report(y_test, y_pred))
 plt.show()
-
-# image = rgb2gray(astronaut())
-# plt.figure()
-# coord, _ = haar_like_feature_coord(50, 50, 'type-4')
-# plt.imshow(draw_haar_like_feature(image, 125, 200, 50, 50,
-#                                   coord, max_n_features=3,
-#                                   random_state=0))
-# plt.plot([200, 200 + 50, 200 + 50, 200, 200],
-#          [125, 125, 125 + 50, 125 + 50, 125],
-#          label='ROI')
-# plt.axis([100, 300, 100, 300])
-# plt.gca().invert_yaxis()
-# plt.axis('off')
-# plt.title('Example of few Haar-like feature extracted in ROI area')
-# plt.legend()
-
-# ###############################################################################
-# # The descriptor
-# ###############################################################################
-# # As previously mentioned, the actual descriptor corresponds to the subtraction
-# # between the rectangle from the integral of the original image. The
-# # :func:`haar_like_feature` allows to extract those features for a specific ROI
-
-# haar_features = haar_like_feature(image, 125, 200, 24, 24)
-# print('{} Haar-like features have been extracted: {}'.format(
-#     haar_features.shape[0], haar_features))
-
-
-# plt.show()
