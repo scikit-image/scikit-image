@@ -1,11 +1,13 @@
 import numpy as np
 cimport numpy as np
 cimport cython
-from libc.math cimport exp
 
 ctypedef np.float64_t IMGDTYPE
 
 cdef double DISTANCE_CUTOFF = 5.0
+
+cdef extern from "fast_exp.h":
+    inline double fast_exp(double y) nogil
 
 @cython.boundscheck(False)
 cdef inline double patch_distance_2d(IMGDTYPE [:, :] p1,
@@ -51,7 +53,7 @@ cdef inline double patch_distance_2d(IMGDTYPE [:, :] p1,
         for j in range(s):
             tmp_diff = p1[i, j] - p2[i, j]
             distance += (w[i, j] * tmp_diff * tmp_diff)
-    distance = exp(-distance)
+    distance = fast_exp(-distance)
     return distance
 
 
@@ -97,7 +99,7 @@ cdef inline double patch_distance_2drgb(IMGDTYPE [:, :, :] p1,
             for color in range(3):
                 tmp_diff = p1[i, j, color] - p2[i, j, color]
                 distance += w[i, j] * tmp_diff * tmp_diff
-    distance = exp(-distance)
+    distance = fast_exp(-distance)
     return distance
 
 
@@ -141,7 +143,7 @@ cdef inline double patch_distance_3d(IMGDTYPE [:, :, :] p1,
             for k in range(s):
                 tmp_diff = p1[i, j, k] - p2[i, j, k]
                 distance += w[i, j, k] * tmp_diff * tmp_diff
-    distance = exp(-distance)
+    distance = fast_exp(-distance)
     return distance
 
 
@@ -594,7 +596,7 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1):
                     # exp of large negative numbers is close to zero
                     if distance > DISTANCE_CUTOFF:
                         continue
-                    weight = alpha * exp(-distance)
+                    weight = alpha * fast_exp(-distance)
                     # Accumulate weights corresponding to different shifts
                     weights[row, col] += weight
                     weights[row + t_row, col + t_col] += weight
@@ -716,7 +718,8 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, double h=0.1):
                             # exp of large negative numbers is close to zero
                             if distance > DISTANCE_CUTOFF:
                                 continue
-                            weight = alpha * exp(-distance)
+
+                            weight = alpha * fast_exp(-distance)
                             # Accumulate weights for the different shifts
                             weights[pln, row, col] += weight
                             weights[pln + t_pln, row + t_row,
