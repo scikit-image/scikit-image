@@ -211,7 +211,8 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
         return haar_feature
 
 
-def draw_haar_like_feature(image, r, c, width, height, feature_type,
+def draw_haar_like_feature(image, r, c, width, height,
+                           feature_coord,
                            color_positive_block=(1., 0., 0.),
                            color_negative_block=(0., 1., 0.),
                            alpha=0.5, max_n_features=None, random_state=None):
@@ -226,19 +227,16 @@ def draw_haar_like_feature(image, r, c, width, height, feature_type,
         Row-coordinate of top left corner of the detection window.
     c : int
         Column-coordinate of top left corner of the detection window.
-    height : int
-        Height of the detection window.
     width : int
         Width of the detection window.
-    feature_type : str
-        The type of feature to consider:
-
-        - 'type-2-x': 2 rectangles varying along the x axis;
-        - 'type-2-y': 2 rectangles varying along the y axis;
-        - 'type-3-x': 3 rectangles varying along the x axis;
-        - 'type-3-y': 3 rectangles varying along the y axis;
-        - 'type-4': 4 rectangles varying along x and y axis.
-
+    height : int
+        Height of the detection window.
+    feature_coord : ndarray of list of tuples or None, optional
+        The array of coordinates to be extracted. This is useful when you want
+        to recompute only a subset of features. In this case `feature_type`
+        needs to be an array containing the type of each feature, as returned
+        by :func:`haar_like_feature_coord`. By default, all coordinates are
+        computed.
     color_positive_rectangle : tuple of 3 floats
         Floats specifying the color for the positive block. Corresponding
         values define (R, G, B) values. Default value is red (1, 0, 0).
@@ -266,13 +264,14 @@ def draw_haar_like_feature(image, r, c, width, height, feature_type,
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.transform import integral_image
+    >>> from skimage.feature import haar_like_feature_coord
     >>> from skimage.feature import draw_haar_like_feature
-    >>> feature = draw_haar_like_feature(np.zeros((2, 2)),
-    ...                                  0, 0, 2, 2,
-    ...                                  'type-4',
-    ...                                  max_n_features=1)
-    >>> feature
+    >>> feature_coord, _ = haar_like_feature_coord(2, 2, 'type-4')
+    >>> image = draw_haar_like_feature(np.zeros((2, 2)),
+    ...                                0, 0, 2, 2,
+    ...                                feature_coord,
+    ...                                max_n_features=1)
+    >>> image
     array([[[ 0. ,  0.5,  0. ],
             [ 0.5,  0. ,  0. ]],
     <BLANKLINE>
@@ -280,29 +279,24 @@ def draw_haar_like_feature(image, r, c, width, height, feature_type,
             [ 0. ,  0.5,  0. ]]])
 
     """
-    if feature_type not in FEATURE_TYPE:
-        raise ValueError('The given feature type is unknown. Got {}'
-                         ' instead of one of {}.'.format(feature_type,
-                                                         FEATURE_TYPE))
-    coord, _ = haar_like_feature_coord(width, height, feature_type)
-
+    random_state = check_random_state(random_state)
     color_positive_block = np.asarray(color_positive_block, dtype=np.float64)
     color_negative_block = np.asarray(color_negative_block, dtype=np.float64)
+
+    if max_n_features is None:
+        feature_coord_ = feature_coord
+    else:
+        feature_coord_ = random_state.choice(feature_coord,
+                                             size=max_n_features,
+                                             replace=False)
 
     output = np.copy(image)
     if len(image.shape) < 3:
         output = gray2rgb(image)
     output = img_as_float(output)
 
-    random_state = check_random_state(random_state)
-    if max_n_features is None:
-        feature_indices = range(len(coord))
-    else:
-        feature_indices = random_state.choice(
-            range(len(coord)), size=max_n_features, replace=False)
-
-    for set_idx, feature_idx in enumerate(feature_indices):
-        for idx_rect, rect in enumerate(coord[feature_idx]):
+    for coord in feature_coord_:
+        for idx_rect, rect in enumerate(coord):
             coord_start, coord_end = rect
             coord_start = tuple(map(add, coord_start, [r, c]))
             coord_end = tuple(map(add, coord_end, [r, c]))
