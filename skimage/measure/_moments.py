@@ -94,7 +94,7 @@ def moments_coords_central(coords, center=None, order=3):
     """
     if isinstance(coords, tuple):
         # Represent as array and rotate to standardize orientation.
-        coords = np.rollaxis(np.asarray(coords), axis=1)
+        coords = np.transpose(coords)
     assert_nD(coords, 2)
     ndim = coords.shape[1]
     if center is None:
@@ -116,7 +116,7 @@ def moments_coords_central(coords, center=None, order=3):
         to_add = np.array(1)
         for axis in point:
             to_add = to_add[..., np.newaxis] * axis
-        M += [to_add]
+        M.append(to_add)
 
     calc = np.sum(M, axis=0)
 
