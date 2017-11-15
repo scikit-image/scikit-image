@@ -118,12 +118,12 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     if multichannel:  # 2-D images
         if fast_mode:
             return np.squeeze(
-                np.array(_fast_nl_means_denoising_2d(image, **nlm_kwargs)))
+                np.asarray(_fast_nl_means_denoising_2d(image, **nlm_kwargs)))
         else:
             return np.squeeze(
-                np.array(_nl_means_denoising_2d(image, **nlm_kwargs)))
+                np.asarray(_nl_means_denoising_2d(image, **nlm_kwargs)))
     else:  # 3-D grayscale
         if fast_mode:
-            return np.array(_fast_nl_means_denoising_3d(image, **nlm_kwargs))
+            return np.asarray(_fast_nl_means_denoising_3d(image, **nlm_kwargs))
         else:
-            return np.array(_nl_means_denoising_3d(image, **nlm_kwargs))
+            return np.asarray(_nl_means_denoising_3d(image, **nlm_kwargs))
