@@ -192,23 +192,21 @@ def test_mssim_vs_legacy():
     assert_almost_equal(mssim, mssim_skimage_0pt11)
 
 
+def test_mssim_mixed_dtype():
+    mssim = ssim(cam, cam_noisy)
+    mssim_mixed = ssim(cam, cam_noisy.astype(np.float32))
+    assert_almost_equal(mssim, mssim_mixed)
+
+
 def test_invalid_input():
-    X = np.zeros((3, 3), dtype=np.double)
-    Y = np.zeros((3, 3), dtype=np.int)
+    # size mismatch
+    X = np.zeros((9, 9), dtype=np.double)
+    Y = np.zeros((8, 8), dtype=np.double)
     with testing.raises(ValueError):
         ssim(X, Y)
-
-    Y = np.zeros((4, 4), dtype=np.double)
+    # win_size exceeds image extent
     with testing.raises(ValueError):
-        ssim(X, Y)
-
-    with testing.raises(ValueError):
-        ssim(X, X, win_size=8)
-
-    # do not allow both image content weighting and gradient calculation
-    with testing.raises(ValueError):
-        ssim(X, X, image_content_weighting=True,
-             gradient=True)
+        ssim(X, X, win_size=X.shape[0]+1)
     # some kwarg inputs must be non-negative
     with testing.raises(ValueError):
         ssim(X, X, K1=-0.1)
