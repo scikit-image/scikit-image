@@ -111,7 +111,7 @@ def hog_histograms(double[:, ::1] gradient_columns,
                                              gradient_rows)
     cdef double[:, ::1] orientation = \
         np.rad2deg(np.arctan2(gradient_rows, gradient_columns)) % 180
-    cdef int i, c, y, o, r_i, c_i, cc, cr, c_0, r_0, \
+    cdef int i, c, r, o, r_i, c_i, cc, cr, c_0, r_0, \
         range_rows_start, range_rows_stop, \
         range_columns_start, range_columns_stop
     cdef float orientation_start, orientation_end, \
@@ -134,11 +134,11 @@ def hog_histograms(double[:, ::1] gradient_columns,
             orientation_start = number_of_orientations_per_180 * (i + 1)
             orientation_end = number_of_orientations_per_180 * i
             c = c_0
-            y = r_0
+            r = r_0
             r_i = 0
             c_i = 0
 
-            while y < cc:
+            while r < cc:
                 c_i = 0
                 c = c_0
 
@@ -146,7 +146,7 @@ def hog_histograms(double[:, ::1] gradient_columns,
                     orientation_histogram[r_i, c_i, i] = \
                         cell_hog(magnitude, orientation,
                                  orientation_start, orientation_end,
-                                 cell_columns, cell_rows, c, y,
+                                 cell_columns, cell_rows, c, r,
                                  size_columns, size_rows,
                                  range_rows_start, range_rows_stop,
                                  range_columns_start, range_columns_stop)
@@ -154,4 +154,4 @@ def hog_histograms(double[:, ::1] gradient_columns,
                     c += cell_columns
 
                 r_i += 1
-                y += cell_rows
+                r += cell_rows
