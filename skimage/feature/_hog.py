@@ -22,7 +22,7 @@ def _hog_normalize_block(block, method, eps=1e-5):
 
 
 def _hog_channel_gradient(channel):
-    """Compute unnormalized gradient image along `x` and `y` axes.
+    """Compute unnormalized gradient image along `row` and `col` axes.
 
     Parameters
     ----------
@@ -31,18 +31,18 @@ def _hog_channel_gradient(channel):
 
     Returns
     -------
-    gx, gy : channel gradient along x-axis and y-axis correspondingly.
+    g_row, g_col : channel gradient along `row` and `col` axes correspondingly.
     """
-    gx = np.empty(channel.shape, dtype=np.double)
-    gx[:, 0] = 0
-    gx[:, -1] = 0
-    gx[:, 1:-1] = channel[:, 2:] - channel[:, :-2]
-    gy = np.empty(channel.shape, dtype=np.double)
-    gy[0, :] = 0
-    gy[-1, :] = 0
-    gy[1:-1, :] = channel[2:, :] - channel[:-2, :]
+    g_row = np.empty(channel.shape, dtype=np.double)
+    g_row[0, :] = 0
+    g_row[-1, :] = 0
+    g_row[1:-1, :] = channel[2:, :] - channel[:-2, :]
+    g_col = np.empty(channel.shape, dtype=np.double)
+    g_col[:, 0] = 0
+    g_col[:, -1] = 0
+    g_col[:, 1:-1] = channel[:, 2:] - channel[:, :-2]
 
-    return gx, gy
+    return g_row, g_col
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
@@ -53,7 +53,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     Compute a Histogram of Oriented Gradients (HOG) by
 
         1. (optional) global image normalization
-        2. computing the gradient image in x and y
+        2. computing the gradient image in `row` and `col`
         3. computing gradient histograms
         4. normalizing across blocks
         5. flattening into a feature vector
@@ -102,10 +102,11 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
 
     Returns
     -------
-    out : ndarray
-        HOG for the image as a 1D (flattened) array.
-    hog_image : ndarray (if visualize==True)
-        A visualisation of the HOG image.
+    out : (n_blocks_row, n_blocks_col, n_cells_row, n_cells_col, n_orient) ndarray
+        HOG descriptor for the image. If `feature_vector` is True, a 1D
+        (flattened) array is returned.
+    hog_image : (M, N) ndarray, optional
+        A visualisation of the HOG image. Only provided if `visualize` is True.
 
     References
     ----------
@@ -185,25 +186,25 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         image = image.astype('float')
 
     if multichannel:
-        gx_by_ch = np.empty_like(image, dtype=np.double)
-        gy_by_ch = np.empty_like(image, dtype=np.double)
+        g_col_by_ch = np.empty_like(image, dtype=np.double)
+        g_row_by_ch = np.empty_like(image, dtype=np.double)
         g_magn = np.empty_like(image, dtype=np.double)
 
         for idx_ch in range(image.shape[2]):
-            gx_by_ch[:, :, idx_ch], gy_by_ch[:, :, idx_ch] = \
+            g_row_by_ch[:, :, idx_ch], g_col_by_ch[:, :, idx_ch] = \
                 _hog_channel_gradient(image[:, :, idx_ch])
-            g_magn[:, :, idx_ch] = np.hypot(gx_by_ch[:, :, idx_ch],
-                                            gy_by_ch[:, :, idx_ch])
+            g_magn[:, :, idx_ch] = np.hypot(g_row_by_ch[:, :, idx_ch],
+                                            g_col_by_ch[:, :, idx_ch])
 
         # For each pixel select the channel with the highest gradient magnitude
         idcs_max = g_magn.argmax(axis=2)
         rr, cc = np.meshgrid(np.arange(image.shape[0]),
                              np.arange(image.shape[1]),
                              indexing='ij')
-        gx = gx_by_ch[rr, cc, idcs_max]
-        gy = gy_by_ch[rr, cc, idcs_max]
+        g_row = g_row_by_ch[rr, cc, idcs_max]
+        g_col = g_col_by_ch[rr, cc, idcs_max]
     else:
-        gx, gy = _hog_channel_gradient(image)
+        g_row, g_col = _hog_channel_gradient(image)
 
     """
     The third stage aims to produce an encoding that is sensitive to
@@ -220,17 +221,18 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     cell are used to vote into the orientation histogram.
     """
 
-    sy, sx = image.shape[:2]
-    cx, cy = pixels_per_cell
-    bx, by = cells_per_block
+    s_row, s_col = image.shape[:2]
+    c_col, c_row = pixels_per_cell
+    b_col, b_row = cells_per_block
 
-    n_cellsx = int(sx // cx)  # number of cells in x
-    n_cellsy = int(sy // cy)  # number of cells in y
+    n_cells_row = int(s_row // c_row)  # number of cells along row-axis
+    n_cells_col = int(s_col // c_col)  # number of cells along col-axis
 
     # compute orientations integral images
-    orientation_histogram = np.zeros((n_cellsy, n_cellsx, orientations))
+    orientation_histogram = np.zeros((n_cells_row, n_cells_col, orientations))
 
-    _hoghistogram.hog_histograms(gx, gy, cx, cy, sx, sy, n_cellsx, n_cellsy,
+    _hoghistogram.hog_histograms(g_col, g_row, c_col, c_row, s_col, s_row,
+                                 n_cells_col, n_cells_row,
                                  orientations, orientation_histogram)
 
     # now compute the histogram for each cell
@@ -243,23 +245,24 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     if visualize:
         from .. import draw
 
-        radius = min(cx, cy) // 2 - 1
+        radius = min(c_row, c_col) // 2 - 1
         orientations_arr = np.arange(orientations)
-        # set dx_arr, dy_arr to correspond to midpoints of orientation bins
+        # set dr_arr, dc_arr to correspond to midpoints of orientation bins
         orientation_bin_midpoints = (
             np.pi * (orientations_arr + .5) / orientations)
-        dx_arr = radius * np.cos(orientation_bin_midpoints)
-        dy_arr = radius * np.sin(orientation_bin_midpoints)
-        hog_image = np.zeros((sy, sx), dtype=float)
-        for x in range(n_cellsx):
-            for y in range(n_cellsy):
-                for o, dx, dy in zip(orientations_arr, dx_arr, dy_arr):
-                    centre = tuple([y * cy + cy // 2, x * cx + cx // 2])
-                    rr, cc = draw.line(int(centre[0] - dx),
-                                       int(centre[1] + dy),
-                                       int(centre[0] + dx),
-                                       int(centre[1] - dy))
-                    hog_image[rr, cc] += orientation_histogram[y, x, o]
+        dr_arr = radius * np.sin(orientation_bin_midpoints)
+        dc_arr = radius * np.cos(orientation_bin_midpoints)
+        hog_image = np.zeros((s_row, s_col), dtype=float)
+        for c in range(n_cells_col):
+            for r in range(n_cells_row):
+                for o, dc, dr in zip(orientations_arr, dc_arr, dr_arr):
+                    centre = tuple([r * c_row + c_row // 2,
+                                    c * c_col + c_col // 2])
+                    rr, cc = draw.line(int(centre[0] - dc),
+                                       int(centre[1] + dr),
+                                       int(centre[0] + dc),
+                                       int(centre[1] - dr))
+                    hog_image[rr, cc] += orientation_histogram[r, c, o]
 
     """
     The fourth stage computes normalization, which takes local groups of
@@ -276,15 +279,15 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     Gradient (HOG) descriptors.
     """
 
-    n_blocksx = (n_cellsx - bx) + 1
-    n_blocksy = (n_cellsy - by) + 1
-    normalized_blocks = np.zeros((n_blocksy, n_blocksx,
-                                  by, bx, orientations))
+    n_blocks_col = (n_cells_col - b_col) + 1
+    n_blocks_row = (n_cells_row - b_row) + 1
+    normalized_blocks = np.zeros((n_blocks_row, n_blocks_col,
+                                  b_row, b_col, orientations))
 
-    for x in range(n_blocksx):
-        for y in range(n_blocksy):
-            block = orientation_histogram[y:y + by, x:x + bx, :]
-            normalized_blocks[y, x, :] = \
+    for c in range(n_blocks_col):
+        for r in range(n_blocks_row):
+            block = orientation_histogram[r:r + b_row, c:c + b_col, :]
+            normalized_blocks[r, c, :] = \
                 _hog_normalize_block(block, method=block_norm)
 
     """
@@ -294,7 +297,10 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     """
 
     if feature_vector:
+        print(normalized_blocks.shape)
         normalized_blocks = normalized_blocks.ravel()
+        print(normalized_blocks.shape)
+    print(hog_image.shape)
 
     if visualize:
         return normalized_blocks, hog_image
