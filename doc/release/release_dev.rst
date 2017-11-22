@@ -33,6 +33,9 @@ Improvements
   ``anti_aliasing`` option to avoid aliasing artifacts when down-sampling
   images (#2802)
 - Support for multichannel images for ``skimage.feature.hog`` (#2870)
+- Non-local means denoising (``denoise_nl_means``) has a new optional
+  parameter, `sigma`, that can be used to specify the noise standard deviation.
+  This enables noise-robust patch distance estimation. (#2890)
 
 
 API Changes
