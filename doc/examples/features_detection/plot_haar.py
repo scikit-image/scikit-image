@@ -19,15 +19,14 @@ References
        DOI: 10.1109/CVPR.2001.990517
 
 """
-
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
-
-from joblib import Parallel, delayed
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
+from sklearn.externals.joblib import Parallel, delayed
 
 from skimage.data import cbcl_database
 from skimage.transform import integral_image
@@ -83,6 +82,9 @@ def extract_feature_image(img, feature_type, feature_coord=None):
     return haar_like_feature(ii, 0, 0, ii.shape[0], ii.shape[1],
                              feature_type=feature_type,
                              feature_coord=feature_coord)
+# trick such that we can pickle this function when building the doc with
+# sphinx-gallery
+sys.modules['__main__'].extract_feature_image = extract_feature_image
 
 
 ###############################################################################
