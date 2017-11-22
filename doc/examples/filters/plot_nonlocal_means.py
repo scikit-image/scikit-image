@@ -22,6 +22,9 @@ distances.  This can lead to a modest improvement in image quality.
 
 The `estimate_sigma` function can provide a good starting point for setting
 the `h` (and optionally, `sigma`) parameters for the non-local means algorithm.
+`h` is a constant that controls the decay in patch weights as a function of the
+distance between patches.  Larger `h` allows more smoothing between disimilar
+patches.
 
 In this demo, `h`, was hand-tuned to give the approximate best-case performance
 of each variant.
