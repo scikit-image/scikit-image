@@ -21,10 +21,11 @@ from skimage.restoration import denoise_nl_means
 astro = img_as_float(data.astronaut())
 astro = astro[30:180, 150:300]
 
-noisy = astro + 0.3 * np.random.random(astro.shape)
+sigma = 0.1
+noisy = astro + sigma * np.random.standard_normal(astro.shape)
 noisy = np.clip(noisy, 0, 1)
 
-denoise = denoise_nl_means(noisy, 7, 9, 0.08, multichannel=True)
+denoise = denoise_nl_means(noisy, 7, 9, 0.8*sigma, multichannel=True)
 
 fig, ax = plt.subplots(ncols=2, figsize=(8, 4), sharex=True, sharey=True,
                        subplot_kw={'adjustable': 'box-forced'})
