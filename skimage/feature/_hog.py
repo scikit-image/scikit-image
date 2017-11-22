@@ -186,8 +186,8 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         image = image.astype('float')
 
     if multichannel:
-        g_col_by_ch = np.empty_like(image, dtype=np.double)
         g_row_by_ch = np.empty_like(image, dtype=np.double)
+        g_col_by_ch = np.empty_like(image, dtype=np.double)
         g_magn = np.empty_like(image, dtype=np.double)
 
         for idx_ch in range(image.shape[2]):
@@ -253,9 +253,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         dr_arr = radius * np.sin(orientation_bin_midpoints)
         dc_arr = radius * np.cos(orientation_bin_midpoints)
         hog_image = np.zeros((s_row, s_col), dtype=float)
-        for c in range(n_cells_col):
-            for r in range(n_cells_row):
-                for o, dc, dr in zip(orientations_arr, dc_arr, dr_arr):
+        for r in range(n_cells_row):
+            for c in range(n_cells_col):
+                for o, dr, dc in zip(orientations_arr, dr_arr, dc_arr):
                     centre = tuple([r * c_row + c_row // 2,
                                     c * c_col + c_col // 2])
                     rr, cc = draw.line(int(centre[0] - dc),
@@ -279,13 +279,13 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     Gradient (HOG) descriptors.
     """
 
-    n_blocks_col = (n_cells_col - b_col) + 1
     n_blocks_row = (n_cells_row - b_row) + 1
+    n_blocks_col = (n_cells_col - b_col) + 1
     normalized_blocks = np.zeros((n_blocks_row, n_blocks_col,
                                   b_row, b_col, orientations))
 
-    for c in range(n_blocks_col):
-        for r in range(n_blocks_row):
+    for r in range(n_blocks_row):
+        for c in range(n_blocks_col):
             block = orientation_histogram[r:r + b_row, c:c + b_col, :]
             normalized_blocks[r, c, :] = \
                 _hog_normalize_block(block, method=block_norm)
@@ -297,10 +297,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     """
 
     if feature_vector:
-        print(normalized_blocks.shape)
         normalized_blocks = normalized_blocks.ravel()
-        print(normalized_blocks.shape)
-    print(hog_image.shape)
 
     if visualize:
         return normalized_blocks, hog_image
