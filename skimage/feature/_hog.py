@@ -47,7 +47,7 @@ def _hog_channel_gradient(channel):
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         block_norm=None, visualize=False, visualise=None, transform_sqrt=False,
-        feature_vector=True, multichannel=False):
+        feature_vector=True, multichannel=None):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Compute a Histogram of Oriented Gradients (HOG) by
@@ -150,6 +150,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
              skimage_deprecation)
 
     image = np.atleast_2d(image)
+
+    if multichannel is None:
+        multichannel = (image.ndim == 3)
 
     ndim_spatial = image.ndim - 1 if multichannel else image.ndim
     if ndim_spatial != 2:
