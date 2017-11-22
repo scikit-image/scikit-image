@@ -108,7 +108,7 @@ class RAG(nx.Graph):
 
     """
     The Region Adjacency Graph (RAG) of an image, subclasses
-    `networx.Graph <http://networkx.github.io/documentation/latest/reference/classes.graph.html>`_
+    `networx.Graph <http://networkx.github.io/documentation/latest/reference/classes/graph.html>`_
 
     Parameters
     ----------
