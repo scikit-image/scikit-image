@@ -35,6 +35,10 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
         If True (default value), a fast version of the non-local means
         algorithm is used. If False, the original version of non-local means is
         used. See the Notes section for more details about the algorithms.
+    sigma : float, optional
+        The standard deviation of the (Gaussian) noise.  If provided, a more
+        robust computation of patch weights is computed that takes the expected
+        noise variance into account (see Notes below).
 
     Returns
     -------
@@ -84,18 +88,38 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     The image is padded using the `reflect` mode of `skimage.util.pad`
     before denoising.
 
+    If the noise standard deviation, `sigma`, is provided a more robust
+    computation of patch weights is used.  Subtracting the known noise variance
+    from the computed patch distances improves the estimates of patch
+    similarity, giving a moderate improvement to denoising performance [4]_.
+    It was also mentioned as an option for the fast variant of the algorithm in
+    [3]_.
+
+    When `sigma` is provided, a smaller `h` should typically be used to
+    avoid oversmoothing.  The optimal value for `h` depends on the image
+    content and noise level, but a reasonable starting point is
+    ``h = 0.8 * sigma`` when `fast_mode` is `True`, or ``h = 0.6 * sigma`` when
+    `fast_mode` is `False`.
+
     References
     ----------
-    .. [1] Buades, A., Coll, B., & Morel, J. M. (2005, June). A non-local
-           algorithm for image denoising. In CVPR 2005, Vol. 2, pp. 60-65, IEEE.
+    .. [1] A. Buades, B. Coll, & J-M. Morel. A non-local algorithm for image
+           denoising. In CVPR 2005, Vol. 2, pp. 60-65, IEEE.
+           DOI: 10.1109/CVPR.2005.38
 
     .. [2] J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
            nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
            International Symposium on Biomedical Imaging: From Nano to Macro,
            2008, pp. 1331-1334.
+           DOI: 10.1109/ISBI.2008.4541250
 
     .. [3] Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
-           Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
+           Denoising. Image Processing On Line, 2014, vol. 4, pp. 300-326.
+           DOI: 10.5201/ipol.2014.120
+
+    .. [4] A. Buades, B. Coll, & J-M. Morel. Non-Local Means Denoising.
+           Image Processing On Line, 2011, vol. 1, pp. 208-212.
+           DOI: 10.5201/ipol.2011.bcm_nlm
 
     Examples
     --------
