@@ -1,13 +1,15 @@
 import numpy as np
-from numpy.testing import (run_module_suite, assert_equal,
-                           assert_almost_equal, assert_warns, assert_)
-import pytest
+
 from skimage import restoration, data, color, img_as_float, measure
-from skimage._shared._warnings import expected_warnings
 from skimage.measure import compare_psnr
 from skimage.restoration._denoise import _wavelet_threshold
-
 import pywt
+
+from skimage._shared import testing
+from skimage._shared.testing import (assert_equal, assert_almost_equal,
+                                     assert_warns, assert_)
+from skimage._shared._warnings import expected_warnings
+
 
 np.random.seed(1234)
 
@@ -200,7 +202,7 @@ def test_denoise_bilateral_color():
 
 def test_denoise_bilateral_3d_grayscale():
     img = np.ones((50, 50, 3))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         restoration.denoise_bilateral(img, multichannel=False)
 
 
@@ -214,11 +216,10 @@ def test_denoise_bilateral_3d_multichannel():
 
 def test_denoise_bilateral_multidimensional():
     img = np.ones((10, 10, 10, 10))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         restoration.denoise_bilateral(img, multichannel=False)
-    with pytest.raises(ValueError):
-        restoration.denoise_bilateral(
-            img, multichannel=True)
+    with testing.raises(ValueError):
+        restoration.denoise_bilateral(img, multichannel=True)
 
 
 def test_denoise_bilateral_nan():
@@ -288,7 +289,7 @@ def test_denoise_nl_means_multichannel():
 
 def test_denoise_nl_means_wrong_dimension():
     img = np.zeros((5, 5, 5, 5))
-    with pytest.raises(NotImplementedError):
+    with testing.raises(NotImplementedError):
         restoration.denoise_nl_means(img, multichannel=True)
 
 
@@ -369,7 +370,7 @@ def test_wavelet_threshold():
     assert_(psnr_denoised > psnr_noisy)
 
     # either method or threshold must be defined
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         _wavelet_threshold(noisy, wavelet='db1', method=None, threshold=None)
 
     # warns if a threshold is provided in a case where it would be ignored
@@ -401,7 +402,7 @@ def test_wavelet_denoising_nd():
 
 
 def test_wavelet_invalid_method():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         restoration.denoise_wavelet(np.ones(16), method='Unimplemented')
 
 
@@ -431,11 +432,11 @@ def test_wavelet_denoising_levels():
     # invalid number of wavelet levels results in a ValueError
     max_level = pywt.dwt_max_level(np.min(img.shape),
                                    pywt.Wavelet(wavelet).dec_len)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         restoration.denoise_wavelet(
             noisy,
             wavelet=wavelet, wavelet_levels=max_level+1)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         restoration.denoise_wavelet(
             noisy,
             wavelet=wavelet, wavelet_levels=-1)
@@ -517,5 +518,93 @@ def test_multichannel_warnings():
     assert_warns(UserWarning, restoration.denoise_nl_means, img)
 
 
+def test_cycle_spinning_multichannel():
+    sigma = 0.1
+    rstate = np.random.RandomState(1234)
+
+    for multichannel in True, False:
+        if multichannel:
+            img = astro
+            # can either omit or be 0 along the channels axis
+            valid_shifts = [1, (0, 1), (1, 0), (1, 1), (1, 1, 0)]
+            # can either omit or be 1 on channels axis.
+            valid_steps = [1, 2, (1, 2), (1, 2, 1)]
+            # too few or too many shifts or non-zero shift on channels
+            invalid_shifts = [(1, 1, 2), (1, ), (1, 1, 0, 1)]
+            # too few or too many shifts or any shifts <= 0
+            invalid_steps = [(1, ), (1, 1, 1, 1), (0, 1), (-1, -1)]
+        else:
+            img = astro_gray
+            valid_shifts = [1, (0, 1), (1, 0), (1, 1)]
+            valid_steps = [1, 2, (1, 2)]
+            invalid_shifts = [(1, 1, 2), (1, )]
+            invalid_steps = [(1, ), (1, 1, 1), (0, 1), (-1, -1)]
+
+        noisy = img.copy() + 0.1 * rstate.randn(*(img.shape))
+
+        denoise_func = restoration.denoise_wavelet
+        func_kw = dict(sigma=sigma, multichannel=multichannel)
+
+        # max_shifts=0 is equivalent to just calling denoise_func
+        dn_cc = restoration.cycle_spin(noisy, denoise_func, max_shifts=0,
+                                       func_kw=func_kw,
+                                       multichannel=multichannel)
+        dn = denoise_func(noisy, **func_kw)
+        assert_equal(dn, dn_cc)
+
+        # denoising with cycle spinning will give better PSNR than without
+        for max_shifts in valid_shifts:
+            dn_cc = restoration.cycle_spin(noisy, denoise_func,
+                                           max_shifts=max_shifts,
+                                           func_kw=func_kw,
+                                           multichannel=multichannel)
+            assert_(compare_psnr(img, dn_cc) > compare_psnr(img, dn))
+
+        for shift_steps in valid_steps:
+            dn_cc = restoration.cycle_spin(noisy, denoise_func,
+                                           max_shifts=2,
+                                           shift_steps=shift_steps,
+                                           func_kw=func_kw,
+                                           multichannel=multichannel)
+            assert_(compare_psnr(img, dn_cc) > compare_psnr(img, dn))
+
+        for max_shifts in invalid_shifts:
+            with testing.raises(ValueError):
+                dn_cc = restoration.cycle_spin(noisy, denoise_func,
+                                               max_shifts=max_shifts,
+                                               func_kw=func_kw,
+                                               multichannel=multichannel)
+        for shift_steps in invalid_steps:
+            with testing.raises(ValueError):
+                dn_cc = restoration.cycle_spin(noisy, denoise_func,
+                                               max_shifts=2,
+                                               shift_steps=shift_steps,
+                                               func_kw=func_kw,
+                                               multichannel=multichannel)
+
+
+def test_cycle_spinning_num_workers():
+    img = astro_gray
+    sigma = 0.1
+    rstate = np.random.RandomState(1234)
+    noisy = img.copy() + 0.1 * rstate.randn(*(img.shape))
+
+    denoise_func = restoration.denoise_wavelet
+    func_kw = dict(sigma=sigma, multichannel=True)
+
+    # same result whether using 1 worker or multiple workers
+    dn_cc1 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
+                                    func_kw=func_kw, multichannel=False,
+                                    num_workers=1)
+    dn_cc2 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
+                                    func_kw=func_kw, multichannel=False,
+                                    num_workers=4)
+    dn_cc3 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
+                                    func_kw=func_kw, multichannel=False,
+                                    num_workers=None)
+    assert_almost_equal(dn_cc1, dn_cc2)
+    assert_almost_equal(dn_cc1, dn_cc3)
+
+
 if __name__ == "__main__":
-    run_module_suite()
+    testing.run_module_suite()

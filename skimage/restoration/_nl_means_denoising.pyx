@@ -21,7 +21,7 @@ cdef inline float patch_distance_2d(IMGDTYPE [:, :] p1,
     p2 : 2-D array_like
         Second patch.
     w : 2-D array_like
-        Array of weigths for the different pixels of the patches.
+        Array of weights for the different pixels of the patches.
     s : int
         Linear size of the patches.
 

@@ -1,8 +1,9 @@
 import numpy as np
-from numpy.testing import assert_array_equal
-import pytest
 from skimage.morphology import convex_hull_image, convex_hull_object
 from skimage.morphology._convex_hull import possible_hull
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_array_equal
 
 
 def test_basic():
@@ -126,11 +127,11 @@ def test_object():
 
     assert_array_equal(convex_hull_object(image, 8), expected8)
 
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         convex_hull_object(image, 7)
 
 
-@pytest.fixture
+@testing.fixture
 def images2d3d():
     from ...measure.tests.test_regionprops import SAMPLE as image
     image3d = np.stack((image, image, image))
@@ -143,7 +144,3 @@ def test_consistent_2d_3d_hulls(images2d3d):
     chimage[8, 0] = True  # correct for single point exactly on hull edge
     chimage3d = convex_hull_image(image3d)
     assert_array_equal(chimage3d[1], chimage)
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

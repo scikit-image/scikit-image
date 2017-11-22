@@ -22,6 +22,8 @@ New Features
 - nD support for image moments (#2603)
 - inertia tensor and its eigenvalues can now be computed outside of
   regionprops; available in ``skimage.measure.inertia_tensor`` (#2603)
+- cycle-spinning function for approximating shift-invariance by averaging
+  results from a series of spatial shifts (#2647)
 - Haar-like feature (#2848)
 
 Improvements

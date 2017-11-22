@@ -1,11 +1,12 @@
 import numpy as np
-from numpy.testing import (run_module_suite, assert_equal,
-                           assert_almost_equal)
-import pytest
 
-from skimage.measure import compare_psnr, compare_nrmse, compare_mse
 import skimage.data
+from skimage.measure import compare_psnr, compare_nrmse, compare_mse
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_almost_equal
 from skimage._shared._warnings import expected_warnings
+
 
 np.random.seed(5)
 cam = skimage.data.camera()
@@ -40,9 +41,9 @@ def test_PSNR_dynamic_range_and_data_range():
 
 
 def test_PSNR_errors():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         compare_psnr(cam, cam.astype(np.float32))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         compare_psnr(cam, cam[:-1, :])
 
 
@@ -65,14 +66,10 @@ def test_NRMSE_no_int_overflow():
 
 def test_NRMSE_errors():
     x = np.ones(4)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         compare_nrmse(x.astype(np.uint8), x.astype(np.float32))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         compare_nrmse(x[:-1], x)
     # invalid normalization name
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         compare_nrmse(x, x, 'foo')
-
-
-if __name__ == "__main__":
-    run_module_suite()

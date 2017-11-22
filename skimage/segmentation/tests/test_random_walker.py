@@ -1,8 +1,8 @@
 import numpy as np
-import pytest
 from skimage.segmentation import random_walker
 from skimage.transform import resize
 from skimage._shared._warnings import expected_warnings
+from skimage._shared import testing
 
 # older versions of scipy raise a warning with new NumPy because they use
 # numpy.rank() instead of arr.ndim or numpy.linalg.matrix_rank.
@@ -313,18 +313,18 @@ def test_bad_inputs():
     # Too few dimensions
     img = np.ones(10)
     labels = np.arange(10)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         random_walker(img, labels)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         random_walker(img, labels, multichannel=True)
 
     # Too many dimensions
     np.random.seed(42)
     img = np.random.normal(size=(3, 3, 3, 3, 3))
     labels = np.arange(3 ** 5).reshape(img.shape)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         random_walker(img, labels)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         random_walker(img, labels, multichannel=True)
 
     # Spacing incorrect length
@@ -332,15 +332,11 @@ def test_bad_inputs():
     labels = np.zeros((10, 10))
     labels[2, 4] = 2
     labels[6, 8] = 5
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         random_walker(img, labels, spacing=(1,))
 
     # Invalid mode
     img = np.random.normal(size=(10, 10))
     labels = np.zeros((10, 10))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         random_walker(img, labels, mode='bad')
-
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()
