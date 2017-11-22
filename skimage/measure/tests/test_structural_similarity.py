@@ -5,6 +5,7 @@ from skimage import data, data_dir
 from skimage.measure import compare_ssim as ssim
 
 from skimage._shared import testing
+from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import (assert_equal, assert_almost_equal,
                                      assert_array_almost_equal)
 
@@ -194,7 +195,12 @@ def test_mssim_vs_legacy():
 
 def test_mssim_mixed_dtype():
     mssim = ssim(cam, cam_noisy)
-    mssim_mixed = ssim(cam, cam_noisy.astype(np.float32))
+    with expected_warnings(['Inputs have mismatched dtype']):
+        mssim_mixed = ssim(cam, cam_noisy.astype(np.float32))
+    assert_almost_equal(mssim, mssim_mixed)
+
+    # no warning when user supplies data_range
+    mssim_mixed = ssim(cam, cam_noisy.astype(np.float32), data_range=255)
     assert_almost_equal(mssim, mssim_mixed)
 
 

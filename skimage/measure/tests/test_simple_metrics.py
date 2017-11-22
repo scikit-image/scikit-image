@@ -32,6 +32,11 @@ def test_PSNR_float():
     p_mixed = compare_psnr(cam/255., np.float32(cam_noisy/255.), data_range=1)
     assert_almost_equal(p_mixed, p_float64, decimal=5)
 
+    # mismatched dtype results in a warning if data_range is unspecified
+    with expected_warnings(['Inputs have mismatched dtype']):
+        p_mixed = compare_psnr(cam/255., np.float32(cam_noisy/255.))
+    assert_almost_equal(p_mixed, p_float64, decimal=5)
+
 
 def test_PSNR_dynamic_range_and_data_range():
     # Tests deprecation of "dynamic_range" in favor of "data_range"
