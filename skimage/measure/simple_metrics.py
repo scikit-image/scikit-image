@@ -12,8 +12,6 @@ __all__ = ['compare_mse',
 
 def _assert_compatible(im1, im2):
     """Raise an error if the shape and dtype do not match."""
-    if not im1.dtype == im2.dtype:
-        raise ValueError('Input images must have the same dtype.')
     if not im1.shape == im2.shape:
         raise ValueError('Input images must have the same dimensions.')
     return
@@ -22,10 +20,8 @@ def _assert_compatible(im1, im2):
 def _as_floats(im1, im2):
     """Promote im1, im2 to nearest appropriate floating point precision."""
     float_type = np.result_type(im1.dtype, im2.dtype, np.float32)
-    if im1.dtype != float_type:
-        im1 = im1.astype(float_type)
-    if im2.dtype != float_type:
-        im2 = im2.astype(float_type)
+    im1 = np.asarray(im1, dtype=float_type)
+    im2 = np.asarray(im2, dtype=float_type)
     return im1, im2
 
 
