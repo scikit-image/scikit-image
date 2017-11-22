@@ -222,8 +222,8 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     """
 
     s_row, s_col = image.shape[:2]
-    c_col, c_row = pixels_per_cell
-    b_col, b_row = cells_per_block
+    c_row, c_col = pixels_per_cell
+    b_row, b_col = cells_per_block
 
     n_cells_row = int(s_row // c_row)  # number of cells along row-axis
     n_cells_col = int(s_col // c_col)  # number of cells along col-axis
