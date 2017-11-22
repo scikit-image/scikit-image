@@ -81,9 +81,6 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
        DOI:10.1007/s10043-009-0119-z
 
     """
-    if not X.dtype == Y.dtype:
-        raise ValueError('Input images must have the same dtype.')
-
     if not X.shape == Y.shape:
         raise ValueError('Input images must have the same dimensions.')
 
