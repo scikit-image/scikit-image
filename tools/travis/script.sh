@@ -64,9 +64,6 @@ if [[ $WITH_PYAMG == 1 ]]; then
     pip install --retries 3 -q pyamg
 fi
 
-# Install scikit-learn which is needed for the haar example
-pip install scikit-learn
-
 # Show what's installed
 pip list
 
