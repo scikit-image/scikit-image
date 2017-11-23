@@ -5,9 +5,9 @@ Haar-like feature descriptor
 
 Haar-like feature descriptors are a set of simple features which was used in
 the first real-time face detector [1]_. Indeed, these features can be
-efficiently computed using a so-called integral image and by subtracting
-rectangle area. The following example will show the mechanism to build this
-family of descriptors.
+efficiently computed using an integral image [1]_ and by subtracting rectangle
+area. The following example will show the mechanism to build this family of
+descriptors.
 
 References
 ----------
