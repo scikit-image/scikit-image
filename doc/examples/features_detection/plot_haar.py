@@ -82,6 +82,8 @@ def extract_feature_image(img, feature_type, feature_coord=None):
     return haar_like_feature(ii, 0, 0, ii.shape[0], ii.shape[1],
                              feature_type=feature_type,
                              feature_coord=feature_coord)
+
+
 # trick such that we can pickle this function when building the doc with
 # sphinx-gallery
 sys.modules['__main__'].extract_feature_image = extract_feature_image
