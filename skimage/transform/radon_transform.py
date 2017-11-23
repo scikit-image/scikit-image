@@ -225,7 +225,7 @@ def iradon(radon_image, theta=None, output_size=None,
         # Start from first element to avoid divide by zero
         fourier_filter[1:] *= np.sin(omega[1:] / 2) / (omega[1:] / 2)
     elif filter == "cosine":
-        freq = (0.5 * np.arange(0, projection_size_padded) 
+        freq = (0.5 * np.arange(0, projection_size_padded)
                 / projection_size_padded)
         cosine_filter = np.fft.fftshift(np.sin(2 * np.pi * np.abs(freq)))
         fourier_filter[:, 0] *= cosine_filter
