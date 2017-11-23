@@ -203,7 +203,8 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         idcs_max = g_magn.argmax(axis=2)
         rr, cc = np.meshgrid(np.arange(image.shape[0]),
                              np.arange(image.shape[1]),
-                             indexing='ij')
+                             indexing='ij',
+                             sparse=True)
         g_row = g_row_by_ch[rr, cc, idcs_max]
         g_col = g_col_by_ch[rr, cc, idcs_max]
     else:
