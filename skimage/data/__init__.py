@@ -21,6 +21,7 @@ from .. import img_as_bool
 __all__ = ['load',
            'astronaut',
            'camera',
+           'cbcl_dataset',
            'checkerboard',
            'chelsea',
            'clock',
@@ -384,3 +385,46 @@ def stereo_motorcycle():
     return (load("motorcycle_left.png"),
             load("motorcycle_right.png"),
             _np.load(_os.path.join(data_dir, "motorcycle_disp.npz"))["arr_0"])
+
+
+def cbcl_database():
+    """Subset of the CBCL database.
+
+    This database is a subset of the CBCL database containing:
+
+    * 100 faces
+    * 100 non-faces
+
+    Returns
+    -------
+    images : (200, 19, 19) uint8 ndarray
+        100 first images are faces and subsequent 100 are non-faces.
+
+    Notes
+    -----
+    Copyright 2000
+    Center for Biological and Computational Learning at MIT and MIT
+    All rights reserved.
+
+    Permission to copy and modify this data, software, and its documentation
+    only for internal research use in your organization is hereby granted,
+    provided that this notice is retained thereon and on all copies. This data
+    and software should not be distributed to anyone outside of your
+    organization without explicit written authorization by the author(s) and
+    MIT. It should not be used for commercial purposes without specific
+    permission from the authors and MIT. MIT also requires written
+    authorization by the author(s) to publish results obtained with the data or
+    software and possibly citation of relevant CBCL reference papers.
+
+    We make no representation as to the suitability and operability of this
+    data or software for any purpose. It is provided "as is" without express or
+    implied warranty.
+
+    References
+    ----------
+    .. [1] Lee, Daniel D., and H. Sebastian Seung. "Learning the parts of
+           objects by non-negative matrix factorization." Nature 401.6755
+           (1999): 788-791.
+
+    """
+    return _np.load(_os.path.join(data_dir, 'cbcl_database.npy'))
