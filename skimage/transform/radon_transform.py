@@ -218,7 +218,7 @@ def iradon(radon_image, theta=None, output_size=None,
     # Construct the Fourier filter
     f = fftfreq(projection_size_padded).reshape(-1, 1)   # digital frequency
     omega = 2 * np.pi * f                                # angular frequency
-    fourier_filter = 2 * np.abs(f)                       # ramp filter
+    fourier_filter =  2 * np.abs(f)                       # ramp filter
     if filter == "ramp":
         pass
     elif filter == "shepp-logan":
