@@ -28,7 +28,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 from sklearn.externals.joblib import Parallel, delayed
 
-from skimage.data import cbcl_database
+from skimage.data import cbcl_face_database
 from skimage.transform import integral_image
 from skimage.feature import haar_like_feature
 from skimage.feature import haar_like_feature_coord
@@ -95,7 +95,7 @@ sys.modules['__main__'].extract_feature_image = extract_feature_image
 # will keep 75 images from each group to train a classifier and check which
 # extracted features are the most salient.
 
-images = cbcl_database()
+images = cbcl_face_database()
 # For a gain of speed, only the two first types of features will be extracted.
 feature_types = ['type-2-x', 'type-2-y']
 
