@@ -21,7 +21,7 @@ from .. import img_as_bool
 __all__ = ['load',
            'astronaut',
            'camera',
-           'cbcl_face_dataset',
+           'cbcl_face_database',
            'checkerboard',
            'chelsea',
            'clock',
