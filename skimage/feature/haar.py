@@ -91,9 +91,8 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
     """Compute the Haar-like features for a region of interest (ROI) of an
     integral image.
 
-    Haar-like features have been successively used in different computer vision
-    applications to detect different targets, objects, etc. It was first
-    introduced in [1]_ and has been widely used for real-time face detection
+    Haar-like features have been successively used for image classification and
+    object detection [1]_. It has been widely used for real-time face detection
     algorithm proposed in [2]_.
 
     Parameters
@@ -119,7 +118,7 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
 
         By default all features are extracted.
 
-        If using with `feature_coord`, it should corresponds to the feature
+        If using with `feature_coord`, it should correspond to the feature
         type of each associated coordinate feature.
     feature_coord : ndarray of list of tuples or None, optional
         The array of coordinates to be extracted. This is useful when you want
@@ -216,7 +215,7 @@ def draw_haar_like_feature(image, r, c, width, height,
                            color_positive_block=(1., 0., 0.),
                            color_negative_block=(0., 1., 0.),
                            alpha=0.5, max_n_features=None, random_state=None):
-    """Helper to visualize Haar-like features.
+    """Helper function for visualization Haar-like features.
 
     Parameters
     ----------

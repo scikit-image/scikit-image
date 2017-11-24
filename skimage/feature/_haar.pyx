@@ -207,9 +207,8 @@ cpdef haar_like_feature_wrapper(
     """Compute the Haar-like features for a region of interest (ROI) of an
     integral image.
 
-    Haar-like features have been successively used in different computer vision
-    applications to detect different targets, objects, etc. It was first
-    introduced in [1]_ and has been widely used for real-time face detection
+    Haar-like features have been successively used for image classification and
+    object detection [1]_. It has been widely used for real-time face detection
     algorithm proposed in [2]_.
 
     Parameters
