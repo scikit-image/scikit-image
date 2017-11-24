@@ -33,6 +33,7 @@ Improvements
 - ``skimage.transform.resize`` and ``skimage.transform.rescale`` have a new
   ``anti_aliasing`` option to avoid aliasing artifacts when down-sampling
   images (#2802)
+- Support for multichannel images for ``skimage.feature.hog`` (#2870)
 
 
 API Changes
