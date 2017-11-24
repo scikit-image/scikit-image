@@ -1,3 +1,7 @@
+import cython
+cimport numpy as cnp
+
+
 ctypedef fused integral_floating:
     cnp.uint8_t
     cnp.uint16_t
