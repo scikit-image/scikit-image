@@ -218,22 +218,23 @@ def iradon(radon_image, theta=None, output_size=None,
     # Construct the Fourier filter
     f = fftfreq(projection_size_padded).reshape(-1, 1)   # digital frequency
     omega = 2 * np.pi * f                                # angular frequency
-    fourier_filter =  2 * np.abs(f)                       # ramp filter
+    fourier_filter = 2 * np.abs(f)                       # ramp filter
     if filter == "ramp":
         pass
     elif filter == "shepp-logan":
         # Start from first element to avoid divide by zero
-        fourier_filter[1:] = fourier_filter[1:] * np.sin(omega[1:] / 2) / (omega[1:] / 2)
+        fourier_filter[1:] *= np.sin(omega[1:] / 2) / (omega[1:] / 2)
     elif filter == "cosine":
-        freq = 0.5 * np.arange(0,projection_size_padded) / projection_size_padded 
+        freq = (0.5 * np.arange(0, projection_size_padded)
+                / projection_size_padded)
         cosine_filter = np.fft.fftshift(np.sin(2 * np.pi * np.abs(freq)))
-        fourier_filter[:,0] *= cosine_filter
+        fourier_filter[:, 0] *= cosine_filter
     elif filter == "hamming":
         hamming_filter = np.fft.fftshift(np.hamming(projection_size_padded))
-        fourier_filter[:,0] *= hamming_filter
+        fourier_filter[:, 0] *= hamming_filter
     elif filter == "hann":
         hanning_filter = np.fft.fftshift(np.hanning(projection_size_padded))
-        fourier_filter[:,0] *= hanning_filter
+        fourier_filter[:, 0] *= hanning_filter
     elif filter is None:
         fourier_filter[:] = 1
     else:
