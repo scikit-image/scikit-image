@@ -4,8 +4,6 @@
 #cython: wraparound=False
 #distutils: language=c++
 
-from libc.stdlib cimport malloc, free, realloc
-
 import numpy as np
 
 from ..transform import integral_image
