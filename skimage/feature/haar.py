@@ -92,7 +92,7 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
     integral image.
 
     Haar-like features have been successively used for image classification and
-    object detection [1]_. It has been widely used for real-time face detection
+    object detection [1]_. It has been used for real-time face detection
     algorithm proposed in [2]_.
 
     Parameters
@@ -130,10 +130,10 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
     Returns
     -------
     haar_features : (n_features,) ndarray of int or float
-        Resulting Haar-like features. Each value corresponds to the subtraction
-        of the positive and negative rectangles. The data type depends of the
-        data type of `int_image`: `int` when the data type of `int_image` is
-        `uint` or `int` and `float` when the data type of `int_image` is
+        Resulting Haar-like features. Each value is equal to the subtraction of
+        sums of the positive and negative rectangles. The data type depends of
+        the data type of `int_image`: `int` when the data type of `int_image`
+        is `uint` or `int` and `float` when the data type of `int_image` is
         `float`.
 
     Examples
@@ -253,7 +253,7 @@ def draw_haar_like_feature(image, r, c, width, height,
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance used
         by `np.random`. The random state is used when generating a set of
-        feature smaller than the total number of available features.
+        features smaller than the total number of available features.
 
     Returns
     -------

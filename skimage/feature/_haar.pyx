@@ -206,7 +206,7 @@ cpdef haar_like_feature_wrapper(
     integral image.
 
     Haar-like features have been successively used for image classification and
-    object detection [1]_. It has been widely used for real-time face detection
+    object detection [1]_. It has been used for real-time face detection
     algorithm proposed in [2]_.
 
     Parameters
@@ -233,10 +233,10 @@ cpdef haar_like_feature_wrapper(
     Returns
     -------
     haar_features : (n_features,) ndarray
-        Resulting Haar-like features. Each value corresponds to the subtraction
-        of the positive and negative rectangles. The data type depends of the
-        data type of `int_image`: `int` when the data type of `int_image` is
-        `uint` or `int` and `float` when the data type of `int_image` is
+        Resulting Haar-like features. Each value is equal to the subtraction of
+        sums of the positive and negative rectangles. The data type depends of
+        the data type of `int_image`: `int` when the data type of `int_image`
+        is `uint` or `int` and `float` when the data type of `int_image` is
         `float`.
 
     References

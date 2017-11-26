@@ -3,11 +3,10 @@
 Haar-like feature descriptor
 ============================
 
-Haar-like feature descriptors are a set of simple features which was used in
-the first real-time face detector [1]_. These features can be efficiently
-computed on any scale in constant time, using an integral image [1]_ and by
-subtracting rectangle area. The following example will show the mechanism to
-build this family of descriptors.
+Haar-like features are simple digital image features that were used first in a
+real-time face detector [1]_. These features can be efficiently computed on any
+scale in constant time, using an integral image [1]_. The following example
+will show the mechanism to build this family of descriptors.
 
 References
 ----------
@@ -30,11 +29,11 @@ from skimage.feature import draw_haar_like_feature
 print(__doc__)
 
 ###############################################################################
-# The different Haar-like feature descriptors
+# Different types of Haar-like feature descriptors
 ###############################################################################
 # The Haar-like feature descriptors come into 5 different types as illustrated
-# in the figure below. The value of the descriptor consists in the subtraction
-# between the green and red rectangles.
+# in the figure below. The value of the descriptor is equal to the difference
+# between the sum of intensity values in the green and the red one.
 
 images = [np.zeros((2, 2)), np.zeros((2, 2)),
           np.zeros((3, 3)), np.zeros((3, 3)),
@@ -63,8 +62,8 @@ plt.axis('off')
 plt.show()
 
 ###############################################################################
-# The feature scalar value corresponds to the sum of the pixel intensities of
-# the red area is subtracted to the sum of the pixel intensities of the green
-# area. In practice, the haar-like features will be placed in all possible
-# location of an image and a feature value will be extracted for each of these
-# locations.
+# The value of the descriptor is equal to the difference between the sum of the
+# intensity values in the green rectangle and the red one.  the red area is
+# subtracted to the sum of the pixel intensities of the green In practice, the
+# Haar-like features will be placed in all possible location of an image and a
+# feature value will be computed for each of these locations.
