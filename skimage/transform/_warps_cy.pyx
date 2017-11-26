@@ -10,8 +10,27 @@ from .._shared.interpolation cimport (nearest_neighbour_interpolation,
                                       bicubic_interpolation)
 
 
-cdef inline void _matrix_transform(double x, double y, double* H, double *x_,
-                                   double *y_) nogil:
+cdef inline void _transform_affine(double x, double y, double* H,
+                                   double *x_, double *y_) nogil:
+    """Apply an affine transformation to a coordinate.
+
+    Parameters
+    ----------
+    x, y : double
+        Input coordinate.
+    H : (3,3) *double
+        Transformation matrix.
+    x_, y_ : *double
+        Output coordinate.
+
+    """
+    cdef double xx, yy
+    xx = H[0] * x + H[1] * y + H[2]
+    yy = H[3] * x + H[4] * y + H[5]
+
+
+cdef inline void _transform_projective(double x, double y, double* H,
+                                       double *x_, double *y_) nogil:
     """Apply a homography to a coordinate.
 
     Parameters
@@ -25,11 +44,9 @@ cdef inline void _matrix_transform(double x, double y, double* H, double *x_,
 
     """
     cdef double xx, yy, zz
-
     xx = H[0] * x + H[1] * y + H[2]
     yy = H[3] * x + H[4] * y + H[5]
-    zz =  H[6] * x + H[7] * y + H[8]
-
+    zz = H[6] * x + H[7] * y + H[8]
     x_[0] = xx / zz
     y_[0] = yy / zz
 
@@ -110,6 +127,14 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
     cdef Py_ssize_t rows = img.shape[0]
     cdef Py_ssize_t cols = img.shape[1]
 
+    cdef void (*transform_func)(double, double, double*, double*, double*) nogil
+    if (abs(M[2, 0]) < 1e-10 and
+            abs(M[2, 1]) < 1e-10 and
+            abs(M[2, 2] - 1) < 1e-10):
+        transform_func = _transform_affine
+    else:
+        transform_func = _transform_projective
+
     cdef double (*interp_func)(double*, Py_ssize_t, Py_ssize_t, double, double,
                                char, double) nogil
     if order == 0:
@@ -124,7 +149,7 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
     with nogil:
         for tfr in range(out_r):
             for tfc in range(out_c):
-                _matrix_transform(tfc, tfr, &M[0, 0], &c, &r)
+                transform_func(tfc, tfr, &M[0, 0], &c, &r)
                 out[tfr, tfc] = interp_func(&img[0, 0], rows, cols, r, c,
                                             mode_c, cval)
 
