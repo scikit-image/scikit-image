@@ -103,4 +103,4 @@ def test_cbcl_face_database():
 
 def test_lfw_subset():
     """ Test that "lfw_subset" can be loaded."""
-    data.lfw_subset
+    data.lfw_subset()
