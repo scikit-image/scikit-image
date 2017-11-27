@@ -28,6 +28,9 @@ class BaseModel(object):
 class LineModelND(BaseModel):
     """Total least squares estimator for N-dimensional lines.
 
+    In contrast to ordinary least squares line estimation, this estimator
+    minimizes the orthogonal distances of points to the estimated line.
+
     Lines are defined by a point (origin) and a unit vector (direction)
     according to the following vector equation::
 
@@ -60,6 +63,9 @@ class LineModelND(BaseModel):
 
     def estimate(self, data):
         """Estimate line model from data.
+
+        This minimizes the sum of shortest (orthogonal) distances
+        from the given data points to the estimated line.
 
         Parameters
         ----------
@@ -95,8 +101,8 @@ class LineModelND(BaseModel):
     def residuals(self, data, params=None):
         """Determine residuals of data to model.
 
-        For each point, the shortest distance to the line is returned.
-        It is obtained by projecting the data onto the line.
+        For each point, the shortest (orthogonal) distance to the line is
+        returned. It is obtained by projecting the data onto the line.
 
         Parameters
         ----------
