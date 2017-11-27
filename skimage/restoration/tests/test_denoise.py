@@ -516,3 +516,95 @@ def test_multichannel_warnings():
     img = data.astronaut()
     assert_warns(UserWarning, restoration.denoise_bilateral, img)
     assert_warns(UserWarning, restoration.denoise_nl_means, img)
+
+
+def test_cycle_spinning_multichannel():
+    sigma = 0.1
+    rstate = np.random.RandomState(1234)
+
+    for multichannel in True, False:
+        if multichannel:
+            img = astro
+            # can either omit or be 0 along the channels axis
+            valid_shifts = [1, (0, 1), (1, 0), (1, 1), (1, 1, 0)]
+            # can either omit or be 1 on channels axis.
+            valid_steps = [1, 2, (1, 2), (1, 2, 1)]
+            # too few or too many shifts or non-zero shift on channels
+            invalid_shifts = [(1, 1, 2), (1, ), (1, 1, 0, 1)]
+            # too few or too many shifts or any shifts <= 0
+            invalid_steps = [(1, ), (1, 1, 1, 1), (0, 1), (-1, -1)]
+        else:
+            img = astro_gray
+            valid_shifts = [1, (0, 1), (1, 0), (1, 1)]
+            valid_steps = [1, 2, (1, 2)]
+            invalid_shifts = [(1, 1, 2), (1, )]
+            invalid_steps = [(1, ), (1, 1, 1), (0, 1), (-1, -1)]
+
+        noisy = img.copy() + 0.1 * rstate.randn(*(img.shape))
+
+        denoise_func = restoration.denoise_wavelet
+        func_kw = dict(sigma=sigma, multichannel=multichannel)
+
+        # max_shifts=0 is equivalent to just calling denoise_func
+        dn_cc = restoration.cycle_spin(noisy, denoise_func, max_shifts=0,
+                                       func_kw=func_kw,
+                                       multichannel=multichannel)
+        dn = denoise_func(noisy, **func_kw)
+        assert_equal(dn, dn_cc)
+
+        # denoising with cycle spinning will give better PSNR than without
+        for max_shifts in valid_shifts:
+            dn_cc = restoration.cycle_spin(noisy, denoise_func,
+                                           max_shifts=max_shifts,
+                                           func_kw=func_kw,
+                                           multichannel=multichannel)
+            assert_(compare_psnr(img, dn_cc) > compare_psnr(img, dn))
+
+        for shift_steps in valid_steps:
+            dn_cc = restoration.cycle_spin(noisy, denoise_func,
+                                           max_shifts=2,
+                                           shift_steps=shift_steps,
+                                           func_kw=func_kw,
+                                           multichannel=multichannel)
+            assert_(compare_psnr(img, dn_cc) > compare_psnr(img, dn))
+
+        for max_shifts in invalid_shifts:
+            with testing.raises(ValueError):
+                dn_cc = restoration.cycle_spin(noisy, denoise_func,
+                                               max_shifts=max_shifts,
+                                               func_kw=func_kw,
+                                               multichannel=multichannel)
+        for shift_steps in invalid_steps:
+            with testing.raises(ValueError):
+                dn_cc = restoration.cycle_spin(noisy, denoise_func,
+                                               max_shifts=2,
+                                               shift_steps=shift_steps,
+                                               func_kw=func_kw,
+                                               multichannel=multichannel)
+
+
+def test_cycle_spinning_num_workers():
+    img = astro_gray
+    sigma = 0.1
+    rstate = np.random.RandomState(1234)
+    noisy = img.copy() + 0.1 * rstate.randn(*(img.shape))
+
+    denoise_func = restoration.denoise_wavelet
+    func_kw = dict(sigma=sigma, multichannel=True)
+
+    # same result whether using 1 worker or multiple workers
+    dn_cc1 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
+                                    func_kw=func_kw, multichannel=False,
+                                    num_workers=1)
+    dn_cc2 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
+                                    func_kw=func_kw, multichannel=False,
+                                    num_workers=4)
+    dn_cc3 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
+                                    func_kw=func_kw, multichannel=False,
+                                    num_workers=None)
+    assert_almost_equal(dn_cc1, dn_cc2)
+    assert_almost_equal(dn_cc1, dn_cc3)
+
+
+if __name__ == "__main__":
+    testing.run_module_suite()

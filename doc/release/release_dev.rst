@@ -22,6 +22,9 @@ New Features
 - nD support for image moments (#2603)
 - inertia tensor and its eigenvalues can now be computed outside of
   regionprops; available in ``skimage.measure.inertia_tensor`` (#2603)
+- cycle-spinning function for approximating shift-invariance by averaging
+  results from a series of spatial shifts (#2647)
+- subset of CBCL faces database (#2897)
 
 
 Improvements
@@ -30,6 +33,7 @@ Improvements
 - ``skimage.transform.resize`` and ``skimage.transform.rescale`` have a new
   ``anti_aliasing`` option to avoid aliasing artifacts when down-sampling
   images (#2802)
+- Support for multichannel images for ``skimage.feature.hog`` (#2870)
 
 
 API Changes

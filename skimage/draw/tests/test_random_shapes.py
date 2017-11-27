@@ -1,7 +1,8 @@
-import pytest
 import numpy as np
 
 from skimage.draw import random_shapes
+
+from skimage._shared import testing
 
 
 def test_generates_color_images_with_correct_shape():
@@ -81,13 +82,13 @@ def test_generates_correct_bounding_boxes_for_circles():
 
 
 def test_generate_circle_throws_when_size_too_small():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         random_shapes(
             (64, 128), max_shapes=1, min_size=1, max_size=1, shape='circle')
 
 
 def test_generate_triangle_throws_when_size_too_small():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         random_shapes(
             (128, 64), max_shapes=1, min_size=1, max_size=1, shape='triangle')
 
@@ -110,9 +111,9 @@ def test_can_generate_one_by_one_rectangle():
 
 
 def test_throws_when_min_pixel_intensity_out_of_range():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         random_shapes((1000, 1234), max_shapes=1, min_pixel_intensity=256)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         random_shapes((2, 2), max_shapes=1, min_pixel_intensity=-1)
 
 

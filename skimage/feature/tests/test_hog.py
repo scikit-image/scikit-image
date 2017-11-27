@@ -50,12 +50,6 @@ def test_hog_image_size_cell_size_mismatch():
     assert len(fd) == 9 * (150 // 8) * (200 // 8)
 
 
-def test_hog_color_image_unsupported_error():
-    image = np.zeros((20, 20, 3))
-    with testing.raises(ValueError):
-        feature.hog(image)
-
-
 def test_hog_basic_orientations_and_data_types():
     # scenario:
     #  1) create image (with float values) where upper half is filled by
@@ -234,3 +228,24 @@ def test_hog_block_normalization_incorrect_error():
     img = np.eye(4)
     with testing.raises(ValueError):
         feature.hog(img, block_norm='Linf')
+
+
+@testing.parametrize("shape,multichannel", [
+    ((3, 3, 3), False),
+    ((3, 3), True),
+    ((3, 3, 3, 3), True),
+])
+def test_hog_incorrect_dimensions(shape, multichannel):
+    img = np.zeros(shape)
+    with testing.raises(ValueError):
+        feature.hog(img, multichannel=multichannel)
+
+
+def test_hog_output_equivariance_multichannel():
+    img = data.astronaut()
+    img[:, :, (1, 2)] = 0
+    hog_ref = feature.hog(img, multichannel=True)
+
+    for n in (1, 2):
+        hog_fact = feature.hog(np.roll(img, n, axis=2), multichannel=True)
+        assert_almost_equal(hog_ref, hog_fact)
