@@ -99,3 +99,8 @@ def test_binary_blobs():
 def test_cbcl_face_database():
     """ Test that "cbcl_face_database" can be loaded."""
     data.cbcl_face_database()
+
+
+def test_lfw_subset():
+    """ Test that "lfw_subset" can be loaded."""
+    data.lfw_subset
