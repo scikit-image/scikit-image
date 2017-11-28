@@ -1,3 +1,5 @@
+import numpy as np
+
 from skimage.draw import random_shapes
 
 from skimage._shared import testing
@@ -28,7 +30,7 @@ def test_generates_correct_bounding_boxes_for_rectangles():
     crop = image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]]
 
     # The crop is filled.
-    assert (crop < 255).all()
+    assert (crop >= 1).all() and (crop <= 255).all()
 
     # The crop is complete.
     image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]] = 255
@@ -49,7 +51,7 @@ def test_generates_correct_bounding_boxes_for_triangles():
     crop = image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]]
 
     # The crop is filled.
-    assert (crop < 255).any()
+    assert (crop >= 1).any() and (crop <= 255).any()
 
     # The crop is complete.
     image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]] = 255
@@ -72,7 +74,7 @@ def test_generates_correct_bounding_boxes_for_circles():
     crop = image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]]
 
     # The crop is filled.
-    assert (crop < 255).any()
+    assert (crop >= 1).any() and (crop <= 255).any()
 
     # The crop is complete.
     image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]] = 255
@@ -102,7 +104,10 @@ def test_can_generate_one_by_one_rectangle():
     assert len(labels) == 1
     _, bbox = labels[0]
     crop = image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]]
-    assert (crop < 255).sum() == 3  # rgb
+
+    # rgb
+    assert (np.shape(crop) == (1, 1, 3) and np.any(crop >= 1)
+            and np.any(crop <= 255))
 
 
 def test_throws_when_min_pixel_intensity_out_of_range():

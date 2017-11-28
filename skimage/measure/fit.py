@@ -28,6 +28,9 @@ class BaseModel(object):
 class LineModelND(BaseModel):
     """Total least squares estimator for N-dimensional lines.
 
+    In contrast to ordinary least squares line estimation, this estimator
+    minimizes the orthogonal distances of points to the estimated line.
+
     Lines are defined by a point (origin) and a unit vector (direction)
     according to the following vector equation::
 
@@ -61,6 +64,9 @@ class LineModelND(BaseModel):
     def estimate(self, data):
         """Estimate line model from data.
 
+        This minimizes the sum of shortest (orthogonal) distances
+        from the given data points to the estimated line.
+
         Parameters
         ----------
         data : (N, dim) array
@@ -72,7 +78,7 @@ class LineModelND(BaseModel):
             True, if model estimation succeeds.
         """
         _check_data_atleast_2D(data)
-        # https://www.youtube.com/watch?v=puVoOw3hNGY
+
         origin = data.mean(axis=0)
         data = data - origin
 
@@ -82,10 +88,9 @@ class LineModelND(BaseModel):
             if norm != 0:  # this should not happen to be norm 0
                 direction /= norm
         elif data.shape[0] > 2:  # over-determined
-            # first principal component
-            # Note: without full_matrices=False Python dies with joblib parallel_for.
-            _, _, u = np.linalg.svd(data, full_matrices=False)
-            direction = u[0]
+            # Note: with full_matrices=1 Python dies with joblib parallel_for.
+            _, _, v = np.linalg.svd(data, full_matrices=False)
+            direction = v[0]
         else:  # under-determined
             raise ValueError('At least 2 input points needed.')
 
@@ -96,8 +101,8 @@ class LineModelND(BaseModel):
     def residuals(self, data, params=None):
         """Determine residuals of data to model.
 
-        For each point the shortest distance to the line is returned.
-        It is obtained by projecting the data onto the line.
+        For each point, the shortest (orthogonal) distance to the line is
+        returned. It is obtained by projecting the data onto the line.
 
         Parameters
         ----------
@@ -130,9 +135,9 @@ class LineModelND(BaseModel):
         Parameters
         ----------
         x : (n, 1) array
-            coordinates along an axis.
+            Coordinates along an axis.
         axis : int
-            axis orthogonal to the hyperplane intersecting the line.
+            Axis orthogonal to the hyperplane intersecting the line.
         params : (2, ) array, optional
             Optional custom parameter set in the form (`origin`, `direction`).
 
@@ -141,7 +146,10 @@ class LineModelND(BaseModel):
         data : (n, m) array
             Predicted coordinates.
 
-        If the line is parallel to the given axis, a ValueError is raised.
+        Raises
+        ------
+        ValueError
+            If the line is parallel to the given axis.
         """
         if params is None:
             params = self.params
@@ -183,7 +191,7 @@ class LineModelND(BaseModel):
         return x
 
     def predict_y(self, x, params=None):
-        """Predict y-coordinates  for 2D lines using the estimated model.
+        """Predict y-coordinates for 2D lines using the estimated model.
 
         Alias for::
 
