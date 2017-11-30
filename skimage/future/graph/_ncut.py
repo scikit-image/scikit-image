@@ -31,38 +31,3 @@ def DW_matrices(graph):
     D = sparse.dia_matrix((entries, 0), shape=W.shape).tocsc()
 
     return D, W
-
-
-def ncut_cost(cut, D, W):
-    """Return the N-cut cost of a bi-partition of a graph.
-
-    Parameters
-    ----------
-    cut : ndarray
-        The mask for the nodes in the graph. Nodes corresponding to a `True`
-        value are in one set.
-    D : csc_matrix
-        The diagonal matrix of the graph.
-    W : csc_matrix
-        The weight matrix of the graph.
-
-    Returns
-    -------
-    cost : float
-        The cost of performing the N-cut.
-
-    References
-    ----------
-    .. [1] Normalized Cuts and Image Segmentation, Jianbo Shi and
-           Jitendra Malik, IEEE Transactions on Pattern Analysis and Machine
-           Intelligence, Page 889, Equation 2.
-    """
-    cut = np.array(cut)
-    cut_cost = _ncut_cy.cut_cost(cut, W)
-
-    # D has elements only along the diagonal, one per node, so we can directly
-    # index the data attribute with cut.
-    assoc_a = D.data[cut].sum()
-    assoc_b = D.data[~cut].sum()
-
-    return (cut_cost / assoc_a) + (cut_cost / assoc_b)
