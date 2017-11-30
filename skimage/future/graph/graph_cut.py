@@ -5,6 +5,7 @@ except ImportError:
     warn('RAGs require networkx')
 import numpy as np
 from . import _ncut
+from . import _ncut_cy
 from scipy.sparse.linalg import eigsh
 
 
@@ -72,7 +73,7 @@ def cut_threshold(labels, rag, thresh, in_place=True):
     return map_array[labels]
 
 
-def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
+def cut_normalized(labels, rag, thresh=0.001, in_place=True,
                    max_edge=1.0):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
@@ -90,8 +91,6 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
     thresh : float
         The threshold. A subgraph won't be further subdivided if the
         value of the N-cut exceeds `thresh`.
-    num_cuts : int
-        The number or N-cuts to perform before determining the optimal one.
     in_place : bool
         If set, modifies `rag` in place. For each node `n` the function will
         set a new attribute ``rag.node[n]['ncut label']``.
@@ -121,12 +120,12 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
            IEEE Transactions on, vol. 22, no. 8, pp. 888-905, August 2000.
 
     """
-    gen = cut_normalized_gen(labels, rag, thresh, num_cuts, in_place, max_edge)
+    gen = cut_normalized_gen(labels, rag, thresh, in_place, max_edge)
     labels = next(gen)
     return labels
 
 
-def cut_normalized_gen(labels, rag, init_thresh=0.001, num_cuts=10,
+def cut_normalized_gen(labels, rag, init_thresh=0.001,
                        in_place=True, max_edge=1.0):
     """Generate normalized graph cuts on the region adjacency graph.
 
@@ -146,8 +145,6 @@ def cut_normalized_gen(labels, rag, init_thresh=0.001, num_cuts=10,
     init_thresh : float
         Initial threshold value to segment with. A subgraph won't be further
         subdivided if the value of the N-cut exceeds a threshold value.
-    num_cuts : int
-        The number or N-cuts to perform before determining the optimal one.
     in_place : bool
         If set, modifies `rag` in place. For each node `n` the function will
         set a new attribute ``rag.node[n]['ncut label']``.
@@ -189,7 +186,7 @@ def cut_normalized_gen(labels, rag, init_thresh=0.001, num_cuts=10,
         rag.add_edge(node, node, weight=max_edge)
 
     # Initialize the generator
-    ncut_gen = _ncut_relabel(rag, 0, num_cuts)
+    ncut_gen = _ncut_relabel(rag, 0)
     next(ncut_gen)
 
     # Generate new labels as thresholds come
@@ -284,19 +281,19 @@ def _get_partition_vector(d, w):
     return part_vec
 
 
-def get_min_ncut(part_vec, d, w, num_cuts):
-    """Threshold an eigenvector evenly, to determine minimum ncut.
+def get_min_ncut(part_vec, w):
+    """
+    Find the minimum ncut and the partition it corresponds to using the
+    supplied partition vector.
 
     Parameters
     ----------
     part_vec : array
-        The vector to threshold.
+        This vector's values effectively thresholded to decide partition
     d : ndarray
         The diagonal matrix of the graph.
     w : ndarray
         The weight matrix of the graph.
-    num_cuts : int
-        The number of evenly spaced thresholds to check for.
 
     Returns
     -------
@@ -305,25 +302,18 @@ def get_min_ncut(part_vec, d, w, num_cuts):
     mcut : float
         The value of the minimum ncut.
     """
-    mcut = np.inf
-    mn = part_vec.min()
-    mx = part_vec.max()
-
-    # If all values in `part_vec` are equal, it implies that the graph can't be
-    # further sub-divided. In this case the bi-partition is the the graph
-    # itself and an empty set.
     min_mask = np.zeros_like(part_vec, dtype=np.bool)
-    if np.allclose(mn, mx):
-        return min_mask, mcut
+
+    # Get sorted indices and make map from unsorted
+    # to sorted indices
+    ind_sorted = np.argsort(part_vec)
+    ind_sort = np.empty(len(ind_sorted), dtype=np.int32)
+    ind_sort[ind_sorted] = np.array(range(len(ind_sorted)))
 
     # Refer Shi & Malik 2000, Section 3.1.3, Page 892
-    # Perform evenly spaced n-cuts and determine the optimal one.
-    for t in np.linspace(mn, mx, num_cuts, endpoint=False):
-        mask = part_vec > t
-        cost = _ncut.ncut_cost(mask, d, w)
-        if cost < mcut:
-            min_mask = mask
-            mcut = cost
+    # Find the optimal partitioning
+    mcut, mcol = _ncut_cy.find_cut(ind_sorted, ind_sort, w)
+    min_mask[ind_sorted[:mcol + 1]] = True
 
     return min_mask, mcut
 
@@ -346,7 +336,7 @@ def _label_all(rag, attr_name):
         d[attr_name] = new_label
 
 
-def _ncut_relabel(rag, init_thresh, num_cuts):
+def _ncut_relabel(rag, init_thresh):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Recursively partition the graph into two, until further subdivision
@@ -363,8 +353,6 @@ def _ncut_relabel(rag, init_thresh, num_cuts):
     thresh : float
         The threshold. A subgraph won't be further subdivided if the
         value of the N-cut exceeds `thresh`.
-    num_cuts : int
-        The number or N-cuts to perform before determining the optimal one.
     map_array : array
         The array which maps old labels to new ones. This is modified inside
         the function.
@@ -375,7 +363,7 @@ def _ncut_relabel(rag, init_thresh, num_cuts):
     # If 2 regions not cutting is optimal choice
     if w.shape[0] > 2:
         part_vec = _get_partition_vector(d, w)
-        cut_mask, mcut = get_min_ncut(part_vec, d, w, num_cuts)
+        cut_mask, mcut = get_min_ncut(part_vec, w)
 
         calc_subgraph = True
         while True:
@@ -390,8 +378,8 @@ def _ncut_relabel(rag, init_thresh, num_cuts):
             # once, and only if necessary
             if calc_subgraph:
                 sub1, sub2 = partition_by_cut(cut_mask, rag)
-                branch1 = _ncut_relabel(sub1, thresh, num_cuts)
-                branch2 = _ncut_relabel(sub2, thresh, num_cuts)
+                branch1 = _ncut_relabel(sub1, thresh)
+                branch2 = _ncut_relabel(sub2, thresh)
                 next(branch1)
                 next(branch2)
                 del cut_mask

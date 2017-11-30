@@ -16,6 +16,7 @@ from skimage import data, segmentation, color
 from skimage.future import graph
 from matplotlib import pyplot as plt
 
+
 img = data.coffee()
 
 labels0 = segmentation.slic(img, compactness=30, n_segments=400)
@@ -25,11 +26,9 @@ g = graph.rag_mean_color(img, labels0, mode='similarity')
 
 # Two ways to apply Normalized Cuts:
 # Get the labels for a single threshold
-
 labels1a = graph.cut_normalized(labels0, g, thresh=1e-3)
 
 # Or use a generator to try several thresholds
-
 label_gen = graph.cut_normalized_gen(labels0, g, init_thresh=1e-4)
 labels2 = next(label_gen)
 labels1b = label_gen.send(1e-3)
