@@ -49,7 +49,6 @@ def cut_threshold(labels, rag, thresh, in_place=True):
     .. [1] Alain Tremeau and Philippe Colantoni
            "Regions Adjacency Graph Applied To Color Image Segmentation"
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.11.5274
-
     """
     if not in_place:
         rag = rag.copy()
@@ -177,7 +176,6 @@ def cut_normalized_gen(labels, rag, init_thresh=0.001,
     .. [1] Shi, J.; Malik, J., "Normalized cuts and image segmentation",
            Pattern Analysis and Machine Intelligence,
            IEEE Transactions on, vol. 22, no. 8, pp. 888-905, August 2000.
-
     """
     if not in_place:
         rag = rag.copy()
@@ -283,21 +281,19 @@ def _get_partition_vector(d, w):
 
 def get_min_ncut(part_vec, w):
     """
-    Find the minimum ncut and the partition it corresponds to using the
-    supplied partition vector.
+    Find the minimum ncut and the partition it by effectively thresholding
+    the values in the supplied partition vector
 
     Parameters
     ----------
     part_vec : array
-        This vector's values effectively thresholded to decide partition
-    d : ndarray
-        The diagonal matrix of the graph.
+        This vector's values thresholded to decide partition
     w : ndarray
         The weight matrix of the graph.
 
     Returns
     -------
-    mask : array
+    min_mask : array
         The array of booleans which denotes the bi-partition.
     mcut : float
         The value of the minimum ncut.
@@ -346,16 +342,11 @@ def _ncut_relabel(rag, init_thresh):
 
     Parameters
     ----------
-    labels : ndarray
-        The array of labels.
     rag : RAG
         The region adjacency graph.
-    thresh : float
-        The threshold. A subgraph won't be further subdivided if the
+    init_thresh : float
+        The initial threshold. A subgraph won't be further subdivided if the
         value of the N-cut exceeds `thresh`.
-    map_array : array
-        The array which maps old labels to new ones. This is modified inside
-        the function.
     """
     thresh = init_thresh
     d, w = _ncut.DW_matrices(rag)
