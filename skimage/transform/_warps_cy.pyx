@@ -128,9 +128,7 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
     cdef Py_ssize_t cols = img.shape[1]
 
     cdef void (*transform_func)(double, double, double*, double*, double*) nogil
-    if (abs(M[2, 0]) < 1e-10 and
-            abs(M[2, 1]) < 1e-10 and
-            abs(M[2, 2] - 1) < 1e-10):
+    if M[2, 0]) == 0 and M[2, 1] == 0 and M[2, 2] == 1:
         transform_func = _transform_affine
     else:
         transform_func = _transform_projective

@@ -164,6 +164,9 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
             tform = AffineTransform()
             tform.estimate(src_corners, dst_corners)
 
+        # Make sure the transform is exactly affine, to ensure fast warping.
+        tform.params[2] = (0, 0, 1)
+
         out = warp(image, tform, output_shape=output_shape, order=order,
                    mode=mode, cval=cval, clip=clip,
                    preserve_range=preserve_range)
@@ -380,6 +383,9 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
         translation = (minc, minr)
         tform4 = SimilarityTransform(translation=translation)
         tform = tform4 + tform
+
+    # Make sure the transform is exactly affine, to ensure fast warping.
+    tform.params[2] = (0, 0, 1)
 
     return warp(image, tform, output_shape=output_shape, order=order,
                 mode=mode, cval=cval, clip=clip, preserve_range=preserve_range)
