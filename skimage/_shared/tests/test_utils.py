@@ -1,4 +1,4 @@
-from skimage._shared.utils import (copy_func, assert_nD)
+from skimage._shared.utils import (copy_func, assert_nD, assert_attrs)
 import numpy.testing as npt
 import numpy as np
 from skimage._shared import testing
@@ -9,6 +9,21 @@ def test_assert_nD():
     x = z[10:30, 30:10]
     with testing.raises(ValueError):
         assert_nD(x, 2)
+
+
+def test_hasattrs():
+    foo = lambda: 0
+    foo.bar = 42
+    foo.baz = 'hello world'
+    assert_attrs(foo, ['bar', 'baz'])
+
+    detects_no_attr = False
+    try:
+        assert_attrs(foo, ['boo'])
+    except AttributeError:
+        detects_no_attr = True
+
+    assert detects_no_attr
 
 
 def test_copyfunc():
