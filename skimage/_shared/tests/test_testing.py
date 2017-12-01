@@ -3,7 +3,8 @@
 
 import numpy as np
 from numpy.testing import assert_equal
-from skimage._shared.testing import doctest_skip_parser, test_parallel
+from skimage._shared.testing import (doctest_skip_parser, test_parallel,
+                                     MockRNG)
 from skimage._shared import testing
 
 
@@ -95,6 +96,21 @@ def test_test_parallel():
         state.append(None)
     change_state3()
     assert len(state) == 6
+
+
+def test_mock_rng():
+    rng = MockRNG('randint', [42, 3, 5])
+
+    # successfully named attr
+    assert_equal(hasattr(rng, 'randint'), True)
+
+    # gives mock values in order
+    assert_equal(rng.randint(), 42)
+    assert_equal(rng.randint(), 3)
+    assert_equal(rng.randint(), 5)
+
+    # loops
+    assert_equal(rng.randint(), 42)
 
 
 if __name__ == '__main__':
