@@ -11,7 +11,7 @@ def test_assert_nD():
         assert_nD(x, 2)
 
 
-def test_hasattrs():
+def test_assert_attrs():
     foo = lambda: 0
     foo.bar = 42
     foo.baz = 'hello world'
