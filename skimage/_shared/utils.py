@@ -221,6 +221,33 @@ def check_random_state(seed):
                      ' instance' % seed)
 
 
+def assert_attrs(obj, attrs):
+    """Asserts that an object has all the attributes specified.
+
+    Parameters
+    ----------
+    obj : object
+        The object to check.
+    attrs : List of String
+        The names of the attributes it must have.
+
+    Raises
+    ------
+    AttributeError
+        If `obj` does not contain one or more `attrs`.
+    """
+    f = np.vectorize(lambda name: not hasattr(obj, name))
+    no_attrs = f(attrs)
+    if no_attrs.any():
+        obj_name = obj.__name__
+        no_attrs = np.asarray(attrs)[no_attrs]
+        message = obj_name + " has no attribute(s): "
+        for attr in no_attrs:
+            message += attr + ", "
+        message = message[:-2]
+        raise AttributeError(message)
+
+
 def convert_to_float(image, preserve_range):
     """Convert input image to double image with the appropriate range.
 
@@ -242,4 +269,3 @@ def convert_to_float(image, preserve_range):
     else:
         image = img_as_float(image)
     return image
-
