@@ -31,6 +31,30 @@ raises = pytest.raises
 fixture = pytest.fixture
 
 
+class MockRNG:
+    """A mock (controlled) random number generator.
+
+    Parameters
+    ----------
+    name : String
+        The name of the function that will output the mock values.
+    mock_values : list
+        The mock values to return in order. Will loop if the end is reached.
+    """
+    def __init__(self, name, mock_values):
+        self.values = mock_values
+        self.index = 0
+
+        def nxt():
+            """Returns the next value requested"""
+            val = self.values[self.index]
+            self.index += 1
+            self.index %= len(self.values)
+            return val
+
+        setattr(self, name, nxt)
+
+
 def assert_less(a, b, msg=None):
     message = "%r is not lower than %r" % (a, b)
     if msg is not None:
