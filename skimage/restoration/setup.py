@@ -31,7 +31,8 @@ def configuration(parent_package='', top_path=None):
         include_dirs=[get_numpy_include_dirs(), '../_shared'])
     config.add_extension('_nl_means_denoising',
                          sources=['_nl_means_denoising.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs(),
+                                       '../_shared'])
 
     return config
 

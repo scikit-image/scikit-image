@@ -24,7 +24,6 @@ New Features
   regionprops; available in ``skimage.measure.inertia_tensor`` (#2603)
 - cycle-spinning function for approximating shift-invariance by averaging
   results from a series of spatial shifts (#2647)
-- subset of CBCL faces database (#2897)
 - Haar-like feature (#2848)
 
 

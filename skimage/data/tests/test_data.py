@@ -94,8 +94,3 @@ def test_binary_blobs():
     other_realization = data.binary_blobs(length=32, volume_fraction=0.25,
                                           n_dim=3)
     assert not np.all(blobs == other_realization)
-
-
-def test_cbcl_face_database():
-    """ Test that "cbcl_face_database" can be loaded."""
-    data.cbcl_face_database()

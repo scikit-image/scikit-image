@@ -186,12 +186,12 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
        samples, see Notes section). 1e-4 by default.
     burnin : int
        The number of sample to ignore to start computation of the
-       mean. 100 by default.
+       mean. 15 by default.
     min_iter : int
        The minimum number of iterations. 30 by default.
     max_iter : int
        The maximum number of iterations if ``threshold`` is not
-       satisfied. 150 by default.
+       satisfied. 200 by default.
     callback : callable (None by default)
        A user provided callable to which is passed, if the function
        exists, the current image sample for whatever purpose. The user
