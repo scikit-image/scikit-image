@@ -20,8 +20,7 @@ def find_cut(ind_sorted_py, ind_sort_py, W):
     ind_sort_py : array
         Maps unsorted indices to their index in sorted order
     W : array
-        The weight matrix of the graph sorted according to the entries
-        in the partition vector.
+        The weight matrix of the graph
 
     Returns
     -------
@@ -31,7 +30,7 @@ def find_cut(ind_sorted_py, ind_sort_py, W):
         Final index of ind_sorted corresponding to subgraph A
     """
     cdef Py_ssize_t num_cols
-    cdef cnp.int32_t col, min_col, row_index
+    cdef cnp.int32_t col, min_col, row, row_index
     cdef cnp.int32_t[:] ind_sorted = ind_sorted_py.astype(np.int32)
     cdef cnp.int32_t[:] ind_sort = ind_sort_py.astype(np.int32)
     cdef cnp.int32_t[:] indices = W.indices
