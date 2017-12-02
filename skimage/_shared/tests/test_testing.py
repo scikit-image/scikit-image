@@ -112,6 +112,15 @@ def test_mock_rng():
     # loops
     assert_equal(rng.randint(), 42)
 
+    # test that it can take in dummy args
+    assert_equal(rng.randint(3, 12, 15), 3)
+
+    # test that it can take in dummy kwargs
+    assert_equal(rng.randint(foo="bar"), 5)
+
+    # test that it can take in both
+    assert_equal(rng.randint(42, foo="bar"), 42)
+
 
 if __name__ == '__main__':
     np.testing.run_module_suite()

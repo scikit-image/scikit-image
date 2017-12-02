@@ -45,7 +45,7 @@ class MockRNG:
         self.values = mock_values
         self.index = 0
 
-        def nxt():
+        def nxt(*args, **kwargs):
             """Returns the next value requested"""
             val = self.values[self.index]
             self.index += 1
