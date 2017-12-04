@@ -91,7 +91,7 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
     """Compute the Haar-like features for a region of interest (ROI) of an
     integral image.
 
-    Haar-like features have been successively used for image classification and
+    Haar-like features have been successfully used for image classification and
     object detection [1]_. It has been used for real-time face detection
     algorithm proposed in [2]_.
 
@@ -215,7 +215,7 @@ def draw_haar_like_feature(image, r, c, width, height,
                            color_positive_block=(1., 0., 0.),
                            color_negative_block=(0., 1., 0.),
                            alpha=0.5, max_n_features=None, random_state=None):
-    """Helper function for visualization Haar-like features.
+    """Visualization of Haar-like features.
 
     Parameters
     ----------

@@ -3,10 +3,12 @@
 Haar-like feature descriptor
 ============================
 
-Haar-like features are simple digital image features that were used first in a
+Haar-like features are simple digital image features that were introduced in a
 real-time face detector [1]_. These features can be efficiently computed on any
-scale in constant time, using an integral image [1]_. The following example
-will show the mechanism to build this family of descriptors.
+scale in constant time, using an integral image [1]_. After that, a small
+number of critical features is selected from this large set of potential
+features (e.g., using AdaBoost learning algorithm as in [1]_). The following
+example will show the mechanism to build this family of descriptors.
 
 References
 ----------
