@@ -1,3 +1,5 @@
+#cython: initializedcheck=False, wraparound=False, boundscheck=False, cdivision=True
+
 import numpy as np
 cimport numpy as np
 cimport cython
@@ -9,10 +11,10 @@ cdef double DISTANCE_CUTOFF = 5.0
 cdef extern from "fast_exp.h":
     inline double fast_exp(double y) nogil
 
-@cython.boundscheck(False)
+
 cdef inline double patch_distance_2d(IMGDTYPE [:, :] p1,
-                                    IMGDTYPE [:, :] p2,
-                                    IMGDTYPE [:, ::] w, int s, double var):
+                                     IMGDTYPE [:, :] p2,
+                                     IMGDTYPE [:, ::] w, int s, double var):
     """
     Compute a Gaussian distance between two image patches.
 
@@ -60,10 +62,9 @@ cdef inline double patch_distance_2d(IMGDTYPE [:, :] p1,
     return distance
 
 
-@cython.boundscheck(False)
 cdef inline double patch_distance_2drgb(IMGDTYPE [:, :, :] p1,
-                                       IMGDTYPE [:, :, :] p2,
-                                       IMGDTYPE [:, ::] w, int s, double var):
+                                        IMGDTYPE [:, :, :] p2,
+                                        IMGDTYPE [:, ::] w, int s, double var):
     """
     Compute a Gaussian distance between two image patches.
 
@@ -109,10 +110,9 @@ cdef inline double patch_distance_2drgb(IMGDTYPE [:, :, :] p1,
     return distance
 
 
-@cython.boundscheck(False)
 cdef inline double patch_distance_3d(IMGDTYPE [:, :, :] p1,
-                                    IMGDTYPE [:, :, :] p2,
-                                    IMGDTYPE [:, :, ::] w, int s, double var):
+                                     IMGDTYPE [:, :, :] p2,
+                                     IMGDTYPE [:, :, ::] w, int s, double var):
     """
     Compute a Gaussian distance between two image patches.
 
@@ -156,8 +156,6 @@ cdef inline double patch_distance_3d(IMGDTYPE [:, :, :] p1,
     return distance
 
 
-@cython.cdivision(True)
-@cython.boundscheck(False)
 def _nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
                            double var=0.):
     """
@@ -263,8 +261,6 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
     return result[offset:-offset, offset:-offset]
 
 
-@cython.cdivision(True)
-@cython.boundscheck(False)
 def _nl_means_denoising_3d(image, int s=7, int d=13, double h=0.1,
                            double var=0.0):
     """
@@ -369,10 +365,8 @@ def _nl_means_denoising_3d(image, int s=7, int d=13, double h=0.1,
 #-------------- Accelerated algorithm of Froment 2015 ------------------
 
 
-@cython.cdivision(True)
-@cython.boundscheck(False)
-cdef inline double _integral_to_distance_2d(IMGDTYPE [:, ::] integral,
-                        int row, int col, int offset, double h2s2):
+cdef inline double _integral_to_distance_2d(
+        IMGDTYPE [:, ::] integral, int row, int col, int offset, double h2s2):
     """
     References
     ----------
@@ -394,12 +388,12 @@ cdef inline double _integral_to_distance_2d(IMGDTYPE [:, ::] integral,
     distance = max(distance, 0.0) / h2s2
     return distance
 
-
+# @cython.wraparound(False)
 @cython.cdivision(True)
 @cython.boundscheck(False)
-cdef inline double _integral_to_distance_3d(IMGDTYPE [:, :, ::] integral,
-                    int pln, int row, int col, int offset,
-                    double s_cube_h_square):
+cdef inline double _integral_to_distance_3d(
+        IMGDTYPE [:, :, ::] integral, int pln, int row, int col, int offset,
+        double s_cube_h_square):
     """
     References
     ----------
@@ -426,8 +420,6 @@ cdef inline double _integral_to_distance_3d(IMGDTYPE [:, :, ::] integral,
     return distance
 
 
-@cython.cdivision(True)
-@cython.boundscheck(False)
 cdef inline _integral_image_2d(IMGDTYPE [:, :, ::] padded,
                                IMGDTYPE [:, ::] integral, int t_row,
                                int t_col, int n_row, int n_col, int n_ch,
@@ -482,8 +474,7 @@ cdef inline _integral_image_2d(IMGDTYPE [:, :, ::] padded,
                                  integral[row, col - 1] - \
                                  integral[row - 1, col - 1]
 
-@cython.cdivision(True)
-@cython.boundscheck(False)
+
 cdef inline _integral_image_3d(IMGDTYPE [:, :, ::] padded,
                                IMGDTYPE [:, :, ::] integral, int t_pln,
                                int t_row, int t_col, int n_pln, int n_row,
@@ -538,8 +529,6 @@ cdef inline _integral_image_3d(IMGDTYPE [:, :, ::] padded,
                      integral[pln - 1, row, col - 1])
 
 
-@cython.cdivision(True)
-@cython.boundscheck(False)
 def _fast_nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
                                 double var=0.):
     """
@@ -652,8 +641,6 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
     return result[pad_size:-pad_size, pad_size:-pad_size]
 
 
-@cython.cdivision(True)
-@cython.boundscheck(False)
 def _fast_nl_means_denoising_3d(image, int s=5, int d=7, double h=0.1,
                                 double var=0.):
     """
