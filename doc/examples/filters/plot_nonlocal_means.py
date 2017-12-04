@@ -54,19 +54,19 @@ patch_kw = dict(patch_size=5,      # 5x5 patches
                 multichannel=True)
 
 # slow algorithm
-denoise = denoise_nl_means(noisy, h=1.15*sigma_est, fast_mode=False,
+denoise = denoise_nl_means(noisy, h=1.15 * sigma_est, fast_mode=False,
                            **patch_kw)
 
 # slow algorithm, sigma provided
-denoise2 = denoise_nl_means(noisy, h=0.8*sigma_est, sigma=sigma_est,
+denoise2 = denoise_nl_means(noisy, h=0.8 * sigma_est, sigma=sigma_est,
                             fast_mode=False, **patch_kw)
 
 # fast algorithm
-denoise_fast = denoise_nl_means(noisy, h=0.8*sigma_est, fast_mode=True,
+denoise_fast = denoise_nl_means(noisy, h=0.8 * sigma_est, fast_mode=True,
                                 **patch_kw)
 
 # fast algorithm, sigma provided
-denoise2_fast = denoise_nl_means(noisy, h=0.6*sigma_est, sigma=sigma_est,
+denoise2_fast = denoise_nl_means(noisy, h=0.6 * sigma_est, sigma=sigma_est,
                                  fast_mode=True, **patch_kw)
 
 fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(8, 6),

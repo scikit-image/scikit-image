@@ -1,4 +1,7 @@
-#cython: initializedcheck=False, wraparound=False, boundscheck=False, cdivision=True
+#cython: initializedcheck=False
+#cython: wraparound=False
+#cython: boundscheck=False
+#cython: cdivision=True
 
 import numpy as np
 cimport numpy as np
@@ -365,8 +368,8 @@ def _nl_means_denoising_3d(image, int s=7, int d=13, double h=0.1,
 #-------------- Accelerated algorithm of Froment 2015 ------------------
 
 
-cdef inline double _integral_to_distance_2d(
-        IMGDTYPE [:, ::] integral, int row, int col, int offset, double h2s2):
+cdef inline double _integral_to_distance_2d(IMGDTYPE [:, ::] integral, int row,
+                                            int col, int offset, double h2s2):
     """
     References
     ----------
@@ -388,12 +391,11 @@ cdef inline double _integral_to_distance_2d(
     distance = max(distance, 0.0) / h2s2
     return distance
 
-# @cython.wraparound(False)
-@cython.cdivision(True)
-@cython.boundscheck(False)
-cdef inline double _integral_to_distance_3d(
-        IMGDTYPE [:, :, ::] integral, int pln, int row, int col, int offset,
-        double s_cube_h_square):
+
+cdef inline double _integral_to_distance_3d(IMGDTYPE [:, :, ::] integral,
+                                            int pln, int row, int col,
+                                            int offset,
+                                            double s_cube_h_square):
     """
     References
     ----------

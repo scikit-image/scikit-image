@@ -232,7 +232,7 @@ def test_denoise_nl_means_2d():
     img = np.zeros((40, 40))
     img[10:-10, 10:-10] = 1.
     sigma = 0.3
-    img += sigma*np.random.randn(*img.shape)
+    img += sigma * np.random.randn(*img.shape)
     for s in [sigma, 0]:
         denoised = restoration.denoise_nl_means(img, 7, 5, 0.2, fast_mode=True,
                                                 multichannel=True, sigma=s)
@@ -269,7 +269,7 @@ def test_denoise_nl_means_3d():
     img = np.zeros((20, 20, 10))
     img[5:-5, 5:-5, 3:-3] = 1.
     sigma = 0.3
-    img += sigma*np.random.randn(*img.shape)
+    img += sigma * np.random.randn(*img.shape)
     for s in [sigma, 0]:
         denoised = restoration.denoise_nl_means(img, 5, 4, 0.2, fast_mode=True,
                                                 multichannel=False, sigma=s)
