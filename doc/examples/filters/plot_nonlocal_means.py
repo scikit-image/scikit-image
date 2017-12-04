@@ -96,10 +96,10 @@ fig.tight_layout()
 
 # print PSNR metric for each case
 psnr_noisy = compare_psnr(astro, noisy)
-psnr = compare_psnr(astro, denoise.astype(astro.dtype))
-psnr2 = compare_psnr(astro, denoise2.astype(astro.dtype))
-psnr_fast = compare_psnr(astro, denoise_fast.astype(astro.dtype))
-psnr2_fast = compare_psnr(astro, denoise2_fast.astype(astro.dtype))
+psnr = compare_psnr(astro, denoise)
+psnr2 = compare_psnr(astro, denoise2)
+psnr_fast = compare_psnr(astro, denoise_fast)
+psnr2_fast = compare_psnr(astro, denoise2_fast)
 
 print("PSNR (noisy) = {:0.2f}".format(psnr_noisy))
 print("PSNR (slow) = {:0.2f}".format(psnr))
