@@ -9,11 +9,13 @@ from .misc import default_selem
 # The default_selem decorator provides a diamond structuring element as default
 # with the same dimension as the input image and size 3 along each axis.
 @default_selem
-def binary_erosion(image, selem=None, out=None):
+def binary_erosion(image, selem=None, out=None, iterations=1, mask=None,
+                   origin=0, border_value=0, brute_force=False):
     """Return fast binary morphological erosion of an image.
 
     This function returns the same result as greyscale erosion but performs
-    faster for binary images.
+    faster for binary images. It is a wrapper to the
+    scipy.ndimage.binary_erosion function.
 
     Morphological erosion sets a pixel at ``(i,j)`` to the minimum over all
     pixels in the neighborhood centered at ``(i,j)``. Erosion shrinks bright
@@ -29,6 +31,16 @@ def binary_erosion(image, selem=None, out=None):
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
+    iterations : {int, float}, optional
+        The number of times dilation is repeated (defaults to 1). If <1,
+        dilation is repeated until the result no longer changes.
+    mask : array-like, optional
+        If provided, erosion is only performed on elements of `image` with
+        a True value at the corresponding `mask` element.
+    origin : int or tuple of ints, optional
+        Placement of the filter, by default 0.
+    border_value : int (cast to 0 or 1), optional
+        Value at the border of the output array.
 
     Returns
     -------
@@ -39,7 +51,9 @@ def binary_erosion(image, selem=None, out=None):
     """
     if out is None:
         out = np.empty(image.shape, dtype=np.bool)
-    ndi.binary_erosion(image, structure=selem, output=out)
+    ndi.binary_erosion(image, structure=selem, output=out,
+                       iterations=iterations, mask=mask, origin=origin,
+                       border_value=border_value, brute_force=brute_force)
     return out
 
 
