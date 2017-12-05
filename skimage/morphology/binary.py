@@ -32,7 +32,7 @@ def binary_erosion(image, selem=None, out=None, iterations=1, mask=None,
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
     iterations : {int, float}, optional
-        The number of times dilation is repeated (defaults to 1). If <1,
+        The number of times erosion is repeated (defaults to 1). If <1,
         dilation is repeated until the result no longer changes.
     mask : array-like, optional
         If provided, erosion is only performed on elements of `image` with
@@ -58,7 +58,8 @@ def binary_erosion(image, selem=None, out=None, iterations=1, mask=None,
 
 
 @default_selem
-def binary_dilation(image, selem=None, out=None):
+def binary_dilation(image, selem=None, out=None, iterations=1, mask=None,
+                    border_value=0, origin=0, brute_force=False):
     """Return fast binary morphological dilation of an image.
 
     This function returns the same result as greyscale dilation but performs
@@ -79,6 +80,16 @@ def binary_dilation(image, selem=None, out=None):
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None, is
         passed, a new array will be allocated.
+    iterations : {int, float}, optional
+        The number of times dilation is repeated (defaults to 1). If <1,
+        dilation is repeated until the result no longer changes.
+    mask : array-like, optional
+        If provided, dilation is only performed on elements of `image` with
+        a True value at the corresponding `mask` element.
+    origin : int or tuple of ints, optional
+        Placement of the filter, by default 0.
+    border_value : int (cast to 0 or 1), optional
+        Value at the border of the output array.
 
     Returns
     -------
@@ -88,7 +99,9 @@ def binary_dilation(image, selem=None, out=None):
     """
     if out is None:
         out = np.empty(image.shape, dtype=np.bool)
-    ndi.binary_dilation(image, structure=selem, output=out)
+    ndi.binary_dilation(image, structure=selem, output=out,
+                        iterations=iterations, mask=mask, origin=origin,
+                        border_value=border_value, brute_force=False)
     return out
 
 
