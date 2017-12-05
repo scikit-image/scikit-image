@@ -104,21 +104,30 @@ def moments_coords_central(coords, center=None, order=3):
         if type(center) not in [tuple, list, np.ndarray]:
             center = (center,) * ndim
 
-    # centralize calculation
-    calc = coords.astype(float) - center
+    # center the coordinates
+    coords = coords.astype(float) - center
 
     # generate all possible exponents for each axis in the given set of points
     # produces a matrix of shape (N, D, order + 1)
-    calc = calc[..., np.newaxis] ** np.arange(order + 1)
+    coords = coords[..., np.newaxis] ** np.arange(order + 1)
 
-    M = []
-    for point in calc:
-        to_add = np.array(1)
-        for axis in point:
-            to_add = to_add[..., np.newaxis] * axis
-        M.append(to_add)
+    calc = 1
 
-    calc = np.sum(M, axis=0)
+    for axis in range(ndim):
+        # isolate each point's axis
+        isolated_axis = coords[:, axis::ndim].squeeze()
+
+        # adjust shape for proper broadcasting later on
+        for _ in itertools.repeat(None, axis):
+            isolated_axis = np.expand_dims(isolated_axis, axis=1)
+        for _ in itertools.repeat(None, ndim - (axis + 1)):
+            isolated_axis = np.expand_dims(isolated_axis, axis=-1)
+
+        # calculate the moments for each point, one axis at a time
+        calc = calc * isolated_axis
+
+    # sum all individual point moments to get our final answer
+    calc = calc.sum(axis=0)
 
     return calc
 
