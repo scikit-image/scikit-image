@@ -111,10 +111,14 @@ def test_moments_normalized():
 
 def test_moments_normalized_3d():
     image = draw.ellipsoid(1, 1, 10)
-    mu = moments_central(image)
-    nu = moments_normalized(mu)
+    mu_image = moments_central(image)
+    nu = moments_normalized(mu_image)
     assert nu[0, 0, 2] > nu[0, 2, 0]
     assert_almost_equal(nu[0, 2, 0], nu[2, 0, 0])
+
+    coords = np.where(image)
+    mu_coords = moments_coords_central(coords)
+    assert_almost_equal(mu_coords, mu_image)
 
 
 def test_moments_normalized_invalid():
