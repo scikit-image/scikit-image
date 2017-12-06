@@ -28,6 +28,7 @@ def _shift_selem(selem, shift_x, shift_y):
     -------
     out : 2D array, shape (M + int(shift_x), N + int(shift_y))
         The shifted structuring element.
+
     """
     if selem.ndim != 2:
         # do nothing for 1D or 3D or higher structuring elements
@@ -76,6 +77,7 @@ def _invert_selem(selem):
     References
     ----------
     .. [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285
+
     """
     inverted = selem[(slice(None, None, -1),) * selem.ndim]
     return inverted
@@ -100,6 +102,7 @@ def pad_for_eccentric_selems(func):
     See Also
     --------
     opening, closing.
+
     """
     @functools.wraps(func)
     def func_out(image, selem, out=None, *args, **kwargs):
@@ -127,13 +130,18 @@ def pad_for_eccentric_selems(func):
         return out
     return func_out
 
+
 @default_selem
-def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
+def erosion(image, selem=None, out=None, shift_x=False, shift_y=False,
+            mode='reflect', cval=0.0, origin=0):
     """Return greyscale morphological erosion of an image.
 
     Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
     in the neighborhood centered at (i,j). Erosion shrinks bright regions and
     enlarges dark regions.
+
+    After optional shifting of selem this function is a wrapper for
+    scipy.ndimage.grey_erosion.
 
     Parameters
     ----------
@@ -148,6 +156,13 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
     shift_x, shift_y : bool, optional
         shift structuring element about center point. This only affects
         eccentric structuring elements (i.e. selem with even numbered sides).
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+        Determines how array borders are handled. If using 'constant', `cval`
+        is the value borders are set to. Default is 'reflect'.
+    cval : scalar, optional
+        Value to fill past edges with if `mode`='constant'. Defaults to 0.0.
+    origin : scalar, optional
+        Controls placement of the filter. Defaults to 0.
 
     Returns
     -------
@@ -182,21 +197,25 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
     selem = _shift_selem(selem, shift_x, shift_y)
     if out is None:
         out = np.empty_like(image)
-    ndi.grey_erosion(image, footprint=selem, output=out)
+    ndi.grey_erosion(image, footprint=selem, output=out, mode=mode, cval=cval,
+                     origin=origin)
     return out
 
 
 @default_selem
-def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
+def dilation(image, selem=None, out=None, shift_x=False, shift_y=False,
+             mode='reflect', cval=0.0, origin=0):
     """Return greyscale morphological dilation of an image.
 
     Morphological dilation sets a pixel at (i,j) to the maximum over all pixels
     in the neighborhood centered at (i,j). Dilation enlarges bright regions
     and shrinks dark regions.
 
+    After optional shifting of selem this function is a wrapper for
+    scipy.ndimage.grey_dilation.
+
     Parameters
     ----------
-
     image : ndarray
         Image array.
     selem : ndarray, optional
@@ -208,6 +227,13 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
     shift_x, shift_y : bool, optional
         shift structuring element about center point. This only affects
         eccentric structuring elements (i.e. selem with even numbered sides).
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+        Determines how array borders are handled. If using 'constant', `cval`
+        is the value borders are set to. Default is 'reflect'.
+    cval : scalar, optional
+        Value to fill past edges with if `mode`='constant'. Defaults to 0.0.
+    origin : scalar, optional
+        Controls placement of the filter. Defaults to 0.
 
     Returns
     -------
@@ -248,7 +274,8 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
     selem = _invert_selem(selem)
     if out is None:
         out = np.empty_like(image)
-    ndi.grey_dilation(image, footprint=selem, output=out)
+    ndi.grey_dilation(image, footprint=selem, output=out, mode=mode,
+                      cval=cval, origin=origin)
     return out
 
 
