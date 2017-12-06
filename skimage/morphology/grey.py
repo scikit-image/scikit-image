@@ -531,6 +531,6 @@ def black_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
         closed = closing(image, selem, mode=mode, cval=cval, origin=origin)
         out = closed - out
     else:
-        out = ndi.morphology.black_tophat(image, footprint=selem, out=out,
+        out = ndi.morphology.black_tophat(image, footprint=selem, output=out,
                                           mode=mode, cval=cval, origin=origin)
         return out
