@@ -111,17 +111,17 @@ def moments_coords_central(coords, center=None, order=3):
     # produces a matrix of shape (N, D, order + 1)
     coords = coords[..., np.newaxis] ** np.arange(order + 1)
 
+    # add extra dimensions for proper broadcasting
+    coords = coords.reshape(coords.shape + (1,) * (ndim - 1))
+
     calc = 1
 
     for axis in range(ndim):
         # isolate each point's axis
-        isolated_axis = coords[:, axis::ndim].squeeze()
+        isolated_axis = coords[:, axis::ndim].squeeze(axis=1)
 
-        # adjust shape for proper broadcasting later on
-        for _ in itertools.repeat(None, axis):
-            isolated_axis = np.expand_dims(isolated_axis, axis=1)
-        for _ in itertools.repeat(None, ndim - (axis + 1)):
-            isolated_axis = np.expand_dims(isolated_axis, axis=-1)
+        # rotate orientation of matrix for proper broadcasting
+        isolated_axis = np.moveaxis(isolated_axis, 1, 1 + axis)
 
         # calculate the moments for each point, one axis at a time
         calc = calc * isolated_axis
