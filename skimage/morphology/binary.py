@@ -63,7 +63,8 @@ def binary_dilation(image, selem=None, out=None, iterations=1, mask=None,
     """Return fast binary morphological dilation of an image.
 
     This function returns the same result as greyscale dilation but performs
-    faster for binary images.
+    faster for binary images. It is a wrapper for the
+    scipy.ndimage.binary_dilation function.
 
     Morphological dilation sets a pixel at ``(i,j)`` to the maximum over all
     pixels in the neighborhood centered at ``(i,j)``. Dilation enlarges bright
@@ -71,7 +72,6 @@ def binary_dilation(image, selem=None, out=None, iterations=1, mask=None,
 
     Parameters
     ----------
-
     image : ndarray
         Binary input image.
     selem : ndarray, optional
@@ -81,7 +81,7 @@ def binary_dilation(image, selem=None, out=None, iterations=1, mask=None,
         The array to store the result of the morphology. If None, is
         passed, a new array will be allocated.
     iterations : {int, float}, optional
-        The number of times dilation is repeated (defaults to 1). If <1,
+        The number of times dilation is repeated (defaults to 1). If < 1,
         dilation is repeated until the result no longer changes.
     mask : array-like, optional
         If provided, dilation is only performed on elements of `image` with
@@ -96,6 +96,7 @@ def binary_dilation(image, selem=None, out=None, iterations=1, mask=None,
     dilated : ndarray of bool or uint
         The result of the morphological dilation with values in
         ``[False, True]``.
+
     """
     if out is None:
         out = np.empty(image.shape, dtype=np.bool)
@@ -106,11 +107,12 @@ def binary_dilation(image, selem=None, out=None, iterations=1, mask=None,
 
 
 @default_selem
-def binary_opening(image, selem=None, out=None):
+def binary_opening(image, selem=None, out=None, iterations=1, origin=0):
     """Return fast binary morphological opening of an image.
 
     This function returns the same result as greyscale opening but performs
-    faster for binary images.
+    faster for binary images. It is a wrapper for the
+    scipy.ndimage.binary_opening function.
 
     The morphological opening on an image is defined as an erosion followed by
     a dilation. Opening can remove small bright spots (i.e. "salt") and connect
@@ -127,6 +129,12 @@ def binary_opening(image, selem=None, out=None):
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
+    iterations : {int, float}, optional
+        The number of times binary closing (dilation followed by erosion = 1)
+        is repeated. Defaults to 1. If < 1, closing is repeated until the
+        output no longer changes.
+    origin : int or tuple of ints, optional
+        Placement of the filter, by default 0.
 
     Returns
     -------
@@ -135,16 +143,18 @@ def binary_opening(image, selem=None, out=None):
 
     """
     eroded = binary_erosion(image, selem)
-    out = binary_dilation(eroded, selem, out=out)
+    out = binary_dilation(eroded, selem, out=out, iterations=iterations,
+                          origin=origin)
     return out
 
 
 @default_selem
-def binary_closing(image, selem=None, out=None):
+def binary_closing(image, selem=None, out=None, iterations=1, origin=0):
     """Return fast binary morphological closing of an image.
 
-    This function returns the same result as greyscale closing but performs
-    faster for binary images.
+    This function acts as a wrapper for scipy.ndimage.binary_closing and
+    returns the same result as greyscale closing but performs faster for
+    binary images.
 
     The morphological closing on an image is defined as a dilation followed by
     an erosion. Closing can remove small dark spots (i.e. "pepper") and connect
@@ -161,6 +171,12 @@ def binary_closing(image, selem=None, out=None):
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.
+    iterations : {int, float}, optional
+        The number of times binary closing (dilation followed by erosion = 1)
+        is repeated. Defaults to 1. If < 1, closing is repeated until the
+        output no longer changes.
+    origin : int or tuple of ints, optional
+        Placement of the filter, by default 0.
 
     Returns
     -------
@@ -169,5 +185,6 @@ def binary_closing(image, selem=None, out=None):
 
     """
     dilated = binary_dilation(image, selem)
-    out = binary_erosion(dilated, selem, out=out)
+    out = binary_erosion(dilated, selem, out=out, iterations=iterations,
+                         origin=origin)
     return out
