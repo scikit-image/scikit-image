@@ -21,7 +21,7 @@ def moments_coords(coords, order=3):
     ----------
     coords : (N, D) double or uint8 array
         Array of N points that describe an image of D dimensionality in
-        Euclidian space.
+        Cartesian space.
     order : int, optional
         Maximum order of moments. Default is 3.
 
@@ -62,7 +62,7 @@ def moments_coords_central(coords, center=None, order=3):
     ----------
     coords : (N, D) double or uint8 array
         Array of N points that describe an image of D dimensionality in
-        Euclidian space.
+        Cartesian space.
     center : tuple of float, optional
         Coordinates of the image centroid. This will be computed if it
         is not provided.
