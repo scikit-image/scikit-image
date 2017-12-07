@@ -118,7 +118,7 @@ def _generate_triangle_mask(point, image, shape, random):
     Parameters
     ----------
     point : tuple
-        The row and column of the top left corner of the rectangle.
+        The row and column of the top left corner of a down-pointing triangle.
     image : tuple
         The height, width and depth of the image into which the shape is placed.
     shape : tuple
@@ -142,7 +142,7 @@ def _generate_triangle_mask(point, image, shape, random):
         A mask of indices that the shape fills.
     """
     if shape[0] == 1 or shape[1] == 1:
-        raise ValueError('dimension must be > 1 for circles')
+        raise ValueError('dimension must be > 1 for triangles')
     available_side = min(image[1] - point[1], point[0] + 1, shape[1])
     if available_side < shape[0]:
         raise ArithmeticError('cannot fit shape to image')
