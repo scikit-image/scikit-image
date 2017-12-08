@@ -197,8 +197,8 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False,
     selem = _shift_selem(selem, shift_x, shift_y)
     if out is None:
         out = np.empty_like(image)
-    out = ndi.grey_erosion(image, footprint=selem, output=out, mode=mode,
-                           cval=cval, origin=origin)
+    ndi.morphology.grey_erosion(image, footprint=selem, output=out, mode=mode,
+                                cval=cval, origin=origin)
     return out
 
 
@@ -271,12 +271,11 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False,
     # this author (@jni). To "patch" this behaviour, we invert our own
     # selem before passing it to `ndi.grey_dilation`.
     # [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285
-    # added 20171207 @nrweir: This is still the case, so keeping _invert_selem.
     selem = _invert_selem(selem)
     if out is None:
         out = np.empty_like(image)
-    out = ndi.grey_dilation(image, footprint=selem, output=out, mode=mode,
-                            cval=cval, origin=origin)
+    ndi.grey_dilation(image, footprint=selem, output=out, mode=mode,
+                      cval=cval, origin=origin)
     return out
 
 
@@ -290,7 +289,11 @@ def opening(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
     small dark cracks. This tends to "open" up (dark) gaps between (bright)
     features.
 
-    This function is a wrapper to ndi.morphology.grey_opening.
+    Note that this function does not directly utilize
+    scipy.ndimage.morphology.grey_opening, but instead manually performs
+    opening through skimage's erosion/dilation (which are wrappers for
+    scipy.ndimage.morphology.grey_erosion and
+    scipy.ndimage.morphology.grey_dilation, respectively)
 
     Parameters
     ----------
@@ -333,10 +336,10 @@ def opening(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    if out is None:
-        out = np.empty_like(image)
-    out = ndi.grey_opening(image, footprint=selem, output=out, mode=mode,
-                           cval=cval, origin=origin)
+    eroded = erosion(image, selem, mode=mode, cval=cval, origin=origin)
+    # note: shift_x, shift_y do nothing if selem side length is odd
+    out = dilation(eroded, selem, out=out, shift_x=True, shift_y=True,
+                   mode=mode, cval=cval, origin=origin)
     return out
 
 
@@ -350,8 +353,10 @@ def closing(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
     small bright cracks. This tends to "close" up (dark) gaps between (bright)
     features.
 
-    This function is a wrapper to ndi.morphology.grey_closing.
-
+    Note that this function does not directly utilize ndi.grey_closing, but
+    instead manually performs opening through skimage's dilation/erosion
+    (which are wrappers for ndi.grey_dilation and ndi.grey_erosion,
+    respectively)
     Parameters
     ----------
     image : ndarray
@@ -393,10 +398,10 @@ def closing(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    if out is None:
-        out = np.empty_like(image)
-    out = ndi.grey_closing(image, footprint=selem, output=out, mode=mode,
-                           cval=cval, origin=origin)
+    dilated = dilation(image, selem, mode=mode, cval=cval, origin=origin)
+    # note: shift_x, shift_y do nothing if selem side length is odd
+    out = erosion(dilated, selem, out=out, shift_x=True, shift_y=True,
+                  mode=mode, cval=cval, origin=origin)
     return out
 
 
@@ -409,7 +414,9 @@ def white_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
     morphological opening. This operation returns the bright spots of the image
     that are smaller than the structuring element.
 
-    This function is a wrapper to ndi.morphology.white_tophat.
+    When `out` is provided, this function directly performs opening as
+    implemented in skimage's opening (a wrapper for ndi.grey_opening). If `out`
+    is not provided, ndi.white_tophat is called directly.
 
     Parameters
     ----------
@@ -453,7 +460,11 @@ def white_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
 
     """
     selem = np.array(selem)
-    if out is None:
+    if out is image:
+        opened = opening(image, selem, mode=mode, cval=cval, origin=origin)
+        out -= opened
+        return out
+    elif out is None:
         out = np.empty_like(image)
     out = ndi.morphology.white_tophat(image, footprint=selem, output=out,
                                       mode=mode, cval=cval, origin=origin)
@@ -470,7 +481,10 @@ def black_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
     are smaller than the structuring element. Note that dark spots in the
     original image are bright spots after the black top hat.
 
-    This function is a wrapper to ndi.morphology.black_tophat.
+    When `out` is provided, this function directly performs opening as
+    implemented in skimage's closing (a wrapper for
+    scipy.ndimage.morphology.grey_closing). If `out` is not provided,
+    scipy.ndimage.morphology.black_tophat is called directly.
 
     Parameters
     ----------
@@ -513,8 +527,10 @@ def black_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    if out is None:
-        out = np.empty_like(image)
-    out = ndi.morphology.black_tophat(image, footprint=selem, output=out,
-                                      mode=mode, cval=cval, origin=origin)
-    return out
+    if out is image:
+        closed = closing(image, selem, mode=mode, cval=cval, origin=origin)
+        out = closed - out
+    else:
+        out = ndi.morphology.black_tophat(image, footprint=selem, output=out,
+                                          mode=mode, cval=cval, origin=origin)
+        return out
