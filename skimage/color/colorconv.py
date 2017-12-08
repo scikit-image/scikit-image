@@ -715,7 +715,7 @@ def rgb2c1c2c3(rgb):
     >>> img = data.astronaut()
     >>> img_c1c2c3 = rgb2c1c2c3(img)
     """
-    out = np.arctan(rgb/np.dstack((np.maximum(rgb[...,1], rgb[...,2]), np.maximum(rgb[...,0], rgb[...,2]), np.maximum(rgb[...,0], rgb[...,1]))))
+    out = np.arctan(rgb/np.dstack((np.maximum(rgb[...,1], rgb[...,2])+0.000000001, np.maximum(rgb[...,0], rgb[...,2])+0.000000001, np.maximum(rgb[...,0], rgb[...,1])+0.000000001)))
     return out
 
 
