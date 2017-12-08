@@ -347,12 +347,6 @@ def hsv2rgb(hsv):
     return out
 
 
-
-
-
-
-
-
 # ---------------------------------------------------------------
 # Primaries for the coordinate systems
 # ---------------------------------------------------------------
@@ -715,10 +709,12 @@ def rgb2c1c2c3(rgb):
     >>> img = data.astronaut()
     >>> img_c1c2c3 = rgb2c1c2c3(img)
     """
-    out = np.arctan(rgb/np.dstack((np.maximum(rgb[...,1], rgb[...,2])+0.000000001, np.maximum(rgb[...,0], rgb[...,2])+0.000000001, np.maximum(rgb[...,0], rgb[...,1])+0.000000001)))
+    out = np.arctan(rgb / np.dstack((
+        np.maximum(rgb[..., 1], rgb[..., 2]) + 0.000000001, 
+        np.maximum(rgb[..., 0], rgb[..., 2]) + 0.000000001, 
+        np.maximum(rgb[..., 0], rgb[..., 1]) + 0.000000001
+        )))
     return out
-
-
 
 
 def rgb2maxrgb(rgb):
@@ -751,22 +747,15 @@ def rgb2maxrgb(rgb):
     >>> img_c1c2c3 = rgb2maxrgb(img)
     """
     rgb = np.copy(rgb)
-    R = rgb[:,:,0]
-    G = rgb[:,:,1]
-    B = rgb[:,:,2]
-    M = np.maximum(np.maximum(R, G), B)
+    R = rgb[:, :, 0]
+    G = rgb[:, :, 1]
+    B = rgb[:, :, 2]
+    M = np.maximum( np.maximum(R, G), B)
     R[R < M] = 0
     G[G < M] = 0
     B[B < M] = 0
-    out = np.dstack((R,G,B))
-
+    out = np.dstack((R, G, B))
     return out
-
-
-
-
-
-
 
 
 def rgb2rgbcie(rgb):
