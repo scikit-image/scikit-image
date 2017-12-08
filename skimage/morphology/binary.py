@@ -51,9 +51,9 @@ def binary_erosion(image, selem=None, out=None, iterations=1, mask=None,
     """
     if out is None:
         out = np.empty(image.shape, dtype=np.bool)
-    ndi.binary_erosion(image, structure=selem, output=out,
-                       iterations=iterations, mask=mask, origin=origin,
-                       border_value=border_value, brute_force=brute_force)
+    out = ndi.binary_erosion(image, structure=selem, output=out,
+                             iterations=iterations, mask=mask, origin=origin,
+                             border_value=border_value, brute_force=brute_force)
     return out
 
 
@@ -100,9 +100,9 @@ def binary_dilation(image, selem=None, out=None, iterations=1, mask=None,
     """
     if out is None:
         out = np.empty(image.shape, dtype=np.bool)
-    ndi.binary_dilation(image, structure=selem, output=out,
-                        iterations=iterations, mask=mask, origin=origin,
-                        border_value=border_value, brute_force=False)
+    out = ndi.binary_dilation(image, structure=selem, output=out,
+                              iterations=iterations, mask=mask, origin=origin,
+                              border_value=border_value, brute_force=False)
     return out
 
 
@@ -142,9 +142,10 @@ def binary_opening(image, selem=None, out=None, iterations=1, origin=0):
         The result of the morphological opening.
 
     """
-    eroded = binary_erosion(image, selem)
-    out = binary_dilation(eroded, selem, out=out, iterations=iterations,
-                          origin=origin)
+    if out is None:
+        out = np.empty(image.shape, dtype=np.bool)
+    out = ndi.binary_opening(image, structure=selem, iterations=iterations,
+                             output=out, origin=origin)
     return out
 
 
@@ -184,7 +185,8 @@ def binary_closing(image, selem=None, out=None, iterations=1, origin=0):
         The result of the morphological closing.
 
     """
-    dilated = binary_dilation(image, selem)
-    out = binary_erosion(dilated, selem, out=out, iterations=iterations,
-                         origin=origin)
+    if out is None:
+        out = np.empty(image.shape, dtype=np.bool)
+    out = ndi.binary_closing(image, structure=selem, iterations=iterations,
+                             output=out, origin=origin)
     return out
