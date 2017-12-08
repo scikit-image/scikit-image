@@ -41,7 +41,7 @@ Supported color spaces
 :author: Travis Oliphant (XYZ and RGB CIE functions)
 :author: Matt Terry (lab2lch)
 :author: Alex Izvorski (yuv2rgb, rgb2yuv and related)
-
+:author: Imran Salam (rgb2c1c2c3 and rgb2maxrgb)
 :license: modified BSD
 
 References
@@ -345,6 +345,12 @@ def hsv2rgb(hsv):
                          np.dstack((v, p, q))])
 
     return out
+
+
+
+
+
+
 
 
 # ---------------------------------------------------------------
@@ -677,6 +683,89 @@ def rgb2xyz(rgb):
     arr[mask] = np.power((arr[mask] + 0.055) / 1.055, 2.4)
     arr[~mask] /= 12.92
     return _convert(xyz_from_rgb, arr)
+
+
+
+def rgb2c1c2c3(rgb):
+    """RGB to C1C2C3 color space conversion.
+
+    Parameters
+    ----------
+    rgb : array_like
+        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
+
+    Returns
+    -------
+    out : ndarray
+        The image in C1C2C3 format, in a 3-D array of shape ``(.., .., 3)``.
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not a 3-D array of shape ``(.., .., 3)``.
+
+
+    References
+    ----------
+    .. [1] https://arxiv.org/abs/1702.05421
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> img = data.astronaut()
+    >>> img_c1c2c3 = rgb2c1c2c3(img)
+    """
+    out = np.arctan(rgb/np.dstack((np.maximum(rgb[...,1], rgb[...,2]), np.maximum(rgb[...,0], rgb[...,2]), np.maximum(rgb[...,0], rgb[...,1]))))
+    return out
+
+
+
+
+def rgb2maxrgb(rgb):
+    """RGB to MAXRGB color space conversion.
+
+    Parameters
+    ----------
+    rgb : array_like
+        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
+
+    Returns
+    -------
+    out : ndarray
+        The image in MAX RGB format, in a 3-D array of shape ``(.., .., 3)``.
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not a 3-D array of shape ``(.., .., 3)``.
+
+
+    References
+    ----------
+    .. [1] https://docs.gimp.org/en/plug-in-max-rgb.html
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> img = data.astronaut()
+    >>> img_c1c2c3 = rgb2maxrgb(img)
+    """
+    R = rgb[:,:,0]
+    G = rgb[:,:,1]
+    B = rgb[:,:,2]
+    M = np.maximum(np.maximum(R, G), B)
+    R[R < M] = 0
+    G[G < M] = 0
+    B[B < M] = 0
+    out = np.dstack((R,G,B))
+
+    return out
+
+
+
+
+
+
 
 
 def rgb2rgbcie(rgb):
