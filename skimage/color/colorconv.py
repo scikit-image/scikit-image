@@ -750,6 +750,7 @@ def rgb2maxrgb(rgb):
     >>> img = data.astronaut()
     >>> img_c1c2c3 = rgb2maxrgb(img)
     """
+    rgb = np.copy(rgb)
     R = rgb[:,:,0]
     G = rgb[:,:,1]
     B = rgb[:,:,2]
