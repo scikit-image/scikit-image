@@ -195,6 +195,8 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False,
     """
     selem = np.array(selem)
     selem = _shift_selem(selem, shift_x, shift_y)
+    if out is None:
+        out = np.empty_like(image)
     ndi.morphology.grey_erosion(image, footprint=selem, output=out, mode=mode,
                                 cval=cval, origin=origin)
     return out
@@ -271,6 +273,8 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False,
     # [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285
     # added 20171207 @nrweir: This is still the case, so keeping _invert_selem.
     selem = _invert_selem(selem)
+    if out is None:
+        out = np.empty_like(image)
     ndi.grey_dilation(image, footprint=selem, output=out, mode=mode,
                       cval=cval, origin=origin)
     return out
@@ -329,6 +333,8 @@ def opening(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
+    if out is None:
+        out = np.empty_like(image)
     out = ndi.grey_opening(image, footprint=selem, output=out, mode=mode,
                            cval=cval, origin=origin)
     return out
@@ -389,10 +395,10 @@ def closing(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    dilated = dilation(image, selem, mode=mode, cval=cval, origin=origin)
-    # note: shift_x, shift_y do nothing if selem side length is odd
-    out = erosion(dilated, selem, out=out, shift_x=True, shift_y=True,
-                  mode=mode, cval=cval, origin=origin)
+    if out is None:
+        out = np.empty_like(image)
+    out = ndi.grey_opening(image, footprint=selem, output=out, mode=mode,
+                           cval=cval, origin=origin)
     return out
 
 
@@ -448,6 +454,8 @@ def white_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
+    if out is None:
+        out = np.empty_like(image)
     out = ndi.grey_closing(image, footprint=selem, output=out, mode=mode,
                            cval=cval, origin=origin)
     return out
@@ -506,6 +514,8 @@ def black_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
+    if out is None:
+        out = np.empty_like(image)
     out = ndi.morphology.black_tophat(image, footprint=selem, output=out,
                                       mode=mode, cval=cval, origin=origin)
     return out
