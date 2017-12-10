@@ -333,8 +333,6 @@ def opening(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    if out is None:
-        out = np.empty_like(image)
     out = ndi.grey_opening(image, footprint=selem, output=out, mode=mode,
                            cval=cval, origin=origin)
     return out
@@ -395,8 +393,6 @@ def closing(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    if out is None:
-        out = np.empty_like(image)
     out = ndi.grey_opening(image, footprint=selem, output=out, mode=mode,
                            cval=cval, origin=origin)
     return out
@@ -454,9 +450,7 @@ def white_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    if out is None:
-        out = np.empty_like(image)
-    out = ndi.grey_closing(image, footprint=selem, output=out, mode=mode,
+    out = ndi.white_tophat(image, footprint=selem, output=out, mode=mode,
                            cval=cval, origin=origin)
     return out
 
@@ -514,8 +508,6 @@ def black_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    if out is None:
-        out = np.empty_like(image)
     out = ndi.morphology.black_tophat(image, footprint=selem, output=out,
                                       mode=mode, cval=cval, origin=origin)
     return out
