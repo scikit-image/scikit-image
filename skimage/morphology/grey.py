@@ -281,7 +281,6 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False,
 
 
 @default_selem
-@pad_for_eccentric_selems
 def opening(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
     """Return greyscale morphological opening of an image.
 
@@ -339,7 +338,6 @@ def opening(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
 
 
 @default_selem
-@pad_for_eccentric_selems
 def closing(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
     """Return greyscale morphological closing of an image.
 
