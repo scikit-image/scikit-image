@@ -51,7 +51,8 @@ def binary_erosion(image, selem=None, out=None, iterations=1, mask=None,
     """
     out = ndi.binary_erosion(image, structure=selem, output=out,
                              iterations=iterations, mask=mask, origin=origin,
-                             border_value=border_value, brute_force=brute_force)
+                             border_value=border_value,
+                             brute_force=brute_force)
     return out
 
 
