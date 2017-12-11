@@ -160,7 +160,7 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False,
         Determines how array borders are handled. If using 'constant', `cval`
         is the value borders are set to. Default is 'reflect'.
     cval : scalar, optional
-        Value to fill past edges with if `mode`='constant'. Defaults to 0.0.
+        Value to fill past edges with if `mode` = 'constant'. Defaults to 0.0.
     origin : scalar, optional
         Controls placement of the filter. Defaults to 0.
 
@@ -231,7 +231,7 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False,
         Determines how array borders are handled. If using 'constant', `cval`
         is the value borders are set to. Default is 'reflect'.
     cval : scalar, optional
-        Value to fill past edges with if `mode`='constant'. Defaults to 0.0.
+        Value to fill past edges with if `mode` = 'constant'. Defaults to 0.0.
     origin : scalar, optional
         Controls placement of the filter. Defaults to 0.
 
@@ -305,7 +305,7 @@ def opening(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
         Determines how array borders are handled. If using 'constant', `cval`
         is the value borders are set to. Default is 'reflect'.
     cval : scalar, optional
-        Value to fill past edges with if `mode`='constant'. Defaults to 0.0.
+        Value to fill past edges with if `mode` = 'constant'. Defaults to 0.0.
     origin : scalar, optional
         Controls placement of the filter. Defaults to 0.
 
@@ -364,7 +364,7 @@ def closing(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
         Determines how array borders are handled. If using 'constant', `cval`
         is the value borders are set to. Default is 'reflect'.
     cval : scalar, optional
-        Value to fill past edges with if `mode`='constant'. Defaults to 0.0.
+        Value to fill past edges with if `mode` = 'constant'. Defaults to 0.0.
     origin : scalar, optional
         Controls placement of the filter. Defaults to 0.
 
@@ -421,7 +421,7 @@ def white_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
         Determines how array borders are handled. If using 'constant', `cval`
         is the value borders are set to. Default is 'reflect'.
     cval : scalar, optional
-        Value to fill past edges with if `mode`='constant'. Defaults to 0.0.
+        Value to fill past edges with if `mode` = 'constant'. Defaults to 0.0.
     origin : scalar, optional
         Controls placement of the filter. Defaults to 0.
 
@@ -479,7 +479,7 @@ def black_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
         Determines how array borders are handled. If using 'constant', `cval`
         is the value borders are set to. Default is 'reflect'.
     cval : scalar, optional
-        Value to fill past edges with if `mode`='constant'. Defaults to 0.0.
+        Value to fill past edges with if `mode` = 'constant'. Defaults to 0.0.
     origin : scalar, optional
         Controls placement of the filter. Defaults to 0.
 
