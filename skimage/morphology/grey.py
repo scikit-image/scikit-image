@@ -350,6 +350,7 @@ def closing(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
     instead manually performs opening through skimage's dilation/erosion
     (which are wrappers for ndi.grey_dilation and ndi.grey_erosion,
     respectively)
+
     Parameters
     ----------
     image : ndarray
