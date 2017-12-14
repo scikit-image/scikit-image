@@ -40,7 +40,7 @@ class TestMorphology(TestCase):
                     for func in funcs:
                         key = '{0}_{1}_{2}_{3}'.format(
                             strel.__name__, n, func.__name__, mode)
-                        output[key] = func(image, strel(n))
+                        output[key] = func(image, strel(n), mode=mode)
 
         return output
 
