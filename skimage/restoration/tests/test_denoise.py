@@ -272,35 +272,37 @@ def test_denoise_nl_means_2d_multichannel():
 
 
 def test_denoise_nl_means_3d():
-    img = np.zeros((20, 20, 10))
-    img[5:-5, 5:-5, 3:-3] = 1.
+    img = np.zeros((12, 12, 8))
+    img[5:-5, 5:-5, 2:-2] = 1.
     sigma = 0.3
-    img += sigma * np.random.randn(*img.shape)
+    imgn = img + sigma * np.random.randn(*img.shape)
+    psnr_noisy = compare_psnr(img, imgn)
     for s in [sigma, 0]:
-        denoised = restoration.denoise_nl_means(img, 5, 4, 0.2, fast_mode=True,
+        denoised = restoration.denoise_nl_means(imgn, 3, 4, h=0.75*sigma,
+                                                fast_mode=True,
                                                 multichannel=False, sigma=s)
         # make sure noise is reduced
-        assert_(img.std() > denoised.std())
-        denoised = restoration.denoise_nl_means(img, 5, 4, 0.2,
+        assert_(compare_psnr(img, denoised) > psnr_noisy)
+        denoised = restoration.denoise_nl_means(imgn, 3, 4, h=0.75*sigma,
                                                 fast_mode=False,
                                                 multichannel=False, sigma=s)
         # make sure noise is reduced
-        assert_(img.std() > denoised.std())
+        assert_(compare_psnr(img, denoised) > psnr_noisy)
 
 
 def test_denoise_nl_means_multichannel():
-    img = np.zeros((21, 20, 10))
-    img[10, 9:11, 2:-2] = 1.
-    img += 0.3*np.random.randn(*img.shape)
+    # for true 3D data, 3D denoising is better than denoising as 2D+channels
+    img = np.zeros((13, 10, 8))
+    img[6, 4:6, 2:-2] = 1.
+    sigma = 0.3
+    imgn = img + sigma * np.random.randn(*img.shape)
     denoised_wrong_multichannel = restoration.denoise_nl_means(
-        img, 5, 4, 0.1, fast_mode=True, multichannel=True)
+        imgn, 3, 4, 0.6 * sigma, fast_mode=True, multichannel=True)
     denoised_ok_multichannel = restoration.denoise_nl_means(
-        img, 5, 4, 0.1, fast_mode=True, multichannel=False)
-    snr_wrong = 10 * np.log10(1. /
-                              ((denoised_wrong_multichannel - img)**2).mean())
-    snr_ok = 10 * np.log10(1. /
-                           ((denoised_ok_multichannel - img)**2).mean())
-    assert_(snr_ok > snr_wrong)
+        imgn, 3, 4, 0.6 * sigma, fast_mode=True, multichannel=False)
+    psnr_wrong = compare_psnr(img, denoised_wrong_multichannel)
+    psnr_ok = compare_psnr(img, denoised_ok_multichannel)
+    assert_(psnr_ok > psnr_wrong)
 
 
 def test_denoise_nl_means_wrong_dimension():
