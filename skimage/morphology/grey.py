@@ -86,6 +86,11 @@ def _invert_selem(selem):
 def pad_for_eccentric_selems(func):
     """Pad input images for certain morphological operations.
 
+    As of 0.14, only used to allow morphological functions to reproduce
+    behavior from previous versions of `skimage.morphology`, which rather than
+    using ndi.morphology edge handling, padded the image border with extra
+    pixels of the same values. Now has no effect unless `mode` = 'pad'.
+
     Parameters
     ----------
     func : callable
@@ -105,24 +110,29 @@ def pad_for_eccentric_selems(func):
 
     """
     @functools.wraps(func)
-    def func_out(image, selem, out=None, *args, **kwargs):
+    def func_out(image, selem, out=None, mode='reflect', cval=0.0, origin=0,
+                 *args, **kwargs):
         pad_widths = []
         padding = False
+        mode_temp = mode
         if out is None:
             out = np.empty_like(image)
-        for axis_len in selem.shape:
-            if axis_len % 2 == 0:
-                axis_pad_width = axis_len - 1
-                padding = True
-            else:
-                axis_pad_width = 0
-            pad_widths.append((axis_pad_width,) * 2)
+        if mode == 'pad':
+            mode_temp = 'reflect'
+            for axis_len in selem.shape:
+                if axis_len % 2 == 0:
+                    axis_pad_width = axis_len - 1
+                    padding = True
+                else:
+                    axis_pad_width = 0
+                pad_widths.append((axis_pad_width,) * 2)
         if padding:
             image = np.pad(image, pad_widths, mode='edge')
             out_temp = np.empty_like(image)
         else:
             out_temp = out
-        out_temp = func(image, selem, out=out_temp, *args, **kwargs)
+        out_temp = func(image, selem, out=out_temp, mode=mode_temp, cval=0.0,
+                        origin=0, *args, **kwargs)
         if padding:
             out[:] = crop(out_temp, pad_widths)
         else:
@@ -281,6 +291,7 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False,
 
 
 @default_selem
+@pad_for_eccentric_selems
 def opening(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
     """Return greyscale morphological opening of an image.
 
@@ -301,9 +312,12 @@ def opening(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
-    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'pad'},
+           optional
         Determines how array borders are handled. If using 'constant', `cval`
-        is the value borders are set to. Default is 'reflect'.
+        is the value borders are set to. Default is 'reflect'. If using 'pad',
+        will reproduce behavior displayed in scikit-imgae < 0.14 and pad edges
+        prior to processing with eccentrically shaped structuring elements.
     cval : scalar, optional
         Value to fill past edges with if `mode` = 'constant'. Defaults to 0.0.
     origin : scalar, optional
@@ -338,6 +352,7 @@ def opening(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
 
 
 @default_selem
+@pad_for_eccentric_selems
 def closing(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
     """Return greyscale morphological closing of an image.
 
@@ -361,9 +376,12 @@ def closing(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.
-    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'pad'},
+           optional
         Determines how array borders are handled. If using 'constant', `cval`
-        is the value borders are set to. Default is 'reflect'.
+        is the value borders are set to. Default is 'reflect'. If using 'pad',
+        will reproduce behavior displayed in scikit-imgae < 0.14 and pad edges
+        prior to processing with eccentrically shaped structuring elements.
     cval : scalar, optional
         Value to fill past edges with if `mode` = 'constant'. Defaults to 0.0.
     origin : scalar, optional
@@ -398,6 +416,7 @@ def closing(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
 
 
 @default_selem
+@pad_for_eccentric_selems
 def white_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
                  origin=0):
     """Return white top hat of an image.
@@ -418,9 +437,12 @@ def white_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
-    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'pad'},
+           optional
         Determines how array borders are handled. If using 'constant', `cval`
-        is the value borders are set to. Default is 'reflect'.
+        is the value borders are set to. Default is 'reflect'. If using 'pad',
+        will reproduce behavior displayed in scikit-imgae < 0.14 and pad edges
+        prior to processing with eccentrically shaped structuring elements.
     cval : scalar, optional
         Value to fill past edges with if `mode` = 'constant'. Defaults to 0.0.
     origin : scalar, optional
@@ -455,6 +477,7 @@ def white_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
 
 
 @default_selem
+@pad_for_eccentric_selems
 def black_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
                  origin=0):
     """Return black top hat of an image.
@@ -476,9 +499,12 @@ def black_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
-    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'pad'},
+           optional
         Determines how array borders are handled. If using 'constant', `cval`
-        is the value borders are set to. Default is 'reflect'.
+        is the value borders are set to. Default is 'reflect'. If using 'pad',
+        will reproduce behavior displayed in scikit-imgae < 0.14 and pad edges
+        prior to processing with eccentrically shaped structuring elements.
     cval : scalar, optional
         Value to fill past edges with if `mode` = 'constant'. Defaults to 0.0.
     origin : scalar, optional
