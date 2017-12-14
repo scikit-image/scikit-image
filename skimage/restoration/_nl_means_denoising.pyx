@@ -65,10 +65,10 @@ cdef inline double patch_distance_2d(IMGDTYPE [:, :] p1,
     return distance
 
 
-cdef inline double patch_distance_2drgb(IMGDTYPE [:, :, :] p1,
-                                        IMGDTYPE [:, :, :] p2,
-                                        IMGDTYPE [:, ::] w, int s, double var,
-                                        int n_ch):
+cdef inline double patch_distance_2dmultichannel(IMGDTYPE [:, :, :] p1,
+                                                 IMGDTYPE [:, :, :] p2,
+                                                 IMGDTYPE [:, ::] w,
+                                                 int s, double var, int n_ch):
     """
     Compute a Gaussian distance between two image patches.
 
@@ -247,7 +247,7 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
                                         col_start_j:col_end_j, 0],
                                  w, s, var)
                     else:
-                        weight = patch_distance_2drgb(
+                        weight = patch_distance_2dmultichannel(
                                  padded[row_start:row_end,
                                         col_start:col_end, :],
                                  padded[row_start_i:row_end_i,
