@@ -56,9 +56,6 @@ class TestEccentricStructuringElements(TestCase):
     def setUp(self):
         # because edges are handled differently under the new ndi morphology
         # functions, these tests have been changed to avoid edge pixels.
-        # TODO: Add new tests which ensure the various options for edge
-        # handling, implemented as new kwargs to the morphology functions,
-        # work correctly. - @nrweir
         self.black_pixel = 255 * np.ones((5, 5), dtype=np.uint8)
         self.black_pixel[2, 2] = 0
         self.white_pixel = 255 - self.black_pixel
