@@ -27,6 +27,7 @@ class TestMorphology(TestCase):
                  grey.white_tophat, grey.black_tophat)
         selems_2D = (selem.square, selem.diamond,
                      selem.disk, selem.star)
+        modes = ('reflect', 'constant', 'nearest', 'mirror', 'wrap')
 
         with expected_warnings(['Possible precision loss']):
             image = img_as_ubyte(transform.downscale_local_mean(
@@ -35,10 +36,11 @@ class TestMorphology(TestCase):
         output = {}
         for n in range(1, 4):
             for strel in selems_2D:
-                for func in funcs:
-                    key = '{0}_{1}_{2}'.format(
-                        strel.__name__, n, func.__name__)
-                    output[key] = func(image, strel(n))
+                for mode in modes:
+                    for func in funcs:
+                        key = '{0}_{1}_{2}_{3}'.format(
+                            strel.__name__, n, func.__name__, mode)
+                        output[key] = func(image, strel(n))
 
         return output
 
