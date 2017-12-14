@@ -115,8 +115,6 @@ def pad_for_eccentric_selems(func):
         pad_widths = []
         padding = False
         mode_temp = mode
-        if out is None:
-            out = np.empty_like(image)
         if mode == 'pad':
             mode_temp = 'reflect'
             for axis_len in selem.shape:
@@ -128,7 +126,7 @@ def pad_for_eccentric_selems(func):
                 pad_widths.append((axis_pad_width,) * 2)
         if padding:
             image = np.pad(image, pad_widths, mode='edge')
-            out_temp = np.empty_like(image)
+            out_temp = None
         else:
             out_temp = out
         out_temp = func(image, selem, out=out_temp, mode=mode_temp, cval=0.0,
