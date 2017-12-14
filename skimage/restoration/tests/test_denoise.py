@@ -245,24 +245,30 @@ def test_denoise_nl_means_2d():
         assert_(img.std() > denoised.std())
 
 
-def test_denoise_nl_means_2drgb():
-    # reduce image size because nl means is very slow
+def test_denoise_nl_means_2d_multichannel():
+    # reduce image size because nl means is slow
     img = np.copy(astro[:50, :50])
+    img = np.concatenate((img, )*2, )  # 6 channels
+
     # add some random noise
-    sigma = 0.5
-    img += sigma * img.std() * np.random.random(img.shape)
-    img = np.clip(img, 0, 1)
-    for s in [sigma, 0]:
-        denoised = restoration.denoise_nl_means(img, 7, 9, 0.3,
-                                                fast_mode=True,
-                                                multichannel=True, sigma=s)
-        # make sure noise is reduced
-        assert_(img.std() > denoised.std())
-        denoised = restoration.denoise_nl_means(img, 7, 9, 0.3,
-                                                fast_mode=False,
-                                                multichannel=True, sigma=s)
-        # make sure noise is reduced
-        assert_(img.std() > denoised.std())
+    sigma = 0.1
+    imgn = img + sigma * np.random.standard_normal(img.shape)
+    imgn = np.clip(imgn, 0, 1)
+    for fast_mode in [True, False]:
+        for s in [sigma, 0]:
+            for n_chan in [2, 3, 6]:
+                psnr_noisy = compare_psnr(img[..., :n_chan],
+                                          imgn[..., :n_chan])
+                denoised = restoration.denoise_nl_means(imgn[..., :n_chan],
+                                                        3, 5, h=0.75*sigma,
+                                                        fast_mode=fast_mode,
+                                                        multichannel=True,
+                                                        sigma=s)
+                psnr_denoised = compare_psnr(denoised[..., :n_chan],
+                                             img[..., :n_chan])
+                print(psnr_noisy, psnr_denoised)
+                # make sure noise is reduced
+                assert_(psnr_denoised > psnr_noisy)
 
 
 def test_denoise_nl_means_3d():
