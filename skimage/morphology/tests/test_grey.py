@@ -282,3 +282,38 @@ def test_1d_erosion():
     expected = np.array([1, 1, 2, 1, 1])
     eroded = grey.erosion(image)
     testing.assert_array_equal(eroded, expected)
+
+
+class TestOriginShift(TestCase):
+
+    # Test behavior when shifting origin in argument (using grey.erosion)
+    def _build_expected_output(self):
+        # @nrweir: after implementing origin shift arg in various morphology
+        # methods, used this function to generate test output.
+        # from skimage.morphology.tests.test_grey import TestOriginShift
+        #   import numpy as np
+        #   output = TestOriginShift()._build_expected_output()
+        #   np.savez_compressed('gray_origin_output.npz', **output)
+
+        origin_shifts = ((0, 0), (-1, 0), (0, -1), (-1, -1),
+                         (1, 0), (0, 1), (1, 1), (-1, 1), (1, -1))
+
+        with expected_warnings(['Possible precision loss']):
+            image = img_as_ubyte(transform.downscale_local_mean(
+                color.rgb2gray(data.coffee()), (20, 20)))
+
+        strel = selem.diamond(1)
+        output = {}
+
+        for o_s in origin_shifts:
+            key = 'origin_{0}_{1}'.format(
+                str(o_s[0]), str(o_s[1]))
+            output[key] = grey.erosion(image, strel, origin=o_s)
+
+        return output
+
+    def test_gray_origin(self):
+        expected = dict(np.load(
+            os.path.join(data_dir, 'gray_origin_output.npz')))
+        calculated = self._build_expected_output()
+        assert_equal(expected, calculated)
