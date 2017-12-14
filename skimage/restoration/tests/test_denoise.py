@@ -248,7 +248,7 @@ def test_denoise_nl_means_2d():
 def test_denoise_nl_means_2d_multichannel():
     # reduce image size because nl means is slow
     img = np.copy(astro[:50, :50])
-    img = np.concatenate((img, )*2, )  # 6 channels
+    img = np.concatenate((img, ) * 2, )  # 6 channels
 
     # add some random noise
     sigma = 0.1
@@ -260,7 +260,7 @@ def test_denoise_nl_means_2d_multichannel():
                 psnr_noisy = compare_psnr(img[..., :n_chan],
                                           imgn[..., :n_chan])
                 denoised = restoration.denoise_nl_means(imgn[..., :n_chan],
-                                                        3, 5, h=0.75*sigma,
+                                                        3, 5, h=0.75 * sigma,
                                                         fast_mode=fast_mode,
                                                         multichannel=True,
                                                         sigma=s)
@@ -278,12 +278,12 @@ def test_denoise_nl_means_3d():
     imgn = img + sigma * np.random.randn(*img.shape)
     psnr_noisy = compare_psnr(img, imgn)
     for s in [sigma, 0]:
-        denoised = restoration.denoise_nl_means(imgn, 3, 4, h=0.75*sigma,
+        denoised = restoration.denoise_nl_means(imgn, 3, 4, h=0.75 * sigma,
                                                 fast_mode=True,
                                                 multichannel=False, sigma=s)
         # make sure noise is reduced
         assert_(compare_psnr(img, denoised) > psnr_noisy)
-        denoised = restoration.denoise_nl_means(imgn, 3, 4, h=0.75*sigma,
+        denoised = restoration.denoise_nl_means(imgn, 3, 4, h=0.75 * sigma,
                                                 fast_mode=False,
                                                 multichannel=False, sigma=s)
         # make sure noise is reduced
