@@ -289,6 +289,7 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False,
 
 
 @default_selem
+@pad_for_eccentric_selems
 def opening(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
     """Return greyscale morphological opening of an image.
 
@@ -310,7 +311,7 @@ def opening(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'pad'},
-           optional
+        optional
         Determines how array borders are handled. If using 'constant', `cval`
         is the value borders are set to. Default is 'reflect'. If using 'pad',
         will reproduce behavior displayed in scikit-imgae < 0.14 and pad edges
@@ -349,6 +350,7 @@ def opening(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
 
 
 @default_selem
+@pad_for_eccentric_selems
 def closing(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
     """Return greyscale morphological closing of an image.
 
@@ -373,7 +375,7 @@ def closing(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'pad'},
-           optional
+        optional
         Determines how array borders are handled. If using 'constant', `cval`
         is the value borders are set to. Default is 'reflect'. If using 'pad',
         will reproduce behavior displayed in scikit-imgae < 0.14 and pad edges
@@ -434,7 +436,7 @@ def white_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'pad'},
-           optional
+        optional
         Determines how array borders are handled. If using 'constant', `cval`
         is the value borders are set to. Default is 'reflect'. If using 'pad',
         will reproduce behavior displayed in scikit-imgae < 0.14 and pad edges
@@ -496,7 +498,7 @@ def black_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'pad'},
-           optional
+        optional
         Determines how array borders are handled. If using 'constant', `cval`
         is the value borders are set to. Default is 'reflect'. If using 'pad',
         will reproduce behavior displayed in scikit-imgae < 0.14 and pad edges
