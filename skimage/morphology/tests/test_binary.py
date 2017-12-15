@@ -1,3 +1,4 @@
+"""Tests for binary morphology functions."""
 import numpy as np
 from numpy import testing
 import os
@@ -180,6 +181,7 @@ def test_binary_output_3d():
 
 
 class TestOriginShift(TestCase):
+    """Tests for shifting the origin in morphology.binary functions."""
 
     # Test behavior when shifting origin in argument (using grey.erosion)
     def _build_expected_output(self):
@@ -210,6 +212,7 @@ class TestOriginShift(TestCase):
         return output
 
     def test_binary_origin(self):
+        """Compare test output to pre-established standards."""
         expected = dict(np.load(
             os.path.join(data_dir, 'binary_origin_output.npz')))
         calculated = self._build_expected_output()
