@@ -2,8 +2,8 @@ import numpy as np
 from numpy import testing
 import os
 
-from skimage import data, color, transform
-from skimage.util import img_as_bool, data_dir, img_as_ubyte
+from skimage import data, color, data_dir, transform
+from skimage.util import img_as_bool, img_as_ubyte
 from skimage.morphology import binary, grey, selem
 from scipy import ndimage as ndi
 from skimage._shared._warnings import expected_warnings
