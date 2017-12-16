@@ -311,7 +311,7 @@ def opening(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'pad'},
-           optional
+        optional
         Determines how array borders are handled. If using 'constant', `cval`
         is the value borders are set to. Default is 'reflect'. If using 'pad',
         will reproduce behavior displayed in scikit-imgae < 0.14 and pad edges
@@ -375,7 +375,7 @@ def closing(image, selem=None, out=None, mode='reflect', cval=0.0, origin=0):
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'pad'},
-           optional
+        optional
         Determines how array borders are handled. If using 'constant', `cval`
         is the value borders are set to. Default is 'reflect'. If using 'pad',
         will reproduce behavior displayed in scikit-imgae < 0.14 and pad edges
@@ -436,7 +436,7 @@ def white_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'pad'},
-           optional
+        optional
         Determines how array borders are handled. If using 'constant', `cval`
         is the value borders are set to. Default is 'reflect'. If using 'pad',
         will reproduce behavior displayed in scikit-imgae < 0.14 and pad edges
@@ -498,7 +498,7 @@ def black_tophat(image, selem=None, out=None, mode='reflect', cval=0.0,
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'pad'},
-           optional
+        optional
         Determines how array borders are handled. If using 'constant', `cval`
         is the value borders are set to. Default is 'reflect'. If using 'pad',
         will reproduce behavior displayed in scikit-imgae < 0.14 and pad edges
