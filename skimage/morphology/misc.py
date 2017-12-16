@@ -205,7 +205,7 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
     if min_size is not None:
         warn("the min_size argument is deprecated and will be removed in " +
              "0.16. Use area_threshold instead.")
-    area_threshold = min_size
+        area_threshold = min_size
 
     if in_place:
         out = ar
