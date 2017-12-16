@@ -134,20 +134,22 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     return out
 
 
-def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
+def remove_small_holes(ar, min_size=None, connectivity=1, in_place=False,
+                       area_threshold=64):
     """Remove continguous holes smaller than the specified size.
 
     Parameters
     ----------
     ar : ndarray (arbitrary shape, int or bool type)
         The array containing the connected components of interest.
-    area_threshold : int, optional (default: 64)
-        The maximum area, in pixels, of a contiguous hole that will be filled.
     connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
         The connectivity defining the neighborhood of a pixel.
     in_place : bool, optional (default: False)
         If `True`, remove the connected components in the input array itself.
         Otherwise, make a copy.
+    area_threshold : int, optional (default: 64)
+        The maximum area, in pixels, of a contiguous hole that will be filled.
+        Replaces `min_size`.
 
     Raises
     ------
@@ -198,6 +200,11 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
     if ar.dtype != bool:
         warn("Any labeled images will be returned as a boolean array. "
              "Did you mean to use a boolean array?", UserWarning)
+
+    if min_size is not None:
+        warn("the min_size argument is deprecated and will be removed in " +
+             "0.16. Use area_threshold instead.")
+    area_threshold = min_size
 
     if in_place:
         out = ar
