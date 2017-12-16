@@ -134,22 +134,23 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     return out
 
 
-def remove_small_holes(ar, min_size=None, connectivity=1, in_place=False,
-                       area_threshold=64):
+def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
+                       min_size=None):
     """Remove continguous holes smaller than the specified size.
 
     Parameters
     ----------
     ar : ndarray (arbitrary shape, int or bool type)
         The array containing the connected components of interest.
+    area_threshold : int, optional (default: 64)
+        The maximum area, in pixels, of a contiguous hole that will be filled.
+        Replaces `min_size`.
     connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
         The connectivity defining the neighborhood of a pixel.
     in_place : bool, optional (default: False)
         If `True`, remove the connected components in the input array itself.
         Otherwise, make a copy.
-    area_threshold : int, optional (default: 64)
-        The maximum area, in pixels, of a contiguous hole that will be filled.
-        Replaces `min_size`.
+
 
     Raises
     ------
