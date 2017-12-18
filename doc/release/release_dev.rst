@@ -61,6 +61,8 @@ Deprecations
   Specifically, the "orientation" region property will measure the
   anticlockwise angle from a *vertical* line, i.e. from the vector (1, 0) in
   row-column coordinates.
+- ``skimage.morphology.remove_small_holes`` ``min_size`` argument is deprecated
+  and will be removed in 0.16. Use ``area_threshold`` instead.
 
 
 Contributors to this release
