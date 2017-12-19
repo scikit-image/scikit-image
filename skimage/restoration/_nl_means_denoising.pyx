@@ -362,7 +362,7 @@ def _nl_means_denoising_3d(image, int s=7, int d=13, double h=0.1,
                                     padded[pln_start_i:pln_end_i,
                                            row_start_j:row_end_j,
                                            col_start_k:col_end_k],
-                                    w, s, var*var)
+                                    w, s, var)
                             # Collect results in weight sum
                             weight_sum += weight
                             new_value += weight * padded[pln + i,
