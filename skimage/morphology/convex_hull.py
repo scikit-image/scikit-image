@@ -76,9 +76,12 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     hull = ConvexHull(coords)
     vertices = hull.points[hull.vertices]
 
-    # If 2D, locate hull perimeter pixels and use fast SciPy function to fill it in
+    # If 2D, locate hull perimeter pixels and use fast SciPy function to fill
+    # it in.
     if ndim == 2:
-        hull_perim_r, hull_perim_c = polygon_perimeter(vertices[:, 0], vertices[:, 1])
+        hull_perim_r, hull_perim_c = polygon_perimeter(
+            vertices[:, 0], vertices[:, 1]
+        )
         mask = np.zeros(image.shape, dtype=np.bool)
         mask[hull_perim_r, hull_perim_c] = True
         mask = binary_fill_holes(mask)
