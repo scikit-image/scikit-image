@@ -11,6 +11,8 @@ else:
     from urllib.request import urlopen
     from urllib.parse import urlencode
 
+USER = 'scikit-image'
+REPO = 'scikit-image'
 
 if len(sys.argv) != 2:
     print("Usage: ./contribs.py tag-of-previous-release")
@@ -27,23 +29,33 @@ def call(cmd):
 tag_date = call("git log -n1 --format='%%cI' %s" % tag)[0]
 print("Release %s was on %s\n" % (tag, tag_date))
 
-merges = call("git log --since='%s' --merges --format='>>>%%B' --reverse" % tag_date)
-merges = [m for m in merges if m.strip()]
-merges = '\n'.join(merges).split('>>>')
-merges = [m.split('\n')[:2] for m in merges]
-merges = [m for m in merges if len(m) == 2 and m[1].strip()]
+# merges = call("git log --since='%s' --merges --format='>>>%%B' --reverse" % tag_date)
+# merges = [m for m in merges if m.strip()]
+# merges = '\n'.join(merges).split('>>>')
+# merges = [m.split('\n')[:2] for m in merges]
+# merges = [m for m in merges if len(m) == 2 and m[1].strip()]
 
 num_commits = call("git rev-list %s..HEAD --count" % tag)[0]
 print("A total of %s changes have been committed.\n" % num_commits)
 
-print("It contained the following %d merges:\n" % len(merges))
-for (merge, message) in merges:
-    if merge.startswith('Merge pull request #'):
-        PR = ' (%s)' % merge.split()[3]
-    else:
-        PR = ''
+# See https://developer.github.com/v3/search/#search-issues
+# See https://help.github.com/articles/understanding-the-search-syntax/#query-for-dates
+query_string = ('user:' + USER + '+'
+                + 'repo:' + REPO + '+'
+                + 'merged:>=' + tag_date)
+merges_url = ('https://api.github.com/search/issues?'
+              + urlencode(dict(q=query_string)))
+merges = urlopen(merges_url)
+merges = merges['items']
+PRs = []
 
-    print('- ' + message + PR)
+print("It contained the following %d merged pull requests:\n" % len(merges))
+for merge in merges:
+    PR = merge['number']
+    title = merge['title']
+    PRs += PR
+
+    print('- ' + title + PR)
 
 print("\nMade by the following committers [alphabetical by last name]:\n")
 
