@@ -2,7 +2,8 @@
 from itertools import product
 import numpy as np
 from scipy.spatial import ConvexHull
-from ..measure.pnpoly import grid_points_in_poly
+from scipy.ndimage.morphology import binary_fill_holes
+from ..draw import polygon_perimeter
 from ._convex_hull import possible_hull
 from ..measure._label import label
 from ..util import unique_rows
@@ -75,9 +76,12 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     hull = ConvexHull(coords)
     vertices = hull.points[hull.vertices]
 
-    # If 2D, use fast Cython function to locate convex hull pixels
+    # If 2D, locate hull perimeter pixels and use fast SciPy function to fill it in
     if ndim == 2:
-        mask = grid_points_in_poly(image.shape, vertices)
+        hull_perim_r, hull_perim_c = polygon_perimeter(vertices[:, 0], vertices[:, 1])
+        mask = np.zeros(image.shape, dtype=np.bool)
+        mask[hull_perim_r, hull_perim_c] = True
+        mask = binary_fill_holes(mask)
     else:
         gridcoords = np.reshape(np.mgrid[tuple(map(slice, image.shape))],
                                 (ndim, -1))
