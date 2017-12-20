@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import subprocess
 import sys
 import string
@@ -9,6 +10,7 @@ if sys.version_info[0] < 3:
 else:
     from urllib.request import urlopen
     from urllib.parse import urlencode
+
 
 if len(sys.argv) != 2:
     print("Usage: ./contribs.py tag-of-previous-release")
@@ -45,10 +47,12 @@ print("\nMade by the following committers [alphabetical by last name]:\n")
 authors = call("git log --since='%s' --format=%%aN" % tag_date)
 authors = [a.strip() for a in authors if a.strip()]
 
+
 def key(author):
     author = [v for v in author.split() if v[0] in string.ascii_letters]
     if len(author) > 0:
         return author[-1]
+
 
 authors = sorted(set(authors), key=key)
 
