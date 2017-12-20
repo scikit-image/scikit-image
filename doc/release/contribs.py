@@ -18,10 +18,13 @@ if len(sys.argv) != 2:
 
 tag = sys.argv[1]
 
+
 def call(cmd):
     return subprocess.check_output(shlex.split(cmd), universal_newlines=True).split('\n')
 
-tag_date = call("git log -n1 --format='%%ci' %s" % tag)[0]
+
+# See https://git-scm.com/docs/pretty-formats - '%cI' is strict ISO-8601 format
+tag_date = call("git log -n1 --format='%%cI' %s" % tag)[0]
 print("Release %s was on %s\n" % (tag, tag_date))
 
 merges = call("git log --since='%s' --merges --format='>>>%%B' --reverse" % tag_date)
