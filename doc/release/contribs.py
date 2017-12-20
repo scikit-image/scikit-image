@@ -5,7 +5,7 @@ import string
 import shlex
 
 if len(sys.argv) != 2:
-    print("Usage: ./contributors.py tag-of-previous-release")
+    print("Usage: ./contribs.py tag-of-previous-release")
     sys.exit(-1)
 
 tag = sys.argv[1]
