@@ -4,6 +4,12 @@ import sys
 import string
 import shlex
 
+if sys.version_info[0] < 3:
+    from urllib import urlopen, urlencode
+else:
+    from urllib.request import urlopen
+    from urllib.parse import urlencode
+
 if len(sys.argv) != 2:
     print("Usage: ./contribs.py tag-of-previous-release")
     sys.exit(-1)
