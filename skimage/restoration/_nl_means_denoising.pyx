@@ -65,9 +65,11 @@ cdef inline double patch_distance_2d(IMGDTYPE [:, :] p1,
     return distance
 
 
-cdef inline double patch_distance_2drgb(IMGDTYPE [:, :, :] p1,
-                                        IMGDTYPE [:, :, :] p2,
-                                        IMGDTYPE [:, ::] w, int s, double var):
+cdef inline double patch_distance_2dmultichannel(IMGDTYPE [:, :, :] p1,
+                                                 IMGDTYPE [:, :, :] p2,
+                                                 IMGDTYPE [:, ::] w,
+                                                 int s, double var,
+                                                 int n_channels):
     """
     Compute a Gaussian distance between two image patches.
 
@@ -83,6 +85,8 @@ cdef inline double patch_distance_2drgb(IMGDTYPE [:, :, :] p1,
         Linear size of the patches.
     var : double
         Expected noise variance.
+    n_channels : int
+        The number of channels.
 
     Returns
     -------
@@ -95,9 +99,7 @@ cdef inline double patch_distance_2drgb(IMGDTYPE [:, :, :] p1,
 
     .. math::  \exp( -w ((p1 - p2)^2 - 2*var))
     """
-    cdef int i, j
-    cdef int center = s / 2
-    cdef int color
+    cdef int i, j, channel
     cdef double tmp_diff = 0
     cdef double distance = 0
     for i in range(s):
@@ -105,8 +107,8 @@ cdef inline double patch_distance_2drgb(IMGDTYPE [:, :, :] p1,
         if distance > DISTANCE_CUTOFF:
             return 0.
         for j in range(s):
-            for color in range(3):
-                tmp_diff = p1[i, j, color] - p2[i, j, color]
+            for channel in range(n_channels):
+                tmp_diff = p1[i, j, channel] - p2[i, j, channel]
                 distance += w[i, j] * (tmp_diff * tmp_diff - 2 * var)
     distance = max(distance, 0)
     distance = fast_exp(-distance)
@@ -179,6 +181,12 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
         Expected noise variance.  If non-zero, this is used to reduce the
         apparent patch distances by the expected distance due to the noise.
 
+    Notes
+    -----
+    This function operates on 2D grayscale and multichannel images.  For
+    2D grayscale images, the input should be 3D with size 1 along the last
+    axis.  The code is compatible with an arbitrary number of channels.
+
     Returns
     -------
     result : ndarray
@@ -186,13 +194,13 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
     """
     if s % 2 == 0:
         s += 1  # odd value for symmetric patch
-    cdef int n_row, n_col, n_ch
-    n_row, n_col, n_ch = image.shape
+    cdef int n_row, n_col, n_channels
+    n_row, n_col, n_channels = image.shape
     cdef int offset = s / 2
-    cdef int row, col, i, j, color
+    cdef int row, col, i, j, channel
     cdef int row_start, row_end, col_start, col_end
     cdef int row_start_i, row_end_i, col_start_j, col_end_j
-    cdef IMGDTYPE [::1] new_values = np.zeros(n_ch).astype(np.float64)
+    cdef IMGDTYPE [::1] new_values = np.zeros(n_channels).astype(np.float64)
     cdef IMGDTYPE [:, :, ::1] padded = np.ascontiguousarray(np.pad(image,
                        ((offset, offset), (offset, offset), (0, 0)),
                         mode='reflect').astype(np.float64))
@@ -205,7 +213,7 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
                              -(xg_row ** 2 + xg_col ** 2) / (2 * A ** 2)).
                              astype(np.float64))
     cdef double distance
-    w = 1. / (n_ch * np.sum(w) * h ** 2) * w
+    w = 1. / (n_channels * np.sum(w) * h ** 2) * w
 
     # Coordinates of central pixel
     # Iterate over rows, taking padding into account
@@ -215,8 +223,8 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
         # Iterate over columns, taking padding into account
         for col in range(offset, n_col + offset):
             # Initialize per-channel bins
-            for color in range(n_ch):
-                new_values[color] = 0
+            for channel in range(n_channels):
+                new_values[channel] = 0
             # Reset weights for each local region
             weight_sum = 0
             col_start = col - offset
@@ -234,7 +242,7 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
                     col_start_j = col_start + j
                     col_end_j = col_end + j
                     # Shortcut for grayscale, else assume RGB
-                    if n_ch == 1:
+                    if n_channels == 1:
                         weight = patch_distance_2d(
                                  padded[row_start:row_end,
                                         col_start:col_end, 0],
@@ -242,23 +250,24 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
                                         col_start_j:col_end_j, 0],
                                  w, s, var)
                     else:
-                        weight = patch_distance_2drgb(
+                        weight = patch_distance_2dmultichannel(
                                  padded[row_start:row_end,
                                         col_start:col_end, :],
                                  padded[row_start_i:row_end_i,
                                         col_start_j:col_end_j, :],
-                                        w, s, var)
+                                        w, s, var, n_channels)
 
                     # Collect results in weight sum
                     weight_sum += weight
                     # Apply to each channel multiplicatively
-                    for color in range(n_ch):
-                        new_values[color] += weight * padded[row + i,
-                                                             col + j, color]
+                    for channel in range(n_channels):
+                        new_values[channel] += weight * padded[row + i,
+                                                               col + j,
+                                                               channel]
 
             # Normalize the result
-            for color in range(n_ch):
-                result[row, col, color] = new_values[color] / weight_sum
+            for channel in range(n_channels):
+                result[row, col, channel] = new_values[channel] / weight_sum
 
     # Return cropped result, undoing padding
     return result[offset:-offset, offset:-offset]
@@ -353,7 +362,7 @@ def _nl_means_denoising_3d(image, int s=7, int d=13, double h=0.1,
                                     padded[pln_start_i:pln_end_i,
                                            row_start_j:row_end_j,
                                            col_start_k:col_end_k],
-                                    w, s, var*var)
+                                    w, s, var)
                             # Collect results in weight sum
                             weight_sum += weight
                             new_value += weight * padded[pln + i,
@@ -424,7 +433,7 @@ cdef inline double _integral_to_distance_3d(IMGDTYPE [:, :, ::] integral,
 
 cdef inline _integral_image_2d(IMGDTYPE [:, :, ::] padded,
                                IMGDTYPE [:, ::] integral, int t_row,
-                               int t_col, int n_row, int n_col, int n_ch,
+                               int t_col, int n_row, int n_col, int n_channels,
                                double var):
     """
     Computes the integral of the squared difference between an image ``padded``
@@ -432,7 +441,7 @@ cdef inline _integral_image_2d(IMGDTYPE [:, :, ::] padded,
 
     Parameters
     ----------
-    padded : ndarray of shape (n_row, n_col, n_ch)
+    padded : ndarray of shape (n_row, n_col, n_channels)
         Image of interest.
     integral : ndarray
         Output of the function. The array is filled with integral values.
@@ -443,7 +452,7 @@ cdef inline _integral_image_2d(IMGDTYPE [:, :, ::] padded,
         Shift along the column axis.
     n_row : int
     n_col : int
-    n_ch : int
+    n_channels : int
     var : double
         Expected noise variance.  If non-zero, this is used to reduce the
         apparent patch distances by the expected distance due to the noise.
@@ -455,22 +464,20 @@ cdef inline _integral_image_2d(IMGDTYPE [:, :, ::] padded,
     ``transform.integral_image``, but this helper function saves memory
     by avoiding copies of ``padded``.
     """
-    cdef int row, col
+    cdef int row, col, channel
     cdef double distance
     for row in range(max(1, -t_row), min(n_row, n_row - t_row)):
         for col in range(max(1, -t_col), min(n_col, n_col - t_col)):
-            if n_ch == 1:
+            if n_channels == 1:
                 distance = (padded[row, col, 0] -
                             padded[row + t_row, col + t_col, 0])**2
                 distance -= 2 * var
             else:
-                distance = ((padded[row, col, 0] -
-                             padded[row + t_row, col + t_col, 0])**2 +
-                            (padded[row, col, 1] -
-                             padded[row + t_row, col + t_col, 1])**2 +
-                            (padded[row, col, 2] -
-                             padded[row + t_row, col + t_col, 2])**2)
-                distance -= 6 * var
+                distance = 0
+                for channel in range(n_channels):
+                    distance += (padded[row, col, channel] -
+                                 padded[row + t_row, col + t_col, channel])**2
+                distance -= 2 * n_channels * var
             integral[row, col] = distance + \
                                  integral[row - 1, col] + \
                                  integral[row, col - 1] - \
@@ -580,13 +587,13 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
     cdef IMGDTYPE [:, :, ::1] result = np.zeros_like(padded)
     cdef IMGDTYPE [:, ::1] weights = np.zeros_like(padded[..., 0], order='C')
     cdef IMGDTYPE [:, ::1] integral = np.zeros_like(padded[..., 0], order='C')
-    cdef int n_row, n_col, n_ch, t_row, t_col, row, col
+    cdef int n_row, n_col, t_row, t_col, row, col, n_channels, channel
     cdef double weight, distance
     cdef double alpha
     cdef double h2 = h ** 2.
     cdef double s2 = s ** 2.
-    n_row, n_col, n_ch = image.shape
-    cdef double h2s2 = n_ch * h2 * s2
+    n_row, n_col, n_channels = image.shape
+    cdef double h2s2 = n_channels * h2 * s2
     n_row += 2 * pad_size
     n_col += 2 * pad_size
 
@@ -606,7 +613,7 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
             # padded and the same image shifted by (t_row, t_col)
             integral = np.zeros_like(padded[..., 0], order='C')
             _integral_image_2d(padded, integral, t_row, t_col,
-                               n_row, n_col, n_ch, var)
+                               n_row, n_col, n_channels, var)
 
             # Inner loops on pixel coordinates
             # Iterate over rows, taking offset and shift into account
@@ -626,16 +633,16 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
                     weights[row, col] += weight
                     weights[row + t_row, col + t_col] += weight
                     # Iterate over channels
-                    for ch in range(n_ch):
-                        result[row, col, ch] += weight * \
-                                    padded[row + t_row, col + t_col, ch]
-                        result[row + t_row, col + t_col, ch] += \
-                                        weight * padded[row, col, ch]
+                    for channel in range(n_channels):
+                        result[row, col, channel] += weight * \
+                                    padded[row + t_row, col + t_col, channel]
+                        result[row + t_row, col + t_col, channel] += \
+                                        weight * padded[row, col, channel]
 
     # Normalize pixel values using sum of weights of contributing patches
     for row in range(offset, n_row - offset):
         for col in range(offset, n_col - offset):
-            for channel in range(n_ch):
+            for channel in range(n_channels):
                 # No risk of division by zero, since the contribution
                 # of a null shift is strictly positive
                 result[row, col, channel] /= weights[row, col]
