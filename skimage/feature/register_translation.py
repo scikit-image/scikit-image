@@ -28,7 +28,7 @@ def _upsampled_dft(data, upsampled_region_size,
 
     Parameters
     ----------
-    data : ndarray
+    data : 2D or 3D ndarray
         The input data array (DFT of original data) to upsample.
     upsampled_region_size : integer or tuple of integers, optional
         The size of the region to be sampled.  If one integer is provided, it
@@ -41,7 +41,7 @@ def _upsampled_dft(data, upsampled_region_size,
 
     Returns
     -------
-    output : ND ndarray
+    output : 2D or 3D ndarray
             The upsampled DFT of the specified region.
     """
     # if people pass in an integer, expand it to a list of equal-sized sections
@@ -59,26 +59,50 @@ def _upsampled_dft(data, upsampled_region_size,
             raise ValueError("number of axis offsets must be equal to input "
                              "data's number of dimensions.")
 
-    im2pi = 1j * 2 * np.pi
-
-    dim_kernels = []
-    for (n_items, ups_size, ax_offset) in zip(data.shape,
-                                              upsampled_region_size,
-                                              axis_offsets):
-        dim_kernels.append(
-            np.exp((-im2pi / (n_items * upsample_factor)) *
-                   (np.arange(upsampled_region_size[0])[:, None] - ax_offset) @
-                   (np.fft.ifftshift(np.arange(n_items))[None,
-                    :] - n_items // 2))
-
+    # For the 2D case, it is more efficient to use the well-optimized
+    # dot product instead of einsum
+    if data.ndim == 2:
+        col_kernel = np.exp(
+            (-1j * 2 * np.pi / (data.shape[1] * upsample_factor)) *
+            (np.fft.ifftshift(np.arange(data.shape[1]))[:, None] -
+             np.floor(data.shape[1] / 2)).dot(
+                np.arange(upsampled_region_size[1])[None, :] - axis_offsets[1])
+        )
+        row_kernel = np.exp(
+            (-1j * 2 * np.pi / (data.shape[0] * upsample_factor)) *
+            (
+            np.arange(upsampled_region_size[0])[:, None] - axis_offsets[0]).dot(
+                np.fft.ifftshift(np.arange(data.shape[0]))[None, :] -
+                np.floor(data.shape[0] / 2))
         )
 
-    if data.ndim == 2:
-        einsum_string = 'ij, ki, lj'
-    elif data.ndim == 3:
-        einsum_string = 'ijk, li, mj, nk'
+        return row_kernel.dot(data).dot(col_kernel)
 
-    return np.einsum(einsum_string, data, *dim_kernels, optimize=True)
+    elif data.ndim == 3:
+        im2pi = 1j * 2 * np.pi
+
+        dim_kernels = []
+
+        dim_kernels = []
+        for (n_items, ups_size, ax_offset) in zip(data.shape,
+                                                  upsampled_region_size,
+                                                  axis_offsets):
+            dim_kernels.append(
+                np.exp(np.dot(
+                    (-im2pi / (n_items * upsample_factor)) *
+                    (np.arange(upsampled_region_size[0])[:, None] - ax_offset),
+                    (np.fft.ifftshift(np.arange(n_items))[None, :]
+                     - n_items // 2))))
+
+            # To compute the upsampled DFT across all spatial dimensions,
+            # a tensor product is computed with einsum
+        return np.einsum('ijk, li, mj, nk -> lmn', data, *dim_kernels,
+                         optimize=True)
+
+    else:
+        raise NotImplementedError("Upsampled registration for images of more"
+                                  " than 3 dimensions is not implemented")
+
 
 def _compute_phasediff(cross_correlation_max):
     """
