@@ -70,8 +70,8 @@ def _upsampled_dft(data, upsampled_region_size,
         )
         row_kernel = np.exp(
             (-1j * 2 * np.pi / (data.shape[0] * upsample_factor)) *
-            (
-            np.arange(upsampled_region_size[0])[:, None] - axis_offsets[0]).dot(
+            (np.arange(upsampled_region_size[0])[:, None] -
+             axis_offsets[0]).dot(
                 np.fft.ifftshift(np.arange(data.shape[0]))[None, :] -
                 np.floor(data.shape[0] / 2))
         )
