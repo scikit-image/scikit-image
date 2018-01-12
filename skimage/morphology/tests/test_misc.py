@@ -179,6 +179,7 @@ def test_label_warning_holes():
                                    dtype=np.int_)
     with expected_warnings(['use a boolean array?']):
         remove_small_holes(labeled_holes_image, area_threshold=3)
+    remove_small_holes(labeled_holes_image.astype(bool), area_threshold=3)
 
 
 def test_float_input_holes():
