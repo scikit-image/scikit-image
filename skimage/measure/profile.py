@@ -43,18 +43,20 @@ def profile_line(image, src, dst, linewidth=1,
            [1, 1, 1, 2, 2, 2],
            [1, 1, 1, 2, 2, 2],
            [0, 0, 0, 0, 0, 0]])
-    >>> profile_line(img, (2, 1), (2, 4))
-    array([ 1.,  1.,  2.,  2.])
-    >>> profile_line(img, (1, 0), (1, 6), cval=4)
-    array([ 1.,  1.,  1.,  2.,  2.,  2.,  4.])
+    >>> profile_line(img, (2, 1), (2, 4))  # doctest: +NORMALIZE_WHITESPACE
+    array([1., 1., 2., 2.])
+    >>> profile_line(img, (1, 0), (1, 6), cval=4)  # doctest: +NORMALIZE_WHITESPACE
+    array([1., 1., 1., 2., 2., 2., 4.])
 
     The destination point is included in the profile, in contrast to
     standard numpy indexing.
     For example:
-    >>> profile_line(img, (1, 0), (1, 6))  # The final point is out of bounds
-    array([ 1.,  1.,  1.,  2.,  2.,  2.,  0.])
-    >>> profile_line(img, (1, 0), (1, 5))  # This accesses the full first row
-    array([ 1.,  1.,  1.,  2.,  2.,  2.])
+    >>> # The final point is out of bounds
+    >>> profile_line(img, (1, 0), (1, 6))  # doctest: +NORMALIZE_WHITESPACE
+    array([1., 1., 1., 2., 2., 2., 0.])
+    >>> # This accesses the full first row
+    >>> profile_line(img, (1, 0), (1, 5))  # doctest: +NORMALIZE_WHITESPACE
+    array([1., 1., 1., 2., 2., 2.])
     """
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
     if image.ndim == 3:

@@ -14,6 +14,7 @@ from .._shared.utils import safe_as_int
 from .corner_cy import _corner_moravec, _corner_orientations
 from warnings import warn
 
+
 def _compute_derivatives(image, mode='constant', cval=0):
     """Compute derivatives in x and y direction using the Sobel operator.
 
@@ -81,12 +82,12 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 1
     >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
-    >>> Axx
-    array([[ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  1.,  0.,  1.,  0.],
-           [ 0.,  4.,  0.,  4.,  0.],
-           [ 0.,  1.,  0.,  1.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.]])
+    >>> Axx  # doctest: +NORMALIZE_WHITESPACE
+    array([[0., 0., 0., 0., 0.],
+           [0., 1., 0., 1., 0.],
+           [0., 4., 0., 4., 0.],
+           [0., 1., 0., 1., 0.],
+           [0., 0., 0., 0., 0.]])
 
     """
 
@@ -146,7 +147,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
     >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order = 'rc')
-    >>> Hrc
+    >>> Hrc  # doctest: +NORMALIZE_WHITESPACE
     array([[ 0.,  0.,  0.,  0.,  0.],
            [ 0.,  1.,  0., -1.,  0.],
            [ 0.,  0.,  0.,  0.,  0.],
@@ -252,12 +253,12 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 1
     >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
-    >>> structure_tensor_eigvals(Axx, Axy, Ayy)[0]
-    array([[ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  2.,  4.,  2.,  0.],
-           [ 0.,  4.,  0.,  4.,  0.],
-           [ 0.,  2.,  4.,  2.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.]])
+    >>> structure_tensor_eigvals(Axx, Axy, Ayy)[0]  # doctest: +NORMALIZE_WHITESPACE
+    array([[0., 0., 0., 0., 0.],
+           [0., 2., 4., 2., 0.],
+           [0., 4., 0., 4., 0.],
+           [0., 2., 4., 2., 0.],
+           [0., 0., 0., 0., 0.]])
 
     """
 
@@ -289,7 +290,7 @@ def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
     >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1, order='rc')
-    >>> hessian_matrix_eigvals(Hxx, Hxy, Hyy)[0]
+    >>> hessian_matrix_eigvals(Hxx, Hxy, Hyy)[0]  # doctest: +NORMALIZE_WHITESPACE
     array([[ 0.,  0.,  2.,  0.,  0.],
            [ 0.,  1.,  0.,  1.,  0.],
            [ 2.,  0., -2.,  0.,  2.],
@@ -359,7 +360,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
     >>> s = shape_index(square, sigma=0.1)
-    >>> s
+    >>> s  # doctest: +NORMALIZE_WHITESPACE
     array([[ nan,  nan, -0.5,  nan,  nan],
            [ nan, -0. ,  nan, -0. ,  nan],
            [-0.5,  nan, -1. ,  nan, -0.5],
@@ -754,8 +755,8 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]])
     >>> coords = corner_peaks(corner_harris(img), min_distance=2)
     >>> coords_subpix = corner_subpix(img, coords, window_size=7)
-    >>> coords_subpix
-    array([[ 4.5,  4.5]])
+    >>> coords_subpix  # doctest: +NORMALIZE_WHITESPACE
+    array([[4.5, 4.5]])
 
     """
 
@@ -896,12 +897,12 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
     >>> from skimage.feature import peak_local_max
     >>> response = np.zeros((5, 5))
     >>> response[2:4, 2:4] = 1
-    >>> response
-    array([[ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  0.],
-           [ 0.,  0.,  1.,  1.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.]])
+    >>> response  # doctest: +NORMALIZE_WHITESPACE
+    array([[0., 0., 0., 0., 0.],
+           [0., 0., 0., 0., 0.],
+           [0., 0., 1., 1., 0.],
+           [0., 0., 1., 1., 0.],
+           [0., 0., 0., 0., 0.]])
     >>> peak_local_max(response)
     array([[3, 3],
            [3, 2],

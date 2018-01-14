@@ -1,7 +1,6 @@
 import numpy as np
-import collections
 
-from .._shared.utils import warn
+# from .._shared.utils import warn
 
 
 def integral_image(image):
@@ -62,13 +61,15 @@ def integrate(ii, start, end):
     --------
     >>> arr = np.ones((5, 6), dtype=np.float)
     >>> ii = integral_image(arr)
-    >>> integrate(ii, (1, 0), (1, 2))  # sum from (1, 0) to (1, 2)
-    array([ 3.])
-    >>> integrate(ii, [(3, 3)], [(4, 5)])  # sum from (3, 3) to (4, 5)
-    array([ 6.])
+    >>> # sum from (1, 0) to (1, 2)
+    >>> integrate(ii, (1, 0), (1, 2))  # doctest: +NORMALIZE_WHITESPACE
+    array([3.])
+    >>> # sum from (3, 3) to (4, 5)
+    >>> integrate(ii, [(3, 3)], [(4, 5)])  # doctest: +NORMALIZE_WHITESPACE
+    array([6.])
     >>> # sum from (1, 0) to (1, 2) and from (3, 3) to (4, 5)
-    >>> integrate(ii, [(1, 0), (3, 3)], [(1, 2), (4, 5)])
-    array([ 3.,  6.])
+    >>> integrate(ii, [(1, 0), (3, 3)], [(1, 2), (4, 5)])  # doctest: +NORMALIZE_WHITESPACE
+    array([3., 6.])
     """
     start = np.atleast_2d(np.array(start))
     end = np.atleast_2d(np.array(end))

@@ -536,11 +536,11 @@ def regionprops(label_image, intensity_image=None, cache=True,
     >>> label_img = label(img, connectivity=img.ndim)
     >>> props = regionprops(label_img)
     >>> # centroid of first labeled object
-    >>> props[0].centroid
-    (22.729879860483141, 81.912285234465827)
+    >>> props[0].centroid  # doctest: +ELLIPSIS
+    (22.7298798..., 81.9122852...)
     >>> # centroid of first labeled object
-    >>> props[0]['centroid']
-    (22.729879860483141, 81.912285234465827)
+    >>> props[0]['centroid']  # doctest: +ELLIPSIS
+    (22.7298798..., 81.9122852...)
 
     """
 

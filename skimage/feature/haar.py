@@ -270,12 +270,12 @@ def draw_haar_like_feature(image, r, c, width, height,
     ...                                0, 0, 2, 2,
     ...                                feature_coord,
     ...                                max_n_features=1)
-    >>> image
-    array([[[ 0. ,  0.5,  0. ],
-            [ 0.5,  0. ,  0. ]],
+    >>> image  # doctest: +NORMALIZE_WHITESPACE
+    array([[[0. , 0.5, 0. ],
+            [0.5, 0. , 0. ]],
     <BLANKLINE>
-           [[ 0.5,  0. ,  0. ],
-            [ 0. ,  0.5,  0. ]]])
+           [[0.5, 0. , 0. ],
+            [0. , 0.5, 0. ]]])
 
     """
     random_state = check_random_state(random_state)

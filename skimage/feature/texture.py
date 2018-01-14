@@ -202,9 +202,9 @@ def greycoprops(P, prop='contrast'):
     >>> g = greycomatrix(image, [1, 2], [0, np.pi/2], levels=4,
     ...                  normed=True, symmetric=True)
     >>> contrast = greycoprops(g, 'contrast')
-    >>> contrast
-    array([[ 0.58333333,  1.        ],
-           [ 1.25      ,  2.75      ]])
+    >>> contrast  # doctest: +NORMALIZE_WHITESPACE
+    array([[0.58333333, 1.        ],
+           [1.25      , 2.75      ]])
 
     """
     assert_nD(P, 4, 'P')

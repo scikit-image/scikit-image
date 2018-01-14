@@ -101,11 +101,11 @@ def moments_central(image, center=None, cc=None, order=3, **kwargs):
     >>> M = moments(image)
     >>> cr = M[1, 0] / M[0, 0]
     >>> cc = M[0, 1] / M[0, 0]
-    >>> moments_central(image, (cr, cc))
-    array([[ 16.,   0.,  20.,   0.],
-           [  0.,   0.,   0.,   0.],
-           [ 20.,   0.,  25.,   0.],
-           [  0.,   0.,   0.,   0.]])
+    >>> moments_central(image, (cr, cc))  # doctest: +NORMALIZE_WHITESPACE
+    array([[16.,  0., 20.,  0.],
+           [ 0.,  0.,  0.,  0.],
+           [20.,  0., 25.,  0.],
+           [ 0.,  0.,  0.,  0.]])
     """
     if cc is not None:  # using deprecated interface
         message = ('Using deprecated 2D-only, xy-coordinate interface to '
@@ -168,11 +168,11 @@ def moments_normalized(mu, order=3):
     >>> cr = m[0, 1] / m[0, 0]
     >>> cc = m[1, 0] / m[0, 0]
     >>> mu = moments_central(image, cr, cc)
-    >>> moments_normalized(mu)
-    array([[        nan,         nan,  0.078125  ,  0.        ],
-           [        nan,  0.        ,  0.        ,  0.        ],
-           [ 0.078125  ,  0.        ,  0.00610352,  0.        ],
-           [ 0.        ,  0.        ,  0.        ,  0.        ]])
+    >>> moments_normalized(mu)  # doctest: +NORMALIZE_WHITESPACE
+    array([[       nan,        nan, 0.078125  , 0.        ],
+           [       nan, 0.        , 0.        , 0.        ],
+           [0.078125  , 0.        , 0.00610352, 0.        ],
+           [0.        , 0.        , 0.        , 0.        ]])
 
     """
     if np.any(np.array(mu.shape) <= order):

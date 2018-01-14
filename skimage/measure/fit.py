@@ -48,16 +48,16 @@ class LineModelND(BaseModel):
     >>> lm = LineModelND()
     >>> lm.estimate(np.array([x, y]).T)
     True
-    >>> tuple(np.round(lm.params, 5))
-    (array([ 1.5 ,  5.25]), array([ 0.5547 ,  0.83205]))
+    >>> tuple(np.round(lm.params, 5))  # doctest: +NORMALIZE_WHITESPACE
+    (array([1.5 , 5.25]), array([0.5547 , 0.83205]))
     >>> res = lm.residuals(np.array([x, y]).T)
-    >>> np.abs(np.round(res, 9))
-    array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
-            0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
-    >>> np.round(lm.predict_y(x[:5]), 3)
-    array([ 4.5  ,  4.562,  4.625,  4.688,  4.75 ])
-    >>> np.round(lm.predict_x(y[:5]), 3)
-    array([ 1.   ,  1.042,  1.083,  1.125,  1.167])
+    >>> np.abs(np.round(res, 9))  # doctest: +NORMALIZE_WHITESPACE
+    array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+           0., 0., 0., 0., 0., 0., 0., 0.])
+    >>> np.round(lm.predict_y(x[:5]), 3)  # doctest: +NORMALIZE_WHITESPACE
+    array([4.5  , 4.562, 4.625, 4.688, 4.75 ])
+    >>> np.round(lm.predict_x(y[:5]), 3)  # doctest: +NORMALIZE_WHITESPACE
+    array([1.   , 1.042, 1.083, 1.125, 1.167])
 
     """
 
@@ -244,9 +244,9 @@ class CircleModel(BaseModel):
     >>> tuple(np.round(model.params, 5))
     (2.0, 3.0, 4.0)
     >>> res = model.residuals(xy)
-    >>> np.abs(np.round(res, 9))
-    array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
-            0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
+    >>> np.abs(np.round(res, 9))  # doctest: +NORMALIZE_WHITESPACE
+    array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+           0., 0., 0., 0., 0., 0., 0., 0.])
 
     """
 
@@ -378,11 +378,11 @@ class EllipseModel(BaseModel):
     >>> ellipse = EllipseModel()
     >>> ellipse.estimate(xy)
     True
-    >>> np.round(ellipse.params, 2)
-    array([ 10.  ,  15.  ,   4.  ,   8.  ,   0.52])
-    >>> np.round(abs(ellipse.residuals(xy)), 5)
-    array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
-            0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
+    >>> np.round(ellipse.params, 2)  # doctest: +NORMALIZE_WHITESPACE
+    array([10.  , 15.  ,  4.  ,  8.  ,  0.52])
+    >>> np.round(abs(ellipse.residuals(xy)), 5)  # doctest: +NORMALIZE_WHITESPACE
+    array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+           0., 0., 0., 0., 0., 0., 0., 0.])
     """
 
     def estimate(self, data):
@@ -742,15 +742,15 @@ def ransac(data, model_class, min_samples, residual_threshold,
     Estimate ellipse model using RANSAC:
 
     >>> ransac_model, inliers = ransac(data, EllipseModel, 20, 3, max_trials=50)
-    >>> abs(np.round(ransac_model.params))
-    array([ 20.,  30.,   5.,  10.,   0.])
+    >>> abs(np.round(ransac_model.params))  # doctest: +NORMALIZE_WHITESPACE
+    array([20., 30.,  5., 10.,  0.])
     >>> inliers # doctest: +SKIP
     array([False, False, False, False,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
-            True,  True,  True,  True,  True], dtype=bool)
+            True,  True,  True,  True,  True])
     >>> sum(inliers) > 40
     True
 
@@ -772,7 +772,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
-            True,  True,  True,  True,  True], dtype=bool)
+            True,  True,  True,  True,  True])
 
     """
 
