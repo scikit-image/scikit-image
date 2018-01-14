@@ -386,6 +386,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
            [123.        , 205.        ,  20.33333333],
            [123.        ,  44.        ,  23.55555556],
            [121.        , 271.        ,  30.        ]])
+
     Notes
     -----
     The radius of each blob is approximately `sigma`.

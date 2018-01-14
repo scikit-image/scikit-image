@@ -4,6 +4,8 @@ import warnings
 import inspect
 import re
 
+import numpy as np
+
 __all__ = ['all_warnings', 'expected_warnings', 'warn']
 
 

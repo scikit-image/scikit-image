@@ -397,7 +397,7 @@ def white_tophat(image, selem=None, out=None):
     selem = np.array(selem)
     if out is image:
         opened = opening(image, selem)
-        out -= opened
+        out = (out - opened)
         return out
     elif out is None:
         out = np.empty_like(image)
@@ -445,7 +445,7 @@ def black_tophat(image, selem=None, out=None):
            [0, 0, 1, 0, 0],
            [0, 1, 5, 1, 0],
            [0, 0, 1, 0, 0],
-           [0, 0, 0, 0, 0]], dtype=uint8)
+           [0, 0, 0, 0, 0]])
 
     """
     if out is image:
@@ -453,5 +453,5 @@ def black_tophat(image, selem=None, out=None):
     else:
         original = image
     out = closing(image, selem, out=out)
-    out -= original
+    out = (out.astype(int) - original)
     return out
