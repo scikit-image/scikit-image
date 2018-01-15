@@ -106,7 +106,7 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
 
     image_max = image.max()
 
-    if np.issubdtype(image.dtype, np.float):
+    if np.issubdtype(image.dtype, np.floating):
         raise ValueError("Float images are not supported by greycomatrix. "
                          "Convert the image to an unsigned integer type.")
 
