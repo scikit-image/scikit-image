@@ -30,7 +30,7 @@ sys.path.append(os.path.join(curpath, '..', 'ext'))
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.mathjax',
               'numpydoc',
-	      'sphinx.ext.autodoc',
+              'sphinx.ext.autodoc',
               'sphinx.ext.autosummary',
               'sphinx.ext.intersphinx',
               'sphinx.ext.linkcode',
