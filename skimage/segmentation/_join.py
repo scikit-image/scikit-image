@@ -115,7 +115,7 @@ def relabel_sequential(label_field, offset=1):
     array([5, 5, 6, 6, 7, 9, 8])
     """
     m = label_field.max()
-    if not np.issubdtype(label_field.dtype, np.int):
+    if not np.issubdtype(label_field.dtype, np.signedinteger):
         new_type = np.min_scalar_type(int(m))
         label_field = label_field.astype(new_type)
         m = m.astype(new_type)  # Ensures m is an integer
