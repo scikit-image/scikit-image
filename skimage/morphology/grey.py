@@ -397,7 +397,10 @@ def white_tophat(image, selem=None, out=None):
     selem = np.array(selem)
     if out is image:
         opened = opening(image, selem)
-        out -= opened
+        if np.issubdtype(opened.dtype, np.bool_):
+            np.logical_xor(out, opened, out=out)
+        else:
+            out -= opened
         return out
     elif out is None:
         out = np.empty_like(image)
@@ -453,5 +456,8 @@ def black_tophat(image, selem=None, out=None):
     else:
         original = image
     out = closing(image, selem, out=out)
-    out -= original
+    if np.issubdtype(out.dtype, np.bool_):
+        np.logical_xor(out, original, out=out)
+    else:
+        out -= original
     return out
