@@ -301,7 +301,7 @@ def local_binary_pattern(image, P, R, method='default'):
     .. [1] Multiresolution Gray-Scale and Rotation Invariant Texture
            Classification with Local Binary Patterns.
            Timo Ojala, Matti Pietikainen, Topi Maenpaa.
-           http://vision.stanford.edu/teaching/cs231b_spring1415/papers/lbp.pdf, 2002.
+           http://www.ee.oulu.fi/research/mvmp/mvg/files/pdf/pdf_94.pdf, 2002.
     .. [2] Face recognition with local binary patterns.
            Timo Ahonen, Abdenour Hadid, Matti Pietikainen,
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.214.6851,
