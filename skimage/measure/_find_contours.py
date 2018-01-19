@@ -99,13 +99,13 @@ def find_contours(array, level,
     --------
     >>> a = np.zeros((3, 3))
     >>> a[0, 0] = 1
-    >>> a
-    array([[ 1.,  0.,  0.],
-           [ 0.,  0.,  0.],
-           [ 0.,  0.,  0.]])
-    >>> find_contours(a, 0.5)
-    [array([[ 0. ,  0.5],
-           [ 0.5,  0. ]])]
+    >>> a  # doctest: +NORMALIZE_WHITESPACE
+    array([[1., 0., 0.],
+           [0., 0., 0.],
+           [0., 0., 0.]])
+    >>> find_contours(a, 0.5)  # doctest: +NORMALIZE_WHITESPACE
+    [array([[0. , 0.5],
+            [0.5, 0. ]])]
     """
     array = np.asarray(array, dtype=np.double)
     if array.ndim != 2:

@@ -189,7 +189,7 @@ class CENSURE(FeatureDetector):
            [154, 156],
            [155, 151],
            [184,  63]])
-    >>> censure.scales
+    >>> censure.scales  # doctest: +NORMALIZE_WHITESPACE
     array([2, 6, 6, 2, 4, 3, 2, 3, 2, 6, 3, 2, 2, 3, 2, 2, 2, 3, 2, 2, 4, 2, 2])
 
     """

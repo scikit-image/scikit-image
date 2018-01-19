@@ -154,7 +154,7 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
            [False, False,  True,  True,  True],
            [False,  True,  True,  True,  True],
            [False,  True,  True, False, False],
-           [False,  True,  True, False, False]], dtype=bool)
+           [False,  True,  True, False, False]])
     """
     if label_img.dtype == 'bool':
         label_img = label_img.astype(np.uint8)

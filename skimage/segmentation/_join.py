@@ -98,7 +98,7 @@ def relabel_sequential(label_field, offset=1):
     >>> relab, fw, inv = relabel_sequential(label_field)
     >>> relab
     array([1, 1, 2, 2, 3, 5, 4])
-    >>> fw
+    >>> fw  # doctest: +NORMALIZE_WHITESPACE
     array([0, 1, 0, 0, 0, 2, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0,
            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

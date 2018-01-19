@@ -82,14 +82,14 @@ def match_template(image, template, pad_input=False, mode='constant',
     --------
     >>> template = np.zeros((3, 3))
     >>> template[1, 1] = 1
-    >>> template
-    array([[ 0.,  0.,  0.],
-           [ 0.,  1.,  0.],
-           [ 0.,  0.,  0.]])
+    >>> template  # doctest: +NORMALIZE_WHITESPACE
+    array([[0., 0., 0.],
+           [0., 1., 0.],
+           [0., 0., 0.]])
     >>> image = np.zeros((6, 6))
     >>> image[1, 1] = 1
     >>> image[4, 4] = -1
-    >>> image
+    >>> image  # doctest: +NORMALIZE_WHITESPACE
     array([[ 0.,  0.,  0.,  0.,  0.,  0.],
            [ 0.,  1.,  0.,  0.,  0.,  0.],
            [ 0.,  0.,  0.,  0.,  0.,  0.],
@@ -97,13 +97,13 @@ def match_template(image, template, pad_input=False, mode='constant',
            [ 0.,  0.,  0.,  0., -1.,  0.],
            [ 0.,  0.,  0.,  0.,  0.,  0.]])
     >>> result = match_template(image, template)
-    >>> np.round(result, 3)
+    >>> np.round(result, 3)  # doctest: +NORMALIZE_WHITESPACE
     array([[ 1.   , -0.125,  0.   ,  0.   ],
            [-0.125, -0.125,  0.   ,  0.   ],
            [ 0.   ,  0.   ,  0.125,  0.125],
            [ 0.   ,  0.   ,  0.125, -1.   ]])
     >>> result = match_template(image, template, pad_input=True)
-    >>> np.round(result, 3)
+    >>> np.round(result, 3)  # doctest: +NORMALIZE_WHITESPACE
     array([[-0.125, -0.125, -0.125,  0.   ,  0.   ,  0.   ],
            [-0.125,  1.   , -0.125,  0.   ,  0.   ,  0.   ],
            [-0.125, -0.125, -0.125,  0.   ,  0.   ,  0.   ],

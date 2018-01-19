@@ -99,18 +99,18 @@ class ORB(FeatureDetector, DescriptorExtractor):
            [2, 2],
            [3, 3],
            [4, 4]])
-    >>> detector_extractor1.keypoints[matches[:, 0]]
-    array([[ 42.,  40.],
-           [ 47.,  58.],
-           [ 44.,  40.],
-           [ 59.,  42.],
-           [ 45.,  44.]])
-    >>> detector_extractor2.keypoints[matches[:, 1]]
-    array([[ 55.,  53.],
-           [ 60.,  71.],
-           [ 57.,  53.],
-           [ 72.,  55.],
-           [ 58.,  57.]])
+    >>> detector_extractor1.keypoints[matches[:, 0]]  # doctest: +NORMALIZE_WHITESPACE
+    array([[42., 40.],
+           [47., 58.],
+           [44., 40.],
+           [59., 42.],
+           [45., 44.]])
+    >>> detector_extractor2.keypoints[matches[:, 1]]  # doctest: +NORMALIZE_WHITESPACE
+    array([[55., 53.],
+           [60., 71.],
+           [57., 53.],
+           [72., 55.],
+           [58., 57.]])
 
     """
 

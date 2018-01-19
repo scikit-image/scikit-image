@@ -36,7 +36,7 @@ def binary_blobs(length=512, blob_size_fraction=0.1, n_dim=2,
            [ True,  True,  True, False,  True],
            [False,  True, False,  True,  True],
            [ True, False, False,  True,  True],
-           [ True, False, False, False,  True]], dtype=bool)
+           [ True, False, False, False,  True]])
     >>> blobs = data.binary_blobs(length=256, blob_size_fraction=0.1)
     >>> # Finer structures
     >>> blobs = data.binary_blobs(length=256, blob_size_fraction=0.05)

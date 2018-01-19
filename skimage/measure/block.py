@@ -38,8 +38,8 @@ def block_reduce(image, block_size, func=np.sum, cval=0):
            [[24, 25, 26, 27],
             [28, 29, 30, 31],
             [32, 33, 34, 35]]])
-    >>> block_reduce(image, block_size=(3, 3, 1), func=np.mean)
-    array([[[ 16.,  17.,  18.,  19.]]])
+    >>> block_reduce(image, block_size=(3, 3, 1), func=np.mean)  # doctest: +NORMALIZE_WHITESPACE
+    array([[[16., 17., 18., 19.]]])
     >>> image_max1 = block_reduce(image, block_size=(1, 3, 4), func=np.max)
     >>> image_max1 # doctest: +NORMALIZE_WHITESPACE
     array([[[11]],

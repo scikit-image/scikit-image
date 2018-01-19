@@ -152,7 +152,7 @@ phantom = orig_phantom.copy()
 phantom[340:350, 200:210] = 255
 phantom[100:110, 200:210] = 0
 
-w_tophat = white_tophat(phantom, selem)
+w_tophat = white_tophat(phantom, selem.astype(int))
 plot_comparison(phantom, w_tophat, 'white tophat')
 
 ######################################################################
@@ -168,7 +168,7 @@ plot_comparison(phantom, w_tophat, 'white tophat')
 # minus the original image**. This operation returns the *dark spots of the
 # image that are smaller than the structuring element*.
 
-b_tophat = black_tophat(phantom, selem)
+b_tophat = black_tophat(phantom, selem.astype(int))
 plot_comparison(phantom, b_tophat, 'black tophat')
 
 ######################################################################
