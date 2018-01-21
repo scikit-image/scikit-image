@@ -43,7 +43,8 @@ API Changes
 -----------
 - ``skimage.util.montage.montage2d`` is now available as
   ``skimage.util.montage2d``.
-
+- ``skimage.morphology.binary_erosion`` now uses ``True`` as border
+  value, and is now consistent with ``skimage.morphology.erosion``.
 
 Deprecations
 ------------
