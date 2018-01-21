@@ -194,8 +194,8 @@ def _check_isolated_seeds(labels):
     return coordinates and label values of isolated seeds, so
     that it is possible to put labels back in random walker output.
     """
-    fill = ndi.binary_propagation(labels == 0, mask=labels>=0)
-    isolated = np.logical_and(labels>0, np.logical_not(fill))
+    fill = ndi.binary_propagation(labels == 0, mask=labels >= 0)
+    isolated = np.logical_and(labels > 0, np.logical_not(fill))
     inds = np.nonzero(isolated)
     values = labels[inds]
     labels[inds] = -1
