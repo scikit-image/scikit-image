@@ -4,7 +4,7 @@ try:
 except ImportError:
     plt = None
 
-from skimage._shared.testing import assert_equal
+#from skimage._shared.testing import assert_equal
 
 from skimage.feature.util import (FeatureDetector, DescriptorExtractor,
                                   _prepare_grayscale_input_2D,
@@ -77,3 +77,5 @@ def test_plot_matches():
                      keypoints_color='r')
         plot_matches(ax, img1, img2, keypoints1, keypoints2, matches,
                      matches_color='r')
+        plot_matches(ax, img1, img2, keypoints1, keypoints2, matches,
+                     left_right=False)
