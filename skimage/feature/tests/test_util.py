@@ -4,7 +4,7 @@ try:
 except ImportError:
     plt = None
 
-#from skimage._shared.testing import assert_equal
+from skimage._shared.testing import assert_equal
 
 from skimage.feature.util import (FeatureDetector, DescriptorExtractor,
                                   _prepare_grayscale_input_2D,
