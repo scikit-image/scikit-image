@@ -94,7 +94,7 @@ class TestSave(unittest.TestCase):
             for dtype in (np.uint8, np.uint16, np.float32, np.float64):
                 x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
-                if np.issubdtype(dtype, float):
+                if np.issubdtype(dtype, np.floating):
                     yield self.roundtrip, dtype, x
                 else:
                     x = (x * 255).astype(dtype)

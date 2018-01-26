@@ -172,7 +172,7 @@ class TestSave:
             for dtype in (np.uint8, np.uint16, np.float32, np.float64):
                 x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
-                if np.issubdtype(dtype, float):
+                if np.issubdtype(dtype, np.floating):
                     yield (self.verify_roundtrip, dtype, x,
                            roundtrip_function(x), 255)
                 else:

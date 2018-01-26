@@ -167,7 +167,8 @@ def test_3d_fallback_white_tophat():
         new_image = grey.white_tophat(image)
     footprint = ndi.generate_binary_structure(3, 1)
     with expected_warnings(['operator.*deprecated|\A\Z']):
-        image_expected = ndi.white_tophat(image, footprint=footprint)
+        image_expected = ndi.white_tophat(
+            image.view(dtype=np.uint8), footprint=footprint)
     assert_array_equal(new_image, image_expected)
 
 
@@ -181,7 +182,8 @@ def test_3d_fallback_black_tophat():
         new_image = grey.black_tophat(image)
     footprint = ndi.generate_binary_structure(3, 1)
     with expected_warnings(['operator.*deprecated|\A\Z']):
-        image_expected = ndi.black_tophat(image, footprint=footprint)
+        image_expected = ndi.black_tophat(
+            image.view(dtype=np.uint8), footprint=footprint)
     assert_array_equal(new_image, image_expected)
 
 

@@ -54,7 +54,7 @@ class TestSave:
     def test_imsave_roundtrip(self, shape, dtype):
         x = np.random.rand(*shape)
 
-        if not np.issubdtype(dtype, float):
+        if not np.issubdtype(dtype, np.floating):
             x = (x * np.iinfo(dtype).max).astype(dtype)
         else:
             x = x.astype(dtype)

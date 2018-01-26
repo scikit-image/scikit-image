@@ -51,7 +51,7 @@ def _get_image_properties(image):
         lo, hi = immin, immax
 
     signed = immin < 0
-    out_of_range_float = (np.issubdtype(image.dtype, np.float) and
+    out_of_range_float = (np.issubdtype(image.dtype, np.floating) and
                           (immin < lo or immax > hi))
     low_data_range = (immin != immax and
                       is_low_contrast(image))
