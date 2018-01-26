@@ -80,5 +80,8 @@ class TestSave:
                 yield self.roundtrip, dtype, x
 
 
-if __name__ == "__main__":
-    run_module_suite()
+        if not np.issubdtype(dtype, np.floating):
+            x = (x * np.iinfo(dtype).max).astype(dtype)
+        else:
+            x = x.astype(dtype)
+        self.roundtrip(dtype, x)
