@@ -3,26 +3,33 @@ try:
     import matplotlib.pyplot as plt
 except ImportError:
     plt = None
-from numpy.testing import assert_equal, assert_raises
+
+from skimage._shared.testing import assert_equal
 
 from skimage.feature.util import (FeatureDetector, DescriptorExtractor,
                                   _prepare_grayscale_input_2D,
                                   _mask_border_keypoints, plot_matches)
 
+from skimage._shared import testing
+
 
 def test_feature_detector():
-    assert_raises(NotImplementedError, FeatureDetector().detect, None)
+    with testing.raises(NotImplementedError):
+        FeatureDetector().detect(None)
 
 
 def test_descriptor_extractor():
-    assert_raises(NotImplementedError, DescriptorExtractor().extract,
-                  None, None)
+    with testing.raises(NotImplementedError):
+        DescriptorExtractor().extract(None, None)
 
 
 def test_prepare_grayscale_input_2D():
-    assert_raises(ValueError, _prepare_grayscale_input_2D, np.zeros((3, 3, 3)))
-    assert_raises(ValueError, _prepare_grayscale_input_2D, np.zeros((3, 1)))
-    assert_raises(ValueError, _prepare_grayscale_input_2D, np.zeros((3, 1, 1)))
+    with testing.raises(ValueError):
+        _prepare_grayscale_input_2D(np.zeros((3, 3, 3)))
+    with testing.raises(ValueError):
+        _prepare_grayscale_input_2D(np.zeros((3, 1)))
+    with testing.raises(ValueError):
+        _prepare_grayscale_input_2D(np.zeros((3, 1, 1)))
     img = _prepare_grayscale_input_2D(np.zeros((3, 3)))
     img = _prepare_grayscale_input_2D(np.zeros((3, 3, 1)))
     img = _prepare_grayscale_input_2D(np.zeros((1, 3, 3)))
@@ -42,7 +49,7 @@ def test_mask_border_keypoints():
                  [0, 0, 0, 0, 1])
 
 
-@np.testing.decorators.skipif(plt is None)
+@testing.skipif(plt is None, reason="Matplotlib not installed")
 def test_plot_matches():
     fig, ax = plt.subplots(nrows=1, ncols=1)
 
@@ -70,8 +77,3 @@ def test_plot_matches():
                      keypoints_color='r')
         plot_matches(ax, img1, img2, keypoints1, keypoints2, matches,
                      matches_color='r')
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()

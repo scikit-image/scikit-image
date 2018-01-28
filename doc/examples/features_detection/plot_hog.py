@@ -24,7 +24,7 @@ Compute a Histogram of Oriented Gradients (HOG) by
 The first stage applies an optional global image normalisation
 equalisation that is designed to reduce the influence of illumination
 effects. In practice we use gamma (power law) compression, either
-computing the square root or the log of each colour channel.
+computing the square root or the log of each color channel.
 Image texture strength is typically proportional to the local surface
 illumination so this compression helps to reduce the effects of local
 shadowing and illumination variations.
@@ -32,7 +32,7 @@ shadowing and illumination variations.
 The second stage computes first order image gradients. These capture
 contour, silhouette and some texture information, while providing
 further resistance to illumination variations. The locally dominant
-colour channel is used, which provides colour invariance to a large
+color channel is used, which provides color invariance to a large
 extent. Variant methods may also include second order image derivatives,
 which act as primitive bar detectors - a useful feature for capturing,
 e.g. bar like structures in bicycles and limbs in humans.
@@ -82,13 +82,13 @@ References
 import matplotlib.pyplot as plt
 
 from skimage.feature import hog
-from skimage import data, color, exposure
+from skimage import data, exposure
 
 
-image = color.rgb2gray(data.astronaut())
+image = data.astronaut()
 
 fd, hog_image = hog(image, orientations=8, pixels_per_cell=(16, 16),
-                    cells_per_block=(1, 1), visualise=True)
+                    cells_per_block=(1, 1), visualize=True, multichannel=True)
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4), sharex=True, sharey=True)
 
@@ -98,7 +98,7 @@ ax1.set_title('Input image')
 ax1.set_adjustable('box-forced')
 
 # Rescale histogram for better display
-hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 0.02))
+hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 10))
 
 ax2.axis('off')
 ax2.imshow(hog_image_rescaled, cmap=plt.cm.gray)

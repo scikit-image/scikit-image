@@ -40,7 +40,7 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
         return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
 
 
-def pil_to_ndarray(im, dtype=None, img_num=None):
+def pil_to_ndarray(image, dtype=None, img_num=None):
     """Import a PIL Image object to an ndarray, in memory.
 
     Parameters
@@ -50,59 +50,59 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
     """
     try:
         # this will raise an IOError if the file is not readable
-        im.getdata()[0]
+        image.getdata()[0]
     except IOError as e:
         site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
         pillow_error_message = str(e)
         error_message = ('Could not load "%s" \n'
                          'Reason: "%s"\n'
                          'Please see documentation at: %s'
-                         % (im.filename, pillow_error_message, site))
+                         % (image.filename, pillow_error_message, site))
         raise ValueError(error_message)
     frames = []
     grayscale = None
     i = 0
     while 1:
         try:
-            im.seek(i)
+            image.seek(i)
         except EOFError:
             break
 
-        frame = im
+        frame = image
 
         if img_num is not None and img_num != i:
-            im.getdata()[0]
+            image.getdata()[0]
             i += 1
             continue
 
-        if im.format == 'PNG' and im.mode == 'I' and dtype is None:
+        if image.format == 'PNG' and image.mode == 'I' and dtype is None:
             dtype = 'uint16'
 
-        if im.mode == 'P':
+        if image.mode == 'P':
             if grayscale is None:
-                grayscale = _palette_is_grayscale(im)
+                grayscale = _palette_is_grayscale(image)
 
             if grayscale:
-                frame = im.convert('L')
+                frame = image.convert('L')
             else:
-                if im.format == 'PNG' and 'transparency' in im.info:
-                    frame = im.convert('RGBA')
+                if image.format == 'PNG' and 'transparency' in image.info:
+                    frame = image.convert('RGBA')
                 else:
-                    frame = im.convert('RGB')
+                    frame = image.convert('RGB')
 
-        elif im.mode == '1':
-            frame = im.convert('L')
+        elif image.mode == '1':
+            frame = image.convert('L')
 
-        elif 'A' in im.mode:
-            frame = im.convert('RGBA')
+        elif 'A' in image.mode:
+            frame = image.convert('RGBA')
 
-        elif im.mode == 'CMYK':
-            frame = im.convert('RGB')
+        elif image.mode == 'CMYK':
+            frame = image.convert('RGB')
 
-        if im.mode.startswith('I;16'):
-            shape = im.size
-            dtype = '>u2' if im.mode.endswith('B') else '<u2'
-            if 'S' in im.mode:
+        if image.mode.startswith('I;16'):
+            shape = image.size
+            dtype = '>u2' if image.mode.endswith('B') else '<u2'
+            if 'S' in image.mode:
                 dtype = dtype.replace('u', 'i')
             frame = np.fromstring(frame.tobytes(), dtype)
             frame.shape = shape[::-1]
@@ -116,8 +116,8 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
         if img_num is not None:
             break
 
-    if hasattr(im, 'fp') and im.fp:
-        im.fp.close()
+    if hasattr(image, 'fp') and image.fp:
+        image.fp.close()
 
     if img_num is None and len(frames) > 1:
         return np.array(frames)
@@ -145,7 +145,7 @@ def _palette_is_grayscale(pil_image):
     palette = np.asarray(pil_image.getpalette()).reshape((256, 3))
     # Not all palette colors are used; unused colors have junk values.
     start, stop = pil_image.getextrema()
-    valid_palette = palette[start:stop]
+    valid_palette = palette[start:stop + 1]
     # Image is grayscale if channel differences (R - G and G - B)
     # are all zero.
     return np.allclose(np.diff(valid_palette), 0)

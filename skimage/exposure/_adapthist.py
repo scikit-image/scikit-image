@@ -16,7 +16,7 @@ comes with no guarantee.
 from __future__ import division
 import numbers
 import numpy as np
-from .. import img_as_float, img_as_uint
+from ..util import img_as_float, img_as_uint
 from ..color.adapt_rgb import adapt_rgb, hsv_value
 from ..exposure import rescale_intensity
 
@@ -26,7 +26,7 @@ NR_OF_GREY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
 
 @adapt_rgb(hsv_value)
 def equalize_adapthist(image, kernel_size=None,
-                       clip_limit=0.01, nbins=256, **kwargs):
+                       clip_limit=0.01, nbins=256):
     """Contrast Limited Adaptive Histogram Equalization (CLAHE).
 
     An algorithm for local contrast enhancement, that uses histograms computed
@@ -73,11 +73,6 @@ def equalize_adapthist(image, kernel_size=None,
     """
     image = img_as_uint(image)
     image = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
-
-    if kwargs:
-        if 'ntiles_x' in kwargs or 'ntiles_y' in kwargs:
-            msg = '`ntiles_*` have been deprecated in favor of `kernel_size`'
-            raise ValueError(msg)
 
     if kernel_size is None:
         kernel_size = (image.shape[0] // 8, image.shape[1] // 8)

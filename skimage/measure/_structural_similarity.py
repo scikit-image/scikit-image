@@ -13,7 +13,7 @@ __all__ = ['compare_ssim']
 
 def compare_ssim(X, Y, win_size=None, gradient=False,
                  data_range=None, multichannel=False, gaussian_weights=False,
-                 full=False, dynamic_range=None, **kwargs):
+                 full=False, **kwargs):
     """Compute the mean structural similarity index between two images.
 
     Parameters
@@ -74,7 +74,7 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
        structural similarity. IEEE Transactions on Image Processing,
        13, 600-612.
        https://ece.uwaterloo.ca/~z70wang/publications/ssim.pdf,
-       DOI:10.1.1.11.2477
+       DOI:10.1109/TIP.2003.819861
 
     .. [2] Avanaki, A. N. (2009). Exact global histogram specification
        optimized for structural similarity. Optical Review, 16, 613-621.
@@ -87,12 +87,6 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
 
     if not X.shape == Y.shape:
         raise ValueError('Input images must have the same dimensions.')
-
-    if dynamic_range is not None:
-        warn('`dynamic_range` has been deprecated in favor of '
-             '`data_range`. The `dynamic_range` keyword argument '
-             'will be removed in v0.14', skimage_deprecation)
-        data_range = dynamic_range
 
     if multichannel:
         # loop over channels
@@ -228,14 +222,3 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
             return mssim, S
         else:
             return mssim
-
-
-@deprecated('compare_ssim', removed_version='0.14')
-def structural_similarity(X, Y, win_size=None, gradient=False,
-                          dynamic_range=None, multichannel=False,
-                          gaussian_weights=False, full=False, **kwargs):
-    """""" + compare_ssim.__doc__
-    return compare_ssim(X, Y, win_size=win_size, gradient=gradient,
-                        data_range=dynamic_range,
-                        multichannel=multichannel,
-                        gaussian_weights=gaussian_weights, full=full, **kwargs)

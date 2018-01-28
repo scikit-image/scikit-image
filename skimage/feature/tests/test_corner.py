@@ -1,12 +1,12 @@
 import numpy as np
-from numpy.testing import (assert_array_equal, assert_raises,
-                           assert_almost_equal, assert_warns)
-
+from skimage._shared.testing import assert_array_equal
+from skimage._shared.testing import assert_almost_equal, assert_warns
 from skimage import data
 from skimage import img_as_float
 from skimage.color import rgb2gray
 from skimage.morphology import octagon
 from skimage._shared.testing import test_parallel
+from skimage._shared import testing
 
 from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_subpix, peak_local_max, corner_peaks,
@@ -332,7 +332,8 @@ def test_blank_image_nans():
 
 def test_corner_fast_image_unsupported_error():
     img = np.zeros((20, 20, 3))
-    assert_raises(ValueError, corner_fast, img)
+    with testing.raises(ValueError):
+        corner_fast(img)
 
 
 @test_parallel()
@@ -382,14 +383,18 @@ def test_corner_fast_astronaut():
 
 def test_corner_orientations_image_unsupported_error():
     img = np.zeros((20, 20, 3))
-    assert_raises(ValueError, corner_orientations, img,
-                  np.asarray([[7, 7]]), np.ones((3, 3)))
+    with testing.raises(ValueError):
+        corner_orientations(
+            img,
+            np.asarray([[7, 7]]), np.ones((3, 3)))
 
 
 def test_corner_orientations_even_shape_error():
     img = np.zeros((20, 20))
-    assert_raises(ValueError, corner_orientations, img,
-                  np.asarray([[7, 7]]), np.ones((4, 4)))
+    with testing.raises(ValueError):
+        corner_orientations(
+            img,
+            np.asarray([[7, 7]]), np.ones((4, 4)))
 
 
 @test_parallel()
@@ -423,8 +428,3 @@ def test_corner_orientations_square():
     expected_orientations_degree = np.array([  45.,  135.,  -45., -135.])
     assert_array_equal(actual_orientations_degrees,
                        expected_orientations_degree)
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()

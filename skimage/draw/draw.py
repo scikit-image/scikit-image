@@ -9,7 +9,7 @@ from ._draw import (_coords_inside_image, _line, _line_aa,
 
 
 def _ellipse_in_shape(shape, center, radii, rotation=0.):
-    """ Generate coordinates of points within ellipse bounded by shape.
+    """Generate coordinates of points within ellipse bounded by shape.
 
     Parameters
     ----------
@@ -91,6 +91,22 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
         ((x * cos(alpha) + y * sin(alpha)) / x_radius) ** 2 +
         ((x * sin(alpha) - y * cos(alpha)) / y_radius) ** 2 = 1
 
+
+    Note that the positions of `ellipse` without specified `shape` can have
+    also, negative values, as this is correct on the plane. On the other hand
+    using these ellipse positions for an image afterwards may lead to appearing
+    on the other side of image, because ``image[-1, -1] = image[end-1, end-1]``
+
+    >>> rr, cc = ellipse(1, 2, 3, 6)
+    >>> img = np.zeros((6, 12), dtype=np.uint8)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1]], dtype=uint8)
     """
 
     center = np.array([r, c])
@@ -244,14 +260,15 @@ def polygon_perimeter(r, c, shape=None, clip=False):
         return _coords_inside_image(rr, cc, shape)
 
 
-def set_color(img, coords, color, alpha=1):
+def set_color(image, coords, color, alpha=1):
     """Set pixel color in the image at the given coordinates.
 
+    Note that this function modifies the color of the image in-place.
     Coordinates that exceed the shape of the image will be ignored.
 
     Parameters
     ----------
-    img : (M, N, D) ndarray
+    image : (M, N, D) ndarray
         Image
     coords : tuple of ((P,) ndarray, (P,) ndarray)
         Row and column coordinates of pixels to be colored.
@@ -260,11 +277,6 @@ def set_color(img, coords, color, alpha=1):
     alpha : scalar or (N,) ndarray
         Alpha values used to blend color with image.  0 is transparent,
         1 is opaque.
-
-    Returns
-    -------
-    img : (M, N, D) ndarray
-        The updated image.
 
     Examples
     --------
@@ -287,29 +299,29 @@ def set_color(img, coords, color, alpha=1):
     """
     rr, cc = coords
 
-    if img.ndim == 2:
-        img = img[..., np.newaxis]
+    if image.ndim == 2:
+        image = image[..., np.newaxis]
 
     color = np.array(color, ndmin=1, copy=False)
 
-    if img.shape[-1] != color.shape[-1]:
+    if image.shape[-1] != color.shape[-1]:
         raise ValueError('Color shape ({}) must match last '
                          'image dimension ({}).'.format(color.shape[0],
-                                                        img.shape[-1]))
+                                                        image.shape[-1]))
 
     if np.isscalar(alpha):
         # Can be replaced by ``full_like`` when numpy 1.8 becomes
         # minimum dependency
         alpha = np.ones_like(rr) * alpha
 
-    rr, cc, alpha = _coords_inside_image(rr, cc, img.shape, val=alpha)
+    rr, cc, alpha = _coords_inside_image(rr, cc, image.shape, val=alpha)
 
     alpha = alpha[..., np.newaxis]
 
     color = color * alpha
-    vals = img[rr, cc] * (1 - alpha)
+    vals = image[rr, cc] * (1 - alpha)
 
-    img[rr, cc] = vals + color
+    image[rr, cc] = vals + color
 
 
 def line(r0, c0, r1, c1):
@@ -598,6 +610,26 @@ def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
            [0, 0, 1, 0, 0, 0, 0, 0, 1, 0],
            [0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+
+
+    Note that the positions of `ellipse` without specified `shape` can have 
+    also, negative values, as this is correct on the plane. On the other hand
+    using these ellipse positions for an image afterwards may lead to appearing
+    on the other side of image, because ``image[-1, -1] = image[end-1, end-1]``
+
+    >>> rr, cc = ellipse_perimeter(2, 3, 4, 5)
+    >>> img = np.zeros((9, 12), dtype=np.uint8)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+           [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+           [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+           [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+           [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]], dtype=uint8)
     """
     return _ellipse_perimeter(r, c, r_radius, c_radius, orientation, shape)
 
@@ -657,3 +689,78 @@ def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
     return _bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape)
+
+
+def rectangle(start, end=None, extent=None, shape=None):
+    """Generate coordinates of pixels within a rectangle.
+
+    Parameters
+    ----------
+    start : tuple
+        Origin point of the rectangle, e.g., ``([plane,] row, column)``.
+    end : tuple
+        End point of the rectangle ``([plane,] row, column)``.
+        Either `end` or `extent` must be specified.
+    extent : tuple
+        The extent (size) of the drawn rectangle.  E.g.,
+        ``([num_planes,] num_rows, num_cols)``.
+        Either `end` or `extent` must be specified.
+    shape : tuple, optional
+        Image shape used to determine the maximum bounds of the output
+        coordinates. This is useful for clipping rectangles that exceed
+        the image size. By default, no clipping is done.
+
+    Returns
+    -------
+    coords : array of int, shape (Ndim, Npoints)
+        The coordinates of all pixels in the rectangle.
+
+    Notes
+    -----
+    This function can be applied to N-dimensional images, by passing `start` and
+    `end` or `extent` as tuples of length N.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.draw import rectangle
+    >>> img = np.zeros((5, 5), dtype=np.uint8)
+    >>> start = (1, 1)
+    >>> extent = (3, 3)
+    >>> rr, cc = rectangle(start, extent=extent, shape=img.shape)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 0, 0, 0, 0],
+           [0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0]], dtype=uint8)
+
+
+    >>> img = np.zeros((5, 5), dtype=np.uint8)
+    >>> start = (0, 1)
+    >>> end = (3, 3)
+    >>> rr, cc = rectangle(start, end=end, shape=img.shape)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0]], dtype=uint8)
+
+    """
+    if extent is not None:
+        end = np.array(start) + np.array(extent)
+    elif end is None:
+        raise ValueError("Either `end` or `extent` must be given")
+    tl = np.minimum(start, end)
+    br = np.maximum(start, end)
+    if extent is None:
+        br += 1
+    if shape is not None:
+        br = np.minimum(shape, br)
+        tl = np.maximum(np.zeros_like(shape), tl)
+    coords = np.meshgrid(*[np.arange(st, en) for st, en in zip(tuple(tl),
+                                                               tuple(br))])
+    return coords

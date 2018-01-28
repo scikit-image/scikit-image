@@ -5,9 +5,6 @@ from scipy import ndimage as ndi
 from scipy import sparse
 import math
 from ... import measure, segmentation, util, color
-from matplotlib import colors, cm
-from matplotlib import pyplot as plt
-from matplotlib.collections import LineCollection
 
 
 def _edge_generator_from_csr(csr_matrix):
@@ -111,7 +108,7 @@ class RAG(nx.Graph):
 
     """
     The Region Adjacency Graph (RAG) of an image, subclasses
-    `networx.Graph <http://networkx.github.io/documentation/latest/reference/classes.graph.html>`_
+    `networx.Graph <http://networkx.github.io/documentation/latest/reference/classes/graph.html>`_
 
     Parameters
     ----------
@@ -139,7 +136,7 @@ class RAG(nx.Graph):
         if self.number_of_nodes() == 0:
             self.max_id = 0
         else:
-            self.max_id = max(self.nodes_iter())
+            self.max_id = max(self.nodes())
 
         if label_image is not None:
             fp = ndi.generate_binary_structure(label_image.ndim, connectivity)
@@ -252,6 +249,28 @@ class RAG(nx.Graph):
         g.max_id = self.max_id
         return g
 
+    def fresh_copy(self):
+        """Return a fresh copy graph with the same data structure.
+
+        A fresh copy has no nodes, edges or graph attributes. It is
+        the same data structure as the current graph. This method is
+        typically used to create an empty version of the graph.
+
+        This is required when subclassing Graph with networkx v2 and
+        does not cause problems for v1. Here is more detail from
+        the network migrating from 1.x to 2.x document::
+
+            With the new GraphViews (SubGraph, ReversedGraph, etc)
+            you can't assume that ``G.__class__()`` will create a new
+            instance of the same graph type as ``G``. In fact, the
+            call signature for ``__class__`` differs depending on
+            whether ``G`` is a view or a base class. For v2.x you
+            should use ``G.fresh_copy()`` to create a null graph of
+            the correct type---ready to fill with nodes and edges.
+
+        """
+        return RAG()
+
     def next_id(self):
         """Returns the `id` for the new node to be inserted.
 
@@ -271,30 +290,6 @@ class RAG(nx.Graph):
 
         .. seealso:: :func:`networkx.Graph.add_node`."""
         super(RAG, self).add_node(n)
-
-    def nodes_iter(self, *args, **kwargs):
-        """ Iterate over nodes
-
-        For compatibility with older versions of networkx.  Versions <= 1.11
-        have an ``nodes_iter`` method, but later versions return an iterator from
-        the nodes method, and lack ``nodes_iter``.
-        """
-        try:
-            return super(RAG, self).nodes_iter(*args, **kwargs)
-        except AttributeError:
-            return super(RAG, self).nodes(*args, **kwargs)
-
-    def edges_iter(self, *args, **kwargs):
-        """ Iterate over edges
-
-        For compatibility with older versions of networkx.  Versions <= 1.11
-        have an ``edges_iter`` method, but later versions return an iterator from
-        the edges method, and lack ``edges_iter``.
-        """
-        try:
-            return super(RAG, self).edges_iter(*args, **kwargs)
-        except AttributeError:
-            return super(RAG, self).edges(*args, **kwargs)
 
 
 def rag_mean_color(image, labels, connectivity=2, mode='distance',
@@ -375,7 +370,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
         graph.node[n]['mean color'] = (graph.node[n]['total color'] /
                                        graph.node[n]['pixel count'])
 
-    for x, y, d in graph.edges_iter(data=True):
+    for x, y, d in graph.edges(data=True):
         diff = graph.node[x]['mean color'] - graph.node[y]['mean color']
         diff = np.linalg.norm(diff)
         if mode == 'similarity':
@@ -452,7 +447,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
     return rag
 
 
-def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
+def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
              edge_cmap='magma', img_cmap='bone', in_place=True, ax=None):
     """Show a Region Adjacency Graph on an image.
 
@@ -466,7 +461,7 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
         The labelled image.
     rag : RAG
         The Region Adjacency Graph.
-    img : ndarray, shape (M, N[, 3])
+    image : ndarray, shape (M, N[, 3])
         Input image. If `colormap` is `None`, the image should be in RGB
         format.
     border_color : color spec, optional
@@ -495,29 +490,34 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     --------
     >>> from skimage import data, segmentation
     >>> from skimage.future import graph
+    >>> import matplotlib.pyplot as plt
+    >>>
     >>> img = data.coffee()
     >>> labels = segmentation.slic(img)
     >>> g =  graph.rag_mean_color(img, labels)
     >>> lc = graph.show_rag(labels, g, img)
     >>> cbar = plt.colorbar(lc)
     """
+    from matplotlib import colors, cm
+    from matplotlib import pyplot as plt
+    from matplotlib.collections import LineCollection
 
     if not in_place:
         rag = rag.copy()
 
     if ax is None:
         fig, ax = plt.subplots()
-    out = util.img_as_float(img, force_copy=True)
+    out = util.img_as_float(image, force_copy=True)
 
     if img_cmap is None:
-        if img.ndim < 3 or img.shape[2] not in [3, 4]:
+        if image.ndim < 3 or image.shape[2] not in [3, 4]:
             msg = 'If colormap is `None`, an RGB or RGBA image should be given'
             raise ValueError(msg)
         # Ignore the alpha channel
-        out = img[:, :, :3]
+        out = image[:, :, :3]
     else:
         img_cmap = cm.get_cmap(img_cmap)
-        out = color.rgb2gray(img)
+        out = color.rgb2gray(image)
         # Ignore the alpha channel
         out = img_cmap(out)[:, :, :3]
 
@@ -527,7 +527,7 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     # offset is 1 so that regionprops does not ignore 0
     offset = 1
     map_array = np.arange(labels.max() + 1)
-    for n, d in rag.nodes_iter(data=True):
+    for n, d in rag.nodes(data=True):
         for label in d['labels']:
             map_array[label] = offset
         offset += 1
@@ -535,7 +535,7 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     rag_labels = map_array[labels]
     regions = measure.regionprops(rag_labels)
 
-    for (n, data), region in zip(rag.nodes_iter(data=True), regions):
+    for (n, data), region in zip(rag.nodes(data=True), regions):
         data['centroid'] = tuple(map(int, region['centroid']))
 
     cc = colors.ColorConverter()
@@ -549,10 +549,10 @@ def show_rag(labels, rag, img, border_color='black', edge_width=1.5,
     # The tuple[::-1] syntax reverses a tuple as matplotlib uses (x,y)
     # convention while skimage uses (row, column)
     lines = [[rag.node[n1]['centroid'][::-1], rag.node[n2]['centroid'][::-1]]
-             for (n1, n2) in rag.edges_iter()]
+             for (n1, n2) in rag.edges()]
 
     lc = LineCollection(lines, linewidths=edge_width, cmap=edge_cmap)
-    edge_weights = [d['weight'] for x, y, d in rag.edges_iter(data=True)]
+    edge_weights = [d['weight'] for x, y, d in rag.edges(data=True)]
     lc.set_array(np.array(edge_weights))
     ax.add_collection(lc)
 

@@ -1,3 +1,4 @@
+from numpy import unique
 from scipy.stats import entropy as scipy_entropy
 
 
@@ -5,7 +6,7 @@ def shannon_entropy(image, base=2):
     """Calculate the Shannon entropy of an image.
 
     The Shannon entropy is defined as S = -sum(pk * log(pk)),
-    where pk are the number of pixels of value k.
+    where pk are frequency/probability of pixels of value k.
 
     Parameters
     ----------
@@ -32,6 +33,8 @@ def shannon_entropy(image, base=2):
     --------
     >>> from skimage import data
     >>> shannon_entropy(data.camera())
-    17.732031303342747
+    7.0479552324230861
     """
-    return scipy_entropy(image.ravel(), base=base)
+
+    _, counts = unique(image, return_counts=True)
+    return scipy_entropy(counts, base=base)

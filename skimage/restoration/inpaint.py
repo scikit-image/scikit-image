@@ -6,7 +6,7 @@ from scipy.sparse.linalg import spsolve
 import scipy.ndimage as ndi
 from scipy.ndimage.filters import laplace
 import skimage
-from skimage.measure import label
+from ..measure import label
 
 
 def _get_neighborhood(nd_idx, radius, nd_shape):
@@ -15,7 +15,7 @@ def _get_neighborhood(nd_idx, radius, nd_shape):
     return bounds_lo, bounds_hi
 
 
-def _inpaint_biharmonic_single_channel(img, mask, out, limits):
+def _inpaint_biharmonic_single_channel(mask, out, limits):
     # Initialize sparse matrices
     matrix_unknown = sparse.lil_matrix((np.sum(mask), out.size))
     matrix_known = sparse.lil_matrix((np.sum(mask), out.size))
@@ -74,19 +74,19 @@ def _inpaint_biharmonic_single_channel(img, mask, out, limits):
     return out
 
 
-def inpaint_biharmonic(img, mask, multichannel=False):
+def inpaint_biharmonic(image, mask, multichannel=False):
     """Inpaint masked points in image with biharmonic equations.
 
     Parameters
     ----------
-    img : (M[, N[, ..., P]][, C]) ndarray
+    image : (M[, N[, ..., P]][, C]) ndarray
         Input image.
     mask : (M[, N[, ..., P]]) ndarray
         Array of pixels to be inpainted. Have to be the same shape as one
-        of the 'img' channels. Unknown pixels have to be represented with 1,
+        of the 'image' channels. Unknown pixels have to be represented with 1,
         known pixels - with 0.
     multichannel : boolean, optional
-        If True, the last `img` dimension is considered as a color channel,
+        If True, the last `image` dimension is considered as a color channel,
         otherwise as spatial.
 
     Returns
@@ -98,7 +98,11 @@ def inpaint_biharmonic(img, mask, multichannel=False):
     ----------
     .. [1]  N.S.Hoang, S.B.Damelin, "On surface completion and image inpainting
             by biharmonic functions: numerical aspects",
-            http://www.ima.umn.edu/~damelin/biharmonic
+            https://arxiv.org/abs/1707.06567
+    .. [2]  C. K. Chui and H. N. Mhaskar, MRA Contextual-Recovery Extension of
+            Smooth Functions on Manifolds, Appl. and Comp. Harmonic Anal.,
+            28 (2010), 104-113,
+            DOI: 10.1016/j.acha.2009.04.004
 
     Examples
     --------
@@ -110,17 +114,17 @@ def inpaint_biharmonic(img, mask, multichannel=False):
     >>> out = inpaint_biharmonic(img, mask)
     """
 
-    if img.ndim < 1:
+    if image.ndim < 1:
         raise ValueError('Input array has to be at least 1D')
 
-    img_baseshape = img.shape[:-1] if multichannel else img.shape
+    img_baseshape = image.shape[:-1] if multichannel else image.shape
     if img_baseshape != mask.shape:
         raise ValueError('Input arrays have to be the same shape')
 
-    if np.ma.isMaskedArray(img):
+    if np.ma.isMaskedArray(image):
         raise TypeError('Masked arrays are not supported')
 
-    img = skimage.img_as_float(img)
+    image = skimage.img_as_float(image)
     mask = mask.astype(np.bool)
 
     # Split inpainting mask into independent regions
@@ -130,18 +134,17 @@ def inpaint_biharmonic(img, mask, multichannel=False):
     mask_labeled *= mask
 
     if not multichannel:
-        img = img[..., np.newaxis]
+        image = image[..., np.newaxis]
 
-    out = np.copy(img)
+    out = np.copy(image)
 
-    for idx_channel in range(img.shape[-1]):
-        known_points = img[..., idx_channel][~mask]
+    for idx_channel in range(image.shape[-1]):
+        known_points = image[..., idx_channel][~mask]
         limits = (np.min(known_points), np.max(known_points))
 
         for idx_region in range(1, num_labels+1):
             mask_region = mask_labeled == idx_region
-            _inpaint_biharmonic_single_channel(
-                img[..., idx_channel], mask_region,
+            _inpaint_biharmonic_single_channel(mask_region,
                 out[..., idx_channel], limits)
 
     if not multichannel:

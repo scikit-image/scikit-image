@@ -7,9 +7,8 @@ from ._geometric import (SimilarityTransform, AffineTransform,
 from ._warps_cy import _warp_fast
 from ..measure import block_reduce
 
-from ..util import img_as_float
-from .._shared.utils import get_bound_method_class, safe_as_int, warn, convert_to_float
-
+from .._shared.utils import (get_bound_method_class, safe_as_int, warn,
+                             convert_to_float)
 
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,
@@ -18,24 +17,38 @@ HOMOGRAPHY_TRANSFORMS = (
 )
 
 
+def _multichannel_default(multichannel, ndim):
+    if multichannel is not None:
+        return multichannel
+    else:
+        warn('The default multichannel argument (None) is deprecated.  Please '
+             'specify either True or False explicitly.  multichannel will '
+             'default to False starting with release 0.16.')
+        # utility for maintaining previous color image default behavior
+        if ndim == 3:
+            return True
+        else:
+            return False
+
+
 def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
-           preserve_range=False):
+           preserve_range=False, anti_aliasing=None, anti_aliasing_sigma=None):
     """Resize image to match a certain size.
 
-    Performs interpolation to up-size or down-size images. For down-sampling
-    N-dimensional images by applying a function or the arithmetic mean, see
-    `skimage.measure.block_reduce` and `skimage.transform.downscale_local_mean`,
-    respectively.
+    Performs interpolation to up-size or down-size images. Note that anti-
+    aliasing should be enabled when down-sizing images to avoid aliasing
+    artifacts. For down-sampling N-dimensional images with an integer factor
+    also see `skimage.transform.downscale_local_mean`.
 
     Parameters
     ----------
     image : ndarray
         Input image.
     output_shape : tuple or ndarray
-        Size of the generated output image `(rows, cols[, dim])`. If `dim` is
-        not provided, the number of channels is preserved. In case the number
-        of input channels does not equal the number of output channels a
-        3-dimensional interpolation is applied.
+        Size of the generated output image `(rows, cols[, ...][, dim])`. If
+        `dim` is not provided, the number of channels is preserved. In case the
+        number of input channels does not equal the number of output channels a
+        n-dimensional interpolation is applied.
 
     Returns
     -------
@@ -61,6 +74,14 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
+    anti_aliasing : bool, optional
+        Whether to apply a Gaussian filter to smooth the image prior to
+        down-scaling. It is crucial to filter when down-sampling the image to
+        avoid aliasing artifacts.
+    anti_aliasing_sigma : {float, tuple of floats}, optional
+        Standard deviation for Gaussian filtering to avoid aliasing artifacts.
+        By default, this value is chosen as (1 - s) / 2 where s is the
+        down-scaling factor.
 
     Notes
     -----
@@ -84,48 +105,61 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
         warn("The default mode, 'constant', will be changed to 'reflect' in "
              "skimage 0.15.")
 
-    rows, cols = output_shape[0], output_shape[1]
-    orig_rows, orig_cols = image.shape[0], image.shape[1]
+    if anti_aliasing is None:
+        anti_aliasing = False
+        warn("Anti-aliasing will be enabled by default in skimage 0.15 to "
+             "avoid aliasing artifacts when down-sampling images.")
 
-    row_scale = float(orig_rows) / rows
-    col_scale = float(orig_cols) / cols
+    output_shape = tuple(output_shape)
+    output_ndim = len(output_shape)
+    input_shape = image.shape
+    if output_ndim > image.ndim:
+        # append dimensions to input_shape
+        input_shape = input_shape + (1, ) * (output_ndim - image.ndim)
+        image = np.reshape(image, input_shape)
+    elif output_ndim == image.ndim - 1:
+        # multichannel case: append shape of last axis
+        output_shape = output_shape + (image.shape[-1], )
+    elif output_ndim < image.ndim - 1:
+        raise ValueError("len(output_shape) cannot be smaller than the image "
+                         "dimensions")
 
-    # 3-dimensional interpolation
-    if len(output_shape) == 3 and (image.ndim == 2
-                                   or output_shape[2] != image.shape[2]):
-        ndi_mode = _to_ndimage_mode(mode)
-        dim = output_shape[2]
-        if image.ndim == 2:
-            image = image[:, :, np.newaxis]
-        orig_dim = image.shape[2]
-        dim_scale = float(orig_dim) / dim
+    factors = (np.asarray(input_shape, dtype=float) /
+               np.asarray(output_shape, dtype=float))
 
-        map_rows, map_cols, map_dims = np.mgrid[:rows, :cols, :dim]
-        map_rows = row_scale * (map_rows + 0.5) - 0.5
-        map_cols = col_scale * (map_cols + 0.5) - 0.5
-        map_dims = dim_scale * (map_dims + 0.5) - 0.5
+    if anti_aliasing:
+        if anti_aliasing_sigma is None:
+            anti_aliasing_sigma = np.maximum(0, (factors - 1) / 2)
+        else:
+            anti_aliasing_sigma = \
+                np.atleast_1d(anti_aliasing_sigma) * np.ones_like(factors)
+            if np.any(anti_aliasing_sigma < 0):
+                raise ValueError("Anti-aliasing standard deviation must be "
+                                 "greater than or equal to zero")
+            elif np.any((anti_aliasing_sigma > 0) & (factors <= 1)):
+                warn("Anti-aliasing standard deviation greater than zero but "
+                     "not down-sampling along all axes")
 
-        coord_map = np.array([map_rows, map_cols, map_dims])
+        image = ndi.gaussian_filter(image, anti_aliasing_sigma,
+                                    cval=cval, mode=mode)
 
-        image = convert_to_float(image, preserve_range)
-
-        out = ndi.map_coordinates(image, coord_map, order=order,
-                                  mode=ndi_mode, cval=cval)
-
-        _clip_warp_output(image, out, order, mode, cval, clip)
-
-    else:  # 2-dimensional interpolation
-
+    # 2-dimensional interpolation
+    if len(output_shape) == 2 or (len(output_shape) == 3 and
+                                  output_shape[2] == input_shape[2]):
+        rows = output_shape[0]
+        cols = output_shape[1]
+        input_rows = input_shape[0]
+        input_cols = input_shape[1]
         if rows == 1 and cols == 1:
-            tform = AffineTransform(translation=(orig_cols / 2.0 - 0.5,
-                                                 orig_rows / 2.0 - 0.5))
+            tform = AffineTransform(translation=(input_cols / 2.0 - 0.5,
+                                                 input_rows / 2.0 - 0.5))
         else:
             # 3 control points necessary to estimate exact AffineTransform
             src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
             dst_corners = np.zeros(src_corners.shape, dtype=np.double)
             # take into account that 0th pixel is at position (0.5, 0.5)
-            dst_corners[:, 0] = col_scale * (src_corners[:, 0] + 0.5) - 0.5
-            dst_corners[:, 1] = row_scale * (src_corners[:, 1] + 0.5) - 0.5
+            dst_corners[:, 0] = factors[1] * (src_corners[:, 0] + 0.5) - 0.5
+            dst_corners[:, 1] = factors[0] * (src_corners[:, 1] + 0.5) - 0.5
 
             tform = AffineTransform()
             tform.estimate(src_corners, dst_corners)
@@ -134,17 +168,34 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
                    mode=mode, cval=cval, clip=clip,
                    preserve_range=preserve_range)
 
+    else:  # n-dimensional interpolation
+        coord_arrays = [factors[i] * (np.arange(d) + 0.5) - 0.5
+                        for i, d in enumerate(output_shape)]
+
+        coord_map = np.array(np.meshgrid(*coord_arrays,
+                                         sparse=False,
+                                         indexing='ij'))
+
+        image = convert_to_float(image, preserve_range)
+
+        ndi_mode = _to_ndimage_mode(mode)
+        out = ndi.map_coordinates(image, coord_map, order=order,
+                                  mode=ndi_mode, cval=cval)
+
+        _clip_warp_output(image, out, order, mode, cval, clip)
+
     return out
 
 
 def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
-            preserve_range=False):
+            preserve_range=False, multichannel=None,
+            anti_aliasing=None, anti_aliasing_sigma=None):
     """Scale image by a certain factor.
 
-    Performs interpolation to upscale or down-scale images. For down-sampling
-    N-dimensional images with integer factors by applying a function or the
-    arithmetic mean, see `skimage.measure.block_reduce` and
-    `skimage.transform.downscale_local_mean`, respectively.
+    Performs interpolation to up-scale or down-scale images. Note that anti-
+    aliasing should be enabled when down-sizing images to avoid aliasing
+    artifacts. For down-sampling N-dimensional images with an integer factor
+    also see `skimage.transform.downscale_local_mean`.
 
     Parameters
     ----------
@@ -152,7 +203,7 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
         Input image.
     scale : {float, tuple of floats}
         Scale factors. Separate scale factors can be defined as
-        `(row_scale, col_scale)`.
+        `(rows, cols[, ...][, dim])`.
 
     Returns
     -------
@@ -178,6 +229,27 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
+    multichannel : bool, optional
+        Whether the last axis of the image is to be interpreted as multiple
+        channels or another spatial dimension. By default, is set to True for
+        3D (2D+color) inputs, and False for others. Starting in release 0.16,
+        this will always default to False.
+    anti_aliasing : bool, optional
+        Whether to apply a Gaussian filter to smooth the image prior to
+        down-scaling. It is crucial to filter when down-sampling the image to
+        avoid aliasing artifacts.
+    anti_aliasing_sigma : {float, tuple of floats}, optional
+        Standard deviation for Gaussian filtering to avoid aliasing artifacts.
+        By default, this value is chosen as (1 - s) / 2 where s is the
+        down-scaling factor.
+
+    Notes
+    -----
+    Modes 'reflect' and 'symmetric' are similar, but differ in whether the edge
+    pixels are duplicated during the reflection.  As an example, if an array
+    has values [0, 1, 2] and was padded to the right by four values using
+    symmetric, the result would be [0, 1, 2, 2, 1, 0, 0], while for reflect it
+    would be [0, 1, 2, 1, 0, 1, 2].
 
     Examples
     --------
@@ -190,19 +262,20 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
     (256, 256)
 
     """
-
-    try:
-        row_scale, col_scale = scale
-    except TypeError:
-        row_scale = col_scale = scale
-
-    orig_rows, orig_cols = image.shape[0], image.shape[1]
-    rows = np.round(row_scale * orig_rows)
-    cols = np.round(col_scale * orig_cols)
-    output_shape = (rows, cols)
+    multichannel = _multichannel_default(multichannel, image.ndim)
+    scale = np.atleast_1d(scale)
+    if len(scale) > 1 and (len(scale) != image.ndim or
+                           (multichannel and len(scale) != image.ndim - 1)):
+        raise ValueError("must supply a single scale or one value per axis")
+    orig_shape = np.asarray(image.shape)
+    output_shape = np.round(scale * orig_shape)
+    if multichannel:  # don't scale channel dimension
+        output_shape[-1] = orig_shape[-1]
 
     return resize(image, output_shape, order=order, mode=mode, cval=cval,
-                  clip=clip, preserve_range=preserve_range)
+                  clip=clip, preserve_range=preserve_range,
+                  anti_aliasing=anti_aliasing,
+                  anti_aliasing_sigma=anti_aliasing_sigma)
 
 
 def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
@@ -246,6 +319,14 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
+
+    Notes
+    -----
+    Modes 'reflect' and 'symmetric' are similar, but differ in whether the edge
+    pixels are duplicated during the reflection.  As an example, if an array
+    has values [0, 1, 2] and was padded to the right by four values using
+    symmetric, the result would be [0, 1, 2, 2, 1, 0, 0], while for reflect it
+    would be [0, 1, 2, 1, 0, 1, 2].
 
     Examples
     --------
@@ -369,7 +450,7 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
     ----------
     image : ndarray
         Input image.
-    center : (row, column) tuple or (2,) ndarray, optional
+    center : (column, row) tuple or (2,) ndarray, optional
         Center coordinate of transformation.
     strength : float, optional
         The amount of swirling applied.
@@ -414,7 +495,7 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
         mode = 'constant'
 
     if center is None:
-        center = np.array(image.shape)[:2] / 2
+        center = np.array(image.shape)[:2][::-1] / 2
 
     warp_args = {'center': center,
                  'rotation': rotation,
@@ -527,15 +608,6 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     return coords
 
 
-def _convert_warp_input(image, preserve_range):
-    """Convert input image to double image with the appropriate range."""
-    if preserve_range:
-        image = image.astype(np.double)
-    else:
-        image = img_as_float(image)
-    return image
-
-
 def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
     """Clip output image to range of values of input image.
 
@@ -570,8 +642,8 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
         min_val = input_image.min()
         max_val = input_image.max()
 
-        preserve_cval = mode == 'constant' and not \
-                        (min_val <= cval <= max_val)
+        preserve_cval = (mode == 'constant' and not
+                         (min_val <= cval <= max_val))
 
         if preserve_cval:
             cval_mask = output_image == cval
@@ -719,7 +791,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
     >>> warped = warp(cube, coords)
 
     """
-    image = _convert_warp_input(image, preserve_range)
+    image = convert_to_float(image, preserve_range)
 
     input_shape = np.array(image.shape)
 
@@ -754,10 +826,9 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
             # inverse_map is a homography
             matrix = inverse_map.params
 
-        elif (hasattr(inverse_map, '__name__')
-              and inverse_map.__name__ == 'inverse'
-              and get_bound_method_class(inverse_map) \
-                  in HOMOGRAPHY_TRANSFORMS):
+        elif (hasattr(inverse_map, '__name__') and
+              inverse_map.__name__ == 'inverse' and
+              get_bound_method_class(inverse_map) in HOMOGRAPHY_TRANSFORMS):
             # inverse_map is the inverse of a homography
             matrix = np.linalg.inv(six.get_method_self(inverse_map).params)
 
@@ -765,8 +836,8 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
             matrix = matrix.astype(np.double)
             if image.ndim == 2:
                 warped = _warp_fast(image, matrix,
-                                 output_shape=output_shape,
-                                 order=order, mode=mode, cval=cval)
+                                    output_shape=output_shape,
+                                    order=order, mode=mode, cval=cval)
             elif image.ndim == 3:
                 dims = []
                 for dim in range(image.shape[2]):
@@ -778,8 +849,8 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
     if warped is None:
         # use ndi.map_coordinates
 
-        if (isinstance(inverse_map, np.ndarray)
-                and inverse_map.shape == (3, 3)):
+        if (isinstance(inverse_map, np.ndarray) and
+                inverse_map.shape == (3, 3)):
             # inverse_map is a transformation matrix as numpy array,
             # this is only used for order >= 4.
             inverse_map = ProjectiveTransform(matrix=inverse_map)

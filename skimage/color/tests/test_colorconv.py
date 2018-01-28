@@ -15,12 +15,9 @@ from __future__ import division
 import os.path
 
 import numpy as np
-from numpy.testing import (assert_equal,
-                           assert_almost_equal,
-                           assert_array_almost_equal,
-                           assert_raises,
-                           TestCase,
-                           )
+from skimage._shared.testing import assert_equal, assert_almost_equal
+from skimage._shared.testing import assert_array_almost_equal
+from skimage._shared.testing import TestCase
 
 from skimage import img_as_float, img_as_ubyte
 from skimage.io import imread
@@ -42,12 +39,11 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2ypbpr, ypbpr2rgb,
                            rgb2ycbcr, ycbcr2rgb,
                            rgba2rgb,
-                           guess_spatial_dimensions
-                           )
+                           guess_spatial_dimensions)
 
 from skimage import data_dir
 from skimage._shared._warnings import expected_warnings
-
+from skimage._shared import testing
 import colorsys
 
 
@@ -61,7 +57,8 @@ def test_guess_spatial_dimensions():
     assert_equal(guess_spatial_dimensions(im2), 3)
     assert_equal(guess_spatial_dimensions(im3), None)
     assert_equal(guess_spatial_dimensions(im4), 3)
-    assert_raises(ValueError, guess_spatial_dimensions, im5)
+    with testing.raises(ValueError):
+        guess_spatial_dimensions(im5)
 
 
 class TestColorconv(TestCase):
@@ -224,24 +221,26 @@ class TestColorconv(TestCase):
                             self.colbars_array)
 
     def test_convert_colorspace(self):
-        colspaces = ['HSV', 'RGB CIE', 'XYZ']
-        colfuncs_from = [hsv2rgb, rgbcie2rgb, xyz2rgb]
-        colfuncs_to = [rgb2hsv, rgb2rgbcie, rgb2xyz]
+        colspaces = ['HSV', 'RGB CIE', 'XYZ', 'YCbCr', 'YPbPr']
+        colfuncs_from = [hsv2rgb, rgbcie2rgb, xyz2rgb, ycbcr2rgb, ypbpr2rgb]
+        colfuncs_to = [rgb2hsv, rgb2rgbcie, rgb2xyz, rgb2ycbcr, rgb2ypbpr]
 
-        assert_almost_equal(convert_colorspace(self.colbars_array, 'RGB',
-                                               'RGB'), self.colbars_array)
+        assert_almost_equal(
+            convert_colorspace(self.colbars_array, 'RGB', 'RGB'),
+            self.colbars_array)
+
         for i, space in enumerate(colspaces):
             gt = colfuncs_from[i](self.colbars_array)
-            assert_almost_equal(convert_colorspace(self.colbars_array, space,
-                                                  'RGB'), gt)
+            assert_almost_equal(
+                convert_colorspace(self.colbars_array, space, 'RGB'), gt)
             gt = colfuncs_to[i](self.colbars_array)
-            assert_almost_equal(convert_colorspace(self.colbars_array, 'RGB',
-                                                   space), gt)
+            assert_almost_equal(
+                convert_colorspace(self.colbars_array, 'RGB', space), gt)
 
-        self.assertRaises(ValueError, convert_colorspace, self.colbars_array,
-                                                           'nokey', 'XYZ')
-        self.assertRaises(ValueError, convert_colorspace, self.colbars_array,
-                                                           'RGB', 'nokey')
+        self.assertRaises(ValueError, convert_colorspace,
+                          self.colbars_array, 'nokey', 'XYZ')
+        self.assertRaises(ValueError, convert_colorspace,
+                          self.colbars_array, 'RGB', 'nokey')
 
     def test_rgb2grey(self):
         x = np.array([1, 1, 1]).reshape((1, 1, 3)).astype(np.float)
@@ -492,7 +491,12 @@ class TestColorconv(TestCase):
 
 def test_gray2rgb():
     x = np.array([0, 0.5, 1])
-    assert_raises(ValueError, gray2rgb, x)
+    w = gray2rgb(x)
+    expected_output = np.array([[ 0, 0, 0 ],
+                                [ 0.5, 0.5, 0.5, ],
+                                [ 1, 1, 1 ]])
+
+    assert_equal(w, expected_output)
 
     x = x.reshape((3, 1))
     y = gray2rgb(x)
@@ -531,8 +535,3 @@ def test_gray2rgb_alpha():
                           alpha=True)[0, 0, 3], 1)
     assert_equal(gray2rgb(np.array([[1, 2], [3, 4]], dtype=np.uint8),
                           alpha=True)[0, 0, 3], 255)
-
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

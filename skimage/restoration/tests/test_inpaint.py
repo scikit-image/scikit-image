@@ -1,9 +1,10 @@
 from __future__ import print_function, division
 
 import numpy as np
-from numpy.testing import (run_module_suite, assert_allclose,
-                           assert_raises)
 from skimage.restoration import inpaint
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_allclose
 
 
 def test_inpaint_biharmonic_2d():
@@ -52,15 +53,14 @@ def test_inpaint_biharmonic_3d():
 
 def test_invalid_input():
     img, mask = np.zeros([]), np.zeros([])
-    assert_raises(ValueError, inpaint.inpaint_biharmonic, img, mask)
+    with testing.raises(ValueError):
+        inpaint.inpaint_biharmonic(img, mask)
 
     img, mask = np.zeros((2, 2)), np.zeros((4, 1))
-    assert_raises(ValueError, inpaint.inpaint_biharmonic, img, mask)
+    with testing.raises(ValueError):
+        inpaint.inpaint_biharmonic(img, mask)
 
     img = np.ma.array(np.zeros((2, 2)), mask=[[0, 0], [0, 0]])
     mask = np.zeros((2, 2))
-    assert_raises(TypeError, inpaint.inpaint_biharmonic, img, mask)
-
-
-if __name__ == '__main__':
-    run_module_suite()
+    with testing.raises(TypeError):
+        inpaint.inpaint_biharmonic(img, mask)

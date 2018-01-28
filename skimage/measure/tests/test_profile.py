@@ -1,9 +1,11 @@
-from numpy.testing import assert_equal, assert_almost_equal
 import numpy as np
-
 from skimage.measure import profile_line
 
+from skimage._shared.testing import assert_equal, assert_almost_equal
+
+
 image = np.arange(100).reshape((10, 10)).astype(np.float)
+
 
 def test_horizontal_rightward():
     prof = profile_line(image, (0, 2), (0, 8), order=0)
@@ -75,6 +77,7 @@ def test_pythagorean_triangle_right_downward_interpolated():
     expected_prof = np.linspace(11, 79, 11)
     assert_almost_equal(prof, expected_prof)
 
+
 pyth_image = np.zeros((6, 7), np.float)
 line = ((1, 2, 2, 3, 3, 4), (1, 2, 3, 3, 4, 5))
 below = ((2, 2, 3, 4, 4, 5), (0, 1, 2, 3, 4, 4))
@@ -102,9 +105,3 @@ def test_pythagorean_triangle_transpose_left_down_linewidth():
                         linewidth=3, order=0)
     expected_prof = np.ones(6)
     assert_almost_equal(prof, expected_prof)
-
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()
-

@@ -2,28 +2,11 @@ Remember to list any API changes below in `doc/source/api_changes.txt`.
 
 Version 0.14
 ------------
-* Remove deprecated ``ntiles_*` kwargs in ``equalize_adapthist``.
-* Remove deprecated ``skimage.restoration.nl_means_denoising``.
-* Remove deprecated ``skimage.filters.gaussian_filter``.
-* Remove deprecated ``skimage.filters.gabor_filter``.
-* Remove deprecated ``skimage.measure.LineModel`` and
-  add an alias LineModel = LineModelND. While the deprecated LineModel has for
-  parameters `(dist, theta)`, LineModelND has the more general parameters
-  `(origin, direction)`.
-* Remove deprecated old syntax support for ``skimage.transform.integrate``.
-* Remove deprecated ``skimage.measure.structural_similarity`` alias and
-  deprecation warning test for this alias.
-* Remove deprecated ``sigma_range`` kwargs in ``skimage.restoration.denoise_bilateral``
-  and corresponding tests.
-* Remove deprecation error on the usage of ``ntiles_x``, ``ntiles_y`` in
-  ``skimage.exposure.equalize_adapthist`` and the corresponding test.
-* Remove the freeimage plugin shim to imageio.
-* Remove deprecated `normalise` and corresponding test for ``skimage.feature.hog``.
-* Remove deprecated ``marching_cubes`` from ``skimage.measure``.
-
+* Finalize ``skimage.future.graph`` API.
 
 Version 0.15
 ------------
+* Finalize ``skimage.future.manual_segmentation`` API.
 * In ``skimage.util.dtype_limits``, set default behavior of `clip_negative` to `False`.
 * In ``skimage.transform.radon``, set default behavior of `circle` to `True`.
 * In ``skimage.transform.iradon``, set default behavior of `circle` to `True`.
@@ -40,3 +23,31 @@ Version 0.15
   ``'reflect'``.
 * In ``skimage.transform.rescale``, set default value of ``mode`` to
   ``'reflect'``.
+* Remove deprecated ``skimage.util.montage2d`` and corresponding tests.
+* In ``skimage.transform.resize`` change default argument from
+  ``anti_aliasing=None`` to ``anti_aliasing=True``.
+
+Version 0.16
+------------
+* In ``skimage.transform.resize``, ``skimage.transform.pyramid_reduce``,
+  ``skimage.transform.pyramid_laplacian``,
+  ``skimage.transform.pyramid_gaussian``,
+  ``skimage.transform.pyramid_expandset``, set default value of
+  ``multichannel`` to False
+* Remove ``_multichannel_default`` from ``skimage.transform._warps.py``, and no
+  longer call it from within the ``resize`` or ``pyramid_*`` transforms.
+* Remove checks for the ``multichannel`` deprecation warnings in several tests
+  in ``skimage.transform.tests.test_pyramids.py`` and
+  ``skimage.transform.tests.test_warps.py``.
+* Remove deprecated argument ``visualise`` from function skimage.feature.hog
+* Remove deprecated module ``skimage.novice``
+* In ``skimage.measure._regionprops``, remove all references to
+  ``coordinates=``, ``_xycoordinates``, and ``_use_xy_warning``.
+* In ``skimage.measure.moments_central``, remove ``cc`` and ``**kwargs``
+  arguments.
+* In ``skimage.morphology.remove_small_holes``, remove ``min_size`` argument.
+
+Other
+-----
+* Remove legacy pretty printing workaround for ``pytest`` in ``conftest.py``
+  once minimal required ``numpy`` is set to >= 1.14.0.

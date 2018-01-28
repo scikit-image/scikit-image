@@ -1,13 +1,13 @@
 import os
-import os.path
-import numpy as np
-from numpy.testing import *
-from numpy.testing.decorators import skipif
-
 from tempfile import NamedTemporaryFile
 
+import numpy as np
 from skimage import data_dir
 from skimage.io import imread, imsave, use_plugin, reset_plugins
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_array_almost_equal, TestCase
+
 
 try:
     import imageio as _imageio
@@ -27,7 +27,7 @@ def teardown():
     reset_plugins()
 
 
-@skipif(not imageio_available)
+@testing.skipif(not imageio_available, reason="imageio not installed")
 def test_imageio_flatten():
     # a color image is flattened
     img = imread(os.path.join(data_dir, 'color.png'), flatten=True)
@@ -38,22 +38,21 @@ def test_imageio_flatten():
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 
-@skipif(not imageio_available)
+@testing.skipif(not imageio_available, reason="imageio not installed")
 def test_imageio_palette():
     img = imread(os.path.join(data_dir, 'palette_color.png'))
     assert img.ndim == 3
 
 
-@skipif(not imageio_available)
+@testing.skipif(not imageio_available, reason="imageio not installed")
 def test_imageio_truncated_jpg():
     # imageio>2.0 uses Pillow / PIL to try and load the file.
     # Oddly, PIL explicitly raises a SyntaxError when the file read fails.
-    assert_raises((RuntimeError, ValueError, SyntaxError),
-                  imread,
-                  os.path.join(data_dir, 'truncated.jpg'))
+    with testing.raises(SyntaxError):
+        imread(os.path.join(data_dir, 'truncated.jpg'))
 
 
-class TestSave:
+class TestSave(TestCase):
 
     def roundtrip(self, x, scaling=1):
         f = NamedTemporaryFile(suffix='.png')
@@ -64,17 +63,14 @@ class TestSave:
 
         assert_array_almost_equal((x * scaling).astype(np.int32), y)
 
-    @skipif(not imageio_available)
+    @testing.skipif(not imageio_available, reason="imageio not installed")
     def test_imsave_roundtrip(self):
         dtype = np.uint8
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
             x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
-            if np.issubdtype(dtype, float):
+            if np.issubdtype(dtype, np.floating):
                 yield self.roundtrip, x, 255
             else:
                 x = (x * 255).astype(dtype)
                 yield self.roundtrip, x
-
-if __name__ == "__main__":
-    run_module_suite()

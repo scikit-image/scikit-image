@@ -1,9 +1,10 @@
 from contextlib import contextmanager
 
-from numpy.testing import assert_equal, raises
-
 from skimage import io
 from skimage.io import manage_plugins
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal
 
 
 io.use_plugin('pil')
@@ -50,9 +51,9 @@ def test_use():
     manage_plugins.use_plugin('test', 'imshow')
 
 
-@raises(ValueError)
 def test_failed_use():
-    manage_plugins.use_plugin('asd')
+    with testing.raises(ValueError):
+        manage_plugins.use_plugin('asd')
 
 
 def test_use_priority():
@@ -119,8 +120,3 @@ def test_load_preferred_plugins_imread():
         assert func == pil_plugin.imread
         plug, func = manage_plugins.plugin_store['imshow'][0]
         assert func == matplotlib_plugin.imshow, func.__module__
-
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

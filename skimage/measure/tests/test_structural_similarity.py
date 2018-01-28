@@ -1,30 +1,20 @@
 import os
 import numpy as np
-import scipy.io
-from numpy.testing import (assert_equal, assert_raises, assert_almost_equal,
-                           assert_array_almost_equal)
 
+from skimage import data, data_dir
 from skimage.measure import compare_ssim as ssim
-import skimage.data
-from skimage.io import imread
-from skimage import data_dir
-from skimage._shared._warnings import expected_warnings
+
+from skimage._shared import testing
+from skimage._shared.testing import (assert_equal, assert_almost_equal,
+                                     assert_array_almost_equal)
 
 np.random.seed(5)
-cam = skimage.data.camera()
+cam = data.camera()
 sigma = 20.0
 cam_noisy = np.clip(cam + sigma * np.random.randn(*cam.shape), 0, 255)
 cam_noisy = cam_noisy.astype(cam.dtype)
 
 np.random.seed(1234)
-
-
-# This test to be removed in 0.14, along with the structural_similarity alias
-# for compare_ssim
-def test_old_name_deprecated():
-    from skimage.measure import structural_similarity
-    with expected_warnings('deprecated'):
-        ssim_result = structural_similarity(cam, cam_noisy, win_size=31)
 
 
 def test_ssim_patch_range():
@@ -48,7 +38,7 @@ def test_ssim_image():
     assert(S1 < 0.3)
 
     S2 = ssim(X, Y, win_size=11, gaussian_weights=True)
-    assert(S1 < 0.3)
+    assert(S2 < 0.3)
 
     mssim0, S3 = ssim(X, Y, full=True)
     assert_equal(S3.shape, X.shape)
@@ -75,24 +65,6 @@ def test_ssim_grad():
 
     mssim, grad, s = ssim(X, Y, data_range=255, gradient=True, full=True)
     assert np.all(grad < 0.05)
-
-
-# NOTE: This test is known to randomly fail on some systems (Mac OS X 10.6)
-def test_ssim_dynamic_range_and_data_range():
-    # Tests deprecation of "dynamic_range" in favor of "data_range"
-    N = 30
-    X = np.random.rand(N, N) * 255
-    Y = np.random.rand(N, N) * 255
-
-    with expected_warnings(
-            '`dynamic_range` has been deprecated in favor of '
-            '`data_range`. The `dynamic_range` keyword argument '
-            'will be removed in v0.14'):
-        out2 = ssim(X, Y, dynamic_range=255)
-
-    out1 = ssim(X, Y, data_range=255)
-
-    assert_equal(out1, out2)
 
 
 def test_ssim_dtype():
@@ -138,7 +110,8 @@ def test_ssim_multichannel():
     assert_equal(S3.shape, Xc.shape)
 
     # fail if win_size exceeds any non-channel dimension
-    assert_raises(ValueError, ssim, Xc, Yc, win_size=7, multichannel=False)
+    with testing.raises(ValueError):
+        ssim(Xc, Yc, win_size=7, multichannel=False)
 
 
 def test_ssim_nD():
@@ -155,7 +128,7 @@ def test_ssim_nD():
 
 def test_ssim_multichannel_chelsea():
     # color image example
-    Xc = skimage.data.chelsea()
+    Xc = data.chelsea()
     sigma = 15.0
     Yc = np.clip(Xc + sigma * np.random.randn(*Xc.shape), 0, 255)
     Yc = Yc.astype(Xc.dtype)
@@ -222,21 +195,24 @@ def test_mssim_vs_legacy():
 def test_invalid_input():
     X = np.zeros((3, 3), dtype=np.double)
     Y = np.zeros((3, 3), dtype=np.int)
-    assert_raises(ValueError, ssim, X, Y)
+    with testing.raises(ValueError):
+        ssim(X, Y)
 
     Y = np.zeros((4, 4), dtype=np.double)
-    assert_raises(ValueError, ssim, X, Y)
+    with testing.raises(ValueError):
+        ssim(X, Y)
 
-    assert_raises(ValueError, ssim, X, X, win_size=8)
+    with testing.raises(ValueError):
+        ssim(X, X, win_size=8)
 
     # do not allow both image content weighting and gradient calculation
-    assert_raises(ValueError, ssim, X, X, image_content_weighting=True,
-                  gradient=True)
+    with testing.raises(ValueError):
+        ssim(X, X, image_content_weighting=True,
+             gradient=True)
     # some kwarg inputs must be non-negative
-    assert_raises(ValueError, ssim, X, X, K1=-0.1)
-    assert_raises(ValueError, ssim, X, X, K2=-0.1)
-    assert_raises(ValueError, ssim, X, X, sigma=-1.0)
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()
+    with testing.raises(ValueError):
+        ssim(X, X, K1=-0.1)
+    with testing.raises(ValueError):
+        ssim(X, X, K2=-0.1)
+    with testing.raises(ValueError):
+        ssim(X, X, sigma=-1.0)

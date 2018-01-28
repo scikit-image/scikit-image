@@ -11,20 +11,19 @@ import numbers
 
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
-                      bins=10000, mode='constant', cval=0, multichannel=None,
-                      sigma_range=None):
+                      bins=10000, mode='constant', cval=0, multichannel=None):
     """Denoise image using bilateral filter.
 
     This is an edge-preserving, denoising filter. It averages pixels based on
-    their spatial closeness and radiometric similarity.
+    their spatial closeness and radiometric similarity [1]_.
 
     Spatial closeness is measured by the Gaussian function of the Euclidean
     distance between two pixels and a certain standard deviation
     (`sigma_spatial`).
 
-    Radiometric similarity is measured by the Gaussian function of the Euclidean
-    distance between two color values and a certain standard deviation
-    (`sigma_color`).
+    Radiometric similarity is measured by the Gaussian function of the
+    Euclidean distance between two color values and a certain standard
+    deviation (`sigma_color`).
 
     Parameters
     ----------
@@ -111,14 +110,6 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                              "``multichannel=True`` for 2-D RGB "
                              "images.".format(image.shape))
 
-    if sigma_range is not None:
-        warn('`sigma_range` has been deprecated in favor of '
-             '`sigma_color`. The `sigma_range` keyword argument '
-             'will be removed in v0.14', skimage_deprecation)
-
-        # If sigma_range is provided, assign it to sigma_color
-        sigma_color = sigma_range
-
     if win_size is None:
         win_size = max(5, 2 * int(ceil(3 * sigma_spatial)) + 1)
 
@@ -132,7 +123,7 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     Total-variation denoising (also know as total-variation regularization)
     tries to find an image with less total-variation under the constraint
     of being similar to the input image, which is controlled by the
-    regularization parameter.
+    regularization parameter ([1]_, [2]_, [3]_, [4]_).
 
     Parameters
     ----------
@@ -173,12 +164,12 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     return _denoise_tv_bregman(image, weight, max_iter, eps, isotropic)
 
 
-def _denoise_tv_chambolle_nd(im, weight=0.1, eps=2.e-4, n_iter_max=200):
+def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):
     """Perform total-variation denoising on n-dimensional images.
 
     Parameters
     ----------
-    im : ndarray
+    image : ndarray
         n-D input data to be denoised.
     weight : float, optional
         Denoising weight. The greater `weight`, the more denoising (at
@@ -203,10 +194,10 @@ def _denoise_tv_chambolle_nd(im, weight=0.1, eps=2.e-4, n_iter_max=200):
 
     """
 
-    ndim = im.ndim
-    p = np.zeros((im.ndim, ) + im.shape, dtype=im.dtype)
+    ndim = image.ndim
+    p = np.zeros((image.ndim, ) + image.shape, dtype=image.dtype)
     g = np.zeros_like(p)
-    d = np.zeros_like(im)
+    d = np.zeros_like(image)
     i = 0
     while i < n_iter_max:
         if i > 0:
@@ -221,9 +212,9 @@ def _denoise_tv_chambolle_nd(im, weight=0.1, eps=2.e-4, n_iter_max=200):
                 d[slices_d] += p[slices_p]
                 slices_d[ax] = slice(None)
                 slices_p[ax+1] = slice(None)
-            out = im + d
+            out = image + d
         else:
-            out = im
+            out = image
         E = (d ** 2).sum()
 
         # g stores the gradients of out along each axis
@@ -242,7 +233,7 @@ def _denoise_tv_chambolle_nd(im, weight=0.1, eps=2.e-4, n_iter_max=200):
         norm += 1.
         p -= tau * g
         p /= norm
-        E /= float(im.size)
+        E /= float(image.size)
         if i == 0:
             E_init = E
             E_previous = E
@@ -255,14 +246,14 @@ def _denoise_tv_chambolle_nd(im, weight=0.1, eps=2.e-4, n_iter_max=200):
     return out
 
 
-def denoise_tv_chambolle(im, weight=0.1, eps=2.e-4, n_iter_max=200,
+def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
                          multichannel=False):
     """Perform total-variation denoising on n-dimensional images.
 
     Parameters
     ----------
-    im : ndarray of ints, uints or floats
-        Input data to be denoised. `im` can be of any numeric type,
+    image : ndarray of ints, uints or floats
+        Input data to be denoised. `image` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
     weight : float, optional
@@ -327,17 +318,17 @@ def denoise_tv_chambolle(im, weight=0.1, eps=2.e-4, n_iter_max=200,
 
     """
 
-    im_type = im.dtype
+    im_type = image.dtype
     if not im_type.kind == 'f':
-        im = img_as_float(im)
+        image = img_as_float(image)
 
     if multichannel:
-        out = np.zeros_like(im)
-        for c in range(im.shape[-1]):
-            out[..., c] = _denoise_tv_chambolle_nd(im[..., c], weight, eps,
+        out = np.zeros_like(image)
+        for c in range(image.shape[-1]):
+            out[..., c] = _denoise_tv_chambolle_nd(image[..., c], weight, eps,
                                                    n_iter_max)
     else:
-        out = _denoise_tv_chambolle_nd(im, weight, eps, n_iter_max)
+        out = _denoise_tv_chambolle_nd(image, weight, eps, n_iter_max)
     return out
 
 
@@ -348,6 +339,11 @@ def _bayes_thresh(details, var):
     eps = np.finfo(details.dtype).eps
     thresh = var / np.sqrt(max(dvar - var, eps))
     return thresh
+
+
+def _universal_thresh(img, sigma):
+    """ Universal threshold used by the VisuShrink method """
+    return sigma*np.sqrt(2*np.log(img.size))
 
 
 def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
@@ -385,27 +381,31 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
     return sigma
 
 
-def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
-                       wavelet_levels=None):
+def _wavelet_threshold(image, wavelet, method=None, threshold=None,
+                       sigma=None, mode='soft', wavelet_levels=None):
     """Perform wavelet thresholding.
 
     Parameters
     ----------
-    img : ndarray (2d or 3d) of ints, uints or floats
-        Input data to be denoised. `img` can be of any numeric type,
+    image : ndarray (2d or 3d) of ints, uints or floats
+        Input data to be denoised. `image` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
     wavelet : string
         The type of wavelet to perform. Can be any of the options
         pywt.wavelist outputs. For example, this may be any of ``{db1, db2,
         db3, db4, haar}``.
+    method : {'BayesShrink', 'VisuShrink'}, optional
+        Thresholding method to be used. The currently supported methods are
+        "BayesShrink" [1]_ and "VisuShrink" [2]_. If it is set to None, a
+        user-specified ``threshold`` must be supplied instead.
+    threshold : float, optional
+        The thresholding value to apply during wavelet coefficient
+        thresholding. The default value (None) uses the selected ``method`` to
+        estimate appropriate threshold(s) for noise removal.
     sigma : float, optional
         The standard deviation of the noise. The noise is estimated when sigma
         is None (the default) by the method in [2]_.
-    threshold : float, optional
-        The thresholding value. All wavelet coefficients less than this value
-        are set to 0. The default value (None) uses the BayesShrink method
-        found in [1]_ to remove noise.
     mode : {'soft', 'hard'}, optional
         An optional argument to choose the type of denoising performed. It
         noted that choosing soft thresholding given additive noise finds the
@@ -435,32 +435,45 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
 
     # original_extent is used to workaround PyWavelets issue #80
     # odd-sized input results in an image with 1 extra sample after waverecn
-    original_extent = [slice(s) for s in img.shape]
+    original_extent = [slice(s) for s in image.shape]
 
     # Determine the number of wavelet decomposition levels
     if wavelet_levels is None:
-        # Determine the maximum number of possible levels for img
+        # Determine the maximum number of possible levels for image
         dlen = wavelet.dec_len
         wavelet_levels = np.min(
-            [pywt.dwt_max_level(s, dlen) for s in img.shape])
+            [pywt.dwt_max_level(s, dlen) for s in image.shape])
 
         # Skip coarsest wavelet scales (see Notes in docstring).
         wavelet_levels = max(wavelet_levels - 3, 1)
 
-    coeffs = pywt.wavedecn(img, wavelet=wavelet, level=wavelet_levels)
+    coeffs = pywt.wavedecn(image, wavelet=wavelet, level=wavelet_levels)
     # Detail coefficients at each decomposition level
     dcoeffs = coeffs[1:]
 
     if sigma is None:
         # Estimate the noise via the method in [2]_
-        detail_coeffs = dcoeffs[-1]['d' * img.ndim]
+        detail_coeffs = dcoeffs[-1]['d' * image.ndim]
         sigma = _sigma_est_dwt(detail_coeffs, distribution='Gaussian')
 
+    if method is not None and threshold is not None:
+        warn(("Thresholding method {} selected.  The user-specified threshold "
+              "will be ignored.").format(method))
+
     if threshold is None:
-        # The BayesShrink thresholds from [1]_ in docstring
         var = sigma**2
-        threshold = [{key: _bayes_thresh(level[key], var) for key in level}
-                     for level in dcoeffs]
+        if method is None:
+            raise ValueError(
+                "If method is None, a threshold must be provided.")
+        elif method == "BayesShrink":
+            # The BayesShrink thresholds from [1]_ in docstring
+            threshold = [{key: _bayes_thresh(level[key], var) for key in level}
+                         for level in dcoeffs]
+        elif method == "VisuShrink":
+            # The VisuShrink thresholds from [2]_ in docstring
+            threshold = _universal_thresh(image, sigma)
+        else:
+            raise ValueError("Unrecognized method: {}".format(method))
 
     if np.isscalar(threshold):
         # A single threshold for all coefficient arrays
@@ -478,22 +491,21 @@ def _wavelet_threshold(img, wavelet, threshold=None, sigma=None, mode='soft',
     return pywt.waverecn(denoised_coeffs, wavelet)[original_extent]
 
 
-def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
+def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
                     wavelet_levels=None, multichannel=False,
-                    convert2ycbcr=False):
+                    convert2ycbcr=False, method='BayesShrink'):
     """Perform wavelet denoising on an image.
 
     Parameters
     ----------
-    img : ndarray ([M[, N[, ...P]][, C]) of ints, uints or floats
-        Input data to be denoised. `img` can be of any numeric type,
+    image : ndarray ([M[, N[, ...P]][, C]) of ints, uints or floats
+        Input data to be denoised. `image` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
     sigma : float or list, optional
-        The noise standard deviation used when computing the threshold
-        adaptively as described in [1]_ for each color channel. When None
-        (default), the noise standard deviation is estimated via the method in
-        [2]_.
+        The noise standard deviation used when computing the wavelet detail
+        coefficient threshold(s). When None (default), the noise standard
+        deviation is estimated via the method in [2]_.
     wavelet : string, optional
         The type of wavelet to perform and can be any of the options
         ``pywt.wavelist`` outputs. The default is `'db1'`. For example,
@@ -512,6 +524,9 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
         If True and multichannel True, do the wavelet denoising in the YCbCr
         colorspace instead of the RGB color space. This typically results in
         better performance for RGB images.
+    method : {'BayesShrink', 'VisuShrink'}, optional
+        Thresholding method to be used. The currently supported methods are
+        "BayesShrink" [1]_ and "VisuShrink" [2]_. Defaults to "BayesShrink".
 
     Returns
     -------
@@ -534,6 +549,16 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
     When YCbCr conversion is done, every color channel is scaled between 0
     and 1, and `sigma` values are applied to these scaled color channels.
 
+    Many wavelet coefficient thresholding approaches have been proposed.  By
+    default, ``denoise_wavelet`` applies BayesShrink, which is an adaptive
+    thresholding method that computes separate thresholds for each wavelet
+    sub-band as described in [1]_.
+
+    If ``method == "VisuShrink"``, a single "universal threshold" is applied to
+    all wavelet detail coefficients as described in [2]_.  This threshold
+    is designed to remove all Gaussian noise at a given ``sigma`` with high
+    probability, but tends to produce images that appear overly smooth.
+
     References
     ----------
     .. [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
@@ -554,49 +579,57 @@ def denoise_wavelet(img, sigma=None, wavelet='db1', mode='soft',
     >>> denoised_img = denoise_wavelet(img, sigma=0.1)
 
     """
-    img = img_as_float(img)
+    if method not in ["BayesShrink", "VisuShrink"]:
+        raise ValueError(
+            ('Invalid method: {}. The currently supported methods are '
+             '"BayesShrink" and "VisuShrink"').format(method))
+
+    image = img_as_float(image)
 
     if multichannel:
         if isinstance(sigma, numbers.Number) or sigma is None:
-            sigma = [sigma] * img.shape[-1]
+            sigma = [sigma] * image.shape[-1]
 
     if multichannel:
         if convert2ycbcr:
-            out = color.rgb2ycbcr(img)
+            out = color.rgb2ycbcr(image)
             for i in range(3):
                 # renormalizing this color channel to live in [0, 1]
                 min, max = out[..., i].min(), out[..., i].max()
                 channel = out[..., i] - min
                 channel /= max - min
-                out[..., i] = denoise_wavelet(channel, sigma=sigma[i],
-                                              wavelet=wavelet, mode=mode)
+                out[..., i] = denoise_wavelet(channel, wavelet=wavelet,
+                                              method=method, sigma=sigma[i],
+                                              mode=mode,
+                                              wavelet_levels=wavelet_levels)
 
                 out[..., i] = out[..., i] * (max - min)
                 out[..., i] += min
             out = color.ycbcr2rgb(out)
         else:
-            out = np.empty_like(img)
-            for c in range(img.shape[-1]):
-                out[..., c] = _wavelet_threshold(img[..., c], wavelet=wavelet,
-                                                 mode=mode, sigma=sigma[c],
+            out = np.empty_like(image)
+            for c in range(image.shape[-1]):
+                out[..., c] = _wavelet_threshold(image[..., c],
+                                                 wavelet=wavelet,
+                                                 method=method,
+                                                 sigma=sigma[c], mode=mode,
                                                  wavelet_levels=wavelet_levels)
-
     else:
-        out = _wavelet_threshold(img, wavelet=wavelet, mode=mode,
-                                 sigma=sigma,
+        out = _wavelet_threshold(image, wavelet=wavelet, method=method,
+                                 sigma=sigma, mode=mode,
                                  wavelet_levels=wavelet_levels)
 
-    clip_range = (-1, 1) if img.min() < 0 else (0, 1)
+    clip_range = (-1, 1) if image.min() < 0 else (0, 1)
     return np.clip(out, *clip_range)
 
 
-def estimate_sigma(im, average_sigmas=False, multichannel=False):
+def estimate_sigma(image, average_sigmas=False, multichannel=False):
     """
     Robust wavelet-based estimator of the (Gaussian) noise standard deviation.
 
     Parameters
     ----------
-    im : ndarray
+    image : ndarray
         Image for which to estimate the noise standard deviation.
     average_sigmas : bool, optional
         If true, average the channel estimates of `sigma`.  Otherwise return
@@ -634,17 +667,17 @@ def estimate_sigma(im, average_sigmas=False, multichannel=False):
     >>> sigma_hat = estimate_sigma(img, multichannel=False)
     """
     if multichannel:
-        nchannels = im.shape[-1]
+        nchannels = image.shape[-1]
         sigmas = [estimate_sigma(
-            im[..., c], multichannel=False) for c in range(nchannels)]
+            image[..., c], multichannel=False) for c in range(nchannels)]
         if average_sigmas:
             sigmas = np.mean(sigmas)
         return sigmas
-    elif im.shape[-1] <= 4:
+    elif image.shape[-1] <= 4:
         msg = ("image is size {0} on the last axis, but multichannel is "
                "False.  If this is a color image, please set multichannel "
                "to True for proper noise estimation.")
-        warn(msg.format(im.shape[-1]))
-    coeffs = pywt.dwtn(im, wavelet='db2')
-    detail_coeffs = coeffs['d' * im.ndim]
+        warn(msg.format(image.shape[-1]))
+    coeffs = pywt.dwtn(image, wavelet='db2')
+    detail_coeffs = coeffs['d' * image.ndim]
     return _sigma_est_dwt(detail_coeffs, distribution='Gaussian')

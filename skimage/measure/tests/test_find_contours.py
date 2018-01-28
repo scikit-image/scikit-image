@@ -1,9 +1,9 @@
 import numpy as np
-from numpy.testing import (assert_raises,
-                           assert_array_equal,
-                           )
-
 from skimage.measure import find_contours
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_array_equal
+
 
 a = np.ones((8, 8), dtype=np.float32)
 a[1:-1, 1] = 0
@@ -45,8 +45,6 @@ def test_binary():
     assert_array_equal(contours[0][::-1], ref)
 
 
-
-
 def test_float():
     contours = find_contours(r, 0.5)
     assert len(contours) == 1
@@ -67,10 +65,7 @@ def test_memory_order():
 
 
 def test_invalid_input():
-    assert_raises(ValueError, find_contours, r, 0.5, 'foo', 'bar')
-    assert_raises(ValueError, find_contours, r[..., None], 0.5)
-
-
-if __name__ == '__main__':
-    from numpy.testing import run_module_suite
-    run_module_suite()
+    with testing.raises(ValueError):
+        find_contours(r, 0.5, 'foo', 'bar')
+    with testing.raises(ValueError):
+        find_contours(r[..., None], 0.5)

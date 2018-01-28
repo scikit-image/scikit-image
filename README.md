@@ -12,14 +12,13 @@
 - **Debian/Ubuntu:** ``sudo apt-get install python-skimage``
 - **OSX:** ``pip install scikit-image``
 - **Anaconda:** ``conda install scikit-image``
-- **Windows:** Download [Windows binaries](http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikits.image)
+- **Windows:** Download [Windows binaries](http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image)
 
-Also see
-[http://scikit-image.org/docs/dev/install.html](http://scikit-image.org/docs/dev/install.html)
+Also see [installing ``scikit-image``](INSTALL.rst).
 
 ## Installation from source
 
-Install [dependencies](DEPENDS.txt) using:
+Install dependencies using:
 
 ```
 pip install -r requirements.txt
@@ -34,7 +33,12 @@ $ pip install .
 If you plan to develop the package, you may run it directly from source:
 
 ```
-$ python setup.py develop       # Do this once to add pkg to Python path
+$ pip install -e .  # Do this once to add package to Python path
+```
+
+Every time you modify Cython files, also run:
+
+```
 $ python setup.py build_ext -i  # Build binary extensions
 ```
 

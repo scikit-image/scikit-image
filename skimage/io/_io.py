@@ -1,5 +1,3 @@
-from io import BytesIO
-
 import numpy as np
 import six
 
@@ -7,7 +5,7 @@ from ..io.manage_plugins import call_plugin
 from ..color import rgb2grey
 from .util import file_or_url_context
 from ..exposure import is_low_contrast
-from .._shared.utils import all_warnings, warn
+from .._shared.utils import warn
 
 
 __all__ = ['imread', 'imsave', 'imshow', 'show',
@@ -33,20 +31,17 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
 
     Other Parameters
     ----------------
+    plugin_args : keywords
+        Passed to the given plugin.
     flatten : bool
         Backward compatible keyword, superseded by `as_grey`.
 
     Returns
     -------
     img_array : ndarray
-        The different colour bands/channels are stored in the
+        The different color bands/channels are stored in the
         third dimension, such that a grey-image is MxN, an
         RGB-image MxNx3 and an RGBA-image MxNx4.
-
-    Other parameters
-    ----------------
-    plugin_args : keywords
-        Passed to the given plugin.
 
     """
     # Backward compatibility
@@ -124,6 +119,13 @@ def imsave(fname, arr, plugin=None, **plugin_args):
     plugin_args : keywords
         Passed to the given plugin.
 
+    Notes
+    -----
+    When saving a JPEG, the compression ratio may be controlled using the
+    ``quality`` keyword argument which is an integer with values in [1, 100]
+    where 1 is worst quality and smallest file size, and 100 is best quality and
+    largest file size (default 75).  This is only available when using the PIL
+    and imageio plugins.
     """
     if plugin is None and hasattr(fname, 'lower'):
         if fname.lower().endswith(('.tiff', '.tif')):

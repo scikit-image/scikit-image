@@ -4,7 +4,7 @@ from .._shared import utils
 import numpy as np
 
 
-def seam_carve(img, energy_map, mode, num, border=1, force_copy=True):
+def seam_carve(image, energy_map, mode, num, border=1, force_copy=True):
     """ Carve vertical or horizontal seams off an image.
 
     Carves out vertical/horizontal seams from an image while using the given
@@ -33,7 +33,7 @@ def seam_carve(img, energy_map, mode, num, border=1, force_copy=True):
         If set, the `image` and `energy_map` are copied before being used by
         the method which modifies it in place. Set this to `False` if the
         original image and the energy map are no longer needed after
-        this opetration.
+        this operation.
 
     Returns
     -------
@@ -47,20 +47,21 @@ def seam_carve(img, energy_map, mode, num, border=1, force_copy=True):
            http://www.cs.jhu.edu/~misha/ReadingSeminar/Papers/Avidan07.pdf
     """
 
-    utils.assert_nD(img, (2, 3))
-    image = util.img_as_float(img, force_copy)
+    utils.assert_nD(image, (2, 3))
+    image = util.img_as_float(image, force_copy)
     energy_map = util.img_as_float(energy_map, force_copy)
 
     if image.ndim == 2:
         image = image[..., np.newaxis]
 
     if mode == 'horizontal':
-        image = np.transpose(image, (1, 0, 2))
+        image = np.swapaxes(image, 0, 1)
+        energy_map = np.swapaxes(energy_map, 0, 1)
 
     image = np.ascontiguousarray(image)
     out = _seam_carve_v(image, energy_map, num, border)
 
     if mode == 'horizontal':
-        out = np.transpose(out, (1, 0, 2))
+        out = np.swapaxes(out, 0, 1)
 
     return np.squeeze(out)

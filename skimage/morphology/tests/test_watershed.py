@@ -44,7 +44,7 @@ Original author: Lee Kamentsky
 
 import math
 import unittest
-
+import pytest
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -482,6 +482,12 @@ def test_numeric_seed_watershed():
                          [1, 1, 1, 1, 2, 2]], dtype=np.int32)
     np.testing.assert_equal(compact, expected)
 
+
+def test_incorrect_markers_shape():
+    with pytest.raises(ValueError):
+        image = np.ones((5, 6))
+        markers = np.ones((5, 7))
+        output = watershed(image, markers)
 
 if __name__ == "__main__":
     np.testing.run_module_suite()

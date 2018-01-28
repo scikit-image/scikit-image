@@ -17,7 +17,7 @@ markers of the two phases from the extreme tails of the histogram of gray
 values, and use the random walker for the segmentation.
 
 .. [1] *Random walks for image segmentation*, Leo Grady, IEEE Trans. Pattern
-       Anal. Mach. Intell. 2006 Nov; 28(11):1768-83
+       Anal. Mach. Intell. 2006 Nov; 28(11):1768-83 DOI:10.1109/TPAMI.2006.233
 
 """
 import numpy as np
@@ -25,14 +25,21 @@ import matplotlib.pyplot as plt
 
 from skimage.segmentation import random_walker
 from skimage.data import binary_blobs
+from skimage.exposure import rescale_intensity
 import skimage
 
 # Generate noisy synthetic data
 data = skimage.img_as_float(binary_blobs(length=128, seed=1))
-data += 0.35 * np.random.randn(*data.shape)
+sigma = 0.35
+data += np.random.normal(loc=0, scale=sigma, size=data.shape)
+data = rescale_intensity(data, in_range=(-sigma, 1 + sigma),
+                         out_range=(-1, 1))
+
+# The range of the binary image spans over (-1, 1).
+# We choose the hottest and the coldest pixels as markers.
 markers = np.zeros(data.shape, dtype=np.uint)
-markers[data < -0.3] = 1
-markers[data > 1.3] = 2
+markers[data < -0.95] = 1
+markers[data > 0.95] = 2
 
 # Run random walker algorithm
 labels = random_walker(data, markers, beta=10, mode='bf')
@@ -44,7 +51,7 @@ ax1.imshow(data, cmap='gray', interpolation='nearest')
 ax1.axis('off')
 ax1.set_adjustable('box-forced')
 ax1.set_title('Noisy data')
-ax2.imshow(markers, cmap='hot', interpolation='nearest')
+ax2.imshow(markers, cmap='magma', interpolation='nearest')
 ax2.axis('off')
 ax2.set_adjustable('box-forced')
 ax2.set_title('Markers')
