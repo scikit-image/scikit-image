@@ -102,17 +102,21 @@ def _validate_connectivity(image_dim, connectivity, offset):
     """
     if connectivity is None:
         connectivity = 1
+
     if np.isscalar(connectivity):
         c_connectivity = ndi.generate_binary_structure(image_dim, connectivity)
     else:
         c_connectivity = np.array(connectivity, bool)
         if c_connectivity.ndim != image_dim:
             raise ValueError("Connectivity dimension must be same as image")
+
     if offset is None:
         if any([x % 2 == 0 for x in c_connectivity.shape]):
             raise ValueError("Connectivity array must have an unambiguous "
                              "center")
+
         offset = np.array(c_connectivity.shape) // 2
+
     return c_connectivity, offset
 
 
