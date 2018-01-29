@@ -130,7 +130,7 @@ def _compute_neighbors(image, structure, offset):
     locations = np.transpose(np.nonzero(structure))
     sqdistances = np.sum((locations - offset)**2, axis=1)
     neighborhood = (np.ravel_multi_index(locations.T, image.shape) -
-                    np.ravel_multi_index(offset, image.shape)).astype(np.int32)
+                    np.ravel_multi_index(offset, image.shape))
     sorted_neighborhood = neighborhood[np.argsort(sqdistances)]
     return sorted_neighborhood
 
@@ -254,8 +254,8 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
     output = np.pad(markers, pad_width, mode='constant')
 
     flat_neighborhood = _compute_neighbors(image, connectivity, offset)
-    marker_locations = np.flatnonzero(output).astype(np.int32)
-    image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
+    marker_locations = np.flatnonzero(output)
+    image_strides = np.array(image.strides) // image.itemsize
 
     _watershed.watershed_raveled(image.ravel(),
                                  marker_locations, flat_neighborhood,
