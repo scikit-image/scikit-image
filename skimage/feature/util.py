@@ -42,7 +42,7 @@ class DescriptorExtractor(object):
 
 def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
                  keypoints_color='k', matches_color=None, only_matches=False,
-                 left_right=True):
+                 alignment='horizontal'):
     """Plot matched features.
 
     Parameters
@@ -68,9 +68,10 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
         color is chosen randomly.
     only_matches : bool, optional
         Whether to only plot matches and not plot the keypoint locations.
-    left_right : bool, optional
-        Whether to show images side by side (left and right) or one above
-        the other.
+    alignment : str, optional
+        Valid values are: 'horizontal' or 'vertical'
+        Whether to show images side by side, 'horizontal', or one above
+        the other, 'vertical'.
 
     """
 
@@ -101,12 +102,14 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
         image2 = new_image2
 
     offset = np.array(image1.shape)
-    if left_right is True:
+    if alignment == 'horizontal':
         image = np.concatenate([image1, image2], axis=1)
         offset[0] = 0
-    else:
+    elif alignment == 'vertical':
         image = np.concatenate([image1, image2], axis=0)
         offset[1] = 0
+    else:
+        raise ValueError('Incorrect value for alignment: %s' % alignment)
 
     if not only_matches:
         ax.scatter(keypoints1[:, 1], keypoints1[:, 0],
