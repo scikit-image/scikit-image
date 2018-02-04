@@ -211,6 +211,7 @@ def test_imsave_filelike():
     assert out.shape == shape
     assert_allclose(out, image)
 
+
 def test_imsave_boolean_input():
     shape = (2, 2)
     image = np.zeros(shape)
@@ -226,6 +227,7 @@ def test_imsave_boolean_input():
     out = imread(s)
     assert out.shape == shape
     assert_allclose(out, image)
+
 
 def test_imexport_imimport():
     shape = (2, 2)

@@ -127,8 +127,9 @@ def imsave(fname, arr, plugin=None, **plugin_args):
     largest file size (default 75).  This is only available when using the PIL
     and imageio plugins.
     """
-    # for arrays of mixed type:
+    # For arrays of mixed type
     arr = np.asanyarray(arr)
+
     if plugin is None and hasattr(fname, 'lower'):
         if fname.lower().endswith(('.tiff', '.tif')):
             plugin = 'tifffile'
@@ -137,6 +138,7 @@ def imsave(fname, arr, plugin=None, **plugin_args):
     if (arr.dtype == bool):
         warn('%s is a boolean image: setting True to 1 and False to 0' % fname)
     return call_plugin('imsave', fname, arr, plugin=plugin, **plugin_args)
+
 
 def imshow(arr, plugin=None, **plugin_args):
     """Display an image.
