@@ -262,9 +262,6 @@ def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
     if theta is None:
         theta = np.pi / 2 - np.arange(180) / 180.0 * np.pi
 
-    use_seed = seed is not None
-    seed = 0 if seed is None else seed
-
     return _prob_hough_line(image, threshold=threshold, line_length=line_length,
                             line_gap=line_gap, theta=theta, seed=seed)
 
