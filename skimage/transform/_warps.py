@@ -264,9 +264,9 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
     """
     multichannel = _multichannel_default(multichannel, image.ndim)
     scale = np.atleast_1d(scale)
-    if len(scale) > 1 and (len(scale) != image.ndim or
+    if len(scale) > 1 and ((not multichannel and len(scale) != image.ndim) or
                            (multichannel and len(scale) != image.ndim - 1)):
-        raise ValueError("must supply a single scale or one value per axis")
+        raise ValueError("Supply a single scale or one value per spatial axis")
     orig_shape = np.asarray(image.shape)
     output_shape = np.round(scale * orig_shape)
     if multichannel:  # don't scale channel dimension
