@@ -267,7 +267,8 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
     if len(scale) > 1:
         if ((not multichannel and len(scale) != image.ndim) or
                 (multichannel and len(scale) != image.ndim - 1)):
-            raise ValueError("Supply a single scale or one value per spatial axis")
+            raise ValueError("Supply a single scale, or one value per spatial "
+                             "axis")
         if multichannel:
             scale = np.concatenate((scale, [1]))
     orig_shape = np.asarray(image.shape)
