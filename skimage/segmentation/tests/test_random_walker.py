@@ -354,7 +354,7 @@ def test_isolated_seeds():
     mask[4, 4] = 2
     mask[6, 6] = 1
 
-    # Test that no error is raised, and that labels if isolated seeds are OK
+    # Test that no error is raised, and that labels of isolated seeds are OK
     res = random_walker(a, mask)
     assert res[1, 1] == 1
     res = random_walker(a, mask, return_full_prob=True)
