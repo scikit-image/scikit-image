@@ -123,15 +123,17 @@ def imsave(fname, arr, plugin=None, **plugin_args):
     -----
     When saving a JPEG, the compression ratio may be controlled using the
     ``quality`` keyword argument which is an integer with values in [1, 100]
-    where 1 is worst quality and smallest file size, and 100 is best quality and
-    largest file size (default 75).  This is only available when using the PIL
-    and imageio plugins.
+    where 1 is worst quality and smallest file size, and 100 is best quality
+    and largest file size (default 75).  This is only available when using
+    the PIL and imageio plugins.
     """
     if plugin is None and hasattr(fname, 'lower'):
         if fname.lower().endswith(('.tiff', '.tif')):
             plugin = 'tifffile'
     if is_low_contrast(arr):
         warn('%s is a low contrast image' % fname)
+    if arr.dtype == bool:
+        warn('%s is a boolean image: setting True to 1 and False to 0' % fname)
     return call_plugin('imsave', fname, arr, plugin=plugin, **plugin_args)
 
 
