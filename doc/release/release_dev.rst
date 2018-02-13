@@ -25,6 +25,7 @@ New Features
 - cycle-spinning function for approximating shift-invariance by averaging
   results from a series of spatial shifts (#2647)
 - Haar-like feature (#2848)
+- subset of LFW database (#2905)
 
 
 Improvements
