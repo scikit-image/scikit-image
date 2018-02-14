@@ -61,7 +61,6 @@ def test_im2type():
             else:
                 output_image_estimate = image.astype(output_type)
 
-
             output_image = im2type(input_image, output_type)
 
             float_decimals = 4
