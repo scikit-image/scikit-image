@@ -11,8 +11,8 @@ features to detect faces vs. non-faces.
 Notes
 -----
 
-This example relies on scikit-learn regarding the feature selection and
-classification.
+This example relies on scikit-learn for feature selection regarding the feature
+selection and classification.
 
 References
 ----------
@@ -26,16 +26,16 @@ References
 """
 from __future__ import print_function
 
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
+
+from dask import delayed, multiprocessing
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
-from sklearn.externals.joblib import Parallel, delayed
 
-from skimage.data import cbcl_face_database
+from skimage.data import lfw_subset
 from skimage.transform import integral_image
 from skimage.feature import haar_like_feature
 from skimage.feature import haar_like_feature_coord
@@ -52,6 +52,7 @@ print(__doc__)
 # features will be computed.
 
 
+@delayed
 def extract_feature_image(img, feature_type, feature_coord=None):
     """Extract the haar feature for the current image"""
     ii = integral_image(img)
@@ -60,24 +61,21 @@ def extract_feature_image(img, feature_type, feature_coord=None):
                              feature_coord=feature_coord)
 
 
-# trick such that we can pickle this function when building the doc with
-# sphinx-gallery
-sys.modules['__main__'].extract_feature_image = extract_feature_image
-
-
 ###############################################################################
 # We will use a subset of the CBCL which is composed of 100 face images and 100
 # non-face images. Each image has been resized to a ROI of 19 by 19 pixels. We
 # will keep 75 images from each group to train a classifier and check which
 # extracted features are the most salient.
 
-images = cbcl_face_database()
+images = lfw_subset()
 # For a gain of speed, only the two first types of features will be extracted.
 feature_types = ['type-2-x', 'type-2-y']
 
-X = np.array(Parallel(n_jobs=-1)(
-    delayed(extract_feature_image)(img, feature_types)
-    for img in images))
+# Delayed the computation and build the graph using dask
+X = delayed(extract_feature_image(img, feature_types)
+            for img in images)
+# Compute the result using the multiprocessing backend
+X = np.array(X.compute(get=multiprocessing.get))
 y = np.array([1] * 100 + [0] * 100)
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=150,
                                                     random_state=0)
@@ -130,10 +128,13 @@ selected_feature_type = feature_type[idx_sorted[:significant_feature]]
 # Note: we could select those features from the
 # original matrix X but we would like to emphasize the usage of `feature_coord`
 # and `feature_type` to recompute a subset of desired features.
-X = np.array(Parallel(n_jobs=-1)(
-    delayed(extract_feature_image)(img, selected_feature_type,
-                                   selected_feature_coord)
-    for img in images))
+
+# Delayed the computation and build the graph using dask
+X = delayed(extract_feature_image(img, selected_feature_type,
+                                  selected_feature_coord)
+            for img in images)
+# Compute the result using the multiprocessing backend
+X = np.array(X.compute(get=multiprocessing.get))
 y = np.array([1] * 100 + [0] * 100)
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=150,
                                                     random_state=0)
