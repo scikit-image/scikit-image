@@ -60,7 +60,6 @@ def im2integer(image, dtype):
         if issubclass(image.dtype.type, np.signedinteger):
             bits_input = bits_input - 1
 
-
         if bits_output < bits_input:
             return (image // (2 ** (bits_input - bits_output))).astype(dtype)
         elif bits_output > bits_input:
