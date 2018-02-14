@@ -29,10 +29,9 @@ def test_bogus_dtype():
 
 
 def test_im2type():
-    image = np.array([[1, 1, 1, 2],
-                      [2, 2, 3, 3],
-                      [4, 4, 6, 6]], dtype=np.uint8)
-    image_max = 255
+    image = np.array([[1, 2, 3, 4],
+                      [5, 6, 7, 8],
+                      [10, 12, 14, 16]]) / 16
 
     types = [np.float64, np.int16, np.float32,
              np.uint16, np.uint8]
@@ -42,22 +41,51 @@ def test_im2type():
 
     for input_type in types:
         for output_type, func in zip(types, functions):
-            input_image = image.astype(input_type)
+            err_message = "input_type: " + str(input_type) + ", " + \
+                          "output_type: " + str(output_type)
+            if issubclass(input_type, np.integer):
+                input_image = \
+                    (image * np.iinfo(input_type).max).astype(input_type)
+                bits_input = np.iinfo(input_type).bits
+                if issubclass(input_type, np.signedinteger):
+                    bits_input = bits_input - 1
+            else:
+                input_image = image.astype(input_type)
 
-            output_image_estimate = image.astype(output_type)
-            if issubclass(output_type, np.floating):
-                output_image_estimate = output_image_estimate / image_max
+            if issubclass(output_type, np.integer):
+                output_image_estimate = \
+                    (image * np.iinfo(output_type).max).astype(output_type)
+                bits_output = np.iinfo(output_type).bits
+                if issubclass(output_type, np.signedinteger):
+                    bits_output = bits_output - 1
+            else:
+                output_image_estimate = image.astype(output_type)
+
 
             output_image = im2type(input_image, output_type)
 
+            float_decimals = 4
+            if issubclass(input_type, np.uint8):
+                float_decimals = 2
             if issubclass(output_type, np.floating):
-                assert_array_almost_equal(output_image, output_image_estimate)
+                assert_array_almost_equal(output_image, output_image_estimate,
+                                          decimal=float_decimals, err_msg=err_message)
+            elif issubclass(input_type, np.integer):
+                assert_array_almost_equal(output_image, output_image_estimate,
+                                          decimal=-np.abs(bits_input - bits_output),
+                                          err_msg=err_message)
             else:
                 assert_array_equal(output_image, output_image_estimate)
 
             output_image = func(input_image)
 
             if issubclass(output_type, np.floating):
-                assert_array_almost_equal(output_image, output_image_estimate)
+                assert_array_almost_equal(output_image, output_image_estimate,
+                                          decimal=float_decimals, err_msg=err_message)
+            elif issubclass(input_type, np.integer):
+                assert_array_almost_equal(output_image, output_image_estimate,
+                                          decimal=-np.abs(bits_input - bits_output),
+                                          err_msg=err_message)
             else:
                 assert_array_equal(output_image, output_image_estimate)
+

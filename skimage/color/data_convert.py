@@ -40,18 +40,33 @@ def im2uint8(image):
 
 def im2integer(image, dtype):
     """Covert an image to a generic integer type."""
-    if issubclass(dtype, np.signedinteger):
-        bits = np.iinfo(dtype).bits - 1
-    elif issubclass(dtype, np.unsignedinteger):
-        bits = np.iinfo(dtype).bits
-    else:
-        raise TypeError("dtype must be a numpy integer type.")
+    if not issubclass(dtype, np.integer):
+        raise TypeError("dtype must be a numpy integer.")
 
     if issubclass(image.dtype.type, np.floating):
-        image_float = np.ldexp(image, bits)
+        # I really wanted to do something smart like:
+        # image_float = np.ldexp(image, bits_output) -1
+        # But that just gives you off by 1 errors everywhere
+        image_float = image * np.iinfo(dtype).max
         return image_float.astype(dtype)
     else:
-        return image.astype(dtype)
+
+        bits_output = np.iinfo(dtype).bits
+
+        if issubclass(dtype, np.signedinteger):
+            bits_output = bits_output - 1
+
+        bits_input = np.iinfo(image.dtype.type).bits
+        if issubclass(image.dtype.type, np.signedinteger):
+            bits_input = bits_input - 1
+
+
+        if bits_output < bits_input:
+            return (image // (2 ** (bits_input - bits_output))).astype(dtype)
+        elif bits_output > bits_input:
+            return image.astype(dtype) * (2 ** (bits_output - bits_input))
+        else:
+            return image.astype(dtype)
 
 
 def im2float(image, dtype):
