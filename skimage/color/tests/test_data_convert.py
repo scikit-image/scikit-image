@@ -27,6 +27,9 @@ def test_bogus_dtype():
     with testing.raises(TypeError):
         im2float(image, dtype=np.uint8)
 
+    with testing.raises(TypeError):
+        im2type(image, dtype=np.complex)
+
 
 def test_im2type():
     image = np.array([[1, 2, 3, 4],
