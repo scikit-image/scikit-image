@@ -69,11 +69,13 @@ def test_im2type():
                 float_decimals = 2
             if issubclass(output_type, np.floating):
                 assert_array_almost_equal(output_image, output_image_estimate,
-                                          decimal=float_decimals, err_msg=err_message)
-            elif issubclass(input_type, np.integer):
-                assert_array_almost_equal(output_image, output_image_estimate,
-                                          decimal=-np.abs(bits_input - bits_output),
+                                          decimal=float_decimals,
                                           err_msg=err_message)
+            elif issubclass(input_type, np.integer):
+                assert_array_almost_equal(
+                    output_image, output_image_estimate,
+                    decimal=-np.abs(bits_input - bits_output),
+                    err_msg=err_message)
             else:
                 assert_array_equal(output_image, output_image_estimate)
 
@@ -81,11 +83,12 @@ def test_im2type():
 
             if issubclass(output_type, np.floating):
                 assert_array_almost_equal(output_image, output_image_estimate,
-                                          decimal=float_decimals, err_msg=err_message)
-            elif issubclass(input_type, np.integer):
-                assert_array_almost_equal(output_image, output_image_estimate,
-                                          decimal=-np.abs(bits_input - bits_output),
+                                          decimal=float_decimals,
                                           err_msg=err_message)
+            elif issubclass(input_type, np.integer):
+                assert_array_almost_equal(
+                    output_image, output_image_estimate,
+                    decimal=-np.abs(bits_input - bits_output),
+                    err_msg=err_message)
             else:
                 assert_array_equal(output_image, output_image_estimate)
-
