@@ -5,4 +5,4 @@ networkx>=1.8
 six>=1.10.0
 pillow>=2.1.0
 PyWavelets>=0.4.0
-dask[array]>=0.9.0
+dask[array,bag]>=0.9.0
