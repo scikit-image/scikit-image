@@ -74,7 +74,7 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
        structural similarity. IEEE Transactions on Image Processing,
        13, 600-612.
        https://ece.uwaterloo.ca/~z70wang/publications/ssim.pdf,
-       DOI:10.1.1.11.2477
+       DOI:10.1109/TIP.2003.819861
 
     .. [2] Avanaki, A. N. (2009). Exact global histogram specification
        optimized for structural similarity. Optical Review, 16, 613-621.

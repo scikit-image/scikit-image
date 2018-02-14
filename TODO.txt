@@ -41,7 +41,13 @@ Version 0.16
   ``skimage.transform.tests.test_warps.py``.
 * Remove deprecated argument ``visualise`` from function skimage.feature.hog
 * Remove deprecated module ``skimage.novice``
-* In ``skimage.measure._regionprops``, remove all references to 
+* In ``skimage.measure._regionprops``, remove all references to
   ``coordinates=``, ``_xycoordinates``, and ``_use_xy_warning``.
 * In ``skimage.measure.moments_central``, remove ``cc`` and ``**kwargs``
   arguments.
+* In ``skimage.morphology.remove_small_holes``, remove ``min_size`` argument.
+
+Other
+-----
+* Remove legacy pretty printing workaround for ``pytest`` in ``conftest.py``
+  once minimal required ``numpy`` is set to >= 1.14.0.

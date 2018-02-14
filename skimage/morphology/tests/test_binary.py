@@ -9,7 +9,7 @@ from scipy import ndimage as ndi
 import pytest
 
 img = color.rgb2gray(data.astronaut())
-bw_img = img > 100
+bw_img = img > 100 / 255.
 
 
 def test_non_square_image():

@@ -214,6 +214,13 @@ def test_rescale_multichannel():
     assert_equal(scaled.shape, (16, 16, 16, 6))
 
 
+def test_rescale_multichannel_multiscale():
+    x = np.zeros((5, 5, 3), dtype=np.double)
+    scaled = rescale(x, (2, 1), order=0, multichannel=True,
+                     anti_aliasing=False)
+    assert_equal(scaled.shape, (10, 5, 3))
+
+
 def test_rescale_multichannel_defaults():
     # ensure multichannel=None matches the previous default behaviour
 

@@ -172,7 +172,7 @@ class TestSave:
             for dtype in (np.uint8, np.uint16, np.float32, np.float64):
                 x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
-                if np.issubdtype(dtype, float):
+                if np.issubdtype(dtype, np.floating):
                     yield (self.verify_roundtrip, dtype, x,
                            roundtrip_function(x), 255)
                 else:
@@ -208,7 +208,24 @@ def test_imsave_filelike():
     # read from file-like object
     s.seek(0)
     out = imread(s)
-    assert out.shape == shape
+    assert_equal(out.shape, shape)
+    assert_allclose(out, image)
+
+
+def test_imsave_boolean_input():
+    shape = (2, 2)
+    image = np.eye(*shape, dtype=np.bool)
+    s = BytesIO()
+
+    # save to file-like object
+    with expected_warnings(
+            ['is a boolean image: setting True to 1 and False to 0']):
+        imsave(s, image)
+
+    # read from file-like object
+    s.seek(0)
+    out = imread(s)
+    assert_equal(out.shape, shape)
     assert_allclose(out, image)
 
 
@@ -218,7 +235,7 @@ def test_imexport_imimport():
     with expected_warnings(['precision loss']):
         pil_image = ndarray_to_pil(image)
     out = pil_to_ndarray(pil_image)
-    assert out.shape == shape
+    assert_equal(out.shape, shape)
 
 
 def test_all_color():
