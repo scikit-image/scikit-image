@@ -21,10 +21,10 @@ def test_bogus_dtype():
     """
     image = np.ones((3, 3))
 
-    with testing.raises(ValueError):
+    with testing.raises(TypeError):
         im2integer(image, dtype=np.float)
 
-    with testing.raises(ValueError):
+    with testing.raises(TypeError):
         im2float(image, dtype=np.uint8)
 
 def test_im2type():
