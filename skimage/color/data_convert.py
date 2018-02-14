@@ -47,7 +47,7 @@ def im2integer(image, dtype):
     else:
         raise TypeError("dtype must be a numpy integer type.")
 
-    if issubclass(image.dtype, np.floating):
+    if issubclass(image.dtype.type, np.floating):
         image_float = np.ldexp(image, bits)
         return image_float.astype(dtype)
     else:
@@ -61,7 +61,7 @@ def im2float(image, dtype):
 
     image_float = image.astype(dtype)
 
-    if issubclass(image.dtype, np.integer):
+    if issubclass(image.dtype.type, np.integer):
         max_val = np.iinfo(image.dtype.type).max
         image_float = image_float / max_val
 

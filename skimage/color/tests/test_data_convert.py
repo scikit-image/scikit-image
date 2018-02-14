@@ -14,7 +14,7 @@ from skimage._shared.testing import (assert_array_almost_equal,
 
 
 def test_bogus_dtype():
-    """Ensures that image conversion will raise errors on bad dtypes.assert_array_almost_equal
+    """Ensures that image conversion will raise errors on bad types.
 
     im2integer should fail if passed a float
     im2float should fail if passed an int.
@@ -26,6 +26,7 @@ def test_bogus_dtype():
 
     with testing.raises(TypeError):
         im2float(image, dtype=np.uint8)
+
 
 def test_im2type():
     image = np.array([[1, 1, 1, 2],
