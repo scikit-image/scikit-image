@@ -51,3 +51,5 @@ Other
 -----
 * Remove legacy pretty printing workaround for ``pytest`` in ``conftest.py``
   once minimal required ``numpy`` is set to >= 1.14.0.
+* Remove deprecated ``Hxx, Hxy, Hyy`` API of ``hessian_matrix_eigvals`` in
+  ``skimage.feature.corner``.
