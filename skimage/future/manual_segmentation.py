@@ -52,10 +52,9 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
     labels : array of int, shape ([Q, ]M, N)
         The segmented regions. If mode is `'separate'`, the leading dimension
         of the array corresponds to the number of regions that the user drew.
-    contours : array of float, shape ([Q, ]O)
-        The contours of the segmented regions. If mode is `'separate'`, the
-        leading dimension of the array corresponds to the number of regions
-        that the user drew.
+    contours : array of float, shape (Q, 2)
+        The contours of the segmented regions. The leading dimension of the
+        array corresponds to the number of regions that the user drew.
 
     Notes
     -----
@@ -173,10 +172,9 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
     labels : array of int, shape ([Q, ]M, N)
         The segmented regions. If mode is `'separate'`, the leading dimension
         of the array corresponds to the number of regions that the user drew.
-    contours : array of float, shape ([Q, ]O)
-        The contours of the segmented regions. If mode is `'separate'`, the
-        leading dimension of the array corresponds to the number of regions
-        that the user drew.
+    contours : array of float, shape (Q, 2)
+        The contours of the segmented regions. The leading dimension of the
+        array corresponds to the number of regions that the user drew.
 
     Notes
     -----
