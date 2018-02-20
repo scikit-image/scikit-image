@@ -26,7 +26,7 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
         window size will depend on `sigma`.
     gradient : bool, optional
         If True, also return the gradient with respect to Y.
-    data_range : int, optional
+    data_range : float, optional
         The data range of the input image (distance between minimum and
         maximum possible values).  By default, this is estimated from the image
         data-type.
