@@ -11,8 +11,7 @@ features to detect faces vs. non-faces.
 Notes
 -----
 
-This example relies on scikit-learn for feature selection regarding the feature
-selection and classification.
+This example relies on scikit-learn to select and classify features.
 
 References
 ----------
