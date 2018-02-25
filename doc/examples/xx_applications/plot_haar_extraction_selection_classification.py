@@ -40,8 +40,6 @@ from skimage.feature import haar_like_feature
 from skimage.feature import haar_like_feature_coord
 from skimage.feature import draw_haar_like_feature
 
-print(__doc__)
-
 ###############################################################################
 # The usual feature extraction scheme
 ###############################################################################
@@ -70,7 +68,7 @@ images = lfw_subset()
 # For a gain of speed, only the two first types of features will be extracted.
 feature_types = ['type-2-x', 'type-2-y']
 
-# Delayed the computation and build the graph using dask
+# Delay the computation and build the graph using dask
 X = delayed(extract_feature_image(img, feature_types)
             for img in images)
 # Compute the result using the multiprocessing backend
@@ -128,7 +126,7 @@ selected_feature_type = feature_type[idx_sorted[:significant_feature]]
 # original matrix X but we would like to emphasize the usage of `feature_coord`
 # and `feature_type` to recompute a subset of desired features.
 
-# Delayed the computation and build the graph using dask
+# Delay the computation and build the graph using dask
 X = delayed(extract_feature_image(img, selected_feature_type,
                                   selected_feature_coord)
             for img in images)
