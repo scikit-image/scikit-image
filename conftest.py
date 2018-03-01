@@ -3,7 +3,8 @@
 # TODO: remove this workaround once minimal required numpy is set to 1.14.0
 import numpy as np
 
-if np.version.full_version >= '1.14.0':
+numpy_version = [int(i) for i in np.version.full_version.split('.')[:2]]
+if numpy_version >= [1, 14]:
     np.set_printoptions(legacy='1.13')
 
 # List of files that pytest should ignore
