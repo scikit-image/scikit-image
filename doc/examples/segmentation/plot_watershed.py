@@ -48,8 +48,7 @@ local_maxi = peak_local_max(distance, indices=False, footprint=np.ones((3, 3)),
 markers = ndi.label(local_maxi)[0]
 labels = watershed(-distance, markers, mask=image)
 
-fig, axes = plt.subplots(ncols=3, figsize=(9, 3), sharex=True, sharey=True,
-                         subplot_kw={'adjustable': 'box-forced'})
+fig, axes = plt.subplots(ncols=3, figsize=(9, 3), sharex=True, sharey=True)
 ax = axes.ravel()
 
 ax[0].imshow(image, cmap=plt.cm.gray, interpolation='nearest')

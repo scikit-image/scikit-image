@@ -45,7 +45,8 @@ gradient = rank.gradient(denoised, disk(2))
 labels = watershed(gradient, markers)
 
 # display results
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(8, 8), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(8, 8),
+                         sharex=True, sharey=True)
 ax = axes.ravel()
 
 ax[0].imshow(image, cmap=plt.cm.gray, interpolation='nearest')

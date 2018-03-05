@@ -35,8 +35,7 @@ cmap_eosin = LinearSegmentedColormap.from_list('mycmap', ['darkviolet',
 ihc_rgb = data.immunohistochemistry()
 ihc_hed = rgb2hed(ihc_rgb)
 
-fig, axes = plt.subplots(2, 2, figsize=(7, 6), sharex=True, sharey=True,
-                         subplot_kw={'adjustable': 'box-forced'})
+fig, axes = plt.subplots(2, 2, figsize=(7, 6), sharex=True, sharey=True)
 ax = axes.ravel()
 
 ax[0].imshow(ihc_rgb)
@@ -61,7 +60,6 @@ fig.tight_layout()
 # Now we can easily manipulate the hematoxylin and DAB "channels":
 
 import numpy as np
-
 from skimage.exposure import rescale_intensity
 
 # Rescale hematoxylin and DAB signals and give them a fluorescence look
@@ -70,7 +68,7 @@ d = rescale_intensity(ihc_hed[:, :, 2], out_range=(0, 1))
 zdh = np.dstack((np.zeros_like(h), d, h))
 
 fig = plt.figure()
-axis = plt.subplot(1, 1, 1, sharex=ax[0], sharey=ax[0], adjustable='box-forced')
+axis = plt.subplot(1, 1, 1, sharex=ax[0], sharey=ax[0])
 axis.imshow(zdh)
 axis.set_title("Stain separated image (rescaled)")
 axis.axis('off')

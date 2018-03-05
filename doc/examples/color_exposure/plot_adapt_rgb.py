@@ -47,9 +47,8 @@ import matplotlib.pyplot as plt
 image = data.astronaut()
 
 fig = plt.figure(figsize=(14, 7))
-ax_each = fig.add_subplot(121, adjustable='box-forced')
-ax_hsv = fig.add_subplot(122, sharex=ax_each, sharey=ax_each,
-                         adjustable='box-forced')
+ax_each = fig.add_subplot(121)
+ax_hsv = fig.add_subplot(122, sharex=ax_each, sharey=ax_each)
 
 # We use 1 - sobel_each(image)
 # but this will not work if image is not normalized
@@ -103,8 +102,7 @@ def sobel_gray(image):
     return filters.sobel(image)
 
 fig = plt.figure(figsize=(7, 7))
-ax = fig.add_subplot(111, sharex=ax_each, sharey=ax_each,
-                     adjustable='box-forced')
+ax = fig.add_subplot(111, sharex=ax_each, sharey=ax_each)
 
 # We use 1 - sobel_gray(image)
 # but this will not work if image is not normalized
