@@ -109,8 +109,7 @@ print('FBP rms reconstruction error: %.3g' % np.sqrt(np.mean(error**2)))
 
 imkwargs = dict(vmin=-0.2, vmax=0.2)
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5),
-                               sharex=True, sharey=True,
-                               subplot_kw={'adjustable': 'box-forced'})
+                               sharex=True, sharey=True)
 ax1.set_title("Reconstruction\nFiltered back projection")
 ax1.imshow(reconstruction_fbp, cmap=plt.cm.Greys_r)
 ax2.set_title("Reconstruction error\nFiltered back projection")
@@ -158,8 +157,7 @@ error = reconstruction_sart - image
 print('SART (1 iteration) rms reconstruction error: %.3g'
       % np.sqrt(np.mean(error**2)))
 
-fig, axes = plt.subplots(2, 2, figsize=(8, 8.5), sharex=True, sharey=True,
-                         subplot_kw={'adjustable': 'box-forced'})
+fig, axes = plt.subplots(2, 2, figsize=(8, 8.5), sharex=True, sharey=True)
 ax = axes.ravel()
 
 ax[0].set_title("Reconstruction\nSART")
