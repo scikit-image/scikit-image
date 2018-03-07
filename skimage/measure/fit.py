@@ -123,7 +123,7 @@ class LineModelND(BaseModel):
         if len(params) != 2:
             raise ValueError('Parameters are defined by 2 sets.')
 
-        origin, direction = self.params
+        origin, direction = params
         res = (data - origin) - \
               np.dot(data - origin, direction)[..., np.newaxis] * direction
         return _norm_along_axis(res, axis=1)
