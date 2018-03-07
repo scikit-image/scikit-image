@@ -34,9 +34,9 @@ binary = image > thresh
 
 fig, axes = plt.subplots(ncols=3, figsize=(8, 2.5))
 ax = axes.ravel()
-ax[0] = plt.subplot(1, 3, 1, adjustable='box-forced')
+ax[0] = plt.subplot(1, 3, 1)
 ax[1] = plt.subplot(1, 3, 2)
-ax[2] = plt.subplot(1, 3, 3, sharex=ax[0], sharey=ax[0], adjustable='box-forced')
+ax[2] = plt.subplot(1, 3, 3, sharex=ax[0], sharey=ax[0])
 
 ax[0].imshow(image, cmap=plt.cm.gray)
 ax[0].set_title('Original')

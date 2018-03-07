@@ -70,8 +70,7 @@ denoise2_fast = denoise_nl_means(noisy, h=0.6 * sigma_est, sigma=sigma_est,
                                  fast_mode=True, **patch_kw)
 
 fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(8, 6),
-                       sharex=True, sharey=True,
-                       subplot_kw={'adjustable': 'box-forced'})
+                       sharex=True, sharey=True)
 
 ax[0, 0].imshow(noisy)
 ax[0, 0].axis('off')

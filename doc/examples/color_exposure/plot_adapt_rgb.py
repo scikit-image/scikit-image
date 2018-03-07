@@ -46,18 +46,14 @@ import matplotlib.pyplot as plt
 
 image = data.astronaut()
 
-fig = plt.figure(figsize=(14, 7))
-ax_each = fig.add_subplot(121, adjustable='box-forced')
-ax_hsv = fig.add_subplot(122, sharex=ax_each, sharey=ax_each,
-                         adjustable='box-forced')
+fig, (ax_each, ax_hsv) = plt.subplots(ncols=2, figsize=(14, 7))
 
-# We use 1 - sobel_each(image)
-# but this will not work if image is not normalized
+# We use 1 - sobel_each(image) but this won't work if image is not normalized
 ax_each.imshow(rescale_intensity(1 - sobel_each(image)))
 ax_each.set_xticks([]), ax_each.set_yticks([])
 ax_each.set_title("Sobel filter computed\n on individual RGB channels")
 
-# We use 1 - sobel_hsv(image) but this will not work if image is not normalized
+# We use 1 - sobel_hsv(image) but this won't work if image is not normalized
 ax_hsv.imshow(rescale_intensity(1 - sobel_hsv(image)))
 ax_hsv.set_xticks([]), ax_hsv.set_yticks([])
 ax_hsv.set_title("Sobel filter computed\n on (V)alue converted image (HSV)")
@@ -102,12 +98,10 @@ def as_gray(image_filter, image, *args, **kwargs):
 def sobel_gray(image):
     return filters.sobel(image)
 
-fig = plt.figure(figsize=(7, 7))
-ax = fig.add_subplot(111, sharex=ax_each, sharey=ax_each,
-                     adjustable='box-forced')
 
-# We use 1 - sobel_gray(image)
-# but this will not work if image is not normalized
+fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(7, 7))
+
+# We use 1 - sobel_gray(image) but this won't work if image is not normalized
 ax.imshow(rescale_intensity(1 - sobel_gray(image)), cmap=plt.cm.gray)
 ax.set_xticks([]), ax.set_yticks([])
 ax.set_title("Sobel filter computed\n on the converted grayscale image")

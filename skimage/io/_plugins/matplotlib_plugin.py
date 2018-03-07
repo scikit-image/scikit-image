@@ -162,7 +162,6 @@ def imshow(image, ax=None, show_cbar=None, **kwargs):
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("right", size="5%", pad=0.05)
         plt.colorbar(ax_im, cax=cax)
-    ax.set_adjustable('box-forced')
     ax.get_figure().tight_layout()
 
     return ax_im

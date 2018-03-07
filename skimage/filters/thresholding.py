@@ -50,8 +50,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     num_rows = math.ceil((len(methods) + 1.) / num_cols)
     num_rows = int(num_rows)  # Python 2.7 support
     fig, ax = plt.subplots(num_rows, num_cols, figsize=figsize,
-                           sharex=True, sharey=True,
-                           subplot_kw={'adjustable': 'box-forced'})
+                           sharex=True, sharey=True)
     ax = ax.ravel()
 
     ax[0].imshow(image, cmap=plt.cm.gray)
