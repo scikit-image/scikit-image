@@ -126,6 +126,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
     cdef Py_ssize_t i = 0
     cdef Py_ssize_t age = 1
     cdef Py_ssize_t index = 0
+    cdef Py_ssize_t neighbor_index = 0
     cdef DTYPE_BOOL_t compact = (compactness > 0)
 
     cdef Heap *hp = <Heap *> heap_from_numpy2()
