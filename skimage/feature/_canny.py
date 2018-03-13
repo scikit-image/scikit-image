@@ -14,8 +14,8 @@ Original author: Lee Kamentsky
 
 import numpy as np
 import scipy.ndimage as ndi
-from scipy.ndimage import (gaussian_filter,
-                           generate_binary_structure, binary_erosion, label)
+from scipy.ndimage import generate_binary_structure, binary_erosion, label
+from ..filters import gaussian
 from .. import dtype_limits
 from .._shared.utils import assert_nD
 
@@ -165,7 +165,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
         mask = np.ones(image.shape, dtype=bool)
 
     def fsmooth(x):
-        return gaussian_filter(x, sigma, mode='constant')
+        return gaussian(x, sigma, mode='constant')
 
     smoothed = smooth_with_function_and_mask(image, fsmooth, mask)
     jsobel = ndi.sobel(smoothed, axis=1)
