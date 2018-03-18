@@ -6,7 +6,7 @@ from scipy import stats
 
 from ..util import img_as_float
 from ..feature import peak_local_max
-from ..feature.util import _prepare_grayscale_input_2D
+from ..feature.util import _prepare_grayscale_input_2D, _prepare_grayscale_input_3D
 from ..feature.corner_cy import _corner_fast
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
@@ -34,13 +34,18 @@ def _compute_derivatives(image, mode='constant', cval=0):
         Derivative in x-direction.
     imy : ndarray
         Derivative in y-direction.
-
+    imz : ndarry
+        Derivative in z-direction, if applicable. 
     """
 
     imy = ndi.sobel(image, axis=0, mode=mode, cval=cval)
     imx = ndi.sobel(image, axis=1, mode=mode, cval=cval)
 
-    return imx, imy
+    if image.ndim == 3:
+        imz = ndi.sobel(image, axis=2, mode=mode, cval=cval)
+        return imx, imy, imz
+    else:
+        return imx, imy
 
 
 def structure_tensor(image, sigma=1, mode='constant', cval=0):
@@ -101,6 +106,99 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     Ayy = ndi.gaussian_filter(imy * imy, sigma, mode=mode, cval=cval)
 
     return Axx, Axy, Ayy
+
+
+def structure_tensor_3D(image, sigma=1, mode='constant', cval=0):
+    """Compute structure tensor using sum of squared differences.
+
+    The 3D structure tensor A is defined as::
+
+        A = [Axx Axy Axz]
+            [Axy Ayy Ayz]
+            [Axz Ayz Azz]
+
+    which is approximated by the weighted sum of squared differences in a local
+    window around each pixel in the image.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    sigma : float, optional
+        Standard deviation used for the Gaussian kernel, which is used as a
+        weighting function for the local summation of squared differences.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
+
+    Returns
+    -------
+    Axx : ndarray
+        Element of the structure tensor for each pixel in the input image.
+    Axy : ndarray
+        Element of the structure tensor for each pixel in the input image.
+    Axz : ndarray
+        Element of the structure tensor for each pixel in the input image.
+    Ayy : ndarray
+        Element of the structure tensor for each pixel in the input image.
+    Ayz : ndarray
+        Element of the structure tensor for each pixel in the input image.
+    Azz : ndarray
+        Element of the structure tensor for each pixel in the input image.
+
+    Examples
+    --------
+    >>> from skimage.feature import structure_tensor_3D
+    >>> square = np.zeros((5,5,5))
+    >>> square[2,2,2] = 1
+    >>> Axx, Axy, Axz, Ayy, Ayz, Azz = structure_tensor_3D(square, sigma=0.1)
+    >>> Axx
+    array([[[ 0.,  0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.,  0.]],
+
+           [[ 0.,  0.,  0.,  0.,  0.],
+            [ 0.,  1.,  4.,  1.,  0.],
+            [ 0.,  0.,  0.,  0.,  0.],
+            [ 0.,  1.,  4.,  1.,  0.],
+            [ 0.,  0.,  0.,  0.,  0.]],
+
+           [[ 0.,  0.,  0.,  0.,  0.],
+            [ 0.,  4., 16.,  4.,  0.],
+            [ 0.,  0.,  0.,  0.,  0.],
+            [ 0.,  4., 16.,  4.,  0.],
+            [ 0.,  0.,  0.,  0.,  0.]],
+
+           [[ 0.,  0.,  0.,  0.,  0.],
+            [ 0.,  1.,  4.,  1.,  0.],
+            [ 0.,  0.,  0.,  0.,  0.],
+            [ 0.,  1.,  4.,  1.,  0.],
+            [ 0.,  0.,  0.,  0.,  0.]],
+
+           [[ 0.,  0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.,  0.]]])
+    """
+
+    image = _prepare_grayscale_input_3D(image)
+
+    imx, imy, imz = _compute_derivatives(image, mode=mode, cval=cval)
+
+    # structure tensor
+    Axx = ndi.gaussian_filter(imx * imx, sigma, mode=mode, cval=cval)
+    Axy = ndi.gaussian_filter(imx * imy, sigma, mode=mode, cval=cval)
+    Axz = ndi.gaussian_filter(imx * imz, sigma, mode=mode, cval=cval)
+    Ayy = ndi.gaussian_filter(imy * imy, sigma, mode=mode, cval=cval)
+    Ayz = ndi.gaussian_filter(imy * imz, sigma, mode=mode, cval=cval)
+    Azz = ndi.gaussian_filter(imz * imz, sigma, mode=mode, cval=cval)
+
+    return Axx, Axy, Axz, Ayy, Ayz, Azz
 
 
 def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
@@ -170,7 +268,6 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
             order = 'xy'
         else:
             order = 'rc'
-
 
     gradients = np.gradient(gaussian_filtered)
     axes = range(image.ndim)

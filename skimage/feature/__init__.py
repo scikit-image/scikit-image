@@ -10,7 +10,7 @@ from .peak import peak_local_max
 from .corner import (corner_kitchen_rosenfeld, corner_harris,
                      corner_shi_tomasi, corner_foerstner, corner_subpix,
                      corner_peaks, corner_fast, structure_tensor,
-                     structure_tensor_eigvals, hessian_matrix,
+                     structure_tensor_3D, structure_tensor_eigvals, hessian_matrix,
                      hessian_matrix_eigvals, hessian_matrix_det,
                      corner_moravec, corner_orientations,
                      shape_index)

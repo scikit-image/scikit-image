@@ -129,6 +129,12 @@ def _prepare_grayscale_input_2D(image):
     return img_as_float(image)
 
 
+def _prepare_grayscale_input_3D(image):
+    image = np.squeeze(image)
+    assert_nD(image, 3)
+    return img_as_float(image)
+
+
 def _mask_border_keypoints(image_shape, keypoints, distance):
     """Mask coordinates that are within certain distance from the image border.
 
