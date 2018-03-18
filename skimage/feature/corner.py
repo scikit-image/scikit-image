@@ -6,7 +6,8 @@ from scipy import stats
 
 from ..util import img_as_float
 from ..feature import peak_local_max
-from ..feature.util import _prepare_grayscale_input_2D, _prepare_grayscale_input_3D
+from ..feature.util import (
+    _prepare_grayscale_input_2D, _prepare_grayscale_input_3D)
 from ..feature.corner_cy import _corner_fast
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
@@ -405,7 +406,7 @@ def structure_tensor_3D_eig(Axx, Axy, Axz, Ayy, Ayz, Azz):
 
     Examples
     --------
-    >>> from skimage.feature import structure_tensor_3D, structure_tensor_eig_3D
+    >>> from skimage.feature import structure_tensor_3D,structure_tensor_eig_3D
     >>> square = np.zeros((3,3,3))
     >>> square[1,1,1] = 1
     >>> Axx, Axy, Axz, Ayy, Ayz, Azz = structure_tensor_3D(square, sigma=0.1)
