@@ -15,9 +15,9 @@ from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_kitchen_rosenfeld, corner_foerstner,
                              corner_fast, corner_orientations,
                              structure_tensor, structure_tensor_eigvals,
-                             structure_tensor_3D, structure_tensor_3D_eig,
-                             hessian_matrix, hessian_matrix_eigvals,
-                             hessian_matrix_det, shape_index)
+                             structure_tensor_3D, hessian_matrix,
+                             hessian_matrix_eigvals, hessian_matrix_det,
+                             shape_index)
 
 
 @pytest.fixture
