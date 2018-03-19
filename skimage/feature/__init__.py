@@ -37,7 +37,9 @@ __all__ = ['canny',
            'draw_multiblock_lbp',
            'peak_local_max',
            'structure_tensor',
+           'structure_tensor_3D'
            'structure_tensor_eigvals',
+           'structure_tensor_3D_eig'
            'hessian_matrix',
            'hessian_matrix_det',
            'hessian_matrix_eigvals',
