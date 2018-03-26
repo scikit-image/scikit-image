@@ -146,7 +146,12 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
     if img.ndim != 2:
             raise ValueError('The input image must be 2D.')
 
-    cdef Py_ssize_t[:, ::1] pixels = np.row_stack(np.nonzero(img))
+    cdef cnp.ndarray[ndim=2, dtype=cnp.intp_t] noncontiguous_mem_pixels = np.row_stack(np.nonzero(img))
+    if noncontiguous_mem_pixels.shape[1] == 0:
+        return None
+
+    cdef Py_ssize_t[:, ::1] pixels = noncontiguous_mem_pixels
+
     cdef Py_ssize_t num_pixels = pixels.shape[1]
     cdef list acc = list()
     cdef list results = list()
