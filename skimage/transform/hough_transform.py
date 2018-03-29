@@ -135,6 +135,7 @@ def hough_ellipse(image, threshold=4, accuracy=1, min_size=4, max_size=None):
           Where ``(yc, xc)`` is the center, ``(a, b)`` the major and minor
           axes, respectively. The `orientation` value follows
           `skimage.draw.ellipse_perimeter` convention.
+          Returns None if no non-zero pixel in the image.
 
     Examples
     --------
