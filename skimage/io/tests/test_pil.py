@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from six import BytesIO
+from io import BytesIO
 from tempfile import NamedTemporaryFile
 
 from ... import data_dir, img_as_float
