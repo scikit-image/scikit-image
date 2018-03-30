@@ -1,25 +1,24 @@
-import os.path
+import os
 import numpy as np
-from numpy.testing import (
-    assert_array_equal, assert_array_almost_equal,
-    assert_allclose, run_module_suite)
-import pytest
-
+from six import BytesIO
 from tempfile import NamedTemporaryFile
 
 from ... import data_dir, img_as_float
 from .. import imread, imsave, use_plugin, reset_plugins
-from ..._shared.testing import mono_check, color_check
-from ..._shared._warnings import expected_warnings
-from ..._shared._tempfile import temporary_file
-
-from six import BytesIO
 
 from PIL import Image
 from .._plugins.pil_plugin import (
     pil_to_ndarray, ndarray_to_pil, _palette_is_grayscale)
 from ...measure import compare_ssim as ssim
 from ...color import rgb2lab
+
+from skimage._shared import testing
+from skimage._shared.testing import (mono_check, color_check,
+                                     assert_equal, assert_array_equal,
+                                     assert_array_almost_equal,
+                                     assert_allclose)
+from skimage._shared._warnings import expected_warnings
+from skimage._shared._tempfile import temporary_file
 
 
 def setup():
@@ -40,6 +39,7 @@ def setup_module(self):
     except ImportError:
         pass
 
+
 def test_png_round_trip():
     f = NamedTemporaryFile(suffix='.png')
     fname = f.name
@@ -49,6 +49,7 @@ def test_png_round_trip():
     Ip = img_as_float(imread(fname))
     os.remove(fname)
     assert np.sum(np.abs(Ip-I)) < 1e-3
+
 
 def test_imread_flatten():
     # a color image is flattened
@@ -130,7 +131,7 @@ def test_imread_uint16():
 
 
 def test_imread_truncated_jpg():
-    with pytest.raises(IOError):
+    with testing.raises(IOError):
         imread(os.path.join(data_dir, 'truncated.jpg'))
 
 
@@ -171,7 +172,7 @@ class TestSave:
             for dtype in (np.uint8, np.uint16, np.float32, np.float64):
                 x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
-                if np.issubdtype(dtype, float):
+                if np.issubdtype(dtype, np.floating):
                     yield (self.verify_roundtrip, dtype, x,
                            roundtrip_function(x), 255)
                 else:
@@ -185,12 +186,14 @@ class TestSave:
     def test_imsave_roundtrip_pil_image(self):
         self.verify_imsave_roundtrip(self.roundtrip_pil_image)
 
+
 def test_imsave_incorrect_dimension():
     with temporary_file(suffix='.png') as fname:
-        with pytest.raises(ValueError):
+        with testing.raises(ValueError):
             imsave(fname, np.zeros((2, 3, 3, 1)))
-        with pytest.raises(ValueError):
+        with testing.raises(ValueError):
             imsave(fname, np.zeros((2, 3, 2)))
+
 
 def test_imsave_filelike():
     shape = (2, 2)
@@ -205,7 +208,24 @@ def test_imsave_filelike():
     # read from file-like object
     s.seek(0)
     out = imread(s)
-    assert out.shape == shape
+    assert_equal(out.shape, shape)
+    assert_allclose(out, image)
+
+
+def test_imsave_boolean_input():
+    shape = (2, 2)
+    image = np.eye(*shape, dtype=np.bool)
+    s = BytesIO()
+
+    # save to file-like object
+    with expected_warnings(
+            ['is a boolean image: setting True to 1 and False to 0']):
+        imsave(s, image)
+
+    # read from file-like object
+    s.seek(0)
+    out = imread(s)
+    assert_equal(out.shape, shape)
     assert_allclose(out, image)
 
 
@@ -215,7 +235,7 @@ def test_imexport_imimport():
     with expected_warnings(['precision loss']):
         pil_image = ndarray_to_pil(image)
     out = pil_to_ndarray(pil_image)
-    assert out.shape == shape
+    assert_equal(out.shape, shape)
 
 
 def test_all_color():
@@ -262,5 +282,7 @@ def test_cmyk():
         sim = ssim(refi, newi, data_range=refi.max() - refi.min())
         assert sim > 0.99
 
-if __name__ == "__main__":
-    run_module_suite()
+
+def test_extreme_palette():
+    img = imread(os.path.join(data_dir, 'green_palette.png'))
+    assert_equal(img.ndim, 3)

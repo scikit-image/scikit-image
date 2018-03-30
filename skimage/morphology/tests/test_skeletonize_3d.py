@@ -4,27 +4,26 @@ import os
 import warnings
 
 import numpy as np
-from numpy.testing import assert_equal, run_module_suite, assert_
-import pytest
 import scipy.ndimage as ndi
 
-import skimage
 from skimage import io, draw, data_dir
 from skimage.data import binary_blobs
 from skimage.util import img_as_ubyte
-
 from skimage.morphology import skeletonize_3d
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_, parametrize
 
 
 # basic behavior tests (mostly copied over from 2D skeletonize)
 
 def test_skeletonize_wrong_dim():
     im = np.zeros(5, dtype=np.uint8)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         skeletonize_3d(im)
 
     im = np.zeros((5, 5, 5, 5), dtype=np.uint8)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         skeletonize_3d(im)
 
 
@@ -79,19 +78,20 @@ def test_dtype_conv():
         res = skeletonize_3d(img)
 
     assert_equal(res.dtype, np.uint8)
-    assert_equal(img, orig)  # operation does not clobber the original 
+    assert_equal(img, orig)  # operation does not clobber the original
     assert_equal(res.max(),
                  img_as_ubyte(img).max())    # the intensity range is preserved
 
 
-def test_input():
+@parametrize("img", [
+    np.ones((8, 8), dtype=float), np.ones((4, 8, 8), dtype=float),
+    np.ones((8, 8), dtype=np.uint8), np.ones((4, 8, 8), dtype=np.uint8),
+    np.ones((8, 8), dtype=bool), np.ones((4, 8, 8), dtype=bool)
+])
+def test_input(img):
     # check that the input is not clobbered
     # for 2D and 3D images of varying dtypes
-    imgs = [np.ones((8, 8), dtype=float), np.ones((4, 8, 8), dtype=float),
-            np.ones((8, 8), dtype=np.uint8), np.ones((4, 8, 8), dtype=np.uint8),
-            np.ones((8, 8), dtype=bool), np.ones((4, 8, 8), dtype=bool)]
-    for img in imgs:
-        yield check_input, img
+    check_input(img)
 
 
 def check_input(img):
@@ -99,7 +99,7 @@ def check_input(img):
     with warnings.catch_warnings():
         # UserWarning for possible precision loss, expected
         warnings.simplefilter('ignore', UserWarning)
-        res = skeletonize_3d(img)
+        skeletonize_3d(img)
     assert_equal(img, orig)
 
 
@@ -151,7 +151,7 @@ def test_two_hole_image():
                       [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
                       [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-                      dtype=np.uint8)
+                     dtype=np.uint8)
     img_f = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0],
@@ -166,7 +166,7 @@ def test_two_hole_image():
                       [0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-                      dtype=np.uint8)
+                     dtype=np.uint8)
     res = skeletonize_3d(img_o)
     assert_equal(res, img_f)
 
@@ -181,7 +181,3 @@ def test_3d_vs_fiji():
     img_s = skeletonize_3d(img)
     img_f = io.imread(os.path.join(data_dir, "_blobs_3d_fiji_skeleton.tif"))
     assert_equal(img_s, img_f)
-
-
-if __name__ == '__main__':
-    run_module_suite()

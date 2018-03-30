@@ -102,17 +102,21 @@ def _validate_connectivity(image_dim, connectivity, offset):
     """
     if connectivity is None:
         connectivity = 1
+
     if np.isscalar(connectivity):
         c_connectivity = ndi.generate_binary_structure(image_dim, connectivity)
     else:
         c_connectivity = np.array(connectivity, bool)
         if c_connectivity.ndim != image_dim:
             raise ValueError("Connectivity dimension must be same as image")
+
     if offset is None:
         if any([x % 2 == 0 for x in c_connectivity.shape]):
             raise ValueError("Connectivity array must have an unambiguous "
                              "center")
+
         offset = np.array(c_connectivity.shape) // 2
+
     return c_connectivity, offset
 
 
@@ -126,7 +130,7 @@ def _compute_neighbors(image, structure, offset):
     locations = np.transpose(np.nonzero(structure))
     sqdistances = np.sum((locations - offset)**2, axis=1)
     neighborhood = (np.ravel_multi_index(locations.T, image.shape) -
-                    np.ravel_multi_index(offset, image.shape)).astype(np.int32)
+                    np.ravel_multi_index(offset, image.shape))
     sorted_neighborhood = neighborhood[np.argsort(sqdistances)]
     return sorted_neighborhood
 
@@ -250,8 +254,8 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
     output = np.pad(markers, pad_width, mode='constant')
 
     flat_neighborhood = _compute_neighbors(image, connectivity, offset)
-    marker_locations = np.flatnonzero(output).astype(np.int32)
-    image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
+    marker_locations = np.flatnonzero(output)
+    image_strides = np.array(image.strides) // image.itemsize
 
     _watershed.watershed_raveled(image.ravel(),
                                  marker_locations, flat_neighborhood,
@@ -260,9 +264,5 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
                                  watershed_line)
 
     output = crop(output, pad_width, copy=True)
-
-    if watershed_line:
-        min_val = output.min()
-        output[output == min_val] = 0
 
     return output

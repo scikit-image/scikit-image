@@ -3,7 +3,7 @@ import itertools
 import numpy as np
 
 from .._shared.utils import warn
-from .. import img_as_float
+from ..util import img_as_float
 from . import rgb_colors
 from .colorconv import rgb2gray, gray2rgb
 

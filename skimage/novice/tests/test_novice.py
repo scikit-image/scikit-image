@@ -2,13 +2,15 @@ import os
 import tempfile
 
 import numpy as np
-from numpy.testing import assert_equal, assert_allclose
-import pytest
 from skimage import novice
 from skimage.novice._novice import (array_to_xy_origin, xy_to_array_origin,
                                     rgb_transpose)
 from skimage import data_dir
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_allclose
 from skimage._shared.utils import all_warnings
+
 
 IMAGE_PATH = os.path.join(data_dir, "chelsea.png")
 SMALL_IMAGE_PATH = os.path.join(data_dir, "block.png")
@@ -168,6 +170,16 @@ def test_update_on_save():
         os.unlink(filename)
 
 
+def test_save_with_alpha_channel():
+    # create an image with an alpha channel
+    pic = novice.Picture(array=np.zeros((3, 3, 4)))
+
+    fd, filename = tempfile.mkstemp(suffix=".jpg")
+    os.close(fd)
+    pic.save(filename)
+    os.unlink(filename)
+
+
 def test_indexing():
     array = 128 * np.ones((10, 10, 3), dtype=np.uint8)
     pic = novice.Picture(array=array)
@@ -264,63 +276,59 @@ def test_getitem_with_step():
 
 def test_1d_getitem_raises():
     pic = novice.Picture.from_size((1, 1))
-    with pytest.raises(IndexError):
+    with testing.raises(IndexError):
         pic[1]
 
 
 def test_3d_getitem_raises():
     pic = novice.Picture.from_size((1, 1))
-    with pytest.raises(IndexError):
+    with testing.raises(IndexError):
         pic[1, 2, 3]
 
 
 def test_1d_setitem_raises():
     pic = novice.Picture.from_size((1, 1))
-    with pytest.raises(IndexError):
+    with testing.raises(IndexError):
         pic[1] = 0
 
 
 def test_3d_setitem_raises():
     pic = novice.Picture.from_size((1, 1))
-    with pytest.raises(IndexError):
+    with testing.raises(IndexError):
         pic[1, 2, 3] = 0
 
 
 def test_out_of_bounds_indexing():
     pic = novice.open(SMALL_IMAGE_PATH)
-    with pytest.raises(IndexError):
+    with testing.raises(IndexError):
         pic[pic.width, pic.height]
 
 
 def test_pixel_rgb_raises():
     pixel = novice.Picture.from_size((1, 1))[0, 0]
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         pixel.rgb = (-1, -1, -1)
 
 
 def test_pixel_red_raises():
     pixel = novice.Picture.from_size((1, 1))[0, 0]
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         pixel.red = 256
 
 
 def test_pixel_green_raises():
     pixel = novice.Picture.from_size((1, 1))[0, 0]
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         pixel.green = 256
 
 
 def test_pixel_blue_raises():
     pixel = novice.Picture.from_size((1, 1))[0, 0]
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         pixel.blue = 256
 
 
 def test_pixel_alpha_raises():
     pixel = novice.Picture.from_size((1, 1))[0, 0]
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         pixel.alpha = 256
-
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()

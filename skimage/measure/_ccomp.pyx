@@ -343,33 +343,36 @@ def undo_reshape_array(arr, swaps):
     return reshaped
 
 
-def label_cython(input, neighbors=None, background=None, return_num=False,
+def label_cython(input_, neighbors=None, background=None, return_num=False,
                  connectivity=None):
     # Connected components search as described in Fiorio et al.
     # We have to ensure that the shape of the input can be handled by the
-    # algorithm the input if it is the case
-    input_corrected, swaps = reshape_array(input)
+    # algorithm.  The input is reshaped as needed for compatibility.
+    input_, swaps = reshape_array(input_)
+    shape = input_.shape
+    ndim = input_.ndim
 
-    cdef cnp.ndarray[DTYPE_t, ndim=1] data
     cdef cnp.ndarray[DTYPE_t, ndim=1] forest
 
     # Having data a 2D array slows down access considerably using linear
     # indices even when using the data_p pointer :-(
-    data = np.copy(input_corrected.flatten().astype(DTYPE))
+
+    # np.array makes a copy so it is safe to modify data in-place
+    data = np.array(input_, order='C', dtype=DTYPE)
     forest = np.arange(data.size, dtype=DTYPE)
 
     cdef DTYPE_t *forest_p = <DTYPE_t*>forest.data
-    cdef DTYPE_t *data_p = <DTYPE_t*>data.data
+    cdef DTYPE_t *data_p = <DTYPE_t*>cnp.PyArray_DATA(data)
 
     cdef shape_info shapeinfo
     cdef bginfo bg
 
-    get_shape_info(input_corrected.shape, &shapeinfo)
+    get_shape_info(shape, &shapeinfo)
     get_bginfo(background, &bg)
 
     if neighbors is None and connectivity is None:
         # use the full connectivity by default
-        connectivity = input_corrected.ndim
+        connectivity = ndim
     elif neighbors is not None:
         DeprecationWarning("The argument 'neighbors' is deprecated, use "
                            "'connectivity' instead")
@@ -377,15 +380,15 @@ def label_cython(input, neighbors=None, background=None, return_num=False,
         if neighbors == 4:
             connectivity = 1
         elif neighbors == 8:
-            connectivity = input_corrected.ndim
+            connectivity = ndim
         else:
             raise ValueError("Neighbors must be either 4 or 8, got '%d'.\n"
                              % neighbors)
 
-    if not 1 <= connectivity <= input_corrected.ndim:
+    if not 1 <= connectivity <= ndim:
         raise ValueError(
             "Connectivity below 1 or above %d is illegal."
-            % input_corrected.ndim)
+            % ndim)
 
     scanBG(data_p, forest_p, &shapeinfo, &bg)
     # the data are treated as degenerated 3D arrays if needed
@@ -400,14 +403,13 @@ def label_cython(input, neighbors=None, background=None, return_num=False,
     if data.dtype == np.int32:
         data = data.view(np.int32)
 
-    res = data.reshape(input_corrected.shape)
-
-    res_orig = undo_reshape_array(res, swaps)
+    if swaps:
+        data = undo_reshape_array(data, swaps)
 
     if return_num:
-        return res_orig, ctr
+        return data, ctr
     else:
-        return res_orig
+        return data
 
 
 cdef DTYPE_t resolve_labels(DTYPE_t *data_p, DTYPE_t *forest_p,

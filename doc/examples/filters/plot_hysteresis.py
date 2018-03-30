@@ -18,8 +18,7 @@ edges.
 import matplotlib.pyplot as plt
 from skimage import data, filters
 
-fig, ax = plt.subplots(nrows=2, ncols=2,
-                       subplot_kw={'adjustable': 'box-forced'})
+fig, ax = plt.subplots(nrows=2, ncols=2)
 
 image = data.coins()
 edges = filters.sobel(image)

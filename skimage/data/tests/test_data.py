@@ -1,6 +1,6 @@
 import numpy as np
 import skimage.data as data
-from numpy.testing import assert_equal, assert_almost_equal
+from skimage._shared.testing import assert_equal, assert_almost_equal
 
 
 def test_astronaut():
@@ -96,6 +96,6 @@ def test_binary_blobs():
     assert not np.all(blobs == other_realization)
 
 
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()
+def test_lfw_subset():
+    """ Test that "lfw_subset" can be loaded."""
+    data.lfw_subset()

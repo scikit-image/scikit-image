@@ -26,7 +26,7 @@ image_wrapped = np.angle(np.exp(1j * image))
 # Perform phase unwrapping
 image_unwrapped = unwrap_phase(image_wrapped)
 
-fig, ax = plt.subplots(2, 2, sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, ax = plt.subplots(2, 2, sharex=True, sharey=True)
 ax1, ax2, ax3, ax4 = ax.ravel()
 
 fig.colorbar(ax1.imshow(image, cmap='gray', vmin=0, vmax=4 * np.pi), ax=ax1)

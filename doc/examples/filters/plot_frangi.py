@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 image = camera()
 
-fig, ax = plt.subplots(ncols=3, subplot_kw={'adjustable': 'box-forced'})
+fig, ax = plt.subplots(ncols=3)
 
 ax[0].imshow(image, cmap=plt.cm.gray)
 ax[0].set_title('Original image')

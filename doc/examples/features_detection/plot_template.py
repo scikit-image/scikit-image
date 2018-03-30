@@ -35,8 +35,8 @@ x, y = ij[::-1]
 
 fig = plt.figure(figsize=(8, 3))
 ax1 = plt.subplot(1, 3, 1)
-ax2 = plt.subplot(1, 3, 2, adjustable='box-forced')
-ax3 = plt.subplot(1, 3, 3, sharex=ax2, sharey=ax2, adjustable='box-forced')
+ax2 = plt.subplot(1, 3, 2)
+ax3 = plt.subplot(1, 3, 3, sharex=ax2, sharey=ax2)
 
 ax1.imshow(coin, cmap=plt.cm.gray)
 ax1.set_axis_off()

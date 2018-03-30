@@ -1,6 +1,6 @@
 .PHONY: all clean test
 PYTHON=python
-PYTESTS=py.test
+PYTESTS=pytest
 
 all:
 	$(PYTHON) setup.py build_ext --inplace

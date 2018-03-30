@@ -76,8 +76,7 @@ image[idx, idx] = 255
 h, theta, d = hough_line(image)
 
 # Generating figure 1
-fig, axes = plt.subplots(1, 3, figsize=(15, 6),
-                         subplot_kw={'adjustable': 'box-forced'})
+fig, axes = plt.subplots(1, 3, figsize=(15, 6))
 ax = axes.ravel()
 
 ax[0].imshow(image, cmap=cm.gray)
@@ -131,7 +130,6 @@ ax[2].set_title('Probabilistic Hough')
 
 for a in ax:
     a.set_axis_off()
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 plt.show()

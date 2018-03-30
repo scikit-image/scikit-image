@@ -1,3 +1,4 @@
+from __future__ import division
 from collections import namedtuple
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,6 +7,8 @@ from ...util import dtype as dtypes
 from ...exposure import is_low_contrast
 from ...util.colormap import viridis
 from ..._shared.utils import warn
+from math import floor, ceil
+
 
 _default_colormap = 'gray'
 _nonstandard_colormap = viridis
@@ -48,10 +51,10 @@ def _get_image_properties(image):
         lo, hi = immin, immax
 
     signed = immin < 0
-    out_of_range_float = (np.issubdtype(image.dtype, np.float) and
+    out_of_range_float = (np.issubdtype(image.dtype, np.floating) and
                           (immin < lo or immax > hi))
     low_data_range = (immin != immax and
-                         is_low_contrast(image))
+                      is_low_contrast(image))
     unsupported_dtype = image.dtype not in dtypes._supported_types
 
     return ImageProperties(signed, out_of_range_float,
@@ -159,7 +162,6 @@ def imshow(image, ax=None, show_cbar=None, **kwargs):
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("right", size="5%", pad=0.05)
         plt.colorbar(ax_im, cax=cax)
-    ax.set_adjustable('box-forced')
     ax.get_figure().tight_layout()
 
     return ax_im
@@ -168,11 +170,34 @@ def imshow(image, ax=None, show_cbar=None, **kwargs):
 def imshow_collection(ic, *args, **kwargs):
     """Display all images in the collection.
 
+    Returns
+    -------
+    fig : `matplotlib.figure.Figure`
+        The `Figure` object returned by `plt.subplots`.
     """
-    fig, axes = plt.subplots(1, len(ic))
+    if len(ic) < 1:
+        raise ValueError('Number of images to plot must be greater than 0')
+
+    # The target is to plot images on a grid with aspect ratio 4:3
+    num_images = len(ic)
+    # Two pairs of `nrows, ncols` are possible
+    k = (num_images * 12)**0.5
+    r1 = max(1, floor(k / 4))
+    r2 = ceil(k / 4)
+    c1 = ceil(num_images / r1)
+    c2 = ceil(num_images / r2)
+    # Select the one which is closer to 4:3
+    if abs(r1 / c1 - 0.75) < abs(r2 / c2 - 0.75):
+        nrows, ncols = r1, c1
+    else:
+        nrows, ncols = r2, c2
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
+    ax = np.asarray(axes).ravel()
     for n, image in enumerate(ic):
-        kwargs['ax'] = axes[n]
-        imshow(image, *args, **kwargs)
+        ax[n].imshow(image, *args, **kwargs)
+    kwargs['ax'] = axes
+    return fig
 
 
 imread = plt.imread

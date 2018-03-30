@@ -1,7 +1,8 @@
 import numpy as np
-from numpy.testing import assert_equal
 from skimage.measure import block_reduce
-import pytest
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal
 
 
 def test_block_reduce_sum():
@@ -81,11 +82,7 @@ def test_block_reduce_max():
 def test_invalid_block_size():
     image = np.arange(4 * 6).reshape(4, 6)
 
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         block_reduce(image, [1, 2, 3])
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         block_reduce(image, [1, 0.5])
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

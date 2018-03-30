@@ -1,9 +1,10 @@
 import numpy as np
-from numpy.testing import (assert_array_almost_equal as assert_close,
-                           assert_, assert_allclose)
-
 from skimage import filters
 from skimage.filters.edges import _mask_filter_result
+
+from skimage._shared import testing
+from skimage._shared.testing import (assert_array_almost_equal,
+                                     assert_, assert_allclose)
 
 
 def test_roberts_zeros():
@@ -19,7 +20,7 @@ def test_roberts_diagonal1():
                  np.tri(10, 10, -2).astype(bool).transpose())
     expected = _mask_filter_result(expected, None)
     result = filters.roberts(image).astype(bool)
-    assert_close(result, expected)
+    assert_array_almost_equal(result, expected)
 
 
 def test_roberts_diagonal2():
@@ -29,7 +30,7 @@ def test_roberts_diagonal2():
                          np.tri(10, 10, -2).astype(bool).transpose())
     expected = _mask_filter_result(expected, None)
     result = filters.roberts(image).astype(bool)
-    assert_close(result, expected)
+    assert_array_almost_equal(result, expected)
 
 
 def test_sobel_zeros():
@@ -363,7 +364,10 @@ def test_laplace_mask():
     assert (np.all(result == 0))
 
 
-def test_horizontal_mask_line():
+@testing.parametrize("grad_func", (
+    filters.prewitt_h, filters.sobel_h, filters.scharr_h
+))
+def test_horizontal_mask_line(grad_func):
     """Horizontal edge filters mask pixels surrounding input mask."""
     vgrad, _ = np.mgrid[:1:11j, :1:11j]  # vertical gradient with spacing 0.1
     vgrad[5, :] = 1                      # bad horizontal line
@@ -375,11 +379,14 @@ def test_horizontal_mask_line():
     expected[1:-1, 1:-1] = 0.2           # constant gradient for most of image,
     expected[4:7, 1:-1] = 0              # but line and neighbors masked
 
-    for grad_func in (filters.prewitt_h, filters.sobel_h, filters.scharr_h):
-        result = grad_func(vgrad, mask)
-        yield assert_close, result, expected
+    result = grad_func(vgrad, mask)
+    assert_allclose(result, expected)
 
-def test_vertical_mask_line():
+
+@testing.parametrize("grad_func", (
+    filters.prewitt_v, filters.sobel_v, filters.scharr_v
+))
+def test_vertical_mask_line(grad_func):
     """Vertical edge filters mask pixels surrounding input mask."""
     _, hgrad = np.mgrid[:1:11j, :1:11j]  # horizontal gradient with spacing 0.1
     hgrad[:, 5] = 1                      # bad vertical line
@@ -391,9 +398,8 @@ def test_vertical_mask_line():
     expected[1:-1, 1:-1] = 0.2           # constant gradient for most of image,
     expected[1:-1, 4:7] = 0              # but line and neighbors masked
 
-    for grad_func in (filters.prewitt_v, filters.sobel_v, filters.scharr_v):
-        result = grad_func(hgrad, mask)
-        yield assert_close, result, expected
+    result = grad_func(hgrad, mask)
+    assert_allclose(result, expected)
 
 
 def test_range():
@@ -410,8 +416,3 @@ def test_range():
                 "Maximum of `{0}` is larger than 1".format(
                     detector.__name__)
                 )
-
-
-if __name__ == "__main__":
-    from numpy import testing
-    testing.run_module_suite()

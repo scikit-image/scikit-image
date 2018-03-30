@@ -130,7 +130,7 @@ def _umeyama(src, dst, estimate_scale):
             T[:dim, :dim] = np.dot(U, np.dot(np.diag(d), V))
             d[dim - 1] = s
     else:
-        T[:dim, :dim] = np.dot(U, np.dot(np.diag(d), V.T))
+        T[:dim, :dim] = np.dot(U, np.dot(np.diag(d), V))
 
     if estimate_scale:
         # Eq. (41) and (42).
@@ -706,14 +706,16 @@ class ProjectiveTransform(GeometricTransform):
         elif (hasattr(other, '__name__')
                 and other.__name__ == 'inverse'
                 and hasattr(get_bound_method_class(other), '_inv_matrix')):
-            return ProjectiveTransform(self._inv_matrix.dot(self.params))
+            return ProjectiveTransform(other.__self__._inv_matrix.dot(self.params))
         else:
             raise TypeError("Cannot combine transformations of differing "
                             "types.")
 
 
 class AffineTransform(ProjectiveTransform):
-    """2D affine transformation of the form:
+    """2D affine transformation.
+
+    Has the following form::
 
         X = a0*x + a1*y + a2 =
           = sx*x*cos(rotation) - sy*y*sin(rotation + shear) + a2
@@ -938,7 +940,9 @@ class PiecewiseAffineTransform(GeometricTransform):
 
 
 class EuclideanTransform(ProjectiveTransform):
-    """2D Euclidean transformation of the form:
+    """2D Euclidean transformation.
+
+    Has the following form::
 
         X = a0 * x - b0 * y + a1 =
           = x * cos(rotation) - y * sin(rotation) + a1
@@ -1035,7 +1039,9 @@ class EuclideanTransform(ProjectiveTransform):
 
 
 class SimilarityTransform(EuclideanTransform):
-    """2D similarity transformation of the form:
+    """2D similarity transformation.
+
+    Has the following form::
 
         X = a0 * x - b0 * y + a1 =
           = s * x * cos(rotation) - s * y * sin(rotation) + a1
@@ -1139,7 +1145,9 @@ class SimilarityTransform(EuclideanTransform):
 
 
 class PolynomialTransform(GeometricTransform):
-    """2D polynomial transformation of the form:
+    """2D polynomial transformation.
+
+    Has the following form::
 
         X = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
         Y = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))

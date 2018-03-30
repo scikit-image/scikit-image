@@ -68,8 +68,6 @@ labels2 = graph.merge_hierarchical(labels, g, thresh=35, rag_copy=False,
                                    merge_func=merge_mean_color,
                                    weight_func=_weight_mean_color)
 
-g2 = graph.rag_mean_color(img, labels2)
-
 out = color.label2rgb(labels2, img, kind='avg')
 out = segmentation.mark_boundaries(out, labels2, (0, 0, 0))
 io.imshow(out)

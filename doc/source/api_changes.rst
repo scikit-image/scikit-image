@@ -23,6 +23,8 @@ Version 0.14
   favor of ``skimage.restoration.denoise_nl_means``.
 - ``skimage.measure.LineModel`` has been removed in favor of
   ``skimage.measure.LineModelND``.
+- In ``skimage.feature.hog`` visualise has been changed to visualize.
+- `freeimage` plugin of ``skimage.io`` has been removed.
 
 Version 0.13
 ------------

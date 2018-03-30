@@ -1,18 +1,14 @@
 from contextlib import contextmanager
 
-from numpy.testing import assert_equal
-import pytest
-
 from skimage import io
 from skimage.io import manage_plugins
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal
 
 
 io.use_plugin('pil')
 priority_plugin = 'pil'
-
-
-def setup_module():
-    manage_plugins.use_plugin('test')  # see ../_plugins/test_plugin.py
 
 
 def teardown_module():
@@ -29,30 +25,8 @@ def protect_preferred_plugins():
         manage_plugins.preferred_plugins = preferred_plugins
 
 
-def test_read():
-    io.imread('test.png', as_grey=True, dtype='i4', plugin='test')
-
-
-def test_save():
-    io.imsave('test.png', [1, 2, 3], plugin='test')
-
-
-def test_show():
-    io.imshow([1, 2, 3], plugin_arg=(1, 2), plugin='test')
-
-
-def test_collection():
-    ic = io.imread_collection('*.png', conserve_memory=False, plugin='test')
-    io.imshow_collection(ic)
-
-
-def test_use():
-    manage_plugins.use_plugin('test')
-    manage_plugins.use_plugin('test', 'imshow')
-
-
 def test_failed_use():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         manage_plugins.use_plugin('asd')
 
 
@@ -61,37 +35,9 @@ def test_use_priority():
     plug, func = manage_plugins.plugin_store['imread'][0]
     assert_equal(plug, priority_plugin)
 
-    manage_plugins.use_plugin('test')
+    manage_plugins.use_plugin('matplotlib')
     plug, func = manage_plugins.plugin_store['imread'][0]
-    assert_equal(plug, 'test')
-
-
-def test_use_priority_with_func():
-    manage_plugins.use_plugin('pil')
-    plug, func = manage_plugins.plugin_store['imread'][0]
-    assert_equal(plug, 'pil')
-
-    manage_plugins.use_plugin('test', 'imread')
-    plug, func = manage_plugins.plugin_store['imread'][0]
-    assert_equal(plug, 'test')
-
-    plug, func = manage_plugins.plugin_store['imsave'][0]
-    assert_equal(plug, 'pil')
-
-    manage_plugins.use_plugin('test')
-    plug, func = manage_plugins.plugin_store['imsave'][0]
-    assert_equal(plug, 'test')
-
-
-def test_plugin_order():
-    p = io.plugin_order()
-    assert 'imread' in p
-    assert 'test' in p['imread']
-
-
-def test_available():
-    assert 'qt' in io.available_plugins
-    assert 'test' in io.find_available_plugins(loaded=True)
+    assert_equal(plug, 'matplotlib')
 
 
 def test_load_preferred_plugins_all():
@@ -120,8 +66,3 @@ def test_load_preferred_plugins_imread():
         assert func == pil_plugin.imread
         plug, func = manage_plugins.plugin_store['imshow'][0]
         assert func == matplotlib_plugin.imshow, func.__module__
-
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()
