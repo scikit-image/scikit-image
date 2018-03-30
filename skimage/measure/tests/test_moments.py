@@ -1,4 +1,3 @@
-from __future__ import division
 import numpy as np
 from skimage import draw
 from skimage.measure import (moments, moments_central, moments_coords,

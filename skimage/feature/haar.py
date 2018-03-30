@@ -1,4 +1,3 @@
-from __future__ import division
 
 from itertools import chain
 from operator import add

@@ -52,7 +52,6 @@ References
 .. [4] http://en.wikipedia.org/wiki/CIE_1931_color_space
 """
 
-from __future__ import division
 
 from warnings import warn
 import numpy as np

@@ -1,5 +1,4 @@
 # coding: utf-8
-from __future__ import division
 from math import sqrt, atan2, pi as PI
 import itertools
 from warnings import warn

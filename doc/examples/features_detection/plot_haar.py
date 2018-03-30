@@ -20,7 +20,6 @@ References
        DOI: 10.1109/CVPR.2001.990517
 
 """
-from __future__ import print_function
 
 import numpy as np
 import matplotlib.pyplot as plt

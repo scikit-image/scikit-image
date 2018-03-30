@@ -1,6 +1,5 @@
 """Data structures to hold collections of images, with optional caching."""
 
-from __future__ import with_statement
 
 import os
 from glob import glob

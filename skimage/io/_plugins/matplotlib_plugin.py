@@ -1,4 +1,3 @@
-from __future__ import division
 from collections import namedtuple
 import numpy as np
 import matplotlib.pyplot as plt

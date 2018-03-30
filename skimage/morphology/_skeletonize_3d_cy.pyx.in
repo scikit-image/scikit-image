@@ -26,7 +26,6 @@ References
            http://fiji.sc/Skeletonize3D
 
 """
-from __future__ import division, print_function, absolute_import
 
 from libc.string cimport memcpy
 
