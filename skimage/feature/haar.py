@@ -3,7 +3,6 @@ from __future__ import division
 from itertools import chain
 from operator import add
 
-import six
 import numpy as np
 
 from ._haar import haar_like_feature_coord_wrapper
@@ -23,7 +22,7 @@ def _validate_feature_type(feature_type):
     if feature_type is None:
         feature_type_ = FEATURE_TYPE
     else:
-        if isinstance(feature_type, six.string_types):
+        if isinstance(feature_type, str):
             feature_type_ = [feature_type]
         else:
             feature_type_ = feature_type

@@ -8,7 +8,6 @@ import re
 from copy import copy
 
 import numpy as np
-import six
 from PIL import Image
 
 from ..external.tifffile import TiffFile
@@ -156,7 +155,7 @@ class ImageCollection(object):
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
                  **load_func_kwargs):
         """Load and manage a collection of images."""
-        if isinstance(load_pattern, six.string_types):
+        if isinstance(load_pattern, str):
             load_pattern = load_pattern.split(os.pathsep)
             self._files = []
             for pattern in load_pattern:
