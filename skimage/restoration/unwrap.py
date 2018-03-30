@@ -1,5 +1,4 @@
 import numpy as np
-from six import string_types
 
 from .._shared.utils import warn
 
@@ -70,7 +69,7 @@ def unwrap_phase(image, wrap_around=False, seed=None):
     if isinstance(wrap_around, bool):
         wrap_around = [wrap_around] * image.ndim
     elif (hasattr(wrap_around, '__getitem__')
-          and not isinstance(wrap_around, string_types)):
+          and not isinstance(wrap_around, str)):
         if len(wrap_around) != image.ndim:
             raise ValueError('Length of `wrap_around` must equal the '
                              'dimensionality of image')
