@@ -611,7 +611,7 @@ def perimeter(image, neighbourhood=4):
     # but that was measured as taking much longer than bincount + np.dot (5x
     # as much time)
     perimeter_histogram = np.bincount(perimeter_image.ravel(), minlength=50)
-    total_perimeter = np.dot(perimeter_histogram, perimeter_weights)
+    total_perimeter = perimeter_histogram @ perimeter_weights
     return total_perimeter
 
 
