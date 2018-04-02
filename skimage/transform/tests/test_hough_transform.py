@@ -464,4 +464,3 @@ def test_hough_ellipse_non_zero_negangle4():
 
 def test_hough_ellipse_all_black_img():
     assert(transform.hough_ellipse(np.zeros((100, 100))) is None)
-    
