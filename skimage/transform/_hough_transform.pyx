@@ -118,11 +118,10 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
 
     Returns
     -------
-    result : ndarray with fields [(accumulator, yc, xc, a, b, orientation)]
+    result : ndarray with fields [(accumulator, yc, xc, a, b, orientation)], or None
           Where ``(yc, xc)`` is the center, ``(a, b)`` the major and minor
           axes, respectively. The `orientation` value follows
           `skimage.draw.ellipse_perimeter` convention.
-          Returns None if no non-zero pixel in the image.
 
     Examples
     --------
@@ -147,6 +146,8 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
     if img.ndim != 2:
             raise ValueError('The input image must be 2D.')
 
+    # The creation of the array `pixels` results in a rather nasty error when the image is empty.
+    # As discussed in GitHub #2820 and #2996, we opt instead to return None.
     if not np.any(img):
         return None
 
