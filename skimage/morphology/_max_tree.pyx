@@ -8,6 +8,7 @@ from this representation, namely attribute openings and closings.
 import numpy as np
 
 from libc.stdlib cimport free, malloc, realloc
+from scipy.constants.constants import point
 
 cimport numpy as np
 cimport cython
@@ -56,25 +57,31 @@ cdef void canonize(dtype_t[::1] image, DTYPE_INT64_t[::1] parent,
             parent[p] = parent[q]
     return
 
+
 # helper function: a list of offsets is transformed to a list of points,
 # which are stored in a numpy array: rows correspond to different points,
 # columns to the dimensions (typically 2 or 3, but there is no limitation).
 cdef np.ndarray[DTYPE_INT32_t, ndim=2] offsets_to_points(DTYPE_INT32_t[::1] offsets, 
-                                                         DTYPE_INT32_t[::1] image_strides):
-    cdef DTYPE_INT32_t number_of_dimensions = len(image_strides)
+                                                         DTYPE_INT32_t[::1] shape):
+    cdef DTYPE_INT32_t number_of_dimensions = len(shape)
     cdef DTYPE_INT32_t number_of_points = len(offsets)
     cdef np.ndarray[DTYPE_INT32_t, ndim=2] points = np.zeros((number_of_points, number_of_dimensions),
                                                              dtype=np.int32)
-    cdef DTYPE_INT32_t cp_offset = np.sum(image_strides)
-    cdef DTYPE_INT32_t i, offset, curr_index, coord
-
+    #cdef np.ndarray[DTYPE_INT32_t, ndim=2] center_point = np.zeros((number_of_dimensions, 1), 
+    #                                                               dtype=np.int32)
+    cdef DTYPE_INT32_t neg_shift = - np.min(offsets)
+    
+    cdef DTYPE_INT32_t i, offset, curr_index, coord, 
+ 
+    center_point = np.unravel_index(neg_shift, shape)    
+        
     for i, offset in enumerate(offsets):
-        curr_index = offset + cp_offset
+        current_point = np.unravel_index(offset + neg_shift, shape)
         for d in range(number_of_dimensions):
-            coord = curr_index // image_strides[d]
-            curr_index = curr_index % image_strides[d]
-            points[i,d] = coord - 1
+            points[i,d] = current_point[d] - center_point[d]
+            
     return points
+
 
 # checks whether a neighbor of a given pixel is inside the image plane.
 # The pixel is given in form of an index of a raveled array, the offset
@@ -82,24 +89,24 @@ cdef np.ndarray[DTYPE_INT32_t, ndim=2] offsets_to_points(DTYPE_INT32_t[::1] offs
 # and should only be applied to border-pixels (defined by mask).
 cdef DTYPE_UINT8_t _is_valid_coordinate(DTYPE_INT64_t index,
                                         DTYPE_INT32_t[::1] coordinates,
-                                        DTYPE_INT32_t[::1] image_strides,
                                         DTYPE_INT32_t[::1] shape):
-    cdef DTYPE_INT64_t number_of_dimensions = image_strides.shape[0]
-    cdef DTYPE_INT64_t curr_index = index
-    cdef DTYPE_INT64_t p_coord = 0
+    cdef DTYPE_INT64_t number_of_dimensions = len(shape)
     cdef DTYPE_INT64_t res_coord = 0
     cdef int i = 0
-
+        
+    p_coord = np.array(np.unravel_index(index, shape))
+    
     # get the coordinates of the point from a 1D index 
     for i in range(number_of_dimensions):
-        p_coord = curr_index // image_strides[i]
-        curr_index = curr_index % image_strides[i]
-        res_coord = p_coord + coordinates[i]
+        res_coord = p_coord[i] + coordinates[i]
+                
         if res_coord < 0:
             return 0
         if res_coord >= shape[i]:
             return 0
+        
     return 1
+
 
 cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_area(dtype_t[::1] image,
                                                         DTYPE_INT64_t[::1] parent,
@@ -118,7 +125,7 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_area(dtype_t[::1] image,
     return area
 
 
-cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_ellipse_ratio_2d(dtype_t[::1] image,
+cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _old_compute_ellipse_ratio_2d(dtype_t[::1] image,
                                                                     DTYPE_INT64_t[::1] parent,
                                                                     DTYPE_INT64_t[::1] sorted_indices,
                                                                     DTYPE_INT32_t[::1] strides):
@@ -184,6 +191,85 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_ellipse_ratio_2d(dtype_t[::1]
 
     return area_ratio
 
+cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_ellipse_ratio_2d(dtype_t[::1] image,
+                                                                    DTYPE_INT64_t[::1] parent,
+                                                                    DTYPE_INT64_t[::1] sorted_indices,
+                                                                    DTYPE_INT32_t[::1] strides,
+                                                                    DTYPE_UINT64_t area_low_thresh,
+                                                                    DTYPE_UINT64_t area_high_thresh):
+    cdef DTYPE_INT64_t p_root = sorted_indices[0]
+    cdef DTYPE_INT64_t p, q
+    cdef DTYPE_UINT64_t number_of_pixels = len(image)
+    cdef DTYPE_UINT64_t x, y
+    cdef DTYPE_FLOAT64_t m02, m11, m20
+    cdef DTYPE_FLOAT64_t eigenvalue_1, eigenvalue_2, area_ellipse
+
+    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] area = np.ones(number_of_pixels,
+                                                           dtype=np.uint64)
+    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] x_acc = np.zeros(number_of_pixels,
+                                                             dtype=np.uint64)
+    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] y_acc = np.zeros(number_of_pixels,
+                                                             dtype=np.uint64)
+    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] x2_acc = np.zeros(number_of_pixels,
+                                                              dtype=np.uint64)
+    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] y2_acc = np.zeros(number_of_pixels,
+                                                              dtype=np.uint64)
+    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] xy_acc = np.zeros(number_of_pixels,
+                                                              dtype=np.uint64)
+    cdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] area_ratio = np.zeros(number_of_pixels,
+                                                                  dtype=np.float64)
+    
+    for p in sorted_indices[::-1]:
+        y_acc[p] = p // strides[0]
+        x_acc[p] = p % strides[0]
+        x2_acc[p] = x_acc[p] * x_acc[p]
+        y2_acc[p] = y_acc[p] * y_acc[p]
+        xy_acc[p] = x_acc[p] * y_acc[p]
+
+    for p in sorted_indices[::-1]:
+        if p == p_root:
+            continue
+        q = parent[p]
+
+        # accumulative features
+        x_acc[q] = x_acc[q] + x_acc[p]
+        y_acc[q] = y_acc[q] + y_acc[p]
+        x2_acc[q] = x2_acc[q] + x2_acc[p]
+        y2_acc[q] = y2_acc[q] + y2_acc[p]
+        xy_acc[q] = xy_acc[q] + xy_acc[p]
+        area[q] = area[q] + area[p]
+
+        # derived features: covariance matrix
+        m02 = <DTYPE_FLOAT64_t>y2_acc[q] - <DTYPE_FLOAT64_t>(y_acc[q] * y_acc[q]) / <DTYPE_FLOAT64_t>area[q]
+        m20 = <DTYPE_FLOAT64_t>x2_acc[q] - <DTYPE_FLOAT64_t>(x_acc[q] * x_acc[q]) / <DTYPE_FLOAT64_t>area[q]
+        m11 = <DTYPE_FLOAT64_t>xy_acc[q] - <DTYPE_FLOAT64_t>(x_acc[q] * y_acc[q]) / <DTYPE_FLOAT64_t>area[q]
+
+        # eigenvalues of the covariance matrix
+        eigenvalue_1 = .5 * (m02 + m20) + .5 * np.sqrt(4 * m11 * m11 + (m20 - m02)**2)
+        eigenvalue_2 = .5 * (m02 + m20) - .5 * np.sqrt(4 * m11 * m11 + (m20 - m02)**2)
+           
+        # the area of an ellipse with the same moments
+        if (eigenvalue_1 * eigenvalue_2 >= 0):
+            area_ellipse = np.pi * 4.0 / <DTYPE_FLOAT64_t>area[q] * np.sqrt(eigenvalue_1 * eigenvalue_2)
+        else:
+            area_ellipse = 0
+            
+        # the ratio between ideal area and real area.
+        if area_ellipse == 0:
+            # low similarity
+            area_ratio[q] = 1.0
+        elif area[q] > area_high_thresh:
+            # low similarity
+            area_ratio[q] = 1.0
+        elif area[q] < area_low_thresh:
+            # high similarity
+            area_ratio[q] = 0.0
+        else:
+            # similarity is calculated
+            area_ratio[q] = np.abs(area[q] - area_ellipse) / area_ellipse
+
+    return area_ratio
+
 
 cpdef void _direct_filter(dtype_t[::1] image,
                           dtype_t[::1] output,
@@ -207,13 +293,61 @@ cpdef void _direct_filter(dtype_t[::1] image,
 
         q = parent[p]
 
+        # this means p is not canonical
+        # in other words, it has a parent that has the
+        # same image value. 
         if image[p] == image[q]:
             output[p] = output[q]
             continue
 
         if attribute[p] < attribute_threshold:
+            # this corresponds to stopping
+            # as the level of the lower parent 
+            # is propagated to the current level
             output[p] = output[q]
         else:
+            # here the image reconstruction continues.
+            # The level is maintained (original value). 
+            output[p] = image[p]
+
+    return
+
+cpdef void _cut_first_filter(dtype_t[::1] image,
+                             dtype_t[::1] output,
+                             DTYPE_INT64_t[::1] parent,
+                             DTYPE_INT64_t[::1] sorted_indices,
+                             DTYPE_FLOAT64_t[::1] attribute,
+                             DTYPE_FLOAT64_t attribute_threshold
+                             ):
+    cdef DTYPE_INT64_t p_root = sorted_indices[0]
+    cdef DTYPE_INT64_t p, q
+    cdef DTYPE_UINT64_t number_of_pixels = len(image)
+
+    if attribute[p_root] < attribute_threshold:
+        output[p_root] = 0
+    else:
+        output[p_root] = image[p_root]
+
+    for p in sorted_indices:
+        if p == p_root:
+            continue
+
+        q = parent[p]
+
+        # in this case we propagate on the same level
+        if image[p] == image[q]:
+            output[p] = output[q]
+            continue
+
+        # here we jump in level
+        if (attribute[p] < attribute_threshold) or (output[q] < image[q]):
+            # in this case the stop criterion is fulfilled
+            # or was fulfilled for a previous level.
+            # the level of the last level is propagated.
+            output[p] = output[q]
+        else:
+            # in this case the stop criterion is not fulfilled
+            # and this level is reconstructed entirely (flooding continues)
             output[p] = image[p]
 
     return
@@ -269,8 +403,8 @@ cpdef void _build_max_tree(dtype_t[::1] image,
 
     cdef DTYPE_INT64_t[::1] zpar = parent.copy()
 
-    cdef np.ndarray[DTYPE_INT32_t, ndim=2] coordinates = offsets_to_points(structure, strides)
-
+    cdef np.ndarray[DTYPE_INT32_t, ndim=2] points = offsets_to_points(structure, shape)
+    
     # initialization of the image parent.
     for i in range(number_of_pixels):
         parent[i] = -1
@@ -280,21 +414,26 @@ cpdef void _build_max_tree(dtype_t[::1] image,
     for p in sorted_indices[::-1]:
         parent[p] = p
         zpar[p] = p
-
+        
         for i in range(nneighbors):
+            
             # get the flattened address of the neighbor
             index = p + structure[i]
-
+            
             if not mask[p]:
-               if not _is_valid_coordinate(p, coordinates[i], strides, shape):
-                   # neighbor is not in mask
-                   continue
-
+                # in this case, p is at the border of the image.
+                # there must be therefore some neighbor point which is not valid. 
+                #if not _is_valid_coordinate(p, structure[i], center_shift, shape):
+                if not _is_valid_coordinate(p, points[i], shape):
+                    # neighbor is not in the image. 
+                    continue
+            
             if parent[index] < 0:
                 # in this case the parent is not yet set: we ignore
                 continue
 
             root = find_root(zpar, index)
+
             if root != p:
                 zpar[root] = p
                 parent[root] = p
@@ -304,4 +443,5 @@ cpdef void _build_max_tree(dtype_t[::1] image,
     # to the same representative which in turn points to the representative
     # pixel at the next level.
     canonize(image, parent, sorted_indices)
+
     return

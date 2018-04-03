@@ -39,7 +39,7 @@ from .watershed import _validate_connectivity
 from .watershed import _compute_neighbors
 
 from . import _max_tree
-
+import pdb
 
 # building the max tree.
 def build_max_tree(image, connectivity=2):
@@ -114,7 +114,7 @@ def build_max_tree(image, connectivity=2):
 
     parent = np.zeros(image.shape, dtype=np.int64)
 
-    flat_neighborhood = _compute_neighbors(image, neighbors, offset)
+    flat_neighborhood = _compute_neighbors(image, neighbors, offset).astype(np.int32)
     image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
 
     # pixels need to be sorted according to their grey level.
@@ -154,7 +154,49 @@ def area_close(image, area_threshold, connectivity=2):
     output = max_val - output
     return output
 
-def ellipse_filter(image, ratio_threshold, connectivity=2):
+def ellipse_filter(image, ratio_threshold, connectivity=2,
+                   area_low_thresh=0, area_high_thresh=None,
+                   method='direct'):
+    
+    if area_high_thresh is None:
+        area_high_thresh = image.shape[0] * image.shape[1]
+        
+    output = image.copy()
+
+    P, S = build_max_tree(image, connectivity)
+
+    image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
+    if method == 'cut_first':
+        ellipse_area_ratio = _max_tree._compute_ellipse_ratio_2d(image.ravel(),
+                                                                 P.ravel(), 
+                                                                 S,
+                                                                 image_strides,
+                                                                 area_low_thresh,
+                                                                 area_high_thresh)
+        ellipse_area_ratio[ellipse_area_ratio > 1.0] = 1.0
+        ellipse_area_ratio[ellipse_area_ratio < 0.0] = 0.0    
+        _max_tree._cut_first_filter(image.ravel(), output.ravel(), P.ravel(), S,
+                                    ellipse_area_ratio, ratio_threshold)
+    elif method == 'direct':
+        ellipse_area_ratio = _max_tree._compute_ellipse_ratio_2d(image.ravel(),
+                                                                 P.ravel(), 
+                                                                 S,
+                                                                 image_strides,
+                                                                 area_low_thresh,
+                                                                 area_high_thresh)
+        
+        ellipse_area_ratio[ellipse_area_ratio > 1.0] = 1.0
+        ellipse_area_ratio[ellipse_area_ratio < 0.0] = 0.0
+        ellipse_area_ratio = 1.0 - ellipse_area_ratio
+        _max_tree._direct_filter(image.ravel(), output.ravel(), P.ravel(), S,
+                                    ellipse_area_ratio, ratio_threshold)
+    else:
+        raise ValueError('Method is not implemented. Please choose among direct and cut_first.')
+    
+    return output
+
+
+def old_ellipse_filter(image, ratio_threshold, connectivity=2):
     output = image.copy()
 
     P, S = build_max_tree(image, connectivity)

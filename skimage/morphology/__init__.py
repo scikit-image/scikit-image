@@ -14,7 +14,7 @@ from .misc import remove_small_objects, remove_small_holes
 from .extrema import (h_minima, h_maxima, local_maxima, local_minima)
 from .attribute import (area_closing, area_opening, diameter_closing,
                         diameter_opening, volume_fill)
-from .max_tree import build_max_tree
+from .max_tree import build_max_tree, ellipse_filter
 
 __all__ = ['binary_erosion',
            'binary_dilation',
@@ -55,4 +55,5 @@ __all__ = ['binary_erosion',
            'diameter_closing',
            'diameter_opening',
            'volume_fill',
-           'build_max_tree']
+           'build_max_tree',
+           'ellipse_filter']
