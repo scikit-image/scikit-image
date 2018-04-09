@@ -882,6 +882,52 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     m, s = _mean_std(image, window_size)
     return m * (1 + k * ((s / r) - 1))
 
+def threshold_singh(image, window_size=15, k=0.02):
+"""Applies Singh local threshold to an array. Singh is very similar to Sauvola, but
+can produces very different results.
+
+    In the original method a threshold T is calculated for every pixel
+    in the image using the following formula::
+
+        T = m(x,y) * (1 + k * ((s(x,y) / (1 - s(x,y))) - 1))
+
+    where m(x,y) and s(x,y) are the mean and standard deviation of
+    pixel (x,y) neighborhood defined by a rectangular window with size w
+    times w centered around the pixel. k is a configurable parameter
+    that weights the effect of standard deviation.
+
+    Parameters
+    ----------
+    image: (N, M) ndarray
+        Grayscale input image.
+    window_size : int, optional
+        Odd size of pixel neighborhood window (e.g. 3, 5, 7...).
+    k : float, optional
+        Value of the positive parameter k.
+
+    Returns
+    -------
+    threshold : (N, M) ndarray
+        Threshold mask. All pixels with an intensity higher than
+        this value are assumed to be foreground.
+
+
+    References
+    ----------
+    .. [1] T. Singh, S. Roy, O. Singh, T. Sinam, Kh. Singh 
+    "A New Local Adaptive Thresholding Technique in Binarization"
+    arXiv:1201.5227 (https://arxiv.org/abs/1201.5227)
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> image = data.page()
+    >>> t_singh = threshold_singh(image, window_size=15, k=0.2)
+    >>> binary_image = image > t_singh
+    """
+
+    m,s=_mean_std(image, window_size)
+    return m * (1 + k*((s / (1 - s)) - 1))
 
 def apply_hysteresis_threshold(image, low, high):
     """Apply hysteresis thresholding to `image`.
