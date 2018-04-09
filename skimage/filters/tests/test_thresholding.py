@@ -421,3 +421,13 @@ def test_mean_std_3d():
     expected_s = ndi.generic_filter(image, np.std, size=window_size,
                                     mode='mirror')
     np.testing.assert_allclose(s, expected_s)
+
+
+def test_niblack_sauvola_pathological_image():
+    # For certain values, floating point error can cause
+    # E(X^2) - (E(X))^2 to be negative, and taking the square root of this
+    # resulted in NaNs. Here we check that these are safely caught.
+    # see https://github.com/scikit-image/scikit-image/issues/3007
+    value = 0.03082192 + 2.19178082e-09
+    src_img = np.full((4, 4), value).astype(np.float64)
+    assert not np.any(np.isnan(threshold_niblack(src_img)))
