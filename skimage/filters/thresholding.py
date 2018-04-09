@@ -772,6 +772,8 @@ def _mean_std(image, w):
     m = crop(sum_full, (left_pad, right_pad)) / (w ** image.ndim)
     sum_sq_full = ndi.correlate(integral_sq, kern, mode='constant')
     g2 = crop(sum_sq_full, (left_pad, right_pad)) / (w ** image.ndim)
+    # Note: we use np.clip because g2 is not guaranteed to be greater than
+    # m*m when floating point error is considered
     s = np.sqrt(np.clip(g2 - m * m, 0, None))
     return m, s
 
