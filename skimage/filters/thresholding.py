@@ -882,9 +882,11 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     m, s = _mean_std(image, window_size)
     return m * (1 + k * ((s / r) - 1))
 
+
 def threshold_singh(image, window_size=15, k=0.02):
-"""Applies Singh local threshold to an array. Singh is very similar to Sauvola, but
-can produces very different results.
+
+    """Applies Singh local threshold to an array. Singh is very similar
+    to Sauvola, but can produces very different results.
 
     In the original method a threshold T is calculated for every pixel
     in the image using the following formula::
@@ -926,8 +928,9 @@ can produces very different results.
     >>> binary_image = image > t_singh
     """
 
-    m,s=_mean_std(image, window_size)
-    return m * (1 + k*((s / (1 - s)) - 1))
+    m, s = _mean_std(image, window_size)
+    return m * (1 + k * ((s / (1 - s)) - 1))
+
 
 def apply_hysteresis_threshold(image, low, high):
     """Apply hysteresis thresholding to `image`.
