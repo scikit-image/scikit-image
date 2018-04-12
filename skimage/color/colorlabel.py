@@ -40,7 +40,7 @@ def _rgb_vector(color):
     return np.array(color[:3])
 
 
-def _match_label_with_color(label, colors, bg_label, bg_color):
+def _match_labels_with_colors(label, colors, bg_label, bg_color, unique=False):
     """Return `unique_labels` and `color_cycle` for label array and color list.
 
     Colors are cycled for normal labels, but the background color should only
@@ -52,7 +52,10 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
     bg_color = _rgb_vector([bg_color])
 
     # map labels to their ranks among all labels from small to large
-    unique_labels, mapped_labels = np.unique(label, return_inverse=True)
+    if unique:
+        _, mapped_labels = np.unique(label, return_inverse=True)
+    else:
+        mapped_labels = label.ravel()
 
     # get rank of bg_label
     bg_label_rank_list = mapped_labels[label.flat == bg_label]
@@ -77,7 +80,8 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
 
 def label2rgb(label, image=None, colors=None, alpha=0.3,
               background=DEFAULT, background_color=None, image_alpha=1,
-              kind='overlay', bg_label=DEFAULT, bg_color=DEFAULT):
+              kind='overlay', relabel=DEFAULT,
+              bg_label=DEFAULT, bg_color=DEFAULT):
     """Return an RGB image where color-coded labels are painted over the image.
 
     Parameters
@@ -106,6 +110,9 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         and overlays the colored labels over the original image. 'avg' or
         'average' replaces each labeled segment with its average color, for a
         stained-glass or pastel painting appearance.
+    relabel : bool, optional
+        Whether to remap input labels to be sequential. Defaults to True
+        currently, but will change to False in 0.16.
 
     Other parameters
     ----------------
@@ -133,7 +140,7 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         raise ValueError(mesg)
     if background is DEFAULT:
         if bg_label is DEFAULT:
-            if np.any(labels == -1) or np.any(labels == 0):
+            if np.any(label == -1) or np.any(label == 0):
                 mesg = ('Starting in version 0.16, label2rgb will consider '
                         'label 0 to be background. Set background=None to '
                         'suppress this message without defining a background, '
@@ -149,16 +156,27 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
             background = bg_label
     if background is None:
         background = int(np.max(labels)) + 1
+    if relabel is DEFAULT:
+        mesg = ('The behavior of label2rgb for nonconsecutive labels will '
+                'change in version 0.16. Currently, nonconsecutive labels '
+                'are remapped to be consecutive before being mapped to '
+                'colors. Starting in 0.16, no remapping will occur, so that '
+                'coloring is reproducible between different images. To get '
+                'this behavior today, pass relabel=False to label2rgb. See '
+                'the discussion at '
+                'https://github.com/scikit-image/scikit-image/issues/2674 '
+                'for details.')
+        relabel = True
     if kind == 'overlay':
         return _label2rgb_overlay(label, image, colors, alpha, background,
-                                  background_color, image_alpha)
+                                  background_color, image_alpha, relabel)
     else:
         return _label2rgb_avg(label, image, background, background_color)
 
 
 def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
                        background=None, background_color=None, image_alpha=1,
-                       bg_label=None, bg_color=None):
+                       relabel=True, bg_label=None, bg_color=None):
     """Return an RGB image where color-coded labels are painted over the image.
 
     Parameters
@@ -237,8 +255,8 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         new_type = np.uint8
     label = label.astype(new_type)
 
-    mapped_labels_flat, color_cycle = _match_label_with_color(label, colors,
-                                                              background, background_color)
+    mapped_labels_flat, color_cycle = _match_labels_with_colors(label, colors,
+                                        background, background_color, relabel)
 
     if len(mapped_labels_flat) == 0:
         return image
