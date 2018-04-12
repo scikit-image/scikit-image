@@ -165,8 +165,11 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
                    'examples/xx_applications/plot_coins_segmentation.html')
             raise ValueError(msg)
 
-        image = img_as_float(rgb2gray(image))
-        image = gray2rgb(image) * image_alpha + (1 - image_alpha)
+        # convert image to an gray-only RGB image to enable blending with
+        # label colors. Note that rgb2gray is a no-op if the original image
+        # is grayscale already.
+        image = (image_alpha * gray2rgb(rgb2gray(image))
+                 + (1 - image_alpha))
 
     # Ensure that all labels are non-negative so we can index into
     # `label_to_color` correctly.
