@@ -3,6 +3,7 @@ import itertools
 import numpy as np
 
 from .._shared.utils import warn
+from .._shared._default_value import DEFAULT
 from ..util import img_as_float
 from . import rgb_colors
 from .colorconv import rgb2gray, gray2rgb
@@ -75,7 +76,8 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
 
 
 def label2rgb(label, image=None, colors=None, alpha=0.3,
-              bg_label=-1, bg_color=(0, 0, 0), image_alpha=1, kind='overlay'):
+              background=DEFAULT, background_color=None, image_alpha=1,
+              kind='overlay', bg_label=DEFAULT, bg_color=DEFAULT):
     """Return an RGB image where color-coded labels are painted over the image.
 
     Parameters
@@ -90,18 +92,31 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         then the colors are cycled.
     alpha : float [0, 1], optional
         Opacity of colorized labels. Ignored if image is `None`.
-    bg_label : int, optional
-        Label that's treated as the background.
-    bg_color : str or array, optional
-        Background color. Must be a name in `color_dict` or RGB float values
-        between [0, 1].
+    background : int, optional
+        Label to be treated as background. Currently defaults to -1, but
+        will default to 0 starting in version 0.16. Use None to indicate that
+        the image contains no background.
+    background_color : str, tuple, array, or None, optional
+        The color of the background. If None, background pixels will have
+        no overlay at all and will show the image directly.
     image_alpha : float [0, 1], optional
         Opacity of the image.
-    kind : string, one of {'overlay', 'avg'}
+    kind : string, one of {'overlay', 'avg', 'average'}
         The kind of color image desired. 'overlay' cycles over defined colors
-        and overlays the colored labels over the original image. 'avg' replaces
-        each labeled segment with its average color, for a stained-class or
-        pastel painting appearance.
+        and overlays the colored labels over the original image. 'avg' or
+        'average' replaces each labeled segment with its average color, for a
+        stained-glass or pastel painting appearance.
+
+    Other parameters
+    ----------------
+    bg_label : int, optional **DEPRECATED**
+        Label that's treated as the background. This parameter has been
+        deprecated in favor of 'background' and will be removed in version
+        0.16.
+    bg_color : str or array, optional **DEPRECATED**
+        Background color. Must be a name in `color_dict` or RGB float values
+        between [0, 1]. This parameter has been deprecated in favor of
+        'background_color' and will be removed in version 0.16.
 
     Returns
     -------
@@ -109,15 +124,41 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         The result of blending a cycling colormap (`colors`) for each distinct
         value in `label` with the image, at a certain alpha value.
     """
+    if image is None and kind in ['avg' or 'average']:
+        mesg = ('"image" *must* be provided when average color mode is used '
+                'in label2rgb. See\n\n'
+                '* http://scikit-image.org/docs/dev/auto_examples/'
+                'segmentation/plot_boundary_merge.html\n\n'
+                'for example usage.')
+        raise ValueError(mesg)
+    if background is DEFAULT:
+        if bg_label is DEFAULT:
+            if np.any(labels == -1) or np.any(labels == 0):
+                mesg = ('Starting in version 0.16, label2rgb will consider '
+                        'label 0 to be background. Set background=None to '
+                        'suppress this message without defining a background, '
+                        'background=-1 to set -1 to be the background, or '
+                        'background=0 to suppress this message and use 0 '
+                        'as the background label.')
+                warn(mesg)
+                background = -1
+        else:
+            mesg = ('The parameter "bg_label" was renamed "background" in '
+                    'version 0.14 and will be removed in version 0.16.')
+            warn(mesg)
+            background = bg_label
+    if background is None:
+        background = int(np.max(labels)) + 1
     if kind == 'overlay':
-        return _label2rgb_overlay(label, image, colors, alpha, bg_label,
-                                  bg_color, image_alpha)
+        return _label2rgb_overlay(label, image, colors, alpha, background,
+                                  background_color, image_alpha)
     else:
-        return _label2rgb_avg(label, image, bg_label, bg_color)
+        return _label2rgb_avg(label, image, background, background_color)
 
 
 def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
-                       bg_label=-1, bg_color=None, image_alpha=1):
+                       background=None, background_color=None, image_alpha=1,
+                       bg_label=None, bg_color=None):
     """Return an RGB image where color-coded labels are painted over the image.
 
     Parameters
@@ -133,13 +174,24 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         then the colors are cycled.
     alpha : float [0, 1], optional
         Opacity of colorized labels. Ignored if image is `None`.
-    bg_label : int, optional
-        Label that's treated as the background.
-    bg_color : str or array, optional
-        Background color. Must be a name in `color_dict` or RGB float values
-        between [0, 1].
+    background : int, optional
+        Label to be treated as background. Starting in version 0.16, this
+        default will change to 0.
+    background_color : str, tuple, array, or None, optional
+        The color of the background. If None, background pixels will have
+        no overlay at all and will show the image directly.
     image_alpha : float [0, 1], optional
         Opacity of the image.
+
+    Other parameters
+    ----------------
+    bg_label : int, optional **DEPRECATED**
+        Label that's treated as the background. This parameter has been
+        deprecated in favor of 'background'.
+    bg_color : str or array, optional **DEPRECATED**
+        Background color. Must be a name in `color_dict` or RGB float values
+        between [0, 1]. This parameter has been deprecated in favor of
+        'background_color'.
 
     Returns
     -------
@@ -153,7 +205,7 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
 
     if image is None:
         image = np.zeros(label.shape + (3,), dtype=np.float64)
-        # Opacity doesn't make sense if no image exists.
+        # Opacity doesn't make sense if no image is provided
         alpha = 1
     else:
         if not image.shape[:label.ndim] == label.shape:
@@ -175,10 +227,10 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
 
     # Ensure that all labels are non-negative so we can index into
     # `label_to_color` correctly.
-    offset = min(label.min(), bg_label)
+    offset = min(label.min(), background)
     if offset != 0:
         label = label - offset  # Make sure you don't modify the input array.
-        bg_label -= offset
+        background -= offset
 
     new_type = np.min_scalar_type(int(label.max()))
     if new_type == np.bool:
@@ -186,7 +238,7 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
     label = label.astype(new_type)
 
     mapped_labels_flat, color_cycle = _match_label_with_color(label, colors,
-                                                              bg_label, bg_color)
+                                                              background, background_color)
 
     if len(mapped_labels_flat) == 0:
         return image
@@ -200,14 +252,15 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
     result = label_to_color[mapped_labels] * alpha + image * (1 - alpha)
 
     # Remove background label if its color was not specified.
-    remove_background = 0 in mapped_labels_flat and bg_color is None
+    remove_background = 0 in mapped_labels_flat and background_color is None
     if remove_background:
-        result[label == bg_label] = image[label == bg_label]
+        result[label == background] = image[label == background]
 
     return result
 
 
-def _label2rgb_avg(label_field, image, bg_label=0, bg_color=(0, 0, 0)):
+def _label2rgb_avg(label_field, image, background=0,
+                   background_color=(0, 0, 0)):
     """Visualise each segment in `label_field` with its mean color in `image`.
 
     Parameters
@@ -216,9 +269,9 @@ def _label2rgb_avg(label_field, image, bg_label=0, bg_color=(0, 0, 0)):
         A segmentation of an image.
     image : array, shape ``label_field.shape + (3,)``
         A color image of the same spatial shape as `label_field`.
-    bg_label : int, optional
+    background : int, optional
         A value in `label_field` to be treated as background.
-    bg_color : 3-tuple of int, optional
+    background_color : 3-tuple of int, optional
         The color for the background label
 
     Returns
@@ -228,10 +281,10 @@ def _label2rgb_avg(label_field, image, bg_label=0, bg_color=(0, 0, 0)):
     """
     out = np.zeros_like(image)
     labels = np.unique(label_field)
-    bg = (labels == bg_label)
-    if bg.any():
-        labels = labels[labels != bg_label]
-        out[bg] = bg_color
+    is_background = (labels == background)
+    if is_background.any():
+        labels = labels[labels != background]
+        out[is_background] = background_color
     for label in labels:
         mask = (label_field == label).nonzero()
         color = image[mask].mean(axis=0)
