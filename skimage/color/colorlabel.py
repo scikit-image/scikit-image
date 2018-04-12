@@ -157,12 +157,14 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         alpha = 1
     else:
         if not image.shape[:label.ndim] == label.shape:
-            msg = ('The (non-color) shape of `image` and `label` passed to '
+            msg = ('The (non-color) shape of `image` and `label` passed to\n'
                    'skimage.color.label2rgb must exactly match. See the '
-                   'function documentation at http://scikit-image.org/docs/dev'
-                   '/api/skimage.color.html#skimage.color.label2rgb and '
-                   'example usage at http://scikit-image.org/docs/dev/auto_'
-                   'examples/xx_applications/plot_coins_segmentation.html')
+                   'function documentation at\n\n'
+                   '* http://scikit-image.org/docs/dev/api/'
+                   'skimage.color.html#skimage.color.label2rgb\n\n'
+                   'and example usage at\n\n'
+                   '* http://scikit-image.org/docs/dev/auto_examples/'
+                   'xx_applications/plot_coins_segmentation.html')
             raise ValueError(msg)
 
         # convert image to an gray-only RGB image to enable blending with
