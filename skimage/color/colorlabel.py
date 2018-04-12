@@ -122,9 +122,10 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
 
     Parameters
     ----------
-    label : array, shape (M, N)
-        Integer array of labels with the same shape as `image`.
-    image : array, shape (M, N, 3), optional
+    label : array, shape (M, N,[[ P,] ...])
+        Integer array of labels with the same shape as `image` (not including
+        channels).
+    image : array, shape (M, N,[[[ P,] ...,] 3]), optional
         Image used as underlay for labels. If the input is an RGB image, it's
         converted to grayscale before coloring.
     colors : list, optional
@@ -142,7 +143,7 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
 
     Returns
     -------
-    result : array of float, shape (M, N, 3)
+    result : array of float, shape (M, N,[[ P,] ...,] 3)
         The result of blending a cycling colormap (`colors`) for each distinct
         value in `label` with the image, at a certain alpha value.
     """
@@ -155,7 +156,7 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         # Opacity doesn't make sense if no image exists.
         alpha = 1
     else:
-        if not image.shape[:2] == label.shape:
+        if not image.shape[:label.ndim] == label.shape:
             raise ValueError("`image` and `label` must be the same shape")
 
         if image.min() < 0:
