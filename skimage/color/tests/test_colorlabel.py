@@ -153,9 +153,3 @@ def test_avg():
     # test default background color
     out_bg = label2rgb(label_field, image, bg_label=2, kind='avg')
     assert_array_equal(out_bg, expected_out_bg)
-
-
-def test_negative_intensity():
-    labels = np.arange(100).reshape(10, 10)
-    image = -1 * np.ones((10, 10))
-    assert_warns(UserWarning, label2rgb, labels, image)

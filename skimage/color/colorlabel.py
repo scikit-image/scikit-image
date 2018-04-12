@@ -159,9 +159,6 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         if not image.shape[:label.ndim] == label.shape:
             raise ValueError("`image` and `label` must be the same shape")
 
-        if image.min() < 0:
-            warn("Negative intensities in `image` are not supported")
-
         image = img_as_float(rgb2gray(image))
         image = gray2rgb(image) * image_alpha + (1 - image_alpha)
 
