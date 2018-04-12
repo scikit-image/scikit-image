@@ -157,7 +157,13 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         alpha = 1
     else:
         if not image.shape[:label.ndim] == label.shape:
-            raise ValueError("`image` and `label` must be the same shape")
+            msg = ('The (non-color) shape of `image` and `label` passed to '
+                   'skimage.color.label2rgb must exactly match. See the '
+                   'function documentation at http://scikit-image.org/docs/dev'
+                   '/api/skimage.color.html#skimage.color.label2rgb and '
+                   'example usage at http://scikit-image.org/docs/dev/auto_'
+                   'examples/xx_applications/plot_coins_segmentation.html')
+            raise ValueError(msg)
 
         image = img_as_float(rgb2gray(image))
         image = gray2rgb(image) * image_alpha + (1 - image_alpha)
