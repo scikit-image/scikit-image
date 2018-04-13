@@ -38,6 +38,7 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2yiq, yiq2rgb,
                            rgb2ypbpr, ypbpr2rgb,
                            rgb2ycbcr, ycbcr2rgb,
+                           rgb2ydbdr, ydbdr2rgb,
                            rgba2rgb,
                            guess_spatial_dimensions)
 
@@ -222,8 +223,14 @@ class TestColorconv(TestCase):
 
     def test_convert_colorspace(self):
         colspaces = ['HSV', 'RGB CIE', 'XYZ', 'YCbCr', 'YPbPr']
-        colfuncs_from = [hsv2rgb, rgbcie2rgb, xyz2rgb, ycbcr2rgb, ypbpr2rgb]
-        colfuncs_to = [rgb2hsv, rgb2rgbcie, rgb2xyz, rgb2ycbcr, rgb2ypbpr]
+        colfuncs_from = [
+            hsv2rgb, rgbcie2rgb, xyz2rgb,
+            ycbcr2rgb, ypbpr2rgb, ydbdr2rgb
+        ]
+        colfuncs_to = [
+            rgb2hsv, rgb2rgbcie, rgb2xyz,
+            rgb2ycbcr, rgb2ypbpr, rgb2ydbdr
+        ]
 
         assert_almost_equal(
             convert_colorspace(self.colbars_array, 'RGB', 'RGB'),
@@ -467,11 +474,13 @@ class TestColorconv(TestCase):
         assert_array_almost_equal(rgb2yiq(rgb), np.array([[[1, 0, 0]]]))
         assert_array_almost_equal(rgb2ypbpr(rgb), np.array([[[1, 0, 0]]]))
         assert_array_almost_equal(rgb2ycbcr(rgb), np.array([[[235, 128, 128]]]))
+        assert_array_almost_equal(rgb2ydbdr(rgb), np.array([[[1, 0, 0]]]))
         rgb = np.array([[[0.0, 1.0, 0.0]]])
         assert_array_almost_equal(rgb2yuv(rgb), np.array([[[0.587, -0.28886916, -0.51496512]]]))
         assert_array_almost_equal(rgb2yiq(rgb), np.array([[[0.587, -0.27455667, -0.52273617]]]))
         assert_array_almost_equal(rgb2ypbpr(rgb), np.array([[[0.587, -0.331264, -0.418688]]]))
         assert_array_almost_equal(rgb2ycbcr(rgb), np.array([[[144.553,   53.797,   34.214]]]))
+        assert_array_almost_equal(rgb2ydbdr(rgb), np.array([[[0.587, -0.883,  1.116]]]))
 
     def test_yuv_roundtrip(self):
         img_rgb = img_as_float(self.img_rgb)[::16, ::16]
@@ -479,6 +488,7 @@ class TestColorconv(TestCase):
         assert_array_almost_equal(yiq2rgb(rgb2yiq(img_rgb)), img_rgb)
         assert_array_almost_equal(ypbpr2rgb(rgb2ypbpr(img_rgb)), img_rgb)
         assert_array_almost_equal(ycbcr2rgb(rgb2ycbcr(img_rgb)), img_rgb)
+        assert_array_almost_equal(ydbdr2rgb(rgb2ydbdr(img_rgb)), img_rgb)
 
     def test_rgb2yiq_conversion(self):
         rgb = img_as_float(self.img_rgb)[::16, ::16]
