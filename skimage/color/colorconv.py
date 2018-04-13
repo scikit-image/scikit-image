@@ -98,9 +98,11 @@ def convert_colorspace(arr, fromspace, tospace):
     ----------
     arr : array_like
         The image to convert.
-    fromspace : {'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV', 'YIQ', 'YPbPr', 'YCbCr', 'YDbDr'}
+    fromspace : {'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV',
+                 'YIQ', 'YPbPr', 'YCbCr', 'YDbDr'}
         The color space to convert from. Can be specified in lower case.
-    tospace : {'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV', 'YIQ', 'YPbPr', 'YCbCr', 'YDbDr'}
+    tospace : {'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV',
+               'YIQ', 'YPbPr', 'YCbCr', 'YDbDr'}
         The color space to convert to. Can be specified in lower case.
 
     Returns

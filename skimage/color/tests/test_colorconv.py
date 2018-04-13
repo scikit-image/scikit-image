@@ -222,7 +222,7 @@ class TestColorconv(TestCase):
                             self.colbars_array)
 
     def test_convert_colorspace(self):
-        colspaces = ['HSV', 'RGB CIE', 'XYZ', 'YCbCr', 'YPbPr']
+        colspaces = ['HSV', 'RGB CIE', 'XYZ', 'YCbCr', 'YPbPr', 'YDbDr']
         colfuncs_from = [
             hsv2rgb, rgbcie2rgb, xyz2rgb,
             ycbcr2rgb, ypbpr2rgb, ydbdr2rgb
@@ -480,7 +480,7 @@ class TestColorconv(TestCase):
         assert_array_almost_equal(rgb2yiq(rgb), np.array([[[0.587, -0.27455667, -0.52273617]]]))
         assert_array_almost_equal(rgb2ypbpr(rgb), np.array([[[0.587, -0.331264, -0.418688]]]))
         assert_array_almost_equal(rgb2ycbcr(rgb), np.array([[[144.553,   53.797,   34.214]]]))
-        assert_array_almost_equal(rgb2ydbdr(rgb), np.array([[[0.587, -0.883,  1.116]]]))
+        assert_array_almost_equal(rgb2ydbdr(rgb), np.array([[[0.587, -0.883, 1.116]]]))
 
     def test_yuv_roundtrip(self):
         img_rgb = img_as_float(self.img_rgb)[::16, ::16]
