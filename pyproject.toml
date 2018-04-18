@@ -1,0 +1,4 @@
+# Also update INSTALL.txt
+
+[build-system]
+requires = ["setuptools", "wheel", "numpy >= 1.11", "Cython >= 0.23"]

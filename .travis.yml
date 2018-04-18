@@ -69,15 +69,16 @@ before_install:
     - source tools/travis/before_install.sh
     - which python; python --version
     - tools/build_versions.py
-    - tools/check_sdist.py
 
 install:
     - section build
-    - python setup.py develop
+    - pip install -e .
     - section_end build
 
 script: tools/travis/script.sh
 
 after_success:
+    - tools/check_sdist.py
     - codecov
     - bash tools/travis/deploy_docs.sh
+

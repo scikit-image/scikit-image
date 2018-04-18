@@ -7,11 +7,10 @@ import scipy as sp
 import matplotlib as mpl
 import six
 from PIL import Image
-import Cython
 import networkx
 
 
-for m in (np, sp, mpl, six, Image, networkx, Cython):
+for m in (np, sp, mpl, six, Image, networkx):
     if m is Image:
         version = m.VERSION
     else:

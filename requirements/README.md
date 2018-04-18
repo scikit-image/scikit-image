@@ -10,8 +10,6 @@
   Optional requirements
 - [test.txt](test.txt)
   Requirements for running test suite
-- [build.txt](build.txt)
-  Requirements for building from the source repository
 
 ## Examples
 
