@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import ndimage as ndi
 from .._shared.utils import assert_nD
+from warnings import warn
 
 
 __all__ = ['gabor_kernel', 'gabor']
@@ -13,9 +14,8 @@ def _sigma_prefactor(bandwidth):
         (2.0 ** b + 1) / (2.0 ** b - 1)
 
 
-def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
-                 n_stds=3, offset=0):
-    """Return complex 2D Gabor filter kernel.
+class gabor_kernel(np.ndarray):
+    """Return complex nD Gabor filter kernel.
 
     Gabor kernel is a Gaussian kernel modulated by a complex harmonic function.
     Harmonic function consists of an imaginary sine function and a real
@@ -72,30 +72,69 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
     >>> io.imshow(gk.real)  # doctest: +SKIP
     >>> io.show()           # doctest: +SKIP
     """
-    if sigma_x is None:
-        sigma_x = _sigma_prefactor(bandwidth) / frequency
-    if sigma_y is None:
-        sigma_y = _sigma_prefactor(bandwidth) / frequency
+    def __new__(cls, frequency, rotation=None, bandwidth=1, sigma=None,
+                sigma_y=None, gamma=3, offset=None, ndim=2, **kwargs):
+        # handle deprecation
+        message = ('Using deprecated, 2D-only interface to'
+                   'gabor_kernel. This interface will be'
+                   'removed in scikit-image 0.16. Use'
+                   'gabor_kernel(frequency, rotation=theta,'
+                   '    bandwidth=1, sigma=(sigma_x, sigma_y),'
+                   '    gamma=n_stds, offset=None, ndim=2)')
+        signal_warning = False
 
-    x0 = np.ceil(max(np.abs(n_stds * sigma_x * np.cos(theta)),
-                     np.abs(n_stds * sigma_y * np.sin(theta)), 1))
-    y0 = np.ceil(max(np.abs(n_stds * sigma_y * np.cos(theta)),
-                     np.abs(n_stds * sigma_x * np.sin(theta)), 1))
-    y, x = np.mgrid[-y0:y0 + 1, -x0:x0 + 1]
+        if sigma_y is not None:
+            signal_warning = True
+            if 'sigma_x' in kwargs and sigma is None:
+                sigma = (kwargs['sigma_x'], sigma_y)
+            else:
+                sigma = (sigma, sigma_y)
 
-    rotx = x * np.cos(theta) + y * np.sin(theta)
-    roty = -x * np.sin(theta) + y * np.cos(theta)
+        if 'theta' in kwargs:
+            signal_warning = True
+            if rotation is None:
+                rotation = kwargs['theta']
 
-    g = np.zeros(y.shape, dtype=np.complex)
-    g[:] = np.exp(-0.5 * (rotx ** 2 / sigma_x ** 2 + roty ** 2 / sigma_y ** 2))
-    g /= 2 * np.pi * sigma_x * sigma_y
-    g *= np.exp(1j * (2 * np.pi * frequency * rotx + offset))
+        if 'n_stds' in kwargs:
+            signal_warning = True
+            if gamma is None:
+                gamma = kwargs['n_stds']
 
-    return g
+        if signal_warning:
+            warn(message)
+
+        # handle translation
+        if offset is None:
+            offset = (0,) * (ndim - 1)
+        elif type(offset) is tuple:
+            offset += (0,) * (len(offset) - (ndim - 1))
+        else:
+            offset = (offset,) * (ndim - 1)
+
+        if type(sigma) is tuple:
+            sigma += (None,) * (len(sigma) - (ndim - 1))
+            sigma = np.asarray(sigma)
+        else:
+            sigma = np.array([sigma] * (ndim - 1))
+        sigma[(sigma == None).nonzero()] = (_sigma_prefactor(bandwidth)
+                                            / frequency)
+
+        # normalization scale
+        norm = (2 * np.pi) ** (ndim / 2)
+        norm *= sigma.prod()
+        norm = 1 / norm
+
+        # gaussian envelope
+        gauss = np.exp(-0.5 * ("Σ(x'/σₓ)²"))
+
+        # complex harmonic function
+        harmonic = np.exp(-1j * 2 * np.pi * ("Σ(?*x)"))
+
+        g = np.ndarray.__new__(cls, ...)
+        return g
 
 
-def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
-          sigma_y=None, n_stds=3, offset=0, mode='reflect', cval=0):
+    def apply(self, image, mode='reflect', cval=0):
     """Return real and imaginary responses to Gabor filter.
 
     The real and imaginary parts of the Gabor filter kernel are applied to the
@@ -110,7 +149,70 @@ def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
 
     Parameters
     ----------
-    image : 2-D array
+    image : array where image.ndim == self.ndim
+        Input image.
+    mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
+        Mode used to convolve image with a kernel, passed to `ndi.convolve`
+    cval : scalar, optional
+        Value to fill past edges of input if `mode` of convolution is
+        'constant'. The parameter is passed to `ndi.convolve`.
+
+    Returns
+    -------
+    real, imag : arrays
+        Filtered images using the real and imaginary parts of the Gabor filter
+        kernel. Images are of the same dimensions as the input one.
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/Gabor_filter
+    .. [2] http://mplab.ucsd.edu/tutorials/gabor.pdf
+
+    Examples
+    --------
+    >>> from skimage.filters import gabor_kernel
+    >>> from skimage import data, io
+    >>> from matplotlib import pyplot as plt  # doctest: +SKIP
+
+    >>> image = data.coins()
+    >>> # detecting edges in a coin image
+    >>> filt_real, filt_imag = gabor_kernel(frequency=0.6).apply(image)
+    >>> plt.figure()            # doctest: +SKIP
+    >>> io.imshow(filt_real)    # doctest: +SKIP
+    >>> io.show()               # doctest: +SKIP
+
+    >>> # less sensitivity to finer details with the lower frequency kernel
+    >>> filt_real, filt_imag = gabor_kernel(frequency=0.1).apply(image)
+    >>> plt.figure()            # doctest: +SKIP
+    >>> io.imshow(filt_real)    # doctest: +SKIP
+    >>> io.show()               # doctest: +SKIP
+    """
+    assert_nD(image, self.ndim)
+
+    filtered_real = ndi.convolve(image, self.real, mode=mode, cval=cval)
+    filtered_imag = ndi.convolve(image, self.imag, mode=mode, cval=cval)
+
+    return filtered_real, filtered_imag
+
+
+def gabor(image, frequency, rotation=None, bandwidth=1, sigma=None,
+          sigma_y=None, gamma=3, offset=None, mode='reflect', cval=0,
+          ndim=2, **kwargs):
+    """Return real and imaginary responses to Gabor filter.
+
+    The real and imaginary parts of the Gabor filter kernel are applied to the
+    image and the response is returned as a pair of arrays.
+
+    Gabor filter is a linear filter with a Gaussian kernel which is modulated
+    by a sinusoidal plane wave. Frequency and orientation representations of
+    the Gabor filter are similar to those of the human visual system.
+    Gabor filter banks are commonly used in computer vision and image
+    processing. They are especially suitable for edge detection and texture
+    classification.
+
+    Parameters
+    ----------
+    image : array where image.ndim == ndim
         Input image.
     frequency : float
         Spatial frequency of the harmonic function. Specified in pixels.
@@ -165,11 +267,7 @@ def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     >>> io.imshow(filt_real)    # doctest: +SKIP
     >>> io.show()               # doctest: +SKIP
     """
-    assert_nD(image, 2)
-    g = gabor_kernel(frequency, theta, bandwidth, sigma_x, sigma_y, n_stds,
-                     offset)
+    g = gabor_kernel(frequency, rotation, bandwidth, sigma, sigma_y, gamma,
+                     offset, ndim, **kwargs)
 
-    filtered_real = ndi.convolve(image, np.real(g), mode=mode, cval=cval)
-    filtered_imag = ndi.convolve(image, np.imag(g), mode=mode, cval=cval)
-
-    return filtered_real, filtered_imag
+    return g.apply(image, mode=mode, cval=cval)
