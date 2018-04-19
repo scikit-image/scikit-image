@@ -1,4 +1,4 @@
-OB#!/usr/bin/env bash
+#!/usr/bin/env bash
 set -ex
 
 export PIP_DEFAULT_TIMEOUT=60

@@ -13,7 +13,6 @@ from scipy import sparse, ndimage as ndi
 
 from .._shared.utils import warn
 
-
 # executive summary for next code block: try to import umfpack from
 # scipy, but make sure not to raise a fuss if it fails since it's only
 # needed to speed up a few cases.
@@ -39,9 +38,17 @@ try:
     amg_loaded = True
 except ImportError:
     amg_loaded = False
-from scipy.sparse.linalg import cg
+
 from ..util import img_as_float
 from ..filters import rank_order
+
+from scipy.sparse.linalg import cg
+import scipy
+from distutils.version import LooseVersion as Version
+import functools
+
+if Version(scipy.__version__) >= Version('1.1'):
+    cg = functools.partial(cg, atol=0)
 
 #-----------Laplacian--------------------
 
@@ -518,7 +525,7 @@ def _solve_cg(lap_sparse, B, tol, return_full_prob=False):
     lap_sparse = lap_sparse.tocsc()
     X = []
     for i in range(len(B)):
-        x0 = cg(lap_sparse, -B[i].todense(), tol=tol, atol='legacy')[0]
+        x0 = cg(lap_sparse, -B[i].todense(), tol=tol)[0]
         X.append(x0)
     if not return_full_prob:
         X = np.array(X)
@@ -537,7 +544,7 @@ def _solve_cg_mg(lap_sparse, B, tol, return_full_prob=False):
     ml = ruge_stuben_solver(lap_sparse)
     M = ml.aspreconditioner(cycle='V')
     for i in range(len(B)):
-        x0 = cg(lap_sparse, -B[i].todense(), tol=tol, atol='legacy', M=M, maxiter=30)[0]
+        x0 = cg(lap_sparse, -B[i].todense(), tol=tol, M=M, maxiter=30)[0]
         X.append(x0)
     if not return_full_prob:
         X = np.array(X)
