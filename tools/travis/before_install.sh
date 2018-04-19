@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+OB#!/usr/bin/env bash
 set -ex
 
 export PIP_DEFAULT_TIMEOUT=60
@@ -38,6 +38,10 @@ retry () {
     }
     return 0
 }
+
+# add all build dependencies
+cat requirements/*.txt > requirements/all.txt
+mv requirements/all.txt requirements/default.txt
 
 if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     sed -i 's/>=/==/g' requirements/default.txt
