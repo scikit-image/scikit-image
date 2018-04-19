@@ -3,7 +3,7 @@ import math
 import numpy as np
 from scipy import spatial
 
-from .._shared.utils import get_bound_method_class, safe_as_int
+from .._shared.utils import get_bound_method_class, safe_as_int, interpret_arg
 
 
 def _to_ndimage_mode(mode):
@@ -30,14 +30,14 @@ def _center_and_normalize_points(points):
 
     Parameters
     ----------
-    points : (N, 2) array
+    points : (M, N) array
         The coordinates of the image points.
 
     Returns
     -------
-    matrix : (3, 3) array
+    matrix : (N + 1, N + 1) array
         The transformation matrix to obtain the new points.
-    new_points : (N, 2) array
+    new_points : (M, N) array
         The transformed image points.
 
     References
@@ -47,24 +47,26 @@ def _center_and_normalize_points(points):
            (1997): 580-593.
 
     """
-
     centroid = np.mean(points, axis=0)
+
+    ndim = centroid.size
 
     rms = math.sqrt(np.sum((points - centroid) ** 2) / points.shape[0])
 
     norm_factor = math.sqrt(2) / rms
 
-    matrix = np.array([[norm_factor, 0, -norm_factor * centroid[0]],
-                       [0, norm_factor, -norm_factor * centroid[1]],
-                       [0, 0, 1]])
+    matrix = np.eye(ndim + 1) * norm_factor
 
-    pointsh = np.row_stack([points.T, np.ones((points.shape[0]),)])
+    matrix[:, -1][:-1] = - norm_factor * centroid
+
+    matrix[-1, -1] = 1
+
+    pointsh = np.row_stack([points.T, np.ones(points.shape[0])])
 
     new_pointsh = np.dot(matrix, pointsh).T
 
-    new_points = new_pointsh[:, :2]
-    new_points[:, 0] /= new_pointsh[:, 2]
-    new_points[:, 1] /= new_pointsh[:, 2]
+    new_points = new_pointsh[:, :ndim]
+    new_points /= new_pointsh[:, ndim, np.newaxis]
 
     return matrix, new_points
 
@@ -148,17 +150,18 @@ class GeometricTransform(object):
     """Base class for geometric transformations.
 
     """
+
     def __call__(self, coords):
         """Apply forward transformation.
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (M, N) array
             Source coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : (M, N) array
             Destination coordinates.
 
         """
@@ -169,12 +172,12 @@ class GeometricTransform(object):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (M, N) array
             Destination coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : (M, N) array
             Source coordinates.
 
         """
@@ -188,9 +191,9 @@ class GeometricTransform(object):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (M, N) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (M, N) array
             Destination coordinates.
 
         Returns
@@ -202,9 +205,7 @@ class GeometricTransform(object):
         return np.sqrt(np.sum((self(src) - dst)**2, axis=1))
 
     def __add__(self, other):
-        """Combine this transformation with another.
-
-        """
+        """Combine this transformation with another."""
         raise NotImplementedError()
 
 
@@ -228,35 +229,39 @@ class FundamentalMatrixTransform(GeometricTransform):
 
     Parameters
     ----------
-    matrix : (3, 3) array, optional
+    matrix : (N, N) array, optional
         Fundamental matrix.
+    ndim : int, optional
+        The dimension of the matrix that this transformation is intended to
+        apply to.
 
     Attributes
     ----------
-    params : (3, 3) array
+    params : (N, N) array
         Fundamental matrix.
 
     """
 
-    def __init__(self, matrix=None):
+    def __init__(self, matrix=None, ndim=2):
         if matrix is None:
             # default to an identity transform
-            matrix = np.eye(3)
-        if matrix.shape != (3, 3):
+            matrix = np.eye(ndim + 1)
+        if matrix.shape != (ndim + 1, ndim + 1):
             raise ValueError("Invalid shape of transformation matrix")
         self.params = matrix
+        self.ndim = ndim
 
     def __call__(self, coords):
         """Apply forward transformation.
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (M, N) array
             Source coordinates.
 
         Returns
         -------
-        coords : (N, 3) array
+        coords : (M, N + 1) array
             Epipolar lines in the destination image.
 
         """
@@ -268,12 +273,12 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (M, N) array
             Destination coordinates.
 
         Returns
         -------
-        coords : (N, 3) array
+        coords : (M, N + 1) array
             Epipolar lines in the source image.
 
         """
@@ -287,46 +292,48 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (M, N) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (M, N) array
             Destination coordinates.
 
         Returns
         -------
-        F_normalized : (3, 3) array
+        F_normalized : (N + 1, N + 1) array
             The normalized solution to the homogeneous system. If the system
             is not well-conditioned, this matrix contains NaNs.
-        src_matrix : (3, 3) array
+        src_matrix : (N + 1, N + 1) array
             The transformation matrix to obtain the normalized source
             coordinates.
-        dst_matrix : (3, 3) array
+        dst_matrix : (N + 1, N + 1) array
             The transformation matrix to obtain the normalized destination
             coordinates.
 
         """
+        ndim = self.ndim
+        size = ndim + 1
+
         assert src.shape == dst.shape
-        assert src.shape[0] >= 8
+        assert src.shape[0] >= 3 * size - 1
 
         # Center and normalize image points for better numerical stability.
         try:
             src_matrix, src = _center_and_normalize_points(src)
             dst_matrix, dst = _center_and_normalize_points(dst)
         except ZeroDivisionError:
-            self.params = np.full((3, 3), np.nan)
-            return 3 * [np.full((3, 3), np.nan)]
+            self.params = np.full((size, size), np.nan)
+            return 3 * [np.full((size, size), np.nan)]
 
         # Setup homogeneous linear equation as dst' * F * src = 0.
-        A = np.ones((src.shape[0], 9))
-        A[:, :2] = src
-        A[:, :3] *= dst[:, 0, np.newaxis]
-        A[:, 3:5] = src
-        A[:, 3:6] *= dst[:, 1, np.newaxis]
-        A[:, 6:8] = src
+        A = np.column_stack(src, np.ones(src.shape[0]))
+        A = A[..., np.newaxis] * np.ones(ndim)
+        A = np.rollaxis(A, -1)
+        A = np.concatenate(A, axis=1)
+        A *= dst.repeat(size, axis=1)
 
         # Solve for the nullspace of the constraint matrix.
         _, _, V = np.linalg.svd(A)
-        F_normalized = V[-1, :].reshape(3, 3)
+        F_normalized = V[-1, :].reshape(size, size)
 
         return F_normalized, src_matrix, dst_matrix
 
@@ -339,9 +346,9 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (M, N) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (M, N) array
             Destination coordinates.
 
         Returns
@@ -371,9 +378,9 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (M, N) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (M, N) array
             Destination coordinates.
 
         Returns
@@ -390,8 +397,8 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         dst_F_src = np.sum(dst_homogeneous * F_src.T, axis=1)
 
-        return np.abs(dst_F_src) / np.sqrt(F_src[0] ** 2 + F_src[1] ** 2
-                                           + Ft_dst[0] ** 2 + Ft_dst[1] ** 2)
+        return np.abs(dst_F_src) / np.sqrt((F_src ** 2).sum()
+                                           + (Ft_dst ** 2).sum())
 
 
 class EssentialMatrixTransform(FundamentalMatrixTransform):
@@ -415,45 +422,50 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
     Parameters
     ----------
-    rotation : (3, 3) array, optional
+    rotation : (N, N) array, optional
         Rotation matrix of the relative camera motion.
-    translation : (3, 1) array, optional
+    translation : (N, 1) array, optional
         Translation vector of the relative camera motion. The vector must
         have unit length.
-    matrix : (3, 3) array, optional
+    matrix : (N, N) array, optional
         Essential matrix.
-
+    ndim : int, optional
+        The dimension of the matrix that this transformation is intended to
+        apply to.
     Attributes
     ----------
-    params : (3, 3) array
+    params : (N, N) array
         Essential matrix.
 
     """
 
-    def __init__(self, rotation=None, translation=None, matrix=None):
-        if rotation is not None:
-            if translation is None:
+    def __init__(self, rotation=None, translation=None, matrix=None, ndim=2):
+        self.ndim = ndim
+        size = ndim + 1
+        if rotation or translation is not None:
+            if None in [rotation, translation]:
                 raise ValueError("Both rotation and translation required")
-            if rotation.shape != (3, 3):
+            if rotation.shape != (size, size):
                 raise ValueError("Invalid shape of rotation matrix")
             if abs(np.linalg.det(rotation) - 1) > 1e-6:
                 raise ValueError("Rotation matrix must have unit determinant")
-            if translation.size != 3:
+            if translation.size != size:
                 raise ValueError("Invalid shape of translation vector")
             if abs(np.linalg.norm(translation) - 1) > 1e-6:
                 raise ValueError("Translation vector must have unit length")
             # Matrix representation of the cross product for t.
-            t_x = np.array([0, -translation[2], translation[1],
-                            translation[2], 0, -translation[0],
-                            -translation[1], translation[0], 0]).reshape(3, 3)
+            t_x = np.array(
+                [[  0,              - translation[2],   translation[1]],
+                 [  translation[2],   0,              - translation[0]],
+                 [- translation[1],   translation[0],   0             ]])
             self.params = np.dot(t_x, rotation)
         elif matrix is not None:
-            if matrix.shape != (3, 3):
+            if matrix.shape != (size, size):
                 raise ValueError("Invalid shape of transformation matrix")
             self.params = matrix
         else:
             # default to an identity transform
-            self.params = np.eye(3)
+            self.params = np.eye(size)
 
     def estimate(self, src, dst):
         """Estimate essential matrix using 8-point algorithm.
@@ -464,9 +476,9 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (M, N) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (M, N) array
             Destination coordinates.
 
         Returns
@@ -561,12 +573,12 @@ class ProjectiveTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (M, N) array
             Source coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : (M, N) array
             Destination coordinates.
 
         """
@@ -577,12 +589,12 @@ class ProjectiveTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (M, N) array
             Destination coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : (M, N) array
             Source coordinates.
 
         """
@@ -633,9 +645,9 @@ class ProjectiveTransform(GeometricTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (M, N) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (M, N) array
             Destination coordinates.
 
         Returns
@@ -875,12 +887,12 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (M, N) array
             Source coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : (M, N) array
             Transformed coordinates.
 
         """
@@ -910,12 +922,12 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (M, N) array
             Source coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : (M, N) array
             Transformed coordinates.
 
         """
@@ -1013,9 +1025,9 @@ class EuclideanTransform(ProjectiveTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (M, N) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (M, N) array
             Destination coordinates.
 
         Returns
@@ -1118,9 +1130,9 @@ class SimilarityTransform(EuclideanTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (M, N) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (M, N) array
             Destination coordinates.
 
         Returns
@@ -1259,12 +1271,12 @@ class PolynomialTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (M, N) array
             source coordinates
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : (M, N) array
             Transformed coordinates.
 
         """
@@ -1383,14 +1395,14 @@ def matrix_transform(coords, matrix):
 
     Parameters
     ----------
-    coords : (N, 2) array
+    coords : (M, N) array
         x, y coordinates to transform
     matrix : (3, 3) array
         Homogeneous transformation matrix.
 
     Returns
     -------
-    coords : (N, 2) array
+    coords : (M, N) array
         Transformed coordinates.
 
     """
