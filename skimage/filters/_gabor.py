@@ -14,6 +14,25 @@ def _sigma_prefactor(bandwidth):
         (2.0 ** b + 1) / (2.0 ** b - 1)
 
 
+def _get_quasipolar_coords(r, *thetas):
+    """Nguyen, Tan Mai, "N-Dimensional Quasipolar Coordinates - Theory and Application" (2014). UNLV Theses, Dissertations, Professional Papers, and Capstones. 2125. https://digitalscholarship.unlv.edu/thesesdissertations/2125
+    """
+    axes = len(thetas) + 1
+    coords = r * np.ones(axes)
+
+    for which_theta, theta in enumerate(thetas[::-1]):
+        sine = np.sin(theta)
+
+        theta_index = axes - which_theta - 1
+
+        for axis in range(theta_index):
+            coords[axis] *= sine
+
+        coords[theta_index] *= np.cos(theta)
+
+    return coords
+
+
 class gabor_kernel(np.ndarray):
     """Return complex nD Gabor filter kernel.
 
