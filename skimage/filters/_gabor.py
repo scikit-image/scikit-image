@@ -130,7 +130,7 @@ class gabor_kernel(np.ndarray):
             sigma = np.asarray(sigma)
         else:
             sigma = np.array([sigma] * ndim)
-        sigma[(sigma == None).nonzero()] = (_sigma_prefactor(bandwidth)
+        sigma[(sigma == None).nonzero()] = (_sigma_prefactor(bandwidth) # noqa
                                             / frequency)
         sigma = sigma.astype(None)
 
@@ -148,66 +148,65 @@ class gabor_kernel(np.ndarray):
         g = np.ndarray.__new__(cls, ...)
         return g
 
-
     def apply(self, image, mode='reflect', cval=0):
-    """Return real and imaginary responses to Gabor filter.
+        """Return real and imaginary responses to Gabor filter.
 
-    The real and imaginary parts of the Gabor filter kernel are applied to the
-    image and the response is returned as a pair of arrays.
+        The real and imaginary parts of the Gabor filter kernel are applied to
+        the image and the response is returned as a pair of arrays.
 
-    Gabor filter is a linear filter with a Gaussian kernel which is modulated
-    by a sinusoidal plane wave. Frequency and orientation representations of
-    the Gabor filter are similar to those of the human visual system.
-    Gabor filter banks are commonly used in computer vision and image
-    processing. They are especially suitable for edge detection and texture
-    classification.
+        Gabor filter is a linear filter with a Gaussian kernel which is
+        modulated by a sinusoidal plane wave. Frequency and orientation
+        representations of the Gabor filter are similar to those of the human
+        visual system. Gabor filter banks are commonly used in computer vision
+        and image processing. They are especially suitable for edge detection
+        and texture classification.
 
-    Parameters
-    ----------
-    image : array where image.ndim == self.ndim
-        Input image.
-    mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
-        Mode used to convolve image with a kernel, passed to `ndi.convolve`
-    cval : scalar, optional
-        Value to fill past edges of input if `mode` of convolution is
-        'constant'. The parameter is passed to `ndi.convolve`.
+        Parameters
+        ----------
+        image : array where image.ndim == self.ndim
+            Input image.
+        mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
+            Mode used to convolve image with a kernel, passed to `ndi.convolve`
+        cval : scalar, optional
+            Value to fill past edges of input if `mode` of convolution is
+            'constant'. The parameter is passed to `ndi.convolve`.
 
-    Returns
-    -------
-    real, imag : arrays
-        Filtered images using the real and imaginary parts of the Gabor filter
-        kernel. Images are of the same dimensions as the input one.
+        Returns
+        -------
+        real, imag : arrays
+            Filtered images using the real and imaginary parts of the Gabor
+            filter kernel. Images are of the same dimensions as the input one.
 
-    References
-    ----------
-    .. [1] http://en.wikipedia.org/wiki/Gabor_filter
-    .. [2] http://mplab.ucsd.edu/tutorials/gabor.pdf
+        References
+        ----------
+        .. [1] http://en.wikipedia.org/wiki/Gabor_filter
+        .. [2] http://mplab.ucsd.edu/tutorials/gabor.pdf
 
-    Examples
-    --------
-    >>> from skimage.filters import gabor_kernel
-    >>> from skimage import data, io
-    >>> from matplotlib import pyplot as plt  # doctest: +SKIP
+        Examples
+        --------
+        >>> from skimage.filters import gabor_kernel
+        >>> from skimage import data, io
+        >>> from matplotlib import pyplot as plt  # doctest: +SKIP
 
-    >>> image = data.coins()
-    >>> # detecting edges in a coin image
-    >>> filt_real, filt_imag = gabor_kernel(frequency=0.6).apply(image)
-    >>> plt.figure()            # doctest: +SKIP
-    >>> io.imshow(filt_real)    # doctest: +SKIP
-    >>> io.show()               # doctest: +SKIP
+        >>> image = data.coins()
+        >>> # detecting edges in a coin image
+        >>> filt_real, filt_imag = gabor_kernel(frequency=0.6).apply(image)
+        >>> plt.figure()            # doctest: +SKIP
+        >>> io.imshow(filt_real)    # doctest: +SKIP
+        >>> io.show()               # doctest: +SKIP
 
-    >>> # less sensitivity to finer details with the lower frequency kernel
-    >>> filt_real, filt_imag = gabor_kernel(frequency=0.1).apply(image)
-    >>> plt.figure()            # doctest: +SKIP
-    >>> io.imshow(filt_real)    # doctest: +SKIP
-    >>> io.show()               # doctest: +SKIP
-    """
-    assert_nD(image, self.ndim)
+        >>> # less sensitivity to finer details with the lower frequency kernel
+        >>> filt_real, filt_imag = gabor_kernel(frequency=0.1).apply(image)
+        >>> plt.figure()            # doctest: +SKIP
+        >>> io.imshow(filt_real)    # doctest: +SKIP
+        >>> io.show()               # doctest: +SKIP
+        """
+        assert_nD(image, self.ndim)
 
-    filtered_real = ndi.convolve(image, self.real, mode=mode, cval=cval)
-    filtered_imag = ndi.convolve(image, self.imag, mode=mode, cval=cval)
+        filtered_real = ndi.convolve(image, self.real, mode=mode, cval=cval)
+        filtered_imag = ndi.convolve(image, self.imag, mode=mode, cval=cval)
 
-    return filtered_real, filtered_imag
+        return filtered_real, filtered_imag
 
 
 def gabor(image, frequency, rotation=None, bandwidth=1, sigma=None,
