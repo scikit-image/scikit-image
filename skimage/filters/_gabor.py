@@ -72,7 +72,7 @@ class gabor_kernel(np.ndarray):
     >>> io.imshow(gk.real)  # doctest: +SKIP
     >>> io.show()           # doctest: +SKIP
     """
-    def __new__(cls, frequency, rotation=None, bandwidth=1, sigma=None,
+    def __new__(cls, frequency, theta=None, bandwidth=1, sigma=None,
                 sigma_y=None, gamma=3, offset=None, ndim=2, **kwargs):
         # handle deprecation
         message = ('Using deprecated, 2D-only interface to'
@@ -90,11 +90,6 @@ class gabor_kernel(np.ndarray):
             else:
                 sigma = (sigma, sigma_y)
 
-        if 'theta' in kwargs:
-            signal_warning = True
-            if rotation is None:
-                rotation = kwargs['theta']
-
         if 'n_stds' in kwargs:
             signal_warning = True
             if gamma is None:
@@ -104,20 +99,21 @@ class gabor_kernel(np.ndarray):
             warn(message)
 
         # handle translation
-        if offset is None:
-            offset = (0,) * (ndim - 1)
+        if theta is None:
+            theta = (0,) * (ndim - 1)
         elif type(offset) is tuple:
-            offset += (0,) * (len(offset) - (ndim - 1))
+            theta += (0,) * (len(theta) - (ndim - 1))
         else:
-            offset = (offset,) * (ndim - 1)
+            theta = (theta,) * (ndim - 1)
 
         if type(sigma) is tuple:
-            sigma += (None,) * (len(sigma) - (ndim - 1))
+            sigma += (None,) * (ndim - len(sigma))
             sigma = np.asarray(sigma)
         else:
-            sigma = np.array([sigma] * (ndim - 1))
+            sigma = np.array([sigma] * ndim)
         sigma[(sigma == None).nonzero()] = (_sigma_prefactor(bandwidth)
                                             / frequency)
+        sigma = sigma.astype(None)
 
         # normalization scale
         norm = (2 * np.pi) ** (ndim / 2)
