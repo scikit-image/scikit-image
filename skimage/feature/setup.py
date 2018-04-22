@@ -20,6 +20,7 @@ def configuration(parent_package='', top_path=None):
     cython(['_hessian_det_appx.pyx'], working_path=base_path)
     cython(['_hoghistogram.pyx'], working_path=base_path)
     cython(['_haar.pyx'], working_path=base_path)
+    cython(['peak_utils.pyx'], working_path=base_path)
 
     config.add_extension('corner_cy', sources=['corner_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
@@ -38,6 +39,8 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('_haar', sources=['_haar.cpp'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'],
                          language="c++")
+    config.add_extension('peak_utils', sources=['peak_utils.c'],
+                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
 
     return config
 
