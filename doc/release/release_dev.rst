@@ -26,6 +26,7 @@ New Features
   results from a series of spatial shifts (#2647)
 - Haar-like feature (#2848)
 - subset of LFW database (#2905)
+- Image moments from coordinate input (#2859)
 
 
 Improvements
