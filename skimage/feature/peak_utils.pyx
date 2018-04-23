@@ -108,19 +108,19 @@ def maxima2d_A(dtype_t[:, ::1] image not None):
         r_max = image.shape[0] - 1
         c_max = image.shape[1] - 1
 
-        # Find local maxima row-wise (ignore other dimension)
-        for r in range(r_max + 1):
+        # Compare values row-wise (ignore other dimension)
+        for r in range(1, r_max):
             c = 1
             while c < c_max:
                 # If previous sample isn't larger -> possible peak
-                if image[r, c - 1] <= image[r, c]:
+                if image[r, c - 1] < image[r, c]:
                     # Find next sample that is unequal to current one or last
                     # sample in row
                     c_ahead = c + 1
                     while c_ahead < c_max and image[r, c_ahead] == image[r, c]:
                         c_ahead += 1
                     # If next sample is not larger -> maximum found
-                    if image[r, c_ahead] <= image[r, c]:
+                    if image[r, c_ahead] < image[r, c]:
                         # Mark samples as potential maximum
                         flags[r, c:c_ahead] = 2
                     # Skip already evaluated samples
@@ -128,30 +128,14 @@ def maxima2d_A(dtype_t[:, ::1] image not None):
                 else:
                     c += 1
 
-            # Evaluate first and last sample in each row. Only mark as potential
-            # maximum if: bordering sample is 2 and has the same value or if
-            # edge sample is larger than bordering sample
-            if (
-                flags[r, 1] == 2 and
-                image[r, 1] == image[r, 0] or
-                image[r, 1] < image[r, 0]
-            ):
-                flags[r, 0] = 2
-            if (
-                flags[r, c_max - 1] == 2 and
-                image[r, c_max - 1] == image[r, c_max] or
-                image[r, c_max - 1] < image[r, c_max]
-            ):
-                flags[r, c_max] = 2
-
         # Initialize a buffer used to queue positions while evaluating each
         # potential maximum (flagged with 2); the initial size is the number
         # of potential maxima
         q_init(&queue, 64)
         try:
-            for r in range(r_max + 1):
-                c = 0
-                while c <= c_max:
+            for r in range(1, r_max ):
+                c = 1
+                while c < c_max:
                     # If sample is flagged as a potential maxima
                     if flags[r, c] == 2:
                         # Find all samples part of the plateau and fill with 0
@@ -205,6 +189,12 @@ cdef inline void \
             # If neighbour wasn't queued already (!= 1) and is part of the
             # current plateau (== h)
             if flags[item.r, item.c] != 1 and image[item.r, item.c] == h:
+                if (
+                    item.r == 0 or item.r == r_max or
+                    item.c == 0 or item.c == c_max
+                ):
+                    true_maximum = 0
+
                 # Push neighbour to buffer
                 q_push(queue_ptr, &item)
                 # Flag as true maximum (initial guess) so that it isn't queued
@@ -244,7 +234,8 @@ def maxima2d_B(dtype_t[:, ::1] image not None):
         Py_ssize_t r_max, c_max, r, c, c_ahead
 
     # Flags: 0 - no maximum, 2 - potential maximum, 1 - definite maximum
-    flags = np.ones_like(image, dtype=np.uint8) * 2
+    flags = np.empty_like(image, dtype=np.uint8)
+    flags[:, :] = 2
 
     with nogil:
         r_max = image.shape[0] - 1
@@ -282,7 +273,11 @@ cdef inline void \
         QueueItem item
 
     h = image[r, c]
-    true_maximum = 1  # Boolean flag
+    if r == 0 or r == r_max or c == 0 or c == c_max:
+        true_maximum = 0
+    else:
+        true_maximum = 1  # Boolean flag
+
     # Steps that shift a position to all 8 neighbouring samples
     steps_r = ( 0, -1, 0, 0, 1, 1,  0,  0)
     steps_c = (-1,  0, 1, 1, 0, 0, -1, -1)
@@ -302,13 +297,20 @@ cdef inline void \
         for i in range(8):
             item.r += steps_r[i]
             item.c += steps_c[i]
+
             if not (0 <= item.r <= r_max and 0 <= item.c <= c_max):
                 continue  # Skip "neighbours" outside image
 
             # If neighbour wasn't queued already (== 2) and is part of the
             # current plateau (== h)
             if flags[item.r, item.c] == 2 and image[item.r, item.c] == h:
-                # Push neighbour to buffer
+                if (
+                    item.r == 0 or item.r == r_max or
+                    item.c == 0 or item.c == c_max
+                ):
+                    true_maximum = 0
+                # Push neighbour to buffer if plateau might still be a
+                # maximum
                 q_push(queue_ptr, &item)
                 # Flag as "not maximum" (initial guess) so that it isn't queued
                 # multiple times
