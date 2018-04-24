@@ -1,8 +1,11 @@
 """_max_tree.pyx - building a max-tree from an image.
 
-This is an implementation of the maxtree, which is a morphological
+This is an implementation of the max-tree, which is a morphological
 representation of the image. Many morphological operators can be built
 from this representation, namely attribute openings and closings.
+
+This file also contains implementations of max-tree based filters and
+functions to characterize the tree components. 
 """
 
 import numpy as np
@@ -67,8 +70,6 @@ cdef np.ndarray[DTYPE_INT32_t, ndim=2] offsets_to_points(DTYPE_INT32_t[::1] offs
     cdef DTYPE_INT32_t number_of_points = len(offsets)
     cdef np.ndarray[DTYPE_INT32_t, ndim=2] points = np.zeros((number_of_points, number_of_dimensions),
                                                              dtype=np.int32)
-    #cdef np.ndarray[DTYPE_INT32_t, ndim=2] center_point = np.zeros((number_of_dimensions, 1), 
-    #                                                               dtype=np.int32)
     cdef DTYPE_INT32_t neg_shift = - np.min(offsets)
     
     cdef DTYPE_INT32_t i, offset, curr_index, coord, 
@@ -85,7 +86,7 @@ cdef np.ndarray[DTYPE_INT32_t, ndim=2] offsets_to_points(DTYPE_INT32_t[::1] offs
 
 # checks whether a neighbor of a given pixel is inside the image plane.
 # The pixel is given in form of an index of a raveled array, the offset
-# is given as a list of coordinates. This function is a bit time-consuming
+# is given as a list of coordinates. This function is relatively time-consuming
 # and should only be applied to border-pixels (defined by mask).
 cdef DTYPE_UINT8_t _is_valid_coordinate(DTYPE_INT64_t index,
                                         DTYPE_INT32_t[::1] coordinates,
@@ -125,152 +126,6 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_area(dtype_t[::1] image,
     return area
 
 
-cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _old_compute_ellipse_ratio_2d(dtype_t[::1] image,
-                                                                    DTYPE_INT64_t[::1] parent,
-                                                                    DTYPE_INT64_t[::1] sorted_indices,
-                                                                    DTYPE_INT32_t[::1] strides):
-    cdef DTYPE_INT64_t p_root = sorted_indices[0]
-    cdef DTYPE_INT64_t p, q
-    cdef DTYPE_UINT64_t number_of_pixels = len(image)
-    cdef DTYPE_UINT64_t x, y
-    cdef DTYPE_FLOAT64_t m02, m11, m20
-    cdef DTYPE_FLOAT64_t eigenvalue_1, eigenvalue_2, area_ellipse
-
-    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] area = np.ones(number_of_pixels,
-                                                           dtype=np.uint64)
-    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] x_acc = np.zeros(number_of_pixels,
-                                                             dtype=np.uint64)
-    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] y_acc = np.zeros(number_of_pixels,
-                                                             dtype=np.uint64)
-    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] x2_acc = np.zeros(number_of_pixels,
-                                                              dtype=np.uint64)
-    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] y2_acc = np.zeros(number_of_pixels,
-                                                              dtype=np.uint64)
-    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] xy_acc = np.zeros(number_of_pixels,
-                                                              dtype=np.uint64)
-    cdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] area_ratio = np.zeros(number_of_pixels,
-                                                                  dtype=np.float64)
-
-    for p in sorted_indices[::-1]:
-        y_acc[p] = p // strides[0]
-        x_acc[p] = p % strides[0]
-        x2_acc[p] = x_acc[p] * x_acc[p]
-        y2_acc[p] = y_acc[p] * y_acc[p]
-        xy_acc[p] = x_acc[p] * y_acc[p]
-
-    for p in sorted_indices[::-1]:
-        if p == p_root:
-            continue
-        q = parent[p]
-
-        # accumulative features
-        x_acc[q] = x_acc[q] + x_acc[p]
-        y_acc[q] = y_acc[q] + y_acc[p]
-        x2_acc[q] = x2_acc[q] + x2_acc[p]
-        y2_acc[q] = y2_acc[q] + y2_acc[p]
-        xy_acc[q] = xy_acc[q] + xy_acc[p]
-        area[q] = area[q] + area[p]
-
-        # derived features: covariance matrix
-        m02 = <DTYPE_FLOAT64_t>y2_acc[q] - <DTYPE_FLOAT64_t>(y_acc[q] * y_acc[q]) / <DTYPE_FLOAT64_t>area[q]
-        m20 = <DTYPE_FLOAT64_t>x2_acc[q] - <DTYPE_FLOAT64_t>(x_acc[q] * x_acc[q]) / <DTYPE_FLOAT64_t>area[q]
-        m11 = <DTYPE_FLOAT64_t>xy_acc[q] - <DTYPE_FLOAT64_t>(x_acc[q] * y_acc[q]) / <DTYPE_FLOAT64_t>area[q]
-
-        # eigenvalues of the covariance matrix
-        eigenvalue_1 = .5 * (m02 + m20) + .5 * np.sqrt(4 * m11 * m11 + (m20 - m02)**2)
-        eigenvalue_2 = .5 * (m02 + m20) - .5 * np.sqrt(4 * m11 * m11 + (m20 - m02)**2)
-
-        # the area of an ellipse with the same moments
-        area_ellipse = np.pi * 4.0 / <DTYPE_FLOAT64_t>area[q] * np.sqrt(eigenvalue_1 * eigenvalue_2)
-
-        # the ratio between ideal area and real area.
-        if area_ellipse == 0.0:
-            area_ratio[q] = 0.0
-        else:
-            area_ratio[q] = 1 - np.abs(area[q] - area_ellipse) / area_ellipse
-
-    return area_ratio
-
-cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_ellipse_ratio_2d(dtype_t[::1] image,
-                                                                    DTYPE_INT64_t[::1] parent,
-                                                                    DTYPE_INT64_t[::1] sorted_indices,
-                                                                    DTYPE_INT32_t[::1] strides,
-                                                                    DTYPE_UINT64_t area_low_thresh,
-                                                                    DTYPE_UINT64_t area_high_thresh):
-    cdef DTYPE_INT64_t p_root = sorted_indices[0]
-    cdef DTYPE_INT64_t p, q
-    cdef DTYPE_UINT64_t number_of_pixels = len(image)
-    cdef DTYPE_UINT64_t x, y
-    cdef DTYPE_FLOAT64_t m02, m11, m20
-    cdef DTYPE_FLOAT64_t eigenvalue_1, eigenvalue_2, area_ellipse
-
-    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] area = np.ones(number_of_pixels,
-                                                           dtype=np.uint64)
-    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] x_acc = np.zeros(number_of_pixels,
-                                                             dtype=np.uint64)
-    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] y_acc = np.zeros(number_of_pixels,
-                                                             dtype=np.uint64)
-    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] x2_acc = np.zeros(number_of_pixels,
-                                                              dtype=np.uint64)
-    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] y2_acc = np.zeros(number_of_pixels,
-                                                              dtype=np.uint64)
-    cdef np.ndarray[DTYPE_UINT64_t, ndim=1] xy_acc = np.zeros(number_of_pixels,
-                                                              dtype=np.uint64)
-    cdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] area_ratio = np.zeros(number_of_pixels,
-                                                                  dtype=np.float64)
-    
-    for p in sorted_indices[::-1]:
-        y_acc[p] = p // strides[0]
-        x_acc[p] = p % strides[0]
-        x2_acc[p] = x_acc[p] * x_acc[p]
-        y2_acc[p] = y_acc[p] * y_acc[p]
-        xy_acc[p] = x_acc[p] * y_acc[p]
-
-    for p in sorted_indices[::-1]:
-        if p == p_root:
-            continue
-        q = parent[p]
-
-        # accumulative features
-        x_acc[q] = x_acc[q] + x_acc[p]
-        y_acc[q] = y_acc[q] + y_acc[p]
-        x2_acc[q] = x2_acc[q] + x2_acc[p]
-        y2_acc[q] = y2_acc[q] + y2_acc[p]
-        xy_acc[q] = xy_acc[q] + xy_acc[p]
-        area[q] = area[q] + area[p]
-
-        # derived features: covariance matrix
-        m02 = <DTYPE_FLOAT64_t>y2_acc[q] - <DTYPE_FLOAT64_t>(y_acc[q] * y_acc[q]) / <DTYPE_FLOAT64_t>area[q]
-        m20 = <DTYPE_FLOAT64_t>x2_acc[q] - <DTYPE_FLOAT64_t>(x_acc[q] * x_acc[q]) / <DTYPE_FLOAT64_t>area[q]
-        m11 = <DTYPE_FLOAT64_t>xy_acc[q] - <DTYPE_FLOAT64_t>(x_acc[q] * y_acc[q]) / <DTYPE_FLOAT64_t>area[q]
-
-        # eigenvalues of the covariance matrix
-        eigenvalue_1 = .5 * (m02 + m20) + .5 * np.sqrt(4 * m11 * m11 + (m20 - m02)**2)
-        eigenvalue_2 = .5 * (m02 + m20) - .5 * np.sqrt(4 * m11 * m11 + (m20 - m02)**2)
-           
-        # the area of an ellipse with the same moments
-        if (eigenvalue_1 * eigenvalue_2 >= 0):
-            area_ellipse = np.pi * 4.0 / <DTYPE_FLOAT64_t>area[q] * np.sqrt(eigenvalue_1 * eigenvalue_2)
-        else:
-            area_ellipse = 0
-            
-        # the ratio between ideal area and real area.
-        if area_ellipse == 0:
-            # low similarity
-            area_ratio[q] = 1.0
-        elif area[q] > area_high_thresh:
-            # low similarity
-            area_ratio[q] = 1.0
-        elif area[q] < area_low_thresh:
-            # high similarity
-            area_ratio[q] = 0.0
-        else:
-            # similarity is calculated
-            area_ratio[q] = np.abs(area[q] - area_ellipse) / area_ellipse
-
-    return area_ratio
-
-
 cpdef void _direct_filter(dtype_t[::1] image,
                           dtype_t[::1] output,
                           DTYPE_INT64_t[::1] parent,
@@ -278,6 +133,31 @@ cpdef void _direct_filter(dtype_t[::1] image,
                           DTYPE_FLOAT64_t[::1] attribute,
                           DTYPE_FLOAT64_t attribute_threshold
                           ):
+    """Direct filtering. Produces an image in which for all possible thresholds, 
+    each connected component has an attribute >= attribute_threshold.
+
+    Parameters
+    ----------
+
+    image : array of arbitrary type
+            The flattened image pixels.
+    output : array of the same shape and type as image.
+    parent : array of int
+        Image of the same shape as the input image. The value
+        at each pixel is the parent index of this pixel in the max-tree
+        reprentation. 
+    sorted_indices : array of int
+        List of length = number of pixels. Each element
+        corresponds to one pixel index in the image. It encodes the order
+        of elements in the tree: a parent of a pixel always comes before
+        the element itself. More formally: i < j implies that j cannot be
+        the parent of i.
+    attribute : array of float 
+        Contains the attributes for the max-tree
+    attribute_threshold : float
+        The threshold to be applied to the attribute.
+    """
+
     cdef DTYPE_INT64_t p_root = sorted_indices[0]
     cdef DTYPE_INT64_t p, q
     cdef DTYPE_UINT64_t number_of_pixels = len(image)
@@ -319,6 +199,33 @@ cpdef void _cut_first_filter(dtype_t[::1] image,
                              DTYPE_FLOAT64_t[::1] attribute,
                              DTYPE_FLOAT64_t attribute_threshold
                              ):
+    """Image filter using max-trees: starting from the root, the tree is pruned
+    if the attribute of a component is smaller than the threshold. For increasing
+    attributes, this is the same as _direct_filter, but for non-increasing attributes,
+    the results are different (and more severe).
+
+    Parameters
+    ----------
+
+    image : array of arbitrary type
+            The flattened image pixels.
+    output : array of the same shape and type as image.
+    parent : array of int
+        Image of the same shape as the input image. The value
+        at each pixel is the parent index of this pixel in the max-tree
+        reprentation. 
+    sorted_indices : array of int
+        List of length = number of pixels. Each element
+        corresponds to one pixel index in the image. It encodes the order
+        of elements in the tree: a parent of a pixel always comes before
+        the element itself. More formally: i < j implies that j cannot be
+        the parent of i.
+    attribute : array of float 
+        Contains the attributes for the max-tree
+    attribute_threshold : float
+        The threshold to be applied to the attribute.
+    """
+
     cdef DTYPE_INT64_t p_root = sorted_indices[0]
     cdef DTYPE_INT64_t p, q
     cdef DTYPE_UINT64_t number_of_pixels = len(image)
@@ -356,7 +263,6 @@ cpdef void _cut_first_filter(dtype_t[::1] image,
 cpdef void _build_max_tree(dtype_t[::1] image,
                            DTYPE_BOOL_t[::1] mask,
                            DTYPE_INT32_t[::1] structure,
-                           DTYPE_INT32_t[::1] strides,
                            DTYPE_INT32_t[::1] shape,
                            DTYPE_INT64_t[::1] parent,
                            DTYPE_INT64_t[::1] sorted_indices
@@ -377,9 +283,6 @@ cpdef void _build_max_tree(dtype_t[::1] image,
     structure : array of int
         A list of coordinate offsets to compute the raveled coordinates of each
         neighbor from the raveled coordinates of the current pixel.
-    strides : array of int
-        An array representing the number of steps to move along each dimension.
-        This is used to transform raveled indices into coordinates.
     parent : array of int
         First output: image of the same shape as the input image. The value
         at each pixel is the parent index of this pixel in the max-tree
@@ -423,7 +326,6 @@ cpdef void _build_max_tree(dtype_t[::1] image,
             if not mask[p]:
                 # in this case, p is at the border of the image.
                 # there must be therefore some neighbor point which is not valid. 
-                #if not _is_valid_coordinate(p, structure[i], center_shift, shape):
                 if not _is_valid_coordinate(p, points[i], shape):
                     # neighbor is not in the image. 
                     continue

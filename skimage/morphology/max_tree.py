@@ -15,12 +15,14 @@ This implementation provides functions for:
 1. max-tree generation
 2. area openings / closings
 3. diameter openings / closings
-4. ellipse fit filter
+4. local maxima / minima
+5. extended local maxima / minima
+6. h-maxima / h-minima (corresponding to dynamics)
 
 References:
     .. [1] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
            Connected Operators for Image and Sequence Processing.
-       IEEE Transactions on Image Processing, 7(4), 555-570.
+           IEEE Transactions on Image Processing, 7(4), 555-570.
     .. [2] Berger, C., Geraud, T., Levillain, R., Widynski, N., Baillard, A.,
            Bertin, E. (2007). Effective Component Tree Computation with
            Application to Pattern Recognition in Astronomical Imaging.
@@ -52,12 +54,13 @@ def build_max_tree(image, connectivity=2):
     efficient representation of a component tree. A connected component at
     one level is represented by one reference pixel at this level, which is
     parent to all other pixels at that level and the reference pixel at the
-    level above.
+    level above. The max-tree is the basis for many morphological operators,
+    namely connected operators. 
 
     Parameters
     ----------
     img: ndarray
-        The input image for which the area_closing is to be calculated.
+        The input image for which the max-tree is to be calculated.
         This image can be of any type.
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
@@ -112,10 +115,12 @@ def build_max_tree(image, connectivity=2):
     neighbors, offset = _validate_connectivity(image.ndim, connectivity,
                                                offset=None)
 
+    # initialization of the parent image
     parent = np.zeros(image.shape, dtype=np.int64)
 
+    # flat_neighborhood contains a list of offsets allowing one to find the neighbors
+    # in the ravelled image.
     flat_neighborhood = _compute_neighbors(image, neighbors, offset).astype(np.int32)
-    image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
 
     # pixels need to be sorted according to their grey level.
     tree_traverser = np.argsort(image.ravel(),
@@ -123,13 +128,93 @@ def build_max_tree(image, connectivity=2):
 
     # call of cython function.
     _max_tree._build_max_tree(image.ravel(), mask.ravel().astype(np.uint8),
-                              flat_neighborhood, image_strides,
+                              flat_neighborhood, 
                               np.array(image.shape, dtype=np.int32),
                               parent.ravel(), tree_traverser)
 
     return parent, tree_traverser
 
-def area_open(image, area_threshold, connectivity=2):
+def area_opening(image, area_threshold, connectivity=2):
+    """Performs an area opening of the image.
+
+    Area opening removes all bright structures of an image with
+    a surface smaller than area_threshold.
+    The output image is thus the largest image smaller than the input
+    for which all local maxima have at least a surface of
+    area_threshold pixels.
+
+    Area openings are similar to morphological openings, but
+    they do not use a fixed structuring element, but rather a deformable
+    one, with surface = area_threshold. Consequently, the area_opening
+    with area_threshold=1 is the identity.
+
+    Technically, this operator is based on the max-tree representation of
+    the image. 
+
+    Parameters
+    ----------
+    img: ndarray
+        The input image for which the area_opening is to be calculated.
+        This image can be of any type.
+    area_threshold: unsigned int
+        The size parameter (number of pixels).
+    connectivity: unsigned int, optional
+        The neighborhood connectivity. The integer represents the maximum
+        number of orthogonal steps to reach a neighbor. It is 1 for
+        4-connectivity and 2 for 8-connectivity. Default value is 1.
+
+    Returns
+    -------
+    output: ndarray
+        Output image of the same shape and type as img.
+
+    See also
+    --------
+    skimage.morphology.max_tree.area_closing
+    skimage.morphology.max_tree.diameter_opening
+    skimage.morphology.max_tree.diameter_closing
+
+
+    References
+    ----------
+    .. [1] Vincent L., Proc. "Grayscale area openings and closings,
+           their efficient implementation and applications",
+           EURASIP Workshop on Mathematical Morphology and its
+           Applications to Signal Processing, Barcelona, Spain, pp.22-27,
+           May 1993.
+    .. [2] Soille, P., "Morphological Image Analysis: Principles and
+           Applications" (Chapter 6), 2nd edition (2003), ISBN 3540429883.
+    .. [3] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
+           Connected Operators for Image and Sequence Processing.
+           IEEE Transactions on Image Processing, 7(4), 555-570.
+    .. [4] Najman, L., & Couprie, M. (2006). Building the component tree in
+           quasi-linear time. IEEE Transactions on Image Processing, 15(11),
+           3531-3539.
+    .. [5] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
+           Component Tree Computation Algorithms. IEEE Transactions on Image
+           Processing, 23(9), 3885-3895.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.morphology import max_tree
+
+    We create an image (quadratic function with a maximum in the center and
+    4 additional local maxima.
+
+    >>> w = 12
+    >>> x, y = np.mgrid[0:w,0:w]
+    >>> f = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
+    >>> f[2:3,1:5] = 40; f[2:4,9:11] = 60; f[9:11,2:4] = 80
+    >>> f[9:10,9:11] = 100; f[10,10] = 100
+    >>> f = f.astype(np.int)
+
+    We can calculate the area opening:
+
+    >>> open = attribute.area_opening(f, 8, connectivity=1)
+
+    The peaks with a surface smaller than 8 are removed.
+    """
     output = image.copy()
 
     P, S = build_max_tree(image, connectivity)
@@ -140,7 +225,92 @@ def area_open(image, area_threshold, connectivity=2):
                              area, area_threshold)
     return output
 
-def area_close(image, area_threshold, connectivity=2):
+def area_closing(image, area_threshold, connectivity=2):
+    """Performs an area closing of the image.
+
+    Area closing removes all dark structures of an image with
+    a surface smaller than area_threshold.
+    The output image is larger than or equal to the input image
+    for every pixel and all local minima have at least a surface of
+    area_threshold pixels.
+
+    Area closings are similar to morphological closings, but
+    they do not use a fixed structuring element, but rather a deformable
+    one, with surface = area_threshold. 
+
+    Technically, this operator is based on the max-tree representation of
+    the image. 
+
+    Parameters
+    ----------
+    img: ndarray
+        The input image for which the area_closing is to be calculated.
+        This image can be of any type.
+    area_threshold: unsigned int
+        The size parameter (number of pixels).
+    connectivity: unsigned int, optional
+        The neighborhood connectivity. The integer represents the maximum
+        number of orthogonal steps to reach a neighbor. It is 1 for
+        4-connectivity and 2 for 8-connectivity. Default value is 1.
+
+    Returns
+    -------
+    output: ndarray
+        Output image of the same shape and type as img.
+
+    See also
+    --------
+    skimage.morphology.max_tree.area_opening
+    skimage.morphology.max_tree.diameter_opening
+    skimage.morphology.max_tree.diameter_closing
+
+
+    References
+    ----------
+    .. [1] Vincent L., Proc. "Grayscale area openings and closings,
+           their efficient implementation and applications",
+           EURASIP Workshop on Mathematical Morphology and its
+           Applications to Signal Processing, Barcelona, Spain, pp.22-27,
+           May 1993.
+    .. [2] Soille, P., "Morphological Image Analysis: Principles and
+           Applications" (Chapter 6), 2nd edition (2003), ISBN 3540429883.
+    .. [3] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
+           Connected Operators for Image and Sequence Processing.
+           IEEE Transactions on Image Processing, 7(4), 555-570.
+    .. [4] Najman, L., & Couprie, M. (2006). Building the component tree in
+           quasi-linear time. IEEE Transactions on Image Processing, 15(11),
+           3531-3539.
+    .. [5] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
+           Component Tree Computation Algorithms. IEEE Transactions on Image
+           Processing, 23(9), 3885-3895.
+
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.morphology import max_tree
+
+    >>> import numpy as np
+    >>> from skimage.morphology import attribute
+
+    We create an image (quadratic function with a minimum in the center and
+    4 additional local minima.
+
+    >>> w = 12
+    >>> x, y = np.mgrid[0:w,0:w]
+    >>> f = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
+    >>> f[2:3,1:5] = 160; f[2:4,9:11] = 140; f[9:11,2:4] = 120
+    >>> f[9:10,9:11] = 100; f[10,10] = 100
+    >>> f = f.astype(np.int)
+
+    We can calculate the area closing:
+
+    >>> closed = attribute.area_closing(f, 8, connectivity=1)
+
+    All small minima are removed, and the remaining minima have at least 
+    a size of 8.
+    """
+
     max_val = image.max()
     image_inv = max_val - image
     output = image_inv.copy()
@@ -154,59 +324,4 @@ def area_close(image, area_threshold, connectivity=2):
     output = max_val - output
     return output
 
-def ellipse_filter(image, ratio_threshold, connectivity=2,
-                   area_low_thresh=0, area_high_thresh=None,
-                   method='direct'):
-    
-    if area_high_thresh is None:
-        area_high_thresh = image.shape[0] * image.shape[1]
-        
-    output = image.copy()
-
-    P, S = build_max_tree(image, connectivity)
-
-    image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
-    if method == 'cut_first':
-        ellipse_area_ratio = _max_tree._compute_ellipse_ratio_2d(image.ravel(),
-                                                                 P.ravel(), 
-                                                                 S,
-                                                                 image_strides,
-                                                                 area_low_thresh,
-                                                                 area_high_thresh)
-        ellipse_area_ratio[ellipse_area_ratio > 1.0] = 1.0
-        ellipse_area_ratio[ellipse_area_ratio < 0.0] = 0.0    
-        _max_tree._cut_first_filter(image.ravel(), output.ravel(), P.ravel(), S,
-                                    ellipse_area_ratio, ratio_threshold)
-    elif method == 'direct':
-        ellipse_area_ratio = _max_tree._compute_ellipse_ratio_2d(image.ravel(),
-                                                                 P.ravel(), 
-                                                                 S,
-                                                                 image_strides,
-                                                                 area_low_thresh,
-                                                                 area_high_thresh)
-        
-        ellipse_area_ratio[ellipse_area_ratio > 1.0] = 1.0
-        ellipse_area_ratio[ellipse_area_ratio < 0.0] = 0.0
-        ellipse_area_ratio = 1.0 - ellipse_area_ratio
-        _max_tree._direct_filter(image.ravel(), output.ravel(), P.ravel(), S,
-                                    ellipse_area_ratio, ratio_threshold)
-    else:
-        raise ValueError('Method is not implemented. Please choose among direct and cut_first.')
-    
-    return output
-
-
-def old_ellipse_filter(image, ratio_threshold, connectivity=2):
-    output = image.copy()
-
-    P, S = build_max_tree(image, connectivity)
-
-    image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
-    ellipse_area_ratio = _max_tree._compute_ellipse_ratio_2d(image.ravel(),
-                                                             P.ravel(), S,
-                                                             image_strides)
-
-    _max_tree._direct_filter(image.ravel(), output.ravel(), P.ravel(), S,
-                             ellipse_area_ratio, ratio_threshold)
-    return output
 
