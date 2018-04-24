@@ -43,6 +43,8 @@ from .watershed import _compute_neighbors
 from . import _max_tree
 import pdb
 
+from skimage.util import invert 
+
 # building the max tree.
 def build_max_tree(image, connectivity=2):
     """Builds the max tree from an image
@@ -311,8 +313,9 @@ def area_closing(image, area_threshold, connectivity=2):
     a size of 8.
     """
 
-    max_val = image.max()
-    image_inv = max_val - image
+    #max_val = image.max()
+    #image_inv = max_val - image
+    image_inv = invert(image)
     output = image_inv.copy()
 
     P, S = build_max_tree(image_inv, connectivity)
@@ -321,7 +324,7 @@ def area_closing(image, area_threshold, connectivity=2):
 
     _max_tree._direct_filter(image_inv.ravel(), output.ravel(), P.ravel(), S,
                              area, area_threshold)
-    output = max_val - output
+    output = invert(output)
     return output
 
 

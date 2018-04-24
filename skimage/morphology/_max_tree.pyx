@@ -108,7 +108,8 @@ cdef DTYPE_UINT8_t _is_valid_coordinate(DTYPE_INT64_t index,
         
     return 1
 
-
+# computes the area of all max-tree components
+# attribute to be used in area opening and closing
 cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_area(dtype_t[::1] image,
                                                         DTYPE_INT64_t[::1] parent,
                                                         DTYPE_INT64_t[::1] sorted_indices):
@@ -124,6 +125,24 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_area(dtype_t[::1] image,
         q = parent[p]
         area[q] = area[q] + area[p] 
     return area
+
+# computes the bbox-extension of all max-tree components
+# attribute to be used in bbox opening and closing
+# cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _bbox(dtype_t[::1] image,
+#                                                 DTYPE_INT64_t[::1] parent,
+#                                                 DTYPE_INT64_t[::1] sorted_indices):
+#     cdef DTYPE_INT64_t p_root = sorted_indices[0]
+#     cdef DTYPE_INT64_t p, q
+#     cdef DTYPE_UINT64_t number_of_pixels = len(image)
+#     cdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] bbox_extension = np.ones(number_of_pixels,
+#                                                                       dtype=np.float64)
+# 
+#     for p in sorted_indices[::-1]:
+#         if p == p_root:
+#             continue
+#         q = parent[p]
+#         area[q] = area[q] + area[p] 
+#     return area
 
 
 cpdef void _direct_filter(dtype_t[::1] image,
@@ -295,7 +314,7 @@ cpdef void _build_max_tree(dtype_t[::1] image,
         the parent of i.
     """
     cdef DTYPE_UINT64_t number_of_pixels = len(image)
-    cdef DTYPE_UINT64_t number_of_dimensions = len(strides)
+    cdef DTYPE_UINT64_t number_of_dimensions = len(shape)
 
     cdef DTYPE_INT64_t i = 0
     cdef DTYPE_INT64_t p = 0
@@ -313,14 +332,14 @@ cpdef void _build_max_tree(dtype_t[::1] image,
         parent[i] = -1
         zpar[i] = -1
 
-    # traverse the array in reversed order
+    # traverse the array in reversed order (from highest value to lowest value)
     for p in sorted_indices[::-1]:
         parent[p] = p
         zpar[p] = p
         
         for i in range(nneighbors):
             
-            # get the flattened address of the neighbor
+            # get the ravelled index of the neighbor
             index = p + structure[i]
             
             if not mask[p]:
