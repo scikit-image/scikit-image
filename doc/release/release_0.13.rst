@@ -1,3 +1,18 @@
+scikit-image 0.13.1 is a bug-fix and compatibility update. See below for
+the many new features in 0.13.0.
+
+The main contribution in 0.13.1 is Jarrod Millman's valiant work to ensure
+scikit-image works with both NetworkX 1.11 and 2.0 (#2766). Additional updates
+include:
+
+- Bug fix in similarity transform estimation, by GitHub user @zhongzyd (#2690)
+- Bug fixes in ``skimage.util.plot_matches`` and ``denoise_wavelet``,
+  by Gregory Lee (#2650, #2640)
+- Documentation updates by Egor Panfilov (#2716) and Jirka Borovec (#2524)
+- Documentation build fixes by Gregory Lee (#2666, #2731), Nelle
+  Varoquaux (#2722), and Stéfan van der Walt (#2723, #2810)
+
+
 Announcement: scikit-image 0.13.0
 =================================
 

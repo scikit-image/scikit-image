@@ -1,7 +1,8 @@
 from __future__ import division
 import numpy as np
 from skimage import draw
-from skimage.measure import (moments, moments_central, moments_normalized,
+from skimage.measure import (moments, moments_central, moments_coords,
+                             moments_coords_central, moments_normalized,
                              moments_hu, centroid)
 
 from skimage._shared import testing
@@ -58,6 +59,42 @@ def test_moments_central_deprecated():
     assert_almost_equal(mu1.T, mu_ref)
 
 
+def test_moments_coords():
+    image = np.zeros((20, 20), dtype=np.double)
+    image[13:17, 13:17] = 1
+    mu_image = moments(image)
+
+    coords = np.array([[r, c] for r in range(13, 17)
+                       for c in range(13, 17)], dtype=np.double)
+    mu_coords = moments_coords(coords)
+    assert_almost_equal(mu_coords, mu_image)
+
+
+def test_moments_central_coords():
+    image = np.zeros((20, 20), dtype=np.double)
+    image[13:17, 13:17] = 1
+    mu_image = moments_central(image, (14.5, 14.5))
+
+    coords = np.array([[r, c] for r in range(13, 17)
+                       for c in range(13, 17)], dtype=np.double)
+    mu_coords = moments_coords_central(coords, (14.5, 14.5))
+    assert_almost_equal(mu_coords, mu_image)
+
+    # ensure that center is being calculated normally
+    mu_coords_calc_centroid = moments_coords_central(coords)
+    assert_almost_equal(mu_coords_calc_centroid, mu_coords)
+
+    # shift image by dx=3 dy=3
+    image = np.zeros((20, 20), dtype=np.double)
+    image[16:20, 16:20] = 1
+    mu_image = moments_central(image, (14.5, 14.5))
+
+    coords = np.array([[r, c] for r in range(16, 20)
+                       for c in range(16, 20)], dtype=np.double)
+    mu_coords = moments_coords_central(coords, (14.5, 14.5))
+    assert_almost_equal(mu_coords, mu_image)
+
+
 def test_moments_normalized():
     image = np.zeros((20, 20), dtype=np.double)
     image[13:17, 13:17] = 1
@@ -74,10 +111,14 @@ def test_moments_normalized():
 
 def test_moments_normalized_3d():
     image = draw.ellipsoid(1, 1, 10)
-    mu = moments_central(image)
-    nu = moments_normalized(mu)
+    mu_image = moments_central(image)
+    nu = moments_normalized(mu_image)
     assert nu[0, 0, 2] > nu[0, 2, 0]
     assert_almost_equal(nu[0, 2, 0], nu[2, 0, 0])
+
+    coords = np.where(image)
+    mu_coords = moments_coords_central(coords)
+    assert_almost_equal(mu_coords, mu_image)
 
 
 def test_moments_normalized_invalid():

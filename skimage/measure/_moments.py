@@ -1,9 +1,135 @@
 # coding: utf-8
 from __future__ import division
 import numpy as np
+from .._shared.utils import assert_nD
 from . import _moments_cy
 import itertools
 from warnings import warn
+
+
+def moments_coords(coords, order=3):
+    """Calculate all raw image moments up to a certain order.
+
+    The following properties can be calculated from raw image moments:
+     * Area as: ``M[0, 0]``.
+     * Centroid as: {``M[1, 0] / M[0, 0]``, ``M[0, 1] / M[0, 0]``}.
+
+    Note that raw moments are neither translation, scale nor rotation
+    invariant.
+
+    Parameters
+    ----------
+    coords : (N, D) double or uint8 array
+        Array of N points that describe an image of D dimensionality in
+        Cartesian space.
+    order : int, optional
+        Maximum order of moments. Default is 3.
+
+    Returns
+    -------
+    m : (``order + 1``, ``order + 1``) array
+        Raw image moments.
+
+    References
+    ----------
+    .. [1] Johannes Kilian. Simple Image Analysis By Moments. Durham
+           University, version 0.2, Durham, 2001.
+
+    Examples
+    --------
+    >>> coords = np.array([[r, c] for r in range(13, 17) \
+                  for c in range(13, 17)], dtype=np.double)
+    >>> M = moments_coords(coords)
+    >>> cr = M[1, 0] / M[0, 0]
+    >>> cc = M[0, 1] / M[0, 0]
+    >>> cr, cc
+    (14.5, 14.5)
+    """
+    return moments_coords_central(coords, 0, order=order)
+
+
+def moments_coords_central(coords, center=None, order=3):
+    """Calculate all central image moments up to a certain order.
+
+    The following properties can be calculated from raw image moments:
+     * Area as: ``M[0, 0]``.
+     * Centroid as: {``M[1, 0] / M[0, 0]``, ``M[0, 1] / M[0, 0]``}.
+
+    Note that raw moments are neither translation, scale nor rotation
+    invariant.
+
+    Parameters
+    ----------
+    coords : (N, D) double or uint8 array
+        Array of N points that describe an image of D dimensionality in
+        Cartesian space.
+    center : tuple of float, optional
+        Coordinates of the image centroid. This will be computed if it
+        is not provided.
+    order : int, optional
+        Maximum order of moments. Default is 3.
+
+    Returns
+    -------
+    m : (``order + 1``, ``order + 1``) array
+        Raw image moments.
+
+    References
+    ----------
+    .. [1] Johannes Kilian. Simple Image Analysis By Moments. Durham
+           University, version 0.2, Durham, 2001.
+
+    Examples
+    --------
+    >>> coords = np.array([[r, c] for r in range(13, 17) \
+                  for c in range(13, 17)], dtype=np.double)
+    >>> M = moments_coords(coords)
+    >>> cr = M[1, 0] / M[0, 0]
+    >>> cc = M[0, 1] / M[0, 0]
+    >>> moments_coords_central(coords, (cr, cc))
+    array([[ 16.,   0.,  20.,   0.],
+           [  0.,   0.,   0.,   0.],
+           [ 20.,   0.,  25.,   0.],
+           [  0.,   0.,   0.,   0.]])
+    """
+    if isinstance(coords, tuple):
+        # Represent as array and rotate to standardize orientation.
+        coords = np.transpose(coords)
+    assert_nD(coords, 2)
+    ndim = coords.shape[1]
+    if center is None:
+        center = np.mean(coords, axis=0)
+    else:
+        # TODO: Handle broadcasting of `center` argument.
+        if type(center) not in [tuple, list, np.ndarray]:
+            center = (center,) * ndim
+
+    # center the coordinates
+    coords = coords.astype(float) - center
+
+    # generate all possible exponents for each axis in the given set of points
+    # produces a matrix of shape (N, D, order + 1)
+    coords = coords[..., np.newaxis] ** np.arange(order + 1)
+
+    # add extra dimensions for proper broadcasting
+    coords = coords.reshape(coords.shape + (1,) * (ndim - 1))
+
+    calc = 1
+
+    for axis in range(ndim):
+        # isolate each point's axis
+        isolated_axis = coords[:, axis::ndim].squeeze(axis=1)
+
+        # rotate orientation of matrix for proper broadcasting
+        isolated_axis = np.moveaxis(isolated_axis, 1, 1 + axis)
+
+        # calculate the moments for each point, one axis at a time
+        calc = calc * isolated_axis
+
+    # sum all individual point moments to get our final answer
+    calc = calc.sum(axis=0)
+
+    return calc
 
 
 def moments(image, order=3):
@@ -18,7 +144,7 @@ def moments(image, order=3):
 
     Parameters
     ----------
-    image : 2D double or uint8 array
+    image : nD double or uint8 array
         Rasterized shape as image.
     order : int, optional
         Maximum order of moments. Default is 3.
@@ -63,7 +189,7 @@ def moments_central(image, center=None, cc=None, order=3, **kwargs):
 
     Parameters
     ----------
-    image : 2D double or uint8 array
+    image : nD double or uint8 array
         Rasterized shape as image.
     center : tuple of float, optional
         Coordinates of the image centroid. This will be computed if it
