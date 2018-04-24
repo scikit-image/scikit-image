@@ -12,7 +12,7 @@ def test_generates_color_images_with_correct_shape():
 
 def test_generates_gray_images_with_correct_shape():
     image, _ = random_shapes(
-        (4567, 123), min_shapes=3, max_shapes=20, gray=True)
+        (4567, 123), min_shapes=3, max_shapes=20, num_channels=1)
     assert image.shape == (4567, 123, 1)
 
 
