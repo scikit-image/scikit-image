@@ -63,10 +63,7 @@ def _full_type_test(img, param, expected, func, param_scale=False):
         out = func(img_s, param)
         exp_s = exp_signed.astype(dt)
         error = diff(out, exp_s)
-        try:
-            assert error < eps
-        except:
-            pdb.set_trace()
+        assert error < eps
 
 class TestMaxtree(unittest.TestCase):
 
@@ -125,6 +122,51 @@ class TestMaxtree(unittest.TestCase):
 #         _full_type_test(img, 2, expected_2, max_tree.diameter_closing)
 #         _full_type_test(img, 3, expected_3, max_tree.diameter_closing)
 
+    def test_max_tree(self):
+        "Test for max tree"
+        img_type = np.uint8
+        img = np.array([[10, 8,  8,  9],
+                        [7,  7,  9,  9],
+                        [8,  7, 10, 10],
+                        [9,  9, 10, 10]], dtype=img_type)
+
+        P_exp = np.array([[ 1,  4,  1,  1],
+                          [ 4,  4,  3,  3],
+                          [ 1,  4,  3, 10],
+                          [ 3,  3, 10, 10]], dtype=np.int64)
+
+        S_exp = np.array([ 4,  5,  9,  1,  2,  8,  3,  6,  7, 12, 13,  0, 10, 11, 14, 15], 
+                         dtype=np.int64)
+        
+        for img_type in [np.uint8, np.uint16, np.uint32, np.uint64]:
+            img = img.astype(img_type)
+            P, S = max_tree.build_max_tree(img)
+            error = diff(P, P_exp)
+            assert error < eps
+            error = diff(S, S_exp)
+            assert error < eps
+
+        for img_type in [np.int8, np.int16, np.int32, np.int64]:
+            img = img.astype(img_type)
+            img_shifted = img - 9
+            P, S = max_tree.build_max_tree(img_shifted)
+            error = diff(P, P_exp)
+            assert error < eps
+            error = diff(S, S_exp)
+            assert error < eps
+
+        img_float = img.astype(np.float)
+        img_float = (img_float-8) / 2.0
+        for img_type in [np.float32, np.float64]:
+            img_float = img_float.astype(img_type)
+            P, S = max_tree.build_max_tree(img_float)
+            error = diff(P, P_exp)
+            assert error < eps
+            error = diff(S, S_exp)
+            assert error < eps
+        
+        return
+    
     def test_area_closing(self):
         "Test for Area Closing (2 thresholds, all types)"
 

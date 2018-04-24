@@ -43,7 +43,9 @@ from .watershed import _compute_neighbors
 from . import _max_tree
 import pdb
 
-from skimage.util import invert 
+unsigned_int_types = [np.uint8, np.uint16, np.uint32, np.uint64]
+signed_int_types = [np.int8, np.int16, np.int32, np.int64]
+signed_float_types = [np.float16, np.float32, np.float64]
 
 # building the max tree.
 def build_max_tree(image, connectivity=2):
@@ -312,10 +314,15 @@ def area_closing(image, area_threshold, connectivity=2):
     All small minima are removed, and the remaining minima have at least 
     a size of 8.
     """
+    # inversion of the input image
+    if image.dtype in unsigned_int_types:
+        maxval = image.max()
+        image_inv = maxval - image
+    elif image.dtype in signed_int_types:
+        image_inv = -1 - image
+    else:
+        image_inv = (-1) * image
 
-    #max_val = image.max()
-    #image_inv = max_val - image
-    image_inv = invert(image)
     output = image_inv.copy()
 
     P, S = build_max_tree(image_inv, connectivity)
@@ -324,7 +331,16 @@ def area_closing(image, area_threshold, connectivity=2):
 
     _max_tree._direct_filter(image_inv.ravel(), output.ravel(), P.ravel(), S,
                              area, area_threshold)
-    output = invert(output)
+
+    # inversion of the output image
+    if image.dtype in unsigned_int_types:
+        output = maxval - output
+    elif image.dtype in signed_int_types:
+        output = -1 - output
+    else:
+        output = (-1) * output
+
     return output
+
 
 
