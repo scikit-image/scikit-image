@@ -58,8 +58,8 @@ def _full_type_test(img, param, expected, func, param_scale=False):
         error = diff(out, exp_s)
         assert error < eps
 
-class TestMaxtree(unittest.TestCase):
 
+class TestMaxtree(unittest.TestCase):
 
     def test_max_tree(self):
         "Test for max tree"
@@ -69,14 +69,14 @@ class TestMaxtree(unittest.TestCase):
                         [8,  7, 10, 10],
                         [9,  9, 10, 10]], dtype=img_type)
 
-        P_exp = np.array([[ 1,  4,  1,  1],
-                          [ 4,  4,  3,  3],
-                          [ 1,  4,  3, 10],
-                          [ 3,  3, 10, 10]], dtype=np.int64)
+        P_exp = np.array([[1,  4,  1,  1],
+                          [4,  4,  3,  3],
+                          [1,  4,  3, 10],
+                          [3,  3, 10, 10]], dtype=np.int64)
 
-        S_exp = np.array([ 4,  5,  9,  1,  2,  8,  3,  6,  7, 12, 13,  0, 10, 11, 14, 15], 
+        S_exp = np.array([ 4,  5,  9,  1,  2,  8,  3,  6,  7, 12, 13,  0, 10, 11, 14, 15],
                          dtype=np.int64)
-        
+
         for img_type in [np.uint8, np.uint16, np.uint32, np.uint64]:
             img = img.astype(img_type)
             P, S = max_tree.build_max_tree(img)
@@ -103,9 +103,9 @@ class TestMaxtree(unittest.TestCase):
             assert error < eps
             error = diff(S, S_exp)
             assert error < eps
-        
+
         return
-    
+
     def test_area_closing(self):
         "Test for Area Closing (2 thresholds, all types)"
 
@@ -165,34 +165,34 @@ class TestMaxtree(unittest.TestCase):
         "Test for Area Opening (2 thresholds, all types)"
 
         # original image
-        img = np.array([[ 15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15],
-                        [ 15,  55,  55,  15,  55,  15,  55,  55,  15,  15,  55,  15],
-                        [ 15,  55, 215,  15,  15,  15,  15,  15,  15,  15, 215,  15],
-                        [ 15,  15,  15,  15, 155,  15, 155, 155,  15,  15,  55,  15],
-                        [ 15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15],
-                        [ 55,  55,  55,  55,  55,  55,  55,  15,  55,  55,   0,   0],
-                        [ 55,   0,  55,  55,  55,   0,  55,  15,   0,   0,   0, 215],
-                        [ 55,  55,  55, 155,  55,  55,  55,  15,   0,   0,   0,   0],
-                        [ 55,  55,  55, 155,  55,  55,  55,  15,  55,  55,   0,   0],
-                        [ 55,  55,  55,  55,  55, 215,  55,  15,  15, 155,   0,   0],
-                        [ 55, 215,   0,   0,   0, 215,  55,   0,  55,  55,   0,   0],
-                        [ 55,  55,  55,  55,  55,  55,  55,   0,   0,   0,   0,   0]], 
-                        dtype=np.uint8)
+        img = np.array([[15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15],
+                        [15, 55, 55, 15, 55, 15, 55, 55, 15, 15, 55, 15],
+                        [15, 55,215, 15, 15, 15, 15, 15, 15, 15,215, 15],
+                        [15, 15, 15, 15,155, 15,155,155, 15, 15, 55, 15],
+                        [15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15],
+                        [55, 55, 55, 55, 55, 55, 55, 15, 55, 55,  0,  0],
+                        [55,  0, 55, 55, 55,  0, 55, 15,  0,  0,  0,215],
+                        [55, 55, 55,155, 55, 55, 55, 15,  0,  0,  0,  0],
+                        [55, 55, 55,155, 55, 55, 55, 15, 55, 55,  0,  0],
+                        [55, 55, 55, 55, 55,215, 55, 15, 15,155,  0,  0],
+                        [55,215,  0,  0,  0,215, 55,  0, 55, 55,  0,  0],
+                        [55, 55, 55, 55, 55, 55, 55,  0,  0,  0,  0,  0]],
+                       dtype=np.uint8)
 
         # expected area closing with area 2
-        expected_2 = np.array([[ 15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15],
-                               [ 15,  55,  55,  15,  15,  15,  55,  55,  15,  15,  55,  15],
-                               [ 15,  55,  55,  15,  15,  15,  15,  15,  15,  15,  55,  15],
-                               [ 15,  15,  15,  15,  15,  15, 155, 155,  15,  15,  55,  15],
-                               [ 15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15],
-                               [ 55,  55,  55,  55,  55,  55,  55,  15,  55,  55,   0,   0],
-                               [ 55,   0,  55,  55,  55,   0,  55,  15,   0,   0,   0,   0],
-                               [ 55,  55,  55, 155,  55,  55,  55,  15,   0,   0,   0,   0],
-                               [ 55,  55,  55, 155,  55,  55,  55,  15,  55,  55,   0,   0],
-                               [ 55,  55,  55,  55,  55, 215,  55,  15,  15,  55,   0,   0],
-                               [ 55,  55,   0,   0,   0, 215,  55,   0,  55,  55,   0,   0],
-                               [ 55,  55,  55,  55,  55,  55,  55,   0,   0,   0,   0,   0]], 
-                               dtype=np.uint8)
+        expected_2 = np.array([[15, 15, 15,  15,  15,  15,  15,  15,  15,  15,  15,  15],
+                               [15, 55, 55,  15,  15,  15,  55,  55,  15,  15,  55,  15],
+                               [15, 55, 55,  15,  15,  15,  15,  15,  15,  15,  55,  15],
+                               [15, 15, 15,  15,  15,  15, 155, 155,  15,  15,  55,  15],
+                               [15, 15, 15,  15,  15,  15,  15,  15,  15,  15,  15,  15],
+                               [55, 55, 55,  55,  55,  55,  55,  15,  55,  55,   0,   0],
+                               [55,  0, 55,  55,  55,   0,  55,  15,   0,   0,   0,   0],
+                               [55, 55, 55, 155,  55,  55,  55,  15,   0,   0,   0,   0],
+                               [55, 55, 55, 155,  55,  55,  55,  15,  55,  55,   0,   0],
+                               [55, 55, 55,  55,  55, 215,  55,  15,  15,  55,   0,   0],
+                               [55, 55,  0,   0,   0, 215,  55,   0,  55,  55,   0,   0],
+                               [55, 55, 55,  55,  55,  55,  55,   0,   0,   0,   0,   0]],
+                              dtype=np.uint8)
 
         # expected diameter closing with diameter 4
         expected_4 = np.array([[15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15],
@@ -206,8 +206,8 @@ class TestMaxtree(unittest.TestCase):
                                [55, 55, 55, 55, 55, 55, 55, 15, 55, 55,  0,  0],
                                [55, 55, 55, 55, 55, 55, 55, 15, 15, 55,  0,  0],
                                [55, 55,  0,  0,  0, 55, 55,  0, 55, 55,  0,  0],
-                               [55, 55, 55, 55, 55, 55, 55,  0,  0,  0,  0,  0]], 
-                               dtype=np.uint8)
+                               [55, 55, 55, 55, 55, 55, 55,  0,  0,  0,  0,  0]],
+                              dtype=np.uint8)
 
         # _full_type_test makes a test with many image types.
         _full_type_test(img, 2, expected_2, max_tree.area_opening)
@@ -282,27 +282,26 @@ class TestMaxtree(unittest.TestCase):
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
                                    dtype=np.uint8)
 
-        # test for local maxima 
+        # test for local maxima
         out = max_tree.local_maxima(data)
         error = diff(expected_result, out)
         assert error < eps
-
 
     def test_3d(self):
         """tests the detection of maxima in 3D."""
         img = np.zeros((8, 8, 8), dtype=np.uint8)
         local_maxima = np.zeros((8, 8, 8), dtype=np.uint8)
- 
+
         # first maximum: only one pixel
         img[1, 1:3, 1:3] = 100
         img[2, 2, 2] = 200
         img[3, 1:3, 1:3] = 100
         local_maxima[2, 2, 2] = 1
- 
+
         # second maximum: three pixels in z-direction
         img[5:8, 1, 1] = 200
         local_maxima[5:8, 1, 1] = 1
- 
+
         # third: two maxima in 0 and 3.
         img[0, 5:8, 5:8] = 200
         img[1, 6, 6] = 100
@@ -310,12 +309,12 @@ class TestMaxtree(unittest.TestCase):
         img[0:3, 5:8, 5:8] += 50
         local_maxima[0, 5:8, 5:8] = 1
         local_maxima[2, 5:7, 5:7] = 1
- 
+
         # four : one maximum in the corner of the square
         img[6:8, 6:8, 6:8] = 200
         img[7, 7, 7] = 255
         local_maxima[7, 7, 7] = 1
- 
+
         out = max_tree.local_maxima(img, 1)
         error = diff(local_maxima, out)
         assert error < eps
