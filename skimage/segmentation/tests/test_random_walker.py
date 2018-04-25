@@ -1,8 +1,8 @@
 import numpy as np
-import pytest
 from skimage.segmentation import random_walker
 from skimage.transform import resize
 from skimage._shared._warnings import expected_warnings
+from skimage._shared import testing
 
 # older versions of scipy raise a warning with new NumPy because they use
 # numpy.rank() instead of arr.ndim or numpy.linalg.matrix_rank.
@@ -313,18 +313,18 @@ def test_bad_inputs():
     # Too few dimensions
     img = np.ones(10)
     labels = np.arange(10)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         random_walker(img, labels)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         random_walker(img, labels, multichannel=True)
 
     # Too many dimensions
     np.random.seed(42)
     img = np.random.normal(size=(3, 3, 3, 3, 3))
     labels = np.arange(3 ** 5).reshape(img.shape)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         random_walker(img, labels)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         random_walker(img, labels, multichannel=True)
 
     # Spacing incorrect length
@@ -332,15 +332,32 @@ def test_bad_inputs():
     labels = np.zeros((10, 10))
     labels[2, 4] = 2
     labels[6, 8] = 5
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         random_walker(img, labels, spacing=(1,))
 
     # Invalid mode
     img = np.random.normal(size=(10, 10))
     labels = np.zeros((10, 10))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         random_walker(img, labels, mode='bad')
 
 
-if __name__ == '__main__':
-    np.testing.run_module_suite()
+def test_isolated_seeds():
+    np.random.seed(0)
+    a = np.random.random((7, 7))
+    mask = - np.ones(a.shape)
+    # This pixel is an isolated seed
+    mask[1, 1] = 1
+    # Unlabeled pixels
+    mask[3:, 3:] = 0
+    # Seeds connected to unlabeled pixels
+    mask[4, 4] = 2
+    mask[6, 6] = 1
+
+    # Test that no error is raised, and that labels of isolated seeds are OK
+    res = random_walker(a, mask)
+    assert res[1, 1] == 1
+    res = random_walker(a, mask, return_full_prob=True)
+    assert res[0, 1, 1] == 1
+    assert res[1, 1, 1] == 0
+

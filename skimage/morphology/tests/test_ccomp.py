@@ -1,13 +1,13 @@
 import numpy as np
-from numpy.testing import assert_array_equal, run_module_suite
-import pytest
 
 from skimage.measure import label
 import skimage.measure._ccomp as ccomp
-from skimage._shared._warnings import expected_warnings
 
-# Background value
-BG = 0
+from skimage._shared import testing
+from skimage._shared.testing import assert_array_equal
+
+
+BG = 0  # background value
 
 
 class TestConnectedComponents:
@@ -262,7 +262,7 @@ class TestConnectedComponents3d:
 
     def test_nd(self):
         x = np.ones((1, 2, 3, 4))
-        with pytest.raises(NotImplementedError):
+        with testing.raises(NotImplementedError):
             label(x)
 
 
@@ -283,7 +283,3 @@ class TestSupport:
             back = ccomp.undo_reshape_array(fixed, swaps)
             # check that the undo works as expected
             assert_array_equal(inp, back)
-
-
-if __name__ == "__main__":
-    run_module_suite()

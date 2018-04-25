@@ -2,7 +2,7 @@ import numpy as np
 from skimage.future import graph
 from skimage._shared.version_requirements import is_installed
 from skimage import segmentation
-import pytest
+from skimage._shared import testing
 
 
 def max_edge(g, src, dst, n):
@@ -12,8 +12,8 @@ def max_edge(g, src, dst, n):
     return {'weight': max(w1, w2)}
 
 
-@pytest.mark.skipif(not is_installed('networkx'),
-                    reason="networkx not installed")
+@testing.skipif(not is_installed('networkx'),
+                reason="networkx not installed")
 def test_rag_merge():
     g = graph.rag.RAG()
 
@@ -32,14 +32,14 @@ def test_rag_merge():
     # We merge nodes and ensure that the minimum weight is chosen
     # when there is a conflict.
     g.merge_nodes(0, 2)
-    assert g.edge[1][2]['weight'] == 10
-    assert g.edge[2][3]['weight'] == 30
+    assert g.adj[1][2]['weight'] == 10
+    assert g.adj[2][3]['weight'] == 30
 
     # We specify `max_edge` as `weight_func` as ensure that maximum
     # weight is chosen in case on conflict
     gc.merge_nodes(0, 2, weight_func=max_edge)
-    assert gc.edge[1][2]['weight'] == 20
-    assert gc.edge[2][3]['weight'] == 40
+    assert gc.adj[1][2]['weight'] == 20
+    assert gc.adj[2][3]['weight'] == 40
 
     g.merge_nodes(1, 4)
     g.merge_nodes(2, 3)
@@ -48,8 +48,8 @@ def test_rag_merge():
     assert list(g.edges()) == []
 
 
-@pytest.mark.skipif(not is_installed('networkx'),
-                    reason="networkx not installed")
+@testing.skipif(not is_installed('networkx'),
+                reason="networkx not installed")
 def test_threshold_cut():
 
     img = np.zeros((100, 100, 3), dtype='uint8')
@@ -74,8 +74,8 @@ def test_threshold_cut():
     assert new_labels.max() == 1
 
 
-@pytest.mark.skipif(not is_installed('networkx'),
-                    reason="networkx not installed")
+@testing.skipif(not is_installed('networkx'),
+                reason="networkx not installed")
 def test_cut_normalized():
 
     img = np.zeros((100, 100, 3), dtype='uint8')
@@ -102,14 +102,14 @@ def test_cut_normalized():
     assert new_labels.max() == 1
 
 
-@pytest.mark.skipif(not is_installed('networkx'),
-                    reason="networkx not installed")
+@testing.skipif(not is_installed('networkx'),
+                reason="networkx not installed")
 def test_rag_error():
     img = np.zeros((10, 10, 3), dtype='uint8')
     labels = np.zeros((10, 10), dtype='uint8')
     labels[:5, :] = 0
     labels[5:, :] = 1
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         graph.rag_mean_color(img, labels,
                              2, 'non existant mode')
 
@@ -134,8 +134,8 @@ def merge_hierarchical_mean_color(labels, rag, thresh, rag_copy=True,
                                     _weight_mean_color)
 
 
-@pytest.mark.skipif(not is_installed('networkx'),
-                    reason="networkx not installed")
+@testing.skipif(not is_installed('networkx'),
+                reason="networkx not installed")
 def test_rag_hierarchical():
     img = np.zeros((8, 8, 3), dtype='uint8')
     labels = np.zeros((8, 8), dtype='uint8')
@@ -166,8 +166,8 @@ def test_rag_hierarchical():
     assert np.all(result == result[0, 0])
 
 
-@pytest.mark.skipif(not is_installed('networkx'),
-                    reason="networkx not installed")
+@testing.skipif(not is_installed('networkx'),
+                reason="networkx not installed")
 def test_ncut_stable_subgraph():
     """ Test to catch an error thrown when subgraph has all equal edges. """
 

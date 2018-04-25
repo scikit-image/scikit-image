@@ -1,7 +1,7 @@
 import numpy as np
 import unittest
-from numpy.testing import (assert_array_almost_equal as assert_close,
-                           assert_equal)
+from skimage._shared.testing import assert_array_almost_equal
+from skimage._shared.testing import assert_equal
 from scipy import ndimage as ndi
 from skimage.feature import peak
 
@@ -37,7 +37,7 @@ class TestPeakLocalMax():
         image[3, 3] = 20
         peaks = peak.peak_local_max(image, min_distance=1, threshold_rel=0.5)
         assert len(peaks) == 1
-        assert_close(peaks, [(3, 3)])
+        assert_array_almost_equal(peaks, [(3, 3)])
 
     def test_absolute_threshold(self):
         image = np.zeros((5, 5), dtype=np.uint8)
@@ -45,7 +45,7 @@ class TestPeakLocalMax():
         image[3, 3] = 20
         peaks = peak.peak_local_max(image, min_distance=1, threshold_abs=10)
         assert len(peaks) == 1
-        assert_close(peaks, [(3, 3)])
+        assert_array_almost_equal(peaks, [(3, 3)])
 
     def test_constant_image(self):
         image = 128 * np.ones((20, 20), dtype=np.uint8)

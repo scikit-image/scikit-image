@@ -157,4 +157,18 @@ else:
     from .util.dtype import *
 
 
+def lookfor(what):
+    """Do a keyword search on scikit-image docstrings.
+
+    Parameters
+    ----------
+    what : str
+        Words to look for.
+
+    """
+    import numpy as np
+    import sys
+    return np.lookfor(what, sys.modules[__name__])
+
+
 del warnings, functools, osp, imp, sys

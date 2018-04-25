@@ -262,3 +262,39 @@ td.field-body blockquote {
 td.field-body p {
     margin-bottom: 0.3em;
 }
+
+/*
+Overrride some default settings in sphinx-gallery's gallery.css.
+
+The !important property is necessary to ensure these settings take precedence
+over the ones bundled with sphinx-gallery.
+*/
+.sphx-glr-thumbcontainer {
+  border: solid #d6d6d6 1px !important;
+}
+
+div.sphx-glr-download {
+  width: auto !important;
+}
+
+div.sphx-glr-footer {
+    text-align: left  !important;
+}
+
+div.sphx-glr-download a {
+  background-color: #d9edf7 !important;
+  border: 1px solid #bce8f1 !important;
+  background-image: none !important;
+}
+
+div.sphx-glr-download code {
+  color: #3a87ad !important;
+}
+
+div.sphx-glr-download a:hover {
+  background-color: #d9edf7 !important;
+}
+
+p.sphx-glr-signature a.reference.external {
+  display: none !important;
+}

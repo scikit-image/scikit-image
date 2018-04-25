@@ -1,9 +1,10 @@
 from .draw import (circle, ellipse, set_color, polygon_perimeter,
                    line, line_aa, polygon, ellipse_perimeter,
                    circle_perimeter, circle_perimeter_aa,
-                   bezier_curve)
+                   bezier_curve,rectangle)
 from .draw3d import ellipsoid, ellipsoid_stats
 from ._draw import _bezier_segment
+from ._random_shapes import random_shapes
 
 __all__ = ['line',
            'line_aa',
@@ -17,4 +18,6 @@ __all__ = ['line',
            'circle',
            'circle_perimeter',
            'circle_perimeter_aa',
-           'set_color']
+           'set_color',
+           'random_shapes',
+           'rectangle']

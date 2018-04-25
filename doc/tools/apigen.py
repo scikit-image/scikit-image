@@ -21,7 +21,7 @@ is an MIT-licensed project.
 import os
 import re
 
-from types import BuiltinFunctionType, FunctionType
+from types import BuiltinFunctionType, FunctionType, ModuleType
 
 # suppress print statements (warnings for empty files)
 DEBUG = True
@@ -199,12 +199,16 @@ class ApiDocWriter(object):
             A list of (public) function names in the module.
         classes : list of str
             A list of (public) class names in the module.
+        submodules : list of str
+            A list of (public) submodule names in the module.
         """
         mod = __import__(uri, fromlist=[uri.split('.')[-1]])
         # find all public objects in the module.
-        obj_strs = [obj for obj in dir(mod) if not obj.startswith('_')]
+        obj_strs = getattr(mod, '__all__',
+                           [obj for obj in dir(mod) if not obj.startswith('_')])
         functions = []
         classes = []
+        submodules = []
         for obj_str in obj_strs:
             # find the actual object from its string representation
             if obj_str not in mod.__dict__:
@@ -214,6 +218,8 @@ class ApiDocWriter(object):
             # figure out if obj is a function or class
             if isinstance(obj, (FunctionType, BuiltinFunctionType)):
                 functions.append(obj_str)
+            elif isinstance(obj, ModuleType) and 'skimage' in mod.__name__:
+                submodules.append(obj_str)
             else:
                 try:
                     issubclass(obj, object)
@@ -221,7 +227,7 @@ class ApiDocWriter(object):
                 except TypeError:
                     # not a function or class
                     pass
-        return functions, classes
+        return functions, classes, submodules
 
     def _parse_lines(self, linesource):
         ''' Parse lines of text for functions and classes '''
@@ -258,9 +264,9 @@ class ApiDocWriter(object):
             Contents of API doc
         '''
         # get the names of all classes and functions
-        functions, classes = self._parse_module_with_import(uri)
-        if not len(functions) and not len(classes) and DEBUG:
-            print('WARNING: Empty -', uri)  # dbg
+        functions, classes, submodules = self._parse_module_with_import(uri)
+        if not (len(functions) or len(classes) or len(submodules)) and DEBUG:
+            print('WARNING: Empty -', uri)
             return ''
 
         # Make a shorter version of the uri that omits the package name for
@@ -285,6 +291,9 @@ class ApiDocWriter(object):
         ad += '\n'
         for c in classes:
             ad += '   ' + uri + '.' + c + '\n'
+        ad += '\n'
+        for m in submodules:
+            ad += '    ' + uri + '.' + m + '\n'
         ad += '\n'
 
         for f in functions:
@@ -389,7 +398,9 @@ class ApiDocWriter(object):
     def write_modules_api(self, modules, outdir):
         # write the list
         written_modules = []
-        for m in modules:
+        public_modules = [m for m in modules
+                          if not m.split('.')[-1].startswith('_')]
+        for m in public_modules:
             api_str = self.generate_api_doc(m)
             if not api_str:
                 continue
@@ -423,7 +434,7 @@ class ApiDocWriter(object):
             os.mkdir(outdir)
         # compose list of modules
         modules = self.discover_modules()
-        self.write_modules_api(modules,outdir)
+        self.write_modules_api(modules, outdir)
 
     def write_index(self, outdir, froot='gen', relative_to=None):
         """Make a reST API index file from written files

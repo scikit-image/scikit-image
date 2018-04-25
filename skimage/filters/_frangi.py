@@ -46,15 +46,13 @@ def _frangi_hessian_common_filter(image, scale_range, scale_step,
     # Filtering for all sigmas
     for i, sigma in enumerate(sigmas):
         # Make 2D hessian
-        (Drr, Drc, Dcc) = hessian_matrix(image, sigma, order='rc')
+        D = hessian_matrix(image, sigma, order='rc')
 
         # Correct for scale
-        Drr = (sigma ** 2) * Drr
-        Drc = (sigma ** 2) * Drc
-        Dcc = (sigma ** 2) * Dcc
+        D = np.array(D) * (sigma ** 2)
 
         # Calculate (abs sorted) eigenvalues and vectors
-        (lambda1, lambda2) = hessian_matrix_eigvals(Drr, Drc, Dcc)
+        lambda1, lambda2 = hessian_matrix_eigvals(D)
 
         # Compute some similarity measures
         lambda1[lambda1 == 0] = 1e-10
@@ -80,7 +78,7 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=0.5, beta2=15,
     whole image containing such objects.
 
     Calculates the eigenvectors of the Hessian to compute the similarity of
-    an image region to vessels, according to the method described in _[1].
+    an image region to vessels, according to the method described in [1]_.
 
     Parameters
     ----------
@@ -139,7 +137,7 @@ def hessian(image, scale_range=(1, 10), scale_step=2, beta1=0.5, beta2=15):
     image containing such objects.
 
     Almost equal to Frangi filter, but uses alternative method of smoothing.
-    Refer to _[1] to find the differences between Frangi and Hessian filters.
+    Refer to [1]_ to find the differences between Frangi and Hessian filters.
 
     Parameters
     ----------

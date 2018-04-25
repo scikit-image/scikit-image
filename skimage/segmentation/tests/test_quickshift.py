@@ -1,7 +1,8 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_array_equal
-from skimage._shared.testing import assert_greater, test_parallel
 from skimage.segmentation import quickshift
+
+from skimage._shared.testing import (assert_greater, test_parallel,
+                                     assert_equal, assert_array_equal)
 
 
 @test_parallel()
@@ -46,8 +47,3 @@ def test_color():
     # still don't cross lines
     assert (seg2[9, :] != seg2[10, :]).all()
     assert (seg2[:, 9] != seg2[:, 10]).all()
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()

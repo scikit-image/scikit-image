@@ -250,3 +250,6 @@
 
 - Gleb Goussarov
   Chan-Vese Segmentation
+
+- Kevin Mader
+  Montage improvements

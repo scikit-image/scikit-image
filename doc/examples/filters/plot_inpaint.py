@@ -9,7 +9,7 @@ The reconstruction is supposed to be performed in fully automatic way by
 exploiting the information presented in non-damaged regions.
 
 In this example, we show how the masked pixels get inpainted by
-inpainting algorithm based on 'biharmonic equation'-assumption [2]_ [3]_.
+inpainting algorithm based on 'biharmonic equation'-assumption [2]_ [3]_ [4]_.
 
 .. [1]  Wikipedia. Inpainting
         https://en.wikipedia.org/wiki/Inpainting
@@ -17,7 +17,11 @@ inpainting algorithm based on 'biharmonic equation'-assumption [2]_ [3]_.
         https://en.wikipedia.org/wiki/Biharmonic_equation
 .. [3]  N.S.Hoang, S.B.Damelin, "On surface completion and image
         inpainting by biharmonic functions: numerical aspects",
-        http://www.ima.umn.edu/~damelin/biharmonic
+        https://arxiv.org/abs/1707.06567
+.. [4]  C. K. Chui and H. N. Mhaskar, MRA Contextual-Recovery Extension of
+        Smooth Functions on Manifolds, Appl. and Comp. Harmonic Anal.,
+        28 (2010), 104-113,
+        DOI: 10.1016/j.acha.2009.04.004
 """
 
 import numpy as np
@@ -39,7 +43,8 @@ image_defect = image_orig.copy()
 for layer in range(image_defect.shape[-1]):
     image_defect[np.where(mask)] = 0
 
-image_result = inpaint.inpaint_biharmonic(image_defect, mask, multichannel=True)
+image_result = inpaint.inpaint_biharmonic(image_defect, mask,
+                                          multichannel=True)
 
 fig, axes = plt.subplots(ncols=2, nrows=2)
 ax = axes.ravel()

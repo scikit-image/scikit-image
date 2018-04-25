@@ -18,14 +18,8 @@ if [[ $TRAVIS_OS_NAME == "osx" ]]; then
 fi
 
 section "Test.with.min.requirements"
-py.test $TEST_ARGS skimage
+pytest $TEST_ARGS skimage
 section_end "Test.with.min.requirements"
-
-section "Build.docs"
-if [[ $NO_SPHINX != 1 ]]; then
-    export SPHINXCACHE=$HOME/.cache/sphinx; make html
-fi
-section_end "Build.docs"
 
 section "Flake8.test"
 flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
@@ -36,7 +30,7 @@ section "Install.optional.dependencies"
 
 # Install most of the optional packages
 if [[ $OPTIONAL_DEPS == 1 ]]; then
-    pip install --retries 3 -q -r ./optional_requirements.txt $WHEELHOUSE
+    pip install --retries 3 -q -r ./requirements/optional.txt $WHEELHOUSE
 fi
 
 # Install Qt and then update the Matplotlib settings
@@ -69,18 +63,24 @@ pip list
 section_end "Install.optional.dependencies"
 
 
-section "Run.doc.examples"
-echo 'backend : Template' > $MPL_DIR/matplotlibrc
+section "Build.docs.or.run.examples"
 
+pip install --retries 3 -q -r ./requirements/docs.txt
 
-for f in doc/examples/*/*.py; do
-    python "$f"
-    if [ $? -ne 0 ]; then
-        exit 1
-    fi
-done
+if [[ $BUILD_DOCS == 1 ]]; then
+    export SPHINXCACHE=$HOME/.cache/sphinx; make html
+else
+    echo 'backend : Template' > $MPL_DIR/matplotlibrc
 
-section_end "Run.doc.examples"
+    for f in doc/examples/*/*.py; do
+        python "$f"
+        if [ $? -ne 0 ]; then
+            exit 1
+        fi
+    done
+fi
+
+section_end "Build.docs.or.run.examples"
 
 
 section "Run.doc.applications"
@@ -114,7 +114,7 @@ section "Test.with.optional.dependencies"
 if [[ $OPTIONAL_DEPS == 1 ]]; then
     TEST_ARGS="$TEST_ARGS --cov=skimage"
 fi
-py.test $TEST_ARGS
+pytest $TEST_ARGS
 
 section_end "Test.with.optional.dependencies"
 

@@ -3,7 +3,7 @@
 # After changing this file, check it on:
 #   http://yaml-online-parser.appspot.com/
 
-# See tools/travis_notes.txt for some guidelines
+# See tools/travis/notes.txt for some guidelines
 
 language: python
 sudo: false
@@ -17,7 +17,6 @@ addons:
   apt:
     packages:
     - ccache
-    - libfreeimage3
     - texlive
     - texlive-latex-extra
     - dvipng
@@ -45,7 +44,7 @@ matrix:
       env: WITH_PYAMG=1 MINIMUM_REQUIREMENTS=1 WITH_QT=1
     - os: linux
       python: 3.4
-      env: OPTIONAL_DEPS=1 WITH_PYSIDE=1
+      env: OPTIONAL_DEPS=1 WITH_PYSIDE=1 BUILD_DOCS=1 DEPLOY_DOCS=1
     - os: linux
       python: 3.5
     - os: linux
@@ -54,20 +53,21 @@ matrix:
     - os: linux
       python: 3.6
     - os: osx
-      osx_image: xcode7.3
+      osx_image: xcode9
       language: objective-c
       env: TRAVIS_PYTHON_VERSION=3.5
 
 before_install:
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source tools/travis_osx_install.sh ; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        source tools/travis/osx_install.sh;
+      else
+        virtualenv -p python ~/venv;
+        source ~/venv/bin/activate;
+      fi
     - ccache -s
     - export PATH=/usr/lib/ccache:${PATH}
-    # Attempt to fix bug making virtualenvs for Python 3.6
-    - python -m pip install -U pip
-    - pip install -U virtualenv
-    - source tools/travis_before_install.sh
+    - source tools/travis/before_install.sh
     - which python; python --version
-    - tools/check_bento_build.py
     - tools/build_versions.py
     - tools/check_sdist.py
 
@@ -76,8 +76,8 @@ install:
     - python setup.py develop
     - section_end build
 
-script: tools/travis_script.sh
+script: tools/travis/script.sh
 
 after_success:
     - codecov
-    - bash tools/deploy_docs.sh
+    - bash tools/travis/deploy_docs.sh

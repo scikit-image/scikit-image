@@ -13,7 +13,7 @@ term which is dependent on the length of the boundary of the segmented
 region.
 
 This algorithm was first proposed by Tony Chan and Luminita Vese, in
-a publicaion entitled "An Active Countour Model Without Edges" [1]_. See also
+a publication entitled "An Active Countour Model Without Edges" [1]_. See also
 [2]_, [3]_.
 
 This implementation of the algorithm is somewhat simplified in the

@@ -3,7 +3,6 @@ Remember to list any API changes below in `doc/source/api_changes.txt`.
 Version 0.14
 ------------
 * Finalize ``skimage.future.graph`` API.
-* Remove the freeimage plugin shim to imageio.
 
 Version 0.15
 ------------
@@ -24,6 +23,9 @@ Version 0.15
   ``'reflect'``.
 * In ``skimage.transform.rescale``, set default value of ``mode`` to
   ``'reflect'``.
+* Remove deprecated ``skimage.util.montage2d`` and corresponding tests.
+* In ``skimage.transform.resize`` change default argument from
+  ``anti_aliasing=None`` to ``anti_aliasing=True``.
 
 Version 0.16
 ------------
@@ -37,3 +39,17 @@ Version 0.16
 * Remove checks for the ``multichannel`` deprecation warnings in several tests
   in ``skimage.transform.tests.test_pyramids.py`` and
   ``skimage.transform.tests.test_warps.py``.
+* Remove deprecated argument ``visualise`` from function skimage.feature.hog
+* Remove deprecated module ``skimage.novice``
+* In ``skimage.measure._regionprops``, remove all references to
+  ``coordinates=``, ``_xycoordinates``, and ``_use_xy_warning``.
+* In ``skimage.measure.moments_central``, remove ``cc`` and ``**kwargs``
+  arguments.
+* In ``skimage.morphology.remove_small_holes``, remove ``min_size`` argument.
+
+Other
+-----
+* Remove legacy pretty printing workaround for ``pytest`` in ``conftest.py``
+  once minimal required ``numpy`` is set to >= 1.14.0.
+* Remove deprecated ``Hxx, Hxy, Hyy`` API of ``hessian_matrix_eigvals`` in
+  ``skimage.feature.corner``.

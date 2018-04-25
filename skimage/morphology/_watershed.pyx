@@ -17,18 +17,20 @@ cimport cython
 
 
 ctypedef cnp.int32_t DTYPE_INT32_t
+ctypedef cnp.int64_t DTYPE_INT64_t
 ctypedef cnp.int8_t DTYPE_BOOL_t
 
 
 include "heap_watershed.pxi"
 
 
+@cython.wraparound(False)
 @cython.boundscheck(False)
 @cython.cdivision(True)
 @cython.overflowcheck(False)
 @cython.unraisable_tracebacks(False)
-cdef inline double _euclid_dist(cnp.int32_t pt0, cnp.int32_t pt1,
-                                cnp.int32_t[::1] strides):
+cdef inline double _euclid_dist(cnp.int64_t pt0, cnp.int64_t pt1,
+                                cnp.int64_t[::1] strides):
     """Return the Euclidean distance between raveled points pt0 and pt1."""
     cdef double result = 0
     cdef double curr = 0
@@ -40,12 +42,47 @@ cdef inline double _euclid_dist(cnp.int32_t pt0, cnp.int32_t pt1,
     return sqrt(result)
 
 
+@cython.wraparound(False)
 @cython.boundscheck(False)
+@cython.cdivision(True)
+@cython.unraisable_tracebacks(False)
+cdef inline DTYPE_BOOL_t _diff_neighbors(DTYPE_INT32_t[::1] output,
+                                         DTYPE_INT64_t[::1] structure,
+                                         DTYPE_BOOL_t[::1] mask,
+                                         Py_ssize_t index):
+    """
+    Return ``True`` and set ``mask[index]`` to ``False`` if the neighbors of
+    ``index`` (as given by the offsets in ``structure``) have more than one
+    distinct nonzero label.
+    """
+    cdef:
+        Py_ssize_t i, neighbor_index
+        DTYPE_INT32_t neighbor_label0, neighbor_label1
+        Py_ssize_t nneighbors = structure.shape[0]
+
+    if not mask[index]:
+        return True
+
+    neighbor_label0, neighbor_label1 = 0, 0
+    for i in range(nneighbors):
+        neighbor_index = structure[i] + index
+        if mask[neighbor_index]:  # neighbor not a watershed line
+            if not neighbor_label0:
+                neighbor_label0 = output[neighbor_index]
+            else:
+                neighbor_label1 = output[neighbor_index]
+                if neighbor_label1 and neighbor_label1 != neighbor_label0:
+                    mask[index] = False
+                    return True
+    return False
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
 def watershed_raveled(cnp.float64_t[::1] image,
-                      DTYPE_INT32_t[::1] marker_locations,
-                      DTYPE_INT32_t[::1] structure,
+                      DTYPE_INT64_t[::1] marker_locations,
+                      DTYPE_INT64_t[::1] structure,
                       DTYPE_BOOL_t[::1] mask,
-                      cnp.int32_t[::1] strides,
+                      cnp.int64_t[::1] strides,
                       cnp.double_t compactness,
                       DTYPE_INT32_t[::1] output,
                       DTYPE_BOOL_t wsl):
@@ -89,7 +126,8 @@ def watershed_raveled(cnp.float64_t[::1] image,
     cdef Py_ssize_t i = 0
     cdef Py_ssize_t age = 1
     cdef Py_ssize_t index = 0
-    cdef DTYPE_INT32_t wsl_label = -1
+    cdef Py_ssize_t neighbor_index = 0
+    cdef DTYPE_BOOL_t compact = (compactness > 0)
 
     cdef Heap *hp = <Heap *> heap_from_numpy2()
 
@@ -100,52 +138,58 @@ def watershed_raveled(cnp.float64_t[::1] image,
         elem.index = index
         elem.source = index
         heappush(hp, &elem)
-        if wsl and wsl_label >= output[index]:
-            wsl_label = output[index] - 1
 
     while hp.items > 0:
         heappop(hp, &elem)
 
-        # this can happen if the same pixel entered the queue
-        # several times before being processed.
-        if wsl and output[elem.index] == wsl_label:
-            # wsl labels are not propagated.
-            continue
+        if compact or wsl:
+            # in the compact case, we need to label pixels as they come off
+            # the heap, because the same pixel can be pushed twice, *and* the
+            # later push can have lower cost because of the compactness.
+            #
+            # In the case of preserving watershed lines, a similar argument
+            # applies: we can only observe that all neighbors have been labeled
+            # as the pixel comes off the heap. Trying to do so at push time
+            # is a bug.
+            if output[elem.index] and elem.index != elem.source:
+                # non-marker, already visited from another neighbor
+                continue
+            if wsl:
+                # if the current element has different-labeled neighbors and we
+                # want to preserve watershed lines, we mask it and move on
+                if _diff_neighbors(output, structure, mask, elem.index):
+                    continue
+            output[elem.index] = output[elem.source]
 
-        if output[elem.index] and elem.index != elem.source:
-            # non-marker, already visited from another neighbor
-            continue
-
-        output[elem.index] = output[elem.source]
         for i in range(nneighbors):
             # get the flattened address of the neighbor
-            index = structure[i] + elem.index
+            neighbor_index = structure[i] + elem.index
 
-            if not mask[index]:
+            if not mask[neighbor_index]:
+                # this branch includes basin boundaries, aka watershed lines
                 # neighbor is not in mask
                 continue
 
-            if wsl and output[index] == wsl_label:
-                continue
-
-            if output[index]:
-                # neighbor has a label (but not wsl_label):
-                # the neighbor is not added to the queue.
-                if wsl:
-                    # if the label of the neighbor is different
-                    # from the label of the pixel taken from the queue,
-                    # the latter takes the WSL label.
-                    if output[index] != output[elem.index]:
-                        output[elem.index] = wsl_label
+            if output[neighbor_index]:
+                # pre-labeled neighbor is not added to the queue.
                 continue
 
             age += 1
-            new_elem.value = image[index]
-            if compactness > 0:
+            new_elem.value = image[neighbor_index]
+            if compact:
                 new_elem.value += (compactness *
-                                   _euclid_dist(index, elem.source, strides))
+                                   _euclid_dist(neighbor_index, elem.source,
+                                                strides))
+            elif not wsl:
+                # in the simplest watershed case (no compactness and no
+                # watershed lines), we can label a pixel at the time that
+                # we push it onto the heap, because it can't be reached with
+                # lower cost later.
+                # This results in a very significant performance gain, see:
+                # https://github.com/scikit-image/scikit-image/issues/2636
+                output[neighbor_index] = output[elem.index]
             new_elem.age = age
-            new_elem.index = index
+            new_elem.index = neighbor_index
             new_elem.source = elem.source
 
             heappush(hp, &new_elem)

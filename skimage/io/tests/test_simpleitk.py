@@ -1,12 +1,12 @@
 import os.path
 import numpy as np
-import pytest
 import unittest
 
 from tempfile import NamedTemporaryFile
 
 from skimage import data_dir
 from skimage.io import imread, imsave, use_plugin, reset_plugins
+from skimage._shared import testing
 
 try:
     import SimpleITK as sitk
@@ -34,7 +34,7 @@ def setup_module(self):
         pass
 
 
-@pytest.mark.skipif(not sitk_available, reason="simpletk not installed")
+@testing.skipif(not sitk_available, reason="simpletk not installed")
 def test_imread_flatten():
     # a color image is flattened
     img = imread(os.path.join(data_dir, 'color.png'), flatten=True)
@@ -45,7 +45,7 @@ def test_imread_flatten():
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 
-@pytest.mark.skipif(not sitk_available, reason="simpletk not installed")
+@testing.skipif(not sitk_available, reason="simpletk not installed")
 def test_bilevel():
     expected = np.zeros((10, 10))
     expected[::2] = 255
@@ -55,7 +55,7 @@ def test_bilevel():
 
 """
 #TODO: This test causes a Segmentation fault
-@pytest.mark.skipif(not sitk_available)
+@testing.skipif(not sitk_available)
 def test_imread_truncated_jpg():
     assert_raises((RuntimeError, ValueError),
                   imread,
@@ -63,7 +63,7 @@ def test_imread_truncated_jpg():
 """
 
 
-@pytest.mark.skipif(not sitk_available, reason="simpletk not installed")
+@testing.skipif(not sitk_available, reason="simpletk not installed")
 def test_imread_uint16():
     expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
     img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16.tif'))
@@ -71,7 +71,7 @@ def test_imread_uint16():
     np.testing.assert_array_almost_equal(img, expected)
 
 
-@pytest.mark.skipif(not sitk_available, reason="simpletk not installed")
+@testing.skipif(not sitk_available, reason="simpletk not installed")
 def test_imread_uint16_big_endian():
     expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
     img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16B.tif'))
@@ -88,18 +88,14 @@ class TestSave(unittest.TestCase):
 
         np.testing.assert_array_almost_equal(x, y)
 
-    @pytest.mark.skipif(not sitk_available, reason="simpletk not installed")
+    @testing.skipif(not sitk_available, reason="simpletk not installed")
     def test_imsave_roundtrip(self):
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
             for dtype in (np.uint8, np.uint16, np.float32, np.float64):
                 x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
-                if np.issubdtype(dtype, float):
+                if np.issubdtype(dtype, np.floating):
                     yield self.roundtrip, dtype, x
                 else:
                     x = (x * 255).astype(dtype)
                     yield self.roundtrip, dtype, x
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

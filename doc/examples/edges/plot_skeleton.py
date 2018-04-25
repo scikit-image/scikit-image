@@ -23,8 +23,7 @@ skeleton = skeletonize(image)
 
 # display results
 fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(8, 4),
-                         sharex=True, sharey=True,
-                         subplot_kw={'adjustable': 'box-forced'})
+                         sharex=True, sharey=True)
 
 ax = axes.ravel()
 
@@ -60,6 +59,16 @@ plt.show()
 #
 # Note that ``skeletonize_3d`` is designed to be used mostly on 3-D images.
 # However, for illustrative purposes, we apply this algorithm on a 2-D image.
+#
+# .. [Zha84] A fast parallel algorithm for thinning digital patterns,
+#            T. Y. Zhang and C. Y. Suen, Communications of the ACM,
+#            March 1984, Volume 27, Number 3.
+#
+# .. [Lee94] T.-C. Lee, R.L. Kashyap and C.-N. Chu, Building skeleton models
+#            via 3-D medial surface/axis thinning algorithms.
+#            Computer Vision, Graphics, and Image Processing, 56(6):462-478,
+#            1994.
+#
 
 import matplotlib.pyplot as plt
 from skimage.morphology import skeletonize, skeletonize_3d
@@ -71,8 +80,7 @@ data = binary_blobs(200, blob_size_fraction=.2, volume_fraction=.35, seed=1)
 skeleton = skeletonize(data)
 skeleton3d = skeletonize_3d(data)
 
-fig, axes = plt.subplots(1, 3, figsize=(8, 4), sharex=True, sharey=True,
-                         subplot_kw={'adjustable': 'box-forced'})
+fig, axes = plt.subplots(1, 3, figsize=(8, 4), sharex=True, sharey=True)
 ax = axes.ravel()
 
 ax[0].imshow(data, cmap=plt.cm.gray, interpolation='nearest')
@@ -125,8 +133,7 @@ dist_on_skel = distance * skel
 
 from skimage.util.colormap import magma
 
-fig, axes = plt.subplots(2, 2, figsize=(8, 8), sharex=True, sharey=True,
-                         subplot_kw={'adjustable': 'box-forced'})
+fig, axes = plt.subplots(2, 2, figsize=(8, 8), sharex=True, sharey=True)
 ax = axes.ravel()
 
 ax[0].imshow(data, cmap=plt.cm.gray, interpolation='nearest')
@@ -169,8 +176,7 @@ skeleton = skeletonize(image)
 thinned = thin(image)
 thinned_partial = thin(image, max_iter=25)
 
-fig, axes = plt.subplots(2, 2, figsize=(8, 8), sharex=True, sharey=True,
-                         subplot_kw={'adjustable': 'box-forced'})
+fig, axes = plt.subplots(2, 2, figsize=(8, 8), sharex=True, sharey=True)
 ax = axes.ravel()
 
 ax[0].imshow(image, cmap=plt.cm.gray, interpolation='nearest')

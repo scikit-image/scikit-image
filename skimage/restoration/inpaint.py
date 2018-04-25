@@ -6,7 +6,7 @@ from scipy.sparse.linalg import spsolve
 import scipy.ndimage as ndi
 from scipy.ndimage.filters import laplace
 import skimage
-from skimage.measure import label
+from ..measure import label
 
 
 def _get_neighborhood(nd_idx, radius, nd_shape):
@@ -15,7 +15,7 @@ def _get_neighborhood(nd_idx, radius, nd_shape):
     return bounds_lo, bounds_hi
 
 
-def _inpaint_biharmonic_single_channel(img, mask, out, limits):
+def _inpaint_biharmonic_single_channel(mask, out, limits):
     # Initialize sparse matrices
     matrix_unknown = sparse.lil_matrix((np.sum(mask), out.size))
     matrix_known = sparse.lil_matrix((np.sum(mask), out.size))
@@ -98,7 +98,11 @@ def inpaint_biharmonic(image, mask, multichannel=False):
     ----------
     .. [1]  N.S.Hoang, S.B.Damelin, "On surface completion and image inpainting
             by biharmonic functions: numerical aspects",
-            http://www.ima.umn.edu/~damelin/biharmonic
+            https://arxiv.org/abs/1707.06567
+    .. [2]  C. K. Chui and H. N. Mhaskar, MRA Contextual-Recovery Extension of
+            Smooth Functions on Manifolds, Appl. and Comp. Harmonic Anal.,
+            28 (2010), 104-113,
+            DOI: 10.1016/j.acha.2009.04.004
 
     Examples
     --------
@@ -140,8 +144,7 @@ def inpaint_biharmonic(image, mask, multichannel=False):
 
         for idx_region in range(1, num_labels+1):
             mask_region = mask_labeled == idx_region
-            _inpaint_biharmonic_single_channel(
-                image[..., idx_channel], mask_region,
+            _inpaint_biharmonic_single_channel(mask_region,
                 out[..., idx_channel], limits)
 
     if not multichannel:
