@@ -28,7 +28,7 @@ def moments_coords(coords, order=3):
     Returns
     -------
     M : (``order + 1``, ``order + 1``, ...) array
-        Raw image moments.
+        Raw image moments. (D dimensions)
 
     References
     ----------
@@ -74,7 +74,7 @@ def moments_coords_central(coords, center=None, order=3):
     Returns
     -------
     Mc : (``order + 1``, ``order + 1``, ...) array
-        Central image moments. (3 dimensions)
+        Central image moments. (D dimensions)
 
     References
     ----------
