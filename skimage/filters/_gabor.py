@@ -14,7 +14,7 @@ def _sigma_prefactor(bandwidth):
         (2.0 ** b + 1) / (2.0 ** b - 1)
 
 
-def _get_quasipolar_coords(r, *thetas):
+def _get_quasipolar_components(r, *thetas):
     """Nguyen, Tan Mai, "N-Dimensional Quasipolar Coordinates - Theory and Application" (2014). UNLV Theses, Dissertations, Professional Papers, and Capstones. 2125. https://digitalscholarship.unlv.edu/thesesdissertations/2125
     """
     axes = len(thetas) + 1
@@ -22,7 +22,6 @@ def _get_quasipolar_coords(r, *thetas):
 
     for which_theta, theta in enumerate(thetas[::-1]):
         sine = np.sin(theta)
-
         theta_index = axes - which_theta - 1
 
         for axis in range(theta_index):
@@ -91,8 +90,11 @@ class gabor_kernel(np.ndarray):
     >>> io.imshow(gk.real)  # doctest: +SKIP
     >>> io.show()           # doctest: +SKIP
     """
-    def __new__(cls, frequency, theta=None, bandwidth=1, sigma=None,
-                sigma_y=None, gamma=3, offset=None, ndim=2, **kwargs):
+    def __new__(cls, frequency, thetas=None, bandwidth=1, sigma=None,
+                sigma_y=None, n_stds=3, offset=None, ndim=2, **kwargs):
+        # Import has to be here due to circular import error
+        from ..transform import rotate
+
         # handle deprecation
         message = ('Using deprecated, 2D-only interface to'
                    'gabor_kernel. This interface will be'
@@ -104,15 +106,14 @@ class gabor_kernel(np.ndarray):
 
         if sigma_y is not None:
             signal_warning = True
-            if 'sigma_x' in kwargs and sigma is None:
-                sigma = (kwargs['sigma_x'], sigma_y)
+            if 'sigma_x' in kwargs:
+                sigma = (sigma_y, kwargs['sigma_x'])
             else:
-                sigma = (sigma, sigma_y)
+                sigma = (sigma_y, sigma)
 
-        if 'n_stds' in kwargs:
+        if 'theta' in kwargs:
             signal_warning = True
-            if gamma is None:
-                gamma = kwargs['n_stds']
+            thetas = kwargs['theta']
 
         if signal_warning:
             warn(message)
@@ -134,19 +135,24 @@ class gabor_kernel(np.ndarray):
                                             / frequency)
         sigma = sigma.astype(None)
 
+        x = ...
+
         # normalization scale
         norm = (2 * np.pi) ** (ndim / 2)
         norm *= sigma.prod()
         norm = 1 / norm
 
         # gaussian envelope
-        gauss = np.exp(-0.5 * ("Σ(x'/σₓ)²"))
+        gauss = np.exp(-0.5 * (x / sigma) ** 2)
+
+        rotx = np.matmul(x, _get_quasipolar_components(frequency, **theta))
 
         # complex harmonic function
-        harmonic = np.exp(-1j * 2 * np.pi * ("Σ(?*x)"))
+        harmonic = np.exp(1j * (2 * np.pi * rotx.sum() + offset))
 
-        g = np.ndarray.__new__(cls, ...)
-        return g
+        g = norm * np.matmul(gauss, harmonic)
+
+        return g.view(cls)
 
     def apply(self, image, mode='reflect', cval=0):
         """Return real and imaginary responses to Gabor filter.
