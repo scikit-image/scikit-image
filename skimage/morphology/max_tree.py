@@ -110,7 +110,7 @@ def build_max_tree(image, connectivity=2):
     # connected component in the mask (and therefore not a single tree that
     # represents the image). Mask here is an image that is 0 on the border
     # and 1 everywhere else.
-    mask_shrink = np.ones([x-2 for x in image.shape], bool)
+    mask_shrink = np.ones([x - 2 for x in image.shape], bool)
     mask = np.pad(mask_shrink, 1, mode='constant')
 
     neighbors, offset = _validate_connectivity(image.ndim, connectivity,

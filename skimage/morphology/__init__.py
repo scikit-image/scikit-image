@@ -48,7 +48,6 @@ __all__ = ['binary_erosion',
            'h_maxima',
            'local_maxima',
            'local_minima',
-           'build_max_tree', 
+           'build_max_tree',
            'area_opening',
            'area_closing']
-
