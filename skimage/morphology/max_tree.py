@@ -43,6 +43,7 @@ unsigned_int_types = [np.uint8, np.uint16, np.uint32, np.uint64]
 signed_int_types = [np.int8, np.int16, np.int32, np.int64]
 signed_float_types = [np.float16, np.float32, np.float64]
 
+
 # building the max tree.
 def build_max_tree(image, connectivity=2):
     """Builds the max tree from an image
@@ -55,7 +56,7 @@ def build_max_tree(image, connectivity=2):
     one level is represented by one reference pixel at this level, which is
     parent to all other pixels at that level and the reference pixel at the
     level above. The max-tree is the basis for many morphological operators,
-    namely connected operators. 
+    namely connected operators.
 
     Parameters
     ----------
@@ -118,21 +119,23 @@ def build_max_tree(image, connectivity=2):
     # initialization of the parent image
     parent = np.zeros(image.shape, dtype=np.int64)
 
-    # flat_neighborhood contains a list of offsets allowing one to find the neighbors
-    # in the ravelled image.
-    flat_neighborhood = _compute_neighbors(image, neighbors, offset).astype(np.int32)
+    # flat_neighborhood contains a list of offsets allowing one to find the
+    # neighbors in the ravelled image.
+    flat_neighborhood = _compute_neighbors(image, neighbors,
+                                           offset).astype(np.int32)
 
     # pixels need to be sorted according to their grey level.
     tree_traverser = np.argsort(image.ravel(),
                                 kind='quicksort').astype(np.int64)
-    
+
     # call of cython function.
     _max_tree._build_max_tree(image.ravel(), mask.ravel().astype(np.uint8),
-                              flat_neighborhood, 
+                              flat_neighborhood,
                               np.array(image.shape, dtype=np.int32),
                               parent.ravel(), tree_traverser)
 
     return parent, tree_traverser
+
 
 def area_opening(image, area_threshold, connectivity=2):
     """Performs an area opening of the image.
@@ -149,7 +152,7 @@ def area_opening(image, area_threshold, connectivity=2):
     with area_threshold=1 is the identity.
 
     Technically, this operator is based on the max-tree representation of
-    the image. 
+    the image.
 
     Parameters
     ----------
@@ -225,6 +228,7 @@ def area_opening(image, area_threshold, connectivity=2):
                              area, area_threshold)
     return output
 
+
 def area_closing(image, area_threshold, connectivity=2):
     """Performs an area closing of the image.
 
@@ -236,10 +240,10 @@ def area_closing(image, area_threshold, connectivity=2):
 
     Area closings are similar to morphological closings, but
     they do not use a fixed structuring element, but rather a deformable
-    one, with surface = area_threshold. 
+    one, with surface = area_threshold.
 
     Technically, this operator is based on the max-tree representation of
-    the image. 
+    the image.
 
     Parameters
     ----------
@@ -307,7 +311,7 @@ def area_closing(image, area_threshold, connectivity=2):
 
     >>> closed = attribute.area_closing(f, 8, connectivity=1)
 
-    All small minima are removed, and the remaining minima have at least 
+    All small minima are removed, and the remaining minima have at least
     a size of 8.
     """
     # inversion of the input image
@@ -338,15 +342,16 @@ def area_closing(image, area_threshold, connectivity=2):
 
     return output
 
+
 def local_maxima(image, connectivity=2):
     """Determine all local maxima of the image.
 
     The local maxima are defined as connected sets of pixels with equal
     grey level strictly greater than the grey levels of all pixels in direct
     neighborhood of the set.
-    
+
     Technically, the implementation is based on the max-tree representation
-    of an image. 
+    of an image.
 
     Parameters
     ----------
@@ -409,7 +414,7 @@ def local_maxima(image, connectivity=2):
 
     >>> maxima = max_tree.local_maxima(f)
 
-    The resulting image will be 1 for all pixels belonging to the 5 
+    The resulting image will be 1 for all pixels belonging to the 5
     local maxima and 0 anywhere else.
     """
 
@@ -420,7 +425,3 @@ def local_maxima(image, connectivity=2):
     _max_tree._local_maxima(image.ravel(), output.ravel(), P.ravel(), S)
 
     return output
-
-
-
-
