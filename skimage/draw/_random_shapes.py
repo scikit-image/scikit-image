@@ -204,7 +204,7 @@ def _generate_random_color(num_channels, intensity_range, random):
     else:
         if len(intensity_range) == 1:
             intensity_range = intensity_range * num_channels
-        return [random.randint(*r) for r in intensity_range]
+        return [random.randint(r[0], r[1]+1) for r in intensity_range]
 
 
 def random_shapes(image_shape,
