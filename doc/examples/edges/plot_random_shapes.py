@@ -41,8 +41,8 @@ for i, image in enumerate([image1, image2, image3, image4], 1):
     ax[i].imshow(image)
     ax[i].set_title('Colored shapes, #{}'.format(i-1))
 
-# These shapes are well suited to test segmentation algorithms. Often, we want
-# shapes to overlap to test the algorithm. This is also possible:
+# These shapes are well suited to test segmentation algorithms. Often, we
+# want shapes to overlap to test the algorithm. This is also possible:
 image, _ = random_shapes((128, 128), min_shapes=5, max_shapes=10,
                          min_size=20, allow_overlap=True)
 ax[5].imshow(image)
