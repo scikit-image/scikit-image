@@ -14,10 +14,7 @@ flexible structuring element that meets a certain criterion.
 This implementation provides functions for:
 1. max-tree generation
 2. area openings / closings
-3. diameter openings / closings
-4. local maxima / minima
-5. extended local maxima / minima
-6. h-maxima / h-minima (corresponding to dynamics)
+3. local maxima
 
 References:
     .. [1] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
@@ -41,7 +38,6 @@ from .watershed import _validate_connectivity
 from .watershed import _compute_neighbors
 
 from . import _max_tree
-import pdb
 
 unsigned_int_types = [np.uint8, np.uint16, np.uint32, np.uint64]
 signed_int_types = [np.int8, np.int16, np.int32, np.int64]
@@ -129,7 +125,7 @@ def build_max_tree(image, connectivity=2):
     # pixels need to be sorted according to their grey level.
     tree_traverser = np.argsort(image.ravel(),
                                 kind='quicksort').astype(np.int64)
-
+    
     # call of cython function.
     _max_tree._build_max_tree(image.ravel(), mask.ravel().astype(np.uint8),
                               flat_neighborhood, 
@@ -341,6 +337,90 @@ def area_closing(image, area_threshold, connectivity=2):
         output = (-1) * output
 
     return output
+
+def local_maxima(image, connectivity=2):
+    """Determine all local maxima of the image.
+
+    The local maxima are defined as connected sets of pixels with equal
+    grey level strictly greater than the grey levels of all pixels in direct
+    neighborhood of the set.
+    
+    Technically, the implementation is based on the max-tree representation
+    of an image. 
+
+    Parameters
+    ----------
+    image : ndarray
+        The input image for which the maxima are to be calculated.
+    connectivity: unsigned int, optional
+        The neighborhood connectivity. The integer represents the maximum
+        number of orthogonal steps to reach a neighbor. It is 1 for
+        4-connectivity and 2 for 8-connectivity. Default value is 1.
+
+    Returns
+    -------
+    local_max : ndarray
+       All local maxima of the image. The result image is a binary image,
+       where pixels belonging to local maxima take value 1, the other pixels
+       take value 0.
+
+    See also
+    --------
+    skimage.morphology.extrema.h_minima
+    skimage.morphology.extrema.h_maxima
+    skimage.morphology.extrema.local_minima
+    skimage.morphology.max_tree.build_max_tree
+
+    References
+    ----------
+    .. [1] Vincent L., Proc. "Grayscale area openings and closings,
+           their efficient implementation and applications",
+           EURASIP Workshop on Mathematical Morphology and its
+           Applications to Signal Processing, Barcelona, Spain, pp.22-27,
+           May 1993.
+    .. [2] Soille, P., "Morphological Image Analysis: Principles and
+           Applications" (Chapter 6), 2nd edition (2003), ISBN 3540429883.
+    .. [3] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
+           Connected Operators for Image and Sequence Processing.
+           IEEE Transactions on Image Processing, 7(4), 555-570.
+    .. [4] Najman, L., & Couprie, M. (2006). Building the component tree in
+           quasi-linear time. IEEE Transactions on Image Processing, 15(11),
+           3531-3539.
+    .. [5] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
+           Component Tree Computation Algorithms. IEEE Transactions on Image
+           Processing, 23(9), 3885-3895.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.morphology import max_tree
+
+    We create an image (quadratic function with a maximum in the center and
+    4 additional constant maxima.
+    The heights of the maxima are: 1, 21, 41, 61, 81
+
+    >>> w = 10
+    >>> x, y = np.mgrid[0:w,0:w]
+    >>> f = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
+    >>> f[2:4,2:4] = 40; f[2:4,7:9] = 60; f[7:9,2:4] = 80; f[7:9,7:9] = 100
+    >>> f = f.astype(np.int)
+
+    We can calculate all local maxima:
+
+    >>> maxima = max_tree.local_maxima(f)
+
+    The resulting image will be 1 for all pixels belonging to the 5 
+    local maxima and 0 anywhere else.
+    """
+
+    output = np.ones(image.shape, dtype=np.uint8)
+
+    P, S = build_max_tree(image, connectivity)
+
+    _max_tree._local_maxima(image.ravel(), output.ravel(), P.ravel(), S)
+
+    return output
+
 
 
 

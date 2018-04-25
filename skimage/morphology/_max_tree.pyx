@@ -126,25 +126,8 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_area(dtype_t[::1] image,
         area[q] = area[q] + area[p] 
     return area
 
-# computes the bbox-extension of all max-tree components
-# attribute to be used in bbox opening and closing
-# cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _bbox(dtype_t[::1] image,
-#                                                 DTYPE_INT64_t[::1] parent,
-#                                                 DTYPE_INT64_t[::1] sorted_indices):
-#     cdef DTYPE_INT64_t p_root = sorted_indices[0]
-#     cdef DTYPE_INT64_t p, q
-#     cdef DTYPE_UINT64_t number_of_pixels = len(image)
-#     cdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] bbox_extension = np.ones(number_of_pixels,
-#                                                                       dtype=np.float64)
-# 
-#     for p in sorted_indices[::-1]:
-#         if p == p_root:
-#             continue
-#         q = parent[p]
-#         area[q] = area[q] + area[p] 
-#     return area
 
-
+# direct filter (criteria based filter)
 cpdef void _direct_filter(dtype_t[::1] image,
                           dtype_t[::1] output,
                           DTYPE_INT64_t[::1] parent,
@@ -211,6 +194,67 @@ cpdef void _direct_filter(dtype_t[::1] image,
 
     return
 
+# _local_maxima cacluates the local maxima from the max-tree representation
+# this is interesting if the max-tree representation has alreayd been calculated
+# for other reasons. Otherwise, it is not so efficient. 
+cpdef void _local_maxima(dtype_t[::1] image,
+                         DTYPE_UINT8_t[::1] output,
+                         DTYPE_INT64_t[::1] parent,
+                         DTYPE_INT64_t[::1] sorted_indices
+                        ):
+    """Finds the local maxima in image.  
+
+    Parameters
+    ----------
+
+    image : array of arbitrary type
+        The flattened image pixels.
+    output : array of the same shape and type as image. 
+        The output image must contain only ones.
+    parent : array of int
+        Image of the same shape as the input image. The value
+        at each pixel is the parent index of this pixel in the max-tree
+        reprentation. 
+    sorted_indices : array of int
+        List of length = number of pixels. Each element
+        corresponds to one pixel index in the image. It encodes the order
+        of elements in the tree: a parent of a pixel always comes before
+        the element itself. More formally: i < j implies that j cannot be
+        the parent of i.
+    """
+
+    cdef DTYPE_INT64_t p_root = sorted_indices[0]
+    cdef DTYPE_INT64_t p, q
+    cdef DTYPE_UINT64_t number_of_pixels = len(image)
+
+    for p in sorted_indices[::-1]:
+        if p == p_root:
+            continue
+
+        q = parent[p]
+        
+        # if p is canonical (parent has a different value)
+        if image[p] != image[q]:
+            output[q] = 0
+            continue
+
+    for p in sorted_indices[::-1]:
+        if p == p_root:
+            continue
+
+        q = parent[p]
+        
+        # if p is not canonical (parent has the same value)
+        if image[p] == image[q]:
+            # in this case we propagate the value
+            output[p] = output[q]
+            continue
+
+    return
+
+# _cut_first_filter is similar to _direct_filter, but it stops the reconstruction
+# process when a criterion is fulfilled for the first time. For increasing criteria
+# this is equivalent to _direct_filter.  
 cpdef void _cut_first_filter(dtype_t[::1] image,
                              dtype_t[::1] output,
                              DTYPE_INT64_t[::1] parent,
@@ -278,7 +322,8 @@ cpdef void _cut_first_filter(dtype_t[::1] image,
 
     return
 
-
+# _build_max_tree is the main function. It allows to construct a max
+# tree representation of the image. 
 cpdef void _build_max_tree(dtype_t[::1] image,
                            DTYPE_BOOL_t[::1] mask,
                            DTYPE_INT32_t[::1] structure,
