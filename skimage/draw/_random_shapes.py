@@ -249,7 +249,7 @@ def random_shapes(image_shape,
         The name of the shape to generate or `None` to pick random ones.
     intensity_range : {tuple of tuples of ints, tuple of ints}, optional
         The range of values to sample pixel values from. For grayscale images
-        the format is (min_, max_). For multichannel - ((min_, max_),) if the
+        the format is (min, max). For multichannel - ((min, max),) if the
         ranges are equal across the channels, and ((min_0, max_0), ... (min_N, max_N))
         if they differ. Maximum range is (0, 255). If None, set to (1, 255) for
         each channel reserving 0-intensity color for background.
@@ -294,7 +294,7 @@ def random_shapes(image_shape,
     if intensity_range is None:
         intensity_range = (1, 255) if num_channels == 1 else ((1, 255), )
     else:
-        tmp = (intensity_range, ) if num_channels != 1 else intensity_range
+        tmp = (intensity_range, ) if num_channels == 1 else intensity_range
         for intensity_pair in tmp:
             for intensity in intensity_pair:
                 if not (0 <= intensity <= 255):
