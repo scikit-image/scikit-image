@@ -68,10 +68,9 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
         color is chosen randomly.
     only_matches : bool, optional
         Whether to only plot matches and not plot the keypoint locations.
-    alignment : str, optional
-        Valid values are: 'horizontal' or 'vertical'
-        Whether to show images side by side, 'horizontal', or one above
-        the other, 'vertical'.
+    alignment : {'horizontal', 'vertical'}, optional
+        Whether to show images side by side, ``'horizontal'``, or one above
+        the other, ``'vertical'``.
 
     """
 
@@ -109,7 +108,11 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
         image = np.concatenate([image1, image2], axis=0)
         offset[1] = 0
     else:
-        raise ValueError('Incorrect value for alignment: %s' % alignment)
+        mesg = ("plot_matches accepts either 'horizontal' or 'vertical' for "
+                "alignment, but '{}' was given. See http://scikit-image.org/"
+                "docs/dev/api/skimage.feature.html#skimage.feature.plot_matches "
+                "for details.").format(alignment)
+        raise ValueError(mesg)
 
     if not only_matches:
         ax.scatter(keypoints1[:, 1], keypoints1[:, 0],
