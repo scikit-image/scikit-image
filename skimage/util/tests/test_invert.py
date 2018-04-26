@@ -30,10 +30,13 @@ def test_invert_uint8():
 def test_invert_int8():
     dtype = 'int8'
     image = np.zeros((3, 3), dtype=dtype)
-    upper_dtype_limit = dtype_limits(image, clip_negative=False)[1]
-    image[1, :] = upper_dtype_limit
-    expected = np.zeros((3, 3), dtype=dtype) + upper_dtype_limit
-    expected[1, :] = 0
+    lower_dtype_limit, upper_dtype_limit = \
+        dtype_limits(image, clip_negative=False)
+    image[1, :] = lower_dtype_limit
+    image[2, :] = upper_dtype_limit
+    expected = np.zeros((3, 3), dtype=dtype)
+    expected[2, :] = lower_dtype_limit
+    expected[1, :] = upper_dtype_limit
     result = invert(image)
     assert_array_equal(expected, result)
 
@@ -41,9 +44,25 @@ def test_invert_int8():
 def test_invert_float64():
     dtype = 'float64'
     image = np.zeros((3, 3), dtype=dtype)
-    upper_dtype_limit = dtype_limits(image, clip_negative=False)[1]
-    image[1, :] = upper_dtype_limit
-    expected = np.zeros((3, 3), dtype=dtype) + upper_dtype_limit
-    expected[1, :] = 0
+    lower_dtype_limit, upper_dtype_limit = \
+        dtype_limits(image, clip_negative=False)
+    image[1, :] = lower_dtype_limit
+    image[2, :] = upper_dtype_limit
+    expected = np.zeros((3, 3), dtype=dtype)
+    expected[2, :] = lower_dtype_limit
+    expected[1, :] = upper_dtype_limit
+    result = invert(image)
+    assert_array_equal(expected, result)
+
+
+def test_invert_float64_b():
+    dtype = 'float64'
+    image = np.zeros((3, 3), dtype=dtype)
+    lower_dtype_limit, upper_dtype_limit = \
+        dtype_limits(image, clip_negative=True)
+    image[2, :] = upper_dtype_limit
+    expected = np.zeros((3, 3), dtype=dtype)
+    expected[0, :] = upper_dtype_limit
+    expected[1, :] = upper_dtype_limit
     result = invert(image)
     assert_array_equal(expected, result)
