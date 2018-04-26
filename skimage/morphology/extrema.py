@@ -12,8 +12,10 @@ Soille, P. (2003). Morphological Image Analysis: Principles and Applications
 from __future__ import absolute_import
 
 import numpy as np
+from scipy import ndimage as ndi
 
 from . import greyreconstruct
+from ._extrema_cy import _local_maxima_a
 from ..util import dtype_limits
 
 
@@ -356,3 +358,62 @@ def local_minima(image, selem=None):
         h = 1
     local_min = h_minima(image, h, selem=selem)
     return local_min
+
+
+def _offset_to_raveled_neighbours(image, connectivity):
+    """Compute offsets to a samples neighbours if the image where raveled.
+
+    Parameters
+    ----------
+    image : ndarray
+        The image for which the offsets are computed.
+    connectivity : int, optional
+        A number describing which to which and how many neighbors a comparison
+        is performed while determining if a pixel is part of a maximum.
+    """
+    connections = ndi.generate_binary_structure(image.ndim, connectivity)
+    center = np.ones(connections.ndim, dtype=np.intp)
+    # Center of kernel is not a neighbor
+    connections[tuple(center)] = False
+
+    connection_indices = np.transpose(np.nonzero(connections))
+    offsets = (np.ravel_multi_index(connection_indices.T, image.shape) -
+               np.ravel_multi_index(center.T, image.shape))
+
+    return offsets
+
+
+def local_maxima_new(image, connectivity=2):
+    """Find all local maxima in an image.
+
+    Parameters
+    ----------
+    image : ndarray
+        An n-dimensional array.
+    connectivity : int, optional
+        A number describing which to which and how many neighbors a comparison
+        is performed while determining if a pixel is part of a maximum.
+
+    Returns
+    -------
+    flags : ndarray
+        An boolean array that is 1 where maxima were found.
+    """
+    neighbour_offsets = _offset_to_raveled_neighbours(image, connectivity)
+
+    # Array of flags used to store the state of each pixel during evaluation.
+    # Possible states are:
+    #   3 - first or last value in a dimension
+    #   2 - potentially part of a maximum
+    #   1 - evaluated
+    flags = np.zeros(image.shape, dtype=np.uint8)
+
+    # Set edge values of flag-array to 3
+    without_borders = (slice(1, -1) for _ in range(flags.ndim))
+    flags = np.pad(flags[tuple(without_borders)], pad_width=1,
+                   mode="constant", constant_values=3)
+
+    _local_maxima_a(image.ravel(), flags.ravel(), neighbour_offsets)
+    # Set edge values back to 0
+    flags[flags == 3] = 0
+    return flags
