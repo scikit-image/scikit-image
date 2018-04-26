@@ -96,12 +96,10 @@ class gabor_kernel(np.ndarray):
         from ..transform import rotate
 
         # handle deprecation
-        message = ('Using deprecated, 2D-only interface to'
-                   'gabor_kernel. This interface will be'
-                   'removed in scikit-image 0.16. Use'
-                   'gabor_kernel(frequency, rotation=theta,'
-                   '    bandwidth=1, sigma=(sigma_x, sigma_y),'
-                   '    gamma=n_stds, offset=None, ndim=2)')
+        message = ('Using deprecated, 2D-only interface to gabor_kernel. '
+                   'This interface will be removed in scikit-image 0.16. Use '
+                   'gabor_kernel(frequency, rotation=theta, '
+                   'sigma=(sigma_y, sigma_x)).')
         signal_warning = False
 
         if sigma_y is not None:
@@ -131,7 +129,7 @@ class gabor_kernel(np.ndarray):
             sigma = np.asarray(sigma)
         else:
             sigma = np.array([sigma] * ndim)
-        sigma[(sigma == None).nonzero()] = (_sigma_prefactor(bandwidth) # noqa
+        sigma[(sigma == None).nonzero()] = (_sigma_prefactor(bandwidth)  # noqa
                                             / frequency)
         sigma = sigma.astype(None)
 
