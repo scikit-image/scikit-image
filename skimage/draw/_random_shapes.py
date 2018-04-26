@@ -172,7 +172,7 @@ SHAPE_CHOICES = list(SHAPE_GENERATORS.values())
 
 
 def _generate_random_colors(num_colors, num_channels, intensity_range, random):
-    """Generates an array of random colors.
+    """Generate an array of random colors.
 
     Parameters
     ----------
@@ -298,7 +298,7 @@ def random_shapes(image_shape,
         raise ValueError('Minimum dimension must be less than ncols and nrows')
     max_size = max_size or max(image_shape[0], image_shape[1])
 
-    if multichannel is False:
+    if not multichannel:
         num_channels = 1
 
     if intensity_range is None:
@@ -348,6 +348,6 @@ def random_shapes(image_shape,
             warn('Could not fit any shapes to image, '
                  'consider reducing the minimum dimension')
 
-    if multichannel is False:
+    if not multichannel:
         image = np.squeeze(image, axis=2)
     return image, labels
