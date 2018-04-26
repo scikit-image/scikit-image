@@ -3,6 +3,7 @@ import numpy as np
 from skimage.draw import random_shapes
 
 from skimage._shared import testing
+from skimage._shared._warnings import expected_warnings
 
 
 def test_generates_color_images_with_correct_shape():
@@ -12,8 +13,8 @@ def test_generates_color_images_with_correct_shape():
 
 def test_generates_gray_images_with_correct_shape():
     image, _ = random_shapes(
-        (4567, 123), min_shapes=3, max_shapes=20, num_channels=1)
-    assert image.shape == (4567, 123, 1)
+        (4567, 123), min_shapes=3, max_shapes=20, multichannel=False)
+    assert image.shape == (4567, 123)
 
 
 def test_generates_correct_bounding_boxes_for_rectangles():
@@ -108,7 +109,7 @@ def test_can_generate_one_by_one_rectangle():
 
 def test_throws_when_intensity_range_out_of_range():
     with testing.raises(ValueError):
-        random_shapes((1000, 1234), max_shapes=1, num_channels=1,
+        random_shapes((1000, 1234), max_shapes=1, multichannel=False,
                       intensity_range=(0, 256))
     with testing.raises(ValueError):
         random_shapes((2, 2), max_shapes=1,
@@ -117,8 +118,9 @@ def test_throws_when_intensity_range_out_of_range():
 
 def test_returns_empty_labels_and_white_image_when_cannot_fit_shape():
     # The circle will never fit this.
-    image, labels = random_shapes(
-        (10000, 10000), max_shapes=1, min_size=10000, shape='circle')
+    with expected_warnings(['Could not fit']):
+        image, labels = random_shapes(
+            (10000, 10000), max_shapes=1, min_size=10000, shape='circle')
     assert len(labels) == 0
     assert (image == 255).all()
 
@@ -127,9 +129,9 @@ def test_random_shapes_is_reproducible_with_seed():
     random_seed = 42
     labels = []
     for _ in range(5):
-        _, l = random_shapes((128, 128), max_shapes=5,
-                             random_seed=random_seed)
-        labels.append(l)
+        _, label = random_shapes((128, 128), max_shapes=5,
+                                 random_seed=random_seed)
+        labels.append(label)
     assert all(other == labels[0] for other in labels[1:])
 
 

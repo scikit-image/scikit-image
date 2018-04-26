@@ -171,16 +171,18 @@ SHAPE_GENERATORS = dict(
 SHAPE_CHOICES = list(SHAPE_GENERATORS.values())
 
 
-def _generate_random_color(num_channels, intensity_range, random):
-    """Generates a random color array.
+def _generate_random_colors(num_colors, num_channels, intensity_range, random):
+    """Generates an array of random colors.
 
     Parameters
     ----------
+    num_colors : int
+        Number of colors to generate.
     num_channels : int
         Number of elements representing color.
     intensity_range : {tuple of tuples of ints, tuple of ints}, optional
         The range of values to sample pixel values from. For grayscale images
-        the format is (min_, max_). For multichannel - ((min_, max_),) if the
+        the format is (min, max). For multichannel - ((min, max),) if the
         ranges are equal across the channels, and
         ((min_0, max_0), ... (min_N, max_N)) if they differ.
     random : np.random.RandomState
@@ -193,18 +195,18 @@ def _generate_random_color(num_channels, intensity_range, random):
 
     Returns
     -------
-    color : scalar or array
-        If `num_channels` is 1, a single random scalar from the
-        `intensity_range`, else an array of `num_channels` elements,
-        each from the corresponding interval of `intensity_range`.
+    colors : array
+        An array of shape (num_colors, num_channels), where the values for
+        each channel are drawn from the corresponding `intensity_range`.
 
     """
     if num_channels == 1:
-        return random.randint(*intensity_range)
-    else:
-        if len(intensity_range) == 1:
-            intensity_range = intensity_range * num_channels
-        return [random.randint(r[0], r[1]+1) for r in intensity_range]
+        intensity_range = (intensity_range, )
+    elif len(intensity_range) == 1:
+        intensity_range = intensity_range * num_channels
+    colors = [random.randint(r[0], r[1]+1, size=num_colors)
+              for r in intensity_range]
+    return np.transpose(colors)
 
 
 def random_shapes(image_shape,
@@ -212,6 +214,7 @@ def random_shapes(image_shape,
                   min_shapes=1,
                   min_size=2,
                   max_size=None,
+                  multichannel=True,
                   num_channels=3,
                   shape=None,
                   intensity_range=None,
@@ -242,9 +245,13 @@ def random_shapes(image_shape,
         The minimum dimension of each shape to fit into the image.
     max_size : int, optional
         The maximum dimension of each shape to fit into the image.
+    multichannel : bool, optional
+        If True, the generated image has ``num_channels`` color channels,
+        otherwise generates grayscale image.
     num_channels : int, optional
         Number of channels in the generated image. If 1, generate monochrome
-        images, else color images with multiple channels.
+        images, else color images with multiple channels. Ignored if
+        ``multichannel`` is set to False.
     shape : {rectangle, circle, triangle, None} str, optional
         The name of the shape to generate or `None` to pick random ones.
     intensity_range : {tuple of tuples of ints, tuple of ints}, optional
@@ -291,6 +298,9 @@ def random_shapes(image_shape,
         raise ValueError('Minimum dimension must be less than ncols and nrows')
     max_size = max_size or max(image_shape[0], image_shape[1])
 
+    if multichannel is False:
+        num_channels = 1
+
     if intensity_range is None:
         intensity_range = (1, 255) if num_channels == 1 else ((1, 255), )
     else:
@@ -307,8 +317,11 @@ def random_shapes(image_shape,
     image = np.ones(image_shape, dtype=np.uint8) * 255
     filled = np.zeros(image_shape, dtype=bool)
     labels = []
-    for _ in range(random.randint(min_shapes, max_shapes + 1)):
-        color = _generate_random_color(num_channels, intensity_range, random)
+
+    num_shapes = random.randint(min_shapes, max_shapes + 1)
+    colors = _generate_random_colors(num_shapes, num_channels,
+                                     intensity_range, random)
+    for shape_idx in range(num_shapes):
         if user_shape is None:
             shape_generator = random.choice(SHAPE_CHOICES)
         else:
@@ -327,7 +340,7 @@ def random_shapes(image_shape,
                 continue
             # Check if there is an overlap where the mask is nonzero.
             if allow_overlap or not filled[indices].any():
-                image[indices] = color
+                image[indices] = colors[shape_idx]
                 filled[indices] = True
                 labels.append(label)
                 break
@@ -335,4 +348,6 @@ def random_shapes(image_shape,
             warn('Could not fit any shapes to image, '
                  'consider reducing the minimum dimension')
 
+    if multichannel is False:
+        image = np.squeeze(image, axis=2)
     return image, labels
