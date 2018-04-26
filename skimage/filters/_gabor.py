@@ -90,7 +90,7 @@ class gabor_kernel(np.ndarray):
     >>> io.imshow(gk.real)  # doctest: +SKIP
     >>> io.show()           # doctest: +SKIP
     """
-    def __new__(cls, frequency, thetas=None, bandwidth=1, sigma=None,
+    def __new__(cls, frequency, theta=None, bandwidth=1, sigma=None,
                 sigma_y=None, n_stds=3, offset=None, ndim=2, **kwargs):
         # Import has to be here due to circular import error
         from ..transform import rotate
@@ -98,23 +98,14 @@ class gabor_kernel(np.ndarray):
         # handle deprecation
         message = ('Using deprecated, 2D-only interface to gabor_kernel. '
                    'This interface will be removed in scikit-image 0.16. Use '
-                   'gabor_kernel(frequency, rotation=theta, '
-                   'sigma=(sigma_y, sigma_x)).')
-        signal_warning = False
+                   'gabor_kernel(frequency, sigma=(sigma_y, sigma_x)).')
 
         if sigma_y is not None:
-            signal_warning = True
+            warn(message)
             if 'sigma_x' in kwargs:
                 sigma = (sigma_y, kwargs['sigma_x'])
             else:
                 sigma = (sigma_y, sigma)
-
-        if 'theta' in kwargs:
-            signal_warning = True
-            thetas = kwargs['theta']
-
-        if signal_warning:
-            warn(message)
 
         # handle translation
         if theta is None:
@@ -213,7 +204,7 @@ class gabor_kernel(np.ndarray):
         return filtered_real, filtered_imag
 
 
-def gabor(image, frequency, rotation=None, bandwidth=1, sigma=None,
+def gabor(image, frequency, theta=None, bandwidth=1, sigma=None,
           sigma_y=None, gamma=3, offset=None, mode='reflect', cval=0,
           ndim=2, **kwargs):
     """Return real and imaginary responses to Gabor filter.
