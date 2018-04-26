@@ -204,9 +204,7 @@ class gabor_kernel(np.ndarray):
         return filtered_real, filtered_imag
 
 
-def gabor(image, frequency, theta=None, bandwidth=1, sigma=None,
-          sigma_y=None, gamma=3, offset=None, mode='reflect', cval=0,
-          ndim=2, **kwargs):
+def gabor(image, *args, mode='reflect', cval=0, **kwargs):
     """Return real and imaginary responses to Gabor filter.
 
     The real and imaginary parts of the Gabor filter kernel are applied to the
@@ -276,7 +274,6 @@ def gabor(image, frequency, theta=None, bandwidth=1, sigma=None,
     >>> io.imshow(filt_real)    # doctest: +SKIP
     >>> io.show()               # doctest: +SKIP
     """
-    g = gabor_kernel(frequency, rotation, bandwidth, sigma, sigma_y, gamma,
-                     offset, ndim, **kwargs)
+    g = gabor_kernel(*args, **kwargs)
 
     return g.apply(image, mode=mode, cval=cval)
