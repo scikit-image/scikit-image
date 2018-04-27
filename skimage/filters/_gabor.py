@@ -32,6 +32,21 @@ def _get_quasipolar_components(r, *thetas):
     return coords
 
 
+def _gaussian(image, center=None, sigma=1, ndim=2):
+    """Do CB. 2008. The Multivariate Gaussian Distribution. Stanford University (CS 229): Stanford, CA. http://cs229.stanford.edu/section/gaussians.pdf"""
+    # normalization factor
+    norm = (2 * np.pi) ** (ndim / 2)
+    norm *= np.prod(sigma)
+
+    # center image
+    centered_image = image - center
+
+    # gaussian envelope
+    gauss = np.exp(-0.5 * centered_image.T * centered_image / sigma)
+
+    return gauss / norm
+
+
 class gabor_kernel(np.ndarray):
     """Return complex nD Gabor filter kernel.
 
@@ -126,13 +141,7 @@ class gabor_kernel(np.ndarray):
 
         x = ...
 
-        # normalization scale
-        norm = (2 * np.pi) ** (ndim / 2)
-        norm *= sigma.prod()
-        norm = 1 / norm
-
-        # gaussian envelope
-        gauss = np.exp(-0.5 * (x / sigma) ** 2)
+        gauss = _gaussian(x, center=0, sigma=sigma, ndim=ndim)
 
         rotx = np.matmul(x, _get_quasipolar_components(frequency, **theta))
 
