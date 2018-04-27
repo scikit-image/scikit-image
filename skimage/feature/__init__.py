@@ -7,7 +7,6 @@ from .texture import (greycomatrix, greycoprops,
                       draw_multiblock_lbp)
 
 from .peak import peak_local_max
-from .peak_utils import maxima2d_A, maxima2d_B
 from .corner import (corner_kitchen_rosenfeld, corner_harris,
                      corner_shi_tomasi, corner_foerstner, corner_subpix,
                      corner_peaks, corner_fast, structure_tensor,
@@ -36,8 +35,6 @@ __all__ = ['canny',
            'multiblock_lbp',
            'draw_multiblock_lbp',
            'peak_local_max',
-           'maxima2d_A',
-           'maxima2d_B',
            'structure_tensor',
            'structure_tensor_eigvals',
            'hessian_matrix',
