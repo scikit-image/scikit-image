@@ -76,9 +76,9 @@ cdef:
         self._buffer_ptr = new_buffer_ptr
 
 
-def _local_maxima_a(dtype_t[::1] image not None,
-                    unsigned char[::1] flags,
-                    Py_ssize_t[::1] neighbour_offsets not None):
+def _local_maxima(dtype_t[::1] image not None,
+                  unsigned char[::1] flags,
+                  Py_ssize_t[::1] neighbour_offsets not None):
     """Detect local maxima in n-dimensional array.
 
     Parameters
@@ -134,13 +134,12 @@ def _local_maxima_a(dtype_t[::1] image not None,
                     # Index is potentially part of a maximum:
                     # Find all samples part of the plateau and fill with 0
                     # or 1 depending on whether it's a true maximum
-                    _fill_plateau_a(image, flags, neighbour_offsets,
-                                    &queue, i)
+                    _fill_plateau(image, flags, neighbour_offsets, &queue, i)
         finally:
             q_free_buffer(&queue)
 
 
-cdef inline void _fill_plateau_a(
+cdef inline void _fill_plateau(
         dtype_t[::1] image, unsigned char[::1] flags,
         Py_ssize_t[::1] neighbour_offsets, Queue* queue_ptr,
         Py_ssize_t start_index) nogil:

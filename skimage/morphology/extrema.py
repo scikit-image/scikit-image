@@ -14,9 +14,9 @@ from __future__ import absolute_import
 import numpy as np
 from scipy import ndimage as ndi
 
-from . import greyreconstruct
-from ._extrema_cy import _local_maxima_a
 from ..util import dtype_limits
+from . import greyreconstruct
+from ._extrema_cy import _local_maxima
 
 
 def _add_constant_clip(image, const_value):
@@ -360,46 +360,57 @@ def local_minima(image, selem=None):
     return local_min
 
 
-def _offset_to_raveled_neighbours(image, connectivity):
+def _offset_to_raveled_neighbours(image_shape, selem):
     """Compute offsets to a samples neighbours if the image where raveled.
 
     Parameters
     ----------
-    image : ndarray
+    image_shape : tuple
         The image for which the offsets are computed.
-    connectivity : int, optional
-        A number describing which to which and how many neighbors a comparison
-        is performed while determining if a pixel is part of a maximum.
+    selem : ndarray, optional
+        The neighborhood expressed as an n-D array of 1's and 0's.
+        Default is the ball of radius 1 according to the maximum norm
+        (i.e. a 3x3 square for 2D images, a 3x3x3 cube for 3D images, etc.)
     """
-    connections = ndi.generate_binary_structure(image.ndim, connectivity)
-    center = np.ones(connections.ndim, dtype=np.intp)
+    center = np.ones(selem.ndim, dtype=np.intp)
     # Center of kernel is not a neighbor
-    connections[tuple(center)] = False
-
-    connection_indices = np.transpose(np.nonzero(connections))
-    offsets = (np.ravel_multi_index(connection_indices.T, image.shape) -
-               np.ravel_multi_index(center.T, image.shape))
+    selem[tuple(center)] = False
+    connection_indices = np.transpose(np.nonzero(selem))
+    offsets = (np.ravel_multi_index(connection_indices.T, image_shape) -
+               np.ravel_multi_index(center.T, image_shape))
 
     return offsets
 
 
-def local_maxima_new(image, connectivity=2):
+def local_maxima_new(image, selem=None, include_border=False):
     """Find all local maxima in an image.
 
     Parameters
     ----------
     image : ndarray
         An n-dimensional array.
-    connectivity : int, optional
-        A number describing which to which and how many neighbors a comparison
-        is performed while determining if a pixel is part of a maximum.
+    selem : int or ndarray, optional
+        The structuring element used to determine the neighborhood of each
+        evaluated pixel. If this is a number it is interpreted as the
+        connectivity of `selem`. If an array, it must only contain 1's and 0's
+        and have the same number of dimensions as `image`. If not given the
+        maximal connectivity is assumed, meaning `selem` is an array of 1's.
+    include_border : bool, optional
+        If true, plateaus that touch the image border can be valid maxima.
 
     Returns
     -------
     flags : ndarray
-        An boolean array that is 1 where maxima were found.
+        An array of 1's where local maxima were found and otherwise 0's.
     """
-    neighbour_offsets = _offset_to_raveled_neighbours(image, connectivity)
+    if include_border:
+        image = np.pad(image, 1, mode="constant", constant_values=image.min())
+
+    if selem is None:
+        selem = image.ndim
+    if np.isscalar(selem):
+        selem = ndi.generate_binary_structure(image.ndim, selem)
+    neighbour_offsets = _offset_to_raveled_neighbours(image.shape, selem)
 
     # Array of flags used to store the state of each pixel during evaluation.
     # Possible states are:
@@ -409,11 +420,17 @@ def local_maxima_new(image, connectivity=2):
     flags = np.zeros(image.shape, dtype=np.uint8)
 
     # Set edge values of flag-array to 3
-    without_borders = (slice(1, -1) for _ in range(flags.ndim))
-    flags = np.pad(flags[tuple(without_borders)], pad_width=1,
+    without_borders = tuple(slice(1, -1) for _ in range(flags.ndim))
+    flags = np.pad(flags[without_borders], pad_width=1,
                    mode="constant", constant_values=3)
 
-    _local_maxima_a(image.ravel(), flags.ravel(), neighbour_offsets)
-    # Set edge values back to 0
-    flags[flags == 3] = 0
+    _local_maxima(image.ravel(), flags.ravel(), neighbour_offsets)
+
+    if include_border:
+        # Revert padding performed at the beginning of the function
+        flags = flags[without_borders]
+    else:
+        # No padding was performed but set edge values back to 0
+        flags[flags == 3] = 0
+
     return flags
