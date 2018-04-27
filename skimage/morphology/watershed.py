@@ -255,7 +255,7 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
 
     flat_neighborhood = _compute_neighbors(image, connectivity, offset)
     marker_locations = np.flatnonzero(output)
-    image_strides = np.array(image.strides) // image.itemsize
+    image_strides = np.array(image.strides, dtype=np.intp) // image.itemsize
 
     _watershed.watershed_raveled(image.ravel(),
                                  marker_locations, flat_neighborhood,
