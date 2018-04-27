@@ -41,8 +41,10 @@ def _gaussian(image, center=None, sigma=1, ndim=2):
     # center image
     centered_image = image - center
 
+    im = centered_image / sigma
+
     # gaussian envelope
-    gauss = np.exp(-0.5 * centered_image.T * centered_image / sigma)
+    gauss = np.exp(-0.5 * np.dot(im, im))
 
     return gauss / norm
 
