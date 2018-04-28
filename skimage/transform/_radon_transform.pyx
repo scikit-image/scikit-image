@@ -39,7 +39,7 @@ cpdef bilinear_ray_sum(cnp.double_t[:, :] image, cnp.double_t theta,
     cdef cnp.double_t t = ray_position - projection_center
     # s0 is the half-length of the ray's path in the reconstruction circle
     cdef cnp.double_t s0
-    s0 = sqrt(radius**2 - t**2) if radius**2 >= t**2 else 0.
+    s0 = sqrt(radius * radius - t * t) if radius*radius >= t*t else 0.
     cdef Py_ssize_t Ns = 2 * (<Py_ssize_t>ceil(2 * s0))  # number of steps
                                                          # along the ray
     cdef cnp.double_t ray_sum = 0.
@@ -71,19 +71,19 @@ cpdef bilinear_ray_sum(cnp.double_t[:, :] image, cnp.double_t theta,
                 if i > 0 and j > 0:
                     weight = (1. - di) * (1. - dj) * ds
                     ray_sum += weight * image[i, j]
-                    weight_norm += weight**2
+                    weight_norm += weight * weight
                 if i > 0 and j < image.shape[1] - 1:
                     weight = (1. - di) * dj * ds
                     ray_sum += weight * image[i, j+1]
-                    weight_norm += weight**2
+                    weight_norm += weight * weight
                 if i < image.shape[0] - 1 and j > 0:
                     weight = di * (1 - dj) * ds
                     ray_sum += weight * image[i+1, j]
-                    weight_norm += weight**2
+                    weight_norm += weight * weight
                 if i < image.shape[0] - 1 and j < image.shape[1] - 1:
                     weight = di * dj * ds
                     ray_sum += weight * image[i+1, j+1]
-                    weight_norm += weight**2
+                    weight_norm += weight * weight
 
     return ray_sum, weight_norm
 
@@ -126,7 +126,7 @@ cpdef bilinear_ray_update(cnp.double_t[:, :] image,
     cdef cnp.double_t t = ray_position - projection_center
     # s0 is the half-length of the ray's path in the reconstruction circle
     cdef cnp.double_t s0
-    s0 = sqrt(radius*radius - t*t) if radius**2 >= t**2 else 0.
+    s0 = sqrt(radius*radius - t*t) if radius*radius >= t*t else 0.
     cdef Py_ssize_t Ns = 2 * (<Py_ssize_t>ceil(2 * s0))
     # beta for equiripple Hamming window
     cdef cnp.double_t hamming_beta = 0.46164
