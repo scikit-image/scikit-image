@@ -65,8 +65,8 @@ def _corner_moravec(image, Py_ssize_t window_size=1):
     cdef double[:, ::1] cimage = np.ascontiguousarray(img_as_float(image))
     cdef double[:, ::1] out = np.zeros(image.shape, dtype=np.double)
 
-    cdef double msum, min_msum
-    cdef Py_ssize_t r, c, br, bc, mr, mc, a, b, t
+    cdef double msum, min_msum, t
+    cdef Py_ssize_t r, c, br, bc, mr, mc, a, b
 
     with nogil:
         for r in range(2 * window_size, rows - 2 * window_size):
