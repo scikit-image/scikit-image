@@ -285,13 +285,13 @@ def expand_arg(arg, times, arg_name='arg', default=0, dtype=None):
     Examples
     --------
     >>> expand_arg(None, 3)
-    array(0., 0., 0.), 3
+    (array([ 0.,  0.,  0.]), 3)
 
     >>> expand_arg((None, 0, None, 42), 5, default=180)
-    array(180., 0., 180., 42., 180.), 1
+    (array([ 180.,    0.,  180.,   42.,  180.]), 1)
 
-    >>> expand_arg((2.6, 2.3), 2, dtype=int)
-    array(2, 2), 0
+    >>> expand_arg((2.6,  2.3), 2, dtype=int)
+    (array([2, 2]), 0)
 
     """
     arg = np.asarray(arg)
