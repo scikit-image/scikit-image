@@ -1,4 +1,4 @@
-from skimage._shared.utils import (copy_func, assert_nD, interpret_arg)
+from skimage._shared.utils import (copy_func, assert_nD, expand_arg)
 import numpy.testing as npt
 import numpy as np
 import pytest
@@ -26,12 +26,12 @@ def test_copyfunc():
     npt.assert_equal(foo.__name__, 'foo')
 
 
-def test_interpret_arg():
-    standardized_output = interpret_arg(None, 3)
-    npt.assert_array_equal(standardized_output, np.zeros(3))
+def test_expand_arg():
+    out = expand_arg(None, 3)
+    npt.assert_array_equal(out, np.zeros(3))
 
-    standardized_output = interpret_arg((None, 10), 5, default=1)
-    npt.assert_array_equal(standardized_output, np.array([1, 10, 1, 1, 1]))
+    out = expand_arg((None, 10), 5, default=1)
+    npt.assert_array_equal(out, np.array([1, 10, 1, 1, 1]))
 
 
 if __name__ == "__main__":

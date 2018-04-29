@@ -244,7 +244,7 @@ def convert_to_float(image, preserve_range):
     return image
 
 
-def interpret_arg(arg, times, arg_name='arg', default=0):
+def expand_arg(arg, times, arg_name='arg', default=0):
     """Provides an expected/standardized output of the parameter as
     an ndarray the size of times. Primarily used in n-Dimensional
     image processing.
@@ -271,15 +271,15 @@ def interpret_arg(arg, times, arg_name='arg', default=0):
 
     Returns
     -------
-    standardized_arg : (``times``,) array
+    expanded_arg : (``times``,) array
         The standardized output of the argument.
 
     Examples
     --------
-    >>> interpret_arg(None, 3)
+    >>> expand_arg(None, 3)
     array(0., 0., 0.)
 
-    >>> interpret_arg((None, 0), 5, default=180)
+    >>> expand_arg((None, 0), 5, default=180)
     array(180., 0., 180., 180., 180.)
 
     """
