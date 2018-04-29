@@ -130,7 +130,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     elif isinstance(spacing, (list, tuple)):
         spacing = np.array(spacing, dtype=np.double)
 
-    sigma, rpl = expand_arg(sigma, 3, dtype=np.double)
+    sigma, rpl = expand_arg(sigma, 3, dtype=np.double, arg_name='sigma')
     if rpl == 3:
         sigma /= spacing.astype(np.double)
     if (sigma > 0).any():

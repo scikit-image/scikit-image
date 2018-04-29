@@ -100,7 +100,7 @@ def moments_coords_central(coords, center=None, order=3):
     if center is None:
         center = np.mean(coords, axis=0)
     else:
-        center, _ = expand_arg(center, ndim, default=0)
+        center, _ = expand_arg(center, ndim, default=0, arg_name='center')
 
     # center the coordinates
     coords = coords.astype(float) - center
@@ -245,7 +245,8 @@ def moments_central(image, center=None, cc=None, order=3, **kwargs):
     if center is None:
         center = centroid(image)
     else:
-        center, _ = expand_arg(center, image.ndim, default=0)
+        center, _ = expand_arg(center, image.ndim, default=0,
+                               arg_name='center')
     calc = image.astype(float)
     for dim, dim_length in enumerate(image.shape):
         delta = np.arange(dim_length, dtype=float) - center[dim]
