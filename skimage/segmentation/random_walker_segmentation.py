@@ -188,6 +188,20 @@ def _build_laplacian(data, spacing, mask=None, beta=50,
     return lap
 
 
+def _check_isolated_seeds(labels):
+    """
+    Prune isolated seed pixels to prevent labeling errors, and
+    return coordinates and label values of isolated seeds, so
+    that it is possible to put labels back in random walker output.
+    """
+    fill = ndi.binary_propagation(labels == 0, mask=(labels >= 0))
+    isolated = np.logical_and(labels > 0, np.logical_not(fill))
+    inds = np.nonzero(isolated)
+    values = labels[inds]
+    labels[inds] = -1
+    return inds, values
+
+
 #----------- Random walker algorithm --------------------------------
 
 
@@ -413,6 +427,10 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         labels = np.copy(labels)
     label_values = np.unique(labels)
 
+    # If some labeled pixels are isolated inside pruned zones, prune them
+    # as well and keep the labels for the final output
+    inds_isolated_seeds, isolated_values = _check_isolated_seeds(labels)
+
     # Reorder label values to have consecutive integers (no gaps)
     if np.any(np.diff(label_values) != 1):
         mask = labels >= 0
@@ -426,6 +444,8 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         labels[np.logical_and(np.logical_not(filled), labels == 0)] = -1
         del filled
     labels = np.atleast_3d(labels)
+
+
     if np.any(labels < 0):
         lap_sparse = _build_laplacian(data, spacing, mask=labels >= 0,
                                       beta=beta, multichannel=multichannel)
@@ -458,6 +478,9 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     # Clean up results
     if return_full_prob:
         labels = labels.astype(np.float)
+        # Put back labels of isolated seeds
+        if len(isolated_values) > 0:
+            labels[inds_isolated_seeds] = isolated_values
         X = np.array([_clean_labels_ar(Xline, labels, copy=True).reshape(dims)
                       for Xline in X])
         for i in range(1, int(labels.max()) + 1):
@@ -466,6 +489,8 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
             X[i - 1, mask_i] = 1
     else:
         X = _clean_labels_ar(X + 1, labels).reshape(dims)
+        # Put back labels of isolated seeds
+        X[inds_isolated_seeds] = isolated_values
     return X
 
 

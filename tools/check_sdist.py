@@ -23,9 +23,8 @@ ignore_dirs = ['./dist', './tools', './doc', './viewer_examples',
                './downloads', './scikit_image.egg-info']
 ignore_files = ['./TODO.md', './README.md', './MANIFEST',
                 './.gitignore', './.travis.yml', './.gitmodules',
-                './.mailmap', './.coveragerc', './appveyor.yml',
+                './.mailmap', './.coveragerc', './.appveyor.yml',
                 './.pep8speaks.yml',
-                './tools/check_bento_build.py',
                 './skimage/filters/rank/README.rst']
 
 

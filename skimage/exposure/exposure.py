@@ -468,9 +468,9 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
         The low contrast fraction threshold. An image is considered low-
         contrast when its range of brightness spans less than this
         fraction of its data type's full range. [1]_
-    lower_bound : float, optional
+    lower_percentile : float, optional
         Disregard values below this percentile when computing image contrast.
-    upper_bound : float, optional
+    upper_percentile : float, optional
         Disregard values above this percentile when computing image contrast.
     method : str, optional
         The contrast determination method.  Right now the only available

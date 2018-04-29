@@ -12,7 +12,7 @@ make a PR to update these notes after you are done with the release. ;-)
   appropriate to master.
 
 - In the master branch, update the version number in ``skimage/__init__.py``
-  and ``bento.info`` to the next ``-dev`` version, commit, and push.
+  to the next ``-dev`` version, commit, and push.
 
 - Back on the release branch, update the release notes:
 
@@ -30,8 +30,10 @@ make a PR to update these notes after you are done with the release. ;-)
   5. Copy ``doc/release/release_template.txt`` to
      ``doc/release/release_dev.txt`` for the next release.
 
-- Update the version number in ``skimage/__init__.py`` and ``bento.info`` and
-  commit.
+  6. Copy relevant deprecations from ``release_<major>_<minor>.txt``
+     to ``release_dev.txt``.
+
+- Update the version number in ``skimage/__init__.py`` and commit.
 
 - Update the docs:
 

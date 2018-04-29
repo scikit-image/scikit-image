@@ -1,17 +1,17 @@
 import numpy as np
-import pytest
 from skimage.filters._gaussian import gaussian
+from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
 
 
 def test_negative_sigma():
     a = np.zeros((3, 3))
     a[1, 1] = 1.
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         gaussian(a, sigma=-1.0)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         gaussian(a, sigma=[-1.0, 1.0])
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         gaussian(a,
                  sigma=np.asarray([-1.0, 1.0]))
 
@@ -61,7 +61,3 @@ def test_multichannel():
 def test_preserve_range():
     img = np.array([[10.0, -10.0], [-4, 3]], dtype=np.float32)
     gaussian(img, 1, preserve_range=True)
-
-if __name__ == "__main__":
-    from numpy import testing
-    testing.run_module_suite()

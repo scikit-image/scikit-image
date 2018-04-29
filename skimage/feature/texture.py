@@ -106,7 +106,7 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
 
     image_max = image.max()
 
-    if np.issubdtype(image.dtype, np.float):
+    if np.issubdtype(image.dtype, np.floating):
         raise ValueError("Float images are not supported by greycomatrix. "
                          "Convert the image to an unsigned integer type.")
 
@@ -301,7 +301,7 @@ def local_binary_pattern(image, P, R, method='default'):
     .. [1] Multiresolution Gray-Scale and Rotation Invariant Texture
            Classification with Local Binary Patterns.
            Timo Ojala, Matti Pietikainen, Topi Maenpaa.
-           http://www.rafbis.it/biplab15/images/stories/docenti/Danielriccio/Articoliriferimento/LBP.pdf, 2002.
+           http://www.ee.oulu.fi/research/mvmp/mvg/files/pdf/pdf_94.pdf, 2002.
     .. [2] Face recognition with local binary patterns.
            Timo Ahonen, Abdenour Hadid, Matti Pietikainen,
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.214.6851,
@@ -369,8 +369,8 @@ def multiblock_lbp(int_image, r, c, width, height):
 
 def draw_multiblock_lbp(image, r, c, width, height,
                         lbp_code=0,
-                        color_greater_block=[1, 1, 1],
-                        color_less_block=[0, 0.69, 0.96],
+                        color_greater_block=(1, 1, 1),
+                        color_less_block=(0, 0.69, 0.96),
                         alpha=0.5
                         ):
     """Multi-block local binary pattern visualization.
@@ -396,15 +396,15 @@ def draw_multiblock_lbp(image, r, c, width, height,
     lbp_code : int
         The descriptor of feature to visualize. If not provided, the
         descriptor with 0 value will be used.
-    color_greater_block : list of 3 floats
+    color_greater_block : tuple of 3 floats
         Floats specifying the color for the block that has greater
         intensity value. They should be in the range [0, 1].
         Corresponding values define (R, G, B) values. Default value
-        is white [1, 1, 1].
-    color_greater_block : list of 3 floats
+        is white (1, 1, 1).
+    color_greater_block : tuple of 3 floats
         Floats specifying the color for the block that has greater intensity
         value. They should be in the range [0, 1]. Corresponding values define
-        (R, G, B) values. Default value is cyan [0, 0.69, 0.96].
+        (R, G, B) values. Default value is cyan (0, 0.69, 0.96).
     alpha : float
         Value in the range [0, 1] that specifies opacity of visualization.
         1 - fully transparent, 0 - opaque.

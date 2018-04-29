@@ -148,12 +148,14 @@ class CENSURE(FeatureDetector):
     .. [1] Motilal Agrawal, Kurt Konolige and Morten Rufus Blas
            "CENSURE: Center Surround Extremas for Realtime Feature
            Detection and Matching",
-           http://link.springer.com/content/pdf/10.1007%2F978-3-540-88693-8_8.pdf
+           https://link.springer.com/chapter/10.1007/978-3-540-88693-8_8
+           DOI:10.1007/978-3-540-88693-8_8
 
     .. [2] Adam Schmidt, Marek Kraft, Michal Fularz and Zuzanna Domagala
            "Comparative Assessment of Point Feature Detectors and
            Descriptors in the Context of Robot Navigation"
-           http://www.jamris.org/01_2013/saveas.php?QUEST=JAMRIS_No01_2013_P_11-20.pdf
+           http://yadda.icm.edu.pl/yadda/element/bwmeta1.element.baztech-268aaf28-0faf-4872-a4df-7e2e61cb364c/c/Schmidt_comparative.pdf
+           DOI:10.1.1.465.1117
 
     Examples
     --------

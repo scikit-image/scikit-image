@@ -263,6 +263,7 @@ def polygon_perimeter(r, c, shape=None, clip=False):
 def set_color(image, coords, color, alpha=1):
     """Set pixel color in the image at the given coordinates.
 
+    Note that this function modifies the color of the image in-place.
     Coordinates that exceed the shape of the image will be ignored.
 
     Parameters
@@ -276,11 +277,6 @@ def set_color(image, coords, color, alpha=1):
     alpha : scalar or (N,) ndarray
         Alpha values used to blend color with image.  0 is transparent,
         1 is opaque.
-
-    Returns
-    -------
-    image : (M, N, D) ndarray
-        The updated image.
 
     Examples
     --------

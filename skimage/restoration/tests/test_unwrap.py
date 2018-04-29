@@ -1,13 +1,13 @@
 from __future__ import print_function, division
 
 import numpy as np
-from numpy.testing import (run_module_suite, assert_array_almost_equal_nulp,
-                           assert_almost_equal, assert_array_equal,
-                           assert_)
-import pytest
-import warnings
-
 from skimage.restoration import unwrap_phase
+
+import warnings
+from skimage._shared import testing
+from skimage._shared.testing import (assert_array_almost_equal_nulp,
+                                     assert_almost_equal, assert_array_equal,
+                                     assert_)
 from skimage._shared._warnings import expected_warnings
 
 
@@ -47,29 +47,33 @@ def test_unwrap_1d():
     image = np.linspace(0, 10 * np.pi, 100)
     check_unwrap(image)
     # Masked arrays are not allowed in 1D
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         check_unwrap(image, True)
     # wrap_around is not allowed in 1D
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         unwrap_phase(image, True, seed=0)
 
 
-def test_unwrap_2d():
+@testing.parametrize("check_with_mask", (False, True))
+def test_unwrap_2d(check_with_mask):
+    mask = None
     x, y = np.ogrid[:8, :16]
     image = 2 * np.pi * (x * 0.2 + y * 0.1)
-    yield check_unwrap, image
-    mask = np.zeros(image.shape, dtype=np.bool)
-    mask[4:6, 4:8] = True
-    yield check_unwrap, image, mask
+    if check_with_mask:
+        mask = np.zeros(image.shape, dtype=np.bool)
+        mask[4:6, 4:8] = True
+    check_unwrap(image, mask)
 
 
-def test_unwrap_3d():
+@testing.parametrize("check_with_mask", (False, True))
+def test_unwrap_3d(check_with_mask):
+    mask = None
     x, y, z = np.ogrid[:8, :12, :16]
     image = 2 * np.pi * (x * 0.2 + y * 0.1 + z * 0.05)
-    yield check_unwrap, image
-    mask = np.zeros(image.shape, dtype=np.bool)
-    mask[4:6, 4:6, 1:3] = True
-    yield check_unwrap, image, mask
+    if check_with_mask:
+        mask = np.zeros(image.shape, dtype=np.bool)
+        mask[4:6, 4:6, 1:3] = True
+    check_unwrap(image, mask)
 
 
 def check_wrap_around(ndim, axis):
@@ -109,10 +113,12 @@ def check_wrap_around(ndim, axis):
                         image_unwrap_wrap_around[index_last])
 
 
-def test_wrap_around():
-    for ndim in (2, 3):
-        for axis in range(ndim):
-            yield check_wrap_around, ndim, axis
+dim_axis = [(ndim, axis) for ndim in (2, 3) for axis in range(ndim)]
+
+
+@testing.parametrize("ndim, axis", dim_axis)
+def test_wrap_around(ndim, axis):
+    check_wrap_around(ndim, axis)
 
 
 def test_mask():
@@ -143,17 +149,18 @@ def test_mask():
             image_unwrapped_3d = unwrap_phase(image_wrapped_3d)
             # remove phase shift
             image_unwrapped_3d -= image_unwrapped_3d[0, 0, 0]
-        assert_array_almost_equal_nulp(image_unwrapped_3d[:, :, -1], image[i, -1])
+        assert_array_almost_equal_nulp(image_unwrapped_3d[:, :, -1],
+                                       image[i, -1])
 
 
 def test_invalid_input():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         unwrap_phase(np.zeros([]))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         unwrap_phase(np.zeros((1, 1, 1, 1)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         unwrap_phase(np.zeros((1, 1)), 3 * [False])
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         unwrap_phase(np.zeros((1, 1)), 'False')
 
 
@@ -209,7 +216,3 @@ def test_unwrap_3d_all_masked():
     assert_(np.ma.isMaskedArray(unwrap))
     assert_(np.sum(unwrap.mask) == 999)   # all but one masked
     assert_(unwrap[0, 0, 0] == 0)
-
-
-if __name__ == "__main__":
-    run_module_suite()

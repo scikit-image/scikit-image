@@ -2,7 +2,6 @@
 Algorithms for computing the skeleton of a binary image
 """
 
-import sys
 from six.moves import range
 import numpy as np
 from scipy import ndimage as ndi
@@ -249,8 +248,6 @@ def thin(image, max_iter=None):
            [0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
-    # check parameters
-    max_iter = max_iter or sys.maxsize
     # check that image is 2d
     assert_nD(image, 2)
 
@@ -258,13 +255,17 @@ def thin(image, max_iter=None):
     skel = np.asanyarray(image, dtype=bool).astype(np.uint8)
 
     # neighborhood mask
-    mask = np.array([[ 8,  4,  2],
-                     [16,  0,  1],
-                     [32, 64,128]], dtype=np.uint8)
+    mask = np.array([[ 8,  4,   2],
+                     [16,  0,   1],
+                     [32, 64, 128]], dtype=np.uint8)
 
     # iterate until convergence, up to the iteration limit
-    for i in range(max_iter):
-        before = np.sum(skel)  # count points before thinning
+    max_iter = max_iter or np.inf
+    n_iter = 0
+    n_pts_old, n_pts_new = np.inf, np.sum(skel)
+    while n_pts_old != n_pts_new and n_iter < max_iter:
+        n_pts_old = n_pts_new
+
         # perform the two "subiterations" described in the paper
         for lut in [G123_LUT, G123P_LUT]:
             # correlate image with neighborhood mask
@@ -274,11 +275,8 @@ def thin(image, max_iter=None):
             # perform deletion
             skel[D] = 0
 
-        after = np.sum(skel)  # count points after thinning
-
-        if before == after:
-            # iteration had no effect: finish
-            break
+        n_pts_new = np.sum(skel)  # count points after thinning
+        n_iter += 1
 
     return skel.astype(np.bool)
 
@@ -429,7 +427,7 @@ def medial_axis(image, mask=None, return_distance=False):
     _skeletonize_loop(result, i, j, order, table)
 
     result = result.astype(bool)
-    if not mask is None:
+    if mask is not None:
         result[~mask] = image[~mask]
     if return_distance:
         return result, store_distance

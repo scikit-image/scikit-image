@@ -1,4 +1,5 @@
 # coding=utf-8
+from __future__ import division
 
 import numpy as np
 from scipy import ndimage as ndi
@@ -176,7 +177,6 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         min_size = int(min_size_factor * segment_size)
         max_size = int(max_size_factor * segment_size)
         labels = _enforce_label_connectivity_cython(labels,
-                                                    n_segments,
                                                     min_size,
                                                     max_size)
 

@@ -1,6 +1,4 @@
 import numpy as np
-from scipy import ndimage
-from .. import measure
 from ._hough_transform import (_hough_circle,
                                _hough_ellipse,
                                _hough_line,
@@ -57,13 +55,16 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     2
 
     """
-    from skimage.feature.peak import _prominent_peaks
+    from ..feature.peak import _prominent_peaks
 
     h, a, d = _prominent_peaks(hspace, min_xdistance=min_angle,
                                min_ydistance=min_distance,
                                threshold=threshold,
                                num_peaks=num_peaks)
-    return (h, angles[a], dists[d])
+    if a.any():
+        return (h, angles[a], dists[d])
+    else:
+        return (h, np.array([]), np.array([]))
 
 
 def hough_circle(image, radius, normalize=True, full_output=False):
@@ -105,7 +106,6 @@ def hough_circle(image, radius, normalize=True, full_output=False):
     (25, 35, 23)
 
     """
-
     radius = np.atleast_1d(np.asarray(radius))
     return _hough_circle(image, radius.astype(np.intp),
                          normalize=normalize, full_output=full_output)
@@ -222,7 +222,7 @@ def hough_line(image, theta=None):
 
 
 def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
-                             theta=None):
+                             theta=None, seed=None):
     """Return lines from a progressive probabilistic line Hough transform.
 
     Parameters
@@ -240,6 +240,8 @@ def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
     theta : 1D ndarray, dtype=double, optional
         Angles at which to compute the transform, in radians.
         If None, use a range from -pi/2 to pi/2.
+    seed : int, optional
+        Seed to initialize the random number generator.
 
     Returns
     -------
@@ -261,7 +263,7 @@ def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
         theta = np.pi / 2 - np.arange(180) / 180.0 * np.pi
 
     return _prob_hough_line(image, threshold=threshold, line_length=line_length,
-                            line_gap=line_gap, theta=theta)
+                            line_gap=line_gap, theta=theta, seed=seed)
 
 
 def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
@@ -306,16 +308,15 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
 
     Examples
     --------
-    >>> from skimage import transform as tf
-    >>> from skimage import draw
+    >>> from skimage import transform, draw
     >>> img = np.zeros((120, 100), dtype=int)
     >>> radius, x_0, y_0 = (20, 99, 50)
     >>> y, x = draw.circle_perimeter(y_0, x_0, radius)
     >>> img[x, y] = 1
-    >>> hspaces = tf.hough_circle(img, radius)
+    >>> hspaces = transform.hough_circle(img, radius)
     >>> accum, cx, cy, rad = hough_circle_peaks(hspaces, [radius,])
     """
-    from skimage.feature.peak import _prominent_peaks
+    from ..feature.peak import _prominent_peaks
 
     r = []
     cx = []
@@ -328,7 +329,6 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
                                          min_ydistance=min_ydistance,
                                          threshold=threshold,
                                          num_peaks=num_peaks)
-
         r.extend((rad,)*len(h_p))
         cx.extend(x_p)
         cy.extend(y_p)

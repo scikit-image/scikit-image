@@ -1,7 +1,9 @@
 import numpy as np
-from numpy.testing import assert_array_equal
-import pytest
 from skimage.segmentation import join_segmentations, relabel_sequential
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_array_equal
+
 
 def test_join_segmentations():
     s1 = np.array([[0, 0, 1, 1],
@@ -23,7 +25,7 @@ def test_join_segmentations():
 
     # test correct exception when arrays are different shapes
     s3 = np.array([[0, 0, 1, 1], [0, 2, 2, 1]])
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         join_segmentations(s1, s3)
 
 
@@ -33,7 +35,11 @@ def test_relabel_sequential_offset1():
     ar_relab_ref = np.array([1, 1, 2, 2, 3, 5, 4])
     assert_array_equal(ar_relab, ar_relab_ref)
     fw_ref = np.zeros(100, int)
-    fw_ref[1] = 1; fw_ref[5] = 2; fw_ref[8] = 3; fw_ref[42] = 4; fw_ref[99] = 5
+    fw_ref[1] = 1
+    fw_ref[5] = 2
+    fw_ref[8] = 3
+    fw_ref[42] = 4
+    fw_ref[99] = 5
     assert_array_equal(fw, fw_ref)
     inv_ref = np.array([0,  1,  5,  8, 42, 99])
     assert_array_equal(inv, inv_ref)
@@ -45,7 +51,11 @@ def test_relabel_sequential_offset5():
     ar_relab_ref = np.array([5, 5, 6, 6, 7, 9, 8])
     assert_array_equal(ar_relab, ar_relab_ref)
     fw_ref = np.zeros(100, int)
-    fw_ref[1] = 5; fw_ref[5] = 6; fw_ref[8] = 7; fw_ref[42] = 8; fw_ref[99] = 9
+    fw_ref[1] = 5
+    fw_ref[5] = 6
+    fw_ref[8] = 7
+    fw_ref[42] = 8
+    fw_ref[99] = 9
     assert_array_equal(fw, fw_ref)
     inv_ref = np.array([0, 0, 0, 0, 0, 1,  5,  8, 42, 99])
     assert_array_equal(inv, inv_ref)
@@ -57,7 +67,11 @@ def test_relabel_sequential_offset5_with0():
     ar_relab_ref = np.array([5, 5, 6, 6, 7, 9, 8, 0])
     assert_array_equal(ar_relab, ar_relab_ref)
     fw_ref = np.zeros(100, int)
-    fw_ref[1] = 5; fw_ref[5] = 6; fw_ref[8] = 7; fw_ref[42] = 8; fw_ref[99] = 9
+    fw_ref[1] = 5
+    fw_ref[5] = 6
+    fw_ref[8] = 7
+    fw_ref[42] = 8
+    fw_ref[99] = 9
     assert_array_equal(fw, fw_ref)
     inv_ref = np.array([0, 0, 0, 0, 0, 1,  5,  8, 42, 99])
     assert_array_equal(inv, inv_ref)
@@ -69,11 +83,11 @@ def test_relabel_sequential_dtype():
     ar_relab_ref = np.array([5, 5, 6, 6, 7, 9, 8, 0])
     assert_array_equal(ar_relab, ar_relab_ref)
     fw_ref = np.zeros(100, int)
-    fw_ref[1] = 5; fw_ref[5] = 6; fw_ref[8] = 7; fw_ref[42] = 8; fw_ref[99] = 9
+    fw_ref[1] = 5
+    fw_ref[5] = 6
+    fw_ref[8] = 7
+    fw_ref[42] = 8
+    fw_ref[99] = 9
     assert_array_equal(fw, fw_ref)
     inv_ref = np.array([0, 0, 0, 0, 0, 1,  5,  8, 42, 99])
     assert_array_equal(inv, inv_ref)
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

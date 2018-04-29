@@ -1,3 +1,23 @@
+.. _howto_contribute:
+
+How to contribute to ``skimage``
+================================
+
+Developing Open Source is great fun!  Join us on the `scikit-image mailing
+list <https://mail.python.org/mailman/listinfo/scikit-image>`_ and tell us
+which of the following challenges you'd like to solve.
+
+* Mentoring is available for those new to scientific programming in Python.
+* If you're looking for something to implement, you can find a list of
+  `requested features on GitHub <https://github.com/scikit-image/scikit-image/wiki/Requested-features>`__.
+  In addition, you can browse the
+  `open issues on GitHub <https://github.com/scikit-image/scikit-image/issues?state=open>`__.
+* The technical detail of the `development process`_ is summed up below.
+  Refer to the :doc:`gitwash <gitwash/index>` for a step-by-step tutorial.
+
+.. contents::
+   :local:
+
 Development process
 -------------------
 
@@ -105,30 +125,50 @@ For a more detailed discussion, read these :doc:`detailed documents
 Divergence between ``upstream master`` and your feature branch
 --------------------------------------------------------------
 
-Do *not* ever merge the main branch into yours. If GitHub indicates that the
-branch of your Pull Request can no longer be merged automatically, rebase
-onto master::
+If GitHub indicates that the branch of your Pull Request can no longer
+be merged automatically, merge the master branch into yours::
 
-   git checkout master
-   git pull upstream master
-   git checkout transform-speedups
-   git rebase master
+   git fetch upstream master
+   git merge upstream/master
 
-If any conflicts occur, fix the according files and continue::
+If any conflicts occur, they need to be fixed before continuing.  See
+which files are in conflict using::
 
-   git add conflict-file1 conflict-file2
-   git rebase --continue
+   git status
 
-However, you should only rebase your own branches and must generally not
-rebase any branch which you collaborate on with someone else.
+Which displays a message like::
 
-Finally, you must push your rebased branch::
+   Unmerged paths:
+     (use "git add <file>..." to mark resolution)
 
-   git push --force origin transform-speedups
+     both modified:   file_with_conflict.txt
 
-(If you are curious, here's a further discussion on the
-`dangers of rebasing <http://tinyurl.com/lll385>`__.
-Also see this `LWN article <http://tinyurl.com/nqcbkj>`__.)
+Inside the conflicted file, you'll find sections like these::
+
+   <<<<<<< HEAD
+   The way the text looks in your branch
+   =======
+   The way the text looks in the master branch
+   >>>>>>> master
+
+Choose one version of the text that should be kept, and delete the
+rest::
+
+   The way the text looks in your branch
+
+Now, add the fixed file::
+
+   git add file_with_conflict.txt
+
+Once you've fixed all merge conflicts, do::
+
+   git commit
+
+.. note::
+
+   Advanced Git users are encouraged to `rebase instead of merge
+   <http://scikit-image.org/docs/dev/gitwash/development_workflow.html#rebasing-on-trunk>`__,
+   but we squash and merge most PRs either way.
 
 Guidelines
 ----------
@@ -189,6 +229,43 @@ Stylistic Guidelines
   ``with nogil:``.
 
 
+Testing
+-------
+``scikit-image`` has an extensive test suite that ensures correct
+execution on your system.  The test suite has to pass before a pull
+request can be merged, and tests should be added to cover any
+modifications to the code base.
+
+We make use of the `pytest <https://docs.pytest.org/en/latest/>`__
+testing framework, with tests located in the various
+``skimage/submodule/tests`` folders.
+
+To use ``pytest``, ensure that Cython extensions are built and that
+the library is installed in development mode::
+
+    $ pip install -e .
+
+Now, run all tests using::
+
+    $ PYTHONPATH=. pytest skimage
+
+Or the tests for a specific submodule::
+
+    $ PYTHONPATH=. pytest skimage/morphology
+
+Or tests from a specific file::
+
+    $ PYTHONPATH=. pytest skimage/morphology/tests/test_grey.py
+
+Or a single test within that file::
+
+    $ PYTHONPATH=. pytest skimage/morphology/tests/test_grey.py::test_3d_fallback_black_tophat
+
+Use ``--doctest-modules`` to run doctests.
+For example, run all tests and all doctests using::
+
+    $ PYTHONPATH=. pytest --doctest-modules skimage
+
 Test coverage
 -------------
 
@@ -245,7 +322,8 @@ all targets.
 Requirements
 ~~~~~~~~~~~~
 
-Sphinx (>= 1.3) and Latex is needed to build doc.
+`Sphinx <http://www.sphinx-doc.org/en/stable/>`__ and LaTeX are needed to build
+the documentation.
 
 **Sphinx:**
 
@@ -253,13 +331,13 @@ Sphinx (>= 1.3) and Latex is needed to build doc.
 
     pip install sphinx
 
-**Latex Ubuntu:**
+**LaTeX Ubuntu:**
 
 .. code:: sh
 
     sudo apt-get install -qq texlive texlive-latex-extra dvipng
 
-**Latex Mac:**
+**LaTeX Mac:**
 
 Install the full `MacTex <http://www.tug.org/mactex/>`__ installation or
 install the smaller
@@ -308,7 +386,8 @@ Deprecation cycle
 If the behavior of the library has to be changed, a deprecation cycle must be
 followed to warn users.
 
-- a deprecation cycle is *not* necessary when
+- a deprecation cycle is *not* necessary when:
+
     * adding a new function, or
     * adding a new keyword argument to the *end* of a function signature, or
     * fixing what was buggy behaviour
@@ -316,6 +395,7 @@ followed to warn users.
 - a deprecation cycle is necessary for *any breaking API change*, meaning a
     change where the function, invoked with the same arguments, would return a
     different result after the change. This includes:
+
     * changing the order of arguments or keyword arguments, or
     * adding arguments or keyword arguments to a function, or
     * changing a function's name or submodule, or
@@ -333,27 +413,24 @@ have
         out = do_something(image, rescale=rescale)
         return out
 
-
 that has to be changed to
 
 .. code-block:: python
 
     def a_function(image, rescale=None):
-    	if rescale is None:
-    	    warn('The default value of rescale will change to `False` in version N+3')
-    	    rescale = True
-    	out = do_something(image, rescale=rescale)
-    	return out
-
+        if rescale is None:
+            warn('The default value of rescale will change to `False` in version N+3')
+            rescale = True
+        out = do_something(image, rescale=rescale)
+        return out
 
 and in version N+3
 
 .. code-block:: python
 
     def a_function(image, rescale=False):
-    	out = do_something(image, rescale=rescale)
-    	return out
-
+        out = do_something(image, rescale=rescale)
+        return out
 
 Here is the process for a 2-release deprecation cycle:
 
@@ -361,6 +438,8 @@ Here is the process for a 2-release deprecation cycle:
   that it's `True`.
 - In the function, _if_ rescale is set to `None`, set to `True` and warn that the
   default will change to `False` in version N+3.
+- In ``doc/release/release_dev.rst``, under deprecations, add "In
+  `a_function`, the `rescale` argument will default to `False` in N+3."
 - In ``TODO.txt``, create an item in the section related to version N+3 and write
   "change rescale default to False in a_function".
 

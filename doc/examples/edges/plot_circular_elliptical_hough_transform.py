@@ -126,9 +126,8 @@ image_rgb[cy, cx] = (0, 0, 255)
 edges = color.gray2rgb(img_as_ubyte(edges))
 edges[cy, cx] = (250, 0, 0)
 
-fig2, (ax1, ax2) = plt.subplots(ncols=2, nrows=1, figsize=(8, 4), sharex=True,
-                                sharey=True,
-                                subplot_kw={'adjustable':'box-forced'})
+fig2, (ax1, ax2) = plt.subplots(ncols=2, nrows=1, figsize=(8, 4),
+                                sharex=True, sharey=True)
 
 ax1.set_title('Original picture')
 ax1.imshow(image_rgb)

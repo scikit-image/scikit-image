@@ -3,8 +3,8 @@
 
 import numpy as np
 from numpy.testing import assert_equal
-import pytest
 from skimage._shared.testing import doctest_skip_parser, test_parallel
+from skimage._shared import testing
 
 
 def test_skipper():
@@ -69,9 +69,9 @@ def test_skipper():
     del HAVE_AMODULE
     f.__doc__ = docstring
     c.__doc__ = docstring
-    with pytest.raises(NameError):
+    with testing.raises(NameError):
         doctest_skip_parser(f)
-    with pytest.raises(NameError):
+    with testing.raises(NameError):
         doctest_skip_parser(c)
 
 

@@ -12,14 +12,13 @@
 - **Debian/Ubuntu:** ``sudo apt-get install python-skimage``
 - **OSX:** ``pip install scikit-image``
 - **Anaconda:** ``conda install scikit-image``
-- **Windows:** Download [Windows binaries](http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikits.image)
+- **Windows:** Download [Windows binaries](http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image)
 
-Also see
-[http://scikit-image.org/docs/dev/install.html](http://scikit-image.org/docs/dev/install.html)
+Also see [installing ``scikit-image``](INSTALL.rst).
 
 ## Installation from source
 
-Install [dependencies](DEPENDS.txt) using:
+Install dependencies using:
 
 ```
 pip install -r requirements.txt
@@ -74,3 +73,12 @@ STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
 IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
+## Citation
+
+If you find this project useful, please cite:
+
+> Stéfan van der Walt, Johannes L. Schönberger, Juan Nunez-Iglesias,
+> François Boulogne, Joshua D. Warner, Neil Yager, Emmanuelle
+> Gouillart, Tony Yu, and the scikit-image contributors.
+> *scikit-image: Image processing in Python*. PeerJ 2:e453 (2014)
+> http://dx.doi.org/10.7717/peerj.453

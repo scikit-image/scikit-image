@@ -1,10 +1,10 @@
 import numpy as np
-from numpy.testing import (assert_array_equal,
-                           assert_almost_equal,
-                           )
-
 import skimage.graph.mcp as mcp
+
+from skimage._shared.testing import (assert_array_equal, assert_almost_equal,
+                                     parametrize)
 from skimage._shared._warnings import expected_warnings
+
 
 np.random.seed(0)
 a = np.ones((8, 8), dtype=np.float32)
@@ -12,6 +12,7 @@ a[1:-1, 1] = 0
 a[1, 1:-1] = 0
 
 warning_optional = r'|\A\Z'
+
 
 def test_basic():
     with expected_warnings(['Upgrading NumPy' + warning_optional]):
@@ -135,9 +136,9 @@ def test_offsets():
                         [10,  0,  1,  2,  3,  4,  5,  6]])
 
 
-def test_crashing():
-    for shape in [(100, 100), (5, 8, 13, 17)] * 5:
-        yield _test_random, shape
+@parametrize("shape", [(100, 100), (5, 8, 13, 17)] * 5)
+def test_crashing(shape):
+    _test_random(shape)
 
 
 def _test_random(shape):
@@ -158,8 +159,3 @@ def _test_random(shape):
     for end in ends:
         m.traceback(end)
     return a, costs, offsets
-
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()
