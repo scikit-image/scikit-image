@@ -34,7 +34,7 @@ def invert(image, signed_float=False):
     -----
     Ideally, for signed integers we would simply multiply by -1. However,
     signed integer ranges are asymmetric. For example, for np.int8, the range
-    of possible values is [-128, 127], so that -128 * -1 equals 128! By
+    of possible values is [-128, 127], so that -128 * -1 equals -128! By
     subtracting from -1, we correctly map the maximum dtype value to the
     minimum.
 
