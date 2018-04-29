@@ -275,18 +275,25 @@ def convert(image, dtype, force_copy=False, uniform=False):
     if kind_out == 'f':
         if itemsize_in >= itemsize_out:
             prec_loss()
+
         # use float type that can exactly represent input integers
-        image = image.astype(_dtype_itemsize(itemsize_in, dtype_out,
-                                             np.float32, np.float64))
+        # The OS probably doesn't truely give the necessary memory until
+        # it is used.
+        # Preallocating it actually speeds up the np.multiply by 2.8 TIMES!!!!
+        computation_type = _dtype_itemsize(itemsize_in, dtype_out,
+                                           np.float32, np.float64)
         if kind_in == 'u':
-            image /= imax_in
+            # using np.divide or np.multiply doesn't copy the data
+            # until the computation time
+            image = np.multiply(image, 1. / imax_in,
+                                dtype=computation_type)
             # DirectX uses this conversion also for signed ints
             # if imin_in:
             #     np.maximum(image, -1.0, out=image)
         else:
-            image *= 2.0
-            image += 1.0
-            image /= imax_in - imin_in
+            image = np.multiply(image, 2. / (imax_in - imin_in),
+                                dtype=computation_type)
+            image += 1.0 / (imax_in - imin_in)
         return np.asarray(image, dtype_out)
 
     # unsigned int -> signed/unsigned int
