@@ -1,6 +1,5 @@
 # coding=utf-8
 
-import collections as coll
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -8,6 +7,7 @@ from ..util import img_as_float, regular_grid
 from ..segmentation._slic import (_slic_cython,
                                   _enforce_label_connectivity_cython)
 from ..color import rgb2lab
+from .._shared.utils import expand_arg
 
 
 def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
@@ -129,11 +129,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     elif isinstance(spacing, (list, tuple)):
         spacing = np.array(spacing, dtype=np.double)
 
-    if not isinstance(sigma, coll.Iterable):
-        sigma = np.array([sigma, sigma, sigma], dtype=np.double)
+    sigma, rpl = expand_arg(sigma, 3, dtype=np.double)
+    if rpl == 3:
         sigma /= spacing.astype(np.double)
-    elif isinstance(sigma, (list, tuple)):
-        sigma = np.array(sigma, dtype=np.double)
     if (sigma > 0).any():
         # add zero smoothing for multichannel dimension
         sigma = list(sigma) + [0]
