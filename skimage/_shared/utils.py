@@ -271,7 +271,7 @@ def expand_arg(arg, times, arg_name='arg', default=0):
 
     Returns
     -------
-    expanded_arg : (``times``,) array
+    expanded_arg : array, shape (``times``,)
         The standardized output of the argument.
 
     Examples
@@ -283,19 +283,21 @@ def expand_arg(arg, times, arg_name='arg', default=0):
     array(180., 0., 180., 180., 180.)
 
     """
-    standardized_arg = np.array(arg)
+    arg = np.asarray(arg)
     message = 'The parameter `%s` cannot be of size larger than %s.'
-    if standardized_arg.ndim == 0:
-        # `param` is not array_like
-        standardized_arg *= np.ones(times)
+    if arg.ndim == 0:
+        # `arg` is not array_like
+        arg = arg.repeat(times)
     else:
-        # `param` is array_like
-        standardized_arg = standardized_param.ravel()
-        if standardized_arg.size > times:
+        # `arg` is array_like
+        arg_len = np.shape(arg)[0]
+        if arg_len > times:
             raise ValueError(message % (arg_name, str(times)))
-        standardized_arg += ([default]
-                             * (times - standardized_arg.size))
-    # replace all `None`s with the default value
-    standardized_arg[(standardized_arg == None).nonzero()] = default
+        arg = np.append(arg, np.repeat(default, times - arg_len), axis=0)
 
-    return standardized_arg.astype(None)
+    # replace all `None`s with the default value
+    arg[(arg == None).nonzero()] = default  # noqa
+
+    expanded_arg = arg.astype(None)
+
+    return expanded_arg
