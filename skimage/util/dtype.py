@@ -251,25 +251,33 @@ def convert(image, dtype, force_copy=False, uniform=False):
         # floating point -> integer
         prec_loss()
         # use float type that can represent output integer type
-        image = image.astype(_dtype_itemsize(itemsize_out, dtype_in,
-                                             np.float32, np.float64))
+        computation_type = _dtype_itemsize(itemsize_out, dtype_in,
+                                           np.float32, np.float64)
+        if copy or computation_type != image.dtype:
+            image_out = np.empty(shape=image.shape, dtype=computation_type)
+        else:
+            image_out = image
+
         if not uniform:
             if kind_out == 'u':
-                image *= imax_out
+                np.multiply(image, imax_out,
+                            out=image_out, dtype=computation_type)
             else:
-                image *= imax_out - imin_out
-                image -= 1.0
-                image /= 2.0
-            np.rint(image, out=image)
-            np.clip(image, imin_out, imax_out, out=image)
+                np.multiply(image, (imax_out - imin_out)/2,
+                            out=image_out, dtype=computation_type)
+                image_out -= 1.0 / 2.
+            np.rint(image_out, out=image_out)
+            np.clip(image_out, imin_out, imax_out, out=image_out)
         elif kind_out == 'u':
-            image *= imax_out + 1
-            np.clip(image, 0, imax_out, out=image)
+            np.multiply(image, imax_out+1,
+                        out=image_out, dtype=computation_type)
+            np.clip(image_out, 0, imax_out, out=image_out)
         else:
-            image *= (imax_out - imin_out + 1.0) / 2.0
-            np.floor(image, out=image)
-            np.clip(image, imin_out, imax_out, out=image)
-        return image.astype(dtype_out)
+            np.multiply(image, (imax_out - imin_out + 1.0) / 2.0,
+                        out=image_out, dtype=computation_type)
+            np.floor(image_out, out=image_out)
+            np.clip(image_out, imin_out, imax_out, out=image_out)
+        return image_out.astype(dtype_out)
 
     # signed/unsigned int -> float
     if kind_out == 'f':
@@ -277,9 +285,6 @@ def convert(image, dtype, force_copy=False, uniform=False):
             prec_loss()
 
         # use float type that can exactly represent input integers
-        # The OS probably doesn't truely give the necessary memory until
-        # it is used.
-        # Preallocating it actually speeds up the np.multiply by 2.8 TIMES!!!!
         computation_type = _dtype_itemsize(itemsize_in, dtype_out,
                                            np.float32, np.float64)
         if kind_in == 'u':
