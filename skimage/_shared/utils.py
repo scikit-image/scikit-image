@@ -244,7 +244,8 @@ def convert_to_float(image, preserve_range):
     return image
 
 
-def expand_arg(arg, times, arg_name='arg', default=0, max_expand=None):
+def expand_arg(arg, times, arg_name='arg', default=0,
+               max_expand=None, dtype=None):
     """Provides an expected/standardized output of the parameter as
     an ndarray the size of times. Primarily used in n-Dimensional
     image processing.
@@ -270,6 +271,12 @@ def expand_arg(arg, times, arg_name='arg', default=0, max_expand=None):
         The value to default to when None is provided.
     max_expand: int, optional
         If not set to None, limits the number of times a scalar is broadcast.
+    dtype: data-type, optional
+        The desired data-type for the array.  If not given, then the type will
+        be determined as the minimum type required to hold the objects in the
+        sequence.  This argument can only be used to 'upcast' the array.  For
+        downcasting, use the .astype(t) method.
+
 
     Returns
     -------
@@ -288,8 +295,8 @@ def expand_arg(arg, times, arg_name='arg', default=0, max_expand=None):
     >>> expand_arg(5, 5, max_expand=3)
     array(5., 5., 5., 0., 0.)
 
-    >>> expand_arg((3, None, 42), 6, max_expand=3)
-    array(3., 0., 42., 0., 0., 0.)
+    >>> expand_arg((3.5, None, 42), 6, max_expand=3, dtype=int)
+    array(3, 0, 42, 0, 0, 0)
 
     """
     if max_expand is None:
@@ -309,6 +316,6 @@ def expand_arg(arg, times, arg_name='arg', default=0, max_expand=None):
     # replace all `None`s with the default value
     arg[(arg == None).nonzero()] = default  # noqa
 
-    expanded_arg = arg.astype(None)
+    expanded_arg = arg.astype(dtype)
 
     return expanded_arg

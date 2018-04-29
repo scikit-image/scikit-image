@@ -37,8 +37,8 @@ def test_expand_arg():
     out = expand_arg(5, 5, max_expand=3)
     npt.assert_array_equal(out, np.array([5, 5, 5, 0, 0]))
 
-    out = expand_arg((3, None, 42), 6, max_expand=3)
-    npt.assert_array_equal(out, np.array([3, 0, 42, 0, 0, 0]))
+    out = expand_arg((3.5, None, 42), 6, max_expand=3, dtype=int)
+    npt.assert_array_equal(out, np.array([3, 0, 42, 0, 0, 0], dtype=int))
 
 
 if __name__ == "__main__":
