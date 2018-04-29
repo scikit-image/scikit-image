@@ -60,13 +60,15 @@ def invert(image, signed_float=False):
     array([[-0.  , -1.  ,  1.  ,  0.25]])
     """
     if image.dtype == 'bool':
-        return(~image)
+        inverted = ~image
     elif np.issubdtype(image.dtype, np.unsignedinteger):
-        return(dtype_limits(image, clip_negative=False)[1] - image)
+        max_val = dtype_limits(image, clip_negative=False)[1]
+        inverted = max_val - image
     elif np.issubdtype(image.dtype, np.signedinteger):
-        return(-1 - image)
-    else:
+        inverted = -1 - image
+    else:  # float dtype
         if signed_float:
-            return(-image)
+            inverted = -image
         else:
-            return(1 - image)
+            inverted = 1 - image
+    return inverted
