@@ -246,7 +246,7 @@ def convert_to_float(image, preserve_range):
 
 def expand_arg(arg, times, arg_name='arg', default=0, dtype=None):
     """Provides an expected/standardized output of the parameter as
-    an ndarray the size of times. Primarily used in n-Dimensional
+    an ndarray the size of times. Primarily used in n-dimensional
     image processing.
 
     An argument that is not what NumPy considers to be array-like
@@ -279,6 +279,8 @@ def expand_arg(arg, times, arg_name='arg', default=0, dtype=None):
     -------
     expanded_arg : array, shape (``times``,)
         The standardized output of the argument.
+    filled : int
+        The number of arguments that have been filled in.
 
     Examples
     --------
