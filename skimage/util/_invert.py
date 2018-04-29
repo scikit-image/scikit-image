@@ -5,8 +5,8 @@ from .dtype import dtype_limits
 def invert(image, signed_float=False):
     """Invert an image.
 
-    Invert the intensity range of the input image, so that the maximum value is
-    now the minimum for the input dtype, and vice-versa. This operation is
+    Invert the intensity range of the input image, so that the dtype maximum
+    is now the dtype minimum, and vice-versa. This operation is
     slightly different depending on the input dtype:
 
     - unsigned integers: subtract the image from the dtype maximum
@@ -34,7 +34,7 @@ def invert(image, signed_float=False):
     -----
     Ideally, for signed integers we would simply multiply by -1. However,
     signed integer ranges are asymmetric. For example, for np.int8, the range
-    of possible values is [-128, 127], so that -128 * -1 equals -128! By
+    of possible values is [-128, 127], so that -128 * -1 equals 128! By
     subtracting from -1, we correctly map the maximum dtype value to the
     minimum.
 
