@@ -149,9 +149,9 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
 
     # The creation of the array `pixels` results in a rather nasty error
     # when the image is empty.
-    # As discussed in GitHub #2820 and #2996, we opt instead to return None.
+    # As discussed in GitHub #2820 and #2996, we opt to return an empty array.
     if not np.any(img):
-        return None
+        return np.zeros((0, 6))
 
     cdef Py_ssize_t[:, ::1] pixels = np.row_stack(np.nonzero(img))
 
