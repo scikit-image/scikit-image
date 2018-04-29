@@ -244,7 +244,7 @@ def convert_to_float(image, preserve_range):
     return image
 
 
-def expand_arg(arg, times, arg_name='arg', default=0):
+def expand_arg(arg, times, arg_name='arg', default=0, max_expand=None):
     """Provides an expected/standardized output of the parameter as
     an ndarray the size of times. Primarily used in n-Dimensional
     image processing.
@@ -266,8 +266,10 @@ def expand_arg(arg, times, arg_name='arg', default=0):
         The number of elements in the output matrix.
     arg_name : str, optional
         Name of the argument in the original function.
-    default : any, optional
+    default : any, optional (default: 0)
         The value to default to when None is provided.
+    max_expand: int, optional
+        If not set to None, limits the number of times a scalar is broadcast.
 
     Returns
     -------
@@ -282,18 +284,27 @@ def expand_arg(arg, times, arg_name='arg', default=0):
     >>> expand_arg((None, 0), 5, default=180)
     array(180., 0., 180., 180., 180.)
 
+
+    >>> expand_arg(5, 5, max_expand=3)
+    array(5., 5., 5., 0., 0.)
+
+    >>> expand_arg((3, None, 42), 6, max_expand=3)
+    array(3., 0., 42., 0., 0., 0.)
+
     """
+    if max_expand is None:
+        max_expand = times
+
     arg = np.asarray(arg)
     message = 'The parameter `%s` cannot be of size larger than %s.'
     if arg.ndim == 0:
         # `arg` is not array_like
-        arg = arg.repeat(times)
-    else:
-        # `arg` is array_like
-        arg_len = np.shape(arg)[0]
-        if arg_len > times:
-            raise ValueError(message % (arg_name, str(times)))
-        arg = np.append(arg, np.repeat(default, times - arg_len), axis=0)
+        arg = arg.repeat(max_expand)
+
+    arg_len = np.shape(arg)[0]
+    if arg_len > times:
+        raise ValueError(message % (arg_name, str(times)))
+    arg = np.append(arg, np.repeat(default, times - arg_len), axis=0)
 
     # replace all `None`s with the default value
     arg[(arg == None).nonzero()] = default  # noqa

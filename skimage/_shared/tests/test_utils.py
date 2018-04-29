@@ -34,5 +34,12 @@ def test_expand_arg():
     npt.assert_array_equal(out, np.array([1, 10, 1, 1, 1]))
 
 
+    out = expand_arg(5, 5, max_expand=3)
+    npt.assert_array_equal(out, np.array([5, 5, 5, 0, 0]))
+
+    out = expand_arg((3, None, 42), 6, max_expand=3)
+    npt.assert_array_equal(out, np.array([3, 0, 42, 0, 0, 0]))
+
+
 if __name__ == "__main__":
     npt.run_module_suite()
