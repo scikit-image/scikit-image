@@ -1,10 +1,9 @@
-import collections as coll
 import numpy as np
 from scipy import ndimage as ndi
 
 from ..util import img_as_float
 from ..color import guess_spatial_dimensions
-from .._shared.utils import warn, convert_to_float
+from .._shared.utils import warn, convert_to_float, expand_arg
 
 
 __all__ = ['gaussian']
@@ -111,10 +110,10 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         raise ValueError("Sigma values less than zero are not valid")
     if multichannel:
         # do not filter across channels
-        if not isinstance(sigma, coll.Iterable):
-            sigma = [sigma] * (image.ndim - 1)
-        if len(sigma) != image.ndim:
-            sigma = np.concatenate((np.asarray(sigma), [0]))
+        sigma, rpl = expand_arg(sigma, image.ndim, default=0, arg_name='sigma')
+        if rpl == image.ndim:
+            sigma[-1] = 0
+
     image = convert_to_float(image, preserve_range)
     return ndi.gaussian_filter(image, sigma, mode=mode, cval=cval,
                                truncate=truncate)

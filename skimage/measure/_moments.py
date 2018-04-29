@@ -1,7 +1,7 @@
 # coding: utf-8
 from __future__ import division
 import numpy as np
-from .._shared.utils import assert_nD
+from .._shared.utils import assert_nD, expand_arg
 from . import _moments_cy
 import itertools
 from warnings import warn
@@ -100,9 +100,7 @@ def moments_coords_central(coords, center=None, order=3):
     if center is None:
         center = np.mean(coords, axis=0)
     else:
-        # TODO: Handle broadcasting of `center` argument.
-        if type(center) not in [tuple, list, np.ndarray]:
-            center = (center,) * ndim
+        center, _ = expand_arg(center, ndim, default=0, arg_name='center')
 
     # center the coordinates
     coords = coords.astype(float) - center
@@ -175,7 +173,7 @@ def moments(image, order=3):
     >>> cr, cc
     (14.5, 14.5)
     """
-    return moments_central(image, (0,) * image.ndim, order=order)
+    return moments_central(image, 0, order=order)
 
 
 def moments_central(image, center=None, cc=None, order=3, **kwargs):
@@ -246,6 +244,9 @@ def moments_central(image, center=None, cc=None, order=3, **kwargs):
         return moments_central(image, center=center, order=order).T
     if center is None:
         center = centroid(image)
+    else:
+        center, _ = expand_arg(center, image.ndim, default=0,
+                               arg_name='center')
     calc = image.astype(float)
     for dim, dim_length in enumerate(image.shape):
         delta = np.arange(dim_length, dtype=float) - center[dim]

@@ -11,7 +11,7 @@ from ..util import img_as_float
 from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
-           'safe_as_int', 'assert_nD', 'warn']
+           'safe_as_int', 'assert_nD', 'warn', 'interpret_arg']
 
 
 class skimage_deprecation(Warning):
@@ -243,3 +243,73 @@ def convert_to_float(image, preserve_range):
         image = img_as_float(image)
     return image
 
+
+def expand_arg(arg, times, arg_name='arg', default=0, dtype=None):
+    """Provides an expected/standardized output of the parameter as
+    an ndarray the size of times. Primarily used in n-dimensional
+    image processing.
+
+    An argument that is not what NumPy considers to be array-like
+    will be repeated the number of times specified. Otherwise,
+    the default value will be appended to the argument until
+    it reaches a size equivalent to that of the number of times
+    specified.
+
+    All values of ``None`` within the argument will be replaced with
+    the default value.
+
+    Parameters
+    ----------
+    arg : any
+        The argument to interpret and standardize.
+    times : int
+        The number of elements in the output matrix.
+    arg_name : str, optional
+        Name of the argument in the original function.
+    default : any, optional (default: 0)
+        The value to default to when None is provided.
+    dtype: data-type, optional
+        The desired data-type for the array.  If not given, then the type will
+        be determined as the minimum type required to hold the objects in the
+        sequence.  This argument can only be used to 'upcast' the array.  For
+        downcasting, use the .astype(t) method.
+
+
+    Returns
+    -------
+    expanded_arg : array, shape (``times``,)
+        The standardized output of the argument.
+    filled : int
+        The number of arguments that have been filled in.
+
+    Examples
+    --------
+    >>> expand_arg(None, 3)
+    (array([ 0.,  0.,  0.]), 3)
+
+    >>> expand_arg((None, 0, None, 42), 5, default=180)
+    (array([ 180.,    0.,  180.,   42.,  180.]), 1)
+
+    >>> expand_arg((2.6,  2.3), 2, dtype=int)
+    (array([2, 2]), 0)
+
+    """
+    arg = np.asarray(arg)
+    message = 'The parameter `%s` cannot be of size larger than %s.'
+    if arg.ndim == 0:
+        # `arg` is not array_like
+        arg = arg.repeat(times)
+        filled = times
+    else:
+        arg_len = np.shape(arg)[0]
+        if arg_len > times:
+            raise ValueError(message % (arg_name, str(times)))
+        filled = times - arg_len
+        arg = np.append(arg, np.repeat(default, filled), axis=0)
+
+    # replace all `None`s with the default value
+    arg[(arg == None).nonzero()] = default  # noqa
+
+    expanded_arg = arg.astype(dtype)
+
+    return expanded_arg, filled
