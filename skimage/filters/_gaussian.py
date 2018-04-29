@@ -110,9 +110,10 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         raise ValueError("Sigma values less than zero are not valid")
     if multichannel:
         # do not filter across channels
-        sigma = expand_arg(sigma, image.ndim,
-                           arg_name='sigma', default=0,
-                           max_expand=image.ndim - 1)
+        sigma, rpl = expand_arg(sigma, image.ndim, arg_name='sigma', default=0)
+        if rpl == image.ndim:
+            sigma[-1] = 0
+
     image = convert_to_float(image, preserve_range)
     return ndi.gaussian_filter(image, sigma, mode=mode, cval=cval,
                                truncate=truncate)

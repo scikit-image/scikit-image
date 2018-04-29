@@ -27,18 +27,17 @@ def test_copyfunc():
 
 
 def test_expand_arg():
-    out = expand_arg(None, 3)
+    out, rpl = expand_arg(None, 3)
     npt.assert_array_equal(out, np.zeros(3))
+    assert rpl == 3
 
-    out = expand_arg((None, 10), 5, default=1)
-    npt.assert_array_equal(out, np.array([1, 10, 1, 1, 1]))
+    out, rpl = expand_arg((None, 0, None, 42), 5, default=180)
+    npt.assert_array_equal(out, np.array([180, 0, 180, 42, 180]))
+    assert rpl == 1
 
-
-    out = expand_arg(5, 5, max_expand=3)
-    npt.assert_array_equal(out, np.array([5, 5, 5, 0, 0]))
-
-    out = expand_arg((3.5, None, 42), 6, max_expand=3, dtype=int)
-    npt.assert_array_equal(out, np.array([3, 0, 42, 0, 0, 0], dtype=int))
+    out, rpl = expand_arg((2.6, 2.3), 2, dtype=int)
+    npt.assert_array_equal(out, np.array([2, 2], dtype=int))
+    assert rpl == 0
 
 
 if __name__ == "__main__":
