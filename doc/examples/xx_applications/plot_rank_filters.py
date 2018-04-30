@@ -677,3 +677,5 @@ ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Image size')
 
 plt.tight_layout()
+
+plt.show()
