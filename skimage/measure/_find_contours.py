@@ -125,10 +125,13 @@ def find_contours(array, level,
 
 def _take_2(seq):
     iterator = iter(seq)
-    while(True):
-        n1 = next(iterator)
-        n2 = next(iterator)
-        yield (n1, n2)
+    while True:
+        try:
+            n1 = next(iterator)
+            n2 = next(iterator)
+            yield (n1, n2)
+        except StopIteration:
+            return
 
 
 def _assemble_contours(points_iterator):
