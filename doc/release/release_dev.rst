@@ -39,6 +39,7 @@ Improvements
 - Non-local means denoising (``denoise_nl_means``) has a new optional
   parameter, `sigma`, that can be used to specify the noise standard deviation.
   This enables noise-robust patch distance estimation. (#2890)
+- New ``alignment`` parameter in ``skimage.feature.plot_matches``. (#2955)
 
 
 API Changes
