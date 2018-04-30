@@ -165,9 +165,8 @@ class TestMaxtree(unittest.TestCase):
         _full_type_test(img, 4, expected_4, max_tree.area_closing)
 
         P, S = max_tree.build_max_tree(invert(img))
-        _full_type_test(img, 4, expected_4, max_tree.area_closing, 
+        _full_type_test(img, 4, expected_4, max_tree.area_closing,
                         parent=P, tree_traverser=S)
-
 
     def test_area_opening(self):
         "Test for Area Opening (2 thresholds, all types)"
@@ -246,7 +245,7 @@ class TestMaxtree(unittest.TestCase):
         _full_type_test(img, 4, expected_4, max_tree.area_opening)
 
         P, S = max_tree.build_max_tree(img)
-        _full_type_test(img, 4, expected_4, max_tree.area_opening, 
+        _full_type_test(img, 4, expected_4, max_tree.area_opening,
                         parent=P, tree_traverser=S)
 
     def test_local_maxima(self):
@@ -281,9 +280,10 @@ class TestMaxtree(unittest.TestCase):
             error = diff(expected_result, out)
             assert error < eps
             assert out.dtype == expected_result.dtype
-            
+
             P, S = max_tree.build_max_tree(test_data)
-            out = max_tree.local_maxima(test_data, parent=P, tree_traverser=S)
+            out = max_tree.local_maxima(test_data,
+                                        parent=P, tree_traverser=S)
 
             error = diff(expected_result, out)
             assert error < eps

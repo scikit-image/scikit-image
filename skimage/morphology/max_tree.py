@@ -232,7 +232,8 @@ def area_opening(image, area_threshold, connectivity=2,
     if parent is None or tree_traverser is None:
         parent, tree_traverser = build_max_tree(image, connectivity)
 
-    area = _max_tree._compute_area(image.ravel(), parent.ravel(), tree_traverser)
+    area = _max_tree._compute_area(image.ravel(),
+                                   parent.ravel(), tree_traverser)
 
     _max_tree._direct_filter(image.ravel(), output.ravel(), parent.ravel(),
                              tree_traverser, area, area_threshold)
@@ -339,7 +340,8 @@ def area_closing(image, area_threshold, connectivity=2,
     if parent is None or tree_traverser is None:
         parent, tree_traverser = build_max_tree(image_inv, connectivity)
 
-    area = _max_tree._compute_area(image_inv.ravel(), parent.ravel(), tree_traverser)
+    area = _max_tree._compute_area(image_inv.ravel(),
+                                   parent.ravel(), tree_traverser)
 
     _max_tree._direct_filter(image_inv.ravel(), output.ravel(), parent.ravel(),
                              tree_traverser, area, area_threshold)
