@@ -36,6 +36,7 @@ import numpy as np
 
 from .watershed import _validate_connectivity
 from .watershed import _compute_neighbors
+from ..util import invert
 
 from . import _max_tree
 
@@ -137,7 +138,8 @@ def build_max_tree(image, connectivity=2):
     return parent, tree_traverser
 
 
-def area_opening(image, area_threshold, connectivity=2):
+def area_opening(image, area_threshold, connectivity=2,
+                 parent=None, tree_traverser=None):
     """Performs an area opening of the image.
 
     Area opening removes all bright structures of an image with
@@ -165,6 +167,13 @@ def area_opening(image, area_threshold, connectivity=2):
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. It is 1 for
         4-connectivity and 2 for 8-connectivity. Default value is 1.
+    parent: ndarray, int64, optional
+        The value of each pixel is the index of its parent in the ravelled
+        array.
+    tree_traverser: 1D array, int64, optional
+        The ordered pixel indices (referring to the ravelled array). The pixels
+        are ordered such that every pixel is preceded by its parent (except for
+        the root which has no parent).
 
     Returns
     -------
@@ -220,16 +229,18 @@ def area_opening(image, area_threshold, connectivity=2):
     """
     output = image.copy()
 
-    P, S = build_max_tree(image, connectivity)
+    if parent is None or tree_traverser is None:
+        parent, tree_traverser = build_max_tree(image, connectivity)
 
-    area = _max_tree._compute_area(image.ravel(), P.ravel(), S)
+    area = _max_tree._compute_area(image.ravel(), parent.ravel(), tree_traverser)
 
-    _max_tree._direct_filter(image.ravel(), output.ravel(), P.ravel(), S,
-                             area, area_threshold)
+    _max_tree._direct_filter(image.ravel(), output.ravel(), parent.ravel(),
+                             tree_traverser, area, area_threshold)
     return output
 
 
-def area_closing(image, area_threshold, connectivity=2):
+def area_closing(image, area_threshold, connectivity=2,
+                 parent=None, tree_traverser=None):
     """Performs an area closing of the image.
 
     Area closing removes all dark structures of an image with
@@ -256,6 +267,13 @@ def area_closing(image, area_threshold, connectivity=2):
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. It is 1 for
         4-connectivity and 2 for 8-connectivity. Default value is 1.
+    parent: ndarray, int64, optional
+        The value of each pixel is the index of its parent in the ravelled
+        array.
+    tree_traverser: 1D array, int64, optional
+        The ordered pixel indices (referring to the ravelled array). The pixels
+        are ordered such that every pixel is preceded by its parent (except for
+        the root which has no parent).
 
     Returns
     -------
@@ -315,35 +333,25 @@ def area_closing(image, area_threshold, connectivity=2):
     a size of 8.
     """
     # inversion of the input image
-    if image.dtype in unsigned_int_types:
-        maxval = image.max()
-        image_inv = maxval - image
-    elif image.dtype in signed_int_types:
-        image_inv = -1 - image
-    else:
-        image_inv = (-1) * image
-
+    image_inv = invert(image)
     output = image_inv.copy()
 
-    P, S = build_max_tree(image_inv, connectivity)
+    if parent is None or tree_traverser is None:
+        parent, tree_traverser = build_max_tree(image_inv, connectivity)
 
-    area = _max_tree._compute_area(image_inv.ravel(), P.ravel(), S)
+    area = _max_tree._compute_area(image_inv.ravel(), parent.ravel(), tree_traverser)
 
-    _max_tree._direct_filter(image_inv.ravel(), output.ravel(), P.ravel(), S,
-                             area, area_threshold)
+    _max_tree._direct_filter(image_inv.ravel(), output.ravel(), parent.ravel(),
+                             tree_traverser, area, area_threshold)
 
     # inversion of the output image
-    if image.dtype in unsigned_int_types:
-        output = maxval - output
-    elif image.dtype in signed_int_types:
-        output = -1 - output
-    else:
-        output = (-1) * output
+    output = invert(output)
 
     return output
 
 
-def local_maxima(image, connectivity=2):
+def local_maxima(image, connectivity=2,
+                 parent=None, tree_traverser=None):
     """Determine all local maxima of the image.
 
     The local maxima are defined as connected sets of pixels with equal
@@ -361,6 +369,13 @@ def local_maxima(image, connectivity=2):
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. It is 1 for
         4-connectivity and 2 for 8-connectivity. Default value is 1.
+    parent: ndarray, int64, optional
+        The value of each pixel is the index of its parent in the ravelled
+        array.
+    tree_traverser: 1D array, int64, optional
+        The ordered pixel indices (referring to the ravelled array). The pixels
+        are ordered such that every pixel is preceded by its parent (except for
+        the root which has no parent).
 
     Returns
     -------
@@ -420,8 +435,10 @@ def local_maxima(image, connectivity=2):
 
     output = np.ones(image.shape, dtype=np.uint8)
 
-    P, S = build_max_tree(image, connectivity)
+    if parent is None or tree_traverser is None:
+        parent, tree_traverser = build_max_tree(image, connectivity)
 
-    _max_tree._local_maxima(image.ravel(), output.ravel(), P.ravel(), S)
+    _max_tree._local_maxima(image.ravel(), output.ravel(), parent.ravel(),
+                            tree_traverser)
 
     return output
