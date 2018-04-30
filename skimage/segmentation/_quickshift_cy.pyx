@@ -47,7 +47,7 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
     # an effect for very high max_dist.
 
     # window size for neighboring pixels to consider
-    cdef double inv_kernel_size_sqr = -0.5 / kernel_size**2
+    cdef double inv_kernel_size_sqr = -0.5 / (kernel_size * kernel_size)
     cdef int kernel_width = <int>ceil(3 * kernel_size)
 
     cdef Py_ssize_t height = image.shape[0]
@@ -56,7 +56,7 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
 
     cdef double[:, ::1] densities = np.zeros((height, width), dtype=np.double)
 
-    cdef double current_density, closest, dist
+    cdef double current_density, closest, dist, t
     cdef Py_ssize_t r, c, r_, c_, channel, r_min, r_max, c_min, c_max
     cdef double* current_pixel_ptr
 
@@ -73,9 +73,13 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
                     for c_ in range(c_min, c_max):
                         dist = 0
                         for channel in range(channels):
-                            dist += (current_pixel_ptr[channel] -
-                                     image[r_, c_, channel])**2
-                        dist += (r - r_)**2 + (c - c_)**2
+                            t = (current_pixel_ptr[channel] -
+                                 image[r_, c_, channel])
+                            dist += t * t
+                        t = r - r_
+                        dist += t * t
+                        t = c - c_
+                        dist += t * t
                         densities[r, c] += exp(dist * inv_kernel_size_sqr)
                 current_pixel_ptr += channels
 
@@ -106,9 +110,13 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
                             # we get crazy memory overhead
                             # (width * height * windowsize**2)
                             for channel in range(channels):
-                                dist += (current_pixel_ptr[channel] -
-                                         image[r_, c_, channel])**2
-                            dist += (r - r_)**2 + (c - c_)**2
+                                t = (current_pixel_ptr[channel] -
+                                     image[r_, c_, channel])
+                                dist += t * t
+                            t = r - r_
+                            dist += t * t
+                            t = c - c_
+                            dist += t * t
                             if dist < closest:
                                 closest = dist
                                 parent[r, c] = r_ * width + c_
