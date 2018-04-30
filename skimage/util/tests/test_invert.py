@@ -37,6 +37,7 @@ def test_invert_int8():
     expected = np.zeros((3, 3), dtype=dtype)
     expected[2, :] = lower_dtype_limit
     expected[1, :] = upper_dtype_limit
+    expected[0, :] = -1
     result = invert(image)
     assert_array_equal(expected, result)
 
@@ -51,7 +52,7 @@ def test_invert_float64_signed():
     expected = np.zeros((3, 3), dtype=dtype)
     expected[2, :] = lower_dtype_limit
     expected[1, :] = upper_dtype_limit
-    result = invert(image)
+    result = invert(image, signed_float=True)
     assert_array_equal(expected, result)
 
 
