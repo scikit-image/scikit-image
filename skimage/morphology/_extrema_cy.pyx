@@ -3,77 +3,21 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 
+"""Cython code to wrapped in extrema.py."""
+
 cimport numpy as cnp
-from libc.stdlib cimport malloc, realloc, free
+
+
+# Must be defined to use RestorableQueue
+ctypedef Py_ssize_t QueueItem
+
+include "_restorable_queue.pxi"
 
 
 ctypedef fused dtype_t:
     cnp.uint8_t
     cnp.uint16_t
     cnp.double_t
-
-
-ctypedef Py_ssize_t QueueItem
-
-
-cdef:
-    struct Queue:
-        # A queue whose items can be restored after consumption.
-        QueueItem* _buffer_ptr
-        Py_ssize_t _buffer_size, _index_valid, _index_consumed
-
-    void q_init(Queue* self, Py_ssize_t buffer_size) nogil:
-        """Initialize the queue and its buffer."""
-        self._buffer_ptr = <QueueItem*>malloc(buffer_size * sizeof(QueueItem))
-        if not self._buffer_ptr:
-            with gil:
-                raise MemoryError("couldn't allocate buffer")
-        self._buffer_size = buffer_size
-        self._index_consumed = -1
-        self._index_valid = -1
-
-    void q_free_buffer(Queue* self) nogil:
-        """Free the buffer of the queue."""
-        free(self._buffer_ptr)
-
-    inline void q_restore(Queue* self) nogil:
-        """Restore all consumed items to the queue."""
-        self._index_consumed = -1
-
-    inline void q_clear(Queue* self) nogil:#
-        """Remove all items in the queue."""
-        self._index_consumed = -1
-        self._index_valid = -1
-
-    inline void q_push(Queue* self, QueueItem* item_ptr) nogil:
-        """Enqueue a new item."""
-        self._index_valid += 1
-        if self._buffer_size <= self._index_valid:
-            _q_grow_buffer(self)
-        self._buffer_ptr[self._index_valid] = item_ptr[0]
-
-    inline unsigned char q_pop(Queue* self, QueueItem* item_ptr) nogil:
-        """Dequeue / consume an item."""
-        if 0 <= self._index_consumed + 1 <= self._index_valid:
-            self._index_consumed += 1
-            item_ptr[0] = self._buffer_ptr[self._index_consumed]
-            return 1
-        return 0
-
-    void _q_grow_buffer(Queue* self) nogil:
-        """Double the memory used for the buffer."""
-        cdef QueueItem* new_buffer
-
-        # TODO prevent integer overflow!
-        self._buffer_size *= 2
-        new_buffer_ptr = <QueueItem*>realloc(
-            self._buffer_ptr,
-            self._buffer_size * sizeof(QueueItem)
-        )
-        if not new_buffer_ptr:
-            with gil:
-                raise MemoryError("couldn't reallocate buffer")
-        self._buffer_ptr = new_buffer_ptr
 
 
 def _local_maxima(dtype_t[::1] image not None,
@@ -98,7 +42,7 @@ def _local_maxima(dtype_t[::1] image not None,
         A "boolean" arrray that is 1 where local maxima where exist.
     """
     cdef:
-        Queue queue
+        RestorableQueue queue
         Py_ssize_t i, i_max, i_ahead
 
     # Current flag meanings:
@@ -127,7 +71,7 @@ def _local_maxima(dtype_t[::1] image not None,
 
         # Initialize a buffer used to queue positions while evaluating each
         # potential maximum (flagged with 2)
-        q_init(&queue, 64)
+        queue_init(&queue, 64)
         try:
             for i in range(image.shape[0]):
                 if flags[i] == 2:
@@ -136,12 +80,12 @@ def _local_maxima(dtype_t[::1] image not None,
                     # or 1 depending on whether it's a true maximum
                     _fill_plateau(image, flags, neighbour_offsets, &queue, i)
         finally:
-            q_free_buffer(&queue)
+            queue_exit(&queue)
 
 
 cdef inline void _fill_plateau(
         dtype_t[::1] image, unsigned char[::1] flags,
-        Py_ssize_t[::1] neighbour_offsets, Queue* queue_ptr,
+        Py_ssize_t[::1] neighbour_offsets, RestorableQueue* queue_ptr,
         Py_ssize_t start_index) nogil:
     """Fill with 1 if plateau is local maximum else with 0."""
     cdef:
@@ -161,11 +105,11 @@ cdef inline void _fill_plateau(
     flags[start_index] = 1
 
     # And queue start position after clearing the buffer
-    q_clear(queue_ptr)
-    q_push(queue_ptr, &start_index)
+    queue_clear(queue_ptr)
+    queue_push(queue_ptr, &start_index)
 
     # Break loop if all queued positions were evaluated
-    while q_pop(queue_ptr, &current_index):
+    while queue_pop(queue_ptr, &current_index):
         # Look at all neighbouring samples
         for i in range(neighbour_offsets.shape[0]):
             neighbor = current_index + neighbour_offsets[i]
@@ -176,7 +120,7 @@ cdef inline void _fill_plateau(
                     true_maximum = 0
                 elif flags[neighbor] != 1:
                     # Index wasn't queued already, do so now
-                    q_push(queue_ptr, &neighbor)
+                    queue_push(queue_ptr, &neighbor)
                     flags[neighbor] = 1
             elif image[neighbor] > h:
                 # Current plateau can't be maximum because it borders a
@@ -184,7 +128,7 @@ cdef inline void _fill_plateau(
                 true_maximum = 0
 
     if not true_maximum:
-        q_restore(queue_ptr)
+        queue_restore(queue_ptr)
         # Initial guess was wrong -> replace 1 with 0 for plateau
-        while q_pop(queue_ptr, &neighbor):
+        while queue_pop(queue_ptr, &neighbor):
             flags[neighbor] = 0
