@@ -30,7 +30,7 @@ def test_generates_correct_bounding_boxes_for_rectangles():
     crop = image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]]
 
     # The crop is filled.
-    assert (crop >= 1).all() and (crop <= 255).all()
+    assert (crop >= 0).all() and (crop < 255).all()
 
     # The crop is complete.
     image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]] = 255
@@ -50,7 +50,7 @@ def test_generates_correct_bounding_boxes_for_triangles():
     crop = image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]]
 
     # The crop is filled.
-    assert (crop >= 1).any() and (crop <= 255).any()
+    assert (crop >= 0).any() and (crop < 255).any()
 
     # The crop is complete.
     image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]] = 255
@@ -72,7 +72,7 @@ def test_generates_correct_bounding_boxes_for_circles():
     crop = image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]]
 
     # The crop is filled.
-    assert (crop >= 1).any() and (crop <= 255).any()
+    assert (crop >= 0).any() and (crop < 255).any()
 
     # The crop is complete.
     image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]] = 255
@@ -104,7 +104,7 @@ def test_can_generate_one_by_one_rectangle():
 
     # rgb
     assert (np.shape(crop) == (1, 1, 3) and np.any(crop >= 1)
-            and np.any(crop <= 255))
+            and np.any(crop < 255))
 
 
 def test_throws_when_intensity_range_out_of_range():

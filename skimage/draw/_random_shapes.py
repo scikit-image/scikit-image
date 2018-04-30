@@ -254,12 +254,13 @@ def random_shapes(image_shape,
         ``multichannel`` is set to False.
     shape : {rectangle, circle, triangle, None} str, optional
         The name of the shape to generate or `None` to pick random ones.
-    intensity_range : {tuple of tuples of ints, tuple of ints}, optional
+    intensity_range : {tuple of tuples of uint8, tuple of uint8}, optional
         The range of values to sample pixel values from. For grayscale images
         the format is (min, max). For multichannel - ((min, max),) if the
         ranges are equal across the channels, and ((min_0, max_0), ... (min_N, max_N))
-        if they differ. Maximum range is (0, 255). If None, set to (1, 255) for
-        each channel reserving 0-intensity color for background.
+        if they differ. As the function supports generation of uint8 arrays only,
+        the maximum range is (0, 255). If None, set to (0, 254) for each
+        channel reserving color of intensity = 255 for background.
     allow_overlap : bool, optional
         If `True`, allow shapes to overlap.
     num_trials : int, optional
@@ -302,7 +303,7 @@ def random_shapes(image_shape,
         num_channels = 1
 
     if intensity_range is None:
-        intensity_range = (1, 255) if num_channels == 1 else ((1, 255), )
+        intensity_range = (0, 254) if num_channels == 1 else ((0, 254), )
     else:
         tmp = (intensity_range, ) if num_channels == 1 else intensity_range
         for intensity_pair in tmp:
