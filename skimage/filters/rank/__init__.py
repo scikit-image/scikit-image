@@ -1,6 +1,6 @@
 """Rank-based filters subpackage.
 
-Filters based on the ranking/ordering of pixel intensities within the filter 
+Filters based on the ranking/ordering of pixel intensities within the filter
 kernel area.
 
 """
