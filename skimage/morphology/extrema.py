@@ -14,7 +14,7 @@ from __future__ import absolute_import
 import numpy as np
 from scipy import ndimage as ndi
 
-from ..util import dtype_limits
+from ..util import dtype_limits, invert, crop
 from . import greyreconstruct
 from ._extrema_cy import _local_maxima
 
@@ -222,7 +222,7 @@ def _find_min_diff(image):
     return min_diff
 
 
-def local_maxima(image, selem=None):
+def local_maxima_old(image, selem=None):
     """Determine all local maxima of the image.
 
     The local maxima are defined as connected sets of pixels with equal
@@ -291,7 +291,7 @@ def local_maxima(image, selem=None):
     return local_max
 
 
-def local_minima(image, selem=None):
+def local_minima_old(image, selem=None):
     """Determine all local minima of the image.
 
     The local minima are defined as connected sets of pixels with equal
@@ -382,7 +382,7 @@ def _offset_to_raveled_neighbours(image_shape, selem):
     return offsets
 
 
-def local_maxima_new(image, selem=None, include_border=False):
+def local_maxima(image, selem=None, include_border=True):
     """Find all local maxima in an image.
 
     Parameters
@@ -420,17 +420,49 @@ def local_maxima_new(image, selem=None, include_border=False):
     flags = np.zeros(image.shape, dtype=np.uint8)
 
     # Set edge values of flag-array to 3
-    without_borders = tuple(slice(1, -1) for _ in range(flags.ndim))
-    flags = np.pad(flags[without_borders], pad_width=1,
-                   mode="constant", constant_values=3)
+    flags = crop(flags, 1)
+    flags = np.pad(flags, pad_width=1, mode="constant", constant_values=3)
+
+    # Ensure correct dtype of `image` for wrapped Cython function
+    if np.issubdtype(image.dtype, np.unsignedinteger):
+        dtype = np.uint64
+    elif np.issubdtype(image.dtype, np.integer):
+        dtype = np.int64
+    else:
+        dtype = np.float64
+    image = image.astype(dtype, order="C", copy=False)
 
     _local_maxima(image.ravel(), flags.ravel(), neighbour_offsets)
 
     if include_border:
         # Revert padding performed at the beginning of the function
-        flags = flags[without_borders]
+        flags = crop(flags, 1)
     else:
         # No padding was performed but set edge values back to 0
         flags[flags == 3] = 0
 
     return flags
+
+
+def local_minima(image, selem=None, include_border=True):
+    """Find all local minima in an image.
+
+    Parameters
+    ----------
+    image : ndarray
+        An n-dimensional array.
+    selem : int or ndarray, optional
+        The structuring element used to determine the neighborhood of each
+        evaluated pixel. If this is a number it is interpreted as the
+        connectivity of `selem`. If an array, it must only contain 1's and 0's
+        and have the same number of dimensions as `image`. If not given the
+        maximal connectivity is assumed, meaning `selem` is an array of 1's.
+    include_border : bool, optional
+        If true, plateaus that touch the image border can be valid maxima.
+
+    Returns
+    -------
+    flags : ndarray
+        An array of 1's where local minima were found and otherwise 0's.
+    """
+    return local_maxima(invert(image), selem, include_border)
