@@ -240,3 +240,5 @@ plot_comparison(horse_mask, hull2, 'convex hull')
 # /ImageProcessing-html/topic4.htm>`_
 #
 # 3. http://en.wikipedia.org/wiki/Mathematical_morphology
+
+plt.show()
