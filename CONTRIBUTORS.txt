@@ -253,3 +253,7 @@
 
 - Kevin Mader
   Montage improvements
+  
+- David Breuer
+  Edge filters and documentation
+  

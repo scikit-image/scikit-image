@@ -1,3 +1,10 @@
+""" Drawing subpackage.
+
+Drawing primitives (lines, text, etc.) that operate on NumPy arrays.
+
+"""
+
+
 from .draw import (circle, ellipse, set_color, polygon_perimeter,
                    line, line_aa, polygon, ellipse_perimeter,
                    circle_perimeter, circle_perimeter_aa,

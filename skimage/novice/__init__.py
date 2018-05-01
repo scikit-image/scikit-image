@@ -1,7 +1,4 @@
-"""
-skimage.novice
-==============
-A special Python image submodule for beginners.
+"""A special Python image subpackage for beginners.
 
 Description
 -----------
@@ -9,12 +6,12 @@ Description
 beginners.  It allows for easy loading, manipulating, and saving of image
 files.
 
-This module is primarily intended for teaching and differs significantly from
+This subpackage is primarily intended for teaching and differs significantly from
 the normal, array-oriented image functions used by scikit-image.
 
 .. note::
 
-    This module uses the Cartesian coordinate system, where the origin is at
+    This subpackage uses the Cartesian coordinate system, where the origin is at
     the lower-left corner instead of the upper-right and the order is x, y
     instead of row, column.
 
@@ -96,6 +93,8 @@ An image can also be restored to its original state after modification:
 >>> picture.compare()  # doctest: +SKIP
 
 """
+
+
 import warnings
 from ._novice import Picture, open, colors, color_dict
 

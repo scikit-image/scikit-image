@@ -1,3 +1,11 @@
+"""Rank-based filters subpackage.
+
+Filters based on the ranking/ordering of pixel intensities within the filter 
+kernel area.
+
+"""
+
+
 from .generic import (autolevel, bottomhat, equalize, gradient, maximum, mean,
                       geometric_mean, subtract_mean, median, minimum, modal,
                       enhance_contrast, pop, threshold, tophat, noise_filter,

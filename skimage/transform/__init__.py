@@ -1,3 +1,10 @@
+"""Image transformation subpackage.
+
+Functions for transforming images between different geometrical spaces.
+
+"""
+
+
 from .hough_transform import (hough_line, hough_line_peaks,
                               probabilistic_hough_line, hough_circle,
                               hough_circle_peaks, hough_ellipse)

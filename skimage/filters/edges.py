@@ -1,4 +1,12 @@
-"""
+"""Edge filters.
+
+Edge detection includes a variety of mathematical methods that aim at 
+identifying points in a digital image at which the image brightness changes 
+sharply or, more formally, has discontinuities. The points at which image 
+brightness changes sharply are typically organized into a set of curved line 
+segments termed edges [1]_.
+
+.. [1] https://en.wikipedia.org/wiki/Edge_detection
 
 Sobel and Prewitt filters originally part of CellProfiler, code licensed under
 both GPL and BSD licenses.
@@ -9,6 +17,8 @@ All rights reserved.
 Original author: Lee Kamentsky
 
 """
+
+
 import numpy as np
 from .. import img_as_float
 from .._shared.utils import assert_nD
