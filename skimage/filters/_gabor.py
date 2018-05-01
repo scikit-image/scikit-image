@@ -46,6 +46,18 @@ def _gaussian(image, center=None, sigma=1, ndim=2):
     return gauss / norm
 
 
+def _rotation(thetas):
+    """Generates an n-dimensional rotation matrix.
+
+    Ognyan Ivanov Zhelezov, N-dimensional Rotation Matrix Generation Algorithm, American Journal of Computational and Applied Mathematics , Vol. 7 No. 2, 2017, pp. 51-57. doi: 10.5923/j.ajcam.20170702.04.
+
+    Copyright (c) 2017 Scientific & Academic Publishing. All Rights Reserved.
+    This work is licensed under the Creative Commons Attribution International License (CC BY).
+    http://creativecommons.org/licenses/by/4.0/
+    """
+    pass
+
+
 def gabor_kernel(frequency, theta=None, bandwidth=1, sigma=None,
                  sigma_y=None, n_stds=3, offset=None, ndim=2, **kwargs):
     """Return complex nD Gabor filter kernel.
@@ -105,9 +117,6 @@ def gabor_kernel(frequency, theta=None, bandwidth=1, sigma=None,
     >>> io.imshow(gk.real)  # doctest: +SKIP
     >>> io.show()           # doctest: +SKIP
     """
-    # Import has to be here due to circular import error
-    from ..transform import rotate
-
     # handle deprecation
     message = ('Using deprecated, 2D-only interface to gabor_kernel. '
                'This interface will be removed in scikit-image 0.16. Use '
@@ -138,13 +147,14 @@ def gabor_kernel(frequency, theta=None, bandwidth=1, sigma=None,
     sigma = sigma.astype(None)
 
     x = ...
+    rotx = np.matmul(_rotation(theta), x)
 
-    gauss = _gaussian(x, center=0, sigma=sigma, ndim=ndim)
+    gauss = _gaussian(rotx, center=0, sigma=sigma, ndim=ndim)
 
-    rotx = np.matmul(x, _get_quasipolar_components(frequency, theta))
+    compx = np.matmul(x, _get_quasipolar_components(frequency, theta))
 
     # complex harmonic function
-    harmonic = np.exp(1j * (2 * np.pi * rotx.sum() + offset))
+    harmonic = np.exp(1j * (2 * np.pi * compx.sum() + offset))
 
     g = norm * np.matmul(gauss, harmonic)
 
