@@ -1,9 +1,9 @@
 """Edge filters.
 
-Edge detection includes a variety of mathematical methods that aim at 
-identifying points in a digital image at which the image brightness changes 
-sharply or, more formally, has discontinuities. The points at which image 
-brightness changes sharply are typically organized into a set of curved line 
+Edge detection includes a variety of mathematical methods that aim at
+identifying points in a digital image at which the image brightness changes
+sharply or, more formally, has discontinuities. The points at which image
+brightness changes sharply are typically organized into a set of curved line
 segments termed edges [1]_.
 
 .. [1] https://en.wikipedia.org/wiki/Edge_detection

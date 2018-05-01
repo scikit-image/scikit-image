@@ -1,6 +1,6 @@
 """Graph subpackage.
 
-Functions which represent an input image as a graph and perform 
+Functions which represent an input image as a graph and perform
 graph-theoretical operations, e.g., computing shortest paths [1]_.
 
 .. [1] https://en.wikipedia.org/wiki/Graph_theory
@@ -9,7 +9,7 @@ graph-theoretical operations, e.g., computing shortest paths [1]_.
 
 
 from .spath import shortest_path
-from .mcp import (MCP, MCP_Geometric, MCP_Connect, MCP_Flexible, 
+from .mcp import (MCP, MCP_Geometric, MCP_Connect, MCP_Flexible,
                   route_through_array)
 
 

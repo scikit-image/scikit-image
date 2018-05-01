@@ -1,6 +1,6 @@
 """Color subpackage.
 
-Functions for conversion between color spaces, i.e., between different 
+Functions for conversion between color spaces, i.e., between different
 organizations of colors [1]_.
 
 .. [1] https://en.wikipedia.org/wiki/Color_space

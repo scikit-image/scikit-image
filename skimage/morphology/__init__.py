@@ -1,6 +1,6 @@
 """Subpackage for morphological operations on binary and grayscale images.
 
-Techniques for the analysis and processing of geometrical image structures. 
+Techniques for the analysis and processing of geometrical image structures.
 Basic morphological operators such as erosion, dilation, opening, and closing
 may be combined to perform more complex operations, e.g., skeletonization
 [1]_.

@@ -1,7 +1,7 @@
 """Filters subpackage.
 
-Filters perform mathematical operations to reduce or enhance certain aspects 
-of a 2D or higher dimensional image [1]_. The subpackage contains, e.g., 
+Filters perform mathematical operations to reduce or enhance certain aspects
+of a 2D or higher dimensional image [1]_. The subpackage contains, e.g.,
 filters to blur the original image and to detect blob- or edge-like structures.
 
 .. [1] https://en.wikipedia.org/wiki/Digital_image_processing#Filtering

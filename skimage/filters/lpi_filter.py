@@ -2,7 +2,7 @@
 
 Linear Position-Invariant filter (2-dimensional) and Wiener filter [1]_.
 
-.. [1] Gonzalez and Woods, Digital image processing, 2012, Upper Saddle River, 
+.. [1] Gonzalez and Woods, Digital image processing, 2012, Upper Saddle River,
 Prentice Hall.
 
 :author: Stefan van der Walt, 2008

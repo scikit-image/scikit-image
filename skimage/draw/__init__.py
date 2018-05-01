@@ -1,4 +1,4 @@
-""" Drawing subpackage.
+"""Drawing subpackage.
 
 Drawing primitives (lines, text, etc.) that operate on NumPy arrays.
 

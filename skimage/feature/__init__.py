@@ -1,9 +1,9 @@
 """Feature detection subpackage.
 
-In computer vision and image processing feature detection includes methods for 
-computing abstractions of image information and making local decisions at every 
-image point whether there is an image feature of a given type at that point or 
-not. The resulting features will be subsets of the image domain, often in the 
+In computer vision and image processing feature detection includes methods for
+computing abstractions of image information and making local decisions at every
+image point whether there is an image feature of a given type at that point or
+not. The resulting features will be subsets of the image domain, often in the
 form of isolated points, continuous curves or connected regions [1]_.
 
 .. [1] https://en.wikipedia.org/wiki/Feature_detection_(computer_vision)

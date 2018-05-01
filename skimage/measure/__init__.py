@@ -1,7 +1,7 @@
 """Subpackage for measuring image properties.
 
-Functions for finding and labeling structures (connected components, lines, 
-circles, etc.), for computing their properties (size, perimeter, moments, 
+Functions for finding and labeling structures (connected components, lines,
+circles, etc.), for computing their properties (size, perimeter, moments,
 etc.), and more.
 
 """
