@@ -221,6 +221,10 @@ def gabor(image, frequency=None, theta=None, bandwidth=1, sigma=None, sigma_y=No
         kernel = gabor_kernel(frequency, theta, bandwidth, sigma, sigma_y,
                               n_stds, offset, ndim=image.ndim, **kwargs)
     else:
+        if frequency is not None:
+            warn("gabor() received arguments of "
+                 "both 'kernel' and 'frequency'; "
+                 "'frequency' will be ignored")
         assert_nD(image.ndim, kernel.ndim)
 
     filtered_real = ndi.convolve(image, np.real(kernel), mode=mode, cval=cval)
