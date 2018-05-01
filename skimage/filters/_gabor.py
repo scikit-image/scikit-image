@@ -151,7 +151,7 @@ def gabor_kernel(frequency, theta=None, bandwidth=1, sigma=None,
     return g.view(cls)
 
 
-def gabor(image, frequency, theta=None, bandwidth=1, sigma=None, sigma_y=None,
+def gabor(image, frequency=None, theta=None, bandwidth=1, sigma=None, sigma_y=None,
           n_stds=3, offset=None, mode='reflect', cval=0, kernel=None, **kwargs):
     """Return real and imaginary responses to Gabor filter.
     The real and imaginary parts of the Gabor filter kernel are applied to the
@@ -215,6 +215,9 @@ def gabor(image, frequency, theta=None, bandwidth=1, sigma=None, sigma_y=None,
     >>> io.show()               # doctest: +SKIP
     """
     if kernel is None:
+        if frequency is None:
+            raise TypeError("gabor() must specify 'frequency' "
+                            "if 'kernel' is not provided")
         kernel = gabor_kernel(frequency, theta, bandwidth, sigma, sigma_y,
                               n_stds, offset, ndim=image.ndim, **kwargs)
     else:
