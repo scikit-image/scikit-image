@@ -25,7 +25,7 @@ cdef vector[vector[Rectangle]] _haar_like_feature_coord(
     """Private function to compute the coordinates of all Haar-like features.
     """
     cdef:
-        Py_ssize_t max_feature = height ** 2 * width ** 2
+        Py_ssize_t max_feature = height * height * width * width
         vector[vector[Rectangle]] rect_feat
         Rectangle single_rect
         Py_ssize_t n_rectangle

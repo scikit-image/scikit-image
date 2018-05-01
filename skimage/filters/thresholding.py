@@ -50,8 +50,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     num_rows = math.ceil((len(methods) + 1.) / num_cols)
     num_rows = int(num_rows)  # Python 2.7 support
     fig, ax = plt.subplots(num_rows, num_cols, figsize=figsize,
-                           sharex=True, sharey=True,
-                           subplot_kw={'adjustable': 'box-forced'})
+                           sharex=True, sharey=True)
     ax = ax.ravel()
 
     ax[0].imshow(image, cmap=plt.cm.gray)
@@ -773,7 +772,9 @@ def _mean_std(image, w):
     m = crop(sum_full, (left_pad, right_pad)) / (w ** image.ndim)
     sum_sq_full = ndi.correlate(integral_sq, kern, mode='constant')
     g2 = crop(sum_sq_full, (left_pad, right_pad)) / (w ** image.ndim)
-    s = np.sqrt(g2 - m * m)
+    # Note: we use np.clip because g2 is not guaranteed to be greater than
+    # m*m when floating point error is considered
+    s = np.sqrt(np.clip(g2 - m * m, 0, None))
     return m, s
 
 

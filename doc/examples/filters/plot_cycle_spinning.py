@@ -35,8 +35,8 @@ original = img_as_float(data.chelsea()[100:250, 50:300])
 sigma = 0.155
 noisy = random_noise(original, var=sigma**2)
 
-fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(10, 4), sharex=False,
-                       sharey=False, subplot_kw={'adjustable': 'box-forced'})
+fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(10, 4),
+                       sharex=False, sharey=False)
 ax = ax.ravel()
 
 psnr_noisy = compare_psnr(original, noisy)

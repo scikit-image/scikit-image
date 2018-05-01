@@ -94,6 +94,10 @@ def test_line_model_nd_residuals():
     assert_equal(abs(model.residuals(np.array([[0, 0, 0]]))), 0)
     assert_equal(abs(model.residuals(np.array([[0, 0, 1]]))), 0)
     assert_equal(abs(model.residuals(np.array([[10, 0, 0]]))), 10)
+    # test params argument in model.rediduals
+    data = np.array([[10, 0, 0]])
+    params = (np.array([0, 0, 0]), np.array([2, 0, 0]))
+    assert_equal(abs(model.residuals(data, params=params)), 30)
 
 
 def test_line_modelND_under_determined():

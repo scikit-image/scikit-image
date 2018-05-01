@@ -8,7 +8,6 @@ cimport numpy as cnp
 cimport cython
 
 from libc.math cimport abs, fabs, sqrt, ceil, atan2, M_PI
-from libc.stdlib cimport rand
 
 from ..draw import circle_perimeter
 
@@ -151,20 +150,21 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
     cdef Py_ssize_t num_pixels = pixels.shape[1]
     cdef list acc = list()
     cdef list results = list()
-    cdef double bin_size = accuracy ** 2
+    cdef double bin_size = accuracy * accuracy
 
     cdef int max_b_squared
     if max_size is None:
         if img.shape[0] < img.shape[1]:
-            max_b_squared = np.round(0.5 * img.shape[0]) ** 2
+            max_b_squared = np.round(0.5 * img.shape[0])
         else:
-            max_b_squared = np.round(0.5 * img.shape[1]) ** 2
+            max_b_squared = np.round(0.5 * img.shape[1])
+        max_b_squared *= max_b_squared
     else:
-        max_b_squared = max_size**2
+        max_b_squared = max_size * max_size
 
     cdef Py_ssize_t p1, p2, p3, p1x, p1y, p2x, p2y, p3x, p3y
-    cdef double xc, yc, a, b, d, k
-    cdef double cos_tau_squared, b_squared, f_squared, orientation
+    cdef double xc, yc, a, b, d, k, dx, dy
+    cdef double cos_tau_squared, b_squared, orientation
 
     for p1 in range(num_pixels):
         p1x = pixels[1, p1]
@@ -175,7 +175,9 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
             p2y = pixels[0, p2]
 
             # Candidate: center (xc, yc) and main axis a
-            a = 0.5 * sqrt((p1x - p2x)**2 + (p1y - p2y)**2)
+            dx = p1x - p2x
+            dy = p1y - p2y
+            a = 0.5 * sqrt(dx * dx + dy * dy)
             if a > 0.5 * min_size:
                 xc = 0.5 * (p1x + p2x)
                 yc = 0.5 * (p1y + p2y)
@@ -183,16 +185,19 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
                 for p3 in range(num_pixels):
                     p3x = pixels[1, p3]
                     p3y = pixels[0, p3]
-
-                    d = sqrt((p3x - xc)**2 + (p3y - yc)**2)
+                    dx = p3x - xc
+                    dy = p3y - yc
+                    d = sqrt(dx * dx + dy * dy)
                     if d > min_size:
-                        f_squared = (p3x - p1x)**2 + (p3y - p1y)**2
-                        cos_tau_squared = ((a**2 + d**2 - f_squared)
-                                           / (2 * a * d))**2
+                        dx = p3x - p1x
+                        dy = p3y - p1y
+                        cos_tau_squared = ((a*a + d*d - dx*dx - dy*dy)
+                                           / (2 * a * d))
+                        cos_tau_squared *= cos_tau_squared
                         # Consider b2 > 0 and avoid division by zero
-                        k = a**2 - d**2 * cos_tau_squared
+                        k = a*a - d*d * cos_tau_squared
                         if k > 0 and cos_tau_squared < 1:
-                            b_squared = a**2 * d**2 * (1 - cos_tau_squared) / k
+                            b_squared = a*a * d*d * (1 - cos_tau_squared) / k
                             # b2 range is limited to avoid histogram memory
                             # overflow
                             if b_squared <= max_b_squared:
@@ -314,7 +319,8 @@ def _hough_line(cnp.ndarray img,
 
 def _probabilistic_hough_line(cnp.ndarray img, int threshold,
                               int line_length, int line_gap,
-                              cnp.ndarray[ndim=1, dtype=cnp.double_t] theta):
+                              cnp.ndarray[ndim=1, dtype=cnp.double_t] theta,
+                              seed=None):
     """Return lines from a progressive probabilistic line Hough transform.
 
     Parameters
@@ -331,6 +337,8 @@ def _probabilistic_hough_line(cnp.ndarray img, int threshold,
         Increase the parameter to merge broken lines more aggresively.
     theta : 1D ndarray, dtype=double
         Angles at which to compute the transform, in radians.
+    seed : int, optional
+        Seed to initialize the random number generator.
 
     Returns
     -------
@@ -379,6 +387,8 @@ def _probabilistic_hough_line(cnp.ndarray img, int threshold,
     # mask all non-zero indexes
     mask[y_idxs, x_idxs] = 1
 
+    random_state = np.random.RandomState(seed)
+
     while 1:
 
         # quit if no remaining points
@@ -387,7 +397,7 @@ def _probabilistic_hough_line(cnp.ndarray img, int threshold,
             break
 
         # select random non-zero point
-        index = rand() % count
+        index = random_state.randint(0, count)
         x = points[index][0]
         y = points[index][1]
         del points[index]
