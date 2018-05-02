@@ -7,6 +7,7 @@ import numpy as np
 cimport numpy as cnp
 cimport cython
 
+from cpython.mem cimport PyMem_Malloc, PyMem_Free
 from libc.stdlib cimport abs
 from libc.math cimport fabs, sqrt, ceil, atan2, M_PI
 
@@ -358,8 +359,11 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
 
     # compute the bins and allocate the accumulator array
     cdef cnp.ndarray[ndim=2, dtype=cnp.uint8_t] mask = \
-         np.zeros((height, width), dtype=np.uint8)
-    cdef cnp.intp_t[:, ::1] line_end = np.zeros((2, 2), dtype=np.intp)
+        np.zeros((height, width), dtype=np.uint8)
+    cdef Py_ssize_t *line_end = \
+        <Py_ssize_t *>PyMem_Malloc(4 * sizeof(Py_ssize_t))
+    if not line_end:
+        raise MemoryError('could not allocate line_end')
     cdef Py_ssize_t max_distance, offset, num_indexes, index
     cdef double a, b
     cdef Py_ssize_t nidxs, i, j, k, x, y, px, py, accum_idx, max_theta
@@ -371,7 +375,6 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     cdef Py_ssize_t lines_max = 2 ** 15  # maximum line number cutoff
     cdef cnp.intp_t[:, :, ::1] lines = np.zeros((lines_max, 2, 2),
                                                 dtype=np.intp)
-
     max_distance = 2 * <Py_ssize_t>ceil((sqrt(img.shape[0] * img.shape[0] +
                                               img.shape[1] * img.shape[1])))
     cdef cnp.int64_t[:, ::1] accum = np.zeros((max_distance, theta.shape[0]),
@@ -393,7 +396,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     count = len(x_idxs)
     random_state = np.random.RandomState(seed)
     random_ = np.arange(count, dtype=np.intp)
-    np.random.shuffle(random_)
+    random_state.shuffle(random_)
     cdef cnp.intp_t[::1] random = random_
 
     with nogil:
@@ -471,8 +474,8 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                     # if non-zero point found, continue the line
                     if mask[y1, x1]:
                         gap = 0
-                        line_end[k, 1] = y1
-                        line_end[k, 0] = x1
+                        line_end[2*k] = x1
+                        line_end[2*k + 1] = y1
                     # if gap to this point was too large, end the line
                     elif gap > line_gap:
                         break
@@ -480,8 +483,8 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                     py += dy
 
             # confirm line length is sufficient
-            good_line = abs(line_end[1, 1] - line_end[0, 1]) >= line_length or \
-                        abs(line_end[1, 0] - line_end[0, 0]) >= line_length
+            good_line = (abs(line_end[3] - line_end[1]) >= line_length or
+                         abs(line_end[2] - line_end[0]) >= line_length)
 
             # pass 2: walk the line again and reset accumulator and mask
             for k in range(2):
@@ -502,25 +505,26 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                     # if non-zero point found, continue the line
                     if mask[y1, x1]:
                         if good_line:
-                            accum_idx = round((ctheta[j] * x1 + stheta[j] * y1)) \
-                                        + offset
+                            accum_idx = round(
+                                (ctheta[j] * x1 + stheta[j] * y1)) + offset
                             accum[accum_idx, max_theta] -= 1
                             mask[y1, x1] = 0
                     # exit when the point is the line end
-                    if x1 == line_end[k, 0] and y1 == line_end[k, 1]:
+                    if x1 == line_end[2*k] and y1 == line_end[2*k + 1]:
                         break
                     px += dx
                     py += dy
 
             # add line to the result
             if good_line:
-                lines[nlines, 0, 0] = line_end[0, 0]
-                lines[nlines, 0, 1] = line_end[0, 1]
-                lines[nlines, 1, 0] = line_end[1, 0]
-                lines[nlines, 1, 1] = line_end[1, 1]
+                lines[nlines, 0, 0] = line_end[0]
+                lines[nlines, 0, 1] = line_end[1]
+                lines[nlines, 1, 0] = line_end[2]
+                lines[nlines, 1, 1] = line_end[3]
                 nlines += 1
                 if nlines > lines_max:
                     break
 
+    PyMem_Free(line_end)
     return [((line[0, 0], line[0, 1]), (line[1, 0], line[1, 1]))
             for line in lines[:nlines]]
