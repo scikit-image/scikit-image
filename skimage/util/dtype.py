@@ -2,28 +2,29 @@ from __future__ import division
 import numpy as np
 from warnings import warn
 
+
 __all__ = ['img_as_float32', 'img_as_float64', 'img_as_float',
            'img_as_int', 'img_as_uint', 'img_as_ubyte',
            'img_as_bool', 'dtype_limits']
 
+# For integers Numpy uses `_integer_types` basis internally, and builds a leaky
+# `np.XintYY` abstraction on top of it. This leads to situations when, for
+# example, there are two np.Xint64 dtypes with the same attributes but
+# different object references. In order to avoid any potential issues,
+# we use the basis dtypes here. For more information, see:
+# - https://github.com/scikit-image/scikit-image/issues/3043
+_integer_types = (np.byte, np.short, np.intc, np.int_, np.longlong,
+                  np.ubyte, np.ushort, np.uintc, np.uint, np.ulonglong)
+_integer_ranges = {t: (np.iinfo(t).min, np.iinfo(t).max)
+                   for t in _integer_types}
 dtype_range = {np.bool_: (False, True),
                np.bool8: (False, True),
-               np.uint8: (0, 255),
-               np.uint16: (0, 65535),
-               np.uint32: (0, 2**32 - 1),
-               np.uint64: (0, 2**64 - 1),
-               np.int8: (-128, 127),
-               np.int16: (-32768, 32767),
-               np.int32: (-2**31, 2**31 - 1),
-               np.int64: (-2**63, 2**63 - 1),
                np.float16: (-1, 1),
                np.float32: (-1, 1),
-               np.float64: (-1, 1)}
+               np.float64: (-1, 1),
+               **_integer_ranges}
 
-_supported_types = (np.bool_, np.bool8,
-                    np.uint8, np.uint16, np.uint32, np.uint64,
-                    np.int8, np.int16, np.int32, np.int64,
-                    np.float16, np.float32, np.float64)
+_supported_types = list(dtype_range.keys())
 
 
 def dtype_limits(image, clip_negative=None):
