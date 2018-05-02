@@ -9,6 +9,7 @@ provides the closely related functions h-maxima and h-minima.
 Soille, P. (2003). Morphological Image Analysis: Principles and Applications
 (2nd ed.), Chapter 6. Springer-Verlag New York, Inc.
 """
+
 from __future__ import absolute_import
 
 import numpy as np
@@ -382,6 +383,28 @@ def _offset_to_raveled_neighbours(image_shape, selem):
     return offsets
 
 
+def _set_edge_values_inplace(image, value, edge_width=1):
+    """Set edge values along all axes to a constant value.
+
+    Parameters
+    ----------
+    image : ndarray
+        The array to modify inplace.
+    value : number
+        The value to use. Should be compatible with `image`'s dtype.
+    edge_width : int
+        Length of edge.
+    """
+    for axis in range(image.ndim):
+        sl = [slice(None)] * image.ndim
+        # Set edge in front
+        sl[axis] = np.arange(edge_width)
+        image[sl] = value
+        # Set edge to the end
+        sl[axis] = -(sl[axis] + 1)
+        image[sl] = value
+
+
 def local_maxima(image, selem=None, include_border=True):
     """Find all local maxima in an image.
 
@@ -418,10 +441,7 @@ def local_maxima(image, selem=None, include_border=True):
     #   2 - potentially part of a maximum
     #   1 - evaluated
     flags = np.zeros(image.shape, dtype=np.uint8)
-
-    # Set edge values of flag-array to 3
-    flags = crop(flags, 1)
-    flags = np.pad(flags, pad_width=1, mode="constant", constant_values=3)
+    _set_edge_values_inplace(flags, value=3)
 
     # Ensure correct dtype of `image` for wrapped Cython function
     if np.issubdtype(image.dtype, np.unsignedinteger):
@@ -439,7 +459,7 @@ def local_maxima(image, selem=None, include_border=True):
         flags = crop(flags, 1)
     else:
         # No padding was performed but set edge values back to 0
-        flags[flags == 3] = 0
+        _set_edge_values_inplace(flags, value=0)
 
     return flags
 
