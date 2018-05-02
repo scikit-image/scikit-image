@@ -14,9 +14,39 @@ def _sigma_prefactor(bandwidth):
         (2.0 ** b + 1) / (2.0 ** b - 1)
 
 
-def _get_quasipolar_components(r, thetas):
-    """Nguyen, Tan Mai, "N-Dimensional Quasipolar Coordinates - Theory and Application" (2014). UNLV Theses, Dissertations, Professional Papers, and Capstones. 2125. https://digitalscholarship.unlv.edu/thesesdissertations/2125"""
-    axes = len(thetas) + 1
+def _decompose_quasipolar_coords(r, thetas):
+    """Decomposes quasipolar coordinates into their cartesian components.
+
+    Parameters
+    ----------
+    r : float
+        Radial coordinate.
+    thetas : (N, 1) array_like object
+        Quasipolar angles.
+
+    Returns
+    -------
+    coords : (``N + 1``, 1) array
+        Cartesian components of the quasipolar coordinates.
+
+    References
+    ----------
+    .. [1] Tan Mai Nguyen. N-Dimensional Quasipolar Coordinates - Theory and
+           Application. University of Nevada: Las Vegas, Nevada, 2014.
+           https://digitalscholarship.unlv.edu/thesesdissertations/2125
+
+    Notes
+    -----
+    Components ``0``, ``1``, ``...``, ``n`` of the quasipolar coordinates
+    correspond to dimensions ``0``, ``1``, ``...``, ``n``.
+
+    For a standard ``xy``-coordinate plane, components ``1`` and ``0``
+    correspond to ``x`` and ``y``, respectively.
+
+    For a standard ``xyz``-coordinate plane, components ``1``, ``0``, and ``2``
+    correspond to ``x``, ``y``, and ``z``, respectively.
+    """
+    axes = np.size(thetas) + 1
     coords = r * np.ones(axes)
 
     for which_theta, theta in enumerate(thetas[::-1]):
@@ -55,7 +85,32 @@ def _rotation(thetas):
     This work is licensed under the Creative Commons Attribution International License (CC BY).
     http://creativecommons.org/licenses/by/4.0/
     """
-    pass
+    #ndim = len(thetas) + 1
+    X = _get_quasipolar_components(1, thetas)
+    ndim = X.size
+    R = np.eye(ndim)
+
+    for step in range(1, ndim, 2):
+        A = np.eye(ndim)
+
+        for n in range(0, ndim - step, 2 * step):
+            r2 = X[n] * X[n] + X[n + step] * X[n + step]
+            if r2 <= 0:
+                continue
+            r = np.sqrt(r2)
+            c = X[n]/r
+            s = -X[n + step]/r
+            #c = np.cos(thetas[n])
+            #s = np.sin(thetas[n])
+            A[n, n] = c
+            A[n, n + step] = s
+            A[n + step, n] = -s
+            A[n + step, n + step] = c
+
+        X = np.matmul(A, X.T)
+        R = np.matmul(A, R)
+
+    return R
 
 
 def gabor_kernel(frequency, theta=None, bandwidth=1, sigma=None,
@@ -151,7 +206,7 @@ def gabor_kernel(frequency, theta=None, bandwidth=1, sigma=None,
 
     gauss = _gaussian(rotx, center=0, sigma=sigma, ndim=ndim)
 
-    compx = np.matmul(x, _get_quasipolar_components(frequency, theta))
+    compx = np.matmul(x, _decompose_quasipolar_coords(frequency, theta))
 
     # complex harmonic function
     harmonic = np.exp(1j * (2 * np.pi * compx.sum() + offset))
