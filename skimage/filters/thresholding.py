@@ -1,3 +1,12 @@
+"""Thresholding filters.
+
+Thresholding is the simplest method of image segmentation. From a grayscale
+image, thresholding can be used to create binary images [1]_.
+
+.. [1] https://en.wikipedia.org/wiki/Thresholding_(image_processing)
+
+"""
+
 import itertools
 import math
 import numpy as np

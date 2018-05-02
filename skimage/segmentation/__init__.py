@@ -1,3 +1,16 @@
+"""Subpackage for image segmentation.
+
+Image segmentation is the process of partitioning a digital image into multiple
+segments. The goal of segmentation is to simplify and/or change the
+representation of an image into something that is more meaningful and easier to
+analyze [1]_. The subpackage contains methods, e.g., inspired from graph theory
+and elastic energy minimization.
+
+.. [1] https://en.wikipedia.org/wiki/Image_segmentation
+
+"""
+
+
 from .random_walker_segmentation import random_walker
 from .active_contour_model import active_contour
 from ._felzenszwalb import felzenszwalb

@@ -1,3 +1,19 @@
+"""Filters subpackage.
+
+Filters perform mathematical operations to reduce or enhance certain aspects
+of a 2D or higher dimensional image [1]_. The subpackage contains, e.g.,
+filters to blur the original image and to detect blob- or edge-like structures.
+
+.. [1] https://en.wikipedia.org/wiki/Digital_image_processing#Filtering
+
+Subpackages
+-----------
+rank
+    Filters based on the ranking of pixel intensities within the filter kernel.
+
+"""
+
+
 from .lpi_filter import inverse, wiener, LPIFilter2D
 from ._gaussian import gaussian
 from .edges import (sobel, sobel_h, sobel_v,

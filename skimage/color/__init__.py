@@ -1,3 +1,13 @@
+"""Color subpackage.
+
+Functions for conversion between color spaces, i.e., between different
+organizations of colors [1]_.
+
+.. [1] https://en.wikipedia.org/wiki/Color_space
+
+"""
+
+
 from .colorconv import (convert_colorspace,
                         guess_spatial_dimensions,
                         rgba2rgb,
