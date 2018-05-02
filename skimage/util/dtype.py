@@ -21,8 +21,8 @@ dtype_range = {np.bool_: (False, True),
                np.bool8: (False, True),
                np.float16: (-1, 1),
                np.float32: (-1, 1),
-               np.float64: (-1, 1),
-               **_integer_ranges}
+               np.float64: (-1, 1)}
+dtype_range.update(_integer_ranges)
 
 _supported_types = list(dtype_range.keys())
 
