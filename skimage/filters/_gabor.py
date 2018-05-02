@@ -86,7 +86,7 @@ def _rotation(thetas):
     http://creativecommons.org/licenses/by/4.0/
     """
     #ndim = len(thetas) + 1
-    X = _get_quasipolar_components(1, thetas)
+    X = _decompose_quasipolar_coords(1, thetas)
     ndim = X.size
     R = np.eye(ndim)
 

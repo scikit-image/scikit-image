@@ -2,7 +2,8 @@ import numpy as np
 from numpy.testing import (assert_equal, assert_almost_equal,
                            assert_array_almost_equal)
 
-from skimage.filters._gabor import gabor_kernel, gabor, _sigma_prefactor
+from skimage.filters._gabor import (gabor_kernel, gabor, _sigma_prefactor,
+                                    _decompose_quasipolar_coords)
 
 
 def test_gabor_kernel_size():
@@ -33,6 +34,51 @@ def test_gabor_kernel_bandwidth():
 def test_sigma_prefactor():
     assert_almost_equal(_sigma_prefactor(1), 0.56, 2)
     assert_almost_equal(_sigma_prefactor(0.5), 1.09, 2)
+
+
+def test_decompose_quasipolar_coords():
+    s = np.sin
+    c = np.cos
+
+    def p(n, d):
+        return n * np.pi / d
+
+    # test polar case
+    y, x = _decompose_quasipolar_coords(2, (p(1, 4),))
+    assert_almost_equal([x, y], [np.sqrt(2), np.sqrt(2)])
+
+    # test spehrical case
+    y, x, z = _decompose_quasipolar_coords(10, (p(1, 4), p(1, 2)))
+    assert_almost_equal([x, y, z], [10 * s(p(1, 2)) * c(p(1, 4)),
+                                    10 * s(p(1, 2)) * s(p(1, 4)),
+                                    10 * c(p(1, 2))])
+
+    # test higher-dimensional case
+    coords = _decompose_quasipolar_coords(1, (p(1, 3),
+                                              p(5, 6),
+                                              p(3, 4),
+                                              p(1, 6),
+                                              p(1, 4)))
+    assert_almost_equal(coords, [s(p(1, 3))
+                                 * s(p(5, 6))
+                                 * s(p(3, 4))
+                                 * s(p(1, 6))
+                                 * s(p(1, 4)),
+                                 c(p(1, 3))
+                                 * s(p(5, 6))
+                                 * s(p(3, 4))
+                                 * s(p(1, 6))
+                                 * s(p(1, 4)),
+                                 c(p(5, 6))
+                                 * s(p(3, 4))
+                                 * s(p(1, 6))
+                                 * s(p(1, 4)),
+                                 c(p(3, 4))
+                                 * s(p(1, 6))
+                                 * s(p(1, 4)),
+                                 c(p(1, 6))
+                                 * s(p(1, 4)),
+                                 c(p(1, 4))])
 
 
 def test_gabor_kernel_sum():
