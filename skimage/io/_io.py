@@ -12,7 +12,7 @@ __all__ = ['imread', 'imsave', 'imshow', 'show',
            'imread_collection', 'imshow_collection']
 
 
-def imread(fname, as_gray=False, as_grey=None, plugin=None, flatten=None,
+def imread(fname, as_gray=False, plugin=None, flatten=None,
            **plugin_args):
     """Load an image from file.
 
@@ -21,11 +21,6 @@ def imread(fname, as_gray=False, as_grey=None, plugin=None, flatten=None,
     fname : string
         Image file name, e.g. ``test.jpg`` or URL.
     as_gray : bool, optional
-        If True, convert color images to gray-scale (64-bit floats).
-        Images that are already in gray-scale format are not converted.
-    as_grey : bool or None, optional
-        Deprecated keyword argument. Use `as_gray` instead.
-        If None, `as_gray` is used.
         If True, convert color images to gray-scale (64-bit floats).
         Images that are already in gray-scale format are not converted.
     plugin : str, optional
@@ -49,10 +44,9 @@ def imread(fname, as_gray=False, as_grey=None, plugin=None, flatten=None,
         RGB-image MxNx3 and an RGBA-image MxNx4.
 
     """
-    if as_grey is not None:
-        as_gray = as_grey
-        warn('`as_grey` has been deprecated in favor of `as_gray`'
-             ' and will be removed in v0.16.')
+    if 'as_grey' in plugin_args.keys():
+        as_gray = plugin_args.pop('as_grey', as_gray)
+        warn('`as_grey` has been deprecated in favor of `as_gray`')
 
     # Backward compatibility
     if flatten is not None:
