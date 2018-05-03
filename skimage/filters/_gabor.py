@@ -21,7 +21,7 @@ def _decompose_quasipolar_coords(r, thetas):
     ----------
     r : float
         Radial coordinate.
-    thetas : (N, 1) array_like object
+    thetas : (N, 1) array
         Quasipolar angles.
 
     Returns
@@ -76,40 +76,65 @@ def _gaussian(image, center=None, sigma=1, ndim=2):
     return gauss / norm
 
 
-def _rotation(X, Y):
-    """Generates an n-dimensional rotation matrix.
+def _rotation(src_axis, dst_axis):
+    """Generates an matrix for the nD rotation of one axis to face another.
 
-    Ognyan Ivanov Zhelezov. One Modification which Increases Performance of N-Dimensional Rotation Matrix Generation Algorithm. International Journal of Chemistry, Mathematics, and Physics, Vol. 2 No. 2, 2018: pp. 13-18. doi: 10.22161/ijcmp.2.2.1
+    Parameters
+    ----------
+    src_axis : (N, 1) array
+        Vector representation of the axis that will be rotated.
+
+    dst_axis : (N, 1) array
+        Vector representation of the axis to rotate to.
+
+    Returns
+    -------
+    R : (N, N) array
+        Matrix that rotates ``src_axis`` to coincide with ``dst_axis``.
+
+    References
+    ----------
+    .. [1] Ognyan Ivanov Zhelezov. One Modification which Increases Performance
+           of N-Dimensional Rotation Matrix Generation Algorithm. International
+           Journal of Chemistry, Mathematics, and Physics, Vol. 2 No. 2, 2018:
+           pp. 13-18. https://dx.doi.org/10.22161/ijcmp.2.2.1
     """
-    def MAR(x, w):
-        N = x.size
-        Lw = w.size
+    X = src_axis
+    Y = dst_axis
 
-        R = np.eye(N)  # Initial rotation matrix = Identity matrix
+
+    def MAR(axis, diffs):
+        ndim = len(axis)
+        num_diffs = len(diffs)
+
+        x = axis
+        w = diffs
+
+        R = np.eye(ndim)  # Initial rotation matrix = Identity matrix
+
         for step in range(1, N, 2):
-            A = np.eye(N)
-            n = 0
-            for n in range(0, N - step, 2 * step):
-                if n + step >= Lw:
+            A = np.eye(ndim)
+            for n in range(0, ndim - step, 2 * step):
+                if n + step >= num_diffs:
                     break
-                r2 = X[w[n]] * X[w[n]] + X[w[n + step]] * X[w[n + step]]
+                r2 = x[w[n]] * x[w[n]] + x[w[n + step]] * x[w[n + step]]
                 if r2 > 0:
                     r = np.sqrt(r2)
-                    pcos = X[w[n]] / r  # Calculation of coefficients
-                    psin = -X[w[n + step]] / r
+                    pcos = x[w[n]] / r  # Calculation of coefficients
+                    psin = -x[w[n + step]] / r
                     # Base 2-dimensional rotation
                     A[w[n], w[n]] = pcos
                     A[w[n], w[n + step]] = psin
                     A[w[n + step], w[n]] = -psin
                     A[w[n + step], w[n + step]] = pcos
-                    X[w[n + step]] = 0
-                    X[w[n]] = r
+                    x[w[n + step]] = 0
+                    x[w[n]] = r
 
             R = np.matmul(A, R)  # Multiply R by current matrix of stage A
 
         return R
 
-    N = X.size  # X and Y have to be row vectors
+
     normX = np.linalg.norm(X)
     normY = np.linalg.norm(Y)
 
