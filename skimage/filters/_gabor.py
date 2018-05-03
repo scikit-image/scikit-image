@@ -1,3 +1,4 @@
+import collection as coll
 import numpy as np
 from scipy import ndimage as ndi
 from .._shared.utils import assert_nD
@@ -112,11 +113,12 @@ def _rotation(src_axis, dst_axis):
 
         R = np.eye(ndim)  # Initial rotation matrix = Identity matrix
 
-        for step in range(1, N, 2):
+        step = 1  # Initial step
+        while step < N:  # Loop to create matrices of stages
             A = np.eye(ndim)
-            for n in range(0, ndim - step, 2 * step):
-                if n + step >= num_diffs:
-                    break
+
+            n = 0
+            while n < ndim - step and n + step >= num_diffs:
                 r2 = x[w[n]] * x[w[n]] + x[w[n + step]] * x[w[n + step]]
                 if r2 > 0:
                     r = np.sqrt(r2)
@@ -129,7 +131,9 @@ def _rotation(src_axis, dst_axis):
                     A[w[n + step], w[n + step]] = pcos
                     x[w[n + step]] = 0
                     x[w[n]] = r
+                n += step << 1  # Move to the next base operation
 
+            step <<= 1  # multiply by 2
             R = np.matmul(A, R)  # Multiply R by current matrix of stage A
 
         return R
@@ -150,7 +154,7 @@ def _rotation(src_axis, dst_axis):
     return M
 
 
-def gabor_kernel(frequency, theta=None, bandwidth=1, sigma=None,
+def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None,
                  sigma_y=None, n_stds=3, offset=None, ndim=2, **kwargs):
     """Return complex nD Gabor filter kernel.
 
@@ -221,21 +225,17 @@ def gabor_kernel(frequency, theta=None, bandwidth=1, sigma=None,
         else:
             sigma = (sigma_y, sigma)
 
-    # handle translation
-    if theta is None:
-        theta = (0,) * (ndim - 1)
-    elif type(offset) is tuple:
-        theta += (0,) * (len(theta) - (ndim - 1))
-    else:
-        theta = (theta,) * (ndim - 1)
+    default_sigma = _sigma_prefactor(bandwidth) / frequency
 
-    if type(sigma) is tuple:
-        sigma += (None,) * (ndim - len(sigma))
-        sigma = np.asarray(sigma)
-    else:
+    # handle translation
+    if not isinstance(theta, coll.Iterable):
+        theta = (0,) * (ndim - 1)
+
+    if not isinstance(sigma, coll.Iterable):
         sigma = np.array([sigma] * ndim)
-    sigma[(sigma == None).nonzero()] = (_sigma_prefactor(bandwidth)  # noqa
-                                        / frequency)
+    else:
+        sigma = np.append(sigma, [None] * (ndim - len(sigma)))
+    sigma[(sigma == None).nonzero()] = default_sigma  # noqa
     sigma = sigma.astype(None)
 
     x = ...
@@ -253,7 +253,7 @@ def gabor_kernel(frequency, theta=None, bandwidth=1, sigma=None,
     return g.view(cls)
 
 
-def gabor(image, frequency=None, theta=None, bandwidth=1, sigma=None, sigma_y=None,
+def gabor(image, frequency=None, theta=0, bandwidth=1, sigma=None, sigma_y=None,
           n_stds=3, offset=None, mode='reflect', cval=0, kernel=None, **kwargs):
     """Return real and imaginary responses to Gabor filter.
     The real and imaginary parts of the Gabor filter kernel are applied to the
