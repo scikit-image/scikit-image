@@ -81,34 +81,31 @@ def _rotation(X, Y):
 
     Ognyan Ivanov Zhelezov. One Modification which Increases Performance of N-Dimensional Rotation Matrix Generation Algorithm. International Journal of Chemistry, Mathematics, and Physics, Vol. 2 No. 2, 2018: pp. 13-18. doi: 10.22161/ijcmp.2.2.1
     """
-    def MAR(X, w):
-        N = X.size  # X have to be row vector (transposed)
-        Lw = w.size  # w have to be row vector (transposed)
+    def MAR(x, w):
+        N = x.size
+        Lw = w.size
 
-        if N <= Lw:  # Length of X can't exceed the length of w
-            R = np.eye(N)  # Initial rotation matrix = Identity matrix
-            step = 1  # Initial step
-            while step < N:
-                A = np.eye(N)
-                n = 0
-                while n < N - step and w[n + step] > 0:
-                    r2 = X[w[n]] * X[w[n]] + X[w[n + step]] * X[w[n + step]]
-                    if r2 > 0:
-                        r = np.sqrt(r2)
-                        pcos = X[w[n]]/r  # Calculation of coefficients
-                        psin = -X[w[n + step]]/r
-                        # Base 2-dimensional rotation
-                        A[w[n], w[n]] = pcos
-                        A[w[n], w[n + step]] = psin
-                        A[w[n + step], w[n]] = -psin
-                        A[w[n + step], w[n + step]] = pcos
-                        X[w[n + step]] = 0
-                        X[w[n]] = r
+        R = np.eye(N)  # Initial rotation matrix = Identity matrix
+        for step in range(1, N, 2):
+            A = np.eye(N)
+            n = 0
+            for n in range(0, N - step, 2 * step):
+                if n + step >= Lw:
+                    break
+                r2 = X[w[n]] * X[w[n]] + X[w[n + step]] * X[w[n + step]]
+                if r2 > 0:
+                    r = np.sqrt(r2)
+                    pcos = X[w[n]] / r  # Calculation of coefficients
+                    psin = -X[w[n + step]] / r
+                    # Base 2-dimensional rotation
+                    A[w[n], w[n]] = pcos
+                    A[w[n], w[n + step]] = psin
+                    A[w[n + step], w[n]] = -psin
+                    A[w[n + step], w[n + step]] = pcos
+                    X[w[n + step]] = 0
+                    X[w[n]] = r
 
-                    n += 2 * step  # Move to the next base operation
-
-                step *= 2
-                R = np.matmul(A, R)  # Multiply R by current matrix of stage A
+            R = np.matmul(A, R)  # Multiply R by current matrix of stage A
 
         return R
 
@@ -119,13 +116,7 @@ def _rotation(X, Y):
     if normX != normY:           # Set norm of Y equal to norm
         Y = (normX / normY) * Y  # of X if they are different
 
-    w = np.zeros(1, N)  # Initialization of vector w
-    m = 0
-
-    for i in range(N):  # Loop to create vector of indexes w
-        if X[n] != Y[n]:
-            w[m] = n  # save in w index of not equal elenents
-            m += 1
+    w = (X != Y).nonzero()  # indices of difference
 
     Mx = MAR(X, w)
     My = MAR(Y, w))
