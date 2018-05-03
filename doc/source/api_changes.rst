@@ -1,5 +1,6 @@
 Version 0.14
 ------------
+- ``skimage.filters.thresholding.threshold_singh`` added.
 - ``skimage.filters.gaussian_filter`` has been removed. Use
   ``skimage.filters.gaussian`` instead.
 - ``skimage.filters.gabor_filter`` has been removed. Use
