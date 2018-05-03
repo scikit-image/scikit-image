@@ -76,41 +76,62 @@ def _gaussian(image, center=None, sigma=1, ndim=2):
     return gauss / norm
 
 
-def _rotation(thetas):
+def _rotation(X, Y):
     """Generates an n-dimensional rotation matrix.
 
-    Ognyan Ivanov Zhelezov, N-dimensional Rotation Matrix Generation Algorithm, American Journal of Computational and Applied Mathematics , Vol. 7 No. 2, 2017, pp. 51-57. doi: 10.5923/j.ajcam.20170702.04.
-
-    Copyright (c) 2017 Scientific & Academic Publishing. All Rights Reserved.
-    This work is licensed under the Creative Commons Attribution International License (CC BY).
-    http://creativecommons.org/licenses/by/4.0/
+    Ognyan Ivanov Zhelezov. One Modification which Increases Performance of N-Dimensional Rotation Matrix Generation Algorithm. International Journal of Chemistry, Mathematics, and Physics, Vol. 2 No. 2, 2018: pp. 13-18. doi: 10.22161/ijcmp.2.2.1
     """
-    #ndim = len(thetas) + 1
-    X = _decompose_quasipolar_coords(1, thetas)
-    ndim = X.size
-    R = np.eye(ndim)
+    def MAR(X, w):
+        N = X.size  # X have to be row vector (transposed)
+        Lw = w.size  # w have to be row vector (transposed)
 
-    for step in range(1, ndim, 2):
-        A = np.eye(ndim)
+        if N <= Lw:  # Length of X can't exceed the length of w
+            R = np.eye(N)  # Initial rotation matrix = Identity matrix
+            step = 1  # Initial step
+            while step < N:
+                A = np.eye(N)
+                n = 0
+                while n < N - step and w[n + step] > 0:
+                    r2 = X[w[n]] * X[w[n]] + X[w[n + step]] * X[w[n + step]]
+                    if r2 > 0:
+                        r = np.sqrt(r2)
+                        pcos = X[w[n]]/r  # Calculation of coefficients
+                        psin = -X[w[n + step]]/r
+                        # Base 2-dimensional rotation
+                        A[w[n], w[n]] = pcos
+                        A[w[n], w[n + step]] = psin
+                        A[w[n + step], w[n]] = -psin
+                        A[w[n + step], w[n + step]] = pcos
+                        X[w[n + step]] = 0
+                        X[w[n]] = r
 
-        for n in range(0, ndim - step, 2 * step):
-            r2 = X[n] * X[n] + X[n + step] * X[n + step]
-            if r2 <= 0:
-                continue
-            r = np.sqrt(r2)
-            c = X[n]/r
-            s = -X[n + step]/r
-            #c = np.cos(thetas[n])
-            #s = np.sin(thetas[n])
-            A[n, n] = c
-            A[n, n + step] = s
-            A[n + step, n] = -s
-            A[n + step, n + step] = c
+                    n += 2 * step  # Move to the next base operation
 
-        X = np.matmul(A, X.T)
-        R = np.matmul(A, R)
+                step *= 2
+                R = np.matmul(A, R)  # Multiply R by current matrix of stage A
 
-    return R
+        return R
+
+    N = X.size  # X and Y have to be row vectors
+    normX = np.linalg.norm(X)
+    normY = np.linalg.norm(Y)
+
+    if normX != normY:           # Set norm of Y equal to norm
+        Y = (normX / normY) * Y  # of X if they are different
+
+    w = np.zeros(1, N)  # Initialization of vector w
+    m = 0
+
+    for i in range(N):  # Loop to create vector of indexes w
+        if X[n] != Y[n]:
+            w[m] = n  # save in w index of not equal elenents
+            m += 1
+
+    Mx = MAR(X, w)
+    My = MAR(Y, w))
+    M = My.T * Mx
+
+    return M
 
 
 def gabor_kernel(frequency, theta=None, bandwidth=1, sigma=None,
