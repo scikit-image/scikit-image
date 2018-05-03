@@ -362,7 +362,7 @@ def local_minima_old(image, selem=None):
 
 
 def _offset_to_raveled_neighbours(image_shape, selem):
-    """Compute offsets to a samples neighbours if the image where raveled.
+    """Compute offsets to a samples neighbors if the image would be raveled.
 
     Parameters
     ----------
@@ -420,7 +420,7 @@ def _fast_pad(image, value):
 
     Notes
     -----
-    The behavior of this function is equivalent to::
+    The output of this function is equivalent to::
 
         np.pad(image, mode="constant", constant_values=value)
 
@@ -468,7 +468,7 @@ def local_maxima(image, selem=None, include_border=True):
         selem = image.ndim
     if np.isscalar(selem):
         selem = ndi.generate_binary_structure(image.ndim, selem)
-    neighbour_offsets = _offset_to_raveled_neighbours(image.shape, selem)
+    neighbor_offsets = _offset_to_raveled_neighbours(image.shape, selem)
 
     # Array of flags used to store the state of each pixel during evaluation.
     # Possible states are:
@@ -487,7 +487,7 @@ def local_maxima(image, selem=None, include_border=True):
         dtype = np.float64
     image = image.astype(dtype, order="C", copy=False)
 
-    _local_maxima(image.ravel(), flags.ravel(), neighbour_offsets)
+    _local_maxima(image.ravel(), flags.ravel(), neighbor_offsets)
 
     if include_border:
         # Revert padding performed at the beginning of the function
@@ -513,7 +513,7 @@ def local_minima(image, selem=None, include_border=True):
         and have the same number of dimensions as `image`. If not given the
         maximal connectivity is assumed, meaning `selem` is an array of 1's.
     include_border : bool, optional
-        If true, plateaus that touch the image border can be valid maxima.
+        If true, plateaus that touch the image border can be valid minima.
 
     Returns
     -------
