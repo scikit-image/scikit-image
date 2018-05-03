@@ -3,7 +3,7 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 
-"""Cython code to wrapped in extrema.py."""
+"""Cython code wrapped in extrema.py."""
 
 cimport numpy as cnp
 
@@ -22,7 +22,7 @@ ctypedef fused dtype_t:
 
 def _local_maxima(dtype_t[::1] image not None,
                   unsigned char[::1] flags,
-                  Py_ssize_t[::1] neighbour_offsets not None):
+                  Py_ssize_t[::1] neighbor_offsets not None):
     """Detect local maxima in n-dimensional array.
 
     Parameters
@@ -32,9 +32,9 @@ def _local_maxima(dtype_t[::1] image not None,
     flags : ndarray
         An array of flags that is used to store the state of each pixel during
         evaluation.
-    neighbour_offsets : ndarray
+    neighbor_offsets : ndarray
         A one-dimensional array that contains the offsets to find the
-        connected neighbours for any index in `image`.
+        connected neighbors for any index in `image`.
 
     Returns
     -------
@@ -78,14 +78,14 @@ def _local_maxima(dtype_t[::1] image not None,
                     # Index is potentially part of a maximum:
                     # Find all samples part of the plateau and fill with 0
                     # or 1 depending on whether it's a true maximum
-                    _fill_plateau(image, flags, neighbour_offsets, &queue, i)
+                    _fill_plateau(image, flags, neighbor_offsets, &queue, i)
         finally:
             queue_exit(&queue)
 
 
 cdef inline void _fill_plateau(
         dtype_t[::1] image, unsigned char[::1] flags,
-        Py_ssize_t[::1] neighbour_offsets, RestorableQueue* queue_ptr,
+        Py_ssize_t[::1] neighbor_offsets, RestorableQueue* queue_ptr,
         Py_ssize_t start_index) nogil:
     """Fill with 1 if plateau is local maximum else with 0."""
     cdef:
@@ -111,8 +111,8 @@ cdef inline void _fill_plateau(
     # Break loop if all queued positions were evaluated
     while queue_pop(queue_ptr, &current_index):
         # Look at all neighbouring samples
-        for i in range(neighbour_offsets.shape[0]):
-            neighbor = current_index + neighbour_offsets[i]
+        for i in range(neighbor_offsets.shape[0]):
+            neighbor = current_index + neighbor_offsets[i]
             if image[neighbor] == h:
                 # Value is part of plateau
                 if flags[neighbor] == 3:
