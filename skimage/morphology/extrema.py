@@ -383,7 +383,7 @@ def _offset_to_raveled_neighbours(image_shape, selem):
     return offsets
 
 
-def _set_edge_values_inplace(image, value, edge_width=1):
+def _set_edge_values_inplace(image, value):
     """Set edge values along all axes to a constant value.
 
     Parameters
@@ -392,17 +392,52 @@ def _set_edge_values_inplace(image, value, edge_width=1):
         The array to modify inplace.
     value : number
         The value to use. Should be compatible with `image`'s dtype.
-    edge_width : int
-        Length of edge.
     """
     for axis in range(image.ndim):
         sl = [slice(None)] * image.ndim
         # Set edge in front
-        sl[axis] = np.arange(edge_width)
+        sl[axis] = 0
         image[sl] = value
         # Set edge to the end
-        sl[axis] = -(sl[axis] + 1)
+        sl[axis] = -1
         image[sl] = value
+
+
+def _fast_pad(image, value):
+    """Pad an array on all axes with one constant value.
+
+    Parameters
+    ----------
+    image : ndarray
+        Image to pad.
+    value : number
+         The value to use. Should be compatible with `image`'s dtype.
+
+    Returns
+    -------
+    padded_image : ndarray
+        The new image.
+
+    Notes
+    -----
+    The behavior of this function is equivalent to::
+
+        np.pad(image, mode="constant", constant_values=value)
+
+    However this method needs to only allocate and copy once which can result
+    in significant speed gains if `image` is large.
+    """
+    # Allocate padded image
+    new_shape = np.array(image.shape) + 2
+    new_image = np.empty(new_shape, dtype=image.dtype)
+
+    # Copy old image into new space
+    original_slice = tuple(slice(1, -1) for _ in range(image.ndim))
+    new_image[original_slice] = image
+    # and set the edge values
+    _set_edge_values_inplace(new_image, value)
+
+    return new_image
 
 
 def local_maxima(image, selem=None, include_border=True):
@@ -427,7 +462,7 @@ def local_maxima(image, selem=None, include_border=True):
         An array of 1's where local maxima were found and otherwise 0's.
     """
     if include_border:
-        image = np.pad(image, 1, mode="constant", constant_values=image.min())
+        image = _fast_pad(image, image.min())
 
     if selem is None:
         selem = image.ndim
