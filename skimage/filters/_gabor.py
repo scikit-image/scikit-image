@@ -63,8 +63,30 @@ def _decompose_quasipolar_coords(r, thetas):
     return coords
 
 
-def _gaussian(image, center=0, sigma=1, ndim=2):
-    """Do CB. 2008. The Multivariate Gaussian Distribution. Stanford University (CS 229): Stanford, CA. http://cs229.stanford.edu/section/gaussians.pdf"""
+def _gaussian(image, center=0, sigma=1, order=2):
+    """Generates gaussian envelope.
+
+    Parameters
+    ----------
+    image : non-complex array
+        Image to seed the filter with.
+    center : scalar or vector, optional
+        Coordinates to center the image with. Defaults to 0.
+    sigma : scalar or vector, optional
+        Spatial dimensions of the envelope. Defaults to 1.
+    order : int, optional
+        Order of the envelope to create. Defaults to 2.
+
+    Returns
+    -------
+    gauss : (``order``, ``order``)
+
+    References
+    ----------
+    .. [1] Do CB. 2008. The Multivariate Gaussian Distribution. Stanford
+           University (CS 229): Stanford, CA.
+           http://cs229.stanford.edu/section/gaussians.pdf
+    """
     sigma_prod = np.prod(sigma)
 
     # normalization factor
