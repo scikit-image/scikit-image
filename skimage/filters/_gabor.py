@@ -1,4 +1,4 @@
-import collection as coll
+import collections as coll
 import numpy as np
 from scipy import ndimage as ndi
 from .._shared.utils import assert_nD
@@ -82,15 +82,15 @@ def _rotation(src_axis, dst_axis):
 
     Parameters
     ----------
-    src_axis : (N, 1) array
+    src_axis : (N,) matrix
         Vector representation of the axis that will be rotated.
 
-    dst_axis : (N, 1) array
+    dst_axis : (N,) matrix
         Vector representation of the axis to rotate to.
 
     Returns
     -------
-    R : (N, N) array
+    M : (N, N) array
         Matrix that rotates ``src_axis`` to coincide with ``dst_axis``.
 
     References
@@ -104,7 +104,7 @@ def _rotation(src_axis, dst_axis):
     Y = dst_axis
 
 
-    def MAR(axis, diffs):
+    def rot(axis, diffs):
         ndim = len(axis)
         num_diffs = len(diffs)
 
@@ -114,11 +114,11 @@ def _rotation(src_axis, dst_axis):
         R = np.eye(ndim)  # Initial rotation matrix = Identity matrix
 
         step = 1  # Initial step
-        while step < N:  # Loop to create matrices of stages
+        while step < ndim:  # Loop to create matrices of stages
             A = np.eye(ndim)
 
             n = 0
-            while n < ndim - step and n + step >= num_diffs:
+            while n < ndim - step and n + step < num_diffs:
                 r2 = x[w[n]] * x[w[n]] + x[w[n + step]] * x[w[n + step]]
                 if r2 > 0:
                     r = np.sqrt(r2)
@@ -126,11 +126,12 @@ def _rotation(src_axis, dst_axis):
                     psin = -x[w[n + step]] / r
                     # Base 2-dimensional rotation
                     A[w[n], w[n]] = pcos
-                    A[w[n], w[n + step]] = psin
-                    A[w[n + step], w[n]] = -psin
+                    A[w[n], w[n + step]] = -psin
+                    A[w[n + step], w[n]] = psin
                     A[w[n + step], w[n + step]] = pcos
                     x[w[n + step]] = 0
                     x[w[n]] = r
+
                 n += step << 1  # Move to the next base operation
 
             step <<= 1  # multiply by 2
@@ -142,14 +143,14 @@ def _rotation(src_axis, dst_axis):
     normX = np.linalg.norm(X)
     normY = np.linalg.norm(Y)
 
-    if normX != normY:           # Set norm of Y equal to norm
+    if not np.isclose(normX, normY):           # Set norm of Y equal to norm
         Y = (normX / normY) * Y  # of X if they are different
 
-    w = (X != Y).nonzero()  # indices of difference
+    w = np.nonzero(~np.isclose(X, Y))[0]  # indices of difference
 
-    Mx = MAR(X, w)
-    My = MAR(Y, w))
-    M = My.T * Mx
+    Mx = rot(X, w)
+    My = rot(Y, w)
+    M = np.matmul(My.T, Mx)
 
     return M
 

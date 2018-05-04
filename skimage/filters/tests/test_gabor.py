@@ -3,7 +3,7 @@ from numpy.testing import (assert_equal, assert_almost_equal,
                            assert_array_almost_equal)
 
 from skimage.filters._gabor import (gabor_kernel, gabor, _sigma_prefactor,
-                                    _decompose_quasipolar_coords)
+                                    _decompose_quasipolar_coords, _rotation)
 
 
 def test_gabor_kernel_size():
@@ -79,6 +79,22 @@ def test_decompose_quasipolar_coords():
                                  c(p(1, 6))
                                  * s(p(1, 4)),
                                  c(p(1, 4))])
+
+
+def test_rotation():
+    X = np.arange(5)
+    Y = np.arange(5, 10)
+    uY = (np.linalg.norm(X) / np.linalg.norm(Y)) * Y
+
+    M = _rotation(X, Y)
+
+    R = [[ 0.7682,   0.5960,   0.1212,   0.1819,   0.0827],
+         [-0.6402,   0.7152,   0.1455,   0.2182,   0.0993],
+         [      0,  -0.2373,   0.9608,   0.0845,   0.1158],
+         [      0,  -0.2712,  -0.1655,   0.9389,   0.1324],
+         [      0,  -0.0583,  -0.1167,  -0.1750,   0.9759]]
+
+    assert_array_almost_equal(M, R, decimal=4)
 
 
 def test_gabor_kernel_sum():
