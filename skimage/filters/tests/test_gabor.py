@@ -82,19 +82,50 @@ def test_decompose_quasipolar_coords():
 
 
 def test_rotation():
+    # trivial case
+    X = np.asarray([1, 0, 0])
+    Y = np.asarray([0, 0, 1])
+
+    M = _rotation(X, Y)
+
+    Z = np.matmul(M, X[..., np.newaxis])
+
+    assert_almost_equal(Z.T, Y[np.newaxis])
+
+    # complex case
     X = np.arange(5)
     Y = np.arange(5, 10)
     uY = (np.linalg.norm(X) / np.linalg.norm(Y)) * Y
 
     M = _rotation(X, Y)
 
-    R = [[ 0.7682,   0.5960,   0.1212,   0.1819,   0.0827],
-         [-0.6402,   0.7152,   0.1455,   0.2182,   0.0993],
-         [      0,  -0.2373,   0.9608,   0.0845,   0.1158],
-         [      0,  -0.2712,  -0.1655,   0.9389,   0.1324],
-         [      0,  -0.0583,  -0.1167,  -0.1750,   0.9759]]
+    Z = np.matmul(M, X[..., np.newaxis])
 
-    assert_array_almost_equal(M, R, decimal=4)
+    assert_almost_equal(Z.T, uY[np.newaxis])
+
+
+def test_rotation_quasipolar():
+    # 2D case
+    X = np.asarray([1, 0])
+    y, x = _decompose_quasipolar_coords(5, [np.pi / 6])
+    Y = np.asarray([x, y])
+
+    M = _rotation(X, Y)
+
+    assert_almost_equal(M,
+                        [[np.cos(np.pi / 6), -np.sin(np.pi / 6)],
+                         [np.sin(np.pi / 6), np.cos(np.pi / 6)]])
+
+    # 3D case
+    X = np.asarray([0, 1, 0])
+    y, x, z = _decompose_quasipolar_coords(1, [np.pi / 3, np.pi / 6])
+    Y = np.asarray([x, y, z])
+
+    M = _rotation(X, Y)
+
+    Z = np.matmul(M, X[..., np.newaxis])
+
+    assert_almost_equal(Z.T, Y[np.newaxis])
 
 
 def test_gabor_kernel_sum():

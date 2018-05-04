@@ -1,8 +1,10 @@
 {
+  "tests/test_gabor.py::test_decompose_quasipolar_coords": true,
   "tests/test_gabor.py::test_gabor": true,
   "tests/test_gabor.py::test_gabor_kernel_bandwidth": true,
   "tests/test_gabor.py::test_gabor_kernel_size": true,
   "tests/test_gabor.py::test_gabor_kernel_sum": true,
   "tests/test_gabor.py::test_gabor_kernel_theta": true,
-  "tests/test_gabor.py::test_rotation": true
+  "tests/test_gabor.py::test_rotation": true,
+  "tests/test_gabor.py::test_sigma_prefactor": true
 }

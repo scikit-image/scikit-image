@@ -100,8 +100,8 @@ def _rotation(src_axis, dst_axis):
            Journal of Chemistry, Mathematics, and Physics, Vol. 2 No. 2, 2018:
            pp. 13-18. https://dx.doi.org/10.22161/ijcmp.2.2.1
     """
-    X = src_axis
-    Y = dst_axis
+    X = np.array(src_axis)
+    Y = np.array(dst_axis)
 
 
     def rot(axis, diffs):
