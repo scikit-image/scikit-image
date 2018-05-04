@@ -39,7 +39,8 @@ def _decompose_quasipolar_coords(r, thetas):
     Notes
     -----
     Components ``0``, ``1``, ``...``, ``n`` of the quasipolar coordinates
-    correspond to dimensions ``0``, ``1``, ``...``, ``n``.
+    correspond to dimensions ``0``, ``1``, ``...``, ``n`` or ``M``, ``...``,
+    ``N``, ``P``.
 
     For a standard ``xy``-coordinate plane, components ``1`` and ``0``
     correspond to ``x`` and ``y``, respectively.
@@ -62,17 +63,19 @@ def _decompose_quasipolar_coords(r, thetas):
     return coords
 
 
-def _gaussian(image, center=None, sigma=1, ndim=2):
+def _gaussian(image, center=0, sigma=1, ndim=2):
     """Do CB. 2008. The Multivariate Gaussian Distribution. Stanford University (CS 229): Stanford, CA. http://cs229.stanford.edu/section/gaussians.pdf"""
+    sigma_prod = np.prod(sigma)
+
     # normalization factor
     norm = (2 * np.pi) ** (ndim / 2)
-    norm *= np.prod(sigma)
+    norm *= sigma_prod
 
     # center image
     image = image - center
 
     # gaussian envelope
-    gauss = np.exp(-0.5 * np.dot(image, image) / (np.prod(sigma) ** 2))
+    gauss = np.exp(-0.5 * np.dot(image, image) / sigma_prod ** 2)
 
     return gauss / norm
 
@@ -99,6 +102,17 @@ def _rotation(src_axis, dst_axis):
            of N-Dimensional Rotation Matrix Generation Algorithm. International
            Journal of Chemistry, Mathematics, and Physics, Vol. 2 No. 2, 2018:
            pp. 13-18. https://dx.doi.org/10.22161/ijcmp.2.2.1
+
+    Examples
+    --------
+    >>> X = np.asarray([1, 0])
+    >>> Y = np.asarray([0.5, 0.5])
+
+    >>> M = _rotation(X, Y)
+    >>> Z = np.matmul(M, Y[..., np.newaxis])
+
+    >>> np.allclose(Z, Y[np.newaxis])
+    True
     """
     X = np.array(src_axis)
     Y = np.array(dst_axis)
