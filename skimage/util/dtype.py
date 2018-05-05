@@ -263,13 +263,13 @@ def convert(image, dtype, force_copy=False, uniform=False):
                 np.multiply(image, imax_out,
                             out=image_out, dtype=computation_type)
             else:
-                np.multiply(image, (imax_out - imin_out)/2,
+                np.multiply(image, (imax_out - imin_out) / 2,
                             out=image_out, dtype=computation_type)
                 image_out -= 1.0 / 2.
             np.rint(image_out, out=image_out)
             np.clip(image_out, imin_out, imax_out, out=image_out)
         elif kind_out == 'u':
-            np.multiply(image, imax_out+1,
+            np.multiply(image, imax_out + 1,
                         out=image_out, dtype=computation_type)
             np.clip(image_out, 0, imax_out, out=image_out)
         else:
