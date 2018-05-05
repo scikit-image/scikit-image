@@ -127,8 +127,7 @@ def color_check(plugin, fmt='png'):
         r3 = roundtrip(img3, plugin, fmt)
     testing.assert_allclose(r3, img)
 
-    with expected_warnings(['precision loss']):
-        img4 = img_as_int(img)
+    img4 = img_as_int(img)
     if fmt.lower() in (('tif', 'tiff')):
         img4 -= 100
         with expected_warnings(['sign loss']):
@@ -167,8 +166,7 @@ def mono_check(plugin, fmt='png'):
     else:
         testing.assert_allclose(r3, img_as_uint(img))
 
-    with expected_warnings(['precision loss']):
-        img4 = img_as_int(img)
+    img4 = img_as_int(img)
     if fmt.lower() in (('tif', 'tiff')):
         img4 -= 100
         with expected_warnings(['sign loss|\A\Z']):

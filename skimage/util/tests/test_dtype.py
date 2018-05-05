@@ -2,9 +2,11 @@ import warnings
 
 import numpy as np
 import itertools
+
 from skimage import (img_as_float, img_as_float32, img_as_float64,
                      img_as_int, img_as_uint, img_as_ubyte)
 from skimage.util.dtype import convert
+from skimage.util.dtype import _check_precision_loss as check_precision_loss
 
 from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
@@ -91,10 +93,12 @@ def test_downcast():
 def test_float_out_of_range():
     too_high = np.array([2], dtype=np.float32)
     with testing.raises(ValueError):
-        img_as_int(too_high)
+        with expected_warnings('precision loss'):
+            img_as_int(too_high)
     too_low = np.array([-2], dtype=np.float32)
     with testing.raises(ValueError):
-        img_as_int(too_low)
+        with expected_warnings('precision loss'):
+            img_as_int(too_low)
 
 
 def test_copy():
@@ -120,7 +124,6 @@ def test_bool():
         converted8 = func(img8)
         assert np.sum(converted8) == dtype_range[dt][1]
 
-
 def test_clobber():
     # The `img_as_*` functions should never modify input arrays.
     for func_input_type in img_funcs:
@@ -136,12 +139,76 @@ def test_clobber():
 
             assert_equal(img_in, img_in_before)
 
+
 def test_signed_scaling_float32():
     x = np.array([-128,  127], dtype=np.int8)
     y = img_as_float32(x)
     assert_equal(y.max(), 1)
 
+
 def test_float32_passthrough():
     x = np.array([-1, 1], dtype=np.float32)
     y = img_as_float(x)
     assert_equal(y.dtype, x.dtype)
+
+
+@parametrize("dtype_in, dtype_out, expecting_loss",
+             [(np.uint8, np.uint8, False),
+              (np.uint8, np.int8, True),
+              (np.uint8, np.uint16, False),
+              (np.uint8, np.int16, False),
+              (np.uint8, np.float32, False),
+              (np.uint8, np.float64, False),
+
+              (np.int8, np.uint8, True),
+              (np.int8, np.int8, False),
+              (np.int8, np.uint16, False),
+              (np.int8, np.int16, False),
+              (np.int8, np.float32, False),
+              (np.int8, np.float64, False),
+
+              (np.int16, np.uint8, True),
+              (np.int16, np.int8, True),
+              (np.int16, np.uint16, True),
+              (np.int16, np.int16, False),
+              (np.int16, np.float32, False),
+              (np.int16, np.float64, False),
+
+              (np.uint16, np.uint8, True),
+              (np.uint16, np.int8, True),
+              (np.uint16, np.uint16, False),
+              (np.uint16, np.int16, True),
+              (np.uint16, np.float32, False),
+              (np.uint16, np.float64, False),
+
+              (np.float32, np.uint8, True),
+              (np.float32, np.int8, True),
+              (np.float32, np.uint16, True),
+              (np.float32, np.int16, True),
+              (np.float32, np.float32, False),
+              (np.float32, np.float64, False),
+
+              (np.float64, np.uint8, True),
+              (np.float64, np.int8, True),
+              (np.float64, np.uint16, True),
+              (np.float64, np.int16, True),
+              (np.float64, np.float32, True),
+              (np.float64, np.float64, False),
+
+              (np.bool, np.uint8, False),
+              (np.bool, np.int8, False),
+              (np.bool, np.uint16, False),
+              (np.bool, np.int16, False),
+              (np.bool, np.float32, False),
+              (np.bool, np.float64, False),
+
+              (np.uint8, np.bool, True),
+              (np.int8, np.bool, True),
+              (np.uint16, np.bool, True),
+              (np.int16, np.bool, True),
+              (np.float32, np.bool, True),
+              (np.float64, np.bool, True),
+              ])
+def test_check_precision_loss(dtype_in, dtype_out, expecting_loss):
+    with expected_warnings(['precision loss|\A\Z']):
+        assert check_precision_loss(dtype_in, dtype_out) == expecting_loss

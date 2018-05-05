@@ -32,7 +32,73 @@ dtype_range.update(_integer_ranges)
 _supported_types = list(dtype_range.keys())
 
 
-def dtype_limits(image, clip_negative=False):
+def _check_precision_loss(dtypeobj_in, dtypeobj_out):
+    """Check if conversion between images will incur loss of precision.
+
+    Generally speaking, the output object needs to have more significant bits
+    than the input kind.
+
+    Details:
+        float -> signed/unsigned ints will always return true.
+        signed/unsigned -> float of same number of bytes will return true.
+
+    Parameters
+    ----------
+    dtypeobj_in: np.dtype
+        dtype of the input image.
+    dtypeobj_out: np.dtype
+        dtype of the output image.
+    output_warning: bool, optional
+        Outputs a warning using `warn` if operation will incur loss of
+        precision.
+    int_same_size_ok: bool, optional
+        Should conversion between integers of the same same (and signedness)
+        be considered lossy.
+
+    """
+    dtypeobj_in = np.dtype(dtypeobj_in)
+    dtypeobj_out = np.dtype(dtypeobj_out)
+    kind_in = dtypeobj_in.kind
+    kind_out = dtypeobj_out.kind
+    itemsize_in = dtypeobj_in.itemsize
+    itemsize_out = dtypeobj_out.itemsize
+
+    has_loss = False
+
+    if kind_in != 'b' and kind_out == 'b':
+        has_loss = True
+    elif kind_in == 'f' and kind_out == 'f':
+        # float->float
+        if itemsize_out < itemsize_in:
+            has_loss = True
+    elif kind_in == 'f':
+        # float -> other (integer or bool)
+        has_loss = True
+    elif kind_out == 'f':
+        # signed/unsigned int -> float
+        if itemsize_in >= itemsize_out:
+            has_loss = True
+    elif ((kind_in == 'i' and kind_out == 'i') or
+            (kind_in == 'u' and kind_out == 'u')):
+        # signed/unsigned to same kind
+        if itemsize_out < itemsize_in:
+            has_loss = True
+    elif kind_in == 'u' and kind_out == 'i':
+        # usigned -> signed int
+        if itemsize_in >= itemsize_out:
+            has_loss = True
+    elif kind_in == 'i' and kind_out == 'u':
+        # signed int to unsigned
+        if itemsize_out <= itemsize_in:
+            has_loss = True
+
+    if has_loss:
+        warn("Possible precision loss when converting from {} to {}"
+             .format(dtypeobj_in, dtypeobj_out))
+    return has_loss
+
+
+def dtype_limits(image, clip_negative=None):
     """Return intensity limits, i.e. (min, max) tuple, of the image's dtype.
 
     Parameters
@@ -130,10 +196,6 @@ def convert(image, dtype, force_copy=False, uniform=False):
              "{} to positive image of type {}."
              .format(dtypeobj_in, dtypeobj_out))
 
-    def prec_loss():
-        warn("Possible precision loss when converting from {} to {}"
-             .format(dtypeobj_in, dtypeobj_out))
-
     def _dtype_itemsize(itemsize, *dtypes):
         # Return first of `dtypes` with itemsize greater than `itemsize`
         return next(dt for dt in dtypes if np.dtype(dt).itemsize >= itemsize)
@@ -187,7 +249,6 @@ def convert(image, dtype, force_copy=False, uniform=False):
             return a.copy() if copy else a
         elif n > m:
             # downscale with precision loss
-            prec_loss()
             if copy:
                 b = np.empty(a.shape, _dtype_bits(kind, m))
                 np.floor_divide(a, 2**(n - m), out=b, dtype=a.dtype,
@@ -209,7 +270,6 @@ def convert(image, dtype, force_copy=False, uniform=False):
         else:
             # upscale to a multiple of `n` bits,
             # then downscale with precision loss
-            prec_loss()
             o = (m // n + 1) * n
             if copy:
                 b = np.empty(a.shape, _dtype_bits(kind, o))
@@ -229,11 +289,12 @@ def convert(image, dtype, force_copy=False, uniform=False):
         imin_out = np.iinfo(dtype_out).min
         imax_out = np.iinfo(dtype_out).max
 
+    _check_precision_loss(dtype_in, dtype_out)
+
     # any -> binary
     if kind_out == 'b':
         if kind_in in "fi":
             sign_loss()
-        prec_loss()
         return image > dtype_in(dtype_range[dtype_in][1] / 2)
 
     # binary -> any
@@ -249,12 +310,9 @@ def convert(image, dtype, force_copy=False, uniform=False):
             raise ValueError("Images of type float must be between -1 and 1.")
         if kind_out == 'f':
             # float -> float
-            if itemsize_in > itemsize_out:
-                prec_loss()
             return image.astype(dtype_out)
 
         # floating point -> integer
-        prec_loss()
         # use float type that can represent output integer type
         computation_type = _dtype_itemsize(itemsize_out, dtype_in,
                                            np.float32, np.float64)
@@ -282,9 +340,6 @@ def convert(image, dtype, force_copy=False, uniform=False):
 
     # signed/unsigned int -> float
     if kind_out == 'f':
-        if itemsize_in >= itemsize_out:
-            prec_loss()
-
         # use float type that can exactly represent input integers
         computation_type = _dtype_itemsize(itemsize_in, dtype_out,
                                            np.float32, np.float64)
