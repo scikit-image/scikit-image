@@ -14,7 +14,8 @@ __all__ = ['img_as_float32', 'img_as_float64', 'img_as_float',
 # we use the basis dtypes here. For more information, see:
 # - https://github.com/scikit-image/scikit-image/issues/3043
 # For convenience, for these dtypes we indicate also the possible bit depths
-# (some of them are platform specific).
+# (some of them are platform specific). For the details, see:
+# http://www.unix.org/whitepapers/64bit.html
 _integer_types = (np.byte, np.ubyte,          # 8 bits
                   np.short, np.ushort,        # 16 bits
                   np.intc, np.uintc,          # 16 or 32 or 64 bits
