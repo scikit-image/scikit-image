@@ -63,12 +63,12 @@ def invert(image, signed_float=False):
         inverted = ~image
     elif np.issubdtype(image.dtype, np.unsignedinteger):
         max_val = dtype_limits(image, clip_negative=False)[1]
-        inverted = max_val - image
+        inverted = np.subtract(max_val, image, dtype=image.dtype)
     elif np.issubdtype(image.dtype, np.signedinteger):
-        inverted = -1 - image
+        inverted = np.subtract(-1, image, dtype=image.dtype)
     else:  # float dtype
         if signed_float:
             inverted = -image
         else:
-            inverted = 1 - image
+            inverted = np.subtract(1, image, dtype=image.dtype)
     return inverted
