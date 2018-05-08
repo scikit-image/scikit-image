@@ -77,7 +77,8 @@ X = delayed(extract_feature_image(img, feature_types)
 X = np.array(X.compute(get=multiprocessing.get))
 y = np.array([1] * 100 + [0] * 100)
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=150,
-                                                    random_state=0)
+                                                    random_state=0,
+                                                    stratify=y)
 
 # Extract all possible features to be able to select the most salient.
 feature_coord, feature_type = \
@@ -138,7 +139,8 @@ X = delayed(extract_feature_image(img, selected_feature_type,
 X = np.array(X.compute(get=multiprocessing.get))
 y = np.array([1] * 100 + [0] * 100)
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=150,
-                                                    random_state=0)
+                                                    random_state=0,
+                                                    stratify=y)
 
 ###############################################################################
 # Once the feature are extracted, we can train and test the a new classifier.
