@@ -29,7 +29,7 @@ from time import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-from dask import delayed, multiprocessing
+from dask import delayed, threaded, multiprocessing
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -143,9 +143,14 @@ selected_feature_type = feature_type[idx_sorted[:sig_feature_count]]
 X = delayed(extract_feature_image(img, selected_feature_type,
                                   selected_feature_coord)
             for img in images)
-# Compute the result using the multiprocessing backend
+# Compute the result using the *threaded* backend:
+# When computing all features, the Python GIL is acquired to process each ROI,
+# and this is where most of the time is spent, so multiprocessing is faster.
+# For this small subset, most of the time is spent on the feature computation
+# rather than the ROI scanning, and using threaded is *much* faster, because
+# we avoid the overhead of launching a new process.
 t_start = time()
-X = np.array(X.compute(get=multiprocessing.get))
+X = np.array(X.compute(get=threaded.get))
 time_subs_feature_comp = time() - t_start
 y = np.array([1] * 100 + [0] * 100)
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=150,
