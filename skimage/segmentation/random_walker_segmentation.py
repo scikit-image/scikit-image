@@ -13,7 +13,6 @@ from scipy import sparse, ndimage as ndi
 
 from .._shared.utils import warn
 
-
 # executive summary for next code block: try to import umfpack from
 # scipy, but make sure not to raise a fuss if it fails since it's only
 # needed to speed up a few cases.
@@ -39,9 +38,17 @@ try:
     amg_loaded = True
 except ImportError:
     amg_loaded = False
-from scipy.sparse.linalg import cg
+
 from ..util import img_as_float
 from ..filters import rank_order
+
+from scipy.sparse.linalg import cg
+import scipy
+from distutils.version import LooseVersion as Version
+import functools
+
+if Version(scipy.__version__) >= Version('1.1'):
+    cg = functools.partial(cg, atol=0)
 
 #-----------Laplacian--------------------
 
