@@ -195,7 +195,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None,
                  sigma_y=None, n_stds=3, offset=None, ndim=2, **kwargs):
     """Return complex nD Gabor filter kernel.
 
-    Gabor kernel is a Gaussian kernel modulated by a complex harmonic function.
+    A gabor kernel is a Gaussian kernel modulated by a complex harmonic function.
     Harmonic function consists of an imaginary sine function and a real
     cosine function. Spatial frequency is inversely proportional to the
     wavelength of the harmonic and to the standard deviation of a Gaussian
@@ -206,21 +206,22 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None,
     ----------
     frequency : float
         Spatial frequency of the harmonic function. Specified in pixels.
-    theta : float, optional
+    theta : float or array of floats, optional
         Orientation in radians. If 0, the harmonic is in the x-direction.
     bandwidth : float, optional
-        The bandwidth captured by the filter. For fixed bandwidth, `sigma_x`
-        and `sigma_y` will decrease with increasing frequency. This value is
-        ignored if `sigma_x` and `sigma_y` are set by the user.
-    sigma_x, sigma_y : float, optional
-        Standard deviation in x- and y-directions. These directions apply to
-        the kernel *before* rotation. If `theta = pi/2`, then the kernel is
-        rotated 90 degrees so that `sigma_x` controls the *vertical* direction.
+        The bandwidth captured by the filter. For fixed bandwidth, `sigma`
+        will decrease with increasing frequency. This value is ignored if
+        `sigma` are set by the user.
+    sigma : float or array of floats, optional
+        Standard deviation. These directions apply to the kernel *before*
+        rotation.
     n_stds : scalar, optional
         The linear size of the kernel is n_stds (3 by default) standard
         deviations
     offset : float, optional
         Phase offset of harmonic function in radians.
+    ndim : int, optional
+        Dimensionality of the kernel. Defaults to 2.
 
     Returns
     -------
@@ -275,12 +276,17 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None,
     sigma[(sigma == None).nonzero()] = default_sigma  # noqa
     sigma = sigma.astype(None)
 
+    coords = _decompose_quasipolar_coords(frequency, theta)
+    base_axis = np.zeros(ndim)
+    base_axis[0] = 1
+    rot = _rotation(base_axis, coords)
+
     x = ...
-    rotx = np.matmul(_rotation(theta), x)
+    rotx = np.matmul(rot, x)
 
     gauss = _gaussian(rotx, center=0, sigma=sigma, ndim=ndim)
 
-    compx = np.matmul(x, _decompose_quasipolar_coords(frequency, theta))
+    compx = np.matmul(x, coords)
 
     # complex harmonic function
     harmonic = np.exp(1j * (2 * np.pi * compx.sum() + offset))
@@ -293,6 +299,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None,
 def gabor(image, frequency=None, theta=0, bandwidth=1, sigma=None, sigma_y=None,
           n_stds=3, offset=None, mode='reflect', cval=0, kernel=None, **kwargs):
     """Return real and imaginary responses to Gabor filter.
+
     The real and imaginary parts of the Gabor filter kernel are applied to the
     image and the response is returned as a pair of arrays.
     Gabor filter is a linear filter with a Gaussian kernel which is modulated
@@ -301,25 +308,25 @@ def gabor(image, frequency=None, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     Gabor filter banks are commonly used in computer vision and image
     processing. They are especially suitable for edge detection and texture
     classification.
+
     Parameters
     ----------
-    image : 2-D array
+    image : array_like
         Input image.
     frequency : float
         Spatial frequency of the harmonic function. Specified in pixels.
-    theta : float, optional
+    theta : float or array of floats, optional
         Orientation in radians. If 0, the harmonic is in the x-direction.
     bandwidth : float, optional
-        The bandwidth captured by the filter. For fixed bandwidth, `sigma_x`
-        and `sigma_y` will decrease with increasing frequency. This value is
-        ignored if `sigma_x` and `sigma_y` are set by the user.
-    sigma_x, sigma_y : float, optional
-        Standard deviation in x- and y-directions. These directions apply to
-        the kernel *before* rotation. If `theta = pi/2`, then the kernel is
-        rotated 90 degrees so that `sigma_x` controls the *vertical* direction.
+        The bandwidth captured by the filter. For fixed bandwidth, `sigma`
+        will decrease with increasing frequency. This value is ignored if
+        `sigma` are set by the user.
+    sigma : float or array of floats, optional
+        Standard deviation. These directions apply to the kernel *before*
+        rotation.
     n_stds : scalar, optional
         The linear size of the kernel is n_stds (3 by default) standard
-        deviations.
+        deviations
     offset : float, optional
         Phase offset of harmonic function in radians.
     mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
@@ -327,15 +334,18 @@ def gabor(image, frequency=None, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     cval : scalar, optional
         Value to fill past edges of input if `mode` of convolution is
         'constant'. The parameter is passed to `ndi.convolve`.
+
     Returns
     -------
     real, imag : arrays
         Filtered images using the real and imaginary parts of the Gabor filter
         kernel. Images are of the same dimensions as the input one.
+
     References
     ----------
     .. [1] http://en.wikipedia.org/wiki/Gabor_filter
     .. [2] http://mplab.ucsd.edu/tutorials/gabor.pdf
+
     Examples
     --------
     >>> from skimage.filters import gabor
@@ -364,7 +374,7 @@ def gabor(image, frequency=None, theta=0, bandwidth=1, sigma=None, sigma_y=None,
             warn("gabor() received arguments of "
                  "both 'kernel' and 'frequency'; "
                  "'frequency' will be ignored")
-        assert_nD(image.ndim, kernel.ndim)
+        assert_nD(np.ndim(image), kernel.ndim)
 
     filtered_real = ndi.convolve(image, np.real(kernel), mode=mode, cval=cval)
     filtered_imag = ndi.convolve(image, np.imag(kernel), mode=mode, cval=cval)
