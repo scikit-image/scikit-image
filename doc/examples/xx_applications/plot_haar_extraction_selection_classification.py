@@ -33,7 +33,7 @@ from dask import delayed, multiprocessing
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, roc_auc_score
+from sklearn.metrics import roc_auc_score
 
 from skimage.data import lfw_subset
 from skimage.transform import integral_image
@@ -75,7 +75,9 @@ feature_types = ['type-2-x', 'type-2-y']
 X = delayed(extract_feature_image(img, feature_types)
             for img in images)
 # Compute the result using the "multiprocessing" dask backend
+t_start = time()
 X = np.array(X.compute(get=multiprocessing.get))
+time_full_feature_comp = time() - t_start
 y = np.array([1] * 100 + [0] * 100)
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=150,
                                                     random_state=0,
@@ -98,7 +100,7 @@ clf = RandomForestClassifier(n_estimators=1000, max_depth=None,
                              max_features=100, n_jobs=-1, random_state=0)
 t_start = time()
 clf.fit(X_train, y_train)
-time_full_features = time() - t_start
+time_full_train = time() - t_start
 auc_full_features = roc_auc_score(y_test, clf.predict_proba(X_test)[:, 1])
 
 # Sort features in order of importance, plot six most significant
@@ -142,28 +144,28 @@ X = delayed(extract_feature_image(img, selected_feature_type,
                                   selected_feature_coord)
             for img in images)
 # Compute the result using the multiprocessing backend
+t_start = time()
 X = np.array(X.compute(get=multiprocessing.get))
+time_subs_feature_comp = time() - t_start
 y = np.array([1] * 100 + [0] * 100)
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=150,
                                                     random_state=0,
                                                     stratify=y)
 
 ###############################################################################
-# Once the feature are extracted, we can train and test the a new classifier.
+# Once the features are extracted, we can train and test the a new classifier.
 
 t_start = time()
 clf.fit(X_train, y_train)
-time_subset_features = time() - t_start
+time_subs_train = time() - t_start
 
-auc_subset_features = roc_auc_score(y_test, clf.predict_proba(X_test)[:, 1])
+auc_subs_features = roc_auc_score(y_test, clf.predict_proba(X_test)[:, 1])
 
-summary = ('Training on the full feature set took {:.3f}s and had an '
-           'AUC of {:.2f}. Training on the feature subset took {:.3f}s '
-           'and had an AUC of {:.2f}.').format(time_full_features,
-                                              auc_full_features,
-                                              time_subset_features,
-                                              auc_subset_features)
+summary = (('Computing the full feature set took {:.3f}s, plus {:.3f}s '
+            'training, for an AUC of {:.2f}. Computing the restricted feature '
+            'set took {:.3f}s, plus {:.3f}s training, for an AUC of {:.2f}.')
+           .format(time_full_feature_comp, time_full_train, auc_full_features,
+                   time_subs_feature_comp, time_subs_train, auc_subs_features))
 
 print(summary)
-#print(classification_report(y_test, y_pred))
 plt.show()
