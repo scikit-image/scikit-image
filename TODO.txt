@@ -39,6 +39,8 @@ Version 0.16
 * Remove checks for the ``multichannel`` deprecation warnings in several tests
   in ``skimage.transform.tests.test_pyramids.py`` and
   ``skimage.transform.tests.test_warps.py``.
+* Remove `flatten` for `imread` in ``skimage.io._io.py``.
+* Remove `as_grey` for `load` in ``skimage.data.__init__.py``.
 * Remove deprecated argument ``visualise`` from function skimage.feature.hog
 * Remove deprecated module ``skimage.novice``
 * In ``skimage.measure._regionprops``, remove all references to

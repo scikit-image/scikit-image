@@ -87,7 +87,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
 
     cdef Py_ssize_t i, c, k, x, y, z, x_min, x_max, y_min, y_max, z_min, z_max
     cdef char change
-    cdef double dist_center, cx, cy, cz, dy, dz
+    cdef double dist_center, cx, cy, cz, dx, dy, dz, t
 
     cdef double sz, sy, sx
     sz = spacing[0]
@@ -100,7 +100,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     cdef double dist_color
 
     # The reference implementation (Achanta et al.) calls this invxywt
-    cdef double spatial_weight = float(1) / (step ** 2)
+    cdef double spatial_weight = float(1) / (step * step)
 
     with nogil:
         for i in range(max_iter):
@@ -124,15 +124,19 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                 x_max = <Py_ssize_t>min(cx + 2 * step_x + 1, width)
 
                 for z in range(z_min, z_max):
-                    dz = (sz * (cz - z)) ** 2
+                    dz = sz * (cz - z)
+                    dz *= dz
                     for y in range(y_min, y_max):
-                        dy = (sy * (cy - y)) ** 2
+                        dy = sy * (cy - y)
+                        dy *= dy
                         for x in range(x_min, x_max):
-                            dist_center = (dz + dy + (sx * (cx - x)) ** 2) * spatial_weight
+                            dx = sx * (cx - x)
+                            dx *= dx
+                            dist_center = (dz + dy + dx) * spatial_weight
                             dist_color = 0
                             for c in range(3, n_features):
-                                dist_color += (image_zyx[z, y, x, c - 3]
-                                                - segments[k, c]) ** 2
+                                t = image_zyx[z, y, x, c - 3] - segments[k, c]
+                                dist_color += t * t
                             if slic_zero:
                                 dist_center += dist_color / max_dist_color[k]
                             else:
@@ -178,8 +182,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                             dist_color = 0
 
                             for c in range(3, n_features):
-                                dist_color += (image_zyx[z, y, x, c - 3] -
-                                               segments[k, c]) ** 2
+                                t = image_zyx[z, y, x, c - 3] - segments[k, c]
+                                dist_color += t * t
 
                             # The reference implementation seems to only change
                             # the color if it increases from previous iteration

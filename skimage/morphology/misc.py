@@ -123,7 +123,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
                          "relabeling the input with `scipy.ndimage.label` or "
                          "`skimage.morphology.label`.")
 
-    if len(component_sizes) == 2:
+    if len(component_sizes) == 2 and out.dtype != bool:
         warn("Only one label was provided to `remove_small_objects`. "
              "Did you mean to use a boolean array?")
 

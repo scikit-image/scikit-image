@@ -12,7 +12,7 @@ ctypedef np.float64_t IMGDTYPE
 cdef double DISTANCE_CUTOFF = 5.0
 
 cdef extern from "fast_exp.h":
-    inline double fast_exp(double y) nogil
+    double fast_exp(double y) nogil
 
 
 cdef inline double patch_distance_2d(IMGDTYPE [:, :] p1,
@@ -210,10 +210,10 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
     cdef double weight_sum, weight
     xg_row, xg_col = np.mgrid[-offset:offset + 1, -offset:offset + 1]
     cdef IMGDTYPE [:, ::1] w = np.ascontiguousarray(np.exp(
-                             -(xg_row ** 2 + xg_col ** 2) / (2 * A ** 2)).
+                             -(xg_row * xg_row + xg_col * xg_col) / (2 * A * A)).
                              astype(np.float64))
     cdef double distance
-    w = 1. / (n_channels * np.sum(w) * h ** 2) * w
+    w = 1. / (n_channels * np.sum(w) * h * h) * w
 
     # Coordinates of central pixel
     # Iterate over rows, taking padding into account
@@ -314,14 +314,15 @@ def _nl_means_denoising_3d(image, int s=7, int d=13, double h=0.1,
                                       -offset: offset + 1,
                                       -offset: offset + 1]
     cdef IMGDTYPE [:, :, ::1] w = np.ascontiguousarray(np.exp(
-                            -(xg_pln ** 2 + xg_row ** 2 + xg_col ** 2) /
-                             (2 * A ** 2)).astype(np.float64))
+                            -(xg_pln * xg_pln + xg_row * xg_row +
+                              xg_col * xg_col) /
+                             (2 * A * A)).astype(np.float64))
     cdef double distance
     cdef int pln, row, col, i, j, k
     cdef int pln_start, pln_end, row_start, row_end, col_start, col_end
     cdef int pln_start_i, pln_end_i, row_start_j, row_end_j, \
              col_start_k, col_end_k
-    w = 1. / (np.sum(w) * h ** 2) * w
+    w = 1. / (np.sum(w) * h * h) * w
 
     # Coordinates of central pixel
     # Iterate over planes, taking padding into account
@@ -465,19 +466,21 @@ cdef inline _integral_image_2d(IMGDTYPE [:, :, ::] padded,
     by avoiding copies of ``padded``.
     """
     cdef int row, col, channel
-    cdef double distance
+    cdef double distance, t
+    var *= 2.0
+
     for row in range(max(1, -t_row), min(n_row, n_row - t_row)):
         for col in range(max(1, -t_col), min(n_col, n_col - t_col)):
             if n_channels == 1:
-                distance = (padded[row, col, 0] -
-                            padded[row + t_row, col + t_col, 0])**2
-                distance -= 2 * var
+                t = padded[row, col, 0] - padded[row + t_row, col + t_col, 0]
+                distance = t * t - var
             else:
                 distance = 0
                 for channel in range(n_channels):
-                    distance += (padded[row, col, channel] -
-                                 padded[row + t_row, col + t_col, channel])**2
-                distance -= 2 * n_channels * var
+                    t = (padded[row, col, channel] -
+                         padded[row + t_row, col + t_col, channel])
+                    distance += t * t
+                distance -= n_channels * var
             integral[row, col] = distance + \
                                  integral[row - 1, col] + \
                                  integral[row, col - 1] - \
@@ -522,14 +525,16 @@ cdef inline _integral_image_3d(IMGDTYPE [:, :, ::] padded,
     """
     cdef int pln, row, col
     cdef double distance
+    var *= 2.0
     for pln in range(max(1, -t_pln), min(n_pln, n_pln - t_pln)):
         for row in range(max(1, -t_row), min(n_row, n_row - t_row)):
             for col in range(max(1, -t_col), min(n_col, n_col - t_col)):
                 distance = (padded[pln, row, col] -
-                            padded[pln + t_pln, row + t_row, col + t_col])**2
-                distance -= 2 * var
-                integral[pln, row, col] = \
-                    (distance +
+                            padded[pln + t_pln, row + t_row, col + t_col])
+                distance *= distance
+                distance -= var
+                integral[pln, row, col] = (
+                     distance +
                      integral[pln - 1, row, col] +
                      integral[pln, row - 1, col] +
                      integral[pln, row, col - 1] +
@@ -590,8 +595,8 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
     cdef int n_row, n_col, t_row, t_col, row, col, n_channels, channel
     cdef double weight, distance
     cdef double alpha
-    cdef double h2 = h ** 2.
-    cdef double s2 = s ** 2.
+    cdef double h2 = h * h
+    cdef double s2 = s * s
     n_row, n_col, n_channels = image.shape
     cdef double h2s2 = n_channels * h2 * s2
     n_row += 2 * pad_size
@@ -704,8 +709,8 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, double h=0.1,
              col_dist_min, col_dist_max
     cdef double weight, distance
     cdef double alpha
-    cdef double h_square = h ** 2.0
-    cdef double s_cube = s ** 3.0
+    cdef double h_square = h * h
+    cdef double s_cube = s * s * s
     cdef double s_cube_h_square = h_square * s_cube
     n_pln, n_row, n_col = image.shape
     n_pln += 2 * pad_size

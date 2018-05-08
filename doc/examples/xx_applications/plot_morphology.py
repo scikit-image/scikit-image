@@ -22,7 +22,7 @@ In this document we outline the following basic morphological operations:
 
 
 To get started, let's load an image using ``io.imread``. Note that morphology
-functions only work on gray-scale or binary images, so we set ``as_grey=True``.
+functions only work on gray-scale or binary images, so we set ``as_gray=True``.
 """
 
 import os
@@ -32,7 +32,7 @@ from skimage.util import img_as_ubyte
 from skimage import io
 
 orig_phantom = img_as_ubyte(io.imread(os.path.join(data_dir, "phantom.png"),
-                                      as_grey=True))
+                                      as_gray=True))
 fig, ax = plt.subplots()
 ax.imshow(orig_phantom, cmap=plt.cm.gray)
 
@@ -47,11 +47,9 @@ def plot_comparison(original, filtered, filter_name):
     ax1.imshow(original, cmap=plt.cm.gray)
     ax1.set_title('original')
     ax1.axis('off')
-    ax1.set_adjustable('box-forced')
     ax2.imshow(filtered, cmap=plt.cm.gray)
     ax2.set_title(filter_name)
     ax2.axis('off')
-    ax2.set_adjustable('box-forced')
 
 ######################################################################
 # Erosion
@@ -193,7 +191,7 @@ plot_comparison(phantom, b_tophat, 'black tophat')
 #*single-pixel wide skeleton*. It is important to note that this is
 #performed on binary images only.
 
-horse = io.imread(os.path.join(data_dir, "horse.png"), as_grey=True)
+horse = io.imread(os.path.join(data_dir, "horse.png"), as_gray=True)
 
 sk = skeletonize(horse == 0)
 plot_comparison(horse, sk, 'skeletonize')
@@ -242,3 +240,5 @@ plot_comparison(horse_mask, hull2, 'convex hull')
 # /ImageProcessing-html/topic4.htm>`_
 #
 # 3. http://en.wikipedia.org/wiki/Mathematical_morphology
+
+plt.show()
