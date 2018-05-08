@@ -62,41 +62,45 @@ def extract_feature_image(img, feature_type, feature_coord=None):
 # We will use a subset of the CBCL which is composed of 100 face images and 100
 # non-face images. Each image has been resized to a ROI of 19 by 19 pixels. We
 # will keep 75 images from each group to train a classifier and check which
-# extracted features are the most salient.
+# extracted features are the most salient, and use the remaining 25 from each
+# class to check the performance of the classifier.
 
 images = lfw_subset()
-# For a gain of speed, only the two first types of features will be extracted.
+# For speed, only extract the two first types of features
 feature_types = ['type-2-x', 'type-2-y']
 
-# Delay the computation and build the graph using dask
+# Build a computation graph using dask. This allows using multiple CPUs for
+# the computation step
 X = delayed(extract_feature_image(img, feature_types)
             for img in images)
-# Compute the result using the multiprocessing backend
+# Compute the result using the "multiprocessing" dask backend
 X = np.array(X.compute(get=multiprocessing.get))
 y = np.array([1] * 100 + [0] * 100)
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=150,
                                                     random_state=0)
 
-# Extract all possible features to be able to select the salient one.
-feature_coord, feature_type = haar_like_feature_coord(images.shape[2],
-                                                      images.shape[1],
-                                                      feature_types)
-
-# Train a random forest classifier and check the feature importance
-clf = RandomForestClassifier(n_estimators=1000, max_depth=None,
-                             max_features=100, n_jobs=-1, random_state=0)
-clf.fit(X_train, y_train)
-
-idx_sorted = np.argsort(clf.feature_importances_)[::-1]
+# Extract all possible features to be able to select the most salient.
+feature_coord, feature_type = \
+        haar_like_feature_coord(width=images.shape[2], height=images.shape[1],
+                                feature_type=feature_types)
 
 ###############################################################################
 # A random forest classifier can be trained in order to select the most salient
 # features, specifically for face classification. The idea is to check which
-# features are the most often used by the ensemble of trees. Below, we are
-# plotting the six most salient features found by the random forest.
+# features are the most often used by the ensemble of trees. By using only
+# the most salient features in subsequent steps, we can dramatically speed up
+# computation, while retaining accuracy.
 
-fig, axs = plt.subplots(3, 2)
-for idx, ax in enumerate(axs.ravel()):
+# Train a random forest classifier and check performance
+clf = RandomForestClassifier(n_estimators=1000, max_depth=None,
+                             max_features=100, n_jobs=-1, random_state=0)
+clf.fit(X_train, y_train)
+
+# Sort features in order of importance, plot six most significant
+idx_sorted = np.argsort(clf.feature_importances_)[::-1]
+
+fig, axes = plt.subplots(3, 2)
+for idx, ax in enumerate(axes.ravel()):
     image = images[0]
     image = draw_haar_like_feature(image, 0, 0,
                                    images.shape[2],
@@ -110,7 +114,7 @@ fig.suptitle('The most important features')
 
 ###############################################################################
 # We can select the most important features by checking the cumulative sum of
-# the feature importance index; we kept features representing 70% of the
+# the feature importance index; below, we keep features representing 70% of the
 # cumulative value which represent only 3% of the total number of features.
 
 cdf_feature_importances = np.cumsum(clf.feature_importances_[idx_sorted[::-1]])
