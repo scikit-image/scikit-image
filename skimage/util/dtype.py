@@ -253,7 +253,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
         # use float type that can represent output integer type
         computation_type = _dtype_itemsize(itemsize_out, dtype_in,
                                            np.float32, np.float64)
-        if copy or computation_type != image.dtype:
+        if force_copy or computation_type != image.dtype:
             image_out = np.empty(shape=image.shape, dtype=computation_type)
         else:
             image_out = image

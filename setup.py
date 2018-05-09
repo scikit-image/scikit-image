@@ -136,7 +136,7 @@ if __name__ == "__main__":
         ],
         install_requires=INSTALL_REQUIRES,
         requires=REQUIRES,
-        packages=setuptools.find_packages(exclude=['doc']),
+        packages=setuptools.find_packages(exclude=['doc', 'tests']),
         include_package_data=True,
         zip_safe=False,  # the package can run out of an .egg file
 

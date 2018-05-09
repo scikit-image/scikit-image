@@ -18,3 +18,4 @@ recursive-include doc/source/_templates *.html
 recursive-include doc *.py
 prune doc/build
 prune doc/gh-pages
+prune skimage/*/tests
