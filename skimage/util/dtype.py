@@ -399,7 +399,7 @@ def img_as_float(image, force_copy=False, default_dtype=np.float64):
         else:
             return image
     else:
-        convert(image, dtype=default_dtype, force_copy=force_copy)
+        return convert(image, dtype=default_dtype, force_copy=force_copy)
 
 
 def img_as_uint(image, force_copy=False):
