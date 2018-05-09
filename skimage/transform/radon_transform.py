@@ -216,15 +216,15 @@ def iradon(radon_image, theta=None, output_size=None,
     img = np.pad(radon_image, pad_width, mode='constant', constant_values=0)
 
     # Construct the Fourier filter
-    n1 = np.arange(0, projection_size_padded/2+1, dtype=np.int)
-    n2 = np.arange(projection_size_padded/2-1, 0, -1, dtype=np.int)
+    n1 = np.arange(0, projection_size_padded / 2 + 1, dtype=np.int)
+    n2 = np.arange(projection_size_padded / 2 - 1, 0, -1, dtype=np.int)
     n = np.concatenate((n1, n2))
     f = np.zeros(projection_size_padded)
     f[0] = 0.25
-    f[1::2] = -1/(np.pi*n[1::2])**2
+    f[1::2] = -1 / (np.pi * n[1::2])**2
 
     omega = 2 * np.pi * fftfreq(projection_size_padded).reshape(-1, 1)
-    fourier_filter = 2 * np.real(fft(f)).reshape(-1, 1)              # ramp filter
+    fourier_filter = 2 * np.real(fft(f)).reshape(-1, 1)          # ramp filter
     if filter == "ramp":
         pass
     elif filter == "shepp-logan":
