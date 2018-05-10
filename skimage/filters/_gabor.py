@@ -254,18 +254,18 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None,
     # handle deprecation
     message = ('Using deprecated, 2D-only interface to gabor_kernel. '
                'This interface will be removed in scikit-image 0.16. Use '
-               'gabor_kernel(frequency, sigma=(sigma_y, sigma_x)).')
+               'gabor_kernel(frequency, sigma=(sigma_x, sigma_y)).')
 
     if sigma_y is not None:
         warn(message)
         if 'sigma_x' in kwargs:
-            sigma = (sigma_y, kwargs['sigma_x'])
+            sigma = (kwargs['sigma_x'], sigma_y)
         else:
-            sigma = (sigma_y, sigma)
+            sigma = (sigma, sigma_y)
 
     # handle translation
     if not isinstance(theta, coll.Iterable):
-        theta = (0,) * (ndim - 1)
+        theta = (theta,) * (ndim - 1)
 
     if not isinstance(sigma, coll.Iterable):
         sigma = np.array([sigma] * ndim)
@@ -284,7 +284,8 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None,
     spatial_dims = np.ceil(np.max(np.abs(n_stds * sigma * rot), axis=-1))
     spatial_dims[spatial_dims < 1] = 1
 
-    m = np.mgrid.__getitem__([slice(-c, c + 1) for c in spatial_dims])  # mesh grid
+    # create mesh grid
+    m = np.mgrid.__getitem__([slice(-c, c + 1) for c in spatial_dims])
 
     rotm = np.matmul(m.T, rot)
 
