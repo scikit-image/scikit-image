@@ -63,7 +63,7 @@ def _decompose_quasipolar_coords(r, thetas):
     return coords
 
 
-def _gaussian(image, center=0, sigma=1, order=2):
+def _gaussian(image, center=0, sigma=1, ndim=2):
     """Generates gaussian envelope.
 
     Parameters
@@ -74,12 +74,12 @@ def _gaussian(image, center=0, sigma=1, order=2):
         Coordinates to center the image with. Defaults to 0.
     sigma : scalar or vector, optional
         Spatial dimensions of the envelope. Defaults to 1.
-    order : int, optional
-        Order of the envelope to create. Defaults to 2.
+    ndim : int, optional
+        Dimensionality of the envelope to create. Defaults to 2.
 
     Returns
     -------
-    gauss : (``order``, ``order``)
+    gauss : (``ndim``, ``ndim``)
 
     References
     ----------
@@ -97,7 +97,7 @@ def _gaussian(image, center=0, sigma=1, order=2):
     image = image - center
 
     # gaussian envelope
-    gauss = np.exp(-0.5 * np.dot(image, image) / sigma_prod ** 2)
+    gauss = np.exp(-0.5 * np.sum(image ** 2) / sigma_prod ** 2)
 
     return gauss / norm
 
@@ -192,7 +192,7 @@ def _rotation(src_axis, dst_axis):
 
 
 def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None,
-                 sigma_y=None, n_stds=3, offset=None, ndim=2, **kwargs):
+                 sigma_y=None, n_stds=3, offset=0, ndim=2, **kwargs):
     """Return complex nD Gabor filter kernel.
 
     A gabor kernel is a Gaussian kernel modulated by a complex harmonic function.
@@ -263,8 +263,6 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None,
         else:
             sigma = (sigma_y, sigma)
 
-    default_sigma = _sigma_prefactor(bandwidth) / frequency
-
     # handle translation
     if not isinstance(theta, coll.Iterable):
         theta = (0,) * (ndim - 1)
@@ -273,31 +271,38 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None,
         sigma = np.array([sigma] * ndim)
     else:
         sigma = np.append(sigma, [None] * (ndim - len(sigma)))
+    default_sigma = _sigma_prefactor(bandwidth) / frequency
     sigma[(sigma == None).nonzero()] = default_sigma  # noqa
     sigma = sigma.astype(None)
 
-    coords = _decompose_quasipolar_coords(frequency, theta)
+    coords = _decompose_quasipolar_coords(1, theta)
     base_axis = np.zeros(ndim)
     base_axis[0] = 1
     rot = _rotation(base_axis, coords)
 
-    x = ...
-    rotx = np.matmul(rot, x)
+    # calculate & rotate kernel size
+    spatial_dims = np.ceil(np.max(np.abs(n_stds * sigma * rot), axis=-1))
+    spatial_dims[spatial_dims < 1] = 1
 
-    gauss = _gaussian(rotx, center=0, sigma=sigma, ndim=ndim)
+    m = np.mgrid.__getitem__([slice(-c, c + 1) for c in spatial_dims])  # mesh grid
 
-    compx = np.matmul(x, coords)
+    rotm = np.matmul(m.T, rot)
+
+    gauss = _gaussian(rotm, center=0, sigma=sigma, ndim=ndim)
+
+    compm = np.matmul(m.T, frequency * coords)
 
     # complex harmonic function
-    harmonic = np.exp(1j * (2 * np.pi * compx.sum() + offset))
+    harmonic = np.exp(1j * (2 * np.pi * compm.sum() + offset))
 
-    g = norm * np.matmul(gauss, harmonic)
+    g = np.zeros(m[0].shape, dtype=np.complex)
+    g[:] = gauss * harmonic
 
-    return g.view(cls)
+    return g
 
 
 def gabor(image, frequency=None, theta=0, bandwidth=1, sigma=None, sigma_y=None,
-          n_stds=3, offset=None, mode='reflect', cval=0, kernel=None, **kwargs):
+          n_stds=3, offset=0, mode='reflect', cval=0, kernel=None, **kwargs):
     """Return real and imaginary responses to Gabor filter.
 
     The real and imaginary parts of the Gabor filter kernel are applied to the
