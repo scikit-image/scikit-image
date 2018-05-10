@@ -348,9 +348,9 @@ def local_maxima(image, selem=None, indices=False, include_border=True):
     -------
     maxima : ndarray or tuple[ndarray]
         If `indices` is false, an array with the same shape as `image` is
-        returned with 1's indicating the position of local maxima (0 otherwise).
-        If `indices` is true, a tuple of one-dimensional arrays containing the
-        coordinates (indices) of all found maxima.
+        returned with 1's indicating the position of local maxima
+        (0 otherwise). If `indices` is true, a tuple of one-dimensional arrays
+        containing the coordinates (indices) of all found maxima.
 
     See Also
     --------
@@ -362,13 +362,13 @@ def local_maxima(image, selem=None, indices=False, include_border=True):
     -----
     This function operates on the following ideas:
 
-    1. Make a first pass over the image's last dimension and flag candidates for
-       local maxima by comparing pixels in only one direction.
+    1. Make a first pass over the image's last dimension and flag candidates
+       for local maxima by comparing pixels in only one direction.
 
     For each candidate:
 
-    2. Perform a flood-fill to find all connected pixels that have the same gray
-       value and are part of the plateau.
+    2. Perform a flood-fill to find all connected pixels that have the same
+       gray value and are part of the plateau.
     3. Consider the connected neighborhood of a plateau: if any no bordering
        sample has a higher gray level, mark the plateau as a definite local
        maximum.
@@ -395,7 +395,8 @@ def local_maxima(image, selem=None, indices=False, include_border=True):
            [0, 1, 1, 0, 1, 1, 0],
            [1, 0, 0, 0, 0, 0, 1]], dtype=uint8)
     >>> local_maxima(image, indices=True)
-     (array([1, 1, 1, 1, 2, 2, 2, 2, 3, 3]), array([1, 2, 4, 5, 1, 2, 4, 5, 0, 6]))
+     (array([1, 1, 1, 1, 2, 2, 2, 2, 3, 3]),
+      array([1, 2, 4, 5, 1, 2, 4, 5, 0, 6]))
 
     Find local maxima by comparing to all 8 neighbors:
 
@@ -497,9 +498,9 @@ def local_minima(image, selem=None, indices=False, include_border=True):
     -------
     minima : ndarray or tuple[ndarray]
         If `indices` is false, an array with the same shape as `image` is
-        returned with 1's indicating the position of local minima (0 otherwise).
-        If `indices` is true, a tuple of one-dimensional arrays containing the
-        coordinates (indices) of all found minima.
+        returned with 1's indicating the position of local minima
+        (0 otherwise). If `indices` is true, a tuple of one-dimensional arrays
+        containing the coordinates (indices) of all found minima.
 
     See Also
     --------
@@ -511,13 +512,13 @@ def local_minima(image, selem=None, indices=False, include_border=True):
     -----
     This function operates on the following ideas:
 
-    1. Make a first pass over the image's last dimension and flag candidates for
-       local minima by comparing pixels in only one direction.
+    1. Make a first pass over the image's last dimension and flag candidates
+       for local minima by comparing pixels in only one direction.
 
     For each candidate:
 
-    2. Perform a flood-fill to find all connected pixels that have the same gray
-       value and are part of the plateau.
+    2. Perform a flood-fill to find all connected pixels that have the same
+       gray value and are part of the plateau.
     3. Consider the connected neighborhood of a plateau: if any no bordering
        sample has a smaller gray level, mark the plateau as a definite local
        minimum.
@@ -544,7 +545,8 @@ def local_minima(image, selem=None, indices=False, include_border=True):
            [0, 1, 1, 0, 1, 1, 0],
            [1, 0, 0, 0, 0, 0, 1]], dtype=uint8)
     >>> local_minima(image, indices=True)
-     (array([1, 1, 1, 1, 2, 2, 2, 2, 3, 3]), array([1, 2, 4, 5, 1, 2, 4, 5, 0, 6]))
+     (array([1, 1, 1, 1, 2, 2, 2, 2, 3, 3]),
+      array([1, 2, 4, 5, 1, 2, 4, 5, 0, 6]))
 
     Find local minima by comparing to all 8 neighbors:
 
