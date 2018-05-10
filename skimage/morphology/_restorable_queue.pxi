@@ -1,6 +1,13 @@
-"""Defines a FIFO queue whose items can be iterated multipe times.
+"""FIFO queue whose items can be iterated multiple times.
 
-Expects "QueueItem" to be defined before inclusion!
+.. warning:: Expects "QueueItem" to be defined before inclusion!
+
+This queue can be operated like a class. The structure stores the state of the
+instance and the contained functions act as instance methods. The important
+distinction compared to normal queues is that popping an element doesn't remove
+it internally. Thus unless the queue's internal buffer is explicitly cleared
+(see `queue_clear`) popped items can be restored at anytime using
+`queue_restore`.
 
 Example
 -------
@@ -29,9 +36,12 @@ Example
 from libc.stdlib cimport malloc, realloc, free
 
 
+# Store state of queue
 cdef struct RestorableQueue:
     QueueItem* _buffer_ptr
-    Py_ssize_t _buffer_size, _index_valid, _index_consumed
+    Py_ssize_t _buffer_size  # Maximal number of elements the buffer can store
+    Py_ssize_t _index_valid  # Index to most recently inserted item
+    Py_ssize_t _index_consumed  # Index to most recently consumed item
 
 
 cdef inline void queue_init(RestorableQueue* self, Py_ssize_t buffer_size) nogil:
@@ -47,8 +57,8 @@ cdef inline void queue_init(RestorableQueue* self, Py_ssize_t buffer_size) nogil
         with gil:
             raise MemoryError("couldn't allocate buffer")
     self._buffer_size = buffer_size
-    self._index_consumed = -1  # Index to most recently consumed item
-    self._index_valid = -1  # Index to most recently inserted item
+    self._index_consumed = -1
+    self._index_valid = -1
 
 
 cdef inline void queue_push(RestorableQueue* self, QueueItem* item_ptr) nogil:
@@ -98,8 +108,6 @@ cdef inline void queue_exit(RestorableQueue* self) nogil:
 cdef inline void _queue_grow_buffer(RestorableQueue* self) nogil:
     """Double the memory used for the buffer."""
     cdef QueueItem* new_buffer
-
-    # TODO prevent integer overflow!
     self._buffer_size *= 2
     new_buffer_ptr = <QueueItem*>realloc(
         self._buffer_ptr,

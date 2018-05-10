@@ -39,7 +39,7 @@ def _local_maxima(dtype_t[::1] image not None,
     Returns
     -------
     is_maximum : ndarray
-        A "boolean" arrray that is 1 where local maxima where exist.
+        A "boolean" array that is 1 where local maxima exist.
     """
     cdef:
         RestorableQueue queue
@@ -87,7 +87,23 @@ cdef inline void _fill_plateau(
         dtype_t[::1] image, unsigned char[::1] flags,
         Py_ssize_t[::1] neighbor_offsets, RestorableQueue* queue_ptr,
         Py_ssize_t start_index) nogil:
-    """Fill with 1 if plateau is local maximum else with 0."""
+    """Fill with 1 if plateau is local maximum else with 0.
+    
+    Parameters
+    ----------
+    image :
+        The raveled view of a n-dimensional array.
+    flags :
+        An array of flags that is used to store the state of each pixel during
+        evaluation.
+    neighbor_offsets :
+        A one-dimensional array that contains the offsets to find the
+        connected neighbors for any index in `image`.
+    queue_ptr :
+        Pointer to initialized queue.
+    start_index :
+        Start position for the flood-fill.
+    """
     cdef:
         dtype_t h
         unsigned char true_maximum
@@ -113,6 +129,7 @@ cdef inline void _fill_plateau(
         # Look at all neighbouring samples
         for i in range(neighbor_offsets.shape[0]):
             neighbor = current_index + neighbor_offsets[i]
+
             if image[neighbor] == h:
                 # Value is part of plateau
                 if flags[neighbor] == 3:
@@ -122,6 +139,7 @@ cdef inline void _fill_plateau(
                     # Index wasn't queued already, do so now
                     queue_push(queue_ptr, &neighbor)
                     flags[neighbor] = 1
+
             elif image[neighbor] > h:
                 # Current plateau can't be maximum because it borders a
                 # larger one
