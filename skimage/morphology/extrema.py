@@ -210,157 +210,6 @@ def h_minima(image, h, selem=None):
     return h_min
 
 
-def _find_min_diff(image):
-    """
-    Find the minimal difference of grey levels inside the image.
-    """
-    img_vec = np.unique(image.flatten())
-
-    if img_vec.size == 1:
-        return 0
-
-    min_diff = np.min(img_vec[1:] - img_vec[:-1])
-    return min_diff
-
-
-def local_maxima_old(image, selem=None):
-    """Determine all local maxima of the image.
-
-    The local maxima are defined as connected sets of pixels with equal
-    grey level strictly greater than the grey levels of all pixels in direct
-    neighborhood of the set.
-
-    For integer typed images, this corresponds to the h-maxima with h=1.
-    For float typed images, h is determined as the smallest difference
-    between grey levels.
-
-    Parameters
-    ----------
-    image : ndarray
-        The input image for which the maxima are to be calculated.
-    selem : ndarray, optional
-        The neighborhood expressed as an n-D array of 1's and 0's.
-        Default is the ball of radius 1 according to the maximum norm
-        (i.e. a 3x3 square for 2D images, a 3x3x3 cube for 3D images, etc.)
-
-    Returns
-    -------
-    local_max : ndarray
-       All local maxima of the image. The result image is a binary image,
-       where pixels belonging to local maxima take value 1, the other pixels
-       take value 0.
-
-    See also
-    --------
-    skimage.morphology.extrema.h_minima
-    skimage.morphology.extrema.h_maxima
-    skimage.morphology.extrema.local_minima
-
-    References
-    ----------
-    .. [1] Soille, P., "Morphological Image Analysis: Principles and
-           Applications" (Chapter 6), 2nd edition (2003), ISBN 3540429883.
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from skimage.morphology import extrema
-
-    We create an image (quadratic function with a maximum in the center and
-    4 additional constant maxima.
-    The heights of the maxima are: 1, 21, 41, 61, 81, 101
-
-    >>> w = 10
-    >>> x, y = np.mgrid[0:w,0:w]
-    >>> f = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
-    >>> f[2:4,2:4] = 40; f[2:4,7:9] = 60; f[7:9,2:4] = 80; f[7:9,7:9] = 100
-    >>> f = f.astype(np.int)
-
-    We can calculate all local maxima:
-
-    >>> maxima = extrema.local_maxima(f)
-
-    The resulting image will contain all 6 local maxima.
-    """
-    # find the minimal grey level difference
-    h = _find_min_diff(image)
-    if h == 0:
-        return np.zeros(image.shape, np.uint8)
-    if not np.issubdtype(image.dtype, np.floating):
-        h = 1
-    local_max = h_maxima(image, h, selem=selem)
-    return local_max
-
-
-def local_minima_old(image, selem=None):
-    """Determine all local minima of the image.
-
-    The local minima are defined as connected sets of pixels with equal
-    grey level strictly smaller than the grey levels of all pixels in direct
-    neighborhood of the set.
-
-    For integer typed images, this corresponds to the h-minima with h=1.
-    For float typed images, h is determined as the smallest difference
-    between grey levels.
-
-    Parameters
-    ----------
-    image : ndarray
-        The input image for which the minima are to be calculated.
-    selem : ndarray, optional
-        The neighborhood expressed as an n-D array of 1's and 0's.
-        Default is the ball of radius 1 according to the maximum norm
-        (i.e. a 3x3 square for 2D images, a 3x3x3 cube for 3D images, etc.)
-
-    Returns
-    -------
-    local_min : ndarray
-       All local minima of the image. The result image is a binary image,
-       where pixels belonging to local minima take value 1, the other pixels
-       take value 0.
-
-    See also
-    --------
-    skimage.morphology.extrema.h_minima
-    skimage.morphology.extrema.h_maxima
-    skimage.morphology.extrema.local_maxima
-
-    References
-    ----------
-    .. [1] Soille, P., "Morphological Image Analysis: Principles and
-           Applications" (Chapter 6), 2nd edition (2003), ISBN 3540429883.
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from skimage.morphology import extrema
-
-    We create an image (quadratic function with a minimum in the center and
-    4 additional constant maxima.
-    The depth of the minima are: 1, 21, 41, 61, 81, 101
-
-    >>> w = 10
-    >>> x, y = np.mgrid[0:w,0:w]
-    >>> f = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
-    >>> f[2:4,2:4] = 160; f[2:4,7:9] = 140; f[7:9,2:4] = 120; f[7:9,7:9] = 100
-    >>> f = f.astype(np.int)
-
-    We can calculate all local minima:
-
-    >>> minima = extrema.local_minima(f)
-
-    The resulting image will contain all 6 local minima.
-    """
-    # find the minimal grey level difference
-    h = _find_min_diff(image)
-    if h == 0:
-        return np.zeros(image.shape, np.uint8)
-    if not np.issubdtype(image.dtype, np.floating):
-        h = 1
-    local_min = h_minima(image, h, selem=selem)
-    return local_min
-
-
 def _offset_to_raveled_neighbours(image_shape, selem):
     """Compute offsets to a samples neighbors if the image would be raveled.
 
@@ -440,7 +289,7 @@ def _fast_pad(image, value):
     return new_image
 
 
-def local_maxima(image, selem=None, include_border=True):
+def local_maxima(image, selem=None, indices=False, include_border=True):
     """Find all local maxima in an image.
 
     Parameters
@@ -450,17 +299,26 @@ def local_maxima(image, selem=None, include_border=True):
     selem : int or ndarray, optional
         The structuring element used to determine the neighborhood of each
         evaluated pixel. If this is a number it is interpreted as the
-        connectivity of `selem`. If an array, it must only contain 1's and 0's
-        and have the same number of dimensions as `image`. If not given the
-        maximal connectivity is assumed, meaning `selem` is an array of 1's.
+        connectivity of `selem`. If an array, it must only contain 1's and 0's,
+        have the same number of dimensions as `image`. If not given the maximal
+        connectivity is assumed, meaning `selem` is an array of 1's.
+    indices : bool, optional
+        If True, the output will be an array representing peak
+        coordinates.  If False, the output will be a boolean array shaped as
+        `image.shape` with peaks present at True elements.
     include_border : bool, optional
         If true, plateaus that touch the image border can be valid maxima.
 
     Returns
     -------
-    flags : ndarray
-        An array of 1's where local maxima were found and otherwise 0's.
+    maxima : ndarray or tuple[ndarray]
+        If `indices` is false, an array with the same shape as `image` is
+        returned with 1's indicating the position of local maxima (0 otherwise).
+        If `indices` is true, a tuple of one-dimensional arrays containing the
+        coordinates (indices) of all found maxima.
     """
+    image = np.asarray(image)
+
     if include_border:
         image = _fast_pad(image, image.min())
 
@@ -468,17 +326,28 @@ def local_maxima(image, selem=None, include_border=True):
         selem = image.ndim
     if np.isscalar(selem):
         selem = ndi.generate_binary_structure(image.ndim, selem)
+    else:
+        # Validate custom structured element
+        selem = np.asarray(selem, dtype=bool)
+        # Must specify neighbors for all dimensions
+        if selem.ndim != image.ndim:
+            raise ValueError("selem and image must have the same number of "
+                             "dimensions")
+        # Must only specify direct neighbors
+        if any(s != 3 for s in selem.shape):
+            raise ValueError("dimension size in selem is not 3")
+
     neighbor_offsets = _offset_to_raveled_neighbours(image.shape, selem)
 
     # Array of flags used to store the state of each pixel during evaluation.
     # Possible states are:
     #   3 - first or last value in a dimension
     #   2 - potentially part of a maximum
-    #   1 - evaluated
+    #   1 - evaluated and part of a maximum
     flags = np.zeros(image.shape, dtype=np.uint8)
     _set_edge_values_inplace(flags, value=3)
 
-    # Ensure correct dtype of `image` for wrapped Cython function
+    # Ensure correct dtype of image for wrapped Cython function
     if np.issubdtype(image.dtype, np.unsignedinteger):
         dtype = np.uint64
     elif np.issubdtype(image.dtype, np.integer):
@@ -496,7 +365,10 @@ def local_maxima(image, selem=None, include_border=True):
         # No padding was performed but set edge values back to 0
         _set_edge_values_inplace(flags, value=0)
 
-    return flags
+    if indices:
+        return np.nonzero(flags)
+    else:
+        return flags
 
 
 def local_minima(image, selem=None, include_border=True):
