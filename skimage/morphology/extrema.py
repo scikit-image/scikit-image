@@ -387,31 +387,31 @@ def local_maxima(image, selem=None, indices=False, include_border=True):
            [0, 1, 1, 0, 2, 2, 0],
            [1, 0, 0, 0, 0, 0, 3]])
 
-    Find local maxima by comparing to four non-diagonal neighbors:
+    Find local maxima by comparing to all neighboring pixels (maximal
+    connectivity):
+
+    >>> local_maxima(image)
+    array([[0, 0, 0, 0, 0, 0, 0],
+           [0, 1, 1, 0, 0, 0, 0],
+           [0, 1, 1, 0, 0, 0, 0],
+           [1, 0, 0, 0, 0, 0, 1]], dtype=uint8)
+    >>> local_maxima(image, indices=True)
+    (array([1, 1, 2, 2, 3, 3]), array([1, 2, 1, 2, 0, 6]))
+
+    Find local maxima without comparing to diagonal pixels (connectivity 1):
 
     >>> local_maxima(image, selem=1)
     array([[0, 0, 0, 0, 0, 0, 0],
            [0, 1, 1, 0, 1, 1, 0],
            [0, 1, 1, 0, 1, 1, 0],
            [1, 0, 0, 0, 0, 0, 1]], dtype=uint8)
-    >>> local_maxima(image, indices=True)
-     (array([1, 1, 1, 1, 2, 2, 2, 2, 3, 3]),
-      array([1, 2, 4, 5, 1, 2, 4, 5, 0, 6]))
 
-    Find local maxima by comparing to all 8 neighbors:
+    and exclude maxima that border the image edge:
 
-    >>> local_maxima(image, selem=2)
+    >>> local_maxima(image, selem=1, include_border=False)
     array([[0, 0, 0, 0, 0, 0, 0],
-           [0, 1, 1, 0, 0, 0, 0],
-           [0, 1, 1, 0, 0, 0, 0],
-           [1, 0, 0, 0, 0, 0, 1]], dtype=uint8)
-
-    and this time exclude maxima that border the image edge:
-
-    >>> local_maxima(image, selem=2, include_border=False)
-    array([[0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0],
+           [0, 1, 1, 0, 1, 1, 0],
+           [0, 1, 1, 0, 1, 1, 0],
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
     image = np.asarray(image)
@@ -537,31 +537,31 @@ def local_minima(image, selem=None, indices=False, include_border=True):
            [ 0, -1, -1,  0, -2, -2,  0],
            [-1,  0,  0,  0,  0,  0, -3]])
 
-    Find local minima by comparing to four non-diagonal neighbors:
+    Find local minima by comparing to all neighboring pixels (maximal
+    connectivity):
+
+    >>> local_minima(image)
+    array([[0, 0, 0, 0, 0, 0, 0],
+           [0, 1, 1, 0, 0, 0, 0],
+           [0, 1, 1, 0, 0, 0, 0],
+           [1, 0, 0, 0, 0, 0, 1]], dtype=uint8)
+    >>> local_minima(image, indices=True)
+    (array([1, 1, 2, 2, 3, 3]), array([1, 2, 1, 2, 0, 6]))
+
+    Find local minima without comparing to diagonal pixels (connectivity 1):
 
     >>> local_minima(image, selem=1)
     array([[0, 0, 0, 0, 0, 0, 0],
            [0, 1, 1, 0, 1, 1, 0],
            [0, 1, 1, 0, 1, 1, 0],
            [1, 0, 0, 0, 0, 0, 1]], dtype=uint8)
-    >>> local_minima(image, indices=True)
-     (array([1, 1, 1, 1, 2, 2, 2, 2, 3, 3]),
-      array([1, 2, 4, 5, 1, 2, 4, 5, 0, 6]))
 
-    Find local minima by comparing to all 8 neighbors:
+    and exclude minima that border the image edge:
 
-    >>> local_minima(image, selem=2)
+    >>> local_minima(image, selem=1, include_border=False)
     array([[0, 0, 0, 0, 0, 0, 0],
-           [0, 1, 1, 0, 0, 0, 0],
-           [0, 1, 1, 0, 0, 0, 0],
-           [1, 0, 0, 0, 0, 0, 1]], dtype=uint8)
-
-    and this time exclude minima that border the image edge:
-
-    >>> local_minima(image, selem=2, include_border=False)
-    array([[0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0],
+           [0, 1, 1, 0, 1, 1, 0],
+           [0, 1, 1, 0, 1, 1, 0],
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
     return local_maxima(invert(image), selem, indices, include_border)
