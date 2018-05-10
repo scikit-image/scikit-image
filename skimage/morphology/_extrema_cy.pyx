@@ -44,6 +44,7 @@ def _local_maxima(dtype_t[::1] image not None,
     cdef:
         RestorableQueue queue
         Py_ssize_t i, i_max, i_ahead
+        unsigned char prefilter
 
     # Current flag meanings:
     # 3 - first or last index in a dimension
@@ -51,22 +52,33 @@ def _local_maxima(dtype_t[::1] image not None,
     # 1 - not used in first loop
     # 0 - not evaluated or none of the above is true
 
+    # Prefilter candidates only if neighbors in last dimension are part of
+    # the structuring element
+    prefilter = -1 in neighbor_offsets and 1 in neighbor_offsets
     with nogil:
         i = 1
         i_max = image.shape[0]
-        while i < i_max:
-            if image[i - 1] < image[i] and flags[i] != 3:
-                # Potential maximum (in last dimension) is found, find other
-                # edge of current plateau or "edge of dimension"
-                i_ahead = i + 1
-                while image[i] == image[i_ahead] and flags[i_ahead] != 3:
-                    i_ahead += 1
-                if image[i] > image[i_ahead]:
-                    # Found local maximum (in one dimension), mark all parts of
-                    # the plateau as potential maximum
-                    flags[i:i_ahead] = 2
-                i = i_ahead
-            else:
+
+        if prefilter:
+            while i < i_max:
+                if image[i - 1] < image[i] and flags[i] != 3:
+                    # Potential maximum (in last dimension) is found, find
+                    # other edge of current plateau or "edge of dimension"
+                    i_ahead = i + 1
+                    while image[i] == image[i_ahead] and flags[i_ahead] != 3:
+                        i_ahead += 1
+                    if image[i] > image[i_ahead]:
+                        # Found local maximum (in one dimension), mark all
+                        # parts of the plateau as potential maximum
+                        flags[i:i_ahead] = 2
+                    i = i_ahead
+                else:
+                    i += 1
+
+        else:  # Skip prefiltering and flag entire array as potential maximum
+            while i < i_max:
+                if flags[i] != 3:
+                    flags[i] = 2
                 i += 1
 
         # Initialize a buffer used to queue positions while evaluating each
