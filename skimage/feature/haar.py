@@ -136,6 +136,17 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
         is `uint` or `int` and `float` when the data type of `int_image` is
         `float`.
 
+    Notes
+    -----
+    When extracting those features in parallel, be aware that the choice of the
+    backend (i.e. multiprocessing vs threading) will have an impact on the
+    performance. The rule of thumb is as follows: use multiprocessing when
+    extracting features for all possible ROI in an image; use threading when
+    extracting the feature at specific location for a limited number of ROIs.
+    Refer to the example
+    :ref:`sphx_glr_auto_examples_xx_applications_plot_haar_extraction_selection_classification.py`
+    for more insights.
+
     Examples
     --------
     >>> import numpy as np
