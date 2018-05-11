@@ -97,7 +97,7 @@ def _gaussian(image, center=0, sigma=1, ndim=2):
     image = image - center
 
     # gaussian envelope
-    gauss = np.exp(-0.5 * np.sum(image ** 2) / sigma_prod ** 2)
+    gauss = np.exp(-0.5 * np.sum(np.prod((image ** 2, 1 / sigma_prod ** 2), axis=0), axis=0))
 
     return gauss / norm
 
@@ -297,7 +297,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     compm = np.matmul(m.T, frequency * coords).T
 
     # complex harmonic function
-    harmonic = np.exp(1j * (2 * np.pi * compm.sum() + offset))
+    harmonic = np.exp(1j * (2 * np.pi * compm.sum(axis=0) + offset))
 
     g = np.zeros(m[0].shape, dtype=np.complex)
     g[:] = gauss * harmonic
