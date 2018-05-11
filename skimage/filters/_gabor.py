@@ -191,8 +191,8 @@ def _rotation(src_axis, dst_axis):
     return M
 
 
-def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None,
-                 sigma_y=None, n_stds=3, offset=0, ndim=2, **kwargs):
+def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
+                 n_stds=3, offset=0, leading_axis=1, ndim=2, **kwargs):
     """Return complex nD Gabor filter kernel.
 
     A gabor kernel is a Gaussian kernel modulated by a complex harmonic function.
@@ -220,6 +220,9 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None,
         deviations
     offset : float, optional
         Phase offset of harmonic function in radians.
+    leading_axis : int, optional
+        The leading axis for rotation. Defaults to 1, the `x` coordinate
+        in most systems.
     ndim : int, optional
         Dimensionality of the kernel. Defaults to 2.
 
@@ -259,9 +262,9 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None,
     if sigma_y is not None:
         warn(message)
         if 'sigma_x' in kwargs:
-            sigma = (kwargs['sigma_x'], sigma_y)
+            sigma = (sigma_y, kwargs['sigma_x'])
         else:
-            sigma = (sigma, sigma_y)
+            sigma = (sigma_y, sigma)
 
     # handle translation
     if not isinstance(theta, coll.Iterable):
@@ -277,7 +280,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None,
 
     coords = _decompose_quasipolar_coords(1, theta)
     base_axis = np.zeros(ndim)
-    base_axis[0] = 1
+    base_axis[leading_axis] = 1
     rot = _rotation(base_axis, coords)
 
     # calculate & rotate kernel size
@@ -287,11 +290,11 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None,
     # create mesh grid
     m = np.mgrid.__getitem__([slice(-c, c + 1) for c in spatial_dims])
 
-    rotm = np.matmul(m.T, rot)
+    rotm = np.matmul(m.T, rot).T
 
     gauss = _gaussian(rotm, center=0, sigma=sigma, ndim=ndim)
 
-    compm = np.matmul(m.T, frequency * coords)
+    compm = np.matmul(m.T, frequency * coords).T
 
     # complex harmonic function
     harmonic = np.exp(1j * (2 * np.pi * compm.sum() + offset))
