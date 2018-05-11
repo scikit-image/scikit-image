@@ -104,3 +104,38 @@ class TestCanny(unittest.TestCase):
 
         self.assertRaises(ValueError, F.canny, image, use_quantiles=True,
                           low_threshold=0.5, high_threshold=-100)
+
+    def test_use_callables(self):
+        image = img_as_float(data.camera()[::50, ::50])
+
+        # Correct output produced manually with quantiles
+        # of 0.8 and 0.6 for high and low respectively
+        correct_output = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+           [0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0],
+           [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
+           [0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0],
+           [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+           [0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0],
+           [0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+           [0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
+
+        # Test using percentile callables so we can check using the same
+        # data as was used in the quantiles test
+        result = F.canny(image, low_threshold=lambda im : np.percentile(im, 60),
+                         high_threshold=lambda im : np.percentile(im, 80))
+
+        assert_equal(result, correct_output)
+
+    def test_invalid_use_callables(self):
+        image = img_as_float(data.camera()[::50, ::50])
+
+        self.assertRaises(TypeError, F.canny, image,
+                          low_threshold=lambda x: True,
+                          high_threshold=lambda : True)
+
+        self.assertRaises(TypeError, F.canny, image,
+                          low_threshold=lambda : True,
+                          high_threshold=lambda x : True)

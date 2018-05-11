@@ -60,11 +60,15 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
         Greyscale input image to detect edges on; can be of any dtype.
     sigma : float
         Standard deviation of the Gaussian filter.
-    low_threshold : float
+    low_threshold : float or callable
         Lower bound for hysteresis thresholding (linking edges).
+        If callable is given, it is applied to the gradient image
+        to generate the low_threshold.
         If None, low_threshold is set to 10% of dtype's max.
-    high_threshold : float
+    high_threshold : float or callable
         Upper bound for hysteresis thresholding (linking edges).
+        If callable is given, it is applied to the gradient image
+        to generate the high_threshold.
         If None, high_threshold is set to 20% of dtype's max.
     mask : array, dtype=bool, optional
         Mask to limit the application of Canny to a certain area.
@@ -265,6 +269,16 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
 
         high_threshold = np.percentile(magnitude, 100.0 * high_threshold)
         low_threshold = np.percentile(magnitude, 100.0 * low_threshold)
+    else:
+        #
+        # Else if high_threshold and/or low_threshold are callables
+        # call them to determine the threshold value / image
+        #
+        if callable(high_threshold):
+            high_threshold = high_threshold(magnitude)
+        if callable(low_threshold):
+            low_threshold = low_threshold(magnitude)
+
 
     #
     #---- Create two masks at the two thresholds.
