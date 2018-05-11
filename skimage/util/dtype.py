@@ -253,28 +253,24 @@ def convert(image, dtype, force_copy=False, uniform=False):
         # use float type that can represent output integer type
         computation_type = _dtype_itemsize(itemsize_out, dtype_in,
                                            np.float32, np.float64)
-        if force_copy or computation_type != image.dtype:
-            image_out = np.empty(shape=image.shape, dtype=computation_type)
-        else:
-            image_out = image
 
         if not uniform:
             if kind_out == 'u':
-                np.multiply(image, imax_out,
-                            out=image_out, dtype=computation_type)
+                image_out = np.multiply(image, imax_out,
+                                        dtype=computation_type)
             else:
-                np.multiply(image, (imax_out - imin_out) / 2,
-                            out=image_out, dtype=computation_type)
+                image_out = np.multiply(image, (imax_out - imin_out) / 2,
+                                        dtype=computation_type)
                 image_out -= 1.0 / 2.
             np.rint(image_out, out=image_out)
             np.clip(image_out, imin_out, imax_out, out=image_out)
         elif kind_out == 'u':
-            np.multiply(image, imax_out + 1,
-                        out=image_out, dtype=computation_type)
+            image_out = np.multiply(image, imax_out + 1,
+                        dtype=computation_type)
             np.clip(image_out, 0, imax_out, out=image_out)
         else:
-            np.multiply(image, (imax_out - imin_out + 1.0) / 2.0,
-                        out=image_out, dtype=computation_type)
+            image_out = np.multiply(image, (imax_out - imin_out + 1.0) / 2.0,
+                                    dtype=computation_type)
             np.floor(image_out, out=image_out)
             np.clip(image_out, imin_out, imax_out, out=image_out)
         return image_out.astype(dtype_out)
