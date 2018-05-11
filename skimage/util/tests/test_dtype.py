@@ -116,3 +116,18 @@ def test_bool():
         assert np.sum(converted_) == dtype_range[dt][1]
         converted8 = func(img8)
         assert np.sum(converted8) == dtype_range[dt][1]
+
+def test_clobber():
+    # The image functions should not clobber the input arrays
+    # This is necessary in case somebody tries to optimize
+    # by not having a copy of the array during computation
+    for func_input_type in img_funcs:
+        for func_output_type in img_funcs:
+            img = np.random.rand(5, 5)
+
+            img_in = func_input_type(img)  # , issue_warnings=False)
+
+            img_in_before = img_in.copy()
+            img_out = func_output_type(img_in)
+
+            assert_equal(img_in, img_in_before)
