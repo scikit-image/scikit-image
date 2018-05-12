@@ -94,15 +94,16 @@ def guess_spatial_dimensions(image):
 def convert_colorspace(arr, fromspace, tospace):
     """Convert an image array to a new color space.
 
+    Valid color spaces include:
+        'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV', 'YIQ', 'YPbPr', 'YCbCr', 'YDbDr'
+
     Parameters
     ----------
     arr : array_like
         The image to convert.
-    fromspace : {'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV',
-                 'YIQ', 'YPbPr', 'YCbCr', 'YDbDr'}
+    fromspace : valid color space
         The color space to convert from. Can be specified in lower case.
-    tospace : {'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV',
-               'YIQ', 'YPbPr', 'YCbCr', 'YDbDr'}
+    tospace : valid color space
         The color space to convert to. Can be specified in lower case.
 
     Returns
@@ -121,6 +122,7 @@ def convert_colorspace(arr, fromspace, tospace):
     >>> from skimage import data
     >>> img = data.astronaut()
     >>> img_hsv = convert_colorspace(img, 'RGB', 'HSV')
+
     """
     fromdict = {'rgb': lambda im: im, 'hsv': hsv2rgb, 'rgb cie': rgbcie2rgb,
                 'xyz': xyz2rgb, 'yuv': yuv2rgb, 'yiq': yiq2rgb,
