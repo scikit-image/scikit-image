@@ -94,11 +94,11 @@ class SaveButtons(BaseWidget):
 
 def notify(msg):
     msglabel = QtWidgets.QLabel(msg)
-    dialog = QtGui.QDialog()
+    dialog = QtWidgets.QDialog()
     ok = QtWidgets.QPushButton('OK', dialog)
     ok.clicked.connect(dialog.accept)
     ok.setDefault(True)
-    dialog.layout = QtGui.QGridLayout(dialog)
+    dialog.layout = QtWidgets.QGridLayout(dialog)
     dialog.layout.addWidget(msglabel, 0, 0, 1, 3)
     dialog.layout.addWidget(ok, 1, 1)
     dialog.exec_()
