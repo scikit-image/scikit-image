@@ -65,7 +65,10 @@ section_end "Install.optional.dependencies"
 
 section "Build.docs.or.run.examples"
 
-pip install --retries 3 -q -r ./requirements/docs.txt
+# This fails on Travis OSX
+if [[ $TRAVIS_OS_NAME != "osx" ]]; then
+    pip install --retries 3 -q -r ./requirements/docs.txt
+fi
 
 if [[ $BUILD_DOCS == 1 ]]; then
     export SPHINXCACHE=$HOME/.cache/sphinx; make html
