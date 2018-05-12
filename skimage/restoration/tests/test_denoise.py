@@ -224,7 +224,8 @@ def test_denoise_bilateral_multidimensional():
 
 def test_denoise_bilateral_nan():
     img = np.full((50, 50), np.NaN)
-    out = restoration.denoise_bilateral(img, multichannel=False)
+    with expected_warnings(['invalid value encountered in reduce']):
+        out = restoration.denoise_bilateral(img, multichannel=False)
     assert_equal(img, out)
 
 
