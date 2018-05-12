@@ -65,7 +65,8 @@ def test_keypoints_censure_moon_image_octagon():
     the expected values for Octagon filter."""
 
     detector = CENSURE(mode='octagon')
-    detector.detect(rescale(img, 0.25))     # quarter scale image for speed
+    # quarter scale image for speed
+    detector.detect(rescale(img, 0.25, multiscale=False))
     expected_keypoints = np.array([[ 23,  27],
                                    [ 29,  89],
                                    [ 31,  87],
@@ -82,7 +83,8 @@ def test_keypoints_censure_moon_image_star():
     """Verify the actual Censure keypoints and their corresponding scale with
     the expected values for STAR filter."""
     detector = CENSURE(mode='star')
-    detector.detect(rescale(img, 0.25))     # quarter scale image for speed
+    # quarter scale image for speed
+    detector.detect(rescale(img, 0.25, multiscale=False))
     expected_keypoints = np.array([[ 23,  27],
                                    [ 29,  89],
                                    [ 30,  86],
