@@ -3,7 +3,7 @@ import os
 from skimage import data, img_as_float, io, img_as_uint
 
 from skimage.viewer import ImageViewer
-from skimage.viewer.qt import QtGui, QtCore, has_qt
+from skimage.viewer.qt import QtWidgets, QtCore, has_qt
 from skimage.viewer.widgets import (
     Slider, OKCancelButtons, SaveButtons, ComboBox, CheckBox, Text)
 from skimage.viewer.plugins.base import Plugin
@@ -99,7 +99,7 @@ def test_save_buttons():
     os.close(fid)
 
     timer = QtCore.QTimer()
-    timer.singleShot(100, QtGui.QApplication.quit)
+    timer.singleShot(100, QtWidgets.QApplication.quit)
 
     # exercise the button clicks
     sv.save_stack.click()
@@ -129,4 +129,3 @@ def test_ok_buttons():
 
     ok.update_original_image(),
     ok.close_plugin()
-
