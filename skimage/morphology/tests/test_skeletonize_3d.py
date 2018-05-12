@@ -76,11 +76,11 @@ def test_dtype_conv():
         # UserWarning for possible precision loss, expected
         warnings.simplefilter('ignore', UserWarning)
         res = skeletonize_3d(img)
+        img_max = img_as_ubyte(img).max()
 
     assert_equal(res.dtype, np.uint8)
     assert_equal(img, orig)  # operation does not clobber the original
-    assert_equal(res.max(),
-                 img_as_ubyte(img).max())    # the intensity range is preserved
+    assert_equal(res.max(), img_max)    # the intensity range is preserved
 
 
 @parametrize("img", [
@@ -126,7 +126,10 @@ def test_skeletonize_num_neighbours():
     circle2 = (ic - 135)**2 + (ir - 150)**2 < 20**2
     image[circle1] = 1
     image[circle2] = 0
-    result = skeletonize_3d(image)
+    with warnings.catch_warnings():
+        # UserWarning for possible precision loss, expected
+        warnings.simplefilter('ignore', UserWarning)
+        result = skeletonize_3d(image)
 
     # there should never be a 2x2 block of foreground pixels in a skeleton
     mask = np.array([[1,  1],
