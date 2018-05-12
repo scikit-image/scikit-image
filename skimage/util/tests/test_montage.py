@@ -6,6 +6,7 @@ import numpy as np
 from skimage.util import montage
 from skimage.util import montage2d as montage2d_deprecated
 
+
 def montage2d(*args, **kwargs):
     with expected_warnings(['deprecated']):
         return montage2d_deprecated(*args, **kwargs)

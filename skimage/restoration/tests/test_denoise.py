@@ -8,7 +8,7 @@ import pywt
 from skimage._shared import testing
 from skimage._shared.testing import (assert_equal, assert_almost_equal,
                                      assert_warns, assert_)
-from skimage._shared._warnings import expected_warnings
+from skimage._shared._warnings import expected_warnings, warnings
 
 
 np.random.seed(1234)
@@ -224,7 +224,8 @@ def test_denoise_bilateral_multidimensional():
 
 def test_denoise_bilateral_nan():
     img = np.full((50, 50), np.NaN)
-    with expected_warnings(['invalid value encountered in reduce']):
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
         out = restoration.denoise_bilateral(img, multichannel=False)
     assert_equal(img, out)
 

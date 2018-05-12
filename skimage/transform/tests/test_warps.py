@@ -93,11 +93,9 @@ def test_warp_clip():
     x = np.zeros((5, 5), dtype=np.double)
     x[2, 2] = 1
 
-
     outx = rescale(x, 3, order=3, clip=False,
                    multichannel=False, anti_aliasing=False, mode='constant')
     assert outx.min() < 0
-
 
     outx = rescale(x, 3, order=3, clip=True,
                    multichannel=False, anti_aliasing=False, mode='constant')
