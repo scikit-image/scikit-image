@@ -93,12 +93,14 @@ def test_warp_clip():
     x = np.zeros((5, 5), dtype=np.double)
     x[2, 2] = 1
 
-    with expected_warnings(['The default mode', 'The default multichannel']):
-        outx = rescale(x, 3, order=3, clip=False, anti_aliasing=False)
+
+    outx = rescale(x, 3, order=3, clip=False,
+                   multichannel=False, anti_aliasing=False, mode='constant')
     assert outx.min() < 0
 
-    with expected_warnings(['The default mode', 'The default multichannel']):
-        outx = rescale(x, 3, order=3, clip=True, anti_aliasing=False)
+
+    outx = rescale(x, 3, order=3, clip=True,
+                   multichannel=False, anti_aliasing=False, mode='constant')
     assert_almost_equal(outx.min(), 0)
     assert_almost_equal(outx.max(), 1)
 
@@ -164,8 +166,8 @@ def test_rescale():
     # same scale factor
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
-    with expected_warnings(['The default mode', 'The default multichannel']):
-        scaled = rescale(x, 2, order=0, anti_aliasing=False)
+    scaled = rescale(x, 2, order=0,
+                     multichannel=False, anti_aliasing=False, mode='constant')
     ref = np.zeros((10, 10))
     ref[2:4, 2:4] = 1
     assert_almost_equal(scaled, ref)
@@ -173,8 +175,9 @@ def test_rescale():
     # different scale factors
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
-    with expected_warnings(['The default mode', 'The default multichannel']):
-        scaled = rescale(x, (2, 1), order=0, anti_aliasing=False)
+
+    scaled = rescale(x, (2, 1), order=0,
+                     multichannel=False, anti_aliasing=False, mode='constant')
     ref = np.zeros((10, 5))
     ref[2:4, 1] = 1
     assert_almost_equal(scaled, ref)
@@ -183,41 +186,49 @@ def test_rescale():
 def test_rescale_invalid_scale():
     x = np.zeros((10, 10, 3))
     with testing.raises(ValueError):
-        rescale(x, (2, 2), multichannel=False)
+        rescale(x, (2, 2),
+                multichannel=False, anti_aliasing=False, mode='constant')
     with testing.raises(ValueError):
-        rescale(x, (2, 2, 2), multichannel=True)
+        rescale(x, (2, 2, 2),
+                multichannel=True, anti_aliasing=False, mode='constant')
 
 
 def test_rescale_multichannel():
     # 1D + channels
     x = np.zeros((8, 3), dtype=np.double)
-    scaled = rescale(x, 2, order=0, multichannel=True, anti_aliasing=False)
+    scaled = rescale(x, 2, order=0, multichannel=True, anti_aliasing=False,
+                     mode='constant')
     assert_equal(scaled.shape, (16, 3))
     # 2D
-    scaled = rescale(x, 2, order=0, multichannel=False, anti_aliasing=False)
+    scaled = rescale(x, 2, order=0, multichannel=False, anti_aliasing=False,
+                     mode='constant')
     assert_equal(scaled.shape, (16, 6))
 
     # 2D + channels
     x = np.zeros((8, 8, 3), dtype=np.double)
-    scaled = rescale(x, 2, order=0, multichannel=True, anti_aliasing=False)
+    scaled = rescale(x, 2, order=0, multichannel=True, anti_aliasing=False,
+                     mode='constant')
     assert_equal(scaled.shape, (16, 16, 3))
     # 3D
-    scaled = rescale(x, 2, order=0, multichannel=False, anti_aliasing=False)
+    scaled = rescale(x, 2, order=0, multichannel=False, anti_aliasing=False,
+                     mode='constant')
     assert_equal(scaled.shape, (16, 16, 6))
 
     # 3D + channels
     x = np.zeros((8, 8, 8, 3), dtype=np.double)
-    scaled = rescale(x, 2, order=0, multichannel=True, anti_aliasing=False)
+    scaled = rescale(x, 2, order=0, multichannel=True, anti_aliasing=False,
+                     mode='constant')
     assert_equal(scaled.shape, (16, 16, 16, 3))
     # 4D
-    scaled = rescale(x, 2, order=0, multichannel=False, anti_aliasing=False)
+    scaled = rescale(x, 2, order=0, multichannel=False, anti_aliasing=False,
+                     mode='constant')
     assert_equal(scaled.shape, (16, 16, 16, 6))
 
 
 def test_rescale_multichannel_multiscale():
     x = np.zeros((5, 5, 3), dtype=np.double)
     scaled = rescale(x, (2, 1), order=0, multichannel=True,
-                     anti_aliasing=False)
+                     anti_aliasing=False, mode='constant')
     assert_equal(scaled.shape, (10, 5, 3))
 
 
@@ -226,14 +237,14 @@ def test_rescale_multichannel_defaults():
 
     # 2D: multichannel should default to False
     x = np.zeros((8, 3), dtype=np.double)
-    with expected_warnings(['The default mode', 'The default multichannel']):
-        scaled = rescale(x, 2, order=0, anti_aliasing=False)
+    with expected_warnings(['multichannel']):
+        scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
     assert_equal(scaled.shape, (16, 6))
 
     # 3D: multichannel should default to True
     x = np.zeros((8, 8, 3), dtype=np.double)
-    with expected_warnings(['The default mode', 'The default multichannel']):
-        scaled = rescale(x, 2, order=0, anti_aliasing=False)
+    with expected_warnings(['multichannel']):
+        scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
     assert_equal(scaled.shape, (16, 16, 3))
 
 
@@ -291,7 +302,8 @@ def test_resize2d_4d():
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
     out_shape = (10, 10, 1, 1)
-    resized = resize(x, out_shape, order=0, anti_aliasing=False)
+    resized = resize(x, out_shape, order=0, anti_aliasing=False,
+                     mode='constant')
     ref = np.zeros(out_shape)
     ref[2:4, 2:4, ...] = 1
     assert_almost_equal(resized, ref)
@@ -376,7 +388,7 @@ def test_warp_coords_example():
 def test_downsize():
     x = np.zeros((10, 10), dtype=np.double)
     x[2:4, 2:4] = 1
-    scaled = resize(x, (5, 5), order=0, anti_aliasing=False)
+    scaled = resize(x, (5, 5), order=0, anti_aliasing=False, mode='constant')
     assert_equal(scaled.shape, (5, 5))
     assert_equal(scaled[1, 1], 1)
     assert_equal(scaled[2:, :].sum(), 0)
@@ -386,7 +398,7 @@ def test_downsize():
 def test_downsize_anti_aliasing():
     x = np.zeros((10, 10), dtype=np.double)
     x[2, 2] = 1
-    scaled = resize(x, (5, 5), order=1, anti_aliasing=True)
+    scaled = resize(x, (5, 5), order=1, anti_aliasing=True, mode='constant')
     assert_equal(scaled.shape, (5, 5))
     assert np.all(scaled[:3, :3] > 0)
     assert_equal(scaled[3:, :].sum(), 0)
@@ -396,7 +408,8 @@ def test_downsize_anti_aliasing():
 def test_downsize_anti_aliasing_invalid_stddev():
     x = np.zeros((10, 10), dtype=np.double)
     with testing.raises(ValueError):
-        resize(x, (5, 5), order=0, anti_aliasing=True, anti_aliasing_sigma=-1)
+        resize(x, (5, 5), order=0, anti_aliasing=True, anti_aliasing_sigma=-1,
+               mode='constant')
     with expected_warnings(["Anti-aliasing standard deviation greater"]):
         resize(x, (5, 15), order=0, anti_aliasing=True,
                anti_aliasing_sigma=(1, 1), mode="reflect")
@@ -407,7 +420,8 @@ def test_downsize_anti_aliasing_invalid_stddev():
 def test_downscale():
     x = np.zeros((10, 10), dtype=np.double)
     x[2:4, 2:4] = 1
-    scaled = rescale(x, 0.5, order=0, anti_aliasing=False)
+    scaled = rescale(x, 0.5, order=0, anti_aliasing=False,
+                     multichannel=False, mode='constant')
     assert_equal(scaled.shape, (5, 5))
     assert_equal(scaled[1, 1], 1)
     assert_equal(scaled[2:, :].sum(), 0)
@@ -417,7 +431,8 @@ def test_downscale():
 def test_downscale_anti_aliasing():
     x = np.zeros((10, 10), dtype=np.double)
     x[2, 2] = 1
-    scaled = rescale(x, 0.5, order=1, anti_aliasing=True)
+    scaled = rescale(x, 0.5, order=1, anti_aliasing=True,
+                     multichannel=False, mode='constant')
     assert_equal(scaled.shape, (5, 5))
     assert np.all(scaled[:3, :3] > 0)
     assert_equal(scaled[3:, :].sum(), 0)
