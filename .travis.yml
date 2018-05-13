@@ -20,7 +20,14 @@ addons:
     - texlive
     - texlive-latex-extra
     - dvipng
-    - python-qt4
+    # - python-qt4
+    # - python-qt5
+    # - python-pyside
+    # - python-pyside2
+    # - python3-qt4
+    # - python3-qt5
+    # - python3-pyside
+
 env:
   global:
     - GH_REF: github.com/scikit-image/docs.git
@@ -98,12 +105,64 @@ before_install:
     - tools/check_sdist.py
 
 install:
-    - section build
     - python setup.py develop
-    - section_end build
+    # Matplotlib settings - do not show figures during doc examples
+    - if [[ $MINIMUM_REQUIREMENTS == 1 || $TRAVIS_OS_NAME == "osx" ]]; then
+        export MPL_DIR=$HOME/.matplotlib
+    else
+        export MPL_DIR=$HOME/.config/matplotlib
+    fi
+    - mkdir -p $MPL_DIR
+    - touch $MPL_DIR/matplotlibrc
+    - if [[ $TRAVIS_OS_NAME == "osx" ]]; then
+        echo 'backend : Template' > $MPL_DIR/matplotlibrc
+    fi
+    # Install most of the optional packages
+    - if [[ $OPTIONAL_DEPS == 1 ]]; then
+        pip install --retries 3 -q -r ./requirements/optional.txt $WHEELHOUSE
+    fi
+    - if [[ $WITH_PYAMG == 1 ]]; then
+        pip install --retries 3 -q pyamg
+    fi
+    - source tools/travis/install_qt.sh
 
-script: tools/travis/script.sh
+
+script:
+    - export PY=$TRAVIS_PYTHON_VERSION
+    - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
+    - echo Build or run examples
+    - if [[ $BUILD_DOCS == 1 ]]; then
+        # This fails on Travis OSX
+        pip install --retries 3 -q -r ./requirements/docs.txt
+        export SPHINXCACHE=$HOME/.cache/sphinx; make html
+    else
+        # Why is this optional?
+        echo 'backend : Template' > $MPL_DIR/matplotlibrc
+
+        for f in doc/examples/*/*.py; do
+            python "$f"
+            if [ $? -ne 0 ]; then
+                exit 1
+            fi
+        done
+    fi
+    # run tests again with optional dependencies to get more coverage
+    - if [[ $OPTIONAL_DEPS == 1 ]]; then
+        export TEST_ARGS="$TEST_ARGS --cov=skimage"
+    fi
+    # Show what's installed
+    - pip list
+    - pytest $TEST_ARGS skimage
+    # Run example applications
+    - for f in doc/examples/xx_applications/*.py; do
+        python "$f"
+        if [ $? -ne 0 ]; then
+            exit 1
+        fi
+    done
 
 after_success:
     - codecov
+    # Prepare.release
+    - doc/release/contribs.py HEAD~10
     - bash tools/travis/deploy_docs.sh
