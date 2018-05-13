@@ -124,16 +124,16 @@ install:
     - source tools/travis/install_qt.sh
 
 script:
-    - export PY=$TRAVIS_PYTHON_VERSION
+    - export PY=${TRAVIS_PYTHON_VERSION}
     - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
     - echo Build or run examples
-    - if [[ $BUILD_DOCS == 1 ]]; then
-        # This fails on Travis OSX
+    # This fails on Travis OSX
+    - if [[ ${BUILD_DOCS} == 1 ]]; then
         pip install --retries 3 -q -r ./requirements/docs.txt
-        export SPHINXCACHE=$HOME/.cache/sphinx; make html
+        export SPHINXCACHE=${HOME}/.cache/sphinx; make html
       else
         for f in doc/examples/*/*.py; do
-            python "$f"
+            python "${f}"
             if [ $? -ne 0 ]; then
                 exit 1
             fi
