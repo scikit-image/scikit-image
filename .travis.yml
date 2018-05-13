@@ -20,10 +20,6 @@ addons:
     - texlive
     - texlive-latex-extra
     - dvipng
-    # - python-qt4
-    # - python-qt5
-    # - python-pyside
-    # - python-pyside2
     # - python3-qt4
     # - python3-qt5
     # - python3-pyside
@@ -72,12 +68,6 @@ matrix:
       python: 3.6
       env: BUILD_DOCS=1 DEPLOY_DOCS=1
     # Test the Qt stuff
-    - os: linux
-      python: 3.6
-      env: QT=PyQt4
-    - os: linux
-      python: 3.6
-      env: QT=PySide
     - os: linux
       python: 3.6
       env: QT=PyQt5
