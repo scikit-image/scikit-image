@@ -107,7 +107,8 @@ before_install:
 install:
     - python setup.py develop
     # Matplotlib settings - do not show figures during doc examples
-    - if [[ "${MINIMUM_REQUIREMENTS}" == "1" || "${TRAVIS_OS_NAME}" == "osx" ]]; then
+    - |
+      if [[ "${MINIMUM_REQUIREMENTS}" == "1" || "${TRAVIS_OS_NAME}" == "osx" ]]; then
         export MPL_DIR=${HOME}/.matplotlib
       else
         export MPL_DIR=${HOME}/.config/matplotlib
@@ -115,10 +116,12 @@ install:
     - mkdir -p ${MPL_DIR}
     - touch ${MPL_DIR}/matplotlibrc
     # Install most of the optional packages
-    - if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
+    - |
+      if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
         pip install --retries 3 -q -r ./requirements/optional.txt $WHEELHOUSE
       fi
-    - if [[ "${WITH_PYAMG}" == "1" ]]; then
+    - |
+      if [[ "${WITH_PYAMG}" == "1" ]]; then
         pip install --retries 3 -q pyamg
       fi
     - source tools/travis/install_qt.sh
@@ -128,7 +131,8 @@ script:
     - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
     - echo Build or run examples
     # This fails on Travis OSX
-    - if [[ "${BUILD_DOCS}" == "1" ]]; then
+    - |
+      if [[ "${BUILD_DOCS}" == "1" ]]; then
         pip install --retries 3 -q -r ./requirements/docs.txt
         export SPHINXCACHE=${HOME}/.cache/sphinx; make html
       else
@@ -140,14 +144,16 @@ script:
         done
       fi
     # run tests again with optional dependencies to get more coverage
-    - if [[ "$OPTIONAL_DEPS" == "1" ]]; then
+    - |
+      if [[ "$OPTIONAL_DEPS" == "1" ]]; then
         export TEST_ARGS="${TEST_ARGS} --cov=skimage"
       fi
     # Show what's installed
     - pip list
     - pytest ${TEST_ARGS} skimage
     # Run example applications
-    - for f in doc/examples/xx_applications/*.py; do
+    - |
+      for f in doc/examples/xx_applications/*.py; do
         python "$f"
         if [ "$?" -ne 0 ]; then
             exit 1
