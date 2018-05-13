@@ -63,41 +63,43 @@ def _decompose_quasipolar_coords(r, thetas):
     return coords
 
 
-def _gaussian(image, center=0, sigma=1, ndim=2):
-    """Generates gaussian envelope.
+def _gaussian_kernel(image, center=0, sigma=1):
+    """Multi-dimensional Gaussian kernel.
 
     Parameters
     ----------
     image : non-complex array
-        Image to seed the filter with.
-    center : scalar or vector, optional
-        Coordinates to center the image with. Defaults to 0.
-    sigma : scalar or vector, optional
-        Spatial dimensions of the envelope. Defaults to 1.
-    ndim : int, optional
-        Dimensionality of the envelope to create. Defaults to 2.
+        Linear space to map the filter to.
+    center : scalar or sequence of scalars, optional
+        Center of Gaussian kernel. The coordinates of the center are given for
+        each axis as a sequence, or as a single number, in which case it is
+        equal for all axes.
+    sigma : scalar or sequence of scalars, optional
+        Standard deviation for Gaussian kernel. The standard deviations of the
+        Gaussian filter are given for each axis as a sequence, or as a single
+        number, in which case it is equal for all axes.
 
     Returns
     -------
-    gauss : (``ndim``, ``ndim``)
+    gauss : (``image.ndim``, ``image.ndim``)
 
     References
     ----------
-    .. [1] Do CB. 2008. The Multivariate Gaussian Distribution. Stanford
-           University (CS 229): Stanford, CA.
-           http://cs229.stanford.edu/section/gaussians.pdf
+    .. [1] Bart M. ter Haar Romeny. Front-End Vision and Multi-Scale Image
+           Analysis. Computation Imaging and Vision, Vol. 27, Springer:
+           Dordrecht, 2003: pp. 37-51.
+           https://doi.org/10.1007/978-1-4020-8840-7_3
     """
     sigma_prod = np.prod(sigma)
 
     # normalization factor
-    norm = (2 * np.pi) ** (ndim / 2)
-    norm *= sigma_prod
+    norm = (2 * np.pi) ** (image.ndim / 2) * sigma_prod
 
     # center image
     image = image - center
 
-    # gaussian envelope
-    gauss = np.exp(-0.5 * np.sum(np.prod((image ** 2, 1 / sigma_prod ** 2), axis=0), axis=0))
+    # gaussian function
+    gauss = np.exp(-0.5 * np.sum(image ** 2 / sigma_prod ** 2, axis=0))
 
     return gauss / norm
 
@@ -131,9 +133,9 @@ def _rotation(src_axis, dst_axis):
     >>> Y = np.asarray([0.5, 0.5])
 
     >>> M = _rotation(X, Y)
-    >>> Z = np.matmul(M, Y[..., np.newaxis])
+    >>> Z = np.matmul(M, X)
 
-    >>> np.allclose(Z, Y[np.newaxis])
+    >>> np.allclose(Z, Y)
     True
     """
     X = np.array(src_axis)
@@ -168,9 +170,9 @@ def _rotation(src_axis, dst_axis):
                     x[w[n + step]] = 0
                     x[w[n]] = r
 
-                n += step << 1  # Move to the next base operation
+                n += step * 2  # Move to the next base operation
 
-            step <<= 1  # multiply by 2
+            step *= 2
             R = np.matmul(A, R)  # Multiply R by current matrix of stage A
 
         return R
@@ -193,9 +195,9 @@ def _rotation(src_axis, dst_axis):
 
 def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
                  n_stds=3, offset=0, leading_axis=1, ndim=2, **kwargs):
-    """Return complex nD Gabor filter kernel.
+    """Multi-dimensional complex Gabor kernel.
 
-    A gabor kernel is a Gaussian kernel modulated by a complex harmonic function.
+    A Gabor kernel is a Gaussian kernel modulated by a complex harmonic function.
     Harmonic function consists of an imaginary sine function and a real
     cosine function. Spatial frequency is inversely proportional to the
     wavelength of the harmonic and to the standard deviation of a Gaussian
@@ -206,25 +208,31 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     ----------
     frequency : float
         Spatial frequency of the harmonic function. Specified in pixels.
-    theta : float or array of floats, optional
+    theta : float or sequence of floats, optional
         Orientation in radians. If 0, the harmonic is in the x-direction.
+    theta : scalar or sequence of scalars, optional
+        Orientation in radians. The angles that describe the orientation
+        are given for each axis as a sequence, or as a single number, in
+        which case it is equal for all axes.
     bandwidth : float, optional
         The bandwidth captured by the filter. For fixed bandwidth, `sigma`
         will decrease with increasing frequency. This value is ignored if
         `sigma` are set by the user.
-    sigma : float or array of floats, optional
-        Standard deviation. These directions apply to the kernel *before*
-        rotation.
+    sigma : scalar or sequence of scalars, optional
+        Standard deviation for Gabor kernel. The standard deviations of the
+        Gabor filter are given for each axis as a sequence, or as a single
+        number, in which case it is equal for all axes. These directions
+        apply to the kernel *before* rotation.
     n_stds : scalar, optional
         The linear size of the kernel is n_stds (3 by default) standard
-        deviations
+        deviations.
     offset : float, optional
         Phase offset of harmonic function in radians.
     leading_axis : int, optional
         The leading axis for rotation. Defaults to 1, the `x` coordinate
         in most systems.
     ndim : int, optional
-        Dimensionality of the kernel. Defaults to 2.
+        Dimensionality of the kernel.
 
     Returns
     -------
@@ -275,7 +283,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     else:
         sigma = np.append(sigma, [None] * (ndim - len(sigma)))
     default_sigma = _sigma_prefactor(bandwidth) / frequency
-    sigma[(sigma == None).nonzero()] = default_sigma  # noqa
+    sigma[sigma == None] = default_sigma  # noqa
     sigma = sigma.astype(None)
 
     coords = _decompose_quasipolar_coords(1, theta)
@@ -284,20 +292,20 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     rot = _rotation(base_axis, coords)
 
     # calculate & rotate kernel size
-    spatial_dims = np.ceil(np.max(np.abs(n_stds * sigma * rot), axis=-1))
-    spatial_dims[spatial_dims < 1] = 1
+    spatial_size = np.ceil(np.max(np.abs(n_stds * sigma * rot), axis=-1))
+    spatial_size[spatial_size < 1] = 1
 
     # create mesh grid
-    m = np.mgrid.__getitem__([slice(-c, c + 1) for c in spatial_dims])
+    m = np.mgrid.__getitem__([slice(-c, c + 1) for c in spatial_size])
 
     rotm = np.matmul(m.T, rot).T
 
-    gauss = _gaussian(rotm, center=0, sigma=sigma, ndim=ndim)
+    gauss = _gaussian_kernel(rotm, sigma=sigma, center=0)
 
-    compm = np.matmul(m.T, frequency * coords).T
+    compm = np.sum(np.matmul(m.T, frequency * coords).T, axis=0)
 
     # complex harmonic function
-    harmonic = np.exp(1j * (2 * np.pi * compm.sum(axis=0) + offset))
+    harmonic = np.exp(1j * (2 * np.pi * compm + offset))
 
     g = np.zeros(m[0].shape, dtype=np.complex)
     g[:] = gauss * harmonic
@@ -335,7 +343,7 @@ def gabor(image, frequency=None, theta=0, bandwidth=1, sigma=None, sigma_y=None,
         rotation.
     n_stds : scalar, optional
         The linear size of the kernel is n_stds (3 by default) standard
-        deviations
+        deviations.
     offset : float, optional
         Phase offset of harmonic function in radians.
     mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
@@ -343,6 +351,10 @@ def gabor(image, frequency=None, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     cval : scalar, optional
         Value to fill past edges of input if `mode` of convolution is
         'constant'. The parameter is passed to `ndi.convolve`.
+    kernel : complex array
+        Pre-computed gabor kernel. When applying the same filter to many
+        images, using a kernel generated from `gabor_kernel` and passing it
+        here may see significant computational improvements.
 
     Returns
     -------

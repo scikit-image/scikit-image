@@ -88,9 +88,9 @@ def test_rotation():
 
     M = _rotation(X, Y)
 
-    Z = np.matmul(M, X[..., np.newaxis])
+    Z = np.matmul(M, X)
 
-    assert_almost_equal(Z.T, Y[np.newaxis])
+    assert_almost_equal(Z, Y)
 
     # complex case
     X = np.arange(5)
@@ -99,9 +99,9 @@ def test_rotation():
 
     M = _rotation(X, Y)
 
-    Z = np.matmul(M, X[..., np.newaxis])
+    Z = np.matmul(M, X)
 
-    assert_almost_equal(Z.T, uY[np.newaxis])
+    assert_almost_equal(Z, uY)
 
 
 def test_rotation_quasipolar():
@@ -123,9 +123,9 @@ def test_rotation_quasipolar():
 
     M = _rotation(X, Y)
 
-    Z = np.matmul(M, X[..., np.newaxis])
+    Z = np.matmul(M, X)
 
-    assert_almost_equal(Z.T, Y[np.newaxis])
+    assert_almost_equal(Z, Y)
 
 
 def test_gabor_kernel_sum():
