@@ -109,23 +109,19 @@ install:
     # Matplotlib settings - do not show figures during doc examples
     - if [[ $MINIMUM_REQUIREMENTS == 1 || $TRAVIS_OS_NAME == "osx" ]]; then
         export MPL_DIR=$HOME/.matplotlib
-    else
+      else
         export MPL_DIR=$HOME/.config/matplotlib
-    fi
+      fi
     - mkdir -p $MPL_DIR
     - touch $MPL_DIR/matplotlibrc
-    - if [[ $TRAVIS_OS_NAME == "osx" ]]; then
-        echo 'backend : Template' > $MPL_DIR/matplotlibrc
-    fi
     # Install most of the optional packages
     - if [[ $OPTIONAL_DEPS == 1 ]]; then
         pip install --retries 3 -q -r ./requirements/optional.txt $WHEELHOUSE
-    fi
+      fi
     - if [[ $WITH_PYAMG == 1 ]]; then
         pip install --retries 3 -q pyamg
-    fi
+      fi
     - source tools/travis/install_qt.sh
-
 
 script:
     - export PY=$TRAVIS_PYTHON_VERSION
@@ -135,21 +131,18 @@ script:
         # This fails on Travis OSX
         pip install --retries 3 -q -r ./requirements/docs.txt
         export SPHINXCACHE=$HOME/.cache/sphinx; make html
-    else
-        # Why is this optional?
-        echo 'backend : Template' > $MPL_DIR/matplotlibrc
-
+      else
         for f in doc/examples/*/*.py; do
             python "$f"
             if [ $? -ne 0 ]; then
                 exit 1
             fi
         done
-    fi
+      fi
     # run tests again with optional dependencies to get more coverage
     - if [[ $OPTIONAL_DEPS == 1 ]]; then
         export TEST_ARGS="$TEST_ARGS --cov=skimage"
-    fi
+      fi
     # Show what's installed
     - pip list
     - pytest $TEST_ARGS skimage
@@ -159,7 +152,7 @@ script:
         if [ $? -ne 0 ]; then
             exit 1
         fi
-    done
+      done
 
 after_success:
     - codecov

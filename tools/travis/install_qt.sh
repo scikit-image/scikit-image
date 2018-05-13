@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+if [[ $TRAVIS_OS_NAME == "osx" ]]; then
+    echo "backend : Template" > $MPL_DIR/matplotlibrc
+fi
 # Now configure Matplotlib to use Qt4
 if [[ $QT == "PyQt4" ]]; then
     pip install pyqt4
