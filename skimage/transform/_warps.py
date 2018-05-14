@@ -364,7 +364,7 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
             [cols - 1, rows - 1],
             [cols - 1, 0]
         ])
-        corners = tform.inverse(corners)
+        corners = tform.inverse_map(corners)
         minc = corners[:, 0].min()
         minr = corners[:, 1].min()
         maxc = corners[:, 0].max()
@@ -536,7 +536,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
 
     Parameters
     ----------
-    coord_map : callable like GeometricTransform.inverse
+    coord_map : callable like GeometricTransform.inverse_map
         Return input coordinates for given output coordinates.
         Coordinates are in the shape (P, 2), where P is the number
         of coordinates and each element is a ``(row, col)`` pair.
@@ -769,7 +769,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
 
     You can also use the inverse of a geometric transformation (fast):
 
-    >>> warped = warp(image, tform.inverse)
+    >>> warped = warp(image, tform.inverse_map)
 
     For N-D images you can pass a coordinate array, that specifies the
     coordinates in the input image for every element in the output image. E.g.
@@ -830,7 +830,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
             matrix = inverse_map.params
 
         elif (hasattr(inverse_map, '__name__') and
-              inverse_map.__name__ == 'inverse' and
+              inverse_map.__name__ == 'inverse_map' and
               get_bound_method_class(inverse_map) in HOMOGRAPHY_TRANSFORMS):
             # inverse_map is the inverse of a homography
             matrix = np.linalg.inv(inverse_map.__self__.params)

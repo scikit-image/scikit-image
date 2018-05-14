@@ -163,7 +163,11 @@ class GeometricTransform(object):
         """
         raise NotImplementedError()
 
-    def inverse(self, coords):
+    def forward_map(self, coords):
+        __doc__ = self.__call__.__doc__
+        return self(coords)
+
+    def inverse_map(self, coords):
         """Apply inverse transformation.
 
         Parameters
@@ -245,6 +249,10 @@ class FundamentalMatrixTransform(GeometricTransform):
             raise ValueError("Invalid shape of transformation matrix")
         self.params = matrix
 
+    @property
+    def inverse_params(self):
+        return self.params.T
+
     def __call__(self, coords):
         """Apply forward transformation.
 
@@ -262,7 +270,7 @@ class FundamentalMatrixTransform(GeometricTransform):
         coords_homogeneous = np.column_stack([coords, np.ones(coords.shape[0])])
         return coords_homogeneous @ self.params.T
 
-    def inverse(self, coords):
+    def inverse_map(self, coords):
         """Apply inverse transformation.
 
         Parameters
@@ -277,7 +285,7 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         """
         coords_homogeneous = np.column_stack([coords, np.ones(coords.shape[0])])
-        return coords_homogeneous @ self.params
+        return np.dot(coords_homogeneous, self.inverse_params.T)
 
     def _setup_constraint_matrix(self, src, dst):
         """Setup and solve the homogeneous epipolar constraint matrix::
@@ -539,7 +547,7 @@ class ProjectiveTransform(GeometricTransform):
         self.params = matrix
 
     @property
-    def _inv_matrix(self):
+    def inverse_params(self):
         return np.linalg.inv(self.params)
 
     def _apply_mat(self, coords, matrix):
@@ -571,7 +579,7 @@ class ProjectiveTransform(GeometricTransform):
         """
         return self._apply_mat(coords, self.params)
 
-    def inverse(self, coords):
+    def inverse_map(self, coords):
         """Apply inverse transformation.
 
         Parameters
@@ -585,7 +593,7 @@ class ProjectiveTransform(GeometricTransform):
             Source coordinates.
 
         """
-        return self._apply_mat(coords, self._inv_matrix)
+        return self._apply_mat(coords, self.inverse_params)
 
     def estimate(self, src, dst):
         """Estimate the transformation from a set of corresponding points.
@@ -703,9 +711,9 @@ class ProjectiveTransform(GeometricTransform):
                 tform = ProjectiveTransform
             return tform(other.params @ self.params)
         elif (hasattr(other, '__name__')
-                and other.__name__ == 'inverse'
-                and hasattr(get_bound_method_class(other), '_inv_matrix')):
-            return ProjectiveTransform(other.__self__._inv_matrix @ self.params)
+                and other.__name__ == 'inverse_map'
+                and hasattr(get_bound_method_class(other), 'inverse_params')):
+            return ProjectiveTransform(other.__self__.inverse_params.dot(self.params))
         else:
             raise TypeError("Cannot combine transformations of differing "
                             "types.")
@@ -902,7 +910,7 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         return out
 
-    def inverse(self, coords):
+    def inverse_map(self, coords):
         """Apply inverse transformation.
 
         Coordinates outside of the mesh will be set to `- 1`.
@@ -951,9 +959,9 @@ class EuclideanTransform(ProjectiveTransform):
 
     where the homogeneous transformation matrix is::
 
-        [[a0  b0  a1]
-         [b0  a0  b1]
-         [0   0    1]]
+        [[a0  -b0  a1]
+         [b0   a0  b1]
+         [ 0    0   1]]
 
     The Euclidean transformation is a rigid transformation with rotation and
     translation parameters. The similarity transformation extends the Euclidean
@@ -1050,9 +1058,9 @@ class SimilarityTransform(EuclideanTransform):
 
     where ``s`` is a scale factor and the homogeneous transformation matrix is::
 
-        [[a0  b0  a1]
-         [b0  a0  b1]
-         [0   0    1]]
+        [[a0  -b0  a1]
+         [b0   a0  b1]
+         [ 0    0   1]]
 
     The similarity transformation extends the Euclidean transformation with a
     single scaling factor in addition to the rotation and translation
@@ -1283,7 +1291,7 @@ class PolynomialTransform(GeometricTransform):
 
         return dst
 
-    def inverse(self, coords):
+    def inverse_map(self, coords):
         raise Exception(
             'There is no explicit way to do the inverse polynomial '
             'transformation. Instead, estimate the inverse transformation '
