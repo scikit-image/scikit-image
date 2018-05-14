@@ -104,21 +104,66 @@ def _gaussian_kernel(image, center=0, sigma=1):
     return gauss / norm
 
 
-def _rotation(src_axis, dst_axis):
-    """Generates an matrix for the nD rotation of one axis to face another.
+def _normalize(a):
+    norm = np.linalg.norm(a)
+
+    if not np.isclose(norm, 1):
+        a = a / norm
+
+    return a
+
+
+def rot(axis, diffs):
+    ndim = len(axis)
+    num_diffs = len(diffs)
+
+    x = axis
+    w = diffs
+
+    R = np.eye(ndim)  # Initial rotation matrix = Identity matrix
+
+    # Loop to create matrices of stages
+    for step in np.round(2 ** np.arange(np.log2(ndim))).astype(np.int):
+        A = np.eye(ndim)
+
+        for n in range(0, ndim - step, step * 2):
+            if n + step >= num_diffs:
+                break
+
+            r2 = x[w[n]] * x[w[n]] + x[w[n + step]] * x[w[n + step]]
+            if r2 > 0:
+                r = np.sqrt(r2)
+                pcos = x[w[n]] / r  # Calculation of coefficients
+                psin = -x[w[n + step]] / r
+                # Base 2-dimensional rotation
+                A[w[n], w[n]] = pcos
+                A[w[n], w[n + step]] = -psin
+                A[w[n + step], w[n]] = psin
+                A[w[n + step], w[n + step]] = pcos
+                x[w[n + step]] = 0
+                x[w[n]] = r
+
+        R = np.matmul(A, R)  # Multiply R by current matrix of stage A
+
+    return R
+
+
+def _compute_rotation_matrix(src, dst, use_homogeneous_coordinates=False):
+    """Generates a matrix for the rotation of one vector to the direction
+    of another.
 
     Parameters
     ----------
-    src_axis : (N,) matrix
-        Vector representation of the axis that will be rotated.
+    src: (N, ) array
+        Vector to rotate.
 
-    dst_axis : (N,) matrix
-        Vector representation of the axis to rotate to.
+    dst : (N, ) array
+        Vector
 
     Returns
     -------
     M : (N, N) array
-        Matrix that rotates ``src_axis`` to coincide with ``dst_axis``.
+        Matrix that rotates `src` to coincide with `dst`.
 
     References
     ----------
@@ -138,51 +183,8 @@ def _rotation(src_axis, dst_axis):
     >>> np.allclose(Z, Y)
     True
     """
-    X = np.array(src_axis)
-    Y = np.array(dst_axis)
-
-
-    def rot(axis, diffs):
-        ndim = len(axis)
-        num_diffs = len(diffs)
-
-        x = axis
-        w = diffs
-
-        R = np.eye(ndim)  # Initial rotation matrix = Identity matrix
-
-        step = 1  # Initial step
-        while step < ndim:  # Loop to create matrices of stages
-            A = np.eye(ndim)
-
-            n = 0
-            while n < ndim - step and n + step < num_diffs:
-                r2 = x[w[n]] * x[w[n]] + x[w[n + step]] * x[w[n + step]]
-                if r2 > 0:
-                    r = np.sqrt(r2)
-                    pcos = x[w[n]] / r  # Calculation of coefficients
-                    psin = -x[w[n + step]] / r
-                    # Base 2-dimensional rotation
-                    A[w[n], w[n]] = pcos
-                    A[w[n], w[n + step]] = -psin
-                    A[w[n + step], w[n]] = psin
-                    A[w[n + step], w[n + step]] = pcos
-                    x[w[n + step]] = 0
-                    x[w[n]] = r
-
-                n += step * 2  # Move to the next base operation
-
-            step *= 2
-            R = np.matmul(A, R)  # Multiply R by current matrix of stage A
-
-        return R
-
-
-    normX = np.linalg.norm(X)
-    normY = np.linalg.norm(Y)
-
-    if not np.isclose(normX, normY):           # Set norm of Y equal to norm
-        Y = (normX / normY) * Y  # of X if they are different
+    X = _normalize(np.array(src))
+    Y = _normalize(np.array(dst))
 
     w = np.nonzero(~np.isclose(X, Y))[0]  # indices of difference
 

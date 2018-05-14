@@ -3,7 +3,8 @@ from numpy.testing import (assert_equal, assert_almost_equal,
                            assert_array_almost_equal)
 
 from skimage.filters._gabor import (gabor_kernel, gabor, _sigma_prefactor,
-                                    _decompose_quasipolar_coords, _rotation)
+                                    _decompose_quasipolar_coords,
+                                    _compute_rotation_matrix)
 
 
 def test_gabor_kernel_size():
@@ -81,12 +82,12 @@ def test_decompose_quasipolar_coords():
                                  c(p(1, 4))])
 
 
-def test_rotation():
+def test_compute_rotation_matrix():
     # trivial case
     X = np.asarray([1, 0, 0])
     Y = np.asarray([0, 0, 1])
 
-    M = _rotation(X, Y)
+    M = _compute_rotation_matrix(X, Y)
 
     Z = np.matmul(M, X)
 
@@ -95,33 +96,45 @@ def test_rotation():
     # complex case
     X = np.arange(5)
     Y = np.arange(5, 10)
-    uY = (np.linalg.norm(X) / np.linalg.norm(Y)) * Y
+    uY = np.linalg.norm(X) / np.linalg.norm(Y) * Y
 
-    M = _rotation(X, Y)
+    M = _compute_rotation_matrix(X, Y)
 
     Z = np.matmul(M, X)
 
     assert_almost_equal(Z, uY)
 
+    # ensure preserves expected length
+    X = np.arange(0, 50)
+    Y = np.arange(175, 225)
 
-def test_rotation_quasipolar():
+    M = _compute_rotation_matrix(X, Y)
+
+    Z = np.arange(250, 300)
+    rotZ = np.matmul(M, Z)
+
+    assert_almost_equal(np.linalg.norm(rotZ), np.linalg.norm(Z))
+
+
+def test_compute_rotation_matrix_quasipolar():
     # 2D case
     X = np.asarray([1, 0])
     y, x = _decompose_quasipolar_coords(5, [np.pi / 6])
     Y = np.asarray([x, y])
 
-    M = _rotation(X, Y)
+    M = _compute_rotation_matrix(X, Y)
 
     assert_almost_equal(M,
                         [[np.cos(np.pi / 6), -np.sin(np.pi / 6)],
                          [np.sin(np.pi / 6), np.cos(np.pi / 6)]])
 
+    # FIXME: actually check components of the matrix; this test is redundant
     # 3D case
     X = np.asarray([0, 1, 0])
     y, x, z = _decompose_quasipolar_coords(1, [np.pi / 3, np.pi / 6])
     Y = np.asarray([x, y, z])
 
-    M = _rotation(X, Y)
+    M = _compute_rotation_matrix(X, Y)
 
     Z = np.matmul(M, X)
 
