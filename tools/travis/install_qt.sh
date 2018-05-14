@@ -9,18 +9,20 @@ if [[ "${QT}" == "PyQt4" ]]; then
     pip install pyqt4
     MPL_QT_API=PyQt4
     export QT_API=pyqt
-elif [[ "${QT}" == "PyQt5" ]]; then
-    pip install pyqt5
-    MPL_QT_API=PyQt5
-    export QT_API=pyqt5
 elif [[ "${QT}" == "PySide" ]]; then
     pip install pyside
     MPL_QT_API=PySide
     export QT_API=pyside
+elif [[ "${QT}" == "PyQt5" ]]; then
+    pip install pyqt5
+    MPL_QT_API=PyQt5
+    export QT_API=pyqt5
 elif [[ "${QT}" == "PySide2" ]]; then
     pip install pyside2
     MPL_QT_API=PySide2
     export QT_API=pyside2
+else
+    echo 'backend: Template' > $MPL_DIR/matplotlibrc
 fi
 if [[ "${QT}" == "PyQt4" || "${QT}" == "PySide" ]]; then
     echo 'backend: Qt4Agg' > $MPL_DIR/matplotlibrc
