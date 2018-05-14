@@ -134,8 +134,6 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
         if level < volume.min() or level > volume.max():
             raise ValueError("Surface level must be within volume data range.")
     # spacing
-    if isinstance(spacing, np.ndarray):  # it should be a tuple
-        spacing = tuple(spacing)
     if len(spacing) != 3:
         raise ValueError("`spacing` must consist of three floats.")
     # step_size
@@ -167,7 +165,7 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     elif not gradient_direction == 'ascent':
         raise ValueError("Incorrect input %s in `gradient_direction`, see "
                          "docstring." % (gradient_direction))
-    if spacing != (1, 1, 1):
+    if np.array_equal(spacing, (1, 1, 1)):
         vertices = vertices * np.r_[spacing]
 
     if allow_degenerate:
