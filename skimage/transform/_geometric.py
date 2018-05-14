@@ -740,7 +740,8 @@ class AffineTransform(ProjectiveTransform):
     Parameters
     ----------
     matrix : (3, 3) array, optional
-        Homogeneous transformation matrix.
+        Homogeneous transformation matrix. If matrix is specified, other
+        parameters are ignored.
     scale : (sx, sy) as array, list or tuple, optional
         Scale factors.
     rotation : float, optional
@@ -759,28 +760,13 @@ class AffineTransform(ProjectiveTransform):
 
     _coeffs = range(6)
 
-    def __init__(self, matrix=None, scale=None, rotation=None, shear=None,
-                 translation=None):
-        params = any(param is not None
-                     for param in (scale, rotation, shear, translation))
-
-        if params and matrix is not None:
-            raise ValueError("You cannot specify the transformation matrix and"
-                             " the implicit parameters at the same time.")
-        elif matrix is not None:
+    def __init__(self, matrix=None, *, scale=(1, 1), rotation=0, shear=0,
+                 translation=(0, 0)):
+        if matrix is not None:
             if matrix.shape != (3, 3):
                 raise ValueError("Invalid shape of transformation matrix.")
             self.params = matrix
-        elif params:
-            if scale is None:
-                scale = (1, 1)
-            if rotation is None:
-                rotation = 0
-            if shear is None:
-                shear = 0
-            if translation is None:
-                translation = (0, 0)
-
+        else:
             sx, sy = scale
             self.params = np.array([
                 [sx * math.cos(rotation), -sy * math.sin(rotation + shear), 0],
@@ -788,9 +774,6 @@ class AffineTransform(ProjectiveTransform):
                 [                      0,                                0, 1]
             ])
             self.params[0:2, 2] = translation
-        else:
-            # default to an identity transform
-            self.params = np.eye(3)
 
     @property
     def scale(self):
@@ -970,7 +953,8 @@ class EuclideanTransform(ProjectiveTransform):
     Parameters
     ----------
     matrix : (3, 3) array, optional
-        Homogeneous transformation matrix.
+        Homogeneous transformation matrix. If matrix is specified, other
+        parameters are ignored.
     rotation : float, optional
         Rotation angle in counter-clockwise direction as radians.
     translation : (tx, ty) as array, list or tuple, optional
@@ -983,18 +967,12 @@ class EuclideanTransform(ProjectiveTransform):
 
     """
 
-    def __init__(self, matrix=None, rotation=None, translation=None):
-        params = any(param is not None
-                     for param in (rotation, translation))
-
-        if params and matrix is not None:
-            raise ValueError("You cannot specify the transformation matrix and"
-                             " the implicit parameters at the same time.")
-        elif matrix is not None:
+    def __init__(self, matrix=None, *, rotation=0, translation=(0, 0)):
+        if matrix is not None:
             if matrix.shape != (3, 3):
                 raise ValueError("Invalid shape of transformation matrix.")
             self.params = matrix
-        elif params:
+        else:
             if rotation is None:
                 rotation = 0
             if translation is None:
@@ -1006,9 +984,6 @@ class EuclideanTransform(ProjectiveTransform):
                 [                 0,                    0, 1]
             ])
             self.params[0:2, 2] = translation
-        else:
-            # default to an identity transform
-            self.params = np.eye(3)
 
     def estimate(self, src, dst):
         """Estimate the transformation from a set of corresponding points.
@@ -1069,7 +1044,8 @@ class SimilarityTransform(EuclideanTransform):
     Parameters
     ----------
     matrix : (3, 3) array, optional
-        Homogeneous transformation matrix.
+        Homogeneous transformation matrix. If matrix is specified, other
+        parameters are ignored.
     scale : float, optional
         Scale factor.
     rotation : float, optional
@@ -1084,26 +1060,13 @@ class SimilarityTransform(EuclideanTransform):
 
     """
 
-    def __init__(self, matrix=None, scale=None, rotation=None,
-                 translation=None):
-        params = any(param is not None
-                     for param in (scale, rotation, translation))
-
-        if params and matrix is not None:
-            raise ValueError("You cannot specify the transformation matrix and"
-                             " the implicit parameters at the same time.")
-        elif matrix is not None:
+    def __init__(self, matrix=None, *, scale=1, rotation=0,
+                 translation=(0, 0)):
+        if matrix is not None:
             if matrix.shape != (3, 3):
                 raise ValueError("Invalid shape of transformation matrix.")
             self.params = matrix
-        elif params:
-            if scale is None:
-                scale = 1
-            if rotation is None:
-                rotation = 0
-            if translation is None:
-                translation = (0, 0)
-
+        else:
             self.params = np.array([
                 [math.cos(rotation), - math.sin(rotation), 0],
                 [math.sin(rotation),   math.cos(rotation), 0],
@@ -1111,9 +1074,7 @@ class SimilarityTransform(EuclideanTransform):
             ])
             self.params[0:2, 0:2] *= scale
             self.params[0:2, 2] = translation
-        else:
-            # default to an identity transform
-            self.params = np.eye(3)
+            
 
     def estimate(self, src, dst):
         """Estimate the transformation from a set of corresponding points.
