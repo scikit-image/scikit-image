@@ -6,19 +6,33 @@ if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
 fi
 # Now configure Matplotlib to use Qt4
 if [[ "${QT}" == "PyQt4" ]]; then
-    pip install pyqt4
+    # only do this for python 2.7
+    # http://stackoverflow.com/a/9716100
+    LIBS=( PyQt4 sip.so )
+
+    VAR=( $(which -a python$PY) )
+
+    GET_PYTHON_LIB_CMD="from distutils.sysconfig import get_python_lib; print (get_python_lib())"
+    LIB_VIRTUALENV_PATH=$(python -c "$GET_PYTHON_LIB_CMD")
+    LIB_SYSTEM_PATH=$(${VAR[-1]} -c "$GET_PYTHON_LIB_CMD")
+
+    for LIB in ${LIBS[@]}
+    do
+        ln -sf $LIB_SYSTEM_PATH/$LIB $LIB_VIRTUALENV_PATH/$LIB
+    done
+
     MPL_QT_API=PyQt4
     export QT_API=pyqt
 elif [[ "${QT}" == "PySide" ]]; then
-    pip install pyside
+    python ~/venv/bin/pyside_postinstall.py -install
     MPL_QT_API=PySide
     export QT_API=pyside
 elif [[ "${QT}" == "PyQt5" ]]; then
-    pip install pyqt5
+    pip install --retries 3 -q $PIP_FLAGS pyqt5
     MPL_QT_API=PyQt5
     export QT_API=pyqt5
 elif [[ "${QT}" == "PySide2" ]]; then
-    pip install pyside2
+    pip install--retries 3 -q $PIP_FLAGS pyside2
     MPL_QT_API=PySide2
     export QT_API=pyside2
 else

@@ -20,6 +20,7 @@ addons:
     - texlive
     - texlive-latex-extra
     - dvipng
+    - python-qt4
     # - python3-qt4
     # - python3-qt5
     # - python3-pyside
@@ -58,7 +59,7 @@ matrix:
       env: QT=PyQt4
     - os: linux
       python: 3.4
-      env: OPTIONAL_DEPS=1 QT=PySide
+      env: OPTIONAL_DEPS=1
     - os: linux
       python: 3.5
     - os: linux
