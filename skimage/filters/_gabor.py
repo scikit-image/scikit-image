@@ -104,30 +104,75 @@ def _gaussian_kernel(image, center=0, sigma=1):
     return gauss / norm
 
 
-def _normalize(a):
-    norm = np.linalg.norm(a)
+def _normalize(x):
+    """Normalizes an array.
+
+    Parameters
+    ----------
+    x : array_like
+        Array to normalize.
+
+    Returns
+    -------
+    u : array
+        Unitary array.
+
+    Examples
+    --------
+    >>> x = np.arange(5)
+    >>> uX = _normalize(x)
+    >>> np.isclose(np.lingalg.norm(uX), 1)
+    True
+    """
+    u = np.asarray(x)
+
+    norm = np.linalg.norm(u)
 
     if not np.isclose(norm, 1):
-        a = a / norm
+        u = u / norm
 
-    return a
+    return u
 
 
-def rot(axis, diffs):
+def _compute_projection_matrix(axis, indices=None):
+    """Generates a matrix that projects an axis onto the 0th coordinate axis.
+
+    Parameters
+    ----------
+    axis : (N, ) array
+        Unit vector.
+    indices : sequence of int
+        Indices of the components of `axis` that should be transformed.
+        If `None`, defaults to all of the indices of `axis`.
+
+    Returns
+    -------
+    R : (N, N) array
+        Orthogonal projection matrix.
+
+    References
+    ----------
+    .. [1] Ognyan Ivanov Zhelezov. One Modification which Increases Performance
+           of N-Dimensional Rotation Matrix Generation Algorithm. International
+           Journal of Chemistry, Mathematics, and Physics, Vol. 2 No. 2, 2018:
+           pp. 13-18. https://dx.doi.org/10.22161/ijcmp.2.2.1
+    """
     ndim = len(axis)
-    num_diffs = len(diffs)
+
+    if indices is None:
+        indices = range(ndim)
 
     x = axis
-    w = diffs
+    w = indices
 
     R = np.eye(ndim)  # Initial rotation matrix = Identity matrix
 
     # Loop to create matrices of stages
-    for step in np.round(2 ** np.arange(np.log2(ndim))).astype(np.int):
+    for step in np.round(2 ** np.arange(np.log2(ndim))).astype(int):
         A = np.eye(ndim)
 
         for n in range(0, ndim - step, step * 2):
-            if n + step >= num_diffs:
+            if n + step >= len(w):
                 break
 
             r2 = x[w[n]] * x[w[n]] + x[w[n + step]] * x[w[n + step]]
@@ -135,6 +180,7 @@ def rot(axis, diffs):
                 r = np.sqrt(r2)
                 pcos = x[w[n]] / r  # Calculation of coefficients
                 psin = -x[w[n + step]] / r
+
                 # Base 2-dimensional rotation
                 A[w[n], w[n]] = pcos
                 A[w[n], w[n + step]] = -psin
@@ -154,11 +200,11 @@ def _compute_rotation_matrix(src, dst, use_homogeneous_coordinates=False):
 
     Parameters
     ----------
-    src: (N, ) array
+    src : (N, ) array
         Vector to rotate.
 
     dst : (N, ) array
-        Vector
+        Vector of desired direction.
 
     Returns
     -------
@@ -186,10 +232,10 @@ def _compute_rotation_matrix(src, dst, use_homogeneous_coordinates=False):
     X = _normalize(np.array(src))
     Y = _normalize(np.array(dst))
 
-    w = np.nonzero(~np.isclose(X, Y))[0]  # indices of difference
+    w = np.flatnonzero(~np.isclose(X, Y))  # indices of difference
 
-    Mx = rot(X, w)
-    My = rot(Y, w)
+    Mx = _compute_projection_matrix(X, w)
+    My = _compute_projection_matrix(Y, w)
     M = np.matmul(My.T, Mx)
 
     return M
