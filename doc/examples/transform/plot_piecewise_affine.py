@@ -37,6 +37,6 @@ out = warp(image, tform, output_shape=(out_rows, out_cols))
 
 fig, ax = plt.subplots()
 ax.imshow(out)
-ax.plot(tform.inverse(src)[:, 0], tform.inverse(src)[:, 1], '.b')
+ax.plot(tform.inverse_map(src)[:, 0], tform.inverse_map(src)[:, 1], '.b')
 ax.axis((0, out_cols, out_rows, 0))
 plt.show()

@@ -54,7 +54,7 @@ def test_euclidean_estimation():
 
     # over-determined
     tform2 = estimate_transform('euclidean', SRC, DST)
-    assert_almost_equal(tform2.inverse_map(tform2(SRC)), SRC)
+    assert_almost_equal(tform2.inverse(tform2(SRC)), SRC)
     assert_almost_equal(tform2.params[0, 0], tform2.params[1, 1])
     assert_almost_equal(tform2.params[0, 1], - tform2.params[1, 0])
 
@@ -101,7 +101,7 @@ def test_similarity_estimation():
 
     # over-determined
     tform2 = estimate_transform('similarity', SRC, DST)
-    assert_almost_equal(tform2.inverse_map(tform2(SRC)), SRC)
+    assert_almost_equal(tform2.inverse(tform2(SRC)), SRC)
     assert_almost_equal(tform2.params[0, 0], tform2.params[1, 1])
     assert_almost_equal(tform2.params[0, 1], - tform2.params[1, 0])
 
@@ -156,7 +156,7 @@ def test_affine_estimation():
 
     # over-determined
     tform2 = estimate_transform('affine', SRC, DST)
-    assert_almost_equal(tform2.inverse_map(tform2(SRC)), SRC)
+    assert_almost_equal(tform2.inverse(tform2(SRC)), SRC)
 
     # via estimate method
     tform3 = AffineTransform()
@@ -231,13 +231,13 @@ def test_fundamental_matrix_forward():
     assert_almost_equal(tform(src), [[0, -1, 0], [0, -1, 1], [0, -1, 1]])
 
 
-def test_fundamental_matrix_inverse_map():
+def test_fundamental_matrix_inverse():
     essential_matrix_tform = EssentialMatrixTransform(
         rotation=np.eye(3), translation=np.array([1, 0, 0]))
     tform = FundamentalMatrixTransform()
     tform.params = essential_matrix_tform.params
     src = np.array([[0, 0], [0, 1], [1, 1]])
-    assert_almost_equal(tform.inverse_map(src),
+    assert_almost_equal(tform.inverse(src),
                         [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
 
 
@@ -274,11 +274,11 @@ def test_essential_matrix_forward():
     assert_almost_equal(tform(src), [[0, -1, 0], [0, -1, 1], [0, -1, 1]])
 
 
-def test_essential_matrix_inverse_map():
+def test_essential_matrix_inverse():
     tform = EssentialMatrixTransform(rotation=np.eye(3),
                                      translation=np.array([1, 0, 0]))
     src = np.array([[0, 0], [0, 1], [1, 1]])
-    assert_almost_equal(tform.inverse_map(src),
+    assert_almost_equal(tform.inverse(src),
                         [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
 
 
@@ -297,7 +297,7 @@ def test_projective_estimation():
 
     # over-determined
     tform2 = estimate_transform('projective', SRC, DST)
-    assert_almost_equal(tform2.inverse_map(tform2(SRC)), SRC)
+    assert_almost_equal(tform2.inverse(tform2(SRC)), SRC)
 
     # via estimate method
     tform3 = ProjectiveTransform()
@@ -336,9 +336,9 @@ def test_polynomial_default_order():
     assert_almost_equal(tform2.params, tform.params)
 
 
-def test_polynomial_inverse_map():
+def test_polynomial_inverse():
     with testing.raises(Exception):
-        PolynomialTransform().inverse_map(0)
+        PolynomialTransform().inverse(0)
 
 
 def test_union():
@@ -356,14 +356,12 @@ def test_union():
     assert tform.__class__ == ProjectiveTransform
 
     tform = AffineTransform(scale=(0.1, 0.1), rotation=0.3)
-    # TODO: Change me, this should be inverse and not inverse_map
-    assert_almost_equal((tform + tform.inverse_map).params, np.eye(3))
+    assert_almost_equal((tform + tform.inverse).params, np.eye(3))
 
     tform1 = SimilarityTransform(scale=0.1, rotation=0.3)
     tform2 = SimilarityTransform(scale=0.1, rotation=0.9)
     tform3 = SimilarityTransform(scale=0.1 * 1/0.1, rotation=0.3 - 0.9)
-    # TODO: Change me, this should be inverse and not inverse_map
-    tform = tform1 + tform2.inverse_map
+    tform = tform1 + tform2.inverse
     assert_almost_equal(tform.params, tform3.params)
 
 
@@ -379,7 +377,7 @@ def test_geometric_tform():
     with testing.raises(NotImplementedError):
         tform(0)
     with testing.raises(NotImplementedError):
-        tform.inverse_map(0)
+        tform.inverse
     with testing.raises(NotImplementedError):
         tform.__add__(0)
 

@@ -37,7 +37,7 @@ def test_warp_tform():
     x90 = warp(x, tform, order=1)
     assert_almost_equal(x90, np.rot90(x))
 
-    x90 = warp(x, tform.inverse_map, order=1)
+    x90 = warp(x, tform.inverse, order=1)
     assert_almost_equal(x90, np.rot90(x))
 
 
@@ -112,7 +112,7 @@ def test_homography():
                   [0,               0,             1]])
 
     x90 = warp(x,
-               inverse_map=ProjectiveTransform(M).inverse_map,
+               inverse_map=ProjectiveTransform(M).inverse,
                order=1)
     assert_almost_equal(x90, np.rot90(x))
 
@@ -461,7 +461,7 @@ def test_inverse():
     tform = SimilarityTransform(scale=0.5, rotation=0.1)
     inverse_tform = SimilarityTransform(matrix=np.linalg.inv(tform.params))
     image = np.arange(10 * 10).reshape(10, 10).astype(np.double)
-    assert_equal(warp(image, inverse_tform), warp(image, tform.inverse_map))
+    assert_equal(warp(image, inverse_tform), warp(image, tform.inverse))
 
 
 def test_slow_warp_nonint_oshape():
