@@ -15,7 +15,7 @@ def _sigma_prefactor(bandwidth):
         (2.0 ** b + 1) / (2.0 ** b - 1)
 
 
-def _decompose_quasipolar_coords(r, thetas):
+def _decompose_quasipolar_coords(r, thetas, leading_axis=0):
     """Decomposes quasipolar coordinates into their cartesian components.
 
     Parameters
@@ -24,6 +24,9 @@ def _decompose_quasipolar_coords(r, thetas):
         Radial coordinate.
     thetas : (N, ) array
         Quasipolar angles.
+    leading_axis : int
+        Leading axis of target coordinate system.
+        For classical cartesian ordering `(x, y, ...)`, set to `1`.
 
     Returns
     -------
@@ -36,17 +39,16 @@ def _decompose_quasipolar_coords(r, thetas):
            Application. University of Nevada: Las Vegas, Nevada, 2014.
            https://digitalscholarship.unlv.edu/thesesdissertations/2125
 
-    Notes
-    -----
-    Components `0`, `1`, `...`, `n` of the quasipolar coordinates
-    correspond to dimensions `0`, `1`, `...`, `n` or `M`, `...`,
-    `N`, `P`.
-
-    For a standard `xy`-coordinate plane, components `1` and `0`
-    correspond to `x` and `y`, respectively.
-
-    For a standard `xyz`-coordinate plane, components `1`, `0`, and `2`
-    correspond to `x`, `y`, and `z`, respectively.
+    Examples
+    --------
+    >>> _decompose_quasipolar_coords(1, (0))
+    [ 0., 1.]
+    >>> _decompose_quasipolar_coords(1, (0), leading_axis=1)
+    [ 1., 0.]
+    >>> _decompose_quasipolar_coords(10, (np.pi / 2, 0))
+    [ 10., 0., 0.]
+    >>> _decompose_quasipolar_coords(5, (np.pi / 2, 0), leading_axis=2)
+    [ 0., 5., 0.]
     """
     axes = np.size(thetas) + 1
     coords = r * np.ones(axes)
@@ -59,6 +61,10 @@ def _decompose_quasipolar_coords(r, thetas):
             coords[axis] *= sine
 
         coords[theta_index] *= np.cos(theta)
+
+    leading_element = coords[leading_axis]
+    following_elements = np.delete(coords, leading_axis)
+    coords = np.append(leading_element, following_elements)
 
     return coords
 
@@ -334,9 +340,9 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     sigma[sigma == None] = default_sigma  # noqa
     sigma = sigma.astype(None)
 
-    coords = _decompose_quasipolar_coords(1, theta)
+    coords = _decompose_quasipolar_coords(1, theta, leading_axis)
     base_axis = np.zeros(ndim)
-    base_axis[leading_axis] = 1
+    base_axis[0] = 1
     rot = _compute_rotation_matrix(base_axis, coords)
 
     # calculate & rotate kernel size
