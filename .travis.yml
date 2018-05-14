@@ -147,10 +147,13 @@ script:
     # Run example applications
     - |
       for f in doc/examples/xx_applications/*.py; do
+        cp $MPL_DIR/matplotlibrc $MPL_DIR/matplotlibrc_backup
+        echo 'backend : Template' > $MPL_DIR/matplotlibrc
         python "$f"
         if [ "$?" -ne 0 ]; then
             exit 1
         fi
+        mv $MPL_DIR/matplotlibrc_backup $MPL_DIR/matplotlibrc
       done
 
 after_success:
