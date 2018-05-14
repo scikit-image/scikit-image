@@ -8,6 +8,7 @@ from skimage.transform import (estimate_transform, matrix_transform,
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_almost_equal
+from skimage._shared._warnings import expected_warnings
 
 
 SRC = np.array([
@@ -345,23 +346,49 @@ def test_union():
     tform1 = SimilarityTransform(scale=0.1, rotation=0.3)
     tform2 = SimilarityTransform(scale=0.1, rotation=0.9)
     tform3 = SimilarityTransform(scale=0.1 ** 2, rotation=0.3 + 0.9)
-    tform = tform1 + tform2
+
+    with expected_warnings(['deprecated']):
+        tform = tform1 + tform2
     assert_almost_equal(tform.params, tform3.params)
+    assert tform.__class__ == SimilarityTransform
+
+    # Multiply version swaps the order of operands to match linear algebra
+    tform = tform2 @ tform1
+    assert_almost_equal(tform.params, tform3.params)
+    assert tform.__class__ == SimilarityTransform
+
 
     tform1 = AffineTransform(scale=(0.1, 0.1), rotation=0.3)
     tform2 = SimilarityTransform(scale=0.1, rotation=0.9)
     tform3 = SimilarityTransform(scale=0.1 ** 2, rotation=0.3 + 0.9)
-    tform = tform1 + tform2
+    with expected_warnings(['deprecated']):
+        tform = tform1 + tform2
+    assert_almost_equal(tform.params, tform3.params)
+    assert tform.__class__ == ProjectiveTransform
+
+    tform = tform2 @ tform1
     assert_almost_equal(tform.params, tform3.params)
     assert tform.__class__ == ProjectiveTransform
 
     tform = AffineTransform(scale=(0.1, 0.1), rotation=0.3)
-    assert_almost_equal((tform + tform.inverse).params, np.eye(3))
+    with expected_warnings(['deprecated']):
+        assert_almost_equal((tform + tform.inverse).params, np.eye(3))
+    assert_almost_equal((tform @ tform.inverse).params, np.eye(3))
+    assert_almost_equal((tform.inverse @ tform).params, np.eye(3))
 
     tform1 = SimilarityTransform(scale=0.1, rotation=0.3)
     tform2 = SimilarityTransform(scale=0.1, rotation=0.9)
     tform3 = SimilarityTransform(scale=0.1 * 1/0.1, rotation=0.3 - 0.9)
-    tform = tform1 + tform2.inverse
+    with expected_warnings(['deprecated']):
+        tform = tform1 + tform2.inverse
+    assert_almost_equal(tform.params, tform3.params)
+    tform = tform2.inverse @ tform1
+    assert_almost_equal(tform.params, tform3.params)
+
+    tform1 = SimilarityTransform(scale=0.1, rotation=0.3)
+    tform2 = SimilarityTransform(translation=(10, 20))
+    tform3 = SimilarityTransform(scale=0.1, rotation=0.3, translation=(10, 20))
+    tform = tform2 @ tform1
     assert_almost_equal(tform.params, tform3.params)
 
 
@@ -369,7 +396,11 @@ def test_union_differing_types():
     tform1 = SimilarityTransform()
     tform2 = PolynomialTransform()
     with testing.raises(TypeError):
-        tform1.__add__(tform2)
+        with expected_warnings(['deprecated']):
+            tform1.__add__(tform2)
+
+    with testing.raises(TypeError):
+            tform1 @ tform2
 
 
 def test_geometric_tform():
@@ -379,7 +410,10 @@ def test_geometric_tform():
     with testing.raises(NotImplementedError):
         tform.inverse
     with testing.raises(NotImplementedError):
-        tform.__add__(0)
+        with expected_warnings(['deprecated']):
+            tform.__add__(0)
+    with testing.raises(NotImplementedError):
+        tform.__matmul__(0)
 
 
 def test_invalid_input():

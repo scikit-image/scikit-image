@@ -3,7 +3,7 @@ import numpy as np
 from scipy import spatial
 
 from .._shared.utils import get_bound_method_class, safe_as_int
-
+from .._shared.utils import warn
 
 def _to_ndimage_mode(mode):
     """Convert from `numpy.pad` mode name to the corresponding ndimage mode."""
@@ -173,7 +173,7 @@ class GeometricTransform(object):
         # ASK: Can you make a property a class method too?
         # I don't thinkl that solves out problem though, we would still
         # have to use some kind of instrospection no?
-        return type(self)(matrix=self.inverse_params)
+        return self.__class__(matrix=self.inverse_params)
 
     def residuals(self, src, dst):
         """Determine residuals of transformed destination coordinates.
@@ -196,10 +196,27 @@ class GeometricTransform(object):
         """
         return np.sqrt(np.sum((self(src) - dst)**2, axis=1))
 
+    def __matmul__(self, other):
+        """Combine this transformation with another.
+
+        Given two callable transforms `A` and `B` the result of `A @ B` is
+        a transformation `C` that implements ``C(coords) == A(B(coords))``.
+
+        If ``A`` and ``B`` are of the same type, then the resulting transform
+        will have the same type. If they are of different types, then
+        the result will be of a promoted type.
+
+        """
+        raise NotImplementedError()
+
     def __add__(self, other):
         """Combine this transformation with another.
 
         """
+        warn("``__add__`` or ``+`` is deprecated. Use ``__matmul__`` or "
+             "``@``. Note that the order of the operations is swapped in "
+             "``@`` compared to ``+``.",
+             UserWarning)
         raise NotImplementedError()
 
 
@@ -657,18 +674,27 @@ class ProjectiveTransform(GeometricTransform):
 
         return True
 
-    def __add__(self, other):
-        """Combine this transformation with another.
-
-        """
+    def __matmul__(self, other):
         if isinstance(other, ProjectiveTransform):
-            # combination of the same types result in a transformation of this
-            # type again, otherwise use general projective transformation
             if type(self) == type(other):
                 tform = self.__class__
             else:
                 tform = ProjectiveTransform
-            return tform(other.params.dot(self.params))
+            return tform(matrix=self.params @ other.params)
+        else:
+            raise TypeError("Cannot combine transformations of differing "
+                            "types.")
+
+    def __add__(self, other):
+        """Combine this transformation with another.
+
+        """
+        warn("``__add__`` or ``+`` is deprecated. Use ``__matmul__`` or "
+             "``@``. Note that the order of the operations is swapped in "
+             "``@`` compared to ``+``.",
+             UserWarning)
+        if isinstance(other, ProjectiveTransform):
+            return other.__matmul__(self)
         else:
             raise TypeError("Cannot combine transformations of differing "
                             "types.")
