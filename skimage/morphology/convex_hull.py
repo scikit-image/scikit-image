@@ -48,7 +48,7 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
 
     """
     ndim = image.ndim
-    if not np.max(image):
+    if np.max(image)<1:
         warn("Input image is entirely zero, no valid convex hull. "
              "Returning empty image", UserWarning)
         return np.zeros(image.shape, dtype=np.bool_)
