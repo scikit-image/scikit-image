@@ -48,7 +48,7 @@ def test_decompose_quasipolar_coords():
     y, x = _decompose_quasipolar_coords(2, (p(1, 4),))
     assert_almost_equal([x, y], [np.sqrt(2), np.sqrt(2)])
 
-    # test spehrical case
+    # test spherical case
     y, x, z = _decompose_quasipolar_coords(10, (p(1, 4), p(1, 2)))
     assert_almost_equal([x, y, z], [10 * s(p(1, 2)) * c(p(1, 4)),
                                     10 * s(p(1, 2)) * s(p(1, 4)),

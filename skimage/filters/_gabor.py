@@ -22,12 +22,12 @@ def _decompose_quasipolar_coords(r, thetas):
     ----------
     r : float
         Radial coordinate.
-    thetas : (N, 1) array
+    thetas : (N, ) array
         Quasipolar angles.
 
     Returns
     -------
-    coords : (``N + 1``, 1) array
+    coords : (``N + 1``, ) array
         Cartesian components of the quasipolar coordinates.
 
     References
@@ -38,15 +38,15 @@ def _decompose_quasipolar_coords(r, thetas):
 
     Notes
     -----
-    Components ``0``, ``1``, ``...``, ``n`` of the quasipolar coordinates
-    correspond to dimensions ``0``, ``1``, ``...``, ``n`` or ``M``, ``...``,
-    ``N``, ``P``.
+    Components `0`, `1`, `...`, `n` of the quasipolar coordinates
+    correspond to dimensions `0`, `1`, `...`, `n` or `M`, `...`,
+    `N`, `P`.
 
-    For a standard ``xy``-coordinate plane, components ``1`` and ``0``
-    correspond to ``x`` and ``y``, respectively.
+    For a standard `xy`-coordinate plane, components `1` and `0`
+    correspond to `x` and `y`, respectively.
 
-    For a standard ``xyz``-coordinate plane, components ``1``, ``0``, and ``2``
-    correspond to ``x``, ``y``, and ``z``, respectively.
+    For a standard `xyz`-coordinate plane, components `1`, `0`, and `2`
+    correspond to `x`, `y`, and `z`, respectively.
     """
     axes = np.size(thetas) + 1
     coords = r * np.ones(axes)
@@ -337,7 +337,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     coords = _decompose_quasipolar_coords(1, theta)
     base_axis = np.zeros(ndim)
     base_axis[leading_axis] = 1
-    rot = _rotation(base_axis, coords)
+    rot = _compute_rotation_matrix(base_axis, coords)
 
     # calculate & rotate kernel size
     spatial_size = np.ceil(np.max(np.abs(n_stds * sigma * rot), axis=-1))
@@ -350,10 +350,10 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
 
     gauss = _gaussian_kernel(rotm, sigma=sigma, center=0)
 
-    compm = np.sum(np.matmul(m.T, frequency * coords).T, axis=0)
+    compm = np.matmul(m.T, frequency * coords).T
 
     # complex harmonic function
-    harmonic = np.exp(1j * (2 * np.pi * compm + offset))
+    harmonic = np.exp(1j * (2 * np.pi * compm.sum(axis=0) + offset))
 
     g = np.zeros(m[0].shape, dtype=np.complex)
     g[:] = gauss * harmonic
