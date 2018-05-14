@@ -134,7 +134,7 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
         if level < volume.min() or level > volume.max():
             raise ValueError("Surface level must be within volume data range.")
     # spacing
-    if isinstance(spacing, np.ndarray): # it should be a tuple
+    if isinstance(spacing, np.ndarray):  # it should be a tuple
         spacing = tuple(spacing)
     if len(spacing) != 3:
         raise ValueError("`spacing` must consist of three floats.")
