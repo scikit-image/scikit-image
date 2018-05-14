@@ -165,7 +165,7 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     elif not gradient_direction == 'ascent':
         raise ValueError("Incorrect input %s in `gradient_direction`, see "
                          "docstring." % (gradient_direction))
-    if spacing != (1, 1, 1):
+    if not np.array_equal(spacing, (1, 1, 1)):
         vertices = vertices * np.r_[spacing]
 
     if allow_degenerate:
