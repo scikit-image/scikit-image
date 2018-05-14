@@ -49,10 +49,10 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     """
     ndim = image.ndim
     if not np.max(image):
-        # if there are no non-zero points print a warning and return an empty image
-        warn("Input image is entirely zero and does not have a valid convex hull"
+        # if image is empty print a warning and return an empty image
+        warn("Input image is entirely zero, no valid convex hull"
              "Returning empty image", UserWarning)
-        return np.zeros(image.shape, dtype = bool)
+        return np.zeros(image.shape, dtype=bool)
     # In 2D, we do an optimisation by choosing only pixels that are
     # the starting or ending pixel of a row or column.  This vastly
     # limits the number of coordinates to examine for the virtual hull.
