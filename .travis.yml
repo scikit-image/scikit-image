@@ -132,9 +132,7 @@ script:
         # requirements/docs.txt fails on Travis OSX
         pip install --retries 3 -q -r ./requirements/docs.txt
         export SPHINXCACHE=${HOME}/.cache/sphinx; make html
-      fi
-    - |
-      if [[ "${TEST_EXAMPLES}" != "0" ]]; then
+      elif [[ "${TEST_EXAMPLES}" != "0" ]]; then
         pip install --retries 3 -q -r ./requirements/docs.txt
         cp $MPL_DIR/matplotlibrc $MPL_DIR/matplotlibrc_backup
         echo 'backend : Template' > $MPL_DIR/matplotlibrc
