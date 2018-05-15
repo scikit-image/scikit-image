@@ -43,9 +43,6 @@ matrix:
     # 2.7 build (until 0.14 is release)
     - os: linux
       python: 2.7
-      env: PIP_FLAGS="--pre"
-    - os: linux
-      python: 2.7
       env: WITH_PYAMG=1 QT=PyQt4
       # Examples need strange versions of Matplotlib and Qt
       # I don't think we should be increasing the minimum version requirement
