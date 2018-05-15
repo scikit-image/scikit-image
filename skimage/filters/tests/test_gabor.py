@@ -127,7 +127,7 @@ def test_compute_rotation_matrix_homogeneous():
     X = np.arange(5)
     Y = np.arange(5, 10)
 
-    M = _compute_rotation_matrix(X, Y, use_homogeneous_coordinates=True)
+    M = _compute_rotation_matrix(X, Y, use_homogeneous_coords=True)
 
     assert_equal(M[-1], [0, 0, 0, 0, 1])
     assert_equal(M[:, -1], [0, 0, 0, 0, 1])

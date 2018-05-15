@@ -244,7 +244,7 @@ def _compute_projection_matrix(axis, indices=None):
     return R
 
 
-def _compute_rotation_matrix(src, dst, use_homogeneous_coordinates=False):
+def _compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
     """Generates a matrix for the rotation of one vector to the direction
     of another.
 
@@ -254,7 +254,7 @@ def _compute_rotation_matrix(src, dst, use_homogeneous_coordinates=False):
         Vector to rotate.
     dst : (N, ) array
         Vector of desired direction.
-    use_homogeneous_coordinates : bool
+    use_homogeneous_coords : bool
         If the input vectors should be treated as homoegeneous coordinates.
 
     Returns
@@ -280,11 +280,11 @@ def _compute_rotation_matrix(src, dst, use_homogeneous_coordinates=False):
     >>> np.allclose(Z, Y)
     True
     """
-    homogeneous_slice = -use_homogeneous_coordinates or None
+    homogeneous_slice = -use_homogeneous_coords or None
     X = _normalize(np.array(src)[:homogeneous_slice])
     Y = _normalize(np.array(dst)[:homogeneous_slice])
 
-    if use_homogeneous_coordinates:
+    if use_homogeneous_coords:
         X = np.append(X, 1)
         Y = np.append(Y, 1)
 
