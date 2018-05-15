@@ -18,13 +18,6 @@ def _sigma_prefactor(bandwidth):
 def _decompose_quasipolar_coords(r, thetas, axes=0):
     """Decomposes quasipolar coordinates into their cartesian components.
 
-    x0 = r sin θ0 sin θ1...sin θn−1
-    x1 = r cos θ0 sin θ1...sin θn−1
-    x2 = r cos θ1 sin θ2...sin θn−1
-    ...
-    xn−1 = r cos θn−2 sin θn−1
-    xn = r cos θn−1
-
     Parameters
     ----------
     r : float
@@ -48,6 +41,46 @@ def _decompose_quasipolar_coords(r, thetas, axes=0):
     .. [1] Tan Mai Nguyen. N-Dimensional Quasipolar Coordinates - Theory and
            Application. University of Nevada: Las Vegas, Nevada, 2014.
            https://digitalscholarship.unlv.edu/thesesdissertations/2125
+
+    Notes
+    -----
+    Quasipolar coordinate decomposition is defined as follows:
+
+    .. math::
+
+         \left\{
+         \begin{array}{llllll}
+	         x_0     & \quad = r \sin \theta_0 \sin \theta_1 ... \sin \theta_{n-1} \\
+	         x_1     & \quad = r \cos \theta_0 \sin \theta_1 ... \sin \theta_{n-1} \\
+	         x_2     & \quad = r \cos \theta_1 \sin \theta_2 ... \sin \theta_{n-1} \\
+	         ...                                                                   \\
+	         x_{n-1} & \quad = r \cos \theta_{n-2} \sin \theta_{n-1}               \\
+	         x_n     & \quad = r \cos \theta_{n-1}
+         \end{array}
+         \right.
+
+    For polar coordinates:
+
+    .. math::
+
+         \left\{
+         \begin{array}{ll}
+	         y = x_0 = r \sin \theta_0 \\
+	         x = x_1 = r \cos \theta_0
+         \end{array}
+         \right.
+
+    For spherical coordinates:
+
+    .. math::
+
+         \left\{
+         \begin{array}{lll}
+	         y = x_0 = r \sin \theta_0 \sin \theta_1 \\
+	         x = x_1 = r \cos \theta_0 \sin \theta_1 \\
+	         z = x_2 = r \cos \theta_1
+         \end{array}
+         \right.
 
     Examples
     --------
