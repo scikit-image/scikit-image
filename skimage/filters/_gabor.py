@@ -15,8 +15,15 @@ def _sigma_prefactor(bandwidth):
         (2.0 ** b + 1) / (2.0 ** b - 1)
 
 
-def _decompose_quasipolar_coords(r, thetas, leading_axis=0):
+def _decompose_quasipolar_coords(r, thetas, axes=0):
     """Decomposes quasipolar coordinates into their cartesian components.
+
+    x0 = r sin θ0 sin θ1...sin θn−1
+    x1 = r cos θ0 sin θ1...sin θn−1
+    x2 = r cos θ1 sin θ2...sin θn−1
+    ...
+    xn−1 = r cos θn−2 sin θn−1
+    xn = r cos θn−1
 
     Parameters
     ----------
@@ -24,8 +31,11 @@ def _decompose_quasipolar_coords(r, thetas, leading_axis=0):
         Radial coordinate.
     thetas : (N, ) array
         Quasipolar angles.
-    leading_axis : int
-        Leading axis of target coordinate system.
+    axes : int or sequence of int
+        Ordering of axes that defines the plane with regards to
+        orientation. Ordering not specified will be padded with
+        remaining axes in ascending order. Non-iterable values
+        will be treated as the single element of a tuple.
         For classical cartesian ordering `(x, y, ...)`, set to `1`.
 
     Returns
@@ -88,6 +98,7 @@ def _gaussian_kernel(image, center=0, sigma=1):
     Returns
     -------
     gauss : (``image.ndim``, ``image.ndim``)
+        Filter kernel.
 
     References
     ----------
@@ -248,7 +259,7 @@ def _compute_rotation_matrix(src, dst, use_homogeneous_coordinates=False):
 
 
 def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
-                 n_stds=3, offset=0, leading_axis=1, ndim=2, **kwargs):
+                 n_stds=3, offset=0, axes=1, ndim=2, **kwargs):
     """Multi-dimensional complex Gabor kernel.
 
     A Gabor kernel is a Gaussian kernel modulated by a complex harmonic function.
@@ -282,9 +293,12 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
         deviations.
     offset : float, optional
         Phase offset of harmonic function in radians.
-    leading_axis : int, optional
-        The leading axis for rotation. Defaults to 1, the `x` coordinate
-        in most systems.
+    axes : int or sequence of int
+        Ordering of axes that defines the plane with regards to
+        orientation. Ordering not specified will be padded with
+        remaining axes in ascending order. Non-iterable values
+        will be treated as the single element of a tuple.
+        For classical cartesian ordering `(x, y, ...)`, set to `1`.
     ndim : int, optional
         Dimensionality of the kernel.
 
