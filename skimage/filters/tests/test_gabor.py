@@ -123,6 +123,21 @@ def test_compute_rotation_matrix():
     assert_almost_equal(np.linalg.norm(rotZ), np.linalg.norm(Z))
 
 
+def test_compute_rotation_matrix_homogeneous():
+    X = np.arange(5)
+    Y = np.arange(5, 10)
+
+    M = _compute_rotation_matrix(X, Y, use_homogeneous_coordinates=True)
+
+    assert_equal(M[-1], [0, 0, 0, 0, 1])
+    assert_equal(M[:, -1], [0, 0, 0, 0, 1])
+
+    Z = np.arange(100, 105)
+    rotZ = np.matmul(M, Z)
+
+    assert_equal(rotZ[-1], Z[-1])
+
+
 def test_compute_rotation_matrix_quasipolar():
     # 2D case
     X = np.asarray([1, 0])

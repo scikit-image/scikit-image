@@ -280,12 +280,13 @@ def _compute_rotation_matrix(src, dst, use_homogeneous_coordinates=False):
     >>> np.allclose(Z, Y)
     True
     """
-    X = _normalize(np.array(src))
-    Y = _normalize(np.array(dst))
+    homogeneous_slice = -use_homogeneous_coordinates or None
+    X = _normalize(np.array(src)[:homogeneous_slice])
+    Y = _normalize(np.array(dst)[:homogeneous_slice])
 
     if use_homogeneous_coordinates:
-        X[-1] = 1
-        Y[-1] = 1
+        X = np.append(X, 1)
+        Y = np.append(Y, 1)
 
     w = np.flatnonzero(~np.isclose(X, Y))  # indices of difference
 
