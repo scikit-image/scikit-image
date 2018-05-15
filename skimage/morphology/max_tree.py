@@ -352,13 +352,13 @@ def area_closing(image, area_threshold, connectivity=2,
     return output
 
 
-def local_maxima(image, connectivity=2,
+def local_maxima(image, label=False, connectivity=2,
                  parent=None, tree_traverser=None):
     """Determine all local maxima of the image.
 
     The local maxima are defined as connected sets of pixels with equal
     grey level strictly greater than the grey levels of all pixels in direct
-    neighborhood of the set.
+    neighborhood of the set. The function can also label the local maxima.
 
     Technically, the implementation is based on the max-tree representation
     of an image.
@@ -367,6 +367,8 @@ def local_maxima(image, connectivity=2,
     ----------
     image : ndarray
         The input image for which the maxima are to be calculated.
+    label : boolean, optional
+        If True, the local maxima are also labeled. 
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. It is 1 for
@@ -381,10 +383,11 @@ def local_maxima(image, connectivity=2,
 
     Returns
     -------
-    local_max : ndarray
-       All local maxima of the image. The result image is a binary image,
-       where pixels belonging to local maxima take value 1, the other pixels
-       take value 0.
+    local_max : ndarray, uint64
+       All local maxima of the image. If label is False, the result image is
+       a binary image, where pixels belonging to local maxima take value 1, the
+       other pixels take value 0. If label is True, the result image contains
+       the labeled maxima, pixels not belonging to local maxima take value 0.
 
     See also
     --------
@@ -419,7 +422,6 @@ def local_maxima(image, connectivity=2,
 
     We create an image (quadratic function with a maximum in the center and
     4 additional constant maxima.
-    The heights of the maxima are: 1, 21, 41, 61, 81
 
     >>> w = 10
     >>> x, y = np.mgrid[0:w,0:w]
@@ -435,12 +437,12 @@ def local_maxima(image, connectivity=2,
     local maxima and 0 anywhere else.
     """
 
-    output = np.ones(image.shape, dtype=np.uint8)
+    output = np.ones(image.shape, dtype=np.uint64)
 
     if parent is None or tree_traverser is None:
         parent, tree_traverser = build_max_tree(image, connectivity)
 
-    _max_tree._local_maxima(image.ravel(), output.ravel(), parent.ravel(),
-                            tree_traverser)
+    _max_tree._local_maxima(image.ravel(), output.ravel(), label, 
+                            parent.ravel(), tree_traverser)
 
     return output

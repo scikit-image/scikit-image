@@ -12,6 +12,7 @@ import numpy as np
 
 from libc.stdlib cimport free, malloc, realloc
 from scipy.constants.constants import point
+from cProfile import label
 
 cimport numpy as np
 cimport cython
@@ -23,6 +24,7 @@ ctypedef np.uint64_t DTYPE_UINT64_t
 ctypedef np.int64_t DTYPE_INT64_t
 ctypedef np.uint8_t DTYPE_BOOL_t
 ctypedef np.uint8_t DTYPE_UINT8_t
+ctypedef np.int8_t DTYPE_INT8_t
 
 ctypedef fused dtype_t:
     np.uint8_t
@@ -127,6 +129,38 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_area(dtype_t[::1] image,
         area[q] = area[q] + area[p]
     return area
 
+# computes the bounding box extension of all max-tree components
+# attribute to be used in area opening and closing
+cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_extension(dtype_t[::1] image,
+                                                               DTYPE_INT32_t[::1] shape,
+                                                               DTYPE_INT64_t[::1] parent,
+                                                               DTYPE_INT64_t[::1] sorted_indices):
+    cdef DTYPE_INT64_t p_root = sorted_indices[0]
+    cdef DTYPE_INT64_t p, q
+    cdef DTYPE_UINT64_t number_of_pixels = len(image)
+    cdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] extension = np.ones(number_of_pixels,
+                                                                   dtype=np.float64)
+    cdef DTYPE_UINT64_t number_of_dimensions = len(shape)
+    cdef np.ndarray[DTYPE_FLOAT64_t, ndim = 2] max_coord = np.zeros([number_of_pixels, number_of_dimensions],
+                                                                    dtype=np.float64)
+    cdef np.ndarray[DTYPE_FLOAT64_t, ndim = 2] min_coord = np.zeros([number_of_pixels, number_of_dimensions],
+                                                                    dtype=np.float64)
+
+    #cdef np.ndarray[DTYPE_INT64_t, ndim=1] coord = np.zeros(number_of_dimensions, dtype=np.int64)
+    
+    #p_coord = np.array(np.unravel_index(index, shape))
+    
+    for p in sorted_indices[::-1]:
+        if p == p_root:
+            continue
+        q = parent[p]
+        coord = np.array(np.unravel_index(q, shape), dtype=np.float64)
+        max_coord[q] = np.maximum(max_coord[q], max_coord[p])
+        min_coord[q] = np.minimum(min_coord[q], min_coord[p])
+        extension[q] = max_coord[q] - min_coord[q]
+        area[q] = area[q] + area[p]
+    return area
+
 
 # direct filter (criteria based filter)
 cpdef void _direct_filter(dtype_t[::1] image,
@@ -198,9 +232,11 @@ cpdef void _direct_filter(dtype_t[::1] image,
 
 # _local_maxima cacluates the local maxima from the max-tree representation
 # this is interesting if the max-tree representation has alreayd been
-# calculated for other reasons. Otherwise, it is not so efficient.
+# calculated for other reasons. Otherwise, it is not the most efficient
+# method. If the parameter label is True, the minima are labeled.
 cpdef void _local_maxima(dtype_t[::1] image,
-                         DTYPE_UINT8_t[::1] output,
+                         DTYPE_UINT64_t[::1] output,
+                         DTYPE_BOOL_t label_minima,
                          DTYPE_INT64_t[::1] parent,
                          DTYPE_INT64_t[::1] sorted_indices
                          ):
@@ -213,6 +249,8 @@ cpdef void _local_maxima(dtype_t[::1] image,
         The flattened image pixels.
     output : array of the same shape and type as image.
         The output image must contain only ones.
+    label : bool.
+        Indicates whether the minima are to be labeled.
     parent : array of int
         Image of the same shape as the input image. The value
         at each pixel is the parent index of this pixel in the max-tree
@@ -228,6 +266,7 @@ cpdef void _local_maxima(dtype_t[::1] image,
     cdef DTYPE_INT64_t p_root = sorted_indices[0]
     cdef DTYPE_INT64_t p, q
     cdef DTYPE_UINT64_t number_of_pixels = len(image)
+    cdef DTYPE_UINT64_t label = 1
 
     for p in sorted_indices[::-1]:
         if p == p_root:
@@ -238,6 +277,13 @@ cpdef void _local_maxima(dtype_t[::1] image,
         # if p is canonical (parent has a different value)
         if image[p] != image[q]:
             output[q] = 0
+            if label_minima:
+                # if output[p] was the parent of some other canonical
+                # pixel, it has been set to zero. Only the leaves
+                # (local maxima) are thus > 0.
+                if output[p] > 0:
+                    output[p] = label
+                    label += 1
             continue
 
     for p in sorted_indices[::-1]:
