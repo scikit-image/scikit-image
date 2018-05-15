@@ -60,23 +60,23 @@ def _decompose_quasipolar_coords(r, thetas, axes=0):
     >>> _decompose_quasipolar_coords(5, (np.pi / 2, 0), leading_axis=2)
     [ 0., 5., 0.]
     """
-    axes = np.size(thetas) + 1
-    coords = r * np.ones(axes)
+    num_axes = len(thetas) + 1
+    coords = r * np.ones(num_axes)
+
+    if not isinstance(axes, coll.Iterable):
+        axes = (axes,)
+    axes = np.append(axes, np.setdiff1d(range(num_axes), axes))
 
     for which_theta, theta in enumerate(thetas[::-1]):
         sine = np.sin(theta)
-        theta_index = axes - which_theta - 1
+        theta_index = num_axes - which_theta - 1
 
         for axis in range(theta_index):
             coords[axis] *= sine
 
         coords[theta_index] *= np.cos(theta)
 
-    leading_element = coords[leading_axis]
-    following_elements = np.delete(coords, leading_axis)
-    coords = np.append(leading_element, following_elements)
-
-    return coords
+    return coords[axes]
 
 
 def _gaussian_kernel(image, center=0, sigma=1):
@@ -354,7 +354,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     sigma[sigma == None] = default_sigma  # noqa
     sigma = sigma.astype(None)
 
-    coords = _decompose_quasipolar_coords(1, theta, leading_axis)
+    coords = _decompose_quasipolar_coords(1, theta, axes)
     base_axis = np.zeros(ndim)
     base_axis[0] = 1
     rot = _compute_rotation_matrix(base_axis, coords)
