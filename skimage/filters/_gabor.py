@@ -252,9 +252,10 @@ def _compute_rotation_matrix(src, dst, use_homogeneous_coordinates=False):
     ----------
     src : (N, ) array
         Vector to rotate.
-
     dst : (N, ) array
         Vector of desired direction.
+    use_homogeneous_coordinates : bool
+        If the input vectors should be treated as homoegeneous coordinates.
 
     Returns
     -------
@@ -281,6 +282,10 @@ def _compute_rotation_matrix(src, dst, use_homogeneous_coordinates=False):
     """
     X = _normalize(np.array(src))
     Y = _normalize(np.array(dst))
+
+    if use_homogeneous_coordinates:
+        X[-1] = 1
+        Y[-1] = 1
 
     w = np.flatnonzero(~np.isclose(X, Y))  # indices of difference
 
