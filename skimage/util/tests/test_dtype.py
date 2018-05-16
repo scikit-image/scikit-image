@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import itertools
 from skimage import (img_as_int, img_as_float,
@@ -125,9 +127,12 @@ def test_clobber():
         for func_output_type in img_funcs:
             img = np.random.rand(5, 5)
 
-            img_in = func_input_type(img)  # , issue_warnings=False)
+            with warnings.catch_warnings():
+                # UserWarning for possible precision loss, expected
+                warnings.simplefilter('ignore', UserWarning)
+                img_in = func_input_type(img)  # , issue_warnings=False)
 
-            img_in_before = img_in.copy()
-            img_out = func_output_type(img_in)
+                img_in_before = img_in.copy()
+                img_out = func_output_type(img_in)
 
             assert_equal(img_in, img_in_before)
