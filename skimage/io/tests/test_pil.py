@@ -54,10 +54,10 @@ def test_png_round_trip():
 
 def test_imread_flatten():
     # a color image is flattened
-    img = imread(os.path.join(data_dir, 'color.png'), flatten=True)
+    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
     assert img.ndim == 2
     assert img.dtype == np.float64
-    img = imread(os.path.join(data_dir, 'camera.png'), flatten=True)
+    img = imread(os.path.join(data_dir, 'camera.png'), as_gray=True)
     # check that flattening does not occur for an image that is grey already.
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
