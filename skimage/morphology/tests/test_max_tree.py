@@ -248,6 +248,58 @@ class TestMaxtree(unittest.TestCase):
         _full_type_test(img, 4, expected_4, max_tree.area_opening,
                         parent=P, tree_traverser=S)
 
+    def test_diameter_closing(self):
+        "Test for Diameter Opening (2 thresholds, all types)"
+        img = np.array([[97, 95, 93, 92, 91, 90, 90, 90, 91, 92, 93, 95],
+                        [95, 93, 91, 89, 88, 88, 88, 88, 88, 89, 91, 93],
+                        [93, 63, 63, 63, 63, 86, 86, 86, 87, 43, 43, 91],
+                        [92, 89, 88, 86, 85, 85, 84, 85, 85, 43, 43, 89],
+                        [91, 88, 87, 85, 84, 84, 83, 84, 84, 85, 87, 88],
+                        [90, 88, 86, 85, 84, 83, 83, 83, 84, 85, 86, 88],
+                        [90, 88, 86, 84, 83, 83, 82, 83, 83, 84, 86, 88],
+                        [90, 88, 86, 85, 84, 83, 83, 83, 84, 85, 86, 88],
+                        [91, 88, 87, 85, 84, 84, 83, 84, 84, 85, 87, 88],
+                        [92, 89, 23, 23, 85, 85, 84, 85, 85, 3, 3, 89],
+                        [93, 91, 23, 23, 87, 86, 86, 86, 87, 88, 3, 91],
+                        [95, 93, 91, 89, 88, 88, 88, 88, 88, 89, 91, 93]],
+                       dtype=np.uint8)
+
+        ex2 = np.array([[97, 95, 93, 92, 91, 90, 90, 90, 91, 92, 93, 95],
+                        [95, 93, 91, 89, 88, 88, 88, 88, 88, 89, 91, 93],
+                        [93, 63, 63, 63, 63, 86, 86, 86, 87, 43, 43, 91],
+                        [92, 89, 88, 86, 85, 85, 84, 85, 85, 43, 43, 89],
+                        [91, 88, 87, 85, 84, 84, 83, 84, 84, 85, 87, 88],
+                        [90, 88, 86, 85, 84, 83, 83, 83, 84, 85, 86, 88],
+                        [90, 88, 86, 84, 83, 83, 83, 83, 83, 84, 86, 88],
+                        [90, 88, 86, 85, 84, 83, 83, 83, 84, 85, 86, 88],
+                        [91, 88, 87, 85, 84, 84, 83, 84, 84, 85, 87, 88],
+                        [92, 89, 23, 23, 85, 85, 84, 85, 85, 3, 3, 89],
+                        [93, 91, 23, 23, 87, 86, 86, 86, 87, 88, 3, 91],
+                        [95, 93, 91, 89, 88, 88, 88, 88, 88, 89, 91, 93]],
+                       dtype=np.uint8)
+
+        ex4 = np.array([[97, 95, 93, 92, 91, 90, 90, 90, 91, 92, 93, 95],
+                        [95, 93, 91, 89, 88, 88, 88, 88, 88, 89, 91, 93],
+                        [93, 63, 63, 63, 63, 86, 86, 86, 87, 84, 84, 91],
+                        [92, 89, 88, 86, 85, 85, 84, 85, 85, 84, 84, 89],
+                        [91, 88, 87, 85, 84, 84, 83, 84, 84, 85, 87, 88],
+                        [90, 88, 86, 85, 84, 83, 83, 83, 84, 85, 86, 88],
+                        [90, 88, 86, 84, 83, 83, 83, 83, 83, 84, 86, 88],
+                        [90, 88, 86, 85, 84, 83, 83, 83, 84, 85, 86, 88],
+                        [91, 88, 87, 85, 84, 84, 83, 84, 84, 85, 87, 88],
+                        [92, 89, 84, 84, 85, 85, 84, 85, 85, 84, 84, 89],
+                        [93, 91, 84, 84, 87, 86, 86, 86, 87, 88, 84, 91],
+                        [95, 93, 91, 89, 88, 88, 88, 88, 88, 89, 91, 93]],
+                       dtype=np.uint8)
+
+        # _full_type_test makes a test with many image types.
+        _full_type_test(img, 2, ex2, max_tree.diameter_closing)
+        _full_type_test(img, 4, ex4, max_tree.diameter_closing)
+
+        P, S = max_tree.build_max_tree(invert(img))
+        _full_type_test(img, 4, ex4, max_tree.diameter_opening,
+                        parent=P, tree_traverser=S)
+
     def test_diameter_opening(self):
         "Test for Diameter Opening (2 thresholds, all types)"
         img = np.array([[5, 7, 9, 11, 12, 12, 12, 12, 12, 11, 9, 7],
@@ -320,7 +372,7 @@ class TestMaxtree(unittest.TestCase):
                                     [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
                                     [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-                                   dtype=np.uint8)
+                                   dtype=np.uint64)
         for dtype in [np.uint8, np.uint64, np.int8, np.int64]:
 
             test_data = data.astype(dtype)
@@ -382,7 +434,7 @@ class TestMaxtree(unittest.TestCase):
     def test_3d(self):
         """tests the detection of maxima in 3D."""
         img = np.zeros((8, 8, 8), dtype=np.uint8)
-        local_maxima = np.zeros((8, 8, 8), dtype=np.uint8)
+        local_maxima = np.zeros((8, 8, 8), dtype=np.uint64)
 
         # first maximum: only one pixel
         img[1, 1:3, 1:3] = 100
@@ -407,7 +459,7 @@ class TestMaxtree(unittest.TestCase):
         img[7, 7, 7] = 255
         local_maxima[7, 7, 7] = 1
 
-        out = max_tree.local_maxima(img, 1)
+        out = max_tree.local_maxima(img, False, 1)
         error = diff(local_maxima, out)
         assert error < eps
 

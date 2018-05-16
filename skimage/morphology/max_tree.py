@@ -168,8 +168,8 @@ def area_opening(image, area_threshold, connectivity=2,
         number of orthogonal steps to reach a neighbor. It is 1 for
         4-connectivity and 2 for 8-connectivity. Default value is 1.
     parent: ndarray, int64, optional
-        The value of each pixel is the index of its parent in the ravelled
-        array.
+        Parent image representing the max tree of the image. The
+        value of each pixel is the index of its parent in the ravelled array.
     tree_traverser: 1D array, int64, optional
         The ordered pixel indices (referring to the ravelled array). The pixels
         are ordered such that every pixel is preceded by its parent (except for
@@ -267,8 +267,8 @@ def diameter_opening(image, diameter_threshold, connectivity=2,
         number of orthogonal steps to reach a neighbor. It is 1 for
         4-connectivity and 2 for 8-connectivity. Default value is 1.
     parent: ndarray, int64, optional
-        The value of each pixel is the index of its parent in the ravelled
-        array.
+        Parent image representing the max tree of the image. The
+        value of each pixel is the index of its parent in the ravelled array.
     tree_traverser: 1D array, int64, optional
         The ordered pixel indices (referring to the ravelled array). The pixels
         are ordered such that every pixel is preceded by its parent (except for
@@ -324,7 +324,8 @@ def diameter_opening(image, diameter_threshold, connectivity=2,
     if parent is None or tree_traverser is None:
         parent, tree_traverser = build_max_tree(image, connectivity)
 
-    diam = _max_tree._compute_extension(image.ravel(), np.array(image.shape, dtype=np.int32),
+    diam = _max_tree._compute_extension(image.ravel(),
+                                        np.array(image.shape, dtype=np.int32),
                                         parent.ravel(), tree_traverser)
 
     _max_tree._direct_filter(image.ravel(), output.ravel(), parent.ravel(),
@@ -361,8 +362,9 @@ def area_closing(image, area_threshold, connectivity=2,
         number of orthogonal steps to reach a neighbor. It is 1 for
         4-connectivity and 2 for 8-connectivity. Default value is 1.
     parent: ndarray, int64, optional
-        The value of each pixel is the index of its parent in the ravelled
-        array.
+        Parent image representing the max tree of the inverted image. The
+        value of each pixel is the index of its parent in the ravelled array.
+        See Note for further details.
     tree_traverser: 1D array, int64, optional
         The ordered pixel indices (referring to the ravelled array). The pixels
         are ordered such that every pixel is preceded by its parent (except for
@@ -425,6 +427,15 @@ def area_closing(image, area_threshold, connectivity=2,
 
     All small minima are removed, and the remaining minima have at least
     a size of 8.
+
+
+    Note
+    ----
+    If a max-tree representation (parent and tree_traverser) are given to the
+    function, they must be calculated from the inverted image for this
+    function, i.e.:
+    >>> P, S = max_tree.build_max_tree(invert(img))
+    >>> closed = max_tree.diameter_closing(img, 3, parent=P, tree_traverser=S)
     """
     # inversion of the input image
     image_inv = invert(image)
@@ -471,8 +482,9 @@ def diameter_closing(image, diameter_threshold, connectivity=2,
         number of orthogonal steps to reach a neighbor. It is 1 for
         4-connectivity and 2 for 8-connectivity. Default value is 1.
     parent: ndarray, int64, optional
-        The value of each pixel is the index of its parent in the ravelled
-        array.
+        Parent image representing the max tree of the inverted image. The
+        value of each pixel is the index of its parent in the ravelled array.
+        See Note for further details.
     tree_traverser: 1D array, int64, optional
         The ordered pixel indices (referring to the ravelled array). The pixels
         are ordered such that every pixel is preceded by its parent (except for
@@ -522,19 +534,29 @@ def diameter_closing(image, diameter_threshold, connectivity=2,
 
     All small minima with a maximal extension of 2 or less are removed.
     The remaining minima have all a maximal extension of at least 3.
+
+
+    Note
+    ----
+    If a max-tree representation (parent and tree_traverser) are given to the
+    function, they must be calculated from the inverted image for this
+    function, i.e.:
+    >>> P, S = max_tree.build_max_tree(invert(img))
+    >>> closed = max_tree.diameter_closing(img, 3, parent=P, tree_traverser=S)
     """
     # inversion of the input image
     image_inv = invert(image)
     output = image_inv.copy()
 
     if parent is None or tree_traverser is None:
-        parent, tree_traverser = build_max_tree(image, connectivity)
+        parent, tree_traverser = build_max_tree(image_inv, connectivity)
 
-    diam = _max_tree._compute_extension(image.ravel(), 
-                                        np.array(image.shape, dtype=np.int32),
+    diam = _max_tree._compute_extension(image_inv.ravel(),
+                                        np.array(image_inv.shape,
+                                                 dtype=np.int32),
                                         parent.ravel(), tree_traverser)
 
-    _max_tree._direct_filter(image.ravel(), output.ravel(), parent.ravel(),
+    _max_tree._direct_filter(image_inv.ravel(), output.ravel(), parent.ravel(),
                              tree_traverser, diam, diameter_threshold)
     output = invert(output)
     return output
@@ -556,7 +578,7 @@ def local_maxima(image, label=False, connectivity=2,
     image : ndarray
         The input image for which the maxima are to be calculated.
     label : boolean, optional
-        If True, the local maxima are also labeled. 
+        If True, the local maxima are also labeled.
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. It is 1 for
@@ -628,9 +650,7 @@ def local_maxima(image, label=False, connectivity=2,
     if parent is None or tree_traverser is None:
         parent, tree_traverser = build_max_tree(image, connectivity)
 
-    _max_tree._local_maxima(image.ravel(), output.ravel(), label, 
+    _max_tree._local_maxima(image.ravel(), output.ravel(), label,
                             parent.ravel(), tree_traverser)
 
     return output
-
-
