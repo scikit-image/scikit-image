@@ -8,6 +8,149 @@ from warnings import warn
 __all__ = ['gabor_kernel', 'gabor']
 
 
+def _normalize(x):
+    """Normalizes an array.
+
+    Parameters
+    ----------
+    x : array_like
+        Array to normalize.
+
+    Returns
+    -------
+    u : array
+        Unitary array.
+
+    Examples
+    --------
+    >>> x = np.arange(5)
+    >>> uX = _normalize(x)
+    >>> np.isclose(np.lingalg.norm(uX), 1)
+    True
+    """
+    u = np.asarray(x)
+
+    norm = np.linalg.norm(u)
+
+    if not np.isclose(norm, 1):
+        u = u / norm
+
+    return u
+
+
+def _compute_projection_matrix(axis, indices=None):
+    """Generates a matrix that projects an axis onto the 0th coordinate axis.
+
+    Parameters
+    ----------
+    axis : (N, ) array
+        Unit vector.
+    indices : sequence of int, optional
+        Indices of the components of `axis` that should be transformed.
+        If `None`, defaults to all of the indices of `axis`.
+
+    Returns
+    -------
+    R : (N, N) array
+        Orthogonal projection matrix.
+
+    References
+    ----------
+    .. [1] Ognyan Ivanov Zhelezov. One Modification which Increases Performance
+           of N-Dimensional Rotation Matrix Generation Algorithm. International
+           Journal of Chemistry, Mathematics, and Physics, Vol. 2 No. 2, 2018:
+           pp. 13-18. https://dx.doi.org/10.22161/ijcmp.2.2.1
+    """
+    ndim = len(axis)
+
+    if indices is None:
+        indices = range(ndim)
+
+    x = axis
+    w = indices
+
+    R = np.eye(ndim)  # Initial rotation matrix = Identity matrix
+
+    # Loop to create matrices of stages
+    for step in np.round(2 ** np.arange(np.log2(ndim))).astype(int):
+        A = np.eye(ndim)
+
+        for n in range(0, ndim - step, step * 2):
+            if n + step >= len(w):
+                break
+
+            r2 = x[w[n]] * x[w[n]] + x[w[n + step]] * x[w[n + step]]
+            if r2 > 0:
+                r = np.sqrt(r2)
+                pcos = x[w[n]] / r  # Calculation of coefficients
+                psin = -x[w[n + step]] / r
+
+                # Base 2-dimensional rotation
+                A[w[n], w[n]] = pcos
+                A[w[n], w[n + step]] = -psin
+                A[w[n + step], w[n]] = psin
+                A[w[n + step], w[n + step]] = pcos
+                x[w[n + step]] = 0
+                x[w[n]] = r
+
+        R = np.matmul(A, R)  # Multiply R by current matrix of stage A
+
+    return R
+
+
+def _compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
+    """Generates a matrix for the rotation of one vector to the direction
+    of another.
+
+    Parameters
+    ----------
+    src : (N, ) array
+        Vector to rotate.
+    dst : (N, ) array
+        Vector of desired direction.
+    use_homogeneous_coords : bool, optional
+        If the input vectors should be treated as homoegeneous coordinates.
+
+    Returns
+    -------
+    M : (N, N) array
+        Matrix that rotates `src` to coincide with `dst`.
+
+    References
+    ----------
+    .. [1] Ognyan Ivanov Zhelezov. One Modification which Increases Performance
+           of N-Dimensional Rotation Matrix Generation Algorithm. International
+           Journal of Chemistry, Mathematics, and Physics, Vol. 2 No. 2, 2018:
+           pp. 13-18. https://dx.doi.org/10.22161/ijcmp.2.2.1
+
+    Examples
+    --------
+    >>> X = np.asarray([1, 0])
+    >>> Y = np.asarray([0.5, 0.5])
+
+    >>> M = _rotation(X, Y)
+    >>> Z = np.matmul(M, X)
+
+    >>> np.allclose(Z, Y)
+    True
+    """
+    homogeneous_slice = -use_homogeneous_coords or None
+    X = _normalize(np.array(src)[:homogeneous_slice])
+    Y = _normalize(np.array(dst)[:homogeneous_slice])
+
+    if use_homogeneous_coords:
+        X = np.append(X, 1)
+        Y = np.append(Y, 1)
+
+    w = np.flatnonzero(~np.isclose(X, Y))  # indices of difference
+
+    Mx = _compute_projection_matrix(X, w)
+    My = _compute_projection_matrix(Y, w)
+    M = np.matmul(My.T, Mx)
+
+    return M
+
+
 def _sigma_prefactor(bandwidth):
     b = bandwidth
     # See http://www.cs.rug.nl/~imaging/simplecell.html
@@ -24,7 +167,7 @@ def _decompose_quasipolar_coords(r, thetas, axes=0):
         Radial coordinate.
     thetas : (N, ) array
         Quasipolar angles.
-    axes : int or sequence of int
+    axes : int or sequence of int, optional
         Ordering of axes that defines the plane with regards to
         orientation. Ordering not specified will be padded with
         remaining axes in ascending order. Non-iterable values
@@ -112,7 +255,7 @@ def _decompose_quasipolar_coords(r, thetas, axes=0):
     return coords[axes]
 
 
-def _gaussian_kernel(image, center=0, sigma=1, ndim=2):
+def _gaussian_kernel(image, center=0, sigma=1, ndim=None):
     """Multi-dimensional Gaussian kernel.
 
     Parameters
@@ -127,10 +270,12 @@ def _gaussian_kernel(image, center=0, sigma=1, ndim=2):
         Standard deviation for Gaussian kernel. The standard deviations of the
         Gaussian filter are given for each axis as a sequence, or as a single
         number, in which case it is equal for all axes.
+    ndim : int, optional
+        Dimensionality of the kernel. If `None`, defaults to `image.ndim`.
 
     Returns
     -------
-    gauss : (``image.ndim``, ``image.ndim``)
+    gauss : (``ndim``, ``ndim``)
         Filter kernel.
 
     References
@@ -140,6 +285,9 @@ def _gaussian_kernel(image, center=0, sigma=1, ndim=2):
            Dordrecht, 2003: pp. 37-51.
            https://doi.org/10.1007/978-1-4020-8840-7_3
     """
+    if ndim is None:
+        ndim = np.ndim(image)
+
     sigma_prod = np.prod(sigma)
 
     # normalization factor
@@ -154,149 +302,6 @@ def _gaussian_kernel(image, center=0, sigma=1, ndim=2):
     gauss = np.exp(-0.5 * np.sum(norm_image, axis=0))
 
     return gauss / norm
-
-
-def _normalize(x):
-    """Normalizes an array.
-
-    Parameters
-    ----------
-    x : array_like
-        Array to normalize.
-
-    Returns
-    -------
-    u : array
-        Unitary array.
-
-    Examples
-    --------
-    >>> x = np.arange(5)
-    >>> uX = _normalize(x)
-    >>> np.isclose(np.lingalg.norm(uX), 1)
-    True
-    """
-    u = np.asarray(x)
-
-    norm = np.linalg.norm(u)
-
-    if not np.isclose(norm, 1):
-        u = u / norm
-
-    return u
-
-
-def _compute_projection_matrix(axis, indices=None):
-    """Generates a matrix that projects an axis onto the 0th coordinate axis.
-
-    Parameters
-    ----------
-    axis : (N, ) array
-        Unit vector.
-    indices : sequence of int
-        Indices of the components of `axis` that should be transformed.
-        If `None`, defaults to all of the indices of `axis`.
-
-    Returns
-    -------
-    R : (N, N) array
-        Orthogonal projection matrix.
-
-    References
-    ----------
-    .. [1] Ognyan Ivanov Zhelezov. One Modification which Increases Performance
-           of N-Dimensional Rotation Matrix Generation Algorithm. International
-           Journal of Chemistry, Mathematics, and Physics, Vol. 2 No. 2, 2018:
-           pp. 13-18. https://dx.doi.org/10.22161/ijcmp.2.2.1
-    """
-    ndim = len(axis)
-
-    if indices is None:
-        indices = range(ndim)
-
-    x = axis
-    w = indices
-
-    R = np.eye(ndim)  # Initial rotation matrix = Identity matrix
-
-    # Loop to create matrices of stages
-    for step in np.round(2 ** np.arange(np.log2(ndim))).astype(int):
-        A = np.eye(ndim)
-
-        for n in range(0, ndim - step, step * 2):
-            if n + step >= len(w):
-                break
-
-            r2 = x[w[n]] * x[w[n]] + x[w[n + step]] * x[w[n + step]]
-            if r2 > 0:
-                r = np.sqrt(r2)
-                pcos = x[w[n]] / r  # Calculation of coefficients
-                psin = -x[w[n + step]] / r
-
-                # Base 2-dimensional rotation
-                A[w[n], w[n]] = pcos
-                A[w[n], w[n + step]] = -psin
-                A[w[n + step], w[n]] = psin
-                A[w[n + step], w[n + step]] = pcos
-                x[w[n + step]] = 0
-                x[w[n]] = r
-
-        R = np.matmul(A, R)  # Multiply R by current matrix of stage A
-
-    return R
-
-
-def _compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
-    """Generates a matrix for the rotation of one vector to the direction
-    of another.
-
-    Parameters
-    ----------
-    src : (N, ) array
-        Vector to rotate.
-    dst : (N, ) array
-        Vector of desired direction.
-    use_homogeneous_coords : bool
-        If the input vectors should be treated as homoegeneous coordinates.
-
-    Returns
-    -------
-    M : (N, N) array
-        Matrix that rotates `src` to coincide with `dst`.
-
-    References
-    ----------
-    .. [1] Ognyan Ivanov Zhelezov. One Modification which Increases Performance
-           of N-Dimensional Rotation Matrix Generation Algorithm. International
-           Journal of Chemistry, Mathematics, and Physics, Vol. 2 No. 2, 2018:
-           pp. 13-18. https://dx.doi.org/10.22161/ijcmp.2.2.1
-
-    Examples
-    --------
-    >>> X = np.asarray([1, 0])
-    >>> Y = np.asarray([0.5, 0.5])
-
-    >>> M = _rotation(X, Y)
-    >>> Z = np.matmul(M, X)
-
-    >>> np.allclose(Z, Y)
-    True
-    """
-    homogeneous_slice = -use_homogeneous_coords or None
-    X = _normalize(np.array(src)[:homogeneous_slice])
-    Y = _normalize(np.array(dst)[:homogeneous_slice])
-
-    if use_homogeneous_coords:
-        X = np.append(X, 1)
-        Y = np.append(Y, 1)
-
-    w = np.flatnonzero(~np.isclose(X, Y))  # indices of difference
-
-    Mx = _compute_projection_matrix(X, w)
-    My = _compute_projection_matrix(Y, w)
-    M = np.matmul(My.T, Mx)
-
-    return M
 
 
 def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
@@ -334,7 +339,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
         deviations.
     offset : float, optional
         Phase offset of harmonic function in radians.
-    axes : int or sequence of int
+    axes : int or sequence of int, optional
         Ordering of axes that defines the plane with regards to
         orientation. Ordering not specified will be padded with
         remaining axes in ascending order. Non-iterable values
@@ -424,7 +429,8 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
 
 
 def gabor(image, frequency=None, theta=0, bandwidth=1, sigma=None, sigma_y=None,
-          n_stds=3, offset=0, mode='reflect', cval=0, kernel=None, **kwargs):
+          n_stds=3, offset=0, mode='reflect', cval=0, axes=1, ndim=None,
+          kernel=None, **kwargs):
     """Return real and imaginary responses to Gabor filter.
 
     The real and imaginary parts of the Gabor filter kernel are applied to the
@@ -438,19 +444,25 @@ def gabor(image, frequency=None, theta=0, bandwidth=1, sigma=None, sigma_y=None,
 
     Parameters
     ----------
-    image : array_like
+    image : non-complex array
         Input image.
-    frequency : float
+    frequency : float, optional
         Spatial frequency of the harmonic function. Specified in pixels.
-    theta : float or array of floats, optional
+    theta : float or sequence of floats, optional
         Orientation in radians. If 0, the harmonic is in the x-direction.
+    theta : scalar or sequence of scalars, optional
+        Orientation in radians. The angles that describe the orientation
+        are given for each axis as a sequence, or as a single number, in
+        which case it is equal for all axes.
     bandwidth : float, optional
         The bandwidth captured by the filter. For fixed bandwidth, `sigma`
         will decrease with increasing frequency. This value is ignored if
         `sigma` are set by the user.
-    sigma : float or array of floats, optional
-        Standard deviation. These directions apply to the kernel *before*
-        rotation.
+    sigma : scalar or sequence of scalars, optional
+        Standard deviation for Gabor kernel. The standard deviations of the
+        Gabor filter are given for each axis as a sequence, or as a single
+        number, in which case it is equal for all axes. These directions
+        apply to the kernel *before* rotation.
     n_stds : scalar, optional
         The linear size of the kernel is n_stds (3 by default) standard
         deviations.
@@ -461,7 +473,15 @@ def gabor(image, frequency=None, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     cval : scalar, optional
         Value to fill past edges of input if `mode` of convolution is
         'constant'. The parameter is passed to `ndi.convolve`.
-    kernel : complex array
+    axes : int or sequence of int, optional
+        Ordering of axes that defines the plane with regards to
+        orientation. Ordering not specified will be padded with
+        remaining axes in ascending order. Non-iterable values
+        will be treated as the single element of a tuple.
+        For classical cartesian ordering `(x, y, ...)`, set to `1`.
+    ndim : int, optional
+        Dimensionality of the kernel. If `None`, defaults to `image.ndim`.
+    kernel : complex array, optional
         Pre-computed gabor kernel. When applying the same filter to many
         images, using a kernel generated from `gabor_kernel` and passing it
         here may see significant computational improvements.
@@ -494,18 +514,21 @@ def gabor(image, frequency=None, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     >>> io.imshow(filt_real)    # doctest: +SKIP
     >>> io.show()               # doctest: +SKIP
     """
+    if ndim is None:
+        ndim = np.ndim(image)
+
     if kernel is None:
         if frequency is None:
             raise TypeError("gabor() must specify 'frequency' "
                             "if 'kernel' is not provided")
         kernel = gabor_kernel(frequency, theta, bandwidth, sigma, sigma_y,
-                              n_stds, offset, ndim=image.ndim, **kwargs)
+                              n_stds, offset, ndim=ndim, **kwargs)
     else:
         if frequency is not None:
             warn("gabor() received arguments of "
                  "both 'kernel' and 'frequency'; "
                  "'frequency' will be ignored")
-        assert_nD(np.ndim(image), kernel.ndim)
+        assert_nD(ndim, kernel.ndim)
 
     filtered_real = ndi.convolve(image, np.real(kernel), mode=mode, cval=cval)
     filtered_imag = ndi.convolve(image, np.imag(kernel), mode=mode, cval=cval)
