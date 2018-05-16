@@ -14,12 +14,13 @@ import numpy as _np
 
 from .. import data_dir
 from ..io import imread, use_plugin
-from .._shared._warnings import expected_warnings
-from ._binary_blobs import binary_blobs
+from .._shared._warnings import expected_warnings, warn
 from .. import img_as_bool
+from ._binary_blobs import binary_blobs
 
 __all__ = ['load',
            'astronaut',
+           'binary_blobs',
            'camera',
            'checkerboard',
            'chelsea',
@@ -38,23 +39,32 @@ __all__ = ['load',
            'stereo_motorcycle']
 
 
-def load(f, as_grey=False):
+def load(f, as_gray=False, as_grey=None):
     """Load an image file located in the data directory.
 
     Parameters
     ----------
     f : string
         File name.
-    as_grey : bool, optional
-        Convert to greyscale.
+    as_gray : bool, optional
+        Convert to grayscale.
+    as_grey : bool or None, optional
+        Deprecated keyword argument. Use `as_gray` instead.
+        If None, `as_gray` is used.
+        Convert to grayscale.
 
     Returns
     -------
     img : ndarray
         Image loaded from ``skimage.data_dir``.
     """
+    if as_grey is not None:
+        as_gray = as_grey
+        warn('`as_grey` has been deprecated in favor of `as_gray`'
+             ' and will be removed in v0.16.')
+
     use_plugin('pil')
-    return imread(_os.path.join(data_dir, f), as_grey=as_grey)
+    return imread(_os.path.join(data_dir, f), as_gray=as_gray)
 
 
 def camera():
@@ -205,7 +215,7 @@ def horse():
         Horse image.
     """
     with expected_warnings(['Possible precision loss', 'Possible sign loss']):
-        return img_as_bool(load("horse.png", as_grey=True))
+        return img_as_bool(load("horse.png", as_gray=True))
 
 
 def clock():
@@ -332,15 +342,15 @@ def rocket():
 def stereo_motorcycle():
     """Rectified stereo image pair with ground-truth disparities.
 
-    The two images are rectified such that every pixel in the left image has its
-    corresponding pixel on the same scanline in the right image. That means that
-    both images are warped such that they have the same orientation but a
+    The two images are rectified such that every pixel in the left image has
+    its corresponding pixel on the same scanline in the right image. That means
+    that both images are warped such that they have the same orientation but a
     horizontal spatial offset (baseline). The ground-truth pixel offset in
     column direction is specified by the included disparity map.
 
-    The two images are part of the Middlebury 2014 stereo benchmark. The dataset
-    was created by Nera Nesic, Porter Westling, Xi Wang, York Kitajima, Greg
-    Krathwohl, and Daniel Scharstein at Middlebury College. A detailed
+    The two images are part of the Middlebury 2014 stereo benchmark. The
+    dataset was created by Nera Nesic, Porter Westling, Xi Wang, York Kitajima,
+    Greg Krathwohl, and Daniel Scharstein at Middlebury College. A detailed
     description of the acquisition process can be found in [1]_.
 
     The images included here are down-sampled versions of the default exposure
@@ -370,14 +380,15 @@ def stereo_motorcycle():
 
     Notes
     -----
-    The original resolution images, images with different exposure and lighting,
-    and ground-truth depth maps can be found at the Middlebury website [2]_.
+    The original resolution images, images with different exposure and
+    lighting, and ground-truth depth maps can be found at the Middlebury
+    website [2]_.
 
     References
     ----------
-    .. [1] D. Scharstein, H. Hirschmueller, Y. Kitajima, G. Krathwohl, N. Nesic,
-           X. Wang, and P. Westling. High-resolution stereo datasets with
-           subpixel-accurate ground truth. In German Conference on Pattern
+    .. [1] D. Scharstein, H. Hirschmueller, Y. Kitajima, G. Krathwohl, N.
+           Nesic, X. Wang, and P. Westling. High-resolution stereo datasets
+           with subpixel-accurate ground truth. In German Conference on Pattern
            Recognition (GCPR 2014), Muenster, Germany, September 2014.
     .. [2] http://vision.middlebury.edu/stereo/data/scenes2014/
 

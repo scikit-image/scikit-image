@@ -24,7 +24,8 @@ def test_marching_cubes_isotropic():
 
 
 def test_marching_cubes_anisotropic():
-    spacing = (1., 10 / 6., 16 / 6.)
+    # test spacing as numpy array (and not just tuple)
+    spacing = np.array([1., 10 / 6., 16 / 6.])
     ellipsoid_anisotropic = ellipsoid(6, 10, 16, spacing=spacing,
                                       levelset=True)
     _, surf = ellipsoid_stats(6, 10, 16)

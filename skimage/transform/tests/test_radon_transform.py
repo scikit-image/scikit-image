@@ -14,7 +14,7 @@ from skimage._shared._warnings import expected_warnings
 
 
 PHANTOM = imread(os.path.join(data_dir, "phantom.png"),
-                 as_grey=True)[::2, ::2]
+                 as_gray=True)[::2, ::2]
 PHANTOM = rescale(PHANTOM, 0.5, order=1, multichannel=False)
 
 
