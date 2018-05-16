@@ -141,8 +141,7 @@ def test_compute_rotation_matrix_homogeneous():
 def test_compute_rotation_matrix_quasipolar():
     # 2D case
     X = np.asarray([1, 0])
-    y, x = _decompose_quasipolar_coords(5, [np.pi / 6])
-    Y = np.asarray([x, y])
+    Y = _decompose_quasipolar_coords(5, [np.pi / 6], axes=1)
 
     M = _compute_rotation_matrix(X, Y)
 
@@ -153,8 +152,7 @@ def test_compute_rotation_matrix_quasipolar():
     # FIXME: actually check components of the matrix; this test is redundant
     # 3D case
     X = np.asarray([0, 1, 0])
-    y, x, z = _decompose_quasipolar_coords(1, [np.pi / 3, np.pi / 6])
-    Y = np.asarray([x, y, z])
+    Y = _decompose_quasipolar_coords(1, [np.pi / 3, np.pi / 6], axes=1)
 
     M = _compute_rotation_matrix(X, Y)
 

@@ -112,7 +112,7 @@ def _decompose_quasipolar_coords(r, thetas, axes=0):
     return coords[axes]
 
 
-def _gaussian_kernel(image, center=0, sigma=1):
+def _gaussian_kernel(image, center=0, sigma=1, ndim=2):
     """Multi-dimensional Gaussian kernel.
 
     Parameters
@@ -143,13 +143,15 @@ def _gaussian_kernel(image, center=0, sigma=1):
     sigma_prod = np.prod(sigma)
 
     # normalization factor
-    norm = (2 * np.pi) ** (image.ndim / 2) * sigma_prod
+    norm = (2 * np.pi) ** (ndim / 2) * sigma_prod
 
     # center image
-    image = image - center
+    image = np.asarray(image) - center
+
+    norm_image = np.transpose(image.T / sigma) ** 2
 
     # gaussian function
-    gauss = np.exp(-0.5 * np.sum(image ** 2 / sigma_prod ** 2, axis=0))
+    gauss = np.exp(-0.5 * np.sum(norm_image, axis=0))
 
     return gauss / norm
 
@@ -393,28 +395,29 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     sigma[sigma == None] = default_sigma  # noqa
     sigma = sigma.astype(None)
 
-    coords = _decompose_quasipolar_coords(1, theta, axes)
-    base_axis = np.zeros(ndim)
-    base_axis[0] = 1
+    coords = _decompose_quasipolar_coords(1, theta, axes=axes)
+    base_axis = (1,) + (0,) * (ndim - 1)
     rot = _compute_rotation_matrix(base_axis, coords)
 
     # calculate & rotate kernel size
-    spatial_size = np.ceil(np.max(np.abs(n_stds * sigma * rot), axis=-1))
+    spatial_size = np.max(np.abs(n_stds * sigma * rot), axis=-1)
+    spatial_size = np.ceil(spatial_size).astype(int)
     spatial_size[spatial_size < 1] = 1
 
     # create mesh grid
-    m = np.mgrid.__getitem__([slice(-c, c + 1) for c in spatial_size])
+    m = np.asarray(np.meshgrid(*[range(-c, c + 1) for c in spatial_size],
+                               indexing='ij'))
 
     rotm = np.matmul(m.T, rot).T
 
-    gauss = _gaussian_kernel(rotm, sigma=sigma, center=0)
+    gauss = _gaussian_kernel(rotm, sigma=sigma, center=0, ndim=ndim)
 
-    compm = np.matmul(m.T, frequency * coords).T
+    compm = frequency * (m.T * coords).T
 
     # complex harmonic function
     harmonic = np.exp(1j * (2 * np.pi * compm.sum(axis=0) + offset))
 
-    g = np.zeros(m[0].shape, dtype=np.complex)
+    g = np.zeros(m.shape[1:], dtype=np.complex)
     g[:] = gauss * harmonic
 
     return g
